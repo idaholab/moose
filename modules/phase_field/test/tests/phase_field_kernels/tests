@@ -3,41 +3,47 @@
     type = 'Exodiff'
     input = 'CahnHilliard.i'
     exodiff = 'CahnHilliard_out.e'
+    issues = '#3356'
+    design = '/CahnHilliard.md'
+    requirement = 'MOOSE shall provide a non-split Cahn-Hilliard formalism'
   [../]
 
   [./SplitCahnHilliard]
     type = 'Exodiff'
     input = 'SplitCahnHilliard.i'
     exodiff = 'SplitCahnHilliard_out.e'
-    max_parallel = 1                      # -pc_type lu
+    issues = '#3356'
+    design = '/SplitCHParsed.md'
+    requirement = 'MOOSE shall provide a split Cahn-Hilliard formalism'
+  [../]
+  [./ADSplitCahnHilliard]
+    type = 'Exodiff'
+    input = 'ADSplitCahnHilliard.i'
+    exodiff = 'SplitCahnHilliard_out.e'
+    prereq = SplitCahnHilliard
+    issues = '#13138'
+    design = '/ADSplitCHParsed.md'
+    requirement = 'MOOSE shall provide an AD version of the split Cahn-Hilliard formalism'
+  [../]
+  [./ADSplitCahnHilliard-jac]
+    type = 'PetscJacobianTester'
+    input = 'ADSplitCahnHilliard.i'
+    run_sim = 'True'
+    cli_args = 'Outputs/exodus=false Executioner/num_steps=2'
+    ratio_tol = 1e-8
+    difference_tol = 1e-4
+    issues = '#13138'
+    design = '/ADSplitCHParsed.md'
+    requirement = 'The Jacobian for the AD split Cahn-Hilliard problem shall be perfect'
   [../]
 
   [./AllenCahn]
     type = 'Exodiff'
     input = 'AllenCahn.i'
     exodiff = 'AllenCahn_out.e'
-  [../]
-
-  # This coupled formulation should give the same result as the direct Allen-Cahn
-  [./CoupledAllenCahn]
-    type = 'Exodiff'
-    prereq = 'AllenCahn'
-    input = 'CoupledAllenCahn.i'
-    exodiff = 'AllenCahn_out.e'
-  [../]
-
-  # This is also a coupled formulation of Allen-Cahn equation, using variable mobility
-  # Primarily here to test CoupledCoefReaction kernel
-  [./CoupledCoefAllenCahn]
-    type = 'Exodiff'
-    input = 'CoupledCoefAllenCahn.i'
-    exodiff = 'CoupledCoefAllenCahn_out.e'
-  [../]
-
-  [./MatGradSquareCoupled]
-    type = 'Exodiff'
-    input = 'MatGradSquareCoupled.i'
-    exodiff = 'MatGradSquareCoupled_out.e'
+    issues = '#3816'
+    design = '/AllenCahn.md'
+    requirement = 'A Allen-Cahn phase field formulation shall be provided'
   [../]
 
   [./analyzejacobian_AllenCahn]
@@ -47,19 +53,58 @@
     expect_out = '\nNo errors detected. :-\)\n'
     resize_mesh = true
     recover = false
-    #skip = 'see #3847'
+    issues = '#3816'
+    design = '/AllenCahn.md'
+    requirement = 'The Allen-Cahn model shall have perfect Jacobians'
+  [../]
+
+# This coupled formulation should give the same result as the direct Allen-Cahn
+  [./CoupledAllenCahn]
+    type = 'Exodiff'
+    prereq = 'AllenCahn'
+    input = 'CoupledAllenCahn.i'
+    exodiff = 'AllenCahn_out.e'
+    issues = '#6194'
+    design = '/CoupledAllenCahn.md'
+    requirement = 'A coupled Allen-Cahn formulation shall be provided'
+  [../]
+
+  # This is also a coupled formulation of Allen-Cahn equation, using variable mobility
+  # Primarily here to test CoupledCoefReaction kernel
+  [./CoupledCoefAllenCahn]
+    type = 'Exodiff'
+    input = 'CoupledCoefAllenCahn.i'
+    exodiff = 'CoupledCoefAllenCahn_out.e'
+    issues = '#6265'
+    design = '/CoupledCoefAllenCahn.md'
+    requirement = 'A coupled Allen-Cahn formulation with a user defined prefactor shall be provided'
+  [../]
+
+  [./MatGradSquareCoupled]
+    type = 'Exodiff'
+    input = 'MatGradSquareCoupled.i'
+    exodiff = 'MatGradSquareCoupled_out.e'
+    issues = '#10721'
+    design = '/MatGradSquareCoupled.md'
+    requirement = 'A coupled gradient square kernel shall be provided'
   [../]
 
   [./SimpleSplitCHWRes]
     type = 'Exodiff'
     input = 'SimpleSplitCHWRes.i'
     exodiff = 'SimpleSplitCHWRes_out.e'
+    issues = '#6910'
+    design = '/SimpleSplitCHWRes.md'
+    requirement = 'A suite of simple to understand phase field kernels shall be provided for novice users'
   [../]
 
   [./SimpleCHInterface]
     type = 'Exodiff'
     input = 'SimpleCHInterface.i'
     exodiff = 'SimpleCHInterface_out.e'
+    issues = '#6910'
+    design = '/SimpleCHInterface.md'
+    requirement = 'A suite of simple to understand phase field kernels shall be provided for novice users'
   [../]
 
   [./ACInterfaceStress]
@@ -67,6 +112,9 @@
     input = 'ACInterfaceStress.i'
     exodiff = 'ACInterfaceStress_out.e'
     cli_args = 'Executioner/dt=0.001'
+    issues = '#9658'
+    design = '/ACInterfaceStress.md'
+    requirement = 'A free energy contribution from elastic stresses in interfaces shall be provided'
   [../]
 
   [./analyzejacobian_ACInterfaceStress]
@@ -75,11 +123,17 @@
     expect_out = '\nNo errors detected. :-\)\n'
     recover = false
     heavy = true
+    issues = '#9658'
+    design = '/ACInterfaceStress.md'
+    requirement = 'The free energy contribution from elastic stresses in interfaces shall shall have a perfect Jacobian'
   [../]
 
   [./nonuniform_barrier_coefficient]
     type = 'Exodiff'
     input = 'nonuniform_barrier_coefficient.i'
     exodiff = 'nonuniform_barrier_coefficient_out.e'
+    issues = '#11829'
+    design = '/ACBarrierFunction.md'
+    requirement = 'The barrier height and gradient energy parameter must be permitted to depend on non-linear variables'
   [../]
 []
