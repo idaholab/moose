@@ -1,18 +1,19 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # EqualGradientConstraint
 
-!alert construction title=Undocumented Class
-The EqualGradientConstraint has not been documented. The content contained on this page includes the
-typical automatic documentation associated with a MooseObject; however, what is contained is
-ultimately determined by what is necessary to make the documentation clear for users.
+The `EqualGradientConstraint` class is used to enforce continuity of a component
+of a variable gradient across a mortar interface or in a periodic boundary
+condition. The gradient component to be matched is specified using the unsigned
+parameter `component`. The variable is specified using the `master_variable`
+parameter. If the gradients to be matched are between different variables, the
+`slave_variable` parameter can also be supplied. Lagrange multipliers are used
+to perform the constraint enforcement.
 
-!syntax description /Constraints/EqualGradientConstraint
+!syntax description /Constraints/EqualGradientConstraint<RESIDUAL>
 
-!syntax parameters /Constraints/EqualGradientConstraint
+!syntax parameters /Constraints/EqualGradientConstraint<RESIDUAL>
 
-!syntax inputs /Constraints/EqualGradientConstraint
+!syntax inputs /Constraints/EqualGradientConstraint<RESIDUAL>
 
-!syntax children /Constraints/EqualGradientConstraint
+!syntax children /Constraints/EqualGradientConstraint<RESIDUAL>
 
 !bibtex bibliography

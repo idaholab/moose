@@ -1,12 +1,12 @@
 # Constraints System
 
-## RealMortarConstraints
+## MortarConstraints
 
 An excellent overview of the conservative mortar constraint implementation in
 MOOSE is given in
 [this technical report](https://www.osti.gov/biblio/1468630/). There are five
 required parameters the user will always have to supply for a constraint derived
-from `RealMortarConstraint`:
+from `MortarConstraint`:
 
 - `master_boundary_id`: the boundary ID assigned to the master side of the
   mortar interface
@@ -20,7 +20,7 @@ from `RealMortarConstraint`:
   operate on
 
 As suggested by the above required parameters, the user must do some mesh work
-before they can use a `RealMortarConstraint` object. The easiest way to prepare
+before they can use a `MortarConstraint` object. The easiest way to prepare
 the mesh is to assign boundary IDs to the slave and master sides of the
 interface when creating the mesh in their 3rd-party meshing software (e.g. Cubit
 or Gmsh). If these boundary IDs exist, then the lower dimensional blocks can be
