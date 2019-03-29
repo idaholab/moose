@@ -35,7 +35,7 @@ FauxGrainTracker::FauxGrainTracker(const InputParameters & parameters)
 {
   // initialize faux data with identity map
   _op_to_grains.resize(_n_vars);
-  for (auto i = beginIndex(_op_to_grains); i < _op_to_grains.size(); ++i)
+  for (MooseIndex(_op_to_grains) i = 0; i < _op_to_grains.size(); ++i)
     _op_to_grains[i] = i;
 
   _empty_var_to_features.resize(_n_vars, FeatureFloodCount::invalid_id);
@@ -75,7 +75,7 @@ FauxGrainTracker::getEntityValue(dof_id_type entity_id,
 
       // If this element contains the centroid of one of features, return it's index
       const auto * elem_ptr = _mesh.elemPtr(entity_id);
-      for (auto var_num = beginIndex(_vars); var_num < _n_vars; ++var_num)
+      for (MooseIndex(_vars) var_num = 0; var_num < _n_vars; ++var_num)
       {
         const auto centroid = _centroid.find(var_num);
         if (centroid != _centroid.end())
@@ -172,7 +172,7 @@ FauxGrainTracker::execute()
                             std::vector<unsigned int>(_n_vars, FeatureFloodCount::invalid_id));
       auto & vec_ref = insert_pair.first->second;
 
-      for (auto var_num = beginIndex(_vars); var_num < _n_vars; ++var_num)
+      for (MooseIndex(_vars) var_num = 0; var_num < _n_vars; ++var_num)
       {
         auto entity_value = _vars[var_num]->sln()[0];
 
@@ -197,7 +197,7 @@ FauxGrainTracker::execute()
       {
         const Node * current_node = current_elem->get_node(i);
 
-        for (auto var_num = beginIndex(_vars); var_num < _n_vars; ++var_num)
+        for (MooseIndex(_vars) var_num = 0; var_num < _n_vars; ++var_num)
         {
           auto entity_value = _vars[var_num]->getNodalValue(*current_node);
           if ((_use_less_than_threshold_comparison && (entity_value >= _threshold)) ||
@@ -226,7 +226,7 @@ FauxGrainTracker::finalize()
   _communicator.set_union(_entity_id_to_var_num);
 
   if (_is_elemental)
-    for (auto var_num = beginIndex(_vars); var_num < _n_vars; ++var_num)
+    for (MooseIndex(_vars) var_num = 0; var_num < _n_vars; ++var_num)
     {
       /**
        * Convert elements of the maps into simple values or vector of Real.

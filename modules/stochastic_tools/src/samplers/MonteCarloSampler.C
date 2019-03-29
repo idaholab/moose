@@ -33,7 +33,7 @@ MonteCarloSampler::sample()
   std::vector<DenseMatrix<Real>> output(1);
   output[0].resize(_num_samples, _distributions.size());
   for (std::size_t i = 0; i < _num_samples; ++i)
-    for (auto j = beginIndex(_distributions); j < _distributions.size(); ++j)
+    for (MooseIndex(_distributions) j = 0; j < _distributions.size(); ++j)
       output[0](i, j) = _distributions[j]->quantile(rand());
   return output;
 }

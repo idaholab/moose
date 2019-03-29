@@ -37,7 +37,7 @@ SobolSampler::sampleSetUp()
   _a_matrix.resize(_num_samples, _distributions.size());
   _b_matrix.resize(_num_samples, _distributions.size());
   for (std::size_t i = 0; i < _num_samples; ++i)
-    for (auto j = beginIndex(_distributions); j < _distributions.size(); ++j)
+    for (MooseIndex(_distributions) j = 0; j < _distributions.size(); ++j)
     {
       _a_matrix(i, j) = _distributions[j]->quantile(this->rand(0));
       _b_matrix(i, j) = _distributions[j]->quantile(this->rand(1));
@@ -63,7 +63,7 @@ SobolSampler::sample()
   output[1] = _b_matrix;
 
   // Create the AB matrices
-  for (auto idx = beginIndex(_distributions, 2); idx < n; ++idx)
+  for (MooseIndex(_distributions) idx = 2; idx < n; ++idx)
   {
     output[idx] = _a_matrix;
     for (std::size_t i = 0; i < _num_samples; ++i)

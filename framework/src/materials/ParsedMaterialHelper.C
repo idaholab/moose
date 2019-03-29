@@ -110,7 +110,7 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
     _tol[i] = -1.0;
 
     // for every argument look through the entire tolerance vector to find a match
-    for (auto j = beginIndex(tol_names); j < tol_names.size(); ++j)
+    for (MooseIndex(tol_names) j = 0; j < tol_names.size(); ++j)
       if (_variable_names[i] == tol_names[j])
       {
         _tol[i] = tol_values[j];
@@ -195,7 +195,7 @@ ParsedMaterialHelper::computeProperties()
 
     // insert material property values
     auto nmat_props = _mat_prop_descriptors.size();
-    for (auto i = beginIndex(_mat_prop_descriptors); i < nmat_props; ++i)
+    for (MooseIndex(_mat_prop_descriptors) i = 0; i < nmat_props; ++i)
       _func_params[i + _nargs] = _mat_prop_descriptors[i].value()[_qp];
 
     // TODO: computeQpProperties()

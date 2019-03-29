@@ -44,7 +44,7 @@ CoupledBEKinetic::computeQpResidual()
 {
   Real assemble_conc = 0.0;
 
-  for (auto i = beginIndex(_vals); i < _vals.size(); ++i)
+  for (MooseIndex(_vals) i = 0; i < _vals.size(); ++i)
     assemble_conc += _weight[i] * ((*_vals[i])[_qp] - (*_vals_old[i])[_qp]) / _dt;
 
   return _porosity[_qp] * _test[_i][_qp] * assemble_conc;

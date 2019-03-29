@@ -66,7 +66,7 @@ ChannelGradientVectorPostprocessor::execute()
   _axis_values->resize(_lv1_axis_values.size());
   _gradient_values->resize(_lv1_axis_values.size());
 
-  for (auto i = beginIndex(_lv1_axis_values); i < _lv1_axis_values.size(); ++i)
+  for (MooseIndex(_lv1_axis_values) i = 0; i < _lv1_axis_values.size(); ++i)
   {
     (*_axis_values)[i] = _lv1_axis_values[i];
     (*_gradient_values)[i] = _lv1_variable_values[i] - _lv2_variable_values[i];

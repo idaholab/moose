@@ -12,6 +12,7 @@
 
 // MOOSE includes
 #include "ElementIntegralVariableUserObject.h"
+#include "Enumerate.h"
 
 // Forward Declarations
 class UserObject;
@@ -103,7 +104,7 @@ NearestPointBase<UserObjectType>::NearestPointBase(const InputParameters & param
   _user_objects.reserve(_points.size());
 
   // Build each of the UserObject objects:
-  for (auto i = beginIndex(_points); i < _points.size(); i++)
+  for (MooseIndex(_points) i = 0; i < _points.size(); ++i)
   {
     auto sub_params = emptyInputParameters();
     sub_params += parameters;
@@ -199,7 +200,7 @@ NearestPointBase<UserObjectType>::threadJoin(const UserObject & y)
 {
   auto & npla = static_cast<const NearestPointBase &>(y);
 
-  for (auto i = beginIndex(_user_objects); i < _user_objects.size(); i++)
+  for (MooseIndex(_user_objects) i = 0; i < _user_objects.size(); ++i)
     _user_objects[i]->threadJoin(*npla._user_objects[i]);
 }
 
@@ -217,16 +218,16 @@ NearestPointBase<UserObjectType>::nearestUserObject(const Point & p) const
   unsigned int closest = 0;
   Real closest_distance = std::numeric_limits<Real>::max();
 
-  for (auto i = beginIndex(_points); i < _points.size(); i++)
+  for (auto it : Moose::enumerate(_points))
   {
-    const auto & current_point = _points[i];
+    const auto & current_point = it.value();
 
     Real current_distance = (p - current_point).norm();
 
     if (current_distance < closest_distance)
     {
       closest_distance = current_distance;
-      closest = i;
+      closest = it.index();
     }
   }
 

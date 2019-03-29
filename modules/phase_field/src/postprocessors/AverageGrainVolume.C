@@ -73,7 +73,7 @@ AverageGrainVolume::AverageGrainVolume(const InputParameters & parameters)
 
       // Build a reflexive map (ops map to grains directly)
       _static_var_to_feature.resize(num_coupled_vars);
-      for (auto i = beginIndex(_static_var_to_feature); i < num_coupled_vars; ++i)
+      for (MooseIndex(_static_var_to_feature) i = 0; i < num_coupled_vars; ++i)
         _static_var_to_feature[i] = i;
     }
     else
@@ -124,8 +124,7 @@ void
 AverageGrainVolume::accumulateVolumes(const std::vector<unsigned int> & var_to_features,
                                       std::size_t libmesh_dbg_var(num_features))
 {
-  for (auto var_index = beginIndex(var_to_features); var_index < var_to_features.size();
-       ++var_index)
+  for (MooseIndex(var_to_features) var_index = 0; var_index < var_to_features.size(); ++var_index)
   {
     // Only sample "active" variables
     if (var_to_features[var_index] != FeatureFloodCount::invalid_id)

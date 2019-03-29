@@ -36,7 +36,7 @@ TestGetActionsAction::act()
   auto actions = _awh.getActions<AddMaterialAction>();
 
   // test on each processor
-  for (auto i = beginIndex(actions); i < actions.size(); ++i)
+  for (MooseIndex(actions) i = 0; i < actions.size(); ++i)
   {
     if (i > 0)
       if (actions[i]->name() < actions[i - 1]->name())
@@ -50,7 +50,7 @@ TestGetActionsAction::act()
   auto & comm = _app.comm();
   if (comm.rank() == 0)
   {
-    for (unsigned int pid = 1; pid < comm.size(); ++pid)
+    for (MooseIndex(comm.size()) pid = 1; pid < comm.size(); ++pid)
     {
       auto size = actions.size();
       comm.receive(pid, size);
@@ -58,7 +58,7 @@ TestGetActionsAction::act()
         mooseError("error occurs during getting actions, sizes of actions on master and rank ",
                    pid,
                    " are different");
-      for (auto i = beginIndex(actions); i < actions.size(); ++i)
+      for (MooseIndex(actions) i = 0; i < actions.size(); ++i)
       {
         std::string action_name;
         comm.receive(pid, action_name);
@@ -73,7 +73,7 @@ TestGetActionsAction::act()
   {
     auto size = actions.size();
     comm.send(0, size);
-    for (auto i = beginIndex(actions); i < actions.size(); ++i)
+    for (MooseIndex(actions) i = 0; i < actions.size(); ++i)
     {
       auto name = actions[i]->name();
       comm.send(0, name);
