@@ -9,6 +9,7 @@
 
 #include "AddRelationshipManager.h"
 #include "FEProblem.h"
+#include "DisplacedProblem.h"
 
 registerMooseAction("MooseApp", AddRelationshipManager, "attach_geometric_rm");
 registerMooseAction("MooseApp", AddRelationshipManager, "attach_algebraic_rm");

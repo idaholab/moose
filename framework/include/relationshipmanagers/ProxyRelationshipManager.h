@@ -17,7 +17,10 @@
 // Forward declarations
 class ProxyRelationshipManager;
 class MooseMesh;
+namespace libMesh
+{
 class System;
+}
 
 template <>
 InputParameters validParams<ProxyRelationshipManager>();

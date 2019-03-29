@@ -11,6 +11,9 @@
 #include "MooseApp.h"
 #include "FEProblem.h"
 #include "DisplacedProblem.h"
+#include "NonlinearSystem.h"
+#include "AuxiliarySystem.h"
+#include "RelationshipManager.h"
 
 registerMooseAction("MooseApp", CreateDisplacedProblemAction, "init_displaced_problem");
 registerMooseAction("MooseApp", CreateDisplacedProblemAction, "add_geometric_rm");

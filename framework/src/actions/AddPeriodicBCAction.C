@@ -18,6 +18,7 @@
 #include "MooseMesh.h"
 #include "MooseVariableFE.h"
 #include "NonlinearSystem.h"
+#include "RelationshipManager.h"
 
 #include "libmesh/periodic_boundary.h" // translation PBCs provided by libmesh
 

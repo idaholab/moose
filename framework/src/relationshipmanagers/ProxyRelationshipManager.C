@@ -12,6 +12,7 @@
 
 #include "libmesh/system.h"
 #include "libmesh/elem.h"
+#include "libmesh/dof_map.h"
 
 registerMooseObject("MooseApp", ProxyRelationshipManager);
 
