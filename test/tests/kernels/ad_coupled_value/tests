@@ -28,4 +28,13 @@
     design = "jacobian_definition.md"
     issues = "#12852"
   []
+  [test_coupled_dot_aux]
+    type = 'Exodiff'
+    input = 'ad_aux_coupled_time_value.i'
+    exodiff = 'ad_aux_coupled_time_value_out.e'
+    requirement = "We shall be able to get dot aux variable values through adCoupledValue with the knowledge that the time derivatives will always be zero"
+    design = "jacobian_definition.md"
+    issues = "#12996"
+    max_parallel = 4
+  []
 []
