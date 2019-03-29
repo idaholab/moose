@@ -75,8 +75,10 @@ void
 dataStore(std::ostream & stream, DualReal & dn, void * context)
 {
   dataStore(stream, dn.value(), context);
-  for (auto i = beginIndex(dn.derivatives()); i < dn.derivatives().size(); ++i)
-    dataStore(stream, dn.derivatives()[i], context);
+
+  auto & derivatives = dn.derivatives();
+  for (MooseIndex(derivatives) i = 0; i < derivatives.size(); ++i)
+    dataStore(stream, derivatives[i], context);
 }
 
 template <>
@@ -266,8 +268,9 @@ dataLoad(std::istream & stream, DualReal & dn, void * context)
 {
   dataLoad(stream, dn.value(), context);
 
-  for (auto i = beginIndex(dn.derivatives()); i < dn.derivatives().size(); ++i)
-    dataLoad(stream, dn.derivatives()[i], context);
+  auto & derivatives = dn.derivatives();
+  for (MooseIndex(derivatives) i = 0; i < derivatives.size(); ++i)
+    dataLoad(stream, derivatives[i], context);
 }
 
 template <>

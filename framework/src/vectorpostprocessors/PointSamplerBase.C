@@ -82,7 +82,7 @@ PointSamplerBase::execute()
   /// So we don't have to create and destroy this
   std::vector<Point> point_vec(1);
 
-  for (auto i = beginIndex(_points); i < _points.size(); ++i)
+  for (MooseIndex(_points) i = 0; i < _points.size(); ++i)
   {
     Point & p = _points[i];
 
@@ -105,7 +105,7 @@ PointSamplerBase::execute()
         _subproblem.setCurrentSubdomainID(elem, 0);
         _subproblem.reinitElemPhys(elem, point_vec, 0); // Zero is for tid
 
-        for (auto j = beginIndex(_coupled_moose_vars); j < _coupled_moose_vars.size(); ++j)
+        for (MooseIndex(_coupled_moose_vars) j = 0; j < _coupled_moose_vars.size(); ++j)
           values[j] = (dynamic_cast<MooseVariable *>(_coupled_moose_vars[j]))->sln()[0] *
                       _pp_value; // The zero is for the "qp"
 
@@ -130,7 +130,7 @@ PointSamplerBase::finalize()
 
   _communicator.maxloc(_found_points, max_id);
 
-  for (auto i = beginIndex(max_id); i < max_id.size(); ++i)
+  for (MooseIndex(max_id) i = 0; i < max_id.size(); ++i)
   {
     // Only do this check on the proc zero because it's the same on every processor
     // _found_points should contain all 1's at this point (ie every point was found by a proc)

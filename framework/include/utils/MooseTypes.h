@@ -89,8 +89,8 @@ _MooseIndex(T, int)
 }
 
 template <typename T>
-decltype(((T *)nullptr)->size())
-_MooseIndex(T, int)
+decltype(std::declval<T>().size())
+_MooseIndex(T &&, int)
 {
 }
 

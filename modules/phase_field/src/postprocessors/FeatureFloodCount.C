@@ -331,7 +331,7 @@ FeatureFloodCount::execute()
       if (elem->processor_id() == rank)
       {
         if (hasBoundary(boundary_id))
-          for (auto var_num = beginIndex(_vars); var_num < _vars.size(); ++var_num)
+          for (MooseIndex(_vars) var_num = 0; var_num < _vars.size(); ++var_num)
             flood(elem, var_num);
       }
     }
@@ -343,7 +343,7 @@ FeatureFloodCount::execute()
       // Loop over elements or nodes
       if (_is_elemental)
       {
-        for (auto var_num = beginIndex(_vars); var_num < _vars.size(); ++var_num)
+        for (MooseIndex(_vars) var_num = 0; var_num < _vars.size(); ++var_num)
           flood(current_elem, var_num);
       }
       else
@@ -541,7 +541,7 @@ FeatureFloodCount::sortAndLabel()
    * with each feature's _var_index.
    */
   unsigned int feature_offset = 0;
-  for (auto map_num = beginIndex(_feature_counts_per_map); map_num < _maps_size; ++map_num)
+  for (MooseIndex(_maps_size) map_num = 0; map_num < _maps_size; ++map_num)
   {
     // Skip empty map checks
     if (_feature_counts_per_map[map_num] == 0)
@@ -563,7 +563,7 @@ FeatureFloodCount::sortAndLabel()
 #endif
 
   // Label the features with an ID based on the sorting (processor number independent value)
-  for (auto i = beginIndex(_feature_sets); i < _feature_sets.size(); ++i)
+  for (MooseIndex(_feature_sets) i = 0; i < _feature_sets.size(); ++i)
     if (_feature_sets[i]._id == invalid_id)
       _feature_sets[i]._id = i;
 }
@@ -588,7 +588,7 @@ FeatureFloodCount::buildLocalToGlobalIndices(std::vector<std::size_t> & local_to
   // Build the offsets vector
   unsigned int globalsize = 0;
   std::vector<int> offsets(_n_procs); // Type is signed for use with the MPI API
-  for (auto i = beginIndex(offsets); i < offsets.size(); ++i)
+  for (MooseIndex(offsets) i = 0; i < offsets.size(); ++i)
   {
     offsets[i] = globalsize;
     globalsize += counts[i];
@@ -618,7 +618,7 @@ void
 FeatureFloodCount::buildFeatureIdToLocalIndices(unsigned int max_id)
 {
   _feature_id_to_local_index.assign(max_id + 1, invalid_size_t);
-  for (auto feature_index = beginIndex(_feature_sets); feature_index < _feature_sets.size();
+  for (MooseIndex(_feature_sets) feature_index = 0; feature_index < _feature_sets.size();
        ++feature_index)
   {
     if (_feature_sets[feature_index]._status != Status::INACTIVE)
@@ -989,8 +989,7 @@ FeatureFloodCount::deserialize(std::vector<std::string> & serialized_buffers, un
 
   auto rank = processor_id();
 
-  for (auto proc_id = beginIndex(serialized_buffers); proc_id < serialized_buffers.size();
-       ++proc_id)
+  for (MooseIndex(serialized_buffers) proc_id = 0; proc_id < serialized_buffers.size(); ++proc_id)
   {
     /**
      * Usually we have the local processor data already in the _partial_feature_sets data structure.
@@ -1148,7 +1147,7 @@ FeatureFloodCount::areFeaturesMergeable(const FeatureData & f1, const FeatureDat
 void
 FeatureFloodCount::updateFieldInfo()
 {
-  for (auto i = beginIndex(_feature_sets); i < _feature_sets.size(); ++i)
+  for (MooseIndex(_feature_sets) i = 0; i < _feature_sets.size(); ++i)
   {
     auto & feature = _feature_sets[i];
 
@@ -1957,7 +1956,7 @@ FeatureFloodCount::FeatureData::expandBBox(const FeatureData & rhs)
 
   auto box_expanded = false;
   for (auto & bbox : _bboxes)
-    for (auto j = beginIndex(rhs._bboxes); j < rhs._bboxes.size(); ++j)
+    for (MooseIndex(rhs._bboxes) j = 0; j < rhs._bboxes.size(); ++j)
     {
       if (bbox.intersects(rhs._bboxes[j], libMesh::TOLERANCE * libMesh::TOLERANCE))
       {
@@ -1972,11 +1971,11 @@ FeatureFloodCount::FeatureData::expandBBox(const FeatureData & rhs)
   {
     std::ostringstream oss;
     oss << "LHS BBoxes:\n";
-    for (auto i = beginIndex(_bboxes); i < _bboxes.size(); ++i)
+    for (MooseIndex(_bboxes) i = 0; i < _bboxes.size(); ++i)
       oss << "Max: " << _bboxes[i].max() << " Min: " << _bboxes[i].min() << '\n';
 
     oss << "RHS BBoxes:\n";
-    for (auto i = beginIndex(rhs._bboxes); i < rhs._bboxes.size(); ++i)
+    for (MooseIndex(rhs._bboxes) i = 0; i < rhs._bboxes.size(); ++i)
       oss << "Max: " << rhs._bboxes[i].max() << " Min: " << rhs._bboxes[i].min() << '\n';
 
     ::mooseError("No Bounding Boxes Expanded - This is a catastrophic error!\n", oss.str());
@@ -1984,7 +1983,7 @@ FeatureFloodCount::FeatureData::expandBBox(const FeatureData & rhs)
 
   // Any bounding box in the rhs vector that doesn't intersect
   // needs to be appended to the lhs vector
-  for (auto j = beginIndex(intersected_boxes); j < intersected_boxes.size(); ++j)
+  for (MooseIndex(intersected_boxes) j = 0; j < intersected_boxes.size(); ++j)
     if (!intersected_boxes[j])
       _bboxes.push_back(rhs._bboxes[j]);
 }

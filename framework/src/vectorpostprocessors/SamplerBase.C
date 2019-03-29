@@ -68,7 +68,7 @@ SamplerBase::addSample(const Point & p, const Real & id, const std::vector<Real>
   _id.push_back(id);
 
   mooseAssert(values.size() == _variable_names.size(), "Mismatch of variable names to vector size");
-  for (auto i = beginIndex(values); i < values.size(); ++i)
+  for (MooseIndex(values) i = 0; i < values.size(); ++i)
     _values[i]->emplace_back(values[i]);
 }
 
@@ -132,13 +132,13 @@ SamplerBase::finalize()
 #endif
 
   // Sort each of the vectors using the same sorted indices
-  for (auto i = beginIndex(vec_ptrs); i < vec_ptrs.size(); ++i)
+  for (auto & vec_ptr : vec_ptrs)
   {
-    for (auto j = beginIndex(sorted_indices); j < sorted_indices.size(); ++j)
-      tmp_vector[j] = (*vec_ptrs[i])[sorted_indices[j]];
+    for (MooseIndex(sorted_indices) j = 0; j < sorted_indices.size(); ++j)
+      tmp_vector[j] = (*vec_ptr)[sorted_indices[j]];
 
     // Swap vector storage with sorted vector
-    vec_ptrs[i]->swap(tmp_vector);
+    vec_ptr->swap(tmp_vector);
   }
 }
 
@@ -151,6 +151,6 @@ SamplerBase::threadJoin(const SamplerBase & y)
 
   _id.insert(_id.end(), y._id.begin(), y._id.end());
 
-  for (unsigned int i = 0; i < _variable_names.size(); i++)
+  for (MooseIndex(_variable_names) i = 0; i < _variable_names.size(); i++)
     _values[i]->insert(_values[i]->end(), y._values[i]->begin(), y._values[i]->end());
 }

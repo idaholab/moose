@@ -83,7 +83,7 @@ Sampler::getSamples()
   if (_sample_names.empty())
   {
     _sample_names.resize(output.size());
-    for (auto i = beginIndex(output); i < output.size(); ++i)
+    for (MooseIndex(output) i = 0; i < output.size(); ++i)
       _sample_names[i] = "sample_" + std::to_string(i);
   }
   mooseAssert(output.size() == _sample_names.size(),
