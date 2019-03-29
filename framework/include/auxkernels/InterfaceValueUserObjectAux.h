@@ -11,7 +11,7 @@
 #define INTERFACEUSEROBJECTQPAUX_H
 
 #include "AuxKernel.h"
-#include "InterfaceValueUO_QP.h"
+#include "InterfaceQpValueUserObject.h"
 
 // Forward Declarations
 class InterfaceValueUserObjectAux;
@@ -20,7 +20,7 @@ template <>
 InputParameters validParams<InterfaceValueUserObjectAux>();
 
 /**
- * AuxKernel creating an AuxVariable from values stored in an InterfaceValueUO_QP
+ * AuxKernel creating an AuxVariable from values stored in an InterfaceQpValueUserObject
  */
 class InterfaceValueUserObjectAux : public AuxKernel
 {
@@ -33,7 +33,7 @@ public:
 
 protected:
   virtual Real computeValue() override;
-  const InterfaceValueUO_QP & _interface_uo;
+  const InterfaceQpValueUserObject & _interface_uo;
 };
 
 #endif // INTERFACEUSEROBJECTQPAUX_H

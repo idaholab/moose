@@ -18,13 +18,14 @@ validParams<InterfaceValueUserObjectAux>()
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredParam<UserObjectName>("interface_uo_name",
                                           "The name of the interface user object to use");
-  params.addClassDescription("Get stored value from the specified InterfaceValueUO_QP.");
+  params.addClassDescription("Get stored value from the specified InterfaceQpValueUserObject.");
 
   return params;
 }
 
 InterfaceValueUserObjectAux::InterfaceValueUserObjectAux(const InputParameters & parameters)
-  : AuxKernel(parameters), _interface_uo(getUserObject<InterfaceValueUO_QP>("interface_uo_name"))
+  : AuxKernel(parameters),
+    _interface_uo(getUserObject<InterfaceQpValueUserObject>("interface_uo_name"))
 {
 }
 

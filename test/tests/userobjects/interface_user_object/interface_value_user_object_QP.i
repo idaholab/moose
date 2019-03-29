@@ -40,7 +40,7 @@
 
 [UserObjects]
   [./interface_value_uo]
-    type = InterfaceValueUO_QP
+    type = InterfaceQpValueUserObject
     var = diffusivity_1
     var_neighbor = diffusivity_2
     boundary = 'interface'
@@ -48,7 +48,7 @@
     interface_value_type = average
   [../]
   [./interface_master_minus_slave_uo]
-    type = InterfaceValueUO_QP
+    type = InterfaceQpValueUserObject
     var = diffusivity_1
     var_neighbor = diffusivity_2
     boundary = 'interface'
@@ -56,7 +56,7 @@
     interface_value_type = jump_master_minus_slave
   [../]
   [./interface_slave_minus_master_uo]
-    type = InterfaceValueUO_QP
+    type = InterfaceQpValueUserObject
     var = diffusivity_1
     var_neighbor = diffusivity_2
     boundary = 'interface'
@@ -64,7 +64,7 @@
     interface_value_type = jump_slave_minus_master
   [../]
   [./interface_absolute_jump_uo]
-    type = InterfaceValueUO_QP
+    type = InterfaceQpValueUserObject
     var = diffusivity_1
     var_neighbor = diffusivity_2
     boundary = 'interface'
@@ -72,7 +72,7 @@
     interface_value_type = jump_abs
   [../]
   [./interface_master_uo]
-    type = InterfaceValueUO_QP
+    type = InterfaceQpValueUserObject
     var = diffusivity_1
     var_neighbor = diffusivity_2
     boundary = 'interface'
@@ -80,7 +80,7 @@
     interface_value_type = master
   [../]
   [./interface_slave_uo]
-    type = InterfaceValueUO_QP
+    type = InterfaceQpValueUserObject
     var = diffusivity_1
     var_neighbor = diffusivity_2
     boundary = 'interface'

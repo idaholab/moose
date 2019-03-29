@@ -7,26 +7,26 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INTERFACEVALUEUO_QP
-#define INTERFACEVALUEUO_QP
+#ifndef INTERFACEQPVALUEUSEROBJECT_H
+#define INTERFACEQPVALUEUSEROBJECT_H
 
 #include "InterfaceValueUserObject.h"
 
-class InterfaceValueUO_QP;
+class InterfaceQpValueUserObject;
 
 template <>
-InputParameters validParams<InterfaceValueUO_QP>();
+InputParameters validParams<InterfaceQpValueUserObject>();
 
 /**
  * This userobject collect values of a variable across an interface for each QP and compute a
  * scalar. The computed scalar value depends on the given parameter _interface_value_type\
  * _interface_value_type (see IntervafeValueTools).
  */
-class InterfaceValueUO_QP : public InterfaceValueUserObject
+class InterfaceQpValueUserObject : public InterfaceValueUserObject
 {
 public:
-  InterfaceValueUO_QP(const InputParameters & parameters);
-  virtual ~InterfaceValueUO_QP();
+  InterfaceQpValueUserObject(const InputParameters & parameters);
+  virtual ~InterfaceQpValueUserObject();
 
   virtual void initialize();
   virtual void execute();
@@ -42,4 +42,4 @@ protected:
   const VariableValue & _u_neighbor;
 };
 
-#endif // INTERFACEVALUEUO_QP
+#endif // INTERFACEQPVALUEUSEROBJECT_H

@@ -2,7 +2,7 @@
 
 ## Description
 
-InterfaceValueUserObjectAux is an AuxKernel used to collect values stored in a [InterfaceValueUO_QP](/InterfaceValueUO_QP.md) and save them into an aux variable at each quadrature point.
+InterfaceValueUserObjectAux is an AuxKernel used to collect values stored in a [InterfaceQpValueUserObject](/InterfaceQpValueUserObject.md) and save them into an aux variable at each quadrature point.
 It requires three inputs:
 
 * `variable` is the name of the output AuxVariable

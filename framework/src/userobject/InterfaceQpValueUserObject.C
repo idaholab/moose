@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "InterfaceValueUO_QP.h"
+#include "InterfaceQpValueUserObject.h"
 #include "MooseMesh.h"
-registerMooseObject("MooseApp", InterfaceValueUO_QP);
+registerMooseObject("MooseApp", InterfaceQpValueUserObject);
 
 template <>
 InputParameters
-validParams<InterfaceValueUO_QP>()
+validParams<InterfaceQpValueUserObject>()
 {
   InputParameters params = validParams<InterfaceValueUserObject>();
   params.addRequiredCoupledVar("var", "The variable name");
@@ -23,7 +23,7 @@ validParams<InterfaceValueUO_QP>()
   return params;
 }
 
-InterfaceValueUO_QP::InterfaceValueUO_QP(const InputParameters & parameters)
+InterfaceQpValueUserObject::InterfaceQpValueUserObject(const InputParameters & parameters)
   : InterfaceValueUserObject(parameters),
     _u(coupledValue("var")),
     _u_neighbor(parameters.isParamSetByUser("var_neighbor") ? coupledNeighborValue("var_neighbor")
@@ -32,10 +32,10 @@ InterfaceValueUO_QP::InterfaceValueUO_QP(const InputParameters & parameters)
 {
 }
 
-InterfaceValueUO_QP::~InterfaceValueUO_QP() {}
+InterfaceQpValueUserObject::~InterfaceQpValueUserObject() {}
 
 void
-InterfaceValueUO_QP::initialize()
+InterfaceQpValueUserObject::initialize()
 {
   // define the boundary map and retrieve element side and boundary_ID
   std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> elem_side_bid =
@@ -67,7 +67,7 @@ InterfaceValueUO_QP::initialize()
 }
 
 void
-InterfaceValueUO_QP::execute()
+InterfaceQpValueUserObject::execute()
 {
   // find the entry on the map
   auto it = _map_values.find(std::make_pair(_current_elem->id(), _current_side));
@@ -83,11 +83,11 @@ InterfaceValueUO_QP::execute()
       vec[qp] = computeInterfaceValueType(_u[qp], _u_neighbor[qp]);
   }
   else
-    mooseError("InterfaceValueUO_QP:: cannot find the required element and side");
+    mooseError("InterfaceQpValueUserObject:: cannot find the required element and side");
 }
 
 Real
-InterfaceValueUO_QP::getQpValue(dof_id_type elem, unsigned int side, unsigned int qp) const
+InterfaceQpValueUserObject::getQpValue(dof_id_type elem, unsigned int side, unsigned int qp) const
 {
   auto data = _map_values.find(std::make_pair(elem, side));
   if (data != _map_values.end())

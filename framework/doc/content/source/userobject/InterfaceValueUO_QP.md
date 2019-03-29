@@ -1,12 +1,15 @@
-# InterfaceValueUO_QP
+# InterfaceQpValueUserObject
 
-## IMPORTANT NOTE
+## IMPORTANT NOTES
 *** Any derived class of InterfaceUserObject does not support yet getMaterialProperty, please use auxvariables***
 
-## Description
-!syntax description /UserObjects/InterfaceValueUO_QP
+*** This userobejct only support multiprocessing. Threading is not supported at this time  ***
 
-InterfaceValueUO_QP is a user object computing and storing average values across an interface for each quadrature. The kind of average value are the one available in [InterfaceValueTools](/InterfaceValueTools.md).
+
+## Description
+!syntax description /UserObjects/InterfaceQpValueUserObject
+
+InterfaceQpValueUserObject is a user object computing and storing average values across an interface for each quadrature. The kind of average value are the one available in [InterfaceValueTools](/InterfaceValueTools.md).
 
 The stored value can be converted into an AuxVariable by using [InterfaceValueUserObjectAux](/InterfaceValueUserObjectAux.md) AuxKernel.
 
@@ -15,10 +18,10 @@ The stored value can be converted into an AuxVariable by using [InterfaceValueUs
 
 listing test/tests/userobjects/interface_user_object/interface_value_user_object_QP.i block=UserObjects/interface_value_uo
 
-!syntax description /UserObjects/InterfaceValueUO_QP
+!syntax description /UserObjects/InterfaceQpValueUserObject
 
-!syntax parameters /UserObjects/InterfaceValueUO_QP
+!syntax parameters /UserObjects/InterfaceQpValueUserObject
 
-!syntax inputs /UserObjects/InterfaceValueUO_QP
+!syntax inputs /UserObjects/InterfaceQpValueUserObject
 
-!syntax children /UserObjects/InterfaceValueUO_QP
+!syntax children /UserObjects/InterfaceQpValueUserObject
