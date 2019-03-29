@@ -25,6 +25,7 @@ enum class Interfaces
   ShapeSideUserObject = 1 << 9,
   Postprocessor = 1 << 10,
   VectorPostprocessor = 1 << 11,
+  InterfaceUserObject = 1 << 12,
 };
 
 template <>

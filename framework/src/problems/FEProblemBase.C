@@ -49,6 +49,7 @@
 #include "NodalPostprocessor.h"
 #include "SidePostprocessor.h"
 #include "InternalSidePostprocessor.h"
+#include "InterfacePostprocessor.h"
 #include "GeneralPostprocessor.h"
 #include "ElementVectorPostprocessor.h"
 #include "NodalVectorPostprocessor.h"
@@ -64,6 +65,7 @@
 #include "NodalUserObject.h"
 #include "SideUserObject.h"
 #include "InternalSideUserObject.h"
+#include "InterfaceUserObject.h"
 #include "GeneralUserObject.h"
 #include "ThreadedGeneralUserObject.h"
 #include "InternalSideIndicator.h"
@@ -2777,6 +2779,7 @@ FEProblemBase::addUserObject(std::string user_object_name,
     auto euo = std::dynamic_pointer_cast<ElementUserObject>(user_object);
     auto suo = std::dynamic_pointer_cast<SideUserObject>(user_object);
     auto isuo = std::dynamic_pointer_cast<InternalSideUserObject>(user_object);
+    auto iuo = std::dynamic_pointer_cast<InterfaceUserObject>(user_object);
     auto nuo = std::dynamic_pointer_cast<NodalUserObject>(user_object);
     auto guo = std::dynamic_pointer_cast<GeneralUserObject>(user_object);
     auto tguo = std::dynamic_pointer_cast<ThreadedGeneralUserObject>(user_object);
@@ -2786,7 +2789,8 @@ FEProblemBase::addUserObject(std::string user_object_name,
     {
       if (euo || nuo)
         _reinit_displaced_elem = true;
-      else if (suo)
+      else if (suo || iuo)
+        // shouldn't we add isuo
         _reinit_displaced_face = true;
     }
 
@@ -3120,7 +3124,8 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
   std::vector<UserObject *> userobjs;
   query.clone()
       .condition<AttribInterfaces>(Interfaces::ElementUserObject | Interfaces::SideUserObject |
-                                   Interfaces::InternalSideUserObject)
+                                   Interfaces::InternalSideUserObject |
+                                   Interfaces::InterfaceUserObject)
       .queryInto(userobjs);
 
   std::vector<UserObject *> tgobjs;
@@ -3178,6 +3183,7 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
     // on a side user object having been finalized first :-(
     joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::SideUserObject));
     joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::InternalSideUserObject));
+    joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::InterfaceUserObject));
     joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::ElementUserObject));
   }
 

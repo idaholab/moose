@@ -18,6 +18,7 @@
 class InternalSideUserObject;
 class ElementUserObject;
 class ShapeElementUserObject;
+class InterfaceUserObject;
 
 // libMesh forward declarations
 namespace libMesh
@@ -43,6 +44,7 @@ public:
   virtual void onElement(const Elem * elem) override;
   virtual void onBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id) override;
   virtual void onInternalSide(const Elem * elem, unsigned int side) override;
+  virtual void onInterface(const Elem * elem, unsigned int side, BoundaryID bnd_id) override;
   virtual void post() override;
   virtual void subdomainChanged() override;
 
@@ -73,6 +75,7 @@ private:
 
   const TheWarehouse::Query _query;
   std::vector<InternalSideUserObject *> _internal_side_objs;
+  std::vector<InterfaceUserObject *> _interface_user_objects;
   std::vector<ElementUserObject *> _element_objs;
   std::vector<ShapeElementUserObject *> _shape_element_objs;
 };
