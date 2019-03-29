@@ -136,6 +136,7 @@ TestAction::addObjects()
   addMaterials();
   addPreconditioner();
   addExecutioner();
+  addOutput();
 }
 
 void
@@ -352,4 +353,9 @@ TestAction::addExecutioner()
 
     _awh.addActionBlock(action);
   }
+}
+
+void
+TestAction::addOutput()
+{
 }
