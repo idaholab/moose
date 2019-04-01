@@ -79,7 +79,7 @@ class ColorBar(base.ChiggerResult):
         length0 = 0
         length1 = 0
         loc = self.getOption('location')
-        if (loc is 'right') or (loc is 'left'):
+        if (loc == 'right') or (loc == 'left'):
             length0 = self.getOption('width')
             length1 = self.getOption('length')
             plane.setOptions(resolution=[1, n+1])
