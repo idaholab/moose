@@ -1,6 +1,7 @@
 #include "HeatFlux3EqnBC.h"
-#include "HeatFluxFromHeatStructureBaseUserObject.h"
+#include "HeatFluxFromHeatStructure3EqnUserObject.h"
 #include "THMIndices3Eqn.h"
+#include "Assembly.h"
 
 registerMooseObject("THMApp", HeatFlux3EqnBC);
 
@@ -24,7 +25,8 @@ validParams<HeatFlux3EqnBC>()
 
 HeatFlux3EqnBC::HeatFlux3EqnBC(const InputParameters & parameters)
   : IntegratedBC(parameters),
-    _q_uo(getUserObject<HeatFluxFromHeatStructureBaseUserObject>("q_uo")),
+    _phi_neighbor(_assembly.phiNeighbor(_var)),
+    _q_uo(getUserObject<HeatFluxFromHeatStructure3EqnUserObject>("q_uo")),
     _P_hs_unit(getParam<Real>("P_hs_unit")),
     _n_unit(getParam<unsigned int>("n_unit")),
     _hs_coord_system_is_cylindrical(getParam<bool>("hs_coord_system_is_cylindrical")),
@@ -36,6 +38,50 @@ HeatFlux3EqnBC::HeatFlux3EqnBC(const InputParameters & parameters)
     _T_wall_jvar(coupled("T_wall")),
     _jvar_map(getVariableIndexMapping())
 {
+}
+
+void
+HeatFlux3EqnBC::computeJacobian()
+{
+  IntegratedBC::computeJacobian();
+}
+
+void
+HeatFlux3EqnBC::computeJacobianBlock(MooseVariableFEBase & jvar)
+{
+  IntegratedBC::computeJacobianBlock(jvar);
+
+  if (jvar.number() == _var.number())
+  {
+    // when doing the diagonal part, also take care of the off-diag jacobian
+    // wrt the heat structure side
+    std::vector<dof_id_type> idofs = _var.dofIndices();
+
+    const dof_id_type & pipe_elem_id = _q_uo.getNearestElem(_current_elem->id());
+    const Elem * neighbor = _mesh.elemPtr(pipe_elem_id);
+
+    _assembly.setCurrentNeighborSubdomainID(neighbor->subdomain_id());
+    _assembly.reinitNeighborAtPhysical(neighbor, _q_point.stdVector());
+
+    std::vector<unsigned int> var_nums = {_rhoA_jvar, _rhouA_jvar, _rhoEA_jvar};
+    for (std::size_t i = 0; i < var_nums.size(); i++)
+    {
+      unsigned int jvar_num = var_nums[i];
+      MooseVariableFEBase & jvar = _fe_problem.getNonlinearSystemBase().getVariable(_tid, jvar_num);
+      jvar.prepareNeighbor();
+      _assembly.copyNeighborShapes(jvar_num);
+
+      auto & jdofs = jvar.dofIndicesNeighbor();
+
+      DenseMatrix<Number> Ke(_test.size(), jvar.phiNeighborSize());
+      for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+        for (_i = 0; _i < _test.size(); _i++)
+          for (_j = 0; _j < jvar.phiNeighborSize(); _j++)
+            Ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobianNeighbor(jvar_num);
+
+      _assembly.cacheJacobianBlock(Ke, idofs, jdofs, _var.scalingFactor());
+    }
+  }
 }
 
 Real
@@ -53,9 +99,10 @@ HeatFlux3EqnBC::computeQpJacobian()
 }
 
 Real
-HeatFlux3EqnBC::computeQpOffDiagJacobian(unsigned int /*jvar*/)
+HeatFlux3EqnBC::computeQpOffDiagJacobianNeighbor(unsigned int jvar)
 {
-  return 0;
+  const std::vector<DenseVector<Real>> & dq_wall = _q_uo.getHeatFluxJacobian(_current_elem->id());
+  return -_hs_scale * dq_wall[_qp](_jvar_map.at(jvar)) * _phi_neighbor[_j][_qp] * _test[_i][_qp];
 }
 
 std::map<unsigned int, unsigned int>

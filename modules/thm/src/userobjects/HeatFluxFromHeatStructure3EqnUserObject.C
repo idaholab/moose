@@ -1,5 +1,7 @@
 #include "HeatFluxFromHeatStructure3EqnUserObject.h"
 #include "THMIndices3Eqn.h"
+#include "FlowModelSinglePhase.h"
+#include "HeatConductionModel.h"
 
 registerMooseObject("THMApp", HeatFluxFromHeatStructure3EqnUserObject);
 
@@ -31,6 +33,36 @@ HeatFluxFromHeatStructure3EqnUserObject::HeatFluxFromHeatStructure3EqnUserObject
     _dT_drhouA(getMaterialPropertyDerivativeTHM<Real>("T", "rhouA")),
     _dT_drhoEA(getMaterialPropertyDerivativeTHM<Real>("T", "rhoEA"))
 {
+}
+
+void
+HeatFluxFromHeatStructure3EqnUserObject::execute()
+{
+  dof_id_type elem_id = _current_elem->id();
+
+  // 1D elements
+  _dofs[elem_id].resize(THM3Eqn::N_EQ);
+  std::vector<std::string> var_names = {
+      FlowModelSinglePhase::RHOA, FlowModelSinglePhase::RHOUA, FlowModelSinglePhase::RHOEA};
+  for (std::size_t i = 0; i < var_names.size(); i++)
+  {
+    MooseVariable & var = _fe_problem.getStandardVariable(_tid, var_names[i]);
+    std::vector<dof_id_type> dofs;
+    var.getDofIndices(_current_elem, dofs);
+    _dofs[elem_id][i] = dofs;
+  }
+
+  dof_id_type nearest_elem_id = _nearest_elem_ids[elem_id];
+  const Elem * nearest_elem = _mesh.elemPtr(nearest_elem_id);
+  _dofs[nearest_elem_id].resize(1);
+  {
+    MooseVariable & var = _fe_problem.getStandardVariable(_tid, HeatConductionModel::TEMPERATURE);
+    std::vector<dof_id_type> dofs;
+    var.getDofIndices(nearest_elem, dofs);
+    _dofs[nearest_elem_id][0] = dofs;
+  }
+
+  HeatFluxFromHeatStructureBaseUserObject::execute();
 }
 
 Real

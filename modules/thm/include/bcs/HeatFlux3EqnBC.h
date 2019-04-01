@@ -4,7 +4,7 @@
 #include "IntegratedBC.h"
 
 class HeatFlux3EqnBC;
-class HeatFluxFromHeatStructureBaseUserObject;
+class HeatFluxFromHeatStructure3EqnUserObject;
 
 template <>
 InputParameters validParams<HeatFlux3EqnBC>();
@@ -14,10 +14,13 @@ class HeatFlux3EqnBC : public IntegratedBC
 public:
   HeatFlux3EqnBC(const InputParameters & parameters);
 
+  virtual void computeJacobian() override;
+  virtual void computeJacobianBlock(MooseVariableFEBase & jvar) override;
+
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
+  virtual Real computeQpOffDiagJacobianNeighbor(unsigned int jvar);
 
   /**
    * Creates the mapping of coupled variable index to local equation system
@@ -25,8 +28,11 @@ protected:
    */
   std::map<unsigned int, unsigned int> getVariableIndexMapping() const;
 
+  /// shape function values (in QPs)
+  const VariablePhiValue & _phi_neighbor;
+
   /// User object that computes the heat flux
-  const HeatFluxFromHeatStructureBaseUserObject & _q_uo;
+  const HeatFluxFromHeatStructure3EqnUserObject & _q_uo;
   /// Perimeter of a single unit of heat structure
   const Real _P_hs_unit;
   /// Number of units of heat structure
