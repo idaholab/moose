@@ -26,13 +26,13 @@ protected:
    * Creates the mapping of coupled variable index to local equation system
    * index for flow channel variables
    */
-  virtual std::map<unsigned int, unsigned int> getFlowChannelIndexMapping() const;
+  std::map<unsigned int, unsigned int> getFlowChannelIndexMapping() const;
 
   /**
    * Creates the mapping of coupled variable index to local equation system
    * index for junction variables
    */
-  virtual std::map<unsigned int, unsigned int> getJunctionIndexMapping() const;
+  std::map<unsigned int, unsigned int> getJunctionIndexMapping() const;
 
   /// Index of the connected flow channel
   const unsigned int _connection_index;
