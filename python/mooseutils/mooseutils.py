@@ -81,7 +81,7 @@ def str2bool(string):
         string[str]: The text to convert (e.g., 'true' or '1')
     """
     string = string.lower()
-    if string is 'true' or string is '1':
+    if string == 'true' or string == '1':
         return True
     else:
         return False

@@ -91,7 +91,7 @@ class Line(base.ChiggerObject):
             self._vtkplot = vtk.vtkPlotLine()
             self._vtkplot.SetInputData(self._vtktable, 0, 1)
 
-        elif style is 'none' and not isinstance(self._vtkplot, vtk.vtkPlotPoints):
+        elif style == 'none' and not isinstance(self._vtkplot, vtk.vtkPlotPoints):
             self._vtkplot = vtk.vtkPlotPoints()
             self._vtkplot.SetInputData(self._vtktable, 0, 1)
 
