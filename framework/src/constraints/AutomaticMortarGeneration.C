@@ -132,7 +132,8 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
     mortar_segment_mesh(mesh_in.comm()),
     h_max(0.),
     _periodic(false),
-    _periodic_set_externally(false)
+    _periodic_set_externally(false),
+    _debug(false)
 {
   master_slave_boundary_id_pairs.push_back(boundary_key);
   master_requested_boundary_ids.insert(boundary_key.first);
@@ -295,7 +296,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     auto key = pr.first;
     auto val = pr.second;
 
-    const Node * master_node = key.first;
+    const Node * master_node = std::get<1>(key);
     Real xi1 = val.first;
     const Elem * slave_elem = val.second;
 
@@ -553,10 +554,11 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
   // }
 
   // (Optionally) Write the mortar segment mesh to file for inspection
-  // {
-  //   ExodusII_IO mortar_segment_mesh_writer(mortar_segment_mesh);
-  //   mortar_segment_mesh_writer.write("mortar_segment_mesh.e");
-  // }
+  if (_debug)
+  {
+    ExodusII_IO mortar_segment_mesh_writer(mortar_segment_mesh);
+    mortar_segment_mesh_writer.write("mortar_segment_mesh.e");
+  }
 
   // Loop over the msm_elem_to_info object and build a bi-directional
   // multimap from slave elements to the master Elems which they are
@@ -872,7 +874,8 @@ AutomaticMortarGeneration::projectSlaveNodesSinglePair(
 
                     // Also map in the other direction.
                     Real xi1 = (slave_node == slave_node_neighbors[snn]->node_ptr(0)) ? -1 : +1;
-                    auto master_key = std::make_pair(master_node, master_node_neighbors[mnn]);
+                    auto master_key =
+                        std::make_tuple(master_node->id(), master_node, master_node_neighbors[mnn]);
                     auto slave_val = std::make_pair(xi1, slave_node_neighbors[snn]);
                     master_node_and_elem_to_xi1_slave_elem.insert(
                         std::make_pair(master_key, slave_val));
@@ -972,7 +975,7 @@ AutomaticMortarGeneration::projectMasterNodesSinglePair(
 
       // Check whether we have already successfully inverse mapped this master node and skip if
       // so.
-      auto master_key = std::make_pair(master_node, master_node_neighbors[0]);
+      auto master_key = std::make_tuple(master_node->id(), master_node, master_node_neighbors[0]);
       if (master_node_and_elem_to_xi1_slave_elem.count(master_key))
         continue;
 
@@ -1090,7 +1093,7 @@ AutomaticMortarGeneration::projectMasterNodesSinglePair(
                 const Node * neigh_node = neigh->node_ptr(nid);
                 if (master_node == neigh_node)
                 {
-                  auto key = std::make_pair(neigh_node, neigh);
+                  auto key = std::make_tuple(neigh_node->id(), neigh_node, neigh);
                   auto val = std::make_pair(xi1, slave_elem_candidate);
                   master_node_and_elem_to_xi1_slave_elem.insert(std::make_pair(key, val));
                 }

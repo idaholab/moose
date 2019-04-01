@@ -176,11 +176,12 @@ public:
   std::map<std::pair<const Node *, const Elem *>, std::pair<Real, const Elem *>>
       slave_node_and_elem_to_xi2_master_elem;
 
-  // Same type of container, but for mapping
-  // (Master Node, Master Elem) -> (xi^(1), Slave Elem)
-  // where they are inverse-projected along the nodal normal
-  // direction.
-  std::map<std::pair<const Node *, const Elem *>, std::pair<Real, const Elem *>>
+  // Same type of container, but for mapping (Master Node ID, Master Node,
+  // Master Elem) -> (xi^(1), Slave Elem) where they are inverse-projected along
+  // the nodal normal direction. Note that the first item of the key, the master
+  // node ID, is important for storing the key-value pairs in a consistent order
+  // across processes, e.g. this container has to be ordered!
+  std::map<std::tuple<dof_id_type, const Node *, const Elem *>, std::pair<Real, const Elem *>>
       master_node_and_elem_to_xi1_slave_elem;
 
   // 1D Mesh of mortar segment elements which gets built by the call
@@ -247,6 +248,9 @@ private:
 
   /// Whether we have externally set the _periodic flag
   bool _periodic_set_externally;
+
+  /// whether to print debug output
+  bool _debug;
 };
 
 #endif
