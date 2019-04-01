@@ -131,8 +131,14 @@ IterationAdaptiveDT::IterationAdaptiveDT(const InputParameters & parameters)
   if (isParamValid("timestep_limiting_function"))
     _max_function_change =
         isParamValid("max_function_change") ? getParam<Real>("max_function_change") : -1;
-  else if (isParamValid("max_function_change"))
-    mooseError("'timestep_limiting_function' must be used for 'max_function_change' to be used");
+  else
+  {
+    if (isParamValid("max_function_change"))
+      mooseError("'timestep_limiting_function' must be used for 'max_function_change' to be used");
+    if (_force_step_every_function_point)
+      mooseError("'timestep_limiting_function' must be used for 'force_step_every_function_point' "
+                 "to be used");
+  }
 }
 
 void
