@@ -27,8 +27,8 @@ validParams<VolumeJunctionOldBC>()
   params.addRequiredParam<Real>("K", "Form loss coefficients");
   params.addRequiredParam<Real>("K_reverse", "Reverse form loss coefficients");
   params.addRequiredParam<Real>("ref_area", "Reference area of this junction");
-  params.addRequiredParam<Real>("deltaH",
-                                "Height difference between pipe BC and VolumeJunctionOld center");
+  params.addRequiredParam<Real>(
+      "deltaH", "Height difference between flow channel BC and VolumeJunctionOld center");
 
   params.addRequiredParam<Real>("gravity_magnitude", "Gravitational acceleration magnitude");
 

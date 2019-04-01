@@ -58,7 +58,7 @@ GeometricalFlowComponent::getConnections(FlowConnection::EEndType end_type) cons
   if (it != _connections.end())
     return it->second;
   else
-    mooseError(name(), ": Invalid pipe end type (", end_type, ").");
+    mooseError(name(), ": Invalid flow channel end type (", end_type, ").");
 }
 
 const THM::FlowModelID &

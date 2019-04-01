@@ -15,8 +15,8 @@ validParams<OneDEnergyFlux>()
   params.addRequiredCoupledVar("arhouA", "alpha*rho*u*A");
   params.addRequiredCoupledVar("arhoEA", "alpha*rho*E*A");
 
-  params.addRequiredParam<MaterialPropertyName>("direction",
-                                                "The direction of the pipe material property");
+  params.addRequiredParam<MaterialPropertyName>(
+      "direction", "The direction of the flow channel material property");
   params.addRequiredParam<MaterialPropertyName>("alpha", "Volume fraction material property");
   params.addRequiredParam<MaterialPropertyName>("rho", "Density material property");
   params.addRequiredParam<MaterialPropertyName>("vel", "Velocity material property");

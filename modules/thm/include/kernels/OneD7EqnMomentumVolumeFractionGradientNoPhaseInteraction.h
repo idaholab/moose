@@ -32,7 +32,7 @@ protected:
   const VariableValue & _area;
   const VariableGradient & _alpha_grad;
 
-  /// The direction of the pipe
+  /// The direction of the flow channel
   const MaterialProperty<RealVectorValue> & _dir;
 
   const MaterialProperty<Real> & _p;

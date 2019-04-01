@@ -9,7 +9,7 @@ template <>
 InputParameters validParams<InletStagnationEnthalpyMomentum>();
 
 /**
- * Boundary condition with prescribed stagnation enthalpy and momentum for pipes
+ * Boundary condition with prescribed stagnation enthalpy and momentum for flow channels
  */
 class InletStagnationEnthalpyMomentum : public FlowBoundary
 {

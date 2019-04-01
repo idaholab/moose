@@ -33,7 +33,7 @@ protected:
   const MaterialProperty<Real> * const _drho_dbeta;
   const MaterialProperty<Real> & _drho_darhoA;
 
-  /// The direction of the pipe
+  /// The direction of the flow channel
   const MaterialProperty<RealVectorValue> & _dir;
   /// Gravitational acceleration vector
   const RealVectorValue & _gravity_vector;

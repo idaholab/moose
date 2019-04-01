@@ -39,7 +39,8 @@ InputParameters
 validParams<FlowChannelBase>()
 {
   InputParameters params = validParams<GeometricalFlowComponent>();
-  params.addRequiredParam<FunctionName>("A", "Area of the pipe, can be a constant or a function");
+  params.addRequiredParam<FunctionName>(
+      "A", "Area of the flow channel, can be a constant or a function");
   params.addParam<Real>("roughness", 0.0, "roughness, [m]");
   params.addParam<FunctionName>("f", "Wall friction");
   params.addParam<MooseEnum>("heat_transfer_geom",
@@ -478,7 +479,8 @@ FlowChannelBase::getHeatTransferNamesSuffix(const std::string & ht_name) const
       return suffix;
     }
     else
-      mooseError("Heat transfer component '", ht_name, "' was not added to pipe '", name(), "'");
+      mooseError(
+          "Heat transfer component '", ht_name, "' was not added to flow channel '", name(), "'");
   }
   // else, don't add a suffix; there is no need
   else

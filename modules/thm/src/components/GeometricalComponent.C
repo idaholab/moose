@@ -8,8 +8,8 @@ validParams<GeometricalComponent>()
 {
   InputParameters params = validParams<Component>();
 
-  params.addRequiredParam<Point>("position", "Origin (start) of the pipe");
-  params.addRequiredParam<RealVectorValue>("orientation", "Orientation vector of the pipe");
+  params.addRequiredParam<Point>("position", "Origin (start) of the component");
+  params.addRequiredParam<RealVectorValue>("orientation", "Orientation vector of the component");
   params.addParam<Real>("rotation", 0., "Rotation of the component (in degrees)");
   params.addRequiredParam<std::vector<Real>>(
       "length", "The lengths of the subsections of the geometric component along the main axis");

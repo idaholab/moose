@@ -9,7 +9,7 @@ template <>
 InputParameters validParams<InletDensityVelocity>();
 
 /**
- * Boundary condition with prescribed density and velocity for pipes
+ * Boundary condition with prescribed density and velocity for flow channels
  *
  */
 class InletDensityVelocity : public FlowBoundary

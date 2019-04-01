@@ -9,7 +9,7 @@ validParams<JunctionStagnationEnthalpyUserObject>()
 {
   InputParameters params = validParams<FlowJunctionUserObject>();
 
-  params.addRequiredCoupledVar("A", "Cross-sectional pipe area");
+  params.addRequiredCoupledVar("A", "Cross-sectional flow channel area");
   params.addRequiredCoupledVar("rhoA", "rho*A");
   params.addRequiredCoupledVar("rhouA", "rho*u*A");
   params.addRequiredCoupledVar("rhoEA", "rho*E*A");

@@ -22,7 +22,7 @@ GeneralizedCircumference::value(Real t, const Point & p)
   RealVectorValue gradA = _area_func.gradient(t, p);
   Real dAdx2 = gradA(0) * gradA(0);
 
-  // Here, we assume a pipe with circular cross section.
+  // Here, we assume a flow channel with circular cross section.
   return std::sqrt(4. * libMesh::pi * _area_func.value(t, p) + dAdx2);
 }
 

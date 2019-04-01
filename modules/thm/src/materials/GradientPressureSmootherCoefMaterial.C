@@ -14,8 +14,8 @@ validParams<GradientPressureSmootherCoefMaterial>()
   params.addRequiredCoupledVar("p", "Pressure");
   params.addParam<Real>("p_reference", "Reference pressure for normalization");
   params.addParam<bool>("use_low_mach_fix", true, "Use the low-Mach fix");
-  params.addRequiredParam<MaterialPropertyName>("direction",
-                                                "The direction of the pipe material property");
+  params.addRequiredParam<MaterialPropertyName>(
+      "direction", "The direction of the flow channel material property");
   params.addRequiredParam<MaterialPropertyName>(
       "coef_name", "The material property name that will hold the dissipation coefficient");
   return params;

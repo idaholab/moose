@@ -110,7 +110,7 @@ protected:
   Factory & _factory;
 
   /// The flow channel component that built this class
-  FlowChannelBase & _pipe;
+  FlowChannelBase & _flow_channel;
 
   /// The name of the user object that defines fluid properties
   const UserObjectName _fp_name;
