@@ -12,7 +12,8 @@ InputParameters
 validParams<FlowChannel1Phase>()
 {
   InputParameters params = validParams<FlowChannelBase>();
-  params.addRequiredParam<FunctionName>("A", "Area of the pipe, can be a constant or a function");
+  params.addRequiredParam<FunctionName>(
+      "A", "Area of the flow channel, can be a constant or a function");
   params.addParam<Real>("roughness", 0.0, "roughness, [m]");
   params.addParam<FunctionName>("f", "Wall friction");
   params.addParam<MaterialPropertyName>("f_2phase_mult_liquid",
@@ -31,9 +32,9 @@ validParams<FlowChannel1Phase>()
                              "Convective heat transfer geometry");
   params.addParam<Real>("PoD", 1, "pitch to diameter ratio for parallel bundle heat transfer");
 
-  params.addParam<FunctionName>("initial_p", "Initial pressure in the pipe");
-  params.addParam<FunctionName>("initial_vel", "Initial velocity in the pipe");
-  params.addParam<FunctionName>("initial_T", "Initial temperature in the pipe");
+  params.addParam<FunctionName>("initial_p", "Initial pressure in the flow channel");
+  params.addParam<FunctionName>("initial_vel", "Initial velocity in the flow channel");
+  params.addParam<FunctionName>("initial_T", "Initial temperature in the flow channel");
 
   params.addClassDescription("1-phase 1D flow channel");
 
@@ -48,7 +49,7 @@ FlowChannel1Phase::buildFlowModel()
   const std::string class_name = "FlowModelSinglePhase";
   InputParameters pars = _factory.getValidParams(class_name);
   pars.set<Simulation *>("_sim") = &_sim;
-  pars.set<FlowChannelBase *>("_pipe") = this;
+  pars.set<FlowChannelBase *>("_flow_channel") = this;
   pars.set<UserObjectName>("fp") = _fp_name;
   pars.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
   pars.set<AuxVariableName>("A_linear_name") = _A_linear_name;

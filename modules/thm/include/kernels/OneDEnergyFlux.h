@@ -26,7 +26,7 @@ protected:
 
   const VariableValue & _A;
 
-  /// The direction of the pipe
+  /// The direction of the flow channel
   const MaterialProperty<RealVectorValue> & _dir;
 
   const MaterialProperty<Real> & _alpha;

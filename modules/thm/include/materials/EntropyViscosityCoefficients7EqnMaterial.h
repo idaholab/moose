@@ -84,7 +84,7 @@ protected:
 
   const PostprocessorValue & _vf_pps;
 
-  /// The direction of the pipe
+  /// The direction of the flow channel
   const MaterialProperty<RealVectorValue> & _dir;
 };
 

@@ -17,7 +17,8 @@ validParams<JunctionMomentumConstraint>()
 
   params.addRequiredParam<std::vector<Real>>("normals", "node normals");
   params.addRequiredParam<std::vector<dof_id_type>>("nodes", "node IDs");
-  params.addRequiredParam<std::vector<Real>>("K", "Loss coefficients for each pipe at junction");
+  params.addRequiredParam<std::vector<Real>>("K",
+                                             "Loss coefficients for each flow channel at junction");
 
   params.addRequiredCoupledVar("A", "Cross-sectional area");
   params.addRequiredCoupledVar("rhoA", "rho*A");

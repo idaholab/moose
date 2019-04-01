@@ -40,7 +40,7 @@ public:
    */
   static MooseEnum getConvHeatTransGeometry(const std::string & name);
 
-  // Pipe specific interface ----
+  // Flow channel specific interface ----
   virtual std::shared_ptr<const FlowModel> getFlowModel() const;
 
   /**
@@ -83,10 +83,10 @@ public:
   std::vector<VariableName> getWallTemperatureNames() const { return _T_wall_names; }
 
   /**
-   * Adds the name of a heat transfer component to the pipe's list.
+   * Adds the name of a heat transfer component to the flow channel's list.
    *
    * This function is called from a heat transfer component to add its name to
-   * the pipe's list, so that the pipe can communicate with it, such as for
+   * the flow channel's list, so that the flow channel can communicate with it, such as for
    * determining variable names used in averages of heat transfer variables.
    *
    * @param[in] ht_name  name of the heat transfer component
@@ -97,9 +97,9 @@ public:
    * Gets suffix to add to heat-transfer-related names in a heat transfer component
    *
    * This function is called from a heat transfer component to determine how to
-   * name its variables. If the pipe has only one heat transfer coefficient, for
+   * name its variables. If the flow channel has only one heat transfer coefficient, for
    * example, then no suffix is returned. This function must be called after all
-   * of the heat transfer component names have been added to the pipe's list
+   * of the heat transfer component names have been added to the flow channel's list
    * (via \c addHeatTransferName()).
    *
    * @param[in] ht_name  name of the heat transfer component
@@ -136,7 +136,7 @@ protected:
    */
   virtual void getHeatTransferVariableNames();
 
-  /// The flow model used by this pipe
+  /// The flow model used by this flow channel
   std::shared_ptr<FlowModel> _flow_model;
 
   /// Function describing the flow channel area
@@ -148,17 +148,17 @@ protected:
   /// Closures object
   std::shared_ptr<ClosuresBase> _closures;
 
-  /// True if the user provided a function describing the area of the pipe
+  /// True if the user provided a function describing the area of the flow channel
   bool _const_A;
 
   const bool & _pipe_pars_transferred;
 
-  /// True if the user provided a function describing the hydraulic diameter of the pipe
+  /// True if the user provided a function describing the hydraulic diameter of the flow channel
   bool _has_Dh;
   /// Function describing the hydraulic diameter
   FunctionName _Dh_function;
 
-  /// Roughness of pipe surface, [m]
+  /// Roughness of flow channel surface, [m]
   const Real & _roughness;
 
   /// Convective Heat transfer geometry
@@ -168,21 +168,21 @@ protected:
   /// True if user provides PoD
   bool _has_PoD;
 
-  /// Subdomain id this pipe defined
+  /// Subdomain id this flow channel defined
   unsigned int _subdomain_id;
-  /// Nodeset id for all pipe nodes
+  /// Nodeset id for all flow channel nodes
   unsigned int _nodeset_id;
-  /// Nodeset name for all pipe nodes
+  /// Nodeset name for all flow channel nodes
   BoundaryName _nodeset_name;
 
-  /// Nodes ids of this pipe component
+  /// Nodes ids of this flow channel component
   std::vector<unsigned int> _node_ids;
-  /// Elements ids of this pipe component
+  /// Elements ids of this flow channel component
   std::vector<unsigned int> _elem_ids;
 
-  /// Flag that pipe is "horizontal"; else "vertical". The pipe is considered
-  /// "horizontal" if the angle between the pipe orientation vector and gravity
-  /// vector is between 45 degrees and 135 degrees.
+  /// Flag that flow channel is "horizontal"; else "vertical". The flow channel
+  /// is considered "horizontal" if the angle between the flow channel orientation
+  /// vector and gravity vector is between 45 degrees and 135 degrees.
   const bool _is_horizontal;
 
   /// The name of the user object that will set up stabilization

@@ -9,8 +9,8 @@ template <>
 InputParameters validParams<ConnectorBase>();
 
 /**
- * Base class for creating component that connect other components together (e.g. a pipe and a heat
- * structure)
+ * Base class for creating component that connect other components together (e.g. a flow channel and
+ * a heat structure)
  */
 class ConnectorBase : public Component
 {

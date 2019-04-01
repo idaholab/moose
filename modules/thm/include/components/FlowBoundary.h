@@ -34,10 +34,10 @@ protected:
    */
   void addWeakBC7Eqn(const std::string & boundary_flux_name);
 
-  /// The name of the connect pipe
-  std::string _connected_pipe_name;
-  /// The end type of the connected pipe
-  EEndType _connected_pipe_end_type;
+  /// The name of the connect flow channel
+  std::string _connected_flow_channel_name;
+  /// The end type of the connected flow channel
+  EEndType _connected_flow_channel_end_type;
 
   /// Node ID
   dof_id_type _node;

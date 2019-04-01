@@ -9,8 +9,8 @@ validParams<LapidusCoefMaterial>()
   InputParameters params = validParams<Material>();
   params.addRequiredParam<Real>("cl", "User-specified coefficient");
   params.addRequiredCoupledVar("vel", "The velocity of the kth phase, aux variable");
-  params.addRequiredParam<MaterialPropertyName>("direction",
-                                                "The direction of the pipe material property");
+  params.addRequiredParam<MaterialPropertyName>(
+      "direction", "The direction of the flow channel material property");
   params.addRequiredParam<MaterialPropertyName>(
       "coef_name", "The material property name that will hold the dissipation coefficient");
   return params;

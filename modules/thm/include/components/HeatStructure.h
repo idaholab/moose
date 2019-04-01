@@ -141,7 +141,7 @@ protected:
   const bool _has_rho;
 
   // mesh related
-  /// Subdomain id this pipe defined
+  /// Subdomain id this flow channel defined
   unsigned int _subdomain_id;
   /// BC ID of the heat structure (top)
   std::vector<unsigned int> _top_bc_id;

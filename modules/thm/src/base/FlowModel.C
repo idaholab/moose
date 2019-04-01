@@ -9,7 +9,7 @@ validParams<FlowModel>()
 {
   InputParameters params = validParams<MooseObject>();
   params.addPrivateParam<Simulation *>("_sim");
-  params.addPrivateParam<FlowChannelBase *>("_pipe");
+  params.addPrivateParam<FlowChannelBase *>("_flow_channel");
   params.addRequiredParam<UserObjectName>(
       "fp", "The name of the user object that defines fluid properties");
   params.addRequiredParam<UserObjectName>("numerical_flux", "Numerical flux user object name");
@@ -75,12 +75,12 @@ FlowModel::FlowModel(const InputParameters & params)
     _sim(*params.getCheckedPointerParam<Simulation *>("_sim")),
     _app(_sim.getApp()),
     _factory(_app.getFactory()),
-    _pipe(*params.getCheckedPointerParam<FlowChannelBase *>("_pipe")),
+    _flow_channel(*params.getCheckedPointerParam<FlowChannelBase *>("_flow_channel")),
     _fp_name(params.get<UserObjectName>("fp")),
     _comp_name(name()),
-    _gravity_vector(_pipe.getParam<RealVectorValue>("gravity_vector")),
+    _gravity_vector(_flow_channel.getParam<RealVectorValue>("gravity_vector")),
     _gravity_magnitude(_gravity_vector.norm()),
-    _lump_mass_matrix(_pipe.getParam<bool>("lump_mass_matrix")),
+    _lump_mass_matrix(_flow_channel.getParam<bool>("lump_mass_matrix")),
     _A_linear_name(params.get<AuxVariableName>("A_linear_name")),
     _rdg_slope_reconstruction(params.get<MooseEnum>("rdg_slope_reconstruction")),
     _numerical_flux_name(params.get<UserObjectName>("numerical_flux"))
@@ -90,12 +90,12 @@ FlowModel::FlowModel(const InputParameters & params)
 const FunctionName &
 FlowModel::getVariableFn(const FunctionName & fn_param_name)
 {
-  const FunctionName & fn_name = _pipe.getParam<FunctionName>(fn_param_name);
+  const FunctionName & fn_name = _flow_channel.getParam<FunctionName>(fn_param_name);
   const Function & fn = _sim.getFunction(fn_name);
 
   if (dynamic_cast<const ConstantFunction *>(&fn) != nullptr)
   {
-    _pipe.connectObject(fn.parameters(), "", fn_name, fn_param_name, "value");
+    _flow_channel.connectObject(fn.parameters(), "", fn_name, fn_param_name, "value");
   }
 
   return fn_name;
@@ -104,7 +104,7 @@ FlowModel::getVariableFn(const FunctionName & fn_param_name)
 void
 FlowModel::addCommonVariables()
 {
-  unsigned int subdomain_id = _pipe.getSubdomainID();
+  unsigned int subdomain_id = _flow_channel.getSubdomainID();
 
   _sim.addVariable(false, AREA, _fe_type, subdomain_id);
   _sim.addVariable(false, HEAT_FLUX_PERIMETER, _fe_type, subdomain_id);
@@ -116,10 +116,10 @@ FlowModel::addCommonVariables()
 void
 FlowModel::addCommonInitialConditions()
 {
-  if (_pipe.isParamValid("A"))
+  if (_flow_channel.isParamValid("A"))
   {
-    const std::vector<SubdomainName> & block = _pipe.getSubdomainNames();
-    const FunctionName & area_function = _pipe.getAreaFunctionName();
+    const std::vector<SubdomainName> & block = _flow_channel.getSubdomainNames();
+    const FunctionName & area_function = _flow_channel.getAreaFunctionName();
 
     if (!_sim.hasFunction(area_function))
     {
@@ -129,7 +129,7 @@ FlowModel::addCommonInitialConditions()
         _sim.addConstantIC(_A_linear_name, fn.value(0, Point()), block);
       // FIXME: eventually use Component::makeFunctionControllableIfConstant
       if (dynamic_cast<ConstantFunction *>(&fn) != nullptr)
-        _pipe.connectObject(fn.parameters(), "", area_function, "Area", "value");
+        _flow_channel.connectObject(fn.parameters(), "", area_function, "Area", "value");
     }
     else
     {
@@ -159,7 +159,7 @@ FlowModel::addCommonMooseObjects()
   {
     const std::string class_name = "ConstantMaterial";
     InputParameters params = _factory.getValidParams(class_name);
-    params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
+    params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
     params.set<std::string>("property_name") = FlowModel::UNITY;
     params.set<Real>("value") = 1.0;
     params.set<std::vector<VariableName>>("derivative_vars") = _derivative_vars;

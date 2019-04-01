@@ -18,7 +18,7 @@ InputParameters validParams<HeatFluxFromHeatStructureBaseUserObject>();
  *
  * There are 2 different clients to the values we cached:
  * 1. BoundaryFluxXYZBC to apply the heat flux on a heat structure boundary
- * 2. OneDXYZEnergyHeatFlux to apply the heat flux on the pipe side.
+ * 2. OneDXYZEnergyHeatFlux to apply the heat flux on the flow channel side.
  */
 class HeatFluxFromHeatStructureBaseUserObject : public ElementUserObject
 {

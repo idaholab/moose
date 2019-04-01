@@ -13,8 +13,8 @@ validParams<OneDMomentumGravity>()
   params.addCoupledVar("beta", "Remapped volume fraction of liquid (two-phase only)");
   params.addRequiredCoupledVar("arhoA", "alpha*rho*A");
 
-  params.addRequiredParam<MaterialPropertyName>("direction",
-                                                "The direction of the pipe material property");
+  params.addRequiredParam<MaterialPropertyName>(
+      "direction", "The direction of the flow channel material property");
   params.addRequiredParam<MaterialPropertyName>("alpha", "Volume fraction property");
   params.addRequiredParam<MaterialPropertyName>("rho", "Density property");
 

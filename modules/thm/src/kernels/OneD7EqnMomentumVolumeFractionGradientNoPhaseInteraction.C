@@ -12,8 +12,8 @@ validParams<OneD7EqnMomentumVolumeFractionGradientNoPhaseInteraction>()
   params.addRequiredCoupledVar("arhoEA", "The total energy of the kth phase");
   params.addRequiredCoupledVar("A", "Cross-sectional area");
   params.addRequiredCoupledVar("alpha", "The volume fraction of the kth phase");
-  params.addRequiredParam<MaterialPropertyName>("direction",
-                                                "The direction of the pipe material property");
+  params.addRequiredParam<MaterialPropertyName>(
+      "direction", "The direction of the flow channel material property");
   params.addRequiredParam<MaterialPropertyName>("p", "Pressure");
   return params;
 }

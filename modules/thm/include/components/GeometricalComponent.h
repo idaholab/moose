@@ -110,7 +110,7 @@ protected:
   /// Physical position in the space
   const Point & _position;
 
-  /// Direction this pipe is going to
+  /// Direction this flow channel is going to
   const RealVectorValue & _dir;
 
   /// Angle between orientation vector and gravity vector, in degrees

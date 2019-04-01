@@ -30,7 +30,7 @@ FlowJunction::setupMesh()
 
   const unsigned int boundary_id = getNextBoundaryId();
 
-  // name the nodeset/sideset corresponding to the nodes of all connected pipe ends
+  // name the nodeset/sideset corresponding to the nodes of all connected flow channel ends
   _mesh.setBoundaryName(boundary_id, name());
 
   for (const auto & connection : getConnections())

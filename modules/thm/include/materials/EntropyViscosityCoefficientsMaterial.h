@@ -68,7 +68,7 @@ protected:
   MaterialProperty<Real> & _visc_max;
   MaterialProperty<Real> & _res;
 
-  /// The direction of the pipe
+  /// The direction of the flow channel
   const MaterialProperty<RealVectorValue> & _dir;
 
   // EOS object

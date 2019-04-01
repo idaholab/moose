@@ -9,7 +9,7 @@ template <>
 InputParameters validParams<InletMassFlowRateTemperature>();
 
 /**
- * Boundary condition with prescribed mass flow rate and temperature for pipes
+ * Boundary condition with prescribed mass flow rate and temperature for flow channels
  *
  */
 class InletMassFlowRateTemperature : public FlowBoundary
