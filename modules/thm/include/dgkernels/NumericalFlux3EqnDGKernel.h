@@ -37,7 +37,7 @@ protected:
    *
    * @returns the mapping of coupled variable index to index in Euler system
    */
-  virtual std::map<unsigned int, unsigned int> getIndexMapping() const;
+  std::map<unsigned int, unsigned int> getIndexMapping() const;
 
   /// linear area
   const VariableValue & _A_linear;
