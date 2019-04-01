@@ -143,7 +143,7 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
 }
 
 void
-AutomaticMortarGeneration::build_node_to_elem_maps()
+AutomaticMortarGeneration::buildNodeToElemMaps()
 {
   if (slave_requested_boundary_ids.empty() || master_requested_boundary_ids.empty())
     libmesh_error_msg(
@@ -205,7 +205,7 @@ AutomaticMortarGeneration::build_node_to_elem_maps()
 }
 
 void
-AutomaticMortarGeneration::build_mortar_segment_mesh()
+AutomaticMortarGeneration::buildMortarSegmentMesh()
 {
   // We maintain a mapping from lower-dimensional slave elements in
   // the original mesh to (sets of) elements in mortar_segment_mesh.
@@ -591,7 +591,7 @@ AutomaticMortarGeneration::build_mortar_segment_mesh()
 }
 
 void
-AutomaticMortarGeneration::compute_nodal_normals()
+AutomaticMortarGeneration::computeNodalNormals()
 {
   // The dimension according to Mesh::mesh_dimension().
   const unsigned int dim = mesh.mesh_dimension();
@@ -670,16 +670,16 @@ AutomaticMortarGeneration::compute_nodal_normals()
 
 // Project slave nodes onto their corresponding master elements for each master/slave pair.
 void
-AutomaticMortarGeneration::project_slave_nodes()
+AutomaticMortarGeneration::projectSlaveNodes()
 {
   // For each master/slave boundary id pair, call the
   // project_slave_nodes_single_pair() helper function.
   for (const auto & pr : master_slave_subdomain_id_pairs)
-    project_slave_nodes_single_pair(pr.first, pr.second);
+    projectSlaveNodesSinglePair(pr.first, pr.second);
 }
 
 void
-AutomaticMortarGeneration::project_slave_nodes_single_pair(
+AutomaticMortarGeneration::projectSlaveNodesSinglePair(
     subdomain_id_type lower_dimensional_master_subdomain_id,
     subdomain_id_type lower_dimensional_slave_subdomain_id)
 {
@@ -927,16 +927,16 @@ AutomaticMortarGeneration::project_slave_nodes_single_pair(
 
 // Inverse map master nodes onto their corresponding slave elements for each master/slave pair.
 void
-AutomaticMortarGeneration::project_master_nodes()
+AutomaticMortarGeneration::projectMasterNodes()
 {
   // For each master/slave boundary id pair, call the
   // project_master_nodes_single_pair() helper function.
   for (const auto & pr : master_slave_subdomain_id_pairs)
-    project_master_nodes_single_pair(pr.first, pr.second);
+    projectMasterNodesSinglePair(pr.first, pr.second);
 }
 
 void
-AutomaticMortarGeneration::project_master_nodes_single_pair(
+AutomaticMortarGeneration::projectMasterNodesSinglePair(
     subdomain_id_type lower_dimensional_master_subdomain_id,
     subdomain_id_type lower_dimensional_slave_subdomain_id)
 {
@@ -1121,7 +1121,7 @@ AutomaticMortarGeneration::project_master_nodes_single_pair(
 }
 
 void
-AutomaticMortarGeneration::write_nodal_normals_to_file()
+AutomaticMortarGeneration::writeNodalNormalsToFile()
 {
   // Must call compute_nodal_normals() first!
   if (slave_node_to_nodal_normal.empty())

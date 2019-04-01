@@ -64,7 +64,7 @@ public:
    * call this function to build node-to-Elem maps for the
    * lower-dimensional elements.
    */
-  void build_node_to_elem_maps();
+  void buildNodeToElemMaps();
 
   /**
    * Computes and stores the nodal normal vectors in a local data
@@ -73,14 +73,14 @@ public:
    * GhostingFunctor operates, but I think it is a better/more
    * efficient way to do it anyway.
    */
-  void compute_nodal_normals();
+  void computeNodalNormals();
 
   /**
    * Since the nodal normals are no longer a variable in the
    * EquationSystems, we need to have an alternate method for writing
    * them out to file for visualization.
    */
-  void write_nodal_normals_to_file();
+  void writeNodalNormalsToFile();
 
   /**
    * Project slave nodes (find xi^(2) values) to the closest points on
@@ -95,7 +95,7 @@ public:
    *
    * Defined in the file project_slave_nodes.C.
    */
-  void project_slave_nodes();
+  void projectSlaveNodes();
 
   /**
    * (Inverse) project master nodes to the points on the slave surface
@@ -111,7 +111,7 @@ public:
    *
    * Defined in the file project_master_nodes.C.
    */
-  void project_master_nodes();
+  void projectMasterNodes();
 
   /**
    * Builds the mortar segment mesh once the slave and master node
@@ -129,7 +129,7 @@ public:
    *
    * Defined in the file build_mortar_segment_mesh.C.
    */
-  void build_mortar_segment_mesh();
+  void buildMortarSegmentMesh();
 
   /**
    * Set whether we will be using this AutomaticMortarGeneration object to enforce periodic
@@ -232,14 +232,14 @@ private:
    * onto master elements for a single master/slave pair. Called by the class member
    * AutomaticMortarGeneration::project_slave_nodes().
    */
-  void project_slave_nodes_single_pair(subdomain_id_type lower_dimensional_master_subdomain_id,
-                                       subdomain_id_type lower_dimensional_slave_subdomain_id);
+  void projectSlaveNodesSinglePair(subdomain_id_type lower_dimensional_master_subdomain_id,
+                                   subdomain_id_type lower_dimensional_slave_subdomain_id);
 
   /**
    * Helper function used internally by AutomaticMortarGeneration::project_master_nodes().
    */
-  void project_master_nodes_single_pair(subdomain_id_type lower_dimensional_master_subdomain_id,
-                                        subdomain_id_type lower_dimensional_slave_subdomain_id);
+  void projectMasterNodesSinglePair(subdomain_id_type lower_dimensional_master_subdomain_id,
+                                    subdomain_id_type lower_dimensional_slave_subdomain_id);
 
 private:
   /// Whether this object will be generating a mortar segment mesh for periodic constraints
