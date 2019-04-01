@@ -29,7 +29,7 @@ protected:
   /**
    * Creates mapping of coupled variable index to local equation system index
    */
-  virtual std::map<unsigned int, unsigned int> getIndexMapping() const;
+  std::map<unsigned int, unsigned int> getIndexMapping() const;
 
   /// Index of connected flow channel
   const unsigned int _connection_index;
