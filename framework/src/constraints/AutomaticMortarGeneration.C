@@ -3,6 +3,7 @@
 #include "NanoflannMeshAdaptor.h"
 #include "MooseError.h"
 #include "MooseTypes.h"
+#include "MooseLagrangeHelpers.h"
 
 #include "libmesh/mesh_tools.h"
 #include "libmesh/getpot.h"
@@ -21,107 +22,6 @@
 
 using namespace libMesh;
 using MetaPhysicL::DualNumber;
-
-// Copy in libmesh's lagrange helper functions, but we template it
-template <typename T>
-T
-fe_lagrange_1D_shape(const Order order, const unsigned int i, const T & xi)
-{
-  switch (order)
-  {
-      // Lagrange linears
-    case FIRST:
-    {
-      libmesh_assert_less(i, 2);
-
-      switch (i)
-      {
-        case 0:
-          return .5 * (1. - xi);
-
-        case 1:
-          return .5 * (1. + xi);
-
-        default:
-          mooseError("Invalid shape function index i = ", i);
-      }
-    }
-
-      // Lagrange quadratics
-    case SECOND:
-    {
-      libmesh_assert_less(i, 3);
-
-      switch (i)
-      {
-        case 0:
-          return .5 * xi * (xi - 1.);
-
-        case 1:
-          return .5 * xi * (xi + 1);
-
-        case 2:
-          return (1. - xi * xi);
-
-        default:
-          mooseError("Invalid shape function index i = ", i);
-      }
-    }
-
-    default:
-      mooseError("Unsupported order");
-  }
-}
-
-template <typename T>
-T
-fe_lagrange_1D_shape_deriv(const Order order, const unsigned int i, const T & xi)
-{
-  switch (order)
-  {
-      // Lagrange linear shape function derivatives
-    case FIRST:
-    {
-      libmesh_assert_less(i, 2);
-
-      switch (i)
-      {
-        case 0:
-          return -.5;
-
-        case 1:
-          return .5;
-
-        default:
-          mooseError("Invalid shape function index i = ", i);
-      }
-    }
-
-      // Lagrange quadratic shape function derivatives
-    case SECOND:
-    {
-      libmesh_assert_less(i, 3);
-
-      switch (i)
-      {
-        case 0:
-          return xi - .5;
-
-        case 1:
-          return xi + .5;
-
-        case 2:
-          return -2. * xi;
-
-        default:
-          mooseError("Invalid shape function index i = ", i);
-      }
-    }
-
-    default:
-      mooseError("Unsupported order");
-  }
-}
 
 const std::string AutomaticMortarGeneration::system_name = "Nodal Normals";
 
@@ -142,6 +42,20 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
   master_slave_subdomain_id_pairs.push_back(subdomain_key);
   master_boundary_subdomain_ids.insert(subdomain_key.first);
   slave_boundary_subdomain_ids.insert(subdomain_key.second);
+}
+
+void
+AutomaticMortarGeneration::clear()
+{
+  mortar_segment_mesh.clear();
+  nodes_to_slave_elem_map.clear();
+  nodes_to_master_elem_map.clear();
+  slave_node_and_elem_to_xi2_master_elem.clear();
+  master_node_and_elem_to_xi1_slave_elem.clear();
+  msm_elem_to_info.clear();
+  lower_elem_to_side_id.clear();
+  mortar_interface_coupling.clear();
+  slave_node_to_nodal_normal.clear();
 }
 
 void
@@ -283,7 +197,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     // Determine physical location of new point to be inserted.
     Point new_pt(0);
     for (MooseIndex(slave_elem->n_nodes()) n = 0; n < slave_elem->n_nodes(); ++n)
-      new_pt += fe_lagrange_1D_shape(order, n, xi1) * slave_elem->point(n);
+      new_pt += Moose::fe_lagrange_1D_shape(order, n, xi1) * slave_elem->point(n);
 
     // Find the current mortar segment that will have to be split.
     auto & mortar_segment_set = slave_elems_to_mortar_segments[slave_elem];
@@ -331,8 +245,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       for (MooseIndex(current_mortar_segment->n_nodes()) n = 0;
            n < current_mortar_segment->n_nodes();
            ++n)
-        left_interior_point +=
-            fe_lagrange_1D_shape(order, n, left_interior_xi) * current_mortar_segment->point(n);
+        left_interior_point += Moose::fe_lagrange_1D_shape(order, n, left_interior_xi) *
+                               current_mortar_segment->point(n);
       new_elem_left->set_node(2) = mortar_segment_mesh.add_point(left_interior_point);
     }
 
@@ -359,8 +273,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       for (MooseIndex(current_mortar_segment->n_nodes()) n = 0;
            n < current_mortar_segment->n_nodes();
            ++n)
-        right_interior_point +=
-            fe_lagrange_1D_shape(order, n, right_interior_xi) * current_mortar_segment->point(n);
+        right_interior_point += Moose::fe_lagrange_1D_shape(order, n, right_interior_xi) *
+                                current_mortar_segment->point(n);
       new_elem_right->set_node(2) = mortar_segment_mesh.add_point(right_interior_point);
     }
 
@@ -369,7 +283,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     // new mortar segments.
     Point dxyz_dxi(0);
     for (MooseIndex(slave_elem->n_nodes()) n = 0; n < slave_elem->n_nodes(); ++n)
-      dxyz_dxi += fe_lagrange_1D_shape_deriv(order, n, xi1) * slave_elem->point(n);
+      dxyz_dxi += Moose::fe_lagrange_1D_shape_deriv(order, n, xi1) * slave_elem->point(n);
     auto normal = Point(dxyz_dxi(1), -dxyz_dxi(0), 0).unit();
     if (_periodic)
       normal *= -1;
@@ -750,7 +664,7 @@ AutomaticMortarGeneration::projectSlaveNodesSinglePair(
             for (MooseIndex(master_elem_candidate->n_nodes()) n = 0;
                  n < master_elem_candidate->n_nodes();
                  ++n)
-              x2 += fe_lagrange_1D_shape(order, n, xi2_dn) * master_elem_candidate->point(n);
+              x2 += Moose::fe_lagrange_1D_shape(order, n, xi2_dn) * master_elem_candidate->point(n);
             auto u = x2 - (*slave_node);
             auto F = u(0) * nodal_normal(1) - u(1) * nodal_normal(0);
 
@@ -877,7 +791,7 @@ AutomaticMortarGeneration::projectSlaveNodesSinglePair(
           break; // out of r-loop
       }          // r-loop
 
-      if (!projection_succeeded)
+      if (!projection_succeeded && _debug)
       {
         mooseInfo("Failed to find master Elem into which slave node ",
                   static_cast<const Point &>(*slave_node),
@@ -999,9 +913,9 @@ AutomaticMortarGeneration::projectMasterNodesSinglePair(
                  n < slave_elem_candidate->n_nodes();
                  ++n)
             {
-              x1 += fe_lagrange_1D_shape(order, n, xi1_dn) * slave_elem_candidate->point(n);
-              dx1_dxi +=
-                  fe_lagrange_1D_shape_deriv(order, n, xi1_dn) * slave_elem_candidate->point(n);
+              x1 += Moose::fe_lagrange_1D_shape(order, n, xi1_dn) * slave_elem_candidate->point(n);
+              dx1_dxi += Moose::fe_lagrange_1D_shape_deriv(order, n, xi1_dn) *
+                         slave_elem_candidate->point(n);
             }
 
             // We're assuming our mesh is in the xy plane here
@@ -1070,7 +984,7 @@ AutomaticMortarGeneration::projectMasterNodesSinglePair(
           break; // out of r-loop
       }          // r-loop
 
-      if (!projection_succeeded)
+      if (!projection_succeeded && _debug)
       {
         mooseInfo("Failed to find point from which master node ",
                   static_cast<const Point &>(*master_node),

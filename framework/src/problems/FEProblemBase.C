@@ -773,7 +773,14 @@ FEProblemBase::initialSetup()
   if (_displaced_problem && _mortar_data.hasDisplacedObjects())
     _displaced_problem->updateMesh();
 
-  // Build the mortar segment meshes
+  // Build the mortar segment meshes for a couple reasons:
+  // 1) Get the ghosting correct for both static and dynamic meshes
+  // 2) Make sure the mortar mesh is built for mortar constraints that live on the static mesh
+  //
+  // It is worth-while to note that mortar meshes that live on a dynamic mesh will be built
+  // during residual and Jacobian evaluation because when displacements are solution variables
+  // the mortar mesh will move and change during the course of a non-linear solve. We DO NOT
+  // redo ghosting during non-linear solve, so for purpose 1) the below call has to be made
   updateMortarMesh();
 
   // Possibly reinit one more time to get ghosting correct
@@ -4538,6 +4545,8 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
   {
     _aux->compute(EXEC_PRE_DISPLACE);
     _displaced_problem->updateMesh();
+    if (_mortar_data.hasDisplacedObjects())
+      updateMortarMesh();
   }
 
   for (THREAD_ID tid = 0; tid < n_threads; tid++)

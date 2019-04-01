@@ -139,6 +139,11 @@ public:
    */
   void periodicConstraint(bool periodic);
 
+  /**
+   * Clears the mortar segment mesh and accompanying data structures
+   */
+  void clear();
+
 public:
   // Reference to the mesh stored in equation_systems.
   MeshBase & mesh;
@@ -250,7 +255,7 @@ private:
   /// Whether we have externally set the _periodic flag
   bool _periodic_set_externally;
 
-  /// whether to print debug output
+  /// Whether to print debug output
   bool _debug;
 };
 
