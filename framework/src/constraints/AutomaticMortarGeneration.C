@@ -28,13 +28,15 @@ const std::string AutomaticMortarGeneration::system_name = "Nodal Normals";
 AutomaticMortarGeneration::AutomaticMortarGeneration(
     MeshBase & mesh_in,
     const std::pair<BoundaryID, BoundaryID> & boundary_key,
-    const std::pair<SubdomainID, SubdomainID> & subdomain_key)
+    const std::pair<SubdomainID, SubdomainID> & subdomain_key,
+    bool on_displaced)
   : mesh(mesh_in),
     mortar_segment_mesh(mesh_in.comm()),
     h_max(0.),
     _periodic(false),
     _periodic_set_externally(false),
-    _debug(false)
+    _debug(false),
+    _on_displaced(on_displaced)
 {
   master_slave_boundary_id_pairs.push_back(boundary_key);
   master_requested_boundary_ids.insert(boundary_key.first);
@@ -416,7 +418,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
   }
 
   // Set up the the mortar segment neighbor information.
-  mortar_segment_mesh.allow_renumbering(false);
+  mortar_segment_mesh.allow_renumbering(true);
   mortar_segment_mesh.skip_partitioning(true);
   mortar_segment_mesh.prepare_for_use();
 

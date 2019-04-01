@@ -28,11 +28,11 @@ class GetPot;
 using libMesh::boundary_id_type;
 using libMesh::dof_id_type;
 using libMesh::Elem;
-using libMesh::Mesh;
 using libMesh::MeshBase;
 using libMesh::Node;
 using libMesh::Point;
 using libMesh::Real;
+using libMesh::ReplicatedMesh;
 using libMesh::subdomain_id_type;
 
 typedef boundary_id_type BoundaryID;
@@ -57,7 +57,8 @@ public:
    */
   AutomaticMortarGeneration(MeshBase & mesh_in,
                             const std::pair<BoundaryID, BoundaryID> & boundary_key,
-                            const std::pair<SubdomainID, SubdomainID> & subdomain_key);
+                            const std::pair<SubdomainID, SubdomainID> & subdomain_key,
+                            bool on_displaced);
 
   /**
    * Once the slave_requested_boundary_ids and
@@ -144,6 +145,11 @@ public:
    */
   void clear();
 
+  /**
+   * returns whether this object is on the displaced mesh
+   */
+  bool onDisplaced() const { return _on_displaced; }
+
 public:
   // Reference to the mesh stored in equation_systems.
   MeshBase & mesh;
@@ -192,7 +198,7 @@ public:
 
   // 1D Mesh of mortar segment elements which gets built by the call
   // to build_mortar_segment_mesh().
-  Mesh mortar_segment_mesh;
+  ReplicatedMesh mortar_segment_mesh;
 
   // Map between Elems in the mortar segment mesh and their info
   // structs. This gets filled in by the call to
@@ -257,6 +263,9 @@ private:
 
   /// Whether to print debug output
   bool _debug;
+
+  /// Whether this object is on the displaced mesh
+  const bool _on_displaced;
 };
 
 #endif

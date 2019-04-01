@@ -21,9 +21,10 @@ MortarData::getMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundar
   _mortar_boundary_coverage.insert(boundary_key.second);
 
   if (_mortar_interfaces.find(boundary_key) == _mortar_interfaces.end())
-    _mortar_interfaces.emplace(boundary_key,
-                               libmesh_make_unique<AutomaticMortarGeneration>(
-                                   subproblem.mesh().getMesh(), boundary_key, subdomain_key));
+    _mortar_interfaces.emplace(
+        boundary_key,
+        libmesh_make_unique<AutomaticMortarGeneration>(
+            subproblem.mesh().getMesh(), boundary_key, subdomain_key, on_displaced));
   return *_mortar_interfaces.at(boundary_key);
 }
 
