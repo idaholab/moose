@@ -27,6 +27,9 @@ public:
 protected:
   /// The dimension of the mesh
   unsigned int _dim;
+
+public:
+  static const BoundaryName INVALID_BOUNDARY_ID;
 };
 
 #endif /* THMMESH_H */

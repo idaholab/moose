@@ -1,0 +1,94 @@
+[GlobalParams]
+  initial_p = 1e5
+  initial_vel = 0
+  initial_T = 300
+
+  closures = simple
+
+  spatial_discretization = rdg
+  rdg_slope_reconstruction = none
+[]
+
+[FluidProperties]
+  [./fp]
+    type = IdealGasFluidProperties
+  [../]
+[]
+
+[HeatStructureMaterials]
+  [./fuel-mat]
+    type = SolidMaterialProperties
+    k = 2.5
+    Cp = 300.
+    rho = 1.032e4
+  [../]
+[]
+
+[Components]
+  [./pipe]
+    type = FlowChannel1Phase
+    position = '0 0.1 0'
+    orientation = '0 0 1'
+    length = 4
+    n_elems = 2
+
+    A = 8.78882e-5
+    D_h = 0.01179
+    f = 0.01
+
+    fp = fp
+  [../]
+
+  [./hs]
+    type = HeatStructure
+    position = '0 0 0'
+    orientation = '0 0 1'
+    length = 4
+    n_elems = 2
+
+    hs_type = cylinder
+    names = 'fuel'
+    widths = '0.1'
+    n_part_elems = '1'
+    materials = 'fuel-mat'
+
+    initial_T = 300
+  [../]
+
+  [./hx]
+    type = HeatTransferFromHeatStructure1Phase
+    hs = hs
+    hs_side = top
+    flow_channel = pipe
+    Hw = 300
+    P_hf = 0.029832559676
+  [../]
+
+  [./inlet]
+    type = InletStagnationPressureTemperature
+    input = 'pipe:in'
+    p0 = 1e5
+    T0 = 300
+  [../]
+
+  [./outlet]
+    type = Outlet
+    input = 'pipe:out'
+    p = 1e5
+  [../]
+[]
+
+[Preconditioning]
+  [./pc]
+    type = SMP
+    full = true
+  [../]
+[]
+
+[Executioner]
+  type = Transient
+  dt = 1.e-5
+  solve_type = 'NEWTON'
+  num_steps = 1
+  abort_on_solve_fail = true
+[]

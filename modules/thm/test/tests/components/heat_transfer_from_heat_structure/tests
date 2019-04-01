@@ -1,0 +1,50 @@
+[Tests]
+  # Error checking
+  [./err:not_a_pipe]
+    type = 'RunException'
+    input = 'err.1phase.i'
+    cli_args = "Components/hx/flow_channel=inlet"
+    expect_err = "hx: The component 'inlet' is not of type 'FlowChannelBase'"
+  [../]
+  [./err:not_a_hs]
+    type = 'RunException'
+    input = 'err.1phase.i'
+    cli_args = "Components/hx/hs=inlet"
+    expect_err = "hx: The component 'inlet' is not of type 'HeatStructure'"
+  [../]
+
+  [./err:elems_mismatch]
+    type = 'RunException'
+    input = 'err.1phase.i'
+    cli_args = "Components/pipe/n_elems=1"
+    expect_err = "hx: The number of elements in component 'pipe' is 1, but the number of axial elements in component 'hs' is 2. They must be the same."
+  [../]
+
+  [./err:length_mismatch]
+    type = 'RunException'
+    input = 'err.1phase.i'
+    cli_args = "Components/pipe/length=3"
+    expect_err = "hx: The length of component 'pipe' is 3, but the length of component 'hs' is 4. They must be the same."
+  [../]
+
+  [./err:wrong_position]
+    type = 'RunException'
+    input = 'err.1phase.i'
+    cli_args = "Components/pipe/position='0 0 0'"
+    expect_err = "hx: The centers of the elements of flow channel 'pipe' do not equal the centers of the specified heat structure side."
+  [../]
+
+  [./err:wrong_orientation]
+    type = 'RunException'
+    input = 'err.1phase.i'
+    cli_args = "Components/pipe/orientation='0 1 0'"
+    expect_err = "hx: The centers of the elements of flow channel 'pipe' do not equal the centers of the specified heat structure side."
+  [../]
+
+  [./err:zero_p_hs_radius]
+    type = 'RunException'
+    input = 'err.1phase.i'
+    cli_args = "Components/pipe/position='0 0.1 0' Components/hx/hs_side=bottom"
+    expect_err = "hx: 'hs_side' parameter is set to 'bottom', but this side of the heat structure 'hs' has radius of zero."
+  [../]
+[]
