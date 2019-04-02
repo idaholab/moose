@@ -58,6 +58,11 @@ public:
    * Returns the master lower dimensional subdomain id
    */
   virtual SubdomainID masterSubdomain() const = 0;
+
+  /**
+   * The variable number that this object operates on.
+   */
+  virtual MooseVariable * variable() = 0;
 };
 
 #endif /* MORTARCONSTRAINTBASE_H */

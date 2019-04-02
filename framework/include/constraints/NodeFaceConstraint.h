@@ -96,6 +96,11 @@ public:
    */
   virtual MooseVariable & masterVariable() { return _master_var; }
 
+  /**
+   * The variable number that this object operates on.
+   */
+  MooseVariable & variable() { return _var; }
+
   // TODO: Make this protected or add an accessor
   // Do the same for all the other public members
   SparseMatrix<Number> * _jacobian;
@@ -208,6 +213,8 @@ protected:
   unsigned int _slave;
   /// Boundary ID for the master surface
   unsigned int _master;
+
+  MooseVariable & _var;
 
   const MooseArray<Point> & _master_q_point;
   QBase *& _master_qrule;

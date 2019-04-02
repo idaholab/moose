@@ -38,6 +38,8 @@ validParams<NodeFaceConstraint>()
   params.addParam<MooseEnum>("order", orders, "The finite element order used for projections");
 
   params.addRequiredCoupledVar("master_variable", "The variable on the master side of the domain");
+  params.addRequiredParam<NonlinearVariableName>(
+      "variable", "The name of the variable that this constraint is applied to.");
 
   return params;
 }
@@ -51,6 +53,7 @@ NodeFaceConstraint::NodeFaceConstraint(const InputParameters & parameters)
         this, true, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD),
     _slave(_mesh.getBoundaryID(getParam<BoundaryName>("slave"))),
     _master(_mesh.getBoundaryID(getParam<BoundaryName>("master"))),
+    _var(_sys.getFieldVariable<Real>(_tid, parameters.get<NonlinearVariableName>("variable"))),
 
     _master_q_point(_assembly.qPointsFace()),
     _master_qrule(_assembly.qRuleFace()),

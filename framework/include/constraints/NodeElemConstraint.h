@@ -80,6 +80,11 @@ public:
    */
   virtual MooseVariable & masterVariable() { return _master_var; }
 
+  /**
+   * The variable number that this object operates on.
+   */
+  MooseVariable & variable() { return _var; }
+
 protected:
   /// prepare the _slave_to_master_map
   virtual void prepareSlaveToMasterMap() = 0;
@@ -181,6 +186,8 @@ protected:
   unsigned short _slave;
   /// master block id
   unsigned short _master;
+
+  MooseVariable & _var;
 
   const MooseArray<Point> & _master_q_point;
   QBase *& _master_qrule;

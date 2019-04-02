@@ -22,14 +22,13 @@
 defineADBaseValidParams(
     MortarConstraint,
     MortarConstraintBase,
+<<<<<<< HEAD
     params.addRequiredParam<BoundaryName>("master_boundary",
                                           "The name of the master boundary sideset.");
     params.addRequiredParam<BoundaryName>("slave_boundary",
                                           "The name of the slave boundary sideset.");
     params.addRequiredParam<SubdomainName>("master_subdomain", "The name of the master subdomain.");
     params.addRequiredParam<SubdomainName>("slave_subdomain", "The name of the slave subdomain.");
-    params.addRequiredParam<VariableName>("master_variable", "Variable on master surface");
-    params.addParam<VariableName>("slave_variable", "Variable on master surface");
     params.addRelationshipManager(
         "AugmentSparsityOnInterface",
         Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC,
@@ -45,6 +44,22 @@ defineADBaseValidParams(
               obj_params.get<SubdomainName>("master_subdomain");
         });
 
+    params.addRequiredParam<NonlinearVariableName>("slave_variable",
+                                                   "Primal variable on slave surface.");
+    params.addParam<NonlinearVariableName>(
+        "master_variable",
+        "Primal variable on master surface. If this parameter is not provided then the master "
+        "variable will be initialized to the slave variable");
+    params.addParam<NonlinearVariableName>(
+        "variable",
+        "The name of the lagrange multiplier variable that this constraint is applied to. This "
+        "parameter may not be supplied in the case of using penalty methods for example");
+    params.addParam<bool>("compute_primal_residuals",
+                          true,
+                          "Whether to compute residuals for the primal variable.");
+    params.addParam<bool>("compute_lm_residuals",
+                          true,
+                          "Whether to compute Lagrange Multiplier residuals");
     params.addParam<bool>(
         "periodic",
         false,
@@ -63,25 +78,31 @@ MortarConstraint<compute_stage>::MortarConstraint(const InputParameters & parame
     _amg(_fe_problem.getMortarInterface(std::make_pair(_master_id, _slave_id),
                                         std::make_pair(_master_subdomain_id, _slave_subdomain_id),
                                         getParam<bool>("use_displaced_mesh"))),
-    _master_var(_subproblem.getStandardVariable(_tid, getParam<VariableName>("master_variable"))),
-    _slave_var(
-        isParamValid("slave_variable")
-            ? _subproblem.getStandardVariable(_tid, getParam<VariableName>("slave_variable"))
-            : _subproblem.getStandardVariable(_tid, getParam<VariableName>("master_variable"))),
-    _primal_var_number(_master_var.number()),
-    _lambda_var_number(_var.number()),
+    _var(isParamValid("variable")
+             ? &_subproblem.getStandardVariable(_tid, parameters.getMooseType("variable"))
+             : nullptr),
+    _slave_var(_subproblem.getStandardVariable(_tid, parameters.getMooseType("slave_variable"))),
+    _master_var(
+        isParamValid("master_variable")
+            ? _subproblem.getStandardVariable(_tid, parameters.getMooseType("master_variable"))
+            : _slave_var),
+
+    _primal_var_number(_slave_var.number()),
+    _lambda_var_number(_var ? _var->number() : libMesh::invalid_uint),
+    _compute_primal_residuals(getParam<bool>("compute_primal_residuals")),
+    _compute_lm_residuals(!_var ? false : getParam<bool>("compute_lm_residuals")),
     _dof_map(_sys.dofMap()),
-    _fe_type_primal(_master_var.feType()),
-    _fe_type_lambda(_var.feType()),
     _interior_dimension(_fe_problem.mesh().getMesh().mesh_dimension()),
     _msm_dimension(_interior_dimension - 1),
-    _fe_msm_primal(FEBase::build(_msm_dimension, _fe_type_primal)),
-    _fe_msm_lambda(FEBase::build(_msm_dimension, _fe_type_lambda)),
-    _fe_slave_interior_primal(FEBase::build(_interior_dimension, _fe_type_primal)),
-    _fe_master_interior_primal(FEBase::build(_interior_dimension, _fe_type_primal)),
+    _fe_msm_primal(FEBase::build(_msm_dimension, _slave_var.feType())),
+    _fe_msm_lambda(_var ? FEBase::build(_msm_dimension, _var->feType()) : nullptr),
+    _fe_slave_interior_primal(FEBase::build(_interior_dimension, _slave_var.feType())),
+    _fe_master_interior_primal(FEBase::build(_interior_dimension, _master_var.feType())),
+    _normals(_fe_slave_interior_primal->get_normals()),
     _qrule_msm(_msm_dimension, SECOND),
     _JxW_msm(_fe_msm_primal->get_JxW()),
-    _test(_fe_msm_lambda->get_phi()),
+    _dummy(),
+    _test(_var ? _fe_msm_lambda->get_phi() : _dummy),
     _test_slave(_fe_slave_interior_primal->get_phi()),
     _test_master(_fe_master_interior_primal->get_phi()),
     _grad_test_slave(_fe_slave_interior_primal->get_dphi()),
@@ -100,7 +121,8 @@ template <ComputeStage compute_stage>
 void
 MortarConstraint<compute_stage>::loopOverMortarMesh()
 {
-  _lambda.resize(_qrule_msm.n_points());
+  if (_var)
+    _lambda.resize(_qrule_msm.n_points());
   _u_slave.resize(_qrule_msm.n_points());
   _u_master.resize(_qrule_msm.n_points());
   if (_need_primal_gradient)
@@ -145,7 +167,8 @@ MortarConstraint<compute_stage>::loopOverMortarMesh()
     const Elem * slave_face_elem = msinfo.slave_elem;
 
     // Get the lambda dof indices for the slave element side.
-    _dof_map.dof_indices(slave_face_elem, _dof_indices_lambda, _lambda_var_number);
+    if (_var)
+      _dof_map.dof_indices(slave_face_elem, _dof_indices_lambda, _lambda_var_number);
 
     // Offset the beginning of slave primal dofs by the length of the LM dof indices
     _slave_primal_offset = _dof_indices_lambda.size();
@@ -211,9 +234,12 @@ MortarConstraint<compute_stage>::loopOverMortarMesh()
       _fe_master_interior_primal->reinit(master_ip, master_side_id, TOLERANCE, &custom_xi2_pts);
     }
 
+    if (_var)
+      for (unsigned int qp = 0; qp < _qrule_msm.n_points(); qp++)
+        _lambda[qp] = 0;
+
     for (unsigned int qp = 0; qp < _qrule_msm.n_points(); qp++)
     {
-      _lambda[qp] = 0;
       _u_slave[qp] = 0;
       _u_master[qp] = 0;
       if (_need_primal_gradient)
@@ -314,27 +340,33 @@ MortarConstraint<compute_stage>::computeElementResidual()
   DenseVector<Real> F_primal_master(_dof_indices_master_interior_primal.size());
   DenseVector<Real> F_lambda_slave(_dof_indices_lambda.size());
 
-  for (_qp = 0; _qp < _qrule_msm.n_points(); ++_qp)
+  if (_compute_lm_residuals)
   {
-    // LM residuals
     for (_i = 0; _i < _dof_indices_lambda.size(); ++_i)
-      F_lambda_slave(_i) += _JxW_msm[_qp] * computeQpResidual();
+      for (_qp = 0; _qp < _qrule_msm.n_points(); ++_qp)
+        F_lambda_slave(_i) += _JxW_msm[_qp] * computeQpResidual();
 
-    // slave interior primal residuals
-    for (_i = 0; _i < _dof_indices_slave_interior_primal.size(); ++_i)
-      F_primal_slave(_i) += _JxW_msm[_qp] * computeQpResidualSide(Moose::Slave);
-
-    // master interior primal residuals
-    if (_has_master)
-      for (_i = 0; _i < _dof_indices_master_interior_primal.size(); ++_i)
-        F_primal_master(_i) += _JxW_msm[_qp] * computeQpResidualSide(Moose::Master);
+    _sys.getVector(_sys.residualVectorTag()).add_vector(F_lambda_slave, _dof_indices_lambda);
   }
 
-  _sys.getVector(_sys.residualVectorTag()).add_vector(F_lambda_slave, _dof_indices_lambda);
-  _sys.getVector(_sys.residualVectorTag())
-      .add_vector(F_primal_slave, _dof_indices_slave_interior_primal);
-  _sys.getVector(_sys.residualVectorTag())
-      .add_vector(F_primal_master, _dof_indices_master_interior_primal);
+  if (_compute_primal_residuals)
+  {
+    for (_qp = 0; _qp < _qrule_msm.n_points(); ++_qp)
+    {
+      // slave interior primal residuals
+      for (_i = 0; _i < _dof_indices_slave_interior_primal.size(); ++_i)
+        F_primal_slave(_i) += _JxW_msm[_qp] * computeQpResidualSide(Moose::Slave);
+
+      // master interior primal residuals
+      if (_has_master)
+        for (_i = 0; _i < _dof_indices_master_interior_primal.size(); ++_i)
+          F_primal_master(_i) += _JxW_msm[_qp] * computeQpResidualSide(Moose::Master);
+    }
+    _sys.getVector(_sys.residualVectorTag())
+        .add_vector(F_primal_slave, _dof_indices_slave_interior_primal);
+    _sys.getVector(_sys.residualVectorTag())
+        .add_vector(F_primal_master, _dof_indices_master_interior_primal);
+  }
 }
 
 template <>
@@ -367,50 +399,64 @@ MortarConstraint<compute_stage>::computeElementJacobian()
   // Derivative of master primal residuals wrt all dofs
   std::vector<DualReal> master_primal_residuals(_dof_indices_master_interior_primal.size(), 0);
 
-  for (_qp = 0; _qp < _qrule_msm.n_points(); ++_qp)
+  if (_compute_lm_residuals)
+    for (_qp = 0; _qp < _qrule_msm.n_points(); ++_qp)
+      for (_i = 0; _i < K_lambda_slave_primal_slave.m(); ++_i)
+        lm_residuals[_i] += _JxW_msm[_qp] * computeQpResidual();
+
+  if (_compute_primal_residuals)
   {
-    for (_i = 0; _i < K_lambda_slave_primal_slave.m(); ++_i)
-      lm_residuals[_i] += _JxW_msm[_qp] * computeQpResidual();
+    for (_qp = 0; _qp < _qrule_msm.n_points(); ++_qp)
+    {
+      for (_i = 0; _i < K_primal_slave_lambda_slave.m(); ++_i)
+        slave_primal_residuals[_i] += _JxW_msm[_qp] * computeQpResidualSide(Moose::Slave);
 
-    for (_i = 0; _i < K_primal_slave_lambda_slave.m(); ++_i)
-      slave_primal_residuals[_i] += _JxW_msm[_qp] * computeQpResidualSide(Moose::Slave);
-
-    for (_i = 0; _i < K_primal_master_lambda_slave.m(); ++_i)
-      master_primal_residuals[_i] += _JxW_msm[_qp] * computeQpResidualSide(Moose::Master);
+      for (_i = 0; _i < K_primal_master_lambda_slave.m(); ++_i)
+        master_primal_residuals[_i] += _JxW_msm[_qp] * computeQpResidualSide(Moose::Master);
+    }
   }
 
-  for (unsigned int i = 0; i < _dof_indices_lambda.size(); ++i)
+  if (_compute_lm_residuals)
   {
-    for (unsigned int j = 0; j < _dof_indices_lambda.size(); ++j)
-      K_lambda_slave_lambda_slave(i, j) = lm_residuals[i].derivatives()[_lm_offset + j];
-    for (unsigned int j = 0; j < _dof_indices_slave_interior_primal.size(); ++j)
-      K_lambda_slave_primal_slave(i, j) = lm_residuals[i].derivatives()[_slave_primal_offset + j];
-    for (unsigned int j = 0; j < _dof_indices_master_interior_primal.size(); ++j)
-      K_lambda_slave_primal_master(i, j) = lm_residuals[i].derivatives()[_master_primal_offset + j];
+    for (unsigned int i = 0; i < _dof_indices_lambda.size(); ++i)
+    {
+      for (unsigned int j = 0; j < _dof_indices_lambda.size(); ++j)
+        K_lambda_slave_lambda_slave(i, j) = lm_residuals[i].derivatives()[_lm_offset + j];
+      for (unsigned int j = 0; j < _dof_indices_slave_interior_primal.size(); ++j)
+        K_lambda_slave_primal_slave(i, j) = lm_residuals[i].derivatives()[_slave_primal_offset + j];
+      for (unsigned int j = 0; j < _dof_indices_master_interior_primal.size(); ++j)
+        K_lambda_slave_primal_master(i, j) =
+            lm_residuals[i].derivatives()[_master_primal_offset + j];
+    }
+
+    _sys.getMatrix(_sys.systemMatrixTag())
+        .add_matrix(K_lambda_slave_lambda_slave, _dof_indices_lambda, _dof_indices_lambda);
+    _sys.getMatrix(_sys.systemMatrixTag())
+        .add_matrix(
+            K_lambda_slave_primal_slave, _dof_indices_lambda, _dof_indices_slave_interior_primal);
+    _sys.getMatrix(_sys.systemMatrixTag())
+        .add_matrix(
+            K_lambda_slave_primal_master, _dof_indices_lambda, _dof_indices_master_interior_primal);
   }
 
-  for (unsigned int i = 0; i < _dof_indices_slave_interior_primal.size(); ++i)
-    for (unsigned int j = 0; j < _dof_indices_lambda.size(); ++j)
-      K_primal_slave_lambda_slave(i, j) = slave_primal_residuals[i].derivatives()[_lm_offset + j];
+  if (_compute_primal_residuals)
+  {
+    for (unsigned int i = 0; i < _dof_indices_slave_interior_primal.size(); ++i)
+      for (unsigned int j = 0; j < _dof_indices_lambda.size(); ++j)
+        K_primal_slave_lambda_slave(i, j) = slave_primal_residuals[i].derivatives()[_lm_offset + j];
 
-  for (unsigned int i = 0; i < _dof_indices_master_interior_primal.size(); ++i)
-    for (unsigned int j = 0; j < _dof_indices_lambda.size(); ++j)
-      K_primal_master_lambda_slave(i, j) = master_primal_residuals[i].derivatives()[_lm_offset + j];
+    for (unsigned int i = 0; i < _dof_indices_master_interior_primal.size(); ++i)
+      for (unsigned int j = 0; j < _dof_indices_lambda.size(); ++j)
+        K_primal_master_lambda_slave(i, j) =
+            master_primal_residuals[i].derivatives()[_lm_offset + j];
 
-  _sys.getMatrix(_sys.systemMatrixTag())
-      .add_matrix(
-          K_primal_slave_lambda_slave, _dof_indices_slave_interior_primal, _dof_indices_lambda);
-  _sys.getMatrix(_sys.systemMatrixTag())
-      .add_matrix(
-          K_primal_master_lambda_slave, _dof_indices_master_interior_primal, _dof_indices_lambda);
-  _sys.getMatrix(_sys.systemMatrixTag())
-      .add_matrix(K_lambda_slave_lambda_slave, _dof_indices_lambda, _dof_indices_lambda);
-  _sys.getMatrix(_sys.systemMatrixTag())
-      .add_matrix(
-          K_lambda_slave_primal_slave, _dof_indices_lambda, _dof_indices_slave_interior_primal);
-  _sys.getMatrix(_sys.systemMatrixTag())
-      .add_matrix(
-          K_lambda_slave_primal_master, _dof_indices_lambda, _dof_indices_master_interior_primal);
+    _sys.getMatrix(_sys.systemMatrixTag())
+        .add_matrix(
+            K_primal_slave_lambda_slave, _dof_indices_slave_interior_primal, _dof_indices_lambda);
+    _sys.getMatrix(_sys.systemMatrixTag())
+        .add_matrix(
+            K_primal_master_lambda_slave, _dof_indices_master_interior_primal, _dof_indices_lambda);
+  }
 }
 
 template <>
@@ -443,6 +489,60 @@ template <>
 void
 MortarConstraint<RESIDUAL>::computeJacobian()
 {
+}
+
+template <ComputeStage compute_stage>
+const VariableValue &
+MortarConstraint<compute_stage>::slaveValue()
+{
+  _variables_for_which_slave_interior_values_requested.insert(&_var);
+
+  return MooseVariableInterface<Real>::value();
+}
+
+template <ComputeStage compute_stage>
+const VariableValue &
+MortarConstraint<compute_stage>::masterValue()
+{
+  _variables_for_which_master_interior_values_requested.insert(_tied_var);
+
+  return MooseVariableInterface<Real>::value();
+}
+
+template <ComputeStage compute_stage>
+const VariableValue &
+MortarConstraint<compute_stage>::lmValue()
+{
+  _variables_for_which_lower_d_values_requested.insert(_lambda_var);
+
+  return MooseVariableInterface<Real>::value();
+}
+
+template <ComputeStage compute_stage>
+const VariableGradient &
+MortarConstraint<compute_stage>::slaveGradient()
+{
+  _variables_for_which_gradients_requested.insert(&_var);
+
+  return MooseVariableInterface<Real>::gradient();
+}
+
+template <ComputeStage compute_stage>
+const VariableValue &
+MortarConstraint<compute_stage>::coupledValue(const std::string & var_name, unsigned int comp)
+{
+  _variables_for_which_values_requested.insert(getVar(var_name, comp));
+
+  return Coupleable::coupledValue(var_name, comp);
+}
+
+template <ComputeStage compute_stage>
+const VariableGradient &
+MortarConstraint<compute_stage>::coupledGradient()
+{
+  _variables_for_which_gradients_requested.insert(getVar(var_name, comp));
+
+  return Coupleable::coupledGradient(var_name, comp);
 }
 
 adBaseClass(MortarConstraint);

@@ -435,6 +435,10 @@ Assembly::createQRules(QuadratureType type, Order order, Order volume_order, Ord
   _holder_qrule_arbitrary.clear();
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
     _holder_qrule_arbitrary[dim] = new ArbitraryQuadrature(dim, order);
+
+  _holder_qrule_arbitrary_face.clear();
+  for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
+    _holder_qrule_arbitrary_face[dim] = new ArbitraryQuadrature(dim - 1, face_order);
 }
 
 void
@@ -1471,28 +1475,6 @@ Assembly::reinitNeighbor(const Elem * neighbor, const std::vector<Point> & refer
   }
 }
 
-void
-Assembly::reinit(const Elem * elem)
-{
-  _current_elem = elem;
-  _current_neighbor_elem = nullptr;
-  mooseAssert(_current_subdomain_id == _current_elem->subdomain_id(),
-              "current subdomain has been set incorrectly");
-  _current_elem_volume_computed = false;
-
-  unsigned int elem_dimension = elem->dim();
-
-  _current_qrule_volume = _holder_qrule_volume[elem_dimension];
-
-  // Make sure the qrule is the right one
-  if (_current_qrule != _current_qrule_volume)
-    setVolumeQRule(_current_qrule_volume, elem_dimension);
-
-  reinitFE(elem);
-
-  computeCurrentElemVolume();
-}
-
 template <ComputeStage compute_stage>
 void
 Assembly::setCoordinateTransformation(const QBase * qrule,
@@ -1589,6 +1571,28 @@ Assembly::reinitAtPhysical(const Elem * elem, const std::vector<Point> & physica
 }
 
 void
+Assembly::reinit(const Elem * elem)
+{
+  _current_elem = elem;
+  _current_neighbor_elem = nullptr;
+  mooseAssert(_current_subdomain_id == _current_elem->subdomain_id(),
+              "current subdomain has been set incorrectly");
+  _current_elem_volume_computed = false;
+
+  unsigned int elem_dimension = elem->dim();
+
+  _current_qrule_volume = _holder_qrule_volume[elem_dimension];
+
+  // Make sure the qrule is the right one
+  if (_current_qrule != _current_qrule_volume)
+    setVolumeQRule(_current_qrule_volume, elem_dimension);
+
+  reinitFE(elem);
+
+  computeCurrentElemVolume();
+}
+
+void
 Assembly::reinit(const Elem * elem, const std::vector<Point> & reference_points)
 {
   _current_elem = elem;
@@ -1625,11 +1629,42 @@ Assembly::reinit(const Elem * elem, unsigned int side)
 
   unsigned int elem_dimension = _current_elem->dim();
 
+  // Make sure the qrule is the right one
   if (_current_qrule_face != _holder_qrule_face[elem_dimension])
   {
     _current_qrule_face = _holder_qrule_face[elem_dimension];
     setFaceQRule(_current_qrule_face, elem_dimension);
   }
+
+  if (_current_side_elem)
+    delete _current_side_elem;
+  _current_side_elem = elem->build_side_ptr(side).release();
+
+  reinitFEFace(elem, side);
+
+  computeCurrentFaceVolume();
+}
+
+void
+Assembly::reinit(const Elem * elem, unsigned int side, const std::vector<Point> & reference_points)
+{
+  _current_elem = elem;
+  _current_neighbor_elem = nullptr;
+  mooseAssert(_current_subdomain_id == _current_elem->subdomain_id(),
+              "current subdomain has been set incorrectly");
+  _current_side = side;
+  _current_elem_volume_computed = false;
+  _current_side_volume_computed = false;
+
+  unsigned int elem_dimension = _current_elem->dim();
+
+  _current_qrule_arbitrary_face = _holder_qrule_arbitrary_face[elem_dimension];
+
+  // Make sure the qrule is the right one
+  if (_current_qrule_face != _current_qrule_arbitrary_face)
+    setFaceQRule(_current_qrule_arbitrary_face, elem_dimension);
+
+  _current_qrule_arbitrary->setPoints(reference_points);
 
   if (_current_side_elem)
     delete _current_side_elem;

@@ -284,6 +284,13 @@ public:
   void makeParamRequired(const std::string & name);
 
   /**
+   * Changes the parameter to not be required.
+   * @param name The parameter name
+   */
+  template <typename T>
+  void makeParamNotRequired(const std::string & name);
+
+  /**
    * This method adds a coupled variable name pair.  The parser will look for variable
    * name pair in the input file and can return a reference to the storage location
    * for the coupled variable if found
@@ -1302,6 +1309,16 @@ InputParameters::makeParamRequired(const std::string & name)
     mooseError("Unable to require nonexistent parameter: ", name);
 
   _params[name]._required = true;
+}
+
+template <typename T>
+void
+InputParameters::makeParamNotRequired(const std::string & name)
+{
+  if (!this->have_parameter<T>(name))
+    mooseError("Unable to un-require nonexistent parameter: ", name);
+
+  _params[name]._required = false;
 }
 
 template <typename T>

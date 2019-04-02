@@ -205,7 +205,16 @@ public:
     _need_matrix_tag_u[tag] = true;
     return _matrix_tag_u[tag];
   }
+
+  /**
+   * Local solution getter
+   */
   const FieldVariableValue & sln() { return _u; }
+  /**
+   * Local solution setter
+   */
+  void sln(const FieldVariableValue & u) { _u = u; }
+
   const FieldVariableValue & slnOld()
   {
     _need_u_old = true;
@@ -221,7 +230,17 @@ public:
     _need_u_previous_nl = true;
     return _u_previous_nl;
   }
+
+  /**
+   * Local solution gradient getter
+   */
   const FieldVariableGradient & gradSln() { return _grad_u; }
+
+  /**
+   * Local solution gradient setter
+   */
+  void gradSln(const FieldVariableGradient & grad_u) { _grad_u = u; }
+
   const FieldVariableGradient & gradSlnOld()
   {
     _need_grad_old = true;

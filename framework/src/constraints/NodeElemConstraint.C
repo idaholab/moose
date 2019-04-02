@@ -26,6 +26,8 @@ validParams<NodeElemConstraint>()
   params.addRequiredParam<SubdomainName>("slave", "slave block id");
   params.addRequiredParam<SubdomainName>("master", "master block id");
   params.addRequiredCoupledVar("master_variable", "The variable on the master side of the domain");
+  params.addRequiredParam<NonlinearVariableName>(
+      "variable", "The name of the variable that this constraint is applied to.");
 
   return params;
 }
@@ -40,6 +42,7 @@ NodeElemConstraint::NodeElemConstraint(const InputParameters & parameters)
 
     _slave(_mesh.getSubdomainID(getParam<SubdomainName>("slave"))),
     _master(_mesh.getSubdomainID(getParam<SubdomainName>("master"))),
+    _var(_sys.getFieldVariable<Real>(_tid, parameters.get<NonlinearVariableName>("variable"))),
 
     _master_q_point(_assembly.qPoints()),
     _master_qrule(_assembly.qRule()),

@@ -21,7 +21,10 @@ defineADValidParams(EqualValueConstraint,
 
 template <ComputeStage compute_stage>
 EqualValueConstraint<compute_stage>::EqualValueConstraint(const InputParameters & parameters)
-  : MortarConstraint<compute_stage>(parameters)
+  : MortarConstraint<compute_stage>(parameters),
+    _u_slave(slaveValue()),
+    _u_master(masterValue()),
+    _lambda(lmValue())
 {
 }
 

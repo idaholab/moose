@@ -30,19 +30,47 @@ public:
 
   virtual void computeJacobian() override;
 
-  virtual SubdomainID masterSubdomain() const final { return _master_subdomain_id; }
+  virtual SubdomainID masterSubdomain() const override { return _master_subdomain_id; }
+
+  MooseVariable * variable() override { return _var; }
+
+  virtual const VariableValue & value() override;
+
+  virtual const VariableGradient & gradient() override;
+
+  virtual const VariableValue & coupledValue(const std::string & var_name,
+                                             unsigned int comp) override;
+
+  virtual const VariableGradient & coupledGradient(const std::string & var_name,
+                                                   unsigned int comp) override;
+
+  /**
+   * Returns variables needed for values
+   */
+  virtual set::set<MooseVariable *> & neededVariablesForValues()
+  {
+    return _variables_for_which_values_requested;
+  }
+
+  /**
+   * Returns variables needed for gradients
+   */
+  virtual set::set<MooseVariable *> & neededVariablesForGradients()
+  {
+    return _variables_for_which_gradients_requested;
+  }
 
 protected:
   /**
    * compute the Lagrange Multipler equation at the quadrature points
    */
-  virtual ADResidual computeQpResidual() = 0;
+  virtual ADResidual computeQpResidual() { return 0; }
 
   /**
    * compute the primal equation at the quadrature points. `type` is either `Moose::Slave` or
    * `Moose::Master`
    */
-  virtual ADResidual computeQpResidualSide(Moose::ConstraintType type) = 0;
+  virtual ADResidual computeQpResidualSide(Moose::ConstraintType /*type*/) { return 0; }
 
   /// Whether the current mortar segment projects onto a face on the master side
   bool _has_master;
@@ -68,11 +96,14 @@ protected:
   /// The mortar mesh generator object
   AutomaticMortarGeneration & _amg;
 
-  /// Reference to the master variable
-  MooseVariable & _master_var;
+  /// Pointer to the lagrange multipler variable. nullptr if none
+  MooseVariable * _var;
 
   /// Reference to the slave variable
   MooseVariable & _slave_var;
+
+  /// Reference to the master variable
+  MooseVariable & _master_var;
 
   /// The primal var number
   const unsigned int _primal_var_number;
@@ -80,14 +111,14 @@ protected:
   /// The lagrange multiplier var number
   const unsigned int _lambda_var_number;
 
+  /// Whether to compute primal residuals
+  const bool _compute_primal_residuals;
+
+  /// Whether to compute lagrange multiplier residuals
+  const bool _compute_lm_residuals;
+
   /// The dof map
   const DofMap & _dof_map;
-
-  /// The FEType of the primal variable
-  const FEType _fe_type_primal;
-
-  /// The FEType of the lagrange multiplier variable
-  const FEType _fe_type_lambda;
 
   /// The dimensionality of the volume elements
   const unsigned int _interior_dimension;
@@ -109,11 +140,17 @@ protected:
   /// The interior master (volume) FE object for the primal variable
   std::unique_ptr<FEBase> _fe_master_interior_primal;
 
+  /// the normals along the slave face
+  const std::vector<Point> & _normals;
+
   /// The mortar segment quadrature rule
   QGauss _qrule_msm;
 
   /// The Jacobian times weights for the mortar segment FE
   const std::vector<Real> & _JxW_msm;
+
+  /// A dummy object useful for constructing _test when not using Lagrange multipliers
+  const std::vector<std::vector<Real>> _dummy;
 
   /// The shape functions corresponding to the lagrange multiplier variable
   const std::vector<std::vector<Real>> & _test;
@@ -200,6 +237,16 @@ private:
    * compute the variable solutions on the current element
    */
   void computeSolutions();
+
+private:
+  /// A set of variables for which solution values have been requested
+  std::set<MooseVariable *> _variables_for_which_values_requested;
+
+  /// A set of variables for which solution gradients have been requested
+  std::set<MooseVariable *> _variables_for_which_gradients_requested;
+
+protected:
+  usingCoupleableMembers;
 };
 
 #define usingMortarConstraintMembers                                                               \
@@ -218,6 +265,7 @@ private:
   using MortarConstraint<compute_stage>::_grad_u_slave;                                            \
   using MortarConstraint<compute_stage>::_grad_u_master;                                           \
   using MortarConstraint<compute_stage>::_grad_test_slave;                                         \
-  using MortarConstraint<compute_stage>::_grad_test_master
+  using MortarConstraint<compute_stage>::_grad_test_master;                                        \
+  using MortarConstraint<compute_stage>::_normals
 
 #endif /* MORTARCONSTRAINT_H */

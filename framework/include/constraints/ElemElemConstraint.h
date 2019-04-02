@@ -63,11 +63,18 @@ public:
    */
   unsigned int getInterfaceID() const { return _interface_id; };
 
+  /**
+   * The variable number that this object operates on.
+   */
+  MooseVariable & variable() { return _var; }
+
 protected:
   FEProblemBase & _fe_problem;
   unsigned int _dim;
 
   unsigned int _interface_id;
+
+  MooseVariable & _var;
 
   const Elem *& _current_elem;
 

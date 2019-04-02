@@ -54,11 +54,6 @@ public:
    */
   SubProblem & subProblem() { return _subproblem; }
 
-  /**
-   * The variable number that this object operates on.
-   */
-  MooseVariable & variable() { return _var; }
-
   virtual bool addCouplingEntriesToJacobian() { return true; }
   virtual void subdomainSetup() override final
   {
@@ -74,7 +69,6 @@ protected:
   THREAD_ID _tid;
 
   Assembly & _assembly;
-  MooseVariable & _var;
   MooseMesh & _mesh;
 
   unsigned int _i, _j;

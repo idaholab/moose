@@ -650,6 +650,12 @@ protected:
   void enforceNodalConstraintsResidual(NumericVector<Number> & residual);
   void enforceNodalConstraintsJacobian();
 
+  /**
+   * Do mortar constraint computation
+   */
+  void mortarConstraints(ComputeStage compute_stage, bool displaced);
+
+protected:
   /// solution vector from nonlinear solver
   const NumericVector<Number> * _current_solution;
   /// ghosted form of the residual
@@ -744,7 +750,26 @@ protected:
   /// Constraints storage object
   ConstraintWarehouse _constraints;
 
-protected:
+  /// Map of undisplaced mortar interfaces to their residual computing functors
+  std::unordered_map<std::pair<BoundaryID, BoundaryID>,
+                     ComputeMortarFunctor<ComputeStage::RESIDUAL>>
+      _undisplaced_mortar_residual_functors;
+
+  /// Map of undisplaced mortar interfaces to their Jacobian computing functors
+  std::unordered_map<std::pair<BoundaryID, BoundaryID>,
+                     ComputeMortarFunctor<ComputeStage::JACOBIAN>>
+      _undisplaced_mortar_jacobian_functors;
+
+  /// Map of displaced mortar interfaces to their residual computing functors
+  std::unordered_map<std::pair<BoundaryID, BoundaryID>,
+                     ComputeMortarFunctor<ComputeStage::RESIDUAL>>
+      _displaced_mortar_residual_functors;
+
+  /// Map of displaced mortar interfaces to their Jacobian computing functors
+  std::unordered_map<std::pair<BoundaryID, BoundaryID>,
+                     ComputeMortarFunctor<ComputeStage::JACOBIAN>>
+      _displaced_mortar_jacobian_functors;
+
   /// increment vector
   NumericVector<Number> * _increment_vec;
   /// Preconditioner

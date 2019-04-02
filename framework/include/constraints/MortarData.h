@@ -29,7 +29,20 @@ public:
    */
   AutomaticMortarGeneration &
   getMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundary_key,
-                     const std::pair<SubdomainID, SubdomainID> & /*subdomain_key*/);
+                     const std::pair<SubdomainID, SubdomainID> & /*subdomain_key*/,
+                     bool on_displaced);
+
+  /**
+   * Return all automatic mortar generation objects on either the displaced or undisplaced mesh
+   */
+  const std::map<std::pair<BoundaryID, BoundaryID>, std::unique_ptr<AutomaticMortarGeneration>> &
+  getMortarInterfaces(bool on_displaced) const
+  {
+    if (on_displaced)
+      return _displaced_mortar_interfaces;
+    else
+      return _mortar_interfaces;
+  }
 
   /**
    * Returns the mortar covered subdomains
@@ -49,7 +62,7 @@ public:
   /**
    * Returns whether any of the AutomaticMortarGeneration objects are running on a displaced mesh
    */
-  bool hasDisplacedObjects() const { return _has_displaced_objects; }
+  bool hasDisplacedObjects() const { return _displaced_mortar_interfaces.size(); }
 
   /**
    * Returns whether we have **any** active AutomaticMortarGeneration objects
@@ -58,9 +71,14 @@ public:
 
 protected:
   /// Map from master-slave (in that order) boundary ID pair to the corresponding
-  /// AutomaticMortarGeneration object
+  /// undisplaced AutomaticMortarGeneration object
   std::map<std::pair<BoundaryID, BoundaryID>, std::unique_ptr<AutomaticMortarGeneration>>
       _mortar_interfaces;
+
+  /// Map from master-slave (in that order) boundary ID pair to the corresponding
+  /// displaced AutomaticMortarGeneration object
+  std::map<std::pair<BoundaryID, BoundaryID>, std::unique_ptr<AutomaticMortarGeneration>>
+      _displaced_mortar_interfaces;
 
   /// A set containing the subdomain ids covered by all the mortar interfaces in this MortarData
   /// object
@@ -69,9 +87,6 @@ protected:
   /// A set containing the boundary ids covered by all the mortar interfaces in this MortarData
   /// object
   std::set<BoundaryID> _mortar_boundary_coverage;
-
-  /// Whether any of the AutomaticMortarGeneration objects are running on a displaced mesh
-  bool _has_displaced_objects;
 };
 
 #endif

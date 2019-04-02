@@ -51,7 +51,20 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object,
 
   // MortarConstraint
   else if (mc)
-    _mortar_constraints.addObject(mc);
+  {
+    MooseMesh & mesh = mc->getParam<FEProblemBase *>("_fe_problem_base")->mesh();
+    bool displaced = nfc->parameters().have_parameter<bool>("use_displaced_mesh") &&
+                     nfc->getParam<bool>("use_displaced_mesh");
+
+    auto slave_boundary_id = mc->getParam<BoundaryName>("slave_boundary_id");
+    auto master_boundary_id = mc->getParam<BoundaryName>("master_boundary_id");
+    auto key = std::make_pair(master_boundary_id, slave_boundary_id);
+
+    if (displaced)
+      _displaced_mortar_constraints[key].addObject(mc);
+    else
+      _mortar_constraints[key].addObject(mc);
+  }
 
   // ElemElemConstraint
   else if (ec)
@@ -119,9 +132,13 @@ ConstraintWarehouse::getActiveNodeFaceConstraints(BoundaryID boundary_id, bool d
 }
 
 const std::vector<std::shared_ptr<MortarConstraintBase>> &
-ConstraintWarehouse::getActiveMortarConstraints() const
+ConstraintWarehouse::getActiveMortarConstraints(
+    const std::pair<BoundaryID, BoundaryID> & mortar_interface_key, bool displaced) const
 {
-  return _mortar_constraints.getActiveObjects();
+  if (displaced)
+    return _displaced_mortar_constraints[key].getActiveObjects();
+  else
+    return _mortar_constraints[key].getActiveObjects();
 }
 
 const std::vector<std::shared_ptr<ElemElemConstraint>> &
@@ -273,17 +290,44 @@ ConstraintWarehouse::subdomainsCovered(std::set<SubdomainID> & subdomains_covere
                                        std::set<std::string> & unique_variables,
                                        THREAD_ID /*tid=0*/) const
 {
-  const auto & objects = _mortar_constraints.getActiveObjects();
-  for (const auto & mc : objects)
+  // Loop over undisplaced
+  for (const auto & pr : _mortar_constraints)
   {
-    MooseVariableFEBase & lm_var = mc->variable();
-    unique_variables.insert(lm_var.name());
-    const std::set<SubdomainID> & lm_subdomains = lm_var.activeSubdomains();
-    subdomains_covered.insert(lm_subdomains.begin(), lm_subdomains.end());
+    const auto & objects = pr.second.getActiveObjects();
+    for (const auto & mc : objects)
+    {
+      MooseVariableFEBase * lm_var = mc->variable();
+      if (lm_var)
+      {
+        unique_variables.insert(lm_var->name());
+        const std::set<SubdomainID> & lm_subdomains = lm_var->activeSubdomains();
+        subdomains_covered.insert(lm_subdomains.begin(), lm_subdomains.end());
+      }
 
-    // Mortar constraints require the creation of a master lower dimensional subdomain in order to
-    // create the mortar segment mesh. We don't need any computing objects on it
-    subdomains_covered.insert(mc->masterSubdomain());
+      // Mortar constraints require the creation of a master lower dimensional subdomain in order to
+      // create the mortar segment mesh. We don't need any computing objects on it
+      subdomains_covered.insert(mc->masterSubdomain());
+    }
+  }
+
+  // Loop over displaced
+  for (const auto & pr : _displaced_mortar_constraints)
+  {
+    const auto & objects = pr.second.getActiveObjects();
+    for (const auto & mc : objects)
+    {
+      MooseVariableFEBase * lm_var = mc->variable();
+      if (lm_var)
+      {
+        unique_variables.insert(lm_var->name());
+        const std::set<SubdomainID> & lm_subdomains = lm_var->activeSubdomains();
+        subdomains_covered.insert(lm_subdomains.begin(), lm_subdomains.end());
+      }
+
+      // Mortar constraints require the creation of a master lower dimensional subdomain in order to
+      // create the mortar segment mesh. We don't need any computing objects on it
+      subdomains_covered.insert(mc->masterSubdomain());
+    }
   }
 }
 

@@ -277,6 +277,14 @@ public:
   QBase *& qRuleFace() { return _current_qrule_face; }
 
   /**
+   * Return a reference to THE qudrature rule for faces for the given element
+   * dimension. I don't want a reference to a quadrature rule that actually
+   * changes when I call Assembly::reinit with specified reference points. I
+   * think that's ridiculous
+   */
+  QBase *& qRuleFace(unsigned int dim) { return _holder_qrule_face[dim]; }
+
+  /**
    * Returns the reference to the current quadrature being used
    * @return A _reference_.  Make sure to store this as a reference!
    */
@@ -460,6 +468,11 @@ public:
    * Reinitialize the assembly data on an side of an element
    */
   void reinit(const Elem * elem, unsigned int side);
+
+  /**
+   * Reinitialize the assembly data on the side of a element at the custom reference points
+   */
+  void reinit(const Elem * elem, unsigned int side, const std::vector<Point> & reference_points);
 
   /**
    * Reinitialize an element and its neighbor along a particular side.
@@ -1211,6 +1224,8 @@ protected:
   QBase * _current_qrule_volume;
   /// The current arbitrary quadrature rule used within the element interior
   ArbitraryQuadrature * _current_qrule_arbitrary;
+  /// The current arbitrary quadrature rule used on the element face
+  ArbitraryQuadrature * _current_qrule_arbitrary_face;
   /// The current list of quadrature points
   MooseArray<Point> _current_q_points;
   /// The current list of transformed jacobian weights
@@ -1226,6 +1241,8 @@ protected:
   std::map<unsigned int, QBase *> _holder_qrule_volume;
   /// Holds arbitrary qrules for each dimension
   std::map<unsigned int, ArbitraryQuadrature *> _holder_qrule_arbitrary;
+  /// Holds arbitrary qrules for each dimension for faces
+  std::map<unsigned int, ArbitraryQuadrature *> _holder_qrule_arbitrary_face;
   /// Holds pointers to the dimension's q_points
   std::map<unsigned int, const std::vector<Point> *> _holder_q_points;
   /// Holds pointers to the dimension's transformed jacobian weights

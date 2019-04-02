@@ -272,6 +272,41 @@ NonlinearSystemBase::initialSetup()
   _constraints.initialSetup();
   _general_dampers.initialSetup();
   _nodal_bcs.initialSetup();
+
+  // go over mortar interfaces and construct functors
+  const auto & undisplaced_mortar_interfaces = _fe_problem.getMortarInterfaces(/*displaced=*/false);
+  for (const auto & mortar_interface : undisplaced_mortar_interfaces)
+  {
+    auto master_slave_boundary_pair = mortar_interface.first;
+    const auto & mortar_generation_object = mortar_interface.second;
+
+    auto & mortar_constraints =
+        _constraints.getActiveMortarConstraints(master_slave_boundary, /*displaced=*/false);
+
+    _undisplaced_mortar_residual_functors[master_slave_boundary_pair] =
+        ComputeMortarFunctor<ComputeStage::RESIDUAL>(
+            mortar_constraints, mortar_generation_object, _fe_problem);
+    _undisplaced_mortar_jacobian_functors[master_slave_boundary_pair] =
+        ComputeMortarFunctor<ComputeStage::JACOBIAN>(
+            mortar_constraints, mortar_generation_object, _fe_problem);
+  }
+
+  const auto & displaced_mortar_interfaces = _fe_problem.getMortarInterfaces(/*displaced=*/true);
+  for (const auto & mortar_interface : displaced_mortar_interfaces)
+  {
+    auto master_slave_boundary_pair = mortar_interface.first;
+    const auto & mortar_generation_object = mortar_interface.second;
+
+    auto & mortar_constraints =
+        _constraints.getActiveMortarConstraints(master_slave_boundary, /*displaced=*/true);
+
+    _displaced_mortar_residual_functors[master_slave_boundary_pair] =
+        ComputeMortarFunctor<ComputeStage::RESIDUAL>(
+            mortar_constraints, mortar_generation_object, _fe_problem);
+    _displaced_mortar_jacobian_functors[master_slave_boundary_pair] =
+        ComputeMortarFunctor<ComputeStage::JACOBIAN>(
+            mortar_constraints, mortar_generation_object, _fe_problem);
+  }
 }
 
 void
@@ -636,7 +671,8 @@ NonlinearSystemBase::computeResidualTags(const std::set<TagID> & tags)
     computeNodalBCs(tags);
     closeTaggedVectors(tags);
 
-    // If we are debugging residuals we need one more assignment to have the ghosted copy up to date
+    // If we are debugging residuals we need one more assignment to have the ghosted copy up to
+    // date
     if (_need_residual_ghosted && _debugging_residuals && required_residual)
     {
       auto & residual = getVector(residualVectorTag());
@@ -998,8 +1034,8 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
   {
     if (_assemble_constraints_separately)
     {
-      // Reset the constraint_applied flag before each new constraint, as they need to be assembled
-      // separately
+      // Reset the constraint_applied flag before each new constraint, as they need to be
+      // assembled separately
       constraints_applied = false;
     }
     PenetrationLocator & pen_loc = *(it.second);
@@ -1064,17 +1100,16 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
     }
     if (_assemble_constraints_separately)
     {
-      // Make sure that slave contribution to master are assembled, and ghosts have been exchanged,
-      // as current masters might become slaves on next iteration
-      // and will need to contribute their former slaves' contributions
-      // to the future masters.
-      // See if constraints were applied anywhere
+      // Make sure that slave contribution to master are assembled, and ghosts have been
+      // exchanged, as current masters might become slaves on next iteration and will need to
+      // contribute their former slaves' contributions to the future masters. See if constraints
+      // were applied anywhere
       _communicator.max(constraints_applied);
 
       if (constraints_applied)
       {
-        // If any of the above constraints inserted values in the residual, it needs to be assembled
-        // before adding the cached residuals below.
+        // If any of the above constraints inserted values in the residual, it needs to be
+        // assembled before adding the cached residuals below.
         _communicator.max(residual_has_inserted_values);
         if (residual_has_inserted_values)
         {
@@ -1109,10 +1144,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
     }
   }
 
-  // go over real mortar constraints
-  auto & mortar_constraints = _constraints.getActiveMortarConstraints();
-  for (auto & mortar_constraint : mortar_constraints)
-    mortar_constraint->computeResidual();
+  mortarConstraints(ComputeStage::RESIDUAL, displaced);
 
   // go over element-element constraint interface
   std::map<unsigned int, std::shared_ptr<ElementPairLocator>> * element_pair_locators = nullptr;
@@ -1424,6 +1456,11 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
       if (_fe_problem.getDisplacedProblem())
         constraintResiduals(*_Re_non_time, true);
 
+      // go over real mortar constraints
+      auto & mortar_constraints = _constraints.getActiveMortarConstraints();
+      for (auto & mortar_constraint : mortar_constraints)
+        mortar_constraint->computeResidual();
+
       if (_fe_problem.computingNonlinearResid())
         _constraints.residualEnd();
     }
@@ -1698,8 +1735,8 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
   {
     if (_assemble_constraints_separately)
     {
-      // Reset the constraint_applied flag before each new constraint, as they need to be assembled
-      // separately
+      // Reset the constraint_applied flag before each new constraint, as they need to be
+      // assembled separately
       constraints_applied = false;
     }
     PenetrationLocator & pen_loc = *(it.second);
@@ -2323,8 +2360,8 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
   if (_fe_problem._has_constraints)
     closeTaggedMatrices(tags);
 
-  // We need to close the save_in variables on the aux system before NodalBCBases clear the dofs on
-  // boundary nodes
+  // We need to close the save_in variables on the aux system before NodalBCBases clear the dofs
+  // on boundary nodes
   if (_has_diag_save_in)
     _fe_problem.getAuxiliarySystem().solution().close();
 
@@ -2354,8 +2391,8 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
         {
           const std::vector<MooseVariableFEBase *> & coupled_moose_vars = bc->getCoupledMooseVars();
 
-          // Create the set of "involved" MOOSE nonlinear vars, which includes all coupled vars and
-          // the BC's own variable
+          // Create the set of "involved" MOOSE nonlinear vars, which includes all coupled vars
+          // and the BC's own variable
           std::set<unsigned int> & var_set = bc_involved_vars[bc->name()];
           for (const auto & coupled_var : coupled_moose_vars)
             if (coupled_var->kind() == Moose::VAR_NONLINEAR)
@@ -2418,8 +2455,8 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 
   closeTaggedMatrices(tags);
 
-  // We need to close the save_in variables on the aux system before NodalBCBases clear the dofs on
-  // boundary nodes
+  // We need to close the save_in variables on the aux system before NodalBCBases clear the dofs
+  // on boundary nodes
   if (_has_nodalbc_diag_save_in)
     _fe_problem.getAuxiliarySystem().solution().close();
 
@@ -2999,4 +3036,32 @@ NonlinearSystemBase::setPreviousNewtonSolution(const NumericVector<Number> & sol
 {
   if (_solution_previous_nl)
     *_solution_previous_nl = soln;
+}
+
+void
+NonlinearSystemBase::mortarConstraints(ComputeStage compute_stage, bool displaced)
+{
+  // go over mortar constraints
+  const auto & mortar_interfaces = _fe_problem.getMortarInterfaces();
+  for (const auto & mortar_interface : mortar_interfaces)
+  {
+    const auto & master_slave_boundary = mortar_interface.first;
+    const auto & mortar_generation_object = mortar_interface.second;
+
+    auto & mortar_constraints =
+        _constraints.getActiveMortarConstraints(master_slave_boundary, displaced);
+
+    if (compute_stage == ComputeStage::RESIDUAL)
+    {
+      ComputeMortarFunctor<ComputeStage::RESIDUAL> cmf(mortar_constraints,
+                                                       mortar_generation_object);
+      cmf();
+    }
+    else if (compute_stage == ComputeStage::JACOBIAN)
+    {
+      ComputeMortarFunctor<ComputeStage::JACOBIAN> cmf(mortar_constraints,
+                                                       mortar_generation_object);
+      cmf();
+    }
+  }
 }

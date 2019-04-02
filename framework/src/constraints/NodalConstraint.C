@@ -25,6 +25,8 @@ validParams<NodalConstraint>()
   params.addParam<MooseEnum>("formulation",
                              formulationtype,
                              "Formulation used to calculate constraint - penalty or kinematic.");
+  params.addRequiredParam<NonlinearVariableName>(
+      "variable", "The name of the variable that this constraint is applied to.");
   return params;
 }
 
@@ -33,6 +35,7 @@ NodalConstraint::NodalConstraint(const InputParameters & parameters)
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, true, true),
     NeighborMooseVariableInterface<Real>(
         this, true, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD),
+    _var(_sys.getFieldVariable<Real>(_tid, parameters.get<NonlinearVariableName>("variable"))),
     _u_slave(_var.dofValuesNeighbor()),
     _u_master(_var.dofValues())
 {

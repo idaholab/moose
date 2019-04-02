@@ -41,7 +41,9 @@ public:
    * Access methods for active objects.
    */
   const std::vector<std::shared_ptr<NodalConstraint>> & getActiveNodalConstraints() const;
-  const std::vector<std::shared_ptr<MortarConstraintBase>> & getActiveMortarConstraints() const;
+  const std::vector<std::shared_ptr<MortarConstraintBase>> &
+  getActiveMortarConstraints(const std::pair<BoundaryID, BoundaryID> & mortar_interface_key,
+                             bool displaced) const;
   const std::vector<std::shared_ptr<ElemElemConstraint>> &
   getActiveElemElemConstraints(InterfaceID interface_id, bool displaced) const;
   const std::vector<std::shared_ptr<NodeFaceConstraint>> &
@@ -85,8 +87,13 @@ protected:
   /// NodeFaceConstraint objects (displaced)
   std::map<BoundaryID, MooseObjectWarehouse<NodeFaceConstraint>> _displaced_node_face_constraints;
 
-  /// MortarConstraints
-  MooseObjectWarehouse<MortarConstraintBase> _mortar_constraints;
+  /// Undisplaced MortarConstraints
+  std::unordered_map<std::pair<BoundaryID, BoundaryID>, MooseObjectWarehouse<MortarConstraintBase>>
+      _mortar_constraints;
+
+  /// Displaced MortarConstraints
+  std::unordered_map<std::pair<BoundaryID, BoundaryID>, MooseObjectWarehouse<MortarConstraintBase>>
+      _displaced_mortar_constraints;
 
   /// ElemElemConstraints (non-displaced)
   std::map<unsigned int, MooseObjectWarehouse<ElemElemConstraint>> _element_constraints;
