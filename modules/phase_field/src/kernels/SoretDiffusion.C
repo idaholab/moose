@@ -53,7 +53,7 @@ SoretDiffusion::computeQpResidual()
 Real
 SoretDiffusion::computeQpJacobian()
 {
-  return _is_coupled ? 0.0 : computeQpCJacobian();
+  return (_is_coupled && _c_var != _var.number()) ? 0.0 : computeQpCJacobian();
 }
 
 Real
