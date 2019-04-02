@@ -117,42 +117,6 @@ SetupMeshAction::setupMesh(MooseMesh * mesh)
   mesh->setUniformRefineLevel(level);
 #endif // LIBMESH_ENABLE_AMR
 
-  // Add entity names to the mesh
-  if (_pars.isParamValid("block_id") && _pars.isParamValid("block_name"))
-  {
-    std::vector<SubdomainID> ids = getParam<std::vector<SubdomainID>>("block_id");
-    std::vector<SubdomainName> names = getParam<std::vector<SubdomainName>>("block_name");
-    std::set<SubdomainName> seen_it;
-
-    if (ids.size() != names.size())
-      mooseError("You must supply the same number of block ids and names parameters");
-
-    for (unsigned int i = 0; i < ids.size(); ++i)
-    {
-      if (seen_it.find(names[i]) != seen_it.end())
-        mooseError("The following dynamic block name is not unique: " + names[i]);
-      seen_it.insert(names[i]);
-      mesh->setSubdomainName(ids[i], names[i]);
-    }
-  }
-  if (_pars.isParamValid("boundary_id") && _pars.isParamValid("boundary_name"))
-  {
-    std::vector<BoundaryID> ids = getParam<std::vector<BoundaryID>>("boundary_id");
-    std::vector<BoundaryName> names = getParam<std::vector<BoundaryName>>("boundary_name");
-    std::set<SubdomainName> seen_it;
-
-    if (ids.size() != names.size())
-      mooseError("You must supply the same number of boundary ids and names parameters");
-
-    for (unsigned int i = 0; i < ids.size(); ++i)
-    {
-      if (seen_it.find(names[i]) != seen_it.end())
-        mooseError("The following dynamic boundary name is not unique: " + names[i]);
-      mesh->setBoundaryName(ids[i], names[i]);
-      seen_it.insert(names[i]);
-    }
-  }
-
   if (getParam<bool>("construct_side_list_from_node_list"))
     mesh->getMesh().get_boundary_info().build_side_list_from_node_list();
 
@@ -218,8 +182,45 @@ SetupMeshAction::act()
   }
 
   else if (_current_task == "set_mesh_base")
+  {
     _mesh->setMeshBase(_mesh->buildMeshBaseObject());
 
+    // Add entity names to the mesh
+    if (_pars.isParamValid("block_id") && _pars.isParamValid("block_name"))
+    {
+      std::vector<SubdomainID> ids = getParam<std::vector<SubdomainID>>("block_id");
+      std::vector<SubdomainName> names = getParam<std::vector<SubdomainName>>("block_name");
+      std::set<SubdomainName> seen_it;
+
+      if (ids.size() != names.size())
+        mooseError("You must supply the same number of block ids and names parameters");
+
+      for (unsigned int i = 0; i < ids.size(); ++i)
+      {
+        if (seen_it.find(names[i]) != seen_it.end())
+          mooseError("The following dynamic block name is not unique: " + names[i]);
+        seen_it.insert(names[i]);
+        _mesh->setSubdomainName(ids[i], names[i]);
+      }
+    }
+    if (_pars.isParamValid("boundary_id") && _pars.isParamValid("boundary_name"))
+    {
+      std::vector<BoundaryID> ids = getParam<std::vector<BoundaryID>>("boundary_id");
+      std::vector<BoundaryName> names = getParam<std::vector<BoundaryName>>("boundary_name");
+      std::set<SubdomainName> seen_it;
+
+      if (ids.size() != names.size())
+        mooseError("You must supply the same number of boundary ids and names parameters");
+
+      for (unsigned int i = 0; i < ids.size(); ++i)
+      {
+        if (seen_it.find(names[i]) != seen_it.end())
+          mooseError("The following dynamic boundary name is not unique: " + names[i]);
+        _mesh->setBoundaryName(ids[i], names[i]);
+        seen_it.insert(names[i]);
+      }
+    }
+  }
   else if (_current_task == "init_mesh")
   {
     _mesh->init();
