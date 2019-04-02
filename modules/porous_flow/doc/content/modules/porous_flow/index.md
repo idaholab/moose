@@ -126,3 +126,45 @@ A number of `Postprocessors` are available:
 - [`PorousFlowFluidMass`](PorousFlowFluidMass.md): Calculates the mass
   of a fluid component $\kappa$
 - [`PorousFlowHeatEnergy`](PorousFlowHeatEnergy.md): Calculates the heat energy
+
+## QA tests of PorousFlow
+
+There are over 500 unit and quality-assurance tests in the PorousFlow test suite.  The pages below describe some of the more non-trivial tests.
+
+- [Infiltration and drainage](tests/broadbridge_white/broadbridge_white_tests.md)
+- [Heat and fluid responses in finite 1D bars](tests/newton_cooling/newton_cooling_tests.md)
+- [Boundary sinks and sources](tests/sinks/sinks_tests.md)
+- [actions](tests/actions/actions_tests.md)
+- [fluids](tests/fluids/fluids_tests.md)
+- [numerical_diffusion](tests/numerical_diffusion/numerical_diffusion_tests.md)
+- [adv_diff_bcs](tests/adv_diff_bcs/adv_diff_bcs_tests.md)
+- [fluidstate](tests/fluidstate/fluidstate_tests.md)
+- [plastic_heating](tests/plastic_heating/plastic_heating_tests.md)
+- [aux_kernels](tests/aux_kernels/aux_kernels_tests.md)
+- [flux_limited_TVD_advection](tests/flux_limited_TVD_advection/flux_limited_TVD_advection_tests.md)
+- [poro_elasticity](tests/poro_elasticity/poro_elasticity_tests.md)
+- [basic_advection](tests/basic_advection/basic_advection_tests.md)
+- [flux_limited_TVD_pflow](tests/flux_limited_TVD_pflow/flux_limited_TVD_pflow_tests.md)
+- [poroperm](tests/poroperm/poroperm_tests.md)
+- [functions](tests/functions/functions_tests.md)
+- [pressure_pulse](tests/pressure_pulse/pressure_pulse_tests.md)
+- [buckley_leverett](tests/buckley_leverett/buckley_leverett_tests.md)
+- [gravity](tests/gravity/gravity_tests.md)
+- [radioactive_decay](tests/radioactive_decay/radioactive_decay_tests.md)
+- [capillary_pressure](tests/capillary_pressure/capillary_pressure_tests.md)
+- [heat_advection](tests/heat_advection/heat_advection_tests.md)
+- [relperm](tests/relperm/relperm_tests.md)
+- [chemistry](tests/chemistry/chemistry_tests.md)
+- [heat_conduction](tests/heat_conduction/heat_conduction_tests.md)
+- [rogers_stallybrass_clements](tests/rogers_stallybrass_clements/rogers_stallybrass_clements_tests.md)
+- [density](tests/density/density_tests.md)
+- [heterogeneous_materials](tests/heterogeneous_materials/heterogeneous_materials_tests.md)
+- [desorption](tests/desorption/desorption_tests.md)
+- [jacobian](tests/jacobian/jacobian_tests.md)
+- [thermal_conductivity](tests/thermal_conductivity/thermal_conductivity_tests.md)
+- [dirackernels](tests/dirackernels/dirackernels_tests.md)
+- [mass_conservation](tests/mass_conservation/mass_conservation_tests.md)
+- [thm_rehbinder](tests/thm_rehbinder/thm_rehbinder_tests.md)
+- [dispersion](tests/dispersion/dispersion_tests.md)
+- [energy_conservation](tests/energy_conservation/energy_conservation_tests.md)
+- [non_thermal_equilibrium](tests/non_thermal_equilibrium/non_thermal_equilibrium_tests.md)
