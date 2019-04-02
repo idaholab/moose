@@ -139,4 +139,22 @@
     design = 'PorousFlowWaterVapor.md'
     issues = '#13108'
   [../]
+  [./geothermal_1d]
+    type = 'CSVDiff'
+    input = 'coldwater_injection.i'
+    csvdiff = 'coldwater_injection_csv_line_0007.csv'
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall calculate the temperature profile in a 1D Avdonin problem'
+    design = 'PorousFlowWaterVapor.md'
+    issues = '#13108'
+  [../]
+  [./geothermal_1d_radial]
+    type = 'CSVDiff'
+    input = 'coldwater_injection_radial.i'
+    csvdiff = 'coldwater_injection_radial_csv_line_0005.csv'
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall calculate the temperature profile in a 1D radial Avdonin problem'
+    design = 'PorousFlowWaterVapor.md'
+    issues = '#13108'
+  [../]
 []
