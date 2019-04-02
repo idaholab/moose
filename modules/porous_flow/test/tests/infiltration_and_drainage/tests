@@ -1,0 +1,110 @@
+[Tests]
+  [./bw01]
+    type = 'Exodiff'
+    input = 'bw01.i'
+    exodiff = 'bw01.e'
+    rel_err = 1E-5
+    use_old_floor = True
+    heavy = true
+    max_time = 1000
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall be able to model 2-phase infiltration and agree with the analytic solution'
+    issues = '#13155'
+    design = 'porous_flow/tests/infiltration_and_drainage/infiltration_and_drainage_tests.md'
+  [../]
+  [./bw02]
+    type = 'Exodiff'
+    input = 'bw02.i'
+    exodiff = 'bw02.e'
+    rel_err = 1E-5
+    use_old_floor = True
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall be able to model 2-phase infiltration on a coarse mesh and agree with the analytic solution'
+    issues = '#13155'
+    design = 'porous_flow/tests/infiltration_and_drainage/infiltration_and_drainage_tests.md'
+  [../]
+  [./wli01]
+    type = 'Exodiff'
+    input = 'wli01.i'
+    exodiff = 'wli01.e'
+    rel_err = 1E-5
+    use_old_floor = True
+    heavy = true
+    max_time = 1000
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall be able to model 2-phase drainage and agree with the analytic solution'
+    issues = '#13155'
+    design = 'porous_flow/tests/infiltration_and_drainage/infiltration_and_drainage_tests.md'
+  [../]
+  [./wli02]
+    type = 'Exodiff'
+    input = 'wli02.i'
+    exodiff = 'wli02.e'
+    rel_err = 1E-5
+    use_old_floor = True
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall be able to model 2-phase drainage on a coarse mesh and agree with the analytic solution'
+    issues = '#13155'
+    design = 'porous_flow/tests/infiltration_and_drainage/infiltration_and_drainage_tests.md'
+  [../]
+  [./rd01]
+    type = 'Exodiff'
+    input = 'rd01.i'
+    exodiff = 'rd01.e'
+    rel_err = 1E-4
+    use_old_floor = True
+    heavy = true
+    max_time = 1000
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall be able to model single-phase infiltration and agree with the analytic solution'
+    issues = '#13155'
+    design = 'porous_flow/tests/infiltration_and_drainage/infiltration_and_drainage_tests.md'
+  [../]
+  [./rd02]
+    type = 'Exodiff'
+    input = 'rd02.i'
+    exodiff = 'rd02.e'
+    rel_err = 1E-4
+    heavy = true
+    use_old_floor = True
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall be able to model single-phase short-term drainage and agree with the analytic solution'
+    issues = '#13155'
+    design = 'porous_flow/tests/infiltration_and_drainage/infiltration_and_drainage_tests.md'
+  [../]
+  [./rd03]
+    type = 'Exodiff'
+    input = 'rd03.i'
+    exodiff = 'rd03.e'
+    rel_err = 1E-4
+    use_old_floor = True
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall be able to model single-phase long-term drainage and agree with the analytic solution'
+    issues = '#13155'
+    design = 'porous_flow/tests/infiltration_and_drainage/infiltration_and_drainage_tests.md'
+  [../]
+  [./rsc01]
+    type = 'Exodiff'
+    input = 'rsc01.i'
+    exodiff = 'rsc01.e'
+    rel_err = 1E-5
+    use_old_floor = True
+    heavy = true
+    max_time = 1000
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall be able to model water infiltration into a 2-phase and agree with the analytic solution'
+    issues = '#13155'
+    design = 'porous_flow/tests/infiltration_and_drainage/infiltration_and_drainage_tests.md'
+  [../]
+  [./rsc02]
+    type = 'Exodiff'
+    input = 'rsc02.i'
+    exodiff = 'rsc02.e'
+    rel_err = 1E-5
+    use_old_floor = True
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall be able to model water infiltration into a 2-phase and agree with the analytic solution in a high-resolution test'
+    issues = '#13155'
+    design = 'porous_flow/tests/infiltration_and_drainage/infiltration_and_drainage_tests.md'
+  [../]
+[]

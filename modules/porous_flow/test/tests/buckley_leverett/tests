@@ -4,5 +4,19 @@
     input = 'bl01.i'
     exodiff = 'bl01.e'
     threading = '!pthreads'
+    cli_args = 'UserObjects/pc/alpha=1E-4 Functions/timestepper/x=0 Functions/timestepper/y=7.5'
+    requirement = 'PorousFlow shall be able to simulate a Buckley-Leverett problem'
+    design = 'porous_flow/tests/buckley_leverett/buckley_leverett_tests.md'
+    issues = '#13155'
+  [../]
+  [./bl01_heavy]
+    type = CSVDiff
+    input = bl01.i
+    csvdiff = 'bl01_pp_0001.csv bl01_sat_0001.csv bl01_pp_0150.csv bl01_sat_0150.csv'
+    heavy = true
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall be able to simulate a Buckley-Leverett problem with small saturation'
+    design = 'porous_flow/tests/buckley_leverett/buckley_leverett_tests.md'
+    issues = '#13155'
   [../]
 []

@@ -10,7 +10,7 @@
     threading = '!pthreads'
     requirement = "PorousFlow shall be able to find steady-state and long-time transient porepressure when gravity is nonzero: for single-phase fully-saturated, single-phase partially-saturated, two-phase PP formulations, and two-phase PS formulations"
     issues = '#6845 #7677 #8073 #8585 #8574 #9537'
-    design = 'porous_flow/governing_equations.md'
+    design = 'porous_flow/governing_equations.md porous_flow/tests/gravity/gravity_tests.md'
   [../]
   [./grav01b]
     type = 'CSVDiff'
@@ -23,7 +23,7 @@
     threading = '!pthreads'
     requirement = "PorousFlow shall be able to find steady-state and long-time transient porepressure when gravity is nonzero: for single-phase fully-saturated, single-phase partially-saturated, two-phase PP formulations, and two-phase PS formulations"
     issues = '#6845 #7677 #8073 #8585 #8574 #9537'
-    design = 'porous_flow/governing_equations.md'
+    design = 'porous_flow/governing_equations.md porous_flow/tests/gravity/gravity_tests.md'
   [../]
   [./grav01c]
     type = 'CSVDiff'
@@ -36,7 +36,7 @@
     threading = '!pthreads'
     requirement = "PorousFlow shall be able to find steady-state and long-time transient porepressure when gravity is nonzero: for single-phase fully-saturated, single-phase partially-saturated, two-phase PP formulations, and two-phase PS formulations"
     issues = '#6845 #7677 #8073 #8585 #8574 #9537'
-    design = 'porous_flow/governing_equations.md'
+    design = 'porous_flow/governing_equations.md porous_flow/tests/gravity/gravity_tests.md'
   [../]
   [./grav01c_action]
     type = 'CSVDiff'
@@ -49,7 +49,7 @@
     threading = '!pthreads'
     requirement = "PorousFlow shall be able to find steady-state and long-time transient porepressure when gravity is nonzero: for single-phase fully-saturated, single-phase partially-saturated, two-phase PP formulations, and two-phase PS formulations"
     issues = '#6845 #7677 #8073 #8585 #8574 #9537'
-    design = 'porous_flow/governing_equations.md'
+    design = 'porous_flow/governing_equations.md porous_flow/tests/gravity/gravity_tests.md'
   [../]
   [./grav02a]
     type = 'CSVDiff'
@@ -59,7 +59,7 @@
     threading = '!pthreads'
     requirement = "PorousFlow shall be able to find steady-state and long-time transient porepressure when gravity is nonzero: for single-phase fully-saturated, single-phase partially-saturated, two-phase PP formulations, and two-phase PS formulations"
     issues = '#6845 #7677 #8073 #8585 #8574 #9537'
-    design = 'porous_flow/governing_equations.md'
+    design = 'porous_flow/governing_equations.md porous_flow/tests/gravity/gravity_tests.md'
   [../]
   [./grav02b]
     type = 'CSVDiff'
@@ -69,7 +69,7 @@
     threading = '!pthreads'
     requirement = "PorousFlow shall be able to find steady-state and long-time transient porepressure when gravity is nonzero: for single-phase fully-saturated, single-phase partially-saturated, two-phase PP formulations, and two-phase PS formulations"
     issues = '#6845 #7677 #8073 #8585 #8574 #9537'
-    design = 'porous_flow/governing_equations.md'
+    design = 'porous_flow/governing_equations.md porous_flow/tests/gravity/gravity_tests.md'
   [../]
   [./grav02c]
     type = 'CSVDiff'
@@ -79,7 +79,7 @@
     threading = '!pthreads'
     requirement = "PorousFlow shall be able to find steady-state and long-time transient porepressure when gravity is nonzero: for single-phase fully-saturated, single-phase partially-saturated, two-phase PP formulations, and two-phase PS formulations"
     issues = '#6845 #7677 #8073 #8585 #8574 #9537'
-    design = 'porous_flow/governing_equations.md'
+    design = 'porous_flow/governing_equations.md porous_flow/tests/gravity/gravity_tests.md'
   [../]
   [./grav02d]
     type = 'CSVDiff'
@@ -89,7 +89,7 @@
     threading = '!pthreads'
     requirement = "PorousFlow shall be able to find steady-state and long-time transient porepressure when gravity is nonzero: for single-phase fully-saturated, single-phase partially-saturated, two-phase PP formulations, and two-phase PS formulations"
     issues = '#6845 #7677 #8073 #8585 #8574 #9537'
-    design = 'porous_flow/governing_equations.md'
+    design = 'porous_flow/governing_equations.md porous_flow/tests/gravity/gravity_tests.md'
   [../]
   [./grav02e]
     type = 'Exodiff'
@@ -98,7 +98,7 @@
     threading = '!pthreads'
     requirement = "PorousFlow shall be able to find steady-state and long-time transient porepressure when gravity is nonzero: for single-phase fully-saturated, single-phase partially-saturated, two-phase PP formulations, and two-phase PS formulations"
     issues = '#6845 #7677 #8073 #8585 #8574 #9537'
-    design = 'porous_flow/governing_equations.md'
+    design = 'porous_flow/governing_equations.md porous_flow/tests/gravity/gravity_tests.md'
   [../]
   [./grav02f]
     type = 'Exodiff'
@@ -107,7 +107,7 @@
     threading = '!pthreads'
     requirement = "PorousFlow shall be able to find steady-state and long-time transient porepressure when gravity is nonzero: for single-phase fully-saturated, single-phase partially-saturated, two-phase PP formulations, and two-phase PS formulations"
     issues = '#6845 #7677 #8073 #8585 #8574 #9537'
-    design = 'porous_flow/governing_equations.md'
+    design = 'porous_flow/governing_equations.md porous_flow/tests/gravity/gravity_tests.md'
   [../]
   [./grav02g]
     type = 'Exodiff'
@@ -116,7 +116,7 @@
     threading = '!pthreads'
     requirement = "PorousFlow shall be able to find steady-state and long-time transient porepressure when gravity is nonzero: for single-phase fully-saturated, single-phase partially-saturated, two-phase PP formulations, and two-phase PS formulations"
     issues = '#6845 #7677 #8073 #8585 #8574 #9537'
-    design = 'porous_flow/governing_equations.md'
+    design = 'porous_flow/governing_equations.md porous_flow/tests/gravity/gravity_tests.md'
   [../]
 
   [./fully_saturated_grav01a]
@@ -130,7 +130,7 @@
     threading = '!pthreads'
     requirement = "PorousFlow shall be able to find steady-state and long-time transient porepressure when gravity is nonzero: for single-phase fully-saturated, single-phase partially-saturated, two-phase PP formulations, and two-phase PS formulations"
     issues = '#6845 #7677 #8073 #8585 #8574 #9537'
-    design = 'porous_flow/governing_equations.md'
+    design = 'porous_flow/governing_equations.md porous_flow/tests/gravity/gravity_tests.md'
   [../]
   [./fully_saturated_grav01b]
     type = 'CSVDiff'
@@ -143,7 +143,7 @@
     threading = '!pthreads'
     requirement = "PorousFlow shall be able to find steady-state and long-time transient porepressure when gravity is nonzero: for single-phase fully-saturated, single-phase partially-saturated, two-phase PP formulations, and two-phase PS formulations"
     issues = '#6845 #7677 #8073 #8585 #8574 #9537'
-    design = 'porous_flow/governing_equations.md'
+    design = 'porous_flow/governing_equations.md porous_flow/tests/gravity/gravity_tests.md'
   [../]
   [./fully_saturated_grav01c]
     type = 'CSVDiff'
@@ -157,7 +157,7 @@
     skip = "#12505"
     requirement = "PorousFlow shall be able to find steady-state and long-time transient porepressure when gravity is nonzero: for single-phase fully-saturated, single-phase partially-saturated, two-phase PP formulations, and two-phase PS formulations"
     issues = '#6845 #7677 #8073 #8585 #8574 #9537'
-    design = 'porous_flow/governing_equations.md'
+    design = 'porous_flow/governing_equations.md porous_flow/tests/gravity/gravity_tests.md'
   [../]
   [./grav01d]
     type = 'CSVDiff'
@@ -170,6 +170,6 @@
     threading = '!pthreads'
     requirement = "PorousFlow shall be able to find steady-state and long-time transient porepressure when gravity is nonzero, when the simulation contains more than one domain, with each domain having its own capillary pressure and relative permeability function"
     issues = '#13116'
-    design = 'porous_flow/governing_equations.md'
+    design = 'porous_flow/governing_equations.md porous_flow/tests/gravity/gravity_tests.md'
   [../]
 []

@@ -2,10 +2,10 @@
 # The front starts at (around) x=5, and at t=50 it should
 # have moved to x=9.6.  The version below has a nonzero
 # suction function, and at t=50, the front sits between
-# (about) x=9.7 and x=10.4.  Changing the van-Genuchten
-# al parameter to 1E-3 sharpens the front so it sits between
-# x=9.6 and x=9.9, but of course the simulation takes longer
-# with al=1E-2 and nx=600, the front sits between x=9.6 and x=9.8,
+# (about) x=9.6 and x=9.9.  Changing the van-Genuchten
+# al parameter to 1E-4 softens the front so it sits between
+# (about) x=9.7 and x=10.4, and the simulation runs much faster.
+# With al=1E-2 and nx=600, the front sits between x=9.6 and x=9.8,
 # but takes about 100 times longer to run.
 
 [Mesh]
@@ -81,7 +81,7 @@
   [./pc]
     type = PorousFlowCapillaryPressureVG
     m = 0.8
-    alpha = 1e-4
+    alpha = 1e-3
   [../]
 []
 
@@ -139,16 +139,52 @@
   [../]
 []
 
+[Functions]
+  [./timestepper]
+    type = PiecewiseLinear
+    x = '0    0.01 0.1 1   1.5 2   20  30  40  50'
+    y = '0.01 0.1  0.2 0.3 0.1 0.3 0.3 0.4 0.4 0.5'
+  [../]
+[]
+
 [Executioner]
   type = Transient
   end_time = 50
-  dt = 2
+  [./TimeStepper]
+    type = FunctionDT
+    function = timestepper
+  [../]
 []
 
+[VectorPostprocessors]
+  [./pp]
+    type = LineValueSampler
+    start_point = '0 0 0'
+    end_point = '15 0 0'
+    num_points = 150
+    sort_by = x
+    variable = pp
+  [../]
+  [./sat]
+    type = LineValueSampler
+    start_point = '0 0 0'
+    end_point = '15 0 0'
+    num_points = 150
+    sort_by = x
+    variable = sat
+  [../]
+[]
+
+
 [Outputs]
+  file_base = bl01
+  [./csv]
+    type = CSV
+    sync_only = true
+    sync_times = '0.01 50'
+  [../]
   [./exodus]
     type = Exodus
-    file_base = bl01
     execute_on = 'initial final'
   [../]
 []

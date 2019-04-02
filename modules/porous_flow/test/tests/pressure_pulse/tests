@@ -6,7 +6,7 @@
     rel_err = 1.0E-5
     threading = '!pthreads'
     issues = '#6845'
-    design = 'porous_flow/tests/pressure_pulse_1d.pdf'
+    design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'PorousFlow shall correctly simulate the transient evolution of a pressure pulse in 1D using 1 phase physics'
   [../]
   [./pressure_pulse_1d_steady]
@@ -16,7 +16,7 @@
     rel_err = 1.0E-5
     threading = '!pthreads'
     issues = '#6845'
-    design = 'porous_flow/tests/pressure_pulse_1d.pdf'
+    design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'PorousFlow shall find the steady-state distribution resulting from a pressure pulse in 1D using 1 phase physics'
   [../]
   [./pressure_pulse_1d_3comp]
@@ -26,7 +26,7 @@
     rel_err = 1.0E-5
     threading = '!pthreads'
     issues = '#6845'
-    design = 'porous_flow/tests/pressure_pulse_1d.pdf'
+    design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'PorousFlow shall correctly simulate the transient evolution of a pressure pulse in 1D using 1 fluid phase with multiple components'
   [../]
   [./pressure_pulse_1d_2phase]
@@ -37,7 +37,7 @@
     rel_err = 1.0E-5
     threading = '!pthreads'
     issues = '#6845'
-    design = 'porous_flow/tests/pressure_pulse_1d.pdf'
+    design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'PorousFlow shall correctly simulate the transient evolution of a pressure pulse in 1D when using 2 fluid phases, with 2 immiscible components, when one phase has zero saturation'
   [../]
   [./pressure_pulse_1d_2phasePS]
@@ -47,7 +47,7 @@
     rel_err = 1.0E-5
     threading = '!pthreads'
     issues = '#6845'
-    design = 'porous_flow/tests/pressure_pulse_1d.pdf'
+    design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'PorousFlow shall correctly simulate the transient evolution of a pressure pulse in 1D when using 2 fluid phases, with 2 immiscible components, with constant capillary pressure'
   [../]
   [./pressure_pulse_1d_2phasePS_KT]
@@ -67,7 +67,7 @@
     rel_err = 1.0E-5
     threading = '!pthreads'
     issues = '#6845'
-    design = 'porous_flow/tests/pressure_pulse_1d.pdf'
+    design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'PorousFlow shall correctly simulate the transient evolution of a pressure pulse in 1D when using 2 fluid phases, with 2 immiscible components, with van-Genuchten capillary pressure'
   [../]
   [./pressure_pulse_1d_2phasePSVG2]
@@ -77,7 +77,7 @@
     rel_err = 1.0E-5
     threading = '!pthreads'
     issues = '#6845'
-    design = 'porous_flow/tests/pressure_pulse_1d.pdf'
+    design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'PorousFlow shall correctly simulate the transient evolution of a pressure pulse in 1D when using 2 fluid phases, with 2 immiscible components, with van-Genuchten capillary pressure and a logarithmic extension'
   [../]
   [./pressure_pulse_1d_MD]
@@ -87,7 +87,7 @@
     rel_err = 1.0E-5
     threading = '!pthreads'
     issues = '#6845'
-    design = 'porous_flow/tests/pressure_pulse_1d.pdf'
+    design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'PorousFlow shall correctly simulate the transient evolution of a pressure pulse in 1D when using 1 fluid phase in the MD formulation where the primary variable is log(mass-density)'
   [../]
   [./pressure_pulse_1d_fully_saturated]
@@ -97,7 +97,7 @@
     rel_err = 1.0E-5
     threading = '!pthreads'
     issues = '#6845'
-    design = 'porous_flow/tests/pressure_pulse_1d.pdf'
+    design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'PorousFlow shall correctly simulate the transient evolution of a pressure pulse in 1D when using 1 fluid phase and employing the fully-saturated version of Darcy flow'
   [../]
   [./pressure_pulse_1d_3comp_fully_saturated]
@@ -107,7 +107,7 @@
     rel_err = 1.0E-5
     threading = '!pthreads'
     issues = '#6845'
-    design = 'porous_flow/tests/pressure_pulse_1d.pdf'
+    design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'PorousFlow shall correctly simulate the transient evolution of a pressure pulse in 1D when using 1 fluid phase with 3 components and employing the fully-saturated version of Darcy flow'
   [../]
   [./pressure_pulse_1d_fully_saturated_2]
@@ -117,7 +117,7 @@
     rel_err = 1.0E-5
     threading = '!pthreads'
     issues = '#6845'
-    design = 'porous_flow/tests/pressure_pulse_1d.pdf'
+    design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'PorousFlow shall correctly simulate the transient evolution of a pressure pulse in 1D when using 1 fluid phase and employing the fully-saturated version of Darcy flow along with the fully-saturated version of the fluid-mass time derivative'
   [../]
 []

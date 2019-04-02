@@ -40,8 +40,7 @@
   [./theis_tabulated]
     type = 'CSVDiff'
     input = 'theis_tabulated.i'
-    csvdiff = "theis_csvout.csv"
-    prereq = 'theis'
+    csvdiff = "theis_tabulated_csvout.csv theis_tabulated_csvout_line_0010.csv"
     threading = '!pthreads'
     requirement = 'PorousFlow shall evolve a gas phase as a gas component is added in a water and NCG system'
     design = 'PorousFlowWaterNCG.md'
@@ -77,7 +76,7 @@
   [./theis_brineco2]
     type = 'CSVDiff'
     input = 'theis_brineco2.i'
-    csvdiff = "theis_brineco2_csvout.csv"
+    csvdiff = "theis_brineco2_csvout.csv theis_brineco2_csvout_line_0028.csv"
     heavy = true
     threading = '!pthreads'
     requirement = 'PorousFlow shall evolve a gas phase as CO2 is added to a liquid brine phase'

@@ -8,7 +8,7 @@
 [Mesh]
   type = GeneratedMesh
   dim = 1
-  nx = 40
+  nx = 80
   xmax = 200
   bias_x = 1.05
 []
@@ -197,19 +197,22 @@
 [Executioner]
   type = Transient
   solve_type = NEWTON
-  end_time = 2e2
+  end_time = 8e2
   [./TimeStepper]
     type = IterationAdaptiveDT
-    dt = 10
+    dt = 2
     growth_factor = 2
   [../]
 []
 
 [VectorPostprocessors]
   [./line]
-    type = NodalValueSampler
+    type = LineValueSampler
     sort_by = x
-    variable = 'pgas zi'
+    start_point = '0 0 0'
+    end_point = '200 0 0'
+    num_points = 1000
+    variable = 'pgas zi x1 saturation_gas'
     execute_on = 'timestep_end'
   [../]
 []
@@ -251,7 +254,7 @@
   perf_graph = true
   [./csvout]
     type = CSV
-    file_base = theis_csvout
+    file_base = theis_tabulated_csvout
     execute_on = timestep_end
     execute_vector_postprocessors_on = final
   [../]
