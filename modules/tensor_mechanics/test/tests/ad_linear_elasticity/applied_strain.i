@@ -17,80 +17,13 @@
   elem_type = QUAD4
 []
 
-# [Modules/TensorMechanics/Master/All]
-#   strain = SMALL
-#   eigenstrain_names = eigenstrain
-#   add_variables = true
-#   generate_output = 'strain_xx strain_yy strain_xy'
-# []
-
-### Everything between here and the next ### should be replaceable by future action availability
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
+[Modules/TensorMechanics/Master/All]
+  strain = SMALL
+  eigenstrain_names = eigenstrain
+  add_variables = true
+  generate_output = 'strain_xx strain_yy strain_xy'
+  use_automatic_differentiation = true
 []
-
-[Kernels]
-  [./x]
-    type = ADStressDivergenceTensors
-    variable = disp_x
-    component = 0
-  [../]
-  [./y]
-    type = ADStressDivergenceTensors
-    variable = disp_y
-    component = 1
-  [../]
-[]
-
-[AuxVariables]
-  [./strain_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./strain_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./strain_xy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-[]
-
-[AuxKernels]
-  [./strain_xx_aux]
-    type = MaterialRankTwoTensorAux
-    variable = strain_xx
-    i = 0
-    j = 0
-    property = total_strain
-  [../]
-  [./strain_yy_aux]
-    type = MaterialRankTwoTensorAux
-    variable = strain_yy
-    i = 1
-    j = 1
-    property = total_strain
-  [../]
-  [./strain_xy_aux]
-    type = MaterialRankTwoTensorAux
-    variable = strain_xy
-    i = 0
-    j = 1
-    property = total_strain
-  [../]
-[]
-
-[Materials]
-  [./strain]
-    type = ADComputeSmallStrain
-    eigenstrain_names = eigenstrain
-  [../]
-[]
-### Replaceable by action
 
 [Materials]
   [./elasticity_tensor]

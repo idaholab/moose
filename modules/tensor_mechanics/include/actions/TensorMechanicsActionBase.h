@@ -31,6 +31,9 @@ public:
   static const std::map<std::string, std::pair<std::string, std::vector<std::string>>>
       _ranktwoscalaraux_table;
   ///@}
+
+protected:
+  const bool _use_ad;
 };
 
 #endif // TENSORMECHANICSACTIONBASE_H

@@ -1,0 +1,1 @@
+../../action/gold/two_coord_out.e
