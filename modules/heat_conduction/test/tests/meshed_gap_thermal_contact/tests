@@ -9,6 +9,28 @@
     across a meshed gap in a 2D plane geometry."
   [../]
 
+  [./constant_conductance]
+    type = 'Exodiff'
+    input = 'meshed_gap_thermal_contact_constant_conductance.i'
+    exodiff = 'meshed_gap_thermal_contact_constant_conductance_out.e'
+    issues = '#13061'
+    design = 'syntax/ThermalContact/index.md source/materials/GapConductanceConstant.md'
+    requirement = "The ThermalContact system shall correctly enforce heat transfer
+    across a meshed gap in a 2D plane geometry using a prescribed constant conductance."
+  [../]
+
+  [./constant_conductance_quadrature]
+    prereq = constant_conductance
+    type = 'Exodiff'
+    input = 'meshed_gap_thermal_contact_constant_conductance.i'
+    cli_args = 'ThermalContact/gap_conductance/quadrature=true Outputs/file_base=meshed_gap_thermal_contact_constant_conductance_quadrature_out'
+    exodiff = 'meshed_gap_thermal_contact_constant_conductance_quadrature_out.e'
+    issues = '#13061'
+    design = 'syntax/ThermalContact/index.md source/materials/GapConductanceConstant.md'
+    requirement = "The ThermalContact system shall correctly enforce heat transfer
+    across a meshed gap in a 2D plane geometry using a prescribed constant conductance with the quadrature option"
+  [../]
+
   [./annulus]
     type = 'Exodiff'
     input = 'meshed_annulus_thermal_contact.i'
