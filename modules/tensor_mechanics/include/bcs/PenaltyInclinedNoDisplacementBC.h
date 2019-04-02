@@ -7,24 +7,24 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PENALTYINCLINEDBC_H
-#define PENALTYINCLINEDBC_H
+#ifndef PENALTYINCLINEDNODISPLACEMENTBC_H
+#define PENALTYINCLINEDNODISPLACEMENTBC_H
 
 #include "IntegratedBC.h"
 
-class PenaltyInclinedBC;
+class PenaltyInclinedNoDisplacementBC;
 class Function;
 
 template <>
-InputParameters validParams<PenaltyInclinedBC>();
+InputParameters validParams<PenaltyInclinedNoDisplacementBC>();
 
 /**
  * Weakly enforce an inclined BC (u\dot n = 0) using a penalty method.
  */
-class PenaltyInclinedBC : public IntegratedBC
+class PenaltyInclinedNoDisplacementBC : public IntegratedBC
 {
 public:
-  PenaltyInclinedBC(const InputParameters & parameters);
+  PenaltyInclinedNoDisplacementBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
@@ -39,7 +39,7 @@ protected:
   std::vector<unsigned int> _disp_var;
 
 private:
-  Real _p;
+  Real _penalty;
 };
 
 #endif
