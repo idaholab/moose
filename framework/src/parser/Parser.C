@@ -717,8 +717,10 @@ Parser::buildJsonSyntaxTree(JsonSyntaxTree & root) const
                  buildable_types.end()) &&                                 // Restricted but found
             moose_obj_params.have_parameter<std::string>("_moose_base") && // Has a registered base
             _syntax.verifyMooseObjectTask(moose_obj_params.get<std::string>("_moose_base"),
-                                          task) &&           // and that base is associated
-            action_obj_params.mooseObjectSyntaxVisibility()) // and the Action says it's visible
+                                          task) &&             // and that base is associated
+            action_obj_params.mooseObjectSyntaxVisibility() && // and the Action says it's visible
+            moose_obj->first.find("<JACOBIAN>") ==
+                std::string::npos) // And it is not a Jacobian templated AD object
         {
           std::string name;
           size_t pos = 0;
@@ -814,8 +816,10 @@ Parser::buildFullTree(const std::string & search_string)
                  buildable_types.end()) &&                                 // Restricted but found
             moose_obj_params.have_parameter<std::string>("_moose_base") && // Has a registered base
             _syntax.verifyMooseObjectTask(moose_obj_params.get<std::string>("_moose_base"),
-                                          task) &&           // and that base is associated
-            action_obj_params.mooseObjectSyntaxVisibility()) // and the Action says it's visible
+                                          task) &&             // and that base is associated
+            action_obj_params.mooseObjectSyntaxVisibility() && // and the Action says it's visible
+            moose_obj->first.find("<JACOBIAN>") ==
+                std::string::npos) // And it is not a Jacobian templated AD object
         {
           std::string name;
           size_t pos = 0;
@@ -824,8 +828,12 @@ Parser::buildFullTree(const std::string & search_string)
           {
             pos = act_name.size();
 
+            // Remove <RESIDUAL> append for AD objects
+            std::string obj_name = moose_obj->first;
+            removeSubstring(obj_name, "<RESIDUAL>");
+
             if (!action_obj_params.collapseSyntaxNesting())
-              name = act_name.substr(0, pos - 1) + moose_obj->first;
+              name = act_name.substr(0, pos - 1) + obj_name;
             else
             {
               name = act_name.substr(0, pos - 1) + "/<type>/" + moose_obj->first;
