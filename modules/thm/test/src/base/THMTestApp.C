@@ -39,6 +39,7 @@ THMTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_te
     s.registerActionSyntax("JacobianTest2PhaseAction", "JacobianTest2Phase");
     s.registerActionSyntax("JacobianTestGeneralAction", "JacobianTestGeneral");
     s.registerActionSyntax("JacobianTest1PhaseRDGAction", "JacobianTest1PhaseRDG");
+    s.registerActionSyntax("JacobianTest2PhaseRDGBaseAction", "JacobianTest2PhaseRDG");
     s.registerActionSyntax("JacobianTest2PhaseNumericalFluxAction",
                            "JacobianTest2PhaseNumericalFlux");
     s.registerActionSyntax("JacobianTest2PhaseBoundaryFluxAction",
