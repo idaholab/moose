@@ -196,6 +196,7 @@ addActionTypes(Syntax & syntax)
   registerTask("deprecated_block", false);
   registerTask("set_adaptivity_options", false);
   registerTask("add_mortar_interface", false);
+  registerTask("add_block_variable_info", true);
 
   // Dummy Actions (useful for sync points in the dependencies)
   registerTask("setup_function_complete", false);
@@ -235,6 +236,10 @@ addActionTypes(Syntax & syntax)
                            "(add_partitioner)"
                            "(add_geometric_rm)"
                            "(init_mesh)"
+                           // init mesh sets up all the things I need
+                           // and also partitions. partitioning must be separated
+                           // and executed after add_block_variable_info
+                           "(add_block_variable_info)"
                            "(prepare_mesh)"
                            "(add_mesh_modifier)"
                            "(execute_mesh_modifiers)"
@@ -407,6 +412,8 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   syntax.registerSyntaxType("Variables/*", "NonlinearVariableName");
   //  syntax.registerActionSyntax("AddVariableAction", "Variables/*", "add_variable");
   //  syntax.registerActionSyntax("AddVariableAction", "Variables/*", "add_ic");
+
+  registerSyntax("AddBlockVariableInfoAction", "Variables/*");
 
   registerSyntax("AddICAction", "Variables/*/InitialCondition");
 

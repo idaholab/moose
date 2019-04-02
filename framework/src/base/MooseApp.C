@@ -1550,6 +1550,23 @@ MooseApp::setBackupObject(std::shared_ptr<Backup> backup)
 }
 
 void
+MooseApp::addBlockDoFs(SubdomainID subdomain_id, unsigned int ndof)
+{
+  if (_block_dofs.find(subdomain_id) == _block_dofs.end())
+    _block_dofs[subdomain_id] = ndof;
+  else
+    _block_dofs[subdomain_id] += ndof;
+}
+
+unsigned int
+MooseApp::blockDoFs(SubdomainID subdomain_id) const
+{
+  if (_block_dofs.find(subdomain_id) == _block_dofs.end())
+    return 0;
+  return _block_dofs.find(subdomain_id)->second;
+}
+
+void
 MooseApp::restoreCachedBackup()
 {
   if (!_cached_backup.get())

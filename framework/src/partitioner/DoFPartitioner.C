@@ -40,5 +40,7 @@ DoFPartitioner::clone() const
 dof_id_type
 DoFPartitioner::computeElementWeight(Elem & elm)
 {
-  return elm.n_dofs(_app.getExecutioner()->feProblem().getNonlinearSystemBase().number());
+  // until changes to mesh reading & partitioning order
+  // are made, the next lines returns 0s
+  return _app.blockDoFs(elm.subdomain_id());
 }

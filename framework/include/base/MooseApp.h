@@ -25,6 +25,7 @@
 #include "libmesh/parallel_object.h"
 #include "libmesh/mesh_base.h"
 #include "libmesh/point.h"
+#include "libmesh/fe_type.h"
 
 // C++ includes
 #include <list>
@@ -659,6 +660,11 @@ public:
    */
   void setBackupObject(std::shared_ptr<Backup> backup);
 
+  ///@{ Public interface for variable block info
+  void addBlockDoFs(SubdomainID subdomain_id, unsigned int ndof);
+  unsigned int blockDoFs(SubdomainID subdomain_id) const;
+  ///@}
+
 protected:
   /**
    * Whether or not this MooseApp has cached a Backup to use for restart / recovery
@@ -825,6 +831,9 @@ protected:
 
   /// The library, registration method and the handle to the method
   std::map<std::pair<std::string, std::string>, void *> _lib_handles;
+
+  /// Stores the type and number of variables defined on each block, prepared before mesh partitioning
+  std::map<SubdomainID, unsigned int> _block_dofs;
 
 private:
   /** Method for creating the minimum required actions for an application (no input file)

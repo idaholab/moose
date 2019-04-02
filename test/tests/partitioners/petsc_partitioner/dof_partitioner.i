@@ -1,17 +1,7 @@
-[MeshGenerators]
-  [./cartesian]
-    type = CartesianMeshGenerator
-    dim = 2
-    dx = '5 5'
-    dy = '5 5'
-    ix = '5 5'
-    iy = '5 5'
-    subdomain_id = '1 1 1 2'
-  []
-[]
 
 [Mesh]
-  type = MeshGeneratorMesh
+  type = FileMesh
+  file = dof_partitioner_in.e
   [Partitioner]
     type = DoFPartitioner
   []
