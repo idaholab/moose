@@ -88,5 +88,3 @@ The [`PorousFlowFluidStateSingleComponent`](/PorousFlowFluidStateSingleComponent
 An initial condition that makes it easy to set enthalpy for a specified pressure and temperature (which may be more suitable for the user) is provided in [PorousFlowFluidPropertyIC](/PorousFlowFluidPropertyIC.md).
 
 !listing modules/porous_flow/test/tests/ics/fluidpropic.i block=ICs
-
-## Example
