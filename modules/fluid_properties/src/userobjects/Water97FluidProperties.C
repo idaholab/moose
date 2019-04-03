@@ -1755,8 +1755,12 @@ Water97FluidProperties::temperature_from_ph2a(DualReal pressure, DualReal enthal
   const DualReal eta = enthalpy / 2000.0e3;
   DualReal sum = 0.0;
 
+  // Factor out the negative in std::pow(eta - 2.1, _Jph2a[i]) to avoid fpe in dbg (see #13163)
+  const Real sgn = MathUtils::sign(eta.value() - 2.1);
+
   for (std::size_t i = 0; i < _nph2a.size(); ++i)
-    sum += _nph2a[i] * std::pow(pi, _Iph2a[i]) * std::pow(eta - 2.1, _Jph2a[i]);
+    sum += _nph2a[i] * std::pow(pi, _Iph2a[i]) * std::pow(std::abs(eta - 2.1), _Jph2a[i]) *
+           std::pow(sgn, _Jph2a[i]);
 
   return sum;
 }
@@ -1768,8 +1772,14 @@ Water97FluidProperties::temperature_from_ph2b(DualReal pressure, DualReal enthal
   const DualReal eta = enthalpy / 2000.0e3;
   DualReal sum = 0.0;
 
+  // Factor out the negatives in std::pow(pi - 2.0, _Iph2b[i])* std::pow(eta - 2.6, _Jph2b[i])
+  // to avoid fpe in dbg (see #13163)
+  const Real sgn0 = MathUtils::sign(pi.value() - 2.0);
+  const Real sgn1 = MathUtils::sign(eta.value() - 2.6);
+
   for (std::size_t i = 0; i < _nph2b.size(); ++i)
-    sum += _nph2b[i] * std::pow(pi - 2.0, _Iph2b[i]) * std::pow(eta - 2.6, _Jph2b[i]);
+    sum += _nph2b[i] * std::pow(std::abs(pi - 2.0), _Iph2b[i]) * std::pow(sgn0, _Iph2b[i]) *
+           std::pow(std::abs(eta - 2.6), _Jph2b[i]) * std::pow(sgn1, _Jph2b[i]);
 
   return sum;
 }
@@ -1781,8 +1791,12 @@ Water97FluidProperties::temperature_from_ph2c(DualReal pressure, DualReal enthal
   const DualReal eta = enthalpy / 2000.0e3;
   DualReal sum = 0.0;
 
+  // Factor out the negative in std::pow(eta - 1.8, _Jph2c[i]) to avoid fpe in dbg (see #13163)
+  const Real sgn = MathUtils::sign(eta.value() - 1.8);
+
   for (std::size_t i = 0; i < _nph2c.size(); ++i)
-    sum += _nph2c[i] * std::pow(pi + 25.0, _Iph2c[i]) * std::pow(eta - 1.8, _Jph2c[i]);
+    sum += _nph2c[i] * std::pow(pi + 25.0, _Iph2c[i]) * std::pow(std::abs(eta - 1.8), _Jph2c[i]) *
+           std::pow(sgn, _Jph2c[i]);
 
   return sum;
 }

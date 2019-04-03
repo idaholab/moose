@@ -168,7 +168,6 @@ public:
   // clang-format on
 
 #undef propfunc
-#pragma GCC diagnostic pop
 
                               virtual Real s(Real pressure, Real temperature) const;
 
@@ -518,6 +517,8 @@ public:
   virtual Real vaporTemperature(Real pressure) const;
   virtual void vaporTemperature(Real pressure, Real & Tsat, Real & dTsat_dp) const;
   virtual DualReal vaporTemperature(DualReal pressure) const;
+
+#pragma GCC diagnostic pop
 
 protected:
   /**
