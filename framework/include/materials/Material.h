@@ -29,6 +29,14 @@ class Material : public MaterialBase, public Coupleable, public MaterialProperty
 public:
   Material(const InputParameters & parameters);
 
+  virtual void initStatefulProperties(unsigned int n_points);
+
+  virtual void computeProperties() override;
+
+  virtual void resetProperties();
+
+  virtual void computePropertiesAtQp(unsigned int qp);
+
   ///@{
   /**
    * Retrieve the property through a given input parameter key with a fallback
@@ -66,6 +74,7 @@ public:
   {
     return MaterialPropertyInterface::getMatPropDependencies();
   }
+  virtual void subdomainSetup() override;
 
 protected:
   virtual const MaterialData & materialData() const override { return *_material_data; }
@@ -88,6 +97,16 @@ protected:
 
   /// current side of the current element
   unsigned int & _current_side;
+
+  enum ConstantTypeEnum
+  {
+    NONE,
+    ELEMENT,
+    SUBDOMAIN
+  };
+
+  /// Options of the constantness level of the material
+  const ConstantTypeEnum _constant_option;
 };
 
 template <typename T>
@@ -166,7 +185,7 @@ template <typename T>
 const ADMaterialPropertyObject<T> &
 Material::getADMaterialPropertyByName(const std::string & prop_name)
 {
-  checkExecutionStage();
+  MaterialBase::checkExecutionStage();
   // The property may not exist yet, so declare it (declare/getADMaterialProperty are referencing
   // the same memory)
   _requested_props.insert(prop_name);

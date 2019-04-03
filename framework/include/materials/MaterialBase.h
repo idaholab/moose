@@ -31,6 +31,7 @@
 #include "MaterialProperty.h"
 #include "MaterialData.h"
 #include "ZeroMaterial.h"
+#include "Assembly.h"
 
 // forward declarations
 class MaterialBase;
@@ -72,7 +73,7 @@ public:
   /**
    * Performs the quadrature point loop, calling computeQpProperties
    */
-  virtual void computeProperties();
+  virtual void computeProperties() = 0;
 
   /**
    * Resets the properties at each quadrature point (see resetQpProperties), only called if 'compute
@@ -149,6 +150,8 @@ public:
   virtual const std::set<unsigned int> & getMatPropDependencies() const = 0;
 
 protected:
+  void copyDualNumbersToValues();
+
   /**
    * Evaluate material properties on subdomain
    */
@@ -224,15 +227,9 @@ protected:
   /// If False MOOSE does not compute this property
   const bool _compute;
 
-  enum ConstantTypeEnum
-  {
-    NONE,
-    ELEMENT,
-    SUBDOMAIN
-  };
+  std::set<unsigned int> _supplied_regular_prop_ids;
 
-  /// Options of the constantness level of the material
-  const ConstantTypeEnum _constant_option;
+  std::set<unsigned int> _supplied_ad_prop_ids;
 
   enum QP_Data_Type
   {
@@ -249,12 +246,17 @@ protected:
   std::map<std::string, int> _props_to_flags;
 
   /// Small helper function to call store{Subdomain,Boundary}MatPropName
-  void registerPropName(std::string prop_name, bool is_get, Prop_State state);
+  void registerPropName(std::string prop_name,
+                        bool is_get,
+                        Prop_State state,
+                        bool is_declared_ad = false);
 
   /// Check and throw an error if the execution has progerssed past the construction stage
   void checkExecutionStage();
 
-private:
+  std::vector<unsigned int> _displacements;
+
+  // private:
   bool _has_stateful_property;
 
   bool _overrides_init_stateful_props = true;

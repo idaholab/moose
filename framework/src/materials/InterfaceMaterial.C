@@ -38,3 +38,16 @@ InterfaceMaterial::InterfaceMaterial(const InputParameters & parameters)
   for (const auto & var : coupled_vars)
     addMooseVariableDependency(var);
 }
+
+void
+InterfaceMaterial::computeProperties()
+{
+
+  // Reference to *all* the MaterialProperties in the MaterialData object, not
+  // just the ones for this Material.
+  // MaterialProperties & props = _material_data->props();
+
+  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+    computeQpProperties();
+  copyDualNumbersToValues();
+}

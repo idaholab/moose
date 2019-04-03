@@ -31,6 +31,8 @@ class InterfaceMaterial : public MaterialBase,
 public:
   InterfaceMaterial(const InputParameters & parameters);
 
+  void computeProperties() override;
+
   ///@{
   /**
    * Retrieve the property through a given input parameter key with a fallback

@@ -39,15 +39,6 @@ validParams<MaterialBase>()
                         "The user must call computeProperties() after retrieving the MaterialBase "
                         "via MaterialBasePropertyInterface::getMaterialBase(). "
                         "Non-computed MaterialBases are not sorted for dependencies.");
-  MooseEnum const_option("NONE=0 ELEMENT=1 SUBDOMAIN=2", "none");
-  params.addParam<MooseEnum>(
-      "constant_on",
-      const_option,
-      "When ELEMENT, MOOSE will only call computeQpProperties() for the 0th "
-      "quadrature point, and then copy that value to the other qps."
-      "When SUBDOMAIN, MOOSE will only call computeSubdomainProperties() for the 0th "
-      "quadrature point, and then copy that value to the other qps. Evaluations on element qps "
-      "will be skipped");
 
   params.addPrivateParam<bool>("_neighbor", false);
 
@@ -60,7 +51,7 @@ validParams<MaterialBase>()
       "must also be defined to an output type)");
 
   params.addParamNamesToGroup("outputs output_properties", "Outputs");
-  params.addParamNamesToGroup("use_displaced_mesh constant_on", "Advanced");
+  params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
   params.registerBase("MaterialBase");
   return params;
 }
@@ -99,7 +90,6 @@ MaterialBase::MaterialBase(const InputParameters & parameters)
     _mesh(_subproblem.mesh()),
     _coord_sys(_assembly.coordSystem()),
     _compute(getParam<bool>("compute")),
-    _constant_option(getParam<MooseEnum>("constant_on").getEnum<ConstantTypeEnum>()),
     _has_stateful_property(false)
 {
 }
@@ -138,12 +128,20 @@ MaterialBase::checkStatefulSanity() const
 }
 
 void
-MaterialBase::registerPropName(std::string prop_name, bool is_get, MaterialBase::Prop_State state)
+MaterialBase::registerPropName(std::string prop_name,
+                               bool is_get,
+                               Material::Prop_State state,
+                               bool is_declared_ad)
 {
   if (!is_get)
   {
     _supplied_props.insert(prop_name);
-    _supplied_prop_ids.insert(materialData().getPropertyId(prop_name));
+    const auto & property_id = materialData().getPropertyId(prop_name);
+    _supplied_prop_ids.insert(property_id);
+    if (is_declared_ad)
+      _supplied_ad_prop_ids.insert(property_id);
+    else
+      _supplied_regular_prop_ids.insert(property_id);
 
     _props_to_flags[prop_name] |= static_cast<int>(state);
     if (static_cast<int>(state) % 2 == 0)
@@ -167,65 +165,23 @@ MaterialBase::getOutputs()
 }
 
 void
-MaterialBase::subdomainSetup()
+MaterialBase::computeSubdomainProperties()
 {
-  if (_constant_option == ConstantTypeEnum::SUBDOMAIN)
-  {
-    unsigned int nqp = _fe_problem.getMaxQps();
-
-    MaterialProperties & props = materialData().props();
-    for (const auto & prop_id : _supplied_prop_ids)
-      props[prop_id]->resize(nqp);
-
-    _qp = 0;
-    computeSubdomainProperties();
-
-    for (const auto & prop_id : _supplied_prop_ids)
-    {
-      for (decltype(nqp) qp = 1; qp < nqp; ++qp)
-        props[prop_id]->qpCopy(qp, props[prop_id], 0);
-    }
-  }
+  mooseError("MaterialBase::computeSubdomainQpProperties in Material '",
+             name(),
+             "' needs to be implemented");
 }
 
 void
-MaterialBase::computeSubdomainProperties()
+MaterialBase::subdomainSetup()
 {
-  mooseError("computeSubdomainQpProperties in Material '", name(), "' needs to be implemented");
+  mooseError("MaterialBase::subdomainSetup in Material'", name(), "' needs to be implemented");
 }
 
 void
 MaterialBase::computeProperties()
 {
-  if (_constant_option == ConstantTypeEnum::SUBDOMAIN)
-    return;
-
-  // If this Material has the _constant_on_elem flag set, we take the
-  // value computed for _qp==0 and use it at all the quadrature points
-  // in the Elem.
-  if (_constant_option == ConstantTypeEnum::ELEMENT)
-  {
-    // Compute MaterialProperty values at the first qp.
-    _qp = 0;
-    computeQpProperties();
-
-    // Reference to *all* the MaterialProperties in the MaterialData object, not
-    // just the ones for this Material.
-    MaterialProperties & props = materialData().props();
-
-    // Now copy the values computed at qp 0 to all the other qps.
-    for (const auto & prop_id : _supplied_prop_ids)
-    {
-      auto nqp = qRule().n_points();
-      for (decltype(nqp) qp = 1; qp < nqp; ++qp)
-        props[prop_id]->qpCopy(qp, props[prop_id], 0);
-    }
-  }
-  else
-  {
-    for (_qp = 0; _qp < qRule().n_points(); ++_qp)
-      computeQpProperties();
-  }
+  mooseError("MaterialBase::computeProperties in Material '", name(), "' needs to be implemented");
 }
 
 void
@@ -264,4 +220,16 @@ MaterialBase::checkExecutionStage()
   if (_fe_problem.startedInitialSetup())
     mooseError("Material properties must be retrieved during material object construction to "
                "ensure correct dependency resolution.");
+}
+
+void
+MaterialBase::copyDualNumbersToValues()
+{
+  if (!_fe_problem.currentlyComputingJacobian() || !_fe_problem.usingADMatProps())
+    return;
+
+  MaterialProperties & props = materialData().props();
+  for (_qp = 0; _qp < qRule().n_points(); ++_qp)
+    for (const auto & prop_id : _supplied_ad_prop_ids)
+      props[prop_id]->copyDualNumberToValue(_qp);
 }
