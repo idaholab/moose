@@ -66,7 +66,8 @@ MaterialDerivativeTestAction::MaterialDerivativeTestAction(const InputParameters
 
         // add derivative to list
         derivative_table[n].push_back(derivative);
-        _derivatives.insert(std::make_pair(derivativePropertyName(_prop_name, derivative), derivative));
+        _derivatives.insert(
+            std::make_pair(derivativePropertyName(_prop_name, derivative), derivative));
       }
 }
 

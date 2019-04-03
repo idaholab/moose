@@ -34,8 +34,8 @@ ComputeGrainForceAndTorque::ComputeGrainForceAndTorque(const InputParameters & p
     _c_var(coupled("c")),
     _dF_name(getParam<MaterialPropertyName>("force_density")),
     _dF(getMaterialPropertyByName<std::vector<RealGradient>>(_dF_name)),
-    _dFdc(
-        getMaterialPropertyByName<std::vector<RealGradient>>(derivativePropertyNameFirst(_dF_name, _c_name))),
+    _dFdc(getMaterialPropertyByName<std::vector<RealGradient>>(
+        derivativePropertyNameFirst(_dF_name, _c_name))),
     _op_num(coupledComponents("etas")),
     _grain_tracker(getUserObject<GrainTrackerInterface>("grain_data")),
     _vals_var(_op_num),
@@ -46,8 +46,8 @@ ComputeGrainForceAndTorque::ComputeGrainForceAndTorque(const InputParameters & p
   {
     _vals_var[i] = coupled("etas", i);
     _vals_name[i] = getVar("etas", i)->name();
-    _dFdgradeta[i] =
-        &getMaterialPropertyByName<std::vector<Real>>(derivativePropertyNameFirst(_dF_name, _vals_name[i]));
+    _dFdgradeta[i] = &getMaterialPropertyByName<std::vector<Real>>(
+        derivativePropertyNameFirst(_dF_name, _vals_name[i]));
   }
 }
 

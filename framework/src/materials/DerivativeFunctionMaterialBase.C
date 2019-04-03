@@ -30,9 +30,7 @@ validParams<DerivativeFunctionMaterialBase>()
 
 DerivativeFunctionMaterialBase::DerivativeFunctionMaterialBase(const InputParameters & parameters)
   : FunctionMaterialBase(parameters),
-    _third_derivatives(isParamValid("third_derivatives")
-                           ? getParam<bool>("third_derivatives")
-                           : (getParam<unsigned int>("derivative_order") == 3))
+    _third_derivatives(getParam<unsigned int>("derivative_order") == 3)
 {
   // reserve space for material properties and explicitly initialize to NULL
   _prop_dF.resize(_nargs, NULL);
@@ -105,8 +103,8 @@ DerivativeFunctionMaterialBase::initialSetup()
       {
         for (unsigned int k = j; k < _nargs; ++k)
         {
-          if (!_fe_problem.isMatPropRequested(
-                  derivativePropertyNameThird(_F_name, _arg_names[i], _arg_names[j], _arg_names[k])))
+          if (!_fe_problem.isMatPropRequested(derivativePropertyNameThird(
+                  _F_name, _arg_names[i], _arg_names[j], _arg_names[k])))
             _prop_d3F[i][j][k] = _prop_d3F[k][i][j] = _prop_d3F[j][k][i] = _prop_d3F[k][j][i] =
                 _prop_d3F[j][i][k] = _prop_d3F[i][k][j] = NULL;
           else

@@ -68,7 +68,7 @@
   [./TensorMechanics]
     [./Master]
       [./all]
-        strain = Finite
+        strain = SMALL
         incremental = true
         add_variables = true
         eigenstrain_names = eigenstrain

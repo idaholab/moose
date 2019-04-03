@@ -80,7 +80,8 @@ ComputeVariableIsotropicElasticityTensor::initialSetup()
   {
     const VariableName & iname = getVar("args", i)->name();
 
-    if (!_fe_problem.isMatPropRequested(derivativePropertyNameFirst(_elasticity_tensor_name, iname)))
+    if (!_fe_problem.isMatPropRequested(
+            derivativePropertyNameFirst(_elasticity_tensor_name, iname)))
       _delasticity_tensor[i] = nullptr;
 
     for (unsigned int j = 0; j < _num_args; ++j)

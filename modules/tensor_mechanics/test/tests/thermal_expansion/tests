@@ -54,6 +54,17 @@
     design = 'ADComputeThermalExpansionEigenstrain.md'
     issues = '#13091'
   [../]
+  [./ad_constant_expansion_coeff-jac]
+    type = 'PetscJacobianTester'
+    input = 'ad_constant_expansion_coeff.i'
+    run_sim = 'True'
+    cli_args = 'Outputs/exodus=false Executioner/num_steps=2'
+    difference_tol = 1e-5
+    issues = '#13091'
+    design = 'ADComputeThermalExpansionEigenstrain.md'
+    requirement = 'The Jacobian for the AD eigenstrain tensor resulting from isotropic '
+                  'thermal expansion shall be perfect'
+  [../]
   [./ad_constant_expansion_stress_free_temp]
     type = 'Exodiff'
     input = 'ad_constant_expansion_stress_free_temp.i'
@@ -65,5 +76,16 @@
                   'temperature of the material.'
     design = 'ADComputeThermalExpansionEigenstrain.md'
     issues = '#13091'
+  [../]
+  [./ad_constant_expansion_stress_free_temp-jac]
+    type = 'PetscJacobianTester'
+    input = 'ad_constant_expansion_stress_free_temp.i'
+    run_sim = 'True'
+    cli_args = 'Outputs/exodus=false Executioner/num_steps=2'
+    difference_tol = 1e-5
+    issues = '#13091'
+    design = 'ADComputeThermalExpansionEigenstrain.md'
+    requirement = 'The Jacobian for the AD eigenstrain tensor resulting from isotropic '
+                  'thermal expansion with an initial strain shall be perfect'
   [../]
 []
