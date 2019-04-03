@@ -25,6 +25,7 @@ public:
 
 protected:
   virtual void addMooseObjects1Phase() const;
+  virtual void addMooseObjects2Phase() const;
 };
 
 #endif /* JUNCTIONONETOONE_H */
