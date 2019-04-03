@@ -11,7 +11,6 @@ from mooseutils import colorText, str2bool, find_moose_executable, runExe, check
 from mooseutils import touch, unique_list, gold, make_chunks, check_file_size, camel_to_space
 from mooseutils import text_diff, git_ls_files, git_root_dir, is_git_repo, unidiff, text_unidiff
 from mooseutils import run_profile, list_files
-from ConvergencePlot import ConvergencePlot
 from message import mooseDebug, mooseWarning, mooseMessage, mooseError
 from MooseException import MooseException
 from eval_path import eval_path
