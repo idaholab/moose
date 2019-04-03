@@ -27,7 +27,7 @@ def expected_nc04(x):
     t0 = 2.0
     te = 1.0
     return t0 + (te - t0) * cc * x / (lam + cc * ll)
-    
+
 def nc08_pp():
     f = open("../../../../../../test/tests/newton_cooling/gold/nc08_porepressure_0001.csv")
     data = [map(float, line.strip().split(",")) for line in f.readlines()[1:] if line.strip()]
@@ -46,10 +46,10 @@ def expected_nc08_pp(x):
     ll = 100.0
     p0 = 200.0
     return p0 * np.sqrt(1.0 - x / 2 / ll)
-    
+
 def expected_nc08_tt(x):
     return 180.0 + 0.0 * x
-    
+
 plt.figure(0)
 xpoints = np.arange(0, 101, 1)
 plt.plot(xpoints, expected_nc04(xpoints), 'b-', linewidth = 2.0, label = 'Expected')

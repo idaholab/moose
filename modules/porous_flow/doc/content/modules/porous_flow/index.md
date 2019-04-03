@@ -132,7 +132,8 @@ A number of `Postprocessors` are available:
 There are over 500 unit and quality-assurance tests in the PorousFlow test suite.  The pages below describe some of the more non-trivial tests.
 
 - [Infiltration and drainage](tests/broadbridge_white/broadbridge_white_tests.md)
-- [Heat and fluid responses in finite 1D bars](tests/newton_cooling/newton_cooling_tests.md)
+- [Heat and fluid responses in finite 1D bars subject to various boundary conditions](tests/newton_cooling/newton_cooling_tests.md)
+- [Poroelasticity](tests/poro_elasticity/poro_elasticity_tests.md)
 - [Boundary sinks and sources](tests/sinks/sinks_tests.md)
 - [actions](tests/actions/actions_tests.md)
 - [fluids](tests/fluids/fluids_tests.md)
@@ -142,7 +143,6 @@ There are over 500 unit and quality-assurance tests in the PorousFlow test suite
 - [plastic_heating](tests/plastic_heating/plastic_heating_tests.md)
 - [aux_kernels](tests/aux_kernels/aux_kernels_tests.md)
 - [flux_limited_TVD_advection](tests/flux_limited_TVD_advection/flux_limited_TVD_advection_tests.md)
-- [poro_elasticity](tests/poro_elasticity/poro_elasticity_tests.md)
 - [basic_advection](tests/basic_advection/basic_advection_tests.md)
 - [flux_limited_TVD_pflow](tests/flux_limited_TVD_pflow/flux_limited_TVD_pflow_tests.md)
 - [poroperm](tests/poroperm/poroperm_tests.md)

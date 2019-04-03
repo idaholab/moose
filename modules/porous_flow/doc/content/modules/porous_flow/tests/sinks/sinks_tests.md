@@ -37,7 +37,7 @@ edge ($x=0$) of a 3D mesh.  A single-phase, single-component fluid is
 used, and the porepressure is initialised to $p=y+1$ (for $0\leq y\leq
 1$).  No fluid flow within the element is used, so the masses of fluid
 at the finite-element nodes behave independently.  The fluid is
-assumed to have density $\rho = 1.1 \exp(p/1.3)$ [kg.m$^{-3}$].  The
+assumed to have density $\rho = 1.1 \exp(p/1.3)\,$kg.m$^{-3}$.  The
 porosity is 0.1.
 
 The input file:
@@ -185,7 +185,7 @@ f = \left\{
 and the porepressure is initialised to $p=y+1$ (for $0\leq y \leq 1$).
 No fluid flow within the element is used, so the masses of fluid at
 the finite-element nodes behave independently.  The fluid is assumed
-to have density $\rho = 1.1 \exp(p/1.3)$ [kg.m$^{-3}$].  The porosity
+to have density $\rho = 1.1 \exp(p/1.3)\,$kg.m$^{-3}$.  The porosity
 is 0.1.
 
 The input file:
@@ -224,7 +224,7 @@ single-component fluid is used, and the porepressure is initialised to
 $p=y+1.4$ (for $0\leq y \leq 1$).  No fluid flow within the element is
 used, so the masses of fluid at the finite-element nodes behave
 independently.  The fluid is assumed to have density $\rho = 1.1
-\exp(p/1.3)$ [kg.m$^{-3}$].  The porosity is 0.1.  A van-Genuchten capillary
+\exp(p/1.3)\,$kg.m$^{-3}$.  The porosity is 0.1.  A van-Genuchten capillary
 relationship is used:
 \begin{equation}
 S = \left( 1 + (-\alpha p)^{1/(1-m)} \right)^{-m} \ ,
@@ -270,7 +270,7 @@ single-phase, single-component fluid is used, and the porepressure is
 initialised to $p=x(y+1)$ (for $0\leq y \leq 1$ and $0\leq x \leq 1$).
 No fluid flow within the element is used, so the masses of fluid at
 the finite-element nodes behave independently.  The fluid is assumed
-to have density $\rho = 1.1 \exp(p/1.3)$ [kg.m$^{-3}$].  The porosity
+to have density $\rho = 1.1 \exp(p/1.3)\,$kg.m$^{-3}$.  The porosity
 is 0.1.
 
 The input file:
