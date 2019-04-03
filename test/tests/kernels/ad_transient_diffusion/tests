@@ -46,4 +46,11 @@
     design = 'MooseVariableFE.md'
     requirement = 'We shall be able to call AD variable methods on an auxiliary variable in a transient simulation and not hit assertions for both regular and neighbor calculations'
   []
+  [neighbor_ad_with_aux_jac]
+    type = PetscJacobianTester
+    design = 'MooseVariableFE.md'
+    input = 'ad_two_var_transient_diffusion.i'
+    difference_tol = 1e-7
+    run_sim = True
+  []
 []
