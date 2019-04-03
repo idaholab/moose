@@ -15,11 +15,13 @@ void
 MaterialWarehouse::addObjects(std::shared_ptr<MaterialBase> block,
                               std::shared_ptr<MaterialBase> neighbor,
                               std::shared_ptr<MaterialBase> face,
+                              std::shared_ptr<MaterialBase> interface,
                               THREAD_ID tid /*=0*/)
 {
   MooseObjectWarehouse<MaterialBase>::addObject(block, tid);
   _neighbor_materials.addObject(neighbor, tid);
   _face_materials.addObject(face, tid);
+  _interface_materials.addObject(interface, tid);
 }
 
 const MooseObjectWarehouse<MaterialBase> & MaterialWarehouse::
@@ -33,6 +35,9 @@ operator[](Moose::MaterialDataType data_type) const
     case Moose::FACE_MATERIAL_DATA:
       return _face_materials;
       break;
+    case Moose::INTERFACE_MATERIAL_DATA:
+      return _interface_materials;
+      break;
     default:
       return *this;
   }
@@ -44,6 +49,7 @@ MaterialWarehouse::initialSetup(THREAD_ID tid /*=0*/) const
   MooseObjectWarehouse<MaterialBase>::initialSetup(tid);
   _neighbor_materials.initialSetup(tid);
   _face_materials.initialSetup(tid);
+  _interface_materials.initialSetup(tid);
 }
 
 void
@@ -52,6 +58,7 @@ MaterialWarehouse::timestepSetup(THREAD_ID tid /*=0*/) const
   MooseObjectWarehouse<MaterialBase>::timestepSetup(tid);
   _neighbor_materials.timestepSetup(tid);
   _face_materials.timestepSetup(tid);
+  _interface_materials.timestepSetup(tid);
 }
 
 void
@@ -86,6 +93,7 @@ MaterialWarehouse::residualSetup(THREAD_ID tid /*=0*/) const
   MooseObjectWarehouse<MaterialBase>::residualSetup(tid);
   _neighbor_materials.residualSetup(tid);
   _face_materials.residualSetup(tid);
+  _interface_materials.residualSetup(tid);
 }
 
 void
@@ -94,6 +102,7 @@ MaterialWarehouse::jacobianSetup(THREAD_ID tid /*=0*/) const
   MooseObjectWarehouse<MaterialBase>::jacobianSetup(tid);
   _neighbor_materials.jacobianSetup(tid);
   _face_materials.jacobianSetup(tid);
+  _interface_materials.jacobianSetup(tid);
 }
 
 void
@@ -102,6 +111,7 @@ MaterialWarehouse::updateActive(THREAD_ID tid /*=0*/)
   MooseObjectWarehouse<MaterialBase>::updateActive(tid);
   _neighbor_materials.updateActive(tid);
   _face_materials.updateActive(tid);
+  _interface_materials.updateActive(tid);
 }
 
 void
@@ -110,4 +120,5 @@ MaterialWarehouse::sort(THREAD_ID tid /*=0*/)
   MooseObjectWarehouse<MaterialBase>::sort(tid);
   _neighbor_materials.sort(tid);
   _face_materials.sort(tid);
+  _interface_materials.sort(tid);
 }

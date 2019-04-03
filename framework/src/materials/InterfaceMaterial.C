@@ -23,11 +23,11 @@ InterfaceMaterial::InterfaceMaterial(const InputParameters & parameters)
   : MaterialBase(parameters),
     NeighborCoupleable(this, false, false),
     TwoMaterialPropertyInterface(this, blockIDs(), boundaryIDs()),
-    _bnd(_material_data_type != Moose::BLOCK_MATERIAL_DATA),
+    _bnd(_material_data_type != Moose::INTERFACE_MATERIAL_DATA),
     _neighbor(_material_data_type == Moose::NEIGHBOR_MATERIAL_DATA),
-    _q_point(_bnd ? _assembly.qPointsFace() : _assembly.qPoints()),
-    _qrule(_bnd ? _assembly.qRuleFace() : _assembly.qRule()),
-    _JxW(_bnd ? _assembly.JxWFace() : _assembly.JxW()),
+    _q_point(_assembly.qPointsFace()),
+    _qrule(_assembly.qRuleFace()),
+    _JxW(_assembly.JxWFace()),
     _current_elem(_neighbor ? _assembly.neighbor() : _assembly.elem()),
     _current_subdomain_id(_neighbor ? _assembly.currentNeighborSubdomainID()
                                     : _assembly.currentSubdomainID()),
@@ -45,7 +45,6 @@ InterfaceMaterial::computeProperties()
 
   // Reference to *all* the MaterialProperties in the MaterialData object, not
   // just the ones for this Material.
-  // MaterialProperties & props = _material_data->props();
 
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
     computeQpProperties();

@@ -215,7 +215,7 @@ MaterialPropertyInterface::checkBlockAndBoundaryCompatibility(
   if (!discrete->hasBlocks(_mi_block_ids))
   {
     std::ostringstream oss;
-    oss << "The MaterialBase object '" << discrete->name()
+    oss << "The Material object '" << discrete->name()
         << "' is defined on blocks that are incompatible with the retrieving object '" << _mi_name
         << "':\n";
     oss << "  " << discrete->name();
@@ -233,7 +233,7 @@ MaterialPropertyInterface::checkBlockAndBoundaryCompatibility(
   if (!discrete->hasBoundary(_mi_boundary_ids))
   {
     std::ostringstream oss;
-    oss << "The MaterialBase object '" << discrete->name()
+    oss << "The Material object '" << discrete->name()
         << "' is defined on boundaries that are incompatible with the retrieving object '"
         << _mi_name << "':\n";
     oss << "  " << discrete->name();

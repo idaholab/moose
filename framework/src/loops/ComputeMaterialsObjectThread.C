@@ -26,9 +26,11 @@ ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(
     std::vector<std::shared_ptr<MaterialData>> & material_data,
     std::vector<std::shared_ptr<MaterialData>> & bnd_material_data,
     std::vector<std::shared_ptr<MaterialData>> & neighbor_material_data,
+    std::vector<std::shared_ptr<MaterialData>> & interface_material_data,
     MaterialPropertyStorage & material_props,
     MaterialPropertyStorage & bnd_material_props,
     MaterialPropertyStorage & neighbor_material_props,
+    MaterialPropertyStorage & interface_material_props,
     std::vector<std::unique_ptr<Assembly>> & assembly)
   : ThreadedElementLoop<ConstElemRange>(fe_problem),
     _fe_problem(fe_problem),
@@ -36,16 +38,19 @@ ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(
     _material_data(material_data),
     _bnd_material_data(bnd_material_data),
     _neighbor_material_data(neighbor_material_data),
+    _interface_material_data(interface_material_data),
     _material_props(material_props),
     _bnd_material_props(bnd_material_props),
     _neighbor_material_props(neighbor_material_props),
+    _interface_material_props(interface_material_props),
     _materials(_fe_problem.getResidualMaterialsWarehouse()),
     _discrete_materials(_fe_problem.getDiscreteMaterialWarehouse()),
     _assembly(assembly),
     _need_internal_side_material(false),
     _has_stateful_props(_material_props.hasStatefulProperties()),
     _has_bnd_stateful_props(_bnd_material_props.hasStatefulProperties()),
-    _has_neighbor_stateful_props(_neighbor_material_props.hasStatefulProperties())
+    _has_neighbor_stateful_props(_neighbor_material_props.hasStatefulProperties()),
+    _has_interface_stateful_props(interface_material_props.hasStatefulProperties())
 {
 }
 
@@ -58,16 +63,19 @@ ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(ComputeMaterialsObjec
     _material_data(x._material_data),
     _bnd_material_data(x._bnd_material_data),
     _neighbor_material_data(x._neighbor_material_data),
+    _interface_material_data(x._interface_material_data),
     _material_props(x._material_props),
     _bnd_material_props(x._bnd_material_props),
     _neighbor_material_props(x._neighbor_material_props),
+    _interface_material_props(x._interface_material_props),
     _materials(x._materials),
     _discrete_materials(x._discrete_materials),
     _assembly(x._assembly),
     _need_internal_side_material(x._need_internal_side_material),
     _has_stateful_props(_material_props.hasStatefulProperties()),
     _has_bnd_stateful_props(_bnd_material_props.hasStatefulProperties()),
-    _has_neighbor_stateful_props(_neighbor_material_props.hasStatefulProperties())
+    _has_neighbor_stateful_props(_neighbor_material_props.hasStatefulProperties()),
+    _has_interface_stateful_props(_interface_material_props.hasStatefulProperties())
 {
 }
 
@@ -155,6 +163,12 @@ ComputeMaterialsObjectThread::onBoundary(const Elem * elem, unsigned int side, B
     }
   }
 }
+
+// void
+// ComputeMaterialsObjectThread::onInterface(const Elem * elem, unsigned int side, BoundaryID
+// bnd_id)
+// {
+// }
 
 void
 ComputeMaterialsObjectThread::onInternalSide(const Elem * elem, unsigned int side)

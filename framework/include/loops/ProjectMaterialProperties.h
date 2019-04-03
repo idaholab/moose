@@ -29,8 +29,10 @@ public:
                             NonlinearSystemBase & sys,
                             std::vector<std::shared_ptr<MaterialData>> & material_data,
                             std::vector<std::shared_ptr<MaterialData>> & bnd_material_data,
+                            std::vector<std::shared_ptr<MaterialData>> & interface_material_data,
                             MaterialPropertyStorage & material_props,
                             MaterialPropertyStorage & bnd_material_props,
+                            MaterialPropertyStorage & interface_material_props,
                             std::vector<std::unique_ptr<Assembly>> & assembly);
 
   // Splitting Constructor
@@ -42,6 +44,7 @@ public:
   virtual void onElement(const Elem * elem) override;
   virtual void onBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id) override;
   virtual void onInternalSide(const Elem * elem, unsigned int side) override;
+  // virtual void onInterface(const Elem * elem, unsigned int side, BoundaryID bnd_id) override;
 
   void join(const ProjectMaterialProperties & /*y*/);
 
@@ -52,8 +55,10 @@ protected:
   NonlinearSystemBase & _sys;
   std::vector<std::shared_ptr<MaterialData>> & _material_data;
   std::vector<std::shared_ptr<MaterialData>> & _bnd_material_data;
+  std::vector<std::shared_ptr<MaterialData>> & _interface_material_data;
   MaterialPropertyStorage & _material_props;
   MaterialPropertyStorage & _bnd_material_props;
+  MaterialPropertyStorage & _interface_material_props;
   std::vector<std::unique_ptr<Assembly>> & _assembly;
   bool _need_internal_side_material;
 };

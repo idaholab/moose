@@ -657,12 +657,15 @@ public:
   reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful = true);
   virtual void
   reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid, bool swap_stateful = true);
+  virtual void
+  reinitMaterialsInterface(BoundaryID boundary_id, THREAD_ID tid, bool swap_stateful = true);
   /*
    * Swap back underlying data storing stateful material properties
    */
   virtual void swapBackMaterials(THREAD_ID tid);
   virtual void swapBackMaterialsFace(THREAD_ID tid);
   virtual void swapBackMaterialsNeighbor(THREAD_ID tid);
+  virtual void swapBackMaterialsInterface(THREAD_ID tid);
 
   // Postprocessors /////
   virtual void
@@ -1225,6 +1228,10 @@ public:
   {
     return _neighbor_material_props;
   }
+  const MaterialPropertyStorage & getInterfaceMaterialPropertyStorage()
+  {
+    return _interface_material_props;
+  }
   ///@}
 
   ///@{
@@ -1669,10 +1676,12 @@ protected:
   MaterialPropertyStorage & _material_props;
   MaterialPropertyStorage & _bnd_material_props;
   MaterialPropertyStorage & _neighbor_material_props;
+  MaterialPropertyStorage & _interface_material_props;
 
   std::vector<std::shared_ptr<MaterialData>> _material_data;
   std::vector<std::shared_ptr<MaterialData>> _bnd_material_data;
   std::vector<std::shared_ptr<MaterialData>> _neighbor_material_data;
+  std::vector<std::shared_ptr<MaterialData>> _interface_material_data;
 
   ///@{
   // Material Warehouses

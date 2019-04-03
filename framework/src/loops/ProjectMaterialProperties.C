@@ -26,8 +26,10 @@ ProjectMaterialProperties::ProjectMaterialProperties(
     NonlinearSystemBase & sys,
     std::vector<std::shared_ptr<MaterialData>> & material_data,
     std::vector<std::shared_ptr<MaterialData>> & bnd_material_data,
+    std::vector<std::shared_ptr<MaterialData>> & interface_material_data,
     MaterialPropertyStorage & material_props,
     MaterialPropertyStorage & bnd_material_props,
+    MaterialPropertyStorage & interface_material_props,
     std::vector<std::unique_ptr<Assembly>> & assembly)
   : ThreadedElementLoop<ConstElemPointerRange>(fe_problem),
     _refine(refine),
@@ -35,8 +37,10 @@ ProjectMaterialProperties::ProjectMaterialProperties(
     _sys(sys),
     _material_data(material_data),
     _bnd_material_data(bnd_material_data),
+    _interface_material_data(interface_material_data),
     _material_props(material_props),
     _bnd_material_props(bnd_material_props),
+    _interface_material_props(interface_material_props),
     _assembly(assembly),
     _need_internal_side_material(false)
 {
@@ -51,8 +55,10 @@ ProjectMaterialProperties::ProjectMaterialProperties(ProjectMaterialProperties &
     _sys(x._sys),
     _material_data(x._material_data),
     _bnd_material_data(x._bnd_material_data),
+    _interface_material_data(x._interface_material_data),
     _material_props(x._material_props),
     _bnd_material_props(x._bnd_material_props),
+    _interface_material_props(x._interface_material_props),
     _assembly(x._assembly),
     _need_internal_side_material(x._need_internal_side_material)
 {
@@ -173,6 +179,11 @@ ProjectMaterialProperties::onInternalSide(const Elem * elem, unsigned int /*side
     }
   }
 }
+
+// void
+// ProjectMaterialProperties::onInterface(const Elem * elem, unsigned int side, BoundaryID bnd_id)
+// {
+// }
 
 void
 ProjectMaterialProperties::join(const ProjectMaterialProperties & /*y*/)

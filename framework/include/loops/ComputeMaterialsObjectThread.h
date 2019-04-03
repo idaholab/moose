@@ -28,9 +28,11 @@ public:
                                std::vector<std::shared_ptr<MaterialData>> & material_data,
                                std::vector<std::shared_ptr<MaterialData>> & bnd_material_data,
                                std::vector<std::shared_ptr<MaterialData>> & neighbor_material_data,
+                               std::vector<std::shared_ptr<MaterialData>> & interface_material_data,
                                MaterialPropertyStorage & material_props,
                                MaterialPropertyStorage & bnd_material_props,
                                MaterialPropertyStorage & neighbor_material_props,
+                               MaterialPropertyStorage & interface_material_props,
                                std::vector<std::unique_ptr<Assembly>> & assembly);
 
   // Splitting Constructor
@@ -41,6 +43,7 @@ public:
   virtual void onElement(const Elem * elem) override;
   virtual void onBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id) override;
   virtual void onInternalSide(const Elem * elem, unsigned int side) override;
+  // virtual void onInterface(const Elem * elem, unsigned int side, BoundaryID bnd_id) override;
 
   void join(const ComputeMaterialsObjectThread & /*y*/);
 
@@ -50,9 +53,11 @@ protected:
   std::vector<std::shared_ptr<MaterialData>> & _material_data;
   std::vector<std::shared_ptr<MaterialData>> & _bnd_material_data;
   std::vector<std::shared_ptr<MaterialData>> & _neighbor_material_data;
+  std::vector<std::shared_ptr<MaterialData>> & _interface_material_data;
   MaterialPropertyStorage & _material_props;
   MaterialPropertyStorage & _bnd_material_props;
   MaterialPropertyStorage & _neighbor_material_props;
+  MaterialPropertyStorage & _interface_material_props;
 
   /// This is populated using _fe_problem.getResidualMaterialsWarehouse because it has the union
   /// of traditional materials and the residual version of AD materials. We don't need the Jacobian
@@ -67,6 +72,7 @@ protected:
   const bool _has_stateful_props;
   const bool _has_bnd_stateful_props;
   const bool _has_neighbor_stateful_props;
+  const bool _has_interface_stateful_props;
 };
 
 #endif // COMPUTEMATERIALOBJECTTHREAD_H
