@@ -32,7 +32,7 @@ public:
 
   virtual void computeProperties() override;
 
-  virtual void resetProperties();
+  // virtual void resetProperties() override;
 
   virtual void computePropertiesAtQp(unsigned int qp);
 

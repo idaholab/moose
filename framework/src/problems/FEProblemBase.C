@@ -222,6 +222,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
         declareRestartableDataWithContext<MaterialPropertyStorage>("bnd_material_props", &_mesh)),
     _neighbor_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
         "neighbor_material_props", &_mesh)),
+    _interface_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
+        "interface_material_props", &_mesh)),
     _pps_data(*this),
     _vpps_data(*this),
     // TODO: delete the following line after apps have been updated to not call getUserObjects
@@ -352,11 +354,13 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   _material_data.resize(n_threads);
   _bnd_material_data.resize(n_threads);
   _neighbor_material_data.resize(n_threads);
+  _interface_material_data.resize(n_threads);
   for (unsigned int i = 0; i < n_threads; i++)
   {
     _material_data[i] = std::make_shared<MaterialData>(_material_props);
     _bnd_material_data[i] = std::make_shared<MaterialData>(_bnd_material_props);
     _neighbor_material_data[i] = std::make_shared<MaterialData>(_neighbor_material_props);
+    _interface_material_data[i] = std::make_shared<MaterialData>(_interface_material_props);
   }
 
   _active_elemental_moose_variables.resize(n_threads);
@@ -658,7 +662,8 @@ FEProblemBase::initialSetup()
   // Build Refinement and Coarsening maps for stateful material projections if necessary
   if (_adaptivity.isOn() &&
       (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
-       _neighbor_material_props.hasStatefulProperties()))
+       _neighbor_material_props.hasStatefulProperties() ||
+       _interface_material_props.hasStatefulProperties()))
   {
     if (_has_internal_edge_residual_objects)
       mooseError("Stateful neighbor material properties do not work with mesh adaptivity");
@@ -763,9 +768,11 @@ FEProblemBase::initialSetup()
                                      _material_data,
                                      _bnd_material_data,
                                      _neighbor_material_data,
+                                     _interface_material_data,
                                      _material_props,
                                      _bnd_material_props,
                                      _neighbor_material_props,
+                                     _interface_material_props,
                                      _assembly);
     /**
      * The ComputeMaterialObjectThread object now allocates memory as needed for the material
@@ -777,7 +784,8 @@ FEProblemBase::initialSetup()
     cmt(elem_range, true);
 
     if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
-        _neighbor_material_props.hasStatefulProperties())
+        _neighbor_material_props.hasStatefulProperties() ||
+        _interface_material_props.hasStatefulProperties())
       _has_initialized_stateful = true;
   }
 
@@ -946,16 +954,19 @@ FEProblemBase::initialSetup()
   // THAT is something we should fix... so I've opened this ticket: #5804
   if (!_app.isRecovering() && !_app.isRestarting() &&
       (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
-       _neighbor_material_props.hasStatefulProperties()))
+       _neighbor_material_props.hasStatefulProperties() ||
+       _interface_material_props.hasStatefulProperties()))
   {
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
     ComputeMaterialsObjectThread cmt(*this,
                                      _material_data,
                                      _bnd_material_data,
                                      _neighbor_material_data,
+                                     _interface_material_data,
                                      _material_props,
                                      _bnd_material_props,
                                      _neighbor_material_props,
+                                     _interface_material_props,
                                      _assembly);
     Threads::parallel_reduce(elem_range, cmt);
   }
@@ -2586,6 +2597,9 @@ FEProblemBase::getMaterial(std::string name,
     case Moose::FACE_MATERIAL_DATA:
       name += "_face";
       break;
+    case Moose::INTERFACE_MATERIAL_DATA:
+      name += "_interface";
+      break;
     default:
       break;
   }
@@ -2616,6 +2630,9 @@ FEProblemBase::getMaterialData(Moose::MaterialDataType type, THREAD_ID tid)
     case Moose::BOUNDARY_MATERIAL_DATA:
     case Moose::FACE_MATERIAL_DATA:
       output = _bnd_material_data[tid];
+      break;
+    case Moose::INTERFACE_MATERIAL_DATA:
+      output = _interface_material_data[tid];
       break;
   }
   return output;
@@ -2705,8 +2722,14 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
       current_parameters.set<Moose::MaterialDataType>("_material_data_type") =
           Moose::FACE_MATERIAL_DATA;
       object_name = name + "_face";
-
       std::shared_ptr<MaterialBase> face_material =
+          _factory.create<MaterialBase>(mat_name, object_name, current_parameters, tid);
+
+      // interface material
+      current_parameters.set<Moose::MaterialDataType>("_material_data_type") =
+          Moose::INTERFACE_MATERIAL_DATA;
+      object_name = name + "_interface";
+      std::shared_ptr<MaterialBase> interface_material =
           _factory.create<MaterialBase>(mat_name, object_name, current_parameters, tid);
 
       // neighbor material
@@ -2714,24 +2737,28 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
           Moose::NEIGHBOR_MATERIAL_DATA;
       current_parameters.set<bool>("_neighbor") = true;
       object_name = name + "_neighbor";
-
       std::shared_ptr<MaterialBase> neighbor_material =
           _factory.create<MaterialBase>(mat_name, object_name, current_parameters, tid);
 
       // Store the material objects
-      _all_materials.addObjects(material, neighbor_material, face_material, tid);
+      _all_materials.addObjects(
+          material, neighbor_material, face_material, interface_material, tid);
 
       if (discrete)
-        _discrete_materials.addObjects(material, neighbor_material, face_material, tid);
+        _discrete_materials.addObjects(
+            material, neighbor_material, face_material, interface_material, tid);
       else
         for (auto && warehouse : warehouses)
-          warehouse->addObjects(material, neighbor_material, face_material, tid);
+          warehouse->addObjects(
+              material, neighbor_material, face_material, interface_material, tid);
 
       // link parameters of face and neighbor materials
       MooseObjectParameterName name(MooseObjectName("Material", material->name()), "*");
       MooseObjectParameterName face_name(MooseObjectName("Material", face_material->name()), "*");
       MooseObjectParameterName neighbor_name(MooseObjectName("Material", neighbor_material->name()),
                                              "*");
+      MooseObjectParameterName interface_name(
+          MooseObjectName("Material", interface_material->name()), "*");
       _app.getInputParameterWarehouse().addControllableParameterConnection(name, face_name, false);
       _app.getInputParameterWarehouse().addControllableParameterConnection(
           name, neighbor_name, false);
@@ -2895,6 +2922,35 @@ FEProblemBase::reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid, bo
 }
 
 void
+FEProblemBase::reinitMaterialsInterface(BoundaryID boundary_id, THREAD_ID tid, bool swap_stateful)
+{
+  if (hasActiveMaterialProperties(tid))
+  {
+    const Elem *& elem = _assembly[tid]->elem();
+    unsigned int side = _assembly[tid]->side();
+    unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
+    _interface_material_data[tid]->resize(n_points);
+
+    if (swap_stateful && !_interface_material_data[tid]->isSwapped())
+      _interface_material_data[tid]->swap(*elem, side);
+
+    if (_discrete_materials.hasActiveBoundaryObjects(boundary_id, tid))
+      _interface_material_data[tid]->reset(
+          _discrete_materials.getActiveBoundaryObjects(boundary_id, tid));
+
+    if (_jacobian_materials.hasActiveBoundaryObjects(boundary_id, tid) &&
+        _currently_computing_jacobian)
+      _interface_material_data[tid]->reinit(
+          _jacobian_materials.getActiveBoundaryObjects(boundary_id, tid));
+
+    if (_residual_materials.hasActiveBoundaryObjects(boundary_id, tid) &&
+        !_currently_computing_jacobian)
+      _interface_material_data[tid]->reinit(
+          _residual_materials.getActiveBoundaryObjects(boundary_id, tid));
+  }
+}
+
+void
 FEProblemBase::swapBackMaterials(THREAD_ID tid)
 {
   auto && elem = _assembly[tid]->elem();
@@ -2916,6 +2972,14 @@ FEProblemBase::swapBackMaterialsNeighbor(THREAD_ID tid)
   auto && neighbor = _assembly[tid]->neighbor();
   unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[tid]->elem());
   _neighbor_material_data[tid]->swapBack(*neighbor, neighbor_side);
+}
+
+void
+FEProblemBase::swapBackMaterialsInterface(THREAD_ID tid)
+{
+  const Elem *& elem = _assembly[tid]->elem();
+  unsigned int side = _assembly[tid]->side();
+  _interface_material_data[tid]->swapBack(*elem, side);
 }
 
 void
@@ -4569,6 +4633,9 @@ FEProblemBase::advanceState()
 
   if (_neighbor_material_props.hasStatefulProperties())
     _neighbor_material_props.shift(*this);
+
+  if (_interface_material_props.hasStatefulProperties())
+    _interface_material_props.shift(*this);
 }
 
 void
@@ -5555,7 +5622,8 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
   TIME_SECTION(_mesh_changed_helper_timer);
 
   if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
-      _neighbor_material_props.hasStatefulProperties())
+      _neighbor_material_props.hasStatefulProperties() ||
+      _interface_material_props.hasStatefulProperties())
   {
     CONSOLE_TIMED_PRINT("Caching changed lists");
     _mesh.cacheChangedLists(); // Currently only used with adaptivity and stateful material
@@ -5617,8 +5685,10 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
                                     *_nl,
                                     _material_data,
                                     _bnd_material_data,
+                                    _interface_material_data,
                                     _material_props,
                                     _bnd_material_props,
+                                    _interface_material_props,
                                     _assembly);
       Threads::parallel_reduce(*_mesh.refinedElementRange(), pmp);
     }
@@ -5629,8 +5699,10 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
                                     *_nl,
                                     _material_data,
                                     _bnd_material_data,
+                                    _interface_material_data,
                                     _material_props,
                                     _bnd_material_props,
+                                    _interface_material_props,
                                     _assembly);
       Threads::parallel_reduce(*_mesh.coarsenedElementRange(), pmp);
     }
@@ -5668,7 +5740,8 @@ FEProblemBase::checkProblemIntegrity()
 #ifdef LIBMESH_ENABLE_AMR
     if (_adaptivity.isOn() &&
         (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
-         _neighbor_material_props.hasStatefulProperties()))
+         _neighbor_material_props.hasStatefulProperties() ||
+         _interface_material_props.hasStatefulProperties()))
     {
       _console << "Using EXPERIMENTAL Stateful Material Property projection with Adaptivity!\n";
 

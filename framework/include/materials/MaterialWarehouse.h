@@ -51,6 +51,7 @@ public:
   void addObjects(std::shared_ptr<MaterialBase> block,
                   std::shared_ptr<MaterialBase> neighbor,
                   std::shared_ptr<MaterialBase> face,
+                  std::shared_ptr<MaterialBase> interface,
                   THREAD_ID tid = 0);
 
 protected:
@@ -59,5 +60,8 @@ protected:
 
   /// Storage for face material objects (Block are stored in the base class)
   MooseObjectWarehouse<MaterialBase> _face_materials;
+
+  /// Storage for interface material objects
+  MooseObjectWarehouse<MaterialBase> _interface_materials;
 };
 
