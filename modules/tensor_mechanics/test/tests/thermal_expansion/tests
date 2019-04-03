@@ -43,4 +43,27 @@
     design = 'ComputeThermalExpansionEigenstrain.md RankTwoAux.md'
     issues = '#7457'
   [../]
+
+  [./ad_constant_expansion_coeff]
+    type = 'Exodiff'
+    input = 'ad_constant_expansion_coeff.i'
+    exodiff = 'ad_constant_expansion_coeff_out.e'
+    requirement = 'The tensor mechanics module shall have the capability to '
+                  'calculate the eigenstrain tensor resulting from isotropic '
+                  'thermal expansion.'
+    design = 'ADComputeThermalExpansionEigenstrain.md'
+    issues = '#13091'
+  [../]
+  [./ad_constant_expansion_stress_free_temp]
+    type = 'Exodiff'
+    input = 'ad_constant_expansion_stress_free_temp.i'
+    exodiff = 'ad_constant_expansion_stress_free_temp_out.e'
+    requirement = 'The tensor mechanics module shall have the capability to '
+                  'calculate the eigenstrain tensor resulting from isotropic '
+                  'thermal expansion with an initial strain due to the '
+                  'difference between the stress free temperature and initial '
+                  'temperature of the material.'
+    design = 'ADComputeThermalExpansionEigenstrain.md'
+    issues = '#13091'
+  [../]
 []
