@@ -18,6 +18,8 @@
 #include "PerfGraphInterface.h"
 
 #include <memory> //std::unique_ptr
+#include <unordered_map>
+#include <unordered_set>
 
 // libMesh
 #include "libmesh/elem_range.h"
@@ -351,6 +353,7 @@ public:
    */
   bool isSemiLocal(Node * node);
 
+  ///@{
   /**
    * Return pointers to range objects for various types of ranges
    * (local nodes, boundary elems, etc.).
@@ -361,6 +364,13 @@ public:
   ConstNodeRange * getLocalNodeRange();
   StoredRange<MooseMesh::const_bnd_node_iterator, const BndNode *> * getBoundaryNodeRange();
   StoredRange<MooseMesh::const_bnd_elem_iterator, const BndElement *> * getBoundaryElementRange();
+  ///@}
+
+  /**
+   * Returns a map of boundaries to elements.
+   */
+  const std::unordered_map<boundary_id_type, std::unordered_set<dof_id_type>> &
+  getBoundariesToElems() const;
 
   /**
    * Returns a read-only reference to the set of subdomains currently
@@ -979,8 +989,9 @@ protected:
   std::vector<BndElement *> _bnd_elems;
   typedef std::vector<BndElement *>::iterator bnd_elem_iterator_imp;
   typedef std::vector<BndElement *>::const_iterator const_bnd_elem_iterator_imp;
+
   /// Map of set of elem IDs connected to each boundary
-  std::map<boundary_id_type, std::set<dof_id_type>> _bnd_elem_ids;
+  std::unordered_map<boundary_id_type, std::unordered_set<dof_id_type>> _bnd_elem_ids;
 
   std::map<dof_id_type, Node *> _quadrature_nodes;
   std::map<dof_id_type, std::map<unsigned int, std::map<dof_id_type, Node *>>>
