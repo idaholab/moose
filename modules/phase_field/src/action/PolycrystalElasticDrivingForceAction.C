@@ -56,7 +56,7 @@ PolycrystalElasticDrivingForceAction::act()
     std::string var_name = _var_name_base + Moose::stringify(op);
 
     // Create Stiffness derivative name
-    MaterialPropertyName D_stiff_name = propertyNameFirst(_elasticity_tensor_name, var_name);
+    MaterialPropertyName D_stiff_name = derivativePropertyNameFirst(_elasticity_tensor_name, var_name);
 
     // Set name of kernel being created
     std::string kernel_type = "ACGrGrElasticDrivingForce";

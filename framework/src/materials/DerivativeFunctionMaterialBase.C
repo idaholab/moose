@@ -90,14 +90,14 @@ DerivativeFunctionMaterialBase::initialSetup()
 
   for (unsigned int i = 0; i < _nargs; ++i)
   {
-    if (!_fe_problem.isMatPropRequested(propertyNameFirst(_F_name, _arg_names[i])))
+    if (!_fe_problem.isMatPropRequested(derivativePropertyNameFirst(_F_name, _arg_names[i])))
       _prop_dF[i] = NULL;
 
     // second derivatives
     for (unsigned int j = i; j < _nargs; ++j)
     {
       if (!_fe_problem.isMatPropRequested(
-              propertyNameSecond(_F_name, _arg_names[i], _arg_names[j])))
+              derivativePropertyNameSecond(_F_name, _arg_names[i], _arg_names[j])))
         _prop_d2F[i][j] = _prop_d2F[j][i] = NULL;
 
       // third derivatives
@@ -106,7 +106,7 @@ DerivativeFunctionMaterialBase::initialSetup()
         for (unsigned int k = j; k < _nargs; ++k)
         {
           if (!_fe_problem.isMatPropRequested(
-                  propertyNameThird(_F_name, _arg_names[i], _arg_names[j], _arg_names[k])))
+                  derivativePropertyNameThird(_F_name, _arg_names[i], _arg_names[j], _arg_names[k])))
             _prop_d3F[i][j][k] = _prop_d3F[k][i][j] = _prop_d3F[j][k][i] = _prop_d3F[k][j][i] =
                 _prop_d3F[j][i][k] = _prop_d3F[i][k][j] = NULL;
           else

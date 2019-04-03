@@ -86,7 +86,7 @@ ComputeVolumetricEigenstrain::initialSetup()
   for (unsigned int i = 0; i < _num_args; ++i)
   {
     const VariableName & iname = getVar("args", i)->name();
-    if (_fe_problem.isMatPropRequested(propertyNameFirst(_base_name + "elastic_strain", iname)))
+    if (_fe_problem.isMatPropRequested(derivativePropertyNameFirst(_base_name + "elastic_strain", iname)))
       mooseError("Derivative of elastic_strain requested, but not yet implemented");
     else
       _delastic_strain[i] = nullptr;
@@ -94,7 +94,7 @@ ComputeVolumetricEigenstrain::initialSetup()
     {
       const VariableName & jname = getVar("args", j)->name();
       if (_fe_problem.isMatPropRequested(
-              propertyNameSecond(_base_name + "elastic_strain", iname, jname)))
+              derivativePropertyNameSecond(_base_name + "elastic_strain", iname, jname)))
         mooseError("Second Derivative of elastic_strain requested, but not yet implemented");
       else
         _d2elastic_strain[i][j] = nullptr;

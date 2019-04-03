@@ -27,8 +27,8 @@ InputParameters validParams<DerivativeFunctionMaterialBase>();
  *
  * A DerivativeFunctionMaterialBase provides numerous material properties which contain
  * the free energy and its derivatives. The material property names are
- * constructed dynamically by the helper functions propertyNameFirst(),
- * propertyNameSecond(), and propertyNameThird() in DerivativeMaterialInterface.
+ * constructed dynamically by the helper functions derivativePropertyNameFirst(),
+ * derivativePropertyNameSecond(), and derivativePropertyNameThird() in DerivativeMaterialInterface.
  *
  * A derived class needs to implement the computeF(), computeDF(),
  * computeD2F(), and (optionally) computeD3F() methods.
