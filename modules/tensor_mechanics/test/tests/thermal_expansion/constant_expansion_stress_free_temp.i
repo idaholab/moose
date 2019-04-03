@@ -193,7 +193,7 @@
 []
 
 [Outputs]
- exodus = true
+  exodus = true
 []
 
 [Postprocessors]

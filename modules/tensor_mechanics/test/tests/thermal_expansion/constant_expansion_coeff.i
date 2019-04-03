@@ -95,8 +95,6 @@
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   petsc_options = '-snes_ksp_ew'
@@ -118,10 +116,9 @@
 []
 
 [Outputs]
- csv = true
- exodus = true
- checkpoint = true
- file_base = constant_thermal_expan_only
+  csv = true
+  exodus = true
+  checkpoint = true
 []
 
 [Postprocessors]

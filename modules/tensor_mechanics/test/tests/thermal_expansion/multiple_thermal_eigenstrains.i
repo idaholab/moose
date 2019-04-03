@@ -23,8 +23,6 @@
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
-  order = FIRST
-  family = LAGRANGE
 []
 
 [Variables]
@@ -157,8 +155,6 @@
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   petsc_options = '-snes_ksp_ew'
@@ -180,10 +176,9 @@
 []
 
 [Outputs]
- csv = true
- exodus = true
- checkpoint = true
- file_base = multiple_thermal_eigenstrains
+  csv = true
+  exodus = true
+  checkpoint = true
 []
 
 [Postprocessors]
