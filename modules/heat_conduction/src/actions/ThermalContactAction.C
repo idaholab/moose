@@ -13,6 +13,7 @@
 #include "FEProblem.h"
 #include "libmesh/string_to_enum.h"
 #include "GapConductance.h"
+#include "GapConductanceConstant.h"
 #include "NonlinearSystem.h"
 
 registerMooseAction("HeatConductionApp", ThermalContactAction, "add_aux_kernel");
@@ -83,6 +84,7 @@ validParams<ThermalContactAction>()
       "Variable to be used in gap_conductivity_function in place of time");
 
   params += GapConductance::actionParameters();
+  params += GapConductanceConstant::actionParameters();
 
   return params;
 }
@@ -241,32 +243,55 @@ ThermalContactAction::addMaterials()
   if (getParam<std::string>("type") != "GapHeatTransfer")
     return;
 
-  const std::string object_type = "GapConductance";
-
-  InputParameters params = _factory.getValidParams(object_type);
-  params.applyParameters(parameters(), {"variable"});
-
-  params.set<std::vector<VariableName>>("variable") = {getParam<NonlinearVariableName>("variable")};
-  params.set<std::vector<BoundaryName>>("boundary") = {getParam<BoundaryName>("slave")};
-
-  if (_quadrature)
+  if (parameters().isParamSetByUser("gap_conductance"))
   {
-    params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("master");
+    if (parameters().isParamSetByUser("gap_conductivity") ||
+        parameters().isParamSetByUser("gap_conductivity_function"))
+      mooseError(
+          "Cannot specify both gap_conductance and gap_conductivity or gap_conductivity_function");
+
+    const std::string object_type = "GapConductanceConstant";
+    InputParameters params = _factory.getValidParams(object_type);
+    params.applyParameters(parameters());
+    params.set<std::vector<BoundaryName>>("boundary") = {getParam<BoundaryName>("slave")};
+    _problem->addMaterial(object_type, name() + "_" + "gap_value", params);
+
+    if (_quadrature)
+    {
+      params.set<std::vector<BoundaryName>>("boundary") = {getParam<BoundaryName>("master")};
+      _problem->addMaterial(object_type, name() + "_" + "gap_value_master", params);
+    }
   }
   else
   {
-    params.set<std::vector<VariableName>>("gap_temp") = {_gap_value_name};
-    params.set<std::vector<VariableName>>("gap_distance") = {"penetration"};
-  }
+    const std::string object_type = "GapConductance";
 
-  _problem->addMaterial(object_type, name() + "_" + "gap_value", params);
+    InputParameters params = _factory.getValidParams(object_type);
+    params.applyParameters(parameters(), {"variable"});
 
-  if (_quadrature)
-  {
-    params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("slave");
-    params.set<std::vector<BoundaryName>>("boundary") = {getParam<BoundaryName>("master")};
+    params.set<std::vector<VariableName>>("variable") = {
+        getParam<NonlinearVariableName>("variable")};
+    params.set<std::vector<BoundaryName>>("boundary") = {getParam<BoundaryName>("slave")};
 
-    _problem->addMaterial(object_type, name() + "_" + "gap_value_master", params);
+    if (_quadrature)
+    {
+      params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("master");
+    }
+    else
+    {
+      params.set<std::vector<VariableName>>("gap_temp") = {_gap_value_name};
+      params.set<std::vector<VariableName>>("gap_distance") = {"penetration"};
+    }
+
+    _problem->addMaterial(object_type, name() + "_" + "gap_value", params);
+
+    if (_quadrature)
+    {
+      params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("slave");
+      params.set<std::vector<BoundaryName>>("boundary") = {getParam<BoundaryName>("master")};
+
+      _problem->addMaterial(object_type, name() + "_" + "gap_value_master", params);
+    }
   }
 }
 
