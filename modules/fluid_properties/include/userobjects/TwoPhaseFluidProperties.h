@@ -71,6 +71,21 @@ public:
   virtual Real h_lat(Real p, Real T) const;
 
   /**
+   * Computes surface tension sigma of
+   * saturated liquid in contact with saturated vapor
+   *
+   * @param T  temperature
+   */
+  virtual Real sigma_from_T(Real T) const;
+
+  /**
+   * Computes dsigma/dT along the saturation line
+   *
+   * @param[in] T          temperature (K)
+   */
+  virtual Real dsigma_dT_from_T(Real T) const;
+
+  /**
    * Returns true if phase change is supported, otherwise false
    */
   virtual bool supportsPhaseChange() const = 0;
