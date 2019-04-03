@@ -48,7 +48,7 @@ PorousFlowFluidPropertyIC::value(const Point & /*p*/)
   const Real Tk = _temperature[_qp] + _T_c2k;
 
   // The fluid property
-  Real property;
+  Real property = 0.0;
 
   switch (_property_enum)
   {
