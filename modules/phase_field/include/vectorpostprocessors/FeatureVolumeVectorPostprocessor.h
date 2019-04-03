@@ -56,6 +56,7 @@ protected:
   VectorPostprocessorValue & _var_num;
   VectorPostprocessorValue & _feature_volumes;
   VectorPostprocessorValue & _intersects_bounds;
+  VectorPostprocessorValue & _percolated;
 
 private:
   /// Add volume contributions to one or entries in the feature volume vector

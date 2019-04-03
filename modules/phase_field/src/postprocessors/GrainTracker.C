@@ -27,7 +27,7 @@ template <>
 void
 dataStore(std::ostream & stream, GrainTracker::PartialFeatureData & feature, void * context)
 {
-  storeHelper(stream, feature.intersects_boundary, context);
+  storeHelper(stream, feature.boundary_intersection, context);
   storeHelper(stream, feature.id, context);
   storeHelper(stream, feature.centroid, context);
   storeHelper(stream, feature.status, context);
@@ -37,7 +37,7 @@ template <>
 void
 dataLoad(std::istream & stream, GrainTracker::PartialFeatureData & feature, void * context)
 {
-  loadHelper(stream, feature.intersects_boundary, context);
+  loadHelper(stream, feature.boundary_intersection, context);
   loadHelper(stream, feature.id, context);
   loadHelper(stream, feature.centroid, context);
   loadHelper(stream, feature.status, context);
@@ -169,7 +169,25 @@ GrainTracker::doesFeatureIntersectBoundary(unsigned int feature_id) const
   if (feature_index != invalid_size_t)
   {
     mooseAssert(feature_index < _feature_sets.size(), "Grain index out of bounds");
-    return _feature_sets[feature_index]._intersects_boundary;
+    return _feature_sets[feature_index]._boundary_intersection != BoundaryIntersection::NONE;
+  }
+
+  return false;
+}
+
+bool
+GrainTracker::isFeaturePercolated(unsigned int feature_id) const
+{
+  // TODO: This data structure may need to be turned into a Multimap
+  mooseAssert(feature_id < _feature_id_to_local_index.size(), "Grain ID out of bounds");
+
+  auto feature_index = _feature_id_to_local_index[feature_id];
+  if (feature_index != invalid_size_t)
+  {
+    mooseAssert(feature_index < _feature_sets.size(), "Grain index out of bounds");
+    return (_feature_sets[feature_index]._boundary_intersection &
+            (BoundaryIntersection::PRIMARY_PERCOLATION_BOUNDARY |
+             BoundaryIntersection::SECONDARY_PERCOLATION_BOUNDARY)) != BoundaryIntersection::NONE;
   }
 
   return false;
@@ -351,7 +369,7 @@ GrainTracker::broadcastAndUpdateGrainData()
                    std::back_inserter(root_feature_data),
                    [](FeatureData & feature) {
                      PartialFeatureData partial_feature;
-                     partial_feature.intersects_boundary = feature._intersects_boundary;
+                     partial_feature.boundary_intersection = feature._boundary_intersection;
                      partial_feature.id = feature._id;
                      partial_feature.centroid = feature._centroid;
                      partial_feature.status = feature._status;
@@ -386,7 +404,7 @@ GrainTracker::broadcastAndUpdateGrainData()
           _feature_id_to_local_index[partial_data.id] != invalid_size_t)
       {
         auto & grain = _feature_sets[_feature_id_to_local_index[partial_data.id]];
-        grain._intersects_boundary = partial_data.intersects_boundary;
+        grain._boundary_intersection = partial_data.boundary_intersection;
         grain._centroid = partial_data.centroid;
         if (partial_data.status == Status::INACTIVE)
           grain._status = Status::INACTIVE;
