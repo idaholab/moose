@@ -49,7 +49,6 @@ class FeatureFloodCount : public GeneralPostprocessor,
 {
 public:
   FeatureFloodCount(const InputParameters & parameters);
-  ~FeatureFloodCount();
 
   virtual void initialSetup() override;
   virtual void meshChanged() override;
@@ -67,7 +66,11 @@ public:
   /// Returns a Boolean indicating whether this feature intersects _any_ boundary
   virtual bool doesFeatureIntersectBoundary(unsigned int feature_id) const;
 
-  /// Returns the centroid of the designated feature (only suppored without periodic boundaries)
+  /// Returns a Boolean indicating whether this feature is percolated (e.g. intersects at least two
+  /// different boundaries from sets supplied by the user)
+  virtual bool isFeaturePercolated(unsigned int feature_id) const;
+
+  /// Returns the centroid of the designated feature (only supported without periodic boundaries)
   virtual Point featureCentroid(unsigned int feature_id) const;
 
   /**
@@ -120,6 +123,15 @@ public:
     INACTIVE = 0x4
   };
 
+  /// This enumeration is used to inidacate status of boundary intersections.
+  enum class BoundaryIntersection : unsigned char
+  {
+    NONE = 0x0,
+    ANY_BOUNDARY = 0x1,
+    PRIMARY_PERCOLATION_BOUNDARY = 0x2,
+    SECONDARY_PERCOLATION_BOUNDARY = 0x4
+  };
+
   class FeatureData
   {
   public:
@@ -154,7 +166,7 @@ public:
         _min_entity_id(DofObject::invalid_id),
         _vol_count(0),
         _status(status),
-        _intersects_boundary(false)
+        _boundary_intersection(BoundaryIntersection::NONE)
     {
     }
 
@@ -291,8 +303,8 @@ public:
     /// The status of a feature (used mostly in derived classes like the GrainTracker)
     Status _status;
 
-    /// Flag indicating whether this feature intersects a boundary
-    bool _intersects_boundary;
+    /// Enumaration indicating boundary intersection status
+    BoundaryIntersection _boundary_intersection;
 
     FeatureData duplicate() const { return FeatureData(*this); }
 
@@ -504,6 +516,11 @@ protected:
   virtual void clearDataStructures();
 
   /**
+   * Update the feature's attributes to indicate boundary intersections
+   */
+  void updateBoundaryIntersections(FeatureData & feature) const;
+
+  /**
    * This routine adds the periodic node information to our data structure prior to packing the data
    * this makes those periodic neighbors appear much like ghosted nodes in a multiprocessor setting
    */
@@ -689,11 +706,14 @@ protected:
 
   /// The set of entities on the boundary of the domain used for determining
   /// if features intersect any boundary
-  std::set<dof_id_type> _all_boundary_entity_ids;
+  std::unordered_set<dof_id_type> _all_boundary_entity_ids;
 
   std::map<dof_id_type, std::vector<unsigned int>> _entity_var_to_features;
 
   std::vector<unsigned int> _empty_var_to_features;
+
+  std::vector<BoundaryID> _primary_perc_bnds;
+  std::vector<BoundaryID> _secondary_perc_bnds;
 
   /// Determines if the flood counter is elements or not (nodes)
   const bool _is_elemental;
@@ -701,7 +721,7 @@ protected:
   /// Indicates that this object should only run on one or more boundaries
   bool _is_boundary_restricted;
 
-  /// Boundary element range pointer (used when boundary restricting this object
+  /// Boundary element range pointer
   ConstBndElemRange * _bnd_elem_range;
 
   /// Convenience variable for testing master rank
@@ -767,6 +787,12 @@ void dataLoad(std::istream & stream, MeshTools::BoundingBox & bbox, void * conte
 
 template <>
 struct enable_bitmask_operators<FeatureFloodCount::Status>
+{
+  static const bool enable = true;
+};
+
+template <>
+struct enable_bitmask_operators<FeatureFloodCount::BoundaryIntersection>
 {
   static const bool enable = true;
 };

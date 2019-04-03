@@ -47,7 +47,7 @@ dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void 
   storeHelper(stream, feature._vol_count, context);
   storeHelper(stream, feature._centroid, context);
   storeHelper(stream, feature._status, context);
-  storeHelper(stream, feature._intersects_boundary, context);
+  storeHelper(stream, feature._boundary_intersection, context);
 }
 
 template <>
@@ -78,7 +78,7 @@ dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, void *
   loadHelper(stream, feature._vol_count, context);
   loadHelper(stream, feature._centroid, context);
   loadHelper(stream, feature._status, context);
-  loadHelper(stream, feature._intersects_boundary, context);
+  loadHelper(stream, feature._boundary_intersection, context);
 }
 
 template <>
@@ -142,6 +142,15 @@ validParams<FeatureFloodCount>()
       true,
       "Controls whether features are defined to be less than or greater than the threshold value.");
 
+  params.addParam<std::vector<BoundaryName>>(
+      "primary_percolation_boundaries",
+      "A list of boundaries used in conjunction with the corresponding "
+      "\"secondary_percolation_boundaries\" parameter for determining if a feature creates a path "
+      "connecting any pair of boundaries");
+  params.addParam<std::vector<BoundaryName>>(
+      "secondary_percolation_boundaries",
+      "Paired boundaries with \"primaryary_percolation_boundaries\" parameter");
+
   /**
    * The FeatureFloodCount and derived objects should not to operate on the displaced mesh. These
    * objects consume variable values from the nonlinear system and use a lot of raw geometric
@@ -153,10 +162,13 @@ validParams<FeatureFloodCount>()
 
   // The FeatureFloodCount object does not require that any state (restartable information) is
   // maintained. This Boolean is set to false so that we don't ask MOOSE to save a potentially
-  // large data structure for no reason.
+  // large data structure for no reason. It is set for true in at least one derived class
+  // (GrainTracker).
   params.addPrivateParam<bool>("restartable_required", false);
 
-  params.addParamNamesToGroup("use_single_map condense_map_info use_global_numbering", "Advanced");
+  params.addParamNamesToGroup(
+      "use_single_map condense_map_info use_global_numbering primary_percolation_boundaries",
+      "Advanced");
 
   MooseEnum flood_type("NODAL ELEMENTAL", "ELEMENTAL");
   params.addParam<MooseEnum>("flood_entity_type",
@@ -223,9 +235,19 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters)
   addMooseVariableDependency(_fe_vars);
 
   _is_boundary_restricted = boundaryRestricted();
-}
 
-FeatureFloodCount::~FeatureFloodCount() {}
+  if (parameters.isParamValid("primary_percolation_boundaries"))
+    _primary_perc_bnds = _mesh.getBoundaryIDs(
+        parameters.get<std::vector<BoundaryName>>("primary_percolation_boundaries"));
+  if (parameters.isParamValid("secondary_percolation_boundaries"))
+    _secondary_perc_bnds = _mesh.getBoundaryIDs(
+        parameters.get<std::vector<BoundaryName>>("secondary_percolation_boundaries"));
+
+  if (_primary_perc_bnds.empty() != _secondary_perc_bnds.empty())
+    paramError("primary_percolation_boundaries",
+               "primary_percolation_boundaries and secondary_percolation_boundaries must both be "
+               "supplied when checking for percolation");
+}
 
 void
 FeatureFloodCount::initialSetup()
@@ -791,8 +813,33 @@ FeatureFloodCount::doesFeatureIntersectBoundary(unsigned int feature_id) const
   {
     mooseAssert(local_index < _feature_sets.size(), "local_index out of bounds");
     return _feature_sets[local_index]._status != Status::INACTIVE
-               ? _feature_sets[local_index]._intersects_boundary
-               : invalid_id;
+               ? _feature_sets[local_index]._boundary_intersection != BoundaryIntersection::NONE
+               : false;
+  }
+
+  return false;
+}
+
+bool
+FeatureFloodCount::isFeaturePercolated(unsigned int feature_id) const
+{
+  // TODO: This information is not parallel consistent when using FeatureFloodCounter
+
+  // Some processors don't contain the largest feature id, in that case we just return invalid_id
+  if (feature_id >= _feature_id_to_local_index.size())
+    return false;
+
+  auto local_index = _feature_id_to_local_index[feature_id];
+
+  if (local_index != invalid_size_t)
+  {
+    mooseAssert(local_index < _feature_sets.size(), "local_index out of bounds");
+    return _feature_sets[local_index]._status != Status::INACTIVE
+               ? (_feature_sets[local_index]._boundary_intersection &
+                  (BoundaryIntersection::PRIMARY_PERCOLATION_BOUNDARY |
+                   BoundaryIntersection::SECONDARY_PERCOLATION_BOUNDARY)) !=
+                     BoundaryIntersection::NONE
+               : false;
   }
 
   return false;
@@ -928,6 +975,9 @@ FeatureFloodCount::prepareDataForTransfer()
   {
     for (auto & feature : list_ref)
     {
+      // See if the feature intersects a boundary or perhaps one of the percolation boundaries.
+      updateBoundaryIntersections(feature);
+
       // Periodic node ids
       appendPeriodicNeighborNodes(feature);
 
@@ -1285,9 +1335,9 @@ FeatureFloodCount::flood(const DofObject * dof_object, std::size_t current_index
       // Sum the centroid values for now, we'll average them later
       feature->_centroid += elem->centroid();
 
-      // Does the volume intersect the boundary?
-      if (_all_boundary_entity_ids.find(elem->id()) != _all_boundary_entity_ids.end())
-        feature->_intersects_boundary = true;
+      //      // Does the volume intersect the boundary?
+      //      if (_all_boundary_entity_ids.find(elem->id()) != _all_boundary_entity_ids.end())
+      //        feature->_intersects_boundary = true;
     }
 
     if (_is_elemental)
@@ -1621,6 +1671,43 @@ FeatureFloodCount::visitNeighborsHelper(const T * curr_entity,
 }
 
 void
+FeatureFloodCount::updateBoundaryIntersections(FeatureData & feature) const
+{
+  if (_is_elemental)
+  {
+    for (auto entity : feature._local_ids)
+    {
+      // See if this feature is on a boundary if we haven't already figured that out
+      if ((feature._boundary_intersection & BoundaryIntersection::ANY_BOUNDARY) ==
+          BoundaryIntersection::NONE)
+      {
+        Elem * elem = _mesh.elemPtr(entity);
+        if (elem && elem->on_boundary())
+          feature._boundary_intersection |= BoundaryIntersection::ANY_BOUNDARY;
+      }
+
+      // Now see if the feature touches the primary and/or secondary boundary IDs if we haven't
+      // figured that out already
+      if ((feature._boundary_intersection & BoundaryIntersection::PRIMARY_PERCOLATION_BOUNDARY) ==
+          BoundaryIntersection::NONE)
+      {
+        for (auto primary_id : _primary_perc_bnds)
+          if (_mesh.isBoundaryElem(entity, primary_id))
+            feature._boundary_intersection |= BoundaryIntersection::PRIMARY_PERCOLATION_BOUNDARY;
+      }
+
+      if ((feature._boundary_intersection & BoundaryIntersection::SECONDARY_PERCOLATION_BOUNDARY) ==
+          BoundaryIntersection::NONE)
+      {
+        for (auto secondary_id : _secondary_perc_bnds)
+          if (_mesh.isBoundaryElem(entity, secondary_id))
+            feature._boundary_intersection |= BoundaryIntersection::SECONDARY_PERCOLATION_BOUNDARY;
+      }
+    }
+  }
+}
+
+void
 FeatureFloodCount::appendPeriodicNeighborNodes(FeatureData & feature) const
 {
   if (_is_elemental)
@@ -1912,7 +1999,7 @@ FeatureFloodCount::FeatureData::merge(FeatureData && rhs)
   _status &= rhs._status;
 
   // Logical OR here to make sure we maintain boundary intersection attribute when joining
-  _intersects_boundary |= rhs._intersects_boundary;
+  _boundary_intersection |= rhs._boundary_intersection;
 
   _vol_count += rhs._vol_count;
   _centroid += rhs._centroid;
