@@ -32,6 +32,12 @@ class Assembly;
 
 class DGKernelBase;
 
+#define usingDGKernelBaseMembers                                                                   \
+  usingNeighborCoupleableMembers;                                                                  \
+  usingFunctionInterfaceMembers;                                                                   \
+  usingBlockRestrictableMembers;                                                                   \
+  usingTransientInterfaceMembers
+
 template <>
 InputParameters validParams<DGKernelBase>();
 

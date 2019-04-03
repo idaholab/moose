@@ -34,6 +34,7 @@ MooseVariableFE<OutputType>::MooseVariableFE(unsigned int var_num,
     _need_u_older(false),
     _need_u_previous_nl(false),
     _need_u_dot(false),
+    _need_ad_u_dot(false),
     _need_u_dotdot(false),
     _need_u_dot_old(false),
     _need_u_dotdot_old(false),
@@ -63,6 +64,7 @@ MooseVariableFE<OutputType>::MooseVariableFE(unsigned int var_num,
     _need_u_older_neighbor(false),
     _need_u_previous_nl_neighbor(false),
     _need_u_dot_neighbor(false),
+    _need_neighbor_ad_u_dot(false),
     _need_u_dotdot_neighbor(false),
     _need_u_dot_old_neighbor(false),
     _need_u_dotdot_old_neighbor(false),
@@ -1324,7 +1326,7 @@ void
 MooseVariableFE<OutputType>::computeAD(
     const unsigned int num_dofs,
     const unsigned int nqp,
-    const bool is_transient,
+    const bool /*is_transient*/,
     const FieldVariablePhiValue & phi,
     const FieldVariablePhiGradient & grad_phi,
     const FieldVariablePhiSecond *& second_phi,
@@ -1340,7 +1342,7 @@ MooseVariableFE<OutputType>::computeAD(
   if (_need_ad_second_u)
     _ad_second_u.resize(nqp);
 
-  if (is_transient)
+  if (_need_ad_u_dot)
   {
     _ad_dofs_dot.resize(num_dofs);
     _ad_u_dot.resize(nqp);
@@ -1365,7 +1367,7 @@ MooseVariableFE<OutputType>::computeAD(
     if (_need_ad_second_u)
       _ad_second_u[qp] = _ad_zero;
 
-    if (is_transient)
+    if (_need_ad_u_dot)
       _ad_u_dot[qp] = _ad_zero;
   }
 
@@ -1377,7 +1379,7 @@ MooseVariableFE<OutputType>::computeAD(
     if (_var_kind == Moose::VAR_NONLINEAR)
       _ad_dof_values[i].derivatives()[ad_offset + i] = 1.0;
 
-    if (is_transient && _time_integrator)
+    if (_need_ad_u_dot && _time_integrator)
     {
       _ad_dofs_dot[i] = _ad_dof_values[i];
       _time_integrator->computeADTimeDerivatives(_ad_dofs_dot[i], _dof_indices[i]);
@@ -1409,12 +1411,12 @@ MooseVariableFE<OutputType>::computeAD(
           _ad_second_u[qp] += _ad_dof_values[i] * (*second_phi)[i][qp];
       }
 
-      if (is_transient && _time_integrator)
+      if (_need_ad_u_dot && _time_integrator)
         _ad_u_dot[qp] += phi[i][qp] * _ad_dofs_dot[i];
     }
   }
 
-  if (is_transient && !_time_integrator)
+  if (_need_ad_u_dot && !_time_integrator)
     for (MooseIndex(nqp) qp = 0; qp < nqp; ++qp)
       _ad_u_dot[qp] = _u_dot[qp];
 }
@@ -1423,7 +1425,7 @@ template <typename OutputType>
 void
 MooseVariableFE<OutputType>::computeADNeighbor(const unsigned int num_dofs,
                                                const unsigned int nqp,
-                                               const bool is_transient,
+                                               const bool /*is_transient*/,
                                                const FieldVariablePhiValue & phi,
                                                const FieldVariablePhiGradient & grad_phi,
                                                const FieldVariablePhiSecond *& second_phi)
@@ -1438,6 +1440,9 @@ MooseVariableFE<OutputType>::computeADNeighbor(const unsigned int num_dofs,
 
   if (_need_neighbor_ad_second_u)
     _neighbor_ad_second_u.resize(nqp);
+
+  if (_need_neighbor_ad_u_dot)
+    _neighbor_ad_u_dot.resize(nqp);
 
   // Derivatives are offset by the variable number
   size_t ad_offset = _var_num * _sys.getMaxVarNDofsPerElem() +
@@ -1459,7 +1464,7 @@ MooseVariableFE<OutputType>::computeADNeighbor(const unsigned int num_dofs,
     if (_need_neighbor_ad_second_u)
       _neighbor_ad_second_u[qp] = _ad_zero;
 
-    if (is_transient)
+    if (_need_neighbor_ad_u_dot)
       _neighbor_ad_u_dot[qp] = _ad_zero;
   }
 
@@ -1471,7 +1476,7 @@ MooseVariableFE<OutputType>::computeADNeighbor(const unsigned int num_dofs,
     if (_var_kind == Moose::VAR_NONLINEAR)
       _neighbor_ad_dof_values[i].derivatives()[ad_offset + i] = 1.0;
 
-    if (is_transient && _time_integrator)
+    if (_need_neighbor_ad_u_dot && _time_integrator)
     {
       _neighbor_ad_dofs_dot[i] = _neighbor_ad_dof_values[i];
       _time_integrator->computeADTimeDerivatives(_neighbor_ad_dofs_dot[i],
@@ -1493,12 +1498,12 @@ MooseVariableFE<OutputType>::computeADNeighbor(const unsigned int num_dofs,
       if (_need_neighbor_ad_second_u)
         _neighbor_ad_second_u[qp] += _neighbor_ad_dof_values[i] * (*second_phi)[i][qp];
 
-      if (is_transient && _time_integrator)
+      if (_need_neighbor_ad_u_dot && _time_integrator)
         _neighbor_ad_u_dot[qp] += phi[i][qp] * _neighbor_ad_dofs_dot[i];
     }
   }
 
-  if (is_transient && !_time_integrator)
+  if (_need_neighbor_ad_u_dot && !_time_integrator)
     for (MooseIndex(nqp) qp = 0; qp < nqp; ++qp)
       _neighbor_ad_u_dot[qp] = _u_dot_neighbor[qp];
 }

@@ -27,7 +27,8 @@
   using Coupleable::coupledValueOlder;                                                             \
   using Coupleable::coupledGradient;                                                               \
   using Coupleable::coupledGradientOld;                                                            \
-  using Coupleable::coupledGradientOlder
+  using Coupleable::coupledGradientOlder;                                                          \
+  using Coupleable::getVar
 
 // Forward declarations
 class MooseVariableScalar;

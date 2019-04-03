@@ -1,0 +1,47 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "ADDGCoupledTest.h"
+
+// MOOSE includes
+#include "MooseVariableFE.h"
+
+#include "libmesh/utility.h"
+
+registerADMooseObject("MooseTestApp", ADDGCoupledTest);
+
+defineADValidParams(ADDGCoupledTest,
+                    ADDGKernel,
+                    params.addRequiredCoupledVar("v", "The coupling variable"););
+
+template <ComputeStage compute_stage>
+ADDGCoupledTest<compute_stage>::ADDGCoupledTest(const InputParameters & parameters)
+  : ADDGKernel<compute_stage>(parameters),
+    _v_var(dynamic_cast<MooseVariable &>(*getVar("v", 0))),
+    _v(_v_var.adSln<compute_stage>()),
+    _v_neighbor(_v_var.adSlnNeighbor<compute_stage>())
+{
+}
+
+template <ComputeStage compute_stage>
+ADResidual
+ADDGCoupledTest<compute_stage>::computeQpResidual(Moose::DGResidualType type)
+{
+  // Make sure we've sized things correctly!
+  if (type == Moose::DGResidualType::Element)
+  {
+    _u[_qp];
+    return _v[_qp];
+  }
+  else
+  {
+    _u_neighbor[_qp];
+    return _v_neighbor[_qp];
+  }
+}
