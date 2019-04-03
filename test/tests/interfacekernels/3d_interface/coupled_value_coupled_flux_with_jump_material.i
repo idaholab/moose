@@ -43,6 +43,13 @@
   [../]
 []
 
+# [AuxVariables]
+#   [./jump_var]
+#     order = CONSTANT
+#     family = MONOMIAL
+#   [../]
+# []
+
 [Kernels]
   [./diff_u]
     type = CoeffParamDiffusion
@@ -62,6 +69,16 @@
     value = 1
   [../]
 []
+
+# [AuxKernels]
+#   [jump_aux]
+#     type = MaterialRealAux
+#     boundary = master0_interface
+#     property = jump
+#     variable = jump_var
+#   []
+# []
+
 
 [InterfaceKernels]
   [./interface]
@@ -107,6 +124,14 @@
     variable = v
     block = 1
   [../]
+  [interface_var_jump]
+    type = InterfaceAverageVariableValuePostprocessor
+    interface_value_type = jump_abs
+    variable = u
+    neighbor_variable = v
+    execute_on = TIMESTEP_END
+    boundary = master0_interface
+  []
 []
 
 [Preconditioning]
