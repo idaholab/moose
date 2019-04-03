@@ -15,6 +15,7 @@ public:
   OneD3EqnEnergyHeatFlux(const InputParameters & parameters);
 
   virtual void computeJacobian() override;
+  virtual void computeOffDiagJacobian(unsigned jvar) override;
   virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
 
 protected:

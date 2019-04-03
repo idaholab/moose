@@ -15,6 +15,7 @@ public:
   HeatFlux3EqnBC(const InputParameters & parameters);
 
   virtual void computeJacobian() override;
+  virtual void computeJacobianBlock(unsigned jvar) override;
   virtual void computeJacobianBlock(MooseVariableFEBase & jvar) override;
 
 protected:

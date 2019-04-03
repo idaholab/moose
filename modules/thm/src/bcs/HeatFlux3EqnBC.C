@@ -47,6 +47,12 @@ HeatFlux3EqnBC::computeJacobian()
 }
 
 void
+HeatFlux3EqnBC::computeJacobianBlock(unsigned jvar)
+{
+  IntegratedBC::computeJacobianBlock(jvar);
+}
+
+void
 HeatFlux3EqnBC::computeJacobianBlock(MooseVariableFEBase & jvar)
 {
   IntegratedBC::computeJacobianBlock(jvar);

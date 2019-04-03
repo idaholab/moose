@@ -47,6 +47,12 @@ OneD3EqnEnergyHeatFlux::computeJacobian()
 }
 
 void
+OneD3EqnEnergyHeatFlux::computeOffDiagJacobian(unsigned jvar)
+{
+  Kernel::computeOffDiagJacobian(jvar);
+}
+
+void
 OneD3EqnEnergyHeatFlux::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 {
   Kernel::computeOffDiagJacobian(jvar);
