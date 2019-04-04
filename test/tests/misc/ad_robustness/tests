@@ -1,0 +1,35 @@
+[Tests]
+  [guard_time_deriv_for_ad_aux]
+    type = RunApp
+    input = 'ad_two_var_transient_diffusion.i'
+    issues = '#13171'
+    design = 'MooseVariableFE.md'
+    requirement = 'We shall be able to call AD variable methods on an auxiliary variable in a transient simulation and not hit assertions for both regular and neighbor calculations'
+  []
+  [neighbor_ad_with_aux_jac]
+    type = PetscJacobianTester
+    design = 'MooseVariableFE.md'
+    issues = '#13171'
+    requirement = 'Coupling an auxiliary variable into a DGKernel shall not destroy the Jacobian'
+    input = 'ad_two_var_transient_diffusion.i'
+    difference_tol = 1e-7
+    run_sim = True
+  []
+  [neighbor_ad_with_nl]
+    type = Exodiff
+    exodiff = 'ad_two_nl_var_transient_diffusion_out.e'
+    design = 'MooseVariableFE.md'
+    issues = '#13171'
+    requirement = 'We shall be able to do NL variable coupling into a DGKernel'
+    input = 'ad_two_nl_var_transient_diffusion.i'
+  []
+  [neighbor_ad_with_nl_jac]
+    type = PetscJacobianTester
+    design = 'MooseVariableFE.md'
+    issues = '#13171'
+    requirement = 'We shall be able to do NL variable coupling into a DGKernel and have a good Jacobian'
+    input = 'ad_two_nl_var_transient_diffusion_jac.i'
+    difference_tol = 1e-7
+    run_sim = True
+  []
+[]

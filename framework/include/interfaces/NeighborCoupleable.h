@@ -13,6 +13,8 @@
 #include "MooseVariableBase.h"
 #include "Coupleable.h"
 
+#define usingNeighborCoupleableMembers usingCoupleableMembers
+
 /**
  * Enhances Coupleable interface to also couple the values from neighbor elements
  *

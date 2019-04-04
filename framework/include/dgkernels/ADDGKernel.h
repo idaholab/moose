@@ -16,6 +16,7 @@
 #include "metaphysicl/dualnumber.h"
 
 #define usingDGKernelMembers                                                                       \
+  usingDGKernelBaseMembers;                                                                        \
   using ADDGKernel<compute_stage>::_test;                                                          \
   using ADDGKernel<compute_stage>::_qp;                                                            \
   using ADDGKernel<compute_stage>::_i;                                                             \

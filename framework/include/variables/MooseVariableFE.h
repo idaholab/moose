@@ -337,7 +337,7 @@ public:
   template <ComputeStage compute_stage>
   const typename VariableValueType<OutputType, compute_stage>::type & adUDot()
   {
-    _need_ad = true;
+    _need_ad = _need_ad_u_dot = true;
     return _ad_u_dot;
   }
 
@@ -429,7 +429,7 @@ public:
   template <ComputeStage compute_stage>
   const typename VariableValueType<OutputType, compute_stage>::type & adUDotNeighbor()
   {
-    _need_neighbor_ad = true;
+    _need_neighbor_ad = _need_neighbor_ad_u_dot = true;
     return _neighbor_ad_u_dot;
   }
 
@@ -804,6 +804,7 @@ protected:
   bool _need_u_previous_nl;
 
   bool _need_u_dot;
+  bool _need_ad_u_dot;
   bool _need_u_dotdot;
   bool _need_u_dot_old;
   bool _need_u_dotdot_old;
@@ -839,6 +840,7 @@ protected:
   bool _need_u_previous_nl_neighbor;
 
   bool _need_u_dot_neighbor;
+  bool _need_neighbor_ad_u_dot;
   bool _need_u_dotdot_neighbor;
   bool _need_u_dot_old_neighbor;
   bool _need_u_dotdot_old_neighbor;
