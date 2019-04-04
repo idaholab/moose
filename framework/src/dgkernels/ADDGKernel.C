@@ -181,9 +181,9 @@ ADDGKernel<compute_stage>::computeOffDiagElemNeighJacobian(Moose::DGJacobianType
 
   size_t ad_offset = 0;
   if (type == Moose::ElementElement || type == Moose::NeighborElement)
-    ad_offset = _var.number() * _sys.getMaxVarNDofsPerElem();
+    ad_offset = jvar * _sys.getMaxVarNDofsPerElem();
   else
-    ad_offset = _var.number() * _sys.getMaxVarNDofsPerElem() +
+    ad_offset = jvar * _sys.getMaxVarNDofsPerElem() +
                 (_sys.system().n_vars() * _sys.getMaxVarNDofsPerElem());
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
