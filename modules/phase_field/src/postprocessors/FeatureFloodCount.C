@@ -834,11 +834,14 @@ FeatureFloodCount::isFeaturePercolated(unsigned int feature_id) const
   if (local_index != invalid_size_t)
   {
     mooseAssert(local_index < _feature_sets.size(), "local_index out of bounds");
+    bool primary = ((_feature_sets[local_index]._boundary_intersection &
+                     BoundaryIntersection::PRIMARY_PERCOLATION_BOUNDARY) ==
+                    BoundaryIntersection::PRIMARY_PERCOLATION_BOUNDARY);
+    bool secondary = ((_feature_sets[local_index]._boundary_intersection &
+                       BoundaryIntersection::SECONDARY_PERCOLATION_BOUNDARY) ==
+                      BoundaryIntersection::SECONDARY_PERCOLATION_BOUNDARY);
     return _feature_sets[local_index]._status != Status::INACTIVE
-               ? (_feature_sets[local_index]._boundary_intersection &
-                  (BoundaryIntersection::PRIMARY_PERCOLATION_BOUNDARY |
-                   BoundaryIntersection::SECONDARY_PERCOLATION_BOUNDARY)) !=
-                     BoundaryIntersection::NONE
+               ? (primary && secondary)
                : false;
   }
 
