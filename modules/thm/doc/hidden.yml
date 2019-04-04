@@ -156,6 +156,8 @@
 - /ICs/OppositePhaseIC
 - /ICs/RhoEFromPressureTemperatureVelocityIC
 - /ICs/RhoFromPressureTemperatureIC
+- /ICs/ScalarSolutionInitialCondition
+- /ICs/SolutionInitialCondition
 - /ICs/SpecificInternalEnergyIC
 - /ICs/SpecificTotalEnthalpyIC
 - /ICs/SpecificVolumeIC
