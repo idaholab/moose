@@ -33,15 +33,10 @@ template <ComputeStage compute_stage>
 ADResidual
 ADDGCoupledTest<compute_stage>::computeQpResidual(Moose::DGResidualType type)
 {
-  // Make sure we've sized things correctly!
+  auto fake_flux = 5 * _u[_qp] - 4 * _u_neighbor[_qp] + 3 * _v[_qp] - 2 * _v_neighbor[_qp];
+
   if (type == Moose::DGResidualType::Element)
-  {
-    _u[_qp];
-    return _v[_qp];
-  }
+    return _test[_i][_qp] * fake_flux;
   else
-  {
-    _u_neighbor[_qp];
-    return _v_neighbor[_qp];
-  }
+    return _test_neighbor[_i][_qp] * -fake_flux;
 }
