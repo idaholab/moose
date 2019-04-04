@@ -17,6 +17,7 @@
   usingMaterialMembers;                                                                            \
   using ADComputeStressBase<compute_stage>::_stress;                                               \
   using ADComputeStressBase<compute_stage>::_mechanical_strain;                                    \
+  using ADComputeStressBase<compute_stage>::_deformation_gradient;                                 \
   using ADComputeStressBase<compute_stage>::_elastic_strain;                                       \
   using ADComputeStressBase<compute_stage>::_base_name;                                            \
   using ADComputeStressBase<compute_stage>::_initial_stress_fcn
@@ -52,6 +53,7 @@ protected:
   const std::string _base_name;
 
   const ADMaterialProperty(RankTwoTensor) & _mechanical_strain;
+  const ADMaterialProperty(RankTwoTensor) & _deformation_gradient;
   ADMaterialProperty(RankTwoTensor) & _stress;
   ADMaterialProperty(RankTwoTensor) & _elastic_strain;
 

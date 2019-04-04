@@ -24,7 +24,8 @@
   using ADComputeStrainBase<compute_stage>::_current_elem_volume;                                  \
   using ADComputeStrainBase<compute_stage>::_eigenstrain_names;                                    \
   using ADComputeStrainBase<compute_stage>::_eigenstrains;                                         \
-  using ADComputeStrainBase<compute_stage>::_total_strain
+  using ADComputeStrainBase<compute_stage>::_total_strain;                                         \
+  using ADComputeStrainBase<compute_stage>::_deformation_gradient;
 
 // Forward Declarations
 template <ComputeStage>
@@ -60,6 +61,8 @@ protected:
 
   ADMaterialProperty(RankTwoTensor) & _mechanical_strain;
   ADMaterialProperty(RankTwoTensor) & _total_strain;
+
+  ADMaterialProperty(RankTwoTensor) & _deformation_gradient;
 
   std::vector<MaterialPropertyName> _eigenstrain_names;
   std::vector<const ADMaterialProperty(RankTwoTensor) *> _eigenstrains;

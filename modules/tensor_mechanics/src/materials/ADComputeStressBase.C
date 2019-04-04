@@ -25,6 +25,8 @@ ADComputeStressBase<compute_stage>::ADComputeStressBase(const InputParameters & 
   : ADMaterial<compute_stage>(parameters),
     _base_name(isParamValid("base_name") ? adGetParam<std::string>("base_name") + "_" : ""),
     _mechanical_strain(adGetADMaterialProperty<RankTwoTensor>(_base_name + "mechanical_strain")),
+    _deformation_gradient(
+        adGetADMaterialProperty<RankTwoTensor>(_base_name + "deformation_gradient")),
     _stress(adDeclareADProperty<RankTwoTensor>(_base_name + "stress")),
     _elastic_strain(adDeclareADProperty<RankTwoTensor>(_base_name + "elastic_strain"))
 {

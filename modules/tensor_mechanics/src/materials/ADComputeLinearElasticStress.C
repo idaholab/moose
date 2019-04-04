@@ -39,8 +39,8 @@ template <ComputeStage compute_stage>
 void
 ADComputeLinearElasticStress<compute_stage>::computeQpStress()
 {
-  // stress = C * e
-  _stress[_qp] = _elasticity_tensor[_qp] * _mechanical_strain[_qp];
+  // stress(PK1) = F * PK2 = F * C * e
+  _stress[_qp] = _deformation_gradient[_qp] * (_elasticity_tensor[_qp] * _mechanical_strain[_qp]);
 
   // Assign value for elastic strain, which is equal to the mechanical strain
   _elastic_strain[_qp] = _mechanical_strain[_qp];

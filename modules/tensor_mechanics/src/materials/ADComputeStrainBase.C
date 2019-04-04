@@ -41,6 +41,7 @@ ADComputeStrainBase<compute_stage>::ADComputeStrainBase(const InputParameters & 
     _base_name(isParamValid("base_name") ? adGetParam<std::string>("base_name") + "_" : ""),
     _mechanical_strain(adDeclareADProperty<RankTwoTensor>(_base_name + "mechanical_strain")),
     _total_strain(adDeclareADProperty<RankTwoTensor>(_base_name + "total_strain")),
+    _deformation_gradient(adDeclareADProperty<RankTwoTensor>(_base_name + "deformation_gradient")),
     _eigenstrain_names(adGetParam<std::vector<MaterialPropertyName>>("eigenstrain_names")),
     _eigenstrains(_eigenstrain_names.size()),
     _global_strain(isParamValid("global_strain")
@@ -99,6 +100,7 @@ ADComputeStrainBase<compute_stage>::initQpStatefulProperties()
 {
   _mechanical_strain[_qp].zero();
   _total_strain[_qp].zero();
+  _deformation_gradient[_qp] = RankTwoTensor(RankTwoTensor::initIdentity);
 }
 
 // explicit instantiation is required for AD base classes

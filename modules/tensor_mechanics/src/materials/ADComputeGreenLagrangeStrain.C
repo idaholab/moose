@@ -43,5 +43,8 @@ ADComputeGreenLagrangeStrain<compute_stage>::computeProperties()
     ADRankTwoTensor dxuT = dxu.transpose();
 
     _mechanical_strain[_qp] = _total_strain[_qp] = (dxuT + dxu + dxuT * dxu) / 2.0;
+
+    _deformation_gradient[_qp] = dxu;
+    _deformation_gradient[_qp].addIa(1.0);
   }
 }
