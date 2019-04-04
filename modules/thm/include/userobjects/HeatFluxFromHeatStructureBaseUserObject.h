@@ -33,6 +33,18 @@ public:
   const std::vector<Real> & getHeatFlux(dof_id_type element_id) const;
   const std::vector<DenseVector<Real>> & getHeatFluxJacobian(dof_id_type element_id) const;
 
+  /**
+   * Get the nearest element ID for given element ID
+   *
+   * Used when a heat structure element needs to know what its nearest element is and vice versa.
+   * @param elem_id Element ID either from a flow channel or a heat structure
+   * @return Nearest element corresponding to a `elem_id`
+   */
+  const dof_id_type & getNearestElem(dof_id_type elem_id) const
+  {
+    return _nearest_elem_ids.at(elem_id);
+  }
+
 protected:
   virtual Real computeQpHeatFlux() = 0;
   virtual DenseVector<Real> computeQpHeatFluxJacobian() = 0;

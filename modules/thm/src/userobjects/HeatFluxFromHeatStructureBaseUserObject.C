@@ -25,6 +25,8 @@ HeatFluxFromHeatStructureBaseUserObject::HeatFluxFromHeatStructureBaseUserObject
   std::vector<Point> master_points;
   // element ids corresponding to the centroids in `master_points`
   std::vector<dof_id_type> master_elem_ids;
+  // local side number corresponding to the element id in `master_elem_ids`
+  std::vector<dof_id_type> master_elem_sides;
   // slave element centroids
   std::vector<Point> slave_points;
   // element ids corresponding to the centroids in `slave_points`
@@ -57,6 +59,7 @@ HeatFluxFromHeatStructureBaseUserObject::HeatFluxFromHeatStructureBaseUserObject
           master_elem_qps[elem->id()].push_back(q_points[i]);
 
         master_elem_ids.push_back(elem->id());
+        master_elem_sides.push_back(belem->_side);
         master_points.push_back(elem->centroid());
       }
       else if (std::find(slave_bnd_id.begin(), slave_bnd_id.end(), boundary_id) !=
@@ -88,6 +91,8 @@ HeatFluxFromHeatStructureBaseUserObject::HeatFluxFromHeatStructureBaseUserObject
 
     _nearest_elem_ids.insert(
         std::pair<dof_id_type, dof_id_type>(slave_elem_ids[i], master_elem_ids[return_index[0]]));
+    _nearest_elem_ids.insert(
+        std::pair<dof_id_type, dof_id_type>(master_elem_ids[return_index[0]], slave_elem_ids[i]));
   }
   // now find out how q-points correspond to each other on the (master, slave) pair of elements
   for (std::size_t i = 0; i < slave_elem_ids.size(); i++)
