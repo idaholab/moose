@@ -21,4 +21,40 @@
     min_parallel = 2
     prereq = 'centroid_output_test'
   [../]
+
+  [./percolation_test]
+    type = 'CSVDiff'
+    input = 'percolation_test.i'
+    csvdiff = 'percolation_test_out_features_0000.csv'
+
+    issues = "#13169"
+    requirement = "The FeatureVolumeVectorPostprocessor shall output whether a percolated pathway exists between
+                    specified primary_percolation_boundaries and secondary_percolation_boundaries."
+    design = "/FeatureVolumeVectorPostprocessor.md"
+  [../]
+
+  [./percolation_test_parallel]
+    type = 'CSVDiff'
+    input = 'percolation_test.i'
+    csvdiff = 'percolation_test_out_features_0000.csv'
+
+    issues = "#13169"
+    requirement = "The FeatureVolumeVectorPostprocessor shall output whether a percolated pathway exists between
+                    specified primary_percolation_boundaries and secondary_percolation_boundaries."
+    design = "/FeatureVolumeVectorPostprocessor.md"
+
+    min_parallel = 2
+    prereq = 'percolation_test'
+  [../]
+
+  [./percolation_test_exodus]
+    type = 'Exodiff'
+    input = 'percolation_test.i'
+    exodiff = 'percolation_test_out.e'
+
+    issues = "#13169"
+    requirement = "The FeatureVolumeVectorPostprocessor shall output whether a percolated pathway exists between
+                    specified primary_percolation_boundaries and secondary_percolation_boundaries."
+    design = "/FeatureVolumeVectorPostprocessor.md"
+  [../]
 []
