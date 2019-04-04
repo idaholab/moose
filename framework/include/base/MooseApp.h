@@ -643,7 +643,7 @@ public:
    * Note: Geometric relationship managers that are supposed to be attached late
    * will be attached when Algebraic are attached.
    */
-  void attachRelationshipManagers(const Moose::RelationshipManagerType & rm_type);
+  void attachRelationshipManagers(Moose::RelationshipManagerType rm_type);
 
   /**
    * Retrieve the relationship managers

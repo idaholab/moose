@@ -41,7 +41,7 @@ protected:
   /// applicable and necessary when using DistributedMesh.
   unsigned short _layers;
 
-  /// Weither or not this RM is keeping track of periodic boundaries
+  /// Whether or not this RM is keeping track of periodic boundaries
   bool _has_periodic_boundaries = false;
 };
 

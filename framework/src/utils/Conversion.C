@@ -353,7 +353,7 @@ stringToEnum<RelationshipManagerType>(const std::string & s)
 std::string
 stringify(const RelationshipManagerType & t)
 {
-  // Connot make a switch statement because the boolean logic doesn't work well with the class type
+  // Cannot make a switch statement because the boolean logic doesn't work well with the class type
   // enumeration and because Cody says so.
   if (t == RelationshipManagerType::DEFAULT)
     return "DEFAULT";

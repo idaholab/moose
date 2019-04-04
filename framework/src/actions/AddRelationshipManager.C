@@ -26,24 +26,18 @@ AddRelationshipManager::AddRelationshipManager(InputParameters params) : Action(
 void
 AddRelationshipManager::act()
 {
-  if (_current_task == "attach_geometric_rm")
-  {
-    // Add any more relationship managers that are needed
-    const auto & all_action_ptrs = _awh.allActionBlocks();
-    for (const auto & action_ptr : all_action_ptrs)
-      action_ptr->addRelationshipManagers(Moose::RelationshipManagerType::GEOMETRIC);
+  Moose::RelationshipManagerType rm_type =
+      (_current_task == "attach_geometric_rm" ? Moose::RelationshipManagerType::GEOMETRIC
+                                              : Moose::RelationshipManagerType::ALGEBRAIC);
 
-    _app.attachRelationshipManagers(Moose::RelationshipManagerType::GEOMETRIC);
-  }
+  const auto & all_action_ptrs = _awh.allActionBlocks();
+  for (const auto & action_ptr : all_action_ptrs)
+    action_ptr->addRelationshipManagers(rm_type);
+
+  _app.attachRelationshipManagers(rm_type);
 
   if (_current_task == "attach_algebraic_rm")
   {
-    const auto & all_action_ptrs = _awh.allActionBlocks();
-    for (const auto & action_ptr : all_action_ptrs)
-      action_ptr->addRelationshipManagers(Moose::RelationshipManagerType::ALGEBRAIC);
-
-    _app.attachRelationshipManagers(Moose::RelationshipManagerType::ALGEBRAIC);
-
     // If we're doing Algebraic then we're done adding ghosting functors
     // and we can tell the mesh that it's safe to remove remote elements again
     _mesh->getMesh().allow_remote_element_removal(true);

@@ -172,8 +172,8 @@ AdaptivityAction::act()
         getParam<std::vector<std::string>>("weight_names");
     const std::vector<Real> & weight_values = getParam<std::vector<Real>>("weight_values");
 
-    int num_weight_names = weight_names.size();
-    int num_weight_values = weight_values.size();
+    auto num_weight_names = weight_names.size();
+    auto num_weight_values = weight_values.size();
 
     if (num_weight_names)
     {
@@ -184,10 +184,10 @@ AdaptivityAction::act()
       // If weights have been specified then set the default weight to zero
       std::vector<Real> weights(system.nVariables(), 0);
 
-      for (int i = 0; i < num_weight_names; i++)
+      for (MooseIndex(num_weight_names) i = 0; i < num_weight_names; i++)
       {
         std::string name = weight_names[i];
-        double value = weight_values[i];
+        auto value = weight_values[i];
 
         weights[system.getVariable(0, name).number()] = value;
       }

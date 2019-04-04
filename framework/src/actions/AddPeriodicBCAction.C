@@ -148,11 +148,6 @@ AddPeriodicBCAction::autoTranslationBoundaries()
   return false;
 }
 
-namespace
-{
-int count = 0;
-}
-
 void
 AddPeriodicBCAction::act()
 {
@@ -171,10 +166,8 @@ AddPeriodicBCAction::act()
 
     if (rm_params.areAllRequiredParamsValid())
     {
-      auto rm_obj =
-          _factory.create<RelationshipManager>("ElementSideNeighborLayers",
-                                               "periodc_bc_ghosting" + Moose::stringify(count++),
-                                               rm_params);
+      auto rm_obj = _factory.create<RelationshipManager>(
+          "ElementSideNeighborLayers", "periodic_bc_ghosting_" + name(), rm_params);
 
       if (!_app.addRelationshipManager(rm_obj))
         _factory.releaseSharedObjects(*rm_obj);
