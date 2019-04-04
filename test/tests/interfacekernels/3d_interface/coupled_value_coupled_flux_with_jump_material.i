@@ -43,12 +43,7 @@
   [../]
 []
 
-# [AuxVariables]
-#   [./jump_var]
-#     order = CONSTANT
-#     family = MONOMIAL
-#   [../]
-# []
+
 
 [Kernels]
   [./diff_u]
@@ -70,14 +65,21 @@
   [../]
 []
 
-# [AuxKernels]
-#   [jump_aux]
-#     type = MaterialRealAux
-#     boundary = master0_interface
-#     property = jump
-#     variable = jump_var
-#   []
-# []
+[AuxVariables]
+  [./jump_var]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
+[AuxKernels]
+  [jump_aux]
+    type = MaterialRealAux
+    boundary = master0_interface
+    property = jump
+    variable = jump_var
+  []
+[]
 
 
 [InterfaceKernels]

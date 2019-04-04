@@ -655,6 +655,9 @@ public:
   virtual void reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful = true);
   virtual void
   reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful = true);
+  virtual void reinitMaterialsNeighborOnInterface(BoundaryID boundary_id,
+                                                  THREAD_ID tid,
+                                                  bool swap_stateful = true);
   virtual void
   reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid, bool swap_stateful = true);
   virtual void
@@ -1364,6 +1367,7 @@ public:
    * @return Boolean indicating whether material properties need to be stored
    */
   bool needBoundaryMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid);
+  bool needInterfaceMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid);
   bool needSubdomainMaterialOnSide(SubdomainID subdomain_id, THREAD_ID tid);
   ///@}
 
@@ -1402,6 +1406,11 @@ public:
                                             Moose::MaterialDataType type,
                                             THREAD_ID tid = 0,
                                             bool no_warn = false);
+
+  std::shared_ptr<MaterialBase> getInterfaceMaterial(std::string name,
+                                                     Moose::MaterialDataType type,
+                                                     THREAD_ID tid = 0,
+                                                     bool no_warn = false);
 
   /*
    * Return a pointer to the MaterialData
@@ -1734,6 +1743,9 @@ protected:
 
   /// Cache for calculating materials on side
   std::vector<std::unordered_map<BoundaryID, bool>> _bnd_mat_side_cache;
+
+  /// Cache for calculating materials on interface
+  std::vector<std::unordered_map<BoundaryID, bool>> _interface_mat_side_cache;
 
   /// Objects to be notified when the mesh changes
   std::vector<MeshChangedInterface *> _notify_when_mesh_changes;

@@ -3035,6 +3035,12 @@ NonlinearSystemBase::needBoundaryMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid
   return _integrated_bcs.hasActiveBoundaryObjects(bnd_id, tid);
 }
 
+bool
+NonlinearSystemBase::needInterfaceMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid) const
+{
+  return _integrated_bcs.hasActiveBoundaryObjects(bnd_id, tid);
+}
+
 bool NonlinearSystemBase::needSubdomainMaterialOnSide(SubdomainID /*subdomain_id*/,
                                                       THREAD_ID /*tid*/) const
 {

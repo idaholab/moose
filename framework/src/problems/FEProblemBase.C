@@ -362,6 +362,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
 
   _block_mat_side_cache.resize(n_threads);
   _bnd_mat_side_cache.resize(n_threads);
+  _interface_mat_side_cache.resize(n_threads);
 
   _resurrector = libmesh_make_unique<Resurrector>(*this);
 
@@ -2324,6 +2325,32 @@ FEProblemBase::getMaterial(std::string name,
     case Moose::FACE_MATERIAL_DATA:
       name += "_face";
       break;
+    // case Moose::INTERFACE_MATERIAL_DATA:
+    //   name += "_interface";
+    //   break;
+    default:
+      break;
+  }
+
+  std::shared_ptr<MaterialBase> material = _all_materials[type].getActiveObject(name, tid);
+  if (!no_warn && material->getParam<bool>("compute") && type == Moose::BLOCK_MATERIAL_DATA)
+    mooseWarning("You are retrieving a Material object (",
+                 material->name(),
+                 "), but its compute flag is set to true. This indicates that MOOSE is "
+                 "computing this property which may not be desired and produce un-expected "
+                 "results.");
+
+  return material;
+}
+
+std::shared_ptr<MaterialBase>
+FEProblemBase::getInterfaceMaterial(std::string name,
+                                    Moose::MaterialDataType type,
+                                    THREAD_ID tid,
+                                    bool no_warn)
+{
+  switch (type)
+  {
     case Moose::INTERFACE_MATERIAL_DATA:
       name += "_interface";
       break;
@@ -2426,12 +2453,41 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
     // If the object is boundary restricted do not create the neighbor and face objects
     if (material->boundaryRestricted())
     {
+
+      std::shared_ptr<MaterialBase> interface_material;
+      if (material->isInterfaceMaterial())
+      {
+        std::string object_name;
+        InputParameters current_parameters = parameters;
+
+        current_parameters.set<Moose::MaterialDataType>("_material_data_type") =
+            Moose::INTERFACE_MATERIAL_DATA;
+        object_name = name + "_interface";
+        interface_material =
+            _factory.create<MaterialBase>(mat_name, object_name, current_parameters, tid);
+      }
+
       _all_materials.addObject(material, tid);
       if (discrete)
+      {
         _discrete_materials.addObject(material, tid);
+        if (material->isInterfaceMaterial())
+          _discrete_materials.addInterfaceObject(interface_material, tid);
+      }
       else
         for (auto && warehouse : warehouses)
+        {
           warehouse->addObject(material, tid);
+          if (material->isInterfaceMaterial())
+            warehouse->addInterfaceObject(interface_material, tid);
+        }
+      if (material->isInterfaceMaterial())
+      {
+        MooseObjectParameterName interface_name(
+            MooseObjectName("Material", interface_material->name()), "*");
+        _app.getInputParameterWarehouse().addControllableParameterConnection(
+            name, interface_name, false);
+      }
     }
 
     // Non-boundary restricted require face and neighbor objects
@@ -2452,13 +2508,6 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
       std::shared_ptr<MaterialBase> face_material =
           _factory.create<MaterialBase>(mat_name, object_name, current_parameters, tid);
 
-      // interface material
-      current_parameters.set<Moose::MaterialDataType>("_material_data_type") =
-          Moose::INTERFACE_MATERIAL_DATA;
-      object_name = name + "_interface";
-      std::shared_ptr<MaterialBase> interface_material =
-          _factory.create<MaterialBase>(mat_name, object_name, current_parameters, tid);
-
       // neighbor material
       current_parameters.set<Moose::MaterialDataType>("_material_data_type") =
           Moose::NEIGHBOR_MATERIAL_DATA;
@@ -2468,24 +2517,20 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
           _factory.create<MaterialBase>(mat_name, object_name, current_parameters, tid);
 
       // Store the material objects
-      _all_materials.addObjects(
-          material, neighbor_material, face_material, interface_material, tid);
+      _all_materials.addObjects(material, neighbor_material, face_material, tid);
 
       if (discrete)
-        _discrete_materials.addObjects(
-            material, neighbor_material, face_material, interface_material, tid);
+        _discrete_materials.addObjects(material, neighbor_material, face_material, tid);
       else
         for (auto && warehouse : warehouses)
-          warehouse->addObjects(
-              material, neighbor_material, face_material, interface_material, tid);
+          warehouse->addObjects(material, neighbor_material, face_material, tid);
 
       // link parameters of face and neighbor materials
       MooseObjectParameterName name(MooseObjectName("Material", material->name()), "*");
       MooseObjectParameterName face_name(MooseObjectName("Material", face_material->name()), "*");
       MooseObjectParameterName neighbor_name(MooseObjectName("Material", neighbor_material->name()),
                                              "*");
-      MooseObjectParameterName interface_name(
-          MooseObjectName("Material", interface_material->name()), "*");
+
       _app.getInputParameterWarehouse().addControllableParameterConnection(name, face_name, false);
       _app.getInputParameterWarehouse().addControllableParameterConnection(
           name, neighbor_name, false);
@@ -2616,6 +2661,48 @@ FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool s
         !_currently_computing_jacobian)
       _neighbor_material_data[tid]->reinit(
           _residual_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
+  }
+}
+
+void
+FEProblemBase::reinitMaterialsNeighborOnInterface(BoundaryID boundary_id,
+                                                  THREAD_ID tid,
+                                                  bool swap_stateful)
+{
+  if (hasActiveMaterialProperties(tid))
+  {
+    // NOTE: this will not work with h-adaptivity
+    const Elem *& neighbor = _assembly[tid]->neighbor();
+    if (neighbor == nullptr)
+      return;
+
+    unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[tid]->elem());
+    unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
+    _neighbor_material_data[tid]->resize(n_points);
+
+    // Only swap if requested
+    if (swap_stateful)
+      _neighbor_material_data[tid]->swap(*neighbor, neighbor_side);
+
+    if (_discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBoundaryObjects(boundary_id,
+                                                                                    tid))
+      _neighbor_material_data[tid]->reset(
+          _discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBoundaryObjects(boundary_id,
+                                                                                      tid));
+
+    if (_jacobian_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBoundaryObjects(boundary_id,
+                                                                                    tid) &&
+        _currently_computing_jacobian)
+      _neighbor_material_data[tid]->reinit(
+          _jacobian_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBoundaryObjects(boundary_id,
+                                                                                      tid));
+
+    if (_residual_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBoundaryObjects(boundary_id,
+                                                                                    tid) &&
+        !_currently_computing_jacobian)
+      _neighbor_material_data[tid]->reinit(
+          _residual_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBoundaryObjects(boundary_id,
+                                                                                      tid));
   }
 }
 
@@ -5896,6 +5983,27 @@ FEProblemBase::needBoundaryMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid)
   }
 
   return _bnd_mat_side_cache[tid][bnd_id];
+}
+
+bool
+FEProblemBase::needInterfaceMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid)
+{
+  if (_interface_mat_side_cache[tid].find(bnd_id) == _interface_mat_side_cache[tid].end())
+  {
+    _interface_mat_side_cache[tid][bnd_id] = true;
+
+    // if (_nl->needInterfaceMaterialOnSide(bnd_id, tid) || _aux->needMaterialOnSide(bnd_id))
+    //   _interface_mat_side_cache[tid][bnd_id] = true;
+    // else if (theWarehouse()
+    //              .query()
+    //              .condition<AttribThread>(tid)
+    //              .condition<AttribInterfaces>(Interfaces::InterfaceUserObject)
+    //              .condition<AttribBoundaries>(bnd_id)
+    //              .count() > 0)
+    //   _interface_mat_side_cache[tid][bnd_id] = true;
+  }
+
+  return _interface_mat_side_cache[tid][bnd_id];
 }
 
 bool

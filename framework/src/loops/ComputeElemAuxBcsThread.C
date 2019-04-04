@@ -14,6 +14,7 @@
 #include "DisplacedProblem.h"
 #include "Assembly.h"
 #include "AuxKernel.h"
+#include "SwapBackSentinel.h"
 
 #include "libmesh/threads.h"
 
@@ -79,8 +80,20 @@ ComputeElemAuxBcsThread::operator()(const ConstBndElemRange & range)
             needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
           }
           _problem.setActiveMaterialProperties(needed_mat_props, _tid);
+
+          const Elem * neighbor = elem->neighbor_ptr(side);
+
           _problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
+          if (neighbor != nullptr)
+            if (neighbor->active())
+            {
+              SwapBackSentinel neighbor_sentinel(
+                  _problem, &FEProblem::swapBackMaterialsNeighbor, _tid);
+              _problem.reinitNeighbor(elem, side, _tid);
+            }
+
           _problem.reinitMaterialsBoundary(boundary_id, _tid);
+          _problem.reinitMaterialsInterface(boundary_id, _tid);
         }
 
         for (const auto & aux : iter->second)

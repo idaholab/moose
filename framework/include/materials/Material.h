@@ -29,13 +29,11 @@ class Material : public MaterialBase, public Coupleable, public MaterialProperty
 public:
   Material(const InputParameters & parameters);
 
-  virtual void initStatefulProperties(unsigned int n_points);
+  virtual void initStatefulProperties(unsigned int n_points) override;
 
   virtual void computeProperties() override;
 
-  // virtual void resetProperties() override;
-
-  virtual void computePropertiesAtQp(unsigned int qp);
+  virtual void computePropertiesAtQp(unsigned int qp) override;
 
   ///@{
   /**
@@ -79,9 +77,6 @@ public:
 protected:
   virtual const MaterialData & materialData() const override { return *_material_data; }
   virtual MaterialData & materialData() override { return *_material_data; }
-
-  virtual const FEProblemBase & miProblem() const override { return _mi_feproblem; }
-  virtual FEProblemBase & miProblem() override { return _mi_feproblem; }
 
   virtual const QBase & qRule() const override { return *_qrule; }
 
