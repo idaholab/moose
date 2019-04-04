@@ -7,6 +7,9 @@
     heavy = True
     max_time = 1000
     threading = '!pthreads'
+    requirement = 'PorousFlow shall be able to model transient newton cooling acting on the fluid mass and agree with the analytic solution'
+    issues = '#13155'
+    design = 'porous_flow/tests/newton_cooling/newton_cooling_tests.md'
   [../]
   [./nc02]
     type = 'CSVDiff'
@@ -14,6 +17,9 @@
     csvdiff = 'nc02_porepressure_0001.csv'
     rel_err = 1E-5
     threading = '!pthreads'
+    requirement = 'PorousFlow shall be able to model steady-state newton cooling acting on the fluid mass and agree with the analytic solution'
+    issues = '#13155'
+    design = 'porous_flow/tests/newton_cooling/newton_cooling_tests.md'
   [../]
   [./nc04]
     type = 'CSVDiff'
@@ -21,6 +27,9 @@
     csvdiff = 'nc04_temp_0001.csv'
     rel_err = 1E-5
     threading = '!pthreads'
+    requirement = 'PorousFlow shall be able to model steady-state newton cooling acting on the temperature and agree with the analytic solution'
+    issues = '#13155'
+    design = 'porous_flow/tests/newton_cooling/newton_cooling_tests.md'
   [../]
   [./nc06]
     type = 'CSVDiff'
@@ -28,6 +37,9 @@
     csvdiff = 'nc06_porepressure_0001.csv nc06_temperature_0001.csv'
     rel_err = 1E-5
     threading = '!pthreads'
+    requirement = 'PorousFlow shall be able to model newton cooling acting on the porepressure and at the same time extracting heat along with the extracted fluid and agree with the analytic solution'
+    issues = '#13155'
+    design = 'porous_flow/tests/newton_cooling/newton_cooling_tests.md'
   [../]
   [./nc08]
     type = 'CSVDiff'
@@ -35,5 +47,8 @@
     csvdiff = 'nc08_porepressure_0001.csv nc08_temperature_0001.csv'
     rel_err = 1E-5
     threading = '!pthreads'
+    requirement = 'PorousFlow shall be able to model newton cooling acting on the porepressure of an ideal gas and at the same time extracting heat along with the extracted gas and agree with the analytic solution'
+    issues = '#13155'
+    design = 'porous_flow/tests/newton_cooling/newton_cooling_tests.md'
   [../]
 []
