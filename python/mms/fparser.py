@@ -62,9 +62,9 @@ class FParserPrinter(CodePrinter):
       'not': '!',
     }
 
-    def __init__(self, settings={}):
+    def __init__(self, **kwargs):
         """Register function mappings supplied by user"""
-        CodePrinter.__init__(self, settings)
+        CodePrinter.__init__(self, kwargs)
         self.known_functions = dict(known_functions)
 
     def _rate_index_position(self, p):
@@ -83,7 +83,6 @@ class FParserPrinter(CodePrinter):
 
     def _get_loop_opening_ending(self, indices):
         return '',''
-        #raise TypeError("FParserPrinter does not support loops")
 
     def _print_Pow(self, expr):
         PREC = precedence(expr)
@@ -96,6 +95,14 @@ class FParserPrinter(CodePrinter):
         else:
             return '%s^%s' % (self.parenthesize(expr.base, PREC),
                      self.parenthesize(expr.exp, PREC))
+
+    def _print_BaseScalar(self, expr):
+        """
+        Print x,y,z instead of R.x, R.y, or R.z.
+
+        see sympy/sympy/vector/scalar.py
+        """
+        return 'xyz'[expr._id[0]]
 
     def _print_Rational(self, expr):
         p, q = int(expr.p), int(expr.q)
@@ -143,7 +150,7 @@ class FParserPrinter(CodePrinter):
         return ",".join(ecpairs) + ")" * (len(ecpairs)-1)
 
 
-def fparser(expr, assign_to=None, **settings):
+def fparser(expr, assign_to=None, **kwargs):
     r"""Converts an expr to an FParser expression
 
       Parameters
@@ -165,9 +172,9 @@ def fparser(expr, assign_to=None, **settings):
       >>> fparser(sin(x), assign_to="s")
       's = sin(x);'
     """
-    return FParserPrinter(settings).doprint(expr, assign_to)
+    return FParserPrinter(**kwargs).doprint(expr, assign_to)[-1]
 
 
-def print_fparser(expr, **settings):
+def print_fparser(expr, **kwargs):
     """Prints an FParser representation of the given expression."""
-    print(ccode(expr, **settings))
+    print(fparser(expr, **kwargs))
