@@ -231,20 +231,6 @@ Water97FluidProperties::e_from_p_T(Real pressure, Real temperature) const
   return internal_energy;
 }
 
-DualReal
-Water97FluidProperties::e_from_p_T(DualReal pressure, DualReal temperature) const
-{
-  Real e, de_dp, de_dT;
-  e_from_p_T(pressure.value(), temperature.value(), e, de_dp, de_dT);
-
-  DualReal result = e;
-  for (std::size_t i = 0; i < pressure.derivatives().size(); ++i)
-    result.derivatives()[i] =
-        pressure.derivatives()[i] * de_dp + temperature.derivatives()[i] * de_dT;
-
-  return result;
-}
-
 void
 Water97FluidProperties::e_from_p_T(
     Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const
@@ -852,8 +838,8 @@ Water97FluidProperties::vaporPressure(Real temperature, Real & psat, Real & dpsa
   dpsat_dT = dpsat * dtheta_dT * 1.0e6;
 }
 
-DualReal
-Water97FluidProperties::vaporTemperature(DualReal pressure) const
+FPDualReal
+Water97FluidProperties::vaporTemperature_ad(const FPDualReal & pressure) const
 {
   // Check whether the input pressure is within the region of validity of this equation.
   // Valid for 611.213 Pa <= p <= 22.064 MPa
@@ -861,12 +847,12 @@ Water97FluidProperties::vaporTemperature(DualReal pressure) const
     throw MooseException(name() + ": vaporTemperature(): Pressure is outside range 611.213 Pa <= "
                                   "p <= 22.064 MPa");
 
-  DualReal beta = std::pow(pressure / 1.e6, 0.25);
-  DualReal beta2 = beta * beta;
-  DualReal e = beta2 + _n4[2] * beta + _n4[5];
-  DualReal f = _n4[0] * beta2 + _n4[3] * beta + _n4[6];
-  DualReal g = _n4[1] * beta2 + _n4[4] * beta + _n4[7];
-  DualReal d = 2.0 * g / (-f - std::sqrt(f * f - 4.0 * e * g));
+  const FPDualReal beta = std::pow(pressure / 1.e6, 0.25);
+  const FPDualReal beta2 = beta * beta;
+  const FPDualReal e = beta2 + _n4[2] * beta + _n4[5];
+  const FPDualReal f = _n4[0] * beta2 + _n4[3] * beta + _n4[6];
+  const FPDualReal g = _n4[1] * beta2 + _n4[4] * beta + _n4[7];
+  const FPDualReal d = 2.0 * g / (-f - std::sqrt(f * f - 4.0 * e * g));
 
   return (_n4[9] + d - std::sqrt((_n4[9] + d) * (_n4[9] + d) - 4.0 * (_n4[8] + _n4[9] * d))) / 2.0;
 }
@@ -874,9 +860,21 @@ Water97FluidProperties::vaporTemperature(DualReal pressure) const
 Real
 Water97FluidProperties::vaporTemperature(Real pressure) const
 {
-  const DualReal p = pressure;
+  const FPDualReal p = pressure;
 
-  return vaporTemperature(p).value();
+  return vaporTemperature_ad(p).value();
+}
+
+void
+Water97FluidProperties::vaporTemperature(Real pressure, Real & Tsat, Real & dTsat_dp) const
+{
+  FPDualReal p = pressure;
+  p.derivatives()[0] = 1.0;
+
+  const FPDualReal T = vaporTemperature_ad(p);
+
+  Tsat = T.value();
+  dTsat_dp = T.derivatives()[0];
 }
 
 Real
@@ -1678,19 +1676,36 @@ Water97FluidProperties::b2bc(Real pressure) const
 Real
 Water97FluidProperties::T_from_p_h(Real pressure, Real enthalpy) const
 {
-  const DualReal p = pressure;
-  const DualReal h = enthalpy;
+  const FPDualReal p = pressure;
+  const FPDualReal h = enthalpy;
 
-  return T_from_p_h(p, h).value();
+  return T_from_p_h_ad(p, h).value();
 }
 
-DualReal
-Water97FluidProperties::T_from_p_h(DualReal pressure, DualReal enthalpy) const
+void
+Water97FluidProperties::T_from_p_h(
+    Real pressure, Real enthalpy, Real & temperature, Real & dT_dp, Real & dT_dh) const
 {
-  DualReal temperature = 0.0;
+  FPDualReal p = pressure;
+  p.derivatives()[0] = 1.0;
+  FPDualReal h = enthalpy;
+  h.derivatives()[1] = 1.0;
+
+  const FPDualReal T = T_from_p_h_ad(p, h);
+
+  temperature = T.value();
+  dT_dp = T.derivatives()[0];
+  dT_dh = T.derivatives()[1];
+}
+
+FPDualReal
+Water97FluidProperties::T_from_p_h_ad(const FPDualReal & pressure,
+                                      const FPDualReal & enthalpy) const
+{
+  FPDualReal temperature = 0.0;
 
   // Determine which region the point is in
-  unsigned int region = inRegionPH(pressure.value(), enthalpy.value());
+  const unsigned int region = inRegionPH(pressure.value(), enthalpy.value());
 
   switch (region)
   {
@@ -1701,7 +1716,7 @@ Water97FluidProperties::T_from_p_h(DualReal pressure, DualReal enthalpy) const
     case 2:
     {
       // First, determine which subregion the point is in:
-      unsigned int subregion = subregion2ph(pressure.value(), enthalpy.value());
+      const unsigned int subregion = subregion2ph(pressure.value(), enthalpy.value());
 
       if (subregion == 1)
         temperature = temperature_from_ph2a(pressure, enthalpy);
@@ -1715,7 +1730,7 @@ Water97FluidProperties::T_from_p_h(DualReal pressure, DualReal enthalpy) const
     case 3:
     {
       // First, determine which subregion the point is in:
-      unsigned int subregion = subregion3ph(pressure.value(), enthalpy.value());
+      const unsigned int subregion = subregion3ph(pressure.value(), enthalpy.value());
 
       if (subregion == 1)
         temperature = temperature_from_ph3a(pressure, enthalpy);
@@ -1735,12 +1750,13 @@ Water97FluidProperties::T_from_p_h(DualReal pressure, DualReal enthalpy) const
   return temperature;
 }
 
-DualReal
-Water97FluidProperties::temperature_from_ph1(DualReal pressure, DualReal enthalpy) const
+FPDualReal
+Water97FluidProperties::temperature_from_ph1(const FPDualReal & pressure,
+                                             const FPDualReal & enthalpy) const
 {
-  const DualReal pi = pressure / 1.0e6;
-  const DualReal eta = enthalpy / 2500.0e3;
-  DualReal sum = 0.0;
+  const FPDualReal pi = pressure / 1.0e6;
+  const FPDualReal eta = enthalpy / 2500.0e3;
+  FPDualReal sum = 0.0;
 
   for (std::size_t i = 0; i < _nph1.size(); ++i)
     sum += _nph1[i] * std::pow(pi, _Iph1[i]) * std::pow(eta + 1.0, _Jph1[i]);
@@ -1748,12 +1764,13 @@ Water97FluidProperties::temperature_from_ph1(DualReal pressure, DualReal enthalp
   return sum;
 }
 
-DualReal
-Water97FluidProperties::temperature_from_ph2a(DualReal pressure, DualReal enthalpy) const
+FPDualReal
+Water97FluidProperties::temperature_from_ph2a(const FPDualReal & pressure,
+                                              const FPDualReal & enthalpy) const
 {
-  const DualReal pi = pressure / 1.0e6;
-  const DualReal eta = enthalpy / 2000.0e3;
-  DualReal sum = 0.0;
+  const FPDualReal pi = pressure / 1.0e6;
+  const FPDualReal eta = enthalpy / 2000.0e3;
+  FPDualReal sum = 0.0;
 
   // Factor out the negative in std::pow(eta - 2.1, _Jph2a[i]) to avoid fpe in dbg (see #13163)
   const Real sgn = MathUtils::sign(eta.value() - 2.1);
@@ -1765,12 +1782,13 @@ Water97FluidProperties::temperature_from_ph2a(DualReal pressure, DualReal enthal
   return sum;
 }
 
-DualReal
-Water97FluidProperties::temperature_from_ph2b(DualReal pressure, DualReal enthalpy) const
+FPDualReal
+Water97FluidProperties::temperature_from_ph2b(const FPDualReal & pressure,
+                                              const FPDualReal & enthalpy) const
 {
-  const DualReal pi = pressure / 1.0e6;
-  const DualReal eta = enthalpy / 2000.0e3;
-  DualReal sum = 0.0;
+  const FPDualReal pi = pressure / 1.0e6;
+  const FPDualReal eta = enthalpy / 2000.0e3;
+  FPDualReal sum = 0.0;
 
   // Factor out the negatives in std::pow(pi - 2.0, _Iph2b[i])* std::pow(eta - 2.6, _Jph2b[i])
   // to avoid fpe in dbg (see #13163)
@@ -1784,12 +1802,13 @@ Water97FluidProperties::temperature_from_ph2b(DualReal pressure, DualReal enthal
   return sum;
 }
 
-DualReal
-Water97FluidProperties::temperature_from_ph2c(DualReal pressure, DualReal enthalpy) const
+FPDualReal
+Water97FluidProperties::temperature_from_ph2c(const FPDualReal & pressure,
+                                              const FPDualReal & enthalpy) const
 {
-  const DualReal pi = pressure / 1.0e6;
-  const DualReal eta = enthalpy / 2000.0e3;
-  DualReal sum = 0.0;
+  const FPDualReal pi = pressure / 1.0e6;
+  const FPDualReal eta = enthalpy / 2000.0e3;
+  FPDualReal sum = 0.0;
 
   // Factor out the negative in std::pow(eta - 1.8, _Jph2c[i]) to avoid fpe in dbg (see #13163)
   const Real sgn = MathUtils::sign(eta.value() - 1.8);
@@ -1816,12 +1835,13 @@ Water97FluidProperties::b3ab(Real pressure) const
   return eta * 1.0e3;
 }
 
-DualReal
-Water97FluidProperties::temperature_from_ph3a(DualReal pressure, DualReal enthalpy) const
+FPDualReal
+Water97FluidProperties::temperature_from_ph3a(const FPDualReal & pressure,
+                                              const FPDualReal & enthalpy) const
 {
-  const DualReal pi = pressure / 100.0e6;
-  const DualReal eta = enthalpy / 2300.0e3;
-  DualReal sum = 0.0;
+  const FPDualReal pi = pressure / 100.0e6;
+  const FPDualReal eta = enthalpy / 2300.0e3;
+  FPDualReal sum = 0.0;
 
   for (std::size_t i = 0; i < _nph3a.size(); ++i)
     sum += _nph3a[i] * std::pow(pi + 0.24, _Iph3a[i]) * std::pow(eta - 0.615, _Jph3a[i]);
@@ -1829,12 +1849,13 @@ Water97FluidProperties::temperature_from_ph3a(DualReal pressure, DualReal enthal
   return sum * 760.0;
 }
 
-DualReal
-Water97FluidProperties::temperature_from_ph3b(DualReal pressure, DualReal enthalpy) const
+FPDualReal
+Water97FluidProperties::temperature_from_ph3b(const FPDualReal & pressure,
+                                              const FPDualReal & enthalpy) const
 {
-  const DualReal pi = pressure / 100.0e6;
-  const DualReal eta = enthalpy / 2800.0e3;
-  DualReal sum = 0.0;
+  const FPDualReal pi = pressure / 100.0e6;
+  const FPDualReal eta = enthalpy / 2800.0e3;
+  FPDualReal sum = 0.0;
 
   for (std::size_t i = 0; i < _nph3b.size(); ++i)
     sum += _nph3b[i] * std::pow(pi + 0.298, _Iph3b[i]) * std::pow(eta - 0.72, _Jph3b[i]);

@@ -159,25 +159,30 @@ PorousFlowWaterVapor::thermophysicalProperties(Real pressure,
       // Vapor quality
       const DualReal X = (h - hl) / hvl;
 
+      // Perturbed saturation temperature to ensure that the correct
+      // phase properties are calculated
+      const DualReal Tsatl = Tsat - dT;
+      const DualReal Tsatv = Tsat + dT;
+
       // Density
-      const DualReal rhol = _water_fp.rho_from_p_T(p, Tsat - dT);
-      const DualReal rhov = _water_fp.rho_from_p_T(p, Tsat + dT);
+      const DualReal rhol = _water_fp.rho_from_p_T(p, Tsatl);
+      const DualReal rhov = _water_fp.rho_from_p_T(p, Tsatv);
 
       // Vapor (gas) saturation
       const DualReal satv = X * rhol / (rhov + X * (rhol - rhov));
 
       gas.temperature = Tsat;
       gas.density = rhov;
-      gas.viscosity = _water_fp.mu_from_p_T(p, Tsat + dT);
+      gas.viscosity = _water_fp.mu_from_p_T(p, Tsatv);
       gas.enthalpy = hv;
-      gas.internal_energy = _water_fp.e_from_p_T(p, Tsat + dT);
+      gas.internal_energy = _water_fp.e_from_p_T(p, Tsatv);
       gas.saturation = satv;
 
       liquid.temperature = Tsat;
       liquid.density = rhol;
-      liquid.viscosity = _water_fp.mu_from_p_T(p, Tsat - dT);
+      liquid.viscosity = _water_fp.mu_from_p_T(p, Tsatl);
       liquid.enthalpy = hl;
-      liquid.internal_energy = _water_fp.e_from_p_T(p, Tsat - dT);
+      liquid.internal_energy = _water_fp.e_from_p_T(p, Tsatl);
       liquid.saturation = 1.0 - satv;
 
       liquid.pressure = p;

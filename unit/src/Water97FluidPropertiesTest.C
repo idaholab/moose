@@ -588,7 +588,7 @@ TEST_F(Water97FluidPropertiesTest, derivatives)
   DualReal adh = 4.0e6;
   adh.derivatives()[1] = 1.0;
 
-  DualReal adT = _fp->T_from_p_h(adp, adh);
+  DualReal adT = _ad_fp->T_from_p_h(adp, adh);
 
   REL_TEST(adT.value(), 0.101077577e4, 1.0e-8);
 
