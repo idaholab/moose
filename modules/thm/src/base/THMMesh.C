@@ -2,6 +2,8 @@
 
 registerMooseObject("THMApp", THMMesh);
 
+const BoundaryName THMMesh::INVALID_BOUNDARY_ID = "invalid_boundary_id";
+
 template <>
 InputParameters
 validParams<THMMesh>()

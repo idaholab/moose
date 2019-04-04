@@ -4,7 +4,7 @@
 #include "Kernel.h"
 
 class OneD3EqnEnergyHeatFlux;
-class HeatFluxFromHeatStructureBaseUserObject;
+class HeatFluxFromHeatStructure3EqnUserObject;
 
 template <>
 InputParameters validParams<OneD3EqnEnergyHeatFlux>();
@@ -14,10 +14,15 @@ class OneD3EqnEnergyHeatFlux : public Kernel
 public:
   OneD3EqnEnergyHeatFlux(const InputParameters & parameters);
 
+  virtual void computeJacobian() override;
+  virtual void computeOffDiagJacobian(unsigned jvar) override;
+  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
+
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
+  virtual Real computeQpOffDiagJacobianNeighbor(unsigned int jvar);
 
   /**
    * Creates the mapping of coupled variable index to local equation system
@@ -25,8 +30,11 @@ protected:
    */
   std::map<unsigned int, unsigned int> getVariableIndexMapping() const;
 
+  /// shape function values (in QPs)
+  const VariablePhiValue & _phi_neighbor;
+
   /// User object that computes the heat flux
-  const HeatFluxFromHeatStructureBaseUserObject & _q_uo;
+  const HeatFluxFromHeatStructure3EqnUserObject & _q_uo;
   /// Heat flux perimeter
   const VariableValue & _P_hf;
 
