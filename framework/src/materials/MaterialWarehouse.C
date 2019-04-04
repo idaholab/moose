@@ -15,12 +15,16 @@ void
 MaterialWarehouse::addObjects(std::shared_ptr<MaterialBase> block,
                               std::shared_ptr<MaterialBase> neighbor,
                               std::shared_ptr<MaterialBase> face,
-                              std::shared_ptr<MaterialBase> interface,
                               THREAD_ID tid /*=0*/)
 {
   MooseObjectWarehouse<MaterialBase>::addObject(block, tid);
   _neighbor_materials.addObject(neighbor, tid);
   _face_materials.addObject(face, tid);
+}
+
+void
+MaterialWarehouse::addInterfaceObject(std::shared_ptr<MaterialBase> interface, THREAD_ID tid /*=0*/)
+{
   _interface_materials.addObject(interface, tid);
 }
 

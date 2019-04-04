@@ -31,6 +31,7 @@ class InterfaceMaterial : public MaterialBase,
 public:
   InterfaceMaterial(const InputParameters & parameters);
 
+  virtual bool isInterfaceMaterial() { return true; };
   void computeProperties() override;
 
   ///@{
@@ -96,9 +97,6 @@ protected:
   virtual const MaterialData & materialData() const override { return *_material_data; }
   virtual MaterialData & materialData() override { return *_material_data; }
 
-  virtual const FEProblemBase & miProblem() const override { return _mi_feproblem; }
-  virtual FEProblemBase & miProblem() override { return _mi_feproblem; }
-
   virtual const QBase & qRule() const override { return *_qrule; }
 
   bool _bnd;
@@ -113,6 +111,12 @@ protected:
 
   /// current side of the current element
   unsigned int & _current_side;
+
+  // virtual bool hasActiveInterfaceMaterials(BoundaryID bnd_id, THREAD_ID tid) override
+  // {
+  //   MaterialWarehouse<THREAD_ID>::checkThreadID(tid);
+  //   return true;
+  // }
 };
 
 template <typename T>

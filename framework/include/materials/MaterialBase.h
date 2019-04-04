@@ -69,6 +69,7 @@ public:
    * Initialize stateful properties (if material has some)
    */
   virtual void initStatefulProperties(unsigned int n_points);
+  virtual bool isInterfaceMaterial() { return false; };
 
   /**
    * Performs the quadrature point loop, calling computeQpProperties
@@ -187,8 +188,8 @@ protected:
   virtual const MaterialData & materialData() const = 0;
   virtual MaterialData & materialData() = 0;
 
-  virtual const FEProblemBase & miProblem() const = 0;
-  virtual FEProblemBase & miProblem() = 0;
+  virtual const FEProblemBase & miProblem() const { return _fe_problem; }
+  virtual FEProblemBase & miProblem() { return _fe_problem; }
 
   virtual const QBase & qRule() const = 0;
 
@@ -313,7 +314,7 @@ MaterialBase::getZeroMaterialProperty(const std::string & prop_name)
 
   // set values for all qpoints to zero
   // (in multiapp scenarios getMaxQps can return different values in each app; we need the max)
-  unsigned int nqp = miProblem().getMaxQps();
+  unsigned int nqp = _fe_problem.getMaxQps();
   if (nqp > preload_with_zero.size())
     preload_with_zero.resize(nqp);
   for (unsigned int qp = 0; qp < nqp; ++qp)
