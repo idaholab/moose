@@ -1,12 +1,12 @@
 # Point and line sources/sinks
 
-A number of sources/sinks are available in Porous Flow, implemented as `DiracKernels`.
+A number of sources/sinks are available in Porous Flow, implemented as `DiracKernels`.  This page may be read in conjunction with [the description of some Dirac Kernel tests](porous_flow/tests/dirackernels/dirackernels_tests.md).
 
 ## Constant point source
 
 [`PorousFlowSquarePulsePointSource`](/PorousFlowSquarePulsePointSource.md)
 implements a constant mass point source that adds (removes) fluid at a constant
-mass flux rate for times between the specified start and end times. If
+mass flux rate (kg.s$^{-1}$) for times between the specified start and end times. If
 no start and end times are specified, the source (sink) starts at the
 start of the simulation and continues to act indefinitely. 
 For instance:
@@ -269,7 +269,7 @@ A production wellbore:
 
 !listing modules/porous_flow/test/tests/dirackernels/bh02.i block=DiracKernels
 
-yields the correct result ([bh02_flow.fig] and [bh02_error.fig]):
+with an initially fully-saturated medium yields the correct result ([bh02_flow.fig] and [bh02_error.fig]):
 
 !media bh02_flow.png style=width:40%;margin-left:10px caption=The flow to a production wellbore in MOOSE agrees with the expected result.  id=bh02_flow.fig
 
@@ -279,13 +279,13 @@ An injection wellbore:
 
 !listing modules/porous_flow/test/tests/dirackernels/bh03.i block=DiracKernels
 
-yields the correct result ([bh03_flow.fig] and [bh03_error.fig]):
+with a fully-saturated medium yields the correct result ([bh03_flow.fig] and [bh03_error.fig]):
 
 !media bh03_flow.png style=width:40%;margin-left:10px caption=The flow from an injection wellbore in MOOSE agrees with the expected result.  id=bh03_flow.fig
 
 !media bh03_error.png style=width:40%;margin-left:10px caption=The mass-balance error is virtually zero.  id=bh03_error.fig
 
-A production wellbore with bottomhole porepressure $P_{\mathrm{bot}}=-1\,$MPa so it forces desaturation:
+A production wellbore with bottomhole porepressure $P_{\mathrm{bot}}=-1\,$MPa so it forces desaturation of an initially-saturated medium:
 
 !listing modules/porous_flow/test/tests/dirackernels/bh04.i block=DiracKernels
 
@@ -299,7 +299,7 @@ An injection wellbore with $P_{\mathrm{bot}}=0$ so it is only active when the ro
 
 !listing modules/porous_flow/test/tests/dirackernels/bh05.i block=DiracKernels
 
-yields the correct result ([bh05_flow.fig] and [bh05_error.fig]):
+yields the correct result for an initially unsaturated medium ([bh05_flow.fig] and [bh05_error.fig]):
 
 !media bh05_flow.png style=width:40%;margin-left:10px caption=The flow from an injection wellbore in MOOSE agrees with the expected result.  id=bh05_flow.fig
 

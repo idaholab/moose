@@ -5,7 +5,7 @@
     csvdiff = 'squarepulse1.csv'
     threading = '!pthreads'
     requirement = 'PorousFlowSquarePulsePointSource shall provide a constant mass point source/sink between two specified times'
-    design = 'PorousFlowSquarePulsePointSource'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowSquarePulsePointSource'
     issues = '#6990'
   [../]
   [./theis1]
@@ -14,8 +14,17 @@
     csvdiff = 'theis1_pressure_0006.csv'
     threading = '!pthreads'
     requirement = 'PorousFlowSquarePulsePointSource shall provide a constant mass point sink between two specified times'
-    design = 'PorousFlowSquarePulsePointSource.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowSquarePulsePointSource.md'
     issues = '#6990'
+  [../]
+  [./theis_rz]
+    type = 'CSVDiff'
+    input = 'theis_rz.i'
+    csvdiff = 'theis_rz_csv_pp_0011.csv'
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall be able to accurately simulate drawdown in 2D groundwater systems, to agree with the Theis solution'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowSquarePulsePointSource.md'
+    issues = '#6990 13155'
   [../]
   [./theis2]
     type = 'CSVDiff'
@@ -23,7 +32,7 @@
     csvdiff = 'theis2_pressure_0006.csv'
     threading = '!pthreads'
     requirement = 'PorousFlowSquarePulsePointSource shall provide a constant mass point sink between two specified times'
-    design = 'PorousFlowSquarePulsePointSource.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowSquarePulsePointSource.md'
     issues = '#6990'
   [../]
   [./theis3]
@@ -32,7 +41,7 @@
     csvdiff = 'theis3.csv'
     threading = '!pthreads'
     requirement = 'PorousFlowSquarePulsePointSource shall provide a constant mass point source of a specified fluid phase'
-    design = 'PorousFlowSquarePulsePointSource.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowSquarePulsePointSource.md'
     issues = '#7677'
   [../]
 
@@ -42,7 +51,7 @@
     expect_err = 'The Dictator proclaims that the maximum phase index in this simulation is 0 whereas you have used 1. Remember that indexing starts at 0. You must try harder.'
     threading = '!pthreads'
     requirement = 'PorousFlowPeacemanBorehole shall throw an error if the fluid phase is larger than the number of phases in the system'
-    design = 'PorousFlowPeacemanBorehole.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   [../]
   [./bh_except02]
@@ -51,7 +60,7 @@
     expect_err = 'The Dictator proclaims that the maximum fluid component index in this simulation is 0 whereas you have used 1. Remember that indexing starts at 0. Please be assured that the Dictator has noted your error.'
     threading = '!pthreads'
     requirement = 'PorousFlowPeacemanBorehole shall throw an error if the fluid component is larger than the number of fluid components in the system'
-    design = 'PorousFlowPeacemanBorehole.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   [../]
   [./bh_except03]
@@ -60,7 +69,7 @@
     expect_err = 'PorousFlowLineSink: You have specified function_of=porepressure, but you do not have a quadpoint porepressure material'
     threading = '!pthreads'
     requirement = 'PorousFlowPeacemanBorehole shall throw an error if flux is a function of porepressure but no porepressure material exists'
-    design = 'PorousFlowPeacemanBorehole.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   [../]
   [./bh_except04]
@@ -69,7 +78,7 @@
     expect_err = 'PorousFlowLineSink: You have specified function_of=temperature, but you do not have a quadpoint temperature material'
     threading = '!pthreads'
     requirement = 'PorousFlowPeacemanBorehole shall throw an error if flux is a function of temperature but no temperature material exists'
-    design = 'PorousFlowPeacemanBorehole.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   [../]
   [./bh_except05]
@@ -78,7 +87,7 @@
     expect_err = 'PorousFlowLineSink: You have specified a fluid component, but do not have a nodal mass-fraction material'
     threading = '!pthreads'
     requirement = 'PorousFlowPeacemanBorehole shall throw an error if flux is restricted to a specific fluid component but no mass fraction material exists'
-    design = 'PorousFlowPeacemanBorehole.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   [../]
   [./bh_except06]
@@ -87,7 +96,7 @@
     expect_err = 'PorousFlowLineSink: You have set use_mobility=true, but do not have nodal density, relative permeability or viscosity material'
     threading = '!pthreads'
     requirement = 'PorousFlowPeacemanBorehole shall throw an error if flux is to be multiplied by mobility but no nodal fluid density material exists'
-    design = 'PorousFlowPeacemanBorehole.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   [../]
   [./bh_except07]
@@ -96,7 +105,7 @@
     expect_err = 'PorousFlowLineSink: You have set use_mobility=true, but do not have nodal density, relative permeability or viscosity material'
     threading = '!pthreads'
     requirement = 'PorousFlowPeacemanBorehole shall throw an error if flux is to be multiplied by mobility but no nodal relative permeability material exists'
-    design = 'PorousFlowPeacemanBorehole.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   [../]
   [./bh_except08]
@@ -105,7 +114,7 @@
     expect_err = 'PorousFlowLineSink: You have set use_mobility=true, but do not have nodal density, relative permeability or viscosity material'
     threading = '!pthreads'
     requirement = 'PorousFlowPeacemanBorehole shall throw an error if flux is to be multiplied by mobility but no nodal fluid density material exists'
-    design = 'PorousFlowPeacemanBorehole.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   [../]
   [./bh_except09]
@@ -114,7 +123,7 @@
     expect_err = 'PorousFlowLineSink: You have set use_enthalpy=true, but do not have a nodal enthalpy material'
     threading = '!pthreads'
     requirement = 'PorousFlowPeacemanBorehole shall throw an error if flux is to be multiplied by enthalpy but no fluid enthalpy material exists'
-    design = 'PorousFlowPeacemanBorehole.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   [../]
   [./bh_except10]
@@ -123,7 +132,7 @@
     expect_err = 'PorousFlowLineSink: You have set use_internal_energy=true, but do not have a nodal internal-energy material'
     threading = '!pthreads'
     requirement = 'PorousFlowPeacemanBorehole shall throw an error if flux is to be multiplied by internal energy but no fluid internal energy material exists'
-    design = 'PorousFlowPeacemanBorehole.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   [../]
   [./bh_except11]
@@ -132,7 +141,7 @@
     expect_err = 'PorousFlowLineSink: You have set use_relative_permeability=true, but do not have a nodal relative permeability material'
     threading = '!pthreads'
     requirement = 'PorousFlowPeacemanBorehole shall throw an error if flux is to be multiplied by relative permeability but no nodal relative permeability material exists'
-    design = 'PorousFlowPeacemanBorehole.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   [../]
   [./bh_except12]
@@ -141,7 +150,7 @@
     expect_err = 'PorousFlowLineGeometry: Error opening file does_not_exist'
     threading = '!pthreads'
     requirement = 'PorousFlowPeacemanBorehole shall throw an error if the given point file does not exist'
-    design = 'PorousFlowPeacemanBorehole.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   [../]
   [./bh_except13]
@@ -150,7 +159,7 @@
     expect_err = 'PorousFlowLineGeometry: zero-segment length detected at \(x,y,z\) = 0.1 0.2 0.3'
     threading = '!pthreads'
     requirement = 'PorousFlowPeacemanBorehole shall throw an error if two points in the point file are coincident'
-    design = 'PorousFlowPeacemanBorehole.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   [../]
   [./bh_except14]
@@ -159,7 +168,7 @@
     expect_err = 'The effective element size \(about 0.2-times-true-ele-size\) for an element containing a Peaceman-type borehole must be \(much\) larger than the borehole radius for the Peaceman formulation to be correct.  Your element has effective size 0.39598 and the borehole radius is 10'
     threading = '!pthreads'
     requirement = 'PorousFlowPeacemanBorehole shall throw an error if the element containing the dirac kernel is not larger than the specified borehole radius'
-    design = 'PorousFlowPeacemanBorehole.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   [../]
   [./bh_except15]
@@ -168,7 +177,7 @@
     expect_err = 'PorousFlowPeacemanBorehole: You have specified function_of=porepressure, but you do not have a quadpoint permeability material'
     threading = '!pthreads'
     requirement = 'PorousFlowPeacemanBorehole shall throw an error if flux is a function of porepressure but no permeability material exists'
-    design = 'PorousFlowPeacemanBorehole.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   [../]
   [./bh_except16]
@@ -177,7 +186,7 @@
     expect_err = 'PorousFlowPeacemanBorehole: You have specified function_of=temperature, but you do not have a quadpoint thermal_conductivity material'
     threading = '!pthreads'
     requirement = 'PorousFlowPeacemanBorehole shall throw an error if flux is a function of temperature but no thermal conductivity material exists'
-    design = 'PorousFlowPeacemanBorehole.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   [../]
 
@@ -188,7 +197,7 @@
     csvdiff = 'pls01_00.csv'
     threading = '!pthreads'
     requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate'
-    design = 'PorousFlowPolyLineSink.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   [../]
   [./pls01_01]
@@ -198,7 +207,7 @@
     csvdiff = 'pls01_01.csv'
     threading = '!pthreads'
     requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate'
-    design = 'PorousFlowPolyLineSink.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   [../]
   [./pls01_20]
@@ -208,7 +217,7 @@
     csvdiff = 'pls01_20.csv'
     threading = '!pthreads'
     requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate'
-    design = 'PorousFlowPolyLineSink.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   [../]
   [./pls01_21]
@@ -218,7 +227,7 @@
     csvdiff = 'pls01_21.csv'
     threading = '!pthreads'
     requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate'
-    design = 'PorousFlowPolyLineSink.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   [../]
   [./pls02]
@@ -227,7 +236,7 @@
     csvdiff = 'pls02.csv'
     threading = '!pthreads'
     requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate'
-    design = 'PorousFlowPolyLineSink.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   [../]
   [./pls03_00]
@@ -237,7 +246,7 @@
     csvdiff = 'pls03_00.csv'
     threading = '!pthreads'
     requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate'
-    design = 'PorousFlowPolyLineSink.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   [../]
   [./pls03_01]
@@ -247,7 +256,7 @@
     csvdiff = 'pls03_01.csv'
     threading = '!pthreads'
     requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate'
-    design = 'PorousFlowPolyLineSink.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   [../]
   [./pls03_20]
@@ -257,7 +266,7 @@
     csvdiff = 'pls03_20.csv'
     threading = '!pthreads'
     requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate'
-    design = 'PorousFlowPolyLineSink.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   [../]
   [./pls03_21]
@@ -267,7 +276,7 @@
     csvdiff = 'pls03_21.csv'
     threading = '!pthreads'
     requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate'
-    design = 'PorousFlowPolyLineSink.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   [../]
   [./pls03_action]
@@ -276,7 +285,7 @@
     csvdiff = 'pls03_action.csv'
     threading = '!pthreads'
     requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate'
-    design = 'PorousFlowPolyLineSink.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   [../]
 
@@ -286,7 +295,7 @@
     csvdiff = 'bh02.csv'
     threading = '!pthreads'
     requirement = 'PorousFlowPeacemanBorehole shall extract fluid at the specified rate in a fully-saturated system'
-    design = 'PorousFlowPeacemanBorehole.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   [../]
   [./bh03]
@@ -295,7 +304,7 @@
     csvdiff = 'bh03.csv'
     threading = '!pthreads'
     requirement = 'PorousFlowPeacemanBorehole shall inject fluid at the specified rate in a fully-saturated system'
-    design = 'PorousFlowPeacemanBorehole.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   [../]
   [./bh04]
@@ -304,7 +313,7 @@
     csvdiff = 'bh04.csv'
     threading = '!pthreads'
     requirement = 'PorousFlowPeacemanBorehole shall extract fluid at the specified rate in a fully-saturated system'
-    design = 'PorousFlowPeacemanBorehole.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   [../]
   [./bh05]
@@ -314,7 +323,7 @@
     rel_err = 5.7e-06 # diff is ~5.6e-6 on falcon
     threading = '!pthreads'
     requirement = 'PorousFlowPeacemanBorehole shall inject fluid at the specified rate in an unsaturated system'
-    design = 'PorousFlowPeacemanBorehole.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   [../]
   [./bh07]
@@ -324,7 +333,7 @@
     csvdiff = 'bh07_csv_pp_0003.csv'
     threading = '!pthreads'
     requirement = 'PorousFlowPeacemanBorehole shall extract fluid at the specified rate in a cylindrical model'
-    design = 'PorousFlowPeacemanBorehole.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   [../]
   [./bh07_exo]
@@ -333,7 +342,7 @@
     exodiff = 'bh07.e'
     threading = '!pthreads'
     requirement = 'PorousFlowPeacemanBorehole shall extract fluid at the specified rate in a cylindrical model'
-    design = 'PorousFlowPeacemanBorehole.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   [../]
   [./injection_production]
@@ -342,7 +351,7 @@
     exodiff = 'injection_production_out.e'
     threading = '!pthreads'
     requirement = 'Multiple PorousFlowPeacemanBorehole objects shall be able to inject and extract fluid in different locations'
-    design = 'PorousFlowPeacemanBorehole.md'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   [../]
   [./strain_at_nearest_qp]
@@ -351,6 +360,6 @@
     threading = '!pthreads'
     requirement = "If the strain at the nearest quadpoint is used when evaluating PorousFlowPorosity that is coupled to solid mechanics, all PorousFlow DiracKernels shall be usable"
     issues = "#12541"
-    design = "sinks.md"
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md'
   [../]
 []
