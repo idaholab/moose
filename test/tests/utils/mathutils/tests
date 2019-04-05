@@ -1,0 +1,10 @@
+[Tests]
+  [./poly]
+    type = 'CSVDiff'
+    input = 'poly.i'
+    csvdiff = 'poly_out_out_0001.csv'
+    issues = '#13184'
+    design = 'MathUtils.md'
+    requirement = 'Moose shall have a function that evaluates the polynomial and derivative of polyonimal of varying degree and arbitrary coefficients'
+  [../]
+[]
