@@ -147,7 +147,6 @@
 
   verbose = true
   nl_abs_tol = 1e-10
-  start_time = 0.0
   num_steps = 50000
   end_time = 2.002e6
   [./TimeStepper]

@@ -117,7 +117,6 @@
   nl_abs_tol = 1e-10
   l_tol = 1e-9
 
-  start_time = 0.0
   end_time = 0.1
   dt = 0.0125
   dtmin = 0.0001

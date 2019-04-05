@@ -57,6 +57,7 @@
 
   solve_type = 'PJFNK'
 
+  # Reset the start_time here
   start_time = 0.0
   num_steps = 10
   dt = .1
