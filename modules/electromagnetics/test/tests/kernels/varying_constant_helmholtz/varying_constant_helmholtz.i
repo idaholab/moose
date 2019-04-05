@@ -80,8 +80,8 @@
     variable = u_real
   [../]
   [./coupledLaplacian_real]
-    type = CoupledCoeffDiffusion
-    coefficient = 0
+    type = CoupledFuncDiffusion
+    func = 0
     sign = -1.0
     coupled_field = u_imag
     variable = u_real
@@ -109,8 +109,8 @@
     variable = u_imag
   [../]
   [./coupledLaplacian_imag]
-    type = CoupledCoeffDiffusion
-    coefficient = 0
+    type = CoupledFuncDiffusion
+    func = 0
     sign = 1.0
     coupled_field = u_real
     variable = u_imag
