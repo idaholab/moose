@@ -9,8 +9,41 @@
 
 #include "gtest/gtest.h"
 
+#include "metaphysicl/numberarray.h"
+#include "metaphysicl/dualnumber.h"
+
+#include "MooseTypes.h"
+
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
+
+#define testADSymmetricEigenvaluesEigenvectors(                                                    \
+    a11, a22, a33, a23, a13, a12, eigvals_expect, eigvecs_expect)                                  \
+  {                                                                                                \
+    RankTwoTensor m(a11, a22, a33, a23, a13, a12);                                                 \
+    std::vector<Real> eigvals;                                                                     \
+    RankTwoTensor eigvecs;                                                                         \
+                                                                                                   \
+    m.symmetricEigenvaluesEigenvectors(eigvals, eigvecs);                                          \
+    for (unsigned int j = 0; j < 3; j++)                                                           \
+    {                                                                                              \
+      EXPECT_NEAR(eigvals_expect[j], eigvals[j], 0.0001);                                          \
+      for (unsigned int i = 0; i < 3; i++)                                                         \
+        EXPECT_NEAR(std::abs(eigvecs_expect(i, j)), std::abs(eigvecs(i, j)), 0.0001);              \
+    }                                                                                              \
+                                                                                                   \
+    DualRankTwoTensor m_ad(a11, a22, a33, a23, a13, a12);                                          \
+    std::vector<DualReal> eigvals_ad;                                                              \
+    DualRankTwoTensor eigvecs_ad;                                                                  \
+                                                                                                   \
+    m_ad.symmetricEigenvaluesEigenvectors(eigvals_ad, eigvecs_ad);                                 \
+    for (unsigned int j = 0; j < 3; j++)                                                           \
+    {                                                                                              \
+      EXPECT_NEAR(eigvals_expect[j], eigvals_ad[j].value(), 0.0001);                               \
+      for (unsigned int i = 0; i < 3; i++)                                                         \
+        EXPECT_NEAR(std::abs(eigvecs_expect(i, j)), std::abs(eigvecs_ad(i, j).value()), 0.0001);   \
+    }                                                                                              \
+  }
 
 TEST(RankTwoEigenRoutines, symmetricEigenvalues)
 {
@@ -33,6 +66,186 @@ TEST(RankTwoEigenRoutines, symmetricEigenvalues)
   EXPECT_NEAR(-8.17113, eigvals[0], 0.0001);
   EXPECT_NEAR(1.51145, eigvals[1], 0.0001);
   EXPECT_NEAR(11.6597, eigvals[2], 0.0001);
+}
+
+TEST(RankTwoEigenRoutines, symmetricEigenvaluesEigenvectors_zero)
+{
+  // all zero eigenvalues
+  // m = [0, 0, 0
+  //      0, 0, 0
+  //      0, 0, 0]
+  // d1 = 0, v1 = [1, 0, 0]^T
+  // d2 = 0, v2 = [0, 1, 0]^T
+  // d3 = 0, v3 = [0, 0, 1]^T
+  std::vector<Real> eigvals_expect = {0, 0, 0};
+  RankTwoTensor eigvecs_expect(1, 0, 0, 0, 1, 0, 0, 0, 1);
+  testADSymmetricEigenvaluesEigenvectors(0, 0, 0, 0, 0, 0, eigvals_expect, eigvecs_expect);
+}
+
+TEST(RankTwoEigenRoutines, symmetricEigenvaluesEigenvectors_sorting)
+{
+  // testing eigenvalue/eigenvector sorting
+  // m = [3, 0, 0
+  //      0, 1, 0
+  //      0, 0, 2]
+  // d1 = 1, v1 = [0, 1, 0]^T
+  // d2 = 2, v2 = [0, 0, 1]^T
+  // d3 = 3, v3 = [1, 0, 0]^T
+  std::vector<Real> eigvals_expect = {1, 2, 3};
+  RankTwoTensor eigvecs_expect(0, 1, 0, 0, 0, 1, 1, 0, 0);
+  testADSymmetricEigenvaluesEigenvectors(3, 1, 2, 0, 0, 0, eigvals_expect, eigvecs_expect);
+}
+
+TEST(RankTwoEigenRoutines, symmetricEigenvaluesEigenvectors_three_nonzero_eigvals)
+{
+  // three distinct nonzero eigenvalues
+  // m = [1, 0, 0
+  //      0, 2, 0
+  //      0, 0, 3]
+  // d1 = 1, v1 = [1, 0, 0]^T
+  // d2 = 2, v2 = [0, 1, 0]^T
+  // d3 = 3, v3 = [0, 0, 1]^T
+  std::vector<Real> eigvals_expect = {1, 2, 3};
+  RankTwoTensor eigvecs_expect(1, 0, 0, 0, 1, 0, 0, 0, 1);
+  testADSymmetricEigenvaluesEigenvectors(1, 2, 3, 0, 0, 0, eigvals_expect, eigvecs_expect);
+}
+
+TEST(RankTwoEigenRoutines, symmetricEigenvaluesEigenvectors_two_nonzero_eigvals)
+{
+  // two distinct nonzero eigenvalues
+  // m = [0, 0, 0
+  //      0, 1, 0
+  //      0, 0, 2]
+  // d1 = 0, v1 = [1, 0, 0]^T
+  // d2 = 1, v2 = [0, 1, 0]^T
+  // d3 = 2, v3 = [0, 0, 1]^T
+  std::vector<Real> eigvals_expect = {0, 1, 2};
+  RankTwoTensor eigvecs_expect(1, 0, 0, 0, 1, 0, 0, 0, 1);
+  testADSymmetricEigenvaluesEigenvectors(0, 1, 2, 0, 0, 0, eigvals_expect, eigvecs_expect);
+}
+
+TEST(RankTwoEigenRoutines, symmetricEigenvaluesEigenvectors_one_nonzero_eigval)
+{
+  // one nonzero eigenvalue
+  // m = [0, 0, 0
+  //      0, 0, 0
+  //      0, 0, 1]
+  // d1 = 0, v1 = [1, 0, 0]^T
+  // d2 = 0, v2 = [0, 1, 0]^T
+  // d3 = 1, v3 = [0, 0, 1]^T
+  std::vector<Real> eigvals_expect = {0, 0, 1};
+  RankTwoTensor eigvecs_expect(1, 0, 0, 0, 1, 0, 0, 0, 1);
+  testADSymmetricEigenvaluesEigenvectors(0, 0, 1, 0, 0, 0, eigvals_expect, eigvecs_expect);
+}
+
+TEST(RankTwoEigenRoutines, hessenberg_dual_number_consistency)
+{
+  // consider a dual rank two tensor
+  // m = [1(1,2,3), 1(2,3,4), 2(1,3,5)
+  //      1(2,3,4), 2(-2,-5,1), 4(2,4,6)
+  //      2(1,3,5), 4(2,4,6), 3(2,1,4)]
+  NumberArray<50, Real> da11_dx;
+  da11_dx[0] = 1;
+  da11_dx[1] = 2;
+  da11_dx[2] = 3;
+  DualReal a11(1, da11_dx);
+  NumberArray<50, Real> da22_dx;
+  da22_dx[0] = -2;
+  da22_dx[1] = -5;
+  da22_dx[2] = 1;
+  DualReal a22(2, da22_dx);
+  NumberArray<50, Real> da33_dx;
+  da33_dx[0] = 2;
+  da33_dx[1] = 1;
+  da33_dx[2] = 4;
+  DualReal a33(3, da33_dx);
+  NumberArray<50, Real> da23_dx;
+  da23_dx[0] = 2;
+  da23_dx[1] = 4;
+  da23_dx[2] = 6;
+  DualReal a23(4, da23_dx);
+  NumberArray<50, Real> da13_dx;
+  da13_dx[0] = 1;
+  da13_dx[1] = 3;
+  da13_dx[2] = 5;
+  DualReal a13(2, da13_dx);
+  NumberArray<50, Real> da12_dx;
+  da12_dx[0] = 2;
+  da12_dx[1] = 3;
+  da12_dx[2] = 4;
+  DualReal a12(1, da12_dx);
+
+  DualRankTwoTensor m(a11, a22, a33, a23, a13, a12);
+  DualRankTwoTensor H, U;
+  m.hessenberg(H, U);
+  DualRankTwoTensor m_ad = U * H * U.transpose();
+
+  // m_ad should be equal to m in values and dual numbers!
+  for (unsigned i = 0; i < 3; i++)
+    for (unsigned j = 0; j < 3; j++)
+    {
+      EXPECT_NEAR(m(i, j).value(), m_ad(i, j).value(), 0.0001);
+      EXPECT_NEAR(m(i, j).derivatives()[0], m_ad(i, j).derivatives()[0], 0.0001);
+      EXPECT_NEAR(m(i, j).derivatives()[1], m_ad(i, j).derivatives()[1], 0.0001);
+      EXPECT_NEAR(m(i, j).derivatives()[2], m_ad(i, j).derivatives()[2], 0.0001);
+    }
+}
+
+TEST(RankTwoEigenRoutines, symmetricEigenvaluesEigenvectors_dual_number_consistency)
+{
+  // consider a dual rank two tensor
+  // m = [1(1,2,3), 1(2,3,4), 2(1,3,5)
+  //      1(2,3,4), 2(-2,-5,1), 4(2,4,6)
+  //      2(1,3,5), 4(2,4,6), 3(2,1,4)]
+  NumberArray<50, Real> da11_dx;
+  da11_dx[0] = 1;
+  da11_dx[1] = 2;
+  da11_dx[2] = 3;
+  DualReal a11(1, da11_dx);
+  NumberArray<50, Real> da22_dx;
+  da22_dx[0] = -2;
+  da22_dx[1] = -5;
+  da22_dx[2] = 1;
+  DualReal a22(2, da22_dx);
+  NumberArray<50, Real> da33_dx;
+  da33_dx[0] = 2;
+  da33_dx[1] = 1;
+  da33_dx[2] = 4;
+  DualReal a33(3, da33_dx);
+  NumberArray<50, Real> da23_dx;
+  da23_dx[0] = 2;
+  da23_dx[1] = 4;
+  da23_dx[2] = 6;
+  DualReal a23(4, da23_dx);
+  NumberArray<50, Real> da13_dx;
+  da13_dx[0] = 1;
+  da13_dx[1] = 3;
+  da13_dx[2] = 5;
+  DualReal a13(2, da13_dx);
+  NumberArray<50, Real> da12_dx;
+  da12_dx[0] = 2;
+  da12_dx[1] = 3;
+  da12_dx[2] = 4;
+  DualReal a12(1, da12_dx);
+
+  DualRankTwoTensor m(a11, a22, a33, a23, a13, a12);
+  DualRankTwoTensor eigvecs;
+  std::vector<DualReal> eigvals;
+
+  m.symmetricEigenvaluesEigenvectors(eigvals, eigvecs);
+  DualRankTwoTensor D_ad;
+  D_ad.fillFromInputVector(eigvals);
+  DualRankTwoTensor m_ad = eigvecs * D_ad * eigvecs.transpose();
+
+  // m_ad should be equal to m in values and dual numbers!
+  for (unsigned i = 0; i < 3; i++)
+    for (unsigned j = 0; j < 3; j++)
+    {
+      EXPECT_NEAR(m(i, j).value(), m_ad(i, j).value(), 0.01);
+      EXPECT_NEAR(m(i, j).derivatives()[0], m_ad(i, j).derivatives()[0], 0.01);
+      EXPECT_NEAR(m(i, j).derivatives()[1], m_ad(i, j).derivatives()[1], 0.01);
+      EXPECT_NEAR(m(i, j).derivatives()[2], m_ad(i, j).derivatives()[2], 0.01);
+    }
 }
 
 TEST(RankTwoEigenRoutines, dsymmetricEigenvalues)

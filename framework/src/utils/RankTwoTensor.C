@@ -890,6 +890,186 @@ RankTwoTensorTempl<T>::symmetricEigenvaluesEigenvectors(std::vector<T> & eigvals
 }
 
 template <typename T>
+RankTwoTensorTempl<T>
+RankTwoTensorTempl<T>::givensRotation(unsigned int row1, unsigned int row2, unsigned int col) const
+{
+  T c, s;
+  T a = (*this)(row1, col);
+  T b = (*this)(row2, col);
+
+  if (b == 0.0)
+  {
+    c = a >= 0.0 ? 1.0 : -1.0;
+    s = 0.0;
+  }
+  else if (a == 0)
+  {
+    c = 0.0;
+    s = b >= 0.0 ? 1.0 : -1.0;
+  }
+  else if (std::abs(a) > std::abs(b))
+  {
+    T t = b / a;
+    Real sgn = a >= 0.0 ? 1.0 : -1.0;
+    T u = sgn * std::sqrt(1.0 + t * t);
+    c = 1.0 / u;
+    s = c * t;
+  }
+  else
+  {
+    T t = a / b;
+    Real sgn = b >= 0.0 ? 1.0 : -1.0;
+    T u = sgn * std::sqrt(1.0 + t * t);
+    s = 1.0 / u;
+    c = s * t;
+  }
+
+  RankTwoTensorTempl<T> R(initIdentity);
+  R(row1, row1) = c;
+  R(row1, row2) = s;
+  R(row2, row1) = -s;
+  R(row2, row2) = c;
+
+  return R;
+}
+
+template <>
+RankTwoTensorTempl<DualReal>
+RankTwoTensorTempl<DualReal>::givensRotation(unsigned int row1,
+                                             unsigned int row2,
+                                             unsigned int col) const
+{
+
+  DualReal c = 0.0;
+  DualReal s = 0.0;
+  DualReal a = (*this)(row1, col);
+  DualReal b = (*this)(row2, col);
+  RankTwoTensorTempl<DualReal> R(initIdentity);
+
+  // rotate Real number
+  RankTwoTensorTempl<Real> temp;
+  temp(row1, col) = a.value();
+  temp(row2, col) = b.value();
+  temp = temp.givensRotation(row1, row2, col);
+  c.value() = temp(row1, row1);
+  s.value() = temp(row1, row2);
+
+  // rotate Dual number
+  for (unsigned int i = 0; i < AD_MAX_DOFS_PER_ELEM; i++)
+  {
+    if (MooseUtils::absoluteFuzzyEqual(a.value(), 0.0) &&
+        MooseUtils::absoluteFuzzyEqual(b.value(), 0.0))
+      c.derivatives()[i] = s.derivatives()[i] = 0.0;
+    else
+    {
+      c.derivatives()[i] = (a.derivatives()[i] * s.value() * s.value() -
+                            b.derivatives()[i] * c.value() * s.value()) /
+                           (b.value() * s.value() + a.value() * c.value());
+      s.derivatives()[i] = (b.derivatives()[i] * c.value() * c.value() -
+                            a.derivatives()[i] * c.value() * s.value()) /
+                           (b.value() * s.value() + a.value() * c.value());
+    }
+  }
+
+  R(row1, row1) = c;
+  R(row1, row2) = s;
+  R(row2, row1) = -s;
+  R(row2, row2) = c;
+
+  return R;
+}
+
+template <typename T>
+void
+RankTwoTensorTempl<T>::hessenberg(RankTwoTensorTempl<T> & H, RankTwoTensorTempl<T> & U) const
+{
+  H = *this;
+  U.zero();
+  U.addIa(1.0);
+
+  if (N < 3)
+    return;
+
+  RankTwoTensorTempl<T> R = this->givensRotation(N - 2, N - 1, 0);
+  H = R * H * R.transpose();
+  U = U * R.transpose();
+}
+
+template <typename T>
+void
+RankTwoTensorTempl<T>::QR(RankTwoTensorTempl<T> & Q, RankTwoTensorTempl<T> & R) const
+{
+  R = *this;
+  Q.zero();
+  Q.addIa(1.0);
+
+  for (unsigned int i = 0; i < N - 1; i++)
+    for (unsigned int b = N - 1; b > i; b--)
+    {
+      unsigned int a = b - 1;
+      RankTwoTensorTempl<T> CS = R.givensRotation(a, b, i);
+      R = CS * R;
+      Q = Q * CS.transpose();
+    }
+}
+
+template <>
+void
+RankTwoTensorTempl<DualReal>::symmetricEigenvaluesEigenvectors(
+    std::vector<DualReal> & eigvals, RankTwoTensorTempl<DualReal> & eigvecs) const
+{
+  const Real eps = libMesh::TOLERANCE * libMesh::TOLERANCE;
+
+  eigvals.resize(N);
+  RankTwoTensorTempl<DualReal> D, Q, R;
+  this->hessenberg(D, eigvecs);
+
+  for (unsigned m = N - 1; m > 0; m--)
+  {
+    unsigned int iter = 0;
+    do
+    {
+      iter++;
+      DualReal shift = D(m, m);
+      D.addIa(-shift);
+      D.QR(Q, R);
+      D = R * Q;
+      D.addIa(shift);
+      eigvecs = eigvecs * Q;
+    } while (std::abs(D(m, m - 1)) > eps);
+  }
+
+  for (unsigned int i = 0; i < N; i++)
+    eigvals[i] = D(i, i);
+
+  // Sort eigenvalues and corresponding vectors.
+  for (unsigned int i = 0; i < N - 1; i++)
+  {
+    unsigned int k = i;
+    DualReal p = eigvals[i];
+    for (unsigned int j = i + 1; j < N; j++)
+    {
+      if (eigvals[j] < p)
+      {
+        k = j;
+        p = eigvals[j];
+      }
+    }
+    if (k != i)
+    {
+      eigvals[k] = eigvals[i];
+      eigvals[i] = p;
+      for (unsigned int j = 0; j < N; j++)
+      {
+        p = eigvecs(j, i);
+        eigvecs(j, i) = eigvecs(j, k);
+        eigvecs(j, k) = p;
+      }
+    }
+  }
+}
+
+template <typename T>
 void
 RankTwoTensorTempl<T>::dsymmetricEigenvalues(std::vector<T> & eigvals,
                                              std::vector<RankTwoTensorTempl<T>> & deigvals) const
@@ -982,8 +1162,8 @@ RankTwoTensorTempl<T>::syev(const char * calculation_type,
 
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
-      // a is destroyed by dsyev, and if calculation_type == "V" then eigenvectors are placed there
-      // Note the explicit symmeterisation
+      // a is destroyed by dsyev, and if calculation_type == "V" then eigenvectors are placed
+      // there Note the explicit symmeterisation
       a[i * N + j] = 0.5 * (this->operator()(i, j) + this->operator()(j, i));
 
   // compute the eigenvalues only (if calculation_type == "N"),

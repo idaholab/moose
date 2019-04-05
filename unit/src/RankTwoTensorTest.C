@@ -521,3 +521,57 @@ TEST_F(RankTwoTensorTest, ErrorComputingEV)
     ASSERT_TRUE(pos != std::string::npos);
   }
 }
+
+TEST_F(RankTwoTensorTest, HessenbergTransformation)
+{
+  RankTwoTensor a(1, 3, 4, 2, 5, 12, 3, 6, 1);
+  RankTwoTensor H, U;
+  a.hessenberg(H, U);
+
+  EXPECT_NEAR(1.0, H(0, 0), 0.0001);
+  EXPECT_NEAR(5.0, H(1, 0), 0.0001);
+  EXPECT_NEAR(0.0, H(2, 0), 0.0001);
+  EXPECT_NEAR(3.6, H(0, 1), 0.0001);
+  EXPECT_NEAR(11.08, H(1, 1), 0.0001);
+  EXPECT_NEAR(-1.44, H(2, 1), 0.0001);
+  EXPECT_NEAR(0.2, H(0, 2), 0.0001);
+  EXPECT_NEAR(-7.44, H(1, 2), 0.0001);
+  EXPECT_NEAR(-5.08, H(2, 2), 0.0001);
+
+  EXPECT_NEAR(1.0, U(0, 0), 0.0001);
+  EXPECT_NEAR(0.0, U(1, 0), 0.0001);
+  EXPECT_NEAR(0.0, U(2, 0), 0.0001);
+  EXPECT_NEAR(0.0, U(0, 1), 0.0001);
+  EXPECT_NEAR(0.6, U(1, 1), 0.0001);
+  EXPECT_NEAR(0.8, U(2, 1), 0.0001);
+  EXPECT_NEAR(0.0, U(0, 2), 0.0001);
+  EXPECT_NEAR(-0.8, U(1, 2), 0.0001);
+  EXPECT_NEAR(0.6, U(2, 2), 0.0001);
+}
+
+TEST_F(RankTwoTensorTest, QRFactorization)
+{
+  RankTwoTensor a(1, 3, 4, 2, 5, 12, 3, 6, 1);
+  RankTwoTensor Q, R;
+  a.QR(Q, R);
+
+  EXPECT_NEAR(0.1961, std::abs(Q(0, 0)), 0.0001);
+  EXPECT_NEAR(0.5883, std::abs(Q(1, 0)), 0.0001);
+  EXPECT_NEAR(0.7845, std::abs(Q(2, 0)), 0.0001);
+  EXPECT_NEAR(0.1543, std::abs(Q(0, 1)), 0.0001);
+  EXPECT_NEAR(0.7715, std::abs(Q(1, 1)), 0.0001);
+  EXPECT_NEAR(0.6172, std::abs(Q(2, 1)), 0.0001);
+  EXPECT_NEAR(0.9684, std::abs(Q(0, 2)), 0.0001);
+  EXPECT_NEAR(0.2421, std::abs(Q(1, 2)), 0.0001);
+  EXPECT_NEAR(0.0605, std::abs(Q(2, 2)), 0.0001);
+
+  EXPECT_NEAR(5.099, std::abs(R(0, 0)), 0.0001);
+  EXPECT_NEAR(0.0, std::abs(R(1, 0)), 0.0001);
+  EXPECT_NEAR(0.0, std::abs(R(2, 0)), 0.0001);
+  EXPECT_NEAR(12.7475, std::abs(R(0, 1)), 0.0001);
+  EXPECT_NEAR(3.2404, std::abs(R(1, 1)), 0.0001);
+  EXPECT_NEAR(0.0, std::abs(R(2, 1)), 0.0001);
+  EXPECT_NEAR(4.9029, std::abs(R(0, 2)), 0.0001);
+  EXPECT_NEAR(4.4748, std::abs(R(1, 2)), 0.0001);
+  EXPECT_NEAR(1.392, std::abs(R(2, 2)), 0.0001);
+}

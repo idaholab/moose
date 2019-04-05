@@ -388,6 +388,30 @@ public:
   void symmetricEigenvalues(std::vector<T> & eigvals) const;
 
   /**
+   * computes and returns the Givens rotation matrix R
+   * @param row1 is the row number of the first component to rotate
+   * @param row2 is the row number of the second component to rotate
+   * @param col is the column number of the components to rotate
+   * consider a RankTwoTensor A = [ a11 a12 a13
+   *                                a21 a22 a23
+   *                                a31 a32 a33]
+   * and we want to rotate a21 and a31. Then row1 = 1, row2 = 2, col = 0.
+   * It retunrs the Givens rotation matrix R of this tensor A such that R * A rotates the second
+   * component to zero, i.e. R * A = [ a11 a12 a13
+   *                                     r a22 a23
+   *                                     0 a32 a33]
+   * A DualReal instantiation is available to rotate dual numbers as well.
+   */
+  RankTwoTensorTempl<T>
+  givensRotation(unsigned int row1, unsigned int row2, unsigned int col) const;
+
+  /// computes the Hessenberg form of this matrix A and its unitary transformation U such that A = U * H * U^T
+  void hessenberg(RankTwoTensorTempl<T> & H, RankTwoTensorTempl<T> & U) const;
+
+  /// computes the QR factorization such that A = Q * R, where Q is the unitary matrix and R an upper triangular matrix
+  void QR(RankTwoTensorTempl<T> & Q, RankTwoTensorTempl<T> & R) const;
+
+  /**
    * computes eigenvalues and eigenvectors, assuming tens is symmetric, and places them
    * in ascending order in eigvals.  eigvecs is a matrix with the first column
    * being the first eigenvector, the second column being the second, etc.
