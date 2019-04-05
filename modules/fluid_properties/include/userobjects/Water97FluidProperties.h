@@ -84,12 +84,8 @@ public:
 
   virtual Real mu_from_rho_T(Real density, Real temperature) const override;
 
-  virtual void mu_from_rho_T(Real density,
-                             Real temperature,
-                             Real ddensity_dT,
-                             Real & mu,
-                             Real & dmu_drho,
-                             Real & dmu_dT) const override;
+  void mu_from_rho_T(
+      Real rho, Real temperature, Real drho_dT, Real & mu, Real & dmu_drho, Real & dmu_dT) const;
 
   virtual void
   rho_mu_from_p_T(Real pressure, Real temperature, Real & rho, Real & mu) const override;

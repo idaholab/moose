@@ -277,21 +277,6 @@ SinglePhaseFluidProperties::henryConstantIAPWS_dT(
   henryConstantIAPWS(T, Kh, dKh_dT, A, B, C);
 }
 
-void
-SinglePhaseFluidProperties::mu_from_rho_T(Real, Real, Real, Real &, Real &, Real &) const
-{
-  mooseError(name(), ": mu_from_rho_T is not implemented.");
-}
-
-void
-SinglePhaseFluidProperties::mu_drhoT_from_rho_T(
-    Real rho, Real T, Real drho_dT, Real & mu, Real & dmu_drho, Real & dmu_dT) const
-{
-  mooseDeprecated(name(), ":mu_drhoT_from_rho_T() is deprecated. Use mu_from_rho_T() instead");
-
-  mu_from_rho_T(rho, T, drho_dT, mu, dmu_drho, dmu_dT);
-}
-
 Real SinglePhaseFluidProperties::henryConstant(Real) const
 {
   mooseError(name(), ": henryConstant() is not implemented");
