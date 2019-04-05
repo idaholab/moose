@@ -108,6 +108,23 @@ SinglePhaseFluidProperties::beta_from_p_T(Real, Real, Real &, Real &, Real &) co
   mooseError(name(), ": ", __PRETTY_FUNCTION__, " is not implemented.");
 }
 
+DualReal
+SinglePhaseFluidProperties::beta_from_p_T(const DualReal & p, const DualReal & T) const
+{
+  Real beta = 0.0;
+  Real pressure = p.value();
+  Real temperature = T.value();
+  Real dbeta_dp = 0.0;
+  Real dbeta_dT = 0.0;
+  beta_from_p_T(pressure, temperature, beta, dbeta_dp, dbeta_dT);
+
+  DualReal result = beta;
+  for (size_t i = 0; i < p.derivatives().size(); ++i)
+    result.derivatives()[i] = p.derivatives()[i] * dbeta_dp + T.derivatives()[i] * dbeta_dT;
+
+  return result;
+}
+
 Real
 SinglePhaseFluidProperties::beta_from_p_T(Real p, Real T) const
 {
@@ -186,6 +203,8 @@ SinglePhaseFluidProperties::gamma_from_p_T(Real p, Real T) const
 Real
 SinglePhaseFluidProperties::beta(Real p, Real T) const
 {
+  mooseDeprecated(name(), ": beta() is deprecated. Use beta_from_p_T() instead");
+
   return beta_from_p_T(p, T);
 }
 
