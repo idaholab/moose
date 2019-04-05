@@ -1611,6 +1611,9 @@ public:
   using SubProblem::haveADObjects;
   void haveADObjects(bool have_ad_objects) override;
 
+  // Whether or not we should solve this system
+  bool shouldSolve() const { return _solve; }
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();

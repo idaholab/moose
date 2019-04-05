@@ -126,9 +126,11 @@ protected:
   virtual void outputSystemInformation() override;
 
   /**
-   * Prints the time step information for the screen output
+   * Prints the time step information for the screen output. The Boolean controls whether the dt is
+   * output. It doesn't really make sense to output this quantity the first time since it's a delta
+   * quantity indicating the step size from the previous step.
    */
-  void writeTimestepInformation();
+  void writeTimestepInformation(bool output_dt);
 
   /**
    * Write message to screen and/or file
