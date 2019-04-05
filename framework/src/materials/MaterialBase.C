@@ -130,7 +130,7 @@ MaterialBase::checkStatefulSanity() const
 void
 MaterialBase::registerPropName(std::string prop_name,
                                bool is_get,
-                               Material::Prop_State state,
+                               Prop_State state,
                                bool is_declared_ad)
 {
   if (!is_get)

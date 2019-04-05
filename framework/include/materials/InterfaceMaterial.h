@@ -31,7 +31,7 @@ class InterfaceMaterial : public MaterialBase,
 public:
   InterfaceMaterial(const InputParameters & parameters);
 
-  virtual bool isInterfaceMaterial() { return true; };
+  virtual bool isInterfaceMaterial() override { return true; };
   void computeProperties() override;
 
   ///@{
