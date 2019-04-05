@@ -185,9 +185,13 @@ GrainTracker::isFeaturePercolated(unsigned int feature_id) const
   if (feature_index != invalid_size_t)
   {
     mooseAssert(feature_index < _feature_sets.size(), "Grain index out of bounds");
-    return (_feature_sets[feature_index]._boundary_intersection &
-            (BoundaryIntersection::PRIMARY_PERCOLATION_BOUNDARY |
-             BoundaryIntersection::SECONDARY_PERCOLATION_BOUNDARY)) != BoundaryIntersection::NONE;
+    bool primary = ((_feature_sets[feature_index]._boundary_intersection &
+                     BoundaryIntersection::PRIMARY_PERCOLATION_BOUNDARY) ==
+                    BoundaryIntersection::PRIMARY_PERCOLATION_BOUNDARY);
+    bool secondary = ((_feature_sets[feature_index]._boundary_intersection &
+                       BoundaryIntersection::SECONDARY_PERCOLATION_BOUNDARY) ==
+                      BoundaryIntersection::SECONDARY_PERCOLATION_BOUNDARY);
+    return (primary && secondary);
   }
 
   return false;

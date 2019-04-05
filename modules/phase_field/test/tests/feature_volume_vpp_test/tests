@@ -46,15 +46,4 @@
     min_parallel = 2
     prereq = 'percolation_test'
   [../]
-
-  [./percolation_test_exodus]
-    type = 'Exodiff'
-    input = 'percolation_test.i'
-    exodiff = 'percolation_test_out.e'
-
-    issues = "#13169"
-    requirement = "The FeatureVolumeVectorPostprocessor shall output whether a percolated pathway exists between
-                    specified primary_percolation_boundaries and secondary_percolation_boundaries."
-    design = "/FeatureVolumeVectorPostprocessor.md"
-  [../]
 []

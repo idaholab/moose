@@ -840,9 +840,7 @@ FeatureFloodCount::isFeaturePercolated(unsigned int feature_id) const
     bool secondary = ((_feature_sets[local_index]._boundary_intersection &
                        BoundaryIntersection::SECONDARY_PERCOLATION_BOUNDARY) ==
                       BoundaryIntersection::SECONDARY_PERCOLATION_BOUNDARY);
-    return _feature_sets[local_index]._status != Status::INACTIVE
-               ? (primary && secondary)
-               : false;
+    return _feature_sets[local_index]._status != Status::INACTIVE ? (primary && secondary) : false;
   }
 
   return false;
