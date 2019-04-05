@@ -43,7 +43,7 @@
 
 [Kernels]
   [./laplacian_real]
-    type = CoeffDiffusion
+    type = FuncDiffusion
     func = d
     variable = u_real
   [../]
@@ -67,7 +67,7 @@
     variable = u_real
   [../]
   [./laplacian_imag]
-    type = CoeffDiffusion
+    type = FuncDiffusion
     func = d
     variable = u_imag
   [../]

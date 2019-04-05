@@ -75,8 +75,8 @@
 
 [Kernels]
   [./laplacian_real]
-    type = CoeffDiffusion
-    coefficient = 1
+    type = FuncDiffusion
+    func = 1
     variable = u_real
   [../]
   [./coupledLaplacian_real]
@@ -104,8 +104,8 @@
     variable = u_real
   [../]
   [./laplacian_imag]
-    type = CoeffDiffusion
-    coefficient = 1
+    type = FuncDiffusion
+    func = 1
     variable = u_imag
   [../]
   [./coupledLaplacian_imag]
