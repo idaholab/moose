@@ -117,8 +117,8 @@ class FParserPrinter(CodePrinter):
     def _print_Exp1(self, expr):
         return 'exp(1)'
 
-    def _print_Pi(self, expr):
-        return '3.14159265359'
+    #def _print_Pi(self, expr):
+    #    return '3.14159265359'
 
     # TODO: we need a more elegant way to deal with infinity in FParser
     def _print_Float(self, expr):

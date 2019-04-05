@@ -47,7 +47,7 @@ def evaluate(pde, soln, variable='u', scalars=set(), vectors=set()):
     # Evaluate the PDE
     pde = pde.replace('grad', 'gradient')
     pde = pde.replace('div', 'divergence')
-    return eval(pde)
+    return -1 * eval(pde)
 
 
 if __name__ == '__main__':

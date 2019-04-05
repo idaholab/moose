@@ -42,21 +42,22 @@ def plot(filename, x='h', y='error', xlabel=None, ylabel=None, output=None, show
 
     else:
         csv = pandas.read_csv(filename)
+        csv.drop([0], inplace=True)
         length = csv[x]
         error = csv[y]
 
     if xlabel is None:
-      xlabel = x
+        xlabel = x
     if ylabel is None:
-      ylabel = y
+        ylabel = y
 
     fig = ConvergencePlot(length, error, xlabel=xlabel, ylabel=ylabel, **kwargs)
 
     if output is not None:
-      fig.save(output)
+        fig.save(output)
 
     if show:
-      fig.show()
+        fig.show()
 
 class ConvergencePlot(object):
     """

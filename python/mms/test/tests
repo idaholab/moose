@@ -1,0 +1,11 @@
+[Tests]
+  [evaluate]
+    type = PythonUnitTest
+    input = test_mms.py
+  []
+  [plot]
+    type = CheckFiles
+    command = input.py
+    check_files = 'convergence.pdf'
+  []
+[]

@@ -1,6 +1,0 @@
-[Tests]
-  [mms]
-    type = PythonUnitTest
-    command = test_evaluate.py
-  []
-[]
