@@ -48,7 +48,7 @@
     variable = u_real
   [../]
   [./coupledLaplacian_real]
-    type = CoupledCoeffDiffusion
+    type = CoupledFuncDiffusion
     func = h
     sign = -1.0
     coupled_field = u_imag
@@ -72,7 +72,7 @@
     variable = u_imag
   [../]
   [./coupledLaplacian_imag]
-    type = CoupledCoeffDiffusion
+    type = CoupledFuncDiffusion
     func = h
     sign = 1.0
     coupled_field = u_real
