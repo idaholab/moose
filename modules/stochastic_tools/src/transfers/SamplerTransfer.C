@@ -9,7 +9,8 @@
 
 // MOOSE includes
 #include "SamplerTransfer.h"
-#include "SamplerMultiApp.h"
+#include "SamplerTransientMultiApp.h"
+#include "SamplerFullSolveMultiApp.h"
 #include "SamplerReceiver.h"
 
 registerMooseObject("StochasticToolsApp", SamplerTransfer);
@@ -40,10 +41,19 @@ SamplerTransfer::SamplerTransfer(const InputParameters & parameters)
 {
 
   // Determine the Sampler
-  std::shared_ptr<SamplerMultiApp> ptr = std::dynamic_pointer_cast<SamplerMultiApp>(_multi_app);
-  if (!ptr)
-    mooseError("The 'multi_app' parameter must provide a 'SamplerMultiApp' object.");
-  _sampler_ptr = &(ptr->getSampler());
+  std::shared_ptr<SamplerTransientMultiApp> ptr_transient =
+      std::dynamic_pointer_cast<SamplerTransientMultiApp>(_multi_app);
+  std::shared_ptr<SamplerFullSolveMultiApp> ptr_fullsolve =
+      std::dynamic_pointer_cast<SamplerFullSolveMultiApp>(_multi_app);
+
+  if (!ptr_transient && !ptr_fullsolve)
+    mooseError("The 'multi_app' parameter must provide either a 'SamplerTransientMultiApp' or "
+               "'SamplerFullSolveMultiApp' object.");
+
+  if (ptr_transient)
+    _sampler_ptr = &(ptr_transient->getSampler());
+  else
+    _sampler_ptr = &(ptr_fullsolve->getSampler());
 
   // Compute the matrix and row for each
   std::vector<DenseMatrix<Real>> out = _sampler_ptr->getSamples();

@@ -44,7 +44,8 @@ public:
   Sampler(const InputParameters & parameters);
 
   /**
-   * Simple object for storing the sampler location (see SamplerMultiApp).
+   * Simple object for storing the sampler location (see SamplerTransientMultiApp and
+   * SamplerFullSolveMultiApp).
    * @param s Sample index (index associated with DenseMatrix returned by Sampler::getSamples())
    * @param r Row index (index associated with the row in the DenseMatrix defined by s).
    */
@@ -109,9 +110,9 @@ public:
 
   /**
    * Return the Sample::Location for the given multi app index.
-   * @param global_index The global row, which is the row if all the DenseMatrix objects
-   *                     were stacked in order in a single object. When using SamplerMultiApp
-   *                     the global_index is the MultiApp global index.
+   * @param global_index The global row, which is the row if all the DenseMatrix objects were
+   * stacked in order in a single object. When using SamplerTransientMultiApp or
+   * SamplerFullSolveMultiApp the global_index is the MultiApp global index.
    * @return The location which includes the DenseMatrix index and the row within that matrix.
    */
   Sampler::Location getLocation(unsigned int global_index);

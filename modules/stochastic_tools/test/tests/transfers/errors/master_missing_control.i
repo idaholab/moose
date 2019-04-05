@@ -34,7 +34,7 @@
 
 [MultiApps]
   [./sub]
-    type = SamplerMultiApp
+    type = SamplerTransientMultiApp
     input_files = sub_missing_control.i
     sampler = sample
   [../]
