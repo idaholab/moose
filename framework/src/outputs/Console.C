@@ -274,9 +274,6 @@ Console::initialSetup()
     if (!_pars.isParamSetByUser("vector_postprocessor_execute_on"))
       _advanced_execute_on["vector_postprocessors"].push_back("final");
   }
-
-  if (_execute_on.contains(EXEC_INITIAL))
-    writeTimestepInformation();
 }
 
 std::string
@@ -309,7 +306,10 @@ Console::output(const ExecFlagType & type)
     outputInput();
 
   // Write the timestep information ("Time Step 0 ..."), this is controlled with "execute_on"
-  if (type == EXEC_FINAL && _execute_on.contains(EXEC_FINAL))
+  // We only write the initial and final here. All of the intermediate outputs will be written
+  // through timestepSetup.
+  if ((type == EXEC_INITIAL && _execute_on.contains(EXEC_INITIAL)) ||
+      (type == EXEC_FINAL && _execute_on.contains(EXEC_FINAL)))
     writeTimestepInformation();
 
   // Print Non-linear Residual (control with "execute_on")
