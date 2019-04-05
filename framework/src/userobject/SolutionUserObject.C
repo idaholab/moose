@@ -257,9 +257,7 @@ SolutionUserObject::readExodusII()
   // Get the variable name lists as set; these need to be sets to perform set_intersection
   const std::vector<std::string> & all_nodal(_exodusII_io->get_nodal_var_names());
   const std::vector<std::string> & all_elemental(_exodusII_io->get_elem_var_names());
-
-  // Storage for the nodal and elemental variables to consider
-  std::vector<std::string> nodal, elemental;
+  const std::vector<std::string> & all_scalar(_exodusII_io->get_global_var_names());
 
   // Build nodal/elemental variable lists, limit to variables listed in 'system_variables', if
   // provided
@@ -268,23 +266,29 @@ SolutionUserObject::readExodusII()
     for (const auto & var_name : _system_variables)
     {
       if (std::find(all_nodal.begin(), all_nodal.end(), var_name) != all_nodal.end())
-        nodal.push_back(var_name);
+        _nodal_variables.push_back(var_name);
       if (std::find(all_elemental.begin(), all_elemental.end(), var_name) != all_elemental.end())
-        elemental.push_back(var_name);
+        _elemental_variables.push_back(var_name);
+      if (std::find(all_scalar.begin(), all_scalar.end(), var_name) != all_scalar.end())
+        _scalar_variables.push_back(var_name);
     }
   }
   else
   {
-    nodal = all_nodal;
-    elemental = all_elemental;
+    _nodal_variables = all_nodal;
+    _elemental_variables = all_elemental;
+    _scalar_variables = all_scalar;
   }
 
   // Add the variables to the system
-  for (const auto & var_name : nodal)
+  for (const auto & var_name : _nodal_variables)
     _system->add_variable(var_name, FIRST);
 
-  for (const auto & var_name : elemental)
+  for (const auto & var_name : _elemental_variables)
     _system->add_variable(var_name, CONSTANT, MONOMIAL);
+
+  for (const auto & var_name : _scalar_variables)
+    _system->add_variable(var_name, FIRST, SCALAR);
 
   // Initialize the equations systems
   _es->init();
@@ -298,11 +302,14 @@ SolutionUserObject::readExodusII()
     _system2 = &_es2->get_system(_system_name);
 
     // Add the variables to the system
-    for (const auto & var_name : nodal)
+    for (const auto & var_name : _nodal_variables)
       _system2->add_variable(var_name, FIRST);
 
-    for (const auto & var_name : elemental)
+    for (const auto & var_name : _elemental_variables)
       _system2->add_variable(var_name, CONSTANT, MONOMIAL);
+
+    for (const auto & var_name : _scalar_variables)
+      _system2->add_variable(var_name, FIRST, SCALAR);
 
     // Initialize
     _es2->init();
@@ -311,16 +318,24 @@ SolutionUserObject::readExodusII()
     updateExodusBracketingTimeIndices(0.0);
 
     // Copy the solutions from the first system
-    for (const auto & var_name : nodal)
+    for (const auto & var_name : _nodal_variables)
     {
       _exodusII_io->copy_nodal_solution(*_system, var_name, var_name, _exodus_index1 + 1);
       _exodusII_io->copy_nodal_solution(*_system2, var_name, var_name, _exodus_index2 + 1);
     }
 
-    for (const auto & var_name : elemental)
+    for (const auto & var_name : _elemental_variables)
     {
       _exodusII_io->copy_elemental_solution(*_system, var_name, var_name, _exodus_index1 + 1);
       _exodusII_io->copy_elemental_solution(*_system2, var_name, var_name, _exodus_index2 + 1);
+    }
+
+    if (_scalar_variables.size() > 0)
+    {
+      _exodusII_io->copy_scalar_solution(
+          *_system, _scalar_variables, _scalar_variables, _exodus_index1 + 1);
+      _exodusII_io->copy_scalar_solution(
+          *_system2, _scalar_variables, _scalar_variables, _exodus_index2 + 1);
     }
 
     // Update the systems
@@ -341,11 +356,15 @@ SolutionUserObject::readExodusII()
                  " time steps.");
 
     // Copy the values from the ExodusII file
-    for (const auto & var_name : nodal)
+    for (const auto & var_name : _nodal_variables)
       _exodusII_io->copy_nodal_solution(*_system, var_name, var_name, _exodus_time_index);
 
-    for (const auto & var_name : elemental)
+    for (const auto & var_name : _elemental_variables)
       _exodusII_io->copy_elemental_solution(*_system, var_name, var_name, _exodus_time_index);
+
+    if (_scalar_variables.size() > 0)
+      _exodusII_io->copy_scalar_solution(
+          *_system, _scalar_variables, _scalar_variables, _exodus_time_index);
 
     // Update the equations systems
     _system->update();
@@ -362,7 +381,10 @@ SolutionUserObject::directValue(const Node * node, const std::string & var_name)
 
   // Get the node id and associated dof
   dof_id_type node_id = node->id();
-  dof_id_type dof_id = _system->get_mesh().node_ref(node_id).dof_number(sys_num, var_num, 0);
+  const Node & sys_node = _system->get_mesh().node_ref(node_id);
+  mooseAssert(sys_node.n_dofs(sys_num, var_num) > 0,
+              "Variable " << var_name << " has no DoFs on node " << sys_node.id());
+  dof_id_type dof_id = sys_node.dof_number(sys_num, var_num, 0);
 
   // Return the desired value for the dof
   return directValue(dof_id);
@@ -377,7 +399,10 @@ SolutionUserObject::directValue(const Elem * elem, const std::string & var_name)
 
   // Get the element id and associated dof
   dof_id_type elem_id = elem->id();
-  dof_id_type dof_id = _system->get_mesh().elem_ptr(elem_id)->dof_number(sys_num, var_num, 0);
+  const Elem & sys_elem = _system->get_mesh().elem_ref(elem_id);
+  mooseAssert(sys_elem.n_dofs(sys_num, var_num) > 0,
+              "Variable " << var_name << " has no DoFs on element " << sys_elem.id());
+  dof_id_type dof_id = sys_elem.dof_number(sys_num, var_num, 0);
 
   // Return the desired value
   return directValue(dof_id);
@@ -498,17 +523,10 @@ SolutionUserObject::initialSetup()
     _mesh_function2->enable_out_of_mesh_mode(default_values);
   }
 
-  // Populate the data maps that indicate if the variable is nodal and the MeshFunction variable
-  // index
+  // Populate the MeshFunction variable index
   for (unsigned int i = 0; i < _system_variables.size(); ++i)
   {
     std::string name = _system_variables[i];
-    FEType type = _system->variable_type(name);
-    if (type.order == CONSTANT)
-      _local_variable_nodal[name] = false;
-    else
-      _local_variable_nodal[name] = true;
-
     _local_variable_index[name] = i;
   }
 
@@ -530,25 +548,25 @@ SolutionUserObject::updateExodusTimeInterpolation(Real time)
     if (updateExodusBracketingTimeIndices(time))
     {
 
-      for (const auto & var_name : _system_variables)
-      {
-        if (_local_variable_nodal[var_name])
-          _exodusII_io->copy_nodal_solution(*_system, var_name, var_name, _exodus_index1 + 1);
-        else
-          _exodusII_io->copy_elemental_solution(*_system, var_name, var_name, _exodus_index1 + 1);
-      }
+      for (const auto & var_name : _nodal_variables)
+        _exodusII_io->copy_nodal_solution(*_system, var_name, var_name, _exodus_index1 + 1);
+      for (const auto & var_name : _elemental_variables)
+        _exodusII_io->copy_elemental_solution(*_system, var_name, var_name, _exodus_index1 + 1);
+      if (_scalar_variables.size() > 0)
+        _exodusII_io->copy_scalar_solution(
+            *_system, _scalar_variables, _scalar_variables, _exodus_index1 + 1);
 
       _system->update();
       _es->update();
       _system->solution->localize(*_serialized_solution);
 
-      for (const auto & var_name : _system_variables)
-      {
-        if (_local_variable_nodal[var_name])
-          _exodusII_io->copy_nodal_solution(*_system2, var_name, var_name, _exodus_index2 + 1);
-        else
-          _exodusII_io->copy_elemental_solution(*_system2, var_name, var_name, _exodus_index2 + 1);
-      }
+      for (const auto & var_name : _nodal_variables)
+        _exodusII_io->copy_nodal_solution(*_system2, var_name, var_name, _exodus_index2 + 1);
+      for (const auto & var_name : _elemental_variables)
+        _exodusII_io->copy_elemental_solution(*_system2, var_name, var_name, _exodus_index2 + 1);
+      if (_scalar_variables.size() > 0)
+        _exodusII_io->copy_scalar_solution(
+            *_system2, _scalar_variables, _scalar_variables, _exodus_index2 + 1);
 
       _system2->update();
       _es2->update();
@@ -1043,8 +1061,7 @@ SolutionUserObject::evalMultiValuedMeshFunction(const Point & p,
   {
     mooseAssert(k.second.size() > local_var_index,
                 "In SolutionUserObject::evalMultiValuedMeshFunction variable with local_var_index "
-                    << local_var_index
-                    << " does not exist");
+                    << local_var_index << " does not exist");
     output[k.first] = k.second(local_var_index);
   }
 
@@ -1133,8 +1150,7 @@ SolutionUserObject::evalMultiValuedMeshFunctionGradient(const Point & p,
   {
     mooseAssert(k.second.size() > local_var_index,
                 "In SolutionUserObject::evalMultiValuedMeshFunction variable with local_var_index "
-                    << local_var_index
-                    << " does not exist");
+                    << local_var_index << " does not exist");
     output[k.first] = k.second[local_var_index];
   }
 
@@ -1150,7 +1166,17 @@ SolutionUserObject::variableNames() const
 bool
 SolutionUserObject::isVariableNodal(const std::string & var_name) const
 {
-  // Use iterator method, [] is not marked const
-  std::map<std::string, bool>::const_iterator it = _local_variable_nodal.find(var_name);
-  return it->second;
+  return std::find(_nodal_variables.begin(), _nodal_variables.end(), var_name) !=
+         _nodal_variables.end();
+}
+
+Real
+SolutionUserObject::scalarValue(Real /*t*/, const std::string & var_name) const
+{
+  unsigned int var_num = _system->variable_number(var_name);
+  const DofMap & dof_map = _system->get_dof_map();
+  std::vector<dof_id_type> dofs;
+  dof_map.SCALAR_dof_indices(dofs, var_num);
+  // We can handle only FIRST order scalar variables
+  return directValue(dofs[0]);
 }

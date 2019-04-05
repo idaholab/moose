@@ -193,6 +193,15 @@ public:
    */
   Real directValue(const Elem * elem, const std::string & var_name) const;
 
+  /**
+   * Returns a value of a global variable
+   * @param t The time at which to extract (not used, it is handled automatically when reading the
+   * data)
+   * @param var_name The variable from which to extract a value
+   * @return The desired value for the given variable
+   */
+  Real scalarValue(Real t, const std::string & var_name) const;
+
   // Required pure virtual function (not used)
   virtual void initialize() override;
 
@@ -322,8 +331,14 @@ protected:
   /// Stores the local index need by MeshFunction
   std::map<std::string, unsigned int> _local_variable_index;
 
-  /// Stores flag indicating if the variable is nodal
-  std::map<std::string, bool> _local_variable_nodal;
+  /// Stores names of nodal variables
+  std::vector<std::string> _nodal_variables;
+
+  /// Stores names of elemental variables
+  std::vector<std::string> _elemental_variables;
+
+  /// Stores names of scalar variables
+  std::vector<std::string> _scalar_variables;
 
   /// Current ExodusII time index
   int _exodus_time_index;
@@ -412,4 +427,3 @@ protected:
 private:
   static Threads::spin_mutex _solution_user_object_mutex;
 };
-
