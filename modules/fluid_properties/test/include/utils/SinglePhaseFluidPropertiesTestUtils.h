@@ -29,6 +29,15 @@
     REL_TEST(df_db, df_db_fd, tol);                                                                \
   }
 
+// Macro for performing a derivative test (1d function)
+#define DERIV_TEST_1D(f, dfda, a, tol)                                                             \
+  {                                                                                                \
+    const Real da = REL_PERTURBATION * a;                                                          \
+    const Real df_da_fd = (f(a + da) - f(a - da)) / (2 * da);                                      \
+    Real df_da = dfda(a);                                                                          \
+    REL_TEST(df_da, df_da_fd, tol);                                                                \
+  }
+
 // Macro for testing that a "not implemented" error message is thrown for f(a,b)
 #define NOT_IMPLEMENTED_TEST_VALUE(f)                                                              \
   {                                                                                                \

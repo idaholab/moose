@@ -25,7 +25,6 @@ class SpiralAnnularMeshGenerator : public MeshGenerator
 {
 public:
   SpiralAnnularMeshGenerator(const InputParameters & parameters);
-  SpiralAnnularMeshGenerator(const SpiralAnnularMeshGenerator & /* other_mesh */) = default;
 
   // No copy
   SpiralAnnularMeshGenerator & operator=(const SpiralAnnularMeshGenerator & other_mesh) = delete;
