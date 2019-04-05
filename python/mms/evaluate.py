@@ -17,7 +17,7 @@ def evaluate(pde, soln, variable='u', scalars=set(), vectors=set()):
 
     Example:
         import mms
-        f = mms.evaluate('diff(T, t) + div(grad(T))', 'cos(u*t*x)', variable='T', symbols=['u'])
+        f = mms.evaluate('diff(T, t) + div(grad(T))', 'cos(u*t*x)', variable='T', scalars=['u'])
         mms.print_moose(f)
         mms.print_fparser(f)
     """
