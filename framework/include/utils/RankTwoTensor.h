@@ -277,6 +277,8 @@ public:
   RankFourTensorTempl<T> positiveProjectionEigenDecomposition(std::vector<T> & eigval,
                                                               RankTwoTensorTempl<T> & eigvec) const;
 
+  void diagonalize(RankTwoTensorTempl<T> & Q, RankTwoTensorTempl<T> & D) const;
+
   /// returns A_ij - de_ij*tr(A)/3, where A are the _coords
   RankTwoTensorTempl<T> deviatoric() const;
 

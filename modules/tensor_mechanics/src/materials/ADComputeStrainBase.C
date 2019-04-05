@@ -100,7 +100,8 @@ ADComputeStrainBase<compute_stage>::initQpStatefulProperties()
 {
   _mechanical_strain[_qp].zero();
   _total_strain[_qp].zero();
-  _deformation_gradient[_qp] = RankTwoTensor(RankTwoTensor::initIdentity);
+  _deformation_gradient[_qp].zero();
+  _deformation_gradient[_qp].addIa(1.0);
 }
 
 // explicit instantiation is required for AD base classes
