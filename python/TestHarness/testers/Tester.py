@@ -7,7 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import platform, re, os
+import platform, re, os, pkgutil
 from TestHarness import util
 from TestHarness.StatusSystem import TestStatus
 from FactorySystem.MooseObject import MooseObject
@@ -82,6 +82,7 @@ class Tester(MooseObject):
         params.addParam('display_required', False, "The test requires and active display for rendering (i.e., ImageDiff tests).")
         params.addParam('timing',         True, "If True, the test will be allowed to run with the timing flag (i.e. Manually turning on performance logging).")
         params.addParam('boost',         ['ALL'], "A test that runs only if BOOST is detected ('ALL', 'TRUE', 'FALSE')")
+        params.addParam('sympy', False, "If True, sympy is required.")
 
         # SQA
         params.addParam("requirement", None, "The SQA requirement that this test satisfies (e.g., 'The Marker system shall provide means to mark elements for refinement within a box region.')")
@@ -573,6 +574,10 @@ class Tester(MooseObject):
         # Check for display
         if self.specs['display_required'] and not os.getenv('DISPLAY', False):
             reasons['display_required'] = 'NO DISPLAY'
+
+        # Check for sympy
+        if self.specs['sympy'] and pkgutil.find_loader('sympy') is None:
+            reasons['python_package_required'] = 'NO SYMPY'
 
         # Remove any matching user supplied caveats from accumulated checkRunnable caveats that
         # would normally produce a skipped test.
