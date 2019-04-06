@@ -1,11 +1,15 @@
 [Tests]
+  issues = '#13181'
+  design = 'mms.md'
   [evaluate]
     type = PythonUnitTest
     input = test_mms.py
+    requirement = "The system shall include a tool for computing forcing functions for the method of manufactured solutions."
   []
   [plot]
     type = CheckFiles
     command = input.py
     check_files = 'convergence.pdf'
+    requirement = "The system shall include a tool for creating convergence plots."
   []
 []
