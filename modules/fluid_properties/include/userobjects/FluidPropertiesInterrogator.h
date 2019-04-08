@@ -14,7 +14,6 @@
 
 class FluidPropertiesInterrogator;
 class FluidProperties;
-class LiquidFluidPropertiesInterface;
 class SinglePhaseFluidProperties;
 class VaporMixtureFluidProperties;
 class TwoPhaseFluidProperties;
@@ -118,17 +117,6 @@ protected:
                                   const Real & p,
                                   const Real & T,
                                   const Real & vel);
-
-  /**
-   * Outputs liquid-specific properties
-   *
-   * @param[in] liquid_fp   Liquid fluid properties
-   * @param[in] p   Pressure
-   * @param[in] T   Temperature
-   */
-  void outputLiquidSpecificProperties(const LiquidFluidPropertiesInterface * const liquid_fp,
-                                      const Real & p,
-                                      const Real & T);
 
   /**
    * Outputs static properties for a vapor mixture fluid properties object

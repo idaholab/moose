@@ -53,6 +53,18 @@ TestTwoPhaseFluidProperties::p_sat(Real T) const
 
 Real TestTwoPhaseFluidProperties::dT_sat_dp(Real /*p*/) const { return 2; }
 
+Real
+TestTwoPhaseFluidProperties::sigma_from_T(Real T) const
+{
+  return 5 * T;
+}
+
+Real
+TestTwoPhaseFluidProperties::dsigma_dT_from_T(Real /*T*/) const
+{
+  return 5;
+}
+
 bool
 TestTwoPhaseFluidProperties::supportsPhaseChange() const
 {

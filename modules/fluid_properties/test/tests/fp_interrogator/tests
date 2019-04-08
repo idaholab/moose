@@ -302,7 +302,8 @@ Latent heat of vaporization:           4.5931000000e\+08  J/kg'
 --------------------------------------------------------------------------------
 Critical pressure:                                   25  Pa
 Saturation pressure:                                900  Pa
-Latent heat of vaporization:           6.8896500000e\+05  J/kg'
+Latent heat of vaporization:           6.8896500000e\+05  J/kg
+Surface tension:                                   1500  N/m'
 
     requirement = "The fluid properties interrogator shall output two-phase "
       "fluid properties for (T) input with a two-phase fluid properties object."
