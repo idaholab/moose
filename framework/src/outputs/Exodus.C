@@ -70,7 +70,7 @@ validParams<Exodus>()
       "discontinuous", false, "Enables discontinuous output format for Exodus files.");
 
   // Need a layer of geometric ghosting for mesh serialization
-  params.addRelationshipManager("ElementSideNeighborLayers",
+  params.addRelationshipManager("MooseGhostPointNeighbors",
                                 Moose::RelationshipManagerType::GEOMETRIC);
 
   // Return the InputParameters
