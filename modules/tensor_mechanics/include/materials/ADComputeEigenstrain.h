@@ -12,7 +12,7 @@
 
 #include "ADComputeEigenstrainBase.h"
 
-#define usingADComputeEigenstrainMembers usingADComputeEigenstrainBaseMembers
+#define usingADComputeEigenstrainMembers usingComputeEigenstrainBaseMembers
 
 template <ComputeStage>
 class ADComputeEigenstrain;
@@ -36,7 +36,7 @@ protected:
 
   RankTwoTensor _eigen_base_tensor;
 
-  usingADComputeEigenstrainBaseMembers;
+  usingComputeEigenstrainBaseMembers;
 };
 
 #endif // ADADCOMPUTEEIGENSTRAIN_H

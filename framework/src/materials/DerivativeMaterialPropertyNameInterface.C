@@ -12,8 +12,8 @@
 #include <algorithm>
 
 const MaterialPropertyName
-DerivativeMaterialPropertyNameInterface::propertyName(const MaterialPropertyName & base,
-                                                      const std::vector<VariableName> & c) const
+DerivativeMaterialPropertyNameInterface::derivativePropertyName(
+    const MaterialPropertyName & base, const std::vector<VariableName> & c) const
 {
   // to obtain well defined names we sort alphabetically
   std::vector<VariableName> a(c);
@@ -52,25 +52,25 @@ DerivativeMaterialPropertyNameInterface::propertyName(const MaterialPropertyName
 }
 
 const MaterialPropertyName
-DerivativeMaterialPropertyNameInterface::propertyNameFirst(const MaterialPropertyName & base,
-                                                           const VariableName & c1) const
+DerivativeMaterialPropertyNameInterface::derivativePropertyNameFirst(
+    const MaterialPropertyName & base, const VariableName & c1) const
 {
   return "d" + base + "/d" + c1;
 }
 
 const MaterialPropertyName
-DerivativeMaterialPropertyNameInterface::propertyNameSecond(const MaterialPropertyName & base,
-                                                            const VariableName & c1,
-                                                            const VariableName & c2) const
+DerivativeMaterialPropertyNameInterface::derivativePropertyNameSecond(
+    const MaterialPropertyName & base, const VariableName & c1, const VariableName & c2) const
 {
-  return propertyName(base, {c1, c2});
+  return derivativePropertyName(base, {c1, c2});
 }
 
 const MaterialPropertyName
-DerivativeMaterialPropertyNameInterface::propertyNameThird(const MaterialPropertyName & base,
-                                                           const VariableName & c1,
-                                                           const VariableName & c2,
-                                                           const VariableName & c3) const
+DerivativeMaterialPropertyNameInterface::derivativePropertyNameThird(
+    const MaterialPropertyName & base,
+    const VariableName & c1,
+    const VariableName & c2,
+    const VariableName & c3) const
 {
-  return propertyName(base, {c1, c2, c3});
+  return derivativePropertyName(base, {c1, c2, c3});
 }

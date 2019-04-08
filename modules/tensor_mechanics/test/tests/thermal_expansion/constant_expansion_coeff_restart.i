@@ -17,7 +17,7 @@
 []
 
 [Problem]
-  restart_file_base = constant_thermal_expan_only_cp/LATEST
+  restart_file_base =  constant_expansion_coeff_out_cp/LATEST
   force_restart = true
 []
 
@@ -101,8 +101,6 @@
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   petsc_options = '-snes_ksp_ew'
@@ -127,7 +125,6 @@
   csv = true
   exodus = true
   checkpoint = true
-  file_base = constant_thermal_expan_restart
 []
 
 [Postprocessors]

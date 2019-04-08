@@ -1,9 +1,3 @@
-# The primary purpose of this test is to verify that the ability to combine
-# multiple eigenstrains works correctly.  It should behave identically to the
-# constant_expansion_coeff.i model in this directory. Instead of applying the
-# thermal expansion in one eigenstrain, it splits that into two eigenstrains
-# that get added together.
-
 # This test involves only thermal expansion strains on a 2x2x2 cube of approximate
 # steel material.  An initial temperature of 25 degrees C is given for the material,
 # and an auxkernel is used to calculate the temperature in the entire cube to
@@ -11,6 +5,8 @@
 # temperature jumps, the temperature increases by 6.25C each timestep.
 # The thermal strain increment should therefore be
 #     6.25 C * 1.3e-5 1/C = 8.125e-5 m/m.
+
+# This test is also designed to be used to identify problems with restart files
 
 [Mesh]
   type = GeneratedMesh
@@ -25,29 +21,7 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-[]
-
-[AuxVariables]
   [./temp]
-  [../]
-
-  [./strain_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./strain_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./strain_zz]
-    order = CONSTANT
-    family = MONOMIAL
   [../]
 []
 
@@ -58,40 +32,25 @@
   [../]
 []
 
-[Kernels]
+[Modules]
   [./TensorMechanics]
-    use_displaced_mesh = true
+    [./Master]
+      [./all]
+        strain = SMALL
+        incremental = true
+        add_variables = true
+        eigenstrain_names = eigenstrain
+        generate_output = 'strain_xx strain_yy strain_zz'
+        use_automatic_differentiation = true
+      [../]
+    [../]
   [../]
 []
 
-[AuxKernels]
+[Kernels]
   [./tempfuncaux]
-    type = FunctionAux
+    type = Diffusion
     variable = temp
-    function = temperature_load
-    use_displaced_mesh = false
-  [../]
-
-  [./strain_xx]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
-    variable = strain_xx
-    index_i = 0
-    index_j = 0
-  [../]
-  [./strain_yy]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
-    variable = strain_yy
-    index_i = 1
-    index_j = 1
-  [../]
-  [./strain_zz]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
-    variable = strain_zz
-    index_i = 2
-    index_j = 2
   [../]
 []
 
@@ -114,6 +73,12 @@
     boundary = back
     value = 0.0
   [../]
+  [./temp]
+    type = FunctionPresetBC
+    variable = temp
+    function = temperature_load
+    boundary = 'left right'
+  [../]
 []
 
 [Materials]
@@ -122,32 +87,28 @@
     youngs_modulus = 2.1e5
     poissons_ratio = 0.3
   [../]
-  [./small_strain]
-    type = ComputeIncrementalSmallStrain
-    eigenstrain_names = 'eigenstrain1 eigenstrain2'
-  [../]
   [./small_stress]
-    type = ComputeFiniteStrainElasticStress
+    type = ADComputeFiniteStrainElasticStress
   [../]
-  [./thermal_expansion_strain1]
-    type = ComputeThermalExpansionEigenstrain
+  [./thermal_expansion_strain]
+    type = ADComputeThermalExpansionEigenstrain
     stress_free_temperature = 298
-    thermal_expansion_coeff = 1.0e-5
+    thermal_expansion_coeff = 1.3e-5
     temperature = temp
-    eigenstrain_name = eigenstrain1
+    eigenstrain_name = eigenstrain
   [../]
-  [./thermal_expansion_strain2]
-    type = ComputeThermalExpansionEigenstrain
-    stress_free_temperature = 298
-    thermal_expansion_coeff = 0.3e-5
-    temperature = temp
-    eigenstrain_name = eigenstrain2
+[]
+
+[Preconditioning]
+  [./smp]
+    type = SMP
+    full = true
   [../]
 []
 
 [Executioner]
   type = Transient
-  solve_type = 'PJFNK'
+  solve_type = 'NEWTON'
 
   l_max_its = 50
   nl_max_its = 50
@@ -164,28 +125,23 @@
 [Outputs]
   csv = true
   exodus = true
-  checkpoint = true
 []
 
 [Postprocessors]
   [./strain_xx]
     type = ElementAverageValue
     variable = strain_xx
-    block = 0
   [../]
   [./strain_yy]
     type = ElementAverageValue
     variable = strain_yy
-    block = 0
   [../]
   [./strain_zz]
     type = ElementAverageValue
     variable = strain_zz
-    block = 0
   [../]
   [./temperature]
     type = AverageNodalVariableValue
     variable = temp
-    block = 0
   [../]
 []

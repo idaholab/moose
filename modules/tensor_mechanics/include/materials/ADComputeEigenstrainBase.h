@@ -12,9 +12,10 @@
 
 #include "ADMaterial.h"
 
-#define usingADComputeEigenstrainBaseMembers                                                       \
+#define usingComputeEigenstrainBaseMembers                                                         \
   usingMaterialMembers;                                                                            \
-  using ADComputeEigenstrainBase<compute_stage>::_eigenstrain
+  using ADComputeEigenstrainBase<compute_stage>::_eigenstrain;                                     \
+  using ADComputeEigenstrainBase<compute_stage>::_eigenstrain_name
 
 // Forward Declarations
 template <ComputeStage>
