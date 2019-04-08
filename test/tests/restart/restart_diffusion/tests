@@ -1,9 +1,13 @@
 [Tests]
-  [./uniform_refine_refine_test_2]
+  [./uniform_refine_test_1]
     type = 'Exodiff'
-    input = 'exodus_refined_refined_restart_2_test.i'
-    exodiff = 'exodus_refined_refined_restart_2.e'
-    prereq = 'uniform_refine_test_1'
+    input = 'exodus_refined_restart_1_test.i'
+    exodiff = 'exodus_refined_restart_1.e'
+    recover = false
+
+    issues = "#563"
+    requirement = "The system shall support outputting a mesh with refinement to Exodus format for restart testing."
+    design = "restart_recover.md"
   [../]
 
   [./uniform_refine_test_2]
@@ -11,46 +15,77 @@
     input = 'exodus_refined_restart_2_test.i'
     exodiff = 'exodus_refined_restart_2.e'
     prereq = 'uniform_refine_test_1'
+
+    # Note: This test is not strictly a "restart" capability. However reading solution information is related to restart.
+    issues = "#563"
+    requirement = "The system shall support reading solution information from an Exodus file."
+    design = "restart_recover.md"
   [../]
 
-  [./uniform_refine_test_1]
+  [./uniform_refine_refine_test_2]
     type = 'Exodiff'
-    input = 'exodus_refined_restart_1_test.i'
-    exodiff = 'exodus_refined_restart_1.e'
-    recover = false
+    input = 'exodus_refined_refined_restart_2_test.i'
+    exodiff = 'exodus_refined_refined_restart_2.e'
+    prereq = 'uniform_refine_test_1'
+
+    # Note: This test is not strictly a "restart" capability. However reading solution information is related to restart.
+    issues = "#563"
+    requirement = "The system shall support reading solution information from an Exodus file with initial uniform refinement."
+    design = "restart_recover.md"
   [../]
 
-  [./test_1]
+  [./steady_1]
     type = 'Exodiff'
     input = 'restart_diffusion_test_steady.i'
     exodiff = 'steady_out.e'
+
+    issues = "#563"
+    requirement = "The system shall support outputting a mesh to checkpoint format for restart testing."
+    design = "restart_recover.md"
   [../]
 
   [./restart_from_steady]
     type = 'Exodiff'
     input = 'restart_diffusion_transient_from_steady.i'
     exodiff = 'restart_diffusion_transient_from_steady_out.e'
-    prereq = 'test_1'
+    prereq = 'steady_1'
+
+    issues = "#13182"
+    requirement = "The system shall support overriding \"start_time\" when restarting from a checkpoint mesh format."
+    design = "restart_recover.md"
   [../]
 
-  [./test_2]
+  [./trans_from_steady]
     type = 'Exodiff'
     input = 'restart_diffusion_test_transient.i'
     exodiff = 'out.e'
-    prereq = 'test_1'
+    prereq = 'steady_1'
+
+    # Note: This test is not strictly a "restart" capability. However reading solution information is related to restart.
+    issues = "#563"
+    requirement = "The system shall support starting a transient simulation from a steady simulation result."
+    design = "restart_recover.md"
   [../]
 
-  [./test_2_new_name]
+  [./restart_with_variable_rename]
     type = 'Exodiff'
     input = 'restart_diffusion_test_transient_new_name.i'
     exodiff = 'restart_diffusion_test_transient_new_name_out.e'
-    prereq = 'test_1'
+    prereq = 'steady_1'
+
+    issues = "#4965"
+    requirement = "The system shall support renaming a variable read from a solution file upon restart."
+    design = "restart_recover.md"
   [../]
 
   # Restart using "LAST"
   [./restart_use_end_part1]
     type = 'RunApp'
     input = 'restart_diffusion_from_end_part1.i'
+
+    issues = "#5748"
+    requirement = "The system shall support writting out several timesteps to a solution file to test reading from a specific point."
+    design = "restart_recover.md"
   [../]
 
   [./restart_use_end_part2]
@@ -58,6 +93,10 @@
     input = 'restart_diffusion_from_end_part2.i'
     exodiff = 'restart_diffusion_from_end_part2_out.e'
     prereq = 'restart_use_end_part1'
+
+    issues = "#5748"
+    requirement = "The system shall support restarting from the last timestep using the keyword \"LATEST\"."
+    design = "restart_recover.md"
   [../]
 
   [./restart_use_end_error_check]
@@ -67,5 +106,9 @@
 
     cli_args = 'Variables/u/initial_from_file_timestep=8'
     prereq = 'restart_use_end_part2'
+
+    issues = "#5748"
+    requirement = "The system shall issue a useful error message stating the valid options when a user requests an invalid time step number or keyword."
+    design = "restart_recover.md"
   [../]
 []
