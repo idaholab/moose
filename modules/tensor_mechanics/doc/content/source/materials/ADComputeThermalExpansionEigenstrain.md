@@ -21,7 +21,7 @@ are computed using forward mode automatic differentiation.
 
 !listing modules/tensor_mechanics/test/tests/thermal_expansion/ad_constant_expansion_stress_free_temp.i block=Materials/thermal_expansion_strain
 
-The `eigenstrain_name` parameter value must also be set for the strain
+The `eigenstrain_names` parameter value must also be set for the strain
 calculator, and an example parameter setting is shown below:
 
 !listing modules/tensor_mechanics/test/tests/thermal_expansion/ad_constant_expansion_stress_free_temp.i block=Modules/TensorMechanics/Master
