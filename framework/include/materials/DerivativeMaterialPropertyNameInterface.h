@@ -11,6 +11,7 @@
 #define DERIVATIVEMATERIALPROPERTYNAMEINTERFACE_H
 
 #include "MooseTypes.h"
+#include "MooseError.h"
 
 class DerivativeMaterialPropertyNameInterface
 {
@@ -45,6 +46,36 @@ public:
                                                          const VariableName & c1,
                                                          const VariableName & c2,
                                                          const VariableName & c3) const;
+
+  ///@{ aliases for the deprecated old function names
+  const MaterialPropertyName propertyName(const MaterialPropertyName & base,
+                                          const std::vector<VariableName> & c) const
+  {
+    mooseDeprecated("This function was renamed to 'derivativePropertyName'");
+    return derivativePropertyName(base, c);
+  }
+  const MaterialPropertyName propertyNameFirst(const MaterialPropertyName & base,
+                                               const VariableName & c1) const
+  {
+    mooseDeprecated("This function was renamed to 'derivativePropertyNameFirst'");
+    return derivativePropertyNameFirst(base, c1);
+  }
+  const MaterialPropertyName propertyNameSecond(const MaterialPropertyName & base,
+                                                const VariableName & c1,
+                                                const VariableName & c2) const
+  {
+    mooseDeprecated("This function was renamed to 'derivativePropertyNameSecond'");
+    return derivativePropertyNameSecond(base, c1, c2);
+  }
+  const MaterialPropertyName propertyNameThird(const MaterialPropertyName & base,
+                                               const VariableName & c1,
+                                               const VariableName & c2,
+                                               const VariableName & c3) const
+  {
+    mooseDeprecated("This function was renamed to 'derivativePropertyNameThird'");
+    return derivativePropertyNameThird(base, c1, c2, c3);
+  }
+  ///@}
 };
 
 #endif // DERIVATIVEMATERIALPROPERTYNAMEINTERFACE_H
