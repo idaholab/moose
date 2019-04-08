@@ -44,17 +44,6 @@
     design = "restart_recover.md"
   [../]
 
-  [./restart_from_steady]
-    type = 'Exodiff'
-    input = 'restart_diffusion_transient_from_steady.i'
-    exodiff = 'restart_diffusion_transient_from_steady_out.e'
-    prereq = 'steady_1'
-
-    issues = "#13182"
-    requirement = "The system shall support overriding \"start_time\" when restarting from a checkpoint mesh format."
-    design = "restart_recover.md"
-  [../]
-
   [./trans_from_steady]
     type = 'Exodiff'
     input = 'restart_diffusion_test_transient.i'
