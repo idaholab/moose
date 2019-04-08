@@ -104,6 +104,8 @@ by plotting the data on a log-log plot. The 'mms' package includes a 'plot' func
 this application that accepts the of the outputed CSV file(s). For this problem the following
 python code produces the plot shown in [convergence].
 
+!listing input.py start=mms.plot
+
 !media convergence.png id=convergence caption=Example convergence plot created by 'mms.plot' function.
 
 The 'plot' function accepts a filename for the first argument. If the filename contains an asterisk
@@ -122,7 +124,7 @@ The following table lists the additional options that may be passed to the 'mms.
 | `ylabel` | `str` | | The text to use for labeling the y-axis, if not provided the value of 'y' is used |
 | `output` | `str` | | The name of the file to create (e.g., "convergence.pdf") |
 | `show` | `bool` | True | Flag for disabling the live window of the plot |
-| `fit` | `bool` | True | Flag for disabling the computation of the slop fit |
+| `fit` | `bool` | True | Flag for disabling the computation of the slope fit |
 
 The rate of convergence is expected to be two for first order elements and third for second order
 elements, for more information regarding convergence rates refer to [citet!fish2007first].
