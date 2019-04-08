@@ -90,7 +90,7 @@
   [./pfbulkmat]
     type = GenericConstantMaterial
     prop_names = 'gc_prop l'
-    prop_values = '2.7 0.015'
+    prop_values = '2.7 0.06'
   [../]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
@@ -122,14 +122,13 @@
   petsc_options_value = 'lu     superlu_dist'
 
   end_time = 1.57
-  dtmax = 1e-5
+  dtmax = 1e-3
   dtmin = 1e-10
   nl_max_its = 50
-  nl_abs_tol = 1e-6
 
   [./TimeStepper]
     type = IterationAdaptiveDT
-    dt = 1e-6
+    dt = 1e-5
     optimal_iterations = 5
     iteration_window = 1
     cutback_factor = 0.5
