@@ -1,0 +1,28 @@
+reset
+create surface circle radius 20 zplane 
+create surface circle radius 10 zplane 
+subtract volume 2  from volume 1 
+webcut volume 1  with general plane xz  noimprint nomerge 
+webcut volume 3  with general plane yz  noimprint nomerge 
+delete Volume 4
+delete Volume 1
+surface 6  size 1
+mesh surface 6 
+set duplicate block elements off
+block 1 add surface 6  
+block 1  element type quad4
+nodeset 1 add curve 8  
+nodeset 2 add curve 14  
+nodeset 3 add curve 12  
+nodeset 4 add curve 13  
+
+Sideset 101 add curve 8  
+Sideset 102 add curve 14  
+Sideset 103 add curve 12  
+Sideset 104 add curve 13  
+
+undo group begin
+set exodus netcdf4 off
+set large exodus on
+export mesh "/Users/jianw/projects/moose5/modules/combined/test/tests/ad_phase_field_fracture/quarter.e" overwrite
+undo group end
