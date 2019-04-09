@@ -24,10 +24,13 @@
   displacements = 'disp_x disp_y disp_z'
 []
 
-[AuxVariables]
+[Variables]
   [./temp]
     initial_condition = 300.0
   [../]
+[]
+
+[AuxVariables]
   [./eigenstrain_yy]
     order = CONSTANT
     family = MONOMIAL
@@ -69,17 +72,20 @@
         incremental = true
         add_variables = true
         eigenstrain_names = eigenstrain
+        use_automatic_differentiation = true
       [../]
     [../]
   [../]
 []
 
-[AuxKernels]
-  [./tempfuncaux]
-    type = FunctionAux
+[Kernels]
+  [./temp]
+    type = Diffusion
     variable = temp
-    function = temperature_load
   [../]
+[]
+
+[AuxKernels]
   [./eigenstrain_yy]
     type = RankTwoAux
     rank_two_tensor = eigenstrain
@@ -149,6 +155,12 @@
     boundary = back
     value = 0.0
   [../]
+  [./temp]
+    type = FunctionPresetBC
+    variable = temp
+    function = temperature_load
+    boundary = 'left right'
+  [../]
 []
 
 [Materials]
@@ -158,10 +170,10 @@
     poissons_ratio = 0.3
   [../]
   [./small_stress]
-    type = ComputeFiniteStrainElasticStress
+    type = ADComputeFiniteStrainElasticStress
   [../]
   [./thermal_expansion_strain]
-    type = ComputeThermalExpansionEigenstrain
+    type = ADComputeThermalExpansionEigenstrain
     stress_free_temperature = 200
     thermal_expansion_coeff = 1.3e-5
     temperature = temp
@@ -169,9 +181,16 @@
   [../]
 []
 
+[Preconditioning]
+  [./smp]
+    type = SMP
+    full = true
+  [../]
+[]
+
 [Executioner]
   type = Transient
-  solve_type = 'PJFNK'
+  solve_type = 'NEWTON'
 
   l_max_its = 50
   nl_max_its = 50
