@@ -151,6 +151,7 @@ class RenderFloat(components.RenderComponent):
 
         if token['bottom']:
             cap = token(0)
+            cap.parent = None # Guarantees that "cap" is removed from the current tree
             cap.parent = token
 
         return div
