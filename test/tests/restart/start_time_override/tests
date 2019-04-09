@@ -1,0 +1,49 @@
+[Tests]
+  [steady]
+    type = 'RunApp'
+    input = 'transient.i'
+    max_parallel = 4 # small test
+
+    issues = "#563"
+    requirement = "The system shall support outputting a mesh to checkpoint format for restart testing with \"start_time\"."
+    design = "restart_recover.md"
+  [../]
+
+  [default_start_timestart]
+    type = 'CSVDiff'
+    input = 'start_time_override.i'
+    csvdiff = 'start_time_override_out.csv'
+    prereq = 'steady'
+    max_parallel = 4 # small test
+
+    issues = "#13182"
+    requirement = "The system shall use the the final time as the \"start_time\" from the restart file."
+    design = "restart_recover.md"
+  []
+
+  [start_time_override_zero]
+    type = 'CSVDiff'
+    input = 'start_time_override.i'
+    csvdiff = 'start_time_override_zero.csv'
+    prereq = 'steady'
+    cli_args = 'Outputs/file_base=start_time_override_zero Executioner/start_time=0'
+    max_parallel = 4 # small test
+
+    issues = "#13182"
+    requirement = "The system shall support resetting \"start_time\" when restarting from a checkpoint mesh format."
+    design = "restart_recover.md"
+  []
+
+  [start_time_override_non_zero]
+    type = 'CSVDiff'
+    input = 'start_time_override.i'
+    csvdiff = 'start_time_override_nonzero.csv'
+    prereq = 'steady'
+    cli_args = 'Outputs/file_base=start_time_override_nonzero Executioner/start_time=4.5'
+    max_parallel = 4 # small test
+
+    issues = "#13182"
+    requirement = "The system shall support overriding \"start_time\" when restarting from a checkpoint mesh format to an arbitrary time."
+    design = "restart_recover.md"
+  []
+[]

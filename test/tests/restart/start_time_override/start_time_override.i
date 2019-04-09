@@ -1,68 +1,66 @@
 [Mesh]
-  file = square.e
+  type = GeneratedMesh
+  nx = 5
+  ny = 5
+  dim = 2
 []
 
 [Problem]
-  restart_file_base = steady_out_cp/0001
+  restart_file_base = transient_out_cp/LATEST
   skip_additional_restart_data = true
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  active = 'bodyforce ie'
-
-  [./bodyforce]
+  [bodyforce]
     type = BodyForce
     variable = u
     value = 10.0
-  [../]
+  []
 
-  [./ie]
+  [ie]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2
-    value = 1
-  [../]
+    value = 10
+  []
 []
 
 [Postprocessors]
-  [./unorm]
+  [u_norm]
     type = ElementL2Norm
     variable = u
-  [../]
+  []
 []
 
 [Executioner]
   type = Transient
 
-  solve_type = 'PJFNK'
-
-  # Reset the start_time here
-  start_time = 0.0
-  num_steps = 10
-  dt = .1
+  # Start time can be set explicitly here or be picked up from the restart file
+  num_steps = 5
+  dt = 0.1
 []
 
 [Outputs]
-  exodus = true
+  csv = true
 []

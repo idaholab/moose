@@ -101,7 +101,8 @@ PicardSolve::PicardSolve(Executioner * ex)
     _picard_status(MoosePicardConvergenceReason::UNSOLVED),
     _xfem_update_count(0),
     _xfem_repeat_step(false),
-    _previous_entering_time(_problem.time() - 1)
+    _previous_entering_time(_problem.time() - 1),
+    _solve_message(_problem.shouldSolve() ? "Solve Converged!" : "Solve Skipped!")
 {
   if (_relax_factor != 1.0)
     // Store a copy of the previous solution here
@@ -382,7 +383,7 @@ PicardSolve::solveStep(Real begin_norm_old,
   else
     _picard_status = MoosePicardConvergenceReason::CONVERGED_NONLINEAR;
 
-  _console << COLOR_GREEN << " Solve Converged!" << COLOR_DEFAULT << std::endl;
+  _console << COLOR_GREEN << ' ' << _solve_message << COLOR_DEFAULT << std::endl;
 
   // Relax the "relaxed_variables"
   if (relax)

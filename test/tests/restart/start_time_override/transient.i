@@ -1,10 +1,8 @@
 [Mesh]
-  file = square.e
-[]
-
-[Problem]
-  restart_file_base = steady_out_cp/0001
-  skip_additional_restart_data = true
+  type = GeneratedMesh
+  nx = 5
+  ny = 5
+  dim = 2
 []
 
 [Variables]
@@ -15,15 +13,12 @@
 []
 
 [Kernels]
-  active = 'bodyforce ie'
-
-  [./bodyforce]
-    type = BodyForce
+  [./diff]
+    type = CoefDiffusion
     variable = u
-    value = 10.0
+    coef = 0.1
   [../]
-
-  [./ie]
+  [./time]
     type = TimeDerivative
     variable = u
   [../]
@@ -46,23 +41,21 @@
 []
 
 [Postprocessors]
-  [./unorm]
+  [u_norm]
     type = ElementL2Norm
     variable = u
-  [../]
+  []
 []
 
 [Executioner]
   type = Transient
-
-  solve_type = 'PJFNK'
-
-  # Reset the start_time here
-  start_time = 0.0
-  num_steps = 10
-  dt = .1
+  dt = 0.1
+  num_steps = 5
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
 []
 
 [Outputs]
-  exodus = true
+  checkpoint = true
+  csv = true
 []
