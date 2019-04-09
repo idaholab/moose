@@ -151,7 +151,6 @@ class RenderFloat(components.RenderComponent):
 
         if token['bottom']:
             cap = token(0)
-            cap.parent = None
             cap.parent = token
 
         return div
