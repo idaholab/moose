@@ -638,7 +638,17 @@ public:
    */
   bool addRelationshipManager(std::shared_ptr<RelationshipManager> relationship_manager);
 
+  /**
+   * Attach the relationship managers of the given type
+   * Note: Geometric relationship managers that are supposed to be attached late
+   * will be attached when Algebraic are attached.
+   */
   void attachRelationshipManagers(Moose::RelationshipManagerType rm_type);
+
+  /**
+   * Retrieve the relationship managers
+   */
+  const std::vector<std::shared_ptr<RelationshipManager>> & getReleationshipManagers();
 
   /**
    * Returns the Relationship managers info suitable for printing.

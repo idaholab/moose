@@ -48,7 +48,7 @@ class SparseMatrix;
 template <typename T>
 class NumericVector;
 class System;
-}
+} // namespace libMesh
 
 template <>
 InputParameters validParams<SubProblem>();
@@ -75,6 +75,11 @@ public:
   virtual void onTimestepEnd() = 0;
 
   virtual bool isTransient() const = 0;
+
+  /**
+   * Whether or not the user has requested default ghosting ot be on.
+   */
+  bool defaultGhosting() { return _default_ghosting; }
 
   /**
    * Create a Tag.  Tags can be associated with Vectors and Matrices and allow objects
@@ -631,6 +636,9 @@ protected:
 
   /// nonlocal coupling requirement flag
   bool _requires_nonlocal_coupling;
+
+  /// Whether or not to use default libMesh coupling
+  bool _default_ghosting;
 
   /// Elements that should have Dofs ghosted to the local processor
   std::set<dof_id_type> _ghosted_elems;

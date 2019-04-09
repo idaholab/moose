@@ -42,6 +42,18 @@ validParams<RelationshipManager>()
    */
   params.addPrivateParam<Moose::RelationshipManagerType>("rm_type");
 
+  /**
+   * The name of the object (or Action) requesting this RM
+   */
+  params.addRequiredParam<std::string>("for_whom", "What object is requesting this RM?");
+
+  params.addParam<bool>(
+      "use_displaced_mesh",
+      false,
+      "Whether this RM should be placed on the undisplaced or displaced problem. Note: yes, it "
+      "still says 'mesh' to match with common parameter name in MOOSE - but if it's purely "
+      "algebraic then it's going to the DofMap no matter what!");
+
   // Set by MOOSE
   params.addPrivateParam<MooseMesh *>("mesh");
   params.registerBase("RelationshipManager");
@@ -52,66 +64,12 @@ RelationshipManager::RelationshipManager(const InputParameters & parameters)
   : MooseObject(parameters),
     GhostingFunctor(),
     _mesh(*getCheckedPointerParam<MooseMesh *>(
-        "mesh", "Mesh is null in GeometricRelationshipManager ctor")),
+        "mesh",
+        "Mesh is null in RelationshipManager constructor. This could well be because No mesh file "
+        "was supplied and no generation block was provided")),
     _attach_geometric_early(getParam<bool>("attach_geometric_early")),
     _rm_type(getParam<Moose::RelationshipManagerType>("rm_type")),
-    _cached_callbacks(Moose::RelationshipManagerType::DEFAULT),
-    _has_set_remote_elem_removal_flag(false)
+    _use_displaced_mesh(getParam<bool>("use_displaced_mesh"))
 {
-}
-
-void
-RelationshipManager::attachRelationshipManagers(Moose::RelationshipManagerType when_type)
-{
-  Moose::RelationshipManagerType early = Moose::RelationshipManagerType::GEOMETRIC;
-  Moose::RelationshipManagerType late = Moose::RelationshipManagerType::ALGEBRAIC;
-
-  /**
-   * If we cannot attach the geometric functor early, we have to prevent the mesh from deleting
-   * elements that we might need for a future relationship manager.
-   */
-  if (!_has_set_remote_elem_removal_flag && !_attach_geometric_early && _mesh.isDistributedMesh())
-  {
-    _mesh.getMesh().allow_remote_element_removal(false);
-    _has_set_remote_elem_removal_flag = true;
-  }
-
-  // Next make sure that we haven't already triggered this type of callback
-  if ((_cached_callbacks & when_type) == when_type)
-    return;
-
-  /**
-   * We have a few different cases to handle when attaching RelationshipManagers to the
-   * corresponding libMesh objects.
-   *
-   * 1) GeometricRelationshipManager objects will only be asked to attach Geometric RMs (a single
-   *    internal callback. However they can be attached either early or late.
-   *
-   * 2) AlgebraicRelationshipManager objects will respond to both the Geometric and Algebraic
-   *    rm_types. Additionally, the object can decide to attach the geometric rm_type either early
-   *    or late depending on the needs of the developer.
-   *
-   * Finally, we will make sure that each RelationshipManager receives only a single callback per
-   * type.
-   */
-
-  // Attach the Geometric RelationshipManager first (AlgebraicRMs are also GeometricRMs)
-  if ((_attach_geometric_early && when_type == early) ||
-      (!_attach_geometric_early && when_type == late))
-  {
-    // We only need to attach GeometricRelationshipManagers when we are splitting the mesh for
-    // a DistributedMesh simulation, or we are running with DistributedMesh.
-    if (_app.isSplitMesh() || _mesh.isDistributedMesh())
-    {
-      attachRelationshipManagersInternal(Moose::RelationshipManagerType::GEOMETRIC);
-      _cached_callbacks |= Moose::RelationshipManagerType::GEOMETRIC;
-    }
-  }
-
-  // Attach the Algebraic RelationshipManager were appropriate (only late)
-  if (getType() == Moose::RelationshipManagerType::ALGEBRAIC && when_type == late)
-  {
-    attachRelationshipManagersInternal(Moose::RelationshipManagerType::ALGEBRAIC);
-    _cached_callbacks |= Moose::RelationshipManagerType::ALGEBRAIC;
-  }
+  _for_whom.push_back(getParam<std::string>("for_whom"));
 }

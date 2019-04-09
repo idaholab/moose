@@ -18,6 +18,12 @@ validParams<InternalSideUserObject>()
   params += validParams<BlockRestrictable>();
   params += validParams<TwoMaterialPropertyInterface>();
   params += validParams<TransientInterface>();
+
+  // Need one layer of ghosting
+  params.addRelationshipManager("ElementSideNeighborLayers",
+                                Moose::RelationshipManagerType::GEOMETRIC |
+                                    Moose::RelationshipManagerType::ALGEBRAIC);
+
   return params;
 }
 

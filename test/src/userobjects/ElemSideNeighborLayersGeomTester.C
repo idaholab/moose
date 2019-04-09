@@ -21,11 +21,24 @@ validParams<ElemSideNeighborLayersGeomTester>()
 {
   InputParameters params = validParams<ElemSideNeighborLayersTester>();
 
+  // Our base class had called out some relationship managers that we don't want for this object
+  params.clearRelationshipManagers();
+
   /**
    * Reuse an existing RelationshipManager, but restrict it to only acting geometrically.
    * There is no new code or options in this class, just a registration change.
    */
-  params.registerRelationshipManagers("ElementSideNeighborLayers", "GEOMETRIC");
+  params.addRelationshipManager(
+      "ElementSideNeighborLayers",
+      Moose::RelationshipManagerType::GEOMETRIC,
+
+      [](const InputParameters & obj_params, InputParameters & rm_params) {
+        rm_params.set<unsigned short>("layers") =
+            obj_params.get<unsigned short>("element_side_neighbor_layers");
+      }
+
+  );
+
   params.addRequiredParam<unsigned short>("element_side_neighbor_layers",
                                           "Number of layers to ghost");
 

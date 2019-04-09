@@ -18,10 +18,12 @@
 #include "MooseMesh.h"
 #include "MooseVariableFE.h"
 #include "NonlinearSystem.h"
+#include "RelationshipManager.h"
 
 #include "libmesh/periodic_boundary.h" // translation PBCs provided by libmesh
 
 registerMooseAction("MooseApp", AddPeriodicBCAction, "add_periodic_bc");
+registerMooseAction("MooseApp", AddPeriodicBCAction, "add_geometric_rm");
 
 template <>
 InputParameters
@@ -149,63 +151,93 @@ AddPeriodicBCAction::autoTranslationBoundaries()
 void
 AddPeriodicBCAction::act()
 {
-  NonlinearSystemBase & nl = _problem->getNonlinearSystemBase();
-  _mesh = &_problem->mesh();
-  auto displaced_problem = _problem->getDisplacedProblem();
-
-  if (autoTranslationBoundaries())
-    return;
-
-  if (_pars.isParamValid("translation"))
+  if (_current_task == "add_geometric_rm")
   {
-    RealVectorValue translation = getParam<RealVectorValue>("translation");
+    auto rm_params = _factory.getValidParams("ElementSideNeighborLayers");
 
-    PeriodicBoundary p(translation);
-    p.myboundary = _mesh->getBoundaryID(getParam<BoundaryName>("primary"));
-    p.pairedboundary = _mesh->getBoundaryID(getParam<BoundaryName>("secondary"));
-    setPeriodicVars(p, getParam<std::vector<VariableName>>("variable"));
+    rm_params.set<std::string>("for_whom") = "PeriodicBCs";
+    rm_params.set<MooseMesh *>("mesh") = Action::_mesh.get();
+    rm_params.set<Moose::RelationshipManagerType>("rm_type") =
+        Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC;
 
-    _problem->addGhostedBoundary(p.myboundary);
-    _problem->addGhostedBoundary(p.pairedboundary);
+    // We can't attach this relationship manager early because
+    // the PeriodicBoundaries object needs to exist!
+    rm_params.set<bool>("attach_geometric_early") = false;
 
-    nl.dofMap().add_periodic_boundary(p);
-    if (displaced_problem)
-      displaced_problem->nlSys().dofMap().add_periodic_boundary(p);
+    if (rm_params.areAllRequiredParamsValid())
+    {
+      auto rm_obj = _factory.create<RelationshipManager>(
+          "ElementSideNeighborLayers", "periodic_bc_ghosting_" + name(), rm_params);
+
+      if (!_app.addRelationshipManager(rm_obj))
+        _factory.releaseSharedObjects(*rm_obj);
+    }
+    else
+      mooseError("Invalid initialization of ElementSideNeighborLayers");
   }
-  else if (getParam<std::vector<std::string>>("transform_func") != std::vector<std::string>())
+
+  if (_current_task == "add_periodic_bc")
   {
-    std::vector<std::string> inv_fn_names =
-        getParam<std::vector<std::string>>("inv_transform_func");
-    std::vector<std::string> fn_names = getParam<std::vector<std::string>>("transform_func");
+    NonlinearSystemBase & nl = _problem->getNonlinearSystemBase();
+    _mesh = &_problem->mesh();
+    auto displaced_problem = _problem->getDisplacedProblem();
 
-    // If the user provided a forward transformation, he must also provide an inverse -- we can't
-    // form the inverse of an arbitrary function automatically...
-    if (inv_fn_names == std::vector<std::string>())
-      mooseError("You must provide an inv_transform_func for FunctionPeriodicBoundary!");
+    if (autoTranslationBoundaries())
+      return;
 
-    FunctionPeriodicBoundary pb(*_problem, fn_names);
-    pb.myboundary = _mesh->getBoundaryID(getParam<BoundaryName>("primary"));
-    pb.pairedboundary = _mesh->getBoundaryID(getParam<BoundaryName>("secondary"));
-    setPeriodicVars(pb, getParam<std::vector<VariableName>>("variable"));
+    if (_pars.isParamValid("translation"))
+    {
+      RealVectorValue translation = getParam<RealVectorValue>("translation");
 
-    FunctionPeriodicBoundary ipb(*_problem, inv_fn_names);
-    ipb.myboundary = _mesh->getBoundaryID(getParam<BoundaryName>("secondary")); // these are swapped
-    ipb.pairedboundary =
-        _mesh->getBoundaryID(getParam<BoundaryName>("primary")); // these are swapped
-    setPeriodicVars(ipb, getParam<std::vector<VariableName>>("variable"));
+      PeriodicBoundary p(translation);
+      p.myboundary = _mesh->getBoundaryID(getParam<BoundaryName>("primary"));
+      p.pairedboundary = _mesh->getBoundaryID(getParam<BoundaryName>("secondary"));
+      setPeriodicVars(p, getParam<std::vector<VariableName>>("variable"));
 
-    _problem->addGhostedBoundary(ipb.myboundary);
-    _problem->addGhostedBoundary(ipb.pairedboundary);
+      _problem->addGhostedBoundary(p.myboundary);
+      _problem->addGhostedBoundary(p.pairedboundary);
 
-    // Add the pair of periodic boundaries to the dof map
-    nl.dofMap().add_periodic_boundary(pb, ipb);
-    if (displaced_problem)
-      displaced_problem->nlSys().dofMap().add_periodic_boundary(pb, ipb);
-  }
-  else
-  {
-    mooseError("You have to specify either 'auto_direction', 'translation' or 'trans_func' in your "
-               "period boundary section '" +
-               _name + "'");
+      nl.dofMap().add_periodic_boundary(p);
+      if (displaced_problem)
+        displaced_problem->nlSys().dofMap().add_periodic_boundary(p);
+    }
+    else if (getParam<std::vector<std::string>>("transform_func") != std::vector<std::string>())
+    {
+      std::vector<std::string> inv_fn_names =
+          getParam<std::vector<std::string>>("inv_transform_func");
+      std::vector<std::string> fn_names = getParam<std::vector<std::string>>("transform_func");
+
+      // If the user provided a forward transformation, he must also provide an inverse -- we can't
+      // form the inverse of an arbitrary function automatically...
+      if (inv_fn_names == std::vector<std::string>())
+        mooseError("You must provide an inv_transform_func for FunctionPeriodicBoundary!");
+
+      FunctionPeriodicBoundary pb(*_problem, fn_names);
+      pb.myboundary = _mesh->getBoundaryID(getParam<BoundaryName>("primary"));
+      pb.pairedboundary = _mesh->getBoundaryID(getParam<BoundaryName>("secondary"));
+      setPeriodicVars(pb, getParam<std::vector<VariableName>>("variable"));
+
+      FunctionPeriodicBoundary ipb(*_problem, inv_fn_names);
+      ipb.myboundary =
+          _mesh->getBoundaryID(getParam<BoundaryName>("secondary")); // these are swapped
+      ipb.pairedboundary =
+          _mesh->getBoundaryID(getParam<BoundaryName>("primary")); // these are swapped
+      setPeriodicVars(ipb, getParam<std::vector<VariableName>>("variable"));
+
+      _problem->addGhostedBoundary(ipb.myboundary);
+      _problem->addGhostedBoundary(ipb.pairedboundary);
+
+      // Add the pair of periodic boundaries to the dof map
+      nl.dofMap().add_periodic_boundary(pb, ipb);
+      if (displaced_problem)
+        displaced_problem->nlSys().dofMap().add_periodic_boundary(pb, ipb);
+    }
+    else
+    {
+      mooseError(
+          "You have to specify either 'auto_direction', 'translation' or 'trans_func' in your "
+          "period boundary section '" +
+          _name + "'");
+    }
   }
 }

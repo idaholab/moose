@@ -52,9 +52,18 @@ validParams<GrainTracker>()
   InputParameters params = validParams<FeatureFloodCount>();
   params += validParams<GrainTrackerInterface>();
 
-  params.registerRelationshipManagers("GrainTrackerHaloRM ElementPointNeighbors",
-                                      "GEOMETRIC ALGEBRAIC");
-  params.addPrivateParam<unsigned short>("element_point_neighbor_layers", 1);
+  params.addRelationshipManager(
+      "ElementPointNeighborLayers",
+      Moose::RelationshipManagerType::GEOMETRIC,
+
+      [](const InputParameters & obj_params, InputParameters & rm_params) {
+        rm_params.set<unsigned short>("layers") = obj_params.get<unsigned short>("halo_level");
+      }
+
+  );
+
+  params.addRelationshipManager("ElementPointNeighborLayers",
+                                Moose::RelationshipManagerType::ALGEBRAIC);
 
   // The GrainTracker requires non-volatile storage for tracking grains across invocations.
   params.set<bool>("restartable_required") = true;

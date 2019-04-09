@@ -178,6 +178,11 @@ validParams<FeatureFloodCount>()
   params.addClassDescription("The object is able to find and count \"connected components\" in any "
                              "solution field or number of solution fields. A primary example would "
                              "be to count \"bubbles\".");
+
+  params.addRelationshipManager("ElementSideNeighborLayers",
+                                Moose::RelationshipManagerType::GEOMETRIC |
+                                    Moose::RelationshipManagerType::ALGEBRAIC);
+
   return params;
 }
 

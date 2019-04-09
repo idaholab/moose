@@ -10,6 +10,9 @@
 // MOOSE includes
 #include "MooseRevision.h"
 #include "AppFactory.h"
+#include "DisplacedProblem.h"
+#include "NonlinearSystemBase.h"
+#include "AuxiliarySystem.h"
 #include "MooseSyntax.h"
 #include "MooseInit.h"
 #include "Executioner.h"
@@ -46,6 +49,7 @@
 #include "libmesh/mesh_refinement.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/checkpoint_io.h"
+#include "libmesh/mesh_base.h"
 
 // System include for dynamic library methods
 #include <dlfcn.h>
@@ -1673,11 +1677,25 @@ MooseApp::addRelationshipManager(std::shared_ptr<RelationshipManager> relationsh
 {
   bool add = true;
   for (const auto & rm : _relationship_managers)
+  {
     if (*rm == *relationship_manager)
     {
       add = false;
+
+      auto & existing_for_whom = rm->forWhom();
+
+      // Since the existing object is going to cover this one
+      // Pass along who is needing it
+      for (auto & fw : relationship_manager->forWhom())
+      {
+        if (std::find(existing_for_whom.begin(), existing_for_whom.end(), fw) ==
+            existing_for_whom.end())
+          rm->addForWhom(fw);
+      }
+
       break;
     }
+  }
 
   if (add)
     _relationship_managers.emplace_back(relationship_manager);
@@ -1690,7 +1708,62 @@ void
 MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
 {
   for (auto & rm : _relationship_managers)
-    rm->attachRelationshipManagers(rm_type);
+  {
+    if (rm->isType(rm_type))
+    {
+      // Will attach them later (during algebraic)
+      if (rm_type == Moose::RelationshipManagerType::GEOMETRIC && !rm->attachGeometricEarly())
+        continue;
+
+      if (rm_type == Moose::RelationshipManagerType::GEOMETRIC)
+      {
+        // The problem is not built yet - so the ActionWarehouse currently owns the mesh
+        auto & mesh = _action_warehouse.mesh();
+
+        rm->init();
+
+        if (rm->useDisplacedMesh() && _action_warehouse.displacedMesh())
+          _action_warehouse.displacedMesh()->getMesh().add_ghosting_functor(*rm);
+        else
+          mesh->getMesh().add_ghosting_functor(*rm);
+      }
+
+      if (rm_type == Moose::RelationshipManagerType::ALGEBRAIC)
+      {
+        // If it's also Geometric but didn't get attached early - then let's attach it now
+        if (rm->isType(Moose::RelationshipManagerType::GEOMETRIC) && !rm->attachGeometricEarly())
+        {
+          // Now that the Problem is built we'll get the mesh from there
+          auto & problem = _executioner->feProblem();
+          auto & mesh = problem.mesh();
+
+          rm->init();
+
+          if (rm->useDisplacedMesh() && _action_warehouse.displacedMesh())
+            _action_warehouse.displacedMesh()->getMesh().add_ghosting_functor(*rm);
+          else
+            mesh.getMesh().add_ghosting_functor(*rm);
+        }
+
+        auto & problem = _executioner->feProblem();
+
+        // If it is not at all GEOMETRIC then it hasn't been inited
+        if (!rm->isType(Moose::RelationshipManagerType::GEOMETRIC))
+          rm->init();
+
+        if (rm->useDisplacedMesh() && problem.getDisplacedProblem())
+        {
+          problem.getDisplacedProblem()->nlSys().dofMap().add_algebraic_ghosting_functor(*rm);
+          problem.getDisplacedProblem()->auxSys().dofMap().add_algebraic_ghosting_functor(*rm);
+        }
+        else
+        {
+          problem.getNonlinearSystemBase().dofMap().add_algebraic_ghosting_functor(*rm);
+          problem.getAuxiliarySystem().dofMap().add_algebraic_ghosting_functor(*rm);
+        }
+      }
+    }
+  }
 }
 
 std::vector<std::pair<std::string, std::string>>
@@ -1702,6 +1775,17 @@ MooseApp::getRelationshipManagerInfo() const
   for (const auto & rm : _relationship_managers)
   {
     auto info = rm->getInfo();
+
+    auto & for_whom = rm->forWhom();
+
+    if (!for_whom.empty())
+    {
+      info = info + " for";
+
+      for (auto & fw : for_whom)
+        info = info + " " + fw;
+    }
+
     if (info.size())
       info_strings.emplace_back(std::make_pair(Moose::stringify(rm->getType()), info));
   }

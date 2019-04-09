@@ -9,10 +9,13 @@
 
 #include "SetAdaptivityOptionsAction.h"
 #include "FEProblem.h"
+#include "RelationshipManager.h"
 
 #include "libmesh/fe.h"
 
 registerMooseAction("MooseApp", SetAdaptivityOptionsAction, "set_adaptivity_options");
+registerMooseAction("MooseApp", SetAdaptivityOptionsAction, "add_geometric_rm");
+registerMooseAction("MooseApp", SetAdaptivityOptionsAction, "add_algebraic_rm");
 
 template <>
 InputParameters
@@ -52,21 +55,81 @@ SetAdaptivityOptionsAction::SetAdaptivityOptionsAction(InputParameters params) :
 void
 SetAdaptivityOptionsAction::act()
 {
-  Adaptivity & adapt = _problem->adaptivity();
+  // Here we are going to mostly mimic the default ghosting in libmesh
+  // By default libmesh adds:
+  // 1) GhostPointNeighbors on the mesh
+  // 2) DefaultCoupling with 1 layer as an algebraic ghosting functor on the dof_map, which also
+  //    gets added to the mesh at the time a new System is added
+  // 3) DefaultCoupling with 0 layers as a coupling functor on the dof_map, which also gets added to
+  //    the mesh at the time a new System is added
+  //
+  // What we will do differently is:
+  // - The 3rd ghosting functor adds nothing so we will not add it at all
 
-  if (isParamValid("marker"))
-    adapt.setMarkerVariableName(getParam<MarkerName>("marker"));
-  if (isParamValid("initial_marker"))
-    adapt.setInitialMarkerVariableName(getParam<MarkerName>("initial_marker"));
+  if (_current_task == "add_algebraic_rm")
+  {
+    auto rm_params = _factory.getValidParams("ElementSideNeighborLayers");
 
-  adapt.setCyclesPerStep(getParam<unsigned int>("cycles_per_step"));
+    rm_params.set<std::string>("for_whom") = "Adaptivity";
+    rm_params.set<MooseMesh *>("mesh") = _mesh.get();
+    rm_params.set<Moose::RelationshipManagerType>("rm_type") =
+        Moose::RelationshipManagerType::ALGEBRAIC;
 
-  adapt.setMaxHLevel(getParam<unsigned int>("max_h_level"));
+    if (rm_params.areAllRequiredParamsValid())
+    {
+      auto rm_obj = _factory.create<RelationshipManager>(
+          "ElementSideNeighborLayers", "adaptivity_algebraic_ghosting", rm_params);
 
-  adapt.init(getParam<unsigned int>("steps"), getParam<unsigned int>("initial_steps"));
-  adapt.setUseNewSystem();
+      // Delete the resources created on behalf of the RM if it ends up not being added to the
+      // App.
+      if (!_app.addRelationshipManager(rm_obj))
+        _factory.releaseSharedObjects(*rm_obj);
+    }
+    else
+      mooseError("Invalid initialization of ElementSideNeighborLayers");
+  }
 
-  adapt.setTimeActive(getParam<Real>("start_time"), getParam<Real>("stop_time"));
+  else if (_current_task == "add_geometric_rm")
+  {
+    auto rm_params = _factory.getValidParams("MooseGhostPointNeighbors");
 
-  adapt.setRecomputeMarkersFlag(getParam<bool>("recompute_markers_during_cycles"));
+    rm_params.set<std::string>("for_whom") = "Adaptivity";
+    rm_params.set<MooseMesh *>("mesh") = _mesh.get();
+    rm_params.set<Moose::RelationshipManagerType>("rm_type") =
+        Moose::RelationshipManagerType::GEOMETRIC;
+
+    if (rm_params.areAllRequiredParamsValid())
+    {
+      auto rm_obj = _factory.create<RelationshipManager>(
+          "MooseGhostPointNeighbors", "adaptivity_geometric_ghosting", rm_params);
+
+      // Delete the resources created on behalf of the RM if it ends up not being added to the
+      // App.
+      if (!_app.addRelationshipManager(rm_obj))
+        _factory.releaseSharedObjects(*rm_obj);
+    }
+    else
+      mooseError("Invalid initialization of MooseGhostPointNeighbors");
+  }
+
+  else if (_current_task == "set_adaptivity_options")
+  {
+    Adaptivity & adapt = _problem->adaptivity();
+
+    if (isParamValid("marker"))
+      adapt.setMarkerVariableName(getParam<MarkerName>("marker"));
+    if (isParamValid("initial_marker"))
+      adapt.setInitialMarkerVariableName(getParam<MarkerName>("initial_marker"));
+
+    adapt.setCyclesPerStep(getParam<unsigned int>("cycles_per_step"));
+
+    adapt.setMaxHLevel(getParam<unsigned int>("max_h_level"));
+
+    adapt.init(getParam<unsigned int>("steps"), getParam<unsigned int>("initial_steps"));
+    adapt.setUseNewSystem();
+
+    adapt.setTimeActive(getParam<Real>("start_time"), getParam<Real>("stop_time"));
+
+    adapt.setRecomputeMarkersFlag(getParam<bool>("recompute_markers_during_cycles"));
+  }
 }
