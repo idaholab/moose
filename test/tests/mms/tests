@@ -1,0 +1,16 @@
+[Tests]
+  issues = '#13181'
+  design = 'mms.md'
+  [spatial]
+    type = CheckFiles
+    command = mms_spatial.py
+    check_files = 'mms_spatial.pdf'
+    requirement = "The system shall include a tool for creating spatial convergence plots."
+  []
+  [temporal]
+    type = CheckFiles
+    command = mms_temporal.py
+    check_files = 'mms_temporal.pdf'
+    requirement = "The system shall include a tool for creating temporal convergence plots."
+  []
+[]

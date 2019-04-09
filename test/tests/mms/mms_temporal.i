@@ -10,8 +10,12 @@
 []
 
 [Kernels]
+  [time]
+    type = ADTimeDerivative
+    variable = u
+  []
   [diff]
-    type = Diffusion
+    type = ADDiffusion
     variable = u
   []
   [force]
@@ -24,15 +28,11 @@
 [Functions]
   [exact]
     type = ParsedFunction
-    value = 'a*sin(2*pi*a*x*y)'
-    vars = 'a'
-    vals = '2'
+    value = 't^3*x*y'
   []
   [force]
     type = ParsedFunction
-    value = '4*x^2*pi^2*a^3*sin(2*x*y*pi*a) + 4*y^2*pi^2*a^3*sin(2*x*y*pi*a)'
-    vars = 'a'
-    vals = '2'
+    value = '3*x*y*t^2'
   []
 []
 
@@ -58,20 +58,14 @@
 
 [Executioner]
   type = Transient
-  num_steps = 5
+  dt = 1
+  end_time = 3
   solve_type = 'PJFNK'
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Adaptivity]
-  marker = marker
-  [Markers/marker]
-    type = UniformMarker
-    mark = refine
-  []
-[]
-
 [Outputs]
+  exodus = true
   csv = true
 []
