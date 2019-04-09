@@ -9,55 +9,9 @@
 
 import matplotlib.pyplot as plt
 import glob
+import collections
 import pandas
 import numpy as np
-
-
-def plot(filename, x='h', y='error', xlabel=None, ylabel=None, output=None, show=True, **kwargs):
-    """
-    Helper function for creating convergence plot from filename(s).
-
-    Inputs:
-        filename[str]: The CSV file(s) to open, when a * is in the name glob is used to open all
-                       the files and extract the last value from the columns, this is useful when
-                       evaluating transient solves
-        x,y [str]: The column names to extract from the PP CSV file(s)
-        xlabel, ylabel [str]: The name of the x and y axis labels
-        output[str]: The filename to output
-        show[bool]: Flag for showing the plot
-        fit[bool]: Flag for showing line fit
-        fontsize[int]: The plot font size (default: 16)
-    """
-
-    # Handle multiple files for transient solutions
-    if '*' in filename:
-        filenames = sorted(glob.glob('level_set_mms*.csv'))
-        n = len(filenames)
-        error = np.zeros(n)
-        length = np.zeros(n)
-        for i, filename in enumerate(filenames):
-            csv = pandas.read_csv(filename)
-            length[i] = csv[x].iloc[-1]
-            error[i] = csv[y].iloc[-1]
-
-    else:
-        csv = pandas.read_csv(filename)
-        csv.drop([0], inplace=True)
-        length = csv[x]
-        error = csv[y]
-
-    if xlabel is None:
-        xlabel = x
-    if ylabel is None:
-        ylabel = y
-
-    fig = ConvergencePlot(length, error, xlabel=xlabel, ylabel=ylabel, **kwargs)
-
-    if output is not None:
-        fig.save(output)
-
-    if show:
-        fig.show()
 
 class ConvergencePlot(object):
     """
@@ -71,13 +25,11 @@ class ConvergencePlot(object):
         xlabel[str]: The label for the x-axis
       ylabel[str]: The label for the y-axis
     """
-    def __init__(self, x, y, xlabel='x', ylabel='y', fontsize=16, fit=True):
+    Line = collections.namedtuple('Line', 'x y label')
 
-        self._x = np.array(x)
-        self._y = np.array(y)
+    def __init__(self, xlabel='x', ylabel='y', fontsize=12, fit=True):
 
         self._figure = plt.figure(figsize=(10,6), facecolor='w')
-        self._line = plt.plot(self._x, self._y, '-ob', markersize=8)[0]
         self._axes = plt.gca()
 
         self._axes.set_yscale('log')
@@ -89,15 +41,36 @@ class ConvergencePlot(object):
 
         # Adjust tick mark fonts
         for tick in self._axes.xaxis.get_major_ticks() + self._axes.yaxis.get_major_ticks():
-            tick.label.set_fontsize(18)
+            tick.label.set_fontsize(fontsize)
 
         # Apply grid marks
         plt.grid(True, which='both', color=[0.8]*3)
 
-        if fit:
-            self.fit()
+    def plot(self, x, y, label=None, invert_x=True, **kwargs):
 
-    def fit(self, **kwargs):
+
+        if invert_x:
+            x = 1./np.array(x)
+        else:
+            x = np.array(x)
+
+        y = np.array(y)
+
+        if label is None:
+            label = 'line-{}'.format(len(self._axes.lines))
+
+
+        slope = self._fit(x, y)
+        label = '{}: {:.3f}'.format(label, slope)
+
+        #self._data.append(ConvergencePlot.Line(x=x, y=y, label=label))
+
+        line, = self._axes.plot(x, y, label=label, **kwargs)
+
+        self._axes.legend()
+        return line
+
+    def _fit(self, x, y):
         """
         Apply the fit and report the slope.
 
@@ -107,12 +80,8 @@ class ConvergencePlot(object):
         """
 
         # Perform fit
-        coefficients = np.polyfit(np.log10(self._x), np.log10(self._y), 1)
-
-        # Display slope
-        x = kwargs.get('x', min(self._x))
-        y = kwargs.get('y', max(self._y))
-        self._axes.text(x, y, 'slope = {}'.format(coefficients[0]), fontsize=15)
+        coefficients = np.polyfit(np.log10(x), np.log10(y), 1)
+        return coefficients[0]
 
     def save(self, filename):
         """

@@ -9,7 +9,7 @@ else:
     from fparser import FParserPrinter, fparser, print_fparser
     from moosefunction import MooseFunctionPrinter, moosefunction, print_moose
     from evaluate import evaluate
-
+    from runner import run_spatial, run_temporal
 
 try:
     import matplotlib
@@ -19,4 +19,4 @@ except ImportError:
           "`pip install matplotlib --user`.")
 
 else:
-    from ConvergencePlot import ConvergencePlot, plot
+    from ConvergencePlot import ConvergencePlot
