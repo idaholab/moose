@@ -31,6 +31,8 @@ public:
   virtual Real T_sat(Real p) const override;
   virtual Real p_sat(Real T) const override;
   virtual Real dT_sat_dp(Real p) const override;
+  virtual Real sigma_from_T(Real T) const override;
+  virtual Real dsigma_dT_from_T(Real T) const override;
   virtual bool supportsPhaseChange() const override;
 };
 

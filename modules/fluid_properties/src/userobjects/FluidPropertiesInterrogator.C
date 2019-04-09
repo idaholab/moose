@@ -9,7 +9,6 @@
 
 #include "FluidPropertiesInterrogator.h"
 #include "FluidProperties.h"
-#include "LiquidFluidPropertiesInterface.h"
 #include "SinglePhaseFluidProperties.h"
 #include "VaporMixtureFluidProperties.h"
 #include "TwoPhaseFluidProperties.h"
@@ -177,12 +176,6 @@ FluidPropertiesInterrogator::execute1Phase(const SinglePhaseFluidProperties * co
     outputHeader(description + " STATIC properties");
     outputStaticProperties(fp_1phase, rho, e, p, T);
 
-    // output liquid-only property values
-    const LiquidFluidPropertiesInterface * const liquid_fp =
-        dynamic_cast<const LiquidFluidPropertiesInterface * const>(fp_1phase);
-    if (liquid_fp)
-      outputLiquidSpecificProperties(liquid_fp, p, T);
-
     // output stagnation property values
     if (isParamValid("vel") || specified["rho,rhou,rhoE"])
     {
@@ -313,8 +306,10 @@ FluidPropertiesInterrogator::execute2Phase()
     const Real T = getParam<Real>("T");
     const Real p_sat = _fp_2phase->p_sat(T);
     const Real h_lat = _fp_2phase->h_lat(p_sat, T);
+    const Real sigma = _fp_2phase->sigma_from_T(T);
     outputProperty("Saturation pressure", p_sat, "Pa");
     outputProperty("Latent heat of vaporization", h_lat, "J/kg");
+    outputProperty("Surface tension", sigma, "N/m");
   }
   if (specified["p,T"])
   {
@@ -482,15 +477,6 @@ FluidPropertiesInterrogator::outputStaticProperties(const SinglePhaseFluidProper
   outputProperty("Specific heat at constant volume", cv, "J/(kg-K)");
   outputProperty("Thermal conductivity", k, "W/(m-K)");
   outputProperty("Volumetric expansion coefficient", beta, "1/K");
-  _console << std::endl;
-}
-
-void
-FluidPropertiesInterrogator::outputLiquidSpecificProperties(
-    const LiquidFluidPropertiesInterface * const liquid_fp, const Real & p, const Real & T)
-{
-  const Real sigma = liquid_fp->sigma_from_p_T(p, T);
-  outputProperty("Surface tension", sigma, "N/m");
   _console << std::endl;
 }
 
