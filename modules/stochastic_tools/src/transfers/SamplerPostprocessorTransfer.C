@@ -9,7 +9,8 @@
 
 // StochasticTools includes
 #include "SamplerPostprocessorTransfer.h"
-#include "SamplerMultiApp.h"
+#include "SamplerFullSolveMultiApp.h"
+#include "SamplerTransientMultiApp.h"
 #include "SamplerReceiver.h"
 #include "StochasticResults.h"
 
@@ -29,12 +30,22 @@ validParams<SamplerPostprocessorTransfer>()
 }
 
 SamplerPostprocessorTransfer::SamplerPostprocessorTransfer(const InputParameters & parameters)
-  : MultiAppVectorPostprocessorTransfer(parameters),
-    _sampler_multi_app(std::dynamic_pointer_cast<SamplerMultiApp>(_multi_app).get()),
-    _sampler(_sampler_multi_app->getSampler())
+  : MultiAppVectorPostprocessorTransfer(parameters)
 {
-  if (!_sampler_multi_app)
-    mooseError("The 'multi_app' must be a 'SamplerMultiApp.'");
+  // Determine the Sampler
+  std::shared_ptr<SamplerTransientMultiApp> ptr_transient =
+      std::dynamic_pointer_cast<SamplerTransientMultiApp>(_multi_app);
+  std::shared_ptr<SamplerFullSolveMultiApp> ptr_fullsolve =
+      std::dynamic_pointer_cast<SamplerFullSolveMultiApp>(_multi_app);
+
+  if (!ptr_transient && !ptr_fullsolve)
+    mooseError("The 'multi_app' parameter must provide either a 'SamplerTransientMultiApp' or "
+               "'SamplerFullSolveMultiApp' object.");
+
+  if (ptr_transient)
+    _sampler = &(ptr_transient->getSampler());
+  else
+    _sampler = &(ptr_fullsolve->getSampler());
 }
 
 void
@@ -46,7 +57,7 @@ SamplerPostprocessorTransfer::initialSetup()
   if (!_results)
     mooseError("The 'results' object must be a 'StochasticResults' object.");
 
-  _results->init(_sampler);
+  _results->init(*_sampler);
 }
 
 void
@@ -75,7 +86,7 @@ SamplerPostprocessorTransfer::executeFromMultiapp()
   // Update VPP
   for (unsigned int i = 0; i < n; i++)
   {
-    Sampler::Location loc = _sampler.getLocation(i);
+    Sampler::Location loc = _sampler->getLocation(i);
     VectorPostprocessorValue & vpp = _results->getVectorPostprocessorValueByGroup(loc.sample());
     vpp[loc.row()] = values[i];
   }

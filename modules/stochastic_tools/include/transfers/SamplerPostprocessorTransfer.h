@@ -17,7 +17,7 @@
 // Forward declarations
 class SamplerPostprocessorTransfer;
 class SamplerReceiver;
-class SamplerMultiApp;
+class SamplerFullSolveMultiApp;
 class StochasticResults;
 
 template <>
@@ -35,11 +35,8 @@ public:
 protected:
   virtual void executeFromMultiapp() override;
 
-  /// SamplerMultiApp that this transfer is working with
-  SamplerMultiApp * _sampler_multi_app;
-
-  /// Sampler object that is retrieved from the SamplerMultiApp
-  Sampler & _sampler;
+  /// Sampler object that is retrieved from the SamplerTransientMultiApp or SamplerFullSolveMultiApp
+  Sampler * _sampler;
 
   /// Storage for StochasticResults object that data will be transferred to/from
   StochasticResults * _results;

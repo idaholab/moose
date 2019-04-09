@@ -38,7 +38,7 @@ public:
   // Struct used to transfer minimal data to all ranks
   struct PartialFeatureData
   {
-    bool intersects_boundary;
+    BoundaryIntersection boundary_intersection;
     unsigned int id;
     Point centroid;
     Status status;
@@ -68,6 +68,7 @@ public:
   virtual std::size_t getNumberActiveGrains() const override;
   virtual Point getGrainCentroid(unsigned int grain_id) const override;
   virtual bool doesFeatureIntersectBoundary(unsigned int feature_id) const override;
+  virtual bool isFeaturePercolated(unsigned int feature_id) const override;
   virtual std::vector<unsigned int> getNewGrainIDs() const override;
 
 protected:

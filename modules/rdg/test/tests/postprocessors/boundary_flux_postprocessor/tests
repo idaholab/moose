@@ -1,0 +1,16 @@
+[Tests]
+  [./test]
+    type = 'CSVDiff'
+    input = 'boundary_flux_postprocessor.i'
+    csvdiff = 'boundary_flux_postprocessor_out.csv'
+    rel_err = 0
+    abs_zero = 1e-15
+
+    allow_test_objects = true
+    threading = '!pthreads'
+
+    requirement = "BoundaryFluxPostprocessor shall output correct boundary flux values."
+    issues = '#13178'
+    design = '/BoundaryFluxPostprocessor.md'
+  [../]
+[]

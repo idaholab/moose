@@ -811,6 +811,12 @@ MooseMesh::getBoundaryElementRange()
   return _bnd_elem_range.get();
 }
 
+const std::unordered_map<boundary_id_type, std::unordered_set<dof_id_type>> &
+MooseMesh::getBoundariesToElems() const
+{
+  return _bnd_elem_ids;
+}
+
 void
 MooseMesh::cacheInfo()
 {
@@ -2669,7 +2675,7 @@ bool
 MooseMesh::isBoundaryElem(dof_id_type elem_id, BoundaryID bnd_id) const
 {
   bool found_elem = false;
-  std::map<boundary_id_type, std::set<dof_id_type>>::const_iterator it = _bnd_elem_ids.find(bnd_id);
+  auto it = _bnd_elem_ids.find(bnd_id);
   if (it != _bnd_elem_ids.end())
     if (it->second.find(elem_id) != it->second.end())
       found_elem = true;

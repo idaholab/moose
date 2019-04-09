@@ -31,7 +31,8 @@ public:
   void virtual execute() override {}
 
   /**
-   * Initialize storage based on the Sampler returned by the SamplerMultiApp.
+   * Initialize storage based on the Sampler returned by the SamplerTransientMultiApp or
+   * SamplerFullSolveMultiApp.
    * @param sampler The Sampler associated with the MultiApp that this VPP is working with.
    *
    * This method is called by the SamplerPostprocessorTransfer.

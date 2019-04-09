@@ -60,7 +60,7 @@ depending on the type of sampler.
 
 However, in general, the system is designed such that each row in the matrices represents a
 complete set of samples that could be passed to sub-applications via the
-[SamplerMultiApp](/SamplerMultiApp.md).
+[SamplerTransientMultiApp](/SamplerTransientMultiApp.md).
 
 ## Objects, Actions, and Syntax
 

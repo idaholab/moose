@@ -1,0 +1,41 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#ifndef TESTBOUNDARYFLUX_H
+#define TESTBOUNDARYFLUX_H
+
+#include "BoundaryFluxBase.h"
+
+class TestBoundaryFlux;
+
+template <>
+InputParameters validParams<TestBoundaryFlux>();
+
+/**
+ * Boundary flux used for testing
+ */
+class TestBoundaryFlux : public BoundaryFluxBase
+{
+public:
+  TestBoundaryFlux(const InputParameters & parameters);
+
+  virtual void calcFlux(unsigned int iside,
+                        dof_id_type ielem,
+                        const std::vector<Real> & uvec1,
+                        const RealVectorValue & dwave,
+                        std::vector<Real> & flux) const override;
+
+  virtual void calcJacobian(unsigned int iside,
+                            dof_id_type ielem,
+                            const std::vector<Real> & uvec1,
+                            const RealVectorValue & dwave,
+                            DenseMatrix<Real> & jac1) const override;
+};
+
+#endif
