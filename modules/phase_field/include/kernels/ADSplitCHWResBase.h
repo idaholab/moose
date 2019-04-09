@@ -13,10 +13,10 @@
 #include "ADKernelGrad.h"
 #include "DerivativeMaterialInterface.h"
 
-#define usingSplitCHWResBase                                                                       \
+#define usingSplitCHWResBase(T)                                                                    \
   usingKernelMembers;                                                                              \
-  using ADSplitCHCRes<compute_stage>::_mob_name;                                                   \
-  using ADSplitCHCRes<compute_stage>::_mob
+  using ADSplitCHWResBase<compute_stage, T>::_mob_name;                                            \
+  using ADSplitCHWResBase<compute_stage, T>::_mob
 
 // Forward declarations
 template <ComputeStage compute_stage, typename T = void>
