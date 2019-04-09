@@ -270,6 +270,13 @@ class RenderWindow(base.ChiggerObject):
         for result in self._results:
             result.getVTKRenderer().ResetCamera()
 
+    def resetCameraClippingRange(self):
+        """
+        Resets the clipping range, this may be needed if you see artifacts in the renderering.
+        """
+        for result in self._results:
+            result.getVTKRenderer().ResetCameraClippingRange()
+
     def write(self, filename, dialog=False, **kwargs):
         """
         Writes the VTKWindow to an image.

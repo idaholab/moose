@@ -876,7 +876,9 @@
                         "loop": false, 
                         "recursive": true, 
                         "src": "https://upload.wikimedia.org/wikipedia/commons/c/c0/Big_Buck_Bunny_4K.webm", 
-                        "tex": "big_buck_bunny.jpg"
+                        "tex": "big_buck_bunny.jpg", 
+                        "tstart": null, 
+                        "tstop": null
                     }, 
                     "children": [], 
                     "name": "Video"

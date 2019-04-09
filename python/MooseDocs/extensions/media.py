@@ -21,7 +21,7 @@ def make_extension(**kwargs):
 
 Image = tokens.newToken('Image', src=u'', tex=u'')
 Video = tokens.newToken('Video', src=u'', tex=u'',
-                        controls=True, autoplay=True, loop=True)
+                        controls=True, autoplay=True, loop=True, tstart=None, tstop=None)
 
 class MediaExtensionBase(command.CommandExtension):
 
@@ -91,7 +91,7 @@ class ImageCommand(command.CommandComponent):
 
 class VideoCommand(command.CommandComponent):
     COMMAND = 'media'
-    SUBCOMMAND = ('ogv', 'webm', 'mp4')
+    SUBCOMMAND = ('ogv', 'webm', 'mp4', 'm4v')
 
     @staticmethod
     def defaultSettings():
@@ -100,6 +100,8 @@ class VideoCommand(command.CommandComponent):
         settings['controls'] = (True, "Display the video player controls.")
         settings['loop'] = (False, "Automatically loop the video.")
         settings['autoplay'] = (False, "Automatically start playing the video.")
+        settings['tstart'] = (None, "Time (sec) to start video.")
+        settings['tstop'] = (None, "Time (sec) to stop video.")
         settings.update(floats.caption_settings())
         return settings
 
@@ -112,7 +114,9 @@ class VideoCommand(command.CommandComponent):
                     tex=self.settings['latex_src'],
                     controls=self.settings['controls'],
                     loop=self.settings['loop'],
-                    autoplay=self.settings['autoplay'])
+                    autoplay=self.settings['autoplay'],
+                    tstart=self.settings['tstart'],
+                    tstop=self.settings['tstop'])
 
         if flt is parent:
             vid.attributes.update(**self.attributes)
@@ -165,6 +169,15 @@ class RenderVideo(components.RenderComponent):
         if not src.startswith('http'):
             node = self.translator.findPage(src)
             src = unicode(node.relativeSource(page))
+
+        tstart = token['tstart']
+        tstop = token['tstop']
+        if tstart and tstop:
+            src += '#t={},{}'.format(tstart, tstop)
+        elif tstart:
+            src += '#t={}'.format(tstart)
+        elif tstop:
+            src += '#t=0,{}'.format(tstop)
 
         video = html.Tag(parent, 'video', token, src=src)
         _, ext = os.path.splitext(src)

@@ -43,8 +43,7 @@ class ConvergencePlot(object):
       tick.label.set_fontsize(18)
 
     # Apply grid marks
-    plt.grid(True)
-    plt.grid(True, which='minor', color='b')
+    plt.grid(True, which='both')
 
     if fit:
       self.fit()
@@ -55,7 +54,7 @@ class ConvergencePlot(object):
 
     Key, value Options:
       x[float]: The x-position in data coordinates.
-      y[float]: The y-poisition in data coordinates.
+      y[float]: The y-position in data coordinates.
     """
 
     # Perform fit

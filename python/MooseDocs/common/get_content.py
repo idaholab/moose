@@ -191,6 +191,9 @@ def get_content(items, in_ext):
 
     # Update the project files
     for root in roots:
-        MooseDocs.PROJECT_FILES.update(mooseutils.git_ls_files(mooseutils.git_root_dir(root)))
+        if mooseutils.is_git_repo(root):
+            MooseDocs.PROJECT_FILES.update(mooseutils.git_ls_files(mooseutils.git_root_dir(root)))
+        else:
+            MooseDocs.PROJECT_FILES.update(mooseutils.list_files(root))
 
     return nodes.values()
