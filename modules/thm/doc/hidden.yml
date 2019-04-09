@@ -251,6 +251,7 @@
 - /Materials/SaturationTemperatureMaterial
 - /Materials/SpecificInterfacialArea7EqnMaterial
 - /Materials/SpecificInterfacialAreaSimpleMaterial
+- /Materials/SurfaceTensionMaterial
 - /Materials/TemperatureWall7EqnMaterial
 - /Materials/VelocityRelaxationRateMaterial
 - /Materials/VolumeFractionMaterial
