@@ -61,6 +61,7 @@ validParams<DGKernelBase>()
   params.addRelationshipManager("ElementSideNeighborLayers",
                                 Moose::RelationshipManagerType::GEOMETRIC |
                                     Moose::RelationshipManagerType::ALGEBRAIC);
+  params.registerBase("DGKernel");
 
   return params;
 }
