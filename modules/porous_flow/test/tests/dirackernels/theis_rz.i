@@ -66,7 +66,7 @@
     variable = pp
   [../]
 []
-  
+
 [VectorPostprocessors]
   [./pp]
     type = LineValueSampler
