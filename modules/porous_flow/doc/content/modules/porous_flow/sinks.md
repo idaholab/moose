@@ -1,6 +1,6 @@
 # Point and line sources/sinks
 
-A number of sources/sinks are available in Porous Flow, implemented as `DiracKernels`.  This page may be read in conjunction with [the description of some Dirac Kernel tests](porous_flow/tests/dirackernels/dirackernels_tests.md).
+A number of sources/sinks are available in Porous Flow, implemented as `DiracKernels`.  This page may be read in conjunction with [the description of some Dirac Kernel tests](porous_flow/tests/dirackernels/dirackernels_tests.md).  Descriptions of tests of point sources and sinks in multi-phase, multi-component scenarios may be found [here](porous_flow/tests/fluidstate/fluidstate_tests.md).
 
 ## Constant point source
 

@@ -229,9 +229,12 @@
 
 [VectorPostprocessors]
   [./line]
-    type = NodalValueSampler
+    type = LineValueSampler
     sort_by = x
-    variable = 'pgas zi xnacl'
+    start_point = '0 0 0'
+    end_point = '2000 0 0'
+    num_points = 10000
+    variable = 'pgas zi xnacl x1 saturation_gas'
     execute_on = 'timestep_end'
   [../]
 []

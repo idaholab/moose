@@ -54,6 +54,7 @@ This equation is identical to the physics described by the [PorousFlowFullySatur
 Place a constant volumetric sink of strength $q$ (m$^{3}$.m$^{-1}$.s$^{-1}$) acting along an infinite line in an isotropic 3D medium.  The situation is therefore two dimensional.  Theis provided the solution for the head
 \begin{equation}
 H = H_{0} + \frac{q}{4\pi K}\mathrm{Ei}\left( -\frac{r^{2}S_{s}}{4Kt} \right) \ ,
+\label{theis_soln_eqn}
 \end{equation}
 which is frequently used in the groundwater literature.  "Ei" is the exponential integral function, with values $\mathrm{Ei}(-x) = \gamma + log(x) - x + O(x^{2})$ for small $x$ (where $\gamma$ is the Euler number $0.57722\ldots$), and $\mathrm{Ei}(-x) = e^{-x}\left(-\frac{1}{x} + \frac{1}{x^{2}} + O(\frac{1}{x^{3}})\right)$ for large $x$.
 
@@ -61,10 +62,21 @@ This is checked using a number of PorousFlow tests (the extraction specified usi
 
 !listing modules/porous_flow/test/tests/dirackernels/theis_rz.i
 
-MOOSE agrees with the Theis solution
+MOOSE agrees with the Theis solution:
 
-!media dirackernels/theis.png style=width:50%;margin-left:10px caption=Results of the Theis simulation. id=theis_fig
+!media dirackernels/theis.png style=width:50%;margin-left:10px caption=Results of the fully-saturated, single-phase Theis simulation. id=theis_fig
 
+Flow from a source in a radial 1D problem admits a similarity solution, where the fluid pressure (and saturation, mass fraction, etc) is a function of the similarity variable $\zeta = r^2/t$.  This may be observed in [theis_soln_eqn].  Using this fact, two-phase immiscible flow may be tested.  The following input file describes injection of a gas phase into a fully liquid-saturated model at a constant rate:
+
+!listing modules/porous_flow/test/tests/dirackernels/theis3.i
+
+[fig:theis_similarity_fig] shows the comparison of
+similarity solutions calculated with either fixed radial distance or fixed time. In this case, good agreement
+is observed between the two results for both liquid pressure and gas saturation. 
+
+!media dirackernels/theis3_similarity_fig.png style=width:90%;margin-left:10px caption=Results of the 2-phase radial injection simulation. id=fig:theis_similarity_fig
+
+Further tests of this kind, involving multi-component, multi-phase flow, including mutual dissolution of gas and liquid phases may be found [here](porous_flow/tests/fluidstate/fluidstate_tests.md).
 
 ## Peaceman borehole fluxes
 
