@@ -43,7 +43,7 @@ protected:
   const bool _variable_L;
 
   /// Mobility derivative w.r.t. order parameter
-  const ADMaterialProperty(Real) & _dLdop;
+  const ADMaterialProperty(Real) * _dLdop;
 
   /// number of coupled variables
   const unsigned int _nvar;

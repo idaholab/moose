@@ -1,5 +1,6 @@
 #
-# Test the parsed function free enery Allen-Cahn Bulk kernel
+# Test the forward automatic differentiation Allen-Cahn Bulk kernel with a
+# spatially varying mobility
 #
 
 [Mesh]
@@ -10,6 +11,15 @@
   xmax = 12
   ymax = 12
   elem_type = QUAD4
+[]
+
+[AuxVariables]
+  [./chi]
+    [./InitialCondition]
+      type = FunctionIC
+      function = 'x/24+0.5'
+    [../]
+  [../]
 []
 
 [Variables]
@@ -30,37 +40,38 @@
 
 [Kernels]
   [./detadt]
-    type = TimeDerivative
+    type = ADTimeDerivative
     variable = eta
   [../]
 
   [./ACBulk]
-    type = AllenCahn
+    type = ADAllenCahn
     variable = eta
     f_name = F
   [../]
 
   [./ACInterface]
-    type = ACInterface
+    type = ADACInterface
     variable = eta
     kappa_name = 1
-    variable_L = false
+    variable_L = true
+    args = chi
   [../]
 []
 
 [Materials]
-  [./consts]
-    type = GenericConstantMaterial
-    prop_names  = 'L'
-    prop_values = '1'
+  [./L]
+    type = ADTestDerivativeFunction
+    function = F2
+    f_name = L
+    op = 'eta chi'
   [../]
 
   [./free_energy]
-    type = DerivativeParsedMaterial
+    type = ADTestDerivativeFunction
+    function = F1
     f_name = F
-    args = 'eta'
-    function = '2 * eta^2 * (1-eta)^2 - 0.2*eta'
-    derivative_order = 2
+    op = 'eta'
   [../]
 []
 
@@ -69,7 +80,7 @@
   scheme = 'bdf2'
   solve_type = 'NEWTON'
   num_steps = 2
-  dt = 0.5
+  dt = 1
 []
 
 [Outputs]

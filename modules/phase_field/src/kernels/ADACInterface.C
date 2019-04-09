@@ -31,23 +31,26 @@ ADACInterface<compute_stage>::ADACInterface(const InputParameters & parameters)
     _name_L(adGetParam<MaterialPropertyName>("mob_name")),
     _kappa(adGetADMaterialProperty<Real>("kappa_name")),
     _variable_L(adGetParam<bool>("variable_L")),
-    _dLdop(adGetADMaterialProperty<Real>(derivativePropertyNameFirst(_name_L, _var.name()))),
+    _dLdop(_variable_L
+               ? &adGetADMaterialProperty<Real>(derivativePropertyNameFirst(_name_L, _var.name()))
+               : nullptr),
     _nvar(_coupled_standard_moose_vars.size()),
     _dLdarg(_nvar),
     _gradarg(_nvar)
 {
   // Get mobility and kappa derivatives and coupled variable gradients
-  for (unsigned int i = 0; i < _nvar; ++i)
-  {
-    MooseVariable * ivar = _coupled_standard_moose_vars[i];
-    const VariableName iname = ivar->name();
-    if (iname == _var.name())
-      paramError("args",
-                 "The kernel variable should not be specified in the coupled `args` parameter.");
+  if (_variable_L)
+    for (unsigned int i = 0; i < _nvar; ++i)
+    {
+      MooseVariable * ivar = _coupled_standard_moose_vars[i];
+      const VariableName iname = ivar->name();
+      if (iname == _var.name())
+        paramError("args",
+                   "The kernel variable should not be specified in the coupled `args` parameter.");
 
-    _dLdarg[i] = &adGetADMaterialProperty<Real>(derivativePropertyNameFirst(_name_L, iname));
-    _gradarg[i] = &(ivar->adGradSln<compute_stage>());
-  }
+      _dLdarg[i] = &adGetADMaterialProperty<Real>(derivativePropertyNameFirst(_name_L, iname));
+      _gradarg[i] = &(ivar->adGradSln<compute_stage>());
+    }
 }
 
 template <ComputeStage compute_stage>
@@ -59,7 +62,7 @@ ADACInterface<compute_stage>::computeQpResidual()
 
   if (_variable_L)
   {
-    ADRealVectorValue grad_L = _grad_u[_qp] * _dLdop[_qp];
+    ADRealVectorValue grad_L = _grad_u[_qp] * (*_dLdop)[_qp];
     for (unsigned int i = 0; i < _nvar; ++i)
       grad_L += (*_gradarg[i])[_qp] * (*_dLdarg[i])[_qp];
 

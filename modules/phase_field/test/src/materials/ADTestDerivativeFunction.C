@@ -1,0 +1,74 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "ADTestDerivativeFunction.h"
+
+registerADMooseObject("PhaseFieldTestApp", ADTestDerivativeFunction);
+
+defineADValidParams(
+    ADTestDerivativeFunction,
+    ADMaterial,
+    params.addClassDescription(
+        "Material that implements the a function of one variable and its first derivative.");
+    MooseEnum functionEnum("F1 F2");
+    params.addRequiredParam<MooseEnum>("function",
+                                       functionEnum,
+                                       "F1 = 2 op^2 (1 - op)^2 - 0.2 op;  F2 = 0.1 * op^2 + 0.1");
+    params.addParam<MaterialPropertyName>("f_name", "F", "function property name");
+    params.addRequiredCoupledVar("op", "Order parameter variables"););
+
+template <ComputeStage compute_stage>
+ADTestDerivativeFunction<compute_stage>::ADTestDerivativeFunction(
+    const InputParameters & parameters)
+  : ADMaterial<compute_stage>(parameters),
+    _function(adGetParam<MooseEnum>("function").template getEnum<FunctionEnum>()),
+    _op(coupledComponents("op")),
+    _f_name(adGetParam<MaterialPropertyName>("f_name")),
+    _prop_F(adDeclareADProperty<Real>(_f_name)),
+    _prop_dFdop(coupledComponents("op"))
+{
+  for (std::size_t i = 0; i < _op.size(); ++i)
+  {
+    _op[i] = &adCoupledValue("op", i);
+    _prop_dFdop[i] = &adDeclareADProperty<Real>(
+        derivativePropertyNameFirst(_f_name, this->getVar("op", i)->name()));
+  }
+
+  if (_function == FunctionEnum::F1 && _op.size() != 1)
+    paramError("op", "Specify exactly one variable to an F1 type function.");
+  if (_function == FunctionEnum::F2 && _op.size() != 2)
+    paramError("op", "Specify exactly two variables to an F2 type function.");
+}
+
+template <ComputeStage compute_stage>
+void
+ADTestDerivativeFunction<compute_stage>::computeQpProperties()
+{
+  const ADReal & a = (*_op[0])[_qp];
+
+  switch (_function)
+  {
+    case FunctionEnum::F1:
+      _prop_F[_qp] = 2.0 * a * a * (1.0 - a) * (1.0 - a) - 0.2 * a;
+      (*_prop_dFdop[0])[_qp] = 4.0 * a * a * (a - 1.0) + 4.0 * a * (1.0 - a) * (1.0 - a) - 0.2;
+      break;
+
+    case FunctionEnum::F2:
+    {
+      const ADReal & b = (*_op[1])[_qp];
+      _prop_F[_qp] = 0.1 * a * a + b * b;
+      (*_prop_dFdop[0])[_qp] = 0.2 * a;
+      (*_prop_dFdop[1])[_qp] = 2.0 * b;
+      break;
+    }
+
+    default:
+      mooseError("Invalid function enum value");
+  }
+}

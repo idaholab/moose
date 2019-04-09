@@ -81,18 +81,9 @@
 
 [Executioner]
   type = Transient
-  scheme = bdf2
-
+  scheme = 'bdf2'
   solve_type = 'NEWTON'
-  petsc_options_iname = -pc_type
-  petsc_options_value = lu
-
-  l_max_its = 30
-  l_tol = 1.0e-4
-  nl_rel_tol = 1.0e-10
-  start_time = 0.0
   num_steps = 2
-
   dt = 1
 []
 
