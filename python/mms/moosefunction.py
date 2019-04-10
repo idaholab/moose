@@ -37,4 +37,4 @@ def print_moose(expr, **kwargs):
     """
     Prints a C++ expression for a Function object.
     """
-    print(MooseFunctionPrinter(**kwargs).doprint(expr))
+    print(moosefunction(expr, **kwargs))

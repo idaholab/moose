@@ -6,7 +6,7 @@ except ImportError:
           "`pip install sympy --user`.")
 
 else:
-    from fparser import FParserPrinter, fparser, print_fparser
+    from fparser import FParserPrinter, fparser, print_fparser, build_hit, print_hit
     from moosefunction import MooseFunctionPrinter, moosefunction, print_moose
     from evaluate import evaluate
     from runner import run_spatial, run_temporal

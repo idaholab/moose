@@ -22,9 +22,7 @@ def _runner(input_file, num_refinements, *args, **kwargs):
         csv[str]: The name of the CSV containing the Postprocessor data, if not provided the name
                   is assumed to be the standard output name if Outputs/csv=true in the input file
         rtype[int]: SPATIAL or TEMPORAL
-        initial_dt[float]: The initial timestep, only used with rtype=TEMPORAL (default: 1)
-        write_csv[str]: The name of the CSV file to write with plot data, this was added for testing
-                        purposes
+        dt[float]: The initial timestep, only used with rtype=TEMPORAL (default: 1)
 
     All additional arguments are passed to the executable
     """
@@ -35,8 +33,7 @@ def _runner(input_file, num_refinements, *args, **kwargs):
     csv = kwargs.get('csv', None)
     console = kwargs.get('console', True)
     rtype = kwargs.get('rtype') # SPATIAL or TEMPORAL
-    dt = kwargs.pop('initial_dt', 1) # only used with rtype=TEMPORAL
-    write_csv = kwargs.pop('write_csv', None)
+    dt = kwargs.pop('dt', 1) # only used with rtype=TEMPORAL
 
     # Check that input file exists
     if not os.path.isfile(input_file):
@@ -85,18 +82,15 @@ def _runner(input_file, num_refinements, *args, **kwargs):
             x.append(dt)
             y.append(current[y_pp].iloc[-1])
 
-    if write_csv is not None:
-        df = pandas.DataFrame({x_pp:x, y_pp:y})
-        df.to_csv(write_csv)
+    if rtype == SPATIAL:
+        x_pp == 'dt'
 
-    return x, y
+    return pandas.DataFrame({x_pp:x, y_pp:y}, columns=[x_pp, y_pp])
 
 def run_spatial(*args, **kwargs):
     """Runs input file for a spatial MMS problem (see _runner.py for inputs)."""
-    x, y = _runner(*args, rtype=SPATIAL, **kwargs)
-    return x, y
+    return _runner(*args, rtype=SPATIAL, **kwargs)
 
 def run_temporal(*args, **kwargs):
     """Runs input file for a temporal MMS problem (see _runner.py for inputs)."""
-    x, y = _runner(*args, rtype=TEMPORAL, **kwargs)
-    return x, y
+    return _runner(*args, rtype=TEMPORAL, **kwargs)

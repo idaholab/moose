@@ -174,7 +174,37 @@ def fparser(expr, assign_to=None, **kwargs):
     """
     return FParserPrinter(**kwargs).doprint(expr, assign_to)[-1]
 
-
 def print_fparser(expr, **kwargs):
     """Prints an FParser representation of the given expression."""
     print(fparser(expr, **kwargs))
+
+def build_hit(expr, name, **kwargs):
+    """
+    Create a hit node containing a ParsedFunction of the given expression
+
+    Inputs:
+        expr[sympy.core.Expr]: The sympy expression to convert
+        name[str]: The name of the input file block to create
+        kwargs: Key, value pairs for val, vals input parameters (defaults to 1.0) if not provided
+    """
+    import hit
+
+    symbols = set([str(s) for s in expr.free_symbols]).difference(set(['R.x', 'R.y', 'R.z', 't']))
+    for symbol in symbols:
+        kwargs.setdefault(symbol, 1.)
+
+    root = hit.NewSection(name)
+    root.addChild(hit.NewField('type', hit.FieldKind.String, 'ParsedFunction'))
+    root.addChild(hit.NewField('value', hit.FieldKind.String, "'{}'".format(str(fparser(expr)))))
+
+    if kwargs:
+        pvars = ' '.join(kwargs.keys())
+        pvals = ' '.join([str(v) for v in kwargs.values()])
+        root.addChild(hit.NewField('vars', hit.FieldKind.String, "'{}'".format(pvars)))
+        root.addChild(hit.NewField('vals', hit.FieldKind.String, "'{}'".format(pvals)))
+
+    return root
+
+def print_hit(*args, **kwargs):
+    """Prints a hit block containing a ParsedFunction of the given expression"""
+    print(build_hit(*args, **kwargs))

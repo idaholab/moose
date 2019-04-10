@@ -46,24 +46,16 @@ class ConvergencePlot(object):
         # Apply grid marks
         plt.grid(True, which='both', color=[0.8]*3)
 
-    def plot(self, x, y, label=None, invert_x=True, **kwargs):
+    def plot(self, df, label=None, **kwargs):
 
-
-        if invert_x:
-            x = 1./np.array(x)
-        else:
-            x = np.array(x)
-
-        y = np.array(y)
+        x = df[df.columns[0]]
+        y = df[df.columns[1]]
 
         if label is None:
             label = 'line-{}'.format(len(self._axes.lines))
 
-
         slope = self._fit(x, y)
         label = '{}: {:.3f}'.format(label, slope)
-
-        #self._data.append(ConvergencePlot.Line(x=x, y=y, label=label))
 
         line, = self._axes.plot(x, y, label=label, **kwargs)
 

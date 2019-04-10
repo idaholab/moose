@@ -13,10 +13,10 @@ MOOSE.  Click on each one for further information
 
 ## Setup
 
-MOOSE includes various python packages within the python directory within MOOSE. In order
-to use these packages the python directory it must be made available to the python interpreter,
-which is accomplished by setting the `PYTHONPATH` environment variable to include this
-location. The following can be set on the command line or inserted into your bash environment.
+MOOSE includes various python packages within the python directory. In order
+to use these packages the python directory must be made available to the interpreter,
+which is accomplished by setting the `PYTHONPATH` environment variable. The following can be set on
+the command line or inserted into your bash environment.
 
 ```bash
 export PYTHONPATH=$PYTHONPATH:~/projects/moose/python
