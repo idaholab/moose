@@ -18,6 +18,7 @@ Content:
         content:
             - /**
             - ~syntax/ThermalContact/index.md
+            - ~source/materials/GapConductanceConstant.md
             - ~source/actions/ThermalContactAction.md
             - ~source/actions/ThermalContactBCsAction.md
             - ~source/actions/ThermalContactMaterialsAction.md
