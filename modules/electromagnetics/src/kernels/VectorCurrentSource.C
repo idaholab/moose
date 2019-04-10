@@ -1,4 +1,5 @@
 #include "VectorCurrentSource.h"
+#include <complex>
 
 registerMooseObject("ElkApp", VectorCurrentSource);
 
@@ -9,18 +10,9 @@ validParams<VectorCurrentSource>()
   InputParameters params = validParams<VectorKernel>();
   params.addClassDescription(
       "Kernel to calculate the RHS current source term in the helmholtz wave equation.");
-  params.addParam<Real>("coeff", 1.0, "Coefficient multiplier for field.");
-  params.addParam<FunctionName>("func", 1.0, "Function multiplier for field.");
-  params.addRequiredParam<FunctionName>("x_real", "x component");
-  params.addRequiredParam<FunctionName>("y_real", "y component");
-  params.addRequiredParam<FunctionName>("z_real", "z component");
-  params.addRequiredParam<FunctionName>("x_imag", "x component");
-  params.addRequiredParam<FunctionName>("y_imag", "y component");
-  params.addRequiredParam<FunctionName>("z_imag", "z component");
-  // params.addParam<RealVectorValue>(
-  //     "source_real", RealVectorValue(), "Current Source vector, real component.");
-  // params.addParam<RealVectorValue>(
-  //     "source_imaginary", RealVectorValue(), "Current Source vector, imaginary component.");
+  params.addParam<FunctionName>("function_coefficient", 1.0, "Function coefficient multiplier for current source (normally $\\omega$ or $\\omega \\cdot \\mu$).");
+  params.addRequiredParam<FunctionName>("source_real", "Current Source vector, real component");
+  params.addRequiredParam<FunctionName>("source_imag", "Current Source vector, imaginary component");
   MooseEnum component("real imaginary");
   params.addParam<MooseEnum>("component", component, "Component of field (real or imaginary).");
   return params;
@@ -29,21 +21,9 @@ validParams<VectorCurrentSource>()
 VectorCurrentSource::VectorCurrentSource(const InputParameters & parameters)
   : VectorKernel(parameters),
 
-    _coefficient(getParam<Real>("coeff")),
-
-    _func(getFunction("func")),
-
-    _x_real(getFunction("x_real")),
-    _y_real(getFunction("y_real")),
-    _z_real(getFunction("z_real")),
-
-    _x_imag(getFunction("x_imag")),
-    _y_imag(getFunction("y_imag")),
-    _z_imag(getFunction("z_imag")),
-
-    // _source_real(getParam<RealVectorValue>("source_real")),
-    // _source_imaginary(getParam<RealVectorValue>("source_imaginary")),
-
+    _func(getFunction("function_coefficient")),
+    _source_real(getFunction("source_real")),
+    _source_imag(getFunction("source_imag")),
     _component(getParam<MooseEnum>("component"))
 {
 }
@@ -51,20 +31,22 @@ VectorCurrentSource::VectorCurrentSource(const InputParameters & parameters)
 Real
 VectorCurrentSource::computeQpResidual()
 {
-  RealVectorValue _source_real(_x_real.value(_t, _q_point[_qp]),
-                               _y_real.value(_t, _q_point[_qp]),
-                               _z_real.value(_t, _q_point[_qp]));
-  RealVectorValue _source_imaginary(_x_imag.value(_t, _q_point[_qp]),
-                                    _y_imag.value(_t, _q_point[_qp]),
-                                    _z_imag.value(_t, _q_point[_qp]));
+  std::complex<double> source0(_source_real.vectorValue(_t, _q_point[_qp])(0), _source_imag.vectorValue(_t, _q_point[_qp])(0));
+  std::complex<double> source1(_source_real.vectorValue(_t, _q_point[_qp])(1), _source_imag.vectorValue(_t, _q_point[_qp])(1));
+  std::complex<double> source2(_source_real.vectorValue(_t, _q_point[_qp])(2), _source_imag.vectorValue(_t, _q_point[_qp])(2));
+  VectorValue<std::complex<double>> source(source0, source1, source2);
+
+  std::complex<double> jay(0, 1);
+
+  std::complex<double> res = jay * _func.value(_t, _q_point[_qp]) * source * _test[_i][_qp];
 
   if (_component == "real")
   {
-    return -_coefficient * _func.value(_t, _q_point[_qp]) * _source_imaginary * _test[_i][_qp];
+    return res.real();
   }
   else
   {
-    return _coefficient * _func.value(_t, _q_point[_qp]) * _source_real * _test[_i][_qp];
+    return res.imag();
   }
 }
 
