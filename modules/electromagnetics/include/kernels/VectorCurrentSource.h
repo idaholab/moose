@@ -17,21 +17,10 @@ protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
 
-  Real _coefficient;
-
   Function & _func;
 
-  Function & _x_real;
-  Function & _y_real;
-  Function & _z_real;
-
-  Function & _x_imag;
-  Function & _y_imag;
-  Function & _z_imag;
-
-  // RealVectorValue _source_real;
-  //
-  // RealVectorValue _source_imaginary;
+  Function & _source_real;
+  Function & _source_imag;
 
   MooseEnum _component;
 };
