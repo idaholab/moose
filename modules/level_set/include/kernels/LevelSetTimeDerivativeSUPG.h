@@ -11,19 +11,20 @@
 #define LEVELSETTIMEDERIVATIVESUPG_H
 
 // MOOSE includes
-#include "TimeDerivative.h"
+#include "ADTimeKernelGrad.h"
 #include "LevelSetVelocityInterface.h"
 
 // Forward declarations
+template <ComputeStage>
 class LevelSetTimeDerivativeSUPG;
 
-template <>
-InputParameters validParams<LevelSetTimeDerivativeSUPG>();
+declareADValidParams(LevelSetTimeDerivativeSUPG);
 
 /**
  * Applies SUPG stabilization to the time derivative.
  */
-class LevelSetTimeDerivativeSUPG : public LevelSetVelocityInterface<TimeDerivative>
+template <ComputeStage compute_stage>
+class LevelSetTimeDerivativeSUPG : public LevelSetVelocityInterface<ADTimeKernelGrad<compute_stage>>
 {
 public:
   LevelSetTimeDerivativeSUPG(const InputParameters & parameters);
