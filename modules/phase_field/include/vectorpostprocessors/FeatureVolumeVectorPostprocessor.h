@@ -12,6 +12,7 @@
 
 #include "GeneralVectorPostprocessor.h"
 #include "MooseVariableDependencyInterface.h"
+#include "BoundaryRestrictable.h"
 
 // Forward Declarations
 class FeatureVolumeVectorPostprocessor;
@@ -31,7 +32,8 @@ InputParameters validParams<FeatureVolumeVectorPostprocessor>();
  * one less thing for the user of this class to worry about.
  */
 class FeatureVolumeVectorPostprocessor : public GeneralVectorPostprocessor,
-                                         public MooseVariableDependencyInterface
+                                         public MooseVariableDependencyInterface,
+                                         public BoundaryRestrictable
 {
 public:
   FeatureVolumeVectorPostprocessor(const InputParameters & parameters);
@@ -57,6 +59,9 @@ protected:
   VectorPostprocessorValue & _feature_volumes;
   VectorPostprocessorValue & _intersects_bounds;
   VectorPostprocessorValue & _percolated;
+
+  /// Indicates whether the calculation should be run on volumes or area of a boundary
+  bool _is_boundary_restricted;
 
 private:
   /// Add volume contributions to one or entries in the feature volume vector

@@ -25,6 +25,7 @@ InputParameters
 validParams<FeatureVolumeVectorPostprocessor>()
 {
   InputParameters params = validParams<GeneralVectorPostprocessor>();
+  params += validParams<BoundaryRestrictable>();
 
   params.addRequiredParam<UserObjectName>("flood_counter",
                                           "The FeatureFloodCount UserObject to get values from.");
@@ -45,6 +46,7 @@ FeatureVolumeVectorPostprocessor::FeatureVolumeVectorPostprocessor(
     const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
     MooseVariableDependencyInterface(),
+    BoundaryRestrictable(this, false),
     _single_feature_per_elem(getParam<bool>("single_feature_per_element")),
     _output_centroids(getParam<bool>("output_centroids")),
     _feature_counter(getUserObject<FeatureFloodCount>("flood_counter")),
@@ -61,6 +63,8 @@ FeatureVolumeVectorPostprocessor::FeatureVolumeVectorPostprocessor(
     _coord(_assembly.coordTransformation())
 {
   addMooseVariableDependency(_vars);
+
+  _is_boundary_restricted = boundaryRestricted();
 
   _coupled_sln.reserve(_vars.size());
   for (auto & var : _feature_counter.getCoupledVars())
@@ -114,21 +118,47 @@ FeatureVolumeVectorPostprocessor::execute()
 
   // Reset the volume vector
   _feature_volumes.assign(num_features, 0);
-  for (const auto & elem : _mesh.getMesh().active_local_element_ptr_range())
-  {
-    _fe_problem.prepare(elem, 0);
-    _fe_problem.reinitElem(elem, 0);
 
-    /**
-     * Here we retrieve the var to features vector on the current element.
-     * We'll use that information to figure out which variables are non-zero
-     * (from a threshold perspective) then we can sum those values into
-     * appropriate grain index locations.
-     */
-    const auto & var_to_features = _feature_counter.getVarToFeatureVector(elem->id());
+  // _console << "Boundary restricted? " << _is_boundary_restricted << std::endl;
+  if (_is_boundary_restricted)
+    for (auto elem_it = _mesh.bndElemsBegin(), elem_end = _mesh.bndElemsEnd(); elem_it != elem_end;
+         ++elem_it)
+    {
+      const std::set<BoundaryID> supplied_bnd_ids = BoundaryRestrictable::boundaryIDs();
+      // loop over only boundaries supplied by user in boundary param
+      for (auto & supplied_bnd_id : supplied_bnd_ids)
+      {
+        if (((*elem_it)->_bnd_id) == supplied_bnd_id)
+        {
+          // _console << "Element number" << std::endl;
+          // _console << (*elem_it)->_elem->id() << std::endl;
+          // _console << "Side number" << std::endl;
+          // _console << (*elem_it)->_side << std::endl;
+          // _console << "Boundary number" << std::endl;
+          // _console << (*elem_it)->_bnd_id << std::endl;
+          _fe_problem.prepare((*elem_it)->_elem, 0);
+          _fe_problem.reinitElemFace(
+              (*elem_it)->_elem, (*elem_it)->_side, (*elem_it)->_bnd_id, 0);
+          // TODO here calculate integral on boundary
+        }
+      }
+    }
+  else
+    for (const auto & elem : _mesh.getMesh().active_local_element_ptr_range())
+    {
+      _fe_problem.prepare(elem, 0);
+      _fe_problem.reinitElem(elem, 0);
 
-    accumulateVolumes(elem, var_to_features, num_features);
-  }
+      /**
+       * Here we retrieve the var to features vector on the current element.
+       * We'll use that information to figure out which variables are non-zero
+       * (from a threshold perspective) then we can sum those values into
+       * appropriate grain index locations.
+       */
+      const auto & var_to_features = _feature_counter.getVarToFeatureVector(elem->id());
+
+      accumulateVolumes(elem, var_to_features, num_features);
+    }
 }
 
 void
