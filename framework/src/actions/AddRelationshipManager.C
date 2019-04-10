@@ -35,14 +35,4 @@ AddRelationshipManager::act()
     action_ptr->addRelationshipManagers(rm_type);
 
   _app.attachRelationshipManagers(rm_type);
-
-  if (_current_task == "attach_algebraic_rm")
-  {
-    // If we're doing Algebraic then we're done adding ghosting functors
-    // and we can tell the mesh that it's safe to remove remote elements again
-    _mesh->getMesh().allow_remote_element_removal(true);
-
-    if (_problem->getDisplacedProblem())
-      _problem->getDisplacedProblem()->mesh().getMesh().allow_remote_element_removal(true);
-  }
 }

@@ -15,6 +15,10 @@
 
 registerMooseAction("MooseApp", SetupMeshCompleteAction, "prepare_mesh");
 
+registerMooseAction("MooseApp",
+                    SetupMeshCompleteAction,
+                    "delete_remote_elements_post_equation_systems_init");
+
 registerMooseAction("MooseApp", SetupMeshCompleteAction, "execute_mesh_modifiers");
 
 registerMooseAction("MooseApp", SetupMeshCompleteAction, "uniform_refine_mesh");
@@ -87,6 +91,15 @@ SetupMeshCompleteAction::act()
         if (_displaced_mesh)
           Adaptivity::uniformRefine(_displaced_mesh.get());
       }
+    }
+  }
+  else if (_current_task == "delete_remote_elements_post_equation_systems_init")
+  {
+    if (_mesh->needsRemoteElemDeletion())
+    {
+      _mesh->getMesh().delete_remote_elements();
+      if (_displaced_mesh)
+        _displaced_mesh->getMesh().delete_remote_elements();
     }
   }
   else
