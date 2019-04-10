@@ -92,7 +92,7 @@ TestAction::addMesh()
 void
 TestAction::addMeshInternal(const unsigned int & nx)
 {
-  std::vector<std::string> setup_mesh_tasks{"setup_mesh", "init_mesh"};
+  std::vector<std::string> setup_mesh_tasks{"setup_mesh", "set_mesh_base", "init_mesh"};
   for (const std::string & task : setup_mesh_tasks)
   {
     const std::string class_name = "SetupMeshAction";
