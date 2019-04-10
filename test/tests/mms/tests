@@ -3,31 +3,37 @@
   design = 'mms.md'
   [spatial]
     type = CheckFiles
+    sympy = True
     command = mms_spatial.py
     check_files = 'mms_spatial.png'
     requirement = "The system shall include a tool for creating spatial convergence plots using method of manufactured solutions."
   []
   [spatial_csv]
     type = CSVDiff
+    sympy = True
     command = mms_spatial.py
     csvdiff = 'mms_spatial_first.csv mms_spatial_second.csv'
     requirement = "The system shall include a tool for writing spatial convergence data to a file using method of manufactured solutions."
   []
   [temporal]
     type = CheckFiles
+    sympy = True
     command = mms_temporal.py
     check_files = 'mms_temporal.png'
     requirement = "The system shall include a tool for creating temporal convergence plots using method of manufactured solutions."
   []
   [temporal_csv]
     type = CSVDiff
+    sympy = True
     command = mms_temporal.py
     csvdiff = 'mms_temporal_first.csv mms_temporal_second.csv'
     requirement = "The system shall include a tool for writing temporal convergence data to a file using method of manufactured solutions."
   []
   [exact]
     type = RunApp
+    sympy = True
     command = mms_exact.py
     expect_out = 'type = ParsedFunction'
+    requirement = "The system shall include a tool to output solution and forcing functions."
   []
 []
