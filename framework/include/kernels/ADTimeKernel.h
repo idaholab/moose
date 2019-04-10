@@ -10,14 +10,14 @@
 #ifndef ADTIMEKERNEL_H
 #define ADTIMEKERNEL_H
 
-#include "ADKernelValue.h"
+#include "ADKernel.h"
 
 /**
  * All AD time kernels should inherit from this class
  *
  */
 template <typename T, ComputeStage compute_stage>
-class ADTimeKernelTempl : public ADKernelValueTempl<T, compute_stage>
+class ADTimeKernelTempl : public ADKernelTempl<T, compute_stage>
 {
 public:
   ADTimeKernelTempl(const InputParameters & parameters);
@@ -26,7 +26,7 @@ protected:
   /// Holds the time derivatives at the quadrature points
   const ADTemplateVariableValue & _u_dot;
 
-  usingTemplKernelValueMembers(T);
+  usingTemplKernelMembers(T);
 };
 
 template <ComputeStage compute_stage>
