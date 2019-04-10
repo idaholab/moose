@@ -14,7 +14,7 @@
 
 #define usingTemplKernelGradMembers(T) usingTemplKernelMembers(T)
 #define usingKernelGradMembers usingTemplKernelGradMembers(Real)
-#define usingVectorKernelGradMembers usingTemplKernelMembers(RealVectorGrad)
+#define usingVectorKernelGradMembers usingTemplKernelMembers(RealVectorValue)
 
 template <typename, ComputeStage>
 class ADKernelGradTempl;
