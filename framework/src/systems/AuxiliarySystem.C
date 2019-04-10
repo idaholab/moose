@@ -435,9 +435,6 @@ AuxiliarySystem::computeScalarVars(ExecFlagType type)
         const std::vector<std::shared_ptr<AuxScalarKernel>> & objects =
             storage.getActiveObjects(tid);
 
-        for (const auto & obj : objects)
-          obj->initialize();
-
         // Call compute() method on all active AuxScalarKernel objects
         for (const auto & obj : objects)
           obj->compute();
@@ -461,19 +458,6 @@ AuxiliarySystem::computeNodalVars(ExecFlagType type)
 {
   // Reference to the Nodal AuxKernel storage
   const MooseObjectWarehouse<AuxKernel> & nodal = _nodal_aux_storage[type];
-
-  if (nodal.hasActiveObjects())
-  {
-    TIME_SECTION(_compute_nodal_vars_timer);
-
-    // Initialize everything
-    for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
-    {
-      auto & objects = nodal.getActiveObjects(tid);
-      for (const auto & obj : objects)
-        obj->initialize();
-    }
-  }
 
   if (nodal.hasActiveBlockObjects())
   {
@@ -515,19 +499,6 @@ AuxiliarySystem::computeElementalVars(ExecFlagType type)
 {
   // Reference to the Nodal AuxKernel storage
   const MooseObjectWarehouse<AuxKernel> & elemental = _elemental_aux_storage[type];
-
-  if (elemental.hasActiveObjects())
-  {
-    TIME_SECTION(_compute_elemental_vars_timer);
-
-    // Initialize everything
-    for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
-    {
-      auto & objects = elemental.getActiveObjects(tid);
-      for (const auto & obj : objects)
-        obj->initialize();
-    }
-  }
 
   if (elemental.hasActiveBlockObjects())
   {
