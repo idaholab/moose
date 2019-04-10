@@ -62,7 +62,6 @@ const std::string FlowModel::HEAT_FLUX_WALL = "q_wall";
 const std::string FlowModel::HEAT_FLUX_PERIMETER = "P_hf";
 const std::string FlowModel::HYDRAULIC_DIAMETER = "D_h";
 const std::string FlowModel::NUSSELT_NUMBER = "Nu";
-const std::string FlowModel::SURFACE_TENSION = "surface_tension";
 const std::string FlowModel::TEMPERATURE_WALL = "T_wall";
 const std::string FlowModel::UNITY = "unity";
 const std::string FlowModel::DIRECTION = "direction";

@@ -58,7 +58,7 @@ StiffenedGas7EqnFluidProperties::StiffenedGas7EqnFluidProperties(const InputPara
 {
   if (_tid == 0)
   {
-    std::string class_name = "StiffenedGasLiquidFluidProperties";
+    std::string class_name = "StiffenedGasFluidProperties";
     InputParameters params = _app.getFactory().getValidParams(class_name);
     params.set<Real>("gamma") = _gamma_liquid;
     params.set<Real>("cv") = _cv_liquid;

@@ -132,7 +132,6 @@
 - /FluidProperties/LinearFluidProperties
 - /FluidProperties/LinearTest7EqnFluidProperties
 - /FluidProperties/StiffenedGas7EqnFluidProperties
-- /FluidProperties/StiffenedGasLiquidFluidProperties
 
 - /Functions/ConstantTimesAreaFunction
 - /Functions/GeneralizedCircumference
@@ -251,6 +250,7 @@
 - /Materials/SaturationTemperatureMaterial
 - /Materials/SpecificInterfacialArea7EqnMaterial
 - /Materials/SpecificInterfacialAreaSimpleMaterial
+- /Materials/SurfaceTensionMaterial
 - /Materials/TemperatureWall7EqnMaterial
 - /Materials/VelocityRelaxationRateMaterial
 - /Materials/VolumeFractionMaterial
