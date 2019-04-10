@@ -1594,7 +1594,8 @@ SolidModel::createConstitutiveModel(const std::string & cm_name)
   Factory & factory = _app.getFactory();
   InputParameters params = factory.getValidParams(cm_name);
 
-  params += parameters();
+  params.applyParameters(parameters());
+  params.set<SubProblem *>("_subproblem") = &_subproblem;
   MooseSharedPointer<ConstitutiveModel> cm =
       factory.create<ConstitutiveModel>(cm_name, name() + "Model", params, _tid);
 
