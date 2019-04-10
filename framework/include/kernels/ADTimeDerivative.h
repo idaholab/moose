@@ -30,4 +30,7 @@ protected:
   usingTimeKernelValueMembers;
 };
 
+#define usingTimeDerivativeMembers usingTemplTimeKernelValueMembers(Real)
+#define usingVectorTimeDerivativeMembers usingTemplTimeKernelValueMembers(RealVectorValue)
+
 #endif // ADTIMEDERIVATIVE_H
