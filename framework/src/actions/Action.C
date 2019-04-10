@@ -156,6 +156,21 @@ Action::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type,
       // Keep looking for more RMs
       continue;
     }
+    // Ok the above block may have told the mesh not to allow remote element removal during the
+    // initial MeshBase::prepare_for_use, which is called after attaching geometric ghosting
+    // functors. If we did tell the mesh not to allow remote element removal **and** we're using a
+    // DistributedMesh, then we need to tell the mesh to allow remote element removal and ensure
+    // that the mesh will delete its remote elements after the EquationSystems init
+    else if (input_rm_type == Moose::RelationshipManagerType::ALGEBRAIC &&
+             (rm_params.get<Moose::RelationshipManagerType>("rm_type") &
+              Moose::RelationshipManagerType::GEOMETRIC) ==
+                 Moose::RelationshipManagerType::GEOMETRIC &&
+             !rm_params.get<bool>("attach_geometric_early") && _mesh->isDistributedMesh())
+    {
+      _mesh->needsRemoteElemDeletion(true);
+      if (_displaced_mesh)
+        _displaced_mesh->needsRemoteElemDeletion(true);
+    }
 
     rm_params.set<MooseMesh *>("mesh") = _mesh.get();
 

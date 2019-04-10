@@ -206,7 +206,8 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _init_timer(registerTimedSection("init", 2)),
     _read_recovered_mesh_timer(registerTimedSection("readRecoveredMesh", 2)),
     _ghost_ghosted_boundaries_timer(registerTimedSection("GhostGhostedBoundaries", 3)),
-    _add_mortar_interface_timer(registerTimedSection("addMortarInterface", 5))
+    _add_mortar_interface_timer(registerTimedSection("addMortarInterface", 5)),
+    _need_delete(false)
 {
   if (isParamValid("ghosting_patch_size") && (_patch_update_strategy != Moose::Iteration))
     mooseError("Ghosting patch size parameter has to be set in the mesh block "

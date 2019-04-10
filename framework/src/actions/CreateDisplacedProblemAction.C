@@ -155,6 +155,17 @@ CreateDisplacedProblemAction::act()
 
       addProxyGeometricRelationshipManagers(undisplaced_nl, displaced_nl);
       addProxyGeometricRelationshipManagers(displaced_nl, undisplaced_nl);
+
+      // When adding the geometric relationship mangers we told the mesh not to allow remote element
+      // removal during the initial MeshBase::prepare_for_use call. If we're using a distributed
+      // mesh we need to make sure we now allow remote element removal and then delete the remote
+      // elmeents after the EquationSystems init
+      if (_mesh->isDistributedMesh())
+      {
+        _mesh->needsRemoteElemDeletion(true);
+        if (_displaced_mesh)
+          _displaced_mesh->needsRemoteElemDeletion(true);
+      }
     }
   }
 }
