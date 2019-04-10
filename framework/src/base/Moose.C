@@ -389,9 +389,12 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("CreateProblemAction", "Problem");
   registerSyntax("DynamicObjectRegistrationAction", "Problem");
+
   registerSyntax("SetupMeshAction", "Mesh");
   registerSyntax("SetupMeshCompleteAction", "Mesh");
   registerSyntax("CreateDisplacedProblemAction", "Mesh");
+  registerSyntax("DisplayGhostingAction", "Mesh");
+
   registerSyntax("AddMeshModifierAction", "MeshModifiers/*");
   registerSyntax("AddMeshGeneratorAction", "MeshGenerators/*");
   registerSyntax("AddMortarInterfaceAction", "Mesh/MortarInterfaces/*");
@@ -411,16 +414,12 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("AddVariableAction", "Variables/*");
   syntax.registerSyntaxType("Variables/*", "VariableName");
   syntax.registerSyntaxType("Variables/*", "NonlinearVariableName");
-  //  syntax.registerActionSyntax("AddVariableAction", "Variables/*", "add_variable");
-  //  syntax.registerActionSyntax("AddVariableAction", "Variables/*", "add_ic");
 
   registerSyntax("AddICAction", "Variables/*/InitialCondition");
 
   registerSyntax("AddAuxVariableAction", "AuxVariables/*");
   syntax.registerSyntaxType("AuxVariables/*", "VariableName");
   syntax.registerSyntaxType("AuxVariables/*", "AuxVariableName");
-  //  syntax.registerActionSyntax("AddAuxVariableAction", "AuxVariables/*", "add_aux_variable");
-  //  syntax.registerActionSyntax("AddAuxVariableAction", "AuxVariables/*", "add_ic");
 
   registerSyntax("AddICAction", "AuxVariables/*/InitialCondition");
 
@@ -475,9 +474,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("AddBoundsVectorsAction", "Bounds");
 
   registerSyntax("AddNodalNormalsAction", "NodalNormals");
-  //  registerSyntaxTask("AddNodalNormalsAction", "NodalNormals", "add_aux_variable");
-  //  registerSyntaxTask("AddNodalNormalsAction", "NodalNormals", "add_postprocessor");
-  //  registerSyntaxTask("AddNodalNormalsAction", "NodalNormals", "add_user_object");
 
   // Indicator
   registerSyntax("AddElementalFieldAction", "Adaptivity/Indicators/*");
