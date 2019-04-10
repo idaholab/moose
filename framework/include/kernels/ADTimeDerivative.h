@@ -10,7 +10,7 @@
 #ifndef ADTIMEDERIVATIVE_H
 #define ADTIMEDERIVATIVE_H
 
-#include "ADTimeKernel.h"
+#include "ADTimeKernelValue.h"
 
 // Forward Declaration
 template <ComputeStage>
@@ -19,7 +19,7 @@ class ADTimeDerivative;
 declareADValidParams(ADTimeDerivative);
 
 template <ComputeStage compute_stage>
-class ADTimeDerivative : public ADTimeKernel<compute_stage>
+class ADTimeDerivative : public ADTimeKernelValue<compute_stage>
 {
 public:
   ADTimeDerivative(const InputParameters & parameters);
@@ -27,7 +27,7 @@ public:
 protected:
   virtual ADResidual precomputeQpResidual() override;
 
-  usingTimeKernelMembers;
+  usingTimeKernelValueMembers;
 };
 
 #endif // ADTIMEDERIVATIVE_H
