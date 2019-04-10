@@ -11,26 +11,34 @@
 #define LEVELSETFORCINGFUNCTIONSUPG_H
 
 // MOOSE includes
-#include "BodyForce.h"
+#include "ADKernelGrad.h"
 #include "LevelSetVelocityInterface.h"
 
 // Forward declarations
+template <ComputeStage>
 class LevelSetForcingFunctionSUPG;
 
-template <>
-InputParameters validParams<LevelSetForcingFunctionSUPG>();
+declareADValidParams(LevelSetForcingFunctionSUPG);
 
 /**
  * SUPG stabilization term for a forcing function.
  */
-class LevelSetForcingFunctionSUPG : public LevelSetVelocityInterface<BodyForce>
+template <ComputeStage compute_stage>
+class LevelSetForcingFunctionSUPG : public LevelSetVelocityInterface<ADKernelGrad<compute_stage>>
 {
 public:
   LevelSetForcingFunctionSUPG(const InputParameters & parameters);
 
 protected:
-  Real computeQpResidual() override;
-  Real computeQpJacobian() override;
+  virtual ADVectorResidual precomputeQpResidual() override;
+
+  /// Function value
+  Function & _function;
+
+  usingKernelGradMembers;
+  using LevelSetVelocityInterface<ADKernelGrad<compute_stage>>::computeQpVelocity;
+  using LevelSetVelocityInterface<ADKernelGrad<compute_stage>>::_velocity;
+  using LevelSetVelocityInterface<ADKernelGrad<compute_stage>>::_q_point;
 };
 
 #endif // LEVELSETFORCINGFUNCTIONSUPG_H
