@@ -10,42 +10,32 @@
 // MOOSE includes
 #include "LevelSetOlssonReinitialization.h"
 
-registerMooseObject("LevelSetApp", LevelSetOlssonReinitialization);
+registerADMooseObject("LevelSetApp", LevelSetOlssonReinitialization);
 
-template <>
-InputParameters
-validParams<LevelSetOlssonReinitialization>()
-{
-  InputParameters params = validParams<Kernel>();
-  params.addClassDescription("The re-initialization equation defined by Olsson et. al. (2007).");
-  params.addRequiredCoupledVar(
-      "phi_0", "The level set variable to be reinitialized as signed distance function.");
-  params.addRequiredParam<PostprocessorName>(
-      "epsilon", "The epsilon coefficient to be used in the reinitialization calculation.");
-  return params;
-}
+defineADValidParams(
+    LevelSetOlssonReinitialization,
+    ADKernelGrad,
+    params.addClassDescription("The re-initialization equation defined by Olsson et. al. (2007).");
+    params.addRequiredCoupledVar(
+        "phi_0", "The level set variable to be reinitialized as signed distance function.");
+    params.addRequiredParam<PostprocessorName>(
+        "epsilon", "The epsilon coefficient to be used in the reinitialization calculation."););
 
-LevelSetOlssonReinitialization::LevelSetOlssonReinitialization(const InputParameters & parameters)
-  : Kernel(parameters),
-    _grad_levelset_0(coupledGradient("phi_0")),
+template <ComputeStage compute_stage>
+LevelSetOlssonReinitialization<compute_stage>::LevelSetOlssonReinitialization(
+    const InputParameters & parameters)
+  : ADKernelGrad<compute_stage>(parameters),
+    _grad_levelset_0(adCoupledGradient("phi_0")),
     _epsilon(getPostprocessorValue("epsilon"))
 {
 }
 
-Real
-LevelSetOlssonReinitialization::computeQpResidual()
+template <ComputeStage compute_stage>
+ADVectorResidual
+LevelSetOlssonReinitialization<compute_stage>::precomputeQpResidual()
 {
-  _s = _grad_levelset_0[_qp].norm() + std::numeric_limits<Real>::epsilon();
-  _n_hat = _grad_levelset_0[_qp] / _s;
-  _f = _u[_qp] * (1 - _u[_qp]) * _n_hat;
-  return _grad_test[_i][_qp] * (-_f + _epsilon * (_grad_u[_qp] * _n_hat) * _n_hat);
-}
-
-Real
-LevelSetOlssonReinitialization::computeQpJacobian()
-{
-  _s = _grad_levelset_0[_qp].norm() + std::numeric_limits<Real>::epsilon();
-  _n_hat = _grad_levelset_0[_qp] / _s;
-  return _grad_test[_i][_qp] * _n_hat *
-         ((2 * _u[_qp] - 1) * _phi[_j][_qp] + _epsilon * (_grad_phi[_j][_qp] * _n_hat));
+  ADReal s = _grad_levelset_0[_qp].norm() + std::numeric_limits<ADReal>::epsilon();
+  ADRealVectorValue n_hat = _grad_levelset_0[_qp] / s;
+  ADRealVectorValue f = _u[_qp] * (1 - _u[_qp]) * n_hat;
+  return (-f + _epsilon * (_grad_u[_qp] * n_hat) * n_hat);
 }

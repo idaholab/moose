@@ -11,19 +11,17 @@
 
 registerMooseObject("LevelSetApp", LevelSetTimeDerivativeSUPG);
 
-template <>
-InputParameters
-validParams<LevelSetTimeDerivativeSUPG>()
-{
-  InputParameters params = validParams<TimeDerivative>();
-  params.addClassDescription(
-      "SUPG stablization terms for the time derivative of the level set equation.");
-  params += validParams<LevelSetVelocityInterface<>>();
-  return params;
-}
+defineADValidParams(
+    LevelSetTimeDerivativeSUPG,
+    ADTimeKernelGrad,
+    params.addClassDescription(
+        "SUPG stablization terms for the time derivative of the level set equation.");
+    params += validParams<LevelSetVelocityInterface<>>(););
 
-LevelSetTimeDerivativeSUPG::LevelSetTimeDerivativeSUPG(const InputParameters & parameters)
-  : LevelSetVelocityInterface<TimeDerivative>(parameters)
+template <ComputeStage compute_stage>
+LevelSetTimeDerivativeSUPG<compute_stage>::LevelSetTimeDerivativeSUPG(
+    const InputParameters & parameters)
+  : LevelSetVelocityInterface<ADTimeKernelGrad<compute_stage>>(parameters)
 {
 }
 

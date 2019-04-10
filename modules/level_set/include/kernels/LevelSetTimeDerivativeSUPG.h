@@ -29,8 +29,11 @@ public:
   LevelSetTimeDerivativeSUPG(const InputParameters & parameters);
 
 protected:
-  Real computeQpResidual() override;
-  Real computeQpJacobian() override;
+  virtual ADVectorResidual precomputeQpResidual() override;
+
+  usingTimeKernelGradMembers;
+  using LevelSetVelocityInterface<ADTimeKernelGrad<compute_stage>>::computeQpVelocity;
+  using LevelSetVelocityInterface<ADTimeKernelGrad<compute_stage>>::_velocity;
 };
 
 #endif // LEVELSETTIMEDERIVATIVESUPG_H
