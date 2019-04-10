@@ -19,7 +19,7 @@
 defineADValidParams(ADTimeKernel, ADKernel, params.set<MultiMooseEnum>("vector_tags") = "time";
                     params.set<MultiMooseEnum>("matrix_tags") = "system time";);
 defineADValidParams(ADVectorTimeKernel,
-                    ADVectorKernelValue,
+                    ADVectorKernel,
                     params.set<MultiMooseEnum>("vector_tags") = "time";
                     params.set<MultiMooseEnum>("matrix_tags") = "system time";);
 
