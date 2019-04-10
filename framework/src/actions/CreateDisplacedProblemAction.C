@@ -137,7 +137,7 @@ CreateDisplacedProblemAction::act()
 
     if (_current_task == "add_algebraic_rm")
     {
-      auto & undisplaced_nl = _problem->getNonlinearSystem();
+      auto & undisplaced_nl = _problem->getNonlinearSystemBase();
       auto & undisplaced_aux = _problem->getAuxiliarySystem();
 
       auto displaced_problem_ptr = _problem->getDisplacedProblem();

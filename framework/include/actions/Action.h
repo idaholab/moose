@@ -45,6 +45,21 @@ public:
    */
   void timedAct();
 
+protected:
+  /**
+   * Method to add a relationship manager for the objects being added to the system. Relationship
+   * managers have to be added relatively early. In many cases before the Action::act() method
+   * is called.
+   * @param when_type The parameter indicating the normal time for adding either Geometric or
+   *        Algebraic RelationshipManagers. It may not always be possible to add your
+   *        RelationshipManager as early as you'd like. In these cases, your DistributedMesh may
+   *        consume more memory during the problem setup.
+   * @param moose_object_pars The MooseObject to inspect for RelationshipManagers to add
+   */
+  void addRelationshipManagers(Moose::RelationshipManagerType when_type,
+                               const InputParameters & moose_object_pars);
+
+public:
   /**
    * Method to add a relationship manager for the objects being added to the system. Relationship
    * managers have to be added relatively early. In many cases before the Action::act() method
@@ -109,8 +124,7 @@ public:
    * back to the normal behavior of mooseError - only printing a message using the given args.
    */
   template <typename... Args>
-  [[noreturn]] void paramError(const std::string & param, Args... args)
-  {
+  [[noreturn]] void paramError(const std::string & param, Args... args) {
     auto prefix = param + ": ";
     if (!_pars.inputLocation(param).empty())
       prefix = _pars.inputLocation(param) + ": (" + _pars.paramFullpath(param) + "):\n";

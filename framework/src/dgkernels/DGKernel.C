@@ -28,7 +28,6 @@ InputParameters
 validParams<DGKernel>()
 {
   InputParameters params = validParams<DGKernelBase>();
-  params.registerBase("DGKernel");
   return params;
 }
 

@@ -24,6 +24,7 @@ class MooseObjectAction : public Action
 public:
   MooseObjectAction(InputParameters params);
 
+  using Action::addRelationshipManagers;
   virtual void addRelationshipManagers(Moose::RelationshipManagerType when_type) override;
 
   /**
