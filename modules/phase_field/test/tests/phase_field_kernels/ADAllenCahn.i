@@ -1,5 +1,5 @@
 #
-# Test the parsed function free enery Allen-Cahn Bulk kernel
+# Test the forward automatic differentiation Allen-Cahn Bulk kernel
 #
 
 [Mesh]

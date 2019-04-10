@@ -43,6 +43,7 @@ public:
 protected:
   virtual ADReal precomputeQpResidual();
 
+  /// Compute the derivative of the bulk free energy w.r.t the order parameter
   virtual ADReal computeDFDOP() = 0;
 
   /// Mobility

@@ -5,20 +5,16 @@
 Implements the term
 
 \begin{equation}
-L(\eta,a,b,\dots)\frac{\delta F}{\delta\eta} = L(\eta,a,b,\dots)\frac{\partial f(\eta,a,b,\dots)}{\partial\eta}
+L\frac{\partial f_{bulk}}(\eta)}{\partial\eta},
 \end{equation}
 
-$F$ is the free energy functional of the system that is defined as $F=\int
-f(\eta) d\Omega$.
+where $\eta$ is the variable the kernel is acting on, $L$ (`mob_name`) its
+associated mobility, and $f_{bulk}$ (`f_name`) is the bulk free energy density
+of the system which is provided by a [function material](../../introduction/FunctionMaterials).
 
-$\eta$ is the variable the kernel is acting on, $L$ (`mob_name`) its associated
-mobility, $f$ (`f_name`) is a free energy density provided by a
-[function material](../../introduction/FunctionMaterials), and $a,b,\dots$ (`args`)
-are additional variable dependencies of the mobility and free energy density.
-
-Note that this makes the assumption that $F$ is *not* depending on $\nabla\eta$.
-The $\nabla \eta$ dependent terms that arise from the gradient interface energy
-are handled separately in the [`ADACInterface`](/ADACInterface.md) kernel.
+The $\nabla \eta$ dependent terms in the free energy functional of the system
+that arise from the gradient interface energy are handled separately in the
+[`ADACInterface`](/ADACInterface.md) kernel.
 
 !syntax parameters /Kernels/ADAllenCahn<RESIDUAL>
 
