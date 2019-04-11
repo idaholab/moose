@@ -90,6 +90,7 @@ def app_syntax(exe, remove=None, allow_test_objects=False, hide=None, alias=None
     # Remove <RESIDUAL>
     for node in anytree.PreOrderIter(root):
         if node.name.endswith('<RESIDUAL>'):
+            node.alias = node.fullpath
             node.name = node.name[:-10]
 
     return root
