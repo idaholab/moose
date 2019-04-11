@@ -1,24 +1,27 @@
 [GlobalParams]
-  displacements = 'disp_x disp_y'
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [Mesh]
   type = GeneratedMesh
-  dim = 2
-  nx = 4
-  ny = 8
+  dim = 3
+  nx = 2
+  ny = 4
+  nz = 2
   xmin = 0.0
   xmax = 1.0
   ymin = 0.0
   ymax = 2.0
-  elem_type = QUAD4
+  zmin = 0.0
+  zmax = 1.0
+  elem_type = HEX8
 []
 
 [MeshModifiers]
   [./rotate]
     type = Transform
     transform = ROTATE
-    vector_value = '0 0 -60'
+    vector_value = '0 -20 -60'
   [../]
 []
 
@@ -38,12 +41,17 @@
     [./right]
       boundary = right
       penalty = 1.0e8
-      displacements = 'disp_x disp_y'
+      displacements = 'disp_x disp_y disp_z'
     [../]
     [./bottom]
       boundary = bottom
       penalty = 1.0e8
-      displacements = 'disp_x disp_y'
+      displacements = 'disp_x disp_y disp_z'
+    [../]
+    [./back]
+      boundary = back
+      penalty = 1.0e8
+      displacements = 'disp_x disp_y disp_z'
     [../]
   [../]
 []
@@ -73,8 +81,8 @@
 
   # controls for nonlinear iterations
   nl_max_its = 100
-  nl_rel_tol = 1e-8
-  nl_abs_tol = 1e-8
+  nl_rel_tol = 1e-12
+  nl_abs_tol = 1e-12
 
   # time control
   start_time = 0.0
@@ -90,5 +98,6 @@
 []
 
 [Outputs]
+  file_base = 'inclined_bc_3d_out'
   exodus = true
 []

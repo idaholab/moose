@@ -7,17 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PenaltyInclinedBC.h"
+#include "PenaltyInclinedNoDisplacementBC.h"
 #include "Function.h"
 
-registerMooseObject("TensorMechanicsApp", PenaltyInclinedBC);
+registerMooseObject("TensorMechanicsApp", PenaltyInclinedNoDisplacementBC);
 
 template <>
 InputParameters
-validParams<PenaltyInclinedBC>()
+validParams<PenaltyInclinedNoDisplacementBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
-  params.addRequiredParam<Real>("penalty", "Penalty scalar");
+  params.addRequiredParam<Real>("penalty", "Penalty parameter");
   params.addRequiredParam<unsigned int>(
       "component", "An integer corresponding to the direction (0 for x, 1 for y, 2 for z)");
   params.addRequiredCoupledVar("displacements",
@@ -26,13 +26,13 @@ validParams<PenaltyInclinedBC>()
   return params;
 }
 
-PenaltyInclinedBC::PenaltyInclinedBC(const InputParameters & parameters)
+PenaltyInclinedNoDisplacementBC::PenaltyInclinedNoDisplacementBC(const InputParameters & parameters)
   : IntegratedBC(parameters),
     _component(getParam<unsigned int>("component")),
     _ndisp(coupledComponents("displacements")),
     _disp(3),
     _disp_var(_ndisp),
-    _p(getParam<Real>("penalty"))
+    _penalty(getParam<Real>("penalty"))
 {
   for (unsigned int i = 0; i < _ndisp; ++i)
   {
@@ -42,30 +42,30 @@ PenaltyInclinedBC::PenaltyInclinedBC(const InputParameters & parameters)
 }
 
 Real
-PenaltyInclinedBC::computeQpResidual()
+PenaltyInclinedNoDisplacementBC::computeQpResidual()
 {
   Real v = 0;
   for (unsigned int i = 0; i < _ndisp; ++i)
     v += (*_disp[i])[_qp] * _normals[_qp](i);
 
-  return _p * _test[_i][_qp] * v * _normals[_qp](_component);
+  return _penalty * _test[_i][_qp] * v * _normals[_qp](_component);
 }
 
 Real
-PenaltyInclinedBC::computeQpJacobian()
+PenaltyInclinedNoDisplacementBC::computeQpJacobian()
 {
-  return _p * _phi[_j][_qp] * _normals[_qp](_component) * _normals[_qp](_component) *
+  return _penalty * _phi[_j][_qp] * _normals[_qp](_component) * _normals[_qp](_component) *
          _test[_i][_qp];
 }
 
 Real
-PenaltyInclinedBC::computeQpOffDiagJacobian(unsigned int jvar)
+PenaltyInclinedNoDisplacementBC::computeQpOffDiagJacobian(unsigned int jvar)
 {
   for (unsigned int coupled_component = 0; coupled_component < _ndisp; ++coupled_component)
     if (jvar == _disp_var[coupled_component])
     {
-      return _p * _phi[_j][_qp] * _normals[_qp](coupled_component) * _normals[_qp](_component) *
-             _test[_i][_qp];
+      return _penalty * _phi[_j][_qp] * _normals[_qp](coupled_component) *
+             _normals[_qp](_component) * _test[_i][_qp];
     }
 
   return 0.0;
