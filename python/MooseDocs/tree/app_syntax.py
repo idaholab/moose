@@ -87,6 +87,11 @@ def app_syntax(exe, remove=None, allow_test_objects=False, hide=None, alias=None
                 if node.fullpath == k:
                     node.alias = unicode(v)
 
+    # Remove <RESIDUAL>
+    for node in anytree.PreOrderIter(root):
+        if node.name.endswith('<RESIDUAL>'):
+            node.name = node.name[:-10]
+
     return root
 
 def __add_moose_object_helper(name, parent, item):
