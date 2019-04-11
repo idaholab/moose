@@ -28,11 +28,8 @@ template <>
 InputParameters
 validParams<MultiAppMeshFunctionTransfer>()
 {
-  InputParameters params = validParams<MultiAppTransfer>();
-  params.addRequiredParam<std::vector<AuxVariableName>>(
-      "variable", "The auxiliary variable to store the transferred values in.");
-  params.addRequiredParam<std::vector<VariableName>>("source_variable",
-                                                     "The variable to transfer from.");
+  InputParameters params = validParams<MultiAppFieldTransferInterface>();
+
   params.addParam<bool>(
       "error_on_miss",
       false,
@@ -41,10 +38,7 @@ validParams<MultiAppMeshFunctionTransfer>()
 }
 
 MultiAppMeshFunctionTransfer::MultiAppMeshFunctionTransfer(const InputParameters & parameters)
-  : MultiAppTransfer(parameters),
-    _to_var_name(getParam<std::vector<AuxVariableName>>("variable")),
-    _from_var_name(getParam<std::vector<VariableName>>("source_variable")),
-    _error_on_miss(getParam<bool>("error_on_miss"))
+  : MultiAppFieldTransferInterface(parameters), _error_on_miss(getParam<bool>("error_on_miss"))
 {
   if (_to_var_name.size() == _from_var_name.size())
     _var_size = _to_var_name.size();
@@ -89,6 +83,8 @@ MultiAppMeshFunctionTransfer::execute()
     }
 
   _console << "Finished MeshFunctionTransfer " << name() << std::endl;
+
+  postExecute();
 }
 
 void

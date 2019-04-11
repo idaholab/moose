@@ -30,9 +30,6 @@ validParams<MultiAppNearestNodeTransfer>()
 {
   InputParameters params = validParams<MultiAppFieldTransferInterface>();
 
-  params.addRequiredParam<AuxVariableName>(
-      "variable", "The auxiliary variable to store the transferred values in.");
-  params.addRequiredParam<VariableName>("source_variable", "The variable to transfer from.");
   params.addParam<BoundaryName>(
       "source_boundary",
       "The boundary we are transferring from (if not specified, whole domain is used).");
@@ -68,9 +65,9 @@ void
 MultiAppNearestNodeTransfer::initialSetup()
 {
   if (_direction == TO_MULTIAPP)
-    variableIntegrityCheck(_to_var_name);
+    variableIntegrityCheck(_to_var_name[0]);
   else
-    variableIntegrityCheck(_from_var_name);
+    variableIntegrityCheck(_from_var_name[0]);
 }
 
 void
@@ -115,9 +112,9 @@ MultiAppNearestNodeTransfer::execute()
   {
     for (unsigned int i_to = 0; i_to < _to_problems.size(); i_to++)
     {
-      System * to_sys = find_sys(*_to_es[i_to], _to_var_name);
+      System * to_sys = find_sys(*_to_es[i_to], _to_var_name[0]);
       unsigned int sys_num = to_sys->number();
-      unsigned int var_num = to_sys->variable_number(_to_var_name);
+      unsigned int var_num = to_sys->variable_number(_to_var_name[0]);
       MeshBase * to_mesh = &_to_meshes[i_to]->getMesh();
       bool is_to_nodal = to_sys->variable_type(var_num).family == LAGRANGE;
 
@@ -298,8 +295,11 @@ MultiAppNearestNodeTransfer::execute()
 
     for (unsigned int i = 0; i < froms_per_proc[processor_id()]; i++)
     {
-      MooseVariableFEBase & from_var = _from_problems[i]->getVariable(
-          0, _from_var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
+      MooseVariableFEBase & from_var =
+          _from_problems[i]->getVariable(0,
+                                         _from_var_name[0],
+                                         Moose::VarKindType::VAR_ANY,
+                                         Moose::VarFieldType::VAR_FIELD_STANDARD);
       bool is_to_nodal = from_var.feType().family == LAGRANGE;
 
       _from_vars.emplace_back(from_var);
@@ -409,7 +409,7 @@ MultiAppNearestNodeTransfer::execute()
       {
         MooseVariableFEBase & from_var = _from_problems[_cached_froms[i_proc][qp]]->getVariable(
             0,
-            _from_var_name,
+            _from_var_name[0],
             Moose::VarKindType::VAR_ANY,
             Moose::VarFieldType::VAR_FIELD_STANDARD);
         System & from_sys = from_var.sys().system();
@@ -441,16 +441,16 @@ MultiAppNearestNodeTransfer::execute()
   for (unsigned int i_to = 0; i_to < _to_problems.size(); i_to++)
   {
     // Loop over the master nodes and set the value of the variable
-    System * to_sys = find_sys(*_to_es[i_to], _to_var_name);
+    System * to_sys = find_sys(*_to_es[i_to], _to_var_name[0]);
 
     unsigned int sys_num = to_sys->number();
-    unsigned int var_num = to_sys->variable_number(_to_var_name);
+    unsigned int var_num = to_sys->variable_number(_to_var_name[0]);
 
     NumericVector<Real> * solution = nullptr;
     switch (_direction)
     {
       case TO_MULTIAPP:
-        solution = &getTransferVector(i_to, _to_var_name);
+        solution = &getTransferVector(i_to, _to_var_name[0]);
         break;
       case FROM_MULTIAPP:
         solution = to_sys->solution.get();

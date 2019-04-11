@@ -34,18 +34,21 @@ public:
   virtual void postExecute();
 
 protected:
-  VariableName _from_var_name;
-  AuxVariableName _to_var_name;
+  std::vector<VariableName> _from_var_name;
+  std::vector<AuxVariableName> _to_var_name;
 
   // If this transfer is going to conserve the physics
   bool _preserve_transfer;
   // Postprocessor evaluates an adjuster for the source physics
-  PostprocessorName _from_postprocessor_to_be_preserved;
+  std::vector<PostprocessorName> _from_postprocessor_to_be_preserved;
   // Postprocessor evaluates an adjuster for the target physics
-  PostprocessorName _to_postprocessor_to_be_preserved;
+  std::vector<PostprocessorName> _to_postprocessor_to_be_preserved;
 
 private:
-  void adjustTransferedSolution(FEProblemBase & from_problem, FEProblemBase & to_problem);
+  void adjustTransferedSolution(FEProblemBase & from_problem,
+                                PostprocessorName & from_postprocessor,
+                                FEProblemBase & to_problem,
+                                PostprocessorName & to_postprocessor);
 };
 
 #endif // MULTIAPPFIELDTRANSFERINTERFACE_H

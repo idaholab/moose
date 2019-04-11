@@ -98,7 +98,7 @@
 [MultiApps]
   [sub]
     type = FullSolveMultiApp
-    input_files = sub.i
+    input_files = sub_power_density.i
     positions = '0 0 0 0.5 0 0'
     execute_on = timestep_end
   []
@@ -112,12 +112,13 @@
     variable = from_master
     multi_app = sub
     execute_on = timestep_end
+    preserve_transfer = true
 
     # The following inputs specify what postprocessors should be conserved
     # N pps are specified on the master side, where N is the number of subapps
     # 1 pp is specified on the subapp side
-    pps_to_be_preserved_on_master_side = 'pwr0 pwr1'
-    pp_to_be_preserved_on_subapp_side = 'from_master_pp'
+    from_postprocessor_to_be_preserved = 'pwr0 pwr1'
+    to_postprocessor_to_be_preserved = 'from_master_pp'
   []
 
   [from_sub]
@@ -127,12 +128,13 @@
     variable = from_sub
     multi_app = sub
     execute_on = timestep_end
+    preserve_transfer = true
 
     # The following inputs specify what postprocessors should be conserved
     # N pps are specified on the master side, where N is the number of subapps
     # 1 pp is specified on the subapp side
-    pps_to_be_preserved_on_master_side = 'from_sub0 from_sub1'
-    pps_to_be_preserved_on_subapp_side = 'sink'
+    to_postprocessor_to_be_preserved = 'from_sub0 from_sub1'
+    from_postprocessor_to_be_preserved = 'sink'
   []
 []
 
