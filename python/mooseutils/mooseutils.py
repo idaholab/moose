@@ -132,9 +132,36 @@ def find_moose_executable(loc, **kwargs):
         print('ERROR: Unable to locate a valid MOOSE executable in directory:', loc)
     return exe
 
-def runExe(app_path, args):
+def find_moose_executable_recursive(loc, **kwargs):
+    """
+    Locate a moose executable in the current directory or any parent directory.
+
+    Inputs: see 'find_moose_executable'
+    """
+    loc = loc.split(os.path.sep)
+    for i in xrange(len(loc), 0, -1):
+        current = os.path.sep + os.path.join(*loc[0:i])
+        executable = find_moose_executable(current, show_error=False)
+        if executable is not None:
+            break
+    return executable
+
+def run_executable(app_path, args, suppress_output=False):
     """
     A function for running an application.
+    """
+    import subprocess
+    cmd = [app_path]
+    cmd += args
+
+    if suppress_output:
+        return subprocess.check_output(cmd)
+    else:
+        return subprocess.call(cmd)
+
+def runExe(app_path, args):
+    """
+    A function for running an application (w/o output).
 
     Args:
         app_path[str]: The application to execute.
