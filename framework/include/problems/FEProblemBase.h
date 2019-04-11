@@ -563,6 +563,12 @@ public:
   NonlinearSystemBase & getNonlinearSystemBase() { return *_nl; }
   const NonlinearSystemBase & getNonlinearSystemBase() const { return *_nl; }
 
+  virtual const SystemBase & systemBaseNonlinear() const override;
+  virtual SystemBase & systemBaseNonlinear() override;
+
+  virtual const SystemBase & systemBaseAuxiliary() const override;
+  virtual SystemBase & systemBaseAuxiliary() override;
+
   virtual NonlinearSystem & getNonlinearSystem();
 
   virtual void addVariable(const std::string & var_name,

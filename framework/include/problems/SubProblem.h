@@ -260,6 +260,18 @@ public:
   virtual void clearActiveMaterialProperties(THREAD_ID tid);
 
   virtual Assembly & assembly(THREAD_ID tid) = 0;
+
+  /**
+   * Return the nonlinear system object as a base class reference
+   */
+  virtual const SystemBase & systemBaseNonlinear() const = 0;
+  virtual SystemBase & systemBaseNonlinear() = 0;
+  /**
+   * Return the auxiliary system object as a base class reference
+   */
+  virtual const SystemBase & systemBaseAuxiliary() const = 0;
+  virtual SystemBase & systemBaseAuxiliary() = 0;
+
   virtual void prepareShapes(unsigned int var, THREAD_ID tid) = 0;
   virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid) = 0;
   virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid) = 0;
@@ -338,6 +350,33 @@ public:
                                   THREAD_ID tid) = 0;
   virtual void reinitScalars(THREAD_ID tid) = 0;
   virtual void reinitOffDiagScalars(THREAD_ID tid) = 0;
+
+  /**
+   * reinitialize FE objects on a given element on a given side at a given set of reference
+   * points and then compute variable data. Note that this method makes no assumptions about what's
+   * been called beforehand, e.g. you don't have to call some prepare method before this one (these
+   * multiple "prepares" and "reinits" that have to be called in conjunction really obfuscate our
+   * assembly process. It's honestly terrible). This is an all-in-one reinit
+   */
+  void reinitElemFaceRef(const Elem * elem,
+                         unsigned int side,
+                         Real tolerance,
+                         const std::vector<Point> * const pts,
+                         const std::vector<Real> * const weights = nullptr,
+                         THREAD_ID tid = 0);
+
+  /**
+   * reinitialize FE objects on a given neighbor element on a given side at a given set of reference
+   * points and then compute variable data. Note that this method makes no assumptions about what's
+   * been called beforehand, e.g. you don't have to call some prepare method before this one. This
+   * is an all-in-one reinit
+   */
+  void reinitNeighborFaceRef(const Elem * neighbor_elem,
+                             unsigned int neighbor_side,
+                             Real tolerance,
+                             const std::vector<Point> * const pts,
+                             const std::vector<Real> * const weights = nullptr,
+                             THREAD_ID tid = 0);
 
   /**
    * Returns true if the Problem has Dirac kernels it needs to compute on elem.

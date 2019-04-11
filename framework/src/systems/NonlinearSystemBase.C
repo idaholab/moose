@@ -3042,7 +3042,14 @@ void
 NonlinearSystemBase::mortarConstraints(ComputeStage compute_stage, bool displaced)
 {
   // go over mortar constraints
-  const auto & mortar_interfaces = _fe_problem.getMortarInterfaces();
+  const auto & mortar_interfaces = _fe_problem.getMortarInterfaces(displaced);
+
+  SubProblem * subproblem;
+  if (displaced)
+    subproblem = _fe_problem.getDisplacedProblem();
+  else
+    subproblem = &_fe_problem;
+
   for (const auto & mortar_interface : mortar_interfaces)
   {
     const auto & master_slave_boundary = mortar_interface.first;
@@ -3053,14 +3060,14 @@ NonlinearSystemBase::mortarConstraints(ComputeStage compute_stage, bool displace
 
     if (compute_stage == ComputeStage::RESIDUAL)
     {
-      ComputeMortarFunctor<ComputeStage::RESIDUAL> cmf(mortar_constraints,
-                                                       mortar_generation_object);
+      ComputeMortarFunctor<ComputeStage::RESIDUAL> cmf(
+          mortar_constraints, mortar_generation_object, *subproblem);
       cmf();
     }
     else if (compute_stage == ComputeStage::JACOBIAN)
     {
-      ComputeMortarFunctor<ComputeStage::JACOBIAN> cmf(mortar_constraints,
-                                                       mortar_generation_object);
+      ComputeMortarFunctor<ComputeStage::JACOBIAN> cmf(
+          mortar_constraints, mortar_generation_object, *subproblem);
       cmf();
     }
   }

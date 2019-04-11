@@ -438,7 +438,7 @@ Assembly::createQRules(QuadratureType type, Order order, Order volume_order, Ord
 
   _holder_qrule_arbitrary_face.clear();
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
-    _holder_qrule_arbitrary_face[dim] = new ArbitraryQuadrature(dim - 1, face_order);
+    _holder_qrule_arbitrary_face[dim] = new ArbitraryQuadrature(dim, order);
 }
 
 void
@@ -1700,6 +1700,140 @@ Assembly::reinitElemAndNeighbor(const Elem * elem,
 
   reinitFEFaceNeighbor(neighbor, reference_points);
   reinitNeighbor(neighbor, reference_points);
+}
+
+void
+Assembly::reinitElemFaceRef(const Elem * elem,
+                            unsigned int elem_side,
+                            Real tolerance,
+                            const std::vector<Point> * const pts,
+                            const std::vector<Real> * const weights)
+{
+  _current_elem = elem;
+
+  unsigned int elem_dim = elem->dim();
+
+  // Attach the quadrature rules
+  if (pts)
+  {
+    ArbitraryQuadrature * face_rule = _holder_qrule_arbitrary_face[elem_dim];
+    face_rule->setPoints(*pts);
+    setFaceQRule(face_rule, elem_dim);
+  }
+  else
+  {
+    if (_current_qrule_face != _holder_qrule_face[elem_dim])
+    {
+      _current_qrule_face = _holder_qrule_face[elem_dim];
+      setFaceQRule(_current_qrule_face, elem_dim);
+    }
+  }
+
+  // reinit face
+  for (const auto & it : _fe_face[elem_dim])
+  {
+    FEBase * fe_face = it.second;
+    FEType fe_type = it.first;
+    FEShapeData * fesd = _fe_shape_data_face[fe_type];
+
+    fe_face->reinit(elem, elem_side, tolerance, pts, weights);
+
+    _current_fe_face[fe_type] = fe_face;
+
+    fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real>> &>(fe_face->get_phi()));
+    fesd->_grad_phi.shallowCopy(
+        const_cast<std::vector<std::vector<RealGradient>> &>(fe_face->get_dphi()));
+    if (_need_second_derivative_neighbor.find(fe_type) != _need_second_derivative_neighbor.end())
+      fesd->_second_phi.shallowCopy(
+          const_cast<std::vector<std::vector<TensorValue<Real>>> &>(fe_face->get_d2phi()));
+  }
+  for (const auto & it : _vector_fe_face[elem_dim])
+  {
+    FEVectorBase * fe_face = it.second;
+    const FEType & fe_type = it.first;
+
+    _current_vector_fe_face[fe_type] = fe_face;
+
+    VectorFEShapeData * fesd = _vector_fe_shape_data_face[fe_type];
+
+    fe_face->reinit(elem, elem_side, tolerance, pts, weights);
+
+    fesd->_phi.shallowCopy(
+        const_cast<std::vector<std::vector<VectorValue<Real>>> &>(fe_face->get_phi()));
+    fesd->_grad_phi.shallowCopy(
+        const_cast<std::vector<std::vector<TensorValue<Real>>> &>(fe_face->get_dphi()));
+    if (_need_second_derivative.find(fe_type) != _need_second_derivative.end())
+      fesd->_second_phi.shallowCopy(
+          const_cast<std::vector<std::vector<TypeNTensor<3, Real>>> &>(fe_face->get_d2phi()));
+    if (_need_curl.find(fe_type) != _need_curl.end())
+      fesd->_curl_phi.shallowCopy(
+          const_cast<std::vector<std::vector<VectorValue<Real>>> &>(fe_face->get_curl_phi()));
+  }
+}
+
+void
+Assembly::reinitNeighborFaceRef(const Elem * neighbor,
+                                unsigned int neighbor_side,
+                                Real tolerance,
+                                const std::vector<Point> * const pts,
+                                const std::vector<Real> * const weights)
+{
+  _current_neighbor_elem = neighbor;
+
+  unsigned int neighbor_dim = neighbor->dim();
+
+  // _holder_qrule_neighbor really does contain pointers to ArbitraryQuadrature
+  ArbitraryQuadrature * neighbor_rule = _holder_qrule_neighbor[neighbor_dim];
+  neighbor_rule->setPoints(*pts);
+
+  // Attach this quadrature rule to all the _fe_face_neighbor FE objects. This
+  // has to have garbage quadrature weights but that's ok because we never
+  // actually use the JxW coming from these FE reinit'd objects, e.g. we use the
+  // JxW coming from the element face reinit for DGKernels or we use the JxW
+  // coming from reinit of the mortar segment element in the case of mortar
+  setNeighborQRule(neighbor_rule, neighbor_dim);
+
+  // reinit neighbor face
+  for (const auto & it : _fe_face_neighbor[neighbor_dim])
+  {
+    FEBase * fe_face_neighbor = it.second;
+    FEType fe_type = it.first;
+    FEShapeData * fesd = _fe_shape_data_face_neighbor[fe_type];
+
+    fe_face_neighbor->reinit(neighbor, neighbor_side, tolerance, pts, weights);
+
+    _current_fe_face_neighbor[fe_type] = fe_face_neighbor;
+
+    fesd->_phi.shallowCopy(
+        const_cast<std::vector<std::vector<Real>> &>(fe_face_neighbor->get_phi()));
+    fesd->_grad_phi.shallowCopy(
+        const_cast<std::vector<std::vector<RealGradient>> &>(fe_face_neighbor->get_dphi()));
+    if (_need_second_derivative_neighbor.find(fe_type) != _need_second_derivative_neighbor.end())
+      fesd->_second_phi.shallowCopy(
+          const_cast<std::vector<std::vector<TensorValue<Real>>> &>(fe_face_neighbor->get_d2phi()));
+  }
+  for (const auto & it : _vector_fe_face_neighbor[neighbor_dim])
+  {
+    FEVectorBase * fe_face_neighbor = it.second;
+    const FEType & fe_type = it.first;
+
+    _current_vector_fe_face_neighbor[fe_type] = fe_face_neighbor;
+
+    VectorFEShapeData * fesd = _vector_fe_shape_data_face_neighbor[fe_type];
+
+    fe_face_neighbor->reinit(neighbor, neighbor_side, tolerance, pts, weights);
+
+    fesd->_phi.shallowCopy(
+        const_cast<std::vector<std::vector<VectorValue<Real>>> &>(fe_face_neighbor->get_phi()));
+    fesd->_grad_phi.shallowCopy(
+        const_cast<std::vector<std::vector<TensorValue<Real>>> &>(fe_face_neighbor->get_dphi()));
+    if (_need_second_derivative.find(fe_type) != _need_second_derivative.end())
+      fesd->_second_phi.shallowCopy(const_cast<std::vector<std::vector<TypeNTensor<3, Real>>> &>(
+          fe_face_neighbor->get_d2phi()));
+    if (_need_curl.find(fe_type) != _need_curl.end())
+      fesd->_curl_phi.shallowCopy(const_cast<std::vector<std::vector<VectorValue<Real>>> &>(
+          fe_face_neighbor->get_curl_phi()));
+  }
 }
 
 void

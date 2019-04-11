@@ -56,8 +56,8 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object,
     bool displaced = nfc->parameters().have_parameter<bool>("use_displaced_mesh") &&
                      nfc->getParam<bool>("use_displaced_mesh");
 
-    auto slave_boundary_id = mc->getParam<BoundaryName>("slave_boundary_id");
-    auto master_boundary_id = mc->getParam<BoundaryName>("master_boundary_id");
+    auto slave_boundary_id = mc->getParam<BoundaryID>("slave_boundary_id");
+    auto master_boundary_id = mc->getParam<BoundaryID>("master_boundary_id");
     auto key = std::make_pair(master_boundary_id, slave_boundary_id);
 
     if (displaced)
@@ -136,9 +136,9 @@ ConstraintWarehouse::getActiveMortarConstraints(
     const std::pair<BoundaryID, BoundaryID> & mortar_interface_key, bool displaced) const
 {
   if (displaced)
-    return _displaced_mortar_constraints[key].getActiveObjects();
+    return _displaced_mortar_constraints[mortar_interface_key].getActiveObjects();
   else
-    return _mortar_constraints[key].getActiveObjects();
+    return _mortar_constraints[mortar_interface_key].getActiveObjects();
 }
 
 const std::vector<std::shared_ptr<ElemElemConstraint>> &

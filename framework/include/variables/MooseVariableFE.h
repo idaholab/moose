@@ -210,10 +210,6 @@ public:
    * Local solution getter
    */
   const FieldVariableValue & sln() { return _u; }
-  /**
-   * Local solution setter
-   */
-  void sln(const FieldVariableValue & u) { _u = u; }
 
   const FieldVariableValue & slnOld()
   {
@@ -235,11 +231,6 @@ public:
    * Local solution gradient getter
    */
   const FieldVariableGradient & gradSln() { return _grad_u; }
-
-  /**
-   * Local solution gradient setter
-   */
-  void gradSln(const FieldVariableGradient & grad_u) { _grad_u = u; }
 
   const FieldVariableGradient & gradSlnOld()
   {

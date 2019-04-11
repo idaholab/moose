@@ -8,26 +8,29 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ComputeMortarFunctor.h"
-#include "DisplacedProblem.h"
-#include "FEProblem.h"
+#include "SubProblem.h"
+#include "Assembly.h"
+#include "MortarConstraint.h"
+#include "AutomaticMortarGeneration.h"
+#include "MooseMesh.h"
 #include "Assembly.h"
 
 #include "libmesh/fe_base.h"
+#include "libmesh/quadrature.h"
+#include "libmesh/elem.h"
+#include "libmesh/point.h"
+#include "libmesh/mesh_base.h"
 
 template <ComputeStage compute_stage>
 ComputeMortarFunctor<compute_stage>::ComputeMortarFunctor(
     std::vector<std::shared_ptr<MortarConstraintBase>> & mortar_constraints,
     const AutomaticMortarGeneration & amg,
-    FEProblemBase & fe_problem,
-    bool on_displaced)
+    SubProblem & subproblem)
   : _amg(amg),
-    _fe_problem(fe_problem),
-    _on_displaced(on_displaced),
-    _assembly(_on_displaced ? _fe_problem.getDisplacedProblem()->assembly(0)
-                            : _fe_problem.assembly(0)),
-    _moose_parent_mesh(_on_displaced ? _fe_problem.getDisplacedProblem()->mesh()
-                                     : _fe_problem.mesh()),
-    _interior_dimension(_fe_problem.mesh().getMesh().mesh_dimension()),
+    _subproblem(subproblem),
+    _assembly(_subproblem.assembly(0)),
+    _moose_parent_mesh(_subproblem.mesh()),
+    _interior_dimension(_moose_parent_mesh.getMesh().mesh_dimension()),
     _msm_dimension(_interior_dimension - 1),
     _qrule_msm(_assembly.qRuleFace())
 {
@@ -45,7 +48,7 @@ ComputeMortarFunctor<compute_stage>::ComputeMortarFunctor(
 
   // Create the FE object that we will use for JxW
   {
-    Order order_for_jxw_fe = _mesh.hasSecondOrderElements() ? SECOND : FIRST;
+    Order order_for_jxw_fe = _moose_parent_mesh.hasSecondOrderElements() ? SECOND : FIRST;
     _fe_for_jxw(FEBase::build(_msm_dimension, FEType(order_for_jxw_fe, LAGRANGE)));
 
     _fe_for_jxw->attach_quadrature_rule(_qrule_msm);
@@ -53,30 +56,13 @@ ComputeMortarFunctor<compute_stage>::ComputeMortarFunctor(
     _JxW_msm = &_fe_for_jxw->get_JxW();
   }
 
-  // Initialize the variable solution and gradient data structures
-  for (auto mc : _mortar_constraints)
-  {
-    _variables_needed_for_values.insert(mc.neededVariablesForValues().begin(),
-                                        mc.neededVariablesForValues().end());
-    _variables_needed_for_gradients.insert(mc.neededVariablesForGradients().begin(),
-                                           mc.neededVariablesForGradients().end());
-  }
-
-  // Now determine and create the FE types we will need to reinit
+  _slave_boundary_id = _amg.master_slave_boundary_id_pairs[0].second;
 }
 
+template <ComputeStage compute_stage>
 void
-ComputeMortarFunctor::operator()()
+ComputeMortarFunctor<compute_stage>::operator()()
 {
-  _lambda.resize(_qrule_msm.n_points());
-  _u_slave.resize(_qrule_msm.n_points());
-  _u_master.resize(_qrule_msm.n_points());
-  if (_need_primal_gradient)
-  {
-    _grad_u_slave.resize(_qrule_msm.n_points());
-    _grad_u_master.resize(_qrule_msm.n_points());
-  }
-
   // Array to hold custom quadrature point locations on the slave and master sides
   std::vector<Point> custom_xi1_pts, custom_xi2_pts;
 
@@ -135,19 +121,34 @@ ComputeMortarFunctor::operator()()
     // Re-compute FE data on the mortar segment Elem (JxW_msm is the only thing we actually use.)
     _fe_for_jxw->reinit(msm_elem);
 
-    // Compute custom integration points for the slave side
-    custom_xi1_pts.resize(_qrule_msm->n_points());
-
-    for (unsigned int qp = 0; qp < _qrule_msm->n_points(); qp++)
+    // Reinit the lower dimensional element and the face of the interior parent on the slave side
     {
-      Real eta = _qrule_msm->qp(qp)(0);
-      Real xi1_eta = 0.5 * (1 - eta) * msinfo.xi1_a + 0.5 * (1 + eta) * msinfo.xi1_b;
-      custom_xi1_pts[qp] = xi1_eta;
+      // Compute custom integration points for the slave side
+      custom_xi1_pts.resize(_qrule_msm->n_points());
+
+      for (unsigned int qp = 0; qp < _qrule_msm->n_points(); qp++)
+      {
+        Real eta = _qrule_msm->qp(qp)(0);
+        Real xi1_eta = 0.5 * (1 - eta) * msinfo.xi1_a + 0.5 * (1 + eta) * msinfo.xi1_b;
+        custom_xi1_pts[qp] = xi1_eta;
+      }
+
+      // Ok we want to get all our variables calculated for use in our residuals and Jacobians!
+
+      // When you don't provide a weights array, the FE object uses
+      // a dummy rule with all 1's. You should probably never use
+      // the resulting JxW values for anything important.
+      _fe_msm_lambda->reinit(slave_face_elem, &custom_xi1_pts);
+
+      // reinit the variables/residuals/jacobians on the slave interior
+      _subproblem.reinitElemFaceRef(
+          slave_ip, slave_side_id, _slave_boundary_id, tolerance, &custom_xi1_pts);
     }
 
-    // Compute custom integration points for the master side
+    // Reinit the face of the interior parent on the master side
     if (_has_master)
     {
+      //  Compute custom integration points for the master side
       custom_xi2_pts.resize(_qrule_msm->n_points());
       for (unsigned int qp = 0; qp < _qrule_msm->n_points(); qp++)
       {
@@ -156,22 +157,9 @@ ComputeMortarFunctor::operator()()
         custom_xi2_pts[qp] = xi2_eta;
       }
 
-      // Reinit the master interior FE on the side in question at the custom qps.
-      _fe_master_interior_primal->reinit(master_ip, master_side_id, TOLERANCE, &custom_xi2_pts);
+      // reinit the variables/residuals/jacobians on the master interior
+      _subproblem.reinitNeighborFaceRef(master_ip, master_side_id, TOLERANCE, &custom_xi2_pts);
     }
-
-    for (unsigned int qp = 0; qp < _qrule_msm->n_points(); qp++)
-    {
-      _lambda[qp] = 0;
-      _u_slave[qp] = 0;
-      _u_master[qp] = 0;
-      if (_need_primal_gradient)
-      {
-        _grad_u_slave[qp] = 0;
-        _grad_u_master[qp] = 0;
-      }
-    }
-    computeSolutions();
 
     if (compute_stage == ComputeStage::RESIDUAL)
       computeElementResidual();

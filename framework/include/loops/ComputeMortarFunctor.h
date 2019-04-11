@@ -10,12 +10,29 @@
 #ifndef COMPUTEMORTARFUNCTOR_H
 #define COMPUTEMORTARFUNCTOR_H
 
+#include "libmesh/libmesh_common.h"
+
+class MortarConstraint;
+class SubProblem;
+class AutomaticMortarGeneration;
+class Assembly;
+class MooseMesh;
+
+namespace libMesh
+{
+class QBase;
+template <typename>
+class FEGenericBase;
+typedef FEGenericBase<Real> FEBase;
+}
+
 template <ComputeStage compute_stage>
 class ComputeMortarFunctor
 {
 public:
   ComputeMortarFunctor(std::vector<std::shared_ptr<MortarConstraintBase>> & mortar_constraints,
-                       const AutomaticMortarGeneration & amg);
+                       const AutomaticMortarGeneration & amg,
+                       SubProblem & subproblem);
 
   /**
    * Loops over the mortar segment mesh and computes the residual/Jacobian
@@ -29,11 +46,8 @@ private:
   /// Automatic mortar generation (amg) object providing the mortar mesh to loop over
   const AutomaticMortarGeneration & _amg;
 
-  /// A reference to the FEProblemBase object because who knows when you're going to need it
-  FEProblemBase & _fe_problem;
-
-  /// whether this functor is on the displaced mesh
-  const bool _on_displaced;
+  /// A reference to the SubProblem object for reiniting
+  SubProblem & _subproblem;
 
   /// The assembly object that these constraints will contribute to
   Assembly & _assembly;
@@ -48,19 +62,16 @@ private:
   const unsigned _msm_dimension;
 
   /// The mortar segment quadrature rule
-  QBase *& _qrule_msm;
+  libMesh::QBase *& _qrule_msm;
 
   /// The FE object used for generating JxW
-  std::unique_ptr<FEBase> _fe_for_jxw;
+  std::unique_ptr<libMesh::FEBase> _fe_for_jxw;
 
   /// Pointer to the mortar segment JxW
-  const std::vector<Real> * _JxW_msm;
+  const std::vector<libMesh::Real> * _JxW_msm;
 
-  /// Container of variables for which values need to be computed
-  std::set<MooseVariable *> _variables_needed_for_values;
-
-  /// Container of variables for which gradients need to be computed
-  std::set<MooseVariable *> _variables_needed_for_gradients;
+  /// The slave boundary id needed for reiniting the MOOSE systems on the element face
+  BoundaryID _slave_boundary_id;
 };
 
 #endif // COMPUTEMORTARFUNCTOR_H

@@ -34,32 +34,6 @@ public:
 
   MooseVariable * variable() override { return _var; }
 
-  virtual const VariableValue & value() override;
-
-  virtual const VariableGradient & gradient() override;
-
-  virtual const VariableValue & coupledValue(const std::string & var_name,
-                                             unsigned int comp) override;
-
-  virtual const VariableGradient & coupledGradient(const std::string & var_name,
-                                                   unsigned int comp) override;
-
-  /**
-   * Returns variables needed for values
-   */
-  virtual set::set<MooseVariable *> & neededVariablesForValues()
-  {
-    return _variables_for_which_values_requested;
-  }
-
-  /**
-   * Returns variables needed for gradients
-   */
-  virtual set::set<MooseVariable *> & neededVariablesForGradients()
-  {
-    return _variables_for_which_gradients_requested;
-  }
-
 protected:
   /**
    * compute the Lagrange Multipler equation at the quadrature points
@@ -237,13 +211,6 @@ private:
    * compute the variable solutions on the current element
    */
   void computeSolutions();
-
-private:
-  /// A set of variables for which solution values have been requested
-  std::set<MooseVariable *> _variables_for_which_values_requested;
-
-  /// A set of variables for which solution gradients have been requested
-  std::set<MooseVariable *> _variables_for_which_gradients_requested;
 
 protected:
   usingCoupleableMembers;

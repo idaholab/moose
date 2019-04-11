@@ -455,6 +455,26 @@ public:
   void reinit(const Elem * elem);
 
   /**
+   * Reinitialize FE data for the given element on the given side, optionally
+   * with a given set of reference points
+   */
+  void reinitElemFaceRef(const Elem * elem,
+                         unsigned int elem_side,
+                         Real tolerance,
+                         const std::vector<Point> * const pts = nullptr,
+                         const std::vector<Real> * const weights = nullptr);
+
+  /**
+   * Reinitialize FE data for the given neighbor_element on the given side with a given set of
+   * reference points
+   */
+  void reinitNeighborFaceRef(const Elem * neighbor_elem,
+                             unsigned int neighbor_side,
+                             Real tolerance,
+                             const std::vector<Point> * const pts,
+                             const std::vector<Real> * const weights = nullptr);
+
+  /**
    * Reinitialize the assembly data at specific physical point in the given element.
    */
   void reinitAtPhysical(const Elem * elem, const std::vector<Point> & physical_points);

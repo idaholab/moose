@@ -750,26 +750,6 @@ protected:
   /// Constraints storage object
   ConstraintWarehouse _constraints;
 
-  /// Map of undisplaced mortar interfaces to their residual computing functors
-  std::unordered_map<std::pair<BoundaryID, BoundaryID>,
-                     ComputeMortarFunctor<ComputeStage::RESIDUAL>>
-      _undisplaced_mortar_residual_functors;
-
-  /// Map of undisplaced mortar interfaces to their Jacobian computing functors
-  std::unordered_map<std::pair<BoundaryID, BoundaryID>,
-                     ComputeMortarFunctor<ComputeStage::JACOBIAN>>
-      _undisplaced_mortar_jacobian_functors;
-
-  /// Map of displaced mortar interfaces to their residual computing functors
-  std::unordered_map<std::pair<BoundaryID, BoundaryID>,
-                     ComputeMortarFunctor<ComputeStage::RESIDUAL>>
-      _displaced_mortar_residual_functors;
-
-  /// Map of displaced mortar interfaces to their Jacobian computing functors
-  std::unordered_map<std::pair<BoundaryID, BoundaryID>,
-                     ComputeMortarFunctor<ComputeStage::JACOBIAN>>
-      _displaced_mortar_jacobian_functors;
-
   /// increment vector
   NumericVector<Number> * _increment_vec;
   /// Preconditioner

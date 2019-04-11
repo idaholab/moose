@@ -88,11 +88,11 @@ protected:
   std::map<BoundaryID, MooseObjectWarehouse<NodeFaceConstraint>> _displaced_node_face_constraints;
 
   /// Undisplaced MortarConstraints
-  std::unordered_map<std::pair<BoundaryID, BoundaryID>, MooseObjectWarehouse<MortarConstraintBase>>
+  std::map<std::pair<BoundaryID, BoundaryID>, MooseObjectWarehouse<MortarConstraintBase>>
       _mortar_constraints;
 
   /// Displaced MortarConstraints
-  std::unordered_map<std::pair<BoundaryID, BoundaryID>, MooseObjectWarehouse<MortarConstraintBase>>
+  std::map<std::pair<BoundaryID, BoundaryID>, MooseObjectWarehouse<MortarConstraintBase>>
       _displaced_mortar_constraints;
 
   /// ElemElemConstraints (non-displaced)

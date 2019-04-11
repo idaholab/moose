@@ -5925,3 +5925,27 @@ FEProblemBase::haveADObjects(bool have_ad_objects)
   if (_displaced_problem)
     _displaced_problem->haveADObjects(have_ad_objects);
 }
+
+const SystemBase &
+FEProblemBase::systemBaseNonlinear() const
+{
+  return *_nl;
+}
+
+SystemBase &
+FEProblemBase::systemBaseNonlinear()
+{
+  return *_nl;
+}
+
+const SystemBase &
+FEProblemBase::systemBaseAuxiliary() const
+{
+  return *_aux;
+}
+
+SystemBase &
+FEProblemBase::systemBaseAuxiliary()
+{
+  return *_aux;
+}

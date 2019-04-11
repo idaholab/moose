@@ -47,6 +47,12 @@ public:
   DisplacedSystem & nlSys() { return _displaced_nl; }
   DisplacedSystem & auxSys() { return _displaced_aux; }
 
+  virtual const SystemBase & systemBaseNonlinear() const override { return _displaced_nl; }
+  virtual SystemBase & systemBaseNonlinear() override { return _displaced_nl; }
+
+  virtual const SystemBase & systemBaseAuxiliary() const override { return _displaced_aux; }
+  virtual SystemBase & systemBaseAuxiliary() override { return _displaced_aux; }
+
   // Return a constant reference to the vector of variable names.
   const std::vector<std::string> & getDisplacementVarNames() const { return _displacements; }
 

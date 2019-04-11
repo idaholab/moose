@@ -668,3 +668,61 @@ SubProblem::getVariableHelper(THREAD_ID tid,
                "(or vice-versa)?");
   }
 }
+
+void
+SubProblem::reinitElemFaceRef(const Elem * elem,
+                              unsigned int side,
+                              BoundaryID bnd_id,
+                              Real tolerance,
+                              const std::vector<Point> * const pts,
+                              const std::vector<Real> * const weights,
+                              THREAD_ID tid)
+{
+  // - Set our _current_elem for proper dof index getting in the moose variables
+  // - Reinitialize all of our FE objects so we have current phi, dphi, etc. data
+  // Note that our number of shape functions will reflect the number of shapes associated with the
+  // interior element while the number of quadrature points will be determined by the passed pts
+  // parameter (which presumably will have a number of pts reflective of a facial quadrature rule)
+  assembly(tid).reinitElemFaceRef(elem, side, tolerance, pts, weights);
+
+  // Actually get the dof indices in the moose variables
+  systemBaseNonlinear().prepare(tid);
+  systemBaseAuxiliary().prepare(tid);
+
+  // With the dof indices set in the moose variables, now let's properly size
+  // our local residuals/Jacobians
+  assembly(tid).prepareJacobianBlock();
+  assembly(tid).prepareResidual();
+
+  // Let's finally compute our variable values!
+  systemBaseNonlinear().reinitElemFace(elem, side, bnd_id, tid);
+  systemBaseAuxiliary().reinitElemFace(elem, side, bnd_id, tid);
+}
+
+void
+SubProblem::reinitNeighborFaceRef(const Elem * neighbor_elem,
+                                  unsigned int neighbor_side,
+                                  Real tolerance,
+                                  const std::vector<Point> * const pts,
+                                  const std::vector<Real> * const weights,
+                                  THREAD_ID tid)
+{
+  // - Set our _current_neighbor_elem for proper dof index getting in the moose variables
+  // - Reinitialize all of our FE objects so we have current phi, dphi, etc. data
+  // Note that our number of shape functions will reflect the number of shapes associated with the
+  // interior element while the number of quadrature points will be determined by the passed pts
+  // parameter (which presumably will have a number of pts reflective of a facial quadrature rule)
+  assembly(tid).reinitNeighborFaceRef(neighbor_elem, neighbor_side, tolerance, pts, weights);
+
+  // Actually get the dof indices in the moose variables
+  systemBaseNonlinear().prepareNeighbor(tid);
+  systemBaseAuxiliary().prepareNeighbor(tid);
+
+  // With the dof indices set in the moose variables, now let's properly size
+  // our local residuals/Jacobians
+  assembly(tid).prepareNeighbor();
+
+  // Let's finally compute our variable values!
+  systemBaseNonlinear().reinitNeighbor(neighbor_elem, tid);
+  systemBaseAuxiliary().reinitNeighbor(neighbor_elem, tid);
+}
