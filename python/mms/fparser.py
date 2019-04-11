@@ -62,9 +62,9 @@ class FParserPrinter(CodePrinter):
       'not': '!',
     }
 
-    def __init__(self, settings={}):
+    def __init__(self, **kwargs):
         """Register function mappings supplied by user"""
-        CodePrinter.__init__(self, settings)
+        CodePrinter.__init__(self, kwargs)
         self.known_functions = dict(known_functions)
 
     def _rate_index_position(self, p):
@@ -83,7 +83,6 @@ class FParserPrinter(CodePrinter):
 
     def _get_loop_opening_ending(self, indices):
         return '',''
-        #raise TypeError("FParserPrinter does not support loops")
 
     def _print_Pow(self, expr):
         PREC = precedence(expr)
@@ -96,6 +95,14 @@ class FParserPrinter(CodePrinter):
         else:
             return '%s^%s' % (self.parenthesize(expr.base, PREC),
                      self.parenthesize(expr.exp, PREC))
+
+    def _print_BaseScalar(self, expr):
+        """
+        Print x,y,z instead of R.x, R.y, or R.z.
+
+        see sympy/sympy/vector/scalar.py
+        """
+        return 'xyz'[expr._id[0]]
 
     def _print_Rational(self, expr):
         p, q = int(expr.p), int(expr.q)
@@ -110,8 +117,8 @@ class FParserPrinter(CodePrinter):
     def _print_Exp1(self, expr):
         return 'exp(1)'
 
-    def _print_Pi(self, expr):
-        return '3.14159265359'
+    #def _print_Pi(self, expr):
+    #    return '3.14159265359'
 
     # TODO: we need a more elegant way to deal with infinity in FParser
     def _print_Float(self, expr):
@@ -143,7 +150,7 @@ class FParserPrinter(CodePrinter):
         return ",".join(ecpairs) + ")" * (len(ecpairs)-1)
 
 
-def fparser(expr, assign_to=None, **settings):
+def fparser(expr, assign_to=None, **kwargs):
     r"""Converts an expr to an FParser expression
 
       Parameters
@@ -165,9 +172,39 @@ def fparser(expr, assign_to=None, **settings):
       >>> fparser(sin(x), assign_to="s")
       's = sin(x);'
     """
-    return FParserPrinter(settings).doprint(expr, assign_to)
+    return FParserPrinter(**kwargs).doprint(expr, assign_to)[-1]
 
-
-def print_fparser(expr, **settings):
+def print_fparser(expr, **kwargs):
     """Prints an FParser representation of the given expression."""
-    print(ccode(expr, **settings))
+    print(fparser(expr, **kwargs))
+
+def build_hit(expr, name, **kwargs):
+    """
+    Create a hit node containing a ParsedFunction of the given expression
+
+    Inputs:
+        expr[sympy.core.Expr]: The sympy expression to convert
+        name[str]: The name of the input file block to create
+        kwargs: Key, value pairs for val, vals input parameters (defaults to 1.0) if not provided
+    """
+    import hit
+
+    symbols = set([str(s) for s in expr.free_symbols]).difference(set(['R.x', 'R.y', 'R.z', 't']))
+    for symbol in symbols:
+        kwargs.setdefault(symbol, 1.)
+
+    root = hit.NewSection(name)
+    root.addChild(hit.NewField('type', hit.FieldKind.String, 'ParsedFunction'))
+    root.addChild(hit.NewField('value', hit.FieldKind.String, "'{}'".format(str(fparser(expr)))))
+
+    if kwargs:
+        pvars = ' '.join(kwargs.keys())
+        pvals = ' '.join([str(v) for v in kwargs.values()])
+        root.addChild(hit.NewField('vars', hit.FieldKind.String, "'{}'".format(pvars)))
+        root.addChild(hit.NewField('vals', hit.FieldKind.String, "'{}'".format(pvals)))
+
+    return root
+
+def print_hit(*args, **kwargs):
+    """Prints a hit block containing a ParsedFunction of the given expression"""
+    print(build_hit(*args, **kwargs))
