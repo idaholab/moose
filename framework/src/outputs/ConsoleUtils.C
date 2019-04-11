@@ -229,9 +229,9 @@ outputRelationshipManagerInformation(const MooseApp & app)
   {
     for (const auto & info_pair : info_strings)
       oss << std::setw(console_field_width)
-          << std::string("  ") +
-                 MooseUtils::underscoreToCamelCase(MooseUtils::toLower(info_pair.first), true)
-          << ": " << info_pair.second << '\n';
+          << "  " + MooseUtils::underscoreToCamelCase(MooseUtils::toLower(info_pair.first), true) +
+                 ":"
+          << info_pair.second << '\n';
     oss << '\n';
   }
 

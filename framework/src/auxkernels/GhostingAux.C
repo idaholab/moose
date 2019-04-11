@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "GhostingAux.h"
+#include "GhostingUserObject.h"
 
 registerMooseObject("MooseApp", GhostingAux);
 
@@ -17,67 +18,51 @@ validParams<GhostingAux>()
 {
   InputParameters params = validParams<AuxKernel>();
 
-  params.addClassDescription("Colors the elements ghosted to the chosen PID.");
-
   params.addRequiredParam<processor_id_type>("pid", "The PID to see the ghosting for");
 
   MooseEnum functor_type("geometric algebraic", "geometric");
-
   params.addParam<MooseEnum>("functor_type", functor_type, "The type of ghosting functor to use");
 
+  params.addParam<bool>("include_local_elements",
+                        false,
+                        "Whether or not to include local elements as part of the ghosting set");
+
+  params.addRequiredParam<UserObjectName>(
+      "ghost_uo", "The GhostUserObject from which to obtain ghosting information from.");
+
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
+
+  params.addClassDescription("Colors the elements ghosted to the chosen PID.");
   return params;
 }
 
 GhostingAux::GhostingAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _pid(getParam<processor_id_type>("pid")),
-    _functor_type(getParam<MooseEnum>("functor_type"))
+    _rm_type(getParam<MooseEnum>("functor_type") == "geometric"
+                 ? Moose::RelationshipManagerType::GEOMETRIC
+                 : Moose::RelationshipManagerType::ALGEBRAIC),
+    _include_local(getParam<bool>("include_local_elements")),
+    _value(0.),
+    _ghost_uo(getUserObject<GhostingUserObject>("ghost_uo"))
 {
   if (isNodal())
     mooseError("GhostingAux only works on elemental fields.");
-
-  // Can only work on Replicated meshes
-  _mesh.errorIfDistributedMesh("GhostingAux");
 }
 
 void
-GhostingAux::initialize()
+GhostingAux::precalculateValue()
 {
-  _ghosted_elems.clear();
-
-  if (_functor_type == 0) // Geometric
-  {
-    auto current_func = _mesh.getMesh().ghosting_functors_begin();
-    const auto end_func = _mesh.getMesh().ghosting_functors_end();
-
-    const auto begin_elem = _mesh.getMesh().active_pid_elements_begin(_pid);
-    const auto end_elem = _mesh.getMesh().active_pid_elements_end(_pid);
-
-    for (; current_func != end_func; ++current_func)
-      (*(*current_func))(begin_elem, end_elem, _pid, _ghosted_elems);
-  }
-  else // Algebraic
-  {
-    auto current_func = _nl_sys.dofMap().algebraic_ghosting_functors_begin();
-    const auto end_func = _nl_sys.dofMap().algebraic_ghosting_functors_end();
-
-    const auto begin_elem = _mesh.getMesh().active_pid_elements_begin(_pid);
-    const auto end_elem = _mesh.getMesh().active_pid_elements_end(_pid);
-
-    for (; current_func != end_func; ++current_func)
-    {
-
-      (*(*current_func))(begin_elem, end_elem, _pid, _ghosted_elems);
-    }
-  }
+  if (_current_elem->processor_id() == _pid && _include_local)
+    _value = 1;
+  else if (_current_elem->processor_id() != _pid)
+    _value = _ghost_uo.getElementalValue(_current_elem, _rm_type, _pid);
+  else
+    _value = 0.;
 }
 
 Real
 GhostingAux::computeValue()
 {
-  if (_current_elem->processor_id() != _pid &&
-      _ghosted_elems.find(_current_elem) != _ghosted_elems.end())
-    return 1.;
-  else
-    return 0.;
+  return _value;
 }

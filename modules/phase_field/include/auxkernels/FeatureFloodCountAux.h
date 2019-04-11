@@ -35,8 +35,8 @@ public:
   virtual ~FeatureFloodCountAux() {}
 
 protected:
-  virtual Real computeValue();
-  virtual void precalculateValue();
+  virtual Real computeValue() override;
+  virtual void precalculateValue() override;
 
   /// Function being used to compute the value of this kernel
   const FeatureFloodCount & _flood_counter;
