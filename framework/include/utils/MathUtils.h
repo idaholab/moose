@@ -38,6 +38,7 @@ Real poly4Log(Real x, Real tol, int order);
 Real taylorLog(Real x);
 
 Real pow(Real x, int e);
+Real poly(std::vector<Real> c, const Real x, const bool deriv);
 
 inline Real
 heavyside(Real x)
@@ -104,6 +105,30 @@ typename CompareTypes<T, T2>::supertype
 dotProduct(const W<T> & a, const W2<T2> & b)
 {
   return a.contract(b);
+}
+
+template <typename T>
+T
+poly(std::vector<Real> c, const T x, const bool derivative)
+{
+  const unsigned int size = c.size();
+  if (size == 0)
+    return 0.0;
+
+  T value = c[0];
+  if (derivative)
+  {
+    value *= size - 1;
+    for (unsigned int i = 1; i < size - 1; i++)
+      value = value * x + c[i] * (size - i - 1);
+  }
+  else
+  {
+    for (unsigned int i = 1; i < size; i++)
+      value = value * x + c[i];
+  }
+
+  return value;
 }
 
 } // namespace MathUtils
