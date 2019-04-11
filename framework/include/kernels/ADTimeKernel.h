@@ -38,7 +38,7 @@ declareADValidParams(ADTimeKernel);
 declareADValidParams(ADVectorTimeKernel);
 
 #define usingTemplTimeKernelMembers(type)                                                          \
-  usingTemplKernelValueMembers(type);                                                              \
+  usingTemplKernelMembers(type);                                                                   \
   using ADTimeKernelTempl<type, compute_stage>::_u_dot
 
 #define usingTimeKernelMembers usingTemplTimeKernelMembers(Real)
