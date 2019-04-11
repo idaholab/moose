@@ -1,5 +1,5 @@
 #
-# Test the coupled Allen-Cahn Bulk kernel
+# Test the forward automatic differentiation Allen-Cahn Bulk kernel
 #
 
 [Mesh]
@@ -13,8 +13,6 @@
 []
 
 [Variables]
-  [./w]
-  [../]
   [./eta]
     order = FIRST
     family = LAGRANGE
@@ -32,32 +30,21 @@
 
 [Kernels]
   [./detadt]
-    type = TimeDerivative
+    type = ADTimeDerivative
     variable = eta
   [../]
 
   [./ACBulk]
-    type = CoupledAllenCahn
-    variable = w
-    v = eta
+    type = ADAllenCahn
+    variable = eta
     f_name = F
   [../]
 
-  [./W]
-    type = Reaction
-    variable = w
-  [../]
-
-  [./CoupledBulk]
-    type = MatReaction
-    variable = eta
-    v = w
-  [../]
-
   [./ACInterface]
-    type = ACInterface
+    type = ADACInterface
     variable = eta
     kappa_name = 1
+    variable_L = false
   [../]
 []
 
@@ -69,44 +56,21 @@
   [../]
 
   [./free_energy]
-    type = DerivativeParsedMaterial
+    type = ADTestDerivativeFunction
+    function = F1
     f_name = F
-    args = 'eta'
-    function = '2 * eta^2 * (1-eta)^2 - 0.2*eta'
-    derivative_order = 2
-  [../]
-[]
-
-[Preconditioning]
-  [./smp]
-    type = SMP
-    full = true
+    op = 'eta'
   [../]
 []
 
 [Executioner]
   type = Transient
   scheme = 'bdf2'
-
-  solve_type = 'PJFNK'
-
-  l_max_its = 15
-  l_tol = 1.0e-4
-
-  nl_max_its = 10
-  nl_rel_tol = 1.0e-11
-
-  start_time = 0.0
+  solve_type = 'NEWTON'
   num_steps = 2
   dt = 0.5
 []
 
-[Debug]
-  show_var_residual_norms = true
-[]
-
 [Outputs]
-  hide = w
-  file_base = AllenCahn_out
   exodus = true
 []

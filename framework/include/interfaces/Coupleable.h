@@ -19,6 +19,7 @@
 #define usingCoupleableMembers                                                                     \
   using Coupleable::_zero;                                                                         \
   using Coupleable::_grad_zero;                                                                    \
+  using Coupleable::_coupled_standard_moose_vars;                                                  \
   using Coupleable::isCoupled;                                                                     \
   using Coupleable::coupledComponents;                                                             \
   using Coupleable::coupled;                                                                       \

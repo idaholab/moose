@@ -1,5 +1,5 @@
 #
-# Test the coupled Allen-Cahn Bulk kernel
+# Test the parsed function free enery Allen-Cahn Bulk kernel
 #
 
 [Mesh]
@@ -12,9 +12,16 @@
   elem_type = QUAD4
 []
 
-[Variables]
-  [./w]
+[AuxVariables]
+  [./chi]
+    [./InitialCondition]
+      type = FunctionIC
+      function = 'x/24+0.5'
+    [../]
   [../]
+[]
+
+[Variables]
   [./eta]
     order = FIRST
     family = LAGRANGE
@@ -37,35 +44,27 @@
   [../]
 
   [./ACBulk]
-    type = CoupledAllenCahn
-    variable = w
-    v = eta
-    f_name = F
-  [../]
-
-  [./W]
-    type = Reaction
-    variable = w
-  [../]
-
-  [./CoupledBulk]
-    type = MatReaction
+    type = AllenCahn
     variable = eta
-    v = w
+    f_name = F
   [../]
 
   [./ACInterface]
     type = ACInterface
     variable = eta
     kappa_name = 1
+    variable_L = true
+    args = chi
   [../]
 []
 
 [Materials]
-  [./consts]
-    type = GenericConstantMaterial
-    prop_names  = 'L'
-    prop_values = '1'
+  [./L]
+    type = DerivativeParsedMaterial
+    f_name = L
+    args = 'eta chi'
+    function = '0.1 * eta^2 + chi^2'
+    derivative_order = 2
   [../]
 
   [./free_energy]
@@ -77,36 +76,14 @@
   [../]
 []
 
-[Preconditioning]
-  [./smp]
-    type = SMP
-    full = true
-  [../]
-[]
-
 [Executioner]
   type = Transient
   scheme = 'bdf2'
-
-  solve_type = 'PJFNK'
-
-  l_max_its = 15
-  l_tol = 1.0e-4
-
-  nl_max_its = 10
-  nl_rel_tol = 1.0e-11
-
-  start_time = 0.0
+  solve_type = 'NEWTON'
   num_steps = 2
-  dt = 0.5
-[]
-
-[Debug]
-  show_var_residual_norms = true
+  dt = 1
 []
 
 [Outputs]
-  hide = w
-  file_base = AllenCahn_out
   exodus = true
 []

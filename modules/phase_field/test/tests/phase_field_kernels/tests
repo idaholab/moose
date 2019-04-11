@@ -45,7 +45,6 @@
     design = '/AllenCahn.md'
     requirement = 'A Allen-Cahn phase field formulation shall be provided'
   [../]
-
   [./analyzejacobian_AllenCahn]
     type = 'AnalyzeJacobian'
     input = 'AllenCahn.i'
@@ -58,7 +57,61 @@
     requirement = 'The Allen-Cahn model shall have perfect Jacobians'
   [../]
 
-# This coupled formulation should give the same result as the direct Allen-Cahn
+  [./AllenCahnVariableL]
+    type = 'Exodiff'
+    input = 'AllenCahnVariableL.i'
+    exodiff = 'AllenCahnVariableL_out.e'
+    issues = '#3816'
+    design = '/AllenCahn.md'
+    requirement = 'A Allen-Cahn phase field formulation with a variable dependent mobility shall be provided'
+  [../]
+
+  [./ADAllenCahn]
+    type = 'Exodiff'
+    input = 'ADAllenCahn.i'
+    allow_test_objects = true
+    exodiff = 'ADAllenCahn_out.e'
+    issues = '#13197'
+    design = '/ADAllenCahn.md'
+    requirement = 'An AD version of the Allen-Cahn phase field formulation shall be provided'
+  [../]
+  [./ADAllenCahn-jac]
+    type = 'PetscJacobianTester'
+    input = 'ADAllenCahn.i'
+    allow_test_objects = true
+    run_sim = 'True'
+    cli_args = 'Outputs/exodus=false Executioner/num_steps=1'
+    ratio_tol = 1e-7
+    difference_tol = 1e-5
+    issues = '#13197'
+    design = '/ADAllenCahn.md'
+    requirement = 'The Jacobian for the AD Allen-Cahn problem shall be perfect'
+  [../]
+
+  [./ADAllenCahnVariableL]
+    type = 'Exodiff'
+    input = 'ADAllenCahnVariableL.i'
+    allow_test_objects = true
+    exodiff = 'ADAllenCahnVariableL_out.e'
+    issues = '#13197'
+    design = '/ADAllenCahn.md'
+    requirement = 'An AD version of the Allen-Cahn phase field formulation with a variable dependent mobility shall be provided'
+  [../]
+  [./ADAllenCahnVariableL-jac]
+    type = 'PetscJacobianTester'
+    input = 'ADAllenCahnVariableL.i'
+    allow_test_objects = true
+    run_sim = 'True'
+    cli_args = 'Outputs/exodus=false Executioner/num_steps=1'
+    ratio_tol = 1e-7
+    difference_tol = 1e-5
+    issues = '#13197'
+    design = '/ADAllenCahn.md'
+    requirement = 'The Jacobian for the AD Allen-Cahn problem with a variable dependent mobility shall be perfect'
+  [../]
+
+
+  # This coupled formulation should give the same result as the direct Allen-Cahn
   [./CoupledAllenCahn]
     type = 'Exodiff'
     prereq = 'AllenCahn'
