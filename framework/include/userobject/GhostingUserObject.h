@@ -19,15 +19,15 @@
 // Forward Declarations
 class GhostingUserObject;
 class MooseMesh;
-class NonlinearSystem;
+class NonlinearSystemBase;
 
 template <>
 InputParameters validParams<GhostingUserObject>();
 
 /**
- * This object loops over all of the underlying ghosting functors (not just RelationshipManagers to
- * display the effective ghosting for a particular simulation. Normally the information is output
- * through several AuxVariables.
+ * This object loops over all of the underlying ghosting functors added by libMesh or MOOSE through
+ * RelationshipManagers to display the effective ghosting for a particular simulation. Normally this
+ * information is output through several AuxVariables.
  */
 class GhostingUserObject : public GeneralUserObject
 {
@@ -57,7 +57,7 @@ private:
   std::vector<std::unordered_map<processor_id_type, libMesh::GhostingFunctor::map_type>> _maps;
 
   MooseMesh & _mesh;
-  NonlinearSystem & _nl;
+  NonlinearSystemBase & _nl;
 };
 
 #endif // GHOSTINGAUX_H

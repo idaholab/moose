@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "GhostingUserObject.h"
-#include "NonlinearSystem.h"
+#include "NonlinearSystemBase.h"
 #include "MooseMesh.h"
 
 registerMooseObject("MooseApp", GhostingUserObject);
@@ -35,7 +35,9 @@ validParams<GhostingUserObject>()
 }
 
 GhostingUserObject::GhostingUserObject(const InputParameters & parameters)
-  : GeneralUserObject(parameters), _mesh(_subproblem.mesh()), _nl(_fe_problem.getNonlinearSystem())
+  : GeneralUserObject(parameters),
+    _mesh(_subproblem.mesh()),
+    _nl(_fe_problem.getNonlinearSystemBase())
 {
   _maps.resize(2); // Geometric and Algebraic maps
 
@@ -81,7 +83,9 @@ GhostingUserObject::meshChanged()
     libMesh::GhostingFunctor::map_type algebraic_elems;
     for (auto & gf : as_range(_nl.dofMap().algebraic_ghosting_functors_begin(),
                               _nl.dofMap().algebraic_ghosting_functors_end()))
-
+      (*gf)(begin_elem, end_elem, pid, algebraic_elems);
+    for (auto & gf :
+         as_range(_nl.dofMap().coupling_functors_begin(), _nl.dofMap().coupling_functors_end()))
       (*gf)(begin_elem, end_elem, pid, algebraic_elems);
     _maps[ALGEBRAIC_MAP_IDX].emplace(pid, algebraic_elems);
   }
