@@ -220,7 +220,6 @@
   nl_rel_tol = 1e-9
   l_max_its = 10
 
-  start_time = 0.0
   dt = 0.05
   end_time = 1.0
 []

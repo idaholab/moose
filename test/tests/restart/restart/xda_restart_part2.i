@@ -112,7 +112,6 @@
 [Executioner]
   type = Transient
   solve_type = JFNK
-  start_time = 1
   dt = 0.1
   reset_dt = true #NECESSARY to force a change in DT when using restart!
   num_steps = 3

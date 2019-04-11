@@ -310,7 +310,11 @@ if __name__ == '__main__':
     if options.open_source:
         os = datetime.date(2014,3,10)
         x_lim = ax1.get_xlim()
-        y_lim = ax2.get_ylim()
+        if options.unique:
+            y_lim = ax2.get_ylim()
+        else:
+            y_lim = ax1.get_ylim()
+
         delta = x_lim[1] - os.toordinal()
         plt.gca().add_patch(plt.Rectangle((os.toordinal(), y_lim[0]), delta, y_lim[1]-y_lim[0], facecolor='green', alpha=0.1))
         ax1.annotate('Open-source ', xy=(x_lim[1] - (delta/2.), y_lim[0]), ha='center', va='bottom', size=options.font)

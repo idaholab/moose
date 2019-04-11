@@ -26,7 +26,6 @@ validParams<PowerLawCreepModel>()
   params.addRequiredParam<Real>("activation_energy", "Activation energy");
   params.addParam<Real>("gas_constant", 8.3143, "Universal gas constant");
   params.addParam<Real>("start_time", 0, "Start time (if not zero)");
-  params.addCoupledVar("temp", "Coupled Temperature");
 
   return params;
 }

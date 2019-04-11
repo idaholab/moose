@@ -23,6 +23,14 @@ validParams<SubProblem>()
 {
   InputParameters params = validParams<Problem>();
   params.addPrivateParam<MooseMesh *>("mesh");
+
+  params.addParam<bool>(
+      "default_ghosting",
+      false,
+      "Whether or not to use libMesh's default amount of algebraic and geometric ghosting");
+
+  params.addParamNamesToGroup("default_ghosting", "Advanced");
+
   return params;
 }
 
@@ -32,6 +40,7 @@ SubProblem::SubProblem(const InputParameters & parameters)
     _factory(_app.getFactory()),
     _nonlocal_cm(),
     _requires_nonlocal_coupling(false),
+    _default_ghosting(getParam<bool>("default_ghosting")),
     _rz_coord_axis(1), // default to RZ rotation around y-axis
     _currently_computing_jacobian(false),
     _computing_nonlinear_residual(false),

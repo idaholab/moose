@@ -11,6 +11,12 @@
 #include "MooseMesh.h"
 #include "Conversion.h"
 #include "MooseApp.h"
+#include "Executioner.h"
+#include "FEProblemBase.h"
+#include "NonlinearSystem.h"
+
+#include "libmesh/default_coupling.h"
+#include "libmesh/dof_map.h"
 
 registerMooseObject("MooseApp", ElementSideNeighborLayers);
 
@@ -18,10 +24,10 @@ template <>
 InputParameters
 validParams<ElementSideNeighborLayers>()
 {
-  InputParameters params = validParams<AlgebraicRelationshipManager>();
+  InputParameters params = validParams<FunctorRelationshipManager>();
 
   params.addRangeCheckedParam<unsigned short>(
-      "element_side_neighbor_layers",
+      "layers",
       1,
       "element_side_neighbor_layers>=1 & element_side_neighbor_layers<=10",
       "The number of additional geometric elements to make available when "
@@ -31,39 +37,22 @@ validParams<ElementSideNeighborLayers>()
 }
 
 ElementSideNeighborLayers::ElementSideNeighborLayers(const InputParameters & parameters)
-  : AlgebraicRelationshipManager(parameters),
-    _element_side_neighbor_layers(getParam<unsigned short>("element_side_neighbor_layers"))
+  : FunctorRelationshipManager(parameters), _layers(getParam<unsigned short>("layers"))
 {
-}
-
-void
-ElementSideNeighborLayers::attachRelationshipManagersInternal(
-    Moose::RelationshipManagerType rm_type)
-{
-  if ((_app.isSplitMesh() || _mesh.isDistributedMesh()) && _element_side_neighbor_layers > 1)
-  {
-    _default_coupling = libmesh_make_unique<DefaultCoupling>();
-    _default_coupling->set_n_levels(_element_side_neighbor_layers);
-
-    if (rm_type == Moose::RelationshipManagerType::GEOMETRIC)
-      attachGeometricFunctorHelper(*_default_coupling);
-    else
-      attachAlgebraicFunctorHelper(*_default_coupling);
-  }
 }
 
 std::string
 ElementSideNeighborLayers::getInfo() const
 {
-  if (_default_coupling)
-  {
-    std::ostringstream oss;
-    std::string layers = _element_side_neighbor_layers == 1 ? "layer" : "layers";
+  std::ostringstream oss;
+  std::string layers = _layers == 1 ? "layer" : "layers";
 
-    oss << "ElementSideNeighborLayers (" << _element_side_neighbor_layers << layers << ')';
-    return oss.str();
-  }
-  return "";
+  oss << "ElementSideNeighborLayers (" << _layers << " " << layers << ')';
+
+  if (_has_periodic_boundaries)
+    oss << " with periodic BCs";
+
+  return oss.str();
 }
 
 bool
@@ -73,14 +62,33 @@ ElementSideNeighborLayers::operator==(const RelationshipManager & rhs) const
   if (!rm)
     return false;
   else
-    return _element_side_neighbor_layers == rm->_element_side_neighbor_layers;
+    return _layers == rm->_layers && _rm_type == rm->_rm_type &&
+           _has_periodic_boundaries == rm->_has_periodic_boundaries;
 }
 
 void
-ElementSideNeighborLayers::operator()(const MeshBase::const_element_iterator &,
-                                      const MeshBase::const_element_iterator &,
-                                      processor_id_type,
-                                      map_type &)
+ElementSideNeighborLayers::internalInit()
 {
-  mooseError("Unused");
+  auto functor = libmesh_make_unique<DefaultCoupling>();
+  functor->set_n_levels(_layers);
+
+  // Need to see if there are periodic BCs - if so we need to dig them out
+  auto executioner_ptr = _app.getExecutioner();
+
+  if (executioner_ptr)
+  {
+    auto & fe_problem = executioner_ptr->feProblem();
+    auto & nl_sys = fe_problem.getNonlinearSystem();
+    auto & dof_map = nl_sys.dofMap();
+    auto periodic_boundaries_ptr = dof_map.get_periodic_boundaries();
+
+    if (periodic_boundaries_ptr)
+    {
+      _has_periodic_boundaries = true;
+      functor->set_mesh(&_mesh.getMesh());
+      functor->set_periodic_boundaries(periodic_boundaries_ptr);
+    }
+  }
+
+  _functor = std::move(functor);
 }

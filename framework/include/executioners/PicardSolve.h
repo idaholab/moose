@@ -153,5 +153,7 @@ private:
 
   /// Time of previous Picard solve as a subapp
   Real _previous_entering_time;
+
+  const std::string _solve_message;
 };
 #endif // PICARDSOLVE_H

@@ -29,6 +29,10 @@ validParams<GMVOutput>()
   // Add description for the GMVOutput class
   params.addClassDescription("Object for outputting data in the GMV format");
 
+  // Need a layer of geometric ghosting for mesh serialization
+  params.addRelationshipManager("MooseGhostPointNeighbors",
+                                Moose::RelationshipManagerType::GEOMETRIC);
+
   // Return the InputParameters
   return params;
 }

@@ -46,7 +46,7 @@ class IconCommand(command.CommandComponent):
         return settings
 
     def createToken(self, parent, info, page):
-        if info.pattern not in ('InlineCommand', 'OldInlineCommand'):
+        if info.pattern not in ('InlineCommand', 'OldInlineCommand', 'OlderInlineCommand'):
             core.Paragraph(parent)
         return Icon(parent, icon=info['subcommand'], faicon=self.settings['faicon'])
 

@@ -25,6 +25,7 @@
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/string_to_enum.h"
+#include "libmesh/default_coupling.h"
 
 void
 assemble_l2(EquationSystems & es, const std::string & system_name)
@@ -54,6 +55,10 @@ validParams<MultiAppProjectionTransfer>()
                         "no movement or adaptivity).  This will cache some "
                         "information to speed up the transfer.");
 
+  // Need one layer of ghosting
+  params.addRelationshipManager("ElementSideNeighborLayers",
+                                Moose::RelationshipManagerType::GEOMETRIC |
+                                    Moose::RelationshipManagerType::ALGEBRAIC);
   return params;
 }
 
@@ -87,7 +92,13 @@ MultiAppProjectionTransfer::initialSetup()
                                       Moose::VarKindType::VAR_ANY,
                                       Moose::VarFieldType::VAR_FIELD_STANDARD)
                          .feType();
+
     LinearImplicitSystem & proj_sys = to_es.add_system<LinearImplicitSystem>("proj-sys-" + name());
+
+    proj_sys.get_dof_map().add_coupling_functor(
+        proj_sys.get_dof_map().default_coupling(),
+        false); // The false keeps it from getting added to the mesh
+
     _proj_var_num = proj_sys.add_variable("var", fe_type);
     proj_sys.attach_assemble_function(assemble_l2);
     _proj_sys[i_to] = &proj_sys;

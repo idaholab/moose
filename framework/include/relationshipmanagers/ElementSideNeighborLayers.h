@@ -10,9 +10,7 @@
 #ifndef ELEMENTSIDENEIGHBORLAYERS_H
 #define ELEMENTSIDENEIGHBORLAYERS_H
 
-#include "AlgebraicRelationshipManager.h"
-
-#include "libmesh/default_coupling.h"
+#include "FunctorRelationshipManager.h"
 
 // Forward declarations
 class ElementSideNeighborLayers;
@@ -28,27 +26,23 @@ InputParameters validParams<ElementSideNeighborLayers>();
  * ElementSideNeighborLayers is used to increase the halo or stencil depth of each processor's
  * partition. It is useful when non-local element resources are needed when using DistributedMesh.
  */
-class ElementSideNeighborLayers : public AlgebraicRelationshipManager
+class ElementSideNeighborLayers : public FunctorRelationshipManager
 {
 public:
   ElementSideNeighborLayers(const InputParameters & parameters);
 
-  virtual void attachRelationshipManagersInternal(Moose::RelationshipManagerType rm_type) override;
   virtual std::string getInfo() const override;
   virtual bool operator==(const RelationshipManager & rhs) const override;
 
-  virtual void operator()(const MeshBase::const_element_iterator & range_begin,
-                          const MeshBase::const_element_iterator & range_end,
-                          processor_id_type p,
-                          map_type & coupled_elements) override;
-
 protected:
+  virtual void internalInit() override;
+
   /// Size of the halo or stencil of elements available in each local processors partition. Only
   /// applicable and necessary when using DistributedMesh.
-  unsigned short _element_side_neighbor_layers;
+  unsigned short _layers;
 
-  /// The libMesh coupling object that provides this RM's functionality.
-  std::unique_ptr<DefaultCoupling> _default_coupling;
+  /// Whether or not this RM is keeping track of periodic boundaries
+  bool _has_periodic_boundaries = false;
 };
 
 #endif /* ELEMENTSIDENEIGHBORLAYERS_H */

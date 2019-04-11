@@ -9,10 +9,10 @@
 
 #include "AddRelationshipManager.h"
 #include "FEProblem.h"
+#include "DisplacedProblem.h"
 
-registerMooseAction("MooseApp", AddRelationshipManager, "add_algebraic_rm");
-
-registerMooseAction("MooseApp", AddRelationshipManager, "add_geometric_rm");
+registerMooseAction("MooseApp", AddRelationshipManager, "attach_geometric_rm");
+registerMooseAction("MooseApp", AddRelationshipManager, "attach_algebraic_rm");
 
 template <>
 InputParameters
@@ -27,8 +27,8 @@ void
 AddRelationshipManager::act()
 {
   Moose::RelationshipManagerType rm_type =
-      (_current_task == "add_geometric_rm" ? Moose::RelationshipManagerType::GEOMETRIC
-                                           : Moose::RelationshipManagerType::ALGEBRAIC);
+      (_current_task == "attach_geometric_rm" ? Moose::RelationshipManagerType::GEOMETRIC
+                                              : Moose::RelationshipManagerType::ALGEBRAIC);
 
   const auto & all_action_ptrs = _awh.allActionBlocks();
   for (const auto & action_ptr : all_action_ptrs)

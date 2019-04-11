@@ -47,10 +47,7 @@
   petsc_options_iname = -ksp_gmres_restart
   petsc_options_value = 101
   line_search = none
-  #l_max_its = 100
-  #nl_max_its = 100
   nl_rel_tol = 1e-8
-  start_time = 0.0
   end_time = 20.0
   [./TimeStepper]
     type = IterationAdaptiveDT

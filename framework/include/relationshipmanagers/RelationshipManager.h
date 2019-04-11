@@ -35,11 +35,28 @@ public:
   RelationshipManager(const InputParameters & parameters);
 
   /**
-   * System entry point to trigger the addition of RelationshipManagers to the system. It is not
-   * virtual and not intended to be overridden by a derived class.
-   * See attachRelationshipManagersInternal()
+   * Called before this RM is attached.  Will only be called once.
    */
-  void attachRelationshipManagers(Moose::RelationshipManagerType rm_type);
+  void init()
+  {
+    _inited = true;
+    internalInit();
+  }
+
+  /**
+   * Whether or not this RM has been inited
+   */
+  bool inited() { return _inited; }
+
+  /**
+   * The object (or Action) this RelationshipManager was built for
+   */
+  virtual const std::vector<std::string> & forWhom() const { return _for_whom; }
+
+  /**
+   * Add another name to for_whom
+   */
+  void addForWhom(const std::string & for_whom) { _for_whom.push_back(for_whom); }
 
   /**
    * Method for returning relationship manager information (suitable for console output).
@@ -51,28 +68,41 @@ public:
    */
   Moose::RelationshipManagerType getType() const { return _rm_type; }
 
-  //  bool compare(const RelationshipManager & rhs) { return *this == rhs; }
+  /**
+   * Check to see if an RM is of a given type
+   *
+   * This is here so that the boolean logic doesn't have to get spread everywhere in the world
+   */
+  bool isType(const Moose::RelationshipManagerType & type) { return (_rm_type & type) == type; }
 
   virtual bool operator==(const RelationshipManager & /*rhs*/) const
   {
     mooseError("Comparison operator required for this RelationshipManager required");
   }
 
+  /**
+   * Whether or not this RM can be attached to the Mesh early if it's geometric.
+   *
+   * Note: this is unused if this RM is purely Algebraic
+   */
+  bool attachGeometricEarly() { return _attach_geometric_early; }
+
+  /**
+   * Whether this should be placed on the undisplaced or displaced systems
+   *
+   * Note: this says 'mesh' but that's just to match the colloquial term
+   * in MOOSE.  If this thing is algebraic then it's going to the DofMap
+   */
+  bool useDisplacedMesh() const { return _use_displaced_mesh; }
+
 protected:
   /**
-   * This method should make the decision of whether or not RMs are needed for the current
-   * simulation and attach them to the corresponding libMesh objects. Helper methods exist to
-   * attach geometric and algebraic RMs to the right places.
-   *
-   * This method is called at most once for each "when_type":
-   * For GeometricRelationshipManagers it'll be called exactly once. However, "when" it is called
-   * depends on the value of the developer-controlled "attach_geometric_early" value.
-   * For AlgebraicRelationshipManagers, this method may be called twice, but only once per "when"
-   * type. If the RM is able to create its geometric RM early, it should do so and attach it
-   * during the normal geometric add time. However, if that's not possible, both the geometric and
-   * algebraic RMs can be added during the "late" when time.
+   * Called before this RM is attached.  Only called once
    */
-  virtual void attachRelationshipManagersInternal(Moose::RelationshipManagerType when_type) = 0;
+  virtual void internalInit() = 0;
+
+  /// Whether or not this has been initialized
+  bool _inited = false;
 
   /// Reference to the Mesh object
   MooseMesh & _mesh;
@@ -86,14 +116,11 @@ protected:
   /// multiple values simultaneously, so you must use bitwise operators to test values.
   Moose::RelationshipManagerType _rm_type;
 
-private:
-  /// Value to keep track of whether the attachRelationshipManagerInternal callback has been
-  /// called for this "when_type"
-  Moose::RelationshipManagerType _cached_callbacks;
+  /// The name of the object that requires this RelationshipManager
+  std::vector<std::string> _for_whom;
 
-  /// Internal variable indicating whether the mesh is allowed to have elements deleted during
-  /// the initial setup phase.
-  bool _has_set_remote_elem_removal_flag;
+  /// Which system this should go to (undisplaced or displaced)
+  bool _use_displaced_mesh;
 };
 
 #endif /* RELATIONSHIPMANAGER_H */

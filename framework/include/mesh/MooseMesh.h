@@ -864,6 +864,16 @@ public:
   /// Helper type for building periodic node maps
   using PeriodicNodeInfo = std::pair<const Node *, BoundaryID>;
 
+  /**
+   * Set whether we need to delete remote elements
+   */
+  void needsRemoteElemDeletion(bool need_delete) { _need_delete = need_delete; }
+
+  /**
+   * Whether we need to delete remote elements
+   */
+  bool needsRemoteElemDeletion() const { return _need_delete; }
+
 protected:
   /// Deprecated (DO NOT USE)
   std::vector<std::unique_ptr<GhostingFunctor>> _ghosting_functors;
@@ -1184,6 +1194,9 @@ private:
   PerfID _read_recovered_mesh_timer;
   PerfID _ghost_ghosted_boundaries_timer;
   PerfID _add_mortar_interface_timer;
+
+  /// Whether we need to delete remote elements after init'ing the EquationSystems
+  bool _need_delete;
 };
 
 /**

@@ -183,7 +183,7 @@ Transient::Transient(const InputParameters & parameters)
   // is (in case anyone else is interested.
   if (_app.hasStartTime())
     _start_time = _app.getStartTime();
-  else if (parameters.isParamSetByUser("start_time"))
+  else if (parameters.isParamSetByUser("start_time") && !_app.isRecovering())
     _app.setStartTime(_start_time);
 
   _time = _time_old = _start_time;
@@ -212,10 +212,9 @@ Transient::init()
 
     /**
      * We have a default "dt" set in the Transient parameters but it's possible for users to set
-     * other
-     * parameters explicitly that could provide a better calculated "dt". Rather than provide
-     * difficult
-     * to understand behavior using the default "dt" in this case, we'll calculate "dt" properly.
+     * other parameters explicitly that could provide a better calculated "dt". Rather than provide
+     * difficult to understand behavior using the default "dt" in this case, we'll calculate "dt"
+     * properly.
      */
     if (!_pars.isParamSetByAddParam("end_time") && !_pars.isParamSetByAddParam("num_steps") &&
         _pars.isParamSetByAddParam("dt"))
@@ -231,10 +230,23 @@ Transient::init()
   _problem.execute(EXEC_PRE_MULTIAPP_SETUP);
   _problem.initialSetup();
 
-  _time_stepper->init();
-
+  /**
+   * If this is a restart run, the user may want to override the start time, which we already set in
+   * the constructor. "_time" however will have been "restored" from the restart file. We need to
+   * honor the original request of the developer now that the restore has been completed. This must
+   * occur before we init the time stepper (since that prints out the start time). The multiapp case
+   * is also bit complicated. If we didn't set a start time, the app won't have it yet, so we just
+   * restart the old time from the current time.
+   */
   if (_app.isRestarting())
-    _time_old = _time;
+  {
+    if (_app.hasStartTime())
+      _time = _time_old = _app.getStartTime();
+    else
+      _time_old = _time;
+  }
+
+  _time_stepper->init();
 
   if (_app.isRecovering()) // Recover case
   {

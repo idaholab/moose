@@ -24,8 +24,14 @@ validParams<AdvectiveFluxCalculatorBase>()
                              flux_limiter_type,
                              "Type of flux limiter to use.  'None' means that no antidiffusion "
                              "will be added in the Kuzmin-Turek scheme");
-  params.registerRelationshipManagers("ElementSideNeighborLayers");
-  params.addPrivateParam<unsigned short>("element_side_neighbor_layers", 2);
+
+  params.addRelationshipManager("ElementSideNeighborLayers",
+                                Moose::RelationshipManagerType::GEOMETRIC |
+                                    Moose::RelationshipManagerType::ALGEBRAIC,
+                                [](const InputParameters &, InputParameters & rm_params) {
+                                  rm_params.set<unsigned short>("layers") = 2;
+                                });
+
   params.set<ExecFlagEnum>("execute_on", true) = {EXEC_LINEAR};
   return params;
 }
@@ -720,7 +726,6 @@ AdvectiveFluxCalculatorBase::limitFlux(Real a, Real b, Real & limited, Real & dl
       return;
   }
 }
-
 
 const std::map<dof_id_type, Real> &
 AdvectiveFluxCalculatorBase::getdFluxOutdu(dof_id_type node_i) const

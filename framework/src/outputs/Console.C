@@ -274,9 +274,6 @@ Console::initialSetup()
     if (!_pars.isParamSetByUser("vector_postprocessor_execute_on"))
       _advanced_execute_on["vector_postprocessors"].push_back("final");
   }
-
-  if (_execute_on.contains(EXEC_INITIAL))
-    writeTimestepInformation();
 }
 
 std::string
@@ -288,7 +285,7 @@ Console::filename()
 void
 Console::timestepSetup()
 {
-  writeTimestepInformation();
+  writeTimestepInformation(/*output_dt = */ true);
 }
 
 void
@@ -309,8 +306,12 @@ Console::output(const ExecFlagType & type)
     outputInput();
 
   // Write the timestep information ("Time Step 0 ..."), this is controlled with "execute_on"
-  if (type == EXEC_FINAL && _execute_on.contains(EXEC_FINAL))
-    writeTimestepInformation();
+  // We only write the initial and final here. All of the intermediate outputs will be written
+  // through timestepSetup.
+  if (type == EXEC_INITIAL && _execute_on.contains(EXEC_INITIAL))
+    writeTimestepInformation(/*output_dt = */ false);
+  else if (type == EXEC_FINAL && _execute_on.contains(EXEC_FINAL))
+    writeTimestepInformation(/*output_dt = */ true);
 
   // Print Non-linear Residual (control with "execute_on")
   if (type == EXEC_NONLINEAR && _execute_on.contains(EXEC_NONLINEAR))
@@ -383,7 +384,7 @@ Console::writeStreamToFile(bool append)
 }
 
 void
-Console::writeTimestepInformation()
+Console::writeTimestepInformation(bool output_dt)
 {
   // Stream to build the time step information
   std::stringstream oss;
@@ -404,23 +405,36 @@ Console::writeTimestepInformation()
       oss << std::scientific;
 
     // Print the time
-    oss << ", time = " << time() << '\n';
+    oss << ", time = " << time();
 
-    // Show old time information, if desired
-    if (_verbose)
-      oss << std::right << std::setw(21) << std::setfill(' ') << "old time = " << std::left
-          << timeOld() << '\n';
+    if (output_dt)
+    {
+      if (!_verbose)
+        // Show the time delta information
+        oss << ", dt = " << std::left << dt();
 
-    // Show the time delta information
-    oss << std::right << std::setw(21) << std::setfill(' ') << "dt = " << std::left << dt() << '\n';
+      // Show old time information, if desired on separate lines
+      else
+      {
+        oss << '\n'
+            << std::right << std::setw(21) << std::setfill(' ') << "old time = " << std::left
+            << timeOld() << '\n';
 
-    // Show the old time delta information, if desired
-    if (_verbose)
-      oss << std::right << std::setw(21) << std::setfill(' ') << "old dt = " << _dt_old << '\n';
+        // Show the time delta information
+        oss << std::right << std::setw(21) << std::setfill(' ') << "dt = " << std::left << dt()
+            << '\n';
+
+        // Show the old time delta information, if desired
+        if (_verbose)
+          oss << std::right << std::setw(21) << std::setfill(' ') << "old dt = " << _dt_old << '\n';
+      }
+    }
+
+    oss << '\n';
+
+    // Output to the screen
+    _console << oss.str() << std::flush;
   }
-
-  // Output to the screen
-  _console << oss.str() << std::flush;
 }
 
 void

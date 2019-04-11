@@ -346,24 +346,31 @@ stringToEnum<RelationshipManagerType>(const std::string & s)
   return rm_type_to_enum[upper];
 }
 
+// Ignore warnings about switching on the |'d type
+#include "libmesh/ignore_warnings.h"
+
 // Definition in MooseTypes.h
 std::string
 stringify(const RelationshipManagerType & t)
 {
-  switch (t)
-  {
-    case RelationshipManagerType::DEFAULT:
-      return "DEFAULT";
-    case RelationshipManagerType::GEOMETRIC:
-      return "GEOMETRIC";
-    case RelationshipManagerType::ALGEBRAIC:
-      return "ALGEBRAIC";
-    case RelationshipManagerType::COUPLING:
-      return "COUPLING";
-    default:
-      return "ERROR";
-  }
+  // Cannot make a switch statement because the boolean logic doesn't work well with the class type
+  // enumeration and because Cody says so.
+  if (t == RelationshipManagerType::DEFAULT)
+    return "DEFAULT";
+  if (t == RelationshipManagerType::GEOMETRIC)
+    return "GEOMETRIC";
+  if (t == RelationshipManagerType::ALGEBRAIC)
+    return "ALGEBRAIC";
+  if (t == (RelationshipManagerType::GEOMETRIC | RelationshipManagerType::ALGEBRAIC))
+    return "GEOMETRIC and ALGEBRAIC";
+  if (t == RelationshipManagerType::COUPLING)
+    return "COUPLING";
+
+  mooseError("Unknown RelationshipManagerType");
 }
+
+// Turn the warnings back on
+#include "libmesh/restore_warnings.h"
 
 std::string
 stringify(const SolveType & t)

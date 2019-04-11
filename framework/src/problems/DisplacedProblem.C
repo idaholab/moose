@@ -57,6 +57,9 @@ DisplacedProblem::DisplacedProblem(const InputParameters & parameters)
     _sync_solutions_timer(registerTimedSection("syncSolutions", 5)),
     _update_geometric_search_timer(registerTimedSection("updateGeometricSearch", 3))
 {
+  // Possibly turn off default ghosting in libMesh
+  _eq.enable_default_ghosting(_default_ghosting);
+
   // TODO: Move newAssemblyArray further up to SubProblem so that we can use it here
   unsigned int n_threads = libMesh::n_threads();
 
@@ -115,6 +118,7 @@ DisplacedProblem::init()
   _displaced_aux.dofMap().attach_extra_send_list_function(&extraSendList, &_displaced_aux);
 
   _displaced_nl.init();
+
   _displaced_aux.init();
 
   {

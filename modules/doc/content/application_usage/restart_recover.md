@@ -19,12 +19,12 @@
 [Mesh]
   #MOOSE supports reading field data from ExodusII, XDA/XDR, and mesh checkpoint files (.e, .xda, .xdr, .cp)
   file = previous.e
-  #This method of restart is only supported on serial meshes  
-  distribution = serial  
+  #This method of restart is only supported on serial meshes
+  distribution = serial
 []
 
 [Variables]
-  [./nodal]  
+  [./nodal]
      family = LAGRANGE
      order = FIRST
      initial_from_file_var = nodal
@@ -33,7 +33,7 @@
 []
 
 [AuxVariables]
-  [./elemental]  
+  [./elemental]
      family = MONOMIAL
      order = CONSTANT
      initial_from_file_var = elemental
@@ -77,8 +77,8 @@ For a complete list see the Doxygen page for Checkpoint. * You should always set
 [Mesh]
   #Serial number should match corresponding Executioner parameter
   file = out_cp/0010_mesh.cpr
-  #This method of restart is only supported on serial meshes  
-  distribution = serial  
+  #This method of restart is only supported on serial meshes
+  distribution = serial
 []
 
 [Problem]
@@ -100,3 +100,9 @@ For a complete list see the Doxygen page for Checkpoint. * You should always set
 ## MultiApp Restart
 
 When running a multiapp simulation you do +not+ need to enable checkpoint output in each sub app input file. The master app stores the restart data for all sub apps in its file.
+
+## Time Control on Restart
+
+`start_time` can be continued on from the previous simulation, or can be overridden on restart. If this parameter is omitted from your input file
+the default will be to continue from the previous simulation. If you supply the parameter in your input file, the new simulation will begin from
+the supplied time.
