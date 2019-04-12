@@ -16,6 +16,9 @@ in the `phase` input parameter.
 This `Postprocessor` also provides the option to only calculate fluid mass below a
 certain saturation, which can be invoked using the `saturation_threshold` parameter.
 
+!alert note
+The flag `use_displaced_mesh = true` must be used in simulations experiencing solid-mechanical deformation.
+
 !syntax parameters /Postprocessors/PorousFlowFluidMass
 
 !syntax inputs /Postprocessors/PorousFlowFluidMass
