@@ -1,0 +1,7 @@
+[Tests]
+  [./waves]
+    type = 'Exodiff'
+    input = 'portbc_waves.i'
+    exodiff = 'portbc_waves_out.e'
+  []
+[]
