@@ -34,7 +34,7 @@ ADACInterface<compute_stage>::ADACInterface(const InputParameters & parameters)
     _dLdop(_variable_L
                ? &adGetADMaterialProperty<Real>(derivativePropertyNameFirst(_name_L, _var.name()))
                : nullptr),
-    _nvar(_coupled_standard_moose_vars.size()),
+    _nvar(Coupleable::_coupled_standard_moose_vars.size()),
     _dLdarg(_nvar),
     _gradarg(_nvar)
 {
