@@ -32,7 +32,7 @@ public:
   virtual void operator()(const MeshBase::const_element_iterator & range_begin,
                           const MeshBase::const_element_iterator & range_end,
                           processor_id_type p,
-                          map_type & coupled_elements) libmesh_override;
+                          map_type & coupled_elements) override;
 
   /**
    * According to the base class docs, "We call mesh_reinit() whenever
@@ -47,13 +47,13 @@ public:
    */
   virtual void redistribute() override { this->mesh_reinit(); }
 
-  void attachRelationshipManagersInternal(Moose::RelationshipManagerType rm_type) override;
-
   std::string getInfo() const override;
 
   virtual bool operator==(const RelationshipManager & other) const override;
 
 protected:
+  virtual void internalInit() override;
+
   /**
    * The Mesh we're calculating on
    */
@@ -61,8 +61,10 @@ protected:
 
   bool _has_attached_amg;
 
+  BoundaryName _master_boundary_name;
+  BoundaryName _slave_boundary_name;
+
   std::pair<BoundaryID, BoundaryID> _interface;
-  std::pair<SubdomainID, SubdomainID> _subdomain_pair;
 };
 
 #endif

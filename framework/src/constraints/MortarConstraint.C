@@ -22,18 +22,28 @@
 defineADBaseValidParams(
     MortarConstraint,
     MortarConstraintBase,
-    params.addParam<BoundaryID>("master_boundary_id", "The id of the master boundary sideset.");
-    params.addParam<BoundaryID>("slave_boundary_id", "The id of the slave boundary sideset.");
-    params.addParam<SubdomainID>("master_subdomain_id", "The id of the master subdomain.");
-    params.addParam<SubdomainID>("slave_subdomain_id", "The id of the slave subdomain.");
-    params.addParam<BoundaryName>("master_boundary_name",
-                                  "The name of the master boundary sideset.");
-    params.addParam<BoundaryName>("slave_boundary_name", "The name of the slave boundary sideset.");
-    params.addParam<SubdomainName>("master_subdomain_name", "The name of the master subdomain.");
-    params.addParam<SubdomainName>("slave_subdomain_name", "The name of the slave subdomain.");
-    params.registerRelationshipManagers("AugmentSparsityOnInterface");
+    params.addRequiredParam<BoundaryName>("master_boundary_name",
+                                          "The name of the master boundary sideset.");
+    params.addRequiredParam<BoundaryName>("slave_boundary_name",
+                                          "The name of the slave boundary sideset.");
+    params.addRequiredParam<SubdomainName>("master_subdomain_name",
+                                           "The name of the master subdomain.");
+    params.addRequiredParam<SubdomainName>("slave_subdomain_name",
+                                           "The name of the slave subdomain.");
     params.addRequiredParam<VariableName>("master_variable", "Variable on master surface");
     params.addParam<VariableName>("slave_variable", "Variable on master surface");
+    params.addRelationshipManager(
+        "AugmentSparsityOnInterface",
+        Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC,
+        [](const InputParameters & obj_params, InputParameteres & rm_params) {
+          rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
+          rm_params.set<bool>("slave_boundary_id") = obj_params.get<bool>("slave_boundary_id");
+          rm_params.set<bool>("master_boundary_id") = obj_params.get<bool>("master_boundary_id");
+          rm_params.set<bool>("slave_boundary_name") = obj_params.get<bool>("slave_boundary_name");
+          rm_params.set<bool>("master_boundary_name") =
+              obj_params.get<bool>("master_boundary_name");
+        });
+
     params.addParam<bool>(
         "periodic",
         false,
