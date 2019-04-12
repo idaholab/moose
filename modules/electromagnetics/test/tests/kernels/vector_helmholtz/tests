@@ -1,0 +1,7 @@
+[Tests]
+  [./vector_kernels]
+    type = 'Exodiff'
+    input = 'vector_kernels.i'
+    exodiff = 'vector_kernels_out.e'
+  [../]
+[]
