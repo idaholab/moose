@@ -55,6 +55,12 @@ public:
    * @return true if it nodal, otherwise false
    */
   virtual bool isNodal() const = 0;
+
+  /**
+   * @returns true if this is a vector-valued element, false otherwise.
+   */
+  virtual bool isVector() const = 0;
+
   virtual dof_id_type & nodalDofIndex() = 0;
   virtual dof_id_type & nodalDofIndexNeighbor() = 0;
 

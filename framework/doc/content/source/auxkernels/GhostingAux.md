@@ -8,6 +8,8 @@
 
 At any one time it will only show you the ghosted elements for one processor ID.
 
+Normally, this class shouldn't be used directly. Instead set it up through the (DisplayGhostingAction.md).
+
 !row!
 !col! class=s12 m6 l6
 

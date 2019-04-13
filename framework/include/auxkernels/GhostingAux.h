@@ -14,30 +14,35 @@
 
 #include "libmesh/ghosting_functor.h"
 
-// Forward Declarations
 class GhostingAux;
+class GhostingUserObject;
 
 template <>
 InputParameters validParams<GhostingAux>();
 
-/**
- *
- */
 class GhostingAux : public AuxKernel
 {
 public:
   GhostingAux(const InputParameters & parameters);
 
-  virtual void initialize() override;
-
 protected:
   virtual Real computeValue() override;
+  virtual void precalculateValue() override;
 
   /// The PID to show the ghosting for
   processor_id_type _pid;
 
   /// The type of ghosting functor to get
-  int _functor_type;
+  Moose::RelationshipManagerType _rm_type;
+
+  /// Whether or not to include local elements in the display field
+  bool _include_local;
+
+  /// precalculated element value
+  Real _value;
+
+  /// The reference to the ghosting user object
+  const GhostingUserObject & _ghost_uo;
 
   /// Ghosted elems
   libMesh::GhostingFunctor::map_type _ghosted_elems;

@@ -43,6 +43,8 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("EmptyAction", "BCs/Pressure");
   registerSyntax("PressureAction", "BCs/Pressure/*");
+  registerSyntax("EmptyAction", "BCs/InclinedNoDisplacementBC");
+  registerSyntax("InclinedNoDisplacementBCAction", "BCs/InclinedNoDisplacementBC/*");
   registerSyntax("EmptyAction", "BCs/CoupledPressure");
   registerSyntax("CoupledPressureAction", "BCs/CoupledPressure/*");
 

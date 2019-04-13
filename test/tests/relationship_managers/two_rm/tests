@@ -14,4 +14,22 @@
     requirement = "MOOSE shall allow multiple active RelationshipManagers to manage ghosting for the same object"
     issues = "#10455 #11981"
   [../]
+
+  [./evaluable_neighbors_distributed]
+    type = 'Exodiff'
+    input = 'two_rm.i'
+    exodiff = 'two_rm_dist_out.e'
+    cli_args = 'Mesh/parallel_type=distributed Outputs/file_base=two_rm_dist_out'
+
+    petsc_version = '>3.8'
+    mesh_mode = 'DISTRIBUTED'
+
+    min_parallel = 3
+    max_parallel = 3
+
+    design = "relationship_managers.md"
+    requirement = "MOOSE shall allow multiple active RelationshipManagers to manage ghosting for the same object"
+    issues = "#10455 #11981"
+  [../]
+
 []

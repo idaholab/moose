@@ -34,33 +34,17 @@
       function = '-1000*t'
     [../]
   [../]
-  [./right_x]
-    type = PenaltyInclinedBC
-    variable = disp_x
-    boundary = right
-    penalty = 1.0e8
-    component = 0
-  [../]
-  [./right_y]
-    type = PenaltyInclinedBC
-    variable = disp_y
-    boundary = right
-    penalty = 1.0e8
-    component = 1
-  [../]
-  [./bottom_x]
-    type = PenaltyInclinedBC
-    variable = disp_x
-    boundary = bottom
-    penalty = 1.0e8
-    component = 0
-  [../]
-  [./bottom_y]
-    type = PenaltyInclinedBC
-    variable = disp_y
-    boundary = bottom
-    penalty = 1.0e8
-    component = 1
+  [./InclinedNoDisplacementBC]
+    [./right]
+      boundary = right
+      penalty = 1.0e8
+      displacements = 'disp_x disp_y'
+    [../]
+    [./bottom]
+      boundary = bottom
+      penalty = 1.0e8
+      displacements = 'disp_x disp_y'
+    [../]
   [../]
 []
 

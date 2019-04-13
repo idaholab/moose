@@ -380,9 +380,8 @@ MooseVariableFE<OutputType>::reinitAux()
   {
     // FIXME: check if the following is equivalent with '_nodal_dof_index = _dof_indices[0];'?
     _nodal_dof_index = _elem->dof_number(_sys.number(), _var_num, 0);
-    libmesh_assert(_dof_indices.size());
-    _dof_values.resize(_dof_indices.size());
-    _sys.currentSolution()->get(_dof_indices, &_dof_values[0]);
+
+    fetchDoFValues();
 
     for (auto & dof_u : _vector_tags_dof_u)
       dof_u.resize(_dof_indices.size());
@@ -407,9 +406,7 @@ MooseVariableFE<OutputType>::reinitAuxNeighbor()
     {
       _nodal_dof_index_neighbor = _neighbor->dof_number(_sys.number(), _var_num, 0);
 
-      libmesh_assert(_dof_indices_neighbor.size());
-      _dof_values_neighbor.resize(_dof_indices_neighbor.size());
-      _sys.currentSolution()->get(_dof_indices_neighbor, &_dof_values_neighbor[0]);
+      fetchDoFValuesNeighbor();
 
       _neighbor_has_dof_indices = true;
     }
@@ -905,14 +902,17 @@ MooseVariableFE<OutputType>::computeValuesHelper(
     const typename VariableTestGradientType<OutputType, JACOBIAN>::type & ad_grad_phi)
 
 {
+  unsigned int num_dofs = _dof_indices.size();
+
+  if (num_dofs > 0)
+    fetchDoFValues();
+
   bool is_transient = _subproblem.isTransient();
   unsigned int nqp = qrule->n_points();
-  auto safe_access_tagged_vectors = _sys.subproblem().safeAccessTaggedVectors();
-  auto safe_access_tagged_matrices = _sys.subproblem().safeAccessTaggedMatrices();
-  auto & active_coupleable_matrix_tags =
-      _sys.subproblem().getActiveFEVariableCoupleableMatrixTags(_tid);
   auto & active_coupleable_vector_tags =
       _sys.subproblem().getActiveFEVariableCoupleableVectorTags(_tid);
+  auto & active_coupleable_matrix_tags =
+      _sys.subproblem().getActiveFEVariableCoupleableMatrixTags(_tid);
 
   _u.resize(nqp);
   _grad_u.resize(nqp);
@@ -1065,254 +1065,106 @@ MooseVariableFE<OutputType>::computeValuesHelper(
     }
   }
 
-  unsigned int num_dofs = _dof_indices.size();
-
-  if (_need_dof_values)
-    _dof_values.resize(num_dofs);
-
-  if (_need_dof_values_previous_nl)
-    _dof_values_previous_nl.resize(num_dofs);
-
-  if (is_transient)
-  {
-    if (_need_dof_values_old)
-      _dof_values_old.resize(num_dofs);
-    if (_need_dof_values_older)
-      _dof_values_older.resize(num_dofs);
-    if (_need_dof_values_dot)
-      _dof_values_dot.resize(num_dofs);
-    if (_need_dof_values_dotdot)
-      _dof_values_dotdot.resize(num_dofs);
-    if (_need_dof_values_dot_old)
-      _dof_values_dot_old.resize(num_dofs);
-    if (_need_dof_values_dotdot_old)
-      _dof_values_dotdot_old.resize(num_dofs);
-  }
-
-  const NumericVector<Real> & current_solution = *_sys.currentSolution();
-  const NumericVector<Real> & solution_old = _sys.solutionOld();
-  const NumericVector<Real> & solution_older = _sys.solutionOlder();
-  const NumericVector<Real> * solution_prev_nl = _sys.solutionPreviousNewton();
-  const NumericVector<Real> * u_dot = _sys.solutionUDot();
-  const NumericVector<Real> * u_dotdot = _sys.solutionUDotDot();
-  const NumericVector<Real> * u_dot_old = _sys.solutionUDotOld();
-  const NumericVector<Real> * u_dotdot_old = _sys.solutionUDotDotOld();
-  const Real & du_dot_du = _sys.duDotDu();
-  const Real & du_dotdot_du = _sys.duDotDotDu();
-
-  dof_id_type idx = 0;
-  Real soln_local = 0;
-  Real tag_local_value = 0;
-  Real soln_old_local = 0;
-  Real soln_older_local = 0;
-  Real soln_previous_nl_local = 0;
-  Real u_dot_local = 0;
-  Real u_dotdot_local = 0;
-  Real u_dot_old_local = 0;
-  Real u_dotdot_old_local = 0;
-
-  const OutputType * phi_local = NULL;
-  const typename OutputTools<OutputType>::OutputGradient * dphi_qp = NULL;
-  const typename OutputTools<OutputType>::OutputSecond * d2phi_local = NULL;
-  const OutputType * curl_phi_local = NULL;
-
-  typename OutputTools<OutputType>::OutputGradient * grad_u_qp = NULL;
-  typename OutputTools<OutputType>::OutputGradient * grad_u_old_qp = NULL;
-  typename OutputTools<OutputType>::OutputGradient * grad_u_older_qp = NULL;
-  typename OutputTools<OutputType>::OutputGradient * grad_u_previous_nl_qp = NULL;
-
-  typename OutputTools<OutputType>::OutputSecond * second_u_qp = NULL;
-  typename OutputTools<OutputType>::OutputSecond * second_u_old_qp = NULL;
-  typename OutputTools<OutputType>::OutputSecond * second_u_older_qp = NULL;
-  typename OutputTools<OutputType>::OutputSecond * second_u_previous_nl_qp = NULL;
+  bool second_required =
+      _need_second || _need_second_old || _need_second_older || _need_second_previous_nl;
+  bool curl_required = _need_curl || _need_curl_old;
 
   for (unsigned int i = 0; i < num_dofs; i++)
   {
-    idx = _dof_indices[i];
-    soln_local = current_solution(idx);
-
-    if (_need_dof_values)
-      _dof_values[i] = soln_local;
-
-    if (_need_u_previous_nl || _need_grad_previous_nl || _need_second_previous_nl ||
-        _need_dof_values_previous_nl)
-      soln_previous_nl_local = (*solution_prev_nl)(idx);
-
-    if (_need_dof_values_previous_nl)
-      _dof_values_previous_nl[i] = soln_previous_nl_local;
-
-    if (is_transient)
-    {
-      if (_need_u_old || _need_grad_old || _need_second_old || _need_dof_values_old)
-        soln_old_local = solution_old(idx);
-
-      if (_need_u_older || _need_grad_older || _need_second_older || _need_dof_values_older)
-        soln_older_local = solution_older(idx);
-
-      if (_need_dof_values_old)
-        _dof_values_old[i] = soln_old_local;
-      if (_need_dof_values_older)
-        _dof_values_older[i] = soln_older_local;
-
-      if (u_dot)
-      {
-        u_dot_local = (*u_dot)(idx);
-        if (_need_dof_values_dot)
-          _dof_values_dot[i] = u_dot_local;
-      }
-
-      if (u_dotdot)
-      {
-        u_dotdot_local = (*u_dotdot)(idx);
-        if (_need_dof_values_dotdot)
-          _dof_values_dotdot[i] = u_dotdot_local;
-      }
-
-      if (u_dot_old)
-      {
-        u_dot_old_local = (*u_dot_old)(idx);
-        if (_need_dof_values_dot_old)
-          _dof_values_dot_old[i] = u_dot_old_local;
-      }
-
-      if (u_dotdot_old)
-      {
-        u_dotdot_old_local = (*u_dotdot_old)(idx);
-        if (_need_dof_values_dotdot_old)
-          _dof_values_dotdot_old[i] = u_dotdot_old_local;
-      }
-    }
-
     for (unsigned int qp = 0; qp < nqp; qp++)
     {
-      phi_local = &phi[i][qp];
-      dphi_qp = &grad_phi[i][qp];
+      const OutputType phi_local = phi[i][qp];
+      const typename OutputTools<OutputType>::OutputGradient dphi_qp = grad_phi[i][qp];
 
-      grad_u_qp = &_grad_u[qp];
+      _u[qp] += phi_local * _dof_values[i];
 
-      if (_need_grad_previous_nl)
-        grad_u_previous_nl_qp = &_grad_u_previous_nl[qp];
+      _grad_u[qp].add_scaled(dphi_qp, _dof_values[i]);
 
       if (is_transient)
       {
+        if (_need_u_old)
+          _u_old[qp] += phi_local * _dof_values_old[i];
+
+        if (_need_u_older)
+          _u_older[qp] += phi_local * _dof_values_older[i];
+
         if (_need_grad_old)
-          grad_u_old_qp = &_grad_u_old[qp];
+          _grad_u_old[qp].add_scaled(dphi_qp, _dof_values_old[i]);
 
         if (_need_grad_older)
-          grad_u_older_qp = &_grad_u_older[qp];
+          _grad_u_older[qp].add_scaled(dphi_qp, _dof_values_older[i]);
+
+        if (_need_u_dot)
+          _u_dot[qp] += phi_local * _dof_values_dot[i];
+
+        if (_need_u_dotdot)
+          _u_dotdot[qp] += phi_local * _dof_values_dotdot[i];
+
+        if (_need_u_dot_old)
+          _u_dot_old[qp] += phi_local * _dof_values_dot_old[i];
+
+        if (_need_u_dotdot_old)
+          _u_dotdot_old[qp] += phi_local * _dof_values_dotdot_old[i];
+
+        if (_need_grad_dot)
+          _grad_u_dot[qp].add_scaled(dphi_qp, _dof_values_dot[i]);
+
+        if (_need_grad_dotdot)
+          _grad_u_dotdot[qp].add_scaled(dphi_qp, _dof_values_dotdot[i]);
+
+        if (_need_du_dot_du)
+          _du_dot_du[qp] = _dof_du_dot_du[i];
+
+        if (_need_du_dotdot_du)
+          _du_dotdot_du[qp] = _dof_du_dotdot_du[i];
       }
 
-      if (_need_second || _need_second_old || _need_second_older || _need_second_previous_nl)
+      if (second_required)
       {
-        d2phi_local = &(*second_phi)[i][qp];
+        libmesh_assert(second_phi);
+        const typename OutputTools<OutputType>::OutputSecond d2phi_local = (*second_phi)[i][qp];
 
         if (_need_second)
-        {
-          second_u_qp = &_second_u[qp];
-          second_u_qp->add_scaled(*d2phi_local, soln_local);
-        }
+          _second_u[qp].add_scaled(d2phi_local, _dof_values[i]);
 
         if (_need_second_previous_nl)
-        {
-          second_u_previous_nl_qp = &_second_u_previous_nl[qp];
-          second_u_previous_nl_qp->add_scaled(*d2phi_local, soln_previous_nl_local);
-        }
+          _second_u_previous_nl[qp].add_scaled(d2phi_local, _dof_values_previous_nl[i]);
 
         if (is_transient)
         {
           if (_need_second_old)
-            second_u_old_qp = &_second_u_old[qp];
+            _second_u_old[qp].add_scaled(d2phi_local, _dof_values_old[i]);
 
           if (_need_second_older)
-            second_u_older_qp = &_second_u_older[qp];
+            _second_u_older[qp].add_scaled(d2phi_local, _dof_values_older[i]);
         }
       }
 
-      if (_need_curl || _need_curl_old)
+      if (curl_required)
       {
-        curl_phi_local = &(*curl_phi)[i][qp];
+        libmesh_assert(curl_phi);
+        const OutputType curl_phi_local = (*curl_phi)[i][qp];
 
         if (_need_curl)
-          _curl_u[qp] += *curl_phi_local * soln_local;
+          _curl_u[qp] += curl_phi_local * _dof_values[i];
 
         if (is_transient && _need_curl_old)
-          _curl_u_old[qp] += *curl_phi_local * soln_old_local;
+          _curl_u_old[qp] += curl_phi_local * _dof_values_old[i];
       }
 
-      _u[qp] += *phi_local * soln_local;
+      for (auto tag : active_coupleable_vector_tags)
+        if (_need_vector_tag_u[tag])
+          _vector_tag_u[tag][qp] += phi_local * _vector_tags_dof_u[tag][i];
 
-      if (safe_access_tagged_vectors)
-      {
-        for (auto tag : active_coupleable_vector_tags)
-          if (_need_vector_tag_u[tag] && _sys.hasVector(tag) && _sys.getVector(tag).closed())
-          {
-            tag_local_value = _sys.getVector(tag)(idx);
-            _vector_tag_u[tag][qp] += *phi_local * tag_local_value;
-          }
-      }
-
-      if (safe_access_tagged_matrices)
-      {
-        for (auto tag : active_coupleable_matrix_tags)
-          if (_need_matrix_tag_u[tag] && _sys.hasMatrix(tag) && _sys.getMatrix(tag).closed())
-          {
-            Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-            tag_local_value = _sys.getMatrix(tag)(idx, idx);
-            _matrix_tag_u[tag][qp] += *phi_local * tag_local_value;
-          }
-      }
-
-      grad_u_qp->add_scaled(*dphi_qp, soln_local);
+      for (auto tag : active_coupleable_matrix_tags)
+        if (_need_matrix_tag_u[tag])
+          _matrix_tag_u[tag][qp] += phi_local * _matrix_tags_dof_u[tag][i];
 
       if (_need_u_previous_nl)
-        _u_previous_nl[qp] += *phi_local * soln_previous_nl_local;
+        _u_previous_nl[qp] += phi_local * _dof_values_previous_nl[i];
+
       if (_need_grad_previous_nl)
-        grad_u_previous_nl_qp->add_scaled(*dphi_qp, soln_previous_nl_local);
-
-      if (is_transient)
-      {
-        if (_need_u_dot)
-          _u_dot[qp] += *phi_local * u_dot_local;
-
-        if (_need_u_dotdot)
-          _u_dotdot[qp] += *phi_local * u_dotdot_local;
-
-        if (_need_u_dot_old)
-          _u_dot_old[qp] += *phi_local * u_dot_old_local;
-
-        if (_need_u_dotdot_old)
-          _u_dotdot_old[qp] += *phi_local * u_dotdot_old_local;
-
-        if (_need_du_dot_du)
-          _du_dot_du[qp] = du_dot_du;
-
-        if (_need_du_dotdot_du)
-          _du_dotdot_du[qp] = du_dotdot_du;
-
-        if (_need_grad_dot)
-          _grad_u_dot[qp].add_scaled(*dphi_qp, u_dot_local);
-
-        if (_need_grad_dotdot)
-          _grad_u_dotdot[qp].add_scaled(*dphi_qp, u_dotdot_local);
-
-        if (_need_u_old)
-          _u_old[qp] += *phi_local * soln_old_local;
-
-        if (_need_u_older)
-          _u_older[qp] += *phi_local * soln_older_local;
-
-        if (_need_grad_old)
-          grad_u_old_qp->add_scaled(*dphi_qp, soln_old_local);
-
-        if (_need_grad_older)
-          grad_u_older_qp->add_scaled(*dphi_qp, soln_older_local);
-
-        if (_need_second_old)
-          second_u_old_qp->add_scaled(*d2phi_local, soln_old_local);
-
-        if (_need_second_older)
-          second_u_older_qp->add_scaled(*d2phi_local, soln_older_local);
-      }
+        _grad_u_previous_nl[qp].add_scaled(dphi_qp, _dof_values_previous_nl[i]);
     }
   }
 
@@ -1515,6 +1367,11 @@ MooseVariableFE<OutputType>::computeNeighborValuesHelper(QBase *& qrule,
                                                          const FieldVariablePhiGradient & grad_phi,
                                                          const FieldVariablePhiSecond *& second_phi)
 {
+  unsigned int num_dofs = _dof_indices_neighbor.size();
+
+  if (num_dofs > 0)
+    fetchDoFValuesNeighbor();
+
   bool is_transient = _subproblem.isTransient();
   unsigned int nqp = qrule->n_points();
 
@@ -1622,156 +1479,75 @@ MooseVariableFE<OutputType>::computeNeighborValuesHelper(QBase *& qrule,
     }
   }
 
-  unsigned int num_dofs = _dof_indices_neighbor.size();
-
-  if (_need_dof_values_neighbor)
-    _dof_values_neighbor.resize(num_dofs);
-  if (is_transient)
-  {
-    if (_need_dof_values_old_neighbor)
-      _dof_values_old_neighbor.resize(num_dofs);
-    if (_need_dof_values_older_neighbor)
-      _dof_values_older_neighbor.resize(num_dofs);
-    if (_need_dof_values_dot_neighbor)
-      _dof_values_dot_neighbor.resize(num_dofs);
-    if (_need_dof_values_dotdot_neighbor)
-      _dof_values_dotdot_neighbor.resize(num_dofs);
-    if (_need_dof_values_dot_old_neighbor)
-      _dof_values_dot_old_neighbor.resize(num_dofs);
-    if (_need_dof_values_dotdot_old_neighbor)
-      _dof_values_dotdot_old_neighbor.resize(num_dofs);
-  }
-
-  const NumericVector<Real> & current_solution = *_sys.currentSolution();
-  const NumericVector<Real> & solution_old = _sys.solutionOld();
-  const NumericVector<Real> & solution_older = _sys.solutionOlder();
-  const NumericVector<Real> * u_dot = _sys.solutionUDot();
-  const NumericVector<Real> * u_dotdot = _sys.solutionUDotDot();
-  const NumericVector<Real> * u_dot_old = _sys.solutionUDotOld();
-  const NumericVector<Real> * u_dotdot_old = _sys.solutionUDotDotOld();
-  const Real & du_dot_du = _sys.duDotDu();
-  const Real & du_dotdot_du = _sys.duDotDotDu();
-
-  dof_id_type idx;
-  Real soln_local;
-  Real soln_old_local = 0;
-  Real soln_older_local = 0;
-  Real u_dot_local = 0;
-  Real u_dotdot_local = 0;
-  Real u_dot_old_local = 0;
-  Real u_dotdot_old_local = 0;
-
-  OutputType phi_local;
-  typename OutputTools<OutputType>::OutputGradient dphi_local;
-  typename OutputTools<OutputType>::OutputSecond d2phi_local;
+  bool second_required =
+      _need_second_neighbor || _need_second_old_neighbor || _need_second_older_neighbor;
 
   for (unsigned int i = 0; i < num_dofs; ++i)
   {
-    idx = _dof_indices_neighbor[i];
-    soln_local = current_solution(idx);
-
-    if (_need_dof_values_neighbor)
-      _dof_values_neighbor[i] = soln_local;
-
-    if (is_transient)
-    {
-      if (_need_u_old_neighbor || _need_dof_values_old_neighbor)
-        soln_old_local = solution_old(idx);
-
-      if (_need_u_older_neighbor || _need_dof_values_older_neighbor)
-        soln_older_local = solution_older(idx);
-
-      if (_need_dof_values_old_neighbor)
-        _dof_values_old_neighbor[i] = soln_old_local;
-      if (_need_dof_values_older_neighbor)
-        _dof_values_older_neighbor[i] = soln_older_local;
-
-      if (u_dot)
-      {
-        u_dot_local = (*u_dot)(idx);
-        if (_need_dof_values_dot_neighbor)
-          _dof_values_dot_neighbor[i] = u_dot_local;
-      }
-
-      if (u_dotdot)
-      {
-        u_dotdot_local = (*u_dotdot)(idx);
-        if (_need_dof_values_dotdot_neighbor)
-          _dof_values_dotdot_neighbor[i] = u_dotdot_local;
-      }
-
-      if (u_dot_old)
-      {
-        u_dot_old_local = (*u_dot_old)(idx);
-        if (_need_dof_values_dot_old_neighbor)
-          _dof_values_dot_old_neighbor[i] = u_dot_old_local;
-      }
-
-      if (u_dotdot_old)
-      {
-        u_dotdot_old_local = (*u_dotdot_old)(idx);
-        if (_need_dof_values_dotdot_old_neighbor)
-          _dof_values_dotdot_old_neighbor[i] = u_dotdot_old_local;
-      }
-    }
-
     for (unsigned int qp = 0; qp < nqp; ++qp)
     {
-      phi_local = phi[i][qp];
-      dphi_local = grad_phi[i][qp];
+      OutputType phi_local = phi[i][qp];
+      typename OutputTools<OutputType>::OutputGradient dphi_local = grad_phi[i][qp];
 
-      if (_need_second_neighbor || _need_second_old_neighbor || _need_second_older_neighbor)
-        d2phi_local = (*second_phi)[i][qp];
+      _u_neighbor[qp] += phi_local * _dof_values_neighbor[i];
 
-      _u_neighbor[qp] += phi_local * soln_local;
-      _grad_u_neighbor[qp] += dphi_local * soln_local;
-
-      if (_need_second_neighbor)
-        _second_u_neighbor[qp] += d2phi_local * soln_local;
+      _grad_u_neighbor[qp] += dphi_local * _dof_values_neighbor[i];
 
       if (is_transient)
       {
         if (_need_u_dot_neighbor)
-          _u_dot_neighbor[qp] += phi_local * u_dot_local;
+          _u_dot_neighbor[qp] += phi_local * _dof_values_dot_neighbor[i];
 
         if (_need_u_dotdot_neighbor)
-          _u_dotdot_neighbor[qp] += phi_local * u_dotdot_local;
+          _u_dotdot_neighbor[qp] += phi_local * _dof_values_dotdot_neighbor[i];
 
         if (_need_u_dot_old_neighbor)
-          _u_dot_old_neighbor[qp] += phi_local * u_dot_old_local;
+          _u_dot_old_neighbor[qp] += phi_local * _dof_values_dot_old_neighbor[i];
 
         if (_need_u_dotdot_old_neighbor)
-          _u_dotdot_old_neighbor[qp] += phi_local * u_dotdot_old_local;
+          _u_dotdot_old_neighbor[qp] += phi_local * _dof_values_dotdot_old_neighbor[i];
 
         if (_need_du_dot_du_neighbor)
-          _du_dot_du_neighbor[qp] = du_dot_du;
+          _du_dot_du_neighbor[qp] = _dof_du_dot_du_neighbor[i];
 
         if (_need_du_dotdot_du_neighbor)
-          _du_dotdot_du_neighbor[qp] = du_dotdot_du;
+          _du_dotdot_du_neighbor[qp] = _dof_du_dotdot_du_neighbor[i];
 
         if (_need_grad_neighbor_dot)
-          _grad_u_neighbor_dot[qp].add_scaled(dphi_local, u_dot_local);
+          _grad_u_neighbor_dot[qp].add_scaled(dphi_local, _dof_values_dot_neighbor[i]);
 
         if (_need_grad_neighbor_dotdot)
-          _grad_u_neighbor_dotdot[qp].add_scaled(dphi_local, u_dotdot_local);
+          _grad_u_neighbor_dotdot[qp].add_scaled(dphi_local, _dof_values_dotdot_neighbor[i]);
 
         if (_need_u_old_neighbor)
-          _u_old_neighbor[qp] += phi_local * soln_old_local;
+          _u_old_neighbor[qp] += phi_local * _dof_values_old_neighbor[i];
 
         if (_need_u_older_neighbor)
-          _u_older_neighbor[qp] += phi_local * soln_older_local;
+          _u_older_neighbor[qp] += phi_local * _dof_values_older_neighbor[i];
 
         if (_need_grad_old_neighbor)
-          _grad_u_old_neighbor[qp] += dphi_local * soln_old_local;
+          _grad_u_old_neighbor[qp] += dphi_local * _dof_values_old_neighbor[i];
 
         if (_need_grad_older_neighbor)
-          _grad_u_older_neighbor[qp] += dphi_local * soln_older_local;
+          _grad_u_older_neighbor[qp] += dphi_local * _dof_values_older_neighbor[i];
+      }
 
-        if (_need_second_old_neighbor)
-          _second_u_old_neighbor[qp] += d2phi_local * soln_old_local;
+      if (second_required)
+      {
+        libmesh_assert(second_phi);
+        typename OutputTools<OutputType>::OutputSecond d2phi_local = (*second_phi)[i][qp];
 
-        if (_need_second_older_neighbor)
-          _second_u_older_neighbor[qp] += d2phi_local * soln_older_local;
+        if (_need_second_neighbor)
+          _second_u_neighbor[qp] += d2phi_local * _dof_values_neighbor[i];
+
+        if (is_transient)
+        {
+          if (_need_second_old_neighbor)
+            _second_u_old_neighbor[qp] += d2phi_local * _dof_values_old_neighbor[i];
+
+          if (_need_second_older_neighbor)
+            _second_u_older_neighbor[qp] += d2phi_local * _dof_values_older_neighbor[i];
+        }
       }
     }
   }
@@ -2064,44 +1840,111 @@ template <typename OutputType>
 void
 MooseVariableFE<OutputType>::computeNodalValues()
 {
-  auto safe_access_tagged_vectors = _sys.subproblem().safeAccessTaggedVectors();
-  auto safe_access_tagged_matrices = _sys.subproblem().safeAccessTaggedMatrices();
-  auto & active_coupleable_matrix_tags =
-      _sys.subproblem().getActiveFEVariableCoupleableMatrixTags(_tid);
-  auto & active_coupleable_vector_tags =
-      _sys.subproblem().getActiveFEVariableCoupleableVectorTags(_tid);
-
   if (_has_dof_indices)
   {
-    auto n = _dof_indices.size();
-    mooseAssert(n, "There must be a non-zero number of degrees of freedom");
-    _dof_values.resize(n);
+    fetchDoFValues();
+    assignNodalValue();
 
-    _sys.currentSolution()->get(_dof_indices, &_dof_values[0]);
-    for (decltype(n) i = 0; i < n; ++i)
-      assignNodalValue(_dof_values[i], i);
+    if (_need_ad && _subproblem.currentlyComputingJacobian())
+      fetchADDoFValues();
+  }
+  else
+    zeroSizeDofValues();
+}
 
-    for (auto tag : active_coupleable_vector_tags)
-      _vector_tags_dof_u[tag].resize(n);
+template <typename OutputType>
+void
+MooseVariableFE<OutputType>::computeNodalNeighborValues()
+{
+  if (_neighbor_has_dof_indices)
+  {
+    fetchDoFValuesNeighbor();
+    assignNodalValueNeighbor();
+  }
+  else
+    zeroSizeDofValuesNeighbor();
+}
 
-    for (auto tag : active_coupleable_matrix_tags)
-      _matrix_tags_dof_u[tag].resize(n);
+template <typename OutputType>
+void
+MooseVariableFE<OutputType>::fetchDoFValues()
+{
+  bool is_transient = _subproblem.isTransient();
 
-    if (safe_access_tagged_vectors)
+  auto n = _dof_indices.size();
+  libmesh_assert(n);
+
+  _dof_values.resize(n);
+  _sys.currentSolution()->get(_dof_indices, &_dof_values[0]);
+
+  if (is_transient)
+  {
+    if (_need_u_old || _need_grad_old || _need_second_old || _need_curl_old || _need_dof_values_old)
     {
-      for (auto tag : active_coupleable_vector_tags)
-        if (_need_vector_tag_dof_u[tag] && _sys.hasVector(tag) && _sys.getVector(tag).closed())
+      _dof_values_old.resize(n);
+      _sys.solutionOld().get(_dof_indices, &_dof_values_old[0]);
+    }
+    if (_need_u_older || _need_grad_older || _need_second_older || _need_dof_values_older)
+    {
+      _dof_values_older.resize(n);
+      _sys.solutionOlder().get(_dof_indices, &_dof_values_older[0]);
+    }
+    if (_need_u_dot || _need_grad_dot || _need_dof_values_dot)
+    {
+      libmesh_assert(_sys.solutionUDot());
+      _dof_values_dot.resize(n);
+      _sys.solutionUDot()->get(_dof_indices, &_dof_values_dot[0]);
+    }
+    if (_need_u_dotdot || _need_grad_dotdot || _need_dof_values_dotdot)
+    {
+      libmesh_assert(_sys.solutionUDotDot());
+      _dof_values_dotdot.resize(n);
+      _sys.solutionUDotDot()->get(_dof_indices, &_dof_values_dotdot[0]);
+    }
+    if (_need_u_dot_old || _need_dof_values_dot_old)
+    {
+      libmesh_assert(_sys.solutionUDotOld());
+      _dof_values_dot_old.resize(n);
+      _sys.solutionUDotOld()->get(_dof_indices, &_dof_values_dot_old[0]);
+    }
+    if (_need_u_dotdot_old || _need_dof_values_dotdot_old)
+    {
+      libmesh_assert(_sys.solutionUDotDotOld());
+      _dof_values_dotdot_old.resize(n);
+      _sys.solutionUDotDotOld()->get(_dof_indices, &_dof_values_dotdot_old[0]);
+    }
+  }
+
+  if (_need_u_previous_nl || _need_grad_previous_nl || _need_second_previous_nl ||
+      _need_dof_values_previous_nl)
+  {
+    _dof_values_previous_nl.resize(n);
+    _sys.solutionPreviousNewton()->get(_dof_indices, &_dof_values_previous_nl[0]);
+  }
+
+  if (_sys.subproblem().safeAccessTaggedVectors())
+  {
+    auto & active_coupleable_vector_tags =
+        _sys.subproblem().getActiveFEVariableCoupleableVectorTags(_tid);
+    for (auto tag : active_coupleable_vector_tags)
+      if (_need_vector_tag_u[tag] || _need_vector_tag_dof_u[tag])
+        if (_sys.hasVector(tag) && _sys.getVector(tag).closed())
         {
           auto & vec = _sys.getVector(tag);
+          _vector_tags_dof_u[tag].resize(n);
           vec.get(_dof_indices, &_vector_tags_dof_u[tag][0]);
         }
-    }
+  }
 
-    if (safe_access_tagged_matrices)
+  if (_sys.subproblem().safeAccessTaggedMatrices())
+  {
+    auto & active_coupleable_matrix_tags =
+        _sys.subproblem().getActiveFEVariableCoupleableMatrixTags(_tid);
+    for (auto tag : active_coupleable_matrix_tags)
     {
-      for (auto tag : active_coupleable_matrix_tags)
-        if (_need_matrix_tag_dof_u[tag] && _sys.hasMatrix(tag) && _sys.matrixTagActive(tag) &&
-            _sys.getMatrix(tag).closed())
+      _matrix_tags_dof_u[tag].resize(n);
+      if (_need_matrix_tag_dof_u[tag] || _need_matrix_tag_u[tag])
+        if (_sys.hasMatrix(tag) && _sys.matrixTagActive(tag) && _sys.getMatrix(tag).closed())
         {
           auto & mat = _sys.getMatrix(tag);
           for (unsigned i = 0; i < _dof_indices.size(); i++)
@@ -2111,178 +1954,130 @@ MooseVariableFE<OutputType>::computeNodalValues()
           }
         }
     }
-
-    if (_need_dof_values_previous_nl)
-    {
-      _dof_values_previous_nl.resize(n);
-      _sys.solutionPreviousNewton()->get(_dof_indices, &_dof_values_previous_nl[0]);
-      for (decltype(n) i = 0; i < n; ++i)
-        assignNodalValuePreviousNL(_dof_values_previous_nl[i], i);
-    }
-    if (_subproblem.isTransient())
-    {
-      _dof_values_old.resize(n);
-      _dof_values_older.resize(n);
-      _sys.solutionOld().get(_dof_indices, &_dof_values_old[0]);
-      _sys.solutionOlder().get(_dof_indices, &_dof_values_older[0]);
-      for (decltype(n) i = 0; i < n; ++i)
-      {
-        assignNodalValueOld(_dof_values_old[i], i);
-        assignNodalValueOlder(_dof_values_older[i], i);
-      }
-
-      _dof_values_dot.resize(n);
-      _dof_values_dotdot.resize(n);
-      _dof_values_dot_old.resize(n);
-      _dof_values_dotdot_old.resize(n);
-      _dof_du_dot_du.resize(n);
-      _dof_du_dotdot_du.resize(n);
-
-      if (_sys.solutionUDot())
-        _dof_values_dot[0] = (*_sys.solutionUDot())(_dof_indices[0]);
-      if (_sys.solutionUDotDot())
-        _dof_values_dotdot[0] = (*_sys.solutionUDotDot())(_dof_indices[0]);
-      if (_sys.solutionUDotOld())
-        _dof_values_dot_old[0] = (*_sys.solutionUDotOld())(_dof_indices[0]);
-      if (_sys.solutionUDotDotOld())
-        _dof_values_dotdot_old[0] = (*_sys.solutionUDotDotOld())(_dof_indices[0]);
-      _dof_du_dot_du[0] = _sys.duDotDu();
-      _dof_du_dotdot_du[0] = _sys.duDotDotDu();
-
-      for (decltype(n) i = 0; i < n; ++i)
-      {
-        assignNodalValueDot(_dof_values_dot[i], i);
-        assignNodalValueDotDot(_dof_values_dotdot[i], i);
-        assignNodalValueDotOld(_dof_values_dot_old[i], i);
-        assignNodalValueDotDotOld(_dof_values_dotdot_old[i], i);
-      }
-    }
-
-    if (_need_ad && _subproblem.currentlyComputingJacobian())
-    {
-      _ad_dof_values.resize(n);
-      auto ad_offset = _var_num * _sys.getMaxVarNDofsPerNode();
-
-      for (decltype(n) i = 0; i < n; ++i)
-      {
-        _ad_dof_values[i] = _dof_values[i];
-        if (_var_kind == Moose::VAR_NONLINEAR)
-          _ad_dof_values[i].derivatives()[ad_offset + i] = 1.;
-        assignADNodalValue(_ad_dof_values[i], i);
-      }
-    }
   }
-  else
+
+  if (_need_du_dot_du || _need_dof_du_dot_du)
   {
-    _dof_values.resize(0);
-    if (_need_dof_values_previous_nl)
-      _dof_values_previous_nl.resize(0);
-    if (_subproblem.isTransient())
-    {
-      _dof_values_old.resize(0);
-      _dof_values_older.resize(0);
-      _dof_values_dot.resize(0);
-      _dof_values_dotdot.resize(0);
-      _dof_values_dot_old.resize(0);
-      _dof_values_dotdot_old.resize(0);
-      _dof_du_dot_du.resize(0);
-      _dof_du_dotdot_du.resize(0);
-    }
+    _dof_du_dot_du.resize(n);
+    for (decltype(n) i = 0; i < n; ++i)
+      _dof_du_dot_du[i] = _sys.duDotDu();
+  }
+  if (_need_du_dotdot_du || _need_dof_du_dotdot_du)
+  {
+    _dof_du_dotdot_du.resize(n);
+    for (decltype(n) i = 0; i < n; ++i)
+      _dof_du_dotdot_du[i] = _sys.duDotDotDu();
   }
 }
 
 template <typename OutputType>
 void
-MooseVariableFE<OutputType>::computeNodalNeighborValues()
+MooseVariableFE<OutputType>::fetchADDoFValues()
 {
-  if (_neighbor_has_dof_indices)
-  {
-    const unsigned int n = _dof_indices_neighbor.size();
-    mooseAssert(n, "There must be a non-zero number of degrees of freedom");
-    _dof_values_neighbor.resize(n);
-    _sys.currentSolution()->get(_dof_indices_neighbor, &_dof_values_neighbor[0]);
-    for (unsigned int i = 0; i < n; ++i)
-      assignNeighborNodalValue(_dof_values_neighbor[i], i);
+  auto n = _dof_indices.size();
+  libmesh_assert(n);
+  _ad_dof_values.resize(n);
+  auto ad_offset = _var_num * _sys.getMaxVarNDofsPerNode();
 
-    if (_need_dof_values_previous_nl_neighbor)
-    {
-      _dof_values_previous_nl_neighbor.resize(n);
-      _sys.solutionPreviousNewton()->get(_dof_indices_neighbor,
-                                         &_dof_values_previous_nl_neighbor[0]);
-      for (unsigned int i = 0; i < n; ++i)
-        assignNeighborNodalValuePreviousNL(_dof_values_previous_nl_neighbor[i], i);
-    }
-    if (_subproblem.isTransient())
-    {
-      _dof_values_old_neighbor.resize(n);
-      _dof_values_older_neighbor.resize(n);
-      _sys.solutionOld().get(_dof_indices_neighbor, &_dof_values_old_neighbor[0]);
-      _sys.solutionOlder().get(_dof_indices_neighbor, &_dof_values_older_neighbor[0]);
-      for (unsigned int i = 0; i < n; ++i)
-      {
-        assignNeighborNodalValueOld(_dof_values_old_neighbor[i], i);
-        assignNeighborNodalValueOlder(_dof_values_older_neighbor[i], i);
-      }
-
-      _dof_values_dot_neighbor.resize(n);
-      _dof_values_dotdot_neighbor.resize(n);
-      _dof_values_dot_old_neighbor.resize(n);
-      _dof_values_dotdot_old_neighbor.resize(n);
-      _dof_du_dot_du_neighbor.resize(n);
-      _dof_du_dotdot_du_neighbor.resize(n);
-      for (unsigned int i = 0; i < n; i++)
-      {
-        if (_sys.solutionUDot())
-          _dof_values_dot_neighbor[i] = (*_sys.solutionUDot())(_dof_indices_neighbor[i]);
-        if (_sys.solutionUDotDot())
-          _dof_values_dotdot_neighbor[i] = (*_sys.solutionUDotDot())(_dof_indices_neighbor[i]);
-        if (_sys.solutionUDotOld())
-          _dof_values_dot_old_neighbor[i] = (*_sys.solutionUDotOld())(_dof_indices_neighbor[i]);
-        if (_sys.solutionUDotDotOld())
-          _dof_values_dotdot_old_neighbor[i] =
-              (*_sys.solutionUDotDotOld())(_dof_indices_neighbor[i]);
-        _dof_du_dot_du_neighbor[i] = _sys.duDotDu();
-        _dof_du_dotdot_du_neighbor[i] = _sys.duDotDotDu();
-      }
-    }
-  }
-  else
+  for (decltype(n) i = 0; i < n; ++i)
   {
-    _dof_values_neighbor.resize(0);
-    if (_need_dof_values_previous_nl_neighbor)
-      _dof_values_previous_nl_neighbor.resize(0);
-    if (_subproblem.isTransient())
-    {
-      _dof_values_old_neighbor.resize(0);
-      _dof_values_older_neighbor.resize(0);
-      _dof_values_dot_neighbor.resize(0);
-      _dof_values_dotdot_neighbor.resize(0);
-      _dof_values_dot_old_neighbor.resize(0);
-      _dof_values_dotdot_old_neighbor.resize(0);
-      _dof_du_dot_du_neighbor.resize(0);
-      _dof_du_dotdot_du_neighbor.resize(0);
-    }
+    _ad_dof_values[i] = _dof_values[i];
+    if (_var_kind == Moose::VAR_NONLINEAR)
+      _ad_dof_values[i].derivatives()[ad_offset + i] = 1.;
+    assignADNodalValue(_ad_dof_values[i], i);
   }
 }
 
 template <typename OutputType>
 void
-MooseVariableFE<OutputType>::assignNodalValue(const Real & value, const unsigned int &)
+MooseVariableFE<OutputType>::zeroSizeDofValues()
 {
-  _nodal_value = value;
+  _dof_values.resize(0);
+  if (_need_dof_values_previous_nl)
+    _dof_values_previous_nl.resize(0);
+  if (_subproblem.isTransient())
+  {
+    _dof_values_old.resize(0);
+    _dof_values_older.resize(0);
+    _dof_values_dot.resize(0);
+    _dof_values_dotdot.resize(0);
+    _dof_values_dot_old.resize(0);
+    _dof_values_dotdot_old.resize(0);
+    _dof_du_dot_du.resize(0);
+    _dof_du_dotdot_du.resize(0);
+  }
+}
+
+template <typename OutputType>
+void
+MooseVariableFE<OutputType>::assignNodalValue()
+{
+  bool is_transient = _subproblem.isTransient();
+
+  libmesh_assert(_dof_indices.size());
+
+  _nodal_value = _dof_values[0];
+
+  if (is_transient)
+  {
+    if (_need_dof_values_old)
+      _nodal_value_old = _dof_values_old[0];
+    if (_need_dof_values_older)
+      _nodal_value_older = _dof_values_older[0];
+    if (_need_dof_values_dot)
+      _nodal_value_dot = _dof_values_dot[0];
+    if (_need_dof_values_dotdot)
+      _nodal_value_dotdot = _dof_values_dotdot[0];
+    if (_need_dof_values_dot_old)
+      _nodal_value_dot_old = _dof_values_dot_old[0];
+    if (_need_dof_values_dotdot_old)
+      _nodal_value_dotdot_old = _dof_values_dotdot_old[0];
+  }
+  if (_need_dof_values_previous_nl)
+    _nodal_value_previous_nl = _dof_values_previous_nl[0];
 }
 
 template <>
 void
-MooseVariableFE<RealVectorValue>::assignNodalValue(const Real & value,
-                                                   const unsigned int & component)
+MooseVariableFE<RealVectorValue>::assignNodalValue()
 {
-  _nodal_value(component) = value;
+  bool is_transient = _subproblem.isTransient();
+
+  auto n = _dof_indices.size();
+  libmesh_assert(n);
+
+  for (decltype(n) i = 0; i < n; ++i)
+    _nodal_value(i) = _dof_values[i];
+
+  if (is_transient)
+  {
+    if (_need_dof_values_old)
+      for (decltype(n) i = 0; i < n; ++i)
+        _nodal_value_old(i) = _dof_values_old[i];
+    if (_need_dof_values_older)
+      for (decltype(n) i = 0; i < n; ++i)
+        _nodal_value_older(i) = _dof_values_older[i];
+    if (_need_dof_values_dot)
+      for (decltype(n) i = 0; i < n; ++i)
+        _nodal_value_dot(i) = _dof_values_dot[i];
+    if (_need_dof_values_dotdot)
+      for (decltype(n) i = 0; i < n; ++i)
+        _nodal_value_dotdot(i) = _dof_values_dotdot[i];
+    if (_need_dof_values_dot_old)
+      for (decltype(n) i = 0; i < n; ++i)
+        _nodal_value_dot_old(i) = _dof_values_dot_old[i];
+    if (_need_dof_values_dotdot_old)
+      for (decltype(n) i = 0; i < n; ++i)
+        _nodal_value_dotdot_old(i) = _dof_values_dotdot_old[i];
+  }
+  if (_need_dof_values_previous_nl)
+    for (decltype(n) i = 0; i < n; ++i)
+      _nodal_value_previous_nl(i) = _dof_values_previous_nl[i];
 }
 
-template <typename OutputType>
+template <>
 void
-MooseVariableFE<OutputType>::assignADNodalValue(const DualReal & value, const unsigned int &)
+MooseVariableFE<Real>::assignADNodalValue(const DualReal & value, const unsigned int &)
 {
   _ad_nodal_value = value;
 }
@@ -2297,168 +2092,147 @@ MooseVariableFE<RealVectorValue>::assignADNodalValue(const DualReal & value,
 
 template <typename OutputType>
 void
-MooseVariableFE<OutputType>::assignNodalValueOld(const Real & value, const unsigned int &)
+MooseVariableFE<OutputType>::fetchDoFValuesNeighbor()
 {
-  _nodal_value_old = value;
-}
+  bool is_transient = _subproblem.isTransient();
 
-template <>
-void
-MooseVariableFE<RealVectorValue>::assignNodalValueOld(const Real & value,
-                                                      const unsigned int & component)
-{
-  _nodal_value_old(component) = value;
-}
+  auto n = _dof_indices_neighbor.size();
+  libmesh_assert(n);
 
-template <typename OutputType>
-void
-MooseVariableFE<OutputType>::assignNodalValueOlder(const Real & value, const unsigned int &)
-{
-  _nodal_value_older = value;
-}
+  _dof_values_neighbor.resize(n);
+  _sys.currentSolution()->get(_dof_indices_neighbor, &_dof_values_neighbor[0]);
 
-template <>
-void
-MooseVariableFE<RealVectorValue>::assignNodalValueOlder(const Real & value,
-                                                        const unsigned int & component)
-{
-  _nodal_value_older(component) = value;
-}
+  if (_need_u_previous_nl_neighbor || _need_grad_previous_nl_neighbor ||
+      _need_second_previous_nl_neighbor || _need_dof_values_previous_nl_neighbor)
+  {
+    _dof_values_previous_nl_neighbor.resize(n);
+    _sys.solutionPreviousNewton()->get(_dof_indices_neighbor, &_dof_values_previous_nl_neighbor[0]);
+  }
 
-template <typename OutputType>
-void
-MooseVariableFE<OutputType>::assignNodalValuePreviousNL(const Real & value, const unsigned int &)
-{
-  _nodal_value_previous_nl = value;
-}
-
-template <>
-void
-MooseVariableFE<RealVectorValue>::assignNodalValuePreviousNL(const Real & value,
-                                                             const unsigned int & component)
-{
-  _nodal_value_previous_nl(component) = value;
-}
-
-template <typename OutputType>
-void
-MooseVariableFE<OutputType>::assignNodalValueDot(const Real & value, const unsigned int &)
-{
-  _nodal_value_dot = value;
-}
-
-template <>
-void
-MooseVariableFE<RealVectorValue>::assignNodalValueDot(const Real & value,
-                                                      const unsigned int & component)
-{
-  _nodal_value_dot(component) = value;
-}
-
-template <typename OutputType>
-void
-MooseVariableFE<OutputType>::assignNodalValueDotOld(const Real & value, const unsigned int &)
-{
-  _nodal_value_dot_old = value;
-}
-
-template <>
-void
-MooseVariableFE<RealVectorValue>::assignNodalValueDotOld(const Real & value,
-                                                         const unsigned int & component)
-{
-  _nodal_value_dot_old(component) = value;
-}
-
-template <typename OutputType>
-void
-MooseVariableFE<OutputType>::assignNodalValueDotDot(const Real & value, const unsigned int &)
-{
-  _nodal_value_dotdot = value;
-}
-
-template <>
-void
-MooseVariableFE<RealVectorValue>::assignNodalValueDotDot(const Real & value,
-                                                         const unsigned int & component)
-{
-  _nodal_value_dotdot(component) = value;
+  if (is_transient)
+  {
+    if (_need_u_old_neighbor || _need_grad_old_neighbor || _need_second_old_neighbor ||
+        _need_dof_values_old_neighbor)
+    {
+      _dof_values_old_neighbor.resize(n);
+      _sys.solutionOld().get(_dof_indices_neighbor, &_dof_values_old_neighbor[0]);
+    }
+    if (_need_u_older_neighbor || _need_grad_older_neighbor || _need_second_older_neighbor ||
+        _need_dof_values_older_neighbor)
+    {
+      _dof_values_older_neighbor.resize(n);
+      _sys.solutionOlder().get(_dof_indices_neighbor, &_dof_values_older_neighbor[0]);
+    }
+    if (_need_u_dot_neighbor || _need_grad_neighbor_dot || _need_dof_values_dot_neighbor)
+    {
+      _dof_values_dot_neighbor.resize(n);
+      libmesh_assert(_sys.solutionUDot());
+      for (unsigned int i = 0; i < n; i++)
+        _dof_values_dot_neighbor[i] = (*_sys.solutionUDot())(_dof_indices_neighbor[i]);
+    }
+    if (_need_u_dotdot_neighbor || _need_grad_neighbor_dotdot || _need_dof_values_dotdot_neighbor)
+    {
+      _dof_values_dotdot_neighbor.resize(n);
+      libmesh_assert(_sys.solutionUDotDot());
+      for (unsigned int i = 0; i < n; i++)
+        _dof_values_dotdot_neighbor[i] = (*_sys.solutionUDotDot())(_dof_indices_neighbor[i]);
+    }
+    if (_need_u_dot_old_neighbor || _need_dof_values_dot_old_neighbor)
+    {
+      _dof_values_dot_old_neighbor.resize(n);
+      libmesh_assert(_sys.solutionUDotOld());
+      for (unsigned int i = 0; i < n; i++)
+        _dof_values_dot_old_neighbor[i] = (*_sys.solutionUDotOld())(_dof_indices_neighbor[i]);
+    }
+    if (_need_u_dotdot_old_neighbor || _need_dof_values_dotdot_old_neighbor)
+    {
+      _dof_values_dotdot_old_neighbor.resize(n);
+      libmesh_assert(_sys.solutionUDotDotOld());
+      for (unsigned int i = 0; i < n; i++)
+        _dof_values_dotdot_old_neighbor[i] = (*_sys.solutionUDotDotOld())(_dof_indices_neighbor[i]);
+    }
+  }
+  if (_need_du_dot_du_neighbor || _need_dof_du_dot_du_neighbor)
+  {
+    _dof_du_dot_du_neighbor.resize(n);
+    for (decltype(n) i = 0; i < n; ++i)
+      _dof_du_dot_du_neighbor[i] = _sys.duDotDu();
+  }
+  if (_need_du_dotdot_du_neighbor || _need_dof_du_dotdot_du_neighbor)
+  {
+    _dof_du_dotdot_du_neighbor.resize(n);
+    for (decltype(n) i = 0; i < n; ++i)
+      _dof_du_dotdot_du_neighbor[i] = _sys.duDotDotDu();
+  }
 }
 
 template <typename OutputType>
 void
-MooseVariableFE<OutputType>::assignNodalValueDotDotOld(const Real & value, const unsigned int &)
+MooseVariableFE<OutputType>::assignNodalValueNeighbor()
 {
-  _nodal_value_dotdot_old = value;
+  bool is_transient = _subproblem.isTransient();
+
+  libmesh_assert(_dof_indices_neighbor.size());
+
+  _neighbor_nodal_value = _dof_values_neighbor[0];
+
+  if (_need_dof_values_previous_nl_neighbor)
+    _neighbor_nodal_value_previous_nl = _dof_values_previous_nl_neighbor[0];
+
+  if (is_transient)
+  {
+    if (_need_dof_values_old_neighbor)
+      _neighbor_nodal_value_old = _dof_values_old_neighbor[0];
+    if (_need_dof_values_older_neighbor)
+      _neighbor_nodal_value_older = _dof_values_older_neighbor[0];
+  }
 }
 
 template <>
 void
-MooseVariableFE<RealVectorValue>::assignNodalValueDotDotOld(const Real & value,
-                                                            const unsigned int & component)
+MooseVariableFE<RealVectorValue>::assignNodalValueNeighbor()
 {
-  _nodal_value_dotdot_old(component) = value;
+  bool is_transient = _subproblem.isTransient();
+
+  auto n = _dof_indices_neighbor.size();
+  libmesh_assert(n);
+
+  for (unsigned int i = 0; i < n; ++i)
+    _neighbor_nodal_value(i) = _dof_values_neighbor[i];
+
+  if (_need_dof_values_previous_nl_neighbor)
+    for (unsigned int i = 0; i < n; ++i)
+      _neighbor_nodal_value_previous_nl(i) = _dof_values_previous_nl_neighbor[i];
+
+  if (is_transient)
+  {
+    if (_need_dof_values_old_neighbor)
+      for (unsigned int i = 0; i < n; ++i)
+        _neighbor_nodal_value_old(i) = _dof_values_old_neighbor[i];
+    if (_need_dof_values_older_neighbor)
+      for (unsigned int i = 0; i < n; ++i)
+        _neighbor_nodal_value_older(i) = _dof_values_older_neighbor[i];
+  }
 }
 
 template <typename OutputType>
 void
-MooseVariableFE<OutputType>::assignNeighborNodalValue(const Real & value, const unsigned int &)
+MooseVariableFE<OutputType>::zeroSizeDofValuesNeighbor()
 {
-  _neighbor_nodal_value = value;
-}
-
-template <>
-void
-MooseVariableFE<RealVectorValue>::assignNeighborNodalValue(const Real & value,
-                                                           const unsigned int & component)
-{
-  _neighbor_nodal_value(component) = value;
-}
-
-template <typename OutputType>
-void
-MooseVariableFE<OutputType>::assignNeighborNodalValueOld(const Real & value, const unsigned int &)
-{
-  _neighbor_nodal_value_old = value;
-}
-
-template <>
-void
-MooseVariableFE<RealVectorValue>::assignNeighborNodalValueOld(const Real & value,
-                                                              const unsigned int & component)
-{
-  _neighbor_nodal_value_old(component) = value;
-}
-
-template <typename OutputType>
-void
-MooseVariableFE<OutputType>::assignNeighborNodalValueOlder(const Real & value, const unsigned int &)
-{
-  _neighbor_nodal_value_older = value;
-}
-
-template <>
-void
-MooseVariableFE<RealVectorValue>::assignNeighborNodalValueOlder(const Real & value,
-                                                                const unsigned int & component)
-{
-  _neighbor_nodal_value_older(component) = value;
-}
-
-template <typename OutputType>
-void
-MooseVariableFE<OutputType>::assignNeighborNodalValuePreviousNL(const Real & value,
-                                                                const unsigned int &)
-{
-  _neighbor_nodal_value_previous_nl = value;
-}
-
-template <>
-void
-MooseVariableFE<RealVectorValue>::assignNeighborNodalValuePreviousNL(const Real & value,
-                                                                     const unsigned int & component)
-{
-  _neighbor_nodal_value_previous_nl(component) = value;
+  _dof_values_neighbor.resize(0);
+  if (_need_dof_values_previous_nl_neighbor)
+    _dof_values_previous_nl_neighbor.resize(0);
+  if (_subproblem.isTransient())
+  {
+    _dof_values_old_neighbor.resize(0);
+    _dof_values_older_neighbor.resize(0);
+    _dof_values_dot_neighbor.resize(0);
+    _dof_values_dotdot_neighbor.resize(0);
+    _dof_values_dot_old_neighbor.resize(0);
+    _dof_values_dotdot_old_neighbor.resize(0);
+    _dof_du_dot_du_neighbor.resize(0);
+    _dof_du_dotdot_du_neighbor.resize(0);
+  }
 }
 
 template <typename OutputType>
@@ -2484,7 +2258,7 @@ MooseVariableFE<OutputType>::setNodalValue(OutputType value, unsigned int idx /*
 {
   _dof_values[idx] = value; // update variable nodal value
   _has_dof_values = true;
-  assignNodalValue(value, 0);
+  _nodal_value = value;
 
   // Update the qp values as well
   for (unsigned int qp = 0; qp < _u.size(); qp++)
@@ -2498,7 +2272,7 @@ MooseVariableFE<RealVectorValue>::setNodalValue(RealVectorValue value, unsigned 
   for (decltype(idx) i = 0; i < LIBMESH_DIM; ++i, ++idx)
   {
     _dof_values[idx] = value(i);
-    assignNodalValue(value(i), i);
+    _nodal_value(i) = value(i);
   }
 
   // Update the qp values as well

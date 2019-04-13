@@ -8,6 +8,8 @@
     nx = 2
     ny = 2
   []
+
+  output_ghosting = true
 []
 
 [Variables]
@@ -19,6 +21,20 @@
   [diff]
     type = Diffusion
     variable = u
+  []
+[]
+
+[AuxVariables]
+  [pid]
+    family = MONOMIAL
+    order = CONSTANT
+  []
+[]
+
+[AuxKernels]
+  [pid]
+    type = ProcessorIDAux
+    variable = pid
   []
 []
 
@@ -46,40 +62,6 @@
 
 [Outputs]
   exodus = true
-[]
-
-[AuxVariables]
-  [pid]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [algebraic1]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [geometric1]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-[]
-
-[AuxKernels]
-  [pid]
-    type = ProcessorIDAux
-    variable = pid
-  []
-  [geometric1]
-    type = GhostingAux
-    pid = 1
-    variable = geometric1
-    functor_type = geometric
-  []
-  [algebraic1]
-    type = GhostingAux
-    functor_type = algebraic
-    pid = 1
-    variable = algebraic1
-  []
 []
 
 [Problem]

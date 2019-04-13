@@ -5,18 +5,11 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 20
-  ny = 20
-  nz = 0
-  xmin = 0
-  xmax = 50
-  ymin = 0
-  ymax = 50
-  zmin = 0
-  zmax = 50
+  nx = 10
+  ny = 10
+  xmax = 12
+  ymax = 12
   elem_type = QUAD4
-
-  uniform_refine = 1
 []
 
 [Variables]
@@ -27,8 +20,8 @@
     family = LAGRANGE
     [./InitialCondition]
       type = SmoothCircleIC
-      x1 = 25.0
-      y1 = 25.0
+      x1 = 0.0
+      y1 = 0.0
       radius = 6.0
       invalue = 0.9
       outvalue = 0.1
