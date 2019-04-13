@@ -760,19 +760,15 @@ public:
    * as they're referred to here in this class). These methods are only truly meaningful for nodal
    * basis families
    */
-  void assignNodalValue(const Real & value, const unsigned int & component);
   void assignADNodalValue(const DualReal & value, const unsigned int & component);
-  void assignNodalValueOld(const Real & value, const unsigned int & component);
-  void assignNodalValueOlder(const Real & value, const unsigned int & component);
-  void assignNodalValuePreviousNL(const Real & value, const unsigned int & component);
-  void assignNodalValueDot(const Real & value, const unsigned int & component);
-  void assignNodalValueDotOld(const Real & value, const unsigned int & component);
-  void assignNodalValueDotDot(const Real & value, const unsigned int & component);
-  void assignNodalValueDotDotOld(const Real & value, const unsigned int & component);
-  void assignNeighborNodalValue(const Real & value, const unsigned int & component);
-  void assignNeighborNodalValueOld(const Real & value, const unsigned int & component);
-  void assignNeighborNodalValueOlder(const Real & value, const unsigned int & component);
-  void assignNeighborNodalValuePreviousNL(const Real & value, const unsigned int & component);
+  void assignNodalValue();
+  void fetchDoFValues();
+  void fetchADDoFValues();
+  void zeroSizeDofValues();
+
+  void assignNodalValueNeighbor();
+  void fetchDoFValuesNeighbor();
+  void zeroSizeDofValuesNeighbor();
 
 protected:
   /// Whether this variable is on the displaced system

@@ -241,6 +241,16 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters)
 
   _is_boundary_restricted = boundaryRestricted();
 
+  if (_subproblem.isTransient())
+  {
+    // tell MOOSE that we are going to need old and older DoF values
+    for (auto & var : _vars)
+    {
+      var->dofValuesOld();
+      var->dofValuesOlder();
+    }
+  }
+
   if (parameters.isParamValid("primary_percolation_boundaries"))
     _primary_perc_bnds = _mesh.getBoundaryIDs(
         parameters.get<std::vector<BoundaryName>>("primary_percolation_boundaries"));
