@@ -25,15 +25,15 @@
 []
 
 [Kernels]
-  [./curl_curl_real]
+  [./curl_curl]
     type = CurlCurlField
     variable = u
   [../]
-  [./coeff_real]
+  [./coeff]
     type = VectorCoeffField
     variable = u
   [../]
-  [./rhs_real]
+  [./rhs]
     type = VectorBodyForce
     variable = u
     function_x = 'y'
