@@ -7,7 +7,7 @@ such that
 
 \begin{equation}
 \begin{aligned}
--\nabla \cdot \nabla u + \nabla\vec{v} \cdot \nabla u = 0 \\
+-\nabla \cdot \nabla u + \nabla v \cdot \nabla u = 0 \\
 -\nabla \cdot \nabla v = 0
 \end{aligned}
 \end{equation}
@@ -27,7 +27,7 @@ inner-product notation, is given by:
 
 \begin{equation}
 \begin{aligned}
-(\nabla u_h, \nabla \phi_i) + (\nabla\vec{v} \cdot \nabla u, \phi_i)= 0 \quad \forall  \phi_i \\
+(\nabla u_h, \nabla \phi_i) + (\nabla v \cdot \nabla u, \phi_i)= 0 \quad \forall  \phi_i \\
 (\nabla\vec{v}, \nabla\phi_i)= 0 \quad \forall  \phi_i
 \end{aligned}
 \end{equation}
@@ -126,5 +126,3 @@ u = \frac{\exp\left(\frac{x}{\epsilon}\right) - 1}{\exp\left(\frac{1}{\epsilon}\
 - [examples/ex03_coupling/include/kernels/ExampleConvection.h]
 - [examples/ex03_coupling/src/kernels/ExampleConvection.C]
 - [examples/ex03_coupling/src/base/ExampleApp.C]
-
-
