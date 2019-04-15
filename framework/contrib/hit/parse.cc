@@ -860,7 +860,7 @@ parseField(Parser * p, Node * n)
   else if (valtok.type == TokType::Error)
     p->error(valtok, valtok.val);
   else
-    p->error(valtok, "unexpected field token type");
+    p->error(valtok, "missing value for field '" + fieldtok.val + "' - found '" + valtok.val + "'");
   n->addChild(field);
 }
 
