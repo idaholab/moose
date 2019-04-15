@@ -29,12 +29,13 @@ public:
 
   static InputParameters actionParameters();
 
-  static Real gapLength(
-      const GAP_GEOMETRY & gap_geom, Real radius, Real r1, Real r2, Real min_gap, Real max_gap);
+  static Real gapLength(const GAP_GEOMETRY & gap_geom, Real radius, Real r1, Real r2, Real max_gap);
 
-  static Real gapRect(Real distance, Real min_gap, Real max_gap);
-  static Real gapCyl(Real radius, Real r1, Real r2, Real min_denom, Real max_denom);
-  static Real gapSphere(Real radius, Real r1, Real r2, Real min_denom, Real max_denom);
+  static Real gapRect(Real distance, Real max_gap);
+  static Real gapCyl(Real radius, Real r1, Real r2, Real max_denom);
+  static Real gapSphere(Real radius, Real r1, Real r2, Real max_denom);
+
+  static Real gapAttenuation(Real adjusted_length, Real min_gap, unsigned int min_gap_order);
 
   static void setGapGeometryParameters(const InputParameters & params,
                                        const Moose::CoordinateSystemType coord_sys,
@@ -54,6 +55,13 @@ public:
                               Real & radius);
 
   virtual void initialSetup() override;
+
+  /// Legacy method that clamps at min_gao
+  static Real gapLength(
+      const GAP_GEOMETRY & gap_geom, Real radius, Real r1, Real r2, Real min_gap, Real max_gap)
+  {
+    return std::max(min_gap, gapLength(gap_geom, radius, r1, r2, max_gap));
+  }
 
 protected:
   virtual void computeQpProperties() override;
@@ -100,8 +108,9 @@ protected:
   const Real _stefan_boltzmann;
   Real _emissivity;
 
-  Real _min_gap;
-  Real _max_gap;
+  const Real _min_gap;
+  const unsigned int _min_gap_order;
+  const Real _max_gap;
 
   MooseVariable * _temp_var;
   PenetrationLocator * _penetration_locator;

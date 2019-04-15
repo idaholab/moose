@@ -49,6 +49,7 @@ protected:
   const MaterialProperty<Real> & _gap_conductance_dT;
 
   const Real _min_gap;
+  const unsigned int _min_gap_order;
   const Real _max_gap;
 
   Real _gap_temp;
