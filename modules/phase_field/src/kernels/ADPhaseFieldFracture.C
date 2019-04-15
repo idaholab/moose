@@ -32,9 +32,30 @@ template <ComputeStage compute_stage>
 ADResidual
 ADPhaseFieldFracture<compute_stage>::computeQpResidual()
 {
-  return (-_gc_prop[_qp] * _l[_qp] * _grad_u[_qp] * _grad_test[_i][_qp] +
+  // return (-_gc_prop[_qp] * _l[_qp] * _grad_u[_qp] * _grad_test[_i][_qp] +
+  //         2.0 * (1.0 - _u[_qp]) * _test[_i][_qp] * _hist_old[_qp] -
+  //         _gc_prop[_qp] / _l[_qp] * _u[_qp] * _test[_i][_qp]) /
+  //        _gc_prop[_qp];
+
+  // if (_current_elem->id() == 0 && _qp == 0)
+  //   std::cout << "hist_old = " << MetaPhysicL::raw_value(_hist_old[_qp]) << ", part 1 = "
+  //             << MetaPhysicL::raw_value(-3.0 / 4 * _gc_prop[_qp] * _l[_qp] * _grad_u[_qp] *
+  //                                       _grad_test[_i][_qp])
+  //             << ", part 2 = "
+  //             << MetaPhysicL::raw_value(2.0 * (1.0 - _u[_qp]) * _test[_i][_qp] * _hist_old[_qp])
+  //             << ", part 3 = "
+  //             << MetaPhysicL::raw_value(_gc_prop[_qp] / _l[_qp] * (3.0 / 8) * _test[_i][_qp])
+  //             << ", residual = "
+  //             << MetaPhysicL::raw_value(
+  //                    (-3.0 / 4 * _gc_prop[_qp] * _l[_qp] * _grad_u[_qp] * _grad_test[_i][_qp] +
+  //                     2.0 * (1.0 - _u[_qp]) * _test[_i][_qp] * _hist_old[_qp] -
+  //                     _gc_prop[_qp] / _l[_qp] * (3.0 / 8) * _test[_i][_qp]) /
+  //                    _gc_prop[_qp])
+  //             << std::endl;
+
+  return (-3.0 / 4 * _gc_prop[_qp] * _l[_qp] * _grad_u[_qp] * _grad_test[_i][_qp] +
           2.0 * (1.0 - _u[_qp]) * _test[_i][_qp] * _hist_old[_qp] -
-          _gc_prop[_qp] / _l[_qp] * _u[_qp] * _test[_i][_qp]) /
+          _gc_prop[_qp] / _l[_qp] * (3.0 / 8) * _test[_i][_qp]) /
          _gc_prop[_qp];
 }
 

@@ -1,0 +1,42 @@
+reset 
+
+brick x 25.4 y 152.4 z 2.37
+create Cylinder height 2.37 radius 4.06 
+create Cylinder height 2.37 radius 4.06 
+move Volume 2  location -12.7 0 0 include_merged
+move Volume 3  location 12.7 0 0 include_merged
+subtract volume 2 from volume 1 
+subtract volume 3 from volume 1 
+
+webcut volume 1  with general plane xz  noimprint nomerge 
+webcut volume 4  with general plane xz move y 12.7  noimprint nomerge 
+webcut volume 1  with general plane xz move y -12.7  noimprint nomerge 
+
+webcut volume 1 4 5 6 with general plane yz  noimprint nomerge 
+
+merge all
+
+volume 9 8 4 5 10 6 7 1 size 3
+mesh volume 9 8 4 5 10 6 7 1
+
+merge all
+
+set duplicate block elements off
+
+block 1 volume 9 5 8 4 10 6 7 1  
+
+refine element with x_coord > -100 and x_coord < 100 and y_coord < 15 and y_coord > -15 numsplit 1
+refine element with x_coord > -100 and x_coord < 100 and y_coord < 2.5 and y_coord > -2.5 numsplit 1
+#refine element with x_coord > -100 and x_coord < 100 and y_coord < 1.5 and y_coord > -1.5 numsplit 1
+
+block 1 element type hex8
+
+nodeset 1 surface 62 54  
+nodeset 2 surface 82 74
+
+undo group begin
+set large exodus file off
+export mesh "/Users/jianw/projects/moose5/modules/combined/test/tests/ad_phase_field_fracture/notch.e" overwrite
+undo group end
+
+

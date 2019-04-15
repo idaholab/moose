@@ -33,8 +33,18 @@ ADComputeHyperElasticPFFractureStress<compute_stage>::ADComputeHyperElasticPFFra
     _kdamage(adGetParam<Real>("kdamage")),
     _use_current_hist(adGetParam<bool>("use_current_history_variable")),
     _hist(adDeclareADProperty<Real>("hist")),
-    _hist_old(adGetMaterialPropertyOld<Real>("hist"))
+    _hist_old(adGetMaterialPropertyOld<Real>("hist")),
+    _cauchy_stress(adDeclareADProperty<RankTwoTensor>(_base_name + "cauchy_stress"))
 {
+}
+
+template <ComputeStage compute_stage>
+void
+ADComputeHyperElasticPFFractureStress<compute_stage>::initQpStatefulProperties()
+{
+  ADComputeStressBase<compute_stage>::initQpStatefulProperties();
+  //_hist[_qp] = 3.0 * 138 / 16 / 14.2;
+  _hist[_qp] = 0.0;
 }
 
 template <ComputeStage compute_stage>
@@ -53,6 +63,12 @@ ADComputeHyperElasticPFFractureStress<compute_stage>::computeQpStress()
   I.addIa(1.0);
 
   ADRankTwoTensor C = _deformation_gradient[_qp].transpose() * _deformation_gradient[_qp];
+
+  if (_current_elem->id() == 0 && _qp == 0)
+  {
+    std::cout << "c = " << MetaPhysicL::raw_value(c) << ", J = " << MetaPhysicL::raw_value(J)
+              << std::endl;
+  }
 
   ADRankTwoTensor stress_pos, stress_neg;
   ADReal G0_pos;
@@ -79,6 +95,10 @@ ADComputeHyperElasticPFFractureStress<compute_stage>::computeQpStress()
     _hist[_qp] = _hist_old[_qp];
 
   // Damage associated with positive component of stress
-  _stress[_qp] = _deformation_gradient[_qp] *
-                 (stress_pos * ((1.0 - c) * (1.0 - c) * (1 - _kdamage) + _kdamage) + stress_neg);
+  ADRankTwoTensor PK2 =
+      stress_pos * ((1.0 - c) * (1.0 - c) * (1 - _kdamage) + _kdamage) + stress_neg;
+  _stress[_qp] = _deformation_gradient[_qp] * PK2;
+
+  _cauchy_stress[_qp] =
+      1.0 / J * _deformation_gradient[_qp] * PK2 * _deformation_gradient[_qp].transpose();
 }

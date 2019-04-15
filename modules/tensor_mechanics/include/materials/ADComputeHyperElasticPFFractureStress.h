@@ -34,7 +34,9 @@ public:
   ADComputeHyperElasticPFFractureStress(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpStress();
+  virtual void initQpStatefulProperties() override;
+
+  virtual void computeQpStress() override;
 
   /// Name of the elasticity tensor material property
   const std::string _elasticity_tensor_name;
@@ -59,6 +61,8 @@ protected:
 
   /// Old value of history variable
   const MaterialProperty<Real> & _hist_old;
+
+  ADMaterialProperty(RankTwoTensor) & _cauchy_stress;
 
   usingComputeStressBaseMembers;
 };

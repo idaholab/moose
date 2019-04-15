@@ -1,0 +1,45 @@
+reset 
+create surface rectangle width 60 height 140 zplane
+create surface circle radius 10 zplane
+move Surface 2  location -30 -40 0 include_merged
+
+create surface circle radius 10 zplane
+move Surface 3  location 30 -40 0 include_merged
+
+create surface circle radius 10 zplane
+move Surface 4  location -30 40 0 include_merged
+
+create surface circle radius 10 zplane
+move Surface 5  location 30 40 0 include_merged
+
+subtract volume 2 from volume 1 
+subtract volume 3 from volume 1 
+subtract volume 4 from volume 1 
+subtract volume 5 from volume 1 
+
+webcut volume 1  with general plane yz move x -20 y 0 z 0  noimprint nomerge 
+webcut volume 1  with general plane yz move x 20 y 0 z 0  noimprint nomerge 
+
+webcut volume 1 6 7  with general plane xz move x 0 y 40 z 0  noimprint nomerge 
+webcut volume 1 6 7  with general plane xz move x 0 y -40 z 0  noimprint nomerge 
+
+delete Volume 12 11
+
+unite volume 9 10 8 13 6 7 1  
+
+surface 12  size 2.5
+mesh surface 12
+
+
+
+set duplicate block elements off
+block 1 surface 12  
+block  1 element type quad4
+
+nodeset 1 curve 32  
+nodeset 2 curve 28  
+
+undo group begin
+set large exodus file off
+export mesh "/Users/jianw/projects/moose6/modules/combined/test/tests/phase_field_fracture_viscoplastic/ishape_m.e" overwrite
+undo group end

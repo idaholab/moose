@@ -40,6 +40,34 @@
   [../]
 []
 
+[AuxVariables]
+  [./strain_yy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_yy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
+[AuxKernels]
+  [./strain_yy]
+    type = MaterialRankTwoTensorAux
+    variable = strain_yy
+    i = 1
+    j = 1
+    property = mechanical_strain
+  [../]
+  [./stress_yy]
+    type = MaterialRankTwoTensorAux
+    variable = stress_yy
+    i = 1
+    j = 1
+    property = stress
+  [../]
+[]
+
 [Variables]
   [./disp_x]
   [../]

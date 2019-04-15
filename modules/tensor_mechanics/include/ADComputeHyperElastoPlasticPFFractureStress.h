@@ -77,8 +77,15 @@ protected:
   const Real _yield_stress;
   const Real _k;
 
-  ADMaterialProperty(RankTwoTensor) & _be;
-  ADMaterialProperty(RankTwoTensor) & _Cp;
+  ADMaterialProperty(RankTwoTensor) & _Ee;
+  ADMaterialProperty(RankTwoTensor) & _Ep;
+  ADMaterialProperty(RankTwoTensor) & _cauchy_stress;
+
+  ADMaterialProperty(Real) & _Wp;
+  const MaterialProperty<Real> & _Wp_old;
+  Real _W0;
+  bool _beta_p;
+  bool _beta_e;
 
   usingComputeStressBaseMembers;
 };

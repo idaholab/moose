@@ -27,14 +27,14 @@
     variable = elastic_strain_yy
     i = 1
     j = 1
-    property = elastic_left_cauchy_green_strain
+    property = elastic_strain
   [../]
   [./plastic_strain_yy]
     type = MaterialRankTwoTensorAux
     variable = plastic_strain_yy
     i = 1
     j = 1
-    property = plastic_right_cauchy_green_strain
+    property = plastic_strain
   [../]
 []
 

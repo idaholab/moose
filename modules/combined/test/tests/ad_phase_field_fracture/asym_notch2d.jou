@@ -1,0 +1,41 @@
+reset 
+create surface rectangle width 25.4 height 152.4 zplane
+create surface circle radius 4.06 zplane
+move Surface 2  location -12.7 0 0 include_merged
+
+create surface circle radius 4.06 zplane
+move Surface 3  location 12.7 0 0 include_merged
+
+subtract volume 2 from volume 1 
+subtract volume 3 from volume 1 
+
+
+webcut volume 1  with general plane xz  noimprint nomerge 
+webcut volume 4  with general plane xz move y 12.7  noimprint nomerge 
+webcut volume 1  with general plane xz move y -12.7  noimprint nomerge 
+
+webcut volume 1 4 5 6 with general plane yz  noimprint nomerge 
+
+merge all
+
+surface 17 16 15 14 13 12 18 19  size 2.5
+mesh surface 17 16 15 14 13 12 18 19 
+
+merge all
+
+
+set duplicate block elements off
+block 1 surface 17 16 15 14 13 12 18 19
+
+refine element with x_coord > -100 and x_coord < 100 and y_coord < 15 and y_coord > -15 numsplit 1
+refine element with x_coord > -100 and x_coord < 100 and y_coord < 15 and y_coord > -15 numsplit 2
+ 
+block  1 element type quad4
+
+nodeset 1 curve 36 32 
+nodeset 2 curve 47 45
+
+undo group begin
+set large exodus file off
+export mesh "/Users/jianw/projects/moose6/modules/combined/test/tests/phase_field_fracture_viscoplastic/notch2d.e" overwrite
+undo group end
