@@ -4,4 +4,9 @@
     input = 'vector_kernels.i'
     exodiff = 'vector_kernels_out.e'
   [../]
+  [./vector_current_source]
+    type = 'Exodiff'
+    input = 'vector_current_source.i'
+    exodiff = 'vector_current_source_out.e'
+  [../]
 []
