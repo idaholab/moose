@@ -481,6 +481,10 @@ Field::render(int indent, const std::string & indent_text, int maxlen)
       s += quote + unquoted.substr(pos, std::string::npos) + quote;
     }
   }
+  else if (_val.size() == 0)
+    s += "''";
+  else if (quote == "" && _val.find_first_of("\n\r \t") != std::string::npos)
+    s += "'" + _val + "'";
   else
     s += _val;
 
