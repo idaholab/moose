@@ -1,6 +1,6 @@
 # ADLagrangeVecFunctionDirichletBC
 
-!syntax description /BCs/ADLagrangeVecFunctionDirichletBC<RESIDUAL>
+!syntax description /BCs/ADLagrangeVecFunctionDirichletBC
 
 ## Description
 
@@ -30,8 +30,8 @@ or more sidesets corresponding to the boundary subset $\partial \Omega_D$.
 
 Note that this BC computes its Jacobian using automatic differentiation
 
-!syntax parameters /BCs/ADLagrangeVecFunctionDirichletBC<RESIDUAL>
+!syntax parameters /BCs/ADLagrangeVecFunctionDirichletBC
 
-!syntax inputs /BCs/ADLagrangeVecFunctionDirichletBC<RESIDUAL>
+!syntax inputs /BCs/ADLagrangeVecFunctionDirichletBC
 
-!syntax children /BCs/ADLagrangeVecFunctionDirichletBC<RESIDUAL>
+!syntax children /BCs/ADLagrangeVecFunctionDirichletBC

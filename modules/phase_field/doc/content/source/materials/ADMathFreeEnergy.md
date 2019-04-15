@@ -14,10 +14,10 @@ This free energy can be used with the AD version of the split Cahn-Hilliard
 equation ([`ADSplitCHWRes`](/ADSplitCHWRes.md) and
 [`ADSplitCHParsed`](/ADSplitCHParsed.md)).
 
-!syntax parameters /Materials/ADMathFreeEnergy<RESIDUAL>
+!syntax parameters /Materials/ADMathFreeEnergy
 
-!syntax inputs /Materials/ADMathFreeEnergy<RESIDUAL>
+!syntax inputs /Materials/ADMathFreeEnergy
 
-!syntax children /Materials/ADMathFreeEnergy<RESIDUAL>
+!syntax children /Materials/ADMathFreeEnergy
 
 !bibtex bibliography

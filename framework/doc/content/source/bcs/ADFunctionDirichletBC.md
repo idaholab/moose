@@ -1,6 +1,6 @@
 # ADFunctionDirichletBC
 
-!syntax description /BCs/ADFunctionDirichletBC<RESIDUAL>
+!syntax description /BCs/ADFunctionDirichletBC
 
 ## Description
 
@@ -34,8 +34,8 @@ Note that `ADFunctionDirichletBC` computes its Jacobian using automatic differen
 
 !listing test/tests/bcs/ad_bcs/ad_bc.i block=BCs
 
-!syntax parameters /BCs/ADFunctionDirichletBC<RESIDUAL>
+!syntax parameters /BCs/ADFunctionDirichletBC
 
-!syntax inputs /BCs/ADFunctionDirichletBC<RESIDUAL>
+!syntax inputs /BCs/ADFunctionDirichletBC
 
-!syntax children /BCs/ADFunctionDirichletBC<RESIDUAL>
+!syntax children /BCs/ADFunctionDirichletBC

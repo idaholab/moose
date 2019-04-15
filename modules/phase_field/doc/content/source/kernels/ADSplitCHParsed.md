@@ -1,6 +1,6 @@
 # ADSplitCHParsed
 
-!syntax description /Kernels/ADSplitCHParsed<RESIDUAL>
+!syntax description /Kernels/ADSplitCHParsed
 
 Implements the weak form
 
@@ -18,10 +18,10 @@ It is used together with [`ADSplitCHWRes`](/ADSplitCHWRes.md) and
 two first order PDEs using a concentration order parameter and a chemical
 potential variable.
 
-!syntax parameters /Kernels/ADSplitCHParsed<RESIDUAL>
+!syntax parameters /Kernels/ADSplitCHParsed
 
-!syntax inputs /Kernels/ADSplitCHParsed<RESIDUAL>
+!syntax inputs /Kernels/ADSplitCHParsed
 
-!syntax children /Kernels/ADSplitCHParsed<RESIDUAL>
+!syntax children /Kernels/ADSplitCHParsed
 
 !bibtex bibliography

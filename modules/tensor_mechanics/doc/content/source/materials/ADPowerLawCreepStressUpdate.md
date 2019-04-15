@@ -1,6 +1,6 @@
 # ADPowerLawCreepStressUpdate
 
-!syntax description /Materials/ADPowerLawCreepStressUpdate<RESIDUAL>
+!syntax description /Materials/ADPowerLawCreepStressUpdate
 
 ## Description
 
@@ -32,10 +32,10 @@ This class is based on the implicit integration algorithm in
 strain return mapping stress calculator such as
 [ADComputeMultipleInelasticStress](ADComputeMultipleInelasticStress.md)
 
-!syntax parameters /Materials/ADPowerLawCreepStressUpdate<RESIDUAL>
+!syntax parameters /Materials/ADPowerLawCreepStressUpdate
 
-!syntax inputs /Materials/ADPowerLawCreepStressUpdate<RESIDUAL>
+!syntax inputs /Materials/ADPowerLawCreepStressUpdate
 
-!syntax children /Materials/ADPowerLawCreepStressUpdate<RESIDUAL>
+!syntax children /Materials/ADPowerLawCreepStressUpdate
 
 !bibtex bibliography

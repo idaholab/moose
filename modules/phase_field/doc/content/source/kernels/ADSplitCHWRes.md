@@ -1,6 +1,6 @@
 # ADSplitCHWRes
 
-!syntax description /Kernels/ADSplitCHWRes<RESIDUAL>
+!syntax description /Kernels/ADSplitCHWRes
 
 This kernel implements the weak form
 
@@ -18,10 +18,10 @@ potential variable.
 For an implementation with an anisotropic (tensorial) mobility see
 [`ADSplitCHWResAniso`](/ADSplitCHWResAniso.md).
 
-!syntax parameters /Kernels/ADSplitCHWRes<RESIDUAL>
+!syntax parameters /Kernels/ADSplitCHWRes
 
-!syntax inputs /Kernels/ADSplitCHWRes<RESIDUAL>
+!syntax inputs /Kernels/ADSplitCHWRes
 
-!syntax children /Kernels/ADSplitCHWRes<RESIDUAL>
+!syntax children /Kernels/ADSplitCHWRes
 
 !bibtex bibliography

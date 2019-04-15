@@ -7,10 +7,10 @@ residual of the momentum equation. This term adds additional (consistent)
 streamline diffusion such that higher Reynolds numbers can be simulated without
 producing crippling oscillations.
 
-!syntax description /Kernels/INSADMomentumSUPG<RESIDUAL>
+!syntax description /Kernels/INSADMomentumSUPG
 
-!syntax parameters /Kernels/INSADMomentumSUPG<RESIDUAL>
+!syntax parameters /Kernels/INSADMomentumSUPG
 
-!syntax inputs /Kernels/INSADMomentumSUPG<RESIDUAL>
+!syntax inputs /Kernels/INSADMomentumSUPG
 
-!syntax children /Kernels/INSADMomentumSUPG<RESIDUAL>
+!syntax children /Kernels/INSADMomentumSUPG

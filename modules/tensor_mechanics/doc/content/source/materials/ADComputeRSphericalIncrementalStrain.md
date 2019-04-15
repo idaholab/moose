@@ -1,6 +1,6 @@
 # ADComputeRSphericalIncrementalStrain
 
-!syntax description /Materials/ADComputeRSphericalIncrementalStrain<RESIDUAL>
+!syntax description /Materials/ADComputeRSphericalIncrementalStrain
 
 ## Description
 
@@ -56,8 +56,8 @@ while the calculation of the total strain components $\epsilon_{\theta \theta}$
 and $\epsilon_{\phi \phi}$ are found with
 [eq:polar_azimuthal_rspherical_strains].
 
-!syntax parameters /Materials/ADComputeRSphericalIncrementalStrain<RESIDUAL>
+!syntax parameters /Materials/ADComputeRSphericalIncrementalStrain
 
-!syntax inputs /Materials/ADComputeRSphericalIncrementalStrain<RESIDUAL>
+!syntax inputs /Materials/ADComputeRSphericalIncrementalStrain
 
-!syntax children /Materials/ADComputeRSphericalIncrementalStrain<RESIDUAL>
+!syntax children /Materials/ADComputeRSphericalIncrementalStrain
