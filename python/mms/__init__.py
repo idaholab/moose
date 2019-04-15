@@ -12,7 +12,11 @@ else:
     from runner import run_spatial, run_temporal
 
 try:
+    import os
     import matplotlib
+    if not os.getenv('DISPLAY', False):
+        matplotlib.use('Agg')
+
 
 except ImportError:
     print("The 'mms' package requires matplotlib, it can be installed by running " \
