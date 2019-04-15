@@ -1,8 +1,8 @@
 # Test the correct calculation of fluid properties using PorousFlwoFluidPropertyIC
-# when temperature is given in Celcius
+# when temperature is given in Celsius
 #
 # Variables:
-# Pressure: 1 Mpa
+# Pressure: 1 MPa
 # Temperature: 50 C
 #
 # Fluid properties for water (reference values from NIST webbook)

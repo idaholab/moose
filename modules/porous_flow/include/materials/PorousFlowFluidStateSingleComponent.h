@@ -43,7 +43,7 @@ protected:
 
   /**
    * Calculates all required thermophysical properties and derivatives for each phase
-   * and fluid component. Must override in all derived classes.
+   * and fluid component
    */
   virtual void thermophysicalProperties();
 

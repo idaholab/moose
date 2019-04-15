@@ -1,7 +1,7 @@
-# Test the correct calculation of fluid properties using PorousFlwoFluidPropertyIC
+# Test the correct calculation of fluid properties using PorousFlowFluidPropertyIC
 #
 # Variables:
-# Pressure: 1 Mpa
+# Pressure: 1 MPa
 # Temperature: 323.15 K
 #
 # Fluid properties for water (reference values from NIST webbook)

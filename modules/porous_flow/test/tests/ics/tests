@@ -8,9 +8,9 @@
     design = 'PorousFlowFluidPropertyIC.md'
     issues = '#13108'
   [../]
-  [./fluidpropic_celcius]
+  [./fluidpropic_celsius]
     type = 'CSVDiff'
-    input = 'fluidpropic_celcius.i'
+    input = 'fluidpropic_celsius.i'
     csvdiff = 'fluidpropic_out.csv'
     threading = '!pthreads'
     prereq = 'fluidpropic'

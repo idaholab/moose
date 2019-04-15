@@ -916,7 +916,7 @@ PorousFlowBrineCO2::activityCoefficientHighTemp(
 void
 PorousFlowBrineCO2::equilibriumConstantH2O(Real temperature, Real & kh2o, Real & dkh2o_dT) const
 {
-  // Uses temperature in Celcius
+  // Uses temperature in Celsius
   const Real Tc = temperature - _T_c2k;
   const Real Tc2 = Tc * Tc;
   const Real Tc3 = Tc2 * Tc;
@@ -949,7 +949,7 @@ PorousFlowBrineCO2::equilibriumConstantH2O(Real temperature, Real & kh2o, Real &
 void
 PorousFlowBrineCO2::equilibriumConstantCO2(Real temperature, Real & kco2, Real & dkco2_dT) const
 {
-  // Uses temperature in Celcius
+  // Uses temperature in Celsius
   const Real Tc = temperature - _T_c2k;
   const Real Tc2 = Tc * Tc;
   const Real Tc3 = Tc2 * Tc;
@@ -1474,7 +1474,7 @@ PorousFlowBrineCO2::henryConstant(
   // The correction to salt is obtained through the salting out coefficient
   const std::vector<Real> b{1.19784e-1, -7.17823e-4, 4.93854e-6, -1.03826e-8, 1.08233e-11};
 
-  // Need temperature in Celcius
+  // Need temperature in Celsius
   const Real Tc = temperature - _T_c2k;
 
   Real kb = 0.0;

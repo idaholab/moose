@@ -25,7 +25,7 @@ validParams<PorousFlowFluidPropertyIC>()
   params.addRequiredParam<UserObjectName>("fp", "The name of the user object for the fluid");
   MooseEnum property_enum("enthalpy internal_energy density");
   params.addRequiredParam<MooseEnum>(
-      "property", property_enum, "The fluid property that this auxillary kernel is to calculate");
+      "property", property_enum, "The fluid property that this initial condition is to calculate");
   params.addClassDescription("An initial condition to calculate one fluid property (such as "
                              "enthalpy) from pressure and temperature");
   return params;
