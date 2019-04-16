@@ -329,7 +329,7 @@ lexEq(Lexer * l)
   return lexString;
 }
 
-void
+size_t
 consumeUnquotedString(Lexer * l)
 {
   while (true)
@@ -340,6 +340,7 @@ consumeUnquotedString(Lexer * l)
       break;
   }
   l->backup();
+  return l->pos() - l->start();
 }
 
 void
@@ -376,8 +377,8 @@ lexString(Lexer * l)
 
   if (!charIn(l->peek(), "'\""))
   {
-    consumeUnquotedString(l);
-    l->emit(TokType::String);
+    if (consumeUnquotedString(l))
+      l->emit(TokType::String);
     return lexHit;
   }
 
@@ -431,16 +432,16 @@ lexNumber(Lexer * l)
   if (n == 0)
   {
     // fall back to string
-    consumeUnquotedString(l);
-    l->emit(TokType::String);
+    if (consumeUnquotedString(l))
+      l->emit(TokType::String);
     return lexHit;
   }
 
   if (!charIn(l->peek(), allspace + "[") && l->peek() != '\0')
   {
     // fall back to string
-    consumeUnquotedString(l);
-    l->emit(TokType::String);
+    if (consumeUnquotedString(l))
+      l->emit(TokType::String);
     return lexHit;
   }
 
@@ -470,7 +471,7 @@ lexHit(Lexer * l)
     l->emit(TokType::EOF);
     return NULL;
   }
-  return l->error("invalid character '" + std::string(1, c) + "'");
+  return l->error("invalid character '" + std::string(1, c) + "' - did you leave a field value blank after a previous '='?");
 }
 
 } // namespace hit

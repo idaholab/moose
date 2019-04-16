@@ -128,6 +128,9 @@ InputFileFormatter::printParams(const std::string & /*prefix*/,
         }
         else
           quotes = "";
+
+        if (value.size() == 0)
+          value = "(no_default)";
         oss << quotes << value << quotes;
         l_offset -= value.size();
       }
