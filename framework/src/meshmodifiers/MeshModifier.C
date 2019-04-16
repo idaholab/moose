@@ -22,7 +22,7 @@ validParams<MeshModifier>()
                         false,
                         "Normally all MeshModifiers run before the mesh is prepared for use. This "
                         "flag can be set on an individual modifier "
-                        "to force preperation between modifiers where they might be needed.");
+                        "to force preparation between modifiers where they might be needed.");
 
   params.addPrivateParam<MooseMesh *>("_mesh");
 

@@ -26,7 +26,7 @@ validParams<StitchedMeshGenerator>()
 
   params.addRequiredParam<std::vector<MeshGeneratorName>>("inputs", "The input MeshGenerators.");
   params.addParam<bool>(
-      "clear_stitched_boundary_ids", true, "Whether or not to clear the stitchd boundary IDs");
+      "clear_stitched_boundary_ids", true, "Whether or not to clear the stitched boundary IDs");
   params.addRequiredParam<std::vector<std::vector<std::string>>>(
       "stitch_boundaries_pairs",
       "Pairs of boundaries to be stitched together between the 1st mesh in inputs and each "
@@ -66,7 +66,7 @@ StitchedMeshGenerator::generate()
   for (MooseIndex(_input_names) i = 1; i < _input_names.size(); ++i)
     _meshes.push_back(dynamic_pointer_cast<ReplicatedMesh>(*_mesh_ptrs[i]));
 
-  // Stich all the meshes to the first one
+  // Stitch all the meshes to the first one
   for (MooseIndex(_meshes) i = 0; i < _meshes.size(); i++)
   {
     auto boundary_pair = _stitch_boundaries_pairs[i];
