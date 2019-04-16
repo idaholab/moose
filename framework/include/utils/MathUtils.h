@@ -146,6 +146,8 @@ template <typename T>
 T
 smootherStep(T x, T start, T end, bool derivative = false)
 {
+  if (end == start)
+    return 0.0;
   x = clamp((x - start) / (end - start), 0.0, 1.0);
   if (x == 0.0)
     return 0.0;

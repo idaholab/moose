@@ -22,7 +22,7 @@ class ClampTestFunction : public Function
 public:
   ClampTestFunction(const InputParameters & parameters);
 
-  virtual Real value(Real t, const Point & p);
+  virtual Real value(Real t, const Point & p) override;
 };
 
 #endif // CLAMPTESTFUNCTION_H
