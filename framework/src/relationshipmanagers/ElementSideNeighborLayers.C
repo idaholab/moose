@@ -49,9 +49,6 @@ ElementSideNeighborLayers::getInfo() const
 
   oss << "ElementSideNeighborLayers (" << _layers << " " << layers << ')';
 
-  if (_has_periodic_boundaries)
-    oss << " with periodic BCs";
-
   return oss.str();
 }
 
@@ -62,8 +59,7 @@ ElementSideNeighborLayers::operator==(const RelationshipManager & rhs) const
   if (!rm)
     return false;
   else
-    return _layers == rm->_layers && _rm_type == rm->_rm_type &&
-           _has_periodic_boundaries == rm->_has_periodic_boundaries;
+    return _layers == rm->_layers && isType(rm->_rm_type);
 }
 
 void
@@ -82,12 +78,10 @@ ElementSideNeighborLayers::internalInit()
     auto & dof_map = nl_sys.dofMap();
     auto periodic_boundaries_ptr = dof_map.get_periodic_boundaries();
 
-    if (periodic_boundaries_ptr)
-    {
-      _has_periodic_boundaries = true;
-      functor->set_mesh(&_mesh.getMesh());
-      functor->set_periodic_boundaries(periodic_boundaries_ptr);
-    }
+    mooseAssert(periodic_boundaries_ptr, "Periodic Boundaries Pointer is nullptr");
+
+    functor->set_mesh(&_mesh.getMesh());
+    functor->set_periodic_boundaries(periodic_boundaries_ptr);
   }
 
   _functor = std::move(functor);
