@@ -1,4 +1,6 @@
 [Tests]
+  design = 'FiniteDifferencePreconditioner.md'
+  issues = '#13232'
   [./jacobian_fdp_coloring_full_test]
     type = AnalyzeJacobian
     input = fdp_test.i
@@ -7,6 +9,7 @@
     petsc_version = '<3.9.0 || >=3.9.4'
     mesh_mode = REPLICATED
     cli_args = 'Preconditioning/FDP/full=true'
+    requirement = "Coloring finite difference Jacobian shall be perfect"
   [../]
   [./jacobian_fdp_standard_test]
     type = AnalyzeJacobian
@@ -16,6 +19,7 @@
     mesh_mode = REPLICATED
     cli_args = 'Preconditioning/FDP/finite_difference_type=standard'
     prereq = 'jacobian_fdp_coloring_full_test'
+    requirement = "Standard finite difference Jacobian shall be perfect"
   [../]
   [./jacobian_fdp_coloring_diagonal_test_fail]
     type = AnalyzeJacobian
@@ -24,5 +28,6 @@
     recover = false
     mesh_mode = REPLICATED
     prereq = 'jacobian_fdp_standard_test'
+    requirement = "Coloring method shall work properly for the diagonal part of matrix"
   [../]
 []

@@ -1,11 +1,11 @@
 [Tests]
+  design = 'InterfaceKernels/index.md'
   [./interface_diffusion]
     type = 'Exodiff'
     input = 'coupled_value_coupled_flux.i'
     exodiff = 'coupled_value_coupled_flux_out.e'
     requirement = "Interface kernels shall provide integrated conditions between subdomains,"
                   " and shall work with boundary restricted materials with stateful properties."
-    design = 'InterfaceKernels/index.md'
     issues = '#11258 #869'
   [../]
   [./interface_diffusion_penalty]
@@ -13,7 +13,6 @@
     input = 'coupled_value_coupled_flux.i'
     cli_args = "InterfaceKernels/active='penalty_interface' BCs/active='left right' Outputs/file_base=coupled_value_coupled_flux_penalty_out"
     exodiff = 'coupled_value_coupled_flux_penalty_out.e'
-    design = 'InterfaceKernels/index.md'
     issues = '#11765'
     requirement = "The interface diffusion penalty method should reproduce the analytic solution"
     prereq = 'interface_diffusion'
@@ -25,6 +24,8 @@
     type = 'Exodiff'
     input = 'mixed_shapes.i'
     exodiff = 'mixed_shapes_out.e'
+    issues = '#13232'
+    requirement = "MOOSE shall support mixed shapes"
   [../]
   [./jacobian_test]
     type = AnalyzeJacobian
@@ -33,6 +34,8 @@
     recover = false
     petsc_version = '<3.9.0 || >=3.9.4'
     cli_args = 'Outputs/exodus=false'
+    issues = '#13232'
+    requirement = "MOOSE shall test Jacobian for coupled flux for interface"
   [../]
   [./mixed_shapes_jacobian_test]
     type = AnalyzeJacobian
@@ -41,6 +44,8 @@
     recover = false
     petsc_version = '<3.9.0 || >=3.9.4'
     cli_args = 'Outputs/exodus=false'
+    issues = '#13232'
+    requirement = "MOOSE shall test Jacobian for mixed shapes"
   [../]
 
   [./single_variable_jacobian_test]
@@ -49,6 +54,8 @@
     expect_out = '\nNo errors detected. :-\)\n'
     recover = false
     petsc_version = '<3.9.0 || >=3.9.4'
+    issues = '#13232'
+    requirement = "MOOSE shall test Jacobian for single variable coupled flux"
   [../]
 
   [./ik_save_in]
@@ -56,7 +63,6 @@
     input = 'ik_save_in_test.i'
     exodiff = 'ik_save_in_test_out.e'
     issues = '#9854'
-    design = 'InterfaceKernels/index.md'
     requirement = "Save-in shall record the correct residuals and Jacobians representing the interface kernel. "
                   "This applies the DirichletBC to side a (block 0) of the interface."
   [../]
@@ -65,8 +71,7 @@
     input = 'ik_save_in_test.i'
     exodiff = 'ik_save_in_other_side_out.e'
     cli_args = 'BCs/middle/variable=u BCs/middle/v=v BCs/middle/save_in=master_resid Outputs/file_base=ik_save_in_other_side_out'
-    issues = '#9854'
-    design = 'InterfaceKernels/index.md'
+    issues = '#13232'
     requirement = "Save-in shall record the correct residuals and Jacobians representing the interface kernel. "
                   "This applies the DirichletBC to side b (block 1) of the interface."
   [../]

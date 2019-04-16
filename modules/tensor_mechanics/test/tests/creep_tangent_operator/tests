@@ -1,15 +1,19 @@
 [Tests]
+  design = 'supplementalRadialReturnStressUpdate.md'
+  issues = '#13232'
   [./ten]
     type = 'CSVDiff'
     input = 'creep.i'
     csvdiff = 'creep_out.csv'
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_ten"'
+    requirement = 'MOOSE shall test creep'
   [../]
   [./zero]
     type = 'CSVDiff'
     input = 'creep.i'
     csvdiff = 'creep_out.csv'
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_ten creep_zero"'
+    requirement = 'MOOSE shall test zero-creep'
     prereq = ten
   [../]
   [./sum]
@@ -17,6 +21,7 @@
     input = 'creep.i'
     csvdiff = 'creep_out.csv'
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_nine creep_one"'
+    requirement = 'MOOSE shall test one-creep'
     prereq = zero
   [../]
   [./cycle]
@@ -24,30 +29,39 @@
     input = 'creep.i'
     csvdiff = 'creep_out.csv'
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_ten creep_ten2" Materials/elastic_strain/cycle_models=true'
+    requirement = 'MOOSE shall test cycle models'
     prereq = sum
   [../]
 
   [./ten_jacobian]
     type = 'AnalyzeJacobian'
     input = 'creep.i'
+    petsc_version = '<3.9.0 || >=3.9.4'
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_ten"'
+    requirement = 'MOOSE shall test Jacobian matrix'
   [../]
   [./zero_jacobian]
     type = 'AnalyzeJacobian'
     input = 'creep.i'
+    petsc_version = '<3.9.0 || >=3.9.4'
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_ten creep_zero"'
     prereq = ten_jacobian
+    requirement = 'MOOSE shall test Jacobian matrix'
   [../]
   [./sum_jacobian]
     type = 'AnalyzeJacobian'
     input = 'creep.i'
+    petsc_version = '<3.9.0 || >=3.9.4'
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_nine creep_one"'
     prereq = zero_jacobian
+    requirement = 'MOOSE shall test Jacobian matrix'
   [../]
   [./cycle_jacobian]
     type = 'AnalyzeJacobian'
     input = 'creep.i'
+    petsc_version = '<3.9.0 || >=3.9.4'
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_ten creep_ten2" Materials/elastic_strain/cycle_models=true'
     prereq = sum_jacobian
+    requirement = 'MOOSE shall test Jacobian matrix'
   [../]
 []

@@ -1,17 +1,23 @@
 [Tests]
+  design = 'ThermalConductivity.md'
+  issues = '#13232'
   [./test]
     type = 'Exodiff'
     input = 'thermal_elastic.i'
     exodiff = 'thermal_elastic_out.e'
+    requirement = 'MOOSE shall test thermal elastic'
   [../]
   [./test_sm]
     type = 'Exodiff'
     input = 'thermal_elastic_sm.i'
     exodiff = 'thermal_elastic_out.e'
     prereq = test
+    requirement = 'MOOSE shall test thermal elastic sm'
   [../]
   [./derivatives]
     type = 'AnalyzeJacobian'
+    petsc_version = '<3.9.0 || >=3.9.4'
+    requirement = 'MOOSE shall test Jacobian for thermal elastic'
     input = 'derivatives.i'
   [../]
 []

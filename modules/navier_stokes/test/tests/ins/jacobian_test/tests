@@ -1,23 +1,33 @@
 [Tests]
+   design = 'modules/navier_stokes/index.md'  
   [./jacobian_test]
     type = AnalyzeJacobian
     input = jacobian_test.i
     expect_out = '\nNo errors detected. :-\)\n'
     recover = false
+    petsc_version = '<3.9.0 || >=3.9.4'
     mesh_mode = REPLICATED
+    issues = '#13025'
+    requirement = 'We shall be able to test Jacobian matrix'
   [../]
   [./jacobian_stabilized_test]
     type = AnalyzeJacobian
     input = jacobian_stabilized_test.i
     expect_out = '\nNo errors detected. :-\)\n'
     recover = false
+    petsc_version = '<3.9.0 || >=3.9.4'
     mesh_mode = REPLICATED
+    issues = '#13025'
+    requirement = 'We shall be able to test Jacobian matrix'
   [../]
   [./jacobian_traction_stabilized_test]
     type = AnalyzeJacobian
     input = jacobian_traction_stabilized.i
     expect_out = '\nNo errors detected. :-\)\n'
     recover = false
+    petsc_version = '<3.9.0 || >=3.9.4'
     mesh_mode = REPLICATED
+    issues = '#13025'
+    requirement = 'We shall be able to test Jacobian matrix'
   [../]
 []
