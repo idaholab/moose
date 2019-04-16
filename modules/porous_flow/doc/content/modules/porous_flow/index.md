@@ -131,7 +131,7 @@ A number of `Postprocessors` are available:
 
 There are over 500 unit and quality-assurance tests in the PorousFlow test suite.  The pages below describe some of the more non-trivial tests.
 
-- [Infiltration and drainage](tests/broadbridge_white/broadbridge_white_tests.md)
+- [Infiltration and drainage](tests/infiltration_and_drainage/infiltration_and_drainage_tests.md)
 - [Heat and fluid responses in finite 1D bars subject to various boundary conditions](tests/newton_cooling/newton_cooling_tests.md)
 - [Poroelasticity](tests/poro_elasticity/poro_elasticity_tests.md)
 - [Boundary sinks and sources](tests/sinks/sinks_tests.md)
@@ -158,7 +158,6 @@ There are over 500 unit and quality-assurance tests in the PorousFlow test suite
 - [capillary_pressure](tests/capillary_pressure/capillary_pressure_tests.md)
 - [relperm](tests/relperm/relperm_tests.md)
 - [chemistry](tests/chemistry/chemistry_tests.md)
-- [rogers_stallybrass_clements](tests/rogers_stallybrass_clements/rogers_stallybrass_clements_tests.md)
 - [density](tests/density/density_tests.md)
 - [heterogeneous_materials](tests/heterogeneous_materials/heterogeneous_materials_tests.md)
 - [desorption](tests/desorption/desorption_tests.md)

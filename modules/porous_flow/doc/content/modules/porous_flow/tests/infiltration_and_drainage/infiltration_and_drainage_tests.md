@@ -94,12 +94,12 @@ as the temporal and spatial resolution is increased, but never totally
 disappear due to the initial condition of $P=-900\,$Pa.
 
 
-!media broadbridge_white/bw.png style=width:50%;margin-left:10px caption=Comparison of the Broadbridge and White analytical solution with the MOOSE solution for 3 times.  This figure is shown in the standard format used in the Broadbridge-White paper: the constant recharge is applied to the top (where depth is zero) and gravity acts downwards in this figure.  id=bw_fig
+!media infiltration_and_drainage/bw.png style=width:50%;margin-left:10px caption=Comparison of the Broadbridge and White analytical solution with the MOOSE solution for 3 times.  This figure is shown in the standard format used in the Broadbridge-White paper: the constant recharge is applied to the top (where depth is zero) and gravity acts downwards in this figure.  id=bw_fig
 
 Two tests are part of the automatic test suite (one is marked
-``heavy'' because it is a high-resolution version).
+"heavy" because it is a high-resolution version).
 
-!listing modules/porous_flow/test/tests/broadbridge_white/bw01.i
+!listing modules/porous_flow/test/tests/infiltration_and_drainage/bw01.i
 
 ## The two-phase analytic drainage solution
 
@@ -116,7 +116,7 @@ the medium.  Their solutions are quite lengthy, so are not written here
 
 A MOOSE model with the parameters almost identical to those listed in
 [tab:bw_params] is compared with the analytical solutions.  The only
-differences are that the ``bar'' length is $10000\,$m (to avoid any
+differences are that the "bar" length is $10000\,$m (to avoid any
 interference from the lower Dirichlet boundary condition), and
 $R_{\ast}=0$ since there is no recharge.  The initial condition is
 $P=10^{-4}\,$Pa: the choice $P=0$ leads to poor convergence since
@@ -128,12 +128,12 @@ extension to $P\geq 0$ is discontinuous at $P=0$.
 solution and the MOOSE implementation.  Any minor discrepancies get
 smaller as the temporal and spatial resolution increase.
 
-!media broadbridge_white/wli.png style=width:50%;margin-left:10px caption=Comparison of the Warrick, Lomen and Islas analytical solution with the MOOSE solution for 3 times.  This figure is shown in the standard format used in the literature: the top of the model is at the top of the figure, and gravity acts downwards in this figure, with fluid draining from the infinitely deep point.  id=wli_fig
+!media infiltration_and_drainage/wli.png style=width:50%;margin-left:10px caption=Comparison of the Warrick, Lomen and Islas analytical solution with the MOOSE solution for 3 times.  This figure is shown in the standard format used in the literature: the top of the model is at the top of the figure, and gravity acts downwards in this figure, with fluid draining from the infinitely deep point.  id=wli_fig
 
 Two tests are part of the automatic test suite (one is marked
-``heavy'' because it is a high-resolution version).
+"heavy" because it is a high-resolution version).
 
-!listing modules/porous_flow/test/tests/broadbridge_white/wli01.i
+!listing modules/porous_flow/test/tests/infiltration_and_drainage/wli01.i
 
 ## Single-phase infiltration and drainage
 
@@ -143,7 +143,7 @@ drainage (experiment 2) in a large caisson.  The simulation is
 effectively one dimensional, and is shown in
 [rd_setup_fig].
 
-!media broadbridge_white/rd_setup.png style=width:50%;margin-left:10px caption=Two experimental setups from Forsyth, Wu and Pruess.  Experiment 1 involves infiltration of water into an initially unsaturated caisson.  Experiment 2 involves drainage of water from an initially saturated caisson.  id=rd_setup_fig
+!media infiltration_and_drainage/rd_setup.png style=width:50%;margin-left:10px caption=Two experimental setups from Forsyth, Wu and Pruess.  Experiment 1 involves infiltration of water into an initially unsaturated caisson.  Experiment 2 involves drainage of water from an initially saturated caisson.  id=rd_setup_fig
 
 The properties common to each experiment
 are listed in [tab:caisson_params]
@@ -166,7 +166,7 @@ van Genuchten turnover | 0.99 |
 
 In each experiment 120 finite elements are used along the length of
 the Caisson.  The modified van-Genuchten relative permeability curve
-with a ``turnover'' (set at $S=0.99$) is employed in order to improve
+with a "turnover" (set at $S=0.99$) is employed in order to improve
 convergence significantly.  Hydrus also uses a modified van-Genuchten
 curve, although I couldn't find any details on the modification.
 
@@ -182,23 +182,95 @@ and the bottom is held at $P=0$ to cause water to drain via the action
 of gravity.  [rd01_result_fig] and [rd02_result_fig] show the agreement between
 MOOSE and the published result.
 
-!media broadbridge_white/rd01.png style=width:50%;margin-left:10px caption=Saturation profile in the caisson after 4.16 days of infiltration.  Note that the HYDRUS results are only approximate they were extrated by hand from online graphics.  id=rd01_result_fig
+!media infiltration_and_drainage/rd01.png style=width:50%;margin-left:10px caption=Saturation profile in the caisson after 4.16 days of infiltration.  Note that the HYDRUS results are only approximate they were extrated by hand from online graphics.  id=rd01_result_fig
 
-!media broadbridge_white/rd02.png style=width:50%;margin-left:10px caption=Saturation profiles in the caisson after drainage from an initially-saturated simulation (4 days and 100 days profiles).  Note that the HYDRUS results are only approximate they were extrated by hand from online graphics.  id=rd02_result_fig
+!media infiltration_and_drainage/rd02.png style=width:50%;margin-left:10px caption=Saturation profiles in the caisson after drainage from an initially-saturated simulation (4 days and 100 days profiles).  Note that the HYDRUS results are only approximate they were extrated by hand from online graphics.  id=rd02_result_fig
 
 Experiment 1 and the first 4 simulation days of experiment 2 are
-marked as ``heavy'' in the PorousFlow test suite since the simulations
+marked as "heavy" in the PorousFlow test suite since the simulations
 take around 3 seconds to complete.
 
 The input file for Experiment 1:
 
-!listing modules/porous_flow/test/tests/broadbridge_white/rd01.i
+!listing modules/porous_flow/test/tests/infiltration_and_drainage/rd01.i
 
 The input file for the first 4 simulation days of Experiment 2:
 
-!listing modules/porous_flow/test/tests/broadbridge_white/rd02.i
+!listing modules/porous_flow/test/tests/infiltration_and_drainage/rd02.i
 
 The input file for the latter 96 days of Experiment 2:
 
-!listing modules/porous_flow/test/tests/broadbridge_white/rd03.i
+!listing modules/porous_flow/test/tests/infiltration_and_drainage/rd03.i
 
+
+## Water infiltration into a two-phase (oil-water) system
+
+An analytic solution of the two-phase Richards' equations with
+gravity on a
+semi-infinite line $z\geq 0$, with a constant water infiltration flux
+at $z=0$ has been derived by [citep!rsc1983] (Unfortunately there must be a typo in the RSC paper
+  as for nonzero gravity their results are clearly incorrect.).  The authors
+assume incompressible fluids; linear relative permeability
+relationships; the "oil" (or "gas") viscosity is larger than the
+water viscosity; and, a certain functional form for the capillary
+pressure.  When the oil viscosity is exactly twice the water
+viscosity, their effective saturation reads
+\begin{equation}
+S_{\mathrm{eff}} = \frac{1}{\sqrt{1 + \exp((P_{c} - A)/B)}} \ ,
+\label{eqn.rsc.seff}
+\end{equation}
+where $P_{c} = P_{\mathrm{oil}}-P_{\mathrm{water}}$ is the capillary
+pressure, and $A$ and $B$ are arbitrary parameters to be defined by
+the user in the PorousFlow implementation.  For other oil/water viscosity
+ratios $P_{c} = P_{c}(S_{\mathrm{eff}})$ is more complicated, and note
+that their formulation allows $P_{c}<0$, but only
+the particular form [eqn.rsc.seff] need be used to validate
+the MOOSE implementation.
+
+RSC's solutions are quite lengthy, so I will not write them here.  To
+compare with MOOSE, the following parameters are used:
+
+!table id=rsc_params caption=Parameter values used in the Rogers-Stallybrass-Clements infiltration tests
+| Parameter | Value |
+| --- | --- |
+| Bar length | 10 m |
+| Bar porosity | 0.25 |
+| Bar permeability | $10^{-5}\,$m$^{2}$ |
+| Gravity | 0 m.s$^{-2}$ |
+| Water density | 10 kg.m$^{-3}$ |
+| Water viscosity | $10^{-3}\,$Pa.s |
+| Oil density | 20 kg.m$^{-3}$ |
+| Oil viscosity | $2\times 10^{-3}\,$Pa.s |
+| Capillary $A$ | 10 Pa |
+| Capillary $B$ | 1 Pa |
+| Initial water pressure | 0 Pa |
+| Initial oil pressure | 15 Pa |
+| Initial water saturation | 0.08181 |
+| Initial oil saturation | 0.91819 |
+| Water injection rate | 1 kg.s$^{-1}$.m$^{-2}$ |
+
+The input file:
+
+!listing modules/porous_flow/test/tests/infiltration_and_drainage/rsc01.i
+
+In the RSC theory water is injected into a semi-infinite domain,
+whereas of course the MOOSE implementation has finite extent ($0\leq z
+\leq 10$ is chosen).  Because of the near incompressibility of the
+fluids (I choose the bulk modulus to be 2 GPa) this causes the
+porepressures to rise enormously, and the problem can suffer from
+precision-loss problems.  Therefore, the porepressures are fixed at
+$z=10$.  This does not affect the progress of the water saturation
+front.
+
+[rsc.fig] shows good agreement between the analytic
+solution and the MOOSE implementation.  Any minor discrepancies get
+smaller as the temporal and spatial resolution increase, as is
+suggested by the two comparisons in that figure.
+
+The "low-resolution" test has 200 elements in $0\leq z\leq
+10$ and uses 15 time steps is part the automatic test suite that
+is run every time the code is updated.  The "high-resolution" test
+has 600 elements and uses 190 time steps, and is marked as
+"heavy".
+
+!media infiltration_and_drainage/rsc.png style=width:50%;margin-left:10px caption=Water saturation profile after 5 seconds of injection in the Rogers-Stallybrass-Clements test.  The initial water saturation is 0.08181, and water is injected at the top of this figure at a constant rate.  This forms a water front which displaces the oil.  Black line: RSC's analytic solution.  Red squares: high-resolution MOOSE simulation.  Green triangles: lower resolution MOOSE simulation.  id=rsc.fig
