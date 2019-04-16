@@ -117,6 +117,61 @@
     function = ana_pp
     point = '-1 0 0'
   [../]
+  [./pp_00]
+    type = PointValue
+    variable = pp
+    point = '0 0 0'
+  [../]
+  [./pp_01]
+    type = PointValue
+    variable = pp
+    point = '-0.1 0 0'
+  [../]
+  [./pp_02]
+    type = PointValue
+    variable = pp
+    point = '-0.2 0 0'
+  [../]
+  [./pp_03]
+    type = PointValue
+    variable = pp
+    point = '-0.3 0 0'
+  [../]
+  [./pp_04]
+    type = PointValue
+    variable = pp
+    point = '-0.4 0 0'
+  [../]
+  [./pp_05]
+    type = PointValue
+    variable = pp
+    point = '-0.5 0 0'
+  [../]
+  [./pp_06]
+    type = PointValue
+    variable = pp
+    point = '-0.6 0 0'
+  [../]
+  [./pp_07]
+    type = PointValue
+    variable = pp
+    point = '-0.7 0 0'
+  [../]
+  [./pp_08]
+    type = PointValue
+    variable = pp
+    point = '-0.8 0 0'
+  [../]
+  [./pp_09]
+    type = PointValue
+    variable = pp
+    point = '-0.9 0 0'
+  [../]
+  [./pp_10]
+    type = PointValue
+    variable = pp
+    point = '-1 0 0'
+  [../]
 []
 
 [Preconditioning]
