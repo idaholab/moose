@@ -48,7 +48,7 @@ ComputeMarkerThread::subdomainChanged()
 
   for (const auto & it : _aux_sys._elem_vars[_tid])
   {
-    MooseVariable * var = it.second;
+    MooseVariableFEBase * var = it.second;
     var->prepareAux();
   }
 
@@ -80,7 +80,7 @@ ComputeMarkerThread::onElement(const Elem * elem)
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for (const auto & it : _aux_sys._elem_vars[_tid])
     {
-      MooseVariable * var = it.second;
+      MooseVariableFEBase * var = it.second;
       var->insert(_aux_sys.solution());
     }
   }

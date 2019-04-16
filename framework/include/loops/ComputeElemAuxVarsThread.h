@@ -21,11 +21,13 @@
 class FEProblemBase;
 class AuxiliarySystem;
 
+template <typename AuxKernelType>
 class ComputeElemAuxVarsThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
   ComputeElemAuxVarsThread(FEProblemBase & problem,
-                           const MooseObjectWarehouse<AuxKernel> & storage,
+                           const MooseObjectWarehouse<AuxKernelType> & storage,
+                           const std::vector<std::map<std::string, MooseVariableFEBase *>> & vars,
                            bool need_materials);
   // Splitting Constructor
   ComputeElemAuxVarsThread(ComputeElemAuxVarsThread & x, Threads::split split);
@@ -42,7 +44,9 @@ protected:
   AuxiliarySystem & _aux_sys;
 
   /// Storage object containing active AuxKernel objects
-  const MooseObjectWarehouse<AuxKernel> & _aux_kernels;
+  const MooseObjectWarehouse<AuxKernelType> & _aux_kernels;
+
+  const std::vector<std::map<std::string, MooseVariableFEBase *>> & _aux_vars;
 
   bool _need_materials;
 };

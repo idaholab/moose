@@ -21,17 +21,6 @@ class AuxKernel : public AuxKernelBase<Real>
 {
 public:
   AuxKernel(const InputParameters & parameters);
-
-protected:
-
-  /// Holds the solution at current quadrature points
-  const VariableValue & _u;
-
-  /// Holds the previous solution at the current quadrature point.
-  const VariableValue & _u_old;
-
-  /// Holds the t-2 solution at the current quadrature point.
-  const VariableValue & _u_older;
 };
 
 #endif

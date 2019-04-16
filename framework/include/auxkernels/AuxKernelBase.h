@@ -64,7 +64,7 @@ class AuxKernelBase : public MooseObject,
                       protected VectorPostprocessorInterface
 {
 public:
-  AuxKernelBase(const InputParameters & parameters);
+  AuxKernelBase(const InputParameters & parameters, Moose::VarFieldType var_type);
 
   virtual ~AuxKernelBase();
 
@@ -165,7 +165,16 @@ protected:
   /// Flag indicating if the AuxKernel is nodal
   bool _nodal;
 
-  /// holds the the test functions
+  /// Holds the solution at current quadrature points
+  const typename OutputTools<ComputeValueType>::VariableValue & _u;
+
+  /// Holds the previous solution at the current quadrature point.
+  const typename OutputTools<ComputeValueType>::VariableValue & _u_old;
+
+  /// Holds the t-2 solution at the current quadrature point.
+  const typename OutputTools<ComputeValueType>::VariableValue & _u_older;
+
+  /// Holds the the test functions
   const typename OutputTools<ComputeValueType>::VariableTestValue & _test;
 
   /// Assembly class

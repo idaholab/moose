@@ -18,13 +18,14 @@
 // Forward declarations
 class FEProblemBase;
 class AuxiliarySystem;
-class AuxKernel;
 
+template <typename AuxKernelType>
 class ComputeElemAuxBcsThread
 {
 public:
   ComputeElemAuxBcsThread(FEProblemBase & problem,
-                          const MooseObjectWarehouse<AuxKernel> & storage,
+                          const MooseObjectWarehouse<AuxKernelType> & storage,
+                          const std::vector<std::map<std::string, MooseVariableFEBase *>> & vars,
                           bool need_materials);
   // Splitting Constructor
   ComputeElemAuxBcsThread(ComputeElemAuxBcsThread & x, Threads::split split);
@@ -39,7 +40,9 @@ protected:
   THREAD_ID _tid;
 
   /// Storage object containing active AuxKernel objects
-  const MooseObjectWarehouse<AuxKernel> & _storage;
+  const MooseObjectWarehouse<AuxKernelType> & _storage;
+
+  const std::vector<std::map<std::string, MooseVariableFEBase *>> & _aux_vars;
 
   bool _need_materials;
 };

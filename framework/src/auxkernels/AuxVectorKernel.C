@@ -7,18 +7,18 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "AuxKernel.h"
+#include "AuxVectorKernel.h"
 
 template <>
 InputParameters
-validParams<AuxKernel>()
+validParams<AuxVectorKernel>()
 {
   InputParameters params = auxKernelBaseValidParams();
-  params.registerBase("AuxKernel");
+  params.registerBase("AuxVectorKernel");
   return params;
 }
 
-AuxKernel::AuxKernel(const InputParameters & parameters)
-  : AuxKernelBase<Real>(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD)
+AuxVectorKernel::AuxVectorKernel(const InputParameters & parameters)
+  : AuxKernelBase<RealVectorValue>(parameters, Moose::VarFieldType::VAR_FIELD_VECTOR)
 {
 }

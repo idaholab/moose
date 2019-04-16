@@ -1,0 +1,10 @@
+[Tests]
+  design = 'VectorFunctionAux.md'
+  issues = '#12312'
+  [VectorFunctionAux]
+    type = Exodiff
+    input = vector_function_aux.i
+    exodiff = vector_function_aux_out.e
+    requirement = "MOOSE shall include the ability to create vector auxiliary variables and set the components using a function defined within the input file."
+  []
+[]

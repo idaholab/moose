@@ -17,25 +17,32 @@
 
 #include "libmesh/threads.h"
 
-ComputeNodalAuxVarsThread::ComputeNodalAuxVarsThread(
-    FEProblemBase & fe_problem, const MooseObjectWarehouse<AuxKernel> & storage)
+template <typename AuxKernelType>
+ComputeNodalAuxVarsThread<AuxKernelType>::ComputeNodalAuxVarsThread(
+    FEProblemBase & fe_problem,
+    const MooseObjectWarehouse<AuxKernelType> & storage,
+    const std::vector<std::map<std::string, MooseVariableFEBase *>> & vars)
   : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
-    _storage(storage)
+    _storage(storage),
+    _aux_vars(vars)
 {
 }
 
 // Splitting Constructor
-ComputeNodalAuxVarsThread::ComputeNodalAuxVarsThread(ComputeNodalAuxVarsThread & x,
-                                                     Threads::split split)
+template <typename AuxKernelType>
+ComputeNodalAuxVarsThread<AuxKernelType>::ComputeNodalAuxVarsThread(ComputeNodalAuxVarsThread & x,
+                                                                    Threads::split split)
   : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
     _aux_sys(x._aux_sys),
-    _storage(x._storage)
+    _storage(x._storage),
+    _aux_vars(x._aux_vars)
 {
 }
 
+template <typename AuxKernelType>
 void
-ComputeNodalAuxVarsThread::subdomainChanged()
+ComputeNodalAuxVarsThread<AuxKernelType>::subdomainChanged()
 {
   std::set<TagID> needed_vector_tags;
   std::set<TagID> needed_matrix_tags;
@@ -60,8 +67,9 @@ ComputeNodalAuxVarsThread::subdomainChanged()
   _fe_problem.setActiveFEVariableCoupleableVectorTags(needed_vector_tags, _tid);
 }
 
+template <typename AuxKernelType>
 void
-ComputeNodalAuxVarsThread::onNode(ConstNodeRange::const_iterator & node_it)
+ComputeNodalAuxVarsThread<AuxKernelType>::onNode(ConstNodeRange::const_iterator & node_it)
 {
   const Node * node = *node_it;
 
@@ -75,9 +83,9 @@ ComputeNodalAuxVarsThread::onNode(ConstNodeRange::const_iterator & node_it)
   }
 
   // prepare variables
-  for (const auto & it : _aux_sys._nodal_vars[_tid])
+  for (const auto & it : _aux_vars[_tid])
   {
-    MooseVariable * var = it.second;
+    MooseVariableFEBase * var = it.second;
     var->prepareAux();
   }
 
@@ -100,22 +108,27 @@ ComputeNodalAuxVarsThread::onNode(ConstNodeRange::const_iterator & node_it)
   // We are done, so update the solution vector
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (const auto & it : _aux_sys._nodal_vars[_tid])
+    for (const auto & it : _aux_vars[_tid])
     {
-      MooseVariable * var = it.second;
+      MooseVariableFEBase * var = it.second;
       var->insert(_aux_sys.solution());
     }
   }
 }
 
+template <typename AuxKernelType>
 void
-ComputeNodalAuxVarsThread::post()
+ComputeNodalAuxVarsThread<AuxKernelType>::post()
 {
   _fe_problem.clearActiveFEVariableCoupleableVectorTags(_tid);
   _fe_problem.clearActiveFEVariableCoupleableMatrixTags(_tid);
 }
 
+template <typename AuxKernelType>
 void
-ComputeNodalAuxVarsThread::join(const ComputeNodalAuxVarsThread & /*y*/)
+ComputeNodalAuxVarsThread<AuxKernelType>::join(const ComputeNodalAuxVarsThread & /*y*/)
 {
 }
+
+template class ComputeNodalAuxVarsThread<AuxKernel>;
+template class ComputeNodalAuxVarsThread<AuxVectorKernel>;

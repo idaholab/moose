@@ -632,7 +632,7 @@ public:
   unsigned int numberOfDofsNeighbor() override { return _dof_indices_neighbor.size(); }
 
   void insert(NumericVector<Number> & residual) override;
-  void add(NumericVector<Number> & residual);
+  void add(NumericVector<Number> & residual) override;
 
   const MooseArray<Number> & dofValue() override;
   const MooseArray<Number> & dofValues() override;
@@ -731,6 +731,13 @@ public:
   const OutputType & nodalValueDotDotOldNeighbor();
   const OutputType & nodalValueDuDotDuNeighbor();
   const OutputType & nodalValueDuDotDotDuNeighbor();
+
+  /**
+   * Methods for retrieving values of variables at the nodes in a MooseArray for AuxKernelBase
+   */
+  const MooseArray<OutputType> & nodalValueArray();
+  const MooseArray<OutputType> & nodalValueOldArray();
+  const MooseArray<OutputType> & nodalValueOlderArray();
 
   const MooseArray<Real> & nodalVectorTagValue(TagID tag);
   const MooseArray<Real> & nodalMatrixTagValue(TagID tag);
@@ -1070,6 +1077,11 @@ protected:
   OutputType _nodal_value_dot_old;
   /// nodal values of u_dotdot_old
   OutputType _nodal_value_dotdot_old;
+
+  /// Nodal values as MooseArrays for use with AuxKernels
+  MooseArray<OutputType> _nodal_value_array;
+  MooseArray<OutputType> _nodal_value_old_array;
+  MooseArray<OutputType> _nodal_value_older_array;
 
   /// AD nodal value
   typename Moose::ValueType<OutputType, JACOBIAN>::type _ad_nodal_value;

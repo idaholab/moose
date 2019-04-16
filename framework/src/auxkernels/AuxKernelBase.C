@@ -58,7 +58,8 @@ auxKernelBaseValidParams()
 }
 
 template <typename ComputeValueType>
-AuxKernelBase<ComputeValueType>::AuxKernelBase(const InputParameters & parameters)
+AuxKernelBase<ComputeValueType>::AuxKernelBase(const InputParameters & parameters,
+                                               Moose::VarFieldType var_type)
   : MooseObject(parameters),
     MooseVariableInterface<ComputeValueType>(
         this,
@@ -68,7 +69,7 @@ AuxKernelBase<ComputeValueType>::AuxKernelBase(const InputParameters & parameter
             .isNodal(),
         "variable",
         Moose::VarKindType::VAR_AUXILIARY,
-        Moose::VarFieldType::VAR_FIELD_STANDARD),
+        var_type),
     BlockRestrictable(this),
     BoundaryRestrictable(this, mooseVariable()->isNodal()),
     SetupInterface(this),
@@ -84,7 +85,7 @@ AuxKernelBase<ComputeValueType>::AuxKernelBase(const InputParameters & parameter
                     parameters.get<THREAD_ID>("_tid"),
                     mooseVariable()->isNodal()),
     GeometricSearchInterface(this),
-    Restartable(this, "AuxKernelBases"),
+    Restartable(this, "AuxKernels"),
     MeshChangedInterface(parameters),
     VectorPostprocessorInterface(this),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
@@ -95,6 +96,10 @@ AuxKernelBase<ComputeValueType>::AuxKernelBase(const InputParameters & parameter
     _var(_aux_sys.getFieldVariable<ComputeValueType>(_tid,
                                                      parameters.get<AuxVariableName>("variable"))),
     _nodal(_var.isNodal()),
+    _u(_nodal ? _var.nodalValueArray() : _var.sln()),
+    _u_old(_nodal ? _var.nodalValueOldArray() : _var.slnOld()),
+    _u_older(_nodal ? _var.nodalValueOlderArray() : _var.slnOlder()),
+
     _test(_var.phi()),
     _assembly(_subproblem.assembly(_tid)),
     _bnd(boundaryRestricted()),
@@ -280,14 +285,13 @@ AuxKernelBase<ComputeValueType>::compute()
   else /* elemental variables */
   {
     _n_local_dofs = _var.numberOfDofs();
-
     if (_n_local_dofs == 1) /* p0 */
     {
       ComputeValueType value = 0;
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
         value += _JxW[_qp] * _coord[_qp] * computeValue();
       value /= (_bnd ? _current_side_volume : _current_elem_volume);
-      // update the variable data refernced by other kernels.
+      // update the variable data referenced by other kernels.
       // Note that this will update the values at the quadrature points too
       // (because this is an Elemental variable)
       _var.setNodalValue(value);
@@ -319,3 +323,4 @@ AuxKernelBase<ComputeValueType>::compute()
 }
 
 template class AuxKernelBase<Real>;
+template class AuxKernelBase<RealVectorValue>;

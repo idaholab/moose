@@ -19,12 +19,14 @@ template <typename T>
 class MooseObjectWarehouse;
 class AuxKernel;
 
+template <typename AuxKernelType>
 class ComputeNodalAuxBcsThread
   : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
 {
 public:
   ComputeNodalAuxBcsThread(FEProblemBase & fe_problem,
-                           const MooseObjectWarehouse<AuxKernel> & storage);
+                           const MooseObjectWarehouse<AuxKernelType> & storage,
+                           const std::vector<std::map<std::string, MooseVariableFEBase *>> & vars);
 
   // Splitting Constructor
   ComputeNodalAuxBcsThread(ComputeNodalAuxBcsThread & x, Threads::split split);
@@ -37,7 +39,9 @@ protected:
   AuxiliarySystem & _aux_sys;
 
   /// Storage object containing active AuxKernel objects
-  const MooseObjectWarehouse<AuxKernel> & _storage;
+  const MooseObjectWarehouse<AuxKernelType> & _storage;
+
+  const std::vector<std::map<std::string, MooseVariableFEBase *>> & _aux_vars;
 };
 
 #endif // COMPUTENODALAUXBCSTHREAD_H

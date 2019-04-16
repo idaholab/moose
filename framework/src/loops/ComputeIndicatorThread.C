@@ -69,7 +69,7 @@ ComputeIndicatorThread::onElement(const Elem * elem)
 {
   for (const auto & it : _aux_sys._elem_vars[_tid])
   {
-    MooseVariable * var = it.second;
+    MooseVariableFEBase * var = it.second;
     var->prepareAux();
   }
 
@@ -119,7 +119,7 @@ ComputeIndicatorThread::onElement(const Elem * elem)
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for (const auto & it : _aux_sys._elem_vars[_tid])
     {
-      MooseVariable * var = it.second;
+      MooseVariableFEBase * var = it.second;
       var->add(_aux_sys.solution());
     }
   }
@@ -149,7 +149,7 @@ ComputeIndicatorThread::onInternalSide(const Elem * elem, unsigned int side)
   {
     for (const auto & it : _aux_sys._elem_vars[_tid])
     {
-      MooseVariable * var = it.second;
+      MooseVariableFEBase * var = it.second;
       var->prepareAux();
     }
 

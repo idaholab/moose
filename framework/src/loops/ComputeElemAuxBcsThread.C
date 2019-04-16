@@ -14,31 +14,39 @@
 #include "DisplacedProblem.h"
 #include "Assembly.h"
 #include "AuxKernel.h"
+#include "AuxVectorKernel.h"
 
 #include "libmesh/threads.h"
 
-ComputeElemAuxBcsThread::ComputeElemAuxBcsThread(FEProblemBase & problem,
-                                                 const MooseObjectWarehouse<AuxKernel> & storage,
-                                                 bool need_materials)
+template <typename AuxKernelType>
+ComputeElemAuxBcsThread<AuxKernelType>::ComputeElemAuxBcsThread(
+    FEProblemBase & problem,
+    const MooseObjectWarehouse<AuxKernelType> & storage,
+    const std::vector<std::map<std::string, MooseVariableFEBase *>> & vars,
+    bool need_materials)
   : _problem(problem),
     _aux_sys(problem.getAuxiliarySystem()),
     _storage(storage),
+    _aux_vars(vars),
     _need_materials(need_materials)
 {
 }
 
 // Splitting Constructor
-ComputeElemAuxBcsThread::ComputeElemAuxBcsThread(ComputeElemAuxBcsThread & x,
-                                                 Threads::split /*split*/)
+template <typename AuxKernelType>
+ComputeElemAuxBcsThread<AuxKernelType>::ComputeElemAuxBcsThread(ComputeElemAuxBcsThread & x,
+                                                                Threads::split /*split*/)
   : _problem(x._problem),
     _aux_sys(x._aux_sys),
     _storage(x._storage),
+    _aux_vars(x._aux_vars),
     _need_materials(x._need_materials)
 {
 }
 
+template <typename AuxKernelType>
 void
-ComputeElemAuxBcsThread::operator()(const ConstBndElemRange & range)
+ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & range)
 {
   ParallelUniqueId puid;
   _tid = puid.id;
@@ -55,9 +63,9 @@ ComputeElemAuxBcsThread::operator()(const ConstBndElemRange & range)
     if (elem->processor_id() == _problem.processor_id())
     {
       // prepare variables
-      for (const auto & it : _aux_sys._elem_vars[_tid])
+      for (const auto & it : _aux_vars[_tid])
       {
-        MooseVariable * var = it.second;
+        MooseVariableFEBase * var = it.second;
         var->prepareAux();
       }
 
@@ -96,9 +104,9 @@ ComputeElemAuxBcsThread::operator()(const ConstBndElemRange & range)
       // update the solution vector
       {
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        for (const auto & it : _aux_sys._elem_vars[_tid])
+        for (const auto & it : _aux_vars[_tid])
         {
-          MooseVariable * var = it.second;
+          MooseVariableFEBase * var = it.second;
           var->insert(_aux_sys.solution());
         }
       }
@@ -106,7 +114,11 @@ ComputeElemAuxBcsThread::operator()(const ConstBndElemRange & range)
   }
 }
 
+template <typename AuxKernelType>
 void
-ComputeElemAuxBcsThread::join(const ComputeElemAuxBcsThread & /*y*/)
+ComputeElemAuxBcsThread<AuxKernelType>::join(const ComputeElemAuxBcsThread & /*y*/)
 {
 }
+
+template class ComputeElemAuxBcsThread<AuxKernel>;
+template class ComputeElemAuxBcsThread<AuxVectorKernel>;

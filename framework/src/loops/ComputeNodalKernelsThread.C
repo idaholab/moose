@@ -64,7 +64,7 @@ ComputeNodalKernelsThread::onNode(ConstNodeRange::const_iterator & node_it)
   // prepare variables
   for (const auto & it : _aux_sys._nodal_vars[_tid])
   {
-    MooseVariable * var = it.second;
+    MooseVariableFEBase * var = it.second;
     var->prepareAux();
   }
 
