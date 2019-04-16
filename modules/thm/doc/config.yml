@@ -37,9 +37,12 @@ Renderer:
 
 Extensions:
     MooseDocs.extensions.navigation:
+        name: 'THM'
+        repo: https://hpcsc.inl.gov/ssl/THM/site/index.html
+        home: https://hpcgitlab.hpc.inl.gov/idaholab/thm
         menu:
-            Developers:
-                Build Status: https://moosebuild.inl.gov/repo/idaholab/thm/
+            Systems: syntax/index.md
+            Build Status: https://moosebuild.inl.gov/repo/idaholab/thm/
 
     MooseDocs.extensions.appsyntax:
         executable: ${ROOT_DIR}
