@@ -481,6 +481,10 @@ Field::render(int indent, const std::string & indent_text, int maxlen)
       s += quote + unquoted.substr(pos, std::string::npos) + quote;
     }
   }
+  else if (_val.size() == 0)
+    s += "''";
+  else if (quote == "" && _val.find_first_of("\n\r \t") != std::string::npos)
+    s += "'" + _val + "'";
   else
     s += _val;
 
@@ -860,7 +864,7 @@ parseField(Parser * p, Node * n)
   else if (valtok.type == TokType::Error)
     p->error(valtok, valtok.val);
   else
-    p->error(valtok, "unexpected field token type");
+    p->error(valtok, "missing value for field '" + fieldtok.val + "' - found '" + valtok.val + "'");
   n->addChild(field);
 }
 

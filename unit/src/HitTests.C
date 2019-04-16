@@ -40,6 +40,8 @@ TEST(HitTests, FailCases)
   PassFailCase cases[] = {
       {"comment in path", "[hello#world] []"},
       {"comment in field", "hello#world=foo"},
+      {"missing string", "[hello] foo = []"},
+      {"missing string 2", "[hello] foo = \n bar = 42[]"},
       {"invalid path char '='", "[hello=world] []"},
       {"invalid path char '&'", "[hello&world] []"},
       {"invalid path char '['", "[hello[world] []"},

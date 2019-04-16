@@ -4,7 +4,7 @@
     input = 'no_mesh_block.i'
     expect_err = "No mesh file was supplied and no generation block was provided"
 
-    issues = #2408
+    issues = '#2408'
     design = "Mesh/index.md"
     requirement = "The system shall issue an error if no Mesh block is provided."
   [../]
@@ -14,7 +14,7 @@
     input = 'generators_no_mesh_block.i'
     expect_err = "No mesh file was supplied and no generation block was provided"
 
-    issues = #2408
+    issues = '#2408'
     design = "Mesh/index.md"
     requirement = "The system shall issue an error if no Mesh block is provided even when MeshGenerators are provided."
   [../]

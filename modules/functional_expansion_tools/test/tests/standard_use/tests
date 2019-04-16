@@ -1,6 +1,6 @@
 [Tests]
   design = 'functional_expansion_tools/index.md'
-  issues = #10577
+  issues = '#10577'
   [./interface_coupling]
     type = Exodiff
     input = interface_coupled.i
