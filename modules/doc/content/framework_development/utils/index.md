@@ -5,3 +5,5 @@ Examples of these utilities include interpolation objects, function "fit" object
 These objects are documented here.
 
 [FormattedTable](FormattedTable.md)
+
+[MathUtils](MathUtils.md)
