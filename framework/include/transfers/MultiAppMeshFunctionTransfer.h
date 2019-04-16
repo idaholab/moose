@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "MultiAppTransfer.h"
+#include "MultiAppFieldTransferInterface.h"
 
 // Forward declarations
 class MultiAppMeshFunctionTransfer;

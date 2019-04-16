@@ -13,6 +13,7 @@
 #include "FEProblem.h"
 #include "MultiApp.h"
 #include "MooseMesh.h"
+#include "UserObject.h"
 
 template <>
 InputParameters
@@ -84,7 +85,7 @@ MultiAppFieldTransferInterface::postExecute()
       FEProblemBase & from_problem = _multi_app->problemBase();
       for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
         if (_multi_app->hasLocalApp(i))
-          adjustTransferedSolution(from_problem,
+          adjustTransferedSolution(&from_problem,
                                    _from_postprocessor_to_be_preserved[i],
                                    _multi_app->appProblemBase(i),
                                    _to_postprocessor_to_be_preserved[0]);
@@ -94,11 +95,13 @@ MultiAppFieldTransferInterface::postExecute()
     {
       FEProblemBase & to_problem = _multi_app->problemBase();
       for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
-        if (_multi_app->hasLocalApp(i))
-          adjustTransferedSolution(_multi_app->appProblemBase(i),
-                                   _from_postprocessor_to_be_preserved[0],
-                                   to_problem,
-                                   _to_postprocessor_to_be_preserved[i]);
+      {
+        adjustTransferedSolution(_multi_app->hasLocalApp(i) ? &_multi_app->appProblemBase(i)
+                                                            : nullptr,
+                                 _from_postprocessor_to_be_preserved[0],
+                                 to_problem,
+                                 _to_postprocessor_to_be_preserved[i]);
+      }
     }
 
     _console << "Finished Conservative transfers " << name() << std::endl;
@@ -106,30 +109,111 @@ MultiAppFieldTransferInterface::postExecute()
 }
 
 void
-MultiAppFieldTransferInterface::adjustTransferedSolution(FEProblemBase & from_problem,
+MultiAppFieldTransferInterface::adjustTransferedSolution(FEProblemBase * from_problem,
                                                          PostprocessorName & from_postprocessor,
                                                          FEProblemBase & to_problem,
                                                          PostprocessorName & to_postprocessor)
 {
-  PostprocessorValue & from_adjuster = from_problem.getPostprocessorValue(from_postprocessor);
+  PostprocessorValue from_adjuster = 0;
+  if (from_problem)
+  {
+    from_adjuster = from_problem->getPostprocessorValue(from_postprocessor);
+  }
+  else
+  {
+    from_adjuster = 0;
+  }
+  /* Everyone on master side should know this value, and use it to scale the solution */
+  if (_direction == FROM_MULTIAPP)
+  {
+    comm().max(from_adjuster);
+  }
+
   // Compute to-postproessor to have the adjuster
   to_problem.computeUserObjectByName(EXEC_TRANSFER, to_postprocessor);
-
-  std::cout << "from_postprocessor " << from_postprocessor << std::endl;
-  std::cout << "to_postprocessor " << to_postprocessor << std::endl;
 
   // Now we should have the right adjuster based on the transfered solution
   PostprocessorValue & to_adjuster = to_problem.getPostprocessorValue(to_postprocessor);
 
   auto & to_var = to_problem.getVariable(
       0, _to_var_name[0], Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
+  auto & to_sys = to_var.sys().system();
+  auto var_num = to_sys.variable_number(_to_var_name[0]);
+  auto sys_num = to_sys.number();
+  auto * pps =
+      dynamic_cast<const BlockRestrictable *>(&(to_problem.getUserObjectBase(to_postprocessor)));
+  auto & to_solution = to_var.sys().solution();
+  auto & to_mesh = to_problem.mesh().getMesh();
+  auto & moose_mesh = to_problem.mesh();
+  bool is_nodal = to_sys.variable_type(var_num).family == LAGRANGE;
+  if (is_nodal)
+  {
+    for (const auto & node : to_mesh.local_node_ptr_range())
+    {
+      // Skip this node if the variable has no dofs at it.
+      if (node->n_dofs(sys_num, var_num) < 1)
+        continue;
 
-  std::cout << "from_adjuster " << from_adjuster << std::endl;
-  std::cout << "to_adjuster " << to_adjuster << std::endl;
+      bool scale_current_node = false;
+      /* If we care about block IDs */
+      if (pps)
+      {
+        auto & blockids = pps->blockIDs();
+        auto & node_to_elem_map = moose_mesh.nodeToElemMap();
+        auto neighbor_elements = node_to_elem_map.find(node->id());
+        for (auto element : neighbor_elements->second)
+        {
+          auto & elem = to_mesh.elem_ref(element);
+          if (blockids.find(elem.subdomain_id()) != blockids.end() ||
+              blockids.find(Moose::ANY_BLOCK_ID) != blockids.end())
+          {
+            scale_current_node = true;
+            break;
+          }
+        }
+      }
+      else
+      {
+        scale_current_node = true;
+      }
+      /* Need to scale this node */
+      if (scale_current_node)
+      {
+        dof_id_type dof = node->dof_number(sys_num, var_num, 0);
+        to_solution.set(dof, (from_adjuster / to_adjuster) * to_solution(dof));
+      }
+    }
+  }
+  else
+  {
+    for (auto & elem : as_range(to_mesh.local_elements_begin(), to_mesh.local_elements_end()))
+    {
+      // Skip this element if the variable has no dofs at it.
+      if (elem->n_dofs(sys_num, var_num) < 1)
+        continue;
 
-  // Scale the solution.
-  // to_var.sys().solution().scale(from_adjuster / to_adjuster);
-  to_var.sys().solution().scale(from_adjuster / to_adjuster);
-  // Update the local solution
-  to_var.sys().update();
+      bool scale_current_element = false;
+      if (pps)
+      {
+        auto & blockids = pps->blockIDs();
+        if (blockids.find(elem->subdomain_id()) != blockids.end() ||
+            blockids.find(Moose::ANY_BLOCK_ID) != blockids.end())
+        {
+          scale_current_element = true;
+        }
+      }
+      else
+      {
+        scale_current_element = true;
+      }
+      if (scale_current_element)
+      {
+        dof_id_type dof = elem->dof_number(sys_num, var_num, 0);
+        to_solution.set(dof, (from_adjuster / to_adjuster) * to_solution(dof));
+      }
+    }
+  }
+
+  to_solution.close();
+  to_sys.update();
 }

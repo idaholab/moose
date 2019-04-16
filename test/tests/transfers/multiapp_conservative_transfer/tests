@@ -14,5 +14,6 @@
     input = master_power_density.i
     exodiff = 'master_power_density_out.e master_power_density_out_sub0.e master_power_density_out_sub1.e'
     requirement = 'MOOSE shall support conservative transfers'
+    min_parallel = 2
   [../]
 []

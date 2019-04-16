@@ -45,7 +45,7 @@ protected:
   std::vector<PostprocessorName> _to_postprocessor_to_be_preserved;
 
 private:
-  void adjustTransferedSolution(FEProblemBase & from_problem,
+  void adjustTransferedSolution(FEProblemBase * from_problem,
                                 PostprocessorName & from_postprocessor,
                                 FEProblemBase & to_problem,
                                 PostprocessorName & to_postprocessor);
