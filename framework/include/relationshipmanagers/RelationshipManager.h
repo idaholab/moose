@@ -71,9 +71,12 @@ public:
   /**
    * Check to see if an RM is of a given type
    *
-   * This is here so that the boolean logic doesn't have to get spread everywhere in the world
+   * This is here so that the Boolean logic doesn't have to get spread everywhere in the world
    */
-  bool isType(const Moose::RelationshipManagerType & type) { return (_rm_type & type) == type; }
+  bool isType(const Moose::RelationshipManagerType & type) const
+  {
+    return (_rm_type & type) == type;
+  }
 
   virtual bool operator==(const RelationshipManager & /*rhs*/) const
   {
@@ -120,7 +123,7 @@ protected:
   std::vector<std::string> _for_whom;
 
   /// Which system this should go to (undisplaced or displaced)
-  bool _use_displaced_mesh;
+  const bool _use_displaced_mesh;
 };
 
 #endif /* RELATIONSHIPMANAGER_H */

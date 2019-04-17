@@ -35,8 +35,11 @@ validParams<PolycrystalUserObjectBase>()
                              PolycrystalUserObjectBase::coloringAlgorithms(),
                              PolycrystalUserObjectBase::coloringAlgorithmDescriptions());
 
+  // FeatureFloodCount adds a relationship manager, but we need to extend that for PolycrystalIC
+  params.clearRelationshipManagers();
+
   params.addRelationshipManager(
-      "ElementPointNeighborLayers",
+      "ElementSideNeighborLayers",
       Moose::RelationshipManagerType::GEOMETRIC,
 
       [](const InputParameters & /*obj_params*/, InputParameters & rm_params) {
@@ -45,7 +48,7 @@ validParams<PolycrystalUserObjectBase>()
 
   );
 
-  params.addRelationshipManager("ElementPointNeighborLayers",
+  params.addRelationshipManager("ElementSideNeighborLayers",
                                 Moose::RelationshipManagerType::ALGEBRAIC);
 
   // Hide the output of the IC objects by default, it doesn't change over time

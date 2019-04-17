@@ -43,7 +43,7 @@ ElementPointNeighborLayers::getInfo() const
   std::ostringstream oss;
   std::string layers = _layers == 1 ? "layer" : "layers";
 
-  oss << "ElementPointNeighborLayers (" << layers << layers << ')';
+  oss << "ElementPointNeighborLayers (" << _layers << " " << layers << ')';
 
   return oss.str();
 }
@@ -55,7 +55,7 @@ ElementPointNeighborLayers::operator==(const RelationshipManager & rhs) const
   if (!rm)
     return false;
   else
-    return _layers == rm->_layers && _rm_type == rm->_rm_type;
+    return _layers == rm->_layers && isType(rm->_rm_type);
 }
 
 void
