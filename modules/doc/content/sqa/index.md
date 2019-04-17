@@ -27,3 +27,7 @@ The software quality documents for MOOSE are listed below:
 - [Requirements Traceability Matrix (RTM)](sqa/moose_rtm.md)
 - [Verification and Validation Report](sqa/moose_v_and_v.md)
 
+The following link(s) may also be of interest when creating documentation related to software
+quality.
+
+- [what_is_a_requirement.md]
