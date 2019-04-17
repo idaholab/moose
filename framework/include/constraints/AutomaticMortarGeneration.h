@@ -153,8 +153,8 @@ public:
   std::vector<std::pair<boundary_id_type, boundary_id_type>> master_slave_boundary_id_pairs;
 
   // Map from nodes to connected lower-dimensional elements on the slave/master subdomains.
-  std::map<dof_id_type, std::vector<const Elem *>> nodes_to_slave_elem_map;
-  std::map<dof_id_type, std::vector<const Elem *>> nodes_to_master_elem_map;
+  std::unordered_map<dof_id_type, std::vector<const Elem *>> nodes_to_slave_elem_map;
+  std::unordered_map<dof_id_type, std::vector<const Elem *>> nodes_to_master_elem_map;
 
   // Similar to the map above, but associates a (Slave Node, Slave Elem)
   // pair to a (xi^(2), master Elem) pair. This allows a single slave node, which is
@@ -173,7 +173,7 @@ public:
   // The entries in the map should be:
   // (Elem A, Node 1) -> (Elem C, xi^(2)=-1)
   // (Elem B, Node 0) -> (Elem D, xi^(2)=+1)
-  std::map<std::pair<const Node *, const Elem *>, std::pair<Real, const Elem *>>
+  std::unordered_map<std::pair<const Node *, const Elem *>, std::pair<Real, const Elem *>>
       slave_node_and_elem_to_xi2_master_elem;
 
   // Same type of container, but for mapping (Master Node ID, Master Node,
@@ -191,11 +191,11 @@ public:
   // Map between Elems in the mortar segment mesh and their info
   // structs. This gets filled in by the call to
   // build_mortar_segment_mesh().
-  std::map<const Elem *, MortarSegmentInfo> msm_elem_to_info;
+  std::unordered_map<const Elem *, MortarSegmentInfo> msm_elem_to_info;
 
   // Keeps track of the mapping between lower-dimensional elements and
   // the side_id of the interior_parent which they are.
-  std::map<const Elem *, unsigned int> lower_elem_to_side_id;
+  std::unordered_map<const Elem *, unsigned int> lower_elem_to_side_id;
 
   // The amount by which elements in the boundary subdomains
   // are offset from their respective interior parent's subdomain ids.

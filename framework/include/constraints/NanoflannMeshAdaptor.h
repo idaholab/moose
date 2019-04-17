@@ -1,7 +1,9 @@
 #ifndef NANOFLANN_MESH_ADAPTOR_H
 #define NANOFLANN_MESH_ADAPTOR_H
 
-// libMesh includes
+// For MooseIndex
+#include "MooseTypes.h"
+
 #include "libmesh/libmesh_config.h"
 #include "libmesh/libmesh_common.h"
 #include "libmesh/mesh_base.h"
@@ -122,18 +124,10 @@ public:
   {
     // Loop over the elements of the Mesh, for those in the requested
     // subdomain, add its node ids to the _legal_point_indices set.
-    for (MeshBase::const_element_iterator el = _mesh.active_elements_begin(),
-                                          end_el = _mesh.active_elements_end();
-         el != end_el;
-         ++el)
-    {
-      const Elem * elem = *el;
+    for (const auto & elem : _mesh.active_element_ptr_range())
       if (elem->subdomain_id() == _sid)
-      {
-        for (unsigned int n = 0; n < elem->n_vertices(); ++n)
+        for (MooseIndex(elem->n_vertices()) n = 0; n < elem->n_vertices(); ++n)
           _legal_point_indices.insert(elem->node_id(n));
-      }
-    }
   }
 
   /**

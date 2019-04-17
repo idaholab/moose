@@ -2,6 +2,7 @@
 #include "MortarSegmentInfo.h"
 #include "NanoflannMeshAdaptor.h"
 #include "MooseError.h"
+#include "MooseTypes.h"
 
 #include "libmesh/mesh_tools.h"
 #include "libmesh/getpot.h"
@@ -147,21 +148,16 @@ void
 AutomaticMortarGeneration::buildNodeToElemMaps()
 {
   if (slave_requested_boundary_ids.empty() || master_requested_boundary_ids.empty())
-    libmesh_error_msg(
-        "Must specify slave and master boundary ids before building node-to-elem maps.");
+    mooseError("Must specify slave and master boundary ids before building node-to-elem maps.");
 
   // Construct nodes_to_slave_elem_map
-  for (MeshBase::const_element_iterator el = mesh.elements_begin(), end_el = mesh.elements_end();
-       el != end_el;
-       ++el)
+  for (const auto & slave_elem : as_range(mesh.elements_begin(), mesh.elements_end()))
   {
-    const Elem * slave_elem = *el;
-
     // If this is not one of the lower-dimensional slave side elements, go on to the next one.
     if (!this->slave_boundary_subdomain_ids.count(slave_elem->subdomain_id()))
       continue;
 
-    for (unsigned int n = 0; n < slave_elem->n_vertices(); ++n)
+    for (MooseIndex(slave_elem->n_vertices()) n = 0; n < slave_elem->n_vertices(); ++n)
     {
       std::vector<const Elem *> & vec = nodes_to_slave_elem_map[slave_elem->node_id(n)];
       vec.push_back(slave_elem);
@@ -169,40 +165,18 @@ AutomaticMortarGeneration::buildNodeToElemMaps()
   }
 
   // Construct nodes_to_master_elem_map
-  for (MeshBase::const_element_iterator el = mesh.elements_begin(), end_el = mesh.elements_end();
-       el != end_el;
-       ++el)
+  for (const auto & master_elem : as_range(mesh.elements_begin(), mesh.elements_end()))
   {
-    const Elem * master_elem = *el;
-
     // If this is not one of the lower-dimensional master side elements, go on to the next one.
     if (!this->master_boundary_subdomain_ids.count(master_elem->subdomain_id()))
       continue;
 
-    for (unsigned int n = 0; n < master_elem->n_vertices(); ++n)
+    for (MooseIndex(master_elem->n_vertices()) n = 0; n < master_elem->n_vertices(); ++n)
     {
       std::vector<const Elem *> & vec = nodes_to_master_elem_map[master_elem->node_id(n)];
       vec.push_back(master_elem);
     }
   }
-
-  // Debugging: print the contents of the map
-  // for (const auto & pr : nodes_to_slave_elem_map)
-  //   {
-  //     libMesh::out << "Elems connected to node " << pr.first << ": ";
-  //     for (const auto & elem : pr.second)
-  //       libMesh::out << elem->id() << " ";
-  //     libMesh::out << std::endl;
-  //   }
-
-  // Debugging: print the contents of the map
-  // for (const auto & pr : nodes_to_master_elem_map)
-  //   {
-  //     libMesh::out << "Elems connected to node " << pr.first << ": ";
-  //     for (const auto & elem : pr.second)
-  //       libMesh::out << elem->id() << " ";
-  //     libMesh::out << std::endl;
-  //   }
 }
 
 void
@@ -227,7 +201,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       continue;
 
     std::vector<Node *> new_nodes;
-    for (unsigned int n = 0; n < slave_elem->n_nodes(); ++n)
+    for (MooseIndex(slave_elem->n_nodes()) n = 0; n < slave_elem->n_nodes(); ++n)
       new_nodes.push_back(
           mortar_segment_mesh.add_point(slave_elem->point(n), slave_elem->node_id(n)));
 
@@ -239,7 +213,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
 
     new_elem->processor_id() = slave_elem->processor_id();
 
-    for (unsigned int n = 0; n < new_elem->n_nodes(); ++n)
+    for (MooseIndex(new_elem->n_nodes()) n = 0; n < new_elem->n_nodes(); ++n)
       new_elem->set_node(n) = new_nodes[n];
 
     // The xi^(1) values for this mortar segment are initially -1 and 1.
@@ -258,8 +232,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
          new_container_node1_found =
              (new_container_it1 != slave_node_and_elem_to_xi2_master_elem.end());
 
-    const Elem * node0_master_candidate = libmesh_nullptr;
-    const Elem * node1_master_candidate = libmesh_nullptr;
+    const Elem * node0_master_candidate = nullptr;
+    const Elem * node1_master_candidate = nullptr;
 
     if (new_container_node0_found)
     {
@@ -308,12 +282,12 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
 
     // Determine physical location of new point to be inserted.
     Point new_pt(0);
-    for (unsigned int n = 0; n < slave_elem->n_nodes(); ++n)
+    for (MooseIndex(slave_elem->n_nodes()) n = 0; n < slave_elem->n_nodes(); ++n)
       new_pt += fe_lagrange_1D_shape(order, n, xi1) * slave_elem->point(n);
 
     // Find the current mortar segment that will have to be split.
     auto & mortar_segment_set = slave_elems_to_mortar_segments[slave_elem];
-    Elem * current_mortar_segment = libmesh_nullptr;
+    Elem * current_mortar_segment = nullptr;
     for (const auto & mortar_segment_candidate : mortar_segment_set)
     {
       // Test whether new_pt lies in the element by checking
@@ -329,8 +303,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     }
 
     // Make sure we found one.
-    if (current_mortar_segment == libmesh_nullptr)
-      libmesh_error_msg("Unable to find appropriate mortar segment during linear search!");
+    if (current_mortar_segment == nullptr)
+      mooseError("Unable to find appropriate mortar segment during linear search!");
 
     Node * new_node = mortar_segment_mesh.add_point(new_pt);
 
@@ -354,7 +328,9 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     {
       Point left_interior_point(0);
       Real left_interior_xi = (xi1 - 1.) / 2.;
-      for (unsigned int n = 0; n < current_mortar_segment->n_nodes(); ++n)
+      for (MooseIndex(current_mortar_segment->n_nodes()) n = 0;
+           n < current_mortar_segment->n_nodes();
+           ++n)
         left_interior_point +=
             fe_lagrange_1D_shape(order, n, left_interior_xi) * current_mortar_segment->point(n);
       new_elem_left->set_node(2) = mortar_segment_mesh.add_point(left_interior_point);
@@ -380,7 +356,9 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     {
       Point right_interior_point(0);
       Real right_interior_xi = (xi1 + 1.) / 2.;
-      for (unsigned int n = 0; n < current_mortar_segment->n_nodes(); ++n)
+      for (MooseIndex(current_mortar_segment->n_nodes()) n = 0;
+           n < current_mortar_segment->n_nodes();
+           ++n)
         right_interior_point +=
             fe_lagrange_1D_shape(order, n, right_interior_xi) * current_mortar_segment->point(n);
       new_elem_right->set_node(2) = mortar_segment_mesh.add_point(right_interior_point);
@@ -390,20 +368,23 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     // determine the orientation of the master elems relative to the
     // new mortar segments.
     Point dxyz_dxi(0);
-    for (unsigned int n = 0; n < slave_elem->n_nodes(); ++n)
+    for (MooseIndex(slave_elem->n_nodes()) n = 0; n < slave_elem->n_nodes(); ++n)
       dxyz_dxi += fe_lagrange_1D_shape_deriv(order, n, xi1) * slave_elem->point(n);
     auto normal = Point(dxyz_dxi(1), -dxyz_dxi(0), 0).unit();
     if (_periodic)
       normal *= -1;
 
     // Get the set of master_node neighbors.
+    if (this->nodes_to_master_elem_map.find(master_node->id()) ==
+        this->nodes_to_master_elem_map.end())
+      mooseError("We should already have built this master node to elem pair!");
     const std::vector<const Elem *> & master_node_neighbors =
-        this->nodes_to_master_elem_map.at(master_node->id());
+        this->nodes_to_master_elem_map[master_node->id()];
 
     // Sanity check
     if (master_node_neighbors.size() == 0 || master_node_neighbors.size() > 2)
-      libmesh_error_msg("We must have either 1 or 2 master side nodal neighbors, but we had "
-                        << master_node_neighbors.size());
+      mooseError("We must have either 1 or 2 master side nodal neighbors, but we had ",
+                 master_node_neighbors.size());
 
     // Master Elem pointers which we will eventually assign to the
     // mortar segments being created.  We start by assuming
@@ -412,19 +393,19 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     // swap them if that's not the case.
     const Elem * left_master_elem = master_node_neighbors[0];
     const Elem * right_master_elem =
-        (master_node_neighbors.size() == 2) ? master_node_neighbors[1] : libmesh_nullptr;
+        (master_node_neighbors.size() == 2) ? master_node_neighbors[1] : nullptr;
 
     Real left_xi2 = MortarSegmentInfo::invalid_xi, right_xi2 = MortarSegmentInfo::invalid_xi;
 
     // Storage for z-component of cross products for determining
     // orientation.
-    std::vector<Real> slave_node_cps(2), master_node_cps(2);
+    std::array<Real, 2> slave_node_cps, master_node_cps;
 
     // Store z-component of left and right slave node cross products with the nodal normal.
     for (unsigned int nid = 0; nid < 2; ++nid)
       slave_node_cps[nid] = normal.cross(slave_elem->point(nid) - new_pt)(2);
 
-    for (unsigned int mnn = 0; mnn < master_node_neighbors.size(); ++mnn)
+    for (MooseIndex(master_node_neighbors) mnn = 0; mnn < master_node_neighbors.size(); ++mnn)
     {
       const Elem * master_neigh = master_node_neighbors[mnn];
       Point opposite = (master_neigh->node_ptr(0) == master_node) ? master_neigh->point(1)
@@ -454,9 +435,9 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
 
     // Verify that both orientations are not simultaneously valid/invalid.
     if (orientation1_valid && orientation2_valid)
-      libmesh_error_msg("Both orientations cannot simultaneously be valid.");
+      mooseError("Both orientations cannot simultaneously be valid.");
     if (!orientation1_valid && !orientation2_valid)
-      libmesh_error_msg("Both orientations cannot simultaneously be invalid.");
+      mooseError("Both orientations cannot simultaneously be invalid.");
 
     // If orientation 2 was valid, swap the left and right masters.
     if (orientation2_valid)
@@ -476,7 +457,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     // copy rather than grabbing a reference.
     auto msm_it = msm_elem_to_info.find(current_mortar_segment);
     if (msm_it == msm_elem_to_info.end())
-      libmesh_error_msg("MortarSegmentInfo not found for current_mortar_segment.");
+      mooseError("MortarSegmentInfo not found for current_mortar_segment.");
     MortarSegmentInfo current_msinfo = msm_it->second;
 
     // Create new MortarSegmentInfo objects for new_elem_left and new_elem_right.
@@ -520,38 +501,10 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     mortar_segment_set.insert(new_elem_right);
   }
 
-  // Debugging: check the contents of slave_elems_to_mortar_segments.
-  // libMesh::out << "\nAfter building the mortar segments." << std::endl;
-  // for (const auto & pr : slave_elems_to_mortar_segments)
-  //   {
-  //     libMesh::out << "Mortar segments contained within slave elem " << pr.first->id() << ": ";
-  //     for (const auto & elem : pr.second)
-  //       libMesh::out << elem->id() << " ";
-  //     libMesh::out << std::endl;
-  //   }
-
   // Set up the the mortar segment neighbor information.
   mortar_segment_mesh.allow_renumbering(false);
   mortar_segment_mesh.skip_partitioning(true);
   mortar_segment_mesh.prepare_for_use();
-
-  // {
-  //   // Temporary container to sort MortarSegmentInfo objects by
-  //   // slave_elem to make them easier to interpret while printing.
-  //   std::multimap<const Elem *, MortarSegmentInfo> sorted_msinfos;
-  //   for (const auto & pr : msm_elem_to_info)
-  //     sorted_msinfos.insert(std::make_pair(pr.second.slave_elem, pr.second));
-  //
-  //   libMesh::out << "\nPrinting info for *new* MortarSegmentMesh:" << std::endl;
-  //   for (const auto & pr : sorted_msinfos)
-  //     {
-  //       pr.second.print();
-  //
-  //       // Check for validity of mortar segment.
-  //       if (!pr.second.is_valid())
-  //         libmesh_error_msg("Error! Mortar segment is not valid!");
-  //     }
-  // }
 
   // (Optionally) Write the mortar segment mesh to file for inspection
   if (_debug)
@@ -596,7 +549,7 @@ void
 AutomaticMortarGeneration::computeNodalNormals()
 {
   // The dimension according to Mesh::mesh_dimension().
-  const unsigned int dim = mesh.mesh_dimension();
+  const auto dim = mesh.mesh_dimension();
 
   // Build FEType objects for the different variables. This order and
   // family isn't that important because we are only using it for
@@ -604,7 +557,7 @@ AutomaticMortarGeneration::computeNodalNormals()
   FEType nnx_fe_type(FIRST, LAGRANGE);
 
   // Build FE objects from those types.
-  UniquePtr<FEBase> nnx_fe_face(FEBase::build(dim, nnx_fe_type));
+  std::unique_ptr<FEBase> nnx_fe_face(FEBase::build(dim, nnx_fe_type));
 
   // A nodal lower-dimensional trapezoidal quadrature rule to be used on faces.
   QTrap qface(dim - 1);
@@ -640,14 +593,14 @@ AutomaticMortarGeneration::computeNodalNormals()
     const Elem * interior_parent = slave_elem->interior_parent();
 
     // Look up which side of the interior parent slave_elem is.
-    unsigned int s = interior_parent->which_side_am_i(slave_elem);
+    auto s = interior_parent->which_side_am_i(slave_elem);
 
     // Reinit the face FE object on side s.
     nnx_fe_face->reinit(interior_parent, s);
 
     // We loop over n_vertices not n_nodes because we're not interested in
     // computing normals at interior nodes
-    for (unsigned int n = 0; n < slave_elem->n_vertices(); ++n)
+    for (MooseIndex(slave_elem->n_vertices()) n = 0; n < slave_elem->n_vertices(); ++n)
     {
       auto & normals_vec = node_to_normals_map[slave_elem->node_id(n)];
       normals_vec.push_back(sign * face_normals[n]);
@@ -708,7 +661,7 @@ AutomaticMortarGeneration::projectSlaveNodesSinglePair(
     // node on the master side using the KDTree, then
     // search in nearby elements for where it projects
     // along the nodal normal direction.
-    for (unsigned int n = 0; n < slave_side_elem->n_vertices(); ++n)
+    for (MooseIndex(slave_side_elem->n_vertices()) n = 0; n < slave_side_elem->n_vertices(); ++n)
     {
       const Node * slave_node = slave_side_elem->node_ptr(n);
 
@@ -720,7 +673,7 @@ AutomaticMortarGeneration::projectSlaveNodesSinglePair(
       // Check whether we've already mapped this slave node
       // successfully for all of its nodal neighbors.
       bool is_mapped = true;
-      for (unsigned int snn = 0; snn < slave_node_neighbors.size(); ++snn)
+      for (MooseIndex(slave_node_neighbors) snn = 0; snn < slave_node_neighbors.size(); ++snn)
       {
         auto slave_key = std::make_pair(slave_node, slave_node_neighbors[snn]);
         if (!slave_node_and_elem_to_xi2_master_elem.count(slave_key))
@@ -738,13 +691,13 @@ AutomaticMortarGeneration::projectSlaveNodesSinglePair(
       Point nodal_normal = this->slave_node_to_nodal_normal.at(slave_node);
 
       // Data structure for performing Nanoflann searches.
-      Real query_pt[3] = {(*slave_node)(0), (*slave_node)(1), (*slave_node)(2)};
+      std::array<Real, 3> query_pt = {(*slave_node)(0), (*slave_node)(1), (*slave_node)(2)};
 
       // The number of results we want to get.  We'll look for a
       // "few" nearest nodes, hopefully that is enough to let us
       // figure out which lower-dimensional Elem on the master
       // side we are across from.
-      const size_t num_results = 3;
+      const std::size_t num_results = 3;
 
       // Initialize result_set and do the search.
       std::vector<size_t> ret_index(num_results);
@@ -764,12 +717,12 @@ AutomaticMortarGeneration::projectSlaveNodesSinglePair(
       // the slave node successfully projects into
       // either of the closest neighbors, stop when
       // the projection succeeds.
-      for (unsigned r = 0; r < result_set.size(); ++r)
+      for (MooseIndex(result_set) r = 0; r < result_set.size(); ++r)
       {
         // Verify that the squared distance we compute is the same as nanoflann's
         if (std::abs((mesh.point(ret_index[r]) - *slave_node).norm_sq() - out_dist_sqr[r]) >
             TOLERANCE)
-          libmesh_error_msg("Lower-dimensional element squared distance verification failed.");
+          mooseError("Lower-dimensional element squared distance verification failed.");
 
         // Get a reference to the vector of lower dimensional elements from the
         // nodes_to_master_elem_map.
@@ -777,7 +730,7 @@ AutomaticMortarGeneration::projectSlaveNodesSinglePair(
             this->nodes_to_master_elem_map.at(static_cast<dof_id_type>(ret_index[r]));
 
         // Search the Elems connected to this node on the master mesh side.
-        for (unsigned int e = 0; e < master_elem_candidates.size(); ++e)
+        for (MooseIndex(master_elem_candidates) e = 0; e < master_elem_candidates.size(); ++e)
         {
           const Elem * master_elem_candidate = master_elem_candidates[e];
 
@@ -794,7 +747,9 @@ AutomaticMortarGeneration::projectSlaveNodesSinglePair(
           do
           {
             VectorValue<DualNumber<Real>> x2(0);
-            for (unsigned int n = 0; n < master_elem_candidate->n_nodes(); ++n)
+            for (MooseIndex(master_elem_candidate->n_nodes()) n = 0;
+                 n < master_elem_candidate->n_nodes();
+                 ++n)
               x2 += fe_lagrange_1D_shape(order, n, xi2_dn) * master_elem_candidate->point(n);
             auto u = x2 - (*slave_node);
             auto F = u(0) * nodal_normal(1) - u(1) * nodal_normal(0);
@@ -835,7 +790,7 @@ AutomaticMortarGeneration::projectSlaveNodesSinglePair(
 
               // Figure out which slave side neighbor is on the "left" and which is on the
               // "right".
-              for (unsigned int nn = 0; nn < slave_node_neighbors.size(); ++nn)
+              for (MooseIndex(slave_node_neighbors) nn = 0; nn < slave_node_neighbors.size(); ++nn)
               {
                 const Elem * slave_neigh = slave_node_neighbors[nn];
                 Point opposite = (slave_neigh->node_ptr(0) == slave_node) ? slave_neigh->point(1)
@@ -846,7 +801,8 @@ AutomaticMortarGeneration::projectSlaveNodesSinglePair(
 
               // Figure out which master side neighbor is on the "left" and which is on the
               // "right".
-              for (unsigned int nn = 0; nn < master_node_neighbors.size(); ++nn)
+              for (MooseIndex(master_node_neighbors) nn = 0; nn < master_node_neighbors.size();
+                   ++nn)
               {
                 const Elem * master_neigh = master_node_neighbors[nn];
                 Point opposite = (master_neigh->node_ptr(0) == master_node)
@@ -858,8 +814,10 @@ AutomaticMortarGeneration::projectSlaveNodesSinglePair(
 
               // Associate slave/master elems on matching sides.
               bool found_match = false;
-              for (unsigned int snn = 0; snn < slave_node_neighbors.size(); ++snn)
-                for (unsigned int mnn = 0; mnn < master_node_neighbors.size(); ++mnn)
+              for (MooseIndex(slave_node_neighbors) snn = 0; snn < slave_node_neighbors.size();
+                   ++snn)
+                for (MooseIndex(master_node_neighbors) mnn = 0; mnn < master_node_neighbors.size();
+                     ++mnn)
                   if (slave_node_neighbor_cps[snn] * master_node_neighbor_cps[mnn] > 0)
                   {
                     found_match = true;
@@ -883,16 +841,16 @@ AutomaticMortarGeneration::projectSlaveNodesSinglePair(
 
               // Sanity check
               if (!found_match)
-                libmesh_error_msg(
+                mooseError(
                     "Could not associate master/slave neighbors on either side of slave_node.");
             }
             else // Point falls somewhere in the middle of the Elem.
             {
               // Add two entries to slave_node_and_elem_to_xi2_master_elem.
-              for (unsigned int nn = 0; nn < slave_node_neighbors.size(); ++nn)
+              for (MooseIndex(slave_node_neighbors) nn = 0; nn < slave_node_neighbors.size(); ++nn)
               {
                 const Elem * neigh = slave_node_neighbors[nn];
-                for (unsigned int nid = 0; nid < neigh->n_vertices(); ++nid)
+                for (MooseIndex(neigh->n_vertices()) nid = 0; nid < neigh->n_vertices(); ++nid)
                 {
                   const Node * neigh_node = neigh->node_ptr(nid);
                   if (slave_node == neigh_node)
@@ -921,8 +879,9 @@ AutomaticMortarGeneration::projectSlaveNodesSinglePair(
 
       if (!projection_succeeded)
       {
-        libMesh::out << "Failed to find master Elem into which slave node "
-                     << static_cast<const Point &>(*slave_node) << " was projected." << std::endl;
+        mooseInfo("Failed to find master Elem into which slave node ",
+                  static_cast<const Point &>(*slave_node),
+                  " was projected.");
       }
     } // loop over side nodes
   }   // end loop over lower-dimensional elements
@@ -951,20 +910,15 @@ AutomaticMortarGeneration::projectMasterNodesSinglePair(
   // Construct the KD tree for lower-dimensional elements in the volume mesh.
   kd_tree.buildIndex();
 
-  for (MeshBase::const_element_iterator el = mesh.active_elements_begin(),
-                                        end_el = mesh.active_elements_end();
-       el != end_el;
-       ++el)
+  for (const auto & master_side_elem : mesh.active_element_ptr_range())
   {
-    const Elem * master_side_elem = *el;
-
     // If this is not one of the lower-dimensional master side elements, go on to the next one.
     if (master_side_elem->subdomain_id() != lower_dimensional_master_subdomain_id)
       continue;
 
     // For each node on this side, find the nearest node on the master side using the KDTree, then
     // search in nearby elements for where it projects along the nodal normal direction.
-    for (unsigned int n = 0; n < master_side_elem->n_vertices(); ++n)
+    for (MooseIndex(master_side_elem->n_vertices()) n = 0; n < master_side_elem->n_vertices(); ++n)
     {
       // Get a pointer to this node.
       const Node * master_node = master_side_elem->node_ptr(n);
@@ -1005,12 +959,12 @@ AutomaticMortarGeneration::projectMasterNodesSinglePair(
 
       // Loop over the closest nodes, check whether the slave node successfully projects into
       // either of the closest neighbors, stop when the projection succeeds.
-      for (unsigned r = 0; r < result_set.size(); ++r)
+      for (MooseIndex(result_set) r = 0; r < result_set.size(); ++r)
       {
         // Verify that the squared distance we compute is the same as nanoflann's
         if (std::abs((mesh.point(ret_index[r]) - *master_node).norm_sq() - out_dist_sqr[r]) >
             TOLERANCE)
-          libmesh_error_msg("Lower-dimensional element squared distance verification failed.");
+          mooseError("Lower-dimensional element squared distance verification failed.");
 
         // Get a reference to the vector of lower dimensional elements from the
         // nodes_to_slave_elem_map.
@@ -1018,7 +972,7 @@ AutomaticMortarGeneration::projectMasterNodesSinglePair(
             this->nodes_to_slave_elem_map.at(static_cast<dof_id_type>(ret_index[r]));
 
         // Print the Elems connected to this node on the slave mesh side.
-        for (unsigned int e = 0; e < slave_elem_candidates.size(); ++e)
+        for (MooseIndex(slave_elem_candidates) e = 0; e < slave_elem_candidates.size(); ++e)
         {
           const Elem * slave_elem_candidate = slave_elem_candidates[e];
 
@@ -1041,7 +995,9 @@ AutomaticMortarGeneration::projectMasterNodesSinglePair(
           {
             VectorValue<DualNumber<Real>> x1(0);
             VectorValue<DualNumber<Real>> dx1_dxi(0);
-            for (unsigned int n = 0; n < slave_elem_candidate->n_nodes(); ++n)
+            for (MooseIndex(slave_elem_candidate->n_nodes()) n = 0;
+                 n < slave_elem_candidate->n_nodes();
+                 ++n)
             {
               x1 += fe_lagrange_1D_shape(order, n, xi1_dn) * slave_elem_candidate->point(n);
               dx1_dxi +=
@@ -1075,8 +1031,8 @@ AutomaticMortarGeneration::projectMasterNodesSinglePair(
               // Special case: xi1=+/-1.
               // We shouldn't get here, because this master node should already
               // have been mapped during the project_slave_nodes() routine.
-              libmesh_error_msg("We should never get here, aligned master nodes should already "
-                                "have been mapped.");
+              mooseError("We should never get here, aligned master nodes should already "
+                         "have been mapped.");
             }
             else // somewhere in the middle of the Elem
             {
@@ -1088,7 +1044,7 @@ AutomaticMortarGeneration::projectMasterNodesSinglePair(
               // we can always look up the neighbors later given the Node... keeping it like this
               // helps to maintain the "symmetry" of the two containers.
               const Elem * neigh = master_node_neighbors[0];
-              for (unsigned int nid = 0; nid < neigh->n_vertices(); ++nid)
+              for (MooseIndex(neigh->n_vertices()) nid = 0; nid < neigh->n_vertices(); ++nid)
               {
                 const Node * neigh_node = neigh->node_ptr(nid);
                 if (master_node == neigh_node)
@@ -1116,8 +1072,9 @@ AutomaticMortarGeneration::projectMasterNodesSinglePair(
 
       if (!projection_succeeded)
       {
-        libMesh::out << "Failed to find point from which master node "
-                     << static_cast<const Point &>(*master_node) << " was projected." << std::endl;
+        mooseInfo("Failed to find point from which master node ",
+                  static_cast<const Point &>(*master_node),
+                  " was projected.");
       }
     } // loop over side nodes
   }   // end loop over elements for finding where master points would have projected from.
@@ -1128,7 +1085,7 @@ AutomaticMortarGeneration::writeNodalNormalsToFile()
 {
   // Must call compute_nodal_normals() first!
   if (slave_node_to_nodal_normal.empty())
-    libmesh_error_msg("No entries found in the slave node -> nodal normal map.");
+    mooseError("No entries found in the slave node -> nodal normal map.");
 
   // Note: I seem to remember an issue with creating a second
   // EquationSystems with the same Mesh, but this code seems to work
@@ -1136,10 +1093,8 @@ AutomaticMortarGeneration::writeNodalNormalsToFile()
   EquationSystems nodal_normals_es(this->mesh);
   ExplicitSystem & nodal_normals_system =
       nodal_normals_es.add_system<ExplicitSystem>("nodal_normals");
-  unsigned int nnx_var_num =
-                   nodal_normals_system.add_variable("nodal_normal_x", FEType(FIRST, LAGRANGE)),
-               nny_var_num =
-                   nodal_normals_system.add_variable("nodal_normal_y", FEType(FIRST, LAGRANGE));
+  auto nnx_var_num = nodal_normals_system.add_variable("nodal_normal_x", FEType(FIRST, LAGRANGE)),
+       nny_var_num = nodal_normals_system.add_variable("nodal_normal_y", FEType(FIRST, LAGRANGE));
   nodal_normals_es.init();
 
   const DofMap & dof_map = nodal_normals_system.get_dof_map();
@@ -1157,7 +1112,7 @@ AutomaticMortarGeneration::writeNodalNormalsToFile()
 
     // For each node of the Elem, if it is in the slave_node_to_nodal_normal
     // container, set the corresponding nodal normal dof values.
-    for (unsigned int n = 0; n < elem->n_vertices(); ++n)
+    for (MooseIndex(elem->n_vertices()) n = 0; n < elem->n_vertices(); ++n)
     {
       auto it = this->slave_node_to_nodal_normal.find(elem->node_ptr(n));
       if (it != this->slave_node_to_nodal_normal.end())
