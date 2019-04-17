@@ -13,7 +13,8 @@
 #include "ADKernelGrad.h"
 
 /**
- * All AD time kernels should inherit from this class
+ * AD time kernels should inherit from this class when the time portion of the weak residual is
+ * multiplied by the gradient of the test function
  */
 template <typename T, ComputeStage compute_stage>
 class ADTimeKernelGradTempl : public ADKernelGradTempl<T, compute_stage>

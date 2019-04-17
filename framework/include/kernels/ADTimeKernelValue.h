@@ -13,7 +13,8 @@
 #include "ADKernelValue.h"
 
 /**
- * All AD time kernels should inherit from this class
+ * AD time kernels should inherit from this class when the time portion of the weak residual is
+ * multiplied by the test function
  */
 template <typename T, ComputeStage compute_stage>
 class ADTimeKernelValueTempl : public ADKernelValueTempl<T, compute_stage>
