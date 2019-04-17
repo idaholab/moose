@@ -649,8 +649,11 @@ protected:
   void enforceNodalConstraintsResidual(NumericVector<Number> & residual);
   void enforceNodalConstraintsJacobian();
 
-  /// determine if the application of  apredictor improved the residual
+  /// determine if the application of a predictor improved the residual
   virtual bool predictorImprovedResidual() { return true; }
+
+  /// by default we do not keep an unpredicted solution copy to roll back to in case of predictor failure
+  virtual bool predictorMayFail() { return false; };
 
   /// solution vector from nonlinear solver
   const NumericVector<Number> * _current_solution;

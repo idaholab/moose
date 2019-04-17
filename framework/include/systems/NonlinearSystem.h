@@ -75,6 +75,7 @@ protected:
   ComputeResidualFunctor _nl_residual_functor;
   ComputeFDResidualFunctor _fd_residual_functor;
 
+  bool predictorMayFail() override { return true; };
   bool predictorImprovedResidual() override;
 
 private:
