@@ -114,7 +114,7 @@
 /// object new_class with the same API. time is the time the object became/becomes deprecated in
 /// "mm/dd/yyyy hh:mm" format.
 #define registerMooseObjectRenamed(app, orig_class, time, new_class)                               \
-  static char combineNames(dummyvar_for_registering_obj_##orig_name, __LINE__) =                   \
+  static char combineNames(dummyvar_for_registering_obj_##orig_class, __LINE__) =                  \
       Registry::add<new_class>({app,                                                               \
                                 #new_class,                                                        \
                                 #orig_class,                                                       \
