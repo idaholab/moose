@@ -192,12 +192,27 @@
   nl_abs_tol = 1E-9
 []
 
+[VectorPostprocessors]
+  [./mf]
+    type = LineValueSampler
+    start_point = '0 0 0'
+    end_point = '1 0 0'
+    num_points = 100
+    sort_by = x
+    variable = frac
+  [../]
+[]
+
 [Outputs]
   file_base = s09_fully_saturated
   [./console]
     type = Console
     execute_on = 'nonlinear linear'
   [../]
+  [./csv]
+    type = CSV
+    sync_times = '0.1 0.5 1'
+    sync_only = true
+  [../]
   interval = 10
-  exodus = true
 []

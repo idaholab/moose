@@ -4,12 +4,18 @@
     input = 'diff01.i'
     csvdiff = 'diff01_out_xmass_0021.csv'
     threading = '!pthreads'
+    issues = '#13155'
+    design = 'porous_flow/tests/dispersion/dispersion_tests.md'
+    requirement = 'PorousFlow shall correctly simulate the molecular diffusion'
   [../]
   [./diff01_action]
     type = 'CSVDiff'
     input = 'diff01_action.i'
     csvdiff = 'diff01_action_out_xmass_0021.csv'
     threading = '!pthreads'
+    issues = '#13155'
+    design = 'porous_flow/tests/dispersion/dispersion_tests.md'
+    requirement = 'PorousFlow shall correctly simulate the molecular diffusion when using an action'
   [../]
   [./disp01]
     type = 'CSVDiff'
@@ -17,6 +23,9 @@
     csvdiff = 'disp01_out_xmass_0029.csv'
     rel_err = 1E-5
     threading = '!pthreads'
+    issues = '#13155'
+    design = 'porous_flow/tests/dispersion/dispersion_tests.md'
+    requirement = 'PorousFlow shall correctly simulate the hydrodynamic dispersion'
   [../]
   [./disp01_heavy]
     type = 'CSVDiff'
@@ -25,5 +34,8 @@
     rel_err = 1E-5
     heavy = true
     threading = '!pthreads'
+    issues = '#13155'
+    design = 'porous_flow/tests/dispersion/dispersion_tests.md'
+    requirement = 'PorousFlow shall correctly simulate the hydrodynamic dispersion in a high-resolution setting'
   [../]
 []

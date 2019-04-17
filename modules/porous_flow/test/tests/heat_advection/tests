@@ -1,51 +1,50 @@
 [Tests]
   [./head_advection_1d]
-    type = Exodiff
+    type = CSVDiff
     input = heat_advection_1d.i
-    exodiff = heat_advection_1d_out.e
+    csvdiff = 'heat_advection_1d_csv_T_0010.csv heat_advection_1d_csv_T_0060.csv'
     threading = '!pthreads'
     issues = '#7984'
-    design = 'PorousFlowHeatAdvection.md PorousFlowEnergyTimeDerivative.md'
+    design = 'PorousFlowHeatAdvection.md PorousFlowEnergyTimeDerivative.md porous_flow/tests/heat_advection/heat_advection_tests.md'
     requirement = 'PorousFlow shall correctly advect heat energy with a moving fluid'
   [../]
   [./head_advection_1d_fully_saturated]
-    type = Exodiff
+    type = CSVDiff
     input = heat_advection_1d_fully_saturated.i
-    exodiff = heat_advection_1d_fully_saturated.e
+    csvdiff = 'heat_advection_1d_fully_saturated_T_0010.csv heat_advection_1d_fully_saturated_T_0060.csv'
     threading = '!pthreads'
     issues = '#7984'
-    design = 'PorousFlowHeatAdvection.md PorousFlowEnergyTimeDerivative.md'
+    design = 'PorousFlowHeatAdvection.md PorousFlowEnergyTimeDerivative.md porous_flow/tests/heat_advection/heat_advection_tests.md'
     requirement = 'PorousFlow shall correctly advect heat energy with a moving fluid, and users should be able to use the PorousFlow Action system to simulate this'
   [../]
   [./heat_advection_1d_KT]
-    type = Exodiff
+    type = CSVDiff
     input = heat_advection_1d_KT.i
-    exodiff = heat_advection_1d_KT_out.e
+    csvdiff = 'heat_advection_1d_KT_T_0010.csv heat_advection_1d_KT_T_0060.csv'
     threading = '!pthreads'
     issues = '#10426'
-    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/tests/heat_advection/heat_advection_tests.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for PorousFlow simulations involving the advection of heat energy in a moving fluid'
   [../]
   [./heat_advection_1d_fully_saturated_action]
-    type = Exodiff
+    type = CSVDiff
     input = heat_advection_1d_fully_saturated_action.i
-    exodiff = heat_advection_1d_KT_out.e
-    prereq = heat_advection_1d_KT
+    csvdiff = 'heat_advection_1d_fully_saturation_action_T_0010.csv heat_advection_1d_fully_saturation_action_T_0060.csv'
     threading = '!pthreads'
     issues = '#10426'
-    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/tests/heat_advection/heat_advection_tests.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for PorousFlow simulations involving the advection of heat energy in a moving fluid, and the user should be able to activiate this stabilization using the PorousFlow Action system'
   [../]
   [./heat_advection_1d_KT_threads]
-    type = Exodiff
+    type = CSVDiff
     input = heat_advection_1d_KT.i
-    exodiff = heat_advection_1d_KT_out.e
+    cli_args = 'Outputs/file_base=heat_advection_1d_KT_threads'
+    csvdiff = 'heat_advection_1d_KT_threads_T_0010.csv heat_advection_1d_KT_threads_T_0060.csv'
     min_threads = 3
     max_threads = 3
     threading = '!pthreads'
-    prereq = heat_advection_1d_fully_saturated_action
     issues = '#10426'
-    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/tests/heat_advection/heat_advection_tests.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for PorousFlow simulations involving the advection of heat energy in a moving fluid'
   [../]
 []

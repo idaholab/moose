@@ -5,6 +5,8 @@ The Porous Flow module includes a very flexible boundary condition that allows m
 scenarios to be modelled. The boundary condition is built by adding various options to a basic
 sink in the following way.
 
+This page may be read in conjuction with the [description of some of the tests of the PorousFlow sinks](tests/sinks/sinks_tests.md).
+
 ## Basic sink formulation
 
 The basic sink is
