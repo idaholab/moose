@@ -207,7 +207,8 @@ class TestHarness:
     Recursively walks the current tree looking for tests to run
     Error codes:
     0x0  - Success
-    0x80 - TestHarness error
+    0x1  - Recoverable errors
+    0x80 - Unrecoverable TestHarness errors
     """
     def findAndRunTests(self, find_only=False):
         self.error_code = 0x0
@@ -288,10 +289,6 @@ class TestHarness:
             # TODO: this DOES NOT WORK WITH MAX FAILES (max failes is considered a scheduler error at the moment)
             if not self.scheduler.schedulerError():
                 self.cleanup()
-
-            # flags for the TestHarness start at the high bit
-            if self.num_failed or self.scheduler.schedulerError():
-                self.error_code = self.error_code | 0x80
 
         except KeyboardInterrupt:
             # Attempt to kill jobs currently running
@@ -466,9 +463,10 @@ class TestHarness:
         """ Determine when to use a job status as opposed to tester status """
         tester = job.getTester()
         message = job.getStatusMessage()
-        if job.isFail():
+        if job.isTimeout():
+            tester.setStatus(tester.no_status, 'FAILED (TIMEOUT)')
+        elif job.isFail():
             tester.setStatus(tester.fail, message)
-
         elif (job.isSkip()
               and not tester.isSilent()
               and not tester.isDeleted()
@@ -484,6 +482,7 @@ class TestHarness:
             # Print results and perform any desired post job processing
             if job.isFinished():
                 tester = self.normalizeStatus(job)
+                self.error_code = self.error_code | job.getStatusCode() | tester.getStatusCode()
 
                 # perform printing of application output if so desired
                 self.printOutput(job)
@@ -498,11 +497,11 @@ class TestHarness:
 
                 self.postRun(tester.specs, timing)
 
-                if tester.isSkip():
+                if job.isSkip() and not tester.isFail():
                     self.num_skipped += 1
                 elif tester.isPass():
                     self.num_passed += 1
-                elif tester.isFail():
+                elif tester.isFail() or job.isTimeout():
                     self.num_failed += 1
                 else:
                     self.num_pending += 1
@@ -539,11 +538,9 @@ class TestHarness:
 
         # Mask off TestHarness error codes to report parser errors
         fatal_error = ''
-        if self.error_code:
-            fatal_error += ', <r>FATAL TEST HARNESS ERROR</r>'
         if len(self.parse_errors) > 0:
             fatal_error += ', <r>FATAL PARSER ERROR</r>'
-            self.error_code = 1
+            self.error_code = self.error_code | 0x80
 
         # Alert the user to their session file
         if self.options.queueing:

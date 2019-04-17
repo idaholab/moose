@@ -130,20 +130,6 @@ class Tester(MooseObject):
         self.deleted = self.status.deleted
         self.finished = self.status.finished
 
-        ### Deprecated statuses to be removed upon application fixes
-        self.bucket_initialized        = self.no_status
-        self.bucket_success            = self.success
-        self.bucket_fail               = self.fail
-        self.bucket_diff               = self.diff
-        self.bucket_finished           = self.finished
-        self.bucket_deleted            = self.deleted
-        self.bucket_skip               = self.skip
-        self.bucket_silent             = self.silent
-        self.bucket_pending            = None
-        self.bucket_queued             = None
-        self.bucket_waiting_processing = None
-        ### END Deprecated statuses
-
     def getStatus(self):
         return self.status.getStatus()
 
@@ -154,7 +140,7 @@ class Tester(MooseObject):
             test_status = self.createStatus()
             result_status = message.status
             result_color = message.color
-            new_status = test_status(status=result_status, color=result_color)
+            new_status = test_status(status=result_status, color=result_color, code=0x0)
             return self.status.setStatus(new_status)
 
         return self.status.setStatus(status, message)
@@ -165,6 +151,8 @@ class Tester(MooseObject):
         return self.status.createStatus()
     def getColor(self):
         return self.status.getColor()
+    def getStatusCode(self):
+        return self.status.getStatusCode()
     def isNoStatus(self):
         return self.status.isNoStatus()
     def isSkip(self):

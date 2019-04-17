@@ -21,3 +21,6 @@ class TestHarnessTester(TestHarnessTestCase):
         e = cm.exception
         self.assertRegexpMatches(e.output, 'test_harness\.exodiff.*?FAILED \(MISSING GOLD FILE\)')
         self.assertRegexpMatches(e.output, 'test_harness\.csvdiff.*?FAILED \(MISSING GOLD FILE\)')
+
+        # Verify return code is a general failure related (0x80)
+        self.assertIs(128, e.returncode)

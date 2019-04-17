@@ -302,7 +302,7 @@ class Scheduler(MooseObject):
         """ Handle jobs that have timed out """
         with j_lock:
             if job.isRunning():
-                job.setStatus(job.crash, 'TIMEOUT')
+                job.setStatus(job.timeout, 'TIMEOUT')
                 job.killProcess()
 
     def handleLongRunningJob(self, job, Jobs, j_lock):

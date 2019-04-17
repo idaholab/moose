@@ -67,6 +67,7 @@ class Job(object):
         self.skip = self.status.skip
         self.crash = self.status.crash
         self.error = self.status.error
+        self.timeout = self.status.timeout
         self.finished = self.status.finished
 
     def getDAG(self):
@@ -241,6 +242,8 @@ class Job(object):
         return self.status.getStatus()
     def getStatusMessage(self):
         return self.status.getStatusMessage()
+    def getStatusCode(self):
+        return self.status.getStatusCode()
     def setStatus(self, status, message=''):
         return self.status.setStatus(status, message)
 
@@ -261,3 +264,5 @@ class Job(object):
         return self.status.isFail()
     def isFinished(self):
         return self.status.isFinished()
+    def isTimeout(self):
+        return self.status.isTimeout()
