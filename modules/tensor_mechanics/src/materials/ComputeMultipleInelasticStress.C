@@ -196,6 +196,8 @@ ComputeMultipleInelasticStress::computeQpStressIntermediateConfiguration()
 
     if (_fe_problem.currentlyComputingJacobian())
       _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
+
+    _matl_timestep_limit[_qp] = std::numeric_limits<Real>::max();
   }
   else
   {
@@ -337,13 +339,9 @@ ComputeMultipleInelasticStress::updateQpState(RankTwoTensor & elastic_strain_inc
     _matl_timestep_limit[_qp] += 1.0 / _models[i_rmm]->computeTimeStepLimit();
 
   if (MooseUtils::absoluteFuzzyEqual(_matl_timestep_limit[_qp], 0.0))
-  {
     _matl_timestep_limit[_qp] = std::numeric_limits<Real>::max();
-  }
   else
-  {
     _matl_timestep_limit[_qp] = 1.0 / _matl_timestep_limit[_qp];
-  }
 }
 
 void
