@@ -28,7 +28,7 @@ class MergedMeshGenerator : public MeshGenerator
 public:
   MergedMeshGenerator(const InputParameters & parameters);
 
-  std::unique_ptr<MeshBase> generate();
+  std::unique_ptr<MeshBase> generate() override;
 
 protected:
   /// The mesh generators to read

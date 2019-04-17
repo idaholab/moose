@@ -26,7 +26,7 @@ class TiledMeshGenerator : public MeshGenerator
 public:
   TiledMeshGenerator(const InputParameters & parameters);
 
-  std::unique_ptr<MeshBase> generate();
+  std::unique_ptr<MeshBase> generate() override;
 
 protected:
   /// Mesh that possibly comes from another generator

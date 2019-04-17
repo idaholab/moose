@@ -28,7 +28,7 @@ class MeshExtruderGenerator : public MeshGenerator
 public:
   MeshExtruderGenerator(const InputParameters & parameters);
 
-  std::unique_ptr<MeshBase> generate();
+  std::unique_ptr<MeshBase> generate() override;
 
 protected:
   /// Mesh that comes from another generator

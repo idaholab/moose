@@ -26,7 +26,7 @@ class ElementGenerator : public MeshGenerator
 public:
   ElementGenerator(const InputParameters & parameters);
 
-  std::unique_ptr<MeshBase> generate();
+  std::unique_ptr<MeshBase> generate() override;
 
   Elem * getElemType(const std::string & type);
 

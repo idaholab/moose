@@ -95,7 +95,7 @@ GapConductance::actionParameters()
 
   // Common
   params.addRangeCheckedParam<Real>(
-      "min_gap", 1e-6, "min_gap>=0", "A minimum gap (denominator) size");
+      "min_gap", 1e-6, "min_gap>0", "A minimum gap (denominator) size");
   params.addRangeCheckedParam<Real>(
       "max_gap", 1e6, "max_gap>=0", "A maximum gap (denominator) size");
   params.addRangeCheckedParam<unsigned int>(
@@ -282,6 +282,8 @@ GapConductance::computeQpConductance()
 Real
 GapConductance::gapAttenuation(Real adjusted_length, Real min_gap, unsigned int min_gap_order)
 {
+  mooseAssert(min_gap > 0, "min_gap must be larger than zero.");
+
   if (adjusted_length > min_gap)
     return 1.0 / adjusted_length;
   else
