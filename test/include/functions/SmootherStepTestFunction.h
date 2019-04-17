@@ -7,25 +7,24 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POLYTESTFUNCTION_H
-#define POLYTESTFUNCTION_H
+#ifndef SMOOTHERSTEPTESTFUNCTION_H
+#define SMOOTHERSTEPTESTFUNCTION_H
 
 #include "Function.h"
 
-class PolyTestFunction;
+class SmootherStepTestFunction;
 
 template <>
-InputParameters validParams<PolyTestFunction>();
+InputParameters validParams<SmootherStepTestFunction>();
 
-class PolyTestFunction : public Function
+class SmootherStepTestFunction : public Function
 {
 public:
-  PolyTestFunction(const InputParameters & parameters);
+  SmootherStepTestFunction(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & p) override;
 
-  const std::vector<Real> _coeffs;
-  const bool _deriv;
+  const bool _derivative;
 };
 
-#endif // POLYTESTFUNCTION_H
+#endif // SMOOTHERSTEPTESTFUNCTION_H

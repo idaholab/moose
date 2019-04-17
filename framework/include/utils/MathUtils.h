@@ -131,6 +131,37 @@ poly(std::vector<Real> c, const T x, const bool derivative)
   return value;
 }
 
+template <typename T>
+T
+clamp(T x, T lowerlimit, T upperlimit)
+{
+  if (x < lowerlimit)
+    return lowerlimit;
+  if (x > upperlimit)
+    return upperlimit;
+  return x;
+}
+
+template <typename T>
+T
+smootherStep(T x, T start, T end, bool derivative = false)
+{
+  if (end == start)
+    return 0.0;
+  x = clamp((x - start) / (end - start), 0.0, 1.0);
+  if (x == 0.0)
+    return 0.0;
+  if (derivative)
+  {
+    if (x == 1.0)
+      return 0.0;
+    return 30.0 * Utility::pow<2>(x) * (x * (x - 2.0) + 1.0) / (end - start);
+  }
+  if (x == 1.0)
+    return 1.0;
+  return Utility::pow<3>(x) * (x * (x * 6.0 - 15.0) + 10.0);
+}
+
 } // namespace MathUtils
 
 #endif // MATHUTILS_H

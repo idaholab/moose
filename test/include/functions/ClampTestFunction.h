@@ -7,25 +7,22 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POLYTESTFUNCTION_H
-#define POLYTESTFUNCTION_H
+#ifndef CLAMPTESTFUNCTION_H
+#define CLAMPTESTFUNCTION_H
 
 #include "Function.h"
 
-class PolyTestFunction;
+class ClampTestFunction;
 
 template <>
-InputParameters validParams<PolyTestFunction>();
+InputParameters validParams<ClampTestFunction>();
 
-class PolyTestFunction : public Function
+class ClampTestFunction : public Function
 {
 public:
-  PolyTestFunction(const InputParameters & parameters);
+  ClampTestFunction(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & p) override;
-
-  const std::vector<Real> _coeffs;
-  const bool _deriv;
 };
 
-#endif // POLYTESTFUNCTION_H
+#endif // CLAMPTESTFUNCTION_H
