@@ -9,6 +9,7 @@
 
 #include "MooseObjectUnitTest.h"
 #include "TheWarehouse.h"
+#include "MooseHashing.h"
 
 #include "gtest_include.h"
 #include <iostream>
@@ -73,7 +74,7 @@ public:
   virtual size_t hash() const override
   {
     size_t h = 0;
-    hash_combine(h, index, val);
+    Moose::hash_combine(h, index, val);
     return h;
   }
 

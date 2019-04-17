@@ -2,6 +2,7 @@
 #define AUTOMATIC_MORTAR_GENERATION_H
 
 #include "MortarSegmentInfo.h"
+#include "MooseHashing.h"
 
 // libMesh includes
 #include "libmesh/id_types.h"
