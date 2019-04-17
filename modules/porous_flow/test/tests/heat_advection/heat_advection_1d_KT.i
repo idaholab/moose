@@ -167,7 +167,22 @@
   end_time = 0.6
 []
 
+[VectorPostprocessors]
+  [./T]
+    type = LineValueSampler
+    start_point = '0 0 0'
+    end_point = '1 0 0'
+    num_points = 51
+    sort_by = x
+    variable = temp
+  [../]
+[]
+
 [Outputs]
-  exodus = true
-  interval = 10
+  file_base = heat_advection_1d_KT
+  [./csv]
+    type = CSV
+    sync_times = '0.1 0.6'
+    sync_only = true
+  [../]
 []
