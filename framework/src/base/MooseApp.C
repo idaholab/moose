@@ -1675,6 +1675,13 @@ MooseApp::hasRelationshipManager(const std::string & name) const
 bool
 MooseApp::addRelationshipManager(std::shared_ptr<RelationshipManager> relationship_manager)
 {
+  // We don't need Geometric-only RelationshipManagers when we run with
+  // ReplicatedMesh unless we are splitting the mesh.
+  if (!_action_warehouse.mesh()->isDistributedMesh() && !_split_mesh &&
+      (relationship_manager->isType(Moose::RelationshipManagerType::GEOMETRIC) &&
+       !relationship_manager->isType(Moose::RelationshipManagerType::ALGEBRAIC)))
+    return false;
+
   bool add = true;
   for (const auto & rm : _relationship_managers)
   {
@@ -1774,20 +1781,19 @@ MooseApp::getRelationshipManagerInfo() const
 
   for (const auto & rm : _relationship_managers)
   {
-    auto info = rm->getInfo();
+    std::stringstream oss;
+    oss << rm->getInfo();
 
     auto & for_whom = rm->forWhom();
 
     if (!for_whom.empty())
     {
-      info = info + " for";
+      oss << " for ";
 
-      for (auto & fw : for_whom)
-        info = info + " " + fw;
+      std::copy(for_whom.begin(), for_whom.end(), infix_ostream_iterator<std::string>(oss, ", "));
     }
 
-    if (info.size())
-      info_strings.emplace_back(std::make_pair(Moose::stringify(rm->getType()), info));
+    info_strings.emplace_back(std::make_pair(Moose::stringify(rm->getType()), oss.str()));
   }
 
   return info_strings;
