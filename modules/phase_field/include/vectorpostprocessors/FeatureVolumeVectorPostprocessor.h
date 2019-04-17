@@ -69,8 +69,17 @@ private:
                          const std::vector<unsigned int> & var_to_features,
                          std::size_t num_features);
 
+  /// When boundary is supplied as input, compute coverage of that boundary by each feature
+  void accumulateBoundaryFaces(const Elem * elem,
+                               const std::vector<unsigned int> & var_to_features,
+                               std::size_t num_features,
+                               unsigned int side);
+
   /// Calculate the integral value of the passed in variable (index)
   Real computeIntegral(std::size_t var_index) const;
+
+  /// Calculate the integral on the face if boundary is supplied as input
+  Real computeFaceIntegral(std::size_t var_index) const;
 
   const std::vector<MooseVariableFEBase *> & _vars;
   std::vector<const VariableValue *> _coupled_sln;
@@ -81,6 +90,8 @@ private:
   QBase *& _qrule;
   const MooseArray<Real> & _JxW;
   const MooseArray<Real> & _coord;
+  QBase *& _qrule_face;
+  const MooseArray<Real> & _JxW_face;
 };
 
 #endif

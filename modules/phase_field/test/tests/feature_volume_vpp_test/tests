@@ -46,4 +46,56 @@
     min_parallel = 2
     prereq = 'percolation_test'
   [../]
+
+  [./boundary_area_2D_test]
+    type = 'CSVDiff'
+    input = 'boundary_area_2D.i'
+    csvdiff = 'boundary_area_2D_out_features_0000.csv'
+
+    issues = "#13202"
+    requirement = "The FeatureVolumeVectorPostprocessor shall calculate coverage of a supplied boundary
+                    by each feature by integrating the corresponding order parameter on the boundary."
+    design = "/FeatureVolumeVectorPostprocessor.md"
+
+    min_parallel = 2
+  [../]
+
+  [./boundary_area_2D_single_test]
+    type = 'CSVDiff'
+    input = 'boundary_area_2D_single.i'
+    csvdiff = 'boundary_area_2D_single_out_features_0000.csv'
+
+    issues = "#13202"
+    requirement = "The FeatureVolumeVectorPostprocessor shall calculate coverage of a supplied boundary
+                    by each feature by calulating the area/length of boundary elements."
+    design = "/FeatureVolumeVectorPostprocessor.md"
+
+    min_parallel = 2
+  [../]
+
+  [./boundary_area_3D_test]
+    type = 'CSVDiff'
+    input = 'boundary_area_3D.i'
+    csvdiff = 'boundary_area_3D_out_features_0000.csv'
+
+    issues = "#13202"
+    requirement = "The FeatureVolumeVectorPostprocessor shall calculate coverage of a supplied boundary
+                    by each feature by integrating the corresponding order parameter on the boundary."
+    design = "/FeatureVolumeVectorPostprocessor.md"
+
+    min_parallel = 2
+  [../]
+
+  [./boundary_area_3D_single_test]
+    type = 'CSVDiff'
+    input = 'boundary_area_3D_single.i'
+    csvdiff = 'boundary_area_3D_single_out_features_0000.csv'
+
+    issues = "#13202"
+    requirement = "The FeatureVolumeVectorPostprocessor shall calculate coverage of a supplied boundary
+                    by each feature by calulating the area/length of boundary elements."
+    design = "/FeatureVolumeVectorPostprocessor.md"
+
+    min_parallel = 2
+  [../]
 []

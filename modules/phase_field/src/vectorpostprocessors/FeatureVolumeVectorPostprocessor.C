@@ -60,7 +60,9 @@ FeatureVolumeVectorPostprocessor::FeatureVolumeVectorPostprocessor(
     _q_point(_assembly.qPoints()),
     _qrule(_assembly.qRule()),
     _JxW(_assembly.JxW()),
-    _coord(_assembly.coordTransformation())
+    _coord(_assembly.coordTransformation()),
+    _qrule_face(_assembly.qRuleFace()),
+    _JxW_face(_assembly.JxWFace())
 {
   addMooseVariableDependency(_vars);
 
@@ -119,31 +121,33 @@ FeatureVolumeVectorPostprocessor::execute()
   // Reset the volume vector
   _feature_volumes.assign(num_features, 0);
 
-  // _console << "Boundary restricted? " << _is_boundary_restricted << std::endl;
+  // Calculate coverage of a boundary if one has been supplied in the input file
   if (_is_boundary_restricted)
+  {
+    const std::set<BoundaryID> supplied_bnd_ids = BoundaryRestrictable::boundaryIDs();
     for (auto elem_it = _mesh.bndElemsBegin(), elem_end = _mesh.bndElemsEnd(); elem_it != elem_end;
          ++elem_it)
-    {
-      const std::set<BoundaryID> supplied_bnd_ids = BoundaryRestrictable::boundaryIDs();
+
       // loop over only boundaries supplied by user in boundary param
       for (auto & supplied_bnd_id : supplied_bnd_ids)
-      {
         if (((*elem_it)->_bnd_id) == supplied_bnd_id)
         {
-          // _console << "Element number" << std::endl;
-          // _console << (*elem_it)->_elem->id() << std::endl;
-          // _console << "Side number" << std::endl;
-          // _console << (*elem_it)->_side << std::endl;
-          // _console << "Boundary number" << std::endl;
-          // _console << (*elem_it)->_bnd_id << std::endl;
-          _fe_problem.prepare((*elem_it)->_elem, 0);
-          _fe_problem.reinitElemFace(
-              (*elem_it)->_elem, (*elem_it)->_side, (*elem_it)->_bnd_id, 0);
-          // TODO here calculate integral on boundary
+          const auto & elem = (*elem_it)->_elem;
+          auto rank = processor_id();
+
+          if (elem->processor_id() == rank)
+          {
+            _fe_problem.prepare(elem, 0);
+            _fe_problem.reinitElem(elem, 0);
+            _fe_problem.reinitElemFace(elem, (*elem_it)->_side, (*elem_it)->_bnd_id, 0);
+
+            const auto & var_to_features = _feature_counter.getVarToFeatureVector(elem->id());
+
+            accumulateBoundaryFaces(elem, var_to_features, num_features, (*elem_it)->_side);
+          }
         }
-      }
-    }
-  else
+  }
+  else // If no boundary is supplied, calculate volumes of features as normal
     for (const auto & elem : _mesh.getMesh().active_local_element_ptr_range())
     {
       _fe_problem.prepare(elem, 0);
@@ -221,6 +225,55 @@ FeatureVolumeVectorPostprocessor::computeIntegral(std::size_t var_index) const
 
   for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
     sum += _JxW[qp] * _coord[qp] * (*_coupled_sln[var_index])[qp];
+
+  return sum;
+}
+
+void
+FeatureVolumeVectorPostprocessor::accumulateBoundaryFaces(
+    const Elem * elem,
+    const std::vector<unsigned int> & var_to_features,
+    std::size_t libmesh_dbg_var(num_features),
+    unsigned int side)
+{
+  unsigned int dominant_feature_id = FeatureFloodCount::invalid_id;
+  Real max_var_value = std::numeric_limits<Real>::lowest();
+
+  for (MooseIndex(var_to_features) var_index = 0; var_index < var_to_features.size(); ++var_index)
+  {
+    // Only sample "active" variables
+    if (var_to_features[var_index] != FeatureFloodCount::invalid_id)
+    {
+      auto feature_id = var_to_features[var_index];
+      mooseAssert(feature_id < num_features, "Feature ID out of range");
+      auto integral_value = computeFaceIntegral(var_index);
+
+      if (_single_feature_per_elem)
+      {
+        if (integral_value > max_var_value)
+        {
+          // Update the current dominant feature and associated value
+          max_var_value = integral_value;
+          dominant_feature_id = feature_id;
+        }
+      }
+      // Solution based boundary area/length calculation (integral value)
+      else
+        _feature_volumes[feature_id] += integral_value;
+    }
+  }
+
+  // Accumulate the boundary area/length into the dominant feature. Do not use the integral value
+  if (_single_feature_per_elem && dominant_feature_id != FeatureFloodCount::invalid_id)
+    _feature_volumes[dominant_feature_id] += elem->side(side)->volume();
+}
+
+Real
+FeatureVolumeVectorPostprocessor::computeFaceIntegral(std::size_t var_index) const
+{
+  Real sum = 0;
+  for (unsigned int qp = 0; qp < _qrule_face->n_points(); ++qp)
+    sum += _JxW_face[qp] * _coord[qp] * (*_coupled_sln[var_index])[qp];
 
   return sum;
 }
