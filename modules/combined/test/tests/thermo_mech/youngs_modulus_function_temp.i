@@ -73,7 +73,7 @@
 
 [Kernels]
   [./heat]
-    type = HeatConduction
+    type = Diffusion
     variable = temp
   [../]
 
@@ -157,11 +157,6 @@
   [../]
   [./stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
-  [./heat1]
-    type = HeatConductionMaterial
-    specific_heat = 1.0
-    thermal_conductivity = 1.0
   [../]
 []
 

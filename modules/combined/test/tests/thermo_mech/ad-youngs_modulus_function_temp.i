@@ -73,7 +73,7 @@
 
 [Kernels]
   [./heat]
-    type = ADHeatConduction
+    type = ADDiffusion
     variable = temp
   [../]
   [./TensorMechanics]
@@ -138,7 +138,7 @@
 
 [Materials]
   [./youngs_modulus]
-    type = PiecewiseLinearInterpolationMaterial
+    type = ADPiecewiseLinearInterpolationMaterial
     xy_data = '0          10e+6
                599.9999   10e+6
                600        9.94e+6
@@ -157,11 +157,6 @@
   [../]
   [./stress]
     type = ADComputeFiniteStrainElasticStress
-  [../]
-  [./heat1]
-    type = HeatConductionMaterial
-    specific_heat = 1.0
-    thermal_conductivity = 1.0
   [../]
 []
 
@@ -187,7 +182,6 @@
     type = ElementAverageValue
     variable = stress_xx
   [../]
-
   [./temp]
     type = AverageNodalVariableValue
     variable = temp

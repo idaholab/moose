@@ -104,7 +104,7 @@
 
 [Kernels]
   [./heat]
-    type = ADHeatConduction
+    type = ADDiffusion
     variable = temp
   [../]
 []
@@ -272,14 +272,14 @@
 
 [Materials]
   [./youngs_modulus]
-    type = PiecewiseLinearInterpolationMaterial
+    type = ADPiecewiseLinearInterpolationMaterial
     x = '100 500'
     y = '1e6 6e5'
     property = youngs_modulus
     variable = temp
   [../]
   [./poissons_ratio]
-    type = PiecewiseLinearInterpolationMaterial
+    type = ADPiecewiseLinearInterpolationMaterial
     x = '100 500'
     y = '0   0.25'
     property = poissons_ratio
@@ -294,17 +294,6 @@
 
   [./stress]
     type = ADComputeFiniteStrainElasticStress
-  [../]
-
-  [./heat]
-    type = HeatConductionMaterial
-    specific_heat = 1.0
-    thermal_conductivity = 1.0
-  [../]
-
-  [./density]
-    type = ADDensity
-    density = 1.0
   [../]
 []
 

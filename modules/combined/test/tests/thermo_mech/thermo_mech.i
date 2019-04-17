@@ -26,7 +26,7 @@
   [../]
 
   [./heat]
-    type = HeatConduction
+    type = Diffusion
     variable = temp
   [../]
 []
@@ -77,20 +77,6 @@
   [../]
   [./stress]
     type = ComputeLinearElasticStress
-  [../]
-
-  [./heat]
-    type = HeatConductionMaterial
-    specific_heat = 1.0
-    thermal_conductivity = 1.0
-  [../]
-
-  [./density]
-    type = Density
-    density = 1.0
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
   [../]
 []
 

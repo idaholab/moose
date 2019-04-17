@@ -86,8 +86,15 @@ template <ComputeStage compute_stage>
 void
 ADPiecewiseLinearInterpolationMaterial<compute_stage>::computeQpProperties()
 {
-  _property[_qp].value() = _scale_factor * _linear_interp->sample(_coupled_var[_qp].value());
-  _property[_qp].derivatives() = _scale_factor *
-                                 _linear_interp->sampleDerivative(_coupled_var[_qp].value()) *
-                                 _coupled_var[_qp].derivatives();
+  _property[_qp] = _scale_factor * _linear_interp->sampleDerivative(_coupled_var[_qp].value()) *
+                   _coupled_var[_qp];
+}
+
+template <>
+void
+ADPiecewiseLinearInterpolationMaterial<RESIDUAL>::computeQpProperties()
+{
+  Moose::out << "res: " << _coupled_var[_qp] << std::endl;
+  _property[_qp] = _scale_factor * _linear_interp->sample(_coupled_var[_qp]);
+  Moose::out << "res prop: " << _property[_qp] << std::endl;
 }
