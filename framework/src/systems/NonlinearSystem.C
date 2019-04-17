@@ -11,6 +11,7 @@
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
 #include "TimeIntegrator.h"
+#include "Predictor.h"
 #include "FiniteDifferencePreconditioner.h"
 #include "PetscSupport.h"
 #include "ComputeResidualFunctor.h"
@@ -141,35 +142,45 @@ NonlinearSystem::addMatrix(TagID tag)
   return *mat;
 }
 
-bool
-NonlinearSystem::predictorImprovedResidual()
+void
+NonlinearSystem::applyPredictor(NumericVector<Number> & initial_solution)
 {
   if (_fe_problem.solverParams()._type != Moose::ST_LINEAR)
   {
+    // retain a copy of the unpredicted solution
+    auto unpredicted_solution = initial_solution.clone();
+
+    _predictor->apply(initial_solution);
+    _fe_problem.predictorCleanup(initial_solution);
+
+    // compute the residual of the prediction
+    _sys.solution->close();
+    update();
     _computing_initial_residual = true;
     _fe_problem.computeResidualSys(_transient_sys, *_current_solution, *_transient_sys.rhs);
     _computing_initial_residual = false;
     _transient_sys.rhs->close();
     auto initial_residual_after_predictor = _transient_sys.rhs->l2_norm();
+
+    // if the prediction does not improve the residual swap the unpredicted solution back in
     if (_initial_residual_before_preset_bcs > initial_residual_after_predictor)
     {
       mooseInfo("Predictor successful: ",
                 _initial_residual_before_preset_bcs,
                 " > ",
                 initial_residual_after_predictor);
-      return true;
     }
     else
     {
-      mooseWarning("Predictor failure: ",
-                   _initial_residual_before_preset_bcs,
-                   " <= ",
-                   initial_residual_after_predictor);
-      return false;
+      mooseInfo("Predictor failure: ",
+                _initial_residual_before_preset_bcs,
+                " <= ",
+                initial_residual_after_predictor);
+      initial_solution.swap(*unpredicted_solution);
     }
   }
-
-  return true;
+  else
+    NonlinearSystemBase::applyPredictor(initial_solution);
 }
 
 void

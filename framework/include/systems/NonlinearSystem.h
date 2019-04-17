@@ -75,8 +75,8 @@ protected:
   ComputeResidualFunctor _nl_residual_functor;
   ComputeFDResidualFunctor _fd_residual_functor;
 
-  bool predictorMayFail() override { return true; };
-  bool predictorImprovedResidual() override;
+  /// apply the active predictor (and roll it back if it increases the residual)
+  void applyPredictor(NumericVector<Number> & initial_solution) override;
 
 private:
   /**

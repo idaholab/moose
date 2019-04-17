@@ -663,31 +663,20 @@ NonlinearSystemBase::onTimestepBegin()
 }
 
 void
+NonlinearSystemBase::applyPredictor(NumericVector<Number> & initial_solution)
+{
+  _predictor->apply(initial_solution);
+  _fe_problem.predictorCleanup(initial_solution);
+}
+
+void
 NonlinearSystemBase::setInitialSolution()
 {
   deactiveAllMatrixTags();
 
   NumericVector<Number> & initial_solution(solution());
   if (_predictor.get() && _predictor->shouldApply())
-  {
-    std::unique_ptr<NumericVector<Number>> unpredicted_solution;
-
-    // retain a copy of the unpredicted solution
-    if (predictorMayFail())
-      unpredicted_solution = initial_solution.clone();
-
-    _predictor->apply(initial_solution);
-    _fe_problem.predictorCleanup(initial_solution);
-
-    // if the prediction does not improve the residual swap the unpredicted solution back in
-    if (predictorMayFail())
-    {
-      _sys.solution->close();
-      update();
-      if (!predictorImprovedResidual())
-        initial_solution.swap(*unpredicted_solution);
-    }
-  }
+    applyPredictor(initial_solution);
 
   // do nodal BC
   ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
