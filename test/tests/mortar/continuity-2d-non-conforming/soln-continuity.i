@@ -76,10 +76,10 @@
 [Constraints]
   [./mortar]
     type = EqualValueConstraint
-    master_boundary_id = 2
-    slave_boundary_id = 1
-    master_subdomain_id = 20
-    slave_subdomain_id = 10
+    master_boundary = 2
+    slave_boundary = 1
+    master_subdomain = 20
+    slave_subdomain = 10
     variable = lambda
     master_variable = T
   [../]

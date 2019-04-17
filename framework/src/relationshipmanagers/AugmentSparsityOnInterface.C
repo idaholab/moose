@@ -16,11 +16,14 @@ InputParameters
 validParams<AugmentSparsityOnInterface>()
 {
   InputParameters params = validParams<RelationshipManager>();
-  params.addParam<BoundaryID>("master_boundary_id", "The id of the master boundary sideset.");
-  params.addParam<BoundaryID>("slave_boundary_id", "The id of the slave boundary sideset.");
-  params.addParam<BoundaryName>("master_boundary_name", "The name of the master boundary sideset.");
-  params.addParam<BoundaryName>("slave_boundary_name", "The name of the slave boundary sideset.");
-
+  params.addRequiredParam<BoundaryName>("master_boundary",
+                                        "The name of the master boundary sideset.");
+  params.addRequiredParam<BoundaryName>("slave_boundary",
+                                        "The name of the slave boundary sideset.");
+  params.addRequiredParam<SubdomainName>("master_subdomain",
+                                         "The name of the master lower dimensional subdomain.");
+  params.addRequiredParam<SubdomainName>("slave_subdomain",
+                                         "The name of the slave lower dimensional subdomain.");
   return params;
 }
 
@@ -28,12 +31,11 @@ AugmentSparsityOnInterface::AugmentSparsityOnInterface(const InputParameters & p
   : RelationshipManager(params),
     _amg(nullptr),
     _has_attached_amg(false),
-    _master_boundary_name(getParam<BoundaryName>("master_boundary_name")),
-    _slave_boundary_name(getParam<BoundaryName>("slave_boundary_name"))
+    _master_boundary_name(getParam<BoundaryName>("master_boundary")),
+    _slave_boundary_name(getParam<BoundaryName>("slave_boundary")),
+    _master_subdomain_name(getParam<SubdomainName>("master_subdomain")),
+    _slave_subdomain_name(getParam<SubdomainName>("slave_subdomain"))
 {
-  BoundaryID slave_boundary_id = getParam<BoundaryID>("slave_boundary_id");
-  BoundaryID master_boundary_id = getParam<BoundaryID>("master_boundary_id");
-  _interface = std::make_pair(master_boundary_id, slave_boundary_id);
 }
 
 void
@@ -74,16 +76,16 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
   // e.g. until after we've run ghosting functors on the DofMap
   if (!_has_attached_amg && _app.getExecutioner())
   {
-    // The user may have passed boundary names instead of ids to our constraint object in which case
-    // we are unable to get the boundary ids until we've read in the mesh, which is done after we
-    // add geometric relationship managers. Hence we can't do the below in our constructor. Now that
+    // We ask the user to pass boundary names instead of ids to our constraint object.  We are
+    // unable to get the boundary ids until we've read in the mesh, which is done after we add
+    // geometric relationship managers. Hence we can't do the below in our constructor. Now that
     // we're doing ghosting we've definitely read in the mesh
-    if (_interface.first == Moose::INVALID_BOUNDARY_ID)
-      _interface.first = _mesh.getBoundaryID(_master_boundary_name);
-    if (_interface.second == Moose::INVALID_BOUNDARY_ID)
-      _interface.second = _mesh.getBoundaryID(_slave_boundary_name);
+    auto boundary_pair = std::make_pair(_mesh.getBoundaryID(_master_boundary_name),
+                                        _mesh.getBoundaryID(_slave_boundary_name));
+    _subdomain_pair.first = _mesh.getSubdomainID(_master_subdomain_name);
+    _subdomain_pair.second = _mesh.getSubdomainID(_slave_subdomain_name);
 
-    _amg = &_app.getExecutioner()->feProblem().getMortarInterface(_interface, _subdomain_pair);
+    _amg = &_app.getExecutioner()->feProblem().getMortarInterface(boundary_pair, _subdomain_pair);
     _has_attached_amg = true;
   }
 
@@ -139,10 +141,10 @@ AugmentSparsityOnInterface::operator==(const RelationshipManager & other) const
 {
   if (auto asoi = dynamic_cast<const AugmentSparsityOnInterface *>(&other))
   {
-    if (_interface.first == asoi->_interface.first &&
-        _interface.second == asoi->_interface.second &&
-        _master_boundary_name == asoi->_master_boundary_name &&
-        _slave_boundary_name == asoi->_slave_boundary_name)
+    if (_master_boundary_name == asoi->_master_boundary_name &&
+        _slave_boundary_name == asoi->_slave_boundary_name &&
+        _master_subdomain_name == asoi->_master_subdomain_name &&
+        _slave_subdomain_name == asoi->_slave_subdomain_name)
       return true;
   }
   return false;

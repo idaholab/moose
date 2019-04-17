@@ -67,20 +67,20 @@
     type = EqualGradientConstraint
     master_variable = u
     variable = lmx
-    master_boundary_id = 100
-    master_subdomain_id = 10000
-    slave_boundary_id = 101
-    slave_subdomain_id = 10001
+    master_boundary = 100
+    master_subdomain = 10000
+    slave_boundary = 101
+    slave_subdomain = 10001
     component = 0
   [../]
   [./cedy]
     type = EqualGradientConstraint
     master_variable = u
     variable = lmy
-    master_boundary_id = 100
-    master_subdomain_id = 10000
-    slave_boundary_id = 101
-    slave_subdomain_id = 10001
+    master_boundary = 100
+    master_subdomain = 10000
+    slave_boundary = 101
+    slave_subdomain = 10001
     component = 1
   [../]
 []

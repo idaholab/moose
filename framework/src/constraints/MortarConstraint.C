@@ -22,26 +22,27 @@
 defineADBaseValidParams(
     MortarConstraint,
     MortarConstraintBase,
-    params.addRequiredParam<BoundaryName>("master_boundary_name",
+    params.addRequiredParam<BoundaryName>("master_boundary",
                                           "The name of the master boundary sideset.");
-    params.addRequiredParam<BoundaryName>("slave_boundary_name",
+    params.addRequiredParam<BoundaryName>("slave_boundary",
                                           "The name of the slave boundary sideset.");
-    params.addRequiredParam<SubdomainName>("master_subdomain_name",
-                                           "The name of the master subdomain.");
-    params.addRequiredParam<SubdomainName>("slave_subdomain_name",
-                                           "The name of the slave subdomain.");
+    params.addRequiredParam<SubdomainName>("master_subdomain", "The name of the master subdomain.");
+    params.addRequiredParam<SubdomainName>("slave_subdomain", "The name of the slave subdomain.");
     params.addRequiredParam<VariableName>("master_variable", "Variable on master surface");
     params.addParam<VariableName>("slave_variable", "Variable on master surface");
     params.addRelationshipManager(
         "AugmentSparsityOnInterface",
         Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC,
-        [](const InputParameters & obj_params, InputParameteres & rm_params) {
+        [](const InputParameters & obj_params, InputParameters & rm_params) {
           rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
-          rm_params.set<bool>("slave_boundary_id") = obj_params.get<bool>("slave_boundary_id");
-          rm_params.set<bool>("master_boundary_id") = obj_params.get<bool>("master_boundary_id");
-          rm_params.set<bool>("slave_boundary_name") = obj_params.get<bool>("slave_boundary_name");
-          rm_params.set<bool>("master_boundary_name") =
-              obj_params.get<bool>("master_boundary_name");
+          rm_params.set<BoundaryName>("slave_boundary") =
+              obj_params.get<BoundaryName>("slave_boundary");
+          rm_params.set<BoundaryName>("master_boundary") =
+              obj_params.get<BoundaryName>("master_boundary");
+          rm_params.set<SubdomainName>("slave_subdomain") =
+              obj_params.get<SubdomainName>("slave_subdomain");
+          rm_params.set<SubdomainName>("master_subdomain") =
+              obj_params.get<SubdomainName>("master_subdomain");
         });
 
     params.addParam<bool>(
@@ -55,20 +56,10 @@ MortarConstraint<compute_stage>::MortarConstraint(const InputParameters & parame
   : MortarConstraintBase(parameters),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
-    _slave_id(isParamValid("slave_boundary_id")
-                  ? getParam<BoundaryID>("slave_boundary_id")
-                  : _mesh.getBoundaryID(getParam<BoundaryName>("slave_boundary_name"))),
-    _master_id(isParamValid("master_boundary_id")
-                   ? getParam<BoundaryID>("master_boundary_id")
-                   : _mesh.getBoundaryID(getParam<BoundaryName>("master_boundary_name"))),
-    _slave_subdomain_id(
-        isParamValid("slave_subdomain_id")
-            ? getParam<SubdomainID>("slave_subdomain_id")
-            : _mesh.getSubdomainID(getParam<SubdomainName>("slave_subdomain_name"))),
-    _master_subdomain_id(
-        isParamValid("master_subdomain_id")
-            ? getParam<SubdomainID>("master_subdomain_id")
-            : _mesh.getSubdomainID(getParam<SubdomainName>("master_subdomain_name"))),
+    _slave_id(_mesh.getBoundaryID(getParam<BoundaryName>("slave_boundary"))),
+    _master_id(_mesh.getBoundaryID(getParam<BoundaryName>("master_boundary"))),
+    _slave_subdomain_id(_mesh.getSubdomainID(getParam<SubdomainName>("slave_subdomain"))),
+    _master_subdomain_id(_mesh.getSubdomainID(getParam<SubdomainName>("master_subdomain"))),
     _amg(_fe_problem.getMortarInterface(std::make_pair(_master_id, _slave_id),
                                         std::make_pair(_master_subdomain_id, _slave_subdomain_id),
                                         getParam<bool>("use_displaced_mesh"))),
@@ -121,17 +112,8 @@ MortarConstraint<compute_stage>::loopOverMortarMesh()
   // Array to hold custom quadrature point locations on the slave and master sides
   std::vector<Point> custom_xi1_pts, custom_xi2_pts;
 
-  for (MeshBase::const_element_iterator
-           el = _amg.mortar_segment_mesh.active_local_elements_begin(),
-           end_el = _amg.mortar_segment_mesh.active_local_elements_end();
-       el != end_el;
-       ++el)
+  for (const auto & msm_elem : _amg.mortar_segment_mesh.active_local_element_ptr_range())
   {
-    // Note: this is a mortar segment mesh Elem, *not* an Elem
-    // from the original mesh or the side of an Elem from the
-    // original mesh.
-    const Elem * msm_elem = *el;
-
     // We may eventually allow zero-length segments in the
     // MSM. They are OK connectivity-wise, and they don't
     // contribute to the mortar segment integrals, but we don't
@@ -176,7 +158,7 @@ MortarConstraint<compute_stage>::loopOverMortarMesh()
     _master_primal_offset = _slave_primal_offset + _dof_indices_slave_interior_primal.size();
 
     // These only get initialized if there is a master Elem associated to this segment.
-    const Elem * master_ip = libmesh_nullptr;
+    const Elem * master_ip = nullptr;
     unsigned int master_side_id = libMesh::invalid_uint;
 
     if (_has_master)

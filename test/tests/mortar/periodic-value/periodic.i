@@ -54,10 +54,10 @@
     type = EqualValueConstraint
     variable = lm
     master_variable = u
-    master_boundary_id = 103
-    slave_boundary_id = 101
-    master_subdomain_id = 12
-    slave_subdomain_id = 11
+    master_boundary = 103
+    slave_boundary = 101
+    master_subdomain = 12
+    slave_subdomain = 11
     periodic = true
   []
 []

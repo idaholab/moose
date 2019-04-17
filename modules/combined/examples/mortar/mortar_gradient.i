@@ -154,10 +154,10 @@
     variable = lm_up_down_x
     component = 0
     master_variable = c
-    slave_boundary_name = bottom
-    master_boundary_name = top
-    slave_subdomain_name = slave_y
-    master_subdomain_name = master_y
+    slave_boundary = bottom
+    master_boundary = top
+    slave_subdomain = slave_y
+    master_subdomain = master_y
     periodic = true
   [../]
   [./equaly_grad_y]
@@ -165,10 +165,10 @@
     variable = lm_up_down_y
     component = 1
     master_variable = c
-    slave_boundary_name = bottom
-    master_boundary_name = top
-    slave_subdomain_name = slave_y
-    master_subdomain_name = master_y
+    slave_boundary = bottom
+    master_boundary = top
+    slave_subdomain = slave_y
+    master_subdomain = master_y
     periodic = true
   [../]
 
@@ -177,10 +177,10 @@
     variable = lm_left_right_x
     component = 0
     master_variable = c
-    slave_boundary_name = left
-    master_boundary_name = right
-    slave_subdomain_name = slave_x
-    master_subdomain_name = master_x
+    slave_boundary = left
+    master_boundary = right
+    slave_subdomain = slave_x
+    master_subdomain = master_x
     periodic = true
   [../]
   [./equalx_grad_y]
@@ -188,10 +188,10 @@
     variable = lm_left_right_y
     component = 1
     master_variable = c
-    slave_boundary_name = left
-    master_boundary_name = right
-    slave_subdomain_name = slave_x
-    master_subdomain_name = master_x
+    slave_boundary = left
+    master_boundary = right
+    slave_subdomain = slave_x
+    master_subdomain = master_x
     periodic = true
   [../]
 []

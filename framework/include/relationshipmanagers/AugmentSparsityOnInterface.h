@@ -3,7 +3,7 @@
 
 // App includes
 #include "AutomaticMortarGeneration.h"
-#include "AlgebraicRelationshipManager.h"
+#include "RelationshipManager.h"
 
 // libMesh includes
 #include "libmesh/mesh_base.h"
@@ -19,7 +19,7 @@ class AugmentSparsityOnInterface;
 template <>
 InputParameters validParams<AugmentSparsityOnInterface>();
 
-class AugmentSparsityOnInterface : public AlgebraicRelationshipManager
+class AugmentSparsityOnInterface : public RelationshipManager
 {
 public:
   AugmentSparsityOnInterface(const InputParameters &);
@@ -63,8 +63,10 @@ protected:
 
   BoundaryName _master_boundary_name;
   BoundaryName _slave_boundary_name;
+  SubdomainName _master_subdomain_name;
+  SubdomainName _slave_subdomain_name;
 
-  std::pair<BoundaryID, BoundaryID> _interface;
+  std::pair<SubdomainID, SubdomainID> _subdomain_pair;
 };
 
 #endif

@@ -1,6 +1,6 @@
 #include "MortarSegmentInfo.h"
+#include "MooseError.h"
 
-// libMesh includes
 #include "libmesh/elem.h"
 
 using namespace libMesh;
@@ -13,30 +13,25 @@ MortarSegmentInfo::MortarSegmentInfo()
     xi1_b(invalid_xi),
     xi2_a(invalid_xi),
     xi2_b(invalid_xi),
-    slave_elem(libmesh_nullptr),
-    master_elem(libmesh_nullptr)
+    slave_elem(nullptr),
+    master_elem(nullptr)
 {
 }
 
 MortarSegmentInfo::MortarSegmentInfo(Real x1a, Real x1b, Real x2a, Real x2b)
-  : xi1_a(x1a),
-    xi1_b(x1b),
-    xi2_a(x2a),
-    xi2_b(x2b),
-    slave_elem(libmesh_nullptr),
-    master_elem(libmesh_nullptr)
+  : xi1_a(x1a), xi1_b(x1b), xi2_a(x2a), xi2_b(x2b), slave_elem(nullptr), master_elem(nullptr)
 {
 }
 
 void
 MortarSegmentInfo::print() const
 {
-  libMesh::out << "xi^(1)_a=" << xi1_a << ", xi^(1)_b=" << xi1_b << std::endl;
-  libMesh::out << "xi^(2)_a=" << xi2_a << ", xi^(2)_b=" << xi2_b << std::endl;
+  Moose::out << "xi^(1)_a=" << xi1_a << ", xi^(1)_b=" << xi1_b << std::endl;
+  Moose::out << "xi^(2)_a=" << xi2_a << ", xi^(2)_b=" << xi2_b << std::endl;
   if (slave_elem)
-    libMesh::out << "slave_elem=" << slave_elem->id() << std::endl;
+    Moose::out << "slave_elem=" << slave_elem->id() << std::endl;
   if (master_elem)
-    libMesh::out << "master_elem=" << master_elem->id() << std::endl;
+    Moose::out << "master_elem=" << master_elem->id() << std::endl;
 }
 
 bool
@@ -53,8 +48,7 @@ MortarSegmentInfo::is_valid() const
   // Both xi^(1) values must be set to have a valid segment.
   if (!b1)
   {
-    libMesh::err << "xi1_a = " << xi1_a << ", xi1_b = " << xi1_b
-                 << ", one or both xi^(1) values were not set." << std::endl;
+    mooseError("xi1_a = ", xi1_a, ", xi1_b = ", xi1_b, ", one or both xi^(1) values were not set.");
     return false;
   }
 
@@ -63,35 +57,35 @@ MortarSegmentInfo::is_valid() const
   // value).
   if (std::abs(xi1_a - xi1_b) < TOLERANCE)
   {
-    libMesh::err << "xi^(1) values too close together." << std::endl;
+    mooseError("xi^(1) values too close together.");
     return false;
   }
 
   // Must have a valid slave Elem to have a valid segment.
-  if (slave_elem == libmesh_nullptr)
+  if (slave_elem == nullptr)
   {
-    libMesh::err << "Slave Elem was not set." << std::endl;
+    mooseError("Slave Elem was not set.");
     return false;
   }
 
   // Either *both* xi^(2) values should be unset or *neither* should be. Anything else is invalid.
   if ((xi2a_unset && !xi2b_unset) || (!xi2a_unset && xi2b_unset))
   {
-    libMesh::err << "One xi^(2) value was set, the other was not set." << std::endl;
+    mooseError("One xi^(2) value was set, the other was not set.");
     return false;
   }
 
   // If both xi^(2) values are unset, then master_elem should be NULL.
-  if (!xi2_set && master_elem != libmesh_nullptr)
+  if (!xi2_set && master_elem != nullptr)
   {
-    libMesh::err << "Both xi^(2) are unset, therefore master_elem should be NULL." << std::endl;
+    mooseError("Both xi^(2) are unset, therefore master_elem should be NULL.");
     return false;
   }
 
   // On the other hand, if both xi^(2) values are unset, then make sure master_elem is non-NULL.
-  if (xi2_set && master_elem == libmesh_nullptr)
+  if (xi2_set && master_elem == nullptr)
   {
-    libMesh::err << "Both xi^(2) are set, the master_elem cannot be NULL." << std::endl;
+    mooseError("Both xi^(2) are set, the master_elem cannot be NULL.");
     return false;
   }
 
@@ -100,14 +94,14 @@ MortarSegmentInfo::is_valid() const
   // assigned the same value by accident.
   if (xi2_set && (std::abs(xi2_a - xi2_b) < TOLERANCE))
   {
-    libMesh::err << "xi^(2) are too close together." << std::endl;
+    mooseError("xi^(2) are too close together.");
     return false;
   }
 
   // If both xi^(2) values are set, they should be in the range.
   if (xi2_set && !b2)
   {
-    libMesh::err << "xi^(2) are set, but they are not in the range [-1,1]." << std::endl;
+    mooseError("xi^(2) are set, but they are not in the range [-1,1].");
     return false;
   }
 
