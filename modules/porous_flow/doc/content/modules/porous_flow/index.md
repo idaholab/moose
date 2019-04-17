@@ -143,7 +143,12 @@ There are over 500 unit and quality-assurance tests in the PorousFlow test suite
 - [Heat advection](tests/heat_advection/heat_advection_tests.md)
 - [Fluid mass computation and conservation](tests/mass_conservation/mass_conservation_tests.md)
 - [Establishment of gravitational head](tests/gravity/gravity_tests.md)
+- [Dispersion and diffusion](tests/dispersion/dispersion_tests.md)
 - [Heating from inelastic deformation](tests/plastic_heating/plastic_heating_tests.md)
+- [Tests of the Jacobian](tests/jacobian/jacobian_tests.md)
+
+Many of the PorousFlow tests were created before MOOSE's current documentation system was established.  Therefore, we are still in the process of documenting the tests.  The following pages need to be completed.
+
 - [actions](tests/actions/actions_tests.md)
 - [fluids](tests/fluids/fluids_tests.md)
 - [numerical_diffusion](tests/numerical_diffusion/numerical_diffusion_tests.md)
@@ -161,9 +166,7 @@ There are over 500 unit and quality-assurance tests in the PorousFlow test suite
 - [density](tests/density/density_tests.md)
 - [heterogeneous_materials](tests/heterogeneous_materials/heterogeneous_materials_tests.md)
 - [desorption](tests/desorption/desorption_tests.md)
-- [jacobian](tests/jacobian/jacobian_tests.md)
 - [thermal_conductivity](tests/thermal_conductivity/thermal_conductivity_tests.md)
 - [thm_rehbinder](tests/thm_rehbinder/thm_rehbinder_tests.md)
-- [dispersion](tests/dispersion/dispersion_tests.md)
 - [energy_conservation](tests/energy_conservation/energy_conservation_tests.md)
 - [non_thermal_equilibrium](tests/non_thermal_equilibrium/non_thermal_equilibrium_tests.md)
