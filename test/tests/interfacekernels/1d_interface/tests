@@ -25,7 +25,8 @@
     input = 'mixed_shapes.i'
     exodiff = 'mixed_shapes_out.e'
     issues = '#13232'
-    requirement = "MOOSE shall support mixed shapes"
+    requirement = "The system shall support the evaluation of neighboring quantities on "
+                   "elements containing different shape functions."
   [../]
   [./jacobian_test]
     type = AnalyzeJacobian
@@ -35,7 +36,7 @@
     petsc_version = '<3.9.0 || >=3.9.4'
     cli_args = 'Outputs/exodus=false'
     issues = '#13232'
-    requirement = "MOOSE shall test Jacobian for coupled flux for interface"
+    requirement = "The system shall produce correct Jacobians for coupled flux on an interface."
   [../]
   [./mixed_shapes_jacobian_test]
     type = AnalyzeJacobian
@@ -45,7 +46,8 @@
     petsc_version = '<3.9.0 || >=3.9.4'
     cli_args = 'Outputs/exodus=false'
     issues = '#13232'
-    requirement = "MOOSE shall test Jacobian for mixed shapes"
+    requirement = "The system shall support produce correct Jacobians when "
+                   "evaluating neighboring quantities on elements containing different shape functions."
   [../]
 
   [./single_variable_jacobian_test]
@@ -55,7 +57,7 @@
     recover = false
     petsc_version = '<3.9.0 || >=3.9.4'
     issues = '#13232'
-    requirement = "MOOSE shall test Jacobian for single variable coupled flux"
+    requirement = "The system shall produce correct Jacobians for single variable coupled flux on an interface."
   [../]
 
   [./ik_save_in]
