@@ -57,7 +57,7 @@
   [./TimeStepper]
     type = IterationAdaptiveDT
     optimal_iterations = 10
-    postprocessor_dtlim = timestep_pp
+    timestep_limiting_postprocessor = timestep_pp
     dt = 1.0
   [../]
 []

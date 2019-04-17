@@ -139,7 +139,7 @@
     dt = 0.2
     growth_factor = 2.0
     cutback_factor = 0.5
-    postprocessor_dtlim = time_step_limit
+    timestep_limiting_postprocessor = time_step_limit
   []
 []
 

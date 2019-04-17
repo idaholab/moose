@@ -215,7 +215,7 @@
     iteration_window = 9
     growth_factor = 2.0
     cutback_factor = 0.5
-    postprocessor_dtlim = matl_ts_min
+    timestep_limiting_postprocessor = matl_ts_min
   [../]
 
   start_time = 0.0
