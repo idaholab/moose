@@ -45,11 +45,6 @@
     input = test_yaml_load.py
     requirement = "MOOSE python utilities shall include a tool for reading YAML files."
   []
-  [check_file_size]
-    type = PythonUnitTest
-    input = test_check_file_size.py
-    requirement = "MOOSE python utilities shall include a tool for checking the size of a file."
-  []
   [AutoPropertyMixin]
     type = PythonUnitTest
     input = test_AutoPropertyMixin.py
