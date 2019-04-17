@@ -75,6 +75,8 @@ protected:
   ComputeResidualFunctor _nl_residual_functor;
   ComputeFDResidualFunctor _fd_residual_functor;
 
+  bool predictorImprovedResidual() override;
+
 private:
   /**
    * Form preconditioning matrix via a standard finite difference method

@@ -141,6 +141,37 @@ NonlinearSystem::addMatrix(TagID tag)
   return *mat;
 }
 
+bool
+NonlinearSystem::predictorImprovedResidual()
+{
+  if (_fe_problem.solverParams()._type != Moose::ST_LINEAR)
+  {
+    _computing_initial_residual = true;
+    _fe_problem.computeResidualSys(_transient_sys, *_current_solution, *_transient_sys.rhs);
+    _computing_initial_residual = false;
+    _transient_sys.rhs->close();
+    auto initial_residual_after_predictor = _transient_sys.rhs->l2_norm();
+    if (_initial_residual_before_preset_bcs > initial_residual_after_predictor)
+    {
+      mooseInfo("Predictor successful: ",
+                _initial_residual_before_preset_bcs,
+                " > ",
+                initial_residual_after_predictor);
+      return true;
+    }
+    else
+    {
+      mooseWarning("Predictor failure: ",
+                   _initial_residual_before_preset_bcs,
+                   " <= ",
+                   initial_residual_after_predictor);
+      return false;
+    }
+  }
+
+  return true;
+}
+
 void
 NonlinearSystem::solve()
 {

@@ -670,8 +670,17 @@ NonlinearSystemBase::setInitialSolution()
   NumericVector<Number> & initial_solution(solution());
   if (_predictor.get() && _predictor->shouldApply())
   {
+    // retain a copy of the unpredicted solution
+    auto unpredicted_solution = initial_solution.clone();
+
     _predictor->apply(initial_solution);
     _fe_problem.predictorCleanup(initial_solution);
+
+    // if the prediction does not improve the residual swap the unpredicted solution back in
+    _sys.solution->close();
+    update();
+    if (!predictorImprovedResidual())
+      initial_solution.swap(*unpredicted_solution);
   }
 
   // do nodal BC
