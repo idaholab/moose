@@ -25,7 +25,7 @@ and a sink flux at the other end:
   T}{\partial x}\right|_{x=L} = -C\left(T - T_{e}\right)_{x=L} \ .
 \label{eq:heat_sink}
 \end{equation}
-Here $T_{e}$ is a fixed quantity (``e'' stands for ``external''), and
+Here $T_{e}$ is a fixed quantity ("e" stands for "external"), and
 $C$ is a constant conductance (J.m$^{-2}$.s$^{-1}$.K$^{-1}$).
 
 The solution is the linear function
@@ -83,7 +83,7 @@ Maintain the end $x=0$ at constant pressure, so that $\rho(x=0, t) =
 \left.\frac{\partial\rho}{\partial x}\right|_{x=L} = -C\left(\rho -
 \rho_{e}\right)_{x=L} \ ,
 \end{equation}
-where $\rho_{e}$ is a fixed quantity (``e'' stands for ``external''),
+where $\rho_{e}$ is a fixed quantity ("e" stands for "external"),
 and $C$ is a constant conductance.  This corresponds to the flux
 \begin{equation}
 \left.\frac{\partial P}{\partial x}\right|_{x=L} = -CB\left(1 -
@@ -237,8 +237,8 @@ at the right-hand end of the bar is
 \end{equation}
 Physically this corresponds to the mass-flow through the boundary
 being proportional to $P-P_{e}$.  Here $P_{e}$ is a fixed
-``environmental'' porepressure, and this acts as a source or sink of
-fluid.  $C$ is the ``conductance'' of the boundary.  Notice the
+"environmental" porepressure, and this acts as a source or sink of
+fluid.  $C$ is the "conductance" of the boundary.  Notice the
 appearence of $\rho \kappa/\mu$ in the LHS of this equation means that
 this is truly a flux of fluid mass (measured in kg.m$^{-2}$.s$^{-1}$),
 and the appearence of $\rho\kappa/\mu$ on the RHS means that a [PorousFlowPiecewiseLinearFlux](sinks.md) may be used with `use_mobility=true`.

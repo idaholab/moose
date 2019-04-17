@@ -80,18 +80,18 @@
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/doc/tests/sinks.tex'
   [../]
   [./s09]
-    type = Exodiff
+    type = CSVDiff
     input = s09.i
-    exodiff = s09.e
+    csvdiff = 's09_mf_0100.csv s09_mf_0050.csv s09_mf_0010.csv'
     threading = '!pthreads'
     requirement = 'PorousFlow shall be able to model a source/sink boundary condition that holds porepressures fixed and extracts fluid components from boundaries at a rate prescribed by the flow within the model at the boundary - viz, the sink should behave like a free boundary'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/doc/tests/sinks.tex'
   [../]
   [./s09_fully_saturated]
-    type = Exodiff
+    type = CSVDiff
     input = s09_fully_saturated.i
-    exodiff = s09_fully_saturated.e
+    csvdiff = 's09_fully_saturated_mf_0100.csv s09_fully_saturated_mf_0050.csv s09_fully_saturated_mf_0010.csv'
     threading = '!pthreads'
     requirement = 'PorousFlow shall be able to model a source/sink boundary condition that holds porepressures fixed and extracts fluid components from boundaries at a rate prescribed by the flow within the model at the boundary - viz, the sink should behave like a free boundary, and this feature shall be compatible with the fully-saturated formalism within PorousFlow'
     issues = '#7333'

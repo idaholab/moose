@@ -17,7 +17,7 @@ fluid mobility, the relative permeability, or a mass fraction.  These
 latter multiplying factors are all useful in the case of sinks to
 prevent an unlimited amount of fluid being withdrawn from the porous
 medium, which can lead to extremely poor nonlinear convergence even if
-only one node in the entire mesh is ``running dry''.
+only one node in the entire mesh is "running dry".
 
 Derived from the basic one, is another boundary condition that allows
 the flux to be modified by a piecewise-linear function of
@@ -365,7 +365,7 @@ may be used in order to compare with the standard fully-upwinded
 Kernels.  These Kernels do not employ any upwinding
 whatsoever, so less numerical
 diffusion is expected.  This is demonstrated in [s09_fig].  Two additional points may also be
-nocied: (1) the lack of upwinding has produced a ``bump'' in the
+nocied: (1) the lack of upwinding has produced a "bump" in the
 mass-fraction profile near the concentrated side; (2) the lack of upwinding
 means the temperature profile moves slightly slower than it should.
 These two affects reduce as the mesh density is increased, however.
@@ -374,8 +374,4 @@ The input file using the fully-saturated Kernels:
 
 !listing modules/porous_flow/test/tests/sinks/s09_fully_saturated.i
 
-!media sinks/s09_0_1.png style=width:50%;margin-left:10px
-
-!media sinks/s09_0_5.png style=width:50%;margin-left:10px
-
-!media sinks/s09_1_0.png style=width:50%;margin-left:10px caption=Results of the advection of a fluid component test, illustrating that the numerical implementation of porous flow within MOOSE diffuses sharp fronts, but advects them at the correct velocity (which is 1m/s in this case).  Notice the centre of the front is at the correct position in each picture.  Less diffusion is experienced when upwinding is not used.  Top: 0.1s.  Middle: 0.5s.  Bottom: 1.0s.  id=s09_fig
+!media sinks/s09.png style=width:80%;margin-left:10px caption=Results of the advection of a fluid component test, illustrating that the numerical implementation of porous flow within MOOSE diffuses sharp fronts, but advects them at the correct velocity (which is 1m/s in this case).  Notice the centre of the front is at the correct position in each picture.  Less diffusion is experienced when upwinding is not used, but notice the slight "bump" in the non-upwinded version at early times.  id=s09_fig

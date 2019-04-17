@@ -173,7 +173,7 @@ curve, although I couldn't find any details on the modification.
 In experiment 1, the caisson is initially at saturation 0.303
 ($P=-72620.4\,$Pa), and water is pumped into the top with a rate
 0.002315$\,$kg.m$^{-2}$.s$^{-1}$.  This causes a front of water to
-advance down the caisson.  Figure~\ref{rd.result.fig} shows the
+advance down the caisson.  [rd01_result_fig] shows the
 agreement between MOOSE and the published result (this result was
 obtained by extracting data by hand from online graphics).
 
@@ -274,3 +274,5 @@ has 600 elements and uses 190 time steps, and is marked as
 "heavy".
 
 !media infiltration_and_drainage/rsc.png style=width:50%;margin-left:10px caption=Water saturation profile after 5 seconds of injection in the Rogers-Stallybrass-Clements test.  The initial water saturation is 0.08181, and water is injected at the top of this figure at a constant rate.  This forms a water front which displaces the oil.  Black line: RSC's analytic solution.  Red squares: high-resolution MOOSE simulation.  Green triangles: lower resolution MOOSE simulation.  id=rsc.fig
+
+!bibtex bibliography

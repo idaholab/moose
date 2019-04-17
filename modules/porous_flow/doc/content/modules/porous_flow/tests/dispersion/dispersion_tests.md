@@ -39,3 +39,5 @@ The input file:
 The comparison between the PorousFlow and the analytical formula is presented in [fig:disp].  For the non-heavy case, the MOOSE results do not coincide with the analytical solution near the top and bottom of the concentration front due to numerical dispersion. If the number of elements in the mesh is increased and the time step size is reduced (the "heavy" case), numerical dispersion is reduced and a much closer fit to the analytical solution is obtained.
 
 !media dispersion/dispersion_fig.png style=width:80%;margin-left:10px caption=Mass fraction profile from hydrodynamic dispersion only. id=fig:disp
+
+!bibtex bibliography

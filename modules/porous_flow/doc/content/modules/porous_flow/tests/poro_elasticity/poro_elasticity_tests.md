@@ -114,7 +114,7 @@ Here $K$ is the solid bulk modulus.  MOOSE produces this result correctly.
 
 A single-element fully-saturated sample is constrained on all sides,
 except its top.  All its boundaries are impermeable.  Fluid is pumped
-into the sample via a source $s$ (kg.s$^{-1}$.m$^{-3}$)) and the rise
+into the sample via a source $s$ (kg.s$^{-1}$.m$^{-3}$) and the rise
 in the top surface, the porepressure, and the stress are observed.
 
 The input file:
@@ -259,3 +259,5 @@ results.
 !media poro_elasticity/mandel_FSV.png style=width:50%;margin-left:10px caption=The porepressure at various points in the sample in the FullSatVol model ("a" is equal to unity). id=mandel_FSV
 
 !media poro_elasticity/mandel_force.png style=width:50%;margin-left:10px caption=The total downwards force on the platten as a function of time.  This should be unity. id=mandel_force
+
+!bibtex bibliography

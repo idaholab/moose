@@ -86,3 +86,5 @@ unsaturated region (the front sits between $x=9.7\,$m and $x=10.4\,$m
 at $t=50\,$s).
 
 !media buckley_leverett/bl01_sat_and_pp1.png style=width:90%;margin-left:10px caption=The MOOSE solution of the Buckley-Leverett problem at time 50s.  Left: saturation.  Right: porepressure.  The front sits at x 9.6m as expected from the analytical solution. id=satfront_figa
+
+!bibtex bibliography

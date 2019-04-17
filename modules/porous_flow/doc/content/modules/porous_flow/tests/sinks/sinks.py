@@ -128,6 +128,8 @@ def s08():
     pc = [(d[6] - d[7]) for d in data]
     return (pc, rate00)
 
+
+
 plt.figure()
 moose_results = s01()
 mooset = moose_results[0]
@@ -242,6 +244,49 @@ plt.xlabel("Capillary pressure (Pa)")
 plt.ylabel("Sink rate (kg/m^2/s)")
 plt.title("Mass-fraction and relative-permeability dependent sink (2 phase, 3 comp)")
 plt.savefig("s08.png")
+
+def s09_01():
+    f = open("../../../../../../test/tests/sinks/gold/s09_mf_0010.csv")
+    data = [map(float, line.strip().split(",")) for line in f.readlines()[1:] if line.strip()]
+    return ([d[0] for d in data], [d[4] for d in data])
+
+def s09_05():
+    f = open("../../../../../../test/tests/sinks/gold/s09_mf_0050.csv")
+    data = [map(float, line.strip().split(",")) for line in f.readlines()[1:] if line.strip()]
+    return ([d[0] for d in data], [d[4] for d in data])
+
+def s09_10():
+    f = open("../../../../../../test/tests/sinks/gold/s09_mf_0100.csv")
+    data = [map(float, line.strip().split(",")) for line in f.readlines()[1:] if line.strip()]
+    return ([d[0] for d in data], [d[4] for d in data])
+
+def s09_fully_saturated_01():
+    f = open("../../../../../../test/tests/sinks/gold/s09_fully_saturated_mf_0010.csv")
+    data = [map(float, line.strip().split(",")) for line in f.readlines()[1:] if line.strip()]
+    return ([d[0] for d in data], [d[4] for d in data])
+
+def s09_fully_saturated_05():
+    f = open("../../../../../../test/tests/sinks/gold/s09_fully_saturated_mf_0050.csv")
+    data = [map(float, line.strip().split(",")) for line in f.readlines()[1:] if line.strip()]
+    return ([d[0] for d in data], [d[4] for d in data])
+
+def s09_fully_saturated_10():
+    f = open("../../../../../../test/tests/sinks/gold/s09_fully_saturated_mf_0100.csv")
+    data = [map(float, line.strip().split(",")) for line in f.readlines()[1:] if line.strip()]
+    return ([d[0] for d in data], [d[4] for d in data])
+
+plt.figure()
+plt.plot(s09_01()[0], s09_01()[1], 'k-', label = 'upwinded, t=0.1')
+plt.plot(s09_fully_saturated_01()[0], s09_fully_saturated_01()[1], 'r-', label = 'no upwinding, t=0.1')
+plt.plot(s09_05()[0], s09_05()[1], 'k--', label = 'upwinded, t=0.5')
+plt.plot(s09_fully_saturated_05()[0], s09_fully_saturated_05()[1], 'r--', label = 'no upwinding, t=0.5')
+plt.plot(s09_10()[0], s09_10()[1], 'k.', label = 'upwinded, t=1.0')
+plt.plot(s09_fully_saturated_10()[0], s09_fully_saturated_10()[1], 'r.', label = 'no upwinding, t=1.0')
+plt.legend()
+plt.xlabel("Mass fraction")
+plt.ylabel("x (m)")
+plt.title("Advected mass-fraction along line")
+plt.savefig("s09.png")
 
 
 sys.exit(0)

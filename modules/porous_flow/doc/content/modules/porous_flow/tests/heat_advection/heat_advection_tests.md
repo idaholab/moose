@@ -10,8 +10,8 @@ implies that the solution is $P(x, t) = 1 - x$, with
 \begin{equation}
 v = k/\mu
 \end{equation}
-being the constant ``Darcy
-velocity'' from $x=0$ to $x=1$.  (The velocity of the individual
+being the constant "Darcy
+velocity" from $x=0$ to $x=1$.  (The velocity of the individual
   fluid particles, this is divided by the porosity.).  Here $k$ is the porous medium's
 permeability, and $\mu$ is the fluid dynamic viscosity.
 
@@ -27,7 +27,7 @@ This is the wave equation with velocity
 \begin{equation}
 v_{T} = \frac{C\rho v}{(1 - \phi)\rho_{R}C_{R} + \phi\rho C} \ .
 \end{equation}
-Recall that the ``Darcy velocity'' is $v=k/\mu$.
+Recall that the "Darcy velocity" is $v=k/\mu$.
 
 Let the initial condition for $T$ be $T(x, t=0) = 200$.  Apply the
 boundary conditions
@@ -57,7 +57,7 @@ Kernels.  The input file using the fully-saturated approach:
 The FullySaturated Kernels do not employ any upwinding
 whatsoever, so less numerical diffusion is expected.  This is demonstrated in
 [heat_advection_1d.fig].  Two additional points may also be
-nocied: (1) the lack of upwinding has produced a ``bump'' in the
+nocied: (1) the lack of upwinding has produced a "bump" in the
 temperature profile near the hotter side; (2) the lack of upwinding
 means the temperature profile moves slightly slower than it should.
 These two affects reduce as the mesh density is increased, however.

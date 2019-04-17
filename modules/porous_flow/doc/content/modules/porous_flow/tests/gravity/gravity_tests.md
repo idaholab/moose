@@ -77,8 +77,8 @@ presence of the mass time-derivative.  The steady-state input file:
 A variety of transient simulations are performed.  In the
 transient simulations, conservation of mass can be checked, and the
 tests demonstrate MOOSE conserves mass.  Depending on the initial and
-boundary conditions, the ``heavy'' phase (with greatest mass) can
-completely displace the ``light'' phase, which is forced to move to
+boundary conditions, the "heavy" phase (with greatest mass) can
+completely displace the "light" phase, which is forced to move to
 the top of the simulation.  [grav.head.eqn] only governs the light phase in the unsaturated zone, since in the
 saturated zone (where there is zero light phase) the pressure must
 follow the heavy-phase version of [grav.head.eqn].  An
