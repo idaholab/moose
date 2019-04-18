@@ -853,6 +853,12 @@ MooseVariableFE<OutputType>::computeNeighborValues()
 
 template <typename OutputType>
 void
+MooseVariableFE<OutputType>::computeLowerDValues()
+{
+}
+
+template <typename OutputType>
+void
 MooseVariableFE<OutputType>::computeIncrementAtQps(const NumericVector<Number> & increment_vec)
 {
   unsigned int nqp = _qrule->n_points();

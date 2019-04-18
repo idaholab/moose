@@ -628,6 +628,7 @@ public:
   virtual void computeElemValuesFace() override;
   virtual void computeNeighborValuesFace() override;
   virtual void computeNeighborValues() override;
+  virtual void computeLowerDValues() override;
   void setNodalValue(OutputType value, unsigned int idx = 0);
   void setDofValues(const DenseVector<Number> & value) override;
   Number getNodalValue(const Node & node) override;
@@ -793,6 +794,21 @@ public:
   void zeroSizeDofValuesNeighbor();
 
 protected:
+  struct DataContainer
+  {
+    QBase *& qrule;
+
+    const FieldVariablePhiValue & phi;
+
+    const FieldVariablePhiGradient & grad_phi;
+
+    const FieldVariablePhiSecond *& second_phi;
+
+    const FieldVariablePhiValue *& curl_phi;
+
+    const typename VariableTestGradientType<OutputType, JACOBIAN>::type & ad_grad_phi;
+  };
+
   /// Whether this variable is on the displaced system
   const bool _displaced;
 

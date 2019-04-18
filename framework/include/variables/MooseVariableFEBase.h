@@ -115,6 +115,10 @@ public:
    */
   virtual void computeNeighborValues() = 0;
   /**
+   * compute values at quadrature points on the lower dimensional element
+   */
+  virtual void computeLowerDValues() = 0;
+  /**
    * Compute nodal values of this variable in the neighbor
    */
   virtual void computeNodalNeighborValues() = 0;

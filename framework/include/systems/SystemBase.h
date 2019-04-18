@@ -524,6 +524,11 @@ public:
   virtual void reinitNeighbor(const Elem * elem, THREAD_ID tid);
 
   /**
+   * Compute the values of the variables on the lower dimensional element
+   */
+  virtual void reinitLowerD(tid);
+
+  /**
    * Reinit nodal assembly info
    * @param node Node to reinit for
    * @param tid Thread ID

@@ -360,6 +360,13 @@ SystemBase::reinitNeighbor(const Elem * /*elem*/, THREAD_ID tid)
     var->computeNeighborValues();
 }
 
+void SystemBase::reinitLowerD(tid)
+{
+  const std::vector<MooseVariableFEBase *> & vars = _vars[tid].fieldVariables();
+  for (const auto & var : vars)
+    var->computeLowerDValues();
+}
+
 void
 SystemBase::reinitNode(const Node * /*node*/, THREAD_ID tid)
 {
@@ -957,7 +964,8 @@ SystemBase::copyVars(ExodusII_IO & io)
       auto rank = comm().rank();
       auto size = comm().size();
 
-      // Read solution on rank 0 only and send data to rank "size - 1" where scalar DOFs are stored
+      // Read solution on rank 0 only and send data to rank "size - 1" where scalar DOFs are
+      // stored
       std::vector<Real> global_values;
       if (rank == 0)
       {

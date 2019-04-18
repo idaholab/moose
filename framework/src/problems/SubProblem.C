@@ -745,7 +745,7 @@ SubProblem::reinitLowerDElemRef(const Elem * elem,
   // our local residuals/Jacobians
   assembly(tid).prepareLowerD();
 
-  // // Let's finally compute our variable values!
-  // systemBaseNonlinear().reinitLowerDElem(elem, tid);
-  // systemBaseAuxiliary().reinitLowerDElem(elem, tid);
+  // Let's finally compute our variable values!
+  systemBaseNonlinear().reinitLowerDElem(tid);
+  systemBaseAuxiliary().reinitLowerDElem(tid);
 }
