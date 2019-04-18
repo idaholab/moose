@@ -10,33 +10,31 @@
   second_order = true
 []
 
-[Variables]
-  [./phi]
+[Variables/phi]
     family = LAGRANGE
-  [../]
 []
 
 [AuxVariables]
-  [./phi_0]
+  [phi_0]
     family = LAGRANGE
-  [../]
-  [./marker]
+  []
+  [marker]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [Kernels]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = phi
-  [../]
-  [./reinit]
+  []
+  [reinit]
     type = LevelSetOlssonReinitialization
     variable = phi
     phi_0 = phi_0
     epsilon = 0.03
-  [../]
+  []
 []
 
 [Problem]
@@ -44,11 +42,16 @@
 []
 
 [UserObjects]
-  [./arnold]
+  [arnold]
     type = LevelSetOlssonTerminator
     tol = 0.5
     min_steps = 3
-  [../]
+  []
+[]
+
+[Preconditioning/smp]
+    type = SMP
+    full = true
 []
 
 [Executioner]
@@ -59,8 +62,6 @@
   nl_abs_tol = 1e-14
   scheme = crank-nicolson
   line_search = none
-  petsc_options_iname = '-pc_type -pc_sub_type'
-  petsc_options_value = 'asm      ilu'
   dt = 0.003
 []
 
