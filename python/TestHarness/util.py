@@ -471,19 +471,28 @@ def checkLogicVersionSingle(checks, iversion, package):
     return (False, logic, version)
 
 def checkVersion(checks, test, package):
-    for version in test[package]:
-        logic_and = False
-        if version.find("&&") != -1:
-            logic_and = True
-        splits = re.split('[(&&) | (||)]+', version)
-        if len(splits) == 1:
-            return checkLogicVersionSingle(checks, version, package)
-        elif len(splits) == 2:
-            return checkLogicVersionSplits(checks, splits, logic_and, package)
-        else:
-            print "Invalid expression: " + version
-            exit(1)
-
+    version = test[package]
+    if len(version) == 1:
+      logic_and = False
+      if version[0].find("&&") != -1:
+        logic_and = True
+      splits = re.split('[(&&) | (||)]+', version[0])
+      if len(splits) == 1:
+        return checkLogicVersionSingle(checks, version[0], package)
+      elif len(splits) == 2:
+        return checkLogicVersionSplits(checks, splits, logic_and, package)
+      else:
+        print "Invalid expression: " + version[0]
+        exit(1)
+    elif len(version) == 3:
+      logic_and = False
+      if version[1].find("&&") != -1:
+         logic_and = True
+      splits = [version[0], version[2]]
+      return checkLogicVersionSplits(checks, splits, logic_and, package)
+    else:
+       print "Invalid expression: " + test[package]
+       exit(1)
     return (False, None, None)
 
 # Break down petsc version logic in a new define
