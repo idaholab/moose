@@ -64,7 +64,7 @@ class AuxKernelTempl : public MooseObject,
                        protected VectorPostprocessorInterface
 {
 public:
-  AuxKernelTempl(const InputParameters & parameters, Moose::VarFieldType var_type);
+  AuxKernelTempl(const InputParameters & parameters);
 
   /**
    * Computes the value and stores it in the solution vector

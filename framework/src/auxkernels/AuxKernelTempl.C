@@ -57,8 +57,7 @@ getAuxKernelTemplValidParams()
 }
 
 template <typename ComputeValueType>
-AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & parameters,
-                                                 Moose::VarFieldType var_type)
+AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & parameters)
   : MooseObject(parameters),
     MooseVariableInterface<ComputeValueType>(
         this,
@@ -68,7 +67,8 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
             .isNodal(),
         "variable",
         Moose::VarKindType::VAR_AUXILIARY,
-        var_type),
+        std::is_same<Real, ComputeValueType>::value ? Moose::VarFieldType::VAR_FIELD_STANDARD
+                                                    : Moose::VarFieldType::VAR_FIELD_VECTOR),
     BlockRestrictable(this),
     BoundaryRestrictable(this, mooseVariable()->isNodal()),
     SetupInterface(this),

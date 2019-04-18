@@ -18,7 +18,4 @@ validParams<AuxKernel>()
   return params;
 }
 
-AuxKernel::AuxKernel(const InputParameters & parameters)
-  : AuxKernelTempl<Real>(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD)
-{
-}
+AuxKernel::AuxKernel(const InputParameters & parameters) : AuxKernelTempl<Real>(parameters) {}

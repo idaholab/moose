@@ -19,6 +19,6 @@ validParams<AuxVectorKernel>()
 }
 
 AuxVectorKernel::AuxVectorKernel(const InputParameters & parameters)
-  : AuxKernelTempl<RealVectorValue>(parameters, Moose::VarFieldType::VAR_FIELD_VECTOR)
+  : AuxKernelTempl<RealVectorValue>(parameters)
 {
 }
