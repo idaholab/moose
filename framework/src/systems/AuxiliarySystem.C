@@ -345,16 +345,10 @@ AuxiliarySystem::compute(ExecFlagType type)
   {
     computeNodalVars(type);
     computeNodalVecVars(type);
-    // compute time derivatives of nodal aux variables _after_ the values were updated
-    if (_fe_problem.dt() > 0. && _time_integrator)
-      _time_integrator->computeTimeDerivatives();
-  }
-
-  if (_vars[0].fieldVariables().size() > 0)
-  {
     computeElementalVars(type);
     computeElementalVecVars(type);
-    // compute time derivatives of elemental aux variables _after_ the values were updated
+
+    // compute time derivatives of nodal aux variables _after_ the values were updated
     if (_fe_problem.dt() > 0. && _time_integrator)
       _time_integrator->computeTimeDerivatives();
   }
