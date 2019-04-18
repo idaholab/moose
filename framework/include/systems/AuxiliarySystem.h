@@ -22,7 +22,7 @@
 template <typename ComputeValueType>
 class AuxKernelTempl;
 typedef AuxKernelTempl<Real> AuxKernel;
-typedef AuxKernelTempl<RealVectorValue> AuxVectorKernel;
+typedef AuxKernelTempl<RealVectorValue> VectorAuxKernel;
 class FEProblemBase;
 class TimeIntegrator;
 class AuxScalarKernel;
@@ -237,9 +237,9 @@ public:
   ExecuteMooseObjectWarehouse<AuxKernel> _nodal_aux_storage;
   ExecuteMooseObjectWarehouse<AuxKernel> _elemental_aux_storage;
 
-  // Storage for AuxVectorKernel objects
-  ExecuteMooseObjectWarehouse<AuxVectorKernel> _nodal_vec_aux_storage;
-  ExecuteMooseObjectWarehouse<AuxVectorKernel> _elemental_vec_aux_storage;
+  // Storage for VectorAuxKernel objects
+  ExecuteMooseObjectWarehouse<VectorAuxKernel> _nodal_vec_aux_storage;
+  ExecuteMooseObjectWarehouse<VectorAuxKernel> _elemental_vec_aux_storage;
 
   /// Timers
   const PerfID _compute_scalar_vars_timer;

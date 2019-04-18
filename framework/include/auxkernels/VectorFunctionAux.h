@@ -22,7 +22,7 @@ InputParameters validParams<VectorFunctionAux>();
 /**
  * Function auxiliary value
  */
-class VectorFunctionAux : public AuxVectorKernel
+class VectorFunctionAux : public VectorAuxKernel
 {
 public:
   /**

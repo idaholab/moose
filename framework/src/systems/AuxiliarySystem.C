@@ -240,10 +240,10 @@ AuxiliarySystem::addKernel(const std::string & kernel_name,
         _elemental_aux_storage.addObject(kernel, tid);
     }
 
-    else if (parameters.get<std::string>("_moose_base") == "AuxVectorKernel")
+    else if (parameters.get<std::string>("_moose_base") == "VectorAuxKernel")
     {
-      std::shared_ptr<AuxVectorKernel> kernel =
-          _factory.create<AuxVectorKernel>(kernel_name, name, parameters, tid);
+      std::shared_ptr<VectorAuxKernel> kernel =
+          _factory.create<VectorAuxKernel>(kernel_name, name, parameters, tid);
       if (kernel->isNodal())
         _nodal_vec_aux_storage.addObject(kernel, tid);
       else
@@ -379,9 +379,9 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
     }
   }
 
-  // Elemental AuxVectorKernels
+  // Elemental VectorAuxKernels
   {
-    const std::vector<std::shared_ptr<AuxVectorKernel>> & auxs =
+    const std::vector<std::shared_ptr<VectorAuxKernel>> & auxs =
         _elemental_vec_aux_storage[type].getActiveObjects();
     for (const auto & aux : auxs)
     {
@@ -401,9 +401,9 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
     }
   }
 
-  // Nodal AuxVectorKernels
+  // Nodal VectorAuxKernels
   {
-    const std::vector<std::shared_ptr<AuxVectorKernel>> & auxs =
+    const std::vector<std::shared_ptr<VectorAuxKernel>> & auxs =
         _nodal_vec_aux_storage[type].getActiveObjects();
     for (const auto & aux : auxs)
     {
@@ -431,9 +431,9 @@ AuxiliarySystem::getDependObjects()
     }
   }
 
-  // Elemental AuxVectorKernels
+  // Elemental VectorAuxKernels
   {
-    const std::vector<std::shared_ptr<AuxVectorKernel>> & auxs =
+    const std::vector<std::shared_ptr<VectorAuxKernel>> & auxs =
         _elemental_vec_aux_storage.getActiveObjects();
     for (const auto & aux : auxs)
     {
@@ -452,9 +452,9 @@ AuxiliarySystem::getDependObjects()
     }
   }
 
-  // Nodal AuxVectorKernels
+  // Nodal VectorAuxKernels
   {
-    const std::vector<std::shared_ptr<AuxVectorKernel>> & auxs =
+    const std::vector<std::shared_ptr<VectorAuxKernel>> & auxs =
         _nodal_vec_aux_storage.getActiveObjects();
     for (const auto & aux : auxs)
     {
@@ -558,8 +558,8 @@ AuxiliarySystem::computeNodalVars(ExecFlagType type)
 void
 AuxiliarySystem::computeNodalVecVars(ExecFlagType type)
 {
-  const MooseObjectWarehouse<AuxVectorKernel> & nodal = _nodal_vec_aux_storage[type];
-  computeNodalVarsHelper<AuxVectorKernel>(nodal, _nodal_vec_vars, _compute_nodal_vec_vars_timer);
+  const MooseObjectWarehouse<VectorAuxKernel> & nodal = _nodal_vec_aux_storage[type];
+  computeNodalVarsHelper<VectorAuxKernel>(nodal, _nodal_vec_vars, _compute_nodal_vec_vars_timer);
 }
 
 void
@@ -572,8 +572,8 @@ AuxiliarySystem::computeElementalVars(ExecFlagType type)
 void
 AuxiliarySystem::computeElementalVecVars(ExecFlagType type)
 {
-  const MooseObjectWarehouse<AuxVectorKernel> & elemental = _elemental_vec_aux_storage[type];
-  computeElementalVarsHelper<AuxVectorKernel>(
+  const MooseObjectWarehouse<VectorAuxKernel> & elemental = _elemental_vec_aux_storage[type];
+  computeElementalVarsHelper<VectorAuxKernel>(
       elemental, _elem_vec_vars, _compute_elemental_vec_vars_timer);
 }
 
@@ -704,15 +704,15 @@ template void AuxiliarySystem::computeElementalVarsHelper<AuxKernel>(
     const MooseObjectWarehouse<AuxKernel> &,
     const std::vector<std::vector<MooseVariableFEBase *>> &,
     const PerfID);
-template void AuxiliarySystem::computeElementalVarsHelper<AuxVectorKernel>(
-    const MooseObjectWarehouse<AuxVectorKernel> &,
+template void AuxiliarySystem::computeElementalVarsHelper<VectorAuxKernel>(
+    const MooseObjectWarehouse<VectorAuxKernel> &,
     const std::vector<std::vector<MooseVariableFEBase *>> &,
     const PerfID);
 template void AuxiliarySystem::computeNodalVarsHelper<AuxKernel>(
     const MooseObjectWarehouse<AuxKernel> &,
     const std::vector<std::vector<MooseVariableFEBase *>> &,
     const PerfID);
-template void AuxiliarySystem::computeNodalVarsHelper<AuxVectorKernel>(
-    const MooseObjectWarehouse<AuxVectorKernel> &,
+template void AuxiliarySystem::computeNodalVarsHelper<VectorAuxKernel>(
+    const MooseObjectWarehouse<VectorAuxKernel> &,
     const std::vector<std::vector<MooseVariableFEBase *>> &,
     const PerfID);

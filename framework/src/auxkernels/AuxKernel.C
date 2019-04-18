@@ -60,10 +60,10 @@ validParams<AuxKernel>()
 
 template <>
 InputParameters
-validParams<AuxVectorKernel>()
+validParams<VectorAuxKernel>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.registerBase("AuxVectorKernel");
+  params.registerBase("VectorAuxKernel");
   return params;
 }
 

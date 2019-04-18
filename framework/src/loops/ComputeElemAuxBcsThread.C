@@ -114,4 +114,4 @@ ComputeElemAuxBcsThread<AuxKernelType>::join(const ComputeElemAuxBcsThread & /*y
 }
 
 template class ComputeElemAuxBcsThread<AuxKernel>;
-template class ComputeElemAuxBcsThread<AuxVectorKernel>;
+template class ComputeElemAuxBcsThread<VectorAuxKernel>;

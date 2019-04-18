@@ -34,7 +34,7 @@ template <typename ComputeValueType>
 class AuxKernelTempl;
 
 typedef AuxKernelTempl<Real> AuxKernel;
-typedef AuxKernelTempl<RealVectorValue> AuxVectorKernel;
+typedef AuxKernelTempl<RealVectorValue> VectorAuxKernel;
 
 class SubProblem;
 class AuxiliarySystem;
@@ -45,7 +45,7 @@ template <>
 InputParameters validParams<AuxKernel>();
 
 template <>
-InputParameters validParams<AuxVectorKernel>();
+InputParameters validParams<VectorAuxKernel>();
 
 /**
  * Base class for creating new auxiliary kernels and auxiliary boundary conditions.
