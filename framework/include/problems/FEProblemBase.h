@@ -1626,6 +1626,11 @@ public:
   // Whether or not we should solve this system
   bool shouldSolve() const { return _solve; }
 
+  /**
+   * Returns the mortar data object
+   */
+  const MortarData & mortarData() const { return _mortar_data; }
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();

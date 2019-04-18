@@ -37,6 +37,11 @@ public:
   const std::set<SubdomainID> & getMortarSubdomainIDs() const { return _mortar_subdomain_coverage; }
 
   /**
+   * Returns the mortar covered boundaries
+   */
+  const std::set<BoundaryID> & getMortarBoundaryIDs() const { return _mortar_boundary_coverage; }
+
+  /**
    * Builds mortar segment meshes for each mortar interface
    */
   void update();
@@ -60,6 +65,10 @@ protected:
   /// A set containing the subdomain ids covered by all the mortar interfaces in this MortarData
   /// object
   std::set<SubdomainID> _mortar_subdomain_coverage;
+
+  /// A set containing the boundary ids covered by all the mortar interfaces in this MortarData
+  /// object
+  std::set<BoundaryID> _mortar_boundary_coverage;
 
   /// Whether any of the AutomaticMortarGeneration objects are running on a displaced mesh
   bool _has_displaced_objects;
