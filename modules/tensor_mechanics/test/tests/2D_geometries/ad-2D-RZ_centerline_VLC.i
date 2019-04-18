@@ -31,13 +31,13 @@
 
 [BCs]
   [./symmetry_x]
-    type = PresetBC
+    type = ADPresetBC
     variable = disp_r
     value = 0
     boundary = left
   [../]
   [./roller_z]
-    type = PresetBC
+    type = ADPresetBC
     variable = disp_z
     value = 0
     boundary = bottom

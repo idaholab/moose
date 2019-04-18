@@ -72,7 +72,7 @@
 
 [BCs]
   [./innerDisp]
-    type = PresetBC
+    type = ADPresetBC
     boundary = left
     variable = disp_r
     value = 0.0
@@ -82,7 +82,7 @@
     boundary = right
     variable = disp_r
     component = 0
-    factor = 2
+    constant = 2
   [../]
 []
 

@@ -117,19 +117,19 @@
 
 [BCs]
   [./no_disp_r_left]
-    type = PresetBC
+    type = ADPresetBC
     variable = disp_r
     boundary = left
     value = 0.0
   [../]
   [./no_disp_r_right]
-    type = PresetBC
+    type = ADPresetBC
     variable = disp_r
     boundary = right
     value = 0.0
   [../]
   [./no_disp_z_bottom]
-    type = PresetBC
+    type = ADPresetBC
     variable = disp_z
     boundary = bottom
     value = 0.0

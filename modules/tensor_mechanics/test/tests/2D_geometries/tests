@@ -110,48 +110,45 @@
     requirement  = 'The volumetric locking correction option in ComputeAxisymmetricRZFiniteStrain shall reinit material properties without inverting a zero tensor when called from a side postprocessor applied to the axis of rotation in an axisymmetric simulation.'
   [../]
 
-
-
-
-
   [./ad-axisym_smallstrain]
     type = Exodiff
     input = 'ad-2D-RZ_test.i'
     exodiff = 'ad-2D-RZ_test_out.e'
     cli_args = 'Modules/TensorMechanics/Master/all/incremental=false
-                Materials/stress/type=ComputeLinearElasticStress'
-    design = 'source/materials/ComputeAxisymmetricRZSmallStrain.md'
-    requirement = 'The ComputeAxisymmetricRZSmallStrain class shall compute the mechanical response for a pressurized hollow cylinder with a small total axisymmetric strain formulation.'
+                Materials/stress/type=ADComputeLinearElasticStress'
+    design = 'source/materials/ADComputeAxisymmetricRZSmallStrain.md'
+    requirement = 'The ADComputeAxisymmetricRZSmallStrain class shall compute the mechanical response for a pressurized hollow cylinder with a small total axisymmetric strain formulation.'
   [../]
   [./ad-axisym_incremental_strain]
     type = Exodiff
     input = 'ad-2D-RZ_test.i'
     exodiff = 'ad-2D-RZ_incremental_strain_test_out.e'
     cli_args = 'Modules/TensorMechanics/Master/all/incremental=true
-                Materials/stress/type=ComputeFiniteStrainElasticStress
-                Outputs/file_base=2D-RZ_incremental_strain_test_out'
+                Materials/stress/type=ADComputeFiniteStrainElasticStress
+                Outputs/file_base=ad-2D-RZ_incremental_strain_test_out'
     prereq = 'ad-axisym_smallstrain'
-    design = 'source/materials/ComputeAxisymmetricRZIncrementalStrain.md'
-    requirement = 'The ComputeAxisymmetricRZIncrementalStrain class shall compute the mechanical response for a pressurized hollow cylinder with a small incremental axisymmetric strain formulation.'
+    design = 'source/materials/ADComputeAxisymmetricRZIncrementalStrain.md'
+    requirement = 'The ADComputeAxisymmetricRZIncrementalStrain class shall compute the mechanical response for a pressurized hollow cylinder with a small incremental axisymmetric strain formulation.'
   [../]
   [./ad-axisym_finitestrain]
     type = Exodiff
     input = 'ad-2D-RZ_finiteStrain_test.i'
     exodiff = 'ad-2D-RZ_finiteStrain_test_out.e'
     rel_err = 5E-4
-    design = 'source/materials/ComputeAxisymmetricRZFiniteStrain.md'
-    requirement = 'The ComputeAxisymmetricRZFiniteStrain class shall compute the mechanical response for a pressurized hollow cylinder with a small incremental axisymmetric strain formulation.'
+    design = 'source/materials/ADComputeAxisymmetricRZFiniteStrain.md'
+    requirement = 'The ADComputeAxisymmetricRZFiniteStrain class shall compute the mechanical response for a pressurized hollow cylinder with a small incremental axisymmetric strain formulation.'
   [../]
   [./ad-3D_RZ_finitestrain]
     type = Exodiff
     input = 'ad-3D-RZ_finiteStrain_test.i'
     exodiff = 'ad-3D-RZ_finiteStrain_test_out.e'
+    skip = 'Exceeds AD_MAX_DOFS_PER_ELEM'
     valgrind = 'HEAVY'
     heavy = true
     abs_zero = 1e-5
     rel_err = 3E-3
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
-    requirement = 'The TensorMechanics MasterAction shall calculate the elastic stress and strain response for a 3D pressurized hollow cylinder with a large strain incremental strain formulation.'
+    requirement = 'The TensorMechanics MasterAction shall calculate the elastic stress and strain response for a 3D pressurized hollow cylinder with a large strain incremental strain formulation using AD.'
   [../]
   [./ad-axisym_resid]
     type = Exodiff
@@ -160,8 +157,8 @@
     use_old_floor = true
     abs_zero = 1e-8
     compiler = 'GCC CLANG'
-    design = 'source/materials/ComputeAxisymmetricRZFiniteStrain.md'
-    requirement = 'The ComputeAxisymmetricRZFiniteStrain class shall compute the reaction forces on the top surface of a cylinder which is loaded axially in tension.'
+    design = 'source/materials/ADComputeAxisymmetricRZFiniteStrain.md'
+    requirement = 'The ADComputeAxisymmetricRZFiniteStrain class shall compute the reaction forces on the top surface of a cylinder which is loaded axially in tension.'
   [../]
   [./ad-axisym_resid_Bbar]
     type = Exodiff
@@ -170,10 +167,10 @@
     use_old_floor = true
     abs_zero = 1e-8
     compiler = 'GCC CLANG'
-    cli_args = 'GlobalParams/volumetric_locking_correction=true Outputs/file_base=2D-RZ_finiteStrain_resid_bbar_out'
+    cli_args = 'GlobalParams/volumetric_locking_correction=true Outputs/file_base=ad-2D-RZ_finiteStrain_resid_bbar_out'
     prereq = 'ad-axisym_resid'
-    design = 'source/materials/ComputeAxisymmetricRZFiniteStrain.md VolumetricLocking.md'
-    requirement = 'The ComputeAxisymmetricRZFiniteStrain class shall compute the reaction forces on the top surface of a cylinder which is loaded axially in tension when using the B-bar volumetric locking correction.'
+    design = 'source/materials/ADComputeAxisymmetricRZFiniteStrain.md VolumetricLocking.md'
+    requirement = 'The ADComputeAxisymmetricRZFiniteStrain class shall compute the reaction forces on the top surface of a cylinder which is loaded axially in tension when using the B-bar volumetric locking correction.'
   [../]
   [./ad-axisymmetric_vlc_centerline_pp]
     type = CSVDiff
@@ -181,12 +178,8 @@
     csvdiff = 'ad-2D-RZ_centerline_VLC_out.csv'
     design = 'VolumetricLocking.md source/postprocessors/AxisymmetricCenterlineAverageValue.md'
     issues = '#12437 #10866'
-    requirement  = 'The volumetric locking correction option in ComputeAxisymmetricRZFiniteStrain shall reinit material properties without inverting a zero tensor when called from a side postprocessor applied to the axis of rotation in an axisymmetric simulation.'
+    requirement  = 'The volumetric locking correction option in ADComputeAxisymmetricRZFiniteStrain shall reinit material properties without inverting a zero tensor when called from a side postprocessor applied to the axis of rotation in an axisymmetric simulation.'
   [../]
-
-
-
-
 
   [./ad-axisym_smallstrain-jac]
     type = PetscJacobianTester
@@ -194,8 +187,8 @@
     cli_args = 'Modules/TensorMechanics/Master/all/incremental=false
     Materials/stress/type=ADComputeLinearElasticStress'
     run_sim = 'True'
-    ratio_tol = 1e-8
-    difference_tol = 1e-8
+    ratio_tol = 5e-8
+    difference_tol = 1e7
     petsc_version = '>=3.9.4'
     issues = '#12650'
     design = 'jacobian_definitions.md'
@@ -207,28 +200,29 @@
     cli_args = 'Modules/TensorMechanics/Master/all/incremental=true
                 Materials/stress/type=ADComputeFiniteStrainElasticStress'
     run_sim = 'True'
-    ratio_tol = 1e-8
-    difference_tol = 1e-8
+    ratio_tol = 5e-8
+    difference_tol = 1e7
     petsc_version = '>=3.9.4'
     issues = '#12650'
     design = 'jacobian_definitions.md'
-    requirement = 'The ComputeAxisymmetricRZIncrementalStrain class shall compute the mechanical response for a pressurized hollow cylinder with a small incremental axisymmetric strain formulation and shall produce perfect jacobians.'
+    requirement = 'The ADComputeAxisymmetricRZIncrementalStrain class shall compute the mechanical response for a pressurized hollow cylinder with a small incremental axisymmetric strain formulation and shall produce perfect jacobians.'
   [../]
   [./ad-axisym_finitestrain-jac]
     type = PetscJacobianTester
     input = 'ad-2D-RZ_finiteStrain_test.i'
     run_sim = 'True'
-    ratio_tol = 1e-8
-    difference_tol = 1e-8
+    ratio_tol = 5e-8
+    difference_tol = 1e7
     petsc_version = '>=3.9.4'
     issues = '#12650'
     design = 'jacobian_definitions.md'
-    requirement = 'The ComputeAxisymmetricRZFiniteStrain class shall compute the mechanical response for a pressurized hollow cylinder with a small incremental axisymmetric strain formulation and shall produce perfect jacobians.'
+    requirement = 'The ADComputeAxisymmetricRZFiniteStrain class shall compute the mechanical response for a pressurized hollow cylinder with a small incremental axisymmetric strain formulation and shall produce perfect jacobians.'
   [../]
   [./ad-3D_RZ_finitestrain-jac]
     type = PetscJacobianTester
     input = 'ad-3D-RZ_finiteStrain_test.i'
     valgrind = 'HEAVY'
+    skip = 'Exceeds AD_MAX_DOFS_PER_ELEM'
     heavy = true
     run_sim = 'True'
     ratio_tol = 1e-8
@@ -236,7 +230,7 @@
     petsc_version = '>=3.9.4'
     issues = '#12650'
     design = 'jacobian_definitions.md'
-    requirement = 'The TensorMechanics MasterAction shall calculate the elastic stress and strain response for a 3D pressurized hollow cylinder with a large strain incremental strain formulation and shall produce perfect jacobians.'
+    requirement = 'The TensorMechanics MasterAction shall calculate the elastic stress and strain response for a 3D pressurized hollow cylinder with a large strain incremental strain formulation with AD and shall produce perfect jacobians.'
   [../]
   [./ad-axisym_resid-jac]
     type = PetscJacobianTester
@@ -248,7 +242,7 @@
     petsc_version = '>=3.9.4'
     issues = '#12650'
     design = 'jacobian_definitions.md'
-    requirement = 'The ComputeAxisymmetricRZFiniteStrain class shall compute the reaction forces on the top surface of a cylinder which is loaded axially in tension and shall produce perfect jacobians.'
+    requirement = 'The ADComputeAxisymmetricRZFiniteStrain class shall compute the reaction forces on the top surface of a cylinder which is loaded axially in tension and shall produce perfect jacobians.'
   [../]
   [./ad-axisym_resid_Bbar-jac]
     type = PetscJacobianTester
@@ -261,7 +255,7 @@
     petsc_version = '>=3.9.4'
     issues = '#12650'
     design = 'jacobian_definitions.md'
-    requirement = 'The ComputeAxisymmetricRZFiniteStrain class shall compute the reaction forces on the top surface of a cylinder which is loaded axially in tension when using the B-bar volumetric locking correction and shall produce perfect jacobians.'
+    requirement = 'The ADComputeAxisymmetricRZFiniteStrain class shall compute the reaction forces on the top surface of a cylinder which is loaded axially in tension when using the B-bar volumetric locking correction and shall produce perfect jacobians.'
   [../]
   [./ad-axisymmetric_vlc_centerline_pp-jac]
     type = PetscJacobianTester
@@ -273,6 +267,6 @@
     petsc_version = '>=3.9.4'
     issues = '#12650'
     design = 'jacobian_definitions.md'
-    requirement  = 'The volumetric locking correction option in ComputeAxisymmetricRZFiniteStrain shall reinit material properties without inverting a zero tensor when called from a side postprocessor applied to the axis of rotation in an axisymmetric simulation and shall produce perfect jacobians.'
+    requirement  = 'The volumetric locking correction option in ADComputeAxisymmetricRZFiniteStrain shall reinit material properties without inverting a zero tensor when called from a side postprocessor applied to the axis of rotation in an axisymmetric simulation and shall produce perfect jacobians.'
   [../]
 []

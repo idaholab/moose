@@ -109,7 +109,7 @@
   [../]
 []
 
-[ADBCs]
+[BCs]
   [./no_disp_x]
     type = ADPresetBC
     variable = disp_x

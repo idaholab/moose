@@ -41,4 +41,4 @@ ADPresetNodalBC<compute_stage>::computeQpResidual()
 }
 
 // explicit instantiation is required for AD base classes
-adBaseClass(ADPresetBC);
+adBaseClass(ADPresetNodalBC);

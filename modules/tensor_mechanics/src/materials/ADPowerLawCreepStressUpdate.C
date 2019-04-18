@@ -9,6 +9,8 @@
 
 #include "ADPowerLawCreepStressUpdate.h"
 
+#include "MooseVariableFE.h"
+
 registerADMooseObject("TensorMechanicsApp", ADPowerLawCreepStressUpdate);
 
 defineADValidParams(
@@ -16,9 +18,8 @@ defineADValidParams(
     ADRadialReturnCreepStressUpdateBase,
     params.addClassDescription(
         "This class uses the stress update material in a radial return isotropic power law creep "
-        "model.  This class can be used in conjunction with other creep and plasticity materials "
-        "for "
-        "more complex simulations.");
+        "model. This class can be used in conjunction with other creep and plasticity materials "
+        "for more complex simulations.");
 
     // Linear strain hardening parameters
     params.addCoupledVar("temperature", 0.0, "Coupled temperature");
@@ -34,8 +35,7 @@ template <ComputeStage compute_stage>
 ADPowerLawCreepStressUpdate<compute_stage>::ADPowerLawCreepStressUpdate(
     const InputParameters & parameters)
   : ADRadialReturnCreepStressUpdateBase<compute_stage>(parameters),
-    _has_temp(parameters.isParamSetByUser("temperature")),
-    _temperature(_has_temp ? coupledValue("temperature") : _zero),
+    _temperature(adCoupledValue("temperature")),
     _coefficient(adGetParam<Real>("coefficient")),
     _n_exponent(adGetParam<Real>("n_exponent")),
     _m_exponent(adGetParam<Real>("m_exponent")),
@@ -54,7 +54,7 @@ void
 ADPowerLawCreepStressUpdate<compute_stage>::computeStressInitialize(
     const ADReal & /*effective_trial_stress*/, const ADRankFourTensor & /*elasticity_tensor*/)
 {
-  if (_has_temp)
+  if (_temperature[_qp] != 0.0)
     _exponential = std::exp(-_activation_energy / (_gas_constant * _temperature[_qp]));
   else
     _exponential = 1.0;

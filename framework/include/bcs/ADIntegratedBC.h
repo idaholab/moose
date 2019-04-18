@@ -23,10 +23,10 @@ public:
 
   virtual MooseVariableFE<T> & variable() override { return _var; }
 
-  void computeResidual() override;
-  void computeJacobian() override;
-  void computeJacobianBlock(MooseVariableFEBase & jvar) override;
-  void computeJacobianBlockScalar(unsigned int jvar) override;
+  virtual void computeResidual() override;
+  virtual void computeJacobian() override;
+  virtual void computeJacobianBlock(MooseVariableFEBase & jvar) override;
+  virtual void computeJacobianBlockScalar(unsigned int jvar) override;
 
 protected:
   /**

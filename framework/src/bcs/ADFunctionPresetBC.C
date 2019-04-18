@@ -17,7 +17,7 @@ defineADValidParams(
     ADPresetNodalBC,
     params.addRequiredParam<FunctionName>("function", "The forcing function.");
     params.addClassDescription(
-        "The same as FunctionDirichletBC except the value is applied before the solve begins"););
+        "The same as ADFunctionDirichletBC except the value is applied before the solve begins"););
 
 template <ComputeStage compute_stage>
 ADFunctionPresetBC<compute_stage>::ADFunctionPresetBC(const InputParameters & parameters)

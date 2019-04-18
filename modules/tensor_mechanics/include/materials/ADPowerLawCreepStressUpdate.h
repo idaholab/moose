@@ -40,11 +40,8 @@ protected:
   virtual ADReal computeDerivative(const ADReal & effective_trial_stress,
                                    const ADReal & scalar) override;
 
-  /// Flag to determine if temperature is supplied by the user
-  const bool _has_temp;
-
   /// Temperature variable value
-  const VariableValue & _temperature;
+  const ADVariableValue & _temperature;
 
   /// Leading coefficient
   const Real _coefficient;

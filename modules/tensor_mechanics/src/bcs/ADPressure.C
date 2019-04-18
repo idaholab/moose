@@ -43,7 +43,7 @@ template <ComputeStage compute_stage>
 ADResidual
 ADPressure<compute_stage>::computeQpResidual()
 {
-  Real factor = _constant;
+  ADReal factor = _constant;
 
   if (_function)
     factor *= _function->value(_t + _alpha * _dt, _q_point[_qp]);

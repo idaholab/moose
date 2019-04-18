@@ -73,7 +73,7 @@
     variable = disp_r
     boundary = outer
     component = 0
-    factor = 200000
+    constant = 200000
   [../]
 
  [./exterior_pressure_z]
@@ -81,7 +81,7 @@
     variable = disp_z
     boundary = outer
     component = 1
-    factor = 200000
+    constant = 200000
   [../]
 
   [./interior_pressure_r]
@@ -89,7 +89,7 @@
     variable = disp_r
     boundary = inner
     component = 0
-    factor = 100000
+    constant = 100000
   [../]
 
   [./interior_pressure_z]
@@ -97,7 +97,7 @@
     variable = disp_z
     boundary = inner
     component = 1
-    factor = 100000
+    constant = 100000
   [../]
 []
 
