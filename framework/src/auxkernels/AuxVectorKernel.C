@@ -17,8 +17,3 @@ validParams<AuxVectorKernel>()
   params.registerBase("AuxVectorKernel");
   return params;
 }
-
-AuxVectorKernel::AuxVectorKernel(const InputParameters & parameters)
-  : AuxKernelTempl<RealVectorValue>(parameters)
-{
-}

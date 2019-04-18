@@ -19,8 +19,10 @@
 #include "libmesh/transient_system.h"
 
 // Forward declarations
-class AuxKernel;
-class AuxVectorKernel;
+template <typename ComputeValueType>
+class AuxKernelTempl;
+typedef AuxKernelTempl<Real> AuxKernel;
+typedef AuxKernelTempl<RealVectorValue> AuxVectorKernel;
 class FEProblemBase;
 class TimeIntegrator;
 class AuxScalarKernel;

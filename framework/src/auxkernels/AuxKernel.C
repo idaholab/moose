@@ -17,5 +17,3 @@ validParams<AuxKernel>()
   params.registerBase("AuxKernel");
   return params;
 }
-
-AuxKernel::AuxKernel(const InputParameters & parameters) : AuxKernelTempl<Real>(parameters) {}

@@ -11,19 +11,9 @@
 #define AUXVECTORKERNEL_H
 
 #include "AuxKernelTempl.h"
-
-class AuxVectorKernel;
+typedef AuxKernelTempl<RealVectorValue> AuxVectorKernel;
 
 template <>
 InputParameters validParams<AuxVectorKernel>();
-
-/**
- * AuxVectorValue allows for the explicit calculation for vector value variables.
- */
-class AuxVectorKernel : public AuxKernelTempl<RealVectorValue>
-{
-public:
-  AuxVectorKernel(const InputParameters & parameters);
-};
 
 #endif

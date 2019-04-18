@@ -11,16 +11,9 @@
 #define AUXKERNEL_H
 
 #include "AuxKernelTempl.h"
-
-class AuxKernel;
+typedef AuxKernelTempl<Real> AuxKernel;
 
 template <>
 InputParameters validParams<AuxKernel>();
-
-class AuxKernel : public AuxKernelTempl<Real>
-{
-public:
-  AuxKernel(const InputParameters & parameters);
-};
 
 #endif
