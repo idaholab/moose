@@ -35,7 +35,7 @@ public:
   /**
    * Return all automatic mortar generation objects on either the displaced or undisplaced mesh
    */
-  const std::map<std::pair<BoundaryID, BoundaryID>, std::unique_ptr<AutomaticMortarGeneration>> &
+  const std::map<std::pair<BoundaryID, BoundaryID>, AutomaticMortarGeneration> &
   getMortarInterfaces(bool on_displaced) const
   {
     if (on_displaced)
@@ -72,12 +72,11 @@ public:
 protected:
   /// Map from master-slave (in that order) boundary ID pair to the corresponding
   /// undisplaced AutomaticMortarGeneration object
-  std::map<std::pair<BoundaryID, BoundaryID>, std::unique_ptr<AutomaticMortarGeneration>>
-      _mortar_interfaces;
+  std::map<std::pair<BoundaryID, BoundaryID>, AutomaticMortarGeneration> _mortar_interfaces;
 
   /// Map from master-slave (in that order) boundary ID pair to the corresponding
   /// displaced AutomaticMortarGeneration object
-  std::map<std::pair<BoundaryID, BoundaryID>, std::unique_ptr<AutomaticMortarGeneration>>
+  std::map<std::pair<BoundaryID, BoundaryID>, AutomaticMortarGeneration>
       _displaced_mortar_interfaces;
 
   /// A set containing the subdomain ids covered by all the mortar interfaces in this MortarData

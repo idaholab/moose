@@ -360,6 +360,7 @@ public:
    */
   void reinitElemFaceRef(const Elem * elem,
                          unsigned int side,
+                         BoundaryID bnd_id,
                          Real tolerance,
                          const std::vector<Point> * const pts,
                          const std::vector<Real> * const weights = nullptr,

@@ -56,8 +56,8 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object,
     bool displaced = nfc->parameters().have_parameter<bool>("use_displaced_mesh") &&
                      nfc->getParam<bool>("use_displaced_mesh");
 
-    auto slave_boundary_id = mc->getParam<BoundaryID>("slave_boundary_id");
-    auto master_boundary_id = mc->getParam<BoundaryID>("master_boundary_id");
+    auto slave_boundary_id = mesh.getBoundaryID(mc->getParam<BoundaryName>("slave_boundary"));
+    auto master_boundary_id = mesh.getBoundaryID(mc->getParam<BoundaryName>("master_boundary"));
     auto key = std::make_pair(master_boundary_id, slave_boundary_id);
 
     if (displaced)
@@ -135,10 +135,26 @@ const std::vector<std::shared_ptr<MortarConstraintBase>> &
 ConstraintWarehouse::getActiveMortarConstraints(
     const std::pair<BoundaryID, BoundaryID> & mortar_interface_key, bool displaced) const
 {
+  std::map<std::pair<BoundaryID, BoundaryID>,
+           MooseObjectWarehouse<MortarConstraintBase>>::const_iterator it,
+      end_it;
+
   if (displaced)
-    return _displaced_mortar_constraints[mortar_interface_key].getActiveObjects();
+  {
+    it = _displaced_mortar_constraints.find(mortar_interface_key);
+    end_it = _displaced_mortar_constraints.end();
+  }
   else
-    return _mortar_constraints[mortar_interface_key].getActiveObjects();
+  {
+    it = _mortar_constraints.find(mortar_interface_key);
+    end_it = _mortar_constraints.end();
+  }
+
+  mooseAssert(it != end_it,
+              "No MortarConstraints exist for the specified master-slave boundary pair: "
+                  << mortar_interface_key);
+
+  return it->second.getActiveObjects();
 }
 
 const std::vector<std::shared_ptr<ElemElemConstraint>> &

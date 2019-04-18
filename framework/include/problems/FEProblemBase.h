@@ -1223,7 +1223,7 @@ public:
                      const std::pair<SubdomainID, SubdomainID> & master_slave_subdomain_pair,
                      bool on_displaced);
 
-  const std::map<std::pair<BoundaryID, BoundaryID>, std::unique_ptr<AutomaticMortarGeneration>> &
+  const std::map<std::pair<BoundaryID, BoundaryID>, AutomaticMortarGeneration> &
   getMortarInterfaces(bool on_displaced) const;
 
   virtual void possiblyRebuildGeomSearchPatches();

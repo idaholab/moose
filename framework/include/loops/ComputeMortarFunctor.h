@@ -12,6 +12,7 @@
 
 #include "libmesh/libmesh_common.h"
 
+template <ComputeStage>
 class MortarConstraint;
 class SubProblem;
 class AutomaticMortarGeneration;
@@ -30,9 +31,10 @@ template <ComputeStage compute_stage>
 class ComputeMortarFunctor
 {
 public:
-  ComputeMortarFunctor(std::vector<std::shared_ptr<MortarConstraintBase>> & mortar_constraints,
-                       const AutomaticMortarGeneration & amg,
-                       SubProblem & subproblem);
+  ComputeMortarFunctor(
+      const std::vector<std::shared_ptr<MortarConstraintBase>> & mortar_constraints,
+      const AutomaticMortarGeneration & amg,
+      SubProblem & subproblem);
 
   /**
    * Loops over the mortar segment mesh and computes the residual/Jacobian
@@ -40,8 +42,19 @@ public:
   void operator()();
 
 private:
+  /**
+   * Computes a residual
+   */
+  void computeElementResidual();
+
+  /**
+   * Computes a jacobian
+   */
+  void computeElementJacobian();
+
+private:
   /// The mortar constraints to loop over when on each element
-  std::vector<std::shared_ptr<MortarConstraint<compute_stage>>> _mortar_constraints;
+  std::vector<const std::shared_ptr<MortarConstraint<compute_stage>>> _mortar_constraints;
 
   /// Automatic mortar generation (amg) object providing the mortar mesh to loop over
   const AutomaticMortarGeneration & _amg;
@@ -72,6 +85,9 @@ private:
 
   /// The slave boundary id needed for reiniting the MOOSE systems on the element face
   BoundaryID _slave_boundary_id;
+
+  /// boolean flag for holding whether our current mortar segment projects onto a master element
+  bool _has_master;
 };
 
 #endif // COMPUTEMORTARFUNCTOR_H

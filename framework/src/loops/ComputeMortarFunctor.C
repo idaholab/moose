@@ -23,7 +23,7 @@
 
 template <ComputeStage compute_stage>
 ComputeMortarFunctor<compute_stage>::ComputeMortarFunctor(
-    std::vector<std::shared_ptr<MortarConstraintBase>> & mortar_constraints,
+    const std::vector<std::shared_ptr<MortarConstraintBase>> & mortar_constraints,
     const AutomaticMortarGeneration & amg,
     SubProblem & subproblem)
   : _amg(amg),
@@ -37,13 +37,13 @@ ComputeMortarFunctor<compute_stage>::ComputeMortarFunctor(
   // Constructor the mortar constraints we will later loop over
   if (compute_stage == ComputeStage::RESIDUAL)
   {
-    for (auto mc : mortar_constraints)
-      if (auto cmc = std::dynamic_pointer_cast<MortarConstraint<ComputeStage::RESIDUAL>>(mc))
+    for (const auto mc : mortar_constraints)
+      if (const auto cmc = std::dynamic_pointer_cast<MortarConstraint<ComputeStage::RESIDUAL>>(mc))
         _mortar_constraints.push_back(cmc);
   }
   else if (compute_stage == ComputeStage::JACOBIAN)
-    for (auto mc : mortar_constraints)
-      if (auto cmc = std::dynamic_pointer_cast<MortarConstraint<ComputeStage::JACOBIAN>>(mc))
+    for (const auto mc : mortar_constraints)
+      if (const auto cmc = std::dynamic_pointer_cast<MortarConstraint<ComputeStage::JACOBIAN>>(mc))
         _mortar_constraints.push_back(cmc);
 
   // Create the FE object that we will use for JxW
@@ -138,11 +138,14 @@ ComputeMortarFunctor<compute_stage>::operator()()
       // When you don't provide a weights array, the FE object uses
       // a dummy rule with all 1's. You should probably never use
       // the resulting JxW values for anything important.
-      _fe_msm_lambda->reinit(slave_face_elem, &custom_xi1_pts);
+      //
+      // The below is a placeholder indicating that we need to add a SubProblem::reinitLowerDElemRef
+      // in order to complete the change-over from libMesh to Moose code
+      // _fe_msm_lambda->reinit(slave_face_elem, &custom_xi1_pts);
 
       // reinit the variables/residuals/jacobians on the slave interior
       _subproblem.reinitElemFaceRef(
-          slave_ip, slave_side_id, _slave_boundary_id, tolerance, &custom_xi1_pts);
+          slave_ip, slave_side_id, _slave_boundary_id, TOLERANCE, &custom_xi1_pts);
     }
 
     // Reinit the face of the interior parent on the master side

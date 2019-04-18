@@ -85,7 +85,8 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
     _subdomain_pair.first = _mesh.getSubdomainID(_master_subdomain_name);
     _subdomain_pair.second = _mesh.getSubdomainID(_slave_subdomain_name);
 
-    _amg = &_app.getExecutioner()->feProblem().getMortarInterface(boundary_pair, _subdomain_pair);
+    _amg = &_app.getExecutioner()->feProblem().getMortarInterface(
+        boundary_pair, _subdomain_pair, _use_displaced_mesh);
     _has_attached_amg = true;
   }
 

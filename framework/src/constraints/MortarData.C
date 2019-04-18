@@ -3,7 +3,7 @@
 #include "MooseMesh.h"
 #include "MooseError.h"
 
-MortarData::MortarData() : _has_displaced_objects(false) {}
+MortarData::MortarData() {}
 
 AutomaticMortarGeneration &
 MortarData::getMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundary_key,
@@ -22,18 +22,18 @@ MortarData::getMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundar
     if (_displaced_mortar_interfaces.find(boundary_key) == _displaced_mortar_interfaces.end())
       _displaced_mortar_interfaces.emplace(
           boundary_key,
-          libmesh_make_unique<AutomaticMortarGeneration>(
+          AutomaticMortarGeneration(
               subproblem.mesh().getMesh(), boundary_key, subdomain_key, on_displaced));
-    return *_displaced_mortar_interfaces.at(boundary_key);
+    return _displaced_mortar_interfaces.at(boundary_key);
   }
   else
   {
     if (_mortar_interfaces.find(boundary_key) == _mortar_interfaces.end())
       _mortar_interfaces.emplace(
           boundary_key,
-          libmesh_make_unique<AutomaticMortarGeneration>(
+          AutomaticMortarGeneration(
               subproblem.mesh().getMesh(), boundary_key, subdomain_key, on_displaced));
-    return *_mortar_interfaces.at(boundary_key);
+    return _mortar_interfaces.at(boundary_key);
   }
 }
 
@@ -48,7 +48,7 @@ MortarData::getMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundar
       mooseError(
           "The requested mortar interface AutomaticMortarGeneration object does not yet exist!");
 
-    return *_displaced_mortar_interfaces.at(boundary_key);
+    return _displaced_mortar_interfaces.at(boundary_key);
   }
   else
   {
@@ -56,7 +56,7 @@ MortarData::getMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundar
       mooseError(
           "The requested mortar interface AutomaticMortarGeneration object does not yet exist!");
 
-    return *_mortar_interfaces.at(boundary_key);
+    return _mortar_interfaces.at(boundary_key);
   }
 }
 
@@ -65,7 +65,7 @@ MortarData::update()
 {
   for (auto & mortar_pair : _mortar_interfaces)
   {
-    auto & amg = *mortar_pair.second;
+    auto & amg = mortar_pair.second;
 
     // Clear exiting data
     amg.clear();

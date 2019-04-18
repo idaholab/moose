@@ -281,14 +281,16 @@ NonlinearSystemBase::initialSetup()
     const auto & mortar_generation_object = mortar_interface.second;
 
     auto & mortar_constraints =
-        _constraints.getActiveMortarConstraints(master_slave_boundary, /*displaced=*/false);
+        _constraints.getActiveMortarConstraints(master_slave_boundary_pair, /*displaced=*/false);
 
-    _undisplaced_mortar_residual_functors[master_slave_boundary_pair] =
+    _undisplaced_mortar_residual_functors.emplace(
+        master_slave_boundary_pair,
         ComputeMortarFunctor<ComputeStage::RESIDUAL>(
-            mortar_constraints, mortar_generation_object, _fe_problem);
-    _undisplaced_mortar_jacobian_functors[master_slave_boundary_pair] =
+            mortar_constraints, mortar_generation_object, _fe_problem));
+    _undisplaced_mortar_jacobian_functors.emplace(
+        master_slave_boundary_pair,
         ComputeMortarFunctor<ComputeStage::JACOBIAN>(
-            mortar_constraints, mortar_generation_object, _fe_problem);
+            mortar_constraints, mortar_generation_object, _fe_problem));
   }
 
   const auto & displaced_mortar_interfaces = _fe_problem.getMortarInterfaces(/*displaced=*/true);
@@ -298,14 +300,16 @@ NonlinearSystemBase::initialSetup()
     const auto & mortar_generation_object = mortar_interface.second;
 
     auto & mortar_constraints =
-        _constraints.getActiveMortarConstraints(master_slave_boundary, /*displaced=*/true);
+        _constraints.getActiveMortarConstraints(master_slave_boundary_pair, /*displaced=*/true);
 
-    _displaced_mortar_residual_functors[master_slave_boundary_pair] =
+    _displaced_mortar_residual_functors.emplace(
+        master_slave_boundary_pair,
         ComputeMortarFunctor<ComputeStage::RESIDUAL>(
-            mortar_constraints, mortar_generation_object, _fe_problem);
-    _displaced_mortar_jacobian_functors[master_slave_boundary_pair] =
+            mortar_constraints, mortar_generation_object, _fe_problem));
+    _displaced_mortar_jacobian_functors.emplace(
+        master_slave_boundary_pair,
         ComputeMortarFunctor<ComputeStage::JACOBIAN>(
-            mortar_constraints, mortar_generation_object, _fe_problem);
+            mortar_constraints, mortar_generation_object, _fe_problem));
   }
 }
 
@@ -1144,7 +1148,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
     }
   }
 
-  mortarConstraints(ComputeStage::RESIDUAL, displaced);
+  mortarResidualConstraints(displaced);
 
   // go over element-element constraint interface
   std::map<unsigned int, std::shared_ptr<ElementPairLocator>> * element_pair_locators = nullptr;
@@ -1455,11 +1459,6 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
       // Displaced Constraints
       if (_fe_problem.getDisplacedProblem())
         constraintResiduals(*_Re_non_time, true);
-
-      // go over real mortar constraints
-      auto & mortar_constraints = _constraints.getActiveMortarConstraints();
-      for (auto & mortar_constraint : mortar_constraints)
-        mortar_constraint->computeResidual();
 
       if (_fe_problem.computingNonlinearResid())
         _constraints.residualEnd();
@@ -1922,10 +1921,7 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
     }
   }
 
-  // go over real mortar constraints
-  auto & mortar_constraints = _constraints.getActiveMortarConstraints();
-  for (auto & mortar_constraint : mortar_constraints)
-    mortar_constraint->computeJacobian();
+  mortarJacobianConstraints(displaced);
 
   THREAD_ID tid = 0;
   // go over element-element constraint interface
@@ -3039,36 +3035,61 @@ NonlinearSystemBase::setPreviousNewtonSolution(const NumericVector<Number> & sol
 }
 
 void
-NonlinearSystemBase::mortarConstraints(ComputeStage compute_stage, bool displaced)
+NonlinearSystemBase::mortarResidualConstraints(bool displaced)
 {
   // go over mortar constraints
   const auto & mortar_interfaces = _fe_problem.getMortarInterfaces(displaced);
 
-  SubProblem * subproblem;
-  if (displaced)
-    subproblem = _fe_problem.getDisplacedProblem();
-  else
-    subproblem = &_fe_problem;
+  std::unordered_map<std::pair<BoundaryID, BoundaryID>, ComputeMortarFunctor<RESIDUAL>>::iterator
+      it,
+      end_it;
 
   for (const auto & mortar_interface : mortar_interfaces)
   {
-    const auto & master_slave_boundary = mortar_interface.first;
-    const auto & mortar_generation_object = mortar_interface.second;
-
-    auto & mortar_constraints =
-        _constraints.getActiveMortarConstraints(master_slave_boundary, displaced);
-
-    if (compute_stage == ComputeStage::RESIDUAL)
+    if (!displaced)
     {
-      ComputeMortarFunctor<ComputeStage::RESIDUAL> cmf(
-          mortar_constraints, mortar_generation_object, *subproblem);
-      cmf();
+      it = _undisplaced_mortar_residual_functors.find(mortar_interface.first);
+      end_it = _undisplaced_mortar_residual_functors.end();
     }
-    else if (compute_stage == ComputeStage::JACOBIAN)
+    else
     {
-      ComputeMortarFunctor<ComputeStage::JACOBIAN> cmf(
-          mortar_constraints, mortar_generation_object, *subproblem);
-      cmf();
+      it = _displaced_mortar_residual_functors.find(mortar_interface.first);
+      end_it = _displaced_mortar_residual_functors.end();
     }
+
+    mooseAssert(it != end_it,
+                "No ComputeMortarFunctor exists for the specified master-slave boundary pair: "
+                    << mortar_interface.first);
+    it->second();
+  }
+}
+
+void
+NonlinearSystemBase::mortarJacobianConstraints(bool displaced)
+{
+  // go over mortar constraints
+  const auto & mortar_interfaces = _fe_problem.getMortarInterfaces(displaced);
+
+  std::unordered_map<std::pair<BoundaryID, BoundaryID>, ComputeMortarFunctor<JACOBIAN>>::iterator
+      it,
+      end_it;
+
+  for (const auto & mortar_interface : mortar_interfaces)
+  {
+    if (!displaced)
+    {
+      it = _undisplaced_mortar_jacobian_functors.find(mortar_interface.first);
+      end_it = _undisplaced_mortar_jacobian_functors.end();
+    }
+    else
+    {
+      it = _displaced_mortar_jacobian_functors.find(mortar_interface.first);
+      end_it = _displaced_mortar_jacobian_functors.end();
+    }
+
+    mooseAssert(it != end_it,
+                "No ComputeMortarFunctor exists for the specified master-slave boundary pair: "
+                    << mortar_interface.first);
+    it->second();
   }
 }

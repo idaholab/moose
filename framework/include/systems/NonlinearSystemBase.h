@@ -14,6 +14,8 @@
 #include "MooseObjectWarehouse.h"
 #include "MooseObjectTagWarehouse.h"
 #include "PerfGraphInterface.h"
+#include "ComputeMortarFunctor.h"
+#include "MooseHashing.h"
 
 #include "libmesh/transient_system.h"
 #include "libmesh/nonlinear_implicit_system.h"
@@ -651,9 +653,14 @@ protected:
   void enforceNodalConstraintsJacobian();
 
   /**
-   * Do mortar constraint computation
+   * Do mortar constraint residual computation
    */
-  void mortarConstraints(ComputeStage compute_stage, bool displaced);
+  void mortarResidualConstraints(bool displaced);
+
+  /**
+   * Do mortar constraint jacobian computation
+   */
+  void mortarJacobianConstraints(bool displaced);
 
 protected:
   /// solution vector from nonlinear solver
@@ -836,5 +843,26 @@ protected:
   PerfID _compute_jacobian_blocks_timer;
   PerfID _compute_dampers_timer;
   PerfID _compute_dirac_timer;
+
+private:
+  /// Functors for computing residuals from undisplaced mortar constraints
+  std::unordered_map<std::pair<BoundaryID, BoundaryID>,
+                     ComputeMortarFunctor<ComputeStage::RESIDUAL>>
+      _undisplaced_mortar_residual_functors;
+
+  /// Functors for computing jacobians from undisplaced mortar constraints
+  std::unordered_map<std::pair<BoundaryID, BoundaryID>,
+                     ComputeMortarFunctor<ComputeStage::JACOBIAN>>
+      _undisplaced_mortar_jacobian_functors;
+
+  /// Functors for computing residuals from displaced mortar constraints
+  std::unordered_map<std::pair<BoundaryID, BoundaryID>,
+                     ComputeMortarFunctor<ComputeStage::RESIDUAL>>
+      _displaced_mortar_residual_functors;
+
+  /// Functors for computing jacobians from displaced mortar constraints
+  std::unordered_map<std::pair<BoundaryID, BoundaryID>,
+                     ComputeMortarFunctor<ComputeStage::JACOBIAN>>
+      _displaced_mortar_jacobian_functors;
 };
 

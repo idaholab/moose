@@ -22,7 +22,6 @@
 defineADBaseValidParams(
     MortarConstraint,
     MortarConstraintBase,
-<<<<<<< HEAD
     params.addRequiredParam<BoundaryName>("master_boundary",
                                           "The name of the master boundary sideset.");
     params.addRequiredParam<BoundaryName>("slave_boundary",

@@ -4993,7 +4993,7 @@ FEProblemBase::getMortarInterface(
       master_slave_boundary_pair, master_slave_subdomain_pair, on_displaced);
 }
 
-const std::map<std::pair<BoundaryID, BoundaryID>, std::unique_ptr<AutomaticMortarGeneration>> &
+const std::map<std::pair<BoundaryID, BoundaryID>, AutomaticMortarGeneration> &
 FEProblemBase::getMortarInterfaces(bool on_displaced) const
 {
   return _mortar_data.getMortarInterfaces(on_displaced);
