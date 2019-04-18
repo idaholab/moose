@@ -26,7 +26,7 @@ class FileMeshGenerator : public MeshGenerator
 public:
   FileMeshGenerator(const InputParameters & parameters);
 
-  std::unique_ptr<MeshBase> generate();
+  std::unique_ptr<MeshBase> generate() override;
 
 protected:
   const MeshFileName & _file_name;

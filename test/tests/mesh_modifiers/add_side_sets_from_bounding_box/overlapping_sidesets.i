@@ -16,7 +16,6 @@
     boundary_id_new = 10
     bottom_left = '-1.1 -1.1 -1.1'
     top_right = '1.1 1.1 1.1'
-    block_id = 0
     boundary_id_overlap = true
   [../]
   [./createNewSidesetTwo]
@@ -25,7 +24,6 @@
     boundary_id_new = 11
     bottom_left = '-1.1 -1.1 -1.1'
     top_right = '1.1 1.1 1.1'
-    block_id = 0
     boundary_id_overlap = true
   [../]
   [./createNewSidesetThree]
@@ -34,7 +32,6 @@
     boundary_id_new = 12
     bottom_left = '-1.1 -1.1 -1.1'
     top_right = '1.1 1.1 1.1'
-    block_id = 0
     boundary_id_overlap = true
   [../]
 []

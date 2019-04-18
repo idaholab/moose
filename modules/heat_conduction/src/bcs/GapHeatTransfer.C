@@ -27,13 +27,15 @@ validParams<GapHeatTransfer>()
 {
   InputParameters params = validParams<IntegratedBC>();
   params.addClassDescription("Transfers heat across a gap between two "
-                             "surfaces dependant on the gap geometry specified.");
+                             "surfaces dependent on the gap geometry specified.");
   params.addParam<std::string>(
       "appended_property_name", "", "Name appended to material properties to make them unique");
 
   // Common
   params.addParam<Real>("min_gap", 1.0e-6, "A minimum gap size");
   params.addParam<Real>("max_gap", 1.0e6, "A maximum gap size");
+  params.addRangeCheckedParam<unsigned int>(
+      "min_gap_order", 0, "min_gap_order<=1", "Order of the Taylor expansion below min_gap");
 
   // Deprecated parameter
   MooseEnum coord_types("default XYZ cyl", "default");
@@ -95,6 +97,7 @@ GapHeatTransfer::GapHeatTransfer(const InputParameters & parameters)
     _gap_conductance_dT(getMaterialProperty<Real>(
         "gap_conductance" + getParam<std::string>("appended_property_name") + "_dT")),
     _min_gap(getParam<Real>("min_gap")),
+    _min_gap_order(getParam<unsigned int>("min_gap_order")),
     _max_gap(getParam<Real>("max_gap")),
     _gap_temp(0),
     _gap_distance(std::numeric_limits<Real>::max()),
@@ -194,8 +197,9 @@ GapHeatTransfer::computeQpJacobian()
   if (!_has_info)
     return 0.0;
 
-  return _test[_i][_qp] * ((_u[_qp] - _gap_temp) * _edge_multiplier * _gap_conductance_dT[_qp] +
-                           _edge_multiplier * _gap_conductance[_qp]) *
+  return _test[_i][_qp] *
+         ((_u[_qp] - _gap_temp) * _edge_multiplier * _gap_conductance_dT[_qp] +
+          _edge_multiplier * _gap_conductance[_qp]) *
          _phi[_j][_qp];
 }
 
@@ -252,7 +256,8 @@ GapHeatTransfer::computeQpOffDiagJacobian(unsigned jvar)
     const Point & normal(_normals[_qp]);
 
     const Real dgap = dgapLength(-normal(coupled_component));
-    dRdx = -(_u[_qp] - _gap_temp) * _edge_multiplier * _gap_conductance[_qp] / gapL * dgap;
+    dRdx = -(_u[_qp] - _gap_temp) * _edge_multiplier * _gap_conductance[_qp] *
+           GapConductance::gapAttenuation(gapL, _min_gap, _min_gap_order) * dgap;
   }
   return _test[_i][_qp] * dRdx * _phi[_j][_qp];
 }
@@ -261,7 +266,7 @@ Real
 GapHeatTransfer::gapLength() const
 {
   if (_has_info)
-    return GapConductance::gapLength(_gap_geometry_type, _radius, _r1, _r2, _min_gap, _max_gap);
+    return GapConductance::gapLength(_gap_geometry_type, _radius, _r1, _r2, _max_gap);
 
   return 1.0;
 }
