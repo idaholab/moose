@@ -42,7 +42,7 @@
     difference_tol = 2e-2
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_ten" Outputs/csv=false -snes_test_err 1e-9 -mat_fd_type ds'
     requirement = "The AD multiple inelastic stress calculator shall provide a correct jacobian for a single power law creep model"
-    petsc_version = '>=3.9.0'
+    petsc_version = '>=3.9.4'
   [../]
   [./powerlaw_zero_jacobian]
     type = 'PetscJacobianTester'
@@ -52,7 +52,7 @@
     difference_tol = 2e-2
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_ten creep_zero" Outputs/csv=false -snes_test_err 1e-9 -mat_fd_type ds'
     requirement = "The AD multiple inelastic stress calculator shall provide a correct jacobian for a single power law creep model and an additional zero creep power law model"
-    petsc_version = '>=3.9.0'
+    petsc_version = '>=3.9.4'
   [../]
   [./powerlaw_sum_jacobian]
     type = 'PetscJacobianTester'
@@ -62,7 +62,7 @@
     difference_tol = 2e-2
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_nine creep_one" Outputs/csv=false -snes_test_err 1e-9 -mat_fd_type ds'
     requirement = "The AD multiple inelastic stress calculator shall provide a correct jacobian for the linear combination of two power law creep models"
-    petsc_version = '>=3.9.0'
+    petsc_version = '>=3.9.4'
   [../]
   [./powerlaw_cycle_jacobian]
     type = 'PetscJacobianTester'
@@ -72,6 +72,6 @@
     difference_tol = 2e-2
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_ten creep_ten2" Materials/elastic_strain/cycle_models=true Outputs/csv=false -snes_test_err 1e-9 -mat_fd_type ds'
     requirement = "The AD multiple inelastic stress calculator shall provide a correct jacobian when cycling through two identical power law creep models"
-    petsc_version = '>=3.9.0'
+    petsc_version = '>=3.9.4'
   [../]
 []

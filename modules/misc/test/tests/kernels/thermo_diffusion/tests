@@ -24,7 +24,7 @@
     ratio_tol = 1e-7
     difference_tol = 1e-3
     run_sim = True
-    petsc_version = '>=3.9'
+    petsc_version = '>=3.9.4'
     requirement = 'AD thermo diffusion shall work with material properties and the Jacobian shall be beautiful'
     design = "jacobian_definition.md"
     issues = "#5658"

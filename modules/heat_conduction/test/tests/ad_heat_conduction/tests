@@ -5,7 +5,7 @@
     ratio_tol = 1e-7
     difference_tol = 1e-5
     run_sim = True
-    petsc_version = '>=3.9'
+    petsc_version = '>=3.9.4'
     requirement = 'AD heat conduction and the Jacobian shall be beautiful'
     design = "jacobian_definition.md"
     issues = "#5658 #12633"

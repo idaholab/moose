@@ -62,7 +62,7 @@
     ratio_tol = 1e-7
     difference_tol = 1e4
     cli_args = 'Modules/TensorMechanics/Master/block1/block=1'
-    petsc_version = '>=3.9.0'
+    petsc_version = '>=3.9.4'
     requirement = 'The Jacobian for the automatic differentiation in the two_block testproblem shall be perfect'
     design = 'jacobian_definitions.md'
   [../]
@@ -72,7 +72,7 @@
     run_sim = 'True'
     ratio_tol = 1e-7
     difference_tol = 1e4
-    petsc_version = '>=3.9.0'
+    petsc_version = '>=3.9.4'
     requirement = 'The Jacobian for the automatic differentiation in the two_block testproblem shall be perfect (non action test case)'
     design = 'jacobian_definitions.md'
   [../]
@@ -82,7 +82,7 @@
     run_sim = 'True'
     ratio_tol = 1e-7
     difference_tol = 1e4
-    petsc_version = '>=3.9.0'
+    petsc_version = '>=3.9.4'
     requirement = 'The Jacobian for the automatic differentiation in the two_block_new problem shall be perfect'
     design = 'jacobian_definitions.md'
   [../]
@@ -92,7 +92,7 @@
     run_sim = 'True'
     ratio_tol = 1e-7
     difference_tol = 1e4
-    petsc_version = '>=3.9.0'
+    petsc_version = '>=3.9.4'
     requirement = 'The Jacobian for the automatic differentiation two_coord problem shall be perfect'
     design = 'jacobian_definitions.md'
   [../]
