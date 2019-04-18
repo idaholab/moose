@@ -10,7 +10,7 @@
 #ifndef VECTORFUNCTIONAUX_H
 #define VECTORFUNCTIONAUX_H
 
-#include "AuxVectorKernel.h"
+#include "AuxKernel.h"
 
 // Forward Declarations
 class VectorFunctionAux;

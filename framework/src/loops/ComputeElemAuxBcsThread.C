@@ -14,7 +14,6 @@
 #include "DisplacedProblem.h"
 #include "Assembly.h"
 #include "AuxKernel.h"
-#include "AuxVectorKernel.h"
 
 #include "libmesh/threads.h"
 
