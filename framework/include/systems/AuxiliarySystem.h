@@ -249,8 +249,6 @@ public:
   PerfID _compute_elemental_vec_vars_timer;
 
   friend class AuxKernel;
-  // friend class ComputeNodalAuxVarsThread;
-  // friend class ComputeNodalAuxBcsThread;
   friend class ComputeIndicatorThread;
   friend class ComputeMarkerThread;
   friend class FlagElementsThread;

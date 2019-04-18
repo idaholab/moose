@@ -14,6 +14,7 @@
 #include "AuxiliarySystem.h"
 #include "FEProblem.h"
 #include "AuxKernel.h"
+#include "AuxVectorKernel.h"
 
 template <typename AuxKernelType>
 ComputeNodalAuxBcsThread<AuxKernelType>::ComputeNodalAuxBcsThread(

@@ -17,7 +17,6 @@
 // Forward declarations
 template <typename T>
 class MooseObjectWarehouse;
-class AuxKernel;
 
 template <typename AuxKernelType>
 class ComputeNodalAuxBcsThread

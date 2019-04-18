@@ -17,7 +17,6 @@
 
 // Forward declarations
 class AuxiliarySystem;
-class AuxKernel;
 class FEProblemBase;
 template <typename T>
 class MooseObjectWarehouse;

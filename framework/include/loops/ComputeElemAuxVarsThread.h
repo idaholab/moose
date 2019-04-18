@@ -15,7 +15,6 @@
 // MOOSE includes
 #include "ThreadedElementLoop.h"
 #include "MooseObjectWarehouse.h"
-#include "AuxKernel.h"
 
 // Forward declarations
 class FEProblemBase;

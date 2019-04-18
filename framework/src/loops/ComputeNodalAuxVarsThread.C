@@ -12,6 +12,7 @@
 // MOOSE includes
 #include "AuxiliarySystem.h"
 #include "AuxKernel.h"
+#include "AuxVectorKernel.h"
 #include "FEProblem.h"
 #include "MooseMesh.h"
 
