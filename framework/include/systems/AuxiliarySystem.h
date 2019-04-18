@@ -185,16 +185,14 @@ public:
   void computeElementalVecVars(ExecFlagType type);
 
   template <typename AuxKernelType>
-  void
-  computeElementalVarsHelper(const MooseObjectWarehouse<AuxKernelType> & warehouse,
-                             const std::vector<std::vector<MooseVariableFEBase *>> & vars,
-                             const PerfID timer);
+  void computeElementalVarsHelper(const MooseObjectWarehouse<AuxKernelType> & warehouse,
+                                  const std::vector<std::vector<MooseVariableFEBase *>> & vars,
+                                  const PerfID timer);
 
   template <typename AuxKernelType>
-  void
-  computeNodalVarsHelper(const MooseObjectWarehouse<AuxKernelType> & warehouse,
-                         const std::vector<std::vector<MooseVariableFEBase *>> & vars,
-                         const PerfID timer);
+  void computeNodalVarsHelper(const MooseObjectWarehouse<AuxKernelType> & warehouse,
+                              const std::vector<std::vector<MooseVariableFEBase *>> & vars,
+                              const PerfID timer);
 
   FEProblemBase & _fe_problem;
 
@@ -248,7 +246,6 @@ public:
   const PerfID _compute_elemental_vars_timer;
   const PerfID _compute_elemental_vec_vars_timer;
 
-  friend class AuxKernel;
   friend class ComputeIndicatorThread;
   friend class ComputeMarkerThread;
   friend class FlagElementsThread;

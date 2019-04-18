@@ -7,8 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef AUXKERNELBASE_H
-#define AUXKERNELBASE_H
+#ifndef AUXKERNELTEMPL_H
+#define AUXKERNELTEMPL_H
 
 #include "MooseObject.h"
 #include "MooseVariableFE.h"
@@ -31,40 +31,40 @@
 
 // forward declarations
 template <typename ComputeValueType>
-class AuxKernelBase;
+class AuxKernelTempl;
 
 class SubProblem;
 class AuxiliarySystem;
 class SystemBase;
 class MooseMesh;
 
-InputParameters auxKernelBaseValidParams();
+InputParameters getAuxKernelTemplValidParams();
 
 /**
  * Base class for creating new auxiliary kernels and auxiliary boundary conditions.
  *
  */
 template <typename ComputeValueType>
-class AuxKernelBase : public MooseObject,
-                      public MooseVariableInterface<ComputeValueType>,
-                      public BlockRestrictable,
-                      public BoundaryRestrictable,
-                      public SetupInterface,
-                      public CoupleableMooseVariableDependencyIntermediateInterface,
-                      public FunctionInterface,
-                      public UserObjectInterface,
-                      public TransientInterface,
-                      public MaterialPropertyInterface,
-                      public PostprocessorInterface,
-                      public DependencyResolverInterface,
-                      public RandomInterface,
-                      protected GeometricSearchInterface,
-                      public Restartable,
-                      public MeshChangedInterface,
-                      protected VectorPostprocessorInterface
+class AuxKernelTempl : public MooseObject,
+                       public MooseVariableInterface<ComputeValueType>,
+                       public BlockRestrictable,
+                       public BoundaryRestrictable,
+                       public SetupInterface,
+                       public CoupleableMooseVariableDependencyIntermediateInterface,
+                       public FunctionInterface,
+                       public UserObjectInterface,
+                       public TransientInterface,
+                       public MaterialPropertyInterface,
+                       public PostprocessorInterface,
+                       public DependencyResolverInterface,
+                       public RandomInterface,
+                       protected GeometricSearchInterface,
+                       public Restartable,
+                       public MeshChangedInterface,
+                       protected VectorPostprocessorInterface
 {
 public:
-  AuxKernelBase(const InputParameters & parameters, Moose::VarFieldType var_type);
+  AuxKernelTempl(const InputParameters & parameters, Moose::VarFieldType var_type);
 
   /**
    * Computes the value and stores it in the solution vector
@@ -144,7 +144,7 @@ protected:
   virtual const VariableValue & coupledDotDu(const std::string & var_name,
                                              unsigned int comp = 0) override;
 
-  /// This callback is used for AuxKernelBases that need to perform a per-element calculation
+  /// This callback is used for AuxKernelTempls that need to perform a per-element calculation
   virtual void precalculateValue() {}
 
   /// Subproblem this kernel is part of
@@ -212,7 +212,7 @@ protected:
   /// Quadrature point index
   unsigned int _qp;
 
-  /// Depend AuxKernelBases
+  /// Depend AuxKernelTempls
   std::set<std::string> _depend_vars;
   std::set<std::string> _supplied_vars;
 
@@ -235,11 +235,11 @@ protected:
 template <typename ComputeValueType>
 template <typename T>
 const MaterialProperty<T> &
-AuxKernelBase<ComputeValueType>::getMaterialProperty(const std::string & name)
+AuxKernelTempl<ComputeValueType>::getMaterialProperty(const std::string & name)
 {
   if (isNodal())
     mooseError("Nodal AuxKernel '",
-               AuxKernelBase::name(),
+               AuxKernelTempl::name(),
                "' attempted to reference material property '",
                name,
                "'\nConsider using an elemental auxiliary variable for '",
@@ -252,11 +252,11 @@ AuxKernelBase<ComputeValueType>::getMaterialProperty(const std::string & name)
 template <typename ComputeValueType>
 template <typename T>
 const MaterialProperty<T> &
-AuxKernelBase<ComputeValueType>::getMaterialPropertyOld(const std::string & name)
+AuxKernelTempl<ComputeValueType>::getMaterialPropertyOld(const std::string & name)
 {
   if (isNodal())
     mooseError("Nodal AuxKernel '",
-               AuxKernelBase::name(),
+               AuxKernelTempl::name(),
                "' attempted to reference material property '",
                name,
                "'\nConsider using an elemental auxiliary variable for '",
@@ -269,11 +269,11 @@ AuxKernelBase<ComputeValueType>::getMaterialPropertyOld(const std::string & name
 template <typename ComputeValueType>
 template <typename T>
 const MaterialProperty<T> &
-AuxKernelBase<ComputeValueType>::getMaterialPropertyOlder(const std::string & name)
+AuxKernelTempl<ComputeValueType>::getMaterialPropertyOlder(const std::string & name)
 {
   if (isNodal())
     mooseError("Nodal AuxKernel '",
-               AuxKernelBase::name(),
+               AuxKernelTempl::name(),
                "' attempted to reference material property '",
                name,
                "'\nConsider using an elemental auxiliary variable for '",
@@ -286,7 +286,7 @@ AuxKernelBase<ComputeValueType>::getMaterialPropertyOlder(const std::string & na
 template <typename ComputeValueType>
 template <typename T>
 const T &
-AuxKernelBase<ComputeValueType>::getUserObject(const std::string & name)
+AuxKernelTempl<ComputeValueType>::getUserObject(const std::string & name)
 {
   _depend_uo.insert(_pars.get<UserObjectName>(name));
   return UserObjectInterface::getUserObject<T>(name);
@@ -295,10 +295,10 @@ AuxKernelBase<ComputeValueType>::getUserObject(const std::string & name)
 template <typename ComputeValueType>
 template <typename T>
 const T &
-AuxKernelBase<ComputeValueType>::getUserObjectByName(const UserObjectName & name)
+AuxKernelTempl<ComputeValueType>::getUserObjectByName(const UserObjectName & name)
 {
   _depend_uo.insert(name);
   return UserObjectInterface::getUserObjectByName<T>(name);
 }
 
-#endif // AUXKERNELBASE_H
+#endif // AUXKERNELTEMPL_H

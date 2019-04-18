@@ -13,12 +13,12 @@ template <>
 InputParameters
 validParams<AuxVectorKernel>()
 {
-  InputParameters params = auxKernelBaseValidParams();
+  InputParameters params = getAuxKernelTemplValidParams();
   params.registerBase("AuxVectorKernel");
   return params;
 }
 
 AuxVectorKernel::AuxVectorKernel(const InputParameters & parameters)
-  : AuxKernelBase<RealVectorValue>(parameters, Moose::VarFieldType::VAR_FIELD_VECTOR)
+  : AuxKernelTempl<RealVectorValue>(parameters, Moose::VarFieldType::VAR_FIELD_VECTOR)
 {
 }

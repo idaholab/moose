@@ -10,14 +10,14 @@
 #ifndef AUXKERNEL_H
 #define AUXKERNEL_H
 
-#include "AuxKernelBase.h"
+#include "AuxKernelTempl.h"
 
 class AuxKernel;
 
 template <>
 InputParameters validParams<AuxKernel>();
 
-class AuxKernel : public AuxKernelBase<Real>
+class AuxKernel : public AuxKernelTempl<Real>
 {
 public:
   AuxKernel(const InputParameters & parameters);

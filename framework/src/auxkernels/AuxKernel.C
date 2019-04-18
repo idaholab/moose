@@ -13,12 +13,12 @@ template <>
 InputParameters
 validParams<AuxKernel>()
 {
-  InputParameters params = auxKernelBaseValidParams();
+  InputParameters params = getAuxKernelTemplValidParams();
   params.registerBase("AuxKernel");
   return params;
 }
 
 AuxKernel::AuxKernel(const InputParameters & parameters)
-  : AuxKernelBase<Real>(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD)
+  : AuxKernelTempl<Real>(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD)
 {
 }

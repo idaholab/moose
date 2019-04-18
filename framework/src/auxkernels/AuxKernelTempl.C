@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "AuxKernelBase.h"
+#include "AuxKernelTempl.h"
 
 // local includes
 #include "FEProblem.h"
@@ -21,7 +21,7 @@
 #include "libmesh/quadrature.h"
 
 InputParameters
-auxKernelBaseValidParams()
+getAuxKernelTemplValidParams()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<BlockRestrictable>();
@@ -49,17 +49,16 @@ auxKernelBaseValidParams()
                         "the undisplaced mesh will still be used.");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
 
-  // This flag is set to true if the AuxKernelBase is being used on a boundary
+  // This flag is set to true if the AuxKernelTempl is being used on a boundary
   params.addPrivateParam<bool>("_on_boundary", false);
 
   params.declareControllable("enable"); // allows Control to enable/disable this type of object
-
   return params;
 }
 
 template <typename ComputeValueType>
-AuxKernelBase<ComputeValueType>::AuxKernelBase(const InputParameters & parameters,
-                                               Moose::VarFieldType var_type)
+AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & parameters,
+                                                 Moose::VarFieldType var_type)
   : MooseObject(parameters),
     MooseVariableInterface<ComputeValueType>(
         this,
@@ -130,21 +129,21 @@ AuxKernelBase<ComputeValueType>::AuxKernelBase(const InputParameters & parameter
 
 template <typename ComputeValueType>
 const std::set<std::string> &
-AuxKernelBase<ComputeValueType>::getRequestedItems()
+AuxKernelTempl<ComputeValueType>::getRequestedItems()
 {
   return _depend_vars;
 }
 
 template <typename ComputeValueType>
 const std::set<std::string> &
-AuxKernelBase<ComputeValueType>::getSuppliedItems()
+AuxKernelTempl<ComputeValueType>::getSuppliedItems()
 {
   return _supplied_vars;
 }
 
 template <typename ComputeValueType>
 const UserObject &
-AuxKernelBase<ComputeValueType>::getUserObjectBase(const std::string & name)
+AuxKernelTempl<ComputeValueType>::getUserObjectBase(const std::string & name)
 {
   _depend_uo.insert(_pars.get<UserObjectName>(name));
   return UserObjectInterface::getUserObjectBase(name);
@@ -152,7 +151,7 @@ AuxKernelBase<ComputeValueType>::getUserObjectBase(const std::string & name)
 
 template <typename ComputeValueType>
 const PostprocessorValue &
-AuxKernelBase<ComputeValueType>::getPostprocessorValue(const std::string & name)
+AuxKernelTempl<ComputeValueType>::getPostprocessorValue(const std::string & name)
 {
   _depend_uo.insert(_pars.get<PostprocessorName>(name));
   return PostprocessorInterface::getPostprocessorValue(name);
@@ -160,7 +159,7 @@ AuxKernelBase<ComputeValueType>::getPostprocessorValue(const std::string & name)
 
 template <typename ComputeValueType>
 const PostprocessorValue &
-AuxKernelBase<ComputeValueType>::getPostprocessorValueByName(const PostprocessorName & name)
+AuxKernelTempl<ComputeValueType>::getPostprocessorValueByName(const PostprocessorName & name)
 {
   _depend_uo.insert(name);
   return PostprocessorInterface::getPostprocessorValueByName(name);
@@ -168,8 +167,8 @@ AuxKernelBase<ComputeValueType>::getPostprocessorValueByName(const Postprocessor
 
 template <typename ComputeValueType>
 const VectorPostprocessorValue &
-AuxKernelBase<ComputeValueType>::getVectorPostprocessorValue(const std::string & name,
-                                                             const std::string & vector_name)
+AuxKernelTempl<ComputeValueType>::getVectorPostprocessorValue(const std::string & name,
+                                                              const std::string & vector_name)
 {
   _depend_uo.insert(_pars.get<VectorPostprocessorName>(name));
   return VectorPostprocessorInterface::getVectorPostprocessorValue(name, vector_name);
@@ -177,7 +176,7 @@ AuxKernelBase<ComputeValueType>::getVectorPostprocessorValue(const std::string &
 
 template <typename ComputeValueType>
 const VectorPostprocessorValue &
-AuxKernelBase<ComputeValueType>::getVectorPostprocessorValueByName(
+AuxKernelTempl<ComputeValueType>::getVectorPostprocessorValueByName(
     const VectorPostprocessorName & name, const std::string & vector_name)
 {
   _depend_uo.insert(name);
@@ -186,9 +185,9 @@ AuxKernelBase<ComputeValueType>::getVectorPostprocessorValueByName(
 
 template <typename ComputeValueType>
 const VectorPostprocessorValue &
-AuxKernelBase<ComputeValueType>::getVectorPostprocessorValue(const std::string & name,
-                                                             const std::string & vector_name,
-                                                             bool needs_broadcast)
+AuxKernelTempl<ComputeValueType>::getVectorPostprocessorValue(const std::string & name,
+                                                              const std::string & vector_name,
+                                                              bool needs_broadcast)
 {
   _depend_uo.insert(_pars.get<VectorPostprocessorName>(name));
   return VectorPostprocessorInterface::getVectorPostprocessorValue(
@@ -197,7 +196,7 @@ AuxKernelBase<ComputeValueType>::getVectorPostprocessorValue(const std::string &
 
 template <typename ComputeValueType>
 const VectorPostprocessorValue &
-AuxKernelBase<ComputeValueType>::getVectorPostprocessorValueByName(
+AuxKernelTempl<ComputeValueType>::getVectorPostprocessorValueByName(
     const VectorPostprocessorName & name, const std::string & vector_name, bool needs_broadcast)
 {
   _depend_uo.insert(name);
@@ -207,8 +206,8 @@ AuxKernelBase<ComputeValueType>::getVectorPostprocessorValueByName(
 
 template <typename ComputeValueType>
 const ScatterVectorPostprocessorValue &
-AuxKernelBase<ComputeValueType>::getScatterVectorPostprocessorValue(const std::string & name,
-                                                                    const std::string & vector_name)
+AuxKernelTempl<ComputeValueType>::getScatterVectorPostprocessorValue(
+    const std::string & name, const std::string & vector_name)
 {
   _depend_uo.insert(_pars.get<VectorPostprocessorName>(name));
   return VectorPostprocessorInterface::getScatterVectorPostprocessorValue(name, vector_name);
@@ -216,7 +215,7 @@ AuxKernelBase<ComputeValueType>::getScatterVectorPostprocessorValue(const std::s
 
 template <typename ComputeValueType>
 const ScatterVectorPostprocessorValue &
-AuxKernelBase<ComputeValueType>::getScatterVectorPostprocessorValueByName(
+AuxKernelTempl<ComputeValueType>::getScatterVectorPostprocessorValueByName(
     const std::string & name, const std::string & vector_name)
 {
   _depend_uo.insert(name);
@@ -225,7 +224,7 @@ AuxKernelBase<ComputeValueType>::getScatterVectorPostprocessorValueByName(
 
 template <typename ComputeValueType>
 void
-AuxKernelBase<ComputeValueType>::coupledCallback(const std::string & var_name, bool is_old)
+AuxKernelTempl<ComputeValueType>::coupledCallback(const std::string & var_name, bool is_old)
 {
   if (is_old)
   {
@@ -237,7 +236,7 @@ AuxKernelBase<ComputeValueType>::coupledCallback(const std::string & var_name, b
 
 template <typename ComputeValueType>
 const VariableValue &
-AuxKernelBase<ComputeValueType>::coupledDot(const std::string & var_name, unsigned int comp)
+AuxKernelTempl<ComputeValueType>::coupledDot(const std::string & var_name, unsigned int comp)
 {
   MooseVariableFEBase * var = getVar(var_name, comp);
   if (var->kind() == Moose::VAR_AUXILIARY)
@@ -250,7 +249,7 @@ AuxKernelBase<ComputeValueType>::coupledDot(const std::string & var_name, unsign
 
 template <typename ComputeValueType>
 const VariableValue &
-AuxKernelBase<ComputeValueType>::coupledDotDu(const std::string & var_name, unsigned int comp)
+AuxKernelTempl<ComputeValueType>::coupledDotDu(const std::string & var_name, unsigned int comp)
 {
   MooseVariableFEBase * var = getVar(var_name, comp);
   if (var->kind() == Moose::VAR_AUXILIARY)
@@ -263,7 +262,7 @@ AuxKernelBase<ComputeValueType>::coupledDotDu(const std::string & var_name, unsi
 
 template <typename ComputeValueType>
 void
-AuxKernelBase<ComputeValueType>::compute()
+AuxKernelTempl<ComputeValueType>::compute()
 {
   precalculateValue();
 
@@ -317,5 +316,6 @@ AuxKernelBase<ComputeValueType>::compute()
   }
 }
 
-template class AuxKernelBase<Real>;
-template class AuxKernelBase<RealVectorValue>;
+// Explicitly instantiates the two versions of the AuxKernelTempl class
+template class AuxKernelTempl<Real>;
+template class AuxKernelTempl<RealVectorValue>;

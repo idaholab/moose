@@ -10,7 +10,7 @@
 #ifndef AUXVECTORKERNEL_H
 #define AUXVECTORKERNEL_H
 
-#include "AuxKernelBase.h"
+#include "AuxKernelTempl.h"
 
 class AuxVectorKernel;
 
@@ -26,7 +26,7 @@ InputParameters validParams<AuxVectorKernel>();
  * base class is initialized using the variable isNodal() method it is not possible to instantiate
  * a nodal version of this class, thus no additional error checks are needed at this point.
  */
-class AuxVectorKernel : public AuxKernelBase<RealVectorValue>
+class AuxVectorKernel : public AuxKernelTempl<RealVectorValue>
 {
 public:
   AuxVectorKernel(const InputParameters & parameters);
