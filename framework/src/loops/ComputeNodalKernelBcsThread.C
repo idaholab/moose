@@ -63,11 +63,8 @@ ComputeNodalKernelBcsThread::onNode(ConstBndNodeRange::const_iterator & node_it)
   BoundaryID boundary_id = bnode->_bnd_id;
 
   // prepare variables
-  for (const auto & it : _aux_sys._nodal_vars[_tid])
-  {
-    MooseVariableFEBase * var = it.second;
+  for (auto * var : _aux_sys._nodal_vars[_tid])
     var->prepareAux();
-  }
 
   if (_nkernel_warehouse->hasActiveBoundaryObjects(boundary_id, _tid))
   {

@@ -129,11 +129,6 @@ AuxKernelBase<ComputeValueType>::AuxKernelBase(const InputParameters & parameter
 }
 
 template <typename ComputeValueType>
-AuxKernelBase<ComputeValueType>::~AuxKernelBase()
-{
-}
-
-template <typename ComputeValueType>
 const std::set<std::string> &
 AuxKernelBase<ComputeValueType>::getRequestedItems()
 {

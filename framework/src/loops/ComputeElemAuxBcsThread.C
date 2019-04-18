@@ -22,7 +22,7 @@ template <typename AuxKernelType>
 ComputeElemAuxBcsThread<AuxKernelType>::ComputeElemAuxBcsThread(
     FEProblemBase & problem,
     const MooseObjectWarehouse<AuxKernelType> & storage,
-    const std::vector<std::map<std::string, MooseVariableFEBase *>> & vars,
+    const std::vector<std::vector<MooseVariableFEBase *>> & vars,
     bool need_materials)
   : _problem(problem),
     _aux_sys(problem.getAuxiliarySystem()),
@@ -63,11 +63,8 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
     if (elem->processor_id() == _problem.processor_id())
     {
       // prepare variables
-      for (const auto & it : _aux_vars[_tid])
-      {
-        MooseVariableFEBase * var = it.second;
+      for (auto * var : _aux_vars[_tid])
         var->prepareAux();
-      }
 
       // Locate the AuxKernel objects for the current BoundaryID
       const auto iter = boundary_kernels.find(boundary_id);
@@ -104,11 +101,8 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
       // update the solution vector
       {
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        for (const auto & it : _aux_vars[_tid])
-        {
-          MooseVariableFEBase * var = it.second;
+        for (auto * var : _aux_vars[_tid])
           var->insert(_aux_sys.solution());
-        }
       }
     }
   }

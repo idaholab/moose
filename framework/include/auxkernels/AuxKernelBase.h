@@ -66,8 +66,6 @@ class AuxKernelBase : public MooseObject,
 public:
   AuxKernelBase(const InputParameters & parameters, Moose::VarFieldType var_type);
 
-  virtual ~AuxKernelBase();
-
   /**
    * Computes the value and stores it in the solution vector
    */

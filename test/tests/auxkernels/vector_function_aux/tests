@@ -5,6 +5,6 @@
     type = Exodiff
     input = vector_function_aux.i
     exodiff = vector_function_aux_out.e
-    requirement = "MOOSE shall include the ability to create vector auxiliary variables and set the components using a function defined within the input file."
+    requirement = "MOOSE  shall include the ability to set the components of a vector auxiliary variable using a function defined within the input file."
   []
 []

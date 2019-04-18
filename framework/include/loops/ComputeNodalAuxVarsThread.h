@@ -28,7 +28,7 @@ class ComputeNodalAuxVarsThread
 public:
   ComputeNodalAuxVarsThread(FEProblemBase & fe_problem,
                             const MooseObjectWarehouse<AuxKernelType> & storage,
-                            const std::vector<std::map<std::string, MooseVariableFEBase *>> & vars);
+                            const std::vector<std::vector<MooseVariableFEBase *>> & vars);
   // Splitting Constructor
   ComputeNodalAuxVarsThread(ComputeNodalAuxVarsThread & x, Threads::split split);
 
@@ -46,7 +46,7 @@ protected:
   /// Storage object containing active AuxKernel objects
   const MooseObjectWarehouse<AuxKernelType> & _storage;
 
-  const std::vector<std::map<std::string, MooseVariableFEBase *>> _aux_vars;
+  const std::vector<std::vector<MooseVariableFEBase *>> _aux_vars;
 
   std::set<SubdomainID> _block_ids;
 };

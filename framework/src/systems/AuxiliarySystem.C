@@ -185,10 +185,10 @@ AuxiliarySystem::addVariable(const std::string & var_name,
     if (type.family == LAGRANGE_VEC)
     {
       VectorMooseVariable * var = _vars[tid].getFieldVariable<RealVectorValue>(var_name);
-      if (var != NULL)
+      if (var)
       {
-        _nodal_vars[tid][var_name] = var;
-        _nodal_vec_vars[tid][var_name] = var;
+        _nodal_vars[tid].push_back(var);
+        _nodal_vec_vars[tid].push_back(var);
       }
     }
 
@@ -196,17 +196,17 @@ AuxiliarySystem::addVariable(const std::string & var_name,
     {
       MooseVariable * var = _vars[tid].getFieldVariable<Real>(var_name);
 
-      if (var != NULL)
+      if (var)
       {
         if (var->feType().family == LAGRANGE)
         {
-          _nodal_vars[tid][var_name] = var;
-          _nodal_std_vars[tid][var_name] = var;
+          _nodal_vars[tid].push_back(var);
+          _nodal_std_vars[tid].push_back(var);
         }
         else
         {
-          _elem_vars[tid][var_name] = var;
-          _elem_std_vars[tid][var_name] = var;
+          _elem_vars[tid].push_back(var);
+          _elem_std_vars[tid].push_back(var);
         }
       }
     }
@@ -269,15 +269,11 @@ AuxiliarySystem::addScalarKernel(const std::string & kernel_name,
 void
 AuxiliarySystem::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
 {
-  for (const auto & it : _nodal_vars[tid])
-  {
-    MooseVariableFEBase * var = it.second;
+  for (auto * var : _nodal_vars[tid])
     var->computeElemValues();
-  }
 
-  for (const auto & it : _elem_vars[tid])
+  for (auto * var : _elem_vars[tid])
   {
-    MooseVariableFEBase * var = it.second;
     var->reinitAux();
     var->computeElemValues();
   }
@@ -289,15 +285,11 @@ AuxiliarySystem::reinitElemFace(const Elem * /*elem*/,
                                 BoundaryID /*bnd_id*/,
                                 THREAD_ID tid)
 {
-  for (const auto & it : _nodal_vars[tid])
-  {
-    MooseVariableFEBase * var = it.second;
+  for (auto * var : _nodal_vars[tid])
     var->computeElemValuesFace();
-  }
 
-  for (const auto & it : _elem_vars[tid])
+  for (auto * var : _elem_vars[tid])
   {
-    MooseVariableFEBase * var = it.second;
     var->reinitAux();
     var->reinitAuxNeighbor();
     var->computeElemValuesFace();
@@ -629,8 +621,8 @@ template <typename AuxKernelType>
 void
 AuxiliarySystem::computeElementalVarsHelper(
     const MooseObjectWarehouse<AuxKernelType> & warehouse,
-    const std::vector<std::map<std::string, MooseVariableFEBase *>> & vars,
-    const PerfID & timer)
+    const std::vector<std::vector<MooseVariableFEBase *>> & vars,
+    const PerfID timer)
 {
   if (warehouse.hasActiveBlockObjects())
   {
@@ -671,8 +663,8 @@ template <typename AuxKernelType>
 void
 AuxiliarySystem::computeNodalVarsHelper(
     const MooseObjectWarehouse<AuxKernelType> & warehouse,
-    const std::vector<std::map<std::string, MooseVariableFEBase *>> & vars,
-    const PerfID & timer)
+    const std::vector<std::vector<MooseVariableFEBase *>> & vars,
+    const PerfID timer)
 {
   if (warehouse.hasActiveBlockObjects())
   {
@@ -711,17 +703,17 @@ AuxiliarySystem::computeNodalVarsHelper(
 
 template void AuxiliarySystem::computeElementalVarsHelper<AuxKernel>(
     const MooseObjectWarehouse<AuxKernel> &,
-    const std::vector<std::map<std::string, MooseVariableFEBase *>> &,
-    const PerfID &);
+    const std::vector<std::vector<MooseVariableFEBase *>> &,
+    const PerfID);
 template void AuxiliarySystem::computeElementalVarsHelper<AuxVectorKernel>(
     const MooseObjectWarehouse<AuxVectorKernel> &,
-    const std::vector<std::map<std::string, MooseVariableFEBase *>> &,
-    const PerfID &);
+    const std::vector<std::vector<MooseVariableFEBase *>> &,
+    const PerfID);
 template void AuxiliarySystem::computeNodalVarsHelper<AuxKernel>(
     const MooseObjectWarehouse<AuxKernel> &,
-    const std::vector<std::map<std::string, MooseVariableFEBase *>> &,
-    const PerfID &);
+    const std::vector<std::vector<MooseVariableFEBase *>> &,
+    const PerfID);
 template void AuxiliarySystem::computeNodalVarsHelper<AuxVectorKernel>(
     const MooseObjectWarehouse<AuxVectorKernel> &,
-    const std::vector<std::map<std::string, MooseVariableFEBase *>> &,
-    const PerfID &);
+    const std::vector<std::vector<MooseVariableFEBase *>> &,
+    const PerfID);

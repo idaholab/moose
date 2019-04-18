@@ -187,14 +187,14 @@ public:
   template <typename AuxKernelType>
   void
   computeElementalVarsHelper(const MooseObjectWarehouse<AuxKernelType> & warehouse,
-                             const std::vector<std::map<std::string, MooseVariableFEBase *>> & vars,
-                             const PerfID & timer);
+                             const std::vector<std::vector<MooseVariableFEBase *>> & vars,
+                             const PerfID timer);
 
   template <typename AuxKernelType>
   void
   computeNodalVarsHelper(const MooseObjectWarehouse<AuxKernelType> & warehouse,
-                         const std::vector<std::map<std::string, MooseVariableFEBase *>> & vars,
-                         const PerfID & timer);
+                         const std::vector<std::vector<MooseVariableFEBase *>> & vars,
+                         const PerfID timer);
 
   FEProblemBase & _fe_problem;
 
@@ -222,13 +222,13 @@ public:
   bool _need_serialized_solution;
 
   // Variables
-  std::vector<std::map<std::string, MooseVariableFEBase *>> _nodal_vars;
-  std::vector<std::map<std::string, MooseVariableFEBase *>> _nodal_std_vars;
-  std::vector<std::map<std::string, MooseVariableFEBase *>> _nodal_vec_vars;
+  std::vector<std::vector<MooseVariableFEBase *>> _nodal_vars;
+  std::vector<std::vector<MooseVariableFEBase *>> _nodal_std_vars;
+  std::vector<std::vector<MooseVariableFEBase *>> _nodal_vec_vars;
 
-  std::vector<std::map<std::string, MooseVariableFEBase *>> _elem_vars;
-  std::vector<std::map<std::string, MooseVariableFEBase *>> _elem_std_vars;
-  std::vector<std::map<std::string, MooseVariableFEBase *>> _elem_vec_vars;
+  std::vector<std::vector<MooseVariableFEBase *>> _elem_vars;
+  std::vector<std::vector<MooseVariableFEBase *>> _elem_std_vars;
+  std::vector<std::vector<MooseVariableFEBase *>> _elem_vec_vars;
 
   // Storage for AuxScalarKernel objects
   ExecuteMooseObjectWarehouse<AuxScalarKernel> _aux_scalar_storage;
@@ -242,11 +242,11 @@ public:
   ExecuteMooseObjectWarehouse<AuxVectorKernel> _elemental_vec_aux_storage;
 
   /// Timers
-  PerfID _compute_scalar_vars_timer;
-  PerfID _compute_nodal_vars_timer;
-  PerfID _compute_nodal_vec_vars_timer;
-  PerfID _compute_elemental_vars_timer;
-  PerfID _compute_elemental_vec_vars_timer;
+  const PerfID _compute_scalar_vars_timer;
+  const PerfID _compute_nodal_vars_timer;
+  const PerfID _compute_nodal_vec_vars_timer;
+  const PerfID _compute_elemental_vars_timer;
+  const PerfID _compute_elemental_vec_vars_timer;
 
   friend class AuxKernel;
   friend class ComputeIndicatorThread;

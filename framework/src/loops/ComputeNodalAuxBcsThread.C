@@ -20,7 +20,7 @@ template <typename AuxKernelType>
 ComputeNodalAuxBcsThread<AuxKernelType>::ComputeNodalAuxBcsThread(
     FEProblemBase & fe_problem,
     const MooseObjectWarehouse<AuxKernelType> & storage,
-    const std::vector<std::map<std::string, MooseVariableFEBase *>> & vars)
+    const std::vector<std::vector<MooseVariableFEBase *>> & vars)
   : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
     _storage(storage),
@@ -48,11 +48,8 @@ ComputeNodalAuxBcsThread<AuxKernelType>::onNode(ConstBndNodeRange::const_iterato
   BoundaryID boundary_id = bnode->_bnd_id;
 
   // prepare variables
-  for (const auto & it : _aux_vars[_tid])
-  {
-    MooseVariableFEBase * var = it.second;
+  for (auto * var : _aux_vars[_tid])
     var->prepareAux();
-  }
 
   Node * node = bnode->_node;
 
@@ -76,11 +73,8 @@ ComputeNodalAuxBcsThread<AuxKernelType>::onNode(ConstBndNodeRange::const_iterato
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     // update the solution vector
-    for (const auto & it : _aux_vars[_tid])
-    {
-      MooseVariableFEBase * var = it.second;
+    for (auto * var : _aux_vars[_tid])
       var->insert(_aux_sys.solution());
-    }
   }
 }
 

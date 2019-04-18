@@ -22,7 +22,7 @@ template <typename AuxKernelType>
 ComputeElemAuxVarsThread<AuxKernelType>::ComputeElemAuxVarsThread(
     FEProblemBase & problem,
     const MooseObjectWarehouse<AuxKernelType> & storage,
-    const std::vector<std::map<std::string, MooseVariableFEBase *>> & vars,
+    const std::vector<std::vector<MooseVariableFEBase *>> & vars,
     bool need_materials)
   : ThreadedElementLoop<ConstElemRange>(problem),
     _aux_sys(problem.getAuxiliarySystem()),
@@ -56,11 +56,8 @@ ComputeElemAuxVarsThread<AuxKernelType>::subdomainChanged()
   _fe_problem.subdomainSetup(_subdomain, _tid);
 
   // prepare variables
-  for (const auto & it : _aux_vars[_tid])
-  {
-    MooseVariableFEBase * var = it.second;
+  for (auto * var : _aux_vars[_tid])
     var->prepareAux();
-  }
 
   std::set<MooseVariableFEBase *> needed_moose_vars;
   std::set<unsigned int> needed_mat_props;
@@ -118,11 +115,8 @@ ComputeElemAuxVarsThread<AuxKernelType>::onElement(const Elem * elem)
     // update the solution vector
     {
       Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-      for (const auto & it : _aux_vars[_tid])
-      {
-        MooseVariableFEBase * var = it.second;
+      for (auto * var : _aux_vars[_tid])
         var->insert(_aux_sys.solution());
-      }
     }
   }
 }

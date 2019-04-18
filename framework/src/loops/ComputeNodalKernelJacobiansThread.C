@@ -112,11 +112,8 @@ ComputeNodalKernelJacobiansThread::onNode(ConstNodeRange::const_iterator & node_
     if (!active_involved_kernels.empty())
     {
       // prepare variables
-      for (const auto & it : _aux_sys._nodal_vars[_tid])
-      {
-        MooseVariableFEBase * var = it.second;
+      for (auto * var : _aux_sys._nodal_vars[_tid])
         var->prepareAux();
-      }
 
       _fe_problem.reinitNode(node, _tid);
 
