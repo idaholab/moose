@@ -59,14 +59,13 @@
     design = "ADPiecewiseLinearInterpolationMaterial.md"
     requirement = 'ADPiecewiseLinearInterpolationMaterial shall throw an error if xy_data vector is not a multiple of two'
   [../]
-  [./stateful_jacobian]
+  [./test-jac]
     type = 'PetscJacobianTester'
     input = 'piecewise_linear_interpolation_material.i'
     ratio_tol = 1e-7
     difference_tol = 1e-5
     run_sim = True
     petsc_version = '>=3.9'
-    turn_off_exodus_output = False
     requirement = 'ADPiecewiseLinearInterpolationMaterial shall calculate perfect Jacobians'
     design = "jacobian_definition.md"
     issues = "#5658"

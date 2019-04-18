@@ -26,7 +26,7 @@
   [../]
 
   [./heat]
-    type = ADDiffusion
+    type = ADHeatConduction
     variable = temp
   [../]
 []
@@ -77,6 +77,17 @@
   [../]
   [./stress]
     type = ADComputeLinearElasticStress
+  [../]
+
+  [./heat]
+    type = HeatConductionMaterial
+    specific_heat = 1.0
+    thermal_conductivity = 1.0
+  [../]
+
+  [./density]
+    type = ADDensity
+    density = 1.0
   [../]
 []
 

@@ -15,7 +15,7 @@
 #include "GuaranteeProvider.h"
 #include "DerivativeMaterialPropertyNameInterface.h"
 
-#define usingADComputeElasticityTensorBaseMembers                                                  \
+#define usingComputeElasticityTensorBaseMembers                                                    \
   usingMaterialMembers;                                                                            \
   using ADComputeElasticityTensorBase<compute_stage>::_elasticity_tensor_name;                     \
   using ADComputeElasticityTensorBase<compute_stage>::_elasticity_tensor;                          \
