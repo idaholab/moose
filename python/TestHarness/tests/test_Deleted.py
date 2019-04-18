@@ -22,7 +22,7 @@ class TestHarnessTester(TestHarnessTestCase):
         self.assertRegexpMatches(e.output, r'test_harness\.deleted.*? \[TEST DELETED TEST\] FAILED \(DELETED\)')
 
         # Verify return code is DELETED related (0x83)
-        self.assertIs(131, e.returncode)
+        self.assertIs(0x83, e.returncode)
 
     def testNoExtraInfo(self):
         """

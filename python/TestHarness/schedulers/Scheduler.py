@@ -328,7 +328,6 @@ class Scheduler(MooseObject):
 
         # Peform within a try, to allow keyboard ctrl-c
         try:
-            tester = job.getTester()
             with j_lock:
                 if job.isRunning():
                     # already reported this job once before
@@ -356,10 +355,10 @@ class Scheduler(MooseObject):
                 self.harness.handleJobStatus(job)
 
                 # Reset activity clock
-                if not tester.isSilent():
+                if not job.isSilent():
                     self.last_reported_time = clock()
 
-                if tester.isFail():
+                if job.isFail():
                     self.__failures += 1
 
                 if job.isFinished():
@@ -395,8 +394,7 @@ class Scheduler(MooseObject):
                 with self.activity_lock:
                     self.__active_jobs.add(job)
 
-                tester = job.getTester()
-                timeout_timer = threading.Timer(float(tester.getMaxTime()),
+                timeout_timer = threading.Timer(float(job.getMaxTime()),
                                                 self.handleTimeoutJob,
                                                 (job, j_lock,))
 

@@ -47,6 +47,7 @@ class Job(object):
     def __init__(self, tester, job_dag, options):
         self.options = options
         self.__tester = tester
+        self.specs = tester.specs
         self.__job_dag = job_dag
         self.timer = Timer()
         self.__outfile = None
@@ -57,6 +58,10 @@ class Job(object):
         self.report_timer = None
         self.__slots = None
         self.__meta_data = {}
+        self.__status_code = 0x0
+        self.__status_status = None
+        self.__status_message = None
+        self.__status_color = None
 
         # Enumerate available job statuses
         self.status = StatusSystem.JobStatus()
@@ -117,6 +122,10 @@ class Job(object):
     def getOutputFiles(self):
         """ Wrapper method to return getOutputFiles """
         return self.__tester.getOutputFiles()
+
+    def getMaxTime(self):
+        """ Wrapper method to return getMaxTime  """
+        return self.__tester.getMaxTime()
 
     def getUniqueIdentifier(self):
         """ A unique identifier for this job object """
@@ -237,21 +246,53 @@ class Job(object):
         else:
             return 0.0
 
+    def _setMessage(self, status_code, status, message, color):
+        self.__status_code = status_code
+        self.__status_status = status
+        self.__status_message = message
+        self.__status_color = color
+
+    def getJointStatus(self):
+        """
+        Returns a tuple with the most relevant data about this job (see getConglumerateStatus)
+
+        returns:
+            (status, status message, status message color, exit code)
+        """
+        self = self._getConglumerateStatus()
+        return self.__status_status, self.__status_message, self.__status_color, self.__status_code
+
+    def _getConglumerateStatus(self):
+        """ Use both job and tester statuses to form a final status """
+        # If the tester has no status, then default to a job status
+        if self.isNoStatus():
+            self._setMessage(self.__status_code, self.getStatus().status, self.getStatusMessage(), self.getStatus().color)
+
+        # Use Tester statuses over Job statuses when available
+        else:
+            self._setMessage(self.__tester.getStatusCode(), self.__tester.getStatus().status, self.__tester.getStatusMessage(), self.__tester.getStatus().color)
+
+        return self
+
     # Wrapper methods for adjusting statuses
     def getStatus(self):
         return self.status.getStatus()
     def getStatusMessage(self):
         return self.status.getStatusMessage()
     def getStatusCode(self):
-        return self.status.getStatusCode()
+        return self.__status_code | self.__tester.getStatusCode()
     def setStatus(self, status, message=''):
+        self.__status_status = status.status
+        self.__status_code = self.__status_code | status.code
+        self.__status_message = message
+        self.__status_color = status.color
         return self.status.setStatus(status, message)
 
-    # Wrapper methods for returning a bool status
+    # Wrapper methods for returning bool status on job and tester
     def isHold(self):
         return self.status.isHold()
     def isSkip(self):
-        return self.status.isSkip()
+        return (self.status.isSkip() and (self.__tester.isSkip() or self.__tester.isNoStatus()))
     def isQueued(self):
         return self.status.isQueued()
     def isRunning(self):
@@ -261,8 +302,18 @@ class Job(object):
     def isError(self):
         return self.status.isError()
     def isFail(self):
-        return self.status.isFail()
+        return self.status.isFail() or self.__tester.isFail()
     def isFinished(self):
         return self.status.isFinished()
     def isTimeout(self):
         return self.status.isTimeout()
+    def isSilent(self):
+        return self.__tester.isSilent()
+    def isDeleted(self):
+        return self.__tester.isDeleted()
+    def isPass(self):
+        return self.__tester.isPass()
+    def isDiff(self):
+        return self.__tester.isDiff()
+    def isNoStatus(self):
+        return self.__tester.isNoStatus()

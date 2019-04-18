@@ -128,7 +128,6 @@ class Tester(MooseObject):
         self.fail = self.status.fail
         self.diff = self.status.diff
         self.deleted = self.status.deleted
-        self.finished = self.status.finished
 
     def getStatus(self):
         return self.status.getStatus()
@@ -167,8 +166,6 @@ class Tester(MooseObject):
         return self.status.isDiff()
     def isDeleted(self):
         return self.status.isDeleted()
-    def isFinished(self):
-        return self.status.isFinished()
     ### Status System wrapper methods ###
 
     def getTestName(self):

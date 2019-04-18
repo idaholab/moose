@@ -20,7 +20,6 @@ class TestStatus(object):
     success = test_status(status='OK', color='GREEN', code=0x0)
     skip = test_status(status='SKIP', color='GREY', code=0x0)
     silent = test_status(status='SILENT', color='GREY', code=0x0)
-    finished = test_status(status='FINISHED', color='GREY', code=0x0)
 
     # Unrecoverable
     fail = test_status(status='FAIL', color='RED', code=0x80)

@@ -206,9 +206,9 @@ class TestHarness:
     """
     Recursively walks the current tree looking for tests to run
     Error codes:
-    0x0  - Success
-    0x1  - Recoverable errors
-    0x80 - Unrecoverable TestHarness errors
+    0x0       - Success
+    0x01-0x7F - Recoverable errors
+    0x80-0xFF - Unrecoverable TestHarness errors
     """
     def findAndRunTests(self, find_only=False):
         self.error_code = 0x0
@@ -459,30 +459,15 @@ class TestHarness:
                 print(output)
         return output
 
-    def normalizeStatus(self, job):
-        """ Determine when to use a job status as opposed to tester status """
-        tester = job.getTester()
-        message = job.getStatusMessage()
-        if job.isTimeout():
-            tester.setStatus(tester.no_status, 'FAILED (TIMEOUT)')
-        elif job.isFail():
-            tester.setStatus(tester.fail, message)
-        elif (job.isSkip()
-              and not tester.isSilent()
-              and not tester.isDeleted()
-              and not tester.isFail()):
-            tester.setStatus(tester.skip, message)
-
-        return tester
-
     def handleJobStatus(self, job):
-        """ Method to handle a job status """
-        tester = job.getTester()
-        if not tester.isSilent():
+        """
+        The Scheduler is calling back the TestHarness to inform us of a status change.
+        The job may or may not be finished yet (RUNNING), or failing, passing, etc.
+        """
+        if not job.isSilent():
             # Print results and perform any desired post job processing
             if job.isFinished():
-                tester = self.normalizeStatus(job)
-                self.error_code = self.error_code | job.getStatusCode() | tester.getStatusCode()
+                self.error_code = self.error_code | job.getStatusCode()
 
                 # perform printing of application output if so desired
                 self.printOutput(job)
@@ -493,15 +478,15 @@ class TestHarness:
                 timing = job.getTiming()
 
                 # Save these results for 'Final Test Result' summary
-                self.test_table.append( (job, tester.getStatus().status, timing) )
+                self.test_table.append( (job, job.getStatus().status, timing) )
 
-                self.postRun(tester.specs, timing)
+                self.postRun(job.specs, timing)
 
-                if job.isSkip() and not tester.isFail():
+                if job.isSkip():
                     self.num_skipped += 1
-                elif tester.isPass():
+                elif job.isPass():
                     self.num_passed += 1
-                elif tester.isFail() or job.isTimeout():
+                elif job.isFail():
                     self.num_failed += 1
                 else:
                     self.num_pending += 1
