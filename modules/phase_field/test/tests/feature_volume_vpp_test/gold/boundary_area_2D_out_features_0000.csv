@@ -1,0 +1,4 @@
+var_num,feature_volumes,intersects_bounds,percolated,centroid_x,centroid_y,centroid_z
+0,10,1,0,25,4.9230769230769,0
+0,10,0,0,25,25,0
+0,8,0,0,25,37.5,0
