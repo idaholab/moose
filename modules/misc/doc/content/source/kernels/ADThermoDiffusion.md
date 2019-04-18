@@ -13,10 +13,10 @@ species concentration, temperature, and other material parameters. $S$ is kept
 agnostic in this formulation and ultimately needs to be formulated in a separate
 material property definition.
 
-!syntax parameters /Kernels/ADThermoDiffusion<RESIDUAL>
+!syntax parameters /Kernels/ADThermoDiffusion
 
-!syntax inputs /Kernels/ADThermoDiffusion<RESIDUAL>
+!syntax inputs /Kernels/ADThermoDiffusion
 
-!syntax children /Kernels/ADThermoDiffusion<RESIDUAL>
+!syntax children /Kernels/ADThermoDiffusion
 
 !bibtex bibliography

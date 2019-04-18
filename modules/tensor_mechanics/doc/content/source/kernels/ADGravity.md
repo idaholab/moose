@@ -1,6 +1,6 @@
 # ADGravity
 
-!syntax description /Kernels/ADGravity<RESIDUAL>
+!syntax description /Kernels/ADGravity
 
 ## Description
 
@@ -18,8 +18,8 @@ the ADGravity body force per unit mass.
 
 !listing modules/tensor_mechanics/test/tests/gravity/ad_gravity_test.i block=Kernels/gravity_y
 
-!syntax parameters /Kernels/ADGravity<RESIDUAL>
+!syntax parameters /Kernels/ADGravity
 
-!syntax inputs /Kernels/ADGravity<RESIDUAL>
+!syntax inputs /Kernels/ADGravity
 
-!syntax children /Kernels/ADGravity<RESIDUAL>
+!syntax children /Kernels/ADGravity

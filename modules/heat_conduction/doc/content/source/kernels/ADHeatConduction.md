@@ -11,12 +11,12 @@ where $k$ denotes the thermal conductivity of the material. $k$ can either be an
 
 This class inherits from the [ADDiffusion](/ADDiffusion.md) class.
 
-!syntax description /Kernels/ADHeatConduction<RESIDUAL>
+!syntax description /Kernels/ADHeatConduction
 
-!syntax parameters /Kernels/ADHeatConduction<RESIDUAL>
+!syntax parameters /Kernels/ADHeatConduction
 
-!syntax inputs /Kernels/ADHeatConduction<RESIDUAL>
+!syntax inputs /Kernels/ADHeatConduction
 
-!syntax children /Kernels/ADHeatConduction<RESIDUAL>
+!syntax children /Kernels/ADHeatConduction
 
 !bibtex bibliography

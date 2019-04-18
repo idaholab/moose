@@ -19,8 +19,8 @@ where $u_h$ is the approximate solution and $\psi_i$ is a finite element test fu
 The Jacobian is given by automatic differentiation, and should be perfect as long as $c_p$ and $\rho$
 are provided using `ADMaterial` derived objects.
 
-!syntax parameters /Kernels/ADHeatConductionTimeDerivative<RESIDUAL>
+!syntax parameters /Kernels/ADHeatConductionTimeDerivative
 
-!syntax inputs /Kernels/ADHeatConductionTimeDerivative<RESIDUAL>
+!syntax inputs /Kernels/ADHeatConductionTimeDerivative
 
-!syntax children /Kernels/ADHeatConductionTimeDerivative<RESIDUAL>
+!syntax children /Kernels/ADHeatConductionTimeDerivative

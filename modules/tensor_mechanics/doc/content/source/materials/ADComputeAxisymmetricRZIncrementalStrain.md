@@ -1,6 +1,6 @@
 # ADComputeAxisymmetricRZIncrementalStrain
 
-!syntax description /Materials/ADComputeAxisymmetricRZIncrementalStrain<RESIDUAL>
+!syntax description /Materials/ADComputeAxisymmetricRZIncrementalStrain
 
 ## Description
 
@@ -14,8 +14,8 @@ deformation gradient is passed to the strain and rotation methods used by
 default 3D Cartesian simulations, as described in the
 [Incremental Finite Strain Class](ADComputeIncrementalSmallStrain.md) page.
 
-!syntax parameters /Materials/ADComputeAxisymmetricRZIncrementalStrain<RESIDUAL>
+!syntax parameters /Materials/ADComputeAxisymmetricRZIncrementalStrain
 
-!syntax inputs /Materials/ADComputeAxisymmetricRZIncrementalStrain<RESIDUAL>
+!syntax inputs /Materials/ADComputeAxisymmetricRZIncrementalStrain
 
-!syntax children /Materials/ADComputeAxisymmetricRZIncrementalStrain<RESIDUAL>
+!syntax children /Materials/ADComputeAxisymmetricRZIncrementalStrain

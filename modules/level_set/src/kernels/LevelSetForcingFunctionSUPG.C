@@ -10,35 +10,28 @@
 #include "LevelSetForcingFunctionSUPG.h"
 #include "Function.h"
 
-registerMooseObject("LevelSetApp", LevelSetForcingFunctionSUPG);
+registerADMooseObject("LevelSetApp", LevelSetForcingFunctionSUPG);
 
-template <>
-InputParameters
-validParams<LevelSetForcingFunctionSUPG>()
+defineADValidParams(
+    LevelSetForcingFunctionSUPG,
+    ADKernelGrad,
+    params.addClassDescription("The SUPG stablization term for a forcing function.");
+    params.addParam<FunctionName>("function", "1", "A function that describes the body force");
+    params += validParams<LevelSetVelocityInterface<>>(););
+
+template <ComputeStage compute_stage>
+LevelSetForcingFunctionSUPG<compute_stage>::LevelSetForcingFunctionSUPG(
+    const InputParameters & parameters)
+  : LevelSetVelocityInterface<ADKernelGrad<compute_stage>>(parameters),
+    _function(getFunction("function"))
 {
-  InputParameters params = validParams<BodyForce>();
-  params.addClassDescription("The SUPG stablization term for a forcing function.");
-  params += validParams<LevelSetVelocityInterface<>>();
-  return params;
 }
 
-LevelSetForcingFunctionSUPG::LevelSetForcingFunctionSUPG(const InputParameters & parameters)
-  : LevelSetVelocityInterface<BodyForce>(parameters)
-{
-}
-
-Real
-LevelSetForcingFunctionSUPG::computeQpResidual()
+template <ComputeStage compute_stage>
+ADVectorResidual
+LevelSetForcingFunctionSUPG<compute_stage>::precomputeQpResidual()
 {
   computeQpVelocity();
-  Real tau = _current_elem->hmin() / (2 * _velocity.norm());
-  return -tau * _velocity * _grad_test[_i][_qp] * _function.value(_t, _q_point[_qp]);
-}
-
-Real
-LevelSetForcingFunctionSUPG::computeQpJacobian()
-{
-  computeQpVelocity();
-  Real tau = _current_elem->hmin() / (2 * _velocity.norm());
-  return -tau * _velocity * _grad_test[_i][_qp] * _function.value(_t, _q_point[_qp]);
+  ADReal tau = _current_elem->hmin() / (2 * _velocity.norm());
+  return -tau * _velocity * _function.value(_t, _q_point[_qp]);
 }

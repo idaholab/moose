@@ -1,6 +1,6 @@
 # Compute R-Spherical Small Strain
 
-!syntax description /Materials/ADComputeRSphericalSmallStrain<RESIDUAL>
+!syntax description /Materials/ADComputeRSphericalSmallStrain
 
 ## Description
 
@@ -55,8 +55,8 @@ while the calculation of the total strain components $\epsilon_{\theta \theta}$
 and $\epsilon_{\phi \phi}$ are found with
 [eq:polar_azimuthal_rspherical_strains].
 
-!syntax parameters /Materials/ADComputeRSphericalSmallStrain<RESIDUAL>
+!syntax parameters /Materials/ADComputeRSphericalSmallStrain
 
-!syntax inputs /Materials/ADComputeRSphericalSmallStrain<RESIDUAL>
+!syntax inputs /Materials/ADComputeRSphericalSmallStrain
 
-!syntax children /Materials/ADComputeRSphericalSmallStrain<RESIDUAL>
+!syntax children /Materials/ADComputeRSphericalSmallStrain

@@ -1,6 +1,6 @@
 # ADComputeThermalExpansionEigenstrain
 
-!syntax description /Materials/ADComputeThermalExpansionEigenstrain<RESIDUAL>
+!syntax description /Materials/ADComputeThermalExpansionEigenstrain
 
 ## Description
 
@@ -26,8 +26,8 @@ calculator, and an example parameter setting is shown below:
 
 !listing modules/tensor_mechanics/test/tests/thermal_expansion/ad_constant_expansion_stress_free_temp.i block=Modules/TensorMechanics/Master
 
-!syntax parameters /Materials/ADComputeThermalExpansionEigenstrain<RESIDUAL>
+!syntax parameters /Materials/ADComputeThermalExpansionEigenstrain
 
-!syntax inputs /Materials/ADComputeThermalExpansionEigenstrain<RESIDUAL>
+!syntax inputs /Materials/ADComputeThermalExpansionEigenstrain
 
-!syntax children /Materials/ADComputeThermalExpansionEigenstrain<RESIDUAL>
+!syntax children /Materials/ADComputeThermalExpansionEigenstrain

@@ -9,36 +9,26 @@
 
 #include "LevelSetAdvectionSUPG.h"
 
-registerMooseObject("LevelSetApp", LevelSetAdvectionSUPG);
+registerADMooseObject("LevelSetApp", LevelSetAdvectionSUPG);
 
-template <>
-InputParameters
-validParams<LevelSetAdvectionSUPG>()
-{
-  InputParameters params = validParams<Kernel>();
-  params.addClassDescription(
-      "SUPG stablization term for the advection portion of the level set equation.");
-  params += validParams<LevelSetVelocityInterface<>>();
-  return params;
-}
+defineADValidParams(
+    LevelSetAdvectionSUPG,
+    ADKernelGrad,
+    params.addClassDescription(
+        "SUPG stablization term for the advection portion of the level set equation.");
+    params += validParams<LevelSetVelocityInterface<>>(););
 
-LevelSetAdvectionSUPG::LevelSetAdvectionSUPG(const InputParameters & parameters)
-  : LevelSetVelocityInterface<Kernel>(parameters)
+template <ComputeStage compute_stage>
+LevelSetAdvectionSUPG<compute_stage>::LevelSetAdvectionSUPG(const InputParameters & parameters)
+  : LevelSetVelocityInterface<ADKernelGrad<compute_stage>>(parameters)
 {
 }
 
-Real
-LevelSetAdvectionSUPG::computeQpResidual()
+template <ComputeStage compute_stage>
+ADVectorResidual
+LevelSetAdvectionSUPG<compute_stage>::precomputeQpResidual()
 {
   computeQpVelocity();
-  Real tau = _current_elem->hmin() / (2 * _velocity.norm());
-  return (tau * _velocity * _grad_test[_i][_qp]) * (_velocity * _grad_u[_qp]);
-}
-
-Real
-LevelSetAdvectionSUPG::computeQpJacobian()
-{
-  computeQpVelocity();
-  Real tau = _current_elem->hmin() / (2 * _velocity.norm());
-  return (tau * _velocity * _grad_test[_i][_qp]) * (_velocity * _grad_phi[_j][_qp]);
+  ADReal tau = _current_elem->hmin() / (2 * _velocity.norm());
+  return (tau * _velocity) * (_velocity * _grad_u[_qp]);
 }

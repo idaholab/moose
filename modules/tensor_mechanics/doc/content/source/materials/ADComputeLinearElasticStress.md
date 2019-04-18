@@ -1,6 +1,6 @@
 # ADComputeLinearElasticStress
 
-!syntax description /Materials/ADComputeLinearElasticStress<RESIDUAL>
+!syntax description /Materials/ADComputeLinearElasticStress
 
 ## Description
 
@@ -23,8 +23,8 @@ where $\boldsymbol{\epsilon}^{total}$ is the total strain formulation; this
 strain measure is also the sum of the mechanical elastic strain and any
 eigenstrains in the system.
 
-!syntax parameters /Materials/ADComputeLinearElasticStress<RESIDUAL>
+!syntax parameters /Materials/ADComputeLinearElasticStress
 
-!syntax inputs /Materials/ADComputeLinearElasticStress<RESIDUAL>
+!syntax inputs /Materials/ADComputeLinearElasticStress
 
-!syntax children /Materials/ADComputeLinearElasticStress<RESIDUAL>
+!syntax children /Materials/ADComputeLinearElasticStress

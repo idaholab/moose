@@ -1,6 +1,6 @@
 # ADComputeMultipleInelasticStress
 
-!syntax description /Materials/ADComputeMultipleInelasticStress<RESIDUAL>
+!syntax description /Materials/ADComputeMultipleInelasticStress
 
 ## Description
 
@@ -222,10 +222,10 @@ step size.
 
 !listing modules/tensor_mechanics/test/tests/material_limit_time_step/elas_plas/nafems_nl1_lim.i block=Materials/isoplas
 
-!syntax parameters /Materials/ADComputeMultipleInelasticStress<RESIDUAL>
+!syntax parameters /Materials/ADComputeMultipleInelasticStress
 
-!syntax inputs /Materials/ADComputeMultipleInelasticStress<RESIDUAL>
+!syntax inputs /Materials/ADComputeMultipleInelasticStress
 
-!syntax children /Materials/ADComputeMultipleInelasticStress<RESIDUAL>
+!syntax children /Materials/ADComputeMultipleInelasticStress
 
 !bibtex bibliography

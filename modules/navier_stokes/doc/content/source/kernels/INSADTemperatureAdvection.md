@@ -6,10 +6,10 @@ specific heat capacity,
 $\vec u$ is the velocity (represented by `_U` in the code), and $\nabla T$ is the temperature gradient
 (represented by `_grad_u` in the code).
 
-!syntax description /Kernels/INSADTemperatureAdvection<RESIDUAL>
+!syntax description /Kernels/INSADTemperatureAdvection
 
-!syntax parameters /Kernels/INSADTemperatureAdvection<RESIDUAL>
+!syntax parameters /Kernels/INSADTemperatureAdvection
 
-!syntax inputs /Kernels/INSADTemperatureAdvection<RESIDUAL>
+!syntax inputs /Kernels/INSADTemperatureAdvection
 
-!syntax children /Kernels/INSADTemperatureAdvection<RESIDUAL>
+!syntax children /Kernels/INSADTemperatureAdvection

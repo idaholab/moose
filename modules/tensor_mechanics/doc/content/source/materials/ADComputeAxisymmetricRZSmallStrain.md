@@ -1,6 +1,6 @@
 # ADComputeAxisymmetricRZSmallStrain
 
-!syntax description /Materials/ADComputeAxisymmetricRZSmallStrain<RESIDUAL>
+!syntax description /Materials/ADComputeAxisymmetricRZSmallStrain
 
 ## Description
 
@@ -15,8 +15,8 @@ axisymmetric problem. The axisymmetric specific
 calculate the total strain component $\epsilon_{\theta \theta}$ before
 calculating the total strain measure with the small strain assumptions.
 
-!syntax parameters /Materials/ADComputeAxisymmetricRZSmallStrain<RESIDUAL>
+!syntax parameters /Materials/ADComputeAxisymmetricRZSmallStrain
 
-!syntax inputs /Materials/ADComputeAxisymmetricRZSmallStrain<RESIDUAL>
+!syntax inputs /Materials/ADComputeAxisymmetricRZSmallStrain
 
-!syntax children /Materials/ADComputeAxisymmetricRZSmallStrain<RESIDUAL>
+!syntax children /Materials/ADComputeAxisymmetricRZSmallStrain

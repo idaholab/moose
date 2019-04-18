@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ADTimeKernel.h"
+#include "ADTimeKernelValue.h"
 
 // MOOSE includes
 #include "Assembly.h"
@@ -16,20 +16,22 @@
 
 #include "libmesh/quadrature.h"
 
-defineADValidParams(ADTimeKernel, ADKernel, params.set<MultiMooseEnum>("vector_tags") = "time";
+defineADValidParams(ADTimeKernelValue,
+                    ADKernelValue,
+                    params.set<MultiMooseEnum>("vector_tags") = "time";
                     params.set<MultiMooseEnum>("matrix_tags") = "system time";);
-defineADValidParams(ADVectorTimeKernel,
-                    ADVectorKernel,
+defineADValidParams(ADVectorTimeKernelValue,
+                    ADVectorKernelValue,
                     params.set<MultiMooseEnum>("vector_tags") = "time";
                     params.set<MultiMooseEnum>("matrix_tags") = "system time";);
 
 template <typename T, ComputeStage compute_stage>
-ADTimeKernelTempl<T, compute_stage>::ADTimeKernelTempl(const InputParameters & parameters)
-  : ADKernelTempl<T, compute_stage>(parameters), _u_dot(_var.template adUDot<compute_stage>())
+ADTimeKernelValueTempl<T, compute_stage>::ADTimeKernelValueTempl(const InputParameters & parameters)
+  : ADKernelValueTempl<T, compute_stage>(parameters), _u_dot(_var.template adUDot<compute_stage>())
 {
 }
 
-template class ADTimeKernelTempl<Real, RESIDUAL>;
-template class ADTimeKernelTempl<Real, JACOBIAN>;
-template class ADTimeKernelTempl<RealVectorValue, RESIDUAL>;
-template class ADTimeKernelTempl<RealVectorValue, JACOBIAN>;
+template class ADTimeKernelValueTempl<Real, RESIDUAL>;
+template class ADTimeKernelValueTempl<Real, JACOBIAN>;
+template class ADTimeKernelValueTempl<RealVectorValue, RESIDUAL>;
+template class ADTimeKernelValueTempl<RealVectorValue, JACOBIAN>;
