@@ -25,7 +25,7 @@
   active = 'diff'
 
   [./diff]
-    type = Diffusion
+    type = ADDiffusion
     variable = u
   [../]
 []
