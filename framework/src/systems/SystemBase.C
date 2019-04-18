@@ -303,6 +303,14 @@ SystemBase::prepareNeighbor(THREAD_ID tid)
 }
 
 void
+SystemBase::prepareLowerD(THREAD_ID tid)
+{
+  const std::vector<MooseVariableFEBase *> & vars = _vars[tid].fieldVariables();
+  for (const auto & var : vars)
+    var->prepareLowerD();
+}
+
+void
 SystemBase::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
 {
 

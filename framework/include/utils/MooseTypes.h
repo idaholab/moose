@@ -531,7 +531,12 @@ enum ConstraintJacobianType
   SlaveSlave = ElementElement,
   SlaveMaster = ElementNeighbor,
   MasterSlave = NeighborElement,
-  MasterMaster = NeighborNeighbor
+  MasterMaster = NeighborNeighbor,
+  LowerLower,
+  LowerSlave,
+  LowerMaster,
+  SlaveLower,
+  MasterLower
 };
 
 enum CoordinateSystemType

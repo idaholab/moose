@@ -354,9 +354,8 @@ public:
   /**
    * reinitialize FE objects on a given element on a given side at a given set of reference
    * points and then compute variable data. Note that this method makes no assumptions about what's
-   * been called beforehand, e.g. you don't have to call some prepare method before this one (these
-   * multiple "prepares" and "reinits" that have to be called in conjunction really obfuscate our
-   * assembly process. It's honestly terrible). This is an all-in-one reinit
+   * been called beforehand, e.g. you don't have to call some prepare method before this one. This
+   * is an all-in-one reinit
    */
   void reinitElemFaceRef(const Elem * elem,
                          unsigned int side,
@@ -378,6 +377,16 @@ public:
                              const std::vector<Point> * const pts,
                              const std::vector<Real> * const weights = nullptr,
                              THREAD_ID tid = 0);
+
+  /**
+   * reinitialize a lower dimensional FE object at a given set of reference points and then compute
+   * variable data. Note that this method makes no assumptions about what's been called beforehand,
+   * e.g. you don't have to call some prepare method before this one. This is an all-in-one reinit
+   */
+  void reinitLowerDElemRef(const Elem * elem,
+                           const std::vector<Point> * const pts,
+                           const std::vector<Real> * const weights = nullptr,
+                           THREAD_ID tid = 0);
 
   /**
    * Returns true if the Problem has Dirac kernels it needs to compute on elem.

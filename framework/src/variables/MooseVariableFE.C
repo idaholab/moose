@@ -30,6 +30,7 @@ MooseVariableFE<OutputType>::MooseVariableFE(unsigned int var_num,
     _elem(_assembly.elem()),
     _current_side(_assembly.side()),
     _neighbor(_assembly.neighbor()),
+    _lower_d_elem(_assembly.lowerDElem()),
     _need_u_old(false),
     _need_u_older(false),
     _need_u_previous_nl(false),
@@ -120,6 +121,8 @@ MooseVariableFE<OutputType>::MooseVariableFE(unsigned int var_num,
     _grad_phi_face_neighbor(_assembly.feGradPhiFaceNeighbor<OutputType>(_fe_type)),
     _ad_grad_phi(_assembly.feADGradPhi<OutputType>(_fe_type)),
     _ad_grad_phi_face(_assembly.feADGradPhiFace<OutputType>(_fe_type)),
+    _phi_lower(_assembly.fePhiLower<OutputType>(_fe_type)),
+    _grad_phi_lower(_assembly.feGradPhiLower<OutputType>(_fe_type)),
     _ad_u(),
     _ad_grad_u(),
     _ad_second_u(),
@@ -344,6 +347,13 @@ MooseVariableFE<OutputType>::prepareNeighbor()
   _dof_map.dof_indices(_neighbor, _dof_indices_neighbor, _var_num);
   _has_dof_values = false;
   _has_dof_values_neighbor = false;
+}
+
+template <typename OutputType>
+void
+MooseVariableFE<OutputType>::prepareLowerD()
+{
+  _dof_map.dof_indices(_lower_d_elem, _dof_indices_lower, _var_num);
 }
 
 template <typename OutputType>

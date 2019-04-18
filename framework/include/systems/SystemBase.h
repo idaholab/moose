@@ -490,6 +490,12 @@ public:
   virtual void prepareNeighbor(THREAD_ID tid);
 
   /**
+   * Prepare the system for use for lower dimensional elements
+   * @param tid ID of the thread
+   */
+  virtual void prepareLowerD(THREAD_ID tid);
+
+  /**
    * Reinit an element assembly info
    * @param elem Which element we are reinitializing for
    * @param tid ID of the thread

@@ -37,9 +37,21 @@ public:
    */
   virtual void clearDofIndices() = 0;
 
+  /**
+   * Prepare the elemental degrees of freedom
+   */
   virtual void prepare() = 0;
 
+  /**
+   * Prepare the neighbor element degrees of freedom
+   */
   virtual void prepareNeighbor() = 0;
+
+  /**
+   * Prepare a lower dimensional element's degrees of freedom
+   */
+  virtual void prepareLowerD() = 0;
+
   virtual void prepareAux() = 0;
 
   virtual void reinitNode() = 0;
@@ -154,6 +166,13 @@ public:
    * @return the neighbor degree of freedom indices
    */
   virtual std::vector<dof_id_type> & dofIndicesNeighbor() = 0;
+
+  /**
+   * Get dof indices for the current lower dimensional element (this is meaningful when performing
+   * mortar FEM)
+   * @return the lower dimensional element's dofs
+   */
+  virtual const std::vector<dof_id_type> & dofIndicesLower() const = 0;
 
   virtual unsigned int numberOfDofsNeighbor() = 0;
 

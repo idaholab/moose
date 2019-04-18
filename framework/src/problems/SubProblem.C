@@ -726,3 +726,26 @@ SubProblem::reinitNeighborFaceRef(const Elem * neighbor_elem,
   systemBaseNonlinear().reinitNeighbor(neighbor_elem, tid);
   systemBaseAuxiliary().reinitNeighbor(neighbor_elem, tid);
 }
+
+void
+SubProblem::reinitLowerDElemRef(const Elem * elem,
+                                const std::vector<Point> * const pts,
+                                const std::vector<Real> * const weights,
+                                THREAD_ID tid)
+{
+  // - Set our _current_lower_d_elem for proper dof index getting in the moose variables
+  // - Reinitialize all of our lower-d FE objects so we have current phi, dphi, etc. data
+  assembly(tid).reinitLowerDElemRef(elem, pts, weights);
+
+  // Actually get the dof indices in the moose variables
+  systemBaseNonlinear().prepareLowerD(tid);
+  systemBaseAuxiliary().prepareLowerD(tid);
+
+  // With the dof indices set in the moose variables, now let's properly size
+  // our local residuals/Jacobians
+  assembly(tid).prepareLowerD();
+
+  // // Let's finally compute our variable values!
+  // systemBaseNonlinear().reinitLowerDElem(elem, tid);
+  // systemBaseAuxiliary().reinitLowerDElem(elem, tid);
+}

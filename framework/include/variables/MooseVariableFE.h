@@ -72,8 +72,9 @@ public:
   void clearDofIndices() override;
 
   void prepare() override;
-
   void prepareNeighbor() override;
+  void prepareLowerD() override;
+
   void prepareAux() override;
 
   void reinitNode() override;
@@ -638,6 +639,11 @@ public:
 
   void getDofIndices(const Elem * elem, std::vector<dof_id_type> & dof_indices) override;
   std::vector<dof_id_type> & dofIndicesNeighbor() override { return _dof_indices_neighbor; }
+  virtual const std::vector<dof_id_type> & dofIndicesLower() const final
+  {
+    return _dof_indices_lower;
+  }
+
   unsigned int numberOfDofsNeighbor() override { return _dof_indices_neighbor.size(); }
 
   void insert(NumericVector<Number> & residual) override;
@@ -811,6 +817,11 @@ protected:
   /// DOF indices (neighbor)
   std::vector<dof_id_type> _dof_indices_neighbor;
 
+  /// lower d element
+  const Elem *& _lower_d_elem;
+
+  std::vector<dof_id_type> _dof_indices_lower;
+
   bool _need_u_old;
   bool _need_u_older;
   bool _need_u_previous_nl;
@@ -980,6 +991,11 @@ protected:
 
   const typename VariableTestGradientType<OutputShape, JACOBIAN>::type & _ad_grad_phi;
   const typename VariableTestGradientType<OutputShape, JACOBIAN>::type & _ad_grad_phi_face;
+
+  /// Reference to lower dimensional fe phi
+  const FieldVariablePhiValue & _phi_lower;
+  /// Reference to lower dimensional fe grad_phi
+  const FieldVariablePhiGradient & _grad_phi_lower;
 
   std::vector<FieldVariableValue> _vector_tag_u;
   std::vector<bool> _need_vector_tag_u;

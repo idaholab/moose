@@ -66,6 +66,8 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     _current_elem_volume_computed(false),
     _current_side_volume_computed(false),
 
+    _current_lower_d_elem(nullptr),
+
     _cached_residual_values(2), // The 2 is for TIME and NONTIME
     _cached_residual_rows(2),   // The 2 is for TIME and NONTIME
 
@@ -295,6 +297,48 @@ Assembly::buildFaceNeighborFE(FEType type)
 }
 
 void
+Assembly::buildLowerDFE(FEType type)
+{
+  if (!_fe_shape_data_lower[type])
+    _fe_shape_data_lower[type] = new FEShapeData;
+
+  // Build an FE object for this type for each dimension up to the dimension of
+  // the current mesh minus one (because this is for lower-dimensional
+  // elements!)
+  for (unsigned int dim = 0; dim <= _mesh_dimension - 1; dim++)
+  {
+    if (!_fe_lower[dim][type])
+      _fe_lower[dim][type] = FEGenericBase<Real>::build(dim, type).release();
+
+    _fe_lower[dim][type]->get_phi();
+    _fe_lower[dim][type]->get_dphi();
+    if (_need_second_derivative.find(type) != _need_second_derivative.end())
+      _fe_lower[dim][type]->get_d2phi();
+  }
+}
+
+void
+Assembly::buildVectorLowerDFE(FEType type)
+{
+  if (!_vector_fe_shape_data_lower[type])
+    _vector_fe_shape_data_lower[type] = new VectorFEShapeData;
+
+  // Build an FE object for this type for each dimension up to the dimension of
+  // the current mesh minus one (because this is for lower-dimensional
+  // elements!)
+  for (unsigned int dim = 0; dim <= _mesh_dimension - 1; dim++)
+  {
+    if (!_vector_fe_lower[dim][type])
+      _vector_fe_lower[dim][type] = FEVectorBase::build(dim, type).release();
+
+    _vector_fe_lower[dim][type]->get_phi();
+    _vector_fe_lower[dim][type]->get_dphi();
+    if (_need_second_derivative.find(type) != _need_second_derivative.end())
+      _vector_fe_lower[dim][type]->get_d2phi();
+  }
+}
+
+void
 Assembly::buildVectorFE(FEType type)
 {
   if (!_vector_fe_shape_data[type])
@@ -430,7 +474,7 @@ Assembly::createQRules(QuadratureType type, Order order, Order volume_order, Ord
 
   _holder_qrule_neighbor.clear();
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
-    _holder_qrule_neighbor[dim] = new ArbitraryQuadrature(dim, face_order);
+    _holder_qrule_neighbor[dim] = new ArbitraryQuadrature(dim - 1, face_order);
 
   _holder_qrule_arbitrary.clear();
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
@@ -438,7 +482,7 @@ Assembly::createQRules(QuadratureType type, Order order, Order volume_order, Ord
 
   _holder_qrule_arbitrary_face.clear();
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
-    _holder_qrule_arbitrary_face[dim] = new ArbitraryQuadrature(dim, order);
+    _holder_qrule_arbitrary_face[dim] = new ArbitraryQuadrature(dim - 1, face_order);
 }
 
 void
@@ -1837,6 +1881,38 @@ Assembly::reinitNeighborFaceRef(const Elem * neighbor,
 }
 
 void
+Assembly::reinitLowerDElemRef(const Elem * elem,
+                              const std::vector<Point> * const pts,
+                              const std::vector<Real> * const weights)
+{
+  mooseAssert(pts->size(),
+              "Currently reinitialization of lower d elements is only supported with custom "
+              "quadrature points; there is no fall-back quadrature rule. Consequently make sure "
+              "you never try to use JxW coming from a fe_lower object unless you are also passing "
+              "a weights argument");
+
+  _current_lower_d_elem = elem;
+
+  unsigned int elem_dim = elem->dim();
+
+  for (const auto & it : _fe_lower[elem_dim])
+  {
+    FEBase * fe_lower = it.second;
+    FEType fe_type = it.first;
+    FEShapeData * fesd = _fe_shape_data_lower[fe_type];
+
+    fe_lower->reinit(elem, pts, weights);
+
+    fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real>> &>(fe_lower->get_phi()));
+    fesd->_grad_phi.shallowCopy(
+        const_cast<std::vector<std::vector<RealGradient>> &>(fe_lower->get_dphi()));
+    if (_need_second_derivative_neighbor.find(fe_type) != _need_second_derivative_neighbor.end())
+      fesd->_second_phi.shallowCopy(
+          const_cast<std::vector<std::vector<TensorValue<Real>>> &>(fe_lower->get_d2phi()));
+  }
+}
+
+void
 Assembly::reinitNeighborAtPhysical(const Elem * neighbor,
                                    unsigned int neighbor_side,
                                    const std::vector<Point> & physical_points)
@@ -1932,6 +2008,65 @@ Assembly::jacobianBlockNeighbor(Moose::DGJacobianType type,
   }
 }
 
+DenseMatrix<Number> &
+Assembly::jacobianBlockLower(Moose::ConstraintJacobianType type,
+                             unsigned int ivar,
+                             unsigned int jvar,
+                             TagID tag /*=0*/)
+{
+  _jacobian_block_lower_used[tag][ivar][jvar] = 1;
+  if (_block_diagonal_matrix)
+  {
+    switch (type)
+    {
+      default:
+      case Moose::LowerLower:
+        return _sub_Kll[tag][ivar][0];
+      case Moose::LowerSlave:
+        return _sub_Kle[tag][ivar][0];
+      case Moose::LowerMaster:
+        return _sub_Kln[tag][ivar][0];
+      case Moose::SlaveLower:
+        return _sub_Kel[tag][ivar][0];
+      case Moose::SlaveSlave:
+        return _sub_Kee[tag][ivar][0];
+      case Moose::SlaveMaster:
+        return _sub_Ken[tag][ivar][0];
+      case Moose::MasterLower:
+        return _sub_Knl[tag][ivar][0];
+      case Moose::MasterSlave:
+        return _sub_Kne[tag][ivar][0];
+      case Moose::MasterMaster:
+        return _sub_Knn[tag][ivar][0];
+    }
+  }
+  else
+  {
+    switch (type)
+    {
+      default:
+      case Moose::LowerLower:
+        return _sub_Kll[tag][ivar][jvar];
+      case Moose::LowerSlave:
+        return _sub_Kle[tag][ivar][jvar];
+      case Moose::LowerMaster:
+        return _sub_Kln[tag][ivar][jvar];
+      case Moose::SlaveLower:
+        return _sub_Kel[tag][ivar][jvar];
+      case Moose::SlaveSlave:
+        return _sub_Kee[tag][ivar][jvar];
+      case Moose::SlaveMaster:
+        return _sub_Ken[tag][ivar][jvar];
+      case Moose::MasterLower:
+        return _sub_Knl[tag][ivar][jvar];
+      case Moose::MasterSlave:
+        return _sub_Kne[tag][ivar][jvar];
+      case Moose::MasterMaster:
+        return _sub_Knn[tag][ivar][jvar];
+    }
+  }
+}
+
 void
 Assembly::init(const CouplingMatrix * cm)
 {
@@ -1994,10 +2129,12 @@ Assembly::init(const CouplingMatrix * cm)
 
   _sub_Re.resize(num_vector_tags);
   _sub_Rn.resize(num_vector_tags);
+  _sub_Rl.resize(num_vector_tags);
   for (MooseIndex(_sub_Re) i = 0; i < _sub_Re.size(); i++)
   {
     _sub_Re[i].resize(n_vars);
     _sub_Rn[i].resize(n_vars);
+    _sub_Rl[i].resize(n_vars);
   }
 
   _cached_residual_values.resize(num_vector_tags);
@@ -2013,9 +2150,15 @@ Assembly::init(const CouplingMatrix * cm)
   _sub_Ken.resize(num_matrix_tags);
   _sub_Kne.resize(num_matrix_tags);
   _sub_Knn.resize(num_matrix_tags);
+  _sub_Kll.resize(num_matrix_tags);
+  _sub_Kle.resize(num_matrix_tags);
+  _sub_Kln.resize(num_matrix_tags);
+  _sub_Kel.resize(num_matrix_tags);
+  _sub_Knl.resize(num_matrix_tags);
 
   _jacobian_block_used.resize(num_matrix_tags);
   _jacobian_block_neighbor_used.resize(num_matrix_tags);
+  _jacobian_block_lower_used.resize(num_matrix_tags);
   _jacobian_block_nonlocal_used.resize(num_matrix_tags);
 
   for (MooseIndex(num_matrix_tags) tag = 0; tag < num_matrix_tags; tag++)
@@ -2025,9 +2168,15 @@ Assembly::init(const CouplingMatrix * cm)
     _sub_Kne[tag].resize(n_vars);
     _sub_Knn[tag].resize(n_vars);
     _sub_Kee[tag].resize(n_vars);
+    _sub_Kll[tag].resize(n_vars);
+    _sub_Kle[tag].resize(n_vars);
+    _sub_Kln[tag].resize(n_vars);
+    _sub_Kel[tag].resize(n_vars);
+    _sub_Knl[tag].resize(n_vars);
 
     _jacobian_block_used[tag].resize(n_vars);
     _jacobian_block_neighbor_used[tag].resize(n_vars);
+    _jacobian_block_lower_used[tag].resize(n_vars);
     _jacobian_block_nonlocal_used[tag].resize(n_vars);
     for (MooseIndex(n_vars) i = 0; i < n_vars; ++i)
     {
@@ -2038,6 +2187,11 @@ Assembly::init(const CouplingMatrix * cm)
         _sub_Ken[tag][i].resize(n_vars);
         _sub_Kne[tag][i].resize(n_vars);
         _sub_Knn[tag][i].resize(n_vars);
+        _sub_Kll[tag][i].resize(n_vars);
+        _sub_Kle[tag][i].resize(n_vars);
+        _sub_Kln[tag][i].resize(n_vars);
+        _sub_Kel[tag][i].resize(n_vars);
+        _sub_Knl[tag][i].resize(n_vars);
       }
       else
       {
@@ -2046,9 +2200,15 @@ Assembly::init(const CouplingMatrix * cm)
         _sub_Ken[tag][i].resize(1);
         _sub_Kne[tag][i].resize(1);
         _sub_Knn[tag][i].resize(1);
+        _sub_Kll[tag][i].resize(1);
+        _sub_Kle[tag][i].resize(1);
+        _sub_Kln[tag][i].resize(1);
+        _sub_Kel[tag][i].resize(1);
+        _sub_Knl[tag][i].resize(1);
       }
       _jacobian_block_used[tag][i].resize(n_vars);
       _jacobian_block_neighbor_used[tag][i].resize(n_vars);
+      _jacobian_block_lower_used[tag][i].resize(n_vars);
       _jacobian_block_nonlocal_used[tag][i].resize(n_vars);
     }
   }
@@ -2232,6 +2392,62 @@ Assembly::prepareNeighbor()
     {
       _sub_Rn[tag][var->number()].resize(var->dofIndicesNeighbor().size());
       _sub_Rn[tag][var->number()].zero();
+    }
+}
+
+void
+Assembly::prepareLowerD()
+{
+  for (const auto & it : _cm_ff_entry)
+  {
+    MooseVariableFEBase & ivar = *(it.first);
+    MooseVariableFEBase & jvar = *(it.second);
+
+    unsigned int vi = ivar.number();
+    unsigned int vj = jvar.number();
+
+    for (MooseIndex(_jacobian_block_lower_used) tag = 0; tag < _jacobian_block_lower_used.size();
+         tag++)
+    {
+      // To cover all possible cases we should have 9 combinations below for every 2-permutation of
+      // Lower,Slave,Master. However, 4 cases will in general be covered by calls to prepare() and
+      // prepareNeighbor(). These calls will cover SlaveSlave (ElementElement), SlaveMaster
+      // (ElementNeighbor), MasterSlave (NeighborElement), and MasterMaster (NeighborNeighbor). With
+      // these covered we only need to prepare the 5 remaining below
+
+      // derivatives w.r.t. lower dimensional residuals
+      jacobianBlockLower(Moose::LowerLower, vi, vj, tag)
+          .resize(ivar.dofIndicesLower().size(), jvar.dofIndicesLower().size());
+      jacobianBlockLower(Moose::LowerLower, vi, vj, tag).zero();
+
+      jacobianBlockLower(Moose::LowerSlave, vi, vj, tag)
+          .resize(ivar.dofIndicesLower().size(), jvar.dofIndices().size());
+      jacobianBlockLower(Moose::LowerSlave, vi, vj, tag).zero();
+
+      jacobianBlockLower(Moose::LowerMaster, vi, vj, tag)
+          .resize(ivar.dofIndicesLower().size(), jvar.dofIndicesNeighbor().size());
+      jacobianBlockLower(Moose::LowerMaster, vi, vj, tag).zero();
+
+      // derivatives w.r.t. interior slave residuals
+      jacobianBlockLower(Moose::SlaveLower, vi, vj, tag)
+          .resize(ivar.dofIndices().size(), jvar.dofIndicesLower().size());
+      jacobianBlockLower(Moose::SlaveLower, vi, vj, tag).zero();
+
+      // derivatives w.r.t. interior master residuals
+      jacobianBlockLower(Moose::MasterLower, vi, vj, tag)
+          .resize(ivar.dofIndicesNeighbor().size(), jvar.dofIndicesLower().size());
+      jacobianBlockLower(Moose::MasterLower, vi, vj, tag).zero();
+
+      _jacobian_block_lower_used[tag][vi][vj] = 0;
+    }
+  }
+
+  const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
+  for (const auto & var : vars)
+    for (MooseIndex(_sub_Rl) tag = 0; tag < _sub_Rl.size(); tag++)
+    {
+      _sub_Rl[tag][var->number()].resize(var->dofIndicesLower().size());
+      _sub_Rl[tag][var->number()].zero();
     }
 }
 
@@ -3254,6 +3470,22 @@ Assembly::feSecondPhi<VectorValue<Real>>(FEType type)
   _need_second_derivative[type] = true;
   buildVectorFE(type);
   return _vector_fe_shape_data[type]->_second_phi;
+}
+
+template <>
+const typename OutputTools<VectorValue<Real>>::VariablePhiValue &
+Assembly::fePhiLower<VectorValue<Real>>(FEType type)
+{
+  buildVectorFE(type);
+  return _vector_fe_shape_data_lower[type]->_phi;
+}
+
+template <>
+const typename OutputTools<VectorValue<Real>>::VariablePhiGradient &
+Assembly::feGradPhiLower<VectorValue<Real>>(FEType type)
+{
+  buildVectorFE(type);
+  return _vector_fe_shape_data_lower[type]->_grad_phi;
 }
 
 template <>

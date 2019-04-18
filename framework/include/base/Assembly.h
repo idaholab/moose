@@ -90,6 +90,12 @@ public:
   void buildFaceNeighborFE(FEType type);
 
   /**
+   * Build FEs for a lower dimensional element with a type
+   * @param type The type of FE
+   */
+  void buildLowerDFE(FEType type);
+
+  /**
    * Build Vector FEs with a type
    * @param type The type of FE
    */
@@ -112,6 +118,12 @@ public:
    * @param type The type of FE
    */
   void buildVectorFaceNeighborFE(FEType type);
+
+  /**
+   * Build Vector FEs for a lower dimensional element with a type
+   * @param type The type of FE
+   */
+  void buildVectorLowerDFE(FEType type);
 
   /**
    * Get a reference to a pointer that will contain the current volume FE.
@@ -373,6 +385,12 @@ public:
   const Elem *& neighbor() { return _current_neighbor_elem; }
 
   /**
+   * Return the lower dimensional element
+   * @return A _reference_.  Make sure to store this as a reference!
+   */
+  const Elem *& lowerDElem() { return _current_lower_d_elem; }
+
+  /**
    * Return the current subdomain ID
    */
   const SubdomainID & currentNeighborSubdomainID() const { return _current_neighbor_subdomain_id; }
@@ -475,6 +493,13 @@ public:
                              const std::vector<Real> * const weights = nullptr);
 
   /**
+   * Reinitialize FE data for a lower dimenesional element with a given set of reference points
+   */
+  void reinitLowerDElemRef(const Elem * elem,
+                           const std::vector<Point> * const pts,
+                           const std::vector<Real> * const weights = nullptr);
+
+  /**
    * Reinitialize the assembly data at specific physical point in the given element.
    */
   void reinitAtPhysical(const Elem * elem, const std::vector<Point> & physical_points);
@@ -554,6 +579,13 @@ public:
   void prepareVariable(MooseVariableFEBase * var);
   void prepareVariableNonlocal(MooseVariableFEBase * var);
   void prepareNeighbor();
+
+  /**
+   * Prepare the Jacobians and residuals for a lower dimensional element. This method may be called
+   * when performing mortar finite element simulations
+   */
+  void prepareLowerD();
+
   void prepareBlock(unsigned int ivar, unsigned jvar, const std::vector<dof_id_type> & dof_indices);
   void prepareBlockNonlocal(unsigned int ivar,
                             unsigned jvar,
@@ -706,6 +738,15 @@ public:
                                               unsigned int ivar,
                                               unsigned int jvar,
                                               TagID tag = 0);
+
+  /**
+   * Returns the jacobian block for the given mortar Jacobian type
+   */
+  DenseMatrix<Number> & jacobianBlockLower(Moose::ConstraintJacobianType type,
+                                           unsigned int ivar,
+                                           unsigned int jvar,
+                                           TagID tag = 0);
+
   void cacheJacobianBlock(DenseMatrix<Number> & jac_block,
                           std::vector<dof_id_type> & idof_indices,
                           std::vector<dof_id_type> & jdof_indices,
@@ -932,6 +973,12 @@ public:
     buildFE(type);
     return _fe_shape_data[type]->_second_phi;
   }
+
+  template <typename OutputType>
+  const typename OutputTools<OutputType>::VariablePhiValue & fePhiLower(FEType type);
+
+  template <typename OutputType>
+  const typename OutputTools<OutputType>::VariablePhiGradient & feGradPhiLower(FEType type);
 
   template <typename OutputType>
   const typename OutputTools<OutputType>::VariablePhiValue & fePhiFace(FEType type)
@@ -1198,6 +1245,8 @@ protected:
   std::vector<std::vector<std::vector<unsigned char>>> _jacobian_block_nonlocal_used;
   /// Flag that indicates if the jacobian block for neighbor was used
   std::vector<std::vector<std::vector<unsigned char>>> _jacobian_block_neighbor_used;
+  /// Flag that indicates if the jacobian block for the lower dimensional element was used
+  std::vector<std::vector<std::vector<unsigned char>>> _jacobian_block_lower_used;
   /// DOF map
   const DofMap & _dof_map;
   /// Thread number (id)
@@ -1310,6 +1359,11 @@ protected:
   std::map<unsigned int, FEBase **> _holder_fe_neighbor_helper;
   std::map<unsigned int, FEBase **> _holder_fe_face_neighbor_helper;
 
+  /// FE objects for lower dimensional elements
+  std::map<unsigned int, std::map<FEType, FEBase *>> _fe_lower;
+  /// Vector FE objects for lower dimensional elements
+  std::map<unsigned int, std::map<FEType, FEVectorBase *>> _vector_fe_lower;
+
   /// quadrature rule used on neighbors
   QBase * _current_qrule_neighbor;
   /// Holds arbitrary qrules for each dimension
@@ -1352,6 +1406,9 @@ protected:
   /// Boolean to indicate whether current element side volumes has been computed
   bool _current_side_volume_computed;
 
+  /// The current lower dimensional element
+  const Elem * _current_lower_d_elem;
+
   /// This will be filled up with the physical points passed into reinitAtPhysical() if it is called.  Invalid at all other times.
   MooseArray<Point> _current_physical_points;
 
@@ -1359,6 +1416,8 @@ protected:
   std::vector<std::vector<DenseVector<Number>>> _sub_Re;
   /// residual contributions for each variable from the neighbor
   std::vector<std::vector<DenseVector<Number>>> _sub_Rn;
+  /// residual contributions for each variable from the lower dimensional element
+  std::vector<std::vector<DenseVector<Number>>> _sub_Rl;
   /// auxiliary vector for scaling residuals (optimization to avoid expensive construction/destruction)
   DenseVector<Number> _tmp_Re;
 
@@ -1372,6 +1431,16 @@ protected:
   std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Kne;
   /// jacobian contributions from the neighbor <Tag, ivar, jvar>
   std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Knn;
+  /// dlower/dlower
+  std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Kll;
+  /// dlower/dslave (or dlower/delement)
+  std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Kle;
+  /// dlower/dmaster (or dlower/dneighbor)
+  std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Kln;
+  /// dslave/dlower (or delement/dlower)
+  std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Kel;
+  /// dmaster/dlower (or dneighbor/dlower)
+  std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Knl;
 
   /// auxiliary matrix for scaling jacobians (optimization to avoid expensive construction/destruction)
   DenseMatrix<Number> _tmp_Ke;
@@ -1437,12 +1506,14 @@ protected:
   std::map<FEType, FEShapeData *> _fe_shape_data_face;
   std::map<FEType, FEShapeData *> _fe_shape_data_neighbor;
   std::map<FEType, FEShapeData *> _fe_shape_data_face_neighbor;
+  std::map<FEType, FEShapeData *> _fe_shape_data_lower;
 
   /// Shape function values, gradients, second derivatives for each vector FE type
   std::map<FEType, VectorFEShapeData *> _vector_fe_shape_data;
   std::map<FEType, VectorFEShapeData *> _vector_fe_shape_data_face;
   std::map<FEType, VectorFEShapeData *> _vector_fe_shape_data_neighbor;
   std::map<FEType, VectorFEShapeData *> _vector_fe_shape_data_face_neighbor;
+  std::map<FEType, VectorFEShapeData *> _vector_fe_shape_data_lower;
 
   std::map<FEType, typename VariableTestGradientType<Real, ComputeStage::JACOBIAN>::type>
       _ad_grad_phi_data;
@@ -1518,6 +1589,22 @@ protected:
   mutable bool _calculate_face_xyz;
   mutable bool _calculate_curvatures;
 };
+
+template <typename OutputType>
+const typename OutputTools<OutputType>::VariablePhiValue &
+Assembly::fePhiLower(FEType type)
+{
+  buildLowerDFE(type);
+  return _fe_shape_data_lower[type]->_phi;
+}
+
+template <typename OutputType>
+const typename OutputTools<OutputType>::VariablePhiGradient &
+Assembly::feGradPhiLower(FEType type)
+{
+  buildLowerDFE(type);
+  return _fe_shape_data_lower[type]->_grad_phi;
+}
 
 template <>
 inline const typename VariableTestGradientType<RealVectorValue, ComputeStage::JACOBIAN>::type &
@@ -1601,6 +1688,14 @@ Assembly::feGradPhi<VectorValue<Real>>(FEType type);
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiSecond &
 Assembly::feSecondPhi<VectorValue<Real>>(FEType type);
+
+template <>
+const typename OutputTools<VectorValue<Real>>::VariablePhiValue &
+Assembly::fePhiLower<VectorValue<Real>>(FEType type);
+
+template <>
+const typename OutputTools<VectorValue<Real>>::VariablePhiGradient &
+Assembly::feGradPhiLower<VectorValue<Real>>(FEType type);
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiValue &
