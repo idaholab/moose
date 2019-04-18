@@ -1265,11 +1265,5 @@ template <>
 const VariableGradient & Coupleable::adZeroGradientTemplate<RESIDUAL>();
 template <>
 const VariableSecond & Coupleable::adZeroSecondTemplate<RESIDUAL>();
-template <>
-const RealVectorValue &
-Coupleable::getNodalDefaultValue<RealVectorValue>(const std::string & var_name, unsigned int comp);
-template <>
-MooseVariableFE<RealVectorValue> *
-Coupleable::getVarHelper<RealVectorValue>(const std::string & var_name, unsigned int comp);
 
 #endif /* COUPLEABLE_H */

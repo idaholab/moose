@@ -289,21 +289,21 @@ public:
     secondPhiFace();
     return _second_u_previous_nl;
   }
-  const FieldVariableValue & curlSln()
+  const FieldVariableCurl & curlSln()
   {
     _need_curl = true;
     curlPhi();
     curlPhiFace();
     return _curl_u;
   }
-  const FieldVariableValue & curlSlnOld()
+  const FieldVariableCurl & curlSlnOld()
   {
     _need_curl_old = true;
     curlPhi();
     curlPhiFace();
     return _curl_u_old;
   }
-  const FieldVariableValue & curlSlnOlder()
+  const FieldVariableCurl & curlSlnOlder()
   {
     _need_curl_older = true;
     curlPhi();
