@@ -137,6 +137,7 @@ FeatureVolumeVectorPostprocessor::execute()
 
           if (elem->processor_id() == rank)
           {
+            _fe_problem.setCurrentSubdomainID(elem, 0);
             _fe_problem.prepare(elem, 0);
             _fe_problem.reinitElem(elem, 0);
             _fe_problem.reinitElemFace(elem, (*elem_it)->_side, (*elem_it)->_bnd_id, 0);
@@ -150,6 +151,7 @@ FeatureVolumeVectorPostprocessor::execute()
   else // If no boundary is supplied, calculate volumes of features as normal
     for (const auto & elem : _mesh.getMesh().active_local_element_ptr_range())
     {
+      _fe_problem.setCurrentSubdomainID(elem, 0);
       _fe_problem.prepare(elem, 0);
       _fe_problem.reinitElem(elem, 0);
 
