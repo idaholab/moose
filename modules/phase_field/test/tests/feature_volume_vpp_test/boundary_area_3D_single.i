@@ -1,15 +1,15 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 18
-  ny = 30
-  nz = 30
-  xmin = 10
-  xmax = 40
+  nx = 6
+  ny = 25
+  nz = 15
+  xmin = 20
+  xmax = 30
   ymin = 0
   ymax = 50
-  zmin = 0
-  zmax = 50
+  zmin = 10
+  zmax = 40
   elem_type = HEX8
 []
 
@@ -42,13 +42,6 @@
   []
 []
 
-[AuxVariables]
-  [./unique_regions]
-    family = MONOMIAL
-    order = CONSTANT
-  [../]
-[]
-
 [ICs]
   [./c]
     type = SpecifiedSmoothCircleIC
@@ -57,8 +50,8 @@
     outvalue = 0.0
     radii =       '4    5  10'
     x_positions = '25   25 25'
-    y_positions = '37.5 25 0'
-    z_positions = '10   35 25'
+    y_positions = '40 25 0'
+    z_positions = '25   25 25'
     int_width = 2.0
   []
 []
@@ -93,15 +86,6 @@
     type = Diffusion
     variable = c
   []
-[]
-
-[AuxKernels]
-  [./unique_regions]
-    type = FeatureFloodCountAux
-    variable = unique_regions
-    flood_counter = flood_count
-    field_display = UNIQUE_REGION
-  [../]
 []
 
 [Problem]
