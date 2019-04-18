@@ -25,8 +25,8 @@
     ymax = 5
   [../]
 
-  [./merge]
-    type = MergedMeshGenerator
+  [./left_and_right]
+    type = MeshCollectionGenerator
     inputs = 'left right'
   [../]
 []

@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MergedMeshGenerator.h"
+#include "MeshCollectionGenerator.h"
 
 #include "CastUniquePointer.h"
 #include "MooseUtils.h"
@@ -15,19 +15,19 @@
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/unstructured_mesh.h"
 
-registerMooseObject("MooseApp", MergedMeshGenerator);
+registerMooseObject("MooseApp", MeshCollectionGenerator);
 
 template <>
 InputParameters
-validParams<MergedMeshGenerator>()
+validParams<MeshCollectionGenerator>()
 {
   InputParameters params = validParams<MeshGenerator>();
-  params.addClassDescription("Merge multiple meshes into a single unconnected mesh.");
+  params.addClassDescription("Collects multiple meshes into a single (unconnected) mesh.");
   params.addRequiredParam<std::vector<MeshGeneratorName>>("inputs", "The input MeshGenerators.");
   return params;
 }
 
-MergedMeshGenerator::MergedMeshGenerator(const InputParameters & parameters)
+MeshCollectionGenerator::MeshCollectionGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters), _input_names(getParam<std::vector<MeshGeneratorName>>("inputs"))
 {
   // error check
@@ -40,7 +40,7 @@ MergedMeshGenerator::MergedMeshGenerator(const InputParameters & parameters)
 }
 
 std::unique_ptr<MeshBase>
-MergedMeshGenerator::generate()
+MeshCollectionGenerator::generate()
 {
   // merge all meshes into the first one
   auto mesh = dynamic_pointer_cast<UnstructuredMesh>(*_meshes[0]);

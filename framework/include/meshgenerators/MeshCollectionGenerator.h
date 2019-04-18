@@ -7,26 +7,26 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MERGEDMESHGENERATOR_H
-#define MERGEDMESHGENERATOR_H
+#ifndef MESHCOLLECTIONGENERATOR_H
+#define MESHCOLLECTIONGENERATOR_H
 
 #include "MeshGenerator.h"
 #include "libmesh/replicated_mesh.h"
 #include "MooseEnum.h"
 
 // Forward declarations
-class MergedMeshGenerator;
+class MeshCollectionGenerator;
 
 template <>
-InputParameters validParams<MergedMeshGenerator>();
+InputParameters validParams<MeshCollectionGenerator>();
 
 /**
- * Merge multiple meshes into a single unconnected mesh
+ * Collects multiple meshes into a single (unconnected) mesh
  */
-class MergedMeshGenerator : public MeshGenerator
+class MeshCollectionGenerator : public MeshGenerator
 {
 public:
-  MergedMeshGenerator(const InputParameters & parameters);
+  MeshCollectionGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 
@@ -38,4 +38,4 @@ protected:
   std::vector<std::unique_ptr<MeshBase> *> _meshes;
 };
 
-#endif // MERGEDMESHGENERATOR_H
+#endif // MESHCOLLECTIONGENERATOR_H

@@ -56,7 +56,7 @@ public:
 
   virtual void initialSetup() override;
 
-  /// Legacy method that clamps at min_gao
+  /// Legacy method that clamps at min_gap
   static Real gapLength(
       const GAP_GEOMETRY & gap_geom, Real radius, Real r1, Real r2, Real min_gap, Real max_gap)
   {
