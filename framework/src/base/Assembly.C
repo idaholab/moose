@@ -217,7 +217,7 @@ Assembly::~Assembly()
 }
 
 void
-Assembly::buildFE(FEType type)
+Assembly::buildFE(FEType type) const
 {
   if (!_fe_shape_data[type])
     _fe_shape_data[type] = new FEShapeData;
@@ -226,7 +226,7 @@ Assembly::buildFE(FEType type)
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
   {
     if (!_fe[dim][type])
-      _fe[dim][type] = FEGenericBase<Real>::build(dim, type).release();
+      _const_fe[dim][type] = _fe[dim][type] = FEGenericBase<Real>::build(dim, type).release();
 
     _fe[dim][type]->get_phi();
     _fe[dim][type]->get_dphi();
@@ -240,7 +240,7 @@ Assembly::buildFE(FEType type)
 }
 
 void
-Assembly::buildFaceFE(FEType type)
+Assembly::buildFaceFE(FEType type) const
 {
   if (!_fe_shape_data_face[type])
     _fe_shape_data_face[type] = new FEShapeData;
@@ -249,7 +249,8 @@ Assembly::buildFaceFE(FEType type)
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
   {
     if (!_fe_face[dim][type])
-      _fe_face[dim][type] = FEGenericBase<Real>::build(dim, type).release();
+      _const_fe_face[dim][type] = _fe_face[dim][type] =
+          FEGenericBase<Real>::build(dim, type).release();
 
     _fe_face[dim][type]->get_phi();
     _fe_face[dim][type]->get_dphi();
@@ -259,7 +260,7 @@ Assembly::buildFaceFE(FEType type)
 }
 
 void
-Assembly::buildNeighborFE(FEType type)
+Assembly::buildNeighborFE(FEType type) const
 {
   if (!_fe_shape_data_neighbor[type])
     _fe_shape_data_neighbor[type] = new FEShapeData;
@@ -268,7 +269,8 @@ Assembly::buildNeighborFE(FEType type)
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
   {
     if (!_fe_neighbor[dim][type])
-      _fe_neighbor[dim][type] = FEGenericBase<Real>::build(dim, type).release();
+      _const_fe_neighbor[dim][type] = _fe_neighbor[dim][type] =
+          FEGenericBase<Real>::build(dim, type).release();
 
     _fe_neighbor[dim][type]->get_phi();
     _fe_neighbor[dim][type]->get_dphi();
@@ -278,7 +280,7 @@ Assembly::buildNeighborFE(FEType type)
 }
 
 void
-Assembly::buildFaceNeighborFE(FEType type)
+Assembly::buildFaceNeighborFE(FEType type) const
 {
   if (!_fe_shape_data_face_neighbor[type])
     _fe_shape_data_face_neighbor[type] = new FEShapeData;
@@ -287,7 +289,8 @@ Assembly::buildFaceNeighborFE(FEType type)
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
   {
     if (!_fe_face_neighbor[dim][type])
-      _fe_face_neighbor[dim][type] = FEGenericBase<Real>::build(dim, type).release();
+      _const_fe_face_neighbor[dim][type] = _fe_face_neighbor[dim][type] =
+          FEGenericBase<Real>::build(dim, type).release();
 
     _fe_face_neighbor[dim][type]->get_phi();
     _fe_face_neighbor[dim][type]->get_dphi();
@@ -297,7 +300,7 @@ Assembly::buildFaceNeighborFE(FEType type)
 }
 
 void
-Assembly::buildLowerDFE(FEType type)
+Assembly::buildLowerDFE(FEType type) const
 {
   if (!_fe_shape_data_lower[type])
     _fe_shape_data_lower[type] = new FEShapeData;
@@ -308,7 +311,8 @@ Assembly::buildLowerDFE(FEType type)
   for (unsigned int dim = 0; dim <= _mesh_dimension - 1; dim++)
   {
     if (!_fe_lower[dim][type])
-      _fe_lower[dim][type] = FEGenericBase<Real>::build(dim, type).release();
+      _const_fe_lower[dim][type] = _fe_lower[dim][type] =
+          FEGenericBase<Real>::build(dim, type).release();
 
     _fe_lower[dim][type]->get_phi();
     _fe_lower[dim][type]->get_dphi();
@@ -318,7 +322,7 @@ Assembly::buildLowerDFE(FEType type)
 }
 
 void
-Assembly::buildVectorLowerDFE(FEType type)
+Assembly::buildVectorLowerDFE(FEType type) const
 {
   if (!_vector_fe_shape_data_lower[type])
     _vector_fe_shape_data_lower[type] = new VectorFEShapeData;
@@ -329,7 +333,8 @@ Assembly::buildVectorLowerDFE(FEType type)
   for (unsigned int dim = 0; dim <= _mesh_dimension - 1; dim++)
   {
     if (!_vector_fe_lower[dim][type])
-      _vector_fe_lower[dim][type] = FEVectorBase::build(dim, type).release();
+      _const_vector_fe_lower[dim][type] = _vector_fe_lower[dim][type] =
+          FEVectorBase::build(dim, type).release();
 
     _vector_fe_lower[dim][type]->get_phi();
     _vector_fe_lower[dim][type]->get_dphi();
@@ -339,7 +344,7 @@ Assembly::buildVectorLowerDFE(FEType type)
 }
 
 void
-Assembly::buildVectorFE(FEType type)
+Assembly::buildVectorFE(FEType type) const
 {
   if (!_vector_fe_shape_data[type])
     _vector_fe_shape_data[type] = new VectorFEShapeData;
@@ -356,7 +361,8 @@ Assembly::buildVectorFE(FEType type)
   for (unsigned int dim = min_dim; dim <= _mesh_dimension; dim++)
   {
     if (!_vector_fe[dim][type])
-      _vector_fe[dim][type] = FEGenericBase<VectorValue<Real>>::build(dim, type).release();
+      _const_vector_fe[dim][type] = _vector_fe[dim][type] =
+          FEGenericBase<VectorValue<Real>>::build(dim, type).release();
 
     _vector_fe[dim][type]->get_phi();
     _vector_fe[dim][type]->get_dphi();
@@ -370,7 +376,7 @@ Assembly::buildVectorFE(FEType type)
 }
 
 void
-Assembly::buildVectorFaceFE(FEType type)
+Assembly::buildVectorFaceFE(FEType type) const
 {
   if (!_vector_fe_shape_data_face[type])
     _vector_fe_shape_data_face[type] = new VectorFEShapeData;
@@ -388,7 +394,8 @@ Assembly::buildVectorFaceFE(FEType type)
   for (unsigned int dim = min_dim; dim <= _mesh_dimension; dim++)
   {
     if (!_vector_fe_face[dim][type])
-      _vector_fe_face[dim][type] = FEGenericBase<VectorValue<Real>>::build(dim, type).release();
+      _const_vector_fe_face[dim][type] = _vector_fe_face[dim][type] =
+          FEGenericBase<VectorValue<Real>>::build(dim, type).release();
 
     _vector_fe_face[dim][type]->get_phi();
     _vector_fe_face[dim][type]->get_dphi();
@@ -398,7 +405,7 @@ Assembly::buildVectorFaceFE(FEType type)
 }
 
 void
-Assembly::buildVectorNeighborFE(FEType type)
+Assembly::buildVectorNeighborFE(FEType type) const
 {
   if (!_vector_fe_shape_data_neighbor[type])
     _vector_fe_shape_data_neighbor[type] = new VectorFEShapeData;
@@ -416,7 +423,8 @@ Assembly::buildVectorNeighborFE(FEType type)
   for (unsigned int dim = min_dim; dim <= _mesh_dimension; dim++)
   {
     if (!_vector_fe_neighbor[dim][type])
-      _vector_fe_neighbor[dim][type] = FEGenericBase<VectorValue<Real>>::build(dim, type).release();
+      _const_vector_fe_neighbor[dim][type] = _vector_fe_neighbor[dim][type] =
+          FEGenericBase<VectorValue<Real>>::build(dim, type).release();
 
     _vector_fe_neighbor[dim][type]->get_phi();
     _vector_fe_neighbor[dim][type]->get_dphi();
@@ -426,7 +434,7 @@ Assembly::buildVectorNeighborFE(FEType type)
 }
 
 void
-Assembly::buildVectorFaceNeighborFE(FEType type)
+Assembly::buildVectorFaceNeighborFE(FEType type) const
 {
   if (!_vector_fe_shape_data_face_neighbor[type])
     _vector_fe_shape_data_face_neighbor[type] = new VectorFEShapeData;
@@ -444,7 +452,7 @@ Assembly::buildVectorFaceNeighborFE(FEType type)
   for (unsigned int dim = min_dim; dim <= _mesh_dimension; dim++)
   {
     if (!_vector_fe_face_neighbor[dim][type])
-      _vector_fe_face_neighbor[dim][type] =
+      _const_vector_fe_face_neighbor[dim][type] = _vector_fe_face_neighbor[dim][type] =
           FEGenericBase<VectorValue<Real>>::build(dim, type).release();
 
     _vector_fe_face_neighbor[dim][type]->get_phi();
@@ -455,7 +463,7 @@ Assembly::buildVectorFaceNeighborFE(FEType type)
 }
 
 const Real &
-Assembly::neighborVolume()
+Assembly::neighborVolume() const
 {
   _need_neighbor_elem_volume = true;
   return _current_neighbor_volume;
@@ -488,37 +496,37 @@ Assembly::createQRules(QuadratureType type, Order order, Order volume_order, Ord
 void
 Assembly::setVolumeQRule(QBase * qrule, unsigned int dim)
 {
-  _current_qrule = qrule;
+  _const_current_qrule = _current_qrule = qrule;
 
   if (qrule) // Don't set a NULL qrule
   {
     for (auto & it : _fe[dim])
-      it.second->attach_quadrature_rule(_current_qrule);
+      it.second->attach_quadrature_rule(qrule);
     for (auto & it : _vector_fe[dim])
-      it.second->attach_quadrature_rule(_current_qrule);
+      it.second->attach_quadrature_rule(qrule);
   }
 }
 
 void
 Assembly::setFaceQRule(QBase * qrule, unsigned int dim)
 {
-  _current_qrule_face = qrule;
+  _const_current_qrule_face = _current_qrule_face = qrule;
 
   for (auto & it : _fe_face[dim])
-    it.second->attach_quadrature_rule(_current_qrule_face);
+    it.second->attach_quadrature_rule(qrule);
   for (auto & it : _vector_fe_face[dim])
-    it.second->attach_quadrature_rule(_current_qrule_face);
+    it.second->attach_quadrature_rule(qrule);
 }
 
 void
 Assembly::setNeighborQRule(QBase * qrule, unsigned int dim)
 {
-  _current_qrule_neighbor = qrule;
+  _const_current_qrule_face = _current_qrule_neighbor = qrule;
 
   for (auto & it : _fe_face_neighbor[dim])
-    it.second->attach_quadrature_rule(_current_qrule_neighbor);
+    it.second->attach_quadrature_rule(qrule);
   for (auto & it : _vector_fe_face_neighbor[dim])
-    it.second->attach_quadrature_rule(_current_qrule_neighbor);
+    it.second->attach_quadrature_rule(qrule);
 }
 
 void
@@ -2659,7 +2667,7 @@ void
 Assembly::cacheResidualBlock(std::vector<Real> & cached_residual_values,
                              std::vector<dof_id_type> & cached_residual_rows,
                              DenseVector<Number> & res_block,
-                             std::vector<dof_id_type> & dof_indices,
+                             const std::vector<dof_id_type> & dof_indices,
                              Real scaling_factor)
 {
   if (dof_indices.size() > 0 && res_block.size())
@@ -2860,7 +2868,7 @@ Assembly::addCachedResidual(NumericVector<Number> & residual, TagID tag_id)
 void
 Assembly::setResidualBlock(NumericVector<Number> & residual,
                            DenseVector<Number> & res_block,
-                           std::vector<dof_id_type> & dof_indices,
+                           const std::vector<dof_id_type> & dof_indices,
                            Real scaling_factor)
 {
   if (dof_indices.size() > 0)
@@ -2923,8 +2931,8 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
 
 void
 Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block,
-                             std::vector<dof_id_type> & idof_indices,
-                             std::vector<dof_id_type> & jdof_indices,
+                             const std::vector<dof_id_type> & idof_indices,
+                             const std::vector<dof_id_type> & jdof_indices,
                              Real scaling_factor,
                              TagID tag /*=0*/)
 {
@@ -3449,7 +3457,7 @@ Assembly::modifyFaceWeightsDueToXFEM(const Elem * elem, unsigned int side)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiValue &
-Assembly::fePhi<VectorValue<Real>>(FEType type)
+Assembly::fePhi<VectorValue<Real>>(FEType type) const
 {
   buildVectorFE(type);
   return _vector_fe_shape_data[type]->_phi;
@@ -3457,7 +3465,7 @@ Assembly::fePhi<VectorValue<Real>>(FEType type)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiGradient &
-Assembly::feGradPhi<VectorValue<Real>>(FEType type)
+Assembly::feGradPhi<VectorValue<Real>>(FEType type) const
 {
   buildVectorFE(type);
   return _vector_fe_shape_data[type]->_grad_phi;
@@ -3465,7 +3473,7 @@ Assembly::feGradPhi<VectorValue<Real>>(FEType type)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiSecond &
-Assembly::feSecondPhi<VectorValue<Real>>(FEType type)
+Assembly::feSecondPhi<VectorValue<Real>>(FEType type) const
 {
   _need_second_derivative[type] = true;
   buildVectorFE(type);
@@ -3474,7 +3482,7 @@ Assembly::feSecondPhi<VectorValue<Real>>(FEType type)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiValue &
-Assembly::fePhiLower<VectorValue<Real>>(FEType type)
+Assembly::fePhiLower<VectorValue<Real>>(FEType type) const
 {
   buildVectorFE(type);
   return _vector_fe_shape_data_lower[type]->_phi;
@@ -3482,7 +3490,7 @@ Assembly::fePhiLower<VectorValue<Real>>(FEType type)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiGradient &
-Assembly::feGradPhiLower<VectorValue<Real>>(FEType type)
+Assembly::feGradPhiLower<VectorValue<Real>>(FEType type) const
 {
   buildVectorFE(type);
   return _vector_fe_shape_data_lower[type]->_grad_phi;
@@ -3490,7 +3498,7 @@ Assembly::feGradPhiLower<VectorValue<Real>>(FEType type)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiValue &
-Assembly::fePhiFace<VectorValue<Real>>(FEType type)
+Assembly::fePhiFace<VectorValue<Real>>(FEType type) const
 {
   buildVectorFaceFE(type);
   return _vector_fe_shape_data_face[type]->_phi;
@@ -3498,7 +3506,7 @@ Assembly::fePhiFace<VectorValue<Real>>(FEType type)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiGradient &
-Assembly::feGradPhiFace<VectorValue<Real>>(FEType type)
+Assembly::feGradPhiFace<VectorValue<Real>>(FEType type) const
 {
   buildVectorFaceFE(type);
   return _vector_fe_shape_data_face[type]->_grad_phi;
@@ -3506,7 +3514,7 @@ Assembly::feGradPhiFace<VectorValue<Real>>(FEType type)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiSecond &
-Assembly::feSecondPhiFace<VectorValue<Real>>(FEType type)
+Assembly::feSecondPhiFace<VectorValue<Real>>(FEType type) const
 {
   _need_second_derivative[type] = true;
   buildVectorFaceFE(type);
@@ -3515,7 +3523,7 @@ Assembly::feSecondPhiFace<VectorValue<Real>>(FEType type)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiValue &
-Assembly::fePhiNeighbor<VectorValue<Real>>(FEType type)
+Assembly::fePhiNeighbor<VectorValue<Real>>(FEType type) const
 {
   buildVectorNeighborFE(type);
   return _vector_fe_shape_data_neighbor[type]->_phi;
@@ -3523,7 +3531,7 @@ Assembly::fePhiNeighbor<VectorValue<Real>>(FEType type)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiGradient &
-Assembly::feGradPhiNeighbor<VectorValue<Real>>(FEType type)
+Assembly::feGradPhiNeighbor<VectorValue<Real>>(FEType type) const
 {
   buildVectorNeighborFE(type);
   return _vector_fe_shape_data_neighbor[type]->_grad_phi;
@@ -3531,7 +3539,7 @@ Assembly::feGradPhiNeighbor<VectorValue<Real>>(FEType type)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiSecond &
-Assembly::feSecondPhiNeighbor<VectorValue<Real>>(FEType type)
+Assembly::feSecondPhiNeighbor<VectorValue<Real>>(FEType type) const
 {
   _need_second_derivative_neighbor[type] = true;
   buildVectorNeighborFE(type);
@@ -3540,7 +3548,7 @@ Assembly::feSecondPhiNeighbor<VectorValue<Real>>(FEType type)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiValue &
-Assembly::fePhiFaceNeighbor<VectorValue<Real>>(FEType type)
+Assembly::fePhiFaceNeighbor<VectorValue<Real>>(FEType type) const
 {
   buildVectorFaceNeighborFE(type);
   return _vector_fe_shape_data_face_neighbor[type]->_phi;
@@ -3548,7 +3556,7 @@ Assembly::fePhiFaceNeighbor<VectorValue<Real>>(FEType type)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiGradient &
-Assembly::feGradPhiFaceNeighbor<VectorValue<Real>>(FEType type)
+Assembly::feGradPhiFaceNeighbor<VectorValue<Real>>(FEType type) const
 {
   buildVectorFaceNeighborFE(type);
   return _vector_fe_shape_data_face_neighbor[type]->_grad_phi;
@@ -3556,7 +3564,7 @@ Assembly::feGradPhiFaceNeighbor<VectorValue<Real>>(FEType type)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiSecond &
-Assembly::feSecondPhiFaceNeighbor<VectorValue<Real>>(FEType type)
+Assembly::feSecondPhiFaceNeighbor<VectorValue<Real>>(FEType type) const
 {
   _need_second_derivative_neighbor[type] = true;
   buildVectorFaceNeighborFE(type);
@@ -3565,7 +3573,7 @@ Assembly::feSecondPhiFaceNeighbor<VectorValue<Real>>(FEType type)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiCurl &
-Assembly::feCurlPhi<VectorValue<Real>>(FEType type)
+Assembly::feCurlPhi<VectorValue<Real>>(FEType type) const
 {
   _need_curl[type] = true;
   buildVectorFE(type);
@@ -3574,7 +3582,7 @@ Assembly::feCurlPhi<VectorValue<Real>>(FEType type)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiCurl &
-Assembly::feCurlPhiFace<VectorValue<Real>>(FEType type)
+Assembly::feCurlPhiFace<VectorValue<Real>>(FEType type) const
 {
   _need_curl[type] = true;
   buildVectorFaceFE(type);
@@ -3583,7 +3591,7 @@ Assembly::feCurlPhiFace<VectorValue<Real>>(FEType type)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiCurl &
-Assembly::feCurlPhiNeighbor<VectorValue<Real>>(FEType type)
+Assembly::feCurlPhiNeighbor<VectorValue<Real>>(FEType type) const
 {
   _need_curl[type] = true;
   buildVectorNeighborFE(type);
@@ -3592,7 +3600,7 @@ Assembly::feCurlPhiNeighbor<VectorValue<Real>>(FEType type)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiCurl &
-Assembly::feCurlPhiFaceNeighbor<VectorValue<Real>>(FEType type)
+Assembly::feCurlPhiFaceNeighbor<VectorValue<Real>>(FEType type) const
 {
   _need_curl[type] = true;
   buildVectorFaceNeighborFE(type);

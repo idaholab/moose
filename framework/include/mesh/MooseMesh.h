@@ -350,7 +350,7 @@ public:
    * @param node Node pointer
    * @return true is the node is semi-local, false otherwise
    */
-  bool isSemiLocal(Node * node);
+  bool isSemiLocal(Node * const node) const;
 
   ///@{
   /**

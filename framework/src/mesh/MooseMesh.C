@@ -597,7 +597,7 @@ MooseMesh::updateActiveSemiLocalNodeRange(std::set<dof_id_type> & ghosted_elems)
 }
 
 bool
-MooseMesh::isSemiLocal(Node * node)
+MooseMesh::isSemiLocal(Node * const node) const
 {
   return _semilocal_node_list.find(node) != _semilocal_node_list.end();
 }
@@ -1594,8 +1594,8 @@ MooseMesh::buildRefinementAndCoarseningMaps(Assembly * assembly)
     assembly->setCurrentSubdomainID(elem->subdomain_id());
     assembly->reinit(elem);
     assembly->reinit(elem, 0);
-    QBase * qrule = assembly->qRule();
-    QBase * qrule_face = assembly->qRuleFace();
+    auto && qrule = assembly->writeableQRule();
+    auto && qrule_face = assembly->writeableQRuleFace();
 
     // Volume to volume projection for refinement
     buildRefinementMap(*elem, *qrule, *qrule_face, -1, -1, -1);

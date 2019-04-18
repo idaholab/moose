@@ -143,6 +143,7 @@ public:
 
   virtual EquationSystems & es() override { return _eq; }
   virtual MooseMesh & mesh() override { return _mesh; }
+  virtual const MooseMesh & mesh() const override { return _mesh; }
 
   virtual Moose::CoordinateSystemType getCoordSystem(SubdomainID sid) override;
   virtual void setCoordSystem(const std::vector<SubdomainName> & blocks,
@@ -329,7 +330,12 @@ public:
     return _uo_jacobian_moose_vars[tid];
   }
 
-  virtual Assembly & assembly(THREAD_ID tid) override
+  Assembly & assembly(THREAD_ID tid) override
+  {
+    mooseAssert(tid < _assembly.size(), "Assembly objects not initialized");
+    return *_assembly[tid];
+  }
+  const Assembly & assembly(THREAD_ID tid) const override
   {
     mooseAssert(tid < _assembly.size(), "Assembly objects not initialized");
     return *_assembly[tid];

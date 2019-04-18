@@ -365,8 +365,14 @@ public:
    */
   virtual void setSolutionUDotDot(const NumericVector<Number> & udotdot);
 
-  virtual NumericVector<Number> * solutionUDot() override { return _u_dot; }
-  virtual NumericVector<Number> * solutionUDotDot() override { return _u_dotdot; }
+  NumericVector<Number> * solutionUDot() override { return _u_dot; }
+  NumericVector<Number> * solutionUDotDot() override { return _u_dotdot; }
+  NumericVector<Number> * solutionUDotOld() override { return _u_dot_old; }
+  NumericVector<Number> * solutionUDotDotOld() override { return _u_dotdot_old; }
+  const NumericVector<Number> * solutionUDot() const override { return _u_dot; }
+  const NumericVector<Number> * solutionUDotDot() const override { return _u_dotdot; }
+  const NumericVector<Number> * solutionUDotOld() const override { return _u_dot_old; }
+  const NumericVector<Number> * solutionUDotDotOld() const override { return _u_dotdot_old; }
 
   /**
    *  Return a numeric vector that is associated with the time tag.
@@ -383,7 +389,10 @@ public:
    */
   NumericVector<Number> & residualVector(TagID tag);
 
-  virtual const NumericVector<Number> *& currentSolution() override { return _current_solution; }
+  const NumericVector<Number> * const & currentSolution() const override
+  {
+    return _current_solution;
+  }
 
   virtual void serializeSolution();
   virtual NumericVector<Number> & serializedSolution() override;
@@ -573,16 +582,14 @@ public:
    */
   bool hasDiagSaveIn() const { return _has_diag_save_in || _has_nodalbc_diag_save_in; }
 
-  virtual NumericVector<Number> & solution() override { return *_sys.solution; }
+  NumericVector<Number> & solution() override { return *_sys.solution; }
+  const NumericVector<Number> & solution() const override { return *_sys.solution; }
 
   virtual System & system() override { return _sys; }
   virtual const System & system() const override { return _sys; }
 
-  virtual NumericVector<Number> * solutionUDotOld() override { return _u_dot_old; }
-
-  virtual NumericVector<Number> * solutionUDotDotOld() override { return _u_dotdot_old; }
-
-  virtual NumericVector<Number> * solutionPreviousNewton() override
+  NumericVector<Number> * solutionPreviousNewton() override { return _solution_previous_nl; }
+  const NumericVector<Number> * solutionPreviousNewton() const override
   {
     return _solution_previous_nl;
   }

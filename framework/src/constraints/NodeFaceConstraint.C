@@ -115,7 +115,7 @@ NodeFaceConstraint::~NodeFaceConstraint()
 void
 NodeFaceConstraint::computeSlaveValue(NumericVector<Number> & current_solution)
 {
-  dof_id_type & dof_idx = _var.nodalDofIndex();
+  const dof_id_type & dof_idx = _var.nodalDofIndex();
   _qp = 0;
   current_solution.set(dof_idx, computeQpSlaveValue());
 }

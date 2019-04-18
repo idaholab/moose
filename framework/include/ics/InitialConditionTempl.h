@@ -111,7 +111,7 @@ protected:
 
   /// The current element we are on will retrieving values at specific points in the domain. Note
   /// that this _IS_ valid even for nodes shared among several elements.
-  const Elem *& _current_elem;
+  const Elem * const & _current_elem;
 
   /// The current node if the point we are evaluating at also happens to be a node.
   /// Otherwise the pointer will be NULL.

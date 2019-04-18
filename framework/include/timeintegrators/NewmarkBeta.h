@@ -28,7 +28,8 @@ public:
 
   virtual int order() override { return 1; }
   virtual void computeTimeDerivatives() override;
-  virtual void computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof) override;
+  virtual void computeADTimeDerivatives(DualReal & ad_u_dot,
+                                        const dof_id_type & dof) const override;
   virtual void postResidual(NumericVector<Number> & residual) override;
 
 protected:
@@ -36,8 +37,11 @@ protected:
    * Helper function that actually does the math for computing the time derivative
    */
   template <typename T, typename T2, typename T3, typename T4, typename T5>
-  void computeTimeDerivativeHelper(
-      T & u_dot, const T2 & u_old, const T3 & u_dot_old, T4 & u_dotdot, const T5 & u_dotdot_old);
+  void computeTimeDerivativeHelper(T & u_dot,
+                                   const T2 & u_old,
+                                   const T3 & u_dot_old,
+                                   T4 & u_dotdot,
+                                   const T5 & u_dotdot_old) const;
 
   /// Newmark time integration parameter-beta
   Real _beta;
@@ -52,7 +56,7 @@ protected:
 template <typename T, typename T2, typename T3, typename T4, typename T5>
 void
 NewmarkBeta::computeTimeDerivativeHelper(
-    T & u_dot, const T2 & u_old, const T3 & u_dot_old, T4 & u_dotdot, const T5 & u_dotdot_old)
+    T & u_dot, const T2 & u_old, const T3 & u_dot_old, T4 & u_dotdot, const T5 & u_dotdot_old) const
 {
   u_dotdot -= u_old;
   u_dotdot *= 1.0 / _beta / _dt / _dt;

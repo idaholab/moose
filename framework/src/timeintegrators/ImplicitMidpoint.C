@@ -50,7 +50,7 @@ ImplicitMidpoint::computeTimeDerivatives()
 }
 
 void
-ImplicitMidpoint::computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof)
+ImplicitMidpoint::computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof) const
 {
   computeTimeDerivativeHelper(ad_u_dot, _solution_old(dof));
 }

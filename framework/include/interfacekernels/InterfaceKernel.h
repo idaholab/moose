@@ -122,19 +122,19 @@ protected:
   MooseMesh & _mesh;
 
   /// Pointer reference to the current element
-  const Elem *& _current_elem;
+  const Elem * const & _current_elem;
 
   /// The volume (or length) of the current element
   const Real & _current_elem_volume;
 
   /// The neighboring element
-  const Elem *& _neighbor_elem;
+  const Elem * const & _neighbor_elem;
 
   /// Current side
-  unsigned int & _current_side;
+  const unsigned int & _current_side;
 
   /// Current side element
-  const Elem *& _current_side_elem;
+  const Elem * const & _current_side_elem;
 
   /// The volume (or length) of the current side
   const Real & _current_side_volume;
@@ -149,7 +149,7 @@ protected:
   const MooseArray<Point> & _q_point;
 
   /// Quadrature rule
-  QBase *& _qrule;
+  const QBase * const & _qrule;
 
   /// Elemtn Jacobian/quadrature weight
   const MooseArray<Real> & _JxW;

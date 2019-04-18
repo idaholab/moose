@@ -59,7 +59,7 @@ ExplicitRK2::computeTimeDerivatives()
 }
 
 void
-ExplicitRK2::computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof)
+ExplicitRK2::computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof) const
 {
   computeTimeDerivativeHelper(ad_u_dot, _solution_old(dof), _solution_older(dof));
 }

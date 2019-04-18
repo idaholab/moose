@@ -183,14 +183,14 @@ SubProblem::clearActiveFEVariableCoupleableMatrixTags(THREAD_ID tid)
   _active_fe_var_coupleable_matrix_tags[tid].clear();
 }
 
-std::set<TagID> &
-SubProblem::getActiveFEVariableCoupleableMatrixTags(THREAD_ID tid)
+const std::set<TagID> &
+SubProblem::getActiveFEVariableCoupleableMatrixTags(THREAD_ID tid) const
 {
   return _active_fe_var_coupleable_matrix_tags[tid];
 }
 
-std::set<TagID> &
-SubProblem::getActiveFEVariableCoupleableVectorTags(THREAD_ID tid)
+const std::set<TagID> &
+SubProblem::getActiveFEVariableCoupleableVectorTags(THREAD_ID tid) const
 {
   return _active_fe_var_coupleable_vector_tags[tid];
 }
@@ -219,14 +219,14 @@ SubProblem::clearActiveScalarVariableCoupleableMatrixTags(THREAD_ID tid)
   _active_sc_var_coupleable_matrix_tags[tid].clear();
 }
 
-std::set<TagID> &
-SubProblem::getActiveScalarVariableCoupleableMatrixTags(THREAD_ID tid)
+const std::set<TagID> &
+SubProblem::getActiveScalarVariableCoupleableMatrixTags(THREAD_ID tid) const
 {
   return _active_sc_var_coupleable_matrix_tags[tid];
 }
 
-std::set<TagID> &
-SubProblem::getActiveScalarVariableCoupleableVectorTags(THREAD_ID tid)
+const std::set<TagID> &
+SubProblem::getActiveScalarVariableCoupleableVectorTags(THREAD_ID tid) const
 {
   return _active_sc_var_coupleable_vector_tags[tid];
 }
@@ -746,6 +746,6 @@ SubProblem::reinitLowerDElemRef(const Elem * elem,
   assembly(tid).prepareLowerD();
 
   // Let's finally compute our variable values!
-  systemBaseNonlinear().reinitLowerDElem(tid);
-  systemBaseAuxiliary().reinitLowerDElem(tid);
+  systemBaseNonlinear().reinitLowerD(tid);
+  systemBaseAuxiliary().reinitLowerD(tid);
 }

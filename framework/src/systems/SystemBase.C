@@ -360,7 +360,8 @@ SystemBase::reinitNeighbor(const Elem * /*elem*/, THREAD_ID tid)
     var->computeNeighborValues();
 }
 
-void SystemBase::reinitLowerD(tid)
+void
+SystemBase::reinitLowerD(THREAD_ID tid)
 {
   const std::vector<MooseVariableFEBase *> & vars = _vars[tid].fieldVariables();
   for (const auto & var : vars)
@@ -738,7 +739,7 @@ SystemBase::residualVectorTag()
 }
 
 bool
-SystemBase::hasVector(TagID tag)
+SystemBase::hasVector(TagID tag) const
 {
   return tag < _tagged_vectors.size() && _tagged_vectors[tag];
 }
@@ -754,6 +755,14 @@ SystemBase::getVector(const std::string & name)
 
 NumericVector<Number> &
 SystemBase::getVector(TagID tag)
+{
+  mooseAssert(hasVector(tag), "Cannot retrieve vector with residual_tag: " << tag);
+
+  return *_tagged_vectors[tag];
+}
+
+const NumericVector<Number> &
+SystemBase::getVector(TagID tag) const
 {
   mooseAssert(hasVector(tag), "Cannot retrieve vector with residual_tag: " << tag);
 
@@ -793,13 +802,21 @@ SystemBase::disassociateAllTaggedVectors()
 }
 
 bool
-SystemBase::hasMatrix(TagID tag)
+SystemBase::hasMatrix(TagID tag) const
 {
   return tag < _tagged_matrices.size() && _tagged_matrices[tag];
 }
 
 SparseMatrix<Number> &
 SystemBase::getMatrix(TagID tag)
+{
+  mooseAssert(hasMatrix(tag), "Cannot retrieve matrix with matrix_tag: " << tag);
+
+  return *_tagged_matrices[tag];
+}
+
+const SparseMatrix<Number> &
+SystemBase::getMatrix(TagID tag) const
 {
   mooseAssert(hasMatrix(tag), "Cannot retrieve matrix with matrix_tag: " << tag);
 
@@ -891,7 +908,7 @@ SystemBase::activeAllMatrixTags()
 }
 
 bool
-SystemBase::matrixTagActive(TagID tag)
+SystemBase::matrixTagActive(TagID tag) const
 {
   mooseAssert(_subproblem.matrixTagExists(tag), "Matrix tag " << tag << " does not exist");
 
@@ -913,6 +930,12 @@ SystemBase::number() const
 
 DofMap &
 SystemBase::dofMap()
+{
+  return system().get_dof_map();
+}
+
+const DofMap &
+SystemBase::dofMap() const
 {
   return system().get_dof_map();
 }

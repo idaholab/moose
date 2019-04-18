@@ -76,10 +76,10 @@ protected:
 
   MooseVariable & _var;
 
-  const Elem *& _current_elem;
+  const Elem * const & _current_elem;
 
   /// The neighboring element
-  const Elem *& _neighbor_elem;
+  const Elem * const & _neighbor_elem;
 
   /// Quadrature points used in integration of constraint
   std::vector<Point> _constraint_q_point;

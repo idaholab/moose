@@ -72,15 +72,13 @@ public:
    */
   virtual bool isVector() const = 0;
 
-  virtual dof_id_type & nodalDofIndex() = 0;
-  virtual dof_id_type & nodalDofIndexNeighbor() = 0;
+  virtual const dof_id_type & nodalDofIndex() const = 0;
+  virtual const dof_id_type & nodalDofIndexNeighbor() const = 0;
 
   /**
    * Current element this variable is evaluated at
    */
-  virtual const Elem *& currentElem() const = 0;
-
-  virtual const MooseArray<Point> & normals() const = 0;
+  virtual const Elem * const & currentElem() const = 0;
 
   /**
    * The subdomains the variable is active on
@@ -164,12 +162,12 @@ public:
    */
   virtual Number getElementalValueOlder(const Elem * elem, unsigned int idx = 0) const = 0;
 
-  virtual void getDofIndices(const Elem * elem, std::vector<dof_id_type> & dof_indices) = 0;
+  virtual void getDofIndices(const Elem * elem, std::vector<dof_id_type> & dof_indices) const = 0;
   /**
    * Get neighbor DOF indices for currently selected element
    * @return the neighbor degree of freedom indices
    */
-  virtual std::vector<dof_id_type> & dofIndicesNeighbor() = 0;
+  virtual const std::vector<dof_id_type> & dofIndicesNeighbor() const = 0;
 
   /**
    * Get dof indices for the current lower dimensional element (this is meaningful when performing

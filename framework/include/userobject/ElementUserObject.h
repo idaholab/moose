@@ -49,13 +49,13 @@ protected:
   MooseMesh & _mesh;
 
   /// The current element pointer (available during execute())
-  const Elem *& _current_elem;
+  const Elem * const & _current_elem;
 
   /// The current element volume (available during execute())
   const Real & _current_elem_volume;
 
   const MooseArray<Point> & _q_point;
-  QBase *& _qrule;
+  const QBase * const & _qrule;
   const MooseArray<Real> & _JxW;
   const MooseArray<Real> & _coord;
 };

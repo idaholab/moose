@@ -63,20 +63,20 @@ public:
 
 protected:
   /// current element
-  const Elem *& _current_elem;
+  const Elem * const & _current_elem;
   /// Volume of the current element
   const Real & _current_elem_volume;
   /// current side of the current element
-  unsigned int & _current_side;
+  const unsigned int & _current_side;
   /// current side element
-  const Elem *& _current_side_elem;
+  const Elem * const & _current_side_elem;
   /// Volume of the current side
   const Real & _current_side_volume;
 
   /// quadrature point index
   unsigned int _qp;
   /// active quadrature rule
-  QBase *& _qrule;
+  const QBase * const & _qrule;
   /// active quadrature points
   const MooseArray<Point> & _q_point;
   /// transformed Jacobian weights

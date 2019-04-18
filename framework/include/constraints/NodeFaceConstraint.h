@@ -217,15 +217,15 @@ protected:
   MooseVariable & _var;
 
   const MooseArray<Point> & _master_q_point;
-  QBase *& _master_qrule;
+  const QBase * const & _master_qrule;
 
 public:
   PenetrationLocator & _penetration_locator;
 
 protected:
   /// current node being processed
-  const Node *& _current_node;
-  const Elem *& _current_master;
+  const Node * const & _current_node;
+  const Elem * const & _current_master;
 
   /// Value of the unknown variable this BC is action on
   const VariableValue & _u_slave;

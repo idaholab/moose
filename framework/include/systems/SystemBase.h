@@ -101,12 +101,19 @@ public:
    */
   virtual unsigned int number() const;
   virtual MooseMesh & mesh() { return _mesh; }
+  virtual const MooseMesh & mesh() const { return _mesh; }
   virtual SubProblem & subproblem() { return _subproblem; }
+  virtual const SubProblem & subproblem() const { return _subproblem; }
 
   /**
-   * Gets the dof map
+   * Gets writeable reference to the dof map
    */
   virtual DofMap & dofMap();
+
+  /**
+   * Gets const reference to the dof map
+   */
+  virtual const DofMap & dofMap() const;
 
   /**
    * Get the reference to the libMesh system
@@ -147,19 +154,32 @@ public:
    * The solution vector that is currently being operated on.
    * This is typically a ghosted vector that comes in from the Nonlinear solver.
    */
-  virtual const NumericVector<Number> *& currentSolution() = 0;
+  virtual const NumericVector<Number> * const & currentSolution() const = 0;
 
   virtual NumericVector<Number> & solution() = 0;
   virtual NumericVector<Number> & solutionOld() = 0;
   virtual NumericVector<Number> & solutionOlder() = 0;
   virtual NumericVector<Number> * solutionPreviousNewton() = 0;
+  virtual const NumericVector<Number> & solution() const = 0;
+  virtual const NumericVector<Number> & solutionOld() const = 0;
+  virtual const NumericVector<Number> & solutionOlder() const = 0;
+  virtual const NumericVector<Number> * solutionPreviousNewton() const = 0;
 
   virtual Number & duDotDu() { return _du_dot_du; }
   virtual Number & duDotDotDu() { return _du_dotdot_du; }
+  virtual const Number & duDotDu() const { return _du_dot_du; }
+  virtual const Number & duDotDotDu() const { return _du_dotdot_du; }
+
+  // non-const getters
   virtual NumericVector<Number> * solutionUDot() = 0;
   virtual NumericVector<Number> * solutionUDotOld() = 0;
   virtual NumericVector<Number> * solutionUDotDot() = 0;
   virtual NumericVector<Number> * solutionUDotDotOld() = 0;
+  // const getters
+  virtual const NumericVector<Number> * solutionUDot() const = 0;
+  virtual const NumericVector<Number> * solutionUDotOld() const = 0;
+  virtual const NumericVector<Number> * solutionUDotDot() const = 0;
+  virtual const NumericVector<Number> * solutionUDotDotOld() const = 0;
 
   virtual void saveOldSolutions();
   virtual void restoreOldSolutions();
@@ -172,7 +192,7 @@ public:
   /**
    * Check if the tagged vector exists in the system.
    */
-  virtual bool hasVector(TagID tag_id);
+  virtual bool hasVector(TagID tag_id) const;
 
   /**
    * Ideally, we should not need this API.
@@ -213,6 +233,11 @@ public:
   virtual NumericVector<Number> & getVector(TagID tag);
 
   /**
+   * Get a raw NumericVector
+   */
+  virtual const NumericVector<Number> & getVector(TagID tag) const;
+
+  /**
    * Associate a vector for a given tag
    */
   virtual void associateVectorToTag(NumericVector<Number> & vec, TagID tag);
@@ -230,12 +255,17 @@ public:
   /**
    * Check if the tagged matrix exists in the system.
    */
-  virtual bool hasMatrix(TagID tag);
+  virtual bool hasMatrix(TagID tag) const;
 
   /**
    * Get a raw SparseMatrix
    */
   virtual SparseMatrix<Number> & getMatrix(TagID tag);
+
+  /**
+   * Get a raw SparseMatrix
+   */
+  virtual const SparseMatrix<Number> & getMatrix(TagID tag) const;
 
   /**
    *  Make all exsiting matrices ative
@@ -250,7 +280,7 @@ public:
   /**
    *  If or not a matrix tag is active
    */
-  virtual bool matrixTagActive(TagID tag);
+  virtual bool matrixTagActive(TagID tag) const;
 
   /**
    *  deactive a matrix for tag
@@ -409,14 +439,14 @@ public:
    *
    * @return The max
    */
-  size_t getMaxVarNDofsPerElem() { return _max_var_n_dofs_per_elem; }
+  size_t getMaxVarNDofsPerElem() const { return _max_var_n_dofs_per_elem; }
 
   /**
    * Gets the maximum number of dofs used by any one variable on any one node
    *
    * @return The max
    */
-  size_t getMaxVarNDofsPerNode() { return _max_var_n_dofs_per_node; }
+  size_t getMaxVarNDofsPerNode() const { return _max_var_n_dofs_per_node; }
 
   /**
    * assign the maximum element dofs
@@ -526,7 +556,7 @@ public:
   /**
    * Compute the values of the variables on the lower dimensional element
    */
-  virtual void reinitLowerD(tid);
+  virtual void reinitLowerD(THREAD_ID tid);
 
   /**
    * Reinit nodal assembly info
@@ -697,6 +727,7 @@ public:
   virtual void addTimeIntegrator(std::shared_ptr<TimeIntegrator> /*ti*/) {}
 
   TimeIntegrator * getTimeIntegrator() { return _time_integrator.get(); }
+  const TimeIntegrator * getTimeIntegrator() const { return _time_integrator.get(); }
 
   std::shared_ptr<TimeIntegrator> getSharedTimeIntegrator() { return _time_integrator; }
 

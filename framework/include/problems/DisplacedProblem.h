@@ -42,6 +42,7 @@ public:
 
   virtual EquationSystems & es() override { return _eq; }
   virtual MooseMesh & mesh() override { return _mesh; }
+  virtual const MooseMesh & mesh() const override { return _mesh; }
   MooseMesh & refMesh();
 
   DisplacedSystem & nlSys() { return _displaced_nl; }
@@ -100,7 +101,7 @@ public:
   virtual TagID getVectorTagID(const TagName & tag_name) override;
   virtual TagName vectorTagName(TagID tag) override;
   virtual bool vectorTagExists(TagID tag) override;
-  virtual unsigned int numVectorTags() override;
+  virtual unsigned int numVectorTags() const override;
   virtual std::map<TagName, TagID> & getVectorTags() override;
 
   virtual TagID addMatrixTag(TagName tag_name) override;
@@ -108,7 +109,7 @@ public:
   virtual TagName matrixTagName(TagID tag) override;
   virtual bool matrixTagExists(const TagName & tag_name) override;
   virtual bool matrixTagExists(TagID tag_id) override;
-  virtual unsigned int numMatrixTags() override;
+  virtual unsigned int numMatrixTags() const override;
 
   virtual bool isTransient() const override;
   virtual Moose::CoordinateSystemType getCoordSystem(SubdomainID sid) override;
@@ -239,7 +240,8 @@ public:
   virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid) override;
   virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid) override;
 
-  virtual Assembly & assembly(THREAD_ID tid) override { return *_assembly[tid]; }
+  Assembly & assembly(THREAD_ID tid) override { return *_assembly[tid]; }
+  const Assembly & assembly(THREAD_ID tid) const override { return *_assembly[tid]; }
 
   // Geom Search /////
   virtual void updateGeomSearch(

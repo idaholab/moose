@@ -526,6 +526,13 @@ enum ConstraintType
   Master = Neighbor
 };
 
+enum class ElementType : unsigned int
+{
+  Element = DGResidualType::Element,
+  Neighbor = DGResidualType::Neighbor,
+  Lower = DGResidualType::Neighbor + 1
+};
+
 enum ConstraintJacobianType
 {
   SlaveSlave = ElementElement,

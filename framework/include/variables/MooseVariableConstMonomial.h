@@ -28,8 +28,5 @@ public:
   virtual void computeElemValuesFace() override;
   virtual void computeNeighborValuesFace() override;
   virtual void computeNeighborValues() override;
-
-  virtual void computeMonomialValuesHelper(const unsigned & nqp, const Real & phi);
-  virtual void computeMonomialNeighborValuesHelper(const unsigned & nqp, const Real & phi);
 };
 

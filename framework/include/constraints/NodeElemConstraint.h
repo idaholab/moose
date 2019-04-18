@@ -190,11 +190,11 @@ protected:
   MooseVariable & _var;
 
   const MooseArray<Point> & _master_q_point;
-  QBase *& _master_qrule;
+  const QBase * const & _master_qrule;
 
   /// current node being processed
-  const Node *& _current_node;
-  const Elem *& _current_elem;
+  const Node * const & _current_node;
+  const Elem * const & _current_elem;
 
   /// Value of the unknown variable on the slave node
   const VariableValue & _u_slave;

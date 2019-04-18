@@ -63,13 +63,13 @@ protected:
   MooseVariable & _var;
 
   /// Current node
-  const Node *& _current_node;
+  const Node * const & _current_node;
 
   /// Quadrature point index
   unsigned int _qp;
 
   /// The current Newton increment
-  VariableValue & _u_increment;
+  const VariableValue & _u_increment;
   /// Holds the current solution at the current node
   const VariableValue & _u;
 };

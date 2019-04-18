@@ -55,7 +55,7 @@ protected:
   const unsigned int _qp;
 
   /// Reference to current node pointer
-  const Node *& _current_node;
+  const Node * const & _current_node;
 
   // Flag for enable/disabling multiple execute calls on nodes that share block ids
   const bool & _unique_node_execute;

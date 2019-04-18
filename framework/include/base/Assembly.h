@@ -66,75 +66,15 @@ public:
   virtual ~Assembly();
 
   /**
-   * Build FEs with a type
-   * @param type The type of FE
-   */
-  void buildFE(FEType type);
-
-  /**
-   * Build FEs for a face with a type
-   * @param type The type of FE
-   */
-  void buildFaceFE(FEType type);
-
-  /**
-   * Build FEs for a neighbor with a type
-   * @param type The type of FE
-   */
-  void buildNeighborFE(FEType type);
-
-  /**
-   * Build FEs for a neighbor face with a type
-   * @param type The type of FE
-   */
-  void buildFaceNeighborFE(FEType type);
-
-  /**
-   * Build FEs for a lower dimensional element with a type
-   * @param type The type of FE
-   */
-  void buildLowerDFE(FEType type);
-
-  /**
-   * Build Vector FEs with a type
-   * @param type The type of FE
-   */
-  void buildVectorFE(FEType type);
-
-  /**
-   * Build Vector FEs for a face with a type
-   * @param type The type of FE
-   */
-  void buildVectorFaceFE(FEType type);
-
-  /**
-   * Build Vector FEs for a neighbor with a type
-   * @param type The type of FE
-   */
-  void buildVectorNeighborFE(FEType type);
-
-  /**
-   * Build Vector FEs for a neighbor face with a type
-   * @param type The type of FE
-   */
-  void buildVectorFaceNeighborFE(FEType type);
-
-  /**
-   * Build Vector FEs for a lower dimensional element with a type
-   * @param type The type of FE
-   */
-  void buildVectorLowerDFE(FEType type);
-
-  /**
    * Get a reference to a pointer that will contain the current volume FE.
    * @param type The type of FE
    * @param dim The dimension of the current volume
    * @return A _reference_ to the pointer.  Make sure to store this as a reference!
    */
-  FEBase *& getFE(FEType type, unsigned int dim)
+  const FEBase * const & getFE(FEType type, unsigned int dim) const
   {
     buildFE(type);
-    return _fe[dim][type];
+    return _const_fe[dim][type];
   }
 
   /**
@@ -143,10 +83,10 @@ public:
    * @param dim The dimension of the current volume
    * @return A _reference_ to the pointer.  Make sure to store this as a reference!
    */
-  FEBase *& getFENeighbor(FEType type, unsigned int dim)
+  const FEBase * const & getFENeighbor(FEType type, unsigned int dim) const
   {
     buildNeighborFE(type);
-    return _fe_neighbor[dim][type];
+    return _const_fe_neighbor[dim][type];
   }
 
   /**
@@ -155,10 +95,10 @@ public:
    * @param dim The dimension of the current face
    * @return A _reference_ to the pointer.  Make sure to store this as a reference!
    */
-  FEBase *& getFEFace(FEType type, unsigned int dim)
+  const FEBase * const & getFEFace(FEType type, unsigned int dim) const
   {
     buildFaceFE(type);
-    return _fe_face[dim][type];
+    return _const_fe_face[dim][type];
   }
 
   /**
@@ -167,10 +107,10 @@ public:
    * @param dim The dimension of the neighbor face
    * @return A _reference_ to the pointer.  Make sure to store this as a reference!
    */
-  FEBase *& getFEFaceNeighbor(FEType type, unsigned int dim)
+  const FEBase * const & getFEFaceNeighbor(FEType type, unsigned int dim) const
   {
     buildFaceNeighborFE(type);
-    return _fe_face_neighbor[dim][type];
+    return _const_fe_face_neighbor[dim][type];
   }
 
   /**
@@ -179,10 +119,10 @@ public:
    * @param dim The dimension of the current volume
    * @return A _reference_ to the pointer.  Make sure to store this as a reference!
    */
-  FEVectorBase *& getVectorFE(FEType type, unsigned int dim)
+  const FEVectorBase * const & getVectorFE(FEType type, unsigned int dim) const
   {
     buildVectorFE(type);
-    return _vector_fe[dim][type];
+    return _const_vector_fe[dim][type];
   }
 
   /**
@@ -191,10 +131,10 @@ public:
    * @param dim The dimension of the current volume
    * @return A _reference_ to the pointer.  Make sure to store this as a reference!
    */
-  FEVectorBase *& getVectorFENeighbor(FEType type, unsigned int dim)
+  const FEVectorBase * const & getVectorFENeighbor(FEType type, unsigned int dim) const
   {
     buildVectorNeighborFE(type);
-    return _vector_fe_neighbor[dim][type];
+    return _const_vector_fe_neighbor[dim][type];
   }
 
   /**
@@ -203,10 +143,10 @@ public:
    * @param dim The dimension of the current face
    * @return A _reference_ to the pointer.  Make sure to store this as a reference!
    */
-  FEVectorBase *& getVectorFEFace(FEType type, unsigned int dim)
+  const FEVectorBase * const & getVectorFEFace(FEType type, unsigned int dim) const
   {
     buildVectorFaceFE(type);
-    return _vector_fe_face[dim][type];
+    return _const_vector_fe_face[dim][type];
   }
 
   /**
@@ -215,35 +155,41 @@ public:
    * @param dim The dimension of the neighbor face
    * @return A _reference_ to the pointer.  Make sure to store this as a reference!
    */
-  FEVectorBase *& getVectorFEFaceNeighbor(FEType type, unsigned int dim)
+  const FEVectorBase * const & getVectorFEFaceNeighbor(FEType type, unsigned int dim) const
   {
     buildVectorFaceNeighborFE(type);
-    return _vector_fe_face_neighbor[dim][type];
+    return _const_vector_fe_face_neighbor[dim][type];
   }
 
   /**
    * Returns the reference to the current quadrature being used
    * @return A _reference_ to the pointer.  Make sure to store this as a reference!
    */
-  QBase *& qRule() { return _current_qrule; }
+  const QBase * const & qRule() const { return _const_current_qrule; }
+
+  /**
+   * Returns the reference to the current quadrature being used
+   * @return A _reference_ to the pointer.  Make sure to store this as a reference!
+   */
+  QBase * const & writeableQRule() { return _current_qrule; }
 
   /**
    * Returns the reference to the quadrature points
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const MooseArray<Point> & qPoints() { return _current_q_points; }
+  const MooseArray<Point> & qPoints() const { return _current_q_points; }
 
   /**
    * The current points in physical space where we have reinited through reinitAtPhysical()
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const MooseArray<Point> & physicalPoints() { return _current_physical_points; }
+  const MooseArray<Point> & physicalPoints() const { return _current_physical_points; }
 
   /**
    * Returns the reference to the transformed jacobian weights
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const MooseArray<Real> & JxW() { return _current_JxW; }
+  const MooseArray<Real> & JxW() const { return _current_JxW; }
 
   template <ComputeStage compute_stage>
   const MooseArray<ADReal> & adJxW() const
@@ -286,33 +232,31 @@ public:
    * Returns the reference to the current quadrature being used on a current face
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  QBase *& qRuleFace() { return _current_qrule_face; }
+  const QBase * const & qRuleFace() const { return _const_current_qrule_face; }
 
   /**
-   * Return a reference to THE qudrature rule for faces for the given element
-   * dimension. I don't want a reference to a quadrature rule that actually
-   * changes when I call Assembly::reinit with specified reference points. I
-   * think that's ridiculous
+   * Returns the reference to the current quadrature being used on a current face
+   * @return A _reference_.  Make sure to store this as a reference!
    */
-  QBase *& qRuleFace(unsigned int dim) { return _holder_qrule_face[dim]; }
+  QBase * const & writeableQRuleFace() { return _current_qrule_face; }
 
   /**
    * Returns the reference to the current quadrature being used
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const MooseArray<Point> & qPointsFace() { return _current_q_points_face; }
+  const MooseArray<Point> & qPointsFace() const { return _current_q_points_face; }
 
   /**
    * Returns the reference to the transformed jacobian weights on a current face
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const MooseArray<Real> & JxWFace() { return _current_JxW_face; }
+  const MooseArray<Real> & JxWFace() const { return _current_JxW_face; }
 
   /**
    * Returns the array of normals for quadrature points on a current side
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const MooseArray<Point> & normals() { return _current_normals; }
+  const MooseArray<Point> & normals() const { return _current_normals; }
 
   template <ComputeStage compute_stage>
   const ADPoint & adNormals() const
@@ -336,7 +280,7 @@ public:
    * Return the current element
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const Elem *& elem() { return _current_elem; }
+  const Elem * const & elem() const { return _current_elem; }
 
   /**
    * Return the current subdomain ID
@@ -358,13 +302,13 @@ public:
    * Returns the current side
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  unsigned int & side() { return _current_side; }
+  const unsigned int & side() const { return _current_side; }
 
   /**
    * Returns the current neighboring side
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  unsigned int & neighborSide() { return _current_neighbor_side; }
+  const unsigned int & neighborSide() const { return _current_neighbor_side; }
 
   /**
    * Returns the side element
@@ -382,13 +326,13 @@ public:
    * Return the neighbor element
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const Elem *& neighbor() { return _current_neighbor_elem; }
+  const Elem * const & neighbor() const { return _current_neighbor_elem; }
 
   /**
    * Return the lower dimensional element
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const Elem *& lowerDElem() { return _current_lower_d_elem; }
+  const Elem * const & lowerDElem() const { return _current_lower_d_elem; }
 
   /**
    * Return the current subdomain ID
@@ -404,31 +348,37 @@ public:
    * Returns the reference to the current neighbor volume
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const Real & neighborVolume();
+  const Real & neighborVolume() const;
 
   /**
    * Returns the reference to the current quadrature being used on a current neighbor
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  QBase *& qRuleNeighbor() { return _current_qrule_neighbor; }
+  const QBase * const & qRuleNeighbor() const { return _const_current_qrule_neighbor; }
+
+  /**
+   * Returns the reference to the current quadrature being used on a current neighbor
+   * @return A _reference_.  Make sure to store this as a reference!
+   */
+  QBase * const & writeableQRuleNeighbor() { return _current_qrule_neighbor; }
 
   /**
    * Returns the reference to the transformed jacobian weights on a current face
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const MooseArray<Real> & JxWNeighbor() { return _current_JxW_neighbor; }
+  const MooseArray<Real> & JxWNeighbor() const { return _current_JxW_neighbor; }
 
   /**
    * Returns the reference to the node
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const Node *& node() { return _current_node; }
+  const Node * const & node() const { return _current_node; }
 
   /**
    * Returns the reference to the neighboring node
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const Node *& nodeNeighbor() { return _current_neighbor_node; }
+  const Node * const & nodeNeighbor() const { return _current_neighbor_node; }
 
   /**
    * Creates the volume, face and arbitrary qrules based on the orders passed in.
@@ -748,8 +698,8 @@ public:
                                            TagID tag = 0);
 
   void cacheJacobianBlock(DenseMatrix<Number> & jac_block,
-                          std::vector<dof_id_type> & idof_indices,
-                          std::vector<dof_id_type> & jdof_indices,
+                          const std::vector<dof_id_type> & idof_indices,
+                          const std::vector<dof_id_type> & jdof_indices,
                           Real scaling_factor,
                           TagID tag = 0);
   void cacheJacobianBlockNonlocal(DenseMatrix<Number> & jac_block,
@@ -946,14 +896,14 @@ public:
   }
 
   template <typename OutputType>
-  const typename OutputTools<OutputType>::VariablePhiValue & fePhi(FEType type)
+  const typename OutputTools<OutputType>::VariablePhiValue & fePhi(FEType type) const
   {
     buildFE(type);
     return _fe_shape_data[type]->_phi;
   }
 
   template <typename OutputType>
-  const typename OutputTools<OutputType>::VariablePhiGradient & feGradPhi(FEType type)
+  const typename OutputTools<OutputType>::VariablePhiGradient & feGradPhi(FEType type) const
   {
     buildFE(type);
     return _fe_shape_data[type]->_grad_phi;
@@ -961,13 +911,17 @@ public:
 
   template <typename OutputType>
   const typename VariableTestGradientType<OutputType, ComputeStage::JACOBIAN>::type &
-  feADGradPhi(FEType type)
+  feADGradPhi(FEType type) const
   {
-    return _ad_grad_phi_data[type];
+    if (_ad_grad_phi_data.find(type) != _ad_grad_phi_data.end())
+      return _ad_grad_phi_data.at(type);
+    else
+      mooseError(
+          "No matching ad_grad_phi_data for family ", type.family, " and order ", type.order);
   }
 
   template <typename OutputType>
-  const typename OutputTools<OutputType>::VariablePhiSecond & feSecondPhi(FEType type)
+  const typename OutputTools<OutputType>::VariablePhiSecond & feSecondPhi(FEType type) const
   {
     _need_second_derivative[type] = true;
     buildFE(type);
@@ -975,20 +929,20 @@ public:
   }
 
   template <typename OutputType>
-  const typename OutputTools<OutputType>::VariablePhiValue & fePhiLower(FEType type);
+  const typename OutputTools<OutputType>::VariablePhiValue & fePhiLower(FEType type) const;
 
   template <typename OutputType>
-  const typename OutputTools<OutputType>::VariablePhiGradient & feGradPhiLower(FEType type);
+  const typename OutputTools<OutputType>::VariablePhiGradient & feGradPhiLower(FEType type) const;
 
   template <typename OutputType>
-  const typename OutputTools<OutputType>::VariablePhiValue & fePhiFace(FEType type)
+  const typename OutputTools<OutputType>::VariablePhiValue & fePhiFace(FEType type) const
   {
     buildFaceFE(type);
     return _fe_shape_data_face[type]->_phi;
   }
 
   template <typename OutputType>
-  const typename OutputTools<OutputType>::VariablePhiGradient & feGradPhiFace(FEType type)
+  const typename OutputTools<OutputType>::VariablePhiGradient & feGradPhiFace(FEType type) const
   {
     buildFaceFE(type);
     return _fe_shape_data_face[type]->_grad_phi;
@@ -996,13 +950,17 @@ public:
 
   template <typename OutputType>
   const typename VariableTestGradientType<OutputType, ComputeStage::JACOBIAN>::type &
-  feADGradPhiFace(FEType type)
+  feADGradPhiFace(FEType type) const
   {
-    return _ad_grad_phi_data_face[type];
+    if (_ad_grad_phi_data_face.find(type) != _ad_grad_phi_data_face.end())
+      return _ad_grad_phi_data_face.at(type);
+    else
+      mooseError(
+          "No matching ad_grad_phi_data_face for family ", type.family, " and order ", type.order);
   }
 
   template <typename OutputType>
-  const typename OutputTools<OutputType>::VariablePhiSecond & feSecondPhiFace(FEType type)
+  const typename OutputTools<OutputType>::VariablePhiSecond & feSecondPhiFace(FEType type) const
   {
     _need_second_derivative[type] = true;
     buildFaceFE(type);
@@ -1010,21 +968,21 @@ public:
   }
 
   template <typename OutputType>
-  const typename OutputTools<OutputType>::VariablePhiValue & fePhiNeighbor(FEType type)
+  const typename OutputTools<OutputType>::VariablePhiValue & fePhiNeighbor(FEType type) const
   {
     buildNeighborFE(type);
     return _fe_shape_data_neighbor[type]->_phi;
   }
 
   template <typename OutputType>
-  const typename OutputTools<OutputType>::VariablePhiGradient & feGradPhiNeighbor(FEType type)
+  const typename OutputTools<OutputType>::VariablePhiGradient & feGradPhiNeighbor(FEType type) const
   {
     buildNeighborFE(type);
     return _fe_shape_data_neighbor[type]->_grad_phi;
   }
 
   template <typename OutputType>
-  const typename OutputTools<OutputType>::VariablePhiSecond & feSecondPhiNeighbor(FEType type)
+  const typename OutputTools<OutputType>::VariablePhiSecond & feSecondPhiNeighbor(FEType type) const
   {
     _need_second_derivative_neighbor[type] = true;
     buildNeighborFE(type);
@@ -1032,21 +990,23 @@ public:
   }
 
   template <typename OutputType>
-  const typename OutputTools<OutputType>::VariablePhiValue & fePhiFaceNeighbor(FEType type)
+  const typename OutputTools<OutputType>::VariablePhiValue & fePhiFaceNeighbor(FEType type) const
   {
     buildFaceNeighborFE(type);
     return _fe_shape_data_face_neighbor[type]->_phi;
   }
 
   template <typename OutputType>
-  const typename OutputTools<OutputType>::VariablePhiGradient & feGradPhiFaceNeighbor(FEType type)
+  const typename OutputTools<OutputType>::VariablePhiGradient &
+  feGradPhiFaceNeighbor(FEType type) const
   {
     buildFaceNeighborFE(type);
     return _fe_shape_data_face_neighbor[type]->_grad_phi;
   }
 
   template <typename OutputType>
-  const typename OutputTools<OutputType>::VariablePhiSecond & feSecondPhiFaceNeighbor(FEType type)
+  const typename OutputTools<OutputType>::VariablePhiSecond &
+  feSecondPhiFaceNeighbor(FEType type) const
   {
     _need_second_derivative_neighbor[type] = true;
     buildFaceNeighborFE(type);
@@ -1054,7 +1014,7 @@ public:
   }
 
   template <typename OutputType>
-  const typename OutputTools<OutputType>::VariablePhiCurl & feCurlPhi(FEType type)
+  const typename OutputTools<OutputType>::VariablePhiCurl & feCurlPhi(FEType type) const
   {
     _need_curl[type] = true;
     buildFE(type);
@@ -1062,7 +1022,7 @@ public:
   }
 
   template <typename OutputType>
-  const typename OutputTools<OutputType>::VariablePhiCurl & feCurlPhiFace(FEType type)
+  const typename OutputTools<OutputType>::VariablePhiCurl & feCurlPhiFace(FEType type) const
   {
     _need_curl[type] = true;
     buildFaceFE(type);
@@ -1070,7 +1030,7 @@ public:
   }
 
   template <typename OutputType>
-  const typename OutputTools<OutputType>::VariablePhiCurl & feCurlPhiNeighbor(FEType type)
+  const typename OutputTools<OutputType>::VariablePhiCurl & feCurlPhiNeighbor(FEType type) const
   {
     _need_curl[type] = true;
     buildNeighborFE(type);
@@ -1078,16 +1038,12 @@ public:
   }
 
   template <typename OutputType>
-  const typename OutputTools<OutputType>::VariablePhiCurl & feCurlPhiFaceNeighbor(FEType type)
+  const typename OutputTools<OutputType>::VariablePhiCurl & feCurlPhiFaceNeighbor(FEType type) const
   {
     _need_curl[type] = true;
     buildFaceNeighborFE(type);
     return _fe_shape_data_face_neighbor[type]->_curl_phi;
   }
-
-  std::map<FEType, bool> _need_second_derivative;
-  std::map<FEType, bool> _need_second_derivative_neighbor;
-  std::map<FEType, bool> _need_curl;
 
   /**
    * Caches the Jacobian entry 'value', to eventually be
@@ -1167,12 +1123,12 @@ protected:
   void cacheResidualBlock(std::vector<Real> & cached_residual_values,
                           std::vector<dof_id_type> & cached_residual_rows,
                           DenseVector<Number> & res_block,
-                          std::vector<dof_id_type> & dof_indices,
+                          const std::vector<dof_id_type> & dof_indices,
                           Real scaling_factor);
 
   void setResidualBlock(NumericVector<Number> & residual,
                         DenseVector<Number> & res_block,
-                        std::vector<dof_id_type> & dof_indices,
+                        const std::vector<dof_id_type> & dof_indices,
                         Real scaling_factor);
 
   void addJacobianBlock(SparseMatrix<Number> & jacobian,
@@ -1218,7 +1174,68 @@ protected:
   void
   computeSinglePointMapAD(const Elem * elem, const std::vector<Real> & qw, unsigned p, FEBase * fe);
 
-protected:
+private:
+  /**
+   * Build FEs with a type
+   * @param type The type of FE
+   */
+  void buildFE(FEType type) const;
+
+  /**
+   * Build FEs for a face with a type
+   * @param type The type of FE
+   */
+  void buildFaceFE(FEType type) const;
+
+  /**
+   * Build FEs for a neighbor with a type
+   * @param type The type of FE
+   */
+  void buildNeighborFE(FEType type) const;
+
+  /**
+   * Build FEs for a neighbor face with a type
+   * @param type The type of FE
+   */
+  void buildFaceNeighborFE(FEType type) const;
+
+  /**
+   * Build FEs for a lower dimensional element with a type
+   * @param type The type of FE
+   */
+  void buildLowerDFE(FEType type) const;
+
+  /**
+   * Build Vector FEs with a type
+   * @param type The type of FE
+   */
+  void buildVectorFE(FEType type) const;
+
+  /**
+   * Build Vector FEs for a face with a type
+   * @param type The type of FE
+   */
+  void buildVectorFaceFE(FEType type) const;
+
+  /**
+   * Build Vector FEs for a neighbor with a type
+   * @param type The type of FE
+   */
+  void buildVectorNeighborFE(FEType type) const;
+
+  /**
+   * Build Vector FEs for a neighbor face with a type
+   * @param type The type of FE
+   */
+  void buildVectorFaceNeighborFE(FEType type) const;
+
+  /**
+   * Build Vector FEs for a lower dimensional element with a type
+   * @param type The type of FE
+   */
+  void buildVectorLowerDFE(FEType type) const;
+
+private:
   SystemBase & _sys;
   SubProblem & _subproblem;
 
@@ -1280,13 +1297,19 @@ protected:
   /**** Volume Stuff ****/
 
   /// Each dimension's actual fe objects indexed on type
-  std::map<unsigned int, std::map<FEType, FEBase *>> _fe;
+  mutable std::map<unsigned int, std::map<FEType, FEBase *>> _fe;
+  /// Each dimension's actual fe objects indexed on type
+  mutable std::map<unsigned int, std::map<FEType, const FEBase *>> _const_fe;
   /// Each dimension's actual vector fe objects indexed on type
-  std::map<unsigned int, std::map<FEType, FEVectorBase *>> _vector_fe;
+  mutable std::map<unsigned int, std::map<FEType, FEVectorBase *>> _vector_fe;
+  /// Each dimension's actual vector fe objects indexed on type
+  mutable std::map<unsigned int, std::map<FEType, const FEVectorBase *>> _const_vector_fe;
   /// Each dimension's helper objects
   std::map<unsigned int, FEBase **> _holder_fe_helper;
   /// The current helper object for transforming coordinates
   FEBase * _current_fe_helper;
+  /// The current current quadrature rule being used (could be either volumetric or arbitrary - for dirac kernels)
+  const QBase * _const_current_qrule;
   /// The current current quadrature rule being used (could be either volumetric or arbitrary - for dirac kernels)
   QBase * _current_qrule;
   /// The current volumetric quadrature for the element
@@ -1320,13 +1343,19 @@ protected:
   /**** Face Stuff ****/
 
   /// types of finite elements
-  std::map<unsigned int, std::map<FEType, FEBase *>> _fe_face;
+  mutable std::map<unsigned int, std::map<FEType, FEBase *>> _fe_face;
+  /// types of finite elements
+  mutable std::map<unsigned int, std::map<FEType, const FEBase *>> _const_fe_face;
   /// types of vector finite elements
-  std::map<unsigned int, std::map<FEType, FEVectorBase *>> _vector_fe_face;
+  mutable std::map<unsigned int, std::map<FEType, FEVectorBase *>> _vector_fe_face;
+  /// types of vector finite elements
+  mutable std::map<unsigned int, std::map<FEType, const FEVectorBase *>> _const_vector_fe_face;
   /// Each dimension's helper objects
   std::map<unsigned int, FEBase **> _holder_fe_face_helper;
   /// helper object for transforming coordinates
   FEBase * _current_fe_face_helper;
+  /// quadrature rule used on faces
+  const QBase * _const_current_qrule_face;
   /// quadrature rule used on faces
   QBase * _current_qrule_face;
   /// The current arbitrary quadrature rule used on element faces
@@ -1351,19 +1380,31 @@ protected:
   /**** Neighbor Stuff ****/
 
   /// types of finite elements
-  std::map<unsigned int, std::map<FEType, FEBase *>> _fe_neighbor;
-  std::map<unsigned int, std::map<FEType, FEBase *>> _fe_face_neighbor;
-  std::map<unsigned int, std::map<FEType, FEVectorBase *>> _vector_fe_neighbor;
-  std::map<unsigned int, std::map<FEType, FEVectorBase *>> _vector_fe_face_neighbor;
+  mutable std::map<unsigned int, std::map<FEType, FEBase *>> _fe_neighbor;
+  mutable std::map<unsigned int, std::map<FEType, FEBase *>> _fe_face_neighbor;
+  mutable std::map<unsigned int, std::map<FEType, FEVectorBase *>> _vector_fe_neighbor;
+  mutable std::map<unsigned int, std::map<FEType, FEVectorBase *>> _vector_fe_face_neighbor;
+  mutable std::map<unsigned int, std::map<FEType, const FEBase *>> _const_fe_neighbor;
+  mutable std::map<unsigned int, std::map<FEType, const FEBase *>> _const_fe_face_neighbor;
+  mutable std::map<unsigned int, std::map<FEType, const FEVectorBase *>> _const_vector_fe_neighbor;
+  mutable std::map<unsigned int, std::map<FEType, const FEVectorBase *>>
+      _const_vector_fe_face_neighbor;
+
   /// Each dimension's helper objects
   std::map<unsigned int, FEBase **> _holder_fe_neighbor_helper;
   std::map<unsigned int, FEBase **> _holder_fe_face_neighbor_helper;
 
   /// FE objects for lower dimensional elements
-  std::map<unsigned int, std::map<FEType, FEBase *>> _fe_lower;
+  mutable std::map<unsigned int, std::map<FEType, FEBase *>> _fe_lower;
+  /// FE objects for lower dimensional elements
+  mutable std::map<unsigned int, std::map<FEType, const FEBase *>> _const_fe_lower;
   /// Vector FE objects for lower dimensional elements
-  std::map<unsigned int, std::map<FEType, FEVectorBase *>> _vector_fe_lower;
+  mutable std::map<unsigned int, std::map<FEType, FEVectorBase *>> _vector_fe_lower;
+  /// Vector FE objects for lower dimensional elements
+  mutable std::map<unsigned int, std::map<FEType, const FEVectorBase *>> _const_vector_fe_lower;
 
+  /// quadrature rule used on neighbors
+  const QBase * _const_current_qrule_neighbor;
   /// quadrature rule used on neighbors
   QBase * _current_qrule_neighbor;
   /// Holds arbitrary qrules for each dimension
@@ -1394,7 +1435,7 @@ protected:
   /// The current side element of the ncurrent neighbor element
   const Elem * _current_neighbor_side_elem;
   /// true is apps need to compute neighbor element volume
-  bool _need_neighbor_elem_volume;
+  mutable bool _need_neighbor_elem_volume;
   /// Volume of the current neighbor
   Real _current_neighbor_volume;
   /// The current node we are working with
@@ -1502,18 +1543,18 @@ protected:
   };
 
   /// Shape function values, gradients, second derivatives for each FE type
-  std::map<FEType, FEShapeData *> _fe_shape_data;
-  std::map<FEType, FEShapeData *> _fe_shape_data_face;
-  std::map<FEType, FEShapeData *> _fe_shape_data_neighbor;
-  std::map<FEType, FEShapeData *> _fe_shape_data_face_neighbor;
-  std::map<FEType, FEShapeData *> _fe_shape_data_lower;
+  mutable std::map<FEType, FEShapeData *> _fe_shape_data;
+  mutable std::map<FEType, FEShapeData *> _fe_shape_data_face;
+  mutable std::map<FEType, FEShapeData *> _fe_shape_data_neighbor;
+  mutable std::map<FEType, FEShapeData *> _fe_shape_data_face_neighbor;
+  mutable std::map<FEType, FEShapeData *> _fe_shape_data_lower;
 
   /// Shape function values, gradients, second derivatives for each vector FE type
-  std::map<FEType, VectorFEShapeData *> _vector_fe_shape_data;
-  std::map<FEType, VectorFEShapeData *> _vector_fe_shape_data_face;
-  std::map<FEType, VectorFEShapeData *> _vector_fe_shape_data_neighbor;
-  std::map<FEType, VectorFEShapeData *> _vector_fe_shape_data_face_neighbor;
-  std::map<FEType, VectorFEShapeData *> _vector_fe_shape_data_lower;
+  mutable std::map<FEType, VectorFEShapeData *> _vector_fe_shape_data;
+  mutable std::map<FEType, VectorFEShapeData *> _vector_fe_shape_data_face;
+  mutable std::map<FEType, VectorFEShapeData *> _vector_fe_shape_data_neighbor;
+  mutable std::map<FEType, VectorFEShapeData *> _vector_fe_shape_data_face_neighbor;
+  mutable std::map<FEType, VectorFEShapeData *> _vector_fe_shape_data_lower;
 
   std::map<FEType, typename VariableTestGradientType<Real, ComputeStage::JACOBIAN>::type>
       _ad_grad_phi_data;
@@ -1588,11 +1629,15 @@ protected:
   mutable bool _calculate_xyz;
   mutable bool _calculate_face_xyz;
   mutable bool _calculate_curvatures;
+
+  mutable std::map<FEType, bool> _need_second_derivative;
+  mutable std::map<FEType, bool> _need_second_derivative_neighbor;
+  mutable std::map<FEType, bool> _need_curl;
 };
 
 template <typename OutputType>
 const typename OutputTools<OutputType>::VariablePhiValue &
-Assembly::fePhiLower(FEType type)
+Assembly::fePhiLower(FEType type) const
 {
   buildLowerDFE(type);
   return _fe_shape_data_lower[type]->_phi;
@@ -1600,7 +1645,7 @@ Assembly::fePhiLower(FEType type)
 
 template <typename OutputType>
 const typename OutputTools<OutputType>::VariablePhiGradient &
-Assembly::feGradPhiLower(FEType type)
+Assembly::feGradPhiLower(FEType type) const
 {
   buildLowerDFE(type);
   return _fe_shape_data_lower[type]->_grad_phi;
@@ -1608,16 +1653,26 @@ Assembly::feGradPhiLower(FEType type)
 
 template <>
 inline const typename VariableTestGradientType<RealVectorValue, ComputeStage::JACOBIAN>::type &
-Assembly::feADGradPhi<RealVectorValue>(FEType type)
+Assembly::feADGradPhi<RealVectorValue>(FEType type) const
 {
-  return _ad_vector_grad_phi_data[type];
+  if (_ad_vector_grad_phi_data.find(type) != _ad_vector_grad_phi_data.end())
+    return _ad_vector_grad_phi_data.at(type);
+  else
+    mooseError(
+        "No matching ad_vector_grad_phi_data for family ", type.family, " and order ", type.order);
 }
 
 template <>
 inline const typename VariableTestGradientType<RealVectorValue, ComputeStage::JACOBIAN>::type &
-Assembly::feADGradPhiFace<RealVectorValue>(FEType type)
+Assembly::feADGradPhiFace<RealVectorValue>(FEType type) const
 {
-  return _ad_vector_grad_phi_data_face[type];
+  if (_ad_vector_grad_phi_data_face.find(type) != _ad_vector_grad_phi_data_face.end())
+    return _ad_vector_grad_phi_data_face.at(type);
+  else
+    mooseError("No matching ad_vector_grad_phi_data_face for family ",
+               type.family,
+               " and order ",
+               type.order);
 }
 
 template <>
@@ -1679,75 +1734,75 @@ Assembly::adCoordTransformation<ComputeStage::JACOBIAN>() const
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiValue &
-Assembly::fePhi<VectorValue<Real>>(FEType type);
+Assembly::fePhi<VectorValue<Real>>(FEType type) const;
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiGradient &
-Assembly::feGradPhi<VectorValue<Real>>(FEType type);
+Assembly::feGradPhi<VectorValue<Real>>(FEType type) const;
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiSecond &
-Assembly::feSecondPhi<VectorValue<Real>>(FEType type);
+Assembly::feSecondPhi<VectorValue<Real>>(FEType type) const;
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiValue &
-Assembly::fePhiLower<VectorValue<Real>>(FEType type);
+Assembly::fePhiLower<VectorValue<Real>>(FEType type) const;
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiGradient &
-Assembly::feGradPhiLower<VectorValue<Real>>(FEType type);
+Assembly::feGradPhiLower<VectorValue<Real>>(FEType type) const;
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiValue &
-Assembly::fePhiFace<VectorValue<Real>>(FEType type);
+Assembly::fePhiFace<VectorValue<Real>>(FEType type) const;
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiGradient &
-Assembly::feGradPhiFace<VectorValue<Real>>(FEType type);
+Assembly::feGradPhiFace<VectorValue<Real>>(FEType type) const;
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiSecond &
-Assembly::feSecondPhiFace<VectorValue<Real>>(FEType type);
+Assembly::feSecondPhiFace<VectorValue<Real>>(FEType type) const;
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiValue &
-Assembly::fePhiNeighbor<VectorValue<Real>>(FEType type);
+Assembly::fePhiNeighbor<VectorValue<Real>>(FEType type) const;
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiGradient &
-Assembly::feGradPhiNeighbor<VectorValue<Real>>(FEType type);
+Assembly::feGradPhiNeighbor<VectorValue<Real>>(FEType type) const;
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiSecond &
-Assembly::feSecondPhiNeighbor<VectorValue<Real>>(FEType type);
+Assembly::feSecondPhiNeighbor<VectorValue<Real>>(FEType type) const;
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiValue &
-Assembly::fePhiFaceNeighbor<VectorValue<Real>>(FEType type);
+Assembly::fePhiFaceNeighbor<VectorValue<Real>>(FEType type) const;
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiGradient &
-Assembly::feGradPhiFaceNeighbor<VectorValue<Real>>(FEType type);
+Assembly::feGradPhiFaceNeighbor<VectorValue<Real>>(FEType type) const;
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiSecond &
-Assembly::feSecondPhiFaceNeighbor<VectorValue<Real>>(FEType type);
+Assembly::feSecondPhiFaceNeighbor<VectorValue<Real>>(FEType type) const;
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiCurl &
-Assembly::feCurlPhi<VectorValue<Real>>(FEType type);
+Assembly::feCurlPhi<VectorValue<Real>>(FEType type) const;
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiCurl &
-Assembly::feCurlPhiFace<VectorValue<Real>>(FEType type);
+Assembly::feCurlPhiFace<VectorValue<Real>>(FEType type) const;
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiCurl &
-Assembly::feCurlPhiNeighbor<VectorValue<Real>>(FEType type);
+Assembly::feCurlPhiNeighbor<VectorValue<Real>>(FEType type) const;
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiCurl &
-Assembly::feCurlPhiFaceNeighbor<VectorValue<Real>>(FEType type);
+Assembly::feCurlPhiFaceNeighbor<VectorValue<Real>>(FEType type) const;
 
 template <>
 const typename VariableTestGradientType<Real, ComputeStage::JACOBIAN>::type &

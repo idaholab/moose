@@ -2526,7 +2526,7 @@ FEProblemBase::reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stat
 {
   if (hasActiveMaterialProperties(tid))
   {
-    const Elem *& elem = _assembly[tid]->elem();
+    auto && elem = _assembly[tid]->elem();
     unsigned int n_points = _assembly[tid]->qRule()->n_points();
     _material_data[tid]->resize(n_points);
 
@@ -2550,7 +2550,7 @@ FEProblemBase::reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid, bool swap_
 {
   if (hasActiveMaterialProperties(tid))
   {
-    const Elem *& elem = _assembly[tid]->elem();
+    auto && elem = _assembly[tid]->elem();
     unsigned int side = _assembly[tid]->side();
     unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
 
@@ -2581,7 +2581,7 @@ FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool s
   if (hasActiveMaterialProperties(tid))
   {
     // NOTE: this will not work with h-adaptivity
-    const Elem *& neighbor = _assembly[tid]->neighbor();
+    auto && neighbor = _assembly[tid]->neighbor();
     unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[tid]->elem());
     unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
     _neighbor_material_data[tid]->resize(n_points);
@@ -2611,7 +2611,7 @@ FEProblemBase::reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid, bo
 {
   if (hasActiveMaterialProperties(tid))
   {
-    const Elem *& elem = _assembly[tid]->elem();
+    auto && elem = _assembly[tid]->elem();
     unsigned int side = _assembly[tid]->side();
     unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
     _bnd_material_data[tid]->resize(n_points);
@@ -2638,14 +2638,14 @@ FEProblemBase::reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid, bo
 void
 FEProblemBase::swapBackMaterials(THREAD_ID tid)
 {
-  const Elem *& elem = _assembly[tid]->elem();
+  auto && elem = _assembly[tid]->elem();
   _material_data[tid]->swapBack(*elem);
 }
 
 void
 FEProblemBase::swapBackMaterialsFace(THREAD_ID tid)
 {
-  const Elem *& elem = _assembly[tid]->elem();
+  auto && elem = _assembly[tid]->elem();
   unsigned int side = _assembly[tid]->side();
   _bnd_material_data[tid]->swapBack(*elem, side);
 }
@@ -2654,7 +2654,7 @@ void
 FEProblemBase::swapBackMaterialsNeighbor(THREAD_ID tid)
 {
   // NOTE: this will not work with h-adaptivity
-  const Elem *& neighbor = _assembly[tid]->neighbor();
+  auto && neighbor = _assembly[tid]->neighbor();
   unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[tid]->elem());
   _neighbor_material_data[tid]->swapBack(*neighbor, neighbor_side);
 }

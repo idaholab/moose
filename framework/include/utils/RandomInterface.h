@@ -83,8 +83,8 @@ private:
   bool _is_nodal;
   ExecFlagType _reset_on;
 
-  const Node *& _curr_node;
-  const Elem *& _curr_element;
+  const Node * const & _curr_node;
+  const Elem * const & _curr_element;
 
   //  friend void FEProblemBase::registerRandomInterface(RandomInterface *random_interface, const
   //  std::string & name, ExecFlagType exec_flag);
