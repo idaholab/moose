@@ -19,7 +19,7 @@
   usingMaterialMembers;                                                                            \
   using ADComputeElasticityTensorBase<compute_stage>::_elasticity_tensor_name;                     \
   using ADComputeElasticityTensorBase<compute_stage>::_elasticity_tensor;                          \
-  using ADComputeElasticityTensorBase<compute_stage>::issueGuarantee;
+  using ADComputeElasticityTensorBase<compute_stage>::issueGuarantee
 
 template <ComputeStage>
 class ADComputeElasticityTensorBase;

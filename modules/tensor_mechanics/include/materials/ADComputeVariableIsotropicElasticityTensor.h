@@ -38,7 +38,7 @@ protected:
   /// Material defining the Poisson's Ratio
   const ADMaterialProperty(Real) & _poissons_ratio;
 
-  usingComputeElasticityTensorBaseMembers
+  usingComputeElasticityTensorBaseMembers;
 };
 
 #endif // ADCOMPUTEVARIABLEISOTROPICELASTICITYTENSOR_H
