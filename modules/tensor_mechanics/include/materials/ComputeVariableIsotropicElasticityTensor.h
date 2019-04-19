@@ -32,10 +32,10 @@ protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpElasticityTensor() override;
 
-  /// Material defininig the Young's Modulus
+  /// Material defining the Young's Modulus
   const MaterialProperty<Real> & _youngs_modulus;
 
-  /// Material defininig the Poisson's Ratio
+  /// Material defining the Poisson's Ratio
   const MaterialProperty<Real> & _poissons_ratio;
 
   /// number of variables the moduli depend on

@@ -39,7 +39,9 @@ PiecewiseLinearInterpolationMaterial::PiecewiseLinearInterpolationMaterial(
   : DerivativeMaterialInterface<Material>(parameters),
     _prop_name(getParam<std::string>("property")),
     _coupled_var(coupledValue("variable")),
-    _scale_factor(getParam<Real>("scale_factor"))
+    _scale_factor(getParam<Real>("scale_factor")),
+    _property(declareProperty<Real>(_prop_name)),
+    _dproperty(declarePropertyDerivative<Real>(_prop_name, getVar("variable", 0)->name()))
 {
   std::vector<Real> x;
   std::vector<Real> y;
@@ -86,15 +88,11 @@ PiecewiseLinearInterpolationMaterial::PiecewiseLinearInterpolationMaterial(
   {
     mooseError("In PiecewiseLinearInterpolationMaterial ", _name, ": ", e.what());
   }
-
-  _property = &declareProperty<Real>(_prop_name);
-  const VariableName & vname = getVar("variable", 0)->name();
-  _dproperty = &declarePropertyDerivative<Real>(_prop_name, vname);
 }
 
 void
 PiecewiseLinearInterpolationMaterial::computeQpProperties()
 {
-  (*_property)[_qp] = _scale_factor * _linear_interp->sample(_coupled_var[_qp]);
-  (*_dproperty)[_qp] = _scale_factor * _linear_interp->sampleDerivative(_coupled_var[_qp]);
+  _property[_qp] = _scale_factor * _linear_interp->sample(_coupled_var[_qp]);
+  _dproperty[_qp] = _scale_factor * _linear_interp->sampleDerivative(_coupled_var[_qp]);
 }
