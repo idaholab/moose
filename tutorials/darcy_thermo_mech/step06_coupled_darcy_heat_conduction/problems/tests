@@ -1,17 +1,22 @@
 [Tests]
+  issues = '#4586'
+  design = 'tutorials/darcy_thermo_mech/index.md'
   [step_a]
     type = RunApp
     input = 'step6a_coupled.i'
     cli_args = Executioner/num_steps=2
+    requirement = "The Darcy-Thermomechanics tutorial shall demonstrate coupling between the Darcy equation and heat equation."
   []
   [step_b]
     type = RunApp
     input = 'step6b_transient_inflow.i'
     cli_args = Executioner/num_steps=2
+    requirement = "The Darcy-Thermomechanics tutorial shall demonstrate coupling between the Darcy equation and heat equation with an outflow boundary condition."
   []
   [step_c]
     type = RunApp
     input = 'step6c_decoupled.i'
     cli_args = Executioner/num_steps=2
+    requirement = "The Darcy-Thermomechanics tutorial shall demonstrate heat equation coupled with an auxiliary pressure variable."
   []
 []
