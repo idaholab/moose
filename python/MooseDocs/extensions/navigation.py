@@ -371,7 +371,6 @@ class NavigationExtension(components.Extension):
                              href='#{}'.format(node['id']),
                              string=node.get('data-section-text', 'Unknown...'),
                              class_='tooltipped')
-                a['data-delay'] = '1000'
                 a['data-position'] = 'left'
                 a['data-tooltip'] = node['data-section-text']
 

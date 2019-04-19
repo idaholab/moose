@@ -8,7 +8,6 @@
 - /Adaptivity/Indicators/ValueJumpIndicator
 - /Adaptivity/Markers/AddElementalFieldAction
 - /Adaptivity/Markers/AddMarkerAction
-- /AuxKernels
 - /AuxKernels/AddKernelAction
 - /AuxKernels/BoundsAux
 - /AuxKernels/DebugResidualAux
@@ -32,7 +31,6 @@
 - /AuxScalarKernels/ConstantScalarAux
 - /AuxScalarKernels/FunctionScalarAux
 - /AuxScalarKernels/QuotientScalarAux
-- /AuxVariables
 - /AuxVariables/AddAuxVariableAction
 - /AuxVariables/CopyNodalVarsAction
 - /AuxVariables/InitialCondition
@@ -312,7 +310,6 @@
 - /UserObjects/Terminator
 - /UserObjects/VerifyElementUniqueID
 - /UserObjects/VerifyNodalUniqueID
-- /Variables
 - /Variables/AddVariableAction
 - /Variables/CopyNodalVarsAction
 - /Variables/InitialCondition

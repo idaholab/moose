@@ -1,6 +1,6 @@
 (function($){
     $(function(){
-        $('.tooltipped').tooltip();
+        $('.tooltipped').tooltip({enterDelay:1000});
         $('.modal').modal();
         $('.collapsible').collapsible();
         $('.slider').slider();

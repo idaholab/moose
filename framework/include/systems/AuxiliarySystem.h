@@ -19,11 +19,13 @@
 #include "libmesh/transient_system.h"
 
 // Forward declarations
-class AuxKernel;
+template <typename ComputeValueType>
+class AuxKernelTempl;
+typedef AuxKernelTempl<Real> AuxKernel;
+typedef AuxKernelTempl<RealVectorValue> VectorAuxKernel;
 class FEProblemBase;
 class TimeIntegrator;
 class AuxScalarKernel;
-class AuxKernel;
 
 // libMesh forward declarations
 namespace libMesh
@@ -177,10 +179,22 @@ public:
 
   void clearScalarVariableCoupleableTags();
 
-protected:
+  // protected:
   void computeScalarVars(ExecFlagType type);
   void computeNodalVars(ExecFlagType type);
+  void computeNodalVecVars(ExecFlagType type);
   void computeElementalVars(ExecFlagType type);
+  void computeElementalVecVars(ExecFlagType type);
+
+  template <typename AuxKernelType>
+  void computeElementalVarsHelper(const MooseObjectWarehouse<AuxKernelType> & warehouse,
+                                  const std::vector<std::vector<MooseVariableFEBase *>> & vars,
+                                  const PerfID timer);
+
+  template <typename AuxKernelType>
+  void computeNodalVarsHelper(const MooseObjectWarehouse<AuxKernelType> & warehouse,
+                              const std::vector<std::vector<MooseVariableFEBase *>> & vars,
+                              const PerfID timer);
 
   FEProblemBase & _fe_problem;
 
@@ -208,28 +222,32 @@ protected:
   bool _need_serialized_solution;
 
   // Variables
-  std::vector<std::map<std::string, MooseVariable *>> _nodal_vars;
-  std::vector<std::map<std::string, MooseVariable *>> _elem_vars;
+  std::vector<std::vector<MooseVariableFEBase *>> _nodal_vars;
+  std::vector<std::vector<MooseVariableFEBase *>> _nodal_std_vars;
+  std::vector<std::vector<MooseVariableFEBase *>> _nodal_vec_vars;
+
+  std::vector<std::vector<MooseVariableFEBase *>> _elem_vars;
+  std::vector<std::vector<MooseVariableFEBase *>> _elem_std_vars;
+  std::vector<std::vector<MooseVariableFEBase *>> _elem_vec_vars;
 
   // Storage for AuxScalarKernel objects
   ExecuteMooseObjectWarehouse<AuxScalarKernel> _aux_scalar_storage;
 
   // Storage for AuxKernel objects
   ExecuteMooseObjectWarehouse<AuxKernel> _nodal_aux_storage;
-
-  // Storage for AuxKernel objects
   ExecuteMooseObjectWarehouse<AuxKernel> _elemental_aux_storage;
 
-  /// Timers
-  PerfID _compute_scalar_vars_timer;
-  PerfID _compute_nodal_vars_timer;
-  PerfID _compute_elemental_vars_timer;
+  // Storage for VectorAuxKernel objects
+  ExecuteMooseObjectWarehouse<VectorAuxKernel> _nodal_vec_aux_storage;
+  ExecuteMooseObjectWarehouse<VectorAuxKernel> _elemental_vec_aux_storage;
 
-  friend class AuxKernel;
-  friend class ComputeNodalAuxVarsThread;
-  friend class ComputeNodalAuxBcsThread;
-  friend class ComputeElemAuxVarsThread;
-  friend class ComputeElemAuxBcsThread;
+  /// Timers
+  const PerfID _compute_scalar_vars_timer;
+  const PerfID _compute_nodal_vars_timer;
+  const PerfID _compute_nodal_vec_vars_timer;
+  const PerfID _compute_elemental_vars_timer;
+  const PerfID _compute_elemental_vec_vars_timer;
+
   friend class ComputeIndicatorThread;
   friend class ComputeMarkerThread;
   friend class FlagElementsThread;
@@ -239,4 +257,4 @@ protected:
   friend class ComputeNodalKernelBCJacobiansThread;
 };
 
-#endif /* EXPLICITSYSTEM_H */
+#endif

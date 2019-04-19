@@ -3,39 +3,39 @@
 []
 
 [Variables]
-  [./convected]
+  [convected]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = convected
-  [../]
+  []
 
-  [./conv]
+  [conv]
     type = ExampleConvection
     variable = convected
     velocity = '0.0 0.0 1.0'
-  [../]
+  []
 []
 
 [BCs]
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = convected
     boundary = 'bottom'
     value = 1
-  [../]
+  []
 
-  [./top]
+  [top]
     type = DirichletBC
     variable = convected
     boundary = 'top'
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

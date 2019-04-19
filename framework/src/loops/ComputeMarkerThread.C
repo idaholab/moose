@@ -46,11 +46,8 @@ ComputeMarkerThread::subdomainChanged()
   std::set<MooseVariableFEBase *> needed_moose_vars;
   _marker_whs.updateVariableDependency(needed_moose_vars, _tid);
 
-  for (const auto & it : _aux_sys._elem_vars[_tid])
-  {
-    MooseVariable * var = it.second;
+  for (auto * var : _aux_sys._elem_vars[_tid])
     var->prepareAux();
-  }
 
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
   _fe_problem.prepareMaterials(_subdomain, _tid);
@@ -78,11 +75,8 @@ ComputeMarkerThread::onElement(const Elem * elem)
 
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (const auto & it : _aux_sys._elem_vars[_tid])
-    {
-      MooseVariable * var = it.second;
+    for (auto * var : _aux_sys._elem_vars[_tid])
       var->insert(_aux_sys.solution());
-    }
   }
 }
 

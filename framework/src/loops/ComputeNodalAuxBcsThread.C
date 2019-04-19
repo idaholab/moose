@@ -15,36 +15,40 @@
 #include "FEProblem.h"
 #include "AuxKernel.h"
 
-ComputeNodalAuxBcsThread::ComputeNodalAuxBcsThread(FEProblemBase & fe_problem,
-                                                   const MooseObjectWarehouse<AuxKernel> & storage)
+template <typename AuxKernelType>
+ComputeNodalAuxBcsThread<AuxKernelType>::ComputeNodalAuxBcsThread(
+    FEProblemBase & fe_problem,
+    const MooseObjectWarehouse<AuxKernelType> & storage,
+    const std::vector<std::vector<MooseVariableFEBase *>> & vars)
   : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
-    _storage(storage)
+    _storage(storage),
+    _aux_vars(vars)
 {
 }
 
 // Splitting Constructor
-ComputeNodalAuxBcsThread::ComputeNodalAuxBcsThread(ComputeNodalAuxBcsThread & x,
-                                                   Threads::split split)
+template <typename AuxKernelType>
+ComputeNodalAuxBcsThread<AuxKernelType>::ComputeNodalAuxBcsThread(ComputeNodalAuxBcsThread & x,
+                                                                  Threads::split split)
   : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
     _aux_sys(x._aux_sys),
-    _storage(x._storage)
+    _storage(x._storage),
+    _aux_vars(x._aux_vars)
 {
 }
 
+template <typename AuxKernelType>
 void
-ComputeNodalAuxBcsThread::onNode(ConstBndNodeRange::const_iterator & node_it)
+ComputeNodalAuxBcsThread<AuxKernelType>::onNode(ConstBndNodeRange::const_iterator & node_it)
 {
   const BndNode * bnode = *node_it;
 
   BoundaryID boundary_id = bnode->_bnd_id;
 
   // prepare variables
-  for (const auto & it : _aux_sys._nodal_vars[_tid])
-  {
-    MooseVariable * var = it.second;
+  for (auto * var : _aux_vars[_tid])
     var->prepareAux();
-  }
 
   Node * node = bnode->_node;
 
@@ -68,15 +72,16 @@ ComputeNodalAuxBcsThread::onNode(ConstBndNodeRange::const_iterator & node_it)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     // update the solution vector
-    for (const auto & it : _aux_sys._nodal_vars[_tid])
-    {
-      MooseVariable * var = it.second;
+    for (auto * var : _aux_vars[_tid])
       var->insert(_aux_sys.solution());
-    }
   }
 }
 
+template <typename AuxKernelType>
 void
-ComputeNodalAuxBcsThread::join(const ComputeNodalAuxBcsThread & /*y*/)
+ComputeNodalAuxBcsThread<AuxKernelType>::join(const ComputeNodalAuxBcsThread & /*y*/)
 {
 }
+
+template class ComputeNodalAuxBcsThread<AuxKernel>;
+template class ComputeNodalAuxBcsThread<VectorAuxKernel>;

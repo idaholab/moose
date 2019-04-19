@@ -62,11 +62,8 @@ ComputeNodalKernelsThread::onNode(ConstNodeRange::const_iterator & node_it)
   const Node * node = *node_it;
 
   // prepare variables
-  for (const auto & it : _aux_sys._nodal_vars[_tid])
-  {
-    MooseVariable * var = it.second;
+  for (auto * var : _aux_sys._nodal_vars[_tid])
     var->prepareAux();
-  }
 
   _fe_problem.reinitNode(node, _tid);
 
