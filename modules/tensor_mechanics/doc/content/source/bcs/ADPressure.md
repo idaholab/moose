@@ -1,6 +1,6 @@
 # ADPressure
 
-!syntax description /ADBCs/ADPressure<RESIDUAL>
+!syntax description /BCs/ADPressure
 
 ## Description
 
@@ -17,8 +17,8 @@ The magnitude of the `ADPressure` boundary condition can be specified as either
 a constant scalar factor (use the input parameter `constant`), a factor from a
 `function`, a factor from a `postprocessor`, or any combination thereof.
 
-!syntax parameters /ADBCs/ADPressure<RESIDUAL>
+!syntax parameters /BCs/ADPressure
 
-!syntax inputs /ADBCs/ADPressure<RESIDUAL>
+!syntax inputs /BCs/ADPressure
 
-!syntax children /ADBCs/ADPressure<RESIDUAL>
+!syntax children /BCs/ADPressure
