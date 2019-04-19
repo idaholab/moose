@@ -15,6 +15,7 @@
 #include "NonlinearSystem.h"
 #include "AllLocalDofIndicesThread.h"
 #include "Console.h"
+#include "EigenExecutionerBase.h"
 
 template <>
 InputParameters
@@ -208,7 +209,7 @@ PicardSolve::solve()
       {
         if (_has_picard_norm)
         {
-          _console << "\n0  Picard |R| = "
+          _console << "\n 0 Picard |R| = "
                    << Console::outputNorm(std::numeric_limits<Real>::max(), _picard_initial_norm)
                    << '\n';
 
@@ -330,6 +331,9 @@ PicardSolve::solveStep(Real begin_norm_old,
                        const std::set<dof_id_type> & relaxed_dofs)
 {
   bool auto_advance = !(_has_picard_its && _problem.isTransient());
+
+  if (dynamic_cast<EigenExecutionerBase *>(&_executioner) && _has_picard_its)
+    auto_advance = true;
 
   _executioner.preSolve();
 
