@@ -56,7 +56,7 @@ GeometricCut3DUserObject::cutElementByGeometry(const Elem * elem,
   for (unsigned int i = 0; i < elem->n_sides(); ++i)
   {
     // This returns the lowest-order type of side.
-    std::unique_ptr<Elem> curr_side = elem->side(i);
+    std::unique_ptr<const Elem> curr_side = elem->side_ptr(i);
     if (curr_side->dim() != 2)
       mooseError("In cutElementByGeometry dimension of side must be 2, but it is ",
                  curr_side->dim());
@@ -68,14 +68,14 @@ GeometricCut3DUserObject::cutElementByGeometry(const Elem * elem,
     for (unsigned int j = 0; j < n_edges; j++)
     {
       // This returns the lowest-order type of side.
-      std::unique_ptr<Elem> curr_edge = curr_side->side(j);
+      std::unique_ptr<const Elem> curr_edge = curr_side->side_ptr(j);
       if (curr_edge->type() != EDGE2)
         mooseError("In cutElementByGeometry face edge must be EDGE2, but type is: ",
                    libMesh::Utility::enum_to_string(curr_edge->type()),
                    " base element type is: ",
                    libMesh::Utility::enum_to_string(elem->type()));
-      Node * node1 = curr_edge->get_node(0);
-      Node * node2 = curr_edge->get_node(1);
+      const Node * node1 = curr_edge->node_ptr(0);
+      const Node * node2 = curr_edge->node_ptr(1);
 
       Point intersection;
       if (intersectWithEdge(*node1, *node2, intersection))

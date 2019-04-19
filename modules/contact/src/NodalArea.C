@@ -78,7 +78,7 @@ NodalArea::execute()
     const Real area = nodeAreas[j];
     if (area != 0)
     {
-      _node_areas[_current_elem->get_node(j)] += area;
+      _node_areas[_current_elem->node_ptr(j)] += area;
     }
   }
 }

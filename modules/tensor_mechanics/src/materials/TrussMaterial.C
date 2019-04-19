@@ -65,9 +65,9 @@ TrussMaterial::computeProperties()
   mooseAssert(_current_elem->n_nodes() == 2, "Truss element needs to have exactly two nodes.");
 
   // fetch the two end nodes for _current_elem
-  std::vector<Node *> node;
+  std::vector<const Node *> node;
   for (unsigned int i = 0; i < 2; ++i)
-    node.push_back(_current_elem->get_node(i));
+    node.push_back(_current_elem->node_ptr(i));
 
   // calculate original length of a truss element
   RealGradient dxyz;

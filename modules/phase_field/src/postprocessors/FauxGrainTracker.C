@@ -195,7 +195,7 @@ FauxGrainTracker::execute()
       unsigned int n_nodes = current_elem->n_vertices();
       for (unsigned int i = 0; i < n_nodes; ++i)
       {
-        const Node * current_node = current_elem->get_node(i);
+        const Node * current_node = current_elem->node_ptr(i);
 
         for (MooseIndex(_vars) var_num = 0; var_num < _n_vars; ++var_num)
         {

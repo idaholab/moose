@@ -31,13 +31,13 @@ XFEMCutElem::XFEMCutElem(Elem * elem, unsigned int n_qpoints, unsigned int n_sid
     _new_face_weights(n_sides)
 {
   for (unsigned int i = 0; i < _n_nodes; ++i)
-    _nodes[i] = elem->get_node(i);
+    _nodes[i] = elem->node_ptr(i);
 
   for (unsigned int i = 0; i < _n_sides; ++i)
   {
     _have_face_weights[i] = false;
     _physical_areafrac[i] = 1.0;
-    _elem_side_area[i] = elem->side(i)->volume();
+    _elem_side_area[i] = elem->side_ptr(i)->volume();
   }
 
   _elem_volume = elem->volume();

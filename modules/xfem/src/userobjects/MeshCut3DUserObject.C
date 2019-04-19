@@ -134,7 +134,7 @@ MeshCut3DUserObject::cutElementByGeometry(const Elem * elem,
   for (unsigned int i = 0; i < elem->n_sides(); ++i)
   {
     // This returns the lowest-order type of side.
-    std::unique_ptr<Elem> curr_side = elem->side(i);
+    std::unique_ptr<const Elem> curr_side = elem->side_ptr(i);
     if (curr_side->dim() != 2)
       mooseError("In cutElementByGeometry dimension of side must be 2, but it is ",
                  curr_side->dim());
@@ -146,14 +146,14 @@ MeshCut3DUserObject::cutElementByGeometry(const Elem * elem,
     for (unsigned int j = 0; j < n_edges; j++)
     {
       // This returns the lowest-order type of side.
-      std::unique_ptr<Elem> curr_edge = curr_side->side(j);
+      std::unique_ptr<const Elem> curr_edge = curr_side->side_ptr(j);
       if (curr_edge->type() != EDGE2)
         mooseError("In cutElementByGeometry face edge must be EDGE2, but type is: ",
                    libMesh::Utility::enum_to_string(curr_edge->type()),
                    " base element type is: ",
                    libMesh::Utility::enum_to_string(elem->type()));
-      Node * node1 = curr_edge->get_node(0);
-      Node * node2 = curr_edge->get_node(1);
+      const Node * node1 = curr_edge->node_ptr(0);
+      const Node * node2 = curr_edge->node_ptr(1);
 
       for (const auto & cut_elem : _cut_mesh->element_ptr_range())
       {
@@ -328,7 +328,7 @@ MeshCut3DUserObject::findBoundaryNodes()
   {
     for (unsigned int i = 0; i < _cut_elem_nnode; ++i)
     {
-      Node * this_node = cut_elem->get_node(i);
+      Node * this_node = cut_elem->node_ptr(i);
       Point & this_point = *this_node;
       vertices[i] = this_point;
       node_id[i] = this_node->id();
@@ -372,7 +372,7 @@ MeshCut3DUserObject::findBoundaryEdges()
   {
     for (unsigned int i = 0; i < _cut_elem_nnode; ++i)
     {
-      node_id[i] = cut_elem->get_node(i)->id();
+      node_id[i] = cut_elem->node_ptr(i)->id();
       is_node_on_boundary[i] = (_boundary_map.find(node_id[i]) != _boundary_map.end());
     }
 
@@ -423,8 +423,8 @@ MeshCut3DUserObject::findBoundaryEdges()
     {
       bool is_edge_inside = 0;
 
-      dof_id_type node1 = cut_elem->get_node(j)->id();
-      dof_id_type node2 = cut_elem->get_node((j + 1 <= 2) ? j + 1 : 0)->id();
+      dof_id_type node1 = cut_elem->node_ptr(j)->id();
+      dof_id_type node2 = cut_elem->node_ptr((j + 1 <= 2) ? j + 1 : 0)->id();
       if (node1 > node2)
         std::swap(node1, node2);
 
@@ -435,8 +435,8 @@ MeshCut3DUserObject::findBoundaryEdges()
         {
           for (unsigned int k = 0; k < _cut_elem_nnode; ++k)
           {
-            dof_id_type node3 = cut_elem2->get_node(k)->id();
-            dof_id_type node4 = cut_elem2->get_node((k + 1 <= 2) ? k + 1 : 0)->id();
+            dof_id_type node3 = cut_elem2->node_ptr(k)->id();
+            dof_id_type node4 = cut_elem2->node_ptr((k + 1 <= 2) ? k + 1 : 0)->id();
             if (node3 > node4)
               std::swap(node3, node4);
 
@@ -826,11 +826,11 @@ MeshCut3DUserObject::findFrontIntersection()
         std::vector<Point> vertices;
 
         elem = belem->_elem;
-        std::unique_ptr<Elem> curr_side = elem->side(belem->_side);
+        std::unique_ptr<const Elem> curr_side = elem->side_ptr(belem->_side);
         for (unsigned int j = 0; j < curr_side->n_nodes(); ++j)
         {
-          Node * node = curr_side->get_node(j);
-          Point & this_point = *node;
+          const Node * node = curr_side->node_ptr(j);
+          const Point & this_point = *node;
           vertices.push_back(this_point);
         }
 

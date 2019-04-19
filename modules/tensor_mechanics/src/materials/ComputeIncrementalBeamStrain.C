@@ -173,9 +173,9 @@ void
 ComputeIncrementalBeamStrain::computeProperties()
 {
   // fetch the two end nodes for current element
-  std::vector<Node *> node;
+  std::vector<const Node *> node;
   for (unsigned int i = 0; i < 2; ++i)
-    node.push_back(_current_elem->get_node(i));
+    node.push_back(_current_elem->node_ptr(i));
 
   // calculate original length of a beam element
   // Nodal positions do not change with time as undisplaced mesh is used by material classes by
