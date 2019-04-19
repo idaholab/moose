@@ -33,6 +33,7 @@ template <typename>
 class MooseVariableFE;
 typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<RealVectorValue> VectorMooseVariable;
+typedef MooseVariableFE<RealArrayValue> ArrayMooseVariable;
 class RestartableDataValue;
 class SystemBase;
 
@@ -161,7 +162,7 @@ public:
    */
   virtual std::map<TagName, TagID> & getMatrixTags() { return _matrix_tag_name_to_tag_id; }
 
-  // Variables /////
+  /// Whether or not this problem has the variable
   virtual bool hasVariable(const std::string & var_name) const = 0;
 
   /**
@@ -184,6 +185,15 @@ public:
 
   /// Returns the variable reference for requested VectorMooseVariable which may be in any system
   virtual VectorMooseVariable & getVectorVariable(THREAD_ID tid, const std::string & var_name) = 0;
+
+  /// Returns the variable reference for requested ArrayMooseVariable which may be in any system
+  virtual ArrayMooseVariable & getArrayVariable(THREAD_ID tid, const std::string & var_name) = 0;
+
+  /// Returns the variable name of a component of an array variable
+  static NonlinearVariableName arrayVariableComponent(const std::string & var_name, unsigned int i)
+  {
+    return var_name + "_" + std::to_string(i);
+  }
 
   /// Returns a Boolean indicating whether any system contains a variable with the name provided
   virtual bool hasScalarVariable(const std::string & var_name) const = 0;
