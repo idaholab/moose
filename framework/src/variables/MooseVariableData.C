@@ -38,6 +38,7 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableFE<OutputTyp
     _assembly(_subproblem.assembly(_tid)),
     _dof_map(_sys.dofMap()),
     _element_type(element_type),
+    _count(var.count()),
     _ad_zero(0),
     _need_u_old(false),
     _need_u_older(false),
@@ -654,11 +655,300 @@ MooseVariableData<OutputType>::computeValues()
     computeAD(num_dofs, nqp);
 }
 
+template <>
+void
+MooseVariableData<RealArrayValue>::computeValues()
+{
+  unsigned int num_dofs = _dof_indices.size();
+
+  if (num_dofs > 0)
+    fetchDoFValues();
+
+  bool is_transient = _subproblem.isTransient();
+  unsigned int nqp = _current_qrule->n_points();
+  auto && active_coupleable_vector_tags =
+      _sys.subproblem().getActiveFEVariableCoupleableVectorTags(_tid);
+  auto && active_coupleable_matrix_tags =
+      _sys.subproblem().getActiveFEVariableCoupleableMatrixTags(_tid);
+
+  _u.resize(nqp);
+  _grad_u.resize(nqp);
+
+  for (auto tag : active_coupleable_vector_tags)
+    if (_need_vector_tag_u[tag])
+      _vector_tag_u[tag].resize(nqp);
+
+  for (auto tag : active_coupleable_matrix_tags)
+    if (_need_matrix_tag_u[tag])
+      _matrix_tag_u[tag].resize(nqp);
+
+  if (_need_second)
+    _second_u.resize(nqp);
+
+  if (_need_curl)
+    _curl_u.resize(nqp);
+
+  if (_need_u_previous_nl)
+    _u_previous_nl.resize(nqp);
+
+  if (_need_grad_previous_nl)
+    _grad_u_previous_nl.resize(nqp);
+
+  if (_need_second_previous_nl)
+    _second_u_previous_nl.resize(nqp);
+
+  if (is_transient)
+  {
+    if (_need_u_dot)
+      _u_dot.resize(nqp);
+
+    if (_need_u_dotdot)
+      _u_dotdot.resize(nqp);
+
+    if (_need_u_dot_old)
+      _u_dot_old.resize(nqp);
+
+    if (_need_u_dotdot_old)
+      _u_dotdot_old.resize(nqp);
+
+    if (_need_du_dot_du)
+      _du_dot_du.resize(nqp);
+
+    if (_need_du_dotdot_du)
+      _du_dotdot_du.resize(nqp);
+
+    if (_need_grad_dot)
+      _grad_u_dot.resize(nqp);
+
+    if (_need_grad_dotdot)
+      _grad_u_dotdot.resize(nqp);
+
+    if (_need_u_old)
+      _u_old.resize(nqp);
+
+    if (_need_u_older)
+      _u_older.resize(nqp);
+
+    if (_need_grad_old)
+      _grad_u_old.resize(nqp);
+
+    if (_need_grad_older)
+      _grad_u_older.resize(nqp);
+
+    if (_need_second_old)
+      _second_u_old.resize(nqp);
+
+    if (_need_curl_old)
+      _curl_u_old.resize(nqp);
+
+    if (_need_second_older)
+      _second_u_older.resize(nqp);
+  }
+
+  for (unsigned int i = 0; i < nqp; ++i)
+  {
+    _u[i].setZero(_count);
+    _grad_u[i].setZero(_count, LIBMESH_DIM);
+
+    for (auto tag : active_coupleable_vector_tags)
+      if (_need_vector_tag_u[tag])
+        _vector_tag_u[tag][i].setZero(_count);
+
+    for (auto tag : active_coupleable_matrix_tags)
+      if (_need_matrix_tag_u[tag])
+        _matrix_tag_u[tag][i].setZero(_count);
+
+    if (_need_second)
+      _second_u[i].setZero(_count, LIBMESH_DIM * LIBMESH_DIM);
+
+    if (_need_curl)
+      _curl_u[i].setZero(_count);
+
+    if (_need_u_previous_nl)
+      _u_previous_nl[i].setZero(_count);
+
+    if (_need_grad_previous_nl)
+      _grad_u_previous_nl[i].setZero(_count, LIBMESH_DIM);
+
+    if (_need_second_previous_nl)
+      _second_u_previous_nl[i].setZero(_count, LIBMESH_DIM * LIBMESH_DIM);
+
+    if (is_transient)
+    {
+      if (_need_u_dot)
+        _u_dot[i].setZero(_count);
+
+      if (_need_u_dotdot)
+        _u_dotdot[i].setZero(_count);
+
+      if (_need_u_dot_old)
+        _u_dot_old[i].setZero(_count);
+
+      if (_need_u_dotdot_old)
+        _u_dotdot_old[i].setZero(_count);
+
+      if (_need_du_dot_du)
+        _du_dot_du[i] = 0;
+
+      if (_need_du_dotdot_du)
+        _du_dotdot_du[i] = 0;
+
+      if (_need_grad_dot)
+        _grad_u_dot[i].setZero(_count, LIBMESH_DIM);
+
+      if (_need_grad_dotdot)
+        _grad_u_dotdot[i].setZero(_count, LIBMESH_DIM);
+
+      if (_need_u_old)
+        _u_old[i].setZero(_count);
+
+      if (_need_u_older)
+        _u_older[i].setZero(_count);
+
+      if (_need_grad_old)
+        _grad_u_old[i].setZero(_count, LIBMESH_DIM);
+
+      if (_need_grad_older)
+        _grad_u_older[i].setZero(_count, LIBMESH_DIM);
+
+      if (_need_second_old)
+        _second_u_old[i].setZero(_count, LIBMESH_DIM * LIBMESH_DIM);
+
+      if (_need_second_older)
+        _second_u_older[i].setZero(_count, LIBMESH_DIM * LIBMESH_DIM);
+
+      if (_need_curl_old)
+        _curl_u_old[i].setZero(_count);
+    }
+  }
+
+  bool second_required =
+      _need_second || _need_second_old || _need_second_older || _need_second_previous_nl;
+  bool curl_required = _need_curl || _need_curl_old;
+
+  for (unsigned int i = 0; i < num_dofs; i++)
+  {
+    for (unsigned int qp = 0; qp < nqp; qp++)
+    {
+      const OutputShape phi_local = (*_current_phi)[i][qp];
+      const OutputShapeGradient dphi_qp = (*_current_grad_phi)[i][qp];
+
+      _u[qp] += phi_local * _dof_values[i];
+
+      for (unsigned int d = 0; d < LIBMESH_DIM; ++d)
+        _grad_u[qp].col(d) += dphi_qp(d) * _dof_values[i];
+
+      if (is_transient)
+      {
+        if (_need_u_old)
+          _u_old[qp] += phi_local * _dof_values_old[i];
+
+        if (_need_u_older)
+          _u_older[qp] += phi_local * _dof_values_older[i];
+
+        if (_need_grad_old)
+          for (unsigned int d = 0; d < LIBMESH_DIM; ++d)
+            _grad_u_old[qp].col(d) += dphi_qp(d) * _dof_values_old[i];
+
+        if (_need_grad_older)
+          for (unsigned int d = 0; d < LIBMESH_DIM; ++d)
+            _grad_u_older[qp].col(d) += dphi_qp(d) * _dof_values_older[i];
+
+        if (_need_u_dot)
+          _u_dot[qp] += phi_local * _dof_values_dot[i];
+
+        if (_need_u_dotdot)
+          _u_dotdot[qp] += phi_local * _dof_values_dotdot[i];
+
+        if (_need_u_dot_old)
+          _u_dot_old[qp] += phi_local * _dof_values_dot_old[i];
+
+        if (_need_u_dotdot_old)
+          _u_dotdot_old[qp] += phi_local * _dof_values_dotdot_old[i];
+
+        if (_need_grad_dot)
+          for (unsigned int d = 0; d < LIBMESH_DIM; ++d)
+            _grad_u_dot[qp].col(d) += dphi_qp(d) * _dof_values_dot[i];
+
+        if (_need_grad_dotdot)
+          for (unsigned int d = 0; d < LIBMESH_DIM; ++d)
+            _grad_u_dotdot[qp].col(d) += dphi_qp(d) * _dof_values_dotdot[i];
+
+        if (_need_du_dot_du)
+          _du_dot_du[qp] = _dof_du_dot_du[i];
+
+        if (_need_du_dotdot_du)
+          _du_dotdot_du[qp] = _dof_du_dotdot_du[i];
+      }
+
+      if (second_required)
+      {
+        mooseAssert(
+            _current_second_phi,
+            "We're requiring a second calculation but have not set a second shape function!");
+        const RealTensorValue d2phi_local = (*_current_second_phi)[i][qp];
+
+        if (_need_second)
+          for (unsigned int d = 0, d1 = 0; d1 < LIBMESH_DIM; ++d1)
+            for (unsigned int d2 = 0; d2 < LIBMESH_DIM; ++d2)
+              _second_u[qp].col(d++) += d2phi_local(d1, d2) * _dof_values[i];
+
+        if (_need_second_previous_nl)
+          for (unsigned int d = 0, d1 = 0; d1 < LIBMESH_DIM; ++d1)
+            for (unsigned int d2 = 0; d2 < LIBMESH_DIM; ++d2)
+              _second_u_previous_nl[qp].col(d++) +=
+                  d2phi_local(d1, d2) * _dof_values_previous_nl[i];
+
+        if (is_transient)
+        {
+          if (_need_second_old)
+            for (unsigned int d = 0, d1 = 0; d1 < LIBMESH_DIM; ++d1)
+              for (unsigned int d2 = 0; d2 < LIBMESH_DIM; ++d2)
+                _second_u_old[qp].col(d++) += d2phi_local(d1, d2) * _dof_values_old[i];
+
+          if (_need_second_older)
+            for (unsigned int d = 0, d1 = 0; d1 < LIBMESH_DIM; ++d1)
+              for (unsigned int d2 = 0; d2 < LIBMESH_DIM; ++d2)
+                _second_u_older[qp].col(d++) += d2phi_local(d1, d2) * _dof_values_older[i];
+        }
+      }
+
+      if (curl_required)
+      {
+        mooseAssert(_current_curl_phi,
+                    "We're requiring a curl calculation but have not set a curl shape function!");
+        const auto curl_phi_local = (*_current_curl_phi)[i][qp];
+
+        if (_need_curl)
+          _curl_u[qp] += curl_phi_local * _dof_values[i];
+
+        if (is_transient && _need_curl_old)
+          _curl_u_old[qp] += curl_phi_local * _dof_values_old[i];
+      }
+
+      for (auto tag : active_coupleable_vector_tags)
+        if (_need_vector_tag_u[tag])
+          _vector_tag_u[tag][qp] += phi_local * _vector_tags_dof_u[tag][i];
+
+      for (auto tag : active_coupleable_matrix_tags)
+        if (_need_matrix_tag_u[tag])
+          _matrix_tag_u[tag][qp] += phi_local * _matrix_tags_dof_u[tag][i];
+
+      if (_need_u_previous_nl)
+        _u_previous_nl[qp] += phi_local * _dof_values_previous_nl[i];
+
+      if (_need_grad_previous_nl)
+        for (unsigned int d = 0; d < LIBMESH_DIM; ++d)
+          _grad_u_previous_nl[qp].col(d) += dphi_qp(d) * _dof_values_previous_nl[i];
+    }
+  }
+  // No AD support for array variable yet.
+}
+
 template <typename OutputType>
 void
 MooseVariableData<OutputType>::computeMonomialValues()
 {
-
   if (_dof_indices.size() == 0)
     return;
 
@@ -863,6 +1153,14 @@ MooseVariableData<OutputType>::computeMonomialValues()
   }
 }
 
+template <>
+void
+MooseVariableData<RealArrayValue>::computeMonomialValues()
+{
+  // Fixeme: will think of optimization later
+  computeValues();
+}
+
 template <typename OutputType>
 void
 MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsigned int nqp)
@@ -990,6 +1288,13 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
       _ad_u_dot[qp] = _u_dot[qp];
 }
 
+template <>
+void
+MooseVariableData<RealArrayValue>::computeAD(const unsigned int /*num_dofs*/, const unsigned int /*nqp*/)
+{
+  mooseError("AD for array variable has not been implemented");
+}
+
 template <typename OutputType>
 void
 MooseVariableData<OutputType>::setNodalValue(OutputType value, unsigned int idx /* = 0*/)
@@ -1016,7 +1321,7 @@ MooseVariableData<RealVectorValue>::setNodalValue(RealVectorValue value, unsigne
 
 template <typename OutputType>
 void
-MooseVariableData<OutputType>::setDofValues(const DenseVector<Number> & values)
+MooseVariableData<OutputType>::setDofValues(const DenseVector<OutputData> & values)
 {
   for (unsigned int i = 0; i < values.size(); i++)
     _dof_values[i] = values(i);
@@ -1025,14 +1330,14 @@ MooseVariableData<OutputType>::setDofValues(const DenseVector<Number> & values)
 
   for (unsigned int qp = 0; qp < _u.size(); qp++)
   {
-    _u[qp] = 0;
-    for (unsigned int i = 0; i < _dof_values.size(); i++)
+    _u[qp] = (*_phi)[0][qp] * _dof_values[0];
+    for (unsigned int i = 1; i < _dof_values.size(); i++)
       _u[qp] += (*_phi)[i][qp] * _dof_values[i];
   }
 }
 
 template <typename OutputType>
-Number
+typename MooseVariableData<OutputType>::OutputData
 MooseVariableData<OutputType>::getNodalValue(const Node & node, Moose::SolutionState state) const
 {
   mooseAssert(_subproblem.mesh().isSemiLocal(const_cast<Node *>(&node)), "Node is not Semilocal");
@@ -1062,8 +1367,47 @@ MooseVariableData<OutputType>::getNodalValue(const Node & node, Moose::SolutionS
   }
 }
 
+template <>
+RealArrayValue
+MooseVariableData<RealArrayValue>::getNodalValue(const Node & node, Moose::SolutionState state) const
+{
+  mooseAssert(_subproblem.mesh().isSemiLocal(const_cast<Node *>(&node)), "Node is not Semilocal");
+
+  // Make sure that the node has DOFs
+  /* Note, this is a reproduction of an assert within libMesh::Node::dof_number, this is done to
+   * produce a better error (see misc/check_error.node_value_off_block) */
+  mooseAssert(node.n_dofs(_sys.number(), _var_num) > 0,
+              "Node " << node.id() << " does not contain any dofs for the "
+                      << _sys.system().variable_name(_var_num) << " variable");
+
+  dof_id_type dof = node.dof_number(_sys.number(), _var_num, 0);
+
+  RealArrayValue v(_count);
+  switch (state)
+  {
+    case Moose::Current:
+      for (unsigned int i = 0; i < _count; ++i)
+        v(i) = (*_sys.currentSolution())(dof++);
+      break;
+
+    case Moose::Old:
+      for (unsigned int i = 0; i < _count; ++i)
+        v(i) = _sys.solutionOld()(dof++);
+      break;
+
+    case Moose::Older:
+      for (unsigned int i = 0; i < _count; ++i)
+        v(i) = _sys.solutionOlder()(dof++);
+      break;
+
+    default:
+      mooseError("PreviousNL not currently supported for getNodalValue");
+  }
+  return v;
+}
+
 template <typename OutputType>
-Number
+typename MooseVariableData<OutputType>::OutputData
 MooseVariableData<OutputType>::getElementalValue(const Elem * elem,
                                                  Moose::SolutionState state,
                                                  unsigned int idx) const
@@ -1087,6 +1431,42 @@ MooseVariableData<OutputType>::getElementalValue(const Elem * elem,
   }
 }
 
+template <>
+RealArrayValue
+MooseVariableData<RealArrayValue>::getElementalValue(const Elem * elem,
+                                                     Moose::SolutionState state,
+                                                     unsigned int idx) const
+{
+  std::vector<dof_id_type> dof_indices;
+  _dof_map.dof_indices(elem, dof_indices, _var_num);
+
+  dof_id_type dof = dof_indices[idx];
+
+  RealArrayValue v(_count);
+
+  switch (state)
+  {
+    case Moose::Current:
+      for (unsigned int i = 0; i < _count; ++i)
+        v(i) = (*_sys.currentSolution())(dof++);
+      break;
+
+    case Moose::Old:
+      for (unsigned int i = 0; i < _count; ++i)
+        v(i) = _sys.solutionOld()(dof++);
+      break;
+
+    case Moose::Older:
+      for (unsigned int i = 0; i < _count; ++i)
+        v(i) = _sys.solutionOlder()(dof++);
+      break;
+
+    default:
+      mooseError("PreviousNL not currently supported for getElementalValue");
+  }
+  return v;
+}
+
 template <typename OutputType>
 void
 MooseVariableData<OutputType>::getDofIndices(const Elem * elem,
@@ -1103,6 +1483,31 @@ MooseVariableData<OutputType>::insert(NumericVector<Number> & residual)
     residual.insert(&_dof_values[0], _dof_indices);
 }
 
+template <>
+void
+MooseVariableData<RealArrayValue>::insert(NumericVector<Number> & residual)
+{
+  if (_has_dof_values)
+  {
+    if (isNodal())
+    {
+      for (unsigned int i = 0; i < _dof_indices.size(); ++i)
+        for (unsigned int j = 0; j < _count; ++j)
+          residual.set(_dof_indices[i] + j, _dof_values[i](j));
+    }
+    else
+    {
+      unsigned int n = 0;
+      for (unsigned int j = 0; j < _count; ++j)
+      {
+        for (unsigned int i = 0; i < _dof_indices.size(); ++i)
+          residual.set(_dof_indices[i] + n, _dof_values[i](j));
+        n += _dof_indices.size();
+      }
+    }
+  }
+}
+
 template <typename OutputType>
 void
 MooseVariableData<OutputType>::add(NumericVector<Number> & residual)
@@ -1111,8 +1516,33 @@ MooseVariableData<OutputType>::add(NumericVector<Number> & residual)
     residual.add_vector(&_dof_values[0], _dof_indices);
 }
 
+template <>
+void
+MooseVariableData<RealArrayValue>::add(NumericVector<Number> & residual)
+{
+  if (_has_dof_values)
+  {
+    if (isNodal())
+    {
+      for (unsigned int i = 0; i < _dof_indices.size(); ++i)
+        for (unsigned int j = 0; j < _count; ++j)
+          residual.add(_dof_indices[i] + j, _dof_values[i](j));
+    }
+    else
+    {
+      unsigned int n = 0;
+      for (unsigned int j = 0; j < _count; ++j)
+      {
+        for (unsigned int i = 0; i < _dof_indices.size(); ++i)
+          residual.add(_dof_indices[i] + n, _dof_values[i](j));
+        n += _dof_indices.size();
+      }
+    }
+  }
+}
+
 template <typename OutputType>
-const MooseArray<Number> &
+const typename MooseVariableData<OutputType>::DoFValue &
 MooseVariableData<OutputType>::dofValues() const
 {
   _need_dof_values = true;
@@ -1120,7 +1550,7 @@ MooseVariableData<OutputType>::dofValues() const
 }
 
 template <typename OutputType>
-const MooseArray<Number> &
+const typename MooseVariableData<OutputType>::DoFValue &
 MooseVariableData<OutputType>::dofValuesOld() const
 {
   _need_dof_values_old = true;
@@ -1128,7 +1558,7 @@ MooseVariableData<OutputType>::dofValuesOld() const
 }
 
 template <typename OutputType>
-const MooseArray<Number> &
+const typename MooseVariableData<OutputType>::DoFValue &
 MooseVariableData<OutputType>::dofValuesOlder() const
 {
   _need_dof_values_older = true;
@@ -1136,7 +1566,7 @@ MooseVariableData<OutputType>::dofValuesOlder() const
 }
 
 template <typename OutputType>
-const MooseArray<Number> &
+const typename MooseVariableData<OutputType>::DoFValue &
 MooseVariableData<OutputType>::dofValuesPreviousNL() const
 {
   _need_dof_values_previous_nl = true;
@@ -1144,7 +1574,7 @@ MooseVariableData<OutputType>::dofValuesPreviousNL() const
 }
 
 template <typename OutputType>
-const MooseArray<Number> &
+const typename MooseVariableData<OutputType>::DoFValue &
 MooseVariableData<OutputType>::dofValuesDot() const
 {
   if (_sys.solutionUDot())
@@ -1153,12 +1583,12 @@ MooseVariableData<OutputType>::dofValuesDot() const
     return _dof_values_dot;
   }
   else
-    mooseError("MooseVariableFE: Time derivative of solution (`u_dot`) is not stored. Please set "
+    mooseError("MooseVariableData: Time derivative of solution (`u_dot`) is not stored. Please set "
                "uDotRequested() to true in FEProblemBase before requesting `u_dot`.");
 }
 
 template <typename OutputType>
-const MooseArray<Number> &
+const typename MooseVariableData<OutputType>::DoFValue &
 MooseVariableData<OutputType>::dofValuesDotDot() const
 {
   if (_sys.solutionUDotDot())
@@ -1167,13 +1597,13 @@ MooseVariableData<OutputType>::dofValuesDotDot() const
     return _dof_values_dotdot;
   }
   else
-    mooseError("MooseVariableFE: Second time derivative of solution (`u_dotdot`) is not stored. "
+    mooseError("MooseVariableData: Second time derivative of solution (`u_dotdot`) is not stored. "
                "Please set uDotDotRequested() to true in FEProblemBase before requesting "
                "`u_dotdot`.");
 }
 
 template <typename OutputType>
-const MooseArray<Number> &
+const typename MooseVariableData<OutputType>::DoFValue &
 MooseVariableData<OutputType>::dofValuesDotOld() const
 {
   if (_sys.solutionUDotOld())
@@ -1182,13 +1612,13 @@ MooseVariableData<OutputType>::dofValuesDotOld() const
     return _dof_values_dot_old;
   }
   else
-    mooseError("MooseVariableFE: Old time derivative of solution (`u_dot_old`) is not stored. "
+    mooseError("MooseVariableData: Old time derivative of solution (`u_dot_old`) is not stored. "
                "Please set uDotOldRequested() to true in FEProblemBase before requesting "
                "`u_dot_old`.");
 }
 
 template <typename OutputType>
-const MooseArray<Number> &
+const typename MooseVariableData<OutputType>::DoFValue &
 MooseVariableData<OutputType>::dofValuesDotDotOld() const
 {
   if (_sys.solutionUDotDotOld())
@@ -1197,7 +1627,7 @@ MooseVariableData<OutputType>::dofValuesDotDotOld() const
     return _dof_values_dotdot_old;
   }
   else
-    mooseError("MooseVariableFE: Old second time derivative of solution (`u_dotdot_old`) is not "
+    mooseError("MooseVariableData: Old second time derivative of solution (`u_dotdot_old`) is not "
                "stored. Please set uDotDotOldRequested() to true in FEProblemBase before "
                "requesting `u_dotdot_old`.");
 }
@@ -1235,6 +1665,39 @@ MooseVariableData<OutputType>::computeIncrementAtQps(const NumericVector<Number>
   }
 }
 
+template <>
+void
+MooseVariableData<RealArrayValue>::computeIncrementAtQps(const NumericVector<Number> & increment_vec)
+{
+  unsigned int nqp = _qrule->n_points();
+
+  _increment.resize(nqp);
+  // Compute the increment at each quadrature point
+  unsigned int num_dofs = _dof_indices.size();
+  if (isNodal())
+  {
+    for (unsigned int qp = 0; qp < nqp; qp++)
+    {
+      for (unsigned int i = 0; i < num_dofs; i++)
+        for (unsigned int j = 0; j < _count; j++)
+          _increment[qp](j) += (*_phi)[i][qp] * increment_vec(_dof_indices[i] + j);
+    }
+  }
+  else
+  {
+    for (unsigned int qp = 0; qp < nqp; qp++)
+    {
+      unsigned int n = 0;
+      for (unsigned int j = 0; j < _count; j++)
+        for (unsigned int i = 0; i < num_dofs; i++)
+        {
+          _increment[qp](j) += (*_phi)[i][qp] * increment_vec(_dof_indices[i] + n);
+          n += num_dofs;
+        }
+    }
+  }
+}
+
 template <typename OutputType>
 void
 MooseVariableData<OutputType>::computeIncrementAtNode(const NumericVector<Number> & increment_vec)
@@ -1246,6 +1709,30 @@ MooseVariableData<OutputType>::computeIncrementAtNode(const NumericVector<Number
 
   // Compute the increment for the current DOF
   _increment[0] = increment_vec(_dof_indices[0]);
+}
+
+template <>
+void
+MooseVariableData<RealArrayValue>::computeIncrementAtNode(const NumericVector<Number> & increment_vec)
+{
+  if (!isNodal())
+    mooseError("computeIncrementAtNode can only be called for nodal variables");
+
+  _increment.resize(1);
+
+  // Compute the increment for the current DOF
+  if (isNodal())
+    for (unsigned int j = 0; j < _count; j++)
+      _increment[0](j) = increment_vec(_dof_indices[0] + j);
+  else
+  {
+    unsigned int n = 0;
+    for (unsigned int j = 0; j < _count; j++)
+    {
+      _increment[0](j) = increment_vec(_dof_indices[0] + n);
+      n += _dof_indices.size();
+    }
+  }
 }
 
 template <typename OutputType>
@@ -1340,7 +1827,7 @@ MooseVariableData<OutputType>::nodalValueDot() const
       return _nodal_value_dot;
     }
     else
-      mooseError("MooseVariableFE: Time derivative of solution (`u_dot`) is not stored. Please set "
+      mooseError("MooseVariableData: Time derivative of solution (`u_dot`) is not stored. Please set "
                  "uDotRequested() to true in FEProblemBase before requesting `u_dot`.");
   }
   else
@@ -1361,7 +1848,7 @@ MooseVariableData<OutputType>::nodalValueDotDot() const
       return _nodal_value_dotdot;
     }
     else
-      mooseError("MooseVariableFE: Second time derivative of solution (`u_dotdot`) is not stored. "
+      mooseError("MooseVariableData: Second time derivative of solution (`u_dotdot`) is not stored. "
                  "Please set uDotDotRequested() to true in FEProblemBase before requesting "
                  "`u_dotdot`.");
   }
@@ -1383,7 +1870,7 @@ MooseVariableData<OutputType>::nodalValueDotOld() const
       return _nodal_value_dot_old;
     }
     else
-      mooseError("MooseVariableFE: Old time derivative of solution (`u_dot_old`) is not stored. "
+      mooseError("MooseVariableData: Old time derivative of solution (`u_dot_old`) is not stored. "
                  "Please set uDotOldRequested() to true in FEProblemBase before requesting "
                  "`u_dot_old`.");
   }
@@ -1405,7 +1892,7 @@ MooseVariableData<OutputType>::nodalValueDotDotOld() const
       return _nodal_value_dotdot_old;
     }
     else
-      mooseError("MooseVariableFE: Old second time derivative of solution (`u_dotdot_old`) is not "
+      mooseError("MooseVariableData: Old second time derivative of solution (`u_dotdot_old`) is not "
                  "stored. Please set uDotDotOldRequested() to true in FEProblemBase before "
                  "requesting `u_dotdot_old`.");
   }
@@ -1432,7 +1919,7 @@ MooseVariableData<OutputType>::computeNodalValues()
 }
 
 template <typename OutputType>
-const MooseArray<Real> &
+const typename MooseVariableData<OutputType>::DoFValue &
 MooseVariableData<OutputType>::nodalVectorTagValue(TagID tag) const
 {
   if (isNodal())
@@ -1454,7 +1941,7 @@ MooseVariableData<OutputType>::nodalVectorTagValue(TagID tag) const
 }
 
 template <typename OutputType>
-const MooseArray<Real> &
+const typename MooseVariableData<OutputType>::DoFValue &
 MooseVariableData<OutputType>::nodalMatrixTagValue(TagID tag) const
 {
   if (isNodal())
@@ -1557,10 +2044,128 @@ MooseVariableData<OutputType>::fetchDoFValues()
         if (_sys.hasMatrix(tag) && _sys.matrixTagActive(tag) && _sys.getMatrix(tag).closed())
         {
           auto & mat = _sys.getMatrix(tag);
-          for (unsigned i = 0; i < _dof_indices.size(); i++)
+          for (unsigned i = 0; i < n; i++)
           {
             Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
             _matrix_tags_dof_u[tag][i] = mat(_dof_indices[i], _dof_indices[i]);
+          }
+        }
+    }
+  }
+
+  if (_need_du_dot_du || _need_dof_du_dot_du)
+  {
+    _dof_du_dot_du.resize(n);
+    for (decltype(n) i = 0; i < n; ++i)
+      _dof_du_dot_du[i] = _sys.duDotDu();
+  }
+  if (_need_du_dotdot_du || _need_dof_du_dotdot_du)
+  {
+    _dof_du_dotdot_du.resize(n);
+    for (decltype(n) i = 0; i < n; ++i)
+      _dof_du_dotdot_du[i] = _sys.duDotDotDu();
+  }
+}
+
+template <>
+void
+MooseVariableData<RealArrayValue>::fetchDoFValues()
+{
+  bool is_transient = _subproblem.isTransient();
+
+  auto n = _dof_indices.size();
+  libmesh_assert(n);
+
+  /* Idea of using Eigen::map from Derek Gaston (Yaqi: we can reevaluate this later) */
+  /*
+  auto & current_solution = dynamic_cast<const PetscVector<Real> &>(*_sys.currentSolution());
+  auto & solution_old = dynamic_cast<const PetscVector<Real> &>(_sys.solutionOld());
+  auto & solution_older = dynamic_cast<const PetscVector<Real> &>(_sys.solutionOlder());
+  auto & u_dot = dynamic_cast<const PetscVector<Real> &>(*_sys.solutionUDot());
+  const Real & du_dot_du = _sys.duDotDu();
+
+  // We need to get array only for reading... but we need to be able to pass the raw pointer into an
+  // Eigen::Map Eigen::Map requires a non-const pointer... so we're going to const_cast it here (but
+  // we're still NOT going to modify it).
+  auto current_solution_values = const_cast<PetscScalar *>(current_solution.get_array_read());
+
+  // Global to local map the dof indices
+  std::vector<dof_id_type> local_dof_indices(n);
+  for (unsigned int i = 0; i < n; i++)
+    local_dof_indices[i] = current_solution.map_global_to_local_index(_dof_indices[i]);
+
+  _dof_values.resize(n);
+  for (unsigned int i = 0; i < n; i++)
+  {
+    auto coefficients_start = current_solution_values + local_dof_indices[i];
+
+    //    // Same here (no allocation actually done)
+    //    OutputData v(NULL, 0);
+    //    new (&v) OutputData(coefficients_start, _count);
+    //    _dof_values.push_back(v);
+  }
+  */
+
+  getArrayDoFValues(*_sys.currentSolution(), n, _dof_values);
+
+  if (is_transient)
+  {
+    if (_need_u_old || _need_grad_old || _need_second_old || _need_curl_old || _need_dof_values_old)
+      getArrayDoFValues(_sys.solutionOld(), n, _dof_values_old);
+    if (_need_u_older || _need_grad_older || _need_second_older || _need_dof_values_older)
+      getArrayDoFValues(_sys.solutionOlder(), n, _dof_values_older);
+    if (_need_u_dot || _need_grad_dot || _need_dof_values_dot)
+    {
+      libmesh_assert(_sys.solutionUDot());
+      getArrayDoFValues(*_sys.solutionUDot(), n, _dof_values_dot);
+    }
+    if (_need_u_dotdot || _need_grad_dotdot || _need_dof_values_dotdot)
+    {
+      libmesh_assert(_sys.solutionUDotDot());
+      getArrayDoFValues(*_sys.solutionUDot(), n, _dof_values_dotdot);
+    }
+    if (_need_u_dot_old || _need_dof_values_dot_old)
+    {
+      libmesh_assert(_sys.solutionUDotOld());
+      getArrayDoFValues(*_sys.solutionUDotOld(), n, _dof_values_dot_old);
+    }
+    if (_need_u_dotdot_old || _need_dof_values_dotdot_old)
+    {
+      libmesh_assert(_sys.solutionUDotDotOld());
+      getArrayDoFValues(*_sys.solutionUDotDotOld(), n, _dof_values_dotdot_old);
+    }
+  }
+
+  if (_need_u_previous_nl || _need_grad_previous_nl || _need_second_previous_nl ||
+      _need_dof_values_previous_nl)
+    getArrayDoFValues(*_sys.solutionPreviousNewton(), n, _dof_values_previous_nl);
+
+  if (_sys.subproblem().safeAccessTaggedVectors())
+  {
+    auto & active_coupleable_vector_tags =
+        _sys.subproblem().getActiveFEVariableCoupleableVectorTags(_tid);
+    for (auto tag : active_coupleable_vector_tags)
+      if (_need_vector_tag_u[tag] || _need_vector_tag_dof_u[tag])
+        if (_sys.hasVector(tag) && _sys.getVector(tag).closed())
+          getArrayDoFValues(_sys.getVector(tag), n, _vector_tags_dof_u[tag]);
+  }
+
+  if (_sys.subproblem().safeAccessTaggedMatrices())
+  {
+    auto & active_coupleable_matrix_tags =
+        _sys.subproblem().getActiveFEVariableCoupleableMatrixTags(_tid);
+    for (auto tag : active_coupleable_matrix_tags)
+    {
+      _matrix_tags_dof_u[tag].resize(n);
+      if (_need_matrix_tag_dof_u[tag] || _need_matrix_tag_u[tag])
+        if (_sys.hasMatrix(tag) && _sys.matrixTagActive(tag) && _sys.getMatrix(tag).closed())
+        {
+          auto & mat = _sys.getMatrix(tag);
+          for (unsigned i = 0; i < n; i++)
+          {
+            Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+            for (unsigned j = 0; j < _count; j++)
+              _matrix_tags_dof_u[tag][i](j) = mat(_dof_indices[i] + j, _dof_indices[i] + j);
           }
         }
     }
@@ -1596,6 +2201,13 @@ MooseVariableData<OutputType>::fetchADDoFValues()
       _ad_dof_values[i].derivatives()[ad_offset + i] = 1.;
     assignADNodalValue(_ad_dof_values[i], i);
   }
+}
+
+template <>
+void
+MooseVariableData<RealArrayValue>::fetchADDoFValues()
+{
+  mooseError("I do not know how to support AD with array variables");
 }
 
 template <typename OutputType>
@@ -1921,3 +2533,4 @@ MooseVariableData<RealVectorValue>::adNodalValue<RESIDUAL>() const
 
 template class MooseVariableData<Real>;
 template class MooseVariableData<RealVectorValue>;
+template class MooseVariableData<RealArrayValue>;

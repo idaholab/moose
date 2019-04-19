@@ -392,6 +392,25 @@ stringify(const SolveType & t)
 }
 
 std::string
+stringify(const VarFieldType & t)
+{
+  switch (t)
+  {
+    case VAR_FIELD_STANDARD:
+      return "STANDARD";
+    case VAR_FIELD_VECTOR:
+      return "VECTOR";
+    case VAR_FIELD_ARRAY:
+      return "ARRAY";
+    case VAR_FIELD_SCALAR:
+      return "SCALAR";
+    case VAR_FIELD_ANY:
+      return "ANY";
+  }
+  return "";
+}
+
+std::string
 stringify(const std::string & s)
 {
   return s;

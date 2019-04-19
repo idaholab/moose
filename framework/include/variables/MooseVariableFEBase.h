@@ -20,8 +20,6 @@ class NumericVector;
 class Point;
 }
 
-class Assembly;
-
 class MooseVariableFEBase : public MooseVariableBase
 {
 public:
@@ -29,7 +27,8 @@ public:
                       const FEType & fe_type,
                       SystemBase & sys,
                       Moose::VarKindType var_kind,
-                      THREAD_ID tid);
+                      THREAD_ID tid,
+                      unsigned int count);
 
   /**
    * Clear out the dof indices.  We do this in case this variable is not going to be prepared at
@@ -60,6 +59,11 @@ public:
 
   virtual void reinitNodes(const std::vector<dof_id_type> & nodes) = 0;
   virtual void reinitNodesNeighbor(const std::vector<dof_id_type> & nodes) = 0;
+
+  /**
+   * Filed type of this variable
+   */
+  virtual Moose::VarFieldType fieldType() const = 0;
 
   /**
    * Is this variable nodal
@@ -124,43 +128,6 @@ public:
    * Compute nodal values of this variable
    */
   virtual void computeNodalValues() = 0;
-  /**
-   * Set values for this variable to keep everything up to date
-   */
-  virtual void setDofValues(const DenseVector<Number> & value) = 0;
-  /**
-   * Get the value of this variable at given node
-   */
-  virtual Number getNodalValue(const Node & node) = 0;
-  /**
-   * Get the old value of this variable at given node
-   */
-  virtual Number getNodalValueOld(const Node & node) = 0;
-  /**
-   * Get the t-2 value of this variable at given node
-   */
-  virtual Number getNodalValueOlder(const Node & node) = 0;
-  /**
-   * Get the current value of this variable on an element
-   * @param[in] elem   Element at which to get value
-   * @param[in] idx    Local index of this variable's element DoFs
-   * @return Variable value
-   */
-  virtual Number getElementalValue(const Elem * elem, unsigned int idx = 0) const = 0;
-  /**
-   * Get the old value of this variable on an element
-   * @param[in] elem   Element at which to get value
-   * @param[in] idx    Local index of this variable's element DoFs
-   * @return Variable value
-   */
-  virtual Number getElementalValueOld(const Elem * elem, unsigned int idx = 0) const = 0;
-  /**
-   * Get the older value of this variable on an element
-   * @param[in] elem   Element at which to get value
-   * @param[in] idx    Local index of this variable's element DoFs
-   * @return Variable value
-   */
-  virtual Number getElementalValueOlder(const Elem * elem, unsigned int idx = 0) const = 0;
 
   virtual void getDofIndices(const Elem * elem, std::vector<dof_id_type> & dof_indices) const = 0;
   /**
@@ -180,91 +147,6 @@ public:
 
   virtual void insert(NumericVector<Number> & residual) = 0;
   virtual void add(NumericVector<Number> & residual) = 0;
-
-  /**
-   * Deprecated method. Use dofValues
-   */
-  virtual const MooseArray<Number> & dofValue() = 0;
-  /**
-   * Returns dof solution on element
-   */
-  virtual const MooseArray<Number> & dofValues() = 0;
-  /**
-   * Returns old dof solution on element
-   */
-  virtual const MooseArray<Number> & dofValuesOld() = 0;
-  /**
-   * Returns older dof solution on element
-   */
-  virtual const MooseArray<Number> & dofValuesOlder() = 0;
-  /**
-   * Returns previous nl solution on element
-   */
-  virtual const MooseArray<Number> & dofValuesPreviousNL() = 0;
-  /**
-   * Returns dof solution on neighbor element
-   */
-  virtual const MooseArray<Number> & dofValuesNeighbor() = 0;
-  /**
-   * Returns old dof solution on neighbor element
-   */
-  virtual const MooseArray<Number> & dofValuesOldNeighbor() = 0;
-  /**
-   * Returns older dof solution on neighbor element
-   */
-  virtual const MooseArray<Number> & dofValuesOlderNeighbor() = 0;
-  /**
-   * Returns previous nl solution on neighbor element
-   */
-  virtual const MooseArray<Number> & dofValuesPreviousNLNeighbor() = 0;
-  /**
-   * Returns time derivative of degrees of freedom
-   */
-  virtual const MooseArray<Number> & dofValuesDot() = 0;
-  /**
-   * Returns time derivative of neighboring degrees of freedom
-   */
-  virtual const MooseArray<Number> & dofValuesDotNeighbor() = 0;
-  /**
-   * Returns second time derivative of degrees of freedom
-   */
-  virtual const MooseArray<Number> & dofValuesDotDot() = 0;
-  /**
-   * Returns second time derivative of neighboring degrees of freedom
-   */
-  virtual const MooseArray<Number> & dofValuesDotDotNeighbor() = 0;
-  /**
-   * Returns old time derivative of degrees of freedom
-   */
-  virtual const MooseArray<Number> & dofValuesDotOld() = 0;
-  /**
-   * Returns old time derivative of neighboring degrees of freedom
-   */
-  virtual const MooseArray<Number> & dofValuesDotOldNeighbor() = 0;
-  /**
-   * Returns old second time derivative of degrees of freedom
-   */
-  virtual const MooseArray<Number> & dofValuesDotDotOld() = 0;
-  /**
-   * Returns old second time derivative of neighboring degrees of freedom
-   */
-  virtual const MooseArray<Number> & dofValuesDotDotOldNeighbor() = 0;
-  /**
-   * Returns derivative of time derivative of degrees of freedom
-   */
-  virtual const MooseArray<Number> & dofValuesDuDotDu() = 0;
-  /**
-   * Returns derivative of time derivative of neighboring degrees of freedom
-   */
-  virtual const MooseArray<Number> & dofValuesDuDotDuNeighbor() = 0;
-  /**
-   * Returns derivative of second time derivative of degrees of freedom
-   */
-  virtual const MooseArray<Number> & dofValuesDuDotDotDu() = 0;
-  /**
-   * Returns derivative of second time derivative of neighboring degrees of freedom
-   */
-  virtual const MooseArray<Number> & dofValuesDuDotDotDuNeighbor() = 0;
 
   /**
    * Return phi size

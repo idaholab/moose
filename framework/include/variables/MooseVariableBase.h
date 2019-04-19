@@ -32,7 +32,8 @@ public:
                     const FEType & fe_type,
                     SystemBase & sys,
                     Moose::VarKindType var_kind,
-                    THREAD_ID tid);
+                    THREAD_ID tid,
+                    unsigned int count = 1);
   virtual ~MooseVariableBase();
 
   /**
@@ -70,18 +71,22 @@ public:
   /**
    * Set the scaling factor for this variable
    */
-  void scalingFactor(Real factor) { _scaling_factor = factor; }
+  void scalingFactor(Real factor) { _scaling_factor.assign(_count, factor); }
+  void scalingFactor(const std::vector<Real> & factor) { _scaling_factor = factor; }
 
   /**
    * Get the scaling factor for this variable
    */
-  Real scalingFactor() const { return _scaling_factor; }
+  Real scalingFactor() const { return _scaling_factor[0]; }
+  std::vector<Real> arrayScalingFactor() const { return _scaling_factor; }
 
   /**
    * Get the order of this variable
    * Note: Order enum can be implicitly converted to unsigned int.
    */
   Order order() const;
+
+  unsigned int count() const { return _count; }
 
   /**
    * The DofMap associated with the system this variable is in.
@@ -118,10 +123,13 @@ protected:
   /// mesh the variable is active in
   MooseMesh & _mesh;
 
-  /// scaling factor for this variable
-  Real _scaling_factor;
-
   /// Thread ID
   THREAD_ID _tid;
+
+  /// Number of variables in the array
+  const unsigned int _count;
+
+  /// scaling factor for this variable
+  std::vector<Real> _scaling_factor;
 };
 

@@ -17,7 +17,7 @@ VariableWarehouse::VariableWarehouse() {}
 VariableWarehouse::~VariableWarehouse()
 {
   for (auto & var : _all_objects)
-    delete var;
+    delete var.second;
 }
 
 void
@@ -25,7 +25,7 @@ VariableWarehouse::add(const std::string & var_name, MooseVariableBase * var)
 {
   _names.push_back(var_name);
   _var_name[var_name] = var;
-  _all_objects.push_back(var);
+  _all_objects[var->number()] = var;
 
   if (auto * tmp_var = dynamic_cast<MooseVariableFEBase *>(var))
   {
@@ -39,6 +39,11 @@ VariableWarehouse::add(const std::string & var_name, MooseVariableBase * var)
     {
       _vector_vars_by_number[tmp_var->number()] = tmp_var;
       _vector_vars_by_name[var_name] = tmp_var;
+    }
+    else if (auto * tmp_var = dynamic_cast<ArrayMooseVariable *>(var))
+    {
+      _array_vars_by_number[tmp_var->number()] = tmp_var;
+      _array_vars_by_name[var_name] = tmp_var;
     }
     else
       mooseError("Unknown variable class passed into VariableWarehouse. Attempt to hack us?");
@@ -83,10 +88,11 @@ VariableWarehouse::getVariable(const std::string & var_name)
 MooseVariableBase *
 VariableWarehouse::getVariable(unsigned int var_number)
 {
-  if (var_number < _all_objects.size())
-    return _all_objects[var_number];
+  auto it = _all_objects.find(var_number);
+  if (it != _all_objects.end())
+    return it->second;
   else
-    return NULL;
+    return nullptr;
 }
 
 const std::vector<VariableName> &
@@ -96,21 +102,21 @@ VariableWarehouse::names() const
 }
 
 const std::vector<MooseVariableFEBase *> &
-VariableWarehouse::fieldVariables()
+VariableWarehouse::fieldVariables() const
 {
   return _vars;
 }
 
 const std::vector<MooseVariableScalar *> &
-VariableWarehouse::scalars()
+VariableWarehouse::scalars() const
 {
   return _scalar_vars;
 }
 
 const std::set<MooseVariableFEBase *> &
-VariableWarehouse::boundaryVars(BoundaryID bnd)
+VariableWarehouse::boundaryVars(BoundaryID bnd) const
 {
-  return _boundary_vars[bnd];
+  return _boundary_vars.find(bnd)->second;
 }
 
 template <typename T>
@@ -128,17 +134,31 @@ VariableWarehouse::getFieldVariable(unsigned int var_number)
 }
 
 template <>
-MooseVariableFE<RealVectorValue> *
+VectorMooseVariable *
 VariableWarehouse::getFieldVariable<RealVectorValue>(const std::string & var_name)
 {
   return _vector_vars_by_name.at(var_name);
 }
 
 template <>
-MooseVariableFE<RealVectorValue> *
+VectorMooseVariable *
 VariableWarehouse::getFieldVariable<RealVectorValue>(unsigned int var_number)
 {
   return _vector_vars_by_number.at(var_number);
+}
+
+template <>
+ArrayMooseVariable *
+VariableWarehouse::getFieldVariable<RealArrayValue>(const std::string & var_name)
+{
+  return _array_vars_by_name.at(var_name);
+}
+
+template <>
+ArrayMooseVariable *
+VariableWarehouse::getFieldVariable<RealArrayValue>(unsigned int var_number)
+{
+  return _array_vars_by_number.at(var_number);
 }
 
 template MooseVariableFE<Real> *

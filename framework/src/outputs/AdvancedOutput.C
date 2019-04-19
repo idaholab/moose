@@ -390,29 +390,36 @@ AdvancedOutput::initAvailableLists()
       MooseVariableFEBase & var = _problem_ptr->getVariable(
           0, var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
       const FEType type = var.feType();
-      if (type.order == CONSTANT)
-        _execute_data["elemental"].available.insert(var_name);
-      else if (type.family == NEDELEC_ONE || type.family == LAGRANGE_VEC)
+      for (unsigned int i = 0; i < var.count(); ++i)
       {
-        switch (_es_ptr->get_mesh().spatial_dimension())
+        VariableName vname = var_name;
+        if (var.count() > 1)
+          vname = SubProblem::arrayVariableComponent(var_name, i);
+
+        if (type.order == CONSTANT)
+          _execute_data["elemental"].available.insert(vname);
+        else if (type.family == NEDELEC_ONE || type.family == LAGRANGE_VEC)
         {
-          case 0:
-          case 1:
-            _execute_data["nodal"].available.insert(var_name);
-            break;
-          case 2:
-            _execute_data["nodal"].available.insert(var_name + "_x");
-            _execute_data["nodal"].available.insert(var_name + "_y");
-            break;
-          case 3:
-            _execute_data["nodal"].available.insert(var_name + "_x");
-            _execute_data["nodal"].available.insert(var_name + "_y");
-            _execute_data["nodal"].available.insert(var_name + "_z");
-            break;
+          switch (_es_ptr->get_mesh().spatial_dimension())
+          {
+            case 0:
+            case 1:
+              _execute_data["nodal"].available.insert(vname);
+              break;
+            case 2:
+              _execute_data["nodal"].available.insert(vname + "_x");
+              _execute_data["nodal"].available.insert(vname + "_y");
+              break;
+            case 3:
+              _execute_data["nodal"].available.insert(vname + "_x");
+              _execute_data["nodal"].available.insert(vname + "_y");
+              _execute_data["nodal"].available.insert(vname + "_z");
+              break;
+          }
         }
+        else
+          _execute_data["nodal"].available.insert(vname);
       }
-      else
-        _execute_data["nodal"].available.insert(var_name);
     }
 
     else if (_problem_ptr->hasScalarVariable(var_name))

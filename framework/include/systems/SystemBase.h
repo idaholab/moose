@@ -349,7 +349,22 @@ public:
   virtual void addVariable(const std::string & var_name,
                            const FEType & type,
                            Real scale_factor,
-                           const std::set<SubdomainID> * const active_subdomains = NULL);
+                           const std::set<SubdomainID> * const active_subdomains = nullptr);
+
+  /**
+   * Adds an array variable to the system
+   *
+   * @param var_name Name of the array variable
+   * @param type FE type of the array variable
+   * @param components Number of components for this array variable
+   * @param scale_factor The scaling factors for the array variable
+   * @param active_subdomains A list of subdomain ids this array variable is active on
+   */
+  virtual void addArrayVariable(const std::string & var_name,
+                                const FEType & type,
+                                unsigned int components,
+                                const std::vector<Real> & scale_factor,
+                                const std::set<SubdomainID> * const active_subdomains = nullptr);
 
   ///@{
   /**

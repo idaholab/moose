@@ -52,6 +52,7 @@ class MooseVariableFE;
 class MooseVariableScalar;
 typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<RealVectorValue> VectorMooseVariable;
+typedef MooseVariableFE<RealArrayValue> ArrayMooseVariable;
 class XFEMInterface;
 class SubProblem;
 
@@ -899,6 +900,7 @@ public:
     return _second_phi_face_neighbor;
   }
 
+  // Writeable references with vector variable
   VectorVariablePhiValue & phi(const VectorMooseVariable &) { return _vector_phi; }
   VectorVariablePhiGradient & gradPhi(const VectorMooseVariable &) { return _vector_grad_phi; }
   VectorVariablePhiSecond & secondPhi(const VectorMooseVariable &) { return _vector_second_phi; }
@@ -928,7 +930,6 @@ public:
   {
     return _vector_curl_phi_neighbor;
   }
-
   VectorVariablePhiValue & phiFaceNeighbor(const VectorMooseVariable &)
   {
     return _vector_phi_face_neighbor;
@@ -944,6 +945,29 @@ public:
   VectorVariablePhiCurl & curlPhiFaceNeighbor(const VectorMooseVariable &)
   {
     return _vector_curl_phi_face_neighbor;
+  }
+
+  // Writeable references with array variable
+  VariablePhiValue & phi(const ArrayMooseVariable &) { return _phi; }
+  VariablePhiGradient & gradPhi(const ArrayMooseVariable &) { return _grad_phi; }
+  VariablePhiSecond & secondPhi(const ArrayMooseVariable &) { return _second_phi; }
+
+  VariablePhiValue & phiFace(const ArrayMooseVariable &) { return _phi_face; }
+  VariablePhiGradient & gradPhiFace(const ArrayMooseVariable &) { return _grad_phi_face; }
+  VariablePhiSecond & secondPhiFace(const ArrayMooseVariable &) { return _second_phi_face; }
+
+  VariablePhiValue & phiNeighbor(const ArrayMooseVariable &) { return _phi_neighbor; }
+  VariablePhiGradient & gradPhiNeighbor(const ArrayMooseVariable &) { return _grad_phi_neighbor; }
+  VariablePhiSecond & secondPhiNeighbor(const ArrayMooseVariable &) { return _second_phi_neighbor; }
+
+  VariablePhiValue & phiFaceNeighbor(const ArrayMooseVariable &) { return _phi_face_neighbor; }
+  VariablePhiGradient & gradPhiFaceNeighbor(const ArrayMooseVariable &)
+  {
+    return _grad_phi_face_neighbor;
+  }
+  VariablePhiSecond & secondPhiFaceNeighbor(const ArrayMooseVariable &)
+  {
+    return _second_phi_face_neighbor;
   }
 
   template <typename OutputType>
