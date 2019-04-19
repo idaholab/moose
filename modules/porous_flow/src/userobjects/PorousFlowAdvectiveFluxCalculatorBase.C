@@ -224,7 +224,6 @@ PorousFlowAdvectiveFluxCalculatorBase::threadJoin(const UserObject & uo)
       _du_dvar[sequential_i] = pfafc._du_dvar[sequential_i];
 }
 
-
 const std::map<dof_id_type, std::vector<Real>> &
 PorousFlowAdvectiveFluxCalculatorBase::getdK_dvar(dof_id_type node_i, dof_id_type node_j) const
 {
@@ -286,4 +285,52 @@ PorousFlowAdvectiveFluxCalculatorBase::finalize()
       }
     }
   }
+}
+
+void
+PorousFlowAdvectiveFluxCalculatorBase::exchangeGhostedInfo()
+{
+  // send and receive u_nodal and k_ij
+  AdvectiveFluxCalculatorBase::exchangeGhostedInfo();
+
+  // send and receive _du_dvar
+  Parallel::MessageTag send_tag = _communicator.get_unique_tag(4714);
+  std::vector<Parallel::Request> send_requests(_app.n_processors() - 1);
+  unsigned sr = 0;
+  for (processor_id_type pid = 0; pid < _app.n_processors(); ++pid)
+  {
+    if (pid == _my_pid)
+      continue;
+    std::vector<Real> du_dvar_to_send; // gigantic 1D vector
+    for (const auto & nd : _nodes_to_send[pid])
+      du_dvar_to_send.insert(du_dvar_to_send.end(), _du_dvar[nd].begin(), _du_dvar[nd].end());
+    // non-blocking send
+    _communicator.send(pid, du_dvar_to_send, send_requests[sr++], send_tag);
+  }
+
+  // Receive _du_dvar information from the other processors
+  const auto item_type = libMesh::Parallel::StandardType<Real>(&(_du_dvar[0][0]));
+  std::vector<Parallel::Request> receive_requests(_app.n_processors() - 1);
+  unsigned rr = 0;
+  for (processor_id_type pid = 0; pid < _app.n_processors(); ++pid)
+  {
+    if (pid == _my_pid)
+      continue;
+    Parallel::Status status(_communicator.probe(Parallel::any_source, send_tag));
+    const auto source_pid = cast_int<processor_id_type>(status.source());
+    const auto message_size = status.size(item_type);
+
+    mooseAssert(message_size / _num_vars == _nodes_to_receive[source_pid].size(), "Bum3");
+    std::vector<Real> du_dvar_received(
+        message_size); // again, a gigantic 1D vector from which we extract _du_dvar
+    _communicator.receive(source_pid, du_dvar_received, receive_requests[rr++], send_tag);
+    for (unsigned i = 0; i < message_size / _num_vars; ++i)
+      _du_dvar[_nodes_to_receive[source_pid][i]] = std::vector<Real>(
+          du_dvar_received.begin() + i * _num_vars, du_dvar_received.begin() + (i + 1) * _num_vars);
+  }
+
+  // wait until send messages are buffered before proceeding
+  Parallel::wait(send_requests);
+  // wait until messages are all received before proceeding, to ensure _du_dvar is properly built
+  Parallel::wait(receive_requests);
 }

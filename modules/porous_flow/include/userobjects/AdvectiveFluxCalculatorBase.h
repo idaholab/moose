@@ -96,6 +96,22 @@ public:
 
 protected:
   /**
+   * When using multiple processors, other processors will compute:
+   *  - u_nodal for nodes that we don't "own", but that we need when doing the stabilization
+   *  - k_ij for node pairs that we don't "own", and contributions to node pairs that we do "own"
+   * (on the boundary of our set of elements), that are used in the stabilization
+   * This method builds _nodes_to_receive and _pairs_to_receive that describe which processors we
+   * are going to receive this info from, and similarly it builds _nodes_to_send and _pairs_to_send.
+   */
+  virtual void buildCommLists();
+
+  /**
+   * Sends and receives multi-processor information regarding u_nodal and k_ij.
+   * See buildCommLists for some more explanation.
+   */
+  virtual void exchangeGhostedInfo();
+
+  /**
    * Computes the transfer velocity between current node i and current node j
    * at the current qp in the current element (_current_elem).
    * For instance, (_grad_phi[i][qp] * _velocity) * _phi[j][qp];
@@ -190,6 +206,47 @@ protected:
 
   /// Number of nodes held by the _connections object
   std::size_t _number_of_nodes;
+
+  /// processor ID of this object
+  processor_id_type _my_pid;
+
+  /**
+   * _nodes_to_receive[proc_id] = list of sequential nodal IDs.  proc_id will send us _u_nodal at
+   * those nodes. _nodes_to_receive is built (in buildCommLists()) using global node IDs, but
+   * after construction, a translation to sequential node IDs is made, for efficiency.
+   * The result is: we will receive _u_nodal[_nodes_to_receive[proc_id][i]] from proc_id
+   */
+  std::vector<std::vector<dof_id_type>> _nodes_to_receive;
+
+  /**
+   * _nodes_to_send[proc_id] = list of sequential nodal IDs.  We will send _u_nodal at those nodes
+   * to proc_id _nodes_to_send is built (in buildCommLists()) using global node IDs, but after
+   * construction, a translation to sequential node IDs is made, for efficiency
+   * The result is: we will send _u_nodal[_nodes_to_receive[proc_id][i]] to proc_id
+   */
+  std::vector<std::vector<dof_id_type>> _nodes_to_send;
+
+  /**
+   * _pairs_to_receive[proc_id] indicates the k(i, j) pairs that will be sent to us from proc_id
+   * _pairs_to_receive is first built (in buildCommLists()) using global node IDs, but after
+   * construction, a translation to sequential node IDs and the index of connections is
+   * performed, for efficiency.  The result is:
+   * _pairs_to_receive has even length; and
+   * for all i even, we will receive
+   * _kij[_pairs_to_receive[proc_id][i]][_pairs_to_receive[proc_id][i+1]] from proc_id
+   */
+  std::vector<std::vector<dof_id_type>> _pairs_to_receive;
+
+  /**
+   * _pairs_to_send[proc_id] indicates the k(i, j) pairs that we will send to proc_id
+   * _pairs_to_send is first built (in buildCommLists()) using global node IDs, but after
+   * construction, a translation to sequential node IDs and the index of connections is
+   * performed, for efficiency.  The result is:
+   * _pairs_to_send has even length; and
+   * for all i even, we will send
+   * _kij[_pairs_to_send[proc_id][i]][_pairs_to_send[proc_id][i+1]] to proc_id
+   */
+  std::vector<std::vector<dof_id_type>> _pairs_to_send;
 
   /// Signals to the PQPlusMinus method what should be computed
   enum class PQPlusMinusEnum

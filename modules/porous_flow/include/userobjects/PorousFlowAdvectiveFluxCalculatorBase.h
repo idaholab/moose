@@ -72,6 +72,8 @@ protected:
   const std::map<dof_id_type, std::vector<Real>> & getdK_dvar(dof_id_type node_i,
                                                               dof_id_type node_j) const;
 
+  virtual void exchangeGhostedInfo() override;
+
   /// PorousFlowDictator UserObject
   const PorousFlowDictator & _dictator;
 

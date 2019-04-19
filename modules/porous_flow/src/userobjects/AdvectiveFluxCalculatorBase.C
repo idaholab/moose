@@ -25,7 +25,7 @@ validParams<AdvectiveFluxCalculatorBase>()
                              "Type of flux limiter to use.  'None' means that no antidiffusion "
                              "will be added in the Kuzmin-Turek scheme");
 
-  params.addRelationshipManager("ElementSideNeighborLayers",
+  params.addRelationshipManager("ElementPointNeighborLayers",
                                 Moose::RelationshipManagerType::GEOMETRIC |
                                     Moose::RelationshipManagerType::ALGEBRAIC,
                                 [](const InputParameters &, InputParameters & rm_params) {
@@ -48,7 +48,12 @@ AdvectiveFluxCalculatorBase::AdvectiveFluxCalculatorBase(const InputParameters &
     _u_nodal(),
     _u_nodal_computed_by_thread(),
     _connections(),
-    _number_of_nodes(0)
+    _number_of_nodes(0),
+    _my_pid(processor_id()),
+    _nodes_to_receive(_app.n_processors()),
+    _nodes_to_send(_app.n_processors()),
+    _pairs_to_receive(_app.n_processors()),
+    _pairs_to_send(_app.n_processors())
 {
   if (!_execute_enum.contains(EXEC_LINEAR))
     paramError(
@@ -65,12 +70,9 @@ AdvectiveFluxCalculatorBase::timestepSetup()
   // If needed, size and initialize quantities appropriately, and compute _valence
   if (_resizing_needed)
   {
-    _connections.clear();
-    // QUERY: does the following properly account for multiple processors, threading, and other
-    // things i haven't thought about?
-
     /*
-     * Populate _connections for all nodes that can be seen by this processor and on relevant blocks
+     * Populate _connections for all nodes that can be seen by this processor and on relevant
+     * blocks
      *
      * MULTIPROC NOTE: this must loop over local elements and 2 layers of ghosted elements.
      * The Kernel will only loop over local elements, so will only use _kij, etc, for
@@ -78,12 +80,13 @@ AdvectiveFluxCalculatorBase::timestepSetup()
      * need to build _kij, etc, for the nodes in the ghosted elements in order to simplify
      * Jacobian computations
      */
-    for (const auto & elem : _subproblem.mesh().getMesh().active_element_ptr_range())
+    _connections.clear();
+    for (const auto & elem : _fe_problem.getEvaluableElementRange())
       if (this->hasBlocks(elem->subdomain_id()))
         for (unsigned i = 0; i < elem->n_nodes(); ++i)
           _connections.addGlobalNode(elem->node_id(i));
     _connections.finalizeAddingGlobalNodes();
-    for (const auto & elem : _subproblem.mesh().getMesh().active_element_ptr_range())
+    for (const auto & elem : _fe_problem.getEvaluableElementRange())
       if (this->hasBlocks(elem->subdomain_id()))
         for (unsigned i = 0; i < elem->n_nodes(); ++i)
           for (unsigned j = 0; j < elem->n_nodes(); ++j)
@@ -140,6 +143,9 @@ AdvectiveFluxCalculatorBase::timestepSetup()
         _dflux_out_dKjk[sequential_i][j].assign(num_con_j, 0.0);
       }
     }
+
+    if (_app.n_processors() > 1)
+      buildCommLists();
 
     _resizing_needed = false;
   }
@@ -224,20 +230,8 @@ AdvectiveFluxCalculatorBase::finalize()
   // relevant Jacobian information, and then the relevant quantities into _flux_out and
   // _dflux_out_du, _dflux_out_dKjk
 
-  /*
-   * MULTIPROC NOTE: execute() only computed contributions from the elements
-   * local to this processor.  Now do the same for the 2 layers of ghosted elements
-   */
-  for (const auto & elem_id : _fe_problem.ghostedElems())
-  {
-    _current_elem = _mesh.elem(elem_id);
-    if (this->hasBlocks(_current_elem->subdomain_id()))
-    {
-      _fe_problem.prepare(_current_elem, _tid);
-      _fe_problem.reinitElem(_current_elem, _tid);
-      execute();
-    }
-  }
+  if (_app.n_processors() > 1)
+    exchangeGhostedInfo();
 
   // Calculate KuzminTurek D matrix
   // See Eqn (32)
@@ -325,8 +319,8 @@ AdvectiveFluxCalculatorBase::finalize()
   // Calculate KuzminTurek f^{a} matrix
   // This is the antidiffusive flux
   // See Eqn (50)
-  std::vector<std::vector<Real>> fa(
-      _number_of_nodes); // fa[sequential_i][j]  sequential_j is the j^th connection to sequential_i
+  std::vector<std::vector<Real>> fa(_number_of_nodes); // fa[sequential_i][j]  sequential_j is the
+                                                       // j^th connection to sequential_i
   // The derivatives are a bit complicated.
   // If i is upwind of j then fa[i][j] depends on all nodes connected to i.
   // But if i is downwind of j then fa[i][j] depends on all nodes connected to j.
@@ -341,9 +335,9 @@ AdvectiveFluxCalculatorBase::finalize()
                          // sequential_i
   std::vector<std::vector<std::vector<Real>>> dFij_dKjk(
       _number_of_nodes); // dFij_dKjk[sequential_i][j][k] =
-                         // d(fa[sequential_i][j])/d(K[sequential_j][k]).  Here sequential_j is the
-                         // j^th connection to sequential_i, and k denotes the k^th connection to
-                         // sequential_j (this will include sequential_i itself)
+                         // d(fa[sequential_i][j])/d(K[sequential_j][k]).  Here sequential_j is
+                         // the j^th connection to sequential_i, and k denotes the k^th connection
+                         // to sequential_j (this will include sequential_i itself)
   for (dof_id_type sequential_i = 0; sequential_i < _number_of_nodes; ++sequential_i)
   {
     const std::vector<dof_id_type> con_i =
@@ -844,4 +838,274 @@ AdvectiveFluxCalculatorBase::PQPlusMinus(dof_id_type sequential_i,
   }
 
   return result;
+}
+
+void
+AdvectiveFluxCalculatorBase::buildCommLists()
+{
+  /**
+   * Build the multi-processor communication lists.
+   *
+   * (A) We will have to send _u_nodal information to other processors.
+   * This is because although we can Evaluate Variables at all elements in
+   * _fe_problem.getEvaluableElementRange(), in the PorousFlow setting
+   * _u_nodal could depend on Material Properties within the elements, and
+   * we can't access those Properties within the ghosted elements.
+   * We don't know which processors require _u_nodal from our nodes.
+   * However, we do know which nodes we require information about, and the
+   * processors that can give us that information.  So we store that in
+   * _nodes_to_receive.  Then we advertise to those processors that we need
+   * the information.  Similarly, we will receive advertisements from the
+   * other processors saying they need information from us.  We then store
+   * that in _nodes_to_send.
+   *
+   * (B) We need to send _kij information to other processors.
+   * The same strategy is followed, first building pairs_to_receive and then
+   * _pairs_to_send.
+   */
+
+  // We use this (hopefully unique) message tag for all communication in this method.
+  // QUESTION: If there are multiple AdvectiveFluxCalculatorBase in the input file, will this
+  // work?
+  Parallel::MessageTag send_tag = _communicator.get_unique_tag(4712);
+
+  _nodes_to_receive.assign(_app.n_processors(), std::vector<dof_id_type>());
+  for (const auto & elem : _fe_problem.getEvaluableElementRange())
+    if (this->hasBlocks(elem->subdomain_id()))
+    {
+      const processor_id_type elem_pid = elem->processor_id();
+      if (elem_pid != _my_pid)
+        for (unsigned i = 0; i < elem->n_nodes(); ++i)
+          if (std::find(_nodes_to_receive[elem_pid].begin(),
+                        _nodes_to_receive[elem_pid].end(),
+                        elem->node_id(i)) == _nodes_to_receive[elem_pid].end())
+            _nodes_to_receive[elem_pid].push_back(elem->node_id(i));
+    }
+
+  // Now advertise that we need this information from the other processors
+  std::vector<Parallel::Request> send_requests(_app.n_processors() - 1);
+  unsigned sr = 0;
+  for (processor_id_type pid = 0; pid < _app.n_processors(); ++pid)
+    if (pid != _my_pid)
+      // non-blocking send
+      _communicator.send(pid, _nodes_to_receive[pid], send_requests[sr++], send_tag);
+
+  // Now receive the adverts from all other processors
+  // QUESTION: what is item_type?  Is there a better way of setting it?
+  const auto item_type = libMesh::Parallel::StandardType<dof_id_type>(&(_nodes_to_receive[0][0]));
+  _nodes_to_send.assign(_app.n_processors(), std::vector<dof_id_type>());
+  std::vector<Parallel::Request> receive_requests(_app.n_processors() - 1);
+  unsigned rr = 0;
+  for (processor_id_type pid = 0; pid < _app.n_processors(); ++pid)
+    if (pid != _my_pid)
+    {
+      // inspect incoming message
+      Parallel::Status status(_communicator.probe(Parallel::any_source, send_tag));
+      const auto source_pid = cast_int<processor_id_type>(status.source());
+      const auto message_size = status.size(item_type);
+
+      // resize receive buffer accordingly and receive data
+      _nodes_to_send[source_pid].resize(message_size);
+      _communicator.receive(
+          source_pid, _nodes_to_send[source_pid], receive_requests[rr++], send_tag);
+    }
+
+  // wait until send messages are buffered before proceeding
+  Parallel::wait(send_requests);
+  // wait until messages are all received before proceeding, to ensure another instance of this
+  // object doesn't use send_tag
+  Parallel::wait(receive_requests);
+
+  // At the moment,  _nodes_to_send and _nodes_to_receive contain global node numbers
+  // It is slightly more efficient to convert to sequential node numbers
+  // so that we don't have to keep doing things like
+  // _u_nodal[_connections.sequentialID(_nodes_to_send[pid][i])
+  // every time we send/receive
+  for (processor_id_type pid = 0; pid < _app.n_processors(); ++pid)
+    if (pid != _my_pid)
+    {
+      for (std::size_t i = 0; i < _nodes_to_send[pid].size(); ++i)
+        _nodes_to_send[pid][i] = _connections.sequentialID(_nodes_to_send[pid][i]);
+      for (std::size_t i = 0; i < _nodes_to_receive[pid].size(); ++i)
+        _nodes_to_receive[pid][i] = _connections.sequentialID(_nodes_to_receive[pid][i]);
+    }
+
+  Parallel::MessageTag send_tag_pair = _communicator.get_unique_tag(4713);
+
+  // Build pairs_to_receive
+  // stdpairs_to_receive is created just so we can use std::find, below
+  std::vector<std::vector<std::pair<dof_id_type, dof_id_type>>> stdpairs_to_receive(
+      _app.n_processors(), std::vector<std::pair<dof_id_type, dof_id_type>>());
+  for (const auto & elem : _fe_problem.getEvaluableElementRange())
+    if (this->hasBlocks(elem->subdomain_id()))
+    {
+      const processor_id_type elem_pid = elem->processor_id();
+      if (elem_pid != _my_pid)
+        for (unsigned i = 0; i < elem->n_nodes(); ++i)
+          for (unsigned j = 0; j < elem->n_nodes(); ++j)
+          {
+            std::pair<dof_id_type, dof_id_type> the_pair(elem->node_id(i), elem->node_id(j));
+            if (std::find(stdpairs_to_receive[elem_pid].begin(),
+                          stdpairs_to_receive[elem_pid].end(),
+                          the_pair) == stdpairs_to_receive[elem_pid].end())
+              stdpairs_to_receive[elem_pid].push_back(the_pair);
+          }
+    }
+  // populate _pairs_to_receive
+  _pairs_to_receive.assign(_app.n_processors(), std::vector<dof_id_type>());
+  for (processor_id_type pid = 0; pid < _app.n_processors(); ++pid)
+  {
+    if (pid == _my_pid)
+      continue;
+    for (const auto & the_pair : stdpairs_to_receive[pid])
+    {
+      _pairs_to_receive[pid].push_back(the_pair.first);
+      _pairs_to_receive[pid].push_back(the_pair.second);
+    }
+  }
+
+  // Advertise that we need these pairs
+  std::vector<Parallel::Request> send_requests_pair(_app.n_processors() - 1);
+  unsigned srp = 0;
+  for (processor_id_type pid = 0; pid < _app.n_processors(); ++pid)
+    if (pid != _my_pid)
+      // non-blocking send
+      _communicator.send(pid, _pairs_to_receive[pid], send_requests_pair[srp++], send_tag_pair);
+
+  // Receive the adverts from all other processors
+  const auto pair_type = libMesh::Parallel::StandardType<dof_id_type>(&(_pairs_to_receive[0][0]));
+  _pairs_to_send.assign(_app.n_processors(), std::vector<dof_id_type>());
+  std::vector<Parallel::Request> receive_requests_pair(_app.n_processors() - 1);
+  unsigned rrp = 0;
+  for (processor_id_type pid = 0; pid < _app.n_processors(); ++pid)
+    if (pid != _my_pid)
+    {
+      // inspect incoming message
+      Parallel::Status status(_communicator.probe(Parallel::any_source, send_tag_pair));
+      const auto source_pid = cast_int<processor_id_type>(status.source());
+      const auto message_size = status.size(pair_type);
+
+      // resize receive buffer accordingly and receive data
+      _pairs_to_send[source_pid].resize(message_size);
+      _communicator.receive(
+          source_pid, _pairs_to_send[source_pid], receive_requests_pair[rrp++], send_tag_pair);
+    }
+
+  // wait until send messages are buffered before proceeding
+  Parallel::wait(send_requests_pair);
+  // wait until messages are all received before proceeding, to ensure another instance of this
+  // object doesn't use send_tag_pair
+  Parallel::wait(receive_requests_pair);
+
+  // _pairs_to_send and _pairs_to_receive have been built using global node IDs
+  // since all processors know about that.  However, using global IDs means
+  // that every time we send/receive, we keep having to do things like
+  // _kij[_connections.sequentialID(_pairs_to_send[pid][i])][_connections.indexOfGlobalConnection(_pairs_to_send[pid][i],
+  // _pairs_to_send[pid][i + 1])] which is quite inefficient.  So:
+  for (processor_id_type pid = 0; pid < _app.n_processors(); ++pid)
+    if (pid != _my_pid)
+    {
+      for (std::size_t i = 0; i < _pairs_to_send[pid].size(); i += 2)
+      {
+        _pairs_to_send[pid][i + 1] = _connections.indexOfGlobalConnection(
+            _pairs_to_send[pid][i], _pairs_to_send[pid][i + 1]);
+        _pairs_to_send[pid][i] = _connections.sequentialID(_pairs_to_send[pid][i]);
+      }
+      for (std::size_t i = 0; i < _pairs_to_receive[pid].size(); i += 2)
+      {
+        _pairs_to_receive[pid][i + 1] = _connections.indexOfGlobalConnection(
+            _pairs_to_receive[pid][i], _pairs_to_receive[pid][i + 1]);
+        _pairs_to_receive[pid][i] = _connections.sequentialID(_pairs_to_receive[pid][i]);
+      }
+    }
+
+  if (_my_pid == 2)
+    for (unsigned pid = 0; pid < _app.n_processors(); ++pid)
+      for (unsigned i = 0; i < _pairs_to_send[pid].size(); i += 2)
+        Moose::err << "proc " << _my_pid << " will send kij info between nodes "
+                   << _pairs_to_send[pid][i] << " and " << _pairs_to_send[pid][i + 1] << " to proc "
+                   << pid << "\n";
+}
+
+void
+AdvectiveFluxCalculatorBase::exchangeGhostedInfo()
+{
+  // Send _u_nodal to the processors that requested it
+  Parallel::MessageTag send_tag = _communicator.get_unique_tag(4712);
+  std::vector<Parallel::Request> send_requests(_app.n_processors() - 1);
+  unsigned sr = 0;
+  for (processor_id_type pid = 0; pid < _app.n_processors(); ++pid)
+  {
+    if (pid == _my_pid)
+      continue;
+    std::vector<Real> unodal_to_send;
+    for (const auto & nd : _nodes_to_send[pid])
+      unodal_to_send.push_back(_u_nodal[nd]);
+    // non-blocking send
+    _communicator.send(pid, unodal_to_send, send_requests[sr++], send_tag);
+  }
+
+  // Receive _u_nodal information from the other processors
+  const auto item_type = libMesh::Parallel::StandardType<Real>(&(_u_nodal[0]));
+  std::vector<Parallel::Request> receive_requests(_app.n_processors() - 1);
+  unsigned rr = 0;
+  for (processor_id_type pid = 0; pid < _app.n_processors(); ++pid)
+  {
+    if (pid == _my_pid)
+      continue;
+    Parallel::Status status(_communicator.probe(Parallel::any_source, send_tag));
+    const auto source_pid = cast_int<processor_id_type>(status.source());
+    const auto message_size = status.size(item_type);
+
+    mooseAssert(message_size == _nodes_to_receive[source_pid].size(), "Bum");
+    std::vector<Real> unodal_received(message_size);
+    _communicator.receive(source_pid, unodal_received, receive_requests[rr++], send_tag);
+    for (unsigned i = 0; i < message_size; ++i)
+      _u_nodal[_nodes_to_receive[source_pid][i]] = unodal_received[i];
+  }
+
+  // wait until send messages are buffered before proceeding
+  Parallel::wait(send_requests);
+  // wait until messages are all received before proceeding, to ensure _u_nodal is properly built
+  Parallel::wait(receive_requests);
+
+  // Send _kij to the processors that requested it
+  Parallel::MessageTag send_tag_pair = _communicator.get_unique_tag(4713);
+  std::vector<Parallel::Request> send_requests_pair(_app.n_processors() - 1);
+  unsigned srp = 0;
+  for (processor_id_type pid = 0; pid < _app.n_processors(); ++pid)
+  {
+    if (pid == _my_pid)
+      continue;
+    std::vector<Real> kij_to_send;
+    for (std::size_t i = 0; i < _pairs_to_send[pid].size(); i += 2)
+      kij_to_send.push_back(_kij[_pairs_to_send[pid][i]][_pairs_to_send[pid][i + 1]]);
+    // non-blocking send
+    _communicator.send(pid, kij_to_send, send_requests_pair[srp++], send_tag_pair);
+  }
+
+  // Receive _kij information from the other processors
+  const auto kij_type = libMesh::Parallel::StandardType<Real>(&(_kij[0][0]));
+  std::vector<Parallel::Request> receive_requests_pair(_app.n_processors() - 1);
+  unsigned rrp = 0;
+  for (processor_id_type pid = 0; pid < _app.n_processors(); ++pid)
+  {
+    if (pid == _my_pid)
+      continue;
+    Parallel::Status status(_communicator.probe(Parallel::any_source, send_tag_pair));
+    const auto source_pid = cast_int<processor_id_type>(status.source());
+    const auto message_size = status.size(kij_type);
+
+    mooseAssert(message_size == _pairs_to_receive[source_pid].size() / 2, "Bum2");
+    std::vector<Real> kij_received(message_size);
+    _communicator.receive(source_pid, kij_received, receive_requests_pair[rrp++], send_tag_pair);
+    for (unsigned i = 0; i < message_size; ++i)
+      _kij[_pairs_to_receive[source_pid][2 * i]][_pairs_to_receive[source_pid][2 * i + 1]] +=
+          kij_received[i];
+  }
+
+  // wait until send messages are buffered before proceeding
+  Parallel::wait(send_requests_pair);
+  // wait until messages are all received before proceeding, to ensure _kij is properly built
+  Parallel::wait(receive_requests_pair);
 }
