@@ -50,15 +50,15 @@ XFEMCrackGrowthIncrement2DCut::cutElementByCrackGrowthIncrement(
     {
       // This returns the lowest-order type of side, which should always
       // be an EDGE2 here because this class is for 2D only.
-      std::unique_ptr<Elem> curr_side = elem->side(i);
+      std::unique_ptr<const Elem> curr_side = elem->side_ptr(i);
       if (curr_side->type() != EDGE2)
         mooseError("In cutElementByGeometry element side must be EDGE2, but type is: ",
                    libMesh::Utility::enum_to_string(curr_side->type()),
                    " base element type is: ",
                    libMesh::Utility::enum_to_string(elem->type()));
 
-      const Node * node1 = curr_side->get_node(0);
-      const Node * node2 = curr_side->get_node(1);
+      const Node * node1 = curr_side->node_ptr(0);
+      const Node * node2 = curr_side->node_ptr(1);
       Real seg_int_frac = 0.0;
 
       if (IntersectSegmentWithCutLine(*node1, *node2, _cut_line_endpoints, fraction, seg_int_frac))

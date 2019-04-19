@@ -388,7 +388,7 @@ FeatureFloodCount::execute()
         auto n_nodes = current_elem->n_vertices();
         for (MooseIndex(n_nodes) i = 0; i < n_nodes; ++i)
         {
-          const Node * current_node = current_elem->get_node(i);
+          const Node * current_node = current_elem->node_ptr(i);
 
           for (MooseIndex(_vars) var_num = 0; var_num < _vars.size(); ++var_num)
             flood(current_node, var_num);
@@ -1454,7 +1454,7 @@ FeatureFloodCount::expandPointHalos()
         auto n_nodes = elem->n_vertices();
         for (MooseIndex(n_nodes) i = 0; i < n_nodes; ++i)
         {
-          const Node * current_node = elem->get_node(i);
+          const Node * current_node = elem->node_ptr(i);
 
           auto elem_vector_it = node_to_elem_map.find(current_node->id());
           if (elem_vector_it == node_to_elem_map.end())
@@ -1566,7 +1566,7 @@ FeatureFloodCount::visitElementalNeighbors(const Elem * elem,
      * Retrieve only the active neighbors for each side of this element, append them to the list
      * of active neighbors
      */
-    neighbor_ancestor = elem->neighbor(i);
+    neighbor_ancestor = elem->neighbor_ptr(i);
     if (neighbor_ancestor)
     {
       if (neighbor_ancestor == libMesh::remote_elem)
@@ -1733,7 +1733,7 @@ FeatureFloodCount::appendPeriodicNeighborNodes(FeatureData & feature) const
 
       for (MooseIndex(elem->n_nodes()) node_n = 0; node_n < elem->n_nodes(); ++node_n)
       {
-        auto iters = _periodic_node_map.equal_range(elem->node(node_n));
+        auto iters = _periodic_node_map.equal_range(elem->node_id(node_n));
 
         for (auto it = iters.first; it != iters.second; ++it)
         {
@@ -2172,7 +2172,7 @@ void
 updateBBoxExtremesHelper(MeshTools::BoundingBox & bbox, const Elem & elem)
 {
   for (MooseIndex(elem.n_nodes()) node_n = 0; node_n < elem.n_nodes(); ++node_n)
-    updateBBoxExtremesHelper(bbox, *(elem.get_node(node_n)));
+    updateBBoxExtremesHelper(bbox, *(elem.node_ptr(node_n)));
 }
 
 bool

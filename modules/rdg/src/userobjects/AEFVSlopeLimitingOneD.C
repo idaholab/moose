@@ -101,9 +101,9 @@ AEFVSlopeLimitingOneD::limitElementSlope() const
     in = is + 1;
 
     // when the current element is an internal cell
-    if (elem->neighbor(is) != NULL)
+    if (elem->neighbor_ptr(is) != NULL)
     {
-      const Elem * neig = elem->neighbor(is);
+      const Elem * neig = elem->neighbor_ptr(is);
       if (this->hasBlocks(neig->subdomain_id()))
       {
         xc[in] = neig->centroid()(0);

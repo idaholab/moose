@@ -147,7 +147,7 @@ PolycrystalUserObjectBase::execute()
       auto n_nodes = current_elem->n_vertices();
       for (auto i = decltype(n_nodes)(0); i < n_nodes; ++i)
       {
-        const Node * current_node = current_elem->get_node(i);
+        const Node * current_node = current_elem->node_ptr(i);
 
         while (flood(current_node, invalid_size_t))
           ;
@@ -320,7 +320,7 @@ PolycrystalUserObjectBase::isNewFeatureOrConnectedRegion(const DofObject * dof_o
          * Retrieve only the active neighbors for each side of this element, append them to the list
          * of active neighbors
          */
-        neighbor_ancestor = elem->neighbor(i);
+        neighbor_ancestor = elem->neighbor_ptr(i);
         if (neighbor_ancestor)
           neighbor_ancestor->active_family_tree_by_neighbor(all_active_neighbors, elem, false);
         else // if (expand_halos_only /*&& feature->_periodic_nodes.empty()*/)

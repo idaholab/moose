@@ -47,7 +47,7 @@ LevelSetCutUserObject::cutElementByGeometry(const Elem * elem,
 
   for (unsigned int i = 0; i < n_sides; ++i)
   {
-    UniquePtr<Elem> curr_side = elem->side(i);
+    UniquePtr<const Elem> curr_side = elem->side_ptr(i);
 
     if (curr_side->type() != EDGE2)
       mooseError("In LevelSetCutUserObject element side must be EDGE2, but type is: ",
@@ -55,8 +55,8 @@ LevelSetCutUserObject::cutElementByGeometry(const Elem * elem,
                  " base element type is: ",
                  libMesh::Utility::enum_to_string(elem->type()));
 
-    const Node * node1 = curr_side->get_node(0);
-    const Node * node2 = curr_side->get_node(1);
+    const Node * node1 = curr_side->node_ptr(0);
+    const Node * node2 = curr_side->node_ptr(1);
 
     dof_id_type ls_dof_id_1 = node1->dof_number(_system.number(), _level_set_var_number, 0);
     dof_id_type ls_dof_id_2 = node2->dof_number(_system.number(), _level_set_var_number, 0);
@@ -89,7 +89,7 @@ LevelSetCutUserObject::cutElementByGeometry(const Elem * elem,
 
   for (unsigned int i = 0; i < elem->n_sides(); ++i)
   {
-    std::unique_ptr<Elem> curr_side = elem->side(i);
+    std::unique_ptr<const Elem> curr_side = elem->side_ptr(i);
     if (curr_side->dim() != 2)
       mooseError("In LevelSetCutUserObject dimension of side must be 2, but it is ",
                  curr_side->dim());
@@ -101,15 +101,15 @@ LevelSetCutUserObject::cutElementByGeometry(const Elem * elem,
     for (unsigned int j = 0; j < n_edges; j++)
     {
       // This returns the lowest-order type of side.
-      std::unique_ptr<Elem> curr_edge = curr_side->side(j);
+      std::unique_ptr<const Elem> curr_edge = curr_side->side_ptr(j);
       if (curr_edge->type() != EDGE2)
         mooseError("In LevelSetCutUserObject face edge must be EDGE2, but type is: ",
                    libMesh::Utility::enum_to_string(curr_edge->type()),
                    " base element type is: ",
                    libMesh::Utility::enum_to_string(elem->type()));
 
-      const Node * node1 = curr_edge->get_node(0);
-      const Node * node2 = curr_edge->get_node(1);
+      const Node * node1 = curr_edge->node_ptr(0);
+      const Node * node2 = curr_edge->node_ptr(1);
 
       dof_id_type ls_dof_id_1 = node1->dof_number(_system.number(), _level_set_var_number, 0);
       dof_id_type ls_dof_id_2 = node2->dof_number(_system.number(), _level_set_var_number, 0);

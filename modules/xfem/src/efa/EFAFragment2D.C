@@ -232,7 +232,7 @@ EFAfragment::commonNodesWithEdge(EFAEdge & other_edge)
   std::vector<EFAnode*> common_nodes;
   for (unsigned int i = 0; i < 2; ++i)
   {
-    EFAnode* edge_node = other_edge.get_node(i);
+    EFAnode* edge_node = other_edge.node_ptr(i);
     if (containsNode(edge_node))
       common_nodes.push_back(edge_node);
   }

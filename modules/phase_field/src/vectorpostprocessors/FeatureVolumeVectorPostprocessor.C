@@ -267,7 +267,7 @@ FeatureVolumeVectorPostprocessor::accumulateBoundaryFaces(
 
   // Accumulate the boundary area/length into the dominant feature. Do not use the integral value
   if (_single_feature_per_elem && dominant_feature_id != FeatureFloodCount::invalid_id)
-    _feature_volumes[dominant_feature_id] += elem->side(side)->volume();
+    _feature_volumes[dominant_feature_id] += elem->side_ptr(side)->volume();
 }
 
 Real

@@ -153,7 +153,7 @@ JIntegral::computeIntegral()
 
   for (unsigned int i = 0; i < _current_elem->n_nodes(); ++i)
   {
-    Node * this_node = _current_elem->get_node(i);
+    const Node * this_node = _current_elem->node_ptr(i);
     Real q_this_node;
 
     if (_q_function_type == "GEOMETRY")

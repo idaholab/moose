@@ -28,7 +28,7 @@ TestSubblockIndexProvider::TestSubblockIndexProvider(const InputParameters & par
 unsigned int
 TestSubblockIndexProvider::getSubblockIndex(const Elem & elem) const
 {
-  Point p = *elem.get_node(0);
+  Point p = *elem.node_ptr(0);
 
   if (MooseUtils::relativeFuzzyLessThan(p(0), 0.5))
     return 0;
