@@ -124,6 +124,8 @@ public:
   virtual MooseVariable & getStandardVariable(THREAD_ID tid, const std::string & var_name) override;
   virtual VectorMooseVariable & getVectorVariable(THREAD_ID tid,
                                                   const std::string & var_name) override;
+  virtual ArrayMooseVariable & getArrayVariable(THREAD_ID tid,
+                                                const std::string & var_name) override;
   virtual bool hasScalarVariable(const std::string & var_name) const override;
   virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid,
                                                   const std::string & var_name) override;
@@ -133,6 +135,11 @@ public:
                            const FEType & type,
                            Real scale_factor,
                            const std::set<SubdomainID> * const active_subdomains = NULL);
+  virtual void addArrayVariable(const std::string & var_name,
+                                const FEType & type,
+                                unsigned int components,
+                                const std::vector<Real> & scale_factor,
+                                const std::set<SubdomainID> * const active_subdomains = NULL);
   virtual void addAuxVariable(const std::string & var_name,
                               const FEType & type,
                               const std::set<SubdomainID> * const active_subdomains = NULL);

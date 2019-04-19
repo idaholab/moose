@@ -60,12 +60,7 @@ NodalVariableValue::getValue()
   Real value = 0;
 
   if (_node_ptr && _node_ptr->processor_id() == processor_id())
-    value = _subproblem
-                .getVariable(_tid,
-                             _var_name,
-                             Moose::VarKindType::VAR_ANY,
-                             Moose::VarFieldType::VAR_FIELD_STANDARD)
-                .getNodalValue(*_node_ptr);
+    value = _subproblem.getStandardVariable(_tid, _var_name).getNodalValue(*_node_ptr);
 
   gatherSum(value);
 

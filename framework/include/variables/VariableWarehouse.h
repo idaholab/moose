@@ -29,6 +29,7 @@ template <typename>
 class MooseVariableFE;
 typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<RealVectorValue> VectorMooseVariable;
+typedef MooseVariableFE<RealArrayValue> ArrayMooseVariable;
 class MooseVariableScalar;
 
 /**
@@ -111,20 +112,20 @@ public:
    * Get the list of variables
    * @return The list of variables
    */
-  const std::vector<MooseVariableFEBase *> & fieldVariables();
+  const std::vector<MooseVariableFEBase *> & fieldVariables() const;
 
   /**
    * Get the list of variables that needs to be reinitialized on a given boundary
    * @param bnd The boundary ID
    * @return The list of variables
    */
-  const std::set<MooseVariableFEBase *> & boundaryVars(BoundaryID bnd);
+  const std::set<MooseVariableFEBase *> & boundaryVars(BoundaryID bnd) const;
 
   /**
    * Get the list of scalar variables
    * @return The list of scalar variables
    */
-  const std::vector<MooseVariableScalar *> & scalars();
+  const std::vector<MooseVariableScalar *> & scalars() const;
 
 protected:
   /// list of variable names
@@ -145,6 +146,12 @@ protected:
   /// map of vector finite element variables with unsigned keys
   HashMap<unsigned, VectorMooseVariable *> _vector_vars_by_number;
 
+  /// map of vector finite element variables with name keys
+  HashMap<std::string, ArrayMooseVariable *> _array_vars_by_name;
+
+  /// map of vector finite element variables with unsigned keys
+  HashMap<unsigned, ArrayMooseVariable *> _array_vars_by_number;
+
   /// Name to variable mapping
   std::map<std::string, MooseVariableBase *> _var_name;
 
@@ -155,7 +162,7 @@ protected:
   std::vector<MooseVariableScalar *> _scalar_vars;
 
   /// All instances of objects (raw pointers)
-  std::vector<MooseVariableBase *> _all_objects;
+  std::map<unsigned int, MooseVariableBase *> _all_objects;
 };
 
 template <>

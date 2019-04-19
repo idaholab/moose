@@ -1848,6 +1848,22 @@ FEProblemBase::addVariable(const std::string & var_name,
 }
 
 void
+FEProblemBase::addArrayVariable(const std::string & var_name,
+                                const FEType & type,
+                                unsigned int components,
+                                const std::vector<Real> & scale_factor,
+                                const std::set<SubdomainID> * const active_subdomains)
+{
+  if (duplicateVariableCheck(var_name, type, /* is_aux = */ false))
+    return;
+
+  _nl->addArrayVariable(var_name, type, components, scale_factor, active_subdomains);
+  if (_displaced_problem)
+    _displaced_problem->addArrayVariable(
+        var_name, type, components, scale_factor, active_subdomains);
+}
+
+void
 FEProblemBase::addScalarVariable(const std::string & var_name,
                                  Order order,
                                  Real scale_factor,
@@ -3773,6 +3789,15 @@ FEProblemBase::getVectorVariable(THREAD_ID tid, const std::string & var_name)
   return _aux->getFieldVariable<RealVectorValue>(tid, var_name);
 }
 
+ArrayMooseVariable &
+FEProblemBase::getArrayVariable(THREAD_ID tid, const std::string & var_name)
+{
+  if (!_nl->hasVariable(var_name))
+    mooseError("Unknown variable " + var_name);
+
+  return _nl->getFieldVariable<RealArrayValue>(tid, var_name);
+}
+
 bool
 FEProblemBase::hasScalarVariable(const std::string & var_name) const
 {
@@ -4005,31 +4030,31 @@ FEProblemBase::setNonlocalCouplingMatrix()
   {
     for (const auto & kernel : nonlocal_kernel)
     {
-      unsigned int i = ivar->number();
-      if (i == kernel->variable().number())
-        for (const auto & jvar : vars)
-        {
-          const auto it = _var_dof_map.find(jvar->name());
-          if (it != _var_dof_map.end())
+      for (unsigned int i = ivar->number(); i < ivar->number() + ivar->count(); ++i)
+        if (i == kernel->variable().number())
+          for (const auto & jvar : vars)
           {
-            unsigned int j = jvar->number();
-            _nonlocal_cm(i, j) = 1;
+            const auto it = _var_dof_map.find(jvar->name());
+            if (it != _var_dof_map.end())
+            {
+              unsigned int j = jvar->number();
+              _nonlocal_cm(i, j) = 1;
+            }
           }
-        }
     }
     for (const auto & integrated_bc : nonlocal_integrated_bc)
     {
-      unsigned int i = ivar->number();
-      if (i == integrated_bc->variable().number())
-        for (const auto & jvar : vars)
-        {
-          const auto it = _var_dof_map.find(jvar->name());
-          if (it != _var_dof_map.end())
+      for (unsigned int i = ivar->number(); i < ivar->number() + ivar->count(); ++i)
+        if (i == integrated_bc->variable().number())
+          for (const auto & jvar : vars)
           {
-            unsigned int j = jvar->number();
-            _nonlocal_cm(i, j) = 1;
+            const auto it = _var_dof_map.find(jvar->name());
+            if (it != _var_dof_map.end())
+            {
+              unsigned int j = jvar->number();
+              _nonlocal_cm(i, j) = 1;
+            }
           }
-        }
     }
   }
 }

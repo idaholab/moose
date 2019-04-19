@@ -110,6 +110,15 @@ public:
     return _coupled_vector_moose_vars;
   }
 
+  /**
+   * Get the list of array coupled variables
+   * @return The list of array coupled variables
+   */
+  const std::vector<ArrayMooseVariable *> & getCoupledArratMooseVars() const
+  {
+    return _coupled_array_moose_vars;
+  }
+
   void addFEVariableCoupleableVectorTag(TagID tag) { _fe_coupleable_vector_tags.insert(tag); }
 
   void addFEVariableCoupleableMatrixTag(TagID tag) { _fe_coupleable_matrix_tags.insert(tag); }
@@ -119,6 +128,12 @@ public:
   std::set<TagID> & getFEVariableCoupleableMatrixTags() { return _fe_coupleable_matrix_tags; }
 
 protected:
+  /**
+   * A call-back function provided by the derived object for actions before coupling a variable
+   * with functions such as coupledValue.
+   */
+  virtual void coupledCallback(const std::string & /*var_name*/, bool /*is_old*/) {}
+
   /**
    * Returns true if a variables has been coupled as name.
    * @param var_name The name the kernel wants to refer to the variable as.
@@ -133,8 +148,6 @@ protected:
    * @return number of components this variable has (usually 1)
    */
   unsigned int coupledComponents(const std::string & var_name);
-
-  virtual void coupledCallback(const std::string & var_name, bool is_old);
 
   /**
    * Returns the index for a coupled variable by name
@@ -209,6 +222,16 @@ protected:
                                                          unsigned int comp = 0);
 
   /**
+   * Returns value of a coupled array variable
+   * @param var_name Name of coupled vector variable
+   * @param comp Component number for vector of coupled vector variables
+   * @return Reference to a ArrayVariableValue for the coupled vector variable
+   * @see ArrayKernel::_u
+   */
+  virtual const ArrayVariableValue & coupledArrayValue(const std::string & var_name,
+                                                       unsigned int comp = 0);
+
+  /**
    * Returns a *writable* reference to a coupled variable.  Note: you
    * should not have to use this very often (use coupledValue()
    * instead) but there are situations, such as writing to multiple
@@ -254,7 +277,7 @@ protected:
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
    * @return Reference to a VectorVariableValue containing the old value of the coupled variable
-   * @see Kernel::_u_old
+   * @see VectorKernel::_u_old
    */
   virtual const VectorVariableValue & coupledVectorValueOld(const std::string & var_name,
                                                             unsigned int comp = 0);
@@ -264,10 +287,30 @@ protected:
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
    * @return Reference to a VectorVariableValue containing the older value of the coupled variable
-   * @see Kernel::_u_older
+   * @see VectorKernel::_u_older
    */
   virtual const VectorVariableValue & coupledVectorValueOlder(const std::string & var_name,
                                                               unsigned int comp = 0);
+
+  /**
+   * Returns an old value from previous time step  of a coupled array variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a ArrayVariableValue containing the old value of the coupled variable
+   * @see ArrayKernel::_u_old
+   */
+  virtual const ArrayVariableValue & coupledArrayValueOld(const std::string & var_name,
+                                                          unsigned int comp = 0);
+
+  /**
+   * Returns an old value from two time steps previous of a coupled array variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a ArrayVariableValue containing the older value of the coupled variable
+   * @see ArrayKernel::_u_older
+   */
+  virtual const ArrayVariableValue & coupledArrayValueOlder(const std::string & var_name,
+                                                            unsigned int comp = 0);
 
   /**
    * Returns gradient of a coupled variable
@@ -400,6 +443,36 @@ protected:
    */
   virtual const VectorVariableGradient & coupledVectorGradientOlder(const std::string & var_name,
                                                                     unsigned int comp = 0);
+
+  /**
+   * Returns gradient of a coupled array variable
+   * @param var_name Name of coupled array variable
+   * @param comp Component number for vector of coupled array variables
+   * @return Reference to a VectorVariableGradient containing the gradient of the coupled array
+   * variable
+   */
+  virtual const ArrayVariableGradient & coupledArrayGradient(const std::string & var_name,
+                                                             unsigned int comp = 0);
+
+  /**
+   * Returns an old gradient from previous time step of a coupled array variable
+   * @param var_name Name of coupled array variable
+   * @param comp Component number for vector of coupled array variables
+   * @return Reference to a VectorVariableGradient containing the old gradient of the coupled array
+   * variable
+   */
+  virtual const ArrayVariableGradient & coupledArrayGradientOld(const std::string & var_name,
+                                                                unsigned int comp = 0);
+
+  /**
+   * Returns an old gradient from two time steps previous of a coupled array variable
+   * @param var_name Name of coupled array variable
+   * @param comp Component number for vector of coupled array variables
+   * @return Reference to a ArrayVariableGradient containing the older gradient of the coupled
+   * array variable
+   */
+  virtual const ArrayVariableGradient & coupledArrayGradientOlder(const std::string & var_name,
+                                                                  unsigned int comp = 0);
 
   /**
    * Returns curl of a coupled variable
@@ -567,6 +640,46 @@ protected:
                                                              unsigned int comp = 0);
 
   /**
+   * Time derivative of a coupled array variable
+   * @param var_name Name of coupled array variable
+   * @param comp Component number for vector of coupled array variables
+   * @return Reference to a ArrayVariableValue containing the time derivative of the coupled
+   * variable
+   */
+  virtual const ArrayVariableValue & coupledArrayDot(const std::string & var_name,
+                                                     unsigned int comp = 0);
+
+  /**
+   * Second time derivative of a coupled array variable
+   * @param var_name Name of coupled array variable
+   * @param comp Component number for vector of coupled array variables
+   * @return Reference to a ArrayVariableValue containing the time derivative of the coupled
+   * variable
+   */
+  virtual const ArrayVariableValue & coupledArrayDotDot(const std::string & var_name,
+                                                        unsigned int comp = 0);
+
+  /**
+   * Old time derivative of a coupled array variable
+   * @param var_name Name of coupled array variable
+   * @param comp Component number for vector of coupled array variables
+   * @return Reference to a ArrayVariableValue containing the time derivative of the coupled
+   * variable
+   */
+  virtual const ArrayVariableValue & coupledArrayDotOld(const std::string & var_name,
+                                                        unsigned int comp = 0);
+
+  /**
+   * Old second time derivative of a coupled array variable
+   * @param var_name Name of coupled array variable
+   * @param comp Component number for vector of coupled array variables
+   * @return Reference to a ArrayVariableValue containing the time derivative of the coupled
+   * variable
+   */
+  virtual const ArrayVariableValue & coupledArrayDotDotOld(const std::string & var_name,
+                                                           unsigned int comp = 0);
+
+  /**
    * Time derivative of a coupled variable with respect to the coefficients
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
@@ -640,12 +753,6 @@ protected:
    */
   template <typename T>
   const T & coupledNodalDot(const std::string & var_name, unsigned int comp = 0);
-
-  /**
-   * Get nodal default value
-   */
-  template <typename T>
-  const T & getNodalDefaultValue(const std::string & var_name, unsigned int comp = 0);
 
   /**
    * Nodal values of second time derivative of a coupled variable
@@ -745,6 +852,9 @@ protected:
   /// Vector of vector coupled variables
   std::vector<VectorMooseVariable *> _coupled_vector_moose_vars;
 
+  /// Vector of array coupled variables
+  std::vector<ArrayMooseVariable *> _coupled_array_moose_vars;
+
   /// True if we provide coupling to nodal values
   bool _c_nodal;
 
@@ -762,6 +872,9 @@ protected:
 
   /// Will hold the default value for optional vector coupled variables.
   std::map<std::string, VectorVariableValue *> _default_vector_value;
+
+  /// Will hold the default value for optional array coupled variables.
+  std::map<std::string, ArrayVariableValue *> _default_array_value;
 
   /// Will hold the default value for optional vector coupled variables for automatic differentiation.
   std::map<std::string, MooseArray<DualRealVectorValue> *> _ad_default_vector_value;
@@ -818,6 +931,18 @@ protected:
   VectorVariableCurl _default_vector_curl;
 
   /**
+   * This will always be zero because the default values for optionally coupled variables is always
+   * constant and this is used for time derivative info
+   */
+  ArrayVariableValue _default_array_value_zero;
+
+  /// This will always be zero because the default values for optionally coupled variables is always constant
+  ArrayVariableGradient _default_array_gradient;
+
+  /// This will always be zero because the default values for optionally coupled variables is always constant
+  ArrayVariableCurl _default_array_curl;
+
+  /**
    * Check that the right kind of variable is being coupled in
    *
    * @param var_name The name of the coupled variable
@@ -855,6 +980,14 @@ protected:
   VectorMooseVariable * getVectorVar(const std::string & var_name, unsigned int comp);
 
   /**
+   * Extract pointer to a coupled array variable
+   * @param var_name Name of parameter desired
+   * @param comp Component number of multiple coupled variables
+   * @return Pointer to the desired variable
+   */
+  ArrayMooseVariable * getArrayVar(const std::string & var_name, unsigned int comp);
+
+  /**
    * Checks to make sure that the current Executioner has set "_is_transient" when old/older values
    * are coupled in.
    * @param name the name of the variable
@@ -864,15 +997,6 @@ protected:
 
   /// Whether or not this object is a "neighbor" object: ie all of it's coupled values should be neighbor values
   bool _coupleable_neighbor;
-
-private:
-  /**
-   * Helper method to return (and insert if necessary) the default value
-   * for an uncoupled variable.
-   * @param var_name the name of the variable for which to retrieve a default value
-   * @return a pointer to the associated VariableValue.
-   */
-  VariableValue * getDefaultValue(const std::string & var_name, unsigned int comp);
 
 public:
   /**
@@ -923,11 +1047,33 @@ public:
 private:
   /**
    * Helper method to return (and insert if necessary) the default value
+   * for an uncoupled variable.
+   * @param var_name the name of the variable for which to retrieve a default value
+   * @return a pointer to the associated VariableValue.
+   */
+  VariableValue * getDefaultValue(const std::string & var_name, unsigned int comp);
+
+  /**
+   * Helper method to return (and insert if necessary) the default value
    * for an uncoupled vector variable.
    * @param var_name the name of the vector variable for which to retrieve a default value
    * @return a pointer to the associated VectorVariableValue.
    */
   VectorVariableValue * getDefaultVectorValue(const std::string & var_name);
+
+  /**
+   * Helper method to return (and insert if necessary) the default value
+   * for an uncoupled array variable.
+   * @param var_name the name of the vector variable for which to retrieve a default value
+   * @return a pointer to the associated VectorVariableValue.
+   */
+  ArrayVariableValue * getDefaultArrayValue(const std::string & var_name);
+
+  /**
+   * Get nodal default value
+   */
+  template <typename T>
+  const T & getNodalDefaultValue(const std::string & var_name, unsigned int comp = 0);
 
   /// Maximum qps for any element in this system
   unsigned int _coupleable_max_qps;

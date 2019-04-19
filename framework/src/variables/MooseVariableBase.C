@@ -20,7 +20,8 @@ MooseVariableBase::MooseVariableBase(unsigned int var_num,
                                      const FEType & fe_type,
                                      SystemBase & sys,
                                      Moose::VarKindType var_kind,
-                                     THREAD_ID tid)
+                                     THREAD_ID tid,
+                                     unsigned int count)
   : _var_num(var_num),
     _fe_type(fe_type),
     _var_kind(var_kind),
@@ -29,8 +30,9 @@ MooseVariableBase::MooseVariableBase(unsigned int var_num,
     _variable(sys.system().variable(_var_num)),
     _dof_map(sys.dofMap()),
     _mesh(_subproblem.mesh()),
-    _scaling_factor(1.0),
-    _tid(tid)
+    _tid(tid),
+    _count(count),
+    _scaling_factor(std::vector<Real>(_count, 1.0))
 {
 }
 

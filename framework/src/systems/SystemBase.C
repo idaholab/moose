@@ -641,6 +641,56 @@ SystemBase::addVariable(const std::string & var_name,
 }
 
 void
+SystemBase::addArrayVariable(const std::string & var_name,
+                             const FEType & type,
+                             unsigned int components,
+                             const std::vector<Real> & scale_factor,
+                             const std::set<SubdomainID> * const active_subdomains)
+{
+  // Turn off automatic variable group identification so that we can be sure that this variable
+  // group will be ordered exactly like it should be
+  system().identify_variable_groups(false);
+
+  // Build up the variable names
+  std::vector<std::string> var_names;
+  for (unsigned int i = 0; i < components; i++)
+    var_names.push_back(SubProblem::arrayVariableComponent(var_name, i));
+
+  // The number returned by libMesh is the _last_ variable number... we want to hold onto the
+  // _first_
+  unsigned int var_num =
+      system().add_variables(var_names, type, active_subdomains) - (components - 1);
+
+  if (active_subdomains == NULL)
+  {
+    unsigned int vn = var_num;
+    for (unsigned int i = 0; i < components; i++)
+      _var_map[vn++] = std::set<SubdomainID>();
+  }
+  else
+  {
+    unsigned int vn = var_num;
+    for (unsigned int i = 0; i < components; i++)
+    {
+      for (auto & sid : *active_subdomains)
+        _var_map[vn].insert(sid);
+      ++vn;
+    }
+  }
+
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  {
+    // FIXME: we cannot refer fetype in libMesh at this point, so we will just make a copy in
+    // MooseVariableBase.
+    // ArrayMooseVariable is defined in MooseTypes.h
+    ArrayMooseVariable * var = new ArrayMooseVariable(
+        var_num, type, *this, _subproblem.assembly(tid), _var_kind, tid, components);
+    var->scalingFactor(scale_factor);
+    _vars[tid].add(var_name, var);
+  }
+}
+
+void
 SystemBase::addScalarVariable(const std::string & var_name,
                               Order order,
                               Real scale_factor,
@@ -669,6 +719,8 @@ SystemBase::hasVariable(const std::string & var_name) const
 {
   if (system().has_variable(var_name))
     return system().variable_type(var_name).family != SCALAR;
+  else if (system().has_variable(SubProblem::arrayVariableComponent(var_name, 0)))
+    return true;
   else
     return false;
 }
@@ -691,7 +743,12 @@ SystemBase::isScalarVariable(unsigned int var_num) const
 unsigned int
 SystemBase::nVariables() const
 {
-  return _vars[0].names().size();
+  unsigned int n = 0;
+  for (auto & var : _vars[0].fieldVariables())
+    n += var->count();
+  n += _vars[0].scalars().size();
+
+  return n;
 }
 
 /**
@@ -1096,8 +1153,14 @@ template MooseVariableFE<Real> & SystemBase::getFieldVariable<Real>(THREAD_ID ti
 template MooseVariableFE<RealVectorValue> &
 SystemBase::getFieldVariable<RealVectorValue>(THREAD_ID tid, const std::string & var_name);
 
+template MooseVariableFE<RealArrayValue> &
+SystemBase::getFieldVariable<RealArrayValue>(THREAD_ID tid, const std::string & var_name);
+
 template MooseVariableFE<Real> & SystemBase::getFieldVariable<Real>(THREAD_ID tid,
                                                                     unsigned int var_number);
 
 template MooseVariableFE<RealVectorValue> &
 SystemBase::getFieldVariable<RealVectorValue>(THREAD_ID tid, unsigned int var_number);
+
+template MooseVariableFE<RealArrayValue> &
+SystemBase::getFieldVariable<RealArrayValue>(THREAD_ID tid, unsigned int var_number);

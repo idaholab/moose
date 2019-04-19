@@ -649,24 +649,25 @@ SubProblem::getVariableHelper(THREAD_ID tid,
   }
 
   // Now make sure the var found has the expected field type.
-  bool var_is_vector = var->isVector();
   if ((expected_var_field_type == Moose::VarFieldType::VAR_FIELD_ANY) ||
-      (var_is_vector && expected_var_field_type == Moose::VarFieldType::VAR_FIELD_VECTOR) ||
-      (!var_is_vector && expected_var_field_type == Moose::VarFieldType::VAR_FIELD_STANDARD))
+      (expected_var_field_type == var->fieldType()))
     return *var;
   else
   {
     std::string expected_var_field_type_string =
-        (expected_var_field_type == Moose::VarFieldType::VAR_FIELD_STANDARD ? "standard"
-                                                                            : "vector");
+        MooseUtils::toLower(Moose::stringify(expected_var_field_type));
+    std::string var_field_type_string = MooseUtils::toLower(Moose::stringify(var->fieldType()));
 
     mooseError("No ",
                expected_var_field_type_string,
                " variable named ",
                var_name,
                " found. "
-               "Did you specify a vector variable when you meant to specify a standard variable "
-               "(or vice-versa)?");
+               "Did you specify a ",
+               var_field_type_string,
+               " variable when you meant to specify a ",
+               expected_var_field_type_string,
+               " variable?");
   }
 }
 
