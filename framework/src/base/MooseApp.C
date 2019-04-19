@@ -374,7 +374,8 @@ MooseApp::MooseApp(InputParameters parameters)
     std::string command_string = command_stream.str();
     Moose::out << "Running: " << command_string << std::endl;
 
-    std::system(command_string.c_str());
+    int ret = std::system(command_string.c_str());
+    libmesh_ignore(ret);
 
     // Sleep to allow time for the debugger to attach
     std::this_thread::sleep_for(std::chrono::seconds(10));

@@ -64,7 +64,7 @@ CrackTipEnrichmentStressDivergenceTensors::CrackTipEnrichmentStressDivergenceTen
 Real
 CrackTipEnrichmentStressDivergenceTensors::computeQpResidual()
 {
-  crackTipEnrichementFunctionAtPoint(*_current_elem->get_node(_i), _BI);
+  crackTipEnrichementFunctionAtPoint(*_current_elem->node_ptr(_i), _BI);
 
   crackTipEnrichementFunctionAtPoint(_q_point[_qp], _B);
   unsigned int crack_front_point_index =
@@ -83,8 +83,8 @@ CrackTipEnrichmentStressDivergenceTensors::computeQpResidual()
 Real
 CrackTipEnrichmentStressDivergenceTensors::computeQpJacobian()
 {
-  crackTipEnrichementFunctionAtPoint(*_current_elem->get_node(_i), _BI);
-  crackTipEnrichementFunctionAtPoint(*_current_elem->get_node(_j), _BJ);
+  crackTipEnrichementFunctionAtPoint(*_current_elem->node_ptr(_i), _BI);
+  crackTipEnrichementFunctionAtPoint(*_current_elem->node_ptr(_j), _BJ);
 
   crackTipEnrichementFunctionAtPoint(_q_point[_qp], _B);
 
@@ -136,8 +136,8 @@ CrackTipEnrichmentStressDivergenceTensors::computeQpOffDiagJacobian(unsigned int
 
   if (active_enrich)
   {
-    crackTipEnrichementFunctionAtPoint(*_current_elem->get_node(_i), _BI);
-    crackTipEnrichementFunctionAtPoint(*_current_elem->get_node(_j), _BJ);
+    crackTipEnrichementFunctionAtPoint(*_current_elem->node_ptr(_i), _BI);
+    crackTipEnrichementFunctionAtPoint(*_current_elem->node_ptr(_j), _BJ);
 
     crackTipEnrichementFunctionAtPoint(_q_point[_qp], _B);
     unsigned int crack_front_point_index =
@@ -161,7 +161,7 @@ CrackTipEnrichmentStressDivergenceTensors::computeQpOffDiagJacobian(unsigned int
   }
   else if (active)
   {
-    crackTipEnrichementFunctionAtPoint(*_current_elem->get_node(_i), _BI);
+    crackTipEnrichementFunctionAtPoint(*_current_elem->node_ptr(_i), _BI);
 
     crackTipEnrichementFunctionAtPoint(_q_point[_qp], _B);
     unsigned int crack_front_point_index =

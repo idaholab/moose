@@ -1435,7 +1435,7 @@ GrainTracker::swapSolutionValues(FeatureData & grain,
 
       for (unsigned int i = 0; i < elem->n_nodes(); ++i)
       {
-        Node * curr_node = elem->get_node(i);
+        Node * curr_node = elem->node_ptr(i);
         if (updated_nodes_tmp.find(curr_node) == updated_nodes_tmp.end())
         {
           // cache this node so we don't attempt to remap it again within this loop

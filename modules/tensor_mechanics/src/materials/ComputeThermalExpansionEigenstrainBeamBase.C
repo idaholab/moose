@@ -34,9 +34,9 @@ void
 ComputeThermalExpansionEigenstrainBeamBase::computeQpEigenstrain()
 {
   // fetch the two end nodes for current element
-  std::vector<Node *> node;
+  std::vector<const Node *> node;
   for (unsigned int i = 0; i < 2; ++i)
-    node.push_back(_current_elem->get_node(i));
+    node.push_back(_current_elem->node_ptr(i));
 
   // calculate initial axis of the beam element
   for (unsigned int i = 0; i < 2; ++i)

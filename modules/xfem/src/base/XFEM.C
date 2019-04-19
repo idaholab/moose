@@ -345,7 +345,7 @@ XFEM::buildEFAMesh()
   {
     std::vector<unsigned int> quad;
     for (unsigned int i = 0; i < elem->n_nodes(); ++i)
-      quad.push_back(elem->node(i));
+      quad.push_back(elem->node_id(i));
     if (_mesh->mesh_dimension() == 2)
       _efa_mesh.add2DElement(quad, elem->id());
     else if (_mesh->mesh_dimension() == 3)
@@ -943,8 +943,8 @@ XFEM::healMesh()
 
           for (unsigned int in = 0; in < elem1->n_nodes(); ++in)
           {
-            Node * e1node = elem1->get_node(in);
-            Node * e2node = elem2->get_node(in);
+            Node * e1node = elem1->node_ptr(in);
+            Node * e2node = elem2->node_ptr(in);
             if (!xfce->isPointPhysical(*e1node) &&
                 e1node != e2node) // This would happen at the crack tip
             {
@@ -971,8 +971,8 @@ XFEM::healMesh()
 
             for (unsigned int in = 0; in < elem1_displaced->n_nodes(); ++in)
             {
-              Node * e1node_displaced = elem1_displaced->get_node(in);
-              Node * e2node_displaced = elem2_displaced->get_node(in);
+              Node * e1node_displaced = elem1_displaced->node_ptr(in);
+              Node * e2node_displaced = elem2_displaced->node_ptr(in);
               if (!xfce->isPointPhysical(*e1node_displaced) &&
                   e1node_displaced != e2node_displaced) // This would happen at the crack tip
               {
@@ -1204,7 +1204,7 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
         }
       }
 
-      Node * parent_node = parent_elem->get_node(j);
+      Node * parent_node = parent_elem->node_ptr(j);
       std::vector<boundary_id_type> parent_node_boundary_ids =
           _mesh->boundary_info->boundary_ids(parent_node);
       _mesh->boundary_info->add_node(libmesh_node, parent_node_boundary_ids);
@@ -1222,7 +1222,7 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
 
         libmesh_elem2->set_node(j) = libmesh_node;
 
-        parent_node = parent_elem2->get_node(j);
+        parent_node = parent_elem2->node_ptr(j);
         parent_node_boundary_ids.clear();
         parent_node_boundary_ids = _displaced_mesh->boundary_info->boundary_ids(parent_node);
         _displaced_mesh->boundary_info->add_node(libmesh_node, parent_node_boundary_ids);
@@ -1475,7 +1475,7 @@ XFEM::getEFANodeCoords(EFANode * CEMnode,
     if (master_nodes[i]->category() == EFANode::N_CATEGORY_PERMANENT)
     {
       unsigned int local_node_id = CEMElem->getLocalNodeIndex(master_nodes[i]);
-      Node * node = elem->get_node(local_node_id);
+      const Node * node = elem->node_ptr(local_node_id);
       if (displaced_mesh)
         node = displaced_mesh->node_ptr(node->id());
       Point node_p((*node)(0), (*node)(1), (*node)(2));
