@@ -1,0 +1,13 @@
+[Tests]
+  [./mesh_collection_generator_test]
+    type = 'Exodiff'
+    input = 'mesh_collection_generator.i'
+    cli_args = '--mesh-only'
+    exodiff = 'mesh_collection_generator_in.e'
+    requirement = 'MOOSE shall be able to combine multiple meshes into a single unconnected mesh.'
+    design = 'meshgenerators/MeshCollectionGenerator.md'
+    issues = '#13221'
+    mesh_mode = 'REPLICATED'
+    recover = false
+  [../]
+[]

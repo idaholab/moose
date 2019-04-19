@@ -11,14 +11,14 @@
 #define LEVELSETADVECTION_H
 
 // MOOSE includes
-#include "Kernel.h"
+#include "ADKernelValue.h"
 #include "LevelSetVelocityInterface.h"
 
 // Forward declarations
+template <ComputeStage>
 class LevelSetAdvection;
 
-template <>
-InputParameters validParams<LevelSetAdvection>();
+declareADValidParams(LevelSetAdvection);
 
 /**
  * Advection Kernel for the levelset equation.
@@ -27,14 +27,18 @@ InputParameters validParams<LevelSetAdvection>();
  * where \vec{v} is the interface velocity that is a set of
  * coupled variables.
  */
-class LevelSetAdvection : public LevelSetVelocityInterface<Kernel>
+template <ComputeStage compute_stage>
+class LevelSetAdvection : public LevelSetVelocityInterface<ADKernelValue<compute_stage>>
 {
 public:
   LevelSetAdvection(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
-  virtual Real computeQpJacobian() override;
+  virtual ADResidual precomputeQpResidual() override;
+
+  usingKernelValueMembers;
+  using LevelSetVelocityInterface<ADKernelValue<compute_stage>>::computeQpVelocity;
+  using LevelSetVelocityInterface<ADKernelValue<compute_stage>>::_velocity;
 };
 
 #endif // LEVELSETADVECTION_H

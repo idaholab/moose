@@ -1,6 +1,6 @@
 # ADStressDivergenceTensors
 
-!syntax description /Kernels/ADStressDivergenceTensors<RESIDUAL>
+!syntax description /Kernels/ADStressDivergenceTensors
 
 ## Description
 
@@ -17,10 +17,10 @@ calculator for the Cartesian system.
 
 ## Example Input File syntax
 
-!syntax parameters /Kernels/ADStressDivergenceTensors<RESIDUAL>
+!syntax parameters /Kernels/ADStressDivergenceTensors
 
 !include modules/tensor_mechanics/common/seealsoADStressDivergenceKernels.md
 
-!syntax inputs /Kernels/ADStressDivergenceTensors<RESIDUAL>
+!syntax inputs /Kernels/ADStressDivergenceTensors
 
-!syntax children /Kernels/ADStressDivergenceTensors<RESIDUAL>
+!syntax children /Kernels/ADStressDivergenceTensors

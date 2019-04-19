@@ -1272,6 +1272,7 @@ FeatureFloodCount::flood(const DofObject * dof_object, std::size_t current_index
   while (!_entity_queue.empty())
   {
     const DofObject * curr_dof_object = _entity_queue.back();
+    const Elem * elem = _is_elemental ? static_cast<const Elem *>(curr_dof_object) : nullptr;
     _entity_queue.pop_back();
 
     // Retrieve the id of the current entity
@@ -1283,18 +1284,18 @@ FeatureFloodCount::flood(const DofObject * dof_object, std::size_t current_index
       continue;
 
     // Are we outside of the range we should be working in?
-    if (_is_elemental)
-    {
-      const Elem & elem = static_cast<const Elem &>(*curr_dof_object);
-
-      if (!_dof_map.is_evaluable(elem))
-        continue;
-    }
+    if (_is_elemental && !_dof_map.is_evaluable(*elem))
+      continue;
 
     // See if the current entity either starts a new feature or continues an existing feature
     auto new_id = invalid_id; // Writable reference to hold an optional id;
     Status status =
         Status::INACTIVE; // Status is inactive until we find an entity above the starting threshold
+
+    // Make sure that the Assembly object has the right element and subdomain information set
+    // since we are moving through the mesh in a manual fashion.
+    if (_is_elemental)
+      _fe_problem.setCurrentSubdomainID(elem, 0);
 
     if (!isNewFeatureOrConnectedRegion(curr_dof_object, current_index, feature, status, new_id))
     {
@@ -1343,8 +1344,6 @@ FeatureFloodCount::flood(const DofObject * dof_object, std::size_t current_index
      */
     if (_is_elemental && processor_id() == curr_dof_object->processor_id())
     {
-      const Elem * elem = static_cast<const Elem *>(curr_dof_object);
-
       // Keep track of how many elements participate in the centroid averaging
       feature->_vol_count++;
 
@@ -1357,7 +1356,7 @@ FeatureFloodCount::flood(const DofObject * dof_object, std::size_t current_index
     }
 
     if (_is_elemental)
-      visitElementalNeighbors(static_cast<const Elem *>(curr_dof_object),
+      visitElementalNeighbors(elem,
                               feature,
                               /*expand_halos_only =*/false,
                               /*disjoint_only =*/false);

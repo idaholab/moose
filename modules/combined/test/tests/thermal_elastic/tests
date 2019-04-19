@@ -1,17 +1,25 @@
 [Tests]
+  design = 'ThermalConductivity.md'
+  issues = '#13232'
   [./test]
     type = 'Exodiff'
     input = 'thermal_elastic.i'
     exodiff = 'thermal_elastic_out.e'
+    requirement = "The system shall compute constant stress in the xx, yy, zz, xy, yz, and xz direction
+                   using irregular elements with functional Poisson's ratios and Young's moduli."
   [../]
   [./test_sm]
     type = 'Exodiff'
     input = 'thermal_elastic_sm.i'
     exodiff = 'thermal_elastic_out.e'
     prereq = test
+    requirement = "The system shall compute the same stress values as the thermal_elastic.i test using the
+                   solid mechanics module implementation  using the solid mechanics module."
   [../]
   [./derivatives]
     type = 'AnalyzeJacobian'
+    petsc_version = '<3.9.0 || >=3.9.4'
+    requirement = 'The system shall compute accurate Jacobians for elastic mechanics.'
     input = 'derivatives.i'
   [../]
 []

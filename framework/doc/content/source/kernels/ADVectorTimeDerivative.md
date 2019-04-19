@@ -33,8 +33,8 @@ block for a transient diffusion problem that demonstrates the
 
 !listing test/tests/kernels/ad_transient_diffusion/ad_transient_vector_diffusion.i block=Kernels
 
-!syntax parameters /Kernels/ADVectorTimeDerivative<RESIDUAL>
+!syntax parameters /Kernels/ADVectorTimeDerivative
 
-!syntax inputs /Kernels/ADVectorTimeDerivative<RESIDUAL>
+!syntax inputs /Kernels/ADVectorTimeDerivative
 
-!syntax children /Kernels/ADVectorTimeDerivative<RESIDUAL>
+!syntax children /Kernels/ADVectorTimeDerivative

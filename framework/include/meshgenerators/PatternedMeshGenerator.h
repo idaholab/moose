@@ -34,7 +34,7 @@ class PatternedMeshGenerator : public MeshGenerator
 public:
   PatternedMeshGenerator(const InputParameters & parameters);
 
-  std::unique_ptr<MeshBase> generate();
+  std::unique_ptr<MeshBase> generate() override;
 
 protected:
   /// The mesh generators to read

@@ -10,10 +10,10 @@ on-diagonal dependence, the saddle point nature of the incompressible equations
 is removed and equal order shape functions can be used for velocity and pressure
 variables.
 
-!syntax description /Kernels/INSADMassPSPG<RESIDUAL>
+!syntax description /Kernels/INSADMassPSPG
 
-!syntax parameters /Kernels/INSADMassPSPG<RESIDUAL>
+!syntax parameters /Kernels/INSADMassPSPG
 
-!syntax inputs /Kernels/INSADMassPSPG<RESIDUAL>
+!syntax inputs /Kernels/INSADMassPSPG
 
-!syntax children /Kernels/INSADMassPSPG<RESIDUAL>
+!syntax children /Kernels/INSADMassPSPG

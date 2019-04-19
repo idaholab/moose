@@ -16,7 +16,6 @@
     boundary_id_new = 10
     bottom_left = '-0.1 -0.1 -0.1'
     top_right = '0.1 0.2 0.3'
-    block_id = 0
   [../]
   [./createNewSidesetTwo]
     type = AddSideSetsFromBoundingBox
@@ -24,7 +23,6 @@
     boundary_id_new = 11
     bottom_left = '0.6 0.7 0.8'
     top_right = '1.1 1.1 1.1'
-    block_id = 0
   [../]
   [./createNewSidesetThree]
     type = AddSideSetsFromBoundingBox
@@ -32,7 +30,6 @@
     boundary_id_new = 12
     bottom_left = '-0.1 0.9 0.9'
     top_right = '0.1 1.1 1.1'
-    block_id = 0
   [../]
   [./createNewSidesetFour]
     type = AddSideSetsFromBoundingBox
@@ -40,7 +37,6 @@
     boundary_id_new = 13
     bottom_left = '0.4 0.4 0.9'
     top_right = '0.6 0.6 1.1'
-    block_id = 0
   [../]
 []
 

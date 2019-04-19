@@ -10,35 +10,26 @@
 // MOOSE includes
 #include "LevelSetAdvection.h"
 
-registerMooseObject("LevelSetApp", LevelSetAdvection);
+registerADMooseObject("LevelSetApp", LevelSetAdvection);
 
-template <>
-InputParameters
-validParams<LevelSetAdvection>()
-{
-  InputParameters params = validParams<Kernel>();
-  params.addClassDescription("Implements the level set advection equation: $\\vec{v}\\cdot\\nabla "
-                             "u = 0$, where the weak form is $(\\psi_i, \\vec{v}\\cdot\\nabla u) = "
-                             "0$.");
-  params += validParams<LevelSetVelocityInterface<>>();
-  return params;
-}
+defineADValidParams(LevelSetAdvection,
+                    ADKernelValue,
+                    params.addClassDescription(
+                        "Implements the level set advection equation: $\\vec{v}\\cdot\\nabla "
+                        "u = 0$, where the weak form is $(\\psi_i, \\vec{v}\\cdot\\nabla u) = "
+                        "0$.");
+                    params += validParams<LevelSetVelocityInterface<>>(););
 
-LevelSetAdvection::LevelSetAdvection(const InputParameters & parameters)
-  : LevelSetVelocityInterface<Kernel>(parameters)
+template <ComputeStage compute_stage>
+LevelSetAdvection<compute_stage>::LevelSetAdvection(const InputParameters & parameters)
+  : LevelSetVelocityInterface<ADKernelValue<compute_stage>>(parameters)
 {
 }
 
-Real
-LevelSetAdvection::computeQpResidual()
+template <ComputeStage compute_stage>
+ADResidual
+LevelSetAdvection<compute_stage>::precomputeQpResidual()
 {
   computeQpVelocity();
-  return _test[_i][_qp] * (_velocity * _grad_u[_qp]);
-}
-
-Real
-LevelSetAdvection::computeQpJacobian()
-{
-  computeQpVelocity();
-  return _test[_i][_qp] * (_velocity * _grad_phi[_j][_qp]);
+  return _velocity * _grad_u[_qp];
 }

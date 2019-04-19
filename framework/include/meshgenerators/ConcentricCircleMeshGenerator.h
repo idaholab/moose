@@ -26,7 +26,7 @@ class ConcentricCircleMeshGenerator : public MeshGenerator
 public:
   ConcentricCircleMeshGenerator(const InputParameters & parameters);
 
-  std::unique_ptr<MeshBase> generate();
+  std::unique_ptr<MeshBase> generate() override;
 
 protected:
   /// Number of sectors in one quadrant

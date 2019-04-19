@@ -1,6 +1,6 @@
 # ADComputeEigenstrain
 
-!syntax description /Materials/ADComputeEigenstrain<RESIDUAL>
+!syntax description /Materials/ADComputeEigenstrain
 
 ## Description
 
@@ -21,10 +21,10 @@ Based on the number and values of constants provided as the argument to the `eig
 
 !listing modules/tensor_mechanics/test/tests/visco/gen_kv_driving.i block=Materials/eigen
 
-!syntax parameters /Materials/ADComputeEigenstrain<RESIDUAL>
+!syntax parameters /Materials/ADComputeEigenstrain
 
-!syntax inputs /Materials/ADComputeEigenstrain<RESIDUAL>
+!syntax inputs /Materials/ADComputeEigenstrain
 
-!syntax children /Materials/ADComputeEigenstrain<RESIDUAL>
+!syntax children /Materials/ADComputeEigenstrain
 
 !bibtex bibliography

@@ -10,7 +10,7 @@
 #ifndef INSADMOMENTUMTIMEDERIVATIVE_H
 #define INSADMOMENTUMTIMEDERIVATIVE_H
 
-#include "ADTimeKernel.h"
+#include "ADTimeKernelValue.h"
 
 // Forward Declarations
 template <ComputeStage compute_stage>
@@ -24,7 +24,7 @@ declareADValidParams(INSADMomentumTimeDerivative);
  * for this.
  */
 template <ComputeStage compute_stage>
-class INSADMomentumTimeDerivative : public ADVectorTimeKernel<compute_stage>
+class INSADMomentumTimeDerivative : public ADVectorTimeKernelValue<compute_stage>
 {
 public:
   INSADMomentumTimeDerivative(const InputParameters & parameters);
@@ -36,7 +36,7 @@ protected:
 
   const ADMaterialProperty(Real) & _rho;
 
-  usingVectorTimeKernelMembers;
+  usingVectorTimeKernelValueMembers;
 };
 
 #endif // INSADMOMENTUMTIMEDERIVATIVE_H

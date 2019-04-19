@@ -133,7 +133,7 @@ poly(std::vector<Real> c, const T x, const bool derivative)
 
 template <typename T>
 T
-clamp(T x, T lowerlimit, T upperlimit)
+clamp(T x, Real lowerlimit, Real upperlimit)
 {
   if (x < lowerlimit)
     return lowerlimit;

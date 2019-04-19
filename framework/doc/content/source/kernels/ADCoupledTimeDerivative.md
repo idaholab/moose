@@ -40,8 +40,8 @@ kernel block below:
 test/tests/kernels/coupled_time_derivative/ad_coupled_time_derivative_test.i
 block=Kernels label=false
 
-!syntax parameters /Kernels/ADCoupledTimeDerivative<RESIDUAL>
+!syntax parameters /Kernels/ADCoupledTimeDerivative
 
-!syntax inputs /Kernels/ADCoupledTimeDerivative<RESIDUAL>
+!syntax inputs /Kernels/ADCoupledTimeDerivative
 
-!syntax children /Kernels/ADCoupledTimeDerivative<RESIDUAL>
+!syntax children /Kernels/ADCoupledTimeDerivative

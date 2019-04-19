@@ -29,7 +29,7 @@ public:
   // No copy
   SpiralAnnularMeshGenerator & operator=(const SpiralAnnularMeshGenerator & other_mesh) = delete;
 
-  std::unique_ptr<MeshBase> generate();
+  std::unique_ptr<MeshBase> generate() override;
 
 protected:
   /// Radius of the inner circle

@@ -27,7 +27,7 @@ class GeneratedMeshGenerator : public MeshGenerator
 public:
   GeneratedMeshGenerator(const InputParameters & parameters);
 
-  std::unique_ptr<MeshBase> generate();
+  std::unique_ptr<MeshBase> generate() override;
 
 protected:
   /// The dimension of the mesh

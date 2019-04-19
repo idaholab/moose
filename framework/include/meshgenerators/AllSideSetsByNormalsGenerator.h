@@ -28,7 +28,7 @@ class AllSideSetsByNormalsGenerator : public SideSetsGeneratorBase
 public:
   AllSideSetsByNormalsGenerator(const InputParameters & parameters);
 
-  std::unique_ptr<MeshBase> generate();
+  std::unique_ptr<MeshBase> generate() override;
 
 protected:
   boundary_id_type getNextBoundaryID();

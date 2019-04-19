@@ -1,11 +1,15 @@
 [Tests]
+  design = 'FiniteDifferencePreconditioner.md'
+  issues = '#13232'
   [./jacobian_fdp_coloring_full_test]
     type = AnalyzeJacobian
     input = fdp_test.i
     expect_out = '\nNo errors detected. :-\)\n'
     recover = false
+    petsc_version = '<3.9.0 || >=3.9.4'
     mesh_mode = REPLICATED
     cli_args = 'Preconditioning/FDP/full=true'
+    requirement = "The system shall produce a perfect coloring for the Jacobian when using the finite difference preconditioner."
   [../]
   [./jacobian_fdp_standard_test]
     type = AnalyzeJacobian
@@ -15,6 +19,7 @@
     mesh_mode = REPLICATED
     cli_args = 'Preconditioning/FDP/finite_difference_type=standard'
     prereq = 'jacobian_fdp_coloring_full_test'
+    requirement = "The system shall produce a perfect Jacobian when using the stadard finite difference preconditioner."
   [../]
   [./jacobian_fdp_coloring_diagonal_test_fail]
     type = AnalyzeJacobian
@@ -23,5 +28,7 @@
     recover = false
     mesh_mode = REPLICATED
     prereq = 'jacobian_fdp_standard_test'
+    requirement = "The system shall detect missing off-diagonal Jacobian entries when using a full
+                   finite different preconditioner."
   [../]
 []

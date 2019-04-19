@@ -12,10 +12,10 @@ The complete Jacobian contributions are provided by automatic differentiation as
 
 This class inherits from the [ADDiffusion](/ADDiffusion.md) class.
 
-!syntax parameters /Kernels/ADMatDiffusion<RESIDUAL>
+!syntax parameters /Kernels/ADMatDiffusion
 
-!syntax inputs /Kernels/ADMatDiffusion<RESIDUAL>
+!syntax inputs /Kernels/ADMatDiffusion
 
-!syntax children /Kernels/ADMatDiffusion<RESIDUAL>
+!syntax children /Kernels/ADMatDiffusion
 
 !bibtex bibliography

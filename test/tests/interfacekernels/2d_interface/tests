@@ -25,6 +25,7 @@
     input = coupled_value_coupled_flux.i
     expect_out = '\nNo errors detected. :-\)\n'
     recover = false
+    petsc_version = '<3.9.0 || >=3.9.4'
     mesh_mode = REPLICATED
     prereq = test
     issues = "#7437"

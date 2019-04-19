@@ -1,6 +1,6 @@
 # ADStressDivergenceRSphericalTensors
 
-!syntax description /Kernels/ADStressDivergenceRSphericalTensors<RESIDUAL>
+!syntax description /Kernels/ADStressDivergenceRSphericalTensors
 
 ## Description
 
@@ -33,10 +33,10 @@ In deriving the weak form of this equation, the second term in
 The coordinate type in the `[Problem]` block of the input file must be set to
 `coord_type = RSPHERICAL`.
 
-!syntax parameters /Kernels/ADStressDivergenceRSphericalTensors<RESIDUAL>
+!syntax parameters /Kernels/ADStressDivergenceRSphericalTensors
 
 !include modules/tensor_mechanics/common/seealsoADStressDivergenceKernels.md
 
-!syntax inputs /Kernels/ADStressDivergenceRSphericalTensors<RESIDUAL>
+!syntax inputs /Kernels/ADStressDivergenceRSphericalTensors
 
-!syntax children /Kernels/ADStressDivergenceRSphericalTensors<RESIDUAL>
+!syntax children /Kernels/ADStressDivergenceRSphericalTensors

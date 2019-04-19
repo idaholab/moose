@@ -24,7 +24,7 @@
     run_sim = 'True'
     ratio_tol = 1e-7
     difference_tol = 1e-4
-    petsc_version = '>=3.9'
+    petsc_version = '>=3.9.4'
     requirement = 'The Jacobian for the AD gravity problem shall be perfect'
     issues = '#13100'
     design = 'jacobian_definitions.md'
