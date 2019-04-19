@@ -102,6 +102,7 @@
   solve_type = 'PJFNK'
   num_steps = 4
   dt = .1
+  compute_initial_residual_before_preset_bcs = true
 []
 
 [Outputs]

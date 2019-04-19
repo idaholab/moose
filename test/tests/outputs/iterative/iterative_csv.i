@@ -51,6 +51,7 @@
   solve_type = NEWTON
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
+  compute_initial_residual_before_preset_bcs = true
 []
 
 [Outputs]

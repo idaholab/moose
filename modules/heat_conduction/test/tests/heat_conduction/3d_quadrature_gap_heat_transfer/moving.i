@@ -104,6 +104,8 @@
 
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
+
+  compute_initial_residual_before_preset_bcs = true
 []
 
 [Outputs]
