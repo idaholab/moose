@@ -69,7 +69,8 @@ setup phase as well.
 
 ## Example A: Post processing with AuxKernel
 
-The following example is extracted from step 4 of the [darcy_thermo_mech/index.md]. Consider Darcy's
+The following example is extracted from step 4 of the
+[Darcy Flow and Thermomechanics Tutorial](darcy_thermo_mech/index.md optional=True). Consider Darcy's
 Law for flow in porous media neglecting changes in time and gravity:
 
 \begin{equation}
@@ -101,7 +102,8 @@ allowing complicated systems of equations to be decoupled for solving individual
 useful for testing and validation.
 
 Consider the heat equation with an advective term that is coupled to the pressure computed
-in [darcy] as in step 6 of the [darcy_thermo_mech/index.md]:
+in [darcy] as in step 6 of the
+[Darcy Flow and Thermomechanics Tutorial](darcy_thermo_mech/index.md optional=True):
 
 \begin{equation}
 \label{heat}
@@ -119,7 +121,7 @@ examining the correctness of the heat equation solve, so an auxiliary variable t
 arbitrary function of space and time is used instead. The following input file snippet demonstrates
 the decoupling of the pressure variable by computing it using an AuxVariable the FunctionAux object.
 
-!listing step6c_decoupled.i block=AuxVariables Kernels AuxKernels
+!listing step6c_decoupled.i block=AuxVariables AuxKernels
 
 
 !syntax list /AuxKernels objects=True actions=False subsystems=False

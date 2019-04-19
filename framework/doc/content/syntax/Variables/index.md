@@ -10,7 +10,7 @@ within documentation. The nonlinear variables defined within this block are used
 ## Example
 
 The following input file snippet demonstrates the creation of a single nonlinear variable that
-is used by two Kernel objects, refer to [ex02_kernel.md] for more details.
+is used by two Kernel objects, refer to [Example 2](ex02_kernel.md optional=True) for more details.
 
 !listing ex02_kernel/ex02.i block=Variables Kernels
 
