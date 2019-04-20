@@ -51,8 +51,6 @@
   using ADKernelTempl<type, compute_stage>::accumulateTaggedLocalResidual;                         \
   using ADKernelTempl<type, compute_stage>::accumulateTaggedLocalMatrix;                           \
   using ADKernelTempl<type, compute_stage>::variable;                                              \
-  using ADKernelTempl<type, compute_stage>::paramError;                                            \
-  using ADKernelTempl<type, compute_stage>::isParamValid;                                          \
   using ADKernelTempl<type, compute_stage>::getFunction;                                           \
   using ADKernelTempl<type, compute_stage>::getPostprocessorValue
 

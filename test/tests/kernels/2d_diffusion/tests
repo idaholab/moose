@@ -17,7 +17,7 @@
     group = 'requirements'
     requirement = 'MOOSE shall provide an ability to solve a 2D diffusion problem with Dirichlet boundary conditions using AD and match non-AD methods.'
     issues = '#13260'
-    design = '/ADDirichletBC.md'
+    design = '/DirichletBC.md'
   [../]
   [./ad-testdirichlet-jac]
     type = 'PetscJacobianTester'
