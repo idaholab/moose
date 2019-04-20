@@ -1,4 +1,4 @@
-# Example 2 : Adding a Custom Kernel
+# Example 2: Adding a Custom Kernel
 
 ## Overview
 
@@ -86,4 +86,3 @@ Peacock or an external application that supports the Exodus II format (e.g., Par
 - [examples/ex02_kernel/src/kernels/ExampleConvection.C]
 - [examples/ex02_kernel/src/base/ExampleApp.C]
 - [examples/ex02_kernel/ex02_oversample.i]
-

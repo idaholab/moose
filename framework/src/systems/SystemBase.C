@@ -940,6 +940,7 @@ SystemBase::copyVars(ExodusII_IO & io)
     {
       if (getVariable(0, vci._dest_name).isNodal())
         io.copy_nodal_solution(system(), vci._dest_name, vci._source_name, timestep);
+
       else
         io.copy_elemental_solution(system(), vci._dest_name, vci._source_name, timestep);
     }

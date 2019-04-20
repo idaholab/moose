@@ -494,7 +494,7 @@ class SyntaxListCommand(SyntaxCommandHeadingBase):
 
         count = 0
         for obj in objects:
-            if group in obj.groups:
+            if (group in obj.groups) and (not obj.removed):
                 count += 1
                 item = SyntaxListItem(parent, group=group, syntax=obj.name)
                 if base:

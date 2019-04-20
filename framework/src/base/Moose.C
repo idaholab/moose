@@ -116,6 +116,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_sampler",                  Sampler,                false);
 
   registerMooseObjectTask("add_aux_kernel",               AuxKernel,              false);
+  appendMooseObjectTask  ("add_aux_kernel",               VectorAuxKernel);
   registerMooseObjectTask("add_elemental_field_variable", AuxKernel,              false);
 
   registerMooseObjectTask("add_scalar_kernel",            ScalarKernel,           false);

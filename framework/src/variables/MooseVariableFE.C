@@ -157,6 +157,12 @@ MooseVariableFE<OutputType>::MooseVariableFE(unsigned int var_num,
   _matrix_tag_u.resize(num_matrix_tags);
 
   _time_integrator = _sys.getTimeIntegrator();
+
+  // These MooseArray objects are used by AuxKernelBase for nodal AuxKernel objects, hence the size
+  // size is always 1 (i.e, nodal kernels work with _qp=0 only).
+  _nodal_value_array.resize(1);
+  _nodal_value_old_array.resize(1);
+  _nodal_value_older_array.resize(1);
 }
 
 template <typename OutputType>
@@ -1601,6 +1607,21 @@ MooseVariableFE<OutputType>::nodalValue()
 }
 
 template <typename OutputType>
+const MooseArray<OutputType> &
+MooseVariableFE<OutputType>::nodalValueArray()
+{
+  if (isNodal())
+  {
+    _need_dof_values = true;
+    return _nodal_value_array;
+  }
+  else
+    mooseError("Nodal values can be requested only on nodal variables, variable '",
+               name(),
+               "' is not nodal.");
+}
+
+template <typename OutputType>
 const OutputType &
 MooseVariableFE<OutputType>::nodalValueNeighbor()
 {
@@ -1675,6 +1696,21 @@ MooseVariableFE<OutputType>::nodalValueOld()
 }
 
 template <typename OutputType>
+const MooseArray<OutputType> &
+MooseVariableFE<OutputType>::nodalValueOldArray()
+{
+  if (isNodal())
+  {
+    _need_dof_values_old = true;
+    return _nodal_value_old_array;
+  }
+  else
+    mooseError("Nodal values can be requested only on nodal variables, variable '",
+               name(),
+               "' is not nodal.");
+}
+
+template <typename OutputType>
 const OutputType &
 MooseVariableFE<OutputType>::nodalValueOldNeighbor()
 {
@@ -1697,6 +1733,21 @@ MooseVariableFE<OutputType>::nodalValueOlder()
   {
     _need_dof_values_older = true;
     return _nodal_value_older;
+  }
+  else
+    mooseError("Nodal values can be requested only on nodal variables, variable '",
+               name(),
+               "' is not nodal.");
+}
+
+template <typename OutputType>
+const MooseArray<OutputType> &
+MooseVariableFE<OutputType>::nodalValueOlderArray()
+{
+  if (isNodal())
+  {
+    _need_dof_values_older = true;
+    return _nodal_value_older_array;
   }
   else
     mooseError("Nodal values can be requested only on nodal variables, variable '",
@@ -2017,13 +2068,20 @@ MooseVariableFE<OutputType>::assignNodalValue()
   libmesh_assert(_dof_indices.size());
 
   _nodal_value = _dof_values[0];
+  _nodal_value_array[0] = _nodal_value;
 
   if (is_transient)
   {
     if (_need_dof_values_old)
+    {
       _nodal_value_old = _dof_values_old[0];
+      _nodal_value_old_array[0] = _nodal_value_old;
+    }
     if (_need_dof_values_older)
+    {
       _nodal_value_older = _dof_values_older[0];
+      _nodal_value_older_array[0] = _nodal_value_older;
+    }
     if (_need_dof_values_dot)
       _nodal_value_dot = _dof_values_dot[0];
     if (_need_dof_values_dotdot)
@@ -2269,11 +2327,11 @@ template <>
 void
 MooseVariableFE<RealVectorValue>::setNodalValue(RealVectorValue value, unsigned int idx /* = 0*/)
 {
-  for (decltype(idx) i = 0; i < LIBMESH_DIM; ++i, ++idx)
-  {
+  for (decltype(idx) i = 0; i < _dof_values.size(); ++i, ++idx)
     _dof_values[idx] = value(i);
-    _nodal_value(i) = value(i);
-  }
+
+  _has_dof_values = true;
+  _nodal_value = value;
 
   // Update the qp values as well
   for (unsigned int qp = 0; qp < _u.size(); qp++)
