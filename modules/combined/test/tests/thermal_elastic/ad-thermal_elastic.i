@@ -98,12 +98,13 @@
     add_variables = true
     generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_xz stress_yz'
     strain = FINITE
+    use_automatic_differentiation = true
   [../]
 []
 
 [Kernels]
   [./heat]
-    type = Diffusion
+    type = ADDiffusion
     variable = temp
   [../]
 []
@@ -116,39 +117,39 @@
     value = 0.0
   [../]
   [./node1_y]
-    type = FunctionDirichletBC
+    type = ADFunctionDirichletBC
     variable = disp_y
     boundary = 1
     function = ramp2
   [../]
   [./node1_z]
-    type = FunctionDirichletBC
+    type = ADFunctionDirichletBC
     variable = disp_z
     boundary = 1
     function = ramp3
   [../]
 
   [./node2_x]
-    type = FunctionDirichletBC
+    type = ADFunctionDirichletBC
     variable = disp_x
     boundary = 2
     function = ramp1
   [../]
   [./node2_y]
-    type = FunctionDirichletBC
+    type = ADFunctionDirichletBC
     variable = disp_y
     boundary = 2
     function = ramp2
   [../]
   [./node2_z]
-    type = FunctionDirichletBC
+    type = ADFunctionDirichletBC
     variable = disp_z
     boundary = 2
     function = ramp6
   [../]
 
   [./node3_x]
-    type = FunctionDirichletBC
+    type = ADFunctionDirichletBC
     variable = disp_x
     boundary = 3
     function = ramp1
@@ -160,7 +161,7 @@
     value = 0.0
   [../]
   [./node3_z]
-    type = FunctionDirichletBC
+    type = ADFunctionDirichletBC
     variable = disp_z
     boundary = 3
     function = ramp3
@@ -186,70 +187,70 @@
   [../]
 
   [./node5_x]
-    type = FunctionDirichletBC
+    type = ADFunctionDirichletBC
     variable = disp_x
     boundary = 5
     function = ramp1
   [../]
   [./node5_y]
-    type = FunctionDirichletBC
+    type = ADFunctionDirichletBC
     variable = disp_y
     boundary = 5
     function = ramp4
   [../]
   [./node5_z]
-    type = FunctionDirichletBC
+    type = ADFunctionDirichletBC
     variable = disp_z
     boundary = 5
     function = ramp3
   [../]
 
   [./node6_x]
-    type = FunctionDirichletBC
+    type = ADFunctionDirichletBC
     variable = disp_x
     boundary = 6
     function = ramp2
   [../]
   [./node6_y]
-    type = FunctionDirichletBC
+    type = ADFunctionDirichletBC
     variable = disp_y
     boundary = 6
     function = ramp4
   [../]
   [./node6_z]
-    type = FunctionDirichletBC
+    type = ADFunctionDirichletBC
     variable = disp_z
     boundary = 6
     function = ramp6
   [../]
 
   [./node7_x]
-    type = FunctionDirichletBC
+    type = ADFunctionDirichletBC
     variable = disp_x
     boundary = 7
     function = ramp2
   [../]
   [./node7_y]
-    type = FunctionDirichletBC
+    type = ADFunctionDirichletBC
     variable = disp_y
     boundary = 7
     function = ramp2
   [../]
   [./node7_z]
-    type = FunctionDirichletBC
+    type = ADFunctionDirichletBC
     variable = disp_z
     boundary = 7
     function = ramp3
   [../]
 
   [./node8_x]
-    type = FunctionDirichletBC
+    type = ADFunctionDirichletBC
     variable = disp_x
     boundary = 8
     function = ramp1
   [../]
   [./node8_y]
-    type = FunctionDirichletBC
+    type = ADFunctionDirichletBC
     variable = disp_y
     boundary = 8
     function = ramp2
@@ -262,7 +263,7 @@
   [../]
 
   [./temp]
-    type = FunctionDirichletBC
+    type = ADFunctionDirichletBC
     variable = temp
     boundary = '10 12'
     function = tempFunc
@@ -271,14 +272,14 @@
 
 [Materials]
   [./youngs_modulus]
-    type = PiecewiseLinearInterpolationMaterial
+    type = ADPiecewiseLinearInterpolationMaterial
     x = '100 500'
     y = '1e6 6e5'
     property = youngs_modulus
     variable = temp
   [../]
   [./poissons_ratio]
-    type = PiecewiseLinearInterpolationMaterial
+    type = ADPiecewiseLinearInterpolationMaterial
     x = '100 500'
     y = '0   0.25'
     property = poissons_ratio
@@ -286,14 +287,20 @@
   [../]
 
   [./elasticity_tensor]
-    type = ComputeVariableIsotropicElasticityTensor
-    args = temp
+    type = ADComputeVariableIsotropicElasticityTensor
     youngs_modulus = youngs_modulus
     poissons_ratio = poissons_ratio
   [../]
 
   [./stress]
-    type = ComputeFiniteStrainElasticStress
+    type = ADComputeFiniteStrainElasticStress
+  [../]
+[]
+
+[Preconditioning]
+  [./smp]
+    type = SMP
+    full = true
   [../]
 []
 

@@ -1,6 +1,6 @@
 # ---------------------------------------------------------------------------
 # This test is designed to verify the variable elasticity tensor functionality in the
-# ComputeFiniteStrainElasticStress class with the elasticity_tensor_has_changed flag
+# ADComputeFiniteStrainElasticStress class with the elasticity_tensor_has_changed flag
 # by varying the young's modulus with temperature. A constant strain is applied
 # to the mesh in this case, and the stress varies with the changing elastic constants.
 #
@@ -73,12 +73,12 @@
 
 [Kernels]
   [./heat]
-    type = Diffusion
+    type = ADDiffusion
     variable = temp
   [../]
-
   [./TensorMechanics]
     use_displaced_mesh = true
+    use_automatic_differentiation = true
   [../]
 []
 
@@ -129,7 +129,7 @@
   [../]
 
   [./temp_bc_1]
-    type = FunctionDirichletBC
+    type = ADFunctionDirichletBC
     variable = temp
     boundary = '1 2 3 4'
     function = temperature_function
@@ -138,7 +138,7 @@
 
 [Materials]
   [./youngs_modulus]
-    type = PiecewiseLinearInterpolationMaterial
+    type = ADPiecewiseLinearInterpolationMaterial
     xy_data = '0          10e+6
                599.9999   10e+6
                600        9.94e+6
@@ -146,17 +146,24 @@
     property = youngs_modulus
     variable = temp
   [../]
+
   [./elasticity_tensor]
-    type = ComputeVariableIsotropicElasticityTensor
-    args = temp
+    type = ADComputeVariableIsotropicElasticityTensor
     youngs_modulus = youngs_modulus
     poissons_ratio = 0.0
   [../]
   [./strain]
-    type = ComputeIncrementalSmallStrain
+    type = ADComputeIncrementalSmallStrain
   [../]
   [./stress]
-    type = ComputeFiniteStrainElasticStress
+    type = ADComputeFiniteStrainElasticStress
+  [../]
+[]
+
+[Preconditioning]
+  [./full]
+    type = SMP
+    full = true
   [../]
 []
 
@@ -175,7 +182,6 @@
     type = ElementAverageValue
     variable = stress_xx
   [../]
-
   [./temp]
     type = AverageNodalVariableValue
     variable = temp

@@ -7,47 +7,49 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PIECEWISELINEARINTERPOLATIONMATERIAL_H
-#define PIECEWISELINEARINTERPOLATIONMATERIAL_H
+#ifndef ADPIECEWISELINEARINTERPOLATIONMATERIAL_H
+#define ADPIECEWISELINEARINTERPOLATIONMATERIAL_H
 
-#include "Material.h"
+#include "ADMaterial.h"
 #include "LinearInterpolation.h"
-#include "DerivativeMaterialInterface.h"
+#include "DerivativeMaterialPropertyNameInterface.h"
 
 // Forward Declarations
-class PiecewiseLinearInterpolationMaterial;
+template <ComputeStage>
+class ADPiecewiseLinearInterpolationMaterial;
 
-template <>
-InputParameters validParams<PiecewiseLinearInterpolationMaterial>();
+declareADValidParams(ADPiecewiseLinearInterpolationMaterial);
 
 /**
  * This material uses a LinearInterpolation object to define the dependence
  * of the material's value on a variable.
  */
-class PiecewiseLinearInterpolationMaterial : public DerivativeMaterialInterface<Material>
+template <ComputeStage compute_stage>
+class ADPiecewiseLinearInterpolationMaterial : public ADMaterial<compute_stage>,
+                                               public DerivativeMaterialPropertyNameInterface
 {
 public:
-  PiecewiseLinearInterpolationMaterial(const InputParameters & parameters);
+  ADPiecewiseLinearInterpolationMaterial(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties() override;
 
   /// Name of the property to be computed
-  std::string _prop_name;
+  const std::string _prop_name;
 
   /// Value of the coupled variable to be used as the abscissa in the piecewise linear interpolation
-  const VariableValue & _coupled_var;
+  const ADVariableValue & _coupled_var;
 
   /// Factor to scale the ordinate values by (default = 1)
   const Real _scale_factor;
 
   /// Material property to be calculated
-  MaterialProperty<Real> & _property;
-  /// First derivative of the material property wrt the coupled variable
-  MaterialProperty<Real> & _dproperty;
+  ADMaterialProperty(Real) & _property;
 
   /// LinearInterpolation object
   std::unique_ptr<LinearInterpolation> _linear_interp;
+
+  usingMaterialMembers;
 };
 
-#endif // PIECEWISELINEARINTERPOLATIONMATERIAL_H
+#endif // ADPIECEWISELINEARINTERPOLATIONMATERIAL_H

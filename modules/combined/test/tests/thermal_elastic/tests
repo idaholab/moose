@@ -1,25 +1,59 @@
 [Tests]
-  design = 'ThermalConductivity.md'
-  issues = '#13232'
   [./test]
     type = 'Exodiff'
     input = 'thermal_elastic.i'
     exodiff = 'thermal_elastic_out.e'
+    design = 'ComputeVariableIsotropicElasticityTensor.md'
+    issues = '#8265'
     requirement = "The system shall compute constant stress in the xx, yy, zz, xy, yz, and xz direction
                    using irregular elements with functional Poisson's ratios and Young's moduli."
   [../]
+  [./ad-test]
+    type = 'Exodiff'
+    input = 'ad-thermal_elastic.i'
+    exodiff = 'ad-thermal_elastic_out.e'
+    design = 'ADComputeVariableIsotropicElasticityTensor.md'
+    issues = '#13232'
+    requirement = "The system shall compute constant stress in the xx, yy, zz, xy, yz, and xz direction
+                   using irregular elements with functional Poisson's ratios and Young's moduli."
+  [../]
+  [./ad-test-jac]
+    type = 'PetscJacobianTester'
+    input = 'ad-thermal_elastic.i'
+    petsc_version = '>=3.9.4 || <3.9.0'
+    ratio_tol = 6e-7
+    method = 'OPT'
+    difference_tol = 1e1 # Higher tolerance due to non-AD linear interpolation material
+    run_sim = True
+    requirement = 'ADComputeVariableIsotropicElasticityTensor shall calculate a good jacobian'
+    design = "jacobian_definition.md"
+    issues = "#12633"
+  [../]
+
   [./test_sm]
     type = 'Exodiff'
     input = 'thermal_elastic_sm.i'
     exodiff = 'thermal_elastic_out.e'
     prereq = test
+    design = 'solid_mechanics/index.md'
+    issues = '#8265'
     requirement = "The system shall compute the same stress values as the thermal_elastic.i test using the
                    solid mechanics module implementation  using the solid mechanics module."
   [../]
+
   [./derivatives]
     type = 'AnalyzeJacobian'
-    petsc_version = '<3.9.0 || >=3.9.4'
+    petsc_version = '>=3.9.4 || <3.9.0'
     requirement = 'The system shall compute accurate Jacobians for elastic mechanics.'
+    design = "jacobian_definition.md"
+    issues = '#8265'
     input = 'derivatives.i'
+  [../]
+  [./ad-derivatives]
+    type = 'AnalyzeJacobian'
+    input = 'ad-derivatives.i'
+    requirement = 'ADComputeVariableIsotropicElasticityTensor shall calculate a good jacobian'
+    design = "jacobian_definition.md"
+    issues = "#12633"
   [../]
 []
