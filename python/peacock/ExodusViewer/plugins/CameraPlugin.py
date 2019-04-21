@@ -10,7 +10,7 @@
 import sys
 import math
 from PyQt5 import QtCore, QtWidgets
-from ExodusPlugin import ExodusPlugin
+from .ExodusPlugin import ExodusPlugin
 
 class CameraPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     """

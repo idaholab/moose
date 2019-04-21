@@ -10,13 +10,13 @@
 
 from PyQt5.QtWidgets import QWidget, QSizePolicy
 from PyQt5.QtCore import Qt, pyqtSignal
-from BlockTree import BlockTree
-from BlockEditor import BlockEditor
+from .BlockTree import BlockTree
+from .BlockEditor import BlockEditor
 from peacock.utils import WidgetUtils
 from peacock.base.MooseWidget import MooseWidget
 import mooseutils
-from InputTree import InputTree
-from ExecutableInfo import ExecutableInfo
+from .InputTree import InputTree
+from .ExecutableInfo import ExecutableInfo
 import os
 
 class InputFileEditor(QWidget, MooseWidget):

@@ -9,9 +9,12 @@
 
 import os
 import copy
-import cStringIO
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
 import mooseutils
-from ParameterInfo import ParameterInfo
+from .ParameterInfo import ParameterInfo
 
 class BlockInfo(object):
     """
@@ -362,7 +365,7 @@ class BlockInfo(object):
         Return:
             str: The dump of this block.
         """
-        o = cStringIO.StringIO()
+        o = StringIO()
         i_str = sep*indent
         o.write("%sPath: %s\n" % (i_str, self.path))
         indent += 1

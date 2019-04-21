@@ -9,7 +9,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import vtk
-import GeometricSourceMeta
+from . import GeometricSourceMeta
 import mooseutils
 from ..base import ColorMap
 

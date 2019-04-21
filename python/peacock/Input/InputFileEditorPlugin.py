@@ -13,8 +13,8 @@ from PyQt5 import QtCore
 from peacock.utils import WidgetUtils
 from peacock.base.Plugin import Plugin
 from peacock.utils.RecentlyUsedMenu import RecentlyUsedMenu
-from CheckInputWidget import CheckInputWidget
-from InputFileEditor import InputFileEditor
+from .CheckInputWidget import CheckInputWidget
+from .InputFileEditor import InputFileEditor
 
 class InputFileEditorPlugin(InputFileEditor, Plugin):
     """

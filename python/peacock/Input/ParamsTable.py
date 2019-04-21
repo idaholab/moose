@@ -11,7 +11,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtGui import QColor, QBrush
 from PyQt5.QtCore import pyqtSignal, Qt
 from peacock.base.MooseWidget import MooseWidget
-from ParameterInfo import ParameterInfo
+from .ParameterInfo import ParameterInfo
 import os
 
 class EditingDelegate(QtWidgets.QStyledItemDelegate):

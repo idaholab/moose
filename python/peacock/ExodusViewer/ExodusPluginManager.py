@@ -11,7 +11,7 @@ import re
 from PyQt5 import QtWidgets
 import peacock
 import mooseutils
-from plugins.ExodusPlugin import ExodusPlugin
+from .plugins.ExodusPlugin import ExodusPlugin
 
 class ExodusPluginManager(QtWidgets.QWidget, peacock.base.PluginManager):
 

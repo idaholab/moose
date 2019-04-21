@@ -9,7 +9,7 @@
 
 import sys
 from PyQt5 import QtWidgets, QtCore
-from ExodusPlugin import ExodusPlugin
+from .ExodusPlugin import ExodusPlugin
 import mooseutils
 import peacock
 

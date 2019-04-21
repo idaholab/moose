@@ -9,9 +9,9 @@
 
 import argparse
 from PyQt5 import QtWidgets
-from PluginManager import PluginManager
-from TabPlugin import TabPlugin
-from TabbedPreferences import TabbedPreferences
+from .PluginManager import PluginManager
+from .TabPlugin import TabPlugin
+from .TabbedPreferences import TabbedPreferences
 
 class TabPluginManager(QtWidgets.QTabWidget, PluginManager):
     """

@@ -8,9 +8,9 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from ExodusSource import ExodusSource
-from ExodusReader import ExodusReader
-from MultiAppExodusReader import MultiAppExodusReader
+from .ExodusSource import ExodusSource
+from .ExodusReader import ExodusReader
+from .MultiAppExodusReader import MultiAppExodusReader
 import mooseutils
 from .. import base
 from .. import utils

@@ -10,7 +10,7 @@
 
 import vtk
 import numpy as np
-from ExodusSource import ExodusSource
+from .ExodusSource import ExodusSource
 import mooseutils
 from .. import geometric
 

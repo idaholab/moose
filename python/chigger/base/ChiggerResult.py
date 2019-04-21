@@ -10,8 +10,8 @@
 
 import mooseutils
 from chigger import utils
-from ChiggerResultBase import ChiggerResultBase
-from ChiggerSourceBase import ChiggerSourceBase
+from .ChiggerResultBase import ChiggerResultBase
+from .ChiggerSourceBase import ChiggerSourceBase
 
 class ChiggerResult(ChiggerResultBase):
     """

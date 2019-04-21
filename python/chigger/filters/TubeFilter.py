@@ -10,7 +10,7 @@
 
 import vtk
 import mooseutils
-from ChiggerFilterBase import ChiggerFilterBase
+from .ChiggerFilterBase import ChiggerFilterBase
 from .. import utils
 
 class TubeFilter(ChiggerFilterBase):

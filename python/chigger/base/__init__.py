@@ -8,20 +8,20 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from ChiggerObject import ChiggerObject
+from .ChiggerObject import ChiggerObject
 
-from ChiggerSourceBase import ChiggerSourceBase
-from ChiggerFilterSourceBase import ChiggerFilterSourceBase
-from ChiggerSource import ChiggerSource
-from ChiggerSource2D import ChiggerSource2D
+from .ChiggerSourceBase import ChiggerSourceBase
+from .ChiggerFilterSourceBase import ChiggerFilterSourceBase
+from .ChiggerSource import ChiggerSource
+from .ChiggerSource2D import ChiggerSource2D
 
-from ChiggerResultBase import ChiggerResultBase
-from ChiggerResult import ChiggerResult
-from KeyPressInteractorStyle import KeyPressInteractorStyle
+from .ChiggerResultBase import ChiggerResultBase
+from .ChiggerResult import ChiggerResult
+from .KeyPressInteractorStyle import KeyPressInteractorStyle
 
-from ColorMap import ColorMap
+from .ColorMap import ColorMap
 
-from ResultGroup import ResultGroup
+from .ResultGroup import ResultGroup
 
 def create_single_source_result(source_type):
     """

@@ -9,7 +9,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import vtk
-from ClipperFilterBase import ClipperFilterBase
+from .ClipperFilterBase import ClipperFilterBase
 
 class BoxClipper(ClipperFilterBase):
     """

@@ -8,6 +8,6 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from ColorBar import ColorBar
-from ChiggerBackground import ChiggerBackground
-from VolumeAxes import VolumeAxes
+from .ColorBar import ColorBar
+from .ChiggerBackground import ChiggerBackground
+from .VolumeAxes import VolumeAxes

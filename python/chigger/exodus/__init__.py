@@ -8,17 +8,17 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from ExodusReader import ExodusReader
-from MultiAppExodusReader import MultiAppExodusReader
-from NemesisReader import NemesisReader
+from .ExodusReader import ExodusReader
+from .MultiAppExodusReader import MultiAppExodusReader
+from .NemesisReader import NemesisReader
 
-from ExodusSource import ExodusSource
-from ExodusColorBar import ExodusColorBar
+from .ExodusSource import ExodusSource
+from .ExodusColorBar import ExodusColorBar
 
-from ExodusResult import ExodusResult
+from .ExodusResult import ExodusResult
 
-from LabelExodusSource import LabelExodusSource
-from LabelExodusResult import LabelExodusResult
+from .LabelExodusSource import LabelExodusSource
+from .LabelExodusResult import LabelExodusResult
 
-from ExodusSourceLineSampler import ExodusSourceLineSampler
-from ExodusResultLineSampler import ExodusResultLineSampler
+from .ExodusSourceLineSampler import ExodusSourceLineSampler
+from .ExodusResultLineSampler import ExodusResultLineSampler

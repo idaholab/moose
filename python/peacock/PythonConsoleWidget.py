@@ -11,7 +11,10 @@ from code import InteractiveConsole
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, QEvent, Qt, QSettings
 from PyQt5.QtWidgets import QWidget, QPlainTextEdit, QSizePolicy
 import sys
-from StringIO import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 from peacock.utils import WidgetUtils
 from peacock.base import MooseWidget
 

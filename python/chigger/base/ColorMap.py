@@ -22,7 +22,7 @@ except ImportError:
 
 import vtk
 import mooseutils
-from ChiggerObject import ChiggerObject
+from .ChiggerObject import ChiggerObject
 
 def get_xml_table_values():
     """

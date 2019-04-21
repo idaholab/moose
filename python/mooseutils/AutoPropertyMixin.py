@@ -10,7 +10,7 @@
 """Auto python property creation."""
 import collections
 import inspect
-from MooseException import MooseException
+from .MooseException import MooseException
 
 class Property(object):
     """

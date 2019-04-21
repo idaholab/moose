@@ -9,7 +9,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import vtk
-from ChiggerObject import ChiggerObject
+from .ChiggerObject import ChiggerObject
 
 class ChiggerResultBase(ChiggerObject):
     """

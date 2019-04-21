@@ -8,10 +8,11 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+from __future__ import print_function
 import os
 import subprocess
-from hit_load import hit_load
-from mooseutils import git_root_dir
+from .hit_load import hit_load
+from .mooseutils import git_root_dir
 
 def check_requirement(filename):
     """Check spec file for requirement documentation."""
@@ -31,8 +32,8 @@ def check_requirement(filename):
             messages.append("    'issues' parameter is missing in '{}' block.".format(child.name))
 
     if messages:
-        print 'ERROR in {}'.format(filename)
-        print '\n'.join(messages) + '\n'
+        print('ERROR in {}'.format(filename))
+        print('\n'.join(messages) + '\n')
         return 1
     return 0
 

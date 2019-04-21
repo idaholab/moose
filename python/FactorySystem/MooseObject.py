@@ -7,7 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from InputParameters import InputParameters
+from .InputParameters import InputParameters
 
 # This is the base class from which all objects should inherit
 class MooseObject(object):

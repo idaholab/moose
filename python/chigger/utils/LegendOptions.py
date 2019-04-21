@@ -9,7 +9,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import vtk
-from Options import Options
+from .Options import Options
 
 def get_options():
     """

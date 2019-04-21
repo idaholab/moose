@@ -8,6 +8,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+from __future__ import print_function
 import os
 import glob
 import shutil
@@ -15,10 +16,10 @@ import subprocess
 import numpy as np
 import vtk
 import mooseutils
-from Options import Option, Options
-import AxisOptions
-import FontOptions
-import LegendOptions
+from .Options import Option, Options
+from . import AxisOptions
+from . import FontOptions
+from . import LegendOptions
 
 def get_active_filenames(basename, pattern=None):
     """
@@ -109,7 +110,7 @@ def print_camera(camera, prefix='camera', precision=10):
     Prints vtkCamera object to screen.
     """
     if not isinstance(camera, vtk.vtkCamera):
-        print "You must supply a vtkCarmera object."
+        print("You must supply a vtkCarmera object.")
         return
 
     view_up = camera.GetViewUp()
@@ -182,6 +183,6 @@ def img2mov(pattern, output, ffmpeg='ffmpeg', duration=60, framerate=None, bitra
     cmd += [output]
 
     c = ' '.join(cmd)
-    print '{0}\n{1}\n{0}'.format('-'*(len(c)), c)
+    print('{0}\n{1}\n{0}'.format('-'*(len(c)), c))
     if not dry_run:
         subprocess.call(cmd)

@@ -17,7 +17,10 @@ import subprocess
 import time
 import cProfile as profile
 import pstats
-import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 def colorText(string, color, **kwargs):
     """
@@ -378,7 +381,7 @@ def run_profile(function, *args, **kwargs):
     start = time.time()
     out = pr.runcall(function, *args, **kwargs)
     print('Total Time:', time.time() - start)
-    s = StringIO.StringIO()
+    s = StringIO()
     ps = pstats.Stats(pr, stream=s).sort_stats('tottime')
     ps.print_stats()
     print(s.getvalue())

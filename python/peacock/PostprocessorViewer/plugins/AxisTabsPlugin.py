@@ -9,9 +9,9 @@
 
 import sys
 from PyQt5 import QtCore, QtWidgets
-from PostprocessorPlugin import PostprocessorPlugin
+from .PostprocessorPlugin import PostprocessorPlugin
 import mooseutils
-from AxisSettingsWidget import AxisSettingsWidget
+from .AxisSettingsWidget import AxisSettingsWidget
 
 class AxisTabsPlugin(QtWidgets.QTabWidget, PostprocessorPlugin):
 

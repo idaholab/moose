@@ -8,9 +8,10 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 """Wrapper for hit parser."""
+from __future__ import print_function
 import os
 import hit
-import message
+from . import message
 
 # The 'HitNode' object is used within the TestHarness, which should operate without any
 # special python libraries. However, the 'anytree' package is used by various utilities within the
@@ -230,5 +231,5 @@ def hit_parse(root, hit_node, filename):
 if __name__ == '__main__':
     filename = '../../test/tests/kernels/simple_diffusion/simple_diffusion.i'
     root = hit_load(filename)
-    print root
-    print root.render()
+    print(root)
+    print(root.render())

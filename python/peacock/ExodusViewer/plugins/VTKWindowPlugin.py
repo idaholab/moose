@@ -14,7 +14,7 @@ import vtk
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 import chigger
 import mooseutils
-from ExodusPlugin import ExodusPlugin
+from .ExodusPlugin import ExodusPlugin
 
 class RetinaQVTKRenderWindowInteractor(QVTKRenderWindowInteractor):
     """
