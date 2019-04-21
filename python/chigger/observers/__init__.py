@@ -8,6 +8,6 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from ChiggerObserver import ChiggerObserver
-from TimerObserver import TimerObserver
-from KeyObserver import KeyObserver
+from .ChiggerObserver import ChiggerObserver
+from .TimerObserver import TimerObserver
+from .KeyObserver import KeyObserver

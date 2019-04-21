@@ -10,7 +10,7 @@
 
 import copy
 import vtk
-from ClipperFilterBase import ClipperFilterBase
+from .ClipperFilterBase import ClipperFilterBase
 
 class PlaneClipper(ClipperFilterBase):
     """

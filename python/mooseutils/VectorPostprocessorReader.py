@@ -12,8 +12,8 @@ import glob
 import pandas
 import bisect
 
-from MooseDataFrame import MooseDataFrame
-import message
+from .MooseDataFrame import MooseDataFrame
+from . import message
 
 class VectorPostprocessorReader(object):
     """

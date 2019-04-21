@@ -9,7 +9,7 @@
 
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
-from ExodusPlugin import ExodusPlugin
+from .ExodusPlugin import ExodusPlugin
 
 class BackgroundPlugin(QtWidgets.QWidget, ExodusPlugin):
     """

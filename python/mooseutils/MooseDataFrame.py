@@ -10,7 +10,7 @@
 import os
 import pandas
 
-import message
+from . import message
 
 class MooseDataFrame(object):
     """

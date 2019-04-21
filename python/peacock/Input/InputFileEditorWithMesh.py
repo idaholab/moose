@@ -8,17 +8,17 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 import os
-from plugins import MeshViewerPlugin
-from plugins import MeshCameraPlugin
-from peacock.ExodusViewer.plugins.BackgroundPlugin import BackgroundPlugin
-from BlockHighlighterPlugin import BlockHighlighterPlugin
-from peacock.base.PluginManager import PluginManager
-from peacock.base.TabPlugin import TabPlugin
 from PyQt5.QtWidgets import QMessageBox, QWidget, QVBoxLayout, QHBoxLayout
 from PyQt5.QtCore import pyqtSignal
-from InputFileEditorPlugin import InputFileEditorPlugin
-import BCHighlighter
-import TimeStepEstimate
+from peacock.ExodusViewer.plugins.BackgroundPlugin import BackgroundPlugin
+from peacock.base.PluginManager import PluginManager
+from peacock.base.TabPlugin import TabPlugin
+from .plugins import MeshViewerPlugin
+from .plugins import MeshCameraPlugin
+from .BlockHighlighterPlugin import BlockHighlighterPlugin
+from .InputFileEditorPlugin import InputFileEditorPlugin
+from . import BCHighlighter
+from . import TimeStepEstimate
 
 class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
     """

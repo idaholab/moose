@@ -9,7 +9,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from peacock.base.Plugin import Plugin
-from TerminalTextEdit import TerminalTextEdit
+from .TerminalTextEdit import TerminalTextEdit
 
 class ConsoleOutputViewerPlugin(TerminalTextEdit, Plugin):
     """

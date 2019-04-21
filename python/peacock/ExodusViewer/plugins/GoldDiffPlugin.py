@@ -10,8 +10,8 @@
 import subprocess
 import os
 from PyQt5 import QtCore, QtWidgets
-from ExodusPlugin import ExodusPlugin
-from VTKWindowPlugin import VTKWindowPlugin
+from .ExodusPlugin import ExodusPlugin
+from .VTKWindowPlugin import VTKWindowPlugin
 import mooseutils
 
 class ExternalVTKWindowPlugin(VTKWindowPlugin):

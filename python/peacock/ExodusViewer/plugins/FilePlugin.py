@@ -12,7 +12,7 @@ import sys
 import glob
 from PyQt5 import QtCore, QtWidgets
 import peacock
-from ExodusPlugin import ExodusPlugin
+from .ExodusPlugin import ExodusPlugin
 from peacock.ExodusViewer.plugins.ExodusFilterProxyModel import ExodusFilterProxyModel
 
 class ExodusComboBox(QtWidgets.QComboBox):

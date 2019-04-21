@@ -8,6 +8,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+from __future__ import print_function
 import os
 
 class ImageDiffer(object):
@@ -82,7 +83,7 @@ class ImageDiffer(object):
 
         # Print the output
         if kwargs.pop('output', False):
-            print '\n'.join(output)
+            print('\n'.join(output))
 
         # Return the text, as a single string
         return '\n'.join(output)
@@ -98,7 +99,7 @@ class ImageDiffer(object):
 
         # Print the output
         if kwargs.pop('output', False):
-            print '\n'.join(output)
+            print('\n'.join(output))
 
         # Return the text, as a single string
         return '\n'.join(output)
@@ -176,7 +177,7 @@ if __name__ == '__main__':
         file0 = args.files[0]
         file1 = args.files[1]
     else:
-        print "You must specify one or two files for comparison, see -h"
+        print("You must specify one or two files for comparison, see -h")
 
     d = ImageDiffer(file0, file1)
-    print '\n\n' + d.message()
+    print('\n\n' + d.message())

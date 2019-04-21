@@ -14,10 +14,9 @@ import matplotlib.pyplot as plt
 import itertools
 
 from PyQt5 import QtCore, QtWidgets
-from PostprocessorPlugin import PostprocessorPlugin
-from LineGroupWidget import LineGroupWidget
-
 import mooseutils
+from .PostprocessorPlugin import PostprocessorPlugin
+from .LineGroupWidget import LineGroupWidget
 
 class PostprocessorSelectPlugin(QtWidgets.QWidget, PostprocessorPlugin):
     """

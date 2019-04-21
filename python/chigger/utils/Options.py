@@ -9,6 +9,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #!/usr/bin/env python2
+from __future__ import print_function
 import sys
 import textwrap
 from collections import OrderedDict
@@ -254,8 +255,8 @@ class Options(object):
         """
         #@todo warning
         if name not in self.__options:
-            print 'No option with the name:', name
-            print self.__options.keys()
+            print('No option with the name:', name)
+            print(self.__options.keys())
             traceback.print_stack()
             sys.exit()
             return None

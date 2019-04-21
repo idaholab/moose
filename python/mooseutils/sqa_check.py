@@ -8,11 +8,12 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+from __future__ import print_function
 import os
 import collections
 import subprocess
-from hit_load import hit_load
-from mooseutils import git_root_dir, colorText
+from .hit_load import hit_load
+from .mooseutils import git_root_dir, colorText
 
 def check_requirement(filename):
     """Check spec file for requirement documentation."""
@@ -50,8 +51,8 @@ def check_requirement(filename):
                 messages.append("    'issues' parameter in block '{}' must not be used within a group.".format(grandchild.name))
 
     if messages:
-        print 'ERROR in {}'.format(filename)
-        print '\n'.join(messages) + '\n'
+        print('ERROR in {}'.format(filename))
+        print('\n'.join(messages) + '\n')
         return 1
     return 0
 

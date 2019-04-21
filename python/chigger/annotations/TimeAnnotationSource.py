@@ -10,7 +10,7 @@
 
 import datetime
 
-from TextAnnotationSource import TextAnnotationSource
+from .TextAnnotationSource import TextAnnotationSource
 
 class TimeAnnotationSource(TextAnnotationSource):
     """

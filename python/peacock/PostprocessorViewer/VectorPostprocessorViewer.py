@@ -12,13 +12,13 @@ from PyQt5 import QtWidgets
 
 import mooseutils
 import peacock
-from PostprocessorViewer import PostprocessorViewer
-from plugins.FigurePlugin import FigurePlugin
-from plugins.MediaControlPlugin import MediaControlPlugin
-from plugins.PostprocessorSelectPlugin import PostprocessorSelectPlugin
-from plugins.AxesSettingsPlugin import AxesSettingsPlugin
-from plugins.AxisTabsPlugin import AxisTabsPlugin
-from plugins.OutputPlugin import OutputPlugin
+from .PostprocessorViewer import PostprocessorViewer
+from .plugins.FigurePlugin import FigurePlugin
+from .plugins.MediaControlPlugin import MediaControlPlugin
+from .plugins.PostprocessorSelectPlugin import PostprocessorSelectPlugin
+from .plugins.AxesSettingsPlugin import AxesSettingsPlugin
+from .plugins.AxisTabsPlugin import AxisTabsPlugin
+from .plugins.OutputPlugin import OutputPlugin
 
 
 class VectorPostprocessorViewer(PostprocessorViewer):

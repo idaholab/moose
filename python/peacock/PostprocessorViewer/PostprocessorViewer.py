@@ -13,14 +13,14 @@ from PyQt5 import QtWidgets
 import peacock
 import mooseutils
 
-from PostprocessorPluginManager import PostprocessorPluginManager
-from PostprocessorDataWidget import PostprocessorDataWidget
+from .PostprocessorPluginManager import PostprocessorPluginManager
+from .PostprocessorDataWidget import PostprocessorDataWidget
 
-from plugins.FigurePlugin import FigurePlugin
-from plugins.PostprocessorSelectPlugin import PostprocessorSelectPlugin
-from plugins.AxesSettingsPlugin import AxesSettingsPlugin
-from plugins.AxisTabsPlugin import AxisTabsPlugin
-from plugins.OutputPlugin import OutputPlugin
+from .plugins.FigurePlugin import FigurePlugin
+from .plugins.PostprocessorSelectPlugin import PostprocessorSelectPlugin
+from .plugins.AxesSettingsPlugin import AxesSettingsPlugin
+from .plugins.AxisTabsPlugin import AxisTabsPlugin
+from .plugins.OutputPlugin import OutputPlugin
 
 
 class PostprocessorViewer(peacock.base.ViewerBase):

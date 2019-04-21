@@ -7,6 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+from __future__ import print_function
 import os
 from mooseutils import message
 from PyQt5 import QtWidgets, QtGui
@@ -114,7 +115,7 @@ def dumpQObjectTree(qobject, level=0):
     """
 
     if level == 0:
-        print '+ ' + qobject.objectName() + ' (' + str(type(qobject)) + ')'
+        print('+ ' + qobject.objectName() + ' (' + str(type(qobject)) + ')')
 
     children = qobject.children()
     n = len(children)
@@ -122,13 +123,13 @@ def dumpQObjectTree(qobject, level=0):
         child = children[i]
 
         if i == 0:
-            print '|  '*(level+1)
+            print('|  '*(level+1))
             prefix = '|  '*(level) + '+--'
         else:
-            print '|  '*(level+2)
+            print('|  '*(level+2))
             prefix = '|  '*(level+1)
 
-        print prefix + '+ ' + child.objectName() + ' (' + str(type(child)) + ')'
+        print(prefix + '+ ' + child.objectName() + ' (' + str(type(child)) + ')')
         dumpQObjectTree(child, level+1)
 
 def createIcon(name):

@@ -7,6 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+from __future__ import print_function
 import os, sys
 import inspect
 
@@ -54,14 +55,14 @@ class Factory:
                                 if isinstance(at, bool) and at:
                                     self.register(obj, name)
                     except Exception as e:
-                        print '\nERROR: Your Plugin Tester "' + module_name + '" failed to import. (skipping)\n\n' + str(e)
+                        print('\nERROR: Your Plugin Tester "' + module_name + '" failed to import. (skipping)\n\n' + str(e))
 
 
     def printDump(self, root_node_name):
-        print "[" + root_node_name + "]"
+        print("[" + root_node_name + "]")
 
         for name, object in sorted(self.objects.iteritems()):
-            print "  [./" + name + "]"
+            print("  [./" + name + "]")
 
             params = self.validParams(name)
 
@@ -74,24 +75,24 @@ class Factory:
                     else:
                         default = str(the_param)
 
-                print "%4s%-30s = %-30s # %s" % ('', key, default, params.getDescription(key))
-            print "  [../]\n"
-        print "[]"
+                print("%4s%-30s = %-30s # %s" % ('', key, default, params.getDescription(key)))
+            print("  [../]\n")
+        print("[]")
 
 
     def printYaml(self, root_node_name):
-        print "**START YAML DATA**"
-        print "- name: /" + root_node_name
-        print "  description: !!str"
-        print "  type:"
-        print "  parameters:"
-        print "  subblocks:"
+        print("**START YAML DATA**")
+        print("- name: /" + root_node_name)
+        print("  description: !!str")
+        print("  type:")
+        print("  parameters:")
+        print("  subblocks:")
 
         for name, object in self.objects.iteritems():
-            print "  - name: /" + root_node_name + "/ + name"
-            print "    description:"
-            print "    type:"
-            print "    parameters:"
+            print("  - name: /" + root_node_name + "/ + name")
+            print("    description:")
+            print("    type:")
+            print("    parameters:")
 
             params = self.validParams(name)
             for key in params.valid:
@@ -102,10 +103,10 @@ class Factory:
                 if params.isValid(key):
                     default = str(params[key])
 
-                print "    - name: " + key
-                print "      required: " + required
-                print "      default: !!str " + default
-                print "      description: |"
-                print "        " + params.getDescription(key)
+                print("    - name: " + key)
+                print("      required: " + required)
+                print("      default: !!str " + default)
+                print("      description: |")
+                print("        " + params.getDescription(key))
 
-        print "**END YAML DATA**"
+        print("**END YAML DATA**")

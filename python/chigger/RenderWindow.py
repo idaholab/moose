@@ -11,11 +11,11 @@
 import os
 import vtk
 
-import base
-import annotations
-import observers
-import misc
 import mooseutils
+from . import base
+from . import annotations
+from . import observers
+from . import misc
 
 VTK_MAJOR_VERSION = vtk.vtkVersion.GetVTKMajorVersion()
 
