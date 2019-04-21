@@ -9,7 +9,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import vtk
-from AxisSource import AxisSource
+from .AxisSource import AxisSource
 from .. import base
 from .. import geometric
 

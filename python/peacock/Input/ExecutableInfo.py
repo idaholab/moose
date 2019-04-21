@@ -8,12 +8,15 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from JsonData import JsonData
+from .JsonData import JsonData
 from peacock.utils.FileCache import FileCache
 import os
-import cStringIO
-from BlockInfo import BlockInfo
-from ParameterInfo import ParameterInfo
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
+from .BlockInfo import BlockInfo
+from .ParameterInfo import ParameterInfo
 
 class ExecutableInfo(object):
     """
@@ -183,7 +186,7 @@ class ExecutableInfo(object):
                 self._dumpNode(output, entry.children[c], level+1, prefix, only_hard=only_hard)
 
     def dumpDefaultTree(self, hard_only=False):
-        output = cStringIO.StringIO()
+        output = StringIO()
         for c in sorted(self.path_map.keys()):
             if c == "/":
                 continue

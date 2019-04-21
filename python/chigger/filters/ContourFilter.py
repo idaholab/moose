@@ -11,7 +11,7 @@
 import vtk
 import mooseutils
 import chigger
-from ChiggerFilterBase import ChiggerFilterBase
+from .ChiggerFilterBase import ChiggerFilterBase
 class ContourFilter(ChiggerFilterBase):
     """
     Filter for computing and visualizing contours.

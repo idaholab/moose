@@ -10,7 +10,7 @@
 from PyQt5.QtWidgets import QTabWidget
 from PyQt5.QtCore import pyqtSignal
 from peacock.base.MooseWidget import MooseWidget
-from ParamsTable import ParamsTable
+from .ParamsTable import ParamsTable
 
 def tabSort(val):
     """

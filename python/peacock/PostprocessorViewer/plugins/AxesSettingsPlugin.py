@@ -9,7 +9,7 @@
 
 import sys
 from PyQt5 import QtCore, QtWidgets
-from PostprocessorPlugin import PostprocessorPlugin
+from .PostprocessorPlugin import PostprocessorPlugin
 import peacock
 
 class AxesSettingsPlugin(QtWidgets.QGroupBox, PostprocessorPlugin):

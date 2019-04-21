@@ -8,7 +8,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from PyQt5 import QtCore, QtWidgets
-from MooseWidget import MooseWidget
+from .MooseWidget import MooseWidget
 from peacock.utils import WidgetUtils
 
 class ViewerCornerWidget(QtWidgets.QWidget, MooseWidget):

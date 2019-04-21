@@ -10,7 +10,7 @@
 import sys
 from PyQt5 import QtCore, QtWidgets
 import chigger
-from ExodusPlugin import ExodusPlugin
+from .ExodusPlugin import ExodusPlugin
 
 class ClipPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     """

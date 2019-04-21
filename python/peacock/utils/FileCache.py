@@ -8,7 +8,11 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from PyQt5.QtCore import QSettings, QStandardPaths
-import os, cPickle
+import os
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 import uuid
 
 class FileCache(object):
@@ -76,7 +80,7 @@ class FileCache(object):
 
         try:
             with open(self.path_data["pickle_path"], "r") as f:
-                data = cPickle.load(f)
+                data = pickle.load(f)
                 return data
         except:
             return None
@@ -118,7 +122,7 @@ class FileCache(object):
         filename = uuid.uuid4().hex
         full_path = os.path.join(cache_dir, filename)
         with open(full_path, "w") as f:
-            cPickle.dump(obj, f, protocol=cPickle.HIGHEST_PROTOCOL)
+            pickle.dump(obj, f, protocol=pickle.HIGHEST_PROTOCOL)
         self.path_data = {"ctime": self.stat.st_ctime,
                 "size": self.stat.st_size,
                 "pickle_path": full_path,

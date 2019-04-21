@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from PyQt5 import QtCore, QtWidgets
 
-from PostprocessorPlugin import PostprocessorPlugin
+from .PostprocessorPlugin import PostprocessorPlugin
 
 class FigurePlugin(QtWidgets.QWidget, PostprocessorPlugin):
     """

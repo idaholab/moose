@@ -9,8 +9,8 @@
 
 import peacock
 from PyQt5 import QtWidgets
-from PostprocessorPlugin import PostprocessorPlugin
-from PostprocessorTableWidget import PostprocessorTableWidget
+from .PostprocessorPlugin import PostprocessorPlugin
+from .PostprocessorTableWidget import PostprocessorTableWidget
 from peacock.utils import WidgetUtils
 import mooseutils
 

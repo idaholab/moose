@@ -10,7 +10,7 @@
 
 import vtk
 import mooseutils
-from ChiggerObject import ChiggerObject
+from .ChiggerObject import ChiggerObject
 
 class ChiggerSourceBase(ChiggerObject):
     """

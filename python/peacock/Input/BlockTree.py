@@ -13,7 +13,10 @@ from PyQt5.QtGui import QBrush, QColor
 from PyQt5.QtCore import Qt, pyqtSignal
 from peacock.utils import WidgetUtils
 from peacock.base.MooseWidget import MooseWidget
-import cStringIO
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 class BlockTree(QTreeWidget, MooseWidget):
     """
@@ -388,7 +391,7 @@ class BlockTree(QTreeWidget, MooseWidget):
         Return:
             str: A display of the current QTreeWidget
         """
-        output = cStringIO.StringIO()
+        output = StringIO()
         for i in range(self.root_item.childCount()):
             child = self.root_item.child(i)
             self._dumpItem(output, child)

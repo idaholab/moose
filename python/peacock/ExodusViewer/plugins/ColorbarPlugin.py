@@ -12,7 +12,7 @@ import os
 import sys
 from PyQt5 import QtCore, QtWidgets, QtGui
 import glob
-from ExodusPlugin import ExodusPlugin
+from .ExodusPlugin import ExodusPlugin
 
 class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     """

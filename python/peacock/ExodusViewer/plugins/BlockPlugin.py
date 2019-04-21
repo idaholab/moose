@@ -10,8 +10,8 @@
 from PyQt5 import QtCore, QtWidgets
 import sys
 import chigger
-from ExodusPlugin import ExodusPlugin
-from BlockSelectorWidget import BlockSelectorWidget
+from .ExodusPlugin import ExodusPlugin
+from .BlockSelectorWidget import BlockSelectorWidget
 
 class BlockPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     """

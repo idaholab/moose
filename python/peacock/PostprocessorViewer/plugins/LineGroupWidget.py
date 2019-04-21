@@ -9,7 +9,7 @@
 
 import collections
 from PyQt5 import QtCore, QtWidgets
-from LineSettingsWidget import LineSettingsWidget
+from .LineSettingsWidget import LineSettingsWidget
 import peacock
 import mooseutils
 

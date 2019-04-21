@@ -9,7 +9,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import vtk
-from ExodusReader import ExodusReader
+from .ExodusReader import ExodusReader
 import mooseutils
 from .. import utils
 from .. import base
