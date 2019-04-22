@@ -9,9 +9,9 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import vtk
+import mooseutils
 from .ExodusSource import ExodusSource
 from .ExodusReader import ExodusReader
-import mooseutils
 from .. import base
 from .. import filters
 from .. import utils

@@ -8,9 +8,9 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from PyQt5 import QtWidgets
+import mooseutils
 from .TabPlugin import TabPlugin
 from .ViewerCornerWidget import ViewerCornerWidget
-import mooseutils
 
 class ViewerBase(QtWidgets.QTabWidget, TabPlugin):
     """

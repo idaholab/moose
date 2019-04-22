@@ -9,8 +9,8 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import vtk
-from . import GeometricSourceMeta
 import mooseutils
+from . import GeometricSourceMeta
 from ..base import ColorMap
 
 def create(base_type):

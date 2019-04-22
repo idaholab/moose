@@ -8,13 +8,13 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from .JsonData import JsonData
-from peacock.utils.FileCache import FileCache
 import os
 try:
     from cStringIO import StringIO
 except ImportError:
     from io import StringIO
+from peacock.utils.FileCache import FileCache
+from .JsonData import JsonData
 from .BlockInfo import BlockInfo
 from .ParameterInfo import ParameterInfo
 

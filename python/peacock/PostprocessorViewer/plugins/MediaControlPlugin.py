@@ -11,9 +11,9 @@
 import sys
 import bisect
 from PyQt5 import QtWidgets, QtCore
-from .PostprocessorPlugin import PostprocessorPlugin
 import mooseutils
 import peacock
+from .PostprocessorPlugin import PostprocessorPlugin
 
 class MediaControlPlugin(QtWidgets.QGroupBox, peacock.base.MediaControlWidgetBase, PostprocessorPlugin):
     """

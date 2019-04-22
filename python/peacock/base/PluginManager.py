@@ -9,9 +9,9 @@
 
 import collections
 from PyQt5 import QtWidgets
+import mooseutils
 from .MooseWidget import MooseWidget
 from .Plugin import Plugin
-import mooseutils
 from .PreferenceWidget import PreferenceWidget
 
 class PluginManager(MooseWidget):
