@@ -9,9 +9,9 @@
 
 import collections
 from PyQt5 import QtCore, QtWidgets
-from .LineSettingsWidget import LineSettingsWidget
 import peacock
 import mooseutils
+from .LineSettingsWidget import LineSettingsWidget
 
 
 class LineGroupWidget(peacock.base.MooseWidget, QtWidgets.QGroupBox):

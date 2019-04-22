@@ -11,11 +11,11 @@
 from PyQt5.QtWidgets import QWidget, QSplitter, QMessageBox
 from PyQt5.QtCore import Qt, pyqtSignal
 from peacock.utils import WidgetUtils
+from peacock.base.MooseWidget import MooseWidget
 from .CommentEditor import CommentEditor
 from .ParamsTable import ParamsTable
 from .ParamsByGroup import ParamsByGroup
 from .ParamsByType import ParamsByType
-from peacock.base.MooseWidget import MooseWidget
 
 class BlockEditor(QWidget, MooseWidget):
     """

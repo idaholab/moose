@@ -8,8 +8,8 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from PyQt5 import QtWidgets
-from .MooseWidget import MooseWidget
 import mooseutils
+from .MooseWidget import MooseWidget
 from .Preferences import Preferences
 
 class Plugin(MooseWidget):

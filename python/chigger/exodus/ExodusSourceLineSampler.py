@@ -10,8 +10,8 @@
 
 import vtk
 import numpy as np
-from .ExodusSource import ExodusSource
 import mooseutils
+from .ExodusSource import ExodusSource
 from .. import geometric
 
 class ExodusSourceLineSampler(geometric.LineSource):
