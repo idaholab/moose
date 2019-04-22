@@ -33,7 +33,12 @@ validParams<IterationAdaptiveDT>()
                             "to determine target linear iterations and "
                             "window for adaptive timestepping (default = "
                             "25)");
-  params.addParam<PostprocessorName>("postprocessor_dtlim",
+  params.addDeprecatedParam<PostprocessorName>("postprocessor_dtlim",
+                                               "If specified, the postprocessor value "
+                                               "is used as an upper limit for the "
+                                               "current time step length",
+                                               "Use 'timestep_limiting_function' instead");
+  params.addParam<PostprocessorName>("timestep_limiting_postprocessor",
                                      "If specified, the postprocessor value "
                                      "is used as an upper limit for the "
                                      "current time step length");
@@ -90,10 +95,13 @@ IterationAdaptiveDT::IterationAdaptiveDT(const InputParameters & parameters)
                                 ? getParam<unsigned>("linear_iteration_ratio")
                                 : 25), // Default to 25
     _adaptive_timestepping(false),
-    _pps_value(isParamValid("postprocessor_dtlim") ? &getPostprocessorValue("postprocessor_dtlim")
-                                                   : NULL),
-    _timestep_limiting_function(NULL),
-    _piecewise_timestep_limiting_function(NULL),
+    _pps_value(isParamValid("timestep_limiting_postprocessor")
+                   ? &getPostprocessorValue("timestep_limiting_postprocessor")
+                   : isParamValid("postprocessor_dtlim")
+                         ? &getPostprocessorValue("postprocessor_dtlim")
+                         : nullptr),
+    _timestep_limiting_function(nullptr),
+    _piecewise_timestep_limiting_function(nullptr),
     _times(0),
     _max_function_change(-1),
     _force_step_every_function_point(getParam<bool>("force_step_every_function_point")),

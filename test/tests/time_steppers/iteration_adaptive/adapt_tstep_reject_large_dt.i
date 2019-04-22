@@ -56,7 +56,7 @@
   dtmin = 0.1
   [./TimeStepper]
     type = IterationAdaptiveDT
-    postprocessor_dtlim = timestep_pp
+    timestep_limiting_postprocessor = timestep_pp
     reject_large_step = true
     reject_large_step_threshold = 0.5
     dt = 3.0

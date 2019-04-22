@@ -1,11 +1,7 @@
-# This is a basic test of the system for continuum damage mechanics
-# materials. It uses ScalarMaterialDamage for the damage model,
-# which simply gets its damage index from another material. In this
-# case, we prescribe the evolution of the damage index using a
-# function. A single element has a fixed prescribed displacement
-# on one side that puts the element in tension, and then the
-# damage index evolves from 0 to 1 over time, and this verifies
-# that the stress correspondingly drops to 0.
+# This is a basic test of the material time step computed by the
+# ComputeMultipleInelasticStress model. If no inelastic models
+# are defined, the material time step should be the maximum
+# value representable by a real number.
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
@@ -14,7 +10,7 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 10
+  nx = 1
   ny = 1
   nz = 1
   elem_type = HEX8
@@ -33,15 +29,6 @@
     incremental = true
     add_variables = true
     generate_output = 'stress_xx strain_xx'
-  []
-[]
-
-[AuxKernels]
-  [damage_index]
-    type = MaterialRealAux
-    variable = damage_index
-    property = damage_index_prop
-    execute_on = timestep_end
   []
 []
 
@@ -72,28 +59,10 @@
   []
 []
 
-[Functions]
-  [damage_evolution]
-    type = ParsedFunction
-    value = 'min(1.0, max(0.0, t - x * 3.0))'
-  []
-[]
-
 [Materials]
-  [damage_index]
-    type = GenericFunctionMaterial
-    prop_names = damage_index_prop
-    prop_values = damage_evolution
-  []
-  [damage]
-    type = ScalarMaterialDamage
-    damage_index = damage_index_prop
-    use_old_damage = true
-    maximum_damage_increment = 0.5
-  []
   [stress]
-    type = ComputeDamageStress
-    damage_model = damage
+    type = ComputeMultipleInelasticStress
+    inelastic_models = ''
   []
   [elasticity]
     type = ComputeIsotropicElasticityTensor
@@ -111,15 +80,8 @@
     type = ElementAverageValue
     variable = strain_xx
   []
-  [damage_index]
-    type = ElementAverageValue
-    variable = damage_index
-  []
   [time_step_limit]
     type = MaterialTimeStepPostprocessor
-    use_material_timestep_limit = false
-    elements_changed_property = damage_index_prop
-    elements_changed = 4
   []
 []
 
@@ -130,13 +92,14 @@
   l_tol      = 1e-8
   nl_max_its = 20
   nl_rel_tol = 1e-12
-  nl_abs_tol = 1e-6
+  nl_abs_tol = 1e-8
 
+  dt = 0.1
   dtmin = 0.001
-  end_time = 4.0
+  end_time = 1.1
   [TimeStepper]
     type = IterationAdaptiveDT
-    dt = 0.2
+    dt = 0.1
     growth_factor = 2.0
     cutback_factor = 0.5
     timestep_limiting_postprocessor = time_step_limit
@@ -144,6 +107,5 @@
 []
 
 [Outputs]
-  exodus = true
   csv=true
 []

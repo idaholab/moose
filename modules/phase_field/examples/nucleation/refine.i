@@ -201,7 +201,7 @@
     cutback_factor = 0.5
     optimal_iterations = 8
     iteration_window = 2
-    postprocessor_dtlim = dtnuc
+    timestep_limiting_postprocessor = dtnuc
   [../]
 []
 

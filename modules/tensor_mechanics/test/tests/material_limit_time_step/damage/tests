@@ -4,6 +4,9 @@
     input = 'scalar_material_damage_timestep_limit.i'
     csvdiff = 'scalar_material_damage_timestep_limit_out.csv'
     abs_zero = 1.e-6
+    requirement = 'The ScalarMaterialDamage model shall be capable of informing the material-based time step calculation based on the damage evolution'
+    issues = '#11662'
+    design = 'ScalarMaterialDamage.md'
   [../]
 
   [./elements_damage_limit]
@@ -11,6 +14,9 @@
     input = 'elements_changed_timestep_limit.i'
     exodiff = 'elements_changed_timestep_limit_out.e'
     abs_zero = 1.e-6
+    requirement = 'The ScalarMaterialDamage model shall be capable of informing the material-based time step calculation based on the number of elements changing damage state in a step'
+    issues = '#11662'
+    design = 'ScalarMaterialDamage.md MaterialTimeStepPostprocessor.md'
   [../]
 
   [./mixed_timestep_limit]
@@ -20,6 +26,9 @@
     abs_zero = 1.e-6
     cli_args = 'Postprocessors/time_step_limit/use_material_timestep_limit=true
                 Outputs/file_base=mixed_timestep_limit_out'
+    requirement = 'The MaterialTimeStepPostprocessor model shall be capable of computing a time step based on both the material time step limited by damage evoluation and the number of elements changing damage state in a step'
+    issues = '#11662'
+    design = 'ScalarMaterialDamage.md MaterialTimeStepPostprocessor.md'
   [../]
 
   [./elements_damage_limit_unknown_prop]
@@ -28,6 +37,9 @@
     input = 'elements_changed_timestep_limit.i'
     cli_args = 'Postprocessors/time_step_limit/elements_changed_property=unknown_property' #Point it to an unknown property
     expect_err = "Material property 'unknown_property', requested by 'time_step_limit' is not defined on block 0"
+    requirement = "The MaterialTimeStepPostprocessor shall generate an error if an unknown property is requested with the 'time_step_limit' parameter"
+    issues = '#11662'
+    design = 'MaterialTimeStepPostprocessor.md'
   [../]
 
   [./e]
@@ -36,6 +48,9 @@
     input = 'scalar_material_damage_timestep_limit.i'
     cli_args = 'Postprocessors/time_step_limit/use_material_timestep_limit=false' #disable botg matl_timestep and elements count
     expect_err = "either use_material_timestep_limit needs to be true or elements_changed_property defined"
+    requirement = "The MaterialTimeStepPostprocessor shall generate an error if neither the material time step limit nor the elements changed limit is specified."
+    issues = '#11662'
+    design = 'MaterialTimeStepPostprocessor.md'
   [../]
 
 []

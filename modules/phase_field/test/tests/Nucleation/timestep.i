@@ -85,7 +85,7 @@
     type = IterationAdaptiveDT
     optimal_iterations = 8
     iteration_window = 2
-    postprocessor_dtlim = dtnuc
+    timestep_limiting_postprocessor = dtnuc
     dt = 1
   [../]
 []
