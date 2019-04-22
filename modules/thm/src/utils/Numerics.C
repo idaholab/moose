@@ -19,6 +19,19 @@ areParallelVectors(const RealVectorValue & a, const RealVectorValue & b, const R
   return absoluteFuzzyEqualVectors(c, RealVectorValue(0, 0, 0), tol);
 }
 
+bool
+areSameDirectionVectors(const RealVectorValue & a, const RealVectorValue & b, const Real & tol)
+{
+  if (areParallelVectors(a, b, tol) == 1)
+  {
+    return a * b > 0;
+  }
+  else
+  {
+    return 0;
+  }
+}
+
 Real
 applyQuotientRule(const Real & num, const Real & den, const Real & dnum_dy, const Real & dden_dy)
 {
