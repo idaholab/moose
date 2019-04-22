@@ -11,6 +11,7 @@
 import os
 import subprocess
 from hit_load import hit_load
+from mooseutils import git_root_dir
 
 def check_requirement(filename):
     """Check spec file for requirement documentation."""
@@ -41,6 +42,9 @@ def sqa_check(working_dir=os.getcwd(), remote='origin', branch='devel', specs=['
     cmd = ['git', 'fetch', remote]
     subprocess.call(cmd)
 
+    # Root directory of repository
+    root = git_root_dir(working_dir)
+
     # Check requirements on changed tests specs
     count = 0
     cmd = ['git', 'merge-base', '{}/{}'.format(remote, branch), 'HEAD']
@@ -49,6 +53,6 @@ def sqa_check(working_dir=os.getcwd(), remote='origin', branch='devel', specs=['
     for filename in subprocess.check_output(cmd).split('\n'):
         if os.path.isfile(filename) and (os.path.basename(filename) in specs) and \
            not any(s in filename for s in skip):
-            count += check_requirement(os.path.join(working_dir, filename))
+            count += check_requirement(os.path.join(root, filename))
 
     return count
