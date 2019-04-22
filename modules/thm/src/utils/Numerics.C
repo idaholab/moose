@@ -20,16 +20,9 @@ areParallelVectors(const RealVectorValue & a, const RealVectorValue & b, const R
 }
 
 bool
-areSameDirectionVectors(const RealVectorValue & a, const RealVectorValue & b, const Real & tol)
+haveSameDirection(const RealVectorValue & a, const RealVectorValue & b, const Real & tol)
 {
-  if (areParallelVectors(a, b, tol) == 1)
-  {
-    return a * b > 0;
-  }
-  else
-  {
-    return 0;
-  }
+  return areParallelVectors(a, b, tol) && a * b > 0;
 }
 
 Real

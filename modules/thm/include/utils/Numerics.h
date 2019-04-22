@@ -60,9 +60,9 @@ bool areParallelVectors(const RealVectorValue & a,
  * @param[in] b     Second vector
  * @param[in] tol   Absolute tolerance
  */
-bool areSameDirectionVectors(const RealVectorValue & a,
-                             const RealVectorValue & b,
-                             const Real & tol = libMesh::TOLERANCE * libMesh::TOLERANCE);
+bool haveSameDirection(const RealVectorValue & a,
+                       const RealVectorValue & b,
+                       const Real & tol = libMesh::TOLERANCE * libMesh::TOLERANCE);
 
 /**
  * Computes a derivative of a fraction using quotient rule for a derivative
