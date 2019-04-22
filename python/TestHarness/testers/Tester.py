@@ -486,15 +486,15 @@ class Tester(MooseObject):
             reasons['recover'] = 'NO RECOVER'
 
         # Check for PETSc versions
-        (petsc_status, logic_reason, petsc_version) = util.checkPetscVersion(checks, self.specs)
+        (petsc_status, petsc_version) = util.checkPetscVersion(checks, self.specs)
         if not petsc_status:
-            reasons['petsc_version'] = 'using PETSc ' + str(checks['petsc_version']) + ' REQ: ' + logic_reason + ' ' + petsc_version
+            reasons['petsc_version'] = 'using PETSc ' + str(checks['petsc_version']) + ' REQ: ' + petsc_version
 
         # Check for SLEPc versions
-        (slepc_status, logic_reason, slepc_version) = util.checkSlepcVersion(checks, self.specs)
+        (slepc_status, slepc_version) = util.checkSlepcVersion(checks, self.specs)
         if not slepc_status and len(self.specs['slepc_version']) != 0:
             if slepc_version != None:
-                reasons['slepc_version'] = 'using SLEPc ' + str(checks['slepc_version']) + ' REQ: ' + logic_reason + ' ' + slepc_version
+                reasons['slepc_version'] = 'using SLEPc ' + str(checks['slepc_version']) + ' REQ: ' + slepc_version
             elif slepc_version == None:
                 reasons['slepc_version'] = 'SLEPc is not installed'
 
