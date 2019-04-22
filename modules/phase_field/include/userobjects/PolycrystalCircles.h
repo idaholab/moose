@@ -26,7 +26,7 @@ InputParameters validParams<PolycrystalCircles>();
  * through a user input or by reading a .txt file.
  * The file is expected to have a one-line header labeling the
  * colums 'x y z r'.
-**/
+ **/
 
 class PolycrystalCircles : public PolycrystalUserObjectBase
 {

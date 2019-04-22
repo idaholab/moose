@@ -29,6 +29,7 @@ public:
   virtual Real getVariableValue(unsigned int op_index, const Point & p) const override;
 
   virtual unsigned int getNumGrains() const override { return _grain_num; }
+  virtual std::vector<Point> getGrainCenters() const { return _centerpoints; }
 
 protected:
   /// The number of grains to create
