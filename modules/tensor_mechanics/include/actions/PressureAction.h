@@ -19,6 +19,9 @@ public:
   virtual void act() override;
 
 protected:
+  /// Flag to use automatic differentiation
+  const bool _use_ad;
+
   std::vector<std::vector<AuxVariableName>> _save_in_vars;
   std::vector<bool> _has_save_in_vars;
 };

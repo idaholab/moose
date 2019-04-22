@@ -54,6 +54,7 @@
 [Kernels]
   [./TensorMechanics]
     displacements = 'disp_x disp_y disp_z'
+    use_automatic_differentiation = true
   [../]
 []
 
@@ -81,17 +82,20 @@
       boundary = 1
       function = rampConstant
       displacements = 'disp_x disp_y disp_z'
+      use_automatic_differentiation = true
     [../]
     [./Side2]
       boundary = 2
       function = zeroRamp
       displacements = 'disp_x disp_y disp_z'
+      use_automatic_differentiation = true
       factor = 2.0
     [../]
     [./Side3]
       boundary = 3
       function = rampUnramp
       displacements = 'disp_x disp_y disp_z'
+      use_automatic_differentiation = true
     [../]
   [../]
 []
@@ -104,13 +108,20 @@
     C_ijkl = '0 0.5e6'
   [../]
   [./strain]
-    type = ComputeSmallStrain
+    type = ADComputeSmallStrain
     displacements = 'disp_x disp_y disp_z'
     block = 1
   [../]
   [./stress]
-    type = ComputeLinearElasticStress
+    type = ADComputeLinearElasticStress
     block = 1
+  [../]
+[]
+
+[Preconditioning]
+  [./smp]
+    type = SMP
+    full = true
   [../]
 []
 

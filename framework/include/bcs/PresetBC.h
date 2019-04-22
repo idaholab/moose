@@ -17,7 +17,8 @@ template <>
 InputParameters validParams<PresetBC>();
 
 /**
- * TODO:
+ * Defines a boundary condition that (pre)sets the solution at the boundary
+ * to be a user specified value.
  */
 class PresetBC : public PresetNodalBC
 {

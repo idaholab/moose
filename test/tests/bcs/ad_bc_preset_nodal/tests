@@ -1,0 +1,40 @@
+[Tests]
+  issues = ''
+  [./bc_function_nodal_test]
+    type = 'Exodiff'
+    input = 'bc_function_preset.i'
+    exodiff = 'bc_func_out.e'
+    design = 'bcs/ADFunctionPresetBC.md'
+    issues = '#13261'
+    requirement = "MOOSE shall support setting AD Dirichlet type boundary conditions, supplied as a function, directly to the solution vector prior to the solve."
+  [../]
+  [./bc_preset_nodal_test]
+    type = 'Exodiff'
+    input = 'bc_preset_nodal.i'
+    exodiff = 'bc_preset_out.e'
+    design = 'bcs/ADPresetBC.md'
+    issues = '#13261'
+    requirement = "MOOSE shall support setting AD Dirichlet type boundary conditions directly to the solution vector prior to the solve."
+  [../]
+
+  [./bc_function_nodal_test-jac]
+    type = 'PetscJacobianTester'
+    input = 'bc_function_preset.i'
+    run_sim = True
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    design = 'bcs/ADFunctionPresetBC.md jacobian_definition.md'
+    issues = '#13261'
+    requirement = "MOOSE shall support setting AD Dirichlet type boundary conditions, supplied as a function, directly to the solution vector prior to the solve and have perfect Jacobians."
+  [../]
+  [./bc_preset_nodal_test-jac]
+    type = 'PetscJacobianTester'
+    input = 'bc_preset_nodal.i'
+    run_sim = True
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    design = 'bcs/ADPresetBC.md jacobian_definition.md'
+    issues = '#13261'
+    requirement = "MOOSE shall support setting AD Dirichlet type boundary conditions directly to the solution vector prior to the solve and have perfect Jacobians."
+  [../]
+[]

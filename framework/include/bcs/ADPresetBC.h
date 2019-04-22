@@ -18,7 +18,8 @@ class ADPresetBC;
 declareADValidParams(ADPresetBC);
 
 /**
- * TODO:
+ * Defines a boundary condition that (pre)sets the solution at the boundary
+ * to be a user specified value.
  */
 template <ComputeStage compute_stage>
 class ADPresetBC : public ADPresetNodalBC<compute_stage>

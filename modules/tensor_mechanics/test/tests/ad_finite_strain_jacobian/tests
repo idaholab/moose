@@ -1,0 +1,80 @@
+[Tests]
+  [./bending]
+    type = Exodiff
+    input = 'bending_jacobian.i'
+    exodiff = 'bending_jacobian_out.e'
+  [../]
+  [./bending_Bbar]
+    type = Exodiff
+    input = 'bending_jacobian.i'
+    exodiff = 'bending_jacobian_bbar_out.e'
+    cli_args = 'GlobalParams/volumetric_locking_correction=true Outputs/file_base=bending_jacobian_bbar_out'
+    prereq = 'bending'
+  [../]
+  [./3d_bar]
+    type = Exodiff
+    input = '3d_bar.i'
+    exodiff = '3d_bar_out.e'
+  [../]
+  [./3d_bar_Bbar]
+    type = Exodiff
+    input = '3d_bar.i'
+    exodiff = '3d_bar_out.e'
+    cli_args = 'GlobalParams/volumetric_locking_correction=true'
+    prereq = '3d_bar'
+  [../]
+
+  [./axisym_incremental_strain-jac]
+    type = PetscJacobianTester
+    input = '2D-RZ_test.i'
+    cli_args = 'Modules/TensorMechanics/Master/all/incremental=true
+                Materials/stress/type=ADComputeFiniteStrainElasticStress'
+    run_sim = 'True'
+    ratio_tol = 5e-8
+    heavy = true
+    difference_tol = 1e7
+    petsc_version = '>=3.9.4'
+    issues = '#12650'
+    design = 'jacobian_definitions.md'
+    requirement = 'The ADComputeAxisymmetricRZIncrementalStrain class shall compute the mechanical response for a pressurized hollow cylinder with a small incremental axisymmetric strain formulation and shall produce perfect jacobians.'
+  [../]
+
+  [./bending-jac]
+    type = PetscJacobianTester
+    input = 'bending_jacobian.i'
+    run_sim = 'True'
+    prereq = 'bending'
+    #ratio_tol = 5e-8
+    #difference_tol = 1e7
+    petsc_version = '>=3.9.4'
+  [../]
+  [./bending_Bbar-jac]
+    type = PetscJacobianTester
+    input = 'bending_jacobian.i'
+    cli_args = 'GlobalParams/volumetric_locking_correction=true'
+    run_sim = 'True'
+    prereq = 'bending_Bbar'
+    #ratio_tol = 5e-8
+    #difference_tol = 1e7
+    petsc_version = '>=3.9.4'
+  [../]
+  [./3d_bar-jac]
+    type = PetscJacobianTester
+    input = '3d_bar.i'
+    prereq = '3d_bar'
+    run_sim = 'True'
+    #ratio_tol = 5e-8
+    #difference_tol = 1e7
+    petsc_version = '>=3.9.4'
+  [../]
+  [./3d_bar_Bbar-jac]
+    type = PetscJacobianTester
+    input = '3d_bar.i'
+    cli_args = 'GlobalParams/volumetric_locking_correction=true'
+    prereq = '3d_bar_Bbar'
+    run_sim = 'True'
+    #ratio_tol = 5e-8
+    #difference_tol = 1e7
+    petsc_version = '>=3.9.4'
+  [../]
+[]

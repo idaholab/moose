@@ -1,0 +1,63 @@
+[Tests]
+  [./3D]
+    type = Exodiff
+    input = 'pressure_test.i'
+    exodiff = 'pressure_test_out.e'
+    issues = '#4781 #13260'
+    design = 'syntax/BCs/Pressure/index.md'
+    requirement = 'The Pressure boundary condition action shall create the objects needed to apply
+                   automatic differentiation pressure boundary conditions on a 3D model as
+                   demonstrated by correctly computing the response of an elastic small-strain
+                   isotropic unit cube with pressure applied on three faces to create a hydrostatic
+                   pressure and match non-AD methods.'
+  [../]
+  [./3D_Bbar]
+    type = Exodiff
+    input = 'pressure_test.i'
+    exodiff = 'pressure_test_out.e'
+    cli_args = 'GlobalParams/volumetric_locking_correction=true'
+    prereq = '3D'
+    issues = '#4781 #8235 #13260'
+    design = 'syntax/BCs/Pressure/index.md'
+    requirement = 'The Pressure boundary condition action shall create the objects needed to apply
+                   automatic differentiation pressure boundary conditions on a 3D model as
+                   demonstrated by correctly computing the response of an elastic small-strain
+                   isotropic unit cube with pressure applied on three faces to create a hydrostatic
+                   pressure using the volumetric locking correction b-bar formulation and match
+                   non-AD methods.'
+  [../]
+
+  [./3D-jac]
+    type = PetscJacobianTester
+    input = 'pressure_test.i'
+    petsc_version = '>=3.9.4'
+    run_sim = 'True'
+    #ratio_tol = 5e-6
+    difference_tol = 5e-7
+    cli_args = "Outputs/active=''"
+    issues = '#4781 #13260'
+    design = 'syntax/BCs/Pressure/index.md'
+    requirement = 'The Pressure boundary condition action shall create the objects needed to apply
+                   automatic differentiation pressure boundary conditions on a 3D model as
+                   demonstrated by correctly computing the response of an elastic small-strain
+                   isotropic unit cube with pressure applied on three faces to create a hydrostatic
+                   pressure and calculate a perfect Jacobian.'
+  [../]
+  [./3D_Bbar-jac]
+    type = PetscJacobianTester
+    input = 'pressure_test.i'
+    petsc_version = '>=3.9.4'
+    run_sim = 'True'
+    #ratio_tol = 5e-6
+    difference_tol = 5e-7
+    cli_args = "GlobalParams/volumetric_locking_correction=true Outputs/active=''"
+    issues = '#4781 #8235 #13260'
+    design = 'syntax/BCs/Pressure/index.md'
+    requirement = 'The Pressure boundary condition action shall create the objects needed to apply
+                   automatic differentiation pressure boundary conditions on a 3D model as
+                   demonstrated by correctly computing the response of an elastic small-strain
+                   isotropic unit cube with pressure applied on three faces to create a hydrostatic
+                   pressure using the volumetric locking correction b-bar formulation and calculate
+                   a perfect Jacobian.'
+  [../]
+[]
