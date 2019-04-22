@@ -68,7 +68,7 @@ class ConvergencePlot(object):
 
         Key, value Options:
           x[float]: The x-position in data coordinates.
-          y[float]: The y-poisition in data coordinates.
+          y[float]: The y-position in data coordinates.
         """
 
         # Perform fit

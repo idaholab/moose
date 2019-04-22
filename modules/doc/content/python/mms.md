@@ -88,15 +88,22 @@ exact solution. The complete output for this function is given below.
 
 The `mms.evaluate` function automatically invokes 'x', 'y', 'z', and 't' as available variables; the
 first argument is the partial differential equation to solve (the strong form) and the second is the
-assumed known solution.
+assumed known solution. The variable 'R' is reserved as the coordinate system
+(see [sympy.vector.CoordSys3D](https://docs.sympy.org/latest/modules/vector/coordsys.html optional=True) for more information.)
+Finally, the variables 'e_i', 'e_j', and 'e_k' are also reserved, each represents the basis vectors
+for a 3D coordinate system. These are simply alternate variables for 'R.i', 'R.j', and 'R.k'.
 
 The following table lists the additional arguments that may be passed to the "evaluate" function.
 
 | Keyword | Type | Default | Description |
 | :- | :- | :- | :- |
 | `variable` | `str` | `u` | The primary variable to be solved for within the PDE |
-| `scalars` | `list` | | A list of arbitrary +scalar+ variables included in the solution or PDE |
-| `vectors` | `list` | | A list of arbitrary +vector+ variables included in the solution or PDE |
+| `scalars` | `list` | | A list of constant +scalar+ variables included in the solution or PDE |
+| `vectors` | `list` | | A list of constant +vector+ variables included in the solution or PDE |
+| `functions` | `list` | | A list of arbitrary functions of 'x', 'y', 'z', and 't' in the solution or PDE |
+| `vectorfunctions` | `list` | | A list of arbitrary vector functions of 'x', 'y', 'z', and 't' in the solution or PDE |
+| `negative` | `bool` | `False` | Flag for returning the negative of the evaluated function, by default this is false thus the function returned is correct for placing in the [BodyForce](BodyForce.md) Kernel object. |
+| `**kwargs` | `dict` | | All additional key, value pairs supplied are evaluated as additional functions that may include the 'x', 'y', 'z', and 't' or any other variables defined in the previous arguments. If 'e_i', 'e_j', 'e_k' are supplied the supplied function components (e.g., '_x', '_y', and '_z') are automatically defined. |
 
 When arbitrary vectors are supplied, the output will include the components named using the
 vector name with "_x", "_y", or "_z". For example, the following example executed in
@@ -233,7 +240,7 @@ as well as performs a "diff" with the data generated from the calls to the `run_
 method on the object returned from the run functions. For example, the spatial script contains
 the following lines at the end of the script to create the files that is tested.
 
-!listing mms_spatial.py start=TESTING
+!listing mms_spatial.py start=TESTING include-start=False
 
 
 !bibtex bibliography
