@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MUTABLECOEFFICIENTSINTERFACE_H
-#define MUTABLECOEFFICIENTSINTERFACE_H
+#pragma once
 
 #include <vector>
 
@@ -124,4 +123,3 @@ private:
   const ConsoleStream & _console;
 };
 
-#endif // MUTABLECOEFFICIENTSINTERFACE_H

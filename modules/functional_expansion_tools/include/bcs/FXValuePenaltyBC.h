@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FXVALUEPENALTYBC_H
-#define FXVALUEPENALTYBC_H
+#pragma once
 
 #include "FunctionPenaltyDirichletBC.h"
 
@@ -26,4 +25,3 @@ public:
   FXValuePenaltyBC(const InputParameters & parameters);
 };
 
-#endif // FXVALUEPENALTYBC_H

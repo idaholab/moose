@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FXINTEGRALBASEUSEROBJECT_H
-#define FXINTEGRALBASEUSEROBJECT_H
+#pragma once
 
 #include "AuxiliarySystem.h"
 #include "MooseError.h"
@@ -241,4 +240,3 @@ FXIntegralBaseUserObject<IntegralBaseVariableUserObject>::spatialValue(const Poi
   return _function_series.expand(_coefficients);
 }
 
-#endif // FXINTEGRALBASEUSEROBJECT_H

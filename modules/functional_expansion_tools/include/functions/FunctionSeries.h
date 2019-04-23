@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FUNCTIONSERIES_H
-#define FUNCTIONSERIES_H
+#pragma once
 
 #include "MutableCoefficientsFunctionInterface.h"
 #include "CompositeSeriesBasisInterface.h"
@@ -127,4 +126,3 @@ private:
   static std::vector<std::size_t> convertOrders(const std::vector<unsigned int> & orders);
 };
 
-#endif

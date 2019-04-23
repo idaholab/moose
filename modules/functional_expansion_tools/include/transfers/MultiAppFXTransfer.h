@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MULTIAPPMUTABLECOEFFICIENTSTRANSFER_H
-#define MULTIAPPMUTABLECOEFFICIENTSTRANSFER_H
+#pragma once
 
 #include "MultiAppTransfer.h"
 
@@ -76,4 +75,3 @@ protected:
   GetProblemObject getSubAppObject;
 };
 
-#endif // MULTIAPPMUTABLECOEFFICIENTSTRANSFER_H

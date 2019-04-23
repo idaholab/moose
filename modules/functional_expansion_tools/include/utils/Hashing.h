@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef HASHING_H
-#define HASHING_H
+#pragma once
 
 #include "MooseTypes.h"
 
@@ -93,4 +92,3 @@ hashCombine(Real time, const libMesh::Point & point)
 }
 }
 
-#endif // HASHING_H

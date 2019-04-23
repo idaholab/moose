@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FUNCTIONSERIESTOAUX_H
-#define FUNCTIONSERIESTOAUX_H
+#pragma once
 
 #include "FunctionAux.h"
 
@@ -27,4 +26,3 @@ public:
   FunctionSeriesToAux(const InputParameters & parameters);
 };
 
-#endif // FUNCTIONSERIESTOAUX_H
