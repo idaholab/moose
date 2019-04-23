@@ -12,7 +12,7 @@ certain situations, one is better than another.
 
 ## Example Input Syntax
 
-!listing test/tests/bcs/bc_preset_nodal/ad-bc_preset_nodal.i block=BCs
+!listing test/tests/bcs/ad_bc_preset_nodal/bc_preset_nodal.i block=BCs
 
 !syntax parameters /BCs/ADPresetBC
 

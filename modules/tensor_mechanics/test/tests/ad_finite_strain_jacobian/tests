@@ -3,6 +3,10 @@
     type = Exodiff
     input = 'bending_jacobian.i'
     exodiff = 'bending_jacobian_out.e'
+    issues = '#7228 #13260'
+    design = '/ADComputeFiniteStrain.md'
+    requirement = 'Finite strain methods in Tensor Mechanics should be able to adequately simulate a
+                   bar bending simulation in 2D using AD and match non-AD methods'
   [../]
   [./bending_Bbar]
     type = Exodiff
@@ -10,11 +14,20 @@
     exodiff = 'bending_jacobian_bbar_out.e'
     cli_args = 'GlobalParams/volumetric_locking_correction=true Outputs/file_base=bending_jacobian_bbar_out'
     prereq = 'bending'
+    issues = '#7228 #13260'
+    design = '/ADComputeFiniteStrain.md'
+    requirement = 'Finite strain methods in Tensor Mechanics should be able to adequately simulate a
+                   bar bending simulation in 2D using a volumetric locking correction using AD and
+                   match non-AD methods'
   [../]
   [./3d_bar]
     type = Exodiff
     input = '3d_bar.i'
     exodiff = '3d_bar_out.e'
+    issues = '#7228 #13260'
+    design = '/ADComputeFiniteStrain.md'
+    requirement = 'Finite strain methods in Tensor Mechanics should be able to adequately simulate a
+                   tensile test simulation in 3D using AD and match non-AD methods'
   [../]
   [./3d_bar_Bbar]
     type = Exodiff
@@ -22,21 +35,11 @@
     exodiff = '3d_bar_out.e'
     cli_args = 'GlobalParams/volumetric_locking_correction=true'
     prereq = '3d_bar'
-  [../]
-
-  [./axisym_incremental_strain-jac]
-    type = PetscJacobianTester
-    input = '2D-RZ_test.i'
-    cli_args = 'Modules/TensorMechanics/Master/all/incremental=true
-                Materials/stress/type=ADComputeFiniteStrainElasticStress'
-    run_sim = 'True'
-    ratio_tol = 5e-8
-    heavy = true
-    difference_tol = 1e7
-    petsc_version = '>=3.9.4'
-    issues = '#12650'
-    design = 'jacobian_definitions.md'
-    requirement = 'The ADComputeAxisymmetricRZIncrementalStrain class shall compute the mechanical response for a pressurized hollow cylinder with a small incremental axisymmetric strain formulation and shall produce perfect jacobians.'
+    issues = '#7228 #13260'
+    design = '/ADComputeFiniteStrain.md'
+    requirement = 'Finite strain methods in Tensor Mechanics should be able to adequately simulate a
+                   tensile test simulation in 3D using a volumetric locking correction using AD and
+                   match non-AD methods'
   [../]
 
   [./bending-jac]
@@ -44,9 +47,13 @@
     input = 'bending_jacobian.i'
     run_sim = 'True'
     prereq = 'bending'
-    #ratio_tol = 5e-8
-    #difference_tol = 1e7
+    ratio_tol = 5e-8
+    difference_tol = 1
     petsc_version = '>=3.9.4'
+    issues = '#12650 #13260'
+    design = 'jacobian_definitions.md'
+    requirement = 'Finite strain methods in Tensor Mechanics should be able to adequately simulate a
+                   bar bending simulation in 2D using AD and calculate perfect Jacobians'
   [../]
   [./bending_Bbar-jac]
     type = PetscJacobianTester
@@ -54,18 +61,27 @@
     cli_args = 'GlobalParams/volumetric_locking_correction=true'
     run_sim = 'True'
     prereq = 'bending_Bbar'
-    #ratio_tol = 5e-8
-    #difference_tol = 1e7
+    ratio_tol = 5e-8
+    difference_tol = 1
     petsc_version = '>=3.9.4'
+    issues = '#12650 #13260'
+    design = 'jacobian_definitions.md'
+    requirement = 'Finite strain methods in Tensor Mechanics should be able to adequately simulate a
+                   bar bending simulation in 2D using a volumetric locking correction using AD and
+                   calculate perfect Jacobians'
   [../]
   [./3d_bar-jac]
     type = PetscJacobianTester
     input = '3d_bar.i'
     prereq = '3d_bar'
     run_sim = 'True'
-    #ratio_tol = 5e-8
-    #difference_tol = 1e7
+    ratio_tol = 5e-8
+    difference_tol = 1
     petsc_version = '>=3.9.4'
+    issues = '#12650 #13260'
+    design = 'jacobian_definitions.md'
+    requirement = 'Finite strain methods in Tensor Mechanics should be able to adequately simulate a
+                   tensile test simulation in 3D using AD and calculate perfect Jacobians'
   [../]
   [./3d_bar_Bbar-jac]
     type = PetscJacobianTester
@@ -73,8 +89,13 @@
     cli_args = 'GlobalParams/volumetric_locking_correction=true'
     prereq = '3d_bar_Bbar'
     run_sim = 'True'
-    #ratio_tol = 5e-8
-    #difference_tol = 1e7
+    ratio_tol = 5e-8
+    difference_tol = 1
     petsc_version = '>=3.9.4'
+    issues = '#12650 #13260'
+    design = 'jacobian_definitions.md'
+    requirement = 'Finite strain methods in Tensor Mechanics should be able to adequately simulate a
+                   tensile test simulation in 3D using a volumetric locking correction using AD and
+                   calculate perfect Jacobians'
   [../]
 []

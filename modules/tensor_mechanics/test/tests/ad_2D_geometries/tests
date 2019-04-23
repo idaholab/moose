@@ -36,12 +36,11 @@
     valgrind = 'HEAVY'
     heavy = true
     abs_zero = 1e-5
-    rel_err = 3E-3
+    rel_err = 3e-3
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The TensorMechanics MasterAction shall calculate the elastic stress and strain response for a 3D pressurized hollow cylinder with a large strain incremental strain formulation using AD.'
   [../]
   [./axisym_resid]
-    #skip = 'ADFunctionPresetBC is wrong'
     type = Exodiff
     input = '2D-RZ_finiteStrain_resid.i'
     exodiff = '2D-RZ_finiteStrain_resid_out.e'
@@ -52,7 +51,6 @@
     requirement = 'The ADComputeAxisymmetricRZFiniteStrain class shall compute the reaction forces on the top surface of a cylinder which is loaded axially in tension.'
   [../]
   [./axisym_resid_Bbar]
-    #skip = 'ADFunctionPresetBC is wrong'
     type = Exodiff
     input = '2D-RZ_finiteStrain_resid.i'
     exodiff = '2D-RZ_finiteStrain_resid_bbar_out.e'
@@ -65,7 +63,6 @@
     requirement = 'The ADComputeAxisymmetricRZFiniteStrain class shall compute the reaction forces on the top surface of a cylinder which is loaded axially in tension when using the B-bar volumetric locking correction.'
   [../]
   [./axisymmetric_vlc_centerline_pp]
-    #skip = 'ADFunctionPresetBC is wrong'
     type = CSVDiff
     input = '2D-RZ_centerline_VLC.i'
     csvdiff = '2D-RZ_centerline_VLC_out.csv'
@@ -129,22 +126,21 @@
     requirement = 'The TensorMechanics MasterAction shall calculate the elastic stress and strain response for a 3D pressurized hollow cylinder with a large strain incremental strain formulation with AD and shall produce perfect jacobians.'
   [../]
   [./axisym_resid-jac]
-    skip = 'ADFunctionPresetBC is wrong'
     type = PetscJacobianTester
     input = '2D-RZ_finiteStrain_resid.i'
     compiler = 'GCC CLANG'
     run_sim = 'True'
-    ratio_tol = 1e-8
-    difference_tol = 1e-8
+    ratio_tol = 5e-8
+    difference_tol = 1e1
     petsc_version = '>=3.9.4'
     issues = '#12650'
     design = 'jacobian_definitions.md'
     requirement = 'The ADComputeAxisymmetricRZFiniteStrain class shall compute the reaction forces on the top surface of a cylinder which is loaded axially in tension and shall produce perfect jacobians.'
   [../]
   [./axisym_resid_Bbar-jac]
-    skip = 'ADFunctionPresetBC is wrong'
     type = PetscJacobianTester
     input = '2D-RZ_finiteStrain_resid.i'
+    skip = 'Volumetric locking correction Jacboain contribution incorrect in AD'
     compiler = 'GCC CLANG'
     cli_args = 'GlobalParams/volumetric_locking_correction=true'
     run_sim = 'True'
@@ -156,9 +152,9 @@
     requirement = 'The ADComputeAxisymmetricRZFiniteStrain class shall compute the reaction forces on the top surface of a cylinder which is loaded axially in tension when using the B-bar volumetric locking correction and shall produce perfect jacobians.'
   [../]
   [./axisymmetric_vlc_centerline_pp-jac]
-    skip = 'ADFunctionPresetBC is wrong'
     type = PetscJacobianTester
     input = '2D-RZ_centerline_VLC.i'
+    skip = 'Volumetric locking correction Jacboain contribution incorrect in AD'
     cli_args = "Outputs/active=''"
     run_sim = 'True'
     ratio_tol = 1e-8

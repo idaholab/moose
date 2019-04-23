@@ -13,7 +13,7 @@
 #include "MooseVariableInterface.h"
 
 /**
- * Base class for deriving any boundary condition of a integrated type
+ * Base class for deriving any automatic differentiation boundary condition of a integrated type
  */
 template <typename T, ComputeStage compute_stage>
 class ADNodalBCTempl : public NodalBCBase, public MooseVariableInterface<T>

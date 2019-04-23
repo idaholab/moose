@@ -14,7 +14,7 @@ progresses.  In certain situations, one is better than another.
 
 ## Example Input Syntax
 
-!listing test/tests/bcs/bc_preset_nodal/ad-bc_function_preset.i block=BCs
+!listing test/tests/bcs/ad_bc_preset_nodal/bc_function_preset.i block=BCs
 
 !syntax parameters /BCs/ADFunctionPresetBC
 

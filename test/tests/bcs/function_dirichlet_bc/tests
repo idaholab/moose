@@ -21,6 +21,7 @@
     run_sim = False
     ratio_tol = 3e-8
     difference_tol = 3e-6
+    method = 'opt'
     design = 'bcs/ADPresetBC.md jacobian_definition.md'
     issues = '#13261'
     requirement = "MOOSE shall support Dirichlet type boundary conditions defined by a function and have perfect Jacobians."

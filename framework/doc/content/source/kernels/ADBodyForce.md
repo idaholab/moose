@@ -34,7 +34,7 @@ parameter is equivalent to setting its value to unity.
 The case below demonstrates the use of `ADBodyForce` where the force term is
 supplied solely through the a function (denoted by `function`):
 
-!listing test/tests/bcs/bc_preset_nodal/ad-bc_function_preset.i block=Kernels
+!listing test/tests/bcs/ad_bc_preset_nodal/bc_function_preset.i block=Kernels
 
 !syntax parameters /Kernels/ADBodyForce
 
