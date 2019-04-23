@@ -35,9 +35,10 @@ validParams<FancyExtruderGenerator>()
       "For each row, every two entries are interpreted as a pair of "
       "'from' and 'to' to remap the subdomains for that elevation");
 
-  params.addParam<Point>("direction",
-                         "A vector that points in the direction to extrude (note, this will be "
-                         "normalized internally - so don't worry about it here)");
+  params.addRequiredParam<Point>(
+      "direction",
+      "A vector that points in the direction to extrude (note, this will be "
+      "normalized internally - so don't worry about it here)");
 
   params.addParam<boundary_id_type>(
       "top_boundary",
