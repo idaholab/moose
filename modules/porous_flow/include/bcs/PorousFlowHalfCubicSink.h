@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWHALFCUBICSINK_H
-#define POROUSFLOWHALFCUBICSINK_H
+#pragma once
 
 #include "PorousFlowSinkPTDefiner.h"
 
@@ -48,4 +47,3 @@ protected:
   virtual Real dmultiplier_dvar(unsigned int pvar) const override;
 };
 
-#endif // POROUSFLOWHALFCUBICSINK_H

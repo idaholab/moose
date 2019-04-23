@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWFLUIDMASS_H
-#define POROUSFLOWFLUIDMASS_H
+#pragma once
 
 #include "ElementIntegralVariablePostprocessor.h"
 #include "PorousFlowDictator.h"
@@ -50,4 +49,3 @@ protected:
   MooseVariable * const _var;
 };
 
-#endif // POROUSFLOWFLUIDMASS_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWDIFFUSIVITYCONST_H
-#define POROUSFLOWDIFFUSIVITYCONST_H
+#pragma once
 
 #include "PorousFlowDiffusivityBase.h"
 
@@ -30,4 +29,3 @@ protected:
   const std::vector<Real> _input_tortuosity;
 };
 
-#endif // POROUSFLOWDIFFUSIVITYCONST_H

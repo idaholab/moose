@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWFLUIDSTATEIC_H
-#define POROUSFLOWFLUIDSTATEIC_H
+#pragma once
 
 #include "InitialCondition.h"
 
@@ -48,4 +47,3 @@ protected:
   const PorousFlowFluidStateBase & _fs;
 };
 
-#endif // POROUSFLOWFLUIDSTATEIC_H

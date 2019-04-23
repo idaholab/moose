@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWFULLYSATURATED_H
-#define POROUSFLOWFULLYSATURATED_H
+#pragma once
 
 #include "PorousFlowSinglePhaseBase.h"
 
@@ -32,4 +31,3 @@ protected:
   virtual void addUserObjects() override;
 };
 
-#endif // POROUSFLOWFULLYSATURATED_H

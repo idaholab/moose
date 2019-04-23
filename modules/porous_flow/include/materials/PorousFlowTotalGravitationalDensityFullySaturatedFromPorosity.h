@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWTOTALGRAVITATIONALDENSITYFULLYSATURATEDFROMPOROSITY_H
-#define POROUSFLOWTOTALGRAVITATIONALDENSITYFULLYSATURATEDFROMPOROSITY_H
+#pragma once
 
 #include "PorousFlowTotalGravitationalDensityBase.h"
 
@@ -51,4 +50,3 @@ protected:
   const MaterialProperty<std::vector<Real>> & _dporosity_qp_dvar;
 };
 
-#endif // POROUSFLOWTOTALGRAVITATIONALDENSITYFULLYSATURATEDFROMPOROSITY_H

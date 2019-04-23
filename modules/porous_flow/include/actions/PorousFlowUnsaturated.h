@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWUNSATURATED_H
-#define POROUSFLOWUNSATURATED_H
+#pragma once
 
 #include "PorousFlowSinglePhaseBase.h"
 
@@ -56,4 +55,3 @@ protected:
   const std::string _capillary_pressure_name;
 };
 
-#endif // POROUSFLOWUNSATURATED_H

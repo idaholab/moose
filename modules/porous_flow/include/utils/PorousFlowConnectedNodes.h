@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWCONNECTEDNODES_H
-#define POROUSFLOWCONNECTEDNODES_H
+#pragma once
 
 #include "Moose.h"
 
@@ -146,4 +145,3 @@ private:
   std::vector<std::vector<dof_id_type>> _global_neighbors;
 };
 
-#endif // POROUSFLOWCONNECTEDNODES_H

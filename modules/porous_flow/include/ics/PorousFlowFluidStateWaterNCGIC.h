@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWFLUIDSTATEWATERNCGIC_H
-#define POROUSFLOWFLUIDSTATEWATERNCGIC_H
+#pragma once
 
 #include "PorousFlowFluidStateIC.h"
 
@@ -29,4 +28,3 @@ public:
   PorousFlowFluidStateWaterNCGIC(const InputParameters & parameters);
 };
 
-#endif // POROUSFLOWFLUIDSTATEWATERNCGIC_H

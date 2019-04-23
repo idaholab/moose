@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWTOTALGRAVITATIONALDENSITYBASE_H
-#define POROUSFLOWTOTALGRAVITATIONALDENSITYBASE_H
+#pragma once
 
 #include "PorousFlowMaterialVectorBase.h"
 
@@ -33,4 +32,3 @@ protected:
   MaterialProperty<std::vector<Real>> & _dgravdensity_dvar;
 };
 
-#endif // POROUSFLOWTOTALGRAVITATIONALDENSITYBASE_H

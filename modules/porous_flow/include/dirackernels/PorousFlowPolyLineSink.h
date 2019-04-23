@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWPOLYLINESINK
-#define POROUSFLOWPOLYLINESINK
+#pragma once
 
 #include "PorousFlowLineSink.h"
 #include "LinearInterpolation.h"
@@ -36,5 +35,3 @@ protected:
                                     Real & outflow,
                                     Real & outflowp) const override;
 };
-
-#endif // POROUSFLOWPOLYLINESINK

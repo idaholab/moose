@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWSINKPTDEFINER_H
-#define POROUSFLOWSINKPTDEFINER_H
+#pragma once
 
 #include "PorousFlowSink.h"
 
@@ -50,4 +49,3 @@ protected:
   virtual Real dptVar(unsigned pvar) const;
 };
 
-#endif // POROUSFLOWSINKPTDEFINER_H

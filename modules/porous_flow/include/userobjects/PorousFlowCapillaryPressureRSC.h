@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWCAPILLARYPRESSURERSC_H
-#define POROUSFLOWCAPILLARYPRESSURERSC_H
+#pragma once
 
 #include "PorousFlowCapillaryPressure.h"
 
@@ -44,4 +43,3 @@ protected:
   const Real _scale;
 };
 
-#endif // POROUSFLOWCAPILLARYPRESSURERSC_H

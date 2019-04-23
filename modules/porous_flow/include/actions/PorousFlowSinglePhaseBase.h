@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWSINGLEPHASEBASE_H
-#define POROUSFLOWSINGLEPHASEBASE_H
+#pragma once
 
 #include "PorousFlowActionBase.h"
 
@@ -66,4 +65,3 @@ protected:
   const unsigned _nacl_index;
 };
 
-#endif // POROUSFLOWSINGLEPHASEBASE_H

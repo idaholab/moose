@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWSQUAREPULSEPOINTSOURCE_H
-#define POROUSFLOWSQUAREPULSEPOINTSOURCE_H
+#pragma once
 
 #include "DiracKernel.h"
 
@@ -44,4 +43,3 @@ protected:
   const Real _end_time;
 };
 
-#endif // POROUSFLOWSQUAREPULSEPOINTSOURCE_H

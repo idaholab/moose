@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWROGERSSTALLYBRASSCLEMENTS_H
-#define POROUSFLOWROGERSSTALLYBRASSCLEMENTS_H
+#pragma once
 
 #include "MooseTypes.h"
 
@@ -50,4 +49,3 @@ Real dEffectiveSaturation(Real pc, Real shift, Real scale);
 Real d2EffectiveSaturation(Real pc, Real shift, Real scale);
 }
 
-#endif // POROUSFLOWROGERSSTALLYBRASSCLEMENTS_H

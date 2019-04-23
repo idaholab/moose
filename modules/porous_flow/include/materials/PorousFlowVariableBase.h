@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWVARIABLEBASE_H
-#define POROUSFLOWVARIABLEBASE_H
+#pragma once
 
 #include "DerivativeMaterialInterface.h"
 #include "PorousFlowMaterial.h"
@@ -72,4 +71,3 @@ protected:
   MaterialProperty<std::vector<std::vector<RealGradient>>> * const _dgrads_qp_dv;
 };
 
-#endif // POROUSFLOWVARIABLEBASE_H

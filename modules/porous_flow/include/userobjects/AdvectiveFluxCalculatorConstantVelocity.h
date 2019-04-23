@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADVECTIVEFLUXCALCULATORCONSTANTVELOCITY_H
-#define ADVECTIVEFLUXCALCULATORCONSTANTVELOCITY_H
+#pragma once
 
 #include "AdvectiveFluxCalculatorBase.h"
 
@@ -43,4 +42,3 @@ protected:
   const VariablePhiGradient & _grad_phi;
 };
 
-#endif // ADVECTIVEFLUXCALCULATORCONSTANTVELOCITY_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWBASICADVECTION_H
-#define POROUSFLOWBASICADVECTION_H
+#pragma once
 
 #include "Kernel.h"
 #include "PorousFlowDictator.h"
@@ -55,4 +54,3 @@ protected:
       _ddarcy_velocity_dgradvar;
 };
 
-#endif // POROUSFLOWBASICADVECTION_H

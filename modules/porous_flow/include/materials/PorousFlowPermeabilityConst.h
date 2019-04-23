@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWPERMEABILITYCONST_H
-#define POROUSFLOWPERMEABILITYCONST_H
+#pragma once
 
 #include "PorousFlowPermeabilityBase.h"
 
@@ -32,4 +31,3 @@ protected:
   const RealTensorValue _input_permeability;
 };
 
-#endif // POROUSFLOWPERMEABILITYCONST_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWMATERIALBASE_H
-#define POROUSFLOWMATERIALBASE_H
+#pragma once
 
 #include "PorousFlowMaterial.h"
 #include "DerivativeMaterialInterface.h"
@@ -38,4 +37,3 @@ protected:
   const std::string _phase;
 };
 
-#endif // POROUSFLOWMATERIALBASE_H

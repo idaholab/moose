@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWFLACRELPERM_H
-#define POROUSFLOWFLACRELPERM_H
+#pragma once
 
 #include "MooseTypes.h"
 
@@ -43,4 +42,3 @@ Real dRelativePermeability(Real seff, Real m);
 Real d2RelativePermeability(Real seff, Real m);
 }
 
-#endif // POROUSFLOWFLACRELPERM_H
