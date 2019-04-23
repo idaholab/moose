@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSLUMPEDMASSCHANGE
-#define RICHARDSLUMPEDMASSCHANGE
+#pragma once
 
 #include "TimeKernel.h"
 #include "Material.h"
@@ -88,5 +87,3 @@ protected:
   /// holds nodal values of d(Seff)/dP_i
   std::vector<Real> _dseff;
 };
-
-#endif // RICHARDSLUMPEDMASSCHANGE

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSPPENALTY
-#define RICHARDSPPENALTY
+#pragma once
 
 #include "Kernel.h"
 
@@ -42,5 +41,3 @@ private:
   /// moose variable number of the _lower variable (needed for OffDiagJacobian)
   unsigned int _lower_var_num;
 };
-
-#endif // RICHARDSPPENALTY

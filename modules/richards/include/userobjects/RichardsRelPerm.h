@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSRELPERM_H
-#define RICHARDSRELPERM_H
+#pragma once
 
 #include "GeneralUserObject.h"
 
@@ -55,4 +54,3 @@ public:
   virtual Real d2relperm(Real seff) const = 0;
 };
 
-#endif // RICHARDSRELPERM_H

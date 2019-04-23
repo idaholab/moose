@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSDENSITYIDEAL_H
-#define RICHARDSDENSITYIDEAL_H
+#pragma once
 
 #include "RichardsDensity.h"
 
@@ -49,4 +48,3 @@ protected:
   Real _p0;
 };
 
-#endif // RICHARDSDENSITYIDEAL_H

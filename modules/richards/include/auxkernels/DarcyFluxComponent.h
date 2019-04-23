@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DARCYFLUXCOMPONENT_H
-#define DARCYFLUXCOMPONENT_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -60,4 +59,3 @@ protected:
   unsigned int _component;
 };
 
-#endif // DARCYFLUXCOMPONENT_H

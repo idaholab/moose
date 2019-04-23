@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef Q2PNODALMASS
-#define Q2PNODALMASS
+#pragma once
 
 #include "TimeKernel.h"
 #include "Material.h"
@@ -49,5 +48,3 @@ protected:
   /// current value of the porosity
   const MaterialProperty<Real> & _porosity;
 };
-
-#endif // Q2PNODALMASS

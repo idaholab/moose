@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROFULLSATMATERIAL_H
-#define POROFULLSATMATERIAL_H
+#pragma once
 
 #include "DerivativeMaterialInterface.h"
 #include "Material.h"
@@ -86,4 +85,3 @@ protected:
   virtual void computeQpProperties();
 };
 
-#endif // POROFULLSATMATERIAL_H

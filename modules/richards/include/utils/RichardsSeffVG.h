@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSSEFFVG_H
-#define RICHARDSSEFFVG_H
+#pragma once
 
 #include "GeneralUserObject.h"
 
@@ -47,4 +46,3 @@ public:
   static Real d2seff(Real p, Real al, Real m);
 };
 
-#endif // RICHARDSSEFFVG_H

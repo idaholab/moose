@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSRELPERMVG_H
-#define RICHARDSRELPERMVG_H
+#pragma once
 
 #include "RichardsRelPerm.h"
 
@@ -52,4 +51,3 @@ protected:
   Real _m;
 };
 
-#endif // RICHARDSRELPERMVG_H

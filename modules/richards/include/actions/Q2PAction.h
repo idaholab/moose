@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef Q2PACTION_H
-#define Q2PACTION_H
+#pragma once
 
 #include "Action.h"
 
@@ -46,4 +45,3 @@ private:
   bool _no_mass_calculations;
 };
 
-#endif // Q2PACTION_H

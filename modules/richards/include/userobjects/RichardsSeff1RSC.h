@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSSEFF1RSC_H
-#define RICHARDSSEFF1RSC_H
+#pragma once
 
 #include "RichardsSeff.h"
 #include "RichardsSeffRSC.h"
@@ -75,4 +74,3 @@ protected:
   Real _scale;
 };
 
-#endif // RICHARDSSEFF1RSC_H
