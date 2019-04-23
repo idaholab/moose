@@ -15,6 +15,7 @@
     recover = false # this is not running a MooseApp, recover doesn't make any sense
     csvdiff = 'mms_spatial_first.csv mms_spatial_second.csv'
     requirement = "The system shall include a tool for writing spatial convergence data to a file using method of manufactured solutions."
+    prereq = spatial
   []
   [temporal]
     type = CheckFiles
@@ -30,6 +31,7 @@
     recover = false # this is not running a MooseApp, recover doesn't make any sense
     csvdiff = 'mms_temporal_first.csv mms_temporal_second.csv'
     requirement = "The system shall include a tool for writing temporal convergence data to a file using method of manufactured solutions."
+    prereq = temporal
   []
   [exact]
     type = RunApp
