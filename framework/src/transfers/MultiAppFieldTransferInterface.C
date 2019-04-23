@@ -56,9 +56,16 @@ MultiAppFieldTransferInterface::MultiAppFieldTransferInterface(const InputParame
 {
   if (_preserve_transfer)
   {
+    /*
+     * Not sure how important to support multi variables
+     * Let us handle the single variable case only right now if the conservative capability is on
+     */
+    mooseAssert(_to_var_name.size() == 1 && _from_var_name.size() == 1,
+                " Support single variable only when the conservative capability is on ");
     if (_direction == TO_MULTIAPP)
     {
-      mooseAssert(_from_postprocessor_to_be_preserved.size() == _multi_app->numGlobalApps(),
+      mooseAssert(_from_postprocessor_to_be_preserved.size() == _multi_app->numGlobalApps() ||
+                      _from_postprocessor_to_be_preserved.size() == 1,
                   "Number of from Postprocessors should equal to the number of subapps");
       mooseAssert(_to_postprocessor_to_be_preserved.size() == 1,
                   "Number of to Postprocessors should equal to 1");
@@ -67,10 +74,14 @@ MultiAppFieldTransferInterface::MultiAppFieldTransferInterface(const InputParame
     {
       mooseAssert(_from_postprocessor_to_be_preserved.size() == 1,
                   "Number of from Postprocessors should equal to 1");
-      mooseAssert(_to_postprocessor_to_be_preserved.size() == _multi_app->numGlobalApps(),
+      mooseAssert(_to_postprocessor_to_be_preserved.size() == _multi_app->numGlobalApps() ||
+                      _to_postprocessor_to_be_preserved.size() == 1,
                   "Number of to Postprocessors should equal to the number of subapps ");
     }
   }
+
+  mooseAssert(_to_var_name.size() == _from_var_name.size() && _to_var_name.size() >= 1,
+              " Number of target variable should equal to the number of source variables ");
 }
 
 void

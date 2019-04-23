@@ -56,6 +56,9 @@ MultiAppInterpolationTransfer::MultiAppInterpolationTransfer(const InputParamete
 {
   // This transfer does not work with DistributedMesh
   _fe_problem.mesh().errorIfDistributedMesh("MultiAppInterpolationTransfer");
+
+  mooseAssert(_to_var_name.size() == 1 && _from_var_name.size() == 1,
+              " Support single variable only ");
 }
 
 void
