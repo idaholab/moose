@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PLC_LSH_H
-#define PLC_LSH_H
+#pragma once
 
 #include "SolidModel.h"
 
@@ -71,4 +70,3 @@ protected:
 private:
 };
 
-#endif // PLC_LSHMATERIAL_H

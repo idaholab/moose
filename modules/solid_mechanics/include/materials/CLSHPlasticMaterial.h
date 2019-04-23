@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CLSHPLASTICMATERIAL_H
-#define CLSHPLASTICMATERIAL_H
+#pragma once
 
 #include "SolidModel.h"
 
@@ -28,4 +27,3 @@ public:
 protected:
 };
 
-#endif // CLSHPLASTICMATERIAL_H

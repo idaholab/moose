@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef STRESSDIVERGENCE_H
-#define STRESSDIVERGENCE_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -61,4 +60,3 @@ private:
   std::vector<std::vector<Real>> _avg_grad_phi;
   bool _volumetric_locking_correction;
 };
-#endif // STRESSDIVERGENCE_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ISOTROPICELASTICITYTENSORRZ_H
-#define ISOTROPICELASTICITYTENSORRZ_H
+#pragma once
 
 #include "IsotropicElasticityTensor.h"
 
@@ -52,4 +51,3 @@ protected:
   void calculateLameCoefficients();
 };
 
-#endif // ISOTROPICELASTICITYTENSORRZ_H

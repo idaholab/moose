@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RATEDEPSMEARCRACKMODEL_H
-#define RATEDEPSMEARCRACKMODEL_H
+#pragma once
 
 #include "ConstitutiveModel.h"
 #include "SymmElasticityTensor.h"
@@ -127,4 +126,3 @@ protected:
 private:
 };
 
-#endif // RATEDEPSMEARCRACKMODEL

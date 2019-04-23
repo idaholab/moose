@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LINEARSTRAINHARDENING_H
-#define LINEARSTRAINHARDENING_H
+#pragma once
 
 #include "SolidModel.h"
 
@@ -24,4 +23,3 @@ public:
   virtual ~LinearStrainHardening() {}
 };
 
-#endif // LINEARSTRAINHARDENING_H

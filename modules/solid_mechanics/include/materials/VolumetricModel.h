@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VOLUMETRICMODEL_H
-#define VOLUMETRICMODEL_H
+#pragma once
 
 #include "Material.h"
 
@@ -39,4 +38,3 @@ private:
   using Material::_qp;
 };
 
-#endif // VOLUMETRICMODEL_H

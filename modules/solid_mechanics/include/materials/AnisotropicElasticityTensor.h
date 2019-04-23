@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ANISOTROPICELASTICITYTENSOR_H
-#define ANISOTROPICELASTICITYTENSOR_H
+#pragma once
 
 #include "ElasticityTensor.h"
 #include "libmesh/libmesh.h"
@@ -90,4 +89,3 @@ protected:
   virtual void calculateEntries(unsigned int qp);
 };
 
-#endif // ANISOTROPICELASTICITYTENSOR_H

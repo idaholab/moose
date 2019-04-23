@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LINEARISOTROPICMATERIAL_H
-#define LINEARISOTROPICMATERIAL_H
+#pragma once
 
 #include "SolidMechanicsMaterial.h"
 
@@ -54,4 +53,3 @@ protected:
   Real _tol;
 };
 
-#endif // LINEARISOTROPICMATERIAL_H

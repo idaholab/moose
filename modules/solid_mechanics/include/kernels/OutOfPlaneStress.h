@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef OUTOFPLANESTRESS_H
-#define OUTOFPLANESTRESS_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -45,4 +44,3 @@ private:
   const unsigned int _ydisp_var;
   const unsigned int _temp_var;
 };
-#endif // OUTOFPLANESTRESS_H

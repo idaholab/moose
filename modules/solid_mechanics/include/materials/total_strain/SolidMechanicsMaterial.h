@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SOLIDMECHANICSMATERIAL_H
-#define SOLIDMECHANICSMATERIAL_H
+#pragma once
 
 #include "Material.h"
 #include "SymmElasticityTensor.h"
@@ -70,4 +69,3 @@ protected:
   }
 };
 
-#endif // SOLIDMECHANICSMATERIAL_H

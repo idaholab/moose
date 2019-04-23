@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RETURNMAPPINGMODEL_H
-#define RETURNMAPPINGMODEL_H
+#pragma once
 
 #include "ConstitutiveModel.h"
 #include "SingleVariableReturnMappingSolution.h"
@@ -102,4 +101,3 @@ protected:
   MaterialProperty<Real> * _matl_timestep_limit;
 };
 
-#endif // RETURNMAPPINGMODEL_H

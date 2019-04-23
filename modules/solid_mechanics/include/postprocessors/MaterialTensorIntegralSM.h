@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATERIALTENSORINTEGRALSM_H
-#define MATERIALTENSORINTEGRALSM_H
+#pragma once
 
 #include "ElementIntegralPostprocessor.h"
 #include "MaterialTensorCalculator.h"
@@ -36,4 +35,3 @@ protected:
   const MaterialProperty<SymmTensor> & _tensor;
 };
 
-#endif // MATERIALTENSORINTEGRALSM_H
