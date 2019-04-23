@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LEVELSETOLSSONREINITIALIZATION_H
-#define LEVELSETOLSSONREINITIALIZATION_H
+#pragma once
 
 // MOOSE includes
 #include "ADKernelGrad.h"
@@ -41,4 +40,3 @@ protected:
   using ADKernelGrad<compute_stage>::getPostprocessorValue;
 };
 
-#endif // LEVELSETOLSSONREINITIALIZATION_H

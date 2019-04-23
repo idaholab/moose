@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LEVELSETVOLUME_H
-#define LEVELSETVOLUME_H
+#pragma once
 
 // MOOSE includes
 #include "ElementVariablePostprocessor.h"
@@ -45,4 +44,3 @@ protected:
   const bool _inside;
 };
 
-#endif // LEVELSETVOLUME_H

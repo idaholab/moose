@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LEVELSETPROBLEM_H
-#define LEVELSETPROBLEM_H
+#pragma once
 
 #include "FEProblem.h"
 
@@ -29,4 +28,3 @@ public:
   virtual void computeMarkers() override;
 };
 
-#endif
