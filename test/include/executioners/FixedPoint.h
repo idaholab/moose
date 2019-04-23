@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FixedPoint_H
-#define FixedPoint_H
+#pragma once
 
 #include "SolveObject.h"
 
@@ -34,4 +33,3 @@ protected:
   const Real _fp_abs_step_tol;
   const Real _fp_rel_step_tol;
 };
-#endif // FixedPoint_H

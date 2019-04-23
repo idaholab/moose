@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FUNCCOEFDIFFUSION_H
-#define FUNCCOEFDIFFUSION_H
+#pragma once
 
 // MOOSE includes
 #include "Kernel.h"
@@ -34,4 +33,3 @@ protected:
   Function & _function;
 };
 
-#endif // FUNCCOEFDIFFUSION_H

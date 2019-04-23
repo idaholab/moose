@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADCOUPLEDVECTORCONVECTION_H
-#define ADCOUPLEDVECTORCONVECTION_H
+#pragma once
 
 #include "ADKernel.h"
 
@@ -34,4 +33,3 @@ private:
   const ADVectorVariableGradient & _grad_velocity_vector;
 };
 
-#endif

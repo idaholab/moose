@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef STATEFULMATERIAL_H
-#define STATEFULMATERIAL_H
+#pragma once
 
 #include "Material.h"
 
@@ -41,4 +40,3 @@ private:
   const MaterialProperty<Real> & _diffusivity_old;
 };
 
-#endif // STATEFULMATERIAL_H

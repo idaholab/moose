@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATDIFFUSIONTEST_H
-#define MATDIFFUSIONTEST_H
+#pragma once
 
 #include "Kernel.h"
 #include "MaterialProperty.h"
@@ -33,4 +32,3 @@ protected:
   const MaterialProperty<Real> * _diff;
 };
 
-#endif // MATDIFFUSIONTEST_H

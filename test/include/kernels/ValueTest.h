@@ -6,8 +6,8 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#ifndef VALUETEST_H_
-#define VALUETEST_H_
+
+#pragma once
 
 #include "Kernel.h"
 
@@ -24,4 +24,3 @@ protected:
 template <>
 InputParameters validParams<ValueTest>();
 
-#endif /* VALUETEST_H_ */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VECTORCOEFFREACTION_H
-#define VECTORCOEFFREACTION_H
+#pragma once
 
 #include "VectorKernel.h"
 #include "MaterialProperty.h"
@@ -31,4 +30,3 @@ protected:
   const Real _coefficient;
 };
 
-#endif // VECTORCOEFFREACTION_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef USRFUNC_H
-#define USRFUNC_H
+#pragma once
 
 #include "Moose.h"
 
@@ -70,4 +69,3 @@ ManSol4ADR2exd(const Point & p, const Parameters &, const std::string &, const s
 Number ManSolzeroV(const Point & p, const Parameters &, const std::string &, const std::string &);
 Gradient ManSolzeroG(const Point & p, const Parameters &, const std::string &, const std::string &);
 
-#endif /* USRFUNC_H */

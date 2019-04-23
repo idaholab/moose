@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TWOCIRCLEMARKER_H
-#define TWOCIRCLEMARKER_H
+#pragma once
 
 #include "Marker.h"
 
@@ -38,4 +37,3 @@ protected:
   const Real _shut_off_time;
 };
 
-#endif /* TWOCIRCLEMARKER_H */

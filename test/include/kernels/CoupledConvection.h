@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COUPLEDCONVECTION_H_
-#define COUPLEDCONVECTION_H_
+#pragma once
 
 #include "Kernel.h"
 
@@ -36,4 +35,3 @@ private:
   const VariableGradient & _velocity_vector;
 };
 
-#endif // COUPLEDCONVECTION_H

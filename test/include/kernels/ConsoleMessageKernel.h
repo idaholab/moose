@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CONSOLEMESSAGEKERNEL_H
-#define CONSOLEMESSAGEKERNEL_H
+#pragma once
 
 // MOOSE includes
 #include "CoefDiffusion.h"
@@ -52,4 +51,3 @@ public:
   void constMethod() const;
 };
 
-#endif // CONSOLEMESSAGEKERNEL_H

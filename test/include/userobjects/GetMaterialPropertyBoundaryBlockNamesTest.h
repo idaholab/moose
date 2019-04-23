@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GETMATERIALPROPERTYBOUNDARYNAMESTEST_H
-#define GETMATERIALPROPERTYBOUNDARYNAMESTEST_H
+#pragma once
 
 #include "GeneralUserObject.h"
 
@@ -65,4 +64,3 @@ GetMaterialPropertyBoundaryBlockNamesTest::performTest(const std::vector<T> & re
   mooseError("TEST PASSED: The retrieved names are the same as the names expected");
 }
 
-#endif /* GETMATERIALPROPERTYBOUNDARYNAMESTEST_H */

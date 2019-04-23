@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EXAMPLESHAPEELEMENTKERNEL2_H
-#define EXAMPLESHAPEELEMENTKERNEL2_H
+#pragma once
 
 #include "NonlocalKernel.h"
 #include "ExampleShapeElementUserObject.h"
@@ -37,4 +36,3 @@ protected:
 template <>
 InputParameters validParams<ExampleShapeElementKernel2>();
 
-#endif // ExampleShapeElementKernel2_H

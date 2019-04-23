@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATDGKERNEL_H
-#define MATDGKERNEL_H
+#pragma once
 
 #include "DGKernel.h"
 
@@ -37,4 +36,3 @@ protected:
   const MaterialProperty<Real> & _value;
 };
 
-#endif

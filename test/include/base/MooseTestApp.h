@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSETESTAPP_H
-#define MOOSETESTAPP_H
+#pragma once
 
 #include "MooseApp.h"
 
@@ -27,4 +26,3 @@ public:
   static void registerApps();
 };
 
-#endif /* MOOSETESTAPP_H */

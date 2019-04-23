@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COEFFPARAMDIFFUSION_H
-#define COEFFPARAMDIFFUSION_H
+#pragma once
 
 // Including the "Diffusion" Kernel here so we can extend it
 #include "Diffusion.h"
@@ -31,4 +30,3 @@ protected:
   Real _D;
 };
 
-#endif /* COEFFPARAMDIFFUSION_H */

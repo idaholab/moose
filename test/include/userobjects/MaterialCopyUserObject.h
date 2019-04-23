@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATERIALCOPYUSEROBJECT_H
-#define MATERIALCOPYUSEROBJECT_H
+#pragma once
 
 #include "GeneralUserObject.h"
 
@@ -45,4 +44,3 @@ protected:
   Real _time_tol;
 };
 
-#endif

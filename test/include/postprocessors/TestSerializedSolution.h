@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TESTSERIALIZEDSOLUTION_H
-#define TESTSERIALIZEDSOLUTION_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 
@@ -51,4 +50,3 @@ protected:
   Real _sum;
 };
 
-#endif

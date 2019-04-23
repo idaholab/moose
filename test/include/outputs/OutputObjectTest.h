@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef OUTPUTOBJECTTEST_H
-#define OUTPUTOBJECTTEST_H
+#pragma once
 
 // MOOSE includes
 #include "Console.h"
@@ -43,4 +42,3 @@ private:
   MooseEnum _type;
 };
 
-#endif // OUTPUTOBJECTTEST_H

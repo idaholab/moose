@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RECOMPUTEMATERIAL_H
-#define RECOMPUTEMATERIAL_H
+#pragma once
 
 // Moose includes
 #include "Material.h"
@@ -40,4 +39,3 @@ private:
   const Real & _constant;
 };
 
-#endif /* RECOMPUTEMATERIAL_H */

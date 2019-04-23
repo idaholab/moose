@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATERIALTESTINDICATOR_H
-#define MATERIALTESTINDICATOR_H
+#pragma once
 
 // MOOSE includes
 #include "Indicator.h"
@@ -44,4 +43,3 @@ protected:
   MooseVariable & _indicator_var;
 };
 
-#endif // MATERIALTESTINDICATOR_H

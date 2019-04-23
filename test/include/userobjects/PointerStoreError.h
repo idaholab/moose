@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POINTERSTOREERROR_H
-#define POINTERSTOREERROR_H
+#pragma once
 
 #include "GeneralUserObject.h"
 
@@ -40,4 +39,3 @@ protected:
   TypeWithNoStore *& _pointer_data;
 };
 
-#endif /* POINTERSTOREERROR_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef STRIPEMESH_H_
-#define STRIPEMESH_H_
+#pragma once
 
 #include "GeneratedMesh.h"
 
@@ -37,4 +36,3 @@ protected:
   unsigned int _n_stripes; ///< number of stripes
 };
 
-#endif /* STRIPEMESH_H_ */

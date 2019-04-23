@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EXPLICITODE_H_
-#define EXPLICITODE_H_
+#pragma once
 
 #include "AuxScalarKernel.h"
 
@@ -35,4 +34,3 @@ protected:
   Real _lambda;
 };
 
-#endif /* EXPLICITODE_H_ */

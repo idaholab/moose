@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PERIODICDISTANCEAUX_H
-#define PERIODICDISTANCEAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -33,4 +32,3 @@ protected:
   Point _point;
 };
 
-#endif /* PERIODICDISTANCEAUX_H */

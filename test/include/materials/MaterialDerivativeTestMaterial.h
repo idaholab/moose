@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATERIALDERIVATIVETESTMATERIAL_H_
-#define MATERIALDERIVATIVETESTMATERIAL_H_
+#pragma once
 
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
@@ -41,4 +40,3 @@ protected:
   const VariableValue & _v;
 };
 
-#endif // MATERIALDERIVATIVETESTMATERIAL_H

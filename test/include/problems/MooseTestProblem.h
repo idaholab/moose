@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSETESTPROBLEM_H
-#define MOOSETESTPROBLEM_H
+#pragma once
 
 #include "FEProblem.h"
 
@@ -28,4 +27,3 @@ public:
   virtual ~MooseTestProblem();
 };
 
-#endif /* MOOSETESTPROBLEM_H */

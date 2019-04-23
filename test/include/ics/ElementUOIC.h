@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMENTUOIC_H
-#define ELEMENTUOIC_H
+#pragma once
 
 #include "InitialCondition.h"
 #include "MooseMesh.h"
@@ -38,4 +37,3 @@ private:
   const MooseEnum _field_type;
 };
 
-#endif /* ELEMENTUOIC_H */

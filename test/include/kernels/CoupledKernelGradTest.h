@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COUPLEDKERNELGRADTEST_H
-#define COUPLEDKERNELGRADTEST_H
+#pragma once
 
 #include "KernelGrad.h"
 
@@ -33,4 +32,3 @@ protected:
   unsigned int _var2_num;
 };
 
-#endif /* COUPLEDKERNELGRADTEST_H */

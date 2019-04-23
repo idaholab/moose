@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ROBINBC_H
-#define ROBINBC_H
+#pragma once
 
 #include "IntegratedBC.h"
 
@@ -27,4 +26,3 @@ protected:
   virtual Real computeQpJacobian();
 };
 
-#endif // ROBINBC_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CHECKCURRENTEXECAUX_H
-#define CHECKCURRENTEXECAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -28,4 +27,3 @@ protected:
   const FEProblemBase & _problem;
 };
 
-#endif // CHECKCURRENTEXECAUX_H

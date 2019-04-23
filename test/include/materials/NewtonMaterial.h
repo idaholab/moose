@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NEWTONMATERIAL_H
-#define NEWTONMATERIAL_H
+#pragma once
 
 // MOOSE includes
 #include "Material.h"
@@ -44,4 +43,3 @@ private:
   Material & _discrete;
 };
 
-#endif /* NEWTONMATERIAL_H */

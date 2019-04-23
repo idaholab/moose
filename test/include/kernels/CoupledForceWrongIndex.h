@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COUPLEDFORCEWRONGINDEX_H
-#define COUPLEDFORCEWRONGINDEX_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -37,4 +36,3 @@ private:
   std::vector<const VariableValue *> _v;
 };
 
-#endif // COUPLEDFORCEWRONGINDEX_H

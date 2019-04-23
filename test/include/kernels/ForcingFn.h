@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FORCINGFN_H_
-#define FORCINGFN_H_
+#pragma once
 
 #include "Kernel.h"
 
@@ -26,4 +25,3 @@ protected:
 template <>
 InputParameters validParams<ForcingFn>();
 
-#endif /* FORCINGFN_H_ */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADAPTANDMODIFY_H
-#define ADAPTANDMODIFY_H
+#pragma once
 
 #include "Transient.h"
 
@@ -31,4 +30,3 @@ protected:
   unsigned int _adapt_cycles;
 };
 
-#endif // ADAPTANDMODIFY_H

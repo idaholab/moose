@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RESTARTABLETYPESCHECKER_H
-#define RESTARTABLETYPESCHECKER_H
+#pragma once
 
 #include "RestartableTypes.h"
 
@@ -37,4 +36,3 @@ public:
   void clearTypes();
 };
 
-#endif /* RESTARTABLETYPESCHECKER_H */

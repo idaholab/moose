@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POSTPROCESSORCED_H
-#define POSTPROCESSORCED_H
+#pragma once
 
 #include "ScalarKernel.h"
 
@@ -59,4 +58,3 @@ protected:
   const PostprocessorValue & _pp_value;
 };
 
-#endif /* POSTPROCESSORCED_H */

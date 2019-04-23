@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RESTARTABLETYPES_H
-#define RESTARTABLETYPES_H
+#pragma once
 
 #include "GeneralUserObject.h"
 
@@ -111,4 +110,3 @@ protected:
   DenseMatrix<Real> & _dense_matrix_data;
 };
 
-#endif /* RESTARTABLETYPES_H */

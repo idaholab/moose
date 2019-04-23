@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DIRICHLETBCFUNCXYZ0_H
-#define DIRICHLETBCFUNCXYZ0_H
+#pragma once
 
 #include "NodalBC.h"
 #include "UsrFunc.h"
@@ -49,4 +48,3 @@ private:
   Real _omega0;
 };
 
-#endif // DIRICHLETBCFUNCXYZ0_H

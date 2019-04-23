@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DUMMYEXTERNALPROBLEM_H
-#define DUMMYEXTERNALPROBLEM_H
+#pragma once
 
 #include "ExternalProblem.h"
 
@@ -31,4 +30,3 @@ public:
   virtual bool converged() override { return true; }
 };
 
-#endif /* DUMMYEXTERNALPROBLEM_H */

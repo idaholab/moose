@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MTUSEROBJECT_H
-#define MTUSEROBJECT_H
+#pragma once
 
 #include "GeneralUserObject.h"
 
@@ -70,4 +69,3 @@ protected:
   static const unsigned int NUM = 10;
 };
 
-#endif /* MTUSEROBJECT_H */

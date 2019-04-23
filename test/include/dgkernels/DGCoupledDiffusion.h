@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DGCOUPLEDDIFFUSION_H
-#define DGCOUPLEDDIFFUSION_H
+#pragma once
 
 #include "DGKernel.h"
 
@@ -36,4 +35,3 @@ protected:
   unsigned int _v_id;
 };
 
-#endif

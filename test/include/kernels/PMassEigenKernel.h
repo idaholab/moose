@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PMASSEIGENKERNEL_H
-#define PMASSEIGENKERNEL_H
+#pragma once
 
 #include "EigenKernel.h"
 
@@ -35,4 +34,3 @@ protected:
   Real _p;
 };
 
-#endif // PMASSEIGENKERNEL_H

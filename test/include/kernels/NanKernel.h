@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NANKERNEL_H
-#define NANKERNEL_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -38,4 +37,3 @@ private:
   unsigned int _deprecated_no_default;
 };
 
-#endif // NANKERNEL_H

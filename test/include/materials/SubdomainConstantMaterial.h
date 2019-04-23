@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SUBDOMAINCONSTANTMATERIAL_H
-#define SUBDOMAINCONSTANTMATERIAL_H
+#pragma once
 
 #include "Material.h"
 
@@ -33,4 +32,3 @@ protected:
   std::map<SubdomainID, Real> _mapped_values;
 };
 
-#endif // SUBDOMAINCONSTANTMATERIAL_H

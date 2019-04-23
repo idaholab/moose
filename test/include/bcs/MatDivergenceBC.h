@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATDIVERGENCEBC_H
-#define MATDIVERGENCEBC_H
+#pragma once
 
 #include "DivergenceBC.h"
 
@@ -33,4 +32,3 @@ protected:
   const MaterialProperty<Real> & _mat;
 };
 
-#endif /* MATDIVERGENCEBC_H */

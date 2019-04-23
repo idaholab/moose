@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INSIDEVALUEPPS_H
-#define INSIDEVALUEPPS_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 
@@ -36,4 +35,3 @@ protected:
   Real _value;
 };
 
-#endif /* INSIDEVALUEPPS_H */

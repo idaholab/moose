@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VECTORPOSTPROCESSORSCALARKERNEL_H
-#define VECTORPOSTPROCESSORSCALARKERNEL_H
+#pragma once
 
 #include "ODEKernel.h"
 
@@ -36,4 +35,3 @@ protected:
   unsigned int _index;
 };
 
-#endif /* VECTORPOSTPROCESSORSCALARKERNEL_H */

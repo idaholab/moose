@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MULTIPLEUPDATEAUX_H_
-#define MULTIPLEUPDATEAUX_H_
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -34,4 +33,3 @@ protected:
   VariableValue & _var2;
 };
 
-#endif /* MULTIPLEUPDATEAUX_H_ */

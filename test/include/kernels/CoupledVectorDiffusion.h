@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COUPLEDVECTORDIFFUSION_H
-#define COUPLEDVECTORDIFFUSION_H
+#pragma once
 
 #include "VectorKernel.h"
 
@@ -32,4 +31,3 @@ protected:
   unsigned _v_id;
 };
 
-#endif /* COUPLEDVECTORDIFFUSION_H */

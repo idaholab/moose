@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMENTL2DIFF_H
-#define ELEMENTL2DIFF_H
+#pragma once
 
 #include "ElementIntegralVariablePostprocessor.h"
 
@@ -34,4 +33,3 @@ protected:
   const VariableValue & _u_old;
 };
 
-#endif // ELEMENTL2DIFF_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTINGINITIALTEST_H
-#define COMPUTINGINITIALTEST_H
+#pragma once
 
 #include "Material.h"
 
@@ -34,4 +33,3 @@ protected:
   const MaterialProperty<Real> & _thermal_conductivity_old;
 };
 
-#endif // COMPUTINGINITIALTEST_H

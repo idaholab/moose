@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef BNDTESTDIRICHLETBC_H
-#define BNDTESTDIRICHLETBC_H
+#pragma once
 
 #include "NodalBC.h"
 
@@ -34,4 +33,3 @@ protected:
   const Real & _value;
 };
 
-#endif /* BNDTESTDIRICHLETBC_H */

@@ -6,8 +6,8 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#ifndef ADCOUPLEDVALUETEST_H_
-#define ADCOUPLEDVALUETEST_H_
+
+#pragma once
 
 #include "ADKernel.h"
 
@@ -30,4 +30,3 @@ protected:
   usingKernelMembers;
 };
 
-#endif /* ADCOUPLEDVALUETEST_H_ */

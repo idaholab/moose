@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COUPLEDKERNELVALUETEST_H
-#define COUPLEDKERNELVALUETEST_H
+#pragma once
 
 #include "KernelValue.h"
 
@@ -32,4 +31,3 @@ protected:
   unsigned int _var2_num;
 };
 
-#endif /* COUPLEDKERNELVALUETEST_H */

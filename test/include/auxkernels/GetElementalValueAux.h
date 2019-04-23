@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GETELEMENTALVALUEAUX_H
-#define GETELEMENTALVALUEAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -35,4 +34,3 @@ protected:
   const MooseEnum & _time_level;
 };
 
-#endif // GETELEMENTALVALUEAUX_H

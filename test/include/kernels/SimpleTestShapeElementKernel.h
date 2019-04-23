@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SIMPLETESTSHAPEELEMENTKERNEL_H
-#define SIMPLETESTSHAPEELEMENTKERNEL_H
+#pragma once
 
 #include "NonlocalKernel.h"
 #include "Assembly.h"
@@ -37,4 +36,3 @@ protected:
 template <>
 InputParameters validParams<SimpleTestShapeElementKernel>();
 
-#endif // SIMPLETESTSHAPEELEMENTKERNEL_H

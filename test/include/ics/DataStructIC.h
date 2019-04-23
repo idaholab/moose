@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DATASTRUCTIC_H
-#define DATASTRUCTIC_H
+#pragma once
 
 #include "InitialCondition.h"
 #include "MooseMesh.h"
@@ -37,4 +36,3 @@ private:
   std::map<dof_id_type, Real> _data;
 };
 
-#endif /* DATASTRUCTIC_H */
