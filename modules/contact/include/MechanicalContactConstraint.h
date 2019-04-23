@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MECHANICALCONTACTCONSTRAINT_H
-#define MECHANICALCONTACTCONSTRAINT_H
+#pragma once
 
 // MOOSE includes
 #include "NodeFaceConstraint.h"
@@ -141,4 +140,3 @@ protected:
   static Threads::spin_mutex _contact_set_mutex;
 };
 
-#endif

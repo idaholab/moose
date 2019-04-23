@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PETSCCONTACTLINESEARCH_H
-#define PETSCCONTACTLINESEARCH_H
+#pragma once
 
 #include "libmesh/libmesh_common.h"
 #include "libmesh/petsc_macro.h"
@@ -47,4 +46,3 @@ protected:
 
 #endif // PETSC_VERSION_LESS_THAN(3, 3, 0)
 #endif // LIBMESH_HAVE_PETSC
-#endif // PETSCCONTACTLINESEARCH_H

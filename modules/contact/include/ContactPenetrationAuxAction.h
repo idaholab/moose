@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CONTACTPENETRATIONAUXACTION_H
-#define CONTACTPENETRATIONAUXACTION_H
+#pragma once
 
 #include "Action.h"
 #include "MooseTypes.h"
@@ -32,4 +31,3 @@ private:
   const MooseEnum _order;
 };
 
-#endif // CONTACTACTION_H
