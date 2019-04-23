@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PETSCDIFFUSIONFDM_H
-#define PETSCDIFFUSIONFDM_H
+#pragma once
 
 #include "libmesh/libmesh.h" // Real, LIBMESH_HAVE_PETSC
 
@@ -28,4 +27,3 @@ PETSC_EXTERN PetscErrorCode FormInitialSolution(TS, Vec, void *);
 
 #endif
 
-#endif /* PETSCDIFFUSIONFDM_H */
