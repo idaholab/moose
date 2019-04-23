@@ -34,6 +34,7 @@ Peacock will attempt to find your application's executable, and then the Input f
 
 !alert! warning
 Do not use `sudo` when running Peacock.
+!alert-end!
 
 ## Input File Tab
 
