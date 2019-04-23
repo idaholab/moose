@@ -9,7 +9,7 @@
 
 import re, os, json
 from timeit import default_timer as clock
-from TestHarness import StatusSystem
+from TestHarness.StatusSystem import StatusSystem
 
 
 class Timer(object):
@@ -58,22 +58,29 @@ class Job(object):
         self.report_timer = None
         self.__slots = None
         self.__meta_data = {}
-        self.__status_code = 0x0
-        self.__status_status = None
-        self.__status_message = None
-        self.__status_color = None
 
-        # Enumerate available job statuses
-        self.status = StatusSystem.JobStatus()
+        # Alternate text we want to print as part of our status instead of the
+        # pre-formatted status text (LAUNCHED (pbs) instead of FINISHED for example)
+        self.__job_message = ''
 
-        self.hold = self.status.hold
-        self.queued = self.status.queued
-        self.running = self.status.running
-        self.skip = self.status.skip
-        self.crash = self.status.crash
-        self.error = self.status.error
-        self.timeout = self.status.timeout
-        self.finished = self.status.finished
+        ### Enumerate the job statuses we want to use
+        self.job_status = StatusSystem()
+
+        self.hold = self.job_status.hold
+        self.queued = self.job_status.queued
+        self.running = self.job_status.running
+        self.skip = self.job_status.skip
+        self.error = self.job_status.error
+        self.timeout = self.job_status.timeout
+        self.finished = self.job_status.finished
+
+        self.__finished_statuses = [self.skip,
+                                    self.error,
+                                    self.timeout,
+                                    self.finished]
+
+        # Initialize jobs with a holding status
+        self.setStatus(self.hold)
 
     def getDAG(self):
         """ Return the DAG associated with this tester """
@@ -90,10 +97,6 @@ class Job(object):
     def getTestNameShort(self):
         """ Return the shorthand Test name """
         return self.getTestName().split('.')[1]
-
-    def getTesterStatus(self):
-        """ Wrapper method to return a testers current status """
-        return self.__tester.getStatus()
 
     def getPrereqs(self):
         """ Wrapper method to return the testers prereqs """
@@ -114,6 +117,10 @@ class Job(object):
     def clearCaveats(self):
         """ Wrapper method for clearing caveats """
         return self.__tester.clearCaveats()
+
+    def getCommand(self):
+        """ Wrapper method for returing command """
+        return self.__tester.getCommand(self.options)
 
     def getRunnable(self):
         """ Wrapper method to return getRunnable """
@@ -246,74 +253,76 @@ class Job(object):
         else:
             return 0.0
 
-    def _setMessage(self, status_code, status, message, color):
-        self.__status_code = status_code
-        self.__status_status = status
-        self.__status_message = message
-        self.__status_color = color
+    def getStatus(self):
+        return self.job_status.getStatus()
+
+    def setStatus(self, status, message=''):
+        if self.isFinished():
+            return self.getStatus()
+        # Try and preserve job messages
+        if not self.__job_message and message:
+            self.__job_message = message
+        return self.job_status.setStatus(status)
+
+    def createStatus(self):
+        return self.job_status.createStatus()
+
+    def getStatusMessage(self):
+        return self.__job_message
+
+    ### Boolean status comparisons based on current Job _and_ Tester status. All finalized status calls
+    ### should now call job.isSomeStatus for the definitive answer.
+    # the following are more job related...
+    def isError(self):
+        _status = self.getStatus()
+        return _status == self.error or _status == self.timeout
+    def isSkip(self):
+        return (self.getStatus() == self.skip and self.__tester.isSkip()) \
+            or (self.getStatus() == self.skip and self.isNoStatus())
+    def isHold(self):
+        return self.getStatus() == self.hold
+    def isQueued(self):
+        _status = self.getStatus()
+        return (_status == self.queued and self.isNoStatus()) \
+            or (_status in self.__finished_statuses and self.__tester.isQueued())
+    def isRunning(self):
+        return self.getStatus() == self.running
+    def isTimeout(self):
+        return self.getStatus() == self.timeout
+    def isFinished(self):
+        return self.getStatus() in self.__finished_statuses
+
+    # the following more tester related...
+    def isSilent(self):
+        return self.__tester.isSilent()
+    def isNoStatus(self):
+        return self.__tester.isNoStatus()
+    def isSilent(self):
+        return self.__tester.isSilent() or (not self.options.report_skipped and self.isSkip())
+    def isPass(self):
+        return self.__tester.isPass()
+    def isFail(self):
+        return self.__tester.isFail() or self.isError()
+    def isDiff(self):
+        return self.__tester.isDiff()
+    def isDeleted(self):
+        return self.__tester.isDeleted()
 
     def getJointStatus(self):
         """
-        Returns a tuple with the most relevant data about this job (see getConglumerateStatus)
-
-        returns:
-            (status, status message, status message color, exit code)
+        Return the most accurate message possible, based on the statuses of both the Tester and Job.
+        Most of the time, we want to return a Tester status. As this class will have the most detail.
         """
-        self = self._getConglumerateStatus()
-        return self.__status_status, self.__status_message, self.__status_color, self.__status_code
-
-    def _getConglumerateStatus(self):
-        """ Use both job and tester statuses to form a final status """
-        # If the tester has no status, then default to a job status
+        # Tester has no status, use a job status instead
         if self.isNoStatus():
-            self._setMessage(self.__status_code, self.getStatus().status, self.getStatusMessage(), self.getStatus().color)
+            return (self.getStatus().status,
+                    self.getStatusMessage(),
+                    self.getStatus().color,
+                    self.getStatus().code)
 
-        # Use Tester statuses over Job statuses when available
+        # Tester has a finished status of some sort
         else:
-            self._setMessage(self.__tester.getStatusCode(), self.__tester.getStatus().status, self.__tester.getStatusMessage(), self.__tester.getStatus().color)
-
-        return self
-
-    # Wrapper methods for adjusting statuses
-    def getStatus(self):
-        return self.status.getStatus()
-    def getStatusMessage(self):
-        return self.status.getStatusMessage()
-    def getStatusCode(self):
-        return self.__status_code | self.__tester.getStatusCode()
-    def setStatus(self, status, message=''):
-        self.__status_status = status.status
-        self.__status_code = self.__status_code | status.code
-        self.__status_message = message
-        self.__status_color = status.color
-        return self.status.setStatus(status, message)
-
-    # Wrapper methods for returning bool status on job and tester
-    def isHold(self):
-        return self.status.isHold()
-    def isSkip(self):
-        return (self.status.isSkip() and (self.__tester.isSkip() or self.__tester.isNoStatus()))
-    def isQueued(self):
-        return self.status.isQueued()
-    def isRunning(self):
-        return self.status.isRunning()
-    def isCrash(self):
-        return self.status.isCrash()
-    def isError(self):
-        return self.status.isError()
-    def isFail(self):
-        return self.status.isFail() or self.__tester.isFail()
-    def isFinished(self):
-        return self.status.isFinished()
-    def isTimeout(self):
-        return self.status.isTimeout()
-    def isSilent(self):
-        return self.__tester.isSilent()
-    def isDeleted(self):
-        return self.__tester.isDeleted()
-    def isPass(self):
-        return self.__tester.isPass()
-    def isDiff(self):
-        return self.__tester.isDiff()
-    def isNoStatus(self):
-        return self.__tester.isNoStatus()
+            return (self.__tester.getStatus().status,
+                    self.__tester.getStatusMessage(),
+                    self.__tester.getStatus().color,
+                    self.__tester.getStatus().code)

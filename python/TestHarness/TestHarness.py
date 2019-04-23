@@ -321,9 +321,6 @@ class TestHarness:
         # Augment the Testers with additional information directly from the TestHarness
         for tester in testers:
 
-            # Initialize the status system for each tester object immediately after creation
-            tester.initStatusSystem(self.options)
-
             self.augmentParameters(file, tester, testroot_params)
             if testroot_params.get("caveats"):
                 # Show what executable we are using if using a different testroot file
@@ -439,22 +436,18 @@ class TestHarness:
         else:
             return True
 
-    def printOutput(self, job):
+    def printOutput(self, job, color):
         """ Method to print a testers output to the screen """
-        tester = job.getTester()
         output = ''
         # Print what ever status the tester has at the time
-        if self.options.verbose or (tester.isFail() and not self.options.quiet):
-            output = 'Working Directory: ' + tester.getTestDir() + '\nRunning command: ' + tester.getCommand(self.options) + '\n'
+        if self.options.verbose or (job.isFail() and not self.options.quiet):
+            output = 'Working Directory: ' + job.getTestDir() + '\nRunning command: ' + job.getCommand() + '\n'
             output += util.trimOutput(job, self.options)
             output = output.replace('\r', '\n')  # replace the carriage returns with newlines
             lines = output.split('\n')
 
-            # Obtain color based on test status
-            color = tester.getColor()
-
             if output != '':
-                test_name = util.colorText(tester.getTestName()  + ": ", color, colored=self.options.colored, code=self.options.code)
+                test_name = util.colorText(job.getTestName()  + ": ", color, colored=self.options.colored, code=self.options.code)
                 output = test_name + ("\n" + test_name).join(lines)
                 print(output)
         return output
@@ -467,10 +460,11 @@ class TestHarness:
         if not job.isSilent():
             # Print results and perform any desired post job processing
             if job.isFinished():
-                self.error_code = self.error_code | job.getStatusCode()
+                status, message, color, exit_code = job.getJointStatus()
+                self.error_code = self.error_code | exit_code
 
                 # perform printing of application output if so desired
-                self.printOutput(job)
+                self.printOutput(job, color)
 
                 # Print status with caveats
                 print(util.formatResult(job, self.options, caveats=True))
@@ -478,7 +472,7 @@ class TestHarness:
                 timing = job.getTiming()
 
                 # Save these results for 'Final Test Result' summary
-                self.test_table.append( (job, job.getStatus().status, timing) )
+                self.test_table.append( (job, status, timing) )
 
                 self.postRun(job.specs, timing)
 
@@ -580,26 +574,27 @@ class TestHarness:
 
         # Write some useful data to our results_storage
         for job in all_jobs:
-            tester = job.getTester()
-
             # If queueing, do not store silent results in session file
-            if tester.isSilent() and self.options.queueing:
+            if job.isSilent() and self.options.queueing:
                 continue
 
+            status, message, message_color, exit_code = job.getJointStatus()
+
             # Create empty key based on TestDir, or re-inialize with existing data so we can append to it
-            self.options.results_storage[tester.getTestDir()] = self.options.results_storage.get(tester.getTestDir(), {})
-            self.options.results_storage[tester.getTestDir()][tester.getTestName()] = {'NAME'      : job.getTestNameShort(),
-                                                                                       'LONG_NAME' : tester.getTestName(),
-                                                                                       'TIMING'    : job.getTiming(),
-                                                                                       'STATUS'    : tester.getStatus().status,
-                                                                                       'FAIL'      : tester.isFail(),
-                                                                                       'COLOR'     : tester.getStatus().color,
-                                                                                       'CAVEATS'   : list(tester.getCaveats()),
-                                                                                       'OUTPUT'    : job.getOutput(),
-                                                                                       'COMMAND'   : tester.getCommand(self.options)}
+            self.options.results_storage[job.getTestDir()] = self.options.results_storage.get(job.getTestDir(), {})
+            self.options.results_storage[job.getTestDir()][job.getTestName()] = {'NAME'           : job.getTestNameShort(),
+                                                                                 'LONG_NAME'      : job.getTestName(),
+                                                                                 'TIMING'         : job.getTiming(),
+                                                                                 'STATUS'         : status,
+                                                                                 'STATUS_MESSAGE' : message,
+                                                                                 'FAIL'           : job.isFail(),
+                                                                                 'COLOR'          : message_color,
+                                                                                 'CAVEATS'        : list(job.getCaveats()),
+                                                                                 'OUTPUT'         : job.getOutput(),
+                                                                                 'COMMAND'        : job.getCommand()}
 
             # Additional data to store (overwrites any previous matching keys)
-            self.options.results_storage[tester.getTestDir()].update(job.getMetaData())
+            self.options.results_storage[job.getTestDir()].update(job.getMetaData())
 
         if self.options.output_dir:
             self.results_storage = os.path.join(self.options.output_dir, self.results_storage)
@@ -625,10 +620,8 @@ class TestHarness:
             if self.options.file:
                 with open(os.path.join(self.output_dir, self.options.file), 'w') as f:
                     for job in all_jobs:
-                        tester = job.getTester()
-
                         # Do not write information about silent tests
-                        if tester.isSilent():
+                        if job.isSilent():
                             continue
 
                         formated_results = util.formatResult( job, self.options, result=job.getOutput(), color=False)
@@ -638,28 +631,28 @@ class TestHarness:
             if ((self.options.ok_files and self.num_passed)
                 or (self.options.fail_files and self.num_failed)):
                 for job in all_jobs:
-                    tester = job.getTester()
+                    status, message, message_color, exit_code = job.getJointStatus()
 
                     if self.options.output_dir:
                         output_dir = self.options.output_dir
                     else:
-                        output_dir = tester.getTestDir()
+                        output_dir = job.getTestDir()
 
                     # Yes, by design test dir will be apart of the output file name
-                    output_file = os.path.join(output_dir, '.'.join([os.path.basename(tester.getTestDir()),
+                    output_file = os.path.join(output_dir, '.'.join([os.path.basename(job.getTestDir()),
                                                                      job.getTestNameShort(),
-                                                                     tester.getStatus().status,
+                                                                     status,
                                                                      'txt']))
 
                     formated_results = util.formatResult(job, self.options, result=job.getOutput(), color=False)
 
                     # Passing tests
-                    if self.options.ok_files and tester.isPass():
+                    if self.options.ok_files and job.isPass():
                         with open(output_file, 'w') as f:
                             f.write(formated_results)
 
                     # Failing tests
-                    if self.options.fail_files and tester.isFail():
+                    if self.options.fail_files and job.isFail():
                         with open(output_file, 'w') as f:
                             f.write(formated_results)
 

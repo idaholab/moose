@@ -254,7 +254,7 @@ def formatResult(job, options, result='', color=True, **kwargs):
     if job.getCaveats() and caveat_index is not None and 'caveats' in kwargs and kwargs['caveats']:
         caveats = ','.join(job.getCaveats())
         caveat_color = message_color
-        if job.isPass() or job.isSkip():
+        if not job.isFail():
             caveat_color = 'CYAN'
 
         f_caveats = '[' + caveats + ']'
