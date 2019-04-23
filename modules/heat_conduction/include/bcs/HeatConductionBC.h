@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef HEATCONDUCTIONBC_H
-#define HEATCONDUCTIONBC_H
+#pragma once
 
 #include "FluxBC.h"
 
@@ -33,4 +32,3 @@ protected:
   const MaterialProperty<Real> & _k;
 };
 
-#endif /* HEATCONDUCTIONBC_H */

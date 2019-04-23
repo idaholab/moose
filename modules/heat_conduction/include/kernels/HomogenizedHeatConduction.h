@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef HOMOGENIZEDHEATCONDUCTION_H
-#define HOMOGENIZEDHEATCONDUCTION_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -32,4 +31,3 @@ protected:
 template <>
 InputParameters validParams<HomogenizedHeatConduction>();
 
-#endif // HOMOGENIZEDHEATCONDUCTION_H

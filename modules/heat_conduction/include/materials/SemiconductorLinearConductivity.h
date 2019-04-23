@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SEMICONDUCTORLINEARCONDUCTIVITY_H
-#define SEMICONDUCTORLINEARCONDUCTIVITY_H
+#pragma once
 
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
@@ -46,4 +45,3 @@ private:
   MaterialProperty<Real> & _delectric_conductivity_dT;
 };
 
-#endif // SEMICONDUCTORLINEARCONDUCTIVITY_H
