@@ -382,7 +382,9 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
         // If we were looking for a steady state, but didn't reach one, we still need to output one
         // more time, regardless of interval
-        if (!at_steady)
+        // Note: if we turn off the output for all time steps for sub-scycling, we still need to
+        // have one output at the end.
+        if ((!at_steady && _detect_steady_state) || !_output_sub_cycles)
           problem.outputStep(EXEC_FORCED);
 
       } // sub_cycling
