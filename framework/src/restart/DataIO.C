@@ -168,22 +168,6 @@ dataStore(std::ostream & stream, std::stringstream *& s, void * context)
   dataStore(stream, *s, context);
 }
 
-template <>
-void
-dataStore(std::ostream & stream, DenseMatrix<Real> & v, void * context)
-{
-  unsigned int m = v.m();
-  unsigned int n = v.n();
-  stream.write((char *)&m, sizeof(m));
-  stream.write((char *)&n, sizeof(n));
-  for (unsigned int i = 0; i < v.m(); i++)
-    for (unsigned int j = 0; j < v.n(); j++)
-    {
-      Real r = v(i, j);
-      dataStore(stream, r, context);
-    }
-}
-
 template <typename T>
 void
 dataStore(std::ostream & stream, TensorValue<T> & v, void * context)
@@ -198,6 +182,25 @@ dataStore(std::ostream & stream, TensorValue<T> & v, void * context)
 
 template void dataStore(std::ostream & stream, TensorValue<Real> & v, void * context);
 template void dataStore(std::ostream & stream, TensorValue<DualReal> & v, void * context);
+
+template <typename T>
+void
+dataStore(std::ostream & stream, DenseMatrix<T> & v, void * context)
+{
+  unsigned int m = v.m();
+  unsigned int n = v.n();
+  stream.write((char *)&m, sizeof(m));
+  stream.write((char *)&n, sizeof(n));
+  for (unsigned int i = 0; i < m; i++)
+    for (unsigned int j = 0; j < n; j++)
+    {
+      T r = v(i, j);
+      dataStore(stream, r, context);
+    }
+}
+
+template void dataStore(std::ostream & stream, DenseMatrix<Real> & v, void * context);
+template void dataStore(std::ostream & stream, DenseMatrix<DualReal> & v, void * context);
 
 template <typename T>
 void
@@ -375,23 +378,6 @@ dataLoad(std::istream & stream, std::stringstream *& s, void * context)
   dataLoad(stream, *s, context);
 }
 
-template <>
-void
-dataLoad(std::istream & stream, DenseMatrix<Real> & v, void * /*context*/)
-{
-  unsigned int nr = 0, nc = 0;
-  stream.read((char *)&nr, sizeof(nr));
-  stream.read((char *)&nc, sizeof(nc));
-  v.resize(nr, nc);
-  for (unsigned int i = 0; i < v.m(); i++)
-    for (unsigned int j = 0; j < v.n(); j++)
-    {
-      Real r = 0;
-      stream.read((char *)&r, sizeof(r));
-      v(i, j) = r;
-    }
-}
-
 template <typename T>
 void
 dataLoad(std::istream & stream, TensorValue<T> & v, void * context)
@@ -409,6 +395,26 @@ dataLoad(std::istream & stream, TensorValue<T> & v, void * context)
 
 template void dataLoad(std::istream & stream, TensorValue<Real> & v, void * context);
 template void dataLoad(std::istream & stream, TensorValue<DualReal> & v, void * context);
+
+template <typename T>
+void
+dataLoad(std::istream & stream, DenseMatrix<T> & v, void * context)
+{
+  unsigned int m = 0, n = 0;
+  stream.read((char *)&m, sizeof(m));
+  stream.read((char *)&n, sizeof(n));
+  v.resize(m, n);
+  for (unsigned int i = 0; i < m; i++)
+    for (unsigned int j = 0; j < n; j++)
+    {
+      T r = 0;
+      dataLoad(stream, r, context);
+      v(i, j) = r;
+    }
+}
+
+template void dataLoad(std::istream & stream, DenseMatrix<Real> & v, void * context);
+template void dataLoad(std::istream & stream, DenseMatrix<DualReal> & v, void * context);
 
 template <typename T>
 void
