@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TWOPHASEFLUIDPROPERTIESINDEPENDENT_H
-#define TWOPHASEFLUIDPROPERTIESINDEPENDENT_H
+#pragma once
 
 #include "TwoPhaseFluidProperties.h"
 
@@ -41,4 +40,3 @@ public:
   [[noreturn]] void throwNotImplementedError() const;
 };
 
-#endif /* TWOPHASEFLUIDPROPERTIESINDEPENDENT_H */

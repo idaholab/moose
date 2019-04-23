@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CO2FLUIDPROPERTIES_H
-#define CO2FLUIDPROPERTIES_H
+#pragma once
 
 #include "HelmholtzFluidProperties.h"
 #include <array>
@@ -259,4 +258,3 @@ protected:
 
 #pragma GCC diagnostic pop
 
-#endif /* CO2FLUIDPROPERTIES_H */

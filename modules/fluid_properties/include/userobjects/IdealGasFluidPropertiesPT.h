@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef IDEALGASFLUIDPROPERTIESPT_H
-#define IDEALGASFLUIDPROPERTIESPT_H
+#pragma once
 
 #include "IdealGasFluidProperties.h"
 
@@ -32,4 +31,3 @@ public:
 
 #pragma GCC diagnostic pop
 
-#endif /* IDEALGASFLUIDPROPERTIESPT_H */

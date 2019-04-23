@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef WATER97FLUIDPROPERTIES_H
-#define WATER97FLUIDPROPERTIES_H
+#pragma once
 
 #include "SinglePhaseFluidProperties.h"
 #include <array>
@@ -1301,4 +1300,3 @@ protected:
 
 #pragma GCC diagnostic pop
 
-#endif /* WATER97FLUIDPROPERTIES_H */

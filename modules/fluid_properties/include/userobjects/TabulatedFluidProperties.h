@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TABULATEDFLUIDPROPERTIES_H
-#define TABULATEDFLUIDPROPERTIES_H
+#pragma once
 
 #include "SinglePhaseFluidProperties.h"
 #include "DelimitedFileReader.h"
@@ -245,4 +244,3 @@ protected:
 
 #pragma GCC diagnostic pop
 
-#endif /* TABULATEDFLUIDPROPERTIES_H */

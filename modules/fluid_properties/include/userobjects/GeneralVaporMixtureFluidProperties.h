@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GENERALVAPORMIXTUREFLUIDPROPERTIES_H
-#define GENERALVAPORMIXTUREFLUIDPROPERTIES_H
+#pragma once
 
 #include "VaporMixtureFluidProperties.h"
 
@@ -186,4 +185,3 @@ protected:
   mutable Real _T_guess;
 };
 
-#endif /* GENERALVAPORMIXTUREFLUIDPROPERTIES_H */

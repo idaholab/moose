@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef BRENTSMETHOD_H
-#define BRENTSMETHOD_H
+#pragma once
 
 // MOOSE includes
 #include "Moose.h"
@@ -40,4 +39,3 @@ void bracket(std::function<Real(Real)> const & f, Real & x1, Real & x2);
 Real root(std::function<Real(Real)> const & f, Real x1, Real x2, Real tol = 1.0e-12);
 }
 
-#endif // BRENTSMETHOD_H

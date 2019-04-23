@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DIMENSIONLESSFLOWNUMBERS_H
-#define DIMENSIONLESSFLOWNUMBERS_H
+#pragma once
 
 #include "libmesh/libmesh_common.h"
 using namespace libMesh;
@@ -84,4 +83,3 @@ Real peclet(Real vel, Real L, Real diffusivity);
 
 } // namespace fp
 
-#endif

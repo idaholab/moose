@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MULTICOMPONENTFLUIDPROPERTIES_H
-#define MULTICOMPONENTFLUIDPROPERTIES_H
+#pragma once
 
 #include "FluidProperties.h"
 #include "SinglePhaseFluidProperties.h"
@@ -280,4 +279,3 @@ public:
   virtual const SinglePhaseFluidProperties & getComponent(unsigned int component) const;
 };
 
-#endif /* MULTICOMPONENTFLUIDPROPERTIES_H */
