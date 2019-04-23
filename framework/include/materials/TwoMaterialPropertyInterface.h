@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TWOMATERIALPROPERTYINTERFACE_H
-#define TWOMATERIALPROPERTYINTERFACE_H
+#pragma once
 
 #include "MaterialPropertyInterface.h"
 
@@ -111,4 +110,3 @@ TwoMaterialPropertyInterface::getNeighborMaterialPropertyOlder(const std::string
     return _neighbor_material_data->getPropertyOlder<T>(prop_name);
 }
 
-#endif // TWOMATERIALPROPERTYINTERFACE_H

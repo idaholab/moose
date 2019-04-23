@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RESURRECTOR_H
-#define RESURRECTOR_H
+#pragma once
 
 // MOOSE includes
 #include "RestartableDataIO.h"
@@ -72,4 +71,3 @@ protected:
   static const std::string RESTARTABLE_DATA_EXT;
 };
 
-#endif /* RESURRECTOR_H */

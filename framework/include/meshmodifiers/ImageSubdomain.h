@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef IMAGESUBDOMAIN_H
-#define IMAGESUBDOMAIN_H
+#pragma once
 
 // MOOSE includes
 #include "MeshModifier.h"
@@ -36,4 +35,3 @@ protected:
   virtual void modify() override;
 };
 
-#endif // IMAGESUBDOMAIN_H

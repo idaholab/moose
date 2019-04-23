@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef IMPLICITMIDPOINT_H
-#define IMPLICITMIDPOINT_H
+#pragma once
 
 #include "TimeIntegrator.h"
 
@@ -77,4 +76,3 @@ ImplicitMidpoint::computeTimeDerivativeHelper(T & u_dot, const T2 & u_old)
   u_dot *= 1. / _dt;
 }
 
-#endif /* IMPLICITMIDPOINT_H */

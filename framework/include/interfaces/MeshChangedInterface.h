@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MESHCHANGEDINTERFACE_H
-#define MESHCHANGEDINTERFACE_H
+#pragma once
 
 #include "MooseEnum.h"
 
@@ -42,4 +41,3 @@ protected:
   FEProblemBase & _mci_feproblem;
 };
 
-#endif /* MESHCHANGEDINTERFACE_H */

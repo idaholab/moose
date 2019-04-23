@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LIBMESHPARTITIONER_H
-#define LIBMESHPARTITIONER_H
+#pragma once
 
 // MOOSE includes
 #include "MooseEnum.h"
@@ -46,4 +45,3 @@ protected:
   MooseMesh & _mesh;
 };
 
-#endif /* LIBMESHPARTITIONER_H */

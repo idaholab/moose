@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MONOTONECUBICINTERPOLATION_H
-#define MONOTONECUBICINTERPOLATION_H
+#pragma once
 
 #include <vector>
 
@@ -152,4 +151,3 @@ protected:
   unsigned int _internal_knots;
 };
 
-#endif

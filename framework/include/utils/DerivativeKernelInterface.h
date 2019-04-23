@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DERIVATIVEKERNELINTERFACE_H
-#define DERIVATIVEKERNELINTERFACE_H
+#pragma once
 
 #include "DerivativeMaterialInterface.h"
 
@@ -48,4 +47,3 @@ DerivativeKernelInterface<T>::validParams()
   return params;
 }
 
-#endif // DERIVATIVEKERNELINTERFACE_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GENERALUSEROBJECT_H
-#define GENERALUSEROBJECT_H
+#pragma once
 
 // MOOSE includes
 #include "UserObject.h"
@@ -77,4 +76,3 @@ protected:
   std::set<std::string> _supplied_vars;
 };
 
-#endif

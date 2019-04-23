@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COEFTIMEDERIVATIVE_H
-#define COEFTIMEDERIVATIVE_H
+#pragma once
 
 #include "TimeDerivative.h"
 
@@ -33,4 +32,3 @@ protected:
   Real _coef;
 };
 
-#endif // COEFTIMEDERIVATIVE_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEJACOBIANTHREAD_H
-#define COMPUTEJACOBIANTHREAD_H
+#pragma once
 
 #include "ThreadedElementLoop.h"
 #include "MooseObjectTagWarehouse.h"
@@ -83,4 +82,3 @@ protected:
   virtual void computeInternalInterFaceJacobian(BoundaryID bnd_id);
 };
 
-#endif // COMPUTEJACOBIANTHREAD_H

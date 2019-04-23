@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EXPLICITRK2_H
-#define EXPLICITRK2_H
+#pragma once
 
 #include "TimeIntegrator.h"
 
@@ -102,4 +101,3 @@ ExplicitRK2::computeTimeDerivativeHelper(T & u_dot, const T2 & u_old, const T3 &
   u_dot *= 1. / _dt;
 }
 
-#endif /* EXPLICITRK2_H */

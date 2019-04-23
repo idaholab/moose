@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VECTORPOSTPROCESSORDATA_H
-#define VECTORPOSTPROCESSORDATA_H
+#pragma once
 
 // MOOSE includes
 #include "MooseTypes.h"
@@ -185,4 +184,3 @@ private:
   std::set<std::string> _supplied_items;
 };
 
-#endif // VECTORPOSTPROCESSORDATA_H

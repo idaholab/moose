@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DEPENDENCYRESOLVERINTERFACE_H
-#define DEPENDENCYRESOLVERINTERFACE_H
+#pragma once
 
 // STL includes
 #include <string>
@@ -105,4 +104,3 @@ DependencyResolverInterface::cyclicDependencyError(CyclicDependencyException<T> 
   mooseError(oss.str());
 }
 
-#endif // DEPENDENCYRESOLVERINTERFACE_H

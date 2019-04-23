@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEADWRAPPER_H
-#define MOOSEADWRAPPER_H
+#pragma once
 
 #include "MooseError.h"
 #include "DualReal.h"
@@ -322,4 +321,3 @@ private:
                                                   void *);
 };
 
-#endif // MOOSEADWRAPPER_H

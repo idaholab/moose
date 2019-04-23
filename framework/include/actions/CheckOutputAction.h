@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CHECKOUTPUTACTION_H
-#define CHECKOUTPUTACTION_H
+#pragma once
 
 // MOOSE includes
 #include "Action.h"
@@ -57,4 +56,3 @@ private:
   void checkPerfLogOutput();
 };
 
-#endif // CHECKOUTPUTACTION_H

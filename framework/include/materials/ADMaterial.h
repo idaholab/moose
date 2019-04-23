@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADMATERIAL_H
-#define ADMATERIAL_H
+#pragma once
 
 #include "Material.h"
 #include "MooseTypes.h"
@@ -69,4 +68,3 @@ ADMaterial<compute_stage>::declareADProperty(const std::string & prop_name)
   return _material_data->declareADProperty<T>(prop_name);
 }
 
-#endif // ADMATERIAL_H

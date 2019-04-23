@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PENETRATIONLOCATOR_H
-#define PENETRATIONLOCATOR_H
+#pragma once
 
 // Moose includes
 #include "Restartable.h"
@@ -134,4 +133,3 @@ dataLoad(std::istream & stream, std::map<dof_id_type, PenetrationInfo *> & m, vo
   }
 }
 
-#endif // PENETRATIONLOCATOR_H

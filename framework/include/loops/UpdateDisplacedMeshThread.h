@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef UPDATEDISPLACEDMESHTHREAD_H
-#define UPDATEDISPLACEDMESHTHREAD_H
+#pragma once
 
 // MOOSE includes
 #include "MooseMesh.h"
@@ -64,4 +63,3 @@ private:
   unsigned int _aux_system_number;
 };
 
-#endif /* UPDATEDISPLACEDMESHTHREAD_H */

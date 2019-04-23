@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FILEMESH_H
-#define FILEMESH_H
+#pragma once
 
 #include "MooseMesh.h"
 
@@ -51,4 +50,3 @@ protected:
   const PerfID _read_mesh_timer;
 };
 
-#endif // FILEMESH_H

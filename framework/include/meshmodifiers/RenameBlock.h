@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RENAMEBLOCK_H
-#define RENAMEBLOCK_H
+#pragma once
 
 // MOOSE includes
 #include "MeshModifier.h"
@@ -93,4 +92,3 @@ private:
   SubdomainID newBlockID(const SubdomainName & new_block_name);
 };
 
-#endif // RENAMEBLOCK_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEREBOUNDARYINITIALCONDITIONTHREAD_H
-#define COMPUTEREBOUNDARYINITIALCONDITIONTHREAD_H
+#pragma once
 
 #include "ThreadedNodeLoop.h"
 
@@ -33,4 +32,3 @@ public:
   void join(const ComputeBoundaryInitialConditionThread & /*y*/);
 };
 
-#endif // COMPUTEBOUNDARYINITIALCONDITIONTHREAD_H

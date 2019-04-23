@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MULTIAPPVECTORPOSTPROCESSORTRANSFER_H
-#define MULTIAPPVECTORPOSTPROCESSORTRANSFER_H
+#pragma once
 
 #include "MultiAppTransfer.h"
 
@@ -39,4 +38,3 @@ protected:
   const std::string & _vector_name;
 };
 
-#endif /* MultiAppVectorPostprocessorTransfer_H */

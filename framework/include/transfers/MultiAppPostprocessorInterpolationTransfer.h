@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MULTIAPPPOSTPROCESSORINTERPOLATIONTRANSFER_H
-#define MULTIAPPPOSTPROCESSORINTERPOLATIONTRANSFER_H
+#pragma once
 
 // MOOSE includes
 #include "MultiAppTransfer.h"
@@ -40,4 +39,3 @@ protected:
   Real _radius;
 };
 
-#endif /* MULTIAPPPOSTPROCESSORINTERPOLATIONTRANSFER_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EIGENDIRICHLETBC_H
-#define EIGENDIRICHLETBC_H
+#pragma once
 
 #include "NodalBC.h"
 
@@ -32,4 +31,3 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 };
 
-#endif /* EIGENDIRICHLETBC_H */

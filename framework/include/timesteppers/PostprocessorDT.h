@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POSTPROCESSORDT_H
-#define POSTPROCESSORDT_H
+#pragma once
 
 #include "TimeStepper.h"
 #include "PostprocessorInterface.h"
@@ -41,4 +40,3 @@ protected:
   const Real & _factor;
 };
 
-#endif /* POSTPROCESSORDT_H */

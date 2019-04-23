@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CONTROLLABLEITEM_H
-#define CONTROLLABLEITEM_H
+#pragma once
 
 #include "libmesh/parameters.h"
 #include "MooseObjectParameterName.h"
@@ -198,4 +197,3 @@ private:
   MooseObjectParameterName _name;
 };
 
-#endif

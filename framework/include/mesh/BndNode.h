@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef BNDNODE_H
-#define BNDNODE_H
+#pragma once
 
 #include "MooseTypes.h"
 
@@ -27,4 +26,3 @@ struct BndNode
   BoundaryID _bnd_id;
 };
 
-#endif /* BNDNODE_H */

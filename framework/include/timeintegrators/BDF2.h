@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef BDF2_H
-#define BDF2_H
+#pragma once
 
 #include "TimeIntegrator.h"
 #include "MathUtils.h"
@@ -64,4 +63,3 @@ BDF2::computeTimeDerivativeHelper(T & u_dot, const T2 & u, const T3 & u_old, con
   }
 }
 
-#endif /* BDF2_H */

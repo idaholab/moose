@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMENTGENERATOR_H
-#define ELEMENTGENERATOR_H
+#pragma once
 
 #include "MeshGenerator.h"
 
@@ -44,4 +43,3 @@ protected:
   const unsigned int _elem_type;
 };
 
-#endif // ELEMENTGENERATOR_H

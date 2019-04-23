@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INDICATORMARKER_H
-#define INDICATORMARKER_H
+#pragma once
 
 #include "Marker.h"
 
@@ -26,4 +25,3 @@ protected:
   ErrorVector & _error_vector;
 };
 
-#endif /* INDICATORMARKER_H */

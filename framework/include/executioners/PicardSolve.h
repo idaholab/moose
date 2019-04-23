@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PICARDSOLVE_H
-#define PICARDSOLVE_H
+#pragma once
 
 #include "SolveObject.h"
 
@@ -156,4 +155,3 @@ private:
 
   const std::string _solve_message;
 };
-#endif // PICARDSOLVE_H

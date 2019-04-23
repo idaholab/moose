@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CHECKPOINT_H
-#define CHECKPOINT_H
+#pragma once
 
 // MOOSE includes
 #include "FileOutput.h"
@@ -102,4 +101,3 @@ private:
   std::deque<CheckpointFileNames> _file_names;
 };
 
-#endif // CHECKPOINT_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TIMESEQUENCESTEPPER_H
-#define TIMESEQUENCESTEPPER_H
+#pragma once
 
 #include "TimeSequenceStepperBase.h"
 
@@ -29,4 +28,3 @@ public:
   virtual void init() override;
 };
 
-#endif // TIMESEQUENCESTEPPER_H

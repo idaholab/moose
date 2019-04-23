@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef BOUNDINGBOXNODESETGENERATOR_H
-#define BOUNDINGBOXNODESETGENERATOR_H
+#pragma once
 
 #include "MeshGenerator.h"
 #include "MooseEnum.h"
@@ -48,4 +47,3 @@ protected:
   BoundingBox _bounding_box;
 };
 
-#endif // BOUNDINGBOXNODESETGENERATOR_H

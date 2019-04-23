@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CENTROIDMULTIAPP_H
-#define CENTROIDMULTIAPP_H
+#pragma once
 
 #include "TransientMultiApp.h"
 #include "BlockRestrictable.h"
@@ -33,4 +32,3 @@ protected:
   virtual void fillPositions() override;
 };
 
-#endif // CENTROID_H

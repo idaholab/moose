@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SPLINEFUNCTION_H
-#define SPLINEFUNCTION_H
+#pragma once
 
 #include "Function.h"
 #include "SplineInterpolation.h"
@@ -39,4 +38,3 @@ protected:
   int _component;
 };
 
-#endif /* SPLINEFUNCTION_H */

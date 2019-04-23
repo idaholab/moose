@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef IMAGEMESH_H
-#define IMAGEMESH_H
+#pragma once
 
 #include "GeneratedMesh.h"
 #include "FileRangeBuilder.h"
@@ -65,4 +64,3 @@ protected:
   const Real & _cells_per_pixel;
 };
 
-#endif /* IMAGEMESH_H */

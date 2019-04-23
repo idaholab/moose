@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef AUXNODALSCALARKERNEL_H
-#define AUXNODALSCALARKERNEL_H
+#pragma once
 
 #include "AuxScalarKernel.h"
 #include "Coupleable.h"
@@ -37,4 +36,3 @@ protected:
   std::vector<dof_id_type> _node_ids;
 };
 
-#endif /* AUXNODALSCALARKERNEL_H */

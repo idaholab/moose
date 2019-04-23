@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTETHREADEDGENERALUSEROBJECTSTHREAD_H
-#define COMPUTETHREADEDGENERALUSEROBJECTSTHREAD_H
+#pragma once
 
 #include "ParallelUniqueId.h"
 #include "MooseTypes.h"
@@ -56,4 +55,3 @@ protected:
   FEProblemBase & _fe_problem;
 };
 
-#endif // COMPUTETHREADEDGENERALUSEROBJECTSTHREAD_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADDGKERNEL_H
-#define ADDGKERNEL_H
+#pragma once
 
 #include "DGKernelBase.h"
 
@@ -73,4 +72,3 @@ protected:
   const ADVariableGradient & _grad_u_neighbor;
 };
 
-#endif /* ADDGKERNEL_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MULTIAPPSCALARTOAUXSCALARTRANSFER_H
-#define MULTIAPPSCALARTOAUXSCALARTRANSFER_H
+#pragma once
 
 // MOOSE includes
 #include "MultiAppTransfer.h"
@@ -40,4 +39,3 @@ protected:
   VariableName _to_aux_name;
 };
 
-#endif /* MULTIAPPSCALARTOAUXSCALARTRANSFER_H */

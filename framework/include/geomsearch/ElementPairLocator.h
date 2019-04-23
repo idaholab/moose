@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMENTPAIRLOCATOR_H
-#define ELEMENTPAIRLOCATOR_H
+#pragma once
 
 #include <list>
 
@@ -71,4 +70,3 @@ protected:
   unsigned int _interface_id;
 };
 
-#endif // ELEMENTPAIRLOCATOR_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEEXCEPTION_H
-#define MOOSEEXCEPTION_H
+#pragma once
 
 #include <exception>
 
@@ -43,4 +42,3 @@ protected:
   std::string _message;
 };
 
-#endif /* MOOSEEXCEPTION_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VECTORPOSTPROCESSORVISUALIZATIONAUX_H
-#define VECTORPOSTPROCESSORVISUALIZATIONAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -52,4 +51,3 @@ protected:
   processor_id_type _my_pid;
 };
 
-#endif // VECTORPOSTPROCESSORVISUALIZATIONAUX_H

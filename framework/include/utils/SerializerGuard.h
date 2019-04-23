@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SERIALIZERGUARD_H
-#define SERIALIZERGUARD_H
+#pragma once
 
 namespace libMesh
 {
@@ -33,4 +32,3 @@ protected:
   bool _warn;
 };
 
-#endif

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADREAL_H
-#define ADREAL_H
+#pragma once
 
 #include "libmesh/libmesh_common.h"
 #include "libmesh/compare_types.h"
@@ -66,5 +65,4 @@ struct ScalarTraits<DualNumber<T, D>>
 };
 }
 
-#endif
 #endif

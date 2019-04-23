@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VERIFYELEMENTUNIQUEID_H
-#define VERIFYELEMENTUNIQUEID_H
+#pragma once
 
 // MOOSE includes
 #include "ElementUserObject.h"
@@ -33,4 +32,3 @@ protected:
   std::vector<dof_id_type> _all_ids;
 };
 
-#endif // VERIFYELEMENTUNIQUEID_H

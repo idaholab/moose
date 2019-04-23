@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CHANGEOVERTIMESTEPPOSTPROCESSOR_H
-#define CHANGEOVERTIMESTEPPOSTPROCESSOR_H
+#pragma once
 
 #include "ChangeOverTimePostprocessor.h"
 
@@ -27,4 +26,3 @@ public:
   ChangeOverTimestepPostprocessor(const InputParameters & parameters);
 };
 
-#endif /* CHANGEOVERTIMESTEPPOSTPROCESSOR_H */

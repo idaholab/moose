@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NODALBCBASE_H
-#define NODALBCBASE_H
+#pragma once
 
 #include "BoundaryCondition.h"
 #include "RandomInterface.h"
@@ -52,4 +51,3 @@ protected:
   std::vector<AuxVariableName> _diag_save_in_strings;
 };
 
-#endif /* NODALBCBASE_H */

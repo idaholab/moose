@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EXECFLAGENUM_H
-#define EXECFLAGENUM_H
+#pragma once
 
 // MOOSE includes
 #include "MultiMooseEnum.h"
@@ -96,4 +95,3 @@ ExecFlagEnum::removeAvailableFlags(const ExecFlagType & flag, Args... flags)
   removeAvailableFlags(flags...);
 }
 
-#endif

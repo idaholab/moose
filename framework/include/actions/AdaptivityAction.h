@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADAPTIVITYACTION_H
-#define ADAPTIVITYACTION_H
+#pragma once
 
 #include "Action.h"
 
@@ -29,4 +28,3 @@ public:
 
 #endif // LIBMESH_ENABLE_AMR
 
-#endif // ADAPTIVITYACTION_H

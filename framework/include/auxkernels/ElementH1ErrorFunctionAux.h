@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMENTH1ERRORFUNCTIONAUX_H
-#define ELEMENTH1ERRORFUNCTIONAUX_H
+#pragma once
 
 // MOOSE includes
 #include "ElementL2ErrorFunctionAux.h"
@@ -53,4 +52,3 @@ protected:
   const VariableGradient & _grad_coupled_var;
 };
 
-#endif // ELEMENTH1ERRORFUNCTIONAUX_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GEOMETRICSEARCHINTERFACE_H
-#define GEOMETRICSEARCHINTERFACE_H
+#pragma once
 
 #include "MooseTypes.h"
 
@@ -82,4 +81,3 @@ protected:
   GeometricSearchData & _geometric_search_data;
 };
 
-#endif // GEOMETRICSEARCHINTERFACE_H

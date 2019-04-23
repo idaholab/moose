@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GEOMETRYSPHERE_H
-#define GEOMETRYSPHERE_H
+#pragma once
 
 #include "GeometryBase.h"
 
@@ -32,4 +31,3 @@ protected:
   const Real _radius;
 };
 
-#endif // GEOMETRYSPHERE_H

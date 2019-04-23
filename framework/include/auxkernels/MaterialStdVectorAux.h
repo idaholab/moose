@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATERIALSTDVECTORAUX_H
-#define MATERIALSTDVECTORAUX_H
+#pragma once
 
 #include "MaterialStdVectorAuxBase.h"
 
@@ -40,4 +39,3 @@ protected:
   const unsigned int _selected_qp;
 };
 
-#endif // MATERIALSTDVECTORAUX_H

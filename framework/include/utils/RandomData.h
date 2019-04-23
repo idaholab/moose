@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RANDOMDATA_H
-#define RANDOMDATA_H
+#pragma once
 
 // MOOSE includes
 #include "MooseRandom.h"
@@ -65,4 +64,3 @@ private:
   std::unordered_map<dof_id_type, unsigned int> _seeds;
 };
 
-#endif // RANDOMDATA_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SONDEFINITIONFORMATTER_H
-#define SONDEFINITIONFORMATTER_H
+#pragma once
 #include "json/json.h"
 #include <map>
 #include <string>
@@ -68,4 +67,3 @@ protected:
   JsonVal _global_params;
 };
 
-#endif /* SONDEFINITIONFORMATTER_H */

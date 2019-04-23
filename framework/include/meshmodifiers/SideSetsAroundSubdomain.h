@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SIDESETSAROUNDSUBDOMAIN_H
-#define SIDESETSAROUNDSUBDOMAIN_H
+#pragma once
 
 #include "AddSideSetsBase.h" // needed for _fe_face, if restricting using normals
 
@@ -50,4 +49,3 @@ protected:
   Point _normal;
 };
 
-#endif /* SIDESETSAROUNDSUBDOMAIN_H */

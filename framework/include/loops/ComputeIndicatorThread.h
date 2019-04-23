@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEINDICATORTHREAD_H
-#define COMPUTEINDICATORTHREAD_H
+#pragma once
 
 #include "ThreadedElementLoop.h"
 
@@ -56,4 +55,3 @@ protected:
   bool _finalize;
 };
 
-#endif // COMPUTEINDICATORTHREAD_H

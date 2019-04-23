@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ITERATIONADAPTIVEDT_H
-#define ITERATIONADAPTIVEDT_H
+#pragma once
 
 #include "TimeStepper.h"
 #include "LinearInterpolation.h"
@@ -111,4 +110,3 @@ protected:
 template <>
 InputParameters validParams<IterationAdaptiveDT>();
 
-#endif /* ITERATIONADAPTIVEDT_H */

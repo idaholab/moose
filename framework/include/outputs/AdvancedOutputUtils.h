@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADVANCEDOUTPUTUTILS_H
-#define ADVANCEDOUTPUTUTILS_H
+#pragma once
 
 // MOOSE includes
 #include "MooseError.h"
@@ -170,4 +169,3 @@ private:
   bool _has_show_list;
 };
 
-#endif // ADVANCEDOUTPUTUTILS_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VALUETHRESHOLDMARKER_H
-#define VALUETHRESHOLDMARKER_H
+#pragma once
 
 #include "QuadraturePointMarker.h"
 
@@ -33,4 +32,3 @@ protected:
   bool _invert;
 };
 
-#endif /* VALUETHRESHOLDMARKER_H */

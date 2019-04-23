@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef IMAGESUBDOMAINGENERATOR_H
-#define IMAGESUBDOMAINGENERATOR_H
+#pragma once
 
 #include "MeshGenerator.h"
 #include "MeshBaseImageSampler.h"
@@ -33,4 +32,3 @@ protected:
   std::unique_ptr<MeshBase> & _input;
 };
 
-#endif // IMAGESUBDOMAINGENERATOR_H

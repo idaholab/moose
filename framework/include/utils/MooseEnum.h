@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEENUM_H
-#define MOOSEENUM_H
+#pragma once
 
 // MOOSE includes
 #include "MooseEnumBase.h"
@@ -146,4 +145,3 @@ MooseEnum::getEnum() const
   return static_cast<T>(_current.id());
 }
 
-#endif // MOOSEENUM_H

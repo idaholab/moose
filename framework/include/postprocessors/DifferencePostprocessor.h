@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DIFFERENCEPOSTPROCESSOR_H
-#define DIFFERENCEPOSTPROCESSOR_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 
@@ -36,4 +35,3 @@ protected:
   const PostprocessorValue & _value2;
 };
 
-#endif /* DIFFERENCEPOSTPROCESSOR_H */

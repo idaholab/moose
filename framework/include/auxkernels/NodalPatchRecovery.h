@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NODALPATCHRECOVERY_H
-#define NODALPATCHRECOVERY_H
+#pragma once
 
 #include "AuxKernel.h"
 #include "FEProblem.h"
@@ -165,4 +164,3 @@ NodalPatchRecovery::getMaterialPropertyOlder(const std::string & name)
   return MaterialPropertyInterface::getMaterialPropertyOlder<T>(name);
 }
 
-#endif // NODALPATCHRECOVERY_H

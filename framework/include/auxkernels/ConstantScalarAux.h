@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CONSTANTSCALARAUX_H
-#define CONSTANTSCALARAUX_H
+#pragma once
 
 #include "AuxScalarKernel.h"
 
@@ -31,4 +30,3 @@ protected:
   const Real & _value;
 };
 
-#endif /* CONSTANTSCALARAUX_H */

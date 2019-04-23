@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADDINDICATORACTION_H
-#define ADDINDICATORACTION_H
+#pragma once
 
 #include "MooseObjectAction.h"
 
@@ -27,4 +26,3 @@ public:
 private:
 };
 
-#endif // ADDINDICATORACTION_H

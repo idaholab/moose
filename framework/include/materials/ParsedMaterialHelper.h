@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PARSEDMATERIALHELPER_H
-#define PARSEDMATERIALHELPER_H
+#pragma once
 
 #include "FunctionMaterialBase.h"
 #include "FunctionParserUtils.h"
@@ -81,4 +80,3 @@ protected:
   const VariableNameMappingMode _map_mode;
 };
 
-#endif // PARSEDMATERIALHELPER_H

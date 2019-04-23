@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POSTPROCESSORDIRICHLETBC_H
-#define POSTPROCESSORDIRICHLETBC_H
+#pragma once
 
 #include "NodalBC.h"
 
@@ -34,4 +33,3 @@ protected:
   const PostprocessorValue & _postprocessor_value;
 };
 
-#endif /* POSTPROCESSORDIRICHLETBC_H */

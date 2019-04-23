@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INPUTFILEFORMATTER_H
-#define INPUTFILEFORMATTER_H
+#pragma once
 
 #include "SyntaxTree.h"
 
@@ -35,4 +34,3 @@ protected:
   bool _dump_mode;
 };
 
-#endif /* INPUTFILEFORMATTER_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NODALNORMALSCORNER_H
-#define NODALNORMALSCORNER_H
+#pragma once
 
 #include "SideUserObject.h"
 
@@ -36,4 +35,3 @@ protected:
   BoundaryID _corner_boundary_id;
 };
 
-#endif /* NODALNORMALSCORNER_H */

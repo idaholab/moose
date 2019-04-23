@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMENTQUALITYAUX_H
-#define ELEMENTQUALITYAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -35,4 +34,3 @@ protected:
   ElemQuality _metric_type;
 };
 
-#endif // ELEMENTQUALITYAUX_H

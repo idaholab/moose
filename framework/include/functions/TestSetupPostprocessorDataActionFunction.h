@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TESTSETUPPOSTPROCESSORDATAACTIONFUNCTION_H
-#define TESTSETUPPOSTPROCESSORDATAACTIONFUNCTION_H
+#pragma once
 
 // MOOSE includes
 #include "Function.h"
@@ -33,4 +32,3 @@ public:
   TestSetupPostprocessorDataActionFunction(const InputParameters & parameters);
 };
 
-#endif // TESTSETUPPOSTPROCESSORDATAACTIONFUNCTION_H

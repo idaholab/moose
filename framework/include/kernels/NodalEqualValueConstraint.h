@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NODALEQUALVALUECONSTRAINT_H
-#define NODALEQUALVALUECONSTRAINT_H
+#pragma once
 
 #include "NodalScalarKernel.h"
 
@@ -38,4 +37,3 @@ protected:
   std::vector<const VariableValue *> _value;
 };
 
-#endif /* NODALEQUALVALUECONSTRAINT_H */

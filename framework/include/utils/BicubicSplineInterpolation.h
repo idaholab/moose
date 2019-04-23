@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef BICUBICSPLINEINTERPOLATION_H
-#define BICUBICSPLINEINTERPOLATION_H
+#pragma once
 
 #include "SplineInterpolationBase.h"
 
@@ -154,4 +153,3 @@ protected:
   static int _file_number;
 };
 
-#endif

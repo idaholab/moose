@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ODEKERNEL_H
-#define ODEKERNEL_H
+#pragma once
 
 #include "ScalarKernel.h"
 
@@ -37,4 +36,3 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 };
 
-#endif /* ODEKERNEL_H */

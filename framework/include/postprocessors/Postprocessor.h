@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POSTPROCESSOR_H
-#define POSTPROCESSOR_H
+#pragma once
 
 // MOOSE includes
 #include "OutputInterface.h"
@@ -46,4 +45,3 @@ protected:
   std::string _pp_name;
 };
 
-#endif

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GLOBALPARAMSACTION_H
-#define GLOBALPARAMSACTION_H
+#pragma once
 
 #include "Action.h"
 
@@ -49,4 +48,3 @@ public:
     return parameters().set<std::vector<std::vector<T>>>(name);
   }
 };
-#endif // GLOBALPARAMSACTION_H

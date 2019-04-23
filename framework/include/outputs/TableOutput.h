@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TABLESOUTPUTBASE_H
-#define TABLESOUTPUTBASE_H
+#pragma once
 
 // MOOSE includes
 #include "AdvancedOutput.h"
@@ -88,4 +87,3 @@ protected:
   const bool _time_column;
 };
 
-#endif /* TABLEOUTPUT_H */

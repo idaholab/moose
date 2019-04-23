@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EQUALVALUEEMBEDDEDCONSTRAINT_H
-#define EQUALVALUEEMBEDDEDCONSTRAINT_H
+#pragma once
 
 // MOOSE includes
 #include "NodeElemConstraint.h"
@@ -67,4 +66,3 @@ protected:
   Real _constraint_residual;
 };
 
-#endif

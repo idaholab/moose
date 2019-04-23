@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TAGGINGINTERFACE_H
-#define TAGGINGINTERFACE_H
+#pragma once
 
 #include "MooseTypes.h"
 #include "MultiMooseEnum.h"
@@ -141,4 +140,3 @@ protected:
   DenseMatrix<Number> _local_ke;
 };
 
-#endif /* TAGGINGINTERFACE_H */

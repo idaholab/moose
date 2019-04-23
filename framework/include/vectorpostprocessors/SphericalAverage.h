@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SPHERICALAVERAGE_H
-#define SPHERICALAVERAGE_H
+#pragma once
 
 #include "SpatialAverageBase.h"
 
@@ -31,4 +30,3 @@ protected:
   virtual Real computeDistance() override;
 };
 
-#endif // SPHERICALAVERAGE_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INTEGRATEDBCBASE_H
-#define INTEGRATEDBCBASE_H
+#pragma once
 
 #include "BoundaryCondition.h"
 #include "RandomInterface.h"
@@ -105,4 +104,3 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int /*jvar*/) { return 0; }
 };
 
-#endif /* INTEGRATEDBCBASE_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATERIALPROPERTYSTORAGE_H
-#define MATERIALPROPERTYSTORAGE_H
+#pragma once
 
 #include "Moose.h"
 #include "HashMap.h"
@@ -303,4 +302,3 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
     dataLoad(stream, storage.propsOlder(), context);
 }
 
-#endif /* MATERIALPROPERTYSTORAGE_H */

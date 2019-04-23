@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEVARIABLECONSTMONOMIAL_H
-#define MOOSEVARIABLECONSTMONOMIAL_H
+#pragma once
 
 #include "MooseTypes.h"
 #include "MooseVariableFE.h"
@@ -34,4 +33,3 @@ public:
   virtual void computeMonomialNeighborValuesHelper(const unsigned & nqp, const Real & phi);
 };
 
-#endif /* MOOSEVARIABLECONSTMONOMIAL_H */

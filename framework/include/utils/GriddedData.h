@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GRIDDEDDATA_H
-#define GRIDDEDDATA_H
+#pragma once
 
 #include "libmesh/libmesh_common.h" // Real
 
@@ -94,4 +93,3 @@ private:
   void splitToRealVec(const std::string & input_string, std::vector<Real> & output_vec);
 };
 
-#endif // GRIDDEDDATA_H

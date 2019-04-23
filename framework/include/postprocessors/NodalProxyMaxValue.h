@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NODALPROXYMAXVALUE_H
-#define NODALPROXYMAXVALUE_H
+#pragma once
 
 #include "NodalVariablePostprocessor.h"
 
@@ -44,4 +43,3 @@ protected:
   dof_id_type _node_id;
 };
 
-#endif // NODALPROXYMAXVALUE_H

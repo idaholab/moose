@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MULTIAPPPROJECTIONTRANSFER_H
-#define MULTIAPPPROJECTIONTRANSFER_H
+#pragma once
 
 #include "MultiAppTransfer.h"
 
@@ -64,4 +63,3 @@ protected:
   std::vector<std::map<std::pair<unsigned int, unsigned int>, unsigned int>> _cached_index_map;
 };
 
-#endif /* MULTIAPPPROJECTIONTRANSFER_H */

@@ -7,6 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#pragma once
 /**
  * Note!  This class comes from https://github.com/friedmud/variadic_table
  *
@@ -14,9 +15,6 @@
  * DO NOT MODIFY THIS CLASS HERE... MODIFY IT THERE AND COPY IT HERE
  *
  */
-
-#ifndef VARIADICTABLE_H
-#define VARIADICTABLE_H
 
 #include <iostream>
 #include <iomanip>
@@ -397,5 +395,3 @@ protected:
   /// Precision For each column
   std::vector<int> _precision;
 };
-
-#endif

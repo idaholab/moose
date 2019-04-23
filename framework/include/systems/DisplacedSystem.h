@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DISPLACEDSYSTEM_H
-#define DISPLACEDSYSTEM_H
+#pragma once
 
 #include "SystemBase.h"
 
@@ -191,4 +190,3 @@ protected:
   TransientExplicitSystem & _sys;
 };
 
-#endif /* DISPLACEDSYSTEM_H */

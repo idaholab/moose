@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SAMPLER_H
-#define SAMPLER_H
+#pragma once
 
 #include "libmesh/dense_matrix.h"
 
@@ -181,4 +180,3 @@ private:
   unsigned int _total_rows;
 };
 
-#endif /* SAMPLER_H */

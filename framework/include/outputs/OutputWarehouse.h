@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef OUTPUTWAREHOUSE_H
-#define OUTPUTWAREHOUSE_H
+#pragma once
 
 // MOOSE includes
 #include "Output.h"
@@ -447,4 +446,3 @@ OutputWarehouse::allowOutput(bool state)
     (*it)->allowOutput(state);
 }
 
-#endif // OUTPUTWAREHOUSE_H

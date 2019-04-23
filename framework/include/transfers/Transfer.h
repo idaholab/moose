@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TRANSFER_H
-#define TRANSFER_H
+#pragma once
 
 // Moose
 #include "MooseObject.h"
@@ -76,4 +75,3 @@ public:
   const static Number OutOfMeshValue;
 };
 
-#endif /* TRANSFER_H */

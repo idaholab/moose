@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEOBJECTWAREHOUSEBASE_H
-#define MOOSEOBJECTWAREHOUSEBASE_H
+#pragma once
 
 // MOOSE includes
 #include "DependencyResolverInterface.h"
@@ -699,4 +698,3 @@ MooseObjectWarehouseBase<T>::checkThreadID(THREAD_ID libmesh_dbg_var(tid)) const
                   << _num_threads << ")");
 }
 
-#endif // MOOSEOBJECTWAREHOUSEBASE_H

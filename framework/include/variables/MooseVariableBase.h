@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEVARIABLEBASE_H
-#define MOOSEVARIABLEBASE_H
+#pragma once
 
 #include "MooseTypes.h"
 #include "MooseArray.h"
@@ -129,4 +128,3 @@ protected:
   THREAD_ID _tid;
 };
 
-#endif /* MOOSEVARIABLEBASE_H */

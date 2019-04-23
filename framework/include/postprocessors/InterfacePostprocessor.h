@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INTERFACEPOSTPROCESSOR_H
-#define INTERFACEPOSTPROCESSOR_H
+#pragma once
 
 #include "InterfaceUserObject.h"
 #include "Postprocessor.h"
@@ -55,4 +54,3 @@ protected:
   Real _interface_master_area;
 };
 
-#endif

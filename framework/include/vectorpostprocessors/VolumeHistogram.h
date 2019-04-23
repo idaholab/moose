@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VOLUMEHISTOGRAM_H
-#define VOLUMEHISTOGRAM_H
+#pragma once
 
 #include "ElementVectorPostprocessor.h"
 
@@ -61,4 +60,3 @@ protected:
   VectorPostprocessorValue & _volume;
 };
 
-#endif // VOLUMEHISTOGRAM_H

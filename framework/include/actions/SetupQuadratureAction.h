@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SETUPQUADRATUREACTION_H
-#define SETUPQUADRATUREACTION_H
+#pragma once
 
 #include "Action.h"
 // libMesh
@@ -37,4 +36,3 @@ protected:
   Order _side_order;
 };
 
-#endif /* SETUPQUADRATUREACTION_H */

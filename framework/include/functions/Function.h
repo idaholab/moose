@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FUNCTION_H
-#define FUNCTION_H
+#pragma once
 
 #include "MooseObject.h"
 #include "SetupInterface.h"
@@ -110,4 +109,3 @@ public:
   virtual Real average();
 };
 
-#endif // FUNCTION_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INTERFACEVALUEUSEROBJECT_H
-#define INTERFACEVALUEUSEROBJECT_H
+#pragma once
 
 #include "InterfaceUserObject.h"
 
@@ -32,4 +31,3 @@ protected:
   virtual Real computeInterfaceValueType(const Real /*value_master*/, const Real /*value_slave*/);
 };
 
-#endif /* INTERFACEVALUEUSEROBJECT_H */

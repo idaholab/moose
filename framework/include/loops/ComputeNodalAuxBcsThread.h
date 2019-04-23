@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTENODALAUXBCSTHREAD_H
-#define COMPUTENODALAUXBCSTHREAD_H
+#pragma once
 
 // MOOSE includes
 #include "MooseMesh.h"
@@ -43,4 +42,3 @@ protected:
   const std::vector<std::vector<MooseVariableFEBase *>> & _aux_vars;
 };
 
-#endif // COMPUTENODALAUXBCSTHREAD_H

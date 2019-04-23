@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTENODALAUXVARSTHREAD_H
-#define COMPUTENODALAUXVARSTHREAD_H
+#pragma once
 
 // MOOSE includes
 #include "ThreadedNodeLoop.h"
@@ -51,4 +50,3 @@ protected:
   std::set<SubdomainID> _block_ids;
 };
 
-#endif // COMPUTENODALAUXVARSTHREAD_H

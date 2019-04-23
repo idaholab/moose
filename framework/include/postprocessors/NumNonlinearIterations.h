@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NUMNONLINEARITERATIONS_H
-#define NUMNONLINEARITERATIONS_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 
@@ -54,4 +53,3 @@ protected:
   Real _time;
 };
 
-#endif // NUMNONLINEARITERATIONS_H

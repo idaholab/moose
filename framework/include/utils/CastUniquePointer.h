@@ -7,14 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#pragma once
 /**
  * These are reworked from https://stackoverflow.com/a/11003103
  *
  * New GitHub Repo here: https://github.com/friedmud/unique_ptr_cast
  */
 
-#ifndef CASTUNIQUEPOINTER_H
-#define CASTUNIQUEPOINTER_H
 
 #include <memory>
 
@@ -54,4 +53,3 @@ dynamic_pointer_cast(std::unique_ptr<T_SRC> & src)
   return dest_temp;
 }
 
-#endif

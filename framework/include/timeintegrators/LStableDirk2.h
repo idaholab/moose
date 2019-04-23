@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LSTABLEDIRK2_H
-#define LSTABLEDIRK2_H
+#pragma once
 
 #include "TimeIntegrator.h"
 
@@ -80,4 +79,3 @@ LStableDirk2::computeTimeDerivativeHelper(T & u_dot, const T2 & u_old)
   u_dot *= 1. / _dt;
 }
 
-#endif /* LSTABLEDIRK2_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEOBJECTWAREHOUSE_H
-#define MOOSEOBJECTWAREHOUSE_H
+#pragma once
 
 // MOOSE includes
 #include "MooseObjectWarehouseBase.h"
@@ -207,4 +206,3 @@ MooseObjectWarehouse<T>::updateActive(THREAD_ID tid)
     it.second.updateActive(tid);
 }
 
-#endif // MOOSEOBJECTWAREHOUSE_H

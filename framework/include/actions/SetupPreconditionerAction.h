@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SETUPPRECONDITIONERACTION_H
-#define SETUPPRECONDITIONERACTION_H
+#pragma once
 
 #include "MooseObjectAction.h"
 
@@ -31,4 +30,3 @@ protected:
   static unsigned int _count;
 };
 
-#endif // SETUPPRECONDITIONERACTION_H

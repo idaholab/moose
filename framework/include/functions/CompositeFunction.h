@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPOSITEFUNCTION_H
-#define COMPOSITEFUNCTION_H
+#pragma once
 
 #include "Function.h"
 #include "FunctionInterface.h"
@@ -34,4 +33,3 @@ private:
   std::vector<Function *> _f;
 };
 
-#endif // COMPOSITE_H

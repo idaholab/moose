@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TECPLOT_H
-#define TECPLOT_H
+#pragma once
 
 // MOOSE includes
 #include "OversampleOutput.h"
@@ -60,4 +59,3 @@ private:
   bool & _first_time;
 };
 
-#endif /* TECPLOT_H */

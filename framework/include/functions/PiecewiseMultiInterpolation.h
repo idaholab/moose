@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PIECEWISEMULTIINTERPOLATION_H
-#define PIECEWISEMULTIINTERPOLATION_H
+#pragma once
 
 #include "Function.h"
 
@@ -86,4 +85,3 @@ protected:
                           unsigned int & upper_x);
 };
 
-#endif // PIECEWISEMULTIINTERPOLATION_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FACEFACECONSTRAINT_H
-#define FACEFACECONSTRAINT_H
+#pragma once
 
 #include "MortarConstraint.h"
 
@@ -29,4 +28,3 @@ public:
   }
 };
 
-#endif

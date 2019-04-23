@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SHAPESIDEUSEROBJECT_H
-#define SHAPESIDEUSEROBJECT_H
+#pragma once
 
 #include "SideUserObject.h"
 #include "ShapeUserObject.h"
@@ -33,4 +32,3 @@ public:
   ShapeSideUserObject(const InputParameters & parameters);
 };
 
-#endif // SHAPESIDEUSEROBJECT_H

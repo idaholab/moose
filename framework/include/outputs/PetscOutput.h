@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PETSCOUTPUT_H
-#define PETSCOUTPUT_H
+#pragma once
 
 // MOOSE includes
 #include "Output.h"
@@ -109,4 +108,3 @@ private:
   /// Linear residual output end time
   Real _linear_end_time;
 };
-#endif // PETSCOUTPUT_H

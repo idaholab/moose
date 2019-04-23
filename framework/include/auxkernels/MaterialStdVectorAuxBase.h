@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATERIALSTDVECTORAUXBASE_H
-#define MATERIALSTDVECTORAUXBASE_H
+#pragma once
 
 // MOOSE includes
 #include "MaterialAuxBase.h"
@@ -59,4 +58,3 @@ MaterialStdVectorAuxBase<T>::computeValue()
   return MaterialAuxBase<std::vector<T>>::computeValue();
 }
 
-#endif // MATERIALSTDVECTORAUXBASE_H

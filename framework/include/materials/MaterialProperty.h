@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATERIALPROPERTY_H
-#define MATERIALPROPERTY_H
+#pragma once
 
 #include <vector>
 
@@ -365,4 +364,3 @@ _init_helper(int size, PropertyValue * /*prop*/, const P *, bool use_ad)
   return copy;
 }
 
-#endif

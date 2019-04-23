@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VECTOR_OF_POSTPROCESSORS_H
-#define VECTOR_OF_POSTPROCESSORS_H
+#pragma once
 
 #include "GeneralVectorPostprocessor.h"
 
@@ -51,4 +50,3 @@ protected:
   std::vector<const PostprocessorValue *> _postprocessor_values;
 };
 
-#endif

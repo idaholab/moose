@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NODEELEMCONSTRAINT_H
-#define NODEELEMCONSTRAINT_H
+#pragma once
 
 // MOOSE includes
 #include "Constraint.h"
@@ -248,4 +247,3 @@ public:
   DenseMatrix<Number> _Kee;
 };
 
-#endif

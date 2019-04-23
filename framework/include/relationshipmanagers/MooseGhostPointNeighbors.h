@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEGHOSTPOINTNEIGHBORS_H
-#define MOOSEGHOSTPOINTNEIGHBORS_H
+#pragma once
 
 #include "FunctorRelationshipManager.h"
 
@@ -37,4 +36,3 @@ protected:
   virtual void internalInit() override;
 };
 
-#endif /* MOOSEGHOSTPOINTNEIGHBORS_H */

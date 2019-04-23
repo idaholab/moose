@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NEIGHBORCOUPLEABLE_H
-#define NEIGHBORCOUPLEABLE_H
+#pragma once
 
 #include "MooseVariableBase.h"
 #include "Coupleable.h"
@@ -70,4 +69,3 @@ protected:
   bool _neighbor_nodal;
 };
 
-#endif /* NEIGHBORCOUPLEABLE_H */

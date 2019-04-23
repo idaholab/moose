@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FEPROBLEMBASE_H
-#define FEPROBLEMBASE_H
+#pragma once
 
 // MOOSE includes
 #include "SubProblem.h"
@@ -1956,4 +1955,3 @@ FEProblemBase::allowOutput(bool state)
   _app.getOutputWarehouse().allowOutput<T>(state);
 }
 
-#endif /* FEPROBLEMBASE_H */

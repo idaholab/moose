@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POSTPROCESSORCOMPARISON_H
-#define POSTPROCESSORCOMPARISON_H
+#pragma once
 
 #include "ComparisonPostprocessor.h"
 
@@ -52,4 +51,3 @@ protected:
   PostprocessorValue _comparison_value;
 };
 
-#endif

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LEAST_SQUARES_FIT_H
-#define LEAST_SQUARES_FIT_H
+#pragma once
 
 #include "GeneralVectorPostprocessor.h"
 
@@ -86,4 +85,3 @@ protected:
   VectorPostprocessorValue * _coeffs;
 };
 
-#endif

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FUNCTIONDT_H
-#define FUNCTIONDT_H
+#pragma once
 
 #include "TimeStepper.h"
 #include "FunctionInterface.h"
@@ -59,4 +58,3 @@ protected:
   std::vector<Real> _time_knots;
 };
 
-#endif /* FUNCTIONDT_H */

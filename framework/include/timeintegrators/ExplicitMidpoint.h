@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EXPLICITMIDPOINT_H
-#define EXPLICITMIDPOINT_H
+#pragma once
 
 #include "ExplicitRK2.h"
 
@@ -41,4 +40,3 @@ protected:
   virtual Real b2() const { return 1.; }
 };
 
-#endif /* EXPLICITMIDPOINT_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADCOUPLEDTIMEDERIVATIVE_H
-#define ADCOUPLEDTIMEDERIVATIVE_H
+#pragma once
 
 #include "ADKernelValue.h"
 
@@ -35,4 +34,3 @@ protected:
   usingKernelValueMembers;
 };
 
-#endif // ADCOUPLEDTIMEDERIVATIVE_H

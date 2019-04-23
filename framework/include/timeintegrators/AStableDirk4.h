@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ASTABLEDIRK4_H
-#define ASTABLEDIRK4_H
+#pragma once
 
 #include "TimeIntegrator.h"
 
@@ -113,4 +112,3 @@ AStableDirk4::computeTimeDerivativeHelper(T & u_dot, const T2 & u_old)
   u_dot *= 1. / _dt;
 }
 
-#endif // ASTABLEDIRK4_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GENERATEDMESHGENERATOR_H
-#define GENERATEDMESHGENERATOR_H
+#pragma once
 
 #include "MeshGenerator.h"
 #include "MooseEnum.h"
@@ -54,4 +53,3 @@ protected:
   Real _bias_x, _bias_y, _bias_z;
 };
 
-#endif // GENERATEDMESHGENERATOR_H

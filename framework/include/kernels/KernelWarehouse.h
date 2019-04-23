@@ -7,12 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef KERNELWAREHOUSE_H
-#define KERNELWAREHOUSE_H
+#pragma once
 
 #include "MooseObjectWarehouse.h"
 
 /// This is only here for backwards compatibility.  Can be removed anytime after 9/1/2018
 typedef MooseObjectWarehouse<KernelBase> KernelWarehouse;
 
-#endif

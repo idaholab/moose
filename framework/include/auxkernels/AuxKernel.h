@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef AUXKERNEL_H
-#define AUXKERNEL_H
+#pragma once
 
 #include "MooseObject.h"
 #include "MooseVariableFE.h"
@@ -308,4 +307,3 @@ AuxKernelTempl<ComputeValueType>::getUserObjectByName(const UserObjectName & nam
   return UserObjectInterface::getUserObjectByName<T>(name);
 }
 
-#endif

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMENTDELETERBASE_H
-#define ELEMENTDELETERBASE_H
+#pragma once
 
 #include "MeshModifier.h"
 
@@ -45,4 +44,3 @@ protected:
   const BoundaryName _boundary_name;
 };
 
-#endif /* ELEMENTDELETERBASE_H */

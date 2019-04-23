@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef BOUNDINGBOXIC_H
-#define BOUNDINGBOXIC_H
+#pragma once
 
 #include "InitialCondition.h"
 
@@ -64,4 +63,3 @@ protected:
   const Point _top_right;
 };
 
-#endif // BOUNDINGBOXIC_H

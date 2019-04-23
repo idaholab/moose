@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef BNDELEMENT_H
-#define BNDELEMENT_H
+#pragma once
 
 #include "MooseTypes.h"
 
@@ -32,4 +31,3 @@ struct BndElement
   BoundaryID _bnd_id;
 };
 
-#endif /* BNDELEMENT_H */

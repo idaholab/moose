@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef STITCHEDMESH_H
-#define STITCHEDMESH_H
+#pragma once
 
 #include "MooseMesh.h"
 
@@ -57,4 +56,3 @@ protected:
   std::vector<std::unique_ptr<ReplicatedMesh>> _meshes;
 };
 
-#endif /* STITCHEDMESH_H */

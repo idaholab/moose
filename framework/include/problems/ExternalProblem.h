@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EXTERNALPROBLEM_H
-#define EXTERNALPROBLEM_H
+#pragma once
 
 #include "FEProblemBase.h"
 
@@ -58,4 +57,3 @@ public:
   virtual void addExternalVariables() {}
 };
 
-#endif /* EXTERNALPROBLEM_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INDIRECTSORT_H
-#define INDIRECTSORT_H
+#pragma once
 
 #include <functional>
 #include <vector>
@@ -117,4 +116,3 @@ applyIndices(T & container, const std::vector<size_t> & indices)
 
 } // namespace Moose
 
-#endif // INDIRECTSORT_H

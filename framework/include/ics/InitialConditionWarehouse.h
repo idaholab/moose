@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INITIALCONDITIONWAREHOUSE_H
-#define INITIALCONDITIONWAREHOUSE_H
+#pragma once
 
 #include "MooseObjectWarehouseBase.h"
 #include "MooseTypes.h"
@@ -47,4 +46,3 @@ protected:
   ///@}
 };
 
-#endif /* INITIALCONDITIONWAREHOUSE_H */

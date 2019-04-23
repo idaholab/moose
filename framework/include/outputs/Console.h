@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CONSOLE_H
-#define CONSOLE_H
+#pragma once
 
 // MOOSE includes
 #include "TableOutput.h"
@@ -237,4 +236,3 @@ private:
   bool _allow_changing_sysinfo_flag;
 };
 
-#endif /* CONSOLE_H */

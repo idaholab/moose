@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PENETRATIONAUX_H
-#define PENETRATIONAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -68,4 +67,3 @@ public:
   static const Real NotPenetrated;
 };
 
-#endif // PENETRATIONAUX_H

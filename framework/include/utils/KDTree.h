@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef KDTREE_H
-#define KDTREE_H
+#pragma once
 
 // Moose includes
 #include "MooseMesh.h"
@@ -47,4 +46,3 @@ protected:
   std::unique_ptr<KdTreeT> _kd_tree;
 };
 
-#endif // KDTREE_H

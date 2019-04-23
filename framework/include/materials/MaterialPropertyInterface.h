@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATERIALPROPERTYINTERFACE_H
-#define MATERIALPROPERTYINTERFACE_H
+#pragma once
 
 // MOOSE includes
 #include "MaterialProperty.h"
@@ -538,4 +537,3 @@ MaterialPropertyInterface::getZeroMaterialProperty(const std::string & /*prop_na
   return zero;
 }
 
-#endif // MATERIALPROPERTYINTERFACE_H

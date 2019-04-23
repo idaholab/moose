@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LINEARNODALCONSTRAINT_H
-#define LINEARNODALCONSTRAINT_H
+#pragma once
 
 #include "NodalConstraint.h"
 
@@ -50,4 +49,3 @@ protected:
   Real _penalty;
 };
 
-#endif /* LINEARNODALCONSTRAINT_H */

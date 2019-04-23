@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CSV_H
-#define CSV_H
+#pragma once
 
 // MOOSE includes
 #include "TableOutput.h"
@@ -115,4 +114,3 @@ private:
   std::string getVectorPostprocessorFilePrefix(const std::string & vpp_name);
 };
 
-#endif /* CSV_H */

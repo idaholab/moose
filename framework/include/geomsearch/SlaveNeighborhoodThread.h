@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SLAVENEIGHBORHOODTHREAD_H
-#define SLAVENEIGHBORHOODTHREAD_H
+#pragma once
 
 // MOOSE includes
 #include "MooseTypes.h"
@@ -61,4 +60,3 @@ protected:
   unsigned int _patch_size;
 };
 
-#endif // SLAVENEIGHBORHOODTHREAD_H

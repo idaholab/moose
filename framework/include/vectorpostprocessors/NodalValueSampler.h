@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NODALVALUESAMPLER_H
-#define NODALVALUESAMPLER_H
+#pragma once
 
 #include "NodalVariableVectorPostprocessor.h"
 #include "SamplerBase.h"
@@ -46,4 +45,3 @@ protected:
   std::vector<unsigned int> _has_values;
 };
 
-#endif

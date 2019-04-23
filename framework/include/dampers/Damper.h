@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DAMPER_H
-#define DAMPER_H
+#pragma once
 
 // Moose Includes
 #include "MooseObject.h"
@@ -50,4 +49,3 @@ protected:
   const Real & _min_damping;
 };
 
-#endif

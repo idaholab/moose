@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INDICATOR_H
-#define INDICATOR_H
+#pragma once
 
 #include "MooseObject.h"
 #include "BlockRestrictable.h"
@@ -76,4 +75,3 @@ protected:
 
   MooseMesh & _mesh;
 };
-#endif /* INDICATOR_H */

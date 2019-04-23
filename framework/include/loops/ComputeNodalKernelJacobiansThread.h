@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTENODALKERNELJACOBIANSTHREAD_H
-#define COMPUTENODALKERNELJACOBIANSTHREAD_H
+#pragma once
 
 #include "ThreadedNodeLoop.h"
 #include "MooseObjectTagWarehouse.h"
@@ -59,4 +58,3 @@ protected:
   unsigned int _num_cached;
 };
 
-#endif // COMPUTENODALKERNELJACOBIANSTHREAD_H

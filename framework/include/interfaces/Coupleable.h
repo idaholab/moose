@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COUPLEABLE_H
-#define COUPLEABLE_H
+#pragma once
 
 #include <map>
 #include "MooseTypes.h"
@@ -1266,4 +1265,3 @@ const VariableGradient & Coupleable::adZeroGradientTemplate<RESIDUAL>();
 template <>
 const VariableSecond & Coupleable::adZeroSecondTemplate<RESIDUAL>();
 
-#endif /* COUPLEABLE_H */

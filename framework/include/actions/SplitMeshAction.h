@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SPLITMESHACTION_H
-#define SPLITMESHACTION_H
+#pragma once
 
 #include "Action.h"
 
@@ -27,4 +26,3 @@ public:
   virtual void act() override;
 };
 
-#endif // SPLITMESHACTION_H

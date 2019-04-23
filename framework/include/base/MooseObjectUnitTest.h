@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEOBJECTUNITTEST_H
-#define MOOSEOBJECTUNITTEST_H
+#pragma once
 
 #include "gtest/gtest.h"
 
@@ -103,4 +102,3 @@ protected:
   std::shared_ptr<FEProblem> _fe_problem;
 };
 
-#endif

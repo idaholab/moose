@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FILEOUTPUT_H
-#define FILEOUTPUT_H
+#pragma once
 
 // MOOSE includes
 #include "PetscOutput.h"
@@ -96,4 +95,3 @@ private:
   friend class OutputWarehouse;
 };
 
-#endif /* FILEOUTPUT_H */

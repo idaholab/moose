@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RELATIONSHIPMANAGER_H
-#define RELATIONSHIPMANAGER_H
+#pragma once
 
 #include "MooseObject.h"
 #include "InputParameters.h"
@@ -126,4 +125,3 @@ protected:
   const bool _use_displaced_mesh;
 };
 
-#endif /* RELATIONSHIPMANAGER_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef BREAKMESHBYBLOCK_H
-#define BREAKMESHBYBLOCK_H
+#pragma once
 
 #include "BreakMeshByBlockBase.h"
 
@@ -34,4 +33,3 @@ private:
       _new_boundary_sides_map;
 };
 
-#endif /* BREAKMESHBYBLOCK_H */

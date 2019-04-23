@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DIFFUSIONFLUXBC_H
-#define DIFFUSIONFLUXBC_H
+#pragma once
 
 #include "FluxBC.h"
 
@@ -39,4 +38,3 @@ protected:
   virtual RealGradient computeQpFluxJacobian() override;
 };
 
-#endif /* DIFFUSIONFLUXBC_H */

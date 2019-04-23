@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADDALLSIDESETS_H
-#define ADDALLSIDESETS_H
+#pragma once
 
 #include "AddSideSetsBase.h"
 #include "MooseTypes.h"
@@ -41,4 +40,3 @@ protected:
   std::set<BoundaryID> _mesh_boundary_ids;
 };
 
-#endif /* ADDALLSIDESETS_H */

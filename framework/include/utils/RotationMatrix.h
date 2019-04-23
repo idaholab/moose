@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ROTATIONMATRIX_H
-#define ROTATIONMATRIX_H
+#pragma once
 
 #include "Moose.h"
 #include "libmesh/vector_value.h"
@@ -26,4 +25,3 @@ RealTensorValue rotVecToZ(RealVectorValue vec);
 RealTensorValue rotVec1ToVec2(RealVectorValue vec1, RealVectorValue vec2);
 }
 
-#endif // ROTATIONMATRIX_H

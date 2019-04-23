@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FUNCTORRELATIONSHIPMANAGER_H
-#define FUNCTORRELATIONSHIPMANAGER_H
+#pragma once
 
 #include "RelationshipManager.h"
 
@@ -48,4 +47,3 @@ protected:
   std::unique_ptr<GhostingFunctor> _functor;
 };
 
-#endif /* FUNCTORRELATIONSHIPMANAGER_H */

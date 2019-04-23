@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MEMORYUSAGE_H
-#define MEMORYUSAGE_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 #include "MemoryUsageReporter.h"
@@ -63,4 +62,3 @@ protected:
   const bool _report_peak_value;
 };
 
-#endif // MEMORYUSAGE_H

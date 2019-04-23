@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NEARESTNODELOCATOR_H
-#define NEARESTNODELOCATOR_H
+#pragma once
 
 // Moose
 #include "Restartable.h"
@@ -125,4 +124,3 @@ public:
   PerfID _update_ghosted_elems_timer;
 };
 
-#endif // NEARESTNODELOCATOR_H

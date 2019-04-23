@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PARALLELUNIQUEID_H
-#define PARALLELUNIQUEID_H
+#pragma once
 
 #include "MooseTypes.h" // included for namespace usage and THREAD_ID
 
@@ -93,4 +92,3 @@ private:
   static bool _initialized;
 };
 
-#endif // PARALLELUNIQUEID_H

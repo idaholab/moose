@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEVARIABLEFE_H
-#define MOOSEVARIABLEFE_H
+#pragma once
 
 #include "metaphysicl/numberarray.h"
 #include "metaphysicl/dualnumber.h"
@@ -1209,4 +1208,3 @@ MooseVariableFE<RealVectorValue>::adGradPhiFace<RESIDUAL>()
 {
   return _grad_phi_face;
 }
-#endif /* MOOSEVARIABLEFE_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DERIVATIVEFUNCTIONMATERIALBASE_H
-#define DERIVATIVEFUNCTIONMATERIALBASE_H
+#pragma once
 
 #include "FunctionMaterialBase.h"
 
@@ -101,4 +100,3 @@ protected:
   std::vector<std::vector<std::vector<MaterialProperty<Real> *>>> _prop_d3F;
 };
 
-#endif // DERIVATIVEFUNCTIONMATERIALBASE_H

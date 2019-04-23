@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSE_H
-#define MOOSE_H
+#pragma once
 
 #include "libmesh/perf_log.h"
 #include "libmesh/libmesh_common.h"
@@ -210,4 +209,3 @@ private:
 
 } // namespace Moose
 
-#endif /* MOOSE_H */

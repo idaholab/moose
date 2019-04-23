@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADDCONTROLACTION_H
-#define ADDCONTROLACTION_H
+#pragma once
 
 // MOOSE includes
 #include "MooseObjectAction.h"
@@ -37,4 +36,3 @@ public:
   virtual void act() override;
 };
 
-#endif // ADDCONTROLACTION_H

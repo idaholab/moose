@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EIGENPROBLEM_H
-#define EIGENPROBLEM_H
+#pragma once
 
 // MOOSE Includes
 #include "FEProblemBase.h"
@@ -95,4 +94,3 @@ protected:
   PerfID _solve_timer;
 };
 
-#endif /* EIGENPROBLEM_H */

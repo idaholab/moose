@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LOWERDBLOCKFROMSIDESET_H
-#define LOWERDBLOCKFROMSIDESET_H
+#pragma once
 
 #include "MeshModifier.h"
 
@@ -34,4 +33,3 @@ protected:
   std::vector<BoundaryID> _sidesets;
 };
 
-#endif /* LOWERDBLOCKFROMSIDESET_H */

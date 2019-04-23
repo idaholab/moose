@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SOLUTIONTIMEADAPTIVEDT_H
-#define SOLUTIONTIMEADAPTIVEDT_H
+#pragma once
 
 #include "TimeStepper.h"
 
@@ -55,4 +54,3 @@ protected:
   std::ofstream _adaptive_log;
 };
 
-#endif /* SOLUTIONTIMEADAPTIVEDT_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FORMATTEDTABLE_H
-#define FORMATTEDTABLE_H
+#pragma once
 
 // MOOSE includes
 #include "Moose.h"
@@ -251,4 +250,3 @@ void dataStore(std::ostream & stream, FormattedTable & table, void * context);
 template <>
 void dataLoad(std::istream & stream, FormattedTable & v, void * context);
 
-#endif // FORMATTEDTABLE_H

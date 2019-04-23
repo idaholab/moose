@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TRANSFORMGENERATOR_H
-#define TRANSFORMGENERATOR_H
+#pragma once
 
 #include "MeshGenerator.h"
 #include "MooseEnum.h"
@@ -33,4 +32,3 @@ protected:
   RealVectorValue _vector_value;
 };
 
-#endif // TRANSFORMGENERATOR_H

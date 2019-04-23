@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VECTORINTEGRATEDBC_H
-#define VECTORINTEGRATEDBC_H
+#pragma once
 
 #include "IntegratedBCBase.h"
 #include "MooseVariableInterface.h"
@@ -68,4 +67,3 @@ protected:
   const VectorVariableValue & _u;
 };
 
-#endif /* VECTORINTEGRATEDBC_H */

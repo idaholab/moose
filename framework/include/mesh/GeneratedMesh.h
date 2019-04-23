@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GENERATEDMESH_H
-#define GENERATEDMESH_H
+#pragma once
 
 #include "MooseMesh.h"
 
@@ -64,4 +63,3 @@ protected:
   bool _dims_may_have_changed;
 };
 
-#endif /* GENERATEDMESH_H */

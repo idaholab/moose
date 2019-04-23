@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADKERNELGRAD_H
-#define ADKERNELGRAD_H
+#pragma once
 
 #include "ADKernel.h"
 
@@ -49,4 +48,3 @@ protected:
   usingTemplKernelMembers(T);
 };
 
-#endif /* ADKERNELGRAD_H */
