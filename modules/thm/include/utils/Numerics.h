@@ -54,6 +54,17 @@ bool areParallelVectors(const RealVectorValue & a,
                         const Real & tol = libMesh::TOLERANCE * libMesh::TOLERANCE);
 
 /**
+ * Tests if two real-valued vectors are in the same direction
+ *
+ * @param[in] a     First vector
+ * @param[in] b     Second vector
+ * @param[in] tol   Absolute tolerance
+ */
+bool haveSameDirection(const RealVectorValue & a,
+                       const RealVectorValue & b,
+                       const Real & tol = libMesh::TOLERANCE * libMesh::TOLERANCE);
+
+/**
  * Computes a derivative of a fraction using quotient rule for a derivative
  * w.r.t. a scalar quantity
  *
