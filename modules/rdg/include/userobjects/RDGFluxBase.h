@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RDGFLUXBASE_H
-#define RDGFLUXBASE_H
+#pragma once
 
 #include "ThreadedGeneralUserObject.h"
 
@@ -132,4 +131,3 @@ protected:
   mutable DenseMatrix<Real> _jac2;
 };
 
-#endif // RDGFLUXBASE_H

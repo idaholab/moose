@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INTERNALSIDEFLUXBASE_H
-#define INTERNALSIDEFLUXBASE_H
+#pragma once
 
 #include "ThreadedGeneralUserObject.h"
 
@@ -130,4 +129,3 @@ protected:
   mutable DenseMatrix<Real> _jac2;
 };
 
-#endif // INTERNALSIDEFLUXBASE_H

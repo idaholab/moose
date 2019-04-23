@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef BOUNDARYFLUXPOSTPROCESSOR_H
-#define BOUNDARYFLUXPOSTPROCESSOR_H
+#pragma once
 
 #include "SideIntegralPostprocessor.h"
 
@@ -45,4 +44,3 @@ protected:
   std::vector<const VariableValue *> _U;
 };
 
-#endif /* BOUNDARYFLUXPOSTPROCESSOR_H */

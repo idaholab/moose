@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SLOPERECONSTRUCTIONBASE_H
-#define SLOPERECONSTRUCTIONBASE_H
+#pragma once
 
 #include "BCUserObject.h"
 #include "ElementLoopUserObject.h"
@@ -119,4 +118,3 @@ private:
   static Threads::spin_mutex _mutex;
 };
 
-#endif
