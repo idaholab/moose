@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MISCAPP_H
-#define MISCAPP_H
+#pragma once
 
 #include "MooseApp.h"
 
@@ -30,4 +29,3 @@ public:
   static void registerExecFlags(Factory & factory);
 };
 
-#endif /* MISCAPP_H */

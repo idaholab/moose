@@ -6,8 +6,8 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#ifndef ADSORETCOEFFTEST_H
-#define ADSORETCOEFFTEST_H
+
+#pragma once
 
 #include "ADMaterial.h"
 
@@ -33,4 +33,3 @@ protected:
   usingMaterialMembers;
 };
 
-#endif // ADSORETCOEFFTEST_H

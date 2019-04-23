@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RIGIDBODYMODES3D_H
-#define RIGIDBODYMODES3D_H
+#pragma once
 
 #include "NodalUserObject.h"
 
@@ -41,4 +40,3 @@ protected:
   unsigned int _disp_z_i;
 };
 
-#endif
