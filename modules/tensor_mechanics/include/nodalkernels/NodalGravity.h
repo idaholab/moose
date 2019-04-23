@@ -34,6 +34,10 @@ public:
 protected:
   virtual Real computeQpResidual() override;
 
+  /// Booleans for validity of params
+  const bool _has_mass;
+  const bool _has_nodal_mass_file;
+
   /// Mass associated with the node
   const Real _mass;
 

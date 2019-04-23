@@ -43,17 +43,19 @@ validParams<NodalGravity>()
 
 NodalGravity::NodalGravity(const InputParameters & parameters)
   : NodalKernel(parameters),
-    _mass(isParamValid("mass") ? getParam<Real>("mass") : 0.0),
+    _has_mass(isParamValid("mass")),
+    _has_nodal_mass_file(isParamValid("nodal_mass_file")),
+    _mass(_has_mass ? getParam<Real>("mass") : 0.0),
     _alpha(getParam<Real>("alpha")),
     _gravity_value(getParam<Real>("gravity_value")),
     _function(getFunction("function"))
 {
-  if (!isParamValid("nodal_mass_file") && !isParamValid("mass"))
+  if (!_has_nodal_mass_file && !_has_mass)
     mooseError("NodalGravity: Please provide either mass or nodal_mass_file as input.");
-  else if (isParamValid("nodal_mass_file") && isParamValid("mass"))
+  else if (_has_nodal_mass_file && _has_mass)
     mooseError("NodalGravity: Please provide either mass or nodal_mass_file as input, not both.");
 
-  if (isParamValid("nodal_mass_file"))
+  if (_has_nodal_mass_file)
   {
     MooseUtils::DelimitedFileReader nodal_mass_file(getParam<FileName>("nodal_mass_file"));
     nodal_mass_file.setHeaderFlag(MooseUtils::DelimitedFileReader::HeaderFlag::OFF);
@@ -102,7 +104,7 @@ Real
 NodalGravity::computeQpResidual()
 {
   Real mass = 0.0;
-  if (isParamValid("mass"))
+  if (_has_mass)
     mass = _mass;
   else
   {
