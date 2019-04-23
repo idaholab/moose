@@ -24,15 +24,18 @@ We have found better performance instructing VcXsrv to use software rendering ov
 
 ## Edit Hostname within WSL
 
-Launch WSL, and modify the /etc/hosts file to include the results of `hostname` to resolve to 127.0.0.1. This is necessary due to the way
+Launch the Windows 10 Command Prompt as an Administrator (right-click the Windows Start button, and select Command Prompt(Admin) in the resulting menu that appears), and modify the Windows 10 hosts file (located in `C:\Windows\System32\Drivers\etc\hosts`) to include the results of `hostname` to resolve to 127.0.0.1. This is necessary due to the way
 MPICH (a message passing interface) passes information among itself when running applications (like MOOSE) in parallel.
 
-```bash
-[~]> hostname
+```
+C:\Users\[your_user_name]> hostname
 DESKTOP-L7BGA7L
 
-[~]> sudo vi /etc/hosts
-127.0.0.1   localhost
+C:\Users\[your_user_name]> Notepad "C:\Windows\System32\Drivers\etc\hosts"
+# localhost name resolution is handled within DNS itself.
+#       127.0.0.1       localhost
+#       ::1             localhost
+
 127.0.0.1   DESKTOP-L7BGA7L    <---- ADD THAT
 ```
 
