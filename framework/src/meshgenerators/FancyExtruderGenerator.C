@@ -90,31 +90,37 @@ FancyExtruderGenerator::FancyExtruderGenerator(const InputParameters & parameter
 std::unique_ptr<MeshBase>
 FancyExtruderGenerator::generate()
 {
+  // Note: bulk of this code originally from libmesh mesh_modification.C
+  // Original copyright: Copyright (C) 2002-2019 Benjamin S. Kirk, John W. Peterson, Roy H. Stogner
+  // Original license is LGPL so it can be used here.
+
   auto mesh = _mesh->buildMeshBaseObject();
+
+  std::unique_ptr<MeshBase> input = std::move(_input);
 
   unsigned int total_num_layers = std::accumulate(_num_layers.begin(), _num_layers.end(), 0);
 
   auto total_num_elevations = _heights.size();
 
-  dof_id_type orig_elem = _input->n_elem();
-  dof_id_type orig_nodes = _input->n_nodes();
+  dof_id_type orig_elem = input->n_elem();
+  dof_id_type orig_nodes = input->n_nodes();
 
 #ifdef LIBMESH_ENABLE_UNIQUE_ID
-  unique_id_type orig_unique_ids = _input->parallel_max_unique_id();
+  unique_id_type orig_unique_ids = input->parallel_max_unique_id();
 #endif
 
   unsigned int order = 1;
 
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
-  const BoundaryInfo & input_boundary_info = _input->get_boundary_info();
+  const BoundaryInfo & input_boundary_info = input->get_boundary_info();
 
   // We know a priori how many elements we'll need
   mesh->reserve_elem(total_num_layers * orig_elem);
 
   // For straightforward meshes we need one or two additional layers per
   // element.
-  if (_input->elements_begin() != _input->elements_end() &&
-      (*_input->elements_begin())->default_order() == SECOND)
+  if (input->elements_begin() != input->elements_end() &&
+      (*input->elements_begin())->default_order() == SECOND)
     order = 2;
   mesh->comm().max(order);
 
@@ -126,7 +132,7 @@ FancyExtruderGenerator::generate()
   Point old_distance;
   Point current_distance;
 
-  for (const auto & node : _input->node_ptr_range())
+  for (const auto & node : input->node_ptr_range())
   {
     unsigned int current_node_layer = 0;
 
@@ -176,9 +182,9 @@ FancyExtruderGenerator::generate()
   // side_ids may not include ids from remote elements, in which case
   // some processors may have underestimated the next_side_id; let's
   // fix that.
-  _input->comm().max(next_side_id);
+  input->comm().max(next_side_id);
 
-  for (const auto & elem : _input->element_ptr_range())
+  for (const auto & elem : input->element_ptr_range())
   {
     const ElemType etype = elem->type();
 
