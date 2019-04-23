@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FACENODE_H
-#define FACENODE_H
+#pragma once
 
 class EFANode;
 
@@ -31,4 +30,3 @@ public:
   void switchNode(EFANode * new_old, EFANode * old_node);
 };
 
-#endif

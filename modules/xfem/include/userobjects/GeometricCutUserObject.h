@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GEOMETRICCUTUSEROBJECT_H
-#define GEOMETRICCUTUSEROBJECT_H
+#pragma once
 
 // MOOSE includes
 #include "CrackFrontPointsProvider.h"
@@ -206,4 +205,3 @@ protected:
   ///@}
 };
 
-#endif // GEOMETRICCUTUSEROBJECT_H

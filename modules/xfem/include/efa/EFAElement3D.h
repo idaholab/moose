@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EFAELEMENT3D_H
-#define EFAELEMENT3D_H
+#pragma once
 
 #include "EFAElement.h"
 #include "EFAPoint.h"
@@ -172,4 +171,3 @@ private:
   void setLocalCoordinates();
 };
 
-#endif

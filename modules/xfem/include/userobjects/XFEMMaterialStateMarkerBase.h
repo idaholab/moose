@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef XFEMMATERIALSTATEMARKERBASE_H
-#define XFEMMATERIALSTATEMARKERBASE_H
+#pragma once
 
 #include "ElementUserObject.h"
 
@@ -52,4 +51,3 @@ private:
 template <>
 InputParameters validParams<XFEMMaterialStateMarkerBase>();
 
-#endif // XFEMMATERIALSTATEMARKERBASE_H

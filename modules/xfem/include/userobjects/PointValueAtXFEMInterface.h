@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POINTVALUEATXFEMINTERFACE_H
-#define POINTVALUEATXFEMINTERFACE_H
+#pragma once
 
 #include "GeneralUserObject.h"
 #include "ElementPairLocator.h"
@@ -122,4 +121,3 @@ protected:
   std::map<unsigned int, RealVectorValue> _grad_values_negative_level_set_side;
 };
 
-#endif

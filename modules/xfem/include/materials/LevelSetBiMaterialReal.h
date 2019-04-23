@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LEVELSETBIMATERIALREAL_H
-#define LEVELSETBIMATERIALREAL_H
+#pragma once
 
 #include "LevelSetBiMaterialBase.h"
 
@@ -39,4 +38,3 @@ protected:
   MaterialProperty<Real> & _material_prop;
 };
 
-#endif // LEVELSETBIMATERIALREAL_H

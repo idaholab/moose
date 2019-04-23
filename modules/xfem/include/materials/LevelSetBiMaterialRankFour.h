@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LEVELSETBIMATERIALRANKFOUR_H
-#define LEVELSETBIMATERIALRANKFOUR_H
+#pragma once
 
 #include "LevelSetBiMaterialBase.h"
 #include "RankFourTensor.h"
@@ -40,4 +39,3 @@ protected:
   MaterialProperty<RankFourTensor> & _material_prop;
 };
 
-#endif // LEVELSETBIMATERIALRANKFOUR_H

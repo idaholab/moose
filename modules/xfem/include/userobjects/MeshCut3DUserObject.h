@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MESH_CUT_3D_USEROBJECT_H
-#define MESH_CUT_3D_USEROBJECT_H
+#pragma once
 
 #include "GeometricCutUserObject.h"
 
@@ -205,4 +204,3 @@ protected:
   Function & _func_z;
 };
 
-#endif

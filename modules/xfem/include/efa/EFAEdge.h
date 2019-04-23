@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EFAEDGE_H
-#define EFAEDGE_H
+#pragma once
 
 #include <vector>
 
@@ -63,4 +62,3 @@ public:
   void removeEmbeddedNode(EFANode * node);
 };
 
-#endif

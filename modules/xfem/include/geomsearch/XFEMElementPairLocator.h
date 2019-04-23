@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef XFEMELEMENTPAIRLOCATOR_H
-#define XFEMELEMENTPAIRLOCATOR_H
+#pragma once
 
 #include "ElementPairLocator.h"
 #include "XFEM.h"
@@ -27,4 +26,3 @@ protected:
   bool _use_displaced_mesh;
 };
 
-#endif // XFEMELEMENTPAIRLOCATOR_H

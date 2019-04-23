@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EFAELEMENT_H
-#define EFAELEMENT_H
+#pragma once
 
 #include <vector>
 #include <map>
@@ -122,4 +121,3 @@ protected:
                   std::map<unsigned int, EFANode *> & TempNodes);
 };
 
-#endif

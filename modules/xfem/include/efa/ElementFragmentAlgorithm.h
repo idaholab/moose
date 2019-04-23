@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMENTFRAGMENTALGORITHM_H
-#define ELEMENTFRAGMENTALGORITHM_H
+#pragma once
 
 #include <vector>
 #include <map>
@@ -89,4 +88,3 @@ public:
   void clearPotentialIsolatedNodes();
 };
 
-#endif // #ifndef ELEMENTFRAGMENTALGORITHM_H

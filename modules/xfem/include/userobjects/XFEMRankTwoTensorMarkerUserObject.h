@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef XFEMRANKTWOTENSORMARKERUSEROBJECT_H
-#define XFEMRANKTWOTENSORMARKERUSEROBJECT_H
+#pragma once
 
 #include "XFEMMaterialStateMarkerBase.h"
 
@@ -50,4 +49,3 @@ protected:
   virtual bool doesElementCrack(RealVectorValue & direction) override;
 };
 
-#endif // XFEMRANKTWOTENSORMARKERUSEROBJECT_H

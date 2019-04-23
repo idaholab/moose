@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LINESEGMENTLEVELSETAUX_H
-#define LINESEGMENTLEVELSETAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -45,4 +44,3 @@ protected:
   std::vector<Real> _cut_data;
 };
 
-#endif // LINESEGMENTLEVELSETAUX_H

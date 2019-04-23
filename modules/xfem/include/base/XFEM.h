@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef XFEM_H
-#define XFEM_H
+#pragma once
 
 #include "ElementPairLocator.h"
 #include "ElementFragmentAlgorithm.h"
@@ -386,4 +385,3 @@ private:
   std::vector<dof_id_type> getNodeSolutionDofs(const Node * node, SystemBase & sys) const;
 };
 
-#endif // XFEM_H

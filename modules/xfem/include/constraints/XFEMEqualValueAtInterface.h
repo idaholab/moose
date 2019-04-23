@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef XFEMEQUALVALUEATINTERFACE_H
-#define XFEMEQUALVALUEATINTERFACE_H
+#pragma once
 
 #include "ElemElemConstraint.h"
 
@@ -42,4 +41,3 @@ protected:
   std::shared_ptr<XFEM> _xfem;
 };
 
-#endif /* XFEMEQUALVALUEATINTERFACE_H_ */

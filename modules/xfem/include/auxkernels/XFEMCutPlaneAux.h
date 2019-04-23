@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef XFEMCUTPLANEAUX_H
-#define XFEMCUTPLANEAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 #include "XFEM.h"
@@ -35,4 +34,3 @@ private:
 template <>
 InputParameters validParams<XFEMCutPlaneAux>();
 
-#endif // XFEMCUTPLANEAUX_H
