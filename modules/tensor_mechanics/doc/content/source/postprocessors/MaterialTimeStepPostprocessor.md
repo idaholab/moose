@@ -101,7 +101,7 @@ of elements changed is used.
 !listing modules/tensor_mechanics/test/tests/material_limit_time_step/elas_plas/nafems_nl1_lim.i block=Postprocessors/matl_ts_min
 
 The name of the `MaterialTimeStepPostprocessor` is passed to the `IterationAdaptiveDT`
-as the argument for the `postprocessor_dtlim` parameter
+as the argument for the `timestep_limiting_postprocessor` parameter
 
 !listing modules/tensor_mechanics/test/tests/material_limit_time_step/elas_plas/nafems_nl1_lim.i block=Executioner/TimeStepper
 

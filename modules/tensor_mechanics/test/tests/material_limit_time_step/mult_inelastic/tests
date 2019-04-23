@@ -1,0 +1,10 @@
+[Tests]
+  [./no_inelastic_model_limit]
+    type = 'CSVDiff'
+    input = 'no_inelastic_model_timestep_limit.i'
+    csvdiff = 'no_inelastic_model_timestep_limit_out.csv'
+    requirement = 'The ComputeMultipleInelasticStress model shall compute a time step equal to the maximum real number if no inelastic model is provided'
+    issues = '#13250'
+    design = 'ScalarMaterialDamage.md MaterialTimeStepPostprocessor.md'
+  [../]
+[]

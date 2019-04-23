@@ -3,7 +3,7 @@
 !syntax description /Postprocessors/DiscreteNucleationTimeStep
 
 Supply this postprocessor to an [IterationAdaptiveDT](/IterationAdaptiveDT.md)
-via the `postprocessor_dtlim` parameter.
+via the `timestep_limiting_postprocessor` parameter.
 
 The timestep limit computed by this postprocessor is computed according to two
 different criteria.
