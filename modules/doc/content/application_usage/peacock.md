@@ -32,6 +32,9 @@ peacock -i your_input_file.i
 
 Peacock will attempt to find your application's executable, and then the Input file tab will be populated with information from 'your_input_file.i'.
 
+!alert! warning
+Do not use `sudo` when running Peacock.
+
 ## Input File Tab
 
 The "Input File" tab (showm below) allows you to create and edit input files. You can automaticaly load an input file by passing it as an argument on the command-line, or you can use the "Open" button on the Input File tab.
