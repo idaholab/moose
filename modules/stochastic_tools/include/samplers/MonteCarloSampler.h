@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MONTECARLOSAMPLER_H
-#define MONTECARLOSAMPLER_H
+#pragma once
 
 #include "Sampler.h"
 
@@ -31,4 +30,3 @@ protected:
   const std::size_t _num_samples;
 };
 
-#endif /* MONTECARLOSAMPLER_H */

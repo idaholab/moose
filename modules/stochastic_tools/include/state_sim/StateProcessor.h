@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef STATEPROCESSOR_H
-#define STATEPROCESSOR_H
+#pragma once
 
 #include <string>
 #include <vector>
@@ -33,4 +32,3 @@ private:
   void addEv(unsigned int time_step);
 };
 
-#endif

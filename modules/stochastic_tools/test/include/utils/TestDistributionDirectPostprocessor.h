@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TESTDISTRIBUTIONDIRECTPOSTPROCESSOR_H
-#define TESTDISTRIBUTIONDIRECTPOSTPROCESSOR_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 
@@ -48,4 +47,3 @@ protected:
   const MooseEnum & _distribution_method;
 };
 
-#endif
