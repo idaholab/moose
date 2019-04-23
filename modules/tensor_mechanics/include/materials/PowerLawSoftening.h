@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POWERLAWSOFTENING_H
-#define POWERLAWSOFTENING_H
+#pragma once
 
 #include "SmearedCrackSofteningBase.h"
 
@@ -41,4 +40,3 @@ protected:
   const Real & _stiffness_reduction;
 };
 
-#endif // POWERLAWSOFTENING_H

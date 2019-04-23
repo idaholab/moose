@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LINEMATERIALRANKTWOSCALARSAMPLER_H
-#define LINEMATERIALRANKTWOSCALARSAMPLER_H
+#pragma once
 
 #include "LineMaterialSamplerBase.h"
 #include "RankTwoTensor.h"
@@ -52,4 +51,3 @@ protected:
   Point _direction;
 };
 
-#endif // LINEMATERIALRANKTWOSCALARSAMPLER_H

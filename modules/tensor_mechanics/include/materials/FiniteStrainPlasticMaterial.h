@@ -7,10 +7,9 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#pragma once
 // Original class author: A.M. Jokisaari,  O. Heinonen
 
-#ifndef FINITESTRAINPLASTICMATERIAL_H
-#define FINITESTRAINPLASTICMATERIAL_H
 
 #include "ComputeStressBase.h"
 
@@ -140,4 +139,3 @@ protected:
   Real getdYieldStressdPlasticStrain(const Real equivalent_plastic_strain);
 };
 
-#endif // FINITESTRAINPLASTICMATERIAL_H

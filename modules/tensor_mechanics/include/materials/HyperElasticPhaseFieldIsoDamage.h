@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef HYPERELASTICPHASEFIELDISODAMAGE_H
-#define HYPERELASTICPHASEFIELDISODAMAGE_H
+#pragma once
 
 #include "FiniteStrainHyperElasticViscoPlastic.h"
 
@@ -82,4 +81,3 @@ protected:
   const MaterialProperty<Real> & _hist_old;
 };
 
-#endif

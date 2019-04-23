@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEINCREMENTALSMALLSTRAIN_H
-#define COMPUTEINCREMENTALSMALLSTRAIN_H
+#pragma once
 
 #include "ComputeIncrementalStrainBase.h"
 
@@ -34,4 +33,3 @@ protected:
   virtual void computeTotalStrainIncrement(RankTwoTensor & total_strain_increment);
 };
 
-#endif // COMPUTEINCREMENTALSMALLSTRAIN_H

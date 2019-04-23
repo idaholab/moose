@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CAVITYPRESSUREUSEROBJECT_H
-#define CAVITYPRESSUREUSEROBJECT_H
+#pragma once
 
 #include "GeneralUserObject.h"
 
@@ -64,4 +63,3 @@ protected:
 template <>
 InputParameters validParams<CavityPressureUserObject>();
 
-#endif // CAVITYRESSUREUSEROBJECT_H

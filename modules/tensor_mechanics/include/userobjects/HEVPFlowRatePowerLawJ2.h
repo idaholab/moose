@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef HEVPFLOWRATEPOWERLAWJ2_H
-#define HEVPFLOWRATEPOWERLAWJ2_H
+#pragma once
 
 #include "HEVPFlowRateUOBase.h"
 
@@ -41,4 +40,3 @@ protected:
   Real computeEqvStress(const RankTwoTensor &, const RankTwoTensor &) const;
 };
 
-#endif

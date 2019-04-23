@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADCOMPUTERSPHERICALINCREMENTALSTRAIN_H
-#define ADCOMPUTERSPHERICALINCREMENTALSTRAIN_H
+#pragma once
 
 #include "ADComputeIncrementalSmallStrain.h"
 
@@ -42,4 +41,3 @@ protected:
   usingComputeIncrementalSmallStrainMembers;
 };
 
-#endif // ADCOMPUTERSPHERICALINCREMENTALSTRAIN_H

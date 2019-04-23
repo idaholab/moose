@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROMECHANICSCOUPLING_H
-#define POROMECHANICSCOUPLING_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -44,4 +43,3 @@ private:
   unsigned int _component;
 };
 
-#endif // POROMECHANICSCOUPLING_H

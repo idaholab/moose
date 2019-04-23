@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEINCREMENTALSTRAINBASE_H
-#define COMPUTEINCREMENTALSTRAINBASE_H
+#pragma once
 
 #include "ComputeStrainBase.h"
 
@@ -46,4 +45,3 @@ protected:
   std::vector<const MaterialProperty<RankTwoTensor> *> _eigenstrains_old;
 };
 
-#endif // COMPUTEINCREMENTALSTRAINBASE_H

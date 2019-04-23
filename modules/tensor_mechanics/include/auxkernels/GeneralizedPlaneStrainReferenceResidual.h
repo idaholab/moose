@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GENERALIZEDPLANESTRAINREFERENCERESIDUAL_H
-#define GENERALIZEDPLANESTRAINREFERENCERESIDUAL_H
+#pragma once
 
 #include "AuxScalarKernel.h"
 
@@ -29,4 +28,3 @@ public:
   const GeneralizedPlaneStrainUserObject & _gps;
   const unsigned int _scalar_var_id;
 };
-#endif // GENERALIZEDPLANESTRAINREFERENCERESIDUAL_H

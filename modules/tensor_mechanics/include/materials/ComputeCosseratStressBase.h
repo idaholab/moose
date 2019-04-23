@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTECOSSERATSTRESSBASE_H
-#define COMPUTECOSSERATSTRESSBASE_H
+#pragma once
 
 #include "ComputeStressBase.h"
 
@@ -42,4 +41,3 @@ protected:
   MaterialProperty<RankFourTensor> & _Jacobian_mult_couple;
 };
 
-#endif // COMPUTECOSSERATSTRESSBASE_H

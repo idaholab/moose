@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTE1DSMALLSTRAIN_H
-#define COMPUTE1DSMALLSTRAIN_H
+#pragma once
 
 #include "ComputeSmallStrain.h"
 
@@ -42,4 +41,3 @@ protected:
   virtual Real computeStrainZZ() = 0;
 };
 
-#endif // COMPUTE1DSMALLSTRAIN_H

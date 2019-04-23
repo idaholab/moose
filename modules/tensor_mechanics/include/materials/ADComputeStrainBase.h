@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADCOMPUTESTRAINBASE_H
-#define ADCOMPUTESTRAINBASE_H
+#pragma once
 
 #include "ADMaterial.h"
 
@@ -72,4 +71,3 @@ protected:
   usingMaterialMembers;
 };
 
-#endif // ADCOMPUTESTRAINBASE_H

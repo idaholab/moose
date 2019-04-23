@@ -6,8 +6,8 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#ifndef ADSTRESSDIVERGENCETEST_H
-#define ADSTRESSDIVERGENCETEST_H
+
+#pragma once
 
 #include "ADKernel.h"
 
@@ -32,4 +32,3 @@ protected:
   usingKernelMembers;
 };
 
-#endif // ADSTRESSDIVERGENCETEST_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CRACK_DATA_SAMPLER_H
-#define CRACK_DATA_SAMPLER_H
+#pragma once
 
 #include "GeneralVectorPostprocessor.h"
 #include "CrackFrontDefinition.h"
@@ -60,4 +59,3 @@ protected:
   std::vector<const PostprocessorValue *> _domain_integral_postprocessor_values;
 };
 
-#endif

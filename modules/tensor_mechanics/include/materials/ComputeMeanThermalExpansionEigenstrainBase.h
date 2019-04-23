@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEMEANTHERMALEXPANSIONEIGENSTRAINBASE_H
-#define COMPUTEMEANTHERMALEXPANSIONEIGENSTRAINBASE_H
+#pragma once
 
 #include "ComputeThermalExpansionEigenstrainBase.h"
 
@@ -65,4 +64,3 @@ protected:
   virtual Real meanThermalExpansionCoefficientDerivative(const Real temperature) = 0;
 };
 
-#endif // COMPUTEMEANTHERMALEXPANSIONEIGENSTRAINBASE_H

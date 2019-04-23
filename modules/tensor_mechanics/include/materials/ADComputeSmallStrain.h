@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADCOMPUTESMALLSTRAIN_H
-#define ADCOMPUTESMALLSTRAIN_H
+#pragma once
 
 #include "ADComputeStrainBase.h"
 
@@ -34,4 +33,3 @@ protected:
   usingComputeStrainBaseMembers;
 };
 
-#endif // ADCOMPUTESMALLSTRAIN_H

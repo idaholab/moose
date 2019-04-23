@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADCOMPUTEAXISYMMETRICRZFINITESTRAIN_H
-#define ADCOMPUTEAXISYMMETRICRZFINITESTRAIN_H
+#pragma once
 
 #include "ADCompute2DFiniteStrain.h"
 
@@ -41,4 +40,3 @@ protected:
   usingCompute2DFiniteStrainMembers;
 };
 
-#endif // ADCOMPUTEAXISYMMETRICRZFINITESTRAIN_H

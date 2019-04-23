@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEEXTRASTRESSCONSTANT_H
-#define COMPUTEEXTRASTRESSCONSTANT_H
+#pragma once
 
 #include "ComputeExtraStressBase.h"
 
@@ -34,4 +33,3 @@ protected:
   RankTwoTensor _extra_stress_tensor;
 };
 
-#endif // COMPUTEEXTRASTRESSCONSTANT_H

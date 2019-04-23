@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTECOSSERATELASTICITYTENSOR_H
-#define COMPUTECOSSERATELASTICITYTENSOR_H
+#pragma once
 
 #include "ComputeElasticityTensorBase.h"
 
@@ -38,4 +37,3 @@ protected:
   MaterialProperty<RankFourTensor> & _elastic_flexural_rigidity_tensor;
 };
 
-#endif // COMPUTECOSSERATELASTICITYTENSOR_H

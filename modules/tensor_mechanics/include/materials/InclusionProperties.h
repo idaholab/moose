@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INCLUSIONPROPERTIES_H
-#define INCLUSIONPROPERTIES_H
+#pragma once
 
 #include "Material.h"
 #include "RankTwoTensor.h"
@@ -66,4 +65,3 @@ private:
   MaterialProperty<Real> & _elastic_energy;
 };
 
-#endif // INCLUSIONPROPERTIES_H

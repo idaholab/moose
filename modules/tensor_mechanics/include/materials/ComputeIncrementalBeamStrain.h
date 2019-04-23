@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEINCREMENTALBEAMSTRAIN_H
-#define COMPUTEINCREMENTALBEAMSTRAIN_H
+#pragma once
 
 #include "Material.h"
 #include "RankTwoTensor.h"
@@ -168,4 +167,3 @@ protected:
   MaterialProperty<RankTwoTensor> & _initial_rotation;
 };
 
-#endif // COMPUTEINCREMENTALBEAMSTRAIN_H

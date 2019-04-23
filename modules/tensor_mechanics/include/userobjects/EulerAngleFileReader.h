@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EULERANGLEFILEREADER_H
-#define EULERANGLEFILEREADER_H
+#pragma once
 
 #include "EulerAngleProvider.h"
 #include <vector>
@@ -41,4 +40,3 @@ protected:
   std::vector<EulerAngles> _angles;
 };
 
-#endif // EULERANGLEFILEREADER_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADCOMPUTERSPHERICALSMALLSTRAIN_H
-#define ADCOMPUTERSPHERICALSMALLSTRAIN_H
+#pragma once
 
 #include "ADComputeSmallStrain.h"
 
@@ -34,4 +33,3 @@ public:
   usingComputeSmallStrainMembers;
 };
 
-#endif // ADCOMPUTERSPHERICALSMALLSTRAIN_H

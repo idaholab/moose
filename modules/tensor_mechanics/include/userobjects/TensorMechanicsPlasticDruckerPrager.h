@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TENSORMECHANICSPLASTICDRUCKERPRAGER_H
-#define TENSORMECHANICSPLASTICDRUCKERPRAGER_H
+#pragma once
 
 #include "TensorMechanicsPlasticModel.h"
 #include "TensorMechanicsHardeningModel.h"
@@ -145,4 +144,3 @@ private:
   void initializeB(Real intnl, int fd, Real & bbb) const;
 };
 
-#endif // TENSORMECHANICSPLASTICDRUCKERPRAGER_H

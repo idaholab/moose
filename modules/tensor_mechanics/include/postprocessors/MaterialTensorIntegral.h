@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATERIALTENSORINTEGRAL_H
-#define MATERIALTENSORINTEGRAL_H
+#pragma once
 
 #include "ElementIntegralPostprocessor.h"
 #include "RankTwoTensor.h"
@@ -36,4 +35,3 @@ private:
   const unsigned int _i;
   const unsigned int _j;
 };
-#endif // MATERIALTENSORINTEGRAL_H

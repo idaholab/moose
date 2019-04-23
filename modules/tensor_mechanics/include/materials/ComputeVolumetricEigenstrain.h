@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEVOLUMETRICEIGENSTRAIN_H
-#define COMPUTEVOLUMETRICEIGENSTRAIN_H
+#pragma once
 
 #include "ComputeEigenstrainBase.h"
 #include "DerivativeMaterialInterface.h"
@@ -52,4 +51,3 @@ protected:
   std::vector<std::vector<MaterialProperty<RankTwoTensor> *>> _d2elastic_strain;
 };
 
-#endif // COMPUTEVOLUMETRICEIGENSTRAIN_H

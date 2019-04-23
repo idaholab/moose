@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VOLUMEDEFORMGRADCORRECTEDSTRESS_H
-#define VOLUMEDEFORMGRADCORRECTEDSTRESS_H
+#pragma once
 
 #include "Material.h"
 #include "RankTwoTensor.h"
@@ -43,4 +42,3 @@ protected:
   MaterialProperty<RankFourTensor> * _Jacobian_mult;
 };
 
-#endif // VOLUMEDEFORMGRADCORRECTEDSTRESS_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NODALTRANSLATIONALINERTIA_H
-#define NODALTRANSLATIONALINERTIA_H
+#pragma once
 
 #include "TimeNodalKernel.h"
 
@@ -85,4 +84,3 @@ protected:
   const MooseArray<Number> * _du_dotdot_du;
 };
 
-#endif /* NODALTRANSLATIONALINERTIA_H */

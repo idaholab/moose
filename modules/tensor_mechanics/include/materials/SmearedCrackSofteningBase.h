@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SMEAREDCRACKSOFTENINGBASE_H
-#define SMEAREDCRACKSOFTENINGBASE_H
+#pragma once
 
 #include "Conversion.h"
 #include "InputParameters.h"
@@ -58,4 +57,3 @@ public:
   ///@}
 };
 
-#endif // SMEAREDCRACKSOFTENINGBASE_H

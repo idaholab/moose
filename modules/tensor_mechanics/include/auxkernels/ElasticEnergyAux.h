@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELASTICENERGYAUX_H
-#define ELASTICENERGYAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 #include "RankTwoTensor.h"
@@ -34,4 +33,3 @@ protected:
   const MaterialProperty<RankTwoTensor> & _elastic_strain;
 };
 
-#endif // ELASTICENERGYAUX_H

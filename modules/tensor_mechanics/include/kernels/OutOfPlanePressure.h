@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef OUTOFPLANEPRESSURE_H
-#define OUTOFPLANEPRESSURE_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -39,4 +38,3 @@ private:
   Function & _function;
   const Real _factor;
 };
-#endif // OUTOFPLANEPRESSURE_H

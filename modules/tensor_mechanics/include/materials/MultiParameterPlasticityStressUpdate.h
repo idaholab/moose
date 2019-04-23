@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MULTIPARAMETERPLASTICITYSTRESSUPDATE_H
-#define MULTIPARAMETERPLASTICITYSTRESSUPDATE_H
+#pragma once
 
 #include "StressUpdateBase.h"
 
@@ -727,4 +726,3 @@ private:
   std::vector<Real> _current_intnl;
 };
 
-#endif // MULTIPARAMETERPLASTICITYSTRESSUPDATE_H

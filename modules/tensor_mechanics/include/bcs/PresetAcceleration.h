@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PRESETACCELERATION_H
-#define PRESETACCELERATION_H
+#pragma once
 
 #include "PresetNodalBC.h"
 
@@ -37,4 +36,3 @@ protected:
 template <>
 InputParameters validParams<PresetAcceleration>();
 
-#endif /* PRESETACCERELATION_H */

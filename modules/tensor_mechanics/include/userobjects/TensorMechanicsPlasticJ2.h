@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TENSORMECHANICSPLASTICJ2_H
-#define TENSORMECHANICSPLASTICJ2_H
+#pragma once
 
 #include "TensorMechanicsPlasticModel.h"
 #include "TensorMechanicsHardeningModel.h"
@@ -91,4 +90,3 @@ private:
   const bool _use_custom_cto;
 };
 
-#endif // TENSORMECHANICSPLASTICJ2_H

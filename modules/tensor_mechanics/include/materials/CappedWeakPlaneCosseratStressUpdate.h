@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CAPPEDWEAKPLANECOSSERATSTRESSUPDATE_H
-#define CAPPEDWEAKPLANECOSSERATSTRESSUPDATE_H
+#pragma once
 
 #include "CappedWeakPlaneStressUpdate.h"
 
@@ -63,4 +62,3 @@ protected:
   virtual RankFourTensor d2qdstress2(const RankTwoTensor & stress) const override;
 };
 
-#endif // CAPPEDWEAKPLANECOSSERATSTRESSUPDATE_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RANKFOURAUX_H
-#define RANKFOURAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 #include "RankFourTensor.h"
@@ -42,4 +41,3 @@ private:
   const unsigned int _l;
 };
 
-#endif // RANKFOURAUX_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TENSORMECHANICSHARDENINGMODEL_H
-#define TENSORMECHANICSHARDENINGMODEL_H
+#pragma once
 
 #include "GeneralUserObject.h"
 
@@ -52,4 +51,3 @@ public:
   virtual std::string modelName() const = 0;
 };
 
-#endif // TENSORMECHANICSHARDENINGMODEL_H

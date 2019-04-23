@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMBINEDSCALARDAMAGE_H
-#define COMBINEDSCALARDAMAGE_H
+#pragma once
 
 #include "ScalarDamageBase.h"
 
@@ -45,4 +44,3 @@ protected:
   std::vector<ScalarDamageBase *> _damage_models;
 };
 
-#endif // COMBINEDSCALARDAMAGE_H

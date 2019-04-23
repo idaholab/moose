@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEELASTICITYBEAM_H
-#define COMPUTEELASTICITYBEAM_H
+#pragma once
 
 #include "Material.h"
 
@@ -49,4 +48,3 @@ protected:
   const VariableValue & _shear_coefficient;
 };
 
-#endif // COMPUTEELASTICITYBEAM_H

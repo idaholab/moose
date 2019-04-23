@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTESMEAREDCRACKINGSTRESS_H
-#define COMPUTESMEAREDCRACKINGSTRESS_H
+#pragma once
 
 #include "ColumnMajorMatrix.h"
 #include "ComputeMultipleInelasticStress.h"
@@ -161,4 +160,3 @@ protected:
   std::vector<SmearedCrackSofteningBase *> _softening_models;
 };
 
-#endif // COMPUTESMEAREDCRACKINGSTRESS_H

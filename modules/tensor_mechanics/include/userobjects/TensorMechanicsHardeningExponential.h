@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TENSORMECHANICSHARDENINGEXPONENTIAL_H
-#define TENSORMECHANICSHARDENINGEXPONENTIAL_H
+#pragma once
 
 #include "TensorMechanicsHardeningModel.h"
 
@@ -45,4 +44,3 @@ private:
   Real _rate;
 };
 
-#endif // TENSORMECHANICSHARDENINGEXPONENTIAL_H

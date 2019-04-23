@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CRACKFRONTDEFINITION_H
-#define CRACKFRONTDEFINITION_H
+#pragma once
 
 #include "GeneralUserObject.h"
 #include "CrackFrontPointsProvider.h"
@@ -199,4 +198,3 @@ protected:
                              const Node * const current_node) const;
 };
 
-#endif /* CRACKFRONTDEFINITION_H */

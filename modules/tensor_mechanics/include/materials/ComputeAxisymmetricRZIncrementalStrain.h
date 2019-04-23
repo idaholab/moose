@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEAXISYMMETRICRZINCREMENTALSTRAIN_H
-#define COMPUTEAXISYMMETRICRZINCREMENTALSTRAIN_H
+#pragma once
 
 #include "Compute2DIncrementalStrain.h"
 
@@ -38,4 +37,3 @@ protected:
   const VariableValue & _disp_old_0;
 };
 
-#endif // COMPUTEAXISYMMETRICRZINCREMENTALSTRAIN_H

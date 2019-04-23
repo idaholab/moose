@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MULTIPLASTICITYDEBUGGER_H
-#define MULTIPLASTICITYDEBUGGER_H
+#pragma once
 
 #include "MultiPlasticityLinearSystem.h"
 
@@ -149,4 +148,3 @@ private:
   bool dof_included(unsigned int dof, const std::vector<bool> & deactivated_due_to_ld);
 };
 
-#endif // MULTIPLASTICITYDEBUGGER_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RADIALRETURNSTRESSUPDATE_H
-#define RADIALRETURNSTRESSUPDATE_H
+#pragma once
 
 #include "StressUpdateBase.h"
 #include "SingleVariableReturnMappingSolution.h"
@@ -146,4 +145,3 @@ protected:
   const RankFourTensor _deviatoric_projection_four;
 };
 
-#endif // RADIALRETURNSTRESSUPDATE_H

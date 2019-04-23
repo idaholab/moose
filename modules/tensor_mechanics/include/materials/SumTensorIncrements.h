@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SUMTENSORINCREMENTS_H
-#define SUMTENSORINCREMENTS_H
+#pragma once
 
 #include "Material.h"
 #include "RankTwoTensor.h"
@@ -41,4 +40,3 @@ protected:
   std::vector<const MaterialProperty<RankTwoTensor> *> _coupled_tensor_increments;
 };
 
-#endif // SUMTENSORINCREMENTS_H

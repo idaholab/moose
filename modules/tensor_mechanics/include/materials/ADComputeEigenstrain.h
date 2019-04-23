@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADADCOMPUTEEIGENSTRAIN_H
-#define ADADCOMPUTEEIGENSTRAIN_H
+#pragma once
 
 #include "ADComputeEigenstrainBase.h"
 
@@ -39,4 +38,3 @@ protected:
   usingComputeEigenstrainBaseMembers;
 };
 
-#endif // ADADCOMPUTEEIGENSTRAIN_H

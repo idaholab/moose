@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEFINITEBEAMSTRAIN_H
-#define COMPUTEFINITEBEAMSTRAIN_H
+#pragma once
 
 #include "ComputeIncrementalBeamStrain.h"
 
@@ -36,4 +35,3 @@ protected:
   const MaterialProperty<RankTwoTensor> & _total_rotation_old;
 };
 
-#endif // COMPUTEFINITEBEAMSTRAIN_H

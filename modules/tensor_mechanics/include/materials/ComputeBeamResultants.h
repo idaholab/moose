@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEBEAMRESULTANTS_H
-#define COMPUTEBEAMRESULTANTS_H
+#pragma once
 
 #include "Material.h"
 #include "RankTwoTensor.h"
@@ -59,4 +58,3 @@ protected:
   const MaterialProperty<RealVectorValue> & _moment_old;
 };
 
-#endif // COMPUTEBEAMRESULTANTS_H

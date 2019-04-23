@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADCOMPUTEFINITESTRAINELASTICSTRESS_H
-#define ADCOMPUTEFINITESTRAINELASTICSTRESS_H
+#pragma once
 
 #include "ADComputeStressBase.h"
 #include "GuaranteeConsumer.h"
@@ -60,4 +59,3 @@ protected:
   usingComputeStressBaseMembers;
 };
 
-#endif // ADCOMPUTEFINITESTRAINELASTICSTRESS_H

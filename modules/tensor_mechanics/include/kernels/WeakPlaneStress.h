@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef WEAKPLANESTRESS_H
-#define WEAKPLANESTRESS_H
+#pragma once
 
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
@@ -52,4 +51,3 @@ protected:
   /// d(strain)/d(temperature), if computed by ComputeThermalExpansionEigenstrain
   const MaterialProperty<RankTwoTensor> * const _deigenstrain_dT;
 };
-#endif // WEAKPLANESTRESS_H

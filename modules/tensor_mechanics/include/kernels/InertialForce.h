@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INERTIALFORCE_H
-#define INERTIALFORCE_H
+#pragma once
 
 #include "TimeKernel.h"
 #include "Material.h"
@@ -51,4 +50,3 @@ private:
   const VariableValue * _du_dotdot_du;
 };
 
-#endif // INERTIALFORCE_H

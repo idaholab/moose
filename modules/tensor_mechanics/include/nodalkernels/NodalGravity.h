@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NodalGravity_H
-#define NodalGravity_H
+#pragma once
 
 #include "NodalKernel.h"
 
@@ -49,4 +48,3 @@ protected:
   std::map<dof_id_type, Real> _node_id_to_mass;
 };
 
-#endif /* NodalGravity_H */

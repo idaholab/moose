@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EULERANGLES_H
-#define EULERANGLES_H
+#pragma once
 
 #include "MooseTypes.h"
 #include "libmesh/vector_value.h"
@@ -30,4 +29,3 @@ public:
   void random(MooseRandom & random);
 };
 
-#endif // EULERANGLES_H

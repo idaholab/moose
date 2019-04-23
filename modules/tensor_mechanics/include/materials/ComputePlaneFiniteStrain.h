@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEPLANEFINITESTRAIN_H
-#define COMPUTEPLANEFINITESTRAIN_H
+#pragma once
 
 #include "Compute2DFiniteStrain.h"
 #include "SubblockIndexProvider.h"
@@ -49,4 +48,3 @@ protected:
   const VariableValue & _out_of_plane_strain_old;
 };
 
-#endif // COMPUTEPLANEFINITESTRAIN_H

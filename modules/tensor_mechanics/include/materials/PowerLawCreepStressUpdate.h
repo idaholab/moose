@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POWERLAWCREEPSTRESSUPDATE_H
-#define POWERLAWCREEPSTRESSUPDATE_H
+#pragma once
 
 #include "RadialReturnCreepStressUpdateBase.h"
 
@@ -69,4 +68,3 @@ protected:
   Real _exp_time;
 };
 
-#endif // POWERLAWCREEPSTRESSUPDATE_H

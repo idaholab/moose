@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RADIALDISPLACEMENTSPHEREAUX_H
-#define RADIALDISPLACEMENTSPHEREAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -46,4 +45,3 @@ protected:
   RealVectorValue _origin;
 };
 
-#endif // RADIALDISPLACEMENTSPHEREAUX_H

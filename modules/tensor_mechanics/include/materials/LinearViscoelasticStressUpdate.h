@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LINEARVISCOELASTICSTRESSUPDATE_H
-#define LINEARVISCOELASTICSTRESSUPDATE_H
+#pragma once
 
 #include "StressUpdateBase.h"
 #include "LinearViscoelasticityBase.h"
@@ -68,4 +67,3 @@ protected:
   const MaterialProperty<RankFourTensor> & _elasticity_tensor_inv;
 };
 
-#endif // LINEARVISCOELASTICSTRESSUPDATE_H

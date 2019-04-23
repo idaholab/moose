@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TENSORMECHANICSPLASTICTENSILEMULTI_H
-#define TENSORMECHANICSPLASTICTENSILEMULTI_H
+#pragma once
 
 #include "TensorMechanicsPlasticModel.h"
 #include "TensorMechanicsHardeningModel.h"
@@ -223,4 +222,3 @@ private:
   };
 };
 
-#endif // TENSORMECHANICSPLASTICTENSILEMULTI_H

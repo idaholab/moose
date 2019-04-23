@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef STRESSDIVERGENCEBEAM_H
-#define STRESSDIVERGENCEBEAM_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -132,4 +131,3 @@ protected:
   std::vector<RealVectorValue> _local_moment_res;
 };
 
-#endif // STRESSDIVERGENCEBEAM_H

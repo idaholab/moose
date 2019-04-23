@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CRYSTALPLASTICITYSTATEVARRATECOMPONENTVOCE_H
-#define CRYSTALPLASTICITYSTATEVARRATECOMPONENTVOCE_H
+#pragma once
 
 #include "CrystalPlasticityStateVarRateComponent.h"
 #include "MooseTypes.h"
@@ -72,4 +71,3 @@ protected:
                                        unsigned int slipSystemIndex_j) const;
 };
 
-#endif // CRYSTALPLASTICITYSTATEVARRATECOMPONENTVOCE_H

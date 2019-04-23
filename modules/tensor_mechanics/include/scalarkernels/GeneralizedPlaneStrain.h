@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GENERALIZEDPLANESTRAIN_H
-#define GENERALIZEDPLANESTRAIN_H
+#pragma once
 
 #include "ScalarKernel.h"
 
@@ -31,4 +30,3 @@ public:
   const GeneralizedPlaneStrainUserObject & _gps;
   const unsigned int _scalar_var_id;
 };
-#endif // GENERALIZEDPLANESTRAIN_H

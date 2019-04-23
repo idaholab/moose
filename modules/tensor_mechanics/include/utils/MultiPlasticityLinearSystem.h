@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MULTIPLASTICITYLINEARSYSTEM_H
-#define MULTIPLASTICITYLINEARSYSTEM_H
+#pragma once
 
 #include "MultiPlasticityRawComponentAssembler.h"
 
@@ -274,4 +273,3 @@ private:
                                          std::vector<bool> & deactivated_due_to_ld);
 };
 
-#endif // MULTIPLASTICITYLINEARSYSTEM_H

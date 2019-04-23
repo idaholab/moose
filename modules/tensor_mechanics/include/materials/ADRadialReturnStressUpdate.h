@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADRADIALRETURNSTRESSUPDATE_H
-#define ADRADIALRETURNSTRESSUPDATE_H
+#pragma once
 
 #include "ADStressUpdateBase.h"
 #include "ADSingleVariableReturnMappingSolution.h"
@@ -138,4 +137,3 @@ protected:
   usingSingleVariableReturnMappingSolutionMembers;
 };
 
-#endif // ADRADIALRETURNSTRESSUPDATE_H

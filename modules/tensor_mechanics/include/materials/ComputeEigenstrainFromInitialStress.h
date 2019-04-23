@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEEIGENSTRAINFROMINITIALSTRESS_H
-#define COMPUTEEIGENSTRAINFROMINITIALSTRESS_H
+#pragma once
 
 #include "ComputeEigenstrainBase.h"
 #include "RankFourTensor.h"
@@ -50,4 +49,3 @@ protected:
   std::vector<const VariableValue *> _ini_aux;
 };
 
-#endif // COMPUTEEIGENSTRAINFROMINITIALSTRESS_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEFINITESTRAINELASTICSTRESS_H
-#define COMPUTEFINITESTRAINELASTICSTRESS_H
+#pragma once
 
 #include "ComputeStressBase.h"
 #include "GuaranteeConsumer.h"
@@ -50,4 +49,3 @@ protected:
   const MaterialProperty<RankTwoTensor> & _elastic_strain_old;
 };
 
-#endif // COMPUTEFINITESTRAINELASTICSTRESS_H

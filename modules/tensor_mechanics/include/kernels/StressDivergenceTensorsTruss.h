@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef STRESSDIVERGENCETENSORSTRUSS_H
-#define STRESSDIVERGENCETENSORSTRUSS_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -49,4 +48,3 @@ private:
   const std::vector<RealGradient> * _orientation;
 };
 
-#endif // STRESSDIVERGENCETENSORSTRUSS_H

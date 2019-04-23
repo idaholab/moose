@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMENTPROPERTYREADFILE_H
-#define ELEMENTPROPERTYREADFILE_H
+#pragma once
 
 #include "GeneralUserObject.h"
 
@@ -100,4 +99,3 @@ private:
   Real _max_range;
 };
 
-#endif

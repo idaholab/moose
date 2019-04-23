@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GENERALIZEDMAXWELLMODEL_H
-#define GENERALIZEDMAXWELLMODEL_H
+#pragma once
 
 #include "GeneralizedMaxwellBase.h"
 
@@ -49,4 +48,3 @@ protected:
   std::vector<RankFourTensor> _Si;
 };
 
-#endif // GENERALIZEDMAXWELLMODEL_H

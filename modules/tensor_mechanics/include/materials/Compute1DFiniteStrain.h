@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTE1DFINITESTRAIN_H
-#define COMPUTE1DFINITESTRAIN_H
+#pragma once
 
 #include "ComputeFiniteStrain.h"
 
@@ -47,4 +46,3 @@ protected:
   virtual Real computeGradDispZZOld() = 0;
 };
 
-#endif // COMPUTE1DFINITESTRAIN_H

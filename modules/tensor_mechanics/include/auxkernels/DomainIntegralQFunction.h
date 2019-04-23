@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DOMAININTEGRALQFUNCTION_H
-#define DOMAININTEGRALQFUNCTION_H
+#pragma once
 
 #include "AuxKernel.h"
 #include "CrackFrontDefinition.h"
@@ -45,4 +44,3 @@ private:
 template <>
 InputParameters validParams<DomainIntegralQFunction>();
 
-#endif // DOMAININTEGRALQFUNCTION_H

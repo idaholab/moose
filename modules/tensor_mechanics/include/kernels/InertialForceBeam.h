@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INERTIALFORCEBEAM_H
-#define INERTIALFORCEBEAM_H
+#pragma once
 
 #include "TimeKernel.h"
 #include "Material.h"
@@ -188,4 +187,3 @@ private:
   const VariableValue * _du_dotdot_du;
 };
 
-#endif // INERTIALFORCEBEAM_H

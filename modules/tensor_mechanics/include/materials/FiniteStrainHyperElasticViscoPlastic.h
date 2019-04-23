@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FINITESTRAINHYPERELASTICVISCOPLASTIC_H
-#define FINITESTRAINHYPERELASTICVISCOPLASTIC_H
+#pragma once
 
 #include "ComputeStressBase.h"
 #include "HEVPFlowRateUOBase.h"
@@ -245,4 +244,3 @@ protected:
   Real _dt_substep;
 };
 
-#endif // FINITESTRAINHYPERELASTICVISCOPLASTIC_H

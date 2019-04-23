@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GUARANTEECONSUMER_H
-#define GUARANTEECONSUMER_H
+#pragma once
 
 #include "Guarantee.h"
 #include "MooseTypes.h"
@@ -42,4 +41,3 @@ private:
   BlockRestrictable * const _gc_block_restrict;
 };
 
-#endif // GUARANTEECONSUMER_H

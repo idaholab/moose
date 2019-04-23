@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef HEVPINTERNALVARUOBASE_H
-#define HEVPINTERNALVARUOBASE_H
+#pragma once
 
 #include "DiscreteElementUserObject.h"
 #include "RankTwoTensor.h"
@@ -37,4 +36,3 @@ protected:
   const MaterialProperty<Real> & _this_old;
 };
 
-#endif

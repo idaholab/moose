@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SUBBLOCKINDEXPROVIDER_H
-#define SUBBLOCKINDEXPROVIDER_H
+#pragma once
 
 #include "GeneralUserObject.h"
 
@@ -38,4 +37,3 @@ public:
   virtual unsigned int getMaxSubblockIndex() const = 0;
 };
 
-#endif // SUBBLOCKINDEXPROVIDER_H

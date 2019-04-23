@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TENSORMECHANICSPLASTICMODEL_H
-#define TENSORMECHANICSPLASTICMODEL_H
+#pragma once
 
 #include "GeneralUserObject.h"
 #include "RankTwoTensor.h"
@@ -371,4 +370,3 @@ protected:
   virtual Real dhardPotential_dintnl(const RankTwoTensor & stress, Real intnl) const;
 };
 
-#endif // TENSORMECHANICSPLASTICMODEL_H
