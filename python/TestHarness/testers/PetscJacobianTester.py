@@ -52,7 +52,7 @@ class PetscJacobianTester(RunApp):
 
         if map(int, util.getPetscVersion(self.libmesh_dir).split(".")) < [3, 9]:
             self.old_petsc = True
-            self.specs['cli_args'].append('-snes_type test')
+            self.specs['cli_args'].extend(['-snes_type test', '-snes_mf_operator 0'])
         else:
             self.old_petsc = False
             self.specs['cli_args'].extend(['-snes_test_jacobian', '-snes_force_iteration'])
