@@ -53,15 +53,13 @@ InertialForce::InertialForce(const InputParameters & parameters)
     _eta(getMaterialProperty<Real>("eta")),
     _alpha(getParam<Real>("alpha"))
 {
-  if (_has_beta && _has_gamma && _has_velocity &&
-      _has_acceleration)
+  if (_has_beta && _has_gamma && _has_velocity && _has_acceleration)
   {
     _vel_old = &coupledValueOld("velocity");
     _accel_old = &coupledValueOld("acceleration");
     _u_old = &valueOld();
   }
-  else if (!_has_beta && !_has_gamma && !_has_velocity &&
-           !_has_acceleration)
+  else if (!_has_beta && !_has_gamma && !_has_velocity && !_has_acceleration)
   {
     _u_dot = &(_var.uDot());
     _u_dotdot = &(_var.uDotDot());

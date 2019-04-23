@@ -64,8 +64,7 @@ NodalTranslationalInertia::NodalTranslationalInertia(const InputParameters & par
     _eta(getParam<Real>("eta")),
     _alpha(getParam<Real>("alpha"))
 {
-  if (_has_beta && _has_gamma && _has_velocity &&
-      _has_acceleration)
+  if (_has_beta && _has_gamma && _has_velocity && _has_acceleration)
   {
     _u_old = &(_var.dofValuesOld());
     _aux_sys = &(_fe_problem.getAuxiliarySystem());
@@ -75,8 +74,7 @@ NodalTranslationalInertia::NodalTranslationalInertia(const InputParameters & par
     MooseVariable * accel_variable = getVar("acceleration", 0);
     _accel_num = accel_variable->number();
   }
-  else if (!_has_beta && !_has_gamma && !_has_velocity &&
-           !_has_acceleration)
+  else if (!_has_beta && !_has_gamma && !_has_velocity && !_has_acceleration)
   {
     _vel = &(_var.dofValuesDot());
     _vel_old = &(_var.dofValuesDotOld());

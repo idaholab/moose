@@ -91,8 +91,7 @@ NodalRotationalInertia::NodalRotationalInertia(const InputParameters & parameter
     _rot_vel_old_value(_nrot),
     _rot_accel_value(_nrot)
 {
-  if (_has_beta && _has_gamma && _has_rot_velocities &&
-      _has_rot_accelerations)
+  if (_has_beta && _has_gamma && _has_rot_velocities && _has_rot_accelerations)
   {
     _aux_sys = &(_fe_problem.getAuxiliarySystem());
     if (coupledComponents("rotational_velocities") != _nrot ||
@@ -117,8 +116,7 @@ NodalRotationalInertia::NodalRotationalInertia(const InputParameters & parameter
       _rot_variables[i] = coupled("rotations", i);
     }
   }
-  else if (!_has_beta && !_has_gamma &&
-           !_has_rot_velocities && !_has_rot_accelerations)
+  else if (!_has_beta && !_has_gamma && !_has_rot_velocities && !_has_rot_accelerations)
   {
     for (unsigned int i = 0; i < _nrot; ++i)
     {

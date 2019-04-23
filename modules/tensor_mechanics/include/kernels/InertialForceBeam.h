@@ -41,7 +41,7 @@ private:
   const bool _has_accelerations;
   const bool _has_rot_accelerations;
   const bool _has_Ix;
-  
+
   /// Density of the beam
   const MaterialProperty<Real> & _density;
 

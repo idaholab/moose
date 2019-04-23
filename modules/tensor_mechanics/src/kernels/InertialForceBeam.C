@@ -107,8 +107,7 @@ InertialForceBeam::InertialForceBeam(const InputParameters & parameters)
     mooseError("InertialForceBeam: The number of variables supplied in 'displacements' and "
                "'rotations' must match.");
 
-  if (_has_beta && _has_gamma && _has_velocities &&
-      _has_accelerations && _has_rot_velocities &&
+  if (_has_beta && _has_gamma && _has_velocities && _has_accelerations && _has_rot_velocities &&
       _has_rot_accelerations)
   {
     if ((coupledComponents("velocities") != _ndisp) ||
@@ -136,9 +135,8 @@ InertialForceBeam::InertialForceBeam(const InputParameters & parameters)
       _rot_accel_num[i] = rot_accel_variable->number();
     }
   }
-  else if (!_has_beta && !_has_gamma && !_has_velocities &&
-           !_has_accelerations && !_has_rot_velocities &&
-           !_has_rot_accelerations)
+  else if (!_has_beta && !_has_gamma && !_has_velocities && !_has_accelerations &&
+           !_has_rot_velocities && !_has_rot_accelerations)
   {
     _du_dot_du = &coupledDotDu("displacements", 0);
     _du_dotdot_du = &coupledDotDotDu("displacements", 0);
