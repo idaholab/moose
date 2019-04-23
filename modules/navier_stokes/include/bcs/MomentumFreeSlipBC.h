@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOMENTUMFREESLIPBC_H
-#define MOMENTUMFREESLIPBC_H
+#pragma once
 
 #include "NodalNormalBC.h"
 
@@ -42,4 +41,3 @@ protected:
   const VariableValue & _rho_w;
 };
 
-#endif /* MOMENTUMFREESLIPBC_H */

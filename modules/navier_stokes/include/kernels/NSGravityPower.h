@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NSGRAVITYPOWER_H
-#define NSGRAVITYPOWER_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -34,4 +33,3 @@ protected:
   const Real _acceleration;
 };
 
-#endif // NSGRAVITYPOWER_H

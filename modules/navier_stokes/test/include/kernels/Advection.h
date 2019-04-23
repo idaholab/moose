@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADVECTION_H
-#define ADVECTION_H
+#pragma once
 
 #include "INSBase.h"
 
@@ -37,4 +36,3 @@ protected:
   MooseEnum _tau_type;
 };
 
-#endif

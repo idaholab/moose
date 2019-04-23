@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NSACTION_H
-#define NSACTION_H
+#pragma once
 
 #include "Action.h"
 
@@ -43,4 +42,3 @@ protected:
   typedef std::vector<VariableName> CoupledName;
 };
 
-#endif

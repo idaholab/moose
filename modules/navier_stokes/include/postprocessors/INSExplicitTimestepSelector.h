@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INSEXPLICITTIMESTEPSELECTOR_H
-#define INSEXPLICITTIMESTEPSELECTOR_H
+#pragma once
 
 #include "ElementPostprocessor.h"
 
@@ -52,4 +51,3 @@ protected:
   const MaterialProperty<Real> & _rho;
 };
 
-#endif /* INSEXPLICITTIMESTEPSELECTOR_H */

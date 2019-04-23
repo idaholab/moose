@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INSADTEMPERATUREADVECTION_H
-#define INSADTEMPERATUREADVECTION_H
+#pragma once
 
 #include "ADKernelValue.h"
 
@@ -66,4 +65,3 @@ protected:
   usingKernelSUPGMembers;
 };
 
-#endif // INSADTEMPERATUREADVECTION_H

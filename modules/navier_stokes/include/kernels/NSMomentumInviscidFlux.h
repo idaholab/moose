@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NSMOMENTUMINVISCIDFLUX_H
-#define NSMOMENTUMINVISCIDFLUX_H
+#pragma once
 
 #include "NSKernel.h"
 
@@ -46,4 +45,3 @@ private:
   Real computeJacobianHelper(unsigned int m);
 };
 
-#endif

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NSMOMENTUMINVISCIDNOPRESSUREIMPLICITFLOWBC_H
-#define NSMOMENTUMINVISCIDNOPRESSUREIMPLICITFLOWBC_H
+#pragma once
 
 #include "NSMomentumInviscidBC.h"
 
@@ -35,4 +34,3 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 };
 
-#endif // NSMOMENTUMINVISCIDNOPRESSUREIMPLICITFLOWBC_H

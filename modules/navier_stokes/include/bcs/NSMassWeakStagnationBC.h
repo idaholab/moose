@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NSMASSWEAKSTAGNATIONBC_H
-#define NSMASSWEAKSTAGNATIONBC_H
+#pragma once
 
 #include "NSWeakStagnationBaseBC.h"
 
@@ -32,4 +31,3 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 };
 
-#endif // NSMASSWEAKSTAGNATIONBC_H

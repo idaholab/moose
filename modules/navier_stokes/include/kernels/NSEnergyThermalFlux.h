@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NSENERGYTHERMALFLUX_H
-#define NSENERGYTHERMALFLUX_H
+#pragma once
 
 #include "NSKernel.h"
 #include "NSTemperatureDerivs.h"
@@ -64,4 +63,3 @@ private:
   std::vector<const VariableGradient *> _gradU;
 };
 
-#endif // NSENERGYTHERMALFLUX_H

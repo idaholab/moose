@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NSIMPOSEDVELOCITYBC_H
-#define NSIMPOSEDVELOCITYBC_H
+#pragma once
 
 // The base class definition (part of MOOSE)
 #include "NodalBC.h"
@@ -39,4 +38,3 @@ protected:
   Real _desired_velocity;
 };
 
-#endif // NSIMPOSEDVELOCITYBC_H

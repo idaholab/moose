@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef IMPLICITNEUMANNBC_H
-#define IMPLICITNEUMANNBC_H
+#pragma once
 
 #include "IntegratedBC.h"
 
@@ -36,4 +35,3 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 };
 
-#endif // IMPLICITNEUMANNBC_H

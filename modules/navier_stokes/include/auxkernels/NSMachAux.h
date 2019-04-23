@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NSMACHAUX_H
-#define NSMACHAUX_H
+#pragma once
 
 // MOOSE includes
 #include "AuxKernel.h"
@@ -43,4 +42,3 @@ protected:
   const SinglePhaseFluidProperties & _fp;
 };
 
-#endif

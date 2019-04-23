@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NSMASSUNSPECIFIEDNORMALFLOWBC_H
-#define NSMASSUNSPECIFIEDNORMALFLOWBC_H
+#pragma once
 
 #include "NSMassBC.h"
 
@@ -33,4 +32,3 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 };
 
-#endif // NSMASSUNSPECIFIEDNORMALFLOWBC_H

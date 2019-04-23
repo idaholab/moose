@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NSMASSINVISCIDFLUX_H
-#define NSMASSINVISCIDFLUX_H
+#pragma once
 
 #include "NSKernel.h"
 
@@ -29,4 +28,3 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 };
 
-#endif // NSMASSINVISCIDFLUX_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NSNAMES_H
-#define NSNAMES_H
+#pragma once
 
 #include <string>
 
@@ -31,4 +30,3 @@ const std::string internal_energy = "internal_energy";
 const std::string specific_volume = "specific_volume";
 }
 
-#endif

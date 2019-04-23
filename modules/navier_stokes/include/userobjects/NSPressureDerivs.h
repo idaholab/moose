@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NSPRESSUREDERIVS_H
-#define NSPRESSUREDERIVS_H
+#pragma once
 
 // FluidProperties includes
 #include "IdealGasFluidProperties.h"
@@ -150,4 +149,3 @@ NSPressureDerivs<T>::get_hess(unsigned i, unsigned j)
   return 0.0;
 }
 
-#endif // NSPRESSUREDERIVS_H

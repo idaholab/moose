@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADDNAVIERSTOKESKERNELSACTION_H
-#define ADDNAVIERSTOKESKERNELSACTION_H
+#pragma once
 
 #include "NSAction.h"
 
@@ -66,4 +65,3 @@ protected:
   UserObjectName _fp_name;
 };
 
-#endif

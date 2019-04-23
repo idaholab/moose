@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INSMOMENTUMNOBCBCTRACTIONFORM_H
-#define INSMOMENTUMNOBCBCTRACTIONFORM_H
+#pragma once
 
 #include "INSMomentumNoBCBCBase.h"
 
@@ -35,4 +34,3 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 };
 
-#endif
