@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TOTALCONCENTRATIONAUX_H
-#define TOTALCONCENTRATIONAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -38,4 +37,3 @@ protected:
   std::vector<const VariableValue *> _secondary_species;
 };
 
-#endif // TOTALCONCENTRATIONAUX_H

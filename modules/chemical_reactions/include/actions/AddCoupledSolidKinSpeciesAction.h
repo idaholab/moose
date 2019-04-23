@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADDCOUPLEDSOLIDKINSPECIESACTION_H
-#define ADDCOUPLEDSOLIDKINSPECIESACTION_H
+#pragma once
 
 #include "Action.h"
 
@@ -61,4 +60,3 @@ private:
   const std::vector<VariableName> _sys_temp;
 };
 
-#endif // ADDCOUPLEDSOLIDKINSPECIESACTION_H

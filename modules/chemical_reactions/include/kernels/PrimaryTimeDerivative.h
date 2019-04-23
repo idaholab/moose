@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PRIMARYTIMEDERIVATIVE
-#define PRIMARYTIMEDERIVATIVE
+#pragma once
 
 #include "TimeDerivative.h"
 
@@ -34,5 +33,3 @@ protected:
   /// Material property of porosity
   const MaterialProperty<Real> & _porosity;
 };
-
-#endif // PRIMARYTIMEDERIVATIVE

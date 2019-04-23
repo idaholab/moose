@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef KINETICDISPRERATEAUX_H
-#define KINETICDISPRERATEAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -51,4 +50,3 @@ protected:
   std::vector<const VariableValue *> _vals;
 };
 
-#endif // KINETICDISPRERATEAUX_H
