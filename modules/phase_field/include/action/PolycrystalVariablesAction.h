@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POLYCRYSTALVARIABLESACTION_H
-#define POLYCRYSTALVARIABLESACTION_H
+#pragma once
 
 #include "InputParameters.h"
 #include "Action.h"
@@ -34,4 +33,3 @@ private:
 template <>
 InputParameters validParams<PolycrystalVariablesAction>();
 
-#endif // POLYCRYSTALVARIABLESACTION_H

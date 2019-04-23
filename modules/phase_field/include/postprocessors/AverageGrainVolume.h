@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef AVERAGEGRAINVOLUME_H
-#define AVERAGEGRAINVOLUME_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 #include "Coupleable.h"
@@ -52,4 +51,3 @@ private:
   const MooseArray<Real> & _coord;
   const FeatureFloodCount * _feature_counter;
 };
-#endif // AVERAGEGRAINVOLUME_H

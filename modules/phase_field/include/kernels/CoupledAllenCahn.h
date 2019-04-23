@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COUPLEDALLENCAHN_H
-#define COUPLEDALLENCAHN_H
+#pragma once
 
 #include "ACBulk.h"
 
@@ -45,4 +44,3 @@ protected:
   std::vector<const MaterialProperty<Real> *> _d2FdVdarg;
 };
 
-#endif // COUPLEDALLENCAHN_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SMOOTHCIRCLEFROMFILE_H
-#define SMOOTHCIRCLEFROMFILE_H
+#pragma once
 
 #include <array>
 
@@ -52,4 +51,3 @@ protected:
   unsigned int _n_circles;
 };
 
-#endif // SMOOTHCIRCLEFROMFILE_H

@@ -6,8 +6,8 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#ifndef CONSERVEDNORMALNOISE_H
-#define CONSERVEDNORMALNOISE_H
+
+#pragma once
 
 #include "ConservedNoiseBase.h"
 #include "ConservedNormalNoiseVeneer.h"
@@ -34,4 +34,3 @@ public:
   }
 };
 
-#endif // CONSERVEDNORMALNOISE_H

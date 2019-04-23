@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INTERFACEDIFFUSIONFLUXMATCH_H
-#define INTERFACEDIFFUSIONFLUXMATCH_H
+#pragma once
 
 #include "InterfaceDiffusionBase.h"
 
@@ -31,4 +30,3 @@ protected:
   virtual Real computeQpJacobian(Moose::DGJacobianType type) override;
 };
 
-#endif // INTERFACEDIFFUSIONFLUXMATCH_H

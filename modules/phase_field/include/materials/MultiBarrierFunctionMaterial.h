@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MULTIBARRIERFUNCTION_H
-#define MULTIBARRIERFUNCTION_H
+#pragma once
 
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
@@ -49,4 +48,3 @@ protected:
   std::vector<MaterialProperty<Real> *> _prop_dg, _prop_d2g;
 };
 
-#endif // MULTIBARRIERFUNCTION_H

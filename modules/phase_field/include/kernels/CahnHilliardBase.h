@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CAHNHILLIARDBASE_H
-#define CAHNHILLIARDBASE_H
+#pragma once
 
 #include "CHBulk.h"
 
@@ -162,4 +161,3 @@ CahnHilliardBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
   return CHBulk<T>::computeQpOffDiagJacobian(jvar) + _M[_qp] * _grad_test[_i][_qp] * J;
 }
 
-#endif // CAHNHILLIARDBASE_H

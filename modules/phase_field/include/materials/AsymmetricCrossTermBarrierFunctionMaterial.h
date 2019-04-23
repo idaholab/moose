@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ASYMMETRICCROSSTERMBARRIERFUNCTIONMATERIAL_H
-#define ASYMMETRICCROSSTERMBARRIERFUNCTIONMATERIAL_H
+#pragma once
 
 #include "CrossTermBarrierFunctionBase.h"
 
@@ -38,4 +37,3 @@ protected:
   ///@}
 };
 
-#endif // ASYMMETRICCROSSTERMBARRIERFUNCTIONMATERIAL_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POLYCRYSTALVORONOI_H
-#define POLYCRYSTALVORONOI_H
+#pragma once
 
 #include "PolycrystalUserObjectBase.h"
 
@@ -47,4 +46,3 @@ protected:
   const FileName _file_name;
 };
 
-#endif // POLYCRYSTALVORONOI_H

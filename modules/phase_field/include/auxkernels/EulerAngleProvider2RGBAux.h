@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EULERANGLEPROVIDER2RGBAUX_H
-#define EULERANGLEPROVIDER2RGBAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 #include "EBSDReader.h"
@@ -64,4 +63,3 @@ protected:
   const Point _no_grain_color;
 };
 
-#endif // EULERANGLEPROVIDER2RGBAUX_H

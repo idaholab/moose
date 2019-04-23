@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GRAINCENTERSPOSTPROCESSOR_H
-#define GRAINCENTERSPOSTPROCESSOR_H
+#pragma once
 
 #include "GeneralVectorPostprocessor.h"
 
@@ -47,4 +46,3 @@ protected:
   unsigned int _total_grains;
 };
 
-#endif // GRAINCENTERSPOSTPROCESSOR_H

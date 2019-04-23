@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MULTIGRAINRIGIDBODYMOTION_H
-#define MULTIGRAINRIGIDBODYMOTION_H
+#pragma once
 
 #include "GrainRigidBodyMotionBase.h"
 
@@ -35,4 +34,3 @@ protected:
   virtual void getUserObjectJacobian(unsigned int jvar, dof_id_type dof_index);
 };
 
-#endif // MULTIGRAINRIGIDBODYMOTION_H

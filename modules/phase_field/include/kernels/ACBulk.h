@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ACBULK_H
-#define ACBULK_H
+#pragma once
 
 #include "KernelValue.h"
 #include "JvarMapInterface.h"
@@ -123,4 +122,3 @@ ACBulk<T>::computeQpOffDiagJacobian(unsigned int jvar)
   return (*_dLdarg[cvar])[_qp] * _phi[_j][_qp] * computeDFDOP(Residual) * _test[_i][_qp];
 }
 
-#endif // ACBULK_H

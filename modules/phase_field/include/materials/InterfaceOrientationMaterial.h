@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INTERFACEORIENTATIONMATERIAL_H
-#define INTERFACEORIENTATIONMATERIAL_H
+#pragma once
 
 #include "Material.h"
 
@@ -46,4 +45,3 @@ private:
   const VariableGradient & _grad_op;
 };
 
-#endif // INTERFACEORIENTATIONMATERIAL_H

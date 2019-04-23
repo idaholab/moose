@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RNDSMOOTHCIRCLEIC_H
-#define RNDSMOOTHCIRCLEIC_H
+#pragma once
 
 #include "SmoothCircleIC.h"
 
@@ -34,4 +33,3 @@ private:
   const Real _variation_outvalue;
 };
 
-#endif // RNDSMOOTHCIRCLEIC_H

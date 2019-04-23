@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EBSDREADER_H
-#define EBSDREADER_H
+#pragma once
 
 #include "EulerAngleProvider.h"
 #include "EBSDAccessFunctors.h"
@@ -187,4 +186,3 @@ protected:
   void buildNodeWeightMaps();
 };
 
-#endif // EBSDREADER_H

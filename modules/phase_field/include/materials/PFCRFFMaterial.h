@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PFCRFFMATERIAL_H
-#define PFCRFFMATERIAL_H
+#pragma once
 
 #include "Material.h"
 
@@ -52,4 +51,3 @@ private:
   unsigned int _num_L;
 };
 
-#endif // PFCRFFMATERIAL_H

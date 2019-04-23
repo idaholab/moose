@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CAHNHILLIARD_H
-#define CAHNHILLIARD_H
+#pragma once
 
 #include "CahnHilliardBase.h"
 
@@ -25,4 +24,3 @@ public:
 template <>
 InputParameters validParams<CahnHilliard>();
 
-#endif // CAHNHILLIARD_H

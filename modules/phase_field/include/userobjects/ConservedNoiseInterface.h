@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CONSERVEDNOISEINTERFACE_H
-#define CONSERVEDNOISEINTERFACE_H
+#pragma once
 
 #include "ElementUserObject.h"
 
@@ -42,4 +41,3 @@ protected:
   unsigned int _qp;
 };
 
-#endif // CONSERVEDNOISEINTERFACE_H

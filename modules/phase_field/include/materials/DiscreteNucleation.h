@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DISCRETENUCLEATION_H
-#define DISCRETENUCLEATION_H
+#pragma once
 
 #include "DerivativeFunctionMaterialBase.h"
 
@@ -48,4 +47,3 @@ protected:
   const DiscreteNucleationMap & _map;
 };
 
-#endif // DISCRETENUCLEATION_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EBSDREADERAVGDATAAUX_H
-#define EBSDREADERAVGDATAAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 #include "EBSDAccessFunctors.h"
@@ -56,4 +55,3 @@ protected:
   Real _value;
 };
 
-#endif // EBSDREADERAVGDATAAUX_H

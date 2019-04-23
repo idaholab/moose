@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EBSDREADERPOINTDATAAUX_H
-#define EBSDREADERPOINTDATAAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 #include "EBSDReader.h"
@@ -44,4 +43,3 @@ protected:
   Real _value;
 };
 
-#endif // EBSDREADERPOINTDATAAUX_H

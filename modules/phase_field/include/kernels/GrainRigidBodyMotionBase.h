@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GRAINRIGIDBODYMOTIONBASE_H
-#define GRAINRIGIDBODYMOTIONBASE_H
+#pragma once
 
 #include "NonlocalKernel.h"
 #include "GrainForceAndTorqueInterface.h"
@@ -87,4 +86,3 @@ protected:
   std::vector<unsigned int> _grain_ids;
 };
 
-#endif // GRAINRIGIDBODYMOTIONBASE_H

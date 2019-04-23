@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EXPRESSIONBUILDER_H
-#define EXPRESSIONBUILDER_H
+#pragma once
 
 #include <vector>
 #include <ostream>
@@ -701,4 +700,3 @@ ExpressionBuilder::EBSubstitutionRuleTyped<Node_T>::apply(
     return substitute(*match_node);
 }
 
-#endif // EXPRESSIONBUILDER_H

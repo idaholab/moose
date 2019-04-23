@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FEATUREFLOODCOUNT_H
-#define FEATUREFLOODCOUNT_H
+#pragma once
 
 #include "Coupleable.h"
 #include "GeneralPostprocessor.h"
@@ -797,4 +796,3 @@ struct enable_bitmask_operators<FeatureFloodCount::BoundaryIntersection>
   static const bool enable = true;
 };
 
-#endif // FEATUREFLOODCOUNT_H

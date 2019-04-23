@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef KKSACBULKF_H
-#define KKSACBULKF_H
+#pragma once
 
 #include "KKSACBulkBase.h"
 
@@ -44,4 +43,3 @@ protected:
   const MaterialProperty<Real> & _prop_d2g;
 };
 
-#endif // KKSACBULKF_H

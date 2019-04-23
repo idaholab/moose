@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SPLITCHWRESBASE_H
-#define SPLITCHWRESBASE_H
+#pragma once
 
 #include "Kernel.h"
 #include "JvarMapInterface.h"
@@ -85,4 +84,3 @@ SplitCHWResBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
   return (*_dmobdarg[cvar])[_qp] * _phi[_j][_qp] * _grad_u[_qp] * _grad_test[_i][_qp];
 }
 
-#endif // SPLITCHWRESBASE_H

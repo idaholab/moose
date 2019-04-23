@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GBWIDTHANISOTROPY_H
-#define GBWIDTHANISOTROPY_H
+#pragma once
 
 #include "GBAnisotropyBase.h"
 
@@ -36,4 +35,3 @@ private:
   const Real _kappa;
 };
 
-#endif // GBWIDTHANISOTROPY_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DISPLACEMENTGRADIENTSACTION_H
-#define DISPLACEMENTGRADIENTSACTION_H
+#pragma once
 
 #include "InputParameters.h"
 #include "Action.h"
@@ -33,4 +32,3 @@ private:
 template <>
 InputParameters validParams<DisplacementGradientsAction>();
 
-#endif // DISPLACEMENTGRADIENTSACTION_H

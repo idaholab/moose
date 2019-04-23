@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ACGRGRMULTI_H
-#define ACGRGRMULTI_H
+#pragma once
 
 #include "ACGrGrBase.h"
 
@@ -48,4 +47,3 @@ private:
   Real computedF0du();
 };
 
-#endif // ACGRGRMULTI_H

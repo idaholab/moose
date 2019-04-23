@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EULERANGLEUPDATERCHECK_H
-#define EULERANGLEUPDATERCHECK_H
+#pragma once
 
 #include "GeneralVectorPostprocessor.h"
 
@@ -51,4 +50,3 @@ protected:
   std::vector<RealVectorValue> _angles_old;
 };
 
-#endif // EULERANGLEUPDATERCHECK_H

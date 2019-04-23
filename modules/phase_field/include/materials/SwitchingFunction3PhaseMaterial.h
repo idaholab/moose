@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SWITCHINGFUNCTION3PHASEMATERIAL_H
-#define SWITCHINGFUNCTION3PHASEMATERIAL_H
+#pragma once
 
 #include "DerivativeParsedMaterialHelper.h"
 #include "ExpressionBuilder.h"
@@ -37,4 +36,3 @@ protected:
   EBTerm _eta_k;
 };
 
-#endif // SWITCHINGFUNCTION3PHASEMATERIAL_H

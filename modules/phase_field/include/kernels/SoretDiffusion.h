@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SORETDIFFUSION_H
-#define SORETDIFFUSION_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -60,4 +59,3 @@ protected:
   const Real _kB;
 };
 
-#endif // SORETDIFFUSION_H

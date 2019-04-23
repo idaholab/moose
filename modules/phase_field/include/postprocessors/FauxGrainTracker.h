@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FAUXGRAINTRACKER_H
-#define FAUXGRAINTRACKER_H
+#pragma once
 
 #include "FeatureFloodCount.h"
 #include "GrainTrackerInterface.h"
@@ -79,4 +78,3 @@ private:
   std::map<unsigned int, Point> _centroid;
 };
 
-#endif

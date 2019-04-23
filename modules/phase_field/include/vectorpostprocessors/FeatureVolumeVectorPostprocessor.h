@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FEATUREVOLUMEVECTORPOSTPROCESSOR_H
-#define FEATUREVOLUMEVECTORPOSTPROCESSOR_H
+#pragma once
 
 #include "GeneralVectorPostprocessor.h"
 #include "MooseVariableDependencyInterface.h"
@@ -94,4 +93,3 @@ private:
   const MooseArray<Real> & _JxW_face;
 };
 
-#endif

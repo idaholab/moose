@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef KKSXEVACSOLIDMATERIAL_H
-#define KKSXEVACSOLIDMATERIAL_H
+#pragma once
 
 #include "DerivativeFunctionMaterialBase.h"
 
@@ -56,4 +55,3 @@ private:
   Real cLogC(Real c);
 };
 
-#endif // KKSXEVACSOLIDMATERIAL_H

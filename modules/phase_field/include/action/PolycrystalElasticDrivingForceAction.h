@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POLYCRYSTALELASTICDRIVINGFORCEACTION_H
-#define POLYCRYSTALELASTICDRIVINGFORCEACTION_H
+#pragma once
 
 #include "Action.h"
 #include "DerivativeMaterialPropertyNameInterface.h"
@@ -39,4 +38,3 @@ private:
   std::string _elasticity_tensor_name;
 };
 
-#endif // POLYCRYSTALELASTICDRIVINGFORCEACTION_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef BNDSCALCAUX_H
-#define BNDSCALCAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -33,4 +32,3 @@ protected:
   std::vector<const VariableValue *> _vals;
 };
 
-#endif // BNDSCALCAUX_H

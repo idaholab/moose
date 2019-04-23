@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef KKSCHBULK_H
-#define KKSCHBULK_H
+#pragma once
 
 #include "CHBulk.h"
 
@@ -73,4 +72,3 @@ private:
   const MaterialProperty<Real> & _second_derivative_Fb;
 };
 
-#endif // KKSCHBULK_H

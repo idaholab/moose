@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COUPLEDSWITCHINGTIMEDERIVATIVE_H
-#define COUPLEDSWITCHINGTIMEDERIVATIVE_H
+#pragma once
 
 #include "CoupledTimeDerivative.h"
 #include "JvarMapInterface.h"
@@ -77,4 +76,3 @@ protected:
   std::vector<std::vector<const MaterialProperty<Real> *>> _prop_d2hjdetaidarg;
 };
 
-#endif // COUPLEDSWITCHINGTIMEDERIVATIVE_H

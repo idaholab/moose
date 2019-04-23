@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VANDERWAALSFREEENERGY_H
-#define VANDERWAALSFREEENERGY_H
+#pragma once
 
 #include "GasFreeEnergyBase.h"
 
@@ -53,4 +52,3 @@ protected:
   const Real _log_tol;
 };
 
-#endif // VANDERWAALSFREEENERGY_H

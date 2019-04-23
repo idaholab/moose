@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GBANISOTROPYBASE_H
-#define GBANISOTROPYBASE_H
+#pragma once
 
 #include "Material.h"
 
@@ -70,4 +69,3 @@ protected:
   std::vector<const VariableGradient *> _grad_vals;
 };
 
-#endif // GBANISOTROPYBASE_H

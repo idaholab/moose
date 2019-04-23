@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADSPLITCHWRES_H
-#define ADSPLITCHWRES_H
+#pragma once
 
 #include "ADSplitCHWResBase.h"
 
@@ -25,4 +24,3 @@ public:
 
 declareADValidParams(ADSplitCHWRes);
 
-#endif // ADSPLITCHWRES_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADSPLITCHWRESBASE_H
-#define ADSPLITCHWRESBASE_H
+#pragma once
 
 #include "ADKernelGrad.h"
 #include "DerivativeMaterialInterface.h"
@@ -59,4 +58,3 @@ ADSplitCHWResBase<compute_stage, T>::precomputeQpResidual()
   return _mob[_qp] * _grad_u[_qp];
 }
 
-#endif // ADSPLITCHWRESBASE_H

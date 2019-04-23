@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PFC_ENERGY_DENSITY_H
-#define PFC_ENERGY_DENSITY_H
+#pragma once
 
 #include "AuxKernel.h"
 #include <sstream>
@@ -34,4 +33,3 @@ protected:
   const MaterialProperty<Real> & _b;
 };
 
-#endif // PFC_ENERGY_DENSITY_H

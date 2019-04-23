@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GBEVOLUTION_H
-#define GBEVOLUTION_H
+#pragma once
 
 #include "GBEvolutionBase.h"
 
@@ -32,4 +31,3 @@ protected:
   Real _GBEnergy;
 };
 
-#endif // GBEVOLUTION_H

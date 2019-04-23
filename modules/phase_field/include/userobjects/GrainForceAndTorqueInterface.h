@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GRAINFORCEANDTORQUEINTERFACE_H
-#define GRAINFORCEANDTORQUEINTERFACE_H
+#pragma once
 
 #include "MooseObject.h"
 
@@ -31,4 +30,3 @@ public:
   virtual const std::vector<std::vector<Real>> & getForceEtaJacobians() const = 0;
 };
 
-#endif // GRAINFORCEANDTORQUEINTERFACE_H

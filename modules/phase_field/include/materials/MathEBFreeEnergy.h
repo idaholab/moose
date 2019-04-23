@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATHEBFREEENERGY_H
-#define MATHEBFREEENERGY_H
+#pragma once
 
 #include "DerivativeParsedMaterialHelper.h"
 #include "ExpressionBuilder.h"
@@ -34,4 +33,3 @@ protected:
   EBTerm _c;
 };
 
-#endif // MATHEBFREEENERGY_H

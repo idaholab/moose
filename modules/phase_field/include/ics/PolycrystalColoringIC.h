@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POLYCRYSTALCOLORINGIC_H
-#define POLYCRYSTALCOLORINGIC_H
+#pragma once
 
 #include "InitialCondition.h"
 #include "PolycrystalICTools.h"
@@ -41,4 +40,3 @@ protected:
   const PolycrystalUserObjectBase & _poly_ic_uo;
 };
 
-#endif // POLYCRYSTALCOLORINGIC_H

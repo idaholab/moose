@@ -6,8 +6,8 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#ifndef CHBULKPFCTRAD_H
-#define CHBULKPFCTRAD_H
+
+#pragma once
 
 #include "CHBulk.h"
 
@@ -31,4 +31,3 @@ private:
   const MaterialProperty<Real> & _b;
 };
 
-#endif // CHBULKPFCTRAD_H

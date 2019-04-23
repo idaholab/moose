@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FORCEDENSITYMATERIAL_H
-#define FORCEDENSITYMATERIAL_H
+#pragma once
 
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
@@ -61,4 +60,3 @@ private:
   std::vector<MaterialProperty<std::vector<Real>> *> _dFdgradeta;
 };
 
-#endif // FORCEDENSITYMATERIAL_H

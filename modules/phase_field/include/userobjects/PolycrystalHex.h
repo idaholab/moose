@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POLYCRYSTALHEX_H
-#define POLYCRYSTALHEX_H
+#pragma once
 
 #include "PolycrystalVoronoi.h"
 #include "MooseRandom.h"
@@ -36,4 +35,3 @@ private:
   MooseRandom _random;
 };
 
-#endif // POLYCRYSTALHEX_H

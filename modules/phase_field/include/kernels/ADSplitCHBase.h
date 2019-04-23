@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADSPLITCHBASE_H
-#define ADSPLITCHBASE_H
+#pragma once
 
 #include "ADKernel.h"
 
@@ -40,4 +39,3 @@ protected:
   usingKernelMembers;
 };
 
-#endif // ADSPLITCHBASE_H

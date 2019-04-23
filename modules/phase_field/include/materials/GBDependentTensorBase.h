@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GBDEPENDENTTENSORBASE_H
-#define GBDEPENDENTTENSORBASE_H
+#pragma once
 
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
@@ -38,4 +37,3 @@ protected:
   MaterialProperty<RealTensorValue> & _gb_dependent_tensor;
 };
 
-#endif

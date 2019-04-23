@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GRAINADVECTIONAUX_H
-#define GRAINADVECTIONAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 #include "GrainTrackerInterface.h"
@@ -57,4 +56,3 @@ private:
   MooseEnum _component;
 };
 
-#endif // GRAINADVECTIONAUXAUX_H

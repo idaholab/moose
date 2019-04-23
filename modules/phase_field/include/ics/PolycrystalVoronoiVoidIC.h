@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POLYCRYSTALVORONOIVOIDIC_H
-#define POLYCRYSTALVORONOIVOIDIC_H
+#pragma once
 
 #include "MultiSmoothCircleIC.h"
 #include "MooseRandom.h"
@@ -71,4 +70,3 @@ protected:
   } _customLess;
 };
 
-#endif // POLYCRYSTALVORONOIVOIDIC_H

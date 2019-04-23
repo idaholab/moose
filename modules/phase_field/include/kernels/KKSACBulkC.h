@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef KKSACBULKC_H
-#define KKSACBULKC_H
+#pragma once
 
 #include "KKSACBulkBase.h"
 
@@ -61,4 +60,3 @@ protected:
   std::vector<const MaterialProperty<Real> *> _prop_d2Fadcadarg;
 };
 
-#endif // KKSACBULKC_H
