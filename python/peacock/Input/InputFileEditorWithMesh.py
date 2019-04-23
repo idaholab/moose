@@ -9,8 +9,8 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 import os
 from plugins import MeshViewerPlugin
+from plugins import MeshCameraPlugin
 from peacock.ExodusViewer.plugins.BackgroundPlugin import BackgroundPlugin
-from peacock.ExodusViewer.plugins.CameraPlugin import CameraPlugin
 from BlockHighlighterPlugin import BlockHighlighterPlugin
 from peacock.base.PluginManager import PluginManager
 from peacock.base.TabPlugin import TabPlugin
@@ -46,7 +46,7 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
                                                 settings_key="input",
                                                 set_result_color=True),
                        lambda: BlockHighlighterPlugin(layout='WindowBottomLayout'),
-                       lambda: CameraPlugin(layout='WindowBottomLayout')]
+                       lambda: MeshCameraPlugin(layout='WindowBottomLayout')]
 
         super(InputFileEditorWithMesh, self).__init__(plugins=plugins)
         self.setTabName('Input file')
@@ -72,6 +72,7 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
         self.InputFileEditorPlugin.blockChanged.connect(self.blockChanged)
         self.InputFileEditorPlugin.blockSelected.connect(self.highlightChanged)
         self.InputFileEditorPlugin.inputFileChanged.connect(self._updateFromInputFile)
+        self.MeshCameraPlugin.reloadMesh.connect(self.onMeshChanged)
 
         self.fixLayoutWidth('LeftLayout')
 
@@ -105,11 +106,17 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
 
     def onExecutableInfoChanged(self, exe_info):
         """
-        When the exeuctable has changed we need to update the mesh
+        When the executable has changed we need to update the mesh
         Input:
             exe_info[ExecutableInfo]: new information from the executable
         """
         self.InputFileEditorPlugin.executableInfoChanged(exe_info)
+        self.updateView.emit(self.InputFileEditorPlugin.tree, True)
+
+    def onMeshChanged(self):
+        """
+        Re-create the mesh file.
+        """
         self.updateView.emit(self.InputFileEditorPlugin.tree, True)
 
     def blockChanged(self, block):
@@ -121,6 +128,10 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
         if block.path.startswith("/BCs/"):
             self.highlightChanged(block)
         elif block.path == "/Mesh" or block.path.startswith("/Mesh/"):
+            self.updateView.emit(self.InputFileEditorPlugin.tree, False)
+        elif block.path == "/MeshModifiers" or block.path.startswith("/MeshModifiers/"):
+            self.updateView.emit(self.InputFileEditorPlugin.tree, False)
+        elif block.path == "/MeshGenerators" or block.path.startswith("/MeshGenerators/"):
             self.updateView.emit(self.InputFileEditorPlugin.tree, False)
         elif block.path == "/Executioner" or block.path.startswith("/Executioner/"):
             num_steps = TimeStepEstimate.findTimeSteps(self.InputFileEditorPlugin.tree)
