@@ -8,12 +8,20 @@
     exodiff = 'master_conservative_transfer_out.e master_conservative_transfer_out_sub0.e'
     requirement = 'MOOSE shall support conservative transfers'
   [../]
+
   [./conservative_transfer_subs]
     # Tests transfer between linear Lagrange nonlinear variable
     type = Exodiff
     input = master_power_density.i
     exodiff = 'master_power_density_out.e master_power_density_out_sub0.e master_power_density_out_sub1.e'
     requirement = 'MOOSE shall support conservative transfers'
-    min_parallel = 2
+  [../]
+
+  [./conservative_transfer_nearest_point]
+    # Tests transfer between linear Lagrange nonlinear variable
+    type = Exodiff
+    input = master_nearest_point.i
+    exodiff = 'master_nearest_point_out.e master_nearest_point_out_sub0.e master_nearest_point_out_sub1.e'
+    requirement = 'MOOSE shall support conservative transfers with nearestpoint postproessor'
   [../]
 []

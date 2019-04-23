@@ -66,6 +66,8 @@ MultiAppNearestNodeTransfer::MultiAppNearestNodeTransfer(const InputParameters &
 void
 MultiAppNearestNodeTransfer::initialSetup()
 {
+  MultiAppFieldTransferInterface::initialSetup();
+
   if (_direction == TO_MULTIAPP)
     variableIntegrityCheck(_to_var_name[0]);
   else

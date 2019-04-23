@@ -49,6 +49,8 @@ MultiAppMeshFunctionTransfer::MultiAppMeshFunctionTransfer(const InputParameters
 void
 MultiAppMeshFunctionTransfer::initialSetup()
 {
+  MultiAppFieldTransferInterface::initialSetup();
+
   for (unsigned int i = 0; i < _var_size; ++i)
     if (_direction == TO_MULTIAPP)
       variableIntegrityCheck(_to_var_name[i]);

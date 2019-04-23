@@ -14,6 +14,7 @@
 #include "MultiApp.h"
 #include "MooseMesh.h"
 #include "UserObject.h"
+#include "NearestPointIntegralVariablePostprocessor.h"
 
 template <>
 InputParameters
@@ -52,7 +53,8 @@ MultiAppFieldTransferInterface::MultiAppFieldTransferInterface(const InputParame
     _from_postprocessor_to_be_preserved(
         parameters.get<std::vector<PostprocessorName>>("from_postprocessor_to_be_preserved")),
     _to_postprocessor_to_be_preserved(
-        parameters.get<std::vector<PostprocessorName>>("to_postprocessor_to_be_preserved"))
+        parameters.get<std::vector<PostprocessorName>>("to_postprocessor_to_be_preserved")),
+    _use_nearestpoint_pps(false)
 {
   if (_preserve_transfer)
   {
@@ -66,7 +68,8 @@ MultiAppFieldTransferInterface::MultiAppFieldTransferInterface(const InputParame
     {
       mooseAssert(_from_postprocessor_to_be_preserved.size() == _multi_app->numGlobalApps() ||
                       _from_postprocessor_to_be_preserved.size() == 1,
-                  "Number of from Postprocessors should equal to the number of subapps");
+                  "Number of from Postprocessors should equal to the number of subapps, or use "
+                  "NearestPointIntegralVariablePostprocessor");
       mooseAssert(_to_postprocessor_to_be_preserved.size() == 1,
                   "Number of to Postprocessors should equal to 1");
     }
@@ -76,12 +79,56 @@ MultiAppFieldTransferInterface::MultiAppFieldTransferInterface(const InputParame
                   "Number of from Postprocessors should equal to 1");
       mooseAssert(_to_postprocessor_to_be_preserved.size() == _multi_app->numGlobalApps() ||
                       _to_postprocessor_to_be_preserved.size() == 1,
-                  "Number of to Postprocessors should equal to the number of subapps ");
+                  "Number of to Postprocessors should equal to the number of subapps, or use "
+                  "NearestPointIntegralVariablePostprocessor ");
     }
   }
 
   mooseAssert(_to_var_name.size() == _from_var_name.size() && _to_var_name.size() >= 1,
               " Number of target variable should equal to the number of source variables ");
+}
+
+void
+MultiAppFieldTransferInterface::initialSetup()
+{
+  if (_preserve_transfer)
+  {
+    if (_from_postprocessor_to_be_preserved.size() == 1 && _direction == TO_MULTIAPP)
+    {
+      FEProblemBase & from_problem = _multi_app->problemBase();
+      auto * pps = dynamic_cast<const NearestPointIntegralVariablePostprocessor *>(
+          &(from_problem.getUserObjectBase(_from_postprocessor_to_be_preserved[0])));
+      if (pps)
+        _use_nearestpoint_pps = true;
+      else
+      {
+        _use_nearestpoint_pps = false;
+        if (_multi_app->numGlobalApps() > 1)
+          mooseError(
+              " You have to specify ",
+              _multi_app->numGlobalApps(),
+              " regular from-postproessors, or use NearestPointIntegralVariablePostprocessor ");
+      }
+    }
+
+    if (_to_postprocessor_to_be_preserved.size() == 1 && _direction == FROM_MULTIAPP)
+    {
+      FEProblemBase & to_problem = _multi_app->problemBase();
+      auto * pps = dynamic_cast<const NearestPointIntegralVariablePostprocessor *>(
+          &(to_problem.getUserObjectBase(_to_postprocessor_to_be_preserved[0])));
+      if (pps)
+        _use_nearestpoint_pps = true;
+      else
+      {
+        _use_nearestpoint_pps = false;
+        if (_multi_app->numGlobalApps() > 1)
+          mooseError(
+              " You have to specify ",
+              _multi_app->numGlobalApps(),
+              " regular to-postproessors, or use NearestPointIntegralVariablePostprocessor ");
+      }
+    }
+  }
 }
 
 void
@@ -94,29 +141,148 @@ MultiAppFieldTransferInterface::postExecute()
     if (_direction == TO_MULTIAPP)
     {
       FEProblemBase & from_problem = _multi_app->problemBase();
+      if (_use_nearestpoint_pps)
+        from_problem.computeUserObjectByName(EXEC_TRANSFER, _from_postprocessor_to_be_preserved[0]);
+
       for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
         if (_multi_app->hasLocalApp(i))
-          adjustTransferedSolution(&from_problem,
-                                   _from_postprocessor_to_be_preserved[i],
-                                   _multi_app->appProblemBase(i),
-                                   _to_postprocessor_to_be_preserved[0]);
+        {
+          if (_use_nearestpoint_pps)
+            adjustTransferedSolutionNearestPoint(i,
+                                                 &from_problem,
+                                                 _from_postprocessor_to_be_preserved[0],
+                                                 _multi_app->appProblemBase(i),
+                                                 _to_postprocessor_to_be_preserved[0]);
+          else
+            adjustTransferedSolution(&from_problem,
+                                     _from_postprocessor_to_be_preserved[i],
+                                     _multi_app->appProblemBase(i),
+                                     _to_postprocessor_to_be_preserved[0]);
+        }
     }
 
     else if (_direction == FROM_MULTIAPP)
     {
       FEProblemBase & to_problem = _multi_app->problemBase();
+      if (_use_nearestpoint_pps)
+        to_problem.computeUserObjectByName(EXEC_TRANSFER, _to_postprocessor_to_be_preserved[0]);
+
       for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
       {
-        adjustTransferedSolution(_multi_app->hasLocalApp(i) ? &_multi_app->appProblemBase(i)
-                                                            : nullptr,
-                                 _from_postprocessor_to_be_preserved[0],
-                                 to_problem,
-                                 _to_postprocessor_to_be_preserved[i]);
+        if (_use_nearestpoint_pps)
+          adjustTransferedSolutionNearestPoint(
+              i,
+              _multi_app->hasLocalApp(i) ? &_multi_app->appProblemBase(i) : nullptr,
+              _from_postprocessor_to_be_preserved[0],
+              to_problem,
+              _to_postprocessor_to_be_preserved[0]);
+        else
+          adjustTransferedSolution(_multi_app->hasLocalApp(i) ? &_multi_app->appProblemBase(i)
+                                                              : nullptr,
+                                   _from_postprocessor_to_be_preserved[0],
+                                   to_problem,
+                                   _to_postprocessor_to_be_preserved[i]);
       }
     }
 
     _console << "Finished Conservative transfers " << name() << std::endl;
   }
+}
+
+void
+MultiAppFieldTransferInterface::adjustTransferedSolutionNearestPoint(
+    unsigned int i,
+    FEProblemBase * from_problem,
+    PostprocessorName & from_postprocessor,
+    FEProblemBase & to_problem,
+    PostprocessorName & to_postprocessor)
+{
+  PostprocessorValue from_adjuster = 0;
+  if (from_problem && _direction == FROM_MULTIAPP)
+    from_adjuster = from_problem->getPostprocessorValue(from_postprocessor);
+  else
+    from_adjuster = 0;
+
+  /* Everyone on master side should know this value, and use it to scale the solution */
+  if (_direction == FROM_MULTIAPP)
+  {
+    /* This might not be right if the integral is negative */
+    comm().max(from_adjuster);
+  }
+
+  PostprocessorValue to_adjuster = 0;
+  // Compute to-postproessor to have the adjuster
+  if (_direction == TO_MULTIAPP)
+  {
+    to_problem.computeUserObjectByName(EXEC_TRANSFER, to_postprocessor);
+    to_adjuster = to_problem.getPostprocessorValue(to_postprocessor);
+  }
+
+  auto & to_var = to_problem.getVariable(
+      0, _to_var_name[0], Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
+  auto & to_sys = to_var.sys().system();
+  auto var_num = to_sys.variable_number(_to_var_name[0]);
+  auto sys_num = to_sys.number();
+  auto & pps = static_cast<const NearestPointIntegralVariablePostprocessor &>(
+      _direction == FROM_MULTIAPP ? (to_problem.getUserObjectBase(to_postprocessor))
+                                  : (from_problem->getUserObjectBase(from_postprocessor)));
+  auto & to_solution = to_var.sys().solution();
+  auto & to_mesh = to_problem.mesh().getMesh();
+  bool is_nodal = to_sys.variable_type(var_num).family == LAGRANGE;
+  if (is_nodal)
+  {
+    for (const auto & node : to_mesh.local_node_ptr_range())
+    {
+      // Skip this node if the variable has no dofs at it.
+      if (node->n_dofs(sys_num, var_num) < 1)
+        continue;
+
+      Real scale = 1;
+      if (_direction == FROM_MULTIAPP)
+      {
+        auto ii = pps.nearestPointIndex(*node);
+        if (ii != i)
+          continue;
+        scale = from_adjuster / pps.userObjectValue(i);
+      }
+      else
+      {
+        scale = pps.userObjectValue(i) / to_adjuster;
+      }
+
+      /* Need to scale this node */
+      dof_id_type dof = node->dof_number(sys_num, var_num, 0);
+      to_solution.set(dof, scale * to_solution(dof));
+    }
+  }
+  else
+  {
+    for (auto & elem : as_range(to_mesh.local_elements_begin(), to_mesh.local_elements_end()))
+    {
+      // Skip this element if the variable has no dofs at it.
+      if (elem->n_dofs(sys_num, var_num) < 1)
+        continue;
+
+      Real scale = 1;
+      if (_direction == FROM_MULTIAPP)
+      {
+        unsigned int ii = pps.nearestPointIndex(elem->centroid());
+        if (ii != i)
+          continue;
+        scale = from_adjuster / pps.userObjectValue(i);
+      }
+      else
+      {
+        scale = pps.userObjectValue(i) / to_adjuster;
+      }
+
+      dof_id_type dof = elem->dof_number(sys_num, var_num, 0);
+      to_solution.set(dof, (from_adjuster / to_adjuster) * to_solution(dof));
+    }
+  }
+
+  to_solution.close();
+  to_sys.update();
 }
 
 void

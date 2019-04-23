@@ -27,6 +27,8 @@ class MultiAppFieldTransferInterface : public MultiAppTransfer
 public:
   MultiAppFieldTransferInterface(const InputParameters & parameters);
 
+  virtual void initialSetup();
+
   /**
    * Add some extra work if necessary after execute(). For example, adjust the solution
    * to preserve some physics quality of interest.
@@ -49,6 +51,14 @@ private:
                                 PostprocessorName & from_postprocessor,
                                 FEProblemBase & to_problem,
                                 PostprocessorName & to_postprocessor);
+
+  void adjustTransferedSolutionNearestPoint(unsigned int i,
+                                            FEProblemBase * from_problem,
+                                            PostprocessorName & from_postprocessor,
+                                            FEProblemBase & to_problem,
+                                            PostprocessorName & to_postprocessor);
+
+  bool _use_nearestpoint_pps;
 };
 
 #endif // MULTIAPPFIELDTRANSFERINTERFACE_H

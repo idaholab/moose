@@ -71,6 +71,8 @@ MultiAppProjectionTransfer::MultiAppProjectionTransfer(const InputParameters & p
 void
 MultiAppProjectionTransfer::initialSetup()
 {
+  MultiAppFieldTransferInterface::initialSetup();
+
   getAppInfo();
 
   _proj_sys.resize(_to_problems.size(), NULL);
