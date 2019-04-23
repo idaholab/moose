@@ -37,7 +37,7 @@ validParams<IterationAdaptiveDT>()
                                                "If specified, the postprocessor value "
                                                "is used as an upper limit for the "
                                                "current time step length",
-                                               "Use 'timestep_limiting_function' instead");
+                                               "Use 'timestep_limiting_postprocessor' instead");
   params.addParam<PostprocessorName>("timestep_limiting_postprocessor",
                                      "If specified, the postprocessor value "
                                      "is used as an upper limit for the "
