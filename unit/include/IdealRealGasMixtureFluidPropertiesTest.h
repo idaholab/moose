@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef IDEALREALGASMIXTUREFLUIDPROPERTIESTEST_H
-#define IDEALREALGASMIXTUREFLUIDPROPERTIESTEST_H
+#pragma once
 
 #include "MooseObjectUnitTest.h"
 #include "StiffenedGasFluidProperties.h"
@@ -77,4 +76,3 @@ protected:
   const IdealRealGasMixtureFluidProperties * _fp_mix;
 };
 
-#endif /* IDEALREALGASMIXTUREFLUIDPROPERTIESTEST_H */

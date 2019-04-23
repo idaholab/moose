@@ -8,8 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
-#ifndef SHARED_POOLH
-#define SHARED_POOLH
 
 // System Includes
 #include <stack>
@@ -111,4 +109,3 @@ private:
   size_t _num_created = 0;
 };
 }
-

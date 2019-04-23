@@ -7,11 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GTESTINCLUDE
-#define GTESTINCLUDE
+#pragma once
 
 #include "libmesh/ignore_warnings.h"
 #include "gtest/gtest.h"
 #include "libmesh/restore_warnings.h"
-
-#endif

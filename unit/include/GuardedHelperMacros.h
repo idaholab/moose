@@ -7,6 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#pragma once
 // Include CPPUnit headers without warnings
 #ifdef __clang__
 #pragma clang diagnostic push
@@ -14,4 +15,3 @@
 #endif
 #ifdef __clang__
 #pragma clang diagnostic pop
-#endif

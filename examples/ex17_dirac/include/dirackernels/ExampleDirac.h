@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EXAMPLEDIRAC_H
-#define EXAMPLEDIRAC_H
+#pragma once
 
 // Moose Includes
 #include "DiracKernel.h"
@@ -32,4 +31,3 @@ protected:
   Point _point;
 };
 
-#endif // EXAMPLEDIRAC_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef BRINEFLUIDPROPERTIESTEST_H
-#define BRINEFLUIDPROPERTIESTEST_H
+#pragma once
 
 #include "MooseObjectUnitTest.h"
 
@@ -35,4 +34,3 @@ protected:
   const SinglePhaseFluidProperties * _water_fp;
 };
 
-#endif // BRINEFLUIDPROPERTIESTEST_H

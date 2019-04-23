@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NACLFLUIDPROPERTIESTEST_H
-#define NACLFLUIDPROPERTIESTEST_H
+#pragma once
 
 #include "MooseObjectUnitTest.h"
 #include "NaClFluidProperties.h"
@@ -32,4 +31,3 @@ protected:
   const NaClFluidProperties * _fp;
 };
 
-#endif // NACLFLUIDPROPERTIESTEST_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COLUMNMAJORMATRIXTEST_H
-#define COLUMNMAJORMATRIXTEST_H
+#pragma once
 
 // CPPUnit includes
 #include "gtest_include.h"
@@ -87,4 +86,3 @@ protected:
   ColumnMajorMatrix a, t, two_mat, add, add_solution, sub, sub_solution;
 };
 
-#endif // COLUMNMAJORMATRIXTEST_H

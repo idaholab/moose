@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RANDOMCORROSION_H
-#define RANDOMCORROSION_H
+#pragma once
 
 // MOOSE includes
 #include "AuxKernel.h"
@@ -77,4 +76,3 @@ private:
   const PostprocessorValue & _temperature;
 };
 
-#endif // RANDOMCORROSION_H

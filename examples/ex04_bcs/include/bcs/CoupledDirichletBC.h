@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COUPLEDDIRICHLETBC_H
-#define COUPLEDDIRICHLETBC_H
+#pragma once
 
 #include "NodalBC.h"
 
@@ -33,4 +32,3 @@ private:
   const VariableValue & _some_var_val;
 };
 
-#endif // COUPLEDDIRICHLETBC_H

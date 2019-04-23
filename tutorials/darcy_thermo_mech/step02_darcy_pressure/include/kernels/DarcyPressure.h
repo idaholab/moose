@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DARCYPRESSURE_H
-#define DARCYPRESSURE_H
+#pragma once
 
 // Including the "Diffusion" Kernel here so we can extend it
 #include "Diffusion.h"
@@ -46,4 +45,3 @@ protected:
   Real _viscosity;
 };
 
-#endif // DARCYPRESSURE_H

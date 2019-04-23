@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EXAMPLEIC_H
-#define EXAMPLEIC_H
+#pragma once
 
 // MOOSE Includes
 #include "InitialCondition.h"
@@ -41,4 +40,3 @@ private:
   Real _coefficient;
 };
 
-#endif // EXAMPLEIC_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DEPENDENCYRESOLVERTEST_H
-#define DEPENDENCYRESOLVERTEST_H
+#pragma once
 
 // CPPUnit includes
 #include "gtest_include.h"
@@ -59,4 +58,3 @@ protected:
   DependencyResolver<std::string> _tree;
 };
 
-#endif // DEPENDENCYRESOLVERTEST_H

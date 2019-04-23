@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWDICTATORTEST_H
-#define POROUSFLOWDICTATORTEST_H
+#pragma once
 
 #include "MooseObjectUnitTest.h"
 #include "PorousFlowDictator.h"
@@ -67,4 +66,3 @@ protected:
   const PorousFlowDictator * _dictator_no_fetype;
 };
 
-#endif // POROUSFLOWDICTATORTEST_H

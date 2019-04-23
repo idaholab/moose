@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DARCYVELOCITY_H
-#define DARCYVELOCITY_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -46,4 +45,3 @@ protected:
   const MaterialProperty<Real> & _viscosity;
 };
 
-#endif // DARCYVELOCITY_H

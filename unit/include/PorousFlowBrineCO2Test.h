@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWBRINECO2TEST_H
-#define POROUSFLOWBRINECO2TEST_H
+#pragma once
 
 #include "MooseObjectUnitTest.h"
 #include "PorousFlowCapillaryPressureVG.h"
@@ -59,4 +58,3 @@ protected:
   const CO2FluidProperties * _co2_fp;
 };
 
-#endif // POROUSFLOWBRINECO2TEST_H
