@@ -42,6 +42,34 @@ class TestMMS(unittest.TestCase):
                             'cos(x*t)*Derivative(h_y(R.x, R.y, R.z, t), R.y) + ' \
                             'cos(x*t)*Derivative(h_z(R.x, R.y, R.z, t), R.z)')
 
+    def testEvaluateWithKwargs(self):
+        f, _ = mms.evaluate('div(h*u)', 'cos(x*t)*e_i', scalars=['k'], h='k*x*x')
+        s = mms.fparser(f)
+
+        self.assertEqual(s, '-x^2*k*t*sin(x*t) + 2*x*k*cos(x*t)')
+
+    def testExceptions(self):
+
+        try:
+            mms.evaluate('div(h*u)', 'cos(x*t)*e_i', scalars=['R'], h='k*x*x')
+        except SyntaxError as e:
+            self.assertIn("name 'R'", e.message)
+
+        try:
+            mms.evaluate('div(h*u)', 'cos(x*t)*e_i', scalars=['x'], h='k*x*x')
+        except SyntaxError as e:
+            self.assertIn("name 'x'", e.message)
+
+        try:
+            mms.evaluate('div(h*u)', 'cos(x*t)*e_i', scalars=['t'], h='k*x*x')
+        except SyntaxError as e:
+            self.assertIn("name 't'", e.message)
+
+        try:
+            mms.evaluate('div(h*u)', 'cos(x*t)*e_i', scalars=['e_k'], h='k*x*x')
+        except SyntaxError as e:
+            self.assertIn("name 'e_k'", e.message)
+
     def testHit(self):
         f,s = mms.evaluate('a*div(k*grad(u))', 'x**3', scalars=['k', 'a'])
         n = str(mms.build_hit(f, 'force', a=42))
