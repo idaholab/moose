@@ -1,10 +1,14 @@
-# Using the Fluid Properties module
+# Fluid equations of state
 
-## Implementation
+PorousFlow uses formulations contained in the [Fluid Properties](/fluid_properties/index.md) module to
+calculate fluid properties such as density or viscosity.
+
+## Using the Fluid Properties module
+
+### Implementation
 
 PorousFlow can use any of the UserObjects in the [Fluid Properties](/fluid_properties/index.md)
-module that use the pressure-temperature formulation. A fluid is included in the input file by adding the
-following block
+module. A specific fluid can be included in the input file by adding the following block
 
 !listing modules/porous_flow/test/tests/fluids/h2o.i block=Modules/FluidProperties
 
@@ -22,17 +26,17 @@ for details).
 Multiple fluids can be included by simply adding additional fluids to the `Modules` block and
 corresponding `PorousFlowSingleComponentFluid` entries in the `Materials` block.
 
-Due to this design, it is trivial to change the fluid used by simply swapping out the
+Due to this design, it is trivial to change the fluid in any simulation by simply swapping out the
 [Fluid Properties](/fluid_properties/index.md) UserObjects.
 
 !alert note
 The fluid properties UserObjects expect temperature in Kelvin.
 
-If the input file uses temperature in Celcius, the `temperature_unit` option in
+If the input file uses temperature in Celsius, the `temperature_unit` option in
 [`PorousFlowSingleComponentFluid`](/PorousFlowSingleComponentFluid.md)
-+must+ be set to `Celcius`.
++must+ be set to `Celsius`.
 
-## Performance
+### Performance
 
 Computing fluid properties such as density and viscosity can be expensive when using
 detailed fluid equations of state (such as [Water97FluidProperties](/Water97FluidProperties.md) or
@@ -52,3 +56,7 @@ achieve the maximum benefit from [TabulatedFluidProperties](/TabulatedFluidPrope
 should ensure that both density and viscosity are calculated by interpolation, by either providing
 them in the supplied properties file, or making sure that both are specified in the
 `interpolated_properties` input parameter if no data file exists.
+
+### Available fluids
+
+The full list of available fluids is provided in the [Fluid Properties](/fluid_properties/index.md) module.
