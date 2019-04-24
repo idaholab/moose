@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MECHANICSOSPD_H
-#define MECHANICSOSPD_H
+#pragma once
 
 #include "MechanicsBasePD.h"
 
@@ -45,7 +44,6 @@ protected:
   const MaterialProperty<Real> & _bond_dfdT_i_j;
   ///@}
 
+  /// The index of displacement component
   const unsigned int _component;
 };
-
-#endif // MECHANICSOSPD_H

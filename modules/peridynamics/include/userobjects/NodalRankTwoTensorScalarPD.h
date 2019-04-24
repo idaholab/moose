@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NODALRANKTWOTENSORSCALARPD_H
-#define NODALRANKTWOTENSORSCALARPD_H
+#pragma once
 
 #include "NodalRankTwoTensorUserObjectBasePD.h"
 
@@ -48,5 +47,3 @@ protected:
   /// Direction vector used to calculate some material tensor quantities
   Point _input_direction;
 };
-
-#endif // NODALRANKTWOTENSORSCALARPD_H

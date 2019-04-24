@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FINITESTRAINNOSPD_H
-#define FINITESTRAINNOSPD_H
+#pragma once
 
 #include "MaterialBaseNOSPD.h"
 #include "RankTwoTensor.h"
@@ -69,5 +68,3 @@ private:
   const DecompMethod _decomposition_method;
   ///@}
 };
-
-#endif // FINITESTRAINNOSPD_H

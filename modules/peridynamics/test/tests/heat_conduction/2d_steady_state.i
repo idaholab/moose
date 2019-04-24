@@ -1,9 +1,22 @@
 # This test solves a 2D steady state heat equation
 # The error is found by comparing to the analytical solution
+
+[MeshGenerators]
+  [gmg]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 10
+    ny = 10
+  []
+  [gpd]
+    type = MeshGeneratorPD
+    input = gmg
+    retain_fe_mesh = false
+  []
+[]
+
 [Mesh]
-  type = GeneratedMeshPD
-  dim = 2
-  nx = 10
+  type = PeridynamicsMesh
   horizon_number = 3
 []
 
@@ -43,25 +56,25 @@
   [./left]
     type = FunctionDirichletBC
     variable = temp
-    boundary = 0
-    function = analytical_sol
-  [../]
-  [./right]
-    type = FunctionDirichletBC
-    variable = temp
-    boundary = 2
+    boundary = left
     function = analytical_sol
   [../]
   [./bottom]
     type = FunctionDirichletBC
     variable = temp
-    boundary = 1
+    boundary = bottom
+    function = analytical_sol
+  [../]
+  [./right]
+    type = FunctionDirichletBC
+    variable = temp
+    boundary = right
     function = analytical_sol
   [../]
   [./top]
     type = FunctionDirichletBC
     variable = temp
-    boundary = 3
+    boundary = top
     function = analytical_sol
   [../]
 []

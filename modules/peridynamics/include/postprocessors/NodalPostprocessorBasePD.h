@@ -7,11 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NODALPOSTPROCESSORBASEPD_H
-#define NODALPOSTPROCESSORBASEPD_H
+#pragma once
 
 #include "NodalPostprocessor.h"
-#include "MeshBasePD.h"
+#include "PeridynamicsMesh.h"
 
 // Forward Declarations
 class NodalPostprocessorBasePD;
@@ -29,10 +28,8 @@ public:
 
 protected:
   /// Reference to peridynamic mesh object
-  MeshBasePD & _pdmesh;
+  PeridynamicsMesh & _pdmesh;
 
   /// Mesh dimension
   const unsigned int _dim;
 };
-
-#endif // NODALPOSTPROCESSORBASEPD

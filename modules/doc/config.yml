@@ -9,6 +9,7 @@ Content:
     - modules/level_set/doc/content
     - modules/misc/doc/content
     - modules/navier_stokes/doc/content
+    - modules/peridynamics/doc/content
     - modules/phase_field/doc/content
     - modules/porous_flow/doc/content
     - modules/rdg/doc/content
@@ -55,6 +56,7 @@ Extensions:
             #level_set: !include modules/level_set/doc/hidden.yml
             misc: !include modules/misc/doc/hidden.yml
             navier_stokes: !include modules/navier_stokes/doc/hidden.yml
+            #peridynamics: !include modules/peridynamics/doc/hidden.yml
             phase_field: !include modules/phase_field/doc/hidden.yml
             porous_flow: !include modules/porous_flow/doc/hidden.yml
             #rdg: !include modules/rdg/doc/hidden.yml
@@ -74,6 +76,7 @@ Extensions:
             #level_set: !include modules/level_set/doc/remove.yml
             #misc: !include modules/misc/doc/remove.yml
             #navier_stokes: !include modules/navier_stokes/doc/remove.yml
+            #peridynamics: !include modules/peridynamics/doc/remove.yml
             #phase_field: !include modules/phase_field/doc/remove.yml
             #porous_flow: !include modules/porous_flow/doc/remove.yml
             #rdg: !include modules/rdg/doc/remove.yml

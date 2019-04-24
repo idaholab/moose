@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef BONDMECHANICALSTRETCHAUX_H
-#define BONDMECHANICALSTRETCHAUX_H
+#pragma once
 
 #include "AuxKernelBasePD.h"
 
@@ -31,5 +30,3 @@ protected:
   /// Material property of bond mechanical stretch
   const MaterialProperty<Real> & _mechanical_stretch;
 };
-
-#endif // MECHANICALSTRETCHPD_H

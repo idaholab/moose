@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NODALVARIABLEINTEGRALPD_H
-#define NODALVARIABLEINTEGRALPD_H
+#pragma once
 
 #include "NodalIntegralPostprocessorBasePD.h"
 
@@ -31,5 +30,3 @@ protected:
   /// Nodal variable to be integrated
   MooseVariableFEBase & _var;
 };
-
-#endif // NODALVARIABLEINTEGRALPD_H

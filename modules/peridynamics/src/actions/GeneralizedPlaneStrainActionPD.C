@@ -24,11 +24,11 @@ validParams<GeneralizedPlaneStrainActionPD>()
   InputParameters params = validParams<Action>();
   params.addClassDescription("Class for setting up the Kernel, ScalarKernel, and UserObject for "
                              "peridynamic generalized plane strain model");
-  params.addRequiredParam<std::vector<NonlinearVariableName>>(
+  params.addRequiredParam<std::vector<VariableName>>(
       "displacements", "Nonlinear variable name for the displacements");
   params.addRequiredParam<VariableName>("scalar_out_of_plane_strain",
                                         "Scalar variable for strain in the out-of-plane direction");
-  params.addParam<NonlinearVariableName>("temperature", "Nonlinear variable for the temperature");
+  params.addParam<VariableName>("temperature", "Nonlinear variable for the temperature");
   MooseEnum formulation_option("OrdinaryState NonOrdinaryState", "NonOrdinaryState");
   params.addParam<MooseEnum>("formulation",
                              formulation_option,
@@ -45,10 +45,9 @@ validParams<GeneralizedPlaneStrainActionPD>()
                         false,
                         "Parameter to set whether to use the nonlocal full Jacobian formulation "
                         "for the scalar components");
-  params.addParam<bool>(
-      "use_displaced_mesh",
-      false,
-      "Parameter to set whether to use the displaced mesh for computation");
+  params.addParam<bool>("use_displaced_mesh",
+                        false,
+                        "Parameter to set whether to use the displaced mesh for computation");
   params.addParam<std::vector<SubdomainName>>("block",
                                               "List of ids of the blocks (subdomains) that the "
                                               "GeneralizedPlaneStrainActionPD will be applied "
@@ -61,7 +60,7 @@ validParams<GeneralizedPlaneStrainActionPD>()
 
 GeneralizedPlaneStrainActionPD::GeneralizedPlaneStrainActionPD(const InputParameters & params)
   : Action(params),
-    _displacements(getParam<std::vector<NonlinearVariableName>>("displacements")),
+    _displacements(getParam<std::vector<VariableName>>("displacements")),
     _ndisp(_displacements.size()),
     _formulation(getParam<MooseEnum>("formulation")),
     _scalar_out_of_plane_strain(getParam<VariableName>("scalar_out_of_plane_strain"))
@@ -85,17 +84,19 @@ GeneralizedPlaneStrainActionPD::act()
   if (_current_task == "add_kernel")
   {
     std::string k_type;
-    if (_formulation ==  "OrdinaryState")
-        k_type = "GeneralizedPlaneStrainOffDiagOSPD"; // Based on ordinary state-based model
-    else if (_formulation ==  "NonOrdinaryState")
+    if (_formulation == "OrdinaryState")
+      k_type = "GeneralizedPlaneStrainOffDiagOSPD"; // Based on ordinary state-based model
+    else if (_formulation == "NonOrdinaryState")
       k_type = "GeneralizedPlaneStrainOffDiagNOSPD"; // Based on bond-associated non-ordinary
                                                      // state-based model
     else
-      paramError("formulation", "Unsupported peridynamic formulation. Choose from: OrdinaryState or NonOrdinaryState");
+      paramError(
+          "formulation",
+          "Unsupported peridynamic formulation. Choose from: OrdinaryState or NonOrdinaryState");
 
     InputParameters params = _factory.getValidParams(k_type);
 
-    params.set<std::vector<NonlinearVariableName>>("displacements") = _displacements;
+    params.set<std::vector<VariableName>>("displacements") = _displacements;
     params.set<std::vector<VariableName>>("scalar_out_of_plane_strain") = {
         _scalar_out_of_plane_strain};
     params.set<bool>("full_jacobian") = getParam<bool>("full_jacobian");
@@ -119,10 +120,10 @@ GeneralizedPlaneStrainActionPD::act()
     // nonlinear variable)
     if (isParamValid("temperature"))
     {
-      NonlinearVariableName temp = getParam<NonlinearVariableName>("temperature");
+      VariableName temp = getParam<VariableName>("temperature");
       if (_problem->getNonlinearSystemBase().hasVariable(temp))
       {
-        params.set<NonlinearVariableName>("temperature") = temp;
+        params.set<VariableName>("temperature") = temp;
 
         std::string k_name = _name + "_GeneralizedPlaneStrainPDOffDiag_temp";
         params.set<NonlinearVariableName>("variable") = temp;
@@ -139,12 +140,14 @@ GeneralizedPlaneStrainActionPD::act()
   else if (_current_task == "add_user_object")
   {
     std::string uo_type;
-    if (_formulation ==  "OrdinaryState")
+    if (_formulation == "OrdinaryState")
       uo_type = "GeneralizedPlaneStrainUserObjectOSPD";
-    else if (_formulation ==  "NonOrdinaryState")
+    else if (_formulation == "NonOrdinaryState")
       uo_type = "GeneralizedPlaneStrainUserObjectNOSPD";
     else
-      paramError("formulation", "Unsupported peridynamic formulation. Choose from: OrdinaryState or NonOrdinaryState");
+      paramError(
+          "formulation",
+          "Unsupported peridynamic formulation. Choose from: OrdinaryState or NonOrdinaryState");
 
     InputParameters params = _factory.getValidParams(uo_type);
 

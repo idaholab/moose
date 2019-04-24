@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "KernelBasePD.h"
-#include "MeshBasePD.h"
+#include "PeridynamicsMesh.h"
 
 template <>
 InputParameters
@@ -30,7 +30,7 @@ KernelBasePD::KernelBasePD(const InputParameters & parameters)
   : Kernel(parameters),
     _bond_status_var(_subproblem.getVariable(_tid, "bond_status")),
     _use_full_jacobian(getParam<bool>("full_jacobian")),
-    _pdmesh(dynamic_cast<MeshBasePD &>(_mesh)),
+    _pdmesh(dynamic_cast<PeridynamicsMesh &>(_mesh)),
     _dim(_pdmesh.dimension()),
     _nnodes(2) // Edge2 element has only two nodes
 {
@@ -39,7 +39,6 @@ KernelBasePD::KernelBasePD(const InputParameters & parameters)
 void
 KernelBasePD::prepare()
 {
-  _nodes_ij.resize(_nnodes);
   _vols_ij.resize(_nnodes);
   _dg_bond_vsum_ij.resize(_nnodes);
   _dg_node_vsum_ij.resize(_nnodes);
@@ -47,16 +46,16 @@ KernelBasePD::prepare()
 
   for (unsigned int nd = 0; nd < _nnodes; ++nd)
   {
-    _nodes_ij[nd] = _current_elem->get_node(nd);
-    _vols_ij[nd] = _pdmesh.volume(_nodes_ij[nd]->id());
+    _vols_ij[nd] = _pdmesh.getVolume(_current_elem->node_id(nd));
     unsigned int id_ji_in_ij =
-        _pdmesh.neighborID(_nodes_ij[nd]->id(), _current_elem->get_node(1 - nd)->id());
-    _dg_bond_vsum_ij[nd] = _pdmesh.dgBondVolumeSum(_nodes_ij[nd]->id(), id_ji_in_ij);
-    _dg_node_vsum_ij[nd] = _pdmesh.dgNodeVolumeSum(_nodes_ij[nd]->id());
-    _horizons_ij[nd] = _pdmesh.horizon(_nodes_ij[nd]->id());
+        _pdmesh.getNeighborID(_current_elem->node_id(nd), _current_elem->node_id(1 - nd));
+    _dg_bond_vsum_ij[nd] =
+        _pdmesh.getBondAssocHorizonVolume(_current_elem->node_id(nd), id_ji_in_ij);
+    _dg_node_vsum_ij[nd] = _pdmesh.getBondAssocHorizonVolumeSum(_current_elem->node_id(nd));
+    _horizons_ij[nd] = _pdmesh.getHorizon(_current_elem->node_id(nd));
   }
 
-  _origin_vec_ij = *_nodes_ij[1] - *_nodes_ij[0];
+  _origin_vec_ij = *_current_elem->node_ptr(1) - *_current_elem->node_ptr(0);
   _bond_status_ij = _bond_status_var.getElementalValue(_current_elem);
 }
 

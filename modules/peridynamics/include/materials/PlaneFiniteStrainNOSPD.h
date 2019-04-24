@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PLANEFINITESTRAINNOSPD_H
-#define PLANEFINITESTRAINNOSPD_H
+#pragma once
 
 #include "FiniteStrainNOSPD.h"
 
@@ -46,5 +45,3 @@ private:
   const VariableValue & _out_of_plane_strain_old;
   ///@}
 };
-
-#endif // PLANEFINITESTRAINNOSPD_H

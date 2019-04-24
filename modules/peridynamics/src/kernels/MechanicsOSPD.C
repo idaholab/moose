@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MechanicsOSPD.h"
-#include "MeshBasePD.h"
+#include "PeridynamicsMesh.h"
 
 registerMooseObject("PeridynamicsApp", MechanicsOSPD);
 
@@ -56,23 +56,22 @@ MechanicsOSPD::computeNonlocalResidual()
     // calculation of residual contribution to current_node's neighbors
     std::vector<dof_id_type> ivardofs(2);
     ivardofs[cur_nd] = _ivardofs_ij[cur_nd];
-    std::vector<dof_id_type> neighbors = _pdmesh.neighbors(_nodes_ij[cur_nd]->id());
-    std::vector<dof_id_type> bonds = _pdmesh.bonds(_nodes_ij[cur_nd]->id());
+    std::vector<dof_id_type> neighbors = _pdmesh.getNeighbors(_current_elem->node_id(cur_nd));
+    std::vector<dof_id_type> bonds = _pdmesh.getAssocBonds(_current_elem->node_id(cur_nd));
     for (unsigned int k = 0; k < neighbors.size(); ++k)
     {
       Node * node_k = _pdmesh.nodePtr(neighbors[k]);
       ivardofs[1 - cur_nd] = node_k->dof_number(_sys.number(), _var.number(), 0);
-      Real vol_k = _pdmesh.volume(neighbors[k]);
+      Real vol_k = _pdmesh.getVolume(neighbors[k]);
 
       // obtain bond ik's origin length and current orientation
-      RealGradient origin_ori_ijk(_dim), cur_ori_ijk(_dim);
+      RealGradient origin_ori_ijk = *node_k - *_pdmesh.nodePtr(_current_elem->node_id(cur_nd));
+
+      RealGradient cur_ori_ijk(_dim);
       for (unsigned int j = 0; j < _dim; ++j)
-      {
-        origin_ori_ijk(j) =
-            _pdmesh.coord(neighbors[k])(j) - _pdmesh.coord(_nodes_ij[cur_nd]->id())(j);
         cur_ori_ijk(j) = origin_ori_ijk(j) + _disp_var[j]->getNodalValue(*node_k) -
-                         _disp_var[j]->getNodalValue(*_nodes_ij[cur_nd]);
-      }
+                         _disp_var[j]->getNodalValue(*_current_elem->node_ptr(cur_nd));
+
       cur_ori_ijk /= cur_ori_ijk.norm();
 
       // bond status for bond k
@@ -93,8 +92,8 @@ MechanicsOSPD::computeNonlocalResidual()
         for (unsigned int i = 0; i < _save_in.size(); ++i)
         {
           std::vector<dof_id_type> save_in_dofs(2);
-          save_in_dofs[cur_nd] =
-              _nodes_ij[cur_nd]->dof_number(_save_in[i]->sys().number(), _save_in[i]->number(), 0);
+          save_in_dofs[cur_nd] = _current_elem->node_ptr(cur_nd)->dof_number(
+              _save_in[i]->sys().number(), _save_in[i]->number(), 0);
           save_in_dofs[1 - cur_nd] =
               node_k->dof_number(_save_in[i]->sys().number(), _save_in[i]->number(), 0);
 
@@ -146,23 +145,22 @@ MechanicsOSPD::computeNonlocalJacobian()
     // calculation of jacobian contribution to current_node's neighbors
     std::vector<dof_id_type> ivardofs(_nnodes);
     ivardofs[cur_nd] = _ivardofs_ij[cur_nd];
-    std::vector<dof_id_type> neighbors = _pdmesh.neighbors(_nodes_ij[cur_nd]->id());
-    std::vector<dof_id_type> bonds = _pdmesh.bonds(_nodes_ij[cur_nd]->id());
+    std::vector<dof_id_type> neighbors = _pdmesh.getNeighbors(_current_elem->node_id(cur_nd));
+    std::vector<dof_id_type> bonds = _pdmesh.getAssocBonds(_current_elem->node_id(cur_nd));
     for (unsigned int k = 0; k < neighbors.size(); ++k)
     {
       Node * node_k = _pdmesh.nodePtr(neighbors[k]);
       ivardofs[1 - cur_nd] = node_k->dof_number(_sys.number(), _var.number(), 0);
-      Real vol_k = _pdmesh.volume(neighbors[k]);
+      Real vol_k = _pdmesh.getVolume(neighbors[k]);
 
       // obtain bond ik's origin length and current orientation
-      RealGradient origin_ori_ijk(_dim), cur_ori_ijk(_dim);
+      RealGradient origin_ori_ijk = *node_k - *_pdmesh.nodePtr(_current_elem->node_id(cur_nd));
+
+      RealGradient cur_ori_ijk(_dim);
       for (unsigned int j = 0; j < _dim; ++j)
-      {
-        origin_ori_ijk(j) =
-            _pdmesh.coord(neighbors[k])(j) - _pdmesh.coord(_nodes_ij[cur_nd]->id())(j);
         cur_ori_ijk(j) = origin_ori_ijk(j) + _disp_var[j]->getNodalValue(*node_k) -
-                         _disp_var[j]->getNodalValue(*_nodes_ij[cur_nd]);
-      }
+                         _disp_var[j]->getNodalValue(*_current_elem->node_ptr(cur_nd));
+
       cur_ori_ijk /= cur_ori_ijk.norm();
 
       // bond status for bond k
@@ -192,7 +190,7 @@ MechanicsOSPD::computeNonlocalJacobian()
         for (unsigned int i = 0; i < _diag_save_in.size(); ++i)
         {
           std::vector<dof_id_type> diag_save_in_dofs(2);
-          diag_save_in_dofs[cur_nd] = _nodes_ij[cur_nd]->dof_number(
+          diag_save_in_dofs[cur_nd] = _current_elem->node_ptr(cur_nd)->dof_number(
               _diag_save_in[i]->sys().number(), _diag_save_in[i]->number(), 0);
           diag_save_in_dofs[1 - cur_nd] =
               node_k->dof_number(_diag_save_in[i]->sys().number(), _diag_save_in[i]->number(), 0);
@@ -223,7 +221,7 @@ MechanicsOSPD::computeNonlocalJacobian()
         for (unsigned int i = 0; i < _diag_save_in.size(); ++i)
         {
           std::vector<dof_id_type> diag_save_in_dofs(2);
-          diag_save_in_dofs[cur_nd] = _nodes_ij[cur_nd]->dof_number(
+          diag_save_in_dofs[cur_nd] = _current_elem->node_ptr(cur_nd)->dof_number(
               _diag_save_in[i]->sys().number(), _diag_save_in[i]->number(), 0);
           diag_save_in_dofs[1 - cur_nd] =
               node_k->dof_number(_diag_save_in[i]->sys().number(), _diag_save_in[i]->number(), 0);
@@ -241,7 +239,7 @@ MechanicsOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_num,
 {
   std::vector<dof_id_type> jvardofs_ij(_nnodes);
   for (unsigned int nd = 0; nd < _nnodes; ++nd)
-    jvardofs_ij[nd] = _nodes_ij[nd]->dof_number(_sys.number(), jvar_num, 0);
+    jvardofs_ij[nd] = _current_elem->node_ptr(nd)->dof_number(_sys.number(), jvar_num, 0);
 
   for (unsigned int cur_nd = 0; cur_nd < _nnodes; ++cur_nd)
   {
@@ -249,23 +247,22 @@ MechanicsOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_num,
     std::vector<dof_id_type> ivardofs(_nnodes), jvardofs(_nnodes);
     ivardofs[cur_nd] = _ivardofs_ij[cur_nd];
     jvardofs[cur_nd] = jvardofs_ij[cur_nd];
-    std::vector<dof_id_type> neighbors = _pdmesh.neighbors(_nodes_ij[cur_nd]->id());
-    std::vector<dof_id_type> bonds = _pdmesh.bonds(_nodes_ij[cur_nd]->id());
+    std::vector<dof_id_type> neighbors = _pdmesh.getNeighbors(_current_elem->node_id(cur_nd));
+    std::vector<dof_id_type> bonds = _pdmesh.getAssocBonds(_current_elem->node_id(cur_nd));
     for (unsigned int k = 0; k < neighbors.size(); ++k)
     {
       Node * node_k = _pdmesh.nodePtr(neighbors[k]);
       ivardofs[1 - cur_nd] = node_k->dof_number(_sys.number(), _var.number(), 0);
       jvardofs[1 - cur_nd] = node_k->dof_number(_sys.number(), jvar_num, 0);
-      Real vol_k = _pdmesh.volume(neighbors[k]);
+      Real vol_k = _pdmesh.getVolume(neighbors[k]);
 
       // obtain bond k's origin length and current orientation
-      RealGradient origin_ori_ijk =
-          _pdmesh.coord(neighbors[k]) - _pdmesh.coord(_nodes_ij[cur_nd]->id());
+      RealGradient origin_ori_ijk = *node_k - *_pdmesh.nodePtr(_current_elem->node_id(cur_nd));
 
       RealGradient cur_ori_ijk;
       for (unsigned int j = 0; j < _dim; ++j)
         cur_ori_ijk(j) = origin_ori_ijk(j) + _disp_var[j]->getNodalValue(*node_k) -
-                         _disp_var[j]->getNodalValue(*_nodes_ij[cur_nd]);
+                         _disp_var[j]->getNodalValue(*_current_elem->node_ptr(cur_nd));
 
       cur_ori_ijk /= cur_ori_ijk.norm();
 

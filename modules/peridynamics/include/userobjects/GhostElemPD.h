@@ -7,11 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GHOSTELEMPD_H
-#define GHOSTELEMPD_H
+#pragma once
 
-#include "GeneralUserObject.h"
-#include "MeshBasePD.h"
+#include "GeneralUserObjectBasePD.h"
+#include "PeridynamicsMesh.h"
 
 class GhostElemPD;
 
@@ -22,7 +21,7 @@ InputParameters validParams<GhostElemPD>();
  * Userobject class to ghost the required element for calculation on current processor from other
  * processors
  */
-class GhostElemPD : public GeneralUserObject
+class GhostElemPD : public GeneralUserObjectBasePD
 {
 public:
   GhostElemPD(const InputParameters & parameters);
@@ -37,9 +36,4 @@ protected:
    * Function to ghost/copy element information from other processors
    */
   void ghostElements();
-
-  MooseMesh & _mesh;
-  MeshBasePD & _pdmesh;
 };
-
-#endif // GHOSTELEMPD_H

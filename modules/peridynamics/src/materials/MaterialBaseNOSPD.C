@@ -67,23 +67,23 @@ MaterialBaseNOSPD::computeQpDeformationGradient()
   if (_dim == 2)
     _shape_tensor[_qp](2, 2) = _deformation_gradient[_qp](2, 2) = 1.0;
 
-  Node * cur_nd = _current_elem->get_node(_qp);
-  Node * end_nd = _current_elem->get_node(1 - _qp); // two nodes for edge2 element
-  std::vector<dof_id_type> neighbors = _pdmesh.neighbors(cur_nd->id());
-  std::vector<dof_id_type> bonds = _pdmesh.bonds(cur_nd->id());
+  const Node * cur_nd = _current_elem->node_ptr(_qp);
+  const Node * end_nd = _current_elem->node_ptr(1 - _qp); // two nodes for edge2 element
+  std::vector<dof_id_type> neighbors = _pdmesh.getNeighbors(cur_nd->id());
+  std::vector<dof_id_type> bonds = _pdmesh.getAssocBonds(cur_nd->id());
 
   unsigned int nb = std::find(neighbors.begin(), neighbors.end(), end_nd->id()) - neighbors.begin();
-  std::vector<unsigned int> dgnodes = _pdmesh.dgNodeInfo(cur_nd->id(), nb);
+  std::vector<unsigned int> BAneighbors = _pdmesh.getBondAssocHorizonNeighbors(cur_nd->id(), nb);
 
-  if (dgnodes.size() < _dim)
+  if (BAneighbors.size() < _dim)
     mooseError("Not enough neighboring bonds for deformation gradient approximation for element: ",
                _current_elem->id(),
                ". Try to use larger bond-associated horizon!");
 
   // check the number of intact bonds for bond-associated deformation gradient calculation
   unsigned int intact_dg_bonds = 0;
-  for (unsigned int j = 0; j < dgnodes.size(); ++j)
-    if (_bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[dgnodes[j]])) > 0.5)
+  for (unsigned int j = 0; j < BAneighbors.size(); ++j)
+    if (_bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[BAneighbors[j]])) > 0.5)
       ++intact_dg_bonds;
   // if there are no sufficient bonds to approximate the deformation gradient of current bond
   // expand the bond-associated horizon to the full horizon
@@ -94,22 +94,21 @@ MaterialBaseNOSPD::computeQpDeformationGradient()
   // calculate the shape tensor and prepare the deformation gradient tensor
   Real dgnodes_vsum = 0.0;
   RealGradient ori_vec(_dim), cur_vec(_dim);
-  ori_vec = 0.0;
-  cur_vec = 0.0;
 
-  for (unsigned int j = 0; j < dgnodes.size(); ++j)
-    if (!apply_bond_status || (apply_bond_status && _bond_status_var.getElementalValue(
-                                                        _pdmesh.elemPtr(bonds[dgnodes[j]])) > 0.5))
+  for (unsigned int j = 0; j < BAneighbors.size(); ++j)
+    if (!apply_bond_status ||
+        (apply_bond_status &&
+         _bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[BAneighbors[j]])) > 0.5))
     {
-      Node * node_j = _pdmesh.nodePtr(neighbors[dgnodes[j]]);
-      Real vol_j = _pdmesh.volume(neighbors[dgnodes[j]]);
+      Node * node_j = _pdmesh.nodePtr(neighbors[BAneighbors[j]]);
+      Real vol_j = _pdmesh.getVolume(neighbors[BAneighbors[j]]);
       dgnodes_vsum += vol_j;
+      ori_vec = *node_j - *_pdmesh.nodePtr(cur_nd->id());
+
       for (unsigned int k = 0; k < _dim; ++k)
-      {
-        ori_vec(k) = _pdmesh.coord(neighbors[dgnodes[j]])(k) - _pdmesh.coord(cur_nd->id())(k);
         cur_vec(k) = ori_vec(k) + _disp_var[k]->getNodalValue(*node_j) -
                      _disp_var[k]->getNodalValue(*cur_nd);
-      }
+
       Real ori_len = ori_vec.norm();
       for (unsigned int k = 0; k < _dim; ++k)
       {

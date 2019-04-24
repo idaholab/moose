@@ -7,11 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATERIALBASEPD_H
-#define MATERIALBASEPD_H
+#pragma once
 
 #include "Material.h"
-#include "MeshBasePD.h"
+#include "PeridynamicsMesh.h"
 
 class MaterialBasePD;
 
@@ -30,7 +29,7 @@ protected:
   virtual void computeProperties() override;
 
   ///@{ Mesh related information for material points of current bond/element
-  MeshBasePD & _pdmesh;
+  PeridynamicsMesh & _pdmesh;
   const unsigned int _dim;
   const unsigned int _nnodes;
   std::vector<Real> _horizon;
@@ -41,5 +40,3 @@ protected:
   Real _origin_length;
   ///@}
 };
-
-#endif // MATERIALBASEPD_H

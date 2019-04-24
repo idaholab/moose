@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEPLANESTRESSISOTROPICELASTICITYTENSOR_H
-#define COMPUTEPLANESTRESSISOTROPICELASTICITYTENSOR_H
+#pragma once
 
 #include "ComputeIsotropicElasticityTensor.h"
 
@@ -25,5 +24,3 @@ class ComputePlaneStressIsotropicElasticityTensor : public ComputeIsotropicElast
 public:
   ComputePlaneStressIsotropicElasticityTensor(const InputParameters & parameters);
 };
-
-#endif // COMPUTEPLANESTRESSISOTROPICELASTICITYTENSOR_H

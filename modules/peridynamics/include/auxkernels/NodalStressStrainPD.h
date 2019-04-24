@@ -7,15 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NODALSTRESSSTRAINPD_H
-#define NODALSTRESSSTRAINPD_H
+#pragma once
 
 #include "AuxKernelBasePD.h"
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 
 class NodalStressStrainPD;
-class MeshBasePD;
+class PeridynamicsMesh;
 
 template <>
 InputParameters validParams<NodalStressStrainPD>();
@@ -32,8 +31,22 @@ public:
 protected:
   Real computeValue() override;
 
+  /**
+   * Function to compute the total strain tensor at each discrete material point
+   * @return The calculated total strain tensor
+   */
   virtual RankTwoTensor computeNodalTotalStrain();
+
+  /**
+   * Function to compute the elastic strain tensor at each discrete material point
+   * @return The calculated elastic strain tensor
+   */
   virtual RankTwoTensor computeNodalElasticStrain();
+
+  /**
+   * Function to compute the stress tensor at each discrete materials point
+   * @return The calculated stress tensor
+   */
   virtual RankTwoTensor computeNodalStress();
 
   /// coupled temperature variable
@@ -76,5 +89,3 @@ protected:
   /// Rank four elasticity tensor
   RankFourTensor _Cijkl;
 };
-
-#endif // NODALSTRESSSTRAINPD_H

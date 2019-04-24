@@ -7,11 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RANDOMIZECRITICALVALUEPD_H
-#define RANDOMIZECRITICALVALUEPD_H
+#pragma once
 
-#include "GeneralUserObject.h"
-#include "MeshBasePD.h"
+#include "GeneralUserObjectBasePD.h"
+#include "PeridynamicsMesh.h"
 
 class RandomizeCriticalValuePD;
 
@@ -22,7 +21,7 @@ InputParameters validParams<RandomizeCriticalValuePD>();
  * Userobject class to generate randomized critical value used to determine bond status
  * for fracture modeling and simulation
  */
-class RandomizeCriticalValuePD : public GeneralUserObject
+class RandomizeCriticalValuePD : public GeneralUserObjectBasePD
 {
 public:
   RandomizeCriticalValuePD(const InputParameters & parameters);
@@ -32,11 +31,7 @@ public:
   virtual void finalize() override;
 
 protected:
-  ///@{ Peridynamic mesh information
-  MooseMesh & _mesh;
-  MeshBasePD & _pdmesh;
-  ///@}
-
+  /// Reference to the auxiliary system
   AuxiliarySystem & _aux;
 
   /// Solution vector for all aux variables
@@ -50,5 +45,3 @@ protected:
   /// Critical elemental aux variable
   MooseVariableFEBase * _critical_var;
 };
-
-#endif // RANDOMIZECRITICALVALUEPD_H

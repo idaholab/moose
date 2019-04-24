@@ -1,0 +1,21 @@
+[Tests]
+  issues = '#11561'
+  design = 'modules/peridynamics/PeridynamicsMesh.md'
+  [./initial_run]
+    type = 'Exodiff'
+    input = 'mesh_restartable_nospd.i'
+    exodiff = 'mesh_restartable_nospd_out.e'
+    map = false
+    requirement = 'PeridynamicsMesh shall be able to save extra unconventional mesh data for peridynamics models.'
+  [../]
+
+  [./restart_run]
+    type = 'Exodiff'
+    input = 'mesh_restartable_nospd_second.i'
+    exodiff = 'mesh_restartable_nospd_second_out.e'
+    map = false
+    prereq = initial_run
+    skip = 'PD does not support restart yet'
+    requirement = 'PeridynamicsMesh shall be able to restore extra unconventional mesh data for peridynamics models.'
+  [../]
+[]

@@ -7,14 +7,11 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MECHANICSBASENOSPD_H
-#define MECHANICSBASENOSPD_H
+#pragma once
 
 #include "MechanicsBasePD.h"
 
 class MechanicsBaseNOSPD;
-class RankTwoTensor;
-class RankFourTensor;
 
 template <>
 InputParameters validParams<MechanicsBaseNOSPD>();
@@ -30,6 +27,9 @@ public:
 protected:
   /**
    * Function to compute derivative of stress with respect to displacements
+   * @param component   The index of displacement component
+   * @param nd   The local index of element node (either 1 or 2 for Edge2 element)
+   * @return The calculated derivative
    */
   virtual RankTwoTensor computeDSDU(unsigned int component, unsigned int nd);
 
@@ -41,8 +41,6 @@ protected:
   const MaterialProperty<RankTwoTensor> & _ddgraddu;
   const MaterialProperty<RankTwoTensor> & _ddgraddv;
   const MaterialProperty<RankTwoTensor> & _ddgraddw;
-  const MaterialProperty<RankFourTensor> & _Cijkl;
+  const MaterialProperty<RankFourTensor> & _Jacobian_mult;
   ///@}
 };
-
-#endif // MECHANICSBASENOSPD_H

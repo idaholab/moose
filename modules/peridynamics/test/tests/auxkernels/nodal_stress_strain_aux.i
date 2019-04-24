@@ -8,10 +8,22 @@
   stress_free_temperature = 0.0
 []
 
+[MeshGenerators]
+  [gmg]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 8
+    ny = 8
+  []
+  [gpd]
+    type = MeshGeneratorPD
+    input = gmg
+    retain_fe_mesh = false
+  []
+[]
+
 [Mesh]
-  type = GeneratedMeshPD
-  dim = 2
-  nx = 8
+  type = PeridynamicsMesh
   horizon_number = 3
 []
 
@@ -84,11 +96,9 @@
   [../]
 []
 
-[Modules]
-  [./Peridynamics]
-    [./Mechanics]
-      formulation = OrdinaryState
-    [../]
+[Modules/Peridynamics/Mechanics/Master]
+  [./all]
+    formulation = OrdinaryState
   [../]
 []
 
@@ -216,13 +226,13 @@
 [BCs]
   [./leftx]
     type = PresetBC
-    boundary = 0
+    boundary = left
     variable = disp_x
     value = 0.0
   [../]
   [./bottomy]
     type = PresetBC
-    boundary = 2
+    boundary = bottom
     variable = disp_y
     value = 0.0
   [../]

@@ -4,89 +4,134 @@
     input = '2d_bond_heat_conduction.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    requirement = 'HeatConductionBPD shall provide the accurate residual and jacobian for bond-based peridynamic heat conduction model.'
+    design = 'modules/peridynamics/HeatConductionBPD.md'
+    issues = '#11561'
   [../]
   [./bond_mechanics]
     type = 'PetscJacobianTester'
     input = '2d_bond.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    requirement = 'MechanicsBPD shall provide the accurate residual and jacobian for bond-based peridynamic mechanics model.'
+    design = 'modules/peridynamics/MechanicsBPD.md'
+    issues = '#11561'
   [../]
   [./bond_thermomechanics]
     type = 'PetscJacobianTester'
     input = '2d_bond_coupled.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    requirement = 'MechanicsBPD and HeatConductionBPD shall provide the accurate residual and jacobian for bond-based peridynamic thermomechanics model.'
+    design = 'modules/peridynamics/MechanicsBPD.md'
+    issues = '#11561'
   [../]
   [./ordinary_state_mechanics]
     type = 'PetscJacobianTester'
     input = '2d_ordinary_state.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    requirement = 'MechanicsOSPD shall provide the accurate residual and jacobian for ordinary state-based peridynamic mechanics model.'
+    design = 'modules/peridynamics/MechanicsOSPD.md'
+    issues = '#11561'
   [../]
   [./ordinary_state_thermomechanics]
     type = 'PetscJacobianTester'
     input = '2d_ordinary_state_coupled.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    requirement = 'MechanicsOSPD and HeatConductionBPD shall provide the accurate residual and jacobian for ordinary state-based peridynamic thermomechanics model.'
+    design = 'modules/peridynamics/MechanicsOSPD.md'
+    issues = '#11561'
   [../]
   [./force_stabilized_non_ordinary_state_mechanics]
     type = 'PetscJacobianTester'
     input = '2d_force_stabilized_non_ordinary_state.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    requirement = 'ForceStabilizedSmallStrainMechanicsNOSPD shall provide the accurate residual and jacobian for force-stabilized small-strain non-ordinary state-based peridynamic mechanics model.'
+    design = 'modules/peridynamics/ForceStabilizedSmallStrainMechanicsNOSPD.md'
+    issues = '#11561'
   [../]
   [./force_stabilized_non_ordinary_state_thermomechanics]
     type = 'PetscJacobianTester'
     input = '2d_force_stabilized_non_ordinary_state_coupled.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    requirement = 'ForceStabilizedSmallStrainMechanicsNOSPD and HeatConductionBPD shall provide the accurate residual and jacobian for force-stabilized small-strain non-ordinary state-based peridynamic thermomechanics model.'
+    design = 'modules/peridynamics/ForceStabilizedSmallStrainMechanicsNOSPD.md'
+    issues = '#11561'
   [../]
-  [./2d_self_stabilized_non_ordinary_state_mechanics]
+  [./2d_non_ordinary_state_mechanics]
     type = 'PetscJacobianTester'
-    input = '2d_self_stabilized_non_ordinary_state.i'
+    input = '2d_non_ordinary_state.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    requirement = 'SmallStrainMechanicsNOSPD shall provide the accurate residual and jacobian for bond-associated small-strain non-ordinary state-based peridynamic mechanics model.'
+    design = 'modules/peridynamics/SmallStrainMechanicsNOSPD.md'
+    issues = '#11561'
   [../]
-  [./2d_self_stabilized_non_ordinary_state_thermomechanics]
+  [./2d_non_ordinary_state_thermomechanics]
     type = 'PetscJacobianTester'
-    input = '2d_self_stabilized_non_ordinary_state_coupled.i'
+    input = '2d_non_ordinary_state_coupled.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    requirement = 'SmallStrainMechanicsNOSPD and HeatConductionBPD shall provide the accurate residual and jacobian for bond-associated small-strain non-ordinary state-based peridynamic thermomechanics model.'
+    design = 'modules/peridynamics/SmallStrainMechanicsNOSPD.md'
+    issues = '#11561'
   [../]
-  [./3d_self_stabilized_non_ordinary_state_mechanics]
+  [./3d_non_ordinary_state_mechanics]
     type = 'PetscJacobianTester'
-    input = '3d_self_stabilized_non_ordinary_state.i'
+    input = '3d_non_ordinary_state.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    requirement = 'SmallStrainMechanicsNOSPD shall provide the accurate residual and jacobian for bond-associated small-strain non-ordinary state-based peridynamic mechanics model.'
+    design = 'modules/peridynamics/SmallStrainMechanicsNOSPD.md'
+    issues = '#11561'
   [../]
   [./ordinary_state_gps]
     type = 'PetscJacobianTester'
     input = 'generalized_plane_strain_ordinary_state.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    requirement = 'GeneralizedPlaneStrainOffDiagOSPD shall provide the off-diagonal jacobian for coupling between scalar variable and displacement variables for ordinary state-based peridynamic generalized plane strain model.'
+    design = 'modules/peridynamics/GeneralizedPlaneStrainOffDiagOSPD.md'
+    issues = '#11561'
   [../]
   [./ordinary_state_thermomechanics_gps]
     type = 'PetscJacobianTester'
     input = 'generalized_plane_strain_ordinary_state_coupled.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    requirement = 'GeneralizedPlaneStrainOffDiagOSPD shall provide the off-diagonal jacobian for coupling between scalar variable and field variables (disp and temp) for ordinary state-based peridynamic generalized plane strain model.'
+    design = 'modules/peridynamics/GeneralizedPlaneStrainOffDiagOSPD.md'
+    issues = '#11561'
   [../]
   [./non_ordinary_state_gps]
     type = 'PetscJacobianTester'
     input = 'generalized_plane_strain_non_ordinary_state.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    requirement = 'GeneralizedPlaneStrainOffDiagNOSPD shall provide the off-diagonal jacobian for coupling between scalar variable and displacement variables for non-ordinary state-based peridynamic generalized plane strain model.'
+    design = 'modules/peridynamics/GeneralizedPlaneStrainOffDiagNOSPD.md'
+    issues = '#11561'
   [../]
   [./non_ordinary_state_thermomechanics_gps]
     type = 'PetscJacobianTester'
     input = 'generalized_plane_strain_non_ordinary_state_coupled.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    requirement = 'GeneralizedPlaneStrainOffDiagNOSPD shall provide the off-diagonal jacobian for coupling between scalar variable and field variables (disp and temp) for ordinary state-based peridynamic generalized plane strain model.'
+    design = 'modules/peridynamics/GeneralizedPlaneStrainOffDiagNOSPD.md'
+    issues = '#11561'
   [../]
   [./weak_plane_stress_snospd_coupled]
     type = 'PetscJacobianTester'
     input = 'weak_plane_stress_snospd_coupled.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    requirement = 'WeakPlaneStressNOSPD shall provide the accurate residual and jacobian for coupled peridynamic weak plane stress model.'
+    design = 'modules/peridynamics/WeakPlaneStressNOSPD.md'
+    issues = '#11561'
   [../]
 []

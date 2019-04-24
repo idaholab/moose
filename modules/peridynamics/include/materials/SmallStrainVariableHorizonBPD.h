@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SMALLSTRAINVARIABLEHORIZONBPD_H
-#define SMALLSTRAINVARIABLEHORIZONBPD_H
+#pragma once
 
 #include "SmallStrainMaterialBaseBPD.h"
 
@@ -29,5 +28,3 @@ public:
 protected:
   virtual void computePDMicroModuli() override;
 };
-
-#endif // SMALLSTRAINVARIABLEHORIZONBPD_H

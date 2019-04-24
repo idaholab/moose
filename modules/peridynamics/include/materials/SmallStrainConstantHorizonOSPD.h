@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SMALLSTRAINCONSTANTHORIZONOSPD_H
-#define SMALLSTRAINCONSTANTHORIZONOSPD_H
+#pragma once
 
 #include "SmallStrainMaterialBaseOSPD.h"
 
@@ -29,5 +28,3 @@ public:
 protected:
   virtual void computePDMicroModuli() override;
 };
-
-#endif // SMALLSTRAINCONSTANTHORIZONOSPD_H

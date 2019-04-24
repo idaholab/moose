@@ -5,11 +5,23 @@
   temperature = temp
 []
 
+[MeshGenerators]
+  [gmg]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 4
+    ny = 4
+  []
+  [gpd]
+    type = MeshGeneratorPD
+    input = gmg
+    retain_fe_mesh = false
+  []
+[]
+
 [Mesh]
-  type = GeneratedMeshPD
-  dim = 2
+  type = PeridynamicsMesh
   horizon_number = 3
-  nx = 4
 []
 
 [Variables]
@@ -22,13 +34,11 @@
   [../]
 []
 
-[Modules]
-  [./Peridynamics]
-    [./Mechanics]
-      formulation = Bond
-    [../]
+[Modules/Peridynamics/Mechanics/Master]
+  [./all]
+    formulation = Bond
   [../]
-[../]
+[]
 
 [Kernels]
   [./heat]
@@ -64,4 +74,7 @@
 [Executioner]
   type = Transient
   solve_type = NEWTON
+  end_time = 1
+  dt = 1
+  num_steps = 1
 []

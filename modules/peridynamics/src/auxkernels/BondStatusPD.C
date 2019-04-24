@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "BondStatusPD.h"
-#include "MeshBasePD.h"
+#include "PeridynamicsMesh.h"
 
 registerMooseObject("PeridynamicsApp", BondStatusPD);
 
@@ -20,7 +20,7 @@ validParams<BondStatusPD>()
   params.addClassDescription("Class for updating the bond status based on different failure "
                              "criteria: critical stretch and "
                              "maximum principal stress");
-  MooseEnum FailureCriteriaType("CriticalStretch MaximumTensileStress", "CriticalStretch");
+  MooseEnum FailureCriteriaType("CriticalStretch MaximumPrincipalStress", "CriticalStretch");
   params.addParam<MooseEnum>(
       "failure_criterion", FailureCriteriaType, "Which failure criterion to be used");
   params.addRequiredCoupledVar("critical_variable", "Name of critical AuxVariable");
@@ -42,7 +42,7 @@ BondStatusPD::BondStatusPD(const InputParameters & parameters)
     case FailureCriterion::CriticalStretch:
       break;
 
-    case FailureCriterion::MaximumTensileStress:
+    case FailureCriterion::MaximumPrincipalStress:
     {
       if (hasMaterialProperty<RankTwoTensor>("stress"))
         _stress = &getMaterialProperty<RankTwoTensor>("stress");
@@ -53,7 +53,8 @@ BondStatusPD::BondStatusPD(const InputParameters & parameters)
     }
 
     default:
-      paramError("failure_criterion", "Unsupported PD failure criterion. Choose from: CriticalStretch and "
+      paramError("failure_criterion",
+                 "Unsupported PD failure criterion. Choose from: CriticalStretch and "
                  "MaximumPrincipalStress");
   }
 }
@@ -69,7 +70,7 @@ BondStatusPD::computeValue()
       val = _mechanical_stretch[0];
       break;
 
-    case FailureCriterion::MaximumTensileStress:
+    case FailureCriterion::MaximumPrincipalStress:
     {
       RankTwoTensor avg_stress = 0.5 * ((*_stress)[0] + (*_stress)[1]);
       std::vector<Real> eigvals(LIBMESH_DIM, 0.0);
@@ -82,7 +83,8 @@ BondStatusPD::computeValue()
     }
 
     default:
-      paramError("failure_criterion", "Unsupported PD failure criterion. Choose from: CriticalStretch and "
+      paramError("failure_criterion",
+                 "Unsupported PD failure criterion. Choose from: CriticalStretch and "
                  "MaximumPrincipalStress");
   }
 

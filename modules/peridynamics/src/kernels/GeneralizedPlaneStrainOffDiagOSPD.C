@@ -9,8 +9,9 @@
 
 #include "GeneralizedPlaneStrainOffDiagOSPD.h"
 #include "MooseVariableScalar.h"
-#include "MeshBasePD.h"
+#include "PeridynamicsMesh.h"
 #include "RankTwoTensor.h"
+#include "RankFourTensor.h"
 
 registerMooseObject("PeridynamicsApp", GeneralizedPlaneStrainOffDiagOSPD);
 
@@ -94,23 +95,22 @@ GeneralizedPlaneStrainOffDiagOSPD::computeDispFullOffDiagJacobianScalar(unsigned
 
     // calculation of jacobian contribution to current node's neighbors
     dof[cur_nd] = _ivardofs_ij[cur_nd];
-    neighbors = _pdmesh.neighbors(_nodes_ij[cur_nd]->id());
-    bonds = _pdmesh.bonds(_nodes_ij[cur_nd]->id());
+    neighbors = _pdmesh.getNeighbors(_current_elem->node_id(cur_nd));
+    bonds = _pdmesh.getAssocBonds(_current_elem->node_id(cur_nd));
     for (unsigned int k = 0; k < neighbors.size(); k++)
     {
       Node * node_k = _pdmesh.nodePtr(neighbors[k]);
       dof[1 - cur_nd] = node_k->dof_number(_sys.number(), _var.number(), 0);
-      Real vol_k = _pdmesh.volume(neighbors[k]);
+      Real vol_k = _pdmesh.getVolume(neighbors[k]);
 
       // obtain bond k's origin length and current orientation
-      RealGradient origin_ori_k(_dim), current_ori_k(_dim);
+      RealGradient origin_ori_k = *node_k - *_pdmesh.nodePtr(_current_elem->node_id(cur_nd));
+
+      RealGradient current_ori_k(_dim);
       for (unsigned int j = 0; j < _dim; j++)
-      {
-        origin_ori_k(j) =
-            _pdmesh.coord(neighbors[k])(j) - _pdmesh.coord(_nodes_ij[cur_nd]->id())(j);
         current_ori_k(j) = origin_ori_k(j) + _disp_var[j]->getNodalValue(*node_k) -
-                           _disp_var[j]->getNodalValue(*_nodes_ij[cur_nd]);
-      }
+                           _disp_var[j]->getNodalValue(*_current_elem->node_ptr(cur_nd));
+
       Real origin_len_k = origin_ori_k.norm();
       Real current_len_k = current_ori_k.norm();
 
@@ -203,8 +203,8 @@ GeneralizedPlaneStrainOffDiagOSPD::computeTempOffDiagJacobianScalar(unsigned int
   DenseMatrix<Number> & kne = _assembly.jacobianBlock(jvar_num, _var.number());
 
   // number of neighbors for node i and j
-  unsigned int nn_i = _pdmesh.neighbors(_nodes_ij[0]->id()).size();
-  unsigned int nn_j = _pdmesh.neighbors(_nodes_ij[1]->id()).size();
+  unsigned int nn_i = _pdmesh.getNeighbors(_current_elem->node_id(0)).size();
+  unsigned int nn_j = _pdmesh.getNeighbors(_current_elem->node_id(1)).size();
 
   //  one-way coupling between the strain_zz and temperature. fill in the row corresponding to the
   //  scalar variable strain_zz

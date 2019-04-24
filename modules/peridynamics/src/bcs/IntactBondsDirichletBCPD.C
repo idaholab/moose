@@ -27,7 +27,7 @@ validParams<IntactBondsDirichletBCPD>()
 
 IntactBondsDirichletBCPD::IntactBondsDirichletBCPD(const InputParameters & parameters)
   : NodalBC(parameters),
-    _pdmesh(dynamic_cast<MeshBasePD &>(_mesh)),
+    _pdmesh(dynamic_cast<PeridynamicsMesh &>(_mesh)),
     _u_old(_var.dofValuesOld()),
     _intact_bonds_val(coupledValue("intact_bonds_variable"))
 {

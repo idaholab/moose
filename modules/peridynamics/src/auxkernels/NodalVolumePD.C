@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NodalVolumePD.h"
-#include "MeshBasePD.h"
+#include "PeridynamicsMesh.h"
 
 registerMooseObject("PeridynamicsApp", NodalVolumePD);
 
@@ -32,5 +32,5 @@ NodalVolumePD::NodalVolumePD(const InputParameters & parameters) : AuxKernelBase
 Real
 NodalVolumePD::computeValue()
 {
-  return _pdmesh.volume(_current_node->id());
+  return _pdmesh.getVolume(_current_node->id());
 }

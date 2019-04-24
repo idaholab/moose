@@ -8,8 +8,9 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "FiniteStrainMechanicsNOSPD.h"
-#include "MeshBasePD.h"
+#include "PeridynamicsMesh.h"
 #include "RankTwoTensor.h"
+#include "RankFourTensor.h"
 
 registerMooseObject("PeridynamicsApp", FiniteStrainMechanicsNOSPD);
 
@@ -87,23 +88,22 @@ FiniteStrainMechanicsNOSPD::computeNonlocalJacobian()
     Real detF = _dgrad[cur_nd].det();
     // calculation of jacobian contribution to current_node's neighbors
     std::vector<dof_id_type> dof(_nnodes);
-    dof[0] = _nodes_ij[cur_nd]->dof_number(_sys.number(), _var.number(), 0);
-    std::vector<dof_id_type> neighbors = _pdmesh.neighbors(_nodes_ij[cur_nd]->id());
-    unsigned int nb = std::find(neighbors.begin(), neighbors.end(), _nodes_ij[1 - cur_nd]->id()) -
-                      neighbors.begin();
-    std::vector<unsigned int> dgnodes = _pdmesh.dgNodeInfo(_nodes_ij[cur_nd]->id(), nb);
-    std::vector<dof_id_type> bonds = _pdmesh.bonds(_nodes_ij[cur_nd]->id());
-    for (unsigned int k = 0; k < dgnodes.size(); ++k)
+    dof[0] = _current_elem->node_ptr(cur_nd)->dof_number(_sys.number(), _var.number(), 0);
+    std::vector<dof_id_type> neighbors = _pdmesh.getNeighbors(_current_elem->node_id(cur_nd));
+    unsigned int nb =
+        std::find(neighbors.begin(), neighbors.end(), _current_elem->node_id(1 - cur_nd)) -
+        neighbors.begin();
+    std::vector<unsigned int> BAneighbors =
+        _pdmesh.getBondAssocHorizonNeighbors(_current_elem->node_id(cur_nd), nb);
+    std::vector<dof_id_type> bonds = _pdmesh.getAssocBonds(_current_elem->node_id(cur_nd));
+    for (unsigned int k = 0; k < BAneighbors.size(); ++k)
     {
-      Node * node_k = _pdmesh.nodePtr(neighbors[dgnodes[k]]);
+      Node * node_k = _pdmesh.nodePtr(neighbors[BAneighbors[k]]);
       dof[1] = node_k->dof_number(_sys.number(), _var.number(), 0);
-      Real vol_k = _pdmesh.volume(neighbors[dgnodes[k]]);
+      Real vol_k = _pdmesh.getVolume(neighbors[BAneighbors[k]]);
 
       // obtain bond ik's origin vector
-      RealGradient origin_vec_ijk(_dim);
-      for (unsigned int j = 0; j < _dim; ++j)
-        origin_vec_ijk(j) =
-            _pdmesh.coord(neighbors[dgnodes[k]])(j) - _pdmesh.coord(_nodes_ij[cur_nd]->id())(j);
+      RealGradient origin_vec_ijk = *node_k - *_pdmesh.nodePtr(_current_elem->node_id(cur_nd));
 
       RankTwoTensor dFdUk;
       dFdUk.zero();
@@ -137,7 +137,8 @@ FiniteStrainMechanicsNOSPD::computeNonlocalJacobian()
                 detF * _stress[cur_nd] * dinvFTdU;
 
       // bond status for bond k
-      Real bond_status_ijk = _bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[dgnodes[k]]));
+      Real bond_status_ijk =
+          _bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[BAneighbors[k]]));
 
       _local_ke.resize(_test.size(), _phi.size());
       _local_ke.zero();
@@ -173,7 +174,7 @@ FiniteStrainMechanicsNOSPD::computeLocalOffDiagJacobian(unsigned int coupled_com
     std::vector<RankTwoTensor> dSdT(_nnodes);
     for (unsigned int nd = 0; nd < _nnodes; ++nd)
       for (unsigned int es = 0; es < _deigenstrain_dT.size(); ++es)
-        dSdT[nd] = -_dgrad[nd].det() * _Cijkl[nd] * (*_deigenstrain_dT[es])[nd] *
+        dSdT[nd] = -_dgrad[nd].det() * _Jacobian_mult[nd] * (*_deigenstrain_dT[es])[nd] *
                    _dgrad[nd].inverse().transpose();
 
     for (_i = 0; _i < _test.size(); ++_i)
@@ -212,23 +213,22 @@ FiniteStrainMechanicsNOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_n
       Real detF = _dgrad[cur_nd].det();
       // calculation of jacobian contribution to current_node's neighbors
       std::vector<dof_id_type> jvardofs_ijk(_nnodes);
-      jvardofs_ijk[0] = _nodes_ij[cur_nd]->dof_number(_sys.number(), jvar_num, 0);
-      std::vector<dof_id_type> neighbors = _pdmesh.neighbors(_nodes_ij[cur_nd]->id());
-      unsigned int nb = std::find(neighbors.begin(), neighbors.end(), _nodes_ij[1 - cur_nd]->id()) -
-                        neighbors.begin();
-      std::vector<unsigned int> dgnodes = _pdmesh.dgNodeInfo(_nodes_ij[cur_nd]->id(), nb);
-      std::vector<dof_id_type> bonds = _pdmesh.bonds(_nodes_ij[cur_nd]->id());
-      for (unsigned int k = 0; k < dgnodes.size(); ++k)
+      jvardofs_ijk[0] = _current_elem->node_ptr(cur_nd)->dof_number(_sys.number(), jvar_num, 0);
+      std::vector<dof_id_type> neighbors = _pdmesh.getNeighbors(_current_elem->node_id(cur_nd));
+      unsigned int nb =
+          std::find(neighbors.begin(), neighbors.end(), _current_elem->node_id(1 - cur_nd)) -
+          neighbors.begin();
+      std::vector<unsigned int> BAneighbors =
+          _pdmesh.getBondAssocHorizonNeighbors(_current_elem->node_id(cur_nd), nb);
+      std::vector<dof_id_type> bonds = _pdmesh.getAssocBonds(_current_elem->node_id(cur_nd));
+      for (unsigned int k = 0; k < BAneighbors.size(); ++k)
       {
-        Node * node_k = _pdmesh.nodePtr(neighbors[dgnodes[k]]);
+        Node * node_k = _pdmesh.nodePtr(neighbors[BAneighbors[k]]);
         jvardofs_ijk[1] = node_k->dof_number(_sys.number(), jvar_num, 0);
-        Real vol_k = _pdmesh.volume(neighbors[dgnodes[k]]);
+        Real vol_k = _pdmesh.getVolume(neighbors[BAneighbors[k]]);
 
         // obtain bond k's origin vector
-        RealGradient origin_vec_ijk(_dim);
-        for (unsigned int j = 0; j < _dim; ++j)
-          origin_vec_ijk(j) =
-              _pdmesh.coord(neighbors[dgnodes[k]])(j) - _pdmesh.coord(_nodes_ij[cur_nd]->id())(j);
+        RealGradient origin_vec_ijk = *node_k - *_pdmesh.nodePtr(_current_elem->node_id(cur_nd));
 
         RankTwoTensor dFdUk;
         dFdUk.zero();
@@ -263,7 +263,7 @@ FiniteStrainMechanicsNOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_n
 
         // bond status for bond k
         Real bond_status_ijk =
-            _bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[dgnodes[k]]));
+            _bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[BAneighbors[k]]));
 
         _local_ke.zero();
         for (_i = 0; _i < _test.size(); ++_i)
@@ -313,7 +313,7 @@ FiniteStrainMechanicsNOSPD::computeDSDFhat(unsigned int nd)
 
   // first calculate the derivative of incremental Cauchy stress w.r.t the inverse of Fhat
   // Reference: M. M. Rashid (1993), Incremental Kinematics for finite element applications, IJNME
-  RankTwoTensor S_inc = _Cijkl[nd] * _E_inc[nd];
+  RankTwoTensor S_inc = _Jacobian_mult[nd] * _E_inc[nd];
   RankFourTensor Tp1;
   Tp1.zero();
   for (unsigned int i = 0; i < 3; ++i)
@@ -329,7 +329,8 @@ FiniteStrainMechanicsNOSPD::computeDSDFhat(unsigned int nd)
                                              0.5 * _R_inc[nd](i, k) * _R_inc[nd](m, l)) +
                          _R_inc[nd](i, m) * (0.5 * I(k, n) * I(j, l) - I(n, l) * _R_inc[nd](j, k) +
                                              0.5 * _R_inc[nd](j, k) * _R_inc[nd](n, l))) -
-                    _R_inc[nd](l, m) * _R_inc[nd](i, n) * _R_inc[nd](j, r) * _Cijkl[nd](n, r, m, k);
+                    _R_inc[nd](l, m) * _R_inc[nd](i, n) * _R_inc[nd](j, r) *
+                        _Jacobian_mult[nd](n, r, m, k);
 
   // second calculate derivative of inverse of Fhat w.r.t Fhat
   // d(inv(Fhat)_kl)/dFhat_mn = - inv(Fhat)_km * inv(Fhat)_nl
