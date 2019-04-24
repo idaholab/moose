@@ -74,6 +74,9 @@ protected:
   /// True if the variable being created is a scalar
   bool _scalar_var;
 
+  /// Number of components for an array variable
+  unsigned int _component;
+
   /// Absolute zero tolerance
   static const Real _abs_zero_tol;
 };
