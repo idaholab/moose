@@ -1,7 +1,7 @@
 !alert! note
 Internal INL users may obtain the latest redistributable packages from the following location:
 
-[http://rod.inl.gov/MOOSE_ENVIRONMENT_PACKAGES/](http://rod.inl.gov/MOOSE_ENVIRONMENT_PACKAGES/)
+[https://rod.inl.gov/moose/](https://rod.inl.gov/moose/)
 !alert-end!
 
 !alert warning title=Close Open Terminals
