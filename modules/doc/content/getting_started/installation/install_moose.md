@@ -1,4 +1,4 @@
-# Obtaining and Building MOOSE
+# Obtaining and Building MOOSE id=obtainingmoose
 
 !include getting_started/installation/clone_moose.md
 
