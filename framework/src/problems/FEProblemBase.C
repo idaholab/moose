@@ -2298,6 +2298,8 @@ FEProblemBase::addInitialCondition(const std::string & ic_name,
         ic = _factory.create<InitialCondition>(ic_name, name, parameters, tid);
       else if (dynamic_cast<VectorMooseVariable *>(&var))
         ic = _factory.create<VectorInitialCondition>(ic_name, name, parameters, tid);
+      else if (dynamic_cast<ArrayMooseVariable *>(&var))
+        ic = _factory.create<ArrayInitialCondition>(ic_name, name, parameters, tid);
       else
         mooseError("Your FE variable in initial condition ",
                    name,

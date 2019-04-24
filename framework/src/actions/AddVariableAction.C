@@ -50,12 +50,15 @@ validParams<AddVariableAction>()
                              "Specifies the order of the FE shape function to use "
                              "for this variable (additional orders not listed are "
                              "allowed)");
-  params.addParam<Real>("initial_condition", "Specifies the initial condition for this variable");
+  params.addParam<unsigned int>("component", 1, "Number of component for an array variable");
+  params.addParam<std::vector<Real>>("initial_condition",
+                                     "Specifies the initial condition for this variable");
   params.addParam<std::vector<SubdomainName>>("block", "The block id where this variable lives");
   params.addParam<bool>("eigen", false, "True to make this variable an eigen variable");
 
   // Advanced input options
-  params.addParam<Real>("scaling", 1.0, "Specifies a scaling factor to apply to this variable");
+  params.addParam<std::vector<Real>>("scaling",
+                                     "Specifies a scaling factor to apply to this variable");
   params.addParamNamesToGroup("scaling eigen", "Advanced");
 
   return params;
@@ -66,7 +69,8 @@ AddVariableAction::AddVariableAction(InputParameters params)
     OutputInterface(params, false),
     _fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
              Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family"))),
-    _scalar_var(_fe_type.family == SCALAR)
+    _scalar_var(_fe_type.family == SCALAR),
+    _component(getParam<unsigned int>("component"))
 {
 }
 
@@ -113,8 +117,10 @@ AddVariableAction::createInitialConditionAction()
 
   if (_scalar_var)
     action_params.set<std::string>("type") = "ScalarConstantIC";
-  else
+  else if (_component == 1)
     action_params.set<std::string>("type") = "ConstantIC";
+  else
+    action_params.set<std::string>("type") = "ArrayConstantIC";
 
   // Create the action
   std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
@@ -122,7 +128,18 @@ AddVariableAction::createInitialConditionAction()
 
   // Set the required parameters for the object to be created
   action->getObjectParams().set<VariableName>("variable") = var_name;
-  action->getObjectParams().set<Real>("value") = getParam<Real>("initial_condition");
+  auto value = getParam<std::vector<Real>>("initial_condition");
+  if (value.size() != _component)
+    mooseError("Size of 'initial_condition' is not consistent");
+  if (_component > 1)
+  {
+    RealArrayValue v(_component);
+    for (unsigned int i = 0; i < _component; ++i)
+      v(i) = value[i];
+    action->getObjectParams().set<RealArrayValue>("value") = v;
+  }
+  else
+    action->getObjectParams().set<Real>("value") = value[0];
 
   // Store the action in the ActionWarehouse
   _awh.addActionBlock(action);
@@ -132,19 +149,34 @@ void
 AddVariableAction::addVariable(const std::string & var_name)
 {
   std::set<SubdomainID> blocks = getSubdomainIDs();
-  Real scale_factor = isParamValid("scaling") ? getParam<Real>("scaling") : 1;
+  std::vector<Real> scale_factor = isParamValid("scaling") ? getParam<std::vector<Real>>("scaling")
+                                                           : std::vector<Real>(_component, 1);
+  if (scale_factor.size() != _component)
+    mooseError("Size of 'scaling' is not consistent");
 
   // Scalar variable
   if (_scalar_var)
-    _problem->addScalarVariable(var_name, _fe_type.order, scale_factor);
+    _problem->addScalarVariable(var_name, _fe_type.order, scale_factor[0]);
 
   // Block restricted variable
-  else if (blocks.empty())
-    _problem->addVariable(var_name, _fe_type, scale_factor);
+  else if (_component == 1)
+  {
+    if (blocks.empty())
+      _problem->addVariable(var_name, _fe_type, scale_factor[0]);
 
-  // Non-block restricted variable
+    // Non-block restricted variable
+    else
+      _problem->addVariable(var_name, _fe_type, scale_factor[0], &blocks);
+  }
   else
-    _problem->addVariable(var_name, _fe_type, scale_factor, &blocks);
+  {
+    if (blocks.empty())
+      _problem->addArrayVariable(var_name, _fe_type, _component, scale_factor);
+
+    // Non-block restricted variable
+    else
+      _problem->addArrayVariable(var_name, _fe_type, _component, scale_factor, &blocks);
+  }
 
   if (getParam<bool>("eigen"))
   {
