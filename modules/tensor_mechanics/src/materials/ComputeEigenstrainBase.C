@@ -24,11 +24,6 @@ validParams<ComputeEigenstrainBase>()
                                        "Material property name for the eigenstrain tensor computed "
                                        "by this model. IMPORTANT: The name of this property must "
                                        "also be provided to the strain calculator.");
-  params.addDeprecatedParam<bool>(
-      "incremental_form",
-      false,
-      "Should the eigenstrain be in incremental form (for incremental models)?",
-      "This parameter no longer has any effect. Simply remove it.");
   return params;
 }
 
