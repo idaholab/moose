@@ -80,7 +80,7 @@
   [./ced_u]
     type = EqualValueConstraint
     variable = lm_u
-    master_variable = u
+    slave_variable = u
     master_boundary = 100
     master_subdomain = 10000
     slave_boundary = 101
@@ -89,7 +89,7 @@
   [./ced_v]
     type = EqualValueConstraint
     variable = lm_v
-    master_variable = v
+    slave_variable = v
     master_boundary = 100
     master_subdomain = 10000
     slave_boundary = 101

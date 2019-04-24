@@ -42,22 +42,11 @@ public:
   void operator()();
 
 private:
-  // /**
-  //  * Computes a residual
-  //  */
-  // void computeElementResidual();
-
-  // /**
-  //  * Computes a jacobian
-  //  */
-  // void computeElementJacobian();
-
-private:
   /// The mortar constraints to loop over when on each element. These must be
   /// pointers to the base class otherwise the compiler will fail to compile
   /// when running std::vector<MortarConstraint0>::push_back(MortarConstraint1>
   /// or visa versa
-  std::vector<const MortarConstraintBase *> _mortar_constraints;
+  std::vector<MortarConstraintBase *> _mortar_constraints;
 
   /// Automatic mortar generation (amg) object providing the mortar mesh to loop over
   const AutomaticMortarGeneration & _amg;
@@ -65,29 +54,19 @@ private:
   /// A reference to the SubProblem object for reiniting
   SubProblem & _subproblem;
 
-  /// The assembly object that these constraints will contribute to
+  /// A reference to the assembly object
   Assembly & _assembly;
 
-  /// The parent mesh from which the amg mortar mesh is generated
-  MooseMesh & _moose_parent_mesh;
+  /// The mortar quadrature rule. Necessary for sizing the number of custom
+  /// points for re-init'ing the slave interior, master interior, and slave face
+  /// elements
+  const QBase * const & _qrule_msm;
 
-  /// The interior mesh dimension
-  const unsigned _interior_dimension;
-
-  /// The mortar segment mesh dimension
-  const unsigned _msm_dimension;
-
-  /// The mortar segment quadrature rule
-  libMesh::QBase * const & _qrule_msm;
-
-  /// The FE object used for generating JxW
-  std::unique_ptr<libMesh::FEBase> _fe_for_jxw;
-
-  /// Pointer to the mortar segment JxW
-  const std::vector<libMesh::Real> * _JxW_msm;
-
-  /// The slave boundary id needed for reiniting the MOOSE systems on the element face
+  /// The slave boundary id needed for reiniting the MOOSE systems on the element (slave) face
   BoundaryID _slave_boundary_id;
+
+  /// The master boundary id needed for reiniting the MOOSE systems on the neighbor (master) face
+  BoundaryID _master_boundary_id;
 
   /// boolean flag for holding whether our current mortar segment projects onto a master element
   bool _has_master;

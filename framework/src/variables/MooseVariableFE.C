@@ -393,6 +393,8 @@ template <typename OutputType>
 void
 MooseVariableFE<OutputType>::computeLowerDValues()
 {
+  _lower_data->setGeometry(Moose::Volume);
+  _lower_data->computeValues();
 }
 
 template <typename OutputType>
@@ -598,77 +600,77 @@ MooseVariableFE<OutputType>::isVector() const
 
 template <typename OutputType>
 const typename MooseVariableFE<OutputType>::FieldVariablePhiSecond &
-MooseVariableFE<OutputType>::secondPhi()
+MooseVariableFE<OutputType>::secondPhi() const
 {
   return _element_data->secondPhi();
 }
 
 template <typename OutputType>
 const typename MooseVariableFE<OutputType>::FieldVariablePhiCurl &
-MooseVariableFE<OutputType>::curlPhi()
+MooseVariableFE<OutputType>::curlPhi() const
 {
   return _element_data->curlPhi();
 }
 
 template <typename OutputType>
 const typename MooseVariableFE<OutputType>::FieldVariablePhiSecond &
-MooseVariableFE<OutputType>::secondPhiFace()
+MooseVariableFE<OutputType>::secondPhiFace() const
 {
   return _element_data->secondPhiFace();
 }
 
 template <typename OutputType>
 const typename MooseVariableFE<OutputType>::FieldVariablePhiCurl &
-MooseVariableFE<OutputType>::curlPhiFace()
+MooseVariableFE<OutputType>::curlPhiFace() const
 {
   return _element_data->curlPhiFace();
 }
 
 template <typename OutputType>
 const typename MooseVariableFE<OutputType>::FieldVariablePhiSecond &
-MooseVariableFE<OutputType>::secondPhiNeighbor()
+MooseVariableFE<OutputType>::secondPhiNeighbor() const
 {
   return _neighbor_data->secondPhi();
 }
 
 template <typename OutputType>
 const typename MooseVariableFE<OutputType>::FieldVariablePhiCurl &
-MooseVariableFE<OutputType>::curlPhiNeighbor()
+MooseVariableFE<OutputType>::curlPhiNeighbor() const
 {
   return _neighbor_data->curlPhi();
 }
 
 template <typename OutputType>
 const typename MooseVariableFE<OutputType>::FieldVariablePhiSecond &
-MooseVariableFE<OutputType>::secondPhiFaceNeighbor()
+MooseVariableFE<OutputType>::secondPhiFaceNeighbor() const
 {
   return _neighbor_data->secondPhiFace();
 }
 
 template <typename OutputType>
 const typename MooseVariableFE<OutputType>::FieldVariablePhiCurl &
-MooseVariableFE<OutputType>::curlPhiFaceNeighbor()
+MooseVariableFE<OutputType>::curlPhiFaceNeighbor() const
 {
   return _neighbor_data->curlPhiFace();
 }
 
 template <typename OutputType>
 bool
-MooseVariableFE<OutputType>::usesSecondPhi()
+MooseVariableFE<OutputType>::usesSecondPhi() const
 {
   return _element_data->usesSecondPhi();
 }
 
 template <typename OutputType>
 bool
-MooseVariableFE<OutputType>::usesSecondPhiNeighbor()
+MooseVariableFE<OutputType>::usesSecondPhiNeighbor() const
 {
   return _neighbor_data->usesSecondPhi();
 }
 
 template <typename OutputType>
 bool
-MooseVariableFE<OutputType>::computingCurl()
+MooseVariableFE<OutputType>::computingCurl() const
 {
   return _element_data->computingCurl();
 }

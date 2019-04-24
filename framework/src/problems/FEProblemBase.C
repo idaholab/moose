@@ -4969,31 +4969,35 @@ FEProblemBase::updateMortarMesh()
   _mortar_data.update();
 }
 
-AutomaticMortarGeneration &
+void
 FEProblemBase::createMortarInterface(
     const std::pair<BoundaryID, BoundaryID> & master_slave_boundary_pair,
     const std::pair<SubdomainID, SubdomainID> & master_slave_subdomain_pair,
-    bool on_displaced)
+    bool on_displaced,
+    bool periodic)
 {
   if (on_displaced)
-    return _mortar_data.getMortarInterface(
-        master_slave_boundary_pair, master_slave_subdomain_pair, *_displaced_problem, on_displaced);
+    return _mortar_data.createMortarInterface(master_slave_boundary_pair,
+                                              master_slave_subdomain_pair,
+                                              *_displaced_problem,
+                                              on_displaced,
+                                              periodic);
   else
-    return _mortar_data.getMortarInterface(
-        master_slave_boundary_pair, master_slave_subdomain_pair, *this, on_displaced);
+    return _mortar_data.createMortarInterface(
+        master_slave_boundary_pair, master_slave_subdomain_pair, *this, on_displaced, periodic);
 }
 
-AutomaticMortarGeneration &
+const AutomaticMortarGeneration &
 FEProblemBase::getMortarInterface(
     const std::pair<BoundaryID, BoundaryID> & master_slave_boundary_pair,
     const std::pair<SubdomainID, SubdomainID> & master_slave_subdomain_pair,
-    bool on_displaced)
+    bool on_displaced) const
 {
   return _mortar_data.getMortarInterface(
       master_slave_boundary_pair, master_slave_subdomain_pair, on_displaced);
 }
 
-const std::map<std::pair<BoundaryID, BoundaryID>, AutomaticMortarGeneration> &
+const std::unordered_map<std::pair<BoundaryID, BoundaryID>, AutomaticMortarGeneration> &
 FEProblemBase::getMortarInterfaces(bool on_displaced) const
 {
   return _mortar_data.getMortarInterfaces(on_displaced);

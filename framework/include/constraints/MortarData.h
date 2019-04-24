@@ -2,6 +2,7 @@
 #define MORTARDATA_H
 
 #include "AutomaticMortarGeneration.h"
+#include "MooseHashing.h"
 
 #include <map>
 
@@ -13,29 +14,34 @@ public:
   MortarData();
 
   /**
-   * Getter to retrieve the AutomaticMortarGeneration object corresponding to the boundary and
-   * subdomain keys. If the AutomaticMortarGeneration object does not yet exist, then it is created
-   * using the mesh of the passed in subproblem
+   * Create mortar generation object
+   * @param boundary_key The master-slave boundary pair on which the AMG objects lives
+   * @param subdomain_key The master-slave subdomain pair on which the AMG objects lives
+   * @param subproblem A reference to the subproblem
+   * @param on_displaced Whether the AMG object lives on the displaced mesh
+   * @param periodic Whether the AMG object will be used for enforcing periodic constraints. Note
+   * that this changes the direction of the projection normals so one AMG object cannot be used to
+   * enforce both periodic and non-periodic constraints
    */
-  AutomaticMortarGeneration &
-  getMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundary_key,
-                     const std::pair<SubdomainID, SubdomainID> & subdomain_key,
-                     SubProblem & subproblem,
-                     bool on_displaced);
+  void createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundary_key,
+                             const std::pair<SubdomainID, SubdomainID> & subdomain_key,
+                             SubProblem & subproblem,
+                             bool on_displaced,
+                             bool periodic);
 
   /**
    * Getter to retrieve the AutomaticMortarGeneration object corresponding to the boundary and
    * subdomain keys. If the AutomaticMortarGeneration object does not yet exist, then we error
    */
-  AutomaticMortarGeneration &
+  const AutomaticMortarGeneration &
   getMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundary_key,
                      const std::pair<SubdomainID, SubdomainID> & /*subdomain_key*/,
-                     bool on_displaced);
+                     bool on_displaced) const;
 
   /**
    * Return all automatic mortar generation objects on either the displaced or undisplaced mesh
    */
-  const std::map<std::pair<BoundaryID, BoundaryID>, AutomaticMortarGeneration> &
+  const std::unordered_map<std::pair<BoundaryID, BoundaryID>, AutomaticMortarGeneration> &
   getMortarInterfaces(bool on_displaced) const
   {
     if (on_displaced)
@@ -69,15 +75,21 @@ public:
    */
   bool hasObjects() const { return _mortar_interfaces.size(); }
 
-protected:
+private:
+  /**
+   * Builds mortar segment mesh from specific AutomaticMortarGeneration object
+   */
+  void update(AutomaticMortarGeneration & amg);
+
+  typedef std::pair<BoundaryID, BoundaryID> MortarKey;
+
   /// Map from master-slave (in that order) boundary ID pair to the corresponding
   /// undisplaced AutomaticMortarGeneration object
-  std::map<std::pair<BoundaryID, BoundaryID>, AutomaticMortarGeneration> _mortar_interfaces;
+  std::unordered_map<MortarKey, AutomaticMortarGeneration> _mortar_interfaces;
 
   /// Map from master-slave (in that order) boundary ID pair to the corresponding
   /// displaced AutomaticMortarGeneration object
-  std::map<std::pair<BoundaryID, BoundaryID>, AutomaticMortarGeneration>
-      _displaced_mortar_interfaces;
+  std::unordered_map<MortarKey, AutomaticMortarGeneration> _displaced_mortar_interfaces;
 
   /// A set containing the subdomain ids covered by all the mortar interfaces in this MortarData
   /// object
@@ -86,6 +98,12 @@ protected:
   /// A set containing the boundary ids covered by all the mortar interfaces in this MortarData
   /// object
   std::set<BoundaryID> _mortar_boundary_coverage;
+
+  /// Map from undisplaced AMG key to whether the undisplaced AMG object is enforcing periodic constraints
+  std::unordered_map<MortarKey, bool> _periodic_map;
+
+  /// Map from displaced AMG key to whether the displaced AMG object is enforcing periodic constraints
+  std::unordered_map<MortarKey, bool> _displaced_periodic_map;
 };
 
 #endif

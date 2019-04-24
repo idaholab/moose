@@ -375,6 +375,7 @@ public:
    */
   void reinitNeighborFaceRef(const Elem * neighbor_elem,
                              unsigned int neighbor_side,
+                             BoundaryID bnd_id,
                              Real tolerance,
                              const std::vector<Point> * const pts,
                              const std::vector<Real> * const weights = nullptr,
@@ -389,6 +390,11 @@ public:
                            const std::vector<Point> * const pts,
                            const std::vector<Real> * const weights = nullptr,
                            THREAD_ID tid = 0);
+
+  /**
+   * Reinit a mortar element to obtain a valid JxW
+   */
+  void reinitMortarElem(const Elem * elem, THREAD_ID tid = 0);
 
   /**
    * Returns true if the Problem has Dirac kernels it needs to compute on elem.

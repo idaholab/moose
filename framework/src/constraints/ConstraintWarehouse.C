@@ -53,8 +53,7 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object,
   else if (mc)
   {
     MooseMesh & mesh = mc->getParam<FEProblemBase *>("_fe_problem_base")->mesh();
-    bool displaced = nfc->parameters().have_parameter<bool>("use_displaced_mesh") &&
-                     nfc->getParam<bool>("use_displaced_mesh");
+    bool displaced = mc->getParam<bool>("use_displaced_mesh");
 
     auto slave_boundary_id = mesh.getBoundaryID(mc->getParam<BoundaryName>("slave_boundary"));
     auto master_boundary_id = mesh.getBoundaryID(mc->getParam<BoundaryName>("master_boundary"));
@@ -312,7 +311,7 @@ ConstraintWarehouse::subdomainsCovered(std::set<SubdomainID> & subdomains_covere
     const auto & objects = pr.second.getActiveObjects();
     for (const auto & mc : objects)
     {
-      MooseVariableFEBase * lm_var = mc->variable();
+      const MooseVariableFEBase * lm_var = mc->variable();
       if (lm_var)
       {
         unique_variables.insert(lm_var->name());
@@ -332,7 +331,7 @@ ConstraintWarehouse::subdomainsCovered(std::set<SubdomainID> & subdomains_covere
     const auto & objects = pr.second.getActiveObjects();
     for (const auto & mc : objects)
     {
-      MooseVariableFEBase * lm_var = mc->variable();
+      const MooseVariableFEBase * lm_var = mc->variable();
       if (lm_var)
       {
         unique_variables.insert(lm_var->name());

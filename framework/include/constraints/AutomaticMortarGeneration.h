@@ -58,7 +58,8 @@ public:
   AutomaticMortarGeneration(MeshBase & mesh_in,
                             const std::pair<BoundaryID, BoundaryID> & boundary_key,
                             const std::pair<SubdomainID, SubdomainID> & subdomain_key,
-                            bool on_displaced);
+                            bool on_displaced,
+                            bool periodic);
 
   /**
    * Once the slave_requested_boundary_ids and
@@ -132,13 +133,6 @@ public:
    * Defined in the file build_mortar_segment_mesh.C.
    */
   void buildMortarSegmentMesh();
-
-  /**
-   * Set whether we will be using this AutomaticMortarGeneration object to enforce periodic
-   * constraints If true, then we will performing projections with inward facing normals. We won't
-   * be able to use this object to enforce both ordinary **and** periodic constraints
-   */
-  void periodicConstraint(bool periodic);
 
   /**
    * Clears the mortar segment mesh and accompanying data structures
@@ -255,17 +249,14 @@ private:
                                     subdomain_id_type lower_dimensional_slave_subdomain_id);
 
 private:
-  /// Whether this object will be generating a mortar segment mesh for periodic constraints
-  bool _periodic;
-
-  /// Whether we have externally set the _periodic flag
-  bool _periodic_set_externally;
-
   /// Whether to print debug output
   bool _debug;
 
   /// Whether this object is on the displaced mesh
   const bool _on_displaced;
+
+  /// Whether this object will be generating a mortar segment mesh for periodic constraints
+  const bool _periodic;
 };
 
 #endif

@@ -296,6 +296,8 @@ NonlinearSystemBase::initialSetup()
   const auto & displaced_mortar_interfaces = _fe_problem.getMortarInterfaces(/*displaced=*/true);
   for (const auto & mortar_interface : displaced_mortar_interfaces)
   {
+    mooseAssert(_fe_problem.getDisplacedProblem(),
+                "Cannot create displaced mortar functors when the displaced problem is null");
     auto master_slave_boundary_pair = mortar_interface.first;
     const auto & mortar_generation_object = mortar_interface.second;
 
@@ -305,11 +307,11 @@ NonlinearSystemBase::initialSetup()
     _displaced_mortar_residual_functors.emplace(
         master_slave_boundary_pair,
         ComputeMortarFunctor<ComputeStage::RESIDUAL>(
-            mortar_constraints, mortar_generation_object, _fe_problem));
+            mortar_constraints, mortar_generation_object, *_fe_problem.getDisplacedProblem()));
     _displaced_mortar_jacobian_functors.emplace(
         master_slave_boundary_pair,
         ComputeMortarFunctor<ComputeStage::JACOBIAN>(
-            mortar_constraints, mortar_generation_object, _fe_problem));
+            mortar_constraints, mortar_generation_object, *_fe_problem.getDisplacedProblem()));
   }
 }
 

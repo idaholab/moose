@@ -26,30 +26,29 @@ GapHeatConductanceTest<compute_stage>::GapHeatConductanceTest(const InputParamet
 }
 
 template <ComputeStage compute_stage>
-ADResidual
-GapHeatConductanceTest<compute_stage>::computeQpResidual()
-{
-  Real heat_transfer_coeff(0);
-  if (_has_master)
-  {
-    auto gap = (_phys_points_slave[_qp] - _phys_points_master[_qp]).norm();
-    heat_transfer_coeff = _gap_conductance_constant / gap;
-  }
-  return _test[_i][_qp] * (_lambda[_qp] - heat_transfer_coeff *
-                                              (_u_slave[_qp] - (_has_master ? _u_master[_qp] : 0)));
-}
-
-template <ComputeStage compute_stage>
-ADResidual
-GapHeatConductanceTest<compute_stage>::computeQpResidualSide(Moose::ConstraintType type)
+ADReal
+GapHeatConductanceTest<compute_stage>::computeQpResidual(Moose::MortarType type)
 {
   switch (type)
   {
-    case Moose::Slave:
+    case Moose::MortarType::Slave:
       return _lambda[_qp] * _test_slave[_i][_qp];
 
-    case Moose::Master:
+    case Moose::MortarType::Master:
       return -_lambda[_qp] * _test_master[_i][_qp];
+
+    case Moose::MortarType::Lower:
+    {
+      Real heat_transfer_coeff(0);
+      if (_has_master)
+      {
+        auto gap = (_phys_points_slave[_qp] - _phys_points_master[_qp]).norm();
+        heat_transfer_coeff = _gap_conductance_constant / gap;
+      }
+      return _test[_i][_qp] *
+             (_lambda[_qp] -
+              heat_transfer_coeff * (_u_slave[_qp] - (_has_master ? _u_master[_qp] : 0)));
+    }
 
     default:
       return 0;

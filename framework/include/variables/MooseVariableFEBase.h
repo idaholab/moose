@@ -269,18 +269,22 @@ public:
   /**
    * Return phi size
    */
-  virtual size_t phiSize() = 0;
+  virtual size_t phiSize() const = 0;
   /**
    * Return phiFace size
    */
-  virtual size_t phiFaceSize() = 0;
+  virtual size_t phiFaceSize() const = 0;
   /**
    * Return phiNeighbor size
    */
-  virtual size_t phiNeighborSize() = 0;
+  virtual size_t phiNeighborSize() const = 0;
   /**
    * Return phiFaceNeighbor size
    */
-  virtual size_t phiFaceNeighborSize() = 0;
+  virtual size_t phiFaceNeighborSize() const = 0;
+  /**
+   * Return the number of shape functions on the lower dimensional element for this variable
+   */
+  virtual size_t phiLowerSize() const = 0;
 };
 

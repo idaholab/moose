@@ -58,7 +58,7 @@
   [./ced]
     type = EqualValueConstraint
     variable = lm
-    master_variable = u
+    slave_variable = u
     master_boundary = 100
     master_subdomain = 10000
     slave_boundary = 101

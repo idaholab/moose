@@ -143,6 +143,9 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableFE<OutputTyp
       _second_phi_face_assembly_method = &Assembly::feSecondPhiFaceNeighbor<OutputType>;
       _curl_phi_assembly_method = &Assembly::feCurlPhiNeighbor<OutputType>;
       _curl_phi_face_assembly_method = &Assembly::feCurlPhiFaceNeighbor<OutputType>;
+
+      _ad_grad_phi = nullptr;
+      _ad_grad_phi_face = nullptr;
       break;
     }
     case Moose::ElementType::Lower:
@@ -151,6 +154,9 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableFE<OutputTyp
       _phi_face_assembly_method = &Assembly::fePhiLower<OutputType>; // Place holder
       _grad_phi_assembly_method = &Assembly::feGradPhiLower<OutputType>;
       _grad_phi_face_assembly_method = &Assembly::feGradPhiLower<OutputType>; // Place holder
+
+      _ad_grad_phi = nullptr;
+      _ad_grad_phi_face = nullptr;
       break;
     }
   }
@@ -889,7 +895,7 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
       // number of dofs on lower-d elements is guaranteed to be lower than on the higher dimensional
       // element, but we're not using that knowledge here. In the future we could implement
       // something like SystemBase::getMaxVarNDofsPerFace (or *PerLowerDElem)
-      ad_offset = 2. * _sys.system().n_vars() * _sys.getMaxVarNDofsPerElem() +
+      ad_offset = 2 * _sys.system().n_vars() * _sys.getMaxVarNDofsPerElem() +
                   _var_num * _sys.getMaxVarNDofsPerElem();
       break;
 
@@ -946,7 +952,10 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
 
       if (_need_ad_grad_u)
       {
-        if (_displaced)
+        // The latter check here is for handling the fact that we have not yet implemented
+        // calculation of ad_grad_phi for neighbor and neighbor-face, so if we are in that situation
+        // we need to default to using the non-ad grad_phi
+        if (_displaced && _current_ad_grad_phi)
           _ad_grad_u[qp] += _ad_dof_values[i] * (*_current_ad_grad_phi)[i][qp];
         else
           _ad_grad_u[qp] += _ad_dof_values[i] * (*_current_grad_phi)[i][qp];

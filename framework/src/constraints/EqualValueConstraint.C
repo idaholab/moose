@@ -26,22 +26,17 @@ EqualValueConstraint<compute_stage>::EqualValueConstraint(const InputParameters 
 }
 
 template <ComputeStage compute_stage>
-ADResidual
-EqualValueConstraint<compute_stage>::computeQpResidual()
+ADReal
+EqualValueConstraint<compute_stage>::computeQpResidual(Moose::MortarType mortar_type)
 {
-  return (_u_master[_qp] - _u_slave[_qp]) * _test[_i][_qp];
-}
-
-template <ComputeStage compute_stage>
-ADResidual
-EqualValueConstraint<compute_stage>::computeQpResidualSide(Moose::ConstraintType res_type)
-{
-  switch (res_type)
+  switch (mortar_type)
   {
-    case Moose::Master:
-      return _lambda[_qp] * _test_master[_i][_qp];
-    case Moose::Slave:
+    case Moose::MortarType::Slave:
       return -_lambda[_qp] * _test_slave[_i][_qp];
+    case Moose::MortarType::Master:
+      return _lambda[_qp] * _test_master[_i][_qp];
+    case Moose::MortarType::Lower:
+      return (_u_master[_qp] - _u_slave[_qp]) * _test[_i][_qp];
     default:
       return 0;
   }

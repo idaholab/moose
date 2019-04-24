@@ -43,7 +43,7 @@ Constraint::Constraint(const InputParameters & parameters)
     GeometricSearchInterface(this),
     Restartable(this, "Constraints"),
     MeshChangedInterface(parameters),
-    _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
+    TaggingInterface(this),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),

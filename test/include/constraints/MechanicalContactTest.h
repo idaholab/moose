@@ -24,7 +24,7 @@ public:
   MechanicalContactTest(const InputParameters & parameters);
 
 protected:
-  virtual ADResidual computeQpResidualSide(Moose::ConstraintType type) override;
+  ADReal computeQpResidual(Moose::MortarType type) final;
 
   const MooseEnum _component;
 

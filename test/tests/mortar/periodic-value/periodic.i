@@ -53,7 +53,7 @@
   [ev]
     type = EqualValueConstraint
     variable = lm
-    master_variable = u
+    slave_variable = u
     master_boundary = 103
     slave_boundary = 101
     master_subdomain = 12

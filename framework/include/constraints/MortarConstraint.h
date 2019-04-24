@@ -26,34 +26,33 @@ class MortarConstraint : public MortarConstraintBase
 public:
   MortarConstraint(const InputParameters & parameters);
 
-  virtual void computeResidual() override;
+  void computeResidual(bool has_master) final;
 
-  virtual void computeJacobian() override;
+  void computeJacobian(bool has_master) final;
 
-  virtual SubdomainID masterSubdomain() const override { return _master_subdomain_id; }
+  SubdomainID masterSubdomain() const final { return _master_subdomain_id; }
 
-  MooseVariable * variable() override { return _var; }
+  const MooseVariable * variable() const final { return _var; }
 
 protected:
   /**
-   * compute the Lagrange Multipler equation at the quadrature points
+   * compute the residual at the quadrature points
    */
-  virtual ADResidual computeQpResidual() { return 0; }
+  virtual ADResidual computeQpResidual(Moose::MortarType mortar_type) = 0;
+
+private:
+  /**
+   * compute the residual for the specified element type
+   */
+  void computeResidual(Moose::MortarType mortar_type);
 
   /**
-   * compute the primal equation at the quadrature points. `type` is either `Moose::Slave` or
-   * `Moose::Master`
+   * compute the residual for the specified element type
    */
-  virtual ADResidual computeQpResidualSide(Moose::ConstraintType /*type*/) { return 0; }
-
-  /// Whether the current mortar segment projects onto a face on the master side
-  bool _has_master;
+  void computeJacobian(Moose::MortarType mortar_type);
 
   /// Reference to the finite element problem
   FEProblemBase & _fe_problem;
-
-  /// Reference to the SystemBase that this object will contribute its residual and Jacobian to
-  SystemBase & _sys;
 
   /// Boundary ID for the slave surface
   const BoundaryID _slave_id;
@@ -67,23 +66,14 @@ protected:
   /// Subdomain ID for the master surface
   const SubdomainID _master_subdomain_id;
 
-  /// The mortar mesh generator object
-  AutomaticMortarGeneration & _amg;
-
   /// Pointer to the lagrange multipler variable. nullptr if none
-  MooseVariable * _var;
+  const MooseVariable * _var;
 
   /// Reference to the slave variable
-  MooseVariable & _slave_var;
+  const MooseVariable & _slave_var;
 
   /// Reference to the master variable
-  MooseVariable & _master_var;
-
-  /// The primal var number
-  const unsigned int _primal_var_number;
-
-  /// The lagrange multiplier var number
-  const unsigned int _lambda_var_number;
+  const MooseVariable & _master_var;
 
   /// Whether to compute primal residuals
   const bool _compute_primal_residuals;
@@ -91,128 +81,61 @@ protected:
   /// Whether to compute lagrange multiplier residuals
   const bool _compute_lm_residuals;
 
-  /// The dof map
-  const DofMap & _dof_map;
-
-  /// The dimensionality of the volume elements
-  const unsigned int _interior_dimension;
-
-  /// The dimensionality of the mortar segment mesh, e.g. the dimension of face
-  /// elements. Equivalent to _interior_dimension - 1
-  const unsigned int _msm_dimension;
-
-  /// The lower-dimensional (mortar face) FE object for the primal variable
-  std::unique_ptr<FEBase> _fe_msm_primal;
-
-  /// FE object for the lagrange multiplier (note that the LM only exists on the
-  /// lower dimesional mesh elements, e.g. the mortar interface boundary)
-  std::unique_ptr<FEBase> _fe_msm_lambda;
-
-  /// The interior slave (volume) FE object for the primal variable
-  std::unique_ptr<FEBase> _fe_slave_interior_primal;
-
-  /// The interior master (volume) FE object for the primal variable
-  std::unique_ptr<FEBase> _fe_master_interior_primal;
-
-  /// the normals along the slave face
-  const std::vector<Point> & _normals;
-
-  /// The mortar segment quadrature rule
-  QGauss _qrule_msm;
-
-  /// The Jacobian times weights for the mortar segment FE
-  const std::vector<Real> & _JxW_msm;
-
   /// A dummy object useful for constructing _test when not using Lagrange multipliers
-  const std::vector<std::vector<Real>> _dummy;
+  const VariableTestValue _test_dummy;
 
-  /// The shape functions corresponding to the lagrange multiplier variable
-  const std::vector<std::vector<Real>> & _test;
-
-  /// The shape functions corresponding to the slave interior primal variable
-  const std::vector<std::vector<Real>> & _test_slave;
-
-  /// The shape functions corresponding to the master interior primal variable
-  const std::vector<std::vector<Real>> & _test_master;
-
-  /// The shape function gradients corresponding to the slave interior primal variable
-  const std::vector<std::vector<RealVectorValue>> & _grad_test_slave;
-
-  /// The shape function gradients corresponding to the master interior primal variable
-  const std::vector<std::vector<RealVectorValue>> & _grad_test_master;
-
-  /// The locations of the quadrature points on the interior slave elements
-  const std::vector<Point> & _phys_points_slave;
-
-  /// The locations of the quadrature points on the interior master elements
-  const std::vector<Point> & _phys_points_master;
-
-  /// The dof indices for the Lagrange Multiplier variable that only lives on the mortar interface
-  std::vector<dof_id_type> _dof_indices_lambda;
-
-  /// The dof indices for the primal variable on the slave interior element
-  std::vector<dof_id_type> _dof_indices_slave_interior_primal;
-
-  /// The dof indices for the primal variable on the master interior element
-  std::vector<dof_id_type> _dof_indices_master_interior_primal;
-
-  /// Quadrature point index
-  unsigned int _qp;
-
-  /// The LM solution
-  MooseArray<ADReal> _lambda;
-
-  /// The primal solution on the slave side
-  MooseArray<ADReal> _u_slave;
-
-  /// The primal solution on the master side
-  MooseArray<ADReal> _u_master;
-
-  /// The primal solution gradient on the slave side
-  MooseArray<VectorValue<ADReal>> _grad_u_slave;
-
-  /// The primal solution gradient on the master side
-  MooseArray<VectorValue<ADReal>> _grad_u_master;
-
-  /// The offset for LM dofs for derivative vector access
-  const unsigned int _lm_offset;
-
-  /// The offset for slave primal dofs for derivative vector access
-  unsigned int _slave_primal_offset;
-
-  /// The offset for master primal dofs for derivative vector access
-  unsigned int _master_primal_offset;
-
-  /// Whether we need to calculate the primal gradients
-  bool _need_primal_gradient;
-
-  /// Whether this constraint is going to be used to enforce a periodic condition. This has the
-  /// effect of changing the normals vector for projection from outward to inward facing
-  bool _periodic;
-
-private:
-  /**
-   * Loop over the mortar mesh and compute either the residual or Jacobian depending on
-   * compute_stage
-   */
-  void loopOverMortarMesh();
-
-  /**
-   * compute the residual on the current element
-   */
-  void computeElementResidual();
-
-  /**
-   * compute the jacobian on the current element
-   */
-  void computeElementJacobian();
-
-  /**
-   * compute the variable solutions on the current element
-   */
-  void computeSolutions();
+  /// A dummy object useful for constructing _lambda when not using Lagrange multipliers
+  const ADVariableValue _lambda_dummy;
 
 protected:
+  /// Whether the current mortar segment projects onto a face on the master side
+  bool _has_master;
+
+  /// the normals along the slave face
+  const MooseArray<Point> & _normals;
+
+  /// The element Jacobian times weights
+  const std::vector<Real> & _JxW_msm;
+
+  /// The quadrature rule
+  const QBase * const & _qrule_msm;
+
+  /// The shape functions corresponding to the lagrange multiplier variable
+  const VariableTestValue & _test;
+
+  /// The shape functions corresponding to the slave interior primal variable
+  const VariableTestValue & _test_slave;
+
+  /// The shape functions corresponding to the master interior primal variable
+  const VariableTestValue & _test_master;
+
+  /// The shape function gradients corresponding to the slave interior primal variable
+  const VariableTestGradient & _grad_test_slave;
+
+  /// The shape function gradients corresponding to the master interior primal variable
+  const VariableTestGradient & _grad_test_master;
+
+  /// The locations of the quadrature points on the interior slave elements
+  const MooseArray<Point> & _phys_points_slave;
+
+  /// The locations of the quadrature points on the interior master elements
+  const MooseArray<Point> & _phys_points_master;
+
+  /// The LM solution
+  const ADVariableValue & _lambda;
+
+  /// The primal solution on the slave side
+  const ADVariableValue & _u_slave;
+
+  /// The primal solution on the master side
+  const ADVariableValue & _u_master;
+
+  /// The primal solution gradient on the slave side
+  const ADVariableGradient & _grad_u_slave;
+
+  /// The primal solution gradient on the master side
+  const ADVariableGradient & _grad_u_master;
+
   usingCoupleableMembers;
 };
 
@@ -228,7 +151,6 @@ protected:
   using MortarConstraint<compute_stage>::_test;                                                    \
   using MortarConstraint<compute_stage>::_test_slave;                                              \
   using MortarConstraint<compute_stage>::_test_master;                                             \
-  using MortarConstraint<compute_stage>::_need_primal_gradient;                                    \
   using MortarConstraint<compute_stage>::_grad_u_slave;                                            \
   using MortarConstraint<compute_stage>::_grad_u_master;                                           \
   using MortarConstraint<compute_stage>::_grad_test_slave;                                         \

@@ -24,7 +24,7 @@ public:
   MechanicalContactLMTest(const InputParameters & parameters);
 
 protected:
-  virtual ADResidual computeQpResidual() override;
+  ADReal computeQpResidual(Moose::MortarType) final;
 
   usingMortarConstraintMembers;
 };

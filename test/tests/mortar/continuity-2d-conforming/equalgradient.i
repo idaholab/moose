@@ -65,7 +65,7 @@
 [Constraints]
   [./cedx]
     type = EqualGradientConstraint
-    master_variable = u
+    slave_variable = u
     variable = lmx
     master_boundary = 100
     master_subdomain = 10000
@@ -75,7 +75,7 @@
   [../]
   [./cedy]
     type = EqualGradientConstraint
-    master_variable = u
+    slave_variable = u
     variable = lmy
     master_boundary = 100
     master_subdomain = 10000

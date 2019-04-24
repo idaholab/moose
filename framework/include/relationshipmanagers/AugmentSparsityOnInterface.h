@@ -57,7 +57,7 @@ protected:
   /**
    * The Mesh we're calculating on
    */
-  AutomaticMortarGeneration * _amg;
+  const AutomaticMortarGeneration * _amg;
 
   bool _has_attached_amg;
 

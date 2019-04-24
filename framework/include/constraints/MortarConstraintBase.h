@@ -15,6 +15,7 @@
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "MooseMesh.h"
 #include "MooseVariableInterface.h"
+#include "TaggingInterface.h"
 
 // Forward Declarations
 class MortarConstraintBase;
@@ -46,13 +47,15 @@ public:
 
   /**
    * Method for computing the residual
+   * @param has_master Whether the mortar segment element projects onto the master face
    */
-  virtual void computeResidual() = 0;
+  virtual void computeResidual(bool has_master) = 0;
 
   /**
    * Method for computing the Jacobian
+   * @param has_master Whether the mortar segment element projects onto the master face
    */
-  virtual void computeJacobian() = 0;
+  virtual void computeJacobian(bool has_master) = 0;
 
   /**
    * Returns the master lower dimensional subdomain id
@@ -62,7 +65,7 @@ public:
   /**
    * The variable number that this object operates on.
    */
-  virtual MooseVariable * variable() = 0;
+  virtual const MooseVariable * variable() const = 0;
 };
 
 #endif /* MORTARCONSTRAINTBASE_H */

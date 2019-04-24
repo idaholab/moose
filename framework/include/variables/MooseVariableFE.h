@@ -88,44 +88,45 @@ public:
    *
    * Currently hardcoded to true because we always compute the value.
    */
-  bool usesPhi() { return true; }
+  bool usesPhi() const { return true; }
   /**
    * Whether or not this variable is actually using the shape function gradient.
    *
    * Currently hardcoded to true because we always compute the value.
    */
-  bool usesGradPhi() { return true; }
+  bool usesGradPhi() const { return true; }
   /**
    * Whether or not this variable is actually using the shape function value.
    *
    * Currently hardcoded to true because we always compute the value.
    */
-  bool usesPhiNeighbor() { return true; }
+  bool usesPhiNeighbor() const { return true; }
   /**
    * Whether or not this variable is actually using the shape function gradient.
    *
    * Currently hardcoded to true because we always compute the value.
    */
-  bool usesGradPhiNeighbor() { return true; }
+  bool usesGradPhiNeighbor() const { return true; }
   /**
    * Whether or not this variable is computing any second derivatives.
    */
-  bool usesSecondPhi();
+  bool usesSecondPhi() const;
 
   /**
    * Whether or not this variable is actually using the shape function second derivative on a
    * neighbor.
    */
-  bool usesSecondPhiNeighbor();
+  bool usesSecondPhiNeighbor() const;
 
   /**
    * Whether or not this variable is computing any second derivatives.
    */
-  bool computingSecond() { return usesSecondPhi(); }
+  bool computingSecond() const { return usesSecondPhi(); }
+
   /**
    * Whether or not this variable is computing the curl
    */
-  bool computingCurl();
+  bool computingCurl() const;
 
   const std::set<SubdomainID> & activeSubdomains() const override;
   bool activeOnSubdomain(SubdomainID subdomain) const override;
@@ -157,25 +158,31 @@ public:
 
   virtual void prepareIC() override;
 
-  const FieldVariablePhiValue & phi() { return _element_data->phi(); }
-  const FieldVariablePhiGradient & gradPhi() { return _element_data->gradPhi(); }
-  const FieldVariablePhiSecond & secondPhi();
-  const FieldVariablePhiCurl & curlPhi();
+  const FieldVariablePhiValue & phi() const { return _element_data->phi(); }
+  const FieldVariablePhiGradient & gradPhi() const { return _element_data->gradPhi(); }
+  const FieldVariablePhiSecond & secondPhi() const;
+  const FieldVariablePhiCurl & curlPhi() const;
 
-  const FieldVariablePhiValue & phiFace() { return _element_data->phiFace(); }
-  const FieldVariablePhiGradient & gradPhiFace() { return _element_data->gradPhiFace(); }
-  const FieldVariablePhiSecond & secondPhiFace();
-  const FieldVariablePhiCurl & curlPhiFace();
+  const FieldVariablePhiValue & phiFace() const { return _element_data->phiFace(); }
+  const FieldVariablePhiGradient & gradPhiFace() const { return _element_data->gradPhiFace(); }
+  const FieldVariablePhiSecond & secondPhiFace() const;
+  const FieldVariablePhiCurl & curlPhiFace() const;
 
-  const FieldVariablePhiValue & phiNeighbor() { return _neighbor_data->phi(); }
-  const FieldVariablePhiGradient & gradPhiNeighbor() { return _neighbor_data->gradPhi(); }
-  const FieldVariablePhiSecond & secondPhiNeighbor();
-  const FieldVariablePhiCurl & curlPhiNeighbor();
+  const FieldVariablePhiValue & phiNeighbor() const { return _neighbor_data->phi(); }
+  const FieldVariablePhiGradient & gradPhiNeighbor() const { return _neighbor_data->gradPhi(); }
+  const FieldVariablePhiSecond & secondPhiNeighbor() const;
+  const FieldVariablePhiCurl & curlPhiNeighbor() const;
 
-  const FieldVariablePhiValue & phiFaceNeighbor() { return _neighbor_data->phiFace(); }
-  const FieldVariablePhiGradient & gradPhiFaceNeighbor() { return _neighbor_data->gradPhiFace(); }
-  const FieldVariablePhiSecond & secondPhiFaceNeighbor();
-  const FieldVariablePhiCurl & curlPhiFaceNeighbor();
+  const FieldVariablePhiValue & phiFaceNeighbor() const { return _neighbor_data->phiFace(); }
+  const FieldVariablePhiGradient & gradPhiFaceNeighbor() const
+  {
+    return _neighbor_data->gradPhiFace();
+  }
+  const FieldVariablePhiSecond & secondPhiFaceNeighbor() const;
+  const FieldVariablePhiCurl & curlPhiFaceNeighbor() const;
+
+  const FieldVariablePhiValue & phiLower() const { return _lower_data->phi(); }
+  const FieldVariablePhiGradient & gradPhiLower() const { return _lower_data->gradPhi(); }
 
   template <ComputeStage compute_stage>
   const typename VariableTestGradientType<OutputType, compute_stage>::type & adGradPhi()
@@ -236,114 +243,136 @@ public:
 
   /// AD
   template <ComputeStage compute_stage>
-  const typename VariableValueType<OutputType, compute_stage>::type & adSln()
+  const typename VariableValueType<OutputType, compute_stage>::type & adSln() const
   {
     return _element_data->template adSln<compute_stage>();
   }
   template <ComputeStage compute_stage>
-  const typename VariableGradientType<OutputType, compute_stage>::type & adGradSln()
+  const typename VariableGradientType<OutputType, compute_stage>::type & adGradSln() const
   {
     return _element_data->template adGradSln<compute_stage>();
   }
   template <ComputeStage compute_stage>
-  const typename VariableSecondType<OutputType, compute_stage>::type & adSecondSln()
+  const typename VariableSecondType<OutputType, compute_stage>::type & adSecondSln() const
   {
     return _element_data->template adSecondSln<compute_stage>();
   }
   template <ComputeStage compute_stage>
-  const typename VariableValueType<OutputType, compute_stage>::type & adUDot()
+  const typename VariableValueType<OutputType, compute_stage>::type & adUDot() const
   {
     return _element_data->template adUDot<compute_stage>();
   }
 
   /// neighbor AD
   template <ComputeStage compute_stage>
-  const typename VariableValueType<OutputType, compute_stage>::type & adSlnNeighbor()
+  const typename VariableValueType<OutputType, compute_stage>::type & adSlnNeighbor() const
   {
     return _neighbor_data->template adSln<compute_stage>();
   }
   template <ComputeStage compute_stage>
-  const typename VariableGradientType<OutputType, compute_stage>::type & adGradSlnNeighbor()
+  const typename VariableGradientType<OutputType, compute_stage>::type & adGradSlnNeighbor() const
   {
     return _neighbor_data->template adGradSln<compute_stage>();
   }
   template <ComputeStage compute_stage>
-  const typename VariableSecondType<OutputType, compute_stage>::type & adSecondSlnNeighbor()
+  const typename VariableSecondType<OutputType, compute_stage>::type & adSecondSlnNeighbor() const
   {
     return _neighbor_data->template adSecondSln<compute_stage>();
   }
   template <ComputeStage compute_stage>
-  const typename VariableValueType<OutputType, compute_stage>::type & adUDotNeighbor()
+  const typename VariableValueType<OutputType, compute_stage>::type & adUDotNeighbor() const
   {
     return _neighbor_data->template adUDot<compute_stage>();
   }
 
   /// element dots
-  const FieldVariableValue & uDot() { return _element_data->uDot(); }
-  const FieldVariableValue & uDotDot() { return _element_data->uDotDot(); }
-  const FieldVariableValue & uDotOld() { return _element_data->uDotOld(); }
-  const FieldVariableValue & uDotDotOld() { return _element_data->uDotDotOld(); }
-  const VariableValue & duDotDu() { return _element_data->duDotDu(); }
-  const VariableValue & duDotDotDu() { return _element_data->duDotDotDu(); }
+  const FieldVariableValue & uDot() const { return _element_data->uDot(); }
+  const FieldVariableValue & uDotDot() const { return _element_data->uDotDot(); }
+  const FieldVariableValue & uDotOld() const { return _element_data->uDotOld(); }
+  const FieldVariableValue & uDotDotOld() const { return _element_data->uDotDotOld(); }
+  const VariableValue & duDotDu() const { return _element_data->duDotDu(); }
+  const VariableValue & duDotDotDu() const { return _element_data->duDotDotDu(); }
 
   /// neighbor solutions
-  const FieldVariableValue & slnNeighbor() { return _neighbor_data->sln(Moose::Current); }
-  const FieldVariableValue & slnOldNeighbor() { return _neighbor_data->sln(Moose::Old); }
-  const FieldVariableValue & slnOlderNeighbor() { return _neighbor_data->sln(Moose::Older); }
-  const FieldVariableValue & slnPreviousNLNeighbor()
+  const FieldVariableValue & slnNeighbor() const { return _neighbor_data->sln(Moose::Current); }
+  const FieldVariableValue & slnOldNeighbor() const { return _neighbor_data->sln(Moose::Old); }
+  const FieldVariableValue & slnOlderNeighbor() const { return _neighbor_data->sln(Moose::Older); }
+  const FieldVariableValue & slnPreviousNLNeighbor() const
   {
     return _neighbor_data->sln(Moose::PreviousNL);
   }
 
   /// neighbor solution gradients
-  const FieldVariableGradient & gradSlnNeighbor()
+  const FieldVariableGradient & gradSlnNeighbor() const
   {
     return _neighbor_data->gradSln(Moose::Current);
   }
-  const FieldVariableGradient & gradSlnOldNeighbor() { return _neighbor_data->gradSln(Moose::Old); }
-  const FieldVariableGradient & gradSlnOlderNeighbor()
+  const FieldVariableGradient & gradSlnOldNeighbor() const
+  {
+    return _neighbor_data->gradSln(Moose::Old);
+  }
+  const FieldVariableGradient & gradSlnOlderNeighbor() const
   {
     return _neighbor_data->gradSln(Moose::Older);
   }
-  const FieldVariableGradient & gradSlnPreviousNLNeighbor()
+  const FieldVariableGradient & gradSlnPreviousNLNeighbor() const
   {
     return _neighbor_data->gradSln(Moose::PreviousNL);
   }
 
   /// neighbor grad dots
-  const FieldVariableGradient & gradSlnNeighborDot() { return _neighbor_data->gradSlnDot(); }
-  const FieldVariableGradient & gradSlnNeighborDotDot() { return _neighbor_data->gradSlnDotDot(); }
+  const FieldVariableGradient & gradSlnNeighborDot() const { return _neighbor_data->gradSlnDot(); }
+  const FieldVariableGradient & gradSlnNeighborDotDot() const
+  {
+    return _neighbor_data->gradSlnDotDot();
+  }
 
   /// neighbor solution seconds
-  const FieldVariableSecond & secondSlnNeighbor()
+  const FieldVariableSecond & secondSlnNeighbor() const
   {
     return _neighbor_data->secondSln(Moose::Current);
   }
-  const FieldVariableSecond & secondSlnOldNeighbor()
+  const FieldVariableSecond & secondSlnOldNeighbor() const
   {
     return _neighbor_data->secondSln(Moose::Old);
   }
-  const FieldVariableSecond & secondSlnOlderNeighbor()
+  const FieldVariableSecond & secondSlnOlderNeighbor() const
   {
     return _neighbor_data->secondSln(Moose::Older);
   }
-  const FieldVariableSecond & secondSlnPreviousNLNeighbor()
+  const FieldVariableSecond & secondSlnPreviousNLNeighbor() const
   {
     return _neighbor_data->secondSln(Moose::PreviousNL);
   }
 
   /// neighbor solution curls
-  const FieldVariableCurl & curlSlnNeighbor() { return _neighbor_data->curlSln(Moose::Current); }
-  const FieldVariableCurl & curlSlnOldNeighbor() { return _neighbor_data->curlSln(Moose::Old); }
-  const FieldVariableCurl & curlSlnOlderNeighbor() { return _neighbor_data->curlSln(Moose::Older); }
+  const FieldVariableCurl & curlSlnNeighbor() const
+  {
+    return _neighbor_data->curlSln(Moose::Current);
+  }
+  const FieldVariableCurl & curlSlnOldNeighbor() const
+  {
+    return _neighbor_data->curlSln(Moose::Old);
+  }
+  const FieldVariableCurl & curlSlnOlderNeighbor() const
+  {
+    return _neighbor_data->curlSln(Moose::Older);
+  }
 
   /// neighbor dots
-  const FieldVariableValue & uDotNeighbor() { return _neighbor_data->uDot(); }
-  const FieldVariableValue & uDotDotNeighbor() { return _neighbor_data->uDotDot(); }
-  const FieldVariableValue & uDotOldNeighbor() { return _neighbor_data->uDotOld(); }
-  const FieldVariableValue & uDotDotOldNeighbor() { return _neighbor_data->uDotDotOld(); }
-  const VariableValue & duDotDuNeighbor() { return _neighbor_data->duDotDu(); }
-  const VariableValue & duDotDotDuNeighbor() { return _neighbor_data->duDotDotDu(); }
+  const FieldVariableValue & uDotNeighbor() const { return _neighbor_data->uDot(); }
+  const FieldVariableValue & uDotDotNeighbor() const { return _neighbor_data->uDotDot(); }
+  const FieldVariableValue & uDotOldNeighbor() const { return _neighbor_data->uDotOld(); }
+  const FieldVariableValue & uDotDotOldNeighbor() const { return _neighbor_data->uDotDotOld(); }
+  const VariableValue & duDotDuNeighbor() const { return _neighbor_data->duDotDu(); }
+  const VariableValue & duDotDotDuNeighbor() const { return _neighbor_data->duDotDotDu(); }
+
+  /// lower-d element solution
+  template <ComputeStage compute_stage>
+  const typename VariableValueType<OutputType, compute_stage>::type & adSlnLower() const
+  {
+    return _lower_data->template adSln<compute_stage>();
+  }
 
   /// Actually compute variable values
   virtual void computeElemValues() override;
@@ -438,19 +467,21 @@ public:
   /**
    * Return phi size
    */
-  virtual size_t phiSize() override { return _element_data->phiSize(); }
+  virtual size_t phiSize() const final { return _element_data->phiSize(); }
   /**
    * Return phiFace size
    */
-  virtual size_t phiFaceSize() override { return _element_data->phiFaceSize(); }
+  virtual size_t phiFaceSize() const final { return _element_data->phiFaceSize(); }
   /**
    * Return phiNeighbor size
    */
-  virtual size_t phiNeighborSize() override { return _neighbor_data->phiSize(); }
+  virtual size_t phiNeighborSize() const final { return _neighbor_data->phiSize(); }
   /**
    * Return phiFaceNeighbor size
    */
-  virtual size_t phiFaceNeighborSize() override { return _neighbor_data->phiFaceSize(); }
+  virtual size_t phiFaceNeighborSize() const final { return _neighbor_data->phiFaceSize(); }
+
+  size_t phiLowerSize() const final { return _lower_data->phiSize(); }
 
   /**
    * Methods for retrieving values of variables at the nodes

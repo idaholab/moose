@@ -81,7 +81,7 @@
     master_subdomain = 20
     slave_subdomain = 10
     variable = lambda
-    master_variable = T
+    slave_variable = T
   [../]
 []
 

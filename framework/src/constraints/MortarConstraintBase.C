@@ -13,7 +13,9 @@ template <>
 InputParameters
 validParams<MortarConstraintBase>()
 {
-  return validParams<Constraint>();
+  auto params = validParams<Constraint>();
+  params += validParams<TaggingInterface>();
+  return params;
 }
 
 MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)

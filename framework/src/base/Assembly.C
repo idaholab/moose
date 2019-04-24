@@ -43,26 +43,27 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     _tid(tid),
     _mesh(sys.mesh()),
     _mesh_dimension(_mesh.dimension()),
-    _current_qrule(NULL),
-    _current_qrule_volume(NULL),
-    _current_qrule_arbitrary(NULL),
+    _current_qrule(nullptr),
+    _current_qrule_volume(nullptr),
+    _current_qrule_arbitrary(nullptr),
     _coord_type(Moose::COORD_XYZ),
-    _current_qrule_face(NULL),
-    _current_qface_arbitrary(NULL),
-    _current_qrule_neighbor(NULL),
+    _current_qrule_face(nullptr),
+    _current_qface_arbitrary(nullptr),
+    _current_qrule_neighbor(nullptr),
+    _qrule_msm(nullptr),
 
-    _current_elem(NULL),
+    _current_elem(nullptr),
     _current_elem_volume(0),
     _current_side(0),
-    _current_side_elem(NULL),
+    _current_side_elem(nullptr),
     _current_side_volume(0),
-    _current_neighbor_elem(NULL),
+    _current_neighbor_elem(nullptr),
     _current_neighbor_side(0),
-    _current_neighbor_side_elem(NULL),
+    _current_neighbor_side_elem(nullptr),
     _need_neighbor_elem_volume(false),
     _current_neighbor_volume(0),
-    _current_node(NULL),
-    _current_neighbor_node(NULL),
+    _current_node(nullptr),
+    _current_neighbor_node(nullptr),
     _current_elem_volume_computed(false),
     _current_side_volume_computed(false),
 
@@ -111,6 +112,9 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     (*_holder_fe_neighbor_helper[dim])->get_xyz();
     (*_holder_fe_neighbor_helper[dim])->get_JxW();
   }
+
+  _fe_msm = FEGenericBase<Real>::build(_mesh_dimension - 1, FEType(helper_order, LAGRANGE));
+  _JxW_msm = &_fe_msm->get_JxW();
 }
 
 Assembly::~Assembly()
@@ -221,6 +225,9 @@ Assembly::~Assembly()
   _curvatures.release();
   _ad_curvatures.release();
   _ad_coord.release();
+
+  if (_qrule_msm)
+    delete _qrule_msm;
 }
 
 void
@@ -498,6 +505,9 @@ Assembly::createQRules(QuadratureType type, Order order, Order volume_order, Ord
   _holder_qrule_arbitrary_face.clear();
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
     _holder_qrule_arbitrary_face[dim] = new ArbitraryQuadrature(dim - 1, face_order);
+
+  _const_qrule_msm = _qrule_msm = QBase::build(type, _mesh_dimension - 1, face_order).release();
+  _fe_msm->attach_quadrature_rule(_qrule_msm);
 }
 
 void
@@ -1087,83 +1097,7 @@ Assembly::reinitFEFace(const Elem * elem, unsigned int side)
     _curvatures.shallowCopy(
         const_cast<std::vector<Real> &>((*_holder_fe_face_helper[dim])->get_curvatures()));
 
-  if (_computing_jacobian && _subproblem.haveADObjects())
-  {
-    const std::unique_ptr<const Elem> side_elem(elem->build_side_ptr(side));
-
-    auto n_qp = _current_qrule_face->n_points();
-    resizeMappingObjects(n_qp, dim);
-    _ad_normals.resize(n_qp);
-    _ad_JxW_face.resize(n_qp);
-    if (_calculate_face_xyz)
-      _ad_q_points_face.resize(n_qp);
-    if (_calculate_curvatures)
-      _ad_curvatures.resize(n_qp);
-
-    if (_displaced)
-    {
-      const auto & qw = _current_qrule_face->get_weights();
-      computeFaceMap(dim, qw, side_elem.get());
-      std::vector<Real> dummy_qw(n_qp, 1.);
-
-      if (elem->has_affine_map())
-        computeAffineMapAD(elem, dummy_qw, n_qp, *_holder_fe_face_helper[dim]);
-      else
-        for (unsigned int qp = 0; qp != n_qp; qp++)
-          computeSinglePointMapAD(elem, dummy_qw, qp, *_holder_fe_face_helper[dim]);
-    }
-    else
-      for (unsigned qp = 0; qp < n_qp; ++qp)
-      {
-        _ad_JxW_face[qp] = _current_JxW_face[qp];
-        if (_calculate_face_xyz)
-          _ad_q_points_face[qp] = _current_q_points_face[qp];
-        _ad_normals[qp] = _current_normals[qp];
-        if (_calculate_curvatures)
-          _ad_curvatures[qp] = _curvatures[qp];
-      }
-
-    for (const auto & it : _fe_face[dim])
-    {
-      FEBase * fe = it.second;
-      auto fe_type = it.first;
-      auto num_shapes = fe->n_shape_functions();
-      auto & grad_phi = _ad_grad_phi_data_face[fe_type];
-
-      grad_phi.resize(num_shapes);
-      for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
-        grad_phi[i].resize(n_qp);
-
-      const auto & regular_grad_phi = _fe_shape_data_face[fe_type]->_grad_phi;
-
-      if (_displaced)
-        computeGradPhiAD(elem, n_qp, grad_phi, fe);
-      else
-        for (unsigned qp = 0; qp < n_qp; ++qp)
-          for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
-            grad_phi[i][qp] = regular_grad_phi[i][qp];
-    }
-    for (const auto & it : _vector_fe_face[dim])
-    {
-      FEVectorBase * fe = it.second;
-      auto fe_type = it.first;
-      auto num_shapes = fe->n_shape_functions();
-      auto & grad_phi = _ad_vector_grad_phi_data_face[fe_type];
-
-      grad_phi.resize(num_shapes);
-      for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
-        grad_phi[i].resize(n_qp);
-
-      const auto & regular_grad_phi = _vector_fe_shape_data_face[fe_type]->_grad_phi;
-
-      if (_displaced)
-        computeGradPhiAD(elem, n_qp, grad_phi, fe);
-      else
-        for (unsigned qp = 0; qp < n_qp; ++qp)
-          for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
-            grad_phi[i][qp] = regular_grad_phi[i][qp];
-    }
-  }
+  computeADFace(elem, side);
 
   if (_xfem != nullptr)
     modifyFaceWeightsDueToXFEM(elem, side);
@@ -1828,6 +1762,104 @@ Assembly::reinitElemFaceRef(const Elem * elem,
       fesd->_curl_phi.shallowCopy(
           const_cast<std::vector<std::vector<VectorValue<Real>>> &>(fe_face->get_curl_phi()));
   }
+  // During that last loop the helper objects will have been reinitialized
+  _current_q_points_face.shallowCopy(
+      const_cast<std::vector<Point> &>((*_holder_fe_face_helper[elem_dim])->get_xyz()));
+  _current_normals.shallowCopy(
+      const_cast<std::vector<Point> &>((*_holder_fe_face_helper[elem_dim])->get_normals()));
+  // Note that if the user did pass in points and not weights to this method, JxW will be garbage
+  // and should not be used
+  _current_JxW_face.shallowCopy(
+      const_cast<std::vector<Real> &>((*_holder_fe_face_helper[elem_dim])->get_JxW()));
+  if (_calculate_curvatures)
+    _curvatures.shallowCopy(
+        const_cast<std::vector<Real> &>((*_holder_fe_face_helper[elem_dim])->get_curvatures()));
+
+  computeADFace(elem, elem_side);
+}
+
+void
+Assembly::computeADFace(const Elem * elem, unsigned int side)
+{
+  auto dim = elem->dim();
+
+  if (_computing_jacobian && _subproblem.haveADObjects())
+  {
+    const std::unique_ptr<const Elem> side_elem(elem->build_side_ptr(side));
+
+    auto n_qp = _current_qrule_face->n_points();
+    resizeMappingObjects(n_qp, dim);
+    _ad_normals.resize(n_qp);
+    _ad_JxW_face.resize(n_qp);
+    if (_calculate_face_xyz)
+      _ad_q_points_face.resize(n_qp);
+    if (_calculate_curvatures)
+      _ad_curvatures.resize(n_qp);
+
+    if (_displaced)
+    {
+      const auto & qw = _current_qrule_face->get_weights();
+      computeFaceMap(dim, qw, side_elem.get());
+      std::vector<Real> dummy_qw(n_qp, 1.);
+
+      if (elem->has_affine_map())
+        computeAffineMapAD(elem, dummy_qw, n_qp, *_holder_fe_face_helper[dim]);
+      else
+        for (unsigned int qp = 0; qp != n_qp; qp++)
+          computeSinglePointMapAD(elem, dummy_qw, qp, *_holder_fe_face_helper[dim]);
+    }
+    else
+      for (unsigned qp = 0; qp < n_qp; ++qp)
+      {
+        _ad_JxW_face[qp] = _current_JxW_face[qp];
+        if (_calculate_face_xyz)
+          _ad_q_points_face[qp] = _current_q_points_face[qp];
+        _ad_normals[qp] = _current_normals[qp];
+        if (_calculate_curvatures)
+          _ad_curvatures[qp] = _curvatures[qp];
+      }
+
+    for (const auto & it : _fe_face[dim])
+    {
+      FEBase * fe = it.second;
+      auto fe_type = it.first;
+      auto num_shapes = fe->n_shape_functions();
+      auto & grad_phi = _ad_grad_phi_data_face[fe_type];
+
+      grad_phi.resize(num_shapes);
+      for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
+        grad_phi[i].resize(n_qp);
+
+      const auto & regular_grad_phi = _fe_shape_data_face[fe_type]->_grad_phi;
+
+      if (_displaced)
+        computeGradPhiAD(elem, n_qp, grad_phi, fe);
+      else
+        for (unsigned qp = 0; qp < n_qp; ++qp)
+          for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
+            grad_phi[i][qp] = regular_grad_phi[i][qp];
+    }
+    for (const auto & it : _vector_fe_face[dim])
+    {
+      FEVectorBase * fe = it.second;
+      auto fe_type = it.first;
+      auto num_shapes = fe->n_shape_functions();
+      auto & grad_phi = _ad_vector_grad_phi_data_face[fe_type];
+
+      grad_phi.resize(num_shapes);
+      for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
+        grad_phi[i].resize(n_qp);
+
+      const auto & regular_grad_phi = _vector_fe_shape_data_face[fe_type]->_grad_phi;
+
+      if (_displaced)
+        computeGradPhiAD(elem, n_qp, grad_phi, fe);
+      else
+        for (unsigned qp = 0; qp < n_qp; ++qp)
+          for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
+            grad_phi[i][qp] = regular_grad_phi[i][qp];
+    }
+  }
 }
 
 void
@@ -1893,6 +1925,10 @@ Assembly::reinitNeighborFaceRef(const Elem * neighbor,
       fesd->_curl_phi.shallowCopy(const_cast<std::vector<std::vector<VectorValue<Real>>> &>(
           fe_face_neighbor->get_curl_phi()));
   }
+  // During that last loop the helper objects will have been reinitialized as well
+  // We need to dig out the q_points from it
+  _current_q_points_face_neighbor.shallowCopy(const_cast<std::vector<Point> &>(
+      (*_holder_fe_face_neighbor_helper[neighbor_dim])->get_xyz()));
 }
 
 void
@@ -1925,6 +1961,15 @@ Assembly::reinitLowerDElemRef(const Elem * elem,
       fesd->_second_phi.shallowCopy(
           const_cast<std::vector<std::vector<TensorValue<Real>>> &>(fe_lower->get_d2phi()));
   }
+}
+
+void
+Assembly::reinitMortarElem(const Elem * elem)
+{
+  mooseAssert(elem->dim() == _mesh_dimension - 1,
+              "You should be calling reinitMortarElem on a lower dimensional element");
+
+  _fe_msm->reinit(elem);
 }
 
 void
@@ -2809,6 +2854,24 @@ Assembly::cacheResidualNeighbor()
 }
 
 void
+Assembly::cacheResidualLower()
+{
+  const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
+  for (const auto & var : vars)
+  {
+    for (MooseIndex(_cached_residual_values) tag = 0; tag < _cached_residual_values.size(); tag++)
+    {
+      if (_sys.hasVector(tag))
+        cacheResidualBlock(_cached_residual_values[tag],
+                           _cached_residual_rows[tag],
+                           _sub_Rl[tag][var->number()],
+                           var->dofIndicesLower(),
+                           var->scalingFactor());
+    }
+  }
+}
+
+void
 Assembly::cacheResidualNodes(const DenseVector<Number> & res,
                              std::vector<dof_id_type> & dof_index,
                              TagID tag /* = 0*/)
@@ -3121,6 +3184,52 @@ Assembly::addJacobianNeighbor()
                          jacobianBlockNeighbor(Moose::NeighborNeighbor, i, j, tag),
                          ivar->dofIndicesNeighbor(),
                          jvar->dofIndicesNeighbor(),
+                         ivar->scalingFactor());
+      }
+  }
+}
+
+void
+Assembly::addJacobianLower()
+{
+  for (const auto & it : _cm_ff_entry)
+  {
+    auto ivar = it.first;
+    auto jvar = it.second;
+    auto i = ivar->number();
+    auto j = jvar->number();
+    for (MooseIndex(_jacobian_block_lower_used) tag = 0; tag < _jacobian_block_lower_used.size();
+         tag++)
+      if (_jacobian_block_lower_used[tag][i][j] && _sys.hasMatrix(tag))
+      {
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockLower(Moose::LowerLower, i, j, tag),
+                         ivar->dofIndicesLower(),
+                         jvar->dofIndicesLower(),
+                         ivar->scalingFactor());
+
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockLower(Moose::LowerSlave, i, j, tag),
+                         ivar->dofIndicesLower(),
+                         jvar->dofIndices(),
+                         ivar->scalingFactor());
+
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockLower(Moose::LowerMaster, i, j, tag),
+                         ivar->dofIndicesLower(),
+                         jvar->dofIndicesNeighbor(),
+                         ivar->scalingFactor());
+
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockLower(Moose::SlaveLower, i, j, tag),
+                         ivar->dofIndices(),
+                         jvar->dofIndicesLower(),
+                         ivar->scalingFactor());
+
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockLower(Moose::MasterLower, i, j, tag),
+                         ivar->dofIndicesNeighbor(),
+                         jvar->dofIndicesLower(),
                          ivar->scalingFactor());
       }
   }

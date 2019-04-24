@@ -25,26 +25,20 @@ template <ComputeStage compute_stage>
 EqualGradientConstraint<compute_stage>::EqualGradientConstraint(const InputParameters & parameters)
   : MortarConstraint<compute_stage>(parameters), _component(adGetParam<unsigned int>("component"))
 {
-  _need_primal_gradient = true;
 }
 
 template <ComputeStage compute_stage>
 ADReal
-EqualGradientConstraint<compute_stage>::computeQpResidual()
+EqualGradientConstraint<compute_stage>::computeQpResidual(Moose::MortarType mortar_type)
 {
-  return (_grad_u_master[_qp](_component) - _grad_u_slave[_qp](_component)) * _test[_i][_qp];
-}
-
-template <ComputeStage compute_stage>
-ADReal
-EqualGradientConstraint<compute_stage>::computeQpResidualSide(Moose::ConstraintType res_type)
-{
-  switch (res_type)
+  switch (mortar_type)
   {
-    case Moose::Master:
-      return _lambda[_qp] * _grad_test_master[_i][_qp](_component);
-    case Moose::Slave:
+    case Moose::MortarType::Slave:
       return -_lambda[_qp] * _grad_test_slave[_i][_qp](_component);
+    case Moose::MortarType::Master:
+      return _lambda[_qp] * _grad_test_master[_i][_qp](_component);
+    case Moose::MortarType::Lower:
+      return (_grad_u_master[_qp](_component) - _grad_u_slave[_qp](_component)) * _test[_i][_qp];
     default:
       return 0;
   }

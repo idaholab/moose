@@ -68,6 +68,13 @@ public:
   void prepareVectorTagNeighbor(Assembly & assembly, unsigned int ivar);
 
   /**
+   * Prepare data for computing the residual according to active tags for mortar constraints.
+   * Residual blocks for different tags will be extracted from Assembly.  A local residual will be
+   * zeroed. It should be called right before the local element vector is computed.
+   */
+  void prepareVectorTagLower(Assembly & assembly, unsigned int ivar);
+
+  /**
    * Prepare data for computing element jacobian according to the ative tags.
    * Jacobian blocks for different tags will be extracted from Assembly.
    * A local Jacobian will be zeroed. It should be called
@@ -86,6 +93,16 @@ public:
                                 unsigned int ivar,
                                 unsigned int jvar,
                                 Moose::DGJacobianType type);
+
+  /**
+   * Prepare data for computing the jacobian according to the ative tags for mortar.  Jacobian
+   * blocks for different tags will be extracted from Assembly.  A local Jacobian will be zeroed. It
+   * should be called right before the local element matrix is computed.
+   */
+  void prepareMatrixTagLower(Assembly & assembly,
+                             unsigned int ivar,
+                             unsigned int jvar,
+                             Moose::ConstraintJacobianType type);
 
   /**
    * Local residual blocks  will be appended by adding the current local kernel residual.

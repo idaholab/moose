@@ -369,6 +369,12 @@ public:
   const MooseArray<Real> & JxWNeighbor() const { return _current_JxW_neighbor; }
 
   /**
+   * Returns the reference to the current quadrature points being used on the neighbor face
+   * @return A _reference_.  Make sure to store this as a reference!
+   */
+  const MooseArray<Point> & qPointsFaceNeighbor() const { return _current_q_points_face_neighbor; }
+
+  /**
    * Returns the reference to the node
    * @return A _reference_.  Make sure to store this as a reference!
    */
@@ -449,6 +455,28 @@ public:
                            const std::vector<Point> * const pts,
                            const std::vector<Real> * const weights = nullptr);
 
+  /**
+   * reinitialize a mortar segment mesh element in order to get a proper JxW
+   */
+  void reinitMortarElem(const Elem * elem);
+
+  /**
+   * Returns a reference to JxW for mortar segment elements
+   */
+  const std::vector<Real> & jxWMortar() const { return *_JxW_msm; }
+
+  /**
+   * Returns a reference to the quadrature rule for the mortar segments
+   */
+  const QBase * const & qRuleMortar() const { return _const_qrule_msm; }
+
+private:
+  /**
+   * compute AD things on an element face
+   */
+  void computeADFace(const Elem * elem, unsigned int side);
+
+public:
   /**
    * Reinitialize the assembly data at specific physical point in the given element.
    */
@@ -596,15 +624,20 @@ public:
                           TagID tag = 0);
 
   /**
-   * Takes the values that are currently in _sub_Ke and appends them to the cached values.
+   * Takes the values that are currently in _sub_Rn and appends them to the cached values.
    */
   void cacheResidualNeighbor();
+
+  /**
+   * Takes the values that are currently in _sub_Rl and appends them to the cached values.
+   */
+  void cacheResidualLower();
 
   void addCachedResiduals();
 
   /**
-   * Adds the values that have been cached by calling cacheResidual() and or cacheResidualNeighbor()
-   * to the residual.
+   * Adds the values that have been cached by calling cacheResidual(), cacheResidualNeighbor(),
+   * and/or cacheResidualLower() to the residual.
    *
    * Note that this will also clear the cache.
    */
@@ -630,7 +663,20 @@ public:
                                 const DofMap & dof_map,
                                 const std::vector<dof_id_type> & idof_indices,
                                 const std::vector<dof_id_type> & jdof_indices);
+
+  /**
+   * Add ElementNeighbor, NeighborElement, and NeighborNeighbor portions of the Jacobian for compute
+   * objects like DGKernels
+   */
   void addJacobianNeighbor();
+
+  /**
+   * Add LowerLower, LowerSlave (LowerElement), LowerMaster (LowerNeighbor), SlaveLower
+   * (ElementLower), and MasterLower (NeighborLower) portions of the Jacobian for compute objects
+   * like MortarConstraints
+   */
+  void addJacobianLower();
+
   void addJacobianNeighbor(SparseMatrix<Number> & jacobian,
                            unsigned int ivar,
                            unsigned int jvar,
@@ -679,6 +725,11 @@ public:
   DenseVector<Number> & residualBlockNeighbor(unsigned int var_num, TagID tag_id = 0)
   {
     return _sub_Rn[tag_id][var_num];
+  }
+
+  DenseVector<Number> & residualBlockLower(unsigned int var_num, TagID tag_id = 0)
+  {
+    return _sub_Rl[tag_id][var_num];
   }
 
   DenseMatrix<Number> & jacobianBlock(unsigned int ivar, unsigned int jvar, TagID tag = 0);
@@ -1397,12 +1448,28 @@ private:
   const QBase * _const_current_qrule_neighbor;
   /// quadrature rule used on neighbors
   QBase * _current_qrule_neighbor;
+  /// The current quadrature points on the neighbor face
+  MooseArray<Point> _current_q_points_face_neighbor;
   /// Holds arbitrary qrules for each dimension
   std::map<unsigned int, ArbitraryQuadrature *> _holder_qrule_neighbor;
   /// The current transformed jacobian weights on a neighbor's face
   MooseArray<Real> _current_JxW_neighbor;
   /// The current coordinate transformation coefficients
   MooseArray<Real> _coord_neighbor;
+
+  /********** mortar stuff *************/
+
+  /// A JxW for working on mortar segement elements
+  const std::vector<Real> * _JxW_msm;
+  /// A FE object for working on mortar segement elements
+  std::unique_ptr<FEBase> _fe_msm;
+  /// A qrule object for working on mortar segement elements. This needs to be a
+  /// raw pointer because we need to be able to return a reference to it because
+  /// we will be constructing other objects that need the qrule before the qrule
+  /// is actually created
+  QBase * _qrule_msm;
+  /// A pointer to const qrule_msm
+  const QBase * _const_qrule_msm;
 
   /// The current "element" we are currently on.
   const Elem * _current_elem;

@@ -29,14 +29,14 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
     MeshBase & mesh_in,
     const std::pair<BoundaryID, BoundaryID> & boundary_key,
     const std::pair<SubdomainID, SubdomainID> & subdomain_key,
-    bool on_displaced)
+    bool on_displaced,
+    bool periodic)
   : mesh(mesh_in),
     mortar_segment_mesh(mesh_in.comm()),
     h_max(0.),
-    _periodic(false),
-    _periodic_set_externally(false),
     _debug(false),
-    _on_displaced(on_displaced)
+    _on_displaced(on_displaced),
+    _periodic(periodic)
 {
   master_slave_boundary_id_pairs.push_back(boundary_key);
   master_requested_boundary_ids.insert(boundary_key.first);
@@ -1044,18 +1044,4 @@ AutomaticMortarGeneration::writeNodalNormalsToFile()
 
   // Write the nodal normals to file
   ExodusII_IO(this->mesh).write_equation_systems("nodal_normals_only.e", nodal_normals_es);
-}
-
-void
-AutomaticMortarGeneration::periodicConstraint(bool periodic)
-{
-  if (_periodic_set_externally && periodic != _periodic)
-    mooseError("Attempting to use the same AutomaticMortarGeneration object for enforcing both "
-               "normal and periodic mortar constraints. We cannot do this because the two types of "
-               "constraints use different facing normal projection operations");
-  else
-  {
-    _periodic_set_externally = true;
-    _periodic = periodic;
-  }
 }

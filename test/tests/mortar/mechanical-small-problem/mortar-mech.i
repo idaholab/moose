@@ -81,35 +81,38 @@
 [Constraints]
   [lm]
     type = MechanicalContactLMTest
-    master_boundary_id = '2'
-    slave_boundary_id = '1'
-    master_subdomain_id = '20'
-    slave_subdomain_id = '10'
+    master_boundary = '2'
+    slave_boundary = '1'
+    master_subdomain = '20'
+    slave_subdomain = '10'
     variable = lambda
     slave_variable = disp_x
     use_displaced_mesh = true
+    compute_primal_residuals = false
   []
   [x]
     type = MechanicalContactTest
-    master_boundary_id = '2'
-    slave_boundary_id = '1'
-    master_subdomain_id = '20'
-    slave_subdomain_id = '10'
+    master_boundary = '2'
+    slave_boundary = '1'
+    master_subdomain = '20'
+    slave_subdomain = '10'
     variable = lambda
     slave_variable = disp_x
     component = x
     use_displaced_mesh = true
+    compute_lm_residuals = false
   []
   [y]
     type = MechanicalContactTest
-    master_boundary_id = '2'
-    slave_boundary_id = '1'
-    master_subdomain_id = '20'
-    slave_subdomain_id = '10'
+    master_boundary = '2'
+    slave_boundary = '1'
+    master_subdomain = '20'
+    slave_subdomain = '10'
     variable = lambda
     slave_variable = disp_y
     component = y
     use_displaced_mesh = true
+    compute_lm_residuals = false
   []
 []
 

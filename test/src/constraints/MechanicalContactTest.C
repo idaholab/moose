@@ -27,12 +27,12 @@ MechanicalContactTest<compute_stage>::MechanicalContactTest(const InputParameter
 }
 
 template <ComputeStage compute_stage>
-ADResidual
-MechanicalContactTest<compute_stage>::computeQpResidualSide(Moose::ConstraintType type)
+ADReal
+MechanicalContactTest<compute_stage>::computeQpResidual(Moose::MortarType type)
 {
   switch (type)
   {
-    case Moose::Slave:
+    case Moose::MortarType::Slave:
       // If normals is positive, then this residual is positive, indicating that we have an outflow
       // of momentum, which in turn indicates that the momentum will tend to decrease at this
       // location with time, which is what we want because the force vector is in the negative
@@ -43,7 +43,7 @@ MechanicalContactTest<compute_stage>::computeQpResidualSide(Moose::ConstraintTyp
       // normals).
       return _test_slave[_i][_qp] * _lambda[_qp] * _normals[_qp](_component);
 
-    case Moose::Master:
+    case Moose::MortarType::Master:
       // The normal vector is signed according to the slave face, so we need to introduce a negative
       // sign here
       return -_test_master[_i][_qp] * _lambda[_qp] * _normals[_qp](_component);

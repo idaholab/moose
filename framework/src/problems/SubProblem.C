@@ -702,6 +702,7 @@ SubProblem::reinitElemFaceRef(const Elem * elem,
 void
 SubProblem::reinitNeighborFaceRef(const Elem * neighbor_elem,
                                   unsigned int neighbor_side,
+                                  BoundaryID bnd_id,
                                   Real tolerance,
                                   const std::vector<Point> * const pts,
                                   const std::vector<Real> * const weights,
@@ -723,8 +724,8 @@ SubProblem::reinitNeighborFaceRef(const Elem * neighbor_elem,
   assembly(tid).prepareNeighbor();
 
   // Let's finally compute our variable values!
-  systemBaseNonlinear().reinitNeighbor(neighbor_elem, tid);
-  systemBaseAuxiliary().reinitNeighbor(neighbor_elem, tid);
+  systemBaseNonlinear().reinitNeighborFace(neighbor_elem, neighbor_side, bnd_id, tid);
+  systemBaseAuxiliary().reinitNeighborFace(neighbor_elem, neighbor_side, bnd_id, tid);
 }
 
 void
@@ -748,4 +749,10 @@ SubProblem::reinitLowerDElemRef(const Elem * elem,
   // Let's finally compute our variable values!
   systemBaseNonlinear().reinitLowerD(tid);
   systemBaseAuxiliary().reinitLowerD(tid);
+}
+
+void
+SubProblem::reinitMortarElem(const Elem * elem, THREAD_ID tid)
+{
+  assembly(tid).reinitMortarElem(elem);
 }

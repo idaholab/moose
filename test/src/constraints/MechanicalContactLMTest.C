@@ -20,22 +20,31 @@ MechanicalContactLMTest<compute_stage>::MechanicalContactLMTest(const InputParam
 }
 
 template <ComputeStage compute_stage>
-ADResidual
-MechanicalContactLMTest<compute_stage>::computeQpResidual()
+ADReal
+MechanicalContactLMTest<compute_stage>::computeQpResidual(Moose::MortarType mortar_type)
 {
-  if (_has_master)
+  switch (mortar_type)
   {
-    auto gap_vec = _phys_points_master[_qp] - _phys_points_slave[_qp];
-    auto gap_mag = gap_vec.norm();
-    ADReal gap;
-    if (gap_vec * _normals[_qp] >= 0)
-      gap = gap_mag;
-    else
-      gap = -gap_mag;
+    case Moose::MortarType::Lower:
+    {
+      if (_has_master)
+      {
+        auto gap_vec = _phys_points_master[_qp] - _phys_points_slave[_qp];
+        auto gap_mag = gap_vec.norm();
+        ADReal gap;
+        if (gap_vec * _normals[_qp] >= 0)
+          gap = gap_mag;
+        else
+          gap = -gap_mag;
 
-    return _test[_i][_qp] *
-           (_lambda[_qp] + gap - std::sqrt(_lambda[_qp] * _lambda[_qp] + gap * gap));
+        return _test[_i][_qp] *
+               (_lambda[_qp] + gap - std::sqrt(_lambda[_qp] * _lambda[_qp] + gap * gap));
+      }
+      else
+        return _test[_i][_qp] * _lambda[_qp];
+    }
+
+    default:
+      return 0;
   }
-  else
-    return _test[_i][_qp] * _lambda[_qp];
 }
