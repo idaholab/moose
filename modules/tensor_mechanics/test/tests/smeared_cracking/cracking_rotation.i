@@ -167,7 +167,7 @@
     end_time = 10.0
     disable_objects = 'BCs/x_lt BCs/x_rt'
     enable_objects = 'BCs/top_pull'
-    set_outside_of_range = false
+    reverse_on_false = false
     execute_on = 'initial timestep_begin'
   [../]
   [./p2]
@@ -175,7 +175,7 @@
     start_time = 10.0
     end_time = 101.0
     disable_objects = 'BCs/x_lt BCs/x_rt BCs/top_pull'
-    set_outside_of_range = false
+    reverse_on_false = false
     execute_on = 'initial timestep_begin'
   [../]
   [./p3]
@@ -184,7 +184,7 @@
     end_time = 110.0
     enable_objects = 'BCs/x_lt BCs/x_rt'
     disable_objects = 'BCs/top_pull'
-    set_outside_of_range = false
+    reverse_on_false = false
     execute_on = 'initial timestep_begin'
   [../]
 []
