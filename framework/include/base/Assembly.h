@@ -913,11 +913,7 @@ public:
   const typename VariableTestGradientType<OutputType, ComputeStage::JACOBIAN>::type &
   feADGradPhi(FEType type) const
   {
-    if (_ad_grad_phi_data.find(type) != _ad_grad_phi_data.end())
-      return _ad_grad_phi_data.at(type);
-    else
-      mooseError(
-          "No matching ad_grad_phi_data for family ", type.family, " and order ", type.order);
+    return _ad_grad_phi_data[type];
   }
 
   template <typename OutputType>
@@ -952,11 +948,7 @@ public:
   const typename VariableTestGradientType<OutputType, ComputeStage::JACOBIAN>::type &
   feADGradPhiFace(FEType type) const
   {
-    if (_ad_grad_phi_data_face.find(type) != _ad_grad_phi_data_face.end())
-      return _ad_grad_phi_data_face.at(type);
-    else
-      mooseError(
-          "No matching ad_grad_phi_data_face for family ", type.family, " and order ", type.order);
+    return _ad_grad_phi_data_face[type];
   }
 
   template <typename OutputType>
@@ -1368,8 +1360,6 @@ private:
   MooseArray<Point> _current_normals;
   /// Holds face qrules for each dimension
   std::map<unsigned int, QBase *> _holder_qrule_face;
-  /// Holds arbitrary face qrules for each dimension
-  std::map<unsigned int, ArbitraryQuadrature *> _holder_qface_arbitrary;
   /// Holds pointers to the dimension's q_points on a face
   std::map<unsigned int, const std::vector<Point> *> _holder_q_points_face;
   /// Holds pointers to the dimension's transformed jacobian weights on a face
@@ -1556,13 +1546,15 @@ private:
   mutable std::map<FEType, VectorFEShapeData *> _vector_fe_shape_data_face_neighbor;
   mutable std::map<FEType, VectorFEShapeData *> _vector_fe_shape_data_lower;
 
-  std::map<FEType, typename VariableTestGradientType<Real, ComputeStage::JACOBIAN>::type>
+  mutable std::map<FEType, typename VariableTestGradientType<Real, ComputeStage::JACOBIAN>::type>
       _ad_grad_phi_data;
-  std::map<FEType, typename VariableTestGradientType<RealVectorValue, ComputeStage::JACOBIAN>::type>
+  mutable std::map<FEType,
+                   typename VariableTestGradientType<RealVectorValue, ComputeStage::JACOBIAN>::type>
       _ad_vector_grad_phi_data;
-  std::map<FEType, typename VariableTestGradientType<Real, ComputeStage::JACOBIAN>::type>
+  mutable std::map<FEType, typename VariableTestGradientType<Real, ComputeStage::JACOBIAN>::type>
       _ad_grad_phi_data_face;
-  std::map<FEType, typename VariableTestGradientType<RealVectorValue, ComputeStage::JACOBIAN>::type>
+  mutable std::map<FEType,
+                   typename VariableTestGradientType<RealVectorValue, ComputeStage::JACOBIAN>::type>
       _ad_vector_grad_phi_data_face;
 
   /// Values cached by calling cacheResidual() (the first vector is for TIME vs NONTIME)
@@ -1655,24 +1647,14 @@ template <>
 inline const typename VariableTestGradientType<RealVectorValue, ComputeStage::JACOBIAN>::type &
 Assembly::feADGradPhi<RealVectorValue>(FEType type) const
 {
-  if (_ad_vector_grad_phi_data.find(type) != _ad_vector_grad_phi_data.end())
-    return _ad_vector_grad_phi_data.at(type);
-  else
-    mooseError(
-        "No matching ad_vector_grad_phi_data for family ", type.family, " and order ", type.order);
+  return _ad_vector_grad_phi_data[type];
 }
 
 template <>
 inline const typename VariableTestGradientType<RealVectorValue, ComputeStage::JACOBIAN>::type &
 Assembly::feADGradPhiFace<RealVectorValue>(FEType type) const
 {
-  if (_ad_vector_grad_phi_data_face.find(type) != _ad_vector_grad_phi_data_face.end())
-    return _ad_vector_grad_phi_data_face.at(type);
-  else
-    mooseError("No matching ad_vector_grad_phi_data_face for family ",
-               type.family,
-               " and order ",
-               type.order);
+  return _ad_vector_grad_phi_data_face[type];
 }
 
 template <>

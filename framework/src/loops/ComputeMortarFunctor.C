@@ -32,24 +32,26 @@ ComputeMortarFunctor<compute_stage>::ComputeMortarFunctor(
     _moose_parent_mesh(_subproblem.mesh()),
     _interior_dimension(_moose_parent_mesh.getMesh().mesh_dimension()),
     _msm_dimension(_interior_dimension - 1),
-    _qrule_msm(_assembly.qRuleFace())
+    _qrule_msm(_assembly.writeableQRuleFace())
 {
   // Constructor the mortar constraints we will later loop over
   if (compute_stage == ComputeStage::RESIDUAL)
   {
-    for (const auto mc : mortar_constraints)
-      if (const auto cmc = std::dynamic_pointer_cast<MortarConstraint<ComputeStage::RESIDUAL>>(mc))
+    for (auto && mc : mortar_constraints)
+      if (const auto * cmc =
+              std::dynamic_pointer_cast<MortarConstraint<ComputeStage::RESIDUAL>>(mc).get())
         _mortar_constraints.push_back(cmc);
   }
   else if (compute_stage == ComputeStage::JACOBIAN)
-    for (const auto mc : mortar_constraints)
-      if (const auto cmc = std::dynamic_pointer_cast<MortarConstraint<ComputeStage::JACOBIAN>>(mc))
+    for (auto && mc : mortar_constraints)
+      if (const auto * cmc =
+              std::dynamic_pointer_cast<MortarConstraint<ComputeStage::JACOBIAN>>(mc).get())
         _mortar_constraints.push_back(cmc);
 
   // Create the FE object that we will use for JxW
   {
     Order order_for_jxw_fe = _moose_parent_mesh.hasSecondOrderElements() ? SECOND : FIRST;
-    _fe_for_jxw(FEBase::build(_msm_dimension, FEType(order_for_jxw_fe, LAGRANGE)));
+    _fe_for_jxw = FEBase::build(_msm_dimension, FEType(order_for_jxw_fe, LAGRANGE));
 
     _fe_for_jxw->attach_quadrature_rule(_qrule_msm);
 
@@ -164,9 +166,12 @@ ComputeMortarFunctor<compute_stage>::operator()()
       _subproblem.reinitNeighborFaceRef(master_ip, master_side_id, TOLERANCE, &custom_xi2_pts);
     }
 
-    if (compute_stage == ComputeStage::RESIDUAL)
-      computeElementResidual();
-    else
-      computeElementJacobian();
+    //   if (compute_stage == ComputeStage::RESIDUAL)
+    //     computeElementResidual();
+    //   else
+    //     computeElementJacobian();
   }
 }
+
+template class ComputeMortarFunctor<ComputeStage::RESIDUAL>;
+template class ComputeMortarFunctor<ComputeStage::JACOBIAN>;

@@ -36,6 +36,10 @@ public:
   {
     return _undisplaced_system.getVector(tag_id);
   }
+  virtual const NumericVector<Number> & getVector(TagID tag_id) const override
+  {
+    return _undisplaced_system.getVector(tag_id);
+  }
 
   virtual TagID residualVectorTag() override { return _undisplaced_system.residualVectorTag(); }
 
@@ -129,6 +133,8 @@ public:
 
   virtual Number & duDotDu() override { return _undisplaced_system.duDotDu(); }
   virtual Number & duDotDotDu() override { return _undisplaced_system.duDotDotDu(); }
+  virtual const Number & duDotDu() const override { return _undisplaced_system.duDotDu(); }
+  virtual const Number & duDotDotDu() const override { return _undisplaced_system.duDotDotDu(); }
 
   /**
    * Return the residual copy from the NonlinearSystem
@@ -195,6 +201,10 @@ public:
   }
 
   virtual SparseMatrix<Number> & getMatrix(TagID tag) override
+  {
+    return _undisplaced_system.getMatrix(tag);
+  }
+  virtual const SparseMatrix<Number> & getMatrix(TagID tag) const override
   {
     return _undisplaced_system.getMatrix(tag);
   }

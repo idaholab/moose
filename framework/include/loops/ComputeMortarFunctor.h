@@ -42,19 +42,22 @@ public:
   void operator()();
 
 private:
-  /**
-   * Computes a residual
-   */
-  void computeElementResidual();
+  // /**
+  //  * Computes a residual
+  //  */
+  // void computeElementResidual();
 
-  /**
-   * Computes a jacobian
-   */
-  void computeElementJacobian();
+  // /**
+  //  * Computes a jacobian
+  //  */
+  // void computeElementJacobian();
 
 private:
-  /// The mortar constraints to loop over when on each element
-  std::vector<const std::shared_ptr<MortarConstraint<compute_stage>>> _mortar_constraints;
+  /// The mortar constraints to loop over when on each element. These must be
+  /// pointers to the base class otherwise the compiler will fail to compile
+  /// when running std::vector<MortarConstraint0>::push_back(MortarConstraint1>
+  /// or visa versa
+  std::vector<const MortarConstraintBase *> _mortar_constraints;
 
   /// Automatic mortar generation (amg) object providing the mortar mesh to loop over
   const AutomaticMortarGeneration & _amg;
@@ -75,7 +78,7 @@ private:
   const unsigned _msm_dimension;
 
   /// The mortar segment quadrature rule
-  libMesh::QBase *& _qrule_msm;
+  libMesh::QBase * const & _qrule_msm;
 
   /// The FE object used for generating JxW
   std::unique_ptr<libMesh::FEBase> _fe_for_jxw;

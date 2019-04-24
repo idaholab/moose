@@ -151,8 +151,8 @@ ConstraintWarehouse::getActiveMortarConstraints(
   }
 
   mooseAssert(it != end_it,
-              "No MortarConstraints exist for the specified master-slave boundary pair: "
-                  << mortar_interface_key);
+              "No MortarConstraints exist for the specified master-slave boundary pair, master "
+                  << mortar_interface_key.first << " and slave " << mortar_interface_key.second);
 
   return it->second.getActiveObjects();
 }

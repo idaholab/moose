@@ -215,6 +215,11 @@ MooseVariableData<OutputType>::sln(Moose::SolutionState state) const
       _need_u_previous_nl = true;
       return _u_previous_nl;
     }
+
+    default:
+      // We should never get here but gcc requires that we have a default. See
+      // htpps://stackoverflow.com/questions/18680378/after-defining-case-for-all-enum-values-compiler-still-says-control-reaches-e
+      mooseError("Unknown SolutionState!");
   }
 }
 
@@ -244,6 +249,11 @@ MooseVariableData<OutputType>::gradSln(Moose::SolutionState state) const
       _need_grad_previous_nl = true;
       return _grad_u_previous_nl;
     }
+
+    default:
+      // We should never get here but gcc requires that we have a default. See
+      // htpps://stackoverflow.com/questions/18680378/after-defining-case-for-all-enum-values-compiler-still-says-control-reaches-e
+      mooseError("Unknown SolutionState!");
   }
 }
 
@@ -278,6 +288,11 @@ MooseVariableData<OutputType>::secondSln(Moose::SolutionState state) const
       _need_second_previous_nl = true;
       return _second_u_previous_nl;
     }
+
+    default:
+      // We should never get here but gcc requires that we have a default. See
+      // htpps://stackoverflow.com/questions/18680378/after-defining-case-for-all-enum-values-compiler-still-says-control-reaches-e
+      mooseError("Unknown SolutionState!");
   }
 }
 
@@ -567,7 +582,9 @@ MooseVariableData<OutputType>::computeValues()
 
       if (second_required)
       {
-        libmesh_assert(second_phi);
+        mooseAssert(
+            _current_second_phi,
+            "We're requiring a second calculation but have not set a second shape function!");
         const typename OutputTools<OutputType>::OutputSecond d2phi_local =
             (*_current_second_phi)[i][qp];
 
@@ -589,7 +606,8 @@ MooseVariableData<OutputType>::computeValues()
 
       if (curl_required)
       {
-        libmesh_assert(curl_phi);
+        mooseAssert(_current_curl_phi,
+                    "We're requiring a curl calculation but have not set a curl shape function!");
         const OutputType curl_phi_local = (*_current_curl_phi)[i][qp];
 
         if (_need_curl)
@@ -1081,6 +1099,20 @@ MooseVariableData<OutputType>::dofValuesPreviousNL() const
 
 template <typename OutputType>
 const MooseArray<Number> &
+MooseVariableData<OutputType>::dofValuesDot() const
+{
+  if (_sys.solutionUDot())
+  {
+    _need_dof_values_dot = true;
+    return _dof_values_dot;
+  }
+  else
+    mooseError("MooseVariableFE: Time derivative of solution (`u_dot`) is not stored. Please set "
+               "uDotRequested() to true in FEProblemBase before requesting `u_dot`.");
+}
+
+template <typename OutputType>
+const MooseArray<Number> &
 MooseVariableData<OutputType>::dofValuesDotDot() const
 {
   if (_sys.solutionUDotDot())
@@ -1201,6 +1233,11 @@ MooseVariableData<OutputType>::nodalValue(Moose::SolutionState state) const
         _need_dof_values_previous_nl = true;
         return _nodal_value_previous_nl;
       }
+
+      default:
+        // We should never get here but gcc requires that we have a default. See
+        // htpps://stackoverflow.com/questions/18680378/after-defining-case-for-all-enum-values-compiler-still-says-control-reaches-e
+        mooseError("Unknown SolutionState!");
     }
   }
   else

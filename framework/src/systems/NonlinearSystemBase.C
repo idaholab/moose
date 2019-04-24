@@ -3057,9 +3057,10 @@ NonlinearSystemBase::mortarResidualConstraints(bool displaced)
       end_it = _displaced_mortar_residual_functors.end();
     }
 
-    mooseAssert(it != end_it,
-                "No ComputeMortarFunctor exists for the specified master-slave boundary pair: "
-                    << mortar_interface.first);
+    mooseAssert(
+        it != end_it,
+        "No ComputeMortarFunctor exists for the specified master-slave boundary pair, master "
+            << mortar_interface.first.first << " and slave " << mortar_interface.first.second);
     it->second();
   }
 }
@@ -3087,9 +3088,10 @@ NonlinearSystemBase::mortarJacobianConstraints(bool displaced)
       end_it = _displaced_mortar_jacobian_functors.end();
     }
 
-    mooseAssert(it != end_it,
-                "No ComputeMortarFunctor exists for the specified master-slave boundary pair: "
-                    << mortar_interface.first);
+    mooseAssert(
+        it != end_it,
+        "No ComputeMortarFunctor exists for the specified master-slave boundary pair, master "
+            << mortar_interface.first.first << " and slave " << mortar_interface.first.second);
     it->second();
   }
 }

@@ -131,6 +131,10 @@ Assembly::~Assembly()
     for (auto & it : _fe_face_neighbor[dim])
       delete it.second;
 
+  for (unsigned int dim = 0; dim <= _mesh_dimension - 1; dim++)
+    for (auto & it : _fe_lower[dim])
+      delete it.second;
+
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
     for (auto & it : _vector_fe[dim])
       delete it.second;
@@ -153,7 +157,7 @@ Assembly::~Assembly()
   for (auto & it : _holder_qrule_arbitrary)
     delete it.second;
 
-  for (auto & it : _holder_qface_arbitrary)
+  for (auto & it : _holder_qrule_arbitrary_face)
     delete it.second;
 
   for (auto & it : _holder_qrule_face)
@@ -184,6 +188,9 @@ Assembly::~Assembly()
     delete it.second;
 
   for (auto & it : _vector_fe_shape_data_face_neighbor)
+    delete it.second;
+
+  for (auto & it : _fe_shape_data_lower)
     delete it.second;
 
   for (auto & it : _ad_grad_phi_data)
