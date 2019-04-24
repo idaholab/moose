@@ -159,7 +159,7 @@ class JobDAG(object):
     def _haltDescent(self, job):
         """ return boolean if this job should not allow its children to run """
         tester = job.getTester()
-        if (job.isFail()
+        if (job.isError()
             or job.isSkip()
             or tester.isFail()
             or tester.isSkip()

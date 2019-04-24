@@ -152,4 +152,4 @@ class RunPBS(QueueManager):
                                     'NCPUS' : template['mpi_procs'],
                                     'WALLTIME' : template['walltime'],
                                     'QSUB_OUTPUT' : template['output']})
-            tester.setStatus(tester.no_status, 'LAUNCHING')
+            tester.setStatus(tester.queued, 'LAUNCHING')

@@ -23,3 +23,6 @@ class TestHarnessTester(TestHarnessTestCase):
         self.assertRegexpMatches(e.output, r'test_harness\.csvdiff.*?FAILED \(CSVDIFF\)')
         self.assertRegexpMatches(e.output, r'test_harness\.exodiff.*?Running exodiff')
         self.assertRegexpMatches(e.output, r'test_harness\.csvdiff.*?Running csvdiff')
+
+        # Verify return code is DIFF related (0x81)
+        self.assertIs(0x81, e.returncode)

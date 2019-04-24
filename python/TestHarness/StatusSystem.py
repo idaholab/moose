@@ -9,209 +9,113 @@
 
 from collections import namedtuple
 
-class TestStatus(object):
+def initStatus():
+    status = namedtuple('status', 'status color code')
+    return status
+
+class StatusSystemError(Exception):
+    pass
+
+class StatusSystem(object):
     """
-    Class for handling all possible test statuses.
-    Every status that is NOT 'no_status' is a Finished status.
+    A Class for supplying statuses, with status text color and corresponding exit codes.
+
+    Syntax:
+    status = StatusSystem()
+
+    status.getStatus()
+      returns a named tuple:
+      status(status='NA', color='GREY', code=0x0)
+
+    status.setStatus(status.fail)
+      returns a named tuple:
+      status(status='FAIL', color='RED', code=0x80)
+
+
+    Available statuses:
+
+      no_status   the default status when instanced
+      success     exit code 0, passing
+      skip        exit code 0, skipped
+      silent      exit code 0, skipped and also silent
+      fail        exit code 0x80, an general error
+      diff        exit code 0x81, an error due to exodiff, csvdiff
+      deleted     exit code 0x83, some tests are instructed not to run (never fixable), but when instructed to do so they fail
+      error       exit code 0x84, an error caused by the TestHarness itself
+      timeout     exit code 0x1, an error caused by a test exceeding it's max_time
+      hold        exit code 0, used to identify the state of a test as it moves around in the TestHarness
+      queued      exit code 0, used to identify the state of a test as it moves around in the TestHarness
+      running     exit code 0, used to identify the state of a test as it moves around in the TestHarness
+      finished    exit code 0, used to identify the state of a test as it moves around in the TestHarness
     """
+    status = initStatus()
 
-    test_status = namedtuple('status', 'status color')
-    no_status = test_status(status='NA', color='GREY')
-    skip = test_status(status='SKIP', color='GREY')
-    silent = test_status(status='SILENT', color='GREY')
-    success = test_status(status='OK', color='GREEN')
-    fail = test_status(status='FAIL', color='RED')
-    diff = test_status(status='DIFF', color='YELLOW')
-    deleted = test_status(status='DELETED', color='RED')
-    finished = test_status(status='FINISHED', color='GREY')
+    # Default statuses
+    no_status = status(status='NA', color='GREY', code=0x0)
 
-    __passing_statuses = set([success])
-    __failing_statuses = set([fail, diff, deleted])
-    __skipped_statuses = set([skip, silent, deleted])
-    __silent_statuses = set([silent, deleted])
+    # exit-zero statuses
+    success = status(status='OK', color='GREEN', code=0x0)
+    skip = status(status='SKIP', color='GREY', code=0x0)
+    silent = status(status='SILENT', color='GREY', code=0x0)
 
-    def __init__(self, options, status=no_status):
-        self.options = options
-        self.__status = status
-        self.__message = ''
+    # non-zero statuses
+    fail = status(status='FAIL', color='RED', code=0x80)
+    diff = status(status='DIFF', color='YELLOW', code=0x81)
+    deleted = status(status='DELETED', color='RED', code=0x83)
+    error  = status(status='ERROR', color='RED', code=0x80)
+    timeout  = status(status='TIMEOUT', color='RED', code=0x1)
 
-    def setStatus(self, status, message=''):
-        """ Set a tester status with optional message """
+    # Pending statuses
+    hold  = status(status='HOLD', color='CYAN', code=0x0)
+    queued  = status(status='QUEUED', color='CYAN', code=0x0)
+    running  = status(status='RUNNING', color='CYAN', code=0x0)
 
-        self.__status = status
+    # all-encompassing finished status
+    finished  = status(status='FINISHED', color='GREY', code=0x0)
 
-        # Use status identifing string as the message if none supplied
-        if not message:
-            message = status.status
-        self.__message = message
+    __all_statuses = [no_status,
+                      success,
+                      skip,
+                      silent,
+                      fail,
+                      diff,
+                      deleted,
+                      error,
+                      timeout,
+                      hold,
+                      queued,
+                      running,
+                      finished]
 
-        return self.__status
+    def __init__(self):
+        self.__status = self.no_status
+
+    def createStatus(self, status_key='NA'):
+        """ return a specific status object based on supplied status name """
+        for status in self.__all_statuses:
+            if status_key == status.status:
+                return status
 
     def getStatus(self):
+        """
+        Return the status object.
+        """
         return self.__status
 
-    def createStatus(self):
-        """ return a compatible status tuple """
-        return self.test_status
+    def setStatus(self, status=no_status):
+        """
+        Set the current status to status. If status is not supplied, 'no_status' is implied.
+        There is a validation check during this process to ensure the named tuple adheres to
+        this class's set statuses.
+        """
+        if self.isValid(status):
+            self.__status = status
+        else:
+            raise StatusSystemError('Invalid status! %s' % (str(status)))
+        return self.__status
 
-    def getStatusMessage(self):
-        """ return what ever current message is set """
-        return self.__message
-
-    def getColor(self):
-        """ return what color should be used to print current status """
-        return self.__status.color
-
-    def isNoStatus(self):
-        """ boolean initialized status """
-        return self.__status == self.no_status
-
-    def isSilent(self):
-        """ boolean for statuses which cause a test to be silent """
-        if self.options.extra_info and self.isDeleted():
-            pass
-        elif (not self.options.report_skipped and self.isSkip()
-              or self.__status in self.__silent_statuses):
+    def isValid(self, status):
+        original = set(self.no_status.__dict__.keys())
+        altered = set(status.__dict__.keys())
+        if not original.difference(altered) or status in self.__all_statuses:
             return True
-        return False
-
-    def isDeleted(self):
-        """ boolean deleted status """
-        return self.__status == self.deleted
-
-    def isDiff(self):
-        """ boolean failed diff status """
-        return self.__status == self.diff
-
-    def isFail(self):
-        """ boolean for statuses which causes a test to fail """
-        return not self.isSilent() and self.__status in self.__failing_statuses
-
-    def isPass(self):
-        """ boolean passing status """
-        return self.__status in self.__passing_statuses
-
-    def isSkip(self):
-        """ boolean for statuses which cause a test to be skipped """
-        return (self.__status in self.__skipped_statuses
-                and self.__status not in self.__passing_statuses.union(self.__failing_statuses))
-
-    def isFinished(self):
-        """ boolean finished status """
-        return not self.isNoStatus()
-
-class JobStatus(object):
-    """ Class for handling all possible job statuses """
-
-    job_status = namedtuple('status', 'status color')
-
-    ## Active Statuses ##
-    # All jobs begin with the holding status
-    hold  = job_status(status='HOLD', color='CYAN')
-
-    # Jobs that are queued, are jobs which have been deemed runnable and have been
-    # asynchronously submitted to the multi-threading pool. They can not be 'un-queued'
-    # and will begin work, as soon as an available thread(s) becomes ready.
-    queued  = job_status(status='QUEUED', color='CYAN')
-
-    # Jobs which are currently consuming slot(s)
-    running  = job_status(status='RUNNING', color='CYAN')
-
-    ## Finished Statuses ##
-    # The following statuses are finished status types for the name implied
-    skip  = job_status(status='SKIP', color='GREY')
-    crash  = job_status(status='CRASH', color='RED')
-    error  = job_status(status='ERROR', color='RED')
-
-    # The finished status encompasses all above finished statuses including itself
-    # A job can specifically be set to 'finished', which basically implies the job
-    # was scheduled, and then exited, with no errors generated by the scheduler.
-    finished  = job_status(status='FINISHED', color='GREY')
-
-    def __init__(self, status=hold):
-        self.__status = status
-        self.__message = ''
-
-    def setStatus(self, status, message=''):
-        """ Set a job status with optional message """
-
-        # Protect a finished job status (for sanity reasons)
-        if self.isFinished():
-            return self.__status
-
-        self.__status = status
-        self.__message = message
-        return self.__status
-
-    def getStatus(self):
-        """ return job status """
-        return self.__status
-
-    def getStatusMessage(self):
-        """ return what ever current message is set """
-        return self.__message
-
-    def getColor(self):
-        """ return what color should be used to print current status """
-        return self.__status.color
-
-    def isHold(self):
-        """ boolean holding status """
-        return self.__status == self.hold
-
-    def isQueued(self):
-        """ boolean queued status """
-        return self.__status == self.queued
-
-    def isRunning(self):
-        """ boolean running status """
-        return self.__status == self.running
-
-    def isCrash(self):
-        """
-        boolean for "everything was cool up until it wasn't"
-
-        Failures involving TIMEOUT, or other external factors that
-        may have caused the scheduler to kill the job prematurely.
-        """
-        return self.__status == self.crash
-
-    def isError(self):
-        """
-        boolean for scheduler specific errors.
-
-        Populating the DAG incorrectly, race conditions, fall
-        under this category.
-        """
-        return self.__status == self.error
-
-    def isSkip(self):
-        """ return bool on skipped status """
-        return self.__status == self.skip
-
-    def isPass(self):
-        """
-        Superficial boolean status on a job that is finished,
-        but not failing: The job entered the scheduler and left
-        with out generating an error.
-
-        This does not mean, the final TEST has passed. See the
-        TestStatus class above for those specific statuses.
-        """
-        return self.__status == self.finished and not self.isFail()
-
-    def isFail(self):
-        """
-        boolean for a general failure while attempting to schedule
-        a job. Encompasses all job failures. See isError and
-        isCrash above for more information.
-        """
-        return self.__status == self.error or self.__status == self.crash
-
-    def isFinished(self):
-        """
-        boolean for jobs which have a protected finalized status and
-        will not be allowed back in the queue. The job may, or may
-        not have run successfully. See isPass an isFail.
-        """
-        return self.isSkip() or self.isPass() or self.isFail()
