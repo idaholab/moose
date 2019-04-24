@@ -868,7 +868,38 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
   }
 
   // Derivatives are offset by the variable number
-  size_t ad_offset = _var_num * _sys.getMaxVarNDofsPerElem();
+  size_t ad_offset;
+  switch (_element_type)
+  {
+    case Moose::ElementType::Element:
+      ad_offset = _var_num * _sys.getMaxVarNDofsPerElem();
+      break;
+
+    case Moose::ElementType::Neighbor:
+      ad_offset = _var_num * _sys.getMaxVarNDofsPerElem() +
+                  (_sys.system().n_vars() * _sys.getMaxVarNDofsPerElem());
+      break;
+
+    case Moose::ElementType::Lower:
+      // At the time of writing, this Lower case is only used in mortar applications where we are
+      // re-init'ing on Element, Neighbor, and Lower dimensional elements
+      // simultaneously. Consequently, we make sure here that our offset is greater than the sum of
+      // the element and neighbor dofs. I can imagine a future case in which you're not re-init'ing
+      // on all three simultaneously in which case this offset could be smaller. Also note that the
+      // number of dofs on lower-d elements is guaranteed to be lower than on the higher dimensional
+      // element, but we're not using that knowledge here. In the future we could implement
+      // something like SystemBase::getMaxVarNDofsPerFace (or *PerLowerDElem)
+      ad_offset = 2. * _sys.system().n_vars() * _sys.getMaxVarNDofsPerElem() +
+                  _var_num * _sys.getMaxVarNDofsPerElem();
+      break;
+
+    default:
+      mooseError(
+          "Unsupported element type ",
+          static_cast<typename std::underlying_type<decltype(_element_type)>::type>(_element_type));
+  }
+  mooseAssert(ad_offset || !_var_num,
+              "Either this is the zeroth variable or we should have an offset");
 
   // Hopefully this problem can go away at some point
   if (ad_offset + num_dofs > AD_MAX_DOFS_PER_ELEM)
@@ -1678,21 +1709,26 @@ MooseVariableData<OutputType>::reinitAux()
 {
   /* FIXME: this method is only for elemental auxiliary variables, so
    * we may want to rename it */
-  _dof_map.dof_indices(_elem, _dof_indices, _var_num);
-  if (_elem->n_dofs(_sys.number(), _var_num) > 0)
+  if (_elem)
   {
-    // FIXME: check if the following is equivalent with '_nodal_dof_index = _dof_indices[0];'?
-    _nodal_dof_index = _elem->dof_number(_sys.number(), _var_num, 0);
+    _dof_map.dof_indices(_elem, _dof_indices, _var_num);
+    if (_elem->n_dofs(_sys.number(), _var_num) > 0)
+    {
+      // FIXME: check if the following is equivalent with '_nodal_dof_index = _dof_indices[0];'?
+      _nodal_dof_index = _elem->dof_number(_sys.number(), _var_num, 0);
 
-    fetchDoFValues();
+      fetchDoFValues();
 
-    for (auto & dof_u : _vector_tags_dof_u)
-      dof_u.resize(_dof_indices.size());
+      for (auto & dof_u : _vector_tags_dof_u)
+        dof_u.resize(_dof_indices.size());
 
-    for (auto & dof_u : _matrix_tags_dof_u)
-      dof_u.resize(_dof_indices.size());
+      for (auto & dof_u : _matrix_tags_dof_u)
+        dof_u.resize(_dof_indices.size());
 
-    _has_dof_indices = true;
+      _has_dof_indices = true;
+    }
+    else
+      _has_dof_indices = false;
   }
   else
     _has_dof_indices = false;
@@ -1824,3 +1860,6 @@ MooseVariableData<RealVectorValue>::adNodalValue<RESIDUAL>() const
 {
   return _nodal_value;
 }
+
+template class MooseVariableData<Real>;
+template class MooseVariableData<RealVectorValue>;

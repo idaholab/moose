@@ -363,6 +363,7 @@ public:
 
   void getDofIndices(const Elem * elem, std::vector<dof_id_type> & dof_indices) const override;
   const std::vector<dof_id_type> & dofIndices() const final { return _element_data->dofIndices(); }
+  unsigned int numberOfDofs() const final { return _element_data->numberOfDofs(); }
   const std::vector<dof_id_type> & dofIndicesNeighbor() const final
   {
     return _neighbor_data->dofIndices();

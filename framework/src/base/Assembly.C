@@ -528,7 +528,7 @@ Assembly::setFaceQRule(QBase * qrule, unsigned int dim)
 void
 Assembly::setNeighborQRule(QBase * qrule, unsigned int dim)
 {
-  _const_current_qrule_face = _current_qrule_neighbor = qrule;
+  _const_current_qrule_neighbor = _current_qrule_neighbor = qrule;
 
   for (auto & it : _fe_face_neighbor[dim])
     it.second->attach_quadrature_rule(qrule);

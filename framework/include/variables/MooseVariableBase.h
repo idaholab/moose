@@ -92,7 +92,7 @@ public:
   virtual const std::vector<dof_id_type> & dofIndices() const { return _dof_indices; }
 
   /// Get the number of local DoFs
-  unsigned int numberOfDofs() { return _dof_indices.size(); }
+  virtual unsigned int numberOfDofs() const { return _dof_indices.size(); }
 
 protected:
   /// variable number (from libMesh)
