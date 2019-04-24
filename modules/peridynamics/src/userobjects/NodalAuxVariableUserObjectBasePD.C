@@ -9,7 +9,7 @@
 
 #include "NodalAuxVariableUserObjectBasePD.h"
 #include "AuxiliarySystem.h"
-#include "MeshBasePD.h"
+#include "PeridynamicsMesh.h"
 #include "MooseVariable.h"
 
 template <>
@@ -44,22 +44,9 @@ NodalAuxVariableUserObjectBasePD::execute()
 {
   for (unsigned int i = 0; i < 2; ++i)
   {
-    dof_id_type dof = _current_elem->get_node(i)->dof_number(_aux.number(), _aux_var->number(), 0);
+    dof_id_type dof = _current_elem->node_ptr(i)->dof_number(_aux.number(), _aux_var->number(), 0);
 
     computeValue(i, dof);
-  }
-}
-
-void
-NodalAuxVariableUserObjectBasePD::threadJoin(const UserObject & uo)
-{
-  const NodalAuxVariableUserObjectBasePD & navuob =
-      static_cast<const NodalAuxVariableUserObjectBasePD &>(uo);
-  for (unsigned int i = 0; i < 2; ++i)
-  {
-    dof_id_type dof = _current_elem->get_node(i)->dof_number(_aux.number(), _aux_var->number(), 0);
-
-    _aux_sln.add(dof, navuob._aux_sln(dof));
   }
 }
 

@@ -355,6 +355,10 @@ ModulesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   NavierStokesApp::registerAll(f, af, s);
 #endif
 
+#ifdef PERIDYNAMICS_ENABLED
+  PeridynamicsApp::registerAll(f, af, s);
+#endif
+
 #ifdef PHASE_FIELD_ENABLED
   PhaseFieldApp::registerAll(f, af, s);
 #endif

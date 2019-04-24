@@ -79,6 +79,6 @@ ThermalMaterialBaseBPD::computeBondHeatFlow()
 void
 ThermalMaterialBaseBPD::computeNodalTemperature()
 {
-  _temp[0] = _temp_var.getNodalValue(*_current_elem->get_node(0));
-  _temp[1] = _temp_var.getNodalValue(*_current_elem->get_node(1));
+  _temp[0] = _temp_var.getNodalValue(*_current_elem->node_ptr(0));
+  _temp[1] = _temp_var.getNodalValue(*_current_elem->node_ptr(1));
 }

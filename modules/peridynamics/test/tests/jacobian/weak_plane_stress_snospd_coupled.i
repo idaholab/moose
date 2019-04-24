@@ -6,10 +6,22 @@
   full_jacobian = true
 []
 
+[MeshGenerators]
+  [gmg]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 4
+    ny = 4
+  []
+  [gpd]
+    type = MeshGeneratorPD
+    input = gmg
+    retain_fe_mesh = false
+  []
+[]
+
 [Mesh]
-  type = GeneratedMeshPD
-  dim = 2
-  nx = 4
+  type = PeridynamicsMesh
   horizon_number = 3
 []
 
@@ -26,12 +38,10 @@
   [../]
 []
 
-[Modules]
-  [./Peridynamics]
-    [./Mechanics]
-      formulation = NonOrdinaryState
-      eigenstrain_names = thermal_strain
-    [../]
+[Modules/Peridynamics/Mechanics/Master]
+  [./all]
+    formulation = NonOrdinaryState
+    eigenstrain_names = thermal_strain
   [../]
 []
 
@@ -87,4 +97,7 @@
 [Executioner]
   type = Transient
   solve_type = NEWTON
+  end_time = 1
+  dt = 1
+  num_steps = 1
 []

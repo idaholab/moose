@@ -3,10 +3,22 @@
   displacements = 'disp_x disp_y'
 []
 
+[MeshGenerators]
+  [gmg]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 8
+    ny = 8
+  []
+  [gpd]
+    type = MeshGeneratorPD
+    input = gmg
+    retain_fe_mesh = false
+  []
+[]
+
 [Mesh]
-  type = GeneratedMeshPD
-  dim = 2
-  nx = 8
+  type = PeridynamicsMesh
   horizon_number = 3
 []
 
@@ -21,28 +33,26 @@
   [./left_dx]
     type = DirichletBC
     variable = disp_x
-    boundary = 0
+    boundary = left
     value = 0.0
   [../]
   [./left_dy]
     type = DirichletBC
     variable = disp_y
-    boundary = 0
+    boundary = left
     value = 0.0
   [../]
   [./right_dx]
     type = FunctionPresetBC
     variable = disp_x
-    boundary = 1
+    boundary = right
     function = '0.001*t'
   [../]
 []
 
-[Modules]
-  [./Peridynamics]
-    [./Mechanics]
-      formulation = NonOrdinaryState
-    [../]
+[Modules/Peridynamics/Mechanics/Master]
+  [./all]
+    formulation = NonOrdinaryState
   [../]
 []
 

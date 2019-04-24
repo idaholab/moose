@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef WEAKPLANESTRESSNOSPD_H
-#define WEAKPLANESTRESSNOSPD_H
+#pragma once
 
 #include "MechanicsBaseNOSPD.h"
 
@@ -32,4 +31,3 @@ public:
   virtual void computePDNonlocalOffDiagJacobian(unsigned int jvar_num,
                                                 unsigned int coupled_component) override;
 };
-#endif // WEAKPLANESTRESSNOSPD_H

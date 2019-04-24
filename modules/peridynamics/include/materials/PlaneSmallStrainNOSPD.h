@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PLANESMALLSTRAINNOSPD_H
-#define PLANESMALLSTRAINNOSPD_H
+#pragma once
 
 #include "SmallStrainNOSPD.h"
 #include "RankTwoTensor.h"
@@ -33,6 +32,7 @@ protected:
   /**
    * Function to compute out-of-plane component of strain tensor for generalized plane strain and
    * weak plane stress
+   * @return The value of out-of-plane strain
    */
   Real computeOutOfPlaneStrain();
 
@@ -47,5 +47,3 @@ private:
   const VariableValue & _out_of_plane_strain;
   ///@}
 };
-
-#endif // PLANESMALLSTRAINNOSPD_H

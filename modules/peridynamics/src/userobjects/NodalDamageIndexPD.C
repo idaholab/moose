@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NodalDamageIndexPD.h"
-#include "MeshBasePD.h"
+#include "PeridynamicsMesh.h"
 #include "AuxiliarySystem.h"
 
 registerMooseObject("PeridynamicsApp", NodalDamageIndexPD);
@@ -34,8 +34,8 @@ NodalDamageIndexPD::NodalDamageIndexPD(const InputParameters & parameters)
 void
 NodalDamageIndexPD::computeValue(unsigned int id, dof_id_type dof)
 {
-  Real neighbor_vol = _pdmesh.volume(_current_elem->get_node(1 - id)->id());
-  Real node_vol_sum = _pdmesh.volumeSum(_current_elem->get_node(id)->id());
+  Real neighbor_vol = _pdmesh.getVolume(_current_elem->node_id(1 - id));
+  Real node_vol_sum = _pdmesh.getHorizonVolume(_current_elem->node_id(id));
 
   if (_bond_status_var.getElementalValue(_current_elem) < 0.5)
     _aux_sln.add(dof, neighbor_vol / node_vol_sum);

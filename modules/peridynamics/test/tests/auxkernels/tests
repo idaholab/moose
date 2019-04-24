@@ -4,5 +4,8 @@
     input = 'nodal_stress_strain_aux.i'
     exodiff = 'nodal_stress_strain_aux.e'
     map = false
+    requirement = 'NodalStressStrainPD shall calculate the stress/strain tensors at a material point for elastic material.'
+    design = 'modules/peridynamics/NodalStressStrainPD.md'
+    issues = '#11561'
   [../]
 []

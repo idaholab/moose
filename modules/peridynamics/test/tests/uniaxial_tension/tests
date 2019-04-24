@@ -1,0 +1,74 @@
+[Tests]
+  [./regular_grid_const_bond]
+    type = 'Exodiff'
+    input = '2d_bond_rc.i'
+    exodiff = '2d_bond_rc.e'
+    map = false
+    requirement = 'SmallStrainConstantHorizonBPD shall provide the correct micro-modulus for bond-based mechanics model using regular mesh.'
+    design = 'modules/peridynamics/SmallStrainConstantHorizonBPD.md'
+    issues = '#11561'
+  [../]
+  [./regular_grid_vary_bond]
+    type = 'Exodiff'
+    input = '2d_bond_rv.i'
+    exodiff = '2d_bond_rv.e'
+    map = false
+    requirement = 'SmallStrainVariableHorizonBPD shall provide the correct micro-modulus for bond-based mechanics model using regular mesh.'
+    design = 'modules/peridynamics/SmallStrainVariableHorizonBPD.md'
+    issues = '#11561'
+  [../]
+  [./regular_grid_const_ordinary_state]
+    type = 'Exodiff'
+    input = '2d_ordinary_state_rc.i'
+    exodiff = '2d_ordinary_state_rc.e'
+    map = false
+    requirement = 'SmallStrainConstantHorizoOSBPD shall provide the correct micro-modulus for ordinary state-based mechanics model using regular mesh.'
+    design = 'modules/peridynamics/SmallStrainConstantHorizoOSBPD.md'
+    issues = '#11561'
+  [../]
+  [./regular_grid_vary_ordinary_state]
+    type = 'Exodiff'
+    input = '2d_ordinary_state_rv.i'
+    exodiff = '2d_ordinary_state_rv.e'
+    map = false
+    requirement = 'SmallStrainVariableHorizonOSPD shall provide the correct micro-modulus for ordinary state-based mechanics model using regular mesh.'
+    design = 'modules/peridynamics/SmallStrainVariableHorizonOSPD.md'
+    issues = '#11561'
+  [../]
+  [./irregular_grid_vary_bond]
+    type = 'Exodiff'
+    input = '2d_bond_iv.i'
+    exodiff = '2d_bond_iv.e'
+    map = false
+    requirement = 'SmallStrainVariableHorizonBPD shall provide the correct micro-modulus for bond-based mechanics model using irregular mesh.'
+    design = 'modules/peridynamics/SmallStrainVariableHorizonBPD.md'
+    issues = '#11561'
+  [../]
+  [./irregular_grid_vary_ordinary_state]
+    type = 'Exodiff'
+    input = '2d_ordinary_state_iv.i'
+    exodiff = '2d_ordinary_state_iv.e'
+    map = false
+    requirement = 'SmallStrainVariableHorizonOSPD shall provide the correct micro-modulus for ordinary state-based mechanics model using irregular mesh.'
+    design = 'modules/peridynamics/SmallStrainVariableHorizonOSPD.md'
+    issues = '#11561'
+  [../]
+  [./non_ordinary_state_small_strain]
+    type = 'Exodiff'
+    input = '2d_non_ordinary_state_small_strain.i'
+    exodiff = '2d_non_ordinary_state_small_strain.e'
+    map = false
+    requirement = 'PlaneSmallStrainNOSPD shall provide the correct strain for non-ordinary state-based mechanics model.'
+    design = 'modules/peridynamics/PlaneSmallStrainNOSPD.md'
+    issues = '#11561'
+  [../]
+  [./non_ordinary_state_finite_strain]
+    type = 'Exodiff'
+    input = '2d_non_ordinary_state_finite_strain.i'
+    exodiff = '2d_non_ordinary_state_finite_strain.e'
+    map = false
+    requirement = 'PlaneFiniteStrainNOSPD shall provide the correct strain increment and rotation increment for non-ordinary state-based mechanics model.'
+    design = 'modules/peridynamics/PlaneFiniteStrainNOSPD.md'
+    issues = '#11561'
+  [../]
+[]

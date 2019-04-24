@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GENERALIZEDPLANESTRAINPD_H
-#define GENERALIZEDPLANESTRAINPD_H
+#pragma once
 
 #include "ScalarKernel.h"
 
@@ -35,4 +34,3 @@ protected:
   /// Userobject to calculate the residual and jacobian
   const GeneralizedPlaneStrainUserObjectBasePD & _gpsuo;
 };
-#endif // GENERALIZEDPLANESTRAINPD_H

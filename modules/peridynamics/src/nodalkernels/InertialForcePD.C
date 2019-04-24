@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "InertialForcePD.h"
-#include "MeshBasePD.h"
+#include "PeridynamicsMesh.h"
 
 registerMooseObject("PeridynamicsApp", InertialForcePD);
 
@@ -29,7 +29,7 @@ validParams<InertialForcePD>()
 
 InertialForcePD::InertialForcePD(const InputParameters & parameters)
   : NodalKernel(parameters),
-    _pdmesh(dynamic_cast<MeshBasePD &>(_mesh)),
+    _pdmesh(dynamic_cast<PeridynamicsMesh &>(_mesh)),
     _density(getParam<Real>("density")),
     _u_old(valueOld()),
     _vel_old(coupledValueOld("velocity")),
@@ -49,7 +49,7 @@ InertialForcePD::computeQpResidual()
                  (((_u[_qp] - _u_old[_qp]) / (_dt * _dt)) - _vel_old[_qp] / _dt -
                   _accel_old[_qp] * (0.5 - _beta));
 
-    return _pdmesh.volume(_current_node->id()) * _density * accel;
+    return _pdmesh.getVolume(_current_node->id()) * _density * accel;
   }
 }
 
@@ -59,5 +59,5 @@ InertialForcePD::computeQpJacobian()
   if (_dt == 0)
     return 0;
   else
-    return _pdmesh.volume(_current_node->id()) * _density / (_beta * _dt * _dt);
+    return _pdmesh.getVolume(_current_node->id()) * _density / (_beta * _dt * _dt);
 }

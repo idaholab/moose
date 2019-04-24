@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SMALLSTRAINNOSPD_H
-#define SMALLSTRAINNOSPD_H
+#pragma once
 
 #include "MaterialBaseNOSPD.h"
 #include "RankTwoTensor.h"
@@ -34,5 +33,3 @@ protected:
    */
   virtual void computeQpTotalStrain();
 };
-
-#endif // SMALLSTRAINNOSPD_H

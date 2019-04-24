@@ -7,13 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef AUXKERNELBASEPD_H
-#define AUXKERNELBASEPD_H
+#pragma once
 
 #include "AuxKernel.h"
 
 class AuxKernelBasePD;
-class MeshBasePD;
+class PeridynamicsMesh;
 
 template <>
 InputParameters validParams<AuxKernelBasePD>();
@@ -28,10 +27,8 @@ public:
 
 protected:
   /// Reference to peridynamic mesh object
-  MeshBasePD & _pdmesh;
+  PeridynamicsMesh & _pdmesh;
 
   /// Problem dimension
-  unsigned int _dim;
+  const unsigned int _dim;
 };
-
-#endif // AUXKERNELBASEPD_H

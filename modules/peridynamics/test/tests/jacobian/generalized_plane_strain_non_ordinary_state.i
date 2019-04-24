@@ -4,10 +4,22 @@
   full_jacobian = true
 []
 
+[MeshGenerators]
+  [gmg]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 4
+    ny = 4
+  []
+  [gpd]
+    type = MeshGeneratorPD
+    input = gmg
+    retain_fe_mesh = false
+  []
+[]
+
 [Mesh]
-  type = GeneratedMeshPD
-  dim = 2
-  nx = 4
+  type = PeridynamicsMesh
   horizon_number = 3
 []
 
@@ -23,15 +35,15 @@
   [../]
 []
 
-[Modules]
-  [./Peridynamics]
-    [./Mechanics]
+[Modules/Peridynamics/Mechanics]
+  [./Master]
+    [./all]
       formulation = NonOrdinaryState
     [../]
-    [./GeneralizedPlaneStrain]
-      [./gps]
-        formulation = NonOrdinaryState
-      [../]
+  [../]
+  [./GeneralizedPlaneStrain]
+    [./all]
+      formulation = NonOrdinaryState
     [../]
   [../]
 []
@@ -62,4 +74,7 @@
 [Executioner]
   type = Transient
   solve_type = NEWTON
+  end_time = 1
+  dt = 1
+  num_steps = 1
 []

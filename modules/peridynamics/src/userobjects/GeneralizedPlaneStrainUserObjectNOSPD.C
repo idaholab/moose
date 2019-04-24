@@ -9,6 +9,7 @@
 
 #include "GeneralizedPlaneStrainUserObjectNOSPD.h"
 #include "RankTwoTensor.h"
+#include "RankFourTensor.h"
 #include "Function.h"
 
 registerMooseObject("PeridynamicsApp", GeneralizedPlaneStrainUserObjectNOSPD);
@@ -35,26 +36,26 @@ void
 GeneralizedPlaneStrainUserObjectNOSPD::execute()
 {
   // dof_id_type for node i and j
-  dof_id_type node_i = _current_elem->get_node(0)->id();
-  dof_id_type node_j = _current_elem->get_node(1)->id();
+  dof_id_type node_i = _current_elem->node_id(0);
+  dof_id_type node_j = _current_elem->node_id(1);
 
   // coordinates for node i and j
-  Point coord_i = _pdmesh.coord(node_i);
-  Point coord_j = _pdmesh.coord(node_j);
+  Point coord_i = *_pdmesh.nodePtr(node_i);
+  Point coord_j = *_pdmesh.nodePtr(node_j);
 
   // nodal area for node i and j
-  Real nv_i = _pdmesh.volume(node_i);
-  Real nv_j = _pdmesh.volume(node_j);
+  Real nv_i = _pdmesh.getVolume(node_i);
+  Real nv_j = _pdmesh.getVolume(node_j);
 
   // sum of volumes of material points used in bond-associated deformation gradient calculation
-  unsigned int id_j_in_i = _pdmesh.neighborID(node_i, node_j);
-  unsigned int id_i_in_j = _pdmesh.neighborID(node_j, node_i);
+  unsigned int id_j_in_i = _pdmesh.getNeighborID(node_i, node_j);
+  unsigned int id_i_in_j = _pdmesh.getNeighborID(node_j, node_i);
 
-  Real dg_bond_vsum_i = _pdmesh.dgBondVolumeSum(node_i, id_j_in_i);
-  Real dg_bond_vsum_j = _pdmesh.dgBondVolumeSum(node_j, id_i_in_j);
+  Real dg_bond_vsum_i = _pdmesh.getBondAssocHorizonVolume(node_i, id_j_in_i);
+  Real dg_bond_vsum_j = _pdmesh.getBondAssocHorizonVolume(node_j, id_i_in_j);
 
-  Real dg_node_vsum_i = _pdmesh.dgNodeVolumeSum(node_i);
-  Real dg_node_vsum_j = _pdmesh.dgNodeVolumeSum(node_j);
+  Real dg_node_vsum_i = _pdmesh.getBondAssocHorizonVolumeSum(node_i);
+  Real dg_node_vsum_j = _pdmesh.getBondAssocHorizonVolumeSum(node_j);
 
   // residual
   _residual += (_stress[0](2, 2) - _pressure.value(_t, coord_i) * _factor) * nv_i * dg_bond_vsum_i /

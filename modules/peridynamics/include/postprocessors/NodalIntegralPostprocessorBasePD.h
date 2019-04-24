@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NODALINTEGRALPOSTPROCESSORBASEPD_H
-#define NODALINTEGRALPOSTPROCESSORBASEPD_H
+#pragma once
 
 #include "NodalPostprocessorBasePD.h"
 
@@ -35,11 +34,10 @@ public:
 protected:
   /**
    * Function to evaluate the given function at each material point
+   * @return The computed nodal value
    */
   virtual Real computeNodalValue() = 0;
 
   /// nodal area integral result
   Real _integral_value;
 };
-
-#endif // NODALINTEGRALPOSTPROCESSORBASEPD

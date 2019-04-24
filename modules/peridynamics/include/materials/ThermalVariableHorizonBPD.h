@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef THERMALVARIABLEHORIZONBPD_H
-#define THERMALVARIABLEHORIZONBPD_H
+#pragma once
 
 #include "ThermalMaterialBaseBPD.h"
 
@@ -29,5 +28,3 @@ public:
 protected:
   virtual void computePDMicroConductivity() override;
 };
-
-#endif // THERMALVARIABLEHORIZONBPD_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PARAMETRICMATERIALBASEPD_H
-#define PARAMETRICMATERIALBASEPD_H
+#pragma once
 
 #include "MechanicsMaterialBasePD.h"
 #include "RankFourTensor.h"
@@ -46,7 +45,10 @@ protected:
   /// Plane stress model or not
   const bool _plane_stress;
 
+  /// Young's modulus
   const Real _youngs_modulus;
+
+  ///Poisson's Ratio
   const Real _poissons_ratio;
 
   ///@{ Scalar out-of-plane component of strain tensor for generalized plane strain
@@ -73,11 +75,12 @@ protected:
   MaterialProperty<Real> & _thermal_expansion_coeff;
   ///@}
 
+  /// Shear modulus calculated from Young's modulus and Poisson's Ratio
   Real _shear_modulus;
+
+  /// Bulk modulus calculated from Young's modulus and Poisson's Ratio
   Real _bulk_modulus;
 
   /// Elasticity tensor
   RankFourTensor _Cijkl;
 };
-
-#endif // PARAMETRICMATERIALBASEPD_H

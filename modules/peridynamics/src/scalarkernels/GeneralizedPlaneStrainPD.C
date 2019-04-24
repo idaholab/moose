@@ -10,6 +10,7 @@
 #include "GeneralizedPlaneStrainPD.h"
 #include "GeneralizedPlaneStrainUserObjectBasePD.h"
 #include "MooseVariableScalar.h"
+#include "Assembly.h"
 
 registerMooseObject("PeridynamicsApp", GeneralizedPlaneStrainPD);
 

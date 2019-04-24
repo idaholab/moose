@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef BONDSTATUSPD_H
-#define BONDSTATUSPD_H
+#pragma once
 
 #include "AuxKernelBasePD.h"
 #include "RankTwoTensor.h"
@@ -32,11 +31,11 @@ public:
 protected:
   virtual Real computeValue() override;
 
-  /// Enum class used to control which failure criterion to use
+  /// Enum class used to determine which failure criterion to use
   enum class FailureCriterion
   {
     CriticalStretch,
-    MaximumTensileStress
+    MaximumPrincipalStress
   };
 
   /// Enum used to control which failure criterion to use
@@ -54,5 +53,3 @@ protected:
   /// Material property containing the stress
   const MaterialProperty<RankTwoTensor> * _stress;
 };
-
-#endif // BONDSTATUSPD_H

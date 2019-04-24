@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MECHANICSACTIONPD_H
-#define MECHANICSACTIONPD_H
+#pragma once
 
 #include "Action.h"
 
@@ -28,11 +27,22 @@ public:
   virtual void act() override;
 
 protected:
-  virtual std::string getKernelType();
-  virtual InputParameters getKernelParameters(std::string type);
+  /**
+   * Function to get the kernel name based on the value of member variables: _formulation and
+   * _stabilization
+   * @return Kernel name
+   */
+  virtual std::string getKernelName();
+
+  /**
+   * Function to get the input parameters for a given kernel name
+   * @param name   the name of the kernel
+   * @return Parameters for the corresponding kernel
+   */
+  virtual InputParameters getKernelParameters(std::string name);
 
   ///@{ Displacement variables
-  std::vector<NonlinearVariableName> _displacements;
+  std::vector<VariableName> _displacements;
   const unsigned int _ndisp;
   ///@}
 
@@ -50,5 +60,3 @@ protected:
   std::vector<AuxVariableName> _diag_save_in;
   ///@}
 };
-
-#endif // MECHANICSACTIONPD_H

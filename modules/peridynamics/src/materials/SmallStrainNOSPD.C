@@ -48,5 +48,5 @@ SmallStrainNOSPD::computeQpTotalStrain()
 {
   // the green-lagrange strain tensor
   _total_strain[_qp] = 0.5 * (_deformation_gradient[_qp].transpose() * _deformation_gradient[_qp] -
-                              RankTwoTensor::initIdentity);
+                              RankTwoTensor(RankTwoTensor::initIdentity));
 }

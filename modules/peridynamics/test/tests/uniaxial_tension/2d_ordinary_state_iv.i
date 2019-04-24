@@ -10,9 +10,20 @@
   displacements = 'disp_x disp_y'
 []
 
+[MeshGenerators]
+  [fmg]
+    type = FileMeshGenerator
+    file = square.e
+  []
+  [gpd]
+    type = MeshGeneratorPD
+    input = fmg
+    retain_fe_mesh = false
+  []
+[]
+
 [Mesh]
-  type = FileMeshPD
-  file = square.e
+  type = PeridynamicsMesh
   horizon_number = 3
 []
 
@@ -44,11 +55,9 @@
   [../]
 []
 
-[Modules]
-  [./Peridynamics]
-    [./Mechanics]
-      formulation = OrdinaryState
-    [../]
+[Modules/Peridynamics/Mechanics/Master]
+  [./all]
+    formulation = OrdinaryState
   [../]
 []
 

@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NodalStressStrainPD.h"
-#include "MeshBasePD.h"
+#include "PeridynamicsMesh.h"
 #include "RankTwoScalarTools.h"
 
 registerMooseObject("PeridynamicsApp", NodalStressStrainPD);
@@ -135,9 +135,9 @@ NodalStressStrainPD::computeValue()
 RankTwoTensor
 NodalStressStrainPD::computeNodalTotalStrain()
 {
-  std::vector<dof_id_type> neighbors = _pdmesh.neighbors(_current_node->id());
-  std::vector<dof_id_type> bonds = _pdmesh.bonds(_current_node->id());
-  Real horizon = _pdmesh.horizon(_current_node->id());
+  std::vector<dof_id_type> neighbors = _pdmesh.getNeighbors(_current_node->id());
+  std::vector<dof_id_type> bonds = _pdmesh.getAssocBonds(_current_node->id());
+  Real horizon = _pdmesh.getHorizon(_current_node->id());
 
   // calculate the shape tensor and prepare the deformation gradient tensor
   RankTwoTensor shape, dgrad, delta(RankTwoTensor::initIdentity);
@@ -153,10 +153,10 @@ NodalStressStrainPD::computeNodalTotalStrain()
   for (unsigned int j = 0; j < neighbors.size(); ++j)
   {
     Node * node_j = _pdmesh.nodePtr(neighbors[j]);
-    Real vol_j = _pdmesh.volume(neighbors[j]);
+    Real vol_j = _pdmesh.getVolume(neighbors[j]);
     for (unsigned int k = 0; k < _dim; ++k)
     {
-      origin_vector(k) = _pdmesh.coord(neighbors[j])(k) - _pdmesh.coord(_current_node->id())(k);
+      origin_vector(k) = (*node_j)(k) - (*_pdmesh.nodePtr(_current_node->id()))(k);
       current_vector(k) = origin_vector(k) + _disp_var[k]->getNodalValue(*node_j) -
                           _disp_var[k]->getNodalValue(*_current_node);
     }

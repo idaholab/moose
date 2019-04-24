@@ -7,11 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INTACTBONDSDIRICHLETBCPD_H
-#define INTACTBONDSDIRICHLETBCPD_H
+#pragma once
 
 #include "NodalBC.h"
-#include "MeshBasePD.h"
+#include "PeridynamicsMesh.h"
 
 class IntactBondsDirichletBCPD;
 
@@ -20,7 +19,7 @@ InputParameters validParams<IntactBondsDirichletBCPD>();
 
 /**
  * Defines Dirichlet boundary condition based on number of intact bonds associated with each
- * material point.
+ * material point
  */
 class IntactBondsDirichletBCPD : public NodalBC
 {
@@ -32,7 +31,7 @@ public:
 
 protected:
   /// Peridynamic mesh
-  MeshBasePD & _pdmesh;
+  PeridynamicsMesh & _pdmesh;
 
   /// Value of the unknown variable this BC is acting on at last time step
   const VariableValue & _u_old;
@@ -40,5 +39,3 @@ protected:
   /// value of the AuxVariable for number of intact bonds associated with each material point
   const VariableValue & _intact_bonds_val;
 };
-
-#endif // INTACTBONDSDIRICHLETBCPD_H

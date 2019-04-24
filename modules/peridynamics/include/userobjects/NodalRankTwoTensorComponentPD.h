@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NODALRANKTWOTENSORCOMPONENTPD_H
-#define NODALRANKTWOTENSORCOMPONENTPD_H
+#pragma once
 
 #include "NodalRankTwoTensorUserObjectBasePD.h"
 
@@ -36,5 +35,3 @@ protected:
   const unsigned int _j;
   ///@}
 };
-
-#endif // NODALRANKTWOTENSORCOMPONENTPD_H

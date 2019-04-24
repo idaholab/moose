@@ -21,7 +21,7 @@ validParams<NodalPostprocessorBasePD>()
 
 NodalPostprocessorBasePD::NodalPostprocessorBasePD(const InputParameters & parameters)
   : NodalPostprocessor(parameters),
-    _pdmesh(dynamic_cast<MeshBasePD &>(_mesh)),
+    _pdmesh(dynamic_cast<PeridynamicsMesh &>(_mesh)),
     _dim(_pdmesh.dimension())
 {
 }

@@ -7,14 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MECHANICSBASEPD_H
-#define MECHANICSBASEPD_H
+#pragma once
 
 #include "KernelBasePD.h"
 #include "DerivativeMaterialInterface.h"
 
 class MechanicsBasePD;
-class RankTwoTensor;
 
 template <>
 InputParameters validParams<MechanicsBasePD>();
@@ -26,16 +24,20 @@ class MechanicsBasePD : public DerivativeMaterialInterface<KernelBasePD>
 {
 public:
   MechanicsBasePD(const InputParameters & parameters);
+
   virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
   using Kernel::computeOffDiagJacobian;
 
   /**
    * Function to compute local contribution to the off-diagonal Jacobian at the current nodes
+   * @param coupled_component   The coupled variable number
    */
   virtual void computeLocalOffDiagJacobian(unsigned int /* coupled_component */){};
 
   /**
    * Function to compute nonlocal contribution to the off-diagonal Jacobian at the current nodes
+   * @param jvar_num   The number of the first coupled variable
+   * @param coupled_component   The component number of the second coupled variable
    */
   virtual void computePDNonlocalOffDiagJacobian(unsigned int /* jvar_num */,
                                                 unsigned int /* coupled_component */){};
@@ -51,6 +53,9 @@ protected:
   const bool _temp_coupled;
   MooseVariableFEBase * _temp_var;
   ///@}
+
+  /// number of displacement components
+  unsigned int _ndisp;
 
   ///@{ Material point based material property for eigen strains
   const std::vector<MaterialPropertyName> _eigenstrain_names;
@@ -74,5 +79,3 @@ protected:
   /// Current bond length
   Real _cur_len_ij;
 };
-
-#endif // MECHANICSBASEPD_H

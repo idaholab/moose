@@ -7,14 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef KERNELBASEPD_H
-#define KERNELBASEPD_H
+#pragma once
 
 #include "Kernel.h"
 #include "Assembly.h"
 #include "SystemBase.h"
 
-class MeshBasePD;
+class PeridynamicsMesh;
 class KernelBasePD;
 
 template <>
@@ -60,10 +59,9 @@ protected:
   const bool _use_full_jacobian;
 
   ///@{ Parameters for peridynamic mesh information
-  MeshBasePD & _pdmesh;
+  PeridynamicsMesh & _pdmesh;
   const unsigned int _dim;
   const unsigned int _nnodes;
-  std::vector<Node *> _nodes_ij;
   std::vector<Real> _vols_ij;
   std::vector<Real> _dg_bond_vsum_ij;
   std::vector<Real> _dg_node_vsum_ij;
@@ -76,5 +74,3 @@ protected:
   /// Bond status of current bond/edge2
   Real _bond_status_ij;
 };
-
-#endif // PDKERNELBASE_H

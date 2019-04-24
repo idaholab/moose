@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GENERALIZEDPLANESTRAINACTIONPD_H
-#define GENERALIZEDPLANESTRAINACTIONPD_H
+#pragma once
 
 #include "Action.h"
 #include "MooseEnum.h"
@@ -29,14 +28,14 @@ public:
   virtual void act() override;
 
 protected:
-  ///@{ displacement variables
-  std::vector<NonlinearVariableName> _displacements;
+  ///@{ Displacement variables
+  std::vector<VariableName> _displacements;
   const unsigned int _ndisp;
   ///@}
 
   /// Option to choose which peridynamic model to use for generalized plane strain formulation: ordinary state based or non-ordinary state based
   const MooseEnum _formulation;
 
+  /// Scalar variable for out-of-plane strain variable
   VariableName _scalar_out_of_plane_strain;
 };
-#endif // GENERALIZEDPLANESTRAINACTIONPD_H

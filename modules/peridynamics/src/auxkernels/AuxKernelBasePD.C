@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "AuxKernelBasePD.h"
-#include "MeshBasePD.h"
+#include "PeridynamicsMesh.h"
 
 template <>
 InputParameters
@@ -21,6 +21,8 @@ validParams<AuxKernelBasePD>()
 }
 
 AuxKernelBasePD::AuxKernelBasePD(const InputParameters & parameters)
-  : AuxKernel(parameters), _pdmesh(dynamic_cast<MeshBasePD &>(_mesh)), _dim(_pdmesh.dimension())
+  : AuxKernel(parameters),
+    _pdmesh(dynamic_cast<PeridynamicsMesh &>(_mesh)),
+    _dim(_pdmesh.dimension())
 {
 }

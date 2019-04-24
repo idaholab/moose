@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SMALLSTRAINMATERIALBASEBPD_H
-#define SMALLSTRAINMATERIALBASEBPD_H
+#pragma once
 
 #include "ParametricMaterialBasePD.h"
 
@@ -36,5 +35,3 @@ protected:
   /// Micro-modulus
   Real _Cij;
 };
-
-#endif // SMALLSTRAINMATERIALBASEBPD_H

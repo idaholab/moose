@@ -7,13 +7,11 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GENERALIZEDPLANESTRAINUSEROBJECTBASEPD_H
-#define GENERALIZEDPLANESTRAINUSEROBJECTBASEPD_H
+#pragma once
 
 #include "ElementUserObjectBasePD.h"
 
 class GeneralizedPlaneStrainUserObjectBasePD;
-class RankFourTensor;
 
 template <>
 InputParameters validParams<GeneralizedPlaneStrainUserObjectBasePD>();
@@ -33,11 +31,13 @@ public:
 
   /**
    * Function to return the computed residual
+   * @return The computed residual
    */
   Real returnResidual() const;
 
   /**
    * Function to return the computed diagonal Jacobian
+   * @return The computed Jacobian
    */
   Real returnJacobian() const;
 
@@ -46,7 +46,7 @@ protected:
   const MaterialProperty<RankFourTensor> & _Cijkl;
 
   ///@{ Applied out-of-plane force parameters
-  Function & _pressure;
+  const Function & _pressure;
   const Real _factor;
   ///@}
 
@@ -56,5 +56,3 @@ protected:
   /// Jacobian parameter
   Real _jacobian;
 };
-
-#endif // GENERALIZEDPLANESTRAINUSEROBJECTBASEPD_H

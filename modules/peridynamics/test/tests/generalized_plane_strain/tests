@@ -5,6 +5,9 @@
     exodiff = 'generalized_plane_strain_ordinary_state.e'
     abs_zero = 1.5e-10
     map = false
+    requirement = 'GeneralizedPlaneStrainUserObjectOSPD shall provide the residual and diagonal jacobian entry for ordinary state-based formulation of generalized plane strain problem.'
+    design = 'modules/peridynamics/GeneralizedPlaneStrainUserObjectOSPD.md'
+    issues = '#11561'
   [../]
 
   [./generalized_plane_strain_ordinary_state_squares]
@@ -12,6 +15,9 @@
     input = 'generalized_plane_strain_ordinary_state_squares.i'
     exodiff = 'generalized_plane_strain_ordinary_state_squares.e'
     map = false
+    requirement = 'GeneralizedPlaneStrainUserObjectOSPD shall provide the residual and diagonal jacobian entry for ordinary state-based formulation of generalized plane strain problem.'
+    design = 'modules/peridynamics/GeneralizedPlaneStrainUserObjectOSPD.md'
+    issues = '#11561'
   [../]
 
   [./out_of_plane_pressure_ordinary_state]
@@ -19,6 +25,9 @@
     input = 'out_of_plane_pressure_ordinary_state.i'
     exodiff = 'out_of_plane_pressure_ordinary_state.e'
     map = false
+    requirement = 'GeneralizedPlaneStrainUserObjectOSPD shall consider the out-of-plane pressure for ordinary state-based formulation of generalized plane strain problem.'
+    design = 'modules/peridynamics/GeneralizedPlaneStrainUserObjectOSPD.md'
+    issues = '#11561'
   [../]
 
   [./plane_strain_prescribed_ordinary_state]
@@ -26,6 +35,9 @@
     input = 'plane_strain_prescribed_ordinary_state.i'
     exodiff = 'plane_strain_prescribed_ordinary_state.e'
     map = false
+    requirement = 'SmallStrainConstantHorizonOSPD shall incorporate prescribed out-of-plane strain for ordinary state-based formulation of generalized plane strain problem.'
+    design = 'modules/peridynamics/SmallStrainConstantHorizonOSPD.md'
+    issues = '#11561'
   [../]
 
   [./generalized_plane_strain_non_ordinary_state]
@@ -34,5 +46,8 @@
     exodiff = 'generalized_plane_strain_non_ordinary_state.e'
     abs_zero = 1.5e-10
     map = false
+    requirement = 'GeneralizedPlaneStrainUserObjectOSPD shall provide the residual and diagonal jacobian entry for ordinary state-based formulation of generalized plane strain problem.'
+    design = 'modules/peridynamics/GeneralizedPlaneStrainUserObjectNOSPD.md'
+    issues = '#11561'
   [../]
 []

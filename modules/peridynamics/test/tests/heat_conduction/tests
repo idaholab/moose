@@ -4,5 +4,8 @@
     input = '2d_steady_state.i'
     exodiff = '2d_steady_state.e'
     map = false
+    requirement = 'HeatConductionBPD shall model heat conduction using bond-based peridynamics model.'
+    design = 'modules/peridynamics/HeatConductionBPD.md'
+    issues = '#11561'
   [../]
 []

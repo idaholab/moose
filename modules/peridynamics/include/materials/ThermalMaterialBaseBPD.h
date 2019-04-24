@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef THERMALMATERIALBASEBPD_H
-#define THERMALMATERIALBASEBPD_H
+#pragma once
 
 #include "MaterialBasePD.h"
 
@@ -53,7 +52,7 @@ protected:
   const Real _thermal_conductivity;
 
   /// Functional thermal conductivity
-  Function * _thermal_conductivity_function;
+  const Function * _thermal_conductivity_function;
 
   ///@{ Material properties to be stored
   MaterialProperty<Real> & _bond_heat_flow;
@@ -66,5 +65,3 @@ protected:
   /// Micro-conductivity
   Real _Kij;
 };
-
-#endif // THERMALMATERIALBASEBPD_H

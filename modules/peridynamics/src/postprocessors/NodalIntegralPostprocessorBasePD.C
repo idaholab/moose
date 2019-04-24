@@ -34,7 +34,7 @@ NodalIntegralPostprocessorBasePD::initialize()
 void
 NodalIntegralPostprocessorBasePD::execute()
 {
-  _integral_value += computeNodalValue() * _pdmesh.volume(_current_node->id());
+  _integral_value += computeNodalValue() * _pdmesh.getVolume(_current_node->id());
 }
 
 Real

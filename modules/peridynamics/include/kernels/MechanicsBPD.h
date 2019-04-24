@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MECHANICSBPD_H
-#define MECHANICSBPD_H
+#pragma once
 
 #include "MechanicsBasePD.h"
 
@@ -36,7 +35,6 @@ protected:
   const MaterialProperty<Real> & _bond_dfdT_ij;
   ///@}
 
+  /// The index of displcement component
   const unsigned int _component;
 };
-
-#endif // MECHANICSBPD_H

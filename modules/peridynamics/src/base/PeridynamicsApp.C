@@ -23,18 +23,9 @@ validParams<PeridynamicsApp>()
 
 registerKnownLabel("PeridynamicsApp");
 
-PeridynamicsApp::PeridynamicsApp(InputParameters parameters) : MooseApp(parameters)
+PeridynamicsApp::PeridynamicsApp(const InputParameters & parameters) : MooseApp(parameters)
 {
-  Moose::registerObjects(_factory);
-  PeridynamicsApp::registerObjectDepends(_factory);
-  PeridynamicsApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  PeridynamicsApp::associateSyntaxDepends(_syntax, _action_factory);
-  PeridynamicsApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags(_factory);
-  PeridynamicsApp::registerExecFlags(_factory);
+  PeridynamicsApp::registerAll(_factory, _action_factory, _syntax);
 }
 
 PeridynamicsApp::~PeridynamicsApp() {}
@@ -48,38 +39,56 @@ PeridynamicsApp::registerApps()
 void
 PeridynamicsApp::registerObjects(Factory & factory)
 {
+  mooseDeprecated("use registerAll instead of registerObjects");
   Registry::registerObjectsTo(factory, {"PeridynamicsApp"});
 }
 
-void
-PeridynamicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+static void
+associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 {
-  Registry::registerActionsTo(action_factory, {"PeridynamicsApp"});
+  registerSyntax("MechanicsActionPD", "Modules/Peridynamics/Mechanics/Master/*");
+  registerSyntax("GeneralizedPlaneStrainActionPD",
+                 "Modules/Peridynamics/Mechanics/GeneralizedPlaneStrain/*");
+}
 
-  registerSyntax("MechanicsActionPD", "Modules/Peridynamics/Mechanics");
-  registerSyntax("GeneralizedPlaneStrainActionPD", "Modules/Peridynamics/GeneralizedPlaneStrain/*");
+void
+PeridynamicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  Registry::registerObjectsTo(f, {"PeridynamicsApp"});
+  Registry::registerActionsTo(af, {"PeridynamicsApp"});
+  associateSyntaxInner(s, af);
+
+  TensorMechanicsApp::registerAll(f, af, s);
 }
 
 void
 PeridynamicsApp::registerObjectDepends(Factory & factory)
 {
+  mooseDeprecated("use registerAll instead of registerObjectsDepends");
   TensorMechanicsApp::registerObjects(factory);
+}
+
+void
+PeridynamicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+{
+  mooseDeprecated("use registerAll instead of associateSyntax");
+  Registry::registerActionsTo(action_factory, {"PeridynamicsApp"});
+  associateSyntaxInner(syntax, action_factory);
 }
 
 void
 PeridynamicsApp::associateSyntaxDepends(Syntax & syntax, ActionFactory & action_factory)
 {
+  mooseDeprecated("use registerAll instead of registerObjectsDepends");
   TensorMechanicsApp::associateSyntax(syntax, action_factory);
 }
 
 void
 PeridynamicsApp::registerExecFlags(Factory & /*factory*/)
 {
+  mooseDeprecated("use registerAll instead of registerExecFlags");
 }
 
-/***************************************************************************************************
- *********************** Dynamic Library Entry Points - DO NOT MODIFY ******************************
- **************************************************************************************************/
 extern "C" void
 PeridynamicsApp__registerApps()
 {
@@ -87,19 +96,7 @@ PeridynamicsApp__registerApps()
 }
 
 extern "C" void
-PeridynamicsApp__registerObjects(Factory & factory)
+PeridynamicsApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
-  PeridynamicsApp::registerObjects(factory);
-}
-
-extern "C" void
-PeridynamicsApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  PeridynamicsApp::associateSyntax(syntax, action_factory);
-}
-
-extern "C" void
-PeridynamicsApp__registerExecFlags(Factory & factory)
-{
-  PeridynamicsApp::registerExecFlags(factory);
+  PeridynamicsApp::registerAll(f, af, s);
 }

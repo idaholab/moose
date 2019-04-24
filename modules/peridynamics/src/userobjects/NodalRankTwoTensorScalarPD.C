@@ -52,7 +52,7 @@ NodalRankTwoTensorScalarPD::gatherWeightedValue(unsigned int id,
                                                 Real dgb_vol_sum,
                                                 Real dgn_vol_sum)
 {
-  Point curr_point = *_current_elem->get_node(id);
+  Point curr_point = *_current_elem->node_ptr(id);
   Real scalar_value = RankTwoScalarTools::getQuantity(
       _tensor[id], _scalar_type, _point1, _point2, curr_point, _input_direction);
 

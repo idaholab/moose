@@ -26,7 +26,7 @@ validParams<MechanicsActionPD>()
 {
   InputParameters params = validParams<Action>();
   params.addClassDescription("Class for setting up peridynamic kernels");
-  params.addRequiredParam<std::vector<NonlinearVariableName>>(
+  params.addRequiredParam<std::vector<VariableName>>(
       "displacements", "Nonlinear variable names for the displacements");
   MooseEnum formulation_option("Bond OrdinaryState NonOrdinaryState", "Bond");
   params.addParam<MooseEnum>("formulation",
@@ -46,11 +46,10 @@ validParams<MechanicsActionPD>()
   params.addParam<bool>("finite_strain_formulation",
                         false,
                         "Parameter to set whether the formulation is finite strain or not");
-  params.addParam<NonlinearVariableName>("temperature",
-                                         "Nonlinear variable name for the temperature");
-  params.addParam<NonlinearVariableName>("out_of_plane_strain",
-                                         "Nonlinear variable name for the out_of_plane strain for "
-                                         "plane stress using SNOSPD formulation");
+  params.addParam<VariableName>("temperature", "Nonlinear variable name for the temperature");
+  params.addParam<VariableName>("out_of_plane_strain",
+                                "Nonlinear variable name for the out_of_plane strain for "
+                                "plane stress using SNOSPD formulation");
   params.addParam<bool>(
       "use_displaced_mesh",
       false,
@@ -70,7 +69,7 @@ validParams<MechanicsActionPD>()
 
 MechanicsActionPD::MechanicsActionPD(const InputParameters & params)
   : Action(params),
-    _displacements(getParam<std::vector<NonlinearVariableName>>("displacements")),
+    _displacements(getParam<std::vector<VariableName>>("displacements")),
     _ndisp(_displacements.size()),
     _formulation(getParam<MooseEnum>("formulation")),
     _stabilization(getParam<MooseEnum>("stabilization")),
@@ -138,12 +137,12 @@ MechanicsActionPD::act()
   }
   else if (_current_task == "add_kernel")
   {
-    const std::string kernel_type = getKernelType();
-    InputParameters params = getKernelParameters(kernel_type);
+    const std::string kernel_name = getKernelName();
+    InputParameters params = getKernelParameters(kernel_name);
 
     for (unsigned int i = 0; i < _ndisp; ++i)
     {
-      const std::string kernel_name = "Peridynamics_" + Moose::stringify(i);
+      const std::string kernel_object_name = "Peridynamics_" + Moose::stringify(i);
 
       params.set<unsigned int>("component") = i;
       params.set<NonlinearVariableName>("variable") = _displacements[i];
@@ -153,7 +152,7 @@ MechanicsActionPD::act()
       if (_diag_save_in.size() != 0)
         params.set<std::vector<AuxVariableName>>("diag_save_in") = {_diag_save_in[i]};
 
-      _problem->addKernel(kernel_type, kernel_name, params);
+      _problem->addKernel(kernel_name, kernel_object_name, params);
     }
   }
   else
@@ -161,47 +160,47 @@ MechanicsActionPD::act()
 }
 
 std::string
-MechanicsActionPD::getKernelType()
+MechanicsActionPD::getKernelName()
 {
-  std::string type;
+  std::string name;
 
   if (_formulation == "Bond")
-    type = "MechanicsBPD";
+    name = "MechanicsBPD";
   else if (_formulation == "OrdinaryState")
-    type = "MechanicsOSPD";
+    name = "MechanicsOSPD";
   else if (_formulation == "NonOrdinaryState")
   {
     if (_stabilization == "Force")
-      type = "ForceStabilizedSmallStrainMechanicsNOSPD";
+      name = "ForceStabilizedSmallStrainMechanicsNOSPD";
     else if (_stabilization == "Self")
     {
       if (_finite_strain_formulation)
-        type = "FiniteStrainMechanicsNOSPD";
+        name = "FiniteStrainMechanicsNOSPD";
       else
-        type = "SmallStrainMechanicsNOSPD";
+        name = "SmallStrainMechanicsNOSPD";
     }
     else
       paramError("stabilization", "Unknown PD stabilization scheme. Choose from: Force Self");
   }
-  else 
-    paramError("formulation", "Unsupported peridynamic formulation. Choose from: Bond OrdinaryState NonOrdinaryState");
+  else
+    paramError(
+        "formulation",
+        "Unsupported peridynamic formulation. Choose from: Bond OrdinaryState NonOrdinaryState");
 
-  return type;
+  return name;
 }
 
 InputParameters
-MechanicsActionPD::getKernelParameters(std::string type)
+MechanicsActionPD::getKernelParameters(std::string name)
 {
-  InputParameters params = _factory.getValidParams(type);
-  params.set<std::vector<NonlinearVariableName>>("displacements") = _displacements;
+  InputParameters params = _factory.getValidParams(name);
+  params.set<std::vector<VariableName>>("displacements") = _displacements;
 
   if (isParamValid("temperature"))
-    params.set<NonlinearVariableName>("temperature") =
-        getParam<NonlinearVariableName>("temperature");
+    params.set<VariableName>("temperature") = getParam<VariableName>("temperature");
 
   if (isParamValid("out_of_plane_strain"))
-    params.set<NonlinearVariableName>("out_of_plane_strain") =
-        getParam<NonlinearVariableName>("out_of_plane_strain");
+    params.set<VariableName>("out_of_plane_strain") = getParam<VariableName>("out_of_plane_strain");
 
   params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
 

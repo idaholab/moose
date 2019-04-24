@@ -9,7 +9,7 @@
 
 #include "ElementUserObjectBasePD.h"
 #include "AuxiliarySystem.h"
-#include "MeshBasePD.h"
+#include "PeridynamicsMesh.h"
 
 template <>
 InputParameters
@@ -26,6 +26,6 @@ ElementUserObjectBasePD::ElementUserObjectBasePD(const InputParameters & paramet
     _bond_status_var(_subproblem.getVariable(_tid, "bond_status")),
     _aux(_fe_problem.getAuxiliarySystem()),
     _aux_sln(_aux.solution()),
-    _pdmesh(dynamic_cast<MeshBasePD &>(_mesh))
+    _pdmesh(dynamic_cast<PeridynamicsMesh &>(_mesh))
 {
 }

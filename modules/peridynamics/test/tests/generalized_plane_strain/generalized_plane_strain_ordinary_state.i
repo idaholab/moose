@@ -3,10 +3,22 @@
   scalar_out_of_plane_strain = scalar_strain_zz
 []
 
+[MeshGenerators]
+  [gmg]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 4
+    ny = 4
+  []
+  [gpd]
+    type = MeshGeneratorPD
+    input = gmg
+    retain_fe_mesh = false
+  []
+[]
+
 [Mesh]
-  type = GeneratedMeshPD
-  dim = 2
-  nx = 4
+  type = PeridynamicsMesh
   horizon_number = 3
 []
 
@@ -33,16 +45,16 @@
   [../]
 []
 
-[Modules]
-  [./Peridynamics]
-    [./Mechanics]
+[Modules/Peridynamics/Mechanics]
+  [./Master]
+    [./all]
       formulation = OrdinaryState
     [../]
-    [./GeneralizedPlaneStrain]
-      [./gps]
-        formulation = OrdinaryState
-        out_of_plane_stress_variable = stress_zz
-      [../]
+  [../]
+  [./GeneralizedPlaneStrain]
+    [./all]
+      formulation = OrdinaryState
+      out_of_plane_stress_variable = stress_zz
     [../]
   [../]
 []
@@ -89,13 +101,13 @@
 [BCs]
   [./bottomx]
     type = PresetBC
-    boundary = 2
+    boundary = bottom
     variable = disp_x
     value = 0.0
   [../]
   [./bottomy]
     type = PresetBC
-    boundary = 2
+    boundary = bottom
     variable = disp_y
     value = 0.0
   [../]

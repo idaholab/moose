@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NODALDAMAGEINDEXPD_H
-#define NODALDAMAGEINDEXPD_H
+#pragma once
 
 #include "NodalAuxVariableUserObjectBasePD.h"
 
@@ -28,5 +27,3 @@ public:
 
   virtual void computeValue(unsigned int id, dof_id_type dof) override;
 };
-
-#endif // NODALDAMAGEINDEXPD_H

@@ -4,10 +4,22 @@
   out_of_plane_strain = strain_zz
 []
 
+[MeshGenerators]
+  [gmg]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 8
+    ny = 8
+  []
+  [gpd]
+    type = MeshGeneratorPD
+    input = gmg
+    retain_fe_mesh = false
+  []
+[]
+
 [Mesh]
-  type = GeneratedMeshPD
-  dim = 2
-  nx = 8
+  type = PeridynamicsMesh
   horizon_number = 3
 []
 
@@ -25,28 +37,26 @@
   [./left_dx]
     type = PresetBC
     variable = disp_x
-    boundary = 0
+    boundary = left
     value = 0.0
   [../]
   [./left_dy]
     type = PresetBC
     variable = disp_y
-    boundary = 0
+    boundary = left
     value = 0.0
   [../]
   [./right_dx]
     type = PresetBC
     variable = disp_x
-    boundary = 1
+    boundary = right
     value = 0.001
   [../]
 []
 
-[Modules]
-  [./Peridynamics]
-    [./Mechanics]
-      formulation = NonOrdinaryState
-    [../]
+[Modules/Peridynamics/Mechanics/Master]
+  [./all]
+    formulation = NonOrdinaryState
   [../]
 []
 

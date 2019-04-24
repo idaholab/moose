@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MECHANICSMATERIALBASEPD_H
-#define MECHANICSMATERIALBASEPD_H
+#pragma once
 
 #include "MaterialBasePD.h"
 
@@ -57,5 +56,3 @@ protected:
   /// Length of current bond
   Real _current_length;
 };
-
-#endif // MECHANICSMATERIALBASEPD_H

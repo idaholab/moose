@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATERIALBASENOSPD_H
-#define MATERIALBASENOSPD_H
+#pragma once
 
 #include "DerivativeMaterialInterface.h"
 #include "MechanicsMaterialBasePD.h"
@@ -33,9 +32,13 @@ protected:
   virtual void computeBondStretch() override;
 
   /**
-   * Function to compute the bond-associated deformation gradient
+   * Function to compute bond-associated deformation gradient
    */
   virtual void computeQpDeformationGradient();
+
+  /**
+   * Function to compute strain tensors
+   */
   virtual void computeQpStrain() = 0;
 
   ///@{ Material properties to store
@@ -55,5 +58,3 @@ protected:
   MaterialProperty<Real> & _multi;
   ///@}
 };
-
-#endif // MATERIALBASENOSPD_H
