@@ -12,6 +12,8 @@
 
 #include "MeshGenerator.h"
 
+#include "libmesh/point.h"
+
 // Forward declarations
 class FancyExtruderGenerator;
 
