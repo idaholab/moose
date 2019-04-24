@@ -39,6 +39,9 @@ protected:
   /// Computes the rotation matrix at time t. For small rotation scenarios, the rotation matrix at time t is same as the intiial rotation matrix
   virtual void computeRotation();
 
+  /// Booleans for validity of params
+  const bool _has_Ix;
+
   /// Number of coupled rotational variables
   unsigned int _nrot;
 
