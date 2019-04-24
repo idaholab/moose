@@ -1,0 +1,10 @@
+[Tests]
+  [./advection_bc]
+    type = 'Exodiff'
+    input = 'advection_bc.i'
+    exodiff = 'advection_bc_out.e'
+    design = 'AdvectionBC.md'
+    issues = '#13283'
+    requirement = "The system shall compute inflow and outflow boundary conditions for advected variables"
+  [../]
+[]
