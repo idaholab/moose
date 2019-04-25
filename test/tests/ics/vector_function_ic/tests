@@ -1,0 +1,10 @@
+[Tests]
+  design = 'VectorConstantIC.md'
+  issues = '#13309'
+  [vector_function_ic]
+    type = 'Exodiff'
+    input = 'vector_function_ic.i'
+    exodiff = 'vector_function_ic_out.e'
+    requirement = 'The system shall allow vector-valued initial conditions be set using a function.'
+  []
+[]
