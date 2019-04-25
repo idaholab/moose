@@ -86,7 +86,8 @@ def evaluate(pde, soln, variable='u',
             locals()['{}_z'.format(_f_)] = locals()[_f_].components.get(R.k, 0)
 
     # Evaluate the supplied solution
-    locals()[variable] = eval(soln)
+    _exact_ = eval(soln)
+    locals()[variable] = _exact_
 
     # Evaluate the PDE
     pde = pde.replace('grad', 'gradient')
@@ -96,13 +97,19 @@ def evaluate(pde, soln, variable='u',
     else:
         _func_ = eval(pde)
 
+    # Convert vector exact solution to a list
+    if isinstance(_exact_, Vector):
+        _exact_ = [_exact_.components.get(R.i, 0),
+                   _exact_.components.get(R.j, 0),
+                   _exact_.components.get(R.k, 0)]
+
     # Convert vector result to a list
     if isinstance(_func_, Vector):
         _func_ = [_func_.components.get(R.i, 0),
                   _func_.components.get(R.j, 0),
                   _func_.components.get(R.k, 0)]
 
-    return _func_, locals()[variable]
+    return _func_, _exact_
 
 def _check_reserved(var):
     """Error checking for input variables."""
