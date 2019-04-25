@@ -34,8 +34,12 @@ private:
   const VariableValue * _u_old;
   const VariableValue * _vel_old;
   const VariableValue * _accel_old;
+  const bool _has_beta;
+  const bool _has_gamma;
   const Real _beta;
   const Real _gamma;
+  const bool _has_velocity;
+  const bool _has_acceleration;
   const MaterialProperty<Real> & _eta;
   const Real _alpha;
 

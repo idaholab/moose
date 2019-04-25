@@ -40,6 +40,14 @@ protected:
 
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
+  /// Booleans for validity of params
+  const bool _has_beta;
+  const bool _has_gamma;
+  const bool _has_rot_velocities;
+  const bool _has_rot_accelerations;
+  const bool _has_x_orientation;
+  const bool _has_y_orientation;
+
   /// Auxiliary system object
   AuxiliarySystem * _aux_sys;
 

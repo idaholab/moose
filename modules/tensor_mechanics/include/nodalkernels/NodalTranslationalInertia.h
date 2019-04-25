@@ -36,6 +36,14 @@ protected:
 
   virtual Real computeQpJacobian() override;
 
+  /// Booleans for validity of params
+  const bool _has_mass;
+  const bool _has_beta;
+  const bool _has_gamma;
+  const bool _has_velocity;
+  const bool _has_acceleration;
+  const bool _has_nodal_mass_file;
+
   /// Mass associated with the node
   const Real _mass;
 

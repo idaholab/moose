@@ -33,6 +33,15 @@ protected:
   virtual Real computeQpResidual() override { return 0.0; };
 
 private:
+  /// Booleans for validity of params
+  const bool _has_beta;
+  const bool _has_gamma;
+  const bool _has_velocities;
+  const bool _has_rot_velocities;
+  const bool _has_accelerations;
+  const bool _has_rot_accelerations;
+  const bool _has_Ix;
+
   /// Density of the beam
   const MaterialProperty<Real> & _density;
 
