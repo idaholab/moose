@@ -28,7 +28,7 @@ protected:
   MooseEnum _component;
 
   const VectorVariableValue & _coupled_val;
-  unsigned int _coupled_id;
+  unsigned int _coupled_var_num;
 
   Function & _inc_real;
   Function & _inc_imag;
