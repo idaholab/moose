@@ -85,15 +85,24 @@ def evaluate(pde, soln, variable='u',
             locals()['{}_y'.format(_f_)] = locals()[_f_].components.get(R.j, 0)
             locals()['{}_z'.format(_f_)] = locals()[_f_].components.get(R.k, 0)
 
+    # Evaluate the supplied solution
     locals()[variable] = eval(soln)
 
     # Evaluate the PDE
     pde = pde.replace('grad', 'gradient')
     pde = pde.replace('div', 'divergence')
     if negative:
-        return -eval(pde), locals()[variable]
+        _func_ = -eval(pde),
     else:
-        return eval(pde), locals()[variable]
+        _func_ = eval(pde)
+
+    # Convert vector result to a list
+    if isinstance(_func_, Vector):
+        _func_ = [_func_.components.get(R.i, 0),
+                  _func_.components.get(R.j, 0),
+                  _func_.components.get(R.k, 0)]
+
+    return _func_, locals()[variable]
 
 def _check_reserved(var):
     """Error checking for input variables."""
