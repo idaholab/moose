@@ -9,7 +9,7 @@ InputParameters
 validParams<VectorPortBC>()
 {
   InputParameters params = validParams<VectorIntegratedBC>();
-  params.addClassDescription("First order Absorbing/Port BC from Jin 'Theory and Computation of "
+  params.addClassDescription("First order Absorbing/Port BC from 'Theory and Computation of "
                              "Electromagnetic Fields' by JM Jin.");
   params.addParam<FunctionName>(
       "beta", 1.0, "Scalar waveguide propagation constant (usually some k, k0).");
