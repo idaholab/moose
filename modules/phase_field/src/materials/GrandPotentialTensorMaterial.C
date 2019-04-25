@@ -49,7 +49,7 @@ GrandPotentialTensorMaterial::GrandPotentialTensorMaterial(const InputParameters
     _Ls(declareProperty<Real>(_Ls_name)),
     _Lv_name(getParam<std::string>("void_mobility")),
     _Lv(declareProperty<Real>(_Lv_name)),
-    _Dmag(declareProperty<Real>("chiD_mag")),
+    _Dmag(declareProperty<Real>(_D_name + "_mag")),
     _sigma_s(getMaterialProperty<Real>("surface_energy")),
     _int_width(getParam<Real>("int_width")),
     _chi_name(getParam<MaterialPropertyName>("chi")),
@@ -91,6 +91,6 @@ GrandPotentialTensorMaterial::computeProperties()
       GBmob = _GBMobility;
 
     _Ls[_qp] = 4.0 / 3.0 * GBmob / _int_width;
-    _Lv[_qp] = (40.0 * _Dbulk) / (3.0 * _int_width * _sigma_s[_qp]); // 10*M_bulk/sigma_s
+    _Lv[_qp] = 40 * _Ls[_qp];
   }
 }
