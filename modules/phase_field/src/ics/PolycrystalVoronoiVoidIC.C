@@ -13,6 +13,8 @@
 #include "MooseMesh.h"
 #include "MooseVariable.h"
 #include "DelimitedFileReader.h"
+#include "GrainTrackerInterface.h"
+#include "PolycrystalVoronoi.h"
 
 InputParameters
 PolycrystalVoronoiVoidIC::actionParameters()
@@ -20,8 +22,6 @@ PolycrystalVoronoiVoidIC::actionParameters()
   InputParameters params = validParams<MultiSmoothCircleIC>();
 
   params.addRequiredParam<unsigned int>("op_num", "Number of order parameters");
-  params.addParam<unsigned int>(
-      "grain_num", 0, "Number of grains being represented by the order parameters");
 
   params.addParam<unsigned int>("rand_seed", 12444, "The random seed");
 
@@ -47,7 +47,8 @@ validParams<PolycrystalVoronoiVoidIC>()
                                 "The index for the current "
                                 "order parameter, not needed if "
                                 "structure_type = voids");
-
+  params.addRequiredParam<UserObjectName>(
+      "polycrystal_ic_uo", "UserObject for obtaining the polycrystal grain structure.");
   params.addParam<FileName>(
       "file_name",
       "",
@@ -60,10 +61,10 @@ PolycrystalVoronoiVoidIC::PolycrystalVoronoiVoidIC(const InputParameters & param
   : MultiSmoothCircleIC(parameters),
     _structure_type(getParam<MooseEnum>("structure_type")),
     _op_num(getParam<unsigned int>("op_num")),
-    _grain_num(getParam<unsigned int>("grain_num")),
     _op_index(getParam<unsigned int>("op_index")),
     _rand_seed(getParam<unsigned int>("rand_seed")),
     _columnar_3D(getParam<bool>("columnar_3D")),
+    _poly_ic_uo(getUserObject<PolycrystalVoronoi>("polycrystal_ic_uo")),
     _file_name(getParam<FileName>("file_name"))
 {
   if (_invalue < _outvalue)
@@ -75,12 +76,6 @@ PolycrystalVoronoiVoidIC::PolycrystalVoronoiVoidIC(const InputParameters & param
                "represented, use invalue = outvalue. In general, you should use "
                "PolycrystalVoronoi to represent Voronoi grain structures without "
                "voids.");
-
-  if (_file_name == "" && _grain_num == 0)
-    mooseError("grain_num must be provided if the grain centriods are not read from a file");
-
-  if (_file_name != "" && _grain_num > 0)
-    mooseWarning("grain_num is ignored and will be determined from the file.");
 }
 
 void
@@ -98,8 +93,9 @@ PolycrystalVoronoiVoidIC::initialSetup()
   }
   _range = _top_right - _bottom_left;
 
-  // Create _centerpoints and _assigned_op vectors
-  computeGrainCenters();
+  // Obtain total number and centerpoints of the grains
+  _grain_num = _poly_ic_uo.getNumGrains();
+  _centerpoints = _poly_ic_uo.getGrainCenters();
 
   // Call initial setup from MultiSmoothCircleIC to create _centers and _radii
   // for voids
@@ -226,7 +222,7 @@ PolycrystalVoronoiVoidIC::value(const Point & p)
   Real void_value = MultiSmoothCircleIC::value(p);
 
   // Determine value for grains
-  Real grain_value = grainValueCalc(p);
+  Real grain_value = _poly_ic_uo.getVariableValue(_op_index, p);
 
   switch (_structure_type)
   {
@@ -265,85 +261,4 @@ PolycrystalVoronoiVoidIC::gradient(const Point & p)
   }
 
   return gradient;
-}
-
-Real
-PolycrystalVoronoiVoidIC::grainValueCalc(const Point & p)
-{
-  Real val = 0.0;
-
-  unsigned int min_index =
-      PolycrystalICTools::assignPointToGrain(p, _centerpoints, _mesh, _var, _range.norm());
-
-  // If the current order parameter index (_op_index) is equal to the min_index,
-  // set the value to
-  // 1.0
-  if (_assigned_op[min_index] == _op_index)
-    val = 1.0;
-
-  if (val > 1.0)
-    val = 1.0;
-
-  if (val < 0.0)
-    val = 0.0;
-
-  return val;
-}
-
-void
-PolycrystalVoronoiVoidIC::computeGrainCenters()
-{
-  if (!_file_name.empty())
-  {
-    MooseUtils::DelimitedFileReader txt_reader(_file_name, &_communicator);
-
-    txt_reader.read();
-    std::vector<std::string> col_names = txt_reader.getNames();
-    std::vector<std::vector<Real>> data = txt_reader.getData();
-
-    _grain_num = data[0].size();
-    _centerpoints.resize(_grain_num);
-
-    for (unsigned int i = 0; i < col_names.size(); ++i)
-    {
-      // Check vector lengths
-      if (data[i].size() != _grain_num)
-        paramError("Columns in ", _file_name, " do not have uniform lengths.");
-    }
-
-    for (unsigned int grain = 0; grain < _grain_num; ++grain)
-    {
-      _centerpoints[grain](0) = data[0][grain];
-      _centerpoints[grain](1) = data[1][grain];
-      if (col_names.size() > 2)
-        _centerpoints[grain](2) = data[2][grain];
-      else
-        _centerpoints[grain](2) = 0.0;
-    }
-  }
-  else
-  {
-    _centerpoints.resize(_grain_num);
-    // Randomly generate the centers of the individual grains represented by the
-    // Voronoi tessellation
-    for (unsigned int grain = 0; grain < _grain_num; grain++)
-    {
-      for (unsigned int i = 0; i < LIBMESH_DIM; i++)
-        _centerpoints[grain](i) = _bottom_left(i) + _range(i) * MooseRandom::rand();
-
-      if (_columnar_3D)
-        _centerpoints[grain](2) = _bottom_left(2) + _range(2) * 0.5;
-    }
-  }
-
-  if (_op_num > _grain_num)
-    mooseError("ERROR in PolycrystalVoronoiVoidIC: Number of order parameters "
-               "(op_num) can't be "
-               "larger than the number of grains (grain_num)");
-
-  _assigned_op.resize(_grain_num);
-
-  // Assign grains to specific order parameters in a way that maximizes the
-  // distance
-  _assigned_op = PolycrystalICTools::assignPointsToVariables(_centerpoints, _op_num, _mesh, _var);
 }
