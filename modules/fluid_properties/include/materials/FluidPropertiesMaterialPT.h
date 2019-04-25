@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FLUIDPROPERTIESMATERIALPT_H
-#define FLUIDPROPERTIESMATERIALPT_H
+#pragma once
 
 #include "Material.h"
 #include "SinglePhaseFluidProperties.h"
@@ -57,4 +56,3 @@ protected:
   const SinglePhaseFluidProperties & _fp;
 };
 
-#endif /* FLUIDPROPERTIESMATERIALPT_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CONSOLEUTILS_H
-#define CONSOLEUTILS_H
+#pragma once
 
 // MOOSE includes
 #include "Moose.h"
@@ -88,4 +87,3 @@ void insertNewline(std::stringstream & oss, std::streampos & begin, std::streamp
 
 } // ConsoleUtils namespace
 
-#endif

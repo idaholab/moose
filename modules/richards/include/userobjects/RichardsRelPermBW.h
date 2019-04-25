@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSRELPERMBW_H
-#define RICHARDSRELPERMBW_H
+#pragma once
 
 #include "RichardsRelPerm.h"
 
@@ -65,4 +64,3 @@ protected:
   Real _coef;
 };
 
-#endif // RICHARDSRELPERMBW_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWSINK_H
-#define POROUSFLOWSINK_H
+#pragma once
 
 #include "IntegratedBC.h"
 #include "Function.h"
@@ -154,4 +153,3 @@ protected:
   virtual Real dmultiplier_dvar(unsigned int pvar) const;
 };
 
-#endif // POROUSFLOWSINK_H

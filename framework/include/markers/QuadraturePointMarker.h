@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef QUADRATUREPOINTMARKER_H
-#define QUADRATUREPOINTMARKER_H
+#pragma once
 
 #include "Marker.h"
 #include "Coupleable.h"
@@ -55,4 +54,3 @@ protected:
   MarkerValue _third_state;
 };
 
-#endif /* QUADRATUREPOINTMARKER_H */

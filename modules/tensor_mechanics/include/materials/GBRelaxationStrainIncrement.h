@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GBRELAXATIONSTRAININCREMENT_H
-#define GBRELAXATIONSTRAININCREMENT_H
+#pragma once
 
 #include "Material.h"
 #include "RankTwoTensor.h"
@@ -37,4 +36,3 @@ protected:
   MaterialProperty<RankTwoTensor> & _strain_increment;
 };
 
-#endif // GBRELAXATIONSTRAININCREMENT_H

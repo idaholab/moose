@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATCONVECTION_H
-#define MATCONVECTION_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -36,4 +35,3 @@ protected:
   Real _z;
 };
 
-#endif // MATCONVECTION_H

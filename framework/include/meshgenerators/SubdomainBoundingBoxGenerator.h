@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SUBDOMAINBOUNDINGBOXGENERATOR_H
-#define SUBDOMAINBOUNDINGBOXGENERATOR_H
+#pragma once
 
 #include "MeshGenerator.h"
 #include "MooseEnum.h"
@@ -49,4 +48,3 @@ protected:
   BoundingBox _bounding_box;
 };
 
-#endif // SUBDOMAINBOUNDINGBOXGENERATOR_H

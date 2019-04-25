@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMENTQUALITYCHECKER_H
-#define ELEMENTQUALITYCHECKER_H
+#pragma once
 
 #include "ElementUserObject.h"
 
@@ -65,4 +64,3 @@ private:
   const FailureType _failure_type;
 };
 
-#endif // ELEMENTQUALITYCHECKER_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GAPCONDUCTANCECONSTRAINT_H
-#define GAPCONDUCTANCECONSTRAINT_H
+#pragma once
 
 #include "MortarConstraint.h"
 
@@ -98,4 +97,3 @@ protected:
   Real _k;
 };
 
-#endif // GAPCONDUCTANCECONSTRAINT_H

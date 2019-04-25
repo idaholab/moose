@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ASSEMBLY_H
-#define ASSEMBLY_H
+#pragma once
 
 #include "MooseArray.h"
 #include "MooseTypes.h"
@@ -1630,4 +1629,3 @@ Assembly::adGradPhi<RealVectorValue, ComputeStage::JACOBIAN>(
 template <>
 const MooseArray<typename Moose::RealType<RESIDUAL>::type> & Assembly::adJxW<RESIDUAL>() const;
 
-#endif /* ASSEMBLY_H */

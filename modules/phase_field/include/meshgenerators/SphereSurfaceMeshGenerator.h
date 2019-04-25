@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SPHERESURFACEMESHGENERATOR_H
-#define SPHERESURFACEMESHGENERATOR_H
+#pragma once
 
 #include "MeshGenerator.h"
 #include "libmesh/point.h"
@@ -40,4 +39,3 @@ protected:
   const unsigned int _depth;
 };
 
-#endif // SPHERESURFACEMESHGENERATOR_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NONLINEAREIGEN_H
-#define NONLINEAREIGEN_H
+#pragma once
 
 #include "EigenExecutionerBase.h"
 
@@ -41,4 +40,3 @@ protected:
   bool _last_solve_converged;
 };
 
-#endif // NONLINEAREIGEN_H

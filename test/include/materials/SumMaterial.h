@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SUMMATERIAL_H
-#define SUMMATERIAL_H
+#pragma once
 
 #include "Material.h"
 
@@ -41,4 +40,3 @@ protected:
   Real _val_mp2;
 };
 
-#endif /* SUMMATERIAL_H */

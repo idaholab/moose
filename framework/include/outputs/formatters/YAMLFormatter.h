@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef YAMLFORMATTER_H
-#define YAMLFORMATTER_H
+#pragma once
 
 #include "SyntaxTree.h"
 #include <sstream>
@@ -49,4 +48,3 @@ protected:
                          const std::iterator_traits<InputParameters::iterator>::value_type & p);
 };
 
-#endif /* YAMLFORMATTER_H */

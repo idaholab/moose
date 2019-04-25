@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef XFEMCUTELEM2D_H
-#define XFEMCUTELEM2D_H
+#pragma once
 
 #include "XFEMCutElem.h"
 #include "EFAElement2D.h"
@@ -68,4 +67,3 @@ private:
                           std::vector<std::vector<Real>> & wsg);
 };
 
-#endif

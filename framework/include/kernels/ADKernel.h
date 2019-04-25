@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADKERNEL_H
-#define ADKERNEL_H
+#pragma once
 
 #include "KernelBase.h"
 
@@ -119,4 +118,3 @@ protected:
   const typename VariablePhiGradientType<T, compute_stage>::type & _grad_phi;
 };
 
-#endif /* ADKERNEL_H */

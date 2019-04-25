@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DRIFTDIFFUSIONFLUXAUX_H
-#define DRIFTDIFFUSIONFLUXAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -33,4 +32,3 @@ private:
   const int _component;
 };
 
-#endif // DRIFTDIFFUSIONFLUXAUX_H

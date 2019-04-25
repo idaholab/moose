@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CONSERVEDLANGEVINNOISE_H
-#define CONSERVEDLANGEVINNOISE_H
+#pragma once
 
 #include "LangevinNoise.h"
 #include "ConservedNoiseBase.h"
@@ -32,4 +31,3 @@ private:
   const ConservedNoiseInterface & _noise;
 };
 
-#endif // CONSERVEDLANGEVINNOISE_H

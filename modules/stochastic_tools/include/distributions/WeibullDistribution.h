@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef WEIBULLDISTRIBUTION_H
-#define WEIBULLDISTRIBUTION_H
+#pragma once
 
 #include "Distribution.h"
 
@@ -45,4 +44,3 @@ protected:
   const Real & _c;
 };
 
-#endif /* WEIBULLDISTRIBUTION_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef HHPFCRFFSPLITKERNELACTION_H
-#define HHPFCRFFSPLITKERNELACTION_H
+#pragma once
 
 #include "Action.h"
 
@@ -31,4 +30,3 @@ protected:
   const VariableName _n_name;
 };
 
-#endif // HHPFCRFFSPLITKERNELACTION_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LEGENDRE_H
-#define LEGENDRE_H
+#pragma once
 
 #include "SingleSeriesBasisInterface.h"
 
@@ -53,4 +52,3 @@ protected:
   getStandardizedLocation(const std::vector<Real> & location) const override;
 };
 
-#endif // LEGENDRE_H

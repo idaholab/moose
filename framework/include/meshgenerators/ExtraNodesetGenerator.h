@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EXTRANODESETGENERATOR_H
-#define EXTRANODESETGENERATOR_H
+#pragma once
 
 #include "MeshGenerator.h"
 
@@ -32,4 +31,3 @@ protected:
   std::unique_ptr<MeshBase> & _input;
 };
 
-#endif // EXTRANODESETGENERATOR_H

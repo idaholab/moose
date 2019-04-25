@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RENAMEDKERNEL_H
-#define RENAMEDKERNEL_H
+#pragma once
 
 #include "Reaction.h"
 
@@ -30,4 +29,3 @@ protected:
   Real _coef;
 };
 
-#endif // RENAMEDKERNEL_H

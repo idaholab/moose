@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef HEVPEQVPLASTICSTRAIN_H
-#define HEVPEQVPLASTICSTRAIN_H
+#pragma once
 
 #include "HEVPInternalVarUOBase.h"
 
@@ -30,4 +29,3 @@ public:
   virtual bool computeDerivative(unsigned int, Real, const std::string &, Real &) const;
 };
 
-#endif

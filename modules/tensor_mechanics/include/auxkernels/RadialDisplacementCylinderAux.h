@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RADIALDISPLACEMENTCYLINDERAUX_H
-#define RADIALDISPLACEMENTCYLINDERAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -48,4 +47,3 @@ protected:
   RealVectorValue _origin;
 };
 
-#endif // RADIALDISPLACEMENTCYLINDERAUX_H

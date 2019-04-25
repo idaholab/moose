@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef Q2PRELPERMPOWERGAS_H
-#define Q2PRELPERMPOWERGAS_H
+#pragma once
 
 #include "RichardsRelPerm.h"
 
@@ -54,4 +53,3 @@ protected:
   Real _n;
 };
 
-#endif // Q2PRELPERMPOWERGAS_H

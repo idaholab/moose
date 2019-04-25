@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NSIMPOSEDVELOCITYDIRECTIONBC_H
-#define NSIMPOSEDVELOCITYDIRECTIONBC_H
+#pragma once
 
 #include "NodalBC.h"
 
@@ -60,4 +59,3 @@ protected:
   Real _desired_unit_velocity_component;
 };
 
-#endif // NSIMPOSEDVELOCITYDIRECTIONBC_H

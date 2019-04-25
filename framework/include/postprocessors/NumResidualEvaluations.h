@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NUMRESIDUALEVALUATIONS_H
-#define NUMRESIDUALEVALUATIONS_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 
@@ -32,4 +31,3 @@ public:
   virtual Real getValue() override;
 };
 
-#endif // NUMRESIDUALEVALUATIONS_H

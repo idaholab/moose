@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SETUPRESIDUALDEBUGACTION_H
-#define SETUPRESIDUALDEBUGACTION_H
+#pragma once
 
 #include "Action.h"
 #include "MooseTypes.h"
@@ -32,4 +31,3 @@ protected:
   std::vector<NonlinearVariableName> _show_var_residual;
 };
 
-#endif /* SETUPRESIDUALDEBUGACTION_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INTERNALSIDEUSEROBJECT_H
-#define INTERNALSIDEUSEROBJECT_H
+#pragma once
 
 #include "UserObject.h"
 #include "BlockRestrictable.h"
@@ -62,4 +61,3 @@ protected:
   const Real & getNeighborElemVolume();
 };
 
-#endif /* INTERNALSIDEUSEROBJECT_H */

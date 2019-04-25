@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWPERMEABILITYCONSTFROMVAR_H
-#define POROUSFLOWPERMEABILITYCONSTFROMVAR_H
+#pragma once
 
 #include "PorousFlowPermeabilityBase.h"
 
@@ -47,4 +46,3 @@ protected:
   const VariableValue & _perm_zz;
 };
 
-#endif // POROUSFLOWPERMEABILITYCONSTFROMVAR_H

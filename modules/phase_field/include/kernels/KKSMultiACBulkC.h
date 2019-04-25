@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef KKSMULTIACBULKC_H
-#define KKSMULTIACBULKC_H
+#pragma once
 
 #include "KKSMultiACBulkBase.h"
 
@@ -48,4 +47,3 @@ protected:
   std::vector<const MaterialProperty<Real> *> _prop_d2F1dc1darg;
 };
 
-#endif // KKSMULTIACBULKC_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADCOMPUTE2DFINITESTRAIN_H
-#define ADCOMPUTE2DFINITESTRAIN_H
+#pragma once
 
 #include "ADComputeFiniteStrain.h"
 
@@ -59,4 +58,3 @@ protected:
   usingComputeFiniteStrainMembers;
 };
 
-#endif // ADCOMPUTE2DFINITESTRAIN_H

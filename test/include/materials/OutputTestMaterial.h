@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef OUTPUTTESTMATERIAL_H
-#define OUTPUTTESTMATERIAL_H
+#pragma once
 
 // MOOSE includes
 #include "Material.h"
@@ -57,4 +56,3 @@ protected:
   const VariableValue & _variable;
 };
 
-#endif // OUTPUTTESTMATERIAL_H

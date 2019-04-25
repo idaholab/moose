@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PHASENORMALTENSOR_H
-#define PHASENORMALTENSOR_H
+#pragma once
 
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
@@ -35,4 +34,3 @@ protected:
   MaterialProperty<RankTwoTensor> & _normal_tensor;
 };
 
-#endif

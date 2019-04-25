@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DYNAMICSTRESSDIVERGENCETENSORS_H
-#define DYNAMICSTRESSDIVERGENCETENSORS_H
+#pragma once
 
 #include "StressDivergenceTensors.h"
 
@@ -40,4 +39,3 @@ protected:
   const bool _static_initialization;
 };
 
-#endif // DYNAMICSTRESSDIVERGENCETENSORS_H

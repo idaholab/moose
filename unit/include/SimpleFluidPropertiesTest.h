@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SIMPLEFLUIDPROPERTIESTEST_H
-#define SIMPLEFLUIDPROPERTIESTEST_H
+#pragma once
 
 #include "MooseObjectUnitTest.h"
 #include "SimpleFluidProperties.h"
@@ -38,4 +37,3 @@ protected:
   const SimpleFluidProperties * _fp2;
 };
 
-#endif // SIMPLEFLUIDPROPERTIESTEST_H

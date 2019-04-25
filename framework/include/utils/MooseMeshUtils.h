@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEMESHUTILS_H
-#define MOOSEMESHUTILS_H
+#pragma once
 
 #include "libmesh/mesh_base.h"
 #include "libmesh/boundary_info.h"
@@ -33,4 +32,3 @@ std::vector<subdomain_id_type> getSubdomainIDs(const libMesh::MeshBase & mesh,
                                                const std::vector<SubdomainName> & subdomain_name);
 }
 
-#endif // MOOSEMESHUTILS_H

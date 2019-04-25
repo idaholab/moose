@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FLUIDPROPERTIES_H
-#define FLUIDPROPERTIES_H
+#pragma once
 
 #include "ThreadedGeneralUserObject.h"
 
@@ -46,4 +45,3 @@ protected:
   const bool _allow_imperfect_jacobians;
 };
 
-#endif /* FLUIDPROPERTIES_H */

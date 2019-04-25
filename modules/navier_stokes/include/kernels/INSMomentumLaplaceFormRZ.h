@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INSMOMENTUMLAPLACEFORMRZ_H
-#define INSMOMENTUMLAPLACEFORMRZ_H
+#pragma once
 
 #include "INSMomentumLaplaceForm.h"
 
@@ -39,4 +38,3 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
 };
 
-#endif

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSBOREHOLE_H
-#define RICHARDSBOREHOLE_H
+#pragma once
 
 // Moose Includes
 #include "PeacemanBorehole.h"
@@ -155,4 +154,3 @@ protected:
   Real jac(unsigned int wrt_num);
 };
 
-#endif // RICHARDSBOREHOLE_H

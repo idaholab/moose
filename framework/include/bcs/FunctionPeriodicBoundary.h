@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FUNCTIONPERIODICBOUNDARY_H
-#define FUNCTIONPERIODICBOUNDARY_H
+#pragma once
 
 #include "Moose.h"
 
@@ -71,4 +70,3 @@ protected:
   void init();
 };
 
-#endif // FUNCTIONPERIODICBOUNDARY_H

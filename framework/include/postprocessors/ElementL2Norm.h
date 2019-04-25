@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMENTL2NORM_H
-#define ELEMENTL2NORM_H
+#pragma once
 
 #include "ElementIntegralVariablePostprocessor.h"
 
@@ -29,4 +28,3 @@ protected:
   virtual Real computeQpIntegral() override;
 };
 
-#endif // ELEMENTL2NORM_H

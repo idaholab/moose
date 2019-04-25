@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATERIALREALDENSEMATRIXAUX_H
-#define MATERIALREALDENSEMATRIXAUX_H
+#pragma once
 
 // MOOSE includes
 #include "MaterialAuxBase.h"
@@ -42,4 +41,3 @@ protected:
   unsigned int _col;
 };
 
-#endif // MATERIALREALDENSEMATRIXAUX_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RNDBOUNDINGBOXIC_H
-#define RNDBOUNDINGBOXIC_H
+#pragma once
 
 #include "InitialCondition.h"
 
@@ -56,4 +55,3 @@ private:
   const Point _top_right;
 };
 
-#endif // RNDBOUNDINGBOXIC_H

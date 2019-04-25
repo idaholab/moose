@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef Q2PMATERIAL_H
-#define Q2PMATERIAL_H
+#pragma once
 
 #include "Material.h"
 
@@ -51,4 +50,3 @@ protected:
   virtual void computeQpProperties();
 };
 
-#endif // Q2PMATERIAL_H

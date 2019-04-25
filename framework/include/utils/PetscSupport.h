@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PETSCSUPPORT_H
-#define PETSCSUPPORT_H
+#pragma once
 
 #include "libmesh/libmesh.h" // Real, LIBMESH_HAVE_PETSC
 
@@ -153,4 +152,3 @@ void colorAdjacencyMatrix(PetscScalar * adjacency_matrix,
 
 #endif // LIBMESH_HAVE_PETSC
 
-#endif // PETSCSUPPORT_H

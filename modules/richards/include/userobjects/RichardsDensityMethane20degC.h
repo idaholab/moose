@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSDENSITYMETHANE20DEGC_H
-#define RICHARDSDENSITYMETHANE20DEGC_H
+#pragma once
 
 #include "RichardsDensity.h"
 
@@ -56,4 +55,3 @@ private:
   Real _p_unit;
 };
 
-#endif // RICHARDSDENSITYMETHANE20DEGC_H

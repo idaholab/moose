@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NUMADAPTIVITYCYCLES_H
-#define NUMADAPTIVITYCYCLES_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 
@@ -32,4 +31,3 @@ public:
   virtual Real getValue() override;
 };
 
-#endif // NUMADAPTIVITYCYCLES_H

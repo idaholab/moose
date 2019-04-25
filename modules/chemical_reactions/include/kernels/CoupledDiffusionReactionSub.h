@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COUPLEDDIFFUSIONREACTIONSUB_H
-#define COUPLEDDIFFUSIONREACTIONSUB_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -55,4 +54,3 @@ private:
   const VariableValue & _gamma_eq;
 };
 
-#endif // COUPLEDDIFFUSIONREACTIONSUB_H

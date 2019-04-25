@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADPIECEWISELINEARINTERPOLATIONMATERIAL_H
-#define ADPIECEWISELINEARINTERPOLATIONMATERIAL_H
+#pragma once
 
 #include "ADMaterial.h"
 #include "LinearInterpolation.h"
@@ -52,4 +51,3 @@ protected:
   usingMaterialMembers;
 };
 
-#endif // ADPIECEWISELINEARINTERPOLATIONMATERIAL_H

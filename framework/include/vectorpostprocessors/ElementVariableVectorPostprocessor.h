@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMENTALVARIABLEVECTORPOSTPROCESSOR_H
-#define ELEMENTALVARIABLEVECTORPOSTPROCESSOR_H
+#pragma once
 
 #include "ElementVectorPostprocessor.h"
 
@@ -26,4 +25,3 @@ public:
   ElementVariableVectorPostprocessor(const InputParameters & parameters);
 };
 
-#endif

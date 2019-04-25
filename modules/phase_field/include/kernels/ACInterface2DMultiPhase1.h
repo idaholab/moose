@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ACINTERFACE2DMULTIPHASE1_H
-#define ACINTERFACE2DMULTIPHASE1_H
+#pragma once
 
 #include "Kernel.h"
 #include "JvarMapInterface.h"
@@ -47,4 +46,3 @@ protected:
   std::vector<const VariableGradient *> _grad_eta;
 };
 
-#endif // ACINTERFACE2DMULTIPHASE1_H

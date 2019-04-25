@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef WATER97FLUIDPROPERTIESTEST_H
-#define WATER97FLUIDPROPERTIESTEST_H
+#pragma once
 
 #include "MooseObjectUnitTest.h"
 #include "Water97FluidProperties.h"
@@ -29,4 +28,3 @@ protected:
   const Water97FluidProperties * _fp;
 };
 
-#endif // WATER97FLUIDPROPERTIESTEST_H

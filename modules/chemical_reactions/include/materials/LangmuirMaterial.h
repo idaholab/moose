@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LANGMUIRMATERIAL_H
-#define LANGMUIRMATERIAL_H
+#pragma once
 
 #include "Material.h"
 
@@ -59,4 +58,3 @@ private:
   MaterialProperty<Real> & _dmass_rate_from_matrix_dp;
 };
 
-#endif // LANGMUIRMATERIAL_H

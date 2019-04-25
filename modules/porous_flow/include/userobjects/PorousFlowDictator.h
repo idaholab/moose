@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWDICTATOR_H
-#define POROUSFLOWDICTATOR_H
+#pragma once
 
 #include "GeneralUserObject.h"
 #include "Coupleable.h"
@@ -182,4 +181,3 @@ private:
   std::vector<unsigned int> _pf_var_num;
 };
 
-#endif // POROUSFLOWDICTATOR_H

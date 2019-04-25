@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SOLVERPARAMS_H
-#define SOLVERPARAMS_H
+#pragma once
 
 #include "MooseTypes.h"
 
@@ -27,4 +26,3 @@ public:
   Moose::WhichEigenPairs _which_eigen_pairs;
 };
 
-#endif /* SOLVERPARAMS_H */

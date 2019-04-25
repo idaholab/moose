@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEVARIABLESCALAR_H
-#define MOOSEVARIABLESCALAR_H
+#pragma once
 
 #include "MooseVariableBase.h"
 #include "SystemBase.h"
@@ -162,4 +161,3 @@ protected:
   bool _need_du_dotdot_du;
 };
 
-#endif /* MOOSEVARIABLESCALAR_H */

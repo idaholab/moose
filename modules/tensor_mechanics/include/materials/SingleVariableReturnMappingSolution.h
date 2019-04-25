@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SINGLEVARIABLERETURNMAPPINGSOLUTION_H
-#define SINGLEVARIABLERETURNMAPPINGSOLUTION_H
+#pragma once
 
 #include "InputParameters.h"
 #include "ConsoleStream.h"
@@ -237,4 +236,3 @@ private:
                     std::stringstream * iter_output);
 };
 
-#endif // SINGLEVARIABLERETURNMAPPINGSOLUTION_H

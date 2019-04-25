@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef JACOBIANCHECK_H
-#define JACOBIANCHECK_H
+#pragma once
 
 #include "NodalKernel.h"
 
@@ -32,4 +31,3 @@ protected:
   virtual Real computeQpJacobian() override;
 };
 
-#endif /*JACOBIANCHECK_H*/

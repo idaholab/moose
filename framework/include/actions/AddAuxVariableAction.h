@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADDAUXVARIABLEACTION_H
-#define ADDAUXVARIABLEACTION_H
+#pragma once
 
 // MOOSE includes
 #include "AddVariableAction.h"
@@ -45,4 +44,3 @@ public:
   static MooseEnum getAuxVariableOrders();
 };
 
-#endif // ADDAUXVARIABLEACTION_H

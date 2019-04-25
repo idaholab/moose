@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NAVIERSTOKESMATERIAL_H
-#define NAVIERSTOKESMATERIAL_H
+#pragma once
 
 #include "Material.h"
 
@@ -132,4 +131,3 @@ private:
   void computeStrongResiduals(unsigned int qp);
 };
 
-#endif // NAVIERSTOKESMATERIAL_H

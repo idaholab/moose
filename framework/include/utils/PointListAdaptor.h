@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POINTLISTADAPTOR_H
-#define POINTLISTADAPTOR_H
+#pragma once
 
 #include "libmesh/nanoflann.hpp"
 #include "libmesh/utility.h"
@@ -118,4 +117,3 @@ PointListAdaptor<Point>::getPoint(const Point & item) const
   return item;
 }
 
-#endif // POINTLISTADAPTOR_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TIMENODALKERNEL_H
-#define TIMENODALKERNEL_H
+#pragma once
 
 #include "NodalKernel.h"
 
@@ -40,4 +39,3 @@ protected:
   const VariableValue & _du_dot_du;
 };
 
-#endif

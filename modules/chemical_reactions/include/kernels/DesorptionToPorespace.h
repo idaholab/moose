@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DESORPTIONTOPORESPACE
-#define DESORPTIONTOPORESPACE
+#pragma once
 
 #include "Kernel.h"
 #include "LangmuirMaterial.h"
@@ -46,5 +45,3 @@ protected:
   /// derivative of mass flow rate from matrix wrt pressure
   const MaterialProperty<Real> & _dmass_rate_from_matrix_dp;
 };
-
-#endif // DESORPTIONTOPORESPACE

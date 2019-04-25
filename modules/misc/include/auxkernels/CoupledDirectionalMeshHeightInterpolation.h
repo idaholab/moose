@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COUPLEDDIRECTIONALMESHHEIGHTINTERPOLATION_H
-#define COUPLEDDIRECTIONALMESHHEIGHTINTERPOLATION_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -53,4 +52,3 @@ protected:
   Real _direction_max;
 };
 
-#endif // COUPLEDDIRECTIONALMESHHEIGHTINTERPOLATION_H

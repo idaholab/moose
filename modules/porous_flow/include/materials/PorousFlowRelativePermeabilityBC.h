@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWRELATIVEPERMEABILITYBC_H
-#define POROUSFLOWRELATIVEPERMEABILITYBC_H
+#pragma once
 
 #include "PorousFlowRelativePermeabilityBase.h"
 
@@ -39,4 +38,3 @@ protected:
   const bool _is_nonwetting;
 };
 
-#endif // POROUSFLOWRELATIVEPERMEABILITYBC_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADRADIALRETURNCREEPSTRESSUPDATEBASE_H
-#define ADRADIALRETURNCREEPSTRESSUPDATEBASE_H
+#pragma once
 
 #include "ADRadialReturnStressUpdate.h"
 
@@ -45,4 +44,3 @@ protected:
   usingRadialReturnStressUpdateMembers;
 };
 
-#endif // ADRADIALRETURNCREEPSTRESSUPDATEBASE_H

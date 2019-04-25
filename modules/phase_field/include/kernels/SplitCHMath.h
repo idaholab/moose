@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SPLITCHMATH_H
-#define SPLITCHMATH_H
+#pragma once
 
 #include "SplitCHCRes.h"
 
@@ -28,4 +27,3 @@ protected:
   virtual Real computeDFDC(PFFunctionType type);
 };
 
-#endif // SPLITCHMATH_H

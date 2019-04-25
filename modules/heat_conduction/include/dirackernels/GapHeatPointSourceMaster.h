@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GAPHEATPOINTSOURCEMASTER_H
-#define GAPHEATPOINTSOURCEMASTER_H
+#pragma once
 
 // Moose Includes
 #include "DiracKernel.h"
@@ -37,4 +36,3 @@ protected:
   //  std::vector<Real> _localized_slave_flux;
 };
 
-#endif // GAPHEATPOINTSOURCEMASTER_H

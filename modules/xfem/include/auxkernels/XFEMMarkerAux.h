@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef XFEMMARKERAUX_H
-#define XFEMMARKERAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -31,4 +30,3 @@ private:
 template <>
 InputParameters validParams<XFEMMarkerAux>();
 
-#endif // XFEMMARKERAUX_H

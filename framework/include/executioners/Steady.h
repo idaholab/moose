@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef STEADY_H
-#define STEADY_H
+#pragma once
 
 #include "Executioner.h"
 
@@ -61,4 +60,3 @@ private:
   bool _last_solve_converged;
 };
 
-#endif // STEADY_H

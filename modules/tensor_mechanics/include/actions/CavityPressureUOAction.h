@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CAVITYPRESSUREUOACTION_H
-#define CAVITYPRESSUREUOACTION_H
+#pragma once
 
 #include "Action.h"
 #include "MooseTypes.h"
@@ -31,4 +30,3 @@ public:
 template <>
 InputParameters validParams<CavityPressureUOAction>();
 
-#endif

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMUNIQUESUBDOMAINS_H
-#define ELEMUNIQUESUBDOMAINS_H
+#pragma once
 
 // MOOSE includes
 #include "MeshModifier.h"
@@ -31,4 +30,3 @@ protected:
   virtual void modify() override;
 };
 
-#endif

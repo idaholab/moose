@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMELEMCONSTRAINT_H
-#define ELEMELEMCONSTRAINT_H
+#pragma once
 
 // MOOSE includes
 #include "Constraint.h"
@@ -126,4 +125,3 @@ protected:
   virtual Real computeQpJacobian(Moose::DGJacobianType type) = 0;
 };
 
-#endif /* ELEMELEMCONSTRAINT_H */

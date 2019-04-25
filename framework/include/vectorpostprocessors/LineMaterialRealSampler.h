@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LINEMATERIALREALSAMPLER_H
-#define LINEMATERIALREALSAMPLER_H
+#pragma once
 
 // MOOSE includes
 #include "LineMaterialSamplerBase.h"
@@ -43,4 +42,3 @@ public:
   virtual Real getScalarFromProperty(const Real & property, const Point & curr_point) override;
 };
 
-#endif

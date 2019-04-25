@@ -7,11 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#pragma once
 // Original class author: A.M. Jokisaari
 // O. Heinonen, et al. at ANL also have contributed significantly - thanks guys!
 
-#ifndef LINEARGENERALANISOTROPICMATERIAL_H
-#define LINEARGENERALANISOTROPICMATERIAL_H
 
 #include "SolidMechanicsMaterial.h"
 #include "SymmTensor.h"
@@ -59,4 +58,3 @@ private:
   SymmAnisotropicElasticityTensor _Cijkl_matrix;
 };
 
-#endif // LINEARGENERALANISOTROPICMATERIAL_H

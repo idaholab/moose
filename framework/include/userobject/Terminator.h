@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TERMINATOR_H
-#define TERMINATOR_H
+#pragma once
 
 #include "libmesh/libmesh_config.h"
 
@@ -74,4 +73,3 @@ protected:
 
 #endif // LIBMESH_HAVE_FPARSER
 
-#endif // TERMINATOR_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NSSUPGMASS_H
-#define NSSUPGMASS_H
+#pragma once
 
 #include "NSSUPGBase.h"
 
@@ -39,4 +38,3 @@ private:
   Real computeJacobianHelper(unsigned var);
 };
 
-#endif // NSSUPGMASS_H

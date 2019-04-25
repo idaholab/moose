@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COEFDIFFUSION_H
-#define COEFDIFFUSION_H
+#pragma once
 
 #include "Kernel.h"
 #include "Function.h"
@@ -33,4 +32,3 @@ private:
   Function * const _func;
 };
 
-#endif // COEFDIFFUSION_H

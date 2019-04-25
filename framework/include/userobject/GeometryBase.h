@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GEOMETRYBASE_H
-#define GEOMETRYBASE_H
+#pragma once
 
 #include "GeneralUserObject.h"
 
@@ -47,4 +46,3 @@ protected:
   const std::vector<BoundaryID> _boundary_ids;
 };
 
-#endif // GEOMETRYBASE_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWADVECTIVEFLUX_H
-#define POROUSFLOWADVECTIVEFLUX_H
+#pragma once
 
 #include "PorousFlowDarcyBase.h"
 
@@ -47,4 +46,3 @@ protected:
   const unsigned int _fluid_component;
 };
 
-#endif // POROUSFLOWADVECTIVEFLUX_H

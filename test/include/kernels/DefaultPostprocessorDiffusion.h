@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DEFAULTPOSTPROCESSORDIFFUSION_H
-#define DEFAULTPOSTPROCESSORDIFFUSION_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -29,4 +28,3 @@ protected:
   const PostprocessorValue & _pps_value;
 };
 
-#endif // DEFAULTPOSTPROCESSORDIFFUSION_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef KERNEL_H
-#define KERNEL_H
+#pragma once
 
 #include "KernelBase.h"
 #include "MooseVariableInterface.h"
@@ -73,4 +72,3 @@ protected:
   const VariableGradient & _grad_u;
 };
 
-#endif /* KERNEL_H */

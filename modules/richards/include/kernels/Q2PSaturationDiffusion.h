@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef Q2PSATURATIONDIFFUSION
-#define Q2PSATURATIONDIFFUSION
+#pragma once
 
 #include "Kernel.h"
 #include "RichardsDensity.h"
@@ -58,5 +57,3 @@ protected:
 
   Real _diffusivity;
 };
-
-#endif // Q2PSATURATIONDIFFUSION

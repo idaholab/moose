@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MUTABLECOEFFICIENTSFUNCTIONINTERFACE_H
-#define MUTABLECOEFFICIENTSFUNCTIONINTERFACE_H
+#pragma once
 
 #include "FunctionInterface.h"
 
@@ -36,4 +35,3 @@ protected:
   virtual void coefficientsChanged() override;
 };
 
-#endif // MUTABLECOEFFICIENTSFUNCTIONINTERFACE_H

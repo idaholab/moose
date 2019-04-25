@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GAPHEATTRANSFER_H
-#define GAPHEATTRANSFER_H
+#pragma once
 
 #include "IntegratedBC.h"
 #include "GapConductance.h"
@@ -78,4 +77,3 @@ protected:
   Point & _p2;
 };
 
-#endif // GAPHEATTRANSFER_H

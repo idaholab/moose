@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSHALFGAUSSIANSINK
-#define RICHARDSHALFGAUSSIANSINK
+#pragma once
 
 #include "IntegratedBC.h"
 #include "RichardsVarNames.h"
@@ -72,5 +71,3 @@ protected:
   /// d(porepressure_i)/dvariable_j
   const MaterialProperty<std::vector<std::vector<Real>>> & _dpp_dv;
 };
-
-#endif // RICHARDSHALFGAUSSIANSINK

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RALSTON_H
-#define RALSTON_H
+#pragma once
 
 #include "ExplicitRK2.h"
 
@@ -40,4 +39,3 @@ protected:
   virtual Real b2() const { return .75; }
 };
 
-#endif /* RALSTON_H */

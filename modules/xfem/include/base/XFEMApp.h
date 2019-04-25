@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef XFEMAPP_H
-#define XFEMAPP_H
+#pragma once
 
 #include "MooseApp.h"
 
@@ -32,4 +31,3 @@ public:
   static void associateSyntaxDepends(Syntax & syntax, ActionFactory & action_factory);
 };
 
-#endif /* XFEMAPP_H */

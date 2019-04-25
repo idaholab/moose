@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TESTSUBBLOCKINDEXPROVIDER_H
-#define TESTSUBBLOCKINDEXPROVIDER_H
+#pragma once
 
 #include "SubblockIndexProvider.h"
 
@@ -42,4 +41,3 @@ public:
   virtual unsigned int getMaxSubblockIndex() const override;
 };
 
-#endif // TESTSUBBLOCKINDEXPROVDER_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSSUPGnone_H
-#define RICHARDSSUPGnone_H
+#pragma once
 
 #include "RichardsSUPG.h"
 
@@ -81,4 +80,3 @@ public:
   bool SUPG_trivial() const;
 };
 
-#endif // RICHARDSSUPGnone_H

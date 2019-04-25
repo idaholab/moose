@@ -6,8 +6,8 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#ifndef PFPARAMSPOLYFREEENERGY_H
-#define PFPARAMSPOLYFREEENERGY_H
+
+#pragma once
 
 #include "Material.h"
 
@@ -56,4 +56,3 @@ protected:
   const Real _kb;
 };
 
-#endif // PFPARAMSPOLYFREEENERGY_H

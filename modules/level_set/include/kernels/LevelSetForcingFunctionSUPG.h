@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LEVELSETFORCINGFUNCTIONSUPG_H
-#define LEVELSETFORCINGFUNCTIONSUPG_H
+#pragma once
 
 // MOOSE includes
 #include "ADKernelGrad.h"
@@ -41,4 +40,3 @@ protected:
   using LevelSetVelocityInterface<ADKernelGrad<compute_stage>>::_q_point;
 };
 
-#endif // LEVELSETFORCINGFUNCTIONSUPG_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADCOMPUTESTRESSBASE_H
-#define ADCOMPUTESTRESSBASE_H
+#pragma once
 
 #include "ADMaterial.h"
 #include "Function.h"
@@ -61,4 +60,3 @@ protected:
   usingMaterialMembers;
 };
 
-#endif // ADCOMPUTESTRESSBASE_H

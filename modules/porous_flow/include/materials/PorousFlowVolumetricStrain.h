@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWVOLUMETRICSTRAIN_H
-#define POROUSFLOWVOLUMETRICSTRAIN_H
+#pragma once
 
 #include "PorousFlowMaterialVectorBase.h"
 #include "RankTwoTensor.h"
@@ -69,4 +68,3 @@ protected:
   MaterialProperty<std::vector<RealGradient>> & _dvol_total_strain_qp_dvar;
 };
 
-#endif // POROUSFLOWVOLUMETRICSTRAIN_H

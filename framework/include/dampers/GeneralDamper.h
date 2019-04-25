@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GENERALDAMPER_H
-#define GENERALDAMPER_H
+#pragma once
 
 // Moose Includes
 #include "Damper.h"
@@ -36,4 +35,3 @@ public:
                               const NumericVector<Number> & update) = 0;
 };
 
-#endif // GENERALDAMPER_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GENERALVAPORMIXTUREFLUIDPROPERTIESTEST_H
-#define GENERALVAPORMIXTUREFLUIDPROPERTIESTEST_H
+#pragma once
 
 #include "MooseObjectUnitTest.h"
 #include "StiffenedGasFluidProperties.h"
@@ -73,4 +72,3 @@ protected:
   const GeneralVaporMixtureFluidProperties * _fp_mix;
 };
 
-#endif /* GENERALVAPORMIXTUREFLUIDPROPERTIESTEST_H */

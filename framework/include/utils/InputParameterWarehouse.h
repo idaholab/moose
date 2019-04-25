@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INPUTPARAMETERWAREHOUSE_H
-#define INPUTPARAMETERWAREHOUSE_H
+#pragma once
 
 #include <gtest/gtest.h>
 #include "MooseObjectName.h"
@@ -192,4 +191,3 @@ InputParameterWarehouse::getControllableParameterValues(
   return param.get<T>();
 }
 
-#endif // INPUTPARAMETERWAREHOUSE_H

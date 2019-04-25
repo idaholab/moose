@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADACINTERFACE_H
-#define ADACINTERFACE_H
+#pragma once
 
 #include "ADKernel.h"
 #include "DerivativeMaterialPropertyNameInterface.h"
@@ -57,4 +56,3 @@ protected:
   usingKernelMembers;
 };
 
-#endif // ADACINTERFACE_H

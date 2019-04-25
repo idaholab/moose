@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PERFGRAPHINTERFACE_H
-#define PERFGRAPHINTERFACE_H
+#pragma once
 
 #include "Moose.h"
 #include "PerfGuard.h"
@@ -69,4 +68,3 @@ protected:
   std::string _prefix;
 };
 
-#endif /* PERFGRAPHINTERFACE_H */

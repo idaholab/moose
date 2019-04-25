@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RANKFOURTENSOR_H
-#define RANKFOURTENSOR_H
+#pragma once
 
 #include "Moose.h"
 #include "DualReal.h"
@@ -464,4 +463,3 @@ RankFourTensorTempl<T>::operator/(const T2 & b) const ->
 typedef RankFourTensorTempl<Real> RankFourTensor;
 typedef RankFourTensorTempl<DualReal> DualRankFourTensor;
 
-#endif // RANKFOURTENSOR_H

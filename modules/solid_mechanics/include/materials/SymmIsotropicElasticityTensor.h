@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SYMMISOTROPICELASTICITYTENSOR_H
-#define SYMMISOTROPICELASTICITYTENSOR_H
+#pragma once
 
 #include "SymmElasticityTensor.h"
 
@@ -114,4 +113,3 @@ protected:
   void calculateLameCoefficients();
 };
 
-#endif // ISOTROPICELASTICITYTENSOR_H

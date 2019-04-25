@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADDGDIFFUSION_H
-#define ADDGDIFFUSION_H
+#pragma once
 
 #include "ADDGKernel.h"
 
@@ -45,4 +44,3 @@ protected:
   usingDGKernelMembers;
 };
 
-#endif

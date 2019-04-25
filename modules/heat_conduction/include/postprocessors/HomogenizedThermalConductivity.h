@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef HOMOGENIZEDTHERMALCONDUCTIVITY_H
-#define HOMOGENIZEDTHERMALCONDUCTIVITY_H
+#pragma once
 
 #include "ElementAverageValue.h"
 
@@ -44,4 +43,3 @@ private:
 template <>
 InputParameters validParams<HomogenizedThermalConductivity>();
 
-#endif // HOMOGENIZEDTHERMALCONDUCTIVITY_H

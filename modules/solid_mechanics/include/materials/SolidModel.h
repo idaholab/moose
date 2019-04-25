@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SOLIDMODEL_H
-#define SOLIDMODEL_H
+#pragma once
 
 #include "DerivativeMaterialInterface.h"
 #include "SymmTensor.h"
@@ -273,4 +272,3 @@ private:
   SymmElasticityTensor * _local_elasticity_tensor;
 };
 
-#endif

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MAXINCREMENT_H
-#define MAXINCREMENT_H
+#pragma once
 
 // Moose Includes
 #include "ElementDamper.h"
@@ -40,4 +39,3 @@ protected:
   const enum class IncrementTypeEnum { absolute, fractional } _increment_type;
 };
 
-#endif // MAXINCREMENT_H

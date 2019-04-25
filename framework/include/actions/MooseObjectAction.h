@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEOBJECTACTION_H
-#define MOOSEOBJECTACTION_H
+#pragma once
 
 #include "Action.h"
 
@@ -50,4 +49,3 @@ protected:
   InputParameters _moose_object_pars;
 };
 
-#endif // MOOSEOBJECTACTION_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef BREAKMESHBYBLOCKBASE_H
-#define BREAKMESHBYBLOCKBASE_H
+#pragma once
 
 #include "MeshModifier.h"
 
@@ -63,4 +62,3 @@ private:
                                     const std::string & /*boundaryName*/);
 };
 
-#endif // BREAKMESHBYBLOCKBASE_H

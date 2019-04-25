@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ABRUPTSOFTENING_H
-#define ABRUPTSOFTENING_H
+#pragma once
 
 #include "SmearedCrackSofteningBase.h"
 
@@ -41,4 +40,3 @@ protected:
   const Real & _residual_stress;
 };
 
-#endif // ABRUPTSOFTENING_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWVANGENUCHTEN_H
-#define POROUSFLOWVANGENUCHTEN_H
+#pragma once
 
 #include "MooseTypes.h"
 
@@ -140,4 +139,3 @@ Real dRelativePermeabilityNW(Real seff, Real m);
 Real d2RelativePermeabilityNW(Real seff, Real m);
 }
 
-#endif // POROUSFLOWVANGENUCHTEN_H

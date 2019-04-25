@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TRACKDIRACFRONT_H
-#define TRACKDIRACFRONT_H
+#pragma once
 
 #include "NodalUserObject.h"
 #include "libmesh/id_types.h"
@@ -65,4 +64,3 @@ protected:
   const VariableValue & _var_value;
 };
 
-#endif // TRACKDIRACFRONT_H

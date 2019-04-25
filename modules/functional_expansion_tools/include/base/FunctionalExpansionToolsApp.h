@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FUNCTIONAL_EXPANSION_TOOLSAPP_H
-#define FUNCTIONAL_EXPANSION_TOOLSAPP_H
+#pragma once
 
 #include "MooseApp.h"
 
@@ -29,4 +28,3 @@ public:
   static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
 };
 
-#endif /* FUNCTIONAL_EXPANSION_TOOLSAPP_H */

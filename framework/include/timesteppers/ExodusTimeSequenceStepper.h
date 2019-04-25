@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EXODUSTIMESEQUENCESTEPPER_H
-#define EXODUSTIMESEQUENCESTEPPER_H
+#pragma once
 
 #include "TimeSequenceStepperBase.h"
 
@@ -31,4 +30,3 @@ protected:
   std::string _mesh_file;
 };
 
-#endif // EXODUSTIMESEQUENCESTEPPER_H

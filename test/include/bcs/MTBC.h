@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MTBC_H
-#define MTBC_H
+#pragma once
 
 #include "IntegratedBC.h"
 #include "MaterialProperty.h"
@@ -41,4 +40,3 @@ private:
   const MaterialProperty<Real> & _mat;
 };
 
-#endif // NEUMANNBC_H

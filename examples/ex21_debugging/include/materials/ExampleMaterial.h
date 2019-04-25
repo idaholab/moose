@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EXAMPLEMATERIAL_H
-#define EXAMPLEMATERIAL_H
+#pragma once
 
 #include "Material.h"
 #include "LinearInterpolation.h"
@@ -55,4 +54,3 @@ private:
   LinearInterpolation _piecewise_func;
 };
 
-#endif // EXAMPLEMATERIAL_H

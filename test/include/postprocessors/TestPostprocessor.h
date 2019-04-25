@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TESTPOSTPROCESSOR_H
-#define TESTPOSTPROCESSOR_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 
@@ -60,4 +59,3 @@ private:
   unsigned int _execute_count = 0;
 };
 
-#endif // TESTPOSTPROCESSOR_H

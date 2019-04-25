@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COUPLEDEIGENKERNEL_H
-#define COUPLEDEIGENKERNEL_H
+#pragma once
 
 #include "EigenKernel.h"
 
@@ -29,4 +28,3 @@ protected:
   const VariableValue & _v;
 };
 
-#endif // COUPLEDEIGENKERNEL_H

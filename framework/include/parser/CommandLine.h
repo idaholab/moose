@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMMANDLINE_H
-#define COMMANDLINE_H
+#pragma once
 
 // Moose Includes
 #include "MooseError.h"
@@ -177,4 +176,3 @@ CommandLine::search(const std::string & option_name, T & argument)
   mooseError("Unrecognized option name");
 }
 
-#endif // COMMANDLINE_H

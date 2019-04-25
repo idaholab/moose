@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NUMELEMS_H
-#define NUMELEMS_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 
@@ -39,4 +38,3 @@ private:
   const MeshBase & _mesh;
 };
 
-#endif // NUMELEMS_H

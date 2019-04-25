@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VARIABLEGRADIENTCOMPONENT_H
-#define VARIABLEGRADIENTCOMPONENT_H
+#pragma once
 
 // MOOSE includes
 #include "AuxKernel.h"
@@ -42,4 +41,3 @@ private:
   int _component;
 };
 
-#endif // VARIABLEGRADIENTCOMPONENT_H

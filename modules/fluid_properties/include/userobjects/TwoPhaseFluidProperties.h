@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TWOPHASEFLUIDPROPERTIES_H
-#define TWOPHASEFLUIDPROPERTIES_H
+#pragma once
 
 #include "FluidProperties.h"
 
@@ -102,4 +101,3 @@ protected:
   const SinglePhaseFluidProperties * _fp_vapor;
 };
 
-#endif /* TWOPHASEFLUIDPROPERTIES_H */

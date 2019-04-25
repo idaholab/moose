@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SIDESETSFROMNORMALS_H
-#define SIDESETSFROMNORMALS_H
+#pragma once
 
 #include "AddSideSetsBase.h"
 
@@ -30,4 +29,3 @@ protected:
   std::vector<Point> _normals;
 };
 
-#endif /* SIDESETSFROMNORMALS_H */

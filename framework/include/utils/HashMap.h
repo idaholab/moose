@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef HASHMAP_H
-#define HASHMAP_H
+#pragma once
 
 /// HashMap is an abstraction for dictionary data type, we make it thread-safe by locking inserts
 #include "libmesh/threads.h"
@@ -32,4 +31,3 @@ private:
   libMesh::Threads::spin_mutex spin_mutex;
 };
 
-#endif /* HASHMAP_H */

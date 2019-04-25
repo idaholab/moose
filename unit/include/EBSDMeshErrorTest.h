@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EBSDMESHERRORTEST_H
-#define EBSDMESHERRORTEST_H
+#pragma once
 
 // CPPUnit includes
 #include "gtest_include.h"
@@ -73,4 +72,3 @@ protected:
   Factory * _factory;
 };
 
-#endif // EBSDMESHERRORTEST_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWBASICTHM_H
-#define POROUSFLOWBASICTHM_H
+#pragma once
 
 #include "PorousFlowSinglePhaseBase.h"
 
@@ -37,4 +36,3 @@ protected:
   const bool _multiply_by_density;
 };
 
-#endif // POROUSFLOWBASICTHM_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEERROR_H
-#define MOOSEERROR_H
+#pragma once
 
 #include "Moose.h"
 #include "MooseException.h"
@@ -255,4 +254,3 @@ mooseInfo(Args &&... args)
   moose::internal::mooseInfoStream(Moose::out, std::forward<Args>(args)...);
 }
 
-#endif /* MOOSEERRORS_H */

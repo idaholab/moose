@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NACLFLUIDPROPERTIES_H
-#define NACLFLUIDPROPERTIES_H
+#pragma once
 
 #include "SinglePhaseFluidProperties.h"
 
@@ -104,4 +103,3 @@ protected:
 
 #pragma GCC diagnostic pop
 
-#endif /* NACLFLUIDPROPERTIES_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef THREADEDELEMENTLOOP_H
-#define THREADEDELEMENTLOOP_H
+#pragma once
 
 #include "ParallelUniqueId.h"
 #include "FEProblemBase.h"
@@ -103,4 +102,3 @@ ThreadedElementLoop<RangeType>::neighborSubdomainChanged()
                                      ThreadedElementLoopBase<RangeType>::_tid);
 }
 
-#endif // THREADEDELEMENTLOOP_H

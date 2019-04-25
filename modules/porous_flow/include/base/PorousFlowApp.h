@@ -6,8 +6,8 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#ifndef POROUS_FLOWAPP_H
-#define POROUS_FLOWAPP_H
+
+#pragma once
 
 #include "MooseApp.h"
 
@@ -31,4 +31,3 @@ public:
   static void registerExecFlags(Factory & factory);
 };
 
-#endif /* POROUS_FLOWAPP_H */

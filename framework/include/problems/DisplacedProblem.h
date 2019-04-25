@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DISPLACEDPROBLEM_H
-#define DISPLACEDPROBLEM_H
+#pragma once
 
 #include "SubProblem.h"
 #include "DisplacedSystem.h"
@@ -303,4 +302,3 @@ private:
   friend class Restartable;
 };
 
-#endif /* DISPLACEDPROBLEM_H */

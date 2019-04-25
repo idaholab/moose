@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef WORKBALANCE_H
-#define WORKBALANCE_H
+#pragma once
 
 #include "GeneralVectorPostprocessor.h"
 
@@ -59,4 +58,3 @@ protected:
   VectorPostprocessorValue & _partition_surface_area;
 };
 
-#endif // WORKBALANCE_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NODALKERNEL_H
-#define NODALKERNEL_H
+#pragma once
 
 // MOOSE
 #include "MooseObject.h"
@@ -165,4 +164,3 @@ protected:
   std::vector<AuxVariableName> _diag_save_in_strings;
 };
 
-#endif /* NODALKERNEL_H */

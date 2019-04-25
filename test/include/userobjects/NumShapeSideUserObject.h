@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NUMSHAPESIDEUSEROBJECT_H
-#define NUMSHAPESIDEUSEROBJECT_H
+#pragma once
 
 #include "ShapeSideUserObject.h"
 
@@ -53,4 +52,3 @@ protected:
   const VariableGradient & _grad_u;
 };
 
-#endif

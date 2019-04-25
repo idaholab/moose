@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEGRAINFORCEANDTORQUE_H
-#define COMPUTEGRAINFORCEANDTORQUE_H
+#pragma once
 
 #include "ShapeElementUserObject.h"
 #include "GrainForceAndTorqueInterface.h"
@@ -76,4 +75,3 @@ protected:
   unsigned int _total_dofs;
 };
 
-#endif // COMPUTEGRAINFORCEANDTORQUE_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef HEATCONDUCTIONOUTFLOW_H
-#define HEATCONDUCTIONOUTFLOW_H
+#pragma once
 
 #include "IntegratedBC.h"
 
@@ -51,4 +50,3 @@ protected:
   const MaterialProperty<Real> & _thermal_conductivity;
 };
 
-#endif // HEATCONDUCTIONOUTFLOW_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef IDEALGASFLUIDPROPERTIES_H
-#define IDEALGASFLUIDPROPERTIES_H
+#pragma once
 
 #include "SinglePhaseFluidProperties.h"
 
@@ -118,4 +117,3 @@ protected:
 
 #pragma GCC diagnostic pop
 
-#endif /* IDEALGASFLUIDPROPERTIES_H */

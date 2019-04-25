@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSFLUX
-#define RICHARDSFLUX
+#pragma once
 
 #include "Kernel.h"
 #include "RichardsVarNames.h"
@@ -91,5 +90,3 @@ protected:
    */
   Real computeQpJac(unsigned int wrt_num);
 };
-
-#endif // RICHARDSFLUX

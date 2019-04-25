@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PERMUTATIONTENSOR_H
-#define PERMUTATIONTENSOR_H
+#pragma once
 
 /**
  * Utility functions to return the permutation
@@ -37,4 +36,3 @@ int eps(unsigned int i, unsigned int j, unsigned int k);
 int eps(unsigned int i, unsigned int j, unsigned int k, unsigned int l);
 }
 
-#endif // PERMUTATIONTENSOR_H

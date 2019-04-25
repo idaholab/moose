@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DISPLAYGHOSTINGACTION_H
-#define DISPLAYGHOSTINGACTION_H
+#pragma once
 
 #include "Action.h"
 
@@ -36,4 +35,3 @@ private:
   bool _include_local;
 };
 
-#endif // DISPLAYGHOSTINGACTION_H

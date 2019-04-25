@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CACHECHANGEDLISTSTHREAD_H
-#define CACHECHANGEDLISTSTHREAD_H
+#pragma once
 
 #include "ThreadedElementLoopBase.h"
 
@@ -35,4 +34,3 @@ public:
   std::map<const Elem *, std::vector<const Elem *>> _coarsened_element_children;
 };
 
-#endif // CACHECHANGEDLISTSTHREAD_H

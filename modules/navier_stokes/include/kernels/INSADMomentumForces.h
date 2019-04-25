@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INSADMOMENTUMFORCES_H
-#define INSADMOMENTUMFORCES_H
+#pragma once
 
 #include "ADKernelValue.h"
 
@@ -38,4 +37,3 @@ protected:
   usingVectorKernelValueMembers;
 };
 
-#endif // INSADMOMENTUMFORCES_H

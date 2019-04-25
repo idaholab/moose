@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CSVREADER_H
-#define CSVREADER_H
+#pragma once
 
 // MOOSE includes
 #include "GeneralVectorPostprocessor.h"
@@ -36,4 +35,3 @@ protected:
   std::map<std::string, VectorPostprocessorValue *> _column_data;
 };
 
-#endif // CSVREADER_H

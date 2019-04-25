@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADSINGLEVARIABLERETURNMAPPINGSOLUTION_H
-#define ADSINGLEVARIABLERETURNMAPPINGSOLUTION_H
+#pragma once
 
 #include "MooseTypes.h"
 #include "InputParameters.h"
@@ -254,4 +253,3 @@ private:
                                    const Real reference_residual);
 };
 
-#endif // ADSINGLEVARIABLERETURNMAPPINGSOLUTION_H

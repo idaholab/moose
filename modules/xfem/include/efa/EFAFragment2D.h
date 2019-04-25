@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EFAFRAGMENT2D_H
-#define EFAFRAGMENT2D_H
+#pragma once
 
 #include "EFAFragment.h"
 
@@ -55,4 +54,3 @@ public:
   std::vector<EFAFragment2D *> split();
 };
 
-#endif

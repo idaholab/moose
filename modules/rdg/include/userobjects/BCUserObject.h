@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef BCUSEROBJECT_H
-#define BCUSEROBJECT_H
+#pragma once
 
 #include "GeneralUserObject.h"
 
@@ -63,4 +62,3 @@ public:
                                               const RealVectorValue & dwave) const = 0;
 };
 
-#endif // BCUSEROBJECT_H

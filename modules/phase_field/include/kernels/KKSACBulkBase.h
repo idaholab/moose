@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef KKSACBULKBASE_H
-#define KKSACBULKBASE_H
+#pragma once
 
 #include "ACBulk.h"
 
@@ -66,4 +65,3 @@ protected:
   std::vector<const VariableGradient *> _grad_args;
 };
 
-#endif // KKSACBULKBASE_H

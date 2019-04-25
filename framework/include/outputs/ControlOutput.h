@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CONTROLOUTPUT_H
-#define CONTROLOUTPUT_H
+#pragma once
 
 // MOOSE includes
 #include "Output.h"
@@ -59,4 +58,3 @@ private:
   bool _show_active_objects;
 };
 
-#endif /* CONTROLOUTPUT_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef IDEALREALGASMIXTUREFLUIDPROPERTIES_H
-#define IDEALREALGASMIXTUREFLUIDPROPERTIES_H
+#pragma once
 
 #include "VaporMixtureFluidProperties.h"
 #include "NaNInterface.h"
@@ -466,4 +465,3 @@ protected:
   const Real _T_mix_max;
 };
 
-#endif /* IDEALREALGASMIXTUREFLUIDPROPERTIES_H */

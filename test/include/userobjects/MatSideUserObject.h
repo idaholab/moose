@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MatSideUserOBJECT_H
-#define MatSideUserOBJECT_H
+#pragma once
 
 #include "SideUserObject.h"
 
@@ -34,4 +33,3 @@ protected:
   const MaterialProperty<Real> & _mat_prop;
 };
 
-#endif

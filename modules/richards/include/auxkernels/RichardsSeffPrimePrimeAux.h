@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSSEFFPRIMEPRIMEAUX_H
-#define RICHARDSSEFFPRIMEPRIMEAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -61,4 +60,3 @@ protected:
   std::vector<std::vector<Real>> _mat;
 };
 
-#endif // RICHARDSSEFFPRIMEPRIMEAUX_H

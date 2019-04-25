@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTETHERMALEXPANSIONEIGENSTRAINBEAMBASE_H
-#define COMPUTETHERMALEXPANSIONEIGENSTRAINBEAMBASE_H
+#pragma once
 
 #include "ComputeEigenstrainBeamBase.h"
 #include "DerivativeMaterialInterface.h"
@@ -49,4 +48,3 @@ protected:
   RealGradient _initial_axis;
 };
 
-#endif // COMPUTTHERMALEXPANSIONEIGENSTRAINBEAMBASE_H

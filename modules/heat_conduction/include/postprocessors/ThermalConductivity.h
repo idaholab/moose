@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef THERMALCONDUCTIVITY_H
-#define THERMALCONDUCTIVITY_H
+#pragma once
 
 #include "SideAverageValue.h"
 
@@ -43,4 +42,3 @@ private:
   bool & _step_zero;
 };
 
-#endif // THERMALCONDUCTIVITY_H

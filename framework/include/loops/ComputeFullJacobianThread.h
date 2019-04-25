@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEFULLJACOBIANTHREAD_H
-#define COMPUTEFULLJACOBIANTHREAD_H
+#pragma once
 
 #include "ComputeJacobianThread.h"
 
@@ -36,4 +35,3 @@ protected:
   virtual void computeInternalInterFaceJacobian(BoundaryID bnd_id) override;
 };
 
-#endif // COMPUTEFULLJACOBIANTHREAD_H

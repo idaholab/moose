@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEMULTIPLASTICITYSTRESS_H
-#define COMPUTEMULTIPLASTICITYSTRESS_H
+#pragma once
 
 #include "ComputeStressBase.h"
 #include "MultiPlasticityDebugger.h"
@@ -593,4 +592,3 @@ private:
   RankTwoTensor rot(const RankTwoTensor & tens);
 };
 
-#endif // COMPUTEMULTIPLASTICITYSTRESS_H

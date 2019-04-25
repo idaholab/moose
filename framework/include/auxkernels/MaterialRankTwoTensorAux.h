@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATERIALRANKTWOTENSORAUX_H
-#define MATERIALRANKTWOTENSORAUX_H
+#pragma once
 
 #include "MaterialAuxBase.h"
 #include "RankTwoTensor.h"
@@ -38,4 +37,3 @@ protected:
   ///@}
 };
 
-#endif // MATERIALRANKTWOTENSORAUX_H

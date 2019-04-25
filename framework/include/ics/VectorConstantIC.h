@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VECTORCONSTANTIC_H
-#define VECTORCONSTANTIC_H
+#pragma once
 
 #include "VectorInitialCondition.h"
 
@@ -43,4 +42,3 @@ protected:
   const Real _z_value;
 };
 
-#endif // VECTORCONSTANTIC_H

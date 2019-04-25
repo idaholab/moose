@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CONSTANTFUNCTION_H
-#define CONSTANTFUNCTION_H
+#pragma once
 
 #include "Function.h"
 
@@ -31,4 +30,3 @@ protected:
   const Real & _value;
 };
 
-#endif

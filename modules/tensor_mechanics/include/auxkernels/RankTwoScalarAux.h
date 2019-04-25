@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RANKTWOSCALARAUX_H
-#define RANKTWOSCALARAUX_H
+#pragma once
 
 #include "NodalPatchRecovery.h"
 #include "RankTwoTensor.h"
@@ -50,4 +49,3 @@ protected:
   Point _input_direction;
 };
 
-#endif // RANKTWOSCALARAUX_H

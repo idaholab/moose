@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWMASSFRACTION_H
-#define POROUSFLOWMASSFRACTION_H
+#pragma once
 
 #include "PorousFlowMaterialVectorBase.h"
 
@@ -63,4 +62,3 @@ protected:
   std::vector<const VariableGradient *> _grad_mf_vars;
 };
 
-#endif // POROUSFLOWMASSFRACTION_H

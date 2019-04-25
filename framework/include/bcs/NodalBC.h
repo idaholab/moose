@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NODALBC_H
-#define NODALBC_H
+#pragma once
 
 #include "NodalBCBase.h"
 #include "RandomInterface.h"
@@ -64,4 +63,3 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 };
 
-#endif /* NODALBC_H */

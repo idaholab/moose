@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PRESETDISPLACEMENT_H
-#define PRESETDISPLACEMENT_H
+#pragma once
 
 #include "PresetNodalBC.h"
 #include "Function.h"
@@ -39,4 +38,3 @@ protected:
 template <>
 InputParameters validParams<PresetDisplacement>();
 
-#endif /* PRESETDISPLACEMENT_H */

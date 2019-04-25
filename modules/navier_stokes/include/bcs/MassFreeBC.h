@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MASSFREEBC_H
-#define MASSFREEBC_H
+#pragma once
 
 #include "IntegratedBC.h"
 
@@ -33,4 +32,3 @@ protected:
   const VariableValue & _vel_z;
 };
 
-#endif /* MASSFREEBC_H */

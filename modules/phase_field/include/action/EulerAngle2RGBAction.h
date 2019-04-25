@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EULERANGLE2RGBACTION_H
-#define EULERANGLE2RGBACTION_H
+#pragma once
 
 #include "InputParameters.h"
 #include "Action.h"
@@ -32,4 +31,3 @@ private:
 template <>
 InputParameters validParams<EulerAngle2RGBAction>();
 
-#endif // EULERANGLE2RGBACTION_H

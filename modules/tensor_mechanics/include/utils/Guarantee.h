@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GUARANTEE_H
-#define GUARANTEE_H
+#pragma once
 
 /**
  * Enum values for guarantees that can be demanded for material properties.
@@ -21,4 +20,3 @@ enum class Guarantee
   UNIFORM_IN_SPACE  // applicable to material properties that have constant values in space
 };
 
-#endif // GUARANTEE_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INTERFACEKERNEL_H
-#define INTERFACEKERNEL_H
+#pragma once
 
 // local includes
 #include "MooseArray.h"
@@ -254,4 +253,3 @@ protected:
   static Threads::spin_mutex _jacoby_vars_mutex;
 };
 
-#endif

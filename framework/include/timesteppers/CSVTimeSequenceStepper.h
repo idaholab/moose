@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CSVTIMESEQUENCESTEPPER_H
-#define CSVTIMESEQUENCESTEPPER_H
+#pragma once
 
 #include "TimeSequenceStepperBase.h"
 #include "DelimitedFileReader.h"
@@ -53,4 +52,3 @@ protected:
   const unsigned int _column_index;
 };
 
-#endif // CSVTIMESEQUENCESTEPPER_H

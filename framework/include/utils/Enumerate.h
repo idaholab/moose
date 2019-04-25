@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ENUMERATE_H
-#define ENUMERATE_H
+#pragma once
 
 #include <iterator>
 #include <iostream>
@@ -144,4 +143,3 @@ private:
 };
 }
 
-#endif // ENUMERATE_H

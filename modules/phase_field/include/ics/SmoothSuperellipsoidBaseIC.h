@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SMOOTHSUPERELLIPSOIDBASEIC_H
-#define SMOOTHSUPERELLIPSOIDBASEIC_H
+#pragma once
 
 #include "InitialCondition.h"
 #include "MooseRandom.h"
@@ -67,4 +66,3 @@ protected:
   MooseRandom _random;
 };
 
-#endif // SMOOTHSUPERELLIPSOIDBASEIC_H

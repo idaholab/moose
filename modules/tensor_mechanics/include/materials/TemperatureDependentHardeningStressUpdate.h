@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TEMPERATUREDEPENDENTHARDENINGSTRESSUPDATE_H
-#define TEMPERATUREDEPENDENTHARDENINGSTRESSUPDATE_H
+#pragma once
 
 #include "IsotropicPlasticityStressUpdate.h"
 
@@ -69,4 +68,3 @@ protected:
   Real _hf_fraction;
 };
 
-#endif // TEMPERATUREDEPENDENTHARDENINGSTRESSUPDATE_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MULTIAPPCOMMANDLINECONTROL_H
-#define MULTIAPPCOMMANDLINECONTROL_H
+#pragma once
 
 // MOOSE includes
 #include "Control.h"
@@ -52,4 +51,3 @@ protected:
   const std::vector<std::string> & _param_names;
 };
 
-#endif

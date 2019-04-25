@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef HELMHOLTZFLUIDPROPERTIES_H
-#define HELMHOLTZFLUIDPROPERTIES_H
+#pragma once
 
 #include "SinglePhaseFluidProperties.h"
 
@@ -126,4 +125,3 @@ protected:
 
 #pragma GCC diagnostic pop
 
-#endif /* HELMHOLTZFLUIDPROPERTIES_H */

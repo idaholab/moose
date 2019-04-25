@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NANINTERFACETESTKERNEL_H
-#define NANINTERFACETESTKERNEL_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -33,4 +32,3 @@ protected:
   const NaNInterfaceTestFluidProperties & _nan_interface_test_fp;
 };
 
-#endif // NANINTERFACETESTKERNEL_H

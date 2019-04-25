@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GRAVITY_H
-#define GRAVITY_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -38,4 +37,3 @@ protected:
   const Real _alpha;
 };
 
-#endif // GRAVITY_H

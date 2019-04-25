@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWFLUIDPROPERTIESBASE_H
-#define POROUSFLOWFLUIDPROPERTIESBASE_H
+#pragma once
 
 #include "PorousFlowMaterialBase.h"
 #include "PorousFlowDictator.h"
@@ -43,4 +42,3 @@ protected:
   const Real _R;
 };
 
-#endif // POROUSFLOWFLUIDPROPERTIESBASE_H

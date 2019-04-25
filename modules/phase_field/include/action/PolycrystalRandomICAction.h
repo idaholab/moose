@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POLYCRYSTALRANDOMICACTION_H
-#define POLYCRYSTALRANDOMICACTION_H
+#pragma once
 
 #include "Action.h"
 #include "InputParameters.h"
@@ -33,4 +32,3 @@ private:
 template <>
 InputParameters validParams<PolycrystalRandomICAction>();
 
-#endif // POLYCRYSTALRANDOMICACTION_H

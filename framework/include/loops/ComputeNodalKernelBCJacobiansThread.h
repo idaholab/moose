@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTENODALKERNELBCJACOBIANSTHREAD_H
-#define COMPUTENODALKERNELBCJACOBIANSTHREAD_H
+#pragma once
 
 #include "MooseMesh.h"
 #include "ThreadedNodeLoop.h"
@@ -50,4 +49,3 @@ protected:
   unsigned int _num_cached;
 };
 
-#endif // COMPUTENODALKERNELBCJACOBIANSTHREAD_H

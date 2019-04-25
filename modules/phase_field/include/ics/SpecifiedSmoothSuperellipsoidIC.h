@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SPECIFIEDSMOOTHSUPERELLIPSOIDIC_H
-#define SPECIFIEDSMOOTHSUPERELLIPSOIDIC_H
+#pragma once
 
 #include "SmoothSuperellipsoidBaseIC.h"
 
@@ -42,4 +41,3 @@ protected:
   std::vector<Real> _input_ns;
 };
 
-#endif // SPECIFIEDSMOOTHSUPERELLIPSOIDIC_H

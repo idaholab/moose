@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SPECIFIEDSMOOTHCIRCLEIC_H
-#define SPECIFIEDSMOOTHCIRCLEIC_H
+#pragma once
 
 #include "SmoothCircleBaseIC.h"
 
@@ -39,4 +38,3 @@ protected:
   std::vector<Real> _input_radii;
 };
 
-#endif // SPECIFIEDSMOOTHCIRCLEIC_H

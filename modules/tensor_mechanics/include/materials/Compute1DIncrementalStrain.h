@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTE1DINCREMENTALSTRAIN_H
-#define COMPUTE1DINCREMENTALSTRAIN_H
+#pragma once
 
 #include "ComputeIncrementalSmallStrain.h"
 
@@ -60,4 +59,3 @@ protected:
   virtual Real computeGradDispZZOld() = 0;
 };
 
-#endif // COMPUTE1DINCREMENTALSTRAIN_H

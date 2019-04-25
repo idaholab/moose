@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMMONTENSORMECHANICSACTION_H
-#define COMMONTENSORMECHANICSACTION_H
+#pragma once
 
 #include "Action.h"
 
@@ -28,4 +27,3 @@ public:
   virtual void act() override{};
 };
 
-#endif // COMMONTENSORMECHANICSACTION_H

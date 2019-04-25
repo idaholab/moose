@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LEVELSETOLSSONTERMINATOR_H
-#define LEVELSETOLSSONTERMINATOR_H
+#pragma once
 
 #include "GeneralUserObject.h"
 
@@ -41,4 +40,3 @@ protected:
   const int & _min_t_steps;
 };
 
-#endif // LEVELSETOLSSONTERMINATOR_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FUNCTIONSCALARIC_H
-#define FUNCTIONSCALARIC_H
+#pragma once
 
 #include "ScalarInitialCondition.h"
 
@@ -31,4 +30,3 @@ protected:
   std::vector<Function *> _func;
 };
 
-#endif // FUNCTIONSCALARIC_H

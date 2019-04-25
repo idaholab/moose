@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LANGEVINNOISE_H
-#define LANGEVINNOISE_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -31,4 +30,3 @@ protected:
   const MaterialProperty<Real> & _multiplier_prop;
 };
 
-#endif // LANGEVINNOISE_H

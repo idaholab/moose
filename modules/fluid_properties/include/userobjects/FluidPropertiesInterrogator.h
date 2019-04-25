@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FLUIDPROPERTYINTERROGATOR_H
-#define FLUIDPROPERTYINTERROGATOR_H
+#pragma once
 
 #include "GeneralUserObject.h"
 
@@ -182,4 +181,3 @@ protected:
   const unsigned int & _precision;
 };
 
-#endif /* FLUIDPROPERTYINTERROGATOR_H */

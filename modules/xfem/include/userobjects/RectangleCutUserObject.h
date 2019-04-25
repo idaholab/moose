@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RECTANGLECUTUSEROBJECT_H
-#define RECTANGLECUTUSEROBJECT_H
+#pragma once
 
 #include "GeometricCut3DUserObject.h"
 
@@ -35,4 +34,3 @@ private:
   bool isInsideCutPlane(Point p) const override;
 };
 
-#endif // RECTANGLECUTUSEROBJECT_H

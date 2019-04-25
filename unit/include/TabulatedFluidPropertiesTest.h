@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TABULATEDFLUIDPROPERTIESTEST_H
-#define TABULATEDFLUIDPROPERTIESTEST_H
+#pragma once
 
 #include "MooseObjectUnitTest.h"
 #include "TabulatedFluidProperties.h"
@@ -99,4 +98,3 @@ protected:
   const TabulatedFluidProperties * _missing_data_fp;
 };
 
-#endif // TABULATEDFLUIDPROPERTIESTEST_H

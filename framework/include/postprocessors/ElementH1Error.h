@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMENTH1ERROR_H
-#define ELEMENTH1ERROR_H
+#pragma once
 
 #include "ElementW1pError.h"
 
@@ -31,4 +30,3 @@ public:
   ElementH1Error(const InputParameters & parameters);
 };
 
-#endif // ELEMENTH1ERROR_H

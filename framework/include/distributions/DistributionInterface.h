@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DISTRIBUTIONINTERFACE_H
-#define DISTRIBUTIONINTERFACE_H
+#pragma once
 
 #include "InputParameters.h"
 #include "ParallelUniqueId.h"
@@ -112,4 +111,3 @@ DistributionInterface::getDistributionByName(const std::string & name) const
   }
 }
 
-#endif /* DISTRIBUTIONINTERFACE_H */

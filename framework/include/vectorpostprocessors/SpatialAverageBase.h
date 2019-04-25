@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SPATIALAVERAGEBASE_H
-#define SPATIALAVERAGEBASE_H
+#pragma once
 
 #include "ElementVectorPostprocessor.h"
 
@@ -69,4 +68,3 @@ protected:
   std::vector<VectorPostprocessorValue *> _average;
 };
 
-#endif // SpatialAverageBase_H

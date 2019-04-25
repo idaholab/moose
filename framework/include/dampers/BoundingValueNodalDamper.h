@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef BOUNDINGVALUENODALDAMPER_H
-#define BOUNDINGVALUENODALDAMPER_H
+#pragma once
 
 // Moose Includes
 #include "NodalDamper.h"
@@ -37,4 +36,3 @@ protected:
   virtual Real computeQpDamping() override;
 };
 
-#endif // BOUNDINGVALUENODALDAMPER_H

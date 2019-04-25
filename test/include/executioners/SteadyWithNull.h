@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef STEADYWITHNULL_H
-#define STEADYWITHNULL_H
+#pragma once
 
 #include "Steady.h"
 
@@ -28,4 +27,3 @@ public:
   virtual void init() override;
 };
 
-#endif /* SteadyWithNull_H */

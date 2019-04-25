@@ -6,8 +6,8 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#ifndef JOULEHEATINGSOURCE_H
-#define JOULEHEATINGSOURCE_H
+
+#pragma once
 
 #include "HeatSource.h"
 #include "JvarMapInterface.h"
@@ -43,4 +43,3 @@ private:
   std::vector<const MaterialProperty<Real> *> _delec_cond_darg;
 };
 
-#endif // JOULEHEATINGSOURCE_H

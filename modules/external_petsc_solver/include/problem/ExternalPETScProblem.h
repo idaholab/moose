@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EXTERNALPETSCPROBLEM_H
-#define EXTERNALPETSCPROBLEM_H
+#pragma once
 
 #include "ExternalProblem.h"
 #include "PETScDiffusionFDM.h"
@@ -51,4 +50,3 @@ private:
 #endif
 };
 
-#endif /* EXTERNALPETSCPROBLEM_H */

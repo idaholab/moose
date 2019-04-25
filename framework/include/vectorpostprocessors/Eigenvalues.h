@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EIGENVALUES_H
-#define EIGENVALUES_H
+#pragma once
 
 #include "GeneralVectorPostprocessor.h"
 
@@ -33,4 +32,3 @@ protected:
   NonlinearEigenSystem * _nl_eigen;
 };
 
-#endif // EIGENVALUES_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWDESORPEDMASSVOLUMETRICEXPANSION_H
-#define POROUSFLOWDESORPEDMASSVOLUMETRICEXPANSION_H
+#pragma once
 
 #include "TimeDerivative.h"
 #include "PorousFlowDictator.h"
@@ -64,4 +63,3 @@ protected:
   Real computeQpJac(unsigned int jvar) const;
 };
 
-#endif // POROUSFLOWDESORPEDMASSVOLUMETRICEXPANSION_H

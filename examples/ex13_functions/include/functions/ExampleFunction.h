@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EXAMPLEFUNCTION_H
-#define EXAMPLEFUNCTION_H
+#pragma once
 
 #include "Function.h"
 
@@ -28,4 +27,3 @@ protected:
   Real _alpha;
 };
 
-#endif // EXAMPLEFUNCTION_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NEARESTPOINTLAYEREDAVERAGE_H
-#define NEARESTPOINTLAYEREDAVERAGE_H
+#pragma once
 
 // MOOSE includes
 #include "ElementIntegralVariableUserObject.h"
@@ -34,4 +33,3 @@ public:
   NearestPointLayeredAverage(const InputParameters & parameters);
 };
 
-#endif

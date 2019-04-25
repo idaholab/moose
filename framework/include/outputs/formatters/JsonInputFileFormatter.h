@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef JSONINPUTFILEFORMATTER_H
-#define JSONINPUTFILEFORMATTER_H
+#pragma once
 
 #include "json/json.h"
 
@@ -65,4 +64,3 @@ protected:
   std::ostringstream _stream;
 };
 
-#endif /* JSONINPUTFILEFORMATTER_H */

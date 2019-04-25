@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DERIVATIVEMULTIPHASEBASE_H
-#define DERIVATIVEMULTIPHASEBASE_H
+#pragma once
 
 #include "DerivativeFunctionMaterialBase.h"
 
@@ -86,4 +85,3 @@ protected:
   Real _W;
 };
 
-#endif // DERIVATIVEMULTIPHASEBASE_H

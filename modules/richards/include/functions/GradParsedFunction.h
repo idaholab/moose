@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GRADPARSEDFUNCTION_H
-#define GRADPARSEDFUNCTION_H
+#pragma once
 
 #include "MooseParsedFunction.h"
 
@@ -38,4 +37,3 @@ protected:
   /// 2*|_direction|
   Real _len;
 };
-#endif // GRADPARSEDFUNCTION_H

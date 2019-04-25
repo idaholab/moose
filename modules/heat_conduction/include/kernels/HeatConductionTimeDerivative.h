@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef HEATCONDUCTIONTIMEDERIVATIVE_H
-#define HEATCONDUCTIONTIMEDERIVATIVE_H
+#pragma once
 
 // MOOSE includes
 #include "TimeDerivative.h"
@@ -45,4 +44,3 @@ protected:
   const MaterialProperty<Real> & _density;
 };
 
-#endif // HEATCONDUCTIONTIMEDERIVATIVE_H

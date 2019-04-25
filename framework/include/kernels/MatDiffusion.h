@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATDIFFUSION_H
-#define MATDIFFUSION_H
+#pragma once
 
 #include "MatDiffusionBase.h"
 
@@ -26,4 +25,3 @@ public:
 template <>
 InputParameters validParams<MatDiffusion>();
 
-#endif // MATDIFFUSION_H

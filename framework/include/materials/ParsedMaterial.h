@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PARSEDMATERIAL_H
-#define PARSEDMATERIAL_H
+#pragma once
 
 #include "ParsedMaterialHelper.h"
 #include "FunctionMaterialBase.h"
@@ -30,4 +29,3 @@ public:
   ParsedMaterial(const InputParameters & parameters);
 };
 
-#endif // PARSEDMATERIAL_H

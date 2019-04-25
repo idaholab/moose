@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWMATRIXINTERNALENERGY_H
-#define POROUSFLOWMATRIXINTERNALENERGY_H
+#pragma once
 
 #include "PorousFlowMaterialVectorBase.h"
 
@@ -55,4 +54,3 @@ protected:
   MaterialProperty<std::vector<Real>> & _den_nodal_dvar;
 };
 
-#endif // POROUSFLOWMATRIXINTERNALENERGY_H

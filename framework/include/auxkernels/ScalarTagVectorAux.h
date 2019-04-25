@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SCALARTAGVECTORAUX_H
-#define SCALARTAGVECTORAUX_H
+#pragma once
 
 #include "AuxScalarKernel.h"
 
@@ -34,4 +33,3 @@ protected:
   const VariableValue & _v;
 };
 
-#endif // SCALARTAGVECTORAUX_H

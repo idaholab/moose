@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MIXEDSWITCHINGFUNCTIONMATERIAL_H
-#define MIXEDSWITCHINGFUNCTIONMATERIAL_H
+#pragma once
 
 #include "OrderParameterFunctionMaterial.h"
 
@@ -40,4 +39,3 @@ protected:
   Real _weight;
 };
 
-#endif // MIXEDSWITCHINGFUNCTIONMATERIAL_H

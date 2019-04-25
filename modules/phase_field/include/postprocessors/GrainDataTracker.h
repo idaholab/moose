@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GRAINDATATRACKER_H
-#define GRAINDATATRACKER_H
+#pragma once
 
 #include "GrainTracker.h"
 
@@ -58,4 +57,3 @@ GrainDataTracker<T>::newGrainCreated(unsigned int new_grain_id)
   _grain_data[new_grain_id] = newGrain(new_grain_id);
 }
 
-#endif // GRAINDATATRACKER_H

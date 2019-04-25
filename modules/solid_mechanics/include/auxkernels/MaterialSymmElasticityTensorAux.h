@@ -7,6 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#pragma once
 /*************************************************************************
 *
 *  Welcome to HYRAX!
@@ -17,8 +18,6 @@
 *
 *************************************************************************/
 
-#ifndef MATERIALSYMMELASTICITYTENSORAUX_H
-#define MATERIALSYMMELASTICITYTENSORAUX_H
 
 #include "AuxKernel.h"
 #include "SymmElasticityTensor.h"
@@ -44,4 +43,3 @@ private:
   const MaterialProperty<SymmElasticityTensor> & _tensor_prop;
 };
 
-#endif // MATERIALSYMMELASTICITYTENSORAUX_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CHPFCRFF_H
-#define CHPFCRFF_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -50,4 +49,3 @@ private:
   const Real _c;
 };
 
-#endif // CHPFCRFF_H

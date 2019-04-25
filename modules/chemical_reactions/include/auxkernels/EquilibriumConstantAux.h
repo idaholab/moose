@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EQUILIBRIUMCONSTANTAUX_H
-#define EQUILIBRIUMCONSTANTAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 #include "EquilibriumConstantFit.h"
@@ -59,4 +58,3 @@ protected:
   std::unique_ptr<PolynomialFit> _linear_logk;
 };
 
-#endif // EQUILIBRIUMCONSTANTAUX_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADPOWERLAWCREEPSTRESSUPDATE_H
-#define ADPOWERLAWCREEPSTRESSUPDATE_H
+#pragma once
 
 #include "ADRadialReturnCreepStressUpdateBase.h"
 
@@ -74,4 +73,3 @@ protected:
   usingRadialReturnCreepStressUpdateBaseMembers;
 };
 
-#endif // ADPOWERLAWCREEPSTRESSUPDATE_H

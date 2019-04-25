@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MULTIAPPNEARESTNODETRANSFER_H
-#define MULTIAPPNEARESTNODETRANSFER_H
+#pragma once
 
 // MOOSE includes
 #include "MultiAppTransfer.h"
@@ -90,4 +89,3 @@ protected:
   std::map<dof_id_type, unsigned int> & _cached_qp_inds;
 };
 
-#endif /* MULTIAPPNEARESTNODETRANSFER_H */

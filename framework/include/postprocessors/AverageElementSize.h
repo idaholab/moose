@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef AVERAGEELEMENTSIZE_H
-#define AVERAGEELEMENTSIZE_H
+#pragma once
 
 #include "ElementPostprocessor.h"
 
@@ -37,4 +36,3 @@ protected:
   int _elems;
 };
 
-#endif // AVERAGEELEMENTSIZE_H

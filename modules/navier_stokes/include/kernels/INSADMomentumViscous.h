@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INSADMOMENTUMVISCOUS_H
-#define INSADMOMENTUMVISCOUS_H
+#pragma once
 
 #include "ADKernelGrad.h"
 
@@ -37,4 +36,3 @@ protected:
   usingVectorKernelGradMembers;
 };
 
-#endif // INSADMOMENTUMVISCOUS_H

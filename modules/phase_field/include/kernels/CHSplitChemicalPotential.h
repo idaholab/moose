@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CHSPLITCHEMICALPOTENTIAL_H
-#define CHSPLITCHEMICALPOTENTIAL_H
+#pragma once
 
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
@@ -43,4 +42,3 @@ protected:
   const unsigned int _c_var;
 };
 
-#endif

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ACINTERFACESTRESS_H
-#define ACINTERFACESTRESS_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -56,4 +55,3 @@ protected:
   RankThreeTensor _ddS;
 };
 
-#endif // ACINTERFACESTRESS_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATERIALMULTIPOINTSOURCE_H
-#define MATERIALMULTIPOINTSOURCE_H
+#pragma once
 
 // Moose Includes
 #include "DiracKernel.h"
@@ -38,4 +37,3 @@ protected:
   const MaterialProperty<Real> & _value;
 };
 
-#endif // MATERIALMULTIPOINTSOURCE_H

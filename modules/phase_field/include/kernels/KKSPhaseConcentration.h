@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef KKSPHASECONCENTRATION_H
-#define KKSPHASECONCENTRATION_H
+#pragma once
 
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
@@ -59,4 +58,3 @@ private:
   const MaterialProperty<Real> & _prop_dh;
 };
 
-#endif // KKSPHASECONCENTRATION_H

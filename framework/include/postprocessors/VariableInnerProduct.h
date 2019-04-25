@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VARIABLEINNERPRODUCT_H
-#define VARIABLEINNERPRODUCT_H
+#pragma once
 
 #include "ElementIntegralVariablePostprocessor.h"
 
@@ -30,4 +29,3 @@ protected:
   const VariableValue & _v;
 };
 
-#endif // VariableInnerProduct_H

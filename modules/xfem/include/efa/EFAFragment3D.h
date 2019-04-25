@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EFAFRAGMENT3D_H
-#define EFAFRAGMENT3D_H
+#pragma once
 
 #include "EFAFragment.h"
 
@@ -70,4 +69,3 @@ private:
   void combine_two_faces(unsigned int face_id1, unsigned int face_id2, const EFAFace * elem_face);
 };
 
-#endif

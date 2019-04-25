@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CRYSTALPLASTICITYSLIPRATEGSS_H
-#define CRYSTALPLASTICITYSLIPRATEGSS_H
+#pragma once
 
 #include "CrystalPlasticitySlipRate.h"
 #include "RankTwoTensor.h"
@@ -45,4 +44,3 @@ protected:
   const MaterialProperty<std::vector<RankTwoTensor>> & _flow_direction;
 };
 
-#endif // CRYSTALPLASTICITYSLIPRATEGSS_H

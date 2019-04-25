@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSVARNAMES_H
-#define RICHARDSVARNAMES_H
+#pragma once
 
 #include "GeneralUserObject.h"
 #include "Coupleable.h"
@@ -134,4 +133,3 @@ protected:
   std::vector<const VariableGradient *> _moose_grad_var;
 };
 
-#endif // RICHARDSVARNAMES_H

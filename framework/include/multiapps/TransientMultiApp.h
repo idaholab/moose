@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TRANSIENTMULTIAPP_H
-#define TRANSIENTMULTIAPP_H
+#pragma once
 
 #include "MultiApp.h"
 
@@ -116,4 +115,3 @@ public:
   ~MultiAppSolveFailure() throw() {}
 };
 
-#endif // TRANSIENTMULTIAPP_H

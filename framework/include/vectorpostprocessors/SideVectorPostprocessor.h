@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SIDEVECTORPOSTPROCESSOR_H
-#define SIDEVECTORPOSTPROCESSOR_H
+#pragma once
 
 #include "SideUserObject.h"
 #include "VectorPostprocessor.h"
@@ -31,4 +30,3 @@ public:
   virtual void finalize() override {}
 };
 
-#endif

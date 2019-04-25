@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CONSTANTVECTORPOSTPROCESSOR_H
-#define CONSTANTVECTORPOSTPROCESSOR_H
+#pragma once
 
 #include "GeneralVectorPostprocessor.h"
 
@@ -30,4 +29,3 @@ protected:
   VectorPostprocessorValue & _value;
 };
 
-#endif

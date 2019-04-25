@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef UPDATEERRORVECTORSTHREAD_H
-#define UPDATEERRORVECTORSTHREAD_H
+#pragma once
 
 #include "ThreadedElementLoop.h"
 
@@ -41,4 +40,3 @@ protected:
   std::map<unsigned int, ErrorVector *> _indicator_field_number_to_error_vector;
 };
 
-#endif // UPDATEERRORVECTORSTHREAD_H

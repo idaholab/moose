@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef Q2PBOREHOLE_H
-#define Q2PBOREHOLE_H
+#pragma once
 
 // Moose Includes
 #include "PeacemanBorehole.h"
@@ -117,4 +116,3 @@ protected:
   Real jac(unsigned int jvar);
 };
 
-#endif // Q2PBOREHOLE_H

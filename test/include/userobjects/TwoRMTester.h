@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TWORMTESTER_H
-#define TWORMTESTER_H
+#pragma once
 
 #include "ElemSideNeighborLayersTester.h"
 
@@ -27,4 +26,3 @@ public:
   TwoRMTester(const InputParameters & parameters);
 };
 
-#endif // TWORMTESTER_H

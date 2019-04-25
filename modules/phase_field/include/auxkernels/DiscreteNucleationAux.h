@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DISCRETENUCLEATIONAUX_H
-#define DISCRETENUCLEATIONAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -43,4 +42,3 @@ protected:
   ///@}
 };
 
-#endif // DISCRETENUCLEATIONAUX_H

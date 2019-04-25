@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTESTRAINBASE_H
-#define COMPUTESTRAINBASE_H
+#pragma once
 
 #include "Material.h"
 #include "RankTwoTensor.h"
@@ -55,4 +54,3 @@ protected:
   const Real & _current_elem_volume;
 };
 
-#endif // COMPUTESTRAINBASE_H

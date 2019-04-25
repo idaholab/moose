@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RANDOMINTERFACE_H
-#define RANDOMINTERFACE_H
+#pragma once
 
 #include "MooseTypes.h"
 #include "MooseEnumItem.h"
@@ -91,4 +90,3 @@ private:
   //  std::string & name, ExecFlagType exec_flag);
 };
 
-#endif /* RANDOMINTERFACE_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EIGENSYSTEM_H
-#define EIGENSYSTEM_H
+#pragma once
 
 #include "NonlinearSystem.h"
 
@@ -109,4 +108,3 @@ protected:
   unsigned int _eigen_kernel_counter;
 };
 
-#endif /* EIGENSYSTEM_H */

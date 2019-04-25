@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LAYEREDBASE_H
-#define LAYEREDBASE_H
+#pragma once
 
 // MOOSE includes
 #include "Moose.h"
@@ -136,4 +135,3 @@ private:
   std::vector<SubdomainID> _layer_bounding_blocks;
 };
 
-#endif

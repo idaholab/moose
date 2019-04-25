@@ -4,11 +4,10 @@
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
 //*
-//* Licensed under LGPL 2.1, please see LICENSE for details;
+//* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADKERNELVALUE_H
-#define ADKERNELVALUE_H
+#pragma once
 
 #include "ADKernel.h"
 
@@ -50,4 +49,3 @@ protected:
   usingTemplKernelMembers(T);
 };
 
-#endif /* ADKERNELVALUE_H */

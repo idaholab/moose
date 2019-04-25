@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NODALNORMALSPREPROCESSOR_H
-#define NODALNORMALSPREPROCESSOR_H
+#pragma once
 
 // MOOSE includes
 #include "ElementUserObject.h"
@@ -60,4 +59,3 @@ protected:
   const VariablePhiGradient & _grad_phi;
 };
 
-#endif /* NODALNORMALSPREPROCESSOR_H */

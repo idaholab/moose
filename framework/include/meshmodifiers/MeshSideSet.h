@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MESHSIDESET_H
-#define MESHSIDESET_H
+#pragma once
 
 #include "MeshModifier.h"
 
@@ -32,4 +31,3 @@ protected:
   const SubdomainID _block_id;
 };
 
-#endif // MESHSIDESET_H

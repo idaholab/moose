@@ -7,9 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADVECTORNODALBC_H
-#define ADVECTORNODALBC_H
+#pragma once
 
 #include "ADNodalBC.h"
 
-#endif /* ADVECTORNODALBC_H */

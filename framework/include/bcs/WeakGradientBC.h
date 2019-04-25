@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef WEAKGRADIENTBC_H
-#define WEAKGRADIENTBC_H
+#pragma once
 
 #include "IntegratedBC.h"
 
@@ -40,4 +39,3 @@ protected:
   virtual Real computeQpJacobian() override;
 };
 
-#endif // WEAKGRADIENTBC_H

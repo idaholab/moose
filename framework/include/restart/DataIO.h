@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DATAIO_H
-#define DATAIO_H
+#pragma once
 
 // MOOSE includes
 #include "DualReal.h"
@@ -893,4 +892,3 @@ public:
 
 } // namespace libMesh
 
-#endif /* DATAIO_H */

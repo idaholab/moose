@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FUNCTIONMATERIALPROPERTYDESCRIPTOR_H
-#define FUNCTIONMATERIALPROPERTYDESCRIPTOR_H
+#pragma once
 
 #include "DerivativeMaterialPropertyNameInterface.h"
 #include "Material.h"
@@ -103,4 +102,3 @@ private:
   MooseObject * _parent;
 };
 
-#endif // FUNCTIONMATERIALPROPERTYDESCRIPTOR_H

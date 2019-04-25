@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PMASSKERNEL_H
-#define PMASSKERNEL_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -34,4 +33,3 @@ protected:
   Real _p;
 };
 
-#endif // PMASSKERNEL_H

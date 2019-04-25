@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COUPLEDNEUMANNBC_H
-#define COUPLEDNEUMANNBC_H
+#pragma once
 
 #include "IntegratedBC.h"
 
@@ -36,4 +35,3 @@ private:
   const VariableValue & _some_var_val;
 };
 
-#endif // COUPLEDNEUMANNBC_H

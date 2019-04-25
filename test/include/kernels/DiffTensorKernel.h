@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DIFFTENSORKERNEL_H
-#define DIFFTENSORKERNEL_H
+#pragma once
 
 #include "Kernel.h"
 #include "MooseParsedVectorFunction.h"
@@ -45,4 +44,3 @@ private:
   RealTensorValue computeConductivity(Real t, const Point & pt);
 };
 
-#endif // DIFFTENSORKERNEL_H

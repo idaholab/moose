@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADCOMPUTE1DSMALLSTRAIN_H
-#define ADCOMPUTE1DSMALLSTRAIN_H
+#pragma once
 
 #include "ADComputeSmallStrain.h"
 
@@ -48,4 +47,3 @@ protected:
   usingComputeSmallStrainMembers;
 };
 
-#endif // ADCOMPUTE1DSMALLSTRAIN_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWPIECEWISELINEARSINK_H
-#define POROUSFLOWPIECEWISELINEARSINK_H
+#pragma once
 
 #include "PorousFlowSinkPTDefiner.h"
 #include "LinearInterpolation.h"
@@ -39,4 +38,3 @@ protected:
   virtual Real dmultiplier_dvar(unsigned int pvar) const override;
 };
 
-#endif // POROUSFLOWPIECEWISELINEARSINK_H

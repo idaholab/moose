@@ -6,8 +6,8 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#ifndef CONSERVEDUNIFORMNOISEVENEER_H
-#define CONSERVEDUNIFORMNOISEVENEER_H
+
+#pragma once
 
 /**
  * Veneer to build userobjects that generate a uniformly distributed random
@@ -40,4 +40,3 @@ ConservedUniformNoiseVeneer<T>::getQpRandom()
   return 2.0 * this->getRandomReal() - 1.0;
 }
 
-#endif // CONSERVEDUNIFORMNOISEVENEER_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PRIMECOUNTERUSEROBJECT_H
-#define PRIMECOUNTERUSEROBJECT_H
+#pragma once
 
 #include "ThreadedGeneralUserObject.h"
 
@@ -45,4 +44,3 @@ protected:
   unsigned int _product;
 };
 
-#endif /* PRIMECOUNTERUSEROBJECT_H */

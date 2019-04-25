@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEVARIABLEFEBASE_H
-#define MOOSEVARIABLEFEBASE_H
+#pragma once
 
 #include "MooseVariableBase.h"
 
@@ -264,4 +263,3 @@ public:
   virtual size_t phiFaceNeighborSize() = 0;
 };
 
-#endif /* MOOSEVARIABLEFEBASE_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GASFREEENERGYBASE_H
-#define GASFREEENERGYBASE_H
+#pragma once
 
 #include "DerivativeParsedMaterialHelper.h"
 #include "ExpressionBuilder.h"
@@ -53,4 +52,3 @@ protected:
   const EBTerm _nq;
 };
 
-#endif // IDEALGASFREEENERGY_H

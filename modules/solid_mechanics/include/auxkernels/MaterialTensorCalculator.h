@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATERIALTENSORCALCULATOR_H
-#define MATERIALTENSORCALCULATOR_H
+#pragma once
 
 // MOOSE includes
 #include "InputParameters.h"
@@ -64,4 +63,3 @@ public:
                          RealVectorValue & direction);
 };
 
-#endif // MATERIALTENSORCALCULATOR_H

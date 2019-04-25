@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TENSORMECHANICSPLASTICSIMPLETESTER_H
-#define TENSORMECHANICSPLASTICSIMPLETESTER_H
+#pragma once
 
 #include "TensorMechanicsPlasticModel.h"
 
@@ -65,4 +64,3 @@ protected:
   Real _strength;
 };
 
-#endif // TENSORMECHANICSPLASTICSIMPLETESTER_H

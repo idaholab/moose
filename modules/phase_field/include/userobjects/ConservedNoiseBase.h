@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CONSERVEDNOISEBASE_H
-#define CONSERVEDNOISEBASE_H
+#pragma once
 
 #include "ConservedNoiseInterface.h"
 
@@ -47,4 +46,3 @@ protected:
   std::unordered_map<dof_id_type, std::vector<Real>> _random_data;
 };
 
-#endif // CONSERVEDNOISEBASE_H

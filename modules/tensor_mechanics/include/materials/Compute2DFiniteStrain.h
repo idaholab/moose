@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTE2DFINITESTRAIN_H
-#define COMPUTE2DFINITESTRAIN_H
+#pragma once
 
 #include "ComputeFiniteStrain.h"
 
@@ -50,4 +49,3 @@ protected:
   const unsigned int _out_of_plane_direction;
 };
 
-#endif // COMPUTE2DFINITESTRAIN_H

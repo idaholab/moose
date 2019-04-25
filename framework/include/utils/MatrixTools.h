@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATRIXTOOLS_H
-#define MATRIXTOOLS_H
+#pragma once
 
 #include "MooseTypes.h"
 #include <petsc.h>
@@ -37,4 +36,3 @@ void inverse(const std::vector<std::vector<Real>> & m, std::vector<std::vector<R
 void inverse(std::vector<PetscScalar> & A, unsigned int n);
 }
 
-#endif // MATRIXTOOLS_H

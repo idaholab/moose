@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TENSORMECHANICSHARDENINGGAUSSIAN_H
-#define TENSORMECHANICSHARDENINGGAUSSIAN_H
+#pragma once
 
 #include "TensorMechanicsHardeningModel.h"
 
@@ -49,4 +48,3 @@ private:
   Real _rate;
 };
 
-#endif // TENSORMECHANICSHARDENINGGAUSSIAN_H

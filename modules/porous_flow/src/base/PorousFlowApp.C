@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "PorousFlowApp.h"
 #include "Moose.h"
 #include "TensorMechanicsApp.h"

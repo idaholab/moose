@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TENSORMECHANICSPLASTICWEAKPLANETENSILEN_H
-#define TENSORMECHANICSPLASTICWEAKPLANETENSILEN_H
+#pragma once
 
 #include "TensorMechanicsPlasticWeakPlaneTensile.h"
 
@@ -51,4 +50,3 @@ protected:
   RealTensorValue _rot;
 };
 
-#endif // TENSORMECHANICSPLASTICWEAKPLANETENSILEN_H

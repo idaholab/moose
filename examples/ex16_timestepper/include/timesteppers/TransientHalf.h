@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TRANSIENTHALF_H
-#define TRANSIENTHALF_H
+#pragma once
 
 #include "TimeStepper.h"
 
@@ -37,4 +36,3 @@ private:
   Real _min_dt;
 };
 
-#endif // TRANSIENTHALF_H

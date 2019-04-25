@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef THREADEDELEMENTLOOPBASE_H
-#define THREADEDELEMENTLOOPBASE_H
+#pragma once
 
 #include "ParallelUniqueId.h"
 #include "MooseMesh.h"
@@ -324,4 +323,3 @@ ThreadedElementLoopBase<RangeType>::neighborSubdomainChanged()
 {
 }
 
-#endif // THREADEDELEMENTLOOPBASE_H

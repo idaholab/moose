@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DISCRETENUCLEATIONMARKER_H
-#define DISCRETENUCLEATIONMARKER_H
+#pragma once
 
 #include "Marker.h"
 #include "DiscreteNucleationInserterBase.h"
@@ -49,4 +48,3 @@ protected:
   const DiscreteNucleationInserterBase::NucleusList & _nucleus_list;
 };
 
-#endif // DISCRETENUCLEATIONMARKER_H

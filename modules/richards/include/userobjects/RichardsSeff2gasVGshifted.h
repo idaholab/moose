@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSSEFF2GASVGSHIFTED_H
-#define RICHARDSSEFF2GASVGSHIFTED_H
+#pragma once
 
 #include "RichardsSeff.h"
 #include "RichardsSeffVG.h"
@@ -74,4 +73,3 @@ protected:
   Real _scale;
 };
 
-#endif // RICHARDSSEFF2GASVGSHIFTED_H

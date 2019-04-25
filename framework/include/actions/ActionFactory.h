@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ACTIONFACTORY_H
-#define ACTIONFACTORY_H
+#pragma once
 
 #include <vector>
 #include <map>
@@ -138,4 +137,3 @@ protected:
   std::set<std::pair<std::string, std::string>> _current_objs;
 };
 
-#endif /* ACTIONFACTORY_H */

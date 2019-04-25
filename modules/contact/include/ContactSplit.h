@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CONTACTSPLIT_H
-#define CONTACTSPLIT_H
+#pragma once
 
 // MOOSE includes
 #include "Split.h"
@@ -39,4 +38,3 @@ protected:
 #endif // defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
 };
 
-#endif /* CONTACTSPLIT_H */

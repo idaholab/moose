@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NODALVARIABLEVALUE_H
-#define NODALVARIABLEVALUE_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 
@@ -44,4 +43,3 @@ protected:
   const Real _scale_factor;
 };
 
-#endif // NODALVARIABLEVALUE_H

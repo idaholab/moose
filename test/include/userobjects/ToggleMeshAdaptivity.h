@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TOGGLEMESHADAPTIVITY_H
-#define TOGGLEMESHADAPTIVITY_H
+#pragma once
 
 #include "GeneralUserObject.h"
 
@@ -36,4 +35,3 @@ protected:
   int _steps_to_wait;
 };
 
-#endif /* TOGGLEMESHADAPTIVITY_H */

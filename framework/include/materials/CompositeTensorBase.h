@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPOSITETENSORBASE_H
-#define COMPOSITETENSORBASE_H
+#pragma once
 
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
@@ -198,4 +197,3 @@ CompositeTensorBase<T, U>::computeQpTensorProperties(MaterialProperty<T> & M,
   }
 }
 
-#endif // COMPOSITETENSORBASE_H

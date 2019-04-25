@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTESURFACETENSIONKKS_H
-#define COMPUTESURFACETENSIONKKS_H
+#pragma once
 
 #include "Material.h"
 
@@ -43,4 +42,3 @@ protected:
   MaterialProperty<RankTwoTensor> & _planar_stress;
 };
 
-#endif // COMPUTESURFACETENSIONKKS_H

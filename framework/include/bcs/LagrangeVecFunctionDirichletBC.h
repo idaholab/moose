@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LAGRANGEVECFUNCTIONDIRICHLETBC_H
-#define LAGRANGEVECFUNCTIONDIRICHLETBC_H
+#pragma once
 
 #include "VectorNodalBC.h"
 
@@ -41,4 +40,3 @@ protected:
   RealVectorValue _values;
 };
 
-#endif /* LAGRANGEVECFUNCTIONDIRICHLETBC_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COUPLEDVALUESMATERIAL_H
-#define COUPLEDVALUESMATERIAL_H
+#pragma once
 
 #include "Material.h"
 
@@ -43,4 +42,3 @@ protected:
   MaterialProperty<Real> & _dot_dot_du_prop;
 };
 
-#endif // COUPLEDVALUESMATERIAL_H

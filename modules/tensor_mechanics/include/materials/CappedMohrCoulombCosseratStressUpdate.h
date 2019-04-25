@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CAPPEDMOHRCOULOMBCOSSERATSTRESSUPDATE_H
-#define CAPPEDMOHRCOULOMBCOSSERATSTRESSUPDATE_H
+#pragma once
 
 #include "CappedMohrCoulombStressUpdate.h"
 
@@ -80,4 +79,3 @@ protected:
                                           RankFourTensor & cto) override;
 };
 
-#endif // CAPPEDMOHRCOULOMBCOSSERATSTRESSUPDATE_H

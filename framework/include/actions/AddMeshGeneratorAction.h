@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADDMESHGENERATORACTION_H
-#define ADDMESHGENERATORACTION_H
+#pragma once
 
 #include "MooseObjectAction.h"
 
@@ -26,4 +25,3 @@ public:
   virtual void act() override;
 };
 
-#endif // ADDMESHGENERATORACTION_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SWITCHINGFUNCTIONMULTIPHASEMATERIAL_H
-#define SWITCHINGFUNCTIONMULTIPHASEMATERIAL_H
+#pragma once
 
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
@@ -56,4 +55,3 @@ protected:
   std::vector<std::vector<MaterialProperty<Real> *>> _prop_d2h;
 };
 
-#endif // SWITCHINGFUNCTIONMULTIPHASEMATERIAL_H

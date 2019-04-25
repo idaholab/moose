@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NUMINTERNALSIDES_H
-#define NUMINTERNALSIDES_H
+#pragma once
 
 // MOOSE includes
 #include "InternalSidePostprocessor.h"
@@ -39,4 +38,3 @@ private:
   unsigned int _count;
 };
 
-#endif // NUMINTERNALSIDES_H

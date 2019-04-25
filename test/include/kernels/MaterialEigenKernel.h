@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATERIALEIGENKERNEL_H
-#define MATERIALEIGENKERNEL_H
+#pragma once
 
 #include "EigenKernel.h"
 
@@ -30,4 +29,3 @@ protected:
   const MaterialProperty<Real> & _mat;
 };
 
-#endif // MATERIALEIGENKERNEL_H

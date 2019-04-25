@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef XFEMPHASETRANSITIONMOVINGINTERFACEVELOCITY_H
-#define XFEMPHASETRANSITIONMOVINGINTERFACEVELOCITY_H
+#pragma once
 
 #include "XFEMMovingInterfaceVelocityBase.h"
 
@@ -36,4 +35,3 @@ protected:
   Real _equilibrium_concentration_jump;
 };
 
-#endif // XFEMPHASETRANSITIONMOVINGINTERFACEVELOCITY_H

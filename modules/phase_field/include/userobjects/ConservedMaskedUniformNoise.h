@@ -6,8 +6,8 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#ifndef CONSERVEDMASKEDUNIFORMNOISE_H
-#define CONSERVEDMASKEDUNIFORMNOISE_H
+
+#pragma once
 
 #include "ConservedMaskedNoiseBase.h"
 #include "ConservedUniformNoiseVeneer.h"
@@ -34,4 +34,3 @@ public:
   }
 };
 
-#endif // CONSERVEDMASKEDUNIFORMNOISE_H

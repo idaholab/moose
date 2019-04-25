@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DOUBLEWELLPOTENTIAL_H
-#define DOUBLEWELLPOTENTIAL_H
+#pragma once
 
 #include "ACBulk.h"
 
@@ -30,4 +29,3 @@ protected:
   virtual Real computeDFDOP(PFFunctionType type);
 };
 
-#endif // DOUBLEWELLPOTENTIAL_H

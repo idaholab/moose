@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PPBINDINGSTEADY_H
-#define PPBINDINGSTEADY_H
+#pragma once
 
 #include "Steady.h"
 
@@ -33,4 +32,3 @@ protected:
   const PostprocessorValue & _pp_older;
 };
 
-#endif /* PPBINDINGSTEADY_H */

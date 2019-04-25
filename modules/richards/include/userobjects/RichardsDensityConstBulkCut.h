@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSDENSITYCONSTBULKCUT_H
-#define RICHARDSDENSITYCONSTBULKCUT_H
+#pragma once
 
 #include "RichardsDensity.h"
 
@@ -63,4 +62,3 @@ protected:
   Real _c3;
 };
 
-#endif // RICHARDSDENSITYCONSTBULKCUT_H

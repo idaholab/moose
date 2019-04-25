@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VOLUMEWEIGHTEDWEIBULL_H
-#define VOLUMEWEIGHTEDWEIBULL_H
+#pragma once
 
 #include "RandomICBase.h"
 
@@ -47,4 +46,3 @@ protected:
   const Real _median;
 };
 
-#endif // VOLUMEWEIGHTEDWEIBULL_H

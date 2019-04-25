@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NODALL2NORM_H
-#define NODALL2NORM_H
+#pragma once
 
 #include "NodalVariablePostprocessor.h"
 
@@ -37,4 +36,3 @@ protected:
   Real _sum_of_squares;
 };
 
-#endif

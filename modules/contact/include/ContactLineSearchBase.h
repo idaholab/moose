@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CONTACTLINESEARCHBASE_H
-#define CONTACTLINESEARCHBASE_H
+#pragma once
 
 #include "LineSearch.h"
 
@@ -80,4 +79,3 @@ protected:
   bool _affect_ltol;
 };
 
-#endif

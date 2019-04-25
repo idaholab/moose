@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CIRCLEMARKER_H
-#define CIRCLEMARKER_H
+#pragma once
 
 #include "Marker.h"
 
@@ -35,4 +34,3 @@ protected:
   Real _r;
 };
 
-#endif /* CIRCLEMARKER_H */

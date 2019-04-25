@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEPLANESMALLSTRAIN_H
-#define COMPUTEPLANESMALLSTRAIN_H
+#pragma once
 
 #include "Compute2DSmallStrain.h"
 #include "SubblockIndexProvider.h"
@@ -48,4 +47,3 @@ private:
   std::vector<const VariableValue *> _scalar_out_of_plane_strain;
 };
 
-#endif // COMPUTEPLANESMALLSTRAIN_H

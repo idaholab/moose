@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWDEPENDENCIES_H
-#define POROUSFLOWDEPENDENCIES_H
+#pragma once
 
 #include "DependencyResolver.h"
 
@@ -38,4 +37,3 @@ protected:
   DependencyResolver<std::string> _deps;
 };
 
-#endif // POROUSFLOWDEPENDENCIES_H

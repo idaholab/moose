@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef BOUNDARYCONDITION_H
-#define BOUNDARYCONDITION_H
+#pragma once
 
 // MOOSE
 #include "MooseObject.h"
@@ -111,4 +110,3 @@ protected:
   MooseMesh & _mesh;
 };
 
-#endif /* BOUNDARYCONDITION_H */

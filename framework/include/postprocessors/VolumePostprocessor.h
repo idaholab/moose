@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VOLUMEPOSTPROCESSOR_H
-#define VOLUMEPOSTPROCESSOR_H
+#pragma once
 
 #include "ElementIntegralPostprocessor.h"
 
@@ -32,4 +31,3 @@ protected:
   virtual Real computeQpIntegral() override;
 };
 
-#endif

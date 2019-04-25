@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NEARESTPOINTBASE_H
-#define NEARESTPOINTBASE_H
+#pragma once
 
 // MOOSE includes
 #include "ElementIntegralVariableUserObject.h"
@@ -234,4 +233,3 @@ NearestPointBase<UserObjectType>::nearestUserObject(const Point & p) const
   return _user_objects[closest];
 }
 
-#endif

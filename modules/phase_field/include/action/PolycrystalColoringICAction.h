@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POLYCRYSTALCOLORINGICACTION_H
-#define POLYCRYSTALCOLORINGICACTION_H
+#pragma once
 
 #include "InputParameters.h"
 #include "Action.h"
@@ -31,4 +30,3 @@ private:
 template <>
 InputParameters validParams<PolycrystalColoringICAction>();
 
-#endif // POLYCRYSTALCOLORINGICACTION_H

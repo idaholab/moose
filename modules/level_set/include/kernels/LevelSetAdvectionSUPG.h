@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LEVELSETADVECTIONSUPG_H
-#define LEVELSETADVECTIONSUPG_H
+#pragma once
 
 // MOOSE includes
 #include "ADKernelGrad.h"
@@ -37,4 +36,3 @@ protected:
   using LevelSetVelocityInterface<ADKernelGrad<compute_stage>>::_velocity;
 };
 
-#endif // LEVELSETADVECTIONSUPG_H

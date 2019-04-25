@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NSPENALIZEDNORMALFLOWBC_H
-#define NSPENALIZEDNORMALFLOWBC_H
+#pragma once
 
 #include "NSIntegratedBC.h"
 
@@ -40,4 +39,3 @@ protected:
   const Real _specified_udotn;
 };
 
-#endif // NSPENALIZEDNORMALFLOWBC_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SLAVECONSTRAINT_H
-#define SLAVECONSTRAINT_H
+#pragma once
 
 #include "ContactMaster.h" // For the ContactModel
 
@@ -56,4 +55,3 @@ protected:
   const NumericVector<Number> * _aux_solution;
 };
 
-#endif // SLAVECONSTRAINT_H

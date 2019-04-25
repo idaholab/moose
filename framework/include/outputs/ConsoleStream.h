@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CONSOLESTREAM_H
-#define CONSOLESTREAM_H
+#pragma once
 
 // C++ includes
 #include <iostream>
@@ -75,4 +74,3 @@ ConsoleStream::operator<<(const StreamType & s) const
   return *this;
 }
 
-#endif // CONSOLESTREAM_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMENTINTEGRALINDICATOR_H
-#define ELEMENTINTEGRALINDICATOR_H
+#pragma once
 
 #include "ElementIndicator.h"
 
@@ -28,4 +27,3 @@ protected:
   virtual Real computeQpIntegral();
 };
 
-#endif /* ELEMENTINTEGRALINDICATOR_H */

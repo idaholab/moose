@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADALLENCAHN_H
-#define ADALLENCAHN_H
+#pragma once
 
 #include "ADAllenCahnBase.h"
 
@@ -38,4 +37,3 @@ protected:
   usingAllenCahnBaseMembers(Real);
 };
 
-#endif // ADALLENCAHN_H

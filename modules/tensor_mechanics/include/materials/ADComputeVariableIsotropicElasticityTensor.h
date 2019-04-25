@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADCOMPUTEVARIABLEISOTROPICELASTICITYTENSOR_H
-#define ADCOMPUTEVARIABLEISOTROPICELASTICITYTENSOR_H
+#pragma once
 
 #include "ADComputeElasticityTensorBase.h"
 
@@ -41,4 +40,3 @@ protected:
   usingComputeElasticityTensorBaseMembers;
 };
 
-#endif // ADCOMPUTEVARIABLEISOTROPICELASTICITYTENSOR_H

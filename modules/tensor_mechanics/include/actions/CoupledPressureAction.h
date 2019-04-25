@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COUPLEDPRESSUREACTION_H
-#define COUPLEDPRESSUREACTION_H
+#pragma once
 
 #include "Action.h"
 
@@ -32,4 +31,3 @@ protected:
   std::vector<bool> _has_save_in_vars;
 };
 
-#endif // PRESSUREACTION_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ALLNODESSENDLISTTHREAD_H
-#define ALLNODESSENDLISTTHREAD_H
+#pragma once
 
 // MOOSE includes
 #include "MooseMesh.h"
@@ -57,4 +56,3 @@ private:
   std::vector<dof_id_type> _send_list;
 };
 
-#endif /* ALLNODESSENDLISTTHREAD_H */

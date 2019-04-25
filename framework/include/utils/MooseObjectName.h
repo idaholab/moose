@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEOBJECTNAME_H
-#define MOOSEOBJECTNAME_H
+#pragma once
 
 // STL includes
 #include <string>
@@ -112,4 +111,3 @@ protected:
   virtual void check();
 };
 
-#endif // MOOSEOBJECTNAME_H

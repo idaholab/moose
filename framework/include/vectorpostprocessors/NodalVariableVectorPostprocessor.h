@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NODALVARIABLEVECTORPOSTPROCESSOR_H
-#define NODALVARIABLEVECTORPOSTPROCESSOR_H
+#pragma once
 
 #include "NodalVectorPostprocessor.h"
 
@@ -27,4 +26,3 @@ public:
   NodalVariableVectorPostprocessor(const InputParameters & parameters);
 };
 
-#endif

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SYMMELASTICITYTENSOR_H
-#define SYMMELASTICITYTENSOR_H
+#pragma once
 
 #include "SymmTensor.h"
 
@@ -206,4 +205,3 @@ void dataStore(std::ostream &, SymmElasticityTensor &, void *);
 template <>
 void dataLoad(std::istream &, SymmElasticityTensor &, void *);
 
-#endif // SYMMELASTICITYTENSOR_H

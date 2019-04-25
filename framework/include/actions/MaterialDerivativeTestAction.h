@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATERIALDERIVATIVETESTACTION_H
-#define MATERIALDERIVATIVETESTACTION_H
+#pragma once
 
 #include "Action.h"
 #include "DerivativeMaterialPropertyNameInterface.h"
@@ -49,4 +48,3 @@ protected:
   std::map<MaterialPropertyName, std::vector<VariableName>> _derivatives;
 };
 
-#endif // MATERIALDERIVATIVETESTACTION_H

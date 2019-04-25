@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef XFEMCUTELEM3D_H
-#define XFEMCUTELEM3D_H
+#pragma once
 
 #include "XFEMCutElem.h"
 #include "EFAElement3D.h"
@@ -60,4 +59,3 @@ public:
                                    MeshBase * displaced_mesh = NULL) const;
 };
 
-#endif

@@ -6,8 +6,8 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#ifndef POROUSFLOWFLUXLIMITEDTVDADVECTION_H
-#define POROUSFLOWFLUXLIMITEDTVDADVECTION_H
+
+#pragma once
 
 #include "Kernel.h"
 #include "PorousFlowAdvectiveFluxCalculatorBase.h"
@@ -47,4 +47,3 @@ protected:
   const PorousFlowAdvectiveFluxCalculatorBase & _fluo;
 };
 
-#endif // POROUSFLOWFLUXLIMITEDTVDADVECTION_H

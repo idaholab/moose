@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADCOMPUTEAXISYMMETRICRZINCREMENTALSTRAIN_H
-#define ADCOMPUTEAXISYMMETRICRZINCREMENTALSTRAIN_H
+#pragma once
 
 #include "ADCompute2DIncrementalStrain.h"
 
@@ -41,4 +40,3 @@ protected:
   usingCompute2DIncrementalStrainMembers;
 };
 
-#endif // ADCOMPUTEAXISYMMETRICRZINCREMENTALSTRAIN_H

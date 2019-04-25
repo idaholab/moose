@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DGMDDBC_H
-#define DGMDDBC_H
+#pragma once
 
 #include "IntegratedBC.h"
 
@@ -52,4 +51,3 @@ private:
   Real _sigma;
 };
 
-#endif // DGMDDBC_H

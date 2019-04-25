@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATCHEDVALUEBC_H
-#define MATCHEDVALUEBC_H
+#pragma once
 
 #include "NodalBC.h"
 
@@ -36,4 +35,3 @@ protected:
   unsigned int _v_num;
 };
 
-#endif // MATCHEDVALUEBC_H

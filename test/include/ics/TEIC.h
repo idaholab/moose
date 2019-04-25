@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TEIC_H
-#define TEIC_H
+#pragma once
 
 #include "Kernel.h"
 #include "InitialCondition.h"
@@ -48,4 +47,3 @@ protected:
   Real _slope;
 };
 
-#endif // TEIC_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef REALCONTROLPARAMETERREPORTER_H
-#define REALCONTROLPARAMETERREPORTER_H
+#pragma once
 
 // MOOSE includes
 #include "GeneralPostprocessor.h"
@@ -49,4 +48,3 @@ private:
   const Real * _parameter;
 };
 
-#endif // REALCONTROLPARAMETERREPORTER_H

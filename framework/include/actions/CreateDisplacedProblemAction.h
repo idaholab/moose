@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CREATEDISPLACEDPROBLEMACTION_H
-#define CREATEDISPLACEDPROBLEMACTION_H
+#pragma once
 
 #include "Action.h"
 
@@ -40,4 +39,3 @@ protected:
   void addProxyGeometricRelationshipManagers(SystemBase & to, SystemBase & from);
 };
 
-#endif /* CREATEDISPLACEDPROBLEMACTION_H */

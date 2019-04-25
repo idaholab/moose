@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TOTALMINERALVOLUMEFRACTION_H
-#define TOTALMINERALVOLUMEFRACTION_H
+#pragma once
 
 #include "ElementAverageValue.h"
 
@@ -33,4 +32,3 @@ protected:
   const Real _molar_volume;
 };
 
-#endif // TOTALMINERALVOLUMEFRACTION_H

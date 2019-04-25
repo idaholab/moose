@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEREINITIALCONDITIONTHREAD_H
-#define COMPUTEREINITIALCONDITIONTHREAD_H
+#pragma once
 
 #include "MooseTypes.h"
 
@@ -33,4 +32,3 @@ protected:
   THREAD_ID _tid;
 };
 
-#endif // COMPUTEINITIALCONDITIONTHREAD_H

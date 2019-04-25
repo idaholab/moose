@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SMOOTHCIRCLEIC_H
-#define SMOOTHCIRCLEIC_H
+#pragma once
 
 #include "SmoothCircleBaseIC.h"
 
@@ -39,4 +38,3 @@ protected:
   Point _center;
 };
 
-#endif // SMOOTHCIRCLEIC_H

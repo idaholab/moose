@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INSMOMENTUMTRACTIONFORM_H
-#define INSMOMENTUMTRACTIONFORM_H
+#pragma once
 
 #include "INSMomentumBase.h"
 
@@ -35,4 +34,3 @@ protected:
   virtual Real computeQpOffDiagJacobianViscousPart(unsigned jvar) override;
 };
 
-#endif

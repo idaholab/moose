@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSBASEFULLYSATURATEDDARCYBASE_H
-#define POROUSBASEFULLYSATURATEDDARCYBASE_H
+#pragma once
 
 #include "Kernel.h"
 #include "PorousFlowDictator.h"
@@ -87,4 +86,3 @@ protected:
   const RealVectorValue _gravity;
 };
 
-#endif // POROUSBASEFULLYSATURATEDDARCYBASE_H

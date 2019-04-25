@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef QPOINTMARKER_H
-#define QPOINTMARKER_H
+#pragma once
 
 #include "QuadraturePointMarker.h"
 
@@ -32,4 +31,3 @@ protected:
   virtual MarkerValue computeQpMarker();
 };
 
-#endif /* QPOINTMARKER_H */

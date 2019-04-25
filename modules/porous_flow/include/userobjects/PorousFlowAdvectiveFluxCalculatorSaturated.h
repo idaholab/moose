@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWADVECTIEFLUXCALCULATORSATURATED_H
-#define POROUSFLOWADVECTIEFLUXCALCULATORSATURATED_H
+#pragma once
 
 #include "PorousFlowAdvectiveFluxCalculatorBase.h"
 
@@ -48,4 +47,3 @@ protected:
   const MaterialProperty<std::vector<std::vector<Real>>> & _dfluid_viscosity_dvar;
 };
 
-#endif // POROUSFLOWADVECTIEFLUXCALCULATORSATURATED_H

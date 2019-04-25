@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FLOATINGPOINTEXCEPTIONGUARD_H
-#define FLOATINGPOINTEXCEPTIONGUARD_H
+#pragma once
 
 #include "MooseApp.h"
 #include "libmesh/libmesh.h"
@@ -45,4 +44,3 @@ private:
   const bool _trapping_enabled;
 };
 
-#endif

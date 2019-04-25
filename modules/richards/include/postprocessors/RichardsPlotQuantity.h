@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSPLOTQUANTITY_H
-#define RICHARDSPLOTQUANTITY_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 
@@ -38,4 +37,3 @@ protected:
   const RichardsSumQuantity & _total_mass;
 };
 
-#endif /* RICHARDSPLOTQUANTITY_H */

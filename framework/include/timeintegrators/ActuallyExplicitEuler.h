@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ACTUALLYEXPLICITEULER_H
-#define ACTUALLYEXPLICITEULER_H
+#pragma once
 
 #include "TimeIntegrator.h"
 #include "MeshChangedInterface.h"
@@ -96,4 +95,3 @@ ActuallyExplicitEuler::computeTimeDerivativeHelper(T & u_dot, const T2 & u_old)
   u_dot *= 1. / _dt;
 }
 
-#endif // ACTUALLYEXPLICITEULER_H

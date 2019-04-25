@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MTPIECEWISECONST3D_H
-#define MTPIECEWISECONST3D_H
+#pragma once
 
 #include "Function.h"
 
@@ -25,4 +24,3 @@ public:
   virtual Real value(Real t, const Point & p);
 };
 
-#endif // MTPIECEWISECONST3D_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef BOOSTWEIBULLDISTRIBUTION_H
-#define BOOSTWEIBULLDISTRIBUTION_H
+#pragma once
 
 #include "BoostDistribution.h"
 
@@ -26,4 +25,3 @@ public:
   BoostWeibullDistribution(const InputParameters & parameters);
 };
 
-#endif // BOOSTWEIBULLDISTRIBUTION_H

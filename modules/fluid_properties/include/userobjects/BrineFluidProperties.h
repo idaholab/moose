@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef BRINEFLUIDPROPERTIES_H
-#define BRINEFLUIDPROPERTIES_H
+#pragma once
 
 #include "MultiComponentFluidProperties.h"
 #include "Water97FluidProperties.h"
@@ -189,4 +188,3 @@ protected:
 
 #pragma GCC diagnostic pop
 
-#endif /* BRINEFLUIDPROPERTIES_H */

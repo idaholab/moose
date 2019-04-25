@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LINEARANISOTROPICMATERIAL_H
-#define LINEARANISOTROPICMATERIAL_H
+#pragma once
 
 #include "LinearIsotropicMaterial.h"
 
@@ -36,4 +35,3 @@ protected:
   Real _euler_angle_3;
 };
 
-#endif // LINEARANISOTROPICMATERIAL_H

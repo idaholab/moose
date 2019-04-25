@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PERFGRAPHOUTPUT_H
-#define PERFGRAPHOUTPUT_H
+#pragma once
 
 // MOOSE includes
 #include "Output.h"
@@ -39,4 +38,3 @@ protected:
   unsigned int _heaviest_sections;
 };
 
-#endif /* PERFGRAPHOUTPUT_H */

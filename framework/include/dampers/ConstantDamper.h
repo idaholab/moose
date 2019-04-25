@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CONSTANTDAMPER_H
-#define CONSTANTDAMPER_H
+#pragma once
 
 // Moose Includes
 #include "GeneralDamper.h"
@@ -40,4 +39,3 @@ protected:
   Real _damping;
 };
 
-#endif // CONSTANTDAMPER_H

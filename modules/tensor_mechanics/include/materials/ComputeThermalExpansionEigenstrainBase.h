@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTETHERMALEXPANSIONEIGENSTRAINBASE_H
-#define COMPUTETHERMALEXPANSIONEIGENSTRAINBASE_H
+#pragma once
 
 #include "ComputeEigenstrainBase.h"
 #include "DerivativeMaterialInterface.h"
@@ -50,4 +49,3 @@ protected:
   const VariableValue & _stress_free_temperature;
 };
 
-#endif // COMPUTETHERMALEXPANSIONEIGENSTRAINBASE_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CONCENTRICCIRCLEMESH_H
-#define CONCENTRICCIRCLEMESH_H
+#pragma once
 
 #include "MooseMesh.h"
 #include "MooseEnum.h"
@@ -54,4 +53,3 @@ protected:
   MooseEnum _portion;
 };
 
-#endif /* CONCENTRICCIRCLEMESH_H */

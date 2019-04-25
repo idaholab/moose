@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DISCRETENUCLEATIONFROMFILE_H
-#define DISCRETENUCLEATIONFROMFILE_H
+#pragma once
 
 #include "DiscreteNucleationInserterBase.h"
 #include "DelimitedFileReader.h"
@@ -56,4 +55,3 @@ protected:
   const Real _nucleation_rate;
 };
 
-#endif // DISCRETENUCLEATIONFROMFILE_H

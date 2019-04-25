@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INSBASE_H
-#define INSBASE_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -111,4 +110,3 @@ protected:
   bool _transient_term;
 };
 
-#endif

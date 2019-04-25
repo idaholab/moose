@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SINGLESERIESBASISINTERFACE_H
-#define SINGLESERIESBASISINTERFACE_H
+#pragma once
 
 #include "FunctionalBasisInterface.h"
 #include <functional>
@@ -104,4 +103,3 @@ private:
   using FunctionalBasisInterface::clearBasisEvaluation;
 };
 
-#endif // SINGLESERIESBASISINTERFACE_H

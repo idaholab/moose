@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NORMALIZATIONAUX_H
-#define NORMALIZATIONAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -37,4 +36,3 @@ protected:
   Real _normal_factor;
 };
 
-#endif // NORMALIZATIONAUX_H

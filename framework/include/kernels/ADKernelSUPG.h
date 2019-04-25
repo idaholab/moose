@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADKERNELSUPG_H
-#define ADKERNELSUPG_H
+#pragma once
 
 #include "ADKernelStabilized.h"
 
@@ -45,4 +44,3 @@ protected:
   usingTemplKernelStabilizedMembers(T);
 };
 
-#endif /* ADKERNELSUPG_H */

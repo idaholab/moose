@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GLOBALDISPLACEMENTAUX_H
-#define GLOBALDISPLACEMENTAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -43,4 +42,3 @@ protected:
   const unsigned int _ndisp;
   std::vector<const VariableValue *> _disp;
 };
-#endif // GLOBALDISPLACEMENTAUX_H

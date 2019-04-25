@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROFULLSATTIMEDERIVATIVE_H
-#define POROFULLSATTIMEDERIVATIVE_H
+#pragma once
 
 #include "DerivativeMaterialInterface.h"
 #include "TimeDerivative.h"
@@ -65,4 +64,3 @@ private:
   const MaterialProperty<Real> & _done_over_biot_modulus_dep;
 };
 
-#endif // POROFULLSATTIMEDERIVATIVE_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MULTIPLEUPDATEELEMAUX_H_
-#define MULTIPLEUPDATEELEMAUX_H_
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -35,4 +34,3 @@ protected:
   std::vector<MooseVariable *> _vars;
 };
 
-#endif /* MULTIPLEUPDATEELEMAUX_H_ */

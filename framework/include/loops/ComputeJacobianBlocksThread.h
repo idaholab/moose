@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEJACOBIANBLOCKSTHREAD_H
-#define COMPUTEJACOBIANBLOCKSTHREAD_H
+#pragma once
 
 #include "ComputeFullJacobianThread.h"
 
@@ -57,4 +56,3 @@ protected:
   std::vector<JacobianBlock *> _blocks;
 };
 
-#endif // COMPUTEJACOBIANBLOCKSTHREAD_H

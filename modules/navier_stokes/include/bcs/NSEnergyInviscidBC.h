@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NSENERGYINVISCIDBC_H
-#define NSENERGYINVISCIDBC_H
+#pragma once
 
 #include "NSIntegratedBC.h"
 #include "NSPressureDerivs.h"
@@ -100,4 +99,3 @@ protected:
   // (3) d/dX (p*(u.n)) = d(p)/dx*(u.n) + p*d(u.n)/dX
 };
 
-#endif // NSENERGYINVISCIDBC_H

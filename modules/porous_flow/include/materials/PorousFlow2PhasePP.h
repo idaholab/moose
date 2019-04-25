@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOW2PHASEPP_H
-#define POROUSFLOW2PHASEPP_H
+#pragma once
 
 #include "PorousFlowVariableBase.h"
 
@@ -57,4 +56,3 @@ protected:
   const PorousFlowCapillaryPressure & _pc_uo;
 };
 
-#endif // POROUSFLOW2PHASEPP_H

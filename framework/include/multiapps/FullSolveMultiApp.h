@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FULLSOLVEMULTIAPP_H
-#define FULLSOLVEMULTIAPP_H
+#pragma once
 
 #include "MultiApp.h"
 
@@ -43,4 +42,3 @@ private:
   std::vector<Executioner *> _executioners;
 };
 
-#endif // FULLSOLVEMULTIAPP_H

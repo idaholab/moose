@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MARKER_H
-#define MARKER_H
+#pragma once
 
 #include "MooseObject.h"
 #include "BlockRestrictable.h"
@@ -122,4 +121,3 @@ protected:
   std::set<std::string> _supplied;
 };
 
-#endif /* MARKER_H */

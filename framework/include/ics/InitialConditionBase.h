@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INITIALCONDITIONBASE_H
-#define INITIALCONDITIONBASE_H
+#pragma once
 
 #include "MooseObject.h"
 #include "Coupleable.h"
@@ -139,4 +138,3 @@ InitialConditionBase::getUserObjectByName(const UserObjectName & name)
   return UserObjectInterface::getUserObjectByName<T>(name);
 }
 
-#endif // INITIALCONDITIONBASE_H

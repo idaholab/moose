@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DARCYFLUX
-#define DARCYFLUX
+#pragma once
 
 #include "Kernel.h"
 
@@ -41,5 +40,3 @@ protected:
   /// Material permeability
   const MaterialProperty<RealTensorValue> & _permeability;
 };
-
-#endif // DARCYFLUX

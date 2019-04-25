@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SODIUMPROPERTIES_H
-#define SODIUMPROPERTIES_H
+#pragma once
 
 #include "FluidProperties.h"
 #include "Moose.h"
@@ -74,4 +73,3 @@ public:
   Real drho_dh(Real enthalpy) const;
 };
 
-#endif // SODIUMPROPERTIES_H

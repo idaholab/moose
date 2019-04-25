@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CROSSTERMBARRIERFUNCTIONMATERIAL_H
-#define CROSSTERMBARRIERFUNCTIONMATERIAL_H
+#pragma once
 
 #include "CrossTermBarrierFunctionBase.h"
 
@@ -31,4 +30,3 @@ protected:
   virtual void computeQpProperties();
 };
 
-#endif // CROSSTERMBARRIERFUNCTIONMATERIAL_H

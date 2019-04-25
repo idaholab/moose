@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VECTORKERNEL_H
-#define VECTORKERNEL_H
+#pragma once
 
 #include "KernelBase.h"
 #include "MooseVariableInterface.h"
@@ -68,4 +67,3 @@ protected:
   const VectorVariableGradient & _grad_u;
 };
 
-#endif /* VECTORKERNEL_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADTIMEKERNELGRAD_H
-#define ADTIMEKERNELGRAD_H
+#pragma once
 
 #include "ADKernelGrad.h"
 
@@ -44,4 +43,3 @@ declareADValidParams(ADVectorTimeKernelGrad);
 #define usingTimeKernelGradMembers usingTemplTimeKernelGradMembers(Real)
 #define usingVectorTimeKernelGradMembers usingTemplTimeKernelGradMembers(RealVectorValue)
 
-#endif // ADTIMEKERNELGRAD_H

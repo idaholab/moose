@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMENTJACOBIANDAMPER_H
-#define ELEMENTJACOBIANDAMPER_H
+#pragma once
 
 // Moose Includes
 #include "GeneralDamper.h"
@@ -72,4 +71,3 @@ protected:
   const Real _max_jacobian_diff;
 };
 
-#endif // ELEMENTJACOBIANDAMPER_H

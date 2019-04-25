@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LINESEARCH_H
-#define LINESEARCH_H
+#pragma once
 
 #include "MooseObject.h"
 
@@ -46,4 +45,3 @@ protected:
   size_t _nl_its;
 };
 
-#endif

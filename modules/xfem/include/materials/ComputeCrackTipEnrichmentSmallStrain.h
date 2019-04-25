@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTECRACKTIPENRICHMENTSMALLSTRAIN_H
-#define COMPUTECRACKTIPENRICHMENTSMALLSTRAIN_H
+#pragma once
 
 #include "Material.h"
 #include "RankTwoTensor.h"
@@ -71,4 +70,3 @@ private:
   const NumericVector<Number> * _sln;
 };
 
-#endif // COMPUTECRACKTIPENRICHMENTSMALLSTRAIN_H

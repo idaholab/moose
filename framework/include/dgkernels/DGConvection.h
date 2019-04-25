@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DGCONVECTION_H
-#define DGCONVECTION_H
+#pragma once
 
 #include "DGKernel.h"
 
@@ -29,4 +28,3 @@ protected:
   RealVectorValue _velocity;
 };
 
-#endif // DGCONVECTION_H

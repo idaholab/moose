@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MTMATERIAL_H
-#define MTMATERIAL_H
+#pragma once
 
 #include "Material.h"
 #include "MaterialProperty.h"
@@ -34,4 +33,3 @@ protected:
   Real _value;
 };
 
-#endif // DIFF1MATERIAL_H

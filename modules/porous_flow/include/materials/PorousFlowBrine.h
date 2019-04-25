@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWBRINE_H
-#define POROUSFLOWBRINE_H
+#pragma once
 
 #include "PorousFlowFluidPropertiesBase.h"
 #include "BrineFluidProperties.h"
@@ -86,4 +85,3 @@ protected:
   const VariableValue & _xnacl;
 };
 
-#endif // POROUSFLOWBRINE_H

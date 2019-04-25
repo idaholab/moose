@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SIDEINTEGRALUSEROBJECT_H
-#define SIDEINTEGRALUSEROBJECT_H
+#pragma once
 
 // MOOSE includes
 #include "SideUserObject.h"
@@ -47,4 +46,3 @@ protected:
   Real _integral_value;
 };
 
-#endif

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CONSOLESTREAMINTERFACE_H
-#define CONSOLESTREAMINTERFACE_H
+#pragma once
 
 // MOOSE includes
 #include "ConsoleStream.h"
@@ -32,4 +31,3 @@ public:
   const ConsoleStream _console;
 };
 
-#endif // CONSOLESTREAMINTERFACE_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef XFEMVOLFRACAUX_H
-#define XFEMVOLFRACAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -38,4 +37,3 @@ private:
 template <>
 InputParameters validParams<XFEMVolFracAux>();
 
-#endif // XFEMVOLFRACAUX_H

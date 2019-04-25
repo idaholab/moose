@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CHMATH_H
-#define CHMATH_H
+#pragma once
 
 #include "CHBulk.h"
 
@@ -34,4 +33,3 @@ protected:
   virtual RealGradient computeGradDFDCons(PFFunctionType type);
 };
 
-#endif // CHMATH_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef THIRDPHASESUPPRESSIONMATERIAL_H
-#define THIRDPHASESUPPRESSIONMATERIAL_H
+#pragma once
 
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
@@ -47,4 +46,3 @@ protected:
   std::vector<std::vector<MaterialProperty<Real> *>> _prop_d2g;
 };
 
-#endif // THIRDPHASESUPPRESSIONMATERIAL_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTECOSSERATSMALLSTRAIN_H
-#define COMPUTECOSSERATSMALLSTRAIN_H
+#pragma once
 
 #include "ComputeStrainBase.h"
 
@@ -41,4 +40,3 @@ protected:
   std::vector<const VariableGradient *> _grad_wc;
 };
 
-#endif // COMPUTECOSSERATSMALLSTRAIN_H

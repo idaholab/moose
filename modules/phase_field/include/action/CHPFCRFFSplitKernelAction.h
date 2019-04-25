@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CHPFCRFFSPLITKERNELACTION_H
-#define CHPFCRFFSPLITKERNELACTION_H
+#pragma once
 
 #include "Action.h"
 
@@ -34,4 +33,3 @@ private:
   const NonlinearVariableName _n_name;
 };
 
-#endif // CHPFCRFFSPLITKERNELACTION_H

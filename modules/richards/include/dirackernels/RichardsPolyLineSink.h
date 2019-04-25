@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSPOLYLINESINK_H
-#define RICHARDSPOLYLINESINK_H
+#pragma once
 
 #include "DiracKernel.h"
 #include "LinearInterpolation.h"
@@ -86,4 +85,3 @@ protected:
   bool parseNextLineReals(std::ifstream & ifs, std::vector<Real> & myvec);
 };
 
-#endif // RICHARDSPOLYLINESINK_H

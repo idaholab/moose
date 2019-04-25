@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DENSITY_H
-#define DENSITY_H
+#pragma once
 
 #include "Material.h"
 
@@ -36,4 +35,3 @@ protected:
 template <>
 InputParameters validParams<Density>();
 
-#endif // DENSITY_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTERSPHERICALFINITESTRAIN_H
-#define COMPUTERSPHERICALFINITESTRAIN_H
+#pragma once
 
 #include "ComputeFiniteStrain.h"
 
@@ -39,4 +38,3 @@ protected:
   const VariableValue & _disp_old_0;
 };
 
-#endif // COMPUTERSPHERICALFINITESTRAIN_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef XFEMCUTELEM_H
-#define XFEMCUTELEM_H
+#pragma once
 
 #include <vector>
 
@@ -133,4 +132,3 @@ public:
                                    std::vector<Point> & intersectionPoints,
                                    MeshBase * displaced_mesh = NULL) const = 0;
 };
-#endif

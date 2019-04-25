@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SPLITTESTER_H
-#define SPLITTESTER_H
+#pragma once
 
 // MOOSE includes
 #include "GeneralUserObject.h"
@@ -31,4 +30,3 @@ public:
   virtual void finalize() override{};
 };
 
-#endif

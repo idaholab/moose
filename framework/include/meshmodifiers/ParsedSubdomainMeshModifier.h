@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PARSEDSUBDOMAINMESHMODIFIER_H
-#define PARSEDSUBDOMAINMESHMODIFIER_H
+#pragma once
 
 // MOOSE includes
 #include "MeshModifier.h"
@@ -48,4 +47,3 @@ private:
   ADFunctionPtr _func_F;
 };
 
-#endif // SUBDOMAINBOUDINGBOX_H

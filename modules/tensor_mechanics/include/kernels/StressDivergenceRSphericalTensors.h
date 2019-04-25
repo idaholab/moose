@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef STRESSDIVERGENCERSPHERICALTENSORS_H
-#define STRESSDIVERGENCERSPHERICALTENSORS_H
+#pragma once
 
 #include "StressDivergenceTensors.h"
 
@@ -47,4 +46,3 @@ protected:
   Real calculateJacobian(unsigned int ivar, unsigned int jvar);
 };
 
-#endif // STRESSDIVERGENCERSPHERICALTENSORS_H

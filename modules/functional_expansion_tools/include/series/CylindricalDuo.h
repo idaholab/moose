@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CYLINDRICALDUO_H
-#define CYLINDRICALDUO_H
+#pragma once
 
 #include "CompositeSeriesBasisInterface.h"
 
@@ -31,4 +30,3 @@ public:
   virtual void setPhysicalBounds(const std::vector<Real> & bounds) final;
 };
 
-#endif // CYLINDRICALDUO_H

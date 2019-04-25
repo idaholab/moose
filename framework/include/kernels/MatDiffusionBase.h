@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATDIFFUSIONBASE_H
-#define MATDIFFUSIONBASE_H
+#pragma once
 
 #include "Kernel.h"
 #include "JvarMapInterface.h"
@@ -133,4 +132,3 @@ MatDiffusionBase<T>::computeQpCJacobian()
 {
   return _D[_qp] * _grad_phi[_j][_qp] * _grad_test[_i][_qp];
 }
-#endif // MATDIFFUSIONBASE_H

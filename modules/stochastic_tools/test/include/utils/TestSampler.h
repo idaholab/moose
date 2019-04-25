@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TESTSAMPLERMATERIAL_H
-#define TESTSAMPLERMATERIAL_H
+#pragma once
 
 #include "ElementUserObject.h"
 #include "SamplerInterface.h"
@@ -38,4 +37,3 @@ protected:
   const MooseEnum & _test_type;
 };
 
-#endif // TESTSAMPLERMATERIAL_H

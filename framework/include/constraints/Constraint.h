@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CONSTRAINT_H
-#define CONSTRAINT_H
+#pragma once
 
 // MOOSE includes
 #include "MooseObject.h"
@@ -82,4 +81,3 @@ protected:
   unsigned int _qp;
 };
 
-#endif

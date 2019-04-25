@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VECTORMEMORYUSAGE_H
-#define VECTORMEMORYUSAGE_H
+#pragma once
 
 #include "GeneralVectorPostprocessor.h"
 #include "MemoryUsageReporter.h"
@@ -63,4 +62,3 @@ protected:
   ///@}
 };
 
-#endif // VECTORMEMORYUSAGE_H

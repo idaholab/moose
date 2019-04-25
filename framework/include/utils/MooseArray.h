@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ARRAY_H
-#define ARRAY_H
+#pragma once
 
 #include <vector>
 #include "MooseError.h"
@@ -352,4 +351,3 @@ freeDoubleMooseArray(MooseArray<MooseArray<T>> & a)
   a.release();
 }
 
-#endif // ARRAY_H

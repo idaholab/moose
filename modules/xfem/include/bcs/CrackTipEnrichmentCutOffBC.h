@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CRACKTIPENRICHMENTCUTOFFBC_H
-#define CRACKTIPENRICHMENTCUTOFFBC_H
+#pragma once
 
 #include "PresetBC.h"
 #include "CrackFrontDefinition.h"
@@ -36,4 +35,3 @@ private:
   const CrackFrontDefinition * _crack_front_definition;
 };
 
-#endif /* CRACKTIPENRICHMENTCUTOFFBC_H */

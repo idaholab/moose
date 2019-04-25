@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TENSORMECHANICSHARDENINGCUBIC_H
-#define TENSORMECHANICSHARDENINGCUBIC_H
+#pragma once
 
 #include "TensorMechanicsHardeningModel.h"
 
@@ -58,4 +57,3 @@ private:
   Real _beta;
 };
 
-#endif // TENSORMECHANICSHARDENINGCUBIC_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSMATERIAL_H
-#define RICHARDSMATERIAL_H
+#pragma once
 
 #include "Material.h"
 
@@ -217,4 +216,3 @@ private:
   void zero2ndDerivedQuantities(unsigned int qp);
 };
 
-#endif // RICHARDSMATERIAL_H

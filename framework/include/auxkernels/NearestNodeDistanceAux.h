@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NEARESTNODEDISTANCEAUX_H
-#define NEARESTNODEDISTANCEAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -33,4 +32,3 @@ protected:
   NearestNodeLocator & _nearest_node;
 };
 
-#endif // NEARESTNODEDISTANCEAUX_H

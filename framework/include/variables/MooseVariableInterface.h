@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEVARIABLEINTERFACE_H
-#define MOOSEVARIABLEINTERFACE_H
+#pragma once
 
 #include "MooseVariableBase.h"
 
@@ -204,4 +203,3 @@ protected:
   Assembly * _mvi_assembly;
 };
 
-#endif /* MOOSEVARIABLEINTERFACE_H */

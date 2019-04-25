@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MASKEDBODYFORCE_H
-#define MASKEDBODYFORCE_H
+#pragma once
 
 #include "BodyForce.h"
 #include "JvarMapInterface.h"
@@ -53,4 +52,3 @@ protected:
   std::vector<const MaterialProperty<Real> *> _dmaskdarg;
 };
 
-#endif

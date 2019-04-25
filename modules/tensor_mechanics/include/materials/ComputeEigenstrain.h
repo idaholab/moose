@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEEIGENSTRAIN_H
-#define COMPUTEEIGENSTRAIN_H
+#pragma once
 
 #include "ComputeEigenstrainBase.h"
 
@@ -36,4 +35,3 @@ protected:
   RankTwoTensor _eigen_base_tensor;
 };
 
-#endif // COMPUTEEIGENSTRAIN_H

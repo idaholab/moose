@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ISOTROPICPLASTICITY_H
-#define ISOTROPICPLASTICITY_H
+#pragma once
 
 #include "ReturnMappingModel.h"
 
@@ -55,4 +54,3 @@ protected:
   const MaterialProperty<Real> & _hardening_variable_old;
 };
 
-#endif // ISOTROPICPLASTICITY_H

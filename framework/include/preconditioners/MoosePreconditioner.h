@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEPRECONDITIONER_H
-#define MOOSEPRECONDITIONER_H
+#pragma once
 
 // MOOSE includes
 #include "MooseObject.h"
@@ -55,4 +54,3 @@ protected:
   FEProblemBase & _fe_problem;
 };
 
-#endif /* MOOSEPRECONDITIONER_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ONOFFDIRICHLETBC_H
-#define ONOFFDIRICHLETBC_H
+#pragma once
 
 #include "DirichletBC.h"
 
@@ -31,4 +30,3 @@ public:
 protected:
 };
 
-#endif /* ONOFFDIRICHLETBC_H */

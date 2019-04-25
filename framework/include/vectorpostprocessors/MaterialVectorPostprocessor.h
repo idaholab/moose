@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATERIALVECTORPOSTPROCESSOR_H
-#define MATERIALVECTORPOSTPROCESSOR_H
+#pragma once
 
 #include "ElementVectorPostprocessor.h"
 
@@ -58,4 +57,3 @@ private:
   std::vector<std::string> _prop_names;
 };
 
-#endif

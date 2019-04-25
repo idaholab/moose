@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ASSIGNSUBDOMAINID_H
-#define ASSIGNSUBDOMAINID_H
+#pragma once
 
 // MOOSE includes
 #include "MeshModifier.h"
@@ -34,4 +33,3 @@ protected:
   SubdomainID _subdomain_id;
 };
 
-#endif // ASSIGNSUBDOMAINID_H

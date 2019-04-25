@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSSUPGstandard_H
-#define RICHARDSSUPGstandard_H
+#pragma once
 
 #include "RichardsSUPG.h"
 
@@ -155,4 +154,3 @@ private:
   Real cosh_relation_prime(Real alpha) const;
 };
 
-#endif // RICHARDSSUPGstandard_H

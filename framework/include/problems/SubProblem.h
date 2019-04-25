@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SUBPROBLEM_H
-#define SUBPROBLEM_H
+#pragma once
 
 #include "Problem.h"
 #include "DiracKernelInfo.h"
@@ -677,4 +676,3 @@ void initial_condition(EquationSystems & es, const std::string & system_name);
 
 } // namespace Moose
 
-#endif /* SUBPROBLEM_H */

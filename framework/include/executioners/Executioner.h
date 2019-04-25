@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EXECUTIONER_H
-#define EXECUTIONER_H
+#pragma once
 
 #include "MooseObject.h"
 #include "UserObjectInterface.h"
@@ -134,4 +133,3 @@ protected:
   std::string _restart_file_base;
 };
 
-#endif // EXECUTIONER_H

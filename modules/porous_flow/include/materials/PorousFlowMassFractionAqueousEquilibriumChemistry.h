@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWMASSFRACTIONAQUEOUSCHEMISTRYCHEMISTRY_H
-#define POROUSFLOWMASSFRACTIONAQUEOUSCHEMISTRYCHEMISTRY_H
+#pragma once
 
 #include "PorousFlowMassFraction.h"
 
@@ -120,4 +119,3 @@ protected:
   const std::vector<Real> _secondary_activity_coefficients;
 };
 
-#endif // POROUSFLOWMASSFRACTIONAQUEOUSCHEMISTRYCHEMISTRY_H

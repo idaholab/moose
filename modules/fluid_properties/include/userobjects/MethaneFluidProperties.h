@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef METHANEFLUIDPROPERTIES_H
-#define METHANEFLUIDPROPERTIES_H
+#pragma once
 
 #include "HelmholtzFluidProperties.h"
 #include <array>
@@ -178,4 +177,3 @@ protected:
                                 -1.95048736e-18}};
 };
 
-#endif /* METHANEFLUIDPROPERTIES_H */

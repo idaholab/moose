@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SCALARCOUPLEDPOSTPROCESSOR_H
-#define SCALARCOUPLEDPOSTPROCESSOR_H
+#pragma once
 
 // MOOSE includes
 #include "SideIntegralPostprocessor.h"
@@ -33,4 +32,3 @@ protected:
   const VariableValue & _u;
 };
 
-#endif // SCALARCOUPLEDPOSTPROCESSOR_H

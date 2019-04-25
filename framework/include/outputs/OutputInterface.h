@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef OUTPUTINTERFACE_H
-#define OUTPUTINTERFACE_H
+#pragma once
 
 // MOOSE includes
 #include "MooseTypes.h"
@@ -75,4 +74,3 @@ private:
   std::set<OutputName> _oi_outputs;
 };
 
-#endif // OUTPUTINTERFACE_H

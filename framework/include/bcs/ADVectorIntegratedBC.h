@@ -7,9 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADVECTORINTEGRATEDBC_H
-#define ADVECTORINTEGRATEDBC_H
+#pragma once
 
 #include "ADIntegratedBC.h"
 
-#endif /* ADVECTORINTEGRATEDBC_H */

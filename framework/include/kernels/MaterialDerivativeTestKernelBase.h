@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATERIALDERIVATIVETESTKERNELBASE_H
-#define MATERIALDERIVATIVETESTKERNELBASE_H
+#pragma once
 
 #include "Kernel.h"
 #include "JvarMapInterface.h"
@@ -76,4 +75,3 @@ MaterialDerivativeTestKernelBase<T>::validParams()
   return params;
 }
 
-#endif // MATERIALDERIVATIVETESTKERNELBASE_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef BREAKMESHBYBLOCKMANUAL_3BLOCKS_H
-#define BREAKMESHBYBLOCKMANUAL_3BLOCKS_H
+#pragma once
 
 #include "BreakMeshByBlockManualBase.h"
 
@@ -30,4 +29,3 @@ private:
   void addInterfaceBoundary();
 };
 
-#endif // BREAKMESHBYBLOCKMANUAL_3BLOCKS_H

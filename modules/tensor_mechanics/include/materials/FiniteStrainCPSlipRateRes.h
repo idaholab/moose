@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FINITESTRAINCPSLIPRATERES_H
-#define FINITESTRAINCPSLIPRATERES_H
+#pragma once
 
 #include "FiniteStrainCrystalPlasticity.h"
 
@@ -97,4 +96,3 @@ protected:
   DenseMatrix<Real> _dsliprate_dsliprate;
 };
 
-#endif // FINITESTRAINCPSLIPRATERES_H

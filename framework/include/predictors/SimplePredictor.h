@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SIMPLEPREDICTOR_H
-#define SIMPLEPREDICTOR_H
+#pragma once
 
 #include "Predictor.h"
 
@@ -48,4 +47,3 @@ public:
   virtual void apply(NumericVector<Number> & sln) override;
 };
 
-#endif /* SIMPLEPREDICTOR_H */

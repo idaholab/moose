@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PFCTRADMATERIAL_H
-#define PFCTRADMATERIAL_H
+#pragma once
 
 #include "Material.h"
 
@@ -40,4 +39,3 @@ private:
   MaterialProperty<Real> & _C8;
 };
 
-#endif // PFCTRADMATERIAL_H

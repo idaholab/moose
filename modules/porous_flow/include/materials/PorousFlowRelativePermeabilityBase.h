@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWRELATIVEPERMEABILITYBASE_H
-#define POROUSFLOWRELATIVEPERMEABILITYBASE_H
+#pragma once
 
 #include "PorousFlowMaterialBase.h"
 
@@ -73,4 +72,3 @@ protected:
   const Real _dseff_ds;
 };
 
-#endif // POROUSFLOWRELATIVEPERMEABILITYBASE_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GENERICFUNCTIONMATERIAL_H
-#define GENERICFUNCTIONMATERIAL_H
+#pragma once
 
 #include "Material.h"
 
@@ -55,4 +54,3 @@ private:
   bool _enable_stateful;
 };
 
-#endif // GENERICFUNCTIONMATERIAL_H

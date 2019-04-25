@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADAMSPREDICTOR_H
-#define ADAMSPREDICTOR_H
+#pragma once
 
 // MOOSE includes
 #include "Predictor.h"
@@ -53,4 +52,3 @@ protected:
   Real & _dtstorage;
 };
 
-#endif /* ADAMSPREDICTOR_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PARSEDAUX_H
-#define PARSEDAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 #include "FunctionParserUtils.h"
@@ -41,4 +40,3 @@ protected:
   ADFunctionPtr _func_F;
 };
 
-#endif /* PARSEDAUX_H */

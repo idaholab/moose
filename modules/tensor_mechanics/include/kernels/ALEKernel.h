@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ALEKERNEL_H
-#define ALEKERNEL_H
+#pragma once
 
 #include "Kernel.h"
 #include "Assembly.h"
@@ -41,4 +40,3 @@ protected:
   ///@}
 };
 
-#endif // ALEKERNEL_H

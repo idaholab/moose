@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADCONVECTIONPRECOMPUTE_H
-#define ADCONVECTIONPRECOMPUTE_H
+#pragma once
 
 #include "ADKernelValue.h"
 
@@ -32,4 +31,3 @@ private:
   usingKernelValueMembers;
 };
 
-#endif // ADCONVECTIONPRECOMPUTE_H

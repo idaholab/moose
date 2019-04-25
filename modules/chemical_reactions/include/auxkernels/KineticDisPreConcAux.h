@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef KINETICDISPRECONCAUX_H
-#define KINETICDISPRECONCAUX_H
+#pragma once
 
 #include "KineticDisPreRateAux.h"
 
@@ -32,4 +31,3 @@ protected:
   virtual Real computeValue() override;
 };
 
-#endif // KINETICDISPRECONCAUX_H

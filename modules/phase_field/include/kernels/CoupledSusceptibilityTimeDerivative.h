@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COUPLEDSUSCEPTIBILITYTIMEDERIVATIVE_H
-#define COUPLEDSUSCEPTIBILITYTIMEDERIVATIVE_H
+#pragma once
 
 #include "CoupledTimeDerivative.h"
 #include "JvarMapInterface.h"
@@ -45,4 +44,3 @@ protected:
   std::vector<const MaterialProperty<Real> *> _dFdarg;
 };
 
-#endif // COUPLEDSUSCEPTIBILITYTIMEDERIVATIVE_H

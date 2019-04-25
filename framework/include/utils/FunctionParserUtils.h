@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FUNCTIONPARSERUTILS_H
-#define FUNCTIONPARSERUTILS_H
+#pragma once
 
 #include "Moose.h"
 
@@ -68,4 +67,3 @@ protected:
   std::vector<Real> _func_params;
 };
 
-#endif // FUNCTIONPARSERUTILS_H

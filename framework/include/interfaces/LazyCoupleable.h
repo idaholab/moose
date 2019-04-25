@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LAZYCOUPLEABLE_H
-#define LAZYCOUPLEABLE_H
+#pragma once
 
 // MOOSE includes
 #include "MooseVariableBase.h"
@@ -70,4 +69,3 @@ private:
   std::map<std::string, std::unique_ptr<unsigned int>> _coupled_var_numbers;
 };
 
-#endif /* LAZYCOUPLEABLE_H */

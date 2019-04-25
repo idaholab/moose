@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADVECTORDIFFUSION_H
-#define ADVECTORDIFFUSION_H
+#pragma once
 
 #include "ADVectorKernel.h"
 
@@ -29,4 +28,3 @@ protected:
   usingVectorKernelMembers;
 };
 
-#endif /* ADVECTORDIFFUSION_H */

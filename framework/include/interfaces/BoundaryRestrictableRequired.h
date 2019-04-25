@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef BOUNDARYRESTRICTABLEREQUIRED_H
-#define BOUNDARYRESTRICTABLEREQUIRED_H
+#pragma once
 
 // Moose includes
 #include "BoundaryRestrictable.h"
@@ -31,4 +30,3 @@ public:
   BoundaryRestrictableRequired(const MooseObject * moose_object, bool nodal);
 };
 
-#endif // BOUNDARYRESTRICTABLEREQURIED_H

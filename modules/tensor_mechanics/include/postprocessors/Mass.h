@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MASS_H
-#define MASS_H
+#pragma once
 
 #include "ElementIntegralVariablePostprocessor.h"
 
@@ -32,4 +31,3 @@ protected:
   const MaterialProperty<Real> & _density;
 };
 
-#endif // MASS_H

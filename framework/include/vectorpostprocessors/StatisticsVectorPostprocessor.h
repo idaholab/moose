@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef STATISTICSVECTORPOSTPROCESSOR_H
-#define STATISTICSVECTORPOSTPROCESSOR_H
+#pragma once
 
 #include "GeneralVectorPostprocessor.h"
 
@@ -50,4 +49,3 @@ protected:
   std::map<std::string, VectorPostprocessorValue *> _stat_vectors;
 };
 
-#endif // STATISTICSVECTORPOSTPROCESSOR_H

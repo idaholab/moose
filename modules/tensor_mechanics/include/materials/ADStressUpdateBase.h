@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADSTRESSUPDATEBASE_H
-#define ADSTRESSUPDATEBASE_H
+#pragma once
 
 #include "ADMaterial.h"
 
@@ -110,4 +109,3 @@ protected:
   usingMaterialMembers;
 };
 
-#endif // ADSTRESSUPDATEBASE_H

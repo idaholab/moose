@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef BOXMARKER_H
-#define BOXMARKER_H
+#pragma once
 
 #include "Marker.h"
 
@@ -33,4 +32,3 @@ protected:
   BoundingBox _bounding_box;
 };
 
-#endif /* BOXMARKER_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GRAINTEXTUREVECTORPOSTPROCESSOR
-#define GRAINTEXTUREVECTORPOSTPROCESSOR
+#pragma once
 
 #include "ElementVectorPostprocessor.h"
 #include "SamplerBase.h"
@@ -41,5 +40,3 @@ protected:
   const unsigned int _grain_num;
   std::vector<Real> _sample;
 };
-
-#endif // GRAINTEXTUREVECTORPOSTPROCESSOR_H

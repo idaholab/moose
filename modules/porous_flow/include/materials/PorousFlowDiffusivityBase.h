@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWDIFFUSIVITYBASE_H
-#define POROUSFLOWDIFFUSIVITYBASE_H
+#pragma once
 
 #include "PorousFlowMaterialVectorBase.h"
 
@@ -42,4 +41,3 @@ protected:
   const std::vector<Real> _input_diffusion_coeff;
 };
 
-#endif // POROUSFLOWDIFFUSIVITYBASE_H

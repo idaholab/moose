@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELASTICITYTENSORTOOLS_H
-#define ELASTICITYTENSORTOOLS_H
+#pragma once
 
 template <typename>
 class RankFourTensorTempl;
@@ -93,4 +92,3 @@ Real getIsotropicYoungsModulus(const RankFourTensor & elasticity_tensor);
 Real getIsotropicPoissonsRatio(const RankFourTensor & elasticity_tensor);
 }
 
-#endif // ELASTICITYTENSORTOOLS_H

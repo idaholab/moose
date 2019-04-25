@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWFULLYSATURATEDHEATADVECTION_H
-#define POROUSFLOWFULLYSATURATEDHEATADVECTION_H
+#pragma once
 
 #include "PorousFlowFullySaturatedDarcyBase.h"
 
@@ -37,4 +36,3 @@ protected:
   const MaterialProperty<std::vector<std::vector<Real>>> & _denthalpy_dvar;
 };
 
-#endif // POROUSFLOWFULLYSATURATEDHEATADVECTION_H

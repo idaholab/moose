@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef BACKUP_H
-#define BACKUP_H
+#pragma once
 
 // C++ includes
 #include <sstream>
@@ -36,4 +35,3 @@ public:
 
 // Specializations for dataLoad and dataStore appear in DataIO.C
 
-#endif /* BACKUP_H */

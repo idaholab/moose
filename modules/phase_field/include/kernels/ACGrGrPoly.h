@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ACGRGRPOLY_H
-#define ACGRGRPOLY_H
+#pragma once
 
 #include "ACGrGrBase.h"
 
@@ -35,4 +34,3 @@ protected:
   const MaterialProperty<Real> & _gamma;
 };
 
-#endif // ACGRGRPOLY_H

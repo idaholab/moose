@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSERANDOM_H
-#define MOOSERANDOM_H
+#pragma once
 
 // MOOSE includes
 #include "MooseError.h"
@@ -180,4 +179,3 @@ dataLoad(std::istream & stream, MooseRandom & v, void * context)
   loadHelper(stream, v._states, context);
 }
 
-#endif // MOOSERANDOM_H

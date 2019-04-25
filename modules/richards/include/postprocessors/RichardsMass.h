@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSMASS_H
-#define RICHARDSMASS_H
+#pragma once
 
 #include "ElementIntegralVariablePostprocessor.h"
 #include "RichardsVarNames.h"
@@ -41,4 +40,3 @@ protected:
   const MaterialProperty<std::vector<Real>> & _mass;
 };
 
-#endif

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EXAMPLESHAPESIDEINTEGRATEDBC_H
-#define EXAMPLESHAPESIDEINTEGRATEDBC_H
+#pragma once
 
 #include "NonlocalIntegratedBC.h"
 #include "NumShapeSideUserObject.h"
@@ -44,4 +43,3 @@ protected:
 template <>
 InputParameters validParams<ExampleShapeSideIntegratedBC>();
 
-#endif // EXAMPLESHAPESIDEINTEGRATEDBC_H

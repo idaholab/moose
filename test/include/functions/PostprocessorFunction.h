@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POSTPROCESSORFUNCTION_H
-#define POSTPROCESSORFUNCTION_H
+#pragma once
 
 #include "Function.h"
 
@@ -28,4 +27,3 @@ protected:
   const PostprocessorValue & _pp;
 };
 
-#endif // POSTPROCESSORFUNCTION_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POSTPROCESSORNEUMANNBC_H
-#define POSTPROCESSORNEUMANNBC_H
+#pragma once
 
 #include "IntegratedBC.h"
 
@@ -37,4 +36,3 @@ protected:
   const PostprocessorValue & _value;
 };
 
-#endif // POSTPROCESSORNEUMANNBC_H

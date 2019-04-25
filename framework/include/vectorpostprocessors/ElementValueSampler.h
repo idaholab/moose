@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMENTVALUESAMPLER_H
-#define ELEMENTVALUESAMPLER_H
+#pragma once
 
 #include "ElementVariableVectorPostprocessor.h"
 #include "SamplerBase.h"
@@ -42,4 +41,3 @@ protected:
   std::vector<Real> _values;
 };
 
-#endif

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ORIENTEDSUBDOMAINBOUNDINGBOX_H
-#define ORIENTEDSUBDOMAINBOUNDINGBOX_H
+#pragma once
 
 // MOOSE includes
 #include "MooseEnum.h"
@@ -44,4 +43,3 @@ private:
   const SubdomainID _block_id;
 };
 
-#endif // ORIENTEDSUBDOMAINBOUNDINGBOX_H

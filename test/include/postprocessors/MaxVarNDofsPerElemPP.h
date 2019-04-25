@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MAXVARNDOFSPERELEMPP_H
-#define MAXVARNDOFSPERELEMPP_H
+#pragma once
 
 // MOOSE includes
 #include "GeneralPostprocessor.h"
@@ -33,4 +32,3 @@ public:
   virtual PostprocessorValue getValue();
 };
 
-#endif // MAXVARNDOFSPERELEMPP_H

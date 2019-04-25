@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMMONOUTPUTACTION_H
-#define COMMONOUTPUTACTION_H
+#pragma once
 
 // MOOSE includes
 #include "Action.h"
@@ -53,4 +52,3 @@ private:
   InputParameters _action_params;
 };
 
-#endif // COMMONOUTPUTACTION_H

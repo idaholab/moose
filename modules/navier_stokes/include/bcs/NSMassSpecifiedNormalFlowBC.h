@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NSMASSSPECIFIEDNORMALFLOWBC_H
-#define NSMASSSPECIFIEDNORMALFLOWBC_H
+#pragma once
 
 #include "NSMassBC.h"
 
@@ -39,4 +38,3 @@ protected:
   const Real _rhoun;
 };
 
-#endif // NSMASSSPECIFIEDNORMALFLOWBC_H

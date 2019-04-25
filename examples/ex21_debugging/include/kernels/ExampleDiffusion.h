@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EXAMPLEDIFFUSION_H
-#define EXAMPLEDIFFUSION_H
+#pragma once
 
 #include "Diffusion.h"
 
@@ -41,4 +40,3 @@ protected:
 
   const VariableValue _coupled_coef;
 };
-#endif // EXAMPLEDIFFUSION_H

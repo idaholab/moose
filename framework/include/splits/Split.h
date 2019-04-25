@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SPLIT_H
-#define SPLIT_H
+#pragma once
 
 // MOOSE includes
 #include "MooseEnum.h"
@@ -72,4 +71,3 @@ protected:
   Moose::PetscSupport::PetscOptions _petsc_options;
 };
 
-#endif // SPLIT_H

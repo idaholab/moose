@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POLYDIFFUSION_H
-#define POLYDIFFUSION_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -27,4 +26,3 @@ protected:
   virtual Real computeQpJacobian();
 };
 
-#endif // POLYDIFFUSION_H

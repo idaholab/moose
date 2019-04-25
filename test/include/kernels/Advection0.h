@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADVECTION0_H
-#define ADVECTION0_H
+#pragma once
 
 #include "Kernel.h"
 #include "Material.h"
@@ -33,4 +32,3 @@ private:
   Real _Au, _Bu, _Cu, _Av, _Bv, _Cv;
 };
 
-#endif // ADVECTION0_H

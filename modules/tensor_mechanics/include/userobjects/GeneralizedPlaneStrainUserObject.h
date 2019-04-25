@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GENERALIZEDPLANESTRAINUSEROBJECT_H
-#define GENERALIZEDPLANESTRAINUSEROBJECT_H
+#pragma once
 
 #include "ElementUserObject.h"
 #include "SubblockIndexProvider.h"
@@ -54,4 +53,3 @@ protected:
   std::vector<Real> _jacobian;
 };
 
-#endif // GENERALIZEDPLANESTRAINUSEROBJECT_H

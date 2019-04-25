@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADINTEGRATEDBC_H
-#define ADINTEGRATEDBC_H
+#pragma once
 
 #include "IntegratedBCBase.h"
 #include "MooseVariableInterface.h"
@@ -93,4 +92,3 @@ declareADValidParams(ADVectorIntegratedBC);
 #define usingIntegratedBCMembers usingTemplIntegratedBCMembers(Real)
 #define usingVectorIntegratedBCMembers usingTemplIntegratedBCMembers(RealVectorValue)
 
-#endif /* ADINTEGRATEDBC_H */

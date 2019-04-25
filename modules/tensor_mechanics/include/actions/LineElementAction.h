@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LINEELEMENTACTION_H
-#define LINEELEMENTACTION_H
+#pragma once
 
 #include "Action.h"
 
@@ -158,4 +157,3 @@ protected:
   bool _truss;
 };
 
-#endif // LINEELEMENTACTION_H

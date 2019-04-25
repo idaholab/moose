@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NEARESTNODETHREAD_H
-#define NEARESTNODETHREAD_H
+#pragma once
 
 #include "NearestNodeLocator.h"
 
@@ -40,4 +39,3 @@ protected:
   std::map<dof_id_type, std::vector<dof_id_type>> & _neighbor_nodes;
 };
 
-#endif // NEARESTNODETHREAD_H

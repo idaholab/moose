@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ACSWITCHING_H
-#define ACSWITCHING_H
+#pragma once
 
 #include "ACBulk.h"
 
@@ -63,4 +62,3 @@ protected:
   std::vector<std::vector<const MaterialProperty<Real> *>> _prop_d2hjdetaidarg;
 };
 
-#endif // ACSWITCHING_H

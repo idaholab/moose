@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ACINTERFACEKOBAYASHI1_H
-#define ACINTERFACEKOBAYASHI1_H
+#pragma once
 
 #include "KernelGrad.h"
 #include "JvarMapInterface.h"
@@ -50,4 +49,3 @@ protected:
   std::vector<const MaterialProperty<Real> *> _ddepsdarg;
 };
 
-#endif // ACINTERFACEKOBAYASHI1_H

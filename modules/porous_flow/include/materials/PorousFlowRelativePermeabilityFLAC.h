@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWRELATIVEPERMEABILITYFLAC_H
-#define POROUSFLOWRELATIVEPERMEABILITYFLAC_H
+#pragma once
 
 #include "PorousFlowRelativePermeabilityBase.h"
 #include "PorousFlowFLACrelperm.h"
@@ -36,4 +35,3 @@ protected:
   const Real _m;
 };
 
-#endif // POROUSFLOWRELATIVEPERMEABILITYFLAC_H

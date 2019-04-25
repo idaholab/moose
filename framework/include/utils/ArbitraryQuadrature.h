@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ARBITRARYQUADRATURE_H
-#define ARBITRARYQUADRATURE_H
+#pragma once
 
 // MOOSE includes
 #include "Moose.h" // using namespace libMesh
@@ -43,4 +42,3 @@ private:
   void init_3D(const ElemType _type = INVALID_ELEM, unsigned int p_level = 0) override;
 };
 
-#endif // ARBITRARYQUADRATURE_H

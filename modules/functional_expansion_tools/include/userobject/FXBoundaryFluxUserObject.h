@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FXBOUNDARYFLUXUSEROBJECT_H
-#define FXBOUNDARYFLUXUSEROBJECT_H
+#pragma once
 
 #include "FXBoundaryBaseUserObject.h"
 
@@ -36,4 +35,3 @@ protected:
   const MaterialProperty<Real> & _diffusivity;
 };
 
-#endif // FXBOUNDARYFLUXUSEROBJECT_H

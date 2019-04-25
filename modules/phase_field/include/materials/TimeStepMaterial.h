@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TIMESTEPMATERIAL_H
-#define TIMESTEPMATERIAL_H
+#pragma once
 
 #include "Material.h"
 
@@ -33,4 +32,3 @@ protected:
   MaterialProperty<Real> & _prop_time_step;
 };
 
-#endif // TIMESTEPMATERIAL_H

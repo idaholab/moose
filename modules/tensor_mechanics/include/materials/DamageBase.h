@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DAMAGEBASE_H
-#define DAMAGEBASE_H
+#pragma once
 
 #include "Material.h"
 #include "RankFourTensor.h"
@@ -75,4 +74,3 @@ protected:
   const std::string _base_name;
 };
 
-#endif // DAMAGEBASE_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWADVECTIEFLUXCALCULATORBASE_H
-#define POROUSFLOWADVECTIEFLUXCALCULATORBASE_H
+#pragma once
 
 #include "AdvectiveFluxCalculatorBase.h"
 #include "PorousFlowDictator.h"
@@ -134,4 +133,3 @@ protected:
   std::vector<std::map<dof_id_type, std::vector<Real>>> _dflux_out_dvars;
 };
 
-#endif // POROUSFLOWADVECTIEFLUXCALCULATORBASE_H

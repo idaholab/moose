@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TIMESTEPSIZE_H
-#define TIMESTEPSIZE_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 
@@ -35,4 +34,3 @@ protected:
   FEProblemBase & _feproblem;
 };
 
-#endif // TIMESTEPSIZE_H

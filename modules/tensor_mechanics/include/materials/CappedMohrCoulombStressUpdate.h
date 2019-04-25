@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CAPPEDMOHRCOULOMBSTRESSUPDATE_H
-#define CAPPEDMOHRCOULOMBSTRESSUPDATE_H
+#pragma once
 
 #include "MultiParameterPlasticityStressUpdate.h"
 #include "TensorMechanicsHardeningModel.h"
@@ -123,4 +122,3 @@ protected:
                                           RankFourTensor & cto) override;
 };
 
-#endif // CAPPEDMOHRCOULOMBSTRESSUPDATE_H

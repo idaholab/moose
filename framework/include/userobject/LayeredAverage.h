@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LAYEREDAVERAGE_H
-#define LAYEREDAVERAGE_H
+#pragma once
 
 #include "LayeredIntegral.h"
 
@@ -37,4 +36,3 @@ protected:
   std::vector<Real> _layer_volumes;
 };
 
-#endif

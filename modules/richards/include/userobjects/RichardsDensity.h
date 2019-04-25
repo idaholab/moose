@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSDENSITY_H
-#define RICHARDSDENSITY_H
+#pragma once
 
 #include "GeneralUserObject.h"
 
@@ -53,4 +52,3 @@ public:
   virtual Real d2density(Real p) const = 0;
 };
 
-#endif // RICHARDSDENSITY_H

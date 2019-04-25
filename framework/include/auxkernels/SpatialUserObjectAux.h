@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SPATIALUSEROBJECTAUX_H
-#define SPATIALUSEROBJECTAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -38,4 +37,3 @@ protected:
   const UserObject & _user_object;
 };
 
-#endif // SPATIALUSEROBJECTAUX_H

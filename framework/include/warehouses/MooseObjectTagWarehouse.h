@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEOBJECTTAGWAREHOUSE_H
-#define MOOSEOBJECTTAGWAREHOUSE_H
+#pragma once
 
 // MOOSE includes
 #include "MooseObjectWarehouse.h"
@@ -258,4 +257,3 @@ MooseObjectTagWarehouse<T>::getMatrixTagsObjectWarehouse(const std::set<TagID> &
   return matrix_tags_to_object_warehouse[m_tags];
 }
 
-#endif // MOOSEOBJECTTAGWAREHOUSE_H

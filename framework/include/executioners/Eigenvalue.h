@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EIGENVALUE_H
-#define EIGENVALUE_H
+#pragma once
 
 #include "Steady.h"
 
@@ -39,4 +38,3 @@ protected:
   EigenProblem & _eigen_problem;
 };
 
-#endif // EIGENVALUE_H

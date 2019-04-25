@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RINGLEBMESHGENERATOR_H
-#define RINGLEBMESHGENERATOR_H
+#pragma once
 
 #include "MeshGenerator.h"
 
@@ -71,4 +70,3 @@ protected:
   const bool & _triangles;
 };
 
-#endif // RINGLEBMESHGENERATOR_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COUPLEDKERNELGRADBC_H
-#define COUPLEDKERNELGRADBC_H
+#pragma once
 
 #include "IntegratedBC.h"
 
@@ -32,4 +31,3 @@ protected:
   const VariableValue & _var2;
 };
 
-#endif /* COUPLEDKERNELGRADBC_H */

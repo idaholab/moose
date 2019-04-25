@@ -7,9 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEVARIABLE_H
-#define MOOSEVARIABLE_H
+#pragma once
 
 #include "MooseVariableFE.h"
 
-#endif /* MOOSEVARIABLE_H */

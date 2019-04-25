@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POLYCOUPLEDDIRICHLETBC_H
-#define POLYCOUPLEDDIRICHLETBC_H
+#pragma once
 
 #include "NodalBC.h"
 
@@ -30,4 +29,3 @@ protected:
   Real _value; // Multiplier on the boundary
 };
 
-#endif // POLYCOUPLEDDIRICHLETBC_H

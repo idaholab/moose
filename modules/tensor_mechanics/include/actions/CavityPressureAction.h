@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CAVITYPRESSUREACTION_H
-#define CAVITYPRESSUREACTION_H
+#pragma once
 
 #include "Action.h"
 #include "MooseTypes.h"
@@ -26,4 +25,3 @@ public:
   virtual void act() override;
 };
 
-#endif // CAVITYPRESSUREACTION_H

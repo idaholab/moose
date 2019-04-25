@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FixedPointProblem_H
-#define FixedPointProblem_H
+#pragma once
 
 #include "FEProblem.h"
 
@@ -36,4 +35,3 @@ protected:
   NumericVector<Number> & _residual_previous;
 };
 
-#endif /* FixedPointProblem_H */

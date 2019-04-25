@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NONLINEARSYSTEMBASE_H
-#define NONLINEARSYSTEMBASE_H
+#pragma once
 
 #include "SystemBase.h"
 #include "ConstraintWarehouse.h"
@@ -831,4 +830,3 @@ protected:
   PerfID _compute_dirac_timer;
 };
 
-#endif /* NONLINEARSYSTEMBASE_H */

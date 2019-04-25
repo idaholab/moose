@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MaskedGrainForceAndTorque_H
-#define MaskedGrainForceAndTorque_H
+#pragma once
 
 #include "GrainForceAndTorqueInterface.h"
 #include "GeneralUserObject.h"
@@ -56,4 +55,3 @@ protected:
   ///@}
 };
 
-#endif // MaskedGrainForceAndTorque_H

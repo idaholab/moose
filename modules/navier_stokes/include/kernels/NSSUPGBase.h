@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NSSUPGBASE_H
-#define NSSUPGBASE_H
+#pragma once
 
 #include "NSKernel.h"
 
@@ -72,4 +71,3 @@ protected:
   const VariableValue & _enthalpy;
 };
 
-#endif // NSSUPGBASE_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CHANGEOVERTIMEPOSTPROCESSOR_H
-#define CHANGEOVERTIMEPOSTPROCESSOR_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 
@@ -50,4 +49,3 @@ protected:
   Real & _pps_value_initial;
 };
 
-#endif /* CHANGEOVERTIMEPOSTPROCESSOR_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ALLENCAHNELASTICENERGYOFFDIAG_H
-#define ALLENCAHNELASTICENERGYOFFDIAG_H
+#pragma once
 
 #include "DerivativeMaterialInterface.h"
 #include "JvarMapInterface.h"
@@ -49,4 +48,3 @@ protected:
   /// Free energy material properties and derivatives
   const MaterialProperty<RankTwoTensor> & _d2Fdcdstrain;
 };
-#endif // ALLENCAHNELASTICENERGYOFFDIAG_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INTERFACEAVERAGEVARIABLEVALUEPOSTPROCESSOR_H
-#define INTERFACEAVERAGEVARIABLEVALUEPOSTPROCESSOR_H
+#pragma once
 
 #include "InterfaceIntegralVariableValuePostprocessor.h"
 
@@ -31,4 +30,3 @@ public:
   virtual Real getValue() override;
 };
 
-#endif /*INTERFACEAVERAGEVARIABLEVALUEPOSTPROCESSOR_H*/

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWDARCYVELOCITYCOMPONENT_H
-#define POROUSFLOWDARCYVELOCITYCOMPONENT_H
+#pragma once
 
 #include "AuxKernel.h"
 #include "PorousFlowDictator.h"
@@ -64,4 +63,3 @@ protected:
   const RealVectorValue _gravity;
 };
 
-#endif // POROUSFLOWDARCYVELOCITYCOMPONENT_H

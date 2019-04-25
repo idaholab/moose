@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CONVDIFFMETAACTION_H
-#define CONVDIFFMETAACTION_H
+#pragma once
 
 #include "Action.h"
 
@@ -23,4 +22,3 @@ public:
 template <>
 InputParameters validParams<ConvDiffMetaAction>();
 
-#endif // CONVDIFFMETAACTION_H

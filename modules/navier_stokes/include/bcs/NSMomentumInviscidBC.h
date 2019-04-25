@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NSMOMENTUMINVISCIDBC_H
-#define NSMOMENTUMINVISCIDBC_H
+#pragma once
 
 #include "NSIntegratedBC.h"
 #include "NSPressureDerivs.h"
@@ -102,4 +101,3 @@ protected:
   Real convectiveQpJacobianHelper(unsigned var_number);
 };
 
-#endif // NSMOMENTUMINVISCIDBC_H

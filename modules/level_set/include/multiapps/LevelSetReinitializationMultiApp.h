@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LEVELSETREINITIALIZATIONMULTIAPP_H
-#define LEVELSETREINITIALIZATIONMULTIAPP_H
+#pragma once
 
 #include "MultiApp.h"
 
@@ -44,4 +43,3 @@ protected:
   const unsigned int & _interval;
 };
 
-#endif // LevelSetReinitializationMultiApp_H

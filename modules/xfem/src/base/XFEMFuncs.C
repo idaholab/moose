@@ -637,7 +637,6 @@ normalizePoint(EFAPoint & p)
 
 double
 r8_acos(double c)
-//****************************************************************************80
 //
 //  Purpose:
 //
@@ -690,7 +689,6 @@ r8_acos(double c)
 
 double
 angle_rad_3d(double p1[3], double p2[3], double p3[3])
-//****************************************************************************80
 //
 //  Purpose:
 //

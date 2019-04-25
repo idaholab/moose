@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RANDOMELEMENTALUSEROBJECT_H
-#define RANDOMELEMENTALUSEROBJECT_H
+#pragma once
 
 #include "ElementUserObject.h"
 
@@ -39,4 +38,3 @@ protected:
   std::map<dof_id_type, unsigned long> _random_data;
 };
 
-#endif // RANDOMELEMENTALUSEROBJECT_H

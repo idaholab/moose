@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWPEACEMANBOREHOLE_H
-#define POROUSFLOWPEACEMANBOREHOLE_H
+#pragma once
 
 #include "PorousFlowLineSink.h"
 
@@ -88,4 +87,3 @@ protected:
                                     Real & outflowp) const override;
 };
 
-#endif // POROUSFLOWPEACEMANBOREHOLE_H

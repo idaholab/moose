@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MTICMULT_H
-#define MTICMULT_H
+#pragma once
 
 #include "InitialCondition.h"
 
@@ -33,4 +32,3 @@ protected:
   Real _factor;
 };
 
-#endif /* MTICMULT_H */

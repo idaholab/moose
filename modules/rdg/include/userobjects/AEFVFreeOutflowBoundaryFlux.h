@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef AEFVFREEOUTFLOWBOUNDARYFLUX_H
-#define AEFVFREEOUTFLOWBOUNDARYFLUX_H
+#pragma once
 
 #include "BoundaryFluxBase.h"
 
@@ -46,4 +45,3 @@ protected:
   const Real _velocity;
 };
 
-#endif

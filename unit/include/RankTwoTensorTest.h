@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RANKTWOTENSORTEST_H
-#define RANKTWOTENSORTEST_H
+#pragma once
 
 #include "gtest_include.h"
 
@@ -36,4 +35,3 @@ protected:
   RankTwoTensor _unsymmetric1;
 };
 
-#endif // RANKTWOTENSORTEST_H

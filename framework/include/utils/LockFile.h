@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LOCKFILE_H
-#define LOCKFILE_H
+#pragma once
 
 #include <string>
 
@@ -32,4 +31,3 @@ protected:
   const std::string _filename;
 };
 
-#endif // LOCKFILE_H

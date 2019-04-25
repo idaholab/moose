@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ANALYTICALINDICATOR_H
-#define ANALYTICALINDICATOR_H
+#pragma once
 
 #include "ElementIntegralIndicator.h"
 
@@ -28,4 +27,3 @@ protected:
   Function & _func;
 };
 
-#endif /* ANALYTICALINDICATOR_H */

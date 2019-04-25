@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CRACKFRONTDATA_H
-#define CRACKFRONTDATA_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 #include "CrackFrontDefinition.h"
@@ -46,4 +45,3 @@ protected:
   MooseVariableFEBase & _field_var;
 };
 
-#endif // CRACKFRONTDATA_H

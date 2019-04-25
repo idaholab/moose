@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWEFFECTIVEFLUIDPRESSURE_H
-#define POROUSFLOWEFFECTIVEFLUIDPRESSURE_H
+#pragma once
 
 #include "PorousFlowMaterialVectorBase.h"
 
@@ -57,4 +56,3 @@ protected:
   MaterialProperty<std::vector<Real>> & _dpf_dvar;
 };
 
-#endif // POROUSFLOWEFFECTIVEFLUIDPRESSURE_H

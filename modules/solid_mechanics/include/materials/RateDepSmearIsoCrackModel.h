@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RATEDEPSMEARISOCRACKMODEL_H
-#define RATEDEPSMEARISOCRACKMODEL_H
+#pragma once
 
 #include "RateDepSmearCrackModel.h"
 
@@ -55,4 +54,3 @@ protected:
 private:
 };
 
-#endif // RATEDEPSMEARCRACKMODEL

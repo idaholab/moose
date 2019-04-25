@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CUMULATIVEVALUEPOSTPROCESSOR_H
-#define CUMULATIVEVALUEPOSTPROCESSOR_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 
@@ -43,4 +42,3 @@ protected:
   const PostprocessorValue & _pps_value;
 };
 
-#endif /* CUMULATIVEVALUEPOSTPROCESSOR_H */

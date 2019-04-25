@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TILEDMESH_H
-#define TILEDMESH_H
+#pragma once
 
 #include "MooseMesh.h"
 
@@ -35,4 +34,3 @@ protected:
   const Real _z_width;
 };
 
-#endif /* TILEDMESH_H */

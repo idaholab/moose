@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWMASSTIMEDERIVATIVE_H
-#define POROUSFLOWMASSTIMEDERIVATIVE_H
+#pragma once
 
 #include "TimeDerivative.h"
 #include "PorousFlowDictator.h"
@@ -99,4 +98,3 @@ protected:
   Real computeQpJac(unsigned int pvar);
 };
 
-#endif // POROUSFLOWMASSTIMEDERIVATIVE_H

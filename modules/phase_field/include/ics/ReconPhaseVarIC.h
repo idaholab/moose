@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RECONPHASEVARIC_H
-#define RECONPHASEVARIC_H
+#pragma once
 
 #include "InitialCondition.h"
 #include "EBSDReader.h"
@@ -43,4 +42,3 @@ private:
   const std::map<dof_id_type, std::vector<Real>> & _node_to_phase_weight_map;
 };
 
-#endif // RECONPHASEVARIC_H

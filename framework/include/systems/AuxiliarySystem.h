@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef AUXILIARYSYSTEM_H
-#define AUXILIARYSYSTEM_H
+#pragma once
 
 // MOOSE includes
 #include "SystemBase.h"
@@ -257,4 +256,3 @@ public:
   friend class ComputeNodalKernelBCJacobiansThread;
 };
 
-#endif

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DGDIFFUSION_H
-#define DGDIFFUSION_H
+#pragma once
 
 #include "DGKernel.h"
 
@@ -43,4 +42,3 @@ protected:
   const MaterialProperty<Real> & _diff_neighbor;
 };
 
-#endif

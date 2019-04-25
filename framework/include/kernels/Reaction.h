@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef REACTION_H
-#define REACTION_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -27,4 +26,3 @@ protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
 };
-#endif // REACTION_H

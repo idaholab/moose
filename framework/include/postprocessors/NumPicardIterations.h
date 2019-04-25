@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NUMPICARDITERATIONS_H
-#define NUMPICARDITERATIONS_H
+#pragma once
 
 // MOOSE includes
 #include "GeneralPostprocessor.h"
@@ -38,4 +37,3 @@ protected:
   Transient * _transient_executioner;
 };
 
-#endif // NUMPICARDITERATIONS_H

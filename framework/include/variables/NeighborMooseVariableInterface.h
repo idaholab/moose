@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NEIGHBORMOOSEVARIABLEINTERFACE_H
-#define NEIGHBORMOOSEVARIABLEINTERFACE_H
+#pragma once
 
 #include "MooseVariableInterface.h"
 #include "MooseVariableBase.h"
@@ -119,4 +118,3 @@ protected:
   virtual const typename OutputTools<T>::VariablePhiSecond & neighborSecondPhi();
 };
 
-#endif /* NEIGHBORMOOSEVARIABLEINTERFACE_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEPARSEDVECTORFUNCTION_H
-#define MOOSEPARSEDVECTORFUNCTION_H
+#pragma once
 
 // MOOSE includes
 #include "Function.h"
@@ -52,4 +51,3 @@ protected:
   std::unique_ptr<MooseParsedFunctionWrapper> _curl_function_ptr;
 };
 
-#endif // MOOSEPARSEDVECTORFUNCTION_H

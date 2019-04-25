@@ -6,8 +6,8 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#ifndef EXTERNAL_PETSC_SOLVERTESTAPP_H
-#define EXTERNAL_PETSC_SOLVERTESTAPP_H
+
+#pragma once
 
 #include "MooseApp.h"
 
@@ -26,4 +26,3 @@ public:
   static void registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs = false);
 };
 
-#endif /* EXTERNAL_PETSC_SOLVERTESTAPP_H */

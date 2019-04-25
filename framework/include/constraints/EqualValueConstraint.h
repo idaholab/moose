@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EQUALVALUECONSTRAINT_H
-#define EQUALVALUECONSTRAINT_H
+#pragma once
 
 #include "MortarConstraint.h"
 
@@ -32,4 +31,3 @@ protected:
   virtual Real computeQpJacobianSide(Moose::ConstraintJacobianType jac_type) override;
 };
 
-#endif /* EQUALVALUECONSTRAINT_H */

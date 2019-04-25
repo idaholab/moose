@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NSINITIALCONDITION_H
-#define NSINITIALCONDITION_H
+#pragma once
 
 #include "InitialCondition.h"
 #include "InputParameters.h"
@@ -47,4 +46,3 @@ protected:
   const IdealGasFluidProperties & _fp;
 };
 
-#endif

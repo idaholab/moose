@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWFLUIDSTATEBASE_H
-#define POROUSFLOWFLUIDSTATEBASE_H
+#pragma once
 
 #include "PorousFlowFluidStateFlash.h"
 #include "PorousFlowCapillaryPressure.h"
@@ -198,4 +197,3 @@ protected:
   const PorousFlowCapillaryPressure & _pc;
 };
 
-#endif // POROUSFLOWFLUIDSTATEBASE_H

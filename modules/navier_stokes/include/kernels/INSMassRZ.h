@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INSMASSRZ_H
-#define INSMASSRZ_H
+#pragma once
 
 #include "INSMass.h"
 
@@ -40,4 +39,3 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
 };
 
-#endif // INSMASSRZ_H

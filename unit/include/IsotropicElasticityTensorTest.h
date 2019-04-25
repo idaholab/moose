@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ISOTROPICELASTICITYTENSORTEST_H
-#define ISOTROPICELASTICITYTENSORTEST_H
+#pragma once
 
 #include "gtest_include.h"
 
@@ -123,4 +122,3 @@ protected:
                       {2.28132, 0, 0, 0, 2.28132, 0, 0, 0, 3.14737}};
 };
 
-#endif // ISOTROPICELASTICITYTENSORTEST_H

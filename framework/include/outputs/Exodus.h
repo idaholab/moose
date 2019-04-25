@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EXODUS_H
-#define EXODUS_H
+#pragma once
 
 // MOOSE includes
 #include "OversampleOutput.h"
@@ -193,4 +192,3 @@ private:
   bool _discontinuous;
 };
 
-#endif /* EXODUS_H */

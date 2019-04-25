@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NUMELEMQPS_H
-#define NUMELEMQPS_H
+#pragma once
 
 // MOOSE includes
 #include "ElementIntegralPostprocessor.h"
@@ -32,4 +31,3 @@ public:
   virtual Real computeQpIntegral();
 };
 
-#endif // NUMELEMQPS_H
