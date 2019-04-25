@@ -13,6 +13,8 @@
 
 #ifdef LIBMESH_HAVE_SLEPC
 
+#include "libmesh/petsc_macro.h"
+
 #include "Moose.h"
 
 class EigenProblem;
@@ -45,4 +47,3 @@ PetscErrorCode mooseSlepcEigenFormFunctionAB(SNES snes, Vec x, Vec Ax, Vec Bx, v
 } // namespace moose
 
 #endif // LIBMESH_HAVE_SLEPC
-
