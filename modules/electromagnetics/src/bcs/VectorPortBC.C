@@ -30,7 +30,7 @@ VectorPortBC::VectorPortBC(const InputParameters & parameters)
     _component(getParam<MooseEnum>("component")),
 
     _coupled_val(coupledVectorValue("coupled_field")),
-    _coupled_id(coupled("coupled_field")),
+    _coupled_var_num(coupled("coupled_field")),
 
     _inc_real(getFunction("real_incoming")),
     _inc_imag(getFunction("imag_incoming")),
@@ -125,11 +125,11 @@ VectorPortBC::computeQpOffDiagJacobian(unsigned int jvar)
   Real off_diag_jac = _beta.value(_t, _q_point[_qp]) * _test[_i][_qp].cross(_normals[_qp]) *
                       _normals[_qp].cross(_phi[_j][_qp]);
 
-  if (_component == elk::REAL && jvar == _coupled_id)
+  if (_component == elk::REAL && jvar == _coupled_var_num)
   {
     return off_diag_jac;
   }
-  else if (_component == elk::IMAGINARY && jvar == _coupled_id)
+  else if (_component == elk::IMAGINARY && jvar == _coupled_var_num)
   {
     return -off_diag_jac;
   }
