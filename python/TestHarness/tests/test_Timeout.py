@@ -20,3 +20,6 @@ class TestHarnessTester(TestHarnessTestCase):
 
         e = cm.exception
         self.assertRegexpMatches(e.output, 'test_harness\.timeout.*?TIMEOUT')
+
+        # Verify return code is TIMEOUT related (0x1)
+        self.assertIs(0x1, e.returncode)

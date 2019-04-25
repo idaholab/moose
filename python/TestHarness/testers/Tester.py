@@ -9,7 +9,7 @@
 
 import platform, re, os, pkgutil
 from TestHarness import util
-from TestHarness.StatusSystem import TestStatus
+from TestHarness.StatusSystem import StatusSystem
 from FactorySystem.MooseObject import MooseObject
 from tempfile import TemporaryFile
 import subprocess
@@ -106,6 +106,10 @@ class Tester(MooseObject):
         self.tags = params['tags']
         self.__caveats = set([])
 
+        # Alternate text we want to print as part of our status instead of the
+        # pre-formatted status text (SYNTAX PASS instead of OK for example)
+        self.__tester_message = ''
+
         # Bool if test can run
         self._runnable = None
 
@@ -116,72 +120,50 @@ class Tester(MooseObject):
         if self.specs["allow_test_objects"]:
             self.specs["cli_args"].append("--allow-test-objects")
 
-    def initStatusSystem(self, options):
-        """ Initialize the tester status system """
-        self.status = TestStatus(options)
+        ### Enumerate the tester statuses we want to use
+        self.test_status = StatusSystem()
+        self.no_status = self.test_status.no_status
+        self.queued = self.test_status.queued
+        self.skip = self.test_status.skip
+        self.silent = self.test_status.silent
+        self.success = self.test_status.success
+        self.fail = self.test_status.fail
+        self.diff = self.test_status.diff
+        self.deleted = self.test_status.deleted
 
-        ### Enumerate the statuses
-        self.no_status = self.status.no_status
-        self.skip = self.status.skip
-        self.silent = self.status.silent
-        self.success = self.status.success
-        self.fail = self.status.fail
-        self.diff = self.status.diff
-        self.deleted = self.status.deleted
-        self.finished = self.status.finished
-
-        ### Deprecated statuses to be removed upon application fixes
-        self.bucket_initialized        = self.no_status
-        self.bucket_success            = self.success
-        self.bucket_fail               = self.fail
-        self.bucket_diff               = self.diff
-        self.bucket_finished           = self.finished
-        self.bucket_deleted            = self.deleted
-        self.bucket_skip               = self.skip
-        self.bucket_silent             = self.silent
-        self.bucket_pending            = None
-        self.bucket_queued             = None
-        self.bucket_waiting_processing = None
-        ### END Deprecated statuses
+        self.__failed_statuses = [self.fail, self.diff, self.deleted]
+        self.__skipped_statuses = [self.skip, self.silent]
 
     def getStatus(self):
-        return self.status.getStatus()
+        return self.test_status.getStatus()
 
     def setStatus(self, status, message=''):
-        # Support deprecated statuses, alert the user.
-        if type(status) == type(''):
-            self.addCaveats('deprecated status bucket')
-            test_status = self.createStatus()
-            result_status = message.status
-            result_color = message.color
-            new_status = test_status(status=result_status, color=result_color)
-            return self.status.setStatus(new_status)
+        self.__tester_message = message
+        return self.test_status.setStatus(status)
 
-        return self.status.setStatus(status, message)
+    def createStatus(self):
+        return self.test_status.createStatus()
 
     def getStatusMessage(self):
-        return self.status.getStatusMessage()
-    def createStatus(self):
-        return self.status.createStatus()
-    def getColor(self):
-        return self.status.getColor()
+        return self.__tester_message
+
+    # Return a boolean based on current status
     def isNoStatus(self):
-        return self.status.isNoStatus()
+        return self.getStatus() == self.no_status
     def isSkip(self):
-        return self.status.isSkip()
+        return self.getStatus() in self.__skipped_statuses
+    def isQueued(self):
+        return self.getStatus() == self.queued
     def isSilent(self):
-        return self.status.isSilent()
+        return self.getStatus() == self.silent
     def isPass(self):
-        return self.status.isPass()
+        return self.getStatus() == self.success
     def isFail(self):
-        return self.status.isFail()
+        return self.getStatus() in self.__failed_statuses
     def isDiff(self):
-        return self.status.isDiff()
+        return self.getStatus() == self.diff
     def isDeleted(self):
-        return self.status.isDeleted()
-    def isFinished(self):
-        return self.status.isFinished()
-    ### Status System wrapper methods ###
+        return self.getStatus() == self.deleted
 
     def getTestName(self):
         """ return test name """
@@ -596,7 +578,10 @@ class Tester(MooseObject):
             # If the test is deleted we still need to treat this differently
             self.addCaveats(flat_reason)
             if 'deleted' in reasons.keys():
-                self.setStatus(self.deleted)
+                if options.extra_info:
+                    self.setStatus(self.deleted)
+                else:
+                    self.setStatus(self.silent)
             else:
                 self.setStatus(self.skip)
             return False

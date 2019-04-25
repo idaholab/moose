@@ -177,34 +177,22 @@ def formatCase(format_key, message, formatted_results):
     elif message:
         formatted_results[format_key] = (message[0], message[1])
 
-def formatStatusMessage(tester, options):
-    # PASS and DRY_RUN fall into this catagory
-    if tester.isPass():
-        result = tester.getStatusMessage()
+def formatStatusMessage(job, status, message, options):
+    # If there is no unique status message, use the name of the status as the message
+    if not message:
+        message = status
 
-        if options.extra_info:
-            for check in options._checks.keys():
-                if tester.specs.isValid(check) and not 'ALL' in tester.specs[check]:
-                    tester.addCaveats(check)
+    # Add caveats if requested
+    if job.isPass() and options.extra_info:
+        for check in options._checks.keys():
+            if job.specs.isValid(check) and not 'ALL' in job.specs[check]:
+                job.addCaveats(check)
 
-    # FAIL, DIFF and DELETED fall into this catagory
-    elif tester.isFail() or (tester.isDeleted() and options.extra_info):
-        message = tester.getStatusMessage()
-        if message == '':
-            message = tester.getStatus().status
+    # Format the failed message to list a big fat FAILED in front of the status
+    elif job.isFail() or (job.isDeleted() and options.extra_info):
+        return 'FAILED (%s)' % (message)
 
-        result = 'FAILED (%s)' % (message)
-
-    # Some other finished status... skipped, silent, etc
-    else:
-        result = tester.getStatusMessage()
-
-    # No one set a unique status message? In that case, use the name of
-    # the status itself as the status message.
-    if not result:
-        result = tester.getStatus().status
-
-    return result
+    return message
 
 ## print an optionally colorified test result
 #
@@ -214,11 +202,9 @@ def formatStatusMessage(tester, options):
 def formatResult(job, options, result='', color=True, **kwargs):
     # Support only one instance of a format identifier, but obey the order
     terminal_format = list(OrderedDict.fromkeys(list(TERM_FORMAT)))
-    tester = job.getTester()
-    if tester.isNoStatus():
-        status = job.getStatus()
-    else:
-        status = tester.getStatus()
+    status, message, message_color, exit_code = job.getJointStatus()
+
+    # status = job.getStatus()
     color_opts = {'code' : options.code, 'colored' : options.colored}
 
     # container for every printable item
@@ -239,21 +225,21 @@ def formatResult(job, options, result='', color=True, **kwargs):
             justification_index = terminal_format[i]
 
         if str(f_key).lower() == 'p':
-            pre_result = ' '*(8-len(status.status)) + status.status
-            formatCase(f_key, (pre_result, status.color), formatted_results)
+            pre_result = ' '*(8-len(status)) + status
+            formatCase(f_key, (pre_result, message_color), formatted_results)
 
         if str(f_key).lower() == 's':
             if not result:
-                result = formatStatusMessage(tester, options)
+                result = formatStatusMessage(job, status, message, options)
 
             # refrain from printing a duplicate pre_result if it will match result
-            if 'p' in [x.lower() for x in terminal_format] and result == status.status:
+            if 'p' in [x.lower() for x in terminal_format] and result == status:
                 formatCase(f_key, None, formatted_results)
             else:
-                formatCase(f_key, (result, status.color), formatted_results)
+                formatCase(f_key, (result, message_color), formatted_results)
 
         if str(f_key).lower() == 'n':
-            formatCase(f_key, (tester.getTestName(), None), formatted_results)
+            formatCase(f_key, (job.getTestName(), None), formatted_results)
 
         # Adjust the precision of time, so we can justify the length. The higher the
         # seconds, the lower the decimal point, ie: [0.000s] - [100.0s]. Max: [99999s]
@@ -265,10 +251,10 @@ def formatResult(job, options, result='', color=True, **kwargs):
             formatCase(f_key, (f_time, None), formatted_results)
 
     # Decorate Caveats
-    if tester.getCaveats() and caveat_index is not None and 'caveats' in kwargs and kwargs['caveats']:
-        caveats = ','.join(tester.getCaveats())
-        caveat_color = status.color
-        if tester.isPass() or tester.isSkip():
+    if job.getCaveats() and caveat_index is not None and 'caveats' in kwargs and kwargs['caveats']:
+        caveats = ','.join(job.getCaveats())
+        caveat_color = message_color
+        if not job.isFail():
             caveat_color = 'CYAN'
 
         f_caveats = '[' + caveats + ']'
@@ -306,6 +292,7 @@ def formatResult(job, options, result='', color=True, **kwargs):
 
             # Do special coloring for first directory
             if format_rule == 'n' and options.color_first_directory:
+                tester = job.getTester()
                 formatted_results[format_rule] = (colorText(tester.specs['first_directory'], 'CYAN', **color_opts) +\
                                          formatted_results[format_rule][0].replace(tester.specs['first_directory'], '', 1), 'CYAN') # Strip out first occurence only
 

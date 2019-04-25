@@ -10,6 +10,7 @@
 import sys, os, json, shutil
 from collections import namedtuple
 from Scheduler import Scheduler
+from TestHarness.StatusSystem import StatusSystem
 
 class QueueManager(Scheduler):
     """
@@ -121,8 +122,7 @@ class QueueManager(Scheduler):
         """ iterate over Jobs and increment the total allowable time needed to complete the entire group """
         total_time = 0
         for job in [x for x in job_data.jobs.getJobs() if not x.isSkip()]:
-            tester = job.getTester()
-            total_time += int(tester.getMaxTime())
+            total_time += int(job.getMaxTime())
 
         return total_time
 
@@ -235,24 +235,24 @@ class QueueManager(Scheduler):
             # ask derived scheduler if this job has failed
             elif self.hasTimedOutOrFailed(job_data):
                 for job in job_data.jobs.getJobs():
-                    job.setStatus(job.crash)
+                    job.setStatus(job.error)
                 is_ready = False
 
             # result does not yet exist but will in the future
             else:
                 for job in job_data.jobs.getJobs():
                     tester = job.getTester()
-                    (status, caveats) = self._getTesterStatusAndCaveatsFromSession(job_data.json_data, tester)
+                    (status, caveats, status_message) = self._getTesterStatusAndCaveatsFromSession(job_data.json_data, tester)
 
                     # This single job will enter the runner thread pool
-                    if status.status == "NA":
+                    if status_message == "LAUNCHING":
+                        tester.setStatus(tester.queued)
                         tester.addCaveats(caveats)
-                        tester.setStatus(status, 'QUEUED')
 
                     # This single job will be skipped for some reason
                     else:
                         tester.addCaveats(caveats)
-                        tester.setStatus(status)
+                        tester.setStatus(status, status_message)
                 is_ready = False
 
         # Job group not originally launched
@@ -261,9 +261,12 @@ class QueueManager(Scheduler):
                 tester = job.getTester()
                 # Entire job group was skipped, deleted, silent, etc
                 if job_data.json_data and job_data.json_data.get(job_data.job_dir, {}):
-                    (status, caveats) = self._getTesterStatusAndCaveatsFromSession(job_data.json_data, tester)
+                    (status, caveats, status_message) = self._getTesterStatusAndCaveatsFromSession(job_data.json_data, tester)
                     tester.addCaveats(caveats)
-                    tester.setStatus(status)
+                    if status == tester.skip:
+                        tester.setStatus(tester.skip, status_message)
+                    else:
+                        tester.setStatus(tester.silent, status_message)
 
                 # Entire job group did not previously enter the Scheduler
                 else:
@@ -301,6 +304,7 @@ class QueueManager(Scheduler):
             job.clearCaveats()
 
         if job_list:
+
             launchable_jobs = [x for x in job_list if not x.isFinished()]
             if launchable_jobs:
                 executor_job = job_list.pop(job_list.index(launchable_jobs.pop(0)))
@@ -309,10 +313,10 @@ class QueueManager(Scheduler):
                                          QUEUEING_NCPUS=self.getCores(job_data),
                                          QUEUEING_MAXTIME=self.getMaxTime(job_data))
 
+                executor_job.setStatus(executor_job.hold)
                 for job in launchable_jobs:
                     tester = job.getTester()
-                    if tester.isNoStatus():
-                        tester.setStatus(tester.no_status, 'LAUNCHING')
+                    tester.setStatus(tester.queued, 'LAUNCHING')
                     job.setStatus(job.finished)
 
     def _setJobStatus(self, job_data):
@@ -346,9 +350,9 @@ class QueueManager(Scheduler):
 
                 if group_results.get(job.getTestName(), {}):
                     job_results = group_results[job.getTestName()]
-                    (status, caveats) = self._getTesterStatusAndCaveatsFromSession(results, tester)
+                    (status, caveats, status_message) = self._getTesterStatusAndCaveatsFromSession(results, tester)
                     tester.addCaveats(caveats)
-                    tester.setStatus(status)
+                    tester.setStatus(status, status_message)
 
                     # Recover useful job information from job results
                     job.setPreviousTime(job_results['TIMING'])
@@ -360,20 +364,16 @@ class QueueManager(Scheduler):
                     tester.setStatus(tester.skip)
 
     def _getTesterStatusAndCaveatsFromSession(self, session, tester):
-        """ extract status and caveats from session for tester, return 'no status' for testers not found """
-        status = tester.no_status
+        """ re-create status for tester using the session file """
+        restored_status = tester.test_status.createStatus()
+        status_message = ''
         caveats = []
         if session and session.get(tester.getTestDir(), {}).get(tester.getTestName(), {}):
-            status_type = session[tester.getTestDir()][tester.getTestName()]['STATUS'].encode('ascii', 'ignore')
-            status_color = session[tester.getTestDir()][tester.getTestName()]['COLOR'].encode('ascii', 'ignore')
-            status = self._createTesterStatus(tester, status_type, status_color)
+            status_key = session[tester.getTestDir()][tester.getTestName()]['STATUS'].encode('ascii', 'ignore')
+            restored_status = tester.test_status.createStatus(status_key)
+            status_message = session[tester.getTestDir()][tester.getTestName()]['STATUS_MESSAGE'].encode('ascii', 'ignore')
             caveats = session[tester.getTestDir()][tester.getTestName()]['CAVEATS']
-        return (status, caveats)
-
-    def _createTesterStatus(self, tester, status, color):
-        """ instance a compatible tester status """
-        test_status = tester.createStatus()
-        return test_status(status=status, color=color)
+        return (restored_status, caveats, status_message)
 
     def _cleanupFiles(self, Jobs):
         """ Silence all Jobs and perform cleanup operations """

@@ -21,6 +21,9 @@ class TestHarnessTester(TestHarnessTestCase):
         e = cm.exception
         self.assertRegexpMatches(e.output, r'test_harness\.deleted.*? \[TEST DELETED TEST\] FAILED \(DELETED\)')
 
+        # Verify return code is DELETED related (0x83)
+        self.assertIs(0x83, e.returncode)
+
     def testNoExtraInfo(self):
         """
         Test that deleted tests do not run without -e (extra) option
