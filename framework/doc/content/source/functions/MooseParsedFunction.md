@@ -14,8 +14,9 @@ corresponding `vals` parameter vector should list the items these variables are
 bound to. Variables can be bound to:
 
 - Constant number literals (for example `vars = kB` and `vals = 8.61733e-5`)
-- A PostProcessor name (providing the value form the PP's last execution)
+- A PostProcessor name (providing the value from the PP's last execution)
 - A Function name (providing an immediate evaluation of the specified function)
+- A scalar variable name
 
 Further information can be found at the
 [function parser site](http://warp.povusers.org/FunctionParser/).

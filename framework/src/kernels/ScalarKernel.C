@@ -34,6 +34,8 @@ validParams<ScalarKernel>()
                         "the undisplaced mesh will still be used.");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
 
+  params.declareControllable("enable");
+
   params.registerBase("ScalarKernel");
 
   return params;

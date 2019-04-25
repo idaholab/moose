@@ -69,6 +69,6 @@
     start_time = 0
     end_time = 1.3
     execute_on = 'timestep_begin'
-    set_outside_of_range = true
+    reverse_on_false = true
   [../]
 []

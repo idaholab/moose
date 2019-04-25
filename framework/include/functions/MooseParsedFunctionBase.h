@@ -28,7 +28,7 @@ InputParameters validParams();
 
 /**
  * Creates the 'vars' and 'vals' parameters used by all ParsedFunctions, the
- * parameters provided from this function should be appeneded to the parameters
+ * parameters provided from this function should be appended to the parameters
  * for the class using the += operator.
  * @see MooseParsedFunction,  MooseParsedGradFunction, MooseParsedVectorFunction
  */
