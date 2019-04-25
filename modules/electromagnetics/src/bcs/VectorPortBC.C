@@ -1,4 +1,5 @@
 #include "VectorPortBC.h"
+#include "ElkEnums.h"
 #include <complex>
 
 registerMooseObject("ElkApp", VectorPortBC);
@@ -49,7 +50,7 @@ VectorPortBC::computeQpResidual()
   std::complex<double> E2(0, 0);
 
   // Create E and ncrossE for residual based on component parameter
-  if (_component == "real")
+  if (_component == elk::REAL)
   {
     E0.real(_u[_qp](0));
     E0.imag(_coupled_val[_qp](0));
@@ -102,7 +103,7 @@ VectorPortBC::computeQpResidual()
 
   std::complex<double> res = U_inc_dot_test - P_dot_test;
 
-  if (_component == "real")
+  if (_component == elk::REAL)
   {
     return res.real();
   }
@@ -124,11 +125,11 @@ VectorPortBC::computeQpOffDiagJacobian(unsigned int jvar)
   Real off_diag_jac = _beta.value(_t, _q_point[_qp]) * _test[_i][_qp].cross(_normals[_qp]) *
                       _normals[_qp].cross(_phi[_j][_qp]);
 
-  if (_component == "real" && jvar == _coupled_id)
+  if (_component == elk::REAL && jvar == _coupled_id)
   {
     return off_diag_jac;
   }
-  else if (_component == "imaginary" && jvar == _coupled_id)
+  else if (_component == elk::IMAGINARY && jvar == _coupled_id)
   {
     return -off_diag_jac;
   }

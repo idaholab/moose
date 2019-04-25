@@ -1,4 +1,5 @@
 #include "RobinTestFunc.h"
+#include "ElkEnums.h"
 #include <complex>
 
 registerMooseObject("ElkApp", RobinTestFunc);
@@ -18,7 +19,7 @@ validParams<RobinTestFunc>()
   params.addRequiredParam<Real>("g0_real", "Real component of DirichletBC where x = 0.");
   params.addRequiredParam<Real>("g0_imag", "Imaginary component of DirichletBC where x = 0.");
   params.addParam<FunctionName>("func", "Function coefficient.");
-  MooseEnum component("imaginary real", "real");
+  MooseEnum component("real imaginary");
   params.addParam<MooseEnum>("component", component, "Real or Imaginary wave component.");
   return params;
 }
@@ -59,7 +60,7 @@ RobinTestFunc::value(Real t, const Point & p)
 
   val = _C1 * std::cos(_c * _x) + _C2 * std::sin(_c * _x);
 
-  if (_component == "real")
+  if (_component == elk::REAL)
   {
     return val.real();
   }

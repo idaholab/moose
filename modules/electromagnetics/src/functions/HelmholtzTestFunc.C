@@ -1,4 +1,5 @@
 #include "HelmholtzTestFunc.h"
+#include "ElkEnums.h"
 #include <complex>
 
 registerMooseObject("ElkApp", HelmholtzTestFunc);
@@ -21,7 +22,7 @@ validParams<HelmholtzTestFunc>()
   params.addRequiredParam<Real>("g0_imag", "Imaginary component of DirichletBC where x = 0.");
   params.addRequiredParam<Real>("gL_real", "Real component of DirichletBC where x = L.");
   params.addRequiredParam<Real>("gL_imag", "Imaginary component of DirichletBC where x = L.");
-  MooseEnum component("imaginary real", "real");
+  MooseEnum component("real imaginary");
   params.addParam<MooseEnum>("component", component, "Real or Imaginary wave component.");
   return params;
 }
@@ -66,7 +67,7 @@ HelmholtzTestFunc::value(Real t, const Point & p)
 
   val = _C1 * std::cos(_lambda * p(0)) + _C2 * std::sin(_lambda * p(0));
 
-  if (_component == "real")
+  if (_component == elk::REAL)
   {
     return val.real();
   }

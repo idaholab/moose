@@ -1,4 +1,5 @@
 #include "PortBC.h"
+#include "ElkEnums.h"
 #include "Function.h"
 #include <complex>
 
@@ -12,7 +13,7 @@ validParams<PortBC>()
 
   params.addRequiredCoupledVar("field_real", "Real component of field.");
   params.addRequiredCoupledVar("field_imaginary", "Imaginary component of field.");
-  MooseEnum component("imaginary real", "real");
+  MooseEnum component("real imaginary");
   params.addParam<MooseEnum>("component", component, "Real or Imaginary wave component.");
   params.addParam<FunctionName>("func_real", 1.0, "Function coefficient, real component.");
   params.addParam<FunctionName>("func_imag", 0.0, "Function coefficient, imaginary component.");
@@ -58,7 +59,7 @@ PortBC::computeQpResidual()
   std::complex<double> _LHS = _common * _field;
   std::complex<double> _diff = _RHS - _LHS;
 
-  if (_component == "real")
+  if (_component == elk::REAL)
   {
     return _sign * _test[_i][_qp] * _diff.real();
   }

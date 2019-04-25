@@ -1,4 +1,5 @@
 #include "JinSlabCoeffFunc.h"
+#include "ElkEnums.h"
 #include <complex>
 
 registerMooseObject("ElkApp", JinSlabCoeffFunc);
@@ -14,7 +15,7 @@ validParams<JinSlabCoeffFunc>()
   params.addParam<Real>("muR_imag", 0.0, "Relative permeability, imaginary component");
   params.addRequiredParam<Real>("k", "Wave Number");
   params.addRequiredParam<Real>("theta", "Wave Incidence angle, in degrees");
-  MooseEnum component("imaginary real", "real");
+  MooseEnum component("real imaginary");
   params.addParam<MooseEnum>("component", component, "Real or Imaginary wave component");
   return params;
 }
@@ -46,7 +47,7 @@ JinSlabCoeffFunc::value(Real t, const Point & p)
   std::complex<double> _val =
       _k * std::sqrt(_epsR * _muR - std::pow(std::sin(_theta * libMesh::pi / 180.), 2));
 
-  if (_component == "real")
+  if (_component == elk::REAL)
   {
     return _val.real();
   }
