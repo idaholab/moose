@@ -65,7 +65,7 @@ MultiAppMeshFunctionTransfer::initialSetup()
 void
 MultiAppMeshFunctionTransfer::execute()
 {
-  Moose::out << "Beginning MeshFunctionTransfer " << name() << std::endl;
+  _console << "Beginning MeshFunctionTransfer " << name() << std::endl;
 
   getAppInfo();
 

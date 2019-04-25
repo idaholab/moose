@@ -67,6 +67,12 @@ validParams<NodalRotationalInertia>()
 
 NodalRotationalInertia::NodalRotationalInertia(const InputParameters & parameters)
   : TimeNodalKernel(parameters),
+    _has_beta(isParamValid("beta")),
+    _has_gamma(isParamValid("gamma")),
+    _has_rot_velocities(isParamValid("rotational_velocities")),
+    _has_rot_accelerations(isParamValid("rotational_accelerations")),
+    _has_x_orientation(isParamValid("x_orientation")),
+    _has_y_orientation(isParamValid("y_orientation")),
     _nrot(coupledComponents("rotations")),
     _rot(_nrot),
     _rot_old(_nrot),
@@ -76,8 +82,8 @@ NodalRotationalInertia::NodalRotationalInertia(const InputParameters & parameter
     _rot_accel(_nrot),
     _rot_vel(_nrot),
     _rot_vel_old(_nrot),
-    _beta(isParamValid("beta") ? getParam<Real>("beta") : 0.1),
-    _gamma(isParamValid("gamma") ? getParam<Real>("gamma") : 0.1),
+    _beta(_has_beta ? getParam<Real>("beta") : 0.1),
+    _gamma(_has_gamma ? getParam<Real>("gamma") : 0.1),
     _eta(getParam<Real>("eta")),
     _alpha(getParam<Real>("alpha")),
     _component(getParam<unsigned int>("component")),
@@ -85,8 +91,7 @@ NodalRotationalInertia::NodalRotationalInertia(const InputParameters & parameter
     _rot_vel_old_value(_nrot),
     _rot_accel_value(_nrot)
 {
-  if (isParamValid("beta") && isParamValid("gamma") && isParamValid("rotational_velocities") &&
-      isParamValid("rotational_accelerations"))
+  if (_has_beta && _has_gamma && _has_rot_velocities && _has_rot_accelerations)
   {
     _aux_sys = &(_fe_problem.getAuxiliarySystem());
     if (coupledComponents("rotational_velocities") != _nrot ||
@@ -111,8 +116,7 @@ NodalRotationalInertia::NodalRotationalInertia(const InputParameters & parameter
       _rot_variables[i] = coupled("rotations", i);
     }
   }
-  else if (!isParamValid("beta") && !isParamValid("gamma") &&
-           !isParamValid("rotational_velocities") && !isParamValid("rotational_accelerations"))
+  else if (!_has_beta && !_has_gamma && !_has_rot_velocities && !_has_rot_accelerations)
   {
     for (unsigned int i = 0; i < _nrot; ++i)
     {
@@ -152,7 +156,7 @@ NodalRotationalInertia::NodalRotationalInertia(const InputParameters & parameter
 
   if (det1 < 1e-6 || det2 < 1e-6 || det3 < 1e-6)
     mooseError("NodalRotationalInertia: The moment of inertia tensor should be positive definite.");
-  if (isParamValid("x_orientation") && isParamValid("y_orientation"))
+  if (_has_x_orientation && _has_y_orientation)
   {
     const RealGradient x_orientation = getParam<RealGradient>("x_orientation");
     const RealGradient y_orientation = getParam<RealGradient>("y_orientation");
@@ -188,8 +192,8 @@ NodalRotationalInertia::NodalRotationalInertia(const InputParameters & parameter
     RankTwoTensor global_inertia = orientation.transpose() * _inertia * orientation;
     _inertia = global_inertia;
   }
-  else if ((isParamValid("x_orientation") && !isParamValid("y_orientation")) ||
-           (!isParamValid("x_orientation") && isParamValid("y_orientation")))
+  else if ((_has_x_orientation && !_has_y_orientation) ||
+           (!_has_x_orientation && _has_y_orientation))
     mooseError("NodalRotationalInertia: Both x_orientation and y_orientation should be provided if "
                "x_orientation or "
                "y_orientation is different from global x or y direction, respectively.");
@@ -202,7 +206,7 @@ NodalRotationalInertia::computeQpResidual()
     return 0;
   else
   {
-    if (isParamValid("beta"))
+    if (_has_beta)
     {
       mooseAssert(_beta > 0.0, "NodalRotationalInertia: Beta parameter should be positive.");
 
@@ -251,7 +255,7 @@ NodalRotationalInertia::computeQpJacobian()
     return 0.0;
   else
   {
-    if (isParamValid("beta"))
+    if (_has_beta)
       return _inertia(_component, _component) / (_beta * _dt * _dt) +
              _eta * (1.0 + _alpha) * _inertia(_component, _component) * _gamma / _beta / _dt;
     else
@@ -282,7 +286,7 @@ NodalRotationalInertia::computeQpOffDiagJacobian(unsigned int jvar)
     return 0.0;
   else if (rot_coupled)
   {
-    if (isParamValid("beta"))
+    if (_has_beta)
       return _inertia(_component, coupled_component) / (_beta * _dt * _dt) +
              _eta * (1.0 + _alpha) * _inertia(_component, coupled_component) * _gamma / _beta / _dt;
     else

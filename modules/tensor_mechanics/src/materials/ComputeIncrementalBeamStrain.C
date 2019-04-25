@@ -59,6 +59,7 @@ validParams<ComputeIncrementalBeamStrain>()
 
 ComputeIncrementalBeamStrain::ComputeIncrementalBeamStrain(const InputParameters & parameters)
   : Material(parameters),
+    _has_Ix(isParamValid("Ix")),
     _nrot(coupledComponents("rotations")),
     _ndisp(coupledComponents("displacements")),
     _rot_num(_nrot),
@@ -68,7 +69,7 @@ ComputeIncrementalBeamStrain::ComputeIncrementalBeamStrain(const InputParameters
     _Az(coupledValue("Az")),
     _Iy(coupledValue("Iy")),
     _Iz(coupledValue("Iz")),
-    _Ix(isParamValid("Ix") ? coupledValue("Ix") : _zero),
+    _Ix(_has_Ix ? coupledValue("Ix") : _zero),
     _original_length(declareProperty<Real>("original_length")),
     _total_rotation(declareProperty<RankTwoTensor>("total_rotation")),
     _total_disp_strain(declareProperty<RealVectorValue>("total_disp_strain")),
@@ -220,7 +221,7 @@ void
 ComputeIncrementalBeamStrain::computeQpStrain()
 {
   Real Ix = _Ix[_qp];
-  if (!isParamValid("Ix"))
+  if (!_has_Ix)
     Ix = _Iy[_qp] + _Iz[_qp];
 
   // Rotate the gradient of displacements and rotations at t+delta t from global coordinate
@@ -328,7 +329,7 @@ ComputeIncrementalBeamStrain::computeStiffnessMatrix()
   const Real Iy_avg = (_Iy[0] + _Iy[1]) / 2.0;
   const Real Iz_avg = (_Iz[0] + _Iz[1]) / 2.0;
   Real Ix_avg = (_Ix[0] + _Ix[1]) / 2.0;
-  if (!isParamValid("Ix"))
+  if (!_has_Ix)
     Ix_avg = Iy_avg + Iz_avg;
 
   // K = |K11 K12|

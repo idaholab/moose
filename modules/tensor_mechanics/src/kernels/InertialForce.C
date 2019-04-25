@@ -44,20 +44,22 @@ validParams<InertialForce>()
 InertialForce::InertialForce(const InputParameters & parameters)
   : TimeKernel(parameters),
     _density(getMaterialProperty<Real>("density")),
-    _beta(isParamValid("beta") ? getParam<Real>("beta") : 0.1),
-    _gamma(isParamValid("gamma") ? getParam<Real>("gamma") : 0.1),
+    _has_beta(isParamValid("beta")),
+    _has_gamma(isParamValid("gamma")),
+    _beta(_has_beta ? getParam<Real>("beta") : 0.1),
+    _gamma(_has_gamma ? getParam<Real>("gamma") : 0.1),
+    _has_velocity(isParamValid("velocity")),
+    _has_acceleration(isParamValid("acceleration")),
     _eta(getMaterialProperty<Real>("eta")),
     _alpha(getParam<Real>("alpha"))
 {
-  if (isParamValid("beta") && isParamValid("gamma") && isParamValid("velocity") &&
-      isParamValid("acceleration"))
+  if (_has_beta && _has_gamma && _has_velocity && _has_acceleration)
   {
     _vel_old = &coupledValueOld("velocity");
     _accel_old = &coupledValueOld("acceleration");
     _u_old = &valueOld();
   }
-  else if (!isParamValid("beta") && !isParamValid("gamma") && !isParamValid("velocity") &&
-           !isParamValid("acceleration"))
+  else if (!_has_beta && !_has_gamma && !_has_velocity && !_has_acceleration)
   {
     _u_dot = &(_var.uDot());
     _u_dotdot = &(_var.uDotDot());
@@ -75,7 +77,7 @@ InertialForce::computeQpResidual()
 {
   if (_dt == 0)
     return 0;
-  else if (isParamValid("beta"))
+  else if (_has_beta)
   {
     Real accel = 1. / _beta *
                  (((_u[_qp] - (*_u_old)[_qp]) / (_dt * _dt)) - (*_vel_old)[_qp] / _dt -
@@ -95,7 +97,7 @@ InertialForce::computeQpJacobian()
 {
   if (_dt == 0)
     return 0;
-  else if (isParamValid("beta"))
+  else if (_has_beta)
     return _test[_i][_qp] * _density[_qp] / (_beta * _dt * _dt) * _phi[_j][_qp] +
            _eta[_qp] * (1 + _alpha) * _test[_i][_qp] * _density[_qp] * _gamma / _beta / _dt *
                _phi[_j][_qp];
