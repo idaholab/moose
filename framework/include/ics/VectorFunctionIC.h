@@ -11,6 +11,7 @@
 #define VECTORFUNCTIONIC_H
 
 #include "VectorInitialCondition.h"
+#include "Function.h"
 
 // System includes
 #include <string>
@@ -28,7 +29,7 @@ template <>
 InputParameters validParams<VectorFunctionIC>();
 
 /**
- * Vectorfunctionic just returns a constant value.
+ * IC that calls vectorValue method of a Function object.
  */
 class VectorFunctionIC : public VectorInitialCondition
 {
@@ -38,7 +39,13 @@ public:
   virtual RealVectorValue value(const Point & p) override;
 
 protected:
-  Function & _function;
+  /// Optional vectorValue function
+  Function * _function;
+
+  /// Optional component function value
+  Function & _function_x;
+  Function & _function_y;
+  Function & _function_z;
 };
 
 #endif

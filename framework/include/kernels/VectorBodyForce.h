@@ -34,7 +34,10 @@ protected:
   /// Scale factor
   const Real & _scale;
 
-  /// Optional function value
+  /// Optional vectorValue function
+  Function * _function;
+
+  /// Optional component function value
   Function & _function_x;
   Function & _function_y;
   Function & _function_z;
