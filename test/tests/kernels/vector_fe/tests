@@ -145,6 +145,8 @@
     input = 'lagrange_vec.i'
     cli_args = 'Kernels/body_force/function=1'
     expect_err = "The 'function' and 'function_x' parameters cannot both be set."
+    design = "VectorBodyForce.md"
+    issues = "#13309"
     requirement = "The system shall error if the 'function' and 'function_x' parameters are both set within the VectorFunctionIC object."
   []
 []

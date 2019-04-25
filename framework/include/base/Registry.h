@@ -127,6 +127,36 @@
                                 #new_class,                                                        \
                                 false})
 
+/// Add AD MooseObjects (e.g. both residual and jacobian objects) to the registry with the given app name/label.  classname is the (unquoted)
+/// c++ class template.  Each class template should only be registered once.
+#define registerADMooseObjectRenamed(app, origtemplatename, time, templatename)                    \
+  static char combineNames(dummyvar_for_registering_obj_##templatename##_residual, __LINE__) =     \
+      Registry::add<templatename<RESIDUAL>>({app,                                                  \
+                                             #templatename "<RESIDUAL>",                           \
+                                             #origtemplatename "<RESIDUAL>",                       \
+                                             #origtemplatename "<RESIDUAL>",                       \
+                                             nullptr,                                              \
+                                             nullptr,                                              \
+                                             nullptr,                                              \
+                                             __FILE__,                                             \
+                                             __LINE__,                                             \
+                                             time,                                                 \
+                                             #templatename "<RESIDUAL>",                           \
+                                             true});                                               \
+  static char combineNames(dummyvar_for_registering_obj_##templatename##_jacobian, __LINE__) =     \
+      Registry::add<templatename<JACOBIAN>>({app,                                                  \
+                                             #templatename "<JACOBIAN>",                           \
+                                             #origtemplatename "<JACOBIAN>",                       \
+                                             #origtemplatename "<JACOBIAN>",                       \
+                                             nullptr,                                              \
+                                             nullptr,                                              \
+                                             nullptr,                                              \
+                                             __FILE__,                                             \
+                                             __LINE__,                                             \
+                                             time,                                                 \
+                                             #templatename "<RESIDUAL>",                           \
+                                             true})
+
 struct RegistryEntry;
 class Factory;
 class ActionFactory;
