@@ -1,4 +1,5 @@
 #include "WaveCoeff.h"
+#include "ElkEnums.h"
 #include <complex>
 
 registerMooseObject("ElkApp", WaveCoeff);
@@ -17,7 +18,7 @@ validParams<WaveCoeff>()
   params.addRequiredParam<FunctionName>("mu_rel_imag",
                                         "Relative permeability, imaginary component.");
   params.addRequiredParam<Real>("k", "Wave number.");
-  MooseEnum component("imaginary real", "real");
+  MooseEnum component("real imaginary");
   params.addParam<MooseEnum>("component", component, "Real or Imaginary wave component.");
   return params;
 }
@@ -43,7 +44,7 @@ WaveCoeff::value(Real t, const Point & p)
 
   std::complex<double> val = std::pow(_k, 2) * mu_r * eps_r;
 
-  if (_component == "real")
+  if (_component == elk::REAL)
   {
     return val.real();
   }

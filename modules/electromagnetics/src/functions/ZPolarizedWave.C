@@ -1,4 +1,5 @@
 #include "ZPolarizedWave.h"
+#include "ElkEnums.h"
 
 registerMooseObject("ElkApp", ZPolarizedWave);
 
@@ -11,7 +12,7 @@ validParams<ZPolarizedWave>()
                              "relative to the x-axis, on a plane parallel to the y-axis.");
   params.addRequiredParam<Real>("theta", "Angle of incidence, in degrees");
   params.addRequiredParam<Real>("k", "Wave Number");
-  MooseEnum component("imaginary real", "real");
+  MooseEnum component("real imaginary");
   params.addParam<MooseEnum>("component", component, "Real or Imaginary wave component.");
   params.addParam<bool>(
       "sign_flip",
@@ -44,7 +45,7 @@ ZPolarizedWave::ZPolarizedWave(const InputParameters & parameters)
 Real
 ZPolarizedWave::value(Real t, const Point & p)
 {
-  if (_component == "real")
+  if (_component == elk::REAL)
   {
     return std::cos(_sign * _k * p(0) * std::cos(2 * libMesh::pi * _theta / 360));
   }

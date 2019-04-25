@@ -1,4 +1,5 @@
 #include "VectorCurrentSource.h"
+#include "ElkEnums.h"
 #include <complex>
 
 registerMooseObject("ElkApp", VectorCurrentSource);
@@ -40,7 +41,7 @@ VectorCurrentSource::computeQpResidual()
 
   std::complex<double> res = jay * _func.value(_t, _q_point[_qp]) * source * _test[_i][_qp];
 
-  if (_component == "real")
+  if (_component == elk::REAL)
   {
     return res.real();
   }

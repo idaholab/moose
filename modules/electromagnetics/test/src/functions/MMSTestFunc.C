@@ -1,4 +1,5 @@
 #include "MMSTestFunc.h"
+#include "ElkEnums.h"
 #include <complex>
 
 registerMooseObject("ElkApp", MMSTestFunc);
@@ -22,7 +23,7 @@ validParams<MMSTestFunc>()
   params.addRequiredParam<Real>("g0_imag", "Imaginary component of DirichletBC where x = 0.");
   params.addRequiredParam<Real>("gL_real", "Real component of DirichletBC where x = L.");
   params.addRequiredParam<Real>("gL_imag", "Imaginary component of DirichletBC where x = L.");
-  MooseEnum component("imaginary real", "real");
+  MooseEnum component("real imaginary");
   params.addParam<MooseEnum>("component", component, "Real or Imaginary wave component.");
   return params;
 }
@@ -75,7 +76,7 @@ MMSTestFunc::value(Real t, const Point & p)
        _C2 * ((_c_second * p(0) + 2.0 * _c_grad) * std::cos(_c * p(0)) -
               (std::pow(_c_grad * p(0), 2) + 2.0 * _c_grad * _c * p(0)) * std::sin(_c * p(0)));
 
-  if (_component == "real")
+  if (_component == elk::REAL)
   {
     _val = _F.real();
   }
