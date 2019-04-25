@@ -18,7 +18,8 @@ The `RealFunctionControl` object is designed for this purpose as shown in [real_
 Notice that the "parameter" input parameter is expecting a parameter name which can be defined
 in various forms.
 
-!include /TimePeriod.md re=For a dis(.*?)section\.
+For a discussion on the naming of objects and parameters see
+[Object and Parameter Names](syntax/Controls/index.md#object-and-parameter-names) section.
 
 !syntax parameters /Controls/RealFunctionControl
 

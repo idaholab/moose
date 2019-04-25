@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#5676'
+  design = 'syntax/Controls/index.md source/controls/TimePeriod.md'
+  [./test]
+    type = CSVDiff
+    input = scalarkernels.i
+    csvdiff = scalarkernels_out.csv
+    requirement = "The Control system shall be capable of activating or deactivating ScalarKernel objects with time."
+  [../]
+[]

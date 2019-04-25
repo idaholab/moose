@@ -19,40 +19,25 @@ template <>
 InputParameters
 validParams<TimePeriod>()
 {
-  InputParameters params = validParams<Control>();
+  InputParameters params = validParams<ConditionalEnableControl>();
+
   params.addClassDescription("Control the enabled/disabled state of objects with time.");
-  params.addParam<std::vector<std::string>>(
-      "disable_objects", std::vector<std::string>(), "A list of object tags to disable.");
-  params.addParam<std::vector<std::string>>(
-      "enable_objects", std::vector<std::string>(), "A list of object tags to enable.");
+
   params.addParam<std::vector<Real>>("start_time",
                                      "The time at which the objects are to be enabled/disabled.");
   params.addParam<std::vector<Real>>("end_time",
                                      "The time at which the objects are to be enable/disabled.");
   params.addParam<bool>(
       "set_sync_times", false, "Set the start and end time as execute sync times.");
-  params.addParam<bool>("set_outside_of_range",
-                        true,
-                        "When true the disable/enable lists are set "
-                        "to opposite values when outside of the "
-                        "given time range.");
+
   return params;
 }
 
-TimePeriod::TimePeriod(const InputParameters & parameters)
-  : Control(parameters),
-    _enable(getParam<std::vector<std::string>>("enable_objects")),
-    _disable(getParam<std::vector<std::string>>("disable_objects")),
-    _set_outside_of_range(getParam<bool>("set_outside_of_range"))
+TimePeriod::TimePeriod(const InputParameters & parameters) : ConditionalEnableControl(parameters)
 {
   // Error if not a transient problem
   if (!_fe_problem.isTransient())
     mooseError("TimePeriod objects only operate on transient problems.");
-
-  // Error if enable and disable lists are both empty
-  if (_enable.empty() && _disable.empty())
-    mooseError(
-        "Either or both of the 'enable_objects' and 'disable_objects' parameters must be set.");
 
   // Set start time
   if (isParamValid("start_time"))
@@ -88,36 +73,6 @@ TimePeriod::TimePeriod(const InputParameters & parameters)
 }
 
 void
-TimePeriod::execute()
-{
-  // ENABLE
-  for (MooseIndex(_enable) i = 0; i < _enable.size(); ++i)
-  {
-    // If the current time falls between the start and end time, ENABLE the object (_t >=
-    // _start_time and _t < _end_time)
-    if (MooseUtils::absoluteFuzzyGreaterEqual(_t, _start_time[i]) &&
-        MooseUtils::absoluteFuzzyLessThan(_t, _end_time[i]))
-      setControllableValueByName<bool>(_enable[i], std::string("enable"), true);
-
-    else if (_set_outside_of_range)
-      setControllableValueByName<bool>(_enable[i], std::string("enable"), false);
-  }
-
-  // DISABLE
-  for (MooseIndex(_disable) i = 0; i < _disable.size(); ++i)
-  {
-    // If the current time falls between the start and end time, DISABLE the object (_t >=
-    // _start_time and _t < _end_time)
-    if (MooseUtils::absoluteFuzzyGreaterEqual(_t, _start_time[i]) &&
-        MooseUtils::absoluteFuzzyLessThan(_t, _end_time[i]))
-      setControllableValueByName<bool>(_disable[i], std::string("enable"), false);
-
-    else if (_set_outside_of_range)
-      setControllableValueByName<bool>(_disable[i], std::string("enable"), true);
-  }
-}
-
-void
 TimePeriod::initialSetup()
 {
   if (getParam<bool>("set_sync_times"))
@@ -126,4 +81,11 @@ TimePeriod::initialSetup()
     sync_times.insert(_start_time.begin(), _start_time.end());
     sync_times.insert(_end_time.begin(), _end_time.end());
   }
+}
+
+bool
+TimePeriod::conditionMet(const unsigned int & i)
+{
+  return MooseUtils::absoluteFuzzyGreaterEqual(_t, _start_time[i]) &&
+         MooseUtils::absoluteFuzzyLessThan(_t, _end_time[i]);
 }

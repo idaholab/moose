@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#5676 #13295'
+  design = 'syntax/Controls/index.md source/controls/ConditionalFunctionEnableControl.md'
+  [./test]
+    type = CSVDiff
+    input = conditional_function_enable.i
+    csvdiff = conditional_function_enable_out.csv
+    requirement = "The Control system shall be capable of activating or deactivating"
+      " MOOSE objects using a conditional function."
+  [../]
+[]

@@ -146,12 +146,15 @@ def find_moose_executable_recursive(loc, **kwargs):
             break
     return executable
 
-def run_executable(app_path, args, suppress_output=False):
+def run_executable(app_path, args, mpi=None, suppress_output=False):
     """
     A function for running an application.
     """
     import subprocess
-    cmd = [app_path]
+    if mpi and isinstance(mpi, int):
+        cmd = ['mpiexec', '-n', str(mpi), app_path]
+    else:
+        cmd = [app_path]
     cmd += args
 
     if suppress_output:

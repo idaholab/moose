@@ -299,7 +299,7 @@
     start_time = 0.0
     end_time = 1.0
     disable_objects = 'BCs/move_y BCs/move_z'
-    set_outside_of_range = false
+    reverse_on_false = false
     execute_on = 'initial timestep_begin'
   [../]
 
@@ -309,7 +309,7 @@
     end_time = 2.0
     disable_objects = 'BCs/move_z'
     enable_objects = 'BCs/move_y'
-    set_outside_of_range = false
+    reverse_on_false = false
     execute_on = 'initial timestep_begin'
   [../]
 
@@ -318,7 +318,7 @@
     start_time = 2.0
     end_time = 3.0
     enable_objects = 'BCs/move_y BCs/move_z'
-    set_outside_of_range = false
+    reverse_on_false = false
     execute_on = 'initial timestep_begin'
     set_sync_times = true
   [../]
