@@ -70,56 +70,56 @@
 
 [BCs]
   [./left_u]
-    type = LagrangeVecDirichletBC
+    type = VectorDirichletBC
     variable = u
     values = '0 0 0'
     boundary = 'left'
   [../]
   [./left_v]
-    type = LagrangeVecDirichletBC
+    type = VectorDirichletBC
     variable = v
     values = '0 0 0'
     boundary = 'left'
   [../]
   [./left_w]
-    type = LagrangeVecDirichletBC
+    type = VectorDirichletBC
     variable = w
     values = '0 0 0'
     boundary = 'left'
   [../]
   [./left_s]
-    type = LagrangeVecDirichletBC
+    type = VectorDirichletBC
     variable = s
     values = '0 0 0'
     boundary = 'left'
   [../]
   [./right_u]
-    type = LagrangeVecFunctionDirichletBC
+    type = VectorFunctionDirichletBC
     variable = u
     boundary = 'right'
-    x_exact_soln = 'x_exact'
-    y_exact_soln = 'y_exact'
+    function_x = 'x_exact'
+    function_y = 'y_exact'
   [../]
   [./right_v]
-    type = LagrangeVecFunctionDirichletBC
+    type = VectorFunctionDirichletBC
     variable = v
     boundary = 'right'
-    x_exact_soln = 'x_exact'
-    y_exact_soln = 'y_exact'
+    function_x = 'x_exact'
+    function_y = 'y_exact'
   [../]
   [./right_w]
-    type = LagrangeVecFunctionDirichletBC
+    type = VectorFunctionDirichletBC
     variable = w
     boundary = 'right'
-    x_exact_soln = 'x_exact_old'
-    y_exact_soln = 'y_exact_old'
+    function_x = 'x_exact_old'
+    function_y = 'y_exact_old'
   [../]
   [./right_s]
-    type = LagrangeVecFunctionDirichletBC
+    type = VectorFunctionDirichletBC
     variable = s
     boundary = 'right'
-    x_exact_soln = 'x_exact_older'
-    y_exact_soln = 'y_exact_older'
+    function_x = 'x_exact_older'
+    function_y = 'y_exact_older'
   [../]
   [./left_q]
     type = DirichletBC

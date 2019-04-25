@@ -31,8 +31,8 @@
     type = VectorCurlPenaltyDirichletBC
     boundary = 'left right top bottom'
     penalty = 1e10
-    x_exact_soln = 'x_sln'
-    y_exact_soln = 'y_sln'
+    function_x = 'x_sln'
+    function_y = 'y_sln'
     variable = u
   [../]
 []

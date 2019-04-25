@@ -34,11 +34,11 @@ protected:
   Function * _function;
 
   /// x component function
-  Function & _exact_x;
+  Function & _function_x;
   /// y component function
-  Function & _exact_y;
+  Function & _function_y;
   /// z component function
-  Function & _exact_z;
+  Function & _function_z;
 
   /// The value for this BC
   RealVectorValue _values;

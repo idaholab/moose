@@ -101,7 +101,7 @@
     type = LagrangeVecFunctionDirichletBC
     variable = velocity
     boundary = 'top'
-    x_exact_soln = 'lid_function'
+    function_x = 'lid_function'
   [../]
 
   [./pressure_pin]

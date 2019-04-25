@@ -11,20 +11,20 @@
 
 #include "VectorNodalBC.h"
 
-class LagrangeVecDirichletBC;
+class VectorDirichletBC;
 
 template <>
-InputParameters validParams<LagrangeVecDirichletBC>();
+InputParameters validParams<VectorDirichletBC>();
 
 /**
  * Boundary condition of a Dirichlet type
  *
  * Sets the value in the node
  */
-class LagrangeVecDirichletBC : public VectorNodalBC
+class VectorDirichletBC : public VectorNodalBC
 {
 public:
-  LagrangeVecDirichletBC(const InputParameters & parameters);
+  VectorDirichletBC(const InputParameters & parameters);
 
 protected:
   virtual RealVectorValue computeQpResidual() override;
@@ -32,4 +32,3 @@ protected:
   /// The value for this BC
   const RealVectorValue & _values;
 };
-

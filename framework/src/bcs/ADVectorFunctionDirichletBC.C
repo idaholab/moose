@@ -10,9 +10,10 @@
 #include "ADVectorFunctionDirichletBC.h"
 #include "Function.h"
 
+registerADMooseObject("MooseApp", ADVectorFunctionDirichletBC);
 registerADMooseObjectRenamed("MooseApp",
                              ADLagrangeVecFunctionDirichletBC,
-                             "08/31/2019 12:01",
+                             "05/01/2019 00:01",
                              ADVectorFunctionDirichletBC);
 
 defineADValidParams(
@@ -43,11 +44,12 @@ ADVectorFunctionDirichletBC<compute_stage>::ADVectorFunctionDirichletBC(
     const InputParameters & parameters)
   : ADVectorNodalBC<compute_stage>(parameters),
     _function(isParamValid("function") ? &getFunction("function") : nullptr),
-    _exact_x(isParamValid("x_exact_soln") ? getFunction("x_exact_soln")
-                                          : getFunction("function_x")),
-    _exact_y(isParamValid("y_exact_soln") ? getFunction("y_exact_soln")
-                                          : getFunction("function_y")),
-    _exact_z(isParamValid("z_exact_soln") ? getFunction("z_exact_soln") : getFunction("function_z"))
+    _function_x(isParamValid("x_exact_soln") ? getFunction("x_exact_soln")
+                                             : getFunction("function_x")),
+    _function_y(isParamValid("y_exact_soln") ? getFunction("y_exact_soln")
+                                             : getFunction("function_y")),
+    _function_z(isParamValid("z_exact_soln") ? getFunction("z_exact_soln")
+                                             : getFunction("function_z"))
 {
   if (_function &&
       (parameters.isParamSetByUser("function_x") || parameters.isParamSetByUser("x_exact_soln")))
@@ -67,9 +69,9 @@ ADVectorFunctionDirichletBC<compute_stage>::computeQpResidual()
   if (_function)
     _values = _function->vectorValue(_t, *_current_node);
   else
-    _values = RealVectorValue(_exact_x.value(_t, *_current_node),
-                              _exact_y.value(_t, *_current_node),
-                              _exact_z.value(_t, *_current_node));
+    _values = RealVectorValue(_function_x.value(_t, *_current_node),
+                              _function_y.value(_t, *_current_node),
+                              _function_z.value(_t, *_current_node));
 
   return _u - _values;
 }

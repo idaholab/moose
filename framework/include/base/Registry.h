@@ -112,6 +112,7 @@
 /// add a deprecated MooseObject orig_class to the registry that has been replaced by another
 /// object new_class with the same API. time is the time the object became/becomes deprecated in
 /// "mm/dd/yyyy hh:mm" format.
+/// A call to registerMooseObject is still required for the new class
 #define registerMooseObjectRenamed(app, orig_class, time, new_class)                               \
   static char combineNames(dummyvar_for_registering_obj_##orig_class, __LINE__) =                  \
       Registry::add<new_class>({app,                                                               \
@@ -129,8 +130,9 @@
 
 /// Add AD MooseObjects (e.g. both residual and jacobian objects) to the registry with the given app name/label.  classname is the (unquoted)
 /// c++ class template.  Each class template should only be registered once.
+/// A call to registerADMooseObject is still required for the new class
 #define registerADMooseObjectRenamed(app, origtemplatename, time, templatename)                    \
-  static char combineNames(dummyvar_for_registering_obj_##templatename##_residual, __LINE__) =     \
+  static char combineNames(dummyvar_for_registering_obj_##origtemplatename##_residual, __LINE__) = \
       Registry::add<templatename<RESIDUAL>>({app,                                                  \
                                              #templatename "<RESIDUAL>",                           \
                                              #origtemplatename "<RESIDUAL>",                       \
@@ -143,7 +145,7 @@
                                              time,                                                 \
                                              #templatename "<RESIDUAL>",                           \
                                              true});                                               \
-  static char combineNames(dummyvar_for_registering_obj_##templatename##_jacobian, __LINE__) =     \
+  static char combineNames(dummyvar_for_registering_obj_##origtemplatename##_jacobian, __LINE__) = \
       Registry::add<templatename<JACOBIAN>>({app,                                                  \
                                              #templatename "<JACOBIAN>",                           \
                                              #origtemplatename "<JACOBIAN>",                       \
@@ -154,7 +156,7 @@
                                              __FILE__,                                             \
                                              __LINE__,                                             \
                                              time,                                                 \
-                                             #templatename "<RESIDUAL>",                           \
+                                             #templatename "<JACOBIAN>",                           \
                                              true})
 
 struct RegistryEntry;

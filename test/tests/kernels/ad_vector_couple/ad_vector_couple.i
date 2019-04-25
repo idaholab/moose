@@ -51,17 +51,17 @@
   []
 
   [left_v]
-    type = ADLagrangeVecFunctionDirichletBC
+    type = ADVectorFunctionDirichletBC
     variable = v
-    x_exact_soln = 1
-    y_exact_soln = 2
+    function_x = 1
+    function_y = 2
     boundary = 'left'
   []
   [right_v]
-    type = ADLagrangeVecFunctionDirichletBC
+    type = ADVectorFunctionDirichletBC
     variable = v
-    x_exact_soln = 4
-    y_exact_soln = 8
+    function_x = 4
+    function_y = 8
     boundary = 'top'
   []
 []

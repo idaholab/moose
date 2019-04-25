@@ -20,11 +20,11 @@
 
 [BCs]
   [./left]
-    type = ADLagrangeVecFunctionDirichletBC
+    type = ADVectorFunctionDirichletBC
     variable = u
     boundary = left
-    x_exact_soln = '1'
-    y_exact_soln = '1'
+    function_x = '1'
+    function_y = '1'
   [../]
   [./right]
     type = ADVectorRobinBC

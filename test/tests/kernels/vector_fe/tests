@@ -82,7 +82,7 @@
     input = 'ad_lagrange_vec.i'
     exodiff = 'lagrange_vec_out.e'
     abs_zero = 1e-7
-    design = "jacobian_definition.md ADLagrangeVecFunctionDirichletBC.md"
+    design = "jacobian_definition.md ADVectorFunctionDirichletBC.md"
     issues = "#5658"
     requirement = "MOOSE shall be able to solve multi-d LAGRANGE_VEC problems with automatic differentiation and reproduce the hand-coded result"
     prereq = 'lagrange_vec'
@@ -94,7 +94,7 @@
     ratio_tol = 1e-7
     difference_tol = 1e-6
     run_sim = True
-    design = "jacobian_definition.md ADLagrangeVecFunctionDirichletBC.md"
+    design = "jacobian_definition.md ADVectorFunctionDirichletBC.md"
     issues = "#5658"
     requirement = "MOOSE shall be able to solve multi-d LAGRANGE_VEC problems with automatic differentiation and have a perfect Jacobian"
     cli_args = 'Mesh/nx=2 Mesh/ny=2'
@@ -136,7 +136,7 @@
     type = Exodiff
     input = 'coupled_vector_gradient.i'
     exodiff = 'coupled_vector_gradient_out.e'
-    design = "moose_variables.md VectorDiffusion.md LagrangeVecDirichletBC.md LagrangeVecFunctionDirichletBC.md"
+    design = "moose_variables.md VectorDiffusion.md VectorDirichletBC.md VectorFunctionDirichletBC.md"
     issues = "#11150"
     requirement = "1) MOOSE shall be able to assign dirichlet boundary conditions for LAGRANGE_VEC variables 2) MOOSE shall be able to obtain coupled vector variable gradients 3) MOOSE shall correctly initialize both volume and face curl shape functions when the curl of a variable is requested"
   [../]
@@ -148,5 +148,14 @@
     design = "VectorBodyForce.md"
     issues = "#13309"
     requirement = "The system shall error if the 'function' and 'function_x' parameters are both set within the VectorFunctionIC object."
+  []
+  [ad_comp_error]
+    type = RunException
+    input = 'ad_lagrange_vec.i'
+    cli_args = 'BCs/bnd/function=1'
+    expect_err = "The 'function' and 'function_x' parameters cannot both be set."
+    design = "ADVectorFunctionDirichletBC.md"
+    issues = "#13309"
+    requirement = "The system shall error if the 'function' and 'function_x' parameters are both set within the ADVectorFunctionDirichletBC object."
   []
 []
