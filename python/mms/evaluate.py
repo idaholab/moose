@@ -92,10 +92,9 @@ def evaluate(pde, soln, variable='u',
     # Evaluate the PDE
     pde = pde.replace('grad', 'gradient')
     pde = pde.replace('div', 'divergence')
+    _func_ = eval(pde)
     if negative:
-        _func_ = -eval(pde),
-    else:
-        _func_ = eval(pde)
+        _func_ = -1 * _func_
 
     # Convert vector exact solution to a list
     if isinstance(_exact_, Vector):
