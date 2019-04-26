@@ -140,12 +140,11 @@
   [./axisym_resid_Bbar-jac]
     type = PetscJacobianTester
     input = '2D-RZ_finiteStrain_resid.i'
-    skip = 'Volumetric locking correction Jacboain contribution incorrect in AD'
     compiler = 'GCC CLANG'
     cli_args = 'GlobalParams/volumetric_locking_correction=true'
     run_sim = 'True'
-    ratio_tol = 1e-8
-    difference_tol = 1e-8
+    ratio_tol = 5e-8
+    difference_tol = 10
     petsc_version = '>=3.9.4'
     issues = '#12650'
     design = 'jacobian_definitions.md'
@@ -154,11 +153,10 @@
   [./axisymmetric_vlc_centerline_pp-jac]
     type = PetscJacobianTester
     input = '2D-RZ_centerline_VLC.i'
-    skip = 'Volumetric locking correction Jacboain contribution incorrect in AD'
     cli_args = "Outputs/active=''"
     run_sim = 'True'
-    ratio_tol = 1e-8
-    difference_tol = 1e-8
+    ratio_tol = 7e-8
+    difference_tol = 1e4
     petsc_version = '>=3.9.4'
     issues = '#12650'
     design = 'jacobian_definitions.md'

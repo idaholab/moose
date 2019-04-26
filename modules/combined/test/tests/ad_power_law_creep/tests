@@ -37,7 +37,6 @@
 
   [./power_law_creep_tm-jac]
     type = 'PetscJacobianTester'
-    skip = 'Volumetric locking correction Jacboain contribution incorrect in AD'
     input = 'power_law_creep.i'
     ratio_tol = 1e-8
     difference_tol = 1e-8
@@ -49,7 +48,6 @@
   [../]
   [./small_strain_tm-jac]
     type = PetscJacobianTester
-    skip = 'Volumetric locking correction Jacboain contribution incorrect in AD'
     input = 'power_law_creep_smallstrain.i'
     ratio_tol = 1e-8
     difference_tol = 1e-8
