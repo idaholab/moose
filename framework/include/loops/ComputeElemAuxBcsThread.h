@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEELEMAUXBCSTHREAD_H
-#define COMPUTEELEMAUXBCSTHREAD_H
+#pragma once
 
 // MOOSE includes
 #include "MooseObjectWarehouse.h"
@@ -47,4 +46,3 @@ protected:
   bool _need_materials;
 };
 
-#endif // COMPUTEELEMAUXBCSTHREAD_H

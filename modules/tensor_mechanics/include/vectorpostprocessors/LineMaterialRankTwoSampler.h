@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LINEMATERIALRANKTWOSAMPLER_H
-#define LINEMATERIALRANKTWOSAMPLER_H
+#pragma once
 
 #include "LineMaterialSamplerBase.h"
 #include "RankTwoTensor.h"
@@ -46,4 +45,3 @@ public:
   const unsigned int _j;
 };
 
-#endif // LINEMATERIALRANKTWOSAMPLER

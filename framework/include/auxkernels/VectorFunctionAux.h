@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VECTORFUNCTIONAUX_H
-#define VECTORFUNCTIONAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -38,4 +37,3 @@ protected:
   Function & _function;
 };
 
-#endif // VECTORFUNCTIONAUX_H

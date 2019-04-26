@@ -6,13 +6,13 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#pragma once
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
 /*                                                              */
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef MULTIPLASTICITYRAWCOMPONENTASSEMBLER_H
-#define MULTIPLASTICITYRAWCOMPONENTASSEMBLER_H
 
 #include "TensorMechanicsPlasticModel.h"
 #include "UserObjectInterface.h"
@@ -330,4 +330,3 @@ private:
                                    std::vector<bool> & act);
 };
 
-#endif // MULTIPLASTICITYRAWCOMPONENTASSEMBLER_H

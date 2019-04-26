@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EFAPOINT_H
-#define EFAPOINT_H
+#pragma once
 
 class EFAPoint
 {
@@ -34,4 +33,3 @@ public:
   EFAPoint cross(const EFAPoint & point);
 };
 
-#endif

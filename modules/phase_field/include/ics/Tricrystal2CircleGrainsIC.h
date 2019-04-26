@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TRICRYSTAL2CIRCLEGRAINSIC_H
-#define TRICRYSTAL2CIRCLEGRAINSIC_H
+#pragma once
 
 #include "InitialCondition.h"
 
@@ -39,4 +38,3 @@ protected:
   Point _range;
 };
 
-#endif // TRICRYSTAL2CIRCLEGRAINSIC_H

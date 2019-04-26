@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADTIMEKERNEL_H
-#define ADTIMEKERNEL_H
+#pragma once
 
 #include "ADKernel.h"
 
@@ -44,4 +43,3 @@ declareADValidParams(ADVectorTimeKernel);
 #define usingTimeKernelMembers usingTemplTimeKernelMembers(Real)
 #define usingVectorTimeKernelMembers usingTemplTimeKernelMembers(RealVectorValue)
 
-#endif // ADTIMEKERNEL_H

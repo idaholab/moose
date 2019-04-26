@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef XFEMINTERFACE_H
-#define XFEMINTERFACE_H
+#pragma once
 
 #include "ConsoleStreamInterface.h"
 #include "MooseTypes.h"
@@ -146,4 +145,3 @@ protected:
   MeshBase * _displaced_mesh;
 };
 
-#endif // XFEMINTERFACE_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TENSORMECHANICSACTION_H
-#define TENSORMECHANICSACTION_H
+#pragma once
 
 #include "TensorMechanicsActionBase.h"
 
@@ -95,4 +94,3 @@ protected:
   std::vector<std::string> _generate_output;
 };
 
-#endif // TENSORMECHANICSACTION_H

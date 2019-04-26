@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSETYPES_H
-#define MOOSETYPES_H
+#pragma once
 
 #include "Moose.h"
 #include "DualReal.h"
@@ -822,4 +821,3 @@ DerivativeStringClass(TagName);
 /// Name of MeshGenerators
 DerivativeStringClass(MeshGeneratorName);
 
-#endif // MOOSETYPES_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PRESETBC_H
-#define PRESETBC_H
+#pragma once
 
 #include "PresetNodalBC.h"
 
@@ -31,4 +30,3 @@ protected:
   const Real & _value;
 };
 
-#endif /* PRESETBC_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEEIGENSTRAINBEAMFROMVARIABLE_H
-#define COMPUTEEIGENSTRAINBEAMFROMVARIABLE_H
+#pragma once
 
 #include "ComputeEigenstrainBeamBase.h"
 
@@ -42,4 +41,3 @@ protected:
   std::vector<const VariableValue *> _rot;
 };
 
-#endif // COMPUTEEIGENSTRAINBEAMFROMVARIABLE_H

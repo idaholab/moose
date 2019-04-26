@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWADDMATERIALACTION_H
-#define POROUSFLOWADDMATERIALACTION_H
+#pragma once
 
 #include "Action.h"
 #include "PorousFlowDependencies.h"
@@ -80,4 +79,3 @@ protected:
   std::vector<AddMaterialAction *> _ama_materials;
 };
 
-#endif // POROUSFLOWADDMATERIALACTION_H

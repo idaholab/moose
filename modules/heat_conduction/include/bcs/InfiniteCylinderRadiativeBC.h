@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INFINITECYLINDERRADIATIVEBC_H
-#define INFINITECYLINDERRADIATIVEBC_H
+#pragma once
 
 #include "RadiativeHeatFluxBCBase.h"
 
@@ -42,4 +41,3 @@ protected:
   Real _coefficient;
 };
 
-#endif // INFINITECYLINDERRADIATIVEBC_H

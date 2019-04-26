@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GHOSTINGUSEROBJECT_H
-#define GHOSTINGUSEROBJECT_H
+#pragma once
 
 #include "GeneralUserObject.h"
 
@@ -60,4 +59,3 @@ private:
   NonlinearSystemBase & _nl;
 };
 
-#endif // GHOSTINGAUX_H

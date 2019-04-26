@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NSSUPGMOMENTUM_H
-#define NSSUPGMOMENTUM_H
+#pragma once
 
 #include "NSSUPGBase.h"
 
@@ -44,4 +43,3 @@ private:
   Real computeJacobianHelper(unsigned int var);
 };
 
-#endif // NSSUPGMOMENTUM_H

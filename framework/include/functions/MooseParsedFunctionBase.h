@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEPARSEDFUNCTIONBASE_H
-#define MOOSEPARSEDFUNCTIONBASE_H
+#pragma once
 
 // Standard library
 #include <vector>
@@ -77,4 +76,3 @@ protected:
   std::unique_ptr<MooseParsedFunctionWrapper> _function_ptr;
 };
 
-#endif // MOOSEPARSEDFUNCTIONBASE_H

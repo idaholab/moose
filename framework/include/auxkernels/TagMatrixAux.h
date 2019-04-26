@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TAGMATRIXAUX_H
-#define TAGMATRIXAUX_H
+#pragma once
 
 #include "TagVectorAux.h"
 
@@ -34,4 +33,3 @@ protected:
   const VariableValue & _v;
 };
 
-#endif // TAGMATRIXAUX_H

@@ -1,4 +1,13 @@
 #!/usr/bin/env python
+#* This file is part of the MOOSE framework
+#* https://www.mooseframework.org
+#*
+#* All rights reserved, see COPYRIGHT for full restrictions
+#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#*
+#* Licensed under LGPL 2.1, please see LICENSE for details
+#* https://www.gnu.org/licenses/lgpl-2.1.html
+
 import unittest
 import mms
 
@@ -47,6 +56,15 @@ class TestMMS(unittest.TestCase):
         s = mms.fparser(f)
 
         self.assertEqual(s, '-x^2*k*t*sin(x*t) + 2*x*k*cos(x*t)')
+
+    def testEvaluateVectorFunction(self):
+        f, e = mms.evaluate('div(u.outer(u))', 'cos(x*t)*e_i')
+
+        s = mms.fparser(f)
+        self.assertEqual(s, '[-2*t*sin(x*t)*cos(x*t), 0, 0]')
+
+        s = mms.fparser(e)
+        self.assertEqual(s, '[cos(x*t), 0, 0]')
 
     def testExceptions(self):
 

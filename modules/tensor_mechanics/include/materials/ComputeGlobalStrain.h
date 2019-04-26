@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEGLOBALSTRAIN_H
-#define COMPUTEGLOBALSTRAIN_H
+#pragma once
 
 #include "Material.h"
 
@@ -47,4 +46,3 @@ protected:
   const unsigned int _ndisp;
 };
 
-#endif // COMPUTEGLOBALSTRAIN_H

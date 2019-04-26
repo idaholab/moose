@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FORCING_FUNCTION_XYZ0_H
-#define FORCING_FUNCTION_XYZ0_H
+#pragma once
 
 #include "Kernel.h"
 #include "UsrFunc.h"
@@ -34,4 +33,3 @@ private:
   Real _A0, _B0, _C0, _Au, _Bu, _Cu, _Av, _Bv, _Cv, _Ak, _Bk, _Ck, _omega0;
 };
 
-#endif // FORCING_FUNCTION_XYZ0H

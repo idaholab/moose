@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INSCOMPRESSIBILITYPENALTY_H
-#define INSCOMPRESSIBILITYPENALTY_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -39,4 +38,3 @@ protected:
   Real _penalty;
 };
 
-#endif /* INSMASSARTIFICIALCOMPRESSIBILITY_H */

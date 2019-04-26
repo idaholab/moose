@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EMPTYPOSTPROCESSOR_H
-#define EMPTYPOSTPROCESSOR_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 
@@ -28,4 +27,3 @@ public:
   virtual Real getValue() override { return 0; }
 };
 
-#endif

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef IMPLICITSTATEFUL_H
-#define IMPLICITSTATEFUL_H
+#pragma once
 
 #include "Material.h"
 
@@ -38,4 +37,3 @@ private:
   const MaterialProperty<Real> & _coupled_older;
 };
 
-#endif // STATEFULMATERIAL_H

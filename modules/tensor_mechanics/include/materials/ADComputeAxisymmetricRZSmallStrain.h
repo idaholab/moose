@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADCOMPUTEAXISYMMETRICRZSMALLSTRAIN_H
-#define ADCOMPUTEAXISYMMETRICRZSMALLSTRAIN_H
+#pragma once
 
 #include "ADCompute2DSmallStrain.h"
 
@@ -35,4 +34,3 @@ protected:
   usingCompute2DSmallStrainMembers;
 };
 
-#endif // ADCOMPUTEAXISYMMETRICRZSMALLSTRAIN_H

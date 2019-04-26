@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef BIMODALINVERSESUPERELLIPSOIDSIC_H
-#define BIMODALINVERSESUPERELLIPSOIDSIC_H
+#pragma once
 
 #include "BimodalSuperellipsoidsIC.h"
 
@@ -39,4 +38,3 @@ public:
   virtual void computeSuperellipsoidCenters();
 };
 
-#endif // BIMODALINVERSESUPERELLIPSOIDSIC_H

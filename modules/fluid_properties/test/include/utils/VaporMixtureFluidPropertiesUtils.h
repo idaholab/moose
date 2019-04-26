@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VAPORMIXTUREFLUIDPROPERTIESUTILS_H
-#define VAPORMIXTUREFLUIDPROPERTIESUTILS_H
+#pragma once
 
 #include "SinglePhaseFluidPropertiesTestUtils.h"
 
@@ -41,4 +40,3 @@
       REL_TEST(df_dx[i], df_dx_fd[i], tol);                                                        \
   }
 
-#endif // VAPORMIXTUREFLUIDPROPERTIESUTILS_H

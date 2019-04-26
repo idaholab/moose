@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef KKSMULTIPHASECONCENTRATION_H
-#define KKSMULTIPHASECONCENTRATION_H
+#pragma once
 
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
@@ -64,4 +63,3 @@ private:
   std::vector<std::vector<const MaterialProperty<Real> *>> _prop_dhjdetai;
 };
 
-#endif // KKSMULTIPHASECONCENTRATION_H

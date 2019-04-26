@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWWATERNCG_H
-#define POROUSFLOWWATERNCG_H
+#pragma once
 
 #include "PorousFlowFluidStateBase.h"
 
@@ -157,4 +156,3 @@ protected:
   const Real _water_critical_temperature;
 };
 
-#endif // POROUSFLOWWATERNCG_H

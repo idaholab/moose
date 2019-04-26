@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEROTATEDELASTICITYTENSORBASE_H
-#define COMPUTEROTATEDELASTICITYTENSORBASE_H
+#pragma once
 
 #include "ComputeElasticityTensorBase.h"
 
@@ -30,4 +29,3 @@ protected:
   RealVectorValue _Euler_angles;
 };
 
-#endif // COMPUTEROTATEDELASTICITYTENSORBASE_H

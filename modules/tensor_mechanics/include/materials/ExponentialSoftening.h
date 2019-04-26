@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EXPONENTIALSOFTENING_H
-#define EXPONENTIALSOFTENING_H
+#pragma once
 
 #include "SmearedCrackSofteningBase.h"
 
@@ -50,4 +49,3 @@ protected:
   const Real & _beta;
 };
 
-#endif // EXPONENTIALSOFTENING_H

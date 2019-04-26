@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELASTIC_H
-#define ELASTIC_H
+#pragma once
 
 #include "SolidModel.h"
 
@@ -26,4 +25,3 @@ public:
 protected:
 };
 
-#endif

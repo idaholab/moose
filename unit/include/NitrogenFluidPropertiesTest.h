@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NITROGENFLUIDPROPERTIESTEST_H
-#define NITROGENFLUIDPROPERTIESTEST_H
+#pragma once
 
 #include "MooseObjectUnitTest.h"
 #include "NitrogenFluidProperties.h"
@@ -29,4 +28,3 @@ protected:
   const NitrogenFluidProperties * _fp;
 };
 
-#endif // NITROGENFLUIDPROPERTIESTEST_H

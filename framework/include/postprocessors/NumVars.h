@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NUMVARS_H
-#define NUMVARS_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 
@@ -43,4 +42,3 @@ protected:
   const EquationSystems * _es_pointer;
 };
 
-#endif // NUMVARS_H

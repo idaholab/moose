@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NEWMARKACCELAUX_H
-#define NEWMARKACCELAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -36,4 +35,3 @@ protected:
   Real _beta;
 };
 
-#endif // NEWMARKACCELAUX_H

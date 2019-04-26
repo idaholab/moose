@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NSVISCSTRESSTENSORDERIVS_H
-#define NSVISCSTRESSTENSORDERIVS_H
+#pragma once
 
 /**
  * Class outside the Moose hierarchy that contains common
@@ -143,4 +142,3 @@ NSViscStressTensorDerivs<T>::dtau(unsigned k, unsigned ell, unsigned m)
   return 0.;
 }
 
-#endif // NSVISCSTRESSTENSORDERIVS_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GRAINTRACKERINTERFACE_H
-#define GRAINTRACKERINTERFACE_H
+#pragma once
 
 #include "InputParameters.h"
 #include "FeatureFloodCount.h"
@@ -82,4 +81,3 @@ public:
   virtual std::vector<unsigned int> getNewGrainIDs() const;
 };
 
-#endif

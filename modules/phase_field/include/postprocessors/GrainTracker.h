@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GRAINTRACKER_H
-#define GRAINTRACKER_H
+#pragma once
 
 #include "FeatureFloodCount.h"
 #include "GrainTrackerInterface.h"
@@ -290,4 +289,3 @@ void dataStore(std::ostream & stream, GrainTracker::PartialFeatureData & feature
 template <>
 void dataLoad(std::istream & stream, GrainTracker::PartialFeatureData & feature, void * context);
 
-#endif

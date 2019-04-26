@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CHBULK_H
-#define CHBULK_H
+#pragma once
 
 #include "KernelGrad.h"
 #include "JvarMapInterface.h"
@@ -116,4 +115,3 @@ CHBulk<T>::computeQpOffDiagJacobian(unsigned int jvar)
   return (*_dMdarg[cvar])[_qp] * _phi[_j][_qp] * computeGradDFDCons(Residual) * _grad_test[_i][_qp];
 }
 
-#endif // CHBULK_H

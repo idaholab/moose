@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PFCFREEZINGIC_H
-#define PFCFREEZINGIC_H
+#pragma once
 
 #include "InitialCondition.h"
 
@@ -54,4 +53,3 @@ private:
   unsigned int _icdim;
 };
 
-#endif // PFCFREEZINGIC_H

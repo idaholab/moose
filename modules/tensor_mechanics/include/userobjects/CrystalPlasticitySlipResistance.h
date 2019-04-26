@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CRYSTALPLASTICITYSLIPRESISTANCE_H
-#define CRYSTALPLASTICITYSLIPRESISTANCE_H
+#pragma once
 
 #include "CrystalPlasticityUOBase.h"
 
@@ -30,4 +29,3 @@ public:
   virtual bool calcSlipResistance(unsigned int qp, std::vector<Real> & val) const = 0;
 };
 
-#endif // CRYSTALPLASTICITYSLIPRESISTANCE_H

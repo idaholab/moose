@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPOSITEEIGENSTRAIN_H
-#define COMPOSITEEIGENSTRAIN_H
+#pragma once
 
 #include "ComputeEigenstrainBase.h"
 #include "CompositeTensorBase.h"
@@ -38,4 +37,3 @@ protected:
   const std::string _M_name;
 };
 
-#endif // COMPOSITEEIGENSTRAIN_H

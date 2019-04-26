@@ -7,10 +7,9 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#pragma once
 //  Base class for Richards SUPG
 //
-#ifndef RICHARDSSUPG_H
-#define RICHARDSSUPG_H
 
 #include "GeneralUserObject.h"
 
@@ -147,4 +146,3 @@ public:
   virtual bool SUPG_trivial() const = 0;
 };
 
-#endif // RICHARDSSUPG_H

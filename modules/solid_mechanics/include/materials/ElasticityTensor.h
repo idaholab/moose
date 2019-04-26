@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELASTICITYTENSOR_H
-#define ELASTICITYTENSOR_H
+#pragma once
 
 #include "ColumnMajorMatrix.h"
 
@@ -62,4 +61,3 @@ protected:
   virtual void calculateEntries(unsigned int qp) = 0;
 };
 
-#endif // ELASTICITYTENSOR_H

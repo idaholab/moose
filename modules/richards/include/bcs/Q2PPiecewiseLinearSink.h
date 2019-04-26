@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef Q2PPIECEWISELINEARSINK
-#define Q2PPIECEWISELINEARSINK
+#pragma once
 
 #include "IntegratedBC.h"
 #include "LinearInterpolation.h"
@@ -113,5 +112,3 @@ protected:
   /// derivative of residual wrt the wrt_num variable
   Real jac(unsigned int wrt_num);
 };
-
-#endif // Q2PPIECEWISELINEARSINK

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POLYNOMIALFIT_H
-#define POLYNOMIALFIT_H
+#pragma once
 
 #include "LeastSquaresFitBase.h"
 
@@ -43,4 +42,3 @@ protected:
   static int _file_number;
 };
 
-#endif // POLYNOMIALFIT_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CLSHPLASTICMODEL_H
-#define CLSHPLASTICMODEL_H
+#pragma once
 
 #include "ReturnMappingModel.h"
 
@@ -52,4 +51,3 @@ protected:
   const MaterialProperty<SymmTensor> & _plastic_strain_old;
 };
 
-#endif // CLSHPLASTICMODEL_H

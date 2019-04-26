@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GRAINTRACKERELASTICITY_H
-#define GRAINTRACKERELASTICITY_H
+#pragma once
 
 #include "GrainDataTracker.h"
 #include "RankFourTensor.h"
@@ -40,4 +39,3 @@ protected:
   const EulerAngleProvider & _euler;
 };
 
-#endif // GRAINTRACKERELASTICITY_H

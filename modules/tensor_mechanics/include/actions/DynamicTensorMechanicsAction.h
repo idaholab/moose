@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DYNAMICTENSORMECHANICSACTION_H
-#define DYNAMICTENSORMECHANICSACTION_H
+#pragma once
 
 #include "TensorMechanicsAction.h"
 
@@ -26,4 +25,3 @@ protected:
   virtual std::string getKernelType();
 };
 
-#endif // DYNAMICTENSORMECHANICSACTION_H

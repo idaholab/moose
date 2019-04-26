@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CRYSTALPLASTICITYSTATEVARIABLE_H
-#define CRYSTALPLASTICITYSTATEVARIABLE_H
+#pragma once
 
 #include "CrystalPlasticityUOBase.h"
 
@@ -71,4 +70,3 @@ protected:
   std::vector<Real> _scale_factor;
 };
 
-#endif // CRYSTALPLASTICITYSTATEVARIABLE_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SYSTEMBASE_H
-#define SYSTEMBASE_H
+#pragma once
 
 #include <vector>
 
@@ -745,4 +744,3 @@ protected:
 
 #define PARALLEL_CATCH _fe_problem.checkExceptionAndStopSolve();
 
-#endif /* SYSTEMBASE_H */

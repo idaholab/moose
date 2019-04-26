@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef QUOTIENTAUX_H
-#define QUOTIENTAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -36,4 +35,3 @@ protected:
   const VariableValue & _denominator;
 };
 
-#endif // QUOTIENTAUX_H

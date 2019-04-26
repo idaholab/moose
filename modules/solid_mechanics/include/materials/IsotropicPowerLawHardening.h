@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ISOTROPICPOWERLAWHARDENING_H
-#define ISOTROPICPOWERLAWHARDENING_H
+#pragma once
 
 #include "IsotropicPlasticity.h"
 
@@ -46,4 +45,3 @@ protected:
 private:
 };
 
-#endif // ISOTROPICPOWERLAWHARDENING_H

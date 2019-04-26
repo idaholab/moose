@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VAPORMIXTUREFLUIDPROPERTIES_H
-#define VAPORMIXTUREFLUIDPROPERTIES_H
+#pragma once
 
 #include "FluidProperties.h"
 
@@ -233,4 +232,3 @@ public:
   Real primaryMassFraction(const std::vector<Real> & x) const;
 };
 
-#endif /* VAPORMIXTUREFLUIDPROPERTIES_H */

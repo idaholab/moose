@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWADDMATERIALJOINER_H
-#define POROUSFLOWADDMATERIALJOINER_H
+#pragma once
 
 #include "Action.h"
 
@@ -54,4 +53,3 @@ protected:
   std::vector<std::string> _already_joined;
 };
 
-#endif // POROUSFLOWADDMATERIALJOINER_H

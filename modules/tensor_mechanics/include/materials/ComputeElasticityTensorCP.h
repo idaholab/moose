@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEELASTICITYTENSORCP_H
-#define COMPUTEELASTICITYTENSORCP_H
+#pragma once
 
 #include "ComputeElasticityTensor.h"
 #include "ElementPropertyReadFile.h"
@@ -48,4 +47,3 @@ protected:
   RotationTensor _R;
 };
 
-#endif // COMPUTEELASTICITYTENSORCP_H

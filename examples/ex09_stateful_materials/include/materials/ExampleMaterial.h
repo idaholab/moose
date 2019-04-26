@@ -7,10 +7,9 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#pragma once
 #include "Material.h"
 
-#ifndef EXAMPLEMATERIAL_H
-#define EXAMPLEMATERIAL_H
 
 // Forward Declarations
 class ExampleMaterial;
@@ -41,4 +40,3 @@ private:
   const MaterialProperty<Real> & _diffusivity_old;
 };
 
-#endif // EXAMPLEMATERIAL_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NANINTERFACETESTFLUIDPROPERTIES_H
-#define NANINTERFACETESTFLUIDPROPERTIES_H
+#pragma once
 
 #include "SinglePhaseFluidProperties.h"
 #include "NaNInterface.h"
@@ -30,4 +29,3 @@ public:
   virtual void p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real & dp_de) const override;
 };
 
-#endif /* NANINTERFACETESTFLUIDPROPERTIES_H */

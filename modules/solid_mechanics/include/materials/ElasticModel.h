@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELASTICMODEL_H
-#define ELASTICMODEL_H
+#pragma once
 
 #include "ConstitutiveModel.h"
 
@@ -32,4 +31,3 @@ protected:
                              SymmTensor & stress_new);
 };
 
-#endif

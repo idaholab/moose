@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEPOLYCRYSTALELASTICITYTENSOR_H
-#define COMPUTEPOLYCRYSTALELASTICITYTENSOR_H
+#pragma once
 
 #include "ComputeElasticityTensorBase.h"
 #include "GrainDataTracker.h"
@@ -50,4 +49,3 @@ protected:
   const Real _JtoeV;
 };
 
-#endif // COMPUTEPOLYCRYSTALELASTICITYTENSOR_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SYNTAXFORMATTERINTERFACE_H
-#define SYNTAXFORMATTERINTERFACE_H
+#pragma once
 
 #include <string>
 #include <ostream>
@@ -82,4 +81,3 @@ public:
                                   bool & found) = 0;
 };
 
-#endif /* SYNTAXFORMATTERINTERFACE_H */

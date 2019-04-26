@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOLLFIEDLANGMUIRMATERIAL_H
-#define MOLLFIEDLANGMUIRMATERIAL_H
+#pragma once
 
 #include "Material.h"
 
@@ -67,4 +66,3 @@ private:
   MaterialProperty<Real> & _dmass_rate_from_matrix_dp;
 };
 
-#endif // MOLLFIEDLANGMUIRMATERIAL_H

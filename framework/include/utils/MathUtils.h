@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATHUTILS_H
-#define MATHUTILS_H
+#pragma once
 
 #include "Moose.h"
 #include "libmesh/libmesh.h"
@@ -164,4 +163,3 @@ smootherStep(T x, T start, T end, bool derivative = false)
 
 } // namespace MathUtils
 
-#endif // MATHUTILS_H

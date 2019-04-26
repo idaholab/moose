@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SIDESETSAROUNDSUBDOMAINGENERATOR_H
-#define SIDESETSAROUNDSUBDOMAINGENERATOR_H
+#pragma once
 
 #include "SideSetsGeneratorBase.h"
 
@@ -53,4 +52,3 @@ protected:
   Point _normal;
 };
 
-#endif // SIDESETSAROUNDSUBDOMAINGENERATOR_H

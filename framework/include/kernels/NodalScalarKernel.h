@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NODALSCALARKERNEL_H
-#define NODALSCALARKERNEL_H
+#pragma once
 
 #include "ScalarKernel.h"
 #include "Coupleable.h"
@@ -39,4 +38,3 @@ protected:
   std::vector<BoundaryName> _boundary_names;
 };
 
-#endif /* NODALSCALARKERNEL_H */

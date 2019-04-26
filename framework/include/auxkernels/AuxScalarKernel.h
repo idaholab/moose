@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef AUXSCALARKERNEL_H
-#define AUXSCALARKERNEL_H
+#pragma once
 
 #include "MooseObject.h"
 #include "ScalarCoupleable.h"
@@ -98,4 +97,3 @@ protected:
   virtual Real computeValue() = 0;
 };
 
-#endif /* AUXSCALARKERNEL_H */

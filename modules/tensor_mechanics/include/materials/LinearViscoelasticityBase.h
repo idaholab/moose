@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LINEARVISCOELASTICITYBASE_H
-#define LINEARVISCOELASTICITYBASE_H
+#pragma once
 
 #include "ComputeElasticityTensorBase.h"
 #include "RankFourTensor.h"
@@ -270,4 +269,3 @@ protected:
   bool & _step_zero;
 };
 
-#endif // LINEARVISCOELASTICITYBASE_H

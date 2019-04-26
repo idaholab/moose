@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FXBOUNDARYVALUEUSEROBJECT_H
-#define FXBOUNDARYVALUEUSEROBJECT_H
+#pragma once
 
 #include "FXBoundaryBaseUserObject.h"
 
@@ -26,4 +25,3 @@ public:
   FXBoundaryValueUserObject(const InputParameters & parameters);
 };
 
-#endif // FXBOUNDARYVALUEUSEROBJECT_H

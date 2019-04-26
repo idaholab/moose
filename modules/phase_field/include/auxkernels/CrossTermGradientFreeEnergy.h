@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CROSSTERMGRADIENTFREEENERGY_H
-#define CROSSTERMGRADIENTFREEENERGY_H
+#pragma once
 
 #include "TotalFreeEnergyBase.h"
 
@@ -32,4 +31,3 @@ protected:
   std::vector<std::vector<const MaterialProperty<Real> *>> _kappas;
 };
 
-#endif // CROSSTERMGRADIENTFREEENERGY_H

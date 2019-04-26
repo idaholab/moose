@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWADVECTIEFLUXCALCULATORUNSATURATEDHEAT_H
-#define POROUSFLOWADVECTIEFLUXCALCULATORUNSATURATEDHEAT_H
+#pragma once
 
 #include "PorousFlowAdvectiveFluxCalculatorSaturatedHeat.h"
 
@@ -43,4 +42,3 @@ protected:
   const MaterialProperty<std::vector<std::vector<Real>>> & _drelative_permeability_dvar;
 };
 
-#endif // POROUSFLOWADVECTIEFLUXCALCULATORUNSATURATEDHEAT_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POWERLAWCREEPMODEL_H
-#define POWERLAWCREEPMODEL_H
+#pragma once
 
 #include "ReturnMappingModel.h"
 
@@ -47,4 +46,3 @@ protected:
 private:
 };
 
-#endif // POWERLAWCREEPMODEL_H

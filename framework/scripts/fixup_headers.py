@@ -50,6 +50,10 @@ def fixupHeader():
                 checkAndUpdatePython(os.path.abspath(dirpath + '/' + file))
 
 def checkAndUpdateCPlusPlus(filename):
+    # Don't update soft links
+    if os.path.islink(filename):
+        return
+
     f = open(filename)
     text = f.read()
     f.close()
@@ -57,7 +61,7 @@ def checkAndUpdateCPlusPlus(filename):
     header = unified_header
 
     # Check (exact match only)
-    if (string.find(text, header) == -1):
+    if (string.find(text, header) == -1 or global_options.force == True):
         # print the first 10 lines or so of the file
         if global_options.update == False: # Report only
             print filename + ' does not contain an up to date header'
@@ -74,9 +78,18 @@ def checkAndUpdateCPlusPlus(filename):
             # Now cleanup extra blank lines
             text = re.sub(r'\A(^\s*\n)', '', text)
 
+            suffix = os.path.splitext(filename)
+            if suffix[-1] == '.h':
+                text = re.sub(r'^#ifndef\s*\S+_H_?\s*\n#define.*\n', '', text, flags=re.M)
+                text = re.sub(r'^#endif.*\n[\s]*\Z', '', text, flags=re.M)
+
             # Update
             f = open(filename + '~tmp', 'w')
             f.write(header + '\n\n')
+
+            if suffix[-1] == '.h':
+                if not re.search(r'#pragma once', text):
+                    f.write("#pragma once\n")
 
             f.write(text)
             f.close()
@@ -150,6 +163,7 @@ if __name__ == '__main__':
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False)
     parser.add_option("--python-only", action="store_true", dest="python_only", default=False)
     parser.add_option("--cxx-only", action="store_true", dest="cxx_only", default=False)
+    parser.add_option("-f", "--force", action="store_true", dest="force", default=False)
 
     (global_options, args) = parser.parse_args()
     fixupHeader()

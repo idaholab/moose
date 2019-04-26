@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEPFFRACTURESTRESSBASE_H
-#define COMPUTEPFFRACTURESTRESSBASE_H
+#pragma once
 
 #include "ComputeStressBase.h"
 
@@ -79,4 +78,3 @@ protected:
   const MaterialProperty<Real> & _d2Dd2c;
 };
 
-#endif

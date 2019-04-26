@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CONSTANTGRAINFORCEANDTORQUE_H
-#define CONSTANTGRAINFORCEANDTORQUE_H
+#pragma once
 
 #include "GeneralUserObject.h"
 #include "GrainForceAndTorqueInterface.h"
@@ -53,4 +52,3 @@ protected:
   ///@}
 };
 
-#endif // CONSTANTGRAINFORCEANDTORQUE_H

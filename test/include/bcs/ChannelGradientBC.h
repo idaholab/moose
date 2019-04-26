@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CHANNELGRADIENTBC_H
-#define CHANNELGRADIENTBC_H
+#pragma once
 
 #include "IntegratedBC.h"
 
@@ -53,4 +52,3 @@ protected:
   const MaterialProperty<Real> & _h;
 };
 
-#endif // CHANNELGRADIENTBC_H

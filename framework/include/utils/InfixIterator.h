@@ -7,11 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#pragma once
 // infix_iterator.h
 
 // Lifted from Jerry Coffin's 's prefix_ostream_iterator, no copyright or license
-#ifndef INFIXITERATOR_H
-#define INFIXITERATOR_H
 
 #include <ostream>
 #include <iterator>
@@ -48,4 +47,3 @@ public:
   infix_ostream_iterator<T, charT, traits> & operator++(int) { return *this; }
 };
 
-#endif

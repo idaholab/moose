@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWTHERMALCONDUCTIVITYFROMPOROSITY_H
-#define POROUSFLOWTHERMALCONDUCTIVITYFROMPOROSITY_H
+#pragma once
 
 #include "PorousFlowThermalConductivityBase.h"
 
@@ -46,4 +45,3 @@ protected:
   const MaterialProperty<std::vector<Real>> & _dporosity_qp_dvar;
 };
 
-#endif // POROUSFLOWTHERMALCONDUCTIVITYFROMPOROSITY_H

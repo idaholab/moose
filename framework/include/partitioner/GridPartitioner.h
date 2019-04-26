@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GRIDPARTITIONER_H
-#define GRIDPARTITIONER_H
+#pragma once
 
 // MOOSE includes
 #include "MooseEnum.h"
@@ -42,4 +41,3 @@ protected:
   MooseMesh & _mesh;
 };
 
-#endif /* GRIDPARTITIONER_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INTERFACEQPVALUEUSEROBJECT_H
-#define INTERFACEQPVALUEUSEROBJECT_H
+#pragma once
 
 #include "InterfaceValueUserObject.h"
 
@@ -42,4 +41,3 @@ protected:
   const VariableValue & _u_neighbor;
 };
 
-#endif // INTERFACEQPVALUEUSEROBJECT_H

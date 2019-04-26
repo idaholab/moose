@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELLIPSECUTUSEROBJECT_H
-#define ELLIPSECUTUSEROBJECT_H
+#pragma once
 
 #include "GeometricCut3DUserObject.h"
 
@@ -39,4 +38,3 @@ private:
   virtual bool isInsideCutPlane(Point p) const override;
 };
 
-#endif // ELLIPSECUTUSEROBJECT_H

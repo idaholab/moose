@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWFLUIDSTATEFLASHTEST_H
-#define POROUSFLOWFLUIDSTATEFLASHTEST_H
+#pragma once
 
 #include "MooseObjectUnitTest.h"
 #include "PorousFlowFluidStateFlash.h"
@@ -29,4 +28,3 @@ protected:
   const PorousFlowFluidStateFlash * _fp;
 };
 
-#endif // POROUSFLOWFLUIDSTATEFLASHTEST_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEELASTICITYTENSOR_H
-#define COMPUTEELASTICITYTENSOR_H
+#pragma once
 
 #include "ComputeRotatedElasticityTensorBase.h"
 
@@ -32,4 +31,3 @@ protected:
   RankFourTensor _Cijkl;
 };
 
-#endif // COMPUTEELASTICITYTENSOR_H

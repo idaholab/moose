@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NUMSIDEQPS_H
-#define NUMSIDEQPS_H
+#pragma once
 
 // MOOSE includes
 #include "SideIntegralPostprocessor.h"
@@ -32,4 +31,3 @@ public:
   virtual Real computeQpIntegral();
 };
 
-#endif // NUMSIDEQPS_H

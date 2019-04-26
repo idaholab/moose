@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COUPLEDODETIMEDERIVATIVE_H
-#define COUPLEDODETIMEDERIVATIVE_H
+#pragma once
 
 #include "ODETimeKernel.h"
 
@@ -31,4 +30,3 @@ protected:
   VariableValue & _dv_dot_dv;
 };
 
-#endif // ODETIMEDERIVATIVE_H

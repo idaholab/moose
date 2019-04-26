@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GEOMETRICCUT3DUSEROBJECT_H
-#define GEOMETRICCUT3DUSEROBJECT_H
+#pragma once
 
 #include "GeometricCutUserObject.h"
 
@@ -52,4 +51,3 @@ protected:
   Real getRelativePosition(const Point & p1, const Point & p2, const Point & p) const;
 };
 
-#endif // GEOMETRICCUT3DUSEROBJECT_H

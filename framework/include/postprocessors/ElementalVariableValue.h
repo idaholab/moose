@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMENTALVARIABLEVALUE_H
-#define ELEMENTALVARIABLEVALUE_H
+#pragma once
 
 // MOOSE includes
 #include "GeneralPostprocessor.h"
@@ -40,4 +39,3 @@ protected:
   Elem * _element;
 };
 
-#endif // ELEMENTALVARIABLEVALUE_H

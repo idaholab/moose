@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MESHCOLLECTIONGENERATOR_H
-#define MESHCOLLECTIONGENERATOR_H
+#pragma once
 
 #include "MeshGenerator.h"
 #include "libmesh/replicated_mesh.h"
@@ -38,4 +37,3 @@ protected:
   std::vector<std::unique_ptr<MeshBase> *> _meshes;
 };
 
-#endif // MESHCOLLECTIONGENERATOR_H

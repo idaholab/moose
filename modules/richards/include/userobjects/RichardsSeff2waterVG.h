@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSSEFF2WATERVG_H
-#define RICHARDSSEFF2WATERVG_H
+#pragma once
 
 #include "RichardsSeff.h"
 #include "RichardsSeffVG.h"
@@ -65,4 +64,3 @@ protected:
   Real _m;
 };
 
-#endif // RICHARDSSEFF2WATERVG_H

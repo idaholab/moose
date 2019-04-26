@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWFULLYSATURATEDMASSTIMEDERIVATIVE_H
-#define POROUSFLOWFULLYSATURATEDMASSTIMEDERIVATIVE_H
+#pragma once
 
 #include "TimeKernel.h"
 #include "PorousFlowDictator.h"
@@ -99,4 +98,3 @@ protected:
   const MaterialProperty<std::vector<RealGradient>> * const _dstrain_rate_dvar;
 };
 
-#endif // POROUSFLOWFULLYSATURATEDMASSTIMEDERIVATIVE_H

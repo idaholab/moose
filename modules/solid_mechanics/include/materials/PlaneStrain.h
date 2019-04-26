@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PLANESTRAIN_H
-#define PLANESTRAIN_H
+#pragma once
 
 #include "Element.h"
 #include "ScalarCoupleable.h"
@@ -46,4 +45,3 @@ protected:
 };
 }
 
-#endif // SOLIDMECHANICSMATERIALRZ_H

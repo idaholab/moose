@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef WRONGJACOBIANDIFFUSION_H
-#define WRONGJACOBIANDIFFUSION_H
+#pragma once
 
 #include "Kernel.h"
 #include "Material.h"
@@ -52,4 +51,3 @@ private:
   Real _jfactor;
 };
 
-#endif // WRONGJACOBIANDIFFUSION_H

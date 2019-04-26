@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PETSCEXTERNALPARTITIONER_H
-#define PETSCEXTERNALPARTITIONER_H
+#pragma once
 
 // MOOSE includes
 #include "MooseEnum.h"
@@ -54,4 +53,3 @@ private:
   bool _apply_side_weight;
 };
 
-#endif /* PETSCEXTERNALPARTITIONER_H */

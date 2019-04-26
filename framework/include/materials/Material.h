@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATERIAL_H
-#define MATERIAL_H
+#pragma once
 
 // MOOOSE includes
 #include "MaterialProperty.h"
@@ -467,4 +466,3 @@ Material::getZeroMaterialProperty(const std::string & prop_name)
   return preload_with_zero;
 }
 
-#endif // MATERIAL_H

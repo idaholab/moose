@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADSPLITCHPARSED_H
-#define ADSPLITCHPARSED_H
+#pragma once
 
 #include "ADSplitCHCRes.h"
 #include "DerivativeMaterialPropertyNameInterface.h"
@@ -43,4 +42,3 @@ protected:
   usingSplitCHCResMembers;
 };
 
-#endif // ADSPLITCHPARSED_H

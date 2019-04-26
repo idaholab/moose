@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef JVARMAPINTERFACE_H
-#define JVARMAPINTERFACE_H
+#pragma once
 
 #include "MooseVariableFE.h"
 #include "NonlinearSystemBase.h"
@@ -151,4 +150,3 @@ JvarMapIntegratedBCInterface<T>::computeJacobianBlock(MooseVariableFEBase & jvar
   T::computeJacobianBlock(jvar);
 }
 
-#endif // JVARMAPINTERFACE_H

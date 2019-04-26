@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SHAPEUSEROBJECT_H
-#define SHAPEUSEROBJECT_H
+#pragma once
 
 #include "Assembly.h"
 #include "Coupleable.h"
@@ -144,4 +143,3 @@ ShapeUserObject<T>::executeJacobianWrapper(unsigned int jvar,
   }
 }
 
-#endif // SHAPEUSEROBJECT_H

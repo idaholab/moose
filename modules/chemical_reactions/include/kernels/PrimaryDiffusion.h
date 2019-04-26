@@ -7,10 +7,9 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#pragma once
 #include "Diffusion.h"
 
-#ifndef PRIMARYDIFFUSION_H
-#define PRIMARYDIFFUSION_H
 
 // Forward Declarations
 class PrimaryDiffusion;
@@ -35,4 +34,3 @@ protected:
   const MaterialProperty<Real> & _diffusivity;
 };
 
-#endif // PRIMARYDIFFUSION_H

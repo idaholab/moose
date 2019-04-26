@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SYMMTENSOR_H
-#define SYMMTENSOR_H
+#pragma once
 
 #include "ColumnMajorMatrix.h"
 #include "MaterialProperty.h"
@@ -480,4 +479,3 @@ void dataStore(std::ostream & stream, const SymmTensor & v, void * /*context*/);
 template <>
 void dataLoad(std::istream & stream, SymmTensor & v, void * /*context*/);
 
-#endif // SYMMTENSOR_H

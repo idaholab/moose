@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DISCRETENUCLEATIONMAP_H
-#define DISCRETENUCLEATIONMAP_H
+#pragma once
 
 #include "ElementUserObject.h"
 #include "DiscreteNucleationInserterBase.h"
@@ -75,4 +74,3 @@ protected:
   ///@}
 };
 
-#endif // DISCRETENUCLEATIONMAP_H

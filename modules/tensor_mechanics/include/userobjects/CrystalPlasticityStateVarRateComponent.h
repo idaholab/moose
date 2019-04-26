@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CRYSTALPLASTICITYSTATEVARRATECOMPONENT_H
-#define CRYSTALPLASTICITYSTATEVARRATECOMPONENT_H
+#pragma once
 
 #include "CrystalPlasticityUOBase.h"
 
@@ -31,4 +30,3 @@ public:
                                                        std::vector<Real> & val) const = 0;
 };
 
-#endif // CRYSTALPLASTICITYSTATEVARRATECOMPONENT_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADDPERIODICBCACTION_H
-#define ADDPERIODICBCACTION_H
+#pragma once
 
 #include "Action.h"
 
@@ -47,4 +46,3 @@ protected:
   MooseMesh * _mesh;
 };
 
-#endif // ADDPERIODICBCACTION_H

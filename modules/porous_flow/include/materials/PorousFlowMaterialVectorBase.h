@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWMATERIALVECTORBASE_H
-#define POROUSFLOWMATERIALVECTORBASE_H
+#pragma once
 
 #include "PorousFlowMaterial.h"
 #include "DerivativeMaterialInterface.h"
@@ -37,4 +36,3 @@ protected:
   const unsigned int _num_var;
 };
 
-#endif // POROUSFLOWMATERIALVECTORBASE_H

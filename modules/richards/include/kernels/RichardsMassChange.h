@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSMASSCHANGE
-#define RICHARDSMASSCHANGE
+#pragma once
 
 #include "TimeDerivative.h"
 #include "RichardsVarNames.h"
@@ -75,5 +74,3 @@ protected:
    */
   Real computeQpJac(unsigned int wrt_num);
 };
-
-#endif // RICHARDSMASSCHANGE

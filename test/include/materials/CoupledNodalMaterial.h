@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COUPLEDNODALMATERIAL_H
-#define COUPLEDNODALMATERIAL_H
+#pragma once
 
 #include "Material.h"
 
@@ -34,4 +33,3 @@ protected:
   const Real & _coupled_val;
 };
 
-#endif // COUPLEDNODALMATERIAL_H

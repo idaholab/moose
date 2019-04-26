@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef AIR_H
-#define AIR_H
+#pragma once
 
 #include "NavierStokesMaterial.h"
 
@@ -46,4 +45,3 @@ protected:
   Real _mu;
 };
 
-#endif // AIR_H

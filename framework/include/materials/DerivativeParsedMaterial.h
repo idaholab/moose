@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DERIVATIVEPARSEDMATERIAL_H
-#define DERIVATIVEPARSEDMATERIAL_H
+#pragma once
 
 #include "DerivativeParsedMaterialHelper.h"
 #include "ParsedMaterialBase.h"
@@ -29,4 +28,3 @@ public:
   DerivativeParsedMaterial(const InputParameters & parameters);
 };
 
-#endif // DERIVATIVEPARSEDMATERIAL_H

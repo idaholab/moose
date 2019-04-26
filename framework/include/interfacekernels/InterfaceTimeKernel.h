@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INTERFACETIMEKERNEL_H
-#define INTERFACETIMEKERNEL_H
+#pragma once
 
 // local includes
 #include "InterfaceKernel.h"
@@ -51,4 +50,3 @@ protected:
   const VariableValue & _dneighbor_value_dot_du;
 };
 
-#endif

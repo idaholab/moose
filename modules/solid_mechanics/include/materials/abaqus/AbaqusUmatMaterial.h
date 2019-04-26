@@ -7,10 +7,9 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#pragma once
 #include "SolidModel.h"
 
-#ifndef ABAQUSUMATMATERIAL_H
-#define ABAQUSUMATMATERIAL_H
 
 typedef void (*umat_t)(Real STRESS[],
                        Real STATEV[],
@@ -104,4 +103,3 @@ protected:
   MaterialProperty<Real> & _creep_dissipation;
 };
 
-#endif // ABAQUSUMATMATERIAL_H

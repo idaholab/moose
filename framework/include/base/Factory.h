@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FACTORY_H
-#define FACTORY_H
+#pragma once
 
 #include <set>
 #include <vector>
@@ -405,4 +404,3 @@ protected:
   std::set<std::pair<std::string, std::string>> _objects_by_label;
 };
 
-#endif /* FACTORY_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEPLASTICHEATENERGY_H
-#define COMPUTEPLASTICHEATENERGY_H
+#pragma once
 
 #include "DerivativeMaterialInterface.h"
 #include "Material.h"
@@ -57,4 +56,3 @@ protected:
   MaterialProperty<RankTwoTensor> & _dplastic_heat_dstrain;
 };
 
-#endif // COMPUTEPLASTICHEATENERGY_H

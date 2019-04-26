@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FXVOLUMEUSEROBJECT_H
-#define FXVOLUMEUSEROBJECT_H
+#pragma once
 
 #include "ElementIntegralVariableUserObject.h"
 #include "FXIntegralBaseUserObject.h"
@@ -32,4 +31,3 @@ protected:
   virtual Real getVolume() const;
 };
 
-#endif // FXVOLUMEUSEROBJECT_H

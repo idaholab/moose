@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MEMORYUTILS_H
-#define MEMORYUTILS_H
+#pragma once
 
 #include "Moose.h"
 #include "MooseEnum.h"
@@ -51,4 +50,3 @@ std::size_t convertBytes(std::size_t bytes, MemUnits unit);
 
 } // namespace MemoryUtils
 
-#endif // MEMORYUTILS_H

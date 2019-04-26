@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADNODALBC_H
-#define ADNODALBC_H
+#pragma once
 
 #include "NodalBCBase.h"
 #include "MooseVariableInterface.h"
@@ -65,4 +64,3 @@ declareADValidParams(ADVectorNodalBC);
 #define usingNodalBCMembers usingTemplNodalBCMembers(Real)
 #define usingVectorNodalBCMembers usingTemplNodalBCMembers(RealVectorValue)
 
-#endif /* ADNODALBC_H */

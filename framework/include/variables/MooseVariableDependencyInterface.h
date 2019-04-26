@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEVARIABLEDEPENDENCYINTERFACE_H
-#define MOOSEVARIABLEDEPENDENCYINTERFACE_H
+#pragma once
 
 #include <set>
 
@@ -47,4 +46,3 @@ private:
   std::set<MooseVariableFEBase *> _moose_variable_dependencies;
 };
 
-#endif // MOOSEVARIABLEDEPENDENCYINTERFACE_H

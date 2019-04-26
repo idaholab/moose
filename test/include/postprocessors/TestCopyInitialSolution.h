@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TESTCOPYINITIALSOLUTION_H
-#define TESTCOPYINITIALSOLUTION_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 
@@ -33,4 +32,3 @@ protected:
   bool _value;
 };
 
-#endif

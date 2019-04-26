@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RADIATIVEHEATFLUXBCBASE_H
-#define RADIATIVEHEATFLUXBCBASE_H
+#pragma once
 
 #include "IntegratedBC.h"
 
@@ -49,4 +48,3 @@ protected:
   const Real _eps_boundary;
 };
 
-#endif // RADIATIVEHEATFLUXBCBASE_H

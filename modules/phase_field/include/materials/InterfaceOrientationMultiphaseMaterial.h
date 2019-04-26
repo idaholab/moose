@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INTERFACEORIENTATIONMULTIPHASEMATERIAL_H
-#define INTERFACEORIENTATIONMULTIPHASEMATERIAL_H
+#pragma once
 
 #include "Material.h"
 
@@ -49,4 +48,3 @@ private:
   const VariableGradient & _grad_etab;
 };
 
-#endif // INTERFACEORIENTATIONMULTIPHASEMATERIAL_H

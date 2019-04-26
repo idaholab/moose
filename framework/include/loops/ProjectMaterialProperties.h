@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PROJECTMATERIALPROPERTIES_H
-#define PROJECTMATERIALPROPERTIES_H
+#pragma once
 
 // MOOSE includes
 #include "ThreadedElementLoop.h"
@@ -58,4 +57,3 @@ protected:
   bool _need_internal_side_material;
 };
 
-#endif // PROJECTMATERIALPROPERTIES_H

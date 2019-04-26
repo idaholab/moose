@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADALLENCAHNBASE_H
-#define ADALLENCAHNBASE_H
+#pragma once
 
 #include "ADKernelValue.h"
 #include "DerivativeMaterialPropertyNameInterface.h"
@@ -67,4 +66,3 @@ ADAllenCahnBase<compute_stage, T>::precomputeQpResidual()
   return _prop_L[_qp] * computeDFDOP();
 }
 
-#endif // ADALLENCAHNBASE_H

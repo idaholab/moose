@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef USEROBJECTKERNEL_H
-#define USEROBJECTKERNEL_H
+#pragma once
 
 #include "Kernel.h"
 #include "MTUserObject.h"
@@ -34,4 +33,3 @@ protected:
   const MTUserObject & _mutley;
 };
 
-#endif /* USEROBJECTKERNEL_H */

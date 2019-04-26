@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INTERACTIONINTEGRALBENCHMARKBC_H
-#define INTERACTIONINTEGRALBENCHMARKBC_H
+#pragma once
 
 #include "PresetNodalBC.h"
 #include "CrackFrontDefinition.h"
@@ -52,4 +51,3 @@ protected:
   Function & _kiii_function;
 };
 
-#endif // INTERACTIONINTEGRALBENCHMARKBC_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EXCEPTIONKERNEL_H
-#define EXCEPTIONKERNEL_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -53,4 +52,3 @@ protected:
   bool time_to_throw() const;
 };
 
-#endif /* EXCEPTIONKERNEL_H */

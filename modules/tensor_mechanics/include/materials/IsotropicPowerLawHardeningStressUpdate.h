@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ISOTROPICPOWERLAWHARDENINGSTRESSUPDATE_H
-#define ISOTROPICPOWERLAWHARDENINGSTRESSUPDATE_H
+#pragma once
 
 #include "IsotropicPlasticityStressUpdate.h"
 #include "MooseMesh.h"
@@ -59,4 +58,3 @@ protected:
   Real getIsotropicLameLambda(const RankFourTensor & elasticity_tensor);
 };
 
-#endif // ISOTROPICPOWERLAWHARDENINGSTRESSUPDATE_H

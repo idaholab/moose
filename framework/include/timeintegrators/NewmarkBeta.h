@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NEWMARKBETA_H
-#define NEWMARKBETA_H
+#pragma once
 
 #include "TimeIntegrator.h"
 #include "MathUtils.h"
@@ -71,4 +70,3 @@ NewmarkBeta::computeTimeDerivativeHelper(
   MathUtils::addScaled(_gamma * _dt, u_dotdot, u_dot);
 }
 
-#endif /* NEWMARKBETA_H */

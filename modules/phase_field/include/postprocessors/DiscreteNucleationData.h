@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DISCRETENUCLEATIONDATA_H
-#define DISCRETENUCLEATIONDATA_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 #include "DiscreteNucleationInserterBase.h"
@@ -49,4 +48,3 @@ protected:
   } _value_type;
 };
 
-#endif // DISCRETENUCLEATIONDATA_H

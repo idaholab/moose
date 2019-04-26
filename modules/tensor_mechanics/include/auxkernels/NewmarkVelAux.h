@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NEWMARKVELAUX_H
-#define NEWMARKVELAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -35,4 +34,3 @@ protected:
   Real _gamma;
 };
 
-#endif // NEWMARKVELAUX_H

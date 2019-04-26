@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWCONNECTEDNODESTEST_H
-#define POROUSFLOWCONNECTEDNODESTEST_H
+#pragma once
 
 #include "gtest_include.h"
 #include "PorousFlowConnectedNodes.h"
@@ -43,4 +42,3 @@ protected:
   PorousFlowConnectedNodes _n2;
 };
 
-#endif // POROUSFLOWCONNECTEDNODESTEST_H

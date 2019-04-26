@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FINDVALUEONLINE_H
-#define FINDVALUEONLINE_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 #include "Coupleable.h"
@@ -69,4 +68,3 @@ protected:
   std::unique_ptr<PointLocatorBase> _pl;
 };
 
-#endif // FINDVALUEONLINE_H

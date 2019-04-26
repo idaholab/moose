@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADVECTIVEFLUXCALCULATORBASE_H
-#define ADVECTIVEFLUXCALCULATORBASE_H
+#pragma once
 
 #include "ElementUserObject.h"
 #include "PorousFlowConnectedNodes.h"
@@ -225,4 +224,3 @@ protected:
   void zeroedConnection(std::map<dof_id_type, Real> & the_map, dof_id_type node_i) const;
 };
 
-#endif // ADVECTIVEFLUXCALCULATORBASE_H

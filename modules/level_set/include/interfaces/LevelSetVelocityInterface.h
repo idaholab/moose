@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LEVELSETVELOCITYINTERFACE_H
-#define LEVELSETVELOCITYINTERFACE_H
+#pragma once
 
 // MOOSE includes
 #include "InputParameters.h"
@@ -77,4 +76,3 @@ LevelSetVelocityInterface<T>::LevelSetVelocityInterface(const InputParameters & 
 {
 }
 
-#endif // LEVELSETVELOCITYINTERFACE_H

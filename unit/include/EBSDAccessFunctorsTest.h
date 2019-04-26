@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EBSDACCESSFUNCTORSTEST_H
-#define EBSDACCESSFUNCTORSTEST_H
+#pragma once
 
 #include "gtest_include.h"
 #include "EBSDAccessFunctors.h"
@@ -54,4 +53,3 @@ protected:
   EulerAngles _angles;
 };
 
-#endif // EBSDACCESSFUNCTORSTEST_H

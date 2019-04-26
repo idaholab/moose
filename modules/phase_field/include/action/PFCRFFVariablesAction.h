@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PFCRFFVARIABLESACTION_H
-#define PFCRFFVARIABLESACTION_H
+#pragma once
 
 #include "InputParameters.h"
 #include "Action.h"
@@ -34,4 +33,3 @@ private:
   const std::string _L_name_base;
 };
 
-#endif // PFCRFFVARIABLESACTION_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEFDRESIDUALFUNCTOR_H
-#define COMPUTEFDRESIDUALFUNCTOR_H
+#pragma once
 
 #include "libmesh/nonlinear_implicit_system.h"
 
@@ -29,4 +28,3 @@ public:
                 NonlinearImplicitSystem & sys) override;
 };
 
-#endif

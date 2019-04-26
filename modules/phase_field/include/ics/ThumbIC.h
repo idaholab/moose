@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef THUMBIC_H
-#define THUMBIC_H
+#pragma once
 
 #include "InitialCondition.h"
 
@@ -36,4 +35,3 @@ protected:
   const Real _outvalue;
 };
 
-#endif // THUMBIC_H

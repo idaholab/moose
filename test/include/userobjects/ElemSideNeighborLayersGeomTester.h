@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMSIDENEIGHBORLAYERSGEOMTESTER_H
-#define ELEMSIDENEIGHBORLAYERSGEOMTESTER_H
+#pragma once
 
 #include "ElemSideNeighborLayersTester.h"
 
@@ -27,4 +26,3 @@ public:
   ElemSideNeighborLayersGeomTester(const InputParameters & parameters);
 };
 
-#endif // ELEMSIDENEIGHBORLAYERSGEOMTESTER_H

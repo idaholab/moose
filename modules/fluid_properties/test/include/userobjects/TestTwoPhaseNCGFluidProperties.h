@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TESTTWOPHASENCGFLUIDPROPERTIES_H
-#define TESTTWOPHASENCGFLUIDPROPERTIES_H
+#pragma once
 
 #include "TwoPhaseNCGFluidProperties.h"
 
@@ -28,4 +27,3 @@ public:
   TestTwoPhaseNCGFluidProperties(const InputParameters & parameters);
 };
 
-#endif /* TESTTWOPHASENCGFLUIDPROPERTIES_H */

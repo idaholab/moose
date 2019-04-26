@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTECONCENTRATIONDEPENDENTELASTICITYTENSOR_H
-#define COMPUTECONCENTRATIONDEPENDENTELASTICITYTENSOR_H
+#pragma once
 
 #include "ComputeRotatedElasticityTensorBase.h"
 
@@ -41,4 +40,3 @@ protected:
   MaterialProperty<RankFourTensor> & _delasticity_tensor_dc;
 };
 
-#endif // COMPUTECONCENTRATIONDEPENDENTELASTICITYTENSOR_H

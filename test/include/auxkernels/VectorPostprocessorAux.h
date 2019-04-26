@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VECTORPOSTPROCESSORAUX_H
-#define VECTORPOSTPROCESSORAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -40,4 +39,3 @@ protected:
   unsigned int _index;
 };
 
-#endif // VECTORPOSTPROCESSORAUX_H

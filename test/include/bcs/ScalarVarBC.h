@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SCALARVARBC_H
-#define SCALARVARBC_H
+#pragma once
 
 #include "IntegratedBC.h"
 
@@ -38,4 +37,3 @@ protected:
   VariableValue & _alpha;
 };
 
-#endif // SCALARVARBC_H

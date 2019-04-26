@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ODETIMEKERNEL_H
-#define ODETIMEKERNEL_H
+#pragma once
 
 #include "ODEKernel.h"
 
@@ -37,4 +36,3 @@ protected:
   const VariableValue & _du_dot_du;
 };
 
-#endif

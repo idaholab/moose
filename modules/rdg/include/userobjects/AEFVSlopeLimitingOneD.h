@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef AEFVSLOPELIMITINGONED_H
-#define AEFVSLOPELIMITINGONED_H
+#pragma once
 
 #include "SlopeLimitingBase.h"
 
@@ -40,4 +39,3 @@ protected:
   MooseEnum _scheme;
 };
 
-#endif

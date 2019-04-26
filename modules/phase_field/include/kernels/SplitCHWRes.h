@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SPLITCHWRES_H
-#define SPLITCHWRES_H
+#pragma once
 
 #include "SplitCHWResBase.h"
 
@@ -26,4 +25,3 @@ public:
 template <>
 InputParameters validParams<SplitCHWRes>();
 
-#endif // SPLITCHWRES_H

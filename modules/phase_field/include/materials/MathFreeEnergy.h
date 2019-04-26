@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATHFREEENERGY_H
-#define MATHFREEENERGY_H
+#pragma once
 
 #include "DerivativeFunctionMaterialBase.h"
 
@@ -39,4 +38,3 @@ private:
   unsigned int _c_var;
 };
 
-#endif // MATHFREEENERGY_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TOTALENERGYCONVECTIVEFLUX_H
-#define TOTALENERGYCONVECTIVEFLUX_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -42,4 +41,3 @@ protected:
   const VariableValue & _enthalpy;
 };
 
-#endif /* TOTALENERGYCONVECTIVEFLUX_H */

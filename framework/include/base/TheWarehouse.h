@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef THEWAREHOUSE_H
-#define THEWAREHOUSE_H
+#pragma once
 
 #include <map>
 #include <string>
@@ -331,4 +330,3 @@ private:
   std::mutex _obj_cache_mutex;
 };
 
-#endif // THEWAREHOUSE_H

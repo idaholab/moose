@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADDLOTSOFDIFFUSION_H
-#define ADDLOTSOFDIFFUSION_H
+#pragma once
 
 #include "AddVariableAction.h"
 
@@ -25,4 +24,3 @@ public:
   virtual void act();
 };
 
-#endif // ADDLOTSOFDIFFUSION_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSFULLYUPWINDFLUX
-#define RICHARDSFULLYUPWINDFLUX
+#pragma once
 
 #include "Kernel.h"
 #include "RichardsVarNames.h"
@@ -142,5 +141,3 @@ protected:
    */
   std::vector<const VariableValue *> _ps_at_nodes;
 };
-
-#endif // RICHARDSFULLYUPWINDFLUX

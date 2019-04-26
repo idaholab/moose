@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef XFEMFUNCS_H
-#define XFEMFUNCS_H
+#pragma once
 
 #include <vector>
 #include "libmesh/point.h"
@@ -66,4 +65,3 @@ double r8_acos(double c);
 double angle_rad_3d(double p1[3], double p2[3], double p3[3]);
 } // namespace Xfem
 
-#endif

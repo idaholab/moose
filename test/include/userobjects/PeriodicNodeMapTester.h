@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PERIODICNODEMAPTESTER_H
-#define PERIODICNODEMAPTESTER_H
+#pragma once
 
 #include "ElementUserObject.h"
 
@@ -49,4 +48,3 @@ protected:
   PerfID _perf_buildmap;
 };
 
-#endif // PERIODICNODEMAPTESTER_H

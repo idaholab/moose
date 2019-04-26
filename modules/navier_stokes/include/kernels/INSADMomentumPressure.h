@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INSADMOMENTUMPRESSURE_H
-#define INSADMOMENTUMPRESSURE_H
+#pragma once
 
 #include "ADKernel.h"
 
@@ -39,4 +38,3 @@ protected:
   usingVectorKernelMembers;
 };
 
-#endif // INSADMOMENTUMPRESSURE_H

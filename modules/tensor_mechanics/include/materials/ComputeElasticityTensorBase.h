@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEELASTICITYTENSORBASE_H
-#define COMPUTEELASTICITYTENSORBASE_H
+#pragma once
 
 #include "DerivativeMaterialInterface.h"
 #include "Material.h"
@@ -42,4 +41,3 @@ protected:
   Function * const _prefactor_function;
 };
 
-#endif // COMPUTEELASTICITYTENSORBASE_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RESTARTABLEDATA_H
-#define RESTARTABLEDATA_H
+#pragma once
 
 // MOOSE includes
 #include "DataIO.h"
@@ -157,4 +156,3 @@ RestartableData<T>::load(std::istream & stream)
  */
 using RestartableDatas = std::vector<std::map<std::string, std::unique_ptr<RestartableDataValue>>>;
 
-#endif

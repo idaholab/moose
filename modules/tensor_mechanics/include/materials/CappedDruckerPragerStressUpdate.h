@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CAPPEDDRUCKERPRAGERSTRESSUPDATE_H
-#define CAPPEDDRUCKERPRAGERSTRESSUPDATE_H
+#pragma once
 
 #include "TwoParameterPlasticityStressUpdate.h"
 #include "TensorMechanicsHardeningModel.h"
@@ -191,4 +190,3 @@ protected:
   virtual RankFourTensor d2qdstress2(const RankTwoTensor & stress) const override;
 };
 
-#endif // CAPPEDDRUCKERPRAGERSTRESSUPDATE_H

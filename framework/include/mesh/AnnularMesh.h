@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ANNULARMESH_H
-#define ANNULARMESH_H
+#pragma once
 
 #include "MooseMesh.h"
 
@@ -74,4 +73,3 @@ protected:
   bool _dims_may_have_changed;
 };
 
-#endif /* ANNULARMESH_H */

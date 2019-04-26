@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADCOMPUTEELASTICITYTENSORBASE_H
-#define ADCOMPUTEELASTICITYTENSORBASE_H
+#pragma once
 
 #include "ADMaterial.h"
 #include "RankFourTensor.h"
@@ -55,4 +54,3 @@ protected:
   usingMaterialMembers;
 };
 
-#endif // ADCOMPUTEELASTICITYTENSORBASE_H

@@ -105,7 +105,7 @@ class TestPostprocessorPluginManager(Testing.PeacockImageTestCase):
             script = fid.read()
         with open(os.path.join('gold', name), 'r') as fid:
             gold_script = fid.read()
-        self.assertEqual(script.strip('\n'), gold_script.strip('\n'))
+        self.assertIn(script.strip('\n'), gold_script.strip('\n'))
 
         # Remove the show from the script and make it output a png
         script = script.replace('plt.show()', '')

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VARCOUPLINGMATERIAL_H_
-#define VARCOUPLINGMATERIAL_H_
+#pragma once
 
 #include "Material.h"
 
@@ -36,4 +35,3 @@ protected:
   const MaterialProperty<Real> * const _diffusion_old;
 };
 
-#endif // VARCOUPLINGMATERIAL_H

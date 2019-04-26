@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSRELPERMPOWERGAS_H
-#define RICHARDSRELPERMPOWERGAS_H
+#pragma once
 
 #include "RichardsRelPerm.h"
 
@@ -53,4 +52,3 @@ protected:
   Real _n;
 };
 
-#endif // RICHARDSRELPERMPOWERGAS_H

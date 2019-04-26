@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEVOLUMETRICDEFORMGRAD_H
-#define COMPUTEVOLUMETRICDEFORMGRAD_H
+#pragma once
 
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
@@ -39,4 +38,3 @@ protected:
   MaterialProperty<RankTwoTensor> & _post_deform_grad;
 };
 
-#endif // COMPUTEVOLUMETRICDEFORMGARD_H

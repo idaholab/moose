@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MULTICOMPONENTFLUIDPROPERTIESMATERIALPT_H
-#define MULTICOMPONENTFLUIDPROPERTIESMATERIALPT_H
+#pragma once
 
 #include "Material.h"
 #include "MultiComponentFluidProperties.h"
@@ -51,4 +50,3 @@ protected:
   const MultiComponentFluidProperties & _fp;
 };
 
-#endif /* MULTICOMPONENTFLUIDPROPERTIESMATERIALPT_H */

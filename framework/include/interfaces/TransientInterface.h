@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TRANSIENTINTERFACE_H
-#define TRANSIENTINTERFACE_H
+#pragma once
 
 #include "Moose.h"
 
@@ -73,4 +72,3 @@ private:
   const std::string _ti_name;
 };
 
-#endif /* TRANSIENTINTERFACE_H */

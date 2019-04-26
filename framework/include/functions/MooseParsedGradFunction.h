@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEPARSEDGRADFUNCTION_H
-#define MOOSEPARSEDGRADFUNCTION_H
+#pragma once
 
 // MOOSE includes
 #include "Function.h"
@@ -79,4 +78,3 @@ protected:
   std::unique_ptr<MooseParsedFunctionWrapper> _grad_function_ptr;
 };
 
-#endif // MOOSEPARSEDGRADFUNCTION_H

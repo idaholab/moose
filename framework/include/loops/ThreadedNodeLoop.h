@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef THREADEDNODELOOP_H
-#define THREADEDNODELOOP_H
+#pragma once
 
 #include "FEProblemBase.h"
 #include "ParallelUniqueId.h"
@@ -136,4 +135,3 @@ ThreadedNodeLoop<RangeType, IteratorType>::postNode(IteratorType & /*node_it*/)
 {
 }
 
-#endif // THREADEDNODELOOP_H

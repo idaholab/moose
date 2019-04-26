@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef STIFFENEDGASFLUIDPROPERTIESTEST_H
-#define STIFFENEDGASFLUIDPROPERTIESTEST_H
+#pragma once
 
 #include "MooseObjectUnitTest.h"
 #include "StiffenedGasFluidProperties.h"
@@ -38,4 +37,3 @@ protected:
   const StiffenedGasFluidProperties * _fp;
 };
 
-#endif /* STIFFENEDGASFLUIDPROPERTIESTEST_H */

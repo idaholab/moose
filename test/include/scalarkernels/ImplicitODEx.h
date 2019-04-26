@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef IMPLICITODEX_H
-#define IMPLICITODEX_H
+#pragma once
 
 #include "ODEKernel.h"
 
@@ -36,4 +35,3 @@ protected:
   VariableValue & _y;
 };
 
-#endif /* IMPLICITODEX_H */

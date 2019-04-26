@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COUPLEDBEEQUILIBRIUMSUB_H
-#define COUPLEDBEEQUILIBRIUMSUB_H
+#pragma once
 
 #include "TimeDerivative.h"
 
@@ -63,4 +62,3 @@ private:
   const VariableValue & _u_old;
 };
 
-#endif // COUPLEDBEEQUILIBRIUMSUB_H

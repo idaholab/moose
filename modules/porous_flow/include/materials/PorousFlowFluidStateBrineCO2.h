@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWFLUIDSTATEBRINECO2_H
-#define POROUSFLOWFLUIDSTATEBRINECO2_H
+#pragma once
 
 #include "PorousFlowFluidState.h"
 
@@ -35,4 +34,3 @@ public:
 protected:
 };
 
-#endif // POROUSFLOWFLUIDSTATEBRINECO2_H

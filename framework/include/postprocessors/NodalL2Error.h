@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NODALL2ERROR_H
-#define NODALL2ERROR_H
+#pragma once
 
 #include "NodalVariablePostprocessor.h"
 
@@ -35,4 +34,3 @@ protected:
   Function & _func;
 };
 
-#endif /* NODALL2ERROR_H */

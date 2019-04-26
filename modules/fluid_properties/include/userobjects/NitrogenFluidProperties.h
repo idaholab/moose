@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NITROGENFLUIDPROPERTIES_H
-#define NITROGENFLUIDPROPERTIES_H
+#pragma once
 
 #include "HelmholtzFluidProperties.h"
 #include <array>
@@ -210,4 +209,3 @@ protected:
 
 #pragma GCC diagnostic pop
 
-#endif /* NITROGENFLUIDPROPERTIES_H */

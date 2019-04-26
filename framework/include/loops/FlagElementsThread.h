@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FLAGELEMENTSTHREAD_H
-#define FLAGELEMENTSTHREAD_H
+#pragma once
 
 #include "ThreadedElementLoop.h"
 
@@ -45,4 +44,3 @@ protected:
   unsigned int _max_h_level;
 };
 
-#endif // FLAGELEMENTSTHREAD_H

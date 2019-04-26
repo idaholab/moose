@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DISPLACEMENTABOUTAXIS_H
-#define DISPLACEMENTABOUTAXIS_H
+#pragma once
 
 #include "PresetNodalBC.h"
 
@@ -59,4 +58,3 @@ protected:
   ColumnMajorMatrix _transformation_matrix_inv;
 };
 
-#endif // DISPLACEMENTABOUTAXIS_H

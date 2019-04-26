@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PARSEDGENERATESIDESET_H
-#define PARSEDGENERATESIDESET_H
+#pragma once
 
 #include "SideSetsGeneratorBase.h"
 #include "FunctionParserUtils.h"
@@ -57,4 +56,3 @@ protected:
   ADFunctionPtr _func_F;
 };
 
-#endif // PARSEDGENERATESIDESET_H

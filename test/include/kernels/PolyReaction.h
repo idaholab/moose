@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POLYREACTION_H
-#define POLYREACTION_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -26,4 +25,3 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 };
-#endif // POLYREACTION_H

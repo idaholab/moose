@@ -7,6 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#pragma once
 /**
  * A node in the PerfGraph.  Stores the timing for a particular section of code.
  *
@@ -14,8 +15,6 @@
  * within the Node - and only raw pointers are handed back out.
  */
 
-#ifndef PERFNODE_H
-#define PERFNODE_H
 
 #include "MooseTypes.h"
 
@@ -123,4 +122,3 @@ protected:
   std::map<PerfID, std::unique_ptr<PerfNode>> _children;
 };
 
-#endif

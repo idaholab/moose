@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSPIECEWISELINEARSINK
-#define RICHARDSPIECEWISELINEARSINK
+#pragma once
 
 #include "IntegratedBC.h"
 #include "LinearInterpolation.h"
@@ -165,5 +164,3 @@ protected:
   /// derivative of residual wrt the wrt_num Richards variable
   Real jac(unsigned int wrt_num);
 };
-
-#endif // RichardsPiecewiseLinearSink

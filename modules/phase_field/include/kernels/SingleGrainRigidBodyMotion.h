@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SINGLEGRAINRIGIDBODYMOTION_H
-#define SINGLEGRAINRIGIDBODYMOTION_H
+#pragma once
 
 #include "GrainRigidBodyMotionBase.h"
 
@@ -38,4 +37,3 @@ protected:
   unsigned int _op_index;
 };
 
-#endif // SINGLEGRAINRIGIDBODYMOTION_H

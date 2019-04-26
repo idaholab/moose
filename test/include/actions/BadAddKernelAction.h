@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef BADADDKERNELACTION_H
-#define BADADDKERNELACTION_H
+#pragma once
 
 #include "MooseObjectAction.h"
 
@@ -30,4 +29,3 @@ public:
   virtual void act();
 };
 
-#endif // BADADDKERNELACTION_H

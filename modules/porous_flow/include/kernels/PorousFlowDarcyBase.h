@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWDARCYBASE_H
-#define POROUSFLOWDARCYBASE_H
+#pragma once
 
 #include "Kernel.h"
 #include "PorousFlowDictator.h"
@@ -205,4 +204,3 @@ protected:
   void harmonicMean(JacRes res_or_jac, unsigned int ph, unsigned int pvar);
 };
 
-#endif // POROUSFLOWDARCYBASE_H

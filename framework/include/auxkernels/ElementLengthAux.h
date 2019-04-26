@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMENTLENGTHAUX_H
-#define ELEMENTLENGTHAUX_H
+#pragma once
 
 // MOOSE includes
 #include "AuxKernel.h"
@@ -37,4 +36,3 @@ protected:
   const bool _use_min;
 };
 
-#endif // ELEMENTLENGTHAUX_H

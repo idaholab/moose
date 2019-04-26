@@ -6,8 +6,8 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#ifndef POLYNOMIALFREEENERGY_H
-#define POLYNOMIALFREEENERGY_H
+
+#pragma once
 
 #include "DerivativeParsedMaterialHelper.h"
 #include "ExpressionBuilder.h"
@@ -41,4 +41,3 @@ protected:
   MooseEnum _order;
 };
 
-#endif // POLYNOMIALFREEENERGY_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SWITCHINGFUNCTIONPENALTY_H
-#define SWITCHINGFUNCTIONPENALTY_H
+#pragma once
 
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
@@ -55,4 +54,3 @@ protected:
   int _a;
 };
 
-#endif // SWITCHINGFUNCTIONPENALTY_H

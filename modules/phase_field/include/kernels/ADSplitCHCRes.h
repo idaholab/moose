@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADSPLITCHCRES_H
-#define ADSPLITCHCRES_H
+#pragma once
 
 #include "ADSplitCHBase.h"
 
@@ -42,4 +41,3 @@ protected:
   usingSplitCHBaseMembers;
 };
 
-#endif // ADSPLITCHCRES_H

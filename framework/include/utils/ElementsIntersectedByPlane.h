@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMENTSINTERSECTEDBYPLANE_H
-#define ELEMENTSINTERSECTEDBYPLANE_H
+#pragma once
 
 #include "Moose.h"
 
@@ -54,4 +53,3 @@ void elementsIntersectedByPlane(const Point & p0,
                                 std::vector<const Elem *> & intersected_elems);
 }
 
-#endif // ELEMENTSINTERSECTEDBYPLANE_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADCOMPUTEINCREMENTALSTRAINBASE_H
-#define ADCOMPUTEINCREMENTALSTRAINBASE_H
+#pragma once
 
 #include "ADComputeStrainBase.h"
 
@@ -59,4 +58,3 @@ protected:
   usingComputeStrainBaseMembers;
 };
 
-#endif // ADCOMPUTEINCREMENTALSTRAINBASE_H

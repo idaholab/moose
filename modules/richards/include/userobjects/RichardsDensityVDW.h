@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSDENSITYVDW_H
-#define RICHARDSDENSITYVDW_H
+#pragma once
 
 #include "RichardsDensity.h"
 
@@ -93,4 +92,3 @@ protected:
   Real densityVDW(Real p) const;
 };
 
-#endif // RICHARDSDENSITYVDW_H

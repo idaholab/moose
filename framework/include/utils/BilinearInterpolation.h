@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef BILINEARINTERPOLATION_H
-#define BILINEARINTERPOLATION_H
+#pragma once
 
 // MOOSE includes
 #include "ColumnMajorMatrix.h"
@@ -64,4 +63,3 @@ private:
   static int _file_number;
 };
 
-#endif // BILINEARINTERPOLATION_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSPIECEWISELINEARSINKFLUX_H
-#define RICHARDSPIECEWISELINEARSINKFLUX_H
+#pragma once
 
 #include "SideIntegralVariablePostprocessor.h"
 #include "LinearInterpolation.h"
@@ -77,4 +76,3 @@ protected:
   const MaterialProperty<std::vector<Real>> & _density;
 };
 
-#endif

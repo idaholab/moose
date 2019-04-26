@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef HEMFLUIDPROPERTIES_H
-#define HEMFLUIDPROPERTIES_H
+#pragma once
 
 #include "FluidProperties.h"
 
@@ -251,4 +250,3 @@ public:
   virtual Real triplePointTemperature() const;
 };
 
-#endif /* HEMFLUIDPROPERTIES_H */

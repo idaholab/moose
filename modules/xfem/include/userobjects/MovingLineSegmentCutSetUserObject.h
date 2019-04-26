@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOVINGMovingLineSegmentCutSetUserObject_H
-#define MOVINGMovingLineSegmentCutSetUserObject_H
+#pragma once
 
 #include "LineSegmentCutSetUserObject.h"
 #include "XFEMMovingInterfaceVelocityBase.h"
@@ -41,4 +40,3 @@ public:
   const XFEMMovingInterfaceVelocityBase * _interface_velocity;
 };
 
-#endif // MOVINGMovingLineSegmentCutSetUserObject_H

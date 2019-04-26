@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef IDEALGASFREEENERGY_H
-#define IDEALGASFREEENERGY_H
+#pragma once
 
 #include "GasFreeEnergyBase.h"
 
@@ -28,4 +27,3 @@ public:
   IdealGasFreeEnergy(const InputParameters & parameters);
 };
 
-#endif // IDEALGASFREEENERGY_H

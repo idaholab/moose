@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DISTRIBUTEDGENERATEDMESH_H
-#define DISTRIBUTEDGENERATEDMESH_H
+#pragma once
 
 #include "MooseMesh.h"
 
@@ -63,4 +62,3 @@ protected:
   bool _dims_may_have_changed;
 };
 
-#endif /* DISTRIBUTEDGENERATEDMESH_H */

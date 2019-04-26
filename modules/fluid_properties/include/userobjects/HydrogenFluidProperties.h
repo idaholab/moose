@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef HYDROGENFLUIDPROPERTIES_H
-#define HYDROGENFLUIDPROPERTIES_H
+#pragma once
 
 #include "HelmholtzFluidProperties.h"
 #include <array>
@@ -208,4 +207,3 @@ protected:
 
 #pragma GCC diagnostic pop
 
-#endif /* HYDROGENFLUIDPROPERTIES_H */

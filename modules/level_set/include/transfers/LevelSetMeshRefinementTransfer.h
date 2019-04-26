@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LEVELSETMESHREFINEMENTTRANSFER_H
-#define LEVELSETMESHREFINEMENTTRANSFER_H
+#pragma once
 
 #include "MultiAppCopyTransfer.h"
 
@@ -30,4 +29,3 @@ public:
   virtual void execute() override;
 };
 
-#endif // LEVELSETMESHREFINEMENTTRANSFER_H

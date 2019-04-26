@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CRANKNICOLSON_H
-#define CRANKNICOLSON_H
+#pragma once
 
 #include "TimeIntegrator.h"
 
@@ -55,4 +54,3 @@ CrankNicolson::computeTimeDerivativeHelper(T & u_dot, const T2 & u_old)
   u_dot *= 2. / _dt;
 }
 
-#endif /* CRANKNICOLSON_H */

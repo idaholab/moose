@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMENTL2ERRORFUNCTIONAUX_H
-#define ELEMENTL2ERRORFUNCTIONAUX_H
+#pragma once
 
 // MOOSE includes
 #include "ElementLpNormAux.h"
@@ -47,4 +46,3 @@ protected:
   Function & _func;
 };
 
-#endif // ELEMENTL2ERRORFUNCTIONAUX_H

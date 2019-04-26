@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LINEVALUESAMPLER_H
-#define LINEVALUESAMPLER_H
+#pragma once
 
 // MOOSE includes
 #include "PointSamplerBase.h"
@@ -67,4 +66,3 @@ protected:
   const Real _line_vector_norm;
 };
 
-#endif

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef AXISYMMETRIC2D3DSOLUTIONFUNCTION_H
-#define AXISYMMETRIC2D3DSOLUTIONFUNCTION_H
+#pragma once
 
 #include "Function.h"
 
@@ -85,4 +84,3 @@ protected:
   std::vector<unsigned int> _solution_object_var_indices;
 };
 
-#endif // AXISYMMETRIC2D3DSOLUTIONFUNCTION_H

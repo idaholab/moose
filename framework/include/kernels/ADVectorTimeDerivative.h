@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADVECTORTIMEDERIVATIVE_H
-#define ADVECTORTIMEDERIVATIVE_H
+#pragma once
 
 #include "ADTimeKernelValue.h"
 
@@ -30,4 +29,3 @@ protected:
   usingVectorTimeKernelValueMembers;
 };
 
-#endif // ADVECTORTIMEDERIVATIVE_H

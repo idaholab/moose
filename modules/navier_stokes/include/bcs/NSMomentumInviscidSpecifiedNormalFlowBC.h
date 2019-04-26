@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NSMOMENTUMINVISCIDSPECIFIEDNORMALFLOWBC_H
-#define NSMOMENTUMINVISCIDSPECIFIEDNORMALFLOWBC_H
+#pragma once
 
 #include "NSMomentumInviscidBC.h"
 
@@ -36,4 +35,3 @@ protected:
   const Real _rhou_udotn;
 };
 
-#endif // NSMOMENTUMINVISCIDSPECIFIEDPRESSUREBC_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SODIUMPROPERTIESTEST_H
-#define SODIUMPROPERTIESTEST_H
+#pragma once
 
 #include "MooseObjectUnitTest.h"
 #include "SodiumProperties.h"
@@ -32,4 +31,3 @@ protected:
   const SodiumProperties * _fp;
 };
 
-#endif // SODIUMPROPERTIESTEST_H

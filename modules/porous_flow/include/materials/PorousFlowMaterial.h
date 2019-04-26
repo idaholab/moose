@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWMATERIAL_H
-#define POROUSFLOWMATERIAL_H
+#pragma once
 
 #include "Material.h"
 #include "MaterialData.h"
@@ -84,4 +83,3 @@ protected:
   const VariableName _mass_fraction_variable_name;
 };
 
-#endif // POROUSFLOWMATERIAL_H

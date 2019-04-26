@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef STEADYWITHPICARDCHECK_H
-#define STEADYWITHPICARDCHECK_H
+#pragma once
 
 #include "Steady.h"
 
@@ -48,4 +47,3 @@ private:
   const PostprocessorValue * _pp_value;
 };
 
-#endif /* STEADYWITHPICARDCHECK_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CHECKINTEGRITYACTION_H
-#define CHECKINTEGRITYACTION_H
+#pragma once
 
 #include "Action.h"
 
@@ -25,4 +24,3 @@ public:
   virtual void act() override;
 };
 
-#endif // CHECKINTEGRITYACTION_H

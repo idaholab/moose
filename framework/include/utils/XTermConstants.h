@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef XTERMCONSTANTS_H
-#define XTERMCONSTANTS_H
+#pragma once
 
 #define XTERM_BLACK "\33[30m"
 #define XTERM_RED "\33[31m"
@@ -20,4 +19,3 @@
 #define XTERM_WHITE "\33[37m"
 #define XTERM_DEFAULT "\33[39m"
 
-#endif

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CRACKTIPENRICHMENTSTRESSDIVERGENCETENSORS_H
-#define CRACKTIPENRICHMENTSTRESSDIVERGENCETENSORS_H
+#pragma once
 
 #include "ALEKernel.h"
 #include "RankTwoTensor.h"
@@ -73,4 +72,3 @@ private:
   std::vector<Real> _BJ;
 };
 
-#endif // CRACKTIPENRICHMENTSTRESSDIVERGENCETENSORS_H

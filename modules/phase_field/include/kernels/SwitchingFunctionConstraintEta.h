@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SWITCHINGFUNCTIONCONSTRAINTETA_H
-#define SWITCHINGFUNCTIONCONSTRAINTETA_H
+#pragma once
 
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
@@ -46,4 +45,3 @@ protected:
   unsigned int _lambda_var;
 };
 
-#endif // SWITCHINGFUNCTIONCONSTRAINTETA_H

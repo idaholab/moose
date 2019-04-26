@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CHINTERFACEBASE_H
-#define CHINTERFACEBASE_H
+#pragma once
 
 #include "Kernel.h"
 #include "Material.h"
@@ -168,4 +167,3 @@ CHInterfaceBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
   return value;
 }
 
-#endif // CHINTERFACE_H

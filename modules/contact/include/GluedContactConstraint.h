@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GLUEDCONTACTCONSTRAINT_H
-#define GLUEDCONTACTCONSTRAINT_H
+#pragma once
 
 // MOOSE includes
 #include "SparsityBasedContactConstraint.h"
@@ -74,4 +73,3 @@ protected:
   const NumericVector<Number> * _aux_solution;
 };
 
-#endif

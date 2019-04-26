@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SHAPEELEMENTUSEROBJECT_H
-#define SHAPEELEMENTUSEROBJECT_H
+#pragma once
 
 #include "ElementUserObject.h"
 #include "ShapeUserObject.h"
@@ -33,4 +32,3 @@ public:
   ShapeElementUserObject(const InputParameters & parameters);
 };
 
-#endif // SHAPEELEMENTUSEROBJECT_H

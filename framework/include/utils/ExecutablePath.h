@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EXECUTABLEPATH_H
-#define EXECUTABLEPATH_H
+#pragma once
 
 #include <string>
 
@@ -24,4 +23,3 @@ namespace Moose
 std::string getExecutablePath();
 }
 
-#endif // EXECUTABLEPATH_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMENTVECTORL2ERROR_H
-#define ELEMENTVECTORL2ERROR_H
+#pragma once
 
 #include "ElementIntegralPostprocessor.h"
 
@@ -39,4 +38,3 @@ protected:
   const VariableValue & _w; // FE solution in z
 };
 
-#endif // ELEMENTVECTORL2ERROR_H

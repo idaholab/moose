@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RANKTWOAUX_H
-#define RANKTWOAUX_H
+#pragma once
 
 #include "NodalPatchRecovery.h"
 #include "RankTwoTensor.h"
@@ -44,4 +43,3 @@ private:
   const unsigned int _selected_qp;
 };
 
-#endif // RANKTWOAUX_H

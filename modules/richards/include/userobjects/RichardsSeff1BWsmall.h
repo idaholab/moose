@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSSEFF1BWSMALL_H
-#define RICHARDSSEFF1BWSMALL_H
+#pragma once
 
 #include "RichardsSeff.h"
 
@@ -78,4 +77,3 @@ protected:
   Real _las;
 };
 
-#endif // RICHARDSSEFF1BWSMALL_H

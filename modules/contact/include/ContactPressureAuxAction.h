@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CONTACTPRESSUREAUXACTION_H
-#define CONTACTPRESSUREAUXACTION_H
+#pragma once
 
 #include "Action.h"
 #include "MooseTypes.h"
@@ -30,4 +29,3 @@ private:
 template <>
 InputParameters validParams<ContactPressureAuxAction>();
 
-#endif

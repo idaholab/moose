@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SYSTEMINFO_H
-#define SYSTEMINFO_H
+#pragma once
 
 #include <string>
 #include <ctime>
@@ -29,4 +28,3 @@ protected:
   char ** _argv;
 };
 
-#endif // SYSTEMINFO_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GRAINFORCEANDTORQUESUM_H
-#define GRAINFORCEANDTORQUESUM_H
+#pragma once
 
 #include "GrainForceAndTorqueInterface.h"
 #include "GeneralUserObject.h"
@@ -54,4 +53,3 @@ protected:
   ///@}
 };
 
-#endif // GRAINFORCEANDTORQUESUM_H

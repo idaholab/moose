@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SMOOTHMESH_H
-#define SMOOTHMESH_H
+#pragma once
 
 // MOOSE includes
 #include "MeshModifier.h"
@@ -34,4 +33,3 @@ private:
   unsigned int _iterations;
 };
 
-#endif // SMOOTHMESH_H

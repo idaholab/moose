@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FEPROBLEMSOLVE_H
-#define FEPROBLEMSOLVE_H
+#pragma once
 
 #include "SolveObject.h"
 
@@ -37,4 +36,3 @@ protected:
   /// Splitting
   std::vector<std::string> _splitting;
 };
-#endif // FEPROBLEMSOLVE_H

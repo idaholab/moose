@@ -6,8 +6,8 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#ifndef ADVALUETEST_H_
-#define ADVALUETEST_H_
+
+#pragma once
 
 #include "ADKernel.h"
 
@@ -28,4 +28,3 @@ protected:
   usingKernelMembers;
 };
 
-#endif /* ADVALUETEST_H_ */

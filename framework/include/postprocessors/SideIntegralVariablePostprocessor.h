@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SIDEINTEGRALVARIABLEPOSTPROCESSOR_H
-#define SIDEINTEGRALVARIABLEPOSTPROCESSOR_H
+#pragma once
 
 #include "SideIntegralPostprocessor.h"
 #include "MooseVariableInterface.h"
@@ -40,4 +39,3 @@ protected:
   const VariableGradient & _grad_u;
 };
 
-#endif

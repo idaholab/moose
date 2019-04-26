@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SCALARKERNEL_H
-#define SCALARKERNEL_H
+#pragma once
 
 #include "MooseObject.h"
 #include "ScalarCoupleable.h"
@@ -85,4 +84,3 @@ protected:
   VariableValue & _u_old;
 };
 
-#endif /* SCALARKERNEL_H */

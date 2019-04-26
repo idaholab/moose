@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EFAFRAGMENT_H
-#define EFAFRAGMENT_H
+#pragma once
 
 #include <vector>
 #include <map>
@@ -34,4 +33,3 @@ public:
   std::vector<EFANode *> getCommonNodes(EFAFragment * other) const;
 };
 
-#endif

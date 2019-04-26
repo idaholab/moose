@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GENERALIZEDPLANESTRAINACTION_H
-#define GENERALIZEDPLANESTRAINACTION_H
+#pragma once
 
 #include "Action.h"
 
@@ -29,4 +28,3 @@ protected:
   unsigned int _ndisp;
   const unsigned int _out_of_plane_direction;
 };
-#endif // GENERALIZEDPLANESTRAINACTION_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CRYSTALPLASTICITYSTATEVARRATECOMPONENTGSS_H
-#define CRYSTALPLASTICITYSTATEVARRATECOMPONENTGSS_H
+#pragma once
 
 #include "CrystalPlasticityStateVarRateComponent.h"
 
@@ -38,4 +37,3 @@ protected:
   std::vector<Real> _hprops;
 };
 
-#endif // CRYSTALPLASTICITYSTATEVARRATECOMPONENTGSS_H

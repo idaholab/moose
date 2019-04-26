@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef AVERAGENODALVARIABLEVALUE_H
-#define AVERAGENODALVARIABLEVALUE_H
+#pragma once
 
 #include "NodalVariablePostprocessor.h"
 
@@ -34,4 +33,3 @@ protected:
   unsigned int _n;
 };
 
-#endif // AVERAGENODALVARIABLEVALUE_H

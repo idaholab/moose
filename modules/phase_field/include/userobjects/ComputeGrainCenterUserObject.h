@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEGRAINCENTERUSEROBJECT_H
-#define COMPUTEGRAINCENTERUSEROBJECT_H
+#pragma once
 
 #include "ElementUserObject.h"
 
@@ -46,4 +45,3 @@ protected:
   ///@}
 };
 
-#endif // COMPUTEGRAINCENTERUSEROBJECT_H

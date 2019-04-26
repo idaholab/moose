@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOW1PHASEMD_GAUSSIAN_H
-#define POROUSFLOW1PHASEMD_GAUSSIAN_H
+#pragma once
 
 #include "PorousFlowVariableBase.h"
 
@@ -65,4 +64,3 @@ protected:
   virtual void buildPS();
 };
 
-#endif // POROUSFLOW1PHASEMD_GAUSSIAN_H

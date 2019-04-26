@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWPLASTICHEATENERGY_H
-#define POROUSFLOWPLASTICHEATENERGY_H
+#pragma once
 
 #include "PlasticHeatEnergy.h"
 #include "PorousFlowDictator.h"
@@ -51,4 +50,3 @@ protected:
   const MaterialProperty<std::vector<RealGradient>> & _dporosity_dgradvar;
 };
 
-#endif // POROUSFLOWPLASTICHEATENERGY_H

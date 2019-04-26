@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSSEFF_H
-#define RICHARDSSEFF_H
+#pragma once
 
 #include "GeneralUserObject.h"
 
@@ -65,4 +64,3 @@ public:
                       std::vector<std::vector<Real>> & result) const = 0;
 };
 
-#endif // RICHARDSSEFF_H

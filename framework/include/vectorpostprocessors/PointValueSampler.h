@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POINTVALUESAMPLER_H
-#define POINTVALUESAMPLER_H
+#pragma once
 
 // MOOSE includes
 #include "PointSamplerBase.h"
@@ -27,4 +26,3 @@ public:
   virtual void initialize() override;
 };
 
-#endif

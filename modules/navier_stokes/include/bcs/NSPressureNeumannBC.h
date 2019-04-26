@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NSPRESSURENEUMANNBC_H
-#define NSPRESSURENEUMANNBC_H
+#pragma once
 
 #include "NSIntegratedBC.h"
 #include "NSPressureDerivs.h"
@@ -62,4 +61,3 @@ private:
   Real computeJacobianHelper(unsigned m);
 };
 
-#endif // PRESSURENEUMANNBC_H

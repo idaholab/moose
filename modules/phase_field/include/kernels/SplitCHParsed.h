@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SPLITCHPARSED_H
-#define SPLITCHPARSED_H
+#pragma once
 
 #include "SplitCHCRes.h"
 #include "JvarMapInterface.h"
@@ -45,4 +44,3 @@ private:
   std::vector<const MaterialProperty<Real> *> _d2Fdcdarg;
 };
 
-#endif // SPLITCHPARSED_H

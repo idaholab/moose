@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DERIVATIVEPARSEDMATERIALHELPER_H
-#define DERIVATIVEPARSEDMATERIALHELPER_H
+#pragma once
 
 #include "DerivativeFunctionMaterialBase.h"
 #include "ParsedMaterialHelper.h"
@@ -69,4 +68,3 @@ struct DerivativeParsedMaterialHelper::Derivative
   std::vector<VariableName> darg_names;
 };
 
-#endif // DERIVATIVEPARSEDMATERIALHELPER_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CONVECTIONDIFFUSIONACTION_H
-#define CONVECTIONDIFFUSIONACTION_H
+#pragma once
 
 #include "Action.h"
 
@@ -23,4 +22,3 @@ public:
 template <>
 InputParameters validParams<ConvectionDiffusionAction>();
 
-#endif // CONVECTIONDIFFUSIONACTION_H

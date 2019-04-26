@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LINEARVISCOELASTICITYMANAGER_H
-#define LINEARVISCOELASTICITYMANAGER_H
+#pragma once
 
 #include "ElementUserObject.h"
 #include "LinearViscoelasticityBase.h"
@@ -63,4 +62,3 @@ protected:
   std::shared_ptr<LinearViscoelasticityBase> _viscoelastic_model;
 };
 
-#endif // STRESSTIMESTEPSETUP_H

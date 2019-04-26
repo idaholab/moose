@@ -6,8 +6,8 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#ifndef RANDOMMATERIAL_H
-#define RANDOMMATERIAL_H
+
+#pragma once
 
 #include "Material.h"
 
@@ -27,4 +27,3 @@ protected:
   MaterialProperty<unsigned long> & _rand_long;
 };
 
-#endif // RANDOMMATERIAL_H

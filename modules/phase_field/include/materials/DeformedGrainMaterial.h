@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DEFORMEDGRAINMATERIAL_H
-#define DEFORMEDGRAINMATERIAL_H
+#pragma once
 
 #include "Material.h"
 
@@ -83,4 +82,3 @@ protected:
   const Real _JtoeV;
 };
 
-#endif // DEFORMEDGRAINMATERIAL_H

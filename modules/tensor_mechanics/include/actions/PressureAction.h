@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PRESSUREACTION_H
-#define PRESSUREACTION_H
+#pragma once
 
 #include "Action.h"
 
@@ -27,4 +26,3 @@ protected:
 template <>
 InputParameters validParams<PressureAction>();
 
-#endif // PRESSUREACTION_H

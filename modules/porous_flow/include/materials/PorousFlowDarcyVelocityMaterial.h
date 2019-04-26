@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWDARCYVELOCITYMATERIAL_H
-#define POROUSFLOWDARCYVELOCITYMATERIAL_H
+#pragma once
 
 #include "PorousFlowMaterial.h"
 
@@ -96,4 +95,3 @@ protected:
       _ddarcy_velocity_dgradvar;
 };
 
-#endif // POROUSFLOWDARCYVELOCITYMATERIAL_H

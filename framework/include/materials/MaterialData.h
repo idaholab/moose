@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATERIALDATA_H
-#define MATERIALDATA_H
+#pragma once
 
 #include "MaterialProperty.h"
 #include "Moose.h"
@@ -311,4 +310,3 @@ MaterialData::getPropertyOlder(const std::string & name)
   return declareHelper<T>(_props_older, name, _storage.addPropertyOlder(name));
 }
 
-#endif /* MATERIALDATA_H */

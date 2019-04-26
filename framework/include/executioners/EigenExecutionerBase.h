@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EIGENEXECUTIONERBASE_H
-#define EIGENEXECUTIONERBASE_H
+#pragma once
 
 #include "Executioner.h"
 
@@ -168,4 +167,3 @@ protected:
                  const PostprocessorValue * solution_diff);
 };
 
-#endif // EIGENEXECUTIONERBASE_H

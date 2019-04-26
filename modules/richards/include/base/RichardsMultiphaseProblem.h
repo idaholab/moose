@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSMULTIPHASEPROBLEM_H
-#define RICHARDSMULTIPHASEPROBLEM_H
+#pragma once
 
 #include "FEProblem.h"
 
@@ -59,4 +58,3 @@ protected:
   unsigned int _lower_var_num;
 };
 
-#endif /* RICHARDSMULTIPHASEPROBLEM_H */

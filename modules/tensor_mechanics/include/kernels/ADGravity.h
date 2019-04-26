@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADGRAVITY_H
-#define ADGRAVITY_H
+#pragma once
 
 #include "ADKernelValue.h"
 
@@ -37,4 +36,3 @@ private:
   usingKernelValueMembers;
 };
 
-#endif // ADGRAVITY_H

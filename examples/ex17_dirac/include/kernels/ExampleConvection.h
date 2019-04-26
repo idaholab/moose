@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EXAMPLECONVECTION_H
-#define EXAMPLECONVECTION_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -79,4 +78,3 @@ private:
   Real _z;
 };
 
-#endif // EXAMPLECONVECTION_H

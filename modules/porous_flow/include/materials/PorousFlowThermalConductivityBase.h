@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWTHERMALCONDUCTIVITYBASE_H
-#define POROUSFLOWTHERMALCONDUCTIVITYBASE_H
+#pragma once
 
 #include "PorousFlowMaterialVectorBase.h"
 
@@ -33,4 +32,3 @@ protected:
   MaterialProperty<std::vector<RealTensorValue>> & _dla_qp_dvar;
 };
 
-#endif // POROUSFLOWTHERMALCONDUCTIVITYBASE_H

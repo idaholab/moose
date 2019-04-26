@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MASSEIGENKERNEL_H
-#define MASSEIGENKERNEL_H
+#pragma once
 
 #include "EigenKernel.h"
 
@@ -28,4 +27,3 @@ protected:
   virtual Real computeQpJacobian() override;
 };
 
-#endif // MASSEIGENKERNEL_H

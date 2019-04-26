@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEAXISYMMETRIC1DINCREMENTALSTRAIN_H
-#define COMPUTEAXISYMMETRIC1DINCREMENTALSTRAIN_H
+#pragma once
 
 #include "Compute1DIncrementalStrain.h"
 #include "SubblockIndexProvider.h"
@@ -66,4 +65,3 @@ protected:
   std::vector<const VariableValue *> _scalar_out_of_plane_strain_old;
 };
 
-#endif // COMPUTEAXISYMMETRIC1DINCREMENTALSTRAIN_H

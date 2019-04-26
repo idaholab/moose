@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PLASTICHEATENERGY_H
-#define PLASTICHEATENERGY_H
+#pragma once
 
 #include "Kernel.h"
 #include "RankTwoTensor.h"
@@ -52,4 +51,3 @@ protected:
   std::vector<unsigned int> _disp_var;
 };
 
-#endif // PLASTICHEATENERGY_H

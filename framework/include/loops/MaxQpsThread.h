@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MAXQPSTHREAD_H
-#define MAXQPSTHREAD_H
+#pragma once
 
 #include "MooseTypes.h"
 
@@ -57,4 +56,3 @@ protected:
   unsigned int _max_shape_funcs;
 };
 
-#endif // MAXQPSTHREAD_H

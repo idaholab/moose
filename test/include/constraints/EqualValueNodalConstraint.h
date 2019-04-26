@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EQUALVALUENODALCONSTRAINT_H
-#define EQUALVALUENODALCONSTRAINT_H
+#pragma once
 
 #include "NodalConstraint.h"
 
@@ -30,4 +29,3 @@ protected:
   Real _penalty;
 };
 
-#endif /* EQUALVALUENODALCONSTRAINT_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SHARED_POOLH
-#define SHARED_POOLH
+#pragma once
 
 // System Includes
 #include <stack>
@@ -110,5 +109,3 @@ private:
   size_t _num_created = 0;
 };
 }
-
-#endif // SHARED_POOLH

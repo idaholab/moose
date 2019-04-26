@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SPLITCHWRESANISO_H
-#define SPLITCHWRESANISO_H
+#pragma once
 
 #include "SplitCHWResBase.h"
 
@@ -26,4 +25,3 @@ public:
 template <>
 InputParameters validParams<SplitCHWResAniso>();
 
-#endif // SPLITCHWRES_H

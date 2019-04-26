@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SCALARINITIALCONDITION_H
-#define SCALARINITIALCONDITION_H
+#pragma once
 
 #include "MooseObject.h"
 #include "ScalarCoupleable.h"
@@ -85,4 +84,3 @@ protected:
   std::set<std::string> _supplied_vars;
 };
 
-#endif // SCALARINITIALCONDITION_H

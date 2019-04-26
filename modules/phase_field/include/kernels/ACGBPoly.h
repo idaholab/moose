@@ -7,10 +7,9 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#pragma once
 #include "ACBulk.h"
 
-#ifndef ACGBPOLY_H
-#define ACGBPOLY_H
 
 // Forward Declarations
 class ACGBPoly;
@@ -36,4 +35,3 @@ protected:
   Real _en_ratio;
 };
 
-#endif // ACGBPOLY_H

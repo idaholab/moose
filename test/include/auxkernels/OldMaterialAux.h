@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef OLDMATERIALAUX_H
-#define OLDMATERIALAUX_H
+#pragma once
 
 // MOOSE includes
 #include "AuxKernel.h"
@@ -36,4 +35,3 @@ private:
   const MaterialProperty<Real> & _older;
 };
 
-#endif // OLDMATERIALAUX_H

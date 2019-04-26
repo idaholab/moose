@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TENSORMECHANICSPLASTICDRUCKERPRAGERHYPERBOLIC_H
-#define TENSORMECHANICSPLASTICDRUCKERPRAGERHYPERBOLIC_H
+#pragma once
 
 #include "TensorMechanicsPlasticDruckerPrager.h"
 #include "TensorMechanicsHardeningModel.h"
@@ -76,4 +75,3 @@ private:
   const unsigned _max_iters;
 };
 
-#endif // TENSORMECHANICSPLASTICDRUCKERPRAGERHYPERBOLIC_H

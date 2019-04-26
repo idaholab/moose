@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADDNAVIERSTOKESVARIABLESACTION_H
-#define ADDNAVIERSTOKESVARIABLESACTION_H
+#pragma once
 
 #include "NSAction.h"
 
@@ -44,4 +43,3 @@ protected:
   std::vector<SubdomainName> _blocks;
 };
 
-#endif /* ADDNAVIERSTOKESVARIABLESACTION_H */

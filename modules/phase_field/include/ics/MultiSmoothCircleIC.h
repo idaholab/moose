@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MULTISMOOTHCIRCLEIC_H
-#define MULTISMOOTHCIRCLEIC_H
+#pragma once
 
 #include "SmoothCircleBaseIC.h"
 
@@ -50,4 +49,3 @@ protected:
   Point _range;
 };
 
-#endif // MULTISMOOTHCIRCLEIC_H

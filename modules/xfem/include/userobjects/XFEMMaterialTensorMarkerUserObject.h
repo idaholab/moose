@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef XFEMMATERIALTENSORMARKERUSEROBJECT_H
-#define XFEMMATERIALTENSORMARKERUSEROBJECT_H
+#pragma once
 
 #include "XFEMMaterialStateMarkerBase.h"
 #include "MaterialTensorCalculator.h"
@@ -34,4 +33,3 @@ protected:
   virtual bool doesElementCrack(RealVectorValue & direction);
 };
 
-#endif // XFEMMATERIALTENSORMARKERUSEROBJECT_H

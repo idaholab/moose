@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATERIALSTDVECTORREALGRADIENTAUX_H
-#define MATERIALSTDVECTORREALGRADIENTAUX_H
+#pragma once
 
 // MOOSE includes
 #include "MaterialStdVectorAuxBase.h"
@@ -34,4 +33,3 @@ protected:
   unsigned int _component;
 };
 
-#endif // MATERIALSTDVECTORREALGRADIENTAUX_H

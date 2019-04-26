@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RESTARTABLEDATAIO_H
-#define RESTARTABLEDATAIO_H
+#pragma once
 
 // MOOSE includes
 #include "DataIO.h"
@@ -97,4 +96,3 @@ private:
   std::vector<std::shared_ptr<std::ifstream>> _in_file_handles;
 };
 
-#endif /* RESTARTABLEDATAIO_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef BICUBICSPLINEFUNCTION_H
-#define BICUBICSPLINEFUNCTION_H
+#pragma once
 
 #include "Function.h"
 #include "FunctionInterface.h"
@@ -54,4 +53,3 @@ protected:
   Real _x2_index;
 };
 
-#endif /* BICUBICSPLINEFUNCTION_H */

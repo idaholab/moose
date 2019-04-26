@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef C1ICBASE_H
-#define C1ICBASE_H
+#pragma once
 
 // Portions of this code Copyright 2007-2009 Roy Stogner
 //
@@ -60,4 +59,3 @@ protected:
   Number interfaceDerivative(Real r);
 };
 
-#endif // C1ICBASE_H

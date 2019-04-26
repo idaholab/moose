@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATERIALVECTORAUXKERNELACTION_H
-#define MATERIALVECTORAUXKERNELACTION_H
+#pragma once
 
 #include "Action.h"
 
@@ -39,4 +38,3 @@ protected:
 template <>
 InputParameters validParams<MaterialVectorAuxKernelAction>();
 
-#endif // MATERIALVECTORAUXKERNELACTION_H

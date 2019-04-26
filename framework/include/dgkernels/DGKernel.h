@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DGKERNEL_H
-#define DGKERNEL_H
+#pragma once
 
 #include "DGKernelBase.h"
 
@@ -70,4 +69,3 @@ protected:
   virtual Real computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigned int jvar);
 };
 
-#endif // DGKERNEL_H

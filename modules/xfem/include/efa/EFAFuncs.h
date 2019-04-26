@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EFAFUNCS_H
-#define EFAFUNCS_H
+#pragma once
 
 #include <map>
 #include <set>
@@ -85,4 +84,3 @@ double linearTetShape3D(unsigned int node_id, std::vector<double> & xi_3d);
 
 } // namespace Efa
 
-#endif

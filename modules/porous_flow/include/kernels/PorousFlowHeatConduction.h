@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWHEATCONDUCTION_H
-#define POROUSFLOWHEATCONDUCTION_H
+#pragma once
 
 #include "Kernel.h"
 #include "PorousFlowDictator.h"
@@ -50,4 +49,3 @@ protected:
   const MaterialProperty<std::vector<Real>> & _dgrad_t_dgradvar;
 };
 
-#endif // POROUSFLOWHEATCONDUCTION_H

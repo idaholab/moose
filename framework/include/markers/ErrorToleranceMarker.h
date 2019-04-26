@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ERRORTOLERANCEMARKER_H
-#define ERRORTOLERANCEMARKER_H
+#pragma once
 
 #include "IndicatorMarker.h"
 
@@ -29,4 +28,3 @@ protected:
   Real _refine;
 };
 
-#endif /* ERRORTOLERANCEMARKER_H */

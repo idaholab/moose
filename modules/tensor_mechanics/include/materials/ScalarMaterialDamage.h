@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SCALARMATERIALDAMAGE_H
-#define SCALARMATERIALDAMAGE_H
+#pragma once
 
 #include "ScalarDamageBase.h"
 
@@ -34,4 +33,3 @@ protected:
   ///@}
 };
 
-#endif // SCALARMATERIALDAMAGE_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef QUOTIENTSCALARAUX_H
-#define QUOTIENTSCALARAUX_H
+#pragma once
 
 #include "AuxScalarKernel.h"
 
@@ -34,4 +33,3 @@ protected:
   VariableValue & _b;
 };
 
-#endif /* QUOTIENTSCALARAUX_H */

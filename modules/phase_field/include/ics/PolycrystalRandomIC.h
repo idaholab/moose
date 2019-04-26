@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POLYCRYSTALRANDOMIC_H
-#define POLYCRYSTALRANDOMIC_H
+#pragma once
 
 #include "InitialCondition.h"
 
@@ -34,4 +33,3 @@ private:
   const unsigned int _random_type;
 };
 
-#endif // POLYCRYSTALRANDOMIC_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NSTEMPERATUREL2_H
-#define NSTEMPERATUREL2_H
+#pragma once
 
 #include "Kernel.h"
 #include "Material.h"
@@ -52,4 +51,3 @@ protected:
   const MaterialProperty<Real> & _c_v;
 };
 
-#endif // NSTEMPERATUREL2_H

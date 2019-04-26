@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VECTORCOUPLEDGRADIENTTIMEDERIVATIVE_H
-#define VECTORCOUPLEDGRADIENTTIMEDERIVATIVE_H
+#pragma once
 
 #include "VectorKernel.h"
 #include "MaterialProperty.h"
@@ -36,4 +35,3 @@ protected:
   const VariablePhiGradient & _standard_grad_phi;
 };
 
-#endif // VECTORCOUPLEDGRADIENTTIMEDERIVATIVE_H

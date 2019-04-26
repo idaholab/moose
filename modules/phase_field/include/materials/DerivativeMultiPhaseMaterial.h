@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DERIVATIVEMULTIPHASEMATERIAL_H
-#define DERIVATIVEMULTIPHASEMATERIAL_H
+#pragma once
 
 #include "DerivativeMultiPhaseBase.h"
 
@@ -36,4 +35,3 @@ protected:
   std::vector<const MaterialProperty<Real> *> _dhi, _d2hi, _d3hi;
 };
 
-#endif // DERIVATIVEMULTIPHASEMATERIAL_H

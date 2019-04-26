@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CYLINDRICALAVERAGE_H
-#define CYLINDRICALAVERAGE_H
+#pragma once
 
 #include "SpatialAverageBase.h"
 
@@ -37,4 +36,3 @@ protected:
   const Real _cyl_axis_norm;
 };
 
-#endif // CYLINDRICALAVERAGE_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TESTTWOPHASEFLUIDPROPERTIES_H
-#define TESTTWOPHASEFLUIDPROPERTIES_H
+#pragma once
 
 #include "TwoPhaseFluidProperties.h"
 
@@ -36,4 +35,3 @@ public:
   virtual bool supportsPhaseChange() const override;
 };
 
-#endif /* TESTTWOPHASEFLUIDPROPERTIES_H */

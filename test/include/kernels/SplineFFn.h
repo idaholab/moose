@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SPLINEFFN_H
-#define SPLINEFFN_H
+#pragma once
 
 #include "Kernel.h"
 #include "SplineFunction.h"
@@ -33,4 +32,3 @@ protected:
   SplineFunction & _fn;
 };
 
-#endif /* SPLINEFFN_H */

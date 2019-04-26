@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEENUMITEM_H
-#define MOOSEENUMITEM_H
+#pragma once
 
 // STL includes
 #include <string>
@@ -102,4 +101,3 @@ private:
   int _id;
 };
 
-#endif

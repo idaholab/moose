@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LINESEGMENTTEST_H
-#define LINESEGMENTTEST_H
+#pragma once
 
 #include "gtest_include.h"
 
@@ -43,4 +42,3 @@ protected:
   LineSegment _neg3diag;
 };
 
-#endif // LINESEGMENTTEST_H

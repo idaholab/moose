@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PETSCDMDAMESH_H
-#define PETSCDMDAMESH_H
+#pragma once
 
 #include "MooseMesh.h"
 
@@ -68,4 +67,3 @@ protected:
 #endif
 };
 
-#endif /* PETSCDMDAMESH_H */

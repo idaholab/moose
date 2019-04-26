@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATERIALAUXBASE_H
-#define MATERIALAUXBASE_H
+#pragma once
 
 // MOOSE includes
 #include "AuxKernel.h"
@@ -66,4 +65,3 @@ MaterialAuxBase<T>::computeValue()
   return _factor * getRealValue() + _offset;
 }
 
-#endif // MATERIALAUXBASE_H

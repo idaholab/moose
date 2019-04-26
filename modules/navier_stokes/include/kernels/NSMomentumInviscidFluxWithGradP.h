@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NSMOMENTUMINVISCIDFLUXWITHGRADP_H
-#define NSMOMENTUMINVISCIDFLUXWITHGRADP_H
+#pragma once
 
 #include "NSKernel.h"
 #include "NSPressureDerivs.h"
@@ -54,4 +53,3 @@ private:
   friend class NSPressureDerivs;
 };
 
-#endif // NSMOMENTUMINVISCIDFLUXWITHGRADP_H

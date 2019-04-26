@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VTKOUTPUT_H
-#define VTKOUTPUT_H
+#pragma once
 
 // MOOSE includes
 #include "OversampleOutput.h"
@@ -47,4 +46,3 @@ private:
   bool _binary;
 };
 
-#endif // VTKOUTPUT_H

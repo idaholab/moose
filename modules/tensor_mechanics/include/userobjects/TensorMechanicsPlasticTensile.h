@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TENSORMECHANICSPLASTICTENSILE_H
-#define TENSORMECHANICSPLASTICTENSILE_H
+#pragma once
 
 #include "TensorMechanicsPlasticModel.h"
 #include "TensorMechanicsHardeningModel.h"
@@ -105,4 +104,3 @@ protected:
   virtual Real dtensile_strength(const Real internal_param) const;
 };
 
-#endif // TENSORMECHANICSPLASTICTENSILE_H

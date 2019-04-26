@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VECTORCURLBC_H
-#define VECTORCURLBC_H
+#pragma once
 
 #include "VectorIntegratedBC.h"
 
@@ -29,4 +28,3 @@ protected:
   Function & _curl_value;
 };
 
-#endif // VECTORCURLBC_H

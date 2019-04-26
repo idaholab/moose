@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INTERFACEDIFFUSIONBASE_H
-#define INTERFACEDIFFUSIONBASE_H
+#pragma once
 
 #include "InterfaceKernel.h"
 
@@ -34,4 +33,3 @@ protected:
   const Real _D_neighbor;
 };
 
-#endif // INTERFACEDIFFUSIONBASE_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SCALARDIRICHLETBC_H
-#define SCALARDIRICHLETBC_H
+#pragma once
 
 #include "NodalBC.h"
 
@@ -39,4 +38,3 @@ protected:
   const VariableValue & _scalar_val;
 };
 
-#endif // SCALARDIRICHLETBC_H

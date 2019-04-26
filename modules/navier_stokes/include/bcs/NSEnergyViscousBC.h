@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NSENERGYVISCOUSBC_H
-#define NSENERGYVISCOUSBC_H
+#pragma once
 
 #include "NSIntegratedBC.h"
 #include "NSViscStressTensorDerivs.h"
@@ -71,4 +70,3 @@ protected:
   std::vector<const VariableGradient *> _gradU;
 };
 
-#endif // NSENERGYVISCOUSBC_H

@@ -7,6 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#pragma once
 // This is the only dependency that ElementFragmentAlgorithm has on MOOSE (or libMesh)
 // To compile standalone, uncomment the following lines and fix the banned keyword that
 // has spaces in it:

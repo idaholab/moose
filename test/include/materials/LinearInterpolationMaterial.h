@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LINEARINTERPOLATIONMATERIAL_H
-#define LINEARINTERPOLATIONMATERIAL_H
+#pragma once
 
 #include "Material.h"
 
@@ -33,4 +32,3 @@ protected:
   MaterialProperty<Real> & _property;
 };
 
-#endif // LINEARINTERPOLATIONMATERIAL_H

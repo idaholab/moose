@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INCLINEDNODISPLACEMENTBCACTION_H
-#define INCLINEDNODISPLACEMENTBCACTION_H
+#pragma once
 
 #include "Action.h"
 
@@ -33,4 +32,3 @@ protected:
 template <>
 InputParameters validParams<InclinedNoDisplacementBCAction>();
 
-#endif // INCLINEDNODISPLACEMENTBCACTION_H

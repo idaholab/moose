@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATTESTNEUMANNBC_H
-#define MATTESTNEUMANNBC_H
+#pragma once
 
 #include "NeumannBC.h"
 
@@ -33,4 +32,3 @@ protected:
   const MaterialProperty<Real> * _value;
 };
 
-#endif /* MATTESTNEUMANNBC_H */

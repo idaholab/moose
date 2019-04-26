@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LINEMATERIALTENSORSAMPLER_H
-#define LINEMATERIALTENSORSAMPLER_H
+#pragma once
 
 #include "LineMaterialSamplerBase.h"
 #include "MaterialTensorCalculator.h"
@@ -48,4 +47,3 @@ public:
   virtual Real getScalarFromProperty(const SymmTensor & property, const Point & curr_point);
 };
 
-#endif

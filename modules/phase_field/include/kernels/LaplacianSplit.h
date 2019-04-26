@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LAPLACIANSPLIT_H
-#define LAPLACIANSPLIT_H
+#pragma once
 
 #include "KernelGrad.h"
 
@@ -36,4 +35,3 @@ private:
   const VariableGradient & _grad_c;
 };
 
-#endif // LAPLACIANSPLIT_H

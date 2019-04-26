@@ -6,8 +6,8 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#ifndef CONSERVEDNORMALNOISEVENEER_H
-#define CONSERVEDNORMALNOISEVENEER_H
+
+#pragma once
 
 /**
  * Veneer to build userobjects that generate a normaly distributed random
@@ -62,4 +62,3 @@ ConservedNormalNoiseVeneer<T>::getQpRandom()
   }
 }
 
-#endif // CONSERVEDNORMALNOISEVENEER_H

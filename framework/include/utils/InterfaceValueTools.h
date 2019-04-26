@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INTERFACEVALUEATOOLS_H
-#define INTERFACEVALUEATOOLS_H
+#pragma once
 
 // MOOSE includes
 #include "MooseTypes.h"
@@ -34,4 +33,3 @@ Real getQuantity(const MooseEnum /*interface_value_type*/,
                  const Real /*value_slave*/);
 }
 
-#endif // INTERFACEVALUEATOOLS_H

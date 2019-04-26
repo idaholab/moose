@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CRYSTALPLASTICITYSLIPRESISTANCEGSS_H
-#define CRYSTALPLASTICITYSLIPRESISTANCEGSS_H
+#pragma once
 
 #include "CrystalPlasticitySlipResistance.h"
 
@@ -31,4 +30,3 @@ protected:
   const MaterialProperty<std::vector<Real>> & _mat_prop_state_var;
 };
 
-#endif // CRYSTALPLASTICITYSLIPRESISTANCEGSS_H

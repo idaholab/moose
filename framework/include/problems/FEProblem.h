@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FEPROBLEM_H
-#define FEPROBLEM_H
+#pragma once
 
 #include "FEProblemBase.h"
 
@@ -41,4 +40,3 @@ protected:
   std::shared_ptr<NonlinearSystem> _nl_sys;
 };
 
-#endif /* FEPROBLEM_H */

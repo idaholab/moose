@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PARSEDADDSIDESET_H
-#define PARSEDADDSIDESET_H
+#pragma once
 
 // MOOSE includes
 #include "AddSideSetsBase.h"
@@ -56,4 +55,3 @@ private:
   ADFunctionPtr _func_F;
 };
 
-#endif // PARSEDADDSIDESET_H

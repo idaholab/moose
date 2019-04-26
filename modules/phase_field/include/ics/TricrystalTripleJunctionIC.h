@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TRICRYSTALTRIPLEJUNCTIONIC_H
-#define TRICRYSTALTRIPLEJUNCTIONIC_H
+#pragma once
 
 #include "InitialCondition.h"
 
@@ -54,4 +53,3 @@ protected:
   Real _tan_theta2;
 };
 
-#endif // TRICRYSTALTRIPLEJUNCTIONIC_H

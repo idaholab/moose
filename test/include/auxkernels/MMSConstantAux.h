@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MMSCONSTANTAUX_H
-#define MMSCONSTANTAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -30,4 +29,3 @@ protected:
   unsigned int _mesh_dimension;
 };
 
-#endif // MMSCONSTANTAUX_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMENTAVERAGESECONDTIMEDERIVATIVE_H
-#define ELEMENTAVERAGESECONDTIMEDERIVATIVE_H
+#pragma once
 
 #include "ElementAverageValue.h"
 
@@ -33,4 +32,3 @@ protected:
   const VariableValue & _u_dotdot;
 };
 
-#endif

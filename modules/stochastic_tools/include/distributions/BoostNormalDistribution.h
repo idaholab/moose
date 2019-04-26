@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef BOOSTNORMALDISTRIBUTION_H
-#define BOOSTNORMALDISTRIBUTION_H
+#pragma once
 
 #include "BoostDistribution.h"
 
@@ -26,4 +25,3 @@ public:
   BoostNormalDistribution(const InputParameters & parameters);
 };
 
-#endif // BOOSTNORMALDISTRIBUTION_H

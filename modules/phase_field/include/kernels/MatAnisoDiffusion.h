@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATANISODIFFUSION_H
-#define MATANISODIFFUSION_H
+#pragma once
 
 #include "MatDiffusionBase.h"
 
@@ -26,4 +25,3 @@ public:
 template <>
 InputParameters validParams<MatAnisoDiffusion>();
 
-#endif // MATANISODIFFUSION_H

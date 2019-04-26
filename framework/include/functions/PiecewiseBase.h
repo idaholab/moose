@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PIECEWISEBASE_H
-#define PIECEWISEBASE_H
+#pragma once
 
 #include "Function.h"
 #include "LinearInterpolation.h"
@@ -47,4 +46,3 @@ protected:
   bool _data_set;
 };
 
-#endif

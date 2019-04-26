@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NSENERGYINVISCIDUNSPECIFIEDBC_H
-#define NSENERGYINVISCIDUNSPECIFIEDBC_H
+#pragma once
 
 #include "NSEnergyInviscidBC.h"
 
@@ -39,4 +38,3 @@ private:
   Real computeJacobianHelper(unsigned var_number);
 };
 
-#endif // NSENERGYINVISCIDUNSPECIFIEDBC_H

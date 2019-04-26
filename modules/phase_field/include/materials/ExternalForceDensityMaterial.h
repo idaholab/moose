@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EXTERNALFORCEDENSITYMATERIAL_H
-#define EXTERNALFORCEDENSITYMATERIAL_H
+#pragma once
 
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
@@ -55,4 +54,3 @@ private:
   std::vector<MaterialProperty<std::vector<RealGradient>> *> _dFdeta;
 };
 
-#endif // EXTERNALFORCEDENSITYMATERIAL_H

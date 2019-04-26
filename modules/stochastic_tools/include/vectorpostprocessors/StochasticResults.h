@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef STOCHASTICRESULTS_H
-#define STOCHASTICRESULTS_H
+#pragma once
 
 // MOOSE includes
 #include "GeneralVectorPostprocessor.h"
@@ -63,4 +62,3 @@ protected:
   Sampler * _sampler = nullptr;
 };
 
-#endif

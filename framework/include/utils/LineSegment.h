@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LINESEGMENT_H
-#define LINESEGMENT_H
+#pragma once
 
 // MOOSE includes
 #include "Moose.h" // using namespace libMesh
@@ -76,4 +75,3 @@ private:
   Point _p0, _p1;
 };
 
-#endif // LINESEGMENT_H

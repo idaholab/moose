@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POLYCRYSTALSTOREDENERGYACTION_H
-#define POLYCRYSTALSTOREDENERGYACTION_H
+#pragma once
 
 #include "Action.h"
 
@@ -37,4 +36,3 @@ protected:
 template <>
 InputParameters validParams<PolycrystalStoredEnergyAction>();
 
-#endif // POLYCRYSTALSTOREDENERGYACTION_H

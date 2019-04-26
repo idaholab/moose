@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LINEARCOMBINATIONFUNCTION_H
-#define LINEARCOMBINATIONFUNCTION_H
+#pragma once
 
 #include "Function.h"
 #include "FunctionInterface.h"
@@ -36,4 +35,3 @@ private:
   std::vector<Function *> _f;
 };
 
-#endif // LINEARCOMBINATIONFUNCTION_H

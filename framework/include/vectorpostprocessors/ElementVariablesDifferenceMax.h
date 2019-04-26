@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMENTVARIABLESDIFFERENCEMAX_H
-#define ELEMENTVARIABLESDIFFERENCEMAX_H
+#pragma once
 
 #include "ElementVectorPostprocessor.h"
 
@@ -74,4 +73,3 @@ protected:
   std::vector<Real> _all;
 };
 
-#endif // ELEMENTVARIABLESDIFFERENCEMAX_H

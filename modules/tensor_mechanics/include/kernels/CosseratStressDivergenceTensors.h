@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COSSERATSTRESSDIVERGENCETENSORS_H
-#define COSSERATSTRESSDIVERGENCETENSORS_H
+#pragma once
 
 #include "StressDivergenceTensors.h"
 
@@ -38,4 +37,3 @@ protected:
   std::vector<unsigned int> _wc_var;
 };
 
-#endif // COSSERATSTRESSDIVERGENCETENSORS_H

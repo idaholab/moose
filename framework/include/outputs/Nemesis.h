@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NEMESIS_H
-#define NEMESIS_H
+#pragma once
 
 // MOOSE includes
 #include "AdvancedOutput.h"
@@ -95,4 +94,3 @@ private:
   bool _nemesis_initialized;
 };
 
-#endif /* NEMESIS_H */

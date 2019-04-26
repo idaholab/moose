@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEEIGENSTRAINBEAMBASE_H
-#define COMPUTEEIGENSTRAINBEAMBASE_H
+#pragma once
 
 #include "Material.h"
 
@@ -45,4 +44,3 @@ protected:
   bool & _step_zero;
 };
 
-#endif // COMPUTEEIGENSTRAINBEAMBASE_H

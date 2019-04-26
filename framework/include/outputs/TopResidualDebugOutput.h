@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TOPRESIDUALEBUGOUTPUT_H
-#define TOPRESIDUALEBUGOUTPUT_H
+#pragma once
 
 // MOOSE includes
 #include "PetscOutput.h"
@@ -113,4 +112,3 @@ protected:
   System & _sys;
 };
 
-#endif // TOPRESIDUALDEBUGOUTPUT_H

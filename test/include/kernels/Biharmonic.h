@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef BIHARMONIC_H
-#define BIHARMONIC_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -38,4 +37,3 @@ protected:
   const VariableTestSecond & _second_test;
 };
 
-#endif

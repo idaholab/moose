@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CHPFCRFFSPLITVARIABLESACTION_H
-#define CHPFCRFFSPLITVARIABLESACTION_H
+#pragma once
 
 #include "InputParameters.h"
 #include "Action.h"
@@ -36,4 +35,3 @@ private:
   const AuxVariableName _n_name;
 };
 
-#endif // CHPFCRFFSPLITVARIABLESACTION_H

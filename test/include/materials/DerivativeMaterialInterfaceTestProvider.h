@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DERIVATIVEMATERIALINTERFACETESTPROVIDER_H
-#define DERIVATIVEMATERIALINTERFACETESTPROVIDER_H
+#pragma once
 
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
@@ -33,4 +32,3 @@ protected:
   MaterialProperty<dof_id_type> & _prop6;
 };
 
-#endif // DERIVATIVEMATERIALINTERFACETESTPROVIDER_H

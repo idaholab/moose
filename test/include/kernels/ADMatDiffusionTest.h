@@ -6,8 +6,8 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#ifndef ADMATDIFFUSIONTEST_H
-#define ADMATDIFFUSIONTEST_H
+
+#pragma once
 
 #include "ADKernel.h"
 #include "MaterialProperty.h"
@@ -36,4 +36,3 @@ protected:
   usingKernelMembers;
 };
 
-#endif // ADMATDIFFUSIONTEST_H

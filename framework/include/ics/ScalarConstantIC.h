@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SCALARCONSTANTIC_H
-#define SCALARCONSTANTIC_H
+#pragma once
 
 #include "ScalarInitialCondition.h"
 
@@ -37,4 +36,3 @@ protected:
   Real _value;
 };
 
-#endif // CONSTANTIC_H

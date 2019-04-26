@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SETUPMESHACTION_H
-#define SETUPMESHACTION_H
+#pragma once
 
 #include "MooseObjectAction.h"
 
@@ -30,4 +29,3 @@ private:
   void setupMesh(MooseMesh * mesh);
 };
 
-#endif // SETUPMESHACTION_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NSTHERMALINFLOWBC_H
-#define NSTHERMALINFLOWBC_H
+#pragma once
 
 // MOOSE includes
 #include "NodalBC.h"
@@ -49,4 +48,3 @@ protected:
   const IdealGasFluidProperties & _fp;
 };
 
-#endif // NSTHERMALINFLOWBC_H

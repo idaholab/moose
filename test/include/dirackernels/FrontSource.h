@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FRONTSOURCE_H
-#define FRONTSOURCE_H
+#pragma once
 
 // Moose Includes
 #include "DiracKernel.h"
@@ -39,4 +38,3 @@ protected:
   const TrackDiracFront & _front_tracker;
 };
 
-#endif // FRONTSOURCE_H

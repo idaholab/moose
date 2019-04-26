@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CONTACTPRESSUREAUX_H
-#define CONTACTPRESSUREAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -32,4 +31,3 @@ protected:
 template <>
 InputParameters validParams<ContactPressureAux>();
 
-#endif

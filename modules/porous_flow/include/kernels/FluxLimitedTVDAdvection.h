@@ -6,8 +6,8 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#ifndef FLUXLIMITEDTVDADVECTION_H
-#define FLUXLIMITEDTVDADVECTION_H
+
+#pragma once
 
 #include "Kernel.h"
 #include "AdvectiveFluxCalculatorBase.h"
@@ -43,4 +43,3 @@ protected:
   const AdvectiveFluxCalculatorBase & _fluo;
 };
 
-#endif // FLUXLIMITEDTVDADVECTION_H

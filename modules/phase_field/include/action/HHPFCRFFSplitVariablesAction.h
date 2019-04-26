@@ -6,8 +6,8 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#ifndef HHPFCRFFSPLITVARIABLESACTION_H
-#define HHPFCRFFSPLITVARIABLESACTION_H
+
+#pragma once
 
 #include "InputParameters.h"
 #include "Action.h"
@@ -33,4 +33,3 @@ private:
   const std::string _L_name_base;
 };
 
-#endif // HHPFCRFFSPLITVARIABLESACTION_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef BLOCKRESTRICTABLE_H
-#define BLOCKRESTRICTABLE_H
+#pragma once
 
 // MOOSE includes
 #include "InputParameters.h"
@@ -255,4 +254,3 @@ BlockRestrictable::hasBlockMaterialProperty(const std::string & prop_name)
          _blk_material_data->haveProperty<T>(prop_name);
 }
 
-#endif // BLOCKRESTRICTABLE_H

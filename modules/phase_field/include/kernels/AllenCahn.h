@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ALLENCAHN_H
-#define ALLENCAHN_H
+#pragma once
 
 #include "ACBulk.h"
 
@@ -41,4 +40,3 @@ protected:
   std::vector<const MaterialProperty<Real> *> _d2FdEtadarg;
 };
 
-#endif // ALLENCAHN_H

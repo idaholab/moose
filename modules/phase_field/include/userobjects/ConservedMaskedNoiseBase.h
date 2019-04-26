@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CONSERVEDMASKEDNOISEBASE_H
-#define CONSERVEDMASKEDNOISEBASE_H
+#pragma once
 
 #include "ConservedNoiseInterface.h"
 
@@ -50,4 +49,3 @@ protected:
   const MaterialProperty<Real> & _mask;
 };
 
-#endif // CONSERVEDMASKEDNOISEBASE_H

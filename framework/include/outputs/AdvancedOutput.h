@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADVANCEDOUTPUT_H
-#define ADVANCEDOUTPUT_H
+#pragma once
 
 // MOOSE includes
 #include "AdvancedOutputUtils.h" // OutputDataWarehouse
@@ -420,4 +419,3 @@ AdvancedOutput::initPostprocessorOrVectorPostprocessorLists(const std::string & 
   }
 }
 
-#endif /* ADVANCEDOUTPUT_H */

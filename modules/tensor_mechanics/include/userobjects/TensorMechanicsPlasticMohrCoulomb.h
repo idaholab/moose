@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TENSORMECHANICSPLASTICMOHRCOULOMB_H
-#define TENSORMECHANICSPLASTICMOHRCOULOMB_H
+#pragma once
 
 #include "TensorMechanicsPlasticModel.h"
 #include "TensorMechanicsHardeningModel.h"
@@ -163,4 +162,3 @@ private:
   RankTwoTensor df_dsig(const RankTwoTensor & stress, const Real sin_angle) const;
 };
 
-#endif // TENSORMECHANICSPLASTICMOHRCOULOMB_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LINESEGMENTCUTSETUSEROBJECT_H
-#define LINESEGMENTCUTSETUSEROBJECT_H
+#pragma once
 
 #include "GeometricCut2DUserObject.h"
 
@@ -36,4 +35,3 @@ protected:
   std::vector<Real> _cut_data;
 };
 
-#endif // LINESEGMENTCUTSETUSEROBJECT_H

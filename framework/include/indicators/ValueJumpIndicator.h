@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VALUEJUMPINDICATOR_H
-#define VALUEJUMPINDICATOR_H
+#pragma once
 
 #include "InternalSideIndicator.h"
 
@@ -26,4 +25,3 @@ protected:
   virtual Real computeQpIntegral() override;
 };
 
-#endif /* VALUEJUMPINDICATOR_H */

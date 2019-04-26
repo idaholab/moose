@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GRAINBOUNDARYAREA_H
-#define GRAINBOUNDARYAREA_H
+#pragma once
 
 #include "ElementIntegralPostprocessor.h"
 
@@ -40,4 +39,3 @@ protected:
   const Real _factor;
 };
 
-#endif // GRAINBOUNDARYAREA_H

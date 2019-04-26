@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TRILINEARINTERPOLATION_H
-#define TRILINEARINTERPOLATION_H
+#pragma once
 
 #include <vector>
 #include "Moose.h"
@@ -116,4 +115,3 @@ protected:
   Real getCornerValues(int x, int y, int z) const;
 };
 
-#endif /* TRILINEARINTERPOLATION_H */

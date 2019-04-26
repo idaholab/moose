@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SMOOTHCIRCLEBASEIC_H
-#define SMOOTHCIRCLEBASEIC_H
+#pragma once
 
 #include "InitialCondition.h"
 #include "MooseRandom.h"
@@ -64,4 +63,3 @@ protected:
   MooseRandom _random;
 };
 
-#endif // SMOOTHCIRCLEBASEIC_H

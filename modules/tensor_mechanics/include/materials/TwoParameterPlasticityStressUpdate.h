@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TWOPARAMETERPLASTICITYSTRESSUPDATE_H
-#define TWOPARAMETERPLASTICITYSTRESSUPDATE_H
+#pragma once
 
 #include "MultiParameterPlasticityStressUpdate.h"
 
@@ -339,4 +338,3 @@ protected:
   virtual RankFourTensor d2qdstress2(const RankTwoTensor & stress) const = 0;
 };
 
-#endif // TWOPARAMETERPLASTICITYSTRESSUPDATE_H

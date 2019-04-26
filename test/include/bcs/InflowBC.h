@@ -6,8 +6,8 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#ifndef INFLOWBC_H
-#define INFLOWBC_H
+
+#pragma once
 
 #include "IntegratedBC.h"
 
@@ -28,4 +28,3 @@ protected:
   virtual Real computeQpJacobian();
 };
 
-#endif // INFLOWBC_H

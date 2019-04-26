@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SIDEFLUXINTEGRAL_H
-#define SIDEFLUXINTEGRAL_H
+#pragma once
 
 // MOOSE includes
 #include "SideIntegralVariablePostprocessor.h"
@@ -34,4 +33,3 @@ protected:
   const MaterialProperty<Real> & _diffusion_coef;
 };
 
-#endif // SIDEFLUXINTEGRAL_H

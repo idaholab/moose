@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CRACKFRONTPOINTSPROVIDER_H
-#define CRACKFRONTPOINTSPROVIDER_H
+#pragma once
 
 #include "ElementUserObject.h"
 
@@ -32,4 +31,3 @@ public:
   getCrackFrontPoints(unsigned int /*num_crack_front_points*/) const = 0;
 };
 
-#endif /* CRACKFRONTPOINTSPROVIDER_H */

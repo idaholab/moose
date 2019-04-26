@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PERCENTCHANGEPOSTPROCESSOR_H
-#define PERCENTCHANGEPOSTPROCESSOR_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 
@@ -34,4 +33,3 @@ protected:
   const PostprocessorValue &_postprocessor, &_postprocessor_old;
 };
 
-#endif /* PERCENTCHANGEPOSTPROCESSOR_H */

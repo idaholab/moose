@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GAPCONDUCTANCE_H
-#define GAPCONDUCTANCE_H
+#pragma once
 
 #include "Material.h"
 
@@ -125,4 +124,3 @@ protected:
 template <>
 InputParameters validParams<GapConductance>();
 
-#endif // GAPCONDUCTANCE_H

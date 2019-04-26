@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEUTILS_H
-#define MOOSEUTILS_H
+#pragma once
 
 // MOOSE includes
 #include "HashMap.h"
@@ -640,4 +639,3 @@ linearPartitionChunk(dof_id_type num_items, dof_id_type num_chunks, dof_id_type 
  */
 void removeSubstring(std::string & main, const std::string & sub);
 
-#endif // MOOSEUTILS_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef STRAINENERGYDENSITY_H
-#define STRAINENERGYDENSITY_H
+#pragma once
 
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
@@ -56,4 +55,3 @@ protected:
   const MaterialProperty<RankTwoTensor> * _strain_increment;
 };
 
-#endif // STRAINENERGYDENSITY_H

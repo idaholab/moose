@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GEOMETRICSEARCHDATA_H
-#define GEOMETRICSEARCHDATA_H
+#pragma once
 
 // MOOSE includes
 #include "MooseTypes.h"
@@ -168,4 +167,3 @@ private:
   void reinitMortarNodes();
 };
 
-#endif // GEOMETRICSEARCHDATA_H

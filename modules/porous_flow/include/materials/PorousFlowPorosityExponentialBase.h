@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWPOROSITYEXPONENTIALBASE_H
-#define POROUSFLOWPOROSITYEXPONENTIALBASE_H
+#pragma once
 
 #include "PorousFlowPorosityBase.h"
 
@@ -77,4 +76,3 @@ protected:
   const bool _ensure_positive;
 };
 
-#endif // POROUSFLOWPOROSITYEXPONENTIALBASE_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NSMOMENTUMVISCOUSBC_H
-#define NSMOMENTUMVISCOUSBC_H
+#pragma once
 
 #include "NSIntegratedBC.h"
 #include "NSViscStressTensorDerivs.h"
@@ -56,4 +55,3 @@ protected:
   friend class NSViscStressTensorDerivs;
 };
 
-#endif // NSMOMENTUMVISCOUSBC_H

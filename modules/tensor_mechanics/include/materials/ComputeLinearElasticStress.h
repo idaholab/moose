@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTELINEARELASTICSTRESS_H
-#define COMPUTELINEARELASTICSTRESS_H
+#pragma once
 
 #include "ComputeStressBase.h"
 
@@ -35,4 +34,3 @@ protected:
   const MaterialProperty<RankFourTensor> & _elasticity_tensor;
 };
 
-#endif // COMPUTELINEARELASTICSTRESS_H

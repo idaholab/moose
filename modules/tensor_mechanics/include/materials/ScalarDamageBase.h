@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SCALARDAMAGEBASE_H
-#define SCALARDAMAGEBASE_H
+#pragma once
 
 #include "DamageBase.h"
 
@@ -62,4 +61,3 @@ protected:
   const Real & _maximum_damage_increment;
 };
 
-#endif // SCALARDAMAGEBASE_H

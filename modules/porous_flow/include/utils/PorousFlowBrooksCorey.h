@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWBROOKSCOREY_H
-#define POROUSFLOWBROOKSCOREY_H
+#pragma once
 
 #include "MooseTypes.h"
 
@@ -121,4 +120,3 @@ Real relativePermeabilityNW(Real seff, Real lambda);
 Real dRelativePermeabilityNW(Real seff, Real lambda);
 }
 
-#endif // POROUSFLOWBROOKSCOREY_H

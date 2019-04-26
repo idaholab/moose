@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTELINEARELASTICPFFRACTURESTRESS_H
-#define COMPUTELINEARELASTICPFFRACTURESTRESS_H
+#pragma once
 
 #include "ComputePFFractureStressBase.h"
 #include "MooseEnum.h"
@@ -66,4 +65,3 @@ protected:
   } _decomposition_type;
 };
 
-#endif

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEAXISYMMETRIC1DSMALLSTRAIN_H
-#define COMPUTEAXISYMMETRIC1DSMALLSTRAIN_H
+#pragma once
 
 #include "Compute1DSmallStrain.h"
 #include "SubblockIndexProvider.h"
@@ -53,4 +52,3 @@ protected:
   std::vector<const VariableValue *> _scalar_out_of_plane_strain;
 };
 
-#endif // COMPUTEAXISYMMETRIC1DSMALLSTRAIN_H

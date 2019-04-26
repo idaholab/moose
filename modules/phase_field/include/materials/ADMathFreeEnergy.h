@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADMATHFREEENERGY_H
-#define ADMATHFREEENERGY_H
+#pragma once
 
 #include "ADMaterial.h"
 #include "DerivativeMaterialPropertyNameInterface.h"
@@ -48,4 +47,3 @@ protected:
   usingMaterialMembers;
 };
 
-#endif // ADMATHFREEENERGY_H

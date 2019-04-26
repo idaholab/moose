@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef BOUNDARYFLUXBASE_H
-#define BOUNDARYFLUXBASE_H
+#pragma once
 
 #include "ThreadedGeneralUserObject.h"
 
@@ -108,4 +107,3 @@ protected:
   mutable DenseMatrix<Real> _jac1;
 };
 
-#endif // BOUNDARYFLUXBASE_H

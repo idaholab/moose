@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RECEIVER_H
-#define RECEIVER_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 
@@ -58,4 +57,3 @@ private:
   const PostprocessorValue & _my_value;
 };
 
-#endif // RECEIVER_H

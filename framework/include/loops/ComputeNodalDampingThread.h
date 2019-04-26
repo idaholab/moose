@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTENODALDAMPINGTHREAD_H
-#define COMPUTENODALDAMPINGTHREAD_H
+#pragma once
 
 // MOOSE includes
 #include "ThreadedNodeLoop.h"
@@ -44,4 +43,3 @@ protected:
   const MooseObjectWarehouse<NodalDamper> & _nodal_dampers;
 };
 
-#endif // COMPUTENODALDAMPINGTHREAD_H

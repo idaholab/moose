@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATERIALPROPERTYDEBUGOUTPUT_H
-#define MATERIALPROPERTYDEBUGOUTPUT_H
+#pragma once
 
 // MOOSE includes
 #include "Output.h"
@@ -55,4 +54,3 @@ protected:
                                const std::vector<std::shared_ptr<Material>> & materials) const;
 };
 
-#endif // MATERIALPROPERTYEBUGOUTPUT_H

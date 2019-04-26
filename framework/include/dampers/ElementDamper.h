@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMENTDAMPER_H
-#define ELEMENTDAMPER_H
+#pragma once
 
 // Moose Includes
 #include "Damper.h"
@@ -84,4 +83,3 @@ protected:
   const VariableGradient & _grad_u;
 };
 
-#endif // ELEMENTDAMPER_H

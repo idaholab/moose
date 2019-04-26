@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATERIALDERIVATIVETESTKERNEL_H
-#define MATERIALDERIVATIVETESTKERNEL_H
+#pragma once
 
 #include "MaterialDerivativeTestKernelBase.h"
 
@@ -31,4 +30,3 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 };
 
-#endif /* MATERIALDERIVATIVETESTKERNEL_H */

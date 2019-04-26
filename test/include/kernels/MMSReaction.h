@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MMSREACTION_H_
-#define MMSREACTION_H_
+#pragma once
 
 #include "Kernel.h"
 
@@ -29,4 +28,3 @@ protected:
   unsigned int _mesh_dimension;
 };
 
-#endif // MMSREACTION_H_

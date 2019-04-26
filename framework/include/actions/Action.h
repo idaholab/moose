@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ACTION_H
-#define ACTION_H
+#pragma once
 
 #include "InputParameters.h"
 #include "ConsoleStreamInterface.h"
@@ -227,4 +226,3 @@ Action::getParam(const std::string & name) const
   return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
 }
 
-#endif // ACTION_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GEOMETRICCUT2DUSEROBJECT_H
-#define GEOMETRICCUT2DUSEROBJECT_H
+#pragma once
 
 #include "GeometricCutUserObject.h"
 
@@ -62,4 +61,3 @@ protected:
   std::vector<std::pair<Real, Real>> _cut_time_ranges;
 };
 
-#endif // GEOMETRICCUT2DUSEROBJECT_H

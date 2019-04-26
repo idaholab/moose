@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TORQUEREACTION_H
-#define TORQUEREACTION_H
+#pragma once
 
 #include "NodalPostprocessor.h"
 
@@ -57,4 +56,3 @@ protected:
   Real _sum;
 };
 
-#endif // TORQUEREACTION_H

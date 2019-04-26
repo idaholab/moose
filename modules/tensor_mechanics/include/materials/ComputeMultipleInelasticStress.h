@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEMULTIPLEINELASTICSTRESS_H
-#define COMPUTEMULTIPLEINELASTICSTRESS_H
+#pragma once
 
 #include "ComputeFiniteStrainElasticStress.h"
 
@@ -178,4 +177,3 @@ protected:
   bool _is_elasticity_tensor_guaranteed_isotropic;
 };
 
-#endif // COMPUTEMULTIPLEINELASTICSTRESS_H

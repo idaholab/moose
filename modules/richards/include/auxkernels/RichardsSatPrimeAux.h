@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RICHARDSSATPRIMEAUX_H
-#define RICHARDSSATPRIMEAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -38,4 +37,3 @@ protected:
   const RichardsSat & _sat_UO;
 };
 
-#endif // RICHARDSSATPRIMEAUX_H

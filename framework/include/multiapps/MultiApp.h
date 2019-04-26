@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MULTIAPP_H
-#define MULTIAPP_H
+#pragma once
 
 #include "MooseObject.h"
 #include "SetupInterface.h"
@@ -448,4 +447,3 @@ dataLoad(std::istream & stream, SubAppBackups & backups, void * context)
   multi_app->restore();
 }
 
-#endif // MULTIAPP_H

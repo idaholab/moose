@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LEVELSETADVECTION_H
-#define LEVELSETADVECTION_H
+#pragma once
 
 // MOOSE includes
 #include "ADKernelValue.h"
@@ -41,4 +40,3 @@ protected:
   using LevelSetVelocityInterface<ADKernelValue<compute_stage>>::_velocity;
 };
 
-#endif // LEVELSETADVECTION_H

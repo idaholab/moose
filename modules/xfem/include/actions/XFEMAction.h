@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef XFEMACTION_H
-#define XFEMACTION_H
+#pragma once
 
 #include "Action.h"
 #include "UserObjectInterface.h"
@@ -41,4 +40,3 @@ protected:
   Real _cut_off_radius;
 };
 
-#endif // XFEMACTION_H

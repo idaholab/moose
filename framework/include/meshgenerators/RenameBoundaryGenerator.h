@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RENAMEBOUNDARYGENERATOR_H
-#define RENAMEBOUNDARYGENERATOR_H
+#pragma once
 
 #include "MeshGenerator.h"
 
@@ -40,4 +39,3 @@ protected:
   std::vector<BoundaryName> _new_boundary_name;
 };
 
-#endif // RENAMEBOUNDARYGENERATOR_H

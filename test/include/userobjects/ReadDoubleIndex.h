@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef READDOUBLEINDEX_H
-#define READDOUBLEINDEX_H
+#pragma once
 
 #include "GeneralUserObject.h"
 
@@ -56,4 +55,3 @@ protected:
   const std::vector<std::vector<MaterialPropertyName>> & _material_property_name_di;
 };
 
-#endif /* ReadDoubleIndex_H */

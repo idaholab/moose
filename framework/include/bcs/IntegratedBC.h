@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INTEGRATEDBC_H
-#define INTEGRATEDBC_H
+#pragma once
 
 #include "IntegratedBCBase.h"
 #include "MooseVariableInterface.h"
@@ -78,4 +77,3 @@ protected:
   const VariableGradient & _grad_u;
 };
 
-#endif /* INTEGRATEDBC_H */

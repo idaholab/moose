@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CONSTRAINTWAREHOUSE_H
-#define CONSTRAINTWAREHOUSE_H
+#pragma once
 
 // MOOSE includes
 #include "MooseObjectWarehouse.h"
@@ -105,4 +104,3 @@ protected:
       _displaced_node_elem_constraints;
 };
 
-#endif // CONSTRAINTWAREHOUSE_H

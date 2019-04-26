@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RANKTHREETENSOR_H
-#define RANKTHREETENSOR_H
+#pragma once
 
 #include "Moose.h"
 #include "DualReal.h"
@@ -277,4 +276,3 @@ RankTwoTensorTempl<T> operator*(const VectorValue<T> & p, const RankThreeTensorT
   return result;
 }
 
-#endif // RANKTHREETENSOR_H

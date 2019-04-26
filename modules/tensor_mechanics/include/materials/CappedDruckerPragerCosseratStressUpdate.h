@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CAPPEDDRUCKERPRAGERCOSSERATSTRESSUPDATE_H
-#define CAPPEDDRUCKERPRAGERCOSSERATSTRESSUPDATE_H
+#pragma once
 
 #include "CappedDruckerPragerStressUpdate.h"
 
@@ -93,4 +92,3 @@ protected:
                                          RankFourTensor & cto) const override;
 };
 
-#endif // CAPPEDDRUCKERPRAGERCOSSERATSTRESSUPDATE_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CREATEPROBLEMACTION_H
-#define CREATEPROBLEMACTION_H
+#pragma once
 
 // MOOSE includes
 #include "MooseObjectAction.h"
@@ -26,4 +25,3 @@ public:
   virtual void act() override;
 };
 
-#endif /* CREATEPROBLEMACTION_H */

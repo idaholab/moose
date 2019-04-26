@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADDPRIMARYSPECIESACTION_H
-#define ADDPRIMARYSPECIESACTION_H
+#pragma once
 
 #include "AddVariableAction.h"
 
@@ -31,4 +30,3 @@ private:
   const Real _scaling;
 };
 
-#endif // ADDPRIMARYSPECIESACTION_H

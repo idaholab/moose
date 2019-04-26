@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INTERNALSIDEPOSTPROCESSOR_H
-#define INTERNALSIDEPOSTPROCESSOR_H
+#pragma once
 
 #include "InternalSideUserObject.h"
 #include "Postprocessor.h"
@@ -25,4 +24,3 @@ public:
   InternalSidePostprocessor(const InputParameters & parameters);
 };
 
-#endif

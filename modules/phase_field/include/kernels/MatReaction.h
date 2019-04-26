@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATREACTION_H
-#define MATREACTION_H
+#pragma once
 
 #include "Kernel.h"
 #include "JvarMapInterface.h"
@@ -67,4 +66,3 @@ protected:
   std::vector<const MaterialProperty<Real> *> _dLdarg;
 };
 
-#endif // MATREACTION_H

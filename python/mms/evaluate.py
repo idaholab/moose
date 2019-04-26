@@ -1,3 +1,12 @@
+#* This file is part of the MOOSE framework
+#* https://www.mooseframework.org
+#*
+#* All rights reserved, see COPYRIGHT for full restrictions
+#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#*
+#* Licensed under LGPL 2.1, please see LICENSE for details
+#* https://www.gnu.org/licenses/lgpl-2.1.html
+
 from sympy import * # use star so all functions are available to supplied strings
 from sympy.vector import divergence, gradient, Vector, CoordSys3D
 from fparser import print_fparser
@@ -85,15 +94,30 @@ def evaluate(pde, soln, variable='u',
             locals()['{}_y'.format(_f_)] = locals()[_f_].components.get(R.j, 0)
             locals()['{}_z'.format(_f_)] = locals()[_f_].components.get(R.k, 0)
 
-    locals()[variable] = eval(soln)
+    # Evaluate the supplied solution
+    _exact_ = eval(soln)
+    locals()[variable] = _exact_
 
     # Evaluate the PDE
     pde = pde.replace('grad', 'gradient')
     pde = pde.replace('div', 'divergence')
+    _func_ = eval(pde)
     if negative:
-        return -eval(pde), locals()[variable]
-    else:
-        return eval(pde), locals()[variable]
+        _func_ = -1 * _func_
+
+    # Convert vector exact solution to a list
+    if isinstance(_exact_, Vector):
+        _exact_ = [_exact_.components.get(R.i, 0),
+                   _exact_.components.get(R.j, 0),
+                   _exact_.components.get(R.k, 0)]
+
+    # Convert vector result to a list
+    if isinstance(_func_, Vector):
+        _func_ = [_func_.components.get(R.i, 0),
+                  _func_.components.get(R.j, 0),
+                  _func_.components.get(R.k, 0)]
+
+    return _func_, _exact_
 
 def _check_reserved(var):
     """Error checking for input variables."""

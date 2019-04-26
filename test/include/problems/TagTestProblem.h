@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TAGTESTPROBLEM_H
-#define TAGTESTPROBLEM_H
+#pragma once
 
 #include "FEProblem.h"
 
@@ -37,4 +36,3 @@ protected:
   std::set<std::string> mtags;
 };
 
-#endif /* TAGTESTPROBLEM_H */

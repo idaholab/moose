@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INTERACTIONINTEGRALSM_H
-#define INTERACTIONINTEGRALSM_H
+#pragma once
 
 #include "ElementIntegralPostprocessor.h"
 #include "CrackFrontDefinition.h"
@@ -88,4 +87,3 @@ private:
   const SifMethod _sif_mode;
 };
 
-#endif // INTERACTIONINTEGRALSM_H

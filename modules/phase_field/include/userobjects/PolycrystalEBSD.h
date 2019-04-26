@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POLYCRYSTALEBSD_H
-#define POLYCRYSTALEBSD_H
+#pragma once
 
 #include "PolycrystalUserObjectBase.h"
 
@@ -36,4 +35,3 @@ protected:
   const std::map<dof_id_type, std::vector<Real>> & _node_to_grain_weight_map;
 };
 
-#endif // POLYCRYSTALEBSD_H

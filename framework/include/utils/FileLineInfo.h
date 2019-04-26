@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FILELINEINFO_H
-#define FILELINEINFO_H
+#pragma once
 
 #include <string>
 #include <map>
@@ -112,4 +111,3 @@ protected:
   std::map<std::string, FileLineInfo> _map;
 };
 
-#endif // FILELINEINFO_H

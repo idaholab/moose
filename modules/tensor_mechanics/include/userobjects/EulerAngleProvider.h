@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EULERANGLEPROVIDER_H
-#define EULERANGLEPROVIDER_H
+#pragma once
 
 #include "EulerAngles.h"
 #include "GeneralUserObject.h"
@@ -31,4 +30,3 @@ public:
   virtual unsigned int getGrainNum() const = 0;
 };
 
-#endif // EULERANGLEPROVIDER_H

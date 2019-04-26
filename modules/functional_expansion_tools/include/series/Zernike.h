@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ZERNIKE_H
-#define ZERNIKE_H
+#pragma once
 
 #include "SingleSeriesBasisInterface.h"
 
@@ -73,4 +72,3 @@ protected:
   std::vector<Real> _positive_azimuthal_components;
 };
 
-#endif // ZERNIKE_H

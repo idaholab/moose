@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CONSTANTDT_H
-#define CONSTANTDT_H
+#pragma once
 
 #include "TimeStepper.h"
 
@@ -31,4 +30,3 @@ private:
   const Real _growth_factor;
 };
 
-#endif /* CONSTANTDT_H */

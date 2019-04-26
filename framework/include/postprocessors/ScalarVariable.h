@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SCALARVARIABLE_H
-#define SCALARVARIABLE_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 
@@ -35,4 +34,3 @@ protected:
   unsigned int _idx;
 };
 
-#endif /* SCALARVARIABLE_H */

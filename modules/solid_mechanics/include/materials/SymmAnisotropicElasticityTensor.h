@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SYMMANISOTROPICELASTICITYTENSOR_H
-#define SYMMANISOTROPICELASTICITYTENSOR_H
+#pragma once
 
 #include "SymmElasticityTensor.h"
 
@@ -119,4 +118,3 @@ protected:
   virtual void calculateEntries(unsigned int qp);
 };
 
-#endif // ANISOTROPICELASTICITYTENSOR_H

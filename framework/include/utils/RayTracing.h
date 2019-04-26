@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RAYTRACING_H
-#define RAYTRACING_H
+#pragma once
 
 // MOOSE includes
 #include "MooseTypes.h"
@@ -45,4 +44,3 @@ void elementsIntersectedByLine(const Point & p0,
                                std::vector<LineSegment> & segments);
 }
 
-#endif // RAYTRACING_H

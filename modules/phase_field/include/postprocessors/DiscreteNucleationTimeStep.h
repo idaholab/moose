@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DISCRETENUCLEATIONTIMESTEP_H
-#define DISCRETENUCLEATIONTIMESTEP_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 #include "DiscreteNucleationInserterBase.h"
@@ -54,4 +53,3 @@ protected:
   Real _max_lambda;
 };
 
-#endif // DISCRETENUCLEATIONTIMESTEP_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MULTIBOUNDINGBOXIC_H
-#define MULTIBOUNDINGBOXIC_H
+#pragma once
 
 #include "InitialCondition.h"
 
@@ -49,4 +48,3 @@ protected:
   const Real _outside;
 };
 
-#endif // MULTIBOUNDINGBOXIC_H

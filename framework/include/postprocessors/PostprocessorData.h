@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POSTPROCESSORDATA_H
-#define POSTPROCESSORDATA_H
+#pragma once
 
 // MOOSE includes
 #include "MooseTypes.h"
@@ -78,4 +77,3 @@ protected:
   std::map<std::string, PostprocessorValue *> _values_older;
 };
 
-#endif // POSTPROCESSORDATA_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWEFFECTIVESTRESSCOUPLING_H
-#define POROUSFLOWEFFECTIVESTRESSCOUPLING_H
+#pragma once
 
 #include "Kernel.h"
 #include "PorousFlowDictator.h"
@@ -53,4 +52,3 @@ protected:
   const bool _rz;
 };
 
-#endif // POROUSFLOWEFFECTIVESTRESSCOUPLING_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INPUTPARAMETERS_H
-#define INPUTPARAMETERS_H
+#pragma once
 
 // MOOSE includes
 #include "MooseUtils.h"
@@ -1454,4 +1453,3 @@ validParams()
   mooseError("Missing validParams declaration!");
 }
 
-#endif /* INPUTPARAMETERS_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COUPLEDTIEDVALUECONSTRAINT_H
-#define COUPLEDTIEDVALUECONSTRAINT_H
+#pragma once
 
 // MOOSE includes
 #include "NodeFaceConstraint.h"
@@ -41,4 +40,3 @@ protected:
   NumericVector<Number> & _residual_copy;
 };
 
-#endif

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NONLINEARSYSTEM_H
-#define NONLINEARSYSTEM_H
+#pragma once
 
 #include "NonlinearSystemBase.h"
 #include "ComputeResidualFunctor.h"
@@ -98,4 +97,3 @@ private:
   bool _use_coloring_finite_difference;
 };
 
-#endif /* NONLINEARSYSTEM_H */

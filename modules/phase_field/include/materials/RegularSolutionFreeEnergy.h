@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef REGULARSOLUTIONFREEENERGY_H
-#define REGULARSOLUTIONFREEENERGY_H
+#pragma once
 
 #include "DerivativeParsedMaterialHelper.h"
 #include "ExpressionBuilder.h"
@@ -43,4 +42,3 @@ protected:
   const Real _kB;
 };
 
-#endif // REGULARSOLUTIONFREEENERGY_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CONVECTION_H
-#define CONVECTION_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -30,4 +29,3 @@ protected:
   RealVectorValue _velocity;
 };
 
-#endif // CONVECTION_H

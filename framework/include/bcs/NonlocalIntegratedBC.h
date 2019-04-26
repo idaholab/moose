@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NONLOCALINTEGRATEDBC_H
-#define NONLOCALINTEGRATEDBC_H
+#pragma once
 
 #include "IntegratedBC.h"
 
@@ -71,4 +70,3 @@ protected:
   unsigned int _k;
 };
 
-#endif /* NONLOCALINTEGRATEDBC_H */

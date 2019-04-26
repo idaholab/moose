@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTECOSSERATINCREMENTALSMALLSTRAIN_H
-#define COMPUTECOSSERATINCREMENTALSMALLSTRAIN_H
+#pragma once
 
 #include "ComputeIncrementalStrainBase.h"
 
@@ -56,4 +55,3 @@ protected:
   MaterialProperty<RankTwoTensor> & _curvature_increment;
 };
 
-#endif // COMPUTECOSSERATINCREMENTALSMALLSTRAIN_H

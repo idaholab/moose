@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NSKERNEL_H
-#define NSKERNEL_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -73,4 +72,3 @@ protected:
   unsigned mapVarNumber(unsigned var);
 };
 
-#endif // NSKERNEL_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FINITESTRAINCRYSTALPLASTICITY_H
-#define FINITESTRAINCRYSTALPLASTICITY_H
+#pragma once
 
 #include "ComputeStressBase.h"
 
@@ -357,4 +356,3 @@ protected:
   bool _first_step_iter, _last_step_iter, _first_substep;
 };
 
-#endif // FINITESTRAINCRYSTALPLASTICITY_H

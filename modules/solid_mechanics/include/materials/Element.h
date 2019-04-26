@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMENT_H
-#define ELEMENT_H
+#pragma once
 
 #include "Material.h"
 #include "InputParameters.h"
@@ -79,4 +78,3 @@ private:
 
 } // namespace solid_mechanics
 
-#endif

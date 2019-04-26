@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPARISONPOSTPROCESSOR_H
-#define COMPARISONPOSTPROCESSOR_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 
@@ -64,4 +63,3 @@ protected:
   const Real _absolute_tolerance;
 };
 
-#endif

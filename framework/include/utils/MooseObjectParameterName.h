@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEOBJECTPARAMETERNAME_H
-#define MOOSEOBJECTPARAMETERNAME_H
+#pragma once
 
 // MOOSE includes
 #include "MooseObjectName.h"
@@ -85,4 +84,3 @@ protected:
   std::string _parameter;
 };
 
-#endif // MOOSEOBJECTPARAMETERNAME_H

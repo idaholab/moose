@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TRANSFORM_H
-#define TRANSFORM_H
+#pragma once
 
 #include "MeshModifier.h"
 #include "MooseEnum.h"
@@ -32,4 +31,3 @@ protected:
   RealVectorValue _vector_value;
 };
 
-#endif /* TRANSFORM_H */

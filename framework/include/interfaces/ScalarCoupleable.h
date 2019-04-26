@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SCALARCOUPLEABLE_H
-#define SCALARCOUPLEABLE_H
+#pragma once
 
 #include "Moose.h"
 
@@ -262,4 +261,3 @@ private:
   std::set<TagID> _sc_coupleable_matrix_tags;
 };
 
-#endif // SCALARCOUPLEABLE_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEINSTANTANEOUSTHERMALEXPANSIONFUNCTIONEIGENSTRAIN_H
-#define COMPUTEINSTANTANEOUSTHERMALEXPANSIONFUNCTIONEIGENSTRAIN_H
+#pragma once
 
 #include "ComputeThermalExpansionEigenstrainBase.h"
 #include "DerivativeMaterialInterface.h"
@@ -45,4 +44,3 @@ protected:
   bool & _step_one;
 };
 
-#endif // COMPUTEINSTANTANEOUSTHERMALEXPANSIONFUNCTIONEIGENSTRAIN_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWTEMPERATURE_H
-#define POROUSFLOWTEMPERATURE_H
+#pragma once
 
 #include "DerivativeMaterialInterface.h"
 #include "PorousFlowMaterial.h"
@@ -61,4 +60,3 @@ protected:
   MaterialProperty<std::vector<RealGradient>> * const _dgrad_temperature_dv;
 };
 
-#endif // POROUSFLOWTEMPERATURE_H

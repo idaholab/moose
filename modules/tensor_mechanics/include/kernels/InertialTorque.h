@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INERTIALTORQUE_H
-#define INERTIALTORQUE_H
+#pragma once
 
 #include "TimeKernel.h"
 #include "Material.h"
@@ -90,4 +89,3 @@ private:
   std::vector<Real> _dvel;
 };
 
-#endif // INERTIALTORQUE_H

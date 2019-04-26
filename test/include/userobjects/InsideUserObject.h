@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INSIDEUSEROBJECT_H
-#define INSIDEUSEROBJECT_H
+#pragma once
 
 #include "InternalSideUserObject.h"
 
@@ -42,4 +41,3 @@ protected:
   const MaterialProperty<Real> & _neighbor_diffusivity_prop;
 };
 
-#endif /* INSIDEUSEROBJECT_H */

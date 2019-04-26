@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWBRINECO2_H
-#define POROUSFLOWBRINECO2_H
+#pragma once
 
 #include "PorousFlowFluidStateBase.h"
 
@@ -543,4 +542,3 @@ protected:
   const Real _Zmin;
 };
 
-#endif // POROUSFLOWBRINECO2_H

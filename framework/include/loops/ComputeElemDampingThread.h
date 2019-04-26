@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEELEMDAMPINGTHREAD_H
-#define COMPUTEELEMDAMPINGTHREAD_H
+#pragma once
 
 // MOOSE includes
 #include "ThreadedElementLoop.h"
@@ -43,4 +42,3 @@ protected:
   const MooseObjectWarehouse<ElementDamper> & _element_dampers;
 };
 
-#endif // COMPUTEELEMDAMPINGTHREAD_H

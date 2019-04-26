@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GLOBALSTRAINACTION_H
-#define GLOBALSTRAINACTION_H
+#pragma once
 
 #include "Action.h"
 
@@ -32,4 +31,3 @@ protected:
   std::vector<SubdomainName> _block_names;
   std::set<SubdomainID> _block_ids;
 };
-#endif // GLOBALSTRAINACTION_H

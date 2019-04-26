@@ -7,9 +7,6 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SLEPCSUPPORT_H
-#define SLEPCSUPPORT_H
-
 #include "libmesh/libmesh_config.h"
 
 #ifdef LIBMESH_HAVE_SLEPC
@@ -564,5 +561,3 @@ mooseSlepcEigenFormFunctionAB(SNES /*snes*/, Vec x, Vec Ax, Vec Bx, void * ctx)
 } // namespace moose
 
 #endif // LIBMESH_HAVE_SLEPC
-
-#endif // SLEPCSUPPORT_H

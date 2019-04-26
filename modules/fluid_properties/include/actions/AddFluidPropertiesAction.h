@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADDFLUIDPROPERTIESACTION_H
-#define ADDFLUIDPROPERTIESACTION_H
+#pragma once
 
 #include "AddUserObjectAction.h"
 
@@ -23,4 +22,3 @@ public:
   AddFluidPropertiesAction(InputParameters params);
 };
 
-#endif /* ADDFLUIDPROPERTIESACTION_H */

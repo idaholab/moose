@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PROXYRELATIONSHIPMANAGER_H
-#define PROXYRELATIONSHIPMANAGER_H
+#pragma once
 
 #include "RelationshipManager.h"
 
@@ -52,4 +51,3 @@ protected:
   System * _other_system;
 };
 
-#endif /* PROXYRELATIONSHIPMANAGER_H */

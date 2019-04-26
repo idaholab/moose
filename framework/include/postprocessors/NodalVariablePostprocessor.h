@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NODALVARIABLEPOSTPROCESSOR_H
-#define NODALVARIABLEPOSTPROCESSOR_H
+#pragma once
 
 // MOOSE includes
 #include "NodalPostprocessor.h"
@@ -34,4 +33,3 @@ protected:
   const VariableValue & _u;
 };
 
-#endif

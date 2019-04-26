@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MASSLUMPEDTIMEDERIVATIVE_H
-#define MASSLUMPEDTIMEDERIVATIVE_H
+#pragma once
 
 #include "TimeKernel.h"
 
@@ -32,4 +31,3 @@ protected:
   const VariableValue & _u_dot_nodal;
 };
 
-#endif // MASSLUMPEDTIMEDERIVATIVE_H

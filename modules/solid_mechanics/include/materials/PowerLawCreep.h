@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POWERLAWCREEP_H
-#define POWERLAWCREEP_H
+#pragma once
 
 #include "SolidModel.h"
 
@@ -31,4 +30,3 @@ public:
 protected:
 };
 
-#endif // POWERLAWCREEPMATERIAL_H

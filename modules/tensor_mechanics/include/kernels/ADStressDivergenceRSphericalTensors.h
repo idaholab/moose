@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADSTRESSDIVERGENCERSPHERICALTENSORS_H
-#define ADSTRESSDIVERGENCERSPHERICALTENSORS_H
+#pragma once
 
 #include "ADStressDivergenceTensors.h"
 
@@ -39,4 +38,3 @@ protected:
   usingStressDivergenceTensorsMembers;
 };
 
-#endif // ADSTRESSDIVERGENCERSPHERICALTENSORS_H

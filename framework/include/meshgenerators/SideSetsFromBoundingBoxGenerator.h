@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SIDESETSFROMBOUNDINGBOXGENERATOR_H
-#define SIDESETSFROMBOUNDINGBOXGENERATOR_H
+#pragma once
 
 #include "MeshGenerator.h"
 #include "MooseEnum.h"
@@ -52,4 +51,3 @@ protected:
   const bool _boundary_id_overlap;
 };
 
-#endif // SIDESETSFROMBOUNDINGBOXGENERATOR_H

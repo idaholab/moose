@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWPOROSITYHMBIOTMODULUS_H
-#define POROUSFLOWPOROSITYHMBIOTMODULUS_H
+#pragma once
 
 #include "PorousFlowPorosity.h"
 
@@ -56,4 +55,3 @@ protected:
   const MaterialProperty<std::vector<RealGradient>> & _dvol_strain_rate_qp_dvar;
 };
 
-#endif // POROUSFLOWPOROSITYHMBIOTMODULUS_H

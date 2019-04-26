@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef XFEMMOVINGINTERFACEVELOCITYBASE_H
-#define XFEMMOVINGINTERFACEVELOCITYBASE_H
+#pragma once
 
 #include "DiscreteElementUserObject.h"
 #include "PointValueAtXFEMInterface.h"
@@ -43,4 +42,3 @@ protected:
   const PointValueAtXFEMInterface * _value_at_interface_uo;
 };
 
-#endif // XFEMMOVINGINTERFACEVELOCITYBASE_H

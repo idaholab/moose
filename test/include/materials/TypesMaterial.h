@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TYPESMATERIAL_H
-#define TYPESMATERIAL_H
+#pragma once
 
 #include "Material.h"
 // libMesh
@@ -40,4 +39,3 @@ protected:
   MaterialProperty<RealTensorValue> & _tensor_prop;
 };
 
-#endif // TYPESMATERIAL_H

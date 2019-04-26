@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PENETRATIONINFO_H
-#define PENETRATIONINFO_H
+#pragma once
 
 // MOOSE includes
 #include "Moose.h"
@@ -116,4 +115,3 @@ void dataStore(std::ostream & stream, PenetrationInfo *& pinfo, void * context);
 template <>
 void dataLoad(std::istream & stream, PenetrationInfo *& pinfo, void * context);
 
-#endif // PENETRATIONINFO_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MESHEXTRUDER_H
-#define MESHEXTRUDER_H
+#pragma once
 
 #include "MeshModifier.h"
 #include "libmesh/mesh_generation.h"
@@ -62,4 +61,3 @@ private:
   void changeID(const std::vector<BoundaryName> & names, BoundaryID old_id);
 };
 
-#endif /* MESHEXTRUDER_H */

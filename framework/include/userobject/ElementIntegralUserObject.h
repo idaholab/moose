@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMENTINTEGRALUSEROBJECT_H
-#define ELEMENTINTEGRALUSEROBJECT_H
+#pragma once
 
 // MOOSE includes
 #include "ElementUserObject.h"
@@ -48,4 +47,3 @@ protected:
   Real _integral_value;
 };
 
-#endif

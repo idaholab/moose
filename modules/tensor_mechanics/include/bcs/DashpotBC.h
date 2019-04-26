@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DASHPOTBC_H
-#define DASHPOTBC_H
+#pragma once
 
 #include "IntegratedBC.h"
 
@@ -49,4 +48,3 @@ private:
   const VariableValue & _disp_z_dot;
 };
 
-#endif // DASHPOTBC_H

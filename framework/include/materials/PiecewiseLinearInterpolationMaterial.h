@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PIECEWISELINEARINTERPOLATIONMATERIAL_H
-#define PIECEWISELINEARINTERPOLATIONMATERIAL_H
+#pragma once
 
 #include "Material.h"
 #include "LinearInterpolation.h"
@@ -50,4 +49,3 @@ protected:
   std::unique_ptr<LinearInterpolation> _linear_interp;
 };
 
-#endif // PIECEWISELINEARINTERPOLATIONMATERIAL_H

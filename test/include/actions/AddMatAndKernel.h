@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADDMATANDKERNEL_H
-#define ADDMATANDKERNEL_H
+#pragma once
 
 #include "AddVariableAction.h"
 
@@ -29,4 +28,3 @@ public:
   virtual void act();
 };
 
-#endif // ADDMATANDKERNEL_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INITIALCONDITIONTEMPL_H
-#define INITIALCONDITIONTEMPL_H
+#pragma once
 
 #include "InitialConditionBase.h"
 
@@ -172,4 +171,3 @@ protected:
 
 typedef InitialConditionTempl<Real> InitialCondition;
 typedef InitialConditionTempl<RealVectorValue> VectorInitialCondition;
-#endif // INITIALCONDITIONTEMPL_H

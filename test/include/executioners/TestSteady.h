@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TESTSTEADY_H
-#define TESTSTEADY_H
+#pragma once
 
 #include "Steady.h"
 
@@ -44,4 +43,3 @@ private:
   Real _some_value_that_needs_to_be_reported;
 };
 
-#endif /* TESTSTEADY_H */

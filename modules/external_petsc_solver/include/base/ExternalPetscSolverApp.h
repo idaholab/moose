@@ -6,8 +6,8 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#ifndef EXTERNAL_PETSC_SOLVERAPP_H
-#define EXTERNAL_PETSC_SOLVERAPP_H
+
+#pragma once
 
 #include "MooseApp.h"
 
@@ -44,4 +44,3 @@ private:
 #endif
 };
 
-#endif /* EXTERNAL_PETSC_SOLVERAPP_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INSADMATERIAL_H
-#define INSADMATERIAL_H
+#pragma once
 
 #include "ADMaterial.h"
 
@@ -98,4 +97,3 @@ protected:
   usingMaterialMembers;
 };
 
-#endif // INSADMATERIAL_H

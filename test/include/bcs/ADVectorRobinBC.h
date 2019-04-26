@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADVECTORROBINBC_H
-#define ADVECTORROBINBC_H
+#pragma once
 
 #include "ADVectorIntegratedBC.h"
 
@@ -29,4 +28,3 @@ protected:
   usingVectorIntegratedBCMembers;
 };
 
-#endif // ADVECTORROBINBC_H

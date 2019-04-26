@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INSMOMENTUMTIMEDERIVATIVE_H
-#define INSMOMENTUMTIMEDERIVATIVE_H
+#pragma once
 
 #include "TimeDerivative.h"
 
@@ -39,4 +38,3 @@ protected:
   const MaterialProperty<Real> & _rho;
 };
 
-#endif // INSMOMENTUMTIMEDERIVATIVE_H

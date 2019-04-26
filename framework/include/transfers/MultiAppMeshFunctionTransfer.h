@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MULTIAPPMESHFUNCTIONTRANSFER_H
-#define MULTIAPPMESHFUNCTIONTRANSFER_H
+#pragma once
 
 #include "MultiAppTransfer.h"
 
@@ -56,4 +55,3 @@ private:
   std::vector<std::vector<Parallel::Request>> _send_ids;
 };
 
-#endif /* MULTIAPPMESHFUNCTIONTRANSFER_H */

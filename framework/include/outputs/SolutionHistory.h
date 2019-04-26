@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SOLUTIONHISTORY_H
-#define SOLUTIONHISTORY_H
+#pragma once
 
 // MOOSE includes
 #include "FileOutput.h"
@@ -49,4 +48,3 @@ public:
   virtual std::string filename() override;
 };
 
-#endif /* SOLUTIONHISTORY_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SINGLEPHASEFLUIDPROPERTIESPT_H
-#define SINGLEPHASEFLUIDPROPERTIESPT_H
+#pragma once
 
 #include "SinglePhaseFluidProperties.h"
 
@@ -33,4 +32,3 @@ public:
 
 #pragma GCC diagnostic pop
 
-#endif /* SINGLEPHASEFLUIDPROPERTIESPT_H */

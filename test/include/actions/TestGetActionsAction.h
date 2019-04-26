@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TESTGETACTIONSACTION_H
-#define TESTGETACTIONSACTION_H
+#pragma once
 
 #include "Action.h"
 
@@ -30,4 +29,3 @@ public:
   virtual void act() override;
 };
 
-#endif // TESTGETACTIONSACTION_H

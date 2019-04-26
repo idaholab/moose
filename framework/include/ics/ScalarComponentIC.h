@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SCALARCOMPONENTIC_H
-#define SCALARCOMPONENTIC_H
+#pragma once
 
 #include "ScalarInitialCondition.h"
 
@@ -31,4 +30,3 @@ protected:
   std::vector<Real> _initial_values;
 };
 
-#endif /* SCALARCOMPONENTIC_H */

@@ -1,4 +1,4 @@
-///* This file is part of the MOOSE framework
+//* This file is part of the MOOSE framework
 //* https://www.mooseframework.org
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PENALTYINTERFACEDIFFUSIONDOT_H
-#define PENALTYINTERFACEDIFFUSIONDOT_H
+#pragma once
 
 #include "InterfaceTimeKernel.h"
 
@@ -32,5 +31,3 @@ protected:
 
   const Real _penalty;
 };
-
-#endif

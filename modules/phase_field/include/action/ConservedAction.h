@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CONSERVEDACTION_H
-#define CONSERVEDACTION_H
+#pragma once
 
 // MOOSE includes
 #include "Action.h"
@@ -48,4 +47,3 @@ protected:
   const Real _scaling;
 };
 
-#endif // CONSERVEDACTION_H

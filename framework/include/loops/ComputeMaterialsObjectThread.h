@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEMATERIALOBJECTTHREAD_H
-#define COMPUTEMATERIALOBJECTTHREAD_H
+#pragma once
 
 #include "ThreadedElementLoop.h"
 
@@ -69,4 +68,3 @@ protected:
   const bool _has_neighbor_stateful_props;
 };
 
-#endif // COMPUTEMATERIALOBJECTTHREAD_H

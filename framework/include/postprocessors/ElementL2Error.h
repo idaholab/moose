@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMENTL2ERROR_H
-#define ELEMENTL2ERROR_H
+#pragma once
 
 #include "ElementIntegralVariablePostprocessor.h"
 
@@ -33,4 +32,3 @@ protected:
   Function & _func;
 };
 
-#endif // ELEMENTL2ERROR_H

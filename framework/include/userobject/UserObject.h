@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef USEROBJECT_H
-#define USEROBJECT_H
+#pragma once
 
 // MOOSE includes
 #include "DistributionInterface.h"
@@ -154,4 +153,3 @@ private:
   UserObject * _primary_thread_copy = nullptr;
 };
 
-#endif /* USEROBJECT_H */

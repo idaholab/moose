@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CHINTERFACE_H
-#define CHINTERFACE_H
+#pragma once
 
 #include "CHInterfaceBase.h"
 
@@ -25,4 +24,3 @@ public:
 template <>
 InputParameters validParams<CHInterface>();
 
-#endif // CHINTERFACE_H

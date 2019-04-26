@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EXPLICITEULER_H
-#define EXPLICITEULER_H
+#pragma once
 
 #include "TimeIntegrator.h"
 
@@ -47,4 +46,3 @@ ExplicitEuler::computeTimeDerivativeHelper(T & u_dot, const T2 & u_old)
   u_dot *= 1. / _dt;
 }
 
-#endif /* EXPLICITEULER_H */

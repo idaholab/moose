@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DERIVATIVETWOPHASEMATERIAL_H
-#define DERIVATIVETWOPHASEMATERIAL_H
+#pragma once
 
 #include "DerivativeFunctionMaterialBase.h"
 
@@ -78,4 +77,3 @@ protected:
   std::vector<std::vector<std::vector<const MaterialProperty<Real> *>>> _prop_d3Fa, _prop_d3Fb;
 };
 
-#endif // DERIVATIVETWOPHASEMATERIAL_H

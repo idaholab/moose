@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef AUGMENTEDLAGRANGIANCONTACTPROBLEM_H
-#define AUGMENTEDLAGRANGIANCONTACTPROBLEM_H
+#pragma once
 
 #include "ReferenceResidualProblem.h"
 #include "NodeFaceConstraint.h"
@@ -54,4 +53,3 @@ private:
   int _max_lagmul_iters;
 };
 
-#endif /* AUGMENTEDLAGRANGIANCONTACTPROBLEM_H */

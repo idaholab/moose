@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MULTIAPPDTKINTERPOLATIONTRANSFER_H
-#define MULTIAPPDTKINTERPOLATIONTRANSFER_H
+#pragma once
 
 #include "libmesh/libmesh_config.h"
 
@@ -42,4 +41,3 @@ protected:
 };
 
 #endif // LIBMESH_TRILINOS_HAVE_DTK
-#endif // MULTIAPPDTKINTERPOLATIONTRANSFER_H

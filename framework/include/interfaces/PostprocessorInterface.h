@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POSTPROCESSORINTERFACE_H
-#define POSTPROCESSORINTERFACE_H
+#pragma once
 
 // Standard includes
 #include <string>
@@ -102,4 +101,3 @@ private:
   FEProblemBase & _pi_feproblem;
 };
 
-#endif // POSTPROCESSORINTERFACE_H

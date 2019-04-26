@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef HOMOGENIZATIONKERNEL_H
-#define HOMOGENIZATIONKERNEL_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -34,4 +33,3 @@ private:
   const unsigned int _component;
   const unsigned int _column;
 };
-#endif // HOMOGENIZATIONKERNEL_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef XFEMCRACKGROWTHINCREMENT2DCUT_H
-#define XFEMCRACKGROWTHINCREMENT2DCUT_H
+#pragma once
 
 #include "libmesh/libmesh_common.h"
 #include "libmesh/libmesh.h" // libMesh::invalid_uint
@@ -50,4 +49,3 @@ private:
   const std::pair<Point, Point> _cut_line_endpoints;
 };
 
-#endif // XFEMCRACKGROWTHINCREMENT2DCUT_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWPROPERTYAUX_H
-#define POROUSFLOWPROPERTYAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 #include "PorousFlowDictator.h"
@@ -120,4 +119,3 @@ private:
   const unsigned int _k_col;
 };
 
-#endif // POROUSFLOWPROPERTYAUX_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GENERALIZEDKELVINVOIGTMODEL_H
-#define GENERALIZEDKELVINVOIGTMODEL_H
+#pragma once
 
 #include "GeneralizedKelvinVoigtBase.h"
 
@@ -48,4 +47,3 @@ protected:
   std::vector<RankFourTensor> _Si;
 };
 
-#endif // GENERALIZEDKELVINVOIGTMODEL_H

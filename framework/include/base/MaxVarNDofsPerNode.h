@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MAXVARNDOFSPERNODE_H
-#define MAXVARNDOFSPERNODE_H
+#pragma once
 
 #include "ThreadedNodeLoop.h"
 // libMesh includes
@@ -46,4 +45,3 @@ protected:
   std::vector<dof_id_type> _dof_indices;
 };
 
-#endif // MAXVARNDOFSPERNODE_H

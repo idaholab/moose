@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MESHMODIFIER_H
-#define MESHMODIFIER_H
+#pragma once
 
 #include "MooseObject.h"
 #include "Restartable.h"
@@ -76,4 +75,3 @@ private:
   const bool _force_prepare;
 };
 
-#endif // MESHMODIFIER_H

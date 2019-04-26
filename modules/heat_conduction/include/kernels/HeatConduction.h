@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef HEATCONDUCTIONKERNEL_H
-#define HEATCONDUCTIONKERNEL_H
+#pragma once
 
 #include "Diffusion.h"
 #include "Material.h"
@@ -40,4 +39,3 @@ private:
   const MaterialProperty<Real> * const _diffusion_coefficient_dT;
 };
 
-#endif // HEATCONDUCTIONKERNEL_H

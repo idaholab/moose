@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEPARSEDFUNCTIONWRAPPER_H
-#define MOOSEPARSEDFUNCTIONWRAPPER_H
+#pragma once
 
 // MOOSE includes
 #include "MooseError.h"
@@ -156,4 +155,3 @@ DenseVector<Real> MooseParsedFunctionWrapper::evaluate(Real t, const Point & p);
 template <>
 RealVectorValue MooseParsedFunctionWrapper::evaluate(Real t, const Point & p);
 
-#endif // MOOOSEPARSEDFUNCTIONWRAPPER_H

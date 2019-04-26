@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FLUXBC_H
-#define FLUXBC_H
+#pragma once
 
 #include "IntegratedBC.h"
 
@@ -35,4 +34,3 @@ protected:
   virtual RealGradient computeQpFluxJacobian() = 0;
 };
 
-#endif /* FLUXBC_H */

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADROBINBC_H
-#define ADROBINBC_H
+#pragma once
 
 #include "ADIntegratedBC.h"
 
@@ -29,4 +28,3 @@ protected:
   usingIntegratedBCMembers;
 };
 
-#endif // ADROBINBC_H

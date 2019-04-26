@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GLOBALSTRAINUSEROBJECT_H
-#define GLOBALSTRAINUSEROBJECT_H
+#pragma once
 
 #include "ElementUserObject.h"
 #include "GlobalStrainUserObjectInterface.h"
@@ -55,4 +54,3 @@ protected:
   VectorValue<bool> _periodic_dir;
 };
 
-#endif // GLOBALSTRAINUSEROBJECT_H

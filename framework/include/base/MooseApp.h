@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEAPP_H
-#define MOOSEAPP_H
+#pragma once
 
 // MOOSE includes
 #include "Moose.h"
@@ -935,4 +934,3 @@ MooseApp::getParam(const std::string & name) const
   return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
 }
 
-#endif /* MOOSEAPP_H */

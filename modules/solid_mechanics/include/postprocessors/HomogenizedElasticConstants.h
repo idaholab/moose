@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef HOMOGENIZEDELASTICCONSTANTS_H
-#define HOMOGENIZEDELASTICCONSTANTS_H
+#pragma once
 
 #include "ElementAverageValue.h"
 
@@ -70,4 +69,3 @@ private:
   Real _integral_value;
 };
 
-#endif // HOMOGENIZEDELASTICCONSTANTS_H

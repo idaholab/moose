@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CHANNELGRADIENTVECTORPOSTPROCESSOR_H
-#define CHANNELGRADIENTVECTORPOSTPROCESSOR_H
+#pragma once
 
 #include "GeneralVectorPostprocessor.h"
 
@@ -56,4 +55,3 @@ protected:
   VectorPostprocessorValue * _gradient_values;
 };
 
-#endif

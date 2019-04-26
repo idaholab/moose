@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ACGRGRELASTICDRIVINGFORCE_H
-#define ACGRGRELASTICDRIVINGFORCE_H
+#pragma once
 
 #include "ACBulk.h"
 
@@ -42,4 +41,3 @@ private:
   const MaterialProperty<RankTwoTensor> & _elastic_strain;
 };
 
-#endif // ACGRGRELASTICDRIVINGFORCE_H

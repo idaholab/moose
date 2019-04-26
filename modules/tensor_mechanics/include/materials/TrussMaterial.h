@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TRUSSMATERIAL_H
-#define TRUSSMATERIAL_H
+#pragma once
 
 #include "Material.h"
 
@@ -46,4 +45,3 @@ protected:
   Real _current_length;
 };
 
-#endif // TRUSSMATERIAL_H

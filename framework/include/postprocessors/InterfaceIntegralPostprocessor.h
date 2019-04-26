@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INTERFACEINTEGRALPOSTPROCESSOR_H
-#define INTERFACEINTEGRALPOSTPROCESSOR_H
+#pragma once
 
 #include "InterfacePostprocessor.h"
 
@@ -44,4 +43,3 @@ protected:
   Real _integral_value;
 };
 
-#endif

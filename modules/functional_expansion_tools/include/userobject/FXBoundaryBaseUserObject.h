@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FXBOUNDARYBASEUSEROBJECT_H
-#define FXBOUNDARYBASEUSEROBJECT_H
+#pragma once
 
 #include "SideIntegralVariableUserObject.h"
 
@@ -35,4 +34,3 @@ protected:
   virtual Real getVolume() const final;
 };
 
-#endif // FXBOUNDARYBASEUSEROBJECT_H

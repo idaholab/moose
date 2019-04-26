@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NODALDAMPER_H
-#define NODALDAMPER_H
+#pragma once
 
 // Moose Includes
 #include "Damper.h"
@@ -75,4 +74,3 @@ protected:
   const VariableValue & _u;
 };
 
-#endif // NODALDAMPER_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EULERANGLEUPDATER_H
-#define EULERANGLEUPDATER_H
+#pragma once
 
 #include "EulerAngleProvider.h"
 
@@ -60,4 +59,3 @@ protected:
   std::vector<EulerAngles> _angles_old;
 };
 
-#endif // EULERANGLEUPDATER_H

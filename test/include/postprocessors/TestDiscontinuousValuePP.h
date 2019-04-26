@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TESTDISCONTINUOUSVALUEPP_H
-#define TESTDISCONTINUOUSVALUEPP_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 
@@ -58,4 +57,3 @@ protected:
   const SolutionUserObject * _solution_object_ptr;
 };
 
-#endif /* TestDiscontinuousValuePP_H */

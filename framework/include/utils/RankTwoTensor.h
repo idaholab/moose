@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RANKTWOTENSOR_H
-#define RANKTWOTENSOR_H
+#pragma once
 
 #include "Moose.h"
 #include "DualReal.h"
@@ -536,4 +535,3 @@ RankTwoTensorTempl<T>::operator/(const T2 & b) const
 {
   return TensorValue<T>::operator/(b);
 }
-#endif // RANKTWOTENSOR_H

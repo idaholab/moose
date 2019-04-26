@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADSTATEFULMATERIAL_H
-#define ADSTATEFULMATERIAL_H
+#pragma once
 
 #include "ADMaterial.h"
 
@@ -45,4 +44,3 @@ private:
   usingMaterialMembers;
 };
 
-#endif // ADSTATEFULMATERIAL_H

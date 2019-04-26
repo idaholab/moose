@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DERIVATIVEMATERIALINTERFACE_H
-#define DERIVATIVEMATERIALINTERFACE_H
+#pragma once
 
 #include "AuxiliarySystem.h"
 #include "BlockRestrictable.h"
@@ -458,4 +457,3 @@ DerivativeMaterialInterface<T>::isNotObjectVariable(const VariableName & name)
   return true;
 }
 
-#endif // DERIVATIVEMATERIALINTERFACE_H

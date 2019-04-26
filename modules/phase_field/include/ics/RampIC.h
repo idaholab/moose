@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RAMPIC_H
-#define RAMPIC_H
+#pragma once
 
 #include "InitialCondition.h"
 
@@ -44,4 +43,3 @@ protected:
   const Real _value_right;
 };
 
-#endif // RAMPIC_H

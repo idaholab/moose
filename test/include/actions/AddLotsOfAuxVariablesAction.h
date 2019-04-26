@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADDLOTSOFAUXVARIABLESACTION_H
-#define ADDLOTSOFAUXVARIABLESACTION_H
+#pragma once
 
 #include "Action.h"
 
@@ -29,4 +28,3 @@ private:
   std::string _variable_to_read;
 };
 
-#endif // ADDLOTSOFAUXVARIABLESACTION_H

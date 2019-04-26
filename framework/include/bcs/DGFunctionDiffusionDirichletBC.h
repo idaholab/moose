@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DGFUNCTIONDIFFUSIONDIRICHLETBC_H
-#define DGFUNCTIONDIFFUSIONDIRICHLETBC_H
+#pragma once
 
 #include "IntegratedBC.h"
 
@@ -49,4 +48,3 @@ private:
   const MaterialProperty<Real> & _diff;
 };
 
-#endif // DGFUNCTIONDIFFUSIONDIRICHLETBC_H

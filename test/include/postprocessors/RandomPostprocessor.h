@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef RANDOMPOSTPROCESSOR_H
-#define RANDOMPOSTPROCESSOR_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 #include "MooseRandom.h"
@@ -38,4 +37,3 @@ private:
   MooseRandom & _random;
 };
 
-#endif // RANDOMPOSTPROCESSOR_H

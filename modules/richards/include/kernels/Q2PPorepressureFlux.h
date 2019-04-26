@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef Q2PPOREPRESSUREFLUX
-#define Q2PPOREPRESSUREFLUX
+#pragma once
 
 #include "Kernel.h"
 #include "RichardsDensity.h"
@@ -124,5 +123,3 @@ protected:
    */
   std::vector<Real> _dmobility_ds;
 };
-
-#endif // Q2PPOREPRESSUREFLUX

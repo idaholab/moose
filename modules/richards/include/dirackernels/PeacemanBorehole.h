@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PEACEMANBOREHOLE_H
-#define PEACEMANBOREHOLE_H
+#pragma once
 
 // Moose Includes
 #include "DiracKernel.h"
@@ -118,4 +117,3 @@ protected:
                     const Real & rad);
 };
 
-#endif // PEACEMANBOREHOLE_H

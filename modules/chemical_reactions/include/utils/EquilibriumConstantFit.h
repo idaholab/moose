@@ -1,4 +1,3 @@
-
 //* This file is part of the MOOSE framework
 //* https://www.mooseframework.org
 //*
@@ -8,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef EQUILIBRIUMCONSTANTFIT_H
-#define EQUILIBRIUMCONSTANTFIT_H
+#pragma once
 
 #include "MooseTypes.h"
 #include "LeastSquaresFitBase.h"
@@ -36,4 +34,3 @@ protected:
   virtual void fillMatrix() override;
 };
 
-#endif // EQUILIBRIUMCONSTANTFIT_H

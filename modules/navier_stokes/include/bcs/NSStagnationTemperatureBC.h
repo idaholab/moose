@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NSSTAGNATIONTEMPERATUREBC_H
-#define NSSTAGNATIONTEMPERATUREBC_H
+#pragma once
 
 #include "NSStagnationBC.h"
 
@@ -40,4 +39,3 @@ protected:
   const Real _desired_stagnation_temperature;
 };
 
-#endif // NSSTAGNATIONTEMPERATUREBC_H

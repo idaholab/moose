@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TIMESEQUENCESTEPPERFAILTEST_H
-#define TIMESEQUENCESTEPPERFAILTEST_H
+#pragma once
 
 #include "TimeSequenceStepper.h"
 
@@ -33,4 +32,3 @@ protected:
   std::vector<Real> _original_time_sequence;
 };
 
-#endif

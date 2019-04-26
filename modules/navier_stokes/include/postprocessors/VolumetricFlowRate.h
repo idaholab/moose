@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VOLUMETRICFLOWRATE_H
-#define VOLUMETRICFLOWRATE_H
+#pragma once
 
 // MOOSE includes
 #include "SideIntegralPostprocessor.h"
@@ -35,4 +34,3 @@ protected:
   const VariableValue & _vel_z;
 };
 
-#endif // VOLUMETRICFLOWRATE_H

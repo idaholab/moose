@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWDARCYVELOCITYCOMPONENTLOWERDIMENSIONAL_H
-#define POROUSFLOWDARCYVELOCITYCOMPONENTLOWERDIMENSIONAL_H
+#pragma once
 
 #include "PorousFlowDarcyVelocityComponent.h"
 
@@ -40,4 +39,3 @@ protected:
   const VariableValue & _aperture;
 };
 
-#endif // POROUSFLOWDARCYVELOCITYCOMPONENTLOWERDIMENSIONAL_H

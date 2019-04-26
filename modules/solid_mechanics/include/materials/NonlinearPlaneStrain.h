@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NONLINEARPLANESTRAIN_H
-#define NONLINEARPLANESTRAIN_H
+#pragma once
 
 #include "Nonlinear.h"
 #include "ScalarCoupleable.h"
@@ -56,4 +55,3 @@ protected:
 
 } // namespace solid_mechanics
 
-#endif

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SOLUTIONFUNCTION_H
-#define SOLUTIONFUNCTION_H
+#pragma once
 
 #include "Function.h"
 
@@ -73,4 +72,3 @@ protected:
   RealGradient _add_grad;
 };
 
-#endif // SOLUTIONFUNCTION_H

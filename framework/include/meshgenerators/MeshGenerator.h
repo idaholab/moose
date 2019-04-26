@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MESHGENERATOR_H
-#define MESHGENERATOR_H
+#pragma once
 
 #include "MooseObject.h"
 #include "Restartable.h"
@@ -80,4 +79,3 @@ private:
   std::unique_ptr<MeshBase> _null_mesh = nullptr;
 };
 
-#endif // MESHGENERATOR_H

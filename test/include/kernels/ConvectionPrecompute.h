@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CONVECTIONPRECOMPUTE_H
-#define CONVECTIONPRECOMPUTE_H
+#pragma once
 
 #include "KernelValue.h"
 
@@ -31,4 +30,3 @@ private:
   RealVectorValue _velocity;
 };
 
-#endif // CONVECTIONPRECOMPUTE_H

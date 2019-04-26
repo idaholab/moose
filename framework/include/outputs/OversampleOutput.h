@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef OVERSAMPLEOUTPUT_H
-#define OVERSAMPLEOUTPUT_H
+#pragma once
 
 // MOOSE includes
 #include "AdvancedOutput.h"
@@ -107,4 +106,3 @@ private:
   std::unique_ptr<NumericVector<Number>> _serialized_solution;
 };
 
-#endif // OVERSAMPLEOUTPUT_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ISOTROPICELASTICITYTENSOR_H
-#define ISOTROPICELASTICITYTENSOR_H
+#pragma once
 
 #include "ElasticityTensor.h"
 
@@ -93,4 +92,3 @@ protected:
   Real isotropicEntry(const unsigned int i, const unsigned j, const unsigned k, const unsigned l);
 };
 
-#endif // ISOTROPICELASTICITYTENSOR_H

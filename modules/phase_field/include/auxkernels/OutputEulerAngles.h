@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef OUTPUTEULERANGLES_H
-#define OUTPUTEULERANGLES_H
+#pragma once
 
 #include "AuxKernel.h"
 #include "EulerAngleProvider.h"
@@ -47,4 +46,3 @@ protected:
   Real _value;
 };
 
-#endif // OUTPUTEULERANGLES_H

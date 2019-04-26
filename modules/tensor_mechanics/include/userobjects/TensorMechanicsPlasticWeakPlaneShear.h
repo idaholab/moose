@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TENSORMECHANICSPLASTICWEAKPLANESHEAR_H
-#define TENSORMECHANICSPLASTICWEAKPLANESHEAR_H
+#pragma once
 
 #include "TensorMechanicsPlasticModel.h"
 #include "TensorMechanicsHardeningModel.h"
@@ -108,4 +107,3 @@ protected:
   virtual Real dtan_psi(const Real internal_param) const;
 };
 
-#endif // TENSORMECHANICSPLASTICWEAKPLANESHEAR_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWPERMEABILITYKOZENYCARMAN_H
-#define POROUSFLOWPERMEABILITYKOZENYCARMAN_H
+#pragma once
 
 #include "PorousFlowPermeabilityBase.h"
 
@@ -76,4 +75,3 @@ protected:
   Real _A;
 };
 
-#endif // POROUSFLOWPERMEABILITYKOZENYCARMAN_H

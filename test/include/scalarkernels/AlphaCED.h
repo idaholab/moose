@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ALPHACED_H
-#define ALPHACED_H
+#pragma once
 
 #include "ScalarKernel.h"
 
@@ -41,4 +40,3 @@ protected:
   Real _value;
 };
 
-#endif /* ALPHACED_H */

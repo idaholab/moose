@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef Q2PNEGATIVENODALMASSOLD
-#define Q2PNEGATIVENODALMASSOLD
+#pragma once
 
 #include "TimeKernel.h"
 #include "Material.h"
@@ -43,5 +42,3 @@ protected:
   /// value of the porosity at the start of the timestep
   const MaterialProperty<Real> & _porosity_old;
 };
-
-#endif // Q2PNEGATIVENODALMASSOLD

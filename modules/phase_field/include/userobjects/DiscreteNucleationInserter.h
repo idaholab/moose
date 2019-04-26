@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DISCRETENUCLEATIONINSERTER_H
-#define DISCRETENUCLEATIONINSERTER_H
+#pragma once
 
 #include "DiscreteNucleationInserterBase.h"
 
@@ -49,4 +48,3 @@ protected:
   Real _nucleation_rate;
 };
 
-#endif // DISCRETENUCLEATIONINSERTER_H

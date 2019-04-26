@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADDEXTRANODESET_H
-#define ADDEXTRANODESET_H
+#pragma once
 
 #include "MeshModifier.h"
 
@@ -27,4 +26,3 @@ protected:
   virtual void modify() override;
 };
 
-#endif // ADDEXTRANODESET_H

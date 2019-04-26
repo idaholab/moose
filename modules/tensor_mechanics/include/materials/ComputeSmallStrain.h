@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTESMALLSTRAIN_H
-#define COMPUTESMALLSTRAIN_H
+#pragma once
 
 #include "ComputeStrainBase.h"
 
@@ -28,4 +27,3 @@ public:
   virtual void computeProperties() override;
 };
 
-#endif // COMPUTESMALLSTRAIN_H

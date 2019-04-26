@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MULTIAPPVARIABLEVALUESAMPLEPOSTPROCESSORTRANSFER_H
-#define MULTIAPPVARIABLEVALUESAMPLEPOSTPROCESSORTRANSFER_H
+#pragma once
 
 #include "MultiAppTransfer.h"
 
@@ -35,4 +34,3 @@ protected:
   PostprocessorName _from_var_name;
 };
 
-#endif // MULTIAPPVARIABLEVALUESAMPLEPOSTPROCESSORTRANSFER_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef AEFVKERNEL_H
-#define AEFVKERNEL_H
+#pragma once
 
 #include "DGKernel.h"
 #include "InternalSideFluxBase.h"
@@ -69,4 +68,3 @@ protected:
   const InternalSideFluxBase & _flux;
 };
 
-#endif

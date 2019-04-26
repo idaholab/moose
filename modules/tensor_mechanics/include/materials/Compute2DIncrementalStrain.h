@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTE2DINCREMENTALSTRAIN_H
-#define COMPUTE2DINCREMENTALSTRAIN_H
+#pragma once
 
 #include "ComputeIncrementalSmallStrain.h"
 
@@ -56,4 +55,3 @@ protected:
   const unsigned int _out_of_plane_direction;
 };
 
-#endif // COMPUTE2DINCREMENTALSTRAIN_H

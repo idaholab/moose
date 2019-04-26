@@ -6,8 +6,8 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#ifndef ADTHERMALCONDUCTIVITYTEST_H
-#define ADTHERMALCONDUCTIVITYTEST_H
+
+#pragma once
 
 #include "ADMaterial.h"
 
@@ -34,4 +34,3 @@ private:
   usingMaterialMembers;
 };
 
-#endif // ADTHERMALCONDUCTIVITYTEST_H

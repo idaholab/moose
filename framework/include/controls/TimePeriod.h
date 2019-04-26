@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TIMEPERIOD_H
-#define TIMEPERIOD_H
+#pragma once
 
 // MOOSE includes
 #include "ConditionalEnableControl.h"
@@ -47,4 +46,3 @@ private:
   std::vector<Real> _end_time;
 };
 
-#endif // TIMEPERIOD_H

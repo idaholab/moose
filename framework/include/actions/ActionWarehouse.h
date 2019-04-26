@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ACTIONWAREHOUSE_H
-#define ACTIONWAREHOUSE_H
+#pragma once
 
 #include <string>
 #include <set>
@@ -285,4 +284,3 @@ private:
   const std::list<Action *> _empty_action_list;
 };
 
-#endif // ACTIONWAREHOUSE_H

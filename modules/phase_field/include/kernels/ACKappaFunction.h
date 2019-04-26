@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ACKAPPAFUNCTION_H
-#define ACKAPPAFUNCTION_H
+#pragma once
 
 #include "Kernel.h"
 #include "JvarMapInterface.h"
@@ -51,4 +50,3 @@ private:
   Real computeFg(); /// gradient energy term
 };
 
-#endif // ACKAPPAFUNCTION_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NSMASSBC_H
-#define NSMASSBC_H
+#pragma once
 
 #include "NSIntegratedBC.h"
 
@@ -52,4 +51,3 @@ protected:
   Real qpJacobianHelper(unsigned var_number);
 };
 
-#endif // MASSBC_H

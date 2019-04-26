@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INSADMASS_H
-#define INSADMASS_H
+#pragma once
 
 #include "ADKernelValue.h"
 
@@ -38,4 +37,3 @@ protected:
   usingKernelValueMembers;
 };
 
-#endif // INSADMASS_H

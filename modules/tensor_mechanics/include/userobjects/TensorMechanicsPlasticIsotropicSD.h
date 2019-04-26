@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef TENSORMECHANICSPLASTICISOTROPICSD_H
-#define TENSORMECHANICSPLASTICISOTROPICSD_H
+#pragma once
 
 #include "TensorMechanicsPlasticJ2.h"
 #include "RankFourTensor.h"
@@ -87,4 +86,3 @@ protected:
   RankTwoTensor flowPotential(const RankTwoTensor & stress, Real intnl) const override;
 };
 
-#endif // TENSORMECHANICSPLASTICISOTROPICSD_H

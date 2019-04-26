@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FINITEDIFFERENCEPRECONDITIONER_H
-#define FINITEDIFFERENCEPRECONDITIONER_H
+#pragma once
 
 #include "MoosePreconditioner.h"
 #include "MooseEnum.h"
@@ -31,4 +30,3 @@ private:
   MooseEnum _finite_difference_type;
 };
 
-#endif /* FINITEDIFFERENCEPRECONDITIONER_H */

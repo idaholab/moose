@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PERFORMANCEDATA_H
-#define PERFORMANCEDATA_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 
@@ -49,4 +48,3 @@ protected:
   MooseEnum _event;
 };
 
-#endif // PERFORMANCEDATA_H

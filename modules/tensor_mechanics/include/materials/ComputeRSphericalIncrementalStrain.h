@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTERSPHERICALINCREMENTALSTRAIN_H
-#define COMPUTERSPHERICALINCREMENTALSTRAIN_H
+#pragma once
 
 #include "ComputeIncrementalSmallStrain.h"
 
@@ -39,4 +38,3 @@ protected:
   const VariableValue & _disp_old_0;
 };
 
-#endif // COMPUTERSPHERICALINCREMENTALSTRAIN_H

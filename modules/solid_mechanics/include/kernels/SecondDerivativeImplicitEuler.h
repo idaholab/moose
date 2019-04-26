@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SECONDDERIVATIVEIMPLICITEULER_H
-#define SECONDDERIVATIVEIMPLICITEULER_H
+#pragma once
 
 #include "TimeKernel.h"
 
@@ -31,4 +30,3 @@ protected:
   const VariableValue & _u_older;
 };
 
-#endif // SECONDDERIVATIVEIMPLICITEULER_H

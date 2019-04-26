@@ -7,11 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#pragma once
 //  "cut" van-Genuchten effective saturation as a function of single pressure, and its derivs wrt to
 //  that pressure
 //
-#ifndef RICHARDSSEFF1VGCUT_H
-#define RICHARDSSEFF1VGCUT_H
 
 #include "RichardsSeff1VG.h"
 
@@ -83,4 +82,3 @@ protected:
   Real _ds_cut;
 };
 
-#endif // RICHARDSSEFF1VGCUT_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DISCRETENUCLEATIONINSERTERBASE_H
-#define DISCRETENUCLEATIONINSERTERBASE_H
+#pragma once
 
 #include "ElementUserObject.h"
 
@@ -54,4 +53,3 @@ protected:
   bool _update_required;
 };
 
-#endif // DISCRETENUCLEATIONINSERTERBASE_H

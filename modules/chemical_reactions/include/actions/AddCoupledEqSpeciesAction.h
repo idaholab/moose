@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADDCOUPLEDEQSPECIESACTION_H
-#define ADDCOUPLEDEQSPECIESACTION_H
+#pragma once
 
 #include "Action.h"
 
@@ -63,4 +62,3 @@ protected:
   const RealVectorValue _gravity;
 };
 
-#endif // ADDCOUPLEDEQSPECIESACTION_H

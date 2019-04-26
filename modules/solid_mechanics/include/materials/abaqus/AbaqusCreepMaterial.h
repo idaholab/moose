@@ -7,10 +7,9 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#pragma once
 #include "SolidModel.h"
 
-#ifndef ABAQUSCREEPMATERIAL_H
-#define ABAQUSCREEPMATERIAL_H
 
 typedef void (*creep_t)(Real DECRA[],
                         Real DESWA[],
@@ -103,4 +102,3 @@ protected:
   const MaterialProperty<Real> & _total_swell_old;
 };
 
-#endif // ABAQUSCREEPMATERIAL_H

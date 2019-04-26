@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DIRACKERNEL_H
-#define DIRACKERNEL_H
+#pragma once
 
 // MOOSE includes
 #include "DiracKernelInfo.h"
@@ -241,4 +240,3 @@ private:
   const Elem * addPointWithValidId(Point p, unsigned id);
 };
 
-#endif

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEISOTROPICELASTICITYTENSOR_H
-#define COMPUTEISOTROPICELASTICITYTENSOR_H
+#pragma once
 
 #include "ComputeElasticityTensorBase.h"
 
@@ -46,4 +45,3 @@ protected:
   RankFourTensor _Cijkl;
 };
 
-#endif // COMPUTEISOTROPICELASTICITYTENSOR_H

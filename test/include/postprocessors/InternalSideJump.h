@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INTERNALSIDEJUMP_H
-#define INTERNALSIDEJUMP_H
+#pragma once
 
 #include "InternalSidePostprocessor.h"
 
@@ -37,4 +36,3 @@ protected:
   Real _integral_value;
 };
 
-#endif

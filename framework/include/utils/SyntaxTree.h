@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SYNTAXTREE_H
-#define SYNTAXTREE_H
+#pragma once
 
 #include "SyntaxFormatterInterface.h"
 
@@ -79,4 +78,3 @@ private:
   std::set<std::string> _params_printed;
 };
 
-#endif // SYNTAXTREE_H

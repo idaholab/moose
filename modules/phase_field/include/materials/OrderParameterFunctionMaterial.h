@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ORDERPARAMETERFUNCTIONMATERIAL_H
-#define ORDERPARAMETERFUNCTIONMATERIAL_H
+#pragma once
 
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
@@ -48,4 +47,3 @@ protected:
   MaterialProperty<Real> & _prop_d2f;
 };
 
-#endif // ORDERPARAMETERFUNCTIONMATERIAL_H

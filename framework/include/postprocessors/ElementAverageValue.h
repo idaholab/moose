@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMENTAVERAGEVALUE_H
-#define ELEMENTAVERAGEVALUE_H
+#pragma once
 
 #include "ElementIntegralVariablePostprocessor.h"
 
@@ -38,4 +37,3 @@ protected:
   Real _volume;
 };
 
-#endif

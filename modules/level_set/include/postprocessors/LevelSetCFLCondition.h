@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LEVELSETCFLCONDITION_H
-#define LEVELSETCFLCONDITION_H
+#pragma once
 
 // MOOSE includes
 #include "ElementPostprocessor.h"
@@ -41,4 +40,3 @@ private:
   Real _cfl_timestep;
 };
 
-#endif // LEVELSETCFLCONDITION_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMSIDENEIGHBORLAYERSTESTER_H
-#define ELEMSIDENEIGHBORLAYERSTESTER_H
+#pragma once
 
 #include "ElementUOProvider.h"
 
@@ -39,4 +38,3 @@ protected:
   const dof_id_type _rank;
 };
 
-#endif // ELEMSIDENEIGHBORLAYERSTESTER_H

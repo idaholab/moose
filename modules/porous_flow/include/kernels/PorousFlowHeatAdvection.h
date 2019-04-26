@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWHEATADVECTION_H
-#define POROUSFLOWHEATADVECTION_H
+#pragma once
 
 #include "PorousFlowDarcyBase.h"
 
@@ -44,4 +43,3 @@ protected:
   const MaterialProperty<std::vector<std::vector<Real>>> & _drelative_permeability_dvar;
 };
 
-#endif // POROUSFLOWHEATADVECTION_H
