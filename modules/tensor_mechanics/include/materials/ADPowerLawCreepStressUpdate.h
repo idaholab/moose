@@ -44,7 +44,7 @@ protected:
   const bool _has_temp;
 
   /// Temperature variable value
-  const VariableValue & _temperature;
+  const ADVariableValue * _temperature;
 
   /// Leading coefficient
   const Real _coefficient;
@@ -68,8 +68,7 @@ protected:
   ADReal _exponential;
 
   /// Exponential calculated from current time
-  ADReal _exp_time;
+  Real _exp_time;
 
   usingRadialReturnCreepStressUpdateBaseMembers;
 };
-

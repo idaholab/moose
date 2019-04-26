@@ -127,7 +127,7 @@ protected:
                               const unsigned int total_it) override;
 
   /// 3 * shear modulus
-  Real _three_shear_modulus;
+  ADReal _three_shear_modulus;
 
   ADMaterialProperty(Real) & _effective_inelastic_strain;
   const MaterialProperty<Real> & _effective_inelastic_strain_old;
