@@ -79,7 +79,9 @@ ADRadialReturnStressUpdate<compute_stage>::updateState(
                                       : std::sqrt(3.0 / 2.0 * dev_trial_stress_squared);
 
   // Set the value of 3 * shear modulus for use as a reference residual value
-  _three_shear_modulus = 3.0 * ElasticityTensorTools::getIsotropicShearModulus(elasticity_tensor);
+  _three_shear_modulus =
+      3.0 *
+      MetaPhysicL::raw_value(ElasticityTensorTools::getIsotropicShearModulus(elasticity_tensor));
 
   computeStressInitialize(effective_trial_stress, elasticity_tensor);
 
@@ -115,7 +117,7 @@ Real
 ADRadialReturnStressUpdate<compute_stage>::computeReferenceResidual(
     const ADReal & effective_trial_stress, const ADReal & scalar_effective_inelastic_strain)
 {
-  return MetaPhysicL::raw_value(effective_trial_stress / _three_shear_modulus) -
+  return MetaPhysicL::raw_value(effective_trial_stress) / _three_shear_modulus -
          MetaPhysicL::raw_value(scalar_effective_inelastic_strain);
 }
 
@@ -124,7 +126,7 @@ Real
 ADRadialReturnStressUpdate<compute_stage>::maximumPermissibleValue(
     const ADReal & effective_trial_stress) const
 {
-  return MetaPhysicL::raw_value(effective_trial_stress / _three_shear_modulus);
+  return MetaPhysicL::raw_value(effective_trial_stress) / _three_shear_modulus;
 }
 
 template <ComputeStage compute_stage>
