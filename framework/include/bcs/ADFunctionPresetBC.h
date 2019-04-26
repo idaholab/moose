@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADFUNCTIONPRESETBC_H
-#define ADFUNCTIONPRESETBC_H
+#pragma once
 
 #include "ADPresetNodalBC.h"
 
@@ -40,5 +39,3 @@ protected:
 
   usingPresetNodalBCMembers;
 };
-
-#endif // ADFUNCTIONPRESETBC_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADPRESSURE_H
-#define ADPRESSURE_H
+#pragma once
 
 #include "ADIntegratedBC.h"
 
@@ -45,5 +44,3 @@ protected:
 
   usingIntegratedBCMembers;
 };
-
-#endif // ADPRESSURE_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADPRESETNODALBC_H
-#define ADPRESETNODALBC_H
+#pragma once
 
 #include "ADNodalBC.h"
 
@@ -39,5 +38,3 @@ protected:
 
   usingNodalBCMembers;
 };
-
-#endif // ADPRESETNODALBC_H
