@@ -22,7 +22,7 @@ defineADValidParams(
         "for more complex simulations.");
 
     // Linear strain hardening parameters
-    params.addCoupledVar("temperature", 0.0, "Coupled temperature");
+    params.addCoupledVar("temperature", "Coupled temperature");
     params.addRequiredParam<Real>("coefficient", "Leading coefficient in power-law equation");
     params.addRequiredParam<Real>("n_exponent",
                                   "Exponent on effective stress in power-law equation");
@@ -35,7 +35,7 @@ template <ComputeStage compute_stage>
 ADPowerLawCreepStressUpdate<compute_stage>::ADPowerLawCreepStressUpdate(
     const InputParameters & parameters)
   : ADRadialReturnCreepStressUpdateBase<compute_stage>(parameters),
-    _temperature(adCoupledValue("temperature")),
+    _has_temp(isParamValid("temperature")),
     _coefficient(adGetParam<Real>("coefficient")),
     _n_exponent(adGetParam<Real>("n_exponent")),
     _m_exponent(adGetParam<Real>("m_exponent")),
@@ -43,6 +43,9 @@ ADPowerLawCreepStressUpdate<compute_stage>::ADPowerLawCreepStressUpdate(
     _gas_constant(adGetParam<Real>("gas_constant")),
     _start_time(adGetParam<Real>("start_time"))
 {
+  if (_has_temp)
+    _temperature = &adCoupledValue("temperature");
+
   if (_start_time < this->_app.getStartTime() && (std::trunc(_m_exponent) != _m_exponent))
     paramError("start_time",
                "Start time must be equal to or greater than the Executioner start_time if a "
@@ -54,8 +57,8 @@ void
 ADPowerLawCreepStressUpdate<compute_stage>::computeStressInitialize(
     const ADReal & /*effective_trial_stress*/, const ADRankFourTensor & /*elasticity_tensor*/)
 {
-  if (_temperature[_qp] != 0.0)
-    _exponential = std::exp(-_activation_energy / (_gas_constant * _temperature[_qp]));
+  if (_has_temp)
+    _exponential = std::exp(-_activation_energy / (_gas_constant * (*_temperature)[_qp]));
   else
     _exponential = 1.0;
 
