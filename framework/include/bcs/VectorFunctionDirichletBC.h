@@ -42,4 +42,3 @@ protected:
   /// The value for this BC
   RealVectorValue _values;
 };
-

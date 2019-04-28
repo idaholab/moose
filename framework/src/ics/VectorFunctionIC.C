@@ -21,7 +21,7 @@ validParams<VectorFunctionIC>()
                                 "The initial condition vector function. This cannot be supplied "
                                 "with the component parameters.");
   params.addParam<FunctionName>(
-      "function_x", "1", "A function that describes the x-component of the initial condition");
+      "function_x", "0", "A function that describes the x-component of the initial condition");
   params.addParam<FunctionName>(
       "function_y", "0", "A function that describes the y-component of the initial condition");
   params.addParam<FunctionName>(
