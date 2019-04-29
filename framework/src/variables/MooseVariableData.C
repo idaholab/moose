@@ -12,8 +12,12 @@
 #include "MooseError.h"
 #include "DisplacedSystem.h"
 #include "TimeIntegrator.h"
+#include "MooseVariableFE.h"
 
 #include "libmesh/quadrature.h"
+#include "libmesh/fe_base.h"
+#include "libmesh/system.h"
+#include "libmesh/type_n_tensor.h"
 
 template <typename OutputType>
 MooseVariableData<OutputType>::MooseVariableData(const MooseVariableFE<OutputType> & var,

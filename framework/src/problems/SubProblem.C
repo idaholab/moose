@@ -16,6 +16,7 @@
 #include "MooseVariableFE.h"
 #include "MooseArray.h"
 #include "SystemBase.h"
+#include "Assembly.h"
 
 template <>
 InputParameters

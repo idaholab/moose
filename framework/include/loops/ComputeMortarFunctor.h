@@ -10,10 +10,11 @@
 #ifndef COMPUTEMORTARFUNCTOR_H
 #define COMPUTEMORTARFUNCTOR_H
 
+#include "MooseTypes.h"
+
 #include "libmesh/libmesh_common.h"
 
-template <ComputeStage>
-class MortarConstraint;
+class MortarConstraintBase;
 class SubProblem;
 class AutomaticMortarGeneration;
 class Assembly;
@@ -60,7 +61,7 @@ private:
   /// The mortar quadrature rule. Necessary for sizing the number of custom
   /// points for re-init'ing the slave interior, master interior, and slave face
   /// elements
-  const QBase * const & _qrule_msm;
+  const libMesh::QBase * const & _qrule_msm;
 
   /// The slave boundary id needed for reiniting the MOOSE systems on the element (slave) face
   BoundaryID _slave_boundary_id;

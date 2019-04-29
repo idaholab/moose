@@ -12,9 +12,12 @@
 
 #include "MooseArray.h"
 #include "MooseTypes.h"
+#include "SystemBase.h"
 
 #include "libmesh/tensor_tools.h"
+#include "libmesh/vector_value.h"
 #include "libmesh/fe_type.h"
+#include "metaphysicl/dualnumberarray.h"
 
 #include <functional>
 #include <vector>
@@ -23,13 +26,20 @@ namespace libMesh
 {
 class QBase;
 class DofMap;
+template <typename>
+class DenseVector;
 }
 
+using libMesh::DenseVector;
 using libMesh::DofMap;
 using libMesh::QBase;
+using libMesh::VectorValue;
 
 class TimeIntegrator;
 class Assembly;
+class SubProblem;
+template <typename>
+class MooseVariableFE;
 
 namespace Moose
 {
