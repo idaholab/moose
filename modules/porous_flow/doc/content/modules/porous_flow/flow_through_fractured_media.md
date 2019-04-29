@@ -2,7 +2,7 @@
 
 Philipp Sch&#228;dle, Andy Wilkins, Anozie Ebigbo and Martin O Saar  
 
-Example files are in [flow_through_fractured_media](https://github.com/idaholab/moose/blob/master/modules/porous_flow/examples/flow_through_fractured_media).
+Example files are in [flow_through_fractured_media](https://github.com/idaholab/moose/blob/master/modules/porous_flow/examples/flow_through_fractured_media).  There is also some [non-PorousFlow documentation](https://github.com/idaholab/moose/blob/master/modules/misc/doc/fracture_flow).
 
 ## Introduction
 
