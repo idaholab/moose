@@ -12,9 +12,9 @@
 #include "ADNodalBC.h"
 
 template <ComputeStage>
-class ADLagrangeVecFunctionDirichletBC;
+class ADVectorFunctionDirichletBC;
 
-declareADValidParams(ADLagrangeVecFunctionDirichletBC);
+declareADValidParams(ADVectorFunctionDirichletBC);
 
 /**
  * Boundary condition of a Dirichlet type
@@ -22,24 +22,26 @@ declareADValidParams(ADLagrangeVecFunctionDirichletBC);
  * Sets the values of a LAGRANGE_VEC variable at nodes to values specified by functions
  */
 template <ComputeStage compute_stage>
-class ADLagrangeVecFunctionDirichletBC : public ADVectorNodalBC<compute_stage>
+class ADVectorFunctionDirichletBC : public ADVectorNodalBC<compute_stage>
 {
 public:
-  ADLagrangeVecFunctionDirichletBC(const InputParameters & parameters);
+  ADVectorFunctionDirichletBC(const InputParameters & parameters);
 
 protected:
   virtual ADRealVectorValue computeQpResidual() override;
 
+  /// Optional vectorValue function
+  Function * _function;
+
   /// x component function
-  Function & _exact_x;
+  Function & _function_x;
   /// y component function
-  Function & _exact_y;
+  Function & _function_y;
   /// z component function
-  Function & _exact_z;
+  Function & _function_z;
 
   /// The value for this BC
   RealVectorValue _values;
 
   usingVectorNodalBCMembers;
 };
-

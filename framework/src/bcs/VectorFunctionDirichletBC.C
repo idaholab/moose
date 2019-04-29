@@ -7,17 +7,28 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "VectorCurlPenaltyDirichletBC.h"
+#include "VectorFunctionDirichletBC.h"
 #include "Function.h"
 
-registerMooseObject("MooseTestApp", VectorCurlPenaltyDirichletBC);
+registerMooseObject("MooseApp", VectorFunctionDirichletBC);
+registerMooseObjectRenamed("MooseApp",
+                           LagrangeVecFunctionDirichletBC,
+                           "05/01/2019 00:01",
+                           VectorFunctionDirichletBC);
 
 template <>
 InputParameters
-validParams<VectorCurlPenaltyDirichletBC>()
+validParams<VectorFunctionDirichletBC>()
 {
-  InputParameters params = validParams<VectorIntegratedBC>();
-  params.addRequiredParam<Real>("penalty", "The penalty coefficient");
+  InputParameters params = validParams<VectorNodalBC>();
+  params.addClassDescription(
+      "Imposes the essential boundary condition $\\vec{u}=\\vec{g}$, where $\\vec{g}$ "
+      "components are calculated with functions.");
+
+  params.addParam<FunctionName>("function",
+                                "The boundary condition vector function. This cannot be supplied "
+                                "with the component parameters.");
+
   params.addParam<FunctionName>("function_x", 0, "The function for the x component");
   params.addParam<FunctionName>("function_y", 0, "The function for the y component");
   params.addParam<FunctionName>("function_z", 0, "The function for the z component");
@@ -31,9 +42,8 @@ validParams<VectorCurlPenaltyDirichletBC>()
   return params;
 }
 
-VectorCurlPenaltyDirichletBC::VectorCurlPenaltyDirichletBC(const InputParameters & parameters)
-  : VectorIntegratedBC(parameters),
-    _penalty(getParam<Real>("penalty")),
+VectorFunctionDirichletBC::VectorFunctionDirichletBC(const InputParameters & parameters)
+  : VectorNodalBC(parameters),
     _function(isParamValid("function") ? &getFunction("function") : nullptr),
     _function_x(isParamValid("x_exact_soln") ? getFunction("x_exact_soln")
                                              : getFunction("function_x")),
@@ -53,22 +63,15 @@ VectorCurlPenaltyDirichletBC::VectorCurlPenaltyDirichletBC(const InputParameters
     paramError("function_z", "The 'function' and 'function_z' parameters cannot both be set.");
 }
 
-Real
-VectorCurlPenaltyDirichletBC::computeQpResidual()
+RealVectorValue
+VectorFunctionDirichletBC::computeQpResidual()
 {
-  RealVectorValue u_exact;
   if (_function)
-    u_exact = _function->vectorValue(_t, _q_point[_qp]);
+    _values = _function->vectorValue(_t, *_current_node);
   else
-    u_exact = {_function_x.value(_t, _q_point[_qp]),
-               _function_y.value(_t, _q_point[_qp]),
-               _function_z.value(_t, _q_point[_qp])};
-  RealVectorValue Ncu = (_u[_qp] - u_exact).cross(_normals[_qp]);
-  return _penalty * Ncu * ((_test[_i][_qp]).cross(_normals[_qp]));
-}
+    _values = {_function_x.value(_t, *_current_node),
+               _function_y.value(_t, *_current_node),
+               _function_z.value(_t, *_current_node)};
 
-Real
-VectorCurlPenaltyDirichletBC::computeQpJacobian()
-{
-  return _penalty * (_phi[_j][_qp]).cross(_normals[_qp]) * (_test[_i][_qp]).cross(_normals[_qp]);
+  return _u - _values;
 }

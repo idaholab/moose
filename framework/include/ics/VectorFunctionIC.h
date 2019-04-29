@@ -7,33 +7,38 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#pragma once
+#ifndef VECTORFUNCTIONIC_H
+#define VECTORFUNCTIONIC_H
 
-#include "VectorKernel.h"
+#include "VectorInitialCondition.h"
+#include "Function.h"
+
+// System includes
+#include <string>
 
 // Forward Declarations
-class VectorBodyForce;
-class Function;
+class VectorFunctionIC;
+class InputParameters;
+
+namespace libMesh
+{
+class Point;
+}
 
 template <>
-InputParameters validParams<VectorBodyForce>();
+InputParameters validParams<VectorFunctionIC>();
 
 /**
- * This kernel implements a generic functional
- * body force term:
- * $ - c \cdof \vec{f} \cdot \vec{\phi_i} $
+ * IC that calls vectorValue method of a Function object.
  */
-class VectorBodyForce : public VectorKernel
+class VectorFunctionIC : public VectorInitialCondition
 {
 public:
-  VectorBodyForce(const InputParameters & parameters);
+  VectorFunctionIC(const InputParameters & parameters);
+
+  virtual RealVectorValue value(const Point & p) override;
 
 protected:
-  virtual Real computeQpResidual() override;
-
-  /// Scale factor
-  const Real & _scale;
-
   /// Optional vectorValue function
   Function * _function;
 
@@ -41,8 +46,6 @@ protected:
   Function & _function_x;
   Function & _function_y;
   Function & _function_z;
-
-  /// Optional Postprocessor value
-  const PostprocessorValue & _postprocessor;
 };
 
+#endif
