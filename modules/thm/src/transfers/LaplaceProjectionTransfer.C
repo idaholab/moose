@@ -13,6 +13,7 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/parallel_algebra.h"
 #include "libmesh/sparse_matrix.h"
+#include "libmesh/default_coupling.h"
 
 void
 assemble_laplace_proj(EquationSystems & es, const std::string & system_name)
@@ -58,6 +59,9 @@ LaplaceProjectionTransfer::initialSetup()
   FEType fe_type = _fe_problem.getStandardVariable(0, _to_var_name).feType();
   LinearImplicitSystem & proj_sys =
       es.add_system<LinearImplicitSystem>("laplace-proj-sys-" + name());
+  proj_sys.get_dof_map().add_coupling_functor(
+      proj_sys.get_dof_map().default_coupling(),
+      false); // The false keeps it from getting added to the mesh
   _proj_var_num = proj_sys.add_variable("var", fe_type, &from_var.activeSubdomains());
   proj_sys.attach_assemble_function(assemble_laplace_proj);
   _proj_sys = &proj_sys;
