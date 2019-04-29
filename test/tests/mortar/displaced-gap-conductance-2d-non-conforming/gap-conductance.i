@@ -59,22 +59,23 @@
 []
 
 [BCs]
-  [./vacuum]
+  [./left]
     type = DirichletBC
     variable = T
-    boundary = '5 8'
+    boundary = '5'
     value = 0
+  [../]
+  [./right]
+    type = DirichletBC
+    variable = T
+    boundary = '8'
+    value = 1
   [../]
 []
 
 [Kernels]
   [./conduction]
     type = Diffusion
-    variable = T
-    block = '1 2'
-  [../]
-  [./uniform_source]
-    type = BodyForce
     variable = T
     block = '1 2'
   [../]
