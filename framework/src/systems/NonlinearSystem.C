@@ -152,8 +152,7 @@ NonlinearSystem::solve()
       _fe_problem.needsPreviousNewtonIteration())
     _transient_sys.nonlinear_solver->postcheck = Moose::compute_postcheck;
 
-  if (_compute_initial_residual_before_preset_bcs &&
-      _fe_problem.solverParams()._type != Moose::ST_LINEAR)
+  if (_fe_problem.solverParams()._type != Moose::ST_LINEAR)
   {
     // Calculate the initial residual for use in the convergence criterion.
     _computing_initial_residual = true;
@@ -161,9 +160,9 @@ NonlinearSystem::solve()
     _computing_initial_residual = false;
     _transient_sys.rhs->close();
     _initial_residual_before_preset_bcs = _transient_sys.rhs->l2_norm();
-
-    _console << "Initial residual before setting preset BCs: "
-             << _initial_residual_before_preset_bcs << '\n';
+    if (_compute_initial_residual_before_preset_bcs)
+      _console << "Initial residual before setting preset BCs: "
+               << _initial_residual_before_preset_bcs << '\n';
   }
 
   // Clear the iteration counters
