@@ -1,5 +1,4 @@
-#ifndef BOUNDARYFLUX3EQNFREEINFLOW_H
-#define BOUNDARYFLUX3EQNFREEINFLOW_H
+#pragma once
 
 #include "BoundaryFluxBase.h"
 #include "SinglePhaseFluidProperties.h"
@@ -36,5 +35,3 @@ protected:
 
   const SinglePhaseFluidProperties & _fp;
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef SIMPLEJUNCTION_H
-#define SIMPLEJUNCTION_H
+#pragma once
 
 #include "FlowJunction.h"
 
@@ -27,5 +26,3 @@ protected:
   std::string _lm_name;
   Real _scaling_factor;
 };
-
-#endif /* SIMPLEJUNCTION_H */

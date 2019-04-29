@@ -1,5 +1,4 @@
-#ifndef HEATFLUXFROMHEATSTRUCTUREBASEUSEROBJECT_H
-#define HEATFLUXFROMHEATSTRUCTUREBASEUSEROBJECT_H
+#pragma once
 
 #include "ElementUserObject.h"
 
@@ -61,5 +60,3 @@ protected:
   /// Cached heat flux jacobians
   std::map<dof_id_type, std::vector<DenseVector<Real>>> _heat_flux_jacobian;
 };
-
-#endif // HEATFLUXFROMHEATSTRUCTUREBASEUSEROBJECT_H

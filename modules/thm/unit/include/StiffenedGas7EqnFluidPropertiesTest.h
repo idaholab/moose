@@ -1,5 +1,4 @@
-#ifndef STIFFENEDGAS7EQNFLUIDPROPERTIESTEST_H
-#define STIFFENEDGAS7EQNFLUIDPROPERTIESTEST_H
+#pragma once
 
 #include "MooseObjectUnitTest.h"
 #include "StiffenedGas7EqnFluidProperties.h"
@@ -24,5 +23,3 @@ protected:
   const StiffenedGasFluidProperties * _fp_liquid;
   const StiffenedGasFluidProperties * _fp_vapor;
 };
-
-#endif /* STIFFENEDGAS7EQNFLUIDPROPERTIESTEST_H */

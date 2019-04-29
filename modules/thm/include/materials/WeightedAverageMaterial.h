@@ -1,5 +1,4 @@
-#ifndef WEIGHTEDAVERAGEMATERIAL_H
-#define WEIGHTEDAVERAGEMATERIAL_H
+#pragma once
 
 #include "Material.h"
 
@@ -34,5 +33,3 @@ protected:
   /// Weights of the values
   std::vector<const VariableValue *> _weights;
 };
-
-#endif /* WEIGHTEDAVERAGEMATERIAL_H */

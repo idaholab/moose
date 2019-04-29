@@ -1,5 +1,4 @@
-#ifndef SAMPLER1DVECTOR_H
-#define SAMPLER1DVECTOR_H
+#pragma once
 
 #include "Sampler1DBase.h"
 
@@ -23,5 +22,3 @@ protected:
   /// index of the component of the vector-valued material property
   const unsigned int _index;
 };
-
-#endif // SAMPLER1DVECTOR_H

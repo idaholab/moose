@@ -1,5 +1,4 @@
-#ifndef TEST3EQNRDGOBJECTBASE_H
-#define TEST3EQNRDGOBJECTBASE_H
+#pragma once
 
 #include "MooseObjectUnitTest.h"
 #include "NumericalFlux3EqnBase.h"
@@ -66,5 +65,3 @@ protected:
   /// Flux object to be tested
   const NumericalFlux3EqnBase * _flux;
 };
-
-#endif /* TEST3EQNRDGOBJECTBASE_H */

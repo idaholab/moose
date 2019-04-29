@@ -1,5 +1,4 @@
-#ifndef RHOVAPORMIXTUREFROMPRESSURETEMPERATUREIC_H
-#define RHOVAPORMIXTUREFROMPRESSURETEMPERATUREIC_H
+#pragma once
 
 #include "InitialCondition.h"
 #include "VaporMixtureInterface.h"
@@ -25,5 +24,3 @@ protected:
   /// Temperature
   const VariableValue & _T;
 };
-
-#endif // RHOVAPORMIXTUREFROMPRESSURETEMPERATUREIC_H

@@ -1,5 +1,4 @@
-#ifndef VOLUMEJUNCTIONPRESSUREVUAUX_H
-#define VOLUMEJUNCTIONPRESSUREVUAUX_H
+#pragma once
 
 #include "AuxScalarKernel.h"
 
@@ -25,5 +24,3 @@ protected:
 
   const SinglePhaseFluidProperties & _fp;
 };
-
-#endif /* VOLUMEJUNCTIONPRESSUREVUAUX_H */

@@ -1,5 +1,4 @@
-#ifndef HEATEXCHANGECOEFFICIENTPARTITIONING_H
-#define HEATEXCHANGECOEFFICIENTPARTITIONING_H
+#pragma once
 
 #include "GeneralUserObject.h"
 
@@ -29,5 +28,3 @@ protected:
   /// Lower cut-off limit
   Real _upper;
 };
-
-#endif /* HEATEXCHANGECOEFFICIENTPARTITIONING_H */

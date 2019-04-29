@@ -1,5 +1,4 @@
-#ifndef ONEDENERGYSTATICPRESSURESUPERSONICBC_H
-#define ONEDENERGYSTATICPRESSURESUPERSONICBC_H
+#pragma once
 
 #include "OneDEnergyFreeBC.h"
 
@@ -29,5 +28,3 @@ protected:
 
   const SinglePhaseFluidProperties & _fp;
 };
-
-#endif // ONEDENERGYSTATICPRESSURESUPERSONICBC_H

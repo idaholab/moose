@@ -1,5 +1,4 @@
-#ifndef WALLFRICTIONFUNCTIONMATERIAL_H
-#define WALLFRICTIONFUNCTIONMATERIAL_H
+#pragma once
 
 #include "Material.h"
 #include "DerivativeMaterialInterfaceTHM.h"
@@ -30,5 +29,3 @@ protected:
   MaterialProperty<Real> & _df_D_darhouA;
   MaterialProperty<Real> & _df_D_darhoEA;
 };
-
-#endif /* WALLFRICTIONFUNCTIONMATERIAL_H */

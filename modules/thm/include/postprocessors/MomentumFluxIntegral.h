@@ -1,5 +1,4 @@
-#ifndef MOMENTUMFLUXINTEGRAL_H
-#define MOMENTUMFLUXINTEGRAL_H
+#pragma once
 
 #include "SideIntegralPostprocessor.h"
 
@@ -34,5 +33,3 @@ protected:
   const VariableValue & _area;
   const VariableValue & _alpha;
 };
-
-#endif // MOMENTUMFLUXINTEGRAL_H

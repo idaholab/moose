@@ -1,5 +1,4 @@
-#ifndef FUNCTIONNODALAVERAGEIC_H
-#define FUNCTIONNODALAVERAGEIC_H
+#pragma once
 
 #include "InitialCondition.h"
 
@@ -32,5 +31,3 @@ protected:
   /// function
   Function & _func;
 };
-
-#endif /* FUNCTIONNODALAVERAGEIC_H */

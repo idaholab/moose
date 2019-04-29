@@ -1,5 +1,4 @@
-#ifndef SYMMETRYTEST3EQNRDGFLUXBASE_H
-#define SYMMETRYTEST3EQNRDGFLUXBASE_H
+#pragma once
 
 #include "Test3EqnRDGObjectBase.h"
 
@@ -25,5 +24,3 @@ protected:
 
   virtual void test() override;
 };
-
-#endif /* SYMMETRYTEST3EQNRDGFLUXBASE_H */

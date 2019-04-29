@@ -1,5 +1,4 @@
-#ifndef WALLFRICTIONMODELS_H
-#define WALLFRICTIONMODELS_H
+#pragma once
 
 #include "libmesh/libmesh_common.h"
 
@@ -24,5 +23,3 @@ Real DarcyFrictionFactor(const Real & f_F);
  */
 Real FanningFrictionFactorChurchill(Real Re, Real roughness, Real D_h);
 }
-
-#endif /* WALLFRICTIONMODELS_H */

@@ -1,5 +1,4 @@
-#ifndef CONSISTENCYTEST3EQNRDGFLUXBASE_H
-#define CONSISTENCYTEST3EQNRDGFLUXBASE_H
+#pragma once
 
 #include "Test3EqnRDGObjectBase.h"
 
@@ -14,5 +13,3 @@ public:
 protected:
   virtual void test() override;
 };
-
-#endif /* CONSISTENCYTEST3EQNRDGFLUXBASE_H */

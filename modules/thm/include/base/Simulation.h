@@ -1,5 +1,4 @@
-#ifndef SIMULATION_H
-#define SIMULATION_H
+#pragma once
 
 #include "FEProblem.h"
 #include "THMApp.h"
@@ -511,5 +510,3 @@ Simulation::getComponentByName(const std::string & name) const
                "' does not exist in the simulation. Use hasComponent or "
                "checkComponnetByName before calling getComponent.");
 }
-
-#endif /* SIMULATION_H */

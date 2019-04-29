@@ -1,5 +1,4 @@
-#ifndef LOGGER_H
-#define LOGGER_H
+#pragma once
 
 #include "MooseError.h"
 
@@ -116,5 +115,3 @@ protected:
   /// The list of logged messages
   std::vector<Message *> _msgs;
 };
-
-#endif // LOGGER_H

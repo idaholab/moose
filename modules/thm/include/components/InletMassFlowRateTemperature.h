@@ -1,5 +1,4 @@
-#ifndef INLETMASSFLOWRATETEMPERATURE_H
-#define INLETMASSFLOWRATETEMPERATURE_H
+#pragma once
 
 #include "FlowBoundary.h"
 
@@ -31,5 +30,3 @@ protected:
   void setup2PhaseRDG();
   void setup2PhaseNCGCG();
 };
-
-#endif /* INLETMASSFLOWRATETEMPERATURE_H */

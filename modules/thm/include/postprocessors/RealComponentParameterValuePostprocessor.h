@@ -1,5 +1,4 @@
-#ifndef REALCOMPONENTPARAMETERVALUEPOSTPROCESSOR_H
-#define REALCOMPONENTPARAMETERVALUEPOSTPROCESSOR_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 #include "MooseObjectParameterName.h"
@@ -28,5 +27,3 @@ protected:
 
   Real _value;
 };
-
-#endif /* REALCOMPONENTPARAMETERVALUEPOSTPROCESSOR_H */

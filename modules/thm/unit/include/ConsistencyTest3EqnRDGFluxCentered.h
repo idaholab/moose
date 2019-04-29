@@ -1,5 +1,4 @@
-#ifndef CONSISTENCYTEST3EQNRDGFLUXCENTERED_H
-#define CONSISTENCYTEST3EQNRDGFLUXCENTERED_H
+#pragma once
 
 #include "ConsistencyTest3EqnRDGFluxBase.h"
 #include "NumericalFlux3EqnCentered.h"
@@ -20,5 +19,3 @@ protected:
         &_fe_problem->getUserObject<NumericalFlux3EqnCentered>(class_name));
   }
 };
-
-#endif /* CONSISTENCYTEST3EQNRDGFLUXCENTERED_H */

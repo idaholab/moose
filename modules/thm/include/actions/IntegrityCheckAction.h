@@ -1,5 +1,4 @@
-#ifndef INTEGRITYCHECKACTION_H
-#define INTEGRITYCHECKACTION_H
+#pragma once
 
 #include "THMAction.h"
 
@@ -20,5 +19,3 @@ public:
 
 protected:
 };
-
-#endif /* INTEGRITYCHECKACTION_H */

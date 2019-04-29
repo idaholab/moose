@@ -1,5 +1,4 @@
-#ifndef HSAMBIENTHEATTRANSFERBOUNDARY_H
-#define HSAMBIENTHEATTRANSFERBOUNDARY_H
+#pragma once
 
 #include "BoundaryBase.h"
 
@@ -26,5 +25,3 @@ protected:
   /// The value of convective heat transfer coefficient
   const Real & _htc_ambient;
 };
-
-#endif /* HSAMBIENTHEATTRANSFERBOUNDARY_H */

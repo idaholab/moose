@@ -1,5 +1,4 @@
-#ifndef DIRECTIONMATERIAL_H
-#define DIRECTIONMATERIAL_H
+#pragma once
 
 #include "Material.h"
 
@@ -22,5 +21,3 @@ protected:
   /// The direction of the geometry (1D elements in 3D space)
   MaterialProperty<RealVectorValue> & _dir;
 };
-
-#endif /* DIRECTIONMATERIAL_H */

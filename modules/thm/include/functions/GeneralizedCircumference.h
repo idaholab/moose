@@ -1,5 +1,4 @@
-#ifndef GENERALIZEDCIRCUMFERENCE_H
-#define GENERALIZEDCIRCUMFERENCE_H
+#pragma once
 
 #include "Function.h"
 #include "FunctionInterface.h"
@@ -37,5 +36,3 @@ protected:
   // The generalized circumference function depends on the cross-sectional area.
   Function & _area_func;
 };
-
-#endif // GENERALIZEDCIRCUMFERENCE_H

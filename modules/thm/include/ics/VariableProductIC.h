@@ -1,5 +1,4 @@
-#ifndef VARIABLEPRODUCTIC_H
-#define VARIABLEPRODUCTIC_H
+#pragma once
 
 #include "InitialCondition.h"
 
@@ -24,5 +23,3 @@ protected:
   /// The values being multipled
   std::vector<const VariableValue *> _values;
 };
-
-#endif // VARIABLEPRODUCTIC_H

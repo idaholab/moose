@@ -1,5 +1,4 @@
-#ifndef GEOMETRICALFLOWCOMPONENT_H
-#define GEOMETRICALFLOWCOMPONENT_H
+#pragma once
 
 #include "GeometricalComponent.h"
 #include "FlowConnection.h"
@@ -101,5 +100,3 @@ protected:
   /// Flow model type
   THM::FlowModelID _model_id;
 };
-
-#endif /* GEOMETRICALFLOWCOMPONENT_H */

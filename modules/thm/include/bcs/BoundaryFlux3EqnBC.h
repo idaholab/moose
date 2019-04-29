@@ -1,5 +1,4 @@
-#ifndef BOUNDARYFLUX3EQNBC_H
-#define BOUNDARYFLUX3EQNBC_H
+#pragma once
 
 #include "OneDIntegratedBC.h"
 #include "BoundaryFluxBase.h"
@@ -54,5 +53,3 @@ protected:
   /// boundary flux user object
   const BoundaryFluxBase & _flux;
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef COUPLEDFORCERZ_H
-#define COUPLEDFORCERZ_H
+#pragma once
 
 #include "CoupledForce.h"
 #include "RZSymmetry.h"
@@ -22,5 +21,3 @@ protected:
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 };
-
-#endif // COUPLEDFORCERZ_H

@@ -1,5 +1,4 @@
-#ifndef OLDJUNCTION_H
-#define OLDJUNCTION_H
+#pragma once
 
 #include "JunctionWithLossesBase.h"
 
@@ -37,5 +36,3 @@ protected:
   /// Scaling factors for pressure and energy
   std::vector<Real> _scaling_factors;
 };
-
-#endif /* OLDJUNCTION_H */

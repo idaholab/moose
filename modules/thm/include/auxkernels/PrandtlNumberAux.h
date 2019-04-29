@@ -1,5 +1,4 @@
-#ifndef PRANDTLNUMBERAUX_H
-#define PRANDTLNUMBERAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -27,5 +26,3 @@ protected:
 
   const SinglePhaseFluidProperties & _fp;
 };
-
-#endif /* PRANDTLNUMBERAUX_H */

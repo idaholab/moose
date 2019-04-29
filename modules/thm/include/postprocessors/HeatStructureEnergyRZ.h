@@ -1,5 +1,4 @@
-#ifndef HEATSTRUCTUREENERGYRZ_H
-#define HEATSTRUCTUREENERGYRZ_H
+#pragma once
 
 #include "HeatStructureEnergyBase.h"
 #include "RZSymmetry.h"
@@ -20,5 +19,3 @@ public:
 protected:
   virtual Real computeQpIntegral();
 };
-
-#endif

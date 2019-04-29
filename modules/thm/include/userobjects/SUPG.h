@@ -1,5 +1,4 @@
-#ifndef SUPG_H
-#define SUPG_H
+#pragma once
 
 #include "StabilizationSettings.h"
 
@@ -28,5 +27,3 @@ public:
   static const std::string DUDX;
   static const std::string DADU;
 };
-
-#endif /* SUPG_H */

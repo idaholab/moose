@@ -1,5 +1,4 @@
-#ifndef ONEDENERGYDENSITYVELOCITYBC_H
-#define ONEDENERGYDENSITYVELOCITYBC_H
+#pragma once
 
 #include "OneDIntegratedBC.h"
 #include "DerivativeMaterialInterfaceTHM.h"
@@ -37,5 +36,3 @@ protected:
 
   const SinglePhaseFluidProperties & _fp;
 };
-
-#endif /* ONEDENERGYDENSITYVELOCITYBC_H */

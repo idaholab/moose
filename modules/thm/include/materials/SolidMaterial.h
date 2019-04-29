@@ -1,5 +1,4 @@
-#ifndef SOLIDMATERIAL_H
-#define SOLIDMATERIAL_H
+#pragma once
 
 #include "Material.h"
 #include "SolidMaterialProperties.h"
@@ -31,5 +30,3 @@ protected:
   /// User object with material properties
   const SolidMaterialProperties & _props;
 };
-
-#endif // SOLIDMATERIAL_H

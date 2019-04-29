@@ -1,5 +1,4 @@
-#ifndef ENTROPYVISCOSITY_H
-#define ENTROPYVISCOSITY_H
+#pragma once
 
 #include "StabilizationSettings.h"
 
@@ -88,5 +87,3 @@ protected:
   static const std::string JUMP_RHO_VAPOR;
   static const std::string JUMP_ALPHA;
 };
-
-#endif /* ENTROPYVISCOSITY_H */

@@ -1,5 +1,4 @@
-#ifndef ONED7EQNENTROPYMINIMUMARTIFICIALDISSIPATION_H
-#define ONED7EQNENTROPYMINIMUMARTIFICIALDISSIPATION_H
+#pragma once
 
 #include "Kernel.h"
 #include "DerivativeMaterialInterfaceTHM.h"
@@ -92,5 +91,3 @@ protected:
   const unsigned int _arhouA_var_num;
   const unsigned int _arhoEA_var_num;
 };
-
-#endif // ONED7EQNENTROPYMINIMUMARTIFICIALDISSIPATION_H

@@ -1,5 +1,4 @@
-#ifndef FLOWMODELSETUP1PHASE_H
-#define FLOWMODELSETUP1PHASE_H
+#pragma once
 
 #include "FlowModelSetup.h"
 
@@ -68,5 +67,3 @@ protected:
   /// Name of specific total enthalpy variable
   const VariableName _H_name;
 };
-
-#endif /* FLOWMODELSETUP1PHASE_H */

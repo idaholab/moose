@@ -1,5 +1,4 @@
-#ifndef NODALMAXFROMAVERAGE_H
-#define NODALMAXFROMAVERAGE_H
+#pragma once
 
 #include "NodalVariablePostprocessor.h"
 
@@ -26,5 +25,3 @@ protected:
   std::string _average_name;
   const PostprocessorValue & _average;
 };
-
-#endif /* NODALMAXFROMAVERAGE_H_ */

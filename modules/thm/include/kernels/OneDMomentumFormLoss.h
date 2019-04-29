@@ -1,5 +1,4 @@
-#ifndef ONEDMOMENTUMFORMLOSS_H
-#define ONEDMOMENTUMFORMLOSS_H
+#pragma once
 
 #include "Kernel.h"
 #include "DerivativeMaterialInterfaceTHM.h"
@@ -58,5 +57,3 @@ protected:
   unsigned int _arhouA_var_number;
   unsigned int _arhoEA_var_number;
 };
-
-#endif

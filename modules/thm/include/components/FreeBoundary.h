@@ -1,5 +1,4 @@
-#ifndef FREEBOUNDARY_H
-#define FREEBOUNDARY_H
+#pragma once
 
 #include "FlowBoundary.h"
 
@@ -38,5 +37,3 @@ protected:
   std::vector<VariableName> _enthalpy_name;
   std::vector<VariableName> _pressure_name;
 };
-
-#endif /* FREEBOUNDARY_H */

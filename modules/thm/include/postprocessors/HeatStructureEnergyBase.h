@@ -1,5 +1,4 @@
-#ifndef HEATSTRUCTUREENERGYBASE_H
-#define HEATSTRUCTUREENERGYBASE_H
+#pragma once
 
 #include "ElementIntegralPostprocessor.h"
 
@@ -33,5 +32,3 @@ protected:
   /// Temperature variable value
   const VariableValue & _T;
 };
-
-#endif

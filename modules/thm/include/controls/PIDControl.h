@@ -1,5 +1,4 @@
-#ifndef PIDCONTROL_H
-#define PIDCONTROL_H
+#pragma once
 
 #include "THMControl.h"
 
@@ -39,5 +38,3 @@ protected:
   /// The old value of the error
   Real _error_old;
 };
-
-#endif // PIDCONTROL_H

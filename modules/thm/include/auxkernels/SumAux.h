@@ -1,5 +1,4 @@
-#ifndef SUMAUX_H
-#define SUMAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -28,5 +27,3 @@ protected:
   const unsigned int _n_values;
   std::vector<const VariableValue *> _values;
 };
-
-#endif /* SUMAUX_H */

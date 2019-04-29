@@ -1,5 +1,4 @@
-#ifndef VOLUMEJUNCTIONBASE_H
-#define VOLUMEJUNCTIONBASE_H
+#pragma once
 
 #include "FlowJunction.h"
 
@@ -30,5 +29,3 @@ protected:
   /// Spatial position of center of the junction
   const Point & _position;
 };
-
-#endif /* VOLUMEJUNCTIONBASE_H */

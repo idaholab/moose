@@ -1,5 +1,4 @@
-#ifndef HEATTRANSFER1PHASEBASE_H
-#define HEATTRANSFER1PHASEBASE_H
+#pragma once
 
 #include "HeatTransferBase.h"
 
@@ -33,5 +32,3 @@ protected:
   /// 1-phase wall heat transfer coefficient name
   MaterialPropertyName _Hw_1phase_name;
 };
-
-#endif /* HEATTRANSFER1PHASEBASE_H */

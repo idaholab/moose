@@ -1,5 +1,4 @@
-#ifndef LOGGINGINTERFACE_H
-#define LOGGINGINTERFACE_H
+#pragma once
 
 #include "THMApp.h"
 
@@ -57,5 +56,3 @@ protected:
   /// Does the logging object have a name that should be printed?
   const bool _logging_obj_has_name;
 };
-
-#endif /* LOGGINGINTERFACE_H */

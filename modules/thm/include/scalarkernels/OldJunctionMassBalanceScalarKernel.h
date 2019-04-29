@@ -1,5 +1,4 @@
-#ifndef OLDJUNCTIONMASSBALANCESCALARKERNEL_H
-#define OLDJUNCTIONMASSBALANCESCALARKERNEL_H
+#pragma once
 
 #include "JunctionScalarKernel.h"
 
@@ -24,5 +23,3 @@ protected:
   unsigned int _rhouA_var_number;
   const VariableValue & _rhouA;
 };
-
-#endif /* OLDJUNCTIONMASSBALANCESCALARKERNEL_H */

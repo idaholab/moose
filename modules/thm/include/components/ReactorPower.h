@@ -1,5 +1,4 @@
-#ifndef REACTORPOWER_H
-#define REACTORPOWER_H
+#pragma once
 
 #include "Component.h"
 
@@ -23,5 +22,3 @@ protected:
   /// The scalar variable holding the value of power
   const VariableName _power_var_name;
 };
-
-#endif /* REACTORPOWER_H */

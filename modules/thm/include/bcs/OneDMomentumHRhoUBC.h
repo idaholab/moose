@@ -1,5 +1,4 @@
-#ifndef ONEDMOMENTUMHRHOUBC_H
-#define ONEDMOMENTUMHRHOUBC_H
+#pragma once
 
 #include "OneDIntegratedBC.h"
 #include "DerivativeMaterialInterfaceTHM.h"
@@ -39,5 +38,3 @@ protected:
   unsigned int _arhoEA_var_num;
   unsigned int _beta_var_num;
 };
-
-#endif /* ONEDMOMENTUMHRHOUBC_H */

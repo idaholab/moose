@@ -1,5 +1,4 @@
-#ifndef CLOSURES1PHASESIMPLE_H
-#define CLOSURES1PHASESIMPLE_H
+#pragma once
 
 #include "Closures1PhaseBase.h"
 
@@ -29,5 +28,3 @@ protected:
    */
   void addWallTemperatureFromHeatFluxMaterial(const FlowChannel1Phase & flow_channel) const;
 };
-
-#endif /* CLOSURES1PHASESIMPLE_H */

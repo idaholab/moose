@@ -1,5 +1,4 @@
-#ifndef ONEDSUPG_H
-#define ONEDSUPG_H
+#pragma once
 
 #include "OneDStabilizationBase.h"
 
@@ -24,5 +23,3 @@ protected:
 
   unsigned int _component;
 };
-
-#endif //  ONEDSUPG_H

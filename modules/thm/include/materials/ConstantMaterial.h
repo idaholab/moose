@@ -1,5 +1,4 @@
-#ifndef CONSTANTMATERIAL_H
-#define CONSTANTMATERIAL_H
+#pragma once
 
 #include "DerivativeMaterialInterface.h"
 
@@ -34,5 +33,3 @@ protected:
   /// Derivatives of material property with respect to each variable
   std::vector<MaterialProperty<Real> *> _derivative_properties;
 };
-
-#endif /* CONSTANTMATERIAL_H */

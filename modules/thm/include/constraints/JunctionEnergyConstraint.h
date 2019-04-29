@@ -1,5 +1,4 @@
-#ifndef JUNCTIONENERGYCONSTRAINT_H
-#define JUNCTIONENERGYCONSTRAINT_H
+#pragma once
 
 #include "NodalConstraint.h"
 
@@ -52,5 +51,3 @@ protected:
 
   const SinglePhaseFluidProperties & _fp;
 };
-
-#endif /* JUNCTIONENERGYCONSTRAINT_H */

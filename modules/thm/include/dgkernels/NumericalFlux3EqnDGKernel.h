@@ -1,5 +1,4 @@
-#ifndef NUMERICALFLUX3EQNDGKERNEL_H
-#define NUMERICALFLUX3EQNDGKERNEL_H
+#pragma once
 
 #include "DGKernel.h"
 #include "RDGFluxBase.h"
@@ -68,5 +67,3 @@ protected:
   /// index within the Euler system of the equation upon which this kernel acts
   const unsigned int _equation_index;
 };
-
-#endif

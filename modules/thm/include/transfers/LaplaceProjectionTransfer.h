@@ -1,5 +1,4 @@
-#ifndef LAPLACEPROJECTIONTRANSFER_H
-#define LAPLACEPROJECTIONTRANSFER_H
+#pragma once
 
 #include "Transfer.h"
 #include "libmesh/linear_implicit_system.h"
@@ -38,5 +37,3 @@ protected:
   // These variables allow us to cache qps for fixed meshes.
   bool _fixed_meshes;
 };
-
-#endif /* LAPLACEPROJECTIONTRANSFER_H */

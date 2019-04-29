@@ -1,5 +1,4 @@
-#ifndef SPECIFICTOTALENTHALPYAUX_H
-#define SPECIFICTOTALENTHALPYAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -31,5 +30,3 @@ protected:
   const VariableValue & _area;
   const VariableValue & _alpha;
 };
-
-#endif // SPECIFICTOTALENTHALPYAUX_H

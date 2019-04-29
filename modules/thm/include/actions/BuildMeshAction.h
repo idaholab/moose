@@ -1,5 +1,4 @@
-#ifndef BUILDMESHACTION_H
-#define BUILDMESHACTION_H
+#pragma once
 
 #include "THMAction.h"
 
@@ -15,5 +14,3 @@ public:
 
   virtual void act();
 };
-
-#endif /* BUILDMESHACTION_H */

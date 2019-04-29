@@ -1,5 +1,4 @@
-#ifndef THMINITSIMULATIONACTION_H
-#define THMINITSIMULATIONACTION_H
+#pragma once
 
 #include "THMAction.h"
 
@@ -20,5 +19,3 @@ public:
 
 protected:
 };
-
-#endif /* THMINITSIMULATIONACTION_H */

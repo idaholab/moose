@@ -1,5 +1,4 @@
-#ifndef COSINEHUMPFUNCTIONTEST_H
-#define COSINEHUMPFUNCTIONTEST_H
+#pragma once
 
 #include "MooseObjectUnitTest.h"
 
@@ -62,5 +61,3 @@ protected:
   /// Value at center of hump for the "negative" hump tests
   const Real _hump_center_value_negative;
 };
-
-#endif /* COSINEHUMPFUNCTIONTEST_H */

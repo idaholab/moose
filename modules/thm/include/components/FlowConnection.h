@@ -1,5 +1,4 @@
-#ifndef FLOWCONNECTION_H
-#define FLOWCONNECTION_H
+#pragma once
 
 #include "Component.h"
 
@@ -198,5 +197,3 @@ namespace THM
 template <>
 FlowConnection::EEndType stringToEnum(const std::string & s);
 }
-
-#endif /* FLOWCONNECTION_H */

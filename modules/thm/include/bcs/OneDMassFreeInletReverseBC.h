@@ -1,5 +1,4 @@
-#ifndef ONEDMASSFREEINLETREVERSEBC_H
-#define ONEDMASSFREEINLETREVERSEBC_H
+#pragma once
 
 #include "OneDMassFreeBC.h"
 
@@ -25,5 +24,3 @@ protected:
   const bool & _reversible;
   const VariableValue & _arhouA_old;
 };
-
-#endif // ONEDMASSFREEINLETREVERSEBC_H

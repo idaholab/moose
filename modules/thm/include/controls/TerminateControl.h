@@ -1,5 +1,4 @@
-#ifndef TERMINATE_H
-#define TERMINATE_H
+#pragma once
 
 #include "THMControl.h"
 
@@ -28,5 +27,3 @@ protected:
   /// The control data that indicates if the simulation should be terminated
   const bool & _terminate;
 };
-
-#endif // TERMINATE_H

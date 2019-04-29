@@ -1,5 +1,4 @@
-#ifndef HEATTRANSFERBASE_H
-#define HEATTRANSFERBASE_H
+#pragma once
 
 #include "ConnectorBase.h"
 
@@ -97,5 +96,3 @@ protected:
   /// heated perimeter function name
   FunctionName _P_hf_fn_name;
 };
-
-#endif /* HEATTRANSFERBASE_H */

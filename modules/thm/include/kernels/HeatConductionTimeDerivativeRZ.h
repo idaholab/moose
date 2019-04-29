@@ -1,5 +1,4 @@
-#ifndef HEATCONDUCTIONTIMEDERIVATIVERZ_H
-#define HEATCONDUCTIONTIMEDERIVATIVERZ_H
+#pragma once
 
 #include "HeatConductionTimeDerivative.h"
 #include "RZSymmetry.h"
@@ -21,5 +20,3 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 };
-
-#endif // HEATCONDUCTIONTIMEDERIVATIVERZ_H

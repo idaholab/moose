@@ -1,5 +1,4 @@
-#ifndef HEATTRANSFERFROMHEATFLUX_H
-#define HEATTRANSFERFROMHEATFLUX_H
+#pragma once
 
 #include "HeatTransferBase.h"
 
@@ -21,5 +20,3 @@ public:
 protected:
   virtual void check() const override;
 };
-
-#endif /* HEATTRANSFERFROMHEATFLUX_H */

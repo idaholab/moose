@@ -1,5 +1,4 @@
-#ifndef SPECIFICVOLUMEIC_H
-#define SPECIFICVOLUMEIC_H
+#pragma once
 
 #include "InitialCondition.h"
 
@@ -23,5 +22,3 @@ protected:
   const VariableValue & _area;
   const VariableValue & _alpha;
 };
-
-#endif /* SPECIFICVOLUMEIC_H */

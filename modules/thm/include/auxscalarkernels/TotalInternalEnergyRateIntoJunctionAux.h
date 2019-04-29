@@ -1,5 +1,4 @@
-#ifndef TOTALINTERNALENERGYRATEINTOJUNCTIONAUX_H
-#define TOTALINTERNALENERGYRATEINTOJUNCTIONAUX_H
+#pragma once
 
 #include "AuxNodalScalarKernel.h"
 
@@ -25,5 +24,3 @@ protected:
   /// Component of outward normals along 1-D direction at nodes
   const std::vector<Real> & _normals;
 };
-
-#endif /* TOTALINTERNALENERGYRATEINTOJUNCTIONAUX_H */

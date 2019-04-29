@@ -1,5 +1,4 @@
-#ifndef ADDSTABILIZATIONSETTINGSACTION_H
-#define ADDSTABILIZATIONSETTINGSACTION_H
+#pragma once
 
 #include "THMObjectAction.h"
 
@@ -15,5 +14,3 @@ public:
 
   void act();
 };
-
-#endif /* ADDSTABILIZATIONSETTINGSACTION_H */

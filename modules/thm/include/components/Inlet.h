@@ -1,5 +1,4 @@
-#ifndef INLET_H
-#define INLET_H
+#pragma once
 
 #include "FlowBoundary.h"
 
@@ -28,5 +27,3 @@ protected:
 
   virtual void check() const override;
 };
-
-#endif /* INLET_H */

@@ -1,5 +1,4 @@
-#ifndef JUNCTIONMASSCONSTRAINT_H
-#define JUNCTIONMASSCONSTRAINT_H
+#pragma once
 
 #include "NodalConstraint.h"
 
@@ -52,5 +51,3 @@ protected:
 
   const SinglePhaseFluidProperties & _fp;
 };
-
-#endif /* JUNCTIONMASSCONSTRAINT_H */

@@ -1,5 +1,4 @@
-#ifndef ONEDMOMENTUMDENSITYVELOCITYBC_H
-#define ONEDMOMENTUMDENSITYVELOCITYBC_H
+#pragma once
 
 #include "OneDIntegratedBC.h"
 #include "DerivativeMaterialInterfaceTHM.h"
@@ -38,5 +37,3 @@ protected:
 
   const SinglePhaseFluidProperties & _fp;
 };
-
-#endif /* ONEDMOMENTUMDENSITYVELOCITYBC_H */

@@ -1,5 +1,4 @@
-#ifndef ONEDMOMENTUMFLUX_H
-#define ONEDMOMENTUMFLUX_H
+#pragma once
 
 #include "Kernel.h"
 #include "DerivativeMaterialInterfaceTHM.h"
@@ -51,5 +50,3 @@ protected:
   const unsigned int _arhouA_var_number;
   const unsigned int _arhoEA_var_number;
 };
-
-#endif /* ONEDMOMENTUMFLUX_H */

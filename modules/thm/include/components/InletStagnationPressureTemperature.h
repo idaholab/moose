@@ -1,5 +1,4 @@
-#ifndef INLETSTAGNATIONPRESSURETEMPERATURE_H
-#define INLETSTAGNATIONPRESSURETEMPERATURE_H
+#pragma once
 
 #include "FlowBoundary.h"
 
@@ -32,5 +31,3 @@ protected:
 
   void setup2PhaseNCGCG();
 };
-
-#endif /* INLETSTAGNATIONPRESSURETEMPERATURE_H */

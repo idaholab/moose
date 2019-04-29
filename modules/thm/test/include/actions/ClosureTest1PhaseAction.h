@@ -1,5 +1,4 @@
-#ifndef CLOSURETEST1PHASEACTION_H
-#define CLOSURETEST1PHASEACTION_H
+#pragma once
 
 #include "ClosureTestAction.h"
 #include "FlowModelSetup1Phase.h"
@@ -23,5 +22,3 @@ protected:
   virtual void addMaterials() override;
   virtual void addUserObjects() override;
 };
-
-#endif /* CLOSURETEST1PHASEACTION_H */

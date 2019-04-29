@@ -1,5 +1,4 @@
-#ifndef TESTSETUPSTATUSCOMPONENT_H
-#define TESTSETUPSTATUSCOMPONENT_H
+#pragma once
 
 #include "Component.h"
 
@@ -19,5 +18,3 @@ public:
 protected:
   virtual void init() override;
 };
-
-#endif /* TESTSETUPSTATUSCOMPONENT_H */

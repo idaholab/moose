@@ -1,5 +1,4 @@
-#ifndef MASSBALANCESCALARKERNEL_H
-#define MASSBALANCESCALARKERNEL_H
+#pragma once
 
 #include "NodalScalarKernel.h"
 
@@ -25,5 +24,3 @@ protected:
   const VariableValue & _rhouA;
   std::vector<Real> _normals;
 };
-
-#endif /* MASSBALANCESCALARKERNEL_H */

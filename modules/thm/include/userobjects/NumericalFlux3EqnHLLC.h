@@ -1,5 +1,4 @@
-#ifndef NUMERICALFLUX3EQNHLLC_H
-#define NUMERICALFLUX3EQNHLLC_H
+#pragma once
 
 #include "NumericalFlux3EqnBase.h"
 #include "SinglePhaseFluidProperties.h"
@@ -45,5 +44,3 @@ protected:
   /// use frozen acoustic speeds Jacobian approximation
   const bool _use_approximate_jacobian;
 };
-
-#endif

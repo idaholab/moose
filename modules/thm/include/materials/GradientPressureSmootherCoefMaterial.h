@@ -1,5 +1,4 @@
-#ifndef GRADIENTPRESSURESMOOTHERCOEFMATERIAL_H
-#define GRADIENTPRESSURESMOOTHERCOEFMATERIAL_H
+#pragma once
 
 #include "Material.h"
 
@@ -44,5 +43,3 @@ protected:
 
   MaterialProperty<Real> & _coef;
 };
-
-#endif /* GRADIENTPRESSURESMOOTHERCOEFMATERIAL_H */

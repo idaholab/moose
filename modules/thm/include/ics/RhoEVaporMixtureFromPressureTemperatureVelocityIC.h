@@ -1,5 +1,4 @@
-#ifndef RHOEVAPORMIXTUREFROMPRESSURETEMPERATUREVELOCITYIC_H
-#define RHOEVAPORMIXTUREFROMPRESSURETEMPERATUREVELOCITYIC_H
+#pragma once
 
 #include "InitialCondition.h"
 #include "VaporMixtureInterface.h"
@@ -28,5 +27,3 @@ protected:
   /// Velocity
   const VariableValue & _vel;
 };
-
-#endif // RHOEVAPORMIXTUREFROMPRESSURETEMPERATUREVELOCITYIC_H

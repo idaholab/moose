@@ -1,5 +1,4 @@
-#ifndef ELEMENTHEATFLUXPOSTPROCESSOR_H
-#define ELEMENTHEATFLUXPOSTPROCESSOR_H
+#pragma once
 
 #include "ElementIntegralPostprocessor.h"
 
@@ -29,5 +28,3 @@ protected:
   /// Heat flux perimeter
   const VariableValue & _P_hf;
 };
-
-#endif /* ELEMENTHEATFLUXPOSTPROCESSOR_H */

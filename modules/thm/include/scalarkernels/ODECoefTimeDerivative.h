@@ -1,5 +1,4 @@
-#ifndef ODECOEFTIMEDERIVATIVE_H
-#define ODECOEFTIMEDERIVATIVE_H
+#pragma once
 
 #include "ODETimeDerivative.h"
 
@@ -23,5 +22,3 @@ protected:
   /// Coefficient that the time derivative terms is multiplied with
   const Real & _coef;
 };
-
-#endif // ODECOEFTIMEDERIVATIVE_H

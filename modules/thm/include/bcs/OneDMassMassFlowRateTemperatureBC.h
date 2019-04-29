@@ -1,5 +1,4 @@
-#ifndef ONEDMASSMASSFLOWRATETEMPERATUREBC_H
-#define ONEDMASSMASSFLOWRATETEMPERATUREBC_H
+#pragma once
 
 #include "OneDIntegratedBC.h"
 
@@ -23,5 +22,3 @@ protected:
 
   const Real & _m_dot;
 };
-
-#endif // ONEDMASSMASSFLOWRATETEMPERATUREBC_H

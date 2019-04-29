@@ -1,5 +1,4 @@
-#ifndef ENERGYSCALARKERNEL_H
-#define ENERGYSCALARKERNEL_H
+#pragma once
 
 #include "NodalScalarKernel.h"
 
@@ -33,5 +32,3 @@ protected:
   const VariableValue & _total_mfr_in;
   const VariableValue & _total_int_energy_rate_in;
 };
-
-#endif /* ENERGYSCALARKERNEL_H */

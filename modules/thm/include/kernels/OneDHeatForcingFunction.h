@@ -1,5 +1,4 @@
-#ifndef ONEDHEATFORCINGFUNCTION_H
-#define ONEDHEATFORCINGFUNCTION_H
+#pragma once
 
 #include "Kernel.h"
 #include "Function.h"
@@ -25,5 +24,3 @@ protected:
   const Real & _volume;
   Function & _power_shape_function;
 };
-
-#endif /* ONEDHEATFORCINGFUNCTION_H */

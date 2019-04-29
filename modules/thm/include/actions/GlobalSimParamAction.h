@@ -1,5 +1,4 @@
-#ifndef GLOBALSIMPARAMACTION_H
-#define GLOBALSIMPARAMACTION_H
+#pragma once
 
 #include "THMAction.h"
 
@@ -20,5 +19,3 @@ public:
 
 protected:
 };
-
-#endif /* GLOBALSIMPARAMACTION_H */

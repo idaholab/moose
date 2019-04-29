@@ -1,5 +1,4 @@
-#ifndef ONEDNODALBC_H
-#define ONEDNODALBC_H
+#pragma once
 
 #include "NodalBC.h"
 
@@ -20,5 +19,3 @@ protected:
   /// Component of outward normal along 1-D direction
   const Real _normal;
 };
-
-#endif /* ONEDNODALBC_H */

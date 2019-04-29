@@ -1,5 +1,4 @@
-#ifndef RUSANOV_H
-#define RUSANOV_H
+#pragma once
 
 #include "StabilizationSettings.h"
 
@@ -23,5 +22,3 @@ protected:
   void setup1Phase(FlowModelSinglePhase & fm, InputParameters & pars) const;
   void setup2Phase(FlowModelTwoPhase & fm, InputParameters & pars) const;
 };
-
-#endif /* RUSANOV_H */

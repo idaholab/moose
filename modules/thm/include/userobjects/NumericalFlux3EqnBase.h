@@ -1,5 +1,4 @@
-#ifndef NUMERICALFLUX3EQNBASE_H
-#define NUMERICALFLUX3EQNBASE_H
+#pragma once
 
 #include "RDGFluxBase.h"
 
@@ -46,5 +45,3 @@ protected:
   /// Index describing the region last entered, which is useful for testing and debugging
   mutable unsigned int _last_region_index;
 };
-
-#endif // NUMERICALFLUX3EQNBASE_H

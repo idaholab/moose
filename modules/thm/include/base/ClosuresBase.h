@@ -1,5 +1,4 @@
-#ifndef CLOSURESBASE_H
-#define CLOSURESBASE_H
+#pragma once
 
 #include "MooseObject.h"
 #include "LoggingInterface.h"
@@ -77,5 +76,3 @@ protected:
   /// Factory associated with the MooseApp
   Factory & _factory;
 };
-
-#endif /* CLOSURESBASE_H */

@@ -1,5 +1,4 @@
-#ifndef THMSETUPOUTPUTACTION_H
-#define THMSETUPOUTPUTACTION_H
+#pragma once
 
 #include "THMAction.h"
 
@@ -15,5 +14,3 @@ public:
 
   virtual void act();
 };
-
-#endif /* THMSETUPOUTPUTACTION_H */

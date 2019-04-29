@@ -1,5 +1,4 @@
-#ifndef VOLUMEJUNCTION1PHASE_H
-#define VOLUMEJUNCTION1PHASE_H
+#pragma once
 
 #include "VolumeJunctionBase.h"
 
@@ -56,5 +55,3 @@ protected:
   /// rho*E*V variable name for junction
   const std::string _rhoEV_var_name;
 };
-
-#endif /* VOLUMEJUNCTION1PHASE_H */

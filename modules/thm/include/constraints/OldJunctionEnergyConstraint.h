@@ -1,5 +1,4 @@
-#ifndef OLDENERGYJUNCTIONCONSTRAINT_H
-#define OLDENERGYJUNCTIONCONSTRAINT_H
+#pragma once
 
 #include "NodalConstraint.h"
 #include "PostprocessorInterface.h"
@@ -59,5 +58,3 @@ protected:
 
   const SinglePhaseFluidProperties & _fp;
 };
-
-#endif /* OLDENERGYJUNCTIONCONSTRAINT_H */

@@ -1,5 +1,4 @@
-#ifndef STABILIZATIONPRESSURE_H
-#define STABILIZATIONPRESSURE_H
+#pragma once
 
 #include "StabilizationSettings.h"
 
@@ -56,5 +55,3 @@ protected:
   static const std::string LAPLACE_P_LIQUID;
   static const std::string LAPLACE_P_VAPOR;
 };
-
-#endif /* STABILIZATIONPRESSURE_H */

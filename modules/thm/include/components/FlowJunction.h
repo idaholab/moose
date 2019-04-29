@@ -1,5 +1,4 @@
-#ifndef FLOWJUNCTION_H
-#define FLOWJUNCTION_H
+#pragma once
 
 #include "FlowConnection.h"
 
@@ -19,5 +18,3 @@ public:
 protected:
   virtual void setupMesh() override;
 };
-
-#endif /* FLOWJUNCTION_H */

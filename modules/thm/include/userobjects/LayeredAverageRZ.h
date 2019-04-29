@@ -1,5 +1,4 @@
-#ifndef LAYEREDAVERAGERZ_H
-#define LAYEREDAVERAGERZ_H
+#pragma once
 
 #include "LayeredAverage.h"
 #include "RZSymmetry.h"
@@ -24,5 +23,3 @@ public:
 protected:
   virtual Real computeIntegral() override;
 };
-
-#endif

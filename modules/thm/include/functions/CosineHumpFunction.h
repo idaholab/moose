@@ -1,5 +1,4 @@
-#ifndef COSINEHUMPFUNCTION_H
-#define COSINEHUMPFUNCTION_H
+#pragma once
 
 #include "Function.h"
 
@@ -44,5 +43,3 @@ protected:
   /// Right end of hump
   const Real _hump_right_end;
 };
-
-#endif // COSINEHUMPFUNCTION_H
