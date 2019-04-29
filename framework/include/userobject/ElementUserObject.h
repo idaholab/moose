@@ -59,4 +59,3 @@ protected:
   const MooseArray<Real> & _JxW;
   const MooseArray<Real> & _coord;
 };
-

@@ -86,10 +86,9 @@ private:
   MooseMesh & _mesh;
   Assembly & _assembly;
   const MooseArray<Point> & _q_point;
-  QBase *& _qrule;
+  const QBase * const & _qrule;
   const MooseArray<Real> & _JxW;
   const MooseArray<Real> & _coord;
-  QBase *& _qrule_face;
+  const QBase * const & _qrule_face;
   const MooseArray<Real> & _JxW_face;
 };
-

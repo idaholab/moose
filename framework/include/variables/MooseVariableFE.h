@@ -510,9 +510,18 @@ public:
   /**
    * Methods for retrieving values of variables at the nodes in a MooseArray for AuxKernelBase
    */
-  const MooseArray<OutputType> & nodalValueArray();
-  const MooseArray<OutputType> & nodalValueOldArray();
-  const MooseArray<OutputType> & nodalValueOlderArray();
+  const MooseArray<OutputType> & nodalValueArray()
+  {
+    return _element_data->nodalValueArray(Moose::Current);
+  }
+  const MooseArray<OutputType> & nodalValueOldArray()
+  {
+    return _element_data->nodalValueArray(Moose::Old);
+  }
+  const MooseArray<OutputType> & nodalValueOlderArray()
+  {
+    return _element_data->nodalValueArray(Moose::Older);
+  }
 
   const MooseArray<Real> & nodalVectorTagValue(TagID tag);
   const MooseArray<Real> & nodalMatrixTagValue(TagID tag);
@@ -551,5 +560,3 @@ MooseVariableFE<OutputType>::adNodalValue()
 {
   return _element_data->template adNodalValue<compute_stage>();
 }
-
-#endif /* MOOSEVARIABLEFE_H */

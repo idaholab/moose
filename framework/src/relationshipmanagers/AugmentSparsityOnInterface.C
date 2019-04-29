@@ -97,7 +97,7 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
   // solve
   if (_use_displaced_mesh)
   {
-    for (const auto & elem : as_range(range_begin, range_end))
+    for (const auto & elem : _mesh.getMesh().active_element_ptr_range())
     {
       if (elem->subdomain_id() == _subdomain_pair.first ||
           elem->subdomain_id() == _subdomain_pair.second)

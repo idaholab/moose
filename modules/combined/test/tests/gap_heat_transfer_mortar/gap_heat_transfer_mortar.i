@@ -65,7 +65,7 @@
   [./ced]
     type = GapConductanceConstraint
     variable = lm
-    master_variable = temp
+    slave_variable = temp
     k = 100
     master_boundary = 100
     master_subdomain = 10000

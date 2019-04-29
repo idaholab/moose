@@ -620,7 +620,7 @@ public:
    * Lets an external class cache residual at a set of nodes
    */
   void cacheResidualNodes(const DenseVector<Number> & res,
-                          std::vector<dof_id_type> & dof_index,
+                          const std::vector<dof_id_type> & dof_index,
                           TagID tag = 0);
 
   /**

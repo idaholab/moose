@@ -318,6 +318,9 @@ MultiDContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
 
     case Moose::MasterMaster:
       return 0.0;
+
+    default:
+      mooseError("Unhandled ConstraintJacobianType");
   }
   return 0.0;
 }

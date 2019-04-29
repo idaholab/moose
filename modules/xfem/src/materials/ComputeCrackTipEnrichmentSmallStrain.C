@@ -124,7 +124,7 @@ ComputeCrackTipEnrichmentSmallStrain::computeProperties()
                  Utility::string_to_enum<FEFamily>("lagrange"));
   const unsigned int dim = _current_elem->dim();
   std::unique_ptr<FEBase> fe(FEBase::build(dim, fe_type));
-  fe->attach_quadrature_rule(_qrule);
+  fe->attach_quadrature_rule(const_cast<QBase *>(_qrule));
   _fe_phi = &(fe->get_phi());
   _fe_dphi = &(fe->get_dphi());
 

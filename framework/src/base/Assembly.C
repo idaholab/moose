@@ -2873,7 +2873,7 @@ Assembly::cacheResidualLower()
 
 void
 Assembly::cacheResidualNodes(const DenseVector<Number> & res,
-                             std::vector<dof_id_type> & dof_index,
+                             const std::vector<dof_id_type> & dof_index,
                              TagID tag /* = 0*/)
 {
   // Add the residual value and dof_index to cached_residual_values and cached_residual_rows

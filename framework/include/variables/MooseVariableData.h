@@ -370,6 +370,7 @@ public:
   ///////////////////////// Nodal value getters ///////////////////////////////////////////
 
   const OutputType & nodalValue(Moose::SolutionState state) const;
+  const MooseArray<OutputType> & nodalValueArray(Moose::SolutionState state) const;
   const OutputType & nodalValueDot() const;
   const OutputType & nodalValueDotDot() const;
   const OutputType & nodalValueDotOld() const;
@@ -560,6 +561,11 @@ private:
   OutputType _nodal_value_dot_old;
   /// nodal values of u_dotdot_old
   OutputType _nodal_value_dotdot_old;
+
+  /// Nodal values as MooseArrays for use with AuxKernels
+  MooseArray<OutputType> _nodal_value_array;
+  MooseArray<OutputType> _nodal_value_old_array;
+  MooseArray<OutputType> _nodal_value_older_array;
 
   /// AD nodal value
   typename Moose::ValueType<OutputType, JACOBIAN>::type _ad_nodal_value;

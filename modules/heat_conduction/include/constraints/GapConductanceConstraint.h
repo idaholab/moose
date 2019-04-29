@@ -61,19 +61,10 @@ protected:
   /**
    * Computes the residual for the LM equation, lambda = (k/l)*(T^(1) - PT^(2)).
    */
-  virtual ADResidual computeQpResidual() override;
-
-  /**
-   * Computes the "lambda * (v^(1) - Pv^(2))" residual term in the
-   * primal equation.  The res_type flag controls whether the
-   * contribution from the master (1) or slave (2) test function is
-   * currently being computed.
-   */
-  virtual ADResidual computeQpResidualSide(Moose::ConstraintType res_type) override;
+  virtual ADReal computeQpResidual(Moose::MortarType mortar_type) override;
 
   /// Thermal conductivity of the gap medium (e.g. air).
   const Real _k;
 
   usingMortarConstraintMembers;
 };
-

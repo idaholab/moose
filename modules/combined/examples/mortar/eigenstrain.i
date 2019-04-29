@@ -146,7 +146,7 @@
     type = EqualGradientConstraint
     variable = lm_up_down_xx
     component = 0
-    master_variable = disp_x
+    slave_variable = disp_x
     slave_boundary = bottom
     master_boundary = top
     slave_subdomain = slave_y
@@ -157,7 +157,7 @@
     type = EqualGradientConstraint
     variable = lm_up_down_xy
     component = 1
-    master_variable = disp_x
+    slave_variable = disp_x
     slave_boundary = bottom
     master_boundary = top
     slave_subdomain = slave_y
@@ -168,7 +168,7 @@
     type = EqualGradientConstraint
     variable = lm_up_down_yx
     component = 0
-    master_variable = disp_y
+    slave_variable = disp_y
     slave_boundary = bottom
     master_boundary = top
     slave_subdomain = slave_y
@@ -179,7 +179,7 @@
     type = EqualGradientConstraint
     variable = lm_up_down_yy
     component = 1
-    master_variable = disp_y
+    slave_variable = disp_y
     slave_boundary = bottom
     master_boundary = top
     slave_subdomain = slave_y
@@ -191,7 +191,7 @@
     type = EqualGradientConstraint
     variable = lm_left_right_xx
     component = 0
-    master_variable = disp_x
+    slave_variable = disp_x
     slave_boundary = left
     master_boundary = right
     slave_subdomain = slave_x
@@ -202,7 +202,7 @@
     type = EqualGradientConstraint
     variable = lm_left_right_xy
     component = 1
-    master_variable = disp_x
+    slave_variable = disp_x
     slave_boundary = left
     master_boundary = right
     slave_subdomain = slave_x
@@ -213,7 +213,7 @@
     type = EqualGradientConstraint
     variable = lm_left_right_yx
     component = 0
-    master_variable = disp_y
+    slave_variable = disp_y
     slave_boundary = left
     master_boundary = right
     slave_subdomain = slave_x
@@ -224,7 +224,7 @@
     type = EqualGradientConstraint
     variable = lm_left_right_yy
     component = 1
-    master_variable = disp_y
+    slave_variable = disp_y
     slave_boundary = left
     master_boundary = right
     slave_subdomain = slave_x

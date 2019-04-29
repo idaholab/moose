@@ -97,6 +97,9 @@ protected:
   /// The element Jacobian times weights
   const std::vector<Real> & _JxW_msm;
 
+  /// Member for handling change of coordinate systems (xyz, rz, spherical)
+  const MooseArray<Real> & _coord;
+
   /// The quadrature rule
   const QBase * const & _qrule_msm;
 
@@ -156,5 +159,3 @@ protected:
   using MortarConstraint<compute_stage>::_grad_test_slave;                                         \
   using MortarConstraint<compute_stage>::_grad_test_master;                                        \
   using MortarConstraint<compute_stage>::_normals
-
-#endif /* MORTARCONSTRAINT_H */

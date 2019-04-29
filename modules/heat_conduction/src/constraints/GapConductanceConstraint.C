@@ -29,23 +29,20 @@ GapConductanceConstraint<compute_stage>::GapConductanceConstraint(
 }
 
 template <ComputeStage compute_stage>
-ADResidual
-GapConductanceConstraint<compute_stage>::computeQpResidual()
+ADReal
+GapConductanceConstraint<compute_stage>::computeQpResidual(Moose::MortarType mortar_type)
 {
-  auto l = (_phys_points_master[_qp] - _phys_points_slave[_qp]).norm();
-  return (_k * (_u_master[_qp] - _u_slave[_qp]) / l - _lambda[_qp]) * _test[_i][_qp];
-}
-
-template <ComputeStage compute_stage>
-ADResidual
-GapConductanceConstraint<compute_stage>::computeQpResidualSide(Moose::ConstraintType res_type)
-{
-  switch (res_type)
+  switch (mortar_type)
   {
-    case Moose::Master:
+    case Moose::MortarType::Master:
       return _lambda[_qp] * _test_master[_i][_qp];
-    case Moose::Slave:
+    case Moose::MortarType::Slave:
       return -_lambda[_qp] * _test_slave[_i][_qp];
+    case Moose::MortarType::Lower:
+    {
+      auto l = (_phys_points_master[_qp] - _phys_points_slave[_qp]).norm();
+      return (_k * (_u_master[_qp] - _u_slave[_qp]) / l - _lambda[_qp]) * _test[_i][_qp];
+    }
     default:
       return 0;
   }

@@ -18,6 +18,7 @@ validParams<Constraint>()
   InputParameters params = validParams<MooseObject>();
   // Add the SetupInterface parameter, 'execute_on', default is 'linear'
   params += validParams<SetupInterface>();
+  params += validParams<TaggingInterface>();
 
   params.addParam<bool>("use_displaced_mesh",
                         false,

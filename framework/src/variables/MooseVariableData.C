@@ -114,6 +114,12 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableFE<OutputTyp
 
   _time_integrator = _sys.getTimeIntegrator();
 
+  // These MooseArray objects are used by AuxKernelBase for nodal AuxKernel objects, hence the size
+  // size is always 1 (i.e, nodal kernels work with _qp=0 only).
+  _nodal_value_array.resize(1);
+  _nodal_value_old_array.resize(1);
+  _nodal_value_older_array.resize(1);
+
   switch (_element_type)
   {
     case Moose::ElementType::Element:
@@ -997,15 +1003,11 @@ template <>
 void
 MooseVariableData<RealVectorValue>::setNodalValue(RealVectorValue value, unsigned int idx /* = 0*/)
 {
-  for (decltype(idx) i = 0; i < LIBMESH_DIM; ++i, ++idx)
-  {
+  for (decltype(idx) i = 0; i < _dof_values.size(); ++i, ++idx)
     _dof_values[idx] = value(i);
-    _nodal_value(i) = value(i);
-  }
 
-  // Update the qp values as well
-  for (unsigned int qp = 0; qp < _u.size(); qp++)
-    _u[qp] = value;
+  _has_dof_values = true;
+  _nodal_value = value;
 }
 
 template <typename OutputType>
@@ -1278,6 +1280,42 @@ MooseVariableData<OutputType>::nodalValue(Moose::SolutionState state) const
         // We should never get here but gcc requires that we have a default. See
         // htpps://stackoverflow.com/questions/18680378/after-defining-case-for-all-enum-values-compiler-still-says-control-reaches-e
         mooseError("Unknown SolutionState!");
+    }
+  }
+  else
+    mooseError("Nodal values can be requested only on nodal variables, variable '",
+               _var.name(),
+               "' is not nodal.");
+}
+
+template <typename OutputType>
+const MooseArray<OutputType> &
+MooseVariableData<OutputType>::nodalValueArray(Moose::SolutionState state) const
+{
+  if (isNodal())
+  {
+    switch (state)
+    {
+      case Moose::Current:
+      {
+        _need_dof_values = true;
+        return _nodal_value_array;
+      }
+
+      case Moose::Old:
+      {
+        _need_dof_values_old = true;
+        return _nodal_value_old_array;
+      }
+
+      case Moose::Older:
+      {
+        _need_dof_values_older = true;
+        return _nodal_value_older_array;
+      }
+
+      default:
+        mooseError("No current support for PreviousNL for nodal value array");
     }
   }
   else
@@ -1585,13 +1623,20 @@ MooseVariableData<OutputType>::assignNodalValue()
   libmesh_assert(_dof_indices.size());
 
   _nodal_value = _dof_values[0];
+  _nodal_value_array[0] = _nodal_value;
 
   if (is_transient)
   {
     if (_need_dof_values_old)
+    {
       _nodal_value_old = _dof_values_old[0];
+      _nodal_value_old_array[0] = _nodal_value_old;
+    }
     if (_need_dof_values_older)
+    {
       _nodal_value_older = _dof_values_older[0];
+      _nodal_value_older_array[0] = _nodal_value_older;
+    }
     if (_need_dof_values_dot)
       _nodal_value_dot = _dof_values_dot[0];
     if (_need_dof_values_dotdot)

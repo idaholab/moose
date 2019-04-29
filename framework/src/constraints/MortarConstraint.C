@@ -82,6 +82,7 @@ MortarConstraint<compute_stage>::MortarConstraint(const InputParameters & parame
     _lambda_dummy(),
     _normals(_assembly.normals()),
     _JxW_msm(_assembly.jxWMortar()),
+    _coord(_assembly.coordTransformation()),
     _qrule_msm(_assembly.qRuleMortar()),
     _test(_var ? _var->phiLower() : _test_dummy),
     _test_slave(_slave_var.phiFace()),
@@ -154,7 +155,7 @@ MortarConstraint<compute_stage>::computeResidual(Moose::MortarType mortar_type)
 
   for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
     for (_i = 0; _i < test_space_size; _i++)
-      _local_re(_i) += _JxW_msm[_qp] * computeQpResidual(mortar_type);
+      _local_re(_i) += _JxW_msm[_qp] * _coord[_qp] * computeQpResidual(mortar_type);
 
   accumulateTaggedLocalResidual();
 }
@@ -221,7 +222,7 @@ MortarConstraint<compute_stage>::computeJacobian(Moose::MortarType mortar_type)
   residuals.resize(test_space_size, 0);
   for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
     for (_i = 0; _i < test_space_size; _i++)
-      residuals[_i] += _JxW_msm[_qp] * computeQpResidual(mortar_type);
+      residuals[_i] += _JxW_msm[_qp] * _coord[_qp] * computeQpResidual(mortar_type);
 
   std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> & ce =
       _assembly.couplingEntries();

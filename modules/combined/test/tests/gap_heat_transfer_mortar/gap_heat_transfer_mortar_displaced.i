@@ -97,7 +97,7 @@
   [./ced]
     type = GapConductanceConstraint
     variable = lm
-    master_variable = temp
+    slave_variable = temp
     k = 100
     use_displaced_mesh = true
     master_boundary = 100
@@ -120,13 +120,6 @@
     variable = temp
     boundary = 'right'
     value = 0
-  [../]
-
-  [./mortar]
-    type = HeatConductionBC
-    variable = temp
-    boundary = '100 101'
-    use_displaced_mesh = true
   [../]
 []
 
