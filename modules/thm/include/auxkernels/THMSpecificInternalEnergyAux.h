@@ -1,5 +1,4 @@
-#ifndef THMSPECIFICINTERNALENERGYAUX_H
-#define THMSPECIFICINTERNALENERGYAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -26,5 +25,3 @@ protected:
   /// total energy, rhoE
   const VariableValue & _rhoE;
 };
-
-#endif /* THMSPECIFICINTERNALENERGYAUX_H */

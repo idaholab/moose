@@ -1,5 +1,4 @@
-#ifndef JUMPGRADIENTINTERFACE_H
-#define JUMPGRADIENTINTERFACE_H
+#pragma once
 
 #include "InternalSideUserObject.h"
 
@@ -39,5 +38,3 @@ protected:
   // Temporary variable:
   Real _value;
 };
-
-#endif /* JUMPGRADIENTINTERFACE_H */

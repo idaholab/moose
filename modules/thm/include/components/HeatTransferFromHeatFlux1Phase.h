@@ -1,5 +1,4 @@
-#ifndef HEATTRANSFERFROMHEATFLUX1PHASE_H
-#define HEATTRANSFERFROMHEATFLUX1PHASE_H
+#pragma once
 
 #include "HeatTransfer1PhaseBase.h"
 
@@ -24,5 +23,3 @@ protected:
   /// wall heat flux function name
   const FunctionName _q_wall_fn_name;
 };
-
-#endif /* HEATTRANSFERFROMHEATFLUX1PHASE_H */

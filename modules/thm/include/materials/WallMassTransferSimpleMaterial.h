@@ -1,5 +1,4 @@
-#ifndef WALLMASSTRANSFERSIMPLEMATERIAL_H
-#define WALLMASSTRANSFERSIMPLEMATERIAL_H
+#pragma once
 
 #include "Material.h"
 #include "DerivativeMaterialInterfaceTHM.h"
@@ -82,5 +81,3 @@ protected:
   const MaterialProperty<Real> & _df_boil_darhouA_liquid;
   const MaterialProperty<Real> & _df_boil_darhoEA_liquid;
 };
-
-#endif // WALLMASSTRANSFERSIMPLEMATERIAL_H

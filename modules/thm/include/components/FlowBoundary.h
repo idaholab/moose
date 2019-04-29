@@ -1,5 +1,4 @@
-#ifndef FLOWBOUNDARY_H
-#define FLOWBOUNDARY_H
+#pragma once
 
 #include "FlowConnection.h"
 
@@ -53,5 +52,3 @@ protected:
   /// rDG interfacial variables user object name
   UserObjectName _rdg_int_var_uo_name;
 };
-
-#endif /* FLOWBOUNDARY_H */

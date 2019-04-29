@@ -1,5 +1,4 @@
-#ifndef WALLFRICTIONCHURCHILLMATERIAL_H
-#define WALLFRICTIONCHURCHILLMATERIAL_H
+#pragma once
 
 #include "Material.h"
 #include "DerivativeMaterialInterfaceTHM.h"
@@ -39,5 +38,3 @@ protected:
   /// Roughness of the surface
   const Real & _roughness;
 };
-
-#endif // WALLFRICTIONCHURCHILLMATERIAL_H

@@ -1,5 +1,4 @@
-#ifndef PERIODICJUNCTION_H
-#define PERIODICJUNCTION_H
+#pragma once
 
 #include "FlowJunction.h"
 
@@ -28,5 +27,3 @@ protected:
   /// Vector which when added to primary boundary coordinates gives secondary boundary coordinates
   RealVectorValue _translation_vector;
 };
-
-#endif /* PERIODICJUNCTION_H */

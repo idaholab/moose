@@ -1,5 +1,4 @@
-#ifndef WALLBOILINGFRACTIONMATERIAL_H
-#define WALLBOILINGFRACTIONMATERIAL_H
+#pragma once
 
 #include "DerivativeMaterialInterfaceTHM.h"
 
@@ -48,5 +47,3 @@ protected:
   const MaterialProperty<Real> & _dT_sat_liquid_darhouA;
   const MaterialProperty<Real> & _dT_sat_liquid_darhoEA;
 };
-
-#endif /* WALLBOILINGFRACTIONMATERIAL_H */

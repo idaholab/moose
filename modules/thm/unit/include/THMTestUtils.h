@@ -1,5 +1,4 @@
-#ifndef THMTESTUTILS_H
-#define THMTESTUTILS_H
+#pragma once
 
 #include "SinglePhaseFluidPropertiesTestUtils.h"
 #include "MooseTypes.h"
@@ -13,5 +12,3 @@
 
 Real computeFDPerturbation(const Real & value,
                            const Real & relative_perturbation = REL_PERTURBATION);
-
-#endif // THMTESTUTILS_H

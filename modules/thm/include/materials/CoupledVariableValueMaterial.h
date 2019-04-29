@@ -1,5 +1,4 @@
-#ifndef COUPLEDVARIABLEVALUE_H
-#define COUPLEDVARIABLEVALUE_H
+#pragma once
 
 #include "Material.h"
 
@@ -26,5 +25,3 @@ protected:
   /// The coupled variable values
   const VariableValue & _value;
 };
-
-#endif // COUPLEDVARIABLEVALUE_H

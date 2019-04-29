@@ -1,5 +1,4 @@
-#ifndef HEATTRANSFERFROMHEATSTRUCTURE1PHASE_H
-#define HEATTRANSFERFROMHEATSTRUCTURE1PHASE_H
+#pragma once
 
 #include "HeatTransferFromTemperature1Phase.h"
 
@@ -41,5 +40,3 @@ protected:
   /// "side" of the heat structure
   const MooseEnum _hs_side;
 };
-
-#endif /* HEATTRANSFERFROMHEATSTRUCTURE1PHASE_H */

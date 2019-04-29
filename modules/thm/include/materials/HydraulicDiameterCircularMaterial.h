@@ -1,5 +1,4 @@
-#ifndef HYDRAULICDIAMETERMATERIAL_H
-#define HYDRAULICDIAMETERMATERIAL_H
+#pragma once
 
 #include "Material.h"
 
@@ -23,5 +22,3 @@ protected:
 
   const VariableValue & _area;
 };
-
-#endif /* HYDRAULICDIAMETERMATERIAL_H */

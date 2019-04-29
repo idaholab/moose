@@ -1,5 +1,4 @@
-#ifndef JACOBIANTEST1PHASEACTION_H
-#define JACOBIANTEST1PHASEACTION_H
+#pragma once
 
 #include "JacobianTestAction.h"
 #include "FlowModelSetup1Phase.h"
@@ -24,5 +23,3 @@ protected:
   virtual void addMaterials() override;
   virtual void addUserObjects() override;
 };
-
-#endif /* JACOBIANTEST1PHASEACTION_H */

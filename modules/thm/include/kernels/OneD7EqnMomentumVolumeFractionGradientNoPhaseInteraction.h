@@ -1,5 +1,4 @@
-#ifndef ONED7EQNMOMENTUMVOLUMEFRACTIONGRADIENTNOPHASEINTERACTION_H
-#define ONED7EQNMOMENTUMVOLUMEFRACTIONGRADIENTNOPHASEINTERACTION_H
+#pragma once
 
 #include "Kernel.h"
 #include "DerivativeMaterialInterfaceTHM.h"
@@ -43,5 +42,3 @@ protected:
   const unsigned int _arhoA_var_number;
   const unsigned int _arhoEA_var_number;
 };
-
-#endif /* ONED7EQNMOMENTUMVOLUMEFRACTIONGRADIENTNOPHASEINTERACTION_H */

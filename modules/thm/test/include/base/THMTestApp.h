@@ -1,5 +1,4 @@
-#ifndef THMTESTAPP_H
-#define THMTESTAPP_H
+#pragma once
 
 #include "THMApp.h"
 
@@ -17,5 +16,3 @@ public:
   static void registerApps();
   static void registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs = false);
 };
-
-#endif /* THMTESTAPP_H */

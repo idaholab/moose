@@ -1,5 +1,4 @@
-#ifndef THMADDVARIABLESACTION_H
-#define THMADDVARIABLESACTION_H
+#pragma once
 
 #include "THMAction.h"
 
@@ -15,5 +14,3 @@ public:
 
   virtual void act();
 };
-
-#endif /* THMADDVARIABLESACTION_H */

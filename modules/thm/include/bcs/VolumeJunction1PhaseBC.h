@@ -1,5 +1,4 @@
-#ifndef VOLUMEJUNCTION1PHASEBC_H
-#define VOLUMEJUNCTION1PHASEBC_H
+#pragma once
 
 #include "OneDIntegratedBC.h"
 
@@ -70,5 +69,3 @@ protected:
   /// Index within local system of the equation upon which this object acts
   const unsigned int _equation_index;
 };
-
-#endif

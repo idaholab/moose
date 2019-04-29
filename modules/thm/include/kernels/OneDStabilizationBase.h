@@ -1,5 +1,4 @@
-#ifndef ONEDSTABILIZATIONBASE_H
-#define ONEDSTABILIZATIONBASE_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -85,5 +84,3 @@ protected:
   /// The direction of the flow channel
   const MaterialProperty<RealVectorValue> & _dir;
 };
-
-#endif //  ONEDSTABILIZATIONBASE_H

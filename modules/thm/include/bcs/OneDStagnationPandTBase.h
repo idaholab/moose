@@ -1,5 +1,4 @@
-#ifndef ONEDSTAGNATIONPANDTBASE_H
-#define ONEDSTAGNATIONPANDTBASE_H
+#pragma once
 
 #include "Function.h"
 
@@ -64,5 +63,3 @@ public:
 protected:
   const SinglePhaseFluidProperties & _fp;
 };
-
-#endif // ONEDSTAGNATIONPANDTBASE

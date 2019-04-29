@@ -1,5 +1,4 @@
-#ifndef FLOWMODELSINGLEPHASE_H
-#define FLOWMODELSINGLEPHASE_H
+#pragma once
 
 #include "FlowModel.h"
 
@@ -61,5 +60,3 @@ public:
   static const std::string TOTAL_ENERGY_DENSITY;
   static const std::string VELOCITY;
 };
-
-#endif /* FLOWMODELSINGLEPHASE_H */

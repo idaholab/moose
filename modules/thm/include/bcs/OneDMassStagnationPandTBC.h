@@ -1,5 +1,4 @@
-#ifndef ONEDMASSSTAGNATIONPANDTBC_H
-#define ONEDMASSSTAGNATIONPANDTBC_H
+#pragma once
 
 #include "OneDNodalBC.h"
 #include "OneDStagnationPandTBase.h"
@@ -47,5 +46,3 @@ protected:
 
   const VolumeFractionMapper * _vfm;
 };
-
-#endif // ONEDMASSSTAGNATIONPANDTBC_H

@@ -1,5 +1,4 @@
-#ifndef BOUNDARYFLUX3EQNGHOSTWALL_H
-#define BOUNDARYFLUX3EQNGHOSTWALL_H
+#pragma once
 
 #include "BoundaryFlux3EqnGhostBase.h"
 
@@ -21,5 +20,3 @@ protected:
   virtual DenseMatrix<Real>
   getGhostCellSolutionJacobian(const std::vector<Real> & U1) const override;
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef NODALENERGYFLUXPOSTPROCESSOR_H
-#define NODALENERGYFLUXPOSTPROCESSOR_H
+#pragma once
 
 #include "NodalPostprocessor.h"
 
@@ -26,5 +25,3 @@ protected:
   const VariableValue & _arhouA;
   const VariableValue & _H;
 };
-
-#endif /* NODALENERGYFLUXPOSTPROCESSOR_H */

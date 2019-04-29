@@ -1,5 +1,4 @@
-#ifndef FLOWCHANNELBASE_H
-#define FLOWCHANNELBASE_H
+#pragma once
 
 #include "GeometricalFlowComponent.h"
 
@@ -214,5 +213,3 @@ namespace THM
 template <>
 FlowChannelBase::EConvHeatTransGeom stringToEnum(const std::string & s);
 }
-
-#endif /* FLOWCHANNELBASE_H */

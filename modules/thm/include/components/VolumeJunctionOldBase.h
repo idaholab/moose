@@ -1,5 +1,4 @@
-#ifndef VOLUMEJUNCTIONOLDBASE_H
-#define VOLUMEJUNCTIONOLDBASE_H
+#pragma once
 
 #include "JunctionWithLossesBase.h"
 
@@ -38,5 +37,3 @@ protected:
   /// Height difference between junction center and connecting nodes
   std::vector<Real> _deltaH;
 };
-
-#endif /* VOLUMEJUNCTIONOLDBASE_H_ */

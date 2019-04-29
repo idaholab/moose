@@ -1,5 +1,4 @@
-#ifndef JUNCTIONWITHLOSSESBASE_H
-#define JUNCTIONWITHLOSSESBASE_H
+#pragma once
 
 #include "FlowJunction.h"
 
@@ -24,5 +23,3 @@ protected:
   /// A reference area for this junction to calculate its reference velocity (User input)
   const Real & _ref_area;
 };
-
-#endif /* JUNCTIONWITHLOSSESBASE_H */

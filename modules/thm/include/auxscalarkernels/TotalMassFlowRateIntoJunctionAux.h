@@ -1,5 +1,4 @@
-#ifndef TOTALMASSFLOWRATEINTOJUNCTIONAUX_H
-#define TOTALMASSFLOWRATEINTOJUNCTIONAUX_H
+#pragma once
 
 #include "AuxNodalScalarKernel.h"
 
@@ -23,5 +22,3 @@ protected:
   /// Component of outward normals along 1-D direction at nodes
   const std::vector<Real> & _normals;
 };
-
-#endif /* TOTALMASSFLOWRATEINTOJUNCTIONAUX_H */

@@ -1,5 +1,4 @@
-#ifndef ONEDHEATFORCINGFUNCTIONRZ_H
-#define ONEDHEATFORCINGFUNCTIONRZ_H
+#pragma once
 
 #include "OneDHeatForcingFunction.h"
 #include "RZSymmetry.h"
@@ -21,5 +20,3 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 };
-
-#endif /* ONEDHEATFORCINGFUNCTIONRZ_H */

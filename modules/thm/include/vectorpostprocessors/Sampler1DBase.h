@@ -1,5 +1,4 @@
-#ifndef SAMPLER1DBASE_H
-#define SAMPLER1DBASE_H
+#pragma once
 
 // MOOSE includes
 #include "GeneralVectorPostprocessor.h"
@@ -158,5 +157,3 @@ Sampler1DBase<T>::finalize()
 {
   SamplerBase::finalize();
 }
-
-#endif

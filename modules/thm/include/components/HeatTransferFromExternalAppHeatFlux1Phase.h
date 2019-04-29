@@ -1,5 +1,4 @@
-#ifndef HEATTRANSFERFROMEXTERNALAPPHEATFLUX1PHASE_H
-#define HEATTRANSFERFROMEXTERNALAPPHEATFLUX1PHASE_H
+#pragma once
 
 #include "HeatTransfer1PhaseBase.h"
 
@@ -22,5 +21,3 @@ public:
 
   virtual bool isTemperatureType() const override;
 };
-
-#endif /* HEATTRANSFERFROMHEATFLUX1PHASE_H */

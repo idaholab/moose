@@ -1,5 +1,4 @@
-#ifndef ENTROPYVISCOSITYCOEFFICIENTS7EQNMATERIAL_H
-#define ENTROPYVISCOSITYCOEFFICIENTS7EQNMATERIAL_H
+#pragma once
 
 #include "Material.h"
 
@@ -87,5 +86,3 @@ protected:
   /// The direction of the flow channel
   const MaterialProperty<RealVectorValue> & _dir;
 };
-
-#endif /* ENTROPYVISCOSITYCOEFFICIENTS7EQNMATERIAL_H */

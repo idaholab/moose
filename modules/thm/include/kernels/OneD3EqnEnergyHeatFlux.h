@@ -1,5 +1,4 @@
-#ifndef ONED3EQNENERGYHEATFLUX_H
-#define ONED3EQNENERGYHEATFLUX_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -47,5 +46,3 @@ protected:
   /// Map of coupled variable index to local equation system index
   const std::map<unsigned int, unsigned int> _jvar_map;
 };
-
-#endif // ONED3EQNENERGYHEATFLUX_H

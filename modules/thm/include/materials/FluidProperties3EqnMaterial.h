@@ -1,5 +1,4 @@
-#ifndef FLUIDPROPERTIESVUMATERIAL_H
-#define FLUIDPROPERTIESVUMATERIAL_H
+#pragma once
 
 #include "DerivativeMaterialInterfaceTHM.h"
 
@@ -87,5 +86,3 @@ protected:
   /// Fluid properties
   const SinglePhaseFluidProperties & _fp;
 };
-
-#endif /* FLUIDPROPERTIESVUMATERIAL_H */

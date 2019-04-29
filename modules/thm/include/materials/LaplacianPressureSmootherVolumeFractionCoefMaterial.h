@@ -1,5 +1,4 @@
-#ifndef LAPLACIANPRESSURESMOOTHERVOLUMEFRACTIONCOEFMATERIAL_H
-#define LAPLACIANPRESSURESMOOTHERVOLUMEFRACTIONCOEFMATERIAL_H
+#pragma once
 
 #include "Material.h"
 
@@ -34,5 +33,3 @@ protected:
   /// artificial dissipation coefficient \f$\mu\f$
   MaterialProperty<Real> & _coef;
 };
-
-#endif /* LAPLACIANPRESSURESMOOTHERVOLUMEFRACTIONCOEFMATERIAL_H */

@@ -1,5 +1,4 @@
-#ifndef ONEDAREATIMESCONSTANTBC_H
-#define ONEDAREATIMESCONSTANTBC_H
+#pragma once
 
 #include "OneDNodalBC.h"
 
@@ -22,5 +21,3 @@ protected:
   const Real & _value;
   const VariableValue & _area;
 };
-
-#endif /* ONEDAREATIMESCONSTANTBC_H */

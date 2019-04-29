@@ -1,5 +1,4 @@
-#ifndef CONVECTIONHEATTRANSFERBC_H
-#define CONVECTIONHEATTRANSFERBC_H
+#pragma once
 
 #include "IntegratedBC.h"
 
@@ -23,5 +22,3 @@ protected:
   /// Heat transfer coefficient with ambient
   const Real & _htc_ambient;
 };
-
-#endif // CONVECTIONHEATTRANSFERBC_H

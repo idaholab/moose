@@ -1,5 +1,4 @@
-#ifndef ONEDMOMENTUMSTATICPRESSURELEGACYBC_H
-#define ONEDMOMENTUMSTATICPRESSURELEGACYBC_H
+#pragma once
 
 #include "OneDIntegratedBC.h"
 #include "DerivativeMaterialInterfaceTHM.h"
@@ -39,5 +38,3 @@ protected:
   // Required parameters
   const Real & _p_in;
 };
-
-#endif // ONEDMOMENTUMSTATICPRESSURELEGACYBC_H

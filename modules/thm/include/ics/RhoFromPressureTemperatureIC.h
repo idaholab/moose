@@ -1,5 +1,4 @@
-#ifndef RHOFROMPRESSURETEMPERATUREIC_H
-#define RHOFROMPRESSURETEMPERATUREIC_H
+#pragma once
 
 #include "InitialCondition.h"
 
@@ -26,5 +25,3 @@ protected:
   /// The temperature
   const VariableValue & _T;
 };
-
-#endif // RHOFROMPRESSURETEMPERATUREIC_H

@@ -1,5 +1,4 @@
-#ifndef LAPIDUS_H
-#define LAPIDUS_H
+#pragma once
 
 #include "StabilizationSettings.h"
 
@@ -30,5 +29,3 @@ protected:
   /// User specified coefficient for vapor phase
   const Real & _cl_vapor;
 };
-
-#endif /* LAPIDUS_H */

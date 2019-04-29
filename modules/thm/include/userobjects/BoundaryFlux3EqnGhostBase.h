@@ -1,5 +1,4 @@
-#ifndef BOUNDARYFLUX3EQNGHOSTBASE_H
-#define BOUNDARYFLUX3EQNGHOSTBASE_H
+#pragma once
 
 #include "BoundaryFluxBase.h"
 #include "RDGFluxBase.h"
@@ -52,5 +51,3 @@ protected:
   /// Numerical flux user object
   const RDGFluxBase & _numerical_flux;
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef LINEARFLUIDPROPERTIESTEST_H
-#define LINEARFLUIDPROPERTIESTEST_H
+#pragma once
 
 #include "MooseObjectUnitTest.h"
 #include "LinearFluidProperties.h"
@@ -26,5 +25,3 @@ protected:
 
   const LinearFluidProperties * _fp;
 };
-
-#endif /* LINEARFLUIDPROPERTIESTEST_H */

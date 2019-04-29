@@ -1,5 +1,4 @@
-#ifndef COSINETRANSITIONFUNCTION_H
-#define COSINETRANSITIONFUNCTION_H
+#pragma once
 
 #include "Function.h"
 
@@ -42,5 +41,3 @@ protected:
   /// Amplitude of the cosine function
   const Real _amplitude;
 };
-
-#endif // COSINETRANSITIONFUNCTION_H

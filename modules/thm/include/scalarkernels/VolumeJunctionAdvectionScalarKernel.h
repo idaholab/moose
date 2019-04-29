@@ -1,5 +1,4 @@
-#ifndef VOLUMEJUNCTIONADVECTIONSCALARKERNEL_H
-#define VOLUMEJUNCTIONADVECTIONSCALARKERNEL_H
+#pragma once
 
 #include "ScalarKernel.h"
 #include "Assembly.h"
@@ -29,5 +28,3 @@ protected:
   /// Volume junction user object
   const VolumeJunctionBaseUserObject & _volume_junction_uo;
 };
-
-#endif

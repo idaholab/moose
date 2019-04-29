@@ -1,5 +1,4 @@
-#ifndef ONEDENERGYSTATICPRESSURELEGACYBC_H
-#define ONEDENERGYSTATICPRESSURELEGACYBC_H
+#pragma once
 
 #include "OneDIntegratedBC.h"
 #include "DerivativeMaterialInterfaceTHM.h"
@@ -43,5 +42,3 @@ protected:
   /// the desired input static pressure
   const Real & _p_in;
 };
-
-#endif // ONEDENERGYSTATICPRESSURELEGACYBC_H

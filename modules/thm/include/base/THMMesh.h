@@ -1,5 +1,4 @@
-#ifndef THMMESH_H
-#define THMMESH_H
+#pragma once
 
 #include "MooseMesh.h"
 
@@ -31,5 +30,3 @@ protected:
 public:
   static const BoundaryName INVALID_BOUNDARY_ID;
 };
-
-#endif /* THMMESH_H */

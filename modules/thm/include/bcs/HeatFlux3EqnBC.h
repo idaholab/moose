@@ -1,5 +1,4 @@
-#ifndef HEATFLUX3EQNBC_H
-#define HEATFLUX3EQNBC_H
+#pragma once
 
 #include "IntegratedBC.h"
 
@@ -56,5 +55,3 @@ protected:
   /// Map of coupled variable index to local equation system index
   const std::map<unsigned int, unsigned int> _jvar_map;
 };
-
-#endif // HEATFLUX3EQNBC_H

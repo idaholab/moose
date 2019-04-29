@@ -1,5 +1,4 @@
-#ifndef HEATTRANSFERFROMTEMPERATURE1PHASE_H
-#define HEATTRANSFERFROMTEMPERATURE1PHASE_H
+#pragma once
 
 #include "HeatTransfer1PhaseBase.h"
 
@@ -27,5 +26,3 @@ protected:
    */
   void addHeatTransferKernels();
 };
-
-#endif /* HEATTRANSFERFROMTEMPERATURE1PHASE_H */

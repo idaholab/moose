@@ -1,5 +1,4 @@
-#ifndef ONEDARTIFICIALDISSIPATION_H
-#define ONEDARTIFICIALDISSIPATION_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -28,5 +27,3 @@ protected:
   const VariableGradient & _grad_alpha;
   const MaterialProperty<Real> & _coef;
 };
-
-#endif /* ONEDARTIFICIALDISSIPATION_H */

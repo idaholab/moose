@@ -1,5 +1,4 @@
-#ifndef ADDCOMPONENTPHYSICSACTION_H
-#define ADDCOMPONENTPHYSICSACTION_H
+#pragma once
 
 #include "THMAction.h"
 
@@ -15,5 +14,3 @@ public:
 
   virtual void act();
 };
-
-#endif /* ADDCOMPONENTPHYSICSACTION_H */

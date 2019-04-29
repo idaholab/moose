@@ -1,5 +1,4 @@
-#ifndef DERIVATIVEMATERIALINTERFACETHM_H
-#define DERIVATIVEMATERIALINTERFACETHM_H
+#pragma once
 
 #include "DerivativeMaterialInterface.h"
 
@@ -123,5 +122,3 @@ DerivativeMaterialInterfaceTHM<T>::getMaterialPropertyDerivativeTHMPhase(
     return this->template getZeroMaterialProperty<U>(der_prop_name);
   }
 }
-
-#endif // DERIVATIVEMATERIALINTERFACETHM_H

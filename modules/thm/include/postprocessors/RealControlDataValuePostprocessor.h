@@ -1,5 +1,4 @@
-#ifndef REALCONTROLDATAVALUEPOSTPROCESSOR_H
-#define REALCONTROLDATAVALUEPOSTPROCESSOR_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 
@@ -28,5 +27,3 @@ protected:
   /// The value of the control data
   const Real & _control_data_value;
 };
-
-#endif /* REALCONTROLDATAVALUEPOSTPROCESSOR_H */

@@ -1,5 +1,4 @@
-#ifndef JACOBIANTEST1PHASERDGACTION_H
-#define JACOBIANTEST1PHASERDGACTION_H
+#pragma once
 
 #include "JacobianTestAction.h"
 #include "MooseEnum.h"
@@ -73,5 +72,3 @@ protected:
   /// fluid properties object name
   const UserObjectName _fp_name;
 };
-
-#endif /* JACOBIANTEST1PHASERDGACTION_H */

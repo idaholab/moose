@@ -1,5 +1,4 @@
-#ifndef MOMENTUMBALANCESCALARKERNEL_H
-#define MOMENTUMBALANCESCALARKERNEL_H
+#pragma once
 
 #include "JunctionScalarKernel.h"
 
@@ -31,5 +30,3 @@ protected:
 
   const Real & _ref_area;
 };
-
-#endif /* MOMENTUMBALANCESCALARKERNEL_H */

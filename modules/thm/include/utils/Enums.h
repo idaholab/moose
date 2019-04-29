@@ -1,5 +1,4 @@
-#ifndef ENUMS_H
-#define ENUMS_H
+#pragma once
 
 #include <algorithm>
 #include "MooseEnum.h"
@@ -68,5 +67,3 @@ THM::getMooseEnum(const std::string & default_key, const std::map<std::string, T
 
   return MooseEnum(keys_string, default_key, true);
 }
-
-#endif // ENUMS_H

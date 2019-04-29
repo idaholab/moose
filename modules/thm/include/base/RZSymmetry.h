@@ -1,5 +1,4 @@
-#ifndef RZSYMMETRY_H
-#define RZSYMMETRY_H
+#pragma once
 
 #include "InputParameters.h"
 
@@ -26,5 +25,3 @@ protected:
   /// The direction of the axis of symmetry
   const RealVectorValue & _axis_dir;
 };
-
-#endif // RZSYMMETRY_H

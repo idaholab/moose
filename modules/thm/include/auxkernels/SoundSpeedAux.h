@@ -1,5 +1,4 @@
-#ifndef SOUNDSPEEDAUX_H
-#define SOUNDSPEEDAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -25,5 +24,3 @@ protected:
 
   const SinglePhaseFluidProperties & _fp;
 };
-
-#endif /* SOUNDSPEEDAUX_H */

@@ -1,5 +1,4 @@
-#ifndef NODE1DFACE2DCONSTRAINT_H
-#define NODE1DFACE2DCONSTRAINT_H
+#pragma once
 
 #include "NodeFaceConstraint.h"
 
@@ -30,5 +29,3 @@ protected:
   DenseMatrix<Number> _Jnn;
   DenseMatrix<Number> _Jne;
 };
-
-#endif /* NODE1DFACE2DCONSTRAINT_H */

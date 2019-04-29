@@ -1,5 +1,4 @@
-#ifndef BOUNDARYFLUX3EQNGHOSTMASSFLOWRATETEMPERATURE_H
-#define BOUNDARYFLUX3EQNGHOSTMASSFLOWRATETEMPERATURE_H
+#pragma once
 
 #include "BoundaryFlux3EqnGhostBase.h"
 
@@ -32,5 +31,3 @@ protected:
   /// Fluid properties object
   const SinglePhaseFluidProperties & _fp;
 };
-
-#endif

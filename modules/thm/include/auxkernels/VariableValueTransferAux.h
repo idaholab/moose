@@ -1,5 +1,4 @@
-#ifndef VARIABLEVALUETRANSFERAUX_H
-#define VARIABLEVALUETRANSFERAUX_H
+#pragma once
 
 #include "NearestNodeValueAux.h"
 
@@ -28,5 +27,3 @@ protected:
 
   unsigned int _paired_variable;
 };
-
-#endif /* VARIABLEVALUETRANSFERAUX_H */

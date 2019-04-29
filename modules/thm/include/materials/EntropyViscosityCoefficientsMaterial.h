@@ -1,5 +1,4 @@
-#ifndef ENTROPYVISCOSITYCOEFFICIENTSMATERIAL_H
-#define ENTROPYVISCOSITYCOEFFICIENTSMATERIAL_H
+#pragma once
 
 #include "Material.h"
 #include "DerivativeMaterialInterfaceTHM.h"
@@ -74,5 +73,3 @@ protected:
   // EOS object
   const NormalizationParameter & _norm_param;
 };
-
-#endif /* ENTROPYVISCOSITYCOEFFICIENTSMATERIAL_H */

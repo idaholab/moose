@@ -1,5 +1,4 @@
-#ifndef TIMERAMPFUNCTION_H
-#define TIMERAMPFUNCTION_H
+#pragma once
 
 #include "Function.h"
 
@@ -36,5 +35,3 @@ protected:
   /// Ramp slope
   const Real _ramp_slope;
 };
-
-#endif // TIMERAMPFUNCTION_H

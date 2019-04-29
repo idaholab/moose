@@ -1,5 +1,4 @@
-#ifndef INPUTPARAMETERLOGIC_H
-#define INPUTPARAMETERLOGIC_H
+#pragma once
 
 #include "MooseObject.h"
 
@@ -76,5 +75,3 @@ getOneOrTwoPhaseParameters(const bool & is_two_phase,
                      "'. This value will not be used.");
   }
 }
-
-#endif // INPUTPARAMETERLOGIC_H

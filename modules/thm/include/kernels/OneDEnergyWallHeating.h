@@ -1,5 +1,4 @@
-#ifndef ONEDENERGYWALLHEATING_H
-#define ONEDENERGYWALLHEATING_H
+#pragma once
 
 #include "Kernel.h"
 #include "DerivativeMaterialInterfaceTHM.h"
@@ -34,5 +33,3 @@ protected:
   unsigned _rhoA_var_number;
   unsigned _rhouA_var_number;
 };
-
-#endif // ONEDENERGYWALLHEATING_H

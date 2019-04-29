@@ -1,5 +1,4 @@
-#ifndef MASSFREECONSTRAINT_H
-#define MASSFREECONSTRAINT_H
+#pragma once
 
 #include "NodalConstraint.h"
 
@@ -28,5 +27,3 @@ protected:
 
   unsigned int _rhouA_var_number;
 };
-
-#endif /* MASSFREECONSTRAINT_H */

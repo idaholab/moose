@@ -1,5 +1,4 @@
-#ifndef ONEDENERGYFLUX_H
-#define ONEDENERGYFLUX_H
+#pragma once
 
 #include "Kernel.h"
 #include "DerivativeMaterialInterfaceTHM.h"
@@ -55,5 +54,3 @@ protected:
   const unsigned int _arhoA_var_number;
   const unsigned int _arhouA_var_number;
 };
-
-#endif /* ONEDENERGYFLUX_H */

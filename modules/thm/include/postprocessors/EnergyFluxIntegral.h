@@ -1,5 +1,4 @@
-#ifndef ENERGYFLUXINTEGRAL_H
-#define ENERGYFLUXINTEGRAL_H
+#pragma once
 
 #include "SideIntegralPostprocessor.h"
 
@@ -31,5 +30,3 @@ protected:
   const VariableValue & _arhouA;
   const VariableValue & _enthalpy;
 };
-
-#endif // ENERGYFLUXINTEGRAL_H

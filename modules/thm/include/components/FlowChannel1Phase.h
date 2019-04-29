@@ -1,5 +1,4 @@
-#ifndef FLOWCHANNEL1PHASE_H
-#define FLOWCHANNEL1PHASE_H
+#pragma once
 
 #include "FlowChannelBase.h"
 
@@ -40,5 +39,3 @@ protected:
   /// 1-phase wall heat transfer coefficient names for connected heat transfers
   std::vector<MaterialPropertyName> _Hw_1phase_names;
 };
-
-#endif /* FLOWCHANNEL1PHASE_H */

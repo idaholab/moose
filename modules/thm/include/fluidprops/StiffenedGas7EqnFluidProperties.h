@@ -1,5 +1,4 @@
-#ifndef STIFFENEDGAS7EQNFLUIDPROPERTIES_H
-#define STIFFENEDGAS7EQNFLUIDPROPERTIES_H
+#pragma once
 
 #include "TwoPhaseFluidProperties.h"
 #include "LinearInterpolation.h"
@@ -83,5 +82,3 @@ protected:
   // Critical pressure
   static const Real _P_critical;
 };
-
-#endif /* STIFFENEDGAS7EQNFLUIDPROPERTIES_H */

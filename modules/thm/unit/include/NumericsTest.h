@@ -1,5 +1,4 @@
-#ifndef NUMERICSTEST_H
-#define NUMERICSTEST_H
+#pragma once
 
 #include "MooseObjectUnitTest.h"
 
@@ -11,5 +10,3 @@ class NumericsTest : public MooseObjectUnitTest
 public:
   NumericsTest() : MooseObjectUnitTest("THMTestApp") {}
 };
-
-#endif /* NUMERICSTEST_H */

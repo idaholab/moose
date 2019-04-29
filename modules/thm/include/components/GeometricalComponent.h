@@ -1,5 +1,4 @@
-#ifndef GEOMETRICALCOMPONENT_H
-#define GEOMETRICALCOMPONENT_H
+#pragma once
 
 #include "Component.h"
 
@@ -163,5 +162,3 @@ private:
                                unsigned int start_node,
                                std::vector<Real> & local_node_locations);
 };
-
-#endif /* GEOMETRICALCOMPONENT_H */

@@ -1,5 +1,4 @@
-#ifndef TEMPERATUREWALL3EQNMATERIAL_H
-#define TEMPERATUREWALL3EQNMATERIAL_H
+#pragma once
 
 #include "Material.h"
 
@@ -28,5 +27,3 @@ protected:
   /// Fluid temperature
   const MaterialProperty<Real> & _T;
 };
-
-#endif /* TEMPERATUREWALL3EQNMATERIAL_H */

@@ -1,5 +1,4 @@
-#ifndef SUPERSONICINLET_H
-#define SUPERSONICINLET_H
+#pragma once
 
 #include "FlowBoundary.h"
 
@@ -21,5 +20,3 @@ public:
 protected:
   virtual void check() const override;
 };
-
-#endif /* SUPERSONICINLET_H */

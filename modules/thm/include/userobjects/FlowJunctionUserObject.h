@@ -1,5 +1,4 @@
-#ifndef FLOWJUNCTIONUSEROBJECT_H
-#define FLOWJUNCTIONUSEROBJECT_H
+#pragma once
 
 #include "SideUserObject.h"
 
@@ -54,5 +53,3 @@ protected:
   /// Number of connected flow channels
   const unsigned int _n_connections;
 };
-
-#endif /* FLOWJUNCTIONUSEROBJECT_H */

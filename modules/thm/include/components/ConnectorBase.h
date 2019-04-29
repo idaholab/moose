@@ -1,5 +1,4 @@
-#ifndef CONNECTORBASE_H
-#define CONNECTORBASE_H
+#pragma once
 
 #include "Component.h"
 
@@ -17,5 +16,3 @@ class ConnectorBase : public Component
 public:
   ConnectorBase(const InputParameters & params);
 };
-
-#endif /* CONNECTORBASE_H */

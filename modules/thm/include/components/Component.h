@@ -1,5 +1,4 @@
-#ifndef COMPONENT_H
-#define COMPONENT_H
+#pragma once
 
 #include "THMObject.h"
 #include "FlowModel.h"
@@ -669,5 +668,3 @@ Component::checkSizeEqualsParameterValue(const std::string & param1,
              value2,
              ")");
 }
-
-#endif /* COMPONENT_H */

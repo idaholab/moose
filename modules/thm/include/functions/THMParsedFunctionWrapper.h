@@ -1,5 +1,4 @@
-#ifndef THMPARSEDFUNCTIONWRAPPER_H
-#define THMPARSEDFUNCTIONWRAPPER_H
+#pragma once
 
 #include "MooseError.h"
 #include "MooseTypes.h"
@@ -123,5 +122,3 @@ private:
    */
   void updateControlDataValues();
 };
-
-#endif // THMPARSEDFUNCTIONWRAPPER_H

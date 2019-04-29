@@ -1,5 +1,4 @@
-#ifndef HEATFLUXFROMHEATSTRUCTURE3EQNUSEROBJECT_H
-#define HEATFLUXFROMHEATSTRUCTURE3EQNUSEROBJECT_H
+#pragma once
 
 #include "HeatFluxFromHeatStructureBaseUserObject.h"
 #include "DerivativeMaterialInterfaceTHM.h"
@@ -40,5 +39,3 @@ protected:
 
   std::map<dof_id_type, std::vector<std::vector<dof_id_type>>> _dofs;
 };
-
-#endif // HEATFLUXFROMHEATSTRUCTURE3EQNUSEROBJECT_H

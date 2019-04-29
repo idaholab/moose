@@ -1,5 +1,4 @@
-#ifndef HEATGENERATION_H
-#define HEATGENERATION_H
+#pragma once
 
 #include "Component.h"
 
@@ -37,5 +36,3 @@ protected:
   /// The name of the power density variable (typically an aux variable)
   const std::string _power_density_name;
 };
-
-#endif /* HEATGENERATION_H */

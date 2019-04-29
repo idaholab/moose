@@ -1,5 +1,4 @@
-#ifndef VOLUMEJUNCTIONOLD_H
-#define VOLUMEJUNCTIONOLD_H
+#pragma once
 
 #include "VolumeJunctionOldBase.h"
 
@@ -36,5 +35,3 @@ protected:
   const std::string _energy_var_name;
   const std::string _total_mfr_in_var_name;
 };
-
-#endif /* VOLUMEJUNCTION_H */

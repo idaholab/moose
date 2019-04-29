@@ -1,5 +1,4 @@
-#ifndef TIMERAMPFUNCTIONTEST_H
-#define TIMERAMPFUNCTIONTEST_H
+#pragma once
 
 #include "MooseObjectUnitTest.h"
 
@@ -40,5 +39,3 @@ protected:
   const Real _initial_time;
   const FunctionName _fn_name;
 };
-
-#endif /* TIMERAMPFUNCTIONTEST_H */

@@ -1,5 +1,4 @@
-#ifndef JUNCTIONSCALARKERNEL_H
-#define JUNCTIONSCALARKERNEL_H
+#pragma once
 
 #include "NodalScalarKernel.h"
 
@@ -19,5 +18,3 @@ public:
 protected:
   std::vector<Real> _normals;
 };
-
-#endif /* JUNCTIONSCALARKERNEL_H */
