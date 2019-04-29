@@ -50,22 +50,22 @@ public:
    */
   struct Location
   {
-    Location(const unsigned int & s, const unsigned int & r) : _sample(s), _row(r) {}
+    Location(const dof_id_type & s, const dof_id_type & r) : _sample(s), _row(r) {}
 
     ///@{
     /**
      * Accessors for the sample and row numbers.
      */
-    unsigned int sample() const { return _sample; }
-    unsigned int row() const { return _row; }
+    dof_id_type sample() const { return _sample; }
+    dof_id_type row() const { return _row; }
     ///@}
 
   private:
     /// Sample number (i.e., the index in the matrix)
-    const unsigned int _sample;
+    const dof_id_type _sample;
 
     /// Row number for the given sample matrix
-    const unsigned int _row;
+    const dof_id_type _row;
   };
 
   /**
@@ -114,13 +114,28 @@ public:
    * SamplerFullSolveMultiApp the global_index is the MultiApp global index.
    * @return The location which includes the DenseMatrix index and the row within that matrix.
    */
-  Sampler::Location getLocation(unsigned int global_index);
+  Sampler::Location getLocation(dof_id_type global_index);
 
   /**
    * Return the number of samples.
    * @return The total number of rows that exist in all DenseMatrix values from getSamples()
    */
-  unsigned int getTotalNumberOfRows();
+  dof_id_type getTotalNumberOfRows();
+
+  /**
+   * Return the number of rows local to this processor.
+   */
+  dof_id_type getLocalNumerOfRows();
+
+  /**
+   * Return the beginning local row index for this processor
+   */
+  dof_id_type getLocalRowBegin();
+
+  /**
+   * Return the ending local row index for this processor
+   */
+  dof_id_type getLocalRowEnd();
 
 protected:
   /**
@@ -173,10 +188,18 @@ private:
   /// Initial random number seed
   const unsigned int & _seed;
 
-  /// Data offsets for computing location based on global index
+  /// Data offsets for computing location based on global row index
   std::vector<unsigned int> _offsets;
 
   /// Total number of rows
-  unsigned int _total_rows;
-};
+  dof_id_type _total_rows;
 
+  /// Number of global rows for this processor
+  dof_id_type _local_rows;
+
+  /// Global row index for start of data for this processor
+  dof_id_type _local_row_begin;
+
+  /// Global row index for end of data for this processor
+  dof_id_type _local_row_end;
+};

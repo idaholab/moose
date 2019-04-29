@@ -11,6 +11,7 @@
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
+#include "StochasticToolsTypes.h"
 
 template <>
 InputParameters
@@ -30,10 +31,13 @@ StochasticToolsApp::StochasticToolsApp(InputParameters parameters) : MooseApp(pa
 StochasticToolsApp::~StochasticToolsApp() {}
 
 void
-StochasticToolsApp::registerAll(Factory & f, ActionFactory & af, Syntax & /*s*/)
+StochasticToolsApp::registerAll(Factory & factory, ActionFactory & af, Syntax & /*s*/)
 {
-  Registry::registerObjectsTo(f, {"StochasticToolsApp"});
+  Registry::registerObjectsTo(factory, {"StochasticToolsApp"});
   Registry::registerActionsTo(af, {"StochasticToolsApp"});
+  registerExecFlag(StochasticTools::EXEC_PRE_BATCH_MULTIAPP);
+  registerExecFlag(StochasticTools::EXEC_BATCH_MULTIAPP);
+  registerExecFlag(StochasticTools::EXEC_POST_BATCH_MULTIAPP);
 }
 
 void

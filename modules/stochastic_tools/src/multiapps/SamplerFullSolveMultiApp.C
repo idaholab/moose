@@ -10,6 +10,9 @@
 // StochasticTools includes
 #include "SamplerFullSolveMultiApp.h"
 #include "Sampler.h"
+#include "StochasticToolsTypes.h"
+
+#include <unistd.h>
 
 registerMooseObject("StochasticToolsApp", SamplerFullSolveMultiApp);
 
@@ -29,13 +32,70 @@ validParams<SamplerFullSolveMultiApp>()
   params.suppressParameter<std::vector<Point>>("move_positions");
   params.suppressParameter<std::vector<unsigned int>>("move_apps");
   params.set<bool>("use_positions") = false;
+
+  MooseEnum modes("normal=0 batch=1", "normal");
+  params.addParam<MooseEnum>("mode", modes, "The operation mode, 'normal' creates one sub-application for each row in the Sampler and 'batch' creates on sub-application for each processor and re-executes for each row.");
+
   return params;
 }
 
 SamplerFullSolveMultiApp::SamplerFullSolveMultiApp(const InputParameters & parameters)
   : FullSolveMultiApp(parameters),
     SamplerInterface(this),
-    _sampler(SamplerInterface::getSampler("sampler"))
+    _sampler(SamplerInterface::getSampler("sampler")),
+    _mode(getParam<MooseEnum>("mode"))
 {
-  init(_sampler.getTotalNumberOfRows());
+  if (_mode == "batch")
+    init(n_processors());
+  else
+    init(_sampler.getTotalNumberOfRows());
+}
+
+bool
+SamplerFullSolveMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
+{
+  bool last_solve_converged = true;
+  if (_mode == "batch")
+    last_solve_converged = solveStepBatch(dt, target_time, auto_advance);
+  else
+      last_solve_converged = FullSolveMultiApp::solveStep(dt, target_time, auto_advance);
+  return last_solve_converged;
+}
+
+bool
+SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_advance)
+{
+  const ExecFlagType & current = _fe_problem.getCurrentExecuteOnFlag();
+  bool last_solve_converged = true;
+
+  _fe_problem.setCurrentExecuteOnFlag(StochasticTools::EXEC_PRE_BATCH_MULTIAPP);
+  _fe_problem.execMultiAppTransfers(StochasticTools::EXEC_PRE_BATCH_MULTIAPP, MultiAppTransfer::TO_MULTIAPP);
+  _fe_problem.execMultiAppTransfers(StochasticTools::EXEC_PRE_BATCH_MULTIAPP, MultiAppTransfer::FROM_MULTIAPP);
+  _fe_problem.setCurrentExecuteOnFlag(current);
+
+  dof_id_type num_items = _sampler.getLocalNumerOfRows();
+  for (MooseIndex(num_items) i = 0; i < num_items; ++i)
+  {
+    _fe_problem.setCurrentExecuteOnFlag(StochasticTools::EXEC_BATCH_MULTIAPP);
+    _fe_problem.execMultiAppTransfers(StochasticTools::EXEC_BATCH_MULTIAPP, MultiAppTransfer::TO_MULTIAPP);
+
+    last_solve_converged = FullSolveMultiApp::solveStep(dt, target_time, auto_advance);
+
+    _fe_problem.execMultiAppTransfers(StochasticTools::EXEC_BATCH_MULTIAPP, MultiAppTransfer::FROM_MULTIAPP);
+    _fe_problem.setCurrentExecuteOnFlag(current);
+
+    if (i != num_items-1)
+    {
+      for (std::size_t app = 0; app < _total_num_apps; app++)
+        resetApp(app, target_time);
+      initialSetup();
+    }
+  }
+
+  _fe_problem.setCurrentExecuteOnFlag(StochasticTools::EXEC_POST_BATCH_MULTIAPP);
+  _fe_problem.execMultiAppTransfers(StochasticTools::EXEC_POST_BATCH_MULTIAPP, MultiAppTransfer::TO_MULTIAPP);
+  _fe_problem.execMultiAppTransfers(StochasticTools::EXEC_POST_BATCH_MULTIAPP, MultiAppTransfer::FROM_MULTIAPP);
+  _fe_problem.setCurrentExecuteOnFlag(current);
+
+  return last_solve_converged;
 }

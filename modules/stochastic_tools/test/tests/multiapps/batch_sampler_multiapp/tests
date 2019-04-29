@@ -1,0 +1,39 @@
+[Tests]
+  [batch_exodus_1]
+    type = CheckFiles
+    input = master_full_solve.i
+    check_files = master_full_solve_out_runner0.e
+    check_not_exists = master_full_solve_out_runner1.e
+    max_parallel = 1
+  []
+  [batch_exodus_2]
+    type = CheckFiles
+    input = master_full_solve.i
+    check_files = 'master_full_solve_out_runner0.e master_full_solve_out_runner1.e'
+    check_not_exists = master_full_solve_out_runner2.e
+    max_parallel = 2
+    min_parallel = 2
+    prereq = batch_exodus_1
+  []
+  [normal]
+    type = CSVDiff
+    input = master_full_solve.i
+    csvdiff = master_full_solve_out_storage_0002.csv
+    prereq = batch_exodus_2
+    cli_args = MultiApps/runner/mode=normal
+  []
+  [batch_csv_1]
+    type = CSVDiff
+    input = master_full_solve.i
+    csvdiff = master_full_solve_out_storage_0002.csv
+    prereq = normal
+  []
+  [batch_csv_2]
+    type = CSVDiff
+    input = master_full_solve.i
+    csvdiff = master_full_solve_out_storage_0002.csv
+    max_parallel = 2
+    min_parallel = 2
+    prereq = batch_csv_1
+  []
+[]

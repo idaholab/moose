@@ -41,6 +41,7 @@ Sampler::Sampler(const InputParameters & parameters)
     _distribution_names(getParam<std::vector<DistributionName>>("distributions")),
     _seed(getParam<unsigned int>("seed")),
     _total_rows(0)
+    //_parallel_offsets(n_processors())
 {
   for (const DistributionName & name : _distribution_names)
     _distributions.push_back(&getDistributionByName(name));
@@ -70,6 +71,9 @@ Sampler::reinit(const std::vector<DenseMatrix<Real>> & data)
     _total_rows += mat.m();
     _offsets.push_back(_total_rows);
   }
+
+  // Update parallel information
+  MooseUtils::linearPartitionItems(_total_rows, n_processors(), processor_id(), _local_rows, _local_row_begin, _local_row_end);
 }
 
 std::vector<DenseMatrix<Real>>
@@ -143,16 +147,49 @@ Sampler::getLocation(unsigned int global_index)
   // The lower_bound method returns the first value "which does not compare less than" the value and
   // upper_bound performs "which compares greater than." The upper_bound -1 method is used here
   // because lower_bound will provide the wrong index, but the method here will provide the correct
-  // index, set the Sampler.GetLocation test in moose/unit/src/Sampler.C for an example.
+  // index, see the Sampler.GetLocation test in moose/unit/src/Sampler.C for an example.
   std::vector<unsigned int>::iterator iter =
       std::upper_bound(_offsets.begin(), _offsets.end(), global_index) - 1;
   return Sampler::Location(std::distance(_offsets.begin(), iter), global_index - *iter);
 }
 
-unsigned int
+dof_id_type
 Sampler::getTotalNumberOfRows()
 {
   if (_total_rows == 0)
     reinit(getSamples());
   return _total_rows;
+}
+
+/**
+ * Return the number of rows local to this processor.
+ */
+dof_id_type
+Sampler::getLocalNumerOfRows()
+{
+  if (_total_rows == 0)
+    reinit(getSamples());
+  return _local_rows;
+}
+
+/**
+ * Return the beginning local row index for this processor
+ */
+dof_id_type
+Sampler::getLocalRowBegin()
+{
+  if (_total_rows == 0)
+    reinit(getSamples());
+  return _local_row_begin;
+}
+
+/**
+ * Return the ending local row index for this processor
+ */
+dof_id_type
+Sampler::getLocalRowEnd()
+{
+  if (_total_rows == 0)
+    reinit(getSamples());
+  return _local_row_end;
 }

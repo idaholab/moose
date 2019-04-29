@@ -39,5 +39,18 @@ protected:
 
   /// Storage for StochasticResults object that data will be transferred to/from
   StochasticResults * _results;
-};
 
+  /// Local values of compute PP values
+  std::vector<PostprocessorValue> _local_values;
+
+  /// SamplerFullSolveMultiapp batch mode flag
+  bool _batch_mode = false;
+
+private:
+
+  ///@{
+  /** Helper methods for performing transfer in various modes, see SamplerFullSolveMultiApp */
+  void executeFromMultiappBatch();
+  void executeFromMultiappNormal();
+  ///@}
+};

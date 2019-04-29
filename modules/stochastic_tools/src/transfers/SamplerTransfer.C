@@ -30,7 +30,7 @@ validParams<SamplerTransfer>()
       "here should match the order of the items in the Sampler.");
   params.addRequiredParam<std::string>("to_control",
                                        "The name of the 'SamplerReceiver' on the sub application "
-                                       "to which the Sampler data will be transfered.");
+                                       "to which the Sampler data will be transferred.");
   return params;
 }
 

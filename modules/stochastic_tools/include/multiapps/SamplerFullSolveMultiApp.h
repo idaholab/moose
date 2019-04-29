@@ -29,8 +29,16 @@ public:
    */
   Sampler & getSampler() const { return _sampler; }
 
+  virtual bool solveStep(Real dt, Real target_time, bool auto_advance = true) override;
+
 protected:
   /// Sampler to utilize for creating MultiApps
   Sampler & _sampler;
-};
 
+  /// The Sup-application solve mode
+  const MooseEnum & _mode;
+
+private:
+  /**Helper method for running in mode='batch'*/
+  bool solveStepBatch(Real dt, Real target_time, bool auto_advance = true);
+};

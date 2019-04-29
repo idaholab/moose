@@ -3461,7 +3461,7 @@ FEProblemBase::execMultiAppTransfers(ExecFlagType type, MultiAppTransfer::DIRECT
     for (const auto & transfer : transfers)
       transfer->execute();
 
-    MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);
+    //MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);
 
     _console << COLOR_CYAN << "Transfers on " << Moose::stringify(type) << " Are Finished\n"
              << COLOR_DEFAULT << std::endl;
@@ -3699,6 +3699,9 @@ FEProblemBase::addTransfer(const std::string & transfer_name,
   }
   else
     _transfers.addObject(transfer);
+
+  std::cout << "ADDING: " << transfer->name() << " " << transfer->getParam<ExecFlagEnum>("execute_on") << std::endl;
+
 }
 
 bool
