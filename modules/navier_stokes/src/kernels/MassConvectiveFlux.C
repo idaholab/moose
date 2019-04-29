@@ -40,5 +40,6 @@ MassConvectiveFlux::computeQpResidual()
 Real
 MassConvectiveFlux::computeQpJacobian()
 {
-  return 0.;
+  RealVectorValue vel_vec(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]);
+  return -_phi[_j][_qp] * vel_vec * _grad_test[_i][_qp];
 }
