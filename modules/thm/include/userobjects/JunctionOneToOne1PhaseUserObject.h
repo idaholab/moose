@@ -1,5 +1,4 @@
-#ifndef JUNCTIONONETOONE1PHASEUSEROBJECT_H
-#define JUNCTIONONETOONE1PHASEUSEROBJECT_H
+#pragma once
 
 #include "FlowJunctionUserObject.h"
 
@@ -101,5 +100,3 @@ protected:
   /// Thread lock
   static Threads::spin_mutex _spin_mutex;
 };
-
-#endif

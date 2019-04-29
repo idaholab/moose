@@ -1,5 +1,4 @@
-#ifndef THMOBJECT_H
-#define THMOBJECT_H
+#pragma once
 
 #include "MooseObject.h"
 
@@ -59,5 +58,3 @@ THMObject::passParameter(const std::string & name, InputParameters & params) con
 {
   passParameter<T>(name, name, params);
 }
-
-#endif /* THMOBJECT_H */

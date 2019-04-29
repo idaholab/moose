@@ -1,5 +1,4 @@
-#ifndef NORMALIZATIONPARAMETER_H
-#define NORMALIZATIONPARAMETER_H
+#pragma once
 
 #include "GeneralUserObject.h"
 
@@ -49,5 +48,3 @@ protected:
   };
   MooseEnum _fnct_type;
 };
-
-#endif // NORMALIZATIONPARAMETER_H

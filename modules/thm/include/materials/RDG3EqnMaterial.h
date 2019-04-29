@@ -1,5 +1,4 @@
-#ifndef RDG3EQNMATERIAL_H
-#define RDG3EQNMATERIAL_H
+#pragma once
 
 #include "Material.h"
 #include "SlopeReconstruction1DInterface.h"
@@ -63,5 +62,3 @@ protected:
     TEMPERATURE = 2
   };
 };
-
-#endif

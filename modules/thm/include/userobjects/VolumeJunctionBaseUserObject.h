@@ -1,5 +1,4 @@
-#ifndef VOLUMEJUNCTIONBASEUSEROBJECT_H
-#define VOLUMEJUNCTIONBASEUSEROBJECT_H
+#pragma once
 
 #include "FlowJunctionUserObject.h"
 
@@ -139,5 +138,3 @@ protected:
   /// for each connection (first index) and each scalar variable (second index)
   std::vector<std::vector<DenseMatrix<Real>>> _residual_jacobian_flow_channel_vars;
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef RHOEFROMPRESSURETEMPERATUREVELOCITYIC_H
-#define RHOEFROMPRESSURETEMPERATUREVELOCITYIC_H
+#pragma once
 
 #include "InitialCondition.h"
 
@@ -31,5 +30,3 @@ protected:
   /// The velocity
   const VariableValue & _vel;
 };
-
-#endif // RHOEFROMPRESSURETEMPERATUREVELOCITYIC_H

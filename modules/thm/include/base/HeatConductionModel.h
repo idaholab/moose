@@ -1,5 +1,4 @@
-#ifndef HEATCONDUCTIONMODEL_H
-#define HEATCONDUCTIONMODEL_H
+#pragma once
 
 class Simulation;
 class THMApp;
@@ -74,5 +73,3 @@ protected:
 
   friend class GlobalSimParamAction;
 };
-
-#endif /* HEATCONDUCTIONMODEL_H */

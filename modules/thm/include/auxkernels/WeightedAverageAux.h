@@ -1,5 +1,4 @@
-#ifndef WEIGHTEDAVERAGEAUX_H
-#define WEIGHTEDAVERAGEAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -29,5 +28,3 @@ protected:
   std::vector<const VariableValue *> _values;
   std::vector<const VariableValue *> _weights;
 };
-
-#endif /* WEIGHTEDAVERAGEAUX_H */

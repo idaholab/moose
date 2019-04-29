@@ -1,5 +1,4 @@
-#ifndef GETFUNCTIONVALUECONTROL_H
-#define GETFUNCTIONVALUECONTROL_H
+#pragma once
 
 #include "THMControl.h"
 
@@ -25,5 +24,3 @@ protected:
   /// Function that is sampled
   Function & _function;
 };
-
-#endif // GETFUNCTIONVALUECONTROL_H

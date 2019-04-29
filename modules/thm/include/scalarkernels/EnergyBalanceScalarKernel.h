@@ -1,5 +1,4 @@
-#ifndef ENERGYBALANCESCALARKERNEL_H
-#define ENERGYBALANCESCALARKERNEL_H
+#pragma once
 
 #include "JunctionScalarKernel.h"
 
@@ -35,5 +34,3 @@ protected:
 
   const SinglePhaseFluidProperties & _fp;
 };
-
-#endif /* ENERGYBALANCESCALARKERNEL_H */

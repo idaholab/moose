@@ -1,5 +1,4 @@
-#ifndef ONEDMOMENTUMAREAGRADIENT_H
-#define ONEDMOMENTUMAREAGRADIENT_H
+#pragma once
 
 #include "Kernel.h"
 #include "DerivativeMaterialInterfaceTHM.h"
@@ -45,5 +44,3 @@ protected:
   unsigned int _arhoE_var_number;
   unsigned int _beta_var_number;
 };
-
-#endif /* ONEDMOMENTUMAREAGRADIENT_H */

@@ -1,5 +1,4 @@
-#ifndef CONTROLDATA_H
-#define CONTROLDATA_H
+#pragma once
 
 // C++ includes
 #include <vector>
@@ -109,5 +108,3 @@ ControlData<T>::type()
 {
   return typeid(T).name();
 }
-
-#endif

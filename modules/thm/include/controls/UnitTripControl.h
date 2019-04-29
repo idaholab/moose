@@ -1,5 +1,4 @@
-#ifndef UNITTRIPCONTROL_H
-#define UNITTRIPCONTROL_H
+#pragma once
 
 #include "THMControl.h"
 #include "MooseParsedFunctionBase.h"
@@ -34,5 +33,3 @@ protected:
   /// Pointer to the Parsed function wrapper object
   std::unique_ptr<THMParsedFunctionWrapper> _condition_ptr;
 };
-
-#endif // UNITTRIPCONTROL_H

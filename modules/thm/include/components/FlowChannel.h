@@ -1,5 +1,4 @@
-#ifndef FLOWCHANNEL_H
-#define FLOWCHANNEL_H
+#pragma once
 
 #include "FlowChannelBase.h"
 
@@ -20,5 +19,3 @@ protected:
   virtual std::shared_ptr<FlowModel> buildFlowModel() override;
   virtual void check() const override;
 };
-
-#endif /* FLOWCHANNEL_H */

@@ -1,5 +1,4 @@
-#ifndef COPYPOSTPROCESSORVALUECONTROL_H
-#define COPYPOSTPROCESSORVALUECONTROL_H
+#pragma once
 
 #include "THMControl.h"
 
@@ -22,5 +21,3 @@ protected:
   Real & _value;
   const Real & _pps_value;
 };
-
-#endif // COPYPOSTPROCESSORVALUECONTROL_H

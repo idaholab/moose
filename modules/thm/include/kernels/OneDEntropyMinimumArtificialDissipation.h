@@ -1,5 +1,4 @@
-#ifndef ONEDENTROPYMINIMUMARTIFICIALDISSIPATION_H
-#define ONEDENTROPYMINIMUMARTIFICIALDISSIPATION_H
+#pragma once
 
 #include "Kernel.h"
 #include "FlowModel.h"
@@ -69,5 +68,3 @@ protected:
   unsigned int _rhouA_var_num;
   unsigned int _rhoEA_var_num;
 };
-
-#endif /* ONEDENTROPYMINIMUMARTIFICIALDISSIPATION_H */

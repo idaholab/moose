@@ -1,5 +1,4 @@
-#ifndef SPECIFICINTERNALENERGYIC_H
-#define SPECIFICINTERNALENERGYIC_H
+#pragma once
 
 #include "InitialCondition.h"
 
@@ -23,5 +22,3 @@ protected:
   const VariableValue & _rhou;
   const VariableValue & _rhoE;
 };
-
-#endif /* SPECIFICINTERNALENERGYIC_H */

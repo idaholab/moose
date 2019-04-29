@@ -1,5 +1,4 @@
-#ifndef FANNINGFRICTIONFACTORMATERIAL_H
-#define FANNINGFRICTIONFACTORMATERIAL_H
+#pragma once
 
 #include "Material.h"
 
@@ -25,5 +24,3 @@ protected:
   /// Fanning friction factor
   MaterialProperty<Real> & _f_F;
 };
-
-#endif /* FANNINGFRICTIONFACTORMATERIAL_H */

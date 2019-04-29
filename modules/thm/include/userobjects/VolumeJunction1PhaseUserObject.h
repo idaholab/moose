@@ -1,5 +1,4 @@
-#ifndef VOLUMEJUNCTION1PHASEUSEROBJECT_H
-#define VOLUMEJUNCTION1PHASEUSEROBJECT_H
+#pragma once
 
 #include "VolumeJunctionBaseUserObject.h"
 
@@ -79,5 +78,3 @@ protected:
   /// Vector of numerical flux user objects for each connected flow channel
   std::vector<const RDGFluxBase *> _numerical_flux_uo;
 };
-
-#endif

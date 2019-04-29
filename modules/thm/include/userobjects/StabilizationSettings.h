@@ -1,5 +1,4 @@
-#ifndef STABILIZATIONSETTINGS_H
-#define STABILIZATIONSETTINGS_H
+#pragma once
 
 #include "GeneralUserObject.h"
 #include "FlowModel.h"
@@ -30,5 +29,3 @@ protected:
   /// The Factory associated with the MooseApp
   Factory & _m_factory;
 };
-
-#endif /* STABILIZATIONSETTINGS_H */

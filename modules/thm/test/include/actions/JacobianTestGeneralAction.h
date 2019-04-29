@@ -1,5 +1,4 @@
-#ifndef JACOBIANTESTGENERALACTION_H
-#define JACOBIANTESTGENERALACTION_H
+#pragma once
 
 #include "JacobianTestAction.h"
 
@@ -33,5 +32,3 @@ protected:
   /// List of values for the variables to add
   const std::vector<Real> _variable_values;
 };
-
-#endif /* JACOBIANTESTGENERALACTION_H */

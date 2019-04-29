@@ -1,5 +1,4 @@
-#ifndef LAPLACIANPRESSURESMOOTHERCOEFMATERIAL_H
-#define LAPLACIANPRESSURESMOOTHERCOEFMATERIAL_H
+#pragma once
 
 #include "Material.h"
 
@@ -46,5 +45,3 @@ protected:
 
   MaterialProperty<Real> & _coef;
 };
-
-#endif /* LAPLACIANPRESSURESMOOTHERCOEFMATERIAL_H */

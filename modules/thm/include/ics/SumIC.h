@@ -1,5 +1,4 @@
-#ifndef SUMIC_H
-#define SUMIC_H
+#pragma once
 
 #include "InitialCondition.h"
 
@@ -30,5 +29,3 @@ protected:
   /// vector of pointers to values to sum
   std::vector<const VariableValue *> _values;
 };
-
-#endif /* SUMIC_H */

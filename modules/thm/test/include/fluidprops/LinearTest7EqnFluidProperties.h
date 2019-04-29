@@ -1,5 +1,4 @@
-#ifndef LINEARTEST7EQNFLUIDPROPERTIES_H
-#define LINEARTEST7EQNFLUIDPROPERTIES_H
+#pragma once
 
 #include "TwoPhaseFluidProperties.h"
 
@@ -37,5 +36,3 @@ protected:
   /// Derivative of interfacial density w.r.t. interfacial temperature
   const Real _drho_int_dT_int;
 };
-
-#endif /* LINEARTEST7EQNFLUIDPROPERTIES_H */

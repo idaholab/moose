@@ -1,5 +1,4 @@
-#ifndef SETREALVALUECONTROL_H
-#define SETREALVALUECONTROL_H
+#pragma once
 
 #include "THMControl.h"
 
@@ -30,5 +29,3 @@ protected:
   /// The value that is written into the component
   const Real & _value;
 };
-
-#endif // SETREALVALUECONTROL_H

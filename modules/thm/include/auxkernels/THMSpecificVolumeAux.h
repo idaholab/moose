@@ -1,5 +1,4 @@
-#ifndef THMSPECIFICVOLUMEAUX_H
-#define THMSPECIFICVOLUMEAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -23,5 +22,3 @@ protected:
   const VariableValue & _area;
   const VariableValue & _alpha;
 };
-
-#endif /* THMSPECIFICVOLUMEAUX_H */

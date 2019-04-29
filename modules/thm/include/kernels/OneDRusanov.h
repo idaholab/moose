@@ -1,5 +1,4 @@
-#ifndef ONEDRUSANOV_H
-#define ONEDRUSANOV_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -26,5 +25,3 @@ protected:
   const VariableValue & _vel;
   const VariableGradient & _velocity_grad;
 };
-
-#endif /* ONEDRUSANOV_H */

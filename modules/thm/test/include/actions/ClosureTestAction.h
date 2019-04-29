@@ -1,5 +1,4 @@
-#ifndef CLOSURETESTACTION_H
-#define CLOSURETESTACTION_H
+#pragma once
 
 #include "TestAction.h"
 
@@ -34,5 +33,3 @@ protected:
   /// List of material properties to output
   const std::vector<std::string> & _output_properties;
 };
-
-#endif /* CLOSURETESTACTION_H */

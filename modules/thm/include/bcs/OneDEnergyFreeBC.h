@@ -1,5 +1,4 @@
-#ifndef ONEDENERGYFREEBC_H
-#define ONEDENERGYFREEBC_H
+#pragma once
 
 #include "OneDIntegratedBC.h"
 #include "DerivativeMaterialInterfaceTHM.h"
@@ -42,5 +41,3 @@ protected:
   const MaterialProperty<Real> * _dp_dbeta;
   const VariableValue & _alpha;
 };
-
-#endif // ONEDENERGYFREEBC_H

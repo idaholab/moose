@@ -1,5 +1,4 @@
-#ifndef ONEDENERGYHRHOUBC_H
-#define ONEDENERGYHRHOUBC_H
+#pragma once
 
 #include "OneDIntegratedBC.h"
 #include "DerivativeMaterialInterfaceTHM.h"
@@ -34,5 +33,3 @@ protected:
 
   unsigned int _beta_var_num;
 };
-
-#endif /* ONEDENERGYHRHOUBC_H */

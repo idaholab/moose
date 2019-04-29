@@ -1,5 +1,4 @@
-#ifndef ONEDENERGYMASSFLOWRATETEMPERATUREBC_H
-#define ONEDENERGYMASSFLOWRATETEMPERATUREBC_H
+#pragma once
 
 #include "OneDIntegratedBC.h"
 #include "DerivativeMaterialInterfaceTHM.h"
@@ -42,5 +41,3 @@ protected:
 
   const SinglePhaseFluidProperties & _fp;
 };
-
-#endif /* ONEDENERGYMASSFLOWRATETEMPERATUREBC_H */

@@ -1,5 +1,4 @@
-#ifndef ADDHEATSTRUCTUREMATERIALACTION_H
-#define ADDHEATSTRUCTUREMATERIALACTION_H
+#pragma once
 
 #include "AddUserObjectAction.h"
 
@@ -13,5 +12,3 @@ class AddHeatStructureMaterialAction : public AddUserObjectAction
 public:
   AddHeatStructureMaterialAction(InputParameters params);
 };
-
-#endif /* ADDHEATSTRUCTUREMATERIALACTION_H */

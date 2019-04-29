@@ -1,5 +1,4 @@
-#ifndef HEATSTRUCTURE_H
-#define HEATSTRUCTURE_H
+#pragma once
 
 #include "GeometricalComponent.h"
 #include "HeatConductionModel.h"
@@ -168,5 +167,3 @@ namespace THM
 template <>
 HeatStructure::EHeatStructureType stringToEnum(const std::string & s);
 }
-
-#endif /* HEATSTRUCTURE_H */

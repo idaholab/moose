@@ -1,5 +1,4 @@
-#ifndef FLOWMODEL_H
-#define FLOWMODEL_H
+#pragma once
 
 #include "MooseObject.h"
 #include "InputParameters.h"
@@ -186,5 +185,3 @@ FlowModel::EEquationType stringToEnum(const std::string & s);
 template <>
 FlowModel::ESpatialDiscretizationType stringToEnum(const std::string & s);
 }
-
-#endif /* FLOWMODEL_H */

@@ -1,5 +1,4 @@
-#ifndef CONSISTENCYTEST3EQNRDGFLUXHLLC_H
-#define CONSISTENCYTEST3EQNRDGFLUXHLLC_H
+#pragma once
 
 #include "ConsistencyTest3EqnRDGFluxBase.h"
 #include "NumericalFlux3EqnHLLC.h"
@@ -20,5 +19,3 @@ protected:
         &_fe_problem->getUserObject<NumericalFlux3EqnHLLC>(class_name));
   }
 };
-
-#endif /* CONSISTENCYTEST3EQNRDGFLUXHLLC_H */

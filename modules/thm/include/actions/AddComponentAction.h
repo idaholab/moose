@@ -1,5 +1,4 @@
-#ifndef ADDCOMPONENTACTION_H
-#define ADDCOMPONENTACTION_H
+#pragma once
 
 #include "THMObjectAction.h"
 
@@ -15,5 +14,3 @@ public:
 
   virtual void act();
 };
-
-#endif /* ADDCOMPONENTACTION_H */

@@ -1,5 +1,4 @@
-#ifndef CIRCULARAREAHYDRAULICDIAMETERFUNCTION_H
-#define CIRCULARAREAHYDRAULICDIAMETERFUNCTION_H
+#pragma once
 
 #include "Function.h"
 #include "FunctionInterface.h"
@@ -24,5 +23,3 @@ protected:
   /// Area function
   Function & _area_function;
 };
-
-#endif // CIRCULARAREAHYDRAULICDIAMETERFUNCTION_H

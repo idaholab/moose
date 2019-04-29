@@ -1,5 +1,4 @@
-#ifndef ONEDINTEGRATEDBC_H
-#define ONEDINTEGRATEDBC_H
+#pragma once
 
 #include "IntegratedBC.h"
 
@@ -20,5 +19,3 @@ protected:
   /// Component of outward normals along 1-D direction
   const Real _normal;
 };
-
-#endif /* ONEDINTEGRATEDBC_H */

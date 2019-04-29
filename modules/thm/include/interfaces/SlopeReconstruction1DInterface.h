@@ -1,5 +1,4 @@
-#ifndef SLOPERECONSTRUCTION1DINTERFACE_H
-#define SLOPERECONSTRUCTION1DINTERFACE_H
+#pragma once
 
 #include "MooseTypes.h"
 #include "InputParameters.h"
@@ -77,5 +76,3 @@ template <>
 SlopeReconstruction1DInterface::ESlopeReconstructionType
 stringToEnum<SlopeReconstruction1DInterface::ESlopeReconstructionType>(const std::string & s);
 }
-
-#endif

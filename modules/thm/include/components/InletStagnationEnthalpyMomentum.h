@@ -1,5 +1,4 @@
-#ifndef INLETSTAGNATIONENTHALPYMOMENTUM_H
-#define INLETSTAGNATIONENTHALPYMOMENTUM_H
+#pragma once
 
 #include "FlowBoundary.h"
 
@@ -28,5 +27,3 @@ protected:
   void setup2Phase();
   void setup2PhaseNCG();
 };
-
-#endif /* INLETSTAGNATIONENTHALPYMOMENTUM_H */

@@ -1,5 +1,4 @@
-#ifndef JUNCTIONSTAGNATIONENTHALPYUSEROBJECT_H
-#define JUNCTIONSTAGNATIONENTHALPYUSEROBJECT_H
+#pragma once
 
 #include "FlowJunctionUserObject.h"
 #include "DerivativeMaterialInterfaceTHM.h"
@@ -64,5 +63,3 @@ protected:
   const MaterialProperty<Real> & _dH_drhouA;
   const MaterialProperty<Real> & _dH_drhoEA;
 };
-
-#endif /* JUNCTIONSTAGNATIONENTHALPYUSEROBJECT_H */

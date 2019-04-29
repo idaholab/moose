@@ -1,5 +1,4 @@
-#ifndef OUTLET_H
-#define OUTLET_H
+#pragma once
 
 #include "FlowBoundary.h"
 
@@ -36,5 +35,3 @@ protected:
   void addNCGStaticPBC();
   void addMooseObjects7EqnRDG();
 };
-
-#endif /* OUTLET_H */

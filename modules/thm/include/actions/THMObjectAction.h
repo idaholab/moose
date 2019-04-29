@@ -1,5 +1,4 @@
-#ifndef THMOBJECTACTION_H
-#define THMOBJECTACTION_H
+#pragma once
 
 #include "MooseObjectAction.h"
 #include "Simulation.h"
@@ -19,5 +18,3 @@ protected:
   /// Simulation this action is part of
   Simulation & _simulation;
 };
-
-#endif /* THMACTION_H */

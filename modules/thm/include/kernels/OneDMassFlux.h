@@ -1,5 +1,4 @@
-#ifndef ONEDMASSFLUX_H
-#define ONEDMASSFLUX_H
+#pragma once
 
 #include "Kernel.h"
 #include "DerivativeMaterialInterfaceTHM.h"
@@ -41,5 +40,3 @@ protected:
   const unsigned int _beta_var_number;
   const unsigned int _arhouA_var_number;
 };
-
-#endif /* ONEDMASSFLUX_H */

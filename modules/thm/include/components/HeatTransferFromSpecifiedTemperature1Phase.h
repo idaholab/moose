@@ -1,5 +1,4 @@
-#ifndef HEATTRANSFERFROMSPECIFIEDTEMPERATURE1PHASE_H
-#define HEATTRANSFERFROMSPECIFIEDTEMPERATURE1PHASE_H
+#pragma once
 
 #include "HeatTransferFromTemperature1Phase.h"
 
@@ -23,5 +22,3 @@ protected:
   /// wall temperature function name
   const FunctionName _T_wall_fn_name;
 };
-
-#endif /* HEATTRANSFERFROMSPECIFIEDTEMPERATURE1PHASE_H */

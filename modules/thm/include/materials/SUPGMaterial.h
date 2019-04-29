@@ -1,5 +1,4 @@
-#ifndef SUPGMATERIAL_H
-#define SUPGMATERIAL_H
+#pragma once
 
 #include "Material.h"
 #include "DerivativeMaterialInterfaceTHM.h"
@@ -156,5 +155,3 @@ protected:
   // the cached values will be used instead of recomputing new delta values.
   std::map<unsigned, std::vector<Real>> _cached_delta;
 };
-
-#endif // SUPGMATERIAL_H

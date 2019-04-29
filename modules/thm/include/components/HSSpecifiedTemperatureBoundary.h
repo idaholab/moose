@@ -1,5 +1,4 @@
-#ifndef HSSPECIFIEDTEMPERATUREBOUNDARY_H
-#define HSSPECIFIEDTEMPERATUREBOUNDARY_H
+#pragma once
 
 #include "BoundaryBase.h"
 
@@ -24,5 +23,3 @@ protected:
   /// The value of temperature imposed at the boundary
   const Real & _temperature;
 };
-
-#endif /* HSSPECIFIEDTEMPERATUREBOUNDARY_H */

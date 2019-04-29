@@ -1,5 +1,4 @@
-#ifndef OLDJUNCTIONMOMENTUMCONSTRAINT_H
-#define OLDJUNCTIONMOMENTUMCONSTRAINT_H
+#pragma once
 
 #include "NodalConstraint.h"
 #include "PostprocessorInterface.h"
@@ -56,5 +55,3 @@ protected:
 
   const SinglePhaseFluidProperties & _fp;
 };
-
-#endif /* OLDJUNCTIONMOMENTUMCONSTRAINT_H */

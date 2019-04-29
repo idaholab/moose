@@ -1,5 +1,4 @@
-#ifndef ONEDSHOCKCAPTURING_H
-#define ONEDSHOCKCAPTURING_H
+#pragma once
 
 #include "OneDStabilizationBase.h"
 
@@ -22,5 +21,3 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 };
-
-#endif //  ONEDSHOCKCAPTURING_H

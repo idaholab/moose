@@ -1,5 +1,4 @@
-#ifndef IDENTIFYLOOPSACTION_H
-#define IDENTIFYLOOPSACTION_H
+#pragma once
 
 #include "THMAction.h"
 
@@ -18,5 +17,3 @@ public:
 
   virtual void act();
 };
-
-#endif /* IDENTIFYLOOPSACTION_H */

@@ -1,5 +1,4 @@
-#ifndef ONEDENERGYHEATSOURCE_H
-#define ONEDENERGYHEATSOURCE_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -28,5 +27,3 @@ protected:
   /// Cross sectional area
   const VariableValue & _area;
 };
-
-#endif // ONEDENERGYHEATSOURCE_H

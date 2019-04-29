@@ -1,5 +1,4 @@
-#ifndef CIRCULARAREAHYDRAULICDIAMETERTEST_H
-#define CIRCULARAREAHYDRAULICDIAMETERTEST_H
+#pragma once
 
 #include "MooseObjectUnitTest.h"
 #include "Function.h"
@@ -39,5 +38,3 @@ protected:
 
   const FunctionName _Dh_name;
 };
-
-#endif /* CIRCULARAREAHYDRAULICDIAMETERTEST_H */

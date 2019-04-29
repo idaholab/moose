@@ -1,5 +1,4 @@
-#ifndef LINEARTESTMATERIAL_H
-#define LINEARTESTMATERIAL_H
+#pragma once
 
 #include "DerivativeMaterialInterface.h"
 
@@ -49,5 +48,3 @@ protected:
   /// Derivatives of material property with respect to each aux variable
   std::vector<MaterialProperty<Real> *> _y_derivatives;
 };
-
-#endif /* LINEARTESTMATERIAL_H */

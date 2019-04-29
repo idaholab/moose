@@ -1,5 +1,4 @@
-#ifndef CLOSURES1PHASEBASE_H
-#define CLOSURES1PHASEBASE_H
+#pragma once
 
 #include "ClosuresBase.h"
 
@@ -35,5 +34,3 @@ protected:
    */
   void addAverageWallTemperatureMaterial(const FlowChannel1Phase & flow_channel) const;
 };
-
-#endif /* CLOSURES1PHASEBASE_H */

@@ -1,5 +1,4 @@
-#ifndef NUMERICS_H
-#define NUMERICS_H
+#pragma once
 
 #include "libmesh/libmesh_common.h"
 #include "libmesh/vector_value.h"
@@ -343,5 +342,3 @@ bool isInlet(Real vel, Real normal);
  */
 bool isOutlet(Real vel, Real normal);
 }
-
-#endif // NUMERICS_H

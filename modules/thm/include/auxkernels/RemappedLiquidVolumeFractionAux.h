@@ -1,5 +1,4 @@
-#ifndef REMAPPEDLIQUIDVOLUMEFRACTIONAUX_H
-#define REMAPPEDLIQUIDVOLUMEFRACTIONAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -29,5 +28,3 @@ protected:
   /// Volume fraction mapper
   const VolumeFractionMapper & _vfm;
 };
-
-#endif /* REMAPPEDLIQUIDVOLUMEFRACTIONAUX_H */

@@ -1,5 +1,4 @@
-#ifndef JUNCTIONONETOONE_H
-#define JUNCTIONONETOONE_H
+#pragma once
 
 #include "FlowJunction.h"
 
@@ -27,5 +26,3 @@ protected:
   virtual void addMooseObjects1Phase() const;
   virtual void addMooseObjects2Phase() const;
 };
-
-#endif /* JUNCTIONONETOONE_H */

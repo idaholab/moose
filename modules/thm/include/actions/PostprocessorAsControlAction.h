@@ -1,5 +1,4 @@
-#ifndef POSTPROCESSORASCONTROLACTION_H
-#define POSTPROCESSORASCONTROLACTION_H
+#pragma once
 
 #include "MooseObjectAction.h"
 
@@ -20,5 +19,3 @@ public:
 
   virtual void act();
 };
-
-#endif /* POSTPROCESSORASCONTROLACTION_H */

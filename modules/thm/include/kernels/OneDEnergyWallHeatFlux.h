@@ -1,5 +1,4 @@
-#ifndef ONEDENERGYWALLHEATFLUX_H
-#define ONEDENERGYWALLHEATFLUX_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -23,5 +22,3 @@ protected:
   /// Heat flux perimeter
   const VariableValue & _P_hf;
 };
-
-#endif // ONEDENERGYWALLHEATFLUX_H

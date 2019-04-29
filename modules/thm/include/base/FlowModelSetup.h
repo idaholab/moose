@@ -1,5 +1,4 @@
-#ifndef FLOWMODELSETUP_H
-#define FLOWMODELSETUP_H
+#pragma once
 
 #include "ActionFactory.h"
 #include "ActionWarehouse.h"
@@ -77,5 +76,3 @@ FlowModelSetup::getParam(const std::string & name) const
 {
   return InputParameters::getParamHelper(name, _this_params, static_cast<T *>(0));
 }
-
-#endif /* FLOWMODELSETUP_H */

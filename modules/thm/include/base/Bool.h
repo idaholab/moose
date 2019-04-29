@@ -1,5 +1,4 @@
-#ifndef BOOL_H
-#define BOOL_H
+#pragma once
 
 /**
  * A wrapper for the C++ boolean type which can be stored in vectors
@@ -24,5 +23,3 @@ struct Bool
 
   bool _value;
 };
-
-#endif

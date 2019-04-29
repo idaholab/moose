@@ -1,5 +1,4 @@
-#ifndef TIMEFUNCTIONCONTROL_H
-#define TIMEFUNCTIONCONTROL_H
+#pragma once
 
 #include "THMControl.h"
 
@@ -22,5 +21,3 @@ protected:
   MooseObjectParameterName _ctrl_param_name;
   Function & _function;
 };
-
-#endif // TIMEFUNCTIONCONTROL_H

@@ -1,5 +1,4 @@
-#ifndef NUMERICALFLUX3EQNCENTERED_H
-#define NUMERICALFLUX3EQNCENTERED_H
+#pragma once
 
 #include "NumericalFlux3EqnBase.h"
 #include "SinglePhaseFluidProperties.h"
@@ -39,5 +38,3 @@ protected:
   /// fluid properties user object
   const SinglePhaseFluidProperties & _fp;
 };
-
-#endif

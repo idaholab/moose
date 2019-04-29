@@ -1,5 +1,4 @@
-#ifndef SPECIFICTOTALENTHALPYIC_H
-#define SPECIFICTOTALENTHALPYIC_H
+#pragma once
 
 #include "InitialCondition.h"
 
@@ -31,5 +30,3 @@ protected:
   const VariableValue & _area;
   const VariableValue & _alpha;
 };
-
-#endif // SPECIFICTOTALENTHALPYIC_H

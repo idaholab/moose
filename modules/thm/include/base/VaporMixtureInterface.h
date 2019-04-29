@@ -1,5 +1,4 @@
-#ifndef VAPORMIXTUREINTERFACE_H
-#define VAPORMIXTUREINTERFACE_H
+#pragma once
 
 #include "InputParameters.h"
 #include "InitialCondition.h"
@@ -56,5 +55,3 @@ VaporMixtureInterface<T>::getMassFractionVector() const
     x_secondary_vapors[i] = (*_x_secondary_vapors[i])[T::_qp];
   return x_secondary_vapors;
 }
-
-#endif // VAPORMIXTUREINTERFACE_H

@@ -1,5 +1,4 @@
-#ifndef HEATSTRUCTUREENERGY_H
-#define HEATSTRUCTUREENERGY_H
+#pragma once
 
 #include "HeatStructureEnergyBase.h"
 
@@ -22,5 +21,3 @@ protected:
   /// Depth of the heat structure
   const Real _plate_depth;
 };
-
-#endif

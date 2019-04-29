@@ -1,5 +1,4 @@
-#ifndef JACOBIANTESTACTION_H
-#define JACOBIANTESTACTION_H
+#pragma once
 
 #include "TestAction.h"
 
@@ -22,5 +21,3 @@ protected:
   /// Finite differencing parameter
   const std::string _snes_test_err;
 };
-
-#endif /* JACOBIANTESTACTION_H */

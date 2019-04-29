@@ -1,5 +1,4 @@
-#ifndef ONEDMOMENTUMMASSFLOWRATETEMPERATUREBC_H
-#define ONEDMOMENTUMMASSFLOWRATETEMPERATUREBC_H
+#pragma once
 
 #include "OneDNodalBC.h"
 
@@ -22,5 +21,3 @@ protected:
 
   const Real & _m_dot;
 };
-
-#endif /* ONEDMOMENTUMMASSFLOWRATETEMPERATUREBC_H */

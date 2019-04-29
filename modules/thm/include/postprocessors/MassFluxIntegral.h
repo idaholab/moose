@@ -1,5 +1,4 @@
-#ifndef MASSFLUXINTEGRAL_H
-#define MASSFLUXINTEGRAL_H
+#pragma once
 
 #include "SideIntegralPostprocessor.h"
 
@@ -30,5 +29,3 @@ protected:
 
   const VariableValue & _arhouA;
 };
-
-#endif // MASSFLUXINTEGRAL_H

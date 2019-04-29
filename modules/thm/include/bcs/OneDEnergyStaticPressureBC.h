@@ -1,5 +1,4 @@
-#ifndef ONEDENERGYSTATICPRESSUREBC_H
-#define ONEDENERGYSTATICPRESSUREBC_H
+#pragma once
 
 #include "OneDNodalBC.h"
 
@@ -51,5 +50,3 @@ protected:
   const SinglePhaseFluidProperties & _fp;
   const VolumeFractionMapper * _vfm;
 };
-
-#endif

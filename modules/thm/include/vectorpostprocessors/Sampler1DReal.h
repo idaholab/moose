@@ -1,5 +1,4 @@
-#ifndef SAMPLER1DREAL_H
-#define SAMPLER1DREAL_H
+#pragma once
 
 #include "Sampler1DBase.h"
 
@@ -31,5 +30,3 @@ public:
    */
   virtual Real getScalarFromProperty(const Real & property, const Point & curr_point) override;
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef INLETDENSITYVELOCITY_H
-#define INLETDENSITYVELOCITY_H
+#pragma once
 
 #include "FlowBoundary.h"
 
@@ -29,5 +28,3 @@ protected:
   void setup2Phase();
   void setup2PhaseNCG();
 };
-
-#endif /* INLETDENSITYVELOCITY_H */

@@ -1,5 +1,4 @@
-#ifndef SOLIDMATERIALPROPERTIES_H
-#define SOLIDMATERIALPROPERTIES_H
+#pragma once
 
 #include "GeneralUserObject.h"
 #include "Function.h"
@@ -34,5 +33,3 @@ protected:
   Function & _Cp;
   Function & _rho;
 };
-
-#endif /* SOLIDMATERIALPROPERTIES_H */

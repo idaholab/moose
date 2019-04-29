@@ -1,5 +1,4 @@
-#ifndef COPYVALUEAUX_H
-#define COPYVALUEAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -21,5 +20,3 @@ protected:
 
   const VariableValue & _source_var;
 };
-
-#endif /* COPYVALUEAUX_H */

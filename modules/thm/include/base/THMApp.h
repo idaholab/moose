@@ -1,5 +1,4 @@
-#ifndef THMAPP_H
-#define THMAPP_H
+#pragma once
 
 #include "MooseApp.h"
 #include "Logger.h"
@@ -114,5 +113,3 @@ protected:
 
   [[noreturn]] void raiseFlowModelError(const FluidProperties & fp, const std::string & mbdf);
 };
-
-#endif /* THMAPP_H */

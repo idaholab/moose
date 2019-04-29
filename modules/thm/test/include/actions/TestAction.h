@@ -1,5 +1,4 @@
-#ifndef TESTACTION_H
-#define TESTACTION_H
+#pragma once
 
 #include "Action.h"
 
@@ -179,5 +178,3 @@ protected:
   /// Default FE order
   const std::string _fe_order;
 };
-
-#endif /* TESTACTION_H */

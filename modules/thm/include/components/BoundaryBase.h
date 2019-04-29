@@ -1,5 +1,4 @@
-#ifndef BOUNDARYBASE_H
-#define BOUNDARYBASE_H
+#pragma once
 
 #include "Component.h"
 
@@ -17,5 +16,3 @@ class BoundaryBase : public Component
 public:
   BoundaryBase(const InputParameters & params);
 };
-
-#endif /* BOUNDARYBASE_H */

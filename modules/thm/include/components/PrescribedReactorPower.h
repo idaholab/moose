@@ -1,5 +1,4 @@
-#ifndef PRESCRIBEDREACTORPOWER_H
-#define PRESCRIBEDREACTORPOWER_H
+#pragma once
 
 #include "ReactorPower.h"
 
@@ -27,5 +26,3 @@ protected:
   /// The value of power when specified as a constant
   Real _power;
 };
-
-#endif /* PRESCRIBEDREACTORPOWER_H */

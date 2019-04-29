@@ -1,5 +1,4 @@
-#ifndef THMINITCOMPONENTSACTION_H
-#define THMINITCOMPONENTSACTION_H
+#pragma once
 
 #include "THMAction.h"
 
@@ -20,5 +19,3 @@ public:
 
 protected:
 };
-
-#endif /* THMINITCOMPONENTSACTION_H */

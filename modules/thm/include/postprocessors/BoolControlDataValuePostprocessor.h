@@ -1,5 +1,4 @@
-#ifndef BOOLCONTROLDATAVALUEPOSTPROCESSOR_H
-#define BOOLCONTROLDATAVALUEPOSTPROCESSOR_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 
@@ -28,5 +27,3 @@ protected:
   /// The boolean value of the control data
   const bool & _control_data_value;
 };
-
-#endif /* BOOLCONTROLDATAVALUEPOSTPROCESSOR_H */

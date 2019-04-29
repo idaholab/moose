@@ -1,5 +1,4 @@
-#ifndef ONEDMOMENTUMFRICTION_H
-#define ONEDMOMENTUMFRICTION_H
+#pragma once
 
 #include "Kernel.h"
 #include "DerivativeMaterialInterfaceTHM.h"
@@ -63,5 +62,3 @@ protected:
   unsigned int _arhouA_var_number;
   unsigned int _arhoEA_var_number;
 };
-
-#endif

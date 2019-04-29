@@ -1,5 +1,4 @@
-#ifndef HEATCONDUCTIONRZ_H
-#define HEATCONDUCTIONRZ_H
+#pragma once
 
 #include "HeatConduction.h"
 #include "RZSymmetry.h"
@@ -21,5 +20,3 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 };
-
-#endif // HEATCONDUCTIONRZ_H

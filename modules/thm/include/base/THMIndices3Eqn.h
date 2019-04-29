@@ -1,5 +1,4 @@
-#ifndef THMINDICES3EQN_H
-#define THMINDICES3EQN_H
+#pragma once
 
 namespace THM3Eqn
 {
@@ -24,5 +23,3 @@ enum EquationIndex
   EQ_ENERGY = 2
 };
 }
-
-#endif // THMINDICES3EQN_H

@@ -1,5 +1,4 @@
-#ifndef THMSETUPMESHACTION_H
-#define THMSETUPMESHACTION_H
+#pragma once
 
 #include "THMAction.h"
 
@@ -15,5 +14,3 @@ public:
 
   virtual void act();
 };
-
-#endif /* THMSETUPMESHACTION_H */

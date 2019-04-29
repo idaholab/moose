@@ -1,5 +1,4 @@
-#ifndef ONEDMOMENTUMSTATICPRESSUREREVERSEBC_H
-#define ONEDMOMENTUMSTATICPRESSUREREVERSEBC_H
+#pragma once
 
 #include "OneDIntegratedBC.h"
 #include "Function.h"
@@ -43,5 +42,3 @@ protected:
 
   const SinglePhaseFluidProperties & _spfp;
 };
-
-#endif // ONED7EQNMOMENTUMSTATICPANDTREVERSEBC_H

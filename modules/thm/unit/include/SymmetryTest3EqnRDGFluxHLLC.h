@@ -1,5 +1,4 @@
-#ifndef SYMMETRYTEST3EQNRDGFLUXHLLC_H
-#define SYMMETRYTEST3EQNRDGFLUXHLLC_H
+#pragma once
 
 #include "SymmetryTest3EqnRDGFluxBase.h"
 #include "NumericalFlux3EqnHLLC.h"
@@ -23,5 +22,3 @@ protected:
   virtual std::vector<std::pair<std::vector<Real>, std::vector<Real>>>
   getPrimitiveSolutionPairs() const override;
 };
-
-#endif /* SYMMETRYTEST3EQNRDGFLUXHLLC_H */

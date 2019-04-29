@@ -1,5 +1,4 @@
-#ifndef ONEDMOMENTUMSTAGNATIONPANDTBC_H
-#define ONEDMOMENTUMSTAGNATIONPANDTBC_H
+#pragma once
 
 #include "OneDIntegratedBC.h"
 #include "DerivativeMaterialInterfaceTHM.h"
@@ -46,5 +45,3 @@ protected:
   const unsigned int _arhoA_var_number;
   const unsigned int _arhoEA_var_number;
 };
-
-#endif // ONEDMOMENTUMSTAGNATIONPANDTBC_H

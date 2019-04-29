@@ -1,5 +1,4 @@
-#ifndef LAPIDUSCOEFMATERIAL_H
-#define LAPIDUSCOEFMATERIAL_H
+#pragma once
 
 #include "Material.h"
 
@@ -26,5 +25,3 @@ protected:
 
   MaterialProperty<Real> & _coef;
 };
-
-#endif /* LAPIDUSCOEFMATERIAL_H */

@@ -1,5 +1,4 @@
-#ifndef AVERAGETEMPERATURE3EQNMATERIAL_H
-#define AVERAGETEMPERATURE3EQNMATERIAL_H
+#pragma once
 
 #include "Material.h"
 
@@ -39,5 +38,3 @@ protected:
   /// Total heated perimeter
   const VariableValue & _P_hf_total;
 };
-
-#endif /* AVERAGETEMPERATURE3EQNMATERIAL_H */

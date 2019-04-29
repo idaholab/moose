@@ -1,5 +1,4 @@
-#ifndef MACHNUMBERAUX_H
-#define MACHNUMBERAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -26,5 +25,3 @@ protected:
 
   const SinglePhaseFluidProperties & _fp;
 };
-
-#endif /* MACHNUMBERAUX_H */

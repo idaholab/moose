@@ -1,5 +1,4 @@
-#ifndef VOLUMEJUNCTIONOLDBC_H
-#define VOLUMEJUNCTIONOLDBC_H
+#pragma once
 
 #include "OneDIntegratedBC.h"
 #include "FlowModel.h"
@@ -51,5 +50,3 @@ protected:
 
   const SinglePhaseFluidProperties & _fp;
 };
-
-#endif

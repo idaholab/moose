@@ -1,5 +1,4 @@
-#ifndef ONEDMASSFREEBC_H
-#define ONEDMASSFREEBC_H
+#pragma once
 
 #include "OneDIntegratedBC.h"
 
@@ -27,5 +26,3 @@ protected:
   unsigned int _arhouA_var_number;
   const VariableValue & _arhouA;
 };
-
-#endif // ONEDMASSFREEBC_H

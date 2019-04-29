@@ -1,5 +1,4 @@
-#ifndef JUNCTION_H
-#define JUNCTION_H
+#pragma once
 
 #include "FlowJunction.h"
 
@@ -46,5 +45,3 @@ protected:
   /// form loss coefficients for each connection
   std::vector<Real> _K;
 };
-
-#endif /* JUNCTION_H */

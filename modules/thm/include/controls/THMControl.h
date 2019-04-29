@@ -1,5 +1,4 @@
-#ifndef THMCONTROL_H
-#define THMCONTROL_H
+#pragma once
 
 #include "Control.h"
 #include "ControlData.h"
@@ -104,5 +103,3 @@ THMControl::getControlDataByName(const std::string & data_name)
 
   return data_ptr->get();
 }
-
-#endif // THMCONTROL_H

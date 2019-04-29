@@ -1,5 +1,4 @@
-#ifndef SUMPOSTPROCESSOR_H
-#define SUMPOSTPROCESSOR_H
+#pragma once
 
 #include "GeneralPostprocessor.h"
 
@@ -28,5 +27,3 @@ protected:
   const PostprocessorValue & _a;
   const PostprocessorValue & _b;
 };
-
-#endif /* SUMPOSTPROCESSOR_H */

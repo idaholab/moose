@@ -1,5 +1,4 @@
-#ifndef LINEARFLUIDPROPERTIES_H
-#define LINEARFLUIDPROPERTIES_H
+#pragma once
 
 #include "SinglePhaseFluidProperties.h"
 
@@ -74,5 +73,3 @@ protected:
   Real _k;
   Real _Pr;
 };
-
-#endif /* LINEARFLUIDPROPERTIES_H */

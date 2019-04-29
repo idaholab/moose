@@ -1,5 +1,4 @@
-#ifndef LINEARFUNCTION_H
-#define LINEARFUNCTION_H
+#pragma once
 
 #include "Function.h"
 #include "FunctionInterface.h"
@@ -29,5 +28,3 @@ protected:
   const Real & _a;
   const Real & _b;
 };
-
-#endif // LINEARFUNCTION_H

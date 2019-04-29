@@ -1,5 +1,4 @@
-#ifndef CFLTIMESTEPSIZE_H
-#define CFLTIMESTEPSIZE_H
+#pragma once
 
 #include "ElementPostprocessor.h"
 
@@ -42,5 +41,3 @@ protected:
   /// Time step size
   Real _dt;
 };
-
-#endif
