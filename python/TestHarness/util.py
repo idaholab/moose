@@ -178,7 +178,7 @@ def formatCase(format_key, message, formatted_results):
         formatted_results[format_key] = (message[0], message[1])
 
 def formatStatusMessage(job, status, message, options):
-    # If there is no unique status message, use the name of the status as the message
+    # If there is no message, use status as message
     if not message:
         message = status
 
@@ -189,7 +189,7 @@ def formatStatusMessage(job, status, message, options):
                 job.addCaveats(check)
 
     # Format the failed message to list a big fat FAILED in front of the status
-    elif job.isFail() or (job.isDeleted() and options.extra_info):
+    elif job.isFail():
         return 'FAILED (%s)' % (message)
 
     return message
@@ -204,7 +204,6 @@ def formatResult(job, options, result='', color=True, **kwargs):
     terminal_format = list(OrderedDict.fromkeys(list(TERM_FORMAT)))
     status, message, message_color, exit_code = job.getJointStatus()
 
-    # status = job.getStatus()
     color_opts = {'code' : options.code, 'colored' : options.colored}
 
     # container for every printable item
@@ -292,9 +291,8 @@ def formatResult(job, options, result='', color=True, **kwargs):
 
             # Do special coloring for first directory
             if format_rule == 'n' and options.color_first_directory:
-                tester = job.getTester()
-                formatted_results[format_rule] = (colorText(tester.specs['first_directory'], 'CYAN', **color_opts) +\
-                                         formatted_results[format_rule][0].replace(tester.specs['first_directory'], '', 1), 'CYAN') # Strip out first occurence only
+                formatted_results[format_rule] = (colorText(job.specs['first_directory'], 'CYAN', **color_opts) +\
+                                         formatted_results[format_rule][0].replace(job.specs['first_directory'], '', 1), 'CYAN') # Strip out first occurence only
 
     # join printable results in the order in which the user asked
     final_results = ' '.join([formatted_results[x][0] for x in terminal_format if formatted_results[x]])
@@ -705,13 +703,12 @@ def readOutput(stdout, stderr):
 # Trimming routines for job output
 def trimOutput(job, options):
     output = job.getOutput()
-    tester = job.getTester()
-    if ((tester.isFail() and options.no_trimmed_output_on_error)
-        or (tester.specs.isValid('max_buffer_size') and tester.specs['max_buffer_size'] == -1)
+    if ((job.isFail() and options.no_trimmed_output_on_error)
+        or (job.specs.isValid('max_buffer_size') and job.specs['max_buffer_size'] == -1)
         or options.no_trimmed_output):
         return output
-    elif tester.specs.isValid('max_buffer_size'):
-        max_size = tester.specs['max_buffer_size']
+    elif job.specs.isValid('max_buffer_size'):
+        max_size = job.specs['max_buffer_size']
     else:
         max_size = 100000
 

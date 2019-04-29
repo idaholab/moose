@@ -472,7 +472,7 @@ class TestHarness:
                 timing = job.getTiming()
 
                 # Save these results for 'Final Test Result' summary
-                self.test_table.append( (job, status, timing) )
+                self.test_table.append( (job, exit_code, timing) )
 
                 self.postRun(job.specs, timing)
 
@@ -508,7 +508,7 @@ class TestHarness:
 
         if (self.options.verbose or (self.num_failed != 0 and not self.options.quiet)) and not self.options.dry_run:
             print('\n\nFinal Test Results:\n' + ('-' * (util.TERM_COLS)))
-            for (job, result, timing) in sorted(self.test_table, key=lambda x: x[1], reverse=True):
+            for (job, exit_code, timing) in sorted(self.test_table, key=lambda x: x[1]):
                 print(util.formatResult(job, self.options, caveats=True))
 
         time = clock() - self.start_time
@@ -551,6 +551,7 @@ class TestHarness:
             else:
                 summary += ', <b>%d failed</b>'
             if self.scheduler.maxFailures():
+                self.error_code = self.error_code | 0x80
                 summary += '\n<r>MAX FAILURES REACHED</r>'
 
             summary += fatal_error
