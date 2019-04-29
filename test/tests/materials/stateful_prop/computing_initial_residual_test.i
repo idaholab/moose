@@ -65,7 +65,6 @@
   start_time = 0.0
   num_steps = 5
   dt = .1
-  compute_initial_residual_before_preset_bcs = true
 []
 
 [Outputs]

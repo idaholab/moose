@@ -266,7 +266,6 @@
   dtmin = 1.0
   l_tol = 1e-5
 
-  compute_initial_residual_before_preset_bcs = true
 []
 
 [VectorPostprocessors]

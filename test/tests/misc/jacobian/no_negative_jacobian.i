@@ -41,5 +41,4 @@
   type = Transient
   dt = 0.5
   end_time = 1.5
-  compute_initial_residual_before_preset_bcs = true
 []

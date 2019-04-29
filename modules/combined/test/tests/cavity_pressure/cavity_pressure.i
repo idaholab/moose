@@ -325,8 +325,6 @@
   start_time = 0.0
   dt = 0.5
   end_time = 1.0
-
-  compute_initial_residual_before_preset_bcs = true
 []
 
 [Postprocessors]

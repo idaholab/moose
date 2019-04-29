@@ -69,8 +69,6 @@
     type = SimplePredictor
     scale = 1.0
   [../]
-
-  compute_initial_residual_before_preset_bcs = true
 []
 
 [Postprocessors]

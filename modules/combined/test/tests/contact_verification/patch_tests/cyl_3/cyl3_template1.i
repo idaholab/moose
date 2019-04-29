@@ -295,7 +295,6 @@
   num_steps = 10
   dtmin = 1.0
   l_tol = 1e-4
-  compute_initial_residual_before_preset_bcs = true
 []
 
 [VectorPostprocessors]
