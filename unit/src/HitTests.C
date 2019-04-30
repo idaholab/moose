@@ -331,6 +331,8 @@ TEST(HitTests, BraceExpressions)
        "42",
        hit::Field::Kind::String},
       {"fparse", "foo=${fparse 40 + 2}\n", "foo", "42", hit::Field::Kind::Float},
+      {"fparse-with-pi", "foo=${fparse cos(pi)}\n", "foo", "-1", hit::Field::Kind::Float},
+      {"fparse-with-e", "foo=${fparse log(e)}\n", "foo", "1", hit::Field::Kind::Float},
       {"fparse-with-var", "var=39 foo=${fparse var + 3}", "foo", "42", hit::Field::Kind::Float},
       {"brace-expression-ends-before-newline",
        "foo=${raw 42} bar=23",
