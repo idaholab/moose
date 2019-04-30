@@ -17,7 +17,7 @@ template <>
 InputParameters validParams<PresetNodalBC>();
 
 /**
- * TODO
+ * Base class for nodal BCs that (pre)set the solution vector entries.
  */
 class PresetNodalBC : public NodalBC
 {

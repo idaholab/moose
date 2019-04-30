@@ -67,6 +67,7 @@
 #include "MaxVarNDofsPerElem.h"
 #include "MaxVarNDofsPerNode.h"
 #include "ADKernel.h"
+#include "ADPresetNodalBC.h"
 
 // libMesh
 #include "libmesh/nonlinear_solver.h"
@@ -126,6 +127,7 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _scalar_kernels(/*threaded=*/false),
     _nodal_bcs(/*threaded=*/false),
     _preset_nodal_bcs(/*threaded=*/false),
+    _ad_preset_nodal_bcs(/*threaded=*/false),
     _splits(/*threaded=*/false),
     _increment_vec(NULL),
     _pc_side(Moose::PCS_DEFAULT),
@@ -417,6 +419,11 @@ NonlinearSystemBase::addBoundaryCondition(const std::string & bc_name,
     std::shared_ptr<PresetNodalBC> pnbc = std::dynamic_pointer_cast<PresetNodalBC>(bc);
     if (pnbc)
       _preset_nodal_bcs.addObject(pnbc);
+
+    std::shared_ptr<ADPresetNodalBC<RESIDUAL>> adpnbc =
+        std::dynamic_pointer_cast<ADPresetNodalBC<RESIDUAL>>(bc);
+    if (adpnbc)
+      _ad_preset_nodal_bcs.addObject(adpnbc);
   }
 
   // IntegratedBCBase
@@ -690,6 +697,12 @@ NonlinearSystemBase::setInitialSolution()
       {
         const auto & preset_bcs = _preset_nodal_bcs.getActiveBoundaryObjects(boundary_id);
         for (const auto & preset_bc : preset_bcs)
+          preset_bc->computeValue(initial_solution);
+      }
+      if (_ad_preset_nodal_bcs.hasActiveBoundaryObjects(boundary_id))
+      {
+        const auto & preset_bcs_res = _ad_preset_nodal_bcs.getActiveBoundaryObjects(boundary_id);
+        for (const auto & preset_bc : preset_bcs_res)
           preset_bc->computeValue(initial_solution);
       }
     }
@@ -2667,6 +2680,7 @@ NonlinearSystemBase::updateActive(THREAD_ID tid)
     _general_dampers.updateActive();
     _nodal_bcs.updateActive();
     _preset_nodal_bcs.updateActive();
+    _ad_preset_nodal_bcs.updateActive();
     _constraints.updateActive();
     _scalar_kernels.updateActive();
   }

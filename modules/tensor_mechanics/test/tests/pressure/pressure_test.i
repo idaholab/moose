@@ -26,7 +26,7 @@
     type = PiecewiseLinear
     x = '0. 1. 2.'
     y = '0. 0. 1.'
-    scale_factor = 2.0
+    scale_factor = 1.0
   [../]
   [./rampUnramp]
     type = PiecewiseLinear
@@ -86,6 +86,7 @@
       boundary = 2
       function = zeroRamp
       displacements = 'disp_x disp_y disp_z'
+      factor = 2.0
     [../]
     [./Side3]
       boundary = 3
