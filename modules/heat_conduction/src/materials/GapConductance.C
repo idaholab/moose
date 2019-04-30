@@ -166,6 +166,9 @@ GapConductance::GapConductance(const InputParameters & parameters)
         getParam<std::vector<BoundaryName>>("boundary")[0],
         Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")));
   }
+
+  if (_mesh.uniformRefineLevel() != 0)
+    mooseError("GapConductance does not work with uniform mesh refinement.");
 }
 
 void
