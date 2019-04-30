@@ -122,7 +122,7 @@ def buildCMD(options):
 
 def verifyCoverage(options):
     summary_command = subprocess.Popen([options.lcov_command[0], '--gcov-tool', options.cov_tool, '--summary', options.outfile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    summary_output = summary_command.communicate()[1]
+    summary_output = ' '.join(summary_command.communicate())
     coverage = float(re.findall(r'lines.*: (\d+.\d+)', summary_output)[0])
     print summary_output + '\n\nCode Coverage: ' + str(coverage)
     if coverage >= options.coverage_percent:
