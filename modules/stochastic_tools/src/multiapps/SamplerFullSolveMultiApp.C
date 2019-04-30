@@ -11,6 +11,7 @@
 #include "SamplerFullSolveMultiApp.h"
 #include "Sampler.h"
 #include "StochasticToolsTypes.h"
+#include "StochasticToolsTransfer.h"
 
 #include <unistd.h>
 
@@ -65,24 +66,30 @@ SamplerFullSolveMultiApp::solveStep(Real dt, Real target_time, bool auto_advance
 bool
 SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_advance)
 {
-  const ExecFlagType & current = _fe_problem.getCurrentExecuteOnFlag();
+  // Value to return
   bool last_solve_converged = true;
 
-  _fe_problem.setCurrentExecuteOnFlag(StochasticTools::EXEC_PRE_BATCH_MULTIAPP);
-  _fe_problem.execMultiAppTransfers(StochasticTools::EXEC_PRE_BATCH_MULTIAPP, MultiAppTransfer::TO_MULTIAPP);
-  _fe_problem.execMultiAppTransfers(StochasticTools::EXEC_PRE_BATCH_MULTIAPP, MultiAppTransfer::FROM_MULTIAPP);
-  _fe_problem.setCurrentExecuteOnFlag(current);
+  // List of active relevant Transfer objects
+  std::vector<std::shared_ptr<StochasticToolsTransfer>> to_transfers = getActiveStochasticToolsTransfers(MultiAppTransfer::TO_MULTIAPP);
+  std::vector<std::shared_ptr<StochasticToolsTransfer>> from_transfers = getActiveStochasticToolsTransfers(MultiAppTransfer::FROM_MULTIAPP);
 
+  // Initialize to/from transfers
+  for (auto transfer : to_transfers)
+    transfer->initializeToMultiapp();
+  for (auto transfer : from_transfers)
+    transfer->initializeFromMultiapp();
+
+  // Perform batch MultiApp solves
   dof_id_type num_items = _sampler.getLocalNumerOfRows();
   for (MooseIndex(num_items) i = 0; i < num_items; ++i)
   {
-    _fe_problem.setCurrentExecuteOnFlag(StochasticTools::EXEC_BATCH_MULTIAPP);
-    _fe_problem.execMultiAppTransfers(StochasticTools::EXEC_BATCH_MULTIAPP, MultiAppTransfer::TO_MULTIAPP);
+    for (auto transfer : to_transfers)
+      transfer->executeToMultiapp();
 
     last_solve_converged = FullSolveMultiApp::solveStep(dt, target_time, auto_advance);
 
-    _fe_problem.execMultiAppTransfers(StochasticTools::EXEC_BATCH_MULTIAPP, MultiAppTransfer::FROM_MULTIAPP);
-    _fe_problem.setCurrentExecuteOnFlag(current);
+    for (auto transfer : from_transfers)
+      transfer->executeFromMultiapp();
 
     if (i != num_items-1)
     {
@@ -92,10 +99,25 @@ SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
     }
   }
 
-  _fe_problem.setCurrentExecuteOnFlag(StochasticTools::EXEC_POST_BATCH_MULTIAPP);
-  _fe_problem.execMultiAppTransfers(StochasticTools::EXEC_POST_BATCH_MULTIAPP, MultiAppTransfer::TO_MULTIAPP);
-  _fe_problem.execMultiAppTransfers(StochasticTools::EXEC_POST_BATCH_MULTIAPP, MultiAppTransfer::FROM_MULTIAPP);
-  _fe_problem.setCurrentExecuteOnFlag(current);
+  // Finalize to/from transfers
+  for (auto transfer : to_transfers)
+    transfer->finalizeToMultiapp();
+  for (auto transfer : from_transfers)
+    transfer->finalizeFromMultiapp();
 
   return last_solve_converged;
+}
+
+std::vector<std::shared_ptr<StochasticToolsTransfer>>
+SamplerFullSolveMultiApp::getActiveStochasticToolsTransfers(MultiAppTransfer::DIRECTION direction)
+{
+  std::vector<std::shared_ptr<StochasticToolsTransfer>> output;
+  const ExecuteMooseObjectWarehouse<Transfer> & warehouse = _fe_problem.getMultiAppTransferWarehouse(direction);
+  for (std::shared_ptr<Transfer> transfer : warehouse.getActiveObjects())
+  {
+    std::shared_ptr<StochasticToolsTransfer> ptr = std::dynamic_pointer_cast<StochasticToolsTransfer>(transfer);
+    if (ptr)
+      output.push_back(ptr);
+  }
+  return output;
 }

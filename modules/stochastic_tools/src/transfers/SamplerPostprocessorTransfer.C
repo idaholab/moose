@@ -23,21 +23,23 @@ template <>
 InputParameters
 validParams<SamplerPostprocessorTransfer>()
 {
-  InputParameters params = validParams<MultiAppVectorPostprocessorTransfer>();
-  params.addClassDescription("Transfers data from Postprocessors on the sub-application.");
+  InputParameters params = validParams<StochasticToolsTransfer>();
+  params.addClassDescription("Transfers data from Postprocessors on the sub-application to a VectorPostprocessor on the master application.");
+  params.addRequiredParam<PostprocessorName>(
+    "postprocessor", "The name of the Postprocessors on the sub-app to transfer from/to.");
+  params.addRequiredParam<VectorPostprocessorName>("vector_postprocessor",
+                                                   "The name of the VectorPostprocessor in "
+                                                   "the MultiApp to transfer values "
+                                                   "from/to.");
   params.set<MooseEnum>("direction") = "from_multiapp";
-  params.set<std::string>("vector_name") = "";
   params.suppressParameter<MooseEnum>("direction");
-  params.suppressParameter<std::string>("vector_name");
-
-  params.set<ExecFlagEnum>("execute_on", true).addAvailableFlags(StochasticTools::EXEC_PRE_BATCH_MULTIAPP,
-                                                                 StochasticTools::EXEC_BATCH_MULTIAPP,
-                                                                 StochasticTools::EXEC_POST_BATCH_MULTIAPP);
   return params;
 }
 
 SamplerPostprocessorTransfer::SamplerPostprocessorTransfer(const InputParameters & parameters)
-  : MultiAppVectorPostprocessorTransfer(parameters)
+    : StochasticToolsTransfer(parameters),
+      _sub_pp_name(getParam<PostprocessorName>("postprocessor")),
+      _master_vpp_name(getParam<VectorPostprocessorName>("vector_postprocessor"))
 {
   // Determine the Sampler
   std::shared_ptr<SamplerTransientMultiApp> ptr_transient =
@@ -52,25 +54,7 @@ SamplerPostprocessorTransfer::SamplerPostprocessorTransfer(const InputParameters
   if (ptr_transient)
     _sampler = &(ptr_transient->getSampler());
   else
-  {
     _sampler = &(ptr_fullsolve->getSampler());
-    _batch_mode = ptr_fullsolve->getParam<MooseEnum>("mode") == "batch";
-  }
-
-  // When the MultiApp object is running with 'mode=batch' the normal execution flags are not
-  // adequate. This is because the MultiApp will run one solve, then reset and run another solve.
-  // Thus, to get data from this operation mode the Transfer objects are required to execute
-  // along with these run/reset executions. To do this the execute flags must be changed and this
-  // must be done prior to this object being added to the warehouse in FEProblemBase::addTransfer.
-  // It might be possible to create an Action that inspects the AddTransferActions, but this
-  // solution is much simpler.
-  if (_batch_mode)
-  {
-    ExecFlagEnum & flags = const_cast<ExecFlagEnum &>(getParam<ExecFlagEnum>("execute_on"));
-    flags = {StochasticTools::EXEC_PRE_BATCH_MULTIAPP,
-             StochasticTools::EXEC_BATCH_MULTIAPP,
-             StochasticTools::EXEC_POST_BATCH_MULTIAPP};
-  }
 }
 
 void
@@ -86,56 +70,43 @@ SamplerPostprocessorTransfer::initialSetup()
 }
 
 void
+SamplerPostprocessorTransfer::initializeFromMultiapp()
+{
+  _local_values.resize(0);
+}
+
+void
 SamplerPostprocessorTransfer::executeFromMultiapp()
 {
-  if (_batch_mode)
-    executeFromMultiappBatch();
-  else
-    executeFromMultiappNormal();
+  const dof_id_type n = _multi_app->numGlobalApps();
+  for (MooseIndex(n) i = 0; i < n; i++)
+  {
+    if (_multi_app->hasLocalApp(i))
+    {
+      FEProblemBase & app_problem = _multi_app->appProblemBase(i);
+      _local_values.push_back(app_problem.getPostprocessorValue(_sub_pp_name));
+    }
+  }
 }
 
 void
-SamplerPostprocessorTransfer::executeFromMultiappBatch()
+SamplerPostprocessorTransfer::finalizeFromMultiapp()
 {
-  const ExecFlagType & exec_flag = _fe_problem.getCurrentExecuteOnFlag();
+  // Gather the PP values from all ranks
+  _communicator.allgather(_local_values);
 
-  // Initialize the storage for the PP values computed on this processor
-  if (exec_flag == StochasticTools::EXEC_PRE_BATCH_MULTIAPP)
-    _local_values.resize(0);
-
-  // Collect the PP values for this processor
-  else if (exec_flag == StochasticTools::EXEC_BATCH_MULTIAPP)
+  // Update VPP
+  const dof_id_type n = _sampler->getTotalNumberOfRows();
+  for (MooseIndex(n) i = 0; i < n; i++)
   {
-    const dof_id_type n = _multi_app->numGlobalApps();
-    for (MooseIndex(n) i = 0; i < n; i++)
-    {
-      if (_multi_app->hasLocalApp(i))
-      {
-        FEProblemBase & app_problem = _multi_app->appProblemBase(i);
-        _local_values.push_back(app_problem.getPostprocessorValue(_sub_pp_name));
-      }
-    }
-  }
-
-  else if (exec_flag == StochasticTools::EXEC_POST_BATCH_MULTIAPP)
-  {
-    // Gather the PP values from all ranks
-    _communicator.allgather(_local_values);
-    std::cerr << "_local_values.size() = " << _local_values.size() << std::endl;
-
-    // Update VPP
-    const dof_id_type n = _sampler->getTotalNumberOfRows();
-    for (MooseIndex(n) i = 0; i < n; i++)
-    {
-      Sampler::Location loc = _sampler->getLocation(i);
-      VectorPostprocessorValue & vpp = _results->getVectorPostprocessorValueByGroup(loc.sample());
-      vpp[loc.row()] = _local_values[i];
-    }
+    Sampler::Location loc = _sampler->getLocation(i);
+    VectorPostprocessorValue & vpp = _results->getVectorPostprocessorValueByGroup(loc.sample());
+    vpp[loc.row()] = _local_values[i];
   }
 }
 
 void
-SamplerPostprocessorTransfer::executeFromMultiappNormal()
+SamplerPostprocessorTransfer::execute()
 {
   // Number of PP is equal to the number of MultiApps
   const unsigned int n = _multi_app->numGlobalApps();

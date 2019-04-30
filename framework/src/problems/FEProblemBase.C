@@ -3480,6 +3480,15 @@ FEProblemBase::getTransfers(ExecFlagType type, MultiAppTransfer::DIRECTION direc
   return wh.getActiveObjects();
 }
 
+const ExecuteMooseObjectWarehouse<Transfer> &
+FEProblemBase::getMultiAppTransferWarehouse(MultiAppTransfer::DIRECTION direction) const
+{
+  if (direction == MultiAppTransfer::TO_MULTIAPP)
+    return _to_multi_app_transfers;
+  else
+    return _from_multi_app_transfers;
+}
+
 bool
 FEProblemBase::execMultiApps(ExecFlagType type, bool auto_advance)
 {

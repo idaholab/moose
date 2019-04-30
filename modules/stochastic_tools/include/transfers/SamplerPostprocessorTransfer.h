@@ -10,7 +10,7 @@
 #pragma once
 
 // MOOSE includes
-#include "MultiAppVectorPostprocessorTransfer.h"
+#include "StochasticToolsTransfer.h"
 #include "Sampler.h"
 
 // Forward declarations
@@ -25,14 +25,26 @@ InputParameters validParams<SamplerPostprocessorTransfer>();
 /**
  * Transfer Postprocessor from sub-applications to the master application.
  */
-class SamplerPostprocessorTransfer : public MultiAppVectorPostprocessorTransfer
+class SamplerPostprocessorTransfer : public StochasticToolsTransfer
 {
 public:
   SamplerPostprocessorTransfer(const InputParameters & parameters);
   virtual void initialSetup() override;
 
 protected:
+  /**
+   * Traditional Transfer callback
+   */
+  virtual void execute() override;
+
+  ///@{
+  /**
+   * Methods used when running in batch mode (see SamplerFullSolveMultiApp)
+   */
+  virtual void initializeFromMultiapp() override;
   virtual void executeFromMultiapp() override;
+  virtual void finalizeFromMultiapp() override;
+  ///@}
 
   /// Sampler object that is retrieved from the SamplerTransientMultiApp or SamplerFullSolveMultiApp
   Sampler * _sampler;
@@ -43,14 +55,9 @@ protected:
   /// Local values of compute PP values
   std::vector<PostprocessorValue> _local_values;
 
-  /// SamplerFullSolveMultiapp batch mode flag
-  bool _batch_mode = false;
+  /// Name of postprocessor on the sub-applications
+  const PostprocessorName & _sub_pp_name;
 
-private:
-
-  ///@{
-  /** Helper methods for performing transfer in various modes, see SamplerFullSolveMultiApp */
-  void executeFromMultiappBatch();
-  void executeFromMultiappNormal();
-  ///@}
+  /// Name of vector-postprocessor on the master
+  const VectorPostprocessorName & _master_vpp_name;
 };
