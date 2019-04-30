@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEHASHING_H
-#define MOOSEHASHING_H
+#pragma once
 
 #include <functional>
 #include <vector>
@@ -59,5 +58,3 @@ struct hash<std::pair<S, T>>
   }
 };
 }
-
-#endif // MOOSEHASHING_H

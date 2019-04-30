@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FUNCTIONGRADIENTNEUMANNBC_H
-#define FUNCTIONGRADIENTNEUMANNBC_H
+#pragma once
 
 #include "IntegratedBC.h"
 
@@ -34,5 +33,3 @@ protected:
   Function & _exact_solution;
   const Real _coeff;
 };
-
-#endif // FUNCTIONGRADIENTNEUMANNBC_H

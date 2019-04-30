@@ -1,5 +1,13 @@
-#ifndef NANOFLANN_MESH_ADAPTOR_H
-#define NANOFLANN_MESH_ADAPTOR_H
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#pragma once
 
 // For MooseIndex
 #include "MooseTypes.h"
@@ -199,5 +207,3 @@ typedef nanoflann::L2_Simple_Adaptor<Real, NanoflannMeshSubdomainAdaptor<3>> sub
 typedef nanoflann::
     KDTreeSingleIndexAdaptor<subdomain_adatper_t, NanoflannMeshSubdomainAdaptor<3>, 3>
         subdomain_kd_tree_t;
-
-#endif

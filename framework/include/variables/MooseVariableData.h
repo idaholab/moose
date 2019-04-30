@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEVARIABLEDATA_H
-#define MOOSEVARIABLEDATA_H
+#pragma once
 
 #include "MooseArray.h"
 #include "MooseTypes.h"
@@ -896,4 +895,3 @@ MooseVariableData<RealVectorValue>::adGradPhiFace<RESIDUAL>() const
 {
   return *_grad_phi_face;
 }
-#endif // MOOSEVARIABLEDATA_H

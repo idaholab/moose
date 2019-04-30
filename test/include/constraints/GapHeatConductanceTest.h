@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GAPHEATCONDUCTANCETEST_H
-#define GAPHEATCONDUCTANCETEST_H
+#pragma once
 
 #include "MortarConstraint.h"
 
@@ -30,5 +29,3 @@ protected:
 
   usingMortarConstraintMembers;
 };
-
-#endif /* GAPHEATCONDUCTANCETEST_H */

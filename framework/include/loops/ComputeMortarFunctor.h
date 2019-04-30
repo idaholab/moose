@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEMORTARFUNCTOR_H
-#define COMPUTEMORTARFUNCTOR_H
+#pragma once
 
 #include "MooseTypes.h"
 
@@ -72,5 +71,3 @@ private:
   /// boolean flag for holding whether our current mortar segment projects onto a master element
   bool _has_master;
 };
-
-#endif // COMPUTEMORTARFUNCTOR_H

@@ -1,5 +1,13 @@
-#ifndef AUGMENT_SPARSITY_ON_INTERFACE_H
-#define AUGMENT_SPARSITY_ON_INTERFACE_H
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#pragma once
 
 // App includes
 #include "AutomaticMortarGeneration.h"
@@ -68,5 +76,3 @@ protected:
 
   std::pair<SubdomainID, SubdomainID> _subdomain_pair;
 };
-
-#endif

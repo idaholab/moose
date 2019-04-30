@@ -1,5 +1,13 @@
-#ifndef AUTOMATIC_MORTAR_GENERATION_H
-#define AUTOMATIC_MORTAR_GENERATION_H
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#pragma once
 
 #include "MortarSegmentInfo.h"
 #include "MooseHashing.h"
@@ -258,5 +266,3 @@ private:
   /// Whether this object will be generating a mortar segment mesh for periodic constraints
   const bool _periodic;
 };
-
-#endif
