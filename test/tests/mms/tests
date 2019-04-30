@@ -7,6 +7,7 @@
     command = mms_spatial.py
     check_files = 'mms_spatial.png'
     requirement = "The system shall include a tool for creating spatial convergence plots using method of manufactured solutions."
+    valgrind = none
   []
   [spatial_csv]
     type = CSVDiff
@@ -16,6 +17,7 @@
     csvdiff = 'mms_spatial_first.csv mms_spatial_second.csv'
     requirement = "The system shall include a tool for writing spatial convergence data to a file using method of manufactured solutions."
     prereq = spatial
+    valgrind = none
   []
   [temporal]
     type = CheckFiles
@@ -23,6 +25,7 @@
     command = mms_temporal.py
     check_files = 'mms_temporal.png'
     requirement = "The system shall include a tool for creating temporal convergence plots using method of manufactured solutions."
+    valgrind = none
   []
   [temporal_csv]
     type = CSVDiff
@@ -32,6 +35,7 @@
     csvdiff = 'mms_temporal_first.csv mms_temporal_second.csv'
     requirement = "The system shall include a tool for writing temporal convergence data to a file using method of manufactured solutions."
     prereq = temporal
+    valgrind = none
   []
   [exact]
     type = RunApp
@@ -39,5 +43,6 @@
     command = mms_exact.py
     expect_out = 'type = ParsedFunction'
     requirement = "The system shall include a tool to output solution and forcing functions."
+    valgrind = none
   []
 []
