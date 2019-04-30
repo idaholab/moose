@@ -42,10 +42,14 @@ validParams<PressureAction>()
   params.addParam<Real>("factor", 1.0, "The factor to use in computing the pressure");
   params.addParam<Real>("alpha", 0.0, "alpha parameter for HHT time integration");
   params.addParam<FunctionName>("function", "The function that describes the pressure");
+  params.addParam<bool>("use_automatic_differentiation",
+                        false,
+                        "Flag to use automatic differentiation (AD) objects when possible");
   return params;
 }
 
-PressureAction::PressureAction(const InputParameters & params) : Action(params)
+PressureAction::PressureAction(const InputParameters & params)
+  : Action(params), _use_ad(getParam<bool>("use_automatic_differentiation"))
 {
   _save_in_vars.push_back(getParam<std::vector<AuxVariableName>>("save_in_disp_x"));
   _save_in_vars.push_back(getParam<std::vector<AuxVariableName>>("save_in_disp_y"));
@@ -59,7 +63,15 @@ PressureAction::PressureAction(const InputParameters & params) : Action(params)
 void
 PressureAction::act()
 {
-  const std::string kernel_name = "Pressure";
+  std::string ad_append = "";
+  std::string ad_prepend = "";
+  if (_use_ad)
+  {
+    ad_append = "<RESIDUAL>";
+    ad_prepend = "AD";
+  }
+
+  std::string kernel_name = ad_prepend + "Pressure";
 
   std::vector<VariableName> displacements;
   if (isParamValid("displacements"))
@@ -85,8 +97,8 @@ PressureAction::act()
     // Create unique kernel name for each of the components
     std::string unique_kernel_name = kernel_name + "_" + _name + "_" + Moose::stringify(i);
 
-    InputParameters params = _factory.getValidParams(kernel_name);
-    params.applyParameters(parameters());
+    InputParameters params = _factory.getValidParams(kernel_name + ad_append);
+    params.applyParameters(parameters(), {"factor"});
     params.set<bool>("use_displaced_mesh") = true;
     params.set<unsigned int>("component") = i;
     params.set<NonlinearVariableName>("variable") = displacements[i];
@@ -94,6 +106,19 @@ PressureAction::act()
     if (_has_save_in_vars[i])
       params.set<std::vector<AuxVariableName>>("save_in") = _save_in_vars[i];
 
-    _problem->addBoundaryCondition(kernel_name, unique_kernel_name, params);
+    if (_use_ad)
+    {
+      params.set<Real>("constant") = getParam<Real>("factor");
+      _problem->addBoundaryCondition(
+          kernel_name + ad_append, unique_kernel_name + "_residual", params);
+      _problem->addBoundaryCondition(
+          kernel_name + "<JACOBIAN>", unique_kernel_name + "_jacobian", params);
+      _problem->haveADObjects(true);
+    }
+    else
+    {
+      params.set<Real>("factor") = getParam<Real>("factor");
+      _problem->addBoundaryCondition(kernel_name, unique_kernel_name, params);
+    }
   }
 }

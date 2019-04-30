@@ -1,0 +1,38 @@
+[Tests]
+  [./testdirichlet]
+    type = 'Exodiff'
+    input = '2d_diffusion_test.i'
+    exodiff = 'out.e'
+    scale_refine = 5
+    group = 'requirements'
+    requirement = 'MOOSE shall provide an ability to solve a 2D diffusion problem with Dirichlet boundary conditions using AD and match non-AD methods.'
+    issues = '#13260'
+    design = '/DirichletBC.md'
+  [../]
+  [./testdirichlet-jac]
+    type = 'PetscJacobianTester'
+    input = '2d_diffusion_bodyforce_test.i'
+    scale_refine = 5
+    requirement = 'MOOSE shall provide an ability to solve a 2D diffusion problem including a volumetric source term using AD and compute a perfect jacobian.'
+    issues = '#13260'
+    design = '/ADBodyForce.md'
+  [../]
+
+  [./testbodyforce]
+    type = 'Exodiff'
+    input = '2d_diffusion_bodyforce_test.i'
+    exodiff = 'bodyforce_out.e'
+    scale_refine = 5
+    requirement = 'MOOSE shall provide an ability to solve a 2D diffusion problem including a volumetric source term using AD and match non-AD methods.'
+    issues = '#13260'
+    design = '/ADBodyForce.md'
+  [../]
+  [./testbodyforce-jac]
+    type = 'PetscJacobianTester'
+    input = '2d_diffusion_bodyforce_test.i'
+    scale_refine = 5
+    requirement = 'MOOSE shall provide an ability to solve a 2D diffusion problem including a volumetric source term using AD and compute a perfect jacobian.'
+    issues = '#13260'
+    design = '/ADBodyForce.md'
+  [../]
+[]

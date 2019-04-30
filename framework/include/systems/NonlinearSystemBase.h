@@ -31,6 +31,8 @@ class GeometricSearchData;
 class IntegratedBCBase;
 class NodalBCBase;
 class PresetNodalBC;
+template <ComputeStage>
+class ADPresetNodalBC;
 class DGKernelBase;
 class InterfaceKernel;
 class ScalarKernel;
@@ -718,6 +720,7 @@ protected:
   MooseObjectTagWarehouse<IntegratedBCBase> _integrated_bcs;
   MooseObjectTagWarehouse<NodalBCBase> _nodal_bcs;
   MooseObjectWarehouse<PresetNodalBC> _preset_nodal_bcs;
+  MooseObjectWarehouse<ADPresetNodalBC<RESIDUAL>> _ad_preset_nodal_bcs;
   ///@}
 
   /// Dirac Kernel storage for each thread

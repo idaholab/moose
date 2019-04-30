@@ -6,7 +6,7 @@
 
 The `FunctionPresetBC` takes the same inputs as
 [FunctionDirichletBC](/FunctionDirichletBC.md) and also acts as a
-Dirichlet boundary condition.  However, the implementation is slightly different.
+Dirichlet boundary condition.  However, the implementation is slightly different;
 `FunctionPresetBC` causes the value of the boundary condition to be applied before the
 solve begins where [FunctionDirichletBC](/FunctionDirichletBC.md)
 enforces the boundary condition as the solve

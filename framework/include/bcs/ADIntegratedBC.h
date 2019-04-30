@@ -57,6 +57,9 @@ protected:
 
   /// The ad version of JxW
   const MooseArray<typename Moose::RealType<compute_stage>::type> & _ad_JxW;
+
+  /// The AD version of coord
+  const MooseArray<typename Moose::RealType<compute_stage>::type> & _ad_coord;
 };
 
 template <ComputeStage compute_stage>
@@ -68,6 +71,8 @@ declareADValidParams(ADIntegratedBC);
 declareADValidParams(ADVectorIntegratedBC);
 
 #define usingTemplIntegratedBCMembers(type)                                                        \
+  usingMooseObjectMembers;                                                                         \
+  usingCoupleableMembers;                                                                          \
   using ADIntegratedBCTempl<type, compute_stage>::_test;                                           \
   using ADIntegratedBCTempl<type, compute_stage>::_qp;                                             \
   using ADIntegratedBCTempl<type, compute_stage>::_i;                                              \
@@ -82,7 +87,6 @@ declareADValidParams(ADVectorIntegratedBC);
   using ADIntegratedBCTempl<type, compute_stage>::_assembly;                                       \
   using ADIntegratedBCTempl<type, compute_stage>::_local_ke;                                       \
   using ADIntegratedBCTempl<type, compute_stage>::_j;                                              \
-  using ADIntegratedBCTempl<type, compute_stage>::_JxW;                                            \
   using ADIntegratedBCTempl<type, compute_stage>::_coord;                                          \
   using ADIntegratedBCTempl<type, compute_stage>::_qrule;                                          \
   using ADIntegratedBCTempl<type, compute_stage>::_normals;                                        \

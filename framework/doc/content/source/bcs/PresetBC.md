@@ -6,7 +6,7 @@
 
 The `PresetBC` takes the same inputs as [DirichletBC](/DirichletBC.md)
 and also acts as a Dirichlet
-boundary condition.  However, the implementation is slightly different.  `PresetBC` causes
+boundary condition.  However, the implementation is slightly different; `PresetBC` causes
 the value of the boundary condition to be applied before the solve begins where
 [DirichletBC](/DirichletBC.md) enforces the boundary
 condition as the solve progresses.  In certain
