@@ -54,7 +54,7 @@ public:
 
     ///@{
     /**
-     * Accessors for the sample and row numbers.
+     * Methods for the sample and row numbers.
      */
     dof_id_type sample() const { return _sample; }
     dof_id_type row() const { return _row; }

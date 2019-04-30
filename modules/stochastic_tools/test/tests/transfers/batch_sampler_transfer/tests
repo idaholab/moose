@@ -1,0 +1,35 @@
+[Tests]
+  [normal]
+    type = CSVDiff
+    input = master.i
+    csvdiff = 'master_out_storage_0002.csv master_out_data_0002.csv'
+    cli_args = 'MultiApps/runner/mode=normal'
+  []
+  [batch_n1]
+    type = CSVDiff
+    input = master.i
+    csvdiff = 'master_out_storage_0002.csv master_out_data_0002.csv'
+    max_parallel = 1
+    prereq = normal
+  []
+  [batch_n2]
+    type = CSVDiff
+    input = master.i
+    csvdiff = 'master_out_storage_0002.csv master_out_data_0002.csv'
+    min_parallel = 2
+    max_parallel = 2
+    prereq = batch_n1
+  []
+  [StochasticToolsTransfer_execute_on_error]
+    type = RunException
+    input = master.i
+    cli_args = Transfers/data/execute_on=INITIAL
+    expect_err = "The 'execute_on' parameter for the 'data' transfer was set"
+  []
+  [StochasticToolsTransfer_execute_on_check]
+    type = RunException
+    input = master.i
+    cli_args = "Transfers/data/execute_on=INITIAL MultiApps/runner/mode=normal"
+    expect_err = "MultiAppTransfer execute_on flags do not match associated Multiapp execute_on flags"
+  []
+[]

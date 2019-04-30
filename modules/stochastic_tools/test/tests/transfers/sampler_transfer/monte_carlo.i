@@ -28,13 +28,13 @@
     type = MonteCarloSampler
     n_samples = 5
     distributions = 'uniform_left uniform_right'
-    execute_on = INITIAL # create random numbers on initial and use them for each timestep
+    execute_on = INITIAL
   [../]
 []
 
 [MultiApps]
   [./sub]
-    type = SamplerTransientMultiApp
+    type = SamplerFullSolveMultiApp
     input_files = sub.i
     sampler = sample
   [../]
