@@ -76,6 +76,7 @@ temp_print_trace.*
 *.tiff
 *.ps
 *.bmp
+*.ico
 *.html
 *.xyz
 *Revision.h
