@@ -153,7 +153,7 @@
   [./axisymmetric_vlc_centerline_pp-jac]
     type = PetscJacobianTester
     input = '2D-RZ_centerline_VLC.i'
-    cli_args = "Outputs/active=''"
+    cli_args = "Outputs/active='' Outputs/csv=false"
     run_sim = 'True'
     ratio_tol = 7e-8
     difference_tol = 1e4
