@@ -38,7 +38,8 @@ validParams<EigenExecutionerBase>()
                               "Normalization");
   params.addParamNamesToGroup("auto_initialization time", "Advanced");
 
-  params.addPrivateParam<bool>("_eigen", true);
+  // Eigen executioner is depending on this residual norm
+  params.set<bool>("compute_initial_residual_before_preset_bcs") = true;
 
   return params;
 }

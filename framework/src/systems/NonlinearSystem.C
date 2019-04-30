@@ -159,10 +159,15 @@ NonlinearSystem::solve()
     _fe_problem.computeResidualSys(_transient_sys, *_current_solution, *_transient_sys.rhs);
     _computing_initial_residual = false;
     _transient_sys.rhs->close();
-    _initial_residual_before_preset_bcs = _transient_sys.rhs->l2_norm();
     if (_compute_initial_residual_before_preset_bcs)
+    {
+      _initial_residual_before_preset_bcs = _transient_sys.rhs->l2_norm();
+
       _console << "Initial residual before setting preset BCs: "
                << _initial_residual_before_preset_bcs << '\n';
+    }
+    else
+      _initial_residual_before_preset_bcs = 0.0;
   }
 
   // Clear the iteration counters
