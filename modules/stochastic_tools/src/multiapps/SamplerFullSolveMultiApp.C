@@ -10,10 +10,7 @@
 // StochasticTools includes
 #include "SamplerFullSolveMultiApp.h"
 #include "Sampler.h"
-#include "StochasticToolsTypes.h"
 #include "StochasticToolsTransfer.h"
-
-#include <unistd.h>
 
 registerMooseObject("StochasticToolsApp", SamplerFullSolveMultiApp);
 

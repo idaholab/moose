@@ -13,9 +13,6 @@
 #include "SamplerTransientMultiApp.h"
 #include "SamplerReceiver.h"
 #include "StochasticResults.h"
-#include "StochasticToolsTypes.h"
-
-#include <unistd.h>
 
 registerMooseObject("StochasticToolsApp", SamplerPostprocessorTransfer);
 
