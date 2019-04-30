@@ -32,10 +32,10 @@
 
 [BCs]
   [./bnd]
-    type = ADLagrangeVecFunctionDirichletBC
+    type = ADVectorFunctionDirichletBC
     variable = u
-    x_exact_soln = 'x_exact_sln'
-    y_exact_soln = 'y_exact_sln'
+    function_x = 'x_exact_sln'
+    function_y = 'y_exact_sln'
     boundary = 'left right top bottom'
   [../]
 []

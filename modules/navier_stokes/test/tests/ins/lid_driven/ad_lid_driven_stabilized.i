@@ -92,16 +92,16 @@
 
 [BCs]
   [./no_slip]
-    type = LagrangeVecFunctionDirichletBC
+    type = VectorFunctionDirichletBC
     variable = velocity
     boundary = 'bottom right left'
   [../]
 
   [./lid]
-    type = LagrangeVecFunctionDirichletBC
+    type = VectorFunctionDirichletBC
     variable = velocity
     boundary = 'top'
-    x_exact_soln = 'lid_function'
+    function_x = 'lid_function'
   [../]
 
   [./pressure_pin]

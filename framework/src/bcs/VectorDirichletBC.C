@@ -7,13 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "LagrangeVecDirichletBC.h"
+#include "VectorDirichletBC.h"
 
-registerMooseObject("MooseApp", LagrangeVecDirichletBC);
+registerMooseObject("MooseApp", VectorDirichletBC);
+registerMooseObjectRenamed("MooseApp",
+                           LagrangeVecDirichletBC,
+                           "05/01/2019 00:01",
+                           VectorDirichletBC);
 
 template <>
 InputParameters
-validParams<LagrangeVecDirichletBC>()
+validParams<VectorDirichletBC>()
 {
   InputParameters p = validParams<VectorNodalBC>();
   p.addRequiredParam<RealVectorValue>("values",
@@ -25,13 +29,13 @@ validParams<LagrangeVecDirichletBC>()
   return p;
 }
 
-LagrangeVecDirichletBC::LagrangeVecDirichletBC(const InputParameters & parameters)
+VectorDirichletBC::VectorDirichletBC(const InputParameters & parameters)
   : VectorNodalBC(parameters), _values(getParam<RealVectorValue>("values"))
 {
 }
 
 RealVectorValue
-LagrangeVecDirichletBC::computeQpResidual()
+VectorDirichletBC::computeQpResidual()
 {
   return _u - _values;
 }

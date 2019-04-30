@@ -32,7 +32,7 @@
     input = 'vector_ad_bc.i'
     exodiff = 'vector_ad_bc_out.e'
     requirement = 'We shall be able to produce the expected result using ADVectorKernel, ADVectorNodalBC, and ADVectorIntegratedBC'
-    design = 'ADLagrangeVecFunctionDirichletBC.md ADVectorDiffusion.md jacobian_definition.md'
+    design = 'ADVectorFunctionDirichletBC.md ADVectorDiffusion.md jacobian_definition.md'
   [../]
   [./vector_jac]
     type = 'PetscJacobianTester'
@@ -42,7 +42,7 @@
     ratio_tol = 1e-7
     difference_tol = 1e-6
     requirement = 'We shall be able to produce the exact Jacobian using ADVectorKernel, ADVectorNodalBC, and ADVectorIntegratedBC with a first order variable'
-    design = 'ADLagrangeVecFunctionDirichletBC.md ADVectorDiffusion.md jacobian_definition.md'
+    design = 'ADVectorFunctionDirichletBC.md ADVectorDiffusion.md jacobian_definition.md'
   [../]
   [./2nd_order_vector_jac]
     type = 'PetscJacobianTester'
@@ -52,6 +52,6 @@
     ratio_tol = 1e-7
     difference_tol = 1e-6
     requirement = 'We shall be able to produce the exact Jacobian using ADVectorKernel, ADVectorNodalBC, and ADVectorIntegratedBC with a second order variable'
-    design = 'ADLagrangeVecFunctionDirichletBC.md ADVectorDiffusion.md jacobian_definition.md'
+    design = 'ADVectorFunctionDirichletBC.md ADVectorDiffusion.md jacobian_definition.md'
   [../]
 []

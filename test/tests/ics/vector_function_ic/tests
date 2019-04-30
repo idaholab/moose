@@ -1,0 +1,37 @@
+[Tests]
+  design = 'VectorConstantIC.md'
+  issues = '#13309'
+  [vector_function_ic]
+    type = 'Exodiff'
+    input = 'vector_function_ic.i'
+    exodiff = 'vector_function_ic_out.e'
+    requirement = 'The system shall allow vector-valued initial conditions be set using a vector function.'
+  []
+  [vector_function_ic_comp]
+    type = 'Exodiff'
+    input = 'vector_function_ic_comp.i'
+    exodiff = 'vector_function_ic_comp_out.e'
+    requirement = 'The system shall allow vector-valued initial conditions be set using a function by components.'
+  []
+  [comp_x_error]
+    type = RunException
+    input = 'vector_function_ic.i'
+    cli_args = 'ICs/A/function_x=1'
+    expect_err = "The 'function' and 'function_x' parameters cannot both be set."
+    requirement = "The system shall error if the 'function' and 'function_x' parameters are both set within the VectorFunctionIC object."
+  []
+  [comp_y_error]
+    type = RunException
+    input = 'vector_function_ic.i'
+    cli_args = 'ICs/A/function_y=1'
+    expect_err = "The 'function' and 'function_y' parameters cannot both be set."
+    requirement = "The system shall error if the 'function' and 'function_y' parameters are both set within the VectorFunctionIC object."
+  []
+  [comp_z_error]
+    type = RunException
+    input = 'vector_function_ic.i'
+    cli_args = 'ICs/A/function_z=1'
+    expect_err = "The 'function' and 'function_z' parameters cannot both be set."
+    requirement = "The system shall error if the 'function' and 'function_z' parameters are both set within the VectorFunctionIC object."
+  []
+[]

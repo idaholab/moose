@@ -32,11 +32,11 @@
 
 [BCs]
   [./bnd]
-    type = LagrangeVecFunctionDirichletBC
+    type = VectorFunctionDirichletBC
     variable = u
-    x_exact_soln = 'x_exact_sln'
-    y_exact_soln = 'y_exact_sln'
-    z_exact_soln = '0'
+    function_x = 'x_exact_sln'
+    function_y = 'y_exact_sln'
+    function_z = '0'
     boundary = 'left right top bottom'
   [../]
 []

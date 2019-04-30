@@ -1,10 +1,10 @@
-# LagrangeVecFunctionDirichletBC
+# VectorFunctionDirichletBC
 
-!syntax description /BCs/LagrangeVecFunctionDirichletBC
+!syntax description /BCs/VectorFunctionDirichletBC
 
 ## Description
 
-`LagrangeVecFunctionDirichletBC` is a generalization of [`LagrangeVecDirichletBC`](/LagrangeVecDirichletBC.md) which
+`VectorFunctionDirichletBC` is a generalization of [`VectorDirichletBC`](/VectorDirichletBC.md) which
 imposes possibly temporally- and spatially-dependent values for the Lagrange
 vector components through
 MOOSE [`Function`](/Functions/index.md) objects on degrees of freedom
@@ -21,16 +21,16 @@ PDE of the form
 
 where $\Omega \subset \mathbb{R}^n$ is the domain, and $\partial
 \Omega = \partial \Omega_D \cup \partial \Omega_N$ is its boundary.
-A `LagrangeVecFunctionDirichletBC` object can be used to impose the
+A `VectorFunctionDirichletBC` object can be used to impose the
 condition (2) if the function is well-defined for $\vec{x} \in
-\partial \Omega_D$. In this case, the `x_exact_soln`, `y_exact_soln`, and `z_exact_soln` parameters correspond to a
+\partial \Omega_D$. In this case, the `function_x`, `function_y`, and `function_z` parameters correspond to a
 set of MOOSE `Function` objects which represent the mathematical function
 $\vec{g(t,\vec{x})}$, and the user must define one or more sidesets
 corresponding to the boundary subset $\partial \Omega_D$ via the
 `boundary` parameter.
 
-!syntax parameters /BCs/LagrangeVecFunctionDirichletBC
+!syntax parameters /BCs/VectorFunctionDirichletBC
 
-!syntax inputs /BCs/LagrangeVecFunctionDirichletBC
+!syntax inputs /BCs/VectorFunctionDirichletBC
 
-!syntax children /BCs/LagrangeVecFunctionDirichletBC
+!syntax children /BCs/VectorFunctionDirichletBC

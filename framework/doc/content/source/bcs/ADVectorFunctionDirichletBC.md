@@ -1,10 +1,10 @@
-# LagrangeVecDirichletBC
+# ADVectorFunctionDirichletBC
 
-!syntax description /BCs/LagrangeVecDirichletBC
+!syntax description /BCs/ADVectorFunctionDirichletBC
 
 ## Description
 
-`LagrangeVecDirichletBC` is the extension of [`DirichletBC`](bcs/DirichletBC) to
+`ADVectorFunctionDirichletBC` is the extension of [`FunctionDirichletBC`](bcs/DirichletBC) to
 Lagrange vector variables and is used for
 imposing so-called "essential" boundary conditions on systems of
 partial differential equations (PDEs).  Such boundary conditions force
@@ -21,13 +21,17 @@ class is appropriate to use for PDEs of the form
 
 where $\Omega \subset \mathbb{R}^n$ is the domain, and $\partial
 \Omega = \partial \Omega_D \cup \partial \Omega_N$ is its boundary. In
-this case, a `LagrangeVecDirichletBC` object is used to impose the condition (2)
-on the subset of the boundary denoted by $\partial \Omega_D$. In this case, the
-`values` correspond to the constant components of $\vec{g}$, and the user must define one
+this case, a `VectorFunctionDirichletBC` object is used to impose the condition (2)
+on the subset of the boundary denoted by $\partial \Omega_D$. In this case,
+$\vec{g}$ is supplied through the `Function` parameters `function_x`, `function_y`, and
+`function_z`. If any of those parameters are not supplied by the user, they
+take a default value of $0$. The user must define one
 or more sidesets corresponding to the boundary subset $\partial \Omega_D$.
 
-!syntax parameters /BCs/LagrangeVecDirichletBC
+Note that this BC computes its Jacobian using automatic differentiation
 
-!syntax inputs /BCs/LagrangeVecDirichletBC
+!syntax parameters /BCs/ADVectorFunctionDirichletBC
 
-!syntax children /BCs/LagrangeVecDirichletBC
+!syntax inputs /BCs/ADVectorFunctionDirichletBC
+
+!syntax children /BCs/ADVectorFunctionDirichletBC

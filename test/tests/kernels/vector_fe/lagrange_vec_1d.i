@@ -29,9 +29,9 @@
 
 [BCs]
   [./bnd]
-    type = LagrangeVecFunctionDirichletBC
+    type = VectorFunctionDirichletBC
     variable = u
-    x_exact_soln = 'x_exact_sln'
+    function_x = 'x_exact_sln'
     boundary = 'left right'
   [../]
 []
