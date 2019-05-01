@@ -358,15 +358,14 @@ void
 dataLoad(std::istream & stream, std::stringstream & s, void * /* context */)
 {
   size_t s_size = 0;
-
   stream.read((char *)&s_size, sizeof(s_size));
 
-  char * s_s = new char[s_size];
+  std::unique_ptr<char[]> s_s(new char[s_size]);
+  stream.read(s_s.get(), s_size);
 
-  stream.read(s_s, s_size);
-
-  s.write(s_s, s_size);
-  delete[] s_s;
+  // Clear the stringstream before loading new data into it.
+  s.str(std::string());
+  s.write(s_s.get(), s_size);
 }
 
 template <>
