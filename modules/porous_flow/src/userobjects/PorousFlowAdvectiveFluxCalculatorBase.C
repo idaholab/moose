@@ -10,6 +10,7 @@
 #include "PorousFlowAdvectiveFluxCalculatorBase.h"
 #include "Assembly.h"
 #include "libmesh/string_to_enum.h"
+#include "libmesh/parallel_sync.h"
 
 template <>
 InputParameters
@@ -70,7 +71,9 @@ PorousFlowAdvectiveFluxCalculatorBase::PorousFlowAdvectiveFluxCalculatorBase(
     _du_dvar(),
     _du_dvar_computed_by_thread(),
     _dkij_dvar(),
-    _dflux_out_dvars()
+    _dflux_out_dvars(),
+    _triples_to_receive(),
+    _triples_to_send()
 
 {
   if (_phase >= _dictator.numPhases())
@@ -226,7 +229,6 @@ PorousFlowAdvectiveFluxCalculatorBase::threadJoin(const UserObject & uo)
       _du_dvar[sequential_i] = pfafc._du_dvar[sequential_i];
 }
 
-
 const std::map<dof_id_type, std::vector<Real>> &
 PorousFlowAdvectiveFluxCalculatorBase::getdK_dvar(dof_id_type node_i, dof_id_type node_j) const
 {
@@ -288,4 +290,165 @@ PorousFlowAdvectiveFluxCalculatorBase::finalize()
       }
     }
   }
+}
+
+void
+PorousFlowAdvectiveFluxCalculatorBase::buildCommLists()
+{
+  // build nodes and pairs to exchange
+  AdvectiveFluxCalculatorBase::buildCommLists();
+
+  // Build _triples_to_receive
+  // tpr_global is essentially _triples_to_receive, but its key-pairs have global nodal IDs: later
+  // we build _triples_to_receive by flattening the data structure and making these key-pairs into
+  // sequential nodal IDs
+  std::map<processor_id_type,
+           std::map<std::pair<dof_id_type, dof_id_type>, std::vector<dof_id_type>>>
+      tpr_global;
+  for (const auto & elem : _fe_problem.getEvaluableElementRange())
+    if (this->hasBlocks(elem->subdomain_id()))
+    {
+      const processor_id_type elem_pid = elem->processor_id();
+      if (elem_pid != _my_pid)
+      {
+        if (tpr_global.find(elem_pid) == tpr_global.end())
+          tpr_global[elem_pid] =
+              std::map<std::pair<dof_id_type, dof_id_type>, std::vector<dof_id_type>>();
+        for (unsigned i = 0; i < elem->n_nodes(); ++i)
+          for (unsigned j = 0; j < elem->n_nodes(); ++j)
+          {
+            std::pair<dof_id_type, dof_id_type> the_pair(elem->node_id(i), elem->node_id(j));
+            if (tpr_global[elem_pid].find(the_pair) == tpr_global[elem_pid].end())
+              tpr_global[elem_pid][the_pair] = std::vector<dof_id_type>();
+
+            for (const auto & global_neighbor_to_i :
+                 _connections.globalConnectionsToGlobalID(elem->node_id(i)))
+              if (std::find(tpr_global[elem_pid][the_pair].begin(),
+                            tpr_global[elem_pid][the_pair].end(),
+                            global_neighbor_to_i) == tpr_global[elem_pid][the_pair].end())
+                tpr_global[elem_pid][the_pair].push_back(global_neighbor_to_i);
+          }
+      }
+    }
+
+  // flattening makes later manipulations a lot more concise.  Store the result in
+  // _triples_to_receive
+  _triples_to_receive.clear();
+  for (const auto & kv : tpr_global)
+  {
+    const processor_id_type pid = kv.first;
+    _triples_to_receive[pid] = std::vector<dof_id_type>();
+    for (const auto & pr_vec : kv.second)
+    {
+      const dof_id_type i = pr_vec.first.first;
+      const dof_id_type j = pr_vec.first.second;
+      for (const auto & global_nd : pr_vec.second)
+      {
+        _triples_to_receive[pid].push_back(i);
+        _triples_to_receive[pid].push_back(j);
+        _triples_to_receive[pid].push_back(global_nd);
+      }
+    }
+  }
+
+  _triples_to_send.clear();
+  auto triples_action_functor = [this](processor_id_type pid,
+                                       const std::vector<dof_id_type> & tts) {
+    _triples_to_send[pid] = tts;
+  };
+  Parallel::push_parallel_vector_data(this->comm(), _triples_to_receive, triples_action_functor);
+
+  // _triples_to_send and _triples_to_receive have been built using global node IDs
+  // since all processors know about that.  However, using global IDs means
+  // that every time we send/receive, we keep having to do things like
+  // _dkij_dvar[_connections.sequentialID(_triples_to_send[pid][i])][_connections.indexOfGlobalConnection(_triples_to_send[pid][i],
+  // _triples_to_send[pid][i + 1])] which is quite inefficient.  So:
+  for (auto & kv : _triples_to_send)
+  {
+    const processor_id_type pid = kv.first;
+    const std::size_t num = kv.second.size();
+    for (std::size_t i = 0; i < num; i += 3)
+    {
+      _triples_to_send[pid][i + 1] = _connections.indexOfGlobalConnection(
+          _triples_to_send[pid][i], _triples_to_send[pid][i + 1]);
+      _triples_to_send[pid][i] = _connections.sequentialID(_triples_to_send[pid][i]);
+    }
+  }
+  for (auto & kv : _triples_to_receive)
+  {
+    const processor_id_type pid = kv.first;
+    const std::size_t num = kv.second.size();
+    for (std::size_t i = 0; i < num; i += 3)
+    {
+      _triples_to_receive[pid][i + 1] = _connections.indexOfGlobalConnection(
+          _triples_to_receive[pid][i], _triples_to_receive[pid][i + 1]);
+      _triples_to_receive[pid][i] = _connections.sequentialID(_triples_to_receive[pid][i]);
+    }
+  }
+}
+
+void
+PorousFlowAdvectiveFluxCalculatorBase::exchangeGhostedInfo()
+{
+  // Exchange u_nodal and k_ij
+  AdvectiveFluxCalculatorBase::exchangeGhostedInfo();
+
+  // Exchange _du_dvar
+  std::map<processor_id_type, std::vector<std::vector<Real>>> du_dvar_to_send;
+  for (const auto & kv : _nodes_to_send)
+  {
+    const processor_id_type pid = kv.first;
+    du_dvar_to_send[pid] = std::vector<std::vector<Real>>();
+    for (const auto & nd : kv.second)
+      du_dvar_to_send[pid].push_back(_du_dvar[nd]);
+  }
+
+  auto du_action_functor = [this](processor_id_type pid,
+                                  const std::vector<std::vector<Real>> & du_dvar_received) {
+    const std::size_t msg_size = du_dvar_received.size();
+    mooseAssert(
+        msg_size == _nodes_to_receive[pid].size(),
+        "Message size, "
+            << msg_size
+            << ", in du_dvar communication is incompatible with nodes_to_receive, which has size "
+            << _nodes_to_receive[pid].size());
+    for (unsigned i = 0; i < msg_size; ++i)
+      _du_dvar[_nodes_to_receive[pid][i]] = du_dvar_received[i];
+  };
+  Parallel::push_parallel_vector_data(this->comm(), du_dvar_to_send, du_action_functor);
+
+  // Exchange _dkij_dvar
+  std::map<processor_id_type, std::vector<std::vector<Real>>> dkij_dvar_to_send;
+  for (const auto & kv : _triples_to_send)
+  {
+    const processor_id_type pid = kv.first;
+    dkij_dvar_to_send[pid] = std::vector<std::vector<Real>>();
+    const std::size_t num = kv.second.size();
+    for (std::size_t i = 0; i < num; i += 3)
+    {
+      const dof_id_type sequential_id = kv.second[i];
+      const unsigned index_to_seq = kv.second[i + 1];
+      const dof_id_type global_id = kv.second[i + 2];
+      dkij_dvar_to_send[pid].push_back(_dkij_dvar[sequential_id][index_to_seq][global_id]);
+    }
+  }
+
+  auto dk_action_functor = [this](processor_id_type pid,
+                                  const std::vector<std::vector<Real>> & dkij_dvar_received) {
+    const std::size_t num = _triples_to_receive[pid].size();
+    mooseAssert(dkij_dvar_received.size() == num / 3,
+                "Message size, " << dkij_dvar_received.size()
+                                 << ", in dkij_dvar communication is incompatible with "
+                                    "triples_to_receive, which has size "
+                                 << _triples_to_receive[pid].size());
+    for (std::size_t i = 0; i < num; i += 3)
+    {
+      const dof_id_type sequential_id = _triples_to_receive[pid][i];
+      const unsigned index_to_seq = _triples_to_receive[pid][i + 1];
+      const dof_id_type global_id = _triples_to_receive[pid][i + 2];
+      for (unsigned pvar = 0; pvar < _num_vars; ++pvar)
+        _dkij_dvar[sequential_id][index_to_seq][global_id][pvar] += dkij_dvar_received[i / 3][pvar];
+    }
+  };
+  Parallel::push_parallel_vector_data(this->comm(), dkij_dvar_to_send, dk_action_functor);
 }
