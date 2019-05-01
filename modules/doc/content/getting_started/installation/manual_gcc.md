@@ -58,7 +58,7 @@ In order to utilize our newly built GCC !!package gcc!! compiler, we need to set
 
 !package! code
 export PATH=$PACKAGES_DIR/gcc-__GCC__/bin:$PATH
-export LD_LIBRARY_PATH=$PACKAGES_DIR/gcc-__GCC__/lib64:$PACKAGES_DIR/gcc-__GCC__/lib:$PACKAGES_DIR/gcc-__GCC__/lib/gcc/x86_64-unknown-linux-gnu/__GCC__:$PACKAGES_DIR/gcc-__GCC__/libexec/gcc/x86_64-unknown-linux-gnu/__GCC__:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$PACKAGES_DIR/gcc-__GCC__/lib64:$PACKAGES_DIR/gcc-__GCC__/lib:$PACKAGES_DIR/gcc-__GCC__/lib/gcc/x86_64-pc-linux-gnu/__GCC__:$PACKAGES_DIR/gcc-__GCC__/libexec/gcc/x86_64-pc-linux-gnu/__GCC__:$LD_LIBRARY_PATH
 !package-end!
 
 !alert-end!
