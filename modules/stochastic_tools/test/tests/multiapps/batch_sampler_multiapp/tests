@@ -1,10 +1,13 @@
 [Tests]
+  issues = "#8863"
+  design = "SamplerPostprocessorTransfer.md SamplerFullSolveMultiApp.md"
   [batch_exodus_1]
     type = CheckFiles
     input = master_full_solve.i
     check_files = master_full_solve_out_runner0.e
     check_not_exists = master_full_solve_out_runner1.e
     max_parallel = 1
+    requirement = "The stochastic tools module shall support running sub-applications in a single batche."
   []
   [batch_exodus_2]
     type = CheckFiles
@@ -14,6 +17,7 @@
     max_parallel = 2
     min_parallel = 2
     prereq = batch_exodus_1
+    requirement = "The stochastic tools module shall support running sub-applications in multiple batches."
   []
   [normal]
     type = CSVDiff
@@ -21,12 +25,14 @@
     csvdiff = master_full_solve_out_storage_0002.csv
     prereq = batch_exodus_2
     cli_args = MultiApps/runner/mode=normal
+    requirement = "The stochastic tools module shall support pulling postprocessor data from a sub-application for each row of sampled data."
   []
   [batch_csv_1]
     type = CSVDiff
     input = master_full_solve.i
     csvdiff = master_full_solve_out_storage_0002.csv
     prereq = normal
+    requirement = "The stochastic tools module shall support pulling postprocessor data from a single sub-application running a batch of sampled data."
   []
   [batch_csv_2]
     type = CSVDiff
@@ -35,5 +41,6 @@
     max_parallel = 2
     min_parallel = 2
     prereq = batch_csv_1
+    requirement = "The stochastic tools module shall support pulling postprocessor data from a single sub-application running multiple batches of sampled data."
   []
 []

@@ -43,7 +43,6 @@
     multi_app = runner
     vector_postprocessor = storage
     postprocessor = average
-    check_multiapp_execute_on = false
   []
 []
 
