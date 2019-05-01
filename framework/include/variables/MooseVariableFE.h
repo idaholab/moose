@@ -512,6 +512,8 @@ public:
    */
   OutputType getValue(const Elem * elem, const std::vector<std::vector<OutputShape>> & phi) const;
 
+  void saveDoFValues(const DenseVector<OutputData> & v) const;
+
   /**
    * Compute the variable gradient value at a point on an element
    * @param elem The element we are computing on
