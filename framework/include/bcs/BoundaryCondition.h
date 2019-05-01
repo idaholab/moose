@@ -75,7 +75,7 @@ public:
    * Get a reference to the subproblem
    * @return Reference to SubProblem
    */
-  SubProblem & subProblem();
+  SubProblem & subProblem() { return _subproblem; }
 
   /**
    * Hook for turning the boundary condition on and off.
@@ -88,7 +88,7 @@ public:
    * this method. However, one has to index into the values manually, i.e. not using _qp.
    * @return true if the boundary condition should be applied, otherwise false
    */
-  virtual bool shouldApply();
+  virtual bool shouldApply() { return true; }
 
 protected:
   /// Reference to SubProblem
@@ -109,4 +109,3 @@ protected:
   /// Mesh this BC is defined on
   MooseMesh & _mesh;
 };
-
