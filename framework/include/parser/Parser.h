@@ -42,6 +42,8 @@ public:
     auto n_errs = exp.errors.size();
 
     FunctionParser fp;
+    fp.AddConstant("pi", libMesh::pi);
+    fp.AddConstant("e", std::exp(Real(1)));
     std::vector<std::string> var_names;
     auto ret = fp.ParseAndDeduceVariables(func_text, var_names);
     if (ret != -1)
@@ -267,4 +269,3 @@ private:
   std::string hitCLIFilter(std::string appname, const std::vector<std::string> & argv);
   void walkRaw(std::string fullpath, std::string nodepath, hit::Node * n);
 };
-
