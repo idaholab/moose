@@ -118,17 +118,14 @@ SystemBase::getVariable(THREAD_ID tid, const std::string & var_name)
 MooseVariableFEBase &
 SystemBase::getVariable(THREAD_ID tid, unsigned int var_number)
 {
-  MooseVariableFEBase * var =
-      dynamic_cast<MooseVariableFEBase *>(_vars[tid].getVariable(var_number));
-  if (!var)
-  {
-    std::stringstream errMsg;
-    errMsg << "Variable '" << Moose::stringify(var_number) << "' does not exist in this system"
-           << std::endl;
-    throw std::runtime_error(errMsg.str().c_str());
-    // mooseError("variable #" + Moose::stringify(var_number) + " does not exist in this system");
-  }
-  return *var;
+  if (var_number < _numbered_vars[tid].size())
+    if (_numbered_vars[tid][var_number])
+      return *_numbered_vars[tid][var_number];
+
+  std::stringstream errMsg;
+  errMsg << "Variable #'" << Moose::stringify(var_number) << "' does not exist in this system"
+         << std::endl;
+  throw std::runtime_error(errMsg.str().c_str());
 }
 
 template <typename T>
@@ -615,12 +612,13 @@ SystemBase::addVariable(const std::string & var_name,
                         Real scale_factor,
                         const std::set<SubdomainID> * const active_subdomains)
 {
+  _numbered_vars.resize(libMesh::n_threads());
   unsigned int var_num = system().add_variable(var_name, type, active_subdomains);
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     // FIXME: we cannot refer fetype in libMesh at this point, so we will just make a copy in
     // MooseVariableBase.
-    MooseVariableBase * var;
+    MooseVariableFEBase * var;
     if (type == FEType(0, MONOMIAL))
       var = new MooseVariableConstMonomial(
           var_num, type, *this, _subproblem.assembly(tid), _var_kind, tid);
@@ -632,6 +630,10 @@ SystemBase::addVariable(const std::string & var_name,
 
     var->scalingFactor(scale_factor);
     _vars[tid].add(var_name, var);
+
+    if (var_num >= _numbered_vars[tid].size())
+      _numbered_vars[tid].resize(var_num + 1);
+    _numbered_vars[tid][var_num] = var;
   }
   if (active_subdomains == nullptr)
     _var_map[var_num] = std::set<SubdomainID>();
@@ -647,6 +649,8 @@ SystemBase::addArrayVariable(const std::string & var_name,
                              const std::vector<Real> & scale_factor,
                              const std::set<SubdomainID> * const active_subdomains)
 {
+  _numbered_vars.resize(libMesh::n_threads());
+
   // Turn off automatic variable group identification so that we can be sure that this variable
   // group will be ordered exactly like it should be
   system().identify_variable_groups(false);
@@ -687,6 +691,10 @@ SystemBase::addArrayVariable(const std::string & var_name,
         var_num, type, *this, _subproblem.assembly(tid), _var_kind, tid, components);
     var->scalingFactor(scale_factor);
     _vars[tid].add(var_name, var);
+
+    if (var_num >= _numbered_vars[tid].size())
+      _numbered_vars[tid].resize(var_num + 1);
+    _numbered_vars[tid][var_num] = var;
   }
 }
 
