@@ -143,14 +143,13 @@ protected:
 };
 
 #define usingMortarConstraintMembers                                                               \
+  usingConstraintMembers;                                                                          \
   using MortarConstraint<compute_stage>::_phys_points_slave;                                       \
   using MortarConstraint<compute_stage>::_phys_points_master;                                      \
   using MortarConstraint<compute_stage>::_lambda;                                                  \
   using MortarConstraint<compute_stage>::_u_slave;                                                 \
   using MortarConstraint<compute_stage>::_u_master;                                                \
-  using MortarConstraint<compute_stage>::_qp;                                                      \
   using MortarConstraint<compute_stage>::_has_master;                                              \
-  using MortarConstraint<compute_stage>::_i;                                                       \
   using MortarConstraint<compute_stage>::_test;                                                    \
   using MortarConstraint<compute_stage>::_test_slave;                                              \
   using MortarConstraint<compute_stage>::_test_master;                                             \

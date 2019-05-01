@@ -76,3 +76,9 @@ protected:
   unsigned int _qp;
 };
 
+#define usingConstraintMembers                                                                     \
+  usingMooseObjectMembers;                                                                         \
+  usingTaggingInterfaceMembers;                                                                    \
+  using Constraint::_i;                                                                            \
+  using Constraint::_qp;                                                                           \
+  using Constraint::_tid

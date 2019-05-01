@@ -157,3 +157,15 @@ protected:
   DenseMatrix<Number> _local_ke;
 };
 
+#define usingTaggingInterfaceMembers                                                               \
+  using TaggingInterface::_subproblem;                                                             \
+  using TaggingInterface::accumulateTaggedLocalResidual;                                           \
+  using TaggingInterface::accumulateTaggedLocalMatrix;                                             \
+  using TaggingInterface::prepareVectorTag;                                                        \
+  using TaggingInterface::prepareMatrixTag;                                                        \
+  using TaggingInterface::prepareVectorTagNeighbor;                                                \
+  using TaggingInterface::_local_re;                                                               \
+  using TaggingInterface::prepareVectorTagLower;                                                   \
+  using TaggingInterface::prepareMatrixTagNeighbor;                                                \
+  using TaggingInterface::prepareMatrixTagLower;                                                   \
+  using TaggingInterface::_local_ke
