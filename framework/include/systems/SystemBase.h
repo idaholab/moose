@@ -795,9 +795,11 @@ protected:
 
   /// Time integrator
   std::shared_ptr<TimeIntegrator> _time_integrator;
+
+  /// Map variable number to its pointer
+  std::vector<std::vector<MooseVariableFEBase *>> _numbered_vars;
 };
 
 #define PARALLEL_TRY
 
 #define PARALLEL_CATCH _fe_problem.checkExceptionAndStopSolve();
-
