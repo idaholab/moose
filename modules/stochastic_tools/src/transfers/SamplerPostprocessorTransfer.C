@@ -21,9 +21,10 @@ InputParameters
 validParams<SamplerPostprocessorTransfer>()
 {
   InputParameters params = validParams<StochasticToolsTransfer>();
-  params.addClassDescription("Transfers data from Postprocessors on the sub-application to a VectorPostprocessor on the master application.");
+  params.addClassDescription("Transfers data from Postprocessors on the sub-application to a "
+                             "VectorPostprocessor on the master application.");
   params.addRequiredParam<PostprocessorName>(
-    "postprocessor", "The name of the Postprocessors on the sub-app to transfer from/to.");
+      "postprocessor", "The name of the Postprocessors on the sub-app to transfer from/to.");
   params.addRequiredParam<VectorPostprocessorName>("vector_postprocessor",
                                                    "The name of the VectorPostprocessor in "
                                                    "the MultiApp to transfer values "
@@ -34,9 +35,9 @@ validParams<SamplerPostprocessorTransfer>()
 }
 
 SamplerPostprocessorTransfer::SamplerPostprocessorTransfer(const InputParameters & parameters)
-    : StochasticToolsTransfer(parameters),
-      _sub_pp_name(getParam<PostprocessorName>("postprocessor")),
-      _master_vpp_name(getParam<VectorPostprocessorName>("vector_postprocessor"))
+  : StochasticToolsTransfer(parameters),
+    _sub_pp_name(getParam<PostprocessorName>("postprocessor")),
+    _master_vpp_name(getParam<VectorPostprocessorName>("vector_postprocessor"))
 {
   // Determine the Sampler
   std::shared_ptr<SamplerTransientMultiApp> ptr_transient =

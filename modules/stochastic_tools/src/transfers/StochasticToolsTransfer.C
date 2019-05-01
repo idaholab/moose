@@ -17,8 +17,8 @@ validParams<StochasticToolsTransfer>()
   return params;
 }
 
-StochasticToolsTransfer::StochasticToolsTransfer(const InputParameters & parameters) :
-  MultiAppTransfer(parameters)
+StochasticToolsTransfer::StochasticToolsTransfer(const InputParameters & parameters)
+  : MultiAppTransfer(parameters)
 {
   // When the MultiApp is running in batch mode the execute flags for the transfer object must
   // be removed. If not the 'regular' transfer that occurs will potentially destroy data
@@ -28,7 +28,13 @@ StochasticToolsTransfer::StochasticToolsTransfer(const InputParameters & paramet
   if (_multi_app->isParamValid("mode") && _multi_app->getParam<MooseEnum>("mode") == "batch")
   {
     if (parameters.isParamSetByUser("execute_on"))
-      paramError("execute_on", "The 'execute_on' parameter for the '", name(), "' transfer was set, but the parent MultiApp object (", _multi_app->name(), ") is running in 'batch' mode. For this case the 'execute_on' parameter must not be set by the user or set to NONE.");
+      paramError("execute_on",
+                 "The 'execute_on' parameter for the '",
+                 name(),
+                 "' transfer was set, but the parent MultiApp object (",
+                 _multi_app->name(),
+                 ") is running in 'batch' mode. For this case the 'execute_on' parameter must not "
+                 "be set by the user or set to NONE.");
     else
     {
       ExecFlagEnum & exec_flags = const_cast<ExecFlagEnum &>(getParam<ExecFlagEnum>("execute_on"));

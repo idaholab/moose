@@ -41,7 +41,7 @@ Sampler::Sampler(const InputParameters & parameters)
     _distribution_names(getParam<std::vector<DistributionName>>("distributions")),
     _seed(getParam<unsigned int>("seed")),
     _total_rows(0)
-    //_parallel_offsets(n_processors())
+//_parallel_offsets(n_processors())
 {
   for (const DistributionName & name : _distribution_names)
     _distributions.push_back(&getDistributionByName(name));
@@ -73,7 +73,8 @@ Sampler::reinit(const std::vector<DenseMatrix<Real>> & data)
   }
 
   // Update parallel information
-  MooseUtils::linearPartitionItems(_total_rows, n_processors(), processor_id(), _local_rows, _local_row_begin, _local_row_end);
+  MooseUtils::linearPartitionItems(
+      _total_rows, n_processors(), processor_id(), _local_rows, _local_row_begin, _local_row_end);
 }
 
 std::vector<DenseMatrix<Real>>

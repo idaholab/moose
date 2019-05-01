@@ -18,16 +18,17 @@ validParams<MonteCarloSampler>()
   InputParameters params = validParams<Sampler>();
   params.addClassDescription("Monte Carlo Sampler.");
   params.addRequiredParam<dof_id_type>(
-    "n_samples", "Number of Monte Carlo samples to perform for each distribution within each matrix.");
+      "n_samples",
+      "Number of Monte Carlo samples to perform for each distribution within each matrix.");
   params.addParam<dof_id_type>(
-    "n_matrices", 1, "Number of matrices to create, each matrix will contain 'n_samples'.");
+      "n_matrices", 1, "Number of matrices to create, each matrix will contain 'n_samples'.");
   return params;
 }
 
 MonteCarloSampler::MonteCarloSampler(const InputParameters & parameters)
-    : Sampler(parameters),
-      _num_matrices(getParam<dof_id_type>("n_matrices")),
-      _num_samples(getParam<dof_id_type>("n_samples"))
+  : Sampler(parameters),
+    _num_matrices(getParam<dof_id_type>("n_matrices")),
+    _num_samples(getParam<dof_id_type>("n_samples"))
 {
 }
 

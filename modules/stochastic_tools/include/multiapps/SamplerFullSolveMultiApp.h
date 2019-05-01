@@ -43,5 +43,6 @@ private:
   /**Helper method for running in mode='batch'*/
   bool solveStepBatch(Real dt, Real target_time, bool auto_advance = true);
 
-  std::vector<std::shared_ptr<StochasticToolsTransfer>> getActiveStochasticToolsTransfers(MultiAppTransfer::DIRECTION direction);
+  std::vector<std::shared_ptr<StochasticToolsTransfer>>
+  getActiveStochasticToolsTransfers(MultiAppTransfer::DIRECTION direction);
 };

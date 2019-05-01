@@ -917,7 +917,8 @@ public:
   /**
    * Return the complete warehouse for MultiAppTransfer object for the given direction
    */
-  const ExecuteMooseObjectWarehouse<Transfer> & getMultiAppTransferWarehouse(MultiAppTransfer::DIRECTION direction) const;
+  const ExecuteMooseObjectWarehouse<Transfer> &
+  getMultiAppTransferWarehouse(MultiAppTransfer::DIRECTION direction) const;
 
   /**
    * Execute MultiAppTransfers associate with execution flag and direction.

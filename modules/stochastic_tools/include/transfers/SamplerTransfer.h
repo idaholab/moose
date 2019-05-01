@@ -58,7 +58,6 @@ protected:
   const std::string & _receiver_name;
 
 private:
-
   /// Storage for data returned from Sampler object
   std::vector<DenseMatrix<Real>> _samples;
 
