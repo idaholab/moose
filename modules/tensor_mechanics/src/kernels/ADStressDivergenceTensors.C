@@ -78,12 +78,12 @@ template <ComputeStage compute_stage>
 void
 ADStressDivergenceTensors<compute_stage>::precalculateResidual()
 {
+  if (!_volumetric_locking_correction)
+    return;
+
   ADReal ad_current_elem_volume = 0.0;
   for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
     ad_current_elem_volume += _ad_JxW[qp] * _ad_coord[qp];
-
-  if (!_volumetric_locking_correction)
-    return;
 
   // Calculate volume averaged value of shape function derivative
   _avg_grad_test.resize(_test.size());
