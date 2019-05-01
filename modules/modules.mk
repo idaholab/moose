@@ -2,9 +2,25 @@
 ############################ COMMON MODULES ###################################
 ###############################################################################
 
+# When building an individual module, you should define APPLICATION_NAME to the
+# module you want to build before including this file. When doing that, there
+# is no need to duplicate the dependencies in the individual module's Makefile.
+# However, since APPLICATION_NAME gets redefined several times if multiple
+# modules are being built we need to save it off to keep track when we need
+# to build the exec for it or not.
+
+SAVED_APPLICATION_NAME := $(APPLICATION_NAME)
+ifneq (, $(SAVED_APPLICATION_NAME))
+  # Exec will automatically be built for the given APPLICATION_NAME
+  SKIP_LOADER := yes
+  UC_APP = $(shell echo $(SAVED_APPLICATION_NAME) | tr a-z A-Z)
+  $(eval $(UC_APP):=yes)
+endif
+
 ifeq ($(ALL_MODULES),yes)
         CHEMICAL_REACTIONS          := yes
         CONTACT                     := yes
+        EXTERNAL_PETSC_SOLVER       := yes
         FLUID_PROPERTIES            := yes
         FUNCTIONAL_EXPANSION_TOOLS  := yes
         HEAT_CONDUCTION             := yes
@@ -19,7 +35,6 @@ ifeq ($(ALL_MODULES),yes)
         STOCHASTIC_TOOLS            := yes
         TENSOR_MECHANICS            := yes
         XFEM                        := yes
-        EXTERNAL_PETSC_SOLVER       := yes
 endif
 
 ifeq ($(XFEM),yes)
@@ -104,6 +119,13 @@ ifeq ($(MISC),yes)
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
+ifeq ($(RDG),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/rdg
+  APPLICATION_NAME   := rdg
+  SUFFIX             := rdg
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
 ifeq ($(NAVIER_STOKES),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/navier_stokes
   APPLICATION_NAME   := navier_stokes
@@ -138,13 +160,6 @@ ifeq ($(POROUS_FLOW),yes)
 
   DEPEND_MODULES     := tensor_mechanics fluid_properties chemical_reactions rdg
   SUFFIX             := pflow
-  include $(FRAMEWORK_DIR)/app.mk
-endif
-
-ifeq ($(RDG),yes)
-  APPLICATION_DIR    := $(MOOSE_DIR)/modules/rdg
-  APPLICATION_NAME   := rdg
-  SUFFIX             := rdg
   include $(FRAMEWORK_DIR)/app.mk
 endif
 

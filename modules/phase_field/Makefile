@@ -18,17 +18,9 @@ ADDITIONAL_CPPFLAGS += -Wall -Wextra
 include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
-# dependency on tensor_mechanics
-TENSOR_MECHANICS := yes
-SKIP_LOADER      := yes
+# Module
+APPLICATION_NAME := phase_field
 include $(MODULE_DIR)/modules.mk
-
-# dep apps
-APPLICATION_DIR    := $(MODULE_DIR)/phase_field
-APPLICATION_NAME   := phase_field
-BUILD_EXEC         := yes
-GEN_REVISION       := no
-include            $(FRAMEWORK_DIR)/app.mk
 
 ###############################################################################
 # Additional special case targets should be added here

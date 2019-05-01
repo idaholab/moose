@@ -18,12 +18,9 @@ ADDITIONAL_CPPFLAGS += -Wall -Wextra
 include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
-# dep apps
-APPLICATION_NAME   := fluid_properties
-APPLICATION_DIR    := $(MODULE_DIR)/$(APPLICATION_NAME)
-BUILD_EXEC         := yes
-GEN_REVISION       := no
-include            $(FRAMEWORK_DIR)/app.mk
+# Module
+APPLICATION_NAME := fluid_properties
+include $(MODULE_DIR)/modules.mk
 
 ###############################################################################
 # Additional special case targets should be added here

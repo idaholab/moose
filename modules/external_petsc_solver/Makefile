@@ -11,18 +11,16 @@
 MODULE_DIR         ?= $(shell dirname `pwd`)
 MOOSE_DIR          ?= $(shell dirname $(MODULE_DIR))
 FRAMEWORK_DIR      ?= $(MOOSE_DIR)/framework
+ADDITIONAL_CPPFLAGS += -Wall -Wextra
 ###############################################################################
 
 # framework
 include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
-# dep apps
-APPLICATION_DIR    := $(MODULE_DIR)/external_petsc_solver
-APPLICATION_NAME   := external_petsc_solver
-BUILD_EXEC         := yes
-GEN_REVISION       := no
-include            $(FRAMEWORK_DIR)/app.mk
+# Module
+APPLICATION_NAME := external_petsc_solver
+include $(MODULE_DIR)/modules.mk
 
 ###############################################################################
 # Additional special case targets should be added here
