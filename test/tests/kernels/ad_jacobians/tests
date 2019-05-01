@@ -1,0 +1,9 @@
+[Tests]
+  [./testbodyforce-jac]
+    type = 'PetscJacobianTester'
+    input = 'test.i'
+    requirement = 'Jacobians calculated by ADTimeDerivative and ADBodyForce shall be perfect.'
+    issues = '#13260'
+    design = '/ADTimeDerivative.md'
+  [../]
+[]
