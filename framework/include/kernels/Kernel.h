@@ -44,12 +44,23 @@ public:
 
   virtual MooseVariable & variable() override { return _var; }
 
+protected:
   /**
    * Compute this Kernel's contribution to the residual at the current quadrature point
    */
   virtual Real computeQpResidual() = 0;
 
-protected:
+  /**
+   * Compute this Kernel's contribution to the Jacobian at the current quadrature point
+   */
+  virtual Real computeQpJacobian() { return 0; }
+
+  /**
+   * This is the virtual that derived classes should override for computing an off-diagonal Jacobian
+   * component.
+   */
+  virtual Real computeQpOffDiagJacobian(unsigned int /*jvar*/) { return 0; }
+
   /// This is a regular kernel so we cast to a regular MooseVariable
   MooseVariable & _var;
 
@@ -71,4 +82,3 @@ protected:
   /// Holds the solution gradient at the current quadrature points
   const VariableGradient & _grad_u;
 };
-
