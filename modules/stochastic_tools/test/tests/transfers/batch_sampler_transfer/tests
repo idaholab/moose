@@ -1,9 +1,12 @@
 [Tests]
+  issues = "#8863"
+  design = "SamplerTransfer.md"
   [normal]
     type = CSVDiff
     input = master.i
     csvdiff = 'master_out_storage_0002.csv master_out_data_0002.csv'
     cli_args = 'MultiApps/runner/mode=normal'
+    requirement = "The stochastic tools module shall include the ability to modify parameters for each sub-application using values from a distribution within a MultiApp."
   []
   [batch_n1]
     type = CSVDiff
@@ -11,6 +14,7 @@
     csvdiff = 'master_out_storage_0002.csv master_out_data_0002.csv'
     max_parallel = 1
     prereq = normal
+    requirement = "The stochastic tools module shall include the ability to modify parameters for each sub-application using values from a distribution within a MultiApp with the MultiApp executing solves in a single batch."
   []
   [batch_n2]
     type = CSVDiff
@@ -19,17 +23,20 @@
     min_parallel = 2
     max_parallel = 2
     prereq = batch_n1
+    requirement = "The stochastic tools module shall include the ability to modify parameters for each sub-application using values from a distribution within a MultiApp with the MultiApp executing solves in multiple batches."
   []
   [StochasticToolsTransfer_execute_on_error]
     type = RunException
     input = master.i
     cli_args = Transfers/data/execute_on=INITIAL
     expect_err = "The 'execute_on' parameter for the 'data' transfer was set"
+    requirement "The 'StochasticToolsTransfer object shall error if the 'execute_on' parameter is defined when the corresponding MultiApp object is running in batch mode."
   []
   [StochasticToolsTransfer_execute_on_check]
     type = RunException
     input = master.i
     cli_args = "Transfers/data/execute_on=INITIAL MultiApps/runner/mode=normal"
     expect_err = "MultiAppTransfer execute_on flags do not match associated Multiapp execute_on flags"
+    requirement = "The 'StochasticToolsTransfer object shall error if the 'execute_on' parameter does not match the corresponding MultiApp object is running in normal mode."
   []
 []
