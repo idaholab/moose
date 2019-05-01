@@ -43,4 +43,14 @@
     prereq = batch_csv_1
     requirement = "The stochastic tools module shall support pulling postprocessor data from a single sub-application running multiple batches of sampled data."
   []
+  [batch_csv_2_restore]
+    type = CSVDiff
+    input = master_full_solve.i
+    csvdiff = master_full_solve_out_storage_0002.csv
+    max_parallel = 2
+    min_parallel = 2
+    prereq = batch_csv_2
+    cli_args = MultiApps/runner/batch-restore
+    requirement = "The stochastic tools module shall support pulling postprocessor data from a single sub-application running multiple batches of sampled data using the backup and restore system."
+  []
 []

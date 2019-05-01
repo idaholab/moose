@@ -31,7 +31,7 @@ validParams<SamplerFullSolveMultiApp>()
   params.suppressParameter<std::vector<unsigned int>>("move_apps");
   params.set<bool>("use_positions") = false;
 
-  MooseEnum modes("normal=0 batch=1", "normal");
+  MooseEnum modes("normal=0 batch-reset=1 batch-restore=2", "normal");
   params.addParam<MooseEnum>(
       "mode",
       modes,
@@ -47,7 +47,7 @@ SamplerFullSolveMultiApp::SamplerFullSolveMultiApp(const InputParameters & param
     _sampler(SamplerInterface::getSampler("sampler")),
     _mode(getParam<MooseEnum>("mode"))
 {
-  if (_mode == "batch")
+  if (_mode == "batch-reset" || _mode == "batch-restore")
     init(n_processors());
   else
     init(_sampler.getTotalNumberOfRows());
@@ -57,7 +57,7 @@ bool
 SamplerFullSolveMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 {
   bool last_solve_converged = true;
-  if (_mode == "batch")
+  if (_mode == "batch-reset" || _mode == "batch-restore")
     last_solve_converged = solveStepBatch(dt, target_time, auto_advance);
   else
     last_solve_converged = FullSolveMultiApp::solveStep(dt, target_time, auto_advance);
@@ -82,6 +82,9 @@ SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
   for (auto transfer : from_transfers)
     transfer->initializeFromMultiapp();
 
+  if (_mode == "batch-restore")
+    backup();
+
   // Perform batch MultiApp solves
   dof_id_type num_items = _sampler.getLocalNumerOfRows();
   for (MooseIndex(num_items) i = 0; i < num_items; ++i)
@@ -96,9 +99,14 @@ SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
 
     if (i != num_items - 1)
     {
-      for (std::size_t app = 0; app < _total_num_apps; app++)
-        resetApp(app, target_time);
-      initialSetup();
+      if (_mode == "batch-restore")
+        restore();
+      else
+      {
+        for (std::size_t app = 0; app < _total_num_apps; app++)
+          resetApp(app, target_time);
+        initialSetup();
+      }
     }
   }
 

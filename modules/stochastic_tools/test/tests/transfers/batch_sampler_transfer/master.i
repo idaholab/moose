@@ -39,7 +39,7 @@
     type = SamplerFullSolveMultiApp
     sampler = mc
     input_files = 'sub.i'
-    mode = batch
+    mode = batch-reset
   []
 []
 

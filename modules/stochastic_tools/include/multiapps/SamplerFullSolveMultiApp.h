@@ -40,9 +40,14 @@ protected:
   const MooseEnum & _mode;
 
 private:
-  /**Helper method for running in mode='batch'*/
+  /**
+   * Helper method for running in mode='batch'
+   * */
   bool solveStepBatch(Real dt, Real target_time, bool auto_advance = true);
 
+  /**
+   * Helper for getting StochasticToolsTransfer objects.
+   */
   std::vector<std::shared_ptr<StochasticToolsTransfer>>
   getActiveStochasticToolsTransfers(MultiAppTransfer::DIRECTION direction);
 };

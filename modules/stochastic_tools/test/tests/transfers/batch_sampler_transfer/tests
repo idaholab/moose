@@ -25,12 +25,22 @@
     prereq = batch_n1
     requirement = "The stochastic tools module shall include the ability to modify parameters for each sub-application using values from a distribution within a MultiApp with the MultiApp executing solves in multiple batches."
   []
+  [batch_n2_restore]
+    type = CSVDiff
+    input = master.i
+    csvdiff = 'master_out_storage_0002.csv master_out_data_0002.csv'
+    min_parallel = 2
+    max_parallel = 2
+    prereq = batch_n2
+    cli_args = MultiApps/runner/mode=batch-restore
+    requirement = "The stochastic tools module shall include the ability to modify parameters for each sub-application using values from a distribution within a MultiApp with the MultiApp executing solves in multiple batches using backup and restore."
+  []
   [StochasticToolsTransfer_execute_on_error]
     type = RunException
     input = master.i
     cli_args = Transfers/data/execute_on=INITIAL
     expect_err = "The 'execute_on' parameter for the 'data' transfer was set"
-    requirement "The 'StochasticToolsTransfer object shall error if the 'execute_on' parameter is defined when the corresponding MultiApp object is running in batch mode."
+    requirement = "The 'StochasticToolsTransfer object shall error if the 'execute_on' parameter is defined when the corresponding MultiApp object is running in batch mode."
   []
   [StochasticToolsTransfer_execute_on_check]
     type = RunException
