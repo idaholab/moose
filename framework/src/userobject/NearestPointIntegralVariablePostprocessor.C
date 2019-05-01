@@ -16,14 +16,16 @@ template <>
 InputParameters
 validParams<NearestPointIntegralVariablePostprocessor>()
 {
-  InputParameters params = nearestPointBaseValidParams<ElementIntegralVariablePostprocessor>();
+  InputParameters params = nearestPointBaseValidParams<ElementIntegralVariablePostprocessor,
+                                                       ElementIntegralVariableUserObject>();
 
   return params;
 }
 
 NearestPointIntegralVariablePostprocessor::NearestPointIntegralVariablePostprocessor(
     const InputParameters & parameters)
-  : NearestPointBase<ElementIntegralVariablePostprocessor>(parameters)
+  : NearestPointBase<ElementIntegralVariablePostprocessor, ElementIntegralVariableUserObject>(
+        parameters)
 {
 }
 

@@ -13,7 +13,7 @@
 // MOOSE includes
 #include "NearestPointBase.h"
 #include "ElementIntegralVariablePostprocessor.h"
-
+#include "ElementIntegralVariableUserObject.h"
 // Forward Declarations
 class NearestPointIntegralVariablePostprocessor;
 
@@ -25,7 +25,7 @@ InputParameters validParams<NearestPointIntegralVariablePostprocessor>();
  * closest to each one of those points.
  */
 class NearestPointIntegralVariablePostprocessor
-  : public NearestPointBase<ElementIntegralVariablePostprocessor>
+  : public NearestPointBase<ElementIntegralVariablePostprocessor, ElementIntegralVariableUserObject>
 {
 public:
   NearestPointIntegralVariablePostprocessor(const InputParameters & parameters);
