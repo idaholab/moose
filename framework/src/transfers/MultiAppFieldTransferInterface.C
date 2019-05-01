@@ -277,7 +277,7 @@ MultiAppFieldTransferInterface::adjustTransferedSolutionNearestPoint(
       }
 
       dof_id_type dof = elem->dof_number(sys_num, var_num, 0);
-      to_solution.set(dof, (from_adjuster / to_adjuster) * to_solution(dof));
+      to_solution.set(dof, scale * to_solution(dof));
     }
   }
 
