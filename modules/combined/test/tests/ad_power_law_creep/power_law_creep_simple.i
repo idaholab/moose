@@ -9,7 +9,7 @@
   dim = 3
 []
 
-[Variables]
+[AuxVariables]
   [./temp]
     initial_condition = 1000.0
   [../]
@@ -24,25 +24,12 @@
     use_automatic_differentiation = true
   [../]
 []
-
-[Kernels]
-  [./heat]
-    type = ADHeatConduction
-    variable = temp
-  [../]
-  [./heat_ie]
-    type = ADHeatConductionTimeDerivative
-    variable = temp
-  [../]
-[]
-
 [BCs]
-  [./u_top_pull]
-    type = ADPressure
+  [./u_top_fix]
+    type = ADPresetBC
     variable = disp_y
-    component = 1
     boundary = top
-    constant = -10.0e6
+    value = 1e-5
   [../]
   [./u_bottom_fix]
     type = ADPresetBC
@@ -61,12 +48,6 @@
     variable = disp_z
     boundary = back
     value = 0.0
-  [../]
-  [./temp_fix]
-    type = DirichletBC
-    variable = temp
-    boundary = 'bottom top'
-    value = 1000.0
   [../]
 []
 
@@ -87,16 +68,6 @@
     activation_energy = 3.0e5
     temperature = temp
   [../]
-
-  [./thermal]
-    type = HeatConductionMaterial
-    specific_heat = 1.0
-    thermal_conductivity = 100.
-  [../]
-  [./density]
-    type = ADDensity
-    density = 1.0
-  [../]
 []
 
 [Preconditioning]
@@ -110,19 +81,6 @@
   type = Transient
   solve_type = 'PJFNK'
 
-  petsc_options = '-snes_ksp'
-  petsc_options_iname = '-ksp_gmres_restart'
-  petsc_options_value = '101'
-
-  line_search = 'none'
-
-  l_max_its = 20
-  nl_max_its = 20
-  nl_rel_tol = 1e-6
-  nl_abs_tol = 1e-6
-  l_tol = 1e-5
-  start_time = 0.0
-  end_time = 1.0
   num_steps = 10
   dt = 0.1
 []

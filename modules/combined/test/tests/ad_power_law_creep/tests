@@ -1,5 +1,5 @@
 [Tests]
-  [./power_law_creep_tm]
+  [./power_law_creep]
     type = 'Exodiff'
     input = 'power_law_creep.i'
     exodiff = 'power_law_creep_out.e'
@@ -9,7 +9,7 @@
                    creep and finite strain using the AD formulation and match non-AD formulation
                    results'
   [../]
-  [./testRestart1_tm]
+  [./testRestart1]
     type = 'RunApp'
     input = 'power_law_creep_restart1.i'
     recover = false
@@ -18,10 +18,10 @@
     requirement = 'Moose shall be able to restart a thermo-mechanics solve with power law creep and
                    finite strain using the AD formulation and match non-AD formulations (precurser)'
   [../]
-  [./testRestart2_tm]
+  [./testRestart2]
     type = 'Exodiff'
     input = 'power_law_creep_restart2.i'
-    prereq = 'testRestart1_tm'
+    prereq = 'testRestart1'
     exodiff = 'power_law_creep_restart2_tm_out.e'
     cli_args = 'Outputs/file_base=power_law_creep_restart2_tm_out'
     exodiff_opts = '-TM'
@@ -30,7 +30,7 @@
     requirement = 'Moose shall be able to restart a thermo-mechanics solve with power law creep and
                    finite strain using the AD formulation and match non-AD formulations'
   [../]
-  [./small_strain_tm]
+  [./small_strain]
     type = Exodiff
     input = 'power_law_creep_smallstrain.i'
     exodiff = 'power_law_creep_smallstrain_out.e'
@@ -41,7 +41,7 @@
                    results'
   [../]
 
-  [./power_law_creep_tm-jac]
+  [./power_law_creep-jac]
     type = 'PetscJacobianTester'
     input = 'power_law_creep.i'
     ratio_tol = 1e-8
@@ -53,7 +53,20 @@
     requirement = 'Moose shall be able to calculate a coupled thermo-mechanics solve with power law
                    creep and finite strain using the AD formulation and calculate a perfect Jacobian'
   [../]
-  [./small_strain_tm-jac]
+
+  [./power_law_creep_simple-jac]
+    type = 'PetscJacobianTester'
+    input = 'power_law_creep_simple.i'
+    ratio_tol = 1e-8
+    difference_tol = 1e-8
+    run_sim = True
+    petsc_version = '>=3.9.4'
+    issues = '#12650'
+    design = 'jacobian_definitions.md'
+    requirement = 'Moose shall be able to calculate a coupled thermo-mechanics solve with power law
+                   creep and finite strain using the AD formulation and calculate a perfect Jacobian'
+  [../]
+  [./small_strain-jac]
     type = PetscJacobianTester
     input = 'power_law_creep_smallstrain.i'
     ratio_tol = 1e-8
