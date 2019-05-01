@@ -40,17 +40,17 @@ protected:
    */
   virtual ADResidual computeQpResidual(Moose::MortarType mortar_type) = 0;
 
+  /**
+   * compute the residual for the specified element type
+   */
+  virtual void computeResidual(Moose::MortarType mortar_type);
+
+  /**
+   * compute the residual for the specified element type
+   */
+  virtual void computeJacobian(Moose::MortarType mortar_type);
+
 private:
-  /**
-   * compute the residual for the specified element type
-   */
-  void computeResidual(Moose::MortarType mortar_type);
-
-  /**
-   * compute the residual for the specified element type
-   */
-  void computeJacobian(Moose::MortarType mortar_type);
-
   /// Reference to the finite element problem
   FEProblemBase & _fe_problem;
 
@@ -66,6 +66,7 @@ private:
   /// Subdomain ID for the master surface
   const SubdomainID _master_subdomain_id;
 
+protected:
   /// Pointer to the lagrange multipler variable. nullptr if none
   const MooseVariable * _var;
 
@@ -75,6 +76,7 @@ private:
   /// Reference to the master variable
   const MooseVariable & _master_var;
 
+private:
   /// Whether to compute primal residuals
   const bool _compute_primal_residuals;
 
