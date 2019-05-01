@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWFLUIDSTATEMULTICOMPONENTBASE_H
-#define POROUSFLOWFLUIDSTATEMULTICOMPONENTBASE_H
+#pragma once
 
 #include "PorousFlowFluidStateFlash.h"
 
@@ -68,5 +67,3 @@ public:
   virtual Real totalMassFraction(
       Real pressure, Real temperature, Real Xnacl, Real saturation, unsigned int qp) const = 0;
 };
-
-#endif // POROUSFLOWFLUIDSTATEMULTICOMPONENTBASE_H

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWWATERVAPOR_H
-#define POROUSFLOWWATERVAPOR_H
+#pragma once
 
 #include "PorousFlowFluidStateSingleComponentBase.h"
 
@@ -51,5 +50,3 @@ protected:
   /// Critical temperature of water (K)
   const Real _T_critical;
 };
-
-#endif // POROUSFLOWWATERVAPOR_H

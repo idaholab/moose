@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWFLUIDPROPERTYIC_H
-#define POROUSFLOWFLUIDPROPERTYIC_H
+#pragma once
 
 #include "InitialCondition.h"
 
@@ -41,5 +40,3 @@ protected:
   /// Conversion from degrees Celsius to degrees Kelvin
   const Real _T_c2k;
 };
-
-#endif // POROUSFLOWFLUIDPROPERTYIC_H

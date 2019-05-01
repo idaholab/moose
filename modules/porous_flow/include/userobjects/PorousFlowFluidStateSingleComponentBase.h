@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWFLUIDSTATESINGLECOMPONENTBASE_H
-#define POROUSFLOWFLUIDSTATESINGLECOMPONENTBASE_H
+#pragma once
 
 #include "PorousFlowFluidStateBase.h"
 
@@ -53,5 +52,3 @@ protected:
   /// Perturbation applied to saturation temperature to move to gas/liquid phase
   const Real dT;
 };
-
-#endif // POROUSFLOWFLUIDSTATESINGLECOMPONENTBASE_H

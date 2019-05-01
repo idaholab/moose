@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWFLUIDSTATESINGLECOMPONENT_H
-#define POROUSFLOWFLUIDSTATESINGLECOMPONENT_H
+#pragma once
 
 #include "PorousFlowVariableBase.h"
 #include "PorousFlowFluidStateSingleComponentBase.h"
@@ -118,5 +117,3 @@ protected:
   /// Index of derivative wrt enthalpy
   const unsigned int _hidx;
 };
-
-#endif // POROUSFLOWFLUIDSTATESINGLECOMPONENT_H
