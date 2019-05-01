@@ -38,8 +38,8 @@ template <>
 InputParameters validParams<KernelBase>();
 
 /**
- * This is the common base class for the two main
- * kernel types implemented in MOOSE, EigenKernel and Kernel.
+ * This is the common base class for the three main
+ * kernel types implemented in MOOSE, Kernel, VectorKernel and ArrayKernel.
  */
 class KernelBase : public MooseObject,
                    public BlockRestrictable,
@@ -95,7 +95,7 @@ public:
   virtual void computeNonlocalOffDiagJacobian(unsigned int /* jvar */) {}
 
   /**
-   * Returns the variable number that this Kernel operates on.
+   * Returns the variable that this Kernel operates on.
    */
   virtual MooseVariableFEBase & variable() = 0;
 
@@ -105,16 +105,6 @@ public:
   SubProblem & subProblem() { return _subproblem; }
 
 protected:
-  /**
-   * Compute this Kernel's contribution to the Jacobian at the current quadrature point
-   */
-  virtual Real computeQpJacobian() { return 0; }
-  /**
-   * This is the virtual that derived classes should override for computing an off-diagonal Jacobian
-   * component.
-   */
-  virtual Real computeQpOffDiagJacobian(unsigned int /*jvar*/) { return 0; }
-
   /**
    * Following methods are used for Kernels that need to perform a per-element calculation
    */
@@ -179,4 +169,3 @@ protected:
 
   std::vector<unsigned int> _displacements;
 };
-

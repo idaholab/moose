@@ -21,8 +21,6 @@ InputParameters
 validParams<VectorIntegratedBC>()
 {
   InputParameters params = validParams<IntegratedBCBase>();
-  params += validParams<RandomInterface>();
-  params += validParams<MaterialPropertyInterface>();
   return params;
 }
 
