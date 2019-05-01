@@ -182,6 +182,7 @@ class HTMLRenderer(Renderer):
         """
         config = Renderer.defaultConfig()
         config['google_analytics'] = (False, "Enable Google Analytics.")
+        config['favicon'] = (None, "The location of the website favicon.")
         return config
 
     def __init__(self, *args, **kwargs):
@@ -222,7 +223,7 @@ class HTMLRenderer(Renderer):
         head = anytree.search.find_by_attr(root, 'head')
         body = anytree.search.find_by_attr(root, 'body')
 
-        favicon = self.get("favicon")
+        favicon = self.get('favicon')
         if favicon:
             html.Tag(head, 'link', rel="icon", type="image/x-icon", href=rel(favicon), sizes="16x16 32x32 64x64 128x128")
 
@@ -262,7 +263,6 @@ class MaterializeRenderer(HTMLRenderer):
         config['home'] = ('/', "The homepage for the website.")
         config['scrollspy'] = (True, "Enable/disable the scrolling table of contents.")
         config['search'] = (True, "Enable/disable the search bar.")
-        config['favicon'] = (None, "The location of the website favicon.")
         return config
 
     def __init__(self, *args, **kwargs):
