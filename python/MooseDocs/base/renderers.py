@@ -225,7 +225,8 @@ class HTMLRenderer(Renderer):
 
         favicon = self.get('favicon')
         if favicon:
-            html.Tag(head, 'link', rel="icon", type="image/x-icon", href=rel(favicon), sizes="16x16 32x32 64x64 128x128")
+            html.Tag(head, 'link', rel="icon", type="image/x-icon", href=rel(favicon), \
+                     sizes="16x16 32x32 64x64 128x128")
 
         for name, kwargs in self.__css:
             html.Tag(head, 'link', href=rel(name), type="text/css", rel="stylesheet", **kwargs)
