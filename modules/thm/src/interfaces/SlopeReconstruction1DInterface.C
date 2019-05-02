@@ -57,7 +57,7 @@ SlopeReconstruction1DInterface::getElementSlopes(const Elem * elem) const
 
   std::vector<const Elem *> neighbors(_n_side, nullptr);
   for (unsigned int i_side = 0; i_side < _n_side; i_side++)
-    neighbors[i_side] = elem->neighbor(i_side);
+    neighbors[i_side] = elem->neighbor_ptr(i_side);
 
   // get this element's position and solution
   const Point x_elem = elem->centroid();

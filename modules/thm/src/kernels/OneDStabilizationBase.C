@@ -59,8 +59,8 @@ OneDStabilizationBase::supg_residual_contribution(unsigned row)
   //  {
   //    // Is _current_elem on the boundary and are we on that boundary's qp?
   //    // If so, then return 0 for the stabilization term
-  //    if (((_current_elem->neighbor(0) == nullptr) && (_qp==0)) ||
-  //        ((_current_elem->neighbor(1) == nullptr) && (_qp==1)))
+  //    if (((_current_elem->neighbor_ptr(0) == nullptr) && (_qp==0)) ||
+  //        ((_current_elem->neighbor_ptr(1) == nullptr) && (_qp==1)))
   //    {
   //      // Try returning 0 - this was actually worse than doing SUPG
   //      return 0.;
