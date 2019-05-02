@@ -263,7 +263,6 @@
 - /Mesh/THMMesh
 
 - /Postprocessors/ElementHeatFluxPostprocessor
-- /Postprocessors/HeatStructureEnergyRZ
 - /Postprocessors/BoolControlDataValuePostprocessor
 - /Postprocessors/CFLTimeStepSize1Phase
 - /Postprocessors/CFLTimeStepSize2Phase

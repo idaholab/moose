@@ -25,6 +25,9 @@
 #   cp2 = 5
 #
 # Finally, rho2 * cp2 * int(T) * P = 1044.
+#
+# For a test variation using a reference temperature of T_ref = 0.5,
+# rho2 * cp2 * int(T - T_ref) * P = 864.
 
 [HeatStructureMaterials]
   [./region1-mat]

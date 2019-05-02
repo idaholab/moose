@@ -21,6 +21,9 @@ protected:
   /// Number of units that heat structure is multiplied by
   const unsigned int _n_units;
 
+  /// Reference temperature
+  const Real & _T_ref;
+
   /// Density of the heat structure
   const MaterialProperty<Real> & _rho;
 

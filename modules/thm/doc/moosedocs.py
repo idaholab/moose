@@ -4,9 +4,9 @@ import os
 
 # Locate MOOSE directory
 MOOSE_DIR = os.getenv('MOOSE_DIR', os.path.abspath(os.path.join(os.path.dirname(__name__), '..', 'moose')))
-if not os.path.exists(MOOSE_DIR):
+if not os.path.exists(os.path.join(MOOSE_DIR, 'python')):
     MOOSE_DIR = os.path.abspath(os.path.join(os.path.dirname(__name__), '..', '..', 'moose'))
-if not os.path.exists(MOOSE_DIR):
+if not os.path.exists(os.path.join(MOOSE_DIR, 'python')):
     raise Exception('Failed to locate MOOSE, specify the MOOSE_DIR environment variable.')
 os.environ['MOOSE_DIR'] = MOOSE_DIR
 
