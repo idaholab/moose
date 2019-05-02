@@ -23,8 +23,6 @@ PolycrystalVoronoiVoidIC::actionParameters()
 
   params.addRequiredParam<unsigned int>("op_num", "Number of order parameters");
 
-  params.addParam<unsigned int>("rand_seed", 12444, "The random seed");
-
   params.addParam<bool>(
       "columnar_3D", false, "3D microstructure will be columnar in the z-direction?");
 
@@ -62,7 +60,6 @@ PolycrystalVoronoiVoidIC::PolycrystalVoronoiVoidIC(const InputParameters & param
     _structure_type(getParam<MooseEnum>("structure_type")),
     _op_num(getParam<unsigned int>("op_num")),
     _op_index(getParam<unsigned int>("op_index")),
-    _rand_seed(getParam<unsigned int>("rand_seed")),
     _columnar_3D(getParam<bool>("columnar_3D")),
     _poly_ic_uo(getUserObject<PolycrystalVoronoi>("polycrystal_ic_uo")),
     _file_name(getParam<FileName>("file_name"))
@@ -83,15 +80,6 @@ PolycrystalVoronoiVoidIC::initialSetup()
 {
   if (_op_num <= _op_index)
     mooseError("op_index is too large in CircleGrainVoidIC");
-
-  MooseRandom::seed(getParam<unsigned int>("rand_seed"));
-  // Set up domain bounds with mesh tools
-  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
-  {
-    _bottom_left(i) = _mesh.getMinInDimension(i);
-    _top_right(i) = _mesh.getMaxInDimension(i);
-  }
-  _range = _top_right - _bottom_left;
 
   // Obtain total number and centerpoints of the grains
   _grain_num = _poly_ic_uo.getNumGrains();
@@ -125,7 +113,7 @@ PolycrystalVoronoiVoidIC::computeCircleCenters()
       Point rand_point;
 
       for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-        rand_point(i) = _bottom_left(i) + _range(i) * MooseRandom::rand();
+        rand_point(i) = _bottom_left(i) + _range(i) * _random.rand(_tid);
 
       // Allow the vectors to be sorted based on their distance from the
       // rand_point
@@ -157,9 +145,10 @@ PolycrystalVoronoiVoidIC::computeCircleCenters()
       Real lambda = 0;
       Point mid_rand_vector = _mesh.minPeriodicVector(_var.number(), midpoint, rand_point);
 
+      Real slope_dot = slope * slope;
+      mooseAssert(slope_dot > 0, "The dot product of slope with itself is zero");
       for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-        lambda += (mid_rand_vector(i) * slope(i)) /
-                  (slope(0) * slope(0) + slope(1) * slope(1) + slope(2) * slope(2));
+        lambda += (mid_rand_vector(i) * slope(i)) / slope_dot;
 
       // Assigning points to vector
       _centers[vp] = slope * lambda + midpoint;
