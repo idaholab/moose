@@ -206,6 +206,20 @@ TEST(InputParameters, applyParameters)
   EXPECT_TRUE(p1.get<MultiMooseEnum>("enum").contains("foo"));
 }
 
+TEST(InputParameters, applyParametersPrivateOverride)
+{
+  InputParameters p1 = emptyInputParameters();
+  p1.addPrivateParam<bool>("_flag", true);
+  EXPECT_TRUE(p1.get<bool>("_flag"));
+
+  InputParameters p2 = emptyInputParameters();
+  p2.addPrivateParam<bool>("_flag", false);
+  EXPECT_FALSE(p2.get<bool>("_flag"));
+
+  p1.applySpecificParameters(p2, {"_flag"}, true);
+  EXPECT_FALSE(p1.get<bool>("_flag"));
+}
+
 TEST(InputParameters, makeParamRequired)
 {
   InputParameters params = emptyInputParameters();
