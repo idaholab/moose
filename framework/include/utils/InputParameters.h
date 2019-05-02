@@ -644,7 +644,8 @@ public:
    * @see CommonOutputAction AddOutputAction
    */
   void applySpecificParameters(const InputParameters & common,
-                               const std::vector<std::string> & include);
+                               const std::vector<std::string> & include,
+                               bool allow_private = false);
 
   /**
    * Apply values from a single parameter in common, to a single parameter stored in this object
@@ -657,7 +658,9 @@ public:
    *   (3) Local parameter must be invalid OR not have been set from its default
    *   (4) Both cannot be private
    */
-  void applyParameter(const InputParameters & common, const std::string & common_name);
+  void applyParameter(const InputParameters & common,
+                      const std::string & common_name,
+                      bool allow_private = false);
 
   /**
    * Apply properties of a single coupled variable in common, to a single coupled variable stored in
@@ -1452,4 +1455,3 @@ validParams()
 
   mooseError("Missing validParams declaration!");
 }
-
