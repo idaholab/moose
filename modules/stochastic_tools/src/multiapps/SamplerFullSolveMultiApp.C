@@ -103,6 +103,8 @@ SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
         restore();
       else
       {
+        // The app is being reset for the next loop, thus the batch index must be indexed as such
+        _local_batch_app_index = i + 1;
         for (std::size_t app = 0; app < _total_num_apps; app++)
           resetApp(app, target_time);
         initialSetup();
@@ -133,4 +135,13 @@ SamplerFullSolveMultiApp::getActiveStochasticToolsTransfers(MultiAppTransfer::DI
       output.push_back(ptr);
   }
   return output;
+}
+
+std::string
+SamplerFullSolveMultiApp::getCommandLineArguments(unsigned int local_app)
+{
+  if (_mode == "batch-reset" && _cli_args.size() > 1)
+    return _cli_args[_local_batch_app_index + _sampler.getLocalRowBegin()];
+  else
+    return FullSolveMultiApp::getCommandLineArguments(local_app);
 }

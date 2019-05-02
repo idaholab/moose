@@ -12,6 +12,15 @@
   type = Steady
 []
 
+[MultiApps]
+  [sub]
+    type = FullSolveMultiApp
+    positions = '0 0 0
+                 1 1 1'
+    input_files = 'sub.i'
+  []
+[]
+
 [Distributions]
   [./uniform]
     type = UniformDistribution
@@ -23,20 +32,10 @@
 [Samplers]
   [./sample]
     type = MonteCarloSampler
-    n_samples = 3
-    distributions = 'uniform uniform'
-    execute_on = PRE_MULTIAPP_SETUP
+    n_samples = 10
+    distributions = 'uniform'
+    execute_on = 'initial timestep_end'
   [../]
-[]
-
-[MultiApps]
-  [sub]
-    type = FullSolveMultiApp
-    positions = '0 0 0
-                 1 1 1
-                 2 2 2'
-    input_files = 'sub.i'
-  []
 []
 
 [Controls]
@@ -44,6 +43,6 @@
     type = MultiAppCommandLineControl
     multi_app = sub
     sampler = sample
-    param_names = 'Mesh/xmax Mesh/ymax Mesh/zmax'
+    arguments = 'Mesh/nx'
   []
 []

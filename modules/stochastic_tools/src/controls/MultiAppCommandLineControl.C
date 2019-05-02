@@ -12,6 +12,7 @@
 #include "Function.h"
 #include "Sampler.h"
 #include "MultiApp.h"
+#include "SamplerFullSolveMultiApp.h"
 
 registerMooseObject("StochasticToolsApp", MultiAppCommandLineControl);
 
@@ -44,7 +45,33 @@ MultiAppCommandLineControl::MultiAppCommandLineControl(const InputParameters & p
     _sampler(SamplerInterface::getSampler("sampler")),
     _param_names(getParam<std::vector<std::string>>("param_names"))
 {
-  if (_multi_app->numGlobalApps() != _sampler.getTotalNumberOfRows())
+  if (!_sampler.getParam<ExecFlagEnum>("execute_on").contains(EXEC_PRE_MULTIAPP_SETUP))
+    _sampler.paramError(
+        "execute_on",
+        "The sampler object, '",
+        _sampler.name(),
+        "', is being used by the '",
+        name(),
+        "' object, thus the 'execute_on' of the sampler must include 'PRE_MULTIAPP_SETUP'.");
+
+  bool batch_reset = _multi_app->isParamValid("mode") &&
+                     (_multi_app->getParam<MooseEnum>("mode") == "batch-reset");
+  bool batch_restore = _multi_app->isParamValid("mode") &&
+                       (_multi_app->getParam<MooseEnum>("mode") == "batch-restore");
+  if (batch_reset)
+    ; // Do not perform the App count test, because in batch mode there is only one
+
+  else if (batch_restore)
+    _multi_app->paramError(
+        "mode",
+        "The MultiApp object, '",
+        _multi_app->name(),
+        "', supplied to the '",
+        name(),
+        "' object is setup to run in 'batch-restore' mode, when using this mode command line "
+        "arguments cannot be modified; batch-reset mode should be used instead.");
+
+  else if (_multi_app->numGlobalApps() != _sampler.getTotalNumberOfRows())
     mooseError("The number of sub apps (",
                _multi_app->numGlobalApps(),
                ") created by MultiApp object '",

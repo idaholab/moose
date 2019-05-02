@@ -39,6 +39,12 @@ protected:
   /// The Sup-application solve mode
   const MooseEnum & _mode;
 
+  ///
+  dof_id_type _local_batch_app_index;
+
+  /// Override to allow for batch mode to get correct cli_args
+  virtual std::string getCommandLineArguments(unsigned int local_app) override;
+
 private:
   /**
    * Helper method for running in mode='batch'
