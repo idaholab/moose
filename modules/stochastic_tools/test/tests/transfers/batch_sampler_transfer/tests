@@ -47,6 +47,6 @@
     input = master.i
     cli_args = "Transfers/data/execute_on=INITIAL MultiApps/runner/mode=normal"
     expect_err = "MultiAppTransfer execute_on flags do not match associated Multiapp execute_on flags"
-    requirement = "The 'StochasticToolsTransfer object shall error if the 'execute_on' parameter does not match the corresponding MultiApp object is running in normal mode."
+    requirement = "The 'StochasticToolsTransfer' object shall error if the 'execute_on' parameter does not match the corresponding MultiApp object is running in normal mode."
   []
 []
