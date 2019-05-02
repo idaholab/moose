@@ -10,6 +10,7 @@
 // StochasticTools includes
 #include "SamplerTransientMultiApp.h"
 #include "Sampler.h"
+#include "StochasticToolsTransfer.h"
 
 registerMooseObject("StochasticToolsApp", SamplerTransientMultiApp);
 

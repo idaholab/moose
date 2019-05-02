@@ -15,6 +15,7 @@
 
 class SamplerTransientMultiApp;
 class Sampler;
+class StochasticToolsTransfer;
 
 template <>
 InputParameters validParams<SamplerTransientMultiApp>();
@@ -57,7 +58,7 @@ private:
    *
    * This is a copy from SamplerFullSolveMultiapp, but the alternative is to create an intermediate
    * base. But, given the inheritance difference between these object that gets rather complex, so
-   * for a few lines of copied code is better for now.
+   * a few lines of copied code is better for now.
    */
   std::vector<std::shared_ptr<StochasticToolsTransfer>>
   getActiveStochasticToolsTransfers(MultiAppTransfer::DIRECTION direction);
