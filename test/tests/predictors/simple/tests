@@ -1,17 +1,29 @@
 [Tests]
+  issues = '#13345'
+  design = "predictors/SimplePredictor.md"
   [./test]
     type = 'CSVDiff'
     input = 'predictor_test.i'
     csvdiff = 'predictor_test_out.csv'
+    requirement = "MOOSE shall be able to predict the solution at the next time by extrapolating from old timestep solutions."
+  [../]
+  [./test_start_time]
+    type = 'CSVDiff'
+    input = 'predictor_test.i'
+    cli_args = 'Executioner/end_time=1.5 Executioner/Predictor/start_time=1.5 Outputs/file_base=predictor_test_start_time'
+    csvdiff = 'predictor_test_start_time.csv'
+    requirement = "The predictor step shall only be applied after the specified predictor start time."
   [../]
   [./test_skip]
     type = 'CSVDiff'
     input = 'predictor_skip_test.i'
     csvdiff = 'predictor_skip_test_out.csv'
+    requirement = "The predictor step shall be skipped based on the timestep value."
   [../]
   [./test_skip_old]
     type = 'CSVDiff'
     input = 'predictor_skip_old_test.i'
     csvdiff = 'predictor_skip_old_test_out.csv'
+    requirement = "The predictor step shall be skipped based on the old timestep value."
   [../]
 []

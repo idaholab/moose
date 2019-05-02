@@ -1,6 +1,6 @@
 [Tests]
   issues = '#6663'
-  design = "syntax/Adaptivity/index.md syntax/Adaptivity/Markers/index.md"
+  design = "syntax/"
   [./test]
     type = 'Exodiff'
     input = 'recompute_markers_during_cycles.i'
