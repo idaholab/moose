@@ -19,7 +19,7 @@ include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
 # Module
-APPLICATION_NAME := heat_conduction
+MODULE_NAME := heat_conduction
 include $(MODULE_DIR)/modules.mk
 
 ###############################################################################

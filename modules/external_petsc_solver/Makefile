@@ -19,7 +19,7 @@ include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
 # Module
-APPLICATION_NAME := external_petsc_solver
+MODULE_NAME := external_petsc_solver
 include $(MODULE_DIR)/modules.mk
 
 ###############################################################################

@@ -19,7 +19,7 @@ include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
 # Module
-APPLICATION_NAME := functional_expansion_tools
+MODULE_NAME := functional_expansion_tools
 include $(MODULE_DIR)/modules.mk
 
 ###############################################################################

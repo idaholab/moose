@@ -1,19 +1,16 @@
-###############################################################################
-############################ COMMON MODULES ###################################
-###############################################################################
+################################################################################
+############################ COMMON MODULES ####################################
+################################################################################
 
-# When building an individual module, you should define APPLICATION_NAME to the
-# module you want to build before including this file. When doing that, there
-# is no need to duplicate the dependencies in the individual module's Makefile.
-# However, since APPLICATION_NAME gets redefined several times if multiple
-# modules are being built we need to save it off to keep track when we need
-# to build the exec for it or not.
+# When building an individual module, you should define MODULE_NAME (lower case)
+# to the module you want to build before including this file. When doing that,
+# there is no need to duplicate the dependencies in the individual module's
+# Makefile.
 
-SAVED_APPLICATION_NAME := $(APPLICATION_NAME)
-ifneq (, $(SAVED_APPLICATION_NAME))
-  # Exec will automatically be built for the given APPLICATION_NAME
+ifneq (,$(MODULE_NAME))
+  # Exec will automatically be built for the given MODULE_NAME
   SKIP_LOADER := yes
-  UC_APP = $(shell echo $(SAVED_APPLICATION_NAME) | tr a-z A-Z)
+  UC_APP = $(shell echo $(MODULE_NAME) | tr a-z A-Z)
   $(eval $(UC_APP):=yes)
 endif
 
@@ -65,9 +62,9 @@ endif
 # The master list of all moose modules
 MODULE_NAMES := "chemical_reactions contact fluid_properties functional_expansion_tools heat_conduction level_set misc navier_stokes phase_field porous_flow rdg richards solid_mechanics stochastic_tools tensor_mechanics xfem external_petsc_solver"
 
-###############################################################################
-########################## MODULE REGISTRATION ################################
-###############################################################################
+################################################################################
+########################## MODULE REGISTRATION #################################
+################################################################################
 GEN_REVISION  := no
 
 ifeq ($(CHEMICAL_REACTIONS),yes)

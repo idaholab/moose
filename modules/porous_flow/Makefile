@@ -19,7 +19,7 @@ include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
 # Module
-APPLICATION_NAME := porous_flow
+MODULE_NAME := porous_flow
 include $(MODULE_DIR)/modules.mk
 
 ###############################################################################

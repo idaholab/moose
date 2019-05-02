@@ -19,7 +19,7 @@ include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
 # Module
-APPLICATION_NAME := phase_field
+MODULE_NAME := phase_field
 include $(MODULE_DIR)/modules.mk
 
 ###############################################################################

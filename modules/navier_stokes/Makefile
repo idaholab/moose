@@ -19,7 +19,7 @@ include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
 # Module
-APPLICATION_NAME := navier_stokes
+MODULE_NAME := navier_stokes
 include $(MODULE_DIR)/modules.mk
 
 ###############################################################################

@@ -264,8 +264,8 @@ LIBRARY_SUFFIX :=
 $(eval $(call CXX_RULE_TEMPLATE,_with$(app_LIB_SUFFIX)))
 
 # If this is a matching module then build the exec, otherwise fall back and use the variable
-ifneq (, $(SAVED_APPLICATION_NAME))
-  ifeq ($(SAVED_APPLICATION_NAME),$(APPLICATION_NAME))
+ifneq (,$(MODULE_NAME))
+  ifeq ($(MODULE_NAME),$(APPLICATION_NAME))
     all:: $(app_EXEC)
   else
     all:: $(app_LIB)

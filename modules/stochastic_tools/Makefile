@@ -19,7 +19,7 @@ include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
 # Module
-APPLICATION_NAME := stochastic_tools
+MODULE_NAME := stochastic_tools
 include $(MODULE_DIR)/modules.mk
 
 ###############################################################################
