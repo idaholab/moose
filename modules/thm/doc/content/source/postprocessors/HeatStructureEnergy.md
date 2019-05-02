@@ -1,12 +1,9 @@
+# HeatStructureEnergy
+
 !syntax description /Postprocessors/HeatStructureEnergy
 
-This post-processor computes the total energy $E_{tot}$ stored in a heat structure:
-\begin{equation}
-  E_{tot} = \sum\limits_i^N \int\limits_{V_i} \rho c_p T dV \,,
-\end{equation}
-where $N$ is the number of regions in the heat structure that are considered
-(i.e., the size of the parameter `block`), $\rho$ is the density, $c_p$ is the isobaric
-specific heat capacity, $T$ is the temperature, and $V_i$ is the spatial domain of region $i$.
+This post-processor derives from [HeatStructureEnergyBase](/HeatStructureEnergyBase.md)
+and performs a volume integral over a plate heat structure.
 
 !syntax parameters /Postprocessors/HeatStructureEnergy
 
