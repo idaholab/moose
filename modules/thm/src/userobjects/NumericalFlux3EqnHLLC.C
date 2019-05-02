@@ -35,7 +35,7 @@ NumericalFlux3EqnHLLC::NumericalFlux3EqnHLLC(const InputParameters & parameters)
 void
 NumericalFlux3EqnHLLC::calcFlux(const std::vector<Real> & U1,
                                 const std::vector<Real> & U2,
-                                const RealVectorValue & normal,
+                                const Real & nLR_dot_d,
                                 std::vector<Real> & flux) const
 {
   // extract the conserved variables and area
@@ -54,8 +54,8 @@ NumericalFlux3EqnHLLC::calcFlux(const std::vector<Real> & U1,
   mooseAssert(std::abs(A2 - A1) < 1e-15, "Left and right areas must be equal.");
   const Real A = A1;
 
-  // x-component of normal vector
-  const Real nx = normal(0);
+  // reference transformation normal
+  const Real & nx = nLR_dot_d;
 
   // compute the primitive variables
 
@@ -181,7 +181,7 @@ NumericalFlux3EqnHLLC::calcFlux(const std::vector<Real> & U1,
 void
 NumericalFlux3EqnHLLC::calcJacobian(const std::vector<Real> & U1,
                                     const std::vector<Real> & U2,
-                                    const RealVectorValue & normal,
+                                    const Real & nLR_dot_d,
                                     DenseMatrix<Real> & jac1,
                                     DenseMatrix<Real> & jac2) const
 {
@@ -205,8 +205,8 @@ NumericalFlux3EqnHLLC::calcJacobian(const std::vector<Real> & U1,
   const Real rhou2 = rhouA2 / A2;
   const Real rhoE2 = rhoEA2 / A2;
 
-  // x-component of normal vector
-  const Real nx = normal(0);
+  // reference transformation normal
+  const Real & nx = nLR_dot_d;
 
   // velocity
   Real u1, du1_drho1, du1_drhou1;

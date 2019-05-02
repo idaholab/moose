@@ -30,7 +30,7 @@ NumericalFlux3EqnCentered::NumericalFlux3EqnCentered(const InputParameters & par
 void
 NumericalFlux3EqnCentered::calcFlux(const std::vector<Real> & U1,
                                     const std::vector<Real> & U2,
-                                    const RealVectorValue & /*normal*/,
+                                    const Real & /*nLR_dot_d*/,
                                     std::vector<Real> & flux) const
 {
   const std::vector<Real> flux1 = computeFlux(U1);
@@ -68,7 +68,7 @@ NumericalFlux3EqnCentered::computeFlux(const std::vector<Real> & U) const
 void
 NumericalFlux3EqnCentered::calcJacobian(const std::vector<Real> & U1,
                                         const std::vector<Real> & U2,
-                                        const RealVectorValue & /*normal*/,
+                                        const Real & /*nLR_dot_d*/,
                                         DenseMatrix<Real> & jac1,
                                         DenseMatrix<Real> & jac2) const
 {

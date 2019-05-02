@@ -3,7 +3,7 @@
 #include "FlowJunctionUserObject.h"
 
 class JunctionOneToOne1PhaseUserObject;
-class RDGFluxBase;
+class NumericalFlux3EqnBase;
 
 template <>
 InputParameters validParams<JunctionOneToOne1PhaseUserObject>();
@@ -64,7 +64,7 @@ protected:
   const unsigned int _rhoEA_jvar;
 
   /// Numerical flux user object
-  const RDGFluxBase & _numerical_flux;
+  const NumericalFlux3EqnBase & _numerical_flux;
 
   /// Name of junction component
   const std::string & _junction_name;

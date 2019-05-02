@@ -1,9 +1,9 @@
 #pragma once
 
 #include "DGKernel.h"
-#include "RDGFluxBase.h"
 
 class NumericalFlux3EqnDGKernel;
+class NumericalFlux3EqnBase;
 
 template <>
 InputParameters validParams<NumericalFlux3EqnDGKernel>();
@@ -54,7 +54,7 @@ protected:
   const MaterialProperty<Real> & _p2;
 
   /// Numerical flux user object
-  const RDGFluxBase & _numerical_flux;
+  const NumericalFlux3EqnBase & _numerical_flux;
 
   // coupled variable indices
   const unsigned int _rhoA_var;
