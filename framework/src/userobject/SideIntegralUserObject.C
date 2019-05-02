@@ -39,8 +39,13 @@ SideIntegralUserObject::execute()
 Real
 SideIntegralUserObject::getValue()
 {
-  gatherSum(_integral_value);
   return _integral_value;
+}
+
+void
+SideIntegralUserObject::finalize()
+{
+  gatherSum(_integral_value);
 }
 
 void
