@@ -35,7 +35,7 @@
 #include "NodalBCBase.h"
 #include "IntegratedBCBase.h"
 #include "DGKernel.h"
-#include "InterfaceKernel.h"
+#include "InterfaceKernelBase.h"
 #include "ElementDamper.h"
 #include "NodalDamper.h"
 #include "GeneralDamper.h"
@@ -550,8 +550,8 @@ NonlinearSystemBase::addInterfaceKernel(std::string interface_kernel_name,
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
-    std::shared_ptr<InterfaceKernel> interface_kernel =
-        _factory.create<InterfaceKernel>(interface_kernel_name, name, parameters, tid);
+    std::shared_ptr<InterfaceKernelBase> interface_kernel =
+        _factory.create<InterfaceKernelBase>(interface_kernel_name, name, parameters, tid);
 
     const std::set<BoundaryID> & boundary_ids = interface_kernel->boundaryIDs();
     _vars[tid].addBoundaryVar(boundary_ids, &interface_kernel->variable());

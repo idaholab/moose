@@ -19,7 +19,7 @@ class FEProblemBase;
 class NonlinearSystemBase;
 class IntegratedBCBase;
 class DGKernelBase;
-class InterfaceKernel;
+class InterfaceKernelBase;
 class Kernel;
 
 class ComputeJacobianThread : public ThreadedElementLoop<ConstElemRange>
@@ -58,9 +58,9 @@ protected:
   MooseObjectWarehouse<DGKernelBase> * _dg_warehouse;
 
   // Reference to interface kernel storage structure
-  MooseObjectTagWarehouse<InterfaceKernel> & _interface_kernels;
+  MooseObjectTagWarehouse<InterfaceKernelBase> & _interface_kernels;
 
-  MooseObjectWarehouse<InterfaceKernel> * _ik_warehouse;
+  MooseObjectWarehouse<InterfaceKernelBase> * _ik_warehouse;
 
   // Reference to Kernel storage structure
   MooseObjectTagWarehouse<KernelBase> & _kernels;
@@ -81,4 +81,3 @@ protected:
   virtual void computeInternalFaceJacobian(const Elem * neighbor);
   virtual void computeInternalInterFaceJacobian(BoundaryID bnd_id);
 };
-

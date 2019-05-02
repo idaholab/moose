@@ -13,7 +13,7 @@
 #include "KernelBase.h"
 #include "IntegratedBCBase.h"
 #include "DGKernel.h"
-#include "InterfaceKernel.h"
+#include "InterfaceKernelBase.h"
 #include "MooseVariableFE.h"
 #include "MooseVariableScalar.h"
 #include "NonlocalKernel.h"
@@ -252,7 +252,7 @@ ComputeFullJacobianThread::computeInternalInterFaceJacobian(BoundaryID bnd_id)
     const auto & ce = _fe_problem.couplingEntries(_tid);
     for (const auto & it : ce)
     {
-      const std::vector<std::shared_ptr<InterfaceKernel>> & int_ks =
+      const std::vector<std::shared_ptr<InterfaceKernelBase>> & int_ks =
           _ik_warehouse->getActiveBoundaryObjects(bnd_id, _tid);
       for (const auto & interface_kernel : int_ks)
       {
