@@ -27,7 +27,7 @@
 [Components]
   [./pipe]
     type = FlowChannel1Phase
-    position = '0 0 0'
+    position = '0 0.1 0'
     orientation = '0 0 1'
     length = 2
     n_elems = 1
