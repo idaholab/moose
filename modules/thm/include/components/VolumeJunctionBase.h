@@ -16,13 +16,6 @@ public:
   VolumeJunctionBase(const InputParameters & params);
 
 protected:
-  /**
-   * Computes junction volume using the areas of the connected flow channels
-   *
-   * @param[in] areas   Areas of connected flow channels
-   */
-  Real computeVolumeFromAreas(const std::vector<Real> & areas) const;
-
   /// Volume of the junction
   const Real _volume;
 
