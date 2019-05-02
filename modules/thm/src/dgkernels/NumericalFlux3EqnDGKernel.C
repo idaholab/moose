@@ -1,4 +1,5 @@
 #include "NumericalFlux3EqnDGKernel.h"
+#include "NumericalFlux3EqnBase.h"
 #include "MooseVariable.h"
 #include "THMIndices3Eqn.h"
 
@@ -35,7 +36,7 @@ NumericalFlux3EqnDGKernel::NumericalFlux3EqnDGKernel(const InputParameters & par
     _rhouA2(getNeighborMaterialProperty<Real>("rhouA")),
     _rhoEA2(getNeighborMaterialProperty<Real>("rhoEA")),
     _p2(getNeighborMaterialProperty<Real>("p")),
-    _numerical_flux(getUserObject<RDGFluxBase>("numerical_flux")),
+    _numerical_flux(getUserObject<NumericalFlux3EqnBase>("numerical_flux")),
     _rhoA_var(coupled("rhoA")),
     _rhouA_var(coupled("rhouA")),
     _rhoEA_var(coupled("rhoEA")),
@@ -52,7 +53,7 @@ NumericalFlux3EqnDGKernel::computeQpResidual(Moose::DGResidualType type)
   std::vector<Real> U2 = {_rhoA2[_qp], _rhouA2[_qp], _rhoEA2[_qp], _A_linear[_qp]};
 
   const std::vector<Real> & flux =
-      _numerical_flux.getFlux(_current_side, _current_elem->id(), U1, U2, _normals[_qp]);
+      _numerical_flux.getFlux(_current_side, _current_elem->id(), U1, U2, _normals[_qp](0));
 
   Real re = 0.0;
   switch (type)
@@ -80,11 +81,11 @@ NumericalFlux3EqnDGKernel::computeQpOffDiagJacobian(Moose::DGJacobianType type, 
   std::vector<Real> U1 = {_rhoA1[_qp], _rhouA1[_qp], _rhoEA1[_qp], _A_linear[_qp]};
   std::vector<Real> U2 = {_rhoA2[_qp], _rhouA2[_qp], _rhoEA2[_qp], _A_linear[_qp]};
 
-  const DenseMatrix<Real> & fjac1 =
-      _numerical_flux.getJacobian(true, _current_side, _current_elem->id(), U1, U2, _normals[_qp]);
+  const DenseMatrix<Real> & fjac1 = _numerical_flux.getJacobian(
+      true, _current_side, _current_elem->id(), U1, U2, _normals[_qp](0));
 
-  const DenseMatrix<Real> & fjac2 =
-      _numerical_flux.getJacobian(false, _current_side, _current_elem->id(), U1, U2, _normals[_qp]);
+  const DenseMatrix<Real> & fjac2 = _numerical_flux.getJacobian(
+      false, _current_side, _current_elem->id(), U1, U2, _normals[_qp](0));
 
   Real re = 0.0;
   switch (type)

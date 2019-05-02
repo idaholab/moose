@@ -1,4 +1,5 @@
 #include "BoundaryFlux3EqnGhostBase.h"
+#include "NumericalFlux3EqnBase.h"
 
 template <>
 InputParameters
@@ -15,7 +16,8 @@ validParams<BoundaryFlux3EqnGhostBase>()
 }
 
 BoundaryFlux3EqnGhostBase::BoundaryFlux3EqnGhostBase(const InputParameters & parameters)
-  : BoundaryFluxBase(parameters), _numerical_flux(getUserObject<RDGFluxBase>("numerical_flux"))
+  : BoundaryFluxBase(parameters),
+    _numerical_flux(getUserObject<NumericalFlux3EqnBase>("numerical_flux"))
 {
 }
 
@@ -28,7 +30,7 @@ BoundaryFlux3EqnGhostBase::calcFlux(unsigned int iside,
 {
   const std::vector<Real> U2 = getGhostCellSolution(U1);
 
-  flux = _numerical_flux.getFlux(iside, ielem, U1, U2, normal);
+  flux = _numerical_flux.getFlux(iside, ielem, U1, U2, normal(0));
 }
 
 void
@@ -40,8 +42,8 @@ BoundaryFlux3EqnGhostBase::calcJacobian(unsigned int iside,
 {
   const std::vector<Real> U2 = getGhostCellSolution(U1);
 
-  const auto & pdF_pdU1 = _numerical_flux.getJacobian(true, iside, ielem, U1, U2, normal);
-  const auto & dF_dU2 = _numerical_flux.getJacobian(false, iside, ielem, U1, U2, normal);
+  const auto & pdF_pdU1 = _numerical_flux.getJacobian(true, iside, ielem, U1, U2, normal(0));
+  const auto & dF_dU2 = _numerical_flux.getJacobian(false, iside, ielem, U1, U2, normal(0));
 
   // compute dF/dU1 = pdF/pdU1 + dF/dU2 * dU2/dU1
   J = getGhostCellSolutionJacobian(U1);

@@ -19,12 +19,12 @@ public:
 
   virtual void calcFlux(const std::vector<Real> & U1,
                         const std::vector<Real> & U2,
-                        const RealVectorValue & normal,
+                        const Real & nLR_dot_d,
                         std::vector<Real> & flux) const override;
 
   virtual void calcJacobian(const std::vector<Real> & U1,
                             const std::vector<Real> & U2,
-                            const RealVectorValue & normal,
+                            const Real & nLR_dot_d,
                             DenseMatrix<Real> & jac1,
                             DenseMatrix<Real> & jac2) const override;
 

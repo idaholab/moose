@@ -1,9 +1,9 @@
 #pragma once
 
 #include "BoundaryFluxBase.h"
-#include "RDGFluxBase.h"
 
 class BoundaryFlux3EqnGhostBase;
+class NumericalFlux3EqnBase;
 
 template <>
 InputParameters validParams<BoundaryFlux3EqnGhostBase>();
@@ -49,5 +49,5 @@ protected:
   virtual DenseMatrix<Real> getGhostCellSolutionJacobian(const std::vector<Real> & U1) const = 0;
 
   /// Numerical flux user object
-  const RDGFluxBase & _numerical_flux;
+  const NumericalFlux3EqnBase & _numerical_flux;
 };
