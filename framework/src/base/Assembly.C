@@ -2157,13 +2157,13 @@ Assembly::init(const CouplingMatrix * cm)
       if (_sys.isScalarVariable(j))
       {
         auto & jvar = _sys.getScalarVariable(_tid, j);
-        _cm_fs_entry.push_back(std::make_pair(ivar, &jvar));
+        _cm_fs_entry.insert(std::make_pair(ivar, &jvar));
         _block_diagonal_matrix = false;
       }
       else
       {
         auto & jvar = _sys.getVariable(_tid, j);
-        _cm_ff_entry.push_back(std::make_pair(ivar, &jvar));
+        _cm_ff_entry.insert(std::make_pair(ivar, &jvar));
         if (i != j)
           _block_diagonal_matrix = false;
       }
@@ -2179,12 +2179,12 @@ Assembly::init(const CouplingMatrix * cm)
       if (_sys.isScalarVariable(j))
       {
         auto & jvar = _sys.getScalarVariable(_tid, j);
-        _cm_ss_entry.push_back(std::make_pair(ivar, &jvar));
+        _cm_ss_entry.insert(std::make_pair(ivar, &jvar));
       }
       else
       {
         auto & jvar = _sys.getVariable(_tid, j);
-        _cm_sf_entry.push_back(std::make_pair(ivar, &jvar));
+        _cm_sf_entry.insert(std::make_pair(ivar, &jvar));
       }
   }
 
@@ -2300,7 +2300,7 @@ Assembly::initNonlocalCoupling()
       if (!_sys.isScalarVariable(j))
       {
         auto & jvar = _sys.getVariable(_tid, j);
-        _cm_nonlocal_entry.push_back(std::make_pair(ivar, &jvar));
+        _cm_nonlocal_entry.insert(std::make_pair(ivar, &jvar));
       }
   }
 }

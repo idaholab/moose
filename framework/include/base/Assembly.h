@@ -766,11 +766,11 @@ public:
                                   Real scaling_factor,
                                   TagID tag = 0);
 
-  std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> & couplingEntries()
+  std::set<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> & couplingEntries()
   {
     return _cm_ff_entry;
   }
-  std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> & nonlocalCouplingEntries()
+  std::set<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> & nonlocalCouplingEntries()
   {
     return _cm_nonlocal_entry;
   }
@@ -1321,15 +1321,15 @@ private:
   const bool & _computing_jacobian;
 
   /// Entries in the coupling matrix for field variables
-  std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> _cm_ff_entry;
+  std::set<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> _cm_ff_entry;
   /// Entries in the coupling matrix for field variables vs scalar variables
-  std::vector<std::pair<MooseVariableFEBase *, MooseVariableScalar *>> _cm_fs_entry;
+  std::set<std::pair<MooseVariableFEBase *, MooseVariableScalar *>> _cm_fs_entry;
   /// Entries in the coupling matrix for scalar variables vs field variables
-  std::vector<std::pair<MooseVariableScalar *, MooseVariableFEBase *>> _cm_sf_entry;
+  std::set<std::pair<MooseVariableScalar *, MooseVariableFEBase *>> _cm_sf_entry;
   /// Entries in the coupling matrix for scalar variables
-  std::vector<std::pair<MooseVariableScalar *, MooseVariableScalar *>> _cm_ss_entry;
+  std::set<std::pair<MooseVariableScalar *, MooseVariableScalar *>> _cm_ss_entry;
   /// Entries in the coupling matrix for field variables for nonlocal calculations
-  std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> _cm_nonlocal_entry;
+  std::set<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> _cm_nonlocal_entry;
   /// Flag that indicates if the jacobian block was used
   std::vector<std::vector<std::vector<unsigned char>>> _jacobian_block_used;
   std::vector<std::vector<std::vector<unsigned char>>> _jacobian_block_nonlocal_used;

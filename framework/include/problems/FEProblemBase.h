@@ -184,9 +184,9 @@ public:
 
   bool areCoupled(unsigned int ivar, unsigned int jvar);
 
-  std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> &
+  std::set<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> &
   couplingEntries(THREAD_ID tid);
-  std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> &
+  std::set<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> &
   nonlocalCouplingEntries(THREAD_ID tid);
 
   /**
