@@ -4067,13 +4067,13 @@ FEProblemBase::areCoupled(unsigned int ivar, unsigned int jvar)
   return (*_cm)(ivar, jvar);
 }
 
-std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> &
+std::set<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> &
 FEProblemBase::couplingEntries(THREAD_ID tid)
 {
   return _assembly[tid]->couplingEntries();
 }
 
-std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> &
+std::set<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> &
 FEProblemBase::nonlocalCouplingEntries(THREAD_ID tid)
 {
   return _assembly[tid]->nonlocalCouplingEntries();
