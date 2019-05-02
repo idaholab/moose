@@ -18,20 +18,9 @@ ADDITIONAL_CPPFLAGS += -Wall -Wextra
 include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
-# dependency on tensor_mechanics and fluid_properties and chemical_reactions and RDG
-TENSOR_MECHANICS := yes
-FLUID_PROPERTIES := yes
-CHEMICAL_REACTIONS := yes
-RDG := yes
-SKIP_LOADER      := yes
+# Module
+MODULE_NAME := porous_flow
 include $(MODULE_DIR)/modules.mk
-
-# dep apps
-APPLICATION_DIR    := $(MODULE_DIR)/porous_flow
-APPLICATION_NAME   := porous_flow
-BUILD_EXEC         := yes
-GEN_REVISION       := no
-include            $(FRAMEWORK_DIR)/app.mk
 
 ###############################################################################
 # Additional special case targets should be added here
