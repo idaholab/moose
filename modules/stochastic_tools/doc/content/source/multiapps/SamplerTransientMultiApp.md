@@ -5,7 +5,7 @@ each matrix returned from the [Sampler](stochastic_tools/index.md#samplers) obje
 
 ## Example Syntax
 
-!listing modules/stochastic_tools/test/tests/multiapps/sampler_multiapp/master_transient.i block=MultiApps
+!listing modules/stochastic_tools/test/tests/multiapps/sampler_transient_multiapp/master_transient.i block=MultiApps
 
 !syntax parameters /MultiApps/SamplerTransientMultiApp
 

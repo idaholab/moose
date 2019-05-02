@@ -28,13 +28,124 @@ validParams<SamplerTransientMultiApp>()
   params.suppressParameter<std::vector<Point>>("move_positions");
   params.suppressParameter<std::vector<unsigned int>>("move_apps");
   params.set<bool>("use_positions") = false;
+
+  // use "batch-restore=2" to be consistent with SamplerFullSolveMultiApp and use the
+  // allow_out_of_range flag to allow the StochasticToolsTransfer object to inspect the MultiApp
+  // object parameters without triggering an assert.
+  MooseEnum modes("normal=0 batch-restore=2", "normal", true);
+  params.addParam<MooseEnum>(
+      "mode",
+      modes,
+      "The operation mode, 'normal' creates one sub-application for each row in the Sampler and "
+      "'batch' creates on sub-application for each processor and re-executes for each row.");
+
   return params;
 }
 
 SamplerTransientMultiApp::SamplerTransientMultiApp(const InputParameters & parameters)
   : TransientMultiApp(parameters),
     SamplerInterface(this),
-    _sampler(SamplerInterface::getSampler("sampler"))
+    _sampler(SamplerInterface::getSampler("sampler")),
+    _mode(getParam<MooseEnum>("mode"))
 {
-  init(_sampler.getTotalNumberOfRows());
+  if (_mode == "batch-restore")
+    init(n_processors());
+  else if (_mode == "normal")
+    init(_sampler.getTotalNumberOfRows());
+  else
+    paramError("mode",
+               "The supplied mode, '",
+               _mode,
+               "', does not exist, the options are 'normal' or 'batch-restore'.");
+}
+
+void
+SamplerTransientMultiApp::initialSetup()
+{
+  TransientMultiApp::initialSetup();
+
+  // Perform initial backup for the batch sub-applications
+  if (_mode == "batch-restore")
+  {
+    dof_id_type n = _sampler.getLocalNumerOfRows();
+    _batch_backup.resize(n);
+    for (MooseIndex(n) i = 0; i < n; ++i)
+      for (MooseIndex(_my_num_apps) j = 0; j < _my_num_apps; j++)
+        _batch_backup[i].emplace_back(_apps[j]->backup());
+  }
+}
+
+bool
+SamplerTransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
+{
+  bool last_solve_converged = true;
+  if (_mode == "batch-restore")
+    last_solve_converged = solveStepBatch(dt, target_time, auto_advance);
+  else
+    last_solve_converged = TransientMultiApp::solveStep(dt, target_time, auto_advance);
+  return last_solve_converged;
+}
+
+bool
+SamplerTransientMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_advance)
+{
+  // Value to return
+  bool last_solve_converged = true;
+
+  // List of active relevant Transfer objects
+  std::vector<std::shared_ptr<StochasticToolsTransfer>> to_transfers =
+      getActiveStochasticToolsTransfers(MultiAppTransfer::TO_MULTIAPP);
+  std::vector<std::shared_ptr<StochasticToolsTransfer>> from_transfers =
+      getActiveStochasticToolsTransfers(MultiAppTransfer::FROM_MULTIAPP);
+
+  // Initialize to/from transfers
+  for (auto transfer : to_transfers)
+    transfer->initializeToMultiapp();
+  for (auto transfer : from_transfers)
+    transfer->initializeFromMultiapp();
+
+  // Perform batch MultiApp solves
+  dof_id_type num_items = _sampler.getLocalNumerOfRows();
+  for (MooseIndex(num_items) i = 0; i < num_items; ++i)
+  {
+    if (_mode == "batch-restore")
+      for (MooseIndex(_my_num_apps) j = 0; j < _my_num_apps; j++)
+        _apps[j]->restore(_batch_backup[i][j]);
+
+    for (auto transfer : to_transfers)
+      transfer->executeToMultiapp();
+
+    last_solve_converged = TransientMultiApp::solveStep(dt, target_time, auto_advance);
+
+    for (auto transfer : from_transfers)
+      transfer->executeFromMultiapp();
+
+    if (_mode == "batch-restore")
+      for (MooseIndex(_my_num_apps) j = 0; j < _my_num_apps; j++)
+        _batch_backup[i][j] = _apps[j]->backup();
+  }
+
+  // Finalize to/from transfers
+  for (auto transfer : to_transfers)
+    transfer->finalizeToMultiapp();
+  for (auto transfer : from_transfers)
+    transfer->finalizeFromMultiapp();
+
+  return last_solve_converged;
+}
+
+std::vector<std::shared_ptr<StochasticToolsTransfer>>
+SamplerTransientMultiApp::getActiveStochasticToolsTransfers(MultiAppTransfer::DIRECTION direction)
+{
+  std::vector<std::shared_ptr<StochasticToolsTransfer>> output;
+  const ExecuteMooseObjectWarehouse<Transfer> & warehouse =
+      _fe_problem.getMultiAppTransferWarehouse(direction);
+  for (std::shared_ptr<Transfer> transfer : warehouse.getActiveObjects())
+  {
+    std::shared_ptr<StochasticToolsTransfer> ptr =
+        std::dynamic_pointer_cast<StochasticToolsTransfer>(transfer);
+    if (ptr)
+      output.push_back(ptr);
+  }
+  return output;
 }

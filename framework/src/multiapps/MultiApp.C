@@ -399,7 +399,7 @@ MultiApp::postExecute()
 void
 MultiApp::backup()
 {
-  _console << "Begining backing up MultiApp " << name() << std::endl;
+  _console << "Beginning backing up MultiApp " << name() << std::endl;
   for (unsigned int i = 0; i < _my_num_apps; i++)
     _backups[i] = _apps[i]->backup();
   _console << "Finished backing up MultiApp " << name() << std::endl;

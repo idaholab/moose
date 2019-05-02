@@ -39,7 +39,7 @@ protected:
   /// The Sup-application solve mode
   const MooseEnum & _mode;
 
-  ///
+  /// Counter for extracting command line arguments in batch mode
   dof_id_type _local_batch_app_index;
 
   /// Override to allow for batch mode to get correct cli_args

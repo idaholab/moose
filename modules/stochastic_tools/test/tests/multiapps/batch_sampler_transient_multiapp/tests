@@ -1,0 +1,25 @@
+[Tests]
+  issues = '#13320'
+  design = 'SamplerTransientMultiApp.md'
+  [transient_normal]
+    type = CSVDiff
+    input = master_transient.i
+    cli_args = MultiApps/runner/mode=normal
+    csvdiff = 'master_transient_out_storage_0000.csv master_transient_out_storage_0001.csv master_transient_out_storage_0002.csv master_transient_out_storage_0003.csv'
+    requirement = "The 'stochastic_tools' module shall support running sub-applications with input parameters varying at each time step."
+  []
+  [transient_batch]
+    type = CSVDiff
+    input = master_transient.i
+    csvdiff = 'master_transient_out_storage_0000.csv master_transient_out_storage_0001.csv master_transient_out_storage_0002.csv master_transient_out_storage_0003.csv'
+    requirement = "The 'stochastic_tools' module shall support running sub-applications with input parameters varying at each time step when running sub-application in batches."
+    prereq = transient_normal
+  []
+  [transient_mode_error]
+    type = RunException
+    input = master_transient.i
+    cli_args = MultiApps/runner/mode=not_normal
+    expect_err = "he supplied mode, 'not_normal', does not exist"
+    requirement = "The SamplerTransientMultiApp object shall error if an unknown mode is supplied."
+  []
+[]
