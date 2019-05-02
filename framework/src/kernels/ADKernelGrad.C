@@ -121,8 +121,7 @@ ADKernelGradTempl<T, compute_stage>::computeADOffDiagJacobian()
       residuals[_i] += MathUtils::dotProduct(value, _grad_test[_i][_qp]);
   }
 
-  std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> & ce =
-      _assembly.couplingEntries();
+  auto & ce = _assembly.couplingEntries();
   for (const auto & it : ce)
   {
     MooseVariableFEBase & ivariable = *(it.first);
