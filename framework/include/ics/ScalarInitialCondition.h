@@ -12,6 +12,7 @@
 #include "MooseObject.h"
 #include "ScalarCoupleable.h"
 #include "FunctionInterface.h"
+#include "UserObjectInterface.h"
 #include "DependencyResolverInterface.h"
 
 // forward declarations
@@ -36,6 +37,7 @@ InputParameters validParams<ScalarInitialCondition>();
 class ScalarInitialCondition : public MooseObject,
                                public ScalarCoupleable,
                                public FunctionInterface,
+                               public UserObjectInterface,
                                public DependencyResolverInterface
 {
 public:
