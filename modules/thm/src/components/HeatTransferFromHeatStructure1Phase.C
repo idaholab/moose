@@ -2,7 +2,6 @@
 #include "FlowChannel1Phase.h"
 #include "HeatStructure.h"
 #include "FlowModelSinglePhase.h"
-#include "FlowModelTwoPhase.h"
 #include "KDTree.h"
 #include "THMMesh.h"
 #include "libmesh/fe_interface.h"
