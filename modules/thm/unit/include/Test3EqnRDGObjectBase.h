@@ -17,7 +17,7 @@ public:
       _fp(getFluidPropertiesObject()),
 
       _A(2.0),
-      _normal(1.0, 0, 0)
+      _nLR_dot_d(1.0)
   {
   }
 
@@ -59,8 +59,8 @@ protected:
 
   /// Cross-sectional area
   const Real _A;
-  /// Normal vector
-  const RealVectorValue _normal;
+  /// Dot product of normal from L to R with direction vector
+  const Real _nLR_dot_d;
 
   /// Flux object to be tested
   const NumericalFlux3EqnBase * _flux;

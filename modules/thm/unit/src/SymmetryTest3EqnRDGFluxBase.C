@@ -19,11 +19,11 @@ SymmetryTest3EqnRDGFluxBase::test()
     const std::vector<Real> UR = computeConservativeSolution(WR);
 
     std::vector<Real> FLR;
-    _flux->calcFlux(UL, UR, _normal, FLR);
+    _flux->calcFlux(UL, UR, _nLR_dot_d, FLR);
     flux_regions.insert(_flux->getLastRegionIndex());
 
     std::vector<Real> FRL;
-    _flux->calcFlux(UR, UL, -_normal, FRL);
+    _flux->calcFlux(UR, UL, -_nLR_dot_d, FRL);
     flux_regions.insert(_flux->getLastRegionIndex());
 
     for (unsigned int i = 0; i < THM3Eqn::N_EQ; ++i)

@@ -1,6 +1,6 @@
 #include "JunctionOneToOne1PhaseUserObject.h"
 #include "THMIndices3Eqn.h"
-#include "RDGFluxBase.h"
+#include "NumericalFlux3EqnBase.h"
 #include "Numerics.h"
 
 registerMooseObject("THMApp", JunctionOneToOne1PhaseUserObject);
@@ -46,7 +46,7 @@ JunctionOneToOne1PhaseUserObject::JunctionOneToOne1PhaseUserObject(const InputPa
     _rhouA_jvar(coupled("rhouA")),
     _rhoEA_jvar(coupled("rhoEA")),
 
-    _numerical_flux(getUserObject<RDGFluxBase>("numerical_flux")),
+    _numerical_flux(getUserObject<NumericalFlux3EqnBase>("numerical_flux")),
 
     _junction_name(getParam<std::string>("junction_name")),
 
@@ -133,23 +133,21 @@ JunctionOneToOne1PhaseUserObject::finalize()
   if (!THM::areParallelVectors(_directions[0], _directions[1]))
     mooseError(_junction_name, ": The connected channels must be parallel at the junction.");
 
-  const RealVectorValue normal = {_normal[0], 0, 0};
-
   // Apply transformation to first connection's reference frame
   const Real n_direction1 = _directions[0] * _directions[1];
   _solutions[1][THM3Eqn::CONS_VAR_RHOUA] *= n_direction1;
 
   _fluxes[0] = _numerical_flux.getFlux(
-      _local_side_ids[0], _elem_ids[0], _solutions[0], _solutions[1], normal);
+      _local_side_ids[0], _elem_ids[0], _solutions[0], _solutions[1], _normal[0]);
 
   _fluxes[1] = _fluxes[0];
   _fluxes[1][THM3Eqn::CONS_VAR_RHOA] *= n_direction1;
   _fluxes[1][THM3Eqn::CONS_VAR_RHOEA] *= n_direction1;
 
   _flux_jacobians[0][0] = _numerical_flux.getJacobian(
-      true, _local_side_ids[0], _elem_ids[0], _solutions[0], _solutions[1], normal);
+      true, _local_side_ids[0], _elem_ids[0], _solutions[0], _solutions[1], _normal[0]);
   _flux_jacobians[0][1] = _numerical_flux.getJacobian(
-      false, _local_side_ids[0], _elem_ids[0], _solutions[0], _solutions[1], normal);
+      false, _local_side_ids[0], _elem_ids[0], _solutions[0], _solutions[1], _normal[0]);
 
   // Perform chain rule for reference frame transformation
   _flux_jacobians[0][1](THM3Eqn::CONS_VAR_RHOA, THM3Eqn::CONS_VAR_RHOUA) *= n_direction1;

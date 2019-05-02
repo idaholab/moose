@@ -2,7 +2,7 @@
 #include "SinglePhaseFluidProperties.h"
 #include "THMIndices3Eqn.h"
 #include "VolumeJunction1Phase.h"
-#include "RDGFluxBase.h"
+#include "NumericalFlux3EqnBase.h"
 #include "Numerics.h"
 
 registerMooseObject("THMApp", VolumeJunction1PhaseUserObject);
@@ -61,7 +61,7 @@ VolumeJunction1PhaseUserObject::VolumeJunction1PhaseUserObject(const InputParame
 {
   _numerical_flux_uo.resize(_n_connections);
   for (std::size_t i = 0; i < _n_connections; i++)
-    _numerical_flux_uo[i] = &getUserObjectByName<RDGFluxBase>(_numerical_flux_names[i]);
+    _numerical_flux_uo[i] = &getUserObjectByName<NumericalFlux3EqnBase>(_numerical_flux_names[i]);
 }
 
 void
@@ -85,8 +85,8 @@ VolumeJunction1PhaseUserObject::computeFluxesAndResiduals(const unsigned int & c
   UJi[THM3Eqn::CONS_VAR_RHOEA] = _rhoEV[0] / _volume * _A[0];
   UJi[THM3Eqn::CONS_VAR_AREA] = _A[0];
 
-  _flux[c] = _numerical_flux_uo[c]->getFlux(
-      _current_side, _current_elem->id(), UJi, Ui, {nJi_dot_di, 0, 0});
+  _flux[c] =
+      _numerical_flux_uo[c]->getFlux(_current_side, _current_elem->id(), UJi, Ui, nJi_dot_di);
 
   Real vJ, dvJ_drhoV;
   THM::v_from_rhoA_A(_rhoV[0], _volume, vJ, dvJ_drhoV);
@@ -119,7 +119,7 @@ VolumeJunction1PhaseUserObject::computeFluxesAndResiduals(const unsigned int & c
 
   // Compute flux Jacobian w.r.t. scalar variables
   const DenseMatrix<Real> dflux_dUJi = _numerical_flux_uo[c]->getJacobian(
-      true, _current_side, _current_elem->id(), UJi, Ui, {nJi_dot_di, 0, 0});
+      true, _current_side, _current_elem->id(), UJi, Ui, nJi_dot_di);
   for (unsigned int i = 0; i < _n_flux_eq; i++)
   {
     _flux_jacobian_scalar_vars[c](i, VolumeJunction1Phase::RHOV_INDEX) =
@@ -136,7 +136,7 @@ VolumeJunction1PhaseUserObject::computeFluxesAndResiduals(const unsigned int & c
 
   // Compute flux Jacobian w.r.t. flow channel variables
   _flux_jacobian_flow_channel_vars[c] = _numerical_flux_uo[c]->getJacobian(
-      false, _current_side, _current_elem->id(), UJi, Ui, {nJi_dot_di, 0, 0});
+      false, _current_side, _current_elem->id(), UJi, Ui, nJi_dot_di);
 
   for (unsigned int i = 0; i < _n_scalar_eq; i++)
   {

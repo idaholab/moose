@@ -4,7 +4,7 @@
 
 class VolumeJunction1PhaseUserObject;
 class SinglePhaseFluidProperties;
-class RDGFluxBase;
+class NumericalFlux3EqnBase;
 
 template <>
 InputParameters validParams<VolumeJunction1PhaseUserObject>();
@@ -76,5 +76,5 @@ protected:
   const SinglePhaseFluidProperties & _fp;
 
   /// Vector of numerical flux user objects for each connected flow channel
-  std::vector<const RDGFluxBase *> _numerical_flux_uo;
+  std::vector<const NumericalFlux3EqnBase *> _numerical_flux_uo;
 };
