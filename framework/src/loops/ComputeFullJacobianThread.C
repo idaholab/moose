@@ -38,8 +38,7 @@ ComputeFullJacobianThread::~ComputeFullJacobianThread() {}
 void
 ComputeFullJacobianThread::computeJacobian()
 {
-  std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> & ce =
-      _fe_problem.couplingEntries(_tid);
+  auto & ce = _fe_problem.couplingEntries(_tid);
   for (const auto & it : ce)
   {
     MooseVariableFEBase & ivariable = *(it.first);
@@ -74,8 +73,7 @@ ComputeFullJacobianThread::computeJacobian()
   /// done only when nonlocal kernels exist in the system
   if (_fe_problem.checkNonlocalCouplingRequirement())
   {
-    std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> & cne =
-        _fe_problem.nonlocalCouplingEntries(_tid);
+    auto & cne = _fe_problem.nonlocalCouplingEntries(_tid);
     for (const auto & it : cne)
     {
       MooseVariableFEBase & ivariable = *(it.first);
@@ -134,8 +132,7 @@ ComputeFullJacobianThread::computeJacobian()
 void
 ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
 {
-  std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> & ce =
-      _fe_problem.couplingEntries(_tid);
+  auto & ce = _fe_problem.couplingEntries(_tid);
   for (const auto & it : ce)
   {
     MooseVariableFEBase & ivar = *(it.first);
@@ -158,8 +155,7 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
   /// done only when nonlocal integrated_bcs exist in the system
   if (_fe_problem.checkNonlocalCouplingRequirement())
   {
-    std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> & cne =
-        _fe_problem.nonlocalCouplingEntries(_tid);
+    auto & cne = _fe_problem.nonlocalCouplingEntries(_tid);
     for (const auto & it : cne)
     {
       MooseVariableFEBase & ivariable = *(it.first);

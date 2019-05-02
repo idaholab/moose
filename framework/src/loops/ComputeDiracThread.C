@@ -116,8 +116,7 @@ ComputeDiracThread::onElement(const Elem * elem)
     }
 
     // Get a list of coupled variables from the SubProblem
-    std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> & coupling_entries =
-        dirac_kernel->subProblem().assembly(_tid).couplingEntries();
+    auto & coupling_entries = dirac_kernel->subProblem().assembly(_tid).couplingEntries();
 
     // Loop over the list of coupled variable pairs
     for (auto & it : coupling_entries)
