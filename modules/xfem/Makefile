@@ -18,18 +18,9 @@ ADDITIONAL_CPPFLAGS += -Wall -Wextra
 include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
-#dependency on solid_mechanics
-SOLID_MECHANICS    := yes
-SKIP_LOADER        := yes
+# Module
+MODULE_NAME := xfem
 include $(MODULE_DIR)/modules.mk
-
-# dep apps
-APPLICATION_DIR    := $(MODULE_DIR)/xfem
-APPLICATION_NAME   := xfem
-BUILD_EXEC         := yes
-DEPEND_MODULES     := solid_mechanics
-GEN_REVISION       := no
-include            $(FRAMEWORK_DIR)/app.mk
 
 ###############################################################################
 # Additional special case targets should be added here

@@ -263,13 +263,22 @@ LIBRARY_SUFFIX :=
 # Instantiate a new suffix rule for the module loader
 $(eval $(call CXX_RULE_TEMPLATE,_with$(app_LIB_SUFFIX)))
 
-ifeq ($(BUILD_EXEC),yes)
-  all:: $(app_EXEC)
+# If this is a matching module then build the exec, otherwise fall back and use the variable
+ifneq (,$(MODULE_NAME))
+  ifeq ($(MODULE_NAME),$(APPLICATION_NAME))
+    all:: $(app_EXEC)
+  else
+    all:: $(app_LIB)
+  endif
 else
-  all:: $(app_LIB)
-endif
+  ifeq ($(BUILD_EXEC),yes)
+    all:: $(app_EXEC)
+  else
+    all:: $(app_LIB)
+  endif
 
-BUILD_EXEC :=
+  BUILD_EXEC :=
+endif
 
 app_GIT_DIR := $(shell cd "$(APPLICATION_DIR)" && which git &> /dev/null && git rev-parse --show-toplevel)
 # Use wildcard in case the files don't exist

@@ -1,0 +1,14 @@
+[Tests]
+  [./intermittent_failure]
+    type = 'RunApp'
+    input = 'intermittent_failure.i'
+    max_time = 10
+
+    requirement = "The system shall support a testing mechanism that fails intermittently."
+    design = "TestHarness.md"
+    issues = "#13334"
+
+    valgrind = 'NONE'
+    method = '!dbg'
+  [../]
+[]
