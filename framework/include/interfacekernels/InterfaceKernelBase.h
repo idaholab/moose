@@ -90,12 +90,14 @@ public:
   virtual void computeJacobian() = 0;
 
 protected:
-
   /// Compute jacobians at quadrature points
   virtual Real computeQpJacobian(Moose::DGJacobianType /*type*/) { return 0; }
 
   /// compute off-diagonal jacobian components at quadrature points
-  virtual Real computeQpOffDiagJacobian(Moose::DGJacobianType /*type*/, unsigned int /*jvar*/) { return 0; }
+  virtual Real computeQpOffDiagJacobian(Moose::DGJacobianType /*type*/, unsigned int /*jvar*/)
+  {
+    return 0;
+  }
 
   /// The volume of the current neighbor
   const Real & getNeighborElemVolume();

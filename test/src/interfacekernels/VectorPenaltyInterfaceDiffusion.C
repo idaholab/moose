@@ -16,8 +16,10 @@ InputParameters
 validParams<VectorPenaltyInterfaceDiffusion>()
 {
   InputParameters params = validParams<VectorInterfaceKernel>();
-  params.addClassDescription("A test VectorInterfaceKernel that imposes the condition: $\\vec{u} - \\vec{v} = 0$ across an interface.");
-  params.addRequiredParam<Real>("penalty", "The penalty that penalizes jump between master and neighbor variables.");
+  params.addClassDescription("A test VectorInterfaceKernel that imposes the condition: $\\vec{u} - "
+                             "\\vec{v} = 0$ across an interface.");
+  params.addRequiredParam<Real>(
+      "penalty", "The penalty that penalizes jump between master and neighbor variables.");
   return params;
 }
 
