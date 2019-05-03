@@ -40,8 +40,6 @@ protected:
   const unsigned int _op_num;
   const unsigned int _op_index;
 
-  const unsigned int _rand_seed;
-
   const bool _columnar_3D;
 
   const PolycrystalVoronoi & _poly_ic_uo;
@@ -69,4 +67,3 @@ protected:
     bool operator()(const DistancePoint & a, const DistancePoint & b) { return a.d < b.d; }
   } _customLess;
 };
-
