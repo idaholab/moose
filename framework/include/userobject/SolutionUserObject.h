@@ -59,12 +59,14 @@ public:
    * data)
    * @param p The location at which to return a value
    * @param var_name The variable to be evaluated
+   * @param subdomain_ids Subdomains IDs where to look for the value, if nullptr look everywhere
    * @return The desired value for the given variable at a location
    */
   Real pointValueWrapper(Real t,
                          const Point & p,
                          const std::string & var_name,
-                         const MooseEnum & weighting_type = weightingType()) const;
+                         const MooseEnum & weighting_type = weightingType(),
+                         const std::set<subdomain_id_type> * subdomain_ids = nullptr) const;
 
   /**
    * Returns a value at a specific location and variable (see SolutionFunction)
@@ -72,9 +74,13 @@ public:
    * data)
    * @param p The location at which to return a value
    * @param local_var_index The local index of the variable to be evaluated
+   * @param subdomain_ids Subdomains IDs where to look for the value, if nullptr look everywhere
    * @return The desired value for the given variable at a location
    */
-  Real pointValue(Real t, const Point & p, const unsigned int local_var_index) const;
+  Real pointValue(Real t,
+                  const Point & p,
+                  const unsigned int local_var_index,
+                  const std::set<subdomain_id_type> * subdomain_ids = nullptr) const;
 
   /**
    * Returns a value at a specific location and variable (see SolutionFunction)
@@ -82,9 +88,13 @@ public:
    * data)
    * @param p The location at which to return a value
    * @param var_name The variable to be evaluated
+   * @param subdomain_ids Subdomains IDs where to look for the value, if nullptr look everywhere
    * @return The desired value for the given variable at a location
    */
-  Real pointValue(Real t, const Point & p, const std::string & var_name) const;
+  Real pointValue(Real t,
+                  const Point & p,
+                  const std::string & var_name,
+                  const std::set<subdomain_id_type> * subdomain_ids = nullptr) const;
 
   /**
    * Returns a value at a specific location and variable for cases where the solution is
@@ -95,10 +105,14 @@ public:
    * data)
    * @param p The location at which to return a value
    * @param local_var_index The local index of the variable to be evaluated
+   * @param subdomain_ids Subdomains IDs where to look for the value, if nullptr look everywhere
    * @return The desired value for the given variable at a location
    */
   std::map<const Elem *, Real>
-  discontinuousPointValue(Real t, Point pt, const unsigned int local_var_index) const;
+  discontinuousPointValue(Real t,
+                          Point pt,
+                          const unsigned int local_var_index,
+                          const std::set<subdomain_id_type> * subdomain_ids = nullptr) const;
 
   /**
    * Returns a value at a specific location and variable for cases where the solution is
@@ -109,10 +123,14 @@ public:
    * data)
    * @param p The location at which to return a value
    * @param var_name The variable to be evaluated
+   * @param subdomain_ids Subdomains IDs where to look for the value, if nullptr look everywhere
    * @return The desired value for the given variable at a location
    */
   std::map<const Elem *, Real>
-  discontinuousPointValue(Real t, const Point & p, const std::string & var_name) const;
+  discontinuousPointValue(Real t,
+                          const Point & p,
+                          const std::string & var_name,
+                          const std::set<subdomain_id_type> * subdomain_ids = nullptr) const;
 
   /**
    * Returns the gradient at a specific location and variable checking for multiple values and
@@ -122,12 +140,15 @@ public:
    * data)
    * @param p The location at which to return a value
    * @param var_name The variable to be evaluated
+   * @param subdomain_ids Subdomains IDs where to look for the value, if nullptr look everywhere
    * @return The desired value for the given variable at a location
    */
-  RealGradient pointValueGradientWrapper(Real t,
-                                         const Point & p,
-                                         const std::string & var_name,
-                                         const MooseEnum & weighting_type = weightingType()) const;
+  RealGradient
+  pointValueGradientWrapper(Real t,
+                            const Point & p,
+                            const std::string & var_name,
+                            const MooseEnum & weighting_type = weightingType(),
+                            const std::set<subdomain_id_type> * subdomain_ids = nullptr) const;
 
   /**
    * Returns the gradient at a specific location and variable (see SolutionFunction)
@@ -135,9 +156,14 @@ public:
    * data)
    * @param p The location at which to return a value
    * @param var_name The variable to be evaluated
+   * @param subdomain_ids Subdomains IDs where to look for the value, if nullptr look everywhere
    * @return The desired value for the given variable at a location
    */
-  RealGradient pointValueGradient(Real t, const Point & p, const std::string & var_name) const;
+  RealGradient
+  pointValueGradient(Real t,
+                     const Point & p,
+                     const std::string & var_name,
+                     const std::set<subdomain_id_type> * subdomain_ids = nullptr) const;
 
   /**
    * Returns the gradient at a specific location and variable (see SolutionFunction)
@@ -145,9 +171,14 @@ public:
    * data)
    * @param p The location at which to return a value
    * @param local_var_index The local index of the variable to be evaluated
+   * @param subdomain_ids Subdomains IDs where to look for the value, if nullptr look everywhere
    * @return The desired value for the given variable at a location
    */
-  RealGradient pointValueGradient(Real t, Point pt, const unsigned int local_var_index) const;
+  RealGradient
+  pointValueGradient(Real t,
+                     Point pt,
+                     const unsigned int local_var_index,
+                     const std::set<subdomain_id_type> * subdomain_ids = nullptr) const;
 
   /**
    * Returns the gradient at a specific location and variable for cases where the gradient is
@@ -158,10 +189,14 @@ public:
    * data)
    * @param p The location at which to return a value
    * @param var_name The variable to be evaluated
+   * @param subdomain_ids Subdomains IDs where to look for the value, if nullptr look everywhere
    * @return The desired value for the given variable at a location
    */
-  std::map<const Elem *, RealGradient>
-  discontinuousPointValueGradient(Real t, const Point & p, const std::string & var_name) const;
+  std::map<const Elem *, RealGradient> discontinuousPointValueGradient(
+      Real t,
+      const Point & p,
+      const std::string & var_name,
+      const std::set<subdomain_id_type> * subdomain_ids = nullptr) const;
 
   /**
    * Returns the gradient at a specific location and variable for cases where the gradient is
@@ -172,10 +207,14 @@ public:
    * data)
    * @param p The location at which to return a value
    * @param local_var_index The local index of the variable to be evaluated
+   * @param subdomain_ids Subdomains IDs where to look for the value, if nullptr look everywhere
    * @return The desired value for the given variable at a location
    */
-  std::map<const Elem *, RealGradient>
-  discontinuousPointValueGradient(Real t, Point pt, const unsigned int local_var_index) const;
+  std::map<const Elem *, RealGradient> discontinuousPointValueGradient(
+      Real t,
+      Point pt,
+      const unsigned int local_var_index,
+      const std::set<subdomain_id_type> * subdomain_ids = nullptr) const;
 
   /**
    * Return a value directly from a Node
@@ -275,32 +314,40 @@ protected:
    * A wrapper method for calling the various MeshFunctions used for reading the data
    * @param p The location at which data is desired
    * @param local_var_index The local index of the variable to extract data from
+   * @param subdomain_ids Subdomains IDs where to look for the value, if nullptr look everywhere
    * @param func_num The MeshFunction index to use (1 = _mesh_function; 2 = _mesh_function2)
    */
   Real evalMeshFunction(const Point & p,
                         const unsigned int local_var_index,
-                        unsigned int func_num) const;
+                        unsigned int func_num,
+                        const std::set<subdomain_id_type> * subdomain_ids = nullptr) const;
 
   /**
    * A wrapper method for calling the various MeshFunctions that calls the mesh function
    * functionality for evaluating discontinuous shape functions near a face (where it's multivalued)
    * @param p The location at which data is desired
    * @param local_var_index The local index of the variable to extract data from
+   * @param subdomain_ids Subdomains IDs where to look for the value, if nullptr look everywhere
    * @param func_num The MeshFunction index to use (1 = _mesh_function; 2 = _mesh_function2)
    */
-  std::map<const Elem *, Real> evalMultiValuedMeshFunction(const Point & p,
-                                                           const unsigned int local_var_index,
-                                                           unsigned int func_num) const;
+  std::map<const Elem *, Real>
+  evalMultiValuedMeshFunction(const Point & p,
+                              const unsigned int local_var_index,
+                              unsigned int func_num,
+                              const std::set<subdomain_id_type> * subdomain_ids = nullptr) const;
 
   /**
    * A wrapper method interfacing with the libMesh mesh function for evaluating the gradient
    * @param p The location at which data is desired
    * @param local_var_index The local index of the variable to extract data from
+   * @param subdomain_ids Subdomains IDs where to look for the value, if nullptr look everywhere
    * @param func_num The MeshFunction index to use (1 = _mesh_function; 2 = _mesh_function2)
    */
-  RealGradient evalMeshFunctionGradient(const Point & p,
-                                        const unsigned int local_var_index,
-                                        unsigned int func_num) const;
+  RealGradient
+  evalMeshFunctionGradient(const Point & p,
+                           const unsigned int local_var_index,
+                           unsigned int func_num,
+                           const std::set<subdomain_id_type> * subdomain_ids = nullptr) const;
 
   /**
    * A wrapper method interfacing with the libMesh mesh function that calls the gradient
@@ -308,10 +355,14 @@ protected:
    * multivalued)
    * @param p The location at which data is desired
    * @param local_var_index The local index of the variable to extract data from
+   * @param subdomain_ids Subdomains IDs where to look for the value, if nullptr look everywhere
    * @param func_num The MeshFunction index to use (1 = _mesh_function; 2 = _mesh_function2)
    */
   std::map<const Elem *, RealGradient> evalMultiValuedMeshFunctionGradient(
-      const Point & p, const unsigned int local_var_index, unsigned int func_num) const;
+      const Point & p,
+      const unsigned int local_var_index,
+      unsigned int func_num,
+      const std::set<subdomain_id_type> * subdomain_ids = nullptr) const;
 
   /// File type to read (0 = xda; 1 = ExodusII)
   MooseEnum _file_type;
