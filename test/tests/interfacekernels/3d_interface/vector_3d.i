@@ -75,6 +75,7 @@
 []
 
 [BCs]
+  # Natural condition of VectorFEWave weak form is curl(u) = 0, curl(v) = 0
 []
 
 [Preconditioning]

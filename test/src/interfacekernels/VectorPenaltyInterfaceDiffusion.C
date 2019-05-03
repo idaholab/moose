@@ -31,31 +31,45 @@ VectorPenaltyInterfaceDiffusion::VectorPenaltyInterfaceDiffusion(const InputPara
 Real
 VectorPenaltyInterfaceDiffusion::computeQpResidual(Moose::DGResidualType type)
 {
+  Real res = 0;
+
   switch (type)
   {
     case Moose::Element:
-      return _test[_i][_qp] * _penalty * (_u[_qp] - _neighbor_value[_qp]);
+      res = _test[_i][_qp] * _penalty * (_u[_qp] - _neighbor_value[_qp]);
+      break;
 
     case Moose::Neighbor:
-      return _test_neighbor[_i][_qp] * -_penalty * (_u[_qp] - _neighbor_value[_qp]);
+      res = _test_neighbor[_i][_qp] * -_penalty * (_u[_qp] - _neighbor_value[_qp]);
+      break;
   }
+
+  return res;
 }
 
 Real
 VectorPenaltyInterfaceDiffusion::computeQpJacobian(Moose::DGJacobianType type)
 {
+  Real jac = 0;
+
   switch (type)
   {
     case Moose::ElementElement:
-      return _test[_i][_qp] * _penalty * _phi[_j][_qp];
+      jac = _test[_i][_qp] * _penalty * _phi[_j][_qp];
+      break;
 
     case Moose::ElementNeighbor:
-      return _test[_i][_qp] * _penalty * -_phi_neighbor[_j][_qp];
+      jac = _test[_i][_qp] * _penalty * -_phi_neighbor[_j][_qp];
+      break;
 
     case Moose::NeighborNeighbor:
-      return _test_neighbor[_i][_qp] * -_penalty * -_phi_neighbor[_j][_qp];
+      jac = _test_neighbor[_i][_qp] * -_penalty * -_phi_neighbor[_j][_qp];
+      break;
 
     case Moose::NeighborElement:
-      return _test_neighbor[_i][_qp] * -_penalty * _phi[_j][_qp];
+      jac = _test_neighbor[_i][_qp] * -_penalty * _phi[_j][_qp];
+      break;
   }
+
+  return jac;
 }
