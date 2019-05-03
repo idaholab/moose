@@ -88,14 +88,14 @@ FancyExtruderGenerator::FancyExtruderGenerator(const InputParameters & parameter
     const auto & elevation_swaps = _subdomain_swaps[i];
     auto & elevation_swap_pairs = _subdomain_swap_pairs[i];
 
-    if (!(elevation_swaps.size() % 2))
+    if (elevation_swaps.size() % 2)
       paramError("subdomain_swaps",
                  "Row ",
                  i + 1,
                  " of subdomain_swaps in ",
                  name(),
                  " does not contain an even number of entries! Num entries: ",
-                 elevation_swap_pairs.size());
+                 elevation_swaps.size());
 
     for (unsigned int j = 0; j < elevation_swaps.size(); j += 2)
       elevation_swap_pairs[elevation_swaps[j]] = elevation_swaps[j + 1];
