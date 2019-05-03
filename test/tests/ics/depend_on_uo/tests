@@ -7,4 +7,13 @@
     min_parallel = 2
     max_parallel = 2
   [../]
+
+  [./scalar_ic_from_uo]
+    type = 'CSVDiff'
+    input = 'scalar_ic_from_uo.i'
+    csvdiff = 'scalar_ic_from_uo_out.csv'
+
+    min_parallel = 2
+    max_parallel = 2
+  [../]
 []
