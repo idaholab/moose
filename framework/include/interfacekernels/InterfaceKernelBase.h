@@ -49,10 +49,10 @@ public:
   InterfaceKernelBase(const InputParameters & parameters);
 
   /// The master variable that this interface kernel operates on
-  virtual MooseVariable & variable() const = 0;
+  virtual MooseVariableFEBase & variable() const = 0;
 
   /// The neighbor variable number that this interface kernel operates on
-  virtual const MooseVariable & neighborVariable() const = 0;
+  virtual const MooseVariableFEBase & neighborVariable() const = 0;
 
   /// Return a reference to the subproblem.
   SubProblem & subProblem() { return _subproblem; }

@@ -12,26 +12,41 @@
 // local includes
 #include "InterfaceKernelBase.h"
 
+#define TemplateVariableValue typename OutputTools<T>::VariableValue
+#define TemplateVariableGradient typename OutputTools<T>::VariableGradient
+#define TemplateVariablePhiValue typename OutputTools<T>::VariablePhiValue
+#define TemplateVariablePhiGradient typename OutputTools<T>::VariablePhiGradient
+#define TemplateVariableTestValue typename OutputTools<T>::VariableTestValue
+#define TemplateVariableTestGradient typename OutputTools<T>::VariableTestGradient
+
 // Forward Declarations
-class InterfaceKernel;
+template <typename T>
+class InterfaceKernelTempl;
+
+typedef InterfaceKernelTempl<Real> InterfaceKernel;
+typedef InterfaceKernelTempl<RealVectorValue> VectorInterfaceKernel;
 
 template <>
 InputParameters validParams<InterfaceKernel>();
 
-/**
- * InterfaceKernel is responsible for interfacing physics across subdomains
- */
+template <>
+InputParameters validParams<VectorInterfaceKernel>();
 
-class InterfaceKernel : public InterfaceKernelBase, public NeighborMooseVariableInterface<Real>
+/**
+ * InterfaceKernel and VectorInterfaceKernel is responsible for interfacing physics across
+ * subdomains
+ */
+template <typename T>
+class InterfaceKernelTempl : public InterfaceKernelBase, public NeighborMooseVariableInterface<T>
 {
 public:
-  InterfaceKernel(const InputParameters & parameters);
+  InterfaceKernelTempl(const InputParameters & parameters);
 
   /// The master variable that this interface kernel operates on
-  virtual MooseVariable & variable() const override { return _var; }
+  virtual MooseVariableFE<T> & variable() const override { return _var; }
 
   /// The neighbor variable number that this interface kernel operates on
-  virtual const MooseVariable & neighborVariable() const override { return _neighbor_var; }
+  virtual const MooseVariableFE<T> & neighborVariable() const override { return _neighbor_var; }
 
   /**
    * Using the passed DGResidual type, selects the correct test function space and residual block,
@@ -71,46 +86,49 @@ public:
 
 protected:
   /// The master side MooseVariable
-  MooseVariable & _var;
+  MooseVariableFE<T> & _var;
 
   /// Normal vectors at the quadrature points
   const MooseArray<Point> & _normals;
 
   /// Holds the current solution at the current quadrature point on the face.
-  const VariableValue & _u;
+  const TemplateVariableValue & _u;
 
   /// Holds the current solution gradient at the current quadrature point on the face.
-  const VariableGradient & _grad_u;
+  const TemplateVariableGradient & _grad_u;
 
   /// shape function
-  const VariablePhiValue & _phi;
+  const TemplateVariablePhiValue & _phi;
 
   /// Shape function gradient
-  const VariablePhiGradient & _grad_phi;
+  const TemplateVariablePhiGradient & _grad_phi;
 
   /// Side shape function.
-  const VariableTestValue & _test;
+  const TemplateVariableTestValue & _test;
+
   /// Gradient of side shape function
-  const VariableTestGradient & _grad_test;
+  const TemplateVariableTestGradient & _grad_test;
 
   /// Coupled neighbor variable
-  MooseVariable & _neighbor_var;
+  MooseVariableFE<T> & _neighbor_var;
 
   /// Coupled neighbor variable value
-  const VariableValue & _neighbor_value;
+  const TemplateVariableValue & _neighbor_value;
 
   /// Coupled neighbor variable gradient
-  const VariableGradient & _grad_neighbor_value;
+  const TemplateVariableGradient & _grad_neighbor_value;
 
   /// Side neighbor shape function.
-  const VariablePhiValue & _phi_neighbor;
+  const TemplateVariablePhiValue & _phi_neighbor;
+
   /// Gradient of side neighbor shape function
-  const VariablePhiGradient & _grad_phi_neighbor;
+  const TemplateVariablePhiGradient & _grad_phi_neighbor;
 
   /// Side neighbor test function
-  const VariableTestValue & _test_neighbor;
+  const TemplateVariableTestValue & _test_neighbor;
+
   /// Gradient of side neighbor shape function
-  const VariableTestGradient & _grad_test_neighbor;
+  const TemplateVariableTestGradient & _grad_test_neighbor;
 
   /// Holds residual entries as they are accumulated by this InterfaceKernel
   /// This variable is temporarily reserved for RattleSnake
