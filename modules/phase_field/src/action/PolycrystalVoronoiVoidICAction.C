@@ -55,6 +55,7 @@ PolycrystalVoronoiVoidICAction::act()
     poly_params.set<MooseEnum>("structure_type") = "grains";
     poly_params.set<UserObjectName>("polycrystal_ic_uo") =
         getParam<UserObjectName>("polycrystal_ic_uo");
+
     // Add initial condition
     _problem->addInitialCondition(
         "PolycrystalVoronoiVoidIC", name() + "_" + Moose::stringify(op), poly_params);
