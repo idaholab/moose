@@ -142,6 +142,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_dirac_kernel",             DiracKernel,            false);
   registerMooseObjectTask("add_dg_kernel",                DGKernel,               false);
   registerMooseObjectTask("add_interface_kernel",         InterfaceKernel,        false);
+  appendMooseObjectTask  ("add_interface_kernel",         VectorInterfaceKernel);
   registerMooseObjectTask("add_constraint",               Constraint,             false);
 
   registerMooseObjectTask("add_ic",                       InitialCondition,       false);
@@ -224,6 +225,7 @@ addActionTypes(Syntax & syntax)
   registerTask("setup_variable_complete", false);
   registerTask("ready_to_init", true);
   appendMooseObjectTask("ready_to_init", InterfaceKernel);
+  appendMooseObjectTask("ready_to_init", VectorInterfaceKernel);
   appendMooseObjectTask("ready_to_init", DGKernel);
 
   // Output related actions
