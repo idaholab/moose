@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FANCYEXTRUDERGENERATOR_H
-#define FANCYEXTRUDERGENERATOR_H
+#pragma once
 
 #include "MeshGenerator.h"
 
@@ -53,5 +52,3 @@ protected:
   bool _has_bottom_boundary;
   boundary_id_type _bottom_boundary;
 };
-
-#endif // FANCYEXTRUDERGENERATOR_H
