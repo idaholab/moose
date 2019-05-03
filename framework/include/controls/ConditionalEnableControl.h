@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CONDITIONALENABLECONTROL_H
-#define CONDITIONALENABLECONTROL_H
+#pragma once
 
 #include "Control.h"
 
@@ -45,5 +44,3 @@ protected:
   /// When true, the disable/enable lists are set to opposite values when the specified condition is false
   const bool & _reverse_on_false;
 };
-
-#endif // CONDITIONALENABLECONTROL_H
