@@ -25,5 +25,7 @@
     design = 'CircleCutUserObject.md '
              'CrackTipEnrichmentStressDivergenceTensors.md'
     issues = '#10042'
+
+    method = '!dbg' #Slow test
   [../]
 []
