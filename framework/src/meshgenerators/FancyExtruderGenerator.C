@@ -9,27 +9,6 @@
 
 #include "FancyExtruderGenerator.h"
 
-#include "libmesh/boundary_info.h"
-#include "libmesh/function_base.h"
-#include "libmesh/cell_tet4.h"
-#include "libmesh/cell_tet10.h"
-#include "libmesh/face_tri3.h"
-#include "libmesh/face_tri6.h"
-#include "libmesh/face_quad4.h"
-#include "libmesh/face_quad9.h"
-#include "libmesh/cell_prism6.h"
-#include "libmesh/cell_prism18.h"
-#include "libmesh/cell_hex8.h"
-#include "libmesh/cell_hex27.h"
-#include "libmesh/libmesh_logging.h"
-#include "libmesh/mesh_communication.h"
-#include "libmesh/mesh_modification.h"
-#include "libmesh/mesh_tools.h"
-#include "libmesh/parallel.h"
-#include "libmesh/remote_elem.h"
-#include "libmesh/string_to_enum.h"
-#include "libmesh/unstructured_mesh.h"
-
 #include <numeric>
 
 registerMooseObject("MooseApp", FancyExtruderGenerator);
@@ -85,27 +64,41 @@ FancyExtruderGenerator::FancyExtruderGenerator(const InputParameters & parameter
     _bottom_boundary(isParamValid("bottom_boundary") ? getParam<boundary_id_type>("bottom_boundary")
                                                      : 0)
 {
+  if (!_direction.norm())
+    paramError("direction", "Must have some length!");
+
   // Normalize it
   _direction /= _direction.norm();
 
   const auto num_elevations = _heights.size();
 
   if (_num_layers.size() != num_elevations)
-    mooseError("The length of 'heights' and 'num_layers' must be the same in ", name());
+    paramError("heights", "The length of 'heights' and 'num_layers' must be the same in ", name());
 
   if (_subdomain_swaps.size() && (_subdomain_swaps.size() != num_elevations))
-    mooseError("If specified, 'subdomain_swaps' must be the same length as 'heights' in ", name());
+    paramError("subdomain_swaps",
+               "If specified, 'subdomain_swaps' must be the same length as 'heights' in ",
+               name());
 
   _subdomain_swap_pairs.resize(_subdomain_swaps.size());
 
   // Reprocess the subdomain swaps to make pairs out of them so they are easier to use
-  for (MooseIndex(_subdomain_swaps) i = 0; i < _subdomain_swaps.size(); i++)
+  for (unsigned int i = 0; i < _subdomain_swaps.size(); i++)
   {
     const auto & elevation_swaps = _subdomain_swaps[i];
     auto & elevation_swap_pairs = _subdomain_swap_pairs[i];
 
-    for (MooseIndex(elevation_swaps) i = 0; i < elevation_swaps.size(); i += 2)
-      elevation_swap_pairs[elevation_swaps[i]] = elevation_swaps[i + 1];
+    if (!(elevation_swaps.size() % 2))
+      paramError("subdomain_swaps",
+                 "Row ",
+                 i + 1,
+                 " of subdomain_swaps in ",
+                 name(),
+                 " does not contain an even number of entries! Num entries: ",
+                 elevation_swap_pairs.size());
+
+    for (unsigned int j = 0; j < elevation_swaps.size(); j += 2)
+      elevation_swap_pairs[elevation_swaps[j]] = elevation_swaps[j + 1];
   }
 }
 
@@ -166,9 +159,13 @@ FancyExtruderGenerator::generate()
 
       auto height = _heights[e];
 
-      for (unsigned int k = 0; k < order * num_layers + 1; ++k)
+      for (unsigned int k = 0; k < order * num_layers + (e == 0 ? 1 : 0); ++k)
       {
-        current_distance = old_distance + (_direction * (height / (Real)num_layers / (Real)order));
+        // For the first layer we don't need to move
+        if (e == 0 && k == 0)
+          current_distance.zero();
+        else
+          current_distance = old_distance + _direction * (height / (Real)num_layers / (Real)order);
 
         Node * new_node = mesh->add_point(*node + current_distance,
                                           node->id() + (current_node_layer * orig_nodes),
@@ -540,7 +537,7 @@ FancyExtruderGenerator::generate()
   // Done building the mesh->  Now prepare it for use.
   auto part = mesh->skip_partitioning();
   mesh->skip_partitioning(true);
-  mesh->prepare_for_use(/*skip_renumber =*/false);
+  mesh->prepare_for_use(/*skip_renumber =*/true);
   mesh->skip_partitioning(part);
 
   return mesh;
