@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [./coupled_3d]
     type = 'Exodiff'
     input = 'coupled_value_coupled_flux.i'
     exodiff = 'coupled_value_coupled_flux_out.e'
@@ -8,5 +8,14 @@
     design = "InterfaceKernels/index.md"
     requirement = "The InterfaceKernel system shall operate with coupled variables in 3D. "
                   "This uses a penalty implementation that is optimally convergent."
+  [../]
+  [./vector_3d]
+    type = 'Exodiff'
+    input = 'vector_3d.i'
+    exodiff = 'vector_3d_out.e'
+    mesh_mode = REPLICATED
+    issues = "#13354"
+    design = "InterfaceKernels/index.md"
+    requirement = "The InterfaceKernel system shall support Vector Finite Elements in 3D."
   [../]
 []
