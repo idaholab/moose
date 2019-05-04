@@ -692,9 +692,11 @@ SystemBase::addArrayVariable(const std::string & var_name,
     var->scalingFactor(scale_factor);
     _vars[tid].add(var_name, var);
 
-    if (var_num >= _numbered_vars[tid].size())
-      _numbered_vars[tid].resize(var_num + 1);
-    _numbered_vars[tid][var_num] = var;
+    unsigned int end_var_num = var_num + components;
+    if (end_var_num > _numbered_vars[tid].size())
+      _numbered_vars[tid].resize(end_var_num);
+    for (unsigned int i = var_num; i < end_var_num; ++i)
+      _numbered_vars[tid][i] = var;
   }
 }
 

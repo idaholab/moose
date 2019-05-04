@@ -89,8 +89,7 @@ MortarConstraint::computeJacobian(Moose::MortarType mortar_type)
       break;
   }
 
-  std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> & ce =
-      _assembly.couplingEntries();
+  auto & ce = _assembly.couplingEntries();
   for (const auto & it : ce)
   {
     MooseVariableFEBase & ivariable = *(it.first);
