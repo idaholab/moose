@@ -486,16 +486,22 @@ MooseVariableFE<RealArrayValue>::getValue(const Elem * elem,
 
 template <typename OutputType>
 void
-MooseVariableFE<OutputType>::saveDoFValues(const DenseVector<OutputData> & v) const
+MooseVariableFE<OutputType>::saveDoFValues(const DenseVector<Number> & v) const
 {
   _sys.solution().add_vector(v, _dof_indices);
 }
 
 template <>
 void
-MooseVariableFE<RealArrayValue>::saveDoFValues(const DenseVector<RealArrayValue> &) const
+MooseVariableFE<RealArrayValue>::saveDoFValues(const DenseVector<Number> & v) const
 {
-//  _sys.solution().add_vector(v, _dof_indices);
+  unsigned int p = 0;
+  for (unsigned int j = 0; j < _count; ++j)
+  {
+    unsigned int inc = (isNodal() ? j : j * _dof_indices.size());
+    for (unsigned int i = 0; i < _dof_indices.size(); ++i)
+      _sys.solution().add(_dof_indices[i] + inc, v(p++));
+  }
 }
 
 template <typename OutputType>

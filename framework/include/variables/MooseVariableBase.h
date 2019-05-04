@@ -78,7 +78,7 @@ public:
    * Get the scaling factor for this variable
    */
   Real scalingFactor() const { return _scaling_factor[0]; }
-  std::vector<Real> arrayScalingFactor() const { return _scaling_factor; }
+  const std::vector<Real> & arrayScalingFactor() const { return _scaling_factor; }
 
   /**
    * Get the order of this variable
@@ -89,12 +89,38 @@ public:
   unsigned int count() const { return _count; }
 
   /**
+   * Is this variable nodal
+   * @return true if it nodal, otherwise false
+   */
+  virtual bool isNodal() const { return true; }
+
+  /**
    * The DofMap associated with the system this variable is in.
    */
   const DofMap & dofMap() const { return _dof_map; }
 
   /// Get local DoF indices
   virtual const std::vector<dof_id_type> & dofIndices() const { return _dof_indices; }
+
+  /// Obtain DoF indices of a component with the indices of the 0th component
+  std::vector<dof_id_type> componentDofIndices(const std::vector<dof_id_type> & dof_indices,
+                                               unsigned int component) const
+  {
+    std::vector<dof_id_type> new_dof_indices(dof_indices);
+    if (component != 0)
+    {
+      if (isNodal())
+        for (auto & id : new_dof_indices)
+          id += component;
+      else
+      {
+        unsigned int n = dof_indices.size();
+        for (auto & id : new_dof_indices)
+          id += component * n;
+      }
+    }
+    return new_dof_indices;
+  }
 
   /// Get the number of local DoFs
   virtual unsigned int numberOfDofs() const { return _dof_indices.size(); }
@@ -132,4 +158,3 @@ protected:
   /// scaling factor for this variable
   std::vector<Real> _scaling_factor;
 };
-

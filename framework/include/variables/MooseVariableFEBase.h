@@ -66,12 +66,6 @@ public:
   virtual Moose::VarFieldType fieldType() const = 0;
 
   /**
-   * Is this variable nodal
-   * @return true if it nodal, otherwise false
-   */
-  virtual bool isNodal() const = 0;
-
-  /**
    * @returns true if this is a vector-valued element, false otherwise.
    */
   virtual bool isVector() const = 0;
@@ -169,4 +163,3 @@ public:
    */
   virtual size_t phiLowerSize() const = 0;
 };
-
