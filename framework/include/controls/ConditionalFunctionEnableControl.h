@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CONDITIONALFUNCTIONENABLECONTROL_H
-#define CONDITIONALFUNCTIONENABLECONTROL_H
+#pragma once
 
 #include "ConditionalEnableControl.h"
 
@@ -33,5 +32,3 @@ private:
   /// The function to give a true or false value
   Function & _function;
 };
-
-#endif // CONDITIONALFUNCTIONENABLECONTROL_H

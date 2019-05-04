@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADVECTIONBC_H
-#define ADVECTIONBC_H
+#pragma once
 
 #include "IntegratedBC.h"
 
@@ -35,5 +34,3 @@ protected:
   const bool _outflow;
   std::vector<const VariableValue *> _velocity;
 };
-
-#endif // ADVECTIONBC_H
