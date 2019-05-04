@@ -131,6 +131,7 @@ typedef VectorValue<Real> RealVectorValue;
 typedef Eigen::Array<Real, Eigen::Dynamic, 1> RealArrayValue;
 typedef Eigen::Array<Real, Eigen::Dynamic, LIBMESH_DIM> RealVectorArrayValue;
 typedef Eigen::Array<Real, Eigen::Dynamic, LIBMESH_DIM * LIBMESH_DIM> RealTensorArrayValue;
+typedef Eigen::Array<Real, Eigen::Dynamic, Eigen::Dynamic> RealArray;
 template <typename>
 class TypeVector;
 template <typename>
