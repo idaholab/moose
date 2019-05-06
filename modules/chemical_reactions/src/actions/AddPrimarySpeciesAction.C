@@ -26,7 +26,8 @@ validParams<AddPrimarySpeciesAction>()
 AddPrimarySpeciesAction::AddPrimarySpeciesAction(const InputParameters & params)
   : AddVariableAction(params),
     _vars(getParam<std::vector<NonlinearVariableName>>("primary_species")),
-    _scaling(getParam<Real>("scaling"))
+    _scaling(isParamValid("scaling") ? getParam<std::vector<Real>>("scaling")
+                                     : std::vector<Real>(1, 1.0))
 {
 }
 
@@ -34,5 +35,5 @@ void
 AddPrimarySpeciesAction::act()
 {
   for (auto & var : _vars)
-    _problem->addVariable(var, _fe_type, _scaling);
+    _problem->addVariable(var, _fe_type, _scaling[0]);
 }
