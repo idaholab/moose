@@ -58,9 +58,9 @@
   solve_type = 'NEWTON'
 
   l_max_its = 30
-  l_tol = 1.0e-4
+  l_tol = 1.0e-5
   nl_max_its = 10
-  nl_rel_tol = 1.0e-10
+  nl_rel_tol = 1.0e-12
 
   start_time = 0.0
   num_steps = 5
