@@ -16,16 +16,7 @@ validParams<FlowChannel1Phase>()
       "A", "Area of the flow channel, can be a constant or a function");
   params.addParam<Real>("roughness", 0.0, "roughness, [m]");
   params.addParam<FunctionName>("f", "Wall friction");
-  params.addParam<MaterialPropertyName>("f_2phase_mult_liquid",
-                                        "2-phase multiplier property for friction for liquid");
-  params.addParam<MaterialPropertyName>("f_2phase_mult_vapor",
-                                        "2-phase multiplier property for friction for vapor");
-
   params.addParam<FunctionName>("K_prime", "Form loss coefficient per unit length function");
-  params.addParam<MaterialPropertyName>("K_2phase_mult_liquid",
-                                        "2-phase multiplier property for form loss for liquid");
-  params.addParam<MaterialPropertyName>("K_2phase_mult_vapor",
-                                        "2-phase multiplier property for form loss for vapor");
 
   params.addParam<MooseEnum>("heat_transfer_geom",
                              FlowChannel1Phase::getConvHeatTransGeometry("PIPE"),
