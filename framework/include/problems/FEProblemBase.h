@@ -16,6 +16,7 @@
 #include "VectorPostprocessorData.h"
 #include "Adaptivity.h"
 #include "InitialConditionWarehouse.h"
+#include "ScalarInitialConditionWarehouse.h"
 #include "Restartable.h"
 #include "SolverParams.h"
 #include "PetscSupport.h"
@@ -1664,7 +1665,7 @@ protected:
   ///@{
   /// Initial condition storage
   InitialConditionWarehouse _ics;
-  MooseObjectWarehouseBase<ScalarInitialCondition> _scalar_ics; // use base b/c of setup methods
+  ScalarInitialConditionWarehouse _scalar_ics; // use base b/c of setup methods
   ///@}
 
   // material properties
@@ -1954,4 +1955,3 @@ FEProblemBase::allowOutput(bool state)
 {
   _app.getOutputWarehouse().allowOutput<T>(state);
 }
-

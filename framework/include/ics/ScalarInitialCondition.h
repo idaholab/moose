@@ -12,6 +12,7 @@
 #include "MooseObject.h"
 #include "ScalarCoupleable.h"
 #include "FunctionInterface.h"
+#include "UserObjectInterface.h"
 #include "DependencyResolverInterface.h"
 
 // forward declarations
@@ -36,6 +37,7 @@ InputParameters validParams<ScalarInitialCondition>();
 class ScalarInitialCondition : public MooseObject,
                                public ScalarCoupleable,
                                public FunctionInterface,
+                               public UserObjectInterface,
                                public DependencyResolverInterface
 {
 public:
@@ -62,6 +64,14 @@ public:
    */
   virtual Real value() = 0;
 
+  /**
+   * Gets called at the beginning of the simulation before this object is asked to do its job.
+   * Note: This method is normally inherited from SetupInterface.  However in this case it makes
+   * no sense to inherit the other virtuals available in that class so we are adding this virtual
+   * directly to this class with out the extra inheritance.
+   */
+  virtual void initialSetup() {}
+
   virtual const std::set<std::string> & getRequestedItems();
 
   virtual const std::set<std::string> & getSuppliedItems();
@@ -83,4 +93,3 @@ protected:
   std::set<std::string> _depend_vars;
   std::set<std::string> _supplied_vars;
 };
-
