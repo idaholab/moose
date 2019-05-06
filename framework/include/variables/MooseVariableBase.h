@@ -157,4 +157,6 @@ protected:
 
   /// scaling factor for this variable
   std::vector<Real> _scaling_factor;
+
+  std::string _name;
 };

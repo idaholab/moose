@@ -34,6 +34,16 @@ MooseVariableBase::MooseVariableBase(unsigned int var_num,
     _count(count),
     _scaling_factor(std::vector<Real>(_count, 1.0))
 {
+  if (_count > 1)
+  {
+    auto name0 = _sys.system().variable(_var_num).name();
+    std::size_t found = name0.find_last_of("_");
+    if (found == std::string::npos)
+      mooseError("");
+    _name = name0.substr(0, found);
+  }
+  else
+    _name = _sys.system().variable(_var_num).name();
 }
 
 MooseVariableBase::~MooseVariableBase() {}
@@ -41,7 +51,7 @@ MooseVariableBase::~MooseVariableBase() {}
 const std::string &
 MooseVariableBase::name() const
 {
-  return _sys.system().variable(_var_num).name();
+  return _name;
 }
 
 const std::vector<dof_id_type> &

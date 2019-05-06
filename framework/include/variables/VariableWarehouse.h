@@ -173,3 +173,10 @@ template <>
 MooseVariableFE<RealVectorValue> *
 VariableWarehouse::getFieldVariable<RealVectorValue>(unsigned int var_number);
 
+template <>
+MooseVariableFE<RealArrayValue> *
+VariableWarehouse::getFieldVariable<RealArrayValue>(const std::string & var_name);
+
+template <>
+MooseVariableFE<RealArrayValue> *
+VariableWarehouse::getFieldVariable<RealArrayValue>(unsigned int var_number);
