@@ -3,35 +3,52 @@
     type = 'Exodiff'
     input = 'derivative_parsed_material.i'
     exodiff = 'derivative_parsed_material.e'
+    issues = '#4835'
+    design = 'DerivativeParsedMaterial.md'
+    requirement = 'The Kim-Kim-Suzuki model implementation shall use free energy densities provided by DerivativeParsedMaterials'
   [../]
 
   [./kks_example]
     type = 'Exodiff'
     input = 'kks_example.i'
     exodiff = 'kks_example.e'
+    issues = '#4835'
+    design = 'KKSCHBulk.md'
+    requirement = 'A non-split version of the Kim-Kim-Suzuki shall be provided'
   [../]
 
   [./kks_example_split]
     type = 'Exodiff'
     input = 'kks_example_split.i'
     exodiff = 'kks_example_split.e'
+    issues = '#4835'
+    design = 'KKSSplitCHCRes.md'
+    requirement = 'A split version of the Kim-Kim-Suzuki shall be provided'
   [../]
 
   [./kks_example_offset]
     type = 'Exodiff'
     input = 'kks_example_offset.i'
     exodiff = 'kks_example_offset.e'
+    issues = '#10315'
+    design = 'KKSSplitCHCRes.md'
+    requirement = 'The split version of the Kim-Kim-Suzuki shall be yield the correct results with asymmetric free energies'
   [../]
 
   [./kks_xevac]
     type = 'Exodiff'
     input = 'kks_xevac.i'
     exodiff = 'kks_xevac.e'
+    design = 'KKSSplitCHCRes.md'
+    requirement = 'A multi component Kim-Kim-Suzuki model shall be implemented'
   [../]
 
   [./kks_multiphase]
     type = 'Exodiff'
     input = 'kks_multiphase.i'
     exodiff = 'kks_multiphase_out.e'
+    issues = '#7007'
+    design = 'KKSMultiACBulkC.md'
+    requirement = 'A multi component Kim-Kim-Suzuki model shall be implemented'
   [../]
 []
