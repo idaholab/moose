@@ -727,9 +727,11 @@ SystemBase::addScalarVariable(const std::string & var_name,
 bool
 SystemBase::hasVariable(const std::string & var_name) const
 {
+  auto & names = getVariableNames();
   if (system().has_variable(var_name))
     return system().variable_type(var_name).family != SCALAR;
-  else if (system().has_variable(SubProblem::arrayVariableComponent(var_name, 0)))
+  if (std::find(names.begin(), names.end(), var_name) != names.end())
+    // array variable
     return true;
   else
     return false;
