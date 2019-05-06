@@ -7,9 +7,6 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ARRAYINITIALCONDITION_H
-#define ARRAYINITIALCONDITION_H
+#pragma once
 
 #include "InitialConditionTempl.h"
-
-#endif // ARRAYINITIALCONDITION_H

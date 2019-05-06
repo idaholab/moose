@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ARRAYCONSTANTIC_H
-#define ARRAYCONSTANTIC_H
+#pragma once
 
 #include "ArrayInitialCondition.h"
 
@@ -32,5 +31,3 @@ public:
 protected:
   const RealArrayValue _value;
 };
-
-#endif // VECTORCONSTANTIC_H
