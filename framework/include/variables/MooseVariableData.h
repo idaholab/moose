@@ -154,6 +154,15 @@ public:
   const FieldVariablePhiGradient & gradPhi() const { return *_grad_phi; }
 
   /**
+   * mapped_grad_phi getter
+   */
+  const MappedArrayVariablePhiGradient & arrayGradPhi() const
+  {
+    mooseAssert(fieldType() == Moose::VarFieldType::VAR_FIELD_ARRAY, "Not an array variable");
+    return _mapped_grad_phi;
+  }
+
+  /**
    * grad_phi_face getter
    */
   const FieldVariablePhiGradient & gradPhiFace() const { return *_grad_phi_face; }
@@ -763,6 +772,7 @@ private:
   // Shape function values, gradients, second derivatives
   const FieldVariablePhiValue * _phi;
   const FieldVariablePhiGradient * _grad_phi;
+  MappedArrayVariablePhiGradient _mapped_grad_phi;
   mutable const FieldVariablePhiSecond * _second_phi;
   mutable const FieldVariablePhiCurl * _curl_phi;
 
