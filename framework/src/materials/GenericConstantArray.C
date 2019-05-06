@@ -18,8 +18,10 @@ InputParameters
 validParams<GenericConstantArray>()
 {
   InputParameters params = validParams<Material>();
-  params.addRequiredParam<std::string>("prop_name", "The names of the properties this material will have");
-  params.addRequiredParam<RealArrayValue>("prop_value", "The values associated with the named properties");
+  params.addRequiredParam<std::string>("prop_name",
+                                       "The names of the properties this material will have");
+  params.addRequiredParam<RealArrayValue>("prop_value",
+                                          "The values associated with the named properties");
   params.declareControllable("prop_value");
   return params;
 }

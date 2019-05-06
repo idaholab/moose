@@ -19,14 +19,14 @@ validParams<ArrayDiffusion>()
   params.addParam<MaterialPropertyName>("diffusion_coefficient", "The name of the diffusivity");
   MooseEnum opt("scalar=0 array=1 full=2", "array");
   params.addParam<MooseEnum>("diffusion_coefficient_type", opt, "Diffusion coefficient type");
-  params.addClassDescription("The array Laplacian operator ($-\\nabla \\cdot \\nabla u$), with the weak "
-                             "form of $(\\nabla \\phi_i, \\nabla u_h)$.");
+  params.addClassDescription(
+      "The array Laplacian operator ($-\\nabla \\cdot \\nabla u$), with the weak "
+      "form of $(\\nabla \\phi_i, \\nabla u_h)$.");
   return params;
 }
 
-ArrayDiffusion::ArrayDiffusion(const InputParameters & parameters) :
-    ArrayKernel(parameters),
-    _dc_type(getParam<MooseEnum>("diffusion_coefficient_type"))
+ArrayDiffusion::ArrayDiffusion(const InputParameters & parameters)
+  : ArrayKernel(parameters), _dc_type(getParam<MooseEnum>("diffusion_coefficient_type"))
 {
   if (_dc_type == 0)
     _d = &getMaterialProperty<Real>("diffusion_coefficient");
@@ -63,7 +63,8 @@ RealArrayValue
 ArrayDiffusion::computeQpJacobian()
 {
   if (_dc_type == 0)
-    return RealArrayValue::Constant(_var.count(), _grad_phi[_j][_qp] * _grad_test[_i][_qp] * (*_d)[_qp]);
+    return RealArrayValue::Constant(_var.count(),
+                                    _grad_phi[_j][_qp] * _grad_test[_i][_qp] * (*_d)[_qp]);
   else if (_dc_type == 1)
     return _grad_phi[_j][_qp] * _grad_test[_i][_qp] * (*_d_array)[_qp];
   else
