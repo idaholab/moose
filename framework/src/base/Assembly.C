@@ -2512,18 +2512,26 @@ Assembly::copyShapes(MooseVariableFE<T> & v)
 void
 Assembly::copyShapes(unsigned int var)
 {
-  try
+  MooseVariableFEBase & v = _sys.getVariable(_tid, var);
+  if (v.fieldType() == Moose::VarFieldType::VAR_FIELD_STANDARD)
   {
     MooseVariable & v = _sys.getFieldVariable<Real>(_tid, var);
     copyShapes(v);
   }
-  catch (std::out_of_range & e)
+  else if (v.fieldType() == Moose::VarFieldType::VAR_FIELD_ARRAY)
+  {
+    ArrayMooseVariable & v = _sys.getFieldVariable<RealArrayValue>(_tid, var);
+    copyShapes(v);
+  }
+  else if (v.fieldType() == Moose::VarFieldType::VAR_FIELD_VECTOR)
   {
     VectorMooseVariable & v = _sys.getFieldVariable<RealVectorValue>(_tid, var);
     copyShapes(v);
     if (v.computingCurl())
       curlPhi(v).shallowCopy(v.curlPhi());
   }
+  else
+    mooseError("Unsupported variable field type!");
 }
 
 template <typename T>
