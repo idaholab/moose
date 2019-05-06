@@ -10,7 +10,7 @@
 // MOOSE includes
 #include "IterationAdaptiveDT.h"
 #include "Function.h"
-#include "PiecewiseBase.h"
+#include "PiecewiseLinear.h"
 #include "Transient.h"
 #include "NonlinearSystem.h"
 
@@ -102,6 +102,7 @@ IterationAdaptiveDT::IterationAdaptiveDT(const InputParameters & parameters)
                          : nullptr),
     _timestep_limiting_function(nullptr),
     _piecewise_timestep_limiting_function(nullptr),
+    _piecewise_linear_timestep_limiting_function(nullptr),
     _times(0),
     _max_function_change(-1),
     _force_step_every_function_point(getParam<bool>("force_step_every_function_point")),
@@ -162,6 +163,8 @@ IterationAdaptiveDT::init()
 
     if (_piecewise_timestep_limiting_function)
     {
+      _piecewise_linear_timestep_limiting_function =
+          dynamic_cast<const PiecewiseLinear *>(_piecewise_timestep_limiting_function);
       unsigned int time_size = _piecewise_timestep_limiting_function->functionSize();
       _times.resize(time_size);
 
@@ -337,7 +340,41 @@ IterationAdaptiveDT::limitDTByFunction(Real & limitedDT)
 {
   Real orig_dt = limitedDT;
 
-  if (_timestep_limiting_function)
+  // Limit by function change for piecewise linear functions.
+  if (_piecewise_linear_timestep_limiting_function && _max_function_change > 0)
+  {
+    const auto current_function_value =
+        _piecewise_linear_timestep_limiting_function->value(_time, {});
+
+    for (std::size_t next_time_index = 1; next_time_index < _times.size(); ++next_time_index)
+    {
+      const auto next_time = _times[next_time_index];
+
+      // Skip ahead to find time point that is just past the current time.
+      if (next_time + _timestep_tolerance <= _time)
+        continue;
+
+      // Find out how far we can go without exceeding the max function change.
+      const auto next_function_value =
+          _piecewise_linear_timestep_limiting_function->range(next_time_index);
+      const auto change = std::abs(next_function_value - current_function_value);
+      if (change > _max_function_change)
+      {
+        // Interpolate to find step.
+        const auto restrictedStep = (_max_function_change / change) * (next_time - _time);
+        if (restrictedStep < limitedDT)
+        {
+          limitedDT = std::max(_dt_min, restrictedStep);
+        }
+        break;
+      }
+
+      // Don't keep going if we've already passed the current limited step.
+      if (next_time > _time + limitedDT)
+        break;
+    }
+  }
+  else if (_timestep_limiting_function)
   {
     Point dummyPoint;
     Real oldValue = _timestep_limiting_function->value(_time_old, dummyPoint);

@@ -93,4 +93,12 @@
     requirement = "MOOSE shall support the ability to reject a time step based
     on a threshold value for the ratio of the ideal step size to the limit."
   [../]
+  [./test_piecewise_linear]
+    type = 'CSVDiff'
+    input = 'piecewise_linear.i'
+    csvdiff = 'piecewise_linear_out.csv'
+    requirement = "MOOSE shall support the ability to force time steps to resolve
+    sudden changes in piecewise linear functions."
+  [../]
+
 []
