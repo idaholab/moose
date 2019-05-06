@@ -173,5 +173,5 @@ ArrayKernel::computeQpOffDiagJacobian(MooseVariableFEBase & jvar)
 RealArray
 ArrayKernel::computeQpOffDiagJacobianScalar(MooseVariableScalar & jvar)
 {
-  return RealArray(_var.count(), (unsigned int) jvar.order() + 1);
+  return RealArray(_var.count(), (unsigned int)jvar.order() + 1);
 }

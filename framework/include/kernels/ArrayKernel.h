@@ -51,12 +51,14 @@ protected:
   virtual RealArrayValue computeQpJacobian() { return RealArrayValue(_var.count()); }
 
   /**
-   * This is the virtual that derived classes should override for computing a full Jacobian component
+   * This is the virtual that derived classes should override for computing a full Jacobian
+   * component
    */
   virtual RealArray computeQpOffDiagJacobian(MooseVariableFEBase & jvar);
 
   /**
-   * This is the virtual that derived classes should override for computing a full Jacobian component
+   * This is the virtual that derived classes should override for computing a full Jacobian
+   * component
    */
   virtual RealArray computeQpOffDiagJacobianScalar(MooseVariableScalar & jvar);
 

@@ -212,9 +212,10 @@ MooseVariableFE<OutputType>::insert(NumericVector<Number> & residual)
 
 template <typename OutputType>
 void
-MooseVariableFE<OutputType>::insertNodalValue(NumericVector<Number> & residual, const OutputData & v)
+MooseVariableFE<OutputType>::insertNodalValue(NumericVector<Number> & residual,
+                                              const OutputData & v)
 {
-  residual.set( _dof_indices[0], v);
+  residual.set(_dof_indices[0], v);
 }
 
 template <>
