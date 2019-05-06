@@ -417,6 +417,11 @@ public:
   void setDofValues(const DenseVector<OutputData> & value);
 
   /**
+   * Write a nodal value to the solution vector
+   */
+  void insertNodalValue(NumericVector<Number> & residual, const OutputData & v);
+
+  /**
    * Get the value of this variable at given node
    */
   OutputData getNodalValue(const Node & node);
