@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#6881'
+  design = '/kernels/Kernel.md'
+  [./test]
+    type = 'Exodiff'
+    input = 'array_diffusion_test.i'
+    exodiff = 'array_diffusion_test_out.e'
+    requirement = 'MOOSE shall provide array kernels.'
+  [../]
+[]
