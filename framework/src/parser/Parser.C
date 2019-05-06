@@ -882,6 +882,14 @@ void Parser::setScalarParameter<Point, Point>(const std::string & full_name,
                                               GlobalParamsAction * global_block);
 
 template <>
+void Parser::setScalarParameter<RealArrayValue, RealArrayValue>(
+    const std::string & full_name,
+    const std::string & short_name,
+    InputParameters::Parameter<RealArrayValue> * param,
+    bool in_global,
+    GlobalParamsAction * global_block);
+
+template <>
 void Parser::setScalarParameter<PostprocessorName, PostprocessorName>(
     const std::string & full_name,
     const std::string & short_name,
@@ -1141,6 +1149,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       // Moose Compound Scalars
       setscalar(RealVectorValue, RealVectorValue);
       setscalar(Point, Point);
+      setscalar(RealArrayValue, RealArrayValue);
       setscalar(MooseEnum, MooseEnum);
       setscalar(MultiMooseEnum, MultiMooseEnum);
       setscalar(RealTensorValue, RealTensorValue);
@@ -1626,6 +1635,38 @@ Parser::setScalarParameter<Point, Point>(const std::string & full_name,
                                          GlobalParamsAction * global_block)
 {
   setScalarComponentParameter(full_name, short_name, param, in_global, global_block);
+}
+
+template <>
+void
+Parser::setScalarParameter<RealArrayValue, RealArrayValue>(
+    const std::string & full_name,
+    const std::string & short_name,
+    InputParameters::Parameter<RealArrayValue> * param,
+    bool in_global,
+    GlobalParamsAction * global_block)
+{
+  std::vector<double> vec;
+  try
+  {
+    vec = _root->param<std::vector<double>>(full_name);
+  }
+  catch (hit::Error & err)
+  {
+    _errmsg += hit::errormsg(_input_filename, _root->find(full_name), err.what()) + "\n";
+    return;
+  }
+
+  RealArrayValue value(vec.size());
+  for (unsigned int i = 0; i < vec.size(); ++i)
+    value(i) = Real(vec[i]);
+
+  param->set() = value;
+  if (in_global)
+  {
+    global_block->remove(short_name);
+    global_block->setScalarParam<RealArrayValue>(short_name) = value;
+  }
 }
 
 template <>
