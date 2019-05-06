@@ -22,8 +22,9 @@
 // BOOST include
 #include "bitmask_operators.h"
 
+#include "libmesh/ignore_warnings.h"
 #include "Eigen/Core"
-
+#include "libmesh/restore_warnings.h"
 #include "libmesh/tensor_tools.h"
 
 #include <string>
