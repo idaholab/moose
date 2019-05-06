@@ -99,6 +99,7 @@ protected:
 
   /// gradient of the test function
   const ArrayVariableTestGradient & _grad_test;
+  const MappedArrayVariablePhiGradient & _array_grad_test;
 
   /// the current shape functions
   const ArrayVariablePhiValue & _phi;

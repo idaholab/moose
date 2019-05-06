@@ -128,10 +128,10 @@ namespace libMesh
 template <typename>
 class VectorValue;
 typedef VectorValue<Real> RealVectorValue;
-typedef Eigen::Array<Real, Eigen::Dynamic, 1> RealArrayValue;
-typedef Eigen::Array<Real, Eigen::Dynamic, LIBMESH_DIM> RealVectorArrayValue;
-typedef Eigen::Array<Real, Eigen::Dynamic, LIBMESH_DIM * LIBMESH_DIM> RealTensorArrayValue;
-typedef Eigen::Array<Real, Eigen::Dynamic, Eigen::Dynamic> RealArray;
+typedef Eigen::Matrix<Real, Eigen::Dynamic, 1> RealArrayValue;
+typedef Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM> RealVectorArrayValue;
+typedef Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM * LIBMESH_DIM> RealTensorArrayValue;
+typedef Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic> RealArray;
 template <typename>
 class TypeVector;
 template <typename>
@@ -146,21 +146,21 @@ class Point;
 namespace TensorTools
 {
 template <>
-struct IncrementRank<Eigen::Array<Real, Eigen::Dynamic, 1>>
+struct IncrementRank<Eigen::Matrix<Real, Eigen::Dynamic, 1>>
 {
-  typedef Eigen::Array<Real, Eigen::Dynamic, LIBMESH_DIM> type;
+  typedef Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM> type;
 };
 
 template <>
-struct IncrementRank<Eigen::Array<Real, Eigen::Dynamic, LIBMESH_DIM>>
+struct IncrementRank<Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM>>
 {
-  typedef Eigen::Array<Real, Eigen::Dynamic, LIBMESH_DIM * LIBMESH_DIM> type;
+  typedef Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM * LIBMESH_DIM> type;
 };
 
 template <>
-struct DecrementRank<Eigen::Array<Real, Eigen::Dynamic, LIBMESH_DIM>>
+struct DecrementRank<Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM>>
 {
-  typedef Eigen::Array<Real, Eigen::Dynamic, 1> type;
+  typedef Eigen::Matrix<Real, Eigen::Dynamic, 1> type;
 };
 }
 }
@@ -235,7 +235,7 @@ struct ShapeType
   typedef OutputType type;
 };
 template <>
-struct ShapeType<Eigen::Array<Real, Eigen::Dynamic, 1>>
+struct ShapeType<Eigen::Matrix<Real, Eigen::Dynamic, 1>>
 {
   typedef Real type;
 };
@@ -329,6 +329,7 @@ typedef typename OutputTools<RealArrayValue>::VariableSecond ArrayVariableSecond
 typedef typename OutputTools<RealArrayValue>::VariableCurl ArrayVariableCurl;
 typedef typename OutputTools<RealArrayValue>::VariablePhiValue ArrayVariablePhiValue;
 typedef typename OutputTools<RealArrayValue>::VariablePhiGradient ArrayVariablePhiGradient;
+typedef std::vector<std::vector<Eigen::Map<Eigen::Vector3d>>> MappedArrayVariablePhiGradient;
 typedef typename OutputTools<RealArrayValue>::VariablePhiSecond ArrayVariablePhiSecond;
 typedef typename OutputTools<RealArrayValue>::VariablePhiCurl ArrayVariablePhiCurl;
 typedef typename OutputTools<RealArrayValue>::VariableTestValue ArrayVariableTestValue;

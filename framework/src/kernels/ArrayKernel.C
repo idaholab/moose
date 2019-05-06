@@ -37,6 +37,7 @@ ArrayKernel::ArrayKernel(const InputParameters & parameters)
     _var(*mooseVariable()),
     _test(_var.phi()),
     _grad_test(_var.gradPhi()),
+    _array_grad_test(_var.arrayGradPhi()),
     _phi(_assembly.phi(_var)),
     _grad_phi(_assembly.gradPhi(_var)),
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
