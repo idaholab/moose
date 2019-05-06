@@ -123,6 +123,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_kernel",                   Kernel,                 false);
   appendMooseObjectTask  ("add_kernel",                   EigenKernel);
   appendMooseObjectTask  ("add_kernel",                   VectorKernel);
+  appendMooseObjectTask  ("add_kernel",                   ArrayKernel);
 
   registerMooseObjectTask("add_nodal_kernel",             NodalKernel,            false);
 
