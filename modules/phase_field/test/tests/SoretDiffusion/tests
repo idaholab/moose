@@ -1,22 +1,29 @@
 [Tests]
+  issues = '#5324'
+  design = 'SoretDiffusion.md'
+
   [./split]
     type = 'Exodiff'
     input = 'split.i'
     exodiff = 'split_out.e'
+    requirement = 'A temperature gradient driving force for diffusion shall be added to the split form of the Cahn-Hilliard equation.'
   [../]
   [./split_temp]
     type = 'Exodiff'
     input = 'split_temp.i'
     exodiff = 'split_temp_out.e'
+    requirement = 'A temperature gradient driving force for diffusion shall be added to the split form of the Cahn-Hilliard equation, where temperature is a coupled non-linear variable'
   [../]
   [./direct]
     type = 'Exodiff'
     input = 'direct.i'
     exodiff = 'direct_out.e'
+    requirement = 'A temperature gradient driving force for diffusion shall be added to the non-split form of the Cahn-Hilliard equation.'
   [../]
   [./direct_temp]
     type = 'Exodiff'
     input = 'direct_temp.i'
     exodiff = 'direct_temp_out.e'
+    requirement = 'A temperature gradient driving force for diffusion shall be added to the non-split form of the Cahn-Hilliard equation, where temperature is a coupled non-linear variable'
   [../]
 []
