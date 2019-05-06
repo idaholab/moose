@@ -23,6 +23,7 @@
     cli_args = MultiApps/sub/mode=normal
     csvdiff = 'master_multiple_out_storage_0002.csv'
     requirement = "The 'stocastic_tools' module shall be able to set multiple command line parameters for the SamplerFullSolveMultiApp from a sample distribution."
+    prereq = master_single_batch
   []
 
   [master_multiple_batch]
@@ -39,6 +40,7 @@
     cli_args = MultiApps/sub/mode=batch-restore
     expect_err = "The MultiApp object, 'sub', supplied to the 'cmdline' object is setup to run in 'batch-restore' mode, when using this mode command line arguments cannot be modified; batch-reset mode should be used instead."
     requirement = "The MultiAppCommandLineControl object shall error when the supplied sampler object operates in a mode that does not allow for command line arguments to be modified."
+    prereq = master_multiple_batch 
   []
 
   [wrong_execute_on]
@@ -47,5 +49,6 @@
     cli_args = Samplers/sample/execute_on=INITIAL
     expect_err = "The sampler object, 'sample', is being used by the 'cmdline' object, thus the 'execute_on' of the sampler must include 'PRE_MULTIAPP_SETUP'."
     requirement = "The MultiAppCommandLineControl object shall error when the supplied sampler does not use the correct 'execute_on' value."
+    prereq = master_multiple_batch
   []
 []

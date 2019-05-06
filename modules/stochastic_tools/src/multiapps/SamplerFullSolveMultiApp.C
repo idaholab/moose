@@ -45,7 +45,8 @@ SamplerFullSolveMultiApp::SamplerFullSolveMultiApp(const InputParameters & param
   : FullSolveMultiApp(parameters),
     SamplerInterface(this),
     _sampler(SamplerInterface::getSampler("sampler")),
-    _mode(getParam<MooseEnum>("mode"))
+    _mode(getParam<MooseEnum>("mode")),
+    _local_batch_app_index(0)
 {
   if (_mode == "batch-reset" || _mode == "batch-restore")
     init(n_processors());
@@ -86,6 +87,7 @@ SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
     backup();
 
   // Perform batch MultiApp solves
+  _local_batch_app_index = 0;
   dof_id_type num_items = _sampler.getLocalNumerOfRows();
   for (MooseIndex(num_items) i = 0; i < num_items; ++i)
   {
