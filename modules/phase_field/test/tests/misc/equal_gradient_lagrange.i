@@ -122,8 +122,8 @@
 [Executioner]
   type = Transient
 
-  petsc_options_iname = '-pctype -sub_pc_type -sub_pc_factor_shift_type'
-  petsc_options_value = ' asm    lu          nonzero'
+  petsc_options_iname = '-pctype -sub_pc_type -sub_pc_factor_shift_type -pc_factor_shift_type'
+  petsc_options_value = ' asm    lu          nonzero                    nonzero'
 
   dt = 0.002
   num_steps = 10

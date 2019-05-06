@@ -92,17 +92,15 @@
 [Executioner]
   type = Transient
   scheme = 'bdf2'
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
 
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg 31'
-  l_tol = 1.0e-4
+
+  l_tol = 1.0e-5
   l_max_its = 15
   nl_max_its = 20
-  nl_rel_tol = 1.0e-8
+  nl_rel_tol = 1.0e-10
   start_time = 0.0
   num_steps = 1
   dt = 40.0

@@ -12,26 +12,26 @@
     exodiff = 'GrGr_wTGrad_out.e'
   [../]
 
-  [./GrGrThumb_test]
+  [./GrGr_thumb_test]
     type = 'Exodiff'
     input = 'GrGr_thumb_test.i'
     exodiff = 'Thumb.e-s006'
     group = 'adaptive'
   [../]
 
-  [./GrGrHex_test]
+  [./GrGr_hex_test]
     type = 'Exodiff'
     input = 'GrGr_hex_test.i'
     exodiff = 'hex.e'
   [../]
 
-  [./GrGrVoronoi_test]
+  [./GrGr_voronoi_test]
     type = 'Exodiff'
     input = 'GrGr_voronoi_test.i'
     exodiff = 'voronoi.e'
   [../]
 
-  [./GrGrBoundingBox_test]
+  [./GrGr_boundingbox_test]
     type = 'Exodiff'
     input = 'GrGr_boundingbox_test.i'
     exodiff = 'bounding_box.e-s003'
@@ -43,7 +43,7 @@
     exodiff = 'GBEvolution.e'
   [../]
 
-  [./GrGrOffDaig_test]
+  [./GrGr_OffDiag_test]
     type = 'Exodiff'
     input = 'GrGr_OffDiag_test.i'
     exodiff = 'OffDiag.e-s002'
@@ -57,14 +57,14 @@
     exodiff = 'GBEvolution_mob.e'
   [../]
 
-  [./Explicit_test]
+  [./GrGr_test_explicit]
     type = 'Exodiff'
     input = 'GrGr_test_explicit.i'
     exodiff = 'explicit.e'
     max_parallel = 1
   [../]
 
-  [./GrGrVoronoi3D_test]
+  [./GrGr_voronoi_columnar3D_test]
     type = 'Exodiff'
     input = 'GrGr_voronoi_columnar3D_test.i'
     exodiff = 'voronoi3D.e'
