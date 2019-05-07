@@ -483,6 +483,8 @@ class TestHarness:
                 elif job.isFail():
                     self.num_failed += 1
                 else:
+                    tester = job.getTester()
+                    print 'PENDING: %s\nJOB:     %s\nTESTER:  %s\nCAVEATS: %s\n' % (job.getTestName(), job.getStatus(), tester.getStatus(), job.getCaveats())
                     self.num_pending += 1
 
             # Just print current status without saving results
