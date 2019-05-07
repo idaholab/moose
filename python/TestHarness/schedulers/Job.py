@@ -277,8 +277,10 @@ class Job(object):
         _status = self.getStatus()
         return _status == self.error or _status == self.timeout
     def isSkip(self):
-        return (self.getStatus() == self.skip and self.__tester.isSkip()) \
-            or (self.getStatus() == self.skip and self.isNoStatus())
+        _status = self.getStatus()
+        return (_status == self.finished and self.__tester.isSkip()) \
+            or (_status == self.skip and self.isNoStatus()) \
+            or (_status == self.skip and self.__tester.isSkip())
     def isHold(self):
         return self.getStatus() == self.hold
     def isQueued(self):
