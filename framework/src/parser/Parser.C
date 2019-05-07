@@ -890,6 +890,13 @@ void Parser::setScalarParameter<RealArrayValue, RealArrayValue>(
     GlobalParamsAction * global_block);
 
 template <>
+void Parser::setScalarParameter<RealArray, RealArray>(const std::string & full_name,
+                                                      const std::string & short_name,
+                                                      InputParameters::Parameter<RealArray> * param,
+                                                      bool in_global,
+                                                      GlobalParamsAction * global_block);
+
+template <>
 void Parser::setScalarParameter<PostprocessorName, PostprocessorName>(
     const std::string & full_name,
     const std::string & short_name,
@@ -1150,6 +1157,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setscalar(RealVectorValue, RealVectorValue);
       setscalar(Point, Point);
       setscalar(RealArrayValue, RealArrayValue);
+      setscalar(RealArray, RealArray);
       setscalar(MooseEnum, MooseEnum);
       setscalar(MultiMooseEnum, MultiMooseEnum);
       setscalar(RealTensorValue, RealTensorValue);
@@ -1666,6 +1674,57 @@ Parser::setScalarParameter<RealArrayValue, RealArrayValue>(
   {
     global_block->remove(short_name);
     global_block->setScalarParam<RealArrayValue>(short_name) = value;
+  }
+}
+
+template <>
+void
+Parser::setScalarParameter<RealArray, RealArray>(const std::string & full_name,
+                                                 const std::string & short_name,
+                                                 InputParameters::Parameter<RealArray> * param,
+                                                 bool in_global,
+                                                 GlobalParamsAction * global_block)
+{
+  // Get the full string assigned to the variable full_name
+  std::string buffer = _root->param<std::string>(full_name);
+
+  // split vector at delim ;
+  // NOTE: the substrings are _not_ of type T yet
+  std::vector<std::string> first_tokenized_vector;
+  MooseUtils::tokenize(buffer, first_tokenized_vector, 1, ";");
+
+  std::vector<std::vector<Real>> values(first_tokenized_vector.size());
+
+  for (unsigned j = 0; j < first_tokenized_vector.size(); ++j)
+  {
+    if (!MooseUtils::tokenizeAndConvert<Real>(first_tokenized_vector[j], values[j]))
+    {
+      _errmsg +=
+          hit::errormsg(
+              _input_filename, _root->find(full_name), "invalid format for parameter ", full_name) +
+          "\n";
+      return;
+    }
+    if (j != 0 && values[j].size() != values[0].size())
+    {
+      _errmsg +=
+          hit::errormsg(
+              _input_filename, _root->find(full_name), "invalid format for parameter ", full_name) +
+          "\n";
+      return;
+    }
+  }
+
+  RealArray value(values.size(), values[0].size());
+  for (unsigned int i = 0; i < values.size(); ++i)
+    for (unsigned int j = 0; j < values[i].size(); ++j)
+      value(i, j) = values[i][j];
+
+  param->set() = value;
+  if (in_global)
+  {
+    global_block->remove(short_name);
+    global_block->setScalarParam<RealArray>(short_name) = value;
   }
 }
 
