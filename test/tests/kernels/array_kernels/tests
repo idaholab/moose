@@ -5,6 +5,12 @@
     type = 'Exodiff'
     input = 'array_diffusion_test.i'
     exodiff = 'array_diffusion_test_out.e'
-    requirement = 'MOOSE shall provide array kernels.'
+    requirement = 'MOOSE shall provide array diffusion kernels.'
+  [../]
+  [./test_diffusion_reaction]
+    type = 'Exodiff'
+    input = 'array_diffusion_reaction.i'
+    exodiff = 'array_diffusion_reaction_out.e'
+    requirement = 'MOOSE shall provide array reaction kernels.'
   [../]
 []
