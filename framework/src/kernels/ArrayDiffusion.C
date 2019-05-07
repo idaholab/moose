@@ -79,7 +79,10 @@ ArrayDiffusion::computeQpOffDiagJacobian(MooseVariableFEBase & jvar)
     if (_dc_type == 0 || _dc_type == 1)
     {
       RealArrayValue v = computeQpJacobian();
-      RealArray t(_var.count(), _var.count());
+      // Note: we cannot do RealArray t(_var.count(), _var.count()) because Eigen does not
+      // initialize
+      //       the memory!
+      RealArray t = RealArray::Zero(_var.count(), _var.count());
       t.diagonal() = v;
       return t;
     }
