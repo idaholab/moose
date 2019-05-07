@@ -163,15 +163,3 @@ ArrayKernel::computeOffDiagJacobianScalar(unsigned int jvar)
 
   accumulateTaggedLocalMatrix();
 }
-
-RealArray
-ArrayKernel::computeQpOffDiagJacobian(MooseVariableFEBase & jvar)
-{
-  return RealArray(_var.count(), jvar.count());
-}
-
-RealArray
-ArrayKernel::computeQpOffDiagJacobianScalar(MooseVariableScalar & jvar)
-{
-  return RealArray(_var.count(), (unsigned int)jvar.order() + 1);
-}
