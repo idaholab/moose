@@ -154,7 +154,7 @@
     # Test that Console output shows up when "final" execution is set and interval is not equal 1
     type = RunApp
     input = 'console_final.i'
-    expect_out = 'Time\sStep\s11'
+    expect_out = '^FINAL:'
     group = 'requirements'
   [../]
   [./console_fit_width_error]
