@@ -16,8 +16,10 @@ InputParameters
 validParams<ElementIntegralArrayVariablePostprocessor>()
 {
   InputParameters params = validParams<ElementIntegralPostprocessor>();
-  params.addRequiredCoupledVar("variable", "The name of the variable that this object operates on");
-  params.addParam<unsigned int>("component", 0, "");
+  params.addRequiredCoupledVar("variable",
+                               "The name of the array variable that this object operates on");
+  params.addParam<unsigned int>("component", 0, "Component of the array variable to be integrated");
+  params.addClassDescription("Integral of one component of an array variable.");
   return params;
 }
 
