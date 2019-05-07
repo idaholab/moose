@@ -25,31 +25,22 @@ validParams<MultiAppFieldTransferInterface>()
       "variable", "The auxiliary variable to store the transferred values in.");
   params.addRequiredParam<std::vector<VariableName>>("source_variable",
                                                      "The variable to transfer from.");
-  params.addParam<bool>("preserve_transfer",
-                        false,
-                        "Whether or not to conserve the transfered field, "
-                        " if true, the transfered variables will be adjusted "
-                        "according to the pps value");
 
-  std::vector<PostprocessorName> from_postprocessor = {"from_postprocessor"};
   params.addParam<std::vector<PostprocessorName>>(
       "from_postprocessor_to_be_preserved",
-      from_postprocessor,
       "The name of the Postprocessor in the from-app to evaluate an adjusting factor.");
 
-  std::vector<PostprocessorName> to_postprocessor = {"to_postprocessor"};
   params.addParam<std::vector<PostprocessorName>>(
       "to_postprocessor_to_be_preserved",
-      to_postprocessor,
       "The name of the Postprocessor in the to-app to evaluate an adjusting factor.");
   return params;
 }
 
 MultiAppFieldTransferInterface::MultiAppFieldTransferInterface(const InputParameters & parameters)
   : MultiAppTransfer(parameters),
-    _from_var_name(getParam<std::vector<VariableName>>("source_variable")),
-    _to_var_name(getParam<std::vector<AuxVariableName>>("variable")),
-    _preserve_transfer(parameters.get<bool>("preserve_transfer")),
+    _from_var_names(getParam<std::vector<VariableName>>("source_variable")),
+    _to_var_names(getParam<std::vector<AuxVariableName>>("variable")),
+    _preserve_transfer(isParamValid("from_postprocessor_to_be_preserved")),
     _from_postprocessor_to_be_preserved(
         parameters.get<std::vector<PostprocessorName>>("from_postprocessor_to_be_preserved")),
     _to_postprocessor_to_be_preserved(
@@ -62,7 +53,7 @@ MultiAppFieldTransferInterface::MultiAppFieldTransferInterface(const InputParame
      * Not sure how important to support multi variables
      * Let us handle the single variable case only right now if the conservative capability is on
      */
-    if (_to_var_name.size() != 1 && _from_var_name.size() != 1)
+    if (_to_var_name.size() != 1 && _from_var_names.size() != 1)
       mooseError(" Support single variable only when the conservative capability is on ");
 
     if (_direction == TO_MULTIAPP)
@@ -86,16 +77,30 @@ MultiAppFieldTransferInterface::MultiAppFieldTransferInterface(const InputParame
     }
   }
 
-  if (_to_var_name.size() != _from_var_name.size())
+  if (_to_var_names.size() != _from_var_names.size())
     mooseError("Number of target variable should equal to the number of source variables ");
 
-  if (_to_var_name.size() == 0)
+  if (_to_var_names.size() == 0)
     mooseError("You need to specify at least one variable");
+
+  /* Right now, most of transfers support one variable only */
+  if (_to_var_names.size() == 1 && _from_var_names.size())
+  {
+    _to_var_name = _to_var_names[0];
+    _from_var_name = _from_var_names[0];
+  }
 }
 
 void
 MultiAppFieldTransferInterface::initialSetup()
 {
+  if (_direction == TO_MULTIAPP)
+    for (auto & to_var : _to_var_names)
+      variableIntegrityCheck(to_var);
+  else
+    for (auto & from_var : _from_var_names)
+      variableIntegrityCheck(from_var);
+
   if (_preserve_transfer)
   {
     if (_from_postprocessor_to_be_preserved.size() == 1 && _direction == TO_MULTIAPP)
@@ -112,7 +117,7 @@ MultiAppFieldTransferInterface::initialSetup()
           mooseError(
               " You have to specify ",
               _multi_app->numGlobalApps(),
-              " regular from-postproessors, or use NearestPointIntegralVariablePostprocessor ");
+              " regular from-postprocessors, or use NearestPointIntegralVariablePostprocessor ");
       }
     }
 
@@ -130,7 +135,7 @@ MultiAppFieldTransferInterface::initialSetup()
           mooseError(
               " You have to specify ",
               _multi_app->numGlobalApps(),
-              " regular to-postproessors, or use NearestPointIntegralVariablePostprocessor ");
+              " regular to-postprocessors, or use NearestPointIntegralVariablePostprocessor ");
       }
     }
   }
@@ -228,9 +233,9 @@ MultiAppFieldTransferInterface::adjustTransferedSolutionNearestPoint(
   }
 
   auto & to_var = to_problem.getVariable(
-      0, _to_var_name[0], Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
+      0, _to_var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
   auto & to_sys = to_var.sys().system();
-  auto var_num = to_sys.variable_number(_to_var_name[0]);
+  auto var_num = to_sys.variable_number(_to_var_name);
   auto sys_num = to_sys.number();
   auto & pps = static_cast<const NearestPointIntegralVariablePostprocessor &>(
       _direction == FROM_MULTIAPP ? (to_problem.getUserObjectBase(to_postprocessor))
@@ -326,9 +331,9 @@ MultiAppFieldTransferInterface::adjustTransferedSolution(FEProblemBase * from_pr
   }
 
   auto & to_var = to_problem.getVariable(
-      0, _to_var_name[0], Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
+      0, _to_var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
   auto & to_sys = to_var.sys().system();
-  auto var_num = to_sys.variable_number(_to_var_name[0]);
+  auto var_num = to_sys.variable_number(_to_var_name);
   auto sys_num = to_sys.number();
   auto * pps =
       dynamic_cast<const BlockRestrictable *>(&(to_problem.getUserObjectBase(to_postprocessor)));

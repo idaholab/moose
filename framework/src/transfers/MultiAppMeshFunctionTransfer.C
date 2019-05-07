@@ -40,22 +40,10 @@ validParams<MultiAppMeshFunctionTransfer>()
 MultiAppMeshFunctionTransfer::MultiAppMeshFunctionTransfer(const InputParameters & parameters)
   : MultiAppFieldTransferInterface(parameters), _error_on_miss(getParam<bool>("error_on_miss"))
 {
-  if (_to_var_name.size() == _from_var_name.size())
-    _var_size = _to_var_name.size();
+  if (_to_var_names.size() == _from_var_names.size())
+    _var_size = _to_var_names.size();
   else
     mooseError("The number of variables to transfer to and from should be equal");
-}
-
-void
-MultiAppMeshFunctionTransfer::initialSetup()
-{
-  MultiAppFieldTransferInterface::initialSetup();
-
-  for (unsigned int i = 0; i < _var_size; ++i)
-    if (_direction == TO_MULTIAPP)
-      variableIntegrityCheck(_to_var_name[i]);
-    else
-      variableIntegrityCheck(_from_var_name[i]);
 }
 
 void
@@ -116,9 +104,9 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
 
   for (unsigned int i_to = 0; i_to < _to_problems.size(); ++i_to)
   {
-    System * to_sys = find_sys(*_to_es[i_to], _to_var_name[i]);
+    System * to_sys = find_sys(*_to_es[i_to], _to_var_names[i]);
     unsigned int sys_num = to_sys->number();
-    unsigned int var_num = to_sys->variable_number(_to_var_name[i]);
+    unsigned int var_num = to_sys->variable_number(_to_var_names[i]);
     MeshBase * to_mesh = &_to_meshes[i_to]->getMesh();
     bool is_nodal = to_sys->variable_type(var_num).family == LAGRANGE;
 
@@ -214,8 +202,11 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
   for (unsigned int i_from = 0; i_from < _from_problems.size(); ++i_from)
   {
     FEProblemBase & from_problem = *_from_problems[i_from];
-    MooseVariableFEBase & from_var = from_problem.getVariable(
-        0, _from_var_name[i], Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
+    MooseVariableFEBase & from_var =
+        from_problem.getVariable(0,
+                                 _from_var_names[i],
+                                 Moose::VarKindType::VAR_ANY,
+                                 Moose::VarFieldType::VAR_FIELD_STANDARD);
     System & from_sys = from_var.sys().system();
     unsigned int from_var_num = from_sys.variable_number(from_var.name());
 
@@ -320,16 +311,16 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
 
   for (unsigned int i_to = 0; i_to < _to_problems.size(); ++i_to)
   {
-    System * to_sys = find_sys(*_to_es[i_to], _to_var_name[i]);
+    System * to_sys = find_sys(*_to_es[i_to], _to_var_names[i]);
 
     unsigned int sys_num = to_sys->number();
-    unsigned int var_num = to_sys->variable_number(_to_var_name[i]);
+    unsigned int var_num = to_sys->variable_number(_to_var_names[i]);
 
     NumericVector<Real> * solution = nullptr;
     switch (_direction)
     {
       case TO_MULTIAPP:
-        solution = &getTransferVector(i_to, _to_var_name[i]);
+        solution = &getTransferVector(i_to, _to_var_names[i]);
         break;
       case FROM_MULTIAPP:
         solution = to_sys->solution.get();

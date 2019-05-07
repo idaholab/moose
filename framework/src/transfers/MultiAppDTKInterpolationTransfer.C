@@ -32,8 +32,8 @@ MultiAppDTKInterpolationTransfer::MultiAppDTKInterpolationTransfer(
     const InputParameters & parameters)
   : MultiAppFieldTransferInterface(parameters)
 {
-  mooseAssert(_to_var_name.size() == 1 && _from_var_name.size() == 1,
-              " Support single variable only ");
+  if (_to_var_name.size() != 1 && _from_var_name.size() != 1)
+    mooseError(" Support single variable only ");
 }
 
 void

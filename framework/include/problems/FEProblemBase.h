@@ -1478,10 +1478,6 @@ public:
    */
   virtual void computeUserObjects(const ExecFlagType & type, const Moose::AuxGroup & group);
 
-  void computeUserObjectsInternal(const ExecFlagType & type,
-                                  const Moose::AuxGroup & group,
-                                  TheWarehouse::Query & query);
-
   /**
    * Compute an user object with the given name
    */
@@ -1792,6 +1788,10 @@ protected:
 
   /// Helper to check for duplicate variable names across systems or within a single system
   bool duplicateVariableCheck(const std::string & var_name, const FEType & type, bool is_aux);
+
+  void computeUserObjectsInternal(const ExecFlagType & type,
+                                  const Moose::AuxGroup & group,
+                                  TheWarehouse::Query & query);
 
   /// Verify that SECOND order mesh uses SECOND order displacements.
   void checkDisplacementOrders();

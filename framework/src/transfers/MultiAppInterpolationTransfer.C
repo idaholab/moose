@@ -57,19 +57,8 @@ MultiAppInterpolationTransfer::MultiAppInterpolationTransfer(const InputParamete
   // This transfer does not work with DistributedMesh
   _fe_problem.mesh().errorIfDistributedMesh("MultiAppInterpolationTransfer");
 
-  mooseAssert(_to_var_name.size() == 1 && _from_var_name.size() == 1,
-              " Support single variable only ");
-}
-
-void
-MultiAppInterpolationTransfer::initialSetup()
-{
-  MultiAppFieldTransferInterface::initialSetup();
-
-  if (_direction == TO_MULTIAPP)
-    variableIntegrityCheck(_to_var_name[0]);
-  else
-    variableIntegrityCheck(_from_var_name[0]);
+  if (_to_var_names.size() != 1 || _from_var_names.size() != 1)
+    mooseError(" Support single variable only ");
 }
 
 void
@@ -82,11 +71,8 @@ MultiAppInterpolationTransfer::execute()
     case TO_MULTIAPP:
     {
       FEProblemBase & from_problem = _multi_app->problemBase();
-      MooseVariableFEBase & from_var =
-          from_problem.getVariable(0,
-                                   _from_var_name[0],
-                                   Moose::VarKindType::VAR_ANY,
-                                   Moose::VarFieldType::VAR_FIELD_STANDARD);
+      MooseVariableFEBase & from_var = from_problem.getVariable(
+          0, _from_var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
 
       MeshBase * from_mesh = NULL;
 
@@ -125,11 +111,11 @@ MultiAppInterpolationTransfer::execute()
       std::vector<Number> & src_vals(idi->get_source_vals());
 
       std::vector<std::string> field_vars;
-      field_vars.push_back(_to_var_name[0]);
+      field_vars.push_back(_to_var_name);
       idi->set_field_variables(field_vars);
 
       std::vector<std::string> vars;
-      vars.push_back(_to_var_name[0]);
+      vars.push_back(_to_var_name);
 
       if (from_is_nodal)
       {
@@ -168,11 +154,11 @@ MultiAppInterpolationTransfer::execute()
           Moose::ScopedCommSwapper swapper(_multi_app->comm());
 
           // Loop over the master nodes and set the value of the variable
-          System * to_sys = find_sys(_multi_app->appProblemBase(i).es(), _to_var_name[0]);
+          System * to_sys = find_sys(_multi_app->appProblemBase(i).es(), _to_var_name);
 
           unsigned int sys_num = to_sys->number();
-          unsigned int var_num = to_sys->variable_number(_to_var_name[0]);
-          NumericVector<Real> & solution = _multi_app->appTransferVector(i, _to_var_name[0]);
+          unsigned int var_num = to_sys->variable_number(_to_var_name);
+          NumericVector<Real> & solution = _multi_app->appTransferVector(i, _to_var_name);
 
           MeshBase * mesh = NULL;
 
@@ -250,7 +236,7 @@ MultiAppInterpolationTransfer::execute()
     {
       FEProblemBase & to_problem = _multi_app->problemBase();
       MooseVariableFEBase & to_var = to_problem.getVariable(
-          0, _to_var_name[0], Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
+          0, _to_var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
       SystemBase & to_system_base = to_var.sys();
 
       System & to_sys = to_system_base.system();
@@ -294,11 +280,11 @@ MultiAppInterpolationTransfer::execute()
       std::vector<Number> & src_vals(idi->get_source_vals());
 
       std::vector<std::string> field_vars;
-      field_vars.push_back(_to_var_name[0]);
+      field_vars.push_back(_to_var_name);
       idi->set_field_variables(field_vars);
 
       std::vector<std::string> vars;
-      vars.push_back(_to_var_name[0]);
+      vars.push_back(_to_var_name);
 
       for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
       {
@@ -310,7 +296,7 @@ MultiAppInterpolationTransfer::execute()
         FEProblemBase & from_problem = _multi_app->appProblemBase(i);
         MooseVariableFEBase & from_var =
             from_problem.getVariable(0,
-                                     _from_var_name[0],
+                                     _from_var_name,
                                      Moose::VarKindType::VAR_ANY,
                                      Moose::VarFieldType::VAR_FIELD_STANDARD);
         SystemBase & from_system_base = from_var.sys();

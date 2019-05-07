@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NEARESTPOINTINTEGRALVARIABLEPOSTPROCESSOR_H
-#define NEARESTPOINTINTEGRALVARIABLEPOSTPROCESSOR_H
+#pragma once
 
 // MOOSE includes
 #include "NearestPointBase.h"
@@ -38,5 +37,3 @@ public:
 
   std::shared_ptr<ElementIntegralVariablePostprocessor> userObject(unsigned int i) const;
 };
-
-#endif /* NEARESTPOINTINTEGRALVARIABLEPOSTPROCESSOR_H */

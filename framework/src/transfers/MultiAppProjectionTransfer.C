@@ -66,6 +66,8 @@ MultiAppProjectionTransfer::MultiAppProjectionTransfer(const InputParameters & p
     _fixed_meshes(getParam<bool>("fixed_meshes")),
     _qps_cached(false)
 {
+  if (_to_var_names.size() != 1 || _from_var_names.size() != 1)
+    mooseError(" Support single variable only ");
 }
 
 void
@@ -85,7 +87,7 @@ MultiAppProjectionTransfer::initialSetup()
     // Add the projection system.
     FEType fe_type = to_problem
                          .getVariable(0,
-                                      _to_var_name[0],
+                                      _to_var_name,
                                       Moose::VarKindType::VAR_ANY,
                                       Moose::VarFieldType::VAR_FIELD_STANDARD)
                          .feType();
@@ -327,7 +329,7 @@ MultiAppProjectionTransfer::execute()
   {
     FEProblemBase & from_problem = *_from_problems[i_from];
     MooseVariableFEBase & from_var = from_problem.getVariable(
-        0, _from_var_name[0], Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
+        0, _from_var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
     System & from_sys = from_var.sys().system();
     unsigned int from_var_num = from_sys.variable_number(from_var.name());
 
@@ -536,7 +538,7 @@ MultiAppProjectionTransfer::projectSolution(unsigned int i_to)
   MeshBase & to_mesh = proj_es.get_mesh();
 
   MooseVariableFEBase & to_var = to_problem.getVariable(
-      0, _to_var_name[0], Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
+      0, _to_var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
   System & to_sys = to_var.sys().system();
   NumericVector<Number> * to_solution = to_sys.solution.get();
 

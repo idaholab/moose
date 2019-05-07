@@ -101,7 +101,6 @@
     variable = from_master
     multi_app = sub
     execute_on = timestep_end
-    preserve_transfer = true
 
     # The following inputs specify what postprocessors should be conserved
     # 1 NearestPointIntegralVariablePostprocessor is specified on the master
@@ -118,7 +117,6 @@
     variable = from_sub
     multi_app = sub
     execute_on = timestep_end
-    preserve_transfer = true
 
     # The following inputs specify what postprocessors should be conserved
     # 1 NearestPointIntegralVariablePostprocessor is specified on the master

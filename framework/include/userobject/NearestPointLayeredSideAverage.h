@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NEARESTPOINTLAYEREDSIDEAVERAGE_H
-#define NEARESTPOINTLAYEREDSIDEAVERAGE_H
+#pragma once
 
 // MOOSE includes
 #include "SideIntegralVariableUserObject.h"
@@ -34,5 +33,3 @@ class NearestPointLayeredSideAverage
 public:
   NearestPointLayeredSideAverage(const InputParameters & parameters);
 };
-
-#endif

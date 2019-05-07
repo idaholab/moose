@@ -61,8 +61,9 @@
     direction = to_multiapp
     source_variable = u
     variable = aux_u
-    preserve_transfer = true
     multi_app = sub
+    from_postprocessor_to_be_preserved = 'from_postprocessor'
+    to_postprocessor_to_be_preserved = 'to_postprocessor'
   [../]
 []
 

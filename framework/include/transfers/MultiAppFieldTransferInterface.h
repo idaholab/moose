@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MULTIAPPFIELDTRANSFERINTERFACE_H
-#define MULTIAPPFIELDTRANSFERINTERFACE_H
+#pragma once
 
 #include "MultiAppTransfer.h"
 
@@ -36,8 +35,11 @@ public:
   virtual void postExecute();
 
 protected:
-  std::vector<VariableName> _from_var_name;
-  std::vector<AuxVariableName> _to_var_name;
+  std::vector<VariableName> _from_var_names;
+  std::vector<AuxVariableName> _to_var_names;
+
+  VariableName _from_var_name;
+  AuxVariableName _to_var_name;
 
   // If this transfer is going to conserve the physics
   bool _preserve_transfer;
@@ -60,5 +62,3 @@ private:
 
   bool _use_nearestpoint_pps;
 };
-
-#endif // MULTIAPPFIELDTRANSFERINTERFACE_H
