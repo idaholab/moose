@@ -3,6 +3,10 @@
   dim = 2
   nx = 20
   ny = 20
+  xmin = 0.05
+  xmax = 1.2
+  ymin = 0.05
+  ymax = 1.1
 []
 
 [Variables]
