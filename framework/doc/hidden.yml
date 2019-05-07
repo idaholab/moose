@@ -194,7 +194,6 @@
 - /Outputs/AddOutputAction
 - /Outputs/CSV
 - /Outputs/Checkpoint
-- /Outputs/Console
 - /Outputs/ControlOutput
 - /Outputs/DOFMap
 - /Outputs/GMV

@@ -1,11 +1,14 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # Console
+The Console object in MOOSE is a buffered ostringstream object that should be used to for
+all screen based output. Each MooseObject derived class has access to the _console
+member for screen writing. Output to this object can be controlled in various ways from
+the `[Outputs]` block. Information can be disabled, output at a lower frequency, colored,
+or color removed.
 
-!alert construction title=Undocumented Class
-The Console has not been documented. The content contained on this page includes the
-typical automatic documentation associated with a MooseObject; however, what is contained is
-ultimately determined by what is necessary to make the documentation clear for users.
+## Multiapp Output
+When using the MOOSE Multiapp system, Output to the _console object will be automatically
+indented and labeled according to the multiapp level. This can make it easier to identify
+where output is coming from in a more complex simulation.
 
 !syntax description /Outputs/Console
 
