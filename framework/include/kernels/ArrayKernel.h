@@ -11,6 +11,7 @@
 
 #include "KernelBase.h"
 #include "MooseVariableInterface.h"
+#include "MooseVariableScalar.h"
 
 class ArrayKernel;
 
@@ -48,19 +49,25 @@ protected:
   /**
    * Compute this Kernel's contribution to the diagonal Jacobian at the current quadrature point
    */
-  virtual RealArrayValue computeQpJacobian() { return RealArrayValue(_var.count()); }
+  virtual RealArrayValue computeQpJacobian() { return RealArrayValue::Zero(_var.count()); }
 
   /**
    * This is the virtual that derived classes should override for computing a full Jacobian
    * component
    */
-  virtual RealArray computeQpOffDiagJacobian(MooseVariableFEBase & jvar);
+  virtual RealArray computeQpOffDiagJacobian(MooseVariableFEBase & jvar)
+  {
+    return RealArray::Zero(_var.count(), jvar.count());
+  }
 
   /**
    * This is the virtual that derived classes should override for computing a full Jacobian
    * component
    */
-  virtual RealArray computeQpOffDiagJacobianScalar(MooseVariableScalar & jvar);
+  virtual RealArray computeQpOffDiagJacobianScalar(MooseVariableScalar & jvar)
+  {
+    return RealArray::Zero(_var.count(), (unsigned int)jvar.order() + 1);
+  }
 
   /// for array kernel
   void saveLocalArrayResidual(DenseVector<Number> & re,
