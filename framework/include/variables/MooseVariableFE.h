@@ -209,37 +209,43 @@ public:
   }
 
   /// element solutions
-  const FieldVariableValue & sln() { return _element_data->sln(Moose::Current); }
-  const FieldVariableValue & slnOld() { return _element_data->sln(Moose::Old); }
-  const FieldVariableValue & slnOlder() { return _element_data->sln(Moose::Older); }
-  const FieldVariableValue & slnPreviousNL() { return _element_data->sln(Moose::PreviousNL); }
+  const FieldVariableValue & sln() const { return _element_data->sln(Moose::Current); }
+  const FieldVariableValue & slnOld() const { return _element_data->sln(Moose::Old); }
+  const FieldVariableValue & slnOlder() const { return _element_data->sln(Moose::Older); }
+  const FieldVariableValue & slnPreviousNL() const { return _element_data->sln(Moose::PreviousNL); }
 
   /// element gradients
-  const FieldVariableGradient & gradSln() { return _element_data->gradSln(Moose::Current); }
-  const FieldVariableGradient & gradSlnOld() { return _element_data->gradSln(Moose::Old); }
-  const FieldVariableGradient & gradSlnOlder() { return _element_data->gradSln(Moose::Older); }
-  const FieldVariableGradient & gradSlnPreviousNL()
+  const FieldVariableGradient & gradSln() const { return _element_data->gradSln(Moose::Current); }
+  const FieldVariableGradient & gradSlnOld() const { return _element_data->gradSln(Moose::Old); }
+  const FieldVariableGradient & gradSlnOlder() const
+  {
+    return _element_data->gradSln(Moose::Older);
+  }
+  const FieldVariableGradient & gradSlnPreviousNL() const
   {
     return _element_data->gradSln(Moose::PreviousNL);
   }
 
   /// element gradient dots
-  const FieldVariableGradient & gradSlnDot() { return _element_data->gradSlnDot(); }
-  const FieldVariableGradient & gradSlnDotDot() { return _element_data->gradSlnDotDot(); }
+  const FieldVariableGradient & gradSlnDot() const { return _element_data->gradSlnDot(); }
+  const FieldVariableGradient & gradSlnDotDot() const { return _element_data->gradSlnDotDot(); }
 
   /// element seconds
-  const FieldVariableSecond & secondSln() { return _element_data->secondSln(Moose::Current); }
-  const FieldVariableSecond & secondSlnOld() { return _element_data->secondSln(Moose::Old); }
-  const FieldVariableSecond & secondSlnOlder() { return _element_data->secondSln(Moose::Older); }
-  const FieldVariableSecond & secondSlnPreviousNL()
+  const FieldVariableSecond & secondSln() const { return _element_data->secondSln(Moose::Current); }
+  const FieldVariableSecond & secondSlnOld() const { return _element_data->secondSln(Moose::Old); }
+  const FieldVariableSecond & secondSlnOlder() const
+  {
+    return _element_data->secondSln(Moose::Older);
+  }
+  const FieldVariableSecond & secondSlnPreviousNL() const
   {
     return _element_data->secondSln(Moose::PreviousNL);
   }
 
   /// element curls
-  const FieldVariableCurl & curlSln() { return _element_data->curlSln(Moose::Current); }
-  const FieldVariableCurl & curlSlnOld() { return _element_data->curlSln(Moose::Old); }
-  const FieldVariableCurl & curlSlnOlder() { return _element_data->curlSln(Moose::Older); }
+  const FieldVariableCurl & curlSln() const { return _element_data->curlSln(Moose::Current); }
+  const FieldVariableCurl & curlSlnOld() const { return _element_data->curlSln(Moose::Old); }
+  const FieldVariableCurl & curlSlnOlder() const { return _element_data->curlSln(Moose::Older); }
 
   /// AD
   template <ComputeStage compute_stage>
@@ -373,6 +379,7 @@ public:
   {
     return _lower_data->template adSln<compute_stage>();
   }
+  const FieldVariableValue & slnLower() const { return _lower_data->sln(Moose::Current); }
 
   /// Actually compute variable values
   virtual void computeElemValues() override;

@@ -6,7 +6,6 @@
 #include "MooseLagrangeHelpers.h"
 
 #include "libmesh/mesh_tools.h"
-#include "libmesh/getpot.h"
 #include "libmesh/explicit_system.h"
 #include "libmesh/numeric_vector.h"
 #include "libmesh/elem.h"

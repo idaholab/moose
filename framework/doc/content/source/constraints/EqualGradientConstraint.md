@@ -8,12 +8,12 @@ parameter. If the gradients to be matched are between different variables, the
 `slave_variable` parameter can also be supplied. Lagrange multipliers are used
 to perform the constraint enforcement.
 
-!syntax description /Constraints/EqualGradientConstraint<RESIDUAL>
+!syntax description /Constraints/EqualGradientConstraint
 
-!syntax parameters /Constraints/EqualGradientConstraint<RESIDUAL>
+!syntax parameters /Constraints/EqualGradientConstraint
 
-!syntax inputs /Constraints/EqualGradientConstraint<RESIDUAL>
+!syntax inputs /Constraints/EqualGradientConstraint
 
-!syntax children /Constraints/EqualGradientConstraint<RESIDUAL>
+!syntax children /Constraints/EqualGradientConstraint
 
 !bibtex bibliography

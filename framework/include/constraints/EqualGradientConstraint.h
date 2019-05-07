@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "MortarConstraint.h"
+#include "ADMortarConstraint.h"
 
 template <ComputeStage>
 class EqualGradientConstraint;
@@ -21,7 +21,7 @@ declareADValidParams(EqualGradientConstraint);
  * on both sides of an interface.
  */
 template <ComputeStage compute_stage>
-class EqualGradientConstraint : public MortarConstraint<compute_stage>
+class EqualGradientConstraint : public ADMortarConstraint<compute_stage>
 {
 public:
   EqualGradientConstraint(const InputParameters & parameters);
@@ -33,4 +33,3 @@ protected:
 
   usingMortarConstraintMembers;
 };
-

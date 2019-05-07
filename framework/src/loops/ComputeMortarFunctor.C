@@ -10,7 +10,7 @@
 #include "ComputeMortarFunctor.h"
 #include "SubProblem.h"
 #include "Assembly.h"
-#include "MortarConstraint.h"
+#include "ADMortarConstraint.h"
 #include "AutomaticMortarGeneration.h"
 #include "MooseMesh.h"
 #include "Assembly.h"
@@ -31,19 +31,21 @@ ComputeMortarFunctor<compute_stage>::ComputeMortarFunctor(
     _assembly(_subproblem.assembly(0)),
     _qrule_msm(_assembly.qRuleMortar())
 {
-  // Constructor the mortar constraints we will later loop over
+  // Construct the mortar constraints we will later loop over
   if (compute_stage == ComputeStage::RESIDUAL)
-  {
     for (auto && mc : mortar_constraints)
-      if (auto && cmc =
-              std::dynamic_pointer_cast<MortarConstraint<ComputeStage::RESIDUAL>>(mc).get())
-        _mortar_constraints.push_back(cmc);
-  }
+    {
+      auto && cmc = std::dynamic_pointer_cast<ADMortarConstraint<ComputeStage::JACOBIAN>>(mc);
+      if (!cmc)
+        _mortar_constraints.push_back(mc.get());
+    }
   else if (compute_stage == ComputeStage::JACOBIAN)
     for (auto && mc : mortar_constraints)
-      if (auto && cmc =
-              std::dynamic_pointer_cast<MortarConstraint<ComputeStage::JACOBIAN>>(mc).get())
-        _mortar_constraints.push_back(cmc);
+    {
+      auto && cmc = std::dynamic_pointer_cast<ADMortarConstraint<ComputeStage::RESIDUAL>>(mc);
+      if (!cmc)
+        _mortar_constraints.push_back(mc.get());
+    }
 
   _master_boundary_id = _amg.master_slave_boundary_id_pairs[0].first;
   _slave_boundary_id = _amg.master_slave_boundary_id_pairs[0].second;
@@ -109,8 +111,8 @@ ComputeMortarFunctor<compute_stage>::operator()()
       master_side_id = master_ip->which_side_am_i(msinfo.master_elem);
     }
 
-    // Compute a JxW for the actual mortar segment element (not the lower dimensional element on the
-    // slave face!)
+    // Compute a JxW for the actual mortar segment element (not the lower dimensional element on
+    // the slave face!)
     _subproblem.reinitMortarElem(msm_elem);
 
     // Compute custom integration points for the slave side
@@ -144,8 +146,8 @@ ComputeMortarFunctor<compute_stage>::operator()()
     }
 
     // reinit the variables/residuals/jacobians on the lower dimensional element corresponding to
-    // the slave face. This must be done last after the dof indices have been prepared for the slave
-    // (element) and master (neighbor)
+    // the slave face. This must be done last after the dof indices have been prepared for the
+    // slave (element) and master (neighbor)
     _subproblem.reinitLowerDElemRef(slave_face_elem, &custom_xi1_pts);
 
     if (compute_stage == ComputeStage::RESIDUAL)
@@ -168,8 +170,8 @@ ComputeMortarFunctor<compute_stage>::operator()()
       // Cache SlaveSlave
       _assembly.cacheJacobian();
 
-      // It doesn't appears that we have caching functions for these yet, or at least it's not used
-      // in ComputeJacobianThread. I'll make sure to add/use them if these methods show up in
+      // It doesn't appears that we have caching functions for these yet, or at least it's not
+      // used in ComputeJacobianThread. I'll make sure to add/use them if these methods show up in
       // profiling
       //
       // Add SlaveMaster, MasterSlave, MasterMaster

@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "MortarConstraint.h"
+#include "ADMortarConstraint.h"
 
 template <ComputeStage>
 class GapConductanceConstraint;
@@ -52,7 +52,7 @@ declareADValidParams(GapConductanceConstraint);
  * temperature variable.
  */
 template <ComputeStage compute_stage>
-class GapConductanceConstraint : public MortarConstraint<compute_stage>
+class GapConductanceConstraint : public ADMortarConstraint<compute_stage>
 {
 public:
   GapConductanceConstraint(const InputParameters & parameters);

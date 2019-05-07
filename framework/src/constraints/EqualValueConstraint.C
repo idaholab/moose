@@ -14,14 +14,14 @@
 registerADMooseObject("MooseApp", EqualValueConstraint);
 
 defineADValidParams(EqualValueConstraint,
-                    MortarConstraint,
+                    ADMortarConstraint,
                     params.addClassDescription(
                         "EqualValueConstraint enforces solution continuity between slave and "
                         "master sides of a mortar interface using lagrange multipliers"););
 
 template <ComputeStage compute_stage>
 EqualValueConstraint<compute_stage>::EqualValueConstraint(const InputParameters & parameters)
-  : MortarConstraint<compute_stage>(parameters)
+  : ADMortarConstraint<compute_stage>(parameters)
 {
 }
 

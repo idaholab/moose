@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "MortarConstraint.h"
+#include "ADMortarConstraint.h"
 
 template <ComputeStage>
 class MechanicalContactLMTest;
@@ -17,7 +17,7 @@ class MechanicalContactLMTest;
 declareADValidParams(MechanicalContactLMTest);
 
 template <ComputeStage compute_stage>
-class MechanicalContactLMTest : public MortarConstraint<compute_stage>
+class MechanicalContactLMTest : public ADMortarConstraint<compute_stage>
 {
 public:
   MechanicalContactLMTest(const InputParameters & parameters);

@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "MortarConstraint.h"
+#include "ADMortarConstraint.h"
 
 template <ComputeStage>
 class GapHeatConductanceTest;
@@ -17,7 +17,7 @@ class GapHeatConductanceTest;
 declareADValidParams(GapHeatConductanceTest);
 
 template <ComputeStage compute_stage>
-class GapHeatConductanceTest : public MortarConstraint<compute_stage>
+class GapHeatConductanceTest : public ADMortarConstraint<compute_stage>
 {
 public:
   GapHeatConductanceTest(const InputParameters & parameters);

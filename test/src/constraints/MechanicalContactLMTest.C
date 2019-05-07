@@ -11,11 +11,11 @@
 
 registerADMooseObject("MooseTestApp", MechanicalContactLMTest);
 
-defineADValidParams(MechanicalContactLMTest, MortarConstraint, );
+defineADValidParams(MechanicalContactLMTest, ADMortarConstraint, );
 
 template <ComputeStage compute_stage>
 MechanicalContactLMTest<compute_stage>::MechanicalContactLMTest(const InputParameters & parameters)
-  : MortarConstraint<compute_stage>(parameters)
+  : ADMortarConstraint<compute_stage>(parameters)
 {
 }
 

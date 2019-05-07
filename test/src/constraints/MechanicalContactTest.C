@@ -12,7 +12,7 @@
 registerADMooseObject("MooseTestApp", MechanicalContactTest);
 
 defineADValidParams(MechanicalContactTest,
-                    MortarConstraint,
+                    ADMortarConstraint,
 
                     MooseEnum component("x=0 y=1 z=2");
                     params.addRequiredParam<MooseEnum>(
@@ -22,7 +22,7 @@ defineADValidParams(MechanicalContactTest,
 
 template <ComputeStage compute_stage>
 MechanicalContactTest<compute_stage>::MechanicalContactTest(const InputParameters & parameters)
-  : MortarConstraint<compute_stage>(parameters), _component(adGetParam<MooseEnum>("component"))
+  : ADMortarConstraint<compute_stage>(parameters), _component(adGetParam<MooseEnum>("component"))
 {
 }
 

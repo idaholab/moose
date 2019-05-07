@@ -15,7 +15,7 @@ registerADMooseObject("MooseApp", EqualGradientConstraint);
 
 defineADValidParams(
     EqualGradientConstraint,
-    MortarConstraint,
+    ADMortarConstraint,
     params.addClassDescription(
         "EqualGradientConstraint enforces continuity of a gradient component between slave and "
         "master sides of a mortar interface using lagrange multipliers");
@@ -23,7 +23,7 @@ defineADValidParams(
 
 template <ComputeStage compute_stage>
 EqualGradientConstraint<compute_stage>::EqualGradientConstraint(const InputParameters & parameters)
-  : MortarConstraint<compute_stage>(parameters), _component(adGetParam<unsigned int>("component"))
+  : ADMortarConstraint<compute_stage>(parameters), _component(adGetParam<unsigned int>("component"))
 {
 }
 

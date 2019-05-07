@@ -9,4 +9,4 @@
 
 #include "FaceFaceConstraint.h"
 
-defineADValidParams(FaceFaceConstraint, MortarConstraint, );
+defineADValidParams(FaceFaceConstraint, ADMortarConstraint, );
