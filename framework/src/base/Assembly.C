@@ -2048,7 +2048,7 @@ Assembly::init(const CouplingMatrix * cm)
         {
           auto & jvar = _sys.getVariable(_tid, j);
           _cm_ff_entry.insert(std::make_pair(ivar, &jvar));
-          if (i != j)
+          if (iv != j)
             _block_diagonal_matrix = false;
         }
       }
