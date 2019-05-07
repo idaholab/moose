@@ -2554,18 +2554,26 @@ Assembly::copyFaceShapes(MooseVariableFE<T> & v)
 void
 Assembly::copyFaceShapes(unsigned int var)
 {
-  try
+  MooseVariableFEBase & v = _sys.getVariable(_tid, var);
+  if (v.fieldType() == Moose::VarFieldType::VAR_FIELD_STANDARD)
   {
     MooseVariable & v = _sys.getFieldVariable<Real>(_tid, var);
     copyFaceShapes(v);
   }
-  catch (std::out_of_range & e)
+  else if (v.fieldType() == Moose::VarFieldType::VAR_FIELD_ARRAY)
+  {
+    ArrayMooseVariable & v = _sys.getFieldVariable<RealArrayValue>(_tid, var);
+    copyFaceShapes(v);
+  }
+  else if (v.fieldType() == Moose::VarFieldType::VAR_FIELD_VECTOR)
   {
     VectorMooseVariable & v = _sys.getFieldVariable<RealVectorValue>(_tid, var);
     copyFaceShapes(v);
     if (v.computingCurl())
       _vector_curl_phi_face.shallowCopy(v.curlPhi());
   }
+  else
+    mooseError("Unsupported variable field type!");
 }
 
 template <typename T>
@@ -2592,16 +2600,24 @@ Assembly::copyNeighborShapes(MooseVariableFE<T> & v)
 void
 Assembly::copyNeighborShapes(unsigned int var)
 {
-  try
+  MooseVariableFEBase & v = _sys.getVariable(_tid, var);
+  if (v.fieldType() == Moose::VarFieldType::VAR_FIELD_STANDARD)
   {
     MooseVariable & v = _sys.getFieldVariable<Real>(_tid, var);
     copyNeighborShapes(v);
   }
-  catch (std::out_of_range & e)
+  else if (v.fieldType() == Moose::VarFieldType::VAR_FIELD_ARRAY)
+  {
+    ArrayMooseVariable & v = _sys.getFieldVariable<RealArrayValue>(_tid, var);
+    copyNeighborShapes(v);
+  }
+  else if (v.fieldType() == Moose::VarFieldType::VAR_FIELD_VECTOR)
   {
     VectorMooseVariable & v = _sys.getFieldVariable<RealVectorValue>(_tid, var);
     copyNeighborShapes(v);
   }
+  else
+    mooseError("Unsupported variable field type!");
 }
 
 void
