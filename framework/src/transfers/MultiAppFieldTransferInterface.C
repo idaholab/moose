@@ -159,6 +159,8 @@ MultiAppFieldTransferInterface::postExecute()
                                      _multi_app->appProblemBase(i),
                                      _to_postprocessor_to_be_preserved[0]);
         }
+
+
     }
 
     else if (_direction == FROM_MULTIAPP)
@@ -183,6 +185,10 @@ MultiAppFieldTransferInterface::postExecute()
                                    to_problem,
                                    _to_postprocessor_to_be_preserved[i]);
       }
+
+      // Compute the to-postproessor again so that it has the right value with the updated solution
+      if (_use_nearestpoint_pps)
+        to_problem.computeUserObjectByName(EXEC_TRANSFER, _to_postprocessor_to_be_preserved[0]);
     }
 
     _console << "Finished Conservative transfers " << name() << std::endl;
@@ -311,6 +317,10 @@ MultiAppFieldTransferInterface::adjustTransferedSolution(FEProblemBase * from_pr
 
   // Now we should have the right adjuster based on the transfered solution
   PostprocessorValue & to_adjuster = to_problem.getPostprocessorValue(to_postprocessor);
+  if (to_adjuster==0.0)
+  {
+    mooseError(" To postproessor has a zero value ");
+  }
 
   auto & to_var = to_problem.getVariable(
       0, _to_var_name[0], Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
@@ -393,4 +403,7 @@ MultiAppFieldTransferInterface::adjustTransferedSolution(FEProblemBase * from_pr
 
   to_solution.close();
   to_sys.update();
+
+  // Compute again so that the post-processor has the value with the updated solution
+  to_problem.computeUserObjectByName(EXEC_TRANSFER, to_postprocessor);
 }
