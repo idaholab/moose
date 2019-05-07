@@ -143,6 +143,9 @@
   type = Transient
   solve_type = NEWTON
 
+  petsc_options_iname = '-ksp_type -pc_type'
+  petsc_options_value = 'preonly   lu'
+
   dt = 0.1
   end_time = 5.0
   timestep_tolerance = 1e-6

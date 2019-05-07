@@ -92,7 +92,7 @@
     input = 'dyn_euler_small_added_mass_dyn_variable_action.i'
     exodiff = 'dyn_euler_small_added_mass_out.e'
     prereq = 'dyn_euler_added_mass_gravity_2'
-
+    superlu = true
     requirement = "The LineElementAction shall create the translational and rotational"
                   " velocities and accelerations required for a dynamic simulation"
                   " using beam elements."

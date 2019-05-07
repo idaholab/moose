@@ -139,7 +139,6 @@
     exodiff = 'uni_axial2.e'
     rel_err = 4.0E-4
     abs_zero = 1.0E-4
-    superlu = true
     heavy = true
   [../]
   [./uni_axial3]
@@ -148,7 +147,6 @@
     exodiff = 'uni_axial3.e'
     rel_err = 4.0E-4
     abs_zero = 1.0E-4
-    superlu = true
     heavy = true
   [../]
 
@@ -198,7 +196,6 @@
     exodiff = 'uni_axial2_planar.e'
     rel_err = 4.0E-3
     abs_zero = 1.0E-3
-    superlu = true
     heavy = true
   [../]
   [./uni_axial3_planar]
@@ -207,7 +204,6 @@
     exodiff = 'uni_axial3_planar.e'
     rel_err = 4.0E-3
     abs_zero = 1.0E-3
-    superlu = true
     heavy = true
   [../]
 
