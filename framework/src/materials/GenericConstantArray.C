@@ -23,6 +23,8 @@ validParams<GenericConstantArray>()
   params.addRequiredParam<RealArrayValue>("prop_value",
                                           "The values associated with the named properties");
   params.declareControllable("prop_value");
+  params.addClassDescription(
+      "A material evaluating one material property in type of RealArrayValue");
   return params;
 }
 
