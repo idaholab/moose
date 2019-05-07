@@ -29,6 +29,7 @@ ScalarInitialCondition::ScalarInitialCondition(const InputParameters & parameter
   : MooseObject(parameters),
     ScalarCoupleable(this),
     FunctionInterface(this),
+    UserObjectInterface(this),
     DependencyResolverInterface(),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),

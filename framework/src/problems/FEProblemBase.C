@@ -212,7 +212,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _coupling(Moose::COUPLING_DIAG),
     _distributions(/*threaded=*/false),
     _samplers(_app.getExecuteOnEnum()),
-    _scalar_ics(/*threaded=*/false),
     _material_props(
         declareRestartableDataWithContext<MaterialPropertyStorage>("material_props", &_mesh)),
     _bnd_material_props(
@@ -678,7 +677,7 @@ FEProblemBase::initialSetup()
 
     for (THREAD_ID tid = 0; tid < n_threads; tid++)
       _ics.initialSetup(tid);
-    _scalar_ics.sort();
+    _scalar_ics.initialSetup();
     projectSolution();
   }
 
