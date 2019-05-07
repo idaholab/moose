@@ -40,6 +40,7 @@
     input = 'kks_xevac.i'
     exodiff = 'kks_xevac.e'
     design = 'KKSSplitCHCRes.md'
+    issues = '#4879'
     requirement = 'A multi component Kim-Kim-Suzuki model shall be implemented'
   [../]
 

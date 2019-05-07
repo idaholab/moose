@@ -5,13 +5,13 @@
   ny = 10
   nz = 0
   xmin = 0
-  xmax = 1000
+  xmax = 400
   ymin = 0
-  ymax = 1000
+  ymax = 400
   zmin = 0
   zmax = 0
   elem_type = QUAD4
-  uniform_refine = 2
+  uniform_refine = 1
 []
 
 [GlobalParams]
@@ -26,11 +26,10 @@
 
 [ICs]
   [./PolycrystalICs]
-    [./BicrystalBoundingBoxIC]
-      x1 = 0
-      y1 = 0
-      x2 = 500
-      y2 = 1000
+    [./BicrystalCircleGrainIC]
+      radius = 300
+      x = 400
+      y = 0
     [../]
   [../]
 []
@@ -54,17 +53,14 @@
   [../]
 []
 
-[BCs]
-[]
-
 [Materials]
   [./Copper]
     type = GBEvolution
     T = 500 # K
     wGB = 60 # nm
-    GBmob0 = 2.5e-6 # m^4/(Js) from Schoenfelder 1997
-    Q = 0.23 # Migration energy in eV
-    GBenergy = 0.708 # GB energy in J/m^2
+    GBmob0 = 2.5e-6 #m^4/(Js) from Schoenfelder 1997
+    Q = 0.23 #Migration energy in eV
+    GBenergy = 0.708 #GB energy in J/m^2
   [../]
 []
 
@@ -83,20 +79,21 @@
 []
 
 [Executioner]
-  # petsc_options_iname = '-pc_type'
-  # petsc_options_value = 'lu'
   type = Transient
   scheme = bdf2
-  solve_type = NEWTON
+  solve_type = 'NEWTON'
+
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg 31'
+
   l_tol = 1.0e-4
   l_max_its = 30
   nl_max_its = 20
   nl_rel_tol = 1.0e-9
   start_time = 0.0
-  num_steps = 10
+  num_steps = 5
   dt = 80.0
+
   [./Adaptivity]
     initial_adaptivity = 2
     refine_fraction = 0.8
@@ -107,7 +104,6 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  file_base = bounding_box
   csv = true
   exodus = true
 []

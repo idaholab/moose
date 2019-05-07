@@ -1,23 +1,21 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 10
-  ny = 10
+  nx = 40
+  ny = 40
   nz = 0
   xmin = 0
-  xmax = 400
+  xmax = 1000
   ymin = 0
-  ymax = 400
+  ymax = 1000
   zmin = 0
   zmax = 0
   elem_type = QUAD4
-  uniform_refine = 1
 []
 
 [GlobalParams]
-  op_num = 2
+  op_num = 4
   var_name_base = gr
-  implicit = false
 []
 
 [Variables]
@@ -25,12 +23,19 @@
   [../]
 []
 
+[UserObjects]
+  [./voronoi]
+    type = PolycrystalVoronoi
+    rand_seed = 105
+    grain_num = 4
+    coloring_algorithm = bt
+  [../]
+[]
+
 [ICs]
   [./PolycrystalICs]
-    [./BicrystalCircleGrainIC]
-      radius = 300
-      x = 400
-      y = 0
+    [./PolycrystalColoringIC]
+      polycrystal_ic_uo = voronoi
     [../]
   [../]
 []
@@ -55,6 +60,14 @@
   [../]
 []
 
+[BCs]
+  [./Periodic]
+    [./All]
+      auto_direction = 'x y'
+    [../]
+  [../]
+[]
+
 [Materials]
   [./Copper]
     type = GBEvolution
@@ -67,14 +80,16 @@
 []
 
 [Postprocessors]
-  [./gr1area]
-    type = ElementIntegralVariablePostprocessor
-    variable = gr1
-    execute_on = 'initial timestep_end'
+  active = ''
+  [./ngrains]
+    type = FeatureFloodCount
+    variable = bnds
+    threshold = 0.7
   [../]
 []
 
 [Preconditioning]
+  active = ''
   [./SMP]
     type = SMP
     full = true
@@ -82,22 +97,22 @@
 []
 
 [Executioner]
-  #l_max_its = 3
-  petsc_options_iname = -pc_type
-  petsc_options_value = bjacobi
   type = Transient
-  scheme = explicit-euler
-  solve_type = NEWTON
-  l_tol = 1.0e-6
-  nl_rel_tol = 1.0e-6
-  num_steps = 61
-  dt = 0.08
+  scheme = 'bdf2'
+  solve_type = 'PJFNK'
+
+  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
+  petsc_options_value = 'hypre boomeramg 31'
+
+  l_tol = 1.0e-4
+  l_max_its = 30
+  nl_max_its = 20
+  nl_rel_tol = 1.0e-9
+  start_time = 0.0
+  num_steps = 2
+  dt = 80.0
 []
 
 [Outputs]
-  file_base = explicit
-  execute_on = 'initial timestep_end final'
-  csv = true
-  interval = 20
   exodus = true
 []

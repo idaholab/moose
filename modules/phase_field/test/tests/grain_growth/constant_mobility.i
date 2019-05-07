@@ -1,6 +1,5 @@
 [Mesh]
   type = GeneratedMesh
-  uniform_refine = 2
   dim = 2
   nx = 10
   ny = 10
@@ -9,10 +8,11 @@
   ymax = 1000
   zmax = 0
   elem_type = QUAD4
+  uniform_refine = 2
 []
 
 [GlobalParams]
-  op_num = '4'
+  op_num = 4
   var_name_base = 'gr'
 []
 
@@ -24,9 +24,9 @@
 [UserObjects]
   [./voronoi]
     type = PolycrystalVoronoi
+    rand_seed = 6
     grain_num = 4
     coloring_algorithm = bt
-    rand_seed = 6
   [../]
 []
 
@@ -80,7 +80,7 @@
 [Postprocessors]
   [./gr1area]
     type = ElementIntegralVariablePostprocessor
-    variable = 'gr1'
+    variable = gr1
     execute_on = 'initial timestep_end'
   [../]
 []
@@ -95,9 +95,11 @@
 [Executioner]
   type = Transient
   scheme = bdf2
-  solve_type = NEWTON
+  solve_type = 'NEWTON'
+
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg 31'
+
   l_tol = 1.0e-4
   l_max_its = 30
   nl_max_its = 20
@@ -108,7 +110,5 @@
 []
 
 [Outputs]
-  file_base = GBEvolution_mob
   exodus = true
 []
-

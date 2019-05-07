@@ -17,6 +17,7 @@
 [GlobalParams]
   op_num = 2
   var_name_base = gr
+  implicit = false
 []
 
 [Variables]
@@ -50,6 +51,7 @@
   [./BndsCalc]
     type = BndsCalcAux
     variable = bnds
+    execute_on = timestep_end
   [../]
 []
 
@@ -68,6 +70,7 @@
   [./gr1area]
     type = ElementIntegralVariablePostprocessor
     variable = gr1
+    execute_on = 'initial timestep_end'
   [../]
 []
 
@@ -79,32 +82,22 @@
 []
 
 [Executioner]
-  # petsc_options_iname = '-pc_type'
-  # petsc_options_value = 'lu'
   type = Transient
-  scheme = bdf2
+  scheme = explicit-euler
+  solve_type = NEWTON
 
-  solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
-  petsc_options_value = 'hypre boomeramg 31'
-  l_tol = 1.0e-4
-  l_max_its = 30
-  nl_max_its = 20
-  nl_rel_tol = 1.0e-9
-  start_time = 0.0
-  num_steps = 5
-  dt = 80.0
-  [./Adaptivity]
-    initial_adaptivity = 2
-    refine_fraction = 0.8
-    coarsen_fraction = 0.05
-    max_h_level = 2
-  [../]
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'bjacobi'
+
+  l_tol = 1.0e-6
+  nl_rel_tol = 1.0e-6
+  num_steps = 61
+  dt = 0.08
 []
 
 [Outputs]
-  execute_on = 'timestep_end'
-  file_base = out
+  execute_on = 'initial timestep_end final'
   csv = true
+  interval = 20
   exodus = true
 []

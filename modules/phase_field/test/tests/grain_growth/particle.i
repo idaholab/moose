@@ -11,8 +11,7 @@
   zmin = 0
   zmax = 0
   elem_type = QUAD4
-
-   uniform_refine = 2
+  uniform_refine = 2
 []
 
 [GlobalParams]
@@ -21,7 +20,6 @@
 []
 
 [Variables]
-
   [./PolycrystalVariables]
   [../]
 []
@@ -32,22 +30,32 @@
       radius = 333.333
       x = 500
       y = 500
-      int_width = 80
     [../]
   [../]
 []
 
 [AuxVariables]
-
   [./bnds]
     order = FIRST
     family = LAGRANGE
   [../]
+  [./c]
+    [./InitialCondition]
+      int_width = 60
+      x1 = 167
+      y1 = 500
+      radius = 50
+      outvalue = 0
+      variable = c
+      invalue = 1
+      type = SmoothCircleIC
+    [../]
+  [../]
 []
 
 [Kernels]
-
   [./PolycrystalKernel]
+    c = c
   [../]
 []
 
@@ -59,14 +67,11 @@
 []
 
 [BCs]
-  active = 'Periodic'
-
   [./Periodic]
     [./all]
       auto_direction = 'x y'
     [../]
   [../]
-
 []
 
 [Materials]
@@ -81,52 +86,45 @@
 []
 
 [Postprocessors]
-  [./gr_area]
+  [./gr1area]
     type = ElementIntegralVariablePostprocessor
     variable = gr1
   [../]
 []
 
 [Preconditioning]
-
   [./SMP]
-   type = SMP
-   full = true
+    type = SMP
+    full = true
   [../]
 []
 
 [Executioner]
   type = Transient
-  scheme = 'bdf2'
-  #scheme = 'crank-nicolson'
-  #petsc_options = '-snes_mf_operator -ksp_monitor -snes_ksp_ew'
+  scheme = bdf2
+  solve_type = NEWTON
 
-  solve_type = 'NEWTON'
+  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
+  petsc_options_value = 'hypre    boomeramg      31'
 
-
-  #petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
-  #petsc_options_value = 'hypre boomeramg 101'
-   petsc_options_iname = '-pc_type'
-   petsc_options_value = 'lu'
-
-
+  l_tol = 1.0e-4
   l_max_its = 30
-
   nl_max_its = 20
-
+  nl_rel_tol = 1.0e-9
   start_time = 0.0
-  num_steps = 7
+  num_steps = 10
   dt = 80.0
 
   [./Adaptivity]
-   initial_adaptivity = 2
-    refine_fraction = 0.3
-    coarsen_fraction = 0.2
+    initial_adaptivity = 2
+    refine_fraction = 0.8
+    coarsen_fraction = 0.05
     max_h_level = 2
   [../]
 []
 
 [Outputs]
-  file_base = OffDiag
+  execute_on = 'timestep_end'
+  csv = true
   exodus = true
 []

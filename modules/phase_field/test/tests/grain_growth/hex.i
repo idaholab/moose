@@ -1,16 +1,16 @@
 [Mesh]
   type = GeneratedMesh
-  dim = 3
+  dim = 2
   nx = 40
   ny = 40
-  nz = 1
+  nz = 0
   xmin = 0
   xmax = 1000
   ymin = 0
   ymax = 1000
   zmin = 0
-  zmax = 25
-  elem_type = HEX8
+  zmax = 0
+  elem_type = QUAD4
 []
 
 [GlobalParams]
@@ -24,19 +24,18 @@
 []
 
 [UserObjects]
-  [./voronoi]
-    type = PolycrystalVoronoi
-    rand_seed = 47
-    grain_num = 4
-    columnar_3D = true
+  [./hex_ic]
+    type = PolycrystalHex
     coloring_algorithm = bt
+    x_offset = .5
+    grain_num = 4
   [../]
 []
 
 [ICs]
   [./PolycrystalICs]
     [./PolycrystalColoringIC]
-      polycrystal_ic_uo = voronoi
+      polycrystal_ic_uo = hex_ic
     [../]
   [../]
 []
@@ -80,12 +79,11 @@
   [../]
 []
 
-[Postprocessors]
+[Preconditioning]
   active = ''
-  [./ngrains]
-    type = FeatureFloodCount
-    variable = bnds
-    threshold = 0.7
+  [./SMP]
+    type = SMP
+    full = true
   [../]
 []
 
@@ -97,16 +95,15 @@
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg 31'
 
-  l_tol = 1.0e-5
-  l_max_its = 15
+  l_tol = 1.0e-4
+  l_max_its = 30
   nl_max_its = 20
-  nl_rel_tol = 1.0e-10
+  nl_rel_tol = 1.0e-9
   start_time = 0.0
-  num_steps = 1
-  dt = 40.0
+  num_steps = 2
+  dt = 80.0
 []
 
 [Outputs]
-  file_base = voronoi3D
   exodus = true
 []
