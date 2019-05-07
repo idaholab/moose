@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#6881'
+  design = '/bcs/ArrayIntegratedBC.md'
+  [./test]
+    type = 'Exodiff'
+    input = 'array_vacuum.i'
+    exodiff = 'array_vacuum_out.e'
+    requirement = 'MOOSE shall provide array integrated BCs.'
+  [../]
+[]
