@@ -50,6 +50,11 @@ main {
     margin-left:5px;
 }
 
+.moose-float{
+    box-shadow:unset;
+    -webkit-box-shadow:unset;
+}
+
 .moose-col-icon{
     font-size: 32pt;
     display:inline-block;
