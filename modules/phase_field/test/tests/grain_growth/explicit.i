@@ -86,11 +86,11 @@
   scheme = explicit-euler
   solve_type = NEWTON
 
-  petsc_options_iname = '-pc_type'
-  petsc_options_value = 'bjacobi'
-
+  # petsc_options_iname = '-pc_type'
+  # petsc_options_value = 'bjacobi'
+  #
   l_tol = 1.0e-6
-  nl_rel_tol = 1.0e-6
+  nl_rel_tol = 1.0e-10
   num_steps = 61
   dt = 0.08
 []
