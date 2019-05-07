@@ -62,30 +62,35 @@ MultiAppFieldTransferInterface::MultiAppFieldTransferInterface(const InputParame
      * Not sure how important to support multi variables
      * Let us handle the single variable case only right now if the conservative capability is on
      */
-    mooseAssert(_to_var_name.size() == 1 && _from_var_name.size() == 1,
-                " Support single variable only when the conservative capability is on ");
+    if (_to_var_name.size() != 1 && _from_var_name.size() != 1)
+      mooseError(" Support single variable only when the conservative capability is on ");
+
     if (_direction == TO_MULTIAPP)
     {
-      mooseAssert(_from_postprocessor_to_be_preserved.size() == _multi_app->numGlobalApps() ||
-                      _from_postprocessor_to_be_preserved.size() == 1,
-                  "Number of from Postprocessors should equal to the number of subapps, or use "
-                  "NearestPointIntegralVariablePostprocessor");
-      mooseAssert(_to_postprocessor_to_be_preserved.size() == 1,
-                  "Number of to Postprocessors should equal to 1");
+      if (_from_postprocessor_to_be_preserved.size() != _multi_app->numGlobalApps() &&
+          _from_postprocessor_to_be_preserved.size() != 1)
+        mooseError("Number of from-postprocessors should equal to the number of subapps, or use "
+                   "NearestPointIntegralVariablePostprocessor");
+      if (_to_postprocessor_to_be_preserved.size() != 1)
+        mooseError("Number of to-postprocessors should equal to 1");
     }
     else if (_direction == FROM_MULTIAPP)
     {
-      mooseAssert(_from_postprocessor_to_be_preserved.size() == 1,
-                  "Number of from Postprocessors should equal to 1");
-      mooseAssert(_to_postprocessor_to_be_preserved.size() == _multi_app->numGlobalApps() ||
-                      _to_postprocessor_to_be_preserved.size() == 1,
-                  "Number of to Postprocessors should equal to the number of subapps, or use "
-                  "NearestPointIntegralVariablePostprocessor ");
+      if (_from_postprocessor_to_be_preserved.size() != 1)
+        mooseError("Number of from Postprocessors should equal to 1");
+
+      if (_to_postprocessor_to_be_preserved.size() != _multi_app->numGlobalApps() &&
+          _to_postprocessor_to_be_preserved.size() != 1)
+        mooseError("Number of to Postprocessors should equal to the number of subapps, or use "
+                   "NearestPointIntegralVariablePostprocessor ");
     }
   }
 
-  mooseAssert(_to_var_name.size() == _from_var_name.size() && _to_var_name.size() >= 1,
-              " Number of target variable should equal to the number of source variables ");
+  if (_to_var_name.size() != _from_var_name.size())
+    mooseError("Number of target variable should equal to the number of source variables ");
+
+  if (_to_var_name.size() == 0)
+    mooseError("You need to specify at least one variable");
 }
 
 void
@@ -159,8 +164,6 @@ MultiAppFieldTransferInterface::postExecute()
                                      _multi_app->appProblemBase(i),
                                      _to_postprocessor_to_be_preserved[0]);
         }
-
-
     }
 
     else if (_direction == FROM_MULTIAPP)
@@ -317,7 +320,7 @@ MultiAppFieldTransferInterface::adjustTransferedSolution(FEProblemBase * from_pr
 
   // Now we should have the right adjuster based on the transfered solution
   PostprocessorValue & to_adjuster = to_problem.getPostprocessorValue(to_postprocessor);
-  if (to_adjuster==0.0)
+  if (to_adjuster == 0.0)
   {
     mooseError(" To postproessor has a zero value ");
   }
