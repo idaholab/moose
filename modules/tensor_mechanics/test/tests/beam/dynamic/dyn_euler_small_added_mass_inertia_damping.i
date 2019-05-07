@@ -359,7 +359,6 @@
   petsc_options_iname = '-ksp_type -pc_type'
   petsc_options_value = 'preonly   lu'
 
-  start_time = 0.0
   dt = 0.1
   end_time = 5.0
   timestep_tolerance = 1e-6

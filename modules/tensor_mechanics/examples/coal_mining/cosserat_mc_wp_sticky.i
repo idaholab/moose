@@ -596,12 +596,12 @@
 
   petsc_options = '-snes_converged_reason'
   petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_type -ksp_type -ksp_gmres_restart'
-  petsc_options_value = ' lu      2              lu            gmres     200'
+  petsc_options_value = ' asm      2              lu            gmres     200'
 
   line_search = bt
 
-  nl_abs_tol = 1e-3
-  nl_rel_tol = 1e-5
+  nl_abs_tol = 1e-8
+  nl_rel_tol = 1e-8
 
   l_max_its = 30
   nl_max_its = 1000
