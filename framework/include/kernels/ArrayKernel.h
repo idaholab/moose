@@ -88,9 +88,13 @@ protected:
                                   unsigned int nphi,
                                   const RealArray & v)
   {
+    unsigned int saved_j = j;
     for (unsigned int k = 0; k < v.rows(); ++k, i += ntest)
+    {
+      j = saved_j;
       for (unsigned int l = 0; l < v.cols(); ++l, j += nphi)
         ke(i, j) += v(k, l);
+    }
   }
 
   /// This is an array kernel so we cast to a ArrayMooseVariable

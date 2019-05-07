@@ -73,7 +73,7 @@ ArrayKernel::computeResidual()
       if (avar)
         avar->saveDoFValues(_local_re);
       else
-        mooseError("");
+        mooseError("Save-in variable for an array kernel must be an array variable");
     }
   }
 }
@@ -108,7 +108,7 @@ ArrayKernel::computeJacobian()
       if (avar)
         avar->saveDoFValues(diag);
       else
-        mooseError("");
+        mooseError("Save-in variable for an array kernel must be an array variable");
     }
   }
 }
@@ -143,7 +143,7 @@ ArrayKernel::computeOffDiagJacobian(MooseVariableFEBase & jvar)
       if (avar)
         avar->saveDoFValues(diag);
       else
-        mooseError("");
+        mooseError("Save-in variable for an array kernel must be an array variable");
     }
   }
 }
