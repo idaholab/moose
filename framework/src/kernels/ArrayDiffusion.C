@@ -74,20 +74,8 @@ ArrayDiffusion::computeQpJacobian()
 RealArray
 ArrayDiffusion::computeQpOffDiagJacobian(MooseVariableFEBase & jvar)
 {
-  if (jvar.number() == _var.number())
-  {
-    if (_dc_type == 0 || _dc_type == 1)
-    {
-      RealArrayValue v = computeQpJacobian();
-      // Note: we cannot do RealArray t(_var.count(), _var.count()) because Eigen does not
-      // initialize the memory!
-      RealArray t = RealArray::Zero(_var.count(), _var.count());
-      t.diagonal() = v;
-      return t;
-    }
-    else
-      return _grad_phi[_j][_qp] * _grad_test[_i][_qp] * (*_d_2d_array)[_qp];
-  }
+  if (jvar.number() == _var.number() && _dc_type == 2)
+    return _grad_phi[_j][_qp] * _grad_test[_i][_qp] * (*_d_2d_array)[_qp];
   else
-    return RealArray(_var.count(), jvar.count());
+    return ArrayKernel::computeQpOffDiagJacobian(jvar);
 }

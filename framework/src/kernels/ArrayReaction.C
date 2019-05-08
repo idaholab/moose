@@ -70,18 +70,8 @@ ArrayReaction::computeQpJacobian()
 RealArray
 ArrayReaction::computeQpOffDiagJacobian(MooseVariableFEBase & jvar)
 {
-  if (jvar.number() == _var.number())
-  {
-    if (_r_type == 0 || _r_type == 1)
-    {
-      RealArrayValue v = computeQpJacobian();
-      RealArray t = RealArray::Zero(_var.count(), _var.count());
-      t.diagonal() = v;
-      return t;
-    }
-    else
-      return _phi[_j][_qp] * _test[_i][_qp] * (*_r_2d_array)[_qp];
-  }
+  if (jvar.number() == _var.number() && _r_type == 2)
+    return _phi[_j][_qp] * _test[_i][_qp] * (*_r_2d_array)[_qp];
   else
-    return RealArray::Zero(_var.count(), jvar.count());
+    return ArrayKernel::computeQpOffDiagJacobian(jvar);
 }

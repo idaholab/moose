@@ -57,7 +57,15 @@ protected:
    */
   virtual RealArray computeQpOffDiagJacobian(MooseVariableFEBase & jvar)
   {
-    return RealArray::Zero(_var.count(), jvar.count());
+    if (jvar.number() == _var.number())
+    {
+      RealArrayValue v = computeQpJacobian();
+      RealArray t = RealArray::Zero(_var.count(), _var.count());
+      t.diagonal() = v;
+      return t;
+    }
+    else
+      return RealArray::Zero(_var.count(), jvar.count());
   }
 
   /**
