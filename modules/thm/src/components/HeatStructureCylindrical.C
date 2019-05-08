@@ -11,17 +11,17 @@ InputParameters
 validParams<HeatStructureCylindrical>()
 {
   InputParameters params = validParams<HeatStructureBase>();
-  params.addParam<Real>("axial_offset", 0., "Axial offset for the undisplaced mesh");
+  params.addParam<Real>("inner_radius", 0., "Inner radius of the heat structure");
   params.addClassDescription("Cylindrical heat structure");
   return params;
 }
 
 HeatStructureCylindrical::HeatStructureCylindrical(const InputParameters & params)
-  : HeatStructureBase(params), _axial_offset(getParam<Real>("axial_offset"))
+  : HeatStructureBase(params), _inner_radius(getParam<Real>("inner_radius"))
 {
   if (_width.size() == _number_of_hs)
   {
-    std::vector<Real> r(_number_of_hs + 1, _axial_offset);
+    std::vector<Real> r(_number_of_hs + 1, _inner_radius);
     for (unsigned int i = 0; i < _number_of_hs; i++)
     {
       r[i + 1] = r[i] + _width[i];
@@ -42,9 +42,9 @@ Real
 HeatStructureCylindrical::getUnitPerimeter(const MooseEnum & side) const
 {
   if (side == "top")
-    return 2 * M_PI * (_axial_offset + _total_width);
+    return 2 * M_PI * (_inner_radius + _total_width);
   else if (side == "bottom")
-    return 2 * M_PI * _axial_offset;
+    return 2 * M_PI * _inner_radius;
   else
     mooseError(name(), ": The heat structure side value '", side, "' is invalid.");
 }

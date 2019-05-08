@@ -19,9 +19,9 @@ public:
   virtual void addMooseObjects() override;
   virtual Real getUnitPerimeter(const MooseEnum & side) const override;
 
-  virtual Real getAxialOffset() const override { return _axial_offset; }
+  virtual Real getAxialOffset() const override { return _inner_radius; }
 
 protected:
-  /// Axial offset for the undisplaced mesh
-  const Real & _axial_offset;
+  /// Inner radius of the heat structure
+  const Real & _inner_radius;
 };
