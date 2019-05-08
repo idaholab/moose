@@ -97,7 +97,7 @@ InletDensityVelocity::setup1Phase()
     params.set<std::vector<VariableName>>("A") = cv_area;
     std::string nm = genName(name(), "rhoA_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "rho", "value");
+    connectObject(params, nm, "rho", "value");
   }
   {
     std::string class_name = "OneDMomentumDensityVelocityBC";
@@ -114,8 +114,8 @@ InletDensityVelocity::setup1Phase()
     params.set<MaterialPropertyName>("alpha") = FlowModel::UNITY;
     std::string nm = genName(name(), "rhouA_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "rho");
-    connectObject(params, "", nm, "vel", "vel");
+    connectObject(params, nm, "rho");
+    connectObject(params, nm, "vel", "vel");
   }
   {
     std::string class_name = "OneDEnergyDensityVelocityBC";
@@ -131,8 +131,8 @@ InletDensityVelocity::setup1Phase()
     params.set<UserObjectName>("fp") = _fp_name;
     std::string nm = genName(name(), "rhoEA_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "rho");
-    connectObject(params, "", nm, "vel", "vel");
+    connectObject(params, nm, "rho");
+    connectObject(params, nm, "vel", "vel");
   }
 }
 
@@ -171,7 +171,7 @@ InletDensityVelocity::setup2Phase()
     params.set<Real>("alpha") = alpha;
     std::string nm = genName(name(), "vf_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "alpha_vapor", "alpha");
+    connectObject(params, nm, "alpha_vapor", "alpha");
   }
 
   // BC for liquid phase: mass, momentum, and energy
@@ -189,7 +189,7 @@ InletDensityVelocity::setup2Phase()
     params.set<UserObjectName>("vfm") = FlowModelTwoPhase::VOLUME_FRACTION_MAPPER;
     std::string nm = genName(name(), "arhoA_liquid_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "rho_liquid", "value");
+    connectObject(params, nm, "rho_liquid", "value");
   }
   {
     std::string class_name = "OneDMomentumDensityVelocityBC";
@@ -206,8 +206,8 @@ InletDensityVelocity::setup2Phase()
     params.set<UserObjectName>("fp") = fp_liquid;
     std::string nm = genName(name(), "arhouA_liquid_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "rho_liquid", "rho");
-    connectObject(params, "", nm, "vel_liquid", "vel");
+    connectObject(params, nm, "rho_liquid", "rho");
+    connectObject(params, nm, "vel_liquid", "vel");
   }
   {
     std::string class_name = "OneDEnergyDensityVelocityBC";
@@ -224,8 +224,8 @@ InletDensityVelocity::setup2Phase()
     params.set<UserObjectName>("fp") = fp_liquid;
     std::string nm = genName(name(), "arhoEA_liquid_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "rho_liquid", "rho");
-    connectObject(params, "", nm, "vel_liquid", "vel");
+    connectObject(params, nm, "rho_liquid", "rho");
+    connectObject(params, nm, "vel_liquid", "vel");
   }
 
   // BC for vapor phase: mass, momentum, and energy
@@ -244,7 +244,7 @@ InletDensityVelocity::setup2Phase()
     params.set<std::vector<VariableName>>("beta") = cv_beta;
     std::string nm = genName(name(), "arhoA_vapor_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "rho_vapor", "value");
+    connectObject(params, nm, "rho_vapor", "value");
   }
   {
     std::string class_name = "OneDMomentumDensityVelocityBC";
@@ -261,8 +261,8 @@ InletDensityVelocity::setup2Phase()
     params.set<UserObjectName>("fp") = fp_vapor;
     std::string nm = genName(name(), "arhouA_vapor_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "rho_vapor", "rho");
-    connectObject(params, "", nm, "vel_vapor", "vel");
+    connectObject(params, nm, "rho_vapor", "rho");
+    connectObject(params, nm, "vel_vapor", "vel");
   }
   {
     std::string class_name = "OneDEnergyDensityVelocityBC";
@@ -279,8 +279,8 @@ InletDensityVelocity::setup2Phase()
     params.set<UserObjectName>("fp") = fp_vapor;
     std::string nm = genName(name(), "arhoEA_vapor_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "rho_vapor", "rho");
-    connectObject(params, "", nm, "vel_vapor", "vel");
+    connectObject(params, nm, "rho_vapor", "rho");
+    connectObject(params, nm, "vel_vapor", "vel");
   }
 }
 

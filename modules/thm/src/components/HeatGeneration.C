@@ -128,7 +128,7 @@ HeatGeneration::addMooseObjects()
         pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
         std::string mon = genName(name(), "heat_src");
         _sim.addKernel(class_name, mon, pars);
-        connectObject(pars, "", mon, "power_fraction");
+        connectObject(pars, mon, "power_fraction");
       }
       break;
 
@@ -157,7 +157,7 @@ HeatGeneration::addMooseObjects()
             std::vector<VariableName>(1, _power_var_name);
         std::string mon = genName(name(), "heat_src");
         _sim.addKernel(class_name, mon, pars);
-        connectObject(pars, "", mon, "power_fraction");
+        connectObject(pars, mon, "power_fraction");
       }
       break;
 
