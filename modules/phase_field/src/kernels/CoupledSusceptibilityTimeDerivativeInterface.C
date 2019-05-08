@@ -31,44 +31,43 @@ CoupledSusceptibilityTimeDerivativeInterface::CoupledSusceptibilityTimeDerivativ
 Real
 CoupledSusceptibilityTimeDerivativeInterface::computeQpResidual()
 {
-  if (_grad_v[_qp].norm() > 1.0e-6)
-    return _F[_qp] * _v_dot[_qp] * _grad_v[_qp] * _grad_test[_i][_qp] / _grad_v[_qp].norm();
-  else
+  const Real norm_sq = _grad_v[_qp].norm_sq();
+  if (norm_sq < libMesh::TOLERANCE)
     return 0.0;
+
+  return _F[_qp] * _v_dot[_qp] * _grad_v[_qp] * _grad_test[_i][_qp] / std::sqrt(norm_sq);
 }
 
 Real
 CoupledSusceptibilityTimeDerivativeInterface::computeQpJacobian()
 {
-  if (_grad_v[_qp].norm() > 1.0e-6)
-    return _dFdu[_qp] * _v_dot[_qp] * _grad_v[_qp] * _grad_test[_i][_qp] * _phi[_j][_qp] /
-           _grad_v[_qp].norm();
-  else
+  const Real norm_sq = _grad_v[_qp].norm_sq();
+  if (norm_sq < libMesh::TOLERANCE)
     return 0.0;
+
+  return _dFdu[_qp] * _v_dot[_qp] * _grad_v[_qp] * _grad_test[_i][_qp] * _phi[_j][_qp] /
+         std::sqrt(norm_sq);
 }
 
 Real
 CoupledSusceptibilityTimeDerivativeInterface::computeQpOffDiagJacobian(unsigned int jvar)
 {
+  const Real norm_sq = _grad_v[_qp].norm_sq();
+  if (norm_sq < libMesh::TOLERANCE)
+    return 0.0;
+
   // get the coupled variable jvar is referring to
   const unsigned int cvar = mapJvarToCvar(jvar);
 
-  if (_grad_v[_qp].norm() > 1.0e-6)
-  {
-    if (jvar == _v_var)
-      return _F[_qp] * _dv_dot[_qp] * _grad_v[_qp] * _grad_test[_i][_qp] * _phi[_j][_qp] /
-                 _grad_v[_qp].norm() +
-             _F[_qp] * _v_dot[_qp] * _grad_test[_i][_qp] * _grad_phi[_j][_qp] /
-                 _grad_v[_qp].norm() -
-             _F[_qp] * _v_dot[_qp] * _grad_v[_qp] * _grad_test[_i][_qp] * _grad_v[_qp] *
-                 _grad_phi[_j][_qp] /
-                 (_grad_v[_qp].norm() * _grad_v[_qp].norm() * _grad_v[_qp].norm()) +
-             _v_dot[_qp] * _grad_v[_qp] * _grad_test[_i][_qp] * _phi[_j][_qp] *
-                 (*_dFdarg[cvar])[_qp] / _grad_v[_qp].norm();
-    else
-      return _v_dot[_qp] * _grad_v[_qp] * _grad_test[_i][_qp] * _phi[_j][_qp] *
-             (*_dFdarg[cvar])[_qp] / _grad_v[_qp].norm();
-  }
-  else
-    return 0.0;
+  if (jvar == _v_var)
+    return (_F[_qp] * _dv_dot[_qp] * _grad_v[_qp] * _grad_test[_i][_qp] * _phi[_j][_qp] +
+            _F[_qp] * _v_dot[_qp] * _grad_test[_i][_qp] * _grad_phi[_j][_qp] -
+            _F[_qp] * _v_dot[_qp] * _grad_v[_qp] * _grad_test[_i][_qp] * _grad_v[_qp] *
+                _grad_phi[_j][_qp] / norm_sq +
+            _v_dot[_qp] * _grad_v[_qp] * _grad_test[_i][_qp] * _phi[_j][_qp] *
+                (*_dFdarg[cvar])[_qp]) /
+           std::sqrt(norm_sq);
+
+  return _v_dot[_qp] * _grad_v[_qp] * _grad_test[_i][_qp] * _phi[_j][_qp] * (*_dFdarg[cvar])[_qp] /
+         std::sqrt(norm_sq);
 }
