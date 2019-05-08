@@ -311,7 +311,10 @@ Console::output(const ExecFlagType & type)
   if (type == EXEC_INITIAL && _execute_on.contains(EXEC_INITIAL))
     writeTimestepInformation(/*output_dt = */ false);
   else if (type == EXEC_FINAL && _execute_on.contains(EXEC_FINAL))
-    writeTimestepInformation(/*output_dt = */ true);
+  {
+    if (wantOutput("postprocessors", type) || wantOutput("scalars", type))
+      _console << "\nFINAL:\n";
+  }
 
   // Print Non-linear Residual (control with "execute_on")
   if (type == EXEC_NONLINEAR && _execute_on.contains(EXEC_NONLINEAR))
