@@ -262,7 +262,7 @@ DisplacedProblem::vectorTagExists(TagID tag)
 }
 
 unsigned int
-DisplacedProblem::numVectorTags()
+DisplacedProblem::numVectorTags() const
 {
   return _mproblem.numVectorTags();
 }
@@ -304,7 +304,7 @@ DisplacedProblem::matrixTagExists(TagID tag_id)
 }
 
 unsigned int
-DisplacedProblem::numMatrixTags()
+DisplacedProblem::numMatrixTags() const
 {
   return _mproblem.numMatrixTags();
 }

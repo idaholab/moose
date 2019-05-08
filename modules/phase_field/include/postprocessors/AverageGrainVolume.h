@@ -46,7 +46,7 @@ private:
   std::vector<const VariableValue *> _vals;
   std::vector<Real> _feature_volumes;
   const MooseArray<Point> & _q_point;
-  QBase *& _qrule;
+  const QBase * const & _qrule;
   const MooseArray<Real> & _JxW;
   const MooseArray<Real> & _coord;
   const FeatureFloodCount * _feature_counter;

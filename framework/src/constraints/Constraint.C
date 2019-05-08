@@ -18,9 +18,8 @@ validParams<Constraint>()
   InputParameters params = validParams<MooseObject>();
   // Add the SetupInterface parameter, 'execute_on', default is 'linear'
   params += validParams<SetupInterface>();
+  params += validParams<TaggingInterface>();
 
-  params.addRequiredParam<NonlinearVariableName>(
-      "variable", "The name of the variable that this constraint is applied to.");
   params.addParam<bool>("use_displaced_mesh",
                         false,
                         "Whether or not this object should use the "
@@ -45,11 +44,10 @@ Constraint::Constraint(const InputParameters & parameters)
     GeometricSearchInterface(this),
     Restartable(this, "Constraints"),
     MeshChangedInterface(parameters),
-    _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
+    TaggingInterface(this),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
-    _var(_sys.getFieldVariable<Real>(_tid, parameters.get<NonlinearVariableName>("variable"))),
     _mesh(_subproblem.mesh())
 {
 }

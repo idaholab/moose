@@ -9,12 +9,12 @@
 
 #pragma once
 
-#include "MortarConstraint.h"
+#include "ADMortarConstraint.h"
 
+template <ComputeStage>
 class GapConductanceConstraint;
 
-template <>
-InputParameters validParams<GapConductanceConstraint>();
+declareADValidParams(GapConductanceConstraint);
 
 /**
  * This Constraint implements thermal contact using a "gap
@@ -51,49 +51,20 @@ InputParameters validParams<GapConductanceConstraint>();
  * variable. Likewise, the term "primal variable" refers to the
  * temperature variable.
  */
-class GapConductanceConstraint : public MortarConstraint
+template <ComputeStage compute_stage>
+class GapConductanceConstraint : public ADMortarConstraint<compute_stage>
 {
 public:
   GapConductanceConstraint(const InputParameters & parameters);
-  virtual ~GapConductanceConstraint();
 
 protected:
   /**
    * Computes the residual for the LM equation, lambda = (k/l)*(T^(1) - PT^(2)).
    */
-  virtual Real computeQpResidual();
-
-  /**
-   * Computes the "lambda * (v^(1) - Pv^(2))" residual term in the
-   * primal equation.  The res_type flag controls whether the
-   * contribution from the master (1) or slave (2) test function is
-   * currently being computed.
-   */
-  virtual Real computeQpResidualSide(Moose::ConstraintType res_type);
-
-  /**
-   * Computes the Jacobian of the LM equation wrt lambda, i.e. both
-   * phi(j) and test(i) are from the LM space.  This is simply a
-   * (negative) mass matrix contribution, due to the structure of the
-   * LM equation.
-   */
-  virtual Real computeQpJacobian();
-
-  /**
-   * Handles Jacobian contributions for *both* the LM equation *and* the primal equation.
-   * The jac_type flag controls the type of contribution:
-   * Master/Master: LM equation Jacobian wrt to T^(1), phi(j) is primal basis, master side, test(i)
-   * is LM basis, master side.
-   * Master/Slave: LM equation Jacobian wrt T^(2), phi(j) is primal basis, slave side, test(i) is LM
-   * basis, slave side.
-   * Slave/Master: Primal equation Jacobian wrt lambda, phi(j) is the LM basis, test(i) is the
-   * primal basis, master side.
-   * Slave/Slave: Primal equation Jacobian wrt lambda, phi(j) is the LM basis, test(i) is the primal
-   * basis, slave side.
-   */
-  virtual Real computeQpJacobianSide(Moose::ConstraintJacobianType jac_type);
+  virtual ADReal computeQpResidual(Moose::MortarType mortar_type) override;
 
   /// Thermal conductivity of the gap medium (e.g. air).
-  Real _k;
-};
+  const Real _k;
 
+  usingMortarConstraintMembers;
+};

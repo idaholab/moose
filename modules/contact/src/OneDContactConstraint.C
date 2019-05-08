@@ -133,6 +133,8 @@ OneDContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
       return slave_jac * _test_master[_i][_qp];
     case Moose::MasterMaster:
       return 0;
+    default:
+      mooseError("Unhandled ConstraintJacobianType");
   }
   return 0;
 }

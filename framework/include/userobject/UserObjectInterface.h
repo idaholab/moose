@@ -17,6 +17,8 @@
 class InputParameters;
 class UserObject;
 
+#define adGetUserObject this->template getUserObject
+
 /**
  * Interface for objects that need to use UserObjects.
  */

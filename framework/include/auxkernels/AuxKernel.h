@@ -194,15 +194,15 @@ protected:
   /// Active quadrature points
   const MooseArray<Point> & _q_point;
   /// Quadrature rule being used
-  QBase *& _qrule;
+  const QBase * const & _qrule;
   /// Transformed Jacobian weights
   const MooseArray<Real> & _JxW;
   const MooseArray<Real> & _coord;
 
   /// Current element (valid only for elemental kernels)
-  const Elem *& _current_elem;
+  const Elem * const & _current_elem;
   /// current side of the current element
-  unsigned int & _current_side;
+  const unsigned int & _current_side;
 
   /// Volume of the current element
   const Real & _current_elem_volume;
@@ -210,7 +210,7 @@ protected:
   const Real & _current_side_volume;
 
   /// Current node (valid only for nodal kernels)
-  const Node *& _current_node;
+  const Node * const & _current_node;
 
   /// reference to the solution vector of auxiliary system
   NumericVector<Number> & _solution;

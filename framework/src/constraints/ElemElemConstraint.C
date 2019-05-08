@@ -24,6 +24,8 @@ validParams<ElemElemConstraint>()
 {
   InputParameters params = validParams<Constraint>();
   params.addParam<unsigned int>("interface_id", 0, "The id of the interface.");
+  params.addRequiredParam<NonlinearVariableName>(
+      "variable", "The name of the variable that this constraint is applied to.");
   return params;
 }
 
@@ -35,6 +37,7 @@ ElemElemConstraint::ElemElemConstraint(const InputParameters & parameters)
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _dim(_mesh.dimension()),
     _interface_id(getParam<unsigned int>("interface_id")),
+    _var(_sys.getFieldVariable<Real>(_tid, parameters.get<NonlinearVariableName>("variable"))),
 
     _current_elem(_assembly.elem()),
 

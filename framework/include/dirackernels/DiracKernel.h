@@ -178,7 +178,7 @@ protected:
   Point _current_point;
 
   ///< Current element
-  const Elem *& _current_elem;
+  const Elem * const & _current_elem;
 
   /// Quadrature point index
   unsigned int _qp;
@@ -187,7 +187,7 @@ protected:
   /// Physical points
   const MooseArray<Point> & _physical_point;
   /// Quadrature rule
-  QBase *& _qrule;
+  const QBase * const & _qrule;
   /// Transformed Jacobian weights
   const MooseArray<Real> & _JxW;
 

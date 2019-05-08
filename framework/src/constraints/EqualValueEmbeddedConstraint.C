@@ -220,6 +220,10 @@ EqualValueEmbeddedConstraint::computeQpJacobian(Moose::ConstraintJacobianType ty
         default:
           mooseError("Invalid formulation");
       }
+
+    default:
+      mooseError("Unsupported type");
+      break;
   }
   return 0.0;
 }
@@ -256,6 +260,10 @@ EqualValueEmbeddedConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobian
 
     case Moose::MasterMaster:
       return 0.0;
+
+    default:
+      mooseError("Unsupported type");
+      break;
   }
 
   return 0.0;

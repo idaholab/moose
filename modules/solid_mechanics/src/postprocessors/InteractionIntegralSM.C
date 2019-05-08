@@ -129,9 +129,8 @@ InteractionIntegralSM::getValue()
   gatherSum(_integral_value);
 
   if (_sif_mode == SifMethod::T && !_treat_as_2d)
-    _integral_value +=
-        _poissons_ratio *
-        _crack_front_definition->getCrackFrontTangentialStrain(_crack_front_point_index);
+    _integral_value += _poissons_ratio * _crack_front_definition->getCrackFrontTangentialStrain(
+                                             _crack_front_point_index);
 
   return _K_factor * _integral_value;
 }
@@ -258,7 +257,7 @@ InteractionIntegralSM::computeIntegral()
                  Utility::string_to_enum<FEFamily>("lagrange"));
   const unsigned int dim = _current_elem->dim();
   std::unique_ptr<FEBase> fe(FEBase::build(dim, fe_type));
-  fe->attach_quadrature_rule(_qrule);
+  fe->attach_quadrature_rule(const_cast<QBase *>(_qrule));
   _phi_curr_elem = &fe->get_phi();
   _dphi_curr_elem = &fe->get_dphi();
   fe->reinit(_current_elem);

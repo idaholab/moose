@@ -62,7 +62,7 @@ DGKernel::computeElemNeighResidual(Moose::DGResidualType type)
     Threads::spin_mutex::scoped_lock lock(_resid_vars_mutex);
     for (const auto & var : _save_in)
     {
-      std::vector<dof_id_type> & dof_indices =
+      const std::vector<dof_id_type> & dof_indices =
           is_elem ? var->dofIndices() : var->dofIndicesNeighbor();
       var->sys().solution().add_vector(_local_re, dof_indices);
     }

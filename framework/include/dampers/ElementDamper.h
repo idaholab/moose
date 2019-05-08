@@ -64,19 +64,19 @@ protected:
   MooseVariable & _var;
 
   /// Current element
-  const Elem *& _current_elem;
+  const Elem * const & _current_elem;
 
   /// Quadrature point index
   unsigned int _qp;
   /// Quadrature points
   const MooseArray<Point> & _q_point;
   /// Quadrature rule
-  QBase *& _qrule;
+  const QBase * const & _qrule;
   /// Transformed Jacobian weights
   const MooseArray<Real> & _JxW;
 
   /// The current Newton increment
-  VariableValue & _u_increment;
+  const VariableValue & _u_increment;
   /// Holds the current solution at the current quadrature point
   const VariableValue & _u;
   /// Holds the current solution gradient at the current quadrature point

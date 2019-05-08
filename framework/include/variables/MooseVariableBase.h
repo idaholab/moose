@@ -88,14 +88,11 @@ public:
    */
   const DofMap & dofMap() const { return _dof_map; }
 
-  /// Get a writable reference of local DoF indices
-  std::vector<dof_id_type> & dofIndices() { return _dof_indices; }
-
   /// Get local DoF indices
-  const std::vector<dof_id_type> & dofIndices() const { return _dof_indices; }
+  virtual const std::vector<dof_id_type> & dofIndices() const { return _dof_indices; }
 
   /// Get the number of local DoFs
-  unsigned int numberOfDofs() { return _dof_indices.size(); }
+  virtual unsigned int numberOfDofs() const { return _dof_indices.size(); }
 
 protected:
   /// variable number (from libMesh)

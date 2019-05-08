@@ -53,6 +53,11 @@ public:
    */
   virtual void computeJacobian(SparseMatrix<Number> & jacobian);
 
+  /**
+   * The variable number that this object operates on.
+   */
+  MooseVariable & variable() { return _var; }
+
 protected:
   /**
    * This is the virtual that derived classes should override for computing the residual on
@@ -65,6 +70,8 @@ protected:
    * neighboring element.
    */
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) = 0;
+
+  MooseVariable & _var;
 
   /// Value of the unknown variable this BC is action on
   const VariableValue & _u_slave;

@@ -44,7 +44,7 @@ protected:
   Assembly & _assembly;
 
   /// Quadrature rule
-  QBase *& _qrule;
+  const QBase * const & _qrule;
 
   /// Transformed Jacobian weights
   const MooseArray<Real> & _JxW;
@@ -70,4 +70,3 @@ protected:
   /// Maximum allowed relative increment in Jacobian
   const Real _max_jacobian_diff;
 };
-

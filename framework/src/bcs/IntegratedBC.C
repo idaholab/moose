@@ -34,7 +34,7 @@ IntegratedBC::IntegratedBC(const InputParameters & parameters)
                                  Moose::VarKindType::VAR_NONLINEAR,
                                  Moose::VarFieldType::VAR_FIELD_STANDARD),
     _var(*mooseVariable()),
-    _normals(_var.normals()),
+    _normals(_assembly.normals()),
     _phi(_assembly.phiFace(_var)),
     _grad_phi(_assembly.gradPhiFace(_var)),
     _test(_var.phiFace()),

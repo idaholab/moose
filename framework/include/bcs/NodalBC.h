@@ -41,7 +41,7 @@ protected:
   MooseVariable & _var;
 
   /// current node being processed
-  const Node *& _current_node;
+  const Node * const & _current_node;
 
   /// Quadrature point index
   unsigned int _qp;

@@ -30,7 +30,7 @@ protected:
 
   MooseVariable & _moose_var;
 
-  const NumericVector<Number> *& _serialized_solution;
+  const NumericVector<Number> * const & _serialized_solution;
 
   const DofMap & _dof_map;
 

@@ -9,27 +9,27 @@
 
 #pragma once
 
-#include "MortarConstraint.h"
+#include "ADMortarConstraint.h"
 
+template <ComputeStage>
 class EqualGradientConstraint;
 
-template <>
-InputParameters validParams<EqualGradientConstraint>();
+declareADValidParams(EqualGradientConstraint);
 
 /**
  * Constrain a specified component of the gradient of a variable to be the same
  * on both sides of an interface.
  */
-class EqualGradientConstraint : public MortarConstraint
+template <ComputeStage compute_stage>
+class EqualGradientConstraint : public ADMortarConstraint<compute_stage>
 {
 public:
   EqualGradientConstraint(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
-  virtual Real computeQpResidualSide(Moose::ConstraintType res_type) override;
-  virtual Real computeQpJacobianSide(Moose::ConstraintJacobianType jac_type) override;
+  ADReal computeQpResidual(Moose::MortarType mortar_type) final;
 
   const unsigned int _component;
-};
 
+  usingMortarConstraintMembers;
+};

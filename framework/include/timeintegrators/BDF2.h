@@ -28,7 +28,7 @@ public:
   virtual int order() override { return 2; }
   virtual void preStep() override;
   virtual void computeTimeDerivatives() override;
-  virtual void computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof) override;
+  void computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof) const override;
   virtual void postResidual(NumericVector<Number> & residual) override;
 
 protected:
@@ -36,7 +36,8 @@ protected:
    * Helper function that actually does the math for computing the time derivative
    */
   template <typename T, typename T2, typename T3, typename T4>
-  void computeTimeDerivativeHelper(T & u_dot, const T2 & u, const T3 & u_old, const T4 & u_older);
+  void
+  computeTimeDerivativeHelper(T & u_dot, const T2 & u, const T3 & u_old, const T4 & u_older) const;
 
   std::vector<Real> & _weight;
 };
@@ -47,7 +48,10 @@ namespace BDF2Helper
 
 template <typename T, typename T2, typename T3, typename T4>
 void
-BDF2::computeTimeDerivativeHelper(T & u_dot, const T2 & u, const T3 & u_old, const T4 & u_older)
+BDF2::computeTimeDerivativeHelper(T & u_dot,
+                                  const T2 & u,
+                                  const T3 & u_old,
+                                  const T4 & u_older) const
 {
   if (_t_step == 1)
   {

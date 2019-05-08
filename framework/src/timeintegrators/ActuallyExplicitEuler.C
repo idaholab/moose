@@ -119,7 +119,7 @@ ActuallyExplicitEuler::computeTimeDerivatives()
 }
 
 void
-ActuallyExplicitEuler::computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof)
+ActuallyExplicitEuler::computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof) const
 {
   computeTimeDerivativeHelper(ad_u_dot, _solution_old(dof));
 }

@@ -24,5 +24,12 @@ AddConstraintAction::AddConstraintAction(InputParameters params) : MooseObjectAc
 void
 AddConstraintAction::act()
 {
-  _problem->addConstraint(_type, _name, _moose_object_pars);
+  if (Registry::isADObj(_type + "<RESIDUAL>"))
+  {
+    _problem->addConstraint(_type + "<RESIDUAL>", _name + "_residual", _moose_object_pars);
+    _problem->addConstraint(_type + "<JACOBIAN>", _name + "_jacobian", _moose_object_pars);
+    _problem->haveADObjects(true);
+  }
+  else
+    _problem->addConstraint(_type, _name, _moose_object_pars);
 }

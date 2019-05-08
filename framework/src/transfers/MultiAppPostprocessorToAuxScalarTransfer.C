@@ -93,7 +93,7 @@ MultiAppPostprocessorToAuxScalarTransfer::execute()
       scalar.reinit();
 
       // The dof indices for the scalar variable of interest
-      std::vector<dof_id_type> & dof = scalar.dofIndices();
+      auto && dof = scalar.dofIndices();
 
       // Error if there is a size mismatch between the scalar AuxVariable and the number of sub apps
       if (num_apps != scalar.sln().size())

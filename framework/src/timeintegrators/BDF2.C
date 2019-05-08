@@ -62,7 +62,7 @@ BDF2::computeTimeDerivatives()
 }
 
 void
-BDF2::computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof)
+BDF2::computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof) const
 {
   auto ad_sln = ad_u_dot;
   if (_t_step != 1)

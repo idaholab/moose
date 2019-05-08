@@ -5,24 +5,37 @@
 #
 
 [Mesh]
-  type = MortarPeriodicMesh
+  type = GeneratedMesh
   dim = 2
   nx = 40
   ny = 40
-  periodic_directions = 'x y'
+[]
 
-  [./MortarInterfaces]
-    [./left_right]
-      master = 1
-      slave = 3
-      subdomain = 10
-    [../]
-    [./up_down]
-      master = 0
-      slave = 2
-      subdomain = 11
-    [../]
-  [../]
+[MeshModifiers]
+  [slave_x]
+    type = LowerDBlockFromSideset
+    sidesets = '3'
+    new_block_id = 10
+    new_block_name = "slave_x"
+  []
+  [master_x]
+    type = LowerDBlockFromSideset
+    sidesets = '1'
+    new_block_id = 12
+    new_block_name = "master_x"
+  []
+  [slave_y]
+    type = LowerDBlockFromSideset
+    sidesets = '0'
+    new_block_id = 11
+    new_block_name = "slave_y"
+  []
+  [master_y]
+    type = LowerDBlockFromSideset
+    sidesets = '2'
+    new_block_id = 13
+    new_block_name = "master_y"
+  []
 []
 
 [Functions]
@@ -76,24 +89,24 @@
   [./lm_left_right_x]
     order = FIRST
     family = LAGRANGE
-    block = 10
+    block = "slave_x"
   [../]
   [./lm_left_right_y]
     order = FIRST
     family = LAGRANGE
-    block = 10
+    block = "slave_x"
   [../]
 
   # Lagrange multipliers for gradient component in the vertical directon
   [./lm_up_down_x]
     order = FIRST
     family = LAGRANGE
-    block = 11
+    block = "slave_y"
   [../]
   [./lm_up_down_y]
     order = FIRST
     family = LAGRANGE
-    block = 11
+    block = "slave_y"
   [../]
 []
 
@@ -139,31 +152,47 @@
   [./equaly_grad_x]
     type = EqualGradientConstraint
     variable = lm_up_down_x
-    interface = up_down
     component = 0
-    master_variable = c
+    slave_variable = c
+    slave_boundary = bottom
+    master_boundary = top
+    slave_subdomain = slave_y
+    master_subdomain = master_y
+    periodic = true
   [../]
   [./equaly_grad_y]
     type = EqualGradientConstraint
     variable = lm_up_down_y
-    interface = up_down
     component = 1
-    master_variable = c
+    slave_variable = c
+    slave_boundary = bottom
+    master_boundary = top
+    slave_subdomain = slave_y
+    master_subdomain = master_y
+    periodic = true
   [../]
 
   [./equalx_grad_x]
     type = EqualGradientConstraint
     variable = lm_left_right_x
-    interface = left_right
     component = 0
-    master_variable = c
+    slave_variable = c
+    slave_boundary = left
+    master_boundary = right
+    slave_subdomain = slave_x
+    master_subdomain = master_x
+    periodic = true
   [../]
   [./equalx_grad_y]
     type = EqualGradientConstraint
     variable = lm_left_right_y
-    interface = left_right
     component = 1
-    master_variable = c
+    slave_variable = c
+    slave_boundary = left
+    master_boundary = right
+    slave_subdomain = slave_x
+    master_subdomain = master_x
+    periodic = true
   [../]
 []
 

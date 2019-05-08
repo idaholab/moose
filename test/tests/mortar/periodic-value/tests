@@ -1,0 +1,20 @@
+[Tests]
+  design = 'Constraints/index.md'
+  issues = '#13080'
+  [exo]
+    type = Exodiff
+    input = periodic.i
+    exodiff = periodic_out.e
+    mesh_mode = replicated
+    requirement = 'We shall be able to enforce periodic boundary conditions on a non-uniform mesh using the mortar method'
+  []
+  [jac]
+    type = PetscJacobianTester
+    input = periodic.i
+    run_sim = True
+    difference_tol = 1e-7
+    cli_args = 'Mesh/file=square_coarse.msh'
+    mesh_mode = replicated
+    requirement = 'The Jacobian for mortar enforcement of periodic boundary conditions shall be perfect'
+  []
+[]

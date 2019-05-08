@@ -109,7 +109,7 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
     for (auto & jvar : jacobian_moose_vars)
     {
       unsigned int jvar_id = jvar->number();
-      std::vector<dof_id_type> & dof_indices = jvar->dofIndices();
+      auto && dof_indices = jvar->dofIndices();
 
       _fe_problem.prepareShapes(jvar_id, _tid);
       for (const auto uo : _shape_element_objs)
@@ -148,7 +148,7 @@ ComputeUserObjectsThread::onBoundary(const Elem * elem, unsigned int side, Bound
     for (auto & jvar : jacobian_moose_vars)
     {
       unsigned int jvar_id = jvar->number();
-      std::vector<dof_id_type> & dof_indices = jvar->dofIndices();
+      auto && dof_indices = jvar->dofIndices();
 
       _fe_problem.prepareFaceShapes(jvar_id, _tid);
 

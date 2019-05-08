@@ -37,7 +37,7 @@ protected:
   const MaterialProperty<Real> & _property;
 
   /// The current quadrature rule
-  QBase *& _qrule;
+  const QBase * const & _qrule;
 
   /// The variable for storing indicator value
   MooseVariable & _indicator_var;

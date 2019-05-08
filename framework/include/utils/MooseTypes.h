@@ -526,12 +526,31 @@ enum ConstraintType
   Master = Neighbor
 };
 
+enum class ElementType : unsigned int
+{
+  Element = DGResidualType::Element,
+  Neighbor = DGResidualType::Neighbor,
+  Lower = DGResidualType::Neighbor + 1
+};
+
+enum class MortarType : unsigned int
+{
+  Slave = static_cast<unsigned int>(Moose::ElementType::Element),
+  Master = static_cast<unsigned int>(Moose::ElementType::Neighbor),
+  Lower = static_cast<unsigned int>(Moose::ElementType::Lower)
+};
+
 enum ConstraintJacobianType
 {
   SlaveSlave = ElementElement,
   SlaveMaster = ElementNeighbor,
   MasterSlave = NeighborElement,
-  MasterMaster = NeighborNeighbor
+  MasterMaster = NeighborNeighbor,
+  LowerLower,
+  LowerSlave,
+  LowerMaster,
+  SlaveLower,
+  MasterLower
 };
 
 enum CoordinateSystemType

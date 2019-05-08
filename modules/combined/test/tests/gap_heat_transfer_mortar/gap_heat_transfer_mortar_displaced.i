@@ -1,14 +1,26 @@
 [Mesh]
   file = 2blk-gap.e
   displacements = 'disp_x disp_y'
+[]
 
-  [./MortarInterfaces]
-    [./middle]
-      master = 100
-      slave = 101
-      subdomain = 1000
-    [../]
-  [../]
+[MeshModifiers]
+  [slave]
+    type = LowerDBlockFromSideset
+    sidesets = '101'
+    new_block_id = 10001
+    new_block_name = 'slave_lower'
+  []
+  [master]
+    type = LowerDBlockFromSideset
+    sidesets = '100'
+    new_block_id = 10000
+    new_block_name = 'master_lower'
+  []
+[]
+
+[Problem]
+  kernel_coverage_check = false
+  material_coverage_check = false
 []
 
 [AuxVariables]
@@ -46,7 +58,7 @@
   [./lm]
     order = FIRST
     family = LAGRANGE
-    block = '1000'
+    block = 'slave_lower'
   [../]
 []
 
@@ -85,10 +97,13 @@
   [./ced]
     type = GapConductanceConstraint
     variable = lm
-    interface = middle
-    master_variable = temp
+    slave_variable = temp
     k = 100
     use_displaced_mesh = true
+    master_boundary = 100
+    master_subdomain = 10000
+    slave_boundary = 101
+    slave_subdomain = 10001
   [../]
 []
 
@@ -105,13 +120,6 @@
     variable = temp
     boundary = 'right'
     value = 0
-  [../]
-
-  [./mortar]
-    type = HeatConductionBC
-    variable = temp
-    boundary = '100 101'
-    use_displaced_mesh = true
   [../]
 []
 
