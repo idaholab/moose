@@ -10,7 +10,6 @@
 []
 
 [GlobalParams]
-  int_width = 3.0
   block = 0
 []
 
@@ -40,6 +39,7 @@
     outside = 0.0
     type = BoundingBoxIC
     variable = eta2
+    int_width = 0
   [../]
   [./IC_eta3]
     x1 = 15
@@ -50,6 +50,7 @@
     outside = 0.0
     type = BoundingBoxIC
     variable = eta3
+    int_width = 0
   [../]
   [./IC_eta4]
     x1 = 0
@@ -60,6 +61,7 @@
     outside = 0.0
     type = BoundingBoxIC
     variable = eta0
+    int_width = 0
   [../]
   [./IC_c]
     x1 = 15
@@ -69,6 +71,7 @@
     variable = c
     invalue = 1.0
     type = SmoothCircleIC
+    int_width = 3.0
   [../]
   [./IC_eta1]
     x1 = 15
@@ -78,6 +81,7 @@
     variable = eta1
     invalue = 1.0
     type = SmoothCircleIC
+    int_width = 3.0
   [../]
 []
 

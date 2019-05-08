@@ -28,6 +28,9 @@ validParams<BoundingBoxIC>()
   params.addParam<Real>("inside", 0.0, "The value of the variable inside the box");
   params.addParam<Real>("outside", 0.0, "The value of the variable outside the box");
 
+  params.addParam<Real>(
+      "int_width", 0.0, "The width of the diffuse interface. Set to 0 for sharp interface.");
+
   params.addClassDescription("BoundingBoxIC allows setting the initial condition of a value inside "
                              "and outside of a specified box. The box is aligned with the x, y, z "
                              "axes");
@@ -46,16 +49,33 @@ BoundingBoxIC::BoundingBoxIC(const InputParameters & parameters)
     _inside(getParam<Real>("inside")),
     _outside(getParam<Real>("outside")),
     _bottom_left(_x1, _y1, _z1),
-    _top_right(_x2, _y2, _z2)
+    _top_right(_x2, _y2, _z2),
+    _int_width(getParam<Real>("int_width"))
 {
 }
 
 Real
 BoundingBoxIC::value(const Point & p)
 {
-  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
-    if (p(i) < _bottom_left(i) || p(i) > _top_right(i))
-      return _outside;
+  if (_int_width < 0.0)
+    mooseError("'int_width' should be non-negative");
 
-  return _inside;
+  if (_int_width == 0.0)
+  {
+    for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+      if (p(i) < _bottom_left(i) || p(i) > _top_right(i))
+        return _outside;
+
+    return _inside;
+  }
+  else
+  {
+    Real f_in = 1.0;
+    for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+      if (_bottom_left(i) != _top_right(i))
+        f_in *= 0.5 * (std::tanh(2.0 * (p(i) - _bottom_left(i)) / _int_width) -
+                       std::tanh(2.0 * (p(i) - _top_right(i)) / _int_width));
+
+    return _outside + (_inside - _outside) * f_in;
+  }
 }

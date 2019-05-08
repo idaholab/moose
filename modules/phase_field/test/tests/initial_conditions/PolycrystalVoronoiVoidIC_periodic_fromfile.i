@@ -50,6 +50,7 @@
   [./voronoi]
     type = PolycrystalVoronoi
     rand_seed = 12444
+    int_width = 0
   [../]
 []
 
