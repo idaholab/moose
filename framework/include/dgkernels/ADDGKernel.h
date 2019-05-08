@@ -37,7 +37,7 @@ class ADDGKernel;
 declareADValidParams(ADDGKernel);
 
 template <ComputeStage compute_stage>
-class ADDGKernel : public DGKernelBase
+class ADDGKernel : public DGKernelBase, public NeighborMooseVariableInterface<Real>
 {
 public:
   ADDGKernel(const InputParameters & parameters);
@@ -53,11 +53,30 @@ public:
   virtual void computeOffDiagElemNeighJacobian(Moose::DGJacobianType type,
                                                unsigned int jvar) override;
 
-  virtual MooseVariable & variable() override { return _var; }
+  virtual MooseVariableFEBase & variable() override { return _var; }
 
 protected:
   /// Compute this Kernel's contribution to the residual at the current quadrature point
   virtual ADResidual computeQpResidual(Moose::DGResidualType type) = 0;
+
+  /// Variable this kernel operates on
+  MooseVariable & _var;
+  /// Shape functions
+  const VariablePhiValue & _phi;
+  /// Gradient of shape function
+  const VariablePhiGradient & _grad_phi;
+  /// test functions
+  const VariableTestValue & _test;
+  /// Gradient of side shape function
+  const VariableTestGradient & _grad_test;
+  /// Side shape function
+  const VariablePhiValue & _phi_neighbor;
+  /// Gradient of side shape function
+  const VariablePhiGradient & _grad_phi_neighbor;
+  /// Side test function
+  const VariableTestValue & _test_neighbor;
+  /// Gradient of side shape function
+  const VariableTestGradient & _grad_test_neighbor;
 
   /// Holds the solution at current quadrature points
   const ADVariableValue & _u;
@@ -71,4 +90,3 @@ protected:
   /// Holds the current solution gradient at the current quadrature point
   const ADVariableGradient & _grad_u_neighbor;
 };
-
