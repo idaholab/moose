@@ -126,3 +126,10 @@ Once enabled, the any object that should operate on the displaced configuration 
 [Postprocessor](/Postprocessors/index.md) with and without the displaced configuration.
 
 !listing test/tests/postprocessors/displaced_mesh/elemental.i block=Postprocessors
+
+## Mixed Dimension Meshes
+
+MOOSE will function properly when running simulations on meshes containing mixed dimension elements
+(e.g. 1D and 2D, 1D and 3D, etc.). Residual calculation, material evaluation, etc should all work properly.
+
+!listing test/tests/mesh/mixed_dim/1d_3d.i block=Mesh
