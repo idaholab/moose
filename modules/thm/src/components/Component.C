@@ -148,16 +148,14 @@ Component::getNextBoundaryId()
 
 void
 Component::connectObject(const InputParameters & params,
-                         const std::string & rname,
                          const std::string & mooseName,
                          const std::string & name) const
 {
-  connectObject(params, rname, mooseName, name, name);
+  connectObject(params, mooseName, name, name);
 }
 
 void
 Component::connectObject(const InputParameters & params,
-                         const std::string & /*rname*/,
                          const std::string & mooseName,
                          const std::string & name,
                          const std::string & par_name) const
@@ -192,7 +190,7 @@ Component::makeFunctionControllableIfConstant(const FunctionName & fn_name,
 {
   Function & fn = _sim.getFunction(fn_name);
   if (dynamic_cast<ConstantFunction *>(&fn) != nullptr)
-    connectObject(fn.parameters(), "", fn_name, control_name, param);
+    connectObject(fn.parameters(), fn_name, control_name, param);
 }
 
 void

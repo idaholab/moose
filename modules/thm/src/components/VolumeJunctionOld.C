@@ -134,7 +134,7 @@ VolumeJunctionOld::addMooseObjects()
 
       std::string nm = genName("bc", _boundary_names[i], "rhou");
       _sim.addBoundaryCondition(class_name, nm, params);
-      connectObject(params, "", nm, "A_ref", "ref_area");
+      connectObject(params, nm, "A_ref", "ref_area");
     }
     {
       std::string class_name = "VolumeJunctionOldBC";
@@ -163,7 +163,7 @@ VolumeJunctionOld::addMooseObjects()
 
       std::string nm = genName("bc", _boundary_names[i], "rhoE");
       _sim.addBoundaryCondition(class_name, nm, params);
-      connectObject(params, "", nm, "A_ref", "ref_area");
+      connectObject(params, nm, "A_ref", "ref_area");
     }
   }
   // add constraint for non-linear scalar
@@ -174,7 +174,7 @@ VolumeJunctionOld::addMooseObjects()
     params.set<Real>("coef") = _volume;
     std::string nm = genName(name(), _rho_var_name, "td");
     _sim.addScalarKernel(class_name, nm, params);
-    connectObject(params, "", nm, "volume", "coef");
+    connectObject(params, nm, "volume", "coef");
   }
   {
     InputParameters params = _factory.getValidParams("MassBalanceScalarKernel");
@@ -194,7 +194,7 @@ VolumeJunctionOld::addMooseObjects()
     params.set<Real>("coef") = _volume;
     std::string nm = genName(name(), _rhoe_var_name, "td");
     _sim.addScalarKernel(class_name, nm, params);
-    connectObject(params, "", nm, "volume", "coef");
+    connectObject(params, nm, "volume", "coef");
   }
   {
     std::string class_name = "EnergyBalanceScalarKernel";
@@ -230,7 +230,7 @@ VolumeJunctionOld::addMooseObjects()
     params.set<std::vector<VariableName>>("junction_rho") = cv_junction_rho;
     std::string nm = genName(name(), "energy_balance", _vel_var_name);
     _sim.addScalarKernel(class_name, nm, params);
-    connectObject(params, "", nm, "A_ref", "ref_area");
+    connectObject(params, nm, "A_ref", "ref_area");
   }
   {
     std::string class_name = "VolumeJunctionPressureAux";

@@ -102,7 +102,7 @@ Outlet::add3EqnStaticPBC()
     params.set<std::vector<VariableName>>("A") = cv_area;
     std::string nm = genName(name(), "bc_rhou");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "p", "p_in");
+    connectObject(params, nm, "p", "p_in");
   }
 
   {
@@ -125,7 +125,7 @@ Outlet::add3EqnStaticPBC()
     params.set<std::vector<VariableName>>("v") = cv_v;
     std::string nm = genName(name(), "bc_rhoE");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "p", "p_in");
+    connectObject(params, nm, "p", "p_in");
   }
   {
     std::string class_name = "OneDEnergyStaticPressureSupersonicBC";
@@ -177,7 +177,7 @@ Outlet::add3EqnStaticPReverseBC()
     params.set<std::vector<VariableName>>("vel") = cv_vel;
     std::string nm = genName(name(), "rhoA", "rev");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "p", "p");
+    connectObject(params, nm, "p", "p");
   }
   {
     std::string class_name = "OneDMomentumStaticPressureReverseBC";
@@ -193,7 +193,7 @@ Outlet::add3EqnStaticPReverseBC()
     params.set<std::vector<VariableName>>("T") = cv_temperature;
     std::string nm = genName(name(), "rhouA", "rev");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "p", "p");
+    connectObject(params, nm, "p", "p");
   }
   {
     std::string class_name = "OneD7EqnEnergyStaticPressureReverseBC";
@@ -208,7 +208,7 @@ Outlet::add3EqnStaticPReverseBC()
     params.set<std::vector<VariableName>>("T") = cv_temperature;
     std::string nm = genName(name(), "rhoEA", "rev");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "p", "p");
+    connectObject(params, nm, "p", "p");
   }
 }
 
@@ -254,7 +254,7 @@ Outlet::add3EqnStaticPBCLegacy()
     params.set<MaterialPropertyName>("alpha") = FlowModel::UNITY;
     std::string nm = genName(name(), "bc_rhou");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "p", "p_in");
+    connectObject(params, nm, "p", "p_in");
   }
 
   {
@@ -273,7 +273,7 @@ Outlet::add3EqnStaticPBCLegacy()
     params.set<MaterialPropertyName>("alpha") = FlowModel::UNITY;
     std::string nm = genName(name(), "bc_rhoE");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "p", "p_in");
+    connectObject(params, nm, "p", "p_in");
   }
 }
 
@@ -345,7 +345,7 @@ Outlet::add7EqnStaticPReverseBC()
     params.set<std::vector<VariableName>>("vel") = cv_vel_liquid;
     std::string nm = genName(name(), "arhoA_liquid_rev");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "p_liquid", "p");
+    connectObject(params, nm, "p_liquid", "p");
   }
   {
     std::string class_name = "OneDMomentumStaticPressureReverseBC";
@@ -364,7 +364,7 @@ Outlet::add7EqnStaticPReverseBC()
     params.set<std::vector<VariableName>>("T") = cv_temperature_liquid;
     std::string nm = genName(name(), "arhouA_liquid_rev");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "p_liquid", "p");
+    connectObject(params, nm, "p_liquid", "p");
   }
   {
     std::string class_name = "OneD7EqnEnergyStaticPressureReverseBC";
@@ -380,7 +380,7 @@ Outlet::add7EqnStaticPReverseBC()
     params.set<std::vector<VariableName>>("T") = cv_temperature_liquid;
     std::string nm = genName(name(), "arhoEA_liquid_rev");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "p_liquid", "p");
+    connectObject(params, nm, "p_liquid", "p");
   }
   // Vapor phase
   {
@@ -397,7 +397,7 @@ Outlet::add7EqnStaticPReverseBC()
     params.set<std::vector<VariableName>>("vel") = cv_vel_vapor;
     std::string nm = genName(name(), "arhoA_vapor_rev");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "p_vapor", "p");
+    connectObject(params, nm, "p_vapor", "p");
   }
   {
     std::string class_name = "OneDMomentumStaticPressureReverseBC";
@@ -416,7 +416,7 @@ Outlet::add7EqnStaticPReverseBC()
     params.set<std::vector<VariableName>>("T") = cv_temperature_vapor;
     std::string nm = genName(name(), "arhouA_vapor_rev");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "p_vapor", "p");
+    connectObject(params, nm, "p_vapor", "p");
   }
   {
     std::string class_name = "OneD7EqnEnergyStaticPressureReverseBC";
@@ -432,7 +432,7 @@ Outlet::add7EqnStaticPReverseBC()
     params.set<std::vector<VariableName>>("T") = cv_temperature_vapor;
     std::string nm = genName(name(), "arhoEA_vapor_rev");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "p_vapor", "p");
+    connectObject(params, nm, "p_vapor", "p");
   }
 }
 
@@ -504,7 +504,7 @@ Outlet::add7EqnStaticPBC()
     params.set<std::vector<VariableName>>("A") = cv_area;
     std::string nm = genName(name(), "arhouA_liquid");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "p_liquid", "p_in");
+    connectObject(params, nm, "p_liquid", "p_in");
   }
   {
     std::string class_name = "OneDEnergyStaticPressureBC";
@@ -528,7 +528,7 @@ Outlet::add7EqnStaticPBC()
     params.set<std::vector<VariableName>>("v") = cv_v_liquid;
     std::string nm = genName(name(), "arhoEA_liquid");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "p_liquid", "p_in");
+    connectObject(params, nm, "p_liquid", "p_in");
   }
   {
     std::string class_name = "OneDEnergyStaticPressureSupersonicBC";
@@ -580,7 +580,7 @@ Outlet::add7EqnStaticPBC()
     params.set<std::vector<VariableName>>("A") = cv_area;
     std::string nm = genName(name(), "arhouA_vapor");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "p_vapor", "p_in");
+    connectObject(params, nm, "p_vapor", "p_in");
   }
   {
     std::string class_name = "OneDEnergyStaticPressureBC";
@@ -605,7 +605,7 @@ Outlet::add7EqnStaticPBC()
     params.set<UserObjectName>("vfm") = FlowModelTwoPhase::VOLUME_FRACTION_MAPPER;
     std::string nm = genName(name(), "arhoEA_vapor");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "p_vapor", "p_in");
+    connectObject(params, nm, "p_vapor", "p_in");
   }
   {
     std::string class_name = "OneDEnergyStaticPressureSupersonicBC";
@@ -686,7 +686,7 @@ Outlet::add7EqnStaticPBCLegacy()
     params.set<std::vector<VariableName>>("A") = cv_area;
     std::string nm = genName(name(), "arhouA_liquid");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "p_liquid", "p_in");
+    connectObject(params, nm, "p_liquid", "p_in");
   }
   {
     std::string class_name = "OneDEnergyStaticPressureLegacyBC";
@@ -704,7 +704,7 @@ Outlet::add7EqnStaticPBCLegacy()
     params.set<std::vector<VariableName>>("vel") = cv_vel_liquid;
     std::string nm = genName(name(), "arhoEA_liquid");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "p_liquid", "p_in");
+    connectObject(params, nm, "p_liquid", "p_in");
   }
   // vapor phase
   {
@@ -733,7 +733,7 @@ Outlet::add7EqnStaticPBCLegacy()
     params.set<std::vector<VariableName>>("A") = cv_area;
     std::string nm = genName(name(), "arhouA_vapor");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "p_vapor", "p_in");
+    connectObject(params, nm, "p_vapor", "p_in");
   }
   {
     std::string class_name = "OneDEnergyStaticPressureLegacyBC";
@@ -751,7 +751,7 @@ Outlet::add7EqnStaticPBCLegacy()
     params.set<std::vector<VariableName>>("vel") = cv_vel_vapor;
     std::string nm = genName(name(), "arhoEA_vapor");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "p_vapor", "p_in");
+    connectObject(params, nm, "p_vapor", "p_in");
   }
 }
 

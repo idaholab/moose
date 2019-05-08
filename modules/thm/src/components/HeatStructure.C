@@ -356,15 +356,15 @@ HeatStructure::addMooseObjects()
       // if the values were given as constant, allow them to be controlled
       ConstantFunction * k_fn = dynamic_cast<ConstantFunction *>(&smp.getKFunction());
       if (k_fn != nullptr)
-        comp->connectObject(k_fn->parameters(), _names[i], k_fn->name(), "k", "value");
+        comp->connectObject(k_fn->parameters(), k_fn->name(), "k", "value");
 
       ConstantFunction * cp_fn = dynamic_cast<ConstantFunction *>(&smp.getCpFunction());
       if (cp_fn != nullptr)
-        comp->connectObject(cp_fn->parameters(), _names[i], cp_fn->name(), "cp", "value");
+        comp->connectObject(cp_fn->parameters(), cp_fn->name(), "cp", "value");
 
       ConstantFunction * rho_fn = dynamic_cast<ConstantFunction *>(&smp.getRhoFunction());
       if (rho_fn != nullptr)
-        comp->connectObject(rho_fn->parameters(), _names[i], rho_fn->name(), "rho", "value");
+        comp->connectObject(rho_fn->parameters(), rho_fn->name(), "rho", "value");
     }
   }
 

@@ -95,7 +95,7 @@ InletStagnationEnthalpyMomentum::setup1Phase()
     params.set<MaterialPropertyName>("alpha") = FlowModel::UNITY;
     std::string nm = genName(name(), "rhoA_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "rhou");
+    connectObject(params, nm, "rhou");
   }
 
   {
@@ -112,7 +112,7 @@ InletStagnationEnthalpyMomentum::setup1Phase()
     params.set<MaterialPropertyName>("p") = FlowModelSinglePhase::PRESSURE;
     std::string nm = genName(name(), "rhouA_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "rhou");
+    connectObject(params, nm, "rhou");
   }
 
   {
@@ -127,8 +127,8 @@ InletStagnationEnthalpyMomentum::setup1Phase()
     params.set<MaterialPropertyName>("alpha") = FlowModel::UNITY;
     std::string nm = genName(name(), "rhoEA_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "rhou");
-    connectObject(params, "", nm, "H");
+    connectObject(params, nm, "rhou");
+    connectObject(params, nm, "H");
   }
 }
 
@@ -157,7 +157,7 @@ InletStagnationEnthalpyMomentum::setup2Phase()
     params.set<Real>("alpha") = alpha;
     nm = genName(name(), "vf_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "alpha_vapor", "alpha");
+    connectObject(params, nm, "alpha_vapor", "alpha");
   }
 
   {
@@ -172,7 +172,7 @@ InletStagnationEnthalpyMomentum::setup2Phase()
     params.set<std::vector<VariableName>>("beta") = {FlowModelTwoPhase::BETA};
     nm = genName(name(), "arhoA_liquid_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "rhou_liquid", "rhou");
+    connectObject(params, nm, "rhou_liquid", "rhou");
   }
   {
     std::string class_name = "OneD7EqnAreaTimesConstantBC";
@@ -189,7 +189,7 @@ InletStagnationEnthalpyMomentum::setup2Phase()
 
     nm = genName(name(), "arhouA_liquid_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "rhou_liquid", "value");
+    connectObject(params, nm, "rhou_liquid", "value");
   }
 
   {
@@ -206,8 +206,8 @@ InletStagnationEnthalpyMomentum::setup2Phase()
     params.set<std::vector<VariableName>>("beta") = {FlowModelTwoPhase::BETA};
     nm = genName(name(), "arhoEA_liquid_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "rhou_liquid", "rhou");
-    connectObject(params, "", nm, "H_liquid", "H");
+    connectObject(params, nm, "rhou_liquid", "rhou");
+    connectObject(params, nm, "H_liquid", "H");
   }
 
   {
@@ -222,7 +222,7 @@ InletStagnationEnthalpyMomentum::setup2Phase()
     params.set<std::vector<VariableName>>("beta") = {FlowModelTwoPhase::BETA};
     nm = genName(name(), "arhoA_vapor_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "rhou_vapor", "rhou");
+    connectObject(params, nm, "rhou_vapor", "rhou");
   }
   {
     std::string class_name = "OneD7EqnAreaTimesConstantBC";
@@ -239,7 +239,7 @@ InletStagnationEnthalpyMomentum::setup2Phase()
 
     nm = genName(name(), "arhouA_vapor_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "rhou_vapor", "value");
+    connectObject(params, nm, "rhou_vapor", "value");
   }
 
   {
@@ -255,8 +255,8 @@ InletStagnationEnthalpyMomentum::setup2Phase()
     params.set<std::vector<VariableName>>("beta") = {FlowModelTwoPhase::BETA};
     nm = genName(name(), "arhoEA_vapor_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "rhou_vapor", "rhou");
-    connectObject(params, "", nm, "H_vapor", "H");
+    connectObject(params, nm, "rhou_vapor", "rhou");
+    connectObject(params, nm, "H_vapor", "H");
   }
 }
 

@@ -101,7 +101,7 @@ InletMassFlowRateTemperature::setup1PhaseCG()
     params.set<Real>("m_dot") = m_dot_in;
     std::string nm = genName(name(), "rhoA_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "m_dot", "m_dot");
+    connectObject(params, nm, "m_dot", "m_dot");
   }
   {
     std::string class_name = "OneDMomentumMassFlowRateTemperatureBC";
@@ -112,7 +112,7 @@ InletMassFlowRateTemperature::setup1PhaseCG()
     params.set<Real>("m_dot") = m_dot_in;
     std::string nm = genName(name(), "rhouA_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "m_dot", "m_dot");
+    connectObject(params, nm, "m_dot", "m_dot");
   }
   {
     std::string class_name = "OneDEnergyMassFlowRateTemperatureBC";
@@ -131,8 +131,8 @@ InletMassFlowRateTemperature::setup1PhaseCG()
     params.set<UserObjectName>("fp") = _fp_name;
     std::string nm = genName(name(), "rhoEA_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "m_dot", "m_dot");
-    connectObject(params, "", nm, "T", "T");
+    connectObject(params, nm, "m_dot", "m_dot");
+    connectObject(params, nm, "T", "T");
   }
 }
 
@@ -153,8 +153,8 @@ InletMassFlowRateTemperature::setup1PhaseRDG()
     params.set<UserObjectName>("fluid_properties") = _fp_name;
     params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
     _sim.addUserObject(class_name, boundary_flux_name, params);
-    connectObject(params, "", boundary_flux_name, "m_dot", "mass_flow_rate");
-    connectObject(params, "", boundary_flux_name, "T", "T");
+    connectObject(params, boundary_flux_name, "m_dot", "mass_flow_rate");
+    connectObject(params, boundary_flux_name, "T", "T");
   }
 
   // BCs
@@ -202,7 +202,7 @@ InletMassFlowRateTemperature::setup2PhaseCG()
     params.set<Real>("alpha") = alpha;
     std::string nm = genName(name(), "vf_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "alpha_vapor", "alpha");
+    connectObject(params, nm, "alpha_vapor", "alpha");
   }
 
   // BC for liquid phase: mass, momentum, and energy
@@ -215,7 +215,7 @@ InletMassFlowRateTemperature::setup2PhaseCG()
     params.set<Real>("m_dot") = m_dot_liquid;
     std::string nm = genName(name(), "arhoA_liquid_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "m_dot_liquid", "m_dot");
+    connectObject(params, nm, "m_dot_liquid", "m_dot");
   }
   {
     std::string class_name = "OneDMomentumMassFlowRateTemperatureBC";
@@ -226,7 +226,7 @@ InletMassFlowRateTemperature::setup2PhaseCG()
     params.set<Real>("m_dot") = m_dot_liquid;
     std::string nm = genName(name(), "arhouA_liquid_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "m_dot_liquid", "m_dot");
+    connectObject(params, nm, "m_dot_liquid", "m_dot");
   }
   {
     std::string class_name = "OneDEnergyMassFlowRateTemperatureBC";
@@ -246,8 +246,8 @@ InletMassFlowRateTemperature::setup2PhaseCG()
     params.set<UserObjectName>("fp") = fp_liquid;
     std::string nm = genName(name(), "arhoEA_liquid_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "m_dot_liquid", "m_dot");
-    connectObject(params, "", nm, "T_liquid", "T");
+    connectObject(params, nm, "m_dot_liquid", "m_dot");
+    connectObject(params, nm, "T_liquid", "T");
   }
 
   // BC for vapor phase: mass, momentum, and energy
@@ -260,7 +260,7 @@ InletMassFlowRateTemperature::setup2PhaseCG()
     params.set<Real>("m_dot") = m_dot_vapor;
     std::string nm = genName(name(), "arhoA_vapor_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "m_dot_vapor", "m_dot");
+    connectObject(params, nm, "m_dot_vapor", "m_dot");
   }
   {
     std::string class_name = "OneDMomentumMassFlowRateTemperatureBC";
@@ -271,7 +271,7 @@ InletMassFlowRateTemperature::setup2PhaseCG()
     params.set<Real>("m_dot") = m_dot_vapor;
     std::string nm = genName(name(), "arhouA_vapor_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "m_dot_vapor", "m_dot");
+    connectObject(params, nm, "m_dot_vapor", "m_dot");
   }
   {
     std::string class_name = "OneDEnergyMassFlowRateTemperatureBC";
@@ -291,8 +291,8 @@ InletMassFlowRateTemperature::setup2PhaseCG()
     params.set<UserObjectName>("fp") = fp_vapor;
     std::string nm = genName(name(), "arhoEA_vapor_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "m_dot_vapor", "m_dot");
-    connectObject(params, "", nm, "T_vapor", "T");
+    connectObject(params, nm, "m_dot_vapor", "m_dot");
+    connectObject(params, nm, "T_vapor", "T");
   }
 }
 
@@ -318,11 +318,11 @@ InletMassFlowRateTemperature::setup2PhaseRDG()
     params.set<ExecFlagEnum>("execute_on") = execute_on;
     _sim.addUserObject(class_name, boundary_flux_name, params);
 
-    connectObject(params, "", boundary_flux_name, "alpha_vapor");
-    connectObject(params, "", boundary_flux_name, "m_dot_liquid");
-    connectObject(params, "", boundary_flux_name, "m_dot_vapor");
-    connectObject(params, "", boundary_flux_name, "T_liquid");
-    connectObject(params, "", boundary_flux_name, "T_vapor");
+    connectObject(params, boundary_flux_name, "alpha_vapor");
+    connectObject(params, boundary_flux_name, "m_dot_liquid");
+    connectObject(params, boundary_flux_name, "m_dot_vapor");
+    connectObject(params, boundary_flux_name, "T_liquid");
+    connectObject(params, boundary_flux_name, "T_vapor");
   }
 
   // BCs

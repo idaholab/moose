@@ -111,14 +111,12 @@ public:
    * Connect with control logic
    */
   void connectObject(const InputParameters & params,
-                     const std::string & rname,
                      const std::string & mooseName,
                      const std::string & name) const;
   /**
    * Connect with control logic
    */
   void connectObject(const InputParameters & params,
-                     const std::string & rname,
                      const std::string & mooseName,
                      const std::string & name,
                      const std::string & par_name) const;

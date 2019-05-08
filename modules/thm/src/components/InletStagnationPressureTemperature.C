@@ -112,8 +112,8 @@ InletStagnationPressureTemperature::setup1PhaseCG()
     params.set<std::vector<VariableName>>("arhoEA") = cv_rhoEA;
     std::string nm = genName(name(), "rhoA_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "p0");
-    connectObject(params, "", nm, "T0");
+    connectObject(params, nm, "p0");
+    connectObject(params, nm, "T0");
   }
   {
     std::string class_name = "OneDMomentumStagnationPandTBC";
@@ -133,8 +133,8 @@ InletStagnationPressureTemperature::setup1PhaseCG()
     params.set<std::vector<VariableName>>("arhoEA") = cv_rhoEA;
     std::string nm = genName(name(), "rhouA_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "p0");
-    connectObject(params, "", nm, "T0");
+    connectObject(params, nm, "p0");
+    connectObject(params, nm, "T0");
   }
   {
     std::string class_name = "OneDEnergyStagnationPandTBC";
@@ -153,8 +153,8 @@ InletStagnationPressureTemperature::setup1PhaseCG()
     params.set<std::vector<VariableName>>("arhoEA") = cv_rhoEA;
     std::string nm = genName(name(), "rhoEA_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "p0");
-    connectObject(params, "", nm, "T0");
+    connectObject(params, nm, "p0");
+    connectObject(params, nm, "T0");
   }
 
   if (_reversible)
@@ -185,7 +185,7 @@ InletStagnationPressureTemperature::setup1PhaseCG()
       params.set<std::vector<VariableName>>("A") = cv_area;
       std::string nm = genName(name(), "bc_rhou", "rev");
       _sim.addBoundaryCondition(class_name, nm, params);
-      connectObject(params, "", nm, "p0", "p_in");
+      connectObject(params, nm, "p0", "p_in");
     }
     {
       std::string class_name = "OneDEnergyStaticPressureBC";
@@ -208,7 +208,7 @@ InletStagnationPressureTemperature::setup1PhaseCG()
       params.set<std::vector<VariableName>>("v") = cv_v;
       std::string nm = genName(name(), "bc_rhoE", "rev");
       _sim.addBoundaryCondition(class_name, nm, params);
-      connectObject(params, "", nm, "p0", "p_in");
+      connectObject(params, nm, "p0", "p_in");
     }
   }
 }
@@ -279,7 +279,7 @@ InletStagnationPressureTemperature::setup2PhaseCG()
     params.set<Real>("alpha") = alpha_vapor;
     std::string nm = genName(name(), "vf_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "alpha_vapor", "alpha");
+    connectObject(params, nm, "alpha_vapor", "alpha");
   }
 
   // liquid BC
@@ -303,8 +303,8 @@ InletStagnationPressureTemperature::setup2PhaseCG()
     params.set<bool>("is_liquid") = true;
     std::string nm = genName(name(), "arhoA_bc_liquid");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "p0_liquid", "p0");
-    connectObject(params, "", nm, "T0_liquid", "T0");
+    connectObject(params, nm, "p0_liquid", "p0");
+    connectObject(params, nm, "T0_liquid", "T0");
   }
   {
     std::string class_name = "OneDMomentumStagnationPandTBC";
@@ -324,8 +324,8 @@ InletStagnationPressureTemperature::setup2PhaseCG()
     params.set<std::vector<VariableName>>("arhoEA") = cv_arhoEA_liquid;
     std::string nm = genName(name(), "arhouA_bc_liquid");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "p0_liquid", "p0");
-    connectObject(params, "", nm, "T0_liquid", "T0");
+    connectObject(params, nm, "p0_liquid", "p0");
+    connectObject(params, nm, "T0_liquid", "T0");
   }
   {
     std::string class_name = "OneDEnergyStagnationPandTBC";
@@ -347,8 +347,8 @@ InletStagnationPressureTemperature::setup2PhaseCG()
     params.set<bool>("is_liquid") = true;
     std::string nm = genName(name(), "arhoEA_bc_liquid");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "p0_liquid", "p0");
-    connectObject(params, "", nm, "T0_liquid", "T0");
+    connectObject(params, nm, "p0_liquid", "p0");
+    connectObject(params, nm, "T0_liquid", "T0");
   }
 
   // vapor BC
@@ -372,8 +372,8 @@ InletStagnationPressureTemperature::setup2PhaseCG()
     params.set<bool>("is_liquid") = false;
     std::string nm = genName(name(), "arhoA_bc_vapor");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "p0_vapor", "p0");
-    connectObject(params, "", nm, "T0_vapor", "T0");
+    connectObject(params, nm, "p0_vapor", "p0");
+    connectObject(params, nm, "T0_vapor", "T0");
   }
   {
     std::string class_name = "OneDMomentumStagnationPandTBC";
@@ -393,8 +393,8 @@ InletStagnationPressureTemperature::setup2PhaseCG()
     params.set<std::vector<VariableName>>("arhoEA") = cv_arhoEA_vapor;
     std::string nm = genName(name(), "arhouA_bc_vapor");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "p0_vapor", "p0");
-    connectObject(params, "", nm, "T0_vapor", "T0");
+    connectObject(params, nm, "p0_vapor", "p0");
+    connectObject(params, nm, "T0_vapor", "T0");
   }
   {
     std::string class_name = "OneDEnergyStagnationPandTBC";
@@ -416,8 +416,8 @@ InletStagnationPressureTemperature::setup2PhaseCG()
     params.set<bool>("is_liquid") = false;
     std::string nm = genName(name(), "arhoEA_bc_vapor");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, "", nm, "p0_vapor", "p0");
-    connectObject(params, "", nm, "T0_vapor", "T0");
+    connectObject(params, nm, "p0_vapor", "p0");
+    connectObject(params, nm, "T0_vapor", "T0");
   }
 }
 
