@@ -13,5 +13,8 @@
 
 #include "metaphysicl/dualnumberarray.h"
 
+namespace libMesh
+{
 template <>
-libMesh::DenseMatrix<DualReal>::DenseMatrix(const unsigned int new_m, const unsigned int new_n);
+DenseMatrix<DualReal>::DenseMatrix(const unsigned int new_m, const unsigned int new_n);
+}
