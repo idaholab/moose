@@ -13,7 +13,7 @@
 
 #ifdef LIBMESH_TRILINOS_HAVE_DTK
 
-#include "MultiAppFieldTransferInterface.h"
+#include "MultiAppFieldTransfer.h"
 #include "DTKInterpolationHelper.h"
 
 // Forward declarations
@@ -25,7 +25,7 @@ InputParameters validParams<MultiAppDTKInterpolationTransfer>();
 /**
  * Transfers from spatially varying Interpolations in a MultiApp to the "master" system.
  */
-class MultiAppDTKInterpolationTransfer : public MultiAppFieldTransferInterface
+class MultiAppDTKInterpolationTransfer : public MultiAppFieldTransfer
 {
 public:
   MultiAppDTKInterpolationTransfer(const InputParameters & parameters);

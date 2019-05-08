@@ -10,7 +10,7 @@
 #pragma once
 
 // MOOSE includes
-#include "MultiAppFieldTransferInterface.h"
+#include "MultiAppFieldTransfer.h"
 
 #include "libmesh/mesh_base.h"
 
@@ -23,7 +23,7 @@ InputParameters validParams<MultiAppInterpolationTransfer>();
 /**
  * Copy the value to the target domain from the nearest node in the source domain.
  */
-class MultiAppInterpolationTransfer : public MultiAppFieldTransferInterface
+class MultiAppInterpolationTransfer : public MultiAppFieldTransfer
 {
 public:
   MultiAppInterpolationTransfer(const InputParameters & parameters);

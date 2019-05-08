@@ -24,13 +24,13 @@ template <>
 InputParameters
 validParams<MultiAppDTKInterpolationTransfer>()
 {
-  InputParameters params = validParams<MultiAppFieldTransferInterface>();
+  InputParameters params = validParams<MultiAppFieldTransfer>();
   return params;
 }
 
 MultiAppDTKInterpolationTransfer::MultiAppDTKInterpolationTransfer(
     const InputParameters & parameters)
-  : MultiAppFieldTransferInterface(parameters)
+  : MultiAppFieldTransfer(parameters)
 {
   if (_to_var_name.size() != 1 && _from_var_name.size() != 1)
     mooseError(" Support single variable only ");

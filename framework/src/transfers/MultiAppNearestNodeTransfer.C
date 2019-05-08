@@ -28,7 +28,7 @@ template <>
 InputParameters
 validParams<MultiAppNearestNodeTransfer>()
 {
-  InputParameters params = validParams<MultiAppFieldTransferInterface>();
+  InputParameters params = validParams<MultiAppFieldTransfer>();
 
   params.addParam<BoundaryName>(
       "source_boundary",
@@ -47,7 +47,7 @@ validParams<MultiAppNearestNodeTransfer>()
 }
 
 MultiAppNearestNodeTransfer::MultiAppNearestNodeTransfer(const InputParameters & parameters)
-  : MultiAppFieldTransferInterface(parameters),
+  : MultiAppFieldTransfer(parameters),
     _fixed_meshes(getParam<bool>("fixed_meshes")),
     _node_map(declareRestartableData<std::map<dof_id_type, Node *>>("node_map")),
     _distance_map(declareRestartableData<std::map<dof_id_type, Real>>("distance_map")),

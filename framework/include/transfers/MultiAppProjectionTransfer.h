@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "MultiAppFieldTransferInterface.h"
+#include "MultiAppFieldTransfer.h"
 
 // Forward declarations
 namespace libMesh
@@ -25,7 +25,7 @@ InputParameters validParams<MultiAppProjectionTransfer>();
 /**
  * Project values from one domain to another
  */
-class MultiAppProjectionTransfer : public MultiAppFieldTransferInterface
+class MultiAppProjectionTransfer : public MultiAppFieldTransfer
 {
 public:
   MultiAppProjectionTransfer(const InputParameters & parameters);

@@ -41,7 +41,7 @@ template <>
 InputParameters
 validParams<MultiAppProjectionTransfer>()
 {
-  InputParameters params = validParams<MultiAppFieldTransferInterface>();
+  InputParameters params = validParams<MultiAppFieldTransfer>();
 
   MooseEnum proj_type("l2", "l2");
   params.addParam<MooseEnum>("proj_type", proj_type, "The type of the projection.");
@@ -60,7 +60,7 @@ validParams<MultiAppProjectionTransfer>()
 }
 
 MultiAppProjectionTransfer::MultiAppProjectionTransfer(const InputParameters & parameters)
-  : MultiAppFieldTransferInterface(parameters),
+  : MultiAppFieldTransfer(parameters),
     _proj_type(getParam<MooseEnum>("proj_type")),
     _compute_matrix(true),
     _fixed_meshes(getParam<bool>("fixed_meshes")),
@@ -73,7 +73,7 @@ MultiAppProjectionTransfer::MultiAppProjectionTransfer(const InputParameters & p
 void
 MultiAppProjectionTransfer::initialSetup()
 {
-  MultiAppFieldTransferInterface::initialSetup();
+  MultiAppFieldTransfer::initialSetup();
 
   getAppInfo();
 

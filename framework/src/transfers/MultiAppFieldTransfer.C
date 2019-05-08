@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // MOOSE includes
-#include "MultiAppFieldTransferInterface.h"
+#include "MultiAppFieldTransfer.h"
 #include "MooseTypes.h"
 #include "FEProblem.h"
 #include "MultiApp.h"
@@ -18,7 +18,7 @@
 
 template <>
 InputParameters
-validParams<MultiAppFieldTransferInterface>()
+validParams<MultiAppFieldTransfer>()
 {
   InputParameters params = validParams<MultiAppTransfer>();
   params.addRequiredParam<std::vector<AuxVariableName>>(
@@ -36,7 +36,7 @@ validParams<MultiAppFieldTransferInterface>()
   return params;
 }
 
-MultiAppFieldTransferInterface::MultiAppFieldTransferInterface(const InputParameters & parameters)
+MultiAppFieldTransfer::MultiAppFieldTransfer(const InputParameters & parameters)
   : MultiAppTransfer(parameters),
     _from_var_names(getParam<std::vector<VariableName>>("source_variable")),
     _to_var_names(getParam<std::vector<AuxVariableName>>("variable")),
@@ -92,7 +92,7 @@ MultiAppFieldTransferInterface::MultiAppFieldTransferInterface(const InputParame
 }
 
 void
-MultiAppFieldTransferInterface::initialSetup()
+MultiAppFieldTransfer::initialSetup()
 {
   if (_direction == TO_MULTIAPP)
     for (auto & to_var : _to_var_names)
@@ -142,7 +142,7 @@ MultiAppFieldTransferInterface::initialSetup()
 }
 
 void
-MultiAppFieldTransferInterface::postExecute()
+MultiAppFieldTransfer::postExecute()
 {
   if (_preserve_transfer)
   {
@@ -152,7 +152,8 @@ MultiAppFieldTransferInterface::postExecute()
     {
       FEProblemBase & from_problem = _multi_app->problemBase();
       if (_use_nearestpoint_pps)
-        from_problem.computeUserObjectByName(EXEC_TRANSFER, _from_postprocessors_to_be_preserved[0]);
+        from_problem.computeUserObjectByName(EXEC_TRANSFER,
+                                             _from_postprocessors_to_be_preserved[0]);
 
       for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
         if (_multi_app->hasLocalApp(i))
@@ -204,12 +205,11 @@ MultiAppFieldTransferInterface::postExecute()
 }
 
 void
-MultiAppFieldTransferInterface::adjustTransferedSolutionNearestPoint(
-    unsigned int i,
-    FEProblemBase * from_problem,
-    PostprocessorName & from_postprocessor,
-    FEProblemBase & to_problem,
-    PostprocessorName & to_postprocessor)
+MultiAppFieldTransfer::adjustTransferedSolutionNearestPoint(unsigned int i,
+                                                            FEProblemBase * from_problem,
+                                                            PostprocessorName & from_postprocessor,
+                                                            FEProblemBase & to_problem,
+                                                            PostprocessorName & to_postprocessor)
 {
   PostprocessorValue from_adjuster = 0;
   if (from_problem && _direction == FROM_MULTIAPP)
@@ -300,10 +300,10 @@ MultiAppFieldTransferInterface::adjustTransferedSolutionNearestPoint(
 }
 
 void
-MultiAppFieldTransferInterface::adjustTransferedSolution(FEProblemBase * from_problem,
-                                                         PostprocessorName & from_postprocessor,
-                                                         FEProblemBase & to_problem,
-                                                         PostprocessorName & to_postprocessor)
+MultiAppFieldTransfer::adjustTransferedSolution(FEProblemBase * from_problem,
+                                                PostprocessorName & from_postprocessor,
+                                                FEProblemBase & to_problem,
+                                                PostprocessorName & to_postprocessor)
 {
   PostprocessorValue from_adjuster = 0;
   if (from_problem)

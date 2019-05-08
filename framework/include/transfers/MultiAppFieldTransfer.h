@@ -12,19 +12,19 @@
 #include "MultiAppTransfer.h"
 
 // Forward declarations
-class MultiAppFieldTransferInterface;
+class MultiAppFieldTransfer;
 
 template <>
-InputParameters validParams<MultiAppFieldTransferInterface>();
+InputParameters validParams<MultiAppFieldTransfer>();
 
 /**
  *  This serves an interface for MultiAppInterpolationTransfer, MultiAppNearestNodeTransfer and so
  * on.
  */
-class MultiAppFieldTransferInterface : public MultiAppTransfer
+class MultiAppFieldTransfer : public MultiAppTransfer
 {
 public:
-  MultiAppFieldTransferInterface(const InputParameters & parameters);
+  MultiAppFieldTransfer(const InputParameters & parameters);
 
   virtual void initialSetup();
 

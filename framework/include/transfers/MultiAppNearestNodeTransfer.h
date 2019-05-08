@@ -10,7 +10,7 @@
 #pragma once
 
 // MOOSE includes
-#include "MultiAppFieldTransferInterface.h"
+#include "MultiAppFieldTransfer.h"
 
 // Forward declarations
 class MultiAppNearestNodeTransfer;
@@ -25,7 +25,7 @@ InputParameters validParams<MultiAppNearestNodeTransfer>();
 /**
  * Copy the value to the target domain from the nearest node in the source domain.
  */
-class MultiAppNearestNodeTransfer : public MultiAppFieldTransferInterface
+class MultiAppNearestNodeTransfer : public MultiAppFieldTransfer
 {
 public:
   MultiAppNearestNodeTransfer(const InputParameters & parameters);

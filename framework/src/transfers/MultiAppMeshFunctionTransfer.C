@@ -28,7 +28,7 @@ template <>
 InputParameters
 validParams<MultiAppMeshFunctionTransfer>()
 {
-  InputParameters params = validParams<MultiAppFieldTransferInterface>();
+  InputParameters params = validParams<MultiAppFieldTransfer>();
 
   params.addParam<bool>(
       "error_on_miss",
@@ -38,7 +38,7 @@ validParams<MultiAppMeshFunctionTransfer>()
 }
 
 MultiAppMeshFunctionTransfer::MultiAppMeshFunctionTransfer(const InputParameters & parameters)
-  : MultiAppFieldTransferInterface(parameters), _error_on_miss(getParam<bool>("error_on_miss"))
+  : MultiAppFieldTransfer(parameters), _error_on_miss(getParam<bool>("error_on_miss"))
 {
   if (_to_var_names.size() == _from_var_names.size())
     _var_size = _to_var_names.size();
