@@ -672,13 +672,29 @@ MooseVariableData<RealArrayValue>::computeValues()
       _sys.subproblem().getActiveFEVariableCoupleableMatrixTags(_tid);
 
   // Map grad_phi using Eigen so that we can perform array operations easier
-  _mapped_grad_phi.resize(num_dofs);
-  for (unsigned int i = 0; i < num_dofs; i++)
+  if (_qrule == _current_qrule)
   {
-    _mapped_grad_phi[i].resize(nqp, NULL);
-    for (unsigned int qp = 0; qp < nqp; qp++)
-      // Note: this does NOT do any allocation.  It is "reconstructing" the object in place
-      new (&_mapped_grad_phi[i][qp]) Eigen::Map<Eigen::Vector3d>(const_cast<Real *>(&(*_current_grad_phi)[i][qp](0)));
+    _mapped_grad_phi.resize(num_dofs);
+    for (unsigned int i = 0; i < num_dofs; i++)
+    {
+      _mapped_grad_phi[i].resize(nqp, nullptr);
+      for (unsigned int qp = 0; qp < nqp; qp++)
+        // Note: this does NOT do any allocation.  It is "reconstructing" the object in place
+        new (&_mapped_grad_phi[i][qp])
+            Eigen::Map<RealDIMValue>(const_cast<Real *>(&(*_current_grad_phi)[i][qp](0)));
+    }
+  }
+  else
+  {
+    _mapped_grad_phi_face.resize(num_dofs);
+    for (unsigned int i = 0; i < num_dofs; i++)
+    {
+      _mapped_grad_phi_face[i].resize(nqp, nullptr);
+      for (unsigned int qp = 0; qp < nqp; qp++)
+        // Note: this does NOT do any allocation.  It is "reconstructing" the object in place
+        new (&_mapped_grad_phi_face[i][qp])
+            Eigen::Map<RealDIMValue>(const_cast<Real *>(&(*_current_grad_phi)[i][qp](0)));
+    }
   }
 
   _u.resize(nqp);

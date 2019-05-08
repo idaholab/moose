@@ -33,7 +33,7 @@ ArrayIntegratedBC::ArrayIntegratedBC(const InputParameters & parameters)
                                            Moose::VarKindType::VAR_NONLINEAR,
                                            Moose::VarFieldType::VAR_FIELD_ARRAY),
     _var(*mooseVariable()),
-    _normals(_var.normals()),
+    _normals(_assembly.normals()),
     _phi(_assembly.phiFace(_var)),
     _test(_var.phiFace()),
     _u(_is_implicit ? _var.sln() : _var.slnOld()),

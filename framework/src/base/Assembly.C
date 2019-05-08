@@ -1086,6 +1086,12 @@ Assembly::reinitFEFace(const Elem * elem, unsigned int side)
       const_cast<std::vector<Real> &>((*_holder_fe_face_helper[dim])->get_JxW()));
   _current_normals.shallowCopy(
       const_cast<std::vector<Point> &>((*_holder_fe_face_helper[dim])->get_normals()));
+
+  _mapped_normals.resize(_current_normals.size(), nullptr);
+  for (unsigned int i = 0; i < _current_normals.size(); i++)
+    // Note: this does NOT do any allocation.  It is "reconstructing" the object in place
+    new (&_mapped_normals[i]) Eigen::Map<RealDIMValue>(const_cast<Real *>(&_current_normals[i](0)));
+
   if (_calculate_curvatures)
     _curvatures.shallowCopy(
         const_cast<std::vector<Real> &>((*_holder_fe_face_helper[dim])->get_curvatures()));
