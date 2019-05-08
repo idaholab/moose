@@ -38,7 +38,7 @@
     input = 'GrandPotentialAnisotropyAntitrap.i'
     exodiff = 'GrandPotentialAnisotropyAntitrap_out.e'
     issues = '#13373'
-    design = '/GrandPotentialInterface.md'
+    design = '/AntitrappingCurrent.md'
     requirement = 'MOOSE shall provide a Grand Potential based dendritic solidification capability for alloy with antitrapping current'
   [../]
 []

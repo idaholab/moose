@@ -7,29 +7,27 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "CoupledSusceptibilityTimeDerivativeInterface.h"
+#include "AntitrappingCurrent.h"
 
-registerMooseObject("PhaseFieldApp", CoupledSusceptibilityTimeDerivativeInterface);
+registerMooseObject("PhaseFieldApp", AntitrappingCurrent);
 
 template <>
 InputParameters
-validParams<CoupledSusceptibilityTimeDerivativeInterface>()
+validParams<AntitrappingCurrent>()
 {
   InputParameters params = validParams<CoupledSusceptibilityTimeDerivative>();
   params.addClassDescription(
-      "A modified coupled time derivative Kernel that multiplies the time "
-      "derivative of a coupled variable by a generalized susceptibility and interface normal");
+      "Kernel that provides antitrapping current at the interface for alloy solidification");
   return params;
 }
 
-CoupledSusceptibilityTimeDerivativeInterface::CoupledSusceptibilityTimeDerivativeInterface(
-    const InputParameters & parameters)
+AntitrappingCurrent::AntitrappingCurrent(const InputParameters & parameters)
   : CoupledSusceptibilityTimeDerivative(parameters), _grad_v(coupledGradient("v"))
 {
 }
 
 Real
-CoupledSusceptibilityTimeDerivativeInterface::computeQpResidual()
+AntitrappingCurrent::computeQpResidual()
 {
   const Real norm_sq = _grad_v[_qp].norm_sq();
   if (norm_sq < libMesh::TOLERANCE)
@@ -39,7 +37,7 @@ CoupledSusceptibilityTimeDerivativeInterface::computeQpResidual()
 }
 
 Real
-CoupledSusceptibilityTimeDerivativeInterface::computeQpJacobian()
+AntitrappingCurrent::computeQpJacobian()
 {
   const Real norm_sq = _grad_v[_qp].norm_sq();
   if (norm_sq < libMesh::TOLERANCE)
@@ -50,7 +48,7 @@ CoupledSusceptibilityTimeDerivativeInterface::computeQpJacobian()
 }
 
 Real
-CoupledSusceptibilityTimeDerivativeInterface::computeQpOffDiagJacobian(unsigned int jvar)
+AntitrappingCurrent::computeQpOffDiagJacobian(unsigned int jvar)
 {
   const Real norm_sq = _grad_v[_qp].norm_sq();
   if (norm_sq < libMesh::TOLERANCE)

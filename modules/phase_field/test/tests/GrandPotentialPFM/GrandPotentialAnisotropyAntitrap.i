@@ -158,13 +158,13 @@
     args = 'etaa0 etab0'
   [../]
   [./coupled_etaa0dot_int]
-    type = CoupledSusceptibilityTimeDerivativeInterface
+    type = AntitrappingCurrent
     variable = w
     v = etaa0
     f_name = rhodiff
   [../]
   [./coupled_etab0dot_int]
-    type = CoupledSusceptibilityTimeDerivativeInterface
+    type = AntitrappingCurrent
     variable = w
     v = etab0
     f_name = rhodiff
