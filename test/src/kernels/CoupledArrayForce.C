@@ -1,0 +1,56 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "CoupledArrayForce.h"
+
+#include "MooseVariable.h"
+
+registerMooseObject("MooseApp", CoupledArrayForce);
+
+template <>
+InputParameters
+validParams<CoupledArrayForce>()
+{
+  InputParameters params = validParams<Kernel>();
+
+  params.addRequiredCoupledVar("v", "The coupled array variable which provides the force");
+  params.addRequiredParam<RealArrayValue>(
+      "coef", "Coefficent ($\\sigma$) multiplier for the coupled force term.");
+
+  return params;
+}
+
+CoupledArrayForce::CoupledArrayForce(const InputParameters & parameters)
+  : Kernel(parameters),
+    _v_var(coupled("v")),
+    _v(coupledArrayValue("v")),
+    _coef(getParam<RealArrayValue>("coef"))
+{
+  if (_var.number() == _v_var)
+    mooseError("Coupled variable 'v' needs to be different from 'variable' with CoupledForce, "
+               "consider using Reaction or somethig similar");
+  if (getArrayVar("v", 0)->count() != _coef.size())
+    mooseError("'coef' size in CoupledArrayForce is inconsistent with the number of components of "
+               "the coupled array variable");
+}
+
+Real
+CoupledArrayForce::computeQpResidual()
+{
+  return -(_coef.transpose() * _v[_qp]).sum() * _test[_i][_qp];
+}
+
+RealArrayValue
+CoupledArrayForce::computeQpOffDiagJacobianArray(ArrayMooseVariable & jvar)
+{
+  if (jvar.number() == _v_var)
+    return _coef * (-_phi[_j][_qp] * _test[_i][_qp]);
+  else
+    return RealArrayValue::Zero(jvar.count());
+}

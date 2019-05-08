@@ -61,6 +61,14 @@ protected:
    */
   virtual Real computeQpOffDiagJacobian(unsigned int /*jvar*/) { return 0; }
 
+  /**
+   * For coupling array variables
+   */
+  virtual RealArrayValue computeQpOffDiagJacobianArray(ArrayMooseVariable & jvar)
+  {
+    return RealArrayValue::Zero(jvar.count());
+  }
+
   /// This is a regular kernel so we cast to a regular MooseVariable
   MooseVariable & _var;
 
