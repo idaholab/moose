@@ -41,7 +41,6 @@ Sampler::Sampler(const InputParameters & parameters)
     _distribution_names(getParam<std::vector<DistributionName>>("distributions")),
     _seed(getParam<unsigned int>("seed")),
     _total_rows(0)
-//_parallel_offsets(n_processors())
 {
   for (const DistributionName & name : _distribution_names)
     _distributions.push_back(&getDistributionByName(name));

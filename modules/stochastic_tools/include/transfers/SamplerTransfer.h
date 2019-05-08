@@ -64,5 +64,8 @@ private:
   /// Current global index for batch execution
   dof_id_type _global_index;
 
+  /**
+   * Extract single row of Sampler data given the global index.
+   */
   std::vector<Real> getRow(const dof_id_type global_index) const;
 };

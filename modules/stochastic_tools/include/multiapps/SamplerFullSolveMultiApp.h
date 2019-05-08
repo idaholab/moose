@@ -13,6 +13,8 @@
 #include "FullSolveMultiApp.h"
 #include "SamplerInterface.h"
 
+#include "StochasticToolsTypes.h"
+
 class SamplerFullSolveMultiApp;
 class Sampler;
 class StochasticToolsTransfer;
@@ -37,13 +39,13 @@ protected:
   Sampler & _sampler;
 
   /// The Sup-application solve mode
-  const MooseEnum & _mode;
+  const StochasticTools::MultiAppMode _mode;
 
   /// Counter for extracting command line arguments in batch mode
   dof_id_type _local_batch_app_index;
 
   /// Override to allow for batch mode to get correct cli_args
-  virtual std::string getCommandLineArguments(unsigned int local_app) override;
+  virtual std::string getCommandLineArgsParamHelper(unsigned int local_app) override;
 
 private:
   /**

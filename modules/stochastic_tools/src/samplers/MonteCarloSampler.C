@@ -39,7 +39,7 @@ MonteCarloSampler::sample()
   for (MooseIndex(_num_matrices) m = 0; m < _num_matrices; ++m)
   {
     output[m].resize(_num_samples, _distributions.size());
-    for (std::size_t i = 0; i < _num_samples; ++i)
+    for (MooseIndex(_num_samples) i = 0; i < _num_samples; ++i)
       for (MooseIndex(_distributions) j = 0; j < _distributions.size(); ++j)
         output[m](i, j) = _distributions[j]->quantile(rand());
   }

@@ -13,6 +13,8 @@
 #include "TransientMultiApp.h"
 #include "SamplerInterface.h"
 
+#include "StochasticToolsTypes.h"
+
 class SamplerTransientMultiApp;
 class Sampler;
 class StochasticToolsTransfer;
@@ -45,7 +47,7 @@ protected:
   Sampler & _sampler;
 
   /// The Sup-application solve mode
-  const MooseEnum & _mode;
+  const StochasticTools::MultiAppMode _mode;
 
 private:
   /**

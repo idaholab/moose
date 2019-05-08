@@ -613,7 +613,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
 
   if (_cli_args.size() > 0)
   {
-    for (const std::string & str : MooseUtils::split(getCommandLineArguments(i), ";"))
+    for (const std::string & str : MooseUtils::split(getCommandLineArgsParamHelper(i), ";"))
     {
       std::ostringstream oss;
       oss << full_name << ":" << str;
@@ -685,7 +685,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
 }
 
 std::string
-MultiApp::getCommandLineArguments(unsigned int local_app)
+MultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
 {
 
   // Single set of "cli_args" to be applied to all sub apps

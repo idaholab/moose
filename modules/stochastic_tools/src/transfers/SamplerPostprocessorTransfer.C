@@ -70,7 +70,7 @@ SamplerPostprocessorTransfer::initialSetup()
 void
 SamplerPostprocessorTransfer::initializeFromMultiapp()
 {
-  _local_values.resize(0);
+  _local_values.clear();
 }
 
 void
@@ -91,7 +91,7 @@ void
 SamplerPostprocessorTransfer::finalizeFromMultiapp()
 {
   // Gather the PP values from all ranks
-  _communicator.allgather(_local_values);
+  _communicator.gather(0, _local_values);
 
   // Update VPP
   const dof_id_type n = _sampler->getTotalNumberOfRows();
@@ -110,8 +110,7 @@ SamplerPostprocessorTransfer::execute()
   const unsigned int n = _multi_app->numGlobalApps();
 
   // Collect the PP values for this processor
-  _local_values.resize(n);
-  std::fill(_local_values.begin(), _local_values.end(), 0);
+  _local_values.assign(n, 0);
   for (unsigned int i = 0; i < n; i++)
   {
     if (_multi_app->hasLocalApp(i))

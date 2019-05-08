@@ -33,7 +33,7 @@ validParams<SamplerTransientMultiApp>()
   // use "batch-restore=2" to be consistent with SamplerFullSolveMultiApp and use the
   // allow_out_of_range flag to allow the StochasticToolsTransfer object to inspect the MultiApp
   // object parameters without triggering an assert.
-  MooseEnum modes("normal=0 batch-restore=2", "normal", true);
+  MooseEnum modes("normal=0 batch-reset=1 batch-restore=2", "normal");
   params.addParam<MooseEnum>(
       "mode",
       modes,
@@ -47,17 +47,18 @@ SamplerTransientMultiApp::SamplerTransientMultiApp(const InputParameters & param
   : TransientMultiApp(parameters),
     SamplerInterface(this),
     _sampler(SamplerInterface::getSampler("sampler")),
-    _mode(getParam<MooseEnum>("mode"))
+    _mode(getParam<MooseEnum>("mode").getEnum<StochasticTools::MultiAppMode>())
 {
-  if (_mode == "batch-restore")
+  if (_mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
     init(n_processors());
-  else if (_mode == "normal")
+  else if (_mode == StochasticTools::MultiAppMode::NORMAL)
     init(_sampler.getTotalNumberOfRows());
   else
     paramError("mode",
                "The supplied mode, '",
-               _mode,
-               "', does not exist, the options are 'normal' or 'batch-restore'.");
+               getParam<MooseEnum>("mode"),
+               "', currently is not implemented for the SamplerTransientMultiApp, the available "
+               "options are 'normal' or 'batch-restore'.");
 }
 
 void
@@ -66,7 +67,7 @@ SamplerTransientMultiApp::initialSetup()
   TransientMultiApp::initialSetup();
 
   // Perform initial backup for the batch sub-applications
-  if (_mode == "batch-restore")
+  if (_mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
   {
     dof_id_type n = _sampler.getLocalNumerOfRows();
     _batch_backup.resize(n);
@@ -80,7 +81,7 @@ bool
 SamplerTransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 {
   bool last_solve_converged = true;
-  if (_mode == "batch-restore")
+  if (_mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
     last_solve_converged = solveStepBatch(dt, target_time, auto_advance);
   else
     last_solve_converged = TransientMultiApp::solveStep(dt, target_time, auto_advance);
@@ -109,7 +110,7 @@ SamplerTransientMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
   dof_id_type num_items = _sampler.getLocalNumerOfRows();
   for (MooseIndex(num_items) i = 0; i < num_items; ++i)
   {
-    if (_mode == "batch-restore")
+    if (_mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
       for (MooseIndex(_my_num_apps) j = 0; j < _my_num_apps; j++)
         _apps[j]->restore(_batch_backup[i][j]);
 
@@ -121,7 +122,7 @@ SamplerTransientMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
     for (auto transfer : from_transfers)
       transfer->executeFromMultiapp();
 
-    if (_mode == "batch-restore")
+    if (_mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
       for (MooseIndex(_my_num_apps) j = 0; j < _my_num_apps; j++)
         _batch_backup[i][j] = _apps[j]->backup();
   }

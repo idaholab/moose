@@ -45,10 +45,11 @@ SamplerFullSolveMultiApp::SamplerFullSolveMultiApp(const InputParameters & param
   : FullSolveMultiApp(parameters),
     SamplerInterface(this),
     _sampler(SamplerInterface::getSampler("sampler")),
-    _mode(getParam<MooseEnum>("mode")),
+    _mode(getParam<MooseEnum>("mode").getEnum<StochasticTools::MultiAppMode>()),
     _local_batch_app_index(0)
 {
-  if (_mode == "batch-reset" || _mode == "batch-restore")
+  if (_mode == StochasticTools::MultiAppMode::BATCH_RESET ||
+      _mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
     init(n_processors());
   else
     init(_sampler.getTotalNumberOfRows());
@@ -58,7 +59,8 @@ bool
 SamplerFullSolveMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 {
   bool last_solve_converged = true;
-  if (_mode == "batch-reset" || _mode == "batch-restore")
+  if (_mode == StochasticTools::MultiAppMode::BATCH_RESET ||
+      _mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
     last_solve_converged = solveStepBatch(dt, target_time, auto_advance);
   else
     last_solve_converged = FullSolveMultiApp::solveStep(dt, target_time, auto_advance);
@@ -83,7 +85,7 @@ SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
   for (auto transfer : from_transfers)
     transfer->initializeFromMultiapp();
 
-  if (_mode == "batch-restore")
+  if (_mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
     backup();
 
   // Perform batch MultiApp solves
@@ -91,17 +93,17 @@ SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
   dof_id_type num_items = _sampler.getLocalNumerOfRows();
   for (MooseIndex(num_items) i = 0; i < num_items; ++i)
   {
-    for (auto transfer : to_transfers)
+    for (auto & transfer : to_transfers)
       transfer->executeToMultiapp();
 
     last_solve_converged = FullSolveMultiApp::solveStep(dt, target_time, auto_advance);
 
-    for (auto transfer : from_transfers)
+    for (auto & transfer : from_transfers)
       transfer->executeFromMultiapp();
 
     if (i != num_items - 1)
     {
-      if (_mode == "batch-restore")
+      if (_mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
         restore();
       else
       {
@@ -131,8 +133,7 @@ SamplerFullSolveMultiApp::getActiveStochasticToolsTransfers(MultiAppTransfer::DI
       _fe_problem.getMultiAppTransferWarehouse(direction);
   for (std::shared_ptr<Transfer> transfer : warehouse.getActiveObjects())
   {
-    std::shared_ptr<StochasticToolsTransfer> ptr =
-        std::dynamic_pointer_cast<StochasticToolsTransfer>(transfer);
+    auto ptr = std::dynamic_pointer_cast<StochasticToolsTransfer>(transfer);
     if (ptr)
       output.push_back(ptr);
   }
@@ -140,10 +141,10 @@ SamplerFullSolveMultiApp::getActiveStochasticToolsTransfers(MultiAppTransfer::DI
 }
 
 std::string
-SamplerFullSolveMultiApp::getCommandLineArguments(unsigned int local_app)
+SamplerFullSolveMultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
 {
-  if (_mode == "batch-reset" && _cli_args.size() > 1)
+  if (_mode == StochasticTools::MultiAppMode::BATCH_RESET && _cli_args.size() > 1)
     return _cli_args[_local_batch_app_index + _sampler.getLocalRowBegin()];
   else
-    return FullSolveMultiApp::getCommandLineArguments(local_app);
+    return FullSolveMultiApp::getCommandLineArgsParamHelper(local_app);
 }
