@@ -19,4 +19,10 @@
     exodiff = 'array_diffusion_reaction_dg_out.e'
     requirement = 'MOOSE shall provide array DG kernels.'
   [../]
+  [./test_diffusion_reaction_coupling]
+    type = 'Exodiff'
+    input = 'array_diffusion_reaction_coupling.i'
+    exodiff = 'array_diffusion_reaction_coupling_out.e'
+    requirement = 'MOOSE shall provide coupling of standard variables in array kernels.'
+  [../]
 []
