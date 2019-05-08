@@ -600,8 +600,8 @@
 
   line_search = bt
 
-  nl_abs_tol = 1e-3
-  nl_rel_tol = 1e-5
+  nl_abs_tol = 1e-8
+  nl_rel_tol = 1e-8
 
   l_max_its = 30
   nl_max_its = 1000

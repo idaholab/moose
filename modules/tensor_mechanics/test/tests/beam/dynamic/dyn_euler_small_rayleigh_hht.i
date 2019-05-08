@@ -274,11 +274,10 @@
 [Executioner]
   type = Transient
   solve_type = NEWTON
-  line_search = 'none'
-  l_tol = 1e-8
+  l_tol = 1e-11
   nl_max_its = 15
-  nl_rel_tol = 1e-8
-  nl_abs_tol = 1e-8
+  nl_rel_tol = 1e-10
+  nl_abs_tol = 1e-10
   start_time = 0.0
   dt = 0.2
   end_time = 5.0

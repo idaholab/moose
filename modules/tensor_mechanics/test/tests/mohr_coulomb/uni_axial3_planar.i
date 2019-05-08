@@ -244,16 +244,6 @@
   dt = 0.1
   solve_type = NEWTON
   type = Transient
-
-  l_tol = 1E-2
-  # These are higher than non-multi case
-  nl_abs_tol = 1E-1
-  nl_rel_tol = 1E-5
-  l_max_its = 200
-  nl_max_its = 400
-
-  petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_type -ksp_type -ksp_gmres_restart'
-  petsc_options_value = ' asm      2              lu            gmres     200'
 []
 
 
