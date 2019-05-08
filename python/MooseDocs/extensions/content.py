@@ -40,6 +40,7 @@ class ContentExtension(command.CommandExtension):
     @staticmethod
     def defaultConfig():
         config = command.CommandExtension.defaultConfig()
+        config['source_links'] = (dict(), "Dictionary of folder name to markdown links.")
         return config
 
     def extend(self, reader, renderer):
@@ -133,14 +134,21 @@ class RenderContentToken(components.RenderComponent):
     def createMaterialize(self, parent, token, page):
 
         headings = self.extension.binContent(page, token['location'], ContentExtension.FOLDER)
+        links = self.extension.get('source_links')
 
         # Build lists
         for head in sorted(headings.keys()):
             items = headings[head]
             if head:
-                html.Tag(parent, 'h{:d}'.format(int(token['level'])),
-                         class_='moose-a-to-z',
-                         string=unicode(head))
+                h = html.Tag(parent, 'h{:d}'.format(int(token['level'])),
+                             class_='moose-a-to-z')
+                if head in links:
+                    p = self.translator.findPage(links[head])
+                    dest = p.relativeDestination(page)
+                    a = html.Tag(h, 'a', href=dest, string=unicode(head) + u' ')
+                    html.Tag(a, 'i', string='link', class_='small material-icons moose-inline-icon')
+                else:
+                    html.String(h, content=unicode(head))
 
             row = html.Tag(parent, 'div', class_='row')
             for chunk in mooseutils.make_chunks(list(items), 3):

@@ -85,6 +85,50 @@ Extensions:
         shortcuts: !include framework/doc/globals.yml
     MooseDocs.extensions.acronym:
         acronyms: !include framework/doc/acronyms.yml
+    MooseDocs.extensions.content:
+        source_links:
+            action: source/actions/Action.md
+            actions: source/actions/Action.md
+            auxkernels: AuxKernels/index.md
+            bcs: syntax/BCs/index.md
+            constraints: syntax/Constraints/index.md
+            controls: syntax/Controls/index.md
+            dampers: syntax/Dampers/index.md
+            dgkernels: syntax/DGKernels/index.md
+            dirackernels: syntax/DiracKernels/index.md
+            distributions: syntax/Distributions/index.md
+            executioners: syntax/Executioner/index.md
+            functions: syntax/Functions/index.md
+            ics: syntax/ICs/index.md
+            indicators: syntax/Adaptivity/Indicators/index.md
+            interfacekernels: syntax/InterfaceKernels/index.md
+            interfaces: framework_development/interfaces/index.md
+            kernels: syntax/Kernels/index.md
+            markers: syntax/Adaptivity/Markers/index.md
+            materials: syntax/Materials/index.md
+            mesh: syntax/Mesh/index.md
+            meshgenerators: syntax/MeshGenerators/index.md
+            meshmodifiers: syntax/MeshModifiers/index.md
+            multiapps: syntax/MultiApps/index.md
+            nodalkernels: syntax/NodalKernels/index.md
+            outputs: syntax/Outputs/index.md
+            partitioner: syntax/Mesh/Partitioner/index.md
+            postprocessors: syntax/Postprocessors/index.md
+            preconditioners: syntax/Preconditioning/index.md
+            predictors: syntax/Executioner/Predictor/index.md
+            problems: syntax/Problem/index.md
+            restart: application_usage/restart_recover.md
+            samplers: syntax/Samplers/index.md
+            scalarkernels: syntax/ScalarKernels/index.md
+            splits: syntax/Preconditioning/index.md
+            timeintegrators: syntax/Executioner/TimeIntegrator/index.md
+            timesteppers: syntax/Executioner/TimeStepper/index.md
+            transfers: syntax/Transfers/index.md
+            userobject: syntax/UserObjects/index.md
+            userobjects: syntax/UserObjects/index.md
+            utils: framework_development/utils/index.md
+            variables: syntax/Variables/index.md
+            vectorpostprocessors: syntax/VectorPostprocessors/index.md
     MooseDocs.extensions.sqa:
         requirement-groups:
             dgkernels: DGKernel Objects
