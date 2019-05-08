@@ -148,10 +148,27 @@ Kernel::computeOffDiagJacobian(MooseVariableFEBase & jvar)
       return;
 
     precalculateOffDiagJacobian(jvar_num);
-    for (_i = 0; _i < _test.size(); _i++)
-      for (_j = 0; _j < jvar.phiSize(); _j++)
-        for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-          _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar_num);
+    if (jvar.count() == 1)
+    {
+      for (_i = 0; _i < _test.size(); _i++)
+        for (_j = 0; _j < jvar.phiSize(); _j++)
+          for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+            _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar_num);
+    }
+    else
+    {
+      unsigned int n = jvar.phiSize();
+      for (_i = 0; _i < _test.size(); _i++)
+        for (_j = 0; _j < n; _j++)
+          for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+          {
+            RealArrayValue v =
+                _JxW[_qp] * _coord[_qp] *
+                computeQpOffDiagJacobianArray(static_cast<ArrayMooseVariable &>(jvar));
+            for (unsigned int k = 0; k < v.size(); ++k)
+              _local_ke(_i, _j + k * n) += v(k);
+          }
+    }
 
     accumulateTaggedLocalMatrix();
   }
