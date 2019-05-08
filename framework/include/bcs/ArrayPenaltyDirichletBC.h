@@ -11,20 +11,21 @@
 
 #include "ArrayIntegratedBC.h"
 
-class ArrayVacuumBC;
+class ArrayPenaltyDirichletBC;
 
 template <>
-InputParameters validParams<ArrayVacuumBC>();
+InputParameters validParams<ArrayPenaltyDirichletBC>();
 
-class ArrayVacuumBC : public ArrayIntegratedBC
+class ArrayPenaltyDirichletBC : public ArrayIntegratedBC
 {
 public:
-  ArrayVacuumBC(const InputParameters & parameters);
+  ArrayPenaltyDirichletBC(const InputParameters & parameters);
 
 protected:
   virtual RealArrayValue computeQpResidual() override;
   virtual RealArrayValue computeQpJacobian() override;
 
-  /// Ratio of u to du/dn
-  RealArrayValue _alpha;
+private:
+  Real _p;
+  const RealArrayValue & _v;
 };
