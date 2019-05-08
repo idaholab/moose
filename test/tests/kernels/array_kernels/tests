@@ -13,4 +13,10 @@
     exodiff = 'array_diffusion_reaction_out.e'
     requirement = 'MOOSE shall provide array reaction kernels.'
   [../]
+  [./test_diffusion_reaction_dg]
+    type = 'Exodiff'
+    input = 'array_diffusion_reaction_dg.i'
+    exodiff = 'array_diffusion_reaction_dg_out.e'
+    requirement = 'MOOSE shall provide array DG kernels.'
+  [../]
 []
