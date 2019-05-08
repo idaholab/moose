@@ -15,8 +15,10 @@
 #include "RankThreeTensor.h"
 #include "RankFourTensor.h"
 
+#include "libmesh/dense_vector.h"
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
+#include "libmesh/dense_matrix.h"
 
 #include "metaphysicl/numberarray.h"
 #include "metaphysicl/dualnumber.h"
@@ -321,3 +323,142 @@ private:
                                                   void *);
 };
 
+template <>
+class MooseADWrapper<DenseVector<Real>>
+{
+public:
+  MooseADWrapper(bool use_ad = false);
+  MooseADWrapper(MooseADWrapper<DenseVector<Real>> &&) = default;
+
+  typedef DenseVector<DualReal> DNType;
+
+  const DenseVector<Real> & value() const { return _val; }
+
+  DenseVector<Real> & value() { return _val; }
+
+  const DenseVector<DualReal> & dn(bool = true) const;
+
+  DenseVector<DualReal> & dn(bool = true);
+
+  void copyDualNumberToValue();
+
+  void markAD(bool use_ad);
+
+  MooseADWrapper<DenseVector<Real>> & operator=(const MooseADWrapper<DenseVector<Real>> &);
+  MooseADWrapper<DenseVector<Real>> & operator=(MooseADWrapper<DenseVector<Real>> &&) = default;
+
+private:
+  bool _use_ad;
+  DenseVector<Real> _val;
+  mutable std::unique_ptr<DenseVector<DualReal>> _dual_number;
+  friend void
+  dataStore<DenseVector<Real>>(std::ostream &, MooseADWrapper<DenseVector<Real>> &, void *);
+  friend void
+  dataLoad<DenseVector<Real>>(std::istream &, MooseADWrapper<DenseVector<Real>> &, void *);
+};
+
+template <>
+class MooseADWrapper<DenseMatrix<Real>>
+{
+public:
+  MooseADWrapper(bool use_ad = false);
+  MooseADWrapper(MooseADWrapper<DenseMatrix<Real>> &&) = default;
+
+  typedef DenseMatrix<DualReal> DNType;
+
+  const DenseMatrix<Real> & value() const { return _val; }
+
+  DenseMatrix<Real> & value() { return _val; }
+
+  const DenseMatrix<DualReal> & dn(bool = true) const;
+
+  DenseMatrix<DualReal> & dn(bool = true);
+
+  void copyDualNumberToValue();
+
+  void markAD(bool use_ad);
+
+  MooseADWrapper<DenseMatrix<Real>> & operator=(const MooseADWrapper<DenseMatrix<Real>> &);
+  MooseADWrapper<DenseMatrix<Real>> & operator=(MooseADWrapper<DenseMatrix<Real>> &&) = default;
+
+private:
+  bool _use_ad;
+  DenseMatrix<Real> _val;
+  mutable std::unique_ptr<DenseMatrix<DualReal>> _dual_number;
+  friend void
+  dataStore<DenseMatrix<Real>>(std::ostream &, MooseADWrapper<DenseMatrix<Real>> &, void *);
+  friend void
+  dataLoad<DenseMatrix<Real>>(std::istream &, MooseADWrapper<DenseMatrix<Real>> &, void *);
+};
+
+template <>
+class MooseADWrapper<std::vector<DenseMatrix<Real>>>
+{
+public:
+  MooseADWrapper(bool use_ad = false);
+  MooseADWrapper(MooseADWrapper<std::vector<DenseMatrix<Real>>> &&) = default;
+
+  typedef std::vector<DenseMatrix<DualReal>> DNType;
+
+  const std::vector<DenseMatrix<Real>> & value() const { return _val; }
+
+  std::vector<DenseMatrix<Real>> & value() { return _val; }
+
+  const std::vector<DenseMatrix<DualReal>> & dn(bool = true) const;
+
+  std::vector<DenseMatrix<DualReal>> & dn(bool = true);
+
+  void copyDualNumberToValue();
+
+  void markAD(bool use_ad);
+
+  MooseADWrapper<std::vector<DenseMatrix<Real>>> &
+  operator=(const MooseADWrapper<std::vector<DenseMatrix<Real>>> &);
+  MooseADWrapper<std::vector<DenseMatrix<Real>>> &
+  operator=(MooseADWrapper<std::vector<DenseMatrix<Real>>> &&) = default;
+
+private:
+  bool _use_ad;
+  std::vector<DenseMatrix<Real>> _val;
+  mutable std::unique_ptr<std::vector<DenseMatrix<DualReal>>> _dual_number;
+  friend void dataStore<std::vector<DenseMatrix<Real>>>(
+      std::ostream &, MooseADWrapper<std::vector<DenseMatrix<Real>>> &, void *);
+  friend void dataLoad<std::vector<DenseMatrix<Real>>>(
+      std::istream &, MooseADWrapper<std::vector<DenseMatrix<Real>>> &, void *);
+};
+
+template <>
+class MooseADWrapper<std::vector<DenseVector<Real>>>
+{
+public:
+  MooseADWrapper(bool use_ad = false);
+  MooseADWrapper(MooseADWrapper<std::vector<DenseVector<Real>>> &&) = default;
+
+  typedef std::vector<DenseVector<DualReal>> DNType;
+
+  const std::vector<DenseVector<Real>> & value() const { return _val; }
+
+  std::vector<DenseVector<Real>> & value() { return _val; }
+
+  const std::vector<DenseVector<DualReal>> & dn(bool = true) const;
+
+  std::vector<DenseVector<DualReal>> & dn(bool = true);
+
+  void copyDualNumberToValue();
+
+  void markAD(bool use_ad);
+
+  MooseADWrapper<std::vector<DenseVector<Real>>> &
+  operator=(const MooseADWrapper<std::vector<DenseVector<Real>>> &);
+  MooseADWrapper<std::vector<DenseVector<Real>>> &
+  operator=(MooseADWrapper<std::vector<DenseVector<Real>>> &&) = default;
+
+private:
+  bool _use_ad;
+  std::vector<DenseVector<Real>> _val;
+  mutable std::unique_ptr<std::vector<DenseVector<DualReal>>> _dual_number;
+  friend void dataStore<std::vector<DenseVector<Real>>>(
+      std::ostream &, MooseADWrapper<std::vector<DenseVector<Real>>> &, void *);
+  friend void dataLoad<std::vector<DenseVector<Real>>>(
+      std::istream &, MooseADWrapper<std::vector<DenseVector<Real>>> &, void *);
+};
