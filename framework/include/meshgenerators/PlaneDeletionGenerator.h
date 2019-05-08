@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PLANEDELETIONGENERATOR_H
-#define PLANEDELETIONGENERATOR_H
+#pragma once
 
 #include "ElementDeletionGeneratorBase.h"
 
@@ -41,5 +40,3 @@ private:
   /// Normal vector
   RealVectorValue _normal;
 };
-
-#endif // PLANEDELETIONGENERATOR_H

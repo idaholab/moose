@@ -35,6 +35,9 @@ PlaneDeletionGenerator::PlaneDeletionGenerator(const InputParameters & parameter
     _point(getParam<Point>("point")),
     _normal(getParam<RealVectorValue>("normal"))
 {
+  if (!_normal.norm())
+    paramError("normal", "Normal vector must have a size!");
+
   // Make sure it's a unit vector
   _normal /= _normal.norm();
 }
@@ -46,8 +49,14 @@ PlaneDeletionGenerator::shouldDelete(const Elem * elem)
 
   auto vec_from_plane_point = centroid - _point;
 
+  auto norm = vec_from_plane_point.norm();
+
+  // If we _perfectly_ hit a centroid... default to deleting the element
+  if (!norm)
+    return true;
+
   // Unitize it
-  vec_from_plane_point /= vec_from_plane_point.norm();
+  vec_from_plane_point /= norm;
 
   return vec_from_plane_point * _normal > 0;
 }
