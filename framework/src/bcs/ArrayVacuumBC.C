@@ -38,17 +38,3 @@ ArrayVacuumBC::computeQpJacobian()
 {
   return _test[_i][_qp] * _phi[_j][_qp] * _alpha;
 }
-
-RealArray
-ArrayVacuumBC::computeQpOffDiagJacobian(MooseVariableFEBase & jvar)
-{
-  if (jvar.number() == _var.number())
-  {
-    RealArrayValue v = computeQpJacobian();
-    RealArray t = RealArray::Zero(_var.count(), _var.count());
-    t.diagonal() = v;
-    return t;
-  }
-  else
-    return RealArray(_var.count(), jvar.count());
-}
