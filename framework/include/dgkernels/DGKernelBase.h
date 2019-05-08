@@ -24,10 +24,11 @@
 #include "MeshChangedInterface.h"
 #include "TaggingInterface.h"
 
+#include "Assembly.h"
+
 // Forward Declarations
 class MooseMesh;
 class SubProblem;
-class Assembly;
 
 class DGKernelBase;
 
@@ -51,7 +52,6 @@ class DGKernelBase : public MooseObject,
                      public FunctionInterface,
                      public UserObjectInterface,
                      public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
-                     public NeighborMooseVariableInterface<Real>,
                      public TwoMaterialPropertyInterface,
                      public Restartable,
                      public MeshChangedInterface,
@@ -68,14 +68,14 @@ public:
   virtual ~DGKernelBase();
 
   /**
-   * The variable number that this kernel operates on.
+   * The variable this kernel operating on.
    */
-  virtual MooseVariable & variable();
+  virtual MooseVariableFEBase & variable() = 0;
 
   /**
    * Return a reference to the subproblem.
    */
-  SubProblem & subProblem();
+  SubProblem & subProblem() { return _subproblem; }
 
   /**
    * Computes the residual for this element or the neighbor
@@ -114,7 +114,6 @@ protected:
   THREAD_ID _tid;
 
   Assembly & _assembly;
-  MooseVariable & _var;
   MooseMesh & _mesh;
 
   const Elem * const & _current_elem;
@@ -129,53 +128,21 @@ protected:
   const unsigned int & _current_side;
   /// Current side element
   const Elem *& _current_side_elem;
-
   /// The volume (or length) of the current side
   const Real & _current_side_volume;
 
   /// Coordinate system
   const Moose::CoordinateSystemType & _coord_sys;
-  unsigned int _qp;
+  /// Quadrature points
   const MooseArray<Point> & _q_point;
+  /// Quadrature rule
   const QBase * const & _qrule;
+  /// Jacobian det times quadrature weighting on quadrature points
   const MooseArray<Real> & _JxW;
+  /// Coordinate transform mainly for curvilinear coordinates
   const MooseArray<Real> & _coord;
-
-  unsigned int _i, _j;
-
-  BoundaryID _boundary_id;
-
-  /// Holds the current solution at the current quadrature point on the face.
-  const VariableValue & _u;
-
-  /// Holds the current solution gradient at the current quadrature point on the face.
-  const VariableGradient & _grad_u;
-  // shape functions
-  const VariablePhiValue & _phi;
-  const VariablePhiGradient & _grad_phi;
-  // test functions
-
-  /// Side shape function.
-  const VariableTestValue & _test;
-  /// Gradient of side shape function
-  const VariableTestGradient & _grad_test;
   /// Normal vectors at the quadrature points
   const MooseArray<Point> & _normals;
-
-  /// Side shape function.
-  const VariablePhiValue & _phi_neighbor;
-  /// Gradient of side shape function
-  const VariablePhiGradient & _grad_phi_neighbor;
-
-  /// Side test function
-  const VariableTestValue & _test_neighbor;
-  /// Gradient of side shape function
-  const VariableTestGradient & _grad_test_neighbor;
-
-  /// Holds the current solution at the current quadrature point
-  const VariableValue & _u_neighbor;
-  /// Holds the current solution gradient at the current quadrature point
-  const VariableGradient & _grad_u_neighbor;
 
   /// The aux variables to save the residual contributions to
   bool _has_save_in;
@@ -188,7 +155,7 @@ protected:
   std::vector<AuxVariableName> _diag_save_in_strings;
 
   /// The volume (or length) of the current neighbor
-  const Real & getNeighborElemVolume();
+  const Real & getNeighborElemVolume() const { return _assembly.neighborVolume(); }
 
 public:
   // boundary id used for internal edges (all DG kernels lives on this boundary id -- a made-up
@@ -196,7 +163,12 @@ public:
   static const BoundaryID InternalBndId;
 
 protected:
+  unsigned int _qp;
+
+  unsigned int _i, _j;
+
+  BoundaryID _boundary_id;
+
   static Threads::spin_mutex _resid_vars_mutex;
   static Threads::spin_mutex _jacoby_vars_mutex;
 };
-

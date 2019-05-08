@@ -22,11 +22,78 @@ defineADBaseValidParams(ADDGKernel, DGKernelBase, );
 template <ComputeStage compute_stage>
 ADDGKernel<compute_stage>::ADDGKernel(const InputParameters & parameters)
   : DGKernelBase(parameters),
+    NeighborMooseVariableInterface(
+        this, false, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD),
+    _var(*mooseVariable()),
+    _phi(_assembly.phiFace(_var)),
+    _grad_phi(_assembly.gradPhiFace(_var)),
+
+    _test(_var.phiFace()),
+    _grad_test(_var.gradPhiFace()),
+
+    _phi_neighbor(_assembly.phiFaceNeighbor(_var)),
+    _grad_phi_neighbor(_assembly.gradPhiFaceNeighbor(_var)),
+
+    _test_neighbor(_var.phiFaceNeighbor()),
+    _grad_test_neighbor(_var.gradPhiFaceNeighbor()),
+
     _u(_var.adSln<compute_stage>()),
     _grad_u(_var.adGradSln<compute_stage>()),
     _u_neighbor(_var.adSlnNeighbor<compute_stage>()),
     _grad_u_neighbor(_var.adGradSlnNeighbor<compute_stage>())
 {
+  addMooseVariableDependency(mooseVariable());
+
+  _save_in.resize(_save_in_strings.size());
+  _diag_save_in.resize(_diag_save_in_strings.size());
+
+  for (unsigned int i = 0; i < _save_in_strings.size(); i++)
+  {
+    MooseVariableFEBase * var = &_subproblem.getVariable(_tid,
+                                                         _save_in_strings[i],
+                                                         Moose::VarKindType::VAR_AUXILIARY,
+                                                         Moose::VarFieldType::VAR_FIELD_STANDARD);
+
+    if (_sys.hasVariable(_save_in_strings[i]))
+      mooseError("Trying to use solution variable " + _save_in_strings[i] +
+                 " as a save_in variable in " + name());
+
+    if (var->feType() != _var.feType())
+      paramError(
+          "save_in",
+          "saved-in auxiliary variable is incompatible with the object's nonlinear variable: ",
+          moose::internal::incompatVarMsg(*var, _var));
+
+    _save_in[i] = var;
+    var->sys().addVariableToZeroOnResidual(_save_in_strings[i]);
+    addMooseVariableDependency(var);
+  }
+
+  _has_save_in = _save_in.size() > 0;
+
+  for (unsigned int i = 0; i < _diag_save_in_strings.size(); i++)
+  {
+    MooseVariableFEBase * var = &_subproblem.getVariable(_tid,
+                                                         _diag_save_in_strings[i],
+                                                         Moose::VarKindType::VAR_NONLINEAR,
+                                                         Moose::VarFieldType::VAR_FIELD_STANDARD);
+
+    if (_sys.hasVariable(_diag_save_in_strings[i]))
+      mooseError("Trying to use solution variable " + _diag_save_in_strings[i] +
+                 " as a diag_save_in variable in " + name());
+
+    if (var->feType() != _var.feType())
+      paramError(
+          "diag_save_in",
+          "saved-in auxiliary variable is incompatible with the object's nonlinear variable: ",
+          moose::internal::incompatVarMsg(*var, _var));
+
+    _diag_save_in[i] = var;
+    var->sys().addVariableToZeroOnJacobian(_diag_save_in_strings[i]);
+    addMooseVariableDependency(var);
+  }
+
+  _has_diag_save_in = _diag_save_in.size() > 0;
 }
 
 template <ComputeStage compute_stage>
