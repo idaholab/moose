@@ -43,7 +43,7 @@ PrescribedReactorPower::addMooseObjects()
       pars.set<Real>("value") = fn.value(0, Point());
       std::string nm = genName(name(), "power_aux");
       _sim.addAuxScalarKernel(class_name, nm, pars);
-      connectObject(pars, "", nm, "power", "value");
+      connectObject(pars, nm, "power", "value");
     }
   }
   else
