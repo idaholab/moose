@@ -69,14 +69,14 @@ GBEvolutionBase::computeQpProperties()
 {
   const Real length_scale4 = _length_scale * _length_scale * _length_scale * _length_scale;
 
-  // Convert to lengthscale^4/(eV*timescale);
-  Real M0 = _GBmob0 * _time_scale / (_JtoeV * length_scale4);
-
   // GB mobility Derivative
   Real dM_GBdT;
 
   if (_GBMobility < 0)
   {
+    // Convert to lengthscale^4/(eV*timescale);
+    const Real M0 = _GBmob0 * _time_scale / (_JtoeV * length_scale4);
+
     _M_GB[_qp] = M0 * std::exp(-_Q / (_kb * _T[_qp]));
     dM_GBdT = _M_GB[_qp] * _Q / (_kb * _T[_qp] * _T[_qp]);
   }

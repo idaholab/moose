@@ -31,7 +31,7 @@ validParams<GBAnisotropyBase>()
                                     "Name of the file containing: 1)GB mobility prefactor; 2) GB "
                                     "migration activation energy; 3)GB energy");
   params.addRequiredParam<bool>("inclination_anisotropy",
-                                "The GB anisotropy ininclination would be considered if true");
+                                "The GB anisotropy inclination would be considered if true");
   params.addRequiredCoupledVarWithAutoBuild(
       "v", "var_name_base", "op_num", "Array of coupled variables");
   return params;

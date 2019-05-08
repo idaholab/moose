@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "InitialCondition.h"
+#include "RandomICBase.h"
 
 // Forward Declarations
 class PolycrystalRandomIC;
@@ -20,7 +20,7 @@ InputParameters validParams<PolycrystalRandomIC>();
 /**
  * Random initial condition for a polycrystalline material
  */
-class PolycrystalRandomIC : public InitialCondition
+class PolycrystalRandomIC : public RandomICBase
 {
 public:
   PolycrystalRandomIC(const InputParameters & parameters);
@@ -32,4 +32,3 @@ private:
   const unsigned int _op_index;
   const unsigned int _random_type;
 };
-

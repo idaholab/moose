@@ -82,20 +82,20 @@
 []
 
 [Executioner]
-  #l_max_its = 3
-  petsc_options_iname = -pc_type
-  petsc_options_value = bjacobi
   type = Transient
   scheme = explicit-euler
   solve_type = NEWTON
+
+  # petsc_options_iname = '-pc_type'
+  # petsc_options_value = 'bjacobi'
+  #
   l_tol = 1.0e-6
-  nl_rel_tol = 1.0e-6
+  nl_rel_tol = 1.0e-10
   num_steps = 61
   dt = 0.08
 []
 
 [Outputs]
-  file_base = explicit
   execute_on = 'initial timestep_end final'
   csv = true
   interval = 20

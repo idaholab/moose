@@ -262,11 +262,9 @@
 [Executioner]
   type = Transient
   scheme = bdf2
-  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -pc_asm_overlap'
-  petsc_options_value = 'asm      31                  lu           1'
-  l_tol = 1.0e-3
-  nl_rel_tol = 1.0e-8
-  nl_abs_tol = 1e-8
+  l_tol = 1.0e-5
+  nl_rel_tol = 1.0e-10
+  nl_abs_tol = 1e-12
   num_steps = 2
   dt = 0.001
 []
