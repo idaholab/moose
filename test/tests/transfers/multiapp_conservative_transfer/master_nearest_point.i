@@ -106,8 +106,8 @@
     # 1 NearestPointIntegralVariablePostprocessor is specified on the master
     # side with N points, where N is the number of subapps
     # 1 pp is specified on the subapp side
-    from_postprocessor_to_be_preserved = 'from_nearest_point'
-    to_postprocessor_to_be_preserved = 'from_master_pp'
+    from_postprocessors_to_be_preserved = 'from_nearest_point'
+    to_postprocessors_to_be_preserved = 'from_master_pp'
   []
 
   [from_sub]
@@ -122,8 +122,8 @@
     # 1 NearestPointIntegralVariablePostprocessor is specified on the master
     # with N points, where N is the number of subapps
     # 1 pp is specified on the subapp side
-    to_postprocessor_to_be_preserved = 'to_nearest_point'
-    from_postprocessor_to_be_preserved = 'sink'
+    to_postprocessors_to_be_preserved = 'to_nearest_point'
+    from_postprocessors_to_be_preserved = 'sink'
   []
 []
 

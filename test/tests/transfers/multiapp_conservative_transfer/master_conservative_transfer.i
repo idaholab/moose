@@ -62,8 +62,8 @@
     source_variable = u
     variable = aux_u
     multi_app = sub
-    from_postprocessor_to_be_preserved = 'from_postprocessor'
-    to_postprocessor_to_be_preserved = 'to_postprocessor'
+    from_postprocessors_to_be_preserved  = 'from_postprocessor'
+    to_postprocessors_to_be_preserved  = 'to_postprocessor'
   [../]
 []
 

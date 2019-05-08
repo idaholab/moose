@@ -44,9 +44,9 @@ protected:
   // If this transfer is going to conserve the physics
   bool _preserve_transfer;
   // Postprocessor evaluates an adjuster for the source physics
-  std::vector<PostprocessorName> _from_postprocessor_to_be_preserved;
+  std::vector<PostprocessorName> _from_postprocessors_to_be_preserved;
   // Postprocessor evaluates an adjuster for the target physics
-  std::vector<PostprocessorName> _to_postprocessor_to_be_preserved;
+  std::vector<PostprocessorName> _to_postprocessors_to_be_preserved;
 
 private:
   void adjustTransferedSolution(FEProblemBase * from_problem,

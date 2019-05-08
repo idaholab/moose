@@ -116,8 +116,8 @@
     # The following inputs specify what postprocessors should be conserved
     # N pps are specified on the master side, where N is the number of subapps
     # 1 pp is specified on the subapp side
-    from_postprocessor_to_be_preserved = 'pwr0 pwr1'
-    to_postprocessor_to_be_preserved = 'from_master_pp'
+    from_postprocessors_to_be_preserved = 'pwr0 pwr1'
+    to_postprocessors_to_be_preserved = 'from_master_pp'
   []
 
   [from_sub]
@@ -131,8 +131,8 @@
     # The following inputs specify what postprocessors should be conserved
     # N pps are specified on the master side, where N is the number of subapps
     # 1 pp is specified on the subapp side
-    to_postprocessor_to_be_preserved = 'from_sub0 from_sub1'
-    from_postprocessor_to_be_preserved = 'sink'
+    to_postprocessors_to_be_preserved = 'from_sub0 from_sub1'
+    from_postprocessors_to_be_preserved = 'sink'
   []
 []
 
