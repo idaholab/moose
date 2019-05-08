@@ -3,7 +3,7 @@
 class Simulation;
 class THMApp;
 class Factory;
-class HeatStructure;
+class HeatStructureBase;
 
 #include "MooseObject.h"
 #include "libmesh/fe_type.h"
@@ -56,7 +56,7 @@ protected:
   /// The Factory associated with the MooseApp
   Factory & _factory;
   /// The heat structure component that built this class
-  HeatStructure & _hs;
+  HeatStructureBase & _hs;
   /// Name of the component
   const std::string _comp_name;
 
