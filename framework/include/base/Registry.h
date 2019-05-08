@@ -22,7 +22,7 @@
 /// when your app/module code may be compiled with other apps without your objects being
 /// registered.  Calling this multiple times with the same argument is safe.
 #define registerKnownLabel(X)                                                                      \
-  static char combineNames1(dummy_var_for_known_label, __LINE__) = Registry::addKnownLabel(X)
+  static char combineNames(dummy_var_for_known_label, __LINE__) = Registry::addKnownLabel(X)
 
 /// add an Action to the registry with the given app name/label as being associated with the given
 /// task (quoted string).  classname is the (unquoted) c++ class.
