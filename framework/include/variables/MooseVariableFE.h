@@ -190,11 +190,19 @@ public:
 
   const FieldVariablePhiValue & phiFace() const { return _element_data->phiFace(); }
   const FieldVariablePhiGradient & gradPhiFace() const { return _element_data->gradPhiFace(); }
+  const MappedArrayVariablePhiGradient & arrayGradPhiFace() const
+  {
+    return _element_data->arrayGradPhiFace();
+  }
   const FieldVariablePhiSecond & secondPhiFace() const;
   const FieldVariablePhiCurl & curlPhiFace() const;
 
   const FieldVariablePhiValue & phiNeighbor() const { return _neighbor_data->phi(); }
   const FieldVariablePhiGradient & gradPhiNeighbor() const { return _neighbor_data->gradPhi(); }
+  const MappedArrayVariablePhiGradient & arrayGradPhiNeighbor() const
+  {
+    return _neighbor_data->arrayGradPhi();
+  }
   const FieldVariablePhiSecond & secondPhiNeighbor() const;
   const FieldVariablePhiCurl & curlPhiNeighbor() const;
 
@@ -202,6 +210,10 @@ public:
   const FieldVariablePhiGradient & gradPhiFaceNeighbor() const
   {
     return _neighbor_data->gradPhiFace();
+  }
+  const MappedArrayVariablePhiGradient & arrayGradPhiFaceNeighbor() const
+  {
+    return _neighbor_data->arrayGradPhiFace();
   }
   const FieldVariablePhiSecond & secondPhiFaceNeighbor() const;
   const FieldVariablePhiCurl & curlPhiFaceNeighbor() const;
@@ -519,6 +531,7 @@ public:
   OutputType getValue(const Elem * elem, const std::vector<std::vector<OutputShape>> & phi) const;
 
   void saveDoFValues(const DenseVector<Number> & v) const;
+  void saveDoFValuesNeighbor(const DenseVector<Number> & v) const;
 
   /**
    * Compute the variable gradient value at a point on an element

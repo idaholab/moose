@@ -129,6 +129,7 @@ namespace libMesh
 template <typename>
 class VectorValue;
 typedef VectorValue<Real> RealVectorValue;
+typedef Eigen::Matrix<Real, LIBMESH_DIM, 1> RealDIMValue;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, 1> RealArrayValue;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM> RealVectorArrayValue;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM * LIBMESH_DIM> RealTensorArrayValue;
@@ -330,7 +331,7 @@ typedef typename OutputTools<RealArrayValue>::VariableSecond ArrayVariableSecond
 typedef typename OutputTools<RealArrayValue>::VariableCurl ArrayVariableCurl;
 typedef typename OutputTools<RealArrayValue>::VariablePhiValue ArrayVariablePhiValue;
 typedef typename OutputTools<RealArrayValue>::VariablePhiGradient ArrayVariablePhiGradient;
-typedef std::vector<std::vector<Eigen::Map<Eigen::Vector3d>>> MappedArrayVariablePhiGradient;
+typedef std::vector<std::vector<Eigen::Map<RealDIMValue>>> MappedArrayVariablePhiGradient;
 typedef typename OutputTools<RealArrayValue>::VariablePhiSecond ArrayVariablePhiSecond;
 typedef typename OutputTools<RealArrayValue>::VariablePhiCurl ArrayVariablePhiCurl;
 typedef typename OutputTools<RealArrayValue>::VariableTestValue ArrayVariableTestValue;

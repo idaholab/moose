@@ -259,6 +259,11 @@ public:
    */
   const MooseArray<Point> & normals() const { return _current_normals; }
 
+  /**
+   * Returns the array of normals for quadrature points on a current side
+   */
+  const std::vector<Eigen::Map<RealDIMValue>> & mappedNormals() const { return _mapped_normals; }
+
   template <ComputeStage compute_stage>
   const ADPoint & adNormals() const
   {
@@ -1629,6 +1634,8 @@ private:
   MooseArray<Real> _current_JxW_face;
   /// The current Normal vectors at the quadrature points.
   MooseArray<Point> _current_normals;
+  /// Mapped normals
+  std::vector<Eigen::Map<RealDIMValue>> _mapped_normals;
   /// Holds face qrules for each dimension
   std::map<unsigned int, QBase *> _holder_qrule_face;
   /// Holds pointers to the dimension's q_points on a face
