@@ -17,16 +17,20 @@ InputParameters
 validParams<NearestPointIntegralVariablePostprocessor>()
 {
   InputParameters params = nearestPointBaseValidParams<ElementIntegralVariablePostprocessor,
-                                                       ElementIntegralVariableUserObject>();
+                                                       ElementVariableVectorPostprocessor>();
 
+  params.addClassDescription(
+      "Compute element variable integrals for nearest-point based subdomains");
   return params;
 }
 
 NearestPointIntegralVariablePostprocessor::NearestPointIntegralVariablePostprocessor(
     const InputParameters & parameters)
-  : NearestPointBase<ElementIntegralVariablePostprocessor, ElementIntegralVariableUserObject>(
-        parameters)
+  : NearestPointBase<ElementIntegralVariablePostprocessor, ElementVariableVectorPostprocessor>(
+        parameters),
+    _np_post_processor_values(declareVector("np_post_processor_values"))
 {
+  _np_post_processor_values.resize(_user_objects.size());
 }
 
 Real
@@ -39,6 +43,17 @@ Real
 NearestPointIntegralVariablePostprocessor::userObjectValue(unsigned int i) const
 {
   return userObject(i)->getValue();
+}
+
+void
+NearestPointIntegralVariablePostprocessor::finalize()
+{
+  unsigned int i = 0;
+  for (auto & user_object : _user_objects)
+  {
+    user_object->finalize();
+    _np_post_processor_values[i++] = user_object->getValue();
+  }
 }
 
 unsigned int

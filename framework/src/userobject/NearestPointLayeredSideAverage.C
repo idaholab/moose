@@ -20,6 +20,8 @@ validParams<NearestPointLayeredSideAverage>()
   InputParameters params =
       nearestPointBaseValidParams<LayeredSideAverage, SideIntegralVariableUserObject>();
 
+  params.addClassDescription("Compute layered side averages for nearest-point based subdomains");
+
   return params;
 }
 
