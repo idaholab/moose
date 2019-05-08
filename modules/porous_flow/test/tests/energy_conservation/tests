@@ -82,6 +82,7 @@
     input = 'heat04_action_KT.i'
     csvdiff = 'heat04_action.csv'
     prereq = heat04_action
+    max_parallel = 1 # 1 element only
     rel_err = 1.0E-5
     threading = '!pthreads'
     issues = '#8123 #10426'
