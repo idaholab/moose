@@ -50,8 +50,7 @@
 
 [Components]
   [./heat_structure]
-    type = HeatStructure
-    hs_type = CYLINDER
+    type = HeatStructureCylindrical
     num_rods = 5
 
     position = '0 0 0'
