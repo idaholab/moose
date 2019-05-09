@@ -75,7 +75,7 @@ VolumeJunctionBaseUserObject::execute()
   for (unsigned int j = 0; j < _n_flux_eq; j++)
   {
     MooseVariable * var = getVar(_flow_variable_names[j], 0);
-    std::vector<dof_id_type> & dofs = var->dofIndices();
+    auto && dofs = var->dofIndices();
     for (unsigned int k = 0; k < dofs.size(); k++)
       _flow_channel_dofs[c].push_back(dofs[k]);
   }
@@ -144,7 +144,7 @@ VolumeJunctionBaseUserObject::finalize()
   for (unsigned int i = 0; i < _n_scalar_eq; i++)
   {
     MooseVariableScalar * var = getScalarVar(_scalar_variable_names[i], 0);
-    std::vector<dof_id_type> & dofs = var->dofIndices();
+    auto && dofs = var->dofIndices();
     mooseAssert(dofs.size() == 1,
                 "There should be exactly 1 coupled DoF index for the variable '" + var->name() +
                     "'.");

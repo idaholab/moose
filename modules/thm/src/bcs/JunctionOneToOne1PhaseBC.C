@@ -93,7 +93,7 @@ JunctionOneToOne1PhaseBC::computeJacobianBlock(MooseVariableFEBase & jvar)
         mult_factor += _A_linear[_qp] / _A_elem[_qp] * _normal * _test[_i][_qp] * _phi[_j][_qp];
   jacobian_block *= mult_factor;
 
-  std::vector<dof_id_type> & dofs_i = _var.dofIndices();
+  auto && dofs_i = _var.dofIndices();
   mooseAssert(dofs_i.size() == 1, "There should be only one DoF index.");
 
   _assembly.cacheJacobianBlock(jacobian_block, dofs_i, dofs_j, _var.scalingFactor());

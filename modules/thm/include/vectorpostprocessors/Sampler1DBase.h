@@ -73,7 +73,7 @@ protected:
   MooseMesh & _mesh;
 
   /// The quadrature rule
-  QBase *& _qrule;
+  const QBase * const & _qrule;
 
   /// The quadrature points
   const MooseArray<Point> & _q_point;

@@ -110,7 +110,7 @@ OldJunctionEnergyConstraint::energy(unsigned int i)
 void
 OldJunctionEnergyConstraint::computeResidual(NumericVector<Number> & /*residual*/)
 {
-  std::vector<dof_id_type> & dofs = _var.dofIndices();
+  auto && dofs = _var.dofIndices();
   DenseVector<Number> re(dofs.size());
 
   re.zero();
@@ -125,7 +125,7 @@ Real OldJunctionEnergyConstraint::computeQpResidual(Moose::ConstraintType /*type
 void
 OldJunctionEnergyConstraint::computeJacobian(SparseMatrix<Number> & /*jacobian*/)
 {
-  std::vector<dof_id_type> & dofs = _var.dofIndices();
+  auto && dofs = _var.dofIndices();
 
   unsigned int n = dofs.size(); // number of connections in the "junction"
 
@@ -135,11 +135,11 @@ OldJunctionEnergyConstraint::computeJacobian(SparseMatrix<Number> & /*jacobian*/
   MooseVariableScalar & var_pbr = _sys.getScalarVariable(_tid, _pbr_var_number);
   MooseVariableScalar & var_ebr = _sys.getScalarVariable(_tid, _ebr_var_number);
 
-  std::vector<dof_id_type> & dofs_arhoA = var_arhoA.dofIndices();
-  std::vector<dof_id_type> & dofs_arhouA = var_arhouA.dofIndices();
-  std::vector<dof_id_type> & dofs_arhoEA = var_arhoEA.dofIndices();
-  std::vector<dof_id_type> & dofs_pbr = var_pbr.dofIndices();
-  std::vector<dof_id_type> & dofs_ebr = var_ebr.dofIndices();
+  auto && dofs_arhoA = var_arhoA.dofIndices();
+  auto && dofs_arhouA = var_arhouA.dofIndices();
+  auto && dofs_arhoEA = var_arhoEA.dofIndices();
+  auto && dofs_pbr = var_pbr.dofIndices();
+  auto && dofs_ebr = var_ebr.dofIndices();
 
   DenseMatrix<Number> Kee_arhoA(dofs.size(), dofs_arhoA.size());
   DenseMatrix<Number> Kee_arhouA(dofs.size(), dofs_arhouA.size());
