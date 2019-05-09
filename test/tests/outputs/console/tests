@@ -1,9 +1,14 @@
 [Tests]
+  design = 'Console.md'
+
   [./no_outputs_block]
     # Test the a file w/o output outputs
     type = RunApp
     input = console_no_outputs_block.i
     expect_out = 'Framework Information'
+
+    requirement = 'The system shall run a simulation without producing any file-based output.'
+    issues = '#3320'
   [../]
   [./postprocessors]
     # Tests if the header line for the postprocessor values table is correct
@@ -11,22 +16,30 @@
     input = 'console.i'
     expect_out = '| time           | num_aux        | num_vars       |'
     match_literal = True
-    group = 'requirements'
+
+    requirement = 'The system shall support outputting table based Postprocessor data.'
+    issues = '#1927'
   [../]
   [./scalar_variables]
     # Test that the first header line for the wrapped scalar AuxVariable table is correct
     type = RunApp
     input = 'console.i'
     expect_out = '\| time\s*?\| aux0_0\s*?\|\n'
+
+    requirement = 'The system shall output Scalar Variables on the console in a table.'
+    issues = '#1927'
   [../]
   [./warning]
-    # Test that duel screen output warning is printed
+    # Test that dual screen output warning is printed
     type = RunApp
     input = 'console_warning.i'
     cli_args = 'Outputs/console=true Outputs/screen/file_base=console_warning_out'
     expect_out = 'Multiple \(3\) Console output objects are writing to the screen, this will likely cause duplicate messages printed.'
     allow_warnings = true
     max_parallel = 1 # warning can mix on multiple processes
+
+    requirement = 'The system shall warning when multiple console outputs attempt to write to the screen simultaneously.'
+    issues = '#3286'
   [../]
   [./file_system_information]
     # Test that file contains regex
@@ -36,7 +49,9 @@
     check_files = 'console_file_system_information_out.txt'
     file_expect_out = 'Num\s*DOFs:\s*242'
     recover = false
-    group = 'requirements'
+
+    requirement = 'The system shall support outputting console information to a file.'
+    issues = '#1927'
   [../]
   [./file_postprocessor]
     # Test that file contains regex
@@ -46,7 +61,9 @@
     check_files = 'console_file_postprocessor_out.txt'
     file_expect_out = '\| time\s*\| num_aux\s*\| num_vars\s*\|\n'
     recover = false
-    group = 'requirements'
+
+    requirement = 'The system shall output Scalar Variables on the console in a table.'
+    issues = '#1927'
   [../]
   [./file_scalar_aux]
     # Test that file contains regex
@@ -56,7 +73,9 @@
     check_files = 'console_file_scalar_aux_out.txt'
     file_expect_out = '\| time\s*?\| aux0_0\s*?\|\n'
     recover = false
-    group = 'requirements'
+
+    requirement = 'The system shall support outputting Scalar Variables to a file.'
+    issues = '#1927'
   [../]
   [./file_solve_log]
     # Test that file contains regex
@@ -66,7 +85,9 @@
     check_files = 'console_file_solve_log_out.txt'
     file_expect_out = 'Scalar\sVariable\sValues:'
     recover = false
-    group = 'requirements'
+
+    requirement = 'The system shall support writing the console solve log to an output file.'
+    issues = '#1927'
   [../]
   [./norms]
     # Test that the variable norms are being output
@@ -74,7 +95,9 @@
     input = 'console.i'
     cli_args = 'Outputs/screen/all_variable_norms=true'
     expect_out = 'Variable Residual Norms:'
-    group = 'requirements'
+
+    requirement = 'The system shall support writing norms to the console for each nonlinear variable in the simulation.'
+    issues = '#1927'
   [../]
   [./timing]
     # Tests that the --timing enables all logs
@@ -82,13 +105,18 @@
     input = 'console.i'
     cli_args = '--timing'
     expect_out = 'Performance\sGraph'
-    group = 'requirements'
+
+    requirement = 'The system shall output a Performance log based on a command line flag.'
+    issues = '#1927'
   [../]
   [./transient]
     # Test the transient console output, with negative start-time
     type = RunApp
     input = 'console_transient.i'
     expect_out = 'Time Step\s+4, time = -0.600000'
+
+    requirement = 'The system shall support writing negative time information in the console.'
+    issues = '#1927 #2728'
   [../]
   [./transient_perf_int]
     # Test the transient console output with a perf log interval
@@ -96,18 +124,27 @@
     input = 'console_transient.i'
     cli_args = 'Outputs/pgraph/type=PerfGraphOutput Outputs/pgraph/additional_execute_on=timestep_end Outputs/pgraph/interval=6'
     expect_out = 'Time Step 6.*?Graph.*?Time Step 7'
+
+    requirement = 'The system shall support outputting the Performance Log at user specified intervals.'
+    issues = '#1927 #2728'
   [../]
   [./_console]
     # Test the used of MooseObject::_console method
     type = RunApp
     input = 'moose_console.i'
     expect_out = 'ConsoleMessageKernel::timestepSetup - time = 0\.4; t_step = 4'
+
+    requirement = 'The system shall support writing to a buffered console object from every MooseObject-derived object.'
+    issues = '#3286'
   [../]
   [./_console_const]
     # Test the used of MooseObject::_console method from a constant method
     type = RunApp
     input = 'moose_console.i'
     expect_out = 'I am writing from a const method'
+
+    requirement = 'The system shall support writing to a buffered console object from const methods in MooseObject-derived objects.'
+    issues = '#3286'
   [../]
   [./input_output]
     # Test the use of --show-input
@@ -115,22 +152,30 @@
     input = 'console.i'
     cli_args = '--show-input'
     expect_out = '\[\./screen\]'
-    group = 'requirements'
+
+    requirement = 'The system shall support outputting a transformed input file to the screen.'
+    issues = '#1927'
   [../]
   [./print_linear_residuals_disable]
     # Tests that using 'output_on' inside console disables flag to show linear residuals
     type = RunApp
     input = 'console_print_toggles.i'
-    expect_out = '\s*0\sNonlinear.*?\n\s*1\sNonlinear'
+    expect_out = '\s*0\sNonlinear[^\n]*?\n\s*1\sNonlinear'
     valgrind = NONE
-    cli_args = "Outputs/execute_on='timestep_begin linear' Outputs/console/execute_on='nonlinear final failed timestep_end'"
+    cli_args = "Outputs/console/execute_on='nonlinear final failed timestep_end'"
+
+    requirement = 'The system shall support disabling the linear residual output.'
+    issues = '#4497'
   [../]
   [./perf_graph]
-    # Tests that flag is working to show performace log from the top level
+    # Tests that flag is working to show performance log from the top level
     type = RunApp
     input = 'console_print_toggles.i'
     expect_out = 'Graph'
     cli_args = 'Outputs/perf_graph=true'
+
+    requirement = 'The system shall output a Performance Log based on a single input file parameter.'
+    issues = '#4497'
   [../]
   [./perf_graph_disable]
     # Tests that perf log is disabled flag when console level flag is set to false
@@ -142,32 +187,43 @@
     valgrind = NONE
     # Note the "--disable-perflog" cli option is for libMesh currently NOT MOOSE
     cli_args = '--disable-perflog Outputs/perf_graph=true --no-timing'
-    method = 'opt oprof devel' # debug prints some extra stuff at the end that messes up the regex
+    method = '!dbg' # debug prints some extra stuff at the end that messes up the regex
+
+    requirement = 'The system shall override Performance Log output when conflicting values appear on the command line and input file.'
+    issues = '#4497'
   [../]
   [./additional_output_on]
     # Test use of 'additional_output_on' parameter
     type = RunApp
     input = 'additional_execute_on.i'
     expect_out = 'Time\sStep\s*0'
+
+    requirement = 'The system shall support adding an additional output time option without clobbering existing default options.'
+    issues = '#4497'
   [../]
   [./console_final]
     # Test that Console output shows up when "final" execution is set and interval is not equal 1
     type = RunApp
     input = 'console_final.i'
-    expect_out = 'Time\sStep\s11'
-    group = 'requirements'
+    expect_out = '^FINAL:'
+
+    requirement = 'The system shall output a "final" label at the end of the simulation before additional screen output occurs.'
+    issues = '#5756'
   [../]
   [./console_fit_width_error]
     type = RunException
     input = console.i
     cli_args = Outputs/screen/fit_mode=foo
     expect_err = "Unable to convert 'foo' to type int"
+
+    requirement = 'The system shall error when specifying an invalid table fit width option.'
+    issues = '#1927'
   [../]
   [./console_off]
     type = RunApp
     input = console_off.i
     expect_out = '\A\s*\Z'
-    requirement = "Disabling Console objects should result in no output to the screen."
+    requirement = "The system shall support disabling all console output to the screen."
     issues = "#5178"
     design = "Outputs/index.md Console.md"
     method = "opt" # dbg has libMesh stuff show up

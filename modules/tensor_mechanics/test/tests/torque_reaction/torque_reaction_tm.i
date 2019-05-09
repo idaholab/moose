@@ -112,13 +112,6 @@
 [Executioner]
   type = Transient
 
-  #Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
-
-  petsc_options = '-snes_ksp_ew'
-  petsc_options_iname = '-ksp_gmres_restart'
-  petsc_options_value = '101'
-
   line_search = 'none'
 
   l_max_its = 30

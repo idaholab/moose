@@ -235,6 +235,9 @@ GluedContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
 
     case Moose::MasterMaster:
       return 0.0;
+
+    default:
+      mooseError("Unhandled ConstraintJacobianType");
   }
 
   return 0.0;
@@ -260,6 +263,9 @@ GluedContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianType t
       retVal = slave_jac * _test_master[_i][_qp];
       break;
     }
+
+    default:
+      mooseError("Unhandled ConstraintJacobianType");
   }
 
   return retVal;

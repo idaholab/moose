@@ -685,7 +685,8 @@ InputParameters::applyParameters(const InputParameters & common,
 
 void
 InputParameters::applySpecificParameters(const InputParameters & common,
-                                         const std::vector<std::string> & include)
+                                         const std::vector<std::string> & include,
+                                         bool allow_private)
 {
   // Loop through the common parameters
   for (const auto & it : common)
@@ -698,7 +699,7 @@ InputParameters::applySpecificParameters(const InputParameters & common,
     if (std::find(include.begin(), include.end(), common_name) == include.end())
       continue;
 
-    applyParameter(common, common_name);
+    applyParameter(common, common_name, allow_private);
   }
 
   // Loop through the coupled variables
@@ -745,7 +746,9 @@ InputParameters::applyCoupledVar(const InputParameters & common, const std::stri
 }
 
 void
-InputParameters::applyParameter(const InputParameters & common, const std::string & common_name)
+InputParameters::applyParameter(const InputParameters & common,
+                                const std::string & common_name,
+                                bool allow_private)
 {
   // Disable the display of deprecated message when applying common parameters, this avoids a dump
   // of messages
@@ -754,12 +757,12 @@ InputParameters::applyParameter(const InputParameters & common, const std::strin
   // Extract the properties from the local parameter for the current common parameter name
   const bool local_exist = _values.find(common_name) != _values.end();
   const bool local_set = _params.count(common_name) > 0 && !_params[common_name]._set_by_add_param;
-  const bool local_priv = isPrivate(common_name);
+  const bool local_priv = allow_private ? false : isPrivate(common_name);
   const bool local_valid = isParamValid(common_name);
 
   // Extract the properties from the common parameter
   const bool common_exist = common._values.find(common_name) != common._values.end();
-  const bool common_priv = common.isPrivate(common_name);
+  const bool common_priv = allow_private ? false : common.isPrivate(common_name);
   const bool common_valid = common.isParamValid(common_name);
 
   /* In order to apply common parameter 4 statements must be satisfied

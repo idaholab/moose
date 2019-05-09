@@ -32,5 +32,8 @@ protected:
 
   // type of the periodic constraint to apply (value, gradient)
   const unsigned int _periodicity;
+
+  // the periodic directions
+  const MultiMooseEnum _periodic_directions;
 };
 

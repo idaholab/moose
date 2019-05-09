@@ -176,7 +176,7 @@
   nl_max_its = 1000
   dt = 0.1
   end_time = 15
-  num_steps = 1000
+  num_steps = 30
   l_tol = 1e-6
   nl_rel_tol = 1e-10
   nl_abs_tol = 1e-6
@@ -190,15 +190,6 @@
 
 [Outputs]
   file_base = frictionless_penalty_out
-  interval = 10
-  [./exodus]
-    type = Exodus
-    elemental_as_nodal = true
-  [../]
-  [./console]
-    type = Console
-    max_rows = 5
-  [../]
 []
 
 [Contact]

@@ -37,9 +37,21 @@ public:
    */
   virtual void clearDofIndices() = 0;
 
+  /**
+   * Prepare the elemental degrees of freedom
+   */
   virtual void prepare() = 0;
 
+  /**
+   * Prepare the neighbor element degrees of freedom
+   */
   virtual void prepareNeighbor() = 0;
+
+  /**
+   * Prepare a lower dimensional element's degrees of freedom
+   */
+  virtual void prepareLowerD() = 0;
+
   virtual void prepareAux() = 0;
 
   virtual void reinitNode() = 0;
@@ -60,15 +72,13 @@ public:
    */
   virtual bool isVector() const = 0;
 
-  virtual dof_id_type & nodalDofIndex() = 0;
-  virtual dof_id_type & nodalDofIndexNeighbor() = 0;
+  virtual const dof_id_type & nodalDofIndex() const = 0;
+  virtual const dof_id_type & nodalDofIndexNeighbor() const = 0;
 
   /**
    * Current element this variable is evaluated at
    */
-  virtual const Elem *& currentElem() const = 0;
-
-  virtual const MooseArray<Point> & normals() const = 0;
+  virtual const Elem * const & currentElem() const = 0;
 
   /**
    * The subdomains the variable is active on
@@ -102,6 +112,10 @@ public:
    * Compute values at quadrature points for the neighbor
    */
   virtual void computeNeighborValues() = 0;
+  /**
+   * compute values at quadrature points on the lower dimensional element
+   */
+  virtual void computeLowerDValues() = 0;
   /**
    * Compute nodal values of this variable in the neighbor
    */
@@ -148,12 +162,19 @@ public:
    */
   virtual Number getElementalValueOlder(const Elem * elem, unsigned int idx = 0) const = 0;
 
-  virtual void getDofIndices(const Elem * elem, std::vector<dof_id_type> & dof_indices) = 0;
+  virtual void getDofIndices(const Elem * elem, std::vector<dof_id_type> & dof_indices) const = 0;
   /**
    * Get neighbor DOF indices for currently selected element
    * @return the neighbor degree of freedom indices
    */
-  virtual std::vector<dof_id_type> & dofIndicesNeighbor() = 0;
+  virtual const std::vector<dof_id_type> & dofIndicesNeighbor() const = 0;
+
+  /**
+   * Get dof indices for the current lower dimensional element (this is meaningful when performing
+   * mortar FEM)
+   * @return the lower dimensional element's dofs
+   */
+  virtual const std::vector<dof_id_type> & dofIndicesLower() const = 0;
 
   virtual unsigned int numberOfDofsNeighbor() = 0;
 
@@ -248,18 +269,22 @@ public:
   /**
    * Return phi size
    */
-  virtual size_t phiSize() = 0;
+  virtual size_t phiSize() const = 0;
   /**
    * Return phiFace size
    */
-  virtual size_t phiFaceSize() = 0;
+  virtual size_t phiFaceSize() const = 0;
   /**
    * Return phiNeighbor size
    */
-  virtual size_t phiNeighborSize() = 0;
+  virtual size_t phiNeighborSize() const = 0;
   /**
    * Return phiFaceNeighbor size
    */
-  virtual size_t phiFaceNeighborSize() = 0;
+  virtual size_t phiFaceNeighborSize() const = 0;
+  /**
+   * Return the number of shape functions on the lower dimensional element for this variable
+   */
+  virtual size_t phiLowerSize() const = 0;
 };
 

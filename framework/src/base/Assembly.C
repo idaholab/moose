@@ -43,28 +43,31 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     _tid(tid),
     _mesh(sys.mesh()),
     _mesh_dimension(_mesh.dimension()),
-    _current_qrule(NULL),
-    _current_qrule_volume(NULL),
-    _current_qrule_arbitrary(NULL),
+    _current_qrule(nullptr),
+    _current_qrule_volume(nullptr),
+    _current_qrule_arbitrary(nullptr),
     _coord_type(Moose::COORD_XYZ),
-    _current_qrule_face(NULL),
-    _current_qface_arbitrary(NULL),
-    _current_qrule_neighbor(NULL),
+    _current_qrule_face(nullptr),
+    _current_qface_arbitrary(nullptr),
+    _current_qrule_neighbor(nullptr),
+    _qrule_msm(nullptr),
 
-    _current_elem(NULL),
+    _current_elem(nullptr),
     _current_elem_volume(0),
     _current_side(0),
-    _current_side_elem(NULL),
+    _current_side_elem(nullptr),
     _current_side_volume(0),
-    _current_neighbor_elem(NULL),
+    _current_neighbor_elem(nullptr),
     _current_neighbor_side(0),
-    _current_neighbor_side_elem(NULL),
+    _current_neighbor_side_elem(nullptr),
     _need_neighbor_elem_volume(false),
     _current_neighbor_volume(0),
-    _current_node(NULL),
-    _current_neighbor_node(NULL),
+    _current_node(nullptr),
+    _current_neighbor_node(nullptr),
     _current_elem_volume_computed(false),
     _current_side_volume_computed(false),
+
+    _current_lower_d_elem(nullptr),
 
     _cached_residual_values(2), // The 2 is for TIME and NONTIME
     _cached_residual_rows(2),   // The 2 is for TIME and NONTIME
@@ -109,6 +112,9 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     (*_holder_fe_neighbor_helper[dim])->get_xyz();
     (*_holder_fe_neighbor_helper[dim])->get_JxW();
   }
+
+  _fe_msm = FEGenericBase<Real>::build(_mesh_dimension - 1, FEType(helper_order, LAGRANGE));
+  _JxW_msm = &_fe_msm->get_JxW();
 }
 
 Assembly::~Assembly()
@@ -127,6 +133,10 @@ Assembly::~Assembly()
 
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
     for (auto & it : _fe_face_neighbor[dim])
+      delete it.second;
+
+  for (unsigned int dim = 0; dim <= _mesh_dimension - 1; dim++)
+    for (auto & it : _fe_lower[dim])
       delete it.second;
 
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
@@ -151,7 +161,7 @@ Assembly::~Assembly()
   for (auto & it : _holder_qrule_arbitrary)
     delete it.second;
 
-  for (auto & it : _holder_qface_arbitrary)
+  for (auto & it : _holder_qrule_arbitrary_face)
     delete it.second;
 
   for (auto & it : _holder_qrule_face)
@@ -184,6 +194,9 @@ Assembly::~Assembly()
   for (auto & it : _vector_fe_shape_data_face_neighbor)
     delete it.second;
 
+  for (auto & it : _fe_shape_data_lower)
+    delete it.second;
+
   for (auto & it : _ad_grad_phi_data)
     it.second.release();
 
@@ -212,10 +225,13 @@ Assembly::~Assembly()
   _curvatures.release();
   _ad_curvatures.release();
   _ad_coord.release();
+
+  if (_qrule_msm)
+    delete _qrule_msm;
 }
 
 void
-Assembly::buildFE(FEType type)
+Assembly::buildFE(FEType type) const
 {
   if (!_fe_shape_data[type])
     _fe_shape_data[type] = new FEShapeData;
@@ -224,7 +240,7 @@ Assembly::buildFE(FEType type)
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
   {
     if (!_fe[dim][type])
-      _fe[dim][type] = FEGenericBase<Real>::build(dim, type).release();
+      _const_fe[dim][type] = _fe[dim][type] = FEGenericBase<Real>::build(dim, type).release();
 
     _fe[dim][type]->get_phi();
     _fe[dim][type]->get_dphi();
@@ -238,7 +254,7 @@ Assembly::buildFE(FEType type)
 }
 
 void
-Assembly::buildFaceFE(FEType type)
+Assembly::buildFaceFE(FEType type) const
 {
   if (!_fe_shape_data_face[type])
     _fe_shape_data_face[type] = new FEShapeData;
@@ -247,7 +263,8 @@ Assembly::buildFaceFE(FEType type)
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
   {
     if (!_fe_face[dim][type])
-      _fe_face[dim][type] = FEGenericBase<Real>::build(dim, type).release();
+      _const_fe_face[dim][type] = _fe_face[dim][type] =
+          FEGenericBase<Real>::build(dim, type).release();
 
     _fe_face[dim][type]->get_phi();
     _fe_face[dim][type]->get_dphi();
@@ -257,7 +274,7 @@ Assembly::buildFaceFE(FEType type)
 }
 
 void
-Assembly::buildNeighborFE(FEType type)
+Assembly::buildNeighborFE(FEType type) const
 {
   if (!_fe_shape_data_neighbor[type])
     _fe_shape_data_neighbor[type] = new FEShapeData;
@@ -266,7 +283,8 @@ Assembly::buildNeighborFE(FEType type)
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
   {
     if (!_fe_neighbor[dim][type])
-      _fe_neighbor[dim][type] = FEGenericBase<Real>::build(dim, type).release();
+      _const_fe_neighbor[dim][type] = _fe_neighbor[dim][type] =
+          FEGenericBase<Real>::build(dim, type).release();
 
     _fe_neighbor[dim][type]->get_phi();
     _fe_neighbor[dim][type]->get_dphi();
@@ -276,7 +294,7 @@ Assembly::buildNeighborFE(FEType type)
 }
 
 void
-Assembly::buildFaceNeighborFE(FEType type)
+Assembly::buildFaceNeighborFE(FEType type) const
 {
   if (!_fe_shape_data_face_neighbor[type])
     _fe_shape_data_face_neighbor[type] = new FEShapeData;
@@ -285,7 +303,8 @@ Assembly::buildFaceNeighborFE(FEType type)
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
   {
     if (!_fe_face_neighbor[dim][type])
-      _fe_face_neighbor[dim][type] = FEGenericBase<Real>::build(dim, type).release();
+      _const_fe_face_neighbor[dim][type] = _fe_face_neighbor[dim][type] =
+          FEGenericBase<Real>::build(dim, type).release();
 
     _fe_face_neighbor[dim][type]->get_phi();
     _fe_face_neighbor[dim][type]->get_dphi();
@@ -295,7 +314,51 @@ Assembly::buildFaceNeighborFE(FEType type)
 }
 
 void
-Assembly::buildVectorFE(FEType type)
+Assembly::buildLowerDFE(FEType type) const
+{
+  if (!_fe_shape_data_lower[type])
+    _fe_shape_data_lower[type] = new FEShapeData;
+
+  // Build an FE object for this type for each dimension up to the dimension of
+  // the current mesh minus one (because this is for lower-dimensional
+  // elements!)
+  for (unsigned int dim = 0; dim <= _mesh_dimension - 1; dim++)
+  {
+    if (!_fe_lower[dim][type])
+      _const_fe_lower[dim][type] = _fe_lower[dim][type] =
+          FEGenericBase<Real>::build(dim, type).release();
+
+    _fe_lower[dim][type]->get_phi();
+    _fe_lower[dim][type]->get_dphi();
+    if (_need_second_derivative.find(type) != _need_second_derivative.end())
+      _fe_lower[dim][type]->get_d2phi();
+  }
+}
+
+void
+Assembly::buildVectorLowerDFE(FEType type) const
+{
+  if (!_vector_fe_shape_data_lower[type])
+    _vector_fe_shape_data_lower[type] = new VectorFEShapeData;
+
+  // Build an FE object for this type for each dimension up to the dimension of
+  // the current mesh minus one (because this is for lower-dimensional
+  // elements!)
+  for (unsigned int dim = 0; dim <= _mesh_dimension - 1; dim++)
+  {
+    if (!_vector_fe_lower[dim][type])
+      _const_vector_fe_lower[dim][type] = _vector_fe_lower[dim][type] =
+          FEVectorBase::build(dim, type).release();
+
+    _vector_fe_lower[dim][type]->get_phi();
+    _vector_fe_lower[dim][type]->get_dphi();
+    if (_need_second_derivative.find(type) != _need_second_derivative.end())
+      _vector_fe_lower[dim][type]->get_d2phi();
+  }
+}
+
+void
+Assembly::buildVectorFE(FEType type) const
 {
   if (!_vector_fe_shape_data[type])
     _vector_fe_shape_data[type] = new VectorFEShapeData;
@@ -312,7 +375,8 @@ Assembly::buildVectorFE(FEType type)
   for (unsigned int dim = min_dim; dim <= _mesh_dimension; dim++)
   {
     if (!_vector_fe[dim][type])
-      _vector_fe[dim][type] = FEGenericBase<VectorValue<Real>>::build(dim, type).release();
+      _const_vector_fe[dim][type] = _vector_fe[dim][type] =
+          FEGenericBase<VectorValue<Real>>::build(dim, type).release();
 
     _vector_fe[dim][type]->get_phi();
     _vector_fe[dim][type]->get_dphi();
@@ -326,7 +390,7 @@ Assembly::buildVectorFE(FEType type)
 }
 
 void
-Assembly::buildVectorFaceFE(FEType type)
+Assembly::buildVectorFaceFE(FEType type) const
 {
   if (!_vector_fe_shape_data_face[type])
     _vector_fe_shape_data_face[type] = new VectorFEShapeData;
@@ -344,7 +408,8 @@ Assembly::buildVectorFaceFE(FEType type)
   for (unsigned int dim = min_dim; dim <= _mesh_dimension; dim++)
   {
     if (!_vector_fe_face[dim][type])
-      _vector_fe_face[dim][type] = FEGenericBase<VectorValue<Real>>::build(dim, type).release();
+      _const_vector_fe_face[dim][type] = _vector_fe_face[dim][type] =
+          FEGenericBase<VectorValue<Real>>::build(dim, type).release();
 
     _vector_fe_face[dim][type]->get_phi();
     _vector_fe_face[dim][type]->get_dphi();
@@ -354,7 +419,7 @@ Assembly::buildVectorFaceFE(FEType type)
 }
 
 void
-Assembly::buildVectorNeighborFE(FEType type)
+Assembly::buildVectorNeighborFE(FEType type) const
 {
   if (!_vector_fe_shape_data_neighbor[type])
     _vector_fe_shape_data_neighbor[type] = new VectorFEShapeData;
@@ -372,7 +437,8 @@ Assembly::buildVectorNeighborFE(FEType type)
   for (unsigned int dim = min_dim; dim <= _mesh_dimension; dim++)
   {
     if (!_vector_fe_neighbor[dim][type])
-      _vector_fe_neighbor[dim][type] = FEGenericBase<VectorValue<Real>>::build(dim, type).release();
+      _const_vector_fe_neighbor[dim][type] = _vector_fe_neighbor[dim][type] =
+          FEGenericBase<VectorValue<Real>>::build(dim, type).release();
 
     _vector_fe_neighbor[dim][type]->get_phi();
     _vector_fe_neighbor[dim][type]->get_dphi();
@@ -382,7 +448,7 @@ Assembly::buildVectorNeighborFE(FEType type)
 }
 
 void
-Assembly::buildVectorFaceNeighborFE(FEType type)
+Assembly::buildVectorFaceNeighborFE(FEType type) const
 {
   if (!_vector_fe_shape_data_face_neighbor[type])
     _vector_fe_shape_data_face_neighbor[type] = new VectorFEShapeData;
@@ -400,7 +466,7 @@ Assembly::buildVectorFaceNeighborFE(FEType type)
   for (unsigned int dim = min_dim; dim <= _mesh_dimension; dim++)
   {
     if (!_vector_fe_face_neighbor[dim][type])
-      _vector_fe_face_neighbor[dim][type] =
+      _const_vector_fe_face_neighbor[dim][type] = _vector_fe_face_neighbor[dim][type] =
           FEGenericBase<VectorValue<Real>>::build(dim, type).release();
 
     _vector_fe_face_neighbor[dim][type]->get_phi();
@@ -411,7 +477,7 @@ Assembly::buildVectorFaceNeighborFE(FEType type)
 }
 
 const Real &
-Assembly::neighborVolume()
+Assembly::neighborVolume() const
 {
   _need_neighbor_elem_volume = true;
   return _current_neighbor_volume;
@@ -430,47 +496,54 @@ Assembly::createQRules(QuadratureType type, Order order, Order volume_order, Ord
 
   _holder_qrule_neighbor.clear();
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
-    _holder_qrule_neighbor[dim] = new ArbitraryQuadrature(dim, face_order);
+    _holder_qrule_neighbor[dim] = new ArbitraryQuadrature(dim - 1, face_order);
 
   _holder_qrule_arbitrary.clear();
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
     _holder_qrule_arbitrary[dim] = new ArbitraryQuadrature(dim, order);
+
+  _holder_qrule_arbitrary_face.clear();
+  for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
+    _holder_qrule_arbitrary_face[dim] = new ArbitraryQuadrature(dim - 1, face_order);
+
+  _const_qrule_msm = _qrule_msm = QBase::build(type, _mesh_dimension - 1, face_order).release();
+  _fe_msm->attach_quadrature_rule(_qrule_msm);
 }
 
 void
 Assembly::setVolumeQRule(QBase * qrule, unsigned int dim)
 {
-  _current_qrule = qrule;
+  _const_current_qrule = _current_qrule = qrule;
 
   if (qrule) // Don't set a NULL qrule
   {
     for (auto & it : _fe[dim])
-      it.second->attach_quadrature_rule(_current_qrule);
+      it.second->attach_quadrature_rule(qrule);
     for (auto & it : _vector_fe[dim])
-      it.second->attach_quadrature_rule(_current_qrule);
+      it.second->attach_quadrature_rule(qrule);
   }
 }
 
 void
 Assembly::setFaceQRule(QBase * qrule, unsigned int dim)
 {
-  _current_qrule_face = qrule;
+  _const_current_qrule_face = _current_qrule_face = qrule;
 
   for (auto & it : _fe_face[dim])
-    it.second->attach_quadrature_rule(_current_qrule_face);
+    it.second->attach_quadrature_rule(qrule);
   for (auto & it : _vector_fe_face[dim])
-    it.second->attach_quadrature_rule(_current_qrule_face);
+    it.second->attach_quadrature_rule(qrule);
 }
 
 void
 Assembly::setNeighborQRule(QBase * qrule, unsigned int dim)
 {
-  _current_qrule_neighbor = qrule;
+  _const_current_qrule_neighbor = _current_qrule_neighbor = qrule;
 
   for (auto & it : _fe_face_neighbor[dim])
-    it.second->attach_quadrature_rule(_current_qrule_neighbor);
+    it.second->attach_quadrature_rule(qrule);
   for (auto & it : _vector_fe_face_neighbor[dim])
-    it.second->attach_quadrature_rule(_current_qrule_neighbor);
+    it.second->attach_quadrature_rule(qrule);
 }
 
 void
@@ -1024,83 +1097,7 @@ Assembly::reinitFEFace(const Elem * elem, unsigned int side)
     _curvatures.shallowCopy(
         const_cast<std::vector<Real> &>((*_holder_fe_face_helper[dim])->get_curvatures()));
 
-  if (_computing_jacobian && _subproblem.haveADObjects())
-  {
-    const std::unique_ptr<const Elem> side_elem(elem->build_side_ptr(side));
-
-    auto n_qp = _current_qrule_face->n_points();
-    resizeMappingObjects(n_qp, dim);
-    _ad_normals.resize(n_qp);
-    _ad_JxW_face.resize(n_qp);
-    if (_calculate_face_xyz)
-      _ad_q_points_face.resize(n_qp);
-    if (_calculate_curvatures)
-      _ad_curvatures.resize(n_qp);
-
-    if (_displaced)
-    {
-      const auto & qw = _current_qrule_face->get_weights();
-      computeFaceMap(dim, qw, side_elem.get());
-      std::vector<Real> dummy_qw(n_qp, 1.);
-
-      if (elem->has_affine_map())
-        computeAffineMapAD(elem, dummy_qw, n_qp, *_holder_fe_face_helper[dim]);
-      else
-        for (unsigned int qp = 0; qp != n_qp; qp++)
-          computeSinglePointMapAD(elem, dummy_qw, qp, *_holder_fe_face_helper[dim]);
-    }
-    else
-      for (unsigned qp = 0; qp < n_qp; ++qp)
-      {
-        _ad_JxW_face[qp] = _current_JxW_face[qp];
-        if (_calculate_face_xyz)
-          _ad_q_points_face[qp] = _current_q_points_face[qp];
-        _ad_normals[qp] = _current_normals[qp];
-        if (_calculate_curvatures)
-          _ad_curvatures[qp] = _curvatures[qp];
-      }
-
-    for (const auto & it : _fe_face[dim])
-    {
-      FEBase * fe = it.second;
-      auto fe_type = it.first;
-      auto num_shapes = fe->n_shape_functions();
-      auto & grad_phi = _ad_grad_phi_data_face[fe_type];
-
-      grad_phi.resize(num_shapes);
-      for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
-        grad_phi[i].resize(n_qp);
-
-      const auto & regular_grad_phi = _fe_shape_data_face[fe_type]->_grad_phi;
-
-      if (_displaced)
-        computeGradPhiAD(elem, n_qp, grad_phi, fe);
-      else
-        for (unsigned qp = 0; qp < n_qp; ++qp)
-          for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
-            grad_phi[i][qp] = regular_grad_phi[i][qp];
-    }
-    for (const auto & it : _vector_fe_face[dim])
-    {
-      FEVectorBase * fe = it.second;
-      auto fe_type = it.first;
-      auto num_shapes = fe->n_shape_functions();
-      auto & grad_phi = _ad_vector_grad_phi_data_face[fe_type];
-
-      grad_phi.resize(num_shapes);
-      for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
-        grad_phi[i].resize(n_qp);
-
-      const auto & regular_grad_phi = _vector_fe_shape_data_face[fe_type]->_grad_phi;
-
-      if (_displaced)
-        computeGradPhiAD(elem, n_qp, grad_phi, fe);
-      else
-        for (unsigned qp = 0; qp < n_qp; ++qp)
-          for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
-            grad_phi[i][qp] = regular_grad_phi[i][qp];
-    }
-  }
+  computeADFace(elem, side);
 
   if (_xfem != nullptr)
     modifyFaceWeightsDueToXFEM(elem, side);
@@ -1471,28 +1468,6 @@ Assembly::reinitNeighbor(const Elem * neighbor, const std::vector<Point> & refer
   }
 }
 
-void
-Assembly::reinit(const Elem * elem)
-{
-  _current_elem = elem;
-  _current_neighbor_elem = nullptr;
-  mooseAssert(_current_subdomain_id == _current_elem->subdomain_id(),
-              "current subdomain has been set incorrectly");
-  _current_elem_volume_computed = false;
-
-  unsigned int elem_dimension = elem->dim();
-
-  _current_qrule_volume = _holder_qrule_volume[elem_dimension];
-
-  // Make sure the qrule is the right one
-  if (_current_qrule != _current_qrule_volume)
-    setVolumeQRule(_current_qrule_volume, elem_dimension);
-
-  reinitFE(elem);
-
-  computeCurrentElemVolume();
-}
-
 template <ComputeStage compute_stage>
 void
 Assembly::setCoordinateTransformation(const QBase * qrule,
@@ -1589,6 +1564,28 @@ Assembly::reinitAtPhysical(const Elem * elem, const std::vector<Point> & physica
 }
 
 void
+Assembly::reinit(const Elem * elem)
+{
+  _current_elem = elem;
+  _current_neighbor_elem = nullptr;
+  mooseAssert(_current_subdomain_id == _current_elem->subdomain_id(),
+              "current subdomain has been set incorrectly");
+  _current_elem_volume_computed = false;
+
+  unsigned int elem_dimension = elem->dim();
+
+  _current_qrule_volume = _holder_qrule_volume[elem_dimension];
+
+  // Make sure the qrule is the right one
+  if (_current_qrule != _current_qrule_volume)
+    setVolumeQRule(_current_qrule_volume, elem_dimension);
+
+  reinitFE(elem);
+
+  computeCurrentElemVolume();
+}
+
+void
 Assembly::reinit(const Elem * elem, const std::vector<Point> & reference_points)
 {
   _current_elem = elem;
@@ -1625,11 +1622,42 @@ Assembly::reinit(const Elem * elem, unsigned int side)
 
   unsigned int elem_dimension = _current_elem->dim();
 
+  // Make sure the qrule is the right one
   if (_current_qrule_face != _holder_qrule_face[elem_dimension])
   {
     _current_qrule_face = _holder_qrule_face[elem_dimension];
     setFaceQRule(_current_qrule_face, elem_dimension);
   }
+
+  if (_current_side_elem)
+    delete _current_side_elem;
+  _current_side_elem = elem->build_side_ptr(side).release();
+
+  reinitFEFace(elem, side);
+
+  computeCurrentFaceVolume();
+}
+
+void
+Assembly::reinit(const Elem * elem, unsigned int side, const std::vector<Point> & reference_points)
+{
+  _current_elem = elem;
+  _current_neighbor_elem = nullptr;
+  mooseAssert(_current_subdomain_id == _current_elem->subdomain_id(),
+              "current subdomain has been set incorrectly");
+  _current_side = side;
+  _current_elem_volume_computed = false;
+  _current_side_volume_computed = false;
+
+  unsigned int elem_dimension = _current_elem->dim();
+
+  _current_qrule_arbitrary_face = _holder_qrule_arbitrary_face[elem_dimension];
+
+  // Make sure the qrule is the right one
+  if (_current_qrule_face != _current_qrule_arbitrary_face)
+    setFaceQRule(_current_qrule_arbitrary_face, elem_dimension);
+
+  _current_qrule_arbitrary->setPoints(reference_points);
 
   if (_current_side_elem)
     delete _current_side_elem;
@@ -1665,6 +1693,283 @@ Assembly::reinitElemAndNeighbor(const Elem * elem,
 
   reinitFEFaceNeighbor(neighbor, reference_points);
   reinitNeighbor(neighbor, reference_points);
+}
+
+void
+Assembly::reinitElemFaceRef(const Elem * elem,
+                            unsigned int elem_side,
+                            Real tolerance,
+                            const std::vector<Point> * const pts,
+                            const std::vector<Real> * const weights)
+{
+  _current_elem = elem;
+
+  unsigned int elem_dim = elem->dim();
+
+  // Attach the quadrature rules
+  if (pts)
+  {
+    ArbitraryQuadrature * face_rule = _holder_qrule_arbitrary_face[elem_dim];
+    face_rule->setPoints(*pts);
+    setFaceQRule(face_rule, elem_dim);
+  }
+  else
+  {
+    if (_current_qrule_face != _holder_qrule_face[elem_dim])
+    {
+      _current_qrule_face = _holder_qrule_face[elem_dim];
+      setFaceQRule(_current_qrule_face, elem_dim);
+    }
+  }
+
+  // reinit face
+  for (const auto & it : _fe_face[elem_dim])
+  {
+    FEBase * fe_face = it.second;
+    FEType fe_type = it.first;
+    FEShapeData * fesd = _fe_shape_data_face[fe_type];
+
+    fe_face->reinit(elem, elem_side, tolerance, pts, weights);
+
+    _current_fe_face[fe_type] = fe_face;
+
+    fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real>> &>(fe_face->get_phi()));
+    fesd->_grad_phi.shallowCopy(
+        const_cast<std::vector<std::vector<RealGradient>> &>(fe_face->get_dphi()));
+    if (_need_second_derivative_neighbor.find(fe_type) != _need_second_derivative_neighbor.end())
+      fesd->_second_phi.shallowCopy(
+          const_cast<std::vector<std::vector<TensorValue<Real>>> &>(fe_face->get_d2phi()));
+  }
+  for (const auto & it : _vector_fe_face[elem_dim])
+  {
+    FEVectorBase * fe_face = it.second;
+    const FEType & fe_type = it.first;
+
+    _current_vector_fe_face[fe_type] = fe_face;
+
+    VectorFEShapeData * fesd = _vector_fe_shape_data_face[fe_type];
+
+    fe_face->reinit(elem, elem_side, tolerance, pts, weights);
+
+    fesd->_phi.shallowCopy(
+        const_cast<std::vector<std::vector<VectorValue<Real>>> &>(fe_face->get_phi()));
+    fesd->_grad_phi.shallowCopy(
+        const_cast<std::vector<std::vector<TensorValue<Real>>> &>(fe_face->get_dphi()));
+    if (_need_second_derivative.find(fe_type) != _need_second_derivative.end())
+      fesd->_second_phi.shallowCopy(
+          const_cast<std::vector<std::vector<TypeNTensor<3, Real>>> &>(fe_face->get_d2phi()));
+    if (_need_curl.find(fe_type) != _need_curl.end())
+      fesd->_curl_phi.shallowCopy(
+          const_cast<std::vector<std::vector<VectorValue<Real>>> &>(fe_face->get_curl_phi()));
+  }
+  // During that last loop the helper objects will have been reinitialized
+  _current_q_points_face.shallowCopy(
+      const_cast<std::vector<Point> &>((*_holder_fe_face_helper[elem_dim])->get_xyz()));
+  _current_normals.shallowCopy(
+      const_cast<std::vector<Point> &>((*_holder_fe_face_helper[elem_dim])->get_normals()));
+  // Note that if the user did pass in points and not weights to this method, JxW will be garbage
+  // and should not be used
+  _current_JxW_face.shallowCopy(
+      const_cast<std::vector<Real> &>((*_holder_fe_face_helper[elem_dim])->get_JxW()));
+  if (_calculate_curvatures)
+    _curvatures.shallowCopy(
+        const_cast<std::vector<Real> &>((*_holder_fe_face_helper[elem_dim])->get_curvatures()));
+
+  computeADFace(elem, elem_side);
+}
+
+void
+Assembly::computeADFace(const Elem * elem, unsigned int side)
+{
+  auto dim = elem->dim();
+
+  if (_computing_jacobian && _subproblem.haveADObjects())
+  {
+    const std::unique_ptr<const Elem> side_elem(elem->build_side_ptr(side));
+
+    auto n_qp = _current_qrule_face->n_points();
+    resizeMappingObjects(n_qp, dim);
+    _ad_normals.resize(n_qp);
+    _ad_JxW_face.resize(n_qp);
+    if (_calculate_face_xyz)
+      _ad_q_points_face.resize(n_qp);
+    if (_calculate_curvatures)
+      _ad_curvatures.resize(n_qp);
+
+    if (_displaced)
+    {
+      const auto & qw = _current_qrule_face->get_weights();
+      computeFaceMap(dim, qw, side_elem.get());
+      std::vector<Real> dummy_qw(n_qp, 1.);
+
+      if (elem->has_affine_map())
+        computeAffineMapAD(elem, dummy_qw, n_qp, *_holder_fe_face_helper[dim]);
+      else
+        for (unsigned int qp = 0; qp != n_qp; qp++)
+          computeSinglePointMapAD(elem, dummy_qw, qp, *_holder_fe_face_helper[dim]);
+    }
+    else
+      for (unsigned qp = 0; qp < n_qp; ++qp)
+      {
+        _ad_JxW_face[qp] = _current_JxW_face[qp];
+        if (_calculate_face_xyz)
+          _ad_q_points_face[qp] = _current_q_points_face[qp];
+        _ad_normals[qp] = _current_normals[qp];
+        if (_calculate_curvatures)
+          _ad_curvatures[qp] = _curvatures[qp];
+      }
+
+    for (const auto & it : _fe_face[dim])
+    {
+      FEBase * fe = it.second;
+      auto fe_type = it.first;
+      auto num_shapes = fe->n_shape_functions();
+      auto & grad_phi = _ad_grad_phi_data_face[fe_type];
+
+      grad_phi.resize(num_shapes);
+      for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
+        grad_phi[i].resize(n_qp);
+
+      const auto & regular_grad_phi = _fe_shape_data_face[fe_type]->_grad_phi;
+
+      if (_displaced)
+        computeGradPhiAD(elem, n_qp, grad_phi, fe);
+      else
+        for (unsigned qp = 0; qp < n_qp; ++qp)
+          for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
+            grad_phi[i][qp] = regular_grad_phi[i][qp];
+    }
+    for (const auto & it : _vector_fe_face[dim])
+    {
+      FEVectorBase * fe = it.second;
+      auto fe_type = it.first;
+      auto num_shapes = fe->n_shape_functions();
+      auto & grad_phi = _ad_vector_grad_phi_data_face[fe_type];
+
+      grad_phi.resize(num_shapes);
+      for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
+        grad_phi[i].resize(n_qp);
+
+      const auto & regular_grad_phi = _vector_fe_shape_data_face[fe_type]->_grad_phi;
+
+      if (_displaced)
+        computeGradPhiAD(elem, n_qp, grad_phi, fe);
+      else
+        for (unsigned qp = 0; qp < n_qp; ++qp)
+          for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
+            grad_phi[i][qp] = regular_grad_phi[i][qp];
+    }
+  }
+}
+
+void
+Assembly::reinitNeighborFaceRef(const Elem * neighbor,
+                                unsigned int neighbor_side,
+                                Real tolerance,
+                                const std::vector<Point> * const pts,
+                                const std::vector<Real> * const weights)
+{
+  _current_neighbor_elem = neighbor;
+
+  unsigned int neighbor_dim = neighbor->dim();
+
+  // _holder_qrule_neighbor really does contain pointers to ArbitraryQuadrature
+  ArbitraryQuadrature * neighbor_rule = _holder_qrule_neighbor[neighbor_dim];
+  neighbor_rule->setPoints(*pts);
+
+  // Attach this quadrature rule to all the _fe_face_neighbor FE objects. This
+  // has to have garbage quadrature weights but that's ok because we never
+  // actually use the JxW coming from these FE reinit'd objects, e.g. we use the
+  // JxW coming from the element face reinit for DGKernels or we use the JxW
+  // coming from reinit of the mortar segment element in the case of mortar
+  setNeighborQRule(neighbor_rule, neighbor_dim);
+
+  // reinit neighbor face
+  for (const auto & it : _fe_face_neighbor[neighbor_dim])
+  {
+    FEBase * fe_face_neighbor = it.second;
+    FEType fe_type = it.first;
+    FEShapeData * fesd = _fe_shape_data_face_neighbor[fe_type];
+
+    fe_face_neighbor->reinit(neighbor, neighbor_side, tolerance, pts, weights);
+
+    _current_fe_face_neighbor[fe_type] = fe_face_neighbor;
+
+    fesd->_phi.shallowCopy(
+        const_cast<std::vector<std::vector<Real>> &>(fe_face_neighbor->get_phi()));
+    fesd->_grad_phi.shallowCopy(
+        const_cast<std::vector<std::vector<RealGradient>> &>(fe_face_neighbor->get_dphi()));
+    if (_need_second_derivative_neighbor.find(fe_type) != _need_second_derivative_neighbor.end())
+      fesd->_second_phi.shallowCopy(
+          const_cast<std::vector<std::vector<TensorValue<Real>>> &>(fe_face_neighbor->get_d2phi()));
+  }
+  for (const auto & it : _vector_fe_face_neighbor[neighbor_dim])
+  {
+    FEVectorBase * fe_face_neighbor = it.second;
+    const FEType & fe_type = it.first;
+
+    _current_vector_fe_face_neighbor[fe_type] = fe_face_neighbor;
+
+    VectorFEShapeData * fesd = _vector_fe_shape_data_face_neighbor[fe_type];
+
+    fe_face_neighbor->reinit(neighbor, neighbor_side, tolerance, pts, weights);
+
+    fesd->_phi.shallowCopy(
+        const_cast<std::vector<std::vector<VectorValue<Real>>> &>(fe_face_neighbor->get_phi()));
+    fesd->_grad_phi.shallowCopy(
+        const_cast<std::vector<std::vector<TensorValue<Real>>> &>(fe_face_neighbor->get_dphi()));
+    if (_need_second_derivative.find(fe_type) != _need_second_derivative.end())
+      fesd->_second_phi.shallowCopy(const_cast<std::vector<std::vector<TypeNTensor<3, Real>>> &>(
+          fe_face_neighbor->get_d2phi()));
+    if (_need_curl.find(fe_type) != _need_curl.end())
+      fesd->_curl_phi.shallowCopy(const_cast<std::vector<std::vector<VectorValue<Real>>> &>(
+          fe_face_neighbor->get_curl_phi()));
+  }
+  // During that last loop the helper objects will have been reinitialized as well
+  // We need to dig out the q_points from it
+  _current_q_points_face_neighbor.shallowCopy(const_cast<std::vector<Point> &>(
+      (*_holder_fe_face_neighbor_helper[neighbor_dim])->get_xyz()));
+}
+
+void
+Assembly::reinitLowerDElemRef(const Elem * elem,
+                              const std::vector<Point> * const pts,
+                              const std::vector<Real> * const weights)
+{
+  mooseAssert(pts->size(),
+              "Currently reinitialization of lower d elements is only supported with custom "
+              "quadrature points; there is no fall-back quadrature rule. Consequently make sure "
+              "you never try to use JxW coming from a fe_lower object unless you are also passing "
+              "a weights argument");
+
+  _current_lower_d_elem = elem;
+
+  unsigned int elem_dim = elem->dim();
+
+  for (const auto & it : _fe_lower[elem_dim])
+  {
+    FEBase * fe_lower = it.second;
+    FEType fe_type = it.first;
+    FEShapeData * fesd = _fe_shape_data_lower[fe_type];
+
+    fe_lower->reinit(elem, pts, weights);
+
+    fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real>> &>(fe_lower->get_phi()));
+    fesd->_grad_phi.shallowCopy(
+        const_cast<std::vector<std::vector<RealGradient>> &>(fe_lower->get_dphi()));
+    if (_need_second_derivative_neighbor.find(fe_type) != _need_second_derivative_neighbor.end())
+      fesd->_second_phi.shallowCopy(
+          const_cast<std::vector<std::vector<TensorValue<Real>>> &>(fe_lower->get_d2phi()));
+  }
+}
+
+void
+Assembly::reinitMortarElem(const Elem * elem)
+{
+  mooseAssert(elem->dim() == _mesh_dimension - 1,
+              "You should be calling reinitMortarElem on a lower dimensional element");
+
+  _fe_msm->reinit(elem);
 }
 
 void
@@ -1763,6 +2068,65 @@ Assembly::jacobianBlockNeighbor(Moose::DGJacobianType type,
   }
 }
 
+DenseMatrix<Number> &
+Assembly::jacobianBlockLower(Moose::ConstraintJacobianType type,
+                             unsigned int ivar,
+                             unsigned int jvar,
+                             TagID tag /*=0*/)
+{
+  _jacobian_block_lower_used[tag][ivar][jvar] = 1;
+  if (_block_diagonal_matrix)
+  {
+    switch (type)
+    {
+      default:
+      case Moose::LowerLower:
+        return _sub_Kll[tag][ivar][0];
+      case Moose::LowerSlave:
+        return _sub_Kle[tag][ivar][0];
+      case Moose::LowerMaster:
+        return _sub_Kln[tag][ivar][0];
+      case Moose::SlaveLower:
+        return _sub_Kel[tag][ivar][0];
+      case Moose::SlaveSlave:
+        return _sub_Kee[tag][ivar][0];
+      case Moose::SlaveMaster:
+        return _sub_Ken[tag][ivar][0];
+      case Moose::MasterLower:
+        return _sub_Knl[tag][ivar][0];
+      case Moose::MasterSlave:
+        return _sub_Kne[tag][ivar][0];
+      case Moose::MasterMaster:
+        return _sub_Knn[tag][ivar][0];
+    }
+  }
+  else
+  {
+    switch (type)
+    {
+      default:
+      case Moose::LowerLower:
+        return _sub_Kll[tag][ivar][jvar];
+      case Moose::LowerSlave:
+        return _sub_Kle[tag][ivar][jvar];
+      case Moose::LowerMaster:
+        return _sub_Kln[tag][ivar][jvar];
+      case Moose::SlaveLower:
+        return _sub_Kel[tag][ivar][jvar];
+      case Moose::SlaveSlave:
+        return _sub_Kee[tag][ivar][jvar];
+      case Moose::SlaveMaster:
+        return _sub_Ken[tag][ivar][jvar];
+      case Moose::MasterLower:
+        return _sub_Knl[tag][ivar][jvar];
+      case Moose::MasterSlave:
+        return _sub_Kne[tag][ivar][jvar];
+      case Moose::MasterMaster:
+        return _sub_Knn[tag][ivar][jvar];
+    }
+  }
+}
+
 void
 Assembly::init(const CouplingMatrix * cm)
 {
@@ -1825,10 +2189,12 @@ Assembly::init(const CouplingMatrix * cm)
 
   _sub_Re.resize(num_vector_tags);
   _sub_Rn.resize(num_vector_tags);
+  _sub_Rl.resize(num_vector_tags);
   for (MooseIndex(_sub_Re) i = 0; i < _sub_Re.size(); i++)
   {
     _sub_Re[i].resize(n_vars);
     _sub_Rn[i].resize(n_vars);
+    _sub_Rl[i].resize(n_vars);
   }
 
   _cached_residual_values.resize(num_vector_tags);
@@ -1844,9 +2210,15 @@ Assembly::init(const CouplingMatrix * cm)
   _sub_Ken.resize(num_matrix_tags);
   _sub_Kne.resize(num_matrix_tags);
   _sub_Knn.resize(num_matrix_tags);
+  _sub_Kll.resize(num_matrix_tags);
+  _sub_Kle.resize(num_matrix_tags);
+  _sub_Kln.resize(num_matrix_tags);
+  _sub_Kel.resize(num_matrix_tags);
+  _sub_Knl.resize(num_matrix_tags);
 
   _jacobian_block_used.resize(num_matrix_tags);
   _jacobian_block_neighbor_used.resize(num_matrix_tags);
+  _jacobian_block_lower_used.resize(num_matrix_tags);
   _jacobian_block_nonlocal_used.resize(num_matrix_tags);
 
   for (MooseIndex(num_matrix_tags) tag = 0; tag < num_matrix_tags; tag++)
@@ -1856,9 +2228,15 @@ Assembly::init(const CouplingMatrix * cm)
     _sub_Kne[tag].resize(n_vars);
     _sub_Knn[tag].resize(n_vars);
     _sub_Kee[tag].resize(n_vars);
+    _sub_Kll[tag].resize(n_vars);
+    _sub_Kle[tag].resize(n_vars);
+    _sub_Kln[tag].resize(n_vars);
+    _sub_Kel[tag].resize(n_vars);
+    _sub_Knl[tag].resize(n_vars);
 
     _jacobian_block_used[tag].resize(n_vars);
     _jacobian_block_neighbor_used[tag].resize(n_vars);
+    _jacobian_block_lower_used[tag].resize(n_vars);
     _jacobian_block_nonlocal_used[tag].resize(n_vars);
     for (MooseIndex(n_vars) i = 0; i < n_vars; ++i)
     {
@@ -1869,6 +2247,11 @@ Assembly::init(const CouplingMatrix * cm)
         _sub_Ken[tag][i].resize(n_vars);
         _sub_Kne[tag][i].resize(n_vars);
         _sub_Knn[tag][i].resize(n_vars);
+        _sub_Kll[tag][i].resize(n_vars);
+        _sub_Kle[tag][i].resize(n_vars);
+        _sub_Kln[tag][i].resize(n_vars);
+        _sub_Kel[tag][i].resize(n_vars);
+        _sub_Knl[tag][i].resize(n_vars);
       }
       else
       {
@@ -1877,9 +2260,15 @@ Assembly::init(const CouplingMatrix * cm)
         _sub_Ken[tag][i].resize(1);
         _sub_Kne[tag][i].resize(1);
         _sub_Knn[tag][i].resize(1);
+        _sub_Kll[tag][i].resize(1);
+        _sub_Kle[tag][i].resize(1);
+        _sub_Kln[tag][i].resize(1);
+        _sub_Kel[tag][i].resize(1);
+        _sub_Knl[tag][i].resize(1);
       }
       _jacobian_block_used[tag][i].resize(n_vars);
       _jacobian_block_neighbor_used[tag][i].resize(n_vars);
+      _jacobian_block_lower_used[tag][i].resize(n_vars);
       _jacobian_block_nonlocal_used[tag][i].resize(n_vars);
     }
   }
@@ -2063,6 +2452,62 @@ Assembly::prepareNeighbor()
     {
       _sub_Rn[tag][var->number()].resize(var->dofIndicesNeighbor().size());
       _sub_Rn[tag][var->number()].zero();
+    }
+}
+
+void
+Assembly::prepareLowerD()
+{
+  for (const auto & it : _cm_ff_entry)
+  {
+    MooseVariableFEBase & ivar = *(it.first);
+    MooseVariableFEBase & jvar = *(it.second);
+
+    unsigned int vi = ivar.number();
+    unsigned int vj = jvar.number();
+
+    for (MooseIndex(_jacobian_block_lower_used) tag = 0; tag < _jacobian_block_lower_used.size();
+         tag++)
+    {
+      // To cover all possible cases we should have 9 combinations below for every 2-permutation of
+      // Lower,Slave,Master. However, 4 cases will in general be covered by calls to prepare() and
+      // prepareNeighbor(). These calls will cover SlaveSlave (ElementElement), SlaveMaster
+      // (ElementNeighbor), MasterSlave (NeighborElement), and MasterMaster (NeighborNeighbor). With
+      // these covered we only need to prepare the 5 remaining below
+
+      // derivatives w.r.t. lower dimensional residuals
+      jacobianBlockLower(Moose::LowerLower, vi, vj, tag)
+          .resize(ivar.dofIndicesLower().size(), jvar.dofIndicesLower().size());
+      jacobianBlockLower(Moose::LowerLower, vi, vj, tag).zero();
+
+      jacobianBlockLower(Moose::LowerSlave, vi, vj, tag)
+          .resize(ivar.dofIndicesLower().size(), jvar.dofIndices().size());
+      jacobianBlockLower(Moose::LowerSlave, vi, vj, tag).zero();
+
+      jacobianBlockLower(Moose::LowerMaster, vi, vj, tag)
+          .resize(ivar.dofIndicesLower().size(), jvar.dofIndicesNeighbor().size());
+      jacobianBlockLower(Moose::LowerMaster, vi, vj, tag).zero();
+
+      // derivatives w.r.t. interior slave residuals
+      jacobianBlockLower(Moose::SlaveLower, vi, vj, tag)
+          .resize(ivar.dofIndices().size(), jvar.dofIndicesLower().size());
+      jacobianBlockLower(Moose::SlaveLower, vi, vj, tag).zero();
+
+      // derivatives w.r.t. interior master residuals
+      jacobianBlockLower(Moose::MasterLower, vi, vj, tag)
+          .resize(ivar.dofIndicesNeighbor().size(), jvar.dofIndicesLower().size());
+      jacobianBlockLower(Moose::MasterLower, vi, vj, tag).zero();
+
+      _jacobian_block_lower_used[tag][vi][vj] = 0;
+    }
+  }
+
+  const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
+  for (const auto & var : vars)
+    for (MooseIndex(_sub_Rl) tag = 0; tag < _sub_Rl.size(); tag++)
+    {
+      _sub_Rl[tag][var->number()].resize(var->dofIndicesLower().size());
+      _sub_Rl[tag][var->number()].zero();
     }
 }
 
@@ -2274,7 +2719,7 @@ void
 Assembly::cacheResidualBlock(std::vector<Real> & cached_residual_values,
                              std::vector<dof_id_type> & cached_residual_rows,
                              DenseVector<Number> & res_block,
-                             std::vector<dof_id_type> & dof_indices,
+                             const std::vector<dof_id_type> & dof_indices,
                              Real scaling_factor)
 {
   if (dof_indices.size() > 0 && res_block.size())
@@ -2409,8 +2854,26 @@ Assembly::cacheResidualNeighbor()
 }
 
 void
+Assembly::cacheResidualLower()
+{
+  const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
+  for (const auto & var : vars)
+  {
+    for (MooseIndex(_cached_residual_values) tag = 0; tag < _cached_residual_values.size(); tag++)
+    {
+      if (_sys.hasVector(tag))
+        cacheResidualBlock(_cached_residual_values[tag],
+                           _cached_residual_rows[tag],
+                           _sub_Rl[tag][var->number()],
+                           var->dofIndicesLower(),
+                           var->scalingFactor());
+    }
+  }
+}
+
+void
 Assembly::cacheResidualNodes(const DenseVector<Number> & res,
-                             std::vector<dof_id_type> & dof_index,
+                             const std::vector<dof_id_type> & dof_index,
                              TagID tag /* = 0*/)
 {
   // Add the residual value and dof_index to cached_residual_values and cached_residual_rows
@@ -2475,7 +2938,7 @@ Assembly::addCachedResidual(NumericVector<Number> & residual, TagID tag_id)
 void
 Assembly::setResidualBlock(NumericVector<Number> & residual,
                            DenseVector<Number> & res_block,
-                           std::vector<dof_id_type> & dof_indices,
+                           const std::vector<dof_id_type> & dof_indices,
                            Real scaling_factor)
 {
   if (dof_indices.size() > 0)
@@ -2538,8 +3001,8 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
 
 void
 Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block,
-                             std::vector<dof_id_type> & idof_indices,
-                             std::vector<dof_id_type> & jdof_indices,
+                             const std::vector<dof_id_type> & idof_indices,
+                             const std::vector<dof_id_type> & jdof_indices,
                              Real scaling_factor,
                              TagID tag /*=0*/)
 {
@@ -2721,6 +3184,52 @@ Assembly::addJacobianNeighbor()
                          jacobianBlockNeighbor(Moose::NeighborNeighbor, i, j, tag),
                          ivar->dofIndicesNeighbor(),
                          jvar->dofIndicesNeighbor(),
+                         ivar->scalingFactor());
+      }
+  }
+}
+
+void
+Assembly::addJacobianLower()
+{
+  for (const auto & it : _cm_ff_entry)
+  {
+    auto ivar = it.first;
+    auto jvar = it.second;
+    auto i = ivar->number();
+    auto j = jvar->number();
+    for (MooseIndex(_jacobian_block_lower_used) tag = 0; tag < _jacobian_block_lower_used.size();
+         tag++)
+      if (_jacobian_block_lower_used[tag][i][j] && _sys.hasMatrix(tag))
+      {
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockLower(Moose::LowerLower, i, j, tag),
+                         ivar->dofIndicesLower(),
+                         jvar->dofIndicesLower(),
+                         ivar->scalingFactor());
+
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockLower(Moose::LowerSlave, i, j, tag),
+                         ivar->dofIndicesLower(),
+                         jvar->dofIndices(),
+                         ivar->scalingFactor());
+
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockLower(Moose::LowerMaster, i, j, tag),
+                         ivar->dofIndicesLower(),
+                         jvar->dofIndicesNeighbor(),
+                         ivar->scalingFactor());
+
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockLower(Moose::SlaveLower, i, j, tag),
+                         ivar->dofIndices(),
+                         jvar->dofIndicesLower(),
+                         ivar->scalingFactor());
+
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockLower(Moose::MasterLower, i, j, tag),
+                         ivar->dofIndicesNeighbor(),
+                         jvar->dofIndicesLower(),
                          ivar->scalingFactor());
       }
   }
@@ -3064,7 +3573,7 @@ Assembly::modifyFaceWeightsDueToXFEM(const Elem * elem, unsigned int side)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiValue &
-Assembly::fePhi<VectorValue<Real>>(FEType type)
+Assembly::fePhi<VectorValue<Real>>(FEType type) const
 {
   buildVectorFE(type);
   return _vector_fe_shape_data[type]->_phi;
@@ -3072,7 +3581,7 @@ Assembly::fePhi<VectorValue<Real>>(FEType type)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiGradient &
-Assembly::feGradPhi<VectorValue<Real>>(FEType type)
+Assembly::feGradPhi<VectorValue<Real>>(FEType type) const
 {
   buildVectorFE(type);
   return _vector_fe_shape_data[type]->_grad_phi;
@@ -3080,7 +3589,7 @@ Assembly::feGradPhi<VectorValue<Real>>(FEType type)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiSecond &
-Assembly::feSecondPhi<VectorValue<Real>>(FEType type)
+Assembly::feSecondPhi<VectorValue<Real>>(FEType type) const
 {
   _need_second_derivative[type] = true;
   buildVectorFE(type);
@@ -3089,7 +3598,23 @@ Assembly::feSecondPhi<VectorValue<Real>>(FEType type)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiValue &
-Assembly::fePhiFace<VectorValue<Real>>(FEType type)
+Assembly::fePhiLower<VectorValue<Real>>(FEType type) const
+{
+  buildVectorFE(type);
+  return _vector_fe_shape_data_lower[type]->_phi;
+}
+
+template <>
+const typename OutputTools<VectorValue<Real>>::VariablePhiGradient &
+Assembly::feGradPhiLower<VectorValue<Real>>(FEType type) const
+{
+  buildVectorFE(type);
+  return _vector_fe_shape_data_lower[type]->_grad_phi;
+}
+
+template <>
+const typename OutputTools<VectorValue<Real>>::VariablePhiValue &
+Assembly::fePhiFace<VectorValue<Real>>(FEType type) const
 {
   buildVectorFaceFE(type);
   return _vector_fe_shape_data_face[type]->_phi;
@@ -3097,7 +3622,7 @@ Assembly::fePhiFace<VectorValue<Real>>(FEType type)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiGradient &
-Assembly::feGradPhiFace<VectorValue<Real>>(FEType type)
+Assembly::feGradPhiFace<VectorValue<Real>>(FEType type) const
 {
   buildVectorFaceFE(type);
   return _vector_fe_shape_data_face[type]->_grad_phi;
@@ -3105,7 +3630,7 @@ Assembly::feGradPhiFace<VectorValue<Real>>(FEType type)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiSecond &
-Assembly::feSecondPhiFace<VectorValue<Real>>(FEType type)
+Assembly::feSecondPhiFace<VectorValue<Real>>(FEType type) const
 {
   _need_second_derivative[type] = true;
   buildVectorFaceFE(type);
@@ -3114,7 +3639,7 @@ Assembly::feSecondPhiFace<VectorValue<Real>>(FEType type)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiValue &
-Assembly::fePhiNeighbor<VectorValue<Real>>(FEType type)
+Assembly::fePhiNeighbor<VectorValue<Real>>(FEType type) const
 {
   buildVectorNeighborFE(type);
   return _vector_fe_shape_data_neighbor[type]->_phi;
@@ -3122,7 +3647,7 @@ Assembly::fePhiNeighbor<VectorValue<Real>>(FEType type)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiGradient &
-Assembly::feGradPhiNeighbor<VectorValue<Real>>(FEType type)
+Assembly::feGradPhiNeighbor<VectorValue<Real>>(FEType type) const
 {
   buildVectorNeighborFE(type);
   return _vector_fe_shape_data_neighbor[type]->_grad_phi;
@@ -3130,7 +3655,7 @@ Assembly::feGradPhiNeighbor<VectorValue<Real>>(FEType type)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiSecond &
-Assembly::feSecondPhiNeighbor<VectorValue<Real>>(FEType type)
+Assembly::feSecondPhiNeighbor<VectorValue<Real>>(FEType type) const
 {
   _need_second_derivative_neighbor[type] = true;
   buildVectorNeighborFE(type);
@@ -3139,7 +3664,7 @@ Assembly::feSecondPhiNeighbor<VectorValue<Real>>(FEType type)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiValue &
-Assembly::fePhiFaceNeighbor<VectorValue<Real>>(FEType type)
+Assembly::fePhiFaceNeighbor<VectorValue<Real>>(FEType type) const
 {
   buildVectorFaceNeighborFE(type);
   return _vector_fe_shape_data_face_neighbor[type]->_phi;
@@ -3147,7 +3672,7 @@ Assembly::fePhiFaceNeighbor<VectorValue<Real>>(FEType type)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiGradient &
-Assembly::feGradPhiFaceNeighbor<VectorValue<Real>>(FEType type)
+Assembly::feGradPhiFaceNeighbor<VectorValue<Real>>(FEType type) const
 {
   buildVectorFaceNeighborFE(type);
   return _vector_fe_shape_data_face_neighbor[type]->_grad_phi;
@@ -3155,7 +3680,7 @@ Assembly::feGradPhiFaceNeighbor<VectorValue<Real>>(FEType type)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiSecond &
-Assembly::feSecondPhiFaceNeighbor<VectorValue<Real>>(FEType type)
+Assembly::feSecondPhiFaceNeighbor<VectorValue<Real>>(FEType type) const
 {
   _need_second_derivative_neighbor[type] = true;
   buildVectorFaceNeighborFE(type);
@@ -3164,7 +3689,7 @@ Assembly::feSecondPhiFaceNeighbor<VectorValue<Real>>(FEType type)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiCurl &
-Assembly::feCurlPhi<VectorValue<Real>>(FEType type)
+Assembly::feCurlPhi<VectorValue<Real>>(FEType type) const
 {
   _need_curl[type] = true;
   buildVectorFE(type);
@@ -3173,7 +3698,7 @@ Assembly::feCurlPhi<VectorValue<Real>>(FEType type)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiCurl &
-Assembly::feCurlPhiFace<VectorValue<Real>>(FEType type)
+Assembly::feCurlPhiFace<VectorValue<Real>>(FEType type) const
 {
   _need_curl[type] = true;
   buildVectorFaceFE(type);
@@ -3182,7 +3707,7 @@ Assembly::feCurlPhiFace<VectorValue<Real>>(FEType type)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiCurl &
-Assembly::feCurlPhiNeighbor<VectorValue<Real>>(FEType type)
+Assembly::feCurlPhiNeighbor<VectorValue<Real>>(FEType type) const
 {
   _need_curl[type] = true;
   buildVectorNeighborFE(type);
@@ -3191,7 +3716,7 @@ Assembly::feCurlPhiNeighbor<VectorValue<Real>>(FEType type)
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiCurl &
-Assembly::feCurlPhiFaceNeighbor<VectorValue<Real>>(FEType type)
+Assembly::feCurlPhiFaceNeighbor<VectorValue<Real>>(FEType type) const
 {
   _need_curl[type] = true;
   buildVectorFaceNeighborFE(type);

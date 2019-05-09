@@ -3,6 +3,21 @@
     type = 'Exodiff'
     input = 'geometric_neighbors_ic.i'
     exodiff = 'geometric_neighbors_ic_out.e'
+    requirement = 'The system shall allow setting field initial condition from an user object'
+    design = 'InitialCondition.md UserObjectInterface.md'
+    issues = '#8810'
+
+    min_parallel = 2
+    max_parallel = 2
+  [../]
+
+  [./scalar_ic_from_uo]
+    type = 'CSVDiff'
+    input = 'scalar_ic_from_uo.i'
+    csvdiff = 'scalar_ic_from_uo_out.csv'
+    requirement = 'The system shall allow setting scalar initial condition from an user object'
+    design = 'ScalarInitialCondition.md UserObjectInterface.md'
+    issues = '#13357'
 
     min_parallel = 2
     max_parallel = 2

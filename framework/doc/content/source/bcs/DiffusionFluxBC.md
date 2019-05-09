@@ -48,7 +48,7 @@ class would then be used to compute the last term in [weakform].
 
 ## Example Input Syntax
 
-!listing test/tests/mortar/2d/equalgradient.i start=[./all] end=[../] include-end=true
+!listing test/tests/mortar/continuity-2d-conforming/equalgradient.i start=[./all] end=[../] include-end=true
 
 !syntax parameters /BCs/DiffusionFluxBC
 

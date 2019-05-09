@@ -52,7 +52,7 @@ public:
     CR_UNKNOWN
   };
 
-  QBase * qrule() { return _qrule; }
+  const QBase * qrule() { return _qrule; }
   const Point & q_point(unsigned i) const { return _q_point[i]; }
   Real JxW(unsigned i) const { return _JxW[i]; }
 
@@ -271,4 +271,3 @@ private:
 
   SymmElasticityTensor * _local_elasticity_tensor;
 };
-

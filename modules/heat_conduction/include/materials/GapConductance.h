@@ -113,7 +113,7 @@ protected:
 
   MooseVariable * _temp_var;
   PenetrationLocator * _penetration_locator;
-  const NumericVector<Number> ** _serialized_solution;
+  const NumericVector<Number> * const * _serialized_solution;
   DofMap * _dof_map;
   const bool _warnings;
 
@@ -123,4 +123,3 @@ protected:
 
 template <>
 InputParameters validParams<GapConductance>();
-

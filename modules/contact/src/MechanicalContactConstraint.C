@@ -849,6 +849,9 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
 
   switch (type)
   {
+    default:
+      mooseError("Unhandled ConstraintJacobianType");
+
     case Moose::SlaveSlave:
       switch (_model)
       {
@@ -1303,6 +1306,9 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
 
   switch (type)
   {
+    default:
+      mooseError("Unhandled ConstraintJacobianType");
+
     case Moose::SlaveSlave:
       switch (_model)
       {

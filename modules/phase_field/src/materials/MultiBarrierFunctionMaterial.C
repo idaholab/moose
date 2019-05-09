@@ -25,7 +25,7 @@ validParams<MultiBarrierFunctionMaterial>()
                         false,
                         "Make the g zero in [0:1] so it only contributes to "
                         "enforcing the eta range and not to the phase "
-                        "transformation berrier.");
+                        "transformation barrier.");
   params.addRequiredCoupledVar("etas", "eta_i order parameters, one for each h");
   return params;
 }
@@ -62,7 +62,6 @@ MultiBarrierFunctionMaterial::computeQpProperties()
 
     if (_well_only && n >= 0.0 && n <= 1.0)
     {
-      _prop_g[_qp] = 0.0;
       (*_prop_dg[i])[_qp] = 0.0;
       (*_prop_d2g[i])[_qp] = 0.0;
       continue;

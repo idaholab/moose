@@ -12,10 +12,12 @@
 // MOOSE includes
 #include "SubProblem.h"
 #include "GeometricSearchData.h"
+#include "MortarData.h"
 #include "PostprocessorData.h"
 #include "VectorPostprocessorData.h"
 #include "Adaptivity.h"
 #include "InitialConditionWarehouse.h"
+#include "ScalarInitialConditionWarehouse.h"
 #include "Restartable.h"
 #include "SolverParams.h"
 #include "PetscSupport.h"
@@ -75,6 +77,7 @@ class KernelBase;
 class IntegratedBCBase;
 class LineSearch;
 class UserObject;
+class AutomaticMortarGeneration;
 
 // libMesh forward declarations
 namespace libMesh
@@ -140,6 +143,7 @@ public:
 
   virtual EquationSystems & es() override { return _eq; }
   virtual MooseMesh & mesh() override { return _mesh; }
+  virtual const MooseMesh & mesh() const override { return _mesh; }
 
   virtual Moose::CoordinateSystemType getCoordSystem(SubdomainID sid) override;
   virtual void setCoordSystem(const std::vector<SubdomainName> & blocks,
@@ -326,7 +330,12 @@ public:
     return _uo_jacobian_moose_vars[tid];
   }
 
-  virtual Assembly & assembly(THREAD_ID tid) override
+  Assembly & assembly(THREAD_ID tid) override
+  {
+    mooseAssert(tid < _assembly.size(), "Assembly objects not initialized");
+    return *_assembly[tid];
+  }
+  const Assembly & assembly(THREAD_ID tid) const override
   {
     mooseAssert(tid < _assembly.size(), "Assembly objects not initialized");
     return *_assembly[tid];
@@ -559,6 +568,12 @@ public:
   // NL /////
   NonlinearSystemBase & getNonlinearSystemBase() { return *_nl; }
   const NonlinearSystemBase & getNonlinearSystemBase() const { return *_nl; }
+
+  virtual const SystemBase & systemBaseNonlinear() const override;
+  virtual SystemBase & systemBaseNonlinear() override;
+
+  virtual const SystemBase & systemBaseAuxiliary() const override;
+  virtual SystemBase & systemBaseAuxiliary() override;
 
   virtual NonlinearSystem & getNonlinearSystem();
 
@@ -1202,6 +1217,21 @@ public:
 
   virtual void updateGeomSearch(
       GeometricSearchData::GeometricSearchType type = GeometricSearchData::ALL) override;
+  virtual void updateMortarMesh();
+
+  void
+  createMortarInterface(const std::pair<BoundaryID, BoundaryID> & master_slave_boundary_pair,
+                        const std::pair<SubdomainID, SubdomainID> & master_slave_subdomain_pair,
+                        bool on_displaced,
+                        bool periodic);
+
+  const AutomaticMortarGeneration &
+  getMortarInterface(const std::pair<BoundaryID, BoundaryID> & master_slave_boundary_pair,
+                     const std::pair<SubdomainID, SubdomainID> & master_slave_subdomain_pair,
+                     bool on_displaced) const;
+
+  const std::unordered_map<std::pair<BoundaryID, BoundaryID>, AutomaticMortarGeneration> &
+  getMortarInterfaces(bool on_displaced) const;
 
   virtual void possiblyRebuildGeomSearchPatches();
 
@@ -1613,6 +1643,11 @@ public:
   // Whether or not we should solve this system
   bool shouldSolve() const { return _solve; }
 
+  /**
+   * Returns the mortar data object
+   */
+  const MortarData & mortarData() const { return _mortar_data; }
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -1664,7 +1699,7 @@ protected:
   ///@{
   /// Initial condition storage
   InitialConditionWarehouse _ics;
-  MooseObjectWarehouseBase<ScalarInitialCondition> _scalar_ics; // use base b/c of setup methods
+  ScalarInitialConditionWarehouse _scalar_ics; // use base b/c of setup methods
   ///@}
 
   // material properties
@@ -1776,6 +1811,7 @@ protected:
   MooseMesh * _displaced_mesh;
   std::shared_ptr<DisplacedProblem> _displaced_problem;
   GeometricSearchData _geometric_search_data;
+  MortarData _mortar_data;
 
   bool _reinit_displaced_elem;
   bool _reinit_displaced_face;
@@ -1954,4 +1990,3 @@ FEProblemBase::allowOutput(bool state)
 {
   _app.getOutputWarehouse().allowOutput<T>(state);
 }
-

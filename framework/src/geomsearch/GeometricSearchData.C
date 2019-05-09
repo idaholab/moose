@@ -19,8 +19,6 @@
 #include "libmesh/elem.h"
 #include "libmesh/node.h"
 
-static const unsigned int MORTAR_BASE_ID = 2e6;
-
 GeometricSearchData::GeometricSearchData(SubProblem & subproblem, MooseMesh & mesh)
   : _subproblem(subproblem), _mesh(mesh), _first(true)
 {
@@ -60,10 +58,6 @@ GeometricSearchData::update(GeometricSearchType type)
       updateQuadratureNodes(qbnd);
   }
 
-  if (type == ALL || type == MORTAR)
-    if (_mortar_boundaries.size() > 0)
-      updateMortarNodes();
-
   if (type == ALL || type == NEAREST_NODE)
   {
     for (const auto & nnl_it : _nearest_node_locators)
@@ -99,7 +93,6 @@ GeometricSearchData::reinit()
   // Update the position of quadrature nodes first
   for (const auto & qbnd : _quadrature_boundaries)
     reinitQuadratureNodes(qbnd);
-  reinitMortarNodes();
 
   for (const auto & nnl_it : _nearest_node_locators)
   {
@@ -211,52 +204,6 @@ GeometricSearchData::getQuadraturePenetrationLocator(const BoundaryName & master
   return *pl;
 }
 
-PenetrationLocator &
-GeometricSearchData::getMortarPenetrationLocator(const BoundaryName & master,
-                                                 const BoundaryName & slave,
-                                                 Moose::ConstraintType side_type,
-                                                 Order order)
-{
-  unsigned int master_id = _mesh.getBoundaryID(master);
-  unsigned int slave_id = _mesh.getBoundaryID(slave);
-
-  // Generate a new boundary id
-  // TODO: Make this better!
-  unsigned int mortar_boundary_id = 0;
-  unsigned int boundary_id = 0;
-  switch (side_type)
-  {
-    case Moose::Master:
-      boundary_id = master_id;
-      mortar_boundary_id = MORTAR_BASE_ID + slave_id;
-      _boundary_to_mortarboundary[slave_id] = mortar_boundary_id;
-      break;
-
-    case Moose::Slave:
-      boundary_id = slave_id;
-      mortar_boundary_id = MORTAR_BASE_ID + master_id;
-      _boundary_to_mortarboundary[master_id] = mortar_boundary_id;
-      break;
-  }
-
-  PenetrationLocator * pl =
-      _penetration_locators[std::pair<unsigned int, unsigned int>(boundary_id, mortar_boundary_id)];
-  if (!pl)
-  {
-    pl = new PenetrationLocator(_subproblem,
-                                *this,
-                                _mesh,
-                                boundary_id,
-                                mortar_boundary_id,
-                                order,
-                                getMortarNearestNodeLocator(master_id, slave_id, side_type));
-    _penetration_locators[std::pair<unsigned int, unsigned int>(boundary_id, mortar_boundary_id)] =
-        pl;
-  }
-
-  return *pl;
-}
-
 NearestNodeLocator &
 GeometricSearchData::getNearestNodeLocator(const BoundaryName & master, const BoundaryName & slave)
 {
@@ -347,77 +294,11 @@ GeometricSearchData::generateQuadratureNodes(unsigned int slave_id, unsigned int
   }
 }
 
-NearestNodeLocator &
-GeometricSearchData::getMortarNearestNodeLocator(const BoundaryName & master,
-                                                 const BoundaryName & slave,
-                                                 Moose::ConstraintType side_type)
-{
-  unsigned int master_id = _mesh.getBoundaryID(master);
-  unsigned int slave_id = _mesh.getBoundaryID(slave);
-
-  return getMortarNearestNodeLocator(master_id, slave_id, side_type);
-}
-
-NearestNodeLocator &
-GeometricSearchData::getMortarNearestNodeLocator(const unsigned int master_id,
-                                                 const unsigned int slave_id,
-                                                 Moose::ConstraintType side_type)
-{
-  unsigned int mortarboundary_id, boundary;
-
-  switch (side_type)
-  {
-    case Moose::Master:
-      boundary = master_id;
-      mortarboundary_id = MORTAR_BASE_ID + slave_id;
-      _boundary_to_mortarboundary[slave_id] = mortarboundary_id;
-      break;
-
-    case Moose::Slave:
-      boundary = slave_id;
-      mortarboundary_id = MORTAR_BASE_ID + master_id;
-      _boundary_to_mortarboundary[master_id] = mortarboundary_id;
-      break;
-
-    default:
-      mooseError("Unknown side type");
-  }
-
-  generateMortarNodes(master_id, slave_id, 1001);
-
-  return getNearestNodeLocator(boundary, 1001);
-}
-
 void
 GeometricSearchData::addElementPairLocator(const unsigned int & interface_id,
                                            std::shared_ptr<ElementPairLocator> epl)
 {
   _element_pair_locators[interface_id] = epl;
-}
-
-void
-GeometricSearchData::generateMortarNodes(unsigned int master_id,
-                                         unsigned int slave_id,
-                                         unsigned int qslave_id)
-{
-  // Have we already generated quadrature nodes for this boundary id?
-  if (_mortar_boundaries.find(std::pair<unsigned int, unsigned int>(master_id, slave_id)) !=
-      _mortar_boundaries.end())
-    return;
-
-  _mortar_boundaries.insert(std::pair<unsigned int, unsigned int>(master_id, slave_id));
-
-  MooseMesh::MortarInterface * iface = _mesh.getMortarInterface(master_id, slave_id);
-
-  const MooseArray<Point> & qpoints = _subproblem.assembly(0).qPoints();
-  for (const auto & elem : iface->_elems)
-  {
-    _subproblem.setCurrentSubdomainID(elem, 0);
-    _subproblem.assembly(0).reinit(elem);
-
-    for (unsigned int qp = 0; qp < qpoints.size(); qp++)
-      _mesh.addQuadratureNode(elem, 0, qp, qslave_id, qpoints[qp]);
-  }
 }
 
 void
@@ -453,37 +334,6 @@ GeometricSearchData::reinitQuadratureNodes(unsigned int /*slave_id*/)
   // Regenerate the quadrature nodes
   for (const auto & it : _slave_to_qslave)
     generateQuadratureNodes(it.first, it.second);
-}
-
-void
-GeometricSearchData::updateMortarNodes()
-{
-  const MooseArray<Point> & qpoints = _subproblem.assembly(0).qPoints();
-
-  auto & ifaces = _mesh.getMortarInterfaces();
-  for (const auto & iface : ifaces)
-    for (const auto & elem : iface->_elems)
-    {
-      _subproblem.setCurrentSubdomainID(elem, 0);
-      _subproblem.assembly(0).reinit(elem);
-
-      for (unsigned int qp = 0; qp < qpoints.size(); qp++)
-        (*_mesh.getQuadratureNode(elem, 0, qp)) = qpoints[qp];
-    }
-}
-
-void
-GeometricSearchData::reinitMortarNodes()
-{
-  _mortar_boundaries.clear();
-  // Regenerate the quadrature nodes for mortar spaces
-  auto & ifaces = _mesh.getMortarInterfaces();
-  for (const auto & iface : ifaces)
-  {
-    unsigned int master_id = _mesh.getBoundaryID(iface->_master);
-    unsigned int slave_id = _mesh.getBoundaryID(iface->_slave);
-    generateMortarNodes(master_id, slave_id, 0);
-  }
 }
 
 void

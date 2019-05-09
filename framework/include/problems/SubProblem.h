@@ -64,6 +64,7 @@ public:
 
   virtual EquationSystems & es() = 0;
   virtual MooseMesh & mesh() = 0;
+  virtual const MooseMesh & mesh() const = 0;
 
   virtual bool checkNonlocalCouplingRequirement() { return _requires_nonlocal_coupling; }
 
@@ -118,7 +119,7 @@ public:
   /**
    * The total number of tags
    */
-  virtual unsigned int numVectorTags() { return _vector_tag_name_to_tag_id.size(); }
+  virtual unsigned int numVectorTags() const { return _vector_tag_name_to_tag_id.size(); }
 
   /**
    * Create a Tag.  Tags can be associated with Vectors and Matrices and allow objects
@@ -153,7 +154,7 @@ public:
   /**
    * The total number of tags
    */
-  virtual unsigned int numMatrixTags() { return _matrix_tag_name_to_tag_id.size(); }
+  virtual unsigned int numMatrixTags() const { return _matrix_tag_name_to_tag_id.size(); }
 
   /**
    * Return all matrix tags in the sytem, where a tag is represented by a map from name to ID
@@ -260,6 +261,19 @@ public:
   virtual void clearActiveMaterialProperties(THREAD_ID tid);
 
   virtual Assembly & assembly(THREAD_ID tid) = 0;
+  virtual const Assembly & assembly(THREAD_ID tid) const = 0;
+
+  /**
+   * Return the nonlinear system object as a base class reference
+   */
+  virtual const SystemBase & systemBaseNonlinear() const = 0;
+  virtual SystemBase & systemBaseNonlinear() = 0;
+  /**
+   * Return the auxiliary system object as a base class reference
+   */
+  virtual const SystemBase & systemBaseAuxiliary() const = 0;
+  virtual SystemBase & systemBaseAuxiliary() = 0;
+
   virtual void prepareShapes(unsigned int var, THREAD_ID tid) = 0;
   virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid) = 0;
   virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid) = 0;
@@ -338,6 +352,49 @@ public:
                                   THREAD_ID tid) = 0;
   virtual void reinitScalars(THREAD_ID tid) = 0;
   virtual void reinitOffDiagScalars(THREAD_ID tid) = 0;
+
+  /**
+   * reinitialize FE objects on a given element on a given side at a given set of reference
+   * points and then compute variable data. Note that this method makes no assumptions about what's
+   * been called beforehand, e.g. you don't have to call some prepare method before this one. This
+   * is an all-in-one reinit
+   */
+  void reinitElemFaceRef(const Elem * elem,
+                         unsigned int side,
+                         BoundaryID bnd_id,
+                         Real tolerance,
+                         const std::vector<Point> * const pts,
+                         const std::vector<Real> * const weights = nullptr,
+                         THREAD_ID tid = 0);
+
+  /**
+   * reinitialize FE objects on a given neighbor element on a given side at a given set of reference
+   * points and then compute variable data. Note that this method makes no assumptions about what's
+   * been called beforehand, e.g. you don't have to call some prepare method before this one. This
+   * is an all-in-one reinit
+   */
+  void reinitNeighborFaceRef(const Elem * neighbor_elem,
+                             unsigned int neighbor_side,
+                             BoundaryID bnd_id,
+                             Real tolerance,
+                             const std::vector<Point> * const pts,
+                             const std::vector<Real> * const weights = nullptr,
+                             THREAD_ID tid = 0);
+
+  /**
+   * reinitialize a lower dimensional FE object at a given set of reference points and then compute
+   * variable data. Note that this method makes no assumptions about what's been called beforehand,
+   * e.g. you don't have to call some prepare method before this one. This is an all-in-one reinit
+   */
+  void reinitLowerDElemRef(const Elem * elem,
+                           const std::vector<Point> * const pts,
+                           const std::vector<Real> * const weights = nullptr,
+                           THREAD_ID tid = 0);
+
+  /**
+   * Reinit a mortar element to obtain a valid JxW
+   */
+  void reinitMortarElem(const Elem * elem, THREAD_ID tid = 0);
 
   /**
    * Returns true if the Problem has Dirac kernels it needs to compute on elem.
@@ -517,13 +574,19 @@ public:
   }
 
   /// Check whether residual being evaulated is non-linear
-  bool & computingNonlinearResid() { return _computing_nonlinear_residual; }
+  bool computingNonlinearResid() const { return _computing_nonlinear_residual; }
+
+  /// Set whether residual being evaulated is non-linear
+  void computingNonlinearResid(bool computing_nonlinear_residual)
+  {
+    _computing_nonlinear_residual = computing_nonlinear_residual;
+  }
 
   /// Is it safe to access the tagged  matrices
-  bool safeAccessTaggedMatrices() { return _safe_access_tagged_matrices; }
+  bool safeAccessTaggedMatrices() const { return _safe_access_tagged_matrices; }
 
   /// Is it safe to access the tagged vectors
-  bool safeAccessTaggedVectors() { return _safe_access_tagged_vectors; }
+  bool safeAccessTaggedVectors() const { return _safe_access_tagged_vectors; }
 
   virtual void clearActiveFEVariableCoupleableMatrixTags(THREAD_ID tid);
 
@@ -541,13 +604,13 @@ public:
 
   virtual void setActiveScalarVariableCoupleableMatrixTags(std::set<TagID> & mtags, THREAD_ID tid);
 
-  std::set<TagID> & getActiveScalarVariableCoupleableVectorTags(THREAD_ID tid);
+  const std::set<TagID> & getActiveScalarVariableCoupleableVectorTags(THREAD_ID tid) const;
 
-  std::set<TagID> & getActiveScalarVariableCoupleableMatrixTags(THREAD_ID tid);
+  const std::set<TagID> & getActiveScalarVariableCoupleableMatrixTags(THREAD_ID tid) const;
 
-  std::set<TagID> & getActiveFEVariableCoupleableVectorTags(THREAD_ID tid);
+  const std::set<TagID> & getActiveFEVariableCoupleableVectorTags(THREAD_ID tid) const;
 
-  std::set<TagID> & getActiveFEVariableCoupleableMatrixTags(THREAD_ID tid);
+  const std::set<TagID> & getActiveFEVariableCoupleableMatrixTags(THREAD_ID tid) const;
 
   /**
    * Method for setting whether we have any ad objects

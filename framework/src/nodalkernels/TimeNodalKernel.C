@@ -36,7 +36,7 @@ TimeNodalKernel::computeResidual()
 {
   if (_var.isNodalDefined())
   {
-    dof_id_type & dof_idx = _var.nodalDofIndex();
+    const dof_id_type & dof_idx = _var.nodalDofIndex();
     _qp = 0;
     Real res = computeQpResidual();
     _assembly.cacheResidualContribution(dof_idx, res, _vector_tags);

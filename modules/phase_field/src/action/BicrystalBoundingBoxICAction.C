@@ -19,7 +19,8 @@ InputParameters
 validParams<BicrystalBoundingBoxICAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addClassDescription("Bicrystal using a bounding box");
+  params.addClassDescription("Constructs a bicrystal, where one grain is on the inside of "
+                             "the box and the other grain is the outside of the box");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
   params.addRequiredParam<unsigned int>("op_num", "Number of grains, should be 2");
   params.addRequiredParam<Real>("x1", "The x coordinate of the lower left-hand corner of the box");
@@ -37,7 +38,7 @@ BicrystalBoundingBoxICAction::BicrystalBoundingBoxICAction(const InputParameters
     _op_num(getParam<unsigned int>("op_num"))
 {
   if (_op_num != 2)
-    paramError("op_num", "op_num must equal 2 for bicrystal ICs");
+    paramError("op_num", "Must equal 2 for bicrystal ICs");
 }
 
 void
@@ -59,7 +60,7 @@ BicrystalBoundingBoxICAction::act()
     poly_params.set<VariableName>("variable") = var_name;
     if (op == 0)
     {
-      // Values for bounding box
+      // Values for bounding box grain
       poly_params.set<Real>("inside") = 1.0;
       poly_params.set<Real>("outside") = 0.0;
     }

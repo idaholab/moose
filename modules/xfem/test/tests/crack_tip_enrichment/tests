@@ -20,10 +20,13 @@
     unique_id = true
     heavy = true
     superlu = true
+    max_time = 400 # Slow test
     requirement = 'The XFEM module shall have the capability to include '
                   'near-tip enrichment functions in 3D mechanics simulations.'
     design = 'CircleCutUserObject.md '
              'CrackTipEnrichmentStressDivergenceTensors.md'
     issues = '#10042'
+
+    method = '!dbg' #Slow test
   [../]
 []

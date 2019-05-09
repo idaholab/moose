@@ -11,6 +11,7 @@
 
 #include "libmesh/string_to_enum.h"
 #include "libmesh/mesh_tools.h"
+#include "libmesh/parallel_sync.h"
 
 template <>
 InputParameters
@@ -27,7 +28,7 @@ validParams<AdvectiveFluxCalculatorBase>()
                              "Type of flux limiter to use.  'None' means that no antidiffusion "
                              "will be added in the Kuzmin-Turek scheme");
 
-  params.addRelationshipManager("ElementSideNeighborLayers",
+  params.addRelationshipManager("ElementPointNeighborLayers",
                                 Moose::RelationshipManagerType::GEOMETRIC |
                                     Moose::RelationshipManagerType::ALGEBRAIC,
                                 [](const InputParameters &, InputParameters & rm_params) {
@@ -50,7 +51,12 @@ AdvectiveFluxCalculatorBase::AdvectiveFluxCalculatorBase(const InputParameters &
     _u_nodal(),
     _u_nodal_computed_by_thread(),
     _connections(),
-    _number_of_nodes(0)
+    _number_of_nodes(0),
+    _my_pid(processor_id()),
+    _nodes_to_receive(),
+    _nodes_to_send(),
+    _pairs_to_receive(),
+    _pairs_to_send()
 {
   if (!_execute_enum.contains(EXEC_LINEAR))
     paramError(
@@ -67,12 +73,9 @@ AdvectiveFluxCalculatorBase::timestepSetup()
   // If needed, size and initialize quantities appropriately, and compute _valence
   if (_resizing_needed)
   {
-    _connections.clear();
-    // QUERY: does the following properly account for multiple processors, threading, and other
-    // things i haven't thought about?
-
     /*
-     * Populate _connections for all nodes that can be seen by this processor and on relevant blocks
+     * Populate _connections for all nodes that can be seen by this processor and on relevant
+     * blocks
      *
      * MULTIPROC NOTE: this must loop over local elements and 2 layers of ghosted elements.
      * The Kernel will only loop over local elements, so will only use _kij, etc, for
@@ -80,12 +83,13 @@ AdvectiveFluxCalculatorBase::timestepSetup()
      * need to build _kij, etc, for the nodes in the ghosted elements in order to simplify
      * Jacobian computations
      */
-    for (const auto & elem : _subproblem.mesh().getMesh().active_element_ptr_range())
+    _connections.clear();
+    for (const auto & elem : _fe_problem.getEvaluableElementRange())
       if (this->hasBlocks(elem->subdomain_id()))
         for (unsigned i = 0; i < elem->n_nodes(); ++i)
           _connections.addGlobalNode(elem->node_id(i));
     _connections.finalizeAddingGlobalNodes();
-    for (const auto & elem : _subproblem.mesh().getMesh().active_element_ptr_range())
+    for (const auto & elem : _fe_problem.getEvaluableElementRange())
       if (this->hasBlocks(elem->subdomain_id()))
         for (unsigned i = 0; i < elem->n_nodes(); ++i)
           for (unsigned j = 0; j < elem->n_nodes(); ++j)
@@ -142,6 +146,9 @@ AdvectiveFluxCalculatorBase::timestepSetup()
         _dflux_out_dKjk[sequential_i][j].assign(num_con_j, 0.0);
       }
     }
+
+    if (_app.n_processors() > 1)
+      buildCommLists();
 
     _resizing_needed = false;
   }
@@ -226,20 +233,8 @@ AdvectiveFluxCalculatorBase::finalize()
   // relevant Jacobian information, and then the relevant quantities into _flux_out and
   // _dflux_out_du, _dflux_out_dKjk
 
-  /*
-   * MULTIPROC NOTE: execute() only computed contributions from the elements
-   * local to this processor.  Now do the same for the 2 layers of ghosted elements
-   */
-  for (const auto & elem_id : _fe_problem.ghostedElems())
-  {
-    _current_elem = _mesh.elem(elem_id);
-    if (this->hasBlocks(_current_elem->subdomain_id()))
-    {
-      _fe_problem.prepare(_current_elem, _tid);
-      _fe_problem.reinitElem(_current_elem, _tid);
-      execute();
-    }
-  }
+  if (_app.n_processors() > 1)
+    exchangeGhostedInfo();
 
   // Calculate KuzminTurek D matrix
   // See Eqn (32)
@@ -327,8 +322,8 @@ AdvectiveFluxCalculatorBase::finalize()
   // Calculate KuzminTurek f^{a} matrix
   // This is the antidiffusive flux
   // See Eqn (50)
-  std::vector<std::vector<Real>> fa(
-      _number_of_nodes); // fa[sequential_i][j]  sequential_j is the j^th connection to sequential_i
+  std::vector<std::vector<Real>> fa(_number_of_nodes); // fa[sequential_i][j]  sequential_j is the
+                                                       // j^th connection to sequential_i
   // The derivatives are a bit complicated.
   // If i is upwind of j then fa[i][j] depends on all nodes connected to i.
   // But if i is downwind of j then fa[i][j] depends on all nodes connected to j.
@@ -343,9 +338,9 @@ AdvectiveFluxCalculatorBase::finalize()
                          // sequential_i
   std::vector<std::vector<std::vector<Real>>> dFij_dKjk(
       _number_of_nodes); // dFij_dKjk[sequential_i][j][k] =
-                         // d(fa[sequential_i][j])/d(K[sequential_j][k]).  Here sequential_j is the
-                         // j^th connection to sequential_i, and k denotes the k^th connection to
-                         // sequential_j (this will include sequential_i itself)
+                         // d(fa[sequential_i][j])/d(K[sequential_j][k]).  Here sequential_j is
+                         // the j^th connection to sequential_i, and k denotes the k^th connection
+                         // to sequential_j (this will include sequential_i itself)
   for (dof_id_type sequential_i = 0; sequential_i < _number_of_nodes; ++sequential_i)
   {
     const std::vector<dof_id_type> con_i =
@@ -846,4 +841,169 @@ AdvectiveFluxCalculatorBase::PQPlusMinus(dof_id_type sequential_i,
   }
 
   return result;
+}
+
+void
+AdvectiveFluxCalculatorBase::buildCommLists()
+{
+  /**
+   * Build the multi-processor communication lists.
+   *
+   * (A) We will have to send _u_nodal information to other processors.
+   * This is because although we can Evaluate Variables at all elements in
+   * _fe_problem.getEvaluableElementRange(), in the PorousFlow setting
+   * _u_nodal could depend on Material Properties within the elements, and
+   * we can't access those Properties within the ghosted elements.
+   *
+   * (B) In a similar way, we need to send _kij information to other processors.
+   * A similar strategy is followed
+   */
+
+  _nodes_to_receive.clear();
+  for (const auto & elem : _fe_problem.getEvaluableElementRange())
+    if (this->hasBlocks(elem->subdomain_id()))
+    {
+      const processor_id_type elem_pid = elem->processor_id();
+      if (elem_pid != _my_pid)
+      {
+        if (_nodes_to_receive.find(elem_pid) == _nodes_to_receive.end())
+          _nodes_to_receive[elem_pid] = std::vector<dof_id_type>();
+        for (unsigned i = 0; i < elem->n_nodes(); ++i)
+          if (std::find(_nodes_to_receive[elem_pid].begin(),
+                        _nodes_to_receive[elem_pid].end(),
+                        elem->node_id(i)) == _nodes_to_receive[elem_pid].end())
+            _nodes_to_receive[elem_pid].push_back(elem->node_id(i));
+      }
+    }
+
+  // exchange this info with other processors, building _nodes_to_send at the same time
+  _nodes_to_send.clear();
+  auto nodes_action_functor = [this](processor_id_type pid, const std::vector<dof_id_type> & nts) {
+    _nodes_to_send[pid] = nts;
+  };
+  Parallel::push_parallel_vector_data(this->comm(), _nodes_to_receive, nodes_action_functor);
+
+  // At the moment,  _nodes_to_send and _nodes_to_receive contain global node numbers
+  // It is slightly more efficient to convert to sequential node numbers
+  // so that we don't have to keep doing things like
+  // _u_nodal[_connections.sequentialID(_nodes_to_send[pid][i])
+  // every time we send/receive
+  for (auto & kv : _nodes_to_send)
+  {
+    const processor_id_type pid = kv.first;
+    const std::size_t num_nodes = kv.second.size();
+    for (unsigned i = 0; i < num_nodes; ++i)
+      _nodes_to_send[pid][i] = _connections.sequentialID(_nodes_to_send[pid][i]);
+  }
+  for (auto & kv : _nodes_to_receive)
+  {
+    const processor_id_type pid = kv.first;
+    const std::size_t num_nodes = kv.second.size();
+    for (unsigned i = 0; i < num_nodes; ++i)
+      _nodes_to_receive[pid][i] = _connections.sequentialID(_nodes_to_receive[pid][i]);
+  }
+
+  // Build pairs_to_receive
+  _pairs_to_receive.clear();
+  for (const auto & elem : _fe_problem.getEvaluableElementRange())
+    if (this->hasBlocks(elem->subdomain_id()))
+    {
+      const processor_id_type elem_pid = elem->processor_id();
+      if (elem_pid != _my_pid)
+      {
+        if (_pairs_to_receive.find(elem_pid) == _pairs_to_receive.end())
+          _pairs_to_receive[elem_pid] = std::vector<std::pair<dof_id_type, dof_id_type>>();
+        for (unsigned i = 0; i < elem->n_nodes(); ++i)
+          for (unsigned j = 0; j < elem->n_nodes(); ++j)
+          {
+            std::pair<dof_id_type, dof_id_type> the_pair(elem->node_id(i), elem->node_id(j));
+            if (std::find(_pairs_to_receive[elem_pid].begin(),
+                          _pairs_to_receive[elem_pid].end(),
+                          the_pair) == _pairs_to_receive[elem_pid].end())
+              _pairs_to_receive[elem_pid].push_back(the_pair);
+          }
+      }
+    }
+
+  _pairs_to_send.clear();
+  auto pairs_action_functor = [this](processor_id_type pid,
+                                     const std::vector<std::pair<dof_id_type, dof_id_type>> & pts) {
+    _pairs_to_send[pid] = pts;
+  };
+  Parallel::push_parallel_vector_data(this->comm(), _pairs_to_receive, pairs_action_functor);
+
+  // _pairs_to_send and _pairs_to_receive have been built using global node IDs
+  // since all processors know about that.  However, using global IDs means
+  // that every time we send/receive, we keep having to do things like
+  // _kij[_connections.sequentialID(_pairs_to_send[pid][i].first)][_connections.indexOfGlobalConnection(_pairs_to_send[pid][i].first,
+  // _pairs_to_send[pid][i].second)] which is quite inefficient.  So:
+  for (auto & kv : _pairs_to_send)
+  {
+    const processor_id_type pid = kv.first;
+    const std::size_t num_pairs = kv.second.size();
+    for (unsigned i = 0; i < num_pairs; ++i)
+    {
+      _pairs_to_send[pid][i].second = _connections.indexOfGlobalConnection(
+          _pairs_to_send[pid][i].first, _pairs_to_send[pid][i].second);
+      _pairs_to_send[pid][i].first = _connections.sequentialID(_pairs_to_send[pid][i].first);
+    }
+  }
+  for (auto & kv : _pairs_to_receive)
+  {
+    const processor_id_type pid = kv.first;
+    const std::size_t num_pairs = kv.second.size();
+    for (unsigned i = 0; i < num_pairs; ++i)
+    {
+      _pairs_to_receive[pid][i].second = _connections.indexOfGlobalConnection(
+          _pairs_to_receive[pid][i].first, _pairs_to_receive[pid][i].second);
+      _pairs_to_receive[pid][i].first = _connections.sequentialID(_pairs_to_receive[pid][i].first);
+    }
+  }
+}
+
+void
+AdvectiveFluxCalculatorBase::exchangeGhostedInfo()
+{
+  // Exchange ghosted _u_nodal information with other processors
+  std::map<processor_id_type, std::vector<Real>> unodal_to_send;
+  for (const auto & kv : _nodes_to_send)
+  {
+    const processor_id_type pid = kv.first;
+    unodal_to_send[pid] = std::vector<Real>();
+    for (const auto & nd : kv.second)
+      unodal_to_send[pid].push_back(_u_nodal[nd]);
+  }
+
+  auto unodal_action_functor = [this](processor_id_type pid,
+                                      const std::vector<Real> & unodal_received) {
+    const std::size_t msg_size = unodal_received.size();
+    mooseAssert(msg_size == _nodes_to_receive[pid].size(),
+                "Message size, " << msg_size
+                                 << ", incompatible with nodes_to_receive, which has size "
+                                 << _nodes_to_receive[pid].size());
+    for (unsigned i = 0; i < msg_size; ++i)
+      _u_nodal[_nodes_to_receive[pid][i]] = unodal_received[i];
+  };
+  Parallel::push_parallel_vector_data(this->comm(), unodal_to_send, unodal_action_functor);
+
+  // Exchange _kij information with other processors
+  std::map<processor_id_type, std::vector<Real>> kij_to_send;
+  for (const auto & kv : _pairs_to_send)
+  {
+    const processor_id_type pid = kv.first;
+    kij_to_send[pid] = std::vector<Real>();
+    for (const auto & pr : kv.second)
+      kij_to_send[pid].push_back(_kij[pr.first][pr.second]);
+  }
+
+  auto kij_action_functor = [this](processor_id_type pid, const std::vector<Real> & kij_received) {
+    const std::size_t msg_size = kij_received.size();
+    mooseAssert(msg_size == _pairs_to_receive[pid].size(),
+                "Message size, " << msg_size
+                                 << ", incompatible with pairs_to_receive, which has size "
+                                 << _pairs_to_receive[pid].size());
+    for (unsigned i = 0; i < msg_size; ++i)
+      _kij[_pairs_to_receive[pid][i].first][_pairs_to_receive[pid][i].second] += kij_received[i];
+  };
+  Parallel::push_parallel_vector_data(this->comm(), kij_to_send, kij_action_functor);
 }

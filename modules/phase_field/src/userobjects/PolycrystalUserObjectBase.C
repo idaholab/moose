@@ -371,7 +371,11 @@ bool
 PolycrystalUserObjectBase::areFeaturesMergeable(const FeatureData & f1,
                                                 const FeatureData & f2) const
 {
-  return _colors_assigned ? f1.mergeable(f2) : f1._id == f2._id;
+  if (f1._id != f2._id)
+    return false;
+
+  mooseAssert(f1._var_index == f2._var_index, "Feature should be mergeable but aren't");
+  return true;
 }
 
 void

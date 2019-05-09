@@ -307,11 +307,10 @@
 [Executioner]
   type = Transient
   solve_type = NEWTON
-  line_search = 'none'
-  l_tol = 1e-8
-  nl_max_its = 15
-  nl_rel_tol = 1e-8
-  nl_abs_tol = 1e-8
+
+  petsc_options_iname = '-ksp_type -pc_type'
+  petsc_options_value = 'preonly   lu'
+
   start_time = 0.0
   dt = 0.1
   end_time = 5.0

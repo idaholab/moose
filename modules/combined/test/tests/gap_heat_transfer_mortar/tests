@@ -1,15 +1,23 @@
 [Tests]
+  design = 'Constraints/index.md'
+  issues = '#13080'
   [./test]
     type = Exodiff
     input = 'gap_heat_transfer_mortar.i'
     exodiff = 'gap_heat_transfer_mortar_out.e'
-    max_parallel = 1                                # address sanitizer reports an error
+    custom_cmp = 'one-variable-temp.cmp'
+    partial = True
+    map = False
+    requirement = 'We shall be able to produce the expected result for a gap conductance test case using the mortar method.'
   [../]
 
   [./displaced]
     type = Exodiff
     input = 'gap_heat_transfer_mortar_displaced.i'
     exodiff = 'gap_heat_transfer_mortar_displaced_out.e'
-    max_parallel = 1                                # address sanitizer reports an error
+    custom_cmp = 'one-variable-temp.cmp'
+    partial = True
+    map = False
+    requirement = 'We shall be able to run the mortar method on a displaced mesh, supplying the displacements with **constant** auxiliary variables'
   [../]
 []

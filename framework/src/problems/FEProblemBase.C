@@ -212,7 +212,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _coupling(Moose::COUPLING_DIAG),
     _distributions(/*threaded=*/false),
     _samplers(_app.getExecuteOnEnum()),
-    _scalar_ics(/*threaded=*/false),
     _material_props(
         declareRestartableDataWithContext<MaterialPropertyStorage>("material_props", &_mesh)),
     _bnd_material_props(
@@ -234,6 +233,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
 #endif
     _displaced_mesh(nullptr),
     _geometric_search_data(*this, _mesh),
+    _mortar_data(),
     _reinit_displaced_elem(false),
     _reinit_displaced_face(false),
     _input_file_saved(false),
@@ -678,7 +678,7 @@ FEProblemBase::initialSetup()
 
     for (THREAD_ID tid = 0; tid < n_threads; tid++)
       _ics.initialSetup(tid);
-    _scalar_ics.sort();
+    _scalar_ics.initialSetup();
     projectSolution();
   }
 
@@ -766,6 +766,22 @@ FEProblemBase::initialSetup()
   _mesh.updateActiveSemiLocalNodeRange(_ghosted_elems);
   if (_displaced_mesh)
     _displaced_mesh->updateActiveSemiLocalNodeRange(_ghosted_elems);
+
+  // We need to move the mesh in order to build a map between mortar slave and master
+  // interfaces. This map will then be used by the AgumentSparsityOnInterface ghosting functor to
+  // know which dofs we need ghosted when we call EquationSystems::reinit
+  if (_displaced_problem && _mortar_data.hasDisplacedObjects())
+    _displaced_problem->updateMesh();
+
+  // Build the mortar segment meshes for a couple reasons:
+  // 1) Get the ghosting correct for both static and dynamic meshes
+  // 2) Make sure the mortar mesh is built for mortar constraints that live on the static mesh
+  //
+  // It is worth-while to note that mortar meshes that live on a dynamic mesh will be built
+  // during residual and Jacobian evaluation because when displacements are solution variables
+  // the mortar mesh will move and change during the course of a non-linear solve. We DO NOT
+  // redo ghosting during non-linear solve, so for purpose 1) the below call has to be made
+  updateMortarMesh();
 
   // Possibly reinit one more time to get ghosting correct
   reinitBecauseOfGhostingOrNewGeomObjects();
@@ -2510,7 +2526,7 @@ FEProblemBase::reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stat
 {
   if (hasActiveMaterialProperties(tid))
   {
-    const Elem *& elem = _assembly[tid]->elem();
+    auto && elem = _assembly[tid]->elem();
     unsigned int n_points = _assembly[tid]->qRule()->n_points();
     _material_data[tid]->resize(n_points);
 
@@ -2534,7 +2550,7 @@ FEProblemBase::reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid, bool swap_
 {
   if (hasActiveMaterialProperties(tid))
   {
-    const Elem *& elem = _assembly[tid]->elem();
+    auto && elem = _assembly[tid]->elem();
     unsigned int side = _assembly[tid]->side();
     unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
 
@@ -2565,7 +2581,7 @@ FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool s
   if (hasActiveMaterialProperties(tid))
   {
     // NOTE: this will not work with h-adaptivity
-    const Elem *& neighbor = _assembly[tid]->neighbor();
+    auto && neighbor = _assembly[tid]->neighbor();
     unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[tid]->elem());
     unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
     _neighbor_material_data[tid]->resize(n_points);
@@ -2595,7 +2611,7 @@ FEProblemBase::reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid, bo
 {
   if (hasActiveMaterialProperties(tid))
   {
-    const Elem *& elem = _assembly[tid]->elem();
+    auto && elem = _assembly[tid]->elem();
     unsigned int side = _assembly[tid]->side();
     unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
     _bnd_material_data[tid]->resize(n_points);
@@ -2622,14 +2638,14 @@ FEProblemBase::reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid, bo
 void
 FEProblemBase::swapBackMaterials(THREAD_ID tid)
 {
-  const Elem *& elem = _assembly[tid]->elem();
+  auto && elem = _assembly[tid]->elem();
   _material_data[tid]->swapBack(*elem);
 }
 
 void
 FEProblemBase::swapBackMaterialsFace(THREAD_ID tid)
 {
-  const Elem *& elem = _assembly[tid]->elem();
+  auto && elem = _assembly[tid]->elem();
   unsigned int side = _assembly[tid]->side();
   _bnd_material_data[tid]->swapBack(*elem, side);
 }
@@ -2638,7 +2654,7 @@ void
 FEProblemBase::swapBackMaterialsNeighbor(THREAD_ID tid)
 {
   // NOTE: this will not work with h-adaptivity
-  const Elem *& neighbor = _assembly[tid]->neighbor();
+  auto && neighbor = _assembly[tid]->neighbor();
   unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[tid]->elem());
   _neighbor_material_data[tid]->swapBack(*neighbor, neighbor_side);
 }
@@ -3273,7 +3289,8 @@ FEProblemBase::reinitBecauseOfGhostingOrNewGeomObjects()
 
   // Need to see if _any_ processor has ghosted elems or geometry objects.
   bool needs_reinit = !_ghosted_elems.empty();
-  needs_reinit = needs_reinit || !_geometric_search_data._nearest_node_locators.empty();
+  needs_reinit = needs_reinit || !_geometric_search_data._nearest_node_locators.empty() ||
+                 _mortar_data.hasObjects();
   needs_reinit =
       needs_reinit ||
       (_displaced_problem && !_displaced_problem->geomSearchData()._nearest_node_locators.empty());
@@ -4528,6 +4545,8 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
   {
     _aux->compute(EXEC_PRE_DISPLACE);
     _displaced_problem->updateMesh();
+    if (_mortar_data.hasDisplacedObjects())
+      updateMortarMesh();
   }
 
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
@@ -4945,6 +4964,46 @@ FEProblemBase::updateGeomSearch(GeometricSearchData::GeometricSearchType type)
 }
 
 void
+FEProblemBase::updateMortarMesh()
+{
+  _mortar_data.update();
+}
+
+void
+FEProblemBase::createMortarInterface(
+    const std::pair<BoundaryID, BoundaryID> & master_slave_boundary_pair,
+    const std::pair<SubdomainID, SubdomainID> & master_slave_subdomain_pair,
+    bool on_displaced,
+    bool periodic)
+{
+  if (on_displaced)
+    return _mortar_data.createMortarInterface(master_slave_boundary_pair,
+                                              master_slave_subdomain_pair,
+                                              *_displaced_problem,
+                                              on_displaced,
+                                              periodic);
+  else
+    return _mortar_data.createMortarInterface(
+        master_slave_boundary_pair, master_slave_subdomain_pair, *this, on_displaced, periodic);
+}
+
+const AutomaticMortarGeneration &
+FEProblemBase::getMortarInterface(
+    const std::pair<BoundaryID, BoundaryID> & master_slave_boundary_pair,
+    const std::pair<SubdomainID, SubdomainID> & master_slave_subdomain_pair,
+    bool on_displaced) const
+{
+  return _mortar_data.getMortarInterface(
+      master_slave_boundary_pair, master_slave_subdomain_pair, on_displaced);
+}
+
+const std::unordered_map<std::pair<BoundaryID, BoundaryID>, AutomaticMortarGeneration> &
+FEProblemBase::getMortarInterfaces(bool on_displaced) const
+{
+  return _mortar_data.getMortarInterfaces(on_displaced);
+}
+
+void
 FEProblemBase::possiblyRebuildGeomSearchPatches()
 {
   if (_displaced_problem) // Only need to do this if things are moving...
@@ -5291,9 +5350,9 @@ FEProblemBase::checkProblemIntegrity()
       }
 
       // also exclude mortar spaces from the material check
-      auto & mortar_ifaces = _mesh.getMortarInterfaces();
-      for (const auto & mortar_iface : mortar_ifaces)
-        local_mesh_subs.erase(mortar_iface->_id);
+      auto && mortar_subdomain_ids = _mortar_data.getMortarSubdomainIDs();
+      for (auto subdomain_id : mortar_subdomain_ids)
+        local_mesh_subs.erase(subdomain_id);
 
       // Check Material Coverage
       if (check_material_coverage && !local_mesh_subs.empty())
@@ -5869,4 +5928,28 @@ FEProblemBase::haveADObjects(bool have_ad_objects)
   _have_ad_objects = have_ad_objects;
   if (_displaced_problem)
     _displaced_problem->haveADObjects(have_ad_objects);
+}
+
+const SystemBase &
+FEProblemBase::systemBaseNonlinear() const
+{
+  return *_nl;
+}
+
+SystemBase &
+FEProblemBase::systemBaseNonlinear()
+{
+  return *_nl;
+}
+
+const SystemBase &
+FEProblemBase::systemBaseAuxiliary() const
+{
+  return *_aux;
+}
+
+SystemBase &
+FEProblemBase::systemBaseAuxiliary()
+{
+  return *_aux;
 }

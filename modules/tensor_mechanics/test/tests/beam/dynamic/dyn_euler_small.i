@@ -280,10 +280,7 @@
 [Executioner]
   type = Transient
   solve_type = NEWTON
-  line_search = 'none'
-  nl_rel_tol = 1e-8
-  nl_abs_tol = 1e-8
-  start_time = 0.0
+
   dt = 0.05
   end_time = 5.0
   timestep_tolerance = 1e-6

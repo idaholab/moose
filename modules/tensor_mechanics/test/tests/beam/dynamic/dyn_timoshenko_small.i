@@ -279,8 +279,8 @@
   type = Transient
   solve_type = NEWTON
   line_search = 'none'
-  nl_rel_tol = 1e-8
-  nl_abs_tol = 1e-8
+  nl_rel_tol = 1e-11
+  nl_abs_tol = 1e-11
   start_time = 0.0
   dt = 0.005
   end_time = 0.5

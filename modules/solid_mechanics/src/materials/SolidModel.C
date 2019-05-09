@@ -1596,6 +1596,8 @@ SolidModel::createConstitutiveModel(const std::string & cm_name)
 
   params.applyParameters(parameters());
   params.set<SubProblem *>("_subproblem") = &_subproblem;
+  params.applySpecificParameters(parameters(), {"_material_data_type", "_neighbor"}, true);
+
   MooseSharedPointer<ConstitutiveModel> cm =
       factory.create<ConstitutiveModel>(cm_name, name() + "Model", params, _tid);
 

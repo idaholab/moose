@@ -4,31 +4,49 @@
     input = 'derivativetwophasematerial.i'
     exodiff = 'derivativetwophasematerial_out.e'
     fparser_jit = True
+    requirement = 'Moose shall provide a material to combine two free energies materials into a WBM two phase free energy'
+    design = 'DerivativeTwoPhaseMaterial.md'
+    issues = '#4035'
   [../]
   [./orderparameterfunctionmaterial]
     type = 'Exodiff'
     input = 'orderparameterfunctionmaterial.i'
     exodiff = 'orderparameterfunctionmaterial_out.e'
+    design = 'SwitchingFunctionMaterial.md'
+    requirement = 'Moose shall provide a materials to generate barrier and switching function in a WBM multiphase model'
+    issues = '#4355'
   [../]
   [./thirdphasesuppressionmaterial]
     type = 'Exodiff'
     input = 'thirdphasesuppressionmaterial.i'
     exodiff = 'thirdphasesuppressionmaterial_out.e'
+    design = 'ThirdPhaseSuppressionMaterial.md'
+    requirement = 'Moose shall provide a free energy penalty class that suppresses the formation of a third phase in grain boundaries'
+    issues = '#6279'
   [../]
   [./multibarrierfunction]
     type = 'Exodiff'
     input = 'multibarrierfunction.i'
     exodiff = 'multibarrierfunction_out.e'
+    design = 'MultiBarrierFunctionMaterial.md'
+    requirement = 'Moose shall provide a material for computing barrier values in multiphase systems'
+    issues = '#4545'
   [../]
   [./crosstermbarrierfunction]
     type = 'Exodiff'
     input = 'crosstermbarrierfunction.i'
     exodiff = 'crosstermbarrierfunction_out.e'
+    design = 'CrossTermBarrierFunctionMaterial.md'
+    requirement = 'Moose shall provide a material for computing independent barrier values for each phase pair in a multiphase system'
+    issues = '#5192'
   [../]
   [./asymmetriccrosstermbarrierfunction]
     type = 'Exodiff'
     input = 'asymmetriccrosstermbarrierfunction.i'
     exodiff = 'asymmetriccrosstermbarrierfunction_out.e'
+    design = 'AsymmetricCrossTermBarrierFunctionMaterial.md'
+    requirement = 'Moose shall provide a material for computing independent barrier values for each phase pair in a multiphase system with asymmetric interface profiles'
+    issues = '#6584'
   [../]
 
   [./lagrangemult]
@@ -36,45 +54,72 @@
     input = 'lagrangemult.i'
     exodiff = 'lagrangemult_out.e'
     fparser_jit = True
+    requirement = 'Moose shall provide a lagrange multiplier based constraint for keeping the sum of all phase order parameters equal to one'
+    design = 'SwitchingFunctionConstraintLagrange.md'
+    issues = '#4545'
   [../]
   [./penalty]
     type = 'Exodiff'
     input = 'penalty.i'
     exodiff = 'penalty_out.e'
+    requirement = 'Moose shall provide a penalty based constraint for keeping the sum of all phase order parameters equal to one'
+    design = 'SwitchingFunctionConstraintLagrange.md'
+    issues = '#4723'
   [../]
   [./crosstermfreeenergy]
     type = 'Exodiff'
     input = 'crosstermfreeenergy.i'
     exodiff = 'crosstermfreeenergy_out.e'
+    requirement = 'Moose shall provide aan AuxKernel to compute the free energy contribution form pairwise phase barrier functions'
+    design = 'CrossTermGradientFreeEnergy.md'
+    issues = '#4710'
   [../]
   [./acmultiinterface]
     type = 'Exodiff'
     input = 'acmultiinterface.i'
     exodiff = 'acmultiinterface_out.e'
+    requirement = 'Moose shall provide an Allen-Cahn gradient energy kernel with cross term contributions'
+    design = 'ACMultiInterface.md'
+    issues = '#4545'
   [../]
   [./acmultiinterface_aux]
     type = 'Exodiff'
     input = 'acmultiinterface_aux.i'
     exodiff = 'acmultiinterface_aux_out.e'
+    requirement = 'Moose shall provide an Allen-Cahn gradient energy kernel with cross term contributions, and some order parameters may be aux variables'
+    design = 'ACMultiInterface.md'
+    issues = '#4545'
   [../]
   [./switchingfunction3phasematerial]
     type = 'Exodiff'
     input = 'switchingfunction3phasematerial.i'
     exodiff = 'switchingfunction3phasematerial_out.e'
+    requirement = 'Moose shall provide switching functions for three-phase KKS phase-field model'
+    design = 'SwitchingFunction3PhaseMaterial.md'
+    issues = '#6857'
   [../]
   [./switchingfunctionmultiphasematerial]
     type = 'Exodiff'
     input = 'switchingfunctionmultiphasematerial.i'
     exodiff = 'switchingfunctionmultiphasematerial_out.e'
+    requirement = 'Moose shall provide switching functions for multi-phase KKS phase-field model'
+    design = 'SwitchingFunctionMultiPhaseMaterial.md'
+    issues = '#8113'
   [../]
   [./mixedswitchingfunctionmaterial]
     type = 'Exodiff'
     input = 'mixedswitchingfunctionmaterial.i'
     exodiff = 'mixedswitchingfunctionmaterial_out.e'
-  [../]
+    requirement = 'Moose shall provide mixed switching functions with order 234 and 246 and an adjustable weight'
+    design = 'MixedSwitchingFunctionMaterial.md'
+    issues = '#9042'
+[../]
   [./barrierfunctionmaterial]
     type = 'Exodiff'
     input = 'barrierfunctionmaterial.i'
     exodiff = 'barrierfunctionmaterial_out.e'
+    requirement = 'Moose shall provide order 246 polynomials in the two phase barrier function'
+    design = 'BarrierFunctionMaterial.md'
+    issues = '#9301'
   [../]
 []

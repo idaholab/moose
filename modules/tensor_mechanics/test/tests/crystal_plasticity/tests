@@ -36,6 +36,7 @@
     input = 'crysp_cutback.i'
     exodiff = 'crysp_cutback_out.e'
     allow_warnings = true
+    max_parallel = 1
     requirement = 'This is a deprecated system that has been replaced by the user object based plasticity and should be removed.'
   [../]
   [./test_substep]

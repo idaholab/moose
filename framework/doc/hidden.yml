@@ -157,8 +157,6 @@
 - /Mesh/CreateDisplacedProblemAction
 - /Mesh/SetupMeshAction
 - /Mesh/SetupMeshCompleteAction
-- /Mesh/MortarInterfaces
-- /Mesh/MortarInterfaces/AddMortarInterfaceAction
 - /Mesh/Partitioner
 - /Mesh/Partitioner/PartitionerAction
 - /Mesh/Partitioner/LibmeshPartitioner
@@ -194,7 +192,6 @@
 - /Outputs/AddOutputAction
 - /Outputs/CSV
 - /Outputs/Checkpoint
-- /Outputs/Console
 - /Outputs/ControlOutput
 - /Outputs/DOFMap
 - /Outputs/GMV

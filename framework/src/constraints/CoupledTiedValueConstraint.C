@@ -83,6 +83,9 @@ CoupledTiedValueConstraint::computeQpJacobian(Moose::ConstraintJacobianType type
     case Moose::MasterMaster:
       retVal = 0;
       break;
+    default:
+      mooseError("Unsupported type");
+      break;
   }
   return retVal;
 }
@@ -108,6 +111,9 @@ CoupledTiedValueConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianTy
         break;
       case Moose::MasterMaster:
         retVal = 0;
+        break;
+      default:
+        mooseError("Unsupported type");
         break;
     }
   }

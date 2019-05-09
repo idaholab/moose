@@ -42,22 +42,22 @@ protected:
   MooseMesh & _mesh;
 
   const MooseArray<Point> & _q_point;
-  QBase *& _qrule;
+  const QBase * const & _qrule;
   const MooseArray<Real> & _JxW;
   const MooseArray<Real> & _coord;
   const MooseArray<Point> & _normals;
 
   /// current element
-  const Elem *& _current_elem;
+  const Elem * const & _current_elem;
   /// current side of the current element
-  unsigned int & _current_side;
+  const unsigned int & _current_side;
   /// the side element
-  const Elem *& _current_side_elem;
+  const Elem * const & _current_side_elem;
   /// current side volume
   const Real & _current_side_volume;
 
   /// The neighboring element
-  const Elem *& _neighbor_elem;
+  const Elem * const & _neighbor_elem;
   /// current neighbor volume
   const Real & _current_neighbor_volume;
 

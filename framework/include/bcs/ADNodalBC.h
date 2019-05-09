@@ -37,7 +37,7 @@ protected:
   MooseVariableFE<T> & _var;
 
   /// current node being processed
-  const Node *& _current_node;
+  const Node * const & _current_node;
 
   /// Value of the unknown variable this BC is acting on
   const typename Moose::ValueType<T, compute_stage>::type & _u;

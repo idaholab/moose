@@ -42,7 +42,7 @@ protected:
   const VariableValue & _u;
 
   /// The quadrature rule for the system
-  QBase *& _qrule;
+  const QBase * const & _qrule;
 
   /// Position of the current quadrature point
   const MooseArray<Point> & _q_point;

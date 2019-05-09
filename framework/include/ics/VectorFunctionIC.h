@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VECTORFUNCTIONIC_H
-#define VECTORFUNCTIONIC_H
+#pragma once
 
 #include "VectorInitialCondition.h"
 #include "Function.h"
@@ -47,5 +46,3 @@ protected:
   Function & _function_y;
   Function & _function_z;
 };
-
-#endif

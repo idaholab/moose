@@ -312,8 +312,8 @@
 []
 
 [Preconditioning]
-  [./fdp]
-    type = FDP
+  [./smp]
+    type = SMP
     full = true
   [../]
 []

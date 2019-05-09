@@ -16,17 +16,16 @@ template <>
 InputParameters
 validParams<PolycrystalRandomIC>()
 {
-  InputParameters params = validParams<InitialCondition>();
+  InputParameters params = validParams<RandomICBase>();
   params.addClassDescription("Random initial condition for a polycrystalline material");
   params.addRequiredParam<unsigned int>("op_num", "Number of order parameters");
   params.addRequiredParam<unsigned int>("op_index", "The index for the current order parameter");
-  params.addRequiredParam<unsigned int>("random_type",
-                                        "Type of random grain structure (formerly called 'typ')");
+  params.addRequiredParam<unsigned int>("random_type", "Type of random grain structure");
   return params;
 }
 
 PolycrystalRandomIC::PolycrystalRandomIC(const InputParameters & parameters)
-  : InitialCondition(parameters),
+  : RandomICBase(parameters),
     _op_num(getParam<unsigned int>("op_num")),
     _op_index(getParam<unsigned int>("op_index")),
     _random_type(getParam<unsigned int>("random_type"))
@@ -37,7 +36,7 @@ Real
 PolycrystalRandomIC::value(const Point & p)
 {
   Point cur_pos = p;
-  Real val = MooseRandom::rand();
+  Real val = generateRandom();
 
   switch (_random_type)
   {

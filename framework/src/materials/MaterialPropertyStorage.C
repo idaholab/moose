@@ -88,8 +88,8 @@ MaterialPropertyStorage::releaseProperties()
 void
 MaterialPropertyStorage::prolongStatefulProps(
     const std::vector<std::vector<QpMap>> & refinement_map,
-    QBase & qrule,
-    QBase & qrule_face,
+    const QBase & qrule,
+    const QBase & qrule_face,
     MaterialPropertyStorage & parent_material_props,
     MaterialData & child_material_data,
     const Elem & elem,
@@ -164,8 +164,8 @@ void
 MaterialPropertyStorage::restrictStatefulProps(
     const std::vector<std::pair<unsigned int, QpMap>> & coarsening_map,
     const std::vector<const Elem *> & coarsened_element_children,
-    QBase & qrule,
-    QBase & qrule_face,
+    const QBase & qrule,
+    const QBase & qrule_face,
     MaterialData & material_data,
     const Elem & elem,
     int input_side)

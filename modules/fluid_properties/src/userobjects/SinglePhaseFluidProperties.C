@@ -73,6 +73,22 @@ SinglePhaseFluidProperties::v_from_p_T(Real p, Real T) const
   return 1.0 / rho;
 }
 
+DualReal
+SinglePhaseFluidProperties::v_from_p_T(const DualReal & p, const DualReal & T) const
+{
+  Real rawv = 0;
+  Real rawp = p.value();
+  Real rawT = T.value();
+  Real dvdp = 0;
+  Real dvdT = 0;
+  v_from_p_T(rawp, rawT, rawv, dvdp, dvdT);
+
+  DualReal result = rawv;
+  for (size_t i = 0; i < p.derivatives().size(); i++)
+    result.derivatives()[i] = p.derivatives()[i] * dvdp + T.derivatives()[i] * dvdT;
+  return result;
+}
+
 void
 SinglePhaseFluidProperties::v_from_p_T(Real p, Real T, Real & v, Real & dv_dp, Real & dv_dT) const
 {

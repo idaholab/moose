@@ -221,19 +221,19 @@ protected:
 
   unsigned int _qp;
 
-  QBase *& _qrule;
+  const QBase * const & _qrule;
   const MooseArray<Real> & _JxW;
   const MooseArray<Real> & _coord;
   const MooseArray<Point> & _q_point;
   /// normals at quadrature points (valid only in boundary materials)
   const MooseArray<Point> & _normals;
 
-  const Elem *& _current_elem;
+  const Elem * const & _current_elem;
 
   const SubdomainID & _current_subdomain_id;
 
   /// current side of the current element
-  unsigned int & _current_side;
+  const unsigned int & _current_side;
 
   MooseMesh & _mesh;
 
