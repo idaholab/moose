@@ -150,7 +150,8 @@
   solve_type = Newton
   end_time = 1e4
   dt = 1e3
-  nl_abs_tol = 1e-10
+  nl_abs_tol = 1e-15
+  nl_rel_tol = 1e-14
 []
 
 [Outputs]

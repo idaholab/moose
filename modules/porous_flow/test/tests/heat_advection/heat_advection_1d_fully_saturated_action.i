@@ -67,6 +67,13 @@
   flux_limiter_type = superbee
 []
 
+[UserObjects]
+  [./this_just_adds_correct_relationship_manager_for_ghosting_13388]
+    type = PorousFlowAdvectiveFluxCalculatorSaturated
+    flux_limiter_type = superbee
+  [../]
+[]
+
 [Modules]
   [./FluidProperties]
     [./simple_fluid]
@@ -104,8 +111,6 @@
   [./andy]
     type = SMP
     full = true
-    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
-    petsc_options_value = 'gmres bjacobi 1E-15 1E-10 10000'
   [../]
 []
 

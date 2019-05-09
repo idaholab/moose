@@ -185,8 +185,8 @@
   solve_type = Newton
   dt = 1E-2
   end_time = 1
-  nl_rel_tol = 1E-9
-  nl_abs_tol = 1E-9
+  nl_rel_tol = 1E-12
+  nl_abs_tol = 1E-12
 []
 
 [VectorPostprocessors]

@@ -4,9 +4,6 @@
     input = 'grav01a.i'
     csvdiff = 'grav01a.csv'
     rel_err = 1.0E-5
-# Run in serial so RandomIC gives the same result, to avoid spurious errors
-    max_parallel = 1
-    max_threads  = 1
     threading = '!pthreads'
     requirement = "PorousFlow shall be able to find steady-state and long-time transient porepressure when gravity is nonzero: for single-phase fully-saturated, single-phase partially-saturated, two-phase PP formulations, and two-phase PS formulations"
     issues = '#6845 #7677 #8073 #8585 #8574 #9537'
@@ -17,9 +14,6 @@
     input = 'grav01b.i'
     csvdiff = 'grav01b.csv'
     rel_err = 1.0E-5
-# Run in serial so RandomIC gives the same result, to avoid spurious errors
-    max_parallel = 1
-    max_threads  = 1
     threading = '!pthreads'
     requirement = "PorousFlow shall be able to find steady-state and long-time transient porepressure when gravity is nonzero: for single-phase fully-saturated, single-phase partially-saturated, two-phase PP formulations, and two-phase PS formulations"
     issues = '#6845 #7677 #8073 #8585 #8574 #9537'
@@ -30,9 +24,6 @@
     input = 'grav01c.i'
     csvdiff = 'grav01c.csv'
     rel_err = 1.0E-5
-# Run in serial so RandomIC gives the same result, to avoid spurious errors
-    max_parallel = 1
-    max_threads  = 1
     threading = '!pthreads'
     requirement = "PorousFlow shall be able to find steady-state and long-time transient porepressure when gravity is nonzero: for single-phase fully-saturated, single-phase partially-saturated, two-phase PP formulations, and two-phase PS formulations"
     issues = '#6845 #7677 #8073 #8585 #8574 #9537'
@@ -43,9 +34,6 @@
     input = 'grav01c_action.i'
     csvdiff = 'grav01c_action.csv'
     rel_err = 1.0E-5
-# Run in serial so RandomIC gives the same result, to avoid spurious errors
-    max_parallel = 1
-    max_threads  = 1
     threading = '!pthreads'
     requirement = "PorousFlow shall be able to find steady-state and long-time transient porepressure when gravity is nonzero: for single-phase fully-saturated, single-phase partially-saturated, two-phase PP formulations, and two-phase PS formulations"
     issues = '#6845 #7677 #8073 #8585 #8574 #9537'
@@ -124,9 +112,6 @@
     input = 'fully_saturated_grav01a.i'
     csvdiff = 'fully_saturated_grav01a.csv'
     rel_err = 1.0E-5
-# Run in serial so RandomIC gives the same result, to avoid spurious errors
-    max_parallel = 1
-    max_threads  = 1
     threading = '!pthreads'
     requirement = "PorousFlow shall be able to find steady-state and long-time transient porepressure when gravity is nonzero: for single-phase fully-saturated, single-phase partially-saturated, two-phase PP formulations, and two-phase PS formulations"
     issues = '#6845 #7677 #8073 #8585 #8574 #9537'
@@ -137,9 +122,6 @@
     input = 'fully_saturated_grav01b.i'
     csvdiff = 'fully_saturated_grav01b.csv'
     rel_err = 1.0E-5
-# Run in serial so RandomIC gives the same result, to avoid spurious errors
-    max_parallel = 1
-    max_threads  = 1
     threading = '!pthreads'
     requirement = "PorousFlow shall be able to find steady-state and long-time transient porepressure when gravity is nonzero: for single-phase fully-saturated, single-phase partially-saturated, two-phase PP formulations, and two-phase PS formulations"
     issues = '#6845 #7677 #8073 #8585 #8574 #9537'
@@ -150,9 +132,6 @@
     input = 'fully_saturated_grav01c.i'
     csvdiff = 'fully_saturated_grav01c.csv'
     rel_err = 1.0E-5
-# Run in serial so RandomIC gives the same result, to avoid spurious errors
-    max_parallel = 1
-    max_threads  = 1
     threading = '!pthreads'
     skip = "#12505"
     requirement = "PorousFlow shall be able to find steady-state and long-time transient porepressure when gravity is nonzero: for single-phase fully-saturated, single-phase partially-saturated, two-phase PP formulations, and two-phase PS formulations"
@@ -164,9 +143,6 @@
     input = 'grav01d.i'
     csvdiff = 'grav01d.csv'
     rel_err = 1.0E-5
-# Run in serial so RandomIC gives the same result, to avoid spurious errors
-    max_parallel = 1
-    max_threads  = 1
     threading = '!pthreads'
     requirement = "PorousFlow shall be able to find steady-state and long-time transient porepressure when gravity is nonzero, when the simulation contains more than one domain, with each domain having its own capillary pressure and relative permeability function"
     issues = '#13116'

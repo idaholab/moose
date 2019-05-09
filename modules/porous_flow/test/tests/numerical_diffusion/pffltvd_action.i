@@ -42,6 +42,14 @@
   flux_limiter_type = superbee
 []
 
+[UserObjects]
+  [./this_just_adds_correct_relationship_manager_for_ghosting_13388]
+    type = PorousFlowAdvectiveFluxCalculatorSaturated
+    gravity = '0 0 0'
+    flux_limiter_type = superbee
+  [../]
+[]
+
 [BCs]
   [./constant_injection_porepressure]
     type = PresetBC
