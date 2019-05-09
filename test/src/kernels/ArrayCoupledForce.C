@@ -11,18 +11,19 @@
 
 #include "MooseVariable.h"
 
-registerMooseObject("MooseApp", ArrayCoupledForce);
+registerMooseObject("MooseTestApp", ArrayCoupledForce);
 
 template <>
 InputParameters
 validParams<ArrayCoupledForce>()
 {
   InputParameters params = validParams<ArrayKernel>();
-
   params.addRequiredCoupledVar("v", "The coupled variable which provides the force");
   params.addRequiredParam<RealArrayValue>(
       "coef", "Coefficent ($\\sigma$) multiplier for the coupled force term.");
-
+  params.addClassDescription(
+      "Implements a source term proportional to the value of a coupled "
+      "standard variable. Weak form: $(\\vec{u}^\\ast, -\\vec{\\sigma} v)$.");
   return params;
 }
 

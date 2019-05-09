@@ -1,23 +1,23 @@
 [Tests]
   issues = '#6881'
-  design = '/kernels/Kernel.md'
+  design = '/variables/ArrayMooseVariable.md'
   [./test]
     type = 'Exodiff'
     input = 'array_diffusion_test.i'
     exodiff = 'array_diffusion_test_out.e'
-    requirement = 'MOOSE shall provide array diffusion kernels.'
+    requirement = 'MOOSE shall provide array diffusion kernels on an array variable.'
   [../]
   [./test_diffusion_reaction]
     type = 'Exodiff'
     input = 'array_diffusion_reaction.i'
     exodiff = 'array_diffusion_reaction_out.e'
-    requirement = 'MOOSE shall provide array reaction kernels.'
+    requirement = 'MOOSE shall provide array reaction kernels on an array variable.'
   [../]
   [./test_diffusion_reaction_dg]
     type = 'Exodiff'
     input = 'array_diffusion_reaction_dg.i'
     exodiff = 'array_diffusion_reaction_dg_out.e'
-    requirement = 'MOOSE shall provide array DG kernels.'
+    requirement = 'MOOSE shall provide array DG diffusion kernels on an elemental array variable.'
   [../]
   [./test_diffusion_reaction_coupling]
     type = 'Exodiff'
