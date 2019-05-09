@@ -52,6 +52,7 @@
     requirement = "The mechanics system shall correctly predict the natural frequencies"
                   " of a massless Euler-Bernoulli beam modeled using beam elements"
                   " with a nodal masses placed at the ends."
+    petsc_version = '>=3.8'
   [../]
   [./dyn_euler_added_mass_file]
     type = 'Exodiff'
@@ -106,6 +107,7 @@
     requirement = "The mechanics system shall correctly model the response of a beam"
                   " modeled using beam elements in the presence of nodal mass,"
                   " nodal inertia and Rayleigh damping."
+    petsc_version = '>=3.8'
   [../]
   [./dyn_euler_added_mass_inertia_damping_ti]
     type = 'Exodiff'
