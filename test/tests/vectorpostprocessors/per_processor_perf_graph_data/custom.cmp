@@ -1,0 +1,38 @@
+
+#  *****************************************************************
+#             EXODIFF	(Version: 2.90) Modified: 2018-02-15
+#             Authors:  Richard Drake, rrdrake@sandia.gov
+#                       Greg Sjaardema, gdsjaar@sandia.gov
+#             Run on    2019/05/09   08:31:40 MDT
+#  *****************************************************************
+
+#  FILE 1: /Users/gastdr/projects/moose/test/tests/vectorpostprocessors/per_processor_perf_graph_data/per_processor_perf_graph_data_out.e
+#   Title: per_processor_perf_graph_data_out.e
+#          Dim = 2, Blocks = 1, Nodes = 1891, Elements = 1800, Nodesets = 4, Sidesets = 4
+#          Vars: Global = 0, Nodal = 1, Element = 1, Nodeset = 0, Sideset = 0, Times = 2
+
+
+# ==============================================================
+#  NOTE: All node and element ids are reported as global ids.
+
+# NOTES:  - The min/max values are reporting the min/max in absolute value.
+#         - Time values (t) are 1-offset time step numbers.
+#         - Element block numbers are the block ids.
+#         - Node(n) and element(e) numbers are 1-offset.
+
+COORDINATES absolute 1.e-6    # min separation not calculated
+
+TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:               1 @ t2
+
+
+# No GLOBAL VARIABLES
+
+NODAL VARIABLES relative 1.e-6 floor 0.0
+	u  # min:               0 @ t1,n1	max:               1 @ t2,n121
+
+ELEMENT VARIABLES relative 1.e2 floor 0.0
+	kernel_time  # min:               0 @ t1,b0,e1	max:      2. @ t2,b0,e184
+
+# No NODESET VARIABLES
+
+# No SIDESET VARIABLES

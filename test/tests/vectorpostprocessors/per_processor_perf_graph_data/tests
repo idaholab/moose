@@ -1,0 +1,10 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'per_processor_perf_graph_data.i'
+    exodiff = 'per_processor_perf_graph_data_out.e'
+    min_parallel = 3
+    max_parallel = 3
+    custom_cmp = custom.cmp
+  [../]
+[]
