@@ -399,7 +399,7 @@ MultiApp::postExecute()
 void
 MultiApp::backup()
 {
-  _console << "Begining backing up MultiApp " << name() << std::endl;
+  _console << "Beginning backing up MultiApp " << name() << std::endl;
   for (unsigned int i = 0; i < _my_num_apps; i++)
     _backups[i] = _apps[i]->backup();
   _console << "Finished backing up MultiApp " << name() << std::endl;
@@ -611,21 +611,9 @@ MultiApp::createApp(unsigned int i, Real start_time)
   app_params.set<FEProblemBase *>("_parent_fep") = &_fe_problem;
   app_params.set<std::shared_ptr<CommandLine>>("_command_line") = _app.commandLine();
 
-  // Single set of "cli_args" to be applied to all sub apps
-  if (_cli_args.size() == 1)
+  if (_cli_args.size() > 0)
   {
-    for (const std::string & str : MooseUtils::split(_cli_args[0], ";"))
-    {
-      std::ostringstream oss;
-      oss << full_name << ":" << str;
-      app_params.get<std::shared_ptr<CommandLine>>("_command_line")->addArgument(oss.str());
-    }
-  }
-
-  // Unique set of "cli_args" to be applied to each sub apps
-  else if (_cli_args.size() > 1)
-  {
-    for (const std::string & str : MooseUtils::split(_cli_args[i + _first_local_app], ";"))
+    for (const std::string & str : MooseUtils::split(getCommandLineArgsParamHelper(i), ";"))
     {
       std::ostringstream oss;
       oss << full_name << ":" << str;
@@ -694,6 +682,19 @@ MultiApp::createApp(unsigned int i, Real start_time)
     FEProblemBase & fe_problem_base = _apps[i]->getExecutioner()->feProblem();
     fe_problem_base.getNonlinearSystemBase().addVector("self_relax_previous", false, PARALLEL);
   }
+}
+
+std::string
+MultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
+{
+
+  // Single set of "cli_args" to be applied to all sub apps
+  if (_cli_args.size() == 1)
+    return _cli_args[0];
+
+  // Unique set of "cli_args" to be applied to each sub apps
+  else
+    return _cli_args[local_app + _first_local_app];
 }
 
 void

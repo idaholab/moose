@@ -1,0 +1,10 @@
+[Tests]
+  issues = "#8863"
+  design = "MonteCarloSampler.md SamplerTransfer.md"
+  [monte_carlo]
+    type = CSVDiff
+    input = monte_carlo.i
+    csvdiff = 'monte_carlo_out_sub0.csv monte_carlo_out_sub1.csv monte_carlo_out_sub2.csv monte_carlo_out_sub3.csv monte_carlo_out_sub4.csv'
+    requirement = "The stochastic tools module shall support the creation of a sub-app for each row of the single DenseMatrix returned by the MonteCarloSampler."
+  []
+[]

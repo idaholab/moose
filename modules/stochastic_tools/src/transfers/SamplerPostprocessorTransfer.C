@@ -20,17 +20,24 @@ template <>
 InputParameters
 validParams<SamplerPostprocessorTransfer>()
 {
-  InputParameters params = validParams<MultiAppVectorPostprocessorTransfer>();
-  params.addClassDescription("Transfers data to and from Postprocessors on the sub-application.");
+  InputParameters params = validParams<StochasticToolsTransfer>();
+  params.addClassDescription("Transfers data from Postprocessors on the sub-application to a "
+                             "VectorPostprocessor on the master application.");
+  params.addRequiredParam<PostprocessorName>(
+      "postprocessor", "The name of the Postprocessors on the sub-app to transfer from/to.");
+  params.addRequiredParam<VectorPostprocessorName>("vector_postprocessor",
+                                                   "The name of the VectorPostprocessor in "
+                                                   "the MultiApp to transfer values "
+                                                   "from/to.");
   params.set<MooseEnum>("direction") = "from_multiapp";
-  params.set<std::string>("vector_name") = "";
   params.suppressParameter<MooseEnum>("direction");
-  params.suppressParameter<std::string>("vector_name");
   return params;
 }
 
 SamplerPostprocessorTransfer::SamplerPostprocessorTransfer(const InputParameters & parameters)
-  : MultiAppVectorPostprocessorTransfer(parameters)
+  : StochasticToolsTransfer(parameters),
+    _sub_pp_name(getParam<PostprocessorName>("postprocessor")),
+    _master_vpp_name(getParam<VectorPostprocessorName>("vector_postprocessor"))
 {
   // Determine the Sampler
   std::shared_ptr<SamplerTransientMultiApp> ptr_transient =
@@ -61,14 +68,52 @@ SamplerPostprocessorTransfer::initialSetup()
 }
 
 void
+SamplerPostprocessorTransfer::initializeFromMultiapp()
+{
+  _local_values.clear();
+}
+
+void
 SamplerPostprocessorTransfer::executeFromMultiapp()
+{
+  const dof_id_type n = _multi_app->numGlobalApps();
+  for (MooseIndex(n) i = 0; i < n; i++)
+  {
+    if (_multi_app->hasLocalApp(i))
+    {
+      FEProblemBase & app_problem = _multi_app->appProblemBase(i);
+      _local_values.push_back(app_problem.getPostprocessorValue(_sub_pp_name));
+    }
+  }
+}
+
+void
+SamplerPostprocessorTransfer::finalizeFromMultiapp()
+{
+  // Gather the PP values from all ranks
+  _communicator.gather(0, _local_values);
+
+  // Update VPP
+  if (processor_id() == 0)
+  {
+    const dof_id_type n = _sampler->getTotalNumberOfRows();
+    for (MooseIndex(n) i = 0; i < n; i++)
+    {
+      Sampler::Location loc = _sampler->getLocation(i);
+      VectorPostprocessorValue & vpp = _results->getVectorPostprocessorValueByGroup(loc.sample());
+      vpp[loc.row()] = _local_values[i];
+    }
+  }
+}
+
+void
+SamplerPostprocessorTransfer::execute()
 {
   // Number of PP is equal to the number of MultiApps
   const unsigned int n = _multi_app->numGlobalApps();
 
   // Collect the PP values for this processor
-  std::vector<PostprocessorValue> values;
-  values.reserve(_multi_app->numLocalApps());
+  _local_values.assign(n, 0);
   for (unsigned int i = 0; i < n; i++)
   {
     if (_multi_app->hasLocalApp(i))
@@ -76,18 +121,18 @@ SamplerPostprocessorTransfer::executeFromMultiapp()
       FEProblemBase & app_problem = _multi_app->appProblemBase(i);
 
       // use reserve and push_back b/c access to FEProblemBase is based on global id
-      values.push_back(app_problem.getPostprocessorValue(_sub_pp_name));
+      _local_values[i] = app_problem.getPostprocessorValue(_sub_pp_name);
     }
   }
 
-  // Gather the PP values from all ranks
-  _communicator.allgather<PostprocessorValue>(values);
+  // Sum the PP values from all ranks
+  _communicator.sum(_local_values);
 
   // Update VPP
   for (unsigned int i = 0; i < n; i++)
   {
     Sampler::Location loc = _sampler->getLocation(i);
     VectorPostprocessorValue & vpp = _results->getVectorPostprocessorValueByGroup(loc.sample());
-    vpp[loc.row()] = values[i];
+    vpp[loc.row()] = _local_values[i];
   }
 }

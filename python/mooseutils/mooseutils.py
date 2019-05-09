@@ -132,7 +132,7 @@ def find_moose_executable(loc, **kwargs):
         print('ERROR: Unable to locate a valid MOOSE executable in directory:', loc)
     return exe
 
-def find_moose_executable_recursive(loc, **kwargs):
+def find_moose_executable_recursive(loc=os.getcwd(), **kwargs):
     """
     Locate a moose executable in the current directory or any parent directory.
 

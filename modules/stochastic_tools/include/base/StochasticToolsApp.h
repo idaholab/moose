@@ -29,3 +29,13 @@ public:
   static void registerExecFlags(Factory & factory);
 };
 
+/// Enum for batch type in stochastic tools MultiApp
+namespace StochasticTools
+{
+enum class MultiAppMode
+{
+  NORMAL = 0,
+  BATCH_RESET = 1,
+  BATCH_RESTORE = 2
+};
+}

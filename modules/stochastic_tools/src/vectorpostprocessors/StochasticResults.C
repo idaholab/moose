@@ -56,6 +56,8 @@ void
 StochasticResults::init(Sampler & sampler)
 {
   _sampler = &sampler;
+  /* TODO: getSamples must be called to initialized the names, this shouldn't be the case */
+  std::vector<DenseMatrix<Real>> data = _sampler->getSamples();
   const std::vector<std::string> & names = _sampler->getSampleNames();
   _sample_vectors.resize(names.size());
   for (MooseIndex(names) i = 0; i < names.size(); ++i)

@@ -17,23 +17,31 @@ validParams<MonteCarloSampler>()
 {
   InputParameters params = validParams<Sampler>();
   params.addClassDescription("Monte Carlo Sampler.");
-  params.addRequiredParam<unsigned int>(
-      "n_samples", "Number of Monte Carlo samples to perform for each distribution.");
+  params.addRequiredParam<dof_id_type>(
+      "n_samples",
+      "Number of Monte Carlo samples to perform for each distribution within each matrix.");
+  params.addParam<dof_id_type>(
+      "n_matrices", 1, "Number of matrices to create, each matrix will contain 'n_samples'.");
   return params;
 }
 
 MonteCarloSampler::MonteCarloSampler(const InputParameters & parameters)
-  : Sampler(parameters), _num_samples(getParam<unsigned int>("n_samples"))
+  : Sampler(parameters),
+    _num_matrices(getParam<dof_id_type>("n_matrices")),
+    _num_samples(getParam<dof_id_type>("n_samples"))
 {
 }
 
 std::vector<DenseMatrix<Real>>
 MonteCarloSampler::sample()
 {
-  std::vector<DenseMatrix<Real>> output(1);
-  output[0].resize(_num_samples, _distributions.size());
-  for (std::size_t i = 0; i < _num_samples; ++i)
-    for (MooseIndex(_distributions) j = 0; j < _distributions.size(); ++j)
-      output[0](i, j) = _distributions[j]->quantile(rand());
+  std::vector<DenseMatrix<Real>> output(_num_matrices);
+  for (MooseIndex(_num_matrices) m = 0; m < _num_matrices; ++m)
+  {
+    output[m].resize(_num_samples, _distributions.size());
+    for (MooseIndex(_num_samples) i = 0; i < _num_samples; ++i)
+      for (MooseIndex(_distributions) j = 0; j < _distributions.size(); ++j)
+        output[m](i, j) = _distributions[j]->quantile(rand());
+  }
   return output;
 }

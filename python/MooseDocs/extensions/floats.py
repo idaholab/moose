@@ -158,7 +158,7 @@ class RenderFloat(components.RenderComponent):
 
     def createMaterialize(self, parent, token, page): #pylint: disable=no-self-use
         div = html.Tag(parent, 'div', token)
-        div.addClass('card')
+        div.addClass('card moose-float')
         content = html.Tag(div, 'div')
 
         if token['img']:
