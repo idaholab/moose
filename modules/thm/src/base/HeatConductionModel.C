@@ -3,7 +3,7 @@
 #include "Factory.h"
 #include "Component.h"
 #include "THMApp.h"
-#include "HeatStructure.h"
+#include "HeatStructureBase.h"
 
 template <>
 InputParameters
@@ -11,7 +11,7 @@ validParams<HeatConductionModel>()
 {
   InputParameters params = validParams<MooseObject>();
   params.addPrivateParam<Simulation *>("_sim");
-  params.addPrivateParam<HeatStructure *>("_hs");
+  params.addPrivateParam<HeatStructureBase *>("_hs");
   params.registerBase("THM:heat_conduction_model");
   return params;
 }
@@ -30,7 +30,7 @@ HeatConductionModel::HeatConductionModel(const InputParameters & params)
     _sim(*params.getCheckedPointerParam<Simulation *>("_sim")),
     _app(_sim.getApp()),
     _factory(_app.getFactory()),
-    _hs(*params.getCheckedPointerParam<HeatStructure *>("_hs")),
+    _hs(*params.getCheckedPointerParam<HeatStructureBase *>("_hs")),
     _comp_name(name())
 {
 }

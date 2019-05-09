@@ -53,8 +53,7 @@
 
 [Components]
   [./heat_structure]
-    type = HeatStructure
-    hs_type = PLATE
+    type = HeatStructurePlate
 
     position = '0 0 0'
     orientation = '1 0 0'

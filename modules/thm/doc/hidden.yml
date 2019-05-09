@@ -71,6 +71,8 @@
 - /Components/HXConnector
 - /Components/HeatGeneration
 - /Components/HeatStructure
+- /Components/HeatStructureCylindrical
+- /Components/HeatStructurePlate
 - /Components/HeatTransferFromExternalAppHeatFlux1Phase
 - /Components/HeatTransferFromExternalAppTemperature
 - /Components/HeatTransferFromExternalAppTemperature1Phase

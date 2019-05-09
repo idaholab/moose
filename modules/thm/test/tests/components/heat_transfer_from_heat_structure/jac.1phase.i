@@ -40,14 +40,12 @@
   [../]
 
   [./hs]
-    type = HeatStructure
+    type = HeatStructureCylindrical
     position = '0 0 0'
     orientation = '0 0 1'
     length = 2
     n_elems = 1
 
-    dim = 2
-    hs_type = cylinder
     names = 'fuel'
     widths = '0.1'
     n_part_elems = '1'
