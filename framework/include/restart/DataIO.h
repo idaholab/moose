@@ -380,11 +380,11 @@ dataStore(std::ostream & stream, DenseVector<T> & v, void * context)
   }
 }
 
-template <>
-void dataStore(std::ostream & stream, DenseMatrix<Real> & v, void * context);
-
 template <typename T>
 void dataStore(std::ostream & stream, TensorValue<T> & v, void * context);
+
+template <typename T>
+void dataStore(std::ostream & stream, DenseMatrix<T> & v, void * context);
 
 template <typename T>
 void dataStore(std::ostream & stream, VectorValue<T> & v, void * context);
@@ -627,11 +627,11 @@ dataLoad(std::istream & stream, DenseVector<T> & v, void * context)
   }
 }
 
-template <>
-void dataLoad(std::istream & stream, DenseMatrix<Real> & v, void * context);
-
 template <typename T>
 void dataLoad(std::istream & stream, TensorValue<T> & v, void * context);
+
+template <typename T>
+void dataLoad(std::istream & stream, DenseMatrix<T> & v, void * context);
 
 template <typename T>
 void dataLoad(std::istream & stream, VectorValue<T> & v, void * context);

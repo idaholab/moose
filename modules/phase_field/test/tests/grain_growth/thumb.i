@@ -12,7 +12,7 @@
   zmax = 0
   elem_type = QUAD4
 
-   uniform_refine = 2
+  uniform_refine = 2
 []
 
 [GlobalParams]
@@ -50,7 +50,6 @@
 []
 
 [AuxVariables]
-
   [./bnds]
     order = FIRST
     family = LAGRANGE
@@ -58,7 +57,6 @@
 []
 
 [Kernels]
-
   [./PolycrystalKernel]
   [../]
 []
@@ -86,7 +84,6 @@
       translation = '-1000 0 0'
     [../]
   [../]
-
 []
 
 [Materials]
@@ -108,8 +105,6 @@
 []
 
 [Preconditioning]
-#active = ' '
-
   [./SMP]
    type = SMP
    full = true
@@ -122,33 +117,29 @@
 
   solve_type = 'NEWTON'
 
+  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
+  petsc_options_value = 'hypre boomeramg 31'
 
-   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
-   petsc_options_value = 'hypre boomeramg 31'
-   #petsc_options_iname = '-pc_type'
-   #petsc_options_value = 'lu'
+  l_tol = 1.0e-4
+  l_max_its = 30
 
-   l_tol = 1.0e-4
-   l_max_its = 30
+  nl_max_its = 20
+  nl_rel_tol = 1.0e-9
 
-   nl_max_its = 20
-   nl_rel_tol = 1.0e-9
+  start_time = 0.0
+  num_steps = 10
+  dt = 80.0
 
-   start_time = 0.0
-   num_steps = 10
-   dt = 80.0
-
-   [./Adaptivity]
-     initial_adaptivity = 2
-     refine_fraction = 0.8
-     coarsen_fraction = 0.05
-     max_h_level = 2
-   [../]
+  [./Adaptivity]
+    initial_adaptivity = 2
+    refine_fraction = 0.8
+    coarsen_fraction = 0.05
+    max_h_level = 2
+  [../]
 []
 
 [Outputs]
   execute_on = 'timestep_end'
-  file_base = Thumb
   csv = true
   exodus = true
 []

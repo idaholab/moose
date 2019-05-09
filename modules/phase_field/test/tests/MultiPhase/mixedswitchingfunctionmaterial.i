@@ -94,16 +94,13 @@
 [Executioner]
   type = Transient
   scheme = bdf2
-
   solve_type = 'PJFNK'
-  petsc_options_iname = '-pc_type  -sub_pc_type '
-  petsc_options_value = 'asm       lu'
 
   l_max_its = 30
   nl_max_its = 10
   l_tol = 1.0e-4
-  nl_rel_tol = 1.0e-8
-  nl_abs_tol = 1.0e-10
+  nl_rel_tol = 1.0e-10
+  nl_abs_tol = 1.0e-12
   start_time = 0.0
   num_steps = 2
 

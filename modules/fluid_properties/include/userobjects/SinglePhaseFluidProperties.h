@@ -221,6 +221,7 @@ public:
    * @param[in] T   temperature
    */
   virtual Real v_from_p_T(Real p, Real T) const;
+  virtual DualReal v_from_p_T(const DualReal & p, const DualReal & T) const;
 
   /**
    * Specific volume and its derivatives from pressure and temperature
@@ -278,6 +279,7 @@ public:
    */
   virtual Real e_from_p_T(Real p, Real T) const;
   virtual Real e(Real pressure, Real temperature) const;
+  DualReal e_from_p_T(const DualReal & p, const DualReal & T) const;
 
   /**
    * Internal energy and its derivatives from pressure and temperature

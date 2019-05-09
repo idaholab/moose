@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "InitialCondition.h"
+#include "RandomICBase.h"
 
 // Forward Declarations
 class PFCFreezingIC;
@@ -24,7 +24,7 @@ InputParameters validParams<PFCFreezingIC>();
  * \todo For the FCC this returns 0. This cannot be right, yet it satisfies the (probably bogus)
  * test.
  */
-class PFCFreezingIC : public InitialCondition
+class PFCFreezingIC : public RandomICBase
 {
 public:
   PFCFreezingIC(const InputParameters & parameters);
@@ -52,4 +52,3 @@ private:
 
   unsigned int _icdim;
 };
-

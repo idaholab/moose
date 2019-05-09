@@ -1,19 +1,22 @@
 [Mesh]
   type = GeneratedMesh
-  uniform_refine = 2
   dim = 2
   nx = 10
   ny = 10
   nz = 0
+  xmin = 0
   xmax = 1000
+  ymin = 0
   ymax = 1000
+  zmin = 0
   zmax = 0
   elem_type = QUAD4
+  uniform_refine = 2
 []
 
 [GlobalParams]
-  op_num = '4'
-  var_name_base = 'gr'
+  op_num = 2
+  var_name_base = gr
 []
 
 [Variables]
@@ -21,19 +24,13 @@
   [../]
 []
 
-[UserObjects]
-  [./voronoi]
-    type = PolycrystalVoronoi
-    grain_num = 4
-    coloring_algorithm = bt
-    rand_seed = 6
-  [../]
-[]
-
 [ICs]
   [./PolycrystalICs]
-    [./PolycrystalColoringIC]
-      polycrystal_ic_uo = voronoi
+    [./BicrystalBoundingBoxIC]
+      x1 = 0
+      y1 = 0
+      x2 = 500
+      y2 = 1000
     [../]
   [../]
 []
@@ -54,34 +51,24 @@
   [./BndsCalc]
     type = BndsCalcAux
     variable = bnds
-    execute_on = 'timestep_end'
-  [../]
-[]
-
-[BCs]
-  [./Periodic]
-    [./All]
-      auto_direction = 'x y'
-    [../]
   [../]
 []
 
 [Materials]
-  [./Moly_GB]
+  [./Copper]
     type = GBEvolution
-    time_scale = 1.0e-2
-    GBMobility = 1.88e-14    # m^4/J*s
-    T = '500'    # K
-    wGB = 60    # nm
-    GBenergy = 1.4
+    T = 500 # K
+    wGB = 60 # nm
+    GBmob0 = 2.5e-6 # m^4/(Js) from Schoenfelder 1997
+    Q = 0.23 # Migration energy in eV
+    GBenergy = 0.708 # GB energy in J/m^2
   [../]
 []
 
 [Postprocessors]
   [./gr1area]
     type = ElementIntegralVariablePostprocessor
-    variable = 'gr1'
-    execute_on = 'initial timestep_end'
+    variable = gr1
   [../]
 []
 
@@ -96,19 +83,27 @@
   type = Transient
   scheme = bdf2
   solve_type = NEWTON
+
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg 31'
+
   l_tol = 1.0e-4
   l_max_its = 30
   nl_max_its = 20
   nl_rel_tol = 1.0e-9
   start_time = 0.0
-  num_steps = 2
-  dt = 4
+  num_steps = 10
+  dt = 80.0
+  [./Adaptivity]
+    initial_adaptivity = 2
+    refine_fraction = 0.8
+    coarsen_fraction = 0.05
+    max_h_level = 2
+  [../]
 []
 
 [Outputs]
-  file_base = GBEvolution_mob
+  execute_on = 'timestep_end'
+  csv = true
   exodus = true
 []
-

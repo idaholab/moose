@@ -9,7 +9,12 @@
 
 #pragma once
 
+#include "DualReal.h"
+
+#include "metaphysicl/numberarray.h"
+#include "metaphysicl/dualnumber.h"
 #include "libmesh/libmesh_common.h"
+
 using namespace libMesh;
 
 namespace fp
@@ -25,6 +30,7 @@ namespace fp
  * @return Reynolds number
  */
 Real reynolds(Real rho, Real vel, Real L, Real mu);
+DualReal reynolds(DualReal rho, DualReal vel, DualReal L, DualReal mu);
 
 /**
  * Compute Prandtl number
@@ -35,6 +41,7 @@ Real reynolds(Real rho, Real vel, Real L, Real mu);
  * @return Prandtl number
  */
 Real prandtl(Real cp, Real mu, Real k);
+DualReal prandtl(DualReal cp, DualReal mu, DualReal k);
 
 /**
  * Compute Grashof number
@@ -49,6 +56,13 @@ Real prandtl(Real cp, Real mu, Real k);
  * @return Grashof number
  */
 Real grashof(Real beta, Real T_s, Real T_bulk, Real L, Real rho, Real mu, Real gravity_magnitude);
+DualReal grashof(DualReal beta,
+                 DualReal T_s,
+                 DualReal T_bulk,
+                 DualReal L,
+                 DualReal rho,
+                 DualReal mu,
+                 DualReal gravity_magnitude);
 
 /**
  * Compute Laplace number
@@ -60,6 +74,7 @@ Real grashof(Real beta, Real T_s, Real T_bulk, Real L, Real rho, Real mu, Real g
  * @return Laplace number
  */
 Real laplace(Real sigma, Real rho, Real L, Real mu);
+DualReal laplace(DualReal sigma, DualReal rho, DualReal L, DualReal mu);
 
 /**
  * Compute thermal diffusivity
@@ -70,6 +85,7 @@ Real laplace(Real sigma, Real rho, Real L, Real mu);
  * @return Thermal diffusivity
  */
 Real thermalDiffusivity(Real k, Real rho, Real cp);
+DualReal thermalDiffusivity(DualReal k, DualReal rho, DualReal cp);
 
 /**
  * Compute Peclet number
@@ -80,6 +96,7 @@ Real thermalDiffusivity(Real k, Real rho, Real cp);
  * @return Peclet number
  */
 Real peclet(Real vel, Real L, Real diffusivity);
+DualReal peclet(DualReal vel, DualReal L, DualReal diffusivity);
 
 } // namespace fp
 

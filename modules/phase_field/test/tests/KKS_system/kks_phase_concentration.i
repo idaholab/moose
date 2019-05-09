@@ -149,6 +149,8 @@
   type = Steady
   solve_type = 'PJFNK'
   #solve_type = 'NEWTON'
+  petsc_options_iname = '-pctype -sub_pc_type -sub_pc_factor_shift_type'
+  petsc_options_value = ' asm    lu          nonzero'
 []
 
 [Preconditioning]
