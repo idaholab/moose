@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWWATERVAPORTEST_H
-#define POROUSFLOWWATERVAPORTEST_H
+#pragma once
 
 #include "MooseObjectUnitTest.h"
 #include "PorousFlowCapillaryPressureVG.h"
@@ -45,5 +44,3 @@ protected:
   const PorousFlowWaterVapor * _fp;
   const Water97FluidProperties * _water_fp;
 };
-
-#endif // POROUSFLOWWATERVAPORTEST_H
