@@ -25,6 +25,7 @@ validParams<ArrayDGDiffusion>()
       "diff", "The diffusion (or thermal conductivity or viscosity) coefficient.");
   params.addParam<Real>("sigma", 4, "sigma");
   params.addParam<Real>("epsilon", 1, "epsilon");
+  params.addClassDescription("Implements interior penalty method for array diffusion equations.");
   return params;
 }
 

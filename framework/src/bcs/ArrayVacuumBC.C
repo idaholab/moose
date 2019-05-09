@@ -17,6 +17,8 @@ validParams<ArrayVacuumBC>()
 {
   InputParameters params = validParams<ArrayIntegratedBC>();
   params.addParam<RealArrayValue>("alpha", "Ratio between directional gradient and solution");
+  params.addClassDescription("Imposes the Robin boundary condition $\\partial_n "
+                             "\\vec{u}=-\\frac{\\vec{\\alpha}}{2}\\vec{u}$.");
   return params;
 }
 

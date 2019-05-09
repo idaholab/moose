@@ -6,6 +6,6 @@
     group = 'requirements'
     requirement = 'MOOSE shall provide an ability to add array variables with constant initial conditions.'
     issues = '#6881'
-    design = 'moose_variables.md'
+    design = 'ArrayMooseVariable.md'
   [../]
 []
