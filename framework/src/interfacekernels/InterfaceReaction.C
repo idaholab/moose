@@ -9,7 +9,7 @@
 
 #include "InterfaceReaction.h"
 
-registerMooseObject("MooseTestApp", InterfaceReaction);
+registerMooseObject("MooseApp", InterfaceReaction);
 
 template <>
 InputParameters
