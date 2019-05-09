@@ -82,7 +82,7 @@ JunctionOneToOne1PhaseUserObject::execute()
   for (const auto & varname_eq_index_pair : _varname_eq_index_pairs)
   {
     MooseVariable * var = getVar(varname_eq_index_pair.first, 0);
-    std::vector<dof_id_type> & dofs = var->dofIndices();
+    auto && dofs = var->dofIndices();
     mooseAssert(dofs.size() == 1, "There should be only one DoF index.");
     _dof_indices[c][varname_eq_index_pair.second] = dofs[0];
   }
