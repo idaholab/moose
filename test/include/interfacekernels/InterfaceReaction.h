@@ -31,5 +31,3 @@ protected:
   const MaterialProperty<Real> & _D;
   const MaterialProperty<Real> & _D_neighbor;
 };
-
-
