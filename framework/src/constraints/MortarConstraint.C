@@ -75,17 +75,17 @@ MortarConstraint::computeJacobian(Moose::MortarType mortar_type)
   {
     case MType::Slave:
       test_space_size = _slave_var.dofIndices().size();
-      jacobian_types = {JType::SlaveSlave, JType::SlaveMaster, JType::SlaveLower};
+      jacobian_types = {{JType::SlaveSlave, JType::SlaveMaster, JType::SlaveLower}};
       break;
 
     case MType::Master:
       test_space_size = _master_var.dofIndicesNeighbor().size();
-      jacobian_types = {JType::MasterSlave, JType::MasterMaster, JType::MasterLower};
+      jacobian_types = {{JType::MasterSlave, JType::MasterMaster, JType::MasterLower}};
       break;
 
     case MType::Lower:
       test_space_size = _var ? _var->dofIndicesLower().size() : 0;
-      jacobian_types = {JType::LowerSlave, JType::LowerMaster, JType::LowerLower};
+      jacobian_types = {{JType::LowerSlave, JType::LowerMaster, JType::LowerLower}};
       break;
   }
 
@@ -117,9 +117,9 @@ MortarConstraint::computeJacobian(Moose::MortarType mortar_type)
         break;
     }
 
-    std::array<size_t, 3> shape_space_sizes{jvariable.dofIndices().size(),
-                                            jvariable.dofIndicesNeighbor().size(),
-                                            jvariable.dofIndicesLower().size()};
+    std::array<size_t, 3> shape_space_sizes{{jvariable.dofIndices().size(),
+                                             jvariable.dofIndicesNeighbor().size(),
+                                             jvariable.dofIndicesLower().size()}};
     std::array<const VariablePhiValue *, 3> phis;
     std::array<const VariablePhiGradient *, 3> grad_phis;
     std::array<const VectorVariablePhiValue *, 3> vector_phis;
@@ -127,16 +127,16 @@ MortarConstraint::computeJacobian(Moose::MortarType mortar_type)
     if (jvariable.isVector())
     {
       const auto & temp_var = static_cast<MooseVariableFE<RealVectorValue> &>(jvariable);
-      vector_phis = {&temp_var.phiFace(), &temp_var.phiFaceNeighbor(), &temp_var.phiLower()};
+      vector_phis = {{&temp_var.phiFace(), &temp_var.phiFaceNeighbor(), &temp_var.phiLower()}};
       vector_grad_phis = {
-          &temp_var.gradPhiFace(), &temp_var.gradPhiFaceNeighbor(), &temp_var.gradPhiLower()};
+          {&temp_var.gradPhiFace(), &temp_var.gradPhiFaceNeighbor(), &temp_var.gradPhiLower()}};
     }
     else
     {
       const auto & temp_var = static_cast<MooseVariableFE<Real> &>(jvariable);
-      phis = {&temp_var.phiFace(), &temp_var.phiFaceNeighbor(), &temp_var.phiLower()};
+      phis = {{&temp_var.phiFace(), &temp_var.phiFaceNeighbor(), &temp_var.phiLower()}};
       grad_phis = {
-          &temp_var.gradPhiFace(), &temp_var.gradPhiFaceNeighbor(), &temp_var.gradPhiLower()};
+          {&temp_var.gradPhiFace(), &temp_var.gradPhiFaceNeighbor(), &temp_var.gradPhiLower()}};
     }
 
     for (MooseIndex(3) type_index = 0; type_index < 3; ++type_index)

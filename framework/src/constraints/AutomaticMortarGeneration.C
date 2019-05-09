@@ -606,7 +606,7 @@ AutomaticMortarGeneration::projectSlaveNodesSinglePair(
       Point nodal_normal = this->slave_node_to_nodal_normal.at(slave_node);
 
       // Data structure for performing Nanoflann searches.
-      std::array<Real, 3> query_pt = {(*slave_node)(0), (*slave_node)(1), (*slave_node)(2)};
+      std::array<Real, 3> query_pt = {{(*slave_node)(0), (*slave_node)(1), (*slave_node)(2)}};
 
       // The number of results we want to get.  We'll look for a
       // "few" nearest nodes, hopefully that is enough to let us
