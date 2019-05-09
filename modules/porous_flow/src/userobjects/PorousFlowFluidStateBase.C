@@ -13,7 +13,7 @@ template <>
 InputParameters
 validParams<PorousFlowFluidStateBase>()
 {
-  InputParameters params = validParams<PorousFlowFluidStateFlash>();
+  InputParameters params = validParams<GeneralUserObject>();
   params.addParam<unsigned int>("liquid_phase_number", 0, "The phase number of the liquid phase");
   params.addParam<unsigned int>(
       "liquid_fluid_component", 0, "The fluid component number of the primary liquid component");
@@ -25,14 +25,12 @@ validParams<PorousFlowFluidStateBase>()
 }
 
 PorousFlowFluidStateBase::PorousFlowFluidStateBase(const InputParameters & parameters)
-  : PorousFlowFluidStateFlash(parameters),
+  : GeneralUserObject(parameters),
     _aqueous_phase_number(getParam<unsigned int>("liquid_phase_number")),
     _aqueous_fluid_component(getParam<unsigned int>("liquid_fluid_component")),
     _salt_component(getParam<unsigned int>("salt_component")),
     _R(8.3144598),
     _T_c2k(273.15),
-    _nr_max_its(42),
-    _nr_tol(1.0e-12),
     _pc(getUserObject<PorousFlowCapillaryPressure>("capillary_pressure"))
 {
 }
@@ -41,4 +39,10 @@ void
 PorousFlowFluidStateBase::clearFluidStateProperties(std::vector<FluidStateProperties> & fsp) const
 {
   std::fill(fsp.begin(), fsp.end(), FluidStateProperties(_num_components));
+}
+
+void
+PorousFlowFluidStateBase::clearFluidStateProperties(std::vector<FluidStatePropertiesAD> & fsp) const
+{
+  std::fill(fsp.begin(), fsp.end(), FluidStatePropertiesAD(_num_components));
 }

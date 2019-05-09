@@ -40,4 +40,3 @@ z^{\kappa} = \frac{\sum_{\alpha} S_{\alpha} \rho_{\alpha} x_{\alpha}^{\kappa}}{\
 
 
 !bibtex bibliography
-

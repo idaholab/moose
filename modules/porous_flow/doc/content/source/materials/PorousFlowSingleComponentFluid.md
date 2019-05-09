@@ -4,7 +4,7 @@
 
 !alert note
 The FluidProperties userobjects expect temperature in Kelvin. If the simulation uses temperature in
-Celcius, `temperature_units = celcius` must be used.
+Celsius, `temperature_units = celsius` must be used.
 
 !syntax parameters /Materials/PorousFlowSingleComponentFluid
 

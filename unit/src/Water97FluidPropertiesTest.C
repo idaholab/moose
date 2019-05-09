@@ -472,34 +472,34 @@ TEST_F(Water97FluidPropertiesTest, properties)
 
   // Backwards equation T(p,h)
   // Region 1
-  REL_TEST(_fp->temperature_from_ph(3.0e6, 500.0e3), 0.391798509e3, tol);
-  REL_TEST(_fp->temperature_from_ph(80.0e6, 500.0e3), 0.378108626e3, tol);
-  REL_TEST(_fp->temperature_from_ph(80.0e6, 1500.0e3), 0.611041229e3, tol);
+  REL_TEST(_fp->T_from_p_h(3.0e6, 500.0e3), 0.391798509e3, tol);
+  REL_TEST(_fp->T_from_p_h(80.0e6, 500.0e3), 0.378108626e3, tol);
+  REL_TEST(_fp->T_from_p_h(80.0e6, 1500.0e3), 0.611041229e3, tol);
 
   // Region 2 (subregion a)
-  REL_TEST(_fp->temperature_from_ph(1.0e3, 3000.0e3), 0.534433241e3, tol);
-  REL_TEST(_fp->temperature_from_ph(3.0e6, 3000.0e3), 0.575373370e3, tol);
-  REL_TEST(_fp->temperature_from_ph(3.0e6, 4000.0e3), 0.101077577e4, tol);
+  REL_TEST(_fp->T_from_p_h(1.0e3, 3000.0e3), 0.534433241e3, tol);
+  REL_TEST(_fp->T_from_p_h(3.0e6, 3000.0e3), 0.575373370e3, tol);
+  REL_TEST(_fp->T_from_p_h(3.0e6, 4000.0e3), 0.101077577e4, tol);
 
   // Region 2 (subregion b)
-  REL_TEST(_fp->temperature_from_ph(5.0e6, 3500.0e3), 0.801299102e3, tol);
-  REL_TEST(_fp->temperature_from_ph(5.0e6, 4000.0e3), 0.101531583e4, tol);
-  REL_TEST(_fp->temperature_from_ph(25.0e6, 3500.0e3), 0.875279054e3, tol);
+  REL_TEST(_fp->T_from_p_h(5.0e6, 3500.0e3), 0.801299102e3, tol);
+  REL_TEST(_fp->T_from_p_h(5.0e6, 4000.0e3), 0.101531583e4, tol);
+  REL_TEST(_fp->T_from_p_h(25.0e6, 3500.0e3), 0.875279054e3, tol);
 
   // Region 2 (subregion c)
-  REL_TEST(_fp->temperature_from_ph(40.0e6, 2700.0e3), 0.743056411e3, tol);
-  REL_TEST(_fp->temperature_from_ph(60.0e6, 2700.0e3), 0.791137067e3, tol);
-  REL_TEST(_fp->temperature_from_ph(60.0e6, 3200.0e3), 0.882756860e3, tol);
+  REL_TEST(_fp->T_from_p_h(40.0e6, 2700.0e3), 0.743056411e3, tol);
+  REL_TEST(_fp->T_from_p_h(60.0e6, 2700.0e3), 0.791137067e3, tol);
+  REL_TEST(_fp->T_from_p_h(60.0e6, 3200.0e3), 0.882756860e3, tol);
 
   // Region 3 (subregion a)
-  REL_TEST(_fp->temperature_from_ph(20.0e6, 1700.0e3), 0.6293083892e3, tol);
-  REL_TEST(_fp->temperature_from_ph(50.0e6, 2000.0e3), 0.6905718338e3, tol);
-  REL_TEST(_fp->temperature_from_ph(100.0e6, 2100.0e3), 0.7336163014e3, tol);
+  REL_TEST(_fp->T_from_p_h(20.0e6, 1700.0e3), 0.6293083892e3, tol);
+  REL_TEST(_fp->T_from_p_h(50.0e6, 2000.0e3), 0.6905718338e3, tol);
+  REL_TEST(_fp->T_from_p_h(100.0e6, 2100.0e3), 0.7336163014e3, tol);
 
   // Region 3 (subregion b)
-  REL_TEST(_fp->temperature_from_ph(20.0e6, 2500.0e3), 0.6418418053e3, tol);
-  REL_TEST(_fp->temperature_from_ph(50.0e6, 2400.0e3), 0.7351848618e3, tol);
-  REL_TEST(_fp->temperature_from_ph(100.0e6, 2700.0e3), 0.8420460876e3, tol);
+  REL_TEST(_fp->T_from_p_h(20.0e6, 2500.0e3), 0.6418418053e3, tol);
+  REL_TEST(_fp->T_from_p_h(50.0e6, 2400.0e3), 0.7351848618e3, tol);
+  REL_TEST(_fp->T_from_p_h(100.0e6, 2700.0e3), 0.8420460876e3, tol);
 }
 
 /**
@@ -580,6 +580,30 @@ TEST_F(Water97FluidPropertiesTest, derivatives)
   _fp->mu_from_p_T(p, T, mu, dmu_dp, dmu_dT);
 
   REL_TEST(dmu_dp, dmu_dp_fd, 1.0e-5);
+
+  // Check derivatives of temperature calculated using pressure and enthalpy using AD
+  DualReal adp = 3.0e6;
+  adp.derivatives()[0] = 1.0;
+
+  DualReal adh = 4.0e6;
+  adh.derivatives()[1] = 1.0;
+
+  DualReal adT = _ad_fp->T_from_p_h(adp, adh);
+
+  REL_TEST(adT.value(), 0.101077577e4, 1.0e-8);
+
+  Real dT_dp_fd = (_fp->T_from_p_h(adp.value() + dp, adh.value()) -
+                   _fp->T_from_p_h(adp.value() - dp, adh.value())) /
+                  (2.0 * dp);
+
+  REL_TEST(adT.derivatives()[0], dT_dp_fd, tol);
+
+  const Real dh = 1.0;
+  Real dT_dh_fd = (_fp->T_from_p_h(adp.value(), adh.value() + dh) -
+                   _fp->T_from_p_h(adp.value(), adh.value() - dh)) /
+                  (2.0 * dh);
+
+  REL_TEST(adT.derivatives()[1], dT_dh_fd, tol);
 }
 
 /**

@@ -17,7 +17,7 @@ template <>
 InputParameters
 validParams<PorousFlowWaterNCG>()
 {
-  InputParameters params = validParams<PorousFlowFluidStateBase>();
+  InputParameters params = validParams<PorousFlowFluidStateMultiComponentBase>();
   params.addRequiredParam<UserObjectName>("water_fp", "The name of the user object for water");
   params.addRequiredParam<UserObjectName>(
       "gas_fp", "The name of the user object for the non-condensable gas");
@@ -26,7 +26,7 @@ validParams<PorousFlowWaterNCG>()
 }
 
 PorousFlowWaterNCG::PorousFlowWaterNCG(const InputParameters & parameters)
-  : PorousFlowFluidStateBase(parameters),
+  : PorousFlowFluidStateMultiComponentBase(parameters),
     _water_fp(getUserObject<SinglePhaseFluidProperties>("water_fp")),
     _ncg_fp(getUserObject<SinglePhaseFluidProperties>("gas_fp")),
     _Mh2o(_water_fp.molarMass()),

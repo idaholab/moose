@@ -1,6 +1,9 @@
 # QA tests of PorousFlow
 
-There are over 500 unit and quality-assurance tests in the PorousFlow test suite.  The pages below describe some of the more non-trivial tests.
+The capability of PorousFlow is rigorously tested through a large number of regression tests
+that are provided in the test suite. Many of these tests are designed to recover analytical
+solutions to the problem or to reproduce well-known benchmark problems. The pages below describe some of
+the more non-trivial tests.
 
 - [Infiltration and drainage](tests/infiltration_and_drainage/infiltration_and_drainage_tests.md)
 - [Heat and fluid responses in finite 1D bars subject to various boundary conditions](tests/newton_cooling/newton_cooling_tests.md)
@@ -16,6 +19,8 @@ There are over 500 unit and quality-assurance tests in the PorousFlow test suite
 - [Establishment of gravitational head](tests/gravity/gravity_tests.md)
 - [Dispersion and diffusion](tests/dispersion/dispersion_tests.md)
 - [Heating from inelastic deformation](tests/plastic_heating/plastic_heating_tests.md)
+- [1D heat and mass transport](tests/avdonin/1d_avdonin.md)
+- [1D radial heat and mass transport](tests/avdonin/1d_radial_avdonin.md)
 - [Tests of the Jacobian](tests/jacobian/jacobian_tests.md)
 
 Many of the PorousFlow tests were created before MOOSE's current documentation system was established.  Therefore, we are still in the process of documenting the tests.  The following pages need to be completed.

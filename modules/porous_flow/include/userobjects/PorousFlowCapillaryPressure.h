@@ -71,6 +71,7 @@ public:
    * @return second derivative of capillary pressure with respect to true saturation
    */
   virtual Real d2CapillaryPressure(Real saturation, unsigned qp = 0) const;
+  virtual DualReal capillaryPressure(DualReal saturation, unsigned qp = 0) const;
 
   /**
    * Effective saturation as a function of capillary pressure

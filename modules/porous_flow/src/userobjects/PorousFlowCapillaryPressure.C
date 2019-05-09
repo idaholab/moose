@@ -172,3 +172,16 @@ PorousFlowCapillaryPressure::interceptFunctionDeriv(Real saturation) const
 
   return saturation * (dpc * dpc / pc - d2pc) / (_log10 * pc);
 }
+
+DualReal
+PorousFlowCapillaryPressure::capillaryPressure(DualReal saturation, unsigned qp) const
+{
+  const Real Pc = capillaryPressure(saturation.value(), qp);
+  const Real dPc_ds = dCapillaryPressure(saturation.value(), qp);
+
+  DualReal result = Pc;
+  for (std::size_t i = 0; i < saturation.derivatives().size(); ++i)
+    result.derivatives()[i] = saturation.derivatives()[i] * dPc_ds;
+
+  return result;
+}
