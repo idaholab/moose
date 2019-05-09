@@ -94,12 +94,15 @@ SamplerPostprocessorTransfer::finalizeFromMultiapp()
   _communicator.gather(0, _local_values);
 
   // Update VPP
-  const dof_id_type n = _sampler->getTotalNumberOfRows();
-  for (MooseIndex(n) i = 0; i < n; i++)
+  if (processor_id() == 0)
   {
-    Sampler::Location loc = _sampler->getLocation(i);
-    VectorPostprocessorValue & vpp = _results->getVectorPostprocessorValueByGroup(loc.sample());
-    vpp[loc.row()] = _local_values[i];
+    const dof_id_type n = _sampler->getTotalNumberOfRows();
+    for (MooseIndex(n) i = 0; i < n; i++)
+    {
+      Sampler::Location loc = _sampler->getLocation(i);
+      VectorPostprocessorValue & vpp = _results->getVectorPostprocessorValueByGroup(loc.sample());
+      vpp[loc.row()] = _local_values[i];
+    }
   }
 }
 
