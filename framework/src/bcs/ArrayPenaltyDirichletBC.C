@@ -18,6 +18,11 @@ validParams<ArrayPenaltyDirichletBC>()
   InputParameters params = validParams<ArrayIntegratedBC>();
   params.addParam<Real>("penalty", 4, "Penalty scalar");
   params.addRequiredParam<RealArrayValue>("value", "Boundary value of the array variable");
+  params.addClassDescription(
+      "Enforces a Dirichlet boundary condition "
+      "in a weak sense with $p(\\vec{u}^\\ast, \\vec{u} - \\vec{u}_0)$, where $p$ is the constant "
+      "scalar penalty; $\\vec{u}^\\ast$ is the test functions and $\\vec{u} - \\vec{u}_0$ is the "
+      "differences between the current solution and the Dirichlet data.");
   return params;
 }
 
