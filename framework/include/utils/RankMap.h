@@ -32,7 +32,11 @@ public:
    * Returns the "hardware ID" (a unique ID given to each physical compute node in the job)
    * for a given processor ID (rank)
    */
-  unsigned int hardwareID(processor_id_type pid) const { return _rank_to_hardware_id[pid]; }
+  unsigned int hardwareID(processor_id_type pid) const
+  {
+    mooseAssert(pid < _communicator.size(), "PID out of range");
+    return _rank_to_hardware_id[pid];
+  }
 
   /**
    * Returns the ranks that are on the given hardwareID (phsical node in the job)
@@ -52,10 +56,10 @@ public:
   const std::vector<unsigned int> & rankHardwareIds() const { return _rank_to_hardware_id; }
 
 protected:
-  PerfID _construct_timer;
+  const PerfID _construct_timer;
 
   /// Map of hardware_id -> ranks on that node
-  std::map<unsigned int, std::vector<processor_id_type>> _hardware_id_to_ranks;
+  std::unordered_map<unsigned int, std::vector<processor_id_type>> _hardware_id_to_ranks;
 
   /// Each entry corresponds to the hardware_id for that PID
   std::vector<unsigned int> _rank_to_hardware_id;

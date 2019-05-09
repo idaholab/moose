@@ -48,7 +48,7 @@ RankMap::RankMap(const Parallel::Communicator & comm, PerfGraph & perf_graph)
   // Assign a contiguous unique numerical id to each shared memory group
   unsigned int next_id = 0;
 
-  for (auto pid = beginIndex(world_ranks); pid < world_ranks.size(); pid++)
+  for (MooseIndex(world_ranks) pid = 0; pid < world_ranks.size(); pid++)
   {
     auto world_rank = world_ranks[pid];
 
