@@ -50,13 +50,12 @@
 
 [Components]
   [./heat_structure]
-    type = HeatStructure
-    hs_type = CYLINDER
+    type = HeatStructureCylindrical
     num_rods = 5
 
     position = '0 0 0'
     orientation = '1 0 0'
-    axial_offset = 2.0
+    inner_radius = 2.0
     length = 2.0
     n_elems = 50
 

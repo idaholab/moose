@@ -1,6 +1,7 @@
 #include "HeatTransferFromHeatStructure1Phase.h"
 #include "FlowChannel1Phase.h"
-#include "HeatStructure.h"
+#include "HeatStructureBase.h"
+#include "HeatStructureCylindrical.h"
 #include "FlowModelSinglePhase.h"
 #include "KDTree.h"
 #include "THMMesh.h"
@@ -129,13 +130,11 @@ HeatTransferFromHeatStructure1Phase::check() const
 {
   HeatTransferFromTemperature1Phase::check();
 
-  checkComponentOfTypeExistsByName<HeatStructure>(_hs_name);
+  checkComponentOfTypeExistsByName<HeatStructureBase>(_hs_name);
 
-  if (hasComponentByName<HeatStructure>(_hs_name))
+  if (hasComponentByName<HeatStructureBase>(_hs_name))
   {
-    const HeatStructure & hs = getComponentByName<HeatStructure>(_hs_name);
-    if (hs.getDimension() == 1)
-      logError("1D heat structures cannot be used; 2D heat structures must be used instead.");
+    const HeatStructureBase & hs = getComponentByName<HeatStructureBase>(_hs_name);
 
     const Real & P_hs = hs.getUnitPerimeter(_hs_side);
     if (MooseUtils::absoluteFuzzyEqual(P_hs, 0.))
@@ -146,10 +145,10 @@ HeatTransferFromHeatStructure1Phase::check() const
                "' has radius of zero.");
   }
 
-  if (hasComponentByName<HeatStructure>(_hs_name) &&
+  if (hasComponentByName<HeatStructureBase>(_hs_name) &&
       hasComponentByName<FlowChannel1Phase>(_flow_channel_name))
   {
-    const HeatStructure & hs = getComponentByName<HeatStructure>(_hs_name);
+    const HeatStructureBase & hs = getComponentByName<HeatStructureBase>(_hs_name);
     const FlowChannel1Phase & flow_channel =
         getComponentByName<FlowChannel1Phase>(_flow_channel_name);
 
@@ -187,7 +186,7 @@ HeatTransferFromHeatStructure1Phase::addVariables()
   // wall temperature initial condition
   if (!_app.isRestarting())
   {
-    const HeatStructure & hs = getComponentByName<HeatStructure>(_hs_name);
+    const HeatStructureBase & hs = getComponentByName<HeatStructureBase>(_hs_name);
     _sim.addFunctionIC(_T_wall_name, hs.getInitialT(), _flow_channel_name);
   }
 }
@@ -200,7 +199,8 @@ HeatTransferFromHeatStructure1Phase::addMooseObjects()
   ExecFlagEnum execute_on(MooseUtils::getDefaultExecFlagEnum());
   execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
 
-  const HeatStructure & hs = getComponentByName<HeatStructure>(_hs_name);
+  const HeatStructureBase & hs = getComponentByName<HeatStructureBase>(_hs_name);
+  const bool is_cylindrical = dynamic_cast<const HeatStructureCylindrical *>(&hs) != nullptr;
   const FlowChannel1Phase & flow_channel =
       getComponentByName<FlowChannel1Phase>(_flow_channel_name);
 
@@ -243,7 +243,7 @@ HeatTransferFromHeatStructure1Phase::addMooseObjects()
     params.set<UserObjectName>("q_uo") = heat_flux_uo_name;
     params.set<Real>("P_hs_unit") = hs.getUnitPerimeter(_hs_side);
     params.set<unsigned int>("n_unit") = hs.getNumberOfUnits();
-    params.set<bool>("hs_coord_system_is_cylindrical") = hs.isCylindrical();
+    params.set<bool>("hs_coord_system_is_cylindrical") = is_cylindrical;
     params.set<std::vector<VariableName>>("rhoA") = {FlowModelSinglePhase::RHOA};
     params.set<std::vector<VariableName>>("rhouA") = {FlowModelSinglePhase::RHOUA};
     params.set<std::vector<VariableName>>("rhoEA") = {FlowModelSinglePhase::RHOEA};
@@ -267,7 +267,7 @@ HeatTransferFromHeatStructure1Phase::addMooseObjects()
 const BoundaryName &
 HeatTransferFromHeatStructure1Phase::getMasterSideName() const
 {
-  const HeatStructure & hs = getComponentByName<HeatStructure>(_hs_name);
+  const HeatStructureBase & hs = getComponentByName<HeatStructureBase>(_hs_name);
 
   switch (_hs_side)
   {
