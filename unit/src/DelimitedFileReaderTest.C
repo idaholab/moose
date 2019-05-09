@@ -7,9 +7,6 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DELIMITEDFILEREADERTEST_H
-#define DELIMITEDFILEREADERTEST_H
-
 #include "gtest/gtest.h"
 
 // MOOSE includes
@@ -421,5 +418,3 @@ TEST(DelimitedFileReader, Empty)
   reader.read();
   EXPECT_EQ(reader.getData(), std::vector<std::vector<double>>());
 }
-
-#endif
