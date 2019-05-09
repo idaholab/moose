@@ -83,6 +83,7 @@
     type = CSVDiff
     input = s09.i
     csvdiff = 's09_mf_0100.csv s09_mf_0050.csv s09_mf_0010.csv'
+    abs_zero = 1E-7
     threading = '!pthreads'
     requirement = 'PorousFlow shall be able to model a source/sink boundary condition that holds porepressures fixed and extracts fluid components from boundaries at a rate prescribed by the flow within the model at the boundary - viz, the sink should behave like a free boundary'
     issues = '#7333'
@@ -92,6 +93,7 @@
     type = CSVDiff
     input = s09_fully_saturated.i
     csvdiff = 's09_fully_saturated_mf_0100.csv s09_fully_saturated_mf_0050.csv s09_fully_saturated_mf_0010.csv'
+    abs_zero = 1E-5
     threading = '!pthreads'
     requirement = 'PorousFlow shall be able to model a source/sink boundary condition that holds porepressures fixed and extracts fluid components from boundaries at a rate prescribed by the flow within the model at the boundary - viz, the sink should behave like a free boundary, and this feature shall be compatible with the fully-saturated formalism within PorousFlow'
     issues = '#7333'

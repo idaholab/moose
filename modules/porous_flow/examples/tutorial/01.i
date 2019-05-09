@@ -111,9 +111,6 @@
   [./basic]
     type = SMP
     full = true
-    petsc_options = '-ksp_diagonal_scale -ksp_diagonal_scale_fix'
-    petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_shift_type -pc_asm_overlap'
-    petsc_options_value = ' asm      lu           NONZERO                   2'
   [../]
   [./preferred_but_might_not_be_installed]
     type = SMP
@@ -128,7 +125,7 @@
   solve_type = Newton
   end_time = 1E6
   dt = 1E5
-  nl_abs_tol = 1E-10
+  nl_abs_tol = 1E-13
 []
 
 [Outputs]

@@ -47,6 +47,8 @@
   solve_type = NEWTON
   dt = 10
   end_time = 100
+  nl_abs_tol = 1E-13
+  nl_rel_tol = 1E-12
 []
 
 [Outputs]
