@@ -11,32 +11,38 @@
 """
 Report statistics regarding the SQA documentation in MOOSE.
 """
-import os
 import mooseutils
 
-def report_requirement_stats(location, specs):
-    """
-    Report requirement statistics for the test spec files with the supplied location.
-    """
-    requirements = 0
-    tests = 0
-    for filename in mooseutils.git_ls_files(location):
-        if not os.path.isfile(filename):
-            continue
-        fname = os.path.basename(filename)
-        if fname in specs:
-            root = mooseutils.hit_load(filename)
-            for child in root.children[0]:
-                tests += 1
-                if child.get('requirement', None):
-                    requirements += 1
-
-    complete = float(requirements)/float(tests)
-    print 'Requirement Definitions ({:2.1f}% complete):'.format(complete*100)
-    print '                 Location: {}'.format(location)
-    print '                    Specs: {}'.format(' '.join(specs))
-    print '    Total Number of Tests: {}'.format(tests)
-    print '  Tests with Requirements: {}'.format(requirements)
-
 if __name__ == '__main__':
-    report_requirement_stats(os.path.abspath(os.path.join('..', 'test', 'tests')), ['tests'])
+    data = mooseutils.SQAStats('Total')
+    data += mooseutils.compute_requirement_stats('test/tests')
+    data += mooseutils.compute_requirement_stats('stork')
+    data += mooseutils.compute_requirement_stats('tutorials')
+    data += mooseutils.compute_requirement_stats('examples')
+    data += mooseutils.compute_requirement_stats('scripts')
+    data += mooseutils.compute_requirement_stats('python')
+    data += mooseutils.compute_requirement_stats('modules/chemical_reactions')
+    data += mooseutils.compute_requirement_stats('modules/combined')
+    data += mooseutils.compute_requirement_stats('modules/contact')
+    data += mooseutils.compute_requirement_stats('modules/external_petsc_solver')
+    data += mooseutils.compute_requirement_stats('modules/fluid_properties')
+    data += mooseutils.compute_requirement_stats('modules/functional_expansion_tools')
+    data += mooseutils.compute_requirement_stats('modules/heat_conduction')
+    data += mooseutils.compute_requirement_stats('modules/level_set')
+    data += mooseutils.compute_requirement_stats('modules/misc')
+    data += mooseutils.compute_requirement_stats('modules/navier_stokes')
+    data += mooseutils.compute_requirement_stats('modules/phase_field')
+    data += mooseutils.compute_requirement_stats('modules/porous_flow')
+    data += mooseutils.compute_requirement_stats('modules/rdg')
+    data += mooseutils.compute_requirement_stats('modules/richards')
+    data += mooseutils.compute_requirement_stats('modules/solid_mechanics')
+    data += mooseutils.compute_requirement_stats('modules/stochastic_tools')
+    data += mooseutils.compute_requirement_stats('modules/tensor_mechanics')
+    data += mooseutils.compute_requirement_stats('modules/xfem')
+    print data
+
+    tdata = mooseutils.compute_requirement_stats('', show=False)
+    if tdata.files != data.files:
+        msg = 'ERROR: The total number of test files for the supplied directories does not match\n' \
+              '       the  number of test files in the repository.'
+        print mooseutils.colorText(msg, 'RED')
