@@ -162,13 +162,6 @@ class TestDocTree(unittest.TestCase):
                 self.assertEqual(p.source,
                                  os.path.join(ROOT_DIR, 'framework/doc/content/getting_started'))
 
-            if p.name == 'getting_started/installation/bash_profile.md':
-                self.assertIsInstance(p, pages.Source)
-                self.assertEqual(p.local, 'getting_started/installation/bash_profile.md')
-                self.assertEqual(p.source,
-                                 os.path.join(ROOT_DIR,
-                                              'framework/doc/content/getting_started/installation/bash_profile.md'))
-
 if __name__ == '__main__':
     import logging
     logging.basicConfig()
