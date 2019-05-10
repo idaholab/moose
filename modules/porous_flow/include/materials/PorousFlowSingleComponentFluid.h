@@ -31,6 +31,18 @@ protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
+  /// Unit used for porepressure
+  const enum class PressureUnitEnum { Pa, MPa } _p_unit;
+
+  /// convert porepressure to Pascals by multiplying by this quantity
+  const Real _pressure_to_Pascals;
+
+  /// Unit used for time
+  const enum class TimeUnitEnum { seconds, hours, days, years } _time_unit;
+
+  /// convert time to seconds by multiplying by this quantity
+  const Real _time_to_seconds;
+
   /// If true, this Material will compute density and viscosity, and their derivatives
   const bool _compute_rho_mu;
 
@@ -79,4 +91,3 @@ protected:
   /// Fluid properties UserObject
   const SinglePhaseFluidProperties & _fp;
 };
-

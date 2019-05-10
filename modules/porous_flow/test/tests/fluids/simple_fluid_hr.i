@@ -1,8 +1,9 @@
 # Test the properties calculated by the simple fluid Material
+# Time are chosen to be hours
 # Pressure 10 MPa
 # Temperature = 300 K  (temperature unit = K)
 # Density should equal 1500*exp(1E7/1E9-2E-4*300)=1426.844 kg/m^3
-# Viscosity should equal 1.1E-3 Pa.s
+# Viscosity should equal 3.06E-7 Pa.hr
 # Energy density should equal 4000 * 300 = 1.2E6 J/kg
 # Specific enthalpy should equal 4000 * 300 + 10e6 / 1426.844 = 1.207008E6 J/kg
 
@@ -42,7 +43,7 @@
 
 [Variables]
   [./pp]
-    initial_condition = 10e6
+    initial_condition = 10E6
   [../]
   [./T]
     initial_condition = 300.0
@@ -75,6 +76,7 @@
     type = PorousFlowSingleComponentFluid
     at_nodes = false
     temperature_unit = Kelvin
+    time_unit = hours
     fp = the_simple_fluid
     phase = 0
   [../]
@@ -114,6 +116,5 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  file_base = simple_fluid
   csv = true
 []
