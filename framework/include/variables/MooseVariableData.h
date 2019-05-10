@@ -887,8 +887,7 @@ MooseVariableData<OutputType>::adNodalValue() const
 ////////////////////////// Forward declaration of fully specialized templates //////////////////
 
 template <>
-void
-MooseVariableData<RealArrayValue>::fetchDoFValues();
+void MooseVariableData<RealArrayValue>::fetchDoFValues();
 
 template <>
 template <>

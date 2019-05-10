@@ -1316,7 +1316,8 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
 
 template <>
 void
-MooseVariableData<RealArrayValue>::computeAD(const unsigned int /*num_dofs*/, const unsigned int /*nqp*/)
+MooseVariableData<RealArrayValue>::computeAD(const unsigned int /*num_dofs*/,
+                                             const unsigned int /*nqp*/)
 {
   mooseError("AD for array variable has not been implemented");
 }
@@ -1395,7 +1396,8 @@ MooseVariableData<OutputType>::getNodalValue(const Node & node, Moose::SolutionS
 
 template <>
 RealArrayValue
-MooseVariableData<RealArrayValue>::getNodalValue(const Node & node, Moose::SolutionState state) const
+MooseVariableData<RealArrayValue>::getNodalValue(const Node & node,
+                                                 Moose::SolutionState state) const
 {
   mooseAssert(_subproblem.mesh().isSemiLocal(const_cast<Node *>(&node)), "Node is not Semilocal");
 
@@ -1693,7 +1695,8 @@ MooseVariableData<OutputType>::computeIncrementAtQps(const NumericVector<Number>
 
 template <>
 void
-MooseVariableData<RealArrayValue>::computeIncrementAtQps(const NumericVector<Number> & increment_vec)
+MooseVariableData<RealArrayValue>::computeIncrementAtQps(
+    const NumericVector<Number> & increment_vec)
 {
   unsigned int nqp = _qrule->n_points();
 
@@ -1739,7 +1742,8 @@ MooseVariableData<OutputType>::computeIncrementAtNode(const NumericVector<Number
 
 template <>
 void
-MooseVariableData<RealArrayValue>::computeIncrementAtNode(const NumericVector<Number> & increment_vec)
+MooseVariableData<RealArrayValue>::computeIncrementAtNode(
+    const NumericVector<Number> & increment_vec)
 {
   if (!isNodal())
     mooseError("computeIncrementAtNode can only be called for nodal variables");
@@ -1853,8 +1857,9 @@ MooseVariableData<OutputType>::nodalValueDot() const
       return _nodal_value_dot;
     }
     else
-      mooseError("MooseVariableData: Time derivative of solution (`u_dot`) is not stored. Please set "
-                 "uDotRequested() to true in FEProblemBase before requesting `u_dot`.");
+      mooseError(
+          "MooseVariableData: Time derivative of solution (`u_dot`) is not stored. Please set "
+          "uDotRequested() to true in FEProblemBase before requesting `u_dot`.");
   }
   else
     mooseError("Nodal values can be requested only on nodal variables, variable '",
@@ -1874,9 +1879,10 @@ MooseVariableData<OutputType>::nodalValueDotDot() const
       return _nodal_value_dotdot;
     }
     else
-      mooseError("MooseVariableData: Second time derivative of solution (`u_dotdot`) is not stored. "
-                 "Please set uDotDotRequested() to true in FEProblemBase before requesting "
-                 "`u_dotdot`.");
+      mooseError(
+          "MooseVariableData: Second time derivative of solution (`u_dotdot`) is not stored. "
+          "Please set uDotDotRequested() to true in FEProblemBase before requesting "
+          "`u_dotdot`.");
   }
   else
     mooseError("Nodal values can be requested only on nodal variables, variable '",
@@ -1918,9 +1924,10 @@ MooseVariableData<OutputType>::nodalValueDotDotOld() const
       return _nodal_value_dotdot_old;
     }
     else
-      mooseError("MooseVariableData: Old second time derivative of solution (`u_dotdot_old`) is not "
-                 "stored. Please set uDotDotOldRequested() to true in FEProblemBase before "
-                 "requesting `u_dotdot_old`.");
+      mooseError(
+          "MooseVariableData: Old second time derivative of solution (`u_dotdot_old`) is not "
+          "stored. Please set uDotDotOldRequested() to true in FEProblemBase before "
+          "requesting `u_dotdot_old`.");
   }
   else
     mooseError("Nodal values can be requested only on nodal variables, variable '",
