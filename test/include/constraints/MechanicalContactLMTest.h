@@ -25,5 +25,13 @@ public:
 protected:
   ADReal computeQpResidual(Moose::MortarType) final;
 
+  MooseVariableFE<Real> * _slave_disp_y;
+  MooseVariableFE<Real> * _master_disp_y;
+
+  bool _computing_gap_dependence;
+
+  const ADVariableValue * _slave_disp_y_sln;
+  const ADVariableValue * _master_disp_y_sln;
+
   usingMortarConstraintMembers;
 };
