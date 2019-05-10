@@ -3354,8 +3354,9 @@ FEProblemBase::reinitBecauseOfGhostingOrNewGeomObjects()
   needs_reinit = needs_reinit || !_geometric_search_data._nearest_node_locators.empty() ||
                  _mortar_data.hasObjects();
   needs_reinit =
-      needs_reinit ||
-      (_displaced_problem && !_displaced_problem->geomSearchData()._nearest_node_locators.empty());
+      needs_reinit || (_displaced_problem &&
+                       (!_displaced_problem->geomSearchData()._nearest_node_locators.empty() ||
+                        _mortar_data.hasDisplacedObjects()));
   _communicator.max(needs_reinit);
 
   if (needs_reinit)
