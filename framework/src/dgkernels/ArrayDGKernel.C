@@ -152,9 +152,9 @@ ArrayDGKernel::computeElemNeighResidual(Moose::DGResidualType type)
         mooseError("Save-in variable for an array kernel must be an array variable");
 
       if (is_elem)
-        avar->saveDoFValues(_local_re);
+        avar->addSolution(_local_re);
       else
-        avar->saveDoFValuesNeighbor(_local_re);
+        avar->addSolutionNeighbor(_local_re);
     }
   }
 }
@@ -197,9 +197,9 @@ ArrayDGKernel::computeElemNeighJacobian(Moose::DGJacobianType type)
         mooseError("Save-in variable for an array kernel must be an array variable");
 
       if (type == Moose::ElementElement)
-        avar->saveDoFValues(diag);
+        avar->addSolution(diag);
       else
-        avar->saveDoFValuesNeighbor(diag);
+        avar->addSolutionNeighbor(diag);
     }
   }
 }

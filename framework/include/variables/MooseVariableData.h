@@ -431,8 +431,18 @@ public:
   const DoFValue & nodalVectorTagValue(TagID tag) const;
   const DoFValue & nodalMatrixTagValue(TagID tag) const;
 
-  void setNodalValue(OutputType value, unsigned int idx = 0);
+  /**
+   * Set nodal value
+   */
+  void setNodalValue(const OutputType & value, unsigned int idx = 0);
+  /**
+   * Set local DOF values and evaluate the values on quadrature points
+   */
   void setDofValues(const DenseVector<OutputData> & value);
+  /**
+   * Write a nodal value to the passed-in solution vector
+   */
+  void insertNodalValue(NumericVector<Number> & residual, const OutputData & v);
   OutputData getNodalValue(const Node & node, Moose::SolutionState state) const;
   OutputData
   getElementalValue(const Elem * elem, Moose::SolutionState state, unsigned int idx = 0) const;
@@ -476,8 +486,18 @@ public:
    */
   void reinitNodes(const std::vector<dof_id_type> & nodes);
 
+  /**
+   * Set the current local DOF values to the input vector
+   */
   void insert(NumericVector<Number> & residual);
+  /**
+   * Add the current local DOF values to the input vector
+   */
   void add(NumericVector<Number> & residual);
+  /**
+   * Add passed in local DOF values to a solution vector
+   */
+  void addSolution(NumericVector<Number> & sol, const DenseVector<Number> & v) const;
 
   /////////////////////////// DoF value getters /////////////////////////////////////
 
