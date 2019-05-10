@@ -2383,25 +2383,30 @@ Assembly::prepareLowerD()
 
       // derivatives w.r.t. lower dimensional residuals
       jacobianBlockLower(Moose::LowerLower, vi, vj, tag)
-          .resize(ivar.dofIndicesLower().size() * ivar.count(), jvar.dofIndicesLower().size() * jvar.count());
+          .resize(ivar.dofIndicesLower().size() * ivar.count(),
+                  jvar.dofIndicesLower().size() * jvar.count());
       jacobianBlockLower(Moose::LowerLower, vi, vj, tag).zero();
 
       jacobianBlockLower(Moose::LowerSlave, vi, vj, tag)
-          .resize(ivar.dofIndicesLower().size() * ivar.count(), jvar.dofIndices().size() * jvar.count());
+          .resize(ivar.dofIndicesLower().size() * ivar.count(),
+                  jvar.dofIndices().size() * jvar.count());
       jacobianBlockLower(Moose::LowerSlave, vi, vj, tag).zero();
 
       jacobianBlockLower(Moose::LowerMaster, vi, vj, tag)
-          .resize(ivar.dofIndicesLower().size() * ivar.count(), jvar.dofIndicesNeighbor().size() * jvar.count());
+          .resize(ivar.dofIndicesLower().size() * ivar.count(),
+                  jvar.dofIndicesNeighbor().size() * jvar.count());
       jacobianBlockLower(Moose::LowerMaster, vi, vj, tag).zero();
 
       // derivatives w.r.t. interior slave residuals
       jacobianBlockLower(Moose::SlaveLower, vi, vj, tag)
-          .resize(ivar.dofIndices().size() * ivar.count(), jvar.dofIndicesLower().size() * jvar.count());
+          .resize(ivar.dofIndices().size() * ivar.count(),
+                  jvar.dofIndicesLower().size() * jvar.count());
       jacobianBlockLower(Moose::SlaveLower, vi, vj, tag).zero();
 
       // derivatives w.r.t. interior master residuals
       jacobianBlockLower(Moose::MasterLower, vi, vj, tag)
-          .resize(ivar.dofIndicesNeighbor().size() * ivar.count(), jvar.dofIndicesLower().size() * jvar.count());
+          .resize(ivar.dofIndicesNeighbor().size() * ivar.count(),
+                  jvar.dofIndicesLower().size() * jvar.count());
       jacobianBlockLower(Moose::MasterLower, vi, vj, tag).zero();
 
       _jacobian_block_lower_used[tag][vi][vj] = 0;
