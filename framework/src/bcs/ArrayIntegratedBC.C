@@ -65,7 +65,7 @@ ArrayIntegratedBC::computeResidual()
     {
       auto * avar = dynamic_cast<ArrayMooseVariable *>(var);
       if (avar)
-        avar->saveDoFValues(_local_re);
+        avar->addSolution(_local_re);
       else
         mooseError("Save-in variable for an array kernel must be an array variable");
     }
@@ -99,7 +99,7 @@ ArrayIntegratedBC::computeJacobian()
     {
       auto * avar = dynamic_cast<ArrayMooseVariable *>(var);
       if (avar)
-        avar->saveDoFValues(diag);
+        avar->addSolution(diag);
       else
         mooseError("Save-in variable for an array kernel must be an array variable");
     }
@@ -134,7 +134,7 @@ ArrayIntegratedBC::computeJacobianBlock(MooseVariableFEBase & jvar)
     {
       auto * avar = dynamic_cast<ArrayMooseVariable *>(var);
       if (avar)
-        avar->saveDoFValues(diag);
+        avar->addSolution(diag);
       else
         mooseError("Save-in variable for an array kernel must be an array variable");
     }

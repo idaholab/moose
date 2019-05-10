@@ -212,26 +212,23 @@ MooseVariableFE<OutputType>::insert(NumericVector<Number> & residual)
 
 template <typename OutputType>
 void
-MooseVariableFE<OutputType>::insertNodalValue(NumericVector<Number> & residual,
-                                              const OutputData & v)
+MooseVariableFE<OutputType>::add(NumericVector<Number> & residual)
 {
-  residual.set(nodalDofIndex(), v);
-}
-
-template <>
-void
-MooseVariableFE<RealArrayValue>::insertNodalValue(NumericVector<Number> & residual,
-                                                  const RealArrayValue & v)
-{
-  for (unsigned int j = 0; j < _count; ++j)
-    residual.set(nodalDofIndex() + j, v(j));
+  _element_data->add(residual);
 }
 
 template <typename OutputType>
 void
-MooseVariableFE<OutputType>::add(NumericVector<Number> & residual)
+MooseVariableFE<OutputType>::addSolution(const DenseVector<Number> & v) const
 {
-  _element_data->add(residual);
+  _element_data->addSolution(_sys.solution(), v);
+}
+
+template <typename OutputType>
+void
+MooseVariableFE<OutputType>::addSolutionNeighbor(const DenseVector<Number> & v) const
+{
+  _neighbor_data->addSolution(_sys.solution(), v);
 }
 
 template <typename OutputType>
@@ -502,26 +499,6 @@ MooseVariableFE<RealArrayValue>::getValue(const Elem * elem,
 }
 
 template <typename OutputType>
-void
-MooseVariableFE<OutputType>::saveDoFValues(const DenseVector<Number> & v) const
-{
-  _sys.solution().add_vector(v, _dof_indices);
-}
-
-template <>
-void
-MooseVariableFE<RealArrayValue>::saveDoFValues(const DenseVector<Number> & v) const
-{
-  unsigned int p = 0;
-  for (unsigned int j = 0; j < _count; ++j)
-  {
-    unsigned int inc = (isNodal() ? j : j * _dof_indices.size());
-    for (unsigned int i = 0; i < _dof_indices.size(); ++i)
-      _sys.solution().add(_dof_indices[i] + inc, v(p++));
-  }
-}
-
-template <typename OutputType>
 typename OutputTools<OutputType>::OutputGradient
 MooseVariableFE<OutputType>::getGradient(
     const Elem * elem,
@@ -697,9 +674,17 @@ MooseVariableFE<OutputType>::setDofValues(const DenseVector<OutputData> & values
 
 template <typename OutputType>
 void
-MooseVariableFE<OutputType>::setNodalValue(OutputType value, unsigned int idx /* = 0*/)
+MooseVariableFE<OutputType>::setNodalValue(const OutputType & value, unsigned int idx)
 {
   _element_data->setNodalValue(value, idx);
+}
+
+template <typename OutputType>
+void
+MooseVariableFE<OutputType>::insertNodalValue(NumericVector<Number> & residual,
+                                              const OutputData & v)
+{
+  _element_data->insertNodalValue(residual, v);
 }
 
 template <typename OutputType>
