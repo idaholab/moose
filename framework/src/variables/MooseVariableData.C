@@ -1325,7 +1325,7 @@ MooseVariableData<RealArrayValue>::computeAD(const unsigned int /*num_dofs*/,
 
 template <typename OutputType>
 void
-MooseVariableData<OutputType>::setNodalValue(OutputType value, unsigned int idx /* = 0*/)
+MooseVariableData<OutputType>::setNodalValue(const OutputType & value, unsigned int idx)
 {
   _dof_values[idx] = value; // update variable nodal value
   _has_dof_values = true;
@@ -1338,7 +1338,7 @@ MooseVariableData<OutputType>::setNodalValue(OutputType value, unsigned int idx 
 
 template <>
 void
-MooseVariableData<RealVectorValue>::setNodalValue(RealVectorValue value, unsigned int idx /* = 0*/)
+MooseVariableData<RealVectorValue>::setNodalValue(const RealVectorValue & value, unsigned int idx)
 {
   for (decltype(idx) i = 0; i < _dof_values.size(); ++i, ++idx)
     _dof_values[idx] = value(i);
@@ -1362,6 +1362,23 @@ MooseVariableData<OutputType>::setDofValues(const DenseVector<OutputData> & valu
     for (unsigned int i = 1; i < _dof_values.size(); i++)
       _u[qp] += (*_phi)[i][qp] * _dof_values[i];
   }
+}
+
+template <typename OutputType>
+void
+MooseVariableData<OutputType>::insertNodalValue(NumericVector<Number> & residual,
+                                                const OutputData & v)
+{
+  residual.set(_nodal_dof_index, v);
+}
+
+template <>
+void
+MooseVariableData<RealArrayValue>::insertNodalValue(NumericVector<Number> & residual,
+                                                    const RealArrayValue & v)
+{
+  for (unsigned int j = 0; j < _count; ++j)
+    residual.set(_nodal_dof_index + j, v(j));
 }
 
 template <typename OutputType>
@@ -1566,6 +1583,32 @@ MooseVariableData<RealArrayValue>::add(NumericVector<Number> & residual)
           residual.add(_dof_indices[i] + n, _dof_values[i](j));
         n += _dof_indices.size();
       }
+    }
+  }
+}
+
+template <typename OutputType>
+void
+MooseVariableData<OutputType>::addSolution(NumericVector<Number> & sol,
+                                           const DenseVector<Number> & v) const
+{
+  if (_has_dof_values)
+    sol.add_vector(v, _dof_indices);
+}
+
+template <>
+void
+MooseVariableData<RealArrayValue>::addSolution(NumericVector<Number> & sol,
+                                               const DenseVector<Number> & v) const
+{
+  if (_has_dof_values)
+  {
+    unsigned int p = 0;
+    for (unsigned int j = 0; j < _count; ++j)
+    {
+      unsigned int inc = (isNodal() ? j : j * _dof_indices.size());
+      for (unsigned int i = 0; i < _dof_indices.size(); ++i)
+        sol.add(_dof_indices[i] + inc, v(p++));
     }
   }
 }

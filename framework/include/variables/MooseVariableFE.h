@@ -96,6 +96,7 @@ public:
   void prepare() override;
   void prepareNeighbor() override;
   void prepareLowerD() override;
+  virtual void prepareIC() override;
 
   void prepareAux() override;
 
@@ -180,7 +181,19 @@ public:
    */
   const Elem * const & neighbor() const { return _neighbor_data->currentElem(); }
 
-  virtual void prepareIC() override;
+  void getDofIndices(const Elem * elem, std::vector<dof_id_type> & dof_indices) const override;
+  const std::vector<dof_id_type> & dofIndices() const final { return _element_data->dofIndices(); }
+  unsigned int numberOfDofs() const final { return _element_data->numberOfDofs(); }
+  const std::vector<dof_id_type> & dofIndicesNeighbor() const final
+  {
+    return _neighbor_data->dofIndices();
+  }
+  const std::vector<dof_id_type> & dofIndicesLower() const final
+  {
+    return _lower_data->dofIndices();
+  }
+
+  unsigned int numberOfDofsNeighbor() override { return _neighbor_data->dofIndices().size(); }
 
   const FieldVariablePhiValue & phi() const { return _element_data->phi(); }
   const FieldVariablePhiGradient & gradPhi() const { return _element_data->gradPhi(); }
@@ -421,18 +434,24 @@ public:
   }
   const FieldVariableValue & slnLower() const { return _lower_data->sln(Moose::Current); }
 
-  /// Actually compute variable values
+  /// Actually compute variable values from the solution vectors
   virtual void computeElemValues() override;
   virtual void computeElemValuesFace() override;
   virtual void computeNeighborValuesFace() override;
   virtual void computeNeighborValues() override;
   virtual void computeLowerDValues() override;
 
-  void setNodalValue(OutputType value, unsigned int idx = 0);
+  /**
+   * Set nodal value
+   */
+  void setNodalValue(const OutputType & value, unsigned int idx = 0);
+  /**
+   * Set local DOF values and evaluate the values on quadrature points
+   */
   void setDofValues(const DenseVector<OutputData> & value);
 
   /**
-   * Write a nodal value to the solution vector
+   * Write a nodal value to the passed-in solution vector
    */
   void insertNodalValue(NumericVector<Number> & residual, const OutputData & v);
 
@@ -469,23 +488,22 @@ public:
    * @return Variable value
    */
   OutputData getElementalValueOlder(const Elem * elem, unsigned int idx = 0) const;
-
-  void getDofIndices(const Elem * elem, std::vector<dof_id_type> & dof_indices) const override;
-  const std::vector<dof_id_type> & dofIndices() const final { return _element_data->dofIndices(); }
-  unsigned int numberOfDofs() const final { return _element_data->numberOfDofs(); }
-  const std::vector<dof_id_type> & dofIndicesNeighbor() const final
-  {
-    return _neighbor_data->dofIndices();
-  }
-  const std::vector<dof_id_type> & dofIndicesLower() const final
-  {
-    return _lower_data->dofIndices();
-  }
-
-  unsigned int numberOfDofsNeighbor() override { return _neighbor_data->dofIndices().size(); }
-
+  /**
+   * Set the current local DOF values to the input vector
+   */
   void insert(NumericVector<Number> & residual) override;
+  /**
+   * Add the current local DOF values to the input vector
+   */
   void add(NumericVector<Number> & residual) override;
+  /**
+   * Add passed in local DOF values onto the current solution
+   */
+  void addSolution(const DenseVector<Number> & v) const;
+  /**
+   * Add passed in local neighbor DOF values onto the current solution
+   */
+  void addSolutionNeighbor(const DenseVector<Number> & v) const;
 
   const DoFValue & dofValue();
   const DoFValue & dofValues();
@@ -532,9 +550,6 @@ public:
    * @return The variable value
    */
   OutputType getValue(const Elem * elem, const std::vector<std::vector<OutputShape>> & phi) const;
-
-  void saveDoFValues(const DenseVector<Number> & v) const;
-  void saveDoFValuesNeighbor(const DenseVector<Number> & v) const;
 
   /**
    * Compute the variable gradient value at a point on an element
