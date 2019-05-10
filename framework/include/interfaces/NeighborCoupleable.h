@@ -55,6 +55,15 @@ public:
   virtual const VectorVariableGradient &
   coupledVectorNeighborGradientOlder(const std::string & var_name, unsigned int comp = 0);
 
+  virtual const ArrayVariableValue & coupledArrayNeighborValue(const std::string & var_name,
+                                                               unsigned int comp = 0);
+  virtual const ArrayVariableGradient & coupledArrayNeighborGradient(const std::string & var_name,
+                                                                     unsigned int comp = 0);
+  virtual const ArrayVariableGradient &
+  coupledArrayNeighborGradientOld(const std::string & var_name, unsigned int comp = 0);
+  virtual const ArrayVariableGradient &
+  coupledArrayNeighborGradientOlder(const std::string & var_name, unsigned int comp = 0);
+
   virtual const VariableSecond & coupledNeighborSecond(const std::string & var_name,
                                                        unsigned int i = 0);
 
@@ -68,4 +77,3 @@ public:
 protected:
   bool _neighbor_nodal;
 };
-
