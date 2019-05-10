@@ -184,7 +184,10 @@ public:
 
   const FieldVariablePhiValue & phi() const { return _element_data->phi(); }
   const FieldVariablePhiGradient & gradPhi() const { return _element_data->gradPhi(); }
-  const MappedArrayVariablePhiGradient & arrayGradPhi() const { return _element_data->arrayGradPhi(); }
+  const MappedArrayVariablePhiGradient & arrayGradPhi() const
+  {
+    return _element_data->arrayGradPhi();
+  }
   const FieldVariablePhiSecond & secondPhi() const;
   const FieldVariablePhiCurl & curlPhi() const;
 

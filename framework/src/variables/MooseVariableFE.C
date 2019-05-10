@@ -23,7 +23,7 @@ MooseVariableFE<OutputType>::MooseVariableFE(unsigned int var_num,
                                              Moose::VarKindType var_kind,
                                              THREAD_ID tid,
                                              unsigned int count)
-: MooseVariableFEBase(var_num, fe_type, sys, var_kind, tid, count), _assembly(assembly)
+  : MooseVariableFEBase(var_num, fe_type, sys, var_kind, tid, count), _assembly(assembly)
 {
   _element_data = libmesh_make_unique<MooseVariableData<OutputType>>(*this,
                                                                      sys,
