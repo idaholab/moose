@@ -140,7 +140,7 @@ NeighborCoupleable::coupledVectorNeighborGradientOld(const std::string & var_nam
   if (_neighbor_nodal)
     mooseError("Gradients are non-sensical with nodal compute objects");
 
-  validateExecutionerType(var_name, "coupledNeighborGradientOld");
+  validateExecutionerType(var_name, "coupledVectorNeighborGradientOld");
   VectorMooseVariable * var = getVectorVar(var_name, comp);
   return (_c_is_implicit) ? var->gradSlnOldNeighbor() : var->gradSlnOlderNeighbor();
 }
@@ -152,8 +152,54 @@ NeighborCoupleable::coupledVectorNeighborGradientOlder(const std::string & var_n
   if (_neighbor_nodal)
     mooseError("Gradients are non-sensical with nodal compute objects");
 
-  validateExecutionerType(var_name, "coupledNeighborGradientOlder");
+  validateExecutionerType(var_name, "coupledVectorNeighborGradientOlder");
   VectorMooseVariable * var = getVectorVar(var_name, comp);
+  if (_c_is_implicit)
+    return var->gradSlnOlderNeighbor();
+  else
+    mooseError("Older values not available for explicit schemes");
+}
+
+const ArrayVariableValue &
+NeighborCoupleable::coupledArrayNeighborValue(const std::string & var_name, unsigned int comp)
+{
+  ArrayMooseVariable * var = getArrayVar(var_name, comp);
+  if (_neighbor_nodal)
+    return (_c_is_implicit) ? var->dofValuesNeighbor() : var->dofValuesOldNeighbor();
+  else
+    return (_c_is_implicit) ? var->slnNeighbor() : var->slnOldNeighbor();
+}
+
+const ArrayVariableGradient &
+NeighborCoupleable::coupledArrayNeighborGradient(const std::string & var_name, unsigned int comp)
+{
+  if (_neighbor_nodal)
+    mooseError("Gradients are non-sensical with nodal compute objects");
+
+  ArrayMooseVariable * var = getArrayVar(var_name, comp);
+  return (_c_is_implicit) ? var->gradSlnNeighbor() : var->gradSlnOldNeighbor();
+}
+
+const ArrayVariableGradient &
+NeighborCoupleable::coupledArrayNeighborGradientOld(const std::string & var_name, unsigned int comp)
+{
+  if (_neighbor_nodal)
+    mooseError("Gradients are non-sensical with nodal compute objects");
+
+  validateExecutionerType(var_name, "coupledArrayNeighborGradientOld");
+  ArrayMooseVariable * var = getArrayVar(var_name, comp);
+  return (_c_is_implicit) ? var->gradSlnOldNeighbor() : var->gradSlnOlderNeighbor();
+}
+
+const ArrayVariableGradient &
+NeighborCoupleable::coupledArrayNeighborGradientOlder(const std::string & var_name,
+                                                      unsigned int comp)
+{
+  if (_neighbor_nodal)
+    mooseError("Gradients are non-sensical with nodal compute objects");
+
+  validateExecutionerType(var_name, "coupledArrayNeighborGradientOlder");
+  ArrayMooseVariable * var = getArrayVar(var_name, comp);
   if (_c_is_implicit)
     return var->gradSlnOlderNeighbor();
   else
