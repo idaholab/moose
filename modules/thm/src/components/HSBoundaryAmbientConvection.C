@@ -1,11 +1,11 @@
-#include "HSAmbientHeatTransferBoundary.h"
+#include "HSBoundaryAmbientConvection.h"
 #include "HeatConductionModel.h"
 
-registerMooseObject("THMApp", HSAmbientHeatTransferBoundary);
+registerMooseObject("THMApp", HSBoundaryAmbientConvection);
 
 template <>
 InputParameters
-validParams<HSAmbientHeatTransferBoundary>()
+validParams<HSBoundaryAmbientConvection>()
 {
   InputParameters params = validParams<BoundaryBase>();
   params.addRequiredParam<std::vector<BoundaryName>>(
@@ -15,7 +15,7 @@ validParams<HSAmbientHeatTransferBoundary>()
   return params;
 }
 
-HSAmbientHeatTransferBoundary::HSAmbientHeatTransferBoundary(const InputParameters & params)
+HSBoundaryAmbientConvection::HSBoundaryAmbientConvection(const InputParameters & params)
   : BoundaryBase(params),
     _boundary(getParam<std::vector<BoundaryName>>("boundary")),
     _T_ambient(getParam<Real>("T_ambient")),
@@ -24,7 +24,7 @@ HSAmbientHeatTransferBoundary::HSAmbientHeatTransferBoundary(const InputParamete
 }
 
 void
-HSAmbientHeatTransferBoundary::addMooseObjects()
+HSBoundaryAmbientConvection::addMooseObjects()
 {
   {
     std::string class_name = "ConvectionHeatTransferBC";

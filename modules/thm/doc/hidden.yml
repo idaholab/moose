@@ -66,7 +66,7 @@
 - /Components/FlowChannel2Phase
 - /Components/FreeBoundary
 - /Components/GeometricalComponent
-- /Components/HSAmbientHeatTransferBoundary
+- /Components/HSBoundaryAmbientConvection
 - /Components/HSSpecifiedTemperatureBoundary
 - /Components/HXConnector
 - /Components/HeatGeneration

@@ -2,18 +2,18 @@
 
 #include "BoundaryBase.h"
 
-class HSAmbientHeatTransferBoundary;
+class HSBoundaryAmbientConvection;
 
 template <>
-InputParameters validParams<HSAmbientHeatTransferBoundary>();
+InputParameters validParams<HSBoundaryAmbientConvection>();
 
 /**
  * Boundary condition for heat transfer between heat structure and ambient environment
  */
-class HSAmbientHeatTransferBoundary : public BoundaryBase
+class HSBoundaryAmbientConvection : public BoundaryBase
 {
 public:
-  HSAmbientHeatTransferBoundary(const InputParameters & params);
+  HSBoundaryAmbientConvection(const InputParameters & params);
 
   virtual void addMooseObjects() override;
 
