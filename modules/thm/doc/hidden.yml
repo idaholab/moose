@@ -19,6 +19,7 @@
 - /AuxScalarKernels/VolumeJunctionPressureAux
 
 - /BCs/ConvectionHeatTransferBC
+- /BCs/ConvectionHeatTransferRZBC
 - /BCs/HeatFlux3EqnBC
 - /BCs/HeatFlux7EqnBC
 - /BCs/OneD7EqnAreaTimesConstantBC

@@ -1,5 +1,6 @@
 #include "HSBoundaryAmbientConvection.h"
 #include "HeatConductionModel.h"
+#include "HeatStructureCylindrical.h"
 
 registerMooseObject("THMApp", HSBoundaryAmbientConvection);
 
@@ -35,13 +36,23 @@ HSBoundaryAmbientConvection::check() const
 void
 HSBoundaryAmbientConvection::addMooseObjects()
 {
+  const HeatStructureBase & hs = getComponent<HeatStructureBase>("hs");
+  const bool is_cylindrical = dynamic_cast<const HeatStructureCylindrical *>(&hs);
+
   {
-    std::string class_name = "ConvectionHeatTransferBC";
+    const std::string class_name =
+        is_cylindrical ? "ConvectionHeatTransferRZBC" : "ConvectionHeatTransferBC";
     InputParameters pars = _factory.getValidParams(class_name);
     pars.set<NonlinearVariableName>("variable") = HeatConductionModel::TEMPERATURE;
     pars.set<std::vector<BoundaryName>>("boundary") = {getHSBoundaryName(this)};
     pars.set<Real>("T_ambient") = _T_ambient;
     pars.set<Real>("htc_ambient") = _htc_ambient;
+    if (is_cylindrical)
+    {
+      pars.set<Point>("axis_point") = hs.getPosition();
+      pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
+    }
+
     _sim.addBoundaryCondition(class_name, genName(name(), "bc"), pars);
   }
 }
