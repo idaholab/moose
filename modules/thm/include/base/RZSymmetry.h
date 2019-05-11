@@ -18,7 +18,7 @@ public:
   RZSymmetry(const InputParameters & parameters);
 
 protected:
-  virtual Real computeRadius(const RealVectorValue & pt);
+  virtual Real computeCircumference(const RealVectorValue & pt);
 
   /// A point on the axis of symmetry
   RealVectorValue _axis_point;

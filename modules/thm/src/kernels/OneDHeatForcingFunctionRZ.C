@@ -19,13 +19,13 @@ OneDHeatForcingFunctionRZ::OneDHeatForcingFunctionRZ(const InputParameters & par
 Real
 OneDHeatForcingFunctionRZ::computeQpResidual()
 {
-  Real r = computeRadius(_q_point[_qp]);
-  return 2. * libMesh::pi * r * OneDHeatForcingFunction::computeQpResidual();
+  const Real circumference = computeCircumference(_q_point[_qp]);
+  return circumference * OneDHeatForcingFunction::computeQpResidual();
 }
 
 Real
 OneDHeatForcingFunctionRZ::computeQpJacobian()
 {
-  Real r = computeRadius(_q_point[_qp]);
-  return 2. * libMesh::pi * r * OneDHeatForcingFunction::computeQpJacobian();
+  const Real circumference = computeCircumference(_q_point[_qp]);
+  return circumference * OneDHeatForcingFunction::computeQpJacobian();
 }
