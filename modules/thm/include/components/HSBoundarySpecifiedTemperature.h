@@ -2,18 +2,18 @@
 
 #include "BoundaryBase.h"
 
-class HSSpecifiedTemperatureBoundary;
+class HSBoundarySpecifiedTemperature;
 
 template <>
-InputParameters validParams<HSSpecifiedTemperatureBoundary>();
+InputParameters validParams<HSBoundarySpecifiedTemperature>();
 
 /**
  * Boundary condition to set a specified value of temperature in a heat structure
  */
-class HSSpecifiedTemperatureBoundary : public BoundaryBase
+class HSBoundarySpecifiedTemperature : public BoundaryBase
 {
 public:
-  HSSpecifiedTemperatureBoundary(const InputParameters & params);
+  HSBoundarySpecifiedTemperature(const InputParameters & params);
 
   virtual void addMooseObjects() override;
 

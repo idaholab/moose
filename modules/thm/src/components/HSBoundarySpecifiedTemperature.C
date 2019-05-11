@@ -1,11 +1,11 @@
-#include "HSSpecifiedTemperatureBoundary.h"
+#include "HSBoundarySpecifiedTemperature.h"
 #include "HeatConductionModel.h"
 
-registerMooseObject("THMApp", HSSpecifiedTemperatureBoundary);
+registerMooseObject("THMApp", HSBoundarySpecifiedTemperature);
 
 template <>
 InputParameters
-validParams<HSSpecifiedTemperatureBoundary>()
+validParams<HSBoundarySpecifiedTemperature>()
 {
   InputParameters params = validParams<BoundaryBase>();
   params.addRequiredParam<std::vector<BoundaryName>>(
@@ -14,7 +14,7 @@ validParams<HSSpecifiedTemperatureBoundary>()
   return params;
 }
 
-HSSpecifiedTemperatureBoundary::HSSpecifiedTemperatureBoundary(const InputParameters & params)
+HSBoundarySpecifiedTemperature::HSBoundarySpecifiedTemperature(const InputParameters & params)
   : BoundaryBase(params),
     _boundary(getParam<std::vector<BoundaryName>>("boundary")),
     _temperature(getParam<Real>("T"))
@@ -22,7 +22,7 @@ HSSpecifiedTemperatureBoundary::HSSpecifiedTemperatureBoundary(const InputParame
 }
 
 void
-HSSpecifiedTemperatureBoundary::addMooseObjects()
+HSBoundarySpecifiedTemperature::addMooseObjects()
 {
   {
     std::string class_name = "DirichletBC";

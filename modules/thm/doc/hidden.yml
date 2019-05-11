@@ -67,7 +67,7 @@
 - /Components/FreeBoundary
 - /Components/GeometricalComponent
 - /Components/HSBoundaryAmbientConvection
-- /Components/HSSpecifiedTemperatureBoundary
+- /Components/HSBoundarySpecifiedTemperature
 - /Components/HXConnector
 - /Components/HeatGeneration
 - /Components/HeatStructure
