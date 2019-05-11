@@ -45,9 +45,9 @@ InputParameters validParams<MaterialBase>();
  * MaterialBases compute MaterialProperties.
  */
 class MaterialBase : public MooseObject,
+                     public SetupInterface,
                      public BlockRestrictable,
                      public BoundaryRestrictable,
-                     public SetupInterface,
                      public MooseVariableDependencyInterface,
                      public ScalarCoupleable,
                      public FunctionInterface,
@@ -261,6 +261,19 @@ protected:
   bool _has_stateful_property;
 
   bool _overrides_init_stateful_props = true;
+
+  void registerMaterialOnBlock(const std::set<SubdomainID> blocks_id, const std::string & prop_name)
+  {
+    for (std::set<SubdomainID>::const_iterator it = blocks_id.begin(); it != blocks_id.end(); ++it)
+      _fe_problem.storeSubdomainZeroMatProp(*it, prop_name);
+  };
+  void registerMaterialOnBoundary(const std::set<BoundaryID> bnds_id, const std::string & prop_name)
+  {
+    for (std::set<BoundaryID>::const_iterator it = bnds_id.begin(); it != bnds_id.end(); ++it)
+      _fe_problem.storeBoundaryZeroMatProp(*it, prop_name);
+  };
+
+  virtual void registerMaterials(const std::string & /*prop_name*/) = 0;
 };
 
 template <typename T>
@@ -304,13 +317,9 @@ MaterialBase::getZeroMaterialProperty(const std::string & prop_name)
   registerPropName(prop_name, true, MaterialBase::CURRENT);
   _fe_problem.markMatPropRequested(prop_name);
 
-  // Register this material on these blocks and boundaries as a zero property with relaxed
-  // consistency checking
-  for (std::set<SubdomainID>::const_iterator it = blockIDs().begin(); it != blockIDs().end(); ++it)
-    _fe_problem.storeSubdomainZeroMatProp(*it, prop_name);
-  for (std::set<BoundaryID>::const_iterator it = boundaryIDs().begin(); it != boundaryIDs().end();
-       ++it)
-    _fe_problem.storeBoundaryZeroMatProp(*it, prop_name);
+  // Register this material on these blocks and or boudanries and boundaries as a zero property with
+  // relaxed consistency checking
+  registerMaterials(prop_name);
 
   // set values for all qpoints to zero
   // (in multiapp scenarios getMaxQps can return different values in each app; we need the max)

@@ -62,9 +62,15 @@ InterfaceValueMaterial::InterfaceValueMaterial(const InputParameters & parameter
 void
 InterfaceValueMaterial::computeQpProperties()
 {
+
+  std::cout << "_var_master[_qp] " << _var_master[_qp] << std::endl;
+  std::cout << "_var_slave[_qp] " << _var_slave[_qp] << std::endl;
+  std::cout << "_mp_master[_qp] " << _mp_master[_qp] << std::endl;
+  std::cout << "_mp_slave[_qp] " << _mp_slave[_qp] << std::endl;
   // TODO remove when everything works correctly
   if (_mp_master[_qp] != _var_master[_qp])
-    mooseWarning("the material property and variable values on the master side do not coincide.");
+    mooseWarning("the material property and variable values on the master side do not"
+                 "coincide.");
   if (_mp_slave[_qp] != _var_slave[_qp])
     mooseWarning("the material property and variable values on the slave side do not coincide.");
 

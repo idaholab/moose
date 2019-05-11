@@ -12,6 +12,7 @@
 
 // MOOOSE includes
 #include "MaterialBase.h"
+// #include "BoundaryRestrictable.h"
 #include "NeighborCoupleable.h"
 #include "TwoMaterialPropertyInterface.h"
 
@@ -25,6 +26,7 @@ InputParameters validParams<InterfaceMaterial>();
  * Interface materials compute MaterialProperties.
  */
 class InterfaceMaterial : public MaterialBase,
+                          // public BoundaryRestrictable,
                           public NeighborCoupleable,
                           public TwoMaterialPropertyInterface
 {
@@ -112,11 +114,11 @@ protected:
   /// current side of the current element
   unsigned int & _current_side;
 
-  // virtual bool hasActiveInterfaceMaterials(BoundaryID bnd_id, THREAD_ID tid) override
-  // {
-  //   MaterialWarehouse<THREAD_ID>::checkThreadID(tid);
-  //   return true;
-  // }
+  /// rester only boundaries
+  virtual void registerMaterials(const std::string & prop_name) override
+  {
+    registerMaterialOnBoundary(boundaryIDs(), prop_name);
+  };
 };
 
 template <typename T>

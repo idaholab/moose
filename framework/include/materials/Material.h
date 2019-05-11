@@ -12,6 +12,8 @@
 
 // MOOOSE includes
 #include "MaterialBase.h"
+// #include "BlockRestrictable.h"
+// #include "BoundaryRestrictable.h"
 #include "Coupleable.h"
 #include "MaterialPropertyInterface.h"
 
@@ -25,6 +27,8 @@ InputParameters validParams<Material>();
  * Materials compute MaterialProperties.
  */
 class Material : public MaterialBase, public Coupleable, public MaterialPropertyInterface
+// public BlockRestrictable,
+// public BoundaryRestrictable
 {
 public:
   Material(const InputParameters & parameters);
@@ -102,6 +106,13 @@ protected:
 
   /// Options of the constantness level of the material
   const ConstantTypeEnum _constant_option;
+
+  /// adding missing part to the base function
+  virtual void registerMaterials(const std::string & prop_name) override
+  {
+    registerMaterialOnBlock(blockIDs(), prop_name);
+    registerMaterialOnBoundary(boundaryIDs(), prop_name);
+  };
 };
 
 template <typename T>

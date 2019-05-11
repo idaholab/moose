@@ -15,16 +15,19 @@ InputParameters
 validParams<InterfaceMaterial>()
 {
   InputParameters params = validParams<MaterialBase>();
+  params += validParams<BoundaryRestrictable>();
   params += validParams<TwoMaterialPropertyInterface>();
   return params;
 }
 
 InterfaceMaterial::InterfaceMaterial(const InputParameters & parameters)
   : MaterialBase(parameters),
+    // BoundaryRestrictable(this, Moose::EMPTY_BLOCK_IDS, false), // false for being _not_ nodal
     NeighborCoupleable(this, false, false),
-    TwoMaterialPropertyInterface(this, blockIDs(), boundaryIDs()),
-    _bnd(_material_data_type != Moose::INTERFACE_MATERIAL_DATA),
-    _neighbor(_material_data_type == Moose::NEIGHBOR_MATERIAL_DATA),
+    TwoMaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, boundaryIDs()),
+    _bnd(_material_data_type == Moose::INTERFACE_MATERIAL_DATA),
+    // _neighbor(tr_material_data_type == Moose::NEIGHBOR_MATERIAL_DATA),
+    _neighbor(true),
     _q_point(_assembly.qPointsFace()),
     _qrule(_assembly.qRuleFace()),
     _JxW(_assembly.JxWFace()),

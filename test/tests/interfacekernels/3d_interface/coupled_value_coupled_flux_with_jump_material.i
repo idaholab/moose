@@ -65,30 +65,13 @@
   [../]
 []
 
-[AuxVariables]
-  [./jump_var]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-[]
-
-[AuxKernels]
-  [jump_aux]
-    type = MaterialRealAux
-    boundary = master0_interface
-    property = jump
-    variable = jump_var
-  []
-[]
-
-
 [InterfaceKernels]
   [./interface]
     type = PenaltyInterfaceDiffusion
     variable = u
     neighbor_var = v
     boundary = master0_interface
-    penalty = 1e6
+    penalty = 1e-6
     jump_prop_name = jump
   [../]
 []
@@ -99,6 +82,7 @@
     var = u
     neighbor_var = v
     boundary = master0_interface
+    outputs = all
   [../]
 []
 
@@ -126,14 +110,14 @@
     variable = v
     block = 1
   [../]
-  [interface_var_jump]
-    type = InterfaceAverageVariableValuePostprocessor
-    interface_value_type = jump_abs
-    variable = u
-    neighbor_variable = v
-    execute_on = TIMESTEP_END
-    boundary = master0_interface
-  []
+  # [interface_var_jump]
+  #   type = InterfaceAverageVariableValuePostprocessor
+  #   interface_value_type = jump_abs
+  #   variable = u
+  #   neighbor_variable = v
+  #   execute_on = TIMESTEP_END
+  #   boundary = master0_interface
+  # []
 []
 
 [Preconditioning]

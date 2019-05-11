@@ -21,8 +21,6 @@ InputParameters
 validParams<MaterialBase>()
 {
   InputParameters params = validParams<MooseObject>();
-  params += validParams<BlockRestrictable>();
-  params += validParams<BoundaryRestrictable>();
   params += validParams<TransientInterface>();
   params += validParams<RandomInterface>();
 
@@ -58,9 +56,9 @@ validParams<MaterialBase>()
 
 MaterialBase::MaterialBase(const InputParameters & parameters)
   : MooseObject(parameters),
+    SetupInterface(this),
     BlockRestrictable(this),
     BoundaryRestrictable(this, blockIDs(), false), // false for being _not_ nodal
-    SetupInterface(this),
     MooseVariableDependencyInterface(),
     ScalarCoupleable(this),
     FunctionInterface(this),
@@ -148,13 +146,7 @@ MaterialBase::registerPropName(std::string prop_name,
       _has_stateful_property = true;
   }
 
-  // Store material properties for block ids
-  for (const auto & block_id : blockIDs())
-    _fe_problem.storeSubdomainMatPropName(block_id, prop_name);
-
-  // Store material properties for the boundary ids
-  for (const auto & boundary_id : boundaryIDs())
-    _fe_problem.storeBoundaryMatPropName(boundary_id, prop_name);
+  registerMaterials(prop_name);
 }
 
 std::set<OutputName>

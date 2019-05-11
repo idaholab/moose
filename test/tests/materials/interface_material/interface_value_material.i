@@ -59,6 +59,17 @@
   [../]
 []
 
+# [InterfaceKernels]
+#   [./interface]
+#     type = PenaltyInterfaceDiffusion
+#     variable = u
+#     neighbor_var = u
+#     boundary = interface
+#     penalty = 1e-3
+#     jump_prop_name = diff_var_jump_abs
+#   [../]
+# []
+
 [BCs]
   [./all]
     type = FunctionDirichletBC
@@ -91,6 +102,7 @@
       var_master = diffusivity_1
       var_slave = diffusivity_2
       mat_prop_var_out_basename = diff_var
+      outputs = all
   [../]
   [./interface_material_jump_master_minus_slave]
       type = InterfaceValueMaterial
@@ -162,44 +174,49 @@
     variable = diffusivity_2
     block = 1
   []
-  [./interface_material_avg]
-    type = MaterialRealAux
-    property = diff_average
-    variable = diffusivity_average
-    boundary = interface
-  []
-  [./interface_material_jump_master_minus_slave]
-    type = MaterialRealAux
-    property = diff_jump_master_minus_slave
-    variable = diffusivity_jump_master_minus_slave
-    boundary = interface
-  []
-  [./interface_material_jump_slave_minus_master]
-    type = MaterialRealAux
-    property = diff_jump_slave_minus_master
-    variable = diffusivity_jump_slave_minus_master
-    boundary = interface
-  []
-  [./interface_material_jump_abs]
-    type = MaterialRealAux
-    property = diff_jump_abs
-    variable = diffusivity_jump_abs
-    boundary = interface
-  []
-  [./interface_material_master]
-    type = MaterialRealAux
-    property = diff_master
-    variable = diffusivity_master
-    boundary = interface
-  []
-  [./interface_material_slave]
-    type = MaterialRealAux
-    property = diff_slave
-    variable = diffusivity_slave
-    boundary = interface
-  []
-
-
+  # [./interface_material_avg]
+  #   type = MaterialRealAux
+  #   property = diff_average
+  #   variable = diffusivity_average
+  #   boundary = interface
+  # []
+#   [./interface_material_jump_master_minus_slave]
+#     type = MaterialRealAux
+#     property = diff_jump_master_minus_slave
+#     variable = diffusivity_jump_master_minus_slave
+#     boundary = interface
+#     execute_on = TIMESTEP_END
+#   []
+#   [./interface_material_jump_slave_minus_master]
+#     type = MaterialRealAux
+#     property = diff_jump_slave_minus_master
+#     variable = diffusivity_jump_slave_minus_master
+#     boundary = interface
+#     execute_on = TIMESTEP_END
+#   []
+#   [./interface_material_jump_abs]
+#     type = MaterialRealAux
+#     property = diff_jump_abs
+#     variable = diffusivity_jump_abs
+#     boundary = interface
+#     execute_on = TIMESTEP_END
+#   []
+#   [./interface_material_master]
+#     type = MaterialRealAux
+#     property = diff_master
+#     variable = diffusivity_master
+#     boundary = interface
+#     execute_on = TIMESTEP_END
+#   []
+#   [./interface_material_slave]
+#     type = MaterialRealAux
+#     property = diff_slave
+#     variable = diffusivity_slave
+#     boundary = interface
+#     execute_on = TIMESTEP_END
+#   []
+#
+#
 []
 
 [AuxVariables]
@@ -211,31 +228,45 @@
     family = MONOMIAL
     order = CONSTANT
   []
-  [./diffusivity_average]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [./diffusivity_jump_master_minus_slave]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [./diffusivity_jump_slave_minus_master]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [./diffusivity_jump_abs]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [./diffusivity_master]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [./diffusivity_slave]
-    family = MONOMIAL
-    order = CONSTANT
-  []
+  # [./diffusivity_average]
+  #   family = MONOMIAL
+  #   order = CONSTANT
+  #   execute_on = TIMESTEP_END
+  # []
+#   [./diffusivity_jump_master_minus_slave]
+#     family = MONOMIAL
+#     order = CONSTANT
+#   []
+#   [./diffusivity_jump_slave_minus_master]
+#     family = MONOMIAL
+#     order = CONSTANT
+#   []
+#   [./diffusivity_jump_abs]
+#     family = MONOMIAL
+#     order = CONSTANT
+#   []
+#   [./diffusivity_master]
+#     family = MONOMIAL
+#     order = CONSTANT
+#   []
+#   [./diffusivity_slave]
+#     family = MONOMIAL
+#     order = CONSTANT
+#   []
 []
+
+# [Postprocessors]
+#   [./jump_avg]
+#     [./diffusivity_average]
+#       type = InterfaceIntegralVariableValuePostprocessor
+#       interface_value_type = average
+#       variable = diffusivity_1
+#       neighbor_variable = diffusivity_2
+#       execute_on = TIMESTEP_END
+#       boundary = 'interface'
+#     [../]
+#   []
+# []
 
 
 [Executioner]

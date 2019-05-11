@@ -28,6 +28,12 @@ MaterialWarehouse::addInterfaceObject(std::shared_ptr<MaterialBase> interface, T
   _interface_materials.addObject(interface, tid);
 }
 
+void
+MaterialWarehouse::addNeighborObject(std::shared_ptr<MaterialBase> neighbor, THREAD_ID tid /*=0*/)
+{
+  _neighbor_materials.addObject(neighbor, tid);
+}
+
 const MooseObjectWarehouse<MaterialBase> & MaterialWarehouse::
 operator[](Moose::MaterialDataType data_type) const
 {

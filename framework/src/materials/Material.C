@@ -15,6 +15,8 @@ InputParameters
 validParams<Material>()
 {
   InputParameters params = validParams<MaterialBase>();
+  params += validParams<BlockRestrictable>();
+  params += validParams<BoundaryRestrictable>();
   params += validParams<MaterialPropertyInterface>();
   MooseEnum const_option("NONE=0 ELEMENT=1 SUBDOMAIN=2", "none");
   params.addParam<MooseEnum>(
@@ -33,8 +35,6 @@ Material::Material(const InputParameters & parameters)
   : MaterialBase(parameters),
     Coupleable(this, false),
     MaterialPropertyInterface(this, blockIDs(), boundaryIDs()),
-    // _bnd(_material_data_type == (Moose::BOUNDARY_MATERIAL_DATA) ||
-    //      _material_data_type == (Moose::FACE_MATERIAL_DATA)),
     _bnd(_material_data_type != Moose::BLOCK_MATERIAL_DATA),
     _neighbor(_material_data_type == Moose::NEIGHBOR_MATERIAL_DATA),
     _q_point(_bnd ? _assembly.qPointsFace() : _assembly.qPoints()),

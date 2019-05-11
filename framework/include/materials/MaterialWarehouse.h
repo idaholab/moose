@@ -59,6 +59,8 @@ public:
    */
   void addInterfaceObject(std::shared_ptr<MaterialBase> interface, THREAD_ID tid = 0);
 
+  void addNeighborObject(std::shared_ptr<MaterialBase> neighbor, THREAD_ID tid = 0);
+
 protected:
   /// Storage for neighbor material objects (Block are stored in the base class)
   MooseObjectWarehouse<MaterialBase> _neighbor_materials;
