@@ -22,6 +22,8 @@
 - /BCs/ConvectionHeatTransferRZBC
 - /BCs/HeatFlux3EqnBC
 - /BCs/HeatFlux7EqnBC
+- /BCs/HSHeatFluxBC
+- /BCs/HSHeatFluxRZBC
 - /BCs/OneD7EqnAreaTimesConstantBC
 - /BCs/OneD7EqnEnergyStaticPressureReverseBC
 - /BCs/OneD7EqnMassStaticPressureReverseBC
