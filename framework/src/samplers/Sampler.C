@@ -134,7 +134,7 @@ Sampler::setSampleNames(const std::vector<std::string> & names)
 }
 
 Sampler::Location
-Sampler::getLocation(unsigned int global_index)
+Sampler::getLocation(dof_id_type global_index)
 {
   if (_offsets.empty())
     reinit(getSamples());
