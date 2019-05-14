@@ -1,0 +1,10 @@
+[Tests]
+  design = "CreateExecutionerAction.md"
+  issues = "#13411"
+  [test]
+    type = 'Exodiff'
+    input = 'auto_smp_simple_diffusion.i'
+    exodiff = 'auto_smp_simple_diffusion_out.e'
+    requirement = "The system shall automatically create the correct preconditioning object when preforming a Newton solve."
+  []
+[]

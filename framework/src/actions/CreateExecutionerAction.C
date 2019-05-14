@@ -48,5 +48,26 @@ CreateExecutionerAction::act()
     mooseError("Executioner is not consistent with each other; EigenExecutioner needs an "
                "EigenProblem, and Steady and Transient need a FEProblem");
 
+  // If 'solve_type = NEWTON' then automatically create SingleMatrixPreconditioner object
+  // with full=true, but only if the Preconditioning block doesn't exist..
+  if (_moose_object_pars.get<MooseEnum>("solve_type") == "NEWTON" &&
+      !_awh.hasActions("add_preconditioning"))
+  {
+    // Action Parameters
+    InputParameters params = _action_factory.getValidParams("SetupPreconditionerAction");
+    params.set<std::string>("type") = "SMP";
+
+    // Create the Action that will build the Preconditioner object
+    std::shared_ptr<Action> ptr =
+        _action_factory.create("SetupPreconditionerAction", "_moose_default_smp", params);
+
+    // Set 'full=true'
+    std::shared_ptr<MooseObjectAction> moa_ptr = std::static_pointer_cast<MooseObjectAction>(ptr);
+    InputParameters & mo_params = moa_ptr->getObjectParams();
+    mo_params.set<bool>("full") = true;
+
+    _awh.addActionBlock(ptr);
+  }
+
   _app.setExecutioner(std::move(executioner));
 }
