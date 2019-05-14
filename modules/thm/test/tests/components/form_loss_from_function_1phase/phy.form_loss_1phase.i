@@ -38,7 +38,14 @@
 
 [FluidProperties]
   [./fp]
-    type = IAPWS95LiquidFluidProperties
+    type = StiffenedGasFluidProperties
+    gamma = 2.35
+    cv = 1816.0
+    q = -1.167e6
+    p_inf = 1.0e9
+    q_prime = 0
+    k = 0.5
+    mu = 281.8e-6
   [../]
 []
 
