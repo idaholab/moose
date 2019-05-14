@@ -56,7 +56,7 @@
     max_parallel = 4
     # We require a recent version of PETSc so that a version of METIS/ParMETIS with a portable RNG is used.
     petsc_version = '>=3.8.0'
-    requirement = "The Nemesis Ouput object shall support writing scalar variables."
+    requirement = "The Nemesis Output object shall support writing scalar variables."
     design = 'Outputs/index.md'
     issues = '#2122'
     recover = false
@@ -71,9 +71,39 @@
     max_parallel = 4
     # We require a recent version of PETSc so that a version of METIS/ParMETIS with a portable RNG is used.
     petsc_version = '>=3.8.0'
-    requirement = "The Nemesis Ouput object shall support writing scalar variables when using DistributedMesh."
+    requirement = "The Nemesis Output object shall support writing scalar variables when using DistributedMesh."
     design = 'Outputs/index.md'
     issues = '#2122'
+    recover = false
+  [../]
+
+  [./nemesis_adaptive_transient]
+    type = 'Exodiff'
+    input = nemesis_transient.i
+    exodiff = 'nemesis_transient_out.e-s0010.4.0 nemesis_transient_out.e-s0010.4.1 nemesis_transient_out.e-s0010.4.2 nemesis_transient_out.e-s0010.4.3'
+    min_parallel = 4
+    max_parallel = 4
+    mesh_mode = distributed
+    # We require a recent version of PETSc so that a version of METIS/ParMETIS with a portable RNG is used.
+    petsc_version = '>=3.8.0'
+    design = 'Outputs/index.md'
+    issues = '#2122'
+    requirement = "The Nemesis Output object shall support writing separate files per processor per time step when running with mesh adaptivity."
+  [../]
+
+  [./nemesis_transient_no_adapt]
+    type = 'Exodiff'
+    input = nemesis_transient.i
+    cli_args = 'Executioner/inactive=Adaptivity Outputs/file_base=nemesis_transient_no_adapt_out'
+    exodiff = 'nemesis_transient_no_adapt_out.e.4.0 nemesis_transient_no_adapt_out.e.4.1 nemesis_transient_no_adapt_out.e.4.2 nemesis_transient_no_adapt_out.e.4.3'
+    min_parallel = 4
+    max_parallel = 4
+    mesh_mode = distributed
+    # We require a recent version of PETSc so that a version of METIS/ParMETIS with a portable RNG is used.
+    petsc_version = '>=3.8.0'
+    design = 'Outputs/index.md'
+    issues = '#2122'
+    requirement = "The Nemesis Output object shall support writing separate files per processor during a transient simulation."
     recover = false
   [../]
 []

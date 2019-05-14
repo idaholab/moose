@@ -61,16 +61,6 @@ public:
   virtual void meshChanged() override;
 
   /**
-   * Performs the necessary deletion and re-creating of ExodusII_IO object
-   *
-   * This function is stand-alone and called directly from the output() method because
-   * the ExodusII_IO object is extremely fragile with respect to closing a file that has
-   * not had data written. Thus, it is important to only create a new ExodusII_IO object
-   * if it is certain that it will be used.
-   */
-  void outputSetup();
-
-  /**
    * Set the sequence state
    * When the sequence state is set to true then the outputSetup() method is called with every
    * call to output(). In the case of Exodus output, this creates a new file with each output.
@@ -103,6 +93,16 @@ public:
   void clear() { _exodus_io_ptr.reset(); }
 
 protected:
+  /**
+   * Performs the necessary deletion and re-creating of ExodusII_IO object
+   *
+   * This function is stand-alone and called directly from the output() method because
+   * the ExodusII_IO object is extremely fragile with respect to closing a file that has
+   * not had data written. Thus, it is important to only create a new ExodusII_IO object
+   * if it is certain that it will be used.
+   */
+  void outputSetup();
+
   /**
    * Outputs nodal, nonlinear variables
    */
@@ -191,4 +191,3 @@ private:
   /// Flag to output discontinuous format in Exodus
   bool _discontinuous;
 };
-

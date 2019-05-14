@@ -36,11 +36,6 @@ public:
   Nemesis(const InputParameters & parameters);
 
   /**
-   * Class destructor
-   */
-  virtual ~Nemesis();
-
-  /**
    * Sets up the libMesh::NemesisII_IO object used for outputting to the Nemesis format
    */
   virtual void initialSetup() override;
@@ -51,6 +46,16 @@ public:
   virtual void meshChanged() override;
 
 protected:
+  /**
+   * Performs the necessary deletion and re-creating of Nemesis_IO object
+   *
+   * This function is stand-alone and called directly from the output() method because
+   * the ExodusII_IO object is extremely fragile with respect to closing a file that has
+   * not had data written. Thus, it is important to only create a new Nemesis_IO object
+   * if it is certain that it will be used.
+   */
+  void outputSetup();
+
   /**
    * Overload the Output::output method, this is required for Nemesis
    * output due to the method utilized for outputing single/global parameters
@@ -83,14 +88,19 @@ protected:
   /// Storage for names of the above scalar values
   std::vector<std::string> _global_names;
 
-  /// Current output filename; utilized by filename() to create the proper suffix
-  unsigned int _file_num;
-
 private:
+  /// Current output filename; utilized by filename() to create the proper suffix
+  unsigned int & _file_num;
+
   /// Count of outputs per exodus file
-  unsigned int _nemesis_num;
+  unsigned int & _nemesis_num;
 
   /// Flag if the output has been initialized
   bool _nemesis_initialized;
-};
 
+  /// Flag indicating MOOSE is recovering via --recover command-line option
+  bool _recovering;
+
+  /// A flag indicating to the Nemesis object that the mesh has changed
+  bool & _nemesis_mesh_changed;
+};
