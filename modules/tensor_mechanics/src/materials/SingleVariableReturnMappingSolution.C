@@ -13,6 +13,7 @@
 #include "Conversion.h"
 #include "MooseEnum.h"
 #include "Moose.h"
+#include "MathUtils.h"
 
 #include <limits>
 #include <string>
@@ -162,12 +163,7 @@ SingleVariableReturnMappingSolution::internalSolve(const Real effective_trial_st
   _initial_residual = _residual = computeResidual(effective_trial_stress, scalar);
 
   Real residual_old = _residual;
-
-  Real init_resid_norm = std::abs(_residual);
-  if (init_resid_norm == 0.0)
-    init_resid_norm = 1.0;
-  Real init_resid_sign = (_residual < 0.0 ? -1.0 : 1.0);
-
+  Real init_resid_sign = MathUtils::sign(_residual);
   Real reference_residual = computeReferenceResidual(effective_trial_stress, scalar);
 
   if (converged(_residual, reference_residual))
@@ -218,11 +214,9 @@ SingleVariableReturnMappingSolution::internalSolve(const Real effective_trial_st
       {
         if (residual_old - _residual != 0.0)
         {
-          Real alpha = residual_old / (residual_old - _residual);
-          if (alpha > 1.0) // upper bound for alpha
-            alpha = 1.0;
-          else if (alpha < 1e-2) // lower bound for alpha
-            alpha = 1e-2;
+          const Real alpha = residual_old / (residual_old - _residual);
+          MathUtils::clamp(alpha, 1.0e-2, 1.0);
+
           if (alpha != 1.0)
           {
             modified_increment = true;
@@ -244,7 +238,7 @@ SingleVariableReturnMappingSolution::internalSolve(const Real effective_trial_st
           if (scalar_upper_bound != max_permissible_scalar &&
               scalar_lower_bound != min_permissible_scalar)
           {
-            Real frac = 0.5;
+            const Real frac = 0.5;
             scalar_increment =
                 (1.0 - frac) * scalar_lower_bound + frac * scalar_upper_bound - scalar_old;
             modified_increment = true;

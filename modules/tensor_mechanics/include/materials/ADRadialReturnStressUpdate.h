@@ -65,12 +65,12 @@ public:
   virtual Real computeReferenceResidual(const ADReal & effective_trial_stress,
                                         const ADReal & scalar_effective_inelastic_strain) override;
 
-  virtual Real minimumPermissibleValue(const ADReal & /*effective_trial_stress*/) const override
+  virtual ADReal minimumPermissibleValue(const ADReal & /*effective_trial_stress*/) const override
   {
     return 0.0;
   }
 
-  virtual Real maximumPermissibleValue(const ADReal & effective_trial_stress) const override;
+  virtual ADReal maximumPermissibleValue(const ADReal & effective_trial_stress) const override;
 
   /**
    * Compute the limiting value of the time step for this material
@@ -107,17 +107,6 @@ protected:
   }
 
   /**
-   * Calculate the derivative of the strain increment with respect to the updated stress.
-   * @param effective_trial_stress Effective trial stress
-   * @param scalar                 Inelastic strain increment magnitude being solved for
-   */
-  virtual Real computeStressDerivative(const ADReal & /*effective_trial_stress*/,
-                                       const ADReal & /*scalar*/)
-  {
-    return 0.0;
-  }
-
-  /**
    * Perform any necessary steps to finalize state after return mapping iterations
    * @param inelasticStrainIncrement Inelastic strain increment
    */
@@ -136,4 +125,3 @@ protected:
   usingStressUpdateBaseMembers;
   usingSingleVariableReturnMappingSolutionMembers;
 };
-

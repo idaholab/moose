@@ -120,11 +120,11 @@ ADRadialReturnStressUpdate<compute_stage>::computeReferenceResidual(
 }
 
 template <ComputeStage compute_stage>
-Real
+ADReal
 ADRadialReturnStressUpdate<compute_stage>::maximumPermissibleValue(
     const ADReal & effective_trial_stress) const
 {
-  return MetaPhysicL::raw_value(effective_trial_stress / _three_shear_modulus);
+  return effective_trial_stress / _three_shear_modulus;
 }
 
 template <ComputeStage compute_stage>

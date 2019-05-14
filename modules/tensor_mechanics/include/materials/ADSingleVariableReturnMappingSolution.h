@@ -60,14 +60,14 @@ protected:
    * of this may be known.
    * @param effective_trial_stress Effective trial stress
    */
-  virtual Real minimumPermissibleValue(const ADReal & effective_trial_stress) const;
+  virtual ADReal minimumPermissibleValue(const ADReal & effective_trial_stress) const;
 
   /**
    * Compute the maximum permissible value of the scalar.  For some models, the magnitude
    * of this may be known.
    * @param effective_trial_stress Effective trial stress
    */
-  virtual Real maximumPermissibleValue(const ADReal & effective_trial_stress) const;
+  virtual ADReal maximumPermissibleValue(const ADReal & effective_trial_stress) const;
 
   /**
    * Compute an initial guess for the value of the scalar. For some cases, an
@@ -218,8 +218,8 @@ private:
   void checkPermissibleRange(ADReal & scalar,
                              ADReal & scalar_increment,
                              const ADReal & scalar_old,
-                             const Real min_permissible_scalar,
-                             const Real max_permissible_scalar,
+                             const ADReal min_permissible_scalar,
+                             const ADReal max_permissible_scalar,
                              std::stringstream * iter_output);
 
   /**
@@ -234,8 +234,8 @@ private:
   void updateBounds(const ADReal & scalar,
                     const ADReal & residual,
                     const Real init_resid_sign,
-                    Real & scalar_upper_bound,
-                    Real & scalar_lower_bound,
+                    ADReal & scalar_upper_bound,
+                    ADReal & scalar_lower_bound,
                     std::stringstream * iter_output);
 
   /**
@@ -252,4 +252,3 @@ private:
                                    const ADReal & scalar,
                                    const Real reference_residual);
 };
-

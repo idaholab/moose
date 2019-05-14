@@ -15,7 +15,7 @@
   [../]
   [./damage]
     type = ADBodyForce
-    value = 1e5
+    value = 1
     variable = u
   [../]
 []
