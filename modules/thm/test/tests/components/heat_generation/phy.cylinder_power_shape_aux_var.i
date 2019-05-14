@@ -4,12 +4,6 @@
   scaling_factor_temperature = 1e1
 []
 
-[FluidProperties]
-  [./fp]
-    type = IAPWS95LiquidFluidProperties
-  [../]
-[]
-
 [Functions]
   [./HeatFunction]
     type = ParsedFunction

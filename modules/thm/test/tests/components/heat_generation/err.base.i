@@ -2,18 +2,7 @@
 # a non-existent block of a heat structure
 
 [GlobalParams]
-  initial_p = 15.5e6
-  initial_vel = 2
-  initial_T = 560
-
-  scaling_factor_1phase = '1 1 1'
   scaling_factor_temperature = '1'
-[]
-
-[FluidProperties]
-  [./fp]
-    type = IAPWS95LiquidFluidProperties
-  [../]
 []
 
 [HeatStructureMaterials]

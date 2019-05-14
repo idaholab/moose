@@ -2,7 +2,6 @@
 # heat source over multiple heat structure regions
 
 [GlobalParams]
-  gravity_vector = '0 0 0'
   scaling_factor_temperature = 1e-3
 []
 
