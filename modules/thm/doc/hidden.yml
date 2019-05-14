@@ -67,6 +67,8 @@
 - /Components/FlowChannel
 - /Components/FlowChannel1Phase
 - /Components/FlowChannel2Phase
+- /Components/FormLossFromFunction1Phase
+- /Components/FormLossFromFunction2Phase
 - /Components/FreeBoundary
 - /Components/GeometricalComponent
 - /Components/HSBoundaryAmbientConvection
@@ -175,6 +177,7 @@
 
 - /Kernels/CoupledForceRZ
 - /Kernels/OneD3EqnEnergyHeatFlux
+- /Kernels/OneD3EqnMomentumFormLoss
 - /Kernels/OneD7EqnEnergyHeatFlux
 - /Kernels/HeatConductionRZ
 - /Kernels/HeatConductionTimeDerivativeRZ
@@ -188,7 +191,6 @@
 - /Kernels/OneDMassFlux
 - /Kernels/OneDMomentumAreaGradient
 - /Kernels/OneDMomentumFlux
-- /Kernels/OneDMomentumFormLoss
 - /Kernels/OneDMomentumFriction
 - /Kernels/OneDMomentumGravity
 - /Kernels/OneD7EqnEnergyInterfacialHeatTransfer
@@ -204,6 +206,7 @@
 - /Kernels/OneD7EqnEntropyMinimumArtificialDissipation
 - /Kernels/OneD7EqnMassInterfacialMassTransfer
 - /Kernels/OneD7EqnMassWallMassTransfer
+- /Kernels/OneD7EqnMomentumFormLoss
 - /Kernels/OneD7EqnMomentumInterfaceFriction
 - /Kernels/OneD7EqnMomentumInterfacialMassTransfer
 - /Kernels/OneD7EqnMomentumVelocityRelaxation
