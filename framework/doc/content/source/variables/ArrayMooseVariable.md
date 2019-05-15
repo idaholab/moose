@@ -12,7 +12,7 @@ The design:
 
 - to use variable groups in [libMesh] to group components in an array variable together.
 - to use template to avoid code duplication with standard and vector variables.
-- to use Eigen::Matrix to hold local dofs, solutions on quadrature points for an array variable to ease the local operations.
+- to use [Eigen](https://eigen.tuxfamily.org/dox/group__QuickRefPage.html)::Matrix to hold local dofs, solutions on quadrature points for an array variable to ease the local operations.
 - to use dense matrices or vectors as standard or vector variables with proper sizes for holding the local Jacobians and residuals that are to be assembled into a global Jacobian matrix and a global residual vector.
 
 The following map is useful for understanding the template:

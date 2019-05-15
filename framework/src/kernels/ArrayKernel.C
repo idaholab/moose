@@ -123,7 +123,7 @@ ArrayKernel::computeOffDiagJacobian(MooseVariableFEBase & jvar)
     for (_j = 0; _j < jvar.phiSize(); _j++)
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       {
-        RealArray v = _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
+        RealEigenMatrix v = _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
         saveFullLocalArrayJacobian(_local_ke, _i, _test.size(), _j, jvar.phiSize(), v);
       }
 
@@ -157,7 +157,7 @@ ArrayKernel::computeOffDiagJacobianScalar(unsigned int jvar)
   for (_i = 0; _i < _test.size(); _i++)
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {
-      RealArray v = _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobianScalar(jv);
+      RealEigenMatrix v = _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobianScalar(jv);
       saveFullLocalArrayJacobian(_local_ke, _i, _test.size(), 0, 1, v);
     }
 

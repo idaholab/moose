@@ -18,18 +18,19 @@ validParams<GenericConstant2DArray>()
   InputParameters params = validParams<Material>();
   params.addRequiredParam<std::string>("prop_name",
                                        "The names of the properties this material will have");
-  params.addRequiredParam<RealArray>("prop_value",
-                                     "The values associated with the named properties");
+  params.addRequiredParam<RealEigenMatrix>("prop_value",
+                                           "The values associated with the named properties");
   params.declareControllable("prop_value");
-  params.addClassDescription("A material evaluating one material property in type of RealArray");
+  params.addClassDescription(
+      "A material evaluating one material property in type of RealEigenMatrix");
   return params;
 }
 
 GenericConstant2DArray::GenericConstant2DArray(const InputParameters & parameters)
   : Material(parameters),
     _prop_name(getParam<std::string>("prop_name")),
-    _prop_value(getParam<RealArray>("prop_value")),
-    _property(declareProperty<RealArray>(_prop_name))
+    _prop_value(getParam<RealEigenMatrix>("prop_value")),
+    _property(declareProperty<RealEigenMatrix>(_prop_name))
 {
 }
 
