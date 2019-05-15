@@ -33,7 +33,8 @@ MechanicalContactLMTest<compute_stage>::MechanicalContactLMTest(const InputParam
                   : nullptr),
     _computing_gap_dependence(false),
     _slave_disp_y_sln(nullptr),
-    _master_disp_y_sln(nullptr)
+    _master_disp_y_sln(nullptr),
+    _epsilon(std::numeric_limits<Real>::epsilon())
 {
   if (_slave_disp_y)
   {
@@ -59,8 +60,12 @@ MechanicalContactLMTest<RESIDUAL>::computeQpResidual(Moose::MortarType mortar_ty
         auto gap_vec = _phys_points_master[_qp] - _phys_points_slave[_qp];
         auto gap = gap_vec * _normals[_qp];
 
-        return _test[_i][_qp] *
-               (_lambda[_qp] + gap - std::sqrt(_lambda[_qp] * _lambda[_qp] + gap * gap));
+        // The FB function (in its pure form) is not differentiable at (0, 0) but if we add some
+        // constant > 0 into the root function, then it is
+        auto fb_function =
+            _lambda[_qp] + gap - std::sqrt(_lambda[_qp] * _lambda[_qp] + gap * gap + _epsilon);
+
+        return _test[_i][_qp] * fb_function;
       }
       else
         return _test[_i][_qp] * _lambda[_qp];
@@ -93,8 +98,12 @@ MechanicalContactLMTest<JACOBIAN>::computeQpResidual(Moose::MortarType mortar_ty
 
         auto gap = gap_vec * _normals[_qp];
 
-        return _test[_i][_qp] *
-               (_lambda[_qp] + gap - std::sqrt(_lambda[_qp] * _lambda[_qp] + gap * gap));
+        // The FB function (in its pure form) is not differentiable at (0, 0) but if we add some
+        // constant > 0 into the root function, then it is
+        auto fb_function =
+            _lambda[_qp] + gap - std::sqrt(_lambda[_qp] * _lambda[_qp] + gap * gap + _epsilon);
+
+        return _test[_i][_qp] * fb_function;
       }
       else
         return _test[_i][_qp] * _lambda[_qp];

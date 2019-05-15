@@ -7,5 +7,9 @@
     exodiff = 'mortar-mech_out.e'
     mesh_mode = 'REPLICATED'
     requirement = "We shall be able to do mechanical contact with the new mortar system. It's beautiful."
+    # Need to set an absolute zero here because there is a slight difference in results between
+    # running with FD and PJFNK at the time step when we have 'resting contact' e.g. there is no
+    # gap, but also no force
+    abs_zero = '2e-8'
   []
 []

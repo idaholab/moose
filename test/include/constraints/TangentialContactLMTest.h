@@ -38,6 +38,7 @@ protected:
   const ADVariableValue & _master_y_dot;
 
   const Real _friction_coeff;
+  const Real _epsilon;
 
   usingMortarConstraintMembers;
 };

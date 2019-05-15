@@ -39,7 +39,8 @@ TangentialContactLMTest<compute_stage>::TangentialContactLMTest(const InputParam
     _master_x_dot(_master_var.template adUDotNeighbor<compute_stage>()),
     _slave_y_dot(_slave_disp_y.template adUDot<compute_stage>()),
     _master_y_dot(_master_disp_y.template adUDotNeighbor<compute_stage>()),
-    _friction_coeff(adGetParam<Real>("friction_coefficient"))
+    _friction_coeff(adGetParam<Real>("friction_coefficient")),
+    _epsilon(std::numeric_limits<Real>::epsilon())
 {
 }
 
@@ -55,7 +56,7 @@ TangentialContactLMTest<compute_stage>::computeQpResidual(Moose::MortarType mort
       if (_has_master)
       {
         // Check whether we are actually in contact
-        if (_contact_pressure[_qp] > TOLERANCE)
+        if (_contact_pressure[_qp] > TOLERANCE * TOLERANCE)
         {
           // Build the velocity vector
           ADRealVectorValue relative_velocity(
@@ -66,13 +67,21 @@ TangentialContactLMTest<compute_stage>::computeQpResidual(Moose::MortarType mort
 
           // NCP part 1: requirement that either there is no slip **or** slip velocity and
           // frictional force exerted **by** the slave side are in the same direction
-          auto a = tangential_velocity / _lambda[_qp];
+          ADReal a;
+          if (tangential_velocity * _lambda[_qp] < 0)
+            a = -tangential_velocity * tangential_velocity;
+          else
+            a = tangential_velocity * tangential_velocity;
 
           // NCP part 2: require that the frictional force can never exceed the frictional
           // coefficient times the normal force
           auto b = _friction_coeff * _contact_pressure[_qp] - std::abs(_lambda[_qp]);
 
-          return a + b - std::sqrt(a * a + b * b);
+          // The FB function (in its pure form) is not differentiable at (0, 0) but if we add some
+          // constant > 0 into the root function, then it is
+          auto fb_function = a + b - std::sqrt(a * a + b * b + _epsilon);
+
+          return _test[_i][_qp] * fb_function;
         }
         else
           // If not in contact then we force the tangential lagrange multiplier to zero
