@@ -77,17 +77,31 @@
   [../]
 []
 
-[Kernels]
-  [diff_x]
-    type = Diffusion
+[SolidMechanics]
+  [./solid]
+    disp_x = disp_x
+    disp_y = disp_y
     block = '1 2'
-    variable = disp_x
-  []
-  [diff_y]
-    type = Diffusion
-    block = '1 2'
-    variable = disp_y
-  []
+  [../]
+[]
+
+[Materials]
+  [./left]
+    type = LinearIsotropicMaterial
+    block = 1
+    disp_y = disp_y
+    disp_x = disp_x
+    poissons_ratio = 0.3
+    youngs_modulus = 1e6
+  [../]
+  [./right]
+    type = LinearIsotropicMaterial
+    block = 2
+    disp_y = disp_y
+    disp_x = disp_x
+    poissons_ratio = 0.3
+    youngs_modulus = 1e6
+  [../]
 []
 
 [Preconditioning]
@@ -100,14 +114,29 @@
 [Executioner]
   type = Transient
   solve_type = 'PJFNK'
-  petsc_options_iname = '-pc_type'
-  petsc_options_value = 'lu'
-  num_steps = 30
-  dtmin = 1
+  petsc_options = '-snes_converged_reason -ksp_converged_reason'
+  petsc_options_iname = '-pc_type -mat_mffd_err -pc_factor_shift_type -pc_factor_shift_amount'
+  petsc_options_value = 'lu       1e-5          NONZERO               1e-15'
+  end_time = 15
+  dt = 0.1
+  dtmin = 0.01
+  l_max_its = 30
+  nl_max_its = 20
+  line_search = 'none'
+
+  [./Predictor]
+    type = SimplePredictor
+    scale = 1.0
+  [../]
 []
 
 [Outputs]
-  exodus = true
+  sync_times = '1 2 3 4 5 6 7 8 9 10 11 12 13 14 15'
+  [exodus]
+    type = Exodus
+    file_base = frictional_lm_out
+    sync_only = true
+  []
   [dof]
     execute_on = 'initial'
     type = DOFMap
@@ -127,11 +156,11 @@
 
 [Constraints]
   [normal_lm]
-    type = MechanicalContactLMTest
+    type = MechanicalContactLM
     master_boundary = '2'
-    slave_boundary = '1'
+    slave_boundary = '3'
     master_subdomain = '20'
-    slave_subdomain = '10'
+    slave_subdomain = '30'
     variable = normal_lm
     slave_variable = disp_x
     slave_disp_y = disp_y
@@ -139,11 +168,11 @@
     compute_primal_residuals = false
   []
   [normal_x]
-    type = MechanicalContactTest
+    type = MechanicalContact
     master_boundary = '2'
-    slave_boundary = '1'
+    slave_boundary = '3'
     master_subdomain = '20'
-    slave_subdomain = '10'
+    slave_subdomain = '30'
     variable = normal_lm
     slave_variable = disp_x
     component = x
@@ -151,11 +180,11 @@
     compute_lm_residuals = false
   []
   [normal_y]
-    type = MechanicalContactTest
+    type = MechanicalContact
     master_boundary = '2'
-    slave_boundary = '1'
+    slave_boundary = '3'
     master_subdomain = '20'
-    slave_subdomain = '10'
+    slave_subdomain = '30'
     variable = normal_lm
     slave_variable = disp_y
     component = y
@@ -163,11 +192,11 @@
     compute_lm_residuals = false
   []
   [tangential_lm]
-    type = TangentialContactLMTest
+    type = TangentialContactLM
     master_boundary = '2'
-    slave_boundary = '1'
+    slave_boundary = '3'
     master_subdomain = '20'
-    slave_subdomain = '10'
+    slave_subdomain = '30'
     variable = tangential_lm
     slave_variable = disp_x
     slave_disp_y = disp_y
@@ -177,11 +206,11 @@
     friction_coefficient = .4
   []
   [tangential_x]
-    type = TangentialContactTest
+    type = TangentialContact
     master_boundary = '2'
-    slave_boundary = '1'
+    slave_boundary = '3'
     master_subdomain = '20'
-    slave_subdomain = '10'
+    slave_subdomain = '30'
     variable = tangential_lm
     slave_variable = disp_x
     component = x
@@ -189,15 +218,32 @@
     compute_lm_residuals = false
   []
   [tangential_y]
-    type = TangentialContactTest
+    type = TangentialContact
     master_boundary = '2'
-    slave_boundary = '1'
+    slave_boundary = '3'
     master_subdomain = '20'
-    slave_subdomain = '10'
+    slave_subdomain = '30'
     variable = tangential_lm
     slave_variable = disp_y
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false
+  []
+[]
+
+[Postprocessors]
+  [./num_nl]
+    type = NumNonlinearIterations
+  [../]
+  [./cumulative]
+    type = CumulativeValuePostprocessor
+    postprocessor = num_nl
+  [../]
+  [lin]
+    type = NumLinearIterations
+  []
+  [cum_lin]
+    type = CumulativeValuePostprocessor
+    postprocessor = lin
   []
 []
