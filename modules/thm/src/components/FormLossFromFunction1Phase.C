@@ -36,16 +36,26 @@ FormLossFromFunction1Phase::addMooseObjects()
 {
   const FlowChannel1Phase & fch = getComponentByName<FlowChannel1Phase>(_flow_channel_name);
 
-  const std::string class_name = "OneD3EqnMomentumFormLoss";
-  InputParameters params = _factory.getValidParams(class_name);
-  params.set<NonlinearVariableName>("variable") = FlowModelSinglePhase::RHOUA;
-  params.set<std::vector<SubdomainName>>("block") = fch.getSubdomainNames();
-  params.set<std::vector<VariableName>>("arhoA") = {FlowModelSinglePhase::RHOA};
-  params.set<std::vector<VariableName>>("arhouA") = {FlowModelSinglePhase::RHOUA};
-  params.set<std::vector<VariableName>>("arhoEA") = {FlowModelSinglePhase::RHOEA};
-  params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
-  params.set<MaterialPropertyName>("rho") = FlowModelSinglePhase::DENSITY;
-  params.set<MaterialPropertyName>("vel") = FlowModelSinglePhase::VELOCITY;
-  params.set<FunctionName>("K_prime") = getParam<FunctionName>("K_prime");
-  _sim.addKernel(class_name, Component::genName(name(), class_name), params);
+  {
+    const std::string class_name = "GenericFunctionMaterial";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<std::vector<SubdomainName>>("block") = fch.getSubdomainNames();
+    params.set<std::vector<std::string>>("prop_names") = {"K_prime"};
+    params.set<std::vector<FunctionName>>("prop_values") = {getParam<FunctionName>("K_prime")};
+    _sim.addMaterial(class_name, Component::genName(name(), "k_prime_material"), params);
+  }
+  {
+    const std::string class_name = "OneD3EqnMomentumFormLoss";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<NonlinearVariableName>("variable") = FlowModelSinglePhase::RHOUA;
+    params.set<std::vector<SubdomainName>>("block") = fch.getSubdomainNames();
+    params.set<std::vector<VariableName>>("arhoA") = {FlowModelSinglePhase::RHOA};
+    params.set<std::vector<VariableName>>("arhouA") = {FlowModelSinglePhase::RHOUA};
+    params.set<std::vector<VariableName>>("arhoEA") = {FlowModelSinglePhase::RHOEA};
+    params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
+    params.set<MaterialPropertyName>("rho") = FlowModelSinglePhase::DENSITY;
+    params.set<MaterialPropertyName>("vel") = FlowModelSinglePhase::VELOCITY;
+    _sim.addKernel(
+        class_name, Component::genName(name(), FlowModelSinglePhase::RHOUA, "form_loss"), params);
+  }
 }

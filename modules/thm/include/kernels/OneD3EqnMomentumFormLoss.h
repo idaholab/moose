@@ -38,7 +38,7 @@ protected:
   const MaterialProperty<Real> & _dvel_darhouA;
 
   /// form loss coefficient per unit length function
-  Function & _K_prime;
+  const MaterialProperty<Real> & _K_prime;
 
   unsigned int _arhoA_var_number;
   unsigned int _arhouA_var_number;

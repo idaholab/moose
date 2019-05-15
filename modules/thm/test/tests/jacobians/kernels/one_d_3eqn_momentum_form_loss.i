@@ -19,10 +19,15 @@
     vars = 'arhoA arhouA'
     slopes = '5 6'
   [../]
+  [./K_prime_mat]
+    type = GenericFunctionMaterial
+    prop_names = 'K_prime'
+    prop_values = 'K_prime_fn'
+  [../]
 []
 
 [Functions]
-  [./K_prime]
+  [./K_prime_fn]
     type = ConstantFunction
     value = 1
   [../]
@@ -38,6 +43,5 @@
     A = A
     rho = rho
     vel = vel
-    K_prime = K_prime
   [../]
 []
