@@ -23,11 +23,11 @@ validParams<ArrayNodalBC>()
 
 ArrayNodalBC::ArrayNodalBC(const InputParameters & parameters)
   : NodalBCBase(parameters),
-    MooseVariableInterface<RealArrayValue>(this,
-                                           true,
-                                           "variable",
-                                           Moose::VarKindType::VAR_NONLINEAR,
-                                           Moose::VarFieldType::VAR_FIELD_ARRAY),
+    MooseVariableInterface<RealEigenVector>(this,
+                                            true,
+                                            "variable",
+                                            Moose::VarKindType::VAR_NONLINEAR,
+                                            Moose::VarFieldType::VAR_FIELD_ARRAY),
     _var(*mooseVariable()),
     _current_node(_var.node()),
     _u(_var.nodalValue())
@@ -40,7 +40,7 @@ ArrayNodalBC::computeResidual()
 {
   if (_var.isNodalDefined())
   {
-    RealArrayValue res = computeQpResidual();
+    RealEigenVector res = computeQpResidual();
 
     for (auto tag_id : _vector_tags)
       if (_sys.hasVector(tag_id))
@@ -53,7 +53,7 @@ ArrayNodalBC::computeJacobian()
 {
   if (_var.isNodalDefined())
   {
-    RealArrayValue cached_val = computeQpJacobian();
+    RealEigenVector cached_val = computeQpJacobian();
 
     dof_id_type cached_row = _var.nodalDofIndex();
 
@@ -86,10 +86,10 @@ ArrayNodalBC::computeOffDiagJacobian(unsigned int jvar)
               cached_row + i, cached_col + j, cached_val(i, j), tag);
 }
 
-RealArrayValue
+RealEigenVector
 ArrayNodalBC::computeQpJacobian()
 {
-  return RealArrayValue::Ones(_var.count());
+  return RealEigenVector::Ones(_var.count());
   ;
 }
 

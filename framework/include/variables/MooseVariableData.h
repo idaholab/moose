@@ -557,7 +557,7 @@ private:
   void zeroSizeDofValues();
   inline void getArrayDoFValues(const NumericVector<Number> & sol,
                                 unsigned int n,
-                                MooseArray<RealArrayValue> & dof_values) const;
+                                MooseArray<RealEigenVector> & dof_values) const;
 
   /// A const reference to the owning MooseVariableFE object
   const MooseVariableFE<OutputType> & _var;
@@ -875,7 +875,7 @@ MooseVariableData<OutputType>::adNodalValue() const
 ////////////////////////// Forward declaration of fully specialized templates //////////////////
 
 template <>
-void MooseVariableData<RealArrayValue>::fetchDoFValues();
+void MooseVariableData<RealEigenVector>::fetchDoFValues();
 
 template <>
 template <>

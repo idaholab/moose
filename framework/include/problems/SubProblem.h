@@ -33,7 +33,7 @@ template <typename>
 class MooseVariableFE;
 typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<RealVectorValue> VectorMooseVariable;
-typedef MooseVariableFE<RealArrayValue> ArrayMooseVariable;
+typedef MooseVariableFE<RealEigenVector> ArrayMooseVariable;
 class RestartableDataValue;
 class SystemBase;
 

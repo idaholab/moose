@@ -27,7 +27,7 @@ InputParameters validParams<InitialConditionTempl<Real>>();
 template <>
 InputParameters validParams<InitialConditionTempl<RealVectorValue>>();
 template <>
-InputParameters validParams<InitialConditionTempl<RealArrayValue>>();
+InputParameters validParams<InitialConditionTempl<RealEigenVector>>();
 
 /**
  * This is a template class that implements the workhorse `compute` and `computeNodal` methods. The
@@ -95,9 +95,9 @@ public:
    */
   Real dotHelper(const RealGradient & op1, const RealGradient & op2) { return op1 * op2; }
   Real dotHelper(const RealTensor & op1, const RealTensor & op2) { return op1.contract(op2); }
-  RealArrayValue dotHelper(const RealVectorArrayValue & op1, const RealGradient & op2)
+  RealEigenVector dotHelper(const RealVectorArrayValue & op1, const RealGradient & op2)
   {
-    RealArrayValue v = op1.col(0) * op2(0);
+    RealEigenVector v = op1.col(0) * op2(0);
     for (unsigned int i = 1; i < LIBMESH_DIM; ++i)
       v += op1.col(i) * op2(i);
     return v;
@@ -190,4 +190,4 @@ protected:
 
 typedef InitialConditionTempl<Real> InitialCondition;
 typedef InitialConditionTempl<RealVectorValue> VectorInitialCondition;
-typedef InitialConditionTempl<RealArrayValue> ArrayInitialCondition;
+typedef InitialConditionTempl<RealEigenVector> ArrayInitialCondition;

@@ -30,7 +30,7 @@ validParams<InitialConditionTempl<RealVectorValue>>()
 
 template <>
 InputParameters
-validParams<InitialConditionTempl<RealArrayValue>>()
+validParams<InitialConditionTempl<RealEigenVector>>()
 {
   return validParams<InitialConditionBase>();
 }
@@ -288,8 +288,8 @@ InitialConditionTempl<RealVectorValue>::gradientComponent(GradientType grad, uns
 }
 
 template <>
-RealArrayValue
-InitialConditionTempl<RealArrayValue>::gradientComponent(GradientType grad, unsigned int i)
+RealEigenVector
+InitialConditionTempl<RealEigenVector>::gradientComponent(GradientType grad, unsigned int i)
 {
   return grad.col(i);
 }
@@ -487,7 +487,7 @@ InitialConditionTempl<T>::choleskySolve(bool is_volume)
 
 template <>
 void
-InitialConditionTempl<RealArrayValue>::choleskySolve(bool is_volume)
+InitialConditionTempl<RealEigenVector>::choleskySolve(bool is_volume)
 {
   _Ke.resize(_free_dofs, _free_dofs);
   _Ke.zero();
@@ -543,4 +543,4 @@ InitialConditionTempl<T>::computeNodal(const Point & p)
 
 template class InitialConditionTempl<Real>;
 template class InitialConditionTempl<RealVectorValue>;
-template class InitialConditionTempl<RealArrayValue>;
+template class InitialConditionTempl<RealEigenVector>;

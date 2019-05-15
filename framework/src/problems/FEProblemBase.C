@@ -3797,7 +3797,7 @@ FEProblemBase::getArrayVariable(THREAD_ID tid, const std::string & var_name)
   if (!_nl->hasVariable(var_name))
     mooseError("Unknown variable " + var_name);
 
-  return _nl->getFieldVariable<RealArrayValue>(tid, var_name);
+  return _nl->getFieldVariable<RealEigenVector>(tid, var_name);
 }
 
 bool

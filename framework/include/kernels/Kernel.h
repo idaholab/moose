@@ -64,9 +64,9 @@ protected:
   /**
    * For coupling array variables
    */
-  virtual RealArrayValue computeQpOffDiagJacobianArray(ArrayMooseVariable & jvar)
+  virtual RealEigenVector computeQpOffDiagJacobianArray(ArrayMooseVariable & jvar)
   {
-    return RealArrayValue::Zero(jvar.count());
+    return RealEigenVector::Zero(jvar.count());
   }
 
   /// This is a regular kernel so we cast to a regular MooseVariable

@@ -134,7 +134,7 @@ ArrayDGKernel::computeElemNeighResidual(Moose::DGResidualType type)
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < test_space.size(); _i++)
     {
-      RealArrayValue residual = _JxW[_qp] * _coord[_qp] * computeQpResidual(type);
+      RealEigenVector residual = _JxW[_qp] * _coord[_qp] * computeQpResidual(type);
       mooseAssert(residual.size() == _count,
                   "Size of local residual is not equal to the number of array variable compoments");
       saveLocalArrayResidual(_local_re, _i, test_space.size(), residual);
@@ -176,7 +176,7 @@ ArrayDGKernel::computeElemNeighJacobian(Moose::DGJacobianType type)
     for (_i = 0; _i < test_space.size(); _i++)
       for (_j = 0; _j < loc_phi.size(); _j++)
       {
-        RealArrayValue v = _JxW[_qp] * _coord[_qp] * computeQpJacobian(type);
+        RealEigenVector v = _JxW[_qp] * _coord[_qp] * computeQpJacobian(type);
         saveDiagLocalArrayJacobian(_local_ke, _i, test_space.size(), _j, loc_phi.size(), v);
       }
 

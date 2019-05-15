@@ -21,7 +21,7 @@ InputParameters validParams<ArrayNodalBC>();
 /**
  * Base class for deriving any boundary condition that works at nodes on vector variables
  */
-class ArrayNodalBC : public NodalBCBase, public MooseVariableInterface<RealArrayValue>
+class ArrayNodalBC : public NodalBCBase, public MooseVariableInterface<RealEigenVector>
 {
 public:
   ArrayNodalBC(const InputParameters & parameters);
@@ -42,16 +42,16 @@ protected:
   const Node * const & _current_node;
 
   /// Value of the unknown variable this BC is acting on
-  const RealArrayValue & _u;
+  const RealEigenVector & _u;
 
-  virtual RealArrayValue computeQpResidual() = 0;
+  virtual RealEigenVector computeQpResidual() = 0;
 
   /**
    * The user can override this function to compute the "on-diagonal"
    * Jacobian contribution for this VectorNodalBC.  If not overriden,
    * returns one.
    */
-  virtual RealArrayValue computeQpJacobian();
+  virtual RealEigenVector computeQpJacobian();
 
   /**
    * This is the virtual that derived classes should override for

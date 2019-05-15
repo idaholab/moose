@@ -170,7 +170,7 @@ dataStore(std::ostream & stream, std::stringstream *& s, void * context)
 
 template <>
 void
-dataStore(std::ostream & stream, RealArrayValue & v, void * context)
+dataStore(std::ostream & stream, RealEigenVector & v, void * context)
 {
   unsigned int m = v.size();
   stream.write((char *)&m, sizeof(m));
@@ -409,7 +409,7 @@ dataLoad(std::istream & stream, std::stringstream *& s, void * context)
 
 template <>
 void
-dataLoad(std::istream & stream, RealArrayValue & v, void * context)
+dataLoad(std::istream & stream, RealEigenVector & v, void * context)
 {
   unsigned int n = 0;
   stream.read((char *)&n, sizeof(n));

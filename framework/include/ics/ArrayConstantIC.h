@@ -26,8 +26,8 @@ class ArrayConstantIC : public ArrayInitialCondition
 public:
   ArrayConstantIC(const InputParameters & parameters);
 
-  virtual RealArrayValue value(const Point & p) override;
+  virtual RealEigenVector value(const Point & p) override;
 
 protected:
-  const RealArrayValue _value;
+  const RealEigenVector _value;
 };

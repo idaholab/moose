@@ -18,19 +18,19 @@ InputParameters
 validParams<ArrayConstantIC>()
 {
   InputParameters params = validParams<ArrayInitialCondition>();
-  params.addRequiredParam<RealArrayValue>("value", "The values to be set in IC");
+  params.addRequiredParam<RealEigenVector>("value", "The values to be set in IC");
   params.addClassDescription("Sets constant component values for an array field variable.");
   return params;
 }
 
 ArrayConstantIC::ArrayConstantIC(const InputParameters & parameters)
-  : ArrayInitialCondition(parameters), _value(getParam<RealArrayValue>("value"))
+  : ArrayInitialCondition(parameters), _value(getParam<RealEigenVector>("value"))
 {
   if (_var.count() != _value.size())
     mooseError("'value' size is inconsistent to the number of components of the array variable");
 }
 
-RealArrayValue
+RealEigenVector
 ArrayConstantIC::value(const Point & /*p*/)
 {
   return _value;

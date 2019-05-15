@@ -27,8 +27,8 @@ public:
   ArrayDirichletBC(const InputParameters & parameters);
 
 protected:
-  virtual RealArrayValue computeQpResidual() override;
+  virtual RealEigenVector computeQpResidual() override;
 
   /// The value for this BC
-  const RealArrayValue & _values;
+  const RealEigenVector & _values;
 };

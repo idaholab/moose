@@ -657,7 +657,7 @@ MooseVariableData<OutputType>::computeValues()
 
 template <>
 void
-MooseVariableData<RealArrayValue>::computeValues()
+MooseVariableData<RealEigenVector>::computeValues()
 {
   unsigned int num_dofs = _dof_indices.size();
 
@@ -1181,7 +1181,7 @@ MooseVariableData<OutputType>::computeMonomialValues()
 
 template <>
 void
-MooseVariableData<RealArrayValue>::computeMonomialValues()
+MooseVariableData<RealEigenVector>::computeMonomialValues()
 {
   // Fixeme: will think of optimization later
   computeValues();
@@ -1316,8 +1316,8 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
 
 template <>
 void
-MooseVariableData<RealArrayValue>::computeAD(const unsigned int /*num_dofs*/,
-                                             const unsigned int /*nqp*/)
+MooseVariableData<RealEigenVector>::computeAD(const unsigned int /*num_dofs*/,
+                                              const unsigned int /*nqp*/)
 {
   mooseError("AD for array variable has not been implemented");
 }
@@ -1373,8 +1373,8 @@ MooseVariableData<OutputType>::insertNodalValue(NumericVector<Number> & residual
 
 template <>
 void
-MooseVariableData<RealArrayValue>::insertNodalValue(NumericVector<Number> & residual,
-                                                    const RealArrayValue & v)
+MooseVariableData<RealEigenVector>::insertNodalValue(NumericVector<Number> & residual,
+                                                     const RealEigenVector & v)
 {
   for (unsigned int j = 0; j < _count; ++j)
     residual.set(_nodal_dof_index + j, v(j));
@@ -1412,9 +1412,9 @@ MooseVariableData<OutputType>::getNodalValue(const Node & node, Moose::SolutionS
 }
 
 template <>
-RealArrayValue
-MooseVariableData<RealArrayValue>::getNodalValue(const Node & node,
-                                                 Moose::SolutionState state) const
+RealEigenVector
+MooseVariableData<RealEigenVector>::getNodalValue(const Node & node,
+                                                  Moose::SolutionState state) const
 {
   mooseAssert(_subproblem.mesh().isSemiLocal(const_cast<Node *>(&node)), "Node is not Semilocal");
 
@@ -1427,7 +1427,7 @@ MooseVariableData<RealArrayValue>::getNodalValue(const Node & node,
 
   dof_id_type dof = node.dof_number(_sys.number(), _var_num, 0);
 
-  RealArrayValue v(_count);
+  RealEigenVector v(_count);
   switch (state)
   {
     case Moose::Current:
@@ -1477,17 +1477,17 @@ MooseVariableData<OutputType>::getElementalValue(const Elem * elem,
 }
 
 template <>
-RealArrayValue
-MooseVariableData<RealArrayValue>::getElementalValue(const Elem * elem,
-                                                     Moose::SolutionState state,
-                                                     unsigned int idx) const
+RealEigenVector
+MooseVariableData<RealEigenVector>::getElementalValue(const Elem * elem,
+                                                      Moose::SolutionState state,
+                                                      unsigned int idx) const
 {
   std::vector<dof_id_type> dof_indices;
   _dof_map.dof_indices(elem, dof_indices, _var_num);
 
   dof_id_type dof = dof_indices[idx];
 
-  RealArrayValue v(_count);
+  RealEigenVector v(_count);
 
   switch (state)
   {
@@ -1530,7 +1530,7 @@ MooseVariableData<OutputType>::insert(NumericVector<Number> & residual)
 
 template <>
 void
-MooseVariableData<RealArrayValue>::insert(NumericVector<Number> & residual)
+MooseVariableData<RealEigenVector>::insert(NumericVector<Number> & residual)
 {
   if (_has_dof_values)
   {
@@ -1563,7 +1563,7 @@ MooseVariableData<OutputType>::add(NumericVector<Number> & residual)
 
 template <>
 void
-MooseVariableData<RealArrayValue>::add(NumericVector<Number> & residual)
+MooseVariableData<RealEigenVector>::add(NumericVector<Number> & residual)
 {
   if (_has_dof_values)
   {
@@ -1597,8 +1597,8 @@ MooseVariableData<OutputType>::addSolution(NumericVector<Number> & sol,
 
 template <>
 void
-MooseVariableData<RealArrayValue>::addSolution(NumericVector<Number> & sol,
-                                               const DenseVector<Number> & v) const
+MooseVariableData<RealEigenVector>::addSolution(NumericVector<Number> & sol,
+                                                const DenseVector<Number> & v) const
 {
   if (_has_dof_values)
   {
@@ -1738,7 +1738,7 @@ MooseVariableData<OutputType>::computeIncrementAtQps(const NumericVector<Number>
 
 template <>
 void
-MooseVariableData<RealArrayValue>::computeIncrementAtQps(
+MooseVariableData<RealEigenVector>::computeIncrementAtQps(
     const NumericVector<Number> & increment_vec)
 {
   unsigned int nqp = _qrule->n_points();
@@ -1785,7 +1785,7 @@ MooseVariableData<OutputType>::computeIncrementAtNode(const NumericVector<Number
 
 template <>
 void
-MooseVariableData<RealArrayValue>::computeIncrementAtNode(
+MooseVariableData<RealEigenVector>::computeIncrementAtNode(
     const NumericVector<Number> & increment_vec)
 {
   if (!isNodal())
@@ -2145,7 +2145,7 @@ MooseVariableData<OutputType>::fetchDoFValues()
 
 template <>
 void
-MooseVariableData<RealArrayValue>::fetchDoFValues()
+MooseVariableData<RealEigenVector>::fetchDoFValues()
 {
   bool is_transient = _subproblem.isTransient();
 
@@ -2256,7 +2256,7 @@ MooseVariableData<OutputType>::fetchADDoFValues()
 
 template <>
 void
-MooseVariableData<RealArrayValue>::fetchADDoFValues()
+MooseVariableData<RealEigenVector>::fetchADDoFValues()
 {
   mooseError("I do not know how to support AD with array variables");
 }
@@ -2285,7 +2285,7 @@ template <typename OutputType>
 void
 MooseVariableData<OutputType>::getArrayDoFValues(const NumericVector<Number> & sol,
                                                  unsigned int n,
-                                                 MooseArray<RealArrayValue> & dof_values) const
+                                                 MooseArray<RealEigenVector> & dof_values) const
 {
   dof_values.resize(n);
   if (isNodal())
@@ -2616,4 +2616,4 @@ MooseVariableData<RealVectorValue>::adNodalValue<RESIDUAL>() const
 
 template class MooseVariableData<Real>;
 template class MooseVariableData<RealVectorValue>;
-template class MooseVariableData<RealArrayValue>;
+template class MooseVariableData<RealEigenVector>;

@@ -52,7 +52,7 @@ class MooseVariableFE;
 class MooseVariableScalar;
 typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<RealVectorValue> VectorMooseVariable;
-typedef MooseVariableFE<RealArrayValue> ArrayMooseVariable;
+typedef MooseVariableFE<RealEigenVector> ArrayMooseVariable;
 class XFEMInterface;
 class SubProblem;
 

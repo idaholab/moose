@@ -18,7 +18,7 @@ class ArrayKernel;
 template <>
 InputParameters validParams<ArrayKernel>();
 
-class ArrayKernel : public KernelBase, public MooseVariableInterface<RealArrayValue>
+class ArrayKernel : public KernelBase, public MooseVariableInterface<RealEigenVector>
 {
 public:
   ArrayKernel(const InputParameters & parameters);
@@ -44,12 +44,12 @@ protected:
   /**
    * Compute this Kernel's contribution to the residual at the current quadrature point
    */
-  virtual RealArrayValue computeQpResidual() = 0;
+  virtual RealEigenVector computeQpResidual() = 0;
 
   /**
    * Compute this Kernel's contribution to the diagonal Jacobian at the current quadrature point
    */
-  virtual RealArrayValue computeQpJacobian() { return RealArrayValue::Zero(_var.count()); }
+  virtual RealEigenVector computeQpJacobian() { return RealEigenVector::Zero(_var.count()); }
 
   /**
    * This is the virtual that derived classes should override for computing a full Jacobian
@@ -59,7 +59,7 @@ protected:
   {
     if (jvar.number() == _var.number())
     {
-      RealArrayValue v = computeQpJacobian();
+      RealEigenVector v = computeQpJacobian();
       RealArray t = RealArray::Zero(_var.count(), _var.count());
       t.diagonal() = v;
       return t;
@@ -81,7 +81,7 @@ protected:
   void saveLocalArrayResidual(DenseVector<Number> & re,
                               unsigned int i,
                               unsigned int ntest,
-                              const RealArrayValue & v)
+                              const RealEigenVector & v)
   {
     for (unsigned int j = 0; j < v.size(); ++j, i += ntest)
       re(i) += v(j);
@@ -91,7 +91,7 @@ protected:
                                   unsigned int ntest,
                                   unsigned int j,
                                   unsigned int nphi,
-                                  const RealArrayValue & v)
+                                  const RealEigenVector & v)
   {
     for (unsigned int k = 0; k < v.size(); ++k, i += ntest, j += nphi)
       ke(i, j) += v(k);

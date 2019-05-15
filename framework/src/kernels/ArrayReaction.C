@@ -30,12 +30,12 @@ ArrayReaction::ArrayReaction(const InputParameters & parameters)
   if (_r_type == 0)
     _r = &getMaterialProperty<Real>("reaction_coefficient");
   else if (_r_type == 1)
-    _r_array = &getMaterialProperty<RealArrayValue>("reaction_coefficient");
+    _r_array = &getMaterialProperty<RealEigenVector>("reaction_coefficient");
   else if (_r_type == 2)
     _r_2d_array = &getMaterialProperty<RealArray>("reaction_coefficient");
 }
 
-RealArrayValue
+RealEigenVector
 ArrayReaction::computeQpResidual()
 {
   if (_r_type == 0)
@@ -61,11 +61,11 @@ ArrayReaction::computeQpResidual()
   }
 }
 
-RealArrayValue
+RealEigenVector
 ArrayReaction::computeQpJacobian()
 {
   if (_r_type == 0)
-    return RealArrayValue::Constant(_var.count(), _phi[_j][_qp] * _test[_i][_qp] * (*_r)[_qp]);
+    return RealEigenVector::Constant(_var.count(), _phi[_j][_qp] * _test[_i][_qp] * (*_r)[_qp]);
   else if (_r_type == 1)
     return _phi[_j][_qp] * _test[_i][_qp] * (*_r_array)[_qp];
 
