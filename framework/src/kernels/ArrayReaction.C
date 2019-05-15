@@ -43,14 +43,20 @@ ArrayReaction::computeQpResidual()
 
   else if (_r_type == 1)
   {
-    mooseAssert((*_r_array)[_qp].size() == _var.count(), "");
+    mooseAssert((*_r_array)[_qp].size() == _var.count(),
+                "reaction_coefficient size is inconsistent with the number of components of array "
+                "variable");
     return ((*_r_array)[_qp].array() * _u[_qp].array()) * _test[_i][_qp];
   }
 
   else
   {
-    mooseAssert((*_r_2d_array)[_qp].cols() == _var.count(), "");
-    mooseAssert((*_r_2d_array)[_qp].rows() == _var.count(), "");
+    mooseAssert((*_r_2d_array)[_qp].cols() == _var.count(),
+                "reaction_coefficient size is inconsistent with the number of components of array "
+                "variable");
+    mooseAssert((*_r_2d_array)[_qp].rows() == _var.count(),
+                "reaction_coefficient size is inconsistent with the number of components of array "
+                "variable");
     return (*_r_2d_array)[_qp] * _u[_qp] * _test[_i][_qp];
   }
 }

@@ -2153,35 +2153,10 @@ MooseVariableData<RealArrayValue>::fetchDoFValues()
   auto n = _dof_indices.size();
   libmesh_assert(n);
 
-  /* Idea of using Eigen::map from Derek Gaston (Yaqi: we can reevaluate this later) */
   /*
-  auto & current_solution = dynamic_cast<const PetscVector<Real> &>(*_sys.currentSolution());
-  auto & solution_old = dynamic_cast<const PetscVector<Real> &>(_sys.solutionOld());
-  auto & solution_older = dynamic_cast<const PetscVector<Real> &>(_sys.solutionOlder());
-  auto & u_dot = dynamic_cast<const PetscVector<Real> &>(*_sys.solutionUDot());
-  const Real & du_dot_du = _sys.duDotDu();
-
-  // We need to get array only for reading... but we need to be able to pass the raw pointer into an
-  // Eigen::Map Eigen::Map requires a non-const pointer... so we're going to const_cast it here (but
-  // we're still NOT going to modify it).
-  auto current_solution_values = const_cast<PetscScalar *>(current_solution.get_array_read());
-
-  // Global to local map the dof indices
-  std::vector<dof_id_type> local_dof_indices(n);
-  for (unsigned int i = 0; i < n; i++)
-    local_dof_indices[i] = current_solution.map_global_to_local_index(_dof_indices[i]);
-
-  _dof_values.resize(n);
-  for (unsigned int i = 0; i < n; i++)
-  {
-    auto coefficients_start = current_solution_values + local_dof_indices[i];
-
-    //    // Same here (no allocation actually done)
-    //    OutputData v(NULL, 0);
-    //    new (&v) OutputData(coefficients_start, _count);
-    //    _dof_values.push_back(v);
-  }
-  */
+   * A note here: we might use Eigen::map to remove fetching data, a future work
+   * we can consider.
+   */
 
   getArrayDoFValues(*_sys.currentSolution(), n, _dof_values);
 
@@ -2304,6 +2279,38 @@ MooseVariableData<OutputType>::zeroSizeDofValues()
     _dof_values_dotdot_old.resize(0);
     _dof_du_dot_du.resize(0);
     _dof_du_dotdot_du.resize(0);
+  }
+}
+
+template <typename OutputType>
+void
+MooseVariableData<OutputType>::getArrayDoFValues(const NumericVector<Number> & sol,
+                                                 unsigned int n,
+                                                 MooseArray<RealArrayValue> & dof_values) const
+{
+  dof_values.resize(n);
+  if (isNodal())
+  {
+    for (unsigned int i = 0; i < n; ++i)
+    {
+      dof_values[i].resize(_count);
+      auto dof = _dof_indices[i];
+      for (unsigned int j = 0; j < _count; ++j)
+        dof_values[i](j) = sol(dof++);
+    }
+  }
+  else
+  {
+    for (unsigned int i = 0; i < n; ++i)
+    {
+      dof_values[i].resize(_count);
+      auto dof = _dof_indices[i];
+      for (unsigned int j = 0; j < _count; ++j)
+      {
+        dof_values[i](j) = sol(dof);
+        dof += n;
+      }
+    }
   }
 }
 

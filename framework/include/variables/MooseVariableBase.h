@@ -86,6 +86,10 @@ public:
    */
   Order order() const;
 
+  /**
+   * Get the number of components
+   * Note: For standard and vector variables, the number is one.
+   */
   unsigned int count() const { return _count; }
 
   /**
@@ -99,30 +103,20 @@ public:
    */
   const DofMap & dofMap() const { return _dof_map; }
 
-  /// Get local DoF indices
+  /**
+   * Get local DoF indices
+   */
   virtual const std::vector<dof_id_type> & dofIndices() const { return _dof_indices; }
 
-  /// Obtain DoF indices of a component with the indices of the 0th component
+  /**
+   * Obtain DoF indices of a component with the indices of the 0th component
+   */
   std::vector<dof_id_type> componentDofIndices(const std::vector<dof_id_type> & dof_indices,
-                                               unsigned int component) const
-  {
-    std::vector<dof_id_type> new_dof_indices(dof_indices);
-    if (component != 0)
-    {
-      if (isNodal())
-        for (auto & id : new_dof_indices)
-          id += component;
-      else
-      {
-        unsigned int n = dof_indices.size();
-        for (auto & id : new_dof_indices)
-          id += component * n;
-      }
-    }
-    return new_dof_indices;
-  }
+                                               unsigned int component) const;
 
-  /// Get the number of local DoFs
+  /**
+   * Get the number of local DoFs
+   */
   virtual unsigned int numberOfDofs() const { return _dof_indices.size(); }
 
 protected:

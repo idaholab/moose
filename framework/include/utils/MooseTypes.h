@@ -252,12 +252,6 @@ struct DOFType<RealVectorValue>
 {
   typedef Real type;
 };
-// not using map for now
-// template <>
-// struct DOFType<RealArrayValue>
-//{
-//  typedef Eigen::Map<RealArrayValue> type;
-//};
 } // MOOSE
 
 template <typename OutputType>

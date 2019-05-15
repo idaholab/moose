@@ -2631,24 +2631,125 @@ Assembly::copyNeighborShapes(unsigned int var)
     mooseError("Unsupported variable field type!");
 }
 
+DenseMatrix<Number> &
+Assembly::jacobianBlockNeighbor(Moose::DGJacobianType type,
+                                unsigned int ivar,
+                                unsigned int jvar,
+                                TagID tag)
+{
+  _jacobian_block_neighbor_used[tag][ivar][jvar] = 1;
+  if (_block_diagonal_matrix)
+  {
+    switch (type)
+    {
+      default:
+      case Moose::ElementElement:
+        return _sub_Kee[tag][ivar][0];
+      case Moose::ElementNeighbor:
+        return _sub_Ken[tag][ivar][0];
+      case Moose::NeighborElement:
+        return _sub_Kne[tag][ivar][0];
+      case Moose::NeighborNeighbor:
+        return _sub_Knn[tag][ivar][0];
+    }
+  }
+  else
+  {
+    switch (type)
+    {
+      default:
+      case Moose::ElementElement:
+        return _sub_Kee[tag][ivar][jvar];
+      case Moose::ElementNeighbor:
+        return _sub_Ken[tag][ivar][jvar];
+      case Moose::NeighborElement:
+        return _sub_Kne[tag][ivar][jvar];
+      case Moose::NeighborNeighbor:
+        return _sub_Knn[tag][ivar][jvar];
+    }
+  }
+}
+
+DenseMatrix<Number> &
+Assembly::jacobianBlockLower(Moose::ConstraintJacobianType type,
+                             unsigned int ivar,
+                             unsigned int jvar,
+                             TagID tag)
+{
+  _jacobian_block_lower_used[tag][ivar][jvar] = 1;
+  if (_block_diagonal_matrix)
+  {
+    switch (type)
+    {
+      default:
+      case Moose::LowerLower:
+        return _sub_Kll[tag][ivar][0];
+      case Moose::LowerSlave:
+        return _sub_Kle[tag][ivar][0];
+      case Moose::LowerMaster:
+        return _sub_Kln[tag][ivar][0];
+      case Moose::SlaveLower:
+        return _sub_Kel[tag][ivar][0];
+      case Moose::SlaveSlave:
+        return _sub_Kee[tag][ivar][0];
+      case Moose::SlaveMaster:
+        return _sub_Ken[tag][ivar][0];
+      case Moose::MasterLower:
+        return _sub_Knl[tag][ivar][0];
+      case Moose::MasterSlave:
+        return _sub_Kne[tag][ivar][0];
+      case Moose::MasterMaster:
+        return _sub_Knn[tag][ivar][0];
+    }
+  }
+  else
+  {
+    switch (type)
+    {
+      default:
+      case Moose::LowerLower:
+        return _sub_Kll[tag][ivar][jvar];
+      case Moose::LowerSlave:
+        return _sub_Kle[tag][ivar][jvar];
+      case Moose::LowerMaster:
+        return _sub_Kln[tag][ivar][jvar];
+      case Moose::SlaveLower:
+        return _sub_Kel[tag][ivar][jvar];
+      case Moose::SlaveSlave:
+        return _sub_Kee[tag][ivar][jvar];
+      case Moose::SlaveMaster:
+        return _sub_Ken[tag][ivar][jvar];
+      case Moose::MasterLower:
+        return _sub_Knl[tag][ivar][jvar];
+      case Moose::MasterSlave:
+        return _sub_Kne[tag][ivar][jvar];
+      case Moose::MasterMaster:
+        return _sub_Knn[tag][ivar][jvar];
+    }
+  }
+}
+
 void
 Assembly::processLocalResidual(DenseVector<Number> & res_block,
                                std::vector<dof_id_type> & dof_indices,
                                const std::vector<Real> & scaling_factor,
                                bool is_nodal)
 {
-  // expanding dof indices
+  // For an array variable, ndof is the number of dofs of the zero-th component and
+  // ntdof is the number of dofs of all components.
+  // For standard or vector variables, ndof will be the same as ntdof.
   auto ndof = dof_indices.size();
   auto ntdof = res_block.size();
   auto count = ntdof / ndof;
-  mooseAssert(count == scaling_factor.size(), "");
-  mooseAssert(count * ndof == ntdof, "");
+  mooseAssert(count == scaling_factor.size(), "Inconsistent of number of components");
+  mooseAssert(count * ndof == ntdof, "Inconsistent of number of components");
   if (count > 1)
   {
+    // expanding dof indices
     dof_indices.resize(ntdof);
     unsigned int p = 0;
-    for (unsigned int j = 0; j < count; ++j)
-      for (unsigned int i = 0; i < ndof; ++i)
+    for (MooseIndex(count) j = 0; j < count; ++j)
+      for (MooseIndex(ndof) i = 0; i < ndof; ++i)
       {
         dof_indices[p] = dof_indices[i] + (is_nodal ? j : j * ndof);
         res_block(p) *= scaling_factor[j];
@@ -3018,13 +3119,59 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block,
 
       for (MooseIndex(di) i = 0; i < di.size(); i++)
         for (MooseIndex(dj) j = 0; j < dj.size(); j++)
-        //          if (sub(i, j) != 0.0) // no storage allocated for unimplemented jacobian terms,
-        //                                // maintaining maximum sparsity possible
         {
           _cached_jacobian_values[tag].push_back(sub(i, j));
           _cached_jacobian_rows[tag].push_back(di[i]);
           _cached_jacobian_cols[tag].push_back(dj[j]);
         }
+    }
+
+  jac_block.zero();
+}
+
+void
+Assembly::cacheJacobianBlockNonzero(DenseMatrix<Number> & jac_block,
+                                    const MooseVariableBase & ivar,
+                                    const MooseVariableBase & jvar,
+                                    const std::vector<dof_id_type> & idof_indices,
+                                    const std::vector<dof_id_type> & jdof_indices,
+                                    TagID tag)
+{
+  if (idof_indices.size() == 0 || jdof_indices.size() == 0)
+    return;
+  if (jac_block.n() == 0 || jac_block.m() == 0)
+    return;
+  if (!_sys.hasMatrix(tag))
+    return;
+
+  auto & scaling_factor = ivar.arrayScalingFactor();
+
+  for (unsigned int i = 0; i < ivar.count(); ++i)
+    for (unsigned int j = 0; j < jvar.count(); ++j)
+    {
+      if (!(*_cm)(ivar.number() + i, jvar.number() + j))
+        continue;
+
+      auto di = ivar.componentDofIndices(idof_indices, i);
+      auto dj = jvar.componentDofIndices(jdof_indices, j);
+      auto indof = di.size();
+      auto jndof = dj.size();
+
+      auto sub = jac_block.sub_matrix(i * indof, indof, j * jndof, jndof);
+      if (scaling_factor[i] != 1.0)
+        sub *= scaling_factor[i];
+
+      _dof_map.constrain_element_matrix(sub, di, dj, false);
+
+      for (MooseIndex(di) i = 0; i < di.size(); i++)
+        for (MooseIndex(dj) j = 0; j < dj.size(); j++)
+          if (sub(i, j) != 0.0) // no storage allocated for unimplemented jacobian terms,
+                                // maintaining maximum sparsity possible
+          {
+            _cached_jacobian_values[tag].push_back(sub(i, j));
+            _cached_jacobian_rows[tag].push_back(di[i]);
+            _cached_jacobian_cols[tag].push_back(dj[j]);
+          }
     }
 
   jac_block.zero();
@@ -3289,12 +3436,12 @@ Assembly::cacheJacobianNonlocal()
          tag < _jacobian_block_nonlocal_used.size();
          tag++)
       if (_jacobian_block_nonlocal_used[tag][i][j] && _sys.hasMatrix(tag))
-        cacheJacobianBlock(jacobianBlockNonlocal(i, j, tag),
-                           *ivar,
-                           *jvar,
-                           ivar->dofIndices(),
-                           jvar->allDofIndices(),
-                           tag);
+        cacheJacobianBlockNonzero(jacobianBlockNonlocal(i, j, tag),
+                                  *ivar,
+                                  *jvar,
+                                  ivar->dofIndices(),
+                                  jvar->allDofIndices(),
+                                  tag);
   }
 }
 
@@ -3352,6 +3499,12 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
   auto & jv = _sys.getVariable(_tid, jvar);
   auto & scaling_factor = iv.arrayScalingFactor();
 
+  // It is guaranteed by design iv.number <= ivar since iv is obtained
+  // through SystemBase::getVariable with ivar.
+  // Most of times ivar will just be equal to iv.number except for array variables,
+  // where ivar could be a number for a component of an array variable but calling
+  // getVariable will return the array variable that has the number of the 0th component.
+  // It is the same for jvar.
   unsigned int i = ivar - iv.number();
   unsigned int j = jvar - jv.number();
 
@@ -3395,6 +3548,12 @@ Assembly::addJacobianBlockNonlocal(SparseMatrix<Number> & jacobian,
   auto & jv = _sys.getVariable(_tid, jvar);
   auto & scaling_factor = iv.arrayScalingFactor();
 
+  // It is guaranteed by design iv.number <= ivar since iv is obtained
+  // through SystemBase::getVariable with ivar.
+  // Most of times ivar will just be equal to iv.number except for array variables,
+  // where ivar could be a number for a component of an array variable but calling
+  // getVariable will return the array variable that has the number of the 0th component.
+  // It is the same for jvar.
   unsigned int i = ivar - iv.number();
   unsigned int j = jvar - jv.number();
 
@@ -3439,6 +3598,12 @@ Assembly::addJacobianNeighbor(SparseMatrix<Number> & jacobian,
   auto & jv = _sys.getVariable(_tid, jvar);
   auto & scaling_factor = iv.arrayScalingFactor();
 
+  // It is guaranteed by design iv.number <= ivar since iv is obtained
+  // through SystemBase::getVariable with ivar.
+  // Most of times ivar will just be equal to iv.number except for array variables,
+  // where ivar could be a number for a component of an array variable but calling
+  // getVariable will return the array variable that has the number of the 0th component.
+  // It is the same for jvar.
   unsigned int i = ivar - iv.number();
   unsigned int j = jvar - jv.number();
 
