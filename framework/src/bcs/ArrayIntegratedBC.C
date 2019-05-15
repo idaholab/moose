@@ -116,7 +116,7 @@ ArrayIntegratedBC::computeJacobianBlock(MooseVariableFEBase & jvar)
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < jvar.phiFaceSize(); _j++)
       {
-        RealArray v = _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
+        RealEigenMatrix v = _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
         saveFullLocalArrayJacobian(_local_ke, _i, _test.size(), _j, jvar.phiSize(), v);
       }
 
@@ -150,7 +150,7 @@ ArrayIntegratedBC::computeJacobianBlockScalar(unsigned int jvar)
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < _test.size(); _i++)
     {
-      RealArray v = _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobianScalar(jv);
+      RealEigenMatrix v = _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobianScalar(jv);
       saveFullLocalArrayJacobian(_local_ke, _i, _test.size(), 0, 1, v);
     }
 

@@ -24,7 +24,7 @@ public:
 protected:
   virtual RealEigenVector computeQpResidual() override;
   virtual RealEigenVector computeQpJacobian() override;
-  virtual RealArray computeQpOffDiagJacobian(MooseVariableFEBase & jvar) override;
+  virtual RealEigenMatrix computeQpOffDiagJacobian(MooseVariableFEBase & jvar) override;
 
   /// diffusion coefficient type
   unsigned int _r_type;
@@ -33,5 +33,5 @@ protected:
   /// array diffusion coefficient
   const MaterialProperty<RealEigenVector> * _r_array;
   /// matrix diffusion coefficient
-  const MaterialProperty<RealArray> * _r_2d_array;
+  const MaterialProperty<RealEigenMatrix> * _r_2d_array;
 };

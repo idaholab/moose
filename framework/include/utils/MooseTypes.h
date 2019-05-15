@@ -133,7 +133,7 @@ typedef Eigen::Matrix<Real, LIBMESH_DIM, 1> RealDIMValue;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, 1> RealEigenVector;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM> RealVectorArrayValue;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM * LIBMESH_DIM> RealTensorArrayValue;
-typedef Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic> RealArray;
+typedef Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic> RealEigenMatrix;
 template <typename>
 class TypeVector;
 template <typename>

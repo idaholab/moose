@@ -71,7 +71,7 @@ ArrayNodalBC::computeOffDiagJacobian(unsigned int jvar)
 {
   MooseVariableFEBase & jv = _sys.getVariable(0, jvar);
 
-  RealArray cached_val = computeQpOffDiagJacobian(jv);
+  RealEigenMatrix cached_val = computeQpOffDiagJacobian(jv);
 
   dof_id_type cached_row = _var.nodalDofIndex();
   // Note: this only works for Lagrange variables...
@@ -93,11 +93,11 @@ ArrayNodalBC::computeQpJacobian()
   ;
 }
 
-RealArray
+RealEigenMatrix
 ArrayNodalBC::computeQpOffDiagJacobian(MooseVariableFEBase & jvar)
 {
   if (jvar.number() == _var.number())
-    return RealArray::Identity(_var.count(), jvar.count());
+    return RealEigenMatrix::Identity(_var.count(), jvar.count());
   else
-    return RealArray::Zero(_var.count(), jvar.count());
+    return RealEigenMatrix::Zero(_var.count(), jvar.count());
 }

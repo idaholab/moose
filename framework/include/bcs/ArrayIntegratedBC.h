@@ -55,26 +55,26 @@ protected:
   /**
    * Method for computing an off-diagonal jacobian component at quadrature points.
    */
-  virtual RealArray computeQpOffDiagJacobian(MooseVariableFEBase & jvar)
+  virtual RealEigenMatrix computeQpOffDiagJacobian(MooseVariableFEBase & jvar)
   {
     if (jvar.number() == _var.number())
     {
       RealEigenVector v = computeQpJacobian();
-      RealArray t = RealArray::Zero(_var.count(), _var.count());
+      RealEigenMatrix t = RealEigenMatrix::Zero(_var.count(), _var.count());
       t.diagonal() = v;
       return t;
     }
     else
-      return RealArray::Zero(_var.count(), jvar.count());
+      return RealEigenMatrix::Zero(_var.count(), jvar.count());
   }
 
   /**
    * This is the virtual that derived classes should override for computing a full Jacobian
    * component
    */
-  virtual RealArray computeQpOffDiagJacobianScalar(MooseVariableScalar & jvar)
+  virtual RealEigenMatrix computeQpOffDiagJacobianScalar(MooseVariableScalar & jvar)
   {
-    return RealArray::Zero(_var.count(), (unsigned int)jvar.order() + 1);
+    return RealEigenMatrix::Zero(_var.count(), (unsigned int)jvar.order() + 1);
   }
 
   /// for array integrated BC
@@ -101,7 +101,7 @@ protected:
                                   unsigned int ntest,
                                   unsigned int j,
                                   unsigned int nphi,
-                                  const RealArray & v)
+                                  const RealEigenMatrix & v)
   {
     unsigned int saved_j = j;
     for (unsigned int k = 0; k < v.rows(); ++k, i += ntest)

@@ -76,17 +76,18 @@ protected:
   /**
    * This is the virtual that derived classes should override for computing the off-diag Jacobian.
    */
-  virtual RealArray computeQpOffDiagJacobian(Moose::DGJacobianType type, MooseVariableFEBase & jvar)
+  virtual RealEigenMatrix computeQpOffDiagJacobian(Moose::DGJacobianType type,
+                                                   MooseVariableFEBase & jvar)
   {
     if (jvar.number() == _var.number())
     {
       RealEigenVector v = computeQpJacobian(type);
-      RealArray t = RealArray::Zero(_var.count(), _var.count());
+      RealEigenMatrix t = RealEigenMatrix::Zero(_var.count(), _var.count());
       t.diagonal() = v;
       return t;
     }
     else
-      return RealArray::Zero(_var.count(), jvar.count());
+      return RealEigenMatrix::Zero(_var.count(), jvar.count());
   }
 
   /// for array kernel
@@ -113,7 +114,7 @@ protected:
                                   unsigned int ntest,
                                   unsigned int j,
                                   unsigned int nphi,
-                                  const RealArray & v)
+                                  const RealEigenMatrix & v)
   {
     unsigned int saved_j = j;
     for (unsigned int k = 0; k < v.rows(); ++k, i += ntest)

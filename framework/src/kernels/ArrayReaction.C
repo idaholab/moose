@@ -32,7 +32,7 @@ ArrayReaction::ArrayReaction(const InputParameters & parameters)
   else if (_r_type == 1)
     _r_array = &getMaterialProperty<RealEigenVector>("reaction_coefficient");
   else if (_r_type == 2)
-    _r_2d_array = &getMaterialProperty<RealArray>("reaction_coefficient");
+    _r_2d_array = &getMaterialProperty<RealEigenMatrix>("reaction_coefficient");
 }
 
 RealEigenVector
@@ -73,7 +73,7 @@ ArrayReaction::computeQpJacobian()
     return _phi[_j][_qp] * _test[_i][_qp] * (*_r_2d_array)[_qp].diagonal();
 }
 
-RealArray
+RealEigenMatrix
 ArrayReaction::computeQpOffDiagJacobian(MooseVariableFEBase & jvar)
 {
   if (jvar.number() == _var.number() && _r_type == 2)

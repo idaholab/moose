@@ -890,11 +890,12 @@ void Parser::setScalarParameter<RealEigenVector, RealEigenVector>(
     GlobalParamsAction * global_block);
 
 template <>
-void Parser::setScalarParameter<RealArray, RealArray>(const std::string & full_name,
-                                                      const std::string & short_name,
-                                                      InputParameters::Parameter<RealArray> * param,
-                                                      bool in_global,
-                                                      GlobalParamsAction * global_block);
+void Parser::setScalarParameter<RealEigenMatrix, RealEigenMatrix>(
+    const std::string & full_name,
+    const std::string & short_name,
+    InputParameters::Parameter<RealEigenMatrix> * param,
+    bool in_global,
+    GlobalParamsAction * global_block);
 
 template <>
 void Parser::setScalarParameter<PostprocessorName, PostprocessorName>(
@@ -1157,7 +1158,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setscalar(RealVectorValue, RealVectorValue);
       setscalar(Point, Point);
       setscalar(RealEigenVector, RealEigenVector);
-      setscalar(RealArray, RealArray);
+      setscalar(RealEigenMatrix, RealEigenMatrix);
       setscalar(MooseEnum, MooseEnum);
       setscalar(MultiMooseEnum, MultiMooseEnum);
       setscalar(RealTensorValue, RealTensorValue);
@@ -1679,11 +1680,12 @@ Parser::setScalarParameter<RealEigenVector, RealEigenVector>(
 
 template <>
 void
-Parser::setScalarParameter<RealArray, RealArray>(const std::string & full_name,
-                                                 const std::string & short_name,
-                                                 InputParameters::Parameter<RealArray> * param,
-                                                 bool in_global,
-                                                 GlobalParamsAction * global_block)
+Parser::setScalarParameter<RealEigenMatrix, RealEigenMatrix>(
+    const std::string & full_name,
+    const std::string & short_name,
+    InputParameters::Parameter<RealEigenMatrix> * param,
+    bool in_global,
+    GlobalParamsAction * global_block)
 {
   // Get the full string assigned to the variable full_name
   std::string buffer = _root->param<std::string>(full_name);
@@ -1715,7 +1717,7 @@ Parser::setScalarParameter<RealArray, RealArray>(const std::string & full_name,
     }
   }
 
-  RealArray value(values.size(), values[0].size());
+  RealEigenMatrix value(values.size(), values[0].size());
   for (unsigned int i = 0; i < values.size(); ++i)
     for (unsigned int j = 0; j < values[i].size(); ++j)
       value(i, j) = values[i][j];
@@ -1724,7 +1726,7 @@ Parser::setScalarParameter<RealArray, RealArray>(const std::string & full_name,
   if (in_global)
   {
     global_block->remove(short_name);
-    global_block->setScalarParam<RealArray>(short_name) = value;
+    global_block->setScalarParam<RealEigenMatrix>(short_name) = value;
   }
 }
 

@@ -57,5 +57,5 @@ protected:
    * This is the virtual that derived classes should override for
    * computing an off-diagonal jacobian component.
    */
-  virtual RealArray computeQpOffDiagJacobian(MooseVariableFEBase & jvar);
+  virtual RealEigenMatrix computeQpOffDiagJacobian(MooseVariableFEBase & jvar);
 };
