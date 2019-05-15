@@ -142,6 +142,7 @@
   print_linear_residuals = true
   execute_on = 'FINAL'
   exodus = true
+  csv = true
 []
 
 [Debug]
