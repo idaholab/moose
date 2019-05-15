@@ -136,7 +136,6 @@
 []
 
 [Outputs]
-  exodus = true
   print_linear_residuals = true
   execute_on = 'FINAL'
 []
