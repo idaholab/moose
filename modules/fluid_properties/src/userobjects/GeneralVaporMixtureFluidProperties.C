@@ -123,6 +123,26 @@ GeneralVaporMixtureFluidProperties::rho_from_p_T(Real p, Real T, const std::vect
   return 1.0 / v_from_p_T(p, T, x);
 }
 
+Real
+GeneralVaporMixtureFluidProperties::c_from_v_e(Real /*v*/,
+                                               Real /*e*/,
+                                               const std::vector<Real> & /*x*/) const
+{
+  mooseError(name(), ": ", __PRETTY_FUNCTION__, " is not implemented.");
+}
+
+void
+GeneralVaporMixtureFluidProperties::c_from_v_e(Real /*v*/,
+                                               Real /*e*/,
+                                               const std::vector<Real> & /*x*/,
+                                               Real & /*c*/,
+                                               Real & /*dc_dv*/,
+                                               Real & /*dc_de*/,
+                                               std::vector<Real> & /*dc_dx*/) const
+{
+  mooseError(name(), ": ", __PRETTY_FUNCTION__, " is not implemented.");
+}
+
 void
 GeneralVaporMixtureFluidProperties::rho_from_p_T(Real p,
                                                  Real T,
