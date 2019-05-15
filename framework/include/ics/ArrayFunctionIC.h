@@ -27,7 +27,7 @@ protected:
   /**
    * The value of the variable at a point.
    */
-  virtual RealArrayValue value(const Point & p) override;
+  virtual RealEigenVector value(const Point & p) override;
 
   /**
    * The value of the gradient at a point.

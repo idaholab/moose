@@ -29,7 +29,7 @@ template <typename>
 class MooseVariableFE;
 typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<RealVectorValue> VectorMooseVariable;
-typedef MooseVariableFE<RealArrayValue> ArrayMooseVariable;
+typedef MooseVariableFE<RealEigenVector> ArrayMooseVariable;
 class MooseVariableScalar;
 
 /**
@@ -174,9 +174,9 @@ MooseVariableFE<RealVectorValue> *
 VariableWarehouse::getFieldVariable<RealVectorValue>(unsigned int var_number);
 
 template <>
-MooseVariableFE<RealArrayValue> *
-VariableWarehouse::getFieldVariable<RealArrayValue>(const std::string & var_name);
+MooseVariableFE<RealEigenVector> *
+VariableWarehouse::getFieldVariable<RealEigenVector>(const std::string & var_name);
 
 template <>
-MooseVariableFE<RealArrayValue> *
-VariableWarehouse::getFieldVariable<RealArrayValue>(unsigned int var_number);
+MooseVariableFE<RealEigenVector> *
+VariableWarehouse::getFieldVariable<RealEigenVector>(unsigned int var_number);

@@ -22,12 +22,12 @@ public:
   ArrayCoupledForce(const InputParameters & parameters);
 
 protected:
-  virtual RealArrayValue computeQpResidual() override;
+  virtual RealEigenVector computeQpResidual() override;
 
   virtual RealArray computeQpOffDiagJacobian(MooseVariableFEBase & jvar) override;
 
 private:
   unsigned int _v_var;
   const VariableValue & _v;
-  RealArrayValue _coef;
+  RealEigenVector _coef;
 };

@@ -22,10 +22,10 @@ public:
   ArrayPenaltyDirichletBC(const InputParameters & parameters);
 
 protected:
-  virtual RealArrayValue computeQpResidual() override;
-  virtual RealArrayValue computeQpJacobian() override;
+  virtual RealEigenVector computeQpResidual() override;
+  virtual RealEigenVector computeQpJacobian() override;
 
 private:
   Real _p;
-  const RealArrayValue & _v;
+  const RealEigenVector & _v;
 };

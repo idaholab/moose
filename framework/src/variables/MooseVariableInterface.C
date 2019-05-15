@@ -334,4 +334,4 @@ MooseVariableInterface<T>::secondPhiFace()
 
 template class MooseVariableInterface<Real>;
 template class MooseVariableInterface<RealVectorValue>;
-template class MooseVariableInterface<RealArrayValue>;
+template class MooseVariableInterface<RealEigenVector>;

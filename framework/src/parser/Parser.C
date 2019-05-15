@@ -882,10 +882,10 @@ void Parser::setScalarParameter<Point, Point>(const std::string & full_name,
                                               GlobalParamsAction * global_block);
 
 template <>
-void Parser::setScalarParameter<RealArrayValue, RealArrayValue>(
+void Parser::setScalarParameter<RealEigenVector, RealEigenVector>(
     const std::string & full_name,
     const std::string & short_name,
-    InputParameters::Parameter<RealArrayValue> * param,
+    InputParameters::Parameter<RealEigenVector> * param,
     bool in_global,
     GlobalParamsAction * global_block);
 
@@ -1156,7 +1156,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       // Moose Compound Scalars
       setscalar(RealVectorValue, RealVectorValue);
       setscalar(Point, Point);
-      setscalar(RealArrayValue, RealArrayValue);
+      setscalar(RealEigenVector, RealEigenVector);
       setscalar(RealArray, RealArray);
       setscalar(MooseEnum, MooseEnum);
       setscalar(MultiMooseEnum, MultiMooseEnum);
@@ -1647,10 +1647,10 @@ Parser::setScalarParameter<Point, Point>(const std::string & full_name,
 
 template <>
 void
-Parser::setScalarParameter<RealArrayValue, RealArrayValue>(
+Parser::setScalarParameter<RealEigenVector, RealEigenVector>(
     const std::string & full_name,
     const std::string & short_name,
-    InputParameters::Parameter<RealArrayValue> * param,
+    InputParameters::Parameter<RealEigenVector> * param,
     bool in_global,
     GlobalParamsAction * global_block)
 {
@@ -1665,7 +1665,7 @@ Parser::setScalarParameter<RealArrayValue, RealArrayValue>(
     return;
   }
 
-  RealArrayValue value(vec.size());
+  RealEigenVector value(vec.size());
   for (unsigned int i = 0; i < vec.size(); ++i)
     value(i) = Real(vec[i]);
 
@@ -1673,7 +1673,7 @@ Parser::setScalarParameter<RealArrayValue, RealArrayValue>(
   if (in_global)
   {
     global_block->remove(short_name);
-    global_block->setScalarParam<RealArrayValue>(short_name) = value;
+    global_block->setScalarParam<RealEigenVector>(short_name) = value;
   }
 }
 

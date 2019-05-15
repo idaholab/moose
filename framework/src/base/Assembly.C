@@ -2570,7 +2570,7 @@ Assembly::copyShapes(unsigned int var)
   }
   else if (v.fieldType() == Moose::VarFieldType::VAR_FIELD_ARRAY)
   {
-    ArrayMooseVariable & v = _sys.getFieldVariable<RealArrayValue>(_tid, var);
+    ArrayMooseVariable & v = _sys.getFieldVariable<RealEigenVector>(_tid, var);
     copyShapes(v);
   }
   else if (v.fieldType() == Moose::VarFieldType::VAR_FIELD_VECTOR)
@@ -2605,7 +2605,7 @@ Assembly::copyFaceShapes(unsigned int var)
   }
   else if (v.fieldType() == Moose::VarFieldType::VAR_FIELD_ARRAY)
   {
-    ArrayMooseVariable & v = _sys.getFieldVariable<RealArrayValue>(_tid, var);
+    ArrayMooseVariable & v = _sys.getFieldVariable<RealEigenVector>(_tid, var);
     copyFaceShapes(v);
   }
   else if (v.fieldType() == Moose::VarFieldType::VAR_FIELD_VECTOR)
@@ -2651,7 +2651,7 @@ Assembly::copyNeighborShapes(unsigned int var)
   }
   else if (v.fieldType() == Moose::VarFieldType::VAR_FIELD_ARRAY)
   {
-    ArrayMooseVariable & v = _sys.getFieldVariable<RealArrayValue>(_tid, var);
+    ArrayMooseVariable & v = _sys.getFieldVariable<RealEigenVector>(_tid, var);
     copyNeighborShapes(v);
   }
   else if (v.fieldType() == Moose::VarFieldType::VAR_FIELD_VECTOR)

@@ -22,8 +22,8 @@ public:
   ArrayReaction(const InputParameters & parameters);
 
 protected:
-  virtual RealArrayValue computeQpResidual() override;
-  virtual RealArrayValue computeQpJacobian() override;
+  virtual RealEigenVector computeQpResidual() override;
+  virtual RealEigenVector computeQpJacobian() override;
   virtual RealArray computeQpOffDiagJacobian(MooseVariableFEBase & jvar) override;
 
   /// diffusion coefficient type
@@ -31,7 +31,7 @@ protected:
   /// scalar diffusion coefficient
   const MaterialProperty<Real> * _r;
   /// array diffusion coefficient
-  const MaterialProperty<RealArrayValue> * _r_array;
+  const MaterialProperty<RealEigenVector> * _r_array;
   /// matrix diffusion coefficient
   const MaterialProperty<RealArray> * _r_2d_array;
 };

@@ -22,9 +22,9 @@ public:
   ArrayVacuumBC(const InputParameters & parameters);
 
 protected:
-  virtual RealArrayValue computeQpResidual() override;
-  virtual RealArrayValue computeQpJacobian() override;
+  virtual RealEigenVector computeQpResidual() override;
+  virtual RealEigenVector computeQpJacobian() override;
 
   /// Ratio of u to du/dn
-  RealArrayValue _alpha;
+  RealEigenVector _alpha;
 };

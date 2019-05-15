@@ -162,7 +162,7 @@ Kernel::computeOffDiagJacobian(MooseVariableFEBase & jvar)
         for (_j = 0; _j < n; _j++)
           for (_qp = 0; _qp < _qrule->n_points(); _qp++)
           {
-            RealArrayValue v =
+            RealEigenVector v =
                 _JxW[_qp] * _coord[_qp] *
                 computeQpOffDiagJacobianArray(static_cast<ArrayMooseVariable &>(jvar));
             for (unsigned int k = 0; k < v.size(); ++k)

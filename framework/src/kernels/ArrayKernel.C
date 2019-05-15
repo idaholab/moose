@@ -29,11 +29,11 @@ validParams<ArrayKernel>()
 
 ArrayKernel::ArrayKernel(const InputParameters & parameters)
   : KernelBase(parameters),
-    MooseVariableInterface<RealArrayValue>(this,
-                                           false,
-                                           "variable",
-                                           Moose::VarKindType::VAR_NONLINEAR,
-                                           Moose::VarFieldType::VAR_FIELD_ARRAY),
+    MooseVariableInterface<RealEigenVector>(this,
+                                            false,
+                                            "variable",
+                                            Moose::VarKindType::VAR_NONLINEAR,
+                                            Moose::VarFieldType::VAR_FIELD_ARRAY),
     _var(*mooseVariable()),
     _test(_var.phi()),
     _grad_test(_var.gradPhi()),
@@ -56,7 +56,7 @@ ArrayKernel::computeResidual()
   for (_i = 0; _i < _test.size(); _i++)
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {
-      RealArrayValue residual = _JxW[_qp] * _coord[_qp] * computeQpResidual();
+      RealEigenVector residual = _JxW[_qp] * _coord[_qp] * computeQpResidual();
       mooseAssert(residual.size() == _count,
                   "Size of local residual is not equal to the number of array variable compoments");
       saveLocalArrayResidual(_local_re, _i, _test.size(), residual);
@@ -88,7 +88,7 @@ ArrayKernel::computeJacobian()
     for (_j = 0; _j < _phi.size(); _j++)
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       {
-        RealArrayValue v = _JxW[_qp] * _coord[_qp] * computeQpJacobian();
+        RealEigenVector v = _JxW[_qp] * _coord[_qp] * computeQpJacobian();
         saveDiagLocalArrayJacobian(_local_ke, _i, _test.size(), _j, _phi.size(), v);
       }
 

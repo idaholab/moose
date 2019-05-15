@@ -22,7 +22,7 @@ InputParameters validParams<ArrayDGKernel>();
  * The DGKernel class is responsible for calculating the residuals for various
  * physics on internal sides (edges/faces).
  */
-class ArrayDGKernel : public DGKernelBase, public NeighborMooseVariableInterface<RealArrayValue>
+class ArrayDGKernel : public DGKernelBase, public NeighborMooseVariableInterface<RealEigenVector>
 {
 public:
   /**
@@ -65,13 +65,13 @@ protected:
    * This is the virtual that derived classes should override for computing the residual on
    * neighboring element.
    */
-  virtual RealArrayValue computeQpResidual(Moose::DGResidualType type) = 0;
+  virtual RealEigenVector computeQpResidual(Moose::DGResidualType type) = 0;
 
   /**
    * This is the virtual that derived classes should override for computing the Jacobian on
    * neighboring element.
    */
-  virtual RealArrayValue computeQpJacobian(Moose::DGJacobianType type) = 0;
+  virtual RealEigenVector computeQpJacobian(Moose::DGJacobianType type) = 0;
 
   /**
    * This is the virtual that derived classes should override for computing the off-diag Jacobian.
@@ -80,7 +80,7 @@ protected:
   {
     if (jvar.number() == _var.number())
     {
-      RealArrayValue v = computeQpJacobian(type);
+      RealEigenVector v = computeQpJacobian(type);
       RealArray t = RealArray::Zero(_var.count(), _var.count());
       t.diagonal() = v;
       return t;
@@ -93,7 +93,7 @@ protected:
   void saveLocalArrayResidual(DenseVector<Number> & re,
                               unsigned int i,
                               unsigned int ntest,
-                              const RealArrayValue & v)
+                              const RealEigenVector & v)
   {
     for (unsigned int j = 0; j < v.size(); ++j, i += ntest)
       re(i) += v(j);
@@ -103,7 +103,7 @@ protected:
                                   unsigned int ntest,
                                   unsigned int j,
                                   unsigned int nphi,
-                                  const RealArrayValue & v)
+                                  const RealEigenVector & v)
   {
     for (unsigned int k = 0; k < v.size(); ++k, i += ntest, j += nphi)
       ke(i, j) += v(k);

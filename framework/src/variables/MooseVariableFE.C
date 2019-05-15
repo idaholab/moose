@@ -68,7 +68,7 @@ MooseVariableFE<OutputType>::fieldType() const
     return Moose::VarFieldType::VAR_FIELD_STANDARD;
   else if (std::is_same<OutputType, RealVectorValue>::value)
     return Moose::VarFieldType::VAR_FIELD_VECTOR;
-  else if (std::is_same<OutputType, RealArrayValue>::value)
+  else if (std::is_same<OutputType, RealEigenVector>::value)
     return Moose::VarFieldType::VAR_FIELD_ARRAY;
   else
     mooseError("Unknown variable field type");
@@ -467,14 +467,14 @@ MooseVariableFE<OutputType>::getValue(const Elem * elem,
 }
 
 template <>
-RealArrayValue
-MooseVariableFE<RealArrayValue>::getValue(const Elem * elem,
-                                          const std::vector<std::vector<Real>> & phi) const
+RealEigenVector
+MooseVariableFE<RealEigenVector>::getValue(const Elem * elem,
+                                           const std::vector<std::vector<Real>> & phi) const
 {
   std::vector<dof_id_type> dof_indices;
   _dof_map.dof_indices(elem, dof_indices, _var_num);
 
-  RealArrayValue value(_count);
+  RealEigenVector value(_count);
   if (isNodal())
   {
     for (unsigned int i = 0; i < dof_indices.size(); ++i)
@@ -528,7 +528,7 @@ MooseVariableFE<OutputType>::getGradient(
 
 template <>
 RealVectorArrayValue
-MooseVariableFE<RealArrayValue>::getGradient(
+MooseVariableFE<RealEigenVector>::getGradient(
     const Elem * elem, const std::vector<std::vector<RealVectorValue>> & grad_phi) const
 {
   std::vector<dof_id_type> dof_indices;
@@ -787,4 +787,4 @@ MooseVariableFE<OutputType>::isNodalNeighborDefined() const
 
 template class MooseVariableFE<Real>;
 template class MooseVariableFE<RealVectorValue>;
-template class MooseVariableFE<RealArrayValue>;
+template class MooseVariableFE<RealEigenVector>;

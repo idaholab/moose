@@ -252,7 +252,7 @@ Coupleable::getVectorVar(const std::string & var_name, unsigned int comp)
 ArrayMooseVariable *
 Coupleable::getArrayVar(const std::string & var_name, unsigned int comp)
 {
-  return getVarHelper<RealArrayValue>(var_name, comp);
+  return getVarHelper<RealEigenVector>(var_name, comp);
 }
 
 unsigned int
@@ -385,8 +385,8 @@ Coupleable::getNodalDefaultValue<RealVectorValue>(const std::string & var_name, 
 }
 
 template <>
-const RealArrayValue &
-Coupleable::getNodalDefaultValue<RealArrayValue>(const std::string & var_name, unsigned int)
+const RealEigenVector &
+Coupleable::getNodalDefaultValue<RealEigenVector>(const std::string & var_name, unsigned int)
 {
   auto && default_variable_value = getDefaultArrayValue(var_name);
   return *default_variable_value->data();

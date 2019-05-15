@@ -21,11 +21,11 @@ The following map is useful for understanding the template:
 |-|-|-|
 | Real                |Real                  |Real|
 | RealVectorValue     |RealVectorValue       |Real|
-| RealArrayValue      |Real                  |RealArrayValue|
+| RealEigenVector     |Real                  |RealEigenVector|
 
 The three rows correspond to standard, vector and array variables.
 OutputType is the data type used for templating.
-RealArrayValue is a typedef in [MooseTypes.h] as *Eigen::Matrix<Real, Eigen::Dynamic, 1>*.
+RealEigenVector is a typedef in [MooseTypes.h] as *Eigen::Matrix<Real, Eigen::Dynamic, 1>*.
 OutputShape is for the type of shape functions and OutputData is the type of basis function expansion coefficients that are stored in the moose array variable grabbed from the solution vector.
 
 The final form of an array kernel is quite simple. Using `ArrayDiffusion` as an example. The `computeQpResidual` function has
@@ -34,12 +34,12 @@ The final form of an array kernel is quite simple. Using `ArrayDiffusion` as an 
   return _grad_u[_qp] * _array_grad_test[_i][_qp] * (*_d)[_qp];
 ```
 
-where `_grad_u[_qp]` is an `Eigen::Matrix` with number of rows being equal to the number of components of the array variable and number of columns being `LIBMESH_DIM`. `_array_grad_test[_i][_qp]` is an `Eigen::Map` of classic `_grad_test[_i][_qp]` which is in type of `Gradient`. Thanks to the Eigen matrix arithmetic operators, we can have a simple multiplication expression here. `_d` is a pointer of a material property of `Real` type for scalar diffusion coefficient. Here we assume the diffusion coefficient is the same for all components. The returned value is RealArrayValue, i.e. an Eigen vector.
+where `_grad_u[_qp]` is an `Eigen::Matrix` with number of rows being equal to the number of components of the array variable and number of columns being `LIBMESH_DIM`. `_array_grad_test[_i][_qp]` is an `Eigen::Map` of classic `_grad_test[_i][_qp]` which is in type of `Gradient`. Thanks to the Eigen matrix arithmetic operators, we can have a simple multiplication expression here. `_d` is a pointer of a material property of `Real` type for scalar diffusion coefficient. Here we assume the diffusion coefficient is the same for all components. The returned value is RealEigenVector, i.e. an Eigen vector.
 
 Of course, if we have different diffusion coefficients for different components, we will have something like
 
 ```
-    RealArrayValue v = _grad_u[_qp] * _array_grad_test[_i][_qp];
+    RealEigenVector v = _grad_u[_qp] * _array_grad_test[_i][_qp];
     for (unsigned int i = 0; i < _var.count(); ++i)
       v(i) *= (*_d_array)[_qp](i);
 ```
@@ -54,8 +54,8 @@ If we have coupled diffusion terms, i.e. diffusion coefficient is a matrix, we w
 Correspondingly the `computeQpJacobian` has
 
 ```
-    return RealArrayValue::Constant(_var.count(),
-                                    _grad_phi[_j][_qp] * _grad_test[_i][_qp] * (*_d)[_qp]);
+    return RealEigenVector::Constant(_var.count(),
+                                     _grad_phi[_j][_qp] * _grad_test[_i][_qp] * (*_d)[_qp]);
 ```
 
 for a scalar diffusion coefficient or

@@ -22,7 +22,7 @@ InputParameters validParams<ArrayIntegratedBC>();
 /**
  * Base class for deriving any boundary condition of a integrated type
  */
-class ArrayIntegratedBC : public IntegratedBCBase, public MooseVariableInterface<RealArrayValue>
+class ArrayIntegratedBC : public IntegratedBCBase, public MooseVariableInterface<RealEigenVector>
 {
 public:
   ArrayIntegratedBC(const InputParameters & parameters);
@@ -45,12 +45,12 @@ protected:
   /**
    * Method for computing the residual at quadrature points
    */
-  virtual RealArrayValue computeQpResidual() = 0;
+  virtual RealEigenVector computeQpResidual() = 0;
 
   /**
    * Method for computing the diagonal Jacobian at quadrature points
    */
-  virtual RealArrayValue computeQpJacobian() { return RealArrayValue::Zero(_var.count()); }
+  virtual RealEigenVector computeQpJacobian() { return RealEigenVector::Zero(_var.count()); }
 
   /**
    * Method for computing an off-diagonal jacobian component at quadrature points.
@@ -59,7 +59,7 @@ protected:
   {
     if (jvar.number() == _var.number())
     {
-      RealArrayValue v = computeQpJacobian();
+      RealEigenVector v = computeQpJacobian();
       RealArray t = RealArray::Zero(_var.count(), _var.count());
       t.diagonal() = v;
       return t;
@@ -81,7 +81,7 @@ protected:
   void saveLocalArrayResidual(DenseVector<Number> & re,
                               unsigned int i,
                               unsigned int ntest,
-                              const RealArrayValue & v)
+                              const RealEigenVector & v)
   {
     for (unsigned int j = 0; j < v.size(); ++j, i += ntest)
       re(i) += v(j);
@@ -91,7 +91,7 @@ protected:
                                   unsigned int ntest,
                                   unsigned int j,
                                   unsigned int nphi,
-                                  const RealArrayValue & v)
+                                  const RealEigenVector & v)
   {
     for (unsigned int k = 0; k < v.size(); ++k, i += ntest, j += nphi)
       ke(i, j) += v(k);

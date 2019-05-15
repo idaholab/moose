@@ -20,7 +20,7 @@ validParams<CoupledArrayForce>()
   InputParameters params = validParams<Kernel>();
 
   params.addRequiredCoupledVar("v", "The coupled array variable which provides the force");
-  params.addRequiredParam<RealArrayValue>(
+  params.addRequiredParam<RealEigenVector>(
       "coef", "Coefficent ($\\sigma$) multiplier for the coupled force term.");
   params.addClassDescription("Implements a source term proportional to the value of a coupled "
                              "array variable. Weak form: $(u^\\ast, -\\vec{\\sigma} \\vec{v})$.");
@@ -31,7 +31,7 @@ CoupledArrayForce::CoupledArrayForce(const InputParameters & parameters)
   : Kernel(parameters),
     _v_var(coupled("v")),
     _v(coupledArrayValue("v")),
-    _coef(getParam<RealArrayValue>("coef"))
+    _coef(getParam<RealEigenVector>("coef"))
 {
   if (_var.number() == _v_var)
     mooseError("Coupled variable 'v' needs to be different from 'variable' with CoupledForce, "
@@ -47,11 +47,11 @@ CoupledArrayForce::computeQpResidual()
   return -(_coef.transpose() * _v[_qp]).sum() * _test[_i][_qp];
 }
 
-RealArrayValue
+RealEigenVector
 CoupledArrayForce::computeQpOffDiagJacobianArray(ArrayMooseVariable & jvar)
 {
   if (jvar.number() == _v_var)
     return _coef * (-_phi[_j][_qp] * _test[_i][_qp]);
   else
-    return RealArrayValue::Zero(jvar.count());
+    return RealEigenVector::Zero(jvar.count());
 }

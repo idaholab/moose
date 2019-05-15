@@ -17,7 +17,7 @@ validParams<ArrayPenaltyDirichletBC>()
 {
   InputParameters params = validParams<ArrayIntegratedBC>();
   params.addParam<Real>("penalty", 4, "Penalty scalar");
-  params.addRequiredParam<RealArrayValue>("value", "Boundary value of the array variable");
+  params.addRequiredParam<RealEigenVector>("value", "Boundary value of the array variable");
   params.addClassDescription(
       "Enforces a Dirichlet boundary condition "
       "in a weak sense with $p(\\vec{u}^\\ast, \\vec{u} - \\vec{u}_0)$, where $p$ is the constant "
@@ -29,18 +29,18 @@ validParams<ArrayPenaltyDirichletBC>()
 ArrayPenaltyDirichletBC::ArrayPenaltyDirichletBC(const InputParameters & parameters)
   : ArrayIntegratedBC(parameters),
     _p(getParam<Real>("penalty")),
-    _v(getParam<RealArrayValue>("value"))
+    _v(getParam<RealEigenVector>("value"))
 {
 }
 
-RealArrayValue
+RealEigenVector
 ArrayPenaltyDirichletBC::computeQpResidual()
 {
   return _p * _test[_i][_qp] * (_u[_qp] - _v);
 }
 
-RealArrayValue
+RealEigenVector
 ArrayPenaltyDirichletBC::computeQpJacobian()
 {
-  return RealArrayValue::Constant(_count, _p * _phi[_j][_qp] * _test[_i][_qp]);
+  return RealEigenVector::Constant(_count, _p * _phi[_j][_qp] * _test[_i][_qp]);
 }
