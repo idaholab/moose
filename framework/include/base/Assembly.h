@@ -834,40 +834,7 @@ public:
   DenseMatrix<Number> & jacobianBlockNeighbor(Moose::DGJacobianType type,
                                               unsigned int ivar,
                                               unsigned int jvar,
-                                              TagID tag = 0)
-  {
-    _jacobian_block_neighbor_used[tag][ivar][jvar] = 1;
-    if (_block_diagonal_matrix)
-    {
-      switch (type)
-      {
-        default:
-        case Moose::ElementElement:
-          return _sub_Kee[tag][ivar][0];
-        case Moose::ElementNeighbor:
-          return _sub_Ken[tag][ivar][0];
-        case Moose::NeighborElement:
-          return _sub_Kne[tag][ivar][0];
-        case Moose::NeighborNeighbor:
-          return _sub_Knn[tag][ivar][0];
-      }
-    }
-    else
-    {
-      switch (type)
-      {
-        default:
-        case Moose::ElementElement:
-          return _sub_Kee[tag][ivar][jvar];
-        case Moose::ElementNeighbor:
-          return _sub_Ken[tag][ivar][jvar];
-        case Moose::NeighborElement:
-          return _sub_Kne[tag][ivar][jvar];
-        case Moose::NeighborNeighbor:
-          return _sub_Knn[tag][ivar][jvar];
-      }
-    }
-  }
+                                              TagID tag = 0);
 
   /**
    * Returns the jacobian block for the given mortar Jacobian type
@@ -875,60 +842,7 @@ public:
   DenseMatrix<Number> & jacobianBlockLower(Moose::ConstraintJacobianType type,
                                            unsigned int ivar,
                                            unsigned int jvar,
-                                           TagID tag = 0)
-  {
-    _jacobian_block_lower_used[tag][ivar][jvar] = 1;
-    if (_block_diagonal_matrix)
-    {
-      switch (type)
-      {
-        default:
-        case Moose::LowerLower:
-          return _sub_Kll[tag][ivar][0];
-        case Moose::LowerSlave:
-          return _sub_Kle[tag][ivar][0];
-        case Moose::LowerMaster:
-          return _sub_Kln[tag][ivar][0];
-        case Moose::SlaveLower:
-          return _sub_Kel[tag][ivar][0];
-        case Moose::SlaveSlave:
-          return _sub_Kee[tag][ivar][0];
-        case Moose::SlaveMaster:
-          return _sub_Ken[tag][ivar][0];
-        case Moose::MasterLower:
-          return _sub_Knl[tag][ivar][0];
-        case Moose::MasterSlave:
-          return _sub_Kne[tag][ivar][0];
-        case Moose::MasterMaster:
-          return _sub_Knn[tag][ivar][0];
-      }
-    }
-    else
-    {
-      switch (type)
-      {
-        default:
-        case Moose::LowerLower:
-          return _sub_Kll[tag][ivar][jvar];
-        case Moose::LowerSlave:
-          return _sub_Kle[tag][ivar][jvar];
-        case Moose::LowerMaster:
-          return _sub_Kln[tag][ivar][jvar];
-        case Moose::SlaveLower:
-          return _sub_Kel[tag][ivar][jvar];
-        case Moose::SlaveSlave:
-          return _sub_Kee[tag][ivar][jvar];
-        case Moose::SlaveMaster:
-          return _sub_Ken[tag][ivar][jvar];
-        case Moose::MasterLower:
-          return _sub_Knl[tag][ivar][jvar];
-        case Moose::MasterSlave:
-          return _sub_Kne[tag][ivar][jvar];
-        case Moose::MasterMaster:
-          return _sub_Knn[tag][ivar][jvar];
-      }
-    }
-  }
+                                           TagID tag = 0);
 
   void cacheJacobianBlock(DenseMatrix<Number> & jac_block,
                           const std::vector<dof_id_type> & idof_indices,
@@ -1359,19 +1273,25 @@ protected:
 
   void computeCurrentNeighborVolume();
 
-  /// Appling scaling, constraints to the local residual block and populate the full DoF indices
-  /// for array variable.
+  /**
+   * Appling scaling, constraints to the local residual block and populate the full DoF indices
+   * for array variable.
+   */
   void processLocalResidual(DenseVector<Number> & res_block,
                             std::vector<dof_id_type> & dof_indices,
                             const std::vector<Real> & scaling_factor,
                             bool is_nodal);
-  /// Add a local residual block to a global residual vector with proper scaling.
+  /**
+   * Add a local residual block to a global residual vector with proper scaling.
+   */
   void addResidualBlock(NumericVector<Number> & residual,
                         DenseVector<Number> & res_block,
                         const std::vector<dof_id_type> & dof_indices,
                         const std::vector<Real> & scaling_factor,
                         bool is_nodal);
-  /// Push a local residual block with proper scaling into cache.
+  /**
+   * Push a local residual block with proper scaling into cache.
+   */
   void cacheResidualBlock(std::vector<Real> & cached_residual_values,
                           std::vector<dof_id_type> & cached_residual_rows,
                           DenseVector<Number> & res_block,
@@ -1379,14 +1299,18 @@ protected:
                           const std::vector<Real> & scaling_factor,
                           bool is_nodal);
 
-  /// Set a local residual block to a global residual vector with proper scaling.
+  /**
+   * Set a local residual block to a global residual vector with proper scaling.
+   */
   void setResidualBlock(NumericVector<Number> & residual,
                         DenseVector<Number> & res_block,
                         const std::vector<dof_id_type> & dof_indices,
                         const std::vector<Real> & scaling_factor,
                         bool is_nodal);
 
-  /// Add a local Jacobian block to a global Jacobian with proper scaling.
+  /**
+   * Add a local Jacobian block to a global Jacobian with proper scaling.
+   */
   void addJacobianBlock(SparseMatrix<Number> & jacobian,
                         DenseMatrix<Number> & jac_block,
                         const MooseVariableBase & ivar,
@@ -1394,7 +1318,9 @@ protected:
                         const std::vector<dof_id_type> & idof_indices,
                         const std::vector<dof_id_type> & jdof_indices);
 
-  /// Push a local Jacobian block with proper scaling into cache for a certain tag.
+  /**
+   * Push a local Jacobian block with proper scaling into cache for a certain tag.
+   */
   void cacheJacobianBlock(DenseMatrix<Number> & jac_block,
                           const MooseVariableBase & ivar,
                           const MooseVariableBase & jvar,
@@ -1402,7 +1328,19 @@ protected:
                           const std::vector<dof_id_type> & jdof_indices,
                           TagID tag = 0);
 
-  ///Adds element matrices for ivar rows and jvar columns to the global Jacobian matrices.
+  /**
+   * Push non-zeros of a local Jacobian block with proper scaling into cache for a certain tag.
+   */
+  void cacheJacobianBlockNonzero(DenseMatrix<Number> & jac_block,
+                                 const MooseVariableBase & ivar,
+                                 const MooseVariableBase & jvar,
+                                 const std::vector<dof_id_type> & idof_indices,
+                                 const std::vector<dof_id_type> & jdof_indices,
+                                 TagID tag = 0);
+
+  /**
+   * Adds element matrices for ivar rows and jvar columns to the global Jacobian matrices.
+   */
   void addJacobianCoupledVarPair(const MooseVariableBase & ivar, const MooseVariableBase & jvar);
 
   /**

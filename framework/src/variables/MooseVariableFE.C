@@ -219,14 +219,14 @@ MooseVariableFE<OutputType>::add(NumericVector<Number> & residual)
 
 template <typename OutputType>
 void
-MooseVariableFE<OutputType>::addSolution(const DenseVector<Number> & v) const
+MooseVariableFE<OutputType>::addSolution(const DenseVector<Number> & v)
 {
   _element_data->addSolution(_sys.solution(), v);
 }
 
 template <typename OutputType>
 void
-MooseVariableFE<OutputType>::addSolutionNeighbor(const DenseVector<Number> & v) const
+MooseVariableFE<OutputType>::addSolutionNeighbor(const DenseVector<Number> & v)
 {
   _neighbor_data->addSolution(_sys.solution(), v);
 }
