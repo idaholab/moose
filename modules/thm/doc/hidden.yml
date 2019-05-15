@@ -67,6 +67,7 @@
 - /Components/FlowChannel
 - /Components/FlowChannel1Phase
 - /Components/FlowChannel2Phase
+- /Components/FormLossFromExternalApp1Phase
 - /Components/FormLossFromFunction1Phase
 - /Components/FormLossFromFunction2Phase
 - /Components/FreeBoundary
