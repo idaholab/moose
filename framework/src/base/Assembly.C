@@ -2032,6 +2032,7 @@ Assembly::init(const CouplingMatrix * cm)
   for (auto & ivar : vars)
   {
     auto i = ivar->number();
+    auto ivar_start = _cm_ff_entry.size();
     for (unsigned int k = 0; k < ivar->count(); ++k)
     {
       unsigned int iv = i + k;
@@ -2040,14 +2041,29 @@ Assembly::init(const CouplingMatrix * cm)
         if (_sys.isScalarVariable(j))
         {
           auto & jvar = _sys.getScalarVariable(_tid, j);
-          _cm_fs_entry.insert(std::make_pair(ivar, &jvar));
+          _cm_fs_entry.push_back(std::make_pair(ivar, &jvar));
           _block_diagonal_matrix = false;
         }
         else
         {
           auto & jvar = _sys.getVariable(_tid, j);
-          _cm_ff_entry.insert(std::make_pair(ivar, &jvar));
-          if (iv != j)
+          auto pair = std::make_pair(ivar, &jvar);
+          auto c = ivar_start;
+          // check if the pair has been pushed or not
+          bool has_pair = false;
+          for (; c < _cm_ff_entry.size(); ++c)
+            if (_cm_ff_entry[c] == pair)
+            {
+              has_pair = true;
+              break;
+            }
+          if (!has_pair)
+            _cm_ff_entry.push_back(pair);
+          // only set having diagonal matrix to false when ivar and jvar numbers are different
+          // Note: for array variables, since we save the entire local Jacobian of all components,
+          //       even there are couplings among components of the same array variable, we still
+          //       do not set the flag to false.
+          if (i != jvar.number())
             _block_diagonal_matrix = false;
         }
       }
@@ -2063,12 +2079,12 @@ Assembly::init(const CouplingMatrix * cm)
       if (_sys.isScalarVariable(j))
       {
         auto & jvar = _sys.getScalarVariable(_tid, j);
-        _cm_ss_entry.insert(std::make_pair(ivar, &jvar));
+        _cm_ss_entry.push_back(std::make_pair(ivar, &jvar));
       }
       else
       {
         auto & jvar = _sys.getVariable(_tid, j);
-        _cm_sf_entry.insert(std::make_pair(ivar, &jvar));
+        _cm_sf_entry.push_back(std::make_pair(ivar, &jvar));
       }
   }
 
@@ -2180,12 +2196,28 @@ Assembly::initNonlocalCoupling()
   for (auto & ivar : vars)
   {
     auto i = ivar->number();
-    for (const auto & j : ConstCouplingRow(i, _nonlocal_cm))
-      if (!_sys.isScalarVariable(j))
-      {
-        auto & jvar = _sys.getVariable(_tid, j);
-        _cm_nonlocal_entry.insert(std::make_pair(ivar, &jvar));
-      }
+    auto ivar_start = _cm_nonlocal_entry.size();
+    for (unsigned int k = 0; k < ivar->count(); ++k)
+    {
+      unsigned int iv = i + k;
+      for (const auto & j : ConstCouplingRow(iv, _nonlocal_cm))
+        if (!_sys.isScalarVariable(j))
+        {
+          auto & jvar = _sys.getVariable(_tid, j);
+          auto pair = std::make_pair(ivar, &jvar);
+          auto c = ivar_start;
+          // check if the pair has been pushed or not
+          bool has_pair = false;
+          for (; c < _cm_nonlocal_entry.size(); ++c)
+            if (_cm_nonlocal_entry[c] == pair)
+            {
+              has_pair = true;
+              break;
+            }
+          if (!has_pair)
+            _cm_nonlocal_entry.push_back(pair);
+        }
+    }
   }
 }
 
