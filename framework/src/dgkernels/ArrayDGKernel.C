@@ -243,7 +243,7 @@ ArrayDGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, unsig
       for (_i = 0; _i < test_space.size(); _i++)
         for (_j = 0; _j < loc_phi.size(); _j++)
         {
-          RealArray v = _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(type, jv);
+          RealEigenMatrix v = _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(type, jv);
           saveFullLocalArrayJacobian(_local_ke, _i, test_space.size(), _j, loc_phi.size(), v);
         }
   }
@@ -258,7 +258,7 @@ ArrayDGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, unsig
       for (_i = 0; _i < test_space.size(); _i++)
         for (_j = 0; _j < loc_phi.size(); _j++)
         {
-          RealArray v = _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(type, jv);
+          RealEigenMatrix v = _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(type, jv);
           saveFullLocalArrayJacobian(_local_ke, _i, test_space.size(), _j, loc_phi.size(), v);
         }
   }

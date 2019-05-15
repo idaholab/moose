@@ -33,7 +33,7 @@ ArrayDiffusion::ArrayDiffusion(const InputParameters & parameters)
   else if (_dc_type == 1)
     _d_array = &getMaterialProperty<RealEigenVector>("diffusion_coefficient");
   else if (_dc_type == 2)
-    _d_2d_array = &getMaterialProperty<RealArray>("diffusion_coefficient");
+    _d_2d_array = &getMaterialProperty<RealEigenMatrix>("diffusion_coefficient");
 }
 
 RealEigenVector
@@ -78,7 +78,7 @@ ArrayDiffusion::computeQpJacobian()
     return _grad_phi[_j][_qp] * _grad_test[_i][_qp] * (*_d_2d_array)[_qp].diagonal();
 }
 
-RealArray
+RealEigenMatrix
 ArrayDiffusion::computeQpOffDiagJacobian(MooseVariableFEBase & jvar)
 {
   if (jvar.number() == _var.number() && _dc_type == 2)

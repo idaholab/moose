@@ -27,7 +27,7 @@ protected:
   virtual void computeQpProperties() override;
 
   std::string _prop_name;
-  const RealArray & _prop_value;
+  const RealEigenMatrix & _prop_value;
 
-  MaterialProperty<RealArray> & _property;
+  MaterialProperty<RealEigenMatrix> & _property;
 };
