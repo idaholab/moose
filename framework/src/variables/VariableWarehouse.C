@@ -149,14 +149,14 @@ VariableWarehouse::getFieldVariable<RealVectorValue>(unsigned int var_number)
 
 template <>
 ArrayMooseVariable *
-VariableWarehouse::getFieldVariable<RealArrayValue>(const std::string & var_name)
+VariableWarehouse::getFieldVariable<RealEigenVector>(const std::string & var_name)
 {
   return _array_vars_by_name.at(var_name);
 }
 
 template <>
 ArrayMooseVariable *
-VariableWarehouse::getFieldVariable<RealArrayValue>(unsigned int var_number)
+VariableWarehouse::getFieldVariable<RealEigenVector>(unsigned int var_number)
 {
   return _array_vars_by_number.at(var_number);
 }

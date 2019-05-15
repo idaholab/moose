@@ -35,10 +35,10 @@ ArrayFunctionIC::ArrayFunctionIC(const InputParameters & parameters)
     _func.push_back(&getFunctionByName(func));
 }
 
-RealArrayValue
+RealEigenVector
 ArrayFunctionIC::value(const Point & p)
 {
-  RealArrayValue v(_var.count());
+  RealEigenVector v(_var.count());
   for (unsigned int i = 0; i < _var.count(); ++i)
     v(i) = _func[i]->value(_t, p);
   return v;

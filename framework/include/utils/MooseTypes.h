@@ -130,7 +130,7 @@ template <typename>
 class VectorValue;
 typedef VectorValue<Real> RealVectorValue;
 typedef Eigen::Matrix<Real, LIBMESH_DIM, 1> RealDIMValue;
-typedef Eigen::Matrix<Real, Eigen::Dynamic, 1> RealArrayValue;
+typedef Eigen::Matrix<Real, Eigen::Dynamic, 1> RealEigenVector;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM> RealVectorArrayValue;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM * LIBMESH_DIM> RealTensorArrayValue;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic> RealArray;
@@ -319,19 +319,19 @@ typedef typename OutputTools<RealVectorValue>::VariableTestSecond VectorVariable
 typedef typename OutputTools<RealVectorValue>::VariableTestCurl VectorVariableTestCurl;
 
 // types for array variable
-typedef typename OutputTools<RealArrayValue>::VariableValue ArrayVariableValue;
-typedef typename OutputTools<RealArrayValue>::VariableGradient ArrayVariableGradient;
-typedef typename OutputTools<RealArrayValue>::VariableSecond ArrayVariableSecond;
-typedef typename OutputTools<RealArrayValue>::VariableCurl ArrayVariableCurl;
-typedef typename OutputTools<RealArrayValue>::VariablePhiValue ArrayVariablePhiValue;
-typedef typename OutputTools<RealArrayValue>::VariablePhiGradient ArrayVariablePhiGradient;
+typedef typename OutputTools<RealEigenVector>::VariableValue ArrayVariableValue;
+typedef typename OutputTools<RealEigenVector>::VariableGradient ArrayVariableGradient;
+typedef typename OutputTools<RealEigenVector>::VariableSecond ArrayVariableSecond;
+typedef typename OutputTools<RealEigenVector>::VariableCurl ArrayVariableCurl;
+typedef typename OutputTools<RealEigenVector>::VariablePhiValue ArrayVariablePhiValue;
+typedef typename OutputTools<RealEigenVector>::VariablePhiGradient ArrayVariablePhiGradient;
 typedef std::vector<std::vector<Eigen::Map<RealDIMValue>>> MappedArrayVariablePhiGradient;
-typedef typename OutputTools<RealArrayValue>::VariablePhiSecond ArrayVariablePhiSecond;
-typedef typename OutputTools<RealArrayValue>::VariablePhiCurl ArrayVariablePhiCurl;
-typedef typename OutputTools<RealArrayValue>::VariableTestValue ArrayVariableTestValue;
-typedef typename OutputTools<RealArrayValue>::VariableTestGradient ArrayVariableTestGradient;
-typedef typename OutputTools<RealArrayValue>::VariableTestSecond ArrayVariableTestSecond;
-typedef typename OutputTools<RealArrayValue>::VariableTestCurl ArrayVariableTestCurl;
+typedef typename OutputTools<RealEigenVector>::VariablePhiSecond ArrayVariablePhiSecond;
+typedef typename OutputTools<RealEigenVector>::VariablePhiCurl ArrayVariablePhiCurl;
+typedef typename OutputTools<RealEigenVector>::VariableTestValue ArrayVariableTestValue;
+typedef typename OutputTools<RealEigenVector>::VariableTestGradient ArrayVariableTestGradient;
+typedef typename OutputTools<RealEigenVector>::VariableTestSecond ArrayVariableTestSecond;
+typedef typename OutputTools<RealEigenVector>::VariableTestCurl ArrayVariableTestCurl;
 
 template <template <class> class W>
 using TemplateDN = W<DualReal>;

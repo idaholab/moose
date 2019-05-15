@@ -16,8 +16,8 @@ InputParameters
 validParams<ArrayDirichletBC>()
 {
   InputParameters p = validParams<ArrayNodalBC>();
-  p.addRequiredParam<RealArrayValue>("values",
-                                     "The values the components must take on the boundary");
+  p.addRequiredParam<RealEigenVector>("values",
+                                      "The values the components must take on the boundary");
   p.declareControllable("values");
   p.addClassDescription(
       "Imposes the essential boundary condition $\\vec{u}=\\vec{g}$, where $\\vec{g}$ "
@@ -26,11 +26,11 @@ validParams<ArrayDirichletBC>()
 }
 
 ArrayDirichletBC::ArrayDirichletBC(const InputParameters & parameters)
-  : ArrayNodalBC(parameters), _values(getParam<RealArrayValue>("values"))
+  : ArrayNodalBC(parameters), _values(getParam<RealEigenVector>("values"))
 {
 }
 
-RealArrayValue
+RealEigenVector
 ArrayDirichletBC::computeQpResidual()
 {
   return _u - _values;

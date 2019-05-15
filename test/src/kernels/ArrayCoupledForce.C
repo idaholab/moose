@@ -19,7 +19,7 @@ validParams<ArrayCoupledForce>()
 {
   InputParameters params = validParams<ArrayKernel>();
   params.addRequiredCoupledVar("v", "The coupled variable which provides the force");
-  params.addRequiredParam<RealArrayValue>(
+  params.addRequiredParam<RealEigenVector>(
       "coef", "Coefficent ($\\sigma$) multiplier for the coupled force term.");
   params.addClassDescription(
       "Implements a source term proportional to the value of a coupled "
@@ -31,7 +31,7 @@ ArrayCoupledForce::ArrayCoupledForce(const InputParameters & parameters)
   : ArrayKernel(parameters),
     _v_var(coupled("v")),
     _v(coupledValue("v")),
-    _coef(getParam<RealArrayValue>("coef"))
+    _coef(getParam<RealEigenVector>("coef"))
 {
   if (_var.number() == _v_var)
     mooseError("Coupled variable 'v' needs to be different from 'variable' with CoupledForce, "
@@ -40,7 +40,7 @@ ArrayCoupledForce::ArrayCoupledForce(const InputParameters & parameters)
     mooseError("We are testing the coupling of a standard variable to an array variable");
 }
 
-RealArrayValue
+RealEigenVector
 ArrayCoupledForce::computeQpResidual()
 {
   return -_coef * (_v[_qp] * _test[_i][_qp]);

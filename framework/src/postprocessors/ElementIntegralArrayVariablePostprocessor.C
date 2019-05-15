@@ -26,7 +26,7 @@ validParams<ElementIntegralArrayVariablePostprocessor>()
 ElementIntegralArrayVariablePostprocessor::ElementIntegralArrayVariablePostprocessor(
     const InputParameters & parameters)
   : ElementIntegralPostprocessor(parameters),
-    MooseVariableInterface<RealArrayValue>(
+    MooseVariableInterface<RealEigenVector>(
         this, false, "variable", Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ARRAY),
     _u(coupledArrayValue("variable")),
     _grad_u(coupledArrayGradient("variable")),

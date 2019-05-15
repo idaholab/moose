@@ -33,15 +33,15 @@ ArrayDGDiffusion::ArrayDGDiffusion(const InputParameters & parameters)
   : ArrayDGKernel(parameters),
     _epsilon(getParam<Real>("epsilon")),
     _sigma(getParam<Real>("sigma")),
-    _diff(getMaterialProperty<RealArrayValue>("diff")),
-    _diff_neighbor(getNeighborMaterialProperty<RealArrayValue>("diff"))
+    _diff(getMaterialProperty<RealEigenVector>("diff")),
+    _diff_neighbor(getNeighborMaterialProperty<RealEigenVector>("diff"))
 {
 }
 
-RealArrayValue
+RealEigenVector
 ArrayDGDiffusion::computeQpResidual(Moose::DGResidualType type)
 {
-  RealArrayValue r = RealArrayValue::Zero(_count);
+  RealEigenVector r = RealEigenVector::Zero(_count);
 
   const unsigned int elem_b_order = _var.order();
   const double h_elem =
@@ -71,10 +71,10 @@ ArrayDGDiffusion::computeQpResidual(Moose::DGResidualType type)
   return r;
 }
 
-RealArrayValue
+RealEigenVector
 ArrayDGDiffusion::computeQpJacobian(Moose::DGJacobianType type)
 {
-  RealArrayValue r = RealArrayValue::Zero(_count);
+  RealEigenVector r = RealEigenVector::Zero(_count);
 
   const unsigned int elem_b_order = _var.order();
   const double h_elem =
@@ -85,23 +85,23 @@ ArrayDGDiffusion::computeQpJacobian(Moose::DGJacobianType type)
     case Moose::ElementElement:
       r -= _grad_phi[_j][_qp] * _normals[_qp] * _test[_i][_qp] * 0.5 * _diff[_qp];
       r += _grad_test[_i][_qp] * _normals[_qp] * _epsilon * 0.5 * _phi[_j][_qp] * _diff[_qp];
-      r += RealArrayValue::Constant(_count, _sigma / h_elem * _phi[_j][_qp] * _test[_i][_qp]);
+      r += RealEigenVector::Constant(_count, _sigma / h_elem * _phi[_j][_qp] * _test[_i][_qp]);
       break;
 
     case Moose::ElementNeighbor:
       r -= _grad_phi_neighbor[_j][_qp] * _normals[_qp] * _test[_i][_qp] * 0.5 * _diff_neighbor[_qp];
       r -= _grad_test[_i][_qp] * _normals[_qp] * _epsilon * 0.5 * _phi_neighbor[_j][_qp] *
            _diff[_qp];
-      r -= RealArrayValue::Constant(_count,
-                                    _sigma / h_elem * _phi_neighbor[_j][_qp] * _test[_i][_qp]);
+      r -= RealEigenVector::Constant(_count,
+                                     _sigma / h_elem * _phi_neighbor[_j][_qp] * _test[_i][_qp]);
       break;
 
     case Moose::NeighborElement:
       r += _grad_phi[_j][_qp] * _normals[_qp] * _test_neighbor[_i][_qp] * 0.5 * _diff[_qp];
       r += _grad_test_neighbor[_i][_qp] * _normals[_qp] * _epsilon * 0.5 * _phi[_j][_qp] *
            _diff_neighbor[_qp];
-      r -= RealArrayValue::Constant(_count,
-                                    _sigma / h_elem * _phi[_j][_qp] * _test_neighbor[_i][_qp]);
+      r -= RealEigenVector::Constant(_count,
+                                     _sigma / h_elem * _phi[_j][_qp] * _test_neighbor[_i][_qp]);
       break;
 
     case Moose::NeighborNeighbor:
@@ -109,7 +109,7 @@ ArrayDGDiffusion::computeQpJacobian(Moose::DGJacobianType type)
            _diff_neighbor[_qp];
       r -= _grad_test_neighbor[_i][_qp] * _normals[_qp] * _epsilon * 0.5 * _phi_neighbor[_j][_qp] *
            _diff_neighbor[_qp];
-      r += RealArrayValue::Constant(
+      r += RealEigenVector::Constant(
           _count, _sigma / h_elem * _phi_neighbor[_j][_qp] * _test_neighbor[_i][_qp]);
       break;
   }

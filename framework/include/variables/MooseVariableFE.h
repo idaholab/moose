@@ -37,7 +37,7 @@ class TimeIntegrator;
  * ----------------------------------------------------
  * Real                Real                  Real
  * RealVectorValue     RealVectorValue       Real
- * RealArrayValue      Real                  RealArrayValue
+ * RealEigenVector      Real                  RealEigenVector
  *
  */
 template <typename OutputType>

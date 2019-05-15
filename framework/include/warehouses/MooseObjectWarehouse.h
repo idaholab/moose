@@ -112,7 +112,7 @@ MooseObjectWarehouse<T>::addObject(std::shared_ptr<T> object,
     }
 
     {
-      auto mvi = std::dynamic_pointer_cast<MooseVariableInterface<RealArrayValue>>(object);
+      auto mvi = std::dynamic_pointer_cast<MooseVariableInterface<RealEigenVector>>(object);
 
       if (mvi)
         _variable_objects[mvi->mooseVariable()->number()].addObject(object, tid, false);

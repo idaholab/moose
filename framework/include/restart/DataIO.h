@@ -344,7 +344,7 @@ void dataStore(std::ostream & stream, std::stringstream *& s, void * context);
 template <>
 void dataStore(std::ostream & stream, DualReal & dn, void * context);
 template <>
-void dataStore(std::ostream & stream, RealArrayValue & v, void * context);
+void dataStore(std::ostream & stream, RealEigenVector & v, void * context);
 template <>
 void dataStore(std::ostream & stream, RealArray & v, void * context);
 
@@ -602,7 +602,7 @@ void dataLoad(std::istream & stream, std::stringstream *& s, void * context);
 template <>
 void dataLoad(std::istream & stream, DualReal & dn, void * context);
 template <>
-void dataLoad(std::istream & stream, RealArrayValue & v, void * context);
+void dataLoad(std::istream & stream, RealEigenVector & v, void * context);
 template <>
 void dataLoad(std::istream & stream, RealArray & v, void * context);
 

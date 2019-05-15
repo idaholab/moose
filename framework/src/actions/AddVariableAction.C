@@ -133,10 +133,10 @@ AddVariableAction::createInitialConditionAction()
     mooseError("Size of 'initial_condition' is not consistent");
   if (_component > 1)
   {
-    RealArrayValue v(_component);
+    RealEigenVector v(_component);
     for (unsigned int i = 0; i < _component; ++i)
       v(i) = value[i];
-    action->getObjectParams().set<RealArrayValue>("value") = v;
+    action->getObjectParams().set<RealEigenVector>("value") = v;
   }
   else
     action->getObjectParams().set<Real>("value") = value[0];

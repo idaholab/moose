@@ -31,12 +31,12 @@ ArrayDiffusion::ArrayDiffusion(const InputParameters & parameters)
   if (_dc_type == 0)
     _d = &getMaterialProperty<Real>("diffusion_coefficient");
   else if (_dc_type == 1)
-    _d_array = &getMaterialProperty<RealArrayValue>("diffusion_coefficient");
+    _d_array = &getMaterialProperty<RealEigenVector>("diffusion_coefficient");
   else if (_dc_type == 2)
     _d_2d_array = &getMaterialProperty<RealArray>("diffusion_coefficient");
 }
 
-RealArrayValue
+RealEigenVector
 ArrayDiffusion::computeQpResidual()
 {
   if (_dc_type == 0)
@@ -48,7 +48,7 @@ ArrayDiffusion::computeQpResidual()
                 "diffusion_coefficient size is inconsistent with the number of components of array "
                 "variable");
     mooseAssert((*_d_array)[_qp].size() == _var.count(), "");
-    RealArrayValue v = _grad_u[_qp] * _array_grad_test[_i][_qp];
+    RealEigenVector v = _grad_u[_qp] * _array_grad_test[_i][_qp];
     for (unsigned int i = 0; i < _var.count(); ++i)
       v(i) *= (*_d_array)[_qp](i);
     return v;
@@ -66,12 +66,12 @@ ArrayDiffusion::computeQpResidual()
   }
 }
 
-RealArrayValue
+RealEigenVector
 ArrayDiffusion::computeQpJacobian()
 {
   if (_dc_type == 0)
-    return RealArrayValue::Constant(_var.count(),
-                                    _grad_phi[_j][_qp] * _grad_test[_i][_qp] * (*_d)[_qp]);
+    return RealEigenVector::Constant(_var.count(),
+                                     _grad_phi[_j][_qp] * _grad_test[_i][_qp] * (*_d)[_qp]);
   else if (_dc_type == 1)
     return _grad_phi[_j][_qp] * _grad_test[_i][_qp] * (*_d_array)[_qp];
   else

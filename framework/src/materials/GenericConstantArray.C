@@ -20,19 +20,19 @@ validParams<GenericConstantArray>()
   InputParameters params = validParams<Material>();
   params.addRequiredParam<std::string>("prop_name",
                                        "The names of the properties this material will have");
-  params.addRequiredParam<RealArrayValue>("prop_value",
-                                          "The values associated with the named properties");
+  params.addRequiredParam<RealEigenVector>("prop_value",
+                                           "The values associated with the named properties");
   params.declareControllable("prop_value");
   params.addClassDescription(
-      "A material evaluating one material property in type of RealArrayValue");
+      "A material evaluating one material property in type of RealEigenVector");
   return params;
 }
 
 GenericConstantArray::GenericConstantArray(const InputParameters & parameters)
   : Material(parameters),
     _prop_name(getParam<std::string>("prop_name")),
-    _prop_value(getParam<RealArrayValue>("prop_value")),
-    _property(declareProperty<RealArrayValue>(_prop_name))
+    _prop_value(getParam<RealEigenVector>("prop_value")),
+    _property(declareProperty<RealEigenVector>(_prop_name))
 {
 }
 

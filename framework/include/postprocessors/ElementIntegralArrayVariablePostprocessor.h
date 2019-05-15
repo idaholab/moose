@@ -25,7 +25,7 @@ InputParameters validParams<ElementIntegralArrayVariablePostprocessor>();
  * class and overriding computeQpIntegral().
  */
 class ElementIntegralArrayVariablePostprocessor : public ElementIntegralPostprocessor,
-                                                  public MooseVariableInterface<RealArrayValue>
+                                                  public MooseVariableInterface<RealEigenVector>
 {
 public:
   ElementIntegralArrayVariablePostprocessor(const InputParameters & parameters);
