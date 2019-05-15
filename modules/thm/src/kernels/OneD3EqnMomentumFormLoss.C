@@ -43,8 +43,8 @@ OneD3EqnMomentumFormLoss::OneD3EqnMomentumFormLoss(const InputParameters & param
 Real
 OneD3EqnMomentumFormLoss::computeQpResidual()
 {
-  return _K_prime[_qp] * 0.5 * _rho[_qp] * _vel[_qp] * std::abs(_vel[_qp]) *
-         _A[_qp] * _test[_i][_qp];
+  return _K_prime[_qp] * 0.5 * _rho[_qp] * _vel[_qp] * std::abs(_vel[_qp]) * _A[_qp] *
+         _test[_i][_qp];
 }
 
 Real
@@ -61,15 +61,13 @@ OneD3EqnMomentumFormLoss::computeQpOffDiagJacobian(unsigned int jvar)
     const Real drhou2_darhoA = _drho_darhoA[_qp] * _vel[_qp] * std::abs(_vel[_qp]) +
                                2.0 * _rho[_qp] * std::abs(_vel[_qp]) * _dvel_darhoA[_qp];
 
-    return _K_prime[_qp] * 0.5 * drhou2_darhoA * _A[_qp] * _phi[_j][_qp] *
-           _test[_i][_qp];
+    return _K_prime[_qp] * 0.5 * drhou2_darhoA * _A[_qp] * _phi[_j][_qp] * _test[_i][_qp];
   }
   else if (jvar == _arhouA_var_number)
   {
     const Real drhou2_darhouA = 2.0 * _rho[_qp] * std::abs(_vel[_qp]) * _dvel_darhouA[_qp];
 
-    return _K_prime[_qp] * 0.5 * drhou2_darhouA * _A[_qp] * _phi[_j][_qp] *
-           _test[_i][_qp];
+    return _K_prime[_qp] * 0.5 * drhou2_darhouA * _A[_qp] * _phi[_j][_qp] * _test[_i][_qp];
   }
   else if (jvar == _arhoEA_var_number)
     return 0.;
