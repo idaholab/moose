@@ -44,6 +44,9 @@ ArrayDiffusion::computeQpResidual()
 
   else if (_dc_type == 1)
   {
+    mooseAssert((*_d_array)[_qp].size() == _var.count(),
+                "diffusion_coefficient size is inconsistent with the number of components of array "
+                "variable");
     mooseAssert((*_d_array)[_qp].size() == _var.count(), "");
     RealArrayValue v = _grad_u[_qp] * _array_grad_test[_i][_qp];
     for (unsigned int i = 0; i < _var.count(); ++i)
@@ -53,8 +56,12 @@ ArrayDiffusion::computeQpResidual()
 
   else
   {
-    mooseAssert((*_d_2d_array)[_qp].cols() == _var.count(), "");
-    mooseAssert((*_d_2d_array)[_qp].rows() == _var.count(), "");
+    mooseAssert((*_d_2d_array)[_qp].cols() == _var.count(),
+                "diffusion_coefficient size is inconsistent with the number of components of array "
+                "variable");
+    mooseAssert((*_d_2d_array)[_qp].rows() == _var.count(),
+                "diffusion_coefficient size is inconsistent with the number of components of array "
+                "variable");
     return (*_d_2d_array)[_qp] * (_grad_u[_qp] * _array_grad_test[_i][_qp]);
   }
 }

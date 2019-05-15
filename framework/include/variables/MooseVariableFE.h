@@ -499,11 +499,11 @@ public:
   /**
    * Add passed in local DOF values onto the current solution
    */
-  void addSolution(const DenseVector<Number> & v) const;
+  void addSolution(const DenseVector<Number> & v);
   /**
    * Add passed in local neighbor DOF values onto the current solution
    */
-  void addSolutionNeighbor(const DenseVector<Number> & v) const;
+  void addSolutionNeighbor(const DenseVector<Number> & v);
 
   const DoFValue & dofValue();
   const DoFValue & dofValues();

@@ -71,3 +71,23 @@ MooseVariableBase::order() const
 {
   return _fe_type.order;
 }
+
+std::vector<dof_id_type>
+MooseVariableBase::componentDofIndices(const std::vector<dof_id_type> & dof_indices,
+                                       unsigned int component) const
+{
+  std::vector<dof_id_type> new_dof_indices(dof_indices);
+  if (component != 0)
+  {
+    if (isNodal())
+      for (auto & id : new_dof_indices)
+        id += component;
+    else
+    {
+      unsigned int n = dof_indices.size();
+      for (auto & id : new_dof_indices)
+        id += component * n;
+    }
+  }
+  return new_dof_indices;
+}

@@ -560,36 +560,9 @@ private:
   void fetchDoFValues();
   void fetchADDoFValues();
   void zeroSizeDofValues();
-
-  void getArrayDoFValues(const NumericVector<Number> & sol,
-                         unsigned int n,
-                         MooseArray<RealArrayValue> & dof_values)
-  {
-    dof_values.resize(n);
-    if (isNodal())
-    {
-      for (unsigned int i = 0; i < n; ++i)
-      {
-        dof_values[i].resize(_count);
-        auto dof = _dof_indices[i];
-        for (unsigned int j = 0; j < _count; ++j)
-          dof_values[i](j) = sol(dof++);
-      }
-    }
-    else
-    {
-      for (unsigned int i = 0; i < n; ++i)
-      {
-        dof_values[i].resize(_count);
-        auto dof = _dof_indices[i];
-        for (unsigned int j = 0; j < _count; ++j)
-        {
-          dof_values[i](j) = sol(dof);
-          dof += n;
-        }
-      }
-    }
-  }
+  inline void getArrayDoFValues(const NumericVector<Number> & sol,
+                                unsigned int n,
+                                MooseArray<RealArrayValue> & dof_values) const;
 
   /// A const reference to the owning MooseVariableFE object
   const MooseVariableFE<OutputType> & _var;
