@@ -1,6 +1,0 @@
-COORDINATES
-TIME STEPS
-NODAL VARIABLES relative 1e-4 floor 1.e-9
-	T_solid
-ELEMENT VARIABLES relative 1e-4 floor 1.e-9
-	power_density

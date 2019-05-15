@@ -1,73 +1,58 @@
 [Tests]
   # physics
-  [./phy:cylinder_power_shape_aux_var]
+  [./phy:power_density_shape]
     type = 'Exodiff'
     input = 'phy.cylinder_power_shape_aux_var.i'
     exodiff = 'phy.cylinder_power_shape_aux_var_out.e'
-    custom_cmp = 'phy.cylinder_power_shape_aux_var.exodiff'
+    rel_err = 1e-4
+    abs_zero = 1e-9
+
+    requirement = "The system shall provide the heat source shape when power density is supplied"
   [../]
-  [./phy:cylinder_power_shape_fn]
+  [./phy:power_component_shape_cylindrical]
     type = 'Exodiff'
     input = 'phy.cylinder_power_shape_fn.i'
     exodiff = 'phy.cylinder_power_shape_fn_out.e'
-    custom_cmp = 'phy.cylinder_power_shape_fn.exodiff'
+    rel_err = 1e-4
+    abs_zero = 1e-9
+
+    requirement = "The system shall provide the heat source shape for a cylindrical heat structure when power component and power shape function are supplied"
   [../]
-  [./phy:plate]
+  [./phy:power_component_shape_plate]
     type = 'Exodiff'
     input = 'phy.plate.i'
     exodiff = 'phy.plate_out.e'
-    custom_cmp = 'phy.plate.exodiff'
+    rel_err = 1e-4
+    abs_zero = 1e-9
+
+    requirement = "The system shall provide the heat source shape for a plate heat structure when power component and power shape function are supplied"
   [../]
+
   [./phy:conservation_plate]
     type = CSVDiff
-    input = 'phy.conservation_cylinder.i'
-    csvdiff = 'phy.conservation_plate.csv'
-    rel_err = 1e-8
+    input = 'phy.conservation.i'
     cli_args = "
       Components/heat_structure/type=HeatStructurePlate
       Components/heat_structure/depth=2
       Postprocessors/E_tot/type=HeatStructureEnergy
       Postprocessors/E_tot/plate_depth=2
       Outputs/file_base=phy.conservation_plate"
-    # because of output has execute_on = 'initial final'
-    recover = false
-  [../]
-  [./phy:conservation_plate_multiple_regions]
-    type = CSVDiff
-    input = 'phy.conservation_cylinder_multiple_regions.i'
-    csvdiff = 'phy.conservation_plate_multiple_regions.csv'
+    csvdiff = 'phy.conservation_plate.csv'
     rel_err = 1e-8
-    cli_args = "
-      Components/heat_structure/type=HeatStructurePlate
-      Components/heat_structure/depth=2
-      Postprocessors/E_tot/type=HeatStructureEnergy
-      Postprocessors/E_tot/plate_depth=2
-      Outputs/file_base=phy.conservation_plate_multiple_regions"
     # because output has execute_on = 'initial final'
     recover = false
   [../]
   [./phy:conservation_cylinder]
     type = CSVDiff
-    input = 'phy.conservation_cylinder.i'
+    input = 'phy.conservation.i'
+    cli_args = "
+      Components/heat_structure/type=HeatStructureCylindrical
+      Components/heat_structure/inner_radius=1.0
+      Postprocessors/E_tot/type=HeatStructureEnergyRZ
+      Postprocessors/E_tot/axis_point='0 1 0'
+      Postprocessors/E_tot/axis_dir='1 0 0'
+      Outputs/file_base=phy.conservation_cylinder"
     csvdiff = 'phy.conservation_cylinder.csv'
-    cli_args = "
-      Components/heat_structure/type=HeatStructureCylindrical
-      Components/heat_structure/inner_radius=1.0
-      Postprocessors/E_tot/axis_point='0 1 0'
-      Postprocessors/E_tot/axis_dir='1 0 0'"
-    rel_err = 1e-8
-    # because of output has execute_on = 'initial final'
-    recover = false
-  [../]
-  [./phy:conservation_cylinder_multiple_regions]
-    type = CSVDiff
-    input = 'phy.conservation_cylinder_multiple_regions.i'
-    csvdiff = 'phy.conservation_cylinder_multiple_regions.csv'
-    cli_args = "
-      Components/heat_structure/type=HeatStructureCylindrical
-      Components/heat_structure/inner_radius=1.0
-      Postprocessors/E_tot/axis_point='0 1 0'
-      Postprocessors/E_tot/axis_dir='1 0 0'"
     rel_err = 1e-8
     # because output has execute_on = 'initial final'
     recover = false

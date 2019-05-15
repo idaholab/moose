@@ -1,5 +1,4 @@
-# Tests conservation for heat generation in a cylindrical heat structure with a
-# heat source over multiple heat structure regions
+# Tests energy conservation for HeatGeneration component when a power component is used
 
 [GlobalParams]
   scaling_factor_temperature = 1e-3
@@ -98,7 +97,6 @@
 []
 
 [Outputs]
-  file_base = 'phy.conservation_cylinder_multiple_regions'
   csv = true
   show = 'E_tot_change'
   execute_on = 'final'
