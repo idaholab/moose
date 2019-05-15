@@ -1,7 +1,21 @@
 # Tests energy conservation for HeatGeneration component when a power component is used
 
+n_units = 5
+power = 1e5
+power_fraction = 0.3
+t = 1
+
+energy_change = ${fparse n_units * power_fraction * power * t}
+
 [GlobalParams]
   scaling_factor_temperature = 1e-3
+[]
+
+[Functions]
+  [./power_shape]
+    type = ConstantFunction
+    value = 0.4
+  [../]
 []
 
 [HeatStructureMaterials]
@@ -13,17 +27,10 @@
   [../]
 []
 
-[Functions]
-  [./T0_fn]
-    type = ParsedFunction
-    value = '290 + 20 * (y - 1)'
-  [../]
-[]
-
 [Components]
   [./heat_structure]
     type = HeatStructureCylindrical
-    num_rods = 5
+    num_rods = ${n_units}
 
     position = '0 1 0'
     orientation = '1 0 0'
@@ -35,17 +42,18 @@
     widths = '0.5 0.5 0.5'
     n_part_elems = '2 2 2'
 
-    initial_T = T0_fn
+    initial_T = 300
   [../]
   [./heat_generation]
     type = HeatGeneration
     hs = heat_structure
     regions = 'rgn1 rgn2'
     power = reactor
+    power_fraction = ${power_fraction}
   [../]
   [./reactor]
     type = PrescribedReactorPower
-    function = 1e5
+    function = ${power}
   [../]
 []
 
@@ -53,13 +61,20 @@
   [./E_tot]
     type = HeatStructureEnergyRZ
     block = 'heat_structure:rgn1 heat_structure:rgn2 heat_structure:rgn3'
-    n_units = 5
+    n_units = ${n_units}
     execute_on = 'initial timestep_end'
   [../]
   [./E_tot_change]
     type = ChangeOverTimePostprocessor
     change_with_respect_to_initial = true
     postprocessor = E_tot
+    execute_on = 'initial timestep_end'
+  [../]
+
+  [./E_tot_change_rel_err]
+    type = RelativeDifferencePostprocessor
+    value1 = E_tot_change
+    value2 = ${energy_change}
     execute_on = 'initial timestep_end'
   [../]
 []
@@ -85,8 +100,8 @@
   l_max_its = 10
 
   start_time = 0.0
-  dt = 0.1
-  num_steps = 10
+  dt = ${t}
+  num_steps = 1
 
   abort_on_solve_fail = true
 
@@ -98,6 +113,6 @@
 
 [Outputs]
   csv = true
-  show = 'E_tot_change'
+  show = 'E_tot_change_rel_err'
   execute_on = 'final'
 []
