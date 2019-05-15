@@ -5,7 +5,7 @@ power = 1e5
 power_fraction = 0.3
 t = 1
 
-energy_change = ${fparse n_units * power_fraction * power * t}
+energy_change = ${fparse power_fraction * power * t}
 
 [GlobalParams]
   scaling_factor_temperature = 1e-3
@@ -34,12 +34,12 @@ energy_change = ${fparse n_units * power_fraction * power * t}
 
     position = '0 1 0'
     orientation = '1 0 0'
-    length = 1.0
+    length = 0.8
     n_elems = 100
 
     names = 'rgn1 rgn2 rgn3'
     materials = 'main-material main-material main-material'
-    widths = '0.5 0.5 0.5'
+    widths = '0.4 0.1 0.5'
     n_part_elems = '2 2 2'
 
     initial_T = 300

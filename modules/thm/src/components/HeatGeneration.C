@@ -84,6 +84,7 @@ HeatGeneration::addMooseObjects()
 {
   /// The heat structure component we work with
   const HeatStructureBase & hs = getComponent<HeatStructureBase>("hs");
+  const Real num_rods = hs.getNumberOfUnits();
   Real volume = 0.;
   std::vector<SubdomainName> subdomain_names;
   for (auto && region : _region_names)
@@ -122,14 +123,38 @@ HeatGeneration::addMooseObjects()
       _sim.addFunction(class_name, _power_shape_func, pars);
     }
 
+    const std::string power_shape_integral_name =
+        _has_psf ? genName(name(), _power_shape_func, "integral")
+                 : genName(_power_shape_func, "integral");
+
+    {
+      const std::string class_name =
+          is_cylindrical ? "FunctionElementIntegralRZ" : "FunctionElementIntegral";
+      InputParameters pars = _factory.getValidParams(class_name);
+      pars.set<std::vector<SubdomainName>>("block") = subdomain_names;
+      pars.set<FunctionName>("function") = _power_shape_func;
+      if (is_cylindrical)
+      {
+        pars.set<Point>("axis_point") = hs.getPosition();
+        pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
+      }
+      pars.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL};
+      // TODO: This seems to produce incorrect output files, even though this is the line
+      // that should be here, becuase we don't want this PPS to be in any output. The effect
+      // of this line is correct, but for some reason, MOOSE will start output scalar variables
+      // even though we did not ask it to do so. Refs idaholab/thm#
+      // pars.set<std::vector<OutputName>>("outputs") = _sim.getOutputsVector("none");
+      _sim.addPostprocessor(class_name, power_shape_integral_name, pars);
+    }
+
     {
       const std::string class_name =
           is_cylindrical ? "OneDHeatForcingFunctionRZ" : "OneDHeatForcingFunction";
       InputParameters pars = _factory.getValidParams(class_name);
       pars.set<NonlinearVariableName>("variable") = HeatConductionModel::TEMPERATURE;
       pars.set<std::vector<SubdomainName>>("block") = subdomain_names;
+      pars.set<Real>("num_units") = num_rods;
       pars.set<Real>("power_fraction") = _power_fraction;
-      pars.set<Real>("volume") = volume;
       pars.set<FunctionName>("power_shape_function") = _power_shape_func;
       pars.set<std::vector<VariableName>>("total_power") =
           std::vector<VariableName>(1, _power_var_name);
@@ -138,6 +163,15 @@ HeatGeneration::addMooseObjects()
         pars.set<Point>("axis_point") = hs.getPosition();
         pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
       }
+      else
+      {
+        // For plate heat structure, the element integral of the power shape only
+        // integrates over x and y, not z, so the depth still needs to be applied.
+        // getUnitPerimeter() with an arbitrary side gives the depth.
+        const MooseEnum hs_side("top bottom", "top");
+        pars.set<Real>("scale") = 1.0 / hs.getUnitPerimeter(hs_side);
+      }
+      pars.set<PostprocessorName>("power_shape_integral_pp") = power_shape_integral_name;
       std::string mon = genName(name(), "heat_src");
       _sim.addKernel(class_name, mon, pars);
       connectObject(pars, mon, "power_fraction");

@@ -276,6 +276,7 @@
 - /Postprocessors/CFLTimeStepSize1Phase
 - /Postprocessors/CFLTimeStepSize2Phase
 - /Postprocessors/EnergyFluxIntegral
+- /Postprocessors/FunctionElementIntegralRZ
 - /Postprocessors/MassFluxIntegral
 - /Postprocessors/MomentumFluxIntegral
 - /Postprocessors/NodalEnergyFluxPostprocessor
