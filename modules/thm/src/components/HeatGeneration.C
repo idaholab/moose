@@ -58,6 +58,10 @@ HeatGeneration::check() const
 
   if (hasComponent<HeatStructureBase>("hs"))
   {
+    if (!hasComponent<HeatStructurePlate>("hs") && !hasComponent<HeatStructureCylindrical>("hs"))
+      logError(
+          "Heat structure must be of type 'HeatStructurePlate' or 'HeatStructureCylindrical'.");
+
     const HeatStructureBase & hs = getComponent<HeatStructureBase>("hs");
 
     for (auto && region : _region_names)
@@ -89,65 +93,38 @@ HeatGeneration::addMooseObjects()
     volume += hs.getVolumes()[idx];
   }
 
-  if (!_has_psf)
-  {
-    _power_shape_func = genName(name(), "power_shape_fn");
-    std::string class_name = "ConstantFunction";
-    InputParameters pars = _factory.getValidParams(class_name);
-    pars.set<Real>("value") = 1. / hs.getLength();
-    _sim.addFunction(class_name, _power_shape_func, pars);
-  }
-
   const HeatStructureCylindrical * hs_cyl = dynamic_cast<const HeatStructureCylindrical *>(&hs);
-  if (hs_cyl != nullptr)
-  {
-    if (_has_power_density)
-    {
-      std::string class_name = "CoupledForceRZ";
-      InputParameters pars = _factory.getValidParams(class_name);
-      pars.set<NonlinearVariableName>("variable") = HeatConductionModel::TEMPERATURE;
-      pars.set<std::vector<SubdomainName>>("block") = subdomain_names;
-      pars.set<std::vector<VariableName>>("v") = std::vector<VariableName>(1, _power_density_name);
-      pars.set<Point>("axis_point") = hs.getPosition();
-      pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
-      std::string mon = genName(name(), "heat_src");
-      _sim.addKernel(class_name, mon, pars);
-    }
-    else
-    {
-      std::string class_name = "OneDHeatForcingFunctionRZ";
-      InputParameters pars = _factory.getValidParams(class_name);
-      pars.set<NonlinearVariableName>("variable") = HeatConductionModel::TEMPERATURE;
-      pars.set<std::vector<SubdomainName>>("block") = subdomain_names;
-      pars.set<Real>("power_fraction") = _power_fraction;
-      pars.set<Real>("volume") = volume;
-      pars.set<FunctionName>("power_shape_function") = _power_shape_func;
-      pars.set<std::vector<VariableName>>("total_power") =
-          std::vector<VariableName>(1, _power_var_name);
-      pars.set<Point>("axis_point") = hs.getPosition();
-      pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
-      std::string mon = genName(name(), "heat_src");
-      _sim.addKernel(class_name, mon, pars);
-      connectObject(pars, mon, "power_fraction");
-    }
-  }
+  const bool is_cylindrical = hs_cyl != nullptr;
 
-  const HeatStructurePlate * hs_plate = dynamic_cast<const HeatStructurePlate *>(&hs);
-  if (hs_plate != nullptr)
+  if (_has_power_density)
   {
-    if (_has_power_density)
+    const std::string class_name = is_cylindrical ? "CoupledForceRZ" : "CoupledForce";
+    InputParameters pars = _factory.getValidParams(class_name);
+    pars.set<NonlinearVariableName>("variable") = HeatConductionModel::TEMPERATURE;
+    pars.set<std::vector<SubdomainName>>("block") = subdomain_names;
+    pars.set<std::vector<VariableName>>("v") = std::vector<VariableName>(1, _power_density_name);
+    if (is_cylindrical)
     {
-      std::string class_name = "CoupledForce";
-      InputParameters pars = _factory.getValidParams(class_name);
-      pars.set<NonlinearVariableName>("variable") = HeatConductionModel::TEMPERATURE;
-      pars.set<std::vector<SubdomainName>>("block") = subdomain_names;
-      pars.set<std::vector<VariableName>>("v") = std::vector<VariableName>(1, _power_density_name);
-      std::string mon = genName(name(), "heat_src");
-      _sim.addKernel(class_name, mon, pars);
+      pars.set<Point>("axis_point") = hs.getPosition();
+      pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
     }
-    else
+    std::string mon = genName(name(), "heat_src");
+    _sim.addKernel(class_name, mon, pars);
+  }
+  else
+  {
+    if (!_has_psf)
     {
-      std::string class_name = "OneDHeatForcingFunction";
+      _power_shape_func = genName(name(), "power_shape_fn");
+      std::string class_name = "ConstantFunction";
+      InputParameters pars = _factory.getValidParams(class_name);
+      pars.set<Real>("value") = 1. / hs.getLength();
+      _sim.addFunction(class_name, _power_shape_func, pars);
+    }
+
+    {
+      const std::string class_name =
+          is_cylindrical ? "OneDHeatForcingFunctionRZ" : "OneDHeatForcingFunction";
       InputParameters pars = _factory.getValidParams(class_name);
       pars.set<NonlinearVariableName>("variable") = HeatConductionModel::TEMPERATURE;
       pars.set<std::vector<SubdomainName>>("block") = subdomain_names;
@@ -156,6 +133,11 @@ HeatGeneration::addMooseObjects()
       pars.set<FunctionName>("power_shape_function") = _power_shape_func;
       pars.set<std::vector<VariableName>>("total_power") =
           std::vector<VariableName>(1, _power_var_name);
+      if (is_cylindrical)
+      {
+        pars.set<Point>("axis_point") = hs.getPosition();
+        pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
+      }
       std::string mon = genName(name(), "heat_src");
       _sim.addKernel(class_name, mon, pars);
       connectObject(pars, mon, "power_fraction");
