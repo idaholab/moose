@@ -1,0 +1,12 @@
+[Tests]
+  [./test]
+    type = 'CSVDiff'
+    input = 'function_element_integral.i'
+    csvdiff = 'function_element_integral_out.csv'
+    abs_zero = 1e-13
+
+    requirement = "The system shall integrate functions over volume."
+    design = 'FunctionElementIntegral.md'
+    issues = '#13418'
+  [../]
+[]
