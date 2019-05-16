@@ -67,7 +67,10 @@ Extensions:
             /FluidProperties/AddFluidPropertiesAction: /Modules/FluidProperties/AddFluidPropertiesAction
             /FluidProperties/BrineFluidProperties: /Modules/FluidProperties/BrineFluidProperties
             /FluidProperties/CO2FluidProperties: /Modules/FluidProperties/CO2FluidProperties
+            /FluidProperties/FlibeFluidProperties: /Modules/FluidProperties/FlibeFluidProperties
+            /FluidProperties/FlinakFluidProperties: /Modules/FluidProperties/FlinakFluidProperties
             /FluidProperties/GeneralVaporMixtureFluidProperties: /Modules/FluidProperties/GeneralVaporMixtureFluidProperties
+            /FluidProperties/HeliumFluidProperties: /Modules/FluidProperties/HeliumFluidProperties
             /FluidProperties/IdealGasFluidProperties: /Modules/FluidProperties/IdealGasFluidProperties
             /FluidProperties/IdealGasFluidPropertiesPT: /Modules/FluidProperties/IdealGasFluidPropertiesPT
             /FluidProperties/MethaneFluidProperties: /Modules/FluidProperties/MethaneFluidProperties
