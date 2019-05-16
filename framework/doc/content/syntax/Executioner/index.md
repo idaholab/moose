@@ -13,12 +13,28 @@ detailed information about these options.
 
 MOOSE provides Picard iterations in all its executioners for tightly-coupled multiphysics simulations.
 MultiApps of two groups of before and after master app and master app are solved sequentially within one Picard iteration.
-The execution order of MutlApps within one group is undefined.
+The execution order of MutliApps within one group is undefined.
 Relevant data transfers happen before and after each of the two groups of MultiApps runs.
 Because MultiApp allows wrapping another levels of MultiApps, the design enables multi-level Picard iterations automatically.
-Picard iterations can be relaxed to improve the stabilitity of the convergence.
+Picard iterations can be relaxed to improve the stability of the convergence.
 When a MultiApp is a subapp of a master and a master of its own subapps, MOOSE allows relaxation of the MultiApp solution
 within the master Picard iterations and within the Picard iterations, where the MultiApp is the master, independently.
+
+## Automatic and Default Preconditioning
+
+For most simulations there are two types of solve types that will be used: Newton or Preconditioned
+Jacobian Free Newton Krylov (PJFNK). The type is specified using the "solve_type" parameter withing the
+Executioner block.
+
+Regardless of solve type, NEWTON or PJFNK, preconditioning is an import part of any simulation
+(see [Preconditioning/index.md]). By default block diagonal preconditioning is used for all
+solves, with one exception. If "solve_type" is set to NEWTON and the Preconditioning block is
+not defined, single matrix preconditioning (SMP) is used (see [SingleMatrixPreconditioner.md])
+with all entries enabled ("full=true"). For NEWTON solves, the auto creation of an SMP objects can be disabled by setting
+"auto_preconditioning=false" within the Executioner block (see [CreateExecutionerAction.md]).
+
+
+
 
 !syntax list /Executioner objects=True actions=False subsystems=False
 
