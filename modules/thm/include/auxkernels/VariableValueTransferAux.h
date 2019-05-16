@@ -23,7 +23,7 @@ protected:
   PenetrationLocator & _penetration_locator;
   NearestNodeLocator & _nearest_node;
 
-  const NumericVector<Number> *& _serialized_solution;
+  const NumericVector<Number> * const & _serialized_solution;
 
   unsigned int _paired_variable;
 };

@@ -73,7 +73,7 @@ protected:
   MooseMesh & _mesh;
 
   /// The quadrature rule
-  QBase *& _qrule;
+  const QBase * const & _qrule;
 
   /// The quadrature points
   const MooseArray<Point> & _q_point;
@@ -85,8 +85,8 @@ Sampler1DBase<T>::Sampler1DBase(const InputParameters & parameters)
     SamplerBase(parameters, this, _communicator),
     BlockRestrictable(this),
     _mesh(_subproblem.mesh()),
-    _qrule(_subproblem.assembly(_tid).qRule()),
-    _q_point(_subproblem.assembly(_tid).qPoints())
+    _qrule(_assembly.qRule()),
+    _q_point(_assembly.qPoints())
 {
   std::vector<std::string> material_property_names = getParam<std::vector<std::string>>("property");
   for (unsigned int i = 0; i < material_property_names.size(); ++i)

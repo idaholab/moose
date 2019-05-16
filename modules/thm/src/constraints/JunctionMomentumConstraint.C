@@ -74,7 +74,7 @@ JunctionMomentumConstraint::JunctionMomentumConstraint(const InputParameters & p
 void
 JunctionMomentumConstraint::computeResidual(NumericVector<Number> & /*residual*/)
 {
-  std::vector<dof_id_type> & dofs = _var.dofIndices();
+  auto && dofs = _var.dofIndices();
   DenseVector<Number> re(dofs.size());
 
   re.zero();
@@ -117,11 +117,11 @@ JunctionMomentumConstraint::computeJacobian(SparseMatrix<Number> & /*jacobian*/)
   MooseVariable & var_rhoEA = _sys.getFieldVariable<Real>(_tid, _rhoEA_var_number);
   MooseVariableScalar & var_s_junction = _sys.getScalarVariable(_tid, _s_junction_var_number);
 
-  std::vector<dof_id_type> & dofs = _var.dofIndices();
-  std::vector<dof_id_type> & dofs_rhoA = var_rhoA.dofIndices();
-  std::vector<dof_id_type> & dofs_rhouA = var_rhouA.dofIndices();
-  std::vector<dof_id_type> & dofs_rhoEA = var_rhoEA.dofIndices();
-  std::vector<dof_id_type> & dofs_s_junction = var_s_junction.dofIndices();
+  auto && dofs = _var.dofIndices();
+  auto && dofs_rhoA = var_rhoA.dofIndices();
+  auto && dofs_rhouA = var_rhouA.dofIndices();
+  auto && dofs_rhoEA = var_rhoEA.dofIndices();
+  auto && dofs_s_junction = var_s_junction.dofIndices();
 
   DenseMatrix<Number> J_rhoA(dofs.size(), dofs_rhoA.size());
   DenseMatrix<Number> J_rhouA(dofs.size(), dofs_rhouA.size());

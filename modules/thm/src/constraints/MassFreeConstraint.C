@@ -30,7 +30,7 @@ MassFreeConstraint::MassFreeConstraint(const InputParameters & parameters)
 void
 MassFreeConstraint::computeResidual(NumericVector<Number> & /*residual*/)
 {
-  std::vector<dof_id_type> & dofs = _var.dofIndices();
+  auto && dofs = _var.dofIndices();
   DenseVector<Number> re(dofs.size());
 
   re.zero();
@@ -45,7 +45,7 @@ Real MassFreeConstraint::computeQpResidual(Moose::ConstraintType /*type*/) { ret
 void
 MassFreeConstraint::computeJacobian(SparseMatrix<Number> & /*jacobian*/)
 {
-  std::vector<dof_id_type> & dofs = _var.dofIndices();
+  auto && dofs = _var.dofIndices();
 
   {
     DenseMatrix<Number> Kee(dofs.size(), dofs.size());
@@ -56,7 +56,7 @@ MassFreeConstraint::computeJacobian(SparseMatrix<Number> & /*jacobian*/)
   // off-diag
   {
     MooseVariable & var_rhouA = _sys.getFieldVariable<Real>(_tid, _rhouA_var_number);
-    std::vector<dof_id_type> & dofs_rhouA = var_rhouA.dofIndices();
+    auto && dofs_rhouA = var_rhouA.dofIndices();
     DenseMatrix<Number> Kee(dofs.size(), dofs_rhouA.size());
 
     Kee.zero();
