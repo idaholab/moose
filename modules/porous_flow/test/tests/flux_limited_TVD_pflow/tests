@@ -238,6 +238,19 @@
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 2D for PorousFlow simulations, for more than 1 thread'
   [../]
+  [./memory_inefficiency]
+    type = 'RunException'
+    input = 'pffltvd_2D.i'
+    prereq = 'pffltvd_1D_threads pffltvd_2D pffltvd_2D_threads'
+    expect_err = "In at least one processor, the sequential node-numbering internal data structure used in advective_flux_calculator_0 is using memory inefficiently.\nThe memory wasted is 4.57764e-05 megabytes.\n  The node-numbering data structure has been optimized for speed at the expense of memory, but that may not be an appropriate optimization for your case, because the node numbering is not close to sequential in your case."
+    threading = '!pthreads'
+    cli_args = 'UserObjects/advective_flux_calculator_0/allowable_MB_wastage=0.000001'
+    min_parallel = 2
+    max_parallel = 2
+    issues = '#13078'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
+    requirement = 'PorousFlow shall issue a warning if the memory is inefficiently used for multi-processor simulations involving Kuzmin-Turek stablization'
+  [../]
   [./pffltvd_3D]
     type = 'CSVDiff'
     input = 'pffltvd_3D.i'

@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "AdvectiveFluxCalculatorBase.h"
+#include "Conversion.h" // for stringify
 
 #include "libmesh/string_to_enum.h"
 #include "libmesh/mesh_tools.h"
@@ -27,6 +28,13 @@ validParams<AdvectiveFluxCalculatorBase>()
                              flux_limiter_type,
                              "Type of flux limiter to use.  'None' means that no antidiffusion "
                              "will be added in the Kuzmin-Turek scheme");
+  params.addRangeCheckedParam<Real>(
+      "allowable_MB_wastage",
+      5.0,
+      "allowable_MB_wastage > 0.0",
+      "This object will issue a memory warning if the internal node-numbering data structure "
+      "wastes more than allowable_MB_wastage megabytes.  This data structure uses sequential "
+      "node-numbering which is optimized for speed rather than memory efficiency");
 
   params.addRelationshipManager("ElementPointNeighborLayers",
                                 Moose::RelationshipManagerType::GEOMETRIC |
@@ -56,7 +64,8 @@ AdvectiveFluxCalculatorBase::AdvectiveFluxCalculatorBase(const InputParameters &
     _nodes_to_receive(),
     _nodes_to_send(),
     _pairs_to_receive(),
-    _pairs_to_send()
+    _pairs_to_send(),
+    _allowable_MB_wastage(getParam<Real>("allowable_MB_wastage"))
 {
   if (!_execute_enum.contains(EXEC_LINEAR))
     paramError(
@@ -97,6 +106,18 @@ AdvectiveFluxCalculatorBase::timestepSetup()
     _connections.finalizeAddingConnections();
 
     _number_of_nodes = _connections.numNodes();
+
+    Real mb_wasted = (_connections.sizeSequential() - _number_of_nodes) * 4.0 / 1048576;
+    gatherMax(mb_wasted);
+    if (mb_wasted > _allowable_MB_wastage)
+      mooseWarning(
+          "In at least one processor, the sequential node-numbering internal data structure used "
+          "in " +
+          name() + " is using memory inefficiently.\nThe memory wasted is " +
+          Moose::stringify(mb_wasted) +
+          " megabytes.\n  The node-numbering data structure has been optimized for speed at the "
+          "expense of memory, but that may not be an appropriate optimization for your case, "
+          "because the node numbering is not close to sequential in your case.\n");
 
     // initialize _kij
     _kij.resize(_number_of_nodes);
