@@ -22,5 +22,10 @@ public:
   CreateExecutionerAction(InputParameters params);
 
   virtual void act() override;
-};
 
+protected:
+  virtual void setupAutoPreconditioning();
+
+private:
+  const bool _auto_preconditioning;
+};

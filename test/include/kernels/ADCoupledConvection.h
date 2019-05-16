@@ -34,5 +34,6 @@ protected:
 
 private:
   const ADVariableGradient & _velocity_vector;
-};
 
+  const Real & _scale;
+};

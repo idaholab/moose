@@ -13,6 +13,7 @@
 #include "AuxiliarySystem.h"
 #include "Conversion.h"
 #include "Executioner.h"
+#include "MoosePreconditioner.h"
 #include "FEProblem.h"
 #include "MooseApp.h"
 #include "MooseMesh.h"
@@ -260,7 +261,18 @@ outputExecutionInformation(const MooseApp & app, FEProblemBase & problem)
 
   const std::string & pc_desc = problem.getPetscOptions().pc_description;
   if (!pc_desc.empty())
-    oss << std::setw(console_field_width) << "  Preconditioner: " << pc_desc << '\n';
+    oss << std::setw(console_field_width) << "  PETSc Preconditioner: " << pc_desc << '\n';
+
+  const std::shared_ptr<const MoosePreconditioner> mpc =
+      problem.getNonlinearSystemBase().getPreconditioner();
+  if (mpc)
+  {
+    oss << std::setw(console_field_width)
+        << "  MOOSE Preconditioner: " << mpc->getParam<std::string>("_type");
+    if (mpc->name() == "_moose_auto")
+      oss << " (auto)";
+    oss << '\n';
+  }
   oss << '\n';
 
   return oss.str();

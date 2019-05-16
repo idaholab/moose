@@ -23,11 +23,16 @@ InputParameters
 validParams<CreateExecutionerAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
-
+  params.addParam<bool>(
+      "auto_preconditioning",
+      true,
+      "When true and a [Preconditioning] block does not exist, the application will attempt to use "
+      "the correct preconditioning given the Executioner settings.");
   return params;
 }
 
-CreateExecutionerAction::CreateExecutionerAction(InputParameters params) : MooseObjectAction(params)
+CreateExecutionerAction::CreateExecutionerAction(InputParameters params)
+  : MooseObjectAction(params), _auto_preconditioning(getParam<bool>("auto_preconditioning"))
 {
 }
 
@@ -48,10 +53,18 @@ CreateExecutionerAction::act()
     mooseError("Executioner is not consistent with each other; EigenExecutioner needs an "
                "EigenProblem, and Steady and Transient need a FEProblem");
 
-  // If 'solve_type = NEWTON' then automatically create SingleMatrixPreconditioner object
-  // with full=true, but only if the Preconditioning block doesn't exist..
-  if (_moose_object_pars.get<MooseEnum>("solve_type") == "NEWTON" &&
-      !_awh.hasActions("add_preconditioning"))
+  // If enabled, automatically create a Preconditioner if the [Preconditioning] block is not found
+  if (_auto_preconditioning && !_awh.hasActions("add_preconditioning"))
+    setupAutoPreconditioning();
+
+  _app.setExecutioner(std::move(executioner));
+}
+
+void
+CreateExecutionerAction::setupAutoPreconditioning()
+{
+  // If using NEWTON then automatically create SingleMatrixPreconditioner object with full=true
+  if (_moose_object_pars.get<MooseEnum>("solve_type") == "NEWTON")
   {
     // Action Parameters
     InputParameters params = _action_factory.getValidParams("SetupPreconditionerAction");
@@ -59,7 +72,7 @@ CreateExecutionerAction::act()
 
     // Create the Action that will build the Preconditioner object
     std::shared_ptr<Action> ptr =
-        _action_factory.create("SetupPreconditionerAction", "_moose_default_smp", params);
+        _action_factory.create("SetupPreconditionerAction", "_moose_auto", params);
 
     // Set 'full=true'
     std::shared_ptr<MooseObjectAction> moa_ptr = std::static_pointer_cast<MooseObjectAction>(ptr);
@@ -68,6 +81,4 @@ CreateExecutionerAction::act()
 
     _awh.addActionBlock(ptr);
   }
-
-  _app.setExecutioner(std::move(executioner));
 }

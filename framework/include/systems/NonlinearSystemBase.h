@@ -411,6 +411,7 @@ public:
    * @param pc The preconditioner to be set
    */
   void setPreconditioner(std::shared_ptr<MoosePreconditioner> pc);
+  const std::shared_ptr<const MoosePreconditioner> getPreconditioner() const;
 
   /**
    * If called with true this system will use a finite differenced form of
@@ -872,4 +873,3 @@ private:
                      ComputeMortarFunctor<ComputeStage::JACOBIAN>>
       _displaced_mortar_jacobian_functors;
 };
-

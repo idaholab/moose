@@ -1,10 +1,27 @@
 [Tests]
   design = "CreateExecutionerAction.md"
   issues = "#13411"
-  [test]
+  [manual]
     type = 'Exodiff'
-    input = 'auto_smp_simple_diffusion.i'
-    exodiff = 'auto_smp_simple_diffusion_out.e'
+    input = 'ad_coupled_convection.i'
+    exodiff = 'ad_coupled_convection_out.e'
+    expect_out = 'MOOSE Preconditioner:\s+SMP'
+    requirement = "The system shall support the disabling of an automatically created preconditioning object when preforming a Newton solve."
+  []
+  [auto]
+    type = 'Exodiff'
+    input = 'ad_coupled_convection.i'
+    exodiff = 'ad_coupled_convection_out.e'
+    cli_args = "Preconditioning/active='' Executioner/auto_preconditioning=true"
+    expect_out = 'MOOSE Preconditioner:\s+SMP\s+\(auto\)'
     requirement = "The system shall automatically create the correct preconditioning object when preforming a Newton solve."
+    prereq = manual
+  []
+  [fail]
+    type = 'RunApp'
+    input = 'ad_coupled_convection.i'
+    cli_args = "Preconditioning/active='' Executioner/auto_preconditioning=false Outputs/exodus=false"
+    requirement = "The system shall not automatically create a preconditioning object when preforming a Newton solve if the auto preconditioning capability is disabled."
+    expect_out = "Solve Did NOT Converge"
   []
 []
