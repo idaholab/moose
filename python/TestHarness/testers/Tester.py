@@ -144,6 +144,20 @@ class Tester(MooseObject):
     def createStatus(self):
         return self.test_status.createStatus()
 
+    # Return a tuple (status, message, caveats) for this tester as found
+    # in the .previous_test_results.json file (or supplied json object)
+    def previousTesterStatus(self, options, previous_results=None):
+        if not previous_results:
+            previous_results = options.results_storage
+
+        status_exists = previous_results.get(self.getTestDir(), {}).get(self.getTestName(), None)
+        status = (self.test_status.createStatus(), '', '')
+        if status_exists:
+            status = (self.test_status.createStatus(status_exists['STATUS'].encode('ascii', 'ignore')),
+                      status_exists['STATUS_MESSAGE'].encode('ascii', 'ignore'),
+                      status_exists['CAVEATS'])
+        return (status)
+
     def getStatusMessage(self):
         return self.__tester_message
 
@@ -387,17 +401,9 @@ class Tester(MooseObject):
             self.setStatus(self.silent)
             return False
 
-        # If something has already deemed this test a failure or is silent, return now
-        if self.isFail() or self.isSilent():
+        # If something has already deemed this test a failure
+        if self.isFail():
             return False
-
-        # Check if we only want to run failed tests
-        if options.failed_tests and options.results_storage is not None:
-            result_key = options.results_storage.get(self.getTestDir(), {})
-            status = result_key.get(self.getTestName(), {}).get('FAIL', '')
-            if not status:
-                self.setStatus(self.silent)
-                return False
 
         # Check if we only want to run syntax tests
         if options.check_input and not self.specs['check_input']:

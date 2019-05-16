@@ -50,7 +50,7 @@ class JobDAG(object):
 
         # delete finished jobs
         next_jobs = set([])
-        for job in list(self.__job_dag.ind_nodes()):
+        for job in self.__job_dag.ind_nodes():
             if job.isFinished():
                 next_jobs.add(job)
                 self.__job_dag.delete_node(job)
@@ -103,12 +103,50 @@ class JobDAG(object):
                 except KeyError:
                     job.setStatus(job.error, 'unknown dependency')
 
+    def _hasDownStreamsWithFailures(self, job):
+        """ Return True if any dependents of job has previous failures """
+        for d_job in self.__job_dag.all_downstreams(job):
+            status, message, caveats = d_job.previousTesterStatus(self.options)
+            if status in d_job.job_status.getFailingStatuses():
+                return True
+
+    def _doPreviouslyFailed(self, job):
+        """
+        Set up statuses for jobs contained within the DAG for use with failed-tests option
+        """
+        tester = job.getTester()
+        status, message, caveats = job.previousTesterStatus(self.options)
+
+        # This job passed, but one of its dependents has not
+        if status == tester.success and self._hasDownStreamsWithFailures(job):
+            tester.setStatus(tester.success)
+            # Do we care? I figure, we should at least mention something. This job is not actually going to re-execute an app.
+            tester.addCaveats('previous results: {}'.format(status.status))
+            job.setStatus(job.finished)
+
+        # This job was skipped (but not due to a failing dependency) or passed without having failing dependencies
+        elif (status == tester.skip and not tester.getPrereqs()) or status == tester.success:
+            tester.setStatus(tester.silent)
+            job.setStatus(job.finished)
+
+        # Remaining independent 'skipped' jobs we don't want to print output for
+        elif not job.getRunnable():
+            tester.setStatus(tester.silent)
+            job.setStatus(job.finished)
+
+        # Remaining jobs are failures of some sort. Append the previous result as a caveat.
+        if message:
+            tester.addCaveats('previous results: {}'.format(message))
+
     def _doSkippedDependencies(self):
         """ Determine which jobs in the DAG should be skipped """
-        for job in list(self.__job_dag.topological_sort()):
-            tester = job.getTester()
+        for job in self.__job_dag.topological_sort():
             dep_jobs = set([])
-            if not job.getRunnable() or self._haltDescent(job):
+
+            if self.options.failed_tests:
+                self._doPreviouslyFailed(job)
+
+            if not job.getRunnable() or job.isFail() or job.isSkip():
                 job.setStatus(job.skip)
                 dep_jobs.update(self.__job_dag.all_downstreams(job))
 
@@ -118,7 +156,7 @@ class JobDAG(object):
 
             for d_job in dep_jobs:
                 d_tester = d_job.getTester()
-                if tester.isSilent() and not d_job.getRunnable():
+                if job.isSilent() and not d_job.getRunnable():
                     d_tester.setStatus(d_tester.silent)
                 elif not self._skipPrereqs():
                     d_job.setStatus(d_job.skip)
@@ -155,17 +193,6 @@ class JobDAG(object):
                 for job in job_list:
                     job.setOutput('Output file will over write pre-existing output file:\n\t%s\n' % (outfile))
                     job.setStatus(job.error, 'OUTFILE RACE CONDITION')
-
-    def _haltDescent(self, job):
-        """ return boolean if this job should not allow its children to run """
-        tester = job.getTester()
-        if (job.isError()
-            or job.isSkip()
-            or tester.isFail()
-            or tester.isSkip()
-            or tester.isSilent()
-            or tester.isDeleted()):
-            return True
 
     def _skipPrereqs(self):
         """

@@ -65,9 +65,6 @@ class DAG(object):
         if node_name not in graph:
             raise KeyError('node %s does not exist' % node_name)
 
-        # cache current graph before we delete a node
-        self.__cacheGraph()
-
         graph.pop(node_name)
 
         for node, edges in graph.iteritems():
@@ -105,9 +102,6 @@ class DAG(object):
         if not graph:
             graph = self.graph
 
-        # cache current graph before we delete an edge
-        self.__cacheGraph()
-
         if dep_node not in graph.get(ind_node, []):
             raise KeyError('this edge does not exist in graph')
         graph[ind_node].remove(dep_node)
@@ -116,9 +110,6 @@ class DAG(object):
         """ Change references to a task in existing edges. """
         if not graph:
             graph = self.graph
-
-        # cache current graph before we rename an edge
-        self.__cacheGraph()
 
         for node, edges in graph.items():
 
@@ -266,13 +257,9 @@ class DAG(object):
     # Added by the MOOSE group
     def getOriginalDAG(self):
         """
-        Returns a clone of the graph as it existed before any nodes
-        were deleted.
-
-        Adding nodes again later, will allow the original graph to
-        'reset' and grow.
+        Returns a clone of the graph as it existed before calling the first ind_nodes
         """
-        return self.__cacheGraph()
+        return self.__cacheGraph().graph
 
     # Added by the MOOSE group
     def clone(self):
@@ -304,8 +291,6 @@ class DAG(object):
     # Added by the MOOSE group
     def reverse_edges(self, graph=None):
         """ Reversed dependencies in current graph. """
-        # Create clone of original graph
-        self.__cacheGraph()
 
         new_graph = self.reverse_clone()
         self.graph = new_graph.graph
@@ -315,9 +300,6 @@ class DAG(object):
         """ Delete an edge from the graph. """
         if not graph:
             graph = self.graph
-
-        # cache current graph before we delete an edge
-        self.__cacheGraph()
 
         if dep_node not in graph.get(ind_node, []):
             return
