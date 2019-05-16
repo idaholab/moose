@@ -107,8 +107,14 @@ HeatFlux3EqnBC::computeQpJacobian()
 Real
 HeatFlux3EqnBC::computeQpOffDiagJacobianNeighbor(unsigned int jvar)
 {
-  const std::vector<DenseVector<Real>> & dq_wall = _q_uo.getHeatFluxJacobian(_current_elem->id());
-  return -_hs_scale * dq_wall[_qp](_jvar_map.at(jvar)) * _phi_neighbor[_j][_qp] * _test[_i][_qp];
+  std::map<unsigned int, unsigned int>::const_iterator it;
+  if ((it = _jvar_map.find(jvar)) != _jvar_map.end())
+  {
+    const std::vector<DenseVector<Real>> & dq_wall = _q_uo.getHeatFluxJacobian(_current_elem->id());
+    return -_hs_scale * dq_wall[_qp](it->second) * _phi_neighbor[_j][_qp] * _test[_i][_qp];
+  }
+  else
+    return 0.;
 }
 
 std::map<unsigned int, unsigned int>

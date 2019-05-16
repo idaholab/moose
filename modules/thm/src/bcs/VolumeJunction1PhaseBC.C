@@ -79,18 +79,21 @@ VolumeJunction1PhaseBC::computeQpJacobian()
 Real
 VolumeJunction1PhaseBC::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if (_junction_jvar_map.find(jvar) == _junction_jvar_map.end())
+  std::map<unsigned int, unsigned int>::const_iterator it;
+  if ((it = _flow_channel_jvar_map.find(jvar)) != _flow_channel_jvar_map.end())
   {
     const auto & J = _volume_junction_uo.getFluxJacobianFlowChannelVariables(_connection_index);
-    return J(_equation_index, _flow_channel_jvar_map.at(jvar)) * _A_linear[_qp] / _A_elem[_qp] *
-           _normal * _phi[_j][_qp] * _test[_i][_qp];
+    return J(_equation_index, it->second) * _A_linear[_qp] / _A_elem[_qp] * _normal *
+           _phi[_j][_qp] * _test[_i][_qp];
   }
-  else
+  else if ((it = _junction_jvar_map.find(jvar)) != _junction_jvar_map.end())
   {
     const auto & J = _volume_junction_uo.getFluxJacobianScalarVariables(_connection_index);
-    return J(_equation_index, _junction_jvar_map.at(jvar)) * _A_linear[_qp] / _A_elem[_qp] *
-           _normal * _test[_i][_qp];
+    return J(_equation_index, it->second) * _A_linear[_qp] / _A_elem[_qp] * _normal *
+           _test[_i][_qp];
   }
+  else
+    return 0;
 }
 
 std::map<unsigned int, unsigned int>
