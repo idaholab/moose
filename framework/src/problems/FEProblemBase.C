@@ -189,7 +189,7 @@ validParams<FEProblemBase>()
   params.addParam<std::vector<TagName>>("extra_tag_matrices",
                                         "Extra matrices to add to the system that can be filled "
                                         "by objects which compute residuals and Jacobians "
-                                        "(Kernels, BCs, etc.) by setting tags on them.");
+                                        "(Kernels, BCs, etc.) by setting tags on them. ");
 
   return params;
 }
