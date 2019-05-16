@@ -1,0 +1,18 @@
+[Tests]
+  [./one_d_3eqn_momentum_form_loss]
+    type = 'PetscJacobianTester'
+    input = 'one_d_3eqn_momentum_form_loss.i'
+    ratio_tol = 3e-8
+    difference_tol = 0.06
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./one_d_7eqn_momentum_form_loss]
+    type = 'PetscJacobianTester'
+    input = 'one_d_7eqn_momentum_form_loss.i'
+    ratio_tol = 3e-8
+    difference_tol = 0.06
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+[]

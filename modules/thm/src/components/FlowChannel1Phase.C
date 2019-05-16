@@ -16,7 +16,6 @@ validParams<FlowChannel1Phase>()
       "A", "Area of the flow channel, can be a constant or a function");
   params.addParam<Real>("roughness", 0.0, "roughness, [m]");
   params.addParam<FunctionName>("f", "Wall friction");
-  params.addParam<FunctionName>("K_prime", "Form loss coefficient per unit length function");
 
   params.addParam<MooseEnum>("heat_transfer_geom",
                              FlowChannel1Phase::getConvHeatTransGeometry("PIPE"),
@@ -77,35 +76,6 @@ FlowChannel1Phase::check() const
 
     logError("The following initial condition parameters are missing:", oss.str());
   }
-}
-
-void
-FlowChannel1Phase::addFormLossObjects()
-{
-  if (isParamValid("K_prime"))
-  {
-    const std::string class_name = "OneDMomentumFormLoss";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<NonlinearVariableName>("variable") = FlowModelSinglePhase::RHOUA;
-    params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-    params.set<std::vector<VariableName>>("arhoA") = {FlowModelSinglePhase::RHOA};
-    params.set<std::vector<VariableName>>("arhouA") = {FlowModelSinglePhase::RHOUA};
-    params.set<std::vector<VariableName>>("arhoEA") = {FlowModelSinglePhase::RHOEA};
-    params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
-    params.set<MaterialPropertyName>("alpha") = FlowModel::UNITY;
-    params.set<MaterialPropertyName>("rho") = FlowModelSinglePhase::DENSITY;
-    params.set<MaterialPropertyName>("vel") = FlowModelSinglePhase::VELOCITY;
-    params.set<MaterialPropertyName>("2phase_multiplier") = FlowModel::UNITY;
-    params.set<FunctionName>("K_prime") = getParam<FunctionName>("K_prime");
-    _sim.addKernel(class_name, Component::genName(name(), class_name), params);
-  }
-}
-
-void
-FlowChannel1Phase::addMooseObjects()
-{
-  FlowChannelBase::addMooseObjects();
-  addFormLossObjects();
 }
 
 void
