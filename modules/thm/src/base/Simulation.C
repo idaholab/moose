@@ -8,6 +8,7 @@
 
 #include "FluidProperties.h"
 #include "THMControl.h"
+#include "TerminateControl.h"
 #include "THMMesh.h"
 
 Simulation::Simulation(ActionWarehouse & action_warehouse)
@@ -786,6 +787,31 @@ Simulation::controlDataIntegrityCheck()
         auto it = std::find(deps.begin(), deps.end(), dep_name);
         if (it == deps.end())
           deps.push_back(dep_name);
+      }
+    }
+  }
+
+  // Find all `TerminateControl`s and all their dependencies. Then add those
+  // objects into TIMESTEP_END control warehouse
+  MooseObjectWarehouse<Control> & ctrl_wh_tse =
+      _fe_problem->getControlWarehouse()[EXEC_TIMESTEP_END];
+  for (auto && i : ctrl_wh.getObjects())
+  {
+    if (TerminateControl * ctrl = dynamic_cast<TerminateControl *>(i.get()))
+    {
+      std::list<THMControl *> l;
+      l.push_back(ctrl);
+      while (l.size() > 0)
+      {
+        THMControl * ctrl = l.front();
+        auto & cd_deps = ctrl->getControlDataDependencies();
+        for (auto && cd_name : cd_deps)
+        {
+          ControlDataValue * cdv = _control_data[cd_name];
+          l.push_back(&cdv->getControl());
+        }
+        ctrl_wh_tse.addObject(ctrl_wh.getObject(ctrl->name()));
+        l.pop_front();
       }
     }
   }
