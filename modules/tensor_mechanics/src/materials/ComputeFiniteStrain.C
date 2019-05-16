@@ -136,13 +136,14 @@ void
 ComputeFiniteStrain::computeQpIncrements(RankTwoTensor & total_strain_increment,
                                          RankTwoTensor & rotation_increment)
 {
+  static const RankTwoTensor zero;
+
   switch (_decomposition_method)
   {
     case DecompMethod::TaylorExpansion:
     {
       // inverse of _Fhat
       RankTwoTensor invFhat;
-      static const RankTwoTensor zero;
       if (_Fhat[_qp] == zero)
         invFhat.zero();
       else
@@ -211,24 +212,33 @@ ComputeFiniteStrain::computeQpIncrements(RankTwoTensor & total_strain_increment,
       std::vector<Real> e_value(3);
       RankTwoTensor e_vector, N1, N2, N3;
 
-      RankTwoTensor Chat = _Fhat[_qp].transpose() * _Fhat[_qp];
-      Chat.symmetricEigenvaluesEigenvectors(e_value, e_vector);
+      if (_Fhat[_qp] == zero)
+      {
+        RankTwoTensor identity(RankTwoTensor::initIdentity);
+        rotation_increment = identity;
+        total_strain_increment = zero;
+      }
+      else
+      {
+        RankTwoTensor Chat = _Fhat[_qp].transpose() * _Fhat[_qp];
+        Chat.symmetricEigenvaluesEigenvectors(e_value, e_vector);
 
-      const Real lambda1 = std::sqrt(e_value[0]);
-      const Real lambda2 = std::sqrt(e_value[1]);
-      const Real lambda3 = std::sqrt(e_value[2]);
+        const Real lambda1 = std::sqrt(e_value[0]);
+        const Real lambda2 = std::sqrt(e_value[1]);
+        const Real lambda3 = std::sqrt(e_value[2]);
 
-      N1.vectorOuterProduct(e_vector.column(0), e_vector.column(0));
-      N2.vectorOuterProduct(e_vector.column(1), e_vector.column(1));
-      N3.vectorOuterProduct(e_vector.column(2), e_vector.column(2));
+        N1.vectorOuterProduct(e_vector.column(0), e_vector.column(0));
+        N2.vectorOuterProduct(e_vector.column(1), e_vector.column(1));
+        N3.vectorOuterProduct(e_vector.column(2), e_vector.column(2));
 
-      RankTwoTensor Uhat = N1 * lambda1 + N2 * lambda2 + N3 * lambda3;
-      RankTwoTensor invUhat(Uhat.inverse());
+        RankTwoTensor Uhat = N1 * lambda1 + N2 * lambda2 + N3 * lambda3;
+        RankTwoTensor invUhat(Uhat.inverse());
 
-      rotation_increment = _Fhat[_qp] * invUhat;
+        rotation_increment = _Fhat[_qp] * invUhat;
 
-      total_strain_increment =
-          N1 * std::log(lambda1) + N2 * std::log(lambda2) + N3 * std::log(lambda3);
+        total_strain_increment =
+            N1 * std::log(lambda1) + N2 * std::log(lambda2) + N3 * std::log(lambda3);
+      }
       break;
     }
 
