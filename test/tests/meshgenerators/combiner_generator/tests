@@ -1,0 +1,9 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'combiner_generator.i'
+    exodiff = 'combiner_generator_in.e'
+    cli_args = '--mesh-only'
+    recover = false
+  [../]
+[]
