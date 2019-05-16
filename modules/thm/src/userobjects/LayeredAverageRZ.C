@@ -28,8 +28,8 @@ LayeredAverageRZ::execute()
   Real current_elem_volume = 0.;
   for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
   {
-    Real r = computeRadius(_q_point[qp]);
-    current_elem_volume += _JxW[qp] * 2 * libMesh::pi * r;
+    const Real circumference = computeCircumference(_q_point[qp]);
+    current_elem_volume += _JxW[qp] * circumference;
   }
 
   unsigned int layer = getLayer(_current_elem->centroid());
@@ -43,8 +43,8 @@ LayeredAverageRZ::computeIntegral()
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
-    Real r = computeRadius(_q_point[_qp]);
-    sum += _JxW[_qp] * 2. * libMesh::pi * r * computeQpIntegral();
+    const Real circumference = computeCircumference(_q_point[_qp]);
+    sum += _JxW[_qp] * circumference * computeQpIntegral();
   }
   return sum;
 }

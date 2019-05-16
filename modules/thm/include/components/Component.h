@@ -157,6 +157,31 @@ public:
    */
   Real getGravityMagnitude() const { return _gravity_magnitude; }
 
+  /**
+   * Checks that a component exists
+   *
+   * @param[in] comp_name   name of the component
+   */
+  void checkComponentExistsByName(const std::string & comp_name) const;
+
+  /**
+   * Checks that the component of a certain type exists, where the name is given by a parameter
+   *
+   * @tparam    T       enforced type of component
+   * @param[in] param   parameter name for component name
+   */
+  template <typename T>
+  void checkComponentOfTypeExists(const std::string & param) const;
+
+  /**
+   * Checks that the component of a certain type exists
+   *
+   * @tparam    T           enforced type of component
+   * @param[in] comp_name   component name
+   */
+  template <typename T>
+  void checkComponentOfTypeExistsByName(const std::string & comp_name) const;
+
 protected:
   /**
    * Initializes the component
@@ -221,31 +246,6 @@ protected:
   template <typename T>
   void insistParameterExists(const std::string & function_name,
                              const std::string & param_name) const;
-
-  /**
-   * Checks that a component exists
-   *
-   * @param[in] comp_name   name of the component
-   */
-  void checkComponentExistsByName(const std::string & comp_name) const;
-
-  /**
-   * Checks that the component of a certain type exists, where the name is given by a parameter
-   *
-   * @tparam    T       enforced type of component
-   * @param[in] param   parameter name for component name
-   */
-  template <typename T>
-  void checkComponentOfTypeExists(const std::string & param) const;
-
-  /**
-   * Checks that the component of a certain type exists
-   *
-   * @tparam    T           enforced type of component
-   * @param[in] comp_name   component name
-   */
-  template <typename T>
-  void checkComponentOfTypeExistsByName(const std::string & comp_name) const;
 
   /**
    * Checks that a parameter value is less than a value

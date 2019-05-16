@@ -1,34 +1,43 @@
-#include "HSSpecifiedTemperatureBoundary.h"
+#include "HSBoundarySpecifiedTemperature.h"
 #include "HeatConductionModel.h"
 
-registerMooseObject("THMApp", HSSpecifiedTemperatureBoundary);
+registerMooseObject("THMApp", HSBoundarySpecifiedTemperature);
 
 template <>
 InputParameters
-validParams<HSSpecifiedTemperatureBoundary>()
+validParams<HSBoundarySpecifiedTemperature>()
 {
   InputParameters params = validParams<BoundaryBase>();
-  params.addRequiredParam<std::vector<BoundaryName>>(
-      "boundary", "The name of the boundary where the boundary condition is imposed.");
+  params += validParams<HSBoundaryInterface>();
+
   params.addRequiredParam<Real>("T", "The value of temperature");
+
   return params;
 }
 
-HSSpecifiedTemperatureBoundary::HSSpecifiedTemperatureBoundary(const InputParameters & params)
+HSBoundarySpecifiedTemperature::HSBoundarySpecifiedTemperature(const InputParameters & params)
   : BoundaryBase(params),
-    _boundary(getParam<std::vector<BoundaryName>>("boundary")),
+    HSBoundaryInterface(this),
+
     _temperature(getParam<Real>("T"))
 {
 }
 
 void
-HSSpecifiedTemperatureBoundary::addMooseObjects()
+HSBoundarySpecifiedTemperature::check() const
+{
+  BoundaryBase::check();
+  HSBoundaryInterface::check(this);
+}
+
+void
+HSBoundarySpecifiedTemperature::addMooseObjects()
 {
   {
     std::string class_name = "DirichletBC";
     InputParameters pars = _factory.getValidParams(class_name);
     pars.set<NonlinearVariableName>("variable") = HeatConductionModel::TEMPERATURE;
-    pars.set<std::vector<BoundaryName>>("boundary") = _boundary;
+    pars.set<std::vector<BoundaryName>>("boundary") = {getHSBoundaryName(this)};
     pars.set<Real>("value") = _temperature;
     _sim.addBoundaryCondition(class_name, genName(name(), "bc"), pars);
   }

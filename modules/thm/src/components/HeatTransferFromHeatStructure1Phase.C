@@ -14,18 +14,16 @@ InputParameters
 validParams<HeatTransferFromHeatStructure1Phase>()
 {
   InputParameters params = validParams<HeatTransferFromTemperature1Phase>();
-  params.addRequiredParam<std::string>("hs", "The name of the heat structure component");
-  MooseEnum hs_sides("top bottom");
-  params.addRequiredParam<MooseEnum>("hs_side", hs_sides, "The side of the heat structure");
+  params += validParams<HSBoundaryInterface>();
+
   params.addClassDescription("Connects a 1-phase flow channel and a heat structure");
+
   return params;
 }
 
 HeatTransferFromHeatStructure1Phase::HeatTransferFromHeatStructure1Phase(
     const InputParameters & parameters)
-  : HeatTransferFromTemperature1Phase(parameters),
-    _hs_name(getParam<std::string>("hs")),
-    _hs_side(getParam<MooseEnum>("hs_side"))
+  : HeatTransferFromTemperature1Phase(parameters), HSBoundaryInterface(this)
 {
 }
 
@@ -129,21 +127,7 @@ void
 HeatTransferFromHeatStructure1Phase::check() const
 {
   HeatTransferFromTemperature1Phase::check();
-
-  checkComponentOfTypeExistsByName<HeatStructureBase>(_hs_name);
-
-  if (hasComponentByName<HeatStructureBase>(_hs_name))
-  {
-    const HeatStructureBase & hs = getComponentByName<HeatStructureBase>(_hs_name);
-
-    const Real & P_hs = hs.getUnitPerimeter(_hs_side);
-    if (MooseUtils::absoluteFuzzyEqual(P_hs, 0.))
-      logError("'hs_side' parameter is set to '",
-               _hs_side,
-               "', but this side of the heat structure '",
-               _hs_name,
-               "' has radius of zero.");
-  }
+  HSBoundaryInterface::check(this);
 
   if (hasComponentByName<HeatStructureBase>(_hs_name) &&
       hasComponentByName<FlowChannel1Phase>(_flow_channel_name))
@@ -267,25 +251,7 @@ HeatTransferFromHeatStructure1Phase::addMooseObjects()
 const BoundaryName &
 HeatTransferFromHeatStructure1Phase::getMasterSideName() const
 {
-  const HeatStructureBase & hs = getComponentByName<HeatStructureBase>(_hs_name);
-
-  switch (_hs_side)
-  {
-    case 0:
-      if (hs.getTopBoundaryNames().size() > 0)
-        return hs.getTopBoundaryNames()[0];
-      else
-        return THMMesh::INVALID_BOUNDARY_ID;
-
-    case 1:
-      if (hs.getBottomBoundaryNames().size() > 0)
-        return hs.getBottomBoundaryNames()[0];
-      else
-        return THMMesh::INVALID_BOUNDARY_ID;
-
-    default:
-      mooseError(name(), ": Unknown side specified in the 'hs_side' parameter.");
-  }
+  return getHSBoundaryName(this);
 }
 
 const BoundaryName &

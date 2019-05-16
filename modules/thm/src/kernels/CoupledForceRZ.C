@@ -19,20 +19,20 @@ CoupledForceRZ::CoupledForceRZ(const InputParameters & parameters)
 Real
 CoupledForceRZ::computeQpResidual()
 {
-  Real r = computeRadius(_q_point[_qp]);
-  return 2 * libMesh::pi * r * CoupledForce::computeQpResidual();
+  const Real circumference = computeCircumference(_q_point[_qp]);
+  return circumference * CoupledForce::computeQpResidual();
 }
 
 Real
 CoupledForceRZ::computeQpJacobian()
 {
-  Real r = computeRadius(_q_point[_qp]);
-  return 2 * libMesh::pi * r * CoupledForce::computeQpJacobian();
+  const Real circumference = computeCircumference(_q_point[_qp]);
+  return circumference * CoupledForce::computeQpJacobian();
 }
 
 Real
 CoupledForceRZ::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  Real r = computeRadius(_q_point[_qp]);
-  return 2 * libMesh::pi * r * CoupledForce::computeQpOffDiagJacobian(jvar);
+  const Real circumference = computeCircumference(_q_point[_qp]);
+  return circumference * CoupledForce::computeQpOffDiagJacobian(jvar);
 }

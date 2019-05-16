@@ -22,7 +22,6 @@ public:
    */
   LoggingInterface(THMApp & app, const std::string & name = "");
 
-protected:
   /**
    * Logs an error
    */
@@ -47,6 +46,7 @@ protected:
       _logging_app.log().add(Logger::WARNING, std::forward<Args>(args)...);
   }
 
+protected:
   /// THM application
   THMApp & _logging_app;
 

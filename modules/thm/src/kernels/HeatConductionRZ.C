@@ -19,13 +19,13 @@ HeatConductionRZ::HeatConductionRZ(const InputParameters & parameters)
 Real
 HeatConductionRZ::computeQpResidual()
 {
-  Real r = computeRadius(_q_point[_qp]);
-  return 2. * libMesh::pi * r * HeatConductionKernel::computeQpResidual();
+  const Real circumference = computeCircumference(_q_point[_qp]);
+  return circumference * HeatConductionKernel::computeQpResidual();
 }
 
 Real
 HeatConductionRZ::computeQpJacobian()
 {
-  Real r = computeRadius(_q_point[_qp]);
-  return 2. * libMesh::pi * r * HeatConductionKernel::computeQpJacobian();
+  const Real circumference = computeCircumference(_q_point[_qp]);
+  return circumference * HeatConductionKernel::computeQpJacobian();
 }
