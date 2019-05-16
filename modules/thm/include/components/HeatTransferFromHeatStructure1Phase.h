@@ -1,6 +1,7 @@
 #pragma once
 
 #include "HeatTransferFromTemperature1Phase.h"
+#include "HSBoundaryInterface.h"
 
 class HeatTransferFromHeatStructure1Phase;
 
@@ -10,7 +11,8 @@ InputParameters validParams<HeatTransferFromHeatStructure1Phase>();
 /**
  * Connects a 1-phase flow channel and a heat structure
  */
-class HeatTransferFromHeatStructure1Phase : public HeatTransferFromTemperature1Phase
+class HeatTransferFromHeatStructure1Phase : public HeatTransferFromTemperature1Phase,
+                                            public HSBoundaryInterface
 {
 public:
   HeatTransferFromHeatStructure1Phase(const InputParameters & parameters);
@@ -34,9 +36,4 @@ protected:
    * @return The nodeset name for the slave side
    */
   const BoundaryName & getSlaveSideName() const;
-
-  /// heat structure name
-  const std::string _hs_name;
-  /// "side" of the heat structure
-  const MooseEnum _hs_side;
 };

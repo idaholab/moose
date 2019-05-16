@@ -19,13 +19,13 @@ HeatConductionTimeDerivativeRZ::HeatConductionTimeDerivativeRZ(const InputParame
 Real
 HeatConductionTimeDerivativeRZ::computeQpResidual()
 {
-  Real r = computeRadius(_q_point[_qp]);
-  return 2. * libMesh::pi * r * HeatConductionTimeDerivative::computeQpResidual();
+  const Real circumference = computeCircumference(_q_point[_qp]);
+  return circumference * HeatConductionTimeDerivative::computeQpResidual();
 }
 
 Real
 HeatConductionTimeDerivativeRZ::computeQpJacobian()
 {
-  Real r = computeRadius(_q_point[_qp]);
-  return 2. * libMesh::pi * r * HeatConductionTimeDerivative::computeQpJacobian();
+  const Real circumference = computeCircumference(_q_point[_qp]);
+  return circumference * HeatConductionTimeDerivative::computeQpJacobian();
 }

@@ -20,6 +20,6 @@ HeatStructureEnergyRZ::HeatStructureEnergyRZ(const InputParameters & parameters)
 Real
 HeatStructureEnergyRZ::computeQpIntegral()
 {
-  Real r = computeRadius(_q_point[_qp]);
-  return 2. * libMesh::pi * r * HeatStructureEnergyBase::computeQpIntegral();
+  const Real circumference = computeCircumference(_q_point[_qp]);
+  return circumference * HeatStructureEnergyBase::computeQpIntegral();
 }

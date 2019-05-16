@@ -19,8 +19,11 @@
 - /AuxScalarKernels/VolumeJunctionPressureAux
 
 - /BCs/ConvectionHeatTransferBC
+- /BCs/ConvectionHeatTransferRZBC
 - /BCs/HeatFlux3EqnBC
 - /BCs/HeatFlux7EqnBC
+- /BCs/HSHeatFluxBC
+- /BCs/HSHeatFluxRZBC
 - /BCs/OneD7EqnAreaTimesConstantBC
 - /BCs/OneD7EqnEnergyStaticPressureReverseBC
 - /BCs/OneD7EqnMassStaticPressureReverseBC
@@ -66,8 +69,8 @@
 - /Components/FlowChannel2Phase
 - /Components/FreeBoundary
 - /Components/GeometricalComponent
-- /Components/HSAmbientHeatTransferBoundary
-- /Components/HSSpecifiedTemperatureBoundary
+- /Components/HSBoundaryAmbientConvection
+- /Components/HSBoundarySpecifiedTemperature
 - /Components/HXConnector
 - /Components/HeatGeneration
 - /Components/HeatStructure

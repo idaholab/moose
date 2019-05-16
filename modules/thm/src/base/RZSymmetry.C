@@ -19,8 +19,9 @@ RZSymmetry::RZSymmetry(const InputParameters & parameters)
 }
 
 Real
-RZSymmetry::computeRadius(const RealVectorValue & pt)
+RZSymmetry::computeCircumference(const RealVectorValue & pt)
 {
   RealVectorValue v = (pt - _axis_point);
-  return v.cross(_axis_dir).norm() / _axis_dir.norm();
+  const Real r = v.cross(_axis_dir).norm() / _axis_dir.norm();
+  return 2 * libMesh::pi * r;
 }

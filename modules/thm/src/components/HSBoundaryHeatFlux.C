@@ -1,0 +1,56 @@
+#include "HSBoundaryHeatFlux.h"
+#include "HeatConductionModel.h"
+#include "HeatStructureCylindrical.h"
+
+registerMooseObject("THMApp", HSBoundaryHeatFlux);
+
+template <>
+InputParameters
+validParams<HSBoundaryHeatFlux>()
+{
+  InputParameters params = validParams<BoundaryBase>();
+  params += validParams<HSBoundaryInterface>();
+
+  params.addRequiredParam<FunctionName>("q_function", "Heat flux function name");
+
+  params.addClassDescription("Applies a specified heat flux to a heat structure boundary");
+
+  return params;
+}
+
+HSBoundaryHeatFlux::HSBoundaryHeatFlux(const InputParameters & params)
+  : BoundaryBase(params),
+    HSBoundaryInterface(this),
+
+    _q_fn_name(getParam<FunctionName>("q_function"))
+{
+}
+
+void
+HSBoundaryHeatFlux::check() const
+{
+  BoundaryBase::check();
+  HSBoundaryInterface::check(this);
+}
+
+void
+HSBoundaryHeatFlux::addMooseObjects()
+{
+  const HeatStructureBase & hs = getComponent<HeatStructureBase>("hs");
+  const bool is_cylindrical = dynamic_cast<const HeatStructureCylindrical *>(&hs);
+
+  {
+    const std::string class_name = is_cylindrical ? "HSHeatFluxRZBC" : "HSHeatFluxBC";
+    InputParameters pars = _factory.getValidParams(class_name);
+    pars.set<NonlinearVariableName>("variable") = HeatConductionModel::TEMPERATURE;
+    pars.set<std::vector<BoundaryName>>("boundary") = {getHSBoundaryName(this)};
+    pars.set<FunctionName>("function") = _q_fn_name;
+    if (is_cylindrical)
+    {
+      pars.set<Point>("axis_point") = hs.getPosition();
+      pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
+    }
+
+    _sim.addBoundaryCondition(class_name, genName(name(), "bc"), pars);
+  }
+}
