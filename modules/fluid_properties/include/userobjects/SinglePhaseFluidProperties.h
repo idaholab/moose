@@ -142,6 +142,7 @@ public:
   propfunc(k, v, e)
   propfunc(s, v, e)
   propfunc(s, h, p)
+  propfunc(T, h, p)
   propfunc(rho, p, s)
   propfunc(e, v, h)
   propfunc(s, p, T)
@@ -168,9 +169,8 @@ public:
   // clang-format on
 
 #undef propfunc
-#pragma GCC diagnostic pop
 
-                              virtual Real s(Real pressure, Real temperature) const;
+                                  virtual Real s(Real pressure, Real temperature) const;
 
   /**
    * Dynamic viscosity and its derivatives wrt density and temperature
@@ -541,3 +541,4 @@ private:
   }
 };
 
+#pragma GCC diagnostic pop
