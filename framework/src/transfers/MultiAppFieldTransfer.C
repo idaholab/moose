@@ -54,34 +54,41 @@ MultiAppFieldTransfer::MultiAppFieldTransfer(const InputParameters & parameters)
      * Let us handle the single variable case only right now if the conservative capability is on
      */
     if (_to_var_name.size() != 1 && _from_var_names.size() != 1)
-      mooseError(" Support single variable only when the conservative capability is on ");
+      paramError("source_variable",
+                 " Support single variable only when the conservative capability is on ");
 
     if (_direction == TO_MULTIAPP)
     {
       if (_from_postprocessors_to_be_preserved.size() != _multi_app->numGlobalApps() &&
           _from_postprocessors_to_be_preserved.size() != 1)
-        mooseError("Number of from-postprocessors should equal to the number of subapps, or use "
+        paramError("from_postprocessors_to_be_preserved",
+                   "Number of from-postprocessors should equal to the number of subapps, or use "
                    "NearestPointIntegralVariablePostprocessor");
       if (_to_postprocessors_to_be_preserved.size() != 1)
-        mooseError("Number of to-postprocessors should equal to 1");
+        paramError("to_postprocessors_to_be_preserved",
+                   "Number of to-postprocessors should equal to 1");
     }
     else if (_direction == FROM_MULTIAPP)
     {
       if (_from_postprocessors_to_be_preserved.size() != 1)
-        mooseError("Number of from Postprocessors should equal to 1");
+        paramError("from_postprocessors_to_be_preserved",
+                   "Number of from Postprocessors should equal to 1");
 
       if (_to_postprocessors_to_be_preserved.size() != _multi_app->numGlobalApps() &&
           _to_postprocessors_to_be_preserved.size() != 1)
-        mooseError("Number of to Postprocessors should equal to the number of subapps, or use "
+        paramError("to_postprocessors_to_be_preserved",
+                   "_to_postprocessors_to_be_preserved",
+                   "Number of to Postprocessors should equal to the number of subapps, or use "
                    "NearestPointIntegralVariablePostprocessor ");
     }
   }
 
   if (_to_var_names.size() != _from_var_names.size())
-    mooseError("Number of target variable should equal to the number of source variables ");
+    paramError("source_variable",
+               "Number of target variable should equal to the number of source variables ");
 
   if (_to_var_names.size() == 0)
-    mooseError("You need to specify at least one variable");
+    paramError("variable", "You need to specify at least one variable");
 
   /* Right now, most of transfers support one variable only */
   if (_to_var_names.size() == 1 && _from_var_names.size())
@@ -220,8 +227,22 @@ MultiAppFieldTransfer::adjustTransferedSolutionNearestPoint(unsigned int i,
   /* Everyone on master side should know this value, and use it to scale the solution */
   if (_direction == FROM_MULTIAPP)
   {
-    /* This might not be right if the integral is negative */
+    /* In this case, only one subapp has value, and other subapps' must be zero.
+     *  We should see the maximum value.
+     */
+    PostprocessorValue from_adjuster_tmp = from_adjuster;
     comm().max(from_adjuster);
+
+    /* We may have a negative value */
+    if (MooseUtils::absoluteFuzzyLessEqual(from_adjuster, 0.))
+    {
+      comm().min(from_adjuster_tmp);
+      from_adjuster = from_adjuster_tmp;
+    }
+
+    /* We should not have a zero value */
+    if (MooseUtils::absoluteFuzzyLessEqual(from_adjuster, 0.))
+      mooseError("from_adjuster must be nonzero");
   }
 
   PostprocessorValue to_adjuster = 0;
@@ -257,10 +278,16 @@ MultiAppFieldTransfer::adjustTransferedSolutionNearestPoint(unsigned int i,
         auto ii = pps.nearestPointIndex(*node);
         if (ii != i)
           continue;
+        if (MooseUtils::absoluteFuzzyLessEqual(pps.userObjectValue(i), 0.))
+          mooseError("to_adjuster must be nonzero");
+
         scale = from_adjuster / pps.userObjectValue(i);
       }
       else
       {
+        if (MooseUtils::absoluteFuzzyLessEqual(to_adjuster, 0.))
+          mooseError("to_adjuster must be nonzero");
+
         scale = pps.userObjectValue(i) / to_adjuster;
       }
 
@@ -283,10 +310,17 @@ MultiAppFieldTransfer::adjustTransferedSolutionNearestPoint(unsigned int i,
         unsigned int ii = pps.nearestPointIndex(elem->centroid());
         if (ii != i)
           continue;
+
+        if (MooseUtils::absoluteFuzzyLessEqual(pps.userObjectValue(i), 0.))
+          mooseError("to_adjuster must be nonzero");
+
         scale = from_adjuster / pps.userObjectValue(i);
       }
       else
       {
+        if (MooseUtils::absoluteFuzzyLessEqual(to_adjuster, 0.))
+          mooseError("to_adjuster must be nonzero");
+
         scale = pps.userObjectValue(i) / to_adjuster;
       }
 
@@ -307,17 +341,29 @@ MultiAppFieldTransfer::adjustTransferedSolution(FEProblemBase * from_problem,
 {
   PostprocessorValue from_adjuster = 0;
   if (from_problem)
-  {
     from_adjuster = from_problem->getPostprocessorValue(from_postprocessor);
-  }
   else
-  {
     from_adjuster = 0;
-  }
+
   /* Everyone on master side should know this value, and use it to scale the solution */
   if (_direction == FROM_MULTIAPP)
   {
+    /* In this case, only one subapp has value, and other subapps' must be zero.
+     *  We should see the maximum value.
+     */
+    PostprocessorValue from_adjuster_tmp = from_adjuster;
     comm().max(from_adjuster);
+
+    /* We may have a negative value, and let us try it again  */
+    if (MooseUtils::absoluteFuzzyLessEqual(from_adjuster, 0.))
+    {
+      comm().min(from_adjuster_tmp);
+      from_adjuster = from_adjuster_tmp;
+    }
+
+    /* We should not have a zero value */
+    if (MooseUtils::absoluteFuzzyLessEqual(from_adjuster, 0.))
+      mooseError("from_adjuster must be nonzero");
   }
 
   // Compute to-postproessor to have the adjuster
@@ -325,10 +371,8 @@ MultiAppFieldTransfer::adjustTransferedSolution(FEProblemBase * from_problem,
 
   // Now we should have the right adjuster based on the transfered solution
   PostprocessorValue & to_adjuster = to_problem.getPostprocessorValue(to_postprocessor);
-  if (to_adjuster == 0.0)
-  {
+  if (MooseUtils::absoluteFuzzyLessEqual(to_adjuster, 0.))
     mooseError(" To postproessor has a zero value ");
-  }
 
   auto & to_var = to_problem.getVariable(
       0, _to_var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);

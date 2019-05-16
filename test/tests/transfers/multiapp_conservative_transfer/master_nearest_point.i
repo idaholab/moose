@@ -61,7 +61,7 @@
   []
 []
 
-[Postprocessors]
+[VectorPostprocessors]
   [from_nearest_point]
     type = NearestPointIntegralVariablePostprocessor
     variable = power_density

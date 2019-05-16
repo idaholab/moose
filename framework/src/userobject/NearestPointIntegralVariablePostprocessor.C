@@ -21,6 +21,9 @@ validParams<NearestPointIntegralVariablePostprocessor>()
 
   params.addClassDescription(
       "Compute element variable integrals for nearest-point based subdomains");
+
+  params.registerBase("VectorPostprocessor");
+
   return params;
 }
 
@@ -42,7 +45,10 @@ NearestPointIntegralVariablePostprocessor::spatialValue(const Point & point) con
 Real
 NearestPointIntegralVariablePostprocessor::userObjectValue(unsigned int i) const
 {
-  return userObject(i)->getValue();
+  if (i >= _user_objects.size())
+    mooseError("There are only ", _user_objects.size(), " user objects but you pass in ", i);
+
+  return _user_objects[i]->getValue();
 }
 
 void
@@ -76,10 +82,4 @@ NearestPointIntegralVariablePostprocessor::nearestPointIndex(const Point & p) co
   }
 
   return closest;
-}
-
-std::shared_ptr<ElementIntegralVariablePostprocessor>
-NearestPointIntegralVariablePostprocessor::userObject(unsigned int i) const
-{
-  return _user_objects[i];
 }

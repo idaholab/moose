@@ -111,7 +111,6 @@ protected:
 
   // Given local app index, returns global app index.
   std::vector<unsigned int> _local2global_map;
-};
 
   /**
    * Helper method for checking the 'check_multiapp_execute_on' flag.

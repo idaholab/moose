@@ -36,8 +36,6 @@ public:
 
   unsigned int nearestPointIndex(const Point & point) const;
 
-  std::shared_ptr<ElementIntegralVariablePostprocessor> userObject(unsigned int i) const;
-
   virtual void finalize() override;
 
 protected:
