@@ -52,6 +52,7 @@
     input = 'adapt_test_cycles.i'
     exodiff = 'out_cycles.e out_cycles.e-s002'
     group = 'adaptive'
+    max_parallel = 8 # Test shows small diffs as the proc count increases
 
     requirement = 'The system shall support multiple adaptive steps per solve.'
     issues = '#830'
