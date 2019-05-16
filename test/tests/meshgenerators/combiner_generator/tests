@@ -6,4 +6,34 @@
     cli_args = '--mesh-only'
     recover = false
   [../]
+
+  [./multi]
+    type = 'Exodiff'
+    input = 'combiner_multi_input.i'
+    exodiff = 'combiner_multi_input_in.e'
+    cli_args = '--mesh-only'
+    recover = false
+  [../]
+
+  [./multi_translate]
+    type = 'Exodiff'
+    input = 'combiner_multi_input_translate.i'
+    exodiff = 'combiner_multi_input_translate_in.e'
+    cli_args = '--mesh-only'
+    recover = false
+  [../]
+
+  [./missing_pos]
+    type = 'RunException'
+    input = 'combiner_generator.i'
+    cli_args ='MeshGenerators/cmbn/positions=""'
+    expect_err = 'If only one input mesh is given'
+  [../]
+
+  [./mismatch_pos]
+    type = 'RunException'
+    input = 'combiner_multi_input.i'
+    cli_args ='MeshGenerators/cmbn/positions="0 0 0"'
+    expect_err = 'If more than one input mesh'
+  [../]
 []

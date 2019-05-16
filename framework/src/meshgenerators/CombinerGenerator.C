@@ -27,6 +27,7 @@ validParams<CombinerGenerator>()
   params.addClassDescription(
       "Combine multiple meshes (or copies of one mesh) together into one (disjoint) mesh.  Can "
       "optionally translate those meshes before combining them.");
+
   params.addRequiredParam<std::vector<MeshGeneratorName>>(
       "inputs",
       "The input MeshGenerators.  This can either be N generators or 1 generator.  If only 1 is "
@@ -49,12 +50,11 @@ CombinerGenerator::CombinerGenerator(const InputParameters & parameters)
   if (_input_names.empty())
     paramError("input_names", "You need to specify at least one MeshGenerator as an input.");
 
-  if (_input_names.size() == 1 && !isParamValid("positions"))
+  if (_input_names.size() == 1 && _positions.empty())
     paramError("positions",
                "If only one input mesh is given, then 'positions' must also be supplied");
 
-  if (isParamValid("positions") && (_input_names.size() != 1) &&
-      (_input_names.size() != _positions.size()))
+  if (_positions.size() && (_input_names.size() != 1) && (_input_names.size() != _positions.size()))
     paramError("positions",
                "If more than one input mesh is provided then the number of positions provided must "
                "exactly match the number of input meshes.");
@@ -87,6 +87,13 @@ CombinerGenerator::generate()
 
       if (!other_mesh)
         paramError("inputs", _input_names[i], " is not a valid unstructured mesh");
+
+      // Move It
+      if (_positions.size())
+      {
+        MeshTools::Modification::translate(
+            *other_mesh, _positions[i](0), _positions[i](1), _positions[i](2));
+      }
 
       copyIntoMesh(*mesh, *other_mesh);
     }
