@@ -15,6 +15,8 @@
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/unstructured_mesh.h"
 #include "libmesh/mesh_modification.h"
+#include "libmesh/point.h"
+#include "libmesh/node.h"
 
 registerMooseObject("MooseApp", CombinerGenerator);
 
