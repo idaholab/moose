@@ -78,25 +78,29 @@ JunctionOneToOne1PhaseBC::computeJacobianBlock(MooseVariableFEBase & jvar)
 {
   DenseMatrix<Real> jacobian_block;
   std::vector<dof_id_type> dofs_j;
-  const unsigned int j_equation_index = _jvar_map.at(jvar.number());
-  _junction_uo.getJacobianEntries(
-      _connection_index, _equation_index, j_equation_index, jacobian_block, dofs_j);
+  std::map<unsigned int, unsigned int>::const_iterator it;
+  if ((it = _jvar_map.find(jvar.number())) != _jvar_map.end())
+  {
+    const unsigned int j_equation_index = it->second;
+    _junction_uo.getJacobianEntries(
+        _connection_index, _equation_index, j_equation_index, jacobian_block, dofs_j);
 
-  // It is assumed here that _phi[_j][_qp] will give the correct value for DoFs
-  // on the other subdomain. For 1-D, there should be only one basis function
-  // on the boundary, and its value should be equal to 1, so this assumption
-  // should remain valid.
-  Real mult_factor = 0;
-  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-    for (_i = 0; _i < _test.size(); _i++)
-      for (_j = 0; _j < jvar.phiFaceSize(); _j++)
-        mult_factor += _A_linear[_qp] / _A_elem[_qp] * _normal * _test[_i][_qp] * _phi[_j][_qp];
-  jacobian_block *= mult_factor;
+    // It is assumed here that _phi[_j][_qp] will give the correct value for DoFs
+    // on the other subdomain. For 1-D, there should be only one basis function
+    // on the boundary, and its value should be equal to 1, so this assumption
+    // should remain valid.
+    Real mult_factor = 0;
+    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+      for (_i = 0; _i < _test.size(); _i++)
+        for (_j = 0; _j < jvar.phiFaceSize(); _j++)
+          mult_factor += _A_linear[_qp] / _A_elem[_qp] * _normal * _test[_i][_qp] * _phi[_j][_qp];
+    jacobian_block *= mult_factor;
 
-  auto && dofs_i = _var.dofIndices();
-  mooseAssert(dofs_i.size() == 1, "There should be only one DoF index.");
+    auto && dofs_i = _var.dofIndices();
+    mooseAssert(dofs_i.size() == 1, "There should be only one DoF index.");
 
-  _assembly.cacheJacobianBlock(jacobian_block, dofs_i, dofs_j, _var.scalingFactor());
+    _assembly.cacheJacobianBlock(jacobian_block, dofs_i, dofs_j, _var.scalingFactor());
+  }
 }
 
 void

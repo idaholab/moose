@@ -98,8 +98,8 @@ OneD3EqnEnergyHeatFlux::computeQpJacobian()
 Real
 OneD3EqnEnergyHeatFlux::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  auto it = _jvar_map.find(jvar);
-  if (it != _jvar_map.end())
+  std::map<unsigned int, unsigned int>::const_iterator it;
+  if ((it = _jvar_map.find(jvar)) != _jvar_map.end())
   {
     const std::vector<DenseVector<Real>> & dq_wall = _q_uo.getHeatFluxJacobian(_current_elem->id());
     return -dq_wall[_qp](it->second) * _phi[_j][_qp] * _test[_i][_qp];
@@ -111,8 +111,8 @@ OneD3EqnEnergyHeatFlux::computeQpOffDiagJacobian(unsigned int jvar)
 Real
 OneD3EqnEnergyHeatFlux::computeQpOffDiagJacobianNeighbor(unsigned int jvar)
 {
-  auto it = _jvar_map.find(jvar);
-  if (it != _jvar_map.end())
+  std::map<unsigned int, unsigned int>::const_iterator it;
+  if ((it = _jvar_map.find(jvar)) != _jvar_map.end())
   {
     const std::vector<DenseVector<Real>> & dq_wall = _q_uo.getHeatFluxJacobian(_current_elem->id());
     return -dq_wall[_qp](it->second) * _phi_neighbor[_j][_qp] * _test[_i][_qp];
