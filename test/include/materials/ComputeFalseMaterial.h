@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEFALSEMATERIAL_H
-#define COMPUTEFALSEMATERIAL_H
+#pragma once
 
 #include "InputParameters.h"
 #include "Material.h"
@@ -57,5 +56,3 @@ protected:
   /// the old values of the scalar computed by this Material
   const MaterialProperty<Real> & _compute_false_scalar_old;
 };
-
-#endif // COMPUTEFALSEMATERIAL_H

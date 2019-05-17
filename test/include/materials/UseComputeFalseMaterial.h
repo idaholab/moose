@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef USECOMPUTEFALSEMATERIAL_H
-#define USECOMPUTEFALSEMATERIAL_H
+#pragma once
 
 #include "Material.h"
 #include "ComputeFalseMaterial.h"
@@ -36,5 +35,3 @@ protected:
 
   ComputeFalseMaterial & _compute_false_material;
 };
-
-#endif // USECOMPUTEFALSEMATERIAL_H
