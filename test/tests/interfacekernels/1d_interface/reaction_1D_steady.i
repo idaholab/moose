@@ -162,16 +162,4 @@
     variable = 'v'
     block = '1'
   [../]
-  [./nodal_u]
-    type = NodalL2Error
-    function = -0.11*x+1
-    variable = 'u'
-    block = '0'
-  [../]
-  [./nodal_v]
-    type = NodalL2Error
-    function = -0.22*x+0.44
-    variable = 'v'
-    block = '1'
-  [../]
 []
