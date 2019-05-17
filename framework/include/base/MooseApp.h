@@ -20,6 +20,7 @@
 #include "ConsoleStreamInterface.h"
 #include "PerfGraph.h"
 #include "TheWarehouse.h"
+#include "RankMap.h"
 
 #include "libmesh/parallel_object.h"
 #include "libmesh/mesh_base.h"
@@ -90,6 +91,12 @@ public:
    * @return The the type of the object
    */
   const std::string & type() const { return _type; }
+
+  /**
+   * The RankMap is a useful object for determining how the processes
+   * are laid out on the physical nodes of the cluster
+   */
+  const RankMap & rankMap() { return _rank_map; }
 
   /**
    * Get the PerfGraph for this app
@@ -725,6 +732,9 @@ protected:
 
   /// The PerfGraph object for this applciation
   PerfGraph _perf_graph;
+
+  /// The RankMap is a useful object for determining how
+  const RankMap _rank_map;
 
   /// Input file name used
   std::string _input_filename;

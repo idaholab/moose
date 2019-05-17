@@ -32,7 +32,7 @@ protected:
   processor_id_type _nrank;
 
   /// hardware IDs for each MPI rank (valid on rank zero only)
-  std::vector<unsigned int> _hardware_id;
+  const std::vector<unsigned int> & _hardware_id;
 
   /// total RAM installed in the local node
   unsigned long long _memory_total;
