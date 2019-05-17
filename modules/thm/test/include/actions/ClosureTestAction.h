@@ -18,7 +18,7 @@ public:
 protected:
   virtual void addInitialConditions() override;
   virtual void addSolutionVariables() override;
-  virtual void addNonConstantAuxVariables() override;
+  virtual void addAuxVariables() override;
   virtual void addOutput() override;
 
   /// Name of the dummy variable that is solved for

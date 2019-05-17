@@ -19,7 +19,7 @@ public:
 protected:
   virtual void addInitialConditions() override;
   virtual void addSolutionVariables() override;
-  virtual void addNonConstantAuxVariables() override;
+  virtual void addAuxVariables() override;
   virtual void addMaterials() override;
   virtual void addUserObjects() override;
 };
