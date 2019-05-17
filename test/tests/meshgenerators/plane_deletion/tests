@@ -1,0 +1,13 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'plane_deletion.i'
+    exodiff = 'plane_deletion_in.e'
+    cli_args = '--mesh-only'
+    recover = false
+
+    requirement = "MOOSE shall provide a method for deleting elements lying on one side of a plane"
+    design = 'PlaneDeletionGenerator.md'
+    issues = '#13046'
+  [../]
+[]
