@@ -67,13 +67,6 @@
   flux_limiter_type = superbee
 []
 
-[UserObjects]
-  [./this_just_adds_correct_relationship_manager_for_ghosting_13388]
-    type = PorousFlowAdvectiveFluxCalculatorSaturated
-    flux_limiter_type = superbee
-  [../]
-[]
-
 [Modules]
   [./FluidProperties]
     [./simple_fluid]

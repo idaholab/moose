@@ -39,6 +39,9 @@ public:
 
   virtual void act() override;
 
+  using Action::addRelationshipManagers;
+  virtual void addRelationshipManagers(Moose::RelationshipManagerType when_type) override;
+
 protected:
   /**
    * List of Kernels, AuxKernels, Materials, etc, that are added in this input file.

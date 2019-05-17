@@ -103,6 +103,15 @@ PorousFlowActionBase::PorousFlowActionBase(const InputParameters & params)
 }
 
 void
+PorousFlowActionBase::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type)
+{
+  InputParameters ips = (_stabilization == StabilizationEnum::KT
+                             ? _factory.getValidParams("PorousFlowAdvectiveFluxCalculatorSaturated")
+                             : emptyInputParameters());
+  addRelationshipManagers(input_rm_type, ips);
+}
+
+void
 PorousFlowActionBase::act()
 {
   // Check if the simulation is transient (note: can't do this in the ctor)
