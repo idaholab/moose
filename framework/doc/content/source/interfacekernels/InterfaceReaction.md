@@ -8,7 +8,7 @@ Specie M transports between two domains (domain 0 and domain 1), at the interfac
 M(0)\xrightleftharpoons[k_b]{k_f}M(1)
 \end{equation}
 
-With the 'quasi-steady-state' reaction rate (equal to flux)
+With the quasi-steady-state reaction rate (equal to flux)
 
 \begin{equation}
 Reaction Rate = k_f C_0 - k_b C_1
