@@ -90,6 +90,7 @@
     csvdiff = 'reaction_1D_steady_out.csv'
     issues = '#13365'
     requirement = "The interface reaction kernel should reproduce the analytic solution"
+    design = 'InterfaceReaction.md'
   [../]
   [./reaction_1D_steady_ExoDiff]
     type = Exodiff
