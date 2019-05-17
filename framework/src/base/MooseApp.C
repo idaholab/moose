@@ -1812,5 +1812,26 @@ MooseApp::getRelationshipManagerInfo() const
     info_strings.emplace_back(std::make_pair(Moose::stringify(rm->getType()), oss.str()));
   }
 
+  // List the libMesh GhostingFunctors - Not that in libMesh all of the algebraic and coupling
+  // Ghosting Functors are also attached to the mesh. This should catch them all.
+  const auto & mesh = _action_warehouse.getMesh();
+  if (mesh)
+  {
+    std::unordered_map<std::string, unsigned int> counts;
+
+    for (auto & gf : as_range(mesh->getMesh().ghosting_functors_begin(),
+                              mesh->getMesh().ghosting_functors_end()))
+    {
+      const auto * gf_ptr = dynamic_cast<const RelationshipManager *>(gf);
+      if (!gf_ptr)
+        // Count how many occurances of the same Ghosting Functor types we are encountering
+        counts[demangle(typeid(*gf).name())]++;
+    }
+
+    for (const auto pair : counts)
+      info_strings.emplace_back(std::make_pair(
+          "Default", pair.first + (pair.second > 1 ? " x " + std::to_string(pair.second) : "")));
+  }
+
   return info_strings;
 }
