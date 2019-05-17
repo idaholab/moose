@@ -9,156 +9,72 @@
 
 #pragma once
 
-// MOOSE includes
-#include "Constraint.h"
-#include "CoupleableMooseVariableDependencyIntermediateInterface.h"
-#include "MooseMesh.h"
-#include "MooseVariableInterface.h"
+#include "MortarConstraintBase.h"
 
 // Forward Declarations
 class MortarConstraint;
-class FEProblemBase;
 
 template <>
 InputParameters validParams<MortarConstraint>();
 
-/**
- * User for mortar methods
- *
- * Indexing:
- *
- *              T_m             T_s         lambda
- *         +--------------+-------------+-------------+
- * T_m     |  K_1         |             | SlaveMaster |
- *         +--------------+-------------+-------------+
- * T_s     |              |  K_2        | SlaveSlave  |
- *         +--------------+-------------+-------------+
- * lambda  | MasterMaster | MasterSlave |             |
- *         +--------------+-------------+-------------+
- *
- */
-class MortarConstraint : public Constraint,
-                         public CoupleableMooseVariableDependencyIntermediateInterface,
-                         public MooseVariableInterface<Real>
+class MortarConstraint : public MortarConstraintBase
 {
 public:
   MortarConstraint(const InputParameters & parameters);
 
-  /**
-   * Evaluate variables, compute q-points, etc.
-   */
-  virtual void reinit();
-  virtual void reinitSide(Moose::ConstraintType res_type);
+  // Using declarations necessary to pull in computeResidual with different parameter list and avoid
+  // hidden method warning
+  using MortarConstraintBase::computeResidual;
 
-  /**
-   * Computes the residual for the current element.
-   */
-  virtual void computeResidual();
-  /**
-   * Computes residual contributions from master or slave side
-   * @param side Master or slave side
-   */
-  virtual void computeResidualSide(Moose::ConstraintType side);
-
-  /**
-   * Computes the Jacobian for the current element (i.e element of the Mortar interface).
-   */
-  virtual void computeJacobian();
-  /**
-   * Computes Jacobian contributions from master or slave side
-   * @param side Master or slave side
-   */
-  virtual void computeJacobianSide(Moose::ConstraintType side);
+  // Using declarations necessary to pull in computeJacobian with different parameter list and avoid
+  // hidden method warning
+  using MortarConstraintBase::computeJacobian;
 
 protected:
-  virtual Real computeQpResidual() = 0;
-  virtual Real computeQpResidualSide(Moose::ConstraintType res_type) = 0;
-  virtual Real computeQpJacobian();
-  virtual Real computeQpJacobianSide(Moose::ConstraintJacobianType jac_type);
-
-  FEProblemBase & _fe_problem;
-  unsigned int _dim;
-
-  /// Boundary ID for the slave surface
-  BoundaryID _slave;
-  /// Boundary ID for the master surface
-  BoundaryID _master;
-
-  const MooseArray<Point> & _q_point;
-  QBase *& _qrule;
-  const MooseArray<Real> & _JxW;
-  const MooseArray<Real> & _coord;
-
-  std::vector<Real> _JxW_lm;
+  /**
+   * compute the residual at the quadrature points
+   */
+  virtual Real computeQpResidual(Moose::MortarType mortar_type) = 0;
 
   /**
-   * Current element on the interface (i.e in the mortar space)
+   * compute the jacobian at the quadrature points
    */
-  const Elem *& _current_elem;
+  virtual Real computeQpJacobian(Moose::ConstraintJacobianType jacobian_type,
+                                 unsigned int jvar) = 0;
 
-  std::vector<std::vector<Real>> _test;
-  std::vector<std::vector<Real>> _phi;
+  void computeResidual(Moose::MortarType mortar_type) override;
 
-  MooseVariable & _master_var;
-  MooseVariable & _slave_var;
+  void computeJacobian(Moose::MortarType mortar_type) override;
 
-  /**
-   * The values of Lagrange multipliers in quadrature points
-   */
+private:
+  /// A dummy object useful for constructing _lambda when not using Lagrange multipliers
+  const VariableValue _lambda_dummy;
+
+protected:
+  /// The LM solution
   const VariableValue & _lambda;
 
-  MooseMesh::MortarInterface & _iface;
-  PenetrationLocator & _master_penetration_locator;
-  PenetrationLocator & _slave_penetration_locator;
+  /// The primal solution on the slave side
+  const VariableValue & _u_slave;
 
-  /**
-   * Values of the constrained variable on the master side
-   */
-  std::vector<Real> _u_master;
-  std::vector<RealGradient> _grad_u_master;
+  /// The primal solution on the master side
+  const VariableValue & _u_master;
 
-  /**
-   * Physical points on the master side
-   */
-  std::vector<Point> _phys_points_master;
-  /**
-   * Element on the master side
-   */
-  const Elem * _elem_master;
-  /**
-   * Values of test functions on the master side
-   */
-  const VariableTestValue & _test_master;
-  const VariableTestGradient & _grad_test_master;
+  /// The primal solution gradient on the slave side
+  const VariableGradient & _grad_u_slave;
 
-  /**
-   * Values of shape function on the master side
-   */
-  const VariablePhiValue & _phi_master;
+  /// The primal solution gradient on the master side
+  const VariableGradient & _grad_u_master;
 
-  /**
-   * Values of the constrained variable on the slave side
-   */
-  std::vector<Real> _u_slave;
-  std::vector<RealGradient> _grad_u_slave;
+  /// The current shape functions
+  const VariablePhiValue * _phi;
 
-  /**
-   * Physical points on the slave side
-   */
-  std::vector<Point> _phys_points_slave;
-  /**
-   * Element on the master side
-   */
-  const Elem * _elem_slave;
-  /**
-   * Values of test functions on the slave side
-   */
-  const VariableTestValue & _test_slave;
-  const VariableTestGradient & _grad_test_slave;
+  /// The current shape function gradients
+  const VariablePhiGradient * _grad_phi;
 
-  /**
-   * Values of shape function on the slave side
-   */
-  const VariablePhiValue & _phi_slave;
+  /// The current shape functions for vector variables
+  const VectorVariablePhiValue * _vector_phi;
+
+  /// The current shape function gradients for vector variables
+  const VectorVariablePhiGradient * _vector_grad_phi;
 };
-

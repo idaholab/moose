@@ -108,18 +108,9 @@
 []
 
 [Preconditioning]
-  active = andy
   [./andy]
     type = SMP
     full = true
-    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
-    petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000'
-  [../]
-  [./check]
-    type = SMP
-    full = true
-    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
-    petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
   [../]
 []
 

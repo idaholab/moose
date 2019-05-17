@@ -98,15 +98,20 @@ public:
   virtual void
   reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid) override;
 
-  virtual const NumericVector<Number> *& currentSolution() override
+  const NumericVector<Number> * const & currentSolution() const override
   {
     _current_solution = _sys.current_local_solution.get();
     return _current_solution;
   }
 
-  virtual NumericVector<Number> * solutionUDot() override { return _u_dot; }
-
-  virtual NumericVector<Number> * solutionUDotDot() override { return _u_dotdot; }
+  NumericVector<Number> * solutionUDot() override { return _u_dot; }
+  NumericVector<Number> * solutionUDotDot() override { return _u_dotdot; }
+  NumericVector<Number> * solutionUDotOld() override { return _u_dot_old; }
+  NumericVector<Number> * solutionUDotDotOld() override { return _u_dotdot_old; }
+  const NumericVector<Number> * solutionUDot() const override { return _u_dot; }
+  const NumericVector<Number> * solutionUDotDot() const override { return _u_dotdot; }
+  const NumericVector<Number> * solutionUDotOld() const override { return _u_dot_old; }
+  const NumericVector<Number> * solutionUDotDotOld() const override { return _u_dotdot_old; }
 
   virtual void serializeSolution();
   virtual NumericVector<Number> & serializedSolution() override;
@@ -154,23 +159,26 @@ public:
    */
   bool needMaterialOnSide(BoundaryID bnd_id);
 
-  virtual NumericVector<Number> & solution() override { return *_sys.solution; }
+  NumericVector<Number> & solution() override { return *_sys.solution; }
+  NumericVector<Number> & solutionOld() override { return *_sys.old_local_solution; }
+  NumericVector<Number> & solutionOlder() override { return *_sys.older_local_solution; }
+  NumericVector<Number> * solutionPreviousNewton() override { return _solution_previous_nl; }
 
-  virtual NumericVector<Number> & solutionOld() override { return *_sys.old_local_solution; }
-
-  virtual NumericVector<Number> & solutionOlder() override { return *_sys.older_local_solution; }
+  const NumericVector<Number> & solution() const override { return *_sys.solution; }
+  const NumericVector<Number> & solutionOld() const override { return *_sys.old_local_solution; }
+  const NumericVector<Number> & solutionOlder() const override
+  {
+    return *_sys.older_local_solution;
+  }
+  const NumericVector<Number> * solutionPreviousNewton() const override
+  {
+    return _solution_previous_nl;
+  }
 
   virtual TransientExplicitSystem & sys() { return _sys; }
 
   virtual System & system() override { return _sys; }
   virtual const System & system() const override { return _sys; }
-
-  virtual NumericVector<Number> * solutionUDotOld() override { return _u_dot_old; }
-  virtual NumericVector<Number> * solutionUDotDotOld() override { return _u_dotdot_old; }
-  virtual NumericVector<Number> * solutionPreviousNewton() override
-  {
-    return _solution_previous_nl;
-  }
 
   virtual void setPreviousNewtonSolution();
 
@@ -200,7 +208,7 @@ public:
   TransientExplicitSystem & _sys;
 
   /// solution vector from nonlinear solver
-  const NumericVector<Number> * _current_solution;
+  mutable const NumericVector<Number> * _current_solution;
   /// Serialized version of the solution vector
   NumericVector<Number> & _serialized_solution;
   /// Solution vector of the previous nonlinear iterate

@@ -57,12 +57,14 @@ public:
     return _transient_sys.nonlinear_solver.get();
   }
 
-  virtual NumericVector<Number> & solutionOld() override
+  NumericVector<Number> & solutionOld() override { return *_transient_sys.old_local_solution; }
+  const NumericVector<Number> & solutionOld() const override
   {
     return *_transient_sys.old_local_solution;
   }
 
-  virtual NumericVector<Number> & solutionOlder() override
+  NumericVector<Number> & solutionOlder() override { return *_transient_sys.older_local_solution; }
+  const NumericVector<Number> & solutionOlder() const override
   {
     return *_transient_sys.older_local_solution;
   }

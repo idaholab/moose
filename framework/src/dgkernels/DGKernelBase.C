@@ -116,7 +116,7 @@ DGKernelBase::DGKernelBase(const InputParameters & parameters)
     _test(_var.phiFace()),
     _grad_test(_var.gradPhiFace()),
 
-    _normals(_var.normals()),
+    _normals(_assembly.normals()),
 
     _phi_neighbor(_assembly.phiFaceNeighbor(_var)),
     _grad_phi_neighbor(_assembly.gradPhiFaceNeighbor(_var)),

@@ -68,6 +68,7 @@
 #include "MaxVarNDofsPerNode.h"
 #include "ADKernel.h"
 #include "ADPresetNodalBC.h"
+#include "Moose.h"
 
 // libMesh
 #include "libmesh/nonlinear_solver.h"
@@ -271,6 +272,47 @@ NonlinearSystemBase::initialSetup()
   _constraints.initialSetup();
   _general_dampers.initialSetup();
   _nodal_bcs.initialSetup();
+
+  // go over mortar interfaces and construct functors
+  const auto & undisplaced_mortar_interfaces = _fe_problem.getMortarInterfaces(/*displaced=*/false);
+  for (const auto & mortar_interface : undisplaced_mortar_interfaces)
+  {
+    auto master_slave_boundary_pair = mortar_interface.first;
+    const auto & mortar_generation_object = mortar_interface.second;
+
+    auto & mortar_constraints =
+        _constraints.getActiveMortarConstraints(master_slave_boundary_pair, /*displaced=*/false);
+
+    _undisplaced_mortar_residual_functors.emplace(
+        master_slave_boundary_pair,
+        ComputeMortarFunctor<ComputeStage::RESIDUAL>(
+            mortar_constraints, mortar_generation_object, _fe_problem));
+    _undisplaced_mortar_jacobian_functors.emplace(
+        master_slave_boundary_pair,
+        ComputeMortarFunctor<ComputeStage::JACOBIAN>(
+            mortar_constraints, mortar_generation_object, _fe_problem));
+  }
+
+  const auto & displaced_mortar_interfaces = _fe_problem.getMortarInterfaces(/*displaced=*/true);
+  for (const auto & mortar_interface : displaced_mortar_interfaces)
+  {
+    mooseAssert(_fe_problem.getDisplacedProblem(),
+                "Cannot create displaced mortar functors when the displaced problem is null");
+    auto master_slave_boundary_pair = mortar_interface.first;
+    const auto & mortar_generation_object = mortar_interface.second;
+
+    auto & mortar_constraints =
+        _constraints.getActiveMortarConstraints(master_slave_boundary_pair, /*displaced=*/true);
+
+    _displaced_mortar_residual_functors.emplace(
+        master_slave_boundary_pair,
+        ComputeMortarFunctor<ComputeStage::RESIDUAL>(
+            mortar_constraints, mortar_generation_object, *_fe_problem.getDisplacedProblem()));
+    _displaced_mortar_jacobian_functors.emplace(
+        master_slave_boundary_pair,
+        ComputeMortarFunctor<ComputeStage::JACOBIAN>(
+            mortar_constraints, mortar_generation_object, *_fe_problem.getDisplacedProblem()));
+  }
 }
 
 void
@@ -635,7 +677,8 @@ NonlinearSystemBase::computeResidualTags(const std::set<TagID> & tags)
     computeNodalBCs(tags);
     closeTaggedVectors(tags);
 
-    // If we are debugging residuals we need one more assignment to have the ghosted copy up to date
+    // If we are debugging residuals we need one more assignment to have the ghosted copy up to
+    // date
     if (_need_residual_ghosted && _debugging_residuals && required_residual)
     {
       auto & residual = getVector(residualVectorTag());
@@ -997,8 +1040,8 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
   {
     if (_assemble_constraints_separately)
     {
-      // Reset the constraint_applied flag before each new constraint, as they need to be assembled
-      // separately
+      // Reset the constraint_applied flag before each new constraint, as they need to be
+      // assembled separately
       constraints_applied = false;
     }
     PenetrationLocator & pen_loc = *(it.second);
@@ -1063,17 +1106,16 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
     }
     if (_assemble_constraints_separately)
     {
-      // Make sure that slave contribution to master are assembled, and ghosts have been exchanged,
-      // as current masters might become slaves on next iteration
-      // and will need to contribute their former slaves' contributions
-      // to the future masters.
-      // See if constraints were applied anywhere
+      // Make sure that slave contribution to master are assembled, and ghosts have been
+      // exchanged, as current masters might become slaves on next iteration and will need to
+      // contribute their former slaves' contributions to the future masters. See if constraints
+      // were applied anywhere
       _communicator.max(constraints_applied);
 
       if (constraints_applied)
       {
-        // If any of the above constraints inserted values in the residual, it needs to be assembled
-        // before adding the cached residuals below.
+        // If any of the above constraints inserted values in the residual, it needs to be
+        // assembled before adding the cached residuals below.
         _communicator.max(residual_has_inserted_values);
         if (residual_has_inserted_values)
         {
@@ -1108,46 +1150,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
     }
   }
 
-  THREAD_ID tid = 0;
-  // go over mortar interfaces
-  auto & ifaces = _mesh.getMortarInterfaces();
-  for (const auto & iface : ifaces)
-  {
-    if (_constraints.hasActiveMortarConstraints(iface->_name))
-    {
-      const auto & face_constraints = _constraints.getActiveMortarConstraints(iface->_name);
-
-      // go over elements on that interface
-      const std::vector<Elem *> & elems = iface->_elems;
-      for (const auto & elem : elems)
-      {
-        // for each element process constraints on the
-        _fe_problem.setCurrentSubdomainID(elem, tid);
-        _fe_problem.prepare(elem, tid);
-        _fe_problem.reinitElem(elem, tid);
-
-        for (const auto & ffc : face_constraints)
-        {
-          ffc->reinit();
-          ffc->computeResidual();
-        }
-        _fe_problem.cacheResidual(tid);
-
-        // evaluate residuals that go into master and slave side
-        for (const auto & ffc : face_constraints)
-        {
-          ffc->reinitSide(Moose::Master);
-          ffc->computeResidualSide(Moose::Master);
-          _fe_problem.cacheResidual(tid);
-
-          ffc->reinitSide(Moose::Slave);
-          ffc->computeResidualSide(Moose::Slave);
-          _fe_problem.cacheResidual(tid);
-        }
-      }
-      _fe_problem.addCachedResidual(tid);
-    }
-  }
+  mortarResidualConstraints(displaced);
 
   // go over element-element constraint interface
   std::map<unsigned int, std::shared_ptr<ElementPairLocator>> * element_pair_locators = nullptr;
@@ -1164,6 +1167,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
     element_pair_locators = &displaced_geom_search_data._element_pair_locators;
   }
 
+  THREAD_ID tid = 0;
   for (const auto & it : *element_pair_locators)
   {
     ElementPairLocator & elem_pair_loc = *(it.second);
@@ -1732,8 +1736,8 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
   {
     if (_assemble_constraints_separately)
     {
-      // Reset the constraint_applied flag before each new constraint, as they need to be assembled
-      // separately
+      // Reset the constraint_applied flag before each new constraint, as they need to be
+      // assembled separately
       constraints_applied = false;
     }
     PenetrationLocator & pen_loc = *(it.second);
@@ -1919,45 +1923,9 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
     }
   }
 
+  mortarJacobianConstraints(displaced);
+
   THREAD_ID tid = 0;
-  // go over mortar interfaces
-  auto & ifaces = _mesh.getMortarInterfaces();
-  for (const auto & iface : ifaces)
-  {
-    if (_constraints.hasActiveMortarConstraints(iface->_name))
-    {
-      // MortarConstraint objects
-      const auto & face_constraints = _constraints.getActiveMortarConstraints(iface->_name);
-
-      // go over elements on that interface
-      const std::vector<Elem *> & elems = iface->_elems;
-      for (const auto & elem : elems)
-      {
-        // for each element process constraints on the
-        for (const auto & ffc : face_constraints)
-        {
-          _fe_problem.setCurrentSubdomainID(elem, tid);
-          _fe_problem.prepare(elem, tid);
-          _fe_problem.reinitElem(elem, tid);
-          ffc->reinit();
-          ffc->subProblem().prepareShapes(ffc->variable().number(), tid);
-          ffc->computeJacobian();
-          _fe_problem.cacheJacobian(tid);
-
-          ffc->reinitSide(Moose::Master);
-          ffc->computeJacobianSide(Moose::Master);
-          _fe_problem.cacheJacobian(tid);
-
-          ffc->reinitSide(Moose::Slave);
-          ffc->computeJacobianSide(Moose::Slave);
-          _fe_problem.cacheJacobian(tid);
-        }
-
-        _fe_problem.addCachedJacobian(tid);
-      }
-    }
-  }
-
   // go over element-element constraint interface
   std::map<unsigned int, std::shared_ptr<ElementPairLocator>> * element_pair_locators = nullptr;
 
@@ -2390,8 +2358,8 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
   if (_fe_problem._has_constraints)
     closeTaggedMatrices(tags);
 
-  // We need to close the save_in variables on the aux system before NodalBCBases clear the dofs on
-  // boundary nodes
+  // We need to close the save_in variables on the aux system before NodalBCBases clear the dofs
+  // on boundary nodes
   if (_has_diag_save_in)
     _fe_problem.getAuxiliarySystem().solution().close();
 
@@ -2421,8 +2389,8 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
         {
           const std::vector<MooseVariableFEBase *> & coupled_moose_vars = bc->getCoupledMooseVars();
 
-          // Create the set of "involved" MOOSE nonlinear vars, which includes all coupled vars and
-          // the BC's own variable
+          // Create the set of "involved" MOOSE nonlinear vars, which includes all coupled vars
+          // and the BC's own variable
           std::set<unsigned int> & var_set = bc_involved_vars[bc->name()];
           for (const auto & coupled_var : coupled_moose_vars)
             if (coupled_var->kind() == Moose::VAR_NONLINEAR)
@@ -2485,8 +2453,8 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 
   closeTaggedMatrices(tags);
 
-  // We need to close the save_in variables on the aux system before NodalBCBases clear the dofs on
-  // boundary nodes
+  // We need to close the save_in variables on the aux system before NodalBCBases clear the dofs
+  // on boundary nodes
   if (_has_nodalbc_diag_save_in)
     _fe_problem.getAuxiliarySystem().solution().close();
 
@@ -3066,4 +3034,66 @@ NonlinearSystemBase::setPreviousNewtonSolution(const NumericVector<Number> & sol
 {
   if (_solution_previous_nl)
     *_solution_previous_nl = soln;
+}
+
+void
+NonlinearSystemBase::mortarResidualConstraints(bool displaced)
+{
+  // go over mortar constraints
+  const auto & mortar_interfaces = _fe_problem.getMortarInterfaces(displaced);
+
+  std::unordered_map<std::pair<BoundaryID, BoundaryID>, ComputeMortarFunctor<RESIDUAL>>::iterator
+      it,
+      end_it;
+
+  for (const auto & mortar_interface : mortar_interfaces)
+  {
+    if (!displaced)
+    {
+      it = _undisplaced_mortar_residual_functors.find(mortar_interface.first);
+      end_it = _undisplaced_mortar_residual_functors.end();
+    }
+    else
+    {
+      it = _displaced_mortar_residual_functors.find(mortar_interface.first);
+      end_it = _displaced_mortar_residual_functors.end();
+    }
+
+    mooseAssert(
+        it != end_it,
+        "No ComputeMortarFunctor exists for the specified master-slave boundary pair, master "
+            << mortar_interface.first.first << " and slave " << mortar_interface.first.second);
+    it->second();
+  }
+}
+
+void
+NonlinearSystemBase::mortarJacobianConstraints(bool displaced)
+{
+  // go over mortar constraints
+  const auto & mortar_interfaces = _fe_problem.getMortarInterfaces(displaced);
+
+  std::unordered_map<std::pair<BoundaryID, BoundaryID>, ComputeMortarFunctor<JACOBIAN>>::iterator
+      it,
+      end_it;
+
+  for (const auto & mortar_interface : mortar_interfaces)
+  {
+    if (!displaced)
+    {
+      it = _undisplaced_mortar_jacobian_functors.find(mortar_interface.first);
+      end_it = _undisplaced_mortar_jacobian_functors.end();
+    }
+    else
+    {
+      it = _displaced_mortar_jacobian_functors.find(mortar_interface.first);
+      end_it = _displaced_mortar_jacobian_functors.end();
+    }
+
+    mooseAssert(
+        it != end_it,
+        "No ComputeMortarFunctor exists for the specified master-slave boundary pair, master "
+            << mortar_interface.first.first << " and slave " << mortar_interface.first.second);
+    it->second();
+  }
 }

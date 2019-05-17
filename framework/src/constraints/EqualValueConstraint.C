@@ -11,54 +11,32 @@
 #include "SubProblem.h"
 #include "FEProblem.h"
 
-registerMooseObject("MooseApp", EqualValueConstraint);
+registerADMooseObject("MooseApp", EqualValueConstraint);
 
-template <>
-InputParameters
-validParams<EqualValueConstraint>()
+defineADValidParams(EqualValueConstraint,
+                    ADMortarConstraint,
+                    params.addClassDescription(
+                        "EqualValueConstraint enforces solution continuity between slave and "
+                        "master sides of a mortar interface using lagrange multipliers"););
+
+template <ComputeStage compute_stage>
+EqualValueConstraint<compute_stage>::EqualValueConstraint(const InputParameters & parameters)
+  : ADMortarConstraint<compute_stage>(parameters)
 {
-  InputParameters params = validParams<MortarConstraint>();
-  return params;
 }
 
-EqualValueConstraint::EqualValueConstraint(const InputParameters & parameters)
-  : MortarConstraint(parameters)
+template <ComputeStage compute_stage>
+ADReal
+EqualValueConstraint<compute_stage>::computeQpResidual(Moose::MortarType mortar_type)
 {
-}
-
-Real
-EqualValueConstraint::computeQpResidual()
-{
-  return (_u_master[_qp] - _u_slave[_qp]) * _test[_i][_qp];
-}
-
-Real
-EqualValueConstraint::computeQpResidualSide(Moose::ConstraintType res_type)
-{
-  switch (res_type)
+  switch (mortar_type)
   {
-    case Moose::Master:
-      return _lambda[_qp] * _test_master[_i][_qp];
-    case Moose::Slave:
+    case Moose::MortarType::Slave:
       return -_lambda[_qp] * _test_slave[_i][_qp];
-    default:
-      return 0;
-  }
-}
-
-Real
-EqualValueConstraint::computeQpJacobianSide(Moose::ConstraintJacobianType jac_type)
-{
-  switch (jac_type)
-  {
-    case Moose::MasterMaster:
-    case Moose::SlaveMaster:
-      return _phi[_j][_qp] * _test_master[_i][_qp];
-
-    case Moose::MasterSlave:
-    case Moose::SlaveSlave:
-      return -_phi[_j][_qp] * _test_slave[_i][_qp];
-
+    case Moose::MortarType::Master:
+      return _lambda[_qp] * _test_master[_i][_qp];
+    case Moose::MortarType::Lower:
+      return (_u_master[_qp] - _u_slave[_qp]) * _test[_i][_qp];
     default:
       return 0;
   }

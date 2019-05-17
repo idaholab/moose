@@ -68,6 +68,13 @@ public:
   void prepareVectorTagNeighbor(Assembly & assembly, unsigned int ivar);
 
   /**
+   * Prepare data for computing the residual according to active tags for mortar constraints.
+   * Residual blocks for different tags will be extracted from Assembly.  A local residual will be
+   * zeroed. It should be called right before the local element vector is computed.
+   */
+  void prepareVectorTagLower(Assembly & assembly, unsigned int ivar);
+
+  /**
    * Prepare data for computing element jacobian according to the ative tags.
    * Jacobian blocks for different tags will be extracted from Assembly.
    * A local Jacobian will be zeroed. It should be called
@@ -86,6 +93,16 @@ public:
                                 unsigned int ivar,
                                 unsigned int jvar,
                                 Moose::DGJacobianType type);
+
+  /**
+   * Prepare data for computing the jacobian according to the ative tags for mortar.  Jacobian
+   * blocks for different tags will be extracted from Assembly.  A local Jacobian will be zeroed. It
+   * should be called right before the local element matrix is computed.
+   */
+  void prepareMatrixTagLower(Assembly & assembly,
+                             unsigned int ivar,
+                             unsigned int jvar,
+                             Moose::ConstraintJacobianType type);
 
   /**
    * Local residual blocks  will be appended by adding the current local kernel residual.
@@ -140,3 +157,15 @@ protected:
   DenseMatrix<Number> _local_ke;
 };
 
+#define usingTaggingInterfaceMembers                                                               \
+  using TaggingInterface::_subproblem;                                                             \
+  using TaggingInterface::accumulateTaggedLocalResidual;                                           \
+  using TaggingInterface::accumulateTaggedLocalMatrix;                                             \
+  using TaggingInterface::prepareVectorTag;                                                        \
+  using TaggingInterface::prepareMatrixTag;                                                        \
+  using TaggingInterface::prepareVectorTagNeighbor;                                                \
+  using TaggingInterface::_local_re;                                                               \
+  using TaggingInterface::prepareVectorTagLower;                                                   \
+  using TaggingInterface::prepareMatrixTagNeighbor;                                                \
+  using TaggingInterface::prepareMatrixTagLower;                                                   \
+  using TaggingInterface::_local_ke

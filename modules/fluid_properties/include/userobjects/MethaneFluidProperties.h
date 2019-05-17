@@ -17,6 +17,9 @@ class MethaneFluidProperties;
 template <>
 InputParameters validParams<MethaneFluidProperties>();
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
 /**
  * Methane (CH4) fluid properties as a function of pressure (Pa)
  * and temperature (K).
@@ -177,3 +180,4 @@ protected:
                                 -1.95048736e-18}};
 };
 
+#pragma GCC diagnostic pop

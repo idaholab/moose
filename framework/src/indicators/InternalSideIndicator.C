@@ -72,7 +72,7 @@ InternalSideIndicator::InternalSideIndicator(const InputParameters & parameters)
     _u(_var.sln()),
     _grad_u(_var.gradSln()),
 
-    _normals(_field_var.normals()),
+    _normals(_assembly.normals()),
 
     _u_neighbor(_var.slnNeighbor()),
     _grad_u_neighbor(_var.gradSlnNeighbor())

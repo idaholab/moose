@@ -9,32 +9,21 @@
 
 #pragma once
 
-#include "GeneralUserObject.h"
+#include "PorousFlowFluidStateBase.h"
 
 class PorousFlowFluidStateFlash;
 
 template <>
 InputParameters validParams<PorousFlowFluidStateFlash>();
 
-/// Phase state enum
-enum class FluidStatePhaseEnum
-{
-  LIQUID,
-  GAS,
-  TWOPHASE
-};
-
 /**
- * Compositional flash routines for miscible multiphase flow classes
+ * Compositional flash routines for miscible multiphase flow classes with multiple
+ * fluid components
  */
-class PorousFlowFluidStateFlash : public GeneralUserObject
+class PorousFlowFluidStateFlash : public PorousFlowFluidStateBase
 {
 public:
   PorousFlowFluidStateFlash(const InputParameters & parameters);
-
-  void initialize() final{};
-  void execute() final{};
-  void finalize() final{};
 
   /**
    * Rachford-Rice equation for vapor fraction. Can be solved analytically for two
@@ -86,16 +75,6 @@ public:
   Real vaporMassFraction(std::vector<Real> & Zi, std::vector<Real> & Ki) const;
 
 protected:
-  /**
-   * Determines the phase state gven the total mass fraction and equilibrium mass fractions
-   *
-   * @param Zi total mass fraction
-   * @param Xi equilibrium mass fraction in liquid
-   * @param Yi equilibrium mass fraction in gas
-   * @param[out] phase_state the phase state (gas, liquid, two phase)
-   */
-  void phaseState(Real Zi, Real Xi, Real Yi, FluidStatePhaseEnum & phase_state) const;
-
   /// Maximum number of iterations for the Newton-Raphson routine
   const Real _nr_max_its;
   /// Tolerance for Newton-Raphson iterations

@@ -58,7 +58,7 @@ PorousFlowVariableBase::PorousFlowVariableBase(const InputParameters & parameter
                                             "dPorousFlow_grad_saturation_qp_dgradvar")),
     _dgrads_qp_dv(_nodal_material ? nullptr
                                   : &declareProperty<std::vector<std::vector<RealGradient>>>(
-                                        "dPorousFlow_grad_saturation_qp_dv"))
+                                        "dPorousFlow_grad_saturation_qp_dvar"))
 {
 }
 

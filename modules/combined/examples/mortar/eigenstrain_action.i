@@ -3,7 +3,7 @@
 #
 
 [Mesh]
-  type = MortarPeriodicMesh
+  type = GeneratedMesh
   dim = 2
   nx = 50
   ny = 50
@@ -11,13 +11,13 @@
   xmax = 0.5
   ymin = -0.5
   ymax = 0.5
-  periodic_directions = 'x y'
 []
 
 [Modules/PhaseField/MortarPeriodicity]
   [./strain]
     variable = 'disp_x disp_y'
     periodicity = gradient
+    periodic_directions = 'x y'
   [../]
 []
 
@@ -111,7 +111,7 @@
   # declare a few constants, such as mobilities (L,M) and interface gradient prefactors (kappa*)
   [./consts]
     type = GenericConstantMaterial
-    block = '0 10 11'
+    block = '0'
     prop_names  = 'M   kappa_c'
     prop_values = '0.2 0.01   '
   [../]
@@ -168,7 +168,6 @@
     type = ComputeSmallStrain
     block = 0
     displacements = 'disp_x disp_y'
-    eigenstrains = eigenstrain
   [../]
 
   [./eigenstrain]

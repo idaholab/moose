@@ -126,3 +126,19 @@ Once enabled, the any object that should operate on the displaced configuration 
 [Postprocessor](/Postprocessors/index.md) with and without the displaced configuration.
 
 !listing test/tests/postprocessors/displaced_mesh/elemental.i block=Postprocessors
+
+## Mixed Dimension Meshes
+
+MOOSE will function properly when running simulations on meshes containing mixed dimension elements
+(e.g. 1D and 2D, 1D and 3D, etc.). Residual calculation, material evaluation, etc should all work properly.
+
+!listing test/tests/mesh/mixed_dim/1d_3d.i block=Mesh
+
+## Unique IDs
+
+There are two "first-class" id types for each mesh entity (elements or nodes): "id and unique_id". Both the id
+and unique_id field are unique numbers for the current active set of mesh entities. Active entities are those
+that are currently representing the domain but doesn't include "coarse parents" of some elements that may become
+active during a coarsening step. The difference however is that unique_ids are never reused, but ids +might+ be.
+Generally the id is "good-enough" for almost all use, but if you need guarentees that an element id is never
+recycled (because it might be a key to an important map), you should use unique_id.

@@ -10,248 +10,157 @@
 #include "MortarConstraint.h"
 
 // MOOSE includes
-#include "Assembly.h"
-#include "FEProblem.h"
 #include "MooseVariable.h"
-#include "NearestNodeLocator.h"
-#include "PenetrationLocator.h"
-
-#include "libmesh/quadrature.h"
+#include "Assembly.h"
 
 template <>
 InputParameters
 validParams<MortarConstraint>()
 {
-  InputParameters params = validParams<Constraint>();
-  params.addRequiredParam<std::string>("interface", "The name of the interface.");
-  params.addRequiredParam<VariableName>("master_variable", "Variable on master surface");
-  params.addParam<VariableName>("slave_variable", "Variable on master surface");
-  return params;
+  return validParams<MortarConstraintBase>();
 }
 
 MortarConstraint::MortarConstraint(const InputParameters & parameters)
-  : Constraint(parameters),
-    CoupleableMooseVariableDependencyIntermediateInterface(this, true),
-    MooseVariableInterface<Real>(this,
-                                 true,
-                                 "variable",
-                                 Moose::VarKindType::VAR_NONLINEAR,
-                                 Moose::VarFieldType::VAR_FIELD_STANDARD),
-    _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
-    _dim(_mesh.dimension()),
-
-    _q_point(_assembly.qPoints()),
-    _qrule(_assembly.qRule()),
-    _JxW(_assembly.JxW()),
-    _coord(_assembly.coordTransformation()),
-    _current_elem(_assembly.elem()),
-
-    _master_var(_subproblem.getStandardVariable(_tid, getParam<VariableName>("master_variable"))),
-    _slave_var(
-        isParamValid("slave_variable")
-            ? _subproblem.getStandardVariable(_tid, getParam<VariableName>("slave_variable"))
-            : _subproblem.getStandardVariable(_tid, getParam<VariableName>("master_variable"))),
-    _lambda(_var.sln()),
-
-    _iface(*_mesh.getMortarInterfaceByName(getParam<std::string>("interface"))),
-    _master_penetration_locator(getMortarPenetrationLocator(
-        _iface._master, _iface._slave, Moose::Master, Order(_master_var.order()))),
-    _slave_penetration_locator(getMortarPenetrationLocator(
-        _iface._master, _iface._slave, Moose::Slave, Order(_slave_var.order()))),
-
-    _test_master(_master_var.phi()),
-    _grad_test_master(_master_var.gradPhi()),
-    _phi_master(_master_var.phi()),
-
-    _test_slave(_slave_var.phi()),
-    _grad_test_slave(_slave_var.gradPhi()),
-    _phi_slave(_slave_var.phi())
+  : MortarConstraintBase(parameters),
+    _lambda_dummy(),
+    _lambda(_var ? _var->slnLower() : _lambda_dummy),
+    _u_slave(_slave_var.sln()),
+    _u_master(_master_var.slnNeighbor()),
+    _grad_u_slave(_slave_var.gradSln()),
+    _grad_u_master(_master_var.gradSlnNeighbor()),
+    _phi(nullptr),
+    _grad_phi(nullptr)
 {
 }
 
 void
-MortarConstraint::reinit()
+MortarConstraint::computeResidual(Moose::MortarType mortar_type)
 {
-  unsigned int nqp = _qrule->n_points();
-
-  _u_master.resize(nqp);
-  _grad_u_master.resize(nqp);
-  _phys_points_master.resize(nqp);
-  _u_slave.resize(nqp);
-  _grad_u_slave.resize(nqp);
-  _phys_points_slave.resize(nqp);
-  _test = _assembly.getFE(_var.feType(), _dim - 1)->get_phi(); // yes we need to do a copy here
-  _JxW_lm = _assembly.getFE(_var.feType(), _dim - 1)
-                ->get_JxW(); // another copy here to preserve the right JxW
-
-  for (_qp = 0; _qp < nqp; _qp++)
+  unsigned int test_space_size = 0;
+  switch (mortar_type)
   {
-    const Node * current_node = _mesh.getQuadratureNode(_current_elem, 0, _qp);
-
-    PenetrationInfo * master_pinfo =
-        _master_penetration_locator._penetration_info[current_node->id()];
-    PenetrationInfo * slave_pinfo =
-        _slave_penetration_locator._penetration_info[current_node->id()];
-
-    if (master_pinfo && slave_pinfo)
-    {
-      const Elem * master_side =
-          master_pinfo->_elem->build_side_ptr(master_pinfo->_side_num, true).release();
-
-      std::vector<std::vector<Real>> & master_side_phi = master_pinfo->_side_phi;
-      std::vector<std::vector<RealGradient>> & master_side_grad_phi = master_pinfo->_side_grad_phi;
-      mooseAssert(master_side_phi.size() == master_side_grad_phi.size(),
-                  "phi and grad phi size are different");
-      _u_master[_qp] = _master_var.getValue(master_side, master_side_phi);
-      _grad_u_master[_qp] = _master_var.getGradient(master_side, master_side_grad_phi);
-      _phys_points_master[_qp] = master_pinfo->_closest_point;
-      _elem_master = master_pinfo->_elem;
-      delete master_side;
-
-      const Elem * slave_side =
-          slave_pinfo->_elem->build_side_ptr(slave_pinfo->_side_num, true).release();
-      std::vector<std::vector<Real>> & slave_side_phi = slave_pinfo->_side_phi;
-      std::vector<std::vector<RealGradient>> & slave_side_grad_phi = slave_pinfo->_side_grad_phi;
-      mooseAssert(slave_side_phi.size() == slave_side_grad_phi.size(),
-                  "phi and grad phi size are different");
-      _u_slave[_qp] = _slave_var.getValue(slave_side, slave_side_phi);
-      _grad_u_slave[_qp] = _slave_var.getGradient(slave_side, slave_side_grad_phi);
-      _phys_points_slave[_qp] = slave_pinfo->_closest_point;
-      _elem_slave = slave_pinfo->_elem;
-      delete slave_side;
-    }
-  }
-}
-
-void
-MortarConstraint::reinitSide(Moose::ConstraintType res_type)
-{
-  switch (res_type)
-  {
-    case Moose::Master:
-      _assembly.setCurrentSubdomainID(_elem_master->subdomain_id());
-      _assembly.reinit(_elem_master);
-      _master_var.prepare();
-      _assembly.prepare();
-      _assembly.reinitAtPhysical(_elem_master, _phys_points_master);
+    case Moose::MortarType::Slave:
+      prepareVectorTag(_assembly, _slave_var.number());
+      test_space_size = _test_slave.size();
       break;
 
-    case Moose::Slave:
-      _assembly.setCurrentSubdomainID(_elem_slave->subdomain_id());
-      _assembly.reinit(_elem_slave);
-      _slave_var.prepare();
-      _assembly.prepare();
-      _assembly.reinitAtPhysical(_elem_slave, _phys_points_slave);
+    case Moose::MortarType::Master:
+      prepareVectorTagNeighbor(_assembly, _master_var.number());
+      test_space_size = _test_master.size();
+      break;
+
+    case Moose::MortarType::Lower:
+      mooseAssert(_var, "LM variable is null");
+      prepareVectorTagLower(_assembly, _var->number());
+      test_space_size = _test.size();
       break;
   }
+
+  for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
+    for (_i = 0; _i < test_space_size; _i++)
+      _local_re(_i) += _JxW_msm[_qp] * _coord[_qp] * computeQpResidual(mortar_type);
+
+  accumulateTaggedLocalResidual();
 }
 
 void
-MortarConstraint::computeResidual()
+MortarConstraint::computeJacobian(Moose::MortarType mortar_type)
 {
-  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
-  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-    for (_i = 0; _i < _test.size(); _i++)
-      re(_i) += _JxW_lm[_qp] * _coord[_qp] * computeQpResidual();
-}
+  size_t test_space_size = 0;
+  typedef Moose::ConstraintJacobianType JType;
+  typedef Moose::MortarType MType;
+  std::array<JType, 3> jacobian_types;
 
-void
-MortarConstraint::computeResidualSide(Moose::ConstraintType side)
-{
-  switch (side)
+  switch (mortar_type)
   {
-    case Moose::Master:
-    {
-      DenseVector<Number> & re_master = _assembly.residualBlock(_master_var.number());
-      for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-      {
-        for (_i = 0; _i < _test_master.size(); _i++)
-          re_master(_i) += _JxW_lm[_qp] * computeQpResidualSide(Moose::Master);
-      }
-    }
-    break;
+    case MType::Slave:
+      test_space_size = _slave_var.dofIndices().size();
+      jacobian_types = {{JType::SlaveSlave, JType::SlaveMaster, JType::SlaveLower}};
+      break;
 
-    case Moose::Slave:
-    {
-      DenseVector<Number> & re_slave = _assembly.residualBlock(_slave_var.number());
-      for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-      {
-        for (_i = 0; _i < _test_slave.size(); _i++)
-          re_slave(_i) += _JxW_lm[_qp] * _coord[_qp] * computeQpResidualSide(Moose::Slave);
-      }
-    }
-    break;
+    case MType::Master:
+      test_space_size = _master_var.dofIndicesNeighbor().size();
+      jacobian_types = {{JType::MasterSlave, JType::MasterMaster, JType::MasterLower}};
+      break;
+
+    case MType::Lower:
+      test_space_size = _var ? _var->dofIndicesLower().size() : 0;
+      jacobian_types = {{JType::LowerSlave, JType::LowerMaster, JType::LowerLower}};
+      break;
   }
-}
 
-void
-MortarConstraint::computeJacobian()
-{
-  _phi = _assembly.getFE(_var.feType(), _dim - 1)->get_phi(); // yes we need to do a copy here
-  std::vector<std::vector<Real>> phi_master;
-  std::vector<std::vector<Real>> phi_slave;
-
-  DenseMatrix<Number> & Kee = _assembly.jacobianBlock(_var.number(), _var.number());
-
-  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-    for (_i = 0; _i < _test.size(); _i++)
-      for (_j = 0; _j < _phi.size(); _j++)
-        Kee(_i, _j) += _JxW_lm[_qp] * _coord[_qp] * computeQpJacobian();
-}
-
-void
-MortarConstraint::computeJacobianSide(Moose::ConstraintType side)
-{
-  switch (side)
+  std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> & ce =
+      _assembly.couplingEntries();
+  for (const auto & it : ce)
   {
-    case Moose::Master:
-    {
-      DenseMatrix<Number> & Ken_master =
-          _assembly.jacobianBlock(_var.number(), _master_var.number());
-      DenseMatrix<Number> & Kne_master =
-          _assembly.jacobianBlock(_master_var.number(), _var.number());
+    MooseVariableFEBase & ivariable = *(it.first);
+    MooseVariableFEBase & jvariable = *(it.second);
 
-      for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-        for (_i = 0; _i < _test_master.size(); _i++)
-        {
-          for (_j = 0; _j < _phi.size(); _j++)
-          {
-            Ken_master(_j, _i) +=
-                _JxW_lm[_qp] * _coord[_qp] * computeQpJacobianSide(Moose::MasterMaster);
-            Kne_master(_i, _j) +=
-                _JxW_lm[_qp] * _coord[_qp] * computeQpJacobianSide(Moose::SlaveMaster);
-          }
-        }
-    }
-    break;
+    unsigned int ivar = ivariable.number();
+    unsigned int jvar = jvariable.number();
 
-    case Moose::Slave:
+    switch (mortar_type)
     {
-      DenseMatrix<Number> & Ken_slave = _assembly.jacobianBlock(_var.number(), _slave_var.number());
-      DenseMatrix<Number> & Kne_slave = _assembly.jacobianBlock(_slave_var.number(), _var.number());
-      for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-        for (_i = 0; _i < _test_slave.size(); _i++)
-        {
-          for (_j = 0; _j < _phi.size(); _j++)
-          {
-            Ken_slave(_j, _i) +=
-                _JxW_lm[_qp] * _coord[_qp] * computeQpJacobianSide(Moose::MasterSlave);
-            Kne_slave(_i, _j) +=
-                _JxW_lm[_qp] * _coord[_qp] * computeQpJacobianSide(Moose::SlaveSlave);
-          }
-        }
+      case MType::Slave:
+        if (ivar != _slave_var.number())
+          continue;
+        break;
+
+      case MType::Master:
+        if (ivar != _master_var.number())
+          continue;
+        break;
+
+      case MType::Lower:
+        if (!_var || _var->number() != ivar)
+          continue;
+        break;
     }
-    break;
+
+    std::array<size_t, 3> shape_space_sizes{{jvariable.dofIndices().size(),
+                                             jvariable.dofIndicesNeighbor().size(),
+                                             jvariable.dofIndicesLower().size()}};
+    std::array<const VariablePhiValue *, 3> phis;
+    std::array<const VariablePhiGradient *, 3> grad_phis;
+    std::array<const VectorVariablePhiValue *, 3> vector_phis;
+    std::array<const VectorVariablePhiGradient *, 3> vector_grad_phis;
+    if (jvariable.isVector())
+    {
+      const auto & temp_var = static_cast<MooseVariableFE<RealVectorValue> &>(jvariable);
+      vector_phis = {{&temp_var.phiFace(), &temp_var.phiFaceNeighbor(), &temp_var.phiLower()}};
+      vector_grad_phis = {
+          {&temp_var.gradPhiFace(), &temp_var.gradPhiFaceNeighbor(), &temp_var.gradPhiLower()}};
+    }
+    else
+    {
+      const auto & temp_var = static_cast<MooseVariableFE<Real> &>(jvariable);
+      phis = {{&temp_var.phiFace(), &temp_var.phiFaceNeighbor(), &temp_var.phiLower()}};
+      grad_phis = {
+          {&temp_var.gradPhiFace(), &temp_var.gradPhiFaceNeighbor(), &temp_var.gradPhiLower()}};
+    }
+
+    for (MooseIndex(3) type_index = 0; type_index < 3; ++type_index)
+    {
+      prepareMatrixTagLower(_assembly, ivar, jvar, jacobian_types[type_index]);
+
+      /// Set the proper phis
+      if (jvariable.isVector())
+      {
+        _vector_phi = vector_phis[type_index];
+        _vector_grad_phi = vector_grad_phis[type_index];
+      }
+      else
+      {
+        _phi = phis[type_index];
+        _grad_phi = grad_phis[type_index];
+      }
+
+      for (_i = 0; _i < test_space_size; _i++)
+        for (_j = 0; _j < shape_space_sizes[type_index]; _j++)
+          for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
+            _local_ke(_i, _j) +=
+                _JxW_msm[_qp] * _coord[_qp] * computeQpJacobian(jacobian_types[type_index], jvar);
+      accumulateTaggedLocalMatrix();
+    }
   }
-}
-
-Real
-MortarConstraint::computeQpJacobian()
-{
-  return 0.;
-}
-
-Real MortarConstraint::computeQpJacobianSide(Moose::ConstraintJacobianType /*side_type*/)
-{
-  return 0.;
 }

@@ -9,25 +9,25 @@
 
 #pragma once
 
-#include "MortarConstraint.h"
+#include "ADMortarConstraint.h"
 
+template <ComputeStage>
 class EqualValueConstraint;
 
-template <>
-InputParameters validParams<EqualValueConstraint>();
+declareADValidParams(EqualValueConstraint);
 
 /**
  * Constrain the value of a variable to be the same on both sides of an
  * interface.
  */
-class EqualValueConstraint : public MortarConstraint
+template <ComputeStage compute_stage>
+class EqualValueConstraint : public ADMortarConstraint<compute_stage>
 {
 public:
   EqualValueConstraint(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
-  virtual Real computeQpResidualSide(Moose::ConstraintType res_type) override;
-  virtual Real computeQpJacobianSide(Moose::ConstraintJacobianType jac_type) override;
-};
+  ADReal computeQpResidual(Moose::MortarType mortar_type) final;
 
+  usingMortarConstraintMembers;
+};

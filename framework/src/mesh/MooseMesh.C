@@ -206,7 +206,6 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _init_timer(registerTimedSection("init", 2)),
     _read_recovered_mesh_timer(registerTimedSection("readRecoveredMesh", 2)),
     _ghost_ghosted_boundaries_timer(registerTimedSection("GhostGhostedBoundaries", 3)),
-    _add_mortar_interface_timer(registerTimedSection("addMortarInterface", 5)),
     _need_delete(false)
 {
   if (isParamValid("ghosting_patch_size") && (_patch_update_strategy != Moose::Iteration))
@@ -264,8 +263,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _change_boundary_id_timer(registerTimedSection("changeBoundaryId", 5)),
     _init_timer(registerTimedSection("init", 2)),
     _read_recovered_mesh_timer(registerTimedSection("readRecoveredMesh", 2)),
-    _ghost_ghosted_boundaries_timer(registerTimedSection("GhostGhostedBoundaries", 3)),
-    _add_mortar_interface_timer(registerTimedSection("addMortarInterface", 5))
+    _ghost_ghosted_boundaries_timer(registerTimedSection("GhostGhostedBoundaries", 3))
 {
   // Note: this calls BoundaryInfo::operator= without changing the
   // ownership semantics of either Mesh's BoundaryInfo object.
@@ -599,7 +597,7 @@ MooseMesh::updateActiveSemiLocalNodeRange(std::set<dof_id_type> & ghosted_elems)
 }
 
 bool
-MooseMesh::isSemiLocal(Node * node)
+MooseMesh::isSemiLocal(Node * const node) const
 {
   return _semilocal_node_list.find(node) != _semilocal_node_list.end();
 }
@@ -1596,8 +1594,8 @@ MooseMesh::buildRefinementAndCoarseningMaps(Assembly * assembly)
     assembly->setCurrentSubdomainID(elem->subdomain_id());
     assembly->reinit(elem);
     assembly->reinit(elem, 0);
-    QBase * qrule = assembly->qRule();
-    QBase * qrule_face = assembly->qRuleFace();
+    auto && qrule = assembly->writeableQRule();
+    auto && qrule_face = assembly->writeableQRuleFace();
 
     // Volume to volume projection for refinement
     buildRefinementMap(*elem, *qrule, *qrule_face, -1, -1, -1);
@@ -2694,28 +2692,6 @@ MooseMesh::errorIfDistributedMesh(std::string name) const
                "to prevent it from being run with DistributedMesh.");
 }
 
-MooseMesh::MortarInterface *
-MooseMesh::getMortarInterfaceByName(const std::string name)
-{
-  std::map<std::string, MortarInterface *>::iterator it = _mortar_interface_by_name.find(name);
-  if (it != _mortar_interface_by_name.end())
-    return (*it).second;
-  else
-    mooseError("Requesting non-existent mortar interface '", name, "'.");
-}
-
-MooseMesh::MortarInterface *
-MooseMesh::getMortarInterface(BoundaryID master, BoundaryID slave)
-{
-  std::map<std::pair<BoundaryID, BoundaryID>, MortarInterface *>::iterator it =
-      _mortar_interface_by_ids.find(std::pair<BoundaryID, BoundaryID>(master, slave));
-  if (it != _mortar_interface_by_ids.end())
-    return (*it).second;
-  else
-    mooseError(
-        "Requesting non-existing mortar interface (master = ", master, ", slave = ", slave, ").");
-}
-
 void
 MooseMesh::setCustomPartitioner(Partitioner * partitioner)
 {
@@ -2754,37 +2730,4 @@ std::unique_ptr<PointLocatorBase>
 MooseMesh::getPointLocator() const
 {
   return getMesh().sub_point_locator();
-}
-
-void
-MooseMesh::addMortarInterface(const std::string & name,
-                              BoundaryName master,
-                              BoundaryName slave,
-                              SubdomainName domain_name)
-{
-  TIME_SECTION(_add_mortar_interface_timer);
-
-  SubdomainID domain_id = getSubdomainID(domain_name);
-  boundary_id_type master_id = getBoundaryID(master);
-  boundary_id_type slave_id = getBoundaryID(slave);
-
-  std::unique_ptr<MortarInterface> iface = libmesh_make_unique<MortarInterface>();
-
-  iface->_id = domain_id;
-  iface->_master = master;
-  iface->_slave = slave;
-  iface->_name = name;
-
-  for (auto & elem : as_range(_mesh->level_elements_begin(0), _mesh->level_elements_end(0)))
-  {
-    if (elem->subdomain_id() == domain_id)
-      iface->_elems.push_back(elem);
-  }
-
-  setSubdomainName(iface->_id, name);
-
-  _mortar_interface.push_back(std::move(iface));
-  _mortar_interface_by_name[name] = _mortar_interface.back().get();
-  _mortar_interface_by_ids[std::pair<BoundaryID, BoundaryID>(master_id, slave_id)] =
-      _mortar_interface.back().get();
 }

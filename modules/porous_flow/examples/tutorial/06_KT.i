@@ -76,6 +76,14 @@
   flux_limiter_type = superbee
 []
 
+[UserObjects]
+  [./this_just_adds_correct_relationship_manager_for_ghosting_13388]
+    type = PorousFlowAdvectiveFluxCalculatorSaturated
+    gravity = '0 0 0'
+    flux_limiter_type = superbee
+  [../]
+[]
+
 [BCs]
   [./constant_injection_porepressure]
     type = PresetBC
@@ -147,7 +155,7 @@
   solve_type = Newton
   end_time = 1E6
   dt = 1E5
-  nl_abs_tol = 1E-7
+  nl_rel_tol = 1E-14
 []
 
 [Outputs]

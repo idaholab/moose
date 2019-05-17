@@ -112,7 +112,7 @@ protected:
   Assembly & _assembly;
 
   MooseVariable & _field_var;
-  const Elem *& _current_elem;
+  const Elem * const & _current_elem;
 
   MooseMesh & _mesh;
 

@@ -149,7 +149,7 @@ if [ -z "$go_fast" ]; then
                                    --disable-maintainer-mode \
                                    --enable-petsc-hypre-required \
                                    --enable-metaphysicl-required \
-                                   $DISABLE_TIMESTAMPS $VTK_OPTIONS $* || exit 1
+                                   $DISABLE_TIMESTAMPS $VTK_OPTIONS $* | tee -a "$SCRIPT_DIR/$DIAGNOSTIC_LOG" || exit 1
 else
   # The build directory must already exist: you can't do --fast for
   # an initial build.
@@ -177,9 +177,3 @@ fi
 # sh-basic-offset: 2
 # sh-indentation: 2
 # End:
-
-# Include libMesh config.log in the diagnostics log
-if [ -f "$SCRIPT_DIR/../libmesh/build/config.log" ]; then
-  echo -e "\nLIBMESH CONFIGURE LOG" >> "$SCRIPT_DIR/$DIAGNOSTIC_LOG"
-  cat "$SCRIPT_DIR/../libmesh/build/config.log" >> "$SCRIPT_DIR/$DIAGNOSTIC_LOG"
-fi

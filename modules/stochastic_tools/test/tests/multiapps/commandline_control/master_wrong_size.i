@@ -34,7 +34,7 @@
     type = MonteCarloSampler
     n_samples = 10
     distributions = 'uniform'
-    execute_on = 'initial timestep_end'
+    execute_on = PRE_MULTIAPP_SETUP
   [../]
 []
 

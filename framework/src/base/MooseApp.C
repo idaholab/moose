@@ -344,7 +344,7 @@ MooseApp::MooseApp(InputParameters parameters)
   if (_check_input && isParamValid("recover"))
     mooseError("Cannot run --check-input with --recover. Recover files might not exist");
 
-  if (isParamValid("start_in_debugger"))
+  if (isParamValid("start_in_debugger") && _multiapp_level == 0)
   {
     auto command = getParam<std::string>("start_in_debugger");
 

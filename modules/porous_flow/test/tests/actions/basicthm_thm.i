@@ -105,6 +105,12 @@
     value = 0
     boundary = 'top bottom'
   [../]
+  [./right]
+    type = PresetBC
+    variable = disp_x
+    value = 0
+    boundary = right
+  [../]
 []
 
 [Modules]
@@ -184,7 +190,8 @@
   solve_type = Newton
   end_time = 1e4
   dt = 1e3
-  nl_abs_tol = 1e-10
+  nl_abs_tol = 1e-12
+  nl_rel_tol = 1E-10
 []
 
 [Outputs]

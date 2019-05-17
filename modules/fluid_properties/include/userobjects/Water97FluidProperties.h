@@ -134,7 +134,8 @@ public:
    * @param pressure water pressure (Pa)
    * @return saturation temperature (K)
    */
-  Real vaporTemperature(Real pressure) const;
+  Real vaporTemperature(Real pressure) const override;
+  virtual void vaporTemperature(Real pressure, Real & Tsat, Real & dTsat_dp) const override;
 
   /**
    * Auxillary equation for the boundary between regions 2 and 3
@@ -219,7 +220,8 @@ public:
    * @param enthalpy water enthalpy (J/kg)
    * @return temperature water temperature (K)
    */
-  virtual Real temperature_from_ph(Real pressure, Real enthalpy) const;
+  virtual Real T_from_p_h(Real pressure, Real enthalpy) const override;
+  virtual void T_from_p_h(Real p, Real h, Real & T, Real & dT_dp, Real & dT_dh) const override;
 
   /**
    * Boundary between subregions b and c in region 2.
@@ -543,6 +545,17 @@ protected:
   unsigned int subregion3ph(Real pressure, Real enthalpy) const;
 
   /**
+   * AD version of backwards equation T(p, h) (used internally)
+   * From Revised Release on the IAPWS Industrial Formulation 1997 for the
+   * Thermodynamic Properties of Water and Steam
+   *
+   * @param pressure water pressure (Pa)
+   * @param enthalpy water enthalpy (J/kg)
+   * @return temperature water temperature (K)
+   */
+  FPDualReal T_from_p_h_ad(const FPDualReal & pressure, const FPDualReal & enthalpy) const;
+
+  /**
    * Backwards equation T(p, h) in Region 1
    * Eq. (11) from Revised Release on the IAPWS Industrial
    * Formulation 1997 for the Thermodynamic Properties of Water
@@ -552,7 +565,7 @@ protected:
    * @param enthalpy water enthalpy (J/kg)
    * @return temperature water temperature (K)
    */
-  Real temperature_from_ph1(Real pressure, Real enthalpy) const;
+  FPDualReal temperature_from_ph1(const FPDualReal & pressure, const FPDualReal & enthalpy) const;
 
   /**
    * Backwards equation T(p, h) in Region 2a
@@ -564,7 +577,7 @@ protected:
    * @param enthalpy water enthalpy (J/kg)
    * @return temperature water temperature (K)
    */
-  Real temperature_from_ph2a(Real pressure, Real enthalpy) const;
+  FPDualReal temperature_from_ph2a(const FPDualReal & pressure, const FPDualReal & enthalpy) const;
 
   /**
    * Backwards equation T(p, h) in Region 2b
@@ -576,7 +589,7 @@ protected:
    * @param enthalpy water enthalpy (J/kg)
    * @return temperature water temperature (K)
    */
-  Real temperature_from_ph2b(Real pressure, Real enthalpy) const;
+  FPDualReal temperature_from_ph2b(const FPDualReal & pressure, const FPDualReal & enthalpy) const;
 
   /**
    * Backwards equation T(p, h) in Region 2c
@@ -588,7 +601,7 @@ protected:
    * @param enthalpy water enthalpy (J/kg)
    * @return temperature water temperature (K)
    */
-  Real temperature_from_ph2c(Real pressure, Real enthalpy) const;
+  FPDualReal temperature_from_ph2c(const FPDualReal & pressure, const FPDualReal & enthalpy) const;
 
   /**
    * Backwards equation T(p, h) in Region 3a
@@ -601,7 +614,7 @@ protected:
    * @param enthalpy water enthalpy (J/kg)
    * @return temperature water temperature (K)
    */
-  Real temperature_from_ph3a(Real pressure, Real enthalpy) const;
+  FPDualReal temperature_from_ph3a(const FPDualReal & pressure, const FPDualReal & enthalpy) const;
 
   /**
    * Backwards equation T(p, h) in Region 3b
@@ -614,7 +627,21 @@ protected:
    * @param enthalpy water enthalpy (J/kg)
    * @return temperature water temperature (K)
    */
-  Real temperature_from_ph3b(Real pressure, Real enthalpy) const;
+  FPDualReal temperature_from_ph3b(const FPDualReal & pressure, const FPDualReal & enthalpy) const;
+
+  /**
+   * AD version of saturation temperature as a function of pressure (used internally)
+   *
+   * Eq. (31) from Revised Release on the IAPWS Industrial
+   * Formulation 1997 for the Thermodynamic Properties of Water
+   * and Steam
+   *
+   * Valid for 611.213 Pa <= p <= 22.064 MPa
+   *
+   * @param pressure water pressure (Pa)
+   * @return saturation temperature (K)
+   */
+  FPDualReal vaporTemperature_ad(const FPDualReal & pressure) const;
 
   /// Water molar mass (kg/mol)
   const Real _Mh2o;

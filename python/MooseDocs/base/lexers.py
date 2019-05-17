@@ -219,9 +219,13 @@ class Lexer(object):
               the entire text to be tokenized and have the errors report upon completion.
         """
         if MooseDocs.LOG_LEVEL == logging.DEBUG:
-            common.check_type('text', text, unicode)
             common.check_type('page', page, pages.Page)
             common.check_type('line', line, int)
+
+        if not isinstance(text, unicode):
+            msg = "EXCEPTION: {}:{}\n{}".format(page.source, line,
+                                                "The supplied text must be unicode.")
+            raise TypeError(msg)
 
         n = len(text)
         pos = 0

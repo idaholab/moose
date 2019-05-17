@@ -62,7 +62,8 @@ EqualValueNodalConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
 
     case Moose::SlaveMaster:
       return -_penalty;
-  }
 
-  return 0.;
+    default:
+      return 0;
+  }
 }

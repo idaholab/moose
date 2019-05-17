@@ -63,16 +63,23 @@ public:
    */
   unsigned int getInterfaceID() const { return _interface_id; };
 
+  /**
+   * The variable number that this object operates on.
+   */
+  MooseVariable & variable() { return _var; }
+
 protected:
   FEProblemBase & _fe_problem;
   unsigned int _dim;
 
   unsigned int _interface_id;
 
-  const Elem *& _current_elem;
+  MooseVariable & _var;
+
+  const Elem * const & _current_elem;
 
   /// The neighboring element
-  const Elem *& _neighbor_elem;
+  const Elem * const & _neighbor_elem;
 
   /// Quadrature points used in integration of constraint
   std::vector<Point> _constraint_q_point;

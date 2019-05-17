@@ -21,11 +21,16 @@ class Exodiff(FileTester):
         params.addParam('custom_cmp',            "Custom comparison file")
         params.addParam('use_old_floor',  False, "Use Exodiff old floor option")
         params.addParam('map',  True, "Use geometrical mapping to match up elements.  This is usually a good idea because it makes files comparable between runs with Serial and Parallel Mesh.")
+        params.addParam('partial', False, ("Invokes a matching algorithm similar to the -m option.  However "
+                                           "this option ignores unmatched nodes and elements.  This allows "
+                                           "comparison of files that only partially overlap."))
 
         return params
 
     def __init__(self, name, params):
         FileTester.__init__(self, name, params)
+        if self.specs['map'] and self.specs['partial']:
+            raise Exception("For the Exodiff tester, you cannot specify both 'map' and 'partial' as True")
 
     def getOutputFiles(self):
         return self.specs['exodiff']
@@ -46,9 +51,15 @@ class Exodiff(FileTester):
             else:
                 map_option = ' '
 
-            commands.append(os.path.join(moose_dir, 'framework', 'contrib', 'exodiff', 'exodiff') + map_option + custom_cmp + ' -F' + ' ' + str(self.specs['abs_zero']) \
+            if self.specs['partial']:
+                partial_option = ' -partial '
+            else:
+                partial_option = ''
+
+            commands.append(os.path.join(moose_dir, 'framework', 'contrib', 'exodiff', 'exodiff') + map_option + partial_option + custom_cmp + ' -F' + ' ' + str(self.specs['abs_zero']) \
                             + old_floor + ' -t ' + str(self.specs['rel_err']) + ' ' + ' '.join(self.specs['exodiff_opts']) + ' ' \
                             + os.path.join(self.specs['test_dir'], self.specs['gold_dir'], file) + ' ' + os.path.join(self.specs['test_dir'], file))
+
 
         return commands
 

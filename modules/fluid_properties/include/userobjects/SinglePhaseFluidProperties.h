@@ -168,7 +168,6 @@ public:
   // clang-format on
 
 #undef propfunc
-#pragma GCC diagnostic pop
 
                               virtual Real s(Real pressure, Real temperature) const;
 
@@ -278,8 +277,8 @@ public:
    * @return internal energy (J/kg)
    */
   virtual Real e_from_p_T(Real p, Real T) const;
-  virtual Real e(Real pressure, Real temperature) const;
   DualReal e_from_p_T(const DualReal & p, const DualReal & T) const;
+  virtual Real e(Real pressure, Real temperature) const;
 
   /**
    * Internal energy and its derivatives from pressure and temperature
@@ -298,11 +297,13 @@ public:
   /**
    * Temperature from pressure and specific enthalpy
    *
-   * @param[in] pressure   pressure (Pa)
-   * @param[in] enthalpy   enthalpy (J/kg)
-   * @return Temperature (K)
+   * @param[in] p pressure (Pa)
+   * @param[in] h enthalpy (J/kg)
+   * @return temperature (K)
    */
-  virtual Real T_from_p_h(Real pressure, Real enthalpy) const;
+  virtual Real T_from_p_h(Real p, Real h) const;
+  virtual void T_from_p_h(Real p, Real h, Real & T, Real & dT_dp, Real & dT_dh) const;
+  DualReal T_from_p_h(const DualReal & p, const DualReal & h) const;
 
   /**
    * Molar mass [kg/mol]
@@ -513,6 +514,11 @@ public:
    */
   virtual void vaporPressure(Real temperature, Real & psat, Real & dpsat_dT) const;
   virtual void vaporPressure_dT(Real temperature, Real & psat, Real & dpsat_dT) const;
+  DualReal vaporPressure(const DualReal & temperature) const;
+
+  virtual Real vaporTemperature(Real pressure) const;
+  virtual void vaporTemperature(Real pressure, Real & Tsat, Real & dTsat_dp) const;
+  DualReal vaporTemperature(const DualReal & pressure) const;
 
 protected:
   /**
@@ -541,3 +547,4 @@ private:
   }
 };
 
+#pragma GCC diagnostic pop

@@ -4,6 +4,9 @@
     input = 'adapt_weight_test.i'
     exodiff = 'out.e-s002'
     group = 'adaptive'
-    max_parallel = 1
+
+    requirement = 'The system shall support weighted error estimation when considering multiple field variables for adaptivity.'
+    design = 'syntax/Adaptivity/index.md'
+    issues = '#447'
   [../]
 []

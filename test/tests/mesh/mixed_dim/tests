@@ -1,19 +1,27 @@
 [Tests]
-  [./onedtwod_test]
+  issues = '#1710 #2130 #2105'
+  design = 'Mesh/index.md'
+  [./oned_twod_test]
     type = 'Exodiff'
     input = '1d_2d.i'
     exodiff = 'out.e'
+
+    requirement = 'The system shall support simulations on meshes containing both 1D and 2D element types.'
   [../]
 
-  [./onedtwod_w_matl_test]
+  [./oned_twod_w_matl_test]
     type = 'Exodiff'
     input = '1d_2d_w_matl.i'
     exodiff = '1d_2d_w_matl_out.e'
+
+    requirement = 'The system shall support proper material evaluations on meshes containing both 1D and 2D element types.'
   [../]
 
-  [./onedthreed_test]
+  [./oned_threed_test]
     type = 'Exodiff'
     input = '1d_3d.i'
     exodiff = '1d_3d_out.e'
+
+    requirement = 'The system shall support simulations on meshes containing both 1D and 3D element types.'
   [../]
 []

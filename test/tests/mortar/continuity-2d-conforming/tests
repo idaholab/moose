@@ -1,0 +1,55 @@
+[Tests]
+  design = 'Constraints/index.md'
+  issues = '#13080'
+  [./conforming]
+    type = 'Exodiff'
+    input = 'conforming.i'
+    exodiff = 'conforming_out.e'
+    max_parallel = 2
+    max_threads = 2
+    custom_cmp = 'one-variable-u.cmp'
+    partial = True
+    map = False
+    mesh_mode = 'REPLICATED'
+    requirement = 'We shall be able to enforce solution continuity on a conforming mesh for one variable'
+  [../]
+
+  [./equalgradient]
+    type = 'Exodiff'
+    input = 'equalgradient.i'
+    exodiff = 'equalgradient_out.e'
+    max_parallel = 2
+    max_threads = 2
+    partial = True
+    map = False
+    custom_cmp = 'one-variable-u.cmp'
+    mesh_mode = 'REPLICATED'
+    requirement = 'We shall be able to enforce solution gradient continuity on a conforming mesh for one variable'
+  [../]
+
+  [./conforming_two_var]
+    type = 'Exodiff'
+    input = 'conforming_two_var.i'
+    exodiff = 'conforming_two_var_out.e'
+    max_parallel = 2
+    max_threads = 2
+    partial = True
+    map = False
+    custom_cmp = 'two-variable-uv.cmp'
+    mesh_mode = 'REPLICATED'
+    requirement = 'We shall be able to enforce solution continuity on a conforming mesh for two variables'
+  [../]
+
+  [./conforming-2nd-order]
+    type = 'Exodiff'
+    input = 'conforming-2nd-order.i'
+    exodiff = 'conforming-2nd-order_out.e'
+    max_parallel = 2
+    max_threads = 2
+    partial = True
+    map = False
+    custom_cmp = 'one-variable-u.cmp'
+    mesh_mode = 'REPLICATED'
+    requirement = 'We shall be able to enforce solution continuity on a conforming mesh for one variable using second order shape functions for both primal and lagrange variables. Note that this may be a relatively unstable discretization'
+  [../]
+[]

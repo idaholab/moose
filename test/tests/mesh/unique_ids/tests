@@ -1,17 +1,22 @@
 [Tests]
-  [./serial_mesh]
+  design = 'Mesh/index.md'
+  issues = '#2142'
+
+  [./replicated_mesh]
     type = 'RunApp'
     input = 'unique_ids.i'
     unique_ids = True
     min_parallel = 2
+    requirement = 'The system shall support having a truly unique_id (never recycled) for all mesh elements and nodes when using replicated mesh.'
   [../]
 
-  [./parallel_mesh]
+  [./distributed_mesh]
     type = 'RunApp'
     input = 'unique_ids.i'
     unique_ids = True
     cli_args = '--distributed-mesh'
     min_parallel = 2
-    prereq = serial_mesh
+    prereq = 'replicated_mesh'
+    requirement = 'The system shall support having a truly unique_id (never recycled) for all mesh elements and nodes when using distributed mes.'
   [../]
 []

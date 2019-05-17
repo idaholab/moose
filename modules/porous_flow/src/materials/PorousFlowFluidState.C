@@ -52,7 +52,7 @@ PorousFlowFluidState::PorousFlowFluidState(const InputParameters & parameters)
               ? _dictator.porousFlowVariableNum(_Xnacl_varnum)
               : 0),
 
-    _fs(getUserObject<PorousFlowFluidStateBase>("fluid_state")),
+    _fs(getUserObject<PorousFlowFluidStateMultiComponentBase>("fluid_state")),
     _aqueous_phase_number(_fs.aqueousPhaseIndex()),
     _gas_phase_number(_fs.gasPhaseIndex()),
     _aqueous_fluid_component(_fs.aqueousComponentIndex()),

@@ -1,10 +1,15 @@
 [Tests]
+   design = 'syntax/Adaptivity/index.md'
+
   [./displaced_test]
     type = 'Exodiff'
     input = 'displaced_adapt_test.i'
     exodiff = 'displaced_adapt_test_out.e-s002'
     group = 'adaptive'
     max_parallel = 1
+
+    requirement = 'The system shall perform identical adaptivity patterns on both the reference mesh and the displaced mesh when it exists.'
+    issues = '#443'
   [../]
 
   [./test_time]
@@ -12,6 +17,9 @@
     input = 'adapt_time_test.i'
     exodiff = 'out_time.e-s002'
     group = 'adaptive'
+
+    requirement = 'The system shall support toggling adaptivity on/off during a simulation.'
+    issues = '#1755 #447'
   [../]
 
   [./initial_adaptivity_test]
@@ -21,6 +29,9 @@
     abs_zero = 1e-08
     group = 'adaptive'
     max_parallel = 3
+
+    requirement = 'The system shall perform one or more adaptivity steps on the mesh before the simulation begins.'
+    issues = '#920'
   [../]
 
   [./patch_test]
@@ -30,7 +41,10 @@
     group = 'adaptive'
     max_parallel = 1
     max_threads = 1
-		# PatchRecoveryErrorEstimator creates slighlty different refinement patterns when run on multiple processors, so this test must be limited to one.
+    # PatchRecoveryErrorEstimator creates slighlty different refinement patterns when run on multiple processors, so this test must be limited to one.
+
+    requirement = 'The system shall support patch-based error estimation among a stencil of elements.'
+    issues = '#833'
   [../]
 
   [./adapt_cycles_test]
@@ -38,7 +52,11 @@
     input = 'adapt_test_cycles.i'
     exodiff = 'out_cycles.e out_cycles.e-s002'
     group = 'adaptive'
-    max_parallel = 1
+    max_parallel = 8 # Test shows small diffs as the proc count increases
+
+    requirement = 'The system shall support multiple adaptive steps per solve.'
+    issues = '#830'
+    abs_zero = 1e-8
   [../]
 
   [./test]
@@ -46,6 +64,9 @@
     input = 'adapt_test.i'
     exodiff = 'out.e-s002'
     group = 'adaptive'
+
+    requirement = 'The system shall perform adaptivity on systems containing multiple independent field variables.'
+    issues = '#920'
   [../]
 
   [./interval]
@@ -53,5 +74,8 @@
     input = 'interval.i'
     exodiff = 'interval_out.e-s002'
     group = 'adaptive'
+
+    requirement = 'The system shall support running adaptivity on an interval basis (every several time steps).'
+    issues = '#6888'
   [../]
 []

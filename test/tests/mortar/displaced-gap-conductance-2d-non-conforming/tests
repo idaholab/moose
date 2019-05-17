@@ -1,0 +1,36 @@
+[Tests]
+  design = 'Constraints/index.md'
+  issues = '#13080'
+  [./dynnamic_mortar_gap_conductance]
+    type = Exodiff
+    input = 'gap-conductance.i'
+    exodiff = 'gap-conductance_out.e'
+    mesh_mode = 'REPLICATED'
+    requirement = 'We shall be able to do gap conductance on a dynamic mesh using auxiliary displacements'
+    max_parallel = 2 # Restrict this test to 2 cores until I can take the time to understand the failure
+  [../]
+  [dynamic_gap_jacobian]
+    type = PetscJacobianTester
+    run_sim = True
+    input = 'gap-conductance.i'
+    difference_tol = 1e-7
+    mesh_mode = 'REPLICATED'
+    requirement = 'The Jacobian for the dynamic aux displacement gap conductance test case shall be perfect'
+  []
+  [dynamic_gap_conductance_fine]
+    type = Exodiff
+    input = 'gap-conductance.i'
+    cli_args = 'Mesh/file=nodal_normals_test_offset_nonmatching_gap_fine.e Outputs/file_base=gap-conductance-fine_out'
+    exodiff = 'gap-conductance-fine_out.e'
+    mesh_mode = 'REPLICATED'
+    requirement = 'We shall be able to do gap conductance on a dynamic mesh using auxiliary displacements on a fine mesh'
+  [../]
+  [linear_exact_verification]
+    type = Exodiff
+    input = 'gap-conductance.i'
+    cli_args = 'Mesh/file=nodal_normals_test_offset_nonmatching_gap_fine.e AuxKernels/function_y/function=0 Outputs/file_base=linear-verification_out'
+    exodiff = 'linear-verification_out.e'
+    mesh_mode = 'REPLICATED'
+    requirement = 'We shall generate the exact expected analytic solution for the gap conductance problem'
+  [../]
+[]

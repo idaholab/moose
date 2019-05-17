@@ -48,7 +48,7 @@ class GraphExtension(command.CommandExtension):
         renderer.add('ScatterToken', RenderScatter())
 
         if isinstance(renderer, renderers.HTMLRenderer):
-            renderer.addJavaScript('plotly', "contrib/plotly/plotly.min.js")
+            renderer.addJavaScript('plotly', "contrib/plotly/plotly.min.js", head=True)
 
         if isinstance(renderer, renderers.LatexRenderer):
             if not HAVE_PYTHON_PLOTLY and not self.get('draft'):
@@ -155,6 +155,7 @@ class RenderScatter(components.RenderComponent):
                                      layout=repr(token['layout']))
         html.Tag(parent, 'div', id_=plot_id)
         html.Tag(parent, 'script', string=content)
+
 
     def createLatex(self, parent, token, page):
 

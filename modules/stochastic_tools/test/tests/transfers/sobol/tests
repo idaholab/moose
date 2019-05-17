@@ -1,0 +1,10 @@
+[Tests]
+  issues = "#8863"
+  design = "SobolSampler.md SamplerTransfer.md"
+  [sobol]
+    type = CSVDiff
+    input = sobol.i
+    csvdiff = 'sobol_out_sub00.csv sobol_out_sub01.csv sobol_out_sub02.csv sobol_out_sub03.csv sobol_out_sub04.csv sobol_out_sub05.csv sobol_out_sub06.csv sobol_out_sub07.csv sobol_out_sub08.csv sobol_out_sub09.csv sobol_out_sub10.csv sobol_out_sub11.csv'
+    requirement = "The stochastic tools module shall support the creation of a sub-app for each row of each matrix returned by the SobolSampler."
+  []
+[]

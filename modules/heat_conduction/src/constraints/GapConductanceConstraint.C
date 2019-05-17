@@ -9,71 +9,40 @@
 
 #include "GapConductanceConstraint.h"
 
-registerMooseObject("HeatConductionApp", GapConductanceConstraint);
+registerADMooseObject("HeatConductionApp", GapConductanceConstraint);
 
-template <>
-InputParameters
-validParams<GapConductanceConstraint>()
-{
-  InputParameters params = validParams<MortarConstraint>();
-  params.addClassDescription(
-      "Computes the residual and Jacobian contributions for the 'Lagrange Multiplier' "
-      "implementation of the thermal contact problem. For more information, see the "
-      "detailed description here: http://tinyurl.com/gmmhbe9");
+defineADValidParams(
+    GapConductanceConstraint,
+    ADMortarConstraint,
+    params.addClassDescription(
+        "Computes the residual and Jacobian contributions for the 'Lagrange Multiplier' "
+        "implementation of the thermal contact problem. For more information, see the "
+        "detailed description here: http://tinyurl.com/gmmhbe9");
 
-  params.addRequiredParam<Real>("k", "Gap conductance");
-  return params;
-}
+    params.addRequiredParam<Real>("k", "Gap conductance"););
 
-GapConductanceConstraint::GapConductanceConstraint(const InputParameters & parameters)
-  : MortarConstraint(parameters), _k(getParam<Real>("k"))
+template <ComputeStage compute_stage>
+GapConductanceConstraint<compute_stage>::GapConductanceConstraint(
+    const InputParameters & parameters)
+  : ADMortarConstraint<compute_stage>(parameters), _k(adGetParam<Real>("k"))
 {
 }
 
-GapConductanceConstraint::~GapConductanceConstraint() {}
-
-Real
-GapConductanceConstraint::computeQpResidual()
+template <ComputeStage compute_stage>
+ADReal
+GapConductanceConstraint<compute_stage>::computeQpResidual(Moose::MortarType mortar_type)
 {
-  Real l = (_phys_points_master[_qp] - _phys_points_slave[_qp]).norm();
-  return (_k * (_u_master[_qp] - _u_slave[_qp]) / l - _lambda[_qp]) * _test[_i][_qp];
-}
-
-Real
-GapConductanceConstraint::computeQpResidualSide(Moose::ConstraintType res_type)
-{
-  switch (res_type)
+  switch (mortar_type)
   {
-    case Moose::Master:
+    case Moose::MortarType::Master:
       return _lambda[_qp] * _test_master[_i][_qp];
-    case Moose::Slave:
+    case Moose::MortarType::Slave:
       return -_lambda[_qp] * _test_slave[_i][_qp];
-    default:
-      return 0;
-  }
-}
-
-Real
-GapConductanceConstraint::computeQpJacobian()
-{
-  return -_phi[_j][_qp] * _test[_i][_qp];
-}
-
-Real
-GapConductanceConstraint::computeQpJacobianSide(Moose::ConstraintJacobianType jac_type)
-{
-  Real l = (_phys_points_master[_qp] - _phys_points_slave[_qp]).norm();
-  switch (jac_type)
-  {
-    case Moose::MasterMaster:
-      return (_k / l) * _phi[_j][_qp] * _test_master[_i][_qp];
-    case Moose::MasterSlave:
-      return -(_k / l) * _phi[_j][_qp] * _test_slave[_i][_qp];
-
-    case Moose::SlaveMaster:
-      return _phi[_j][_qp] * _test_master[_i][_qp];
-    case Moose::SlaveSlave:
-      return -_phi[_j][_qp] * _test_slave[_i][_qp];
+    case Moose::MortarType::Lower:
+    {
+      auto l = (_phys_points_master[_qp] - _phys_points_slave[_qp]).norm();
+      return (_k * (_u_master[_qp] - _u_slave[_qp]) / l - _lambda[_qp]) * _test[_i][_qp];
+    }
     default:
       return 0;
   }

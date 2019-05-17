@@ -19,7 +19,7 @@ template <>
 InputParameters
 validParams<SamplerTransfer>()
 {
-  InputParameters params = validParams<MultiAppTransfer>();
+  InputParameters params = validParams<StochasticToolsTransfer>();
   params.addClassDescription("Copies Sampler data to a SamplerReceiver object.");
   params.set<MooseEnum>("direction") = "to_multiapp";
   params.suppressParameter<MooseEnum>("direction");
@@ -30,12 +30,12 @@ validParams<SamplerTransfer>()
       "here should match the order of the items in the Sampler.");
   params.addRequiredParam<std::string>("to_control",
                                        "The name of the 'SamplerReceiver' on the sub application "
-                                       "to which the Sampler data will be transfered.");
+                                       "to which the Sampler data will be transferred.");
   return params;
 }
 
 SamplerTransfer::SamplerTransfer(const InputParameters & parameters)
-  : MultiAppTransfer(parameters),
+  : StochasticToolsTransfer(parameters),
     _parameter_names(getParam<std::vector<std::string>>("parameters")),
     _receiver_name(getParam<std::string>("to_control"))
 {
@@ -54,19 +54,24 @@ SamplerTransfer::SamplerTransfer(const InputParameters & parameters)
     _sampler_ptr = &(ptr_transient->getSampler());
   else
     _sampler_ptr = &(ptr_fullsolve->getSampler());
+}
 
-  // Compute the matrix and row for each
-  std::vector<DenseMatrix<Real>> out = _sampler_ptr->getSamples();
-  for (MooseIndex(out) mat = 0; mat < out.size(); ++mat)
-    for (unsigned int row = 0; row < out[mat].m(); ++row)
-      _multi_app_matrix_row.push_back(std::make_pair(mat, row));
+std::vector<Real>
+SamplerTransfer::getRow(const dof_id_type global_index) const
+{
+  Sampler::Location loc = _sampler_ptr->getLocation(global_index);
+  std::vector<Real> row;
+  row.reserve(_samples[loc.sample()].n());
+  for (unsigned int j = 0; j < _samples[loc.sample()].n(); ++j)
+    row.emplace_back(_samples[loc.sample()](loc.row(), j));
+  return row;
 }
 
 void
 SamplerTransfer::execute()
 {
   // Get the Sampler data
-  const std::vector<DenseMatrix<Real>> samples = _sampler_ptr->getSamples();
+  _samples = _sampler_ptr->getSamples();
 
   // Loop over all sub-apps
   for (unsigned int app_index = 0; app_index < _multi_app->numGlobalApps(); app_index++)
@@ -79,15 +84,33 @@ SamplerTransfer::execute()
     SamplerReceiver * ptr = getReceiver(app_index);
 
     // Populate the row of data to transfer
-    std::pair<unsigned int, unsigned int> loc = _multi_app_matrix_row[app_index];
-    std::vector<Real> row;
-    row.reserve(samples[loc.first].n());
-    for (unsigned int j = 0; j < samples[loc.first].n(); ++j)
-      row.emplace_back(samples[loc.first](loc.second, j));
+    std::vector<Real> row = getRow(app_index);
 
     // Perform the transfer
     ptr->transfer(_parameter_names, row);
   }
+}
+
+void
+SamplerTransfer::initializeToMultiapp()
+{
+  _samples = _sampler_ptr->getSamples();
+  _global_index = _sampler_ptr->getLocalRowBegin();
+}
+
+void
+SamplerTransfer::executeToMultiapp()
+{
+
+  SamplerReceiver * ptr = getReceiver(processor_id());
+  std::vector<Real> row = getRow(_global_index);
+  ptr->transfer(_parameter_names, row);
+  _global_index += 1;
+}
+
+void
+SamplerTransfer::finalizeToMultiapp()
+{
 }
 
 SamplerReceiver *

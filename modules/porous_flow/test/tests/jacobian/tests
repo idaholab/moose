@@ -795,7 +795,7 @@
   [./brineco2_twophase_2]
     type = 'PetscJacobianTester'
     input = 'brineco2_twophase_2.i'
-    ratio_tol = 1e-6 # Lots of chain rule derivatives
+    ratio_tol = 1e-5 # Lots of chain rule derivatives
     difference_tol = 1e10
     cli_args = '-mat_fd_type ds Executioner/num_steps=1'
     threading = '!pthreads'

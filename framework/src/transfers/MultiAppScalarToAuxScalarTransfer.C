@@ -71,7 +71,7 @@ MultiAppScalarToAuxScalarTransfer::execute()
           to_variable->reinit();
 
           // Determine number of DOFs that we're going to read and write
-          std::vector<dof_id_type> & to_dof = to_variable->dofIndices();
+          auto && to_dof = to_variable->dofIndices();
           auto & from_values = from_variable->sln();
 
           // Check that the DOF matches
@@ -99,7 +99,7 @@ MultiAppScalarToAuxScalarTransfer::execute()
       to_variable->reinit();
 
       // The dof indices for the scalar variable of interest
-      std::vector<dof_id_type> & to_dof = to_variable->dofIndices();
+      auto && to_dof = to_variable->dofIndices();
 
       // Loop over each sub-app and populate the AuxVariable values
       for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)

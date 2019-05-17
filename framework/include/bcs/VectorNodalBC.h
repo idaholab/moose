@@ -39,7 +39,7 @@ protected:
   VectorMooseVariable & _var;
 
   /// current node being processed
-  const Node *& _current_node;
+  const Node * const & _current_node;
 
   /// Value of the unknown variable this BC is acting on
   const RealVectorValue & _u;

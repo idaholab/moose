@@ -104,6 +104,7 @@ PorousFlowDependencies::PorousFlowDependencies()
   _deps.insertDependency("PorousFlowEnergyTimeDerivative", "nearest_qp_nodal");
   _deps.insertDependency("PorousFlowEnergyTimeDerivative", "matrix_internal_energy_nodal");
   _deps.insertDependency("PorousFlowEnergyTimeDerivative", "density_nodal");
+  _deps.insertDependency("PorousFlowEnergyTimeDerivative", "enthalpy_nodal");
   _deps.insertDependency("PorousFlowEnergyTimeDerivative", "internal_energy_nodal");
   _deps.insertDependency("PorousFlowEnergyTimeDerivative", "pressure_saturation_nodal");
 

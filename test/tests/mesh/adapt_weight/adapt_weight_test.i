@@ -95,6 +95,9 @@
   num_steps = 2
   dt = .1
 
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
+
   [./Adaptivity]
     refine_fraction = 0.2
     coarsen_fraction = 0.3

@@ -19,24 +19,24 @@ require the maximum x and y coordinates of a generated mesh be varied between 5 
 
 First, the MultiApps block is defined to execute the desired simulations.
 
-!listing commandline_control/master_multiple.i block=Distributions
+!listing multiapps/commandline_control/master_multiple.i block=Distributions
 
 Second, a [UniformDistribution](distributions/UniformDistribution.md)
 object must be created:
 
-!listing commandline_control/master_multiple.i block=Distributions
+!listing multiapps/commandline_control/master_multiple.i block=Distributions
 
 A sampling scheme must be defined for capturing values from the uniform distribution. In
 this example, since there are two pieces of data to be controlled ("xmax" and "ymax") the
 uniform distribution is sampled twice. Since this sampled data will only be used during
 "PRE_MULTIAPP_SETUP" execution, so the "execute_on" parameter is setup to match.
 
-!listing commandline_control/master_multiple.i block=Samplers
+!listing multiapps/commandline_control/master_multiple.i block=Samplers
 
 Finally, the `MultiAppCommandLineControl` is used to apply the sampled data to the
 desired Mesh settings.
 
-!listing commandline_control/master_multiple.i block=Controls
+!listing multiapps/commandline_control/master_multiple.i block=Controls
 
 !syntax parameters /Controls/MultiAppCommandLineControl
 

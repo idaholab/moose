@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "MooseHashing.h"
 #include "TheWarehouse.h"
 
 enum class Interfaces
@@ -43,7 +44,7 @@ struct enable_bitmask_operators<Interfaces>
   virtual size_t hash() const override                                                             \
   {                                                                                                \
     size_t h = 0;                                                                                  \
-    hash_combine(h, __VA_ARGS__);                                                                  \
+    Moose::hash_combine(h, __VA_ARGS__);                                                           \
     return h;                                                                                      \
   }
 

@@ -40,13 +40,13 @@ public:
 protected:
   MooseVariable & _field_var;
 
-  const Elem *& _current_elem;
+  const Elem * const & _current_elem;
   /// Volume of the current element
   const Real & _current_elem_volume;
 
   unsigned int _qp;
   const MooseArray<Point> & _q_point;
-  QBase *& _qrule;
+  const QBase * const & _qrule;
   const MooseArray<Real> & _JxW;
   const MooseArray<Real> & _coord;
 

@@ -10,6 +10,7 @@
 #pylint: enable=missing-docstring
 import os
 import re
+import copy
 import logging
 import mooseutils
 import MooseDocs
@@ -105,6 +106,12 @@ def _doc_import(root_dir, content=None):
 
     for pattern in exclude:
         output -= _find_files(output, os.path.join(root_dir, pattern))
+
+    # Test the files exist
+    for fname in copy.copy(output):
+        if not os.path.isfile(fname):
+            LOG.error("Unknown file provided in content (it is being removed):\n%s", fname)
+            output.remove(fname)
 
     return sorted(output)
 

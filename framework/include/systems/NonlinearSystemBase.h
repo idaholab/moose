@@ -14,6 +14,8 @@
 #include "MooseObjectWarehouse.h"
 #include "MooseObjectTagWarehouse.h"
 #include "PerfGraphInterface.h"
+#include "ComputeMortarFunctor.h"
+#include "MooseHashing.h"
 
 #include "libmesh/transient_system.h"
 #include "libmesh/nonlinear_implicit_system.h"
@@ -363,8 +365,14 @@ public:
    */
   virtual void setSolutionUDotDot(const NumericVector<Number> & udotdot);
 
-  virtual NumericVector<Number> * solutionUDot() override { return _u_dot; }
-  virtual NumericVector<Number> * solutionUDotDot() override { return _u_dotdot; }
+  NumericVector<Number> * solutionUDot() override { return _u_dot; }
+  NumericVector<Number> * solutionUDotDot() override { return _u_dotdot; }
+  NumericVector<Number> * solutionUDotOld() override { return _u_dot_old; }
+  NumericVector<Number> * solutionUDotDotOld() override { return _u_dotdot_old; }
+  const NumericVector<Number> * solutionUDot() const override { return _u_dot; }
+  const NumericVector<Number> * solutionUDotDot() const override { return _u_dotdot; }
+  const NumericVector<Number> * solutionUDotOld() const override { return _u_dot_old; }
+  const NumericVector<Number> * solutionUDotDotOld() const override { return _u_dotdot_old; }
 
   /**
    *  Return a numeric vector that is associated with the time tag.
@@ -381,7 +389,10 @@ public:
    */
   NumericVector<Number> & residualVector(TagID tag);
 
-  virtual const NumericVector<Number> *& currentSolution() override { return _current_solution; }
+  const NumericVector<Number> * const & currentSolution() const override
+  {
+    return _current_solution;
+  }
 
   virtual void serializeSolution();
   virtual NumericVector<Number> & serializedSolution() override;
@@ -571,16 +582,14 @@ public:
    */
   bool hasDiagSaveIn() const { return _has_diag_save_in || _has_nodalbc_diag_save_in; }
 
-  virtual NumericVector<Number> & solution() override { return *_sys.solution; }
+  NumericVector<Number> & solution() override { return *_sys.solution; }
+  const NumericVector<Number> & solution() const override { return *_sys.solution; }
 
   virtual System & system() override { return _sys; }
   virtual const System & system() const override { return _sys; }
 
-  virtual NumericVector<Number> * solutionUDotOld() override { return _u_dot_old; }
-
-  virtual NumericVector<Number> * solutionUDotDotOld() override { return _u_dotdot_old; }
-
-  virtual NumericVector<Number> * solutionPreviousNewton() override
+  NumericVector<Number> * solutionPreviousNewton() override { return _solution_previous_nl; }
+  const NumericVector<Number> * solutionPreviousNewton() const override
   {
     return _solution_previous_nl;
   }
@@ -650,6 +659,17 @@ protected:
   void enforceNodalConstraintsResidual(NumericVector<Number> & residual);
   void enforceNodalConstraintsJacobian();
 
+  /**
+   * Do mortar constraint residual computation
+   */
+  void mortarResidualConstraints(bool displaced);
+
+  /**
+   * Do mortar constraint jacobian computation
+   */
+  void mortarJacobianConstraints(bool displaced);
+
+protected:
   /// solution vector from nonlinear solver
   const NumericVector<Number> * _current_solution;
   /// ghosted form of the residual
@@ -744,7 +764,6 @@ protected:
   /// Constraints storage object
   ConstraintWarehouse _constraints;
 
-protected:
   /// increment vector
   NumericVector<Number> * _increment_vec;
   /// Preconditioner
@@ -831,5 +850,26 @@ protected:
   PerfID _compute_jacobian_blocks_timer;
   PerfID _compute_dampers_timer;
   PerfID _compute_dirac_timer;
+
+private:
+  /// Functors for computing residuals from undisplaced mortar constraints
+  std::unordered_map<std::pair<BoundaryID, BoundaryID>,
+                     ComputeMortarFunctor<ComputeStage::RESIDUAL>>
+      _undisplaced_mortar_residual_functors;
+
+  /// Functors for computing jacobians from undisplaced mortar constraints
+  std::unordered_map<std::pair<BoundaryID, BoundaryID>,
+                     ComputeMortarFunctor<ComputeStage::JACOBIAN>>
+      _undisplaced_mortar_jacobian_functors;
+
+  /// Functors for computing residuals from displaced mortar constraints
+  std::unordered_map<std::pair<BoundaryID, BoundaryID>,
+                     ComputeMortarFunctor<ComputeStage::RESIDUAL>>
+      _displaced_mortar_residual_functors;
+
+  /// Functors for computing jacobians from displaced mortar constraints
+  std::unordered_map<std::pair<BoundaryID, BoundaryID>,
+                     ComputeMortarFunctor<ComputeStage::JACOBIAN>>
+      _displaced_mortar_jacobian_functors;
 };
 

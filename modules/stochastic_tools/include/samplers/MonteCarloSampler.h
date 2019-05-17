@@ -26,7 +26,9 @@ public:
 protected:
   virtual std::vector<DenseMatrix<Real>> sample() override;
 
-  /// Number of monte carlo samples to create for each distribution
-  const std::size_t _num_samples;
-};
+  /// Number of matrices
+  const dof_id_type _num_matrices;
 
+  /// Number of monte carlo samples to create for each distribution
+  const dof_id_type _num_samples;
+};

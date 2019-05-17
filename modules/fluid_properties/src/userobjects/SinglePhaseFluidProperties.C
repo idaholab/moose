@@ -34,16 +34,17 @@ SinglePhaseFluidProperties::e_from_p_T(Real p, Real T) const
 DualReal
 SinglePhaseFluidProperties::e_from_p_T(const DualReal & p, const DualReal & T) const
 {
-  Real rawe = 0;
-  Real rawp = p.value();
-  Real rawT = T.value();
-  Real dedp = 0;
-  Real dedT = 0;
-  e_from_p_T(rawp, rawT, rawe, dedp, dedT);
+  Real e = 0.0;
+  Real pressure = p.value();
+  Real temperature = T.value();
+  Real de_dp = 0.0;
+  Real de_dT = 0.0;
+  e_from_p_T(pressure, temperature, e, de_dp, de_dT);
 
-  DualReal result = rawe;
-  for (size_t i = 0; i < p.derivatives().size(); i++)
-    result.derivatives()[i] = p.derivatives()[i] * dedp + T.derivatives()[i] * dedT;
+  DualReal result = e;
+  for (size_t i = 0; i < p.derivatives().size(); ++i)
+    result.derivatives()[i] = p.derivatives()[i] * de_dp + T.derivatives()[i] * de_dT;
+
   return result;
 }
 
@@ -297,9 +298,12 @@ Real SinglePhaseFluidProperties::vaporPressure(Real) const
 }
 
 void
-SinglePhaseFluidProperties::vaporPressure(Real, Real &, Real &) const
+SinglePhaseFluidProperties::vaporPressure(Real T, Real & p, Real & dp_dT) const
 {
-  mooseError(name(), ": vaporPressure() is not implemented");
+  fluidPropError(name(), ": ", __PRETTY_FUNCTION__, " derivatives not implemented.");
+
+  dp_dT = 0.0;
+  p = vaporPressure(T);
 }
 
 void
@@ -308,6 +312,52 @@ SinglePhaseFluidProperties::vaporPressure_dT(Real T, Real & psat, Real & dpsat_d
   mooseDeprecated(name(), ": vaporPressure_dT() is deprecated. Use vaporPressure() instead");
 
   vaporPressure(T, psat, dpsat_dT);
+}
+
+DualReal
+SinglePhaseFluidProperties::vaporPressure(const DualReal & T) const
+{
+  Real p = 0.0;
+  Real temperature = T.value();
+  Real dpdT = 0.0;
+
+  vaporPressure(temperature, p, dpdT);
+
+  DualReal result = p;
+  for (std::size_t i = 0; i < T.derivatives().size(); ++i)
+    result.derivatives()[i] = T.derivatives()[i] * dpdT;
+
+  return result;
+}
+
+Real SinglePhaseFluidProperties::vaporTemperature(Real) const
+{
+  mooseError(name(), ": vaporTemperature() is not implemented");
+}
+
+void
+SinglePhaseFluidProperties::vaporTemperature(Real p, Real & T, Real & dT_dp) const
+{
+  fluidPropError(name(), ": ", __PRETTY_FUNCTION__, " derivatives not implemented.");
+
+  dT_dp = 0.0;
+  T = vaporTemperature(p);
+}
+
+DualReal
+SinglePhaseFluidProperties::vaporTemperature(const DualReal & p) const
+{
+  Real T = 0.0;
+  Real pressure = p.value();
+  Real dTdp = 0.0;
+
+  vaporTemperature(pressure, T, dTdp);
+
+  DualReal result = T;
+  for (std::size_t i = 0; i < p.derivatives().size(); ++i)
+    result.derivatives()[i] = p.derivatives()[i] * dTdp;
+
+  return result;
 }
 
 void
@@ -499,4 +549,31 @@ SinglePhaseFluidProperties::T_from_p_h(Real p, Real h) const
   const Real v = 1. / rho;
   const Real e = e_from_v_h(v, h);
   return T_from_v_e(v, e);
+}
+
+void
+SinglePhaseFluidProperties::T_from_p_h(Real p, Real h, Real & T, Real & dT_dp, Real & dT_dh) const
+{
+  fluidPropError(name(), ": ", __PRETTY_FUNCTION__, " derivatives not implemented.");
+
+  dT_dp = 0.0;
+  dT_dh = 0.0;
+  T = T_from_p_h(p, h);
+}
+
+DualReal
+SinglePhaseFluidProperties::T_from_p_h(const DualReal & p, const DualReal & h) const
+{
+  Real T = 0.0;
+  Real pressure = p.value();
+  Real enthalpy = h.value();
+  Real dT_dp = 0.0;
+  Real dT_dh = 0.0;
+  T_from_p_h(pressure, enthalpy, T, dT_dp, dT_dh);
+
+  DualReal result = T;
+  for (size_t i = 0; i < p.derivatives().size(); ++i)
+    result.derivatives()[i] = p.derivatives()[i] * dT_dp + h.derivatives()[i] * dT_dh;
+
+  return result;
 }

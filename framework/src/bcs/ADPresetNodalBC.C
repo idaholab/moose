@@ -29,7 +29,7 @@ template <ComputeStage compute_stage>
 void
 ADPresetNodalBC<compute_stage>::computeValue(NumericVector<Number> & current_solution)
 {
-  dof_id_type & dof_idx = _var.nodalDofIndex();
+  auto && dof_idx = _var.nodalDofIndex();
   current_solution.set(dof_idx, MetaPhysicL::raw_value(computeQpValue()));
 }
 

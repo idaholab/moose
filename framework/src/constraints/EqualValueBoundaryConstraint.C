@@ -218,6 +218,9 @@ EqualValueBoundaryConstraint::computeQpJacobian(Moose::ConstraintJacobianType ty
       return _penalty;
     case Moose::MasterSlave:
       return -_penalty;
+    default:
+      mooseError("Unsupported type");
+      break;
   }
   return 0.;
 }

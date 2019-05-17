@@ -57,6 +57,18 @@ DisplacedSystem::solutionOlder()
   return *_sys.older_local_solution;
 }
 
+const NumericVector<Number> &
+DisplacedSystem::solutionOld() const
+{
+  return *_sys.old_local_solution;
+}
+
+const NumericVector<Number> &
+DisplacedSystem::solutionOlder() const
+{
+  return *_sys.older_local_solution;
+}
+
 System &
 DisplacedSystem::system()
 {
