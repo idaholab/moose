@@ -22,7 +22,7 @@ public:
 protected:
   virtual void addInitialConditions() override;
   virtual void addSolutionVariables() override;
-  virtual void addNonConstantAuxVariables() override;
+  virtual void addAuxVariables() override;
   virtual void addMaterials() override;
   virtual void addUserObjects() override;
 
@@ -30,5 +30,5 @@ protected:
   const std::vector<VariableName> _variables;
 
   /// List of values for the variables to add
-  const std::vector<Real> _variable_values;
+  const std::vector<FunctionName> _variable_values;
 };

@@ -37,33 +37,17 @@ protected:
    * @param[in] values  values of the variables to add
    */
   void addScalarVariables(const std::vector<VariableName> & names,
-                          const std::vector<Real> & values);
+                          const std::vector<FunctionName> & values);
 
   /**
-   * Adds constant aux variables
-   *
-   * @param[in] fe_family  finite element family
-   * @param[in] fe_order   finite element order
+   * Adds aux variables
    */
-  void addConstantAuxVariables(const std::string & fe_family, const std::string & fe_order);
+  virtual void addAuxVariables();
 
   /**
-   * Adds constant aux variables
-   *
-   * @param[in] names  names of the variables to add
-   * @param[in] values  values of the variables to add
-   * @param[in] fe_family  finite element family
-   * @param[in] fe_order   finite element order
+   * Adds materials
    */
-  void addConstantAuxVariables(const std::vector<VariableName> & names,
-                               const std::vector<Real> & values,
-                               const std::string & fe_family,
-                               const std::string & fe_order);
-
-  /**
-   * Adds constant materials
-   */
-  void addConstantMaterials();
+  virtual void addMaterials();
 
   /**
    * Adds a solution variable
@@ -79,19 +63,6 @@ protected:
                            const Real & scaling = 1.0);
 
   /**
-   * Adds constant solution variables
-   *
-   * @param[in] names  names of the variables to add
-   * @param[in] values  values of the variables to add
-   * @param[in] family  variable family
-   * @param[in] order  variable order
-   */
-  void addConstantSolutionVariables(const std::vector<VariableName> & names,
-                                    const std::vector<Real> & values,
-                                    const std::string & family = "LAGRANGE",
-                                    const std::string & order = "FIRST");
-
-  /**
    * Adds an aux variable
    *
    * @param[in] var_name  name of the variable to add
@@ -101,6 +72,14 @@ protected:
   void addAuxVariable(const VariableName & var_name,
                       const std::string & fe_family,
                       const std::string & fe_order);
+
+  /**
+   * Adds a constant initial condition
+   *
+   * @param[in] var_name  name of the variable for which to add initial condition
+   * @param[in] value  value of the initial condition
+   */
+  void addConstantIC(const VariableName & var_name, const Real & value);
 
   /**
    * Adds a function initial condition
@@ -141,16 +120,6 @@ protected:
   virtual void addSolutionVariables() = 0;
 
   /**
-   * Adds the non-constant aux variables and their initial conditions
-   */
-  virtual void addNonConstantAuxVariables() = 0;
-
-  /**
-   * Adds materials
-   */
-  virtual void addMaterials() = 0;
-
-  /**
    * Adds user objects
    */
   virtual void addUserObjects() = 0;
@@ -161,17 +130,17 @@ protected:
   /// List of scalar variables to add
   const std::vector<VariableName> _scalar_variables;
   /// List of values for the scalar variables to add
-  const std::vector<Real> _scalar_variable_values;
+  const std::vector<FunctionName> _scalar_variable_values;
 
-  /// List of constant aux variables to add
-  const std::vector<VariableName> _constant_aux_variables;
-  /// List of values for the constant aux variables to add
-  const std::vector<Real> _constant_aux_variable_values;
+  /// List of aux variables to add
+  const std::vector<VariableName> _aux_variables;
+  /// List of function names for aux variables to add
+  const std::vector<FunctionName> _aux_variable_values;
 
-  /// List of constant material properties to add
-  const std::vector<std::string> _constant_mat_property_names;
-  /// List of values for the constant material properties to add
-  const std::vector<Real> _constant_mat_property_values;
+  /// List of material properties to add
+  const std::vector<std::string> _mat_property_names;
+  /// List of function names for material properties to add
+  const std::vector<FunctionName> _mat_property_values;
 
   /// Default FE family
   const std::string _fe_family;

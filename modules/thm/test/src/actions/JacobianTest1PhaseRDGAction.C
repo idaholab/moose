@@ -148,7 +148,11 @@ JacobianTest1PhaseRDGAction::addSolutionVariables()
   {
     const std::vector<Real> values = {2.0, 4.0, 30.0};
 
-    addConstantSolutionVariables(variables, values);
+    for (std::size_t i = 0; i < variables.size(); ++i)
+    {
+      addSolutionVariable(variables[i]);
+      addConstantIC(variables[i], values[i]);
+    }
   }
   else if (_ic_option == "riemann_L") // left region
   {
@@ -213,28 +217,17 @@ JacobianTest1PhaseRDGAction::addSolutionVariablesRiemannIC(
       _awh.addActionBlock(action);
     }
 
-    // add the IC
-    {
-      const std::string class_name = "AddInitialConditionAction";
-      InputParameters params = _action_factory.getValidParams(class_name);
-      params.set<std::string>("type") = "FunctionIC";
-
-      std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
-          _action_factory.create(class_name, variables[i] + "_IC", params));
-
-      action->getObjectParams().set<VariableName>("variable") = variables[i];
-      action->getObjectParams().set<FunctionName>("function") = ic_fn_name;
-
-      _awh.addActionBlock(action);
-    }
+    addFunctionIC(variables[i], ic_fn_name);
   }
 }
 
 void
-JacobianTest1PhaseRDGAction::addNonConstantAuxVariables()
+JacobianTest1PhaseRDGAction::addAuxVariables()
 {
-  addConstantAuxVariables({_A_name}, {2.0}, _fe_family, _fe_order);
-  addConstantAuxVariables({_A_linear_name}, {2.0}, "LAGRANGE", "FIRST");
+  addAuxVariable(_A_name, _fe_family, _fe_order);
+  addConstantIC(_A_name, 2.0);
+  addAuxVariable(_A_linear_name, "LAGRANGE", "FIRST");
+  addConstantIC(_A_linear_name, 2.0);
 }
 
 void
