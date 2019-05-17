@@ -100,7 +100,7 @@ ComputeDiracThread::onElement(const Elem * elem)
     // called, we need to reinit Materials.
     if (dirac_kernel->getMaterialPropertyCalled())
     {
-      _fe_problem.reinitMaterials(_subdomain, _tid, /*swap_stateful=*/false);
+      _fe_problem.reinitMaterials(_subdomain, _tid, /*swap_stateful=*/true);
       break;
     }
   }
