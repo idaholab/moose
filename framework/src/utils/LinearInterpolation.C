@@ -9,20 +9,27 @@
 
 #include "LinearInterpolation.h"
 
+#include "metaphysicl/numberarray.h"
+#include "metaphysicl/dualnumber.h"
+
 #include <cassert>
 #include <fstream>
 #include <stdexcept>
 
-int LinearInterpolation::_file_number = 0;
+template <typename T>
+int LinearInterpolationTempl<T>::_file_number = 0;
 
-LinearInterpolation::LinearInterpolation(const std::vector<Real> & x, const std::vector<Real> & y)
+template <typename T>
+LinearInterpolationTempl<T>::LinearInterpolationTempl(const std::vector<Real> & x,
+                                                      const std::vector<Real> & y)
   : _x(x), _y(y)
 {
   errorCheck();
 }
 
+template <typename T>
 void
-LinearInterpolation::errorCheck()
+LinearInterpolationTempl<T>::errorCheck()
 {
   if (_x.size() != _y.size())
     throw std::domain_error("Vectors are not the same length");
@@ -37,10 +44,11 @@ LinearInterpolation::errorCheck()
     }
 }
 
-Real
-LinearInterpolation::sample(Real x) const
+template <typename T>
+T
+LinearInterpolationTempl<T>::sample(const T & x) const
 {
-  // sanity check (empty LinearInterpolations get constructed in many places
+  // sanity check (empty LinearInterpolationTempls get constructed in many places
   // so we cannot put this into the errorCheck)
   assert(_x.size() > 0);
 
@@ -58,8 +66,9 @@ LinearInterpolation::sample(Real x) const
   return 0;
 }
 
-Real
-LinearInterpolation::sampleDerivative(Real x) const
+template <typename T>
+T
+LinearInterpolationTempl<T>::sampleDerivative(const T & x) const
 {
   // endpoint cases
   if (x < _x[0])
@@ -75,8 +84,9 @@ LinearInterpolation::sampleDerivative(Real x) const
   return 0;
 }
 
+template <typename T>
 Real
-LinearInterpolation::integrate()
+LinearInterpolationTempl<T>::integrate()
 {
   Real answer = 0;
   for (unsigned int i = 1; i < _x.size(); ++i)
@@ -85,20 +95,26 @@ LinearInterpolation::integrate()
   return answer;
 }
 
+template <typename T>
 Real
-LinearInterpolation::domain(int i) const
+LinearInterpolationTempl<T>::domain(int i) const
 {
   return _x[i];
 }
 
+template <typename T>
 Real
-LinearInterpolation::range(int i) const
+LinearInterpolationTempl<T>::range(int i) const
 {
   return _y[i];
 }
 
+template <typename T>
 unsigned int
-LinearInterpolation::getSampleSize()
+LinearInterpolationTempl<T>::getSampleSize()
 {
   return _x.size();
 }
+
+template class LinearInterpolationTempl<Real>;
+template class LinearInterpolationTempl<DualReal>;
