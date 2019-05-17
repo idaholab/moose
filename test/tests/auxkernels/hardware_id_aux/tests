@@ -1,0 +1,15 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'hardware_id_aux.i'
+    exodiff = 'hardware_id_aux_out.e'
+    requirement = 'MOOSE shall allow visualization of the MPI processes mapping to compute nodes'
+    design = 'HardwareIDAux.md'
+    issues = '#12629 #12630'
+
+    # Note, we never test on multiple nodes
+    # so there is no reason to test this on more than one processor
+    min_parallel = 1
+    max_parallel = 1
+  [../]
+[]

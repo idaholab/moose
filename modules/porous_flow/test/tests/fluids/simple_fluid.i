@@ -4,7 +4,7 @@
 # Density should equal 1500*exp(1E7/1E9-2E-4*300)=1426.844 kg/m^3
 # Viscosity should equal 1.1E-3 Pa.s
 # Energy density should equal 4000 * 300 = 1.2E6 J/kg
-# Specific enthalpy should equal 4000 * 300 + 10e6 / 1426.844 = 1.207011E6 J/kg
+# Specific enthalpy should equal 4000 * 300 + 10e6 / 1426.844 = 1.207008E6 J/kg
 
 [Modules]
   [./FluidProperties]

@@ -42,6 +42,11 @@ protected:
   /// The system to count DoFs from
   int _system;
 
+  /// Helpful in determining the physical layout of the ranks
+  const RankMap & _rank_map;
+
+  unsigned int _my_hardware_id;
+
   bool _sync_to_all_procs;
 
   dof_id_type _local_num_elems;
@@ -50,11 +55,17 @@ protected:
   dof_id_type _local_num_partition_sides;
   Real _local_partition_surface_area;
 
+  // These are measuring the size of inter-nodal (compute nodes) communication
+  dof_id_type _local_num_partition_hardware_id_sides;
+  Real _local_partition_hardware_id_surface_area;
+
   VectorPostprocessorValue & _pid;
   VectorPostprocessorValue & _num_elems;
   VectorPostprocessorValue & _num_nodes;
   VectorPostprocessorValue & _num_dofs;
   VectorPostprocessorValue & _num_partition_sides;
   VectorPostprocessorValue & _partition_surface_area;
+  VectorPostprocessorValue & _num_partition_hardware_id_sides;
+  VectorPostprocessorValue & _partition_hardware_id_surface_area;
 };
 

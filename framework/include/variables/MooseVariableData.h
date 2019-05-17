@@ -94,6 +94,11 @@ public:
                     const Elem * const & elem);
 
   /**
+   * Returns whether this data structure needs automatic differentiation calculations
+   */
+  bool needsAD() const { return _need_ad; }
+
+  /**
    * Set the geometry type before calculating variables values
    * @param gm_type The type type of geometry; either Volume or Face
    */
