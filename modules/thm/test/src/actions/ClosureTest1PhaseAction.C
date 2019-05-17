@@ -26,9 +26,9 @@ ClosureTest1PhaseAction::addInitialConditions()
 }
 
 void
-ClosureTest1PhaseAction::addNonConstantAuxVariables()
+ClosureTest1PhaseAction::addAuxVariables()
 {
-  ClosureTestAction::addNonConstantAuxVariables();
+  ClosureTestAction::addAuxVariables();
 
   // add the usual solution variables as aux variables
   FlowModelSetup::addAuxVariable(_rhoA_name);
@@ -42,6 +42,7 @@ ClosureTest1PhaseAction::addNonConstantAuxVariables()
 void
 ClosureTest1PhaseAction::addMaterials()
 {
+  TestAction::addMaterials();
   FlowModelSetup1Phase::addMaterials();
 }
 

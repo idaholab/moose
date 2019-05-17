@@ -13,16 +13,15 @@ validParams<TestAction>()
   params.addParam<bool>("use_transient_executioner", "Option to use a transient executioner");
   params.addParam<bool>("generate_mesh", true, "Option to have the action generate the mesh");
   params.addParam<std::vector<VariableName>>("scalar_variable_names", "List of scalar variables");
-  params.addParam<std::vector<Real>>("scalar_variable_values",
-                                     "List of values of the scalar variables");
-  params.addParam<std::vector<VariableName>>("constant_aux_variable_names",
-                                             "List of constant aux variables");
-  params.addParam<std::vector<Real>>("constant_aux_variable_values",
-                                     "List of values of the constant aux variables");
-  params.addParam<std::vector<std::string>>("constant_mat_property_names",
-                                            "List of constant material property names");
-  params.addParam<std::vector<Real>>("constant_mat_property_values",
-                                     "List of values of the constant material properties");
+  params.addParam<std::vector<FunctionName>>("scalar_variable_values",
+                                             "List of values of the scalar variables");
+  params.addParam<std::vector<VariableName>>("aux_variable_names", "List of aux variables");
+  params.addParam<std::vector<FunctionName>>("aux_variable_values",
+                                             "List of values of the aux variables");
+  params.addParam<std::vector<std::string>>("mat_property_names",
+                                            "List of material property names");
+  params.addParam<std::vector<FunctionName>>("mat_property_values",
+                                             "List of values of the material properties");
 
   params.addPrivateParam<std::string>("fe_family");
   params.addPrivateParam<std::string>("fe_order");
@@ -37,11 +36,11 @@ TestAction::TestAction(InputParameters params)
     _default_use_transient_executioner(false),
 
     _scalar_variables(getParam<std::vector<VariableName>>("scalar_variable_names")),
-    _scalar_variable_values(getParam<std::vector<Real>>("scalar_variable_values")),
-    _constant_aux_variables(getParam<std::vector<VariableName>>("constant_aux_variable_names")),
-    _constant_aux_variable_values(getParam<std::vector<Real>>("constant_aux_variable_values")),
-    _constant_mat_property_names(getParam<std::vector<std::string>>("constant_mat_property_names")),
-    _constant_mat_property_values(getParam<std::vector<Real>>("constant_mat_property_values")),
+    _scalar_variable_values(getParam<std::vector<FunctionName>>("scalar_variable_values")),
+    _aux_variables(getParam<std::vector<VariableName>>("aux_variable_names")),
+    _aux_variable_values(getParam<std::vector<FunctionName>>("aux_variable_values")),
+    _mat_property_names(getParam<std::vector<std::string>>("mat_property_names")),
+    _mat_property_values(getParam<std::vector<FunctionName>>("mat_property_values")),
     _fe_family(getParam<std::string>("fe_family")),
     _fe_order(getParam<std::string>("fe_order"))
 {
@@ -49,14 +48,14 @@ TestAction::TestAction(InputParameters params)
     mooseError(name(),
                ": The parameters 'scalar_variable_names' and ",
                "'scalar_variable_values' must have the same numbers of entries.");
-  if (_constant_aux_variables.size() != _constant_aux_variable_values.size())
+  if (_aux_variables.size() != _aux_variable_values.size())
     mooseError(name(),
-               ": The parameters 'constant_aux_variable_names' and ",
-               "'constant_aux_variable_values' must have the same numbers of entries.");
-  if (_constant_mat_property_names.size() != _constant_mat_property_values.size())
+               ": The parameters 'aux_variable_names' and ",
+               "'aux_variable_values' must have the same numbers of entries.");
+  if (_mat_property_names.size() != _mat_property_values.size())
     mooseError(name(),
-               ": The parameters 'constant_mat_property_names' and ",
-               "'constant_mat_property_values' must have the same numbers of entries.");
+               ": The parameters 'mat_property_names' and ",
+               "'mat_property_values' must have the same numbers of entries.");
 }
 
 void
@@ -128,11 +127,9 @@ TestAction::addObjects()
 {
   addSolutionVariables();
   addScalarVariables(_scalar_variables, _scalar_variable_values);
-  addConstantAuxVariables(_fe_family, _fe_order);
-  addNonConstantAuxVariables();
+  addAuxVariables();
   addInitialConditions();
   addUserObjects();
-  addConstantMaterials();
   addMaterials();
   addPreconditioner();
   addExecutioner();
@@ -141,7 +138,7 @@ TestAction::addObjects()
 
 void
 TestAction::addScalarVariables(const std::vector<VariableName> & names,
-                               const std::vector<Real> & values)
+                               const std::vector<FunctionName> & values)
 {
   for (unsigned int i = 0; i < names.size(); ++i)
   {
@@ -152,13 +149,13 @@ TestAction::addScalarVariables(const std::vector<VariableName> & names,
     {
       const std::string class_name = "AddInitialConditionAction";
       InputParameters params = _action_factory.getValidParams(class_name);
-      params.set<std::string>("type") = "ScalarConstantIC";
+      params.set<std::string>("type") = "FunctionScalarIC";
 
       std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
           _action_factory.create(class_name, names[i] + "_IC", params));
 
       action->getObjectParams().set<VariableName>("variable") = names[i];
-      action->getObjectParams().set<Real>("value") = values[i];
+      action->getObjectParams().set<std::vector<FunctionName>>("function") = {values[i]};
 
       _awh.addActionBlock(action);
     }
@@ -166,50 +163,33 @@ TestAction::addScalarVariables(const std::vector<VariableName> & names,
 }
 
 void
-TestAction::addConstantAuxVariables(const std::string & fe_family, const std::string & fe_order)
+TestAction::addAuxVariables()
 {
-  addConstantAuxVariables(
-      _constant_aux_variables, _constant_aux_variable_values, fe_family, fe_order);
-}
+  const std::vector<VariableName> names = _aux_variables;
+  const std::vector<FunctionName> values = _aux_variable_values;
+  const std::string fe_family = _fe_family;
+  const std::string fe_order = _fe_order;
 
-void
-TestAction::addConstantAuxVariables(const std::vector<VariableName> & names,
-                                    const std::vector<Real> & values,
-                                    const std::string & fe_family,
-                                    const std::string & fe_order)
-{
   for (unsigned int i = 0; i < names.size(); ++i)
   {
     // add the aux variable
     addAuxVariable(names[i], fe_family, fe_order);
 
     // add its IC
-    {
-      const std::string class_name = "AddInitialConditionAction";
-      InputParameters params = _action_factory.getValidParams(class_name);
-      params.set<std::string>("type") = "ConstantIC";
-
-      std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
-          _action_factory.create(class_name, names[i] + "_IC", params));
-
-      action->getObjectParams().set<VariableName>("variable") = names[i];
-      action->getObjectParams().set<Real>("value") = values[i];
-
-      _awh.addActionBlock(action);
-    }
+    addFunctionIC(names[i], values[i]);
 
     // add its aux kernel
     {
       const std::string class_name = "AddKernelAction";
       InputParameters params = _action_factory.getValidParams(class_name);
-      params.set<std::string>("type") = "ConstantAux";
+      params.set<std::string>("type") = "FunctionAux";
       params.set<std::string>("task") = "add_aux_kernel";
 
       std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
           _action_factory.create(class_name, names[i] + "_aux", params));
 
       action->getObjectParams().set<AuxVariableName>("variable") = names[i];
-      action->getObjectParams().set<Real>("value") = values[i];
+      action->getObjectParams().set<FunctionName>("function") = values[i];
 
       _awh.addActionBlock(action);
     }
@@ -217,18 +197,17 @@ TestAction::addConstantAuxVariables(const std::vector<VariableName> & names,
 }
 
 void
-TestAction::addConstantMaterials()
+TestAction::addMaterials()
 {
   const std::string class_name = "AddMaterialAction";
   InputParameters params = _action_factory.getValidParams(class_name);
-  params.set<std::string>("type") = "GenericConstantMaterial";
+  params.set<std::string>("type") = "GenericFunctionMaterial";
 
   std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
-      _action_factory.create(class_name, "constant_material", params));
+      _action_factory.create(class_name, "material", params));
 
-  action->getObjectParams().set<std::vector<std::string>>("prop_names") =
-      _constant_mat_property_names;
-  action->getObjectParams().set<std::vector<Real>>("prop_values") = _constant_mat_property_values;
+  action->getObjectParams().set<std::vector<std::string>>("prop_names") = _mat_property_names;
+  action->getObjectParams().set<std::vector<FunctionName>>("prop_values") = _mat_property_values;
 
   _awh.addActionBlock(action);
 }
@@ -252,34 +231,6 @@ TestAction::addSolutionVariable(const VariableName & var_name,
 }
 
 void
-TestAction::addConstantSolutionVariables(const std::vector<VariableName> & names,
-                                         const std::vector<Real> & values,
-                                         const std::string & family,
-                                         const std::string & order)
-{
-  for (unsigned int i = 0; i < names.size(); ++i)
-  {
-    // add the variable
-    addSolutionVariable(names[i], family, order);
-
-    // add its IC
-    {
-      const std::string class_name = "AddInitialConditionAction";
-      InputParameters params = _action_factory.getValidParams(class_name);
-      params.set<std::string>("type") = "ConstantIC";
-
-      std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
-          _action_factory.create(class_name, names[i] + "_IC", params));
-
-      action->getObjectParams().set<VariableName>("variable") = names[i];
-      action->getObjectParams().set<Real>("value") = values[i];
-
-      _awh.addActionBlock(action);
-    }
-  }
-}
-
-void
 TestAction::addAuxVariable(const VariableName & var_name,
                            const std::string & fe_family,
                            const std::string & fe_order)
@@ -292,6 +243,22 @@ TestAction::addAuxVariable(const VariableName & var_name,
 
   std::shared_ptr<Action> action =
       std::static_pointer_cast<Action>(_action_factory.create(class_name, var_name, params));
+
+  _awh.addActionBlock(action);
+}
+
+void
+TestAction::addConstantIC(const VariableName & var_name, const Real & value)
+{
+  const std::string class_name = "AddInitialConditionAction";
+  InputParameters params = _action_factory.getValidParams(class_name);
+  params.set<std::string>("type") = "ConstantIC";
+
+  std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
+      _action_factory.create(class_name, var_name + "_IC", params));
+
+  action->getObjectParams().set<VariableName>("variable") = var_name;
+  action->getObjectParams().set<Real>("value") = value;
 
   _awh.addActionBlock(action);
 }

@@ -34,14 +34,16 @@ JacobianTest1PhaseAction::addSolutionVariables()
 }
 
 void
-JacobianTest1PhaseAction::addNonConstantAuxVariables()
+JacobianTest1PhaseAction::addAuxVariables()
 {
+  TestAction::addAuxVariables();
   FlowModelSetup1Phase::addNonConstantAuxVariables();
 }
 
 void
 JacobianTest1PhaseAction::addMaterials()
 {
+  TestAction::addMaterials();
   FlowModelSetup1Phase::addMaterials();
 }
 

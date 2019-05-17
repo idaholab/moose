@@ -1,8 +1,8 @@
 [JacobianTestGeneral]
   variable_names = 'arhoA arhouA arhoEA'
   variable_values = '3 4 5'
-  constant_aux_variable_names = 'A'
-  constant_aux_variable_values = '1'
+  aux_variable_names = 'A'
+  aux_variable_values = '1'
   snes_test_err = 1e-8
 []
 

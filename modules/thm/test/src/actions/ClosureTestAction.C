@@ -43,8 +43,9 @@ ClosureTestAction::addSolutionVariables()
 }
 
 void
-ClosureTestAction::addNonConstantAuxVariables()
+ClosureTestAction::addAuxVariables()
 {
+  TestAction::addAuxVariables();
   if (_has_T_wall)
     addAuxVariable(_T_wall_name, _fe_family, _fe_order);
 }
