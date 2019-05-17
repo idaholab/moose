@@ -649,6 +649,9 @@ SystemBase::addArrayVariable(const std::string & var_name,
                              const std::vector<Real> & scale_factor,
                              const std::set<SubdomainID> * const active_subdomains)
 {
+  if (type == FEType(FIRST, NEDELEC_ONE) || type.family == LAGRANGE_VEC)
+    mooseError("Vector family type cannot be used in an array variable");
+
   _numbered_vars.resize(libMesh::n_threads());
 
   // Turn off automatic variable group identification so that we can be sure that this variable
