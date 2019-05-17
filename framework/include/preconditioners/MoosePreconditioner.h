@@ -53,4 +53,3 @@ protected:
   /// Subproblem this preconditioner is part of
   FEProblemBase & _fe_problem;
 };
-

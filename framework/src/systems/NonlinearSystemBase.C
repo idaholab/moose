@@ -2891,6 +2891,12 @@ NonlinearSystemBase::setPreconditioner(std::shared_ptr<MoosePreconditioner> pc)
   _preconditioner = pc;
 }
 
+MoosePreconditioner const *
+NonlinearSystemBase::getPreconditioner() const
+{
+  return _preconditioner.get();
+}
+
 void
 NonlinearSystemBase::setupDampers()
 {
