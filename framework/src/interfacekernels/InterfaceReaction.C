@@ -21,7 +21,7 @@ validParams<InterfaceReaction>()
       "D_neighbor", "D_neighbor", "The neighboring diffusion coefficient.");
   params.addRequiredParam<Real>("kf", "Forward reaction rate coefficient.");
   params.addRequiredParam<Real>("kb", "Backward reaction rate coefficient.");
-  params.addClassDescription("Implements a reaction to establish flux=kf*u-kb*v "
+  params.addClassDescription("Implements a reaction to establish Flux=k_f*u-k_b*v "
                              "at interface.");
   return params;
 }
@@ -44,7 +44,7 @@ InterfaceReaction::computeQpResidual(Moose::DGResidualType type)
   {
 
       // Move all the terms to the LHS to get residual, for master domain
-      //  R = flux - kf*u + kb*v = (-D*grad(u))_from_neighbor - kf*u + kb*v
+      // Residual = flux - kf*u + kb*v = (-D*grad(u))_from_neighbor - kf*u + kb*v
       // Weak form for master domain is: -(test, n*(D*grad(u))_from_neighbor + kf*u - kb*v)
 
     case Moose::Element:
