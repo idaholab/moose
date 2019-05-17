@@ -1,0 +1,13 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'gen_extrude.i'
+    cli_args = '--mesh-only'
+    exodiff = 'gen_extrude_in.e'
+    requirement = 'MOOSE shall be able to extrude with variable height elevations with variable numbers of layers and swap subdomain IDs'
+    design = 'FancyExtruderGenerator.md'
+    issues = '#13276 #3554 #5634'
+    mesh_mode = 'REPLICATED'
+    recover = false
+  [../]
+[]
