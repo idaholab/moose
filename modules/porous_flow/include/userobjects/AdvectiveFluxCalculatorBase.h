@@ -243,6 +243,14 @@ protected:
    */
   std::map<processor_id_type, std::vector<std::pair<dof_id_type, dof_id_type>>> _pairs_to_send;
 
+  /**
+   * A mooseWarning is issued if mb_wasted = (_connections.sizeSequential() -
+   * _connections.numNodes()) * 4 / 1048576 > _allowable_MB_wastage.  The _connections object uses
+   * sequential node numbering for computational efficiency, but this leads to memory being used
+   * inefficiently: the number of megabytes wasted is mb_wasted.
+   */
+  const Real _allowable_MB_wastage;
+
   /// Signals to the PQPlusMinus method what should be computed
   enum class PQPlusMinusEnum
   {
