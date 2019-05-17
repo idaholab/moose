@@ -18,6 +18,15 @@
 
 CommandLine::CommandLine(int argc, char * argv[]) { addArguments(argc, argv); }
 
+CommandLine::CommandLine(const CommandLine & other)
+  : _cli_options(other._cli_options),
+    _used_hiti(other._used_hiti),
+    _hiti(other._hiti),
+    _argv(other._argv),
+    _args(other._args)
+{
+}
+
 void
 CommandLine::addArguments(int argc, char * argv[])
 {

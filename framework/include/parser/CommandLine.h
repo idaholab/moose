@@ -49,6 +49,7 @@ public:
   };
 
   CommandLine(int argc, char * argv[]);
+  CommandLine(const CommandLine & other);
   virtual ~CommandLine();
 
   void addArguments(int argc, char * argv[]);

@@ -609,7 +609,12 @@ MultiApp::createApp(unsigned int i, Real start_time)
 
   InputParameters app_params = AppFactory::instance().getValidParams(_app_type);
   app_params.set<FEProblemBase *>("_parent_fep") = &_fe_problem;
-  app_params.set<std::shared_ptr<CommandLine>>("_command_line") = _app.commandLine();
+
+  // Set the command line parameters with a copy of the main application command line parameters,
+  // the copy is required so that the addArgument command below doesn't accumulate more and more
+  // of the same cli_args, which is important when running in batch mode.
+  app_params.set<std::shared_ptr<CommandLine>>("_command_line") =
+      std::make_shared<CommandLine>(*_app.commandLine());
 
   if (_cli_args.size() > 0)
   {
