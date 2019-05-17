@@ -263,8 +263,7 @@ outputExecutionInformation(const MooseApp & app, FEProblemBase & problem)
   if (!pc_desc.empty())
     oss << std::setw(console_field_width) << "  PETSc Preconditioner: " << pc_desc << '\n';
 
-  const std::shared_ptr<const MoosePreconditioner> mpc =
-      problem.getNonlinearSystemBase().getPreconditioner();
+  MoosePreconditioner const * mpc = problem.getNonlinearSystemBase().getPreconditioner();
   if (mpc)
   {
     oss << std::setw(console_field_width)

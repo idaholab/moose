@@ -2891,10 +2891,10 @@ NonlinearSystemBase::setPreconditioner(std::shared_ptr<MoosePreconditioner> pc)
   _preconditioner = pc;
 }
 
-const std::shared_ptr<const MoosePreconditioner>
+MoosePreconditioner const *
 NonlinearSystemBase::getPreconditioner() const
 {
-  return std::dynamic_pointer_cast<const MoosePreconditioner>(_preconditioner);
+  return _preconditioner.get();
 }
 
 void
