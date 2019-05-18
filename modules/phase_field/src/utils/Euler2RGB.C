@@ -159,7 +159,7 @@ euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int phase, u
     eta_min = 0 * (pi / 180);
     eta_max = 45 * (pi / 180);
     chi_min = 0 * (pi / 180);
-    chi_max = std::acos(std::sqrt(1.0 / (2.0 + (std::tan(Utility::pow<2>(eta_max))))));
+    chi_max = std::acos(std::sqrt(1.0 / (2.0 + (Utility::pow<2>(std::tan(eta_max))))));
   }
 
   //  Load hexagonal parameters (class 622)
@@ -289,15 +289,19 @@ euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int phase, u
       // Increment to next symmetry operator if not in SST
       else
         index++;
+
+      // Error check if no solution found
+      if (index == nsym)
+        mooseError("Euler2RGB failed to map the supplied Euler angle into the SST!");
     }
 
     //  Adjust maximum chi value to ensure it falls within the SST (cubic materials only)
     if (sym == 43)
-      chi_max2 = std::acos(std::sqrt(1.0 / (2.0 + (std::tan(Utility::pow<2>(eta))))));
+      chi_max2 = std::acos(std::sqrt(1.0 / (2.0 + (Utility::pow<2>(std::tan(eta))))));
     else
       chi_max2 = pi / 2;
 
-    //  Calculate the RGB color values and make adjustments to maximize colorspace
+    // Calculate the RGB color values and make adjustments to maximize colorspace
     red = std::abs(1.0 - (chi / chi_max2));
     blue = std::abs((eta - eta_min) / (eta_max - eta_min));
     green = 1.0 - blue;
@@ -305,12 +309,16 @@ euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int phase, u
     blue = blue * (chi / chi_max2);
     green = green * (chi / chi_max2);
 
+    // Error check to prevent negative values being input into the square root calculation
+    if (red < 0 || green < 0 || blue < 0)
+      mooseError("RGB componenet values cannot be negative!");
+
     RGB(0) = std::sqrt(red);
     RGB(1) = std::sqrt(green);
     RGB(2) = std::sqrt(blue);
 
     // Find maximum value of red, green, or blue
-    maxRGB = std::max(RGB(0), std::max(RGB(1), RGB(2)));
+    maxRGB = std::max({RGB(0), RGB(1), RGB(2)});
 
     //  Adjust RGB values to enforce white center point instead of black
     RGB /= maxRGB;
