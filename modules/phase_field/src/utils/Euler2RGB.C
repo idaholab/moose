@@ -290,9 +290,8 @@ euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int phase, u
       else
         index++;
 
-      // Error check if no solution found
-      if (index == nsym)
-        mooseError("Euler2RGB failed to map the supplied Euler angle into the SST!");
+      // Check for solution
+      mooseAssert(index != nsym, "Euler2RGB failed to map the supplied Euler angle into the SST!");
     }
 
     //  Adjust maximum chi value to ensure it falls within the SST (cubic materials only)
@@ -309,9 +308,8 @@ euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int phase, u
     blue = blue * (chi / chi_max2);
     green = green * (chi / chi_max2);
 
-    // Error check to prevent negative values being input into the square root calculation
-    if (red < 0 || green < 0 || blue < 0)
-      mooseError("RGB componenet values cannot be negative!");
+    // Check for negative RGB values before taking square root
+    mooseAssert(red >= 0 || green >= 0 || blue >= 0, "RGB component values must be positive!");
 
     RGB(0) = std::sqrt(red);
     RGB(1) = std::sqrt(green);
@@ -320,7 +318,7 @@ euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int phase, u
     // Find maximum value of red, green, or blue
     maxRGB = std::max({RGB(0), RGB(1), RGB(2)});
 
-    //  Adjust RGB values to enforce white center point instead of black
+    // Normalize position of SST center point
     RGB /= maxRGB;
   }
 
