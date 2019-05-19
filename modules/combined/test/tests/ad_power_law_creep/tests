@@ -44,8 +44,9 @@
   [./power_law_creep-jac]
     type = 'PetscJacobianTester'
     input = 'power_law_creep.i'
-    ratio_tol = 1e-8
-    difference_tol = 1e-8
+    ratio_tol = 5e-6
+    difference_tol = 1e6
+    cli_args = 'Executioner/num_steps=2 -snes_test_err 1e-11'
     run_sim = True
     petsc_version = '>=3.9.4'
     issues = '#12650'
@@ -57,8 +58,9 @@
   [./power_law_creep_simple-jac]
     type = 'PetscJacobianTester'
     input = 'power_law_creep_simple.i'
-    ratio_tol = 1e-8
-    difference_tol = 1e-8
+    ratio_tol = 5e-6
+    difference_tol = 1e6
+    cli_args = 'Executioner/num_steps=2 -snes_test_err 1e-9'
     run_sim = True
     petsc_version = '>=3.9.4'
     issues = '#12650'
@@ -69,8 +71,9 @@
   [./small_strain-jac]
     type = PetscJacobianTester
     input = 'power_law_creep_smallstrain.i'
-    ratio_tol = 1e-8
-    difference_tol = 1e-8
+    ratio_tol = 5e-6
+    difference_tol = 1e6
+    cli_args = 'Executioner/num_steps=2 -snes_test_err 1e-11'
     run_sim = True
     petsc_version = '>=3.9.4'
     issues = '#12650'
