@@ -2,19 +2,19 @@
 
 ## Description
 
-Specie M transports between two domains (domain 0 and domain 1), at the interface consider the First-order reaction is taking place:
+Specie M transports between two domains (domain 1 and domain 2), at the interface consider the following reaction is taking place:
 
 \begin{equation}
-M(0)\xrightleftharpoons[k_b]{k_f}M(1)
+M(1)\xrightleftharpoons[k_b]{k_f}M(2)
 \end{equation}
 
-With the quasi-steady-state reaction rate (equal to flux)
+With the first order reaction rate assuming a quasi-steady-state
 
 \begin{equation}
-Reaction Rate = k_f C_0 - k_b C_1
+Reaction Rate = \frac {\partial C_1} {\partial t} = k_f C_1 - k_b C_2 \approx 0
 \end{equation}
 
-where $k_f$ is the forward reaction coefficient, and $k_b$ is the backward reaction coefficient. `InterfaceReaction` object is used to impose this condition. Associated kernel is:
+where $C_1$ is the specie concentration in domain 1, $C_2$ is the specie concentration in domain 2, $k_f$ is the forward reaction coefficient, and $k_b$ is the backward reaction coefficient. `InterfaceReaction` object is used to impose this condition. Associated kernel is:
 
 [/InterfaceReaction.C]
 
@@ -40,4 +40,3 @@ Two examples (steady-state and transient-state) are shown in the MOOSE test dire
 !syntax inputs /InterfaceKernels/InterfaceReaction
 
 !syntax children /InterfaceKernels/InterfaceReaction
-

@@ -21,7 +21,7 @@ validParams<InterfaceReaction>()
       "D_neighbor", "D_neighbor", "The neighboring diffusion coefficient.");
   params.addRequiredParam<Real>("kf", "Forward reaction rate coefficient.");
   params.addRequiredParam<Real>("kb", "Backward reaction rate coefficient.");
-  params.addClassDescription("Implements a reaction to establish Flux=k_f*u-k_b*v "
+  params.addClassDescription("Implements a reaction to establish ReactionRate=k_f*u-k_b*v "
                              "at interface.");
   return params;
 }
@@ -44,19 +44,17 @@ InterfaceReaction::computeQpResidual(Moose::DGResidualType type)
   {
 
       // Move all the terms to the LHS to get residual, for master domain
-      // Residual = flux - kf*u + kb*v = (-D*grad(u))_from_neighbor - kf*u + kb*v
-      // Weak form for master domain is: -(test, n*(D*grad(u))_from_neighbor + kf*u - kb*v)
+      // Residual = kf*u - kb*v = kf*u - kb*v
+      // Weak form for master domain is: (test, kf*u - kb*v)
 
     case Moose::Element:
-      r = -_test[_i][_qp] * (_D_neighbor[_qp] * _grad_neighbor_value[_qp] * _normals[_qp] +
-                             _kf * _u[_qp] - _kb * _neighbor_value[_qp]);
+      r = _test[_i][_qp] * (_kf * _u[_qp] - _kb * _neighbor_value[_qp]);
       break;
 
-    // Similarly, weak form for slave domain is: (test, n*(D*grad(u))_from_master + kf*u - kb*v),
+    // Similarly, weak form for slave domain is: -(test, kf*u - kb*v),
     // flip the sign because the direction is opposite.
     case Moose::Neighbor:
-      r = _test_neighbor[_i][_qp] *
-          (_D[_qp] * _grad_u[_qp] * _normals[_qp] + _kf * _u[_qp] - _kb * _neighbor_value[_qp]);
+      r = -_test_neighbor[_i][_qp] * (_kf * _u[_qp] - _kb * _neighbor_value[_qp]);
       break;
   }
 
@@ -71,21 +69,19 @@ InterfaceReaction::computeQpJacobian(Moose::DGJacobianType type)
   switch (type)
   {
     case Moose::ElementElement:
-      jac = -_test[_i][_qp] * _kf * _phi[_j][_qp];
+      jac = _test[_i][_qp] * _kf * _phi[_j][_qp];
       break;
 
     case Moose::NeighborNeighbor:
-      jac = _test_neighbor[_i][_qp] * -_kb * _phi_neighbor[_j][_qp];
+      jac = -_test_neighbor[_i][_qp] * -_kb * _phi_neighbor[_j][_qp];
       break;
 
     case Moose::NeighborElement:
-      jac = _test_neighbor[_i][_qp] *
-            (_D[_qp] * _grad_phi[_j][_qp] * _normals[_qp] + _kf * _phi[_j][_qp]);
+      jac = -_test_neighbor[_i][_qp] * _kf * _phi[_j][_qp];
       break;
 
     case Moose::ElementNeighbor:
-      jac = -_test[_i][_qp] * (_D_neighbor[_qp] * _grad_phi_neighbor[_j][_qp] * _normals[_qp] -
-                               _kb * _phi_neighbor[_j][_qp]);
+      jac = _test[_i][_qp] * -_kb * _phi_neighbor[_j][_qp];
       break;
   }
 
