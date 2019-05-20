@@ -40,13 +40,8 @@ ElementIntegralUserObject::execute()
 Real
 ElementIntegralUserObject::getValue()
 {
-  return _integral_value;
-}
-
-void
-ElementIntegralUserObject::finalize()
-{
   gatherSum(_integral_value);
+  return _integral_value;
 }
 
 void

@@ -39,13 +39,8 @@ ElementIntegralPostprocessor::execute()
 Real
 ElementIntegralPostprocessor::getValue()
 {
-  return _integral_value;
-}
-
-void
-ElementIntegralPostprocessor::finalize()
-{
   gatherSum(_integral_value);
+  return _integral_value;
 }
 
 void
