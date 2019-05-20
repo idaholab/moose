@@ -64,7 +64,8 @@ void
 CreateExecutionerAction::setupAutoPreconditioning()
 {
   // If using NEWTON then automatically create SingleMatrixPreconditioner object with full=true
-  if (_moose_object_pars.get<MooseEnum>("solve_type") == "NEWTON")
+  const MooseEnum & solve_type = _moose_object_pars.get<MooseEnum>("solve_type");
+  if ((solve_type.find("NEWTON") != solve_type.items().end()) && (solve_type == "NEWTON"))
   {
     // Action Parameters
     InputParameters params = _action_factory.getValidParams("SetupPreconditionerAction");
