@@ -205,35 +205,41 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
   _func_params.resize(_nargs + _mat_prop_descriptors.size());
 }
 
-// TODO: computeQpProperties()
 void
-DerivativeParsedMaterialHelper::computeProperties()
+DerivativeParsedMaterialHelper::initQpStatefulProperties()
 {
-  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  if (_prop_F)
+    (*_prop_F)[_qp] = 0.0;
+
+  for (auto & D : _derivatives)
+    (*D.first)[_qp] = 0.0;
+}
+
+void
+DerivativeParsedMaterialHelper::computeQpProperties()
+{
+  // fill the parameter vector, apply tolerances
+  for (unsigned int i = 0; i < _nargs; ++i)
   {
-    // fill the parameter vector, apply tolerances
-    for (unsigned int i = 0; i < _nargs; ++i)
+    if (_tol[i] < 0.0)
+      _func_params[i] = (*_args[i])[_qp];
+    else
     {
-      if (_tol[i] < 0.0)
-        _func_params[i] = (*_args[i])[_qp];
-      else
-      {
-        Real a = (*_args[i])[_qp];
-        _func_params[i] = a < _tol[i] ? _tol[i] : (a > 1.0 - _tol[i] ? 1.0 - _tol[i] : a);
-      }
+      Real a = (*_args[i])[_qp];
+      _func_params[i] = a < _tol[i] ? _tol[i] : (a > 1.0 - _tol[i] ? 1.0 - _tol[i] : a);
     }
-
-    // insert material property values
-    auto nmat_props = _mat_prop_descriptors.size();
-    for (MooseIndex(_mat_prop_descriptors) i = 0; i < nmat_props; ++i)
-      _func_params[i + _nargs] = _mat_prop_descriptors[i].value()[_qp];
-
-    // set function value
-    if (_prop_F)
-      (*_prop_F)[_qp] = evaluate(_func_F);
-
-    // set derivatives
-    for (auto & D : _derivatives)
-      (*D.first)[_qp] = evaluate(D.second);
   }
+
+  // insert material property values
+  auto nmat_props = _mat_prop_descriptors.size();
+  for (MooseIndex(_mat_prop_descriptors) i = 0; i < nmat_props; ++i)
+    _func_params[i + _nargs] = _mat_prop_descriptors[i].value()[_qp];
+
+  // set function value
+  if (_prop_F)
+    (*_prop_F)[_qp] = evaluate(_func_F);
+
+  // set derivatives
+  for (auto & D : _derivatives)
+    (*D.first)[_qp] = evaluate(D.second);
 }

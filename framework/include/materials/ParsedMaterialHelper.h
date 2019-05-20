@@ -48,7 +48,8 @@ public:
                      const std::vector<Real> & tol_values);
 
 protected:
-  virtual void computeProperties();
+  virtual void initQpStatefulProperties();
+  virtual void computeQpProperties();
 
   // tasks to perform after parsing the primary function
   virtual void functionsPostParse();
