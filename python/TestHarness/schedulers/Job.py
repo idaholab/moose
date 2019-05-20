@@ -8,6 +8,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import re, os, json
+import time
 from timeit import default_timer as clock
 from TestHarness.StatusSystem import StatusSystem
 
@@ -59,6 +60,15 @@ class Job(object):
         self.__slots = None
         self.__meta_data = {}
 
+        ### List of files modified by this job.
+        self.modifiedFiles = []
+
+        ###List of nodes that depend on this node.
+        self.downstreamNodes = []
+
+        ###List of all jobs that this job races with.
+        self.racePartners = set()
+
         # Alternate text we want to print as part of our status instead of the
         # pre-formatted status text (LAUNCHED (pbs) instead of FINISHED for example)
         self.__job_message = ''
@@ -81,6 +91,26 @@ class Job(object):
 
         # Initialize jobs with a holding status
         self.setStatus(self.hold)
+
+    def getUpstream(self, a_job):
+        """ Method to return a list of all the jobs that need to be run before this job """
+        somejobs = self.getDAG()
+        t_list = []
+        for temp_job in somejobs.predecessors(a_job):
+            t_list.append(temp_job.getTestName())
+        return t_list
+
+    def getDownstreams(self, a_job, graph):
+        """ Method to return a list of all the jobs that need to be run after this job """
+        somejobs = self.getDAG()
+        t_list = []
+        for temp_job in somejobs.all_downstreams(a_job):
+            t_list.append(temp_job.getTestName())
+        return t_list
+
+    def addDownsteamNode(self, node):
+        """ Add a job to the list of jobs that are downstream from here """
+        return downstreamNodes.append(node)
 
     def getDAG(self):
         """ Return the DAG associated with this tester """
@@ -171,6 +201,11 @@ class Job(object):
         A blocking method to handle the exit status of the process object while keeping track of the
         time the process was active. When the process exits, read the output and close the file.
         """
+        if self.options.testharness_diagnostics:
+            #Give some time so that modified time has a distinct new value.
+            time.sleep(1)
+            ###  Before the job does anythong, get the times files below it were last modified
+            self.__job_dag.get_all_files(self, self.__job_dag.originalTimes)
 
         # Do not execute app, but allow processResults to commence
         if not self.__tester.shouldExecute():
@@ -184,6 +219,11 @@ class Job(object):
         self.__start_time = self.timer.starts[0]
         self.__end_time = self.timer.ends[-1]
         self.__joined_out = self.__tester.joined_out
+
+        if self.options.testharness_diagnostics:
+            ### Check if the files we checked on earlier were modified.
+            self.__job_dag.get_all_files(self, self.__job_dag.newTimes)
+            self.modifiedFiles = self.__job_dag.check_changes(self.__job_dag.originalTimes, self.__job_dag.newTimes)
 
     def killProcess(self):
         """ Kill remaining process that may be running """
