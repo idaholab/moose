@@ -27,13 +27,9 @@ template <>
 InputParameters
 validParams<MultiAppInterpolationTransfer>()
 {
-  InputParameters params = validParams<MultiAppTransfer>();
+  InputParameters params = validParams<MultiAppFieldTransfer>();
   params.addClassDescription(
       "Transfers the value to the target domain from the nearest node in the source domain.");
-  params.addRequiredParam<AuxVariableName>(
-      "variable", "The auxiliary variable to store the transferred values in.");
-  params.addRequiredParam<VariableName>("source_variable", "The variable to transfer from.");
-
   params.addParam<unsigned int>(
       "num_points", 3, "The number of nearest points to use for interpolation.");
   params.addParam<Real>(
@@ -52,9 +48,7 @@ validParams<MultiAppInterpolationTransfer>()
 }
 
 MultiAppInterpolationTransfer::MultiAppInterpolationTransfer(const InputParameters & parameters)
-  : MultiAppTransfer(parameters),
-    _to_var_name(getParam<AuxVariableName>("variable")),
-    _from_var_name(getParam<VariableName>("source_variable")),
+  : MultiAppFieldTransfer(parameters),
     _num_points(getParam<unsigned int>("num_points")),
     _power(getParam<Real>("power")),
     _interp_type(getParam<MooseEnum>("interp_type")),
@@ -62,15 +56,9 @@ MultiAppInterpolationTransfer::MultiAppInterpolationTransfer(const InputParamete
 {
   // This transfer does not work with DistributedMesh
   _fe_problem.mesh().errorIfDistributedMesh("MultiAppInterpolationTransfer");
-}
 
-void
-MultiAppInterpolationTransfer::initialSetup()
-{
-  if (_direction == TO_MULTIAPP)
-    variableIntegrityCheck(_to_var_name);
-  else
-    variableIntegrityCheck(_from_var_name);
+  if (_to_var_names.size() != 1 || _from_var_names.size() != 1)
+    mooseError(" Support single variable only ");
 }
 
 void
@@ -426,6 +414,8 @@ MultiAppInterpolationTransfer::execute()
   }
 
   _console << "Finished InterpolationTransfer " << name() << std::endl;
+
+  postExecute();
 }
 
 Node *

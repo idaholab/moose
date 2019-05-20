@@ -10,15 +10,15 @@
 #pragma once
 
 // MOOSE includes
-#include "ElementIntegralVariableUserObject.h"
+#include "SideIntegralVariableUserObject.h"
 #include "NearestPointBase.h"
-#include "LayeredAverage.h"
+#include "LayeredSideAverage.h"
 
 // Forward Declarations
-class NearestPointLayeredAverage;
+class NearestPointLayeredSideAverage;
 
 template <>
-InputParameters validParams<NearestPointLayeredAverage>();
+InputParameters validParams<NearestPointLayeredSideAverage>();
 
 /**
  * This UserObject computes averages of a variable storing partial
@@ -27,10 +27,9 @@ InputParameters validParams<NearestPointLayeredAverage>();
  * Given a list of points this object computes the layered average
  * closest to each one of those points.
  */
-class NearestPointLayeredAverage
-  : public NearestPointBase<LayeredAverage, ElementIntegralVariableUserObject>
+class NearestPointLayeredSideAverage
+  : public NearestPointBase<LayeredSideAverage, SideIntegralVariableUserObject>
 {
 public:
-  NearestPointLayeredAverage(const InputParameters & parameters);
+  NearestPointLayeredSideAverage(const InputParameters & parameters);
 };
-

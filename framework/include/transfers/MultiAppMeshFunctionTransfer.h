@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "MultiAppTransfer.h"
+#include "MultiAppFieldTransfer.h"
 
 // Forward declarations
 class MultiAppMeshFunctionTransfer;
@@ -23,20 +23,14 @@ InputParameters validParams<MultiAppMeshFunctionTransfer>();
  * the MultiApp is. Copies that value into a postprocessor in the MultiApp.
  * The source and destination vectors (of variables) should be ordered consistently.
  */
-class MultiAppMeshFunctionTransfer : public MultiAppTransfer
+class MultiAppMeshFunctionTransfer : public MultiAppFieldTransfer
 {
 public:
   MultiAppMeshFunctionTransfer(const InputParameters & parameters);
 
-  virtual void initialSetup() override;
-
   virtual void execute() override;
 
 protected:
-  /// The vector of variables to transfer to
-  std::vector<AuxVariableName> _to_var_name;
-  /// The vector of variables to transfer from
-  std::vector<VariableName> _from_var_name;
   /// The number of variables to transfer
   unsigned int _var_size;
   bool _error_on_miss;

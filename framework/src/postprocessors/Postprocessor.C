@@ -17,6 +17,9 @@ validParams<Postprocessor>()
   InputParameters params = validParams<UserObject>();
   params += validParams<OutputInterface>();
 
+  ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
+  exec_enum.addAvailableFlags(EXEC_TRANSFER);
+
   params.addParamNamesToGroup("outputs", "Advanced");
   params.registerBase("Postprocessor");
   return params;
