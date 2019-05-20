@@ -4,7 +4,6 @@
   [./conservative_transfer]
     type = Exodiff
     input = master_conservative_transfer.i
-    max_parallel = 6
     exodiff = 'master_conservative_transfer_out.e master_conservative_transfer_out_sub0.e'
     requirement = 'The system shall support conservative transfers'
   [../]
