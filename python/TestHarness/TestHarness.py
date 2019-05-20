@@ -12,8 +12,10 @@ if sys.version_info[0:2] != (2, 7):
     print("python 2.7 is required to run the test harness")
     sys.exit(1)
 
+import itertools
 import os, re, inspect, errno, copy, json
 import shlex
+import RaceChecker
 
 from socket import gethostname
 from FactorySystem.Factory import Factory
@@ -570,6 +572,14 @@ class TestHarness:
         """ write test results to disc in some fashion the user has requested """
         all_jobs = self.scheduler.retrieveJobs()
 
+        # Gather and print the jobs with race conditions after the jobs are finished
+        # and only run when running --diag.
+        if self.options.testharness_diagnostics:
+            checker = RaceChecker.RaceChecker(all_jobs)
+            checker.findRacePartners()
+            # Print the unique racer conditions.  If any are printed, then the error_code needs to be updated.
+            self.error_code = checker.printUniqueRacerSets()
+
         # Record the input file name that was used
         self.options.results_storage['INPUT_FILE_NAME'] = self.options.input_file_name
 
@@ -768,6 +778,7 @@ class TestHarness:
         parser.add_argument('--check-input', action='store_true', dest='check_input', help='Run check_input (syntax) tests only')
         parser.add_argument('--no-check-input', action='store_true', dest='no_check_input', help='Do not run check_input (syntax) tests')
         parser.add_argument('--spec-file', action='store', type=str, dest='spec_file', help='Supply a path to the tests spec file to run the tests found therein. Or supply a path to a directory in which the TestHarness will search for tests. You can further alter which tests spec files are found through the use of -i and --re')
+        parser.add_argument('--diag', action='store_true', dest='testharness_diagnostics', help='Run TestHarness diagnostics')
 
         # Options that pass straight through to the executable
         parser.add_argument('--parallel-mesh', action='store_true', dest='parallel_mesh', help='Deprecated, use --distributed-mesh instead')

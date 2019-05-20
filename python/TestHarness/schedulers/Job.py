@@ -8,8 +8,10 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import re, os, json
+import time
 from timeit import default_timer as clock
 from TestHarness.StatusSystem import StatusSystem
+from TestHarness.FileChecker import FileChecker
 
 
 class Timer(object):
@@ -31,7 +33,7 @@ class Timer(object):
         """ returns the total/cumulative time taken by the timer """
         diffs = [end - start for start, end in zip(self.starts, self.ends)]
         return sum(diffs)
-    def avgerageDur(self):
+    def averageDur(self):
         return self.cumulativeDur() / len(self.starts)
     def nRuns(self):
         return len(self.starts)
@@ -59,6 +61,21 @@ class Job(object):
         self.__slots = None
         self.__meta_data = {}
 
+        # Create a fileChecker object to be able to call filecheck methods
+        self.fileChecker = FileChecker()
+
+        # List of files modified by this job.
+        self.modifiedFiles = []
+
+        # List of nodes that depend on this node.
+        self.__downstreamNodes = []
+
+        # List of jobs that this job depends on.
+        self.__upstreamNodes = []
+
+        # Set of all jobs that this job races with.
+        self.racePartners = set()
+
         # Alternate text we want to print as part of our status instead of the
         # pre-formatted status text (LAUNCHED (pbs) instead of FINISHED for example)
         self.__job_message = ''
@@ -81,6 +98,34 @@ class Job(object):
 
         # Initialize jobs with a holding status
         self.setStatus(self.hold)
+
+    def getUpstreams(self):
+        """ Wrapper method to return a list of all the jobs that need to be run before the given job """
+        return self.__job_dag.getUpstreams(self)
+
+    def getDownstreams(self):
+        """ Wrapper method to return a list of all the jobs that need to be run after the given job """
+        return self.__job_dag.getDownstreams(self)
+
+    def addUpsteamNode(self, node):
+        """ Add a job to the list of jobs that are upstream from here """
+        return self.__upstreamNodes.append(node)
+
+    def getUpstreamNodes(self):
+        """ Return the list of jobs that are upstream from here """
+        return self.__upstreamNodes
+
+    def addDownsteamNode(self, node):
+        """ Add a job to the list of jobs that are downstream from here """
+        return self.__downstreamNodes.append(node)
+
+    def removeDownsteamNode(self, node):
+        """ Remove a job from the list of jobs that are downstream from here """
+        return self.__downstreamNodes.remove(node)
+
+    def getDownstreamNodes(self):
+        """ Return the list of jobs that are downstream from here """
+        return self.__downstreamNodes
 
     def getDAG(self):
         """ Return the DAG associated with this tester """
@@ -176,6 +221,17 @@ class Job(object):
         if not self.__tester.shouldExecute():
             return
 
+        if self.options.testharness_diagnostics:
+            # Record the time before we check everything so that we can wait properly.
+            before_check_time = clock()
+            # Before the job does anything, get the times files below it were last modified
+            self.fileChecker.get_all_files(self, self.fileChecker.getOriginalTimes())
+            # Get the time after we checked all the files so that we can wait properly.
+            after_check_time = clock()
+            # Give some time so that file modified time has a distinct new value.
+            while(after_check_time - before_check_time < 1):
+                after_check_time = clock()
+
         self.__tester.prepare(self.options)
 
         self.__start_time = clock()
@@ -184,6 +240,11 @@ class Job(object):
         self.__start_time = self.timer.starts[0]
         self.__end_time = self.timer.ends[-1]
         self.__joined_out = self.__tester.joined_out
+
+        if self.options.testharness_diagnostics:
+            # Check if the files we checked on earlier were modified.
+            self.fileChecker.get_all_files(self, self.fileChecker.getNewTimes())
+            self.modifiedFiles = self.fileChecker.check_changes(self.fileChecker.getOriginalTimes(), self.fileChecker.getNewTimes())
 
     def killProcess(self):
         """ Kill remaining process that may be running """

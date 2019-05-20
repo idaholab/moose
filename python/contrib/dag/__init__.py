@@ -1,5 +1,6 @@
 from copy import copy, deepcopy
 from collections import deque
+import os
 
 try:
     from collections import OrderedDict
@@ -32,6 +33,22 @@ class DAG(object):
         if self.__cached_graph == None:
             self.__cached_graph = self.clone()
         return self.__cached_graph
+
+    # Added by the MOOSE group
+    def serialize_dag(self, graph=None):
+        """ Serialize the DAG """
+        if not graph:
+            graph = self.graph
+        queue = deque()
+        for u in self.topological_sort():
+            queue.append(u)
+        while queue:
+            u = queue.pop()
+            if queue:
+                v = queue.pop()
+                self.add_edge(v, u)
+                queue.append(v)
+        return graph
 
     def add_node(self, node_name, graph=None):
         """ Add a node if it does not exist yet, or error out. """

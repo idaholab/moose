@@ -36,6 +36,7 @@ class JobDAG(object):
         """ return the running DAG object """
         return self.__job_dag
 
+
     def getJobs(self):
         """ return current job group """
         return self.__job_dag.ind_nodes()
@@ -47,8 +48,6 @@ class JobDAG(object):
         """
         # handle any skipped dependencies
         self._doSkippedDependencies()
-
-        # delete finished jobs
         next_jobs = set([])
         for job in list(self.__job_dag.ind_nodes()):
             if job.isFinished():
@@ -72,6 +71,17 @@ class JobDAG(object):
         if self.__job_dag.size():
 
             self._doMakeDependencies()
+            if self.options.testharness_diagnostics:
+                # If we run this, we need a copy of the DAG before the extra edges are added
+                for name in self.__name_to_job:
+                    temp_downstream_job_list = self.__job_dag.all_downstreams(self.__name_to_job[name])
+                    for job in temp_downstream_job_list:
+                        self.__name_to_job[name].addDownsteamNode(job)
+                    temp_upstream_job_list = self.__job_dag.predecessors(self.__name_to_job[name])
+                    for job in temp_upstream_job_list:
+                        self.__name_to_job[name].addUpsteamNode(job)
+
+                self._doMakeSerializeDependencies()
 
             self._doSkippedDependencies()
 
@@ -80,6 +90,9 @@ class JobDAG(object):
                 self._doSkippedDependencies()
 
         return self.__job_dag
+
+    def _doMakeSerializeDependencies(self):
+        return self.__job_dag.serialize_dag()
 
     def _doMakeDependencies(self):
         """ Setup dependencies within the current Job DAG """
@@ -148,7 +161,12 @@ class JobDAG(object):
 
             if not job.getRunnable() or job.isFail() or job.isSkip():
                 job.setStatus(job.skip)
-                dep_jobs.update(self.__job_dag.all_downstreams(job))
+                if not self.options.testharness_diagnostics:
+                    dep_jobs.update(self.__job_dag.all_downstreams(job))
+                # If running --diag, we need to use the original downstreams, rather
+                # than the downstreams in the current DAG
+                else:
+                    dep_jobs.update(job.getDownstreamNodes())
 
                 # Remove parent dependency so it can launch individually
                 for p_job in self.__job_dag.predecessors(job):
@@ -162,7 +180,13 @@ class JobDAG(object):
                     d_job.setStatus(d_job.skip)
                     d_job.addCaveats('skipped dependency')
 
-                self.__job_dag.delete_edge_if_exists(job, d_job)
+                if not self.options.testharness_diagnostics:
+                    self.__job_dag.delete_edge_if_exists(job, d_job)
+                else:
+                    try:
+                        job.removeDownsteamNode(d_job)
+                    except:
+                        pass
 
     def _doRaceConditions(self):
         """ Check for race condition errors within in the DAG"""
@@ -202,6 +226,20 @@ class JobDAG(object):
             and ('all' in self.options.ignored_caveats
                  or 'prereq' in self.options.ignored_caveats)):
             return True
+
+    def getUpstreams(self, a_job):
+        """ Method to return a list of all the jobs that need to be run before the given job """
+        t_list = []
+        for temp_job in self.__job_dag.predecessors(a_job):
+            t_list.append(temp_job.getTestName())
+        return t_list
+
+    def getDownstreams(self, a_job):
+        """ Method to return a list of all the jobs that need to be run after the given job """
+        t_list = []
+        for temp_job in self.__job_dag.all_downstreams(a_job):
+            t_list.append(temp_job.getTestName())
+        return t_list
 
     def _printDownstreams(self, job):
         """
