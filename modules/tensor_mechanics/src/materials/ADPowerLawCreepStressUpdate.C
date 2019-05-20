@@ -16,12 +16,11 @@ defineADValidParams(
     ADRadialReturnCreepStressUpdateBase,
     params.addClassDescription(
         "This class uses the stress update material in a radial return isotropic power law creep "
-        "model.  This class can be used in conjunction with other creep and plasticity materials "
-        "for "
-        "more complex simulations.");
+        "model. This class can be used in conjunction with other creep and plasticity materials "
+        "for more complex simulations.");
 
     // Linear strain hardening parameters
-    params.addCoupledVar("temperature", 0.0, "Coupled temperature");
+    params.addCoupledVar("temperature", "Coupled temperature");
     params.addRequiredParam<Real>("coefficient", "Leading coefficient in power-law equation");
     params.addRequiredParam<Real>("n_exponent",
                                   "Exponent on effective stress in power-law equation");
@@ -34,14 +33,14 @@ template <ComputeStage compute_stage>
 ADPowerLawCreepStressUpdate<compute_stage>::ADPowerLawCreepStressUpdate(
     const InputParameters & parameters)
   : ADRadialReturnCreepStressUpdateBase<compute_stage>(parameters),
-    _has_temp(parameters.isParamSetByUser("temperature")),
-    _temperature(_has_temp ? coupledValue("temperature") : _zero),
+    _temperature(isParamValid("temperature") ? &adCoupledValue("temperature") : nullptr),
     _coefficient(adGetParam<Real>("coefficient")),
     _n_exponent(adGetParam<Real>("n_exponent")),
     _m_exponent(adGetParam<Real>("m_exponent")),
     _activation_energy(adGetParam<Real>("activation_energy")),
     _gas_constant(adGetParam<Real>("gas_constant")),
-    _start_time(adGetParam<Real>("start_time"))
+    _start_time(adGetParam<Real>("start_time")),
+    _exponential(1.0)
 {
   if (_start_time < this->_app.getStartTime() && (std::trunc(_m_exponent) != _m_exponent))
     paramError("start_time",
@@ -54,10 +53,8 @@ void
 ADPowerLawCreepStressUpdate<compute_stage>::computeStressInitialize(
     const ADReal & /*effective_trial_stress*/, const ADRankFourTensor & /*elasticity_tensor*/)
 {
-  if (_has_temp)
-    _exponential = std::exp(-_activation_energy / (_gas_constant * _temperature[_qp]));
-  else
-    _exponential = 1.0;
+  if (_temperature)
+    _exponential = std::exp(-_activation_energy / (_gas_constant * (*_temperature)[_qp]));
 
   _exp_time = std::pow(_t - _start_time, _m_exponent);
 }

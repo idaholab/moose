@@ -14,6 +14,7 @@
 #include "MooseObject.h"
 #include "ConsoleStreamInterface.h"
 #include "Conversion.h"
+#include "MathUtils.h"
 
 #include "metaphysicl/numberarray.h"
 #include "metaphysicl/dualnumber.h"
@@ -73,7 +74,7 @@ ADSingleVariableReturnMappingSolution<compute_stage>::ADSingleVariableReturnMapp
 }
 
 template <ComputeStage compute_stage>
-Real
+ADReal
 ADSingleVariableReturnMappingSolution<compute_stage>::minimumPermissibleValue(
     const ADReal & /*effective_trial_stress*/) const
 {
@@ -81,7 +82,7 @@ ADSingleVariableReturnMappingSolution<compute_stage>::minimumPermissibleValue(
 }
 
 template <ComputeStage compute_stage>
-Real
+ADReal
 ADSingleVariableReturnMappingSolution<compute_stage>::maximumPermissibleValue(
     const ADReal & /*effective_trial_stress*/) const
 {
@@ -154,21 +155,16 @@ ADSingleVariableReturnMappingSolution<compute_stage>::internalSolve(
   scalar = initialGuess(effective_trial_stress);
   ADReal scalar_old = scalar;
   ADReal scalar_increment = 0.0;
-  const Real min_permissible_scalar = minimumPermissibleValue(effective_trial_stress);
-  const Real max_permissible_scalar = maximumPermissibleValue(effective_trial_stress);
-  Real scalar_upper_bound = max_permissible_scalar;
-  Real scalar_lower_bound = min_permissible_scalar;
+  const ADReal min_permissible_scalar = minimumPermissibleValue(effective_trial_stress);
+  const ADReal max_permissible_scalar = maximumPermissibleValue(effective_trial_stress);
+  ADReal scalar_upper_bound = max_permissible_scalar;
+  ADReal scalar_lower_bound = min_permissible_scalar;
   _iteration = 0;
 
   _initial_residual = _residual = computeResidual(effective_trial_stress, scalar);
 
   ADReal residual_old = _residual;
-
-  Real init_resid_norm = MetaPhysicL::raw_value(std::abs(_residual));
-  if (init_resid_norm == 0.0)
-    init_resid_norm = 1.0;
-  Real init_resid_sign = (_residual < 0.0 ? -1.0 : 1.0);
-
+  Real init_resid_sign = MathUtils::sign(MetaPhysicL::raw_value(_residual));
   Real reference_residual = computeReferenceResidual(effective_trial_stress, scalar);
 
   if (converged(_residual, reference_residual))
@@ -218,10 +214,8 @@ ADSingleVariableReturnMappingSolution<compute_stage>::internalSolve(
         if (residual_old - _residual != 0.0)
         {
           ADReal alpha = residual_old / (residual_old - _residual);
-          if (alpha > 1.0) // upper bound for alpha
-            alpha = 1.0;
-          else if (alpha < 1e-2) // lower bound for alpha
-            alpha = 1e-2;
+          MathUtils::clamp(alpha, 1.0e-2, 1.0);
+
           if (alpha != 1.0)
           {
             modified_increment = true;
@@ -243,7 +237,7 @@ ADSingleVariableReturnMappingSolution<compute_stage>::internalSolve(
           if (scalar_upper_bound != max_permissible_scalar &&
               scalar_lower_bound != min_permissible_scalar)
           {
-            ADReal frac = 0.5;
+            const Real frac = 0.5;
             scalar_increment =
                 (1.0 - frac) * scalar_lower_bound + frac * scalar_upper_bound - scalar_old;
             modified_increment = true;
@@ -330,8 +324,8 @@ ADSingleVariableReturnMappingSolution<compute_stage>::checkPermissibleRange(
     ADReal & scalar,
     ADReal & scalar_increment,
     const ADReal & scalar_old,
-    const Real min_permissible_scalar,
-    const Real max_permissible_scalar,
+    const ADReal min_permissible_scalar,
+    const ADReal max_permissible_scalar,
     std::stringstream * iter_output)
 {
   if (scalar > max_permissible_scalar)
@@ -359,8 +353,8 @@ void
 ADSingleVariableReturnMappingSolution<compute_stage>::updateBounds(const ADReal & scalar,
                                                                    const ADReal & residual,
                                                                    const Real init_resid_sign,
-                                                                   Real & scalar_upper_bound,
-                                                                   Real & scalar_lower_bound,
+                                                                   ADReal & scalar_upper_bound,
+                                                                   ADReal & scalar_lower_bound,
                                                                    std::stringstream * iter_output)
 {
   // Update upper/lower bounds as applicable

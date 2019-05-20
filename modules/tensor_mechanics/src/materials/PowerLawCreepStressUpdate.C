@@ -22,7 +22,7 @@ validParams<PowerLawCreepStressUpdate>()
       "more complex simulations.");
 
   // Linear strain hardening parameters
-  params.addCoupledVar("temperature", 0.0, "Coupled temperature");
+  params.addCoupledVar("temperature", "Coupled temperature");
   params.addRequiredParam<Real>("coefficient", "Leading coefficient in power-law equation");
   params.addRequiredParam<Real>("n_exponent", "Exponent on effective stress in power-law equation");
   params.addParam<Real>("m_exponent", 0.0, "Exponent on time in power-law equation");
@@ -35,7 +35,7 @@ validParams<PowerLawCreepStressUpdate>()
 
 PowerLawCreepStressUpdate::PowerLawCreepStressUpdate(const InputParameters & parameters)
   : RadialReturnCreepStressUpdateBase(parameters),
-    _has_temp(parameters.isParamSetByUser("temperature")),
+    _has_temp(isParamValid("temperature")),
     _temperature(_has_temp ? coupledValue("temperature") : _zero),
     _coefficient(getParam<Real>("coefficient")),
     _n_exponent(getParam<Real>("n_exponent")),
