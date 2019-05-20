@@ -1,0 +1,43 @@
+[Tests]
+[./testA]
+  type = RunApp
+  input = samuel.i
+[../]
+[./testB]
+  type = RunApp
+  input = samuel.i
+  prereq = testA
+[../]
+[./testC]
+  type = RunApp
+  input = samuel.i
+  prereq = testB
+[../]
+[./testD]
+  type = RunApp
+  input = samuel.i
+[../]
+[./testE]
+  type = RunApp
+  input = samuel.i
+  prereq = testB
+[../]
+[./testF]
+  type = RunApp
+  input = samuel.i
+  prereq = testE
+[../]
+[./exo]
+  type = Exodiff
+  input = good.i
+  exodiff = good_exodiff_out.e
+  prereq = testE
+[../]
+[./csv]
+  type = CSVDiff
+  input = csvdiff_comparison_floor.i
+  csvdiff = csvdiff_comparison_floor_out.csv
+  prereq = testE
+[../]
+
+[]

@@ -7,6 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+import itertools
 import sys
 if sys.version_info[0:2] != (2, 7):
     print("python 2.7 is required to run the test harness")
@@ -570,6 +571,60 @@ class TestHarness:
         """ write test results to disc in some fashion the user has requested """
         all_jobs = self.scheduler.retrieveJobs()
 
+        #%%%%%%%%%% Probably move back to TestHarness.py %%%%%%%%%%#
+        # all_jobs = [l for l in self.__scheduled_jobs]
+
+        # print(all_jobs)
+        # for l in all_jobs:
+        #     print(l.getDAG().getOriginalDAG().graph)
+        #     print("HI")
+        ## Only run when the proper option is set.
+        if self.options.testharness_diagnostics:
+            for a, b in itertools.combinations(all_jobs, 2):
+                # print("\n\n\n")
+                # print(a.getPreSerializationDAG().graph, "<<<<<<<------------------------->>>>>>>>>>>>>>>>>>>", b)
+                # print("\n\n\n")
+
+                for c in a.modifiedFiles:
+                    for d in b.modifiedFiles:
+                        # print("\n\n", type(c), type(d))
+                        # print(c, "<<<<----------------------------------------------->>>>", d, "\n\n")
+                        if (c == d):
+                            # print("Possible Colission")
+                            # print(b.getDAG().getOriginalDAG().graph)
+                            # print(a.getTestName(), "---------------------------", b.downstreamNodes)
+                            # print(b.getTestName(), "---------------------------", a.downstreamNodes)
+                            if not (a.getTestName() in b.downstreamNodes or b.getTestName() in a.downstreamNodes):
+                                a.racePartners.add(b)
+                                b.racePartners.add(a)
+#                                print("Colission between {} and {}".format(a.getTestName(), b.getTestName()))
+                            else:
+                                print("Good dependencies")
+            for job in all_jobs:
+                print("Race Partners of {}".format(job.getTestName()))
+                for partner in job.racePartners:
+                    print(partner.getTestName())
+            print("Everything is done\n\n\n")
+
+
+#%%%%%%%%%%%%%%%%%% May Return to This Location %%%%%%%%%%%%%%%%%%%%%%#
+
+#######################################
+        # for a, b in itertools.combinations(all_jobs, 2):
+        #     for c in a.modifiedFiles:
+        #         for d in b.modifiedFiles:
+        #             print("\n\n", type(c), type(d))
+        #             print(c, "<<<<----------------------------------------------->>>>", d, "\n\n")
+        #             if (c == d):
+        #                 print("Possible Colission")
+        #                 if a in b.getDownstreams(b.getUniqueIdentifier(), b.getDAG()) or b in a.getDownstreams(a):
+        #                     print("Colission between {} and {}".format(a.getTestName(), b.getTestName()))
+        #                 else:
+        #                     print("Good dependencies")
+#                    print("Colission between {} and {}".format(c.getTestNameShort(), d.getTestNameShort()))
+#            print("Going Through the Jobs")
+
+
         # Record the input file name that was used
         self.options.results_storage['INPUT_FILE_NAME'] = self.options.input_file_name
 
@@ -765,6 +820,7 @@ class TestHarness:
         parser.add_argument('--check-input', action='store_true', dest='check_input', help='Run check_input (syntax) tests only')
         parser.add_argument('--no-check-input', action='store_true', dest='no_check_input', help='Do not run check_input (syntax) tests')
         parser.add_argument('--spec-file', action='store', type=str, dest='spec_file', help='Supply a path to the tests spec file to run the tests found therein. Or supply a path to a directory in which the TestHarness will search for tests. You can further alter which tests spec files are found through the use of -i and --re')
+        parser.add_argument('--diag', action='store_true', dest='testharness_diagnostics', help='Run TestHarness diagnostics')
 
         # Options that pass straight through to the executable
         parser.add_argument('--parallel-mesh', action='store_true', dest='parallel_mesh', help='Deprecated, use --distributed-mesh instead')
