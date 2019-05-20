@@ -9,25 +9,28 @@
 
 #pragma once
 
+#include "Moose.h"
+#include "MooseTypes.h"
+#include "DualReal.h"
+
 #include <vector>
 #include <string>
-
-#include "Moose.h"
 
 /**
  * This class interpolates values given a set of data pairs and an abscissa.
  */
-class LinearInterpolation
+template <typename T>
+class LinearInterpolationTempl
 {
 public:
   /* Constructor, Takes two vectors of points for which to apply the fit.  One should be of the
    * independent variable while the other should be of the dependent variable.  These values should
    * correspond to one and other in the same position.
    */
-  LinearInterpolation(const std::vector<Real> & X, const std::vector<Real> & Y);
-  LinearInterpolation() : _x(std::vector<Real>()), _y(std::vector<Real>()) {}
+  LinearInterpolationTempl(const std::vector<Real> & X, const std::vector<Real> & Y);
+  LinearInterpolationTempl() : _x(std::vector<Real>()), _y(std::vector<Real>()) {}
 
-  virtual ~LinearInterpolation() = default;
+  virtual ~LinearInterpolationTempl() = default;
 
   /**
    * Set the x and y values.
@@ -45,14 +48,14 @@ public:
    * This function will take an independent variable input and will return the dependent variable
    * based on the generated fit
    */
-  Real sample(Real x) const;
+  T sample(const T & x) const;
 
   /**
    * This function will take an independent variable input and will return the derivative of the
    * dependent variable
    * with respect to the independent variable based on the generated fit
    */
-  Real sampleDerivative(Real x) const;
+  T sampleDerivative(const T & x) const;
 
   /**
    * This function returns the size of the array holding the points, i.e. the number of sample
@@ -75,3 +78,18 @@ private:
   static int _file_number;
 };
 
+#define ADLinearInterpolation typename LinearInterpolationType<compute_stage>::type
+
+typedef LinearInterpolationTempl<Real> LinearInterpolation;
+typedef LinearInterpolationTempl<DualReal> DualLinearInterpolation;
+
+template <ComputeStage compute_stage>
+struct LinearInterpolationType
+{
+  typedef LinearInterpolation type;
+};
+template <>
+struct LinearInterpolationType<JACOBIAN>
+{
+  typedef DualLinearInterpolation type;
+};

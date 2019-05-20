@@ -10,9 +10,9 @@
 #pragma once
 
 #include "IsotropicPlasticity.h"
+#include "LinearInterpolation.h"
 
 class PiecewiseLinear;
-class LinearInterpolation;
 
 class IsotropicTempDepHardening;
 
@@ -42,4 +42,3 @@ protected:
   unsigned int _hf_index_hi;
   Real _hf_fraction;
 };
-
