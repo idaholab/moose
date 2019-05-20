@@ -17,10 +17,16 @@ class UnitTripControl : public THMControl, public MooseParsedFunctionBase
 public:
   UnitTripControl(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
   virtual void init() override;
   virtual void execute() override;
 
 protected:
+  /**
+   * Build the function that is used to evaluate the condition of this trip control
+   */
+  void buildConditionFunction();
+
   /// The user-defined condition
   std::string _condition;
   /// The state of this control object

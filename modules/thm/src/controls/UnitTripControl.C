@@ -31,7 +31,7 @@ UnitTripControl::UnitTripControl(const InputParameters & parameters)
 }
 
 void
-UnitTripControl::init()
+UnitTripControl::buildConditionFunction()
 {
   if (!_condition_ptr)
   {
@@ -41,13 +41,25 @@ UnitTripControl::init()
 
     _condition_ptr = libmesh_make_unique<THMParsedFunctionWrapper>(
         _sim, _pfb_feproblem, _condition, _vars, _vals, tid);
-
-    // establish dependency so that the control data graph is properly evaluated
-    for (auto & ctrl_name : _condition_ptr->getRealControlData())
-      getControlDataByName<Real>(ctrl_name->name());
-    for (auto & ctrl_name : _condition_ptr->getBoolControlData())
-      getControlDataByName<bool>(ctrl_name->name());
   }
+}
+
+void
+UnitTripControl::initialSetup()
+{
+  buildConditionFunction();
+}
+
+void
+UnitTripControl::init()
+{
+  buildConditionFunction();
+
+  // establish dependency so that the control data graph is properly evaluated
+  for (auto & ctrl_name : _condition_ptr->getRealControlData())
+    getControlDataByName<Real>(ctrl_name->name());
+  for (auto & ctrl_name : _condition_ptr->getBoolControlData())
+    getControlDataByName<bool>(ctrl_name->name());
 }
 
 void
