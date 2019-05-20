@@ -32,9 +32,10 @@ template <>
 InputParameters
 validParams<MultiAppUserObjectTransfer>()
 {
-  InputParameters params = validParams<MultiAppTransfer>();
-  params.addRequiredParam<AuxVariableName>(
-      "variable", "The auxiliary variable to store the transferred values in.");
+  InputParameters params = validParams<MultiAppFieldTransfer>();
+  //  MultiAppUserObjectTransfer does not need source variable since it query values from user
+  //  objects
+  params.suppressParameter<std::vector<VariableName>>("source_variable");
   params.addRequiredParam<UserObjectName>(
       "user_object",
       "The UserObject you want to transfer values from.  Note: This might be a "
@@ -49,20 +50,20 @@ validParams<MultiAppUserObjectTransfer>()
 }
 
 MultiAppUserObjectTransfer::MultiAppUserObjectTransfer(const InputParameters & parameters)
-  : MultiAppTransfer(parameters),
-    _to_var_name(getParam<AuxVariableName>("variable")),
+  : MultiAppFieldTransfer(parameters),
     _user_object_name(getParam<UserObjectName>("user_object")),
     _all_master_nodes_contained_in_sub_app(getParam<bool>("all_master_nodes_contained_in_sub_app"))
 {
   // This transfer does not work with DistributedMesh
   _fe_problem.mesh().errorIfDistributedMesh("MultiAppUserObjectTransfer");
-}
 
-void
-MultiAppUserObjectTransfer::initialSetup()
-{
-  if (_direction == TO_MULTIAPP)
-    variableIntegrityCheck(_to_var_name);
+  if (_to_var_names.size() != 1)
+    paramError("variable", " Support single to-variable only ");
+
+  if (_from_var_names.size() > 0)
+    paramError("source_variable",
+               " You should not provide any source variables since the transfer takes values from "
+               "user objects ");
 }
 
 void
@@ -329,4 +330,6 @@ MultiAppUserObjectTransfer::execute()
   }
 
   _console << "Finished MultiAppUserObjectTransfer " << name() << std::endl;
+
+  postExecute();
 }
