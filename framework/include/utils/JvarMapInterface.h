@@ -51,6 +51,7 @@ class JvarMapIntegratedBCInterface : public JvarMapInterfaceBase<T>
 public:
   JvarMapIntegratedBCInterface(const InputParameters & parameters);
   virtual void computeJacobianBlock(MooseVariableFEBase & jvar) override;
+  using T::computeJacobianBlock;
 };
 
 /**
@@ -149,4 +150,3 @@ JvarMapIntegratedBCInterface<T>::computeJacobianBlock(MooseVariableFEBase & jvar
   // call the underlying class' off-diagonal Jacobian
   T::computeJacobianBlock(jvar);
 }
-
