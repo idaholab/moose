@@ -224,6 +224,7 @@ ifeq ($(coverage),true)
 	libmesh_CXXFLAGS += -fprofile-arcs -ftest-coverage
 	ifeq (,$(findstring clang++,$(cxx_compiler)))
 		libmesh_LDFLAGS += -lgcov
+		libmesh_LIBS += -lgcov
 	endif
 endif
 
