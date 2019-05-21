@@ -48,19 +48,15 @@
   [./curl_u_plus_u]
     type = VectorFEWave
     variable = u
+    x_forcing_func = 1
+    y_forcing_func = 1
+    z_forcing_func = 1
     block = 0
   [../]
   [./curl_v_plus_v]
     type = VectorFEWave
     variable = v
     block = 1
-  [../]
-  [./u_source]
-    type = VectorBodyForce
-    variable = u
-    function_x = 1
-    function_y = 1
-    function_z = 1
   [../]
 []
 
