@@ -61,7 +61,7 @@
     input = 'bad_bc_var_test.i'
     expect_err = "No nonlinear variable named foo found. Did you specify an auxiliary variable when you meant to specify a nonlinear variable"
 
-    requirement = 'The system shall report an error when a non-existent Nonlinear Variable name is used a MooseObject.'
+    requirement = 'The system shall report an error when a non-existent nonlinear variable name is used by a MooseObject.'
     issues = '#11227'
   [../]
 
@@ -115,7 +115,7 @@
     input = 'bad_parsed_function_vars.i'
     expect_err = 'The variables \"x, y, z, and t\" in the ParsedFunction are pre-declared for use and must not be declared in \"vars\"'
 
-    requirement = 'The system shall an error when a previously undeclared variable is used in a parsed function expression.'
+    requirement = 'The system shall report an error when a previously undeclared variable is used in a parsed function expression.'
     issues = '#4683'
   [../]
 
@@ -282,7 +282,7 @@
     input = 'function_file_test8.i'
     expect_err = "In Piecewise \S+: Length of data provided in 'xy_data' must be a multiple of 2."
 
-    requirement = 'The system shall report and error if the supplied domain/range pairs is not even in the Piecewise utility.'
+    requirement = 'The system shall report and error if the supplied domain/range pairs are not even in the Piecewise utility.'
     issues = '#2421'
   [../]
 
@@ -291,7 +291,7 @@
     input = 'function_file_test9.i'
     expect_err = "In Piecewise \S+: Either 'data_file', 'x' and 'y', or 'xy_data' must be specified."
 
-    requirement = 'The system shall report and error if no function is supplied in the Piecewise utility.'
+    requirement = 'The system shall report an error if no function is supplied in the Piecewise utility.'
     issues = '#2421'
   [../]
 
@@ -336,7 +336,7 @@
     input = 'function_file_test14.i'
     expect_err = "In Piecewise \S+: Read more than two rows of data from file '\S+'.  Did you mean to use \"format = columns\" or set \"xy_in_file_only\" to false?"
 
-    requirement = 'The system shall report an error when too many rows are supplied when the data is expected to contain row information.'
+    requirement = 'The system shall report an error if too many rows are supplied when the data is expected to contain row information.'
     issues = '#2421'
   [../]
 
@@ -372,7 +372,7 @@
     input = 'incomplete_kernel_block_coverage_test.i'
     expect_err = "The following block\(s\) lack an active kernel:"
 
-    requirement = 'The system shall report an error if one or more domain blocks do not have any active Kernels (equation operator) on them.'
+    requirement = 'The system shall report an error if one or more domain blocks do not have any active Kernels objects assigned.'
     issues = '#1405'
   [../]
 
@@ -381,7 +381,7 @@
     input = 'incomplete_kernel_variable_coverage_test.i'
     expect_err = "The following variable\(s\) lack an active kernel:"
 
-    requirement = 'The system shall report an error if one or more variables do not have any active Kernels (equation operator) on them.'
+    requirement = 'The system shall report an error if one or more variables do not have any active Kernel objects assigned.'
     issues = '#1405'
   [../]
 
@@ -390,7 +390,7 @@
     input = 'invalid_aux_coupling_test.i'
     expect_err = "You cannot couple an elemental variable to a nodal variable"
 
-    requirement = 'The system shall report an error when an elemental variable (no C0 continuity) is coupled to a variable with C0 continuity.'
+    requirement = 'The system shall report an error when an elemental variable (no $C_0$ continuity) is coupled to a variable with $C_0$ continuity.'
     issues = '#1405'
   [../]
 
@@ -399,7 +399,7 @@
     input = 'missing_active_section.i'
     expect_err = "variables listed as active"
 
-    requirement = 'The system shall report an error when an active input block section is specified by missing.'
+    requirement = 'The system shall report an error when an active input block section is specified but missing.'
     issues = '#1405'
   [../]
 
@@ -417,7 +417,7 @@
     input = 'coupled_grad_without_declare.i'
     expect_err = 'The coupled variable "\w+" was never added to this objects\'s InputParameters'
 
-    requirement = "The system shall report an error when a coupled variable is supplied that wasn't added as a valid parameter."
+    requirement = "The system shall report an error when a coupled variable is supplied that was not added as a valid parameter."
     issues = '#1405'
   [../]
 
@@ -435,7 +435,7 @@
     input = 'missing_function_test.i'
     expect_err = "Unable to find function \S+"
 
-    requirement = "The system shall report an error when the coupled function doesn't exist or isn't parseable for the Piecewise utility."
+    requirement = "The system shall report an error when the coupled function does not exist or can not be parsedfor the Piecewise utility."
     issues = '#1405'
   [../]
 
@@ -453,7 +453,7 @@
     input = 'missing_material_prop_test2.i'
     expect_err = "Material property '\w+', requested by '\w+' is not defined on block \d+"
 
-    requirement = 'The system shall report an error when a material property is supplied on some blocks but missing on some blocks where it is requested.'
+    requirement = 'The system shall report an error when a material property is supplied on some blocks but missing on other blocks where it is requested.'
     issues = '#1405'
   [../]
 
@@ -546,7 +546,7 @@
     cli_args = '--no-trap-fpe'
     expect_out = 'Solve Did NOT Converge'
 
-    requirement = 'The system shall abort the solve and report an FPE error when a NaN is produced during user computation with the Steady executioner.'
+    requirement = 'The system shall abort the solve and report a floating point error when a NaN is produced during user computation with the Steady executioner.'
     issues = '#374 #3614'
   [../]
 
@@ -556,7 +556,7 @@
     cli_args = '--no-trap-fpe'
     expect_err = 'Solve Did NOT Converge'
 
-    requirement = 'The system shall abort the solve and report an FPE error when a NaN is produced during user computation with the Transient executioner.'
+    requirement = 'The system shall abort the solve and report a floating point error when a NaN is produced during user computation with the Transient executioner.'
     issues = '#374 #3614'
   [../]
 
@@ -621,7 +621,7 @@
     input = 'unused_param_test.i'
     allow_unused = true
 
-    requirement = 'The system shall report a warning when an unused parameter is through the input file or an Action.'
+    requirement = 'The system shall report a warning when an unused parameter is provided through the input file or an Action.'
     issues = '#709 #759 #4101'
   [../]
 
@@ -688,7 +688,7 @@
     input = 'ic_variable_not_specified.i'
     expect_err = "missing required parameter 'ICs/u_ic/variable'"
 
-    requirement = 'The system shall report an error when a required variable is missing from the InitialConditions block.'
+    requirement = 'The system shall report an error when a required variable is missing from the ICs input file block.'
     issues = '#534'
   [../]
 
@@ -755,7 +755,7 @@
     expect_out = 'Syntax OK'
     max_parallel = 1
 
-    requirement = 'The system shall report the successful parsing and interpretation of input file syntax when using the "chech input" command line flag.'
+    requirement = 'The system shall report the successful parsing and interpretation of input file syntax when using the "--check-input" command line flag.'
     issues = '#4437'
   [../]
 
@@ -787,7 +787,7 @@
     input = time_integrator_error.i
     expect_err = 'You cannot specify time_scheme in the Executioner and independently add a TimeIntegrator.'
 
-    requirement = 'The system shall report an error when multiple time_schemes are specified in the same input file.'
+    requirement = 'The system shall report an error when multiple time schemes are specified in the same input file.'
     issues = '#5463'
   [../]
 
@@ -951,7 +951,7 @@
     input = 'dirac_kernel_with_aux_var.i'
     expect_err = "No nonlinear variable named v found. Did you specify an auxiliary variable when you meant to specify a nonlinear variable"
 
-    requirement = 'The system shall report an error when a Dirac Kernel attempts to use an auxiliary variable.'
+    requirement = 'The system shall report an error when a DiracKernel attempts to use an auxiliary variable.'
     issues = '#11039'
   [../]
 
