@@ -39,13 +39,8 @@ SideIntegralPostprocessor::execute()
 Real
 SideIntegralPostprocessor::getValue()
 {
-  return _integral_value;
-}
-
-void
-SideIntegralPostprocessor::finalize()
-{
   gatherSum(_integral_value);
+  return _integral_value;
 }
 
 void

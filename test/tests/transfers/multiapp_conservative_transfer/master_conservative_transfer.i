@@ -57,7 +57,7 @@
 
 [Transfers]
   [./to_sub]
-    type = MultiAppNearestNodeTransfer
+    type = MultiAppMeshFunctionTransfer
     direction = to_multiapp
     source_variable = u
     variable = aux_u

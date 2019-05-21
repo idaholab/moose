@@ -39,21 +39,38 @@ NearestPointIntegralVariablePostprocessor::NearestPointIntegralVariablePostproce
 Real
 NearestPointIntegralVariablePostprocessor::spatialValue(const Point & point) const
 {
-  return nearestUserObject(point)->getValue();
+  unsigned int i = nearestPointIndex(point);
+
+  if (i >= _np_post_processor_values.size())
+    mooseError("The vector length of vector post processor is ",
+               _np_post_processor_values.size(),
+               " but nearestPointIndex() return ",
+               i);
+
+  return _np_post_processor_values[i];
 }
 
 Real
 NearestPointIntegralVariablePostprocessor::userObjectValue(unsigned int i) const
 {
-  if (i >= _user_objects.size())
-    mooseError("There are only ", _user_objects.size(), " user objects but you pass in ", i);
+  if (i >= _np_post_processor_values.size())
+    mooseError("The vector length of vector post processor is ",
+               _np_post_processor_values.size(),
+               " but you pass in ",
+               i);
 
-  return _user_objects[i]->getValue();
+  return _np_post_processor_values[i];
 }
 
 void
 NearestPointIntegralVariablePostprocessor::finalize()
 {
+  if (_user_objects.size() != _np_post_processor_values.size())
+    mooseError("The vector length of the vector postproessor ",
+               _np_post_processor_values.size(),
+               " is different from the number of user objects ",
+               _user_objects.size());
+
   unsigned int i = 0;
   for (auto & user_object : _user_objects)
   {
