@@ -64,7 +64,10 @@ class Job(object):
         self.modifiedFiles = []
 
         ###List of nodes that depend on this node.
-        self.downstreamNodes = []
+        self.__downstreamNodes = []
+
+        ### List of jobs that this job depends on.
+        self.__upstreamNodes = []
 
         ###List of all jobs that this job races with.
         self.racePartners = set()
@@ -108,9 +111,25 @@ class Job(object):
             t_list.append(temp_job.getTestName())
         return t_list
 
+    def addUpsteamNode(self, node):
+        """ Add a job to the list of jobs that are upstream from here """
+        return self.__upstreamNodes.append(node)
+
+    def getUpstreamNodes(self):
+        """ Return the list of jobs that are upstream from here """
+        return self.__upstreamNodes
+
     def addDownsteamNode(self, node):
         """ Add a job to the list of jobs that are downstream from here """
-        return downstreamNodes.append(node)
+        return self.__downstreamNodes.append(node)
+
+    def removeDownsteamNode(self, node):
+        """ Remove a job from the list of jobs that are downstream from here """
+        return self.__downstreamNodes.remove(node)
+
+    def getDownstreamNodes(self):
+        """ Return the list of jobs that are downstream from here """
+        return self.__downstreamNodes
 
     def getDAG(self):
         """ Return the DAG associated with this tester """

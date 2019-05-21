@@ -26,7 +26,6 @@ class FileTester(RunApp):
         RunApp.__init__(self, name, params)
 
     def prepare(self, options):
-        return
         if self.specs['delete_output_before_running'] == True:
             util.deleteFilesAndFolders(self.specs['test_dir'], self.getOutputFiles(), self.specs['delete_output_folders'])
 

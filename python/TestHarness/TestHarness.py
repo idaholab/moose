@@ -7,12 +7,12 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import itertools
 import sys
 if sys.version_info[0:2] != (2, 7):
     print("python 2.7 is required to run the test harness")
     sys.exit(1)
 
+import itertools
 import os, re, inspect, errno, copy, json
 import shlex
 
@@ -563,6 +563,99 @@ class TestHarness:
             # Perform any write-to-disc operations
             self.writeResults()
 
+    def findRacePartners(self):
+        """ Collect all the jobs that have race conditions """
+        raceConditionsExist = False
+        all_jobs = self.scheduler.retrieveJobs()
+
+        for job_a, job_b in itertools.combinations(all_jobs, 2):
+            for filesInA in job_a.modifiedFiles:
+                for filesInB in job_b.modifiedFiles:
+                    if (filesInA == filesInB):
+                        if not (job_a in job_b.getDownstreamNodes() or job_b in job_a.getDownstreamNodes()):
+                            job_a.racePartners.add(job_b)
+                            job_b.racePartners.add(job_a)
+                            raceConditionsExist = True
+        return raceConditionsExist
+
+    def printRaceConditionsByPrereq(self):
+        """ Print jobs with race conditions that share a prereq """
+        all_jobs = self.scheduler.retrieveJobs()
+
+        colissions = dict()
+        for job in all_jobs:
+            if len(job.racePartners) > 0:
+                prereq = str([x.getTestName() for x in job.getUpstreamNodes()])
+                shared = list()
+                shared.append(job.getTestName())
+                for partner in job.racePartners:
+                    if job.getUpstreamNodes() == partner.getUpstreamNodes():
+                        shared.append(partner.getTestName())
+                    colissions[prereq] = shared
+        for prereq in colissions:
+            if prereq != "[]":
+                print("The following share " + prereq + " for their prereq(s)")
+            else:
+                print("The following don't share any prereqs")
+            for job in colissions[prereq]:
+                print(job)
+        return
+
+    def printUniqueRacerSets(self):
+        """ Print the jobs that share race conditions within unique sets """
+        all_jobs = self.scheduler.retrieveJobs()
+
+        allOfRacers = set()
+        for job in all_jobs:
+            temp_set = set()
+
+            # Only jobs that have race conditions
+            if len(job.racePartners) > 0:
+                temp_set.add(job)
+                for partner in job.racePartners:
+                    temp_set.add(partner)
+            allOfRacers.add(frozenset(sorted(temp_set)))
+        # If there are any jobs with race conditions, print them out.
+        setNumber = 0
+        # Keep the files that are modified.
+        racerModifiedFiles = set()
+        if len(allOfRacers) > 1:
+            print("Diagnostic analysis shows that the members of the following unique sets exhibit race conditions:")
+
+            # Print each set of jobs with shared race conditions.
+            for racers in allOfRacers:
+                racerModifiedFiles.clear()
+                if racers:
+                    setNumber += 1
+                    print(" Set " + str(setNumber) + "\n- - - - -")
+                for racer in racers:
+                    print("  --" + racer.getTestName())
+                for a, b in itertools.combinations(racers, 2):
+                    for c in a.modifiedFiles:
+                        if c in b.modifiedFiles:
+                            racerModifiedFiles.add(c)
+                        else:
+                            try:
+                                racerModifiedFiles.remove(c)
+                            except:
+                                pass
+                print("\n   Each of the tests in this set create or modify the all of the following files:")
+                for file in racerModifiedFiles:
+                    print("    -->" + file)
+
+                print("- - - - -\n")
+
+            sys.exit("There are a total of " + str(setNumber) + " sets of tests with unique race conditions. " +
+            "Please review them and either create any necessary prereqs, or create unique filenames for the" +
+            " outputs of each test.")
+
+        else:
+            print("There are no race conditions.")
+
+
+
+        return setNumber
+
     def writeResults(self):
         """ Don't update the results file when using the --failed-tests argument """
         if self.options.failed_tests:
@@ -571,59 +664,11 @@ class TestHarness:
         """ write test results to disc in some fashion the user has requested """
         all_jobs = self.scheduler.retrieveJobs()
 
-        #%%%%%%%%%% Probably move back to TestHarness.py %%%%%%%%%%#
-        # all_jobs = [l for l in self.__scheduled_jobs]
-
-        # print(all_jobs)
-        # for l in all_jobs:
-        #     print(l.getDAG().getOriginalDAG().graph)
-        #     print("HI")
-        ## Only run when the proper option is set.
+        # Gather and print the jobs with race conditions after the jobs are finished
+        # and only run when running --diag.
         if self.options.testharness_diagnostics:
-            for a, b in itertools.combinations(all_jobs, 2):
-                # print("\n\n\n")
-                # print(a.getPreSerializationDAG().graph, "<<<<<<<------------------------->>>>>>>>>>>>>>>>>>>", b)
-                # print("\n\n\n")
-
-                for c in a.modifiedFiles:
-                    for d in b.modifiedFiles:
-                        # print("\n\n", type(c), type(d))
-                        # print(c, "<<<<----------------------------------------------->>>>", d, "\n\n")
-                        if (c == d):
-                            # print("Possible Colission")
-                            # print(b.getDAG().getOriginalDAG().graph)
-                            # print(a.getTestName(), "---------------------------", b.downstreamNodes)
-                            # print(b.getTestName(), "---------------------------", a.downstreamNodes)
-                            if not (a.getTestName() in b.downstreamNodes or b.getTestName() in a.downstreamNodes):
-                                a.racePartners.add(b)
-                                b.racePartners.add(a)
-#                                print("Colission between {} and {}".format(a.getTestName(), b.getTestName()))
-                            else:
-                                print("Good dependencies")
-            for job in all_jobs:
-                print("Race Partners of {}".format(job.getTestName()))
-                for partner in job.racePartners:
-                    print(partner.getTestName())
-            print("Everything is done\n\n\n")
-
-
-#%%%%%%%%%%%%%%%%%% May Return to This Location %%%%%%%%%%%%%%%%%%%%%%#
-
-#######################################
-        # for a, b in itertools.combinations(all_jobs, 2):
-        #     for c in a.modifiedFiles:
-        #         for d in b.modifiedFiles:
-        #             print("\n\n", type(c), type(d))
-        #             print(c, "<<<<----------------------------------------------->>>>", d, "\n\n")
-        #             if (c == d):
-        #                 print("Possible Colission")
-        #                 if a in b.getDownstreams(b.getUniqueIdentifier(), b.getDAG()) or b in a.getDownstreams(a):
-        #                     print("Colission between {} and {}".format(a.getTestName(), b.getTestName()))
-        #                 else:
-        #                     print("Good dependencies")
-#                    print("Colission between {} and {}".format(c.getTestNameShort(), d.getTestNameShort()))
-#            print("Going Through the Jobs")
-
+            self.findRacePartners()
+            self.printUniqueRacerSets()
 
         # Record the input file name that was used
         self.options.results_storage['INPUT_FILE_NAME'] = self.options.input_file_name
