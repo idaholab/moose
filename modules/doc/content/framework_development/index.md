@@ -48,6 +48,8 @@ For development of MOOSE-based applications see [Application Development](applic
 
 [Utils](utils/index.md) - Basic utilities used throughout the framework
 
+[System Integrity Checking](sanity_checking.md) - Parsing and system integrity checks
+
 ## Internal Systems
 
 [MooseVariables](moose_variables.md) - The set of objects that compute and hold variable/field values
