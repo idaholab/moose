@@ -214,8 +214,8 @@ SingleVariableReturnMappingSolution::internalSolve(const Real effective_trial_st
       {
         if (residual_old - _residual != 0.0)
         {
-          const Real alpha = residual_old / (residual_old - _residual);
-          MathUtils::clamp(alpha, 1.0e-2, 1.0);
+          Real alpha = residual_old / (residual_old - _residual);
+          alpha = MathUtils::clamp(alpha, 1.0e-2, 1.0);
 
           if (alpha != 1.0)
           {
