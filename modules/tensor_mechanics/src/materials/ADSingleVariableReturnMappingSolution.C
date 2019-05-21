@@ -214,7 +214,7 @@ ADSingleVariableReturnMappingSolution<compute_stage>::internalSolve(
         if (residual_old - _residual != 0.0)
         {
           ADReal alpha = residual_old / (residual_old - _residual);
-          MathUtils::clamp(alpha, 1.0e-2, 1.0);
+          alpha = MathUtils::clamp(alpha, 1.0e-2, 1.0);
 
           if (alpha != 1.0)
           {
