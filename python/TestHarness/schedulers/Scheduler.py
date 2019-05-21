@@ -188,7 +188,11 @@ class Scheduler(MooseObject):
 
             # Completed all jobs sanity check
             if not self.__error_state and self.__job_bank:
-                raise SchedulerError('Scheduler exiting with different amount of work than what was tasked!')
+                print("Jobs that didn't run:")
+                for job in self.__job_bank:
+                    print("  --" + job.getTestName())
+                    print("Status:","-----------------------------", job.getStatus())
+                #raise SchedulerError('Scheduler exiting with different amount of work than what was tasked!')
 
             if not self.__error_state:
                 self.run_pool.close()
