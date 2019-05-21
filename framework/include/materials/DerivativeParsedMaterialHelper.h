@@ -29,7 +29,8 @@ public:
                                  VariableNameMappingMode map_mode = USE_PARAM_NAMES);
 
 protected:
-  virtual void computeProperties();
+  virtual void initQpStatefulProperties();
+  virtual void computeQpProperties();
 
   virtual void functionsPostParse();
   void assembleDerivatives();
