@@ -1,0 +1,9 @@
+[Tests]
+  design = 'MooseDocs/index.md'
+  issues = '#6699'
+  [core]
+    type = PythonUnitTest
+    input = test_core.py
+    requirement = "The documentation system shall include basic support for a markdown-like syntax."
+  []
+[]

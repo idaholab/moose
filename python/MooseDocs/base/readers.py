@@ -56,6 +56,8 @@ class Reader(mixins.ConfigObject, mixins.ComponentObject):
         if isinstance(page, pages.Source) and page.source and os.path.exists(page.source):
             LOG.debug('READ %s', page.source)
             return common.read(page.source).lstrip('\n')
+        elif isinstance(page, pages.Text):
+            return page.content
 
     def tokenize(self, root, content, page, group=None, line=1, report=True):
         """
@@ -80,8 +82,8 @@ class Reader(mixins.ConfigObject, mixins.ComponentObject):
                 if token.name == 'ErrorToken':
                     msg = common.report_error(token['message'],
                                               page.source,
-                                              token.info.line,
-                                              token.info[0],
+                                              token.info.line if token.info else None,
+                                              token.info[0] if token.info else token.text(),
                                               token['traceback'],
                                               u'TOKENIZE ERROR')
                     LOG.error(msg)

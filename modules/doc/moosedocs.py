@@ -24,6 +24,6 @@ MOOSE_PYTHON_DIR = os.path.join(MOOSE_DIR, 'python')
 if MOOSE_PYTHON_DIR not in sys.path:
     sys.path.append(MOOSE_PYTHON_DIR)
 
-from MooseDocs import main
+from MooseDocs import main #pylint: disable=wrong-import-position
 if __name__ == '__main__':
     sys.exit(main.run())
