@@ -1,0 +1,12 @@
+[Tests]
+  [./clg:ctrl_m_dot_3eqn_rdg]
+    type = 'CSVDiff'
+    input = 'clg.ctrl_m_dot_3eqn_rdg.i'
+    csvdiff = 'clg.ctrl_m_dot_3eqn_rdg_out.csv'
+  [../]
+  [./clg:ctrl_T_3eqn_rdg]
+    type = 'CSVDiff'
+    input = 'clg.ctrl_T_3eqn_rdg.i'
+    csvdiff = 'clg.ctrl_T_3eqn_rdg_out.csv'
+  [../]
+[]
