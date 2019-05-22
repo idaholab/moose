@@ -386,54 +386,6 @@ hostname()
   return hostname;
 }
 
-bool
-absoluteFuzzyGreaterEqual(const Real & var1, const Real & var2, const Real & tol)
-{
-  return (var1 >= (var2 - tol));
-}
-
-bool
-absoluteFuzzyGreaterThan(const Real & var1, const Real & var2, const Real & tol)
-{
-  return (var1 > (var2 + tol));
-}
-
-bool
-absoluteFuzzyLessEqual(const Real & var1, const Real & var2, const Real & tol)
-{
-  return (var1 <= (var2 + tol));
-}
-
-bool
-absoluteFuzzyLessThan(const Real & var1, const Real & var2, const Real & tol)
-{
-  return (var1 < (var2 - tol));
-}
-
-bool
-relativeFuzzyGreaterEqual(const Real & var1, const Real & var2, const Real & tol)
-{
-  return (absoluteFuzzyGreaterEqual(var1, var2, tol * (std::abs(var1) + std::abs(var2))));
-}
-
-bool
-relativeFuzzyGreaterThan(const Real & var1, const Real & var2, const Real & tol)
-{
-  return (absoluteFuzzyGreaterThan(var1, var2, tol * (std::abs(var1) + std::abs(var2))));
-}
-
-bool
-relativeFuzzyLessEqual(const Real & var1, const Real & var2, const Real & tol)
-{
-  return (absoluteFuzzyLessEqual(var1, var2, tol * (std::abs(var1) + std::abs(var2))));
-}
-
-bool
-relativeFuzzyLessThan(const Real & var1, const Real & var2, const Real & tol)
-{
-  return (absoluteFuzzyLessThan(var1, var2, tol * (std::abs(var1) + std::abs(var2))));
-}
-
 void
 MaterialPropertyStorageDump(
     const HashMap<const libMesh::Elem *, HashMap<unsigned int, MaterialProperties>> & props)

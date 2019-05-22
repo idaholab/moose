@@ -10,21 +10,25 @@
 #include "gtest/gtest.h"
 
 #include "LinearInterpolation.h"
+#include "DualReal.h"
+
+#include "metaphysicl/numberarray.h"
+#include "metaphysicl/dualnumber.h"
 
 #include <cmath>
 
 TEST(LinearInterpolationTest, getSampleSize)
 {
-  std::vector<double> x = {1, 2, 3, 5};
-  std::vector<double> y = {0, 5, 6, 8};
+  std::vector<Real> x = {1, 2, 3, 5};
+  std::vector<Real> y = {0, 5, 6, 8};
   LinearInterpolation interp(x, y);
   ASSERT_EQ(interp.getSampleSize(), x.size());
 }
 
 TEST(LinearInterpolationTest, sample)
 {
-  std::vector<double> x = {1, 2, 3, 5};
-  std::vector<double> y = {0, 5, 6, 8};
+  std::vector<Real> x = {1, 2, 3, 5};
+  std::vector<Real> y = {0, 5, 6, 8};
   LinearInterpolation interp(x, y);
 
   EXPECT_DOUBLE_EQ(interp.sample(0.), 0.);
@@ -41,4 +45,18 @@ TEST(LinearInterpolationTest, sample)
   EXPECT_DOUBLE_EQ(interp.sampleDerivative(1.1), 5.);
   EXPECT_DOUBLE_EQ(interp.sampleDerivative(2.), 1.);
   EXPECT_DOUBLE_EQ(interp.sampleDerivative(2.1), 1.);
+}
+
+TEST(LinearInterpolationTest, automatic_differentiation_sample)
+{
+  std::vector<Real> x = {1, 2};
+  std::vector<Real> y = {0, 5};
+  DualLinearInterpolation interp(x, y);
+
+  DualReal xx = 1.5;
+  xx.derivatives()[0] = 1;
+  auto yy = interp.sample(xx);
+
+  EXPECT_DOUBLE_EQ(yy.value(), 2.5);
+  EXPECT_DOUBLE_EQ(yy.derivatives()[0], 5.0);
 }

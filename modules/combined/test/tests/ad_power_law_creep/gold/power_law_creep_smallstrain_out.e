@@ -1,0 +1,1 @@
+../../power_law_creep/gold/power_law_creep_smallstrain_out.e

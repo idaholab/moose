@@ -17,12 +17,13 @@ template <>
 InputParameters
 validParams<NearestPointLayeredAverage>()
 {
-  InputParameters params = nearestPointBaseValidParams<LayeredAverage>();
+  InputParameters params =
+      nearestPointBaseValidParams<LayeredAverage, ElementIntegralVariableUserObject>();
 
   return params;
 }
 
 NearestPointLayeredAverage::NearestPointLayeredAverage(const InputParameters & parameters)
-  : NearestPointBase<LayeredAverage>(parameters)
+  : NearestPointBase<LayeredAverage, ElementIntegralVariableUserObject>(parameters)
 {
 }

@@ -235,4 +235,3 @@ private:
                     Real & scalar_lower_bound,
                     std::stringstream * iter_output);
 };
-

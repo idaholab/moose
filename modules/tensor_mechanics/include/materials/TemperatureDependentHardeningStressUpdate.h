@@ -10,9 +10,9 @@
 #pragma once
 
 #include "IsotropicPlasticityStressUpdate.h"
+#include "LinearInterpolation.h"
 
 class PiecewiseLinear;
-class LinearInterpolation;
 
 class TemperatureDependentHardeningStressUpdate;
 
@@ -67,4 +67,3 @@ protected:
    */
   Real _hf_fraction;
 };
-

@@ -132,7 +132,7 @@ poly(std::vector<Real> c, const T x, const bool derivative)
 
 template <typename T>
 T
-clamp(T x, Real lowerlimit, Real upperlimit)
+clamp(const T & x, Real lowerlimit, Real upperlimit)
 {
   if (x < lowerlimit)
     return lowerlimit;
@@ -162,4 +162,3 @@ smootherStep(T x, T start, T end, bool derivative = false)
 }
 
 } // namespace MathUtils
-

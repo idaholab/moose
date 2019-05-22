@@ -1,0 +1,10 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'nearest_point_layered_side_average.i'
+    exodiff = 'nearest_point_layered_side_average_out.e'
+    requirement = 'The system shall compute layered side averages that computed from the closest values for a list of points'
+    design = 'NearestPointLayeredSideAverage.md'
+    issues = '#13252'
+  [../]
+[]

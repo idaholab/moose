@@ -84,7 +84,7 @@ public:
   /**
    * Return the complete set of available flags.
    */
-  const std::set<MooseEnumItem> & items() { return _items; }
+  const std::set<MooseEnumItem> & items() const { return _items; }
 
   ///@{
   /**
@@ -137,4 +137,3 @@ protected:
   /// Flag to enable enumeration items not previously defined
   bool _allow_out_of_range;
 };
-

@@ -47,7 +47,6 @@ validParams<MultiAppTransfer>()
   params.addParam<bool>("displaced_target_mesh",
                         false,
                         "Whether or not to use the displaced mesh for the target mesh.");
-
   return params;
 }
 

@@ -28,11 +28,8 @@ template <>
 InputParameters
 validParams<MultiAppNearestNodeTransfer>()
 {
-  InputParameters params = validParams<MultiAppTransfer>();
+  InputParameters params = validParams<MultiAppFieldTransfer>();
 
-  params.addRequiredParam<AuxVariableName>(
-      "variable", "The auxiliary variable to store the transferred values in.");
-  params.addRequiredParam<VariableName>("source_variable", "The variable to transfer from.");
   params.addParam<BoundaryName>(
       "source_boundary",
       "The boundary we are transferring from (if not specified, whole domain is used).");
@@ -50,9 +47,7 @@ validParams<MultiAppNearestNodeTransfer>()
 }
 
 MultiAppNearestNodeTransfer::MultiAppNearestNodeTransfer(const InputParameters & parameters)
-  : MultiAppTransfer(parameters),
-    _to_var_name(getParam<AuxVariableName>("variable")),
-    _from_var_name(getParam<VariableName>("source_variable")),
+  : MultiAppFieldTransfer(parameters),
     _fixed_meshes(getParam<bool>("fixed_meshes")),
     _node_map(declareRestartableData<std::map<dof_id_type, Node *>>("node_map")),
     _distance_map(declareRestartableData<std::map<dof_id_type, Real>>("distance_map")),
@@ -64,15 +59,8 @@ MultiAppNearestNodeTransfer::MultiAppNearestNodeTransfer(const InputParameters &
         declareRestartableData<std::map<dof_id_type, unsigned int>>("cached_from_ids")),
     _cached_qp_inds(declareRestartableData<std::map<dof_id_type, unsigned int>>("cached_qp_inds"))
 {
-}
-
-void
-MultiAppNearestNodeTransfer::initialSetup()
-{
-  if (_direction == TO_MULTIAPP)
-    variableIntegrityCheck(_to_var_name);
-  else
-    variableIntegrityCheck(_from_var_name);
+  if (_to_var_names.size() != 1 && _from_var_names.size() != 1)
+    mooseError(" Support single variable only");
 }
 
 void
@@ -593,6 +581,8 @@ MultiAppNearestNodeTransfer::execute()
   }
 
   _console << "Finished NearestNodeTransfer " << name() << std::endl;
+
+  postExecute();
 }
 
 Node *

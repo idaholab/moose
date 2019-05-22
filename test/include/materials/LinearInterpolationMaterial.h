@@ -10,9 +10,9 @@
 #pragma once
 
 #include "Material.h"
+#include "LinearInterpolation.h"
 
 class LinearInterpolationMaterial;
-class LinearInterpolation;
 class PolynomialFit;
 
 template <>
@@ -31,4 +31,3 @@ protected:
   std::unique_ptr<PolynomialFit> _poly_fit;
   MaterialProperty<Real> & _property;
 };
-

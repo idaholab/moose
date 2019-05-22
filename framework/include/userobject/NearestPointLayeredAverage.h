@@ -27,7 +27,8 @@ InputParameters validParams<NearestPointLayeredAverage>();
  * Given a list of points this object computes the layered average
  * closest to each one of those points.
  */
-class NearestPointLayeredAverage : public NearestPointBase<LayeredAverage>
+class NearestPointLayeredAverage
+  : public NearestPointBase<LayeredAverage, ElementIntegralVariableUserObject>
 {
 public:
   NearestPointLayeredAverage(const InputParameters & parameters);
