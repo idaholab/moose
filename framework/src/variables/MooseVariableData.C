@@ -13,6 +13,7 @@
 #include "DisplacedSystem.h"
 #include "TimeIntegrator.h"
 #include "MooseVariableFE.h"
+#include "MooseTypes.h"
 
 #include "libmesh/quadrature.h"
 #include "libmesh/fe_base.h"
@@ -914,7 +915,7 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
           "Unsupported element type ",
           static_cast<typename std::underlying_type<decltype(_element_type)>::type>(_element_type));
   }
-  mooseAssert(ad_offset || !_var_num,
+  mooseAssert(_var.kind() == VarKindType::VAR_AUXILIARY || ad_offset || !_var_num,
               "Either this is the zeroth variable or we should have an offset");
 
   // Hopefully this problem can go away at some point
