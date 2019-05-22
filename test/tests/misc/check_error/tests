@@ -985,8 +985,7 @@
   [./vector_kernel_with_standard_var]
     type = 'RunException'
     input = 'vector_kernel_with_standard_var.i'
-    expect_err = 'No vector variable named u found. Did you specify a vector variable when you meant to specify a standard variable'
-
+    expect_err = 'No vector variable named \w+ found. Did you specify a standard variable when you meant to specify a vector variable'
     requirement = 'The system shall report an error when a vector Kernel attempts to use a scalar solution variable.'
     issues = '#11039'
   [../]
