@@ -32,6 +32,7 @@
   using ADMaterial<compute_stage>::_fe_problem;                                                    \
   using ADMaterial<compute_stage>::_assembly;                                                      \
   using ADMaterial<compute_stage>::_mesh;                                                          \
+  using ADMaterial<compute_stage>::isBoundaryMaterial;                                             \
   using ADMaterial<compute_stage>::copyDualNumbersToValues;                                        \
   using ADMaterial<compute_stage>::_displacements
 

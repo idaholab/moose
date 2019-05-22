@@ -141,12 +141,7 @@ ComputeFiniteStrain::computeQpIncrements(RankTwoTensor & total_strain_increment,
     case DecompMethod::TaylorExpansion:
     {
       // inverse of _Fhat
-      RankTwoTensor invFhat;
-      static const RankTwoTensor zero;
-      if (_Fhat[_qp] == zero)
-        invFhat.zero();
-      else
-        invFhat = _Fhat[_qp].inverse();
+      const RankTwoTensor invFhat = _Fhat[_qp].inverse();
 
       // A = I - _Fhat^-1
       RankTwoTensor A(RankTwoTensor::initIdentity);
@@ -222,8 +217,8 @@ ComputeFiniteStrain::computeQpIncrements(RankTwoTensor & total_strain_increment,
       N2.vectorOuterProduct(e_vector.column(1), e_vector.column(1));
       N3.vectorOuterProduct(e_vector.column(2), e_vector.column(2));
 
-      RankTwoTensor Uhat = N1 * lambda1 + N2 * lambda2 + N3 * lambda3;
-      RankTwoTensor invUhat(Uhat.inverse());
+      const RankTwoTensor Uhat = N1 * lambda1 + N2 * lambda2 + N3 * lambda3;
+      const RankTwoTensor invUhat(Uhat.inverse());
 
       rotation_increment = _Fhat[_qp] * invUhat;
 

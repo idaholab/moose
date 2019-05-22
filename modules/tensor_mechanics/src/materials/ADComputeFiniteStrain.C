@@ -127,12 +127,7 @@ ADComputeFiniteStrain<compute_stage>::computeQpIncrements(ADRankTwoTensor & tota
     case DecompMethod::TaylorExpansion:
     {
       // inverse of _Fhat
-      ADRankTwoTensor invFhat;
-      static const RankTwoTensor zero;
-      if (_Fhat[_qp] == zero)
-        invFhat.zero();
-      else
-        invFhat = _Fhat[_qp].inverse();
+      const ADRankTwoTensor invFhat = _Fhat[_qp].inverse();
 
       // A = I - _Fhat^-1
       ADRankTwoTensor A(RankTwoTensorType<compute_stage>::type::initIdentity);
@@ -211,7 +206,7 @@ ADComputeFiniteStrain<compute_stage>::computeQpIncrements(ADRankTwoTensor & tota
       N3.vectorOuterProduct(e_vector.column(2), e_vector.column(2));
 
       const auto Uhat = N1 * lambda1 + N2 * lambda2 + N3 * lambda3;
-      ADRankTwoTensor invUhat(Uhat.inverse());
+      const ADRankTwoTensor invUhat(Uhat.inverse());
 
       rotation_increment = _Fhat[_qp] * invUhat;
 
