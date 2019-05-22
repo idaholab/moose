@@ -1,6 +1,7 @@
 #pragma once
 
 #include "InputParameters.h"
+#include "HeatStructureBase.h"
 
 class HSBoundaryInterface;
 class Component;
@@ -23,6 +24,10 @@ protected:
 
   /// Heat structure name
   const std::string & _hs_name;
+  /// Heat structure side enum
+  const MooseEnum & _hs_side_enum;
   /// Heat structure side
-  const MooseEnum & _hs_side;
+  const HeatStructureBase::SideType _hs_side;
+  /// True of valid heat structure side was provided
+  bool _hs_side_valid;
 };

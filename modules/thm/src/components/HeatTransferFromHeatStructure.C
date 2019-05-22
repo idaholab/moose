@@ -1,4 +1,5 @@
 #include "HeatTransferFromHeatStructure.h"
+#include "HeatStructureBase.h"
 
 registerMooseObject("THMApp", HeatTransferFromHeatStructure);
 
@@ -8,8 +9,8 @@ validParams<HeatTransferFromHeatStructure>()
 {
   InputParameters params = validParams<HeatTransferBase>();
   params.addRequiredParam<std::string>("hs", "The name of the heat structure component");
-  MooseEnum hs_sides("top bottom");
-  params.addRequiredParam<MooseEnum>("hs_side", hs_sides, "The side of the heat structure");
+  params.addRequiredParam<MooseEnum>(
+      "hs_side", HeatStructureBase::getSideType(), "The side of the heat structure");
   params.addParam<FunctionName>("Hw", "Convective heat transfer coefficient");
   params.addParam<FunctionName>("Hw_liquid",
                                 "Convective one-phase liquid heat transfer coefficient");

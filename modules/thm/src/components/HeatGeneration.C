@@ -168,8 +168,7 @@ HeatGeneration::addMooseObjects()
         // For plate heat structure, the element integral of the power shape only
         // integrates over x and y, not z, so the depth still needs to be applied.
         // getUnitPerimeter() with an arbitrary side gives the depth.
-        const MooseEnum hs_side("top bottom", "top");
-        pars.set<Real>("scale") = 1.0 / hs.getUnitPerimeter(hs_side);
+        pars.set<Real>("scale") = 1.0 / hs.getUnitPerimeter(HeatStructureBase::OUTER);
       }
       pars.set<PostprocessorName>("power_shape_integral_pp") = power_shape_integral_name;
       std::string mon = genName(name(), "heat_src");

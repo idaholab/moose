@@ -6,6 +6,22 @@
 #include "libmesh/face_quad4.h"
 #include "libmesh/face_quad9.h"
 
+const std::map<std::string, HeatStructureBase::SideType> HeatStructureBase::_side_type_to_enum{
+    {"INNER", INNER}, {"OUTER", OUTER}};
+
+MooseEnum
+HeatStructureBase::getSideType(const std::string & name)
+{
+  return THM::getMooseEnum<SideType>(name, _side_type_to_enum);
+}
+
+template <>
+HeatStructureBase::SideType
+THM::stringToEnum(const std::string & s)
+{
+  return stringToEnum<HeatStructureBase::SideType>(s, HeatStructureBase::_side_type_to_enum);
+}
+
 template <>
 InputParameters
 validParams<HeatStructureBase>()
