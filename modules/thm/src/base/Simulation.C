@@ -384,6 +384,14 @@ Simulation::addTransfer(const std::string & type, const std::string & name, Inpu
   _fe_problem->addTransfer(type, name, params);
 }
 
+void
+Simulation::addControl(const std::string & type, const std::string & name, InputParameters params)
+{
+  params.addPrivateParam<FEProblemBase *>("_fe_problem_base", _fe_problem);
+  std::shared_ptr<Control> control = _factory.create<Control>(type, name, params);
+  _fe_problem->getControlWarehouse().addObject(control);
+}
+
 Real &
 Simulation::getPostprocessorValue(const std::string & name)
 {
