@@ -144,7 +144,7 @@ validParams<FEProblemBase>()
                         "restart file instead of using of using the master "
                         "backup file");
   params.addParam<bool>("skip_additional_restart_data",
-                        false,
+                        true,
                         "True to skip additional data in equation system for restart. It is useful "
                         "for starting a transient calculation with a steady-state solution");
   params.addParam<bool>("skip_nl_system_check",
