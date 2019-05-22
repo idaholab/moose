@@ -1,26 +1,40 @@
 [Tests]
+  design = 'sanity_checking.md'
   [./steady_no_converge]
     type = 'RunApp'
     input = 'steady_no_converge.i'
     expect_out = 'Aborting as solve did not converge'
+
+    requirement = 'The system shall report an error when the system solver is unable to find a converged solution.'
+    design = 'Executioner/index.md'
+    issues = '#5144 #5153'
   [../]
 
   [./range_check_param]
     type = 'RunException'
     input = 'range_check_param.i'
     expect_err = 'Range check failed for parameter \S'
+
+    requirement = 'The system shall report an error message when a range-checked parameter is out of range.'
+    issues = '#2777'
   [../]
 
   [./checked_pointer_param_test]
     type = 'RunException'
     input = 'checked_pointer_param_test.i'
     expect_err = "after parameter name"
+
+    requirement = 'The system shall report an error when a null pointer-checked parameter is retrieved from the InputParameters object.'
+    issues = '#10356'
   [../]
 
   [./add_aux_variable_multiple_test]
     type = 'RunException'
     input = 'add_aux_variable_multiple_test.i'
     expect_err = "AuxVariable with name 'q' already exists but is of a differing type!"
+
+    requirement = 'The system shall report an error when multiple AuxVariables are added to the system with conflicting types.'
+    issues = '#1222'
   [../]
 
   [./add_aux_scalar_variable_multiple_test]
@@ -28,54 +42,81 @@
     input = 'add_aux_variable_multiple_test.i'
     cli_args = 'Variables/q/family=SCALAR MoreAuxVariables/q/family=SCALAR'
     expect_err = "AuxVariable with name 'q' already exists but is of a differing type!"
+
+    requirement = 'The system shall report an error when multiple Scalar AuxVariables are added to the system with conflicting types.'
+    issues = '#9313'
   [../]
 
   [./bad_bc_test]
     type = 'RunException'
     input = 'bad_bc_test.i'
     expect_err = "A '\w+' is not a registered object"
+
+    requirement = 'The system shall report an error when an attempt to is made to instantiate a non-existent BoundaryCondition object.'
+    issues = '#10486'
   [../]
 
   [./bad_bc_var_test]
     type = 'RunException'
     input = 'bad_bc_var_test.i'
     expect_err = "No nonlinear variable named foo found. Did you specify an auxiliary variable when you meant to specify a nonlinear variable"
+
+    requirement = 'The system shall report an error when a non-existent nonlinear variable name is used by a MooseObject.'
+    issues = '#11227'
   [../]
 
   [./bad_enum_test]
     type = 'RunException'
     input = 'bad_enum_test.i'
     expect_err = 'Invalid option "\w+" in MooseEnum.'
+
+    requirement = 'The system shall report an error message when an invalid enumeration is supplied in any MooseEnum type.'
+    issues = '#489'
   [../]
 
   [./bad_executioner_test]
     type = 'RunException'
     input = 'bad_executioner_test.i'
     expect_err = "A '\w+' is not a registered object"
+
+    requirement = 'The system shall report an error message when an invalid Executioner is specified.'
+    issues = '#12106'
   [../]
 
   [./bad_kernel_test]
     type = 'RunException'
     input = 'bad_kernel_test.i'
     expect_err = "A '\w+' is not a registered object"
+
+    requirement = 'The system shall report an error message when an invalid Kernel is specified.'
+    issues = '#12106'
   [../]
 
   [./bad_kernel_var_test]
     type = 'RunException'
     input = 'bad_kernel_var_test.i'
     expect_err = "Unknown variable foo"
+
+    requirement = 'The system shall report an error message when a Kernel object attempts to access a non-existent variable.'
+    issues = '#11227'
   [../]
 
-  [./Badd_material_test]
+  [./bad_material_test]
     type = 'RunException'
     input = 'bad_material_test.i'
     expect_err = "A '\w+' is not a registered object"
+
+    requirement = 'The system shall report an error when an invalid Material is specified.'
+    issues = '#12106'
   [../]
 
   [./bad_parsed_function_vars_test]
     type = 'RunException'
     input = 'bad_parsed_function_vars.i'
     expect_err = 'The variables \"x, y, z, and t\" in the ParsedFunction are pre-declared for use and must not be declared in \"vars\"'
+
+    requirement = 'The system shall report an error when a previously undeclared variable is used in a parsed function expression.'
+    issues = '#4683'
   [../]
 
   [./bad_second_order_test]
@@ -83,12 +124,18 @@
     input = 'bad_second_order_test.i'
     expect_err = 'ERROR: Finite element LAGRANGE on geometric element QUAD4\nonly supports FEInterface::max_order = 1, not fe_type.order = 2'
     method = 'DBG'
+
+    requirement = 'The system shall report an error when a first order element is used with a second order discretization.'
+    issues = '#1405'
   [../]
 
   [./deprecated_block_test]
     type = 'RunException'
     input = 'deprecated_block_test.i'
     expect_err = "Input file block '\S+' has been deprecated."
+
+    requirement = 'The system shall report an error message when a deprecated input file block is used.'
+    issues = '#$1405'
   [../]
 
   [./deprecated_param_default]
@@ -97,6 +144,9 @@
     expect_out = "The parameter \w+ is deprecated."
     cli_args = 'Kernels/nan/deprecated_default=1'
     no_error_deprecated = true
+
+    requirement = 'The system shall report a warning when a deprecated parameter with a default value is explicitly set by the user.'
+    issues = '#1951'
   [../]
 
   [./deprecated_param_no_default]
@@ -105,218 +155,315 @@
     expect_out = "The parameter \w+ is deprecated."
     cli_args = 'Kernels/nan/deprecated_no_default=1'
     no_error_deprecated = true
+
+    requirement = 'The system shall report a warning when an optional deprecated parameter is explicitly set by the user.'
+    issues = '#1951'
   [../]
 
   [./double_restrict_uo_test]
     type = 'RunException'
     input = 'double_restrict_uo.i'
     expect_err = "Attempted to restrict the object '\S+' to a boundary, but the object is already restricted"
+
+    requirement = 'The system shall report an error when conflicting domain restrictions are applied to a single object.'
+    issues = '#1405'
   [../]
 
   [./dynamic_check_name_block_mismatch_test]
     type = 'RunException'
     input = 'check_dynamic_name_block_mismatch.i'
     expect_err = "You must supply the same number of block ids and names parameters"
+
+    requirement = 'The system shall report an error when the number of ids and corresponding block names are mismatched.'
+    issues = '#8596'
   [../]
 
   [./dynamic_check_name_block_test]
     type = 'RunException'
     input = 'check_dynamic_name_block.i'
     expect_err = "The following dynamic block name is not unique: \w+"
+
+    requirement = 'The system shall report an error when a duplicate name is provided for a set of unique block ids.'
+    issues = '#8596'
   [../]
 
   [./dynamic_check_name_boundary_mismatch_test]
     type = 'RunException'
     input = 'check_dynamic_name_boundary_mismatch.i'
     expect_err = "You must supply the same number of boundary ids and names parameters"
+
+    requirement = 'The system shall report an error when the number of ids and corresponding boundary names are mismatched.'
+    issues = '#8596'
   [../]
 
   [./dynamic_check_name_boundary_test]
     type = 'RunException'
     input = 'check_dynamic_name_boundary.i'
     expect_err = "The following dynamic boundary name is not unique: \w+"
+
+    requirement = 'The system shall report an error when a duplicate name is provided for a set of unique boundary ids.'
+    issues = '#8596'
   [../]
 
   [./linear_interp_material_check]
     type = 'RunException'
     input = 'linear_interp_not_increasing.i'
     expect_err = "In LinearInterpolationMaterial \S+: x-values are not strictly increasing"
+
+    requirement = 'The system shall report an error when the linear interpolation utility is supplied with bad domain values.'
+    issues = '#5886'
   [../]
 
   [./function_file_test1]
     type = 'RunException'
     input = 'function_file_test1.i'
     expect_err = "In Piecewise \S+: Read more than two rows of data from file '\S+'.  Did you mean to use \"format = columns\" or set \"xy_in_file_only\" to false?"
+
+    requirement = 'The system shall report an error when the Piecewise utility encounters an unexpected column data format.'
+    issues = '#2421'
   [../]
 
   [./function_file_test2]
     type = 'RunException'
     input = 'function_file_test2.i'
     expect_err = "In Piecewise \S+: Read more than two columns of data from file '\S+'.  Did you mean to use \"format = rows\"?"
+
+    requirement = 'The system shall report an error when the Piecewise utility encounters an unexpected row data format.'
+    issues = '#2421'
   [../]
 
   [./function_file_test3]
     type = 'RunException'
     input = 'function_file_test3.i'
     expect_err = "In PiecewiseBase \S+: Lengths of x and y data do not match."
+
+    requirement = 'The system shall report an error when the Piecewise utility encounters inconsistent domain and range data.'
+    issues = '#2421'
   [../]
 
   [./function_file_test4]
     type = 'RunException'
     input = 'function_file_test4.i'
     expect_err = "Invalid option \"rowls\" in MooseEnum.\s+Valid options \(not case-sensitive\) are \"columns rows\""
+
+    requirement = 'The system shall report an error when an invalid enumeration is supplied in the Piecewise utility.'
+    issues = '#2421'
   [../]
 
   [./function_file_test5]
     type = 'RunException'
     input = 'function_file_test5.i'
     expect_err = "In Piecewise \S+: Cannot specify 'data_file' and 'x', 'y', or 'xy_data' together."
+
+    requirement = 'The system shall report an error when the Piecewise data is over-specified with the data file option.'
+    issues = '#2421'
   [../]
 
   [./function_file_test6]
     type = 'RunException'
     input = 'function_file_test6.i'
     expect_err = "In Piecewise \S+: Cannot specify 'x', 'y', and 'xy_data' together."
+
+    requirement = 'The system shall report an error when the Piecewise data is over-specified with row/column data.'
+    issues = '#2421'
   [../]
 
   [./function_file_test7]
     type = 'RunException'
     input = 'function_file_test7.i'
     expect_err = "In Piecewise \S+: Both 'x' and 'y' must be specified if either one is specified."
+
+    requirement = 'The system shall report an error when either the domain or range is missing when using the domain/range option in the Piecewise utility.'
+    issues = '#2421'
   [../]
 
   [./function_file_test8]
     type = 'RunException'
     input = 'function_file_test8.i'
     expect_err = "In Piecewise \S+: Length of data provided in 'xy_data' must be a multiple of 2."
+
+    requirement = 'The system shall report and error if the supplied domain/range pairs are not even in the Piecewise utility.'
+    issues = '#2421'
   [../]
 
   [./function_file_test9]
     type = 'RunException'
     input = 'function_file_test9.i'
     expect_err = "In Piecewise \S+: Either 'data_file', 'x' and 'y', or 'xy_data' must be specified."
+
+    requirement = 'The system shall report an error if no function is supplied in the Piecewise utility.'
+    issues = '#2421'
   [../]
 
   [./function_file_test10]
     type = 'RunException'
     input = 'function_file_test10.i'
     expect_err = "Invalid option \"3\" in MooseEnum.\s+Valid options \(not case-sensitive\) are \"x y z"
+
+    requirement = 'The system shall report an error if the xy_data is supplied but the function is missing in the Piecewise utility.'
+    issues = '#2421'
   [../]
 
   [./function_file_test11]
     type = 'RunException'
     input = 'function_file_test11.i'
     expect_err = "In Piecewise \S+: Read more than two columns of data from file '\S+'.  Did you mean to use \"format = rows\" or set \"xy_in_file_only\" to false?"
+
+    requirement = 'The system shall report an error when the number of columns appears incorrect in the Piecewise utility.'
+    issues = '#2421'
   [../]
 
   [./function_file_test12]
     type = 'RunException'
     input = 'function_file_test12.i'
     expect_err = "In Piecewise \S+: The 'y_index_in_file' is out-of-range of the available data in '\S+', which contains 3 columns of data."
+
+    requirement = 'The system shall report an error when an out of range y-column index is supplied in the Piecewise utility.'
+    issues = '#2421'
   [../]
 
   [./function_file_test13]
     type = 'RunException'
     input = 'function_file_test13.i'
     expect_err = "In Piecewise \S+: The 'x_index_in_file' is out-of-range of the available data in '\S+', which contains 3 columns of data."
+
+    requirement = 'The system shall report an error when an out of range x-column index is supplied in the Piecewise utility.'
+    issues = '#2421'
   [../]
 
   [./function_file_test14]
     type = 'RunException'
     input = 'function_file_test14.i'
     expect_err = "In Piecewise \S+: Read more than two rows of data from file '\S+'.  Did you mean to use \"format = columns\" or set \"xy_in_file_only\" to false?"
+
+    requirement = 'The system shall report an error if too many rows are supplied when the data is expected to contain row information.'
+    issues = '#2421'
   [../]
 
   [./function_file_test15]
     type = 'RunException'
     input = 'function_file_test15.i'
     expect_err = "In Piecewise \S+: The 'x_index_in_file' is out-of-range of the available data in '\S+', which contains 3 rows of data."
+
+    requirement = 'The system shall report an error when an out of range x-row index is supplied in the Piecewise utility.'
+    issues = '#2421'
   [../]
 
   [./function_file_test16]
     type = 'RunException'
     input = 'function_file_test16.i'
     expect_err = "In Piecewise \S+: The 'y_index_in_file' is out-of-range of the available data in '\S+', which contains 3 rows of data."
+
+    requirement = 'The system shall report an error when an out of range y-row index is supplied in the Piecewise utility.'
+    issues = '#2421'
   [../]
 
   [./function_file_test17]
     type = 'RunException'
     input = 'function_file_test17.i'
     expect_err = "In Piecewise \S+: 'x_index_in_file' and 'y_index_in_file' are set to the same value."
+
+    requirement = 'The system shall report an error when the x and y index in file are equal in the Piecewise utility.'
+    issues = '#2421'
   [../]
 
   [./incomplete_kernel_block_coverage_test]
     type = 'RunException'
     input = 'incomplete_kernel_block_coverage_test.i'
     expect_err = "The following block\(s\) lack an active kernel:"
+
+    requirement = 'The system shall report an error if one or more domain blocks do not have any active Kernels objects assigned.'
+    issues = '#1405'
   [../]
 
   [./incomplete_kernel_variable_coverage_test]
     type = 'RunException'
     input = 'incomplete_kernel_variable_coverage_test.i'
     expect_err = "The following variable\(s\) lack an active kernel:"
+
+    requirement = 'The system shall report an error if one or more variables do not have any active Kernel objects assigned.'
+    issues = '#1405'
   [../]
 
   [./invalid_elemental_to_nodal_couple_test]
     type = 'RunException'
     input = 'invalid_aux_coupling_test.i'
     expect_err = "You cannot couple an elemental variable to a nodal variable"
-  [../]
 
-#  This will now be caught by a Tag error
-#  [./invalid_steady_exec_test]
-#    type = 'RunException'
-#    input = 'invalid_steady_exec_test.i'
-#    expect_err = "You have specified time kernels in your steady state simulation"
-#    deleted = true
-#  [../]
+    requirement = 'The system shall report an error when an elemental variable (no $C_0$ continuity) is coupled to a variable with $C_0$ continuity.'
+    issues = '#1405'
+  [../]
 
   [./missing_active_section_test]
     type = 'RunException'
     input = 'missing_active_section.i'
     expect_err = "variables listed as active"
+
+    requirement = 'The system shall report an error when an active input block section is specified but missing.'
+    issues = '#1405'
   [../]
 
   [./missing_coupled_mat_prop_test]
     type = 'RunException'
     input = 'missing_coupled_mat_prop_test.i'
     expect_err = "One or more Material Properties were not supplied on block"
+
+    requirement = 'The system shall report an error when a material property is requested but not supplied on a mesh block.'
+    issues = '#1405'
   [../]
 
   [./coupled_grad_without_declare]
     type = 'RunException'
     input = 'coupled_grad_without_declare.i'
     expect_err = 'The coupled variable "\w+" was never added to this objects\'s InputParameters'
+
+    requirement = "The system shall report an error when a coupled variable is supplied that was not added as a valid parameter."
+    issues = '#1405'
   [../]
 
   [./missing_function_file_test]
     type = 'RunException'
     input = 'missing_function_file_test.i'
     expect_err = "Unable to open file \S+. Check to make sure that it exists and that you have read permission."
+
+    requirement = 'The system shall report an error when the data file is non-existent or not-readable in the Piecewise utility.'
+    issues = '#1405'
   [../]
 
   [./missing_function_test]
     type = 'RunException'
     input = 'missing_function_test.i'
     expect_err = "Unable to find function \S+"
+
+    requirement = "The system shall report an error when the coupled function does not exist or can not be parsedfor the Piecewise utility."
+    issues = '#1405'
   [../]
 
   [./missing_material_prop_test]
     type = 'RunException'
     input = 'missing_material_prop_test.i'
     expect_err = "The following blocks from your input mesh do not contain an active material: \d+"
+
+    requirement = 'The system shall report an error when one or more material properties are missing from any mesh block.'
+    issues = '#1405'
   [../]
 
   [./missing_material_prop_test2]
     type = 'RunException'
     input = 'missing_material_prop_test2.i'
     expect_err = "Material property '\w+', requested by '\w+' is not defined on block \d+"
+
+    requirement = 'The system shall report an error when a material property is supplied on some blocks but missing on other blocks where it is requested.'
+    issues = '#1405'
   [../]
 
   [./bad_stateful_material_only_old]
     type = 'RunException'
     input = 'bad_stateful_material.i'
     expect_err = "One or more Material Properties were not supplied on block"
+
+    requirement = 'The system shall report an error when only "old" properties are supplied but current properties are requested.'
+    issues = '#1405'
   [../]
 
   [./bad_stateful_material_only_older]
@@ -324,118 +471,148 @@
     input = 'bad_stateful_material.i'
     expect_err = "One or more Material Properties were not supplied on block"
     cli_args = 'Materials/stateful_mat/get_older=true'
+
+    requirement = 'The system shall report an error when only "older" properties are supplied but current properties are requested.'
+    issues = '#1405'
   [../]
 
   [./missing_mesh_test]
     type = 'RunException'
     input = 'missing_mesh_test.i'
     expect_err = "cannot locate mesh file '\S+'"
+
+    requirement = 'The system shall report an error when the mesh file cannot be found.'
+    issues = '#1405'
   [../]
 
   [./missing_req_par_action_obj_test]
     type = 'RunException'
     input = 'missing_req_par_action_obj_test.i'
     expect_err = "missing required parameter 'ConvectionDiffusion/variables'"
+
+    requirement = 'The system shall report an error when a required parameter is not supplied in an Action.'
+    issues = '#1405'
   [../]
 
   [./missing_req_par_mesh_block_test]
     type = 'RunException'
     input = 'missing_req_par_mesh_block_test.i'
     expect_err = "missing required parameter 'Mesh/stripes'"
+
+    requirement = 'The system shall report an error when a specific mesh required parameter is not supplied.'
+    issues = '#1405'
   [../]
 
   [./missing_req_par_moose_obj_test]
     type = 'RunException'
     input = 'missing_req_par_moose_obj_test.i'
     expect_err = "missing required parameter 'Kernels/diff/type'"
+
+    requirement = 'The system shall report an error when the special "type" parameter is not supplied for a MooseObject.'
+    issues = '#1405'
   [../]
 
   [./missing_var_in_kernel_test]
     type = 'RunException'
     input = 'missing_var_in_kernel_test.i'
     expect_err = "missing required parameter 'Kernels/diff/variable'"
+
+    requirement = 'The system shall report an error when a required parameter is not supplied in a MooseObject.'
+    issues = '#1405'
   [../]
 
   [./missing_required_coupled_test]
     type = 'RunException'
     input = 'missing_required_coupled.i'
     expect_err = "missing required parameter 'Kernels/conv_v/velocity_vector'"
+
+    requirement = 'The system shall report an error when a required coupling parameter is missing.'
+    issues = '#1405'
   [../]
 
   [./multi_precond_test]
     type = 'RunException'
     input = 'multi_precond_test.i'
     expect_err = "More than one active Preconditioner detected"
-    max_parallel = 1
+    max_parallel = 1 # Will trigger a different warning/error in parallel because FD is one of the preconditioners
+
+    requirement = 'The system shall report an error when more than one preconditioner block is supplied.'
+    issues = '#1904'
   [../]
 
-  [./nan_test]
-    type = 'RunException'
-    input = 'nan_test.i'
-    expect_err = "Floating point exception"
-    petsc_version = '<3.4'
-    # Right now we don't check for the PETSc converged reason after the solve
-    # we only do this in the monitor callbacks, thus we don't get a PETSc
-    # error on newer versions of PETSc.
-  [../]
-
-  # This is a Steady test so it would be skipped anyway but it turns out that we read the
-  # mesh and initialize the system before exiting safely. However this input file
-  # is used by several other error tests that may also be accessing the checkpoint
-  # file so it's just easier to not execute it in the first place.
   [./nan_no_trap_fpe_test]
     type = 'RunApp'
     input = 'nan_test.i'
     cli_args = '--no-trap-fpe'
-    recover = false
+    expect_out = 'Solve Did NOT Converge'
+
+    requirement = 'The system shall abort the solve and report a floating point error when a NaN is produced during user computation with the Steady executioner.'
+    issues = '#374 #3614'
   [../]
 
-  [./nan_test_transient]
+  [./nan_no_trap_fpe_test_trans]
     type = 'RunException'
     input = 'nan_test_transient.i'
-    expect_err = "Floating point exception"
-    petsc_version = '<3.4'
-    # Right now we don't check for the PETSc converged reason after the solve
-    # we only do this in the monitor callbacks, thus we don't get a PETSc
-    # error on newer versions of PETSc.
+    cli_args = '--no-trap-fpe'
+    expect_err = 'Solve Did NOT Converge'
+
+    requirement = 'The system shall abort the solve and report a floating point error when a NaN is produced during user computation with the Transient executioner.'
+    issues = '#374 #3614'
   [../]
 
   [./nodal_material_test]
     type = 'RunException'
     input = 'nodal_material_test.i'
     expect_err = "Nodal AuxKernel '\w+' attempted to reference material property '\w+'"
+
+    requirement = 'The system shall report an error when a nodal AuxKernel attempts to access a material property.'
+    issues = '#1405'
   [../]
 
   [./override_name_variable_test]
     type = 'RunException'
     input = 'override_name_variable_test.i'
     expect_err = 'supplied multiple times'
-    max_parallel = 1
     allow_warnings = true
+
+    requirement = 'The system shall report an error when the same named parameter appears multiple times in the same input file.'
+    issues = '#9617'
   [../]
 
   [./rz_3d_error_check_test]
     type = 'RunException'
     input = '3D_RZ_error_check.i'
     expect_err = "An RZ coordinate system was requested for subdomain \d+ which contains 3D elements"
+
+    requirement = 'The system shall report an error when the coordinate transformation conflicts with the underlying element types.'
+    issues = '#1405'
   [../]
 
   [./same_name_variable_test]
     type = 'RunException'
     input = 'same_name_variable_test.i'
     expect_err = "Cannot have an auxiliary variable and a nonlinear variable with the same name"
+
+    requirement = 'The system shall report an error when nonlinear and auxiliary variables are declared with the same name.'
+    issues = '#1405'
   [../]
 
   [./subdomain_restricted_auxkernel_test]
     type = 'RunException'
     input = 'subdomain_restricted_auxkernel_mismatch.i'
     expect_err = "The 'block' parameter of the object 'foo' must be a subset of the 'block' parameter of the variable 'foo'"
+
+    requirement = 'The system shall report an error when an AuxKernel is applied outside of the domain where a restricted variable exists.'
+    issues = '#1405'
   [../]
 
   [./subdomain_restricted_kernel_test]
     type = 'RunException'
     input = 'subdomain_restricted_kernel_mismatch.i'
     expect_err = "The 'block' parameter of the object 'body_force' must be a subset of the 'block' parameter of the variable 'v'"
+
+    requirement = 'The system shall report an error when a Kernel is applied outside of the domain where a restricted variable exists.'
+    issues = '#1405'
   [../]
 
   [./unused_param_test]
@@ -443,7 +620,9 @@
     expect_out = "unused parameter 'Mesh/unused_param'"
     input = 'unused_param_test.i'
     allow_unused = true
-    max_parallel = 1 # warning can mix on multiple processes
+
+    requirement = 'The system shall report a warning when an unused parameter is provided through the input file or an Action.'
+    issues = '#709 #759 #4101'
   [../]
 
   [./unused_param_test_cli]
@@ -452,32 +631,46 @@
     input = 'unused_param_test.i'
     cli_args = 'Executioner/unused_param=true'
     allow_unused = true
-    max_parallel = 1 # warning can mix on multiple processes
+
+    requirement = 'The system shall report a warning when an unused parameter is supplied on the command line.'
+    issues = '#709 #759 #4101'
   [../]
 
   [./uo_pps_name_collision_test]
     type = 'RunException'
     input = 'uo_pps_name_collision_test.i'
     expect_err = 'A UserObject with the name "\w+" already exists'
+
+    requirement = 'The system shall report an error when a UserObject and a Postprocessor are added with the same names.'
+    issues = '#1405'
   [../]
 
   [./uo_vector_pps_name_collision_test]
     type = 'RunException'
     input = 'uo_vector_pps_name_collision_test.i'
     expect_err = 'A UserObject with the name "\w+" already exists'
+
+    requirement = 'The system shall report and error when a UserObject and a VectorPostprocessor are added with the same names.'
+    issues = '#1405'
   [../]
 
   [./wrong_object_test]
     type = 'RunException'
     input = 'wrong_moose_object_test.i'
     expect_err = "Task \w+ is not registered to build \w+ derived objects"
-    method = 'opt oprof'
+    method = '!dbg'
+
+    requirement = 'The system shall report an error when an input file block associated with on pluggable system is asked to build an object from a different system.'
+    issues = '#1405'
   [../]
 
   [./wrong_object_test2]
     type = 'RunException'
     input = 'nonexistent_pps_test.i'
     expect_err = "Postprocessor '\S+' requested but not specified in the input file."
+
+    requirement = 'The system shall report an error when a Postprocessor value is requested from a non-existent Postprocessor.'
+    issues = '#1405'
   [../]
 
   [./wrong_input_switch]
@@ -485,42 +678,63 @@
     input = 'Foo'
     input_switch = '-m'
     expect_out = '^Usage:'
+
+    requirement = 'The system shall report a standard Unix usage statement when an invalid command line switch is used.'
+    issues = '#1405'
   [../]
 
   [./ics_missing_variable]
     type = 'RunException'
     input = 'ic_variable_not_specified.i'
     expect_err = "missing required parameter 'ICs/u_ic/variable'"
+
+    requirement = 'The system shall report an error when a required variable is missing from the ICs input file block.'
+    issues = '#534'
   [../]
 
   [./ic_bnd_for_non_nodal]
     type = 'RunException'
     input = 'ic_bnd_for_non_nodal.i'
     expect_err = "You are trying to set a boundary restricted variable on non-nodal variable. That is not allowed."
+
+    requirement = 'The system shall report an error when a boundary restriction is applied to a non-nodal variable discretization.'
+    issues = '#534'
   [../]
 
   [./old_integrity_check]
     type = 'RunException'
     input = 'old_integrity_check.i'
     expect_err = 'Calling \'coupledGradientOld\' on variable \S+ when using a \"Steady\" executioner is not allowed. This value is available only in transient simulations.'
+
+    requirement = 'The system shall report an error when coupling to old temporal solution vectors in a Steady (no time) Executioner.'
+    issues = '#380'
   [../]
 
   [./dot_integrity_check]
     type = 'RunException'
     input = 'dot_integrity_check.i'
     expect_err = 'Calling \'coupledDot\' on variable \S+ when using a \"Steady\" executioner is not allowed. This value is available only in transient simulations.'
+
+    requirement = 'The system shall report an error when coupling to a time derivative solution vector in a Steady (no time) Executioner.'
+    issues = '#10810'
   [../]
 
   [./scalar_old_integrity_check]
     type = 'RunException'
     input = 'scalar_old_integrity_check.i'
     expect_err = 'Vector tag: TIME does not exist'
+
+    requirement = 'The system shall report an error when an older scalar solution variable is accessed in a Steady (no time) Executioner.'
+    issues = '#10810'
   [../]
 
   [./scalar_dot_integrity_check]
     type = 'RunException'
     input = 'scalar_dot_integrity_check.i'
     expect_err = 'Vector tag: TIME does not exist.'
+
+    requirement = 'The system shall report an error when an older time derivative scalar solution variable is accessed in a Steady (no time) Executioner.'
+    issues = '#10810'
   [../]
 
   [./node_value_off_block]
@@ -528,6 +742,9 @@
     input = 'nodal_value_off_block.i'
     expect_err = 'Node 0 does not contain any dofs for the v variable'
     method = 'dbg'
+
+    requirement = 'The system shall report an error when a coupled variable is not defined in the same region as the variable performing the coupling.'
+    issues = '#2849'
   [../]
 
   # check syntax
@@ -537,6 +754,9 @@
     cli_args = '--check-input'
     expect_out = 'Syntax OK'
     max_parallel = 1
+
+    requirement = 'The system shall report the successful parsing and interpretation of input file syntax when using the "--check-input" command line flag.'
+    issues = '#4437'
   [../]
 
   [./check_syntax_error]
@@ -547,6 +767,9 @@
     # because with distributed, not all nodes end up on one proc, so the number of received nodes
     # in not 3
     mesh_mode = REPLICATED
+
+    requirement = 'The system shall report an error when performing nodal constraints when there is a mismatch in the number of constrained nodes.'
+    issues = '#4437'
   [../]
 
   [./check_syntax_no_input]
@@ -554,24 +777,36 @@
     input = 'Foo'
     input_switch = '--check-input'
     expect_err = 'You specified --check-input, but did not provide an input file. Add -i <inputfile> to your command line.'
+
+    requirement = 'The system shall report an error when requested to check the syntax in an input file but no input file is supplied.'
+    issues = '#4437'
   [../]
 
   [./multiple_time_int_check]
     type = 'RunException'
     input = time_integrator_error.i
     expect_err = 'You cannot specify time_scheme in the Executioner and independently add a TimeIntegrator.'
+
+    requirement = 'The system shall report an error when multiple time schemes are specified in the same input file.'
+    issues = '#5463'
   [../]
 
   [./calling_wrong_feproblem_method]
     type = 'RunException'
     input = bad_kernel_action.i
     expect_err = "We expected to create an object of type '\w+?'\.\nInstead we received a parameters object for type '\w+?'."
+
+    requirement = 'The system shall report an error when there is a mismatch between the parameter for an object and the type of object are mismatched.'
+    issues = '#6383'
   [../]
 
   [./wrong_displacement_order]
     type = 'RunException'
     input = wrong_displacement_order.i
     expect_err = "Error: mesh has SECOND order elements, so all displacement variables must be SECOND order."
+
+    requirement = 'The system shall report an error when the variables representing displacement are of a lower order than the mesh.'
+    issues = '#6561'
   [../]
 
   [./function_conflict]
@@ -580,127 +815,207 @@
     input = 'function_conflict.i'
     expect_out = "Function name 'x' could evaluate as a ParsedFunction"
     allow_warnings = true
+
+    requirement = 'The system shall report an error when the name of a function could be misinterpreted because it could also be evaluated (e.g. a function name of "x").'
+    issues = '#8412'
   [../]
 
   [./bad_number]
     type = 'RunException'
     input = 'bad_number.i'
     expect_err = "invalid float syntax for parameter: BCs/right/value"
+
+    requirement = 'The system shall report an error when floating point input parameter types fail to parse as floating point numbers.'
+    issues = '#10310'
   [../]
 
   [./coupling_field_into_scalar]
     type = 'RunException'
     input = 'coupling_field_into_scalar.i'
     expect_err = "slm: Trying to couple a field variable where scalar variable is expected, 'lambda = v'"
+
+    requirement = 'The system shall report an error when a scalar variable is used where a spatial variable is expected.'
+    issues = '#10398'
   [../]
 
   [./coupling_scalar_into_field]
     type = 'RunException'
     input = 'coupling_scalar_into_field.i'
     expect_err = "coupled: Trying to couple a scalar variable where field variable is expected, 'v = a'"
+
+    requirement = 'The system shall report an error when a field variable is used where a scalar variable is expected.'
+    issues = '#10398'
   [../]
 
   [./coupling_nonexistent_field]
     type = 'RunException'
     input = 'coupling_nonexistent_field.i'
     expect_err = "coupled: Coupled variable 'a' was not found"
+
+    requirement = 'The system shall report an error when an invalid coupled spatial variable is requested.'
+    issues = '#10398'
   [../]
 
   [./coupling_nonexistent_scalar]
     type = 'RunException'
     input = 'coupling_nonexistent_scalar.i'
     expect_err = "slm: Coupled variable 'b' was not found"
+
+    requirement = 'The system shall report an error when an invalid coupled scalar variable is requested.'
+    issues = '#10398'
   [../]
 
   [./coupling_itself]
     type = 'RunException'
     input = 'coupling_itself.i'
     expect_err = "Coupled variable 'v' needs to be different from 'variable' with CoupledForce"
+
+    requirement = 'The system shall report an error when an attempt is made to couple a variable with itself.'
+    issues = '#10398'
   [../]
+
   [./missing_input]
     type = 'RunException'
     input = 'missing_input_file.i'
     expect_err = "Unable to open file"
+
+    requirement = 'The system shall report an error when an input file cannot be opened and read.'
+    issues = '#10909'
   [../]
 
   [./kernel_with_aux_var]
     type = 'RunException'
     input = 'kernel_with_aux_var.i'
     expect_err = "No nonlinear variable named v found. Did you specify an auxiliary variable when you meant to specify a nonlinear variable"
+
+    requirement = 'The system shall report an error when a Kernel attempts to use an auxiliary variable.'
+    issues = '#11039'
   [../]
+
   [./bc_with_aux_var]
     type = 'RunException'
     input = 'bc_with_aux_var.i'
     expect_err = "No nonlinear variable named v found. Did you specify an auxiliary variable when you meant to specify a nonlinear variable"
+
+    requirement = 'The system shall report an error when a boundary condition object attempts to use an auxiliary variable.'
+    issues = '#11039'
   [../]
+
   [./aux_kernel_with_var]
     type = 'RunException'
     input = 'aux_kernel_with_var.i'
     expect_err = "Variable 'u' does not exist in this system"
+
+    requirement = 'The system shall report an error when an AuxKernel specifies a non-existent variable.'
+    issues = '#11039'
   [../]
+
   [./scalar_kernel_with_var]
     type = 'RunException'
     input = 'scalar_kernel_with_var.i'
     expect_err = "Scalar variable 'u' does not exist in this system"
+
+    requirement = 'The system shall report an error when a scalar Kernel specifies a non-existent variable.'
+    issues = '#11039'
   [../]
+
   [./nodal_kernel_with_aux_var]
     type = 'RunException'
     input = 'nodal_kernel_with_aux_var.i'
     expect_err = "No nonlinear variable named v found. Did you specify an auxiliary variable when you meant to specify a nonlinear variable"
+
+    requirement = 'The system shall report an error when a nodal Kernel attempts to use an auxiliary variable.'
+    issues = '#11039'
   [../]
+
   [./constraint_with_aux_var]
     type = 'RunException'
     input = 'constraint_with_aux_var.i'
     expect_err = "Cannot add Constraint for variable v, it is not a nonlinear variable"
+
+    requirement = 'The system shall report an error when a constraint attempts to use an auxiliary variable.'
+    issues = '#11039'
   [../]
+
   [./scalar_aux_kernel_with_var]
     type = 'RunException'
     input = 'scalar_aux_kernel_with_var.i'
     expect_err = "Scalar variable 'u' does not exist in this system"
+
+    requirement = 'The system shall report an error when a scalar auxiliary Kernel attempts to use a solution variable.'
+    issues = '#11039'
   [../]
+
   [./dirac_kernel_with_aux_var]
     type = 'RunException'
     input = 'dirac_kernel_with_aux_var.i'
     expect_err = "No nonlinear variable named v found. Did you specify an auxiliary variable when you meant to specify a nonlinear variable"
+
+    requirement = 'The system shall report an error when a DiracKernel attempts to use an auxiliary variable.'
+    issues = '#11039'
   [../]
+
   [./dg_kernel_with_aux_var]
     type = 'RunException'
     input = 'dg_kernel_with_aux_var.i'
     expect_err = "No nonlinear variable named v found. Did you specify an auxiliary variable when you meant to specify a nonlinear variable"
+
+    requirement = 'The system shall report an error when a discontinuous Galerkin Kernel attempts to use a solution variable.'
+    issues = '#11039'
   [../]
+
   [./interface_kernel_with_aux_var]
     type = 'RunException'
     input = 'interface_kernel_with_aux_var.i'
     expect_err = "No nonlinear variable named v found. Did you specify an auxiliary variable when you meant to specify a nonlinear variable"
+
+    requirement = 'The system shall report an error when an interface Kernel attempts to use an auxiliary variable.'
+    issues = '#11039'
   [../]
+
   [./kernel_with_empty_var]
     type = 'RunException'
     input = 'kernel_with_empty_var.i'
     expect_err = 'Error constructing object \'rea\' while retrieving value for \'variable\' parameter! Did you set variable = \'\' \(empty string\) by accident'
+
+    requirement = 'The system shall report an error when a Kernel attempts to retrieve an empty string variable.'
+    issues = '#11039'
   [../]
+
   [./vector_kernel_with_standard_var]
     type = 'RunException'
     input = 'vector_kernel_with_standard_var.i'
     expect_err = 'No vector variable named u found. Did you specify a vector variable when you meant to specify a standard variable'
+
+    requirement = 'The system shall report an error when a vector Kernel attempts to use a scalar solution variable.'
+    issues = '#11039'
   [../]
+
   [./kernel_with_vector_var]
     type = 'RunException'
     input = 'kernel_with_vector_var.i'
     expect_err = 'No standard variable named u found. Did you specify a vector variable when you meant to specify a standard variable'
+
+    requirement = 'The system shall report an error when a Kernel attempts to use a vector solution variable.'
+    issues = '#11039'
   [../]
+
   [./coupled_nodal_for_non_nodal_variable]
     type = 'RunException'
     input = 'coupled_nodal_for_non_nodal_variable.i'
     expect_err = 'm: Trying to get nodal values of variable \'v\', but it is not nodal.'
+
     requirement = "The system shall report an error if users try to get nodal values of non-nodal variables."
     design = 'Coupleable.md'
     issues = '#11623'
   [../]
+
   [./coupled_nodal_for_non_nodal_variable_old]
     type = 'RunException'
     input = 'coupled_nodal_for_non_nodal_variable.i'
     cli_args = 'Materials/m/lag=OLD'
     expect_err = 'm: Trying to get old nodal values of variable \'v\', but it is not nodal.'
+
     requirement = "The system shall report an error if users try to get old nodal values of non-nodal variables."
     design = 'Coupleable.md'
     issues = '#11623'
@@ -710,6 +1025,7 @@
     input = 'coupled_nodal_for_non_nodal_variable.i'
     cli_args = 'Materials/m/lag=OLDER'
     expect_err = 'm: Trying to get older nodal values of variable \'v\', but it is not nodal.'
+
     requirement = "The system shall report an error if users try to get older nodal values of non-nodal variables."
     design = 'Coupleable.md'
     issues = '#11623'

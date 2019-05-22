@@ -175,33 +175,35 @@ ParsedMaterialHelper::functionsOptimize()
 }
 
 void
-ParsedMaterialHelper::computeProperties()
+ParsedMaterialHelper::initQpStatefulProperties()
+{
+  if (_prop_F)
+    (*_prop_F)[_qp] = 0.0;
+}
+
+void
+ParsedMaterialHelper::computeQpProperties()
 {
   Real a;
 
-  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  // fill the parameter vector, apply tolerances
+  for (unsigned int i = 0; i < _nargs; ++i)
   {
-    // fill the parameter vector, apply tolerances
-    for (unsigned int i = 0; i < _nargs; ++i)
+    if (_tol[i] < 0.0)
+      _func_params[i] = (*_args[i])[_qp];
+    else
     {
-      if (_tol[i] < 0.0)
-        _func_params[i] = (*_args[i])[_qp];
-      else
-      {
-        a = (*_args[i])[_qp];
-        _func_params[i] = a < _tol[i] ? _tol[i] : (a > 1.0 - _tol[i] ? 1.0 - _tol[i] : a);
-      }
+      a = (*_args[i])[_qp];
+      _func_params[i] = a < _tol[i] ? _tol[i] : (a > 1.0 - _tol[i] ? 1.0 - _tol[i] : a);
     }
-
-    // insert material property values
-    auto nmat_props = _mat_prop_descriptors.size();
-    for (MooseIndex(_mat_prop_descriptors) i = 0; i < nmat_props; ++i)
-      _func_params[i + _nargs] = _mat_prop_descriptors[i].value()[_qp];
-
-    // TODO: computeQpProperties()
-
-    // set function value
-    if (_prop_F)
-      (*_prop_F)[_qp] = evaluate(_func_F);
   }
+
+  // insert material property values
+  auto nmat_props = _mat_prop_descriptors.size();
+  for (MooseIndex(_mat_prop_descriptors) i = 0; i < nmat_props; ++i)
+    _func_params[i + _nargs] = _mat_prop_descriptors[i].value()[_qp];
+
+  // set function value
+  if (_prop_F)
+    (*_prop_F)[_qp] = evaluate(_func_F);
 }
