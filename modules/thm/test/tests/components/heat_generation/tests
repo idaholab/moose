@@ -1,0 +1,92 @@
+[Tests]
+  # physics
+  [./phy:power_density_shape]
+    type = 'Exodiff'
+    input = 'phy.cylinder_power_shape_aux_var.i'
+    exodiff = 'phy.cylinder_power_shape_aux_var_out.e'
+    rel_err = 1e-4
+    abs_zero = 1e-9
+
+    requirement = "The system shall provide the heat source shape when power density is supplied"
+  [../]
+  [./phy:power_component_shape_cylindrical]
+    type = 'Exodiff'
+    input = 'phy.cylinder_power_shape_fn.i'
+    exodiff = 'phy.cylinder_power_shape_fn_out.e'
+    rel_err = 1e-4
+    abs_zero = 1e-9
+
+    requirement = "The system shall provide the heat source shape for a cylindrical heat structure when power component and power shape function are supplied"
+  [../]
+  [./phy:power_component_shape_plate]
+    type = 'Exodiff'
+    input = 'phy.plate.i'
+    exodiff = 'phy.plate_out.e'
+    rel_err = 1e-4
+    abs_zero = 1e-9
+
+    requirement = "The system shall provide the heat source shape for a plate heat structure when power component and power shape function are supplied"
+  [../]
+
+  [./phy:conservation_plate]
+    type = CSVDiff
+    input = 'phy.conservation.i'
+    cli_args = "
+      Components/heat_structure/type=HeatStructurePlate
+      Components/heat_structure/depth=2
+      Postprocessors/E_tot/type=HeatStructureEnergy
+      Postprocessors/E_tot/plate_depth=2
+      Outputs/file_base=phy.conservation_plate"
+    csvdiff = 'phy.conservation_plate.csv'
+    abs_zero = 1e-7
+    # because output has execute_on = 'initial final'
+    recover = false
+  [../]
+  [./phy:conservation_cylinder]
+    type = CSVDiff
+    input = 'phy.conservation.i'
+    cli_args = "
+      Components/heat_structure/type=HeatStructureCylindrical
+      Components/heat_structure/inner_radius=1.0
+      Postprocessors/E_tot/type=HeatStructureEnergyRZ
+      Postprocessors/E_tot/axis_point='0 1 0'
+      Postprocessors/E_tot/axis_dir='1 0 0'
+      Outputs/file_base=phy.conservation_cylinder"
+    csvdiff = 'phy.conservation_cylinder.csv'
+    abs_zero = 1e-7
+    # because output has execute_on = 'initial final'
+    recover = false
+  [../]
+
+  # Error checking
+  [./err:no_hs]
+    type = 'RunException'
+    input = 'err.base.i'
+    cli_args = "Components/hgen/hs=reactor Components/hgen/regions='fuel' Components/hgen/power=reactor"
+    expect_err = "hgen: The component 'reactor' is not of type 'HeatStructureBase'"
+  [../]
+  [./err:wrong_block_name]
+    type = 'RunException'
+    input = 'err.base.i'
+    cli_args = "Components/hgen/hs=hs Components/hgen/regions='asdf' Components/hgen/power=reactor"
+    expect_err = "hgen: Region 'asdf' does not exist in heat structure 'hs'."
+  [../]
+  [./err:wrong_power_comp]
+    type = 'RunException'
+    input = 'err.base.i'
+    cli_args = "Components/hgen/hs=hs Components/hgen/regions='fuel' Components/hgen/power=hs"
+    expect_err = "hgen: The component 'hs' is not of type 'ReactorPower'"
+  [../]
+  [./err:both_power_and_power_density]
+    type = 'RunException'
+    input = 'err.base.i'
+    cli_args = "Components/hgen/hs=hs Components/hgen/regions='fuel' Components/hgen/power=reactor Components/hgen/power_density=asdf"
+    expect_err = "hgen: Only one of the parameters \{'power', 'power_density'\} can be provided"
+  [../]
+  [./err:neither_power_nor_power_density]
+    type = 'RunException'
+    input = 'err.base.i'
+    cli_args = "Components/hgen/hs=hs Components/hgen/regions='fuel'"
+    expect_err = "hgen: One of the parameters \{'power', 'power_density'\} must be provided"
+  [../]
+[]
