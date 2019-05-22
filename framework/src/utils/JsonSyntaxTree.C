@@ -43,7 +43,13 @@ JsonSyntaxTree::JsonSyntaxTree(const std::string & search_string) : _search(sear
         name = obj._alias;
       if (name.empty())
         name = obj._classname;
-      _object_label_map[name] = std::make_pair(entry.first, obj._file);
+
+      // Skip <JACOBIAN> instances and remove <RESIDUAL> from name
+      if (name.find("<JACOBIAN>") == std::string::npos)
+      {
+        name = name.substr(0, name.find("<RESIDUAL>"));
+        _object_label_map[name] = std::make_pair(entry.first, obj._file);
+      }
     }
 }
 
@@ -302,7 +308,8 @@ JsonSyntaxTree::buildOutputString(
   for (auto & ch : tmp_str)
     if (ch == '\n')
       ch = ' ';
-  return tmp_str;
+
+  return tmp_str.substr(0, tmp_str.find("<RESIDUAL>"));
 }
 
 void
