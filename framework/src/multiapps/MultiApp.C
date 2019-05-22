@@ -245,7 +245,10 @@ MultiApp::initialSetup()
         _app_type, getParam<std::string>("library_path"), getParam<std::string>("library_name"));
 
   for (unsigned int i = 0; i < _my_num_apps; i++)
+  {
     createApp(i, _global_time_offset);
+    _app.parser().hitCLIFilter(_apps[i]->name(), _app.commandLine()->getArguments());
+  }
 }
 
 void
@@ -613,8 +616,9 @@ MultiApp::createApp(unsigned int i, Real start_time)
   // Set the command line parameters with a copy of the main application command line parameters,
   // the copy is required so that the addArgument command below doesn't accumulate more and more
   // of the same cli_args, which is important when running in batch mode.
-  app_params.set<std::shared_ptr<CommandLine>>("_command_line") =
-      std::make_shared<CommandLine>(*_app.commandLine());
+  std::shared_ptr<CommandLine> app_cli = std::make_shared<CommandLine>(*_app.commandLine());
+  app_cli->initForMultiApp(full_name);
+  app_params.set<std::shared_ptr<CommandLine>>("_command_line") = app_cli;
 
   if (_cli_args.size() > 0)
   {
