@@ -9,7 +9,7 @@ validParams<HeatStructureEnergyBase>()
 
   params.addClassDescription("Computes the total energy for a heat structure.");
 
-  params.addParam<unsigned int>("n_units", 1, "Number of units of heat structure represents");
+  params.addParam<Real>("n_units", 1., "Number of units of heat structure represents");
   params.addParam<Real>("T_ref", 0, "Reference temperature");
 
   return params;
@@ -17,7 +17,7 @@ validParams<HeatStructureEnergyBase>()
 
 HeatStructureEnergyBase::HeatStructureEnergyBase(const InputParameters & parameters)
   : ElementIntegralPostprocessor(parameters),
-    _n_units(getParam<unsigned int>("n_units")),
+    _n_units(getParam<Real>("n_units")),
     _T_ref(getParam<Real>("T_ref")),
     _rho(getMaterialPropertyByName<Real>(HeatConductionModel::DENSITY)),
     _cp(getMaterialPropertyByName<Real>(HeatConductionModel::SPECIFIC_HEAT_CONSTANT_PRESSURE)),
