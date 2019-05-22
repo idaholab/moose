@@ -260,6 +260,14 @@ public:
    */
   void addTransfer(const std::string & type, const std::string & name, InputParameters params);
 
+  /**
+   * Add a control
+   * @param type Type (registered name) of the control
+   * @param name Name of the control
+   * @param params Input parameters
+   */
+  void addControl(const std::string & type, const std::string & name, InputParameters params);
+
   void addFileOutputter(const std::string & name);
   void addScreenOutputter(const std::string & name);
 
