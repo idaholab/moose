@@ -1,0 +1,42 @@
+[Tests]
+  design = "syntax/ICs/index.md"
+  issues = '#13438'
+  [nodal_var_1]
+    type = 'Exodiff'
+    input = 'nodal_part1.i'
+    exodiff = 'out_nodal_part1.e'
+
+    requirement = 'The system shall write output files containing nodal solutions in ExodusII format suitable for restart.'
+  []
+  [nodal_var_2]
+    type = 'Exodiff'
+    input = 'nodal_part2.i'
+    exodiff = 'out_nodal_var_restart.e'
+    max_parallel = 1
+    prereq = 'nodal_var_1'
+    abs_zero = 1e-9
+
+    requirement = 'The system shall be able to populate nodal initial conditions from a previous solution file in ExodusII format.'
+  []
+
+  [elem_var_1]
+    type = 'Exodiff'
+    input = 'elem_part1.i'
+    exodiff = 'elem_part1_out.e'
+    use_old_floor = true
+    abs_zero = 1e-09
+
+    requirement = 'The system shall write output files containing elemental solutions in ExodusII format suitable for restart.'
+  []
+  [elem_var_2]
+    type = 'Exodiff'
+    input = 'elem_part2.i'
+    exodiff = 'elem_part2_out.e'
+    use_old_floor = true
+    abs_zero = 1e-09
+    max_parallel = 1
+    prereq = 'elem_var_1'
+
+    requirement = 'The system shall be able to populate elemental initial conditions from a previous solution file in ExodusII format.'
+  []
+[]

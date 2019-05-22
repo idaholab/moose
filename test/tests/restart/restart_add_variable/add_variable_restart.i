@@ -5,7 +5,7 @@
 #
 
 [Mesh]
-  file = out_xda_restart_part1.e
+  file = transient_with_stateful_out.e
 []
 
 [Functions]
@@ -118,7 +118,6 @@
 []
 
 [Outputs]
-  file_base = out_xda_restart_part2
   [./out]
     type = Exodus
     elemental_as_nodal = true
@@ -127,5 +126,5 @@
 []
 
 [Problem]
-  restart_file_base = out_xda_restart_part1_cp/0005
+  restart_file_base = transient_with_stateful_out_cp/LATEST
 []
