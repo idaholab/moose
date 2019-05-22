@@ -620,7 +620,7 @@ class TestHarness:
         # Keep the files that are modified.
         racerModifiedFiles = set()
         if len(allOfRacers) > 1:
-            print("Diagnostic analysis shows that the members of the following unique sets exhibit race conditions:")
+            print("\nDiagnostic analysis shows that the members of the following unique sets exhibit race conditions:")
 
             # Print each set of jobs with shared race conditions.
             for racers in allOfRacers:
@@ -628,22 +628,22 @@ class TestHarness:
                 if racers:
                     setNumber += 1
                     print(" Set " + str(setNumber) + "\n- - - - -")
-                for racer in racers:
-                    print("  --" + racer.getTestName())
-                for a, b in itertools.combinations(racers, 2):
-                    for c in a.modifiedFiles:
-                        if c in b.modifiedFiles:
-                            racerModifiedFiles.add(c)
-                        else:
-                            try:
-                                racerModifiedFiles.remove(c)
-                            except:
-                                pass
-                print("\n   Each of the tests in this set create or modify the all of the following files:")
-                for file in racerModifiedFiles:
-                    print("    -->" + file)
+                    for racer in racers:
+                        print("  --" + racer.getTestName())
+                    for a, b in itertools.combinations(racers, 2):
+                        for c in a.modifiedFiles:
+                            if c in b.modifiedFiles:
+                                racerModifiedFiles.add(c)
+                            else:
+                                try:
+                                    racerModifiedFiles.remove(c)
+                                except:
+                                    pass
+                    print("\n   Each of the tests in this set create or modify the all of the following files:")
+                    for file in racerModifiedFiles:
+                        print("    -->" + file)
 
-                print("- - - - -\n")
+                    print("- - - - -\n\n")
 
             sys.exit("There are a total of " + str(setNumber) + " sets of tests with unique race conditions. " +
             "Please review them and either create any necessary prereqs, or create unique filenames for the" +
