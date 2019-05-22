@@ -230,6 +230,8 @@ InletStagnationPressureTemperature::setup1PhaseRDG()
     params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
     params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
     _sim.addUserObject(class_name, boundary_flux_name, params);
+    connectObject(params, boundary_flux_name, "p0");
+    connectObject(params, boundary_flux_name, "T0");
   }
 
   // BCs

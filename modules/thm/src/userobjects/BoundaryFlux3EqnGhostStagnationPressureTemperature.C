@@ -20,6 +20,8 @@ validParams<BoundaryFlux3EqnGhostStagnationPressureTemperature>()
   params.addRequiredParam<UserObjectName>("fluid_properties",
                                           "Name of fluid properties user object");
 
+  params.declareControllable("p0 T0");
+
   return params;
 }
 
