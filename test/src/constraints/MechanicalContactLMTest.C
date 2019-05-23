@@ -17,7 +17,12 @@ defineADValidParams(
     params.addParam<NonlinearVariableName>("slave_disp_y",
                                            "The y displacement variable on the slave face");
     params.addParam<NonlinearVariableName>("master_disp_y",
-                                           "The y displacement variable on the master face"););
+                                           "The y displacement variable on the master face");
+    MooseEnum ncp_type("min fb", "min");
+    params.addParam<MooseEnum>("ncp_function_type",
+                               ncp_type,
+                               "The type of the nonlinear complimentarity function; options are "
+                               "min or fb where fb stands for Fischer-Burmeister"););
 
 template <ComputeStage compute_stage>
 MechanicalContactLMTest<compute_stage>::MechanicalContactLMTest(const InputParameters & parameters)
@@ -34,7 +39,8 @@ MechanicalContactLMTest<compute_stage>::MechanicalContactLMTest(const InputParam
     _computing_gap_dependence(false),
     _slave_disp_y_sln(nullptr),
     _master_disp_y_sln(nullptr),
-    _epsilon(std::numeric_limits<Real>::epsilon())
+    _epsilon(std::numeric_limits<Real>::epsilon()),
+    _ncp_type(adGetParam<MooseEnum>("ncp_function_type"))
 {
   if (_slave_disp_y)
   {
@@ -60,10 +66,14 @@ MechanicalContactLMTest<RESIDUAL>::computeQpResidual(Moose::MortarType mortar_ty
         auto gap_vec = _phys_points_master[_qp] - _phys_points_slave[_qp];
         auto gap = gap_vec * _normals[_qp];
 
-        // The FB function (in its pure form) is not differentiable at (0, 0) but if we add some
-        // constant > 0 into the root function, then it is
-        auto fb_function =
-            _lambda[_qp] + gap - std::sqrt(_lambda[_qp] * _lambda[_qp] + gap * gap + _epsilon);
+        Real fb_function;
+        if (_ncp_type == "fb")
+          // The FB function (in its pure form) is not differentiable at (0, 0) but if we add some
+          // constant > 0 into the root function, then it is
+          fb_function =
+              _lambda[_qp] + gap - std::sqrt(_lambda[_qp] * _lambda[_qp] + gap * gap + _epsilon);
+        else
+          fb_function = std::min(_lambda[_qp], gap);
 
         return _test[_i][_qp] * fb_function;
       }
@@ -98,10 +108,14 @@ MechanicalContactLMTest<JACOBIAN>::computeQpResidual(Moose::MortarType mortar_ty
 
         auto gap = gap_vec * _normals[_qp];
 
-        // The FB function (in its pure form) is not differentiable at (0, 0) but if we add some
-        // constant > 0 into the root function, then it is
-        auto fb_function =
-            _lambda[_qp] + gap - std::sqrt(_lambda[_qp] * _lambda[_qp] + gap * gap + _epsilon);
+        DualReal fb_function;
+        if (_ncp_type == "fb")
+          // The FB function (in its pure form) is not differentiable at (0, 0) but if we add some
+          // constant > 0 into the root function, then it is
+          fb_function =
+              _lambda[_qp] + gap - std::sqrt(_lambda[_qp] * _lambda[_qp] + gap * gap + _epsilon);
+        else
+          fb_function = std::min(_lambda[_qp], gap);
 
         return _test[_i][_qp] * fb_function;
       }

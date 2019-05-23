@@ -35,5 +35,7 @@ protected:
 
   const Real _epsilon;
 
+  MooseEnum _ncp_type;
+
   usingMortarConstraintMembers;
 };

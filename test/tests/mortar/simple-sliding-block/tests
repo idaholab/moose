@@ -7,6 +7,30 @@
     exodiff = 'frictional-two-body-slip_out.e'
     mesh_mode = 'REPLICATED'
     requirement = 'We shall be able to use mortar to do frictional mechanical contact'
-    cli_args = 'Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50'
+    cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 Postprocessors/active=''"
+  []
+  [frictionless-nodal-lm-mortar-disp-coarse]
+    type = 'Exodiff'
+    input = 'frictionless-nodal-lm-mortar-disp.i'
+    exodiff = 'frictionless-nodal-lm-mortar-disp_out.e'
+    mesh_mode = 'REPLICATED'
+    requirement = 'We will be able to use nodal constraint enforcement with mortar integration for the contact force for frictionless contact in the bouncing basketball problem'
+    cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 Postprocessors/active=''"
+  []
+  [frictionless-mortar-fb-lm-mortar-disp-coarse]
+    type = 'Exodiff'
+    input = 'frictionless-mortar-fb-lm-mortar-disp.i'
+    exodiff = 'frictionless-mortar-fb-lm-mortar-disp_out.e'
+    mesh_mode = 'REPLICATED'
+    requirement = 'We will be able to use fischer-burmeister mortar constraint enforcement with mortar integration for the contact force for frictionless contact in the bouncing basketball problem'
+    cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 Postprocessors/active=''"
+  []
+  [frictionless-mortar-min-lm-mortar-disp-coarse]
+    type = 'Exodiff'
+    input = 'frictionless-mortar-min-lm-mortar-disp.i'
+    exodiff = 'frictionless-mortar-min-lm-mortar-disp_out.e'
+    mesh_mode = 'REPLICATED'
+    requirement = 'We will be able to use std::min mortar constraint enforcement with mortar integration for the contact force for frictionless contact in the bouncing basketball problem'
+    cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 Postprocessors/active=''"
   []
 []
