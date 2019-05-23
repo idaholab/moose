@@ -218,6 +218,7 @@ public:
    * @return isochoric specific heat (J/kg.K)
    */
   virtual Real cv_from_p_T(Real p, Real T) const override;
+  virtual void cv_from_p_T(Real p, Real T, Real & cv, Real & dcv_dp, Real & dcv_dT) const override;
 
   /**
    * Molar mass
