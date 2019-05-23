@@ -176,4 +176,10 @@
     requirement = "TestHarness shall trim output once threshold has exceeded"
     issues = '#12167'
   [../]
+  [./race_conditions]
+    type = PythonUnitTest
+    input = test_RaceConditions.py
+    requirement = "TestHarness shall detect and report race conditions that exist in the supplied tests"
+    issues = '#99999'
+  [../]
 []

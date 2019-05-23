@@ -15,6 +15,7 @@ if sys.version_info[0:2] != (2, 7):
 import itertools
 import os, re, inspect, errno, copy, json
 import shlex
+import RaceChecker
 
 from socket import gethostname
 from FactorySystem.Factory import Factory
@@ -614,12 +615,13 @@ class TestHarness:
                 temp_set.add(job)
                 for partner in job.racePartners:
                     temp_set.add(partner)
-            allOfRacers.add(frozenset(sorted(temp_set)))
-        # If there are any jobs with race conditions, print them out.
+                allOfRacers.add(frozenset(sorted(temp_set)))
         setNumber = 0
         # Keep the files that are modified.
         racerModifiedFiles = set()
-        if len(allOfRacers) > 1:
+
+        # If there are any jobs with race conditions, print them out.
+        if len(allOfRacers) > 0:
             print("\nDiagnostic analysis shows that the members of the following unique sets exhibit race conditions:")
 
             # Print each set of jobs with shared race conditions.
@@ -642,12 +644,14 @@ class TestHarness:
                     print("\n   Each of the tests in this set create or modify the all of the following files:")
                     for file in racerModifiedFiles:
                         print("    -->" + file)
-
                     print("- - - - -\n\n")
 
-            sys.exit("There are a total of " + str(setNumber) + " sets of tests with unique race conditions. " +
-            "Please review them and either create any necessary prereqs, or create unique filenames for the" +
-            " outputs of each test.")
+            if setNumber > 1:
+                print("There are a total of " + str(setNumber) + " sets of tests with unique race conditions. ")
+            else:
+                print("There is " + str(setNumber) + " set of tests with unique race conditions. ")
+            sys.exit("Please review the tests and either add any necessary prereqs, or create unique filenames " +
+            "for the outputs of each test.")
 
         else:
             print("There are no race conditions.")
@@ -667,8 +671,9 @@ class TestHarness:
         # Gather and print the jobs with race conditions after the jobs are finished
         # and only run when running --diag.
         if self.options.testharness_diagnostics:
-            self.findRacePartners()
-            self.printUniqueRacerSets()
+            checker = RaceChecker.RaceChecker(all_jobs)
+            checker.findRacePartners()
+            checker.printUniqueRacerSets()
 
         # Record the input file name that was used
         self.options.results_storage['INPUT_FILE_NAME'] = self.options.input_file_name
