@@ -16,9 +16,9 @@ class JobDAG(object):
         self.__job_dag = dag.DAG()
         self.options = options
 
-
     def createJobs(self, testers):
         """ Return a usable Job DAG based on supplied list of tester objects """
+        # for each tester, instance a job and create a DAG node for that job
         self.__name_to_job = {}
         for tester in testers:
             job = Job(tester, self.__job_dag, self.options)
@@ -31,10 +31,6 @@ class JobDAG(object):
             self.__job_dag.add_node(job)
 
         return self._checkDAG()
-
-
-
-
 
     def getDAG(self):
         """ return the running DAG object """
@@ -53,6 +49,7 @@ class JobDAG(object):
         # handle any skipped dependencies
         self._doSkippedDependencies()
 
+        # delete finished jobs
         next_jobs = set([])
         for job in list(self.__job_dag.ind_nodes()):
             if job.isFinished():
@@ -60,7 +57,6 @@ class JobDAG(object):
                 self.__job_dag.delete_node(job)
 
         next_jobs.update(self.getJobs())
-
         return next_jobs
 
     def removeAllDependencies(self):
@@ -78,10 +74,9 @@ class JobDAG(object):
 
             self._doMakeDependencies()
 
-            """ This is the key part.  Moved to here to allow skips, at least at first. """
-            # If --diag is checked, run _doMakeSerializeDependencies
+            # If checking for race conditions, run do the following.
             if self.options.testharness_diagnostics:
-                ### If we run this, we need a copy of the DAG before the extra edges are added
+                # If we run this, we need a copy of the DAG before the extra edges are added
                 for name in self.__name_to_job:
                     temp_downstream_job_list = self.__job_dag.all_downstreams(self.__name_to_job[name])
                     for job in temp_downstream_job_list:
@@ -90,7 +85,6 @@ class JobDAG(object):
                     for job in temp_upstream_job_list:
                         self.__name_to_job[name].addUpsteamNode(job)
 
-                # If --diag is checked, run _doMakeSerializeDependencies
                 self._doMakeSerializeDependencies()
 
             self._doSkippedDependencies()
@@ -130,10 +124,8 @@ class JobDAG(object):
         """ Determine which jobs in the DAG should be skipped """
         for job in list(self.__job_dag.topological_sort()):
             tester = job.getTester()
-
             dep_jobs = set([])
             if not job.getRunnable() or self._haltDescent(job):
-
                 job.setStatus(job.skip)
                 if not self.options.testharness_diagnostics:
                     dep_jobs.update(self.__job_dag.all_downstreams(job))

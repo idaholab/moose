@@ -54,9 +54,9 @@ class DAG(object):
     # Added by the MOOSE group
     def check_changes(self, originalTimes, newTimes):
         """ Method to compare names of times kept kept in the two dictionaries created filled by get_all_files """
-        ### Are the new mod times different?
         changed = []
-        ########## Check if the key is there before accessing
+        # Are the new mod times different?
+        # Check if the key is there before accessing
         for fullyQualifiedFile in originalTimes:
             try:
                 if originalTimes[fullyQualifiedFile] != newTimes[fullyQualifiedFile]:
