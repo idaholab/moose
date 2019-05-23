@@ -231,7 +231,5 @@
   [./SMP]
     type = SMP
     full = true
-    petsc_options_iname = 'pc_type'
-    petsc_options_value = 'lu'
   [../]
 []
