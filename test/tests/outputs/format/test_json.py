@@ -223,5 +223,11 @@ class TestLineInfo(TestJSONBase):
         self.assertTrue(fname.endswith(os.path.join("src", "actions", "SetAdaptivityOptionsAction.C")))
         self.assertGreater(fi[fname], 0)
 
+class TestNoTemplate(unittest.TestCase):
+    def test(self):
+        output = run_app(['--json'])
+        self.assertNotIn('<RESIDUAL>', output)
+        self.assertNotIn('<JACOBIAN>', output)
+
 if __name__ == '__main__':
     unittest.main(__name__, verbosity=2)
