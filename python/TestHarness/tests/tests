@@ -180,6 +180,6 @@
     type = PythonUnitTest
     input = test_RaceConditions.py
     requirement = "TestHarness shall detect and report race conditions that exist in the supplied tests"
-    issues = '#99999'
+    issues = '#13186'
   [../]
 []
