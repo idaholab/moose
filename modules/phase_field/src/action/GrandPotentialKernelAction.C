@@ -65,7 +65,9 @@ validParams<GrandPotentialKernelAction>()
   parameters.addParam<bool>("implicit", true, "Whether kernels are implicit or not");
   parameters.addParam<bool>(
       "use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
-  parameters.addParam<bool>("anisotropic", false, "Set to true if the diffusivity is a tensor");
+  MultiMooseEnum anisotropy("true=1 false=0", "false");
+  parameters.addRequiredParam<MultiMooseEnum>(
+      "anisotropic", anisotropy, "Whether each chemical potential is anisotropic");
 
   return parameters;
 }
@@ -97,7 +99,7 @@ GrandPotentialKernelAction::act()
   const auto op_mob = getParam<MaterialPropertyName>("mobility_name_op");
   auto implicity = getParam<bool>("implicit");
   auto displaced_mesh = getParam<bool>("use_displaced_mesh");
-  auto aniso = getParam<bool>("anisotropic");
+  auto aniso = getParam<MultiMooseEnum>("anisotropic");
 
   // Size definitions and checks
   unsigned int n_w = w_names.size();
@@ -118,6 +120,9 @@ GrandPotentialKernelAction::act()
                "switching_function_names");
   if (M.size() != n_w)
     mooseError("M and chemical_potentials should be vectors of the same length.");
+  if (aniso.size() != n_w)
+    mooseError(
+        "parameter 'anisotropy' should be a vector of the same length as 'chemical_potentials'.");
 
   // Define additional vectors
   std::vector<std::string> grs; // vector of all grain variable names
@@ -248,7 +253,7 @@ GrandPotentialKernelAction::act()
     InputParameters params = _factory.getValidParams("SusceptibilityTimeDerivative");
     params.set<NonlinearVariableName>("variable") = w_names[i];
     params.set<MaterialPropertyName>("f_name") = chis[i];
-    params.set<std::vector<VariableName>>("args") = v1;
+    params.set<std::vector<VariableName>>("args") = v0;
     params.set<bool>("implicit") = implicity;
     params.set<bool>("use_displaced_mesh") = displaced_mesh;
     kernel_name = "ChiDt_" + w_names[i];
@@ -261,10 +266,13 @@ GrandPotentialKernelAction::act()
     params.set<bool>("use_displaced_mesh") = displaced_mesh;
     params.set<MaterialPropertyName>("D_name") = M[i];
     kernel_name = "MatDif_" + w_names[i];
-    if (aniso)
+    if (aniso.get(i))
       _problem->addKernel("MatAnisoDiffusion", kernel_name, params);
     else
+    {
+      params.set<std::vector<VariableName>>("args") = v0;
       _problem->addKernel("MatDiffusion", kernel_name, params);
+    }
 
     // CoupledSwitchingTimeDerivative
     for (unsigned int j = 0; j < n_hj; ++j)
@@ -275,7 +283,7 @@ GrandPotentialKernelAction::act()
       params = _factory.getValidParams("CoupledSwitchingTimeDerivative");
       params.set<NonlinearVariableName>("variable") = w_names[i];
       params.set<std::vector<VariableName>>("v") = notarealvector;
-      params.set<std::vector<VariableName>>("args") = v1;
+      params.set<std::vector<VariableName>>("args") = v0;
       params.set<std::vector<MaterialPropertyName>>("Fj_names") = fj_temp;
       params.set<std::vector<MaterialPropertyName>>("hj_names") = hj;
       params.set<bool>("implicit") = implicity;
