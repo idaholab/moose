@@ -124,8 +124,8 @@ class JobDAG(object):
             tester.addCaveats('previous results: {}'.format(status.status))
             job.setStatus(job.finished)
 
-        # This job was skipped (but not due to a failing dependency) or passed without having failing dependencies
-        elif (status == tester.skip and not tester.getPrereqs()) or status == tester.success:
+        # This job was skipped, passed or silent
+        elif status in job.job_status.getSuccessStatuses():
             tester.setStatus(tester.silent)
             job.setStatus(job.finished)
 
