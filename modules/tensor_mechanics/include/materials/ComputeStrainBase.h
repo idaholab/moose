@@ -50,7 +50,7 @@ protected:
 
   const MaterialProperty<RankTwoTensor> * _global_strain;
 
-  bool _volumetric_locking_correction;
+  const bool _volumetric_locking_correction;
   const Real & _current_elem_volume;
 };
 

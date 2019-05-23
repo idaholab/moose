@@ -46,7 +46,8 @@ ADComputeStrainBase<compute_stage>::ADComputeStrainBase(const InputParameters & 
     _global_strain(isParamValid("global_strain")
                        ? &adGetADMaterialProperty<RankTwoTensor>(_base_name + "global_strain")
                        : nullptr),
-    _volumetric_locking_correction(adGetParam<bool>("volumetric_locking_correction")),
+    _volumetric_locking_correction(adGetParam<bool>("volumetric_locking_correction") &&
+                                   !this->isBoundaryMaterial()),
     _current_elem_volume(_assembly.elemVolume())
 {
   for (unsigned int i = 0; i < _eigenstrains.size(); ++i)
