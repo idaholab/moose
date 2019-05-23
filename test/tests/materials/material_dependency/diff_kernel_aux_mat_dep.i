@@ -69,8 +69,8 @@
 # fail. It  better to restrict the test
 # count the residual evaluations in the nonlinear level only.
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type'
-  petsc_options_value = 'lu'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
+  petsc_options_value = 'lu superlu_dist'
 []
 
 [Outputs]
