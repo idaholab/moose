@@ -12,15 +12,15 @@
 #include "ADMortarConstraint.h"
 
 template <ComputeStage>
-class MechanicalContact;
+class MortarNormalContact;
 
-declareADValidParams(MechanicalContact);
+declareADValidParams(MortarNormalContact);
 
 template <ComputeStage compute_stage>
-class MechanicalContact : public ADMortarConstraint<compute_stage>
+class MortarNormalContact : public ADMortarConstraint<compute_stage>
 {
 public:
-  MechanicalContact(const InputParameters & parameters);
+  MortarNormalContact(const InputParameters & parameters);
 
 protected:
   ADReal computeQpResidual(Moose::MortarType type) final;

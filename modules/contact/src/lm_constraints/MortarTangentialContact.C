@@ -7,11 +7,11 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "TangentialContact.h"
+#include "MortarTangentialContact.h"
 
-registerADMooseObject("ContactApp", TangentialContact);
+registerADMooseObject("ContactApp", MortarTangentialContact);
 
-defineADValidParams(TangentialContact,
+defineADValidParams(MortarTangentialContact,
                     ADMortarConstraint,
 
                     MooseEnum component("x=0 y=1 z=2");
@@ -21,14 +21,14 @@ defineADValidParams(TangentialContact,
                         "The force component constraint that this object is supplying"););
 
 template <ComputeStage compute_stage>
-TangentialContact<compute_stage>::TangentialContact(const InputParameters & parameters)
+MortarTangentialContact<compute_stage>::MortarTangentialContact(const InputParameters & parameters)
   : ADMortarConstraint<compute_stage>(parameters), _component(adGetParam<MooseEnum>("component"))
 {
 }
 
 template <ComputeStage compute_stage>
 ADReal
-TangentialContact<compute_stage>::computeQpResidual(Moose::MortarType type)
+MortarTangentialContact<compute_stage>::computeQpResidual(Moose::MortarType type)
 {
   switch (type)
   {

@@ -7,11 +7,11 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MechanicalContact.h"
+#include "MortarNormalContact.h"
 
-registerADMooseObject("ContactApp", MechanicalContact);
+registerADMooseObject("ContactApp", MortarNormalContact);
 
-defineADValidParams(MechanicalContact,
+defineADValidParams(MortarNormalContact,
                     ADMortarConstraint,
 
                     MooseEnum component("x=0 y=1 z=2");
@@ -21,14 +21,14 @@ defineADValidParams(MechanicalContact,
                         "The force component constraint that this object is supplying"););
 
 template <ComputeStage compute_stage>
-MechanicalContact<compute_stage>::MechanicalContact(const InputParameters & parameters)
+MortarNormalContact<compute_stage>::MortarNormalContact(const InputParameters & parameters)
   : ADMortarConstraint<compute_stage>(parameters), _component(adGetParam<MooseEnum>("component"))
 {
 }
 
 template <ComputeStage compute_stage>
 ADReal
-MechanicalContact<compute_stage>::computeQpResidual(Moose::MortarType type)
+MortarNormalContact<compute_stage>::computeQpResidual(Moose::MortarType type)
 {
   switch (type)
   {

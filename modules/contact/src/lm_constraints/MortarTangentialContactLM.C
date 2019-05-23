@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "TangentialContactLM.h"
+#include "MortarTangentialContactLM.h"
 
-registerADMooseObject("ContactApp", TangentialContactLM);
+registerADMooseObject("ContactApp", MortarTangentialContactLM);
 
 defineADValidParams(
-    TangentialContactLM,
+    MortarTangentialContactLM,
     ADMortarConstraint,
     params.addRequiredParam<NonlinearVariableName>("slave_disp_y",
                                                    "The y displacement variable on the slave face");
@@ -25,7 +25,7 @@ defineADValidParams(
     params.addRequiredParam<Real>("friction_coefficient", "The friction coefficient"););
 
 template <ComputeStage compute_stage>
-TangentialContactLM<compute_stage>::TangentialContactLM(const InputParameters & parameters)
+MortarTangentialContactLM<compute_stage>::MortarTangentialContactLM(const InputParameters & parameters)
   : ADMortarConstraint<compute_stage>(parameters),
     _slave_disp_y(_subproblem.getStandardVariable(_tid, parameters.getMooseType("slave_disp_y"))),
     _master_disp_y(
@@ -46,7 +46,7 @@ TangentialContactLM<compute_stage>::TangentialContactLM(const InputParameters & 
 
 template <ComputeStage compute_stage>
 ADReal
-TangentialContactLM<compute_stage>::computeQpResidual(Moose::MortarType mortar_type)
+MortarTangentialContactLM<compute_stage>::computeQpResidual(Moose::MortarType mortar_type)
 {
   switch (mortar_type)
   {
