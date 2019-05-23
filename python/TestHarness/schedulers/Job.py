@@ -60,16 +60,16 @@ class Job(object):
         self.__slots = None
         self.__meta_data = {}
 
-        ### List of files modified by this job.
+        # List of files modified by this job.
         self.modifiedFiles = []
 
-        ###List of nodes that depend on this node.
+        # List of nodes that depend on this node.
         self.__downstreamNodes = []
 
-        ### List of jobs that this job depends on.
+        # List of jobs that this job depends on.
         self.__upstreamNodes = []
 
-        ###List of all jobs that this job races with.
+        # Set of all jobs that this job races with.
         self.racePartners = set()
 
         # Alternate text we want to print as part of our status instead of the
@@ -221,9 +221,9 @@ class Job(object):
         time the process was active. When the process exits, read the output and close the file.
         """
         if self.options.testharness_diagnostics:
-            #Give some time so that modified time has a distinct new value.
+            # Give some time so that file modified time has a distinct new value.
             time.sleep(1)
-            ###  Before the job does anythong, get the times files below it were last modified
+            # Before the job does anything, get the times files below it were last modified
             self.__job_dag.get_all_files(self, self.__job_dag.originalTimes)
 
         # Do not execute app, but allow processResults to commence
