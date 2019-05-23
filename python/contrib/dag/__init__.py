@@ -48,9 +48,7 @@ class DAG(object):
                     lastModifiedTime = os.path.getmtime(fullyQualifiedFile)
                     times[fullyQualifiedFile] = lastModifiedTime
                 except:
-                    print("Except")
-                    print("Filename: {} doesn't exist.".format(fullyQualifiedFile))
-
+                    pass
         return times
 
     # Added by the MOOSE group
@@ -64,7 +62,7 @@ class DAG(object):
                 if originalTimes[fullyQualifiedFile] != newTimes[fullyQualifiedFile]:
                     changed.append(fullyQualifiedFile)
             except:
-                print("File deleted--->", fullyQualifiedFile)
+                pass
 
         ##Going to need to check to see if any other items were added
         for fullyQualifiedFile in newTimes:

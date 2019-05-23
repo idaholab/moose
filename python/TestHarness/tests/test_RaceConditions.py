@@ -7,6 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+import subprocess
 from TestHarnessTestCase import TestHarnessTestCase
 
 class TestHarnessTester(TestHarnessTestCase):
@@ -15,23 +16,8 @@ class TestHarnessTester(TestHarnessTestCase):
         Test for Race Conditions in the TestHarness
         """
 
-        # Test that the SYNTAX PASS status message properly displays
-        output = self.runTests('-i', '--diag')
-        self.assertIn('Diagnostic analysis', output)
-
-        # # Test that the SYNTAX PASS status message properly displays
-        # output = self.runTests('--check-input', '-i', 'syntax')
-        # self.assertIn('SYNTAX PASS', output)
-        #
-        # # Check that the _non_ SYNTAX test was not run
-        # output = self.runTests('--check-input', '-i', 'no_syntax')
-        # self.assertNotIn('SYNTAX PASS', output)
-        #
-        # # Check that _thee_ SYNTAX test is not run
-        # output = self.runTests('--no-check-input', '-i', 'syntax')
-        # self.assertNotIn('SYNTAX PASS', output)
-        #
-        # # Check that it is skipped when running valgrind
-        # output = self.runTests('--valgrind', '-i', 'syntax')
-        # self.assertIn('CHECK_INPUT==TRUE', output)
-        # self.checkStatus(output, skipped=1)
+        # Check for the words 'Diagnostic analysis' which indicate that race conditions exist
+        with self.assertRaises(subprocess.CalledProcessError) as cm:
+            self.runTests('--diag', '-i', 'output_clobber_simple')
+        e = cm.exception
+        self.assertIn('Diagnostic analysis', e.output)
