@@ -12,7 +12,7 @@
 #include "DGKernelBase.h"
 #include "FEProblem.h"
 #include "IntegratedBCBase.h"
-#include "InterfaceKernel.h"
+#include "InterfaceKernelBase.h"
 #include "MooseVariableFE.h"
 #include "NonlinearSystem.h"
 #include "NonlocalIntegratedBC.h"

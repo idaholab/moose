@@ -36,7 +36,7 @@ class PresetNodalBC;
 template <ComputeStage>
 class ADPresetNodalBC;
 class DGKernelBase;
-class InterfaceKernel;
+class InterfaceKernelBase;
 class ScalarKernel;
 class DiracKernel;
 class NodalKernel;
@@ -556,7 +556,7 @@ public:
     return _ad_jacobian_kernels;
   }
   MooseObjectTagWarehouse<DGKernelBase> & getDGKernelWarehouse() { return _dg_kernels; }
-  MooseObjectTagWarehouse<InterfaceKernel> & getInterfaceKernelWarehouse()
+  MooseObjectTagWarehouse<InterfaceKernelBase> & getInterfaceKernelWarehouse()
   {
     return _interface_kernels;
   }
@@ -732,7 +732,7 @@ protected:
   MooseObjectTagWarehouse<KernelBase> _ad_jacobian_kernels;
   MooseObjectTagWarehouse<ScalarKernel> _scalar_kernels;
   MooseObjectTagWarehouse<DGKernelBase> _dg_kernels;
-  MooseObjectTagWarehouse<InterfaceKernel> _interface_kernels;
+  MooseObjectTagWarehouse<InterfaceKernelBase> _interface_kernels;
 
   ///@}
 

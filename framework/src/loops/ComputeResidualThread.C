@@ -14,7 +14,7 @@
 #include "KernelBase.h"
 #include "IntegratedBCBase.h"
 #include "DGKernelBase.h"
-#include "InterfaceKernel.h"
+#include "InterfaceKernelBase.h"
 #include "Material.h"
 #include "TimeKernel.h"
 #include "SwapBackSentinel.h"
