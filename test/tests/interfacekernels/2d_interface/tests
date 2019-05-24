@@ -45,4 +45,14 @@
     requirement = 'The finite difference preconditioner shall work in parallel.'
     allow_warnings = true
   [../]
+
+  [./vector_2d]
+    type = 'Exodiff'
+    input = 'vector_2d.i'
+    exodiff = 'vector_2d_out.e'
+    mesh_mode = REPLICATED
+    issues = "#13354"
+    design = "InterfaceKernels/index.md"
+    requirement = "The InterfaceKernel system shall support Vector Finite Elements in 2D."
+    [../]
 []
