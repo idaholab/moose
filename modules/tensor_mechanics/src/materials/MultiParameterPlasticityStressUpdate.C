@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MultiParameterPlasticityStressUpdate.h"
-#include "Conversion.h"      // for stringify
+#include "Conversion.h" // for stringify
 
 // libMesh includes
 #include "libmesh/utility.h" // for Utility::pow
@@ -136,8 +136,7 @@ void
 MultiParameterPlasticityStressUpdate::propagateQpStatefulProperties()
 {
   _plastic_strain[_qp] = _plastic_strain_old[_qp];
-  for (unsigned i = 0; i < _num_intnl; ++i)
-    _intnl[_qp][i] = _intnl_old[_qp][i];
+  std::copy(_intnl_old[_qp].begin(), _intnl_old[_qp].end(), _intnl[_qp].begin());
 }
 
 void
@@ -151,6 +150,14 @@ MultiParameterPlasticityStressUpdate::updateState(RankTwoTensor & strain_increme
                                                   bool compute_full_tangent_operator,
                                                   RankFourTensor & tangent_operator)
 {
+  // Size _yf[_qp] appropriately
+  _yf[_qp].assign(_num_yf, 0);
+  // _plastic_strain and _intnl are usually sized appropriately because they are stateful, but this
+  // Material may be used from a DiracKernel where stateful materials are not allowed.  The best we
+  // can do is:
+  if (_intnl[_qp].size() != _num_intnl)
+    initQpStatefulProperties();
+
   initializeReturnProcess();
 
   if (_t_step >= 2)
