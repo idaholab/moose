@@ -1,0 +1,10 @@
+[Tests]
+  design = "MultiApps/index.md"
+  issues = "#1736"
+  [output_on_final]
+    type = Exodiff
+    input = master.i
+    exodiff = 'master_final.e sub_final.e'
+    requirement = "The MultiApp system shall support output of the master and sub-application solution after the final timestep."
+  []
+[]
