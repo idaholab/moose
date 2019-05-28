@@ -84,8 +84,6 @@
     variable = u
     neighbor_var = 'v'
     boundary = 'master0_interface'
-    D = D
-    D_neighbor = D
     kf = 1 # Forward reaction rate coefficient
     kb = 2 # Backward reaction rate coefficient
   [../]
