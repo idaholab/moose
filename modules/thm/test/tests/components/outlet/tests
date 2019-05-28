@@ -1,0 +1,7 @@
+[Tests]
+  [./clg:ctrl_p_3eqn_rdg]
+    type = 'CSVDiff'
+    input = 'clg.ctrl_p_3eqn_rdg.i'
+    csvdiff = 'clg.ctrl_p_3eqn_rdg_out.csv'
+  [../]
+[]
