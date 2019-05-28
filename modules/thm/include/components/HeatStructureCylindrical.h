@@ -17,7 +17,7 @@ public:
   HeatStructureCylindrical(const InputParameters & params);
 
   virtual void addMooseObjects() override;
-  virtual Real getUnitPerimeter(const MooseEnum & side) const override;
+  virtual Real getUnitPerimeter(const SideType & side) const override;
 
   virtual Real getAxialOffset() const override { return _inner_radius; }
 

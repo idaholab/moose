@@ -13,6 +13,13 @@ class HeatStructureBase : public GeometricalComponent
 public:
   HeatStructureBase(const InputParameters & params);
 
+  /// heat structure side
+  enum SideType
+  {
+    INNER = 0,
+    OUTER = 1
+  };
+
   virtual void buildMesh() override;
   virtual void addVariables() override;
   virtual void addMooseObjects() override;
@@ -47,7 +54,7 @@ public:
    * @param[in] side   Side of the heat structure corresponding to desired perimeter
    * @returns Perimeter of one unit of this heat structure on the specified side
    */
-  virtual Real getUnitPerimeter(const MooseEnum & side) const = 0;
+  virtual Real getUnitPerimeter(const HeatStructureBase::SideType & side) const = 0;
 
   /**
    * Gets the number of units that heat structure represents
@@ -128,4 +135,22 @@ protected:
   std::vector<unsigned int> _bottom_heat_node_ids;
   /// Elements generated for hs (heat structure)
   std::vector<std::vector<unsigned int>> _elem_ids;
+
+public:
+  /// map of heat structure side string to enum
+  static const std::map<std::string, SideType> _side_type_to_enum;
+
+  /**
+   * Gets a MooseEnum for heat structure side
+   *
+   * @param[in] name   default value
+   * @returns MooseEnum for heat structure side type
+   */
+  static MooseEnum getSideType(const std::string & name = "");
 };
+
+namespace THM
+{
+template <>
+HeatStructureBase::SideType stringToEnum(const std::string & s);
+}

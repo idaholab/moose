@@ -57,7 +57,7 @@
   [./hx]
     type = HeatTransferFromHeatStructure1Phase
     hs = hs
-    hs_side = top
+    hs_side = outer
     flow_channel = pipe
     Hw = 300
     P_hf = 0.029832559676

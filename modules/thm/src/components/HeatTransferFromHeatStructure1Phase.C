@@ -158,7 +158,8 @@ HeatTransferFromHeatStructure1Phase::check() const
                hs.getLength(),
                ". They must be the same.");
 
-    checkFlowChannelAlignment();
+    if (_hs_side_valid)
+      checkFlowChannelAlignment();
   }
 }
 
