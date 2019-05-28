@@ -106,6 +106,7 @@
     primary_subdomain = 10000
     secondary_boundary = 101
     secondary_subdomain = 10001
+    displacements = 'disp_x disp_y'
   [../]
 []
 

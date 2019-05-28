@@ -64,4 +64,11 @@ protected:
 
   /// Minimum gap distance allowed
   const Real _min_gap;
+
+  ///@{ Displacement variables
+  const std::vector<std::string> _disp_name;
+  const unsigned int _n_disp;
+  std::vector<const ADVariableValue *> _disp_secondary;
+  std::vector<const ADVariableValue *> _disp_primary;
+  ///@}
 };
