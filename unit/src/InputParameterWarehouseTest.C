@@ -114,6 +114,22 @@ TEST(InputParameterWarehouse, getControllableParameterValues)
   EXPECT_EQ(values, std::vector<int>(1, 2011));
 }
 
+TEST(InputParameterWarehouse, emptyControllableParameterValues)
+{
+  InputParameters in_params = emptyInputParameters();
+  in_params.addPrivateParam<std::string>("_moose_base", "Base");
+  in_params.addParam<int>("control", 2011, "");
+  in_params.declareControllable("control");
+
+  InputParameterWarehouse wh;
+  wh.addInputParameters("Object", in_params);
+
+  MooseObjectParameterName name("Base", "Object", "asdf");
+  std::vector<int> values = wh.getControllableParameterValues<int>(name);
+
+  ASSERT_TRUE(values.empty());
+}
+
 TEST(InputParameterWarehouse, addControllableParameterConnection)
 {
   // One-to-one
