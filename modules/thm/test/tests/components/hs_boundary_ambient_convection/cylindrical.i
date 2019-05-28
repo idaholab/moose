@@ -47,7 +47,7 @@ E_change = ${fparse heat_flux * A * t}
   [./ambient_convection]
     type = HSBoundaryAmbientConvection
     hs = hs
-    hs_side = top
+    hs_side = outer
     T_ambient = ${T_ambient}
     htc_ambient = ${htc}
   [../]

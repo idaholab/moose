@@ -1,6 +1,5 @@
 #include "HSBoundaryInterface.h"
 #include "Component.h"
-#include "HeatStructureBase.h"
 #include "THMMesh.h"
 
 template <>
@@ -10,34 +9,48 @@ validParams<HSBoundaryInterface>()
   InputParameters params = emptyInputParameters();
 
   params.addRequiredParam<std::string>("hs", "Heat structure name");
-  MooseEnum hs_sides("top bottom");
-  params.addRequiredParam<MooseEnum>("hs_side", hs_sides, "Heat structure side");
+  params.addRequiredParam<MooseEnum>(
+      "hs_side", HeatStructureBase::getSideType(), "Heat structure side");
 
   return params;
 }
 
 HSBoundaryInterface::HSBoundaryInterface(const Component * const component)
   : _hs_name(component->getParam<std::string>("hs")),
-    _hs_side(component->getParam<MooseEnum>("hs_side"))
+    _hs_side_enum(component->getParam<MooseEnum>("hs_side")),
+    _hs_side(THM::stringToEnum<HeatStructureBase::SideType>(_hs_side_enum))
 {
+  if (_hs_side == HeatStructureBase::OUTER || _hs_side == HeatStructureBase::INNER)
+    _hs_side_valid = true;
+  else
+    _hs_side_valid = false;
 }
 
 void
 HSBoundaryInterface::check(const Component * const component) const
 {
+  if (!_hs_side_valid)
+    component->logError("Invalid option '",
+                        _hs_side_enum,
+                        "' provided for 'hs_side' parameter. Valid options (not case-sensitive) "
+                        "are 'inner' and 'outer'.");
+
   component->checkComponentOfTypeExistsByName<HeatStructureBase>(_hs_name);
 
   if (component->hasComponentByName<HeatStructureBase>(_hs_name))
   {
     const HeatStructureBase & hs = component->getComponentByName<HeatStructureBase>(_hs_name);
 
-    const Real & P_hs = hs.getUnitPerimeter(_hs_side);
-    if (MooseUtils::absoluteFuzzyEqual(P_hs, 0.))
-      component->logError("'hs_side' parameter is set to '",
-                          _hs_side,
-                          "', but this side of the heat structure '",
-                          _hs_name,
-                          "' has radius of zero.");
+    if (_hs_side_valid)
+    {
+      const Real & P_hs = hs.getUnitPerimeter(_hs_side);
+      if (MooseUtils::absoluteFuzzyEqual(P_hs, 0.))
+        component->logError("'hs_side' parameter is set to '",
+                            _hs_side_enum,
+                            "', but this side of the heat structure '",
+                            _hs_name,
+                            "' has radius of zero.");
+    }
   }
 }
 
@@ -48,13 +61,13 @@ HSBoundaryInterface::getHSBoundaryName(const Component * const component) const
 
   switch (_hs_side)
   {
-    case 0:
+    case HeatStructureBase::OUTER:
       if (hs.getTopBoundaryNames().size() > 0)
         return hs.getTopBoundaryNames()[0];
       else
         return THMMesh::INVALID_BOUNDARY_ID;
 
-    case 1:
+    case HeatStructureBase::INNER:
       if (hs.getBottomBoundaryNames().size() > 0)
         return hs.getBottomBoundaryNames()[0];
       else

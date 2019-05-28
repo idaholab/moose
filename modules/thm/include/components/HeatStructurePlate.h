@@ -17,7 +17,7 @@ public:
   HeatStructurePlate(const InputParameters & params);
 
   virtual void addMooseObjects() override;
-  virtual Real getUnitPerimeter(const MooseEnum & side) const override;
+  virtual Real getUnitPerimeter(const SideType & side) const override;
 
 protected:
   /// plate fuel depth

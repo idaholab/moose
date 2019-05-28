@@ -31,12 +31,15 @@ HeatStructurePlate::addMooseObjects()
 }
 
 Real
-HeatStructurePlate::getUnitPerimeter(const MooseEnum & side) const
+HeatStructurePlate::getUnitPerimeter(const HeatStructureBase::SideType & side) const
 {
-  if (side == "top")
-    return _depth;
-  else if (side == "bottom")
-    return _depth;
-  else
-    mooseError(name(), ": The heat structure side value '", side, "' is invalid.");
+  switch (side)
+  {
+    case HeatStructureBase::OUTER:
+    case HeatStructureBase::INNER:
+      return _depth;
+
+    default:
+      mooseError(name(), ": The heat structure side value '", side, "' is invalid.");
+  }
 }

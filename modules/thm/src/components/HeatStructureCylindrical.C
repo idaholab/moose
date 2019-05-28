@@ -39,12 +39,17 @@ HeatStructureCylindrical::addMooseObjects()
 }
 
 Real
-HeatStructureCylindrical::getUnitPerimeter(const MooseEnum & side) const
+HeatStructureCylindrical::getUnitPerimeter(const HeatStructureBase::SideType & side) const
 {
-  if (side == "top")
-    return 2 * M_PI * (_inner_radius + _total_width);
-  else if (side == "bottom")
-    return 2 * M_PI * _inner_radius;
-  else
-    mooseError(name(), ": The heat structure side value '", side, "' is invalid.");
+  switch (side)
+  {
+    case HeatStructureBase::OUTER:
+      return 2 * M_PI * (_inner_radius + _total_width);
+
+    case HeatStructureBase::INNER:
+      return 2 * M_PI * _inner_radius;
+
+    default:
+      mooseError(name(), ": The heat structure side value '", side, "' is invalid.");
+  }
 }
