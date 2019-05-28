@@ -66,15 +66,14 @@ const std::string FlowModel::TEMPERATURE_WALL = "T_wall";
 const std::string FlowModel::UNITY = "unity";
 const std::string FlowModel::DIRECTION = "direction";
 
-FEType FlowModel::_fe_type = FEType(CONSTANT, MONOMIAL);
-FlowModel::ESpatialDiscretizationType FlowModel::_spatial_discretization = FlowModel::rDG;
-
 FlowModel::FlowModel(const InputParameters & params)
   : MooseObject(params),
     _sim(*params.getCheckedPointerParam<Simulation *>("_sim")),
     _app(_sim.getApp()),
     _factory(_app.getFactory()),
     _flow_channel(*params.getCheckedPointerParam<FlowChannelBase *>("_flow_channel")),
+    _fe_type(_sim.getFlowFEType()),
+    _spatial_discretization(_sim.getSpatialDiscretization()),
     _fp_name(params.get<UserObjectName>("fp")),
     _comp_name(name()),
     _gravity_vector(_flow_channel.getParam<RealVectorValue>("gravity_vector")),
@@ -124,7 +123,7 @@ FlowModel::addCommonInitialConditions()
     {
       Function & fn = _sim.getFunction(area_function);
       _sim.addConstantIC(AREA, fn.value(0, Point()), block);
-      if (getSpatialDiscretizationType() == rDG)
+      if (_spatial_discretization == rDG)
         _sim.addConstantIC(_A_linear_name, fn.value(0, Point()), block);
       // FIXME: eventually use Component::makeFunctionControllableIfConstant
       if (dynamic_cast<ConstantFunction *>(&fn) != nullptr)
@@ -132,7 +131,7 @@ FlowModel::addCommonInitialConditions()
     }
     else
     {
-      if (getSpatialDiscretizationType() == rDG)
+      if (_spatial_discretization == rDG)
       {
         _sim.addFunctionIC(_A_linear_name, area_function, block);
 

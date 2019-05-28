@@ -17,9 +17,8 @@ SolidWall::SolidWall(const InputParameters & params) : FlowBoundary(params) {}
 void
 SolidWall::check() const
 {
-  if ((FlowModel::getSpatialDiscretizationType() == FlowModel::rDG) &&
-      (_flow_model_id == THM::FM_TWO_PHASE_NCG))
-    logSpatialDiscretizationNotImplementedError(FlowModel::getSpatialDiscretizationType());
+  if ((_spatial_discretization == FlowModel::rDG) && (_flow_model_id == THM::FM_TWO_PHASE_NCG))
+    logSpatialDiscretizationNotImplementedError(_spatial_discretization);
 }
 
 void
@@ -42,7 +41,7 @@ SolidWall::addMooseObjects1Phase()
   addWeakBC3Eqn(boundary_flux_name);
 
   // Strongly impose zero velocity for CG
-  if (FlowModel::getSpatialDiscretizationType() == FlowModel::CG)
+  if (_spatial_discretization == FlowModel::CG)
   {
     InputParameters params = _factory.getValidParams("DirichletBC");
     params.set<NonlinearVariableName>("variable") = FlowModelSinglePhase::RHOUA;
@@ -55,7 +54,7 @@ SolidWall::addMooseObjects1Phase()
 void
 SolidWall::addMooseObjects2Phase()
 {
-  if (FlowModel::getSpatialDiscretizationType() == FlowModel::CG)
+  if (_spatial_discretization == FlowModel::CG)
   {
     {
       InputParameters params = _factory.getValidParams("DirichletBC");
@@ -72,7 +71,7 @@ SolidWall::addMooseObjects2Phase()
       _sim.addBoundaryCondition("DirichletBC", genName(name(), "arhouA_vapor"), params);
     }
   }
-  else if (FlowModel::getSpatialDiscretizationType() == FlowModel::rDG)
+  else if (_spatial_discretization == FlowModel::rDG)
   {
     ExecFlagEnum userobject_execute_on(MooseUtils::getDefaultExecFlagEnum());
     userobject_execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};

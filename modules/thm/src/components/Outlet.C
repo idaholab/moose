@@ -52,9 +52,8 @@ Outlet::check() const
   else
     logModelNotImplementedError(_flow_model_id);
 
-  if (_flow_model_id == THM::FM_TWO_PHASE_NCG &&
-      FlowModel::getSpatialDiscretizationType() == FlowModel::rDG)
-    logSpatialDiscretizationNotImplementedError(FlowModel::getSpatialDiscretizationType());
+  if (_flow_model_id == THM::FM_TWO_PHASE_NCG && _spatial_discretization == FlowModel::rDG)
+    logSpatialDiscretizationNotImplementedError(_spatial_discretization);
 }
 
 void
@@ -812,7 +811,7 @@ Outlet::addMooseObjects()
 
   if (_flow_model_id == THM::FM_SINGLE_PHASE)
   {
-    if (FlowModel::getSpatialDiscretizationType() == FlowModel::CG)
+    if (_spatial_discretization == FlowModel::CG)
     {
       if (_legacy)
         add3EqnStaticPBCLegacy();
@@ -821,12 +820,12 @@ Outlet::addMooseObjects()
       if (_reversible)
         add3EqnStaticPReverseBC();
     }
-    else if (FlowModel::getSpatialDiscretizationType() == FlowModel::rDG)
+    else if (_spatial_discretization == FlowModel::rDG)
       addMooseObjects3EqnRDG();
   }
   else if (_flow_model_id == THM::FM_TWO_PHASE || _flow_model_id == THM::FM_TWO_PHASE_NCG)
   {
-    if (FlowModel::getSpatialDiscretizationType() == FlowModel::CG)
+    if (_spatial_discretization == FlowModel::CG)
     {
       if (_legacy)
         add7EqnStaticPBCLegacy();
@@ -838,7 +837,7 @@ Outlet::addMooseObjects()
       if (_flow_model_id == THM::FM_TWO_PHASE_NCG)
         addNCGStaticPBC();
     }
-    else if (FlowModel::getSpatialDiscretizationType() == FlowModel::rDG)
+    else if (_spatial_discretization == FlowModel::rDG)
       addMooseObjects7EqnRDG();
   }
 }

@@ -23,7 +23,9 @@ validParams<FlowConnection>()
 }
 
 FlowConnection::FlowConnection(const InputParameters & params)
-  : Component(params), _flow_model_id(THM::FM_INVALID)
+  : Component(params),
+    _spatial_discretization(_sim.getSpatialDiscretization()),
+    _flow_model_id(THM::FM_INVALID)
 {
 }
 
