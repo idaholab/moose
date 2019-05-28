@@ -44,9 +44,8 @@ protected:
   MaterialProperty<Real> * const _thermal_conductivity_z_dT;
 
   MaterialProperty<Real> & _specific_heat;
-  Function * const _specific_heat_temperature_function;
+  const Function * const _specific_heat_temperature_function;
 };
 
 template <>
 InputParameters validParams<AnisoHeatConductionMaterial>();
-

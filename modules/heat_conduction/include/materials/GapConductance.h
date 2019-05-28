@@ -101,7 +101,7 @@ protected:
   MaterialProperty<Real> & _gap_thermal_conductivity;
 
   const Real _gap_conductivity;
-  Function * const _gap_conductivity_function;
+  const Function * const _gap_conductivity_function;
   const VariableValue * _gap_conductivity_function_variable;
 
   const Real _stefan_boltzmann;
