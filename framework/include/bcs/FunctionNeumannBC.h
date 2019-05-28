@@ -30,6 +30,5 @@ protected:
   virtual Real computeQpResidual() override;
 
   /// The function being used for setting the value
-  Function & _func;
+  const Function & _func;
 };
-

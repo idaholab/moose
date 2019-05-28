@@ -32,5 +32,5 @@ public:
 private:
   std::vector<Real> _w;
 
-  std::vector<Function *> _f;
+  std::vector<const Function *> _f;
 };

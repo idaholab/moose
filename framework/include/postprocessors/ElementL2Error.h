@@ -29,6 +29,5 @@ public:
 protected:
   virtual Real computeQpIntegral() override;
 
-  Function & _func;
+  const Function & _func;
 };
-

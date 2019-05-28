@@ -39,7 +39,7 @@ CompositeFunction::CompositeFunction(const InputParameters & parameters)
     if (name() == names[i])
       mooseError("A composite function must not reference itself");
 
-    Function * const f = &getFunctionByName(names[i]);
+    const Function * f = &getFunctionByName(names[i]);
     if (!f)
     {
       std::string msg("Error in composite function ");

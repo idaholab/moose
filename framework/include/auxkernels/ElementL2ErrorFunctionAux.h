@@ -43,6 +43,5 @@ protected:
   virtual Real computeValue() override;
 
   /// Function representing the exact solution.
-  Function & _func;
+  const Function & _func;
 };
-

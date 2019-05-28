@@ -28,6 +28,5 @@ public:
 protected:
   virtual Real computeValue() override;
 
-  std::vector<Function *> _functions;
+  std::vector<const Function *> _functions;
 };
-

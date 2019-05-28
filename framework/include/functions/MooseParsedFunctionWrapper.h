@@ -108,7 +108,7 @@ private:
   std::vector<unsigned int> _function_index;
 
   /// Vector of Functions this parsed function is using
-  std::vector<Function *> _functions;
+  std::vector<const Function *> _functions;
 
   /// Pointers to the variables that store the values of _vars inside the libMesh::ParsedFunction object
   std::vector<Real *> _addr;
@@ -154,4 +154,3 @@ DenseVector<Real> MooseParsedFunctionWrapper::evaluate(Real t, const Point & p);
 
 template <>
 RealVectorValue MooseParsedFunctionWrapper::evaluate(Real t, const Point & p);
-

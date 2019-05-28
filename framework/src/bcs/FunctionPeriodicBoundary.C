@@ -85,17 +85,12 @@ FunctionPeriodicBoundary::init()
 {
   switch (_dim)
   {
-    case 1:
-      _tr_x->initialSetup();
-      break;
-    case 2:
-      _tr_x->initialSetup();
-      _tr_y->initialSetup();
-      break;
     case 3:
-      _tr_x->initialSetup();
-      _tr_y->initialSetup();
-      _tr_z->initialSetup();
+      const_cast<Function *>(_tr_z)->initialSetup();
+    case 2:
+      const_cast<Function *>(_tr_y)->initialSetup();
+    case 1:
+      const_cast<Function *>(_tr_x)->initialSetup();
       break;
     default:
       mooseError("Unsupported dimension");

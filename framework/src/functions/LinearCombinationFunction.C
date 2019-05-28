@@ -39,7 +39,7 @@ LinearCombinationFunction::LinearCombinationFunction(const InputParameters & par
   {
     if (name() == names[i])
       mooseError("A LinearCombinationFunction must not reference itself");
-    Function * const f = &getFunctionByName(names[i]);
+    const Function * const f = &getFunctionByName(names[i]);
     if (!f)
       mooseError("LinearCombinationFunction: The function ",
                  names[i],

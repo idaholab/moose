@@ -27,6 +27,5 @@ protected:
   virtual Real value() override;
 
   unsigned int _ncomp;
-  std::vector<Function *> _func;
+  std::vector<const Function *> _func;
 };
-

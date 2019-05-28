@@ -30,5 +30,5 @@ public:
 
 private:
   const Real _scale_factor;
-  std::vector<Function *> _f;
+  std::vector<const Function *> _f;
 };

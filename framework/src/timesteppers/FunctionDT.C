@@ -91,9 +91,10 @@ FunctionDT::FunctionDT(const InputParameters & parameters)
     _function = &getFunction("function");
     // If dt is given by piece-wise linear and constant function, we add the domain into
     // _time_knots, so that the time stepper hits those time points
-    if (dynamic_cast<PiecewiseLinear *>(_function) || dynamic_cast<PiecewiseConstant *>(_function))
+    if (dynamic_cast<const PiecewiseLinear *>(_function) ||
+        dynamic_cast<const PiecewiseConstant *>(_function))
     {
-      Piecewise * pw = dynamic_cast<Piecewise *>(_function);
+      const Piecewise * pw = dynamic_cast<const Piecewise *>(_function);
       unsigned int n_knots = pw->functionSize();
       for (unsigned int i = 0; i < n_knots; i++)
         _time_knots.push_back(pw->domain(i));

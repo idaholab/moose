@@ -29,7 +29,6 @@ public:
 protected:
   virtual Real computeQpResidual() override;
 
-  Function & _function;
+  const Function & _function;
   Point _p;
 };
-

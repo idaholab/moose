@@ -45,8 +45,8 @@ protected:
   std::vector<Real> _yx21;
   std::vector<Real> _yx2n;
 
-  Function & _yx1;
-  Function & _yx2;
+  const Function & _yx1;
+  const Function & _yx2;
 
   // The xyz index that x1/x2 should map to
   Real _x1_index;

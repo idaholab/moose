@@ -42,7 +42,7 @@ protected:
   bool _use_function;
   /// The time-dependent function specifying the time step size (turn this into a reference then
   /// `time_t` and `time_dt` is removed)
-  Function * _function;
+  const Function * _function;
 
   /// Piecewise linear definition of time stepping
   std::unique_ptr<LinearInterpolation> _time_ipol;
@@ -57,4 +57,3 @@ protected:
 
   std::vector<Real> _time_knots;
 };
-

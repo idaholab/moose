@@ -29,12 +29,11 @@ public:
 protected:
   virtual Real computeQpIntegral() override;
 
-  Function & _funcx;
-  Function & _funcy;
-  Function & _funcz;
+  const Function & _funcx;
+  const Function & _funcy;
+  const Function & _funcz;
 
   const VariableValue & _u; // FE solution in x
   const VariableValue & _v; // FE solution in y
   const VariableValue & _w; // FE solution in z
 };
-

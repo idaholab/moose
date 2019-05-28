@@ -39,10 +39,10 @@ public:
 
 protected:
   /// Optional vectorValue function
-  Function * _function;
+  const Function * _function;
 
   /// Optional component function value
-  Function & _function_x;
-  Function & _function_y;
-  Function & _function_z;
+  const Function & _function_x;
+  const Function & _function_y;
+  const Function & _function_z;
 };

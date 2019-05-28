@@ -49,6 +49,5 @@ protected:
    */
   virtual RealGradient gradient(const Point & p) override;
 
-  Function & _func;
+  const Function & _func;
 };
-
