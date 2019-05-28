@@ -48,7 +48,7 @@ protected:
 
   ///@{The function names and expressions for hardening as a function of temperature
   const std::vector<FunctionName> _hardening_functions_names;
-  std::vector<PiecewiseLinear *> _hardening_functions;
+  std::vector<const PiecewiseLinear *> _hardening_functions;
   ///@}
 
   /// The temperatures at which each of the hardening functions are defined.

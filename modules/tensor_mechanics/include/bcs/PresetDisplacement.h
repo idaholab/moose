@@ -29,7 +29,7 @@ protected:
 
   const VariableValue & _u_old;
   const Real _scale_factor;
-  Function & _function;
+  const Function & _function;
   const VariableValue & _vel_old;
   const VariableValue & _accel_old;
   const Real _beta;
@@ -37,4 +37,3 @@ protected:
 
 template <>
 InputParameters validParams<PresetDisplacement>();
-

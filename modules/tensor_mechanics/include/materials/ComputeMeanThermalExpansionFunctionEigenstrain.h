@@ -48,8 +48,7 @@ protected:
    */
   virtual Real meanThermalExpansionCoefficientDerivative(const Real temperature) override;
 
-  Function & _thermal_expansion_function;
+  const Function & _thermal_expansion_function;
 
   const Real & _thexp_func_ref_temp;
 };
-

@@ -36,7 +36,7 @@ protected:
   MaterialProperty<RealVectorValue> & _material_flexure;
 
   /// Prefactor function used to modify (i.e., multiply) the material stiffness and flexure vectors
-  Function * const _prefactor_function;
+  const Function * const _prefactor_function;
 
   /// Young's modulus of the beam material
   const VariableValue & _youngs_modulus;
@@ -47,4 +47,3 @@ protected:
   /// Shear coefficient for the beam cross-section
   const VariableValue & _shear_coefficient;
 };
-

@@ -67,8 +67,8 @@ TemperatureDependentHardeningStressUpdate::TemperatureDependentHardeningStressUp
   std::vector<Real> yield_stress_vec;
   for (unsigned int i = 0; i < len; ++i)
   {
-    PiecewiseLinear * const f =
-        dynamic_cast<PiecewiseLinear *>(&getFunctionByName(_hardening_functions_names[i]));
+    const PiecewiseLinear * const f =
+        dynamic_cast<const PiecewiseLinear *>(&getFunctionByName(_hardening_functions_names[i]));
     if (!f)
       mooseError("Function ", _hardening_functions_names[i], " not found in ", name());
 
