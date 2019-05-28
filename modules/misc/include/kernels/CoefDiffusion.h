@@ -29,6 +29,5 @@ protected:
 
 private:
   const Real _coef;
-  Function * const _func;
+  const Function * const _func;
 };
-
