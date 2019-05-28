@@ -50,5 +50,5 @@ protected:
    * these points the Dirichlet condition variable = _p_excav
    * will be applied
    */
-  Function & _func;
+  const Function & _func;
 };

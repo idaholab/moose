@@ -62,7 +62,7 @@ protected:
   LinearInterpolation _sink_func;
 
   /// sink flux gets multiplied by this function
-  Function & _m_func;
+  const Function & _m_func;
 
   /// fluid density
   const RichardsDensity & _density;

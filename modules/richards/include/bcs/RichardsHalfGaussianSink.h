@@ -48,7 +48,7 @@ protected:
   Real _centre;
 
   /// multiplying function: all fluxes will be multiplied by this
-  Function & _m_func;
+  const Function & _m_func;
 
   /**
    * holds info regarding the names of the Richards variables

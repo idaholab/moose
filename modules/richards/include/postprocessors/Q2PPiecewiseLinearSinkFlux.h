@@ -43,7 +43,7 @@ protected:
   LinearInterpolation _sink_func;
 
   /// the multiplier function
-  Function & _m_func;
+  const Function & _m_func;
 
   /// the porepressure variable
   const VariableValue & _pp;
@@ -69,4 +69,3 @@ protected:
   /// medium permeability
   const MaterialProperty<RealTensorValue> & _permeability;
 };
-
