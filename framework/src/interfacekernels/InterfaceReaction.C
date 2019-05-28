@@ -24,9 +24,7 @@ validParams<InterfaceReaction>()
 }
 
 InterfaceReaction::InterfaceReaction(const InputParameters & parameters)
-  : InterfaceKernel(parameters),
-    _kf(getParam<Real>("kf")),
-    _kb(getParam<Real>("kb"))
+  : InterfaceKernel(parameters), _kf(getParam<Real>("kf")), _kb(getParam<Real>("kb"))
 {
 }
 

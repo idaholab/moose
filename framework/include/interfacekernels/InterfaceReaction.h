@@ -35,5 +35,4 @@ protected:
 
   /// Backward reaction rate coefficient
   Real _kb;
-
 };
