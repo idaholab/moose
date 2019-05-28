@@ -37,7 +37,7 @@ protected:
   const Real _maximum;
 
   /// Denote x = porepressure - center.  Then Flux out = (max/cutoff^3)*(2x + cutoff)(x - cutoff)^2 for cutoff < x < 0.  Flux out = max for x >= 0.  Flux out = 0 for x <= cutoff.
-  Function & _cutoff;
+  const Function & _cutoff;
 
   /// Center of the cubic sink
   const Real _center;
@@ -46,4 +46,3 @@ protected:
 
   virtual Real dmultiplier_dvar(unsigned int pvar) const override;
 };
-

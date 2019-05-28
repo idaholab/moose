@@ -30,7 +30,7 @@ class MovingPlanarFront : public Function, protected FunctionInterface
 public:
   MovingPlanarFront(const InputParameters & parameters);
 
-  virtual Real value(Real t, const Point & p) override;
+  virtual Real value(Real t, const Point & p) const override;
 
 protected:
   /// Initial position of front
@@ -40,7 +40,7 @@ protected:
   const RealVectorValue _end_posn;
 
   /// The front's distance from start_posn (along the normal direction)
-  Function & _distance;
+  const Function & _distance;
 
   /// Active length
   const Real _active_length;
@@ -60,4 +60,3 @@ protected:
   /// Front unit normal
   RealVectorValue _front_normal;
 };
-
