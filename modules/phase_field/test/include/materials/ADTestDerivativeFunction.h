@@ -35,7 +35,8 @@ protected:
   enum class FunctionEnum
   {
     F1,
-    F2
+    F2,
+    F3
   } _function;
 
   /// Coupled variable value for the order parameter
@@ -52,4 +53,3 @@ protected:
 
   usingMaterialMembers;
 };
-
