@@ -17,6 +17,10 @@ class InterfaceReaction;
 template <>
 InputParameters validParams<InterfaceReaction>();
 
+/**
+ * Implements a reaction to establish ReactionRate=k_f*u-k_b*v
+ * at interface.
+ */
 class InterfaceReaction : public InterfaceKernel
 {
 public:
@@ -26,8 +30,10 @@ protected:
   virtual Real computeQpResidual(Moose::DGResidualType type) override;
   virtual Real computeQpJacobian(Moose::DGJacobianType type) override;
 
+  /// Forward reaction rate coefficient
   Real _kf;
+
+  /// Backward reaction rate coefficient
   Real _kb;
-  const MaterialProperty<Real> & _D;
-  const MaterialProperty<Real> & _D_neighbor;
+
 };

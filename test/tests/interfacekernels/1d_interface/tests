@@ -108,4 +108,15 @@
     requirement = "The solution should be discontinued at the interface due to the reaction taking place"
     design = 'InterfaceReaction.md'
   [../]
+  [./reaction_1D_transient_Jac]
+    type = PetscJacobianTester
+    input = 'reaction_1D_transient.i'
+    cli_args = 'Outputs/exodus=false Executioner/num_steps=3'
+    run_sim = True
+    ratio_tol = 1e-8
+    difference_tol = 1e-8
+    issues = '#13365'
+    requirement = "The Jacobian from InterfaceReaction shall be perfect"
+    design = 'InterfaceReaction.md'
+  [../]
 []

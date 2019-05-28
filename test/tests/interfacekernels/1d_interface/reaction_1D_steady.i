@@ -1,7 +1,7 @@
 # Steady-state test for the InterfaceReaction kernel.
 #
-# Specie M transport from domain 0 (0<=x<=1) to domain 1 (1<x<=2),
-# u and v are concentrations in domain 0 and domain 1.
+# Specie M transport from domain 1 (0<=x<=1) to domain 2 (1<x<=2),
+# u and v are concentrations in domain 1 and domain 2.
 #
 # Diffusion in both domains can be described by Ficks law and diffusion
 # kernel is applied.
@@ -18,7 +18,7 @@
 #
 # Analytical solution is
 # u = -0.2*u+1,    0<=u<=1
-# v = -0.4*v+0.8, 1<v<=2
+# v = -0.4*v+0.8,  1<v<=2
 
 [Mesh]
   type = GeneratedMesh
@@ -85,8 +85,6 @@
     variable = u
     neighbor_var = 'v'
     boundary = 'master0_interface'
-    D = D
-    D_neighbor = D
     kf = 1 # Forward reaction rate coefficient
     kb = 2 # Backward reaction rate coefficient
   [../]
