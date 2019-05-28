@@ -30,6 +30,5 @@ public:
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
-  Function & _function;
+  const Function & _function;
 };
-

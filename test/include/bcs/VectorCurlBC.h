@@ -25,6 +25,5 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
-  Function & _curl_value;
+  const Function & _curl_value;
 };
-

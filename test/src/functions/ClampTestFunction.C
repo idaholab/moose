@@ -23,7 +23,7 @@ validParams<ClampTestFunction>()
 ClampTestFunction::ClampTestFunction(const InputParameters & parameters) : Function(parameters) {}
 
 Real
-ClampTestFunction::value(Real /*t*/, const Point & p)
+ClampTestFunction::value(Real /*t*/, const Point & p) const
 {
   return MathUtils::clamp<Real>(p(0), 0.2, 0.8);
 }

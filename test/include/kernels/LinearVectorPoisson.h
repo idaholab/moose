@@ -27,8 +27,7 @@ protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
 
-  Function & _x_sln;
-  Function & _y_sln;
+  const Function & _x_sln;
+  const Function & _y_sln;
   const Real _eps;
 };
-
