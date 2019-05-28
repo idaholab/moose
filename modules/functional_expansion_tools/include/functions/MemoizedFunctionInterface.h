@@ -41,7 +41,7 @@ public:
   // Make this implementation of Function::value() final so derived classes cannot bypass the
   // memoization functionality it implements. Instead, deriving classes should implement
   // evaluateValue().
-  virtual Real value(Real time, const Point & point) final;
+  virtual Real value(Real time, const Point & point) const final;
 
 protected:
   /**
@@ -56,10 +56,10 @@ protected:
 
 private:
   /// Cached evaluations for each point
-  std::unordered_map<hashing::HashValue, Real> _cache;
+  mutable std::unordered_map<hashing::HashValue, Real> _cache;
 
   /// Stores the time evaluation of the cache
-  Real _current_time;
+  mutable Real _current_time;
 
   /// Flag for whether to cache values
   bool _enable_cache;
@@ -67,4 +67,3 @@ private:
   /// Flag for whether changes in time invalidate the cache
   bool _respect_time;
 };
-
