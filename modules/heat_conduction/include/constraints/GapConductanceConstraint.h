@@ -66,5 +66,12 @@ protected:
   /// Thermal conductivity of the gap medium (e.g. air).
   const Real _k;
 
+  ///@{ Displacement variables
+  const std::vector<std::string> _disp_name;
+  const unsigned int _n_disp;
+  std::vector<const ADVariableValue *> _disp_slave;
+  std::vector<const ADVariableValue *> _disp_master;
+  ///@}
+
   usingMortarConstraintMembers;
 };

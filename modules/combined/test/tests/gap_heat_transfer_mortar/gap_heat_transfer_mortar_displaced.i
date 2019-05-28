@@ -104,6 +104,7 @@
     master_subdomain = 10000
     slave_boundary = 101
     slave_subdomain = 10001
+    displacements = 'disp_x disp_y'
   [../]
 []
 
