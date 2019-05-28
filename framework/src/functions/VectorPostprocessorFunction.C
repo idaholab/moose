@@ -52,7 +52,7 @@ VectorPostprocessorFunction::VectorPostprocessorFunction(const InputParameters &
 }
 
 Real
-VectorPostprocessorFunction::value(Real /*t*/, const Point & p)
+VectorPostprocessorFunction::value(Real /*t*/, const Point & p) const
 {
   if (_argument_column.empty())
   {

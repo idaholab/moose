@@ -31,7 +31,7 @@ PiecewiseMultilinear::PiecewiseMultilinear(const InputParameters & parameters)
 }
 
 Real
-PiecewiseMultilinear::sample(const std::vector<Real> & pt)
+PiecewiseMultilinear::sample(const std::vector<Real> & pt) const
 {
   /*
    * left contains the indices of the point to the 'left', 'down', etc, of pt

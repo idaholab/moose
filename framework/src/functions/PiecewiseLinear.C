@@ -23,7 +23,7 @@ validParams<PiecewiseLinear>()
 PiecewiseLinear::PiecewiseLinear(const InputParameters & parameters) : Piecewise(parameters) {}
 
 Real
-PiecewiseLinear::value(Real t, const Point & p)
+PiecewiseLinear::value(Real t, const Point & p) const
 {
   Real func_value;
   if (_has_axis)
@@ -38,7 +38,7 @@ PiecewiseLinear::value(Real t, const Point & p)
 }
 
 Real
-PiecewiseLinear::timeDerivative(Real t, const Point & p)
+PiecewiseLinear::timeDerivative(Real t, const Point & p) const
 {
   Real func_value;
   if (_has_axis)
@@ -53,13 +53,13 @@ PiecewiseLinear::timeDerivative(Real t, const Point & p)
 }
 
 Real
-PiecewiseLinear::integral()
+PiecewiseLinear::integral() const
 {
   return _scale_factor * _linear_interp->integrate();
 }
 
 Real
-PiecewiseLinear::average()
+PiecewiseLinear::average() const
 {
   return integral() /
          (_linear_interp->domain(_linear_interp->getSampleSize() - 1) - _linear_interp->domain(0));

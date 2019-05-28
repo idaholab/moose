@@ -211,7 +211,7 @@ ImageSampler::setupImageSampler(MooseMesh & mesh)
 }
 
 Real
-ImageSampler::sample(const Point & p)
+ImageSampler::sample(const Point & p) const
 {
 #ifdef LIBMESH_HAVE_VTK
 

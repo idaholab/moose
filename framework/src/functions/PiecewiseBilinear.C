@@ -112,7 +112,7 @@ PiecewiseBilinear::PiecewiseBilinear(const InputParameters & parameters)
 PiecewiseBilinear::~PiecewiseBilinear() {}
 
 Real
-PiecewiseBilinear::value(Real t, const Point & p)
+PiecewiseBilinear::value(Real t, const Point & p) const
 {
   Real retVal(0);
   if (_yaxisValid && _xaxisValid && _radial)

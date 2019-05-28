@@ -48,7 +48,7 @@ PiecewiseConstant::PiecewiseConstant(const InputParameters & parameters)
 }
 
 Real
-PiecewiseConstant::value(Real t, const Point & p)
+PiecewiseConstant::value(Real t, const Point & p) const
 {
   Real func_value(0);
   Real x = t;
@@ -93,13 +93,13 @@ PiecewiseConstant::value(Real t, const Point & p)
 }
 
 Real
-PiecewiseConstant::timeDerivative(Real /*t*/, const Point & /*p*/)
+PiecewiseConstant::timeDerivative(Real /*t*/, const Point & /*p*/) const
 {
   return 0;
 }
 
 Real
-PiecewiseConstant::integral()
+PiecewiseConstant::integral() const
 {
   const unsigned len = functionSize();
   Real sum = 0;
@@ -115,7 +115,7 @@ PiecewiseConstant::integral()
 }
 
 Real
-PiecewiseConstant::average()
+PiecewiseConstant::average() const
 {
   return integral() / (domain(functionSize() - 1) - domain(0));
 }

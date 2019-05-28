@@ -26,14 +26,14 @@ class BicubicSplineFunction : public Function, public FunctionInterface
 public:
   BicubicSplineFunction(const InputParameters & parameters);
 
-  virtual Real value(Real t, const Point & p) override;
+  virtual Real value(Real t, const Point & p) const override;
 
-  virtual Real derivative(const Point & p, unsigned int deriv_var);
-  virtual RealGradient gradient(Real t, const Point & p) override;
-  virtual Real secondDerivative(const Point & p, unsigned int deriv_var);
+  virtual Real derivative(const Point & p, unsigned int deriv_var) const;
+  virtual RealGradient gradient(Real t, const Point & p) const override;
+  virtual Real secondDerivative(const Point & p, unsigned int deriv_var) const;
 
 protected:
-  BicubicSplineInterpolation _ipol;
+  mutable BicubicSplineInterpolation _ipol;
 
   // Desired normal direction
   unsigned int _normal_component;
@@ -52,4 +52,3 @@ protected:
   Real _x1_index;
   Real _x2_index;
 };
-

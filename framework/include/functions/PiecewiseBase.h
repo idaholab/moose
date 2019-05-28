@@ -29,9 +29,9 @@ public:
   PiecewiseBase(const InputParameters & parameters);
 
   virtual void initialSetup();
-  virtual Real functionSize();
-  virtual Real domain(const int i);
-  virtual Real range(const int i);
+  virtual Real functionSize() const;
+  virtual Real domain(const int i) const;
+  virtual Real range(const int i) const;
 
   /**
    * Provides a means for explicitly setting the x and y data. This must
@@ -45,4 +45,3 @@ protected:
   const bool _has_axis;
   bool _data_set;
 };
-

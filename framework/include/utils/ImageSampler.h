@@ -65,7 +65,7 @@ public:
    * Return the pixel value for the given point
    * @param p The point at which to extract pixel data
    */
-  virtual Real sample(const Point & p);
+  virtual Real sample(const Point & p) const;
 
   /**
    * Perform initialization of image data
@@ -160,4 +160,3 @@ private:
   /// Create a console stream object for this helper class
   ConsoleStream _is_console;
 };
-

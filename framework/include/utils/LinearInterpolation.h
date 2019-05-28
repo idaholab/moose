@@ -61,7 +61,7 @@ public:
    * This function returns the size of the array holding the points, i.e. the number of sample
    * points
    */
-  unsigned int getSampleSize();
+  unsigned int getSampleSize() const;
 
   /**
    * This function returns the integral of the function

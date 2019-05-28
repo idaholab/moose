@@ -25,11 +25,11 @@ class SplineFunction : public Function
 public:
   SplineFunction(const InputParameters & parameters);
 
-  virtual Real value(Real t, const Point & p) override;
-  virtual RealGradient gradient(Real t, const Point & p) override;
+  virtual Real value(Real t, const Point & p) const override;
+  virtual RealGradient gradient(Real t, const Point & p) const override;
 
-  virtual Real derivative(const Point & p);
-  virtual Real secondDerivative(const Point & p);
+  virtual Real derivative(const Point & p) const;
+  virtual Real secondDerivative(const Point & p) const;
 
 protected:
   SplineInterpolation _ipol;
@@ -37,4 +37,3 @@ protected:
   /// Desired component
   int _component;
 };
-

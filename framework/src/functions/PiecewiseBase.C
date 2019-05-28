@@ -61,19 +61,19 @@ PiecewiseBase::setData(const std::vector<Real> & x, const std::vector<Real> & y)
 }
 
 Real
-PiecewiseBase::functionSize()
+PiecewiseBase::functionSize() const
 {
   return _linear_interp->getSampleSize();
 }
 
 Real
-PiecewiseBase::domain(const int i)
+PiecewiseBase::domain(const int i) const
 {
   return _linear_interp->domain(i);
 }
 
 Real
-PiecewiseBase::range(const int i)
+PiecewiseBase::range(const int i) const
 {
   return _linear_interp->range(i);
 }

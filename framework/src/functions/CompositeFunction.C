@@ -54,7 +54,7 @@ CompositeFunction::CompositeFunction(const InputParameters & parameters)
 }
 
 Real
-CompositeFunction::value(Real t, const Point & p)
+CompositeFunction::value(Real t, const Point & p) const
 {
   Real val = _scale_factor;
 

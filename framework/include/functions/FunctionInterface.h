@@ -68,6 +68,5 @@ private:
   FEProblemBase & _fni_feproblem;
 
   /// Thread ID
-  THREAD_ID _fni_tid;
+  const THREAD_ID _fni_tid;
 };
-

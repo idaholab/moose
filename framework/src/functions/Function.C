@@ -35,45 +35,45 @@ Function::Function(const InputParameters & parameters)
 Function::~Function() {}
 
 Real
-Function::value(Real /*t*/, const Point & /*p*/)
+Function::value(Real /*t*/, const Point & /*p*/) const
 {
   return 0.0;
 }
 
 RealGradient
-Function::gradient(Real /*t*/, const Point & /*p*/)
+Function::gradient(Real /*t*/, const Point & /*p*/) const
 {
   return RealGradient(0, 0, 0);
 }
 
 Real
-Function::timeDerivative(Real /*t*/, const Point & /*p*/)
+Function::timeDerivative(Real /*t*/, const Point & /*p*/) const
 {
   mooseError("timeDerivative method not defined for function ", name());
   return 0;
 }
 
 RealVectorValue
-Function::vectorValue(Real /*t*/, const Point & /*p*/)
+Function::vectorValue(Real /*t*/, const Point & /*p*/) const
 {
   return RealVectorValue(0, 0, 0);
 }
 
 RealVectorValue
-Function::vectorCurl(Real /*t*/, const Point & /*p*/)
+Function::vectorCurl(Real /*t*/, const Point & /*p*/) const
 {
   return RealVectorValue(0, 0, 0);
 }
 
 Real
-Function::integral()
+Function::integral() const
 {
   mooseError("Integral method not defined for function ", name());
   return 0;
 }
 
 Real
-Function::average()
+Function::average() const
 {
   mooseError("Average method not defined for function ", name());
   return 0;

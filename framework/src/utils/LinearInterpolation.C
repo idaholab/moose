@@ -111,7 +111,7 @@ LinearInterpolationTempl<T>::range(int i) const
 
 template <typename T>
 unsigned int
-LinearInterpolationTempl<T>::getSampleSize()
+LinearInterpolationTempl<T>::getSampleSize() const
 {
   return _x.size();
 }

@@ -135,7 +135,7 @@ Axisymmetric2D3DSolutionFunction::initialSetup()
 }
 
 Real
-Axisymmetric2D3DSolutionFunction::value(Real t, const Point & p)
+Axisymmetric2D3DSolutionFunction::value(Real t, const Point & p) const
 {
   Point xypoint;
   Point r_dir_2d;

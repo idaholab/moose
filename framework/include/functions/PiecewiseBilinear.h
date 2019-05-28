@@ -61,7 +61,7 @@ public:
   /**
    * This function will return a value based on the first input argument only.
    */
-  virtual Real value(Real t, const Point & pt) override;
+  virtual Real value(Real t, const Point & pt) const override;
 
 private:
   std::unique_ptr<BilinearInterpolation> _bilinear_interp;
@@ -77,4 +77,3 @@ private:
 
   void parse(std::vector<Real> & x, std::vector<Real> & y, ColumnMajorMatrix & z);
 };
-
