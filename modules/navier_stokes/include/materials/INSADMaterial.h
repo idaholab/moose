@@ -86,14 +86,13 @@ protected:
   ADMaterialProperty(RealVectorValue) & _momentum_strong_residual;
 
   /// The x velocity mms forcing function
-  Function & _x_vel_fn;
+  const Function & _x_vel_fn;
 
   /// The y velocity mms forcing function
-  Function & _y_vel_fn;
+  const Function & _y_vel_fn;
 
   /// The z velocity mms forcing function
-  Function & _z_vel_fn;
+  const Function & _z_vel_fn;
 
   usingMaterialMembers;
 };
-
