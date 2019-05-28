@@ -273,7 +273,7 @@ FlowChannelBase::addVariables()
 
   // wall heat flux
   if (!_temperature_mode && _n_heat_transfer_connections != 1)
-    _sim.addVariable(false, FlowModel::HEAT_FLUX_WALL, FlowModel::feType(), _subdomain_id);
+    _sim.addVariable(false, FlowModel::HEAT_FLUX_WALL, _sim.getFlowFEType(), _subdomain_id);
 
   // total heat flux perimeter
   if (_n_heat_transfer_connections > 1)
@@ -338,7 +338,7 @@ FlowChannelBase::addCommonObjects()
   if (!_pipe_pars_transferred)
   {
     // Area
-    if (FlowModel::getSpatialDiscretizationType() == FlowModel::rDG)
+    if (_spatial_discretization == FlowModel::rDG)
     {
       {
         std::string class_name = "FunctionAux";

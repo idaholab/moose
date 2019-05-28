@@ -19,6 +19,8 @@ Simulation::Simulation(ActionWarehouse & action_warehouse)
     _factory(_app.getFactory()),
     _action_factory(_app.getActionFactory()),
     _pars(emptyInputParameters()),
+    _flow_fe_type(FEType(CONSTANT, MONOMIAL)),
+    _spatial_discretization(FlowModel::rDG),
     _implicit_time_integration(true),
     _zero(0)
 {

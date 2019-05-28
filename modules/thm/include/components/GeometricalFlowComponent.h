@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GeometricalComponent.h"
+#include "FlowModel.h"
 #include "FlowConnection.h"
 
 class GeometricalFlowComponent;
@@ -78,6 +79,9 @@ protected:
   virtual void init() override;
 
   virtual bool usingSecondOrderMesh() const override;
+
+  /// Spatial discretization
+  const FlowModel::ESpatialDiscretizationType & _spatial_discretization;
 
   /// Map of end type to a list of connections
   std::map<FlowConnection::EEndType, std::vector<Connection>> _connections;

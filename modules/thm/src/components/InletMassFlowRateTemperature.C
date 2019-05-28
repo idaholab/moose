@@ -74,9 +74,8 @@ InletMassFlowRateTemperature::check() const
   else
     logModelNotImplementedError(_flow_model_id);
 
-  if ((FlowModel::getSpatialDiscretizationType() == FlowModel::rDG) &&
-      (_flow_model_id == THM::FM_TWO_PHASE_NCG))
-    logSpatialDiscretizationNotImplementedError(FlowModel::getSpatialDiscretizationType());
+  if ((_spatial_discretization == FlowModel::rDG) && (_flow_model_id == THM::FM_TWO_PHASE_NCG))
+    logSpatialDiscretizationNotImplementedError(_spatial_discretization);
 }
 
 void
@@ -365,16 +364,16 @@ InletMassFlowRateTemperature::addMooseObjects()
 
   if (_flow_model_id == THM::FM_SINGLE_PHASE)
   {
-    if (FlowModel::getSpatialDiscretizationType() == FlowModel::CG)
+    if (_spatial_discretization == FlowModel::CG)
       setup1PhaseCG();
-    else if (FlowModel::getSpatialDiscretizationType() == FlowModel::rDG)
+    else if (_spatial_discretization == FlowModel::rDG)
       setup1PhaseRDG();
   }
   else if (_flow_model_id == THM::FM_TWO_PHASE)
   {
-    if (FlowModel::getSpatialDiscretizationType() == FlowModel::CG)
+    if (_spatial_discretization == FlowModel::CG)
       setup2PhaseCG();
-    else if (FlowModel::getSpatialDiscretizationType() == FlowModel::rDG)
+    else if (_spatial_discretization == FlowModel::rDG)
       setup2PhaseRDG();
   }
   else if (_flow_model_id == THM::FM_TWO_PHASE_NCG)

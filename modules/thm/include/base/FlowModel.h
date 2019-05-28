@@ -85,20 +85,6 @@ public:
    */
   virtual void addMooseObjects() = 0;
 
-  /**
-   * Get the FE type used for flow
-   * @return The finite element type
-   */
-  static const FEType & feType() { return _fe_type; }
-
-  /**
-   * Gets the spatial discretization type for flow
-   */
-  static const ESpatialDiscretizationType & getSpatialDiscretizationType()
-  {
-    return _spatial_discretization;
-  }
-
 protected:
   Simulation & _sim;
 
@@ -110,6 +96,12 @@ protected:
 
   /// The flow channel component that built this class
   FlowChannelBase & _flow_channel;
+
+  /// The type of FE used for flow
+  const FEType & _fe_type;
+
+  /// Spatial discretization
+  const ESpatialDiscretizationType & _spatial_discretization;
 
   /// The name of the user object that defines fluid properties
   const UserObjectName _fp_name;
@@ -167,14 +159,6 @@ public:
   static const std::string TEMPERATURE_WALL;
   static const std::string UNITY;
   static const std::string DIRECTION;
-
-protected:
-  /// The type of FE used for flow
-  static FEType _fe_type;
-  /// Spatial discretization
-  static ESpatialDiscretizationType _spatial_discretization;
-
-  friend class GlobalSimParamAction;
 };
 
 namespace THM

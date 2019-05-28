@@ -53,14 +53,17 @@ GlobalSimParamAction::GlobalSimParamAction(InputParameters parameters) : THMActi
   // merge parameters into simulation parameters
   pars += this->parameters();
 
-  FlowModel::_spatial_discretization = THM::stringToEnum<FlowModel::ESpatialDiscretizationType>(
+  // Setting the _spatial_discretization and _flow_fe_type members is currently achieved
+  // via friend statement. This is because we need to support CG.  When CG is removed
+  // the need to friend should go away
+  _simulation._spatial_discretization = THM::stringToEnum<FlowModel::ESpatialDiscretizationType>(
       pars.get<MooseEnum>("spatial_discretization"));
 
   bool second_order_mesh = pars.get<bool>("2nd_order_mesh");
   HeatConductionModel::_fe_type =
       second_order_mesh ? FEType(SECOND, LAGRANGE) : FEType(FIRST, LAGRANGE);
-  if (FlowModel::getSpatialDiscretizationType() == FlowModel::CG)
-    FlowModel::_fe_type = HeatConductionModel::_fe_type;
+  if (_simulation.getSpatialDiscretization() == FlowModel::CG)
+    _simulation._flow_fe_type = HeatConductionModel::_fe_type;
 }
 
 void

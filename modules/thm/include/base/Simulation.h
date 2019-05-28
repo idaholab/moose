@@ -2,6 +2,7 @@
 
 #include "FEProblem.h"
 #include "THMApp.h"
+#include "FlowModel.h"
 #include "ControlData.h"
 #include "LoggingInterface.h"
 
@@ -43,6 +44,19 @@ public:
    */
   template <typename T>
   const T & getParam(const std::string & name) const;
+
+  /**
+   * Gets the FE type for the flow in this simulation
+   */
+  const FEType & getFlowFEType() const { return _flow_fe_type; }
+
+  /**
+   * Gets the spatial discretization type for flow
+   */
+  const FlowModel::ESpatialDiscretizationType & getSpatialDiscretization() const
+  {
+    return _spatial_discretization;
+  }
 
   /**
    * Sets the simulation up
@@ -448,8 +462,11 @@ protected:
   /// "Global" of this simulation
   InputParameters _pars;
 
-  /// finite element type for the simulation
-  FEType _fe_type;
+  /// finite element type for the flow in the simulation
+  FEType _flow_fe_type;
+
+  /// Spatial discretization
+  FlowModel::ESpatialDiscretizationType _spatial_discretization;
 
   /**
    * Setup equations to be solved in this simulation
@@ -485,6 +502,8 @@ protected:
 
 public:
   Real _zero;
+
+  friend class GlobalSimParamAction;
 };
 
 template <typename T>

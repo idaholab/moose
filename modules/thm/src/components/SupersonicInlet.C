@@ -25,8 +25,8 @@ SupersonicInlet::check() const
   if (_flow_model_id != THM::FM_SINGLE_PHASE)
     logModelNotImplementedError(_flow_model_id);
 
-  if (FlowModel::getSpatialDiscretizationType() == FlowModel::rDG)
-    logSpatialDiscretizationNotImplementedError(FlowModel::getSpatialDiscretizationType());
+  if (_spatial_discretization == FlowModel::rDG)
+    logSpatialDiscretizationNotImplementedError(_spatial_discretization);
 }
 
 void

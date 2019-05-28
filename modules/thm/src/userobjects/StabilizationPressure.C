@@ -67,7 +67,7 @@ StabilizationPressure::addVariables(FlowModel & fm, unsigned int subdomain_id) c
   {
     _m_sim.addVariable(false, PRESSURE_BAR, FEType(CONSTANT, MONOMIAL), subdomain_id);
     if (_method == SECOND_ORDER)
-      _m_sim.addVariable(false, LAPLACE_P, FlowModel::feType(), subdomain_id);
+      _m_sim.addVariable(false, LAPLACE_P, _m_sim.getFlowFEType(), subdomain_id);
   }
   else if (dynamic_cast<FlowModelTwoPhase *>(&fm))
   {
@@ -77,12 +77,12 @@ StabilizationPressure::addVariables(FlowModel & fm, unsigned int subdomain_id) c
     {
       _m_sim.addVariable(false,
                          LAPLACE_P_LIQUID,
-                         FlowModel::feType(),
+                         _m_sim.getFlowFEType(),
                          subdomain_id,
                          _scaling_factor_laplacep_liquid);
       _m_sim.addVariable(false,
                          LAPLACE_P_VAPOR,
-                         FlowModel::feType(),
+                         _m_sim.getFlowFEType(),
                          subdomain_id,
                          _scaling_factor_laplacep_vapor);
     }
