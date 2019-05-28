@@ -115,7 +115,7 @@ class StatusSystem(object):
         return self.__status
 
     def isValid(self, status):
-        original = set(self.no_status.__dict__.keys())
-        altered = set(status.__dict__.keys())
+        original = set(self.no_status._asdict().keys())
+        altered = set(status._asdict().keys())
         if not original.difference(altered) or status in self.__all_statuses:
             return True
