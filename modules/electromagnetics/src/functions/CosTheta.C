@@ -21,7 +21,7 @@ CosTheta::CosTheta(const InputParameters & parameters)
 }
 
 Real
-CosTheta::value(Real t, const Point & p)
+CosTheta::value(Real /*t*/, const Point & /*p*/)
 {
   return std::cos(_theta * libMesh::pi / 180.);
 }
