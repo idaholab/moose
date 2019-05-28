@@ -24,6 +24,15 @@ RealComponentParameterValuePostprocessor::RealComponentParameterValuePostprocess
     _param_name(getParam<std::string>("parameter")),
     _ctrl_param_name("component/" + _component_name + "/" + _param_name)
 {
+  std::vector<Real> values =
+      _input_parameter_warehouse.getControllableParameterValues<Real>(_ctrl_param_name);
+  if (values.size() == 0)
+    paramError("component",
+               "Either component '",
+               _component_name,
+               "' does not exist or parameter '",
+               _param_name,
+               "' does not exist in that component.");
 }
 
 void
