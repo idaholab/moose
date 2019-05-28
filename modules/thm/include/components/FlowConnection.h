@@ -145,6 +145,8 @@ protected:
   /// Outward normals associated with connected flow channels
   std::vector<Real> _normals;
 
+  /// Spatial discretization
+  const FlowModel::ESpatialDiscretizationType & _spatial_discretization;
   /// Convenience variable that stores model type
   THM::FlowModelID _flow_model_id;
   /// Flow model used in this connection

@@ -109,7 +109,7 @@ HeatTransferBase::addMooseObjects()
 void
 HeatTransferBase::addHeatedPerimeter()
 {
-  _sim.addVariable(false, _P_hf_name, FlowModel::feType(), _block_ids_flow_channel);
+  _sim.addVariable(false, _P_hf_name, _sim.getFlowFEType(), _block_ids_flow_channel);
 
   // create heat flux perimeter variable if not transferred from external app
   if (!_P_hf_transferred)
