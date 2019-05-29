@@ -29,6 +29,7 @@ cd $STACK_SRC/petsc-__PETSC_DEFAULT__
 --download-superlu_dist=1 \
 --download-mumps=1 \
 --download-scalapack=1 \
+--with-cxx-dialect=C++11 \
 --CC=mpicc --CXX=mpicxx --FC=mpif90 --F77=mpif77 --F90=mpif90 \
 --CFLAGS='-fPIC -fopenmp' \
 --CXXFLAGS='-fPIC -fopenmp' \
