@@ -28,5 +28,5 @@ protected:
   virtual Real computeQpIntegral() override;
 
   /// Function to integrate
-  Function & _function;
+  const Function & _function;
 };

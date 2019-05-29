@@ -34,7 +34,7 @@ public:
    */
   Axisymmetric2D3DSolutionFunction(const InputParameters & parameters);
 
-  virtual Real value(Real t, const Point & p) override;
+  virtual Real value(Real t, const Point & p) const override;
 
   /**
    * Setup the function for use
@@ -83,4 +83,3 @@ protected:
   /// The local SolutionUserObject indices for the variables extracted from the file
   std::vector<unsigned int> _solution_object_var_indices;
 };
-

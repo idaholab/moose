@@ -32,7 +32,7 @@ class WedgeFunction : public Function, protected FunctionInterface
 public:
   WedgeFunction(const InputParameters & parameters);
 
-  virtual Real value(Real t, const Point & p) override;
+  virtual Real value(Real t, const Point & p) const override;
 
 protected:
   /// The half-angle of the wedge, stored in radians.
@@ -85,6 +85,5 @@ protected:
    * The pre-computed semi-analytic exact solution f(theta) as a
    * PiecewiseLinear function.
    */
-  Function & _f;
+  const Function & _f;
 };
-

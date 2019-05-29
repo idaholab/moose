@@ -53,9 +53,8 @@ protected:
   const MaterialProperty<RankTwoTensor> & _extra_stress;
 
   /// initial stress components
-  std::vector<Function *> _initial_stress_fcn;
+  std::vector<const Function *> _initial_stress_fcn;
 
   /// derivative of stress w.r.t. strain (_dstress_dstrain)
   MaterialProperty<RankFourTensor> & _Jacobian_mult;
 };
-

@@ -90,7 +90,7 @@ protected:
   const bool _has_thermal_conductivity;
 
   /// The flux
-  Function & _m_func;
+  const Function & _m_func;
 
   /// Permeability of porous material
   const MaterialProperty<RealTensorValue> * const _permeability;
@@ -152,4 +152,3 @@ protected:
   /// d(multiplier)/d(Porous flow variable pvar)
   virtual Real dmultiplier_dvar(unsigned int pvar) const;
 };
-

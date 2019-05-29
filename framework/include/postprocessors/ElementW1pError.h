@@ -46,6 +46,5 @@ protected:
 
   // The exponent used in the norm
   Real _p;
-  Function & _func;
+  const Function & _func;
 };
-

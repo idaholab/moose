@@ -38,21 +38,21 @@ MooseParsedGradFunction::MooseParsedGradFunction(const InputParameters & paramet
 MooseParsedGradFunction::~MooseParsedGradFunction() {}
 
 Real
-MooseParsedGradFunction::value(Real t, const Point & p)
+MooseParsedGradFunction::value(Real t, const Point & p) const
 {
   // Return a scalar value
   return _function_ptr->evaluate<Real>(t, p);
 }
 
 RealGradient
-MooseParsedGradFunction::gradient(Real t, const Point & p)
+MooseParsedGradFunction::gradient(Real t, const Point & p) const
 {
   // Return gradient (RealGradient = RealVectorValue)
   return _grad_function_ptr->evaluate<RealVectorValue>(t, p);
 }
 
 RealVectorValue
-MooseParsedGradFunction::vectorValue(Real /*t*/, const Point & /*p*/)
+MooseParsedGradFunction::vectorValue(Real /*t*/, const Point & /*p*/) const
 {
   mooseError("The vectorValue method is not defined in ParsedGradFunction");
 }

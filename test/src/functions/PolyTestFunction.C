@@ -33,7 +33,7 @@ PolyTestFunction::PolyTestFunction(const InputParameters & parameters)
 }
 
 Real
-PolyTestFunction::value(Real /*t*/, const Point & p)
+PolyTestFunction::value(Real /*t*/, const Point & p) const
 {
   return MathUtils::poly<Real>(_coeffs, p(0), _deriv);
 }

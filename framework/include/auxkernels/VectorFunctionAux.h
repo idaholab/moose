@@ -34,6 +34,5 @@ protected:
   virtual RealVectorValue computeValue() override;
 
   /// Function being used to compute the value of this kernel
-  Function & _function;
+  const Function & _function;
 };
-

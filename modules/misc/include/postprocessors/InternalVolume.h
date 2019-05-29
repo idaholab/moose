@@ -40,6 +40,5 @@ protected:
 
   const unsigned int _component;
   const Real _scale;
-  Function & _addition;
+  const Function & _addition;
 };
-

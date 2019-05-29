@@ -37,7 +37,7 @@ public:
    * @param p Spatial location of desired data
    * @return The value at t and p
    */
-  virtual Real value(Real t, const Point & p) override;
+  virtual Real value(Real t, const Point & p) const override;
 
   /**
    * Extract a gradient from the solution
@@ -45,7 +45,7 @@ public:
    * @param p Spatial location of desired data
    * @return The value at t and p
    */
-  virtual RealGradient gradient(Real t, const Point & p) override;
+  virtual RealGradient gradient(Real t, const Point & p) const override;
 
   /**
    * Setup the function for use
@@ -71,4 +71,3 @@ protected:
   /// Factor to add to the solution if gradient is requested (default = \vec{0})
   RealGradient _add_grad;
 };
-

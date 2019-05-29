@@ -39,8 +39,7 @@ protected:
   virtual Real computeQpPGOffDiagJacobian(unsigned comp);
 
   bool _pspg;
-  Function & _x_ffn;
-  Function & _y_ffn;
-  Function & _z_ffn;
+  const Function & _x_ffn;
+  const Function & _y_ffn;
+  const Function & _z_ffn;
 };
-

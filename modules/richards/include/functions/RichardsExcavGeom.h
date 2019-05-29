@@ -47,7 +47,7 @@ class RichardsExcavGeom : public Function
 public:
   RichardsExcavGeom(const InputParameters & parameters);
 
-  virtual Real value(Real t, const Point & p);
+  virtual Real value(Real t, const Point & p) const;
 
 protected:
   /// start position

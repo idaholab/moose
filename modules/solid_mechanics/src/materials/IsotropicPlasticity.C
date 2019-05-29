@@ -41,9 +41,9 @@ IsotropicPlasticity::IsotropicPlasticity(const InputParameters & parameters)
     _yield_stress(isParamValid("yield_stress") ? getParam<Real>("yield_stress") : 0),
     _hardening_constant(isParamValid("hardening_constant") ? getParam<Real>("hardening_constant")
                                                            : 0),
-    _hardening_function(isParamValid("hardening_function")
-                            ? dynamic_cast<PiecewiseLinear *>(&getFunction("hardening_function"))
-                            : NULL),
+    _hardening_function(isParamValid("hardening_function") ? dynamic_cast<const PiecewiseLinear *>(
+                                                                 &getFunction("hardening_function"))
+                                                           : NULL),
 
     _plastic_strain(declareProperty<SymmTensor>("plastic_strain")),
     _plastic_strain_old(getMaterialPropertyOld<SymmTensor>("plastic_strain")),

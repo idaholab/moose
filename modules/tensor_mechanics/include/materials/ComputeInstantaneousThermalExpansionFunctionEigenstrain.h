@@ -32,7 +32,7 @@ protected:
   virtual void computeThermalStrain(Real & thermal_strain, Real & instantaneous_cte) override;
 
   const VariableValue & _temperature_old;
-  Function & _thermal_expansion_function;
+  const Function & _thermal_expansion_function;
 
   /// Stores the thermal strain as a scalar for use in computing an incremental update to this.
   //@{
@@ -43,4 +43,3 @@ protected:
   /// Indicates whether we are on the first step, avoiding false positives when restarting
   bool & _step_one;
 };
-

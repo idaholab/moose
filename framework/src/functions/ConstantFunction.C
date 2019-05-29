@@ -27,7 +27,7 @@ ConstantFunction::ConstantFunction(const InputParameters & parameters)
 }
 
 Real
-ConstantFunction::value(Real, const Point &)
+ConstantFunction::value(Real, const Point &) const
 {
   return _value;
 }

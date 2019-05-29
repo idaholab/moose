@@ -21,9 +21,8 @@ protected:
 
   const VariableValue & _u_old;
   const Real _velocity;
-  Function & _function;
+  const Function & _function;
 };
 
 template <>
 InputParameters validParams<PresetVelocity>();
-

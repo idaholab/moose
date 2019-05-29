@@ -41,6 +41,5 @@ protected:
   const MaterialProperty<std::vector<RealVectorValue>> & _flux;
 
   /// the RichardsExcavGeom that defines where on the boundary we'll compute the mass flux
-  Function & _func;
+  const Function & _func;
 };
-

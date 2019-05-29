@@ -33,9 +33,8 @@ protected:
   virtual Real computeValue();
 
   /// Function object from which gradient is retrieved
-  Function & _func;
+  const Function & _func;
 
   /// The dimension index: 0|1|2 for x|y|z
   unsigned int _dim_index;
 };
-

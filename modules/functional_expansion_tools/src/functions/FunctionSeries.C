@@ -172,11 +172,11 @@ FunctionSeries::FunctionSeries(const InputParameters & parameters)
 }
 
 FunctionSeries &
-FunctionSeries::checkAndConvertFunction(Function & function,
+FunctionSeries::checkAndConvertFunction(const Function & function,
                                         const std::string & typeName,
                                         const std::string & objectName)
 {
-  FunctionSeries * test = dynamic_cast<FunctionSeries *>(&function);
+  const FunctionSeries * test = dynamic_cast<const FunctionSeries *>(&function);
   if (!test)
     ::mooseError("In ",
                  typeName,
@@ -186,7 +186,7 @@ FunctionSeries::checkAndConvertFunction(Function & function,
                  function.name(),
                  "\" must be a FunctionSeries-type object.");
 
-  return *test;
+  return *const_cast<FunctionSeries *>(test);
 }
 
 Real

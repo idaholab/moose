@@ -31,6 +31,5 @@ protected:
   virtual Real computeQpResidual() override;
 
   /// User-provided function which computes the Laplacian.
-  Function & _lap_u;
+  const Function & _lap_u;
 };
-

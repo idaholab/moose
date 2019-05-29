@@ -36,6 +36,5 @@ protected:
   virtual Real computeQpResidual() override;
 
   /// The function being used for evaluation
-  Function & _func;
+  const Function & _func;
 };
-

@@ -35,7 +35,7 @@ Grad2ParsedFunction::Grad2ParsedFunction(const InputParameters & parameters)
 }
 
 Real
-Grad2ParsedFunction::value(Real t, const Point & p)
+Grad2ParsedFunction::value(Real t, const Point & p) const
 {
   return (_function_ptr->evaluate<Real>(t, p + _direction) -
           2 * _function_ptr->evaluate<Real>(t, p) +

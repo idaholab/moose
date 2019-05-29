@@ -31,14 +31,14 @@ protected:
   virtual ADRealVectorValue computeQpResidual() override;
 
   /// Optional vectorValue function
-  Function * _function;
+  const Function * _function;
 
   /// x component function
-  Function & _function_x;
+  const Function & _function_x;
   /// y component function
-  Function & _function_y;
+  const Function & _function_y;
   /// z component function
-  Function & _function_z;
+  const Function & _function_z;
 
   /// The value for this BC
   RealVectorValue _values;

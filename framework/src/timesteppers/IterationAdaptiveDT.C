@@ -158,7 +158,7 @@ IterationAdaptiveDT::init()
         &_fe_problem.getFunction(getParam<FunctionName>("timestep_limiting_function"),
                                  isParamValid("_tid") ? getParam<THREAD_ID>("_tid") : 0);
     _piecewise_timestep_limiting_function =
-        dynamic_cast<PiecewiseBase *>(_timestep_limiting_function);
+        dynamic_cast<const PiecewiseBase *>(_timestep_limiting_function);
 
     if (_piecewise_timestep_limiting_function)
     {

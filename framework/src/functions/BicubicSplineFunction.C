@@ -117,7 +117,7 @@ BicubicSplineFunction::BicubicSplineFunction(const InputParameters & parameters)
 }
 
 Real
-BicubicSplineFunction::value(Real /*t*/, const Point & p)
+BicubicSplineFunction::value(Real /*t*/, const Point & p) const
 {
   // Call yx11/yx1n with the correctly oriented points
   Real x1_begin = _x1[0];
@@ -140,7 +140,7 @@ BicubicSplineFunction::value(Real /*t*/, const Point & p)
 }
 
 Real
-BicubicSplineFunction::derivative(const Point & p, unsigned int deriv_var)
+BicubicSplineFunction::derivative(const Point & p, unsigned int deriv_var) const
 {
   Real yp1, ypn;
   Point x1(0, 0, 0);
@@ -184,7 +184,7 @@ BicubicSplineFunction::derivative(const Point & p, unsigned int deriv_var)
 }
 
 RealGradient
-BicubicSplineFunction::gradient(Real /*t*/, const Point & p)
+BicubicSplineFunction::gradient(Real /*t*/, const Point & p) const
 {
   RealGradient grad = RealGradient(0, 0, 0);
 
@@ -198,7 +198,7 @@ BicubicSplineFunction::gradient(Real /*t*/, const Point & p)
 }
 
 Real
-BicubicSplineFunction::secondDerivative(const Point & p, unsigned int deriv_var)
+BicubicSplineFunction::secondDerivative(const Point & p, unsigned int deriv_var) const
 {
   Real yp1, ypn;
   Point x1(0, 0, 0);

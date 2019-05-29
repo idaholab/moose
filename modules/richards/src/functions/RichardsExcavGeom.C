@@ -64,7 +64,7 @@ RichardsExcavGeom::RichardsExcavGeom(const InputParameters & parameters)
 }
 
 Real
-RichardsExcavGeom::value(Real t, const Point & p)
+RichardsExcavGeom::value(Real t, const Point & p) const
 {
   if (t < _start_time || (p - _start_posn) * _retreat_vel < 0)
     // point is behind start posn - it'll never be active

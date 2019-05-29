@@ -26,14 +26,14 @@ FunctionInterface::FunctionInterface(const MooseObject * moose_object)
 {
 }
 
-Function &
-FunctionInterface::getFunction(const std::string & name)
+const Function &
+FunctionInterface::getFunction(const std::string & name) const
 {
   return _fni_feproblem.getFunction(_fni_params.get<FunctionName>(name), _fni_tid);
 }
 
-Function &
-FunctionInterface::getFunctionByName(const FunctionName & name)
+const Function &
+FunctionInterface::getFunctionByName(const FunctionName & name) const
 {
   return _fni_feproblem.getFunction(name, _fni_tid);
 }

@@ -28,7 +28,7 @@ PostprocessorFunction::PostprocessorFunction(const InputParameters & parameters)
 }
 
 Real
-PostprocessorFunction::value(Real /*t*/, const Point & /*p*/)
+PostprocessorFunction::value(Real /*t*/, const Point & /*p*/) const
 {
   return _pp;
 }

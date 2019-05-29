@@ -21,8 +21,7 @@ class SmootherStepTestFunction : public Function
 public:
   SmootherStepTestFunction(const InputParameters & parameters);
 
-  virtual Real value(Real t, const Point & p) override;
+  virtual Real value(Real t, const Point & p) const override;
 
   const bool _derivative;
 };
-

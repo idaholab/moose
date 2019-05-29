@@ -40,13 +40,13 @@ SplineFunction::SplineFunction(const InputParameters & parameters)
 }
 
 Real
-SplineFunction::value(Real /*t*/, const Point & p)
+SplineFunction::value(Real /*t*/, const Point & p) const
 {
   return _ipol.sample(p(_component));
 }
 
 RealGradient
-SplineFunction::gradient(Real /*t*/, const Point & p)
+SplineFunction::gradient(Real /*t*/, const Point & p) const
 {
   RealGradient grad(0.0);
   grad(0) = derivative(p);
@@ -54,13 +54,13 @@ SplineFunction::gradient(Real /*t*/, const Point & p)
 }
 
 Real
-SplineFunction::derivative(const Point & p)
+SplineFunction::derivative(const Point & p) const
 {
   return _ipol.sampleDerivative(p(_component));
 }
 
 Real
-SplineFunction::secondDerivative(const Point & p)
+SplineFunction::secondDerivative(const Point & p) const
 {
   return _ipol.sample2ndDerivative(p(_component));
 }

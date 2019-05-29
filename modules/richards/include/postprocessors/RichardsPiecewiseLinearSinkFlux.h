@@ -48,7 +48,7 @@ protected:
   bool _use_relperm;
 
   /// the multiplier function
-  Function & _m_func;
+  const Function & _m_func;
 
   /// holds info regarding the Richards variable names, and their values in the simulation
   const RichardsVarNames & _richards_name_UO;
@@ -75,4 +75,3 @@ protected:
   /// fluid density
   const MaterialProperty<std::vector<Real>> & _density;
 };
-

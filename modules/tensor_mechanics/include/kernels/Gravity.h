@@ -31,9 +31,8 @@ protected:
 
   const MaterialProperty<Real> & _density;
   const Real _value;
-  Function & _function;
+  const Function & _function;
 
   // _alpha parameter for HHT time integration scheme
   const Real _alpha;
 };
-

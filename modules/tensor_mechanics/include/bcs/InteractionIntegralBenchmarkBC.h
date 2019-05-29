@@ -46,8 +46,7 @@ protected:
   const Real _youngs_modulus;
   Real _kappa;
   Real _mu;
-  Function & _ki_function;
-  Function & _kii_function;
-  Function & _kiii_function;
+  const Function & _ki_function;
+  const Function & _kii_function;
+  const Function & _kiii_function;
 };
-

@@ -35,7 +35,7 @@ protected:
 
   ///@{ Pressure value constant factor, function factor, and postprocessor factor
   const Real _constant;
-  Function * const _function;
+  const Function * const _function;
   const PostprocessorValue * const _postprocessor;
   ///@}
 

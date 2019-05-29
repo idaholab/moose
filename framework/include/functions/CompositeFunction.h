@@ -26,10 +26,9 @@ class CompositeFunction : public Function, protected FunctionInterface
 public:
   CompositeFunction(const InputParameters & parameters);
 
-  virtual Real value(Real t, const Point & pt) override;
+  virtual Real value(Real t, const Point & pt) const override;
 
 private:
   const Real _scale_factor;
-  std::vector<Function *> _f;
+  std::vector<const Function *> _f;
 };
-

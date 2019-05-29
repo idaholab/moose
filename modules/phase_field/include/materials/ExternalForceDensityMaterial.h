@@ -32,9 +32,9 @@ protected:
   virtual void computeQpProperties();
 
 private:
-  Function & _force_x;
-  Function & _force_y;
-  Function & _force_z;
+  const Function & _force_x;
+  const Function & _force_y;
+  const Function & _force_z;
 
   /// concentration field considered to be the density of particles
   const VariableValue & _c;
@@ -53,4 +53,3 @@ private:
 
   std::vector<MaterialProperty<std::vector<RealGradient>> *> _dFdeta;
 };
-

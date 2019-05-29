@@ -29,7 +29,7 @@ SmootherStepTestFunction::SmootherStepTestFunction(const InputParameters & param
 }
 
 Real
-SmootherStepTestFunction::value(Real /*t*/, const Point & p)
+SmootherStepTestFunction::value(Real /*t*/, const Point & p) const
 {
   return MathUtils::smootherStep<Real>(p(0), 0.2, 0.8, _derivative);
 }
