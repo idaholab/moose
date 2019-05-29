@@ -20,7 +20,7 @@ public:
 protected:
   virtual void computeQpProperties();
 
-  Function & _function;
+  const Function & _function;
 
   const MaterialPropertyName _f_D_name;
   MaterialProperty<Real> & _f_D;

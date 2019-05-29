@@ -23,7 +23,7 @@ protected:
       _fe_problem->addFunction(class_name, A_name, params);
     }
 
-    Function & A_fn = _fe_problem->getFunction(A_name);
+    const Function & A_fn = _fe_problem->getFunction(A_name);
     A_fn.initialSetup();
 
     // hydraulic diameter

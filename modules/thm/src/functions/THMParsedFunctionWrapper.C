@@ -64,7 +64,7 @@ THMParsedFunctionWrapper::initialize()
     }
     else if (_feproblem.hasFunction(_vals_input[i]))
     {
-      Function & fn = _feproblem.getFunction(_vals_input[i], _tid);
+      const Function & fn = _feproblem.getFunction(_vals_input[i], _tid);
       _initial_vals.push_back(0);
       _functions.push_back(&fn);
       _function_index.push_back(i);

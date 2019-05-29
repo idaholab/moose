@@ -22,5 +22,5 @@ protected:
   /// The stored function value
   Real & _value;
   /// Function that is sampled
-  Function & _function;
+  const Function & _function;
 };

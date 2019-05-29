@@ -24,12 +24,12 @@ public:
   Real Cp(Real temp) const;
   Real rho(Real temp) const;
 
-  Function & getKFunction() const { return _k; }
-  Function & getCpFunction() const { return _Cp; }
-  Function & getRhoFunction() const { return _rho; }
+  const Function & getKFunction() const { return _k; }
+  const Function & getCpFunction() const { return _Cp; }
+  const Function & getRhoFunction() const { return _rho; }
 
 protected:
-  Function & _k;
-  Function & _Cp;
-  Function & _rho;
+  const Function & _k;
+  const Function & _Cp;
+  const Function & _rho;
 };

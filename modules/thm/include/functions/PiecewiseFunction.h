@@ -16,9 +16,9 @@ class PiecewiseFunction : public Function, public FunctionInterface
 public:
   PiecewiseFunction(const InputParameters & parameters);
 
-  virtual Real value(Real t, const Point & p) override;
-  virtual RealVectorValue gradient(Real t, const Point & p) override;
-  virtual Real timeDerivative(Real t, const Point & p) override;
+  virtual Real value(Real t, const Point & p) const override;
+  virtual RealVectorValue gradient(Real t, const Point & p) const override;
+  virtual Real timeDerivative(Real t, const Point & p) const override;
 
 protected:
   /**
@@ -43,5 +43,5 @@ protected:
   /// Number of functions, N
   const unsigned int _n_functions;
   /// Functions in the N regions
-  std::vector<Function *> _functions;
+  std::vector<const Function *> _functions;
 };

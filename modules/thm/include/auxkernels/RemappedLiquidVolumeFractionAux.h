@@ -23,7 +23,7 @@ protected:
   virtual Real computeValue();
 
   /// Vapor volume fraction function
-  Function & _alpha_vapor;
+  const Function & _alpha_vapor;
 
   /// Volume fraction mapper
   const VolumeFractionMapper & _vfm;

@@ -24,7 +24,7 @@ PrescribedReactorPower::addVariables()
   ReactorPower::addVariables();
 
   _const_power = !_sim.hasFunction(_power_fn);
-  Function & fn = _sim.getFunction(_power_fn);
+  const Function & fn = _sim.getFunction(_power_fn);
   _sim.addConstantScalarIC(_power_var_name, fn.value(0, Point()));
 }
 
@@ -35,7 +35,7 @@ PrescribedReactorPower::addMooseObjects()
   {
     // we have to be able to control the power parameter, thus we need to setup a ConstantScalarAux
     // for it
-    Function & fn = _sim.getFunction(_power_fn);
+    const Function & fn = _sim.getFunction(_power_fn);
     {
       std::string class_name = "ConstantScalarAux";
       InputParameters pars = _factory.getValidParams(class_name);

@@ -38,7 +38,7 @@ CosineTransitionFunction::CosineTransitionFunction(const InputParameters & param
 }
 
 Real
-CosineTransitionFunction::value(Real t, const Point & p)
+CosineTransitionFunction::value(Real t, const Point & p) const
 {
   const Real x = _use_time ? t : p(_component);
 
@@ -55,7 +55,7 @@ CosineTransitionFunction::value(Real t, const Point & p)
 }
 
 RealVectorValue
-CosineTransitionFunction::gradient(Real /*t*/, const Point & /*p*/)
+CosineTransitionFunction::gradient(Real /*t*/, const Point & /*p*/) const
 {
   mooseError(name(), ": ", __PRETTY_FUNCTION__, " is not implemented.");
 }

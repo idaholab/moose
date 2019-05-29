@@ -23,13 +23,13 @@ LinearFunction::LinearFunction(const InputParameters & parameters)
 }
 
 Real
-LinearFunction::value(Real t, const Point & p)
+LinearFunction::value(Real t, const Point & p) const
 {
   return _a + _b * _x_func.value(t, p);
 }
 
 RealVectorValue
-LinearFunction::gradient(Real /*t*/, const Point & /*p*/)
+LinearFunction::gradient(Real /*t*/, const Point & /*p*/) const
 {
   mooseError(name(), ": ", __PRETTY_FUNCTION__, " is not implemented.");
 }

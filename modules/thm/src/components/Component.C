@@ -188,8 +188,8 @@ Component::makeFunctionControllableIfConstant(const FunctionName & fn_name,
                                               const std::string & control_name,
                                               const std::string & param) const
 {
-  Function & fn = _sim.getFunction(fn_name);
-  if (dynamic_cast<ConstantFunction *>(&fn) != nullptr)
+  const Function & fn = _sim.getFunction(fn_name);
+  if (dynamic_cast<const ConstantFunction *>(&fn) != nullptr)
     connectObject(fn.parameters(), fn_name, control_name, param);
 }
 
