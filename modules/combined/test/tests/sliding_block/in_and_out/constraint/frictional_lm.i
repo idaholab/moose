@@ -12,6 +12,7 @@
 
 [Mesh]
   file = sliding_elastic_blocks_2d.e
+  patch_size = 80
 []
 
 [MeshModifiers]
@@ -40,14 +41,14 @@
   [../]
   [normal_lm]
     block = '30'
-    family = MONOMIAL
-    order = CONSTANT
+    # family = MONOMIAL
+    # order = CONSTANT
   []
-  [tangential_lm]
-    block = '30'
-    family = MONOMIAL
-    order = CONSTANT
-  []
+  # [tangential_lm]
+  #   block = '30'
+  #   family = MONOMIAL
+  #   order = CONSTANT
+  # []
 []
 
 [BCs]
@@ -123,23 +124,27 @@
   l_max_its = 30
   nl_max_its = 20
   line_search = 'none'
+  timestep_tolerance = 1e-6
+[]
 
-  [./Predictor]
-    type = SimplePredictor
-    scale = 1.0
-  [../]
+[Debug]
+  show_var_residual_norms = true
 []
 
 [Outputs]
-  sync_times = '1 2 3 4 5 6 7 8 9 10 11 12 13 14 15'
+  # sync_times = '1 2 3 4 5 6 7 8 9 10 11 12 13 14 15'
   [exodus]
     type = Exodus
     file_base = frictional_lm_out
-    sync_only = true
+    # sync_only = true
   []
   [dof]
     execute_on = 'initial'
     type = DOFMap
+  []
+  [csv]
+    type = CSV
+    execute_on = 'nonlinear timestep_end'
   []
 []
 
@@ -155,20 +160,29 @@
 []
 
 [Constraints]
-  [normal_lm]
-    type = MechanicalContactLM
-    master_boundary = '2'
-    slave_boundary = '3'
-    master_subdomain = '20'
-    slave_subdomain = '30'
+  # [normal_lm]
+  #   type = MortarNormalContactLM
+  #   master_boundary = '2'
+  #   slave_boundary = '3'
+  #   master_subdomain = '20'
+  #   slave_subdomain = '30'
+  #   variable = normal_lm
+  #   slave_variable = disp_x
+  #   slave_disp_y = disp_y
+  #   use_displaced_mesh = true
+  #   compute_primal_residuals = false
+  # []
+  [./lm]
+    type = NodalNormalContactLM
+    slave = 3
+    master = 2
     variable = normal_lm
-    slave_variable = disp_x
-    slave_disp_y = disp_y
-    use_displaced_mesh = true
-    compute_primal_residuals = false
-  []
+    master_variable = disp_x
+    disp_y = disp_y
+    c = 1
+  [../]
   [normal_x]
-    type = MechanicalContact
+    type = MortarNormalContact
     master_boundary = '2'
     slave_boundary = '3'
     master_subdomain = '20'
@@ -180,7 +194,7 @@
     compute_lm_residuals = false
   []
   [normal_y]
-    type = MechanicalContact
+    type = MortarNormalContact
     master_boundary = '2'
     slave_boundary = '3'
     master_subdomain = '20'
@@ -191,44 +205,44 @@
     use_displaced_mesh = true
     compute_lm_residuals = false
   []
-  [tangential_lm]
-    type = TangentialContactLM
-    master_boundary = '2'
-    slave_boundary = '3'
-    master_subdomain = '20'
-    slave_subdomain = '30'
-    variable = tangential_lm
-    slave_variable = disp_x
-    slave_disp_y = disp_y
-    use_displaced_mesh = true
-    compute_primal_residuals = false
-    contact_pressure = normal_lm
-    friction_coefficient = .4
-  []
-  [tangential_x]
-    type = TangentialContact
-    master_boundary = '2'
-    slave_boundary = '3'
-    master_subdomain = '20'
-    slave_subdomain = '30'
-    variable = tangential_lm
-    slave_variable = disp_x
-    component = x
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-  []
-  [tangential_y]
-    type = TangentialContact
-    master_boundary = '2'
-    slave_boundary = '3'
-    master_subdomain = '20'
-    slave_subdomain = '30'
-    variable = tangential_lm
-    slave_variable = disp_y
-    component = y
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-  []
+  # [tangential_lm]
+  #   type = MortarTangentialContactLM
+  #   master_boundary = '2'
+  #   slave_boundary = '3'
+  #   master_subdomain = '20'
+  #   slave_subdomain = '30'
+  #   variable = tangential_lm
+  #   slave_variable = disp_x
+  #   slave_disp_y = disp_y
+  #   use_displaced_mesh = true
+  #   compute_primal_residuals = false
+  #   contact_pressure = normal_lm
+  #   friction_coefficient = .4
+  # []
+  # [tangential_x]
+  #   type = MortarTangentialContact
+  #   master_boundary = '2'
+  #   slave_boundary = '3'
+  #   master_subdomain = '20'
+  #   slave_subdomain = '30'
+  #   variable = tangential_lm
+  #   slave_variable = disp_x
+  #   component = x
+  #   use_displaced_mesh = true
+  #   compute_lm_residuals = false
+  # []
+  # [tangential_y]
+  #   type = MortarTangentialContact
+  #   master_boundary = '2'
+  #   slave_boundary = '3'
+  #   master_subdomain = '20'
+  #   slave_subdomain = '30'
+  #   variable = tangential_lm
+  #   slave_variable = disp_y
+  #   component = y
+  #   use_displaced_mesh = true
+  #   compute_lm_residuals = false
+  # []
 []
 
 [Postprocessors]
@@ -245,5 +259,11 @@
   [cum_lin]
     type = CumulativeValuePostprocessor
     postprocessor = lin
+  []
+  [contact]
+    type = ContactDofSet
+    variable = normal_lm
+    subdomain = '30'
+    execute_on = 'nonlinear timestep_end'
   []
 []
