@@ -22,10 +22,6 @@ protected:
   const VariableValue & _coupled_val_0;
   const VariableValue & _coupled_val_1;
   const VariableValue & _coupled_val_2;
-
-  int _component;
-
-  Real _penalty;
 };
 
 #endif // PEC_H
