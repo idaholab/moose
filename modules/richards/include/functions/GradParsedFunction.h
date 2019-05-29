@@ -28,7 +28,7 @@ class GradParsedFunction : public MooseParsedFunction
 public:
   GradParsedFunction(const InputParameters & parameters);
 
-  virtual Real value(Real t, const Point & pt);
+  virtual Real value(Real t, const Point & pt) const;
 
 protected:
   /// central difference direction
