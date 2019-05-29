@@ -13,6 +13,11 @@
 #include "SystemBase.h"
 #include "Assembly.h"
 
+#include "metaphysicl/dualnumberarray.h"
+
+using MetaPhysicL::DualNumber;
+using MetaPhysicL::NumberArray;
+
 registerMooseObject("MooseTestApp", NodeLMConstraintTest);
 
 template <>
@@ -24,6 +29,12 @@ validParams<NodeLMConstraintTest>()
 
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
+  params.addParam<Real>("c_gap", 1, "The scale of the gap");
+  params.addParam<Real>("c_lm", 1, "The scale of the contact pressure/lagrange multiplier");
+
+  MooseEnum ncp_function_type("min fb", "min");
+  params.addParam<MooseEnum>(
+      "ncp_function_type", ncp_function_type, "The type of NCP function to use");
 
   params.addClassDescription("Implements the KKT conditions for normal contact using an NCP "
                              "function. Requires that either the gap distance or the normal "
@@ -35,7 +46,10 @@ NodeLMConstraintTest::NodeLMConstraintTest(const InputParameters & parameters)
   : NodeFaceConstraint(parameters),
     _disp_y_id(coupled("disp_y")),
     _disp_z_id(coupled("disp_z")),
-    _epsilon(std::numeric_limits<Real>::epsilon())
+    _c_gap(getParam<Real>("c_gap")),
+    _c_lm(getParam<Real>("c_lm")),
+    _epsilon(std::numeric_limits<Real>::epsilon()),
+    _ncp_type(getParam<MooseEnum>("ncp_function_type"))
 
 {
   _overwrite_slave_residual = false;
@@ -103,14 +117,20 @@ Real NodeLMConstraintTest::computeQpResidual(Moose::ConstraintType /*type*/)
     PenetrationInfo * pinfo = found->second;
     if (pinfo != NULL)
     {
-      Real a = -pinfo->_distance;
-      Real b = _u_slave[_qp];
-      // return a + b - std::sqrt(a * a + b * b);
-      return std::min(a, b);
+      Real a = -pinfo->_distance / _c_gap;
+      Real b = _u_slave[_qp] / _c_lm;
+
+      if (_ncp_type == "fb")
+        return a + b - std::sqrt(a * a + b * b + _epsilon);
+      else
+        return std::min(a, b);
     }
   }
   return 0;
 }
+
+// Note that the Jacobians below are inexact. To really make them exact, the most algorithmically
+// rigorous way will be to accomplish libmesh/libmesh#2121
 
 Real NodeLMConstraintTest::computeQpJacobian(Moose::ConstraintJacobianType /*type*/)
 {
@@ -121,12 +141,16 @@ Real NodeLMConstraintTest::computeQpJacobian(Moose::ConstraintJacobianType /*typ
     PenetrationInfo * pinfo = found->second;
     if (pinfo != NULL)
     {
-      Real a = -pinfo->_distance;
-      Real b = _u_slave[_qp];
-      if (b > a)
-        return 0.;
+      DualNumber<Real> dual_u_slave(_u_slave[_qp]);
+      dual_u_slave.derivatives() = 1.;
+
+      auto a = -pinfo->_distance / _c_gap;
+      auto b = dual_u_slave / _c_lm;
+
+      if (_ncp_type == "fb")
+        return (a + b - std::sqrt(a * a + b * b + _epsilon)).derivatives();
       else
-        return 1.;
+        return std::min(a, b).derivatives();
     }
   }
   return 0;
@@ -135,9 +159,6 @@ Real NodeLMConstraintTest::computeQpJacobian(Moose::ConstraintJacobianType /*typ
 Real
 NodeLMConstraintTest::computeQpOffDiagJacobian(Moose::ConstraintJacobianType type, unsigned jvar)
 {
-  // TODO: Make Jacobian generally applicable to higher order variables. This current Jacobian
-  // implementation improves preconditioning when first order Lagranges are used, but actually
-  // can degrade preconditioner performance when higher order variables are used.
   std::map<dof_id_type, PenetrationInfo *>::iterator found =
       _penetration_locator._penetration_info.find(_current_node->id());
   if (found != _penetration_locator._penetration_info.end())
@@ -145,8 +166,7 @@ NodeLMConstraintTest::computeQpOffDiagJacobian(Moose::ConstraintJacobianType typ
     PenetrationInfo * pinfo = found->second;
     if (pinfo != NULL)
     {
-      Real a = -pinfo->_distance;
-      Real b = _u_slave[_qp];
+      DualNumber<Real> gap(-pinfo->_distance);
 
       unsigned comp;
       if (jvar == _master_var_num)
@@ -158,24 +178,27 @@ NodeLMConstraintTest::computeQpOffDiagJacobian(Moose::ConstraintJacobianType typ
       else
         return 0;
 
-      Real da_daj = pinfo->_normal(comp);
+      gap.derivatives() = pinfo->_normal(comp);
 
       switch (type)
       {
         case Moose::SlaveSlave:
-          da_daj *= 1;
+          gap.derivatives() *= 1;
           break;
         case Moose::SlaveMaster:
-          da_daj *= -_phi_master[_j][_qp];
+          gap.derivatives() *= -_phi_master[_j][_qp];
           break;
         default:
           mooseError("LMs do not have a master contribution.");
       }
 
-      if (b > a)
-        return da_daj;
+      auto a = gap / _c_gap;
+      auto b = _u_slave[_qp] / _c_lm;
+
+      if (_ncp_type == "fb")
+        return (a + b - std::sqrt(a * a + b * b + _epsilon)).derivatives();
       else
-        return 0;
+        return std::min(a, b).derivatives();
     }
   }
   return 0.;

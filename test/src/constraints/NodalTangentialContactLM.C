@@ -40,6 +40,8 @@ validParams<NodalTangentialContactLM>()
                              "an NCP function. Requires that either the relative tangential "
                              "velocity is zero or the tangential stress is equal to the friction "
                              "coefficient times the normal contact pressure.");
+
+  params.addRequiredParam<Real>("mu", "The friction coefficient for the Coulomb friction law");
   return params;
 }
 
