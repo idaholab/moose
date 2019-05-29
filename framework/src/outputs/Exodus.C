@@ -185,8 +185,14 @@ Exodus::outputSetup()
     // Set the recovering flag to false so that this special case is not triggered again
     _recovering = false;
 
-    // Set the append flag to true b/c on recover the file is being appended
-    _exodus_io_ptr->append(true);
+    // Set the append flag to true b/c on recover the file is being appended, but only set the flag
+    // if the file is valid. In the case when 'execute_on=FINAL' the failed execution can cause
+    // an empty Exodus file to exist. The append flag should only be set if the file exists and
+    // contains content.
+    std::string current = filename();
+    if (processor_id() == 0 && MooseUtils::checkFileReadable(current, false, false) &&
+        (MooseUtils::fileSize(current) != 0))
+      _exodus_io_ptr->append(true);
   }
   else
   {
