@@ -369,6 +369,12 @@ public:
   /// Print the rank two tensor
   void print(std::ostream & stm = Moose::out) const;
 
+  /// Print the Real part of the DualReal rank two tensor
+  void printReal(std::ostream & stm = Moose::out) const;
+
+  /// Print the Real part of the DualReal rank two tensor along with its first nDual dual numbers
+  void printDualReal(unsigned int nDual, std::ostream & stm = Moose::out) const;
+
   /// Add identity times a to _coords
   void addIa(const T & a);
 
@@ -386,6 +392,24 @@ public:
    * in ascending order in eigvals
    */
   void symmetricEigenvalues(std::vector<T> & eigvals) const;
+
+  /**
+   * computes and returns the permutation matrix P
+   * @param old_row is the original row numbering
+   * @param new_row is the permuted row numbering
+   * Dual numbers are permuted as well
+   */
+  RankTwoTensorTempl<T> rowPermutationTensor(std::vector<unsigned int> old_row,
+                                             std::vector<unsigned int> new_row) const;
+
+  /**
+   * computes and returns the permutation matrix P
+   * @param old_col is the original column numbering
+   * @param new_col is the permuted column numbering
+   * Dual numbers are permuted as well
+   */
+  RankTwoTensorTempl<T> columnPermutationTensor(std::vector<unsigned int> old_col,
+                                                std::vector<unsigned int> new_col) const;
 
   /**
    * computes and returns the Givens rotation matrix R

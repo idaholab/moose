@@ -124,26 +124,12 @@ TEST(RankTwoEigenRoutines, symmetricEigenvaluesEigenvectors_two_nonzero_eigvals)
   testADSymmetricEigenvaluesEigenvectors(0, 1, 2, 0, 0, 0, eigvals_expect, eigvecs_expect);
 }
 
-TEST(RankTwoEigenRoutines, symmetricEigenvaluesEigenvectors_one_nonzero_eigval)
-{
-  // one nonzero eigenvalue
-  // m = [0, 0, 0
-  //      0, 0, 0
-  //      0, 0, 1]
-  // d1 = 0, v1 = [1, 0, 0]^T
-  // d2 = 0, v2 = [0, 1, 0]^T
-  // d3 = 1, v3 = [0, 0, 1]^T
-  std::vector<Real> eigvals_expect = {0, 0, 1};
-  RankTwoTensor eigvecs_expect(1, 0, 0, 0, 1, 0, 0, 0, 1);
-  testADSymmetricEigenvaluesEigenvectors(0, 0, 1, 0, 0, 0, eigvals_expect, eigvecs_expect);
-}
-
 TEST(RankTwoEigenRoutines, hessenberg_dual_number_consistency)
 {
   // consider a dual rank two tensor
-  // m = [1(1,2,3), 1(2,3,4), 2(1,3,5)
-  //      1(2,3,4), 2(-2,-5,1), 4(2,4,6)
-  //      2(1,3,5), 4(2,4,6), 3(2,1,4)]
+  // m = [1(1,2,3), 0(2,3,4), 0(1,3,5)
+  //      0(2,3,4), 2(-2,-5,1), 4(2,4,6)
+  //      0(1,3,5), 4(2,4,6), 3(2,1,4)]
   NumberArray<50, Real> da11_dx;
   da11_dx[0] = 1;
   da11_dx[1] = 2;
@@ -168,12 +154,12 @@ TEST(RankTwoEigenRoutines, hessenberg_dual_number_consistency)
   da13_dx[0] = 1;
   da13_dx[1] = 3;
   da13_dx[2] = 5;
-  DualReal a13(2, da13_dx);
+  DualReal a13(0, da13_dx);
   NumberArray<50, Real> da12_dx;
   da12_dx[0] = 2;
   da12_dx[1] = 3;
   da12_dx[2] = 4;
-  DualReal a12(1, da12_dx);
+  DualReal a12(0, da12_dx);
 
   DualRankTwoTensor m(a11, a22, a33, a23, a13, a12);
   DualRankTwoTensor H, U;
@@ -241,10 +227,10 @@ TEST(RankTwoEigenRoutines, symmetricEigenvaluesEigenvectors_dual_number_consiste
   for (unsigned i = 0; i < 3; i++)
     for (unsigned j = 0; j < 3; j++)
     {
-      EXPECT_NEAR(m(i, j).value(), m_ad(i, j).value(), 0.01);
-      EXPECT_NEAR(m(i, j).derivatives()[0], m_ad(i, j).derivatives()[0], 0.01);
-      EXPECT_NEAR(m(i, j).derivatives()[1], m_ad(i, j).derivatives()[1], 0.01);
-      EXPECT_NEAR(m(i, j).derivatives()[2], m_ad(i, j).derivatives()[2], 0.01);
+      EXPECT_NEAR(m(i, j).value(), m_ad(i, j).value(), 0.0001);
+      EXPECT_NEAR(m(i, j).derivatives()[0], m_ad(i, j).derivatives()[0], 0.0001);
+      EXPECT_NEAR(m(i, j).derivatives()[1], m_ad(i, j).derivatives()[1], 0.0001);
+      EXPECT_NEAR(m(i, j).derivatives()[2], m_ad(i, j).derivatives()[2], 0.0001);
     }
 }
 

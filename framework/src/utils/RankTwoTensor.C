@@ -829,6 +829,44 @@ RankTwoTensorTempl<T>::print(std::ostream & stm) const
   }
 }
 
+template <>
+void
+RankTwoTensorTempl<Real>::printReal(std::ostream & stm) const
+{
+  this->print(stm);
+}
+
+template <>
+void
+RankTwoTensorTempl<DualReal>::printReal(std::ostream & stm) const
+{
+  const RankTwoTensorTempl<DualReal> & a = *this;
+  for (unsigned int i = 0; i < N; ++i)
+  {
+    for (unsigned int j = 0; j < N; ++j)
+      stm << std::setw(15) << a(i, j).value() << ' ';
+    stm << std::endl;
+  }
+}
+
+template <>
+void
+RankTwoTensorTempl<DualReal>::printDualReal(unsigned int nDual, std::ostream & stm) const
+{
+  const RankTwoTensorTempl<DualReal> & a = *this;
+  for (unsigned int i = 0; i < N; ++i)
+  {
+    for (unsigned int j = 0; j < N; ++j)
+    {
+      stm << std::setw(15) << a(i, j).value() << " {";
+      for (unsigned int k = 0; k < nDual; ++k)
+        stm << std::setw(5) << a(i, j).derivatives()[k] << ' ';
+      stm << " }";
+    }
+    stm << std::endl;
+  }
+}
+
 template <typename T>
 void
 RankTwoTensorTempl<T>::addIa(const T & a)
@@ -891,18 +929,43 @@ RankTwoTensorTempl<T>::symmetricEigenvaluesEigenvectors(std::vector<T> & eigvals
 
 template <typename T>
 RankTwoTensorTempl<T>
+RankTwoTensorTempl<T>::rowPermutationTensor(std::vector<unsigned int> old_row,
+                                            std::vector<unsigned int> new_row) const
+{
+  mooseAssert(N == old_row.size() && N == new_row.size(),
+              "rowPermutationTensor: number of rows should be equal to LIBMESH_DIM");
+
+  RankTwoTensorTempl<T> P;
+
+  for (unsigned int i = 0; i < N; ++i)
+    P(old_row[i], new_row[i]) = 1.0;
+
+  return P;
+}
+
+template <typename T>
+RankTwoTensorTempl<T>
+RankTwoTensorTempl<T>::columnPermutationTensor(std::vector<unsigned int> old_col,
+                                               std::vector<unsigned int> new_col) const
+{
+  RankTwoTensorTempl<T> P = this->rowPermutationTensor(old_col, new_col);
+  return P.transpose();
+}
+
+template <typename T>
+RankTwoTensorTempl<T>
 RankTwoTensorTempl<T>::givensRotation(unsigned int row1, unsigned int row2, unsigned int col) const
 {
   T c, s;
   T a = (*this)(row1, col);
   T b = (*this)(row2, col);
 
-  if (b == 0.0)
+  if (MooseUtils::absoluteFuzzyEqual(b, 0.0))
   {
     c = a >= 0.0 ? 1.0 : -1.0;
     s = 0.0;
   }
-  else if (a == 0)
+  else if (MooseUtils::absoluteFuzzyEqual(a, 0.0))
   {
     c = 0.0;
     s = b >= 0.0 ? 1.0 : -1.0;
@@ -940,41 +1003,81 @@ RankTwoTensorTempl<DualReal>::givensRotation(unsigned int row1,
                                              unsigned int col) const
 {
 
-  DualReal c = 0.0;
-  DualReal s = 0.0;
+  DualReal cos = 0.0;
+  DualReal sin = 0.0;
   DualReal a = (*this)(row1, col);
   DualReal b = (*this)(row2, col);
   RankTwoTensorTempl<DualReal> R(initIdentity);
+
+  // special case when both entries are zero
+  // in that case the rotation of dual numbers isn't well defined
+  // we need to find the third entry to rotate
+  if (MooseUtils::absoluteFuzzyEqual(a.value(), 0.0) &&
+      MooseUtils::absoluteFuzzyEqual(b.value(), 0.0))
+  {
+    if (N < 3)
+      return R;
+    else
+    {
+      unsigned int row3 = 3 - row1 - row2;
+      RankTwoTensorTempl<DualReal> P, permuted;
+      P = this->rowPermutationTensor({row1, row2, row3}, {row3, row2, row1});
+      permuted = P * (*this) * P.transpose();
+      a = permuted(row1, col);
+      b = permuted(row2, col);
+      if (MooseUtils::absoluteFuzzyEqual(a.value(), 0.0) &&
+          MooseUtils::absoluteFuzzyEqual(b.value(), 0.0))
+      {
+        P = this->rowPermutationTensor({row1, row2, row3}, {row2, row1, row3});
+        permuted = P * (*this) * P.transpose();
+        a = permuted(row1, col);
+        b = permuted(row2, col);
+        if (MooseUtils::absoluteFuzzyEqual(a.value(), 0.0) &&
+            MooseUtils::absoluteFuzzyEqual(b.value(), 0.0))
+        {
+          P = this->rowPermutationTensor({row1, row2, row3}, {row1, row3, row2});
+          permuted = P * (*this) * P.transpose();
+          a = permuted(row1, col);
+          b = permuted(row2, col);
+          if (MooseUtils::absoluteFuzzyEqual(a.value(), 0.0) &&
+              MooseUtils::absoluteFuzzyEqual(b.value(), 0.0))
+            return R;
+        }
+      }
+      R = permuted.givensRotation(row1, row2, col);
+      return R * P;
+    }
+  }
 
   // rotate Real number
   RankTwoTensorTempl<Real> temp;
   temp(row1, col) = a.value();
   temp(row2, col) = b.value();
   temp = temp.givensRotation(row1, row2, col);
-  c.value() = temp(row1, row1);
-  s.value() = temp(row1, row2);
+  cos.value() = temp(row1, row1);
+  sin.value() = temp(row1, row2);
 
   // rotate Dual number
   for (unsigned int i = 0; i < AD_MAX_DOFS_PER_ELEM; i++)
   {
     if (MooseUtils::absoluteFuzzyEqual(a.value(), 0.0) &&
         MooseUtils::absoluteFuzzyEqual(b.value(), 0.0))
-      c.derivatives()[i] = s.derivatives()[i] = 0.0;
+      mooseError("RankTwoTensor::givensRotation in wrong state");
     else
     {
-      c.derivatives()[i] = (a.derivatives()[i] * s.value() * s.value() -
-                            b.derivatives()[i] * c.value() * s.value()) /
-                           (b.value() * s.value() + a.value() * c.value());
-      s.derivatives()[i] = (b.derivatives()[i] * c.value() * c.value() -
-                            a.derivatives()[i] * c.value() * s.value()) /
-                           (b.value() * s.value() + a.value() * c.value());
+      cos.derivatives()[i] = (a.derivatives()[i] * sin.value() * sin.value() -
+                              b.derivatives()[i] * cos.value() * sin.value()) /
+                             (b.value() * sin.value() + a.value() * cos.value());
+      sin.derivatives()[i] = (b.derivatives()[i] * cos.value() * cos.value() -
+                              a.derivatives()[i] * cos.value() * sin.value()) /
+                             (b.value() * sin.value() + a.value() * cos.value());
     }
   }
 
-  R(row1, row1) = c;
-  R(row1, row2) = s;
-  R(row2, row1) = -s;
-  R(row2, row2) = c;
+  R(row1, row1) = cos;
+  R(row1, row2) = sin;
+  R(row2, row1) = -sin;
+  R(row2, row2) = cos;
 
   return R;
 }
