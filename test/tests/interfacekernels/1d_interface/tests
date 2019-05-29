@@ -114,7 +114,7 @@
     cli_args = 'Outputs/exodus=false Executioner/num_steps=3'
     run_sim = True
     ratio_tol = 1e-8
-    difference_tol = 1e-8
+    difference_tol = 1e-6
     issues = '#13365'
     requirement = "The Jacobian from InterfaceReaction shall be perfect"
     design = 'InterfaceReaction.md'
