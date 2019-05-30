@@ -21,7 +21,7 @@ protected:
 private:
   Real _coefficient;
 
-  Function & _func;
+  const Function & _func;
 
   const VariableValue & _coupled_val;
 

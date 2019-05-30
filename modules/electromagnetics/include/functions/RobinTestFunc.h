@@ -34,7 +34,7 @@ protected:
   Real _gL_real;
   Real _gL_imag;
 
-  Function & _func;
+  const Function & _func;
 
   MooseEnum _component;
 };

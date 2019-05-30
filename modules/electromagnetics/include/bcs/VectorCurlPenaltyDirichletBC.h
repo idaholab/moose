@@ -20,9 +20,9 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   Real _penalty;
-  Function & _exact_x;
-  Function & _exact_y;
-  Function & _exact_z;
+  const Function & _exact_x;
+  const Function & _exact_y;
+  const Function & _exact_z;
 };
 
 #endif // VECTORCURLPENALTYDIRICHLETBC_H

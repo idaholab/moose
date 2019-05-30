@@ -19,7 +19,7 @@ protected:
 
 private:
 
-  Function & _func;
+  const Function & _func;
 };
 
 #endif // FUNCDIFFUSION_H

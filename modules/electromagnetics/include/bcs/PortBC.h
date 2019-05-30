@@ -23,13 +23,13 @@ private:
 
   MooseEnum _component;
 
-  Function & _func_real;
+  const Function & _func_real;
 
-  Function & _func_imag;
+  const Function & _func_imag;
 
-  Function & _profile_func_real;
+  const Function & _profile_func_real;
 
-  Function & _profile_func_imag;
+  const Function & _profile_func_imag;
 
   Real _coeff_real;
 
