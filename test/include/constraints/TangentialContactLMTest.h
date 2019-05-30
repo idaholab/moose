@@ -40,5 +40,7 @@ protected:
   const Real _friction_coeff;
   const Real _epsilon;
 
+  const MooseEnum _ncp_type;
+
   usingMortarConstraintMembers;
 };

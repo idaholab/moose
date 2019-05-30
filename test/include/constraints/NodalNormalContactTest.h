@@ -24,6 +24,9 @@ class NodalNormalContactTest : public NodeFaceConstraint
 public:
   NodalNormalContactTest(const InputParameters & parameters);
 
+  void computeJacobian() override;
+  void computeOffDiagJacobian(unsigned int jvar) override;
+
 protected:
   virtual Real computeQpSlaveValue() override;
 

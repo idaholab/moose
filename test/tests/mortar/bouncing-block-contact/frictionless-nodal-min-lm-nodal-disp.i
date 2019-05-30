@@ -1,6 +1,5 @@
 starting_point = 2e-1
-# offset = 1e-2
-offset = -1e-2
+offset = 1e-2
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
@@ -9,7 +8,7 @@ offset = -1e-2
 []
 
 [Mesh]
-  file = long-bottom-block-1elem-blocks-coarse.e
+  file = long-bottom-block-1elem-blocks.e
 []
 
 [Problem]
@@ -50,23 +49,23 @@ offset = -1e-2
 
 
 [Constraints]
-  # [./lm]
-  #   type = NodeLMConstraintTest
-  #   slave = 10
-  #   master = 20
-  #   variable = normal_lm
-  #   master_variable = disp_x
-  #   disp_y = disp_y
-  # [../]
-  # [./disp_x]
-  #   type = NodalNormalContactTest
-  #   slave = 10
-  #   master = 20
-  #   variable = disp_x
-  #   master_variable = disp_x
-  #   lambda = normal_lm
-  #   component = x
-  # [../]
+  [./lm]
+    type = NodeLMConstraintTest
+    slave = 10
+    master = 20
+    variable = normal_lm
+    master_variable = disp_x
+    disp_y = disp_y
+  [../]
+  [./disp_x]
+    type = NodalNormalContactTest
+    slave = 10
+    master = 20
+    variable = disp_x
+    master_variable = disp_x
+    lambda = normal_lm
+    component = x
+  [../]
   [./disp_y]
     type = NodalNormalContactTest
     slave = 10
@@ -125,6 +124,10 @@ offset = -1e-2
 
 [Outputs]
   exodus = true
+  [dof]
+    type = DOFMap
+    execute_on = 'initial'
+  []
 []
 
 [Preconditioning]

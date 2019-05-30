@@ -69,7 +69,7 @@ offset = 1e-2
     slave_disp_y = disp_y
     use_displaced_mesh = true
     compute_primal_residuals = false
-    ncp_function_type = fb
+    ncp_function_type = min
   []
   [normal_x]
     type = MechanicalContactTest
@@ -108,6 +108,7 @@ offset = 1e-2
     compute_primal_residuals = false
     contact_pressure = normal_lm
     friction_coefficient = .1
+    ncp_function_type = min
   []
   [tangential_x]
     type = TangentialContactTest
@@ -173,12 +174,7 @@ offset = 1e-2
   petsc_options_value = 'lu       NONZERO               1e-15                   1e-5'
   l_max_its = 30
   nl_max_its = 20
-  line_search = 'bt'
-
-  # [./Predictor]
-  #   type = SimplePredictor
-  #   scale = 1.0
-  # [../]
+  line_search = 'none'
 []
 
 [Debug]
@@ -187,11 +183,6 @@ offset = 1e-2
 
 [Outputs]
   exodus = true
-  # checkpoint = true
-  # [./dofmap]
-  #   type = DOFMap
-  #   execute_on = 'initial'
-  # [../]
 []
 
 [Preconditioning]
@@ -202,7 +193,6 @@ offset = 1e-2
 []
 
 [Postprocessors]
-  active = ''
   [./num_nl]
     type = NumNonlinearIterations
   [../]
@@ -210,4 +200,10 @@ offset = 1e-2
     type = CumulativeValuePostprocessor
     postprocessor = num_nl
   [../]
+  [contact]
+    type = ContactDofSet
+    variable = normal_lm
+    subdomain = '3'
+    execute_on = 'nonlinear timestep_end'
+  []
 []

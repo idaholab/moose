@@ -22,7 +22,13 @@ defineADValidParams(
         "contact_pressure",
         "The normal contact pressure; oftentimes this may be a separate lagrange multiplier "
         "variable");
-    params.addRequiredParam<Real>("friction_coefficient", "The friction coefficient"););
+    params.addRequiredParam<Real>("friction_coefficient", "The friction coefficient");
+
+    MooseEnum ncp_type("min fb", "min");
+    params.addParam<MooseEnum>("ncp_function_type",
+                               ncp_type,
+                               "The type of the nonlinear complimentarity function; options are "
+                               "min or fb where fb stands for Fischer-Burmeister"););
 
 template <ComputeStage compute_stage>
 TangentialContactLMTest<compute_stage>::TangentialContactLMTest(const InputParameters & parameters)
@@ -40,7 +46,8 @@ TangentialContactLMTest<compute_stage>::TangentialContactLMTest(const InputParam
     _slave_y_dot(_slave_disp_y.template adUDot<compute_stage>()),
     _master_y_dot(_master_disp_y.template adUDotNeighbor<compute_stage>()),
     _friction_coeff(adGetParam<Real>("friction_coefficient")),
-    _epsilon(std::numeric_limits<Real>::epsilon())
+    _epsilon(std::numeric_limits<Real>::epsilon()),
+    _ncp_type(adGetParam<MooseEnum>("ncp_function_type"))
 {
 }
 
@@ -77,9 +84,13 @@ TangentialContactLMTest<compute_stage>::computeQpResidual(Moose::MortarType mort
           // coefficient times the normal force
           auto b = _friction_coeff * _contact_pressure[_qp] - std::abs(_lambda[_qp]);
 
-          // The FB function (in its pure form) is not differentiable at (0, 0) but if we add some
-          // constant > 0 into the root function, then it is
-          auto fb_function = a + b - std::sqrt(a * a + b * b + _epsilon);
+          ADReal fb_function;
+          if (_ncp_type == "fb")
+            // The FB function (in its pure form) is not differentiable at (0, 0) but if we add some
+            // constant > 0 into the root function, then it is
+            fb_function = a + b - std::sqrt(a * a + b * b + _epsilon);
+          else
+            fb_function = std::min(a, b);
 
           return _test[_i][_qp] * fb_function;
         }

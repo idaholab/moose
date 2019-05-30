@@ -1,4 +1,8 @@
 starting_point = 2e-1
+
+# We offset slightly so we avoid the case where the bottom of the slave block and the top of the
+# master block are perfectly vertically aligned which can cause the backtracking line search some
+# issues for a coarse mesh (basic line search handles that fine)
 offset = 1e-2
 
 [GlobalParams]
@@ -14,15 +18,21 @@ offset = 1e-2
 [Variables]
   [./disp_x]
     block = '1 2'
+    # order = SECOND
   [../]
   [./disp_y]
     block = '1 2'
+    # order = SECOND
   [../]
   [./normal_lm]
     block = 3
+    family = MONOMIAL
+    order = CONSTANT
   [../]
   [./tangential_lm]
     block = 3
+    family = MONOMIAL
+    order = CONSTANT
   [../]
 []
 
@@ -49,13 +59,17 @@ offset = 1e-2
 
 [Constraints]
   [normal_lm]
-    type = NodeLMConstraintTest
-    master = 20
-    slave = 10
+    type = MechanicalContactLMTest
+    master_boundary = 20
+    slave_boundary = 10
+    master_subdomain = 4
+    slave_subdomain = 3
     variable = normal_lm
-    master_variable = disp_x
-    disp_y = disp_y
-    ncp_function_type = min
+    slave_variable = disp_x
+    slave_disp_y = disp_y
+    use_displaced_mesh = true
+    compute_primal_residuals = false
+    ncp_function_type = fb
   []
   [normal_x]
     type = MechanicalContactTest
@@ -82,15 +96,19 @@ offset = 1e-2
     compute_lm_residuals = false
   []
   [tangential_lm]
-    type = NodalTangentialContactLM
-    master = 20
-    slave = 10
+    type = TangentialContactLMTest
+    master_boundary = 20
+    slave_boundary = 10
+    master_subdomain = 4
+    slave_subdomain = 3
     variable = tangential_lm
-    master_variable = disp_x
-    disp_y = disp_y
+    slave_variable = disp_x
+    slave_disp_y = disp_y
+    use_displaced_mesh = true
+    compute_primal_residuals = false
     contact_pressure = normal_lm
-    ncp_function_type = min
-    mu = .1
+    friction_coefficient = .1
+    ncp_function_type = fb
   []
   [tangential_x]
     type = TangentialContactTest
@@ -157,6 +175,11 @@ offset = 1e-2
   l_max_its = 30
   nl_max_its = 20
   line_search = 'none'
+
+  # [./Predictor]
+  #   type = SimplePredictor
+  #   scale = 1.0
+  # [../]
 []
 
 [Debug]
@@ -165,10 +188,11 @@ offset = 1e-2
 
 [Outputs]
   exodus = true
-  [dof]
-    type = DOFMap
-    execute_on = 'initial'
-  []
+  # checkpoint = true
+  # [./dofmap]
+  #   type = DOFMap
+  #   execute_on = 'initial'
+  # [../]
 []
 
 [Preconditioning]

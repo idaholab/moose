@@ -45,6 +45,34 @@ NodalNormalContactTest::computeQpSlaveValue()
   return _u_slave[_qp];
 }
 
+void
+NodalNormalContactTest::computeJacobian()
+{
+}
+
+void
+NodalNormalContactTest::computeOffDiagJacobian(unsigned jvar)
+{
+  // Our residual only strongly depends on the lagrange multiplier (the normal vector does indeed
+  // depend on displacements but it's complicated and shouldn't be too strong of a dependence)
+  if (jvar != _lambda_id)
+    return;
+
+  MooseVariableFEBase & var = _sys.getVariable(0, jvar);
+  _connected_dof_indices.clear();
+  _connected_dof_indices.push_back(var.nodalDofIndex());
+
+  _qp = 0;
+
+  _Kee.resize(1, 1);
+  _Kee(0, 0) = computeQpOffDiagJacobian(Moose::SlaveSlave, jvar);
+
+  _Kne.resize(_test_master.size(), 1);
+
+  for (_i = 0; _i < _test_master.size(); ++_i)
+    _Kne(_i, 0) = computeQpOffDiagJacobian(Moose::MasterSlave, jvar);
+}
+
 Real
 NodalNormalContactTest::computeQpResidual(Moose::ConstraintType type)
 {
@@ -83,6 +111,9 @@ NodalNormalContactTest::computeQpOffDiagJacobian(Moose::ConstraintJacobianType t
   if (found != _penetration_locator._penetration_info.end())
   {
     PenetrationInfo * pinfo = found->second;
+
+    // Latter check here is actually redundant because we don't call into this function unless jvar
+    // == _lambda_id
     if (pinfo && jvar == _lambda_id)
     {
       switch (type)
