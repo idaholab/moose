@@ -960,15 +960,10 @@ RankTwoTensorTempl<T>::givensRotation(unsigned int row1, unsigned int row2, unsi
   T a = (*this)(row1, col);
   T b = (*this)(row2, col);
 
-  if (MooseUtils::absoluteFuzzyEqual(b, 0.0))
+  if (MooseUtils::absoluteFuzzyEqual(b, 0.0) && MooseUtils::absoluteFuzzyEqual(a, 0.0))
   {
     c = a >= 0.0 ? 1.0 : -1.0;
     s = 0.0;
-  }
-  else if (MooseUtils::absoluteFuzzyEqual(a, 0.0))
-  {
-    c = 0.0;
-    s = b >= 0.0 ? 1.0 : -1.0;
   }
   else if (std::abs(a) > std::abs(b))
   {
@@ -992,55 +987,6 @@ RankTwoTensorTempl<T>::givensRotation(unsigned int row1, unsigned int row2, unsi
   R(row1, row2) = s;
   R(row2, row1) = -s;
   R(row2, row2) = c;
-
-  return R;
-}
-
-template <>
-RankTwoTensorTempl<DualReal>
-RankTwoTensorTempl<DualReal>::givensRotation(unsigned int row1,
-                                             unsigned int row2,
-                                             unsigned int col) const
-{
-
-  DualReal cos = 0.0;
-  DualReal sin = 0.0;
-  DualReal a = (*this)(row1, col);
-  DualReal b = (*this)(row2, col);
-  RankTwoTensorTempl<DualReal> R(initIdentity);
-
-  // rotate Real number
-  RankTwoTensorTempl<Real> temp;
-  temp(row1, col) = a.value();
-  temp(row2, col) = b.value();
-  temp = temp.givensRotation(row1, row2, col);
-  cos.value() = temp(row1, row1);
-  sin.value() = temp(row1, row2);
-
-  // rotate Dual number
-  for (unsigned int i = 0; i < AD_MAX_DOFS_PER_ELEM; i++)
-  {
-    if (MooseUtils::absoluteFuzzyEqual(a.value(), 0.0) &&
-        MooseUtils::absoluteFuzzyEqual(b.value(), 0.0))
-    {
-      cos.derivatives()[i] = 0.0;
-      sin.derivatives()[i] = 0.0;
-    }
-    else
-    {
-      cos.derivatives()[i] = (a.derivatives()[i] * sin.value() * sin.value() -
-                              b.derivatives()[i] * cos.value() * sin.value()) /
-                             (b.value() * sin.value() + a.value() * cos.value());
-      sin.derivatives()[i] = (b.derivatives()[i] * cos.value() * cos.value() -
-                              a.derivatives()[i] * cos.value() * sin.value()) /
-                             (b.value() * sin.value() + a.value() * cos.value());
-    }
-  }
-
-  R(row1, row1) = cos;
-  R(row1, row2) = sin;
-  R(row2, row1) = -sin;
-  R(row2, row2) = cos;
 
   return R;
 }
@@ -1163,13 +1109,11 @@ RankTwoTensorTempl<DualReal>::symmetricEigenvaluesEigenvectors(
     unsigned int k = i;
     DualReal p = eigvals[i];
     for (unsigned int j = i + 1; j < N; j++)
-    {
       if (eigvals[j] < p)
       {
         k = j;
         p = eigvals[j];
       }
-    }
     if (k != i)
     {
       eigvals[k] = eigvals[i];
