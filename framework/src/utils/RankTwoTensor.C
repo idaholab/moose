@@ -1009,46 +1009,6 @@ RankTwoTensorTempl<DualReal>::givensRotation(unsigned int row1,
   DualReal b = (*this)(row2, col);
   RankTwoTensorTempl<DualReal> R(initIdentity);
 
-  // special case when both entries are zero
-  // in that case the rotation of dual numbers isn't well defined
-  // we need to find the third entry to rotate
-  if (MooseUtils::absoluteFuzzyEqual(a.value(), 0.0) &&
-      MooseUtils::absoluteFuzzyEqual(b.value(), 0.0))
-  {
-    if (N < 3)
-      return R;
-    else
-    {
-      unsigned int row3 = 3 - row1 - row2;
-      RankTwoTensorTempl<DualReal> P, permuted;
-      P = this->rowPermutationTensor({row1, row2, row3}, {row3, row2, row1});
-      permuted = P * (*this) * P.transpose();
-      a = permuted(row1, col);
-      b = permuted(row2, col);
-      if (MooseUtils::absoluteFuzzyEqual(a.value(), 0.0) &&
-          MooseUtils::absoluteFuzzyEqual(b.value(), 0.0))
-      {
-        P = this->rowPermutationTensor({row1, row2, row3}, {row2, row1, row3});
-        permuted = P * (*this) * P.transpose();
-        a = permuted(row1, col);
-        b = permuted(row2, col);
-        if (MooseUtils::absoluteFuzzyEqual(a.value(), 0.0) &&
-            MooseUtils::absoluteFuzzyEqual(b.value(), 0.0))
-        {
-          P = this->rowPermutationTensor({row1, row2, row3}, {row1, row3, row2});
-          permuted = P * (*this) * P.transpose();
-          a = permuted(row1, col);
-          b = permuted(row2, col);
-          if (MooseUtils::absoluteFuzzyEqual(a.value(), 0.0) &&
-              MooseUtils::absoluteFuzzyEqual(b.value(), 0.0))
-            return R;
-        }
-      }
-      R = permuted.givensRotation(row1, row2, col);
-      return R * P;
-    }
-  }
-
   // rotate Real number
   RankTwoTensorTempl<Real> temp;
   temp(row1, col) = a.value();
@@ -1062,7 +1022,10 @@ RankTwoTensorTempl<DualReal>::givensRotation(unsigned int row1,
   {
     if (MooseUtils::absoluteFuzzyEqual(a.value(), 0.0) &&
         MooseUtils::absoluteFuzzyEqual(b.value(), 0.0))
-      mooseError("RankTwoTensor::givensRotation in wrong state");
+    {
+      cos.derivatives()[i] = 0.0;
+      sin.derivatives()[i] = 0.0;
+    }
     else
     {
       cos.derivatives()[i] = (a.derivatives()[i] * sin.value() * sin.value() -
@@ -1100,19 +1063,70 @@ RankTwoTensorTempl<T>::hessenberg(RankTwoTensorTempl<T> & H, RankTwoTensorTempl<
 
 template <typename T>
 void
-RankTwoTensorTempl<T>::QR(RankTwoTensorTempl<T> & Q, RankTwoTensorTempl<T> & R) const
+RankTwoTensorTempl<T>::QR(RankTwoTensorTempl<T> & Q,
+                          RankTwoTensorTempl<T> & R,
+                          unsigned int dim) const
 {
   R = *this;
   Q.zero();
   Q.addIa(1.0);
 
-  for (unsigned int i = 0; i < N - 1; i++)
-    for (unsigned int b = N - 1; b > i; b--)
+  for (unsigned int i = 0; i < dim - 1; i++)
+    for (unsigned int b = dim - 1; b > i; b--)
     {
       unsigned int a = b - 1;
       RankTwoTensorTempl<T> CS = R.givensRotation(a, b, i);
       R = CS * R;
       Q = Q * CS.transpose();
+    }
+}
+
+template <>
+void
+RankTwoTensorTempl<DualReal>::QR(RankTwoTensorTempl<DualReal> & Q,
+                                 RankTwoTensorTempl<DualReal> & R,
+                                 unsigned int dim) const
+{
+  R = *this;
+  Q.zero();
+  Q.addIa(1.0);
+
+  for (unsigned int i = 0; i < dim - 1; i++)
+    for (unsigned int b = dim - 1; b > i; b--)
+    {
+      unsigned int a = b - 1;
+      RankTwoTensorTempl<DualReal> P(initIdentity);
+
+      // special case when both entries to rotate are zero
+      // in which case the dual numbers cannot be rotated
+      // therefore we need to find another nonzero entry to permute
+      if (MooseUtils::absoluteFuzzyEqual(R(a, i).value(), 0.0) &&
+          MooseUtils::absoluteFuzzyEqual(R(b, i).value(), 0.0))
+      {
+        bool found = false;
+        for (unsigned int c = 0; c < dim; c++)
+          for (unsigned int j = 0; j < dim; j++)
+          {
+            if (found || (c == a && j == i) || (c == b && j == i))
+              continue;
+            if (!MooseUtils::absoluteFuzzyEqual(R(c, j).value(), 0.0))
+            {
+              found = true;
+              P = this->rowPermutationTensor({a, b, c}, {c, b, a});
+              if (i != j)
+              {
+                unsigned int k = 3 - i - j;
+                P = P * this->columnPermutationTensor({i, j, k}, {j, i, k});
+              }
+            }
+          }
+      }
+
+      Q = Q * P.transpose();
+      R = P * R;
+      RankTwoTensorTempl<DualReal> CS = R.givensRotation(a, b, i);
+      R = P.transpose() * CS * R;
+      Q = Q * CS.transpose() * P;
     }
 }
 
@@ -1127,20 +1141,18 @@ RankTwoTensorTempl<DualReal>::symmetricEigenvaluesEigenvectors(
   RankTwoTensorTempl<DualReal> D, Q, R;
   this->hessenberg(D, eigvecs);
 
+  unsigned int iter = 0;
   for (unsigned m = N - 1; m > 0; m--)
-  {
-    unsigned int iter = 0;
     do
     {
       iter++;
       DualReal shift = D(m, m);
       D.addIa(-shift);
-      D.QR(Q, R);
+      D.QR(Q, R, m + 1);
       D = R * Q;
       D.addIa(shift);
       eigvecs = eigvecs * Q;
     } while (std::abs(D(m, m - 1)) > eps);
-  }
 
   for (unsigned int i = 0; i < N; i++)
     eigvals[i] = D(i, i);
