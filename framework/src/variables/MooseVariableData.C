@@ -920,7 +920,9 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
 
   // Hopefully this problem can go away at some point
   if (ad_offset + num_dofs > AD_MAX_DOFS_PER_ELEM)
-    mooseError("Current number of dofs per element is greater than AD_MAX_DOFS_PER_ELEM of ",
+    mooseError("Current number of dofs per element ",
+               ad_offset + num_dofs,
+               " is greater than AD_MAX_DOFS_PER_ELEM of ",
                AD_MAX_DOFS_PER_ELEM);
 
   for (unsigned int qp = 0; qp < nqp; qp++)

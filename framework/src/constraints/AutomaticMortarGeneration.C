@@ -210,7 +210,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       // the new point is approximately equal to the distance
       // between the endpoints.
       Point a = mortar_segment_candidate->point(0), b = mortar_segment_candidate->point(1);
-      if (std::abs((a - new_pt).norm() + (b - new_pt).norm() - (b - a).norm()) < TOLERANCE)
+      if (std::abs((a - new_pt).norm() + (b - new_pt).norm() - (b - a).norm()) < TOLERANCE + 999)
       {
         current_mortar_segment = mortar_segment_candidate;
         break;

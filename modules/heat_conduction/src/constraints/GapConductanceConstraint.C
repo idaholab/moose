@@ -55,8 +55,9 @@ GapConductanceConstraint<RESIDUAL>::computeQpResidual(Moose::MortarType mortar_t
 
     case Moose::MortarType::Lower:
     {
-      auto l = (_phys_points_master[_qp] - _phys_points_slave[_qp]).norm();
-      return (_k * (_u_master[_qp] - _u_slave[_qp]) / l - _lambda[_qp]) * _test[_i][_qp];
+      // auto l = (_phys_points_master[_qp] - _phys_points_slave[_qp]).norm();
+      // return (_k * (_u_master[_qp] - _u_slave[_qp]) / l - _lambda[_qp]) * _test[_i][_qp];
+      return 0.0;
     }
 
     default:
@@ -78,25 +79,27 @@ GapConductanceConstraint<JACOBIAN>::computeQpResidual(Moose::MortarType mortar_t
 
     case Moose::MortarType::Lower:
     {
-      // we are creating a dual version of phys points master and slave here...
-      DualRealVectorValue dual_phys_points_master;
-      DualRealVectorValue dual_phys_points_slave;
-      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-      {
-        dual_phys_points_master(i) = _phys_points_master[_qp](i);
-        dual_phys_points_slave(i) = _phys_points_slave[_qp](i);
-      }
+      return 0;
 
-      // ...which uses the derivative vector of the master and slave displacements as
-      // an approximation of the true phys points derivatives
-      for (unsigned int i = 0; i < _n_disp; ++i)
-      {
-        dual_phys_points_master(i).derivatives() = (*_disp_master[i])[_qp].derivatives();
-        dual_phys_points_slave(i).derivatives() = (*_disp_slave[i])[_qp].derivatives();
-      }
-
-      auto l = (dual_phys_points_master - dual_phys_points_slave).norm();
-      return (_k * (_u_master[_qp] - _u_slave[_qp]) / l - _lambda[_qp]) * _test[_i][_qp];
+      // // we are creating a dual version of phys points master and slave here...
+      // DualRealVectorValue dual_phys_points_master;
+      // DualRealVectorValue dual_phys_points_slave;
+      // for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+      // {
+      //   dual_phys_points_master(i) = _phys_points_master[_qp](i);
+      //   dual_phys_points_slave(i) = _phys_points_slave[_qp](i);
+      // }
+      //
+      // // ...which uses the derivative vector of the master and slave displacements as
+      // // an approximation of the true phys points derivatives
+      // for (unsigned int i = 0; i < _n_disp; ++i)
+      // {
+      //   dual_phys_points_master(i).derivatives() = (*_disp_master[i])[_qp].derivatives();
+      //   dual_phys_points_slave(i).derivatives() = (*_disp_slave[i])[_qp].derivatives();
+      // }
+      //
+      // auto l = (dual_phys_points_master - dual_phys_points_slave).norm();
+      // return (_k * (_u_master[_qp] - _u_slave[_qp]) / l - _lambda[_qp]) * _test[_i][_qp];
     }
 
     default:

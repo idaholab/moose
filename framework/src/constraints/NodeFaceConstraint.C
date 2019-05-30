@@ -75,7 +75,7 @@ NodeFaceConstraint::NodeFaceConstraint(const InputParameters & parameters)
     _phi_master(_assembly.phiFaceNeighbor(_master_var)),
     _grad_phi_master(_assembly.gradPhiFaceNeighbor(_master_var)),
 
-    _test_master(_var.phiFaceNeighbor()),
+    _test_master(_var.phiFaceNeighbor()), // _var -> _master_var ?
     _grad_test_master(_var.gradPhiFaceNeighbor()),
 
     _u_master(_master_var.slnNeighbor()),
