@@ -23,14 +23,14 @@ CircularAreaHydraulicDiameterFunction::CircularAreaHydraulicDiameterFunction(
 }
 
 Real
-CircularAreaHydraulicDiameterFunction::value(Real t, const Point & p)
+CircularAreaHydraulicDiameterFunction::value(Real t, const Point & p) const
 {
   const Real A = _area_function.value(t, p);
   return std::sqrt(4.0 * A / M_PI);
 }
 
 RealVectorValue
-CircularAreaHydraulicDiameterFunction::gradient(Real /*t*/, const Point & /*p*/)
+CircularAreaHydraulicDiameterFunction::gradient(Real /*t*/, const Point & /*p*/) const
 {
   mooseError(name(), ": ", __PRETTY_FUNCTION__, " is not implemented.");
 }

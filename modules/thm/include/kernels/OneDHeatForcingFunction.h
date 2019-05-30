@@ -21,7 +21,7 @@ protected:
 
   const Real & _power_fraction;
   const VariableValue & _total_power;
-  Function & _power_shape_function;
+  const Function & _power_shape_function;
   const PostprocessorValue & _power_shape_integral;
   const Real & _scale;
   const Real & _num_units;

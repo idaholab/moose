@@ -29,5 +29,5 @@ protected:
   virtual Real value(const Point & p) override;
 
   /// function
-  Function & _func;
+  const Function & _func;
 };
