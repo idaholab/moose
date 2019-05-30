@@ -65,63 +65,14 @@ The number of nodes in contact is 11
       5 Linear |R| = 3.046073e-10
   Linear solve converged due to CONVERGED_RTOL iterations 5
  8 Nonlinear |R| = 4.432194e-04
-    |residual|_2 of individual variables:
-                  disp_x:    0.000396694
-                  disp_y:    0.00019545
-                  normal_lm: 2.96026e-05
-
-
-The number of nodes in contact is 11
-
-      0 Linear |R| = 4.432194e-04
-      1 Linear |R| = 1.355937e-04
-      2 Linear |R| = 1.216011e-05
-      3 Linear |R| = 6.386954e-07
-      4 Linear |R| = 2.235639e-08
-      5 Linear |R| = 2.884168e-10
-  Linear solve converged due to CONVERGED_RTOL iterations 5
- 9 Nonlinear |R| = 4.008045e-04
-    |residual|_2 of individual variables:
-                  disp_x:    0.000399816
-                  disp_y:    2.76329e-05
-                  normal_lm: 5.29313e-06
-
-
-The number of nodes in contact is 11
-
-      0 Linear |R| = 4.008045e-04
-      1 Linear |R| = 1.287272e-04
-      2 Linear |R| = 8.423081e-06
-      3 Linear |R| = 1.047782e-07
-      4 Linear |R| = 8.054779e-09
-      5 Linear |R| = 3.046073e-10
-  Linear solve converged due to CONVERGED_RTOL iterations 5
-10 Nonlinear |R| = 4.432194e-04
-    |residual|_2 of individual variables:
-                  disp_x:    0.000396694
-                  disp_y:    0.00019545
-                  normal_lm: 2.96026e-05
-
-
-The number of nodes in contact is 11
-
-      0 Linear |R| = 4.432194e-04
-      1 Linear |R| = 1.355937e-04
-      2 Linear |R| = 1.216011e-05
-      3 Linear |R| = 6.386954e-07
-      4 Linear |R| = 2.235639e-08
-      5 Linear |R| = 2.884168e-10
-  Linear solve converged due to CONVERGED_RTOL iterations 5
-11 Nonlinear |R| = 4.008045e-04
-    |residual|_2 of individual variables:
-                  disp_x:    0.000399816
-                  disp_y:    2.76329e-05
-                  normal_lm: 5.29313e-06
 ```
 
 # Preliminary frictional contact algorithm comparison
 
-| Lagrange multipliers | Displacement | NCP function | Time (arbitrary units) | Time steps | Nonlinear iterations |
-| -------------------  | ------------ | ------------ | ---------------------- | ---------- | -------------------- |
-| Mortar | Mortar | FB | 28.494 | 49 | 228 |
-| Mortar | Mortar | Min | 22.629 | 42 | 233 |
+| Lagrange multipliers | Displacement | NCP function normal | NCP function tangential | Time (arbitrary units) | Time steps | Nonlinear iterations |
+| -------------------  | ------------ | ------------------- | ----------------------- | ---------------------- | ---------- | -------------------- |
+| Mortar | Mortar | FB | FB | 18.771 | 43 | 190 |
+| Mortar | Mortar | min | FB | 18.281 | 41 | 194 |
+| Mortar | Mortar | Min | Min | 74.801 | 58 | 320 |
+| Nodal | Mortar | Min | Min | 36.923 | 52 | 230 |
+| Nodal | Mortar | FB | FB | NA | NA | NA |

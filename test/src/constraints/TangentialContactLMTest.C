@@ -76,9 +76,9 @@ TangentialContactLMTest<compute_stage>::computeQpResidual(Moose::MortarType mort
           // frictional force exerted **by** the slave side are in the same direction
           ADReal a;
           if (tangential_velocity * _lambda[_qp] < 0)
-            a = -tangential_velocity * tangential_velocity;
+            a = -std::abs(tangential_velocity);
           else
-            a = tangential_velocity * tangential_velocity;
+            a = std::abs(tangential_velocity);
 
           // NCP part 2: require that the frictional force can never exceed the frictional
           // coefficient times the normal force

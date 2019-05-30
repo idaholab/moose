@@ -1,28 +1,38 @@
+# fb stands for the Fischer-Burmeister function
+
 [Tests]
   design = 'Constraints/index.md'
   issues = '#13080'
-  [exo_coarse]
+  [frictionless-nodal-min-lm-mortar-disp-coarse]
     type = 'Exodiff'
-    input = 'frictional-two-body-slip.i'
-    exodiff = 'frictional-two-body-slip_out.e'
+    input = 'frictionless-nodal-min-lm-mortar-disp.i'
+    exodiff = 'frictionless-nodal-min-lm-mortar-disp_out.e'
     mesh_mode = 'REPLICATED'
-    requirement = 'We shall be able to use mortar to do frictional mechanical contact'
+    requirement = 'We will solve the frictionless bouncing block problem with nodal constraint enforcement, mortar application of forces, and min NCP function'
     cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 Postprocessors/active=''"
   []
-  [frictionless-nodal-lm-mortar-disp-coarse]
+  [frictionless-nodal-fb-lm-mortar-disp-coarse]
     type = 'Exodiff'
-    input = 'frictionless-nodal-lm-mortar-disp.i'
-    exodiff = 'frictionless-nodal-lm-mortar-disp_out.e'
+    input = 'frictionless-nodal-fb-lm-mortar-disp.i'
+    exodiff = 'frictionless-nodal-fb-lm-mortar-disp_out.e'
     mesh_mode = 'REPLICATED'
-    requirement = 'We will be able to use nodal constraint enforcement with mortar integration for the contact force for frictionless contact in the bouncing basketball problem'
+    requirement = 'We will solve the frictionless bouncing block problem with nodal constraint enforcement, mortar application of forces, and fb NCP function'
     cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 Postprocessors/active=''"
   []
-  [frictionless-mortar-fb-lm-mortar-disp-coarse]
+  [frictionless-nodal-min-lm-nodal-disp-coarse]
     type = 'Exodiff'
-    input = 'frictionless-mortar-fb-lm-mortar-disp.i'
-    exodiff = 'frictionless-mortar-fb-lm-mortar-disp_out.e'
+    input = 'frictionless-nodal-min-lm-nodal-disp.i'
+    exodiff = 'frictionless-nodal-min-lm-nodal-disp_out.e'
     mesh_mode = 'REPLICATED'
-    requirement = 'We will be able to use fischer-burmeister mortar constraint enforcement with mortar integration for the contact force for frictionless contact in the bouncing basketball problem'
+    requirement = 'We will solve the frictionless bouncing block problem with nodal constraint enforcement, nodal application of forces, and min NCP function'
+    cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 Postprocessors/active=''"
+  []
+  [frictionless-nodal-fb-lm-nodal-disp-coarse]
+    type = 'Exodiff'
+    input = 'frictionless-nodal-fb-lm-nodal-disp.i'
+    exodiff = 'frictionless-nodal-fb-lm-nodal-disp_out.e'
+    mesh_mode = 'REPLICATED'
+    requirement = 'We will solve the frictionless bouncing block problem with nodal constraint enforcement, nodal application of forces, and fb NCP function'
     cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 Postprocessors/active=''"
   []
   [frictionless-mortar-min-lm-mortar-disp-coarse]
@@ -30,7 +40,43 @@
     input = 'frictionless-mortar-min-lm-mortar-disp.i'
     exodiff = 'frictionless-mortar-min-lm-mortar-disp_out.e'
     mesh_mode = 'REPLICATED'
-    requirement = 'We will be able to use std::min mortar constraint enforcement with mortar integration for the contact force for frictionless contact in the bouncing basketball problem'
+    requirement = 'We will solve the frictionless bouncing block problem with mortar constraint enforcement, mortar application of forces, and min NCP function'
     cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 Postprocessors/active=''"
+  []
+  [frictionless-mortar-fb-lm-mortar-disp-coarse]
+    type = 'Exodiff'
+    input = 'frictionless-mortar-fb-lm-mortar-disp.i'
+    exodiff = 'frictionless-mortar-fb-lm-mortar-disp_out.e'
+    mesh_mode = 'REPLICATED'
+    requirement = 'We will solve the frictionless bouncing block problem with mortar constraint enforcement, mortar application of forces, and fb NCP function'
+    cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 Postprocessors/active=''"
+  []
+  [frictional-mortar-min-lm-mortar-disp-coarse]
+    type = 'Exodiff'
+    input = 'frictional-mortar-min-lm-mortar-disp.i'
+    exodiff = 'frictional-mortar-min-lm-mortar-disp_out.e'
+    mesh_mode = 'REPLICATED'
+    requirement = 'We will solve the frictional bouncing block problem with mortar constraint enforcement, mortar application of forces, and min NCP function'
+    cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 Postprocessors/active=''"
+    max_parallel = 1
+    abs_zero = 1e-9
+  []
+  [frictional-mortar-fb-lm-mortar-disp-coarse]
+    type = 'Exodiff'
+    input = 'frictional-mortar-fb-lm-mortar-disp.i'
+    exodiff = 'frictional-mortar-fb-lm-mortar-disp_out.e'
+    mesh_mode = 'REPLICATED'
+    requirement = 'We will solve the frictional bouncing block problem with mortar constraint enforcement, mortar application of forces, and fb NCP function'
+    cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 Postprocessors/active=''"
+  []
+  [frictional-nodal-min-lm-mortar-disp-coarse]
+    type = 'Exodiff'
+    input = 'frictional-nodal-min-lm-mortar-disp.i'
+    exodiff = 'frictional-nodal-min-lm-mortar-disp_out.e'
+    mesh_mode = 'REPLICATED'
+    requirement = 'We will solve the frictional bouncing block problem with nodal constraint enforcement, mortar application of forces, and min NCP function'
+    cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 Postprocessors/active=''"
+    allow_warnings = True
+    max_parallel = 1
   []
 []

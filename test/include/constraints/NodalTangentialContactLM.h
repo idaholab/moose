@@ -49,9 +49,6 @@ protected:
   const Real _epsilon;
 
   const MooseEnum _ncp_type;
-
-  const Real _k_abs;
-  const Real _k_step;
 };
 
 #endif

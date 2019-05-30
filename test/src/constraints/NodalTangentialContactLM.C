@@ -48,10 +48,6 @@ validParams<NodalTangentialContactLM>()
       10,
       "The smoothing parameter for the function used to approximate std::abs. The approximating "
       "function is courtesy of https://math.stackexchange.com/a/1115033/408963");
-  params.addParam<Real>("k_step",
-                        10,
-                        "The smoothing parameter for approximating the step function as a "
-                        "hyperbolic tangent function");
   return params;
 }
 
@@ -66,9 +62,7 @@ NodalTangentialContactLM::NodalTangentialContactLM(const InputParameters & param
 
     _mu(getParam<Real>("mu")),
     _epsilon(std::numeric_limits<Real>::epsilon()),
-    _ncp_type(getParam<MooseEnum>("ncp_function_type")),
-    _k_abs(getParam<Real>("k_abs")),
-    _k_step(getParam<Real>("k_step"))
+    _ncp_type(getParam<MooseEnum>("ncp_function_type"))
 {
   _overwrite_slave_residual = false;
 }
@@ -138,21 +132,15 @@ Real NodalTangentialContactLM::computeQpResidual(Moose::ConstraintType /*type*/)
 
         // NCP part 1: requirement that either there is no slip **or** slip velocity and
         // frictional force exerted **by** the slave side are in the same direction
-        //
-        // The exact description of this inequality is: v_dot_tan * std::abs(u) / u >= 0 or more
-        // succinctly: v_dot_tan * sgn(u) >= 0. However we are going to approximate the sgn function
-        // by a hyperbolic tangent
-        Real a = v_dot_tan * std::tanh(_k_step * _u_slave[_qp]);
+        Real a;
+        if (v_dot_tan * _u_slave[_qp] < 0)
+          a = -std::abs(v_dot_tan);
+        else
+          a = std::abs(v_dot_tan);
 
         // NCP part 2: require that the frictional force can never exceed the frictional
         // coefficient times the normal force.
-        //
-        // The exact description of this inequation is: _mu * _contact_pressure - std::abs(u) >= 0.
-        // However we are goign to approximate the abs function by the function given in
-        // https://math.stackexchange.com/a/1115033/408963
-        auto approx_abs = 2. / _k_abs * std::log(1. + std::exp(_k_abs * _u_slave[_qp])) -
-                          _u_slave[_qp] - 2. / _k_abs * std::log(2);
-        auto b = _mu * _contact_pressure - approx_abs;
+        auto b = _mu * _contact_pressure - std::abs(_u_slave[_qp]);
 
         if (_ncp_type == "fb")
           return a + b - std::sqrt(a * a + b * b + _epsilon);
@@ -182,24 +170,18 @@ Real NodalTangentialContactLM::computeQpJacobian(Moose::ConstraintJacobianType /
 
         // NCP part 1: requirement that either there is no slip **or** slip velocity and
         // frictional force exerted **by** the slave side are in the same direction
-        //
-        // The exact description of this inequality is: v_dot_tan * std::abs(u) / u >= 0 or more
-        // succinctly: v_dot_tan * sgn(u) >= 0. However we are going to approximate the sgn function
-        // by a hyperbolic tangent
-        Real a = v_dot_tan * std::tanh(_k_step * _u_slave[_qp]);
+        Real a;
+        if (v_dot_tan * _u_slave[_qp] < 0)
+          a = -std::abs(v_dot_tan);
+        else
+          a = std::abs(v_dot_tan);
 
         // NCP part 2: require that the frictional force can never exceed the frictional
         // coefficient times the normal force.
-        //
-        // The exact description of this inequation is: _mu * _contact_pressure - std::abs(u) >= 0.
-        // However we are goign to approximate the abs function by the function given in
-        // https://math.stackexchange.com/a/1115033/408963
         DualNumber<Real> dual_u_slave(_u_slave[_qp]);
         dual_u_slave.derivatives() = 1;
 
-        auto approx_abs = 2. / _k_abs * std::log(1. + std::exp(_k_abs * dual_u_slave)) -
-                          dual_u_slave - 2. / _k_abs * std::log(2);
-        auto b = _mu * _contact_pressure - approx_abs;
+        auto b = _mu * _contact_pressure - std::abs(dual_u_slave);
 
         if (_ncp_type == "fb")
           return (a + b - std::sqrt(a * a + b * b + _epsilon)).derivatives();
@@ -247,21 +229,15 @@ NodalTangentialContactLM::computeQpOffDiagJacobian(Moose::ConstraintJacobianType
 
       // NCP part 1: requirement that either there is no slip **or** slip velocity and
       // frictional force exerted **by** the slave side are in the same direction
-      //
-      // The exact description of this inequality is: v_dot_tan * std::abs(u) / u >= 0 or more
-      // succinctly: v_dot_tan * sgn(u) >= 0. However we are going to approximate the sgn function
-      // by a hyperbolic tangent
-      auto a = v_dot_tan * std::tanh(_k_step * _u_slave[_qp]);
+      LocalDN a;
+      if (v_dot_tan * _u_slave[_qp] < 0)
+        a = -std::abs(v_dot_tan);
+      else
+        a = std::abs(v_dot_tan);
 
       // NCP part 2: require that the frictional force can never exceed the frictional
       // coefficient times the normal force.
-      //
-      // The exact description of this inequation is: _mu * _contact_pressure - std::abs(u) >= 0.
-      // However we are goign to approximate the abs function by the function given in
-      // https://math.stackexchange.com/a/1115033/408963
-      auto approx_abs = 2. / _k_abs * std::log(1. + std::exp(_k_abs * _u_slave[_qp])) -
-                        _u_slave[_qp] - 2. / _k_abs * std::log(2);
-      auto b = _mu * dual_contact_pressure - approx_abs;
+      auto b = _mu * dual_contact_pressure - std::abs(_u_slave[_qp]);
 
       LocalDN ncp_value;
       if (_ncp_type == "fb")
