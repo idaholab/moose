@@ -59,8 +59,11 @@ MultiAppNearestNodeTransfer::MultiAppNearestNodeTransfer(const InputParameters &
         declareRestartableData<std::map<dof_id_type, unsigned int>>("cached_from_ids")),
     _cached_qp_inds(declareRestartableData<std::map<dof_id_type, unsigned int>>("cached_qp_inds"))
 {
-  if (_to_var_names.size() != 1 && _from_var_names.size() != 1)
-    mooseError(" Support single variable only");
+  if (_to_var_names.size() != 1)
+    paramError("variable", " Support single to-variable only");
+
+  if (_from_var_names.size() != 1)
+    paramError("source_variable", " Support single from-variable only");
 }
 
 void

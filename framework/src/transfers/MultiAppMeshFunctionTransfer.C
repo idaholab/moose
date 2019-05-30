@@ -43,7 +43,7 @@ MultiAppMeshFunctionTransfer::MultiAppMeshFunctionTransfer(const InputParameters
   if (_to_var_names.size() == _from_var_names.size())
     _var_size = _to_var_names.size();
   else
-    mooseError("The number of variables to transfer to and from should be equal");
+    paramError("variable", "The number of variables to transfer to and from should be equal");
 }
 
 void
