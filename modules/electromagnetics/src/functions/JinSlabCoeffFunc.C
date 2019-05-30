@@ -35,7 +35,7 @@ JinSlabCoeffFunc::JinSlabCoeffFunc(const InputParameters & parameters)
 }
 
 Real
-JinSlabCoeffFunc::value(Real /*t*/, const Point & p)
+JinSlabCoeffFunc::value(Real /*t*/, const Point & p) const
 {
   // std::complex<double> _epsR(_epsR_real.value(t, p), _epsR_imag.value(t, p));
   // std::complex<double> _muR(_muR_real, _muR_imag);

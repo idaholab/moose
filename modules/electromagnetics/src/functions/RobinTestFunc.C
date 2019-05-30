@@ -39,7 +39,7 @@ RobinTestFunc::RobinTestFunc(const InputParameters & parameters)
 }
 
 Real
-RobinTestFunc::value(Real t, const Point & p)
+RobinTestFunc::value(Real t, const Point & p) const
 {
   std::complex<double> _C1(0, 0);
   std::complex<double> _C2(0, 0);

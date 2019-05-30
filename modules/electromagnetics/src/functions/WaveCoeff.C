@@ -37,7 +37,7 @@ WaveCoeff::WaveCoeff(const InputParameters & parameters)
 }
 
 Real
-WaveCoeff::value(Real t, const Point & p)
+WaveCoeff::value(Real t, const Point & p) const
 {
   std::complex<double> eps_r(_eps_r_real.value(t, p), _eps_r_imag.value(t, p));
   std::complex<double> mu_r(_mu_r_real.value(t, p), _mu_r_imag.value(t, p));

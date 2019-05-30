@@ -14,7 +14,7 @@ class OneDFieldCoeff : public Function, public FunctionInterface
 public:
   OneDFieldCoeff(const InputParameters & parameters);
 
-  virtual Real value(Real t, const Point & p) override;
+  virtual Real value(Real t, const Point & p) const override;
 
 private:
   Real _theta;

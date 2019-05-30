@@ -46,7 +46,7 @@ MMSTestFunc::MMSTestFunc(const InputParameters & parameters)
 }
 
 Real
-MMSTestFunc::value(Real t, const Point & p)
+MMSTestFunc::value(Real t, const Point & p) const
 {
 
   Real _val = 0;
