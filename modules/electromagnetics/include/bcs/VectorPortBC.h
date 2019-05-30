@@ -23,15 +23,15 @@ protected:
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-  Function & _beta;
+  const Function & _beta;
 
   MooseEnum _component;
 
   const VectorVariableValue & _coupled_val;
   unsigned int _coupled_var_num;
 
-  Function & _inc_real;
-  Function & _inc_imag;
+  const Function & _inc_real;
+  const Function & _inc_imag;
 
   std::complex<double> _jay;
 };

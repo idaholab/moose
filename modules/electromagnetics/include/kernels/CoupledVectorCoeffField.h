@@ -19,7 +19,7 @@ protected:
 
   Real _coefficient;
 
-  Function & _func;
+  const Function & _func;
 
   const VectorVariableValue & _coupled_val;
 };

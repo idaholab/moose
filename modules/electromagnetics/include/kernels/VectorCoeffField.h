@@ -19,7 +19,7 @@ protected:
 
   Real _coefficient;
 
-  Function & _func;
+  const Function & _func;
 };
 
 #endif // VECTORCOEFFFIELD_H

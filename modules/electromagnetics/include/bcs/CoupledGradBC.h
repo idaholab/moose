@@ -22,7 +22,7 @@ private:
 
   Real _coefficient;
 
-  Function & _func;
+  const Function & _func;
 
   const VariableGradient & _coupled_grad;
 };

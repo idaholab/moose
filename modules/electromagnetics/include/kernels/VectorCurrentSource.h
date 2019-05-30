@@ -17,10 +17,10 @@ protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
 
-  Function & _func;
+  const Function & _func;
 
-  Function & _source_real;
-  Function & _source_imag;
+  const Function & _source_real;
+  const Function & _source_imag;
 
   MooseEnum _component;
 };

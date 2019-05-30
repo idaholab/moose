@@ -20,8 +20,8 @@ public:
   virtual Real value(Real t, const Point & p) override;
 
 protected:
-  Function & _epsR_real;
-  Function & _epsR_imag;
+  const Function & _epsR_real;
+  const Function & _epsR_imag;
 
   Real _muR_real;
   Real _muR_imag;

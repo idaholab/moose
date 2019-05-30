@@ -23,9 +23,9 @@ private:
 
   MooseEnum _component;
 
-  Function & _func_real;
+  const Function & _func_real;
 
-  Function & _func_imag;
+  const Function & _func_imag;
 
   Real _coeff_real;
 
