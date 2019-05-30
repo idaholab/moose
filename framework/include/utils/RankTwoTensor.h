@@ -395,21 +395,13 @@ public:
 
   /**
    * computes and returns the permutation matrix P
-   * @param old_row is the original row numbering
-   * @param new_row is the permuted row numbering
+   * @param old_elements is the original row/column numbering
+   * @param new_elements is the permuted row/column numbering
    * Dual numbers are permuted as well
+   * P * A permutes rows and A * P^T permutes columns
    */
-  RankTwoTensorTempl<T> rowPermutationTensor(std::vector<unsigned int> old_row,
-                                             std::vector<unsigned int> new_row) const;
-
-  /**
-   * computes and returns the permutation matrix P
-   * @param old_col is the original column numbering
-   * @param new_col is the permuted column numbering
-   * Dual numbers are permuted as well
-   */
-  RankTwoTensorTempl<T> columnPermutationTensor(std::vector<unsigned int> old_col,
-                                                std::vector<unsigned int> new_col) const;
+  RankTwoTensorTempl<T> permutationTensor(std::vector<unsigned int> old_elements,
+                                          std::vector<unsigned int> new_elements) const;
 
   /**
    * computes and returns the Givens rotation matrix R

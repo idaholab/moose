@@ -929,27 +929,18 @@ RankTwoTensorTempl<T>::symmetricEigenvaluesEigenvectors(std::vector<T> & eigvals
 
 template <typename T>
 RankTwoTensorTempl<T>
-RankTwoTensorTempl<T>::rowPermutationTensor(std::vector<unsigned int> old_row,
-                                            std::vector<unsigned int> new_row) const
+RankTwoTensorTempl<T>::permutationTensor(std::vector<unsigned int> old_elements,
+                                         std::vector<unsigned int> new_elements) const
 {
-  mooseAssert(N == old_row.size() && N == new_row.size(),
-              "rowPermutationTensor: number of rows should be equal to LIBMESH_DIM");
+  mooseAssert(N == old_elements.size() && N == new_elements.size(),
+              "permutationTensor: number of permuting elements should be equal to LIBMESH_DIM");
 
   RankTwoTensorTempl<T> P;
 
   for (unsigned int i = 0; i < N; ++i)
-    P(old_row[i], new_row[i]) = 1.0;
+    P(old_elements[i], new_elements[i]) = 1.0;
 
   return P;
-}
-
-template <typename T>
-RankTwoTensorTempl<T>
-RankTwoTensorTempl<T>::columnPermutationTensor(std::vector<unsigned int> old_col,
-                                               std::vector<unsigned int> new_col) const
-{
-  RankTwoTensorTempl<T> P = this->rowPermutationTensor(old_col, new_col);
-  return P.transpose();
 }
 
 template <typename T>
@@ -1041,31 +1032,17 @@ RankTwoTensorTempl<DualReal>::QR(RankTwoTensorTempl<DualReal> & Q,
     for (unsigned int b = dim - 1; b > i; b--)
     {
       unsigned int a = b - 1;
-      RankTwoTensorTempl<DualReal> P(initIdentity);
 
       // special case when both entries to rotate are zero
       // in which case the dual numbers cannot be rotated
       // therefore we need to find another nonzero entry to permute
+      RankTwoTensorTempl<DualReal> P(initIdentity);
       if (MooseUtils::absoluteFuzzyEqual(R(a, i).value(), 0.0) &&
           MooseUtils::absoluteFuzzyEqual(R(b, i).value(), 0.0))
       {
-        bool found = false;
-        for (unsigned int c = 0; c < dim; c++)
-          for (unsigned int j = 0; j < dim; j++)
-          {
-            if (found || (c == a && j == i) || (c == b && j == i))
-              continue;
-            if (!MooseUtils::absoluteFuzzyEqual(R(c, j).value(), 0.0))
-            {
-              found = true;
-              P = this->rowPermutationTensor({a, b, c}, {c, b, a});
-              if (i != j)
-              {
-                unsigned int k = 3 - i - j;
-                P = P * this->columnPermutationTensor({i, j, k}, {j, i, k});
-              }
-            }
-          }
+        unsigned int c = 3 - a - b;
+        if (!MooseUtils::absoluteFuzzyEqual(R(c, i).value(), 0.0))
+          P = this->permutationTensor({a, b, c}, {c, b, a});
       }
 
       Q = Q * P.transpose();
