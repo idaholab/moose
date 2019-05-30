@@ -79,4 +79,12 @@
     allow_warnings = True
     max_parallel = 1
   []
+  [frictional-nodal-min-normal-lm-mortar-fb-tangential-lm-mortar-disp-coarse]
+    type = 'Exodiff'
+    input = 'frictional-nodal-min-normal-lm-mortar-fb-tangential-lm-mortar-disp.i'
+    exodiff = 'frictional-nodal-min-normal-lm-mortar-fb-tangential-lm-mortar-disp_out.e'
+    mesh_mode = 'REPLICATED'
+    requirement = 'We will solve the frictional bouncing block problem with nodal constraint enforcment for the normal LM using min NCP, mortar constraint enforcement of the tangential LM with fb, and mortar application of forces'
+    cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 Postprocessors/active=''"
+  []
 []

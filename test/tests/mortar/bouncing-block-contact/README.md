@@ -69,10 +69,11 @@ The number of nodes in contact is 11
 
 # Preliminary frictional contact algorithm comparison
 
-| Lagrange multipliers | Displacement | NCP function normal | NCP function tangential | Time (arbitrary units) | Time steps | Nonlinear iterations |
-| -------------------  | ------------ | ------------------- | ----------------------- | ---------------------- | ---------- | -------------------- |
-| Mortar | Mortar | FB | FB | 18.771 | 43 | 190 |
-| Mortar | Mortar | min | FB | 18.281 | 41 | 194 |
-| Mortar | Mortar | Min | Min | 74.801 | 58 | 320 |
-| Nodal | Mortar | Min | Min | 36.923 | 52 | 230 |
-| Nodal | Mortar | FB | FB | NA | NA | NA |
+| LM normal | LM tangential | Displacement | NCP function normal | NCP function tangential | Time (arbitrary units) | Time steps | Nonlinear iterations |
+| --------- | ------------  | ------------ | ------------------- | ----------------------- | ---------------------- | ---------- | -------------------- |
+| Mortar | Mortar | Mortar | FB | FB | 18.771 | 43 | 190 |
+| Mortar | Mortar | Mortar | min | FB | 18.281 | 41 | 194 |
+| Nodal | Mortar | Mortar | min | FB | 15.544 | 41 | 165 |
+| Mortar | Mortar | Mortar | Min | Min | 74.801 | 58 | 320 |
+| Nodal | Nodal | Mortar | Min | Min | 36.923 | 52 | 230 |
+| Nodal | Nodal | Mortar | FB | FB | NA | NA | NA |
