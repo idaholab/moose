@@ -400,8 +400,9 @@ public:
    * Dual numbers are permuted as well
    * P * A permutes rows and A * P^T permutes columns
    */
-  RankTwoTensorTempl<T> permutationTensor(std::vector<unsigned int> old_elements,
-                                          std::vector<unsigned int> new_elements) const;
+  RankTwoTensorTempl<T>
+  permutationTensor(const std::array<unsigned int, LIBMESH_DIM> & old_elements,
+                    const std::array<unsigned int, LIBMESH_DIM> & new_elements) const;
 
   /**
    * computes and returns the Givens rotation matrix R

@@ -929,12 +929,10 @@ RankTwoTensorTempl<T>::symmetricEigenvaluesEigenvectors(std::vector<T> & eigvals
 
 template <typename T>
 RankTwoTensorTempl<T>
-RankTwoTensorTempl<T>::permutationTensor(std::vector<unsigned int> old_elements,
-                                         std::vector<unsigned int> new_elements) const
+RankTwoTensorTempl<T>::permutationTensor(
+    const std::array<unsigned int, LIBMESH_DIM> & old_elements,
+    const std::array<unsigned int, LIBMESH_DIM> & new_elements) const
 {
-  mooseAssert(N == old_elements.size() && N == new_elements.size(),
-              "permutationTensor: number of permuting elements should be equal to LIBMESH_DIM");
-
   RankTwoTensorTempl<T> P;
 
   for (unsigned int i = 0; i < N; ++i)
