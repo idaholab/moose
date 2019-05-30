@@ -28,7 +28,7 @@ OneDFieldCoeff::OneDFieldCoeff(const InputParameters & parameters)
 }
 
 Real
-OneDFieldCoeff::value(Real t, const Point & p)
+OneDFieldCoeff::value(Real t, const Point & p) const
 {
   return _epsR.value(t, p) -
          _InverseMuR.value(t, p) * std::pow(std::sin(_theta * 2 * libMesh::pi / 360.), 2);

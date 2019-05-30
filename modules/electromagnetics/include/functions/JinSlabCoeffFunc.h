@@ -17,7 +17,7 @@ class JinSlabCoeffFunc : public Function, public FunctionInterface
 public:
   JinSlabCoeffFunc(const InputParameters & parameters);
 
-  virtual Real value(Real t, const Point & p) override;
+  virtual Real value(Real t, const Point & p) const override;
 
 protected:
   const Function & _epsR_real;

@@ -17,7 +17,7 @@ class HelmholtzTestFunc : public Function, public FunctionInterface
 public:
   HelmholtzTestFunc(const InputParameters & parameters);
 
-  virtual Real value(Real t, const Point & p) override;
+  virtual Real value(Real t, const Point & p) const override;
 
 protected:
   Real _L;

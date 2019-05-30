@@ -43,7 +43,7 @@ ZPolarizedWave::ZPolarizedWave(const InputParameters & parameters)
 }
 
 Real
-ZPolarizedWave::value(Real /*t*/, const Point & p)
+ZPolarizedWave::value(Real /*t*/, const Point & p) const
 {
   if (_component == elk::REAL)
   {

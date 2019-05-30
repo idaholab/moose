@@ -17,7 +17,7 @@ class WaveCoeff : public Function, public FunctionInterface
 public:
   WaveCoeff(const InputParameters & parameters);
 
-  virtual Real value(Real t, const Point & p) override;
+  virtual Real value(Real t, const Point & p) const override;
 
 protected:
   const Function & _eps_r_real;
