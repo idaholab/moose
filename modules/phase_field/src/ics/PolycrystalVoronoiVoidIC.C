@@ -222,7 +222,7 @@ PolycrystalVoronoiVoidIC::value(const Point & p)
           if (void_value == _outvalue) // Not in a void
         value = grain_value;
       else if (void_value > _outvalue && void_value < _invalue) // On void interface
-        value = 1.0 - (void_value - _outvalue) / (_invalue - _outvalue);
+        value = grain_value * (_invalue - void_value) / (_invalue - _outvalue);
       else if (void_value == _invalue) // In a void, so op = 0
         value = 0.0;
       break;

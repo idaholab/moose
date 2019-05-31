@@ -34,6 +34,7 @@ validParams<PolycrystalVoronoi>()
       "",
       "File containing grain centroids, if file_name is provided, the centroids "
       "from the file will be used.");
+  params.addParam<Real>("int_width", 0.0, "Width of diffuse interfaces");
   return params;
 }
 
@@ -42,6 +43,7 @@ PolycrystalVoronoi::PolycrystalVoronoi(const InputParameters & parameters)
     _grain_num(getParam<unsigned int>("grain_num")),
     _columnar_3D(getParam<bool>("columnar_3D")),
     _rand_seed(getParam<unsigned int>("rand_seed")),
+    _int_width(getParam<Real>("int_width")),
     _file_name(getParam<FileName>("file_name"))
 {
   if (_file_name == "" && _grain_num == 0)
@@ -55,26 +57,37 @@ void
 PolycrystalVoronoi::getGrainsBasedOnPoint(const Point & point,
                                           std::vector<unsigned int> & grains) const
 {
+  grains.resize(0);
+  Real d_min = _range.norm();
+  Real distance;
   auto n_grains = _centerpoints.size();
-  auto min_distance = _range.norm();
   auto min_index = n_grains;
 
-  // Loops through all of the grain centers and finds the center that is closest to the point p
+  // Find the closest centerpoint to the current point
   for (MooseIndex(_centerpoints) grain = 0; grain < n_grains; ++grain)
   {
-    auto distance = _mesh.minPeriodicDistance(_vars[0]->number(), _centerpoints[grain], point);
-
-    if (distance < min_distance)
+    distance = _mesh.minPeriodicDistance(_vars[0]->number(), _centerpoints[grain], point);
+    if (distance < d_min)
     {
-      min_distance = distance;
+      d_min = distance;
       min_index = grain;
     }
   }
-
   mooseAssert(min_index < n_grains, "Couldn't find closest Voronoi cell");
+  Point current_grain = _centerpoints[min_index];
+  grains.push_back(min_index); // closest centerpoint always gets included
 
-  grains.resize(1);
-  grains[0] = min_index;
+  if (_int_width > 0.0)
+    for (MooseIndex(_centerpoints) grain = 0; grain < n_grains; ++grain)
+      if (grain != min_index)
+      {
+        Point next_grain = _centerpoints[grain];
+        Point N = findNormalVector(point, current_grain, next_grain);
+        Point cntr = findCenterPoint(point, current_grain, next_grain);
+        distance = N * (cntr - point);
+        if (distance < _int_width)
+          grains.push_back(grain); // also include all grains with nearby boundaries
+      }
 }
 
 Real
@@ -92,7 +105,11 @@ PolycrystalVoronoi::getVariableValue(unsigned int op_index, const Point & p) con
       break;
     }
 
-  return active_grain_on_op != invalid_id ? 1.0 : 0.0;
+  Real profile_val = 0.0;
+  if (active_grain_on_op != invalid_id)
+    profile_val = computeDiffuseInterface(p, active_grain_on_op, grain_ids);
+
+  return profile_val;
 }
 
 void
@@ -150,4 +167,57 @@ PolycrystalVoronoi::precomputeGrainStructure()
         _centerpoints[grain](2) = _bottom_left(2) + _range(2) * 0.5;
     }
   }
+}
+
+Real
+PolycrystalVoronoi::computeDiffuseInterface(const Point & point,
+                                            const unsigned int & gr_index,
+                                            const std::vector<unsigned int> & grain_ids) const
+{
+  Real val = 1.0;
+  Point current_grain = _centerpoints[gr_index];
+  for (auto i : grain_ids)
+    if (i != gr_index)
+    {
+      Point next_grain = _centerpoints[i];
+      Point N = findNormalVector(point, current_grain, next_grain);
+      Point cntr = findCenterPoint(point, current_grain, next_grain);
+      for (unsigned int vcomp = 0; vcomp < 3; ++vcomp)
+        if (N(vcomp) != 0.0)
+        {
+          Real L = findLinePoint(point, N, cntr, vcomp);
+          val *= 0.5 * (1.0 - std::tanh(2.0 * (point(vcomp) - L) * N(vcomp) / _int_width));
+          break;
+        }
+    }
+  return val;
+}
+
+Point
+PolycrystalVoronoi::findNormalVector(const Point & point, const Point & p1, const Point & p2) const
+{
+  Point pa = point + _mesh.minPeriodicVector(_vars[0]->number(), point, p1);
+  Point pb = point + _mesh.minPeriodicVector(_vars[0]->number(), point, p2);
+  Point N = pb - pa;
+  return N / N.norm();
+}
+
+Point
+PolycrystalVoronoi::findCenterPoint(const Point & point, const Point & p1, const Point & p2) const
+{
+  Point pa = point + _mesh.minPeriodicVector(_vars[0]->number(), point, p1);
+  Point pb = point + _mesh.minPeriodicVector(_vars[0]->number(), point, p2);
+  return 0.5 * (pa + pb);
+}
+
+Real
+PolycrystalVoronoi::findLinePoint(const Point & point,
+                                  const Point & N,
+                                  const Point & cntr,
+                                  const unsigned int vcomp) const
+{
+  const Real l_sum = N((vcomp + 1) % 3) * (point((vcomp + 1) % 3) - cntr((vcomp + 1) % 3)) +
+                     N((vcomp + 2) % 3) * (point((vcomp + 2) % 3) - cntr((vcomp + 2) % 3));
+
+  return cntr(vcomp) - l_sum / N(vcomp);
 }

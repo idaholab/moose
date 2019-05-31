@@ -137,8 +137,7 @@ SmoothCircleBaseIC::computeCircleValue(const Point & p, const Point & center, co
     }
 
     case ProfileType::TANH:
-      return (_invalue - _outvalue) * 0.5 *
-                 (std::tanh(libMesh::pi * (radius - dist) / _int_width) + 1.0) +
+      return (_invalue - _outvalue) * 0.5 * (std::tanh(2.0 * (radius - dist) / _int_width) + 1.0) +
              _outvalue;
 
     default:

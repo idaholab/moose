@@ -13,12 +13,17 @@
 []
 
 [GlobalParams]
-  op_num = 4
+  op_num = 6
   var_name_base = gr
 []
 
 [Variables]
   [./PolycrystalVariables]
+  [../]
+[]
+
+[AuxVariables]
+  [./bnds]
   [../]
 []
 
@@ -32,6 +37,7 @@
     execute_on = 'initial'
     threshold = 0.2
     connecting_threshold = 0.08
+    int_width = 8
   [../]
 []
 
@@ -59,6 +65,22 @@
   [./dt_gr3]
     type = TimeDerivative
     variable = gr3
+  [../]
+  [./dt_gr4]
+    type = TimeDerivative
+    variable = gr4
+  [../]
+  [./dt_gr5]
+    type = TimeDerivative
+    variable = gr5
+  [../]
+[]
+
+[AuxKernels]
+  [./bnds_aux]
+    type = BndsCalcAux
+    variable = bnds
+    execute_on = 'initial timestep_end'
   [../]
 []
 

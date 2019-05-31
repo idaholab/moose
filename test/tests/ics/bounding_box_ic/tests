@@ -3,5 +3,16 @@
     type = 'Exodiff'
     input = 'bounding_box_ic_test.i'
     exodiff = 'out.e'
+    requirement = 'Generates a rectangular IC'
+    issues = '#11034'
+    design = 'ics/BoundingBoxIC.md'
+  [../]
+  [./diffuse]
+    type = 'Exodiff'
+    input = 'bounding_box_ic_diffuse_test.i'
+    exodiff = 'bounding_box_ic_diffuse_test_out.e'
+    requirement = 'BoundingBoxIC shall have a diffuse interface option.'
+    issues = '#13331'
+    design = 'ics/BoundingBoxIC.md'
   [../]
 []

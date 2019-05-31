@@ -61,5 +61,7 @@ protected:
 
   /// The Point object constructed from the x2, y2, z2 components for the bottom left BB corner
   const Point _top_right;
-};
 
+  /// Interfacial width
+  const Real _int_width;
+};

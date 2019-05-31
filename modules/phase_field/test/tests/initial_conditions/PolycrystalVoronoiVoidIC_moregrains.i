@@ -46,6 +46,7 @@
 [UserObjects]
   [./voronoi]
     type = PolycrystalVoronoi
+    int_width = 0
   [../]
 []
 

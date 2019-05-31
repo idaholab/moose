@@ -37,6 +37,7 @@ protected:
   const bool _columnar_3D;
 
   const unsigned int _rand_seed;
+  const Real _int_width;
 
   Point _bottom_left;
   Point _top_right;
@@ -45,5 +46,16 @@ protected:
   std::vector<Point> _centerpoints;
 
   const FileName _file_name;
+
+private:
+  Real computeDiffuseInterface(const Point & point,
+                               const unsigned int & gr_index,
+                               const std::vector<unsigned int> & grain_ids) const;
+  Point findNormalVector(const Point & point, const Point & p1, const Point & p2) const;
+  Point findCenterPoint(const Point & point, const Point & p1, const Point & p2) const;
+  Real findLinePoint(const Point & point,
+                     const Point & N,
+                     const Point & cntr,
+                     const unsigned int dim) const;
 };
 
