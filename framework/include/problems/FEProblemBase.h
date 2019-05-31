@@ -1685,6 +1685,25 @@ public:
    */
   const MortarData & mortarData() const { return _mortar_data; }
 
+  void enableMaterialCache()
+  {
+    for (size_t i = 0; i < _material_data.size(); i++)
+    {
+      _material_data[i]->enableCache();
+      _bnd_material_data[i]->enableCache();
+      _neighbor_material_data[i]->enableCache();
+    }
+  }
+  void invalidateMaterialCache()
+  {
+    for (size_t i = 0; i < _material_data.size(); i++)
+    {
+      _material_data[i]->invalidateCache();
+      _bnd_material_data[i]->invalidateCache();
+      _neighbor_material_data[i]->invalidateCache();
+    }
+  }
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();

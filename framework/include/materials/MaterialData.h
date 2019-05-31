@@ -20,6 +20,50 @@
 
 class Material;
 
+typedef std::size_t HashValue;
+
+inline void
+hashCombine(HashValue & /* seed */)
+{
+}
+
+template <class T, class... Rest>
+inline void
+hashCombine(HashValue & seed, const T & value, Rest... rest)
+{
+  std::hash<T> hasher;
+
+  seed ^= hasher(value) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+  hashCombine(seed, rest...);
+}
+
+struct MaterialCacheKey
+{
+  MaterialCacheKey(const Material * m, const Elem * e, unsigned int s) : mat(m), elem(e), side(s) {}
+  bool operator==(const MaterialCacheKey & other) const
+  {
+    return (mat == other.mat && elem == other.elem && side == other.side);
+  }
+
+  const Material * mat;
+  const Elem * elem;
+  unsigned int side;
+};
+
+namespace std
+{
+template <>
+struct hash<MaterialCacheKey>
+{
+  std::size_t operator()(const MaterialCacheKey & k) const
+  {
+    HashValue v = 0;
+    hashCombine(v, k.mat, k.elem, k.side);
+    return v;
+  }
+};
+}
+
 /**
  * Proxy for accessing MaterialPropertyStorage.
  * MaterialData stores the values associated with a particular material object
@@ -35,6 +79,10 @@ public:
    */
   void release();
 
+  /// This needs to be called early - before material objects are constructed.
+  void enableCache() { _use_cache = true; }
+  void disableCache() { _use_cache = false; }
+
   /**
    * Resize the data to hold properties for n_qpoints quadrature points.
    */
@@ -45,6 +93,8 @@ public:
    * support/hold.
    */
   unsigned int nQPoints();
+
+  void invalidateCache() { _cache.clear(); }
 
   /**
    * Declare the Real valued property named "name".
@@ -150,6 +200,13 @@ protected:
   /// Reference to the MaterialStorage class
   MaterialPropertyStorage & _storage;
 
+private:
+  std::unordered_map<MaterialCacheKey, bool> _cache;
+  bool _use_cache = true; // TODO: fix this to default off
+  const Elem * _swapped_elem = nullptr;
+  unsigned int _swapped_side = 0;
+
+protected:
   /// Number of quadrature points
   unsigned int _n_qpoints;
 
@@ -222,14 +279,20 @@ template <typename T>
 MaterialProperty<T> &
 MaterialData::declarePropertyTempl(const std::string & prop_name)
 {
-  return declareHelper<T>(_props, prop_name, _storage.addProperty(prop_name));
+  if (_use_cache)
+    return declareHelper<T>(_props, prop_name, _storage.addPropertyOld(prop_name));
+  else
+    return declareHelper<T>(_props, prop_name, _storage.addProperty(prop_name));
 }
 
 template <typename T>
 ADMaterialPropertyObject<T> &
 MaterialData::declareADPropertyTempl(const std::string & prop_name)
 {
-  return declareADHelper<T>(_props, prop_name, _storage.addProperty(prop_name));
+  if (_use_cache)
+    return declareADHelper<T>(_props, prop_name, _storage.addPropertyOld(prop_name));
+  else
+    return declareADHelper<T>(_props, prop_name, _storage.addProperty(prop_name));
 }
 
 template <typename T>

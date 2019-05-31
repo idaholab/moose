@@ -132,13 +132,15 @@ Material::initStatefulProperties(unsigned int n_points)
   // because owned props might have been promoted to stateful by calls to
   // getMaterialProperty[Old/Older] from other objects.  In these cases, this
   // object won't otherwise know that it owns stateful properties.
-  for (auto & prop : _supplied_props)
-    if (_material_data->getMaterialPropertyStorage().isStatefulProp(prop) &&
-        !_overrides_init_stateful_props)
-      mooseError(std::string("Material \"") + name() +
-                 "\" provides one or more stateful "
-                 "properties but initQpStatefulProperties() "
-                 "was not overridden in the derived class.");
+  // TODO: this error check must be smarter to recognize when materials were promoted to stateful
+  // for cacheing purposes.  Then we can re-enable it.
+  // for (auto & prop : _supplied_props)
+  //  if (_material_data->getMaterialPropertyStorage().isStatefulProp(prop) &&
+  //      !_overrides_init_stateful_props)
+  //    mooseError(std::string("Material \"") + name() +
+  //               "\" provides one or more stateful "
+  //               "properties but initQpStatefulProperties() "
+  //               "was not overridden in the derived class.");
 }
 
 void

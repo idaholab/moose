@@ -56,18 +56,33 @@ MaterialData::copy(const Elem & elem_to, const Elem & elem_from, unsigned int si
 void
 MaterialData::swap(const Elem & elem, unsigned int side /* = 0*/)
 {
-  if (!_storage.hasStatefulProperties() || _swapped)
+  if (_swapped || (!_storage.hasStatefulProperties() && !_use_cache))
     return;
 
   _storage.swap(*this, elem, side);
   _swapped = true;
+  _swapped_elem = &elem;
+  _swapped_side = side;
 }
 
 void
 MaterialData::reinit(const std::vector<std::shared_ptr<Material>> & mats)
 {
   for (const auto & mat : mats)
-    mat->computeProperties();
+  {
+    MaterialCacheKey key(mat.get(), _swapped_elem, _swapped_side);
+    if (!_use_cache || _cache.count(key) == 0)
+    {
+      mat->computeProperties();
+      std::cout << "recomputing value for mat=" << mat->name()
+                << ", elem=" << (_swapped_elem ? _swapped_elem->id() : 0) << "\n";
+      if (_use_cache)
+        _cache[key] = true;
+    }
+    else
+      std::cout << "reusing value for mat=" << mat->name()
+                << ", elem=" << (_swapped_elem ? _swapped_elem->id() : 0) << "\n";
+  }
 }
 
 void
@@ -80,11 +95,13 @@ MaterialData::reset(const std::vector<std::shared_ptr<Material>> & mats)
 void
 MaterialData::swapBack(const Elem & elem, unsigned int side /* = 0*/)
 {
-  if (_swapped && _storage.hasStatefulProperties())
-  {
-    _storage.swapBack(*this, elem, side);
-    _swapped = false;
-  }
+  if (!_swapped)
+    return;
+
+  _storage.swapBack(*this, elem, side);
+  _swapped = false;
+  _swapped_elem = nullptr;
+  _swapped_side = 0;
 }
 
 bool
