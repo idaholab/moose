@@ -178,6 +178,7 @@ private:
   FRIEND_TEST(InputParameterWarehouse, getControllableItems);
   FRIEND_TEST(InputParameterWarehouse, getControllableParameter);
   FRIEND_TEST(InputParameterWarehouse, getControllableParameterValues);
+  FRIEND_TEST(InputParameterWarehouse, emptyControllableParameterValues);
   FRIEND_TEST(InputParameterWarehouse, addControllableParameterConnection);
   FRIEND_TEST(InputParameterWarehouse, addControllableParameterAlias);
 };
@@ -190,4 +191,3 @@ InputParameterWarehouse::getControllableParameterValues(
   ControllableParameter param = getControllableParameter(input);
   return param.get<T>();
 }
-
