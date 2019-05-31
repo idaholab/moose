@@ -66,6 +66,12 @@ ElementLoopUserObject::initialize()
 }
 
 void
+ElementLoopUserObject::preElement(const Elem * elem)
+{
+  _fe_problem.setCurrentSubdomainID(elem, _tid);
+}
+
+void
 ElementLoopUserObject::execute()
 {
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
@@ -83,6 +89,7 @@ ElementLoopUserObject::execute()
 
       const Elem * elem = *el;
       unsigned int cur_subdomain = elem->subdomain_id();
+      preElement(elem);
 
       _old_subdomain = _subdomain;
       _subdomain = cur_subdomain;
