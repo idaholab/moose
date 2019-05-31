@@ -13,7 +13,7 @@
 []
 
 [GlobalParams]
-  op_num = 4
+  op_num = 6
   var_name_base = gr
 []
 
@@ -30,6 +30,7 @@
     execute_on = 'initial'
     threshold = 0.2
     connecting_threshold = 0.08
+    int_width = 8
   [../]
 []
 
@@ -57,6 +58,14 @@
   [./dt_gr3]
     type = TimeDerivative
     variable = gr3
+  [../]
+  [./dt_gr4]
+    type = TimeDerivative
+    variable = gr4
+  [../]
+  [./dt_gr5]
+    type = TimeDerivative
+    variable = gr5
   [../]
 []
 

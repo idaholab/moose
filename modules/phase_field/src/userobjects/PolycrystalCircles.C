@@ -11,6 +11,7 @@
 #include "MooseMesh.h"
 #include "MooseVariable.h"
 
+#include "libmesh/utility.h"
 #include <fstream>
 
 registerMooseObject("PhaseFieldApp", PolycrystalCircles);
@@ -34,6 +35,7 @@ validParams<PolycrystalCircles>()
   params.addParam<std::vector<Real>>("z_positions", "z coordinate for each circle center");
   params.addParam<std::vector<Real>>("radii", "The radius for each circle");
   params.addParam<FileName>("file_name", "File containing circle centers and radii");
+  params.addParam<Real>("int_width", 0.0, "Width of diffuse interface");
 
   return params;
 }
@@ -41,6 +43,7 @@ validParams<PolycrystalCircles>()
 PolycrystalCircles::PolycrystalCircles(const InputParameters & parameters)
   : PolycrystalUserObjectBase(parameters),
     _columnar_3D(getParam<bool>("columnar_3D")),
+    _int_width(getParam<Real>("int_width")),
     _grain_num(0)
 {
 }
@@ -65,7 +68,7 @@ PolycrystalCircles::getGrainsBasedOnPoint(const Point & point,
     else
       distance = _mesh.minPeriodicDistance(_vars[0]->number(), _centerpoints[i], point);
 
-    if (distance < _radii[i])
+    if (distance < _radii[i] + _int_width)
       grains.push_back(i);
   }
 }
@@ -84,7 +87,7 @@ PolycrystalCircles::getVariableValue(unsigned int op_index, const Point & p) con
       break;
     }
 
-  return active_grain_on_op != invalid_id ? 1.0 : 0.0;
+  return active_grain_on_op != invalid_id ? computeDiffuseInterface(p, active_grain_on_op) : 0.0;
 }
 
 void
@@ -169,4 +172,24 @@ PolycrystalCircles::precomputeGrainStructure()
       _centerpoints[i](2) = z_c[i];
     }
   }
+}
+
+Real
+PolycrystalCircles::computeDiffuseInterface(const Point & p, const unsigned int & i) const
+{
+  if (_int_width == 0)
+    return 1.0;
+
+  Real d = 0;
+
+  if (_columnar_3D)
+  {
+    Real d_x = (p(0) - _centerpoints[i](0)) * (p(0) - _centerpoints[i](0));
+    Real d_y = (p(1) - _centerpoints[i](1)) * (p(1) - _centerpoints[i](1));
+    d = std::sqrt(d_x + d_y);
+  }
+  else
+    d = _mesh.minPeriodicDistance(_vars[0]->number(), _centerpoints[i], p);
+
+  return 0.5 * (1 - std::tanh(2.0 * (d - _radii[i]) / _int_width));
 }
