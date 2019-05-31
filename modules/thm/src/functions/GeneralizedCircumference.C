@@ -17,7 +17,7 @@ GeneralizedCircumference::GeneralizedCircumference(const InputParameters & param
 }
 
 Real
-GeneralizedCircumference::value(Real t, const Point & p)
+GeneralizedCircumference::value(Real t, const Point & p) const
 {
   RealVectorValue gradA = _area_func.gradient(t, p);
   Real dAdx2 = gradA(0) * gradA(0);
@@ -27,7 +27,7 @@ GeneralizedCircumference::value(Real t, const Point & p)
 }
 
 RealVectorValue
-GeneralizedCircumference::gradient(Real /*t*/, const Point & /*p*/)
+GeneralizedCircumference::gradient(Real /*t*/, const Point & /*p*/) const
 {
   mooseError(name(), ": ", __PRETTY_FUNCTION__, " is not implemented.");
 }

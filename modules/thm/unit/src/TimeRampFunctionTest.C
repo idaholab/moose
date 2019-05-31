@@ -4,7 +4,7 @@
 
 TEST_F(TimeRampFunctionTest, test)
 {
-  Function & fn = _fe_problem->getFunction(_fn_name);
+  const Function & fn = _fe_problem->getFunction(_fn_name);
   const Point p(0, 0, 0);
 
   // during ramp

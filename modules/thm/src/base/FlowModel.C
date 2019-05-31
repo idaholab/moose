@@ -121,12 +121,12 @@ FlowModel::addCommonInitialConditions()
 
     if (!_sim.hasFunction(area_function))
     {
-      Function & fn = _sim.getFunction(area_function);
+      const Function & fn = _sim.getFunction(area_function);
       _sim.addConstantIC(AREA, fn.value(0, Point()), block);
       if (_spatial_discretization == rDG)
         _sim.addConstantIC(_A_linear_name, fn.value(0, Point()), block);
       // FIXME: eventually use Component::makeFunctionControllableIfConstant
-      if (dynamic_cast<ConstantFunction *>(&fn) != nullptr)
+      if (dynamic_cast<const ConstantFunction *>(&fn) != nullptr)
         _flow_channel.connectObject(fn.parameters(), area_function, "Area", "value");
     }
     else

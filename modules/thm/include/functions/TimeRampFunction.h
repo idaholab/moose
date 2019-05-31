@@ -20,8 +20,8 @@ class TimeRampFunction : public Function
 public:
   TimeRampFunction(const InputParameters & parameters);
 
-  virtual Real value(Real t, const Point & p);
-  virtual RealVectorValue gradient(Real t, const Point & p);
+  virtual Real value(Real t, const Point & p) const;
+  virtual RealVectorValue gradient(Real t, const Point & p) const;
 
 protected:
   /// Initial value

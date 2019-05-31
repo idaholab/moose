@@ -83,21 +83,21 @@ PiecewiseFunction::getFunctionIndex(Real t, const Point & p) const
 }
 
 Real
-PiecewiseFunction::value(Real t, const Point & p)
+PiecewiseFunction::value(Real t, const Point & p) const
 {
   const unsigned int i = getFunctionIndex(t, p);
   return _functions[i]->value(t, p);
 }
 
 RealVectorValue
-PiecewiseFunction::gradient(Real t, const Point & p)
+PiecewiseFunction::gradient(Real t, const Point & p) const
 {
   const unsigned int i = getFunctionIndex(t, p);
   return _functions[i]->gradient(t, p);
 }
 
 Real
-PiecewiseFunction::timeDerivative(Real t, const Point & p)
+PiecewiseFunction::timeDerivative(Real t, const Point & p) const
 {
   const unsigned int i = getFunctionIndex(t, p);
   return _functions[i]->timeDerivative(t, p);

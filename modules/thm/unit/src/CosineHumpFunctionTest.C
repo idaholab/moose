@@ -4,7 +4,7 @@
 
 TEST_F(CosineHumpFunctionTest, testPositiveHump)
 {
-  Function & fn = _fe_problem->getFunction(_fn_name_positive);
+  const Function & fn = _fe_problem->getFunction(_fn_name_positive);
 
   const Real x = 3.0;
   const Real z = 6.0;
@@ -37,7 +37,7 @@ TEST_F(CosineHumpFunctionTest, testPositiveHump)
 
 TEST_F(CosineHumpFunctionTest, testNegativeHump)
 {
-  Function & fn = _fe_problem->getFunction(_fn_name_negative);
+  const Function & fn = _fe_problem->getFunction(_fn_name_negative);
 
   const Real x = 3.0;
   const Real z = 6.0;

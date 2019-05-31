@@ -23,7 +23,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   /// Heat source function
-  Function & _q;
+  const Function & _q;
   /// Cross sectional area
   const VariableValue & _area;
 };

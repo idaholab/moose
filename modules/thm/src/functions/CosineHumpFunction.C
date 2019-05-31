@@ -38,7 +38,7 @@ CosineHumpFunction::CosineHumpFunction(const InputParameters & parameters)
 }
 
 Real
-CosineHumpFunction::value(Real /*t*/, const Point & p)
+CosineHumpFunction::value(Real /*t*/, const Point & p) const
 {
   const Real x = p(_component);
 
@@ -53,7 +53,7 @@ CosineHumpFunction::value(Real /*t*/, const Point & p)
 }
 
 RealVectorValue
-CosineHumpFunction::gradient(Real /*t*/, const Point & /*p*/)
+CosineHumpFunction::gradient(Real /*t*/, const Point & /*p*/) const
 {
   mooseError(name(), ": ", __PRETTY_FUNCTION__, " is not implemented.");
 }

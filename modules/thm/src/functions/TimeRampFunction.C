@@ -30,7 +30,7 @@ TimeRampFunction::TimeRampFunction(const InputParameters & parameters)
 }
 
 Real
-TimeRampFunction::value(Real t, const Point & /*p*/)
+TimeRampFunction::value(Real t, const Point & /*p*/) const
 {
   if (t < _initial_time)
     mooseError("Time is less than this object's 'initial_time' parameter.");
@@ -44,7 +44,7 @@ TimeRampFunction::value(Real t, const Point & /*p*/)
 }
 
 RealVectorValue
-TimeRampFunction::gradient(Real /*t*/, const Point & /*p*/)
+TimeRampFunction::gradient(Real /*t*/, const Point & /*p*/) const
 {
   mooseError("TimeRampFunction::gradient() is not implemented!");
 }
