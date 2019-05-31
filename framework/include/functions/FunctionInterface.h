@@ -51,14 +51,14 @@ public:
    * @param name The name of the parameter key of the function to retrieve
    * @return The function with name associated with the parameter 'name'
    */
-  Function & getFunction(const std::string & name);
+  const Function & getFunction(const std::string & name) const;
 
   /**
    * Get a function with a given name
    * @param name The name of the function to retrieve
    * @return The function with name 'name'
    */
-  Function & getFunctionByName(const FunctionName & name);
+  const Function & getFunctionByName(const FunctionName & name) const;
 
 private:
   /// Parameters of the object with this interface
@@ -68,6 +68,5 @@ private:
   FEProblemBase & _fni_feproblem;
 
   /// Thread ID
-  THREAD_ID _fni_tid;
+  const THREAD_ID _fni_tid;
 };
-

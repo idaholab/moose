@@ -25,7 +25,7 @@ public:
 protected:
   const int _component;
   const Real _factor;
-  Function * const _function;
+  const Function * const _function;
 
   std::map<unsigned int, std::shared_ptr<ElementPairLocator>> * _element_pair_locators;
   std::map<const Elem *, std::map<unsigned int, Point>> _elem_qp_normal;
@@ -34,4 +34,3 @@ protected:
 
 template <>
 InputParameters validParams<XFEMPressure>();
-

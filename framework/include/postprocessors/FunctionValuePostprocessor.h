@@ -32,8 +32,7 @@ public:
   virtual PostprocessorValue getValue() override;
 
 protected:
-  Function & _function;
+  const Function & _function;
   const Point & _point;
   const Real _scale_factor;
 };
-

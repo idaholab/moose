@@ -66,8 +66,11 @@ MultiAppProjectionTransfer::MultiAppProjectionTransfer(const InputParameters & p
     _fixed_meshes(getParam<bool>("fixed_meshes")),
     _qps_cached(false)
 {
-  if (_to_var_names.size() != 1 || _from_var_names.size() != 1)
-    mooseError(" Support single variable only ");
+  if (_to_var_names.size() != 1)
+    paramError("variable", " Support single to-variable only ");
+
+  if (_from_var_names.size() != 1)
+    paramError("source_variable", " Support single from-variable only ");
 }
 
 void

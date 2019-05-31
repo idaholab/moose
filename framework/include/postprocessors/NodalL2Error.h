@@ -31,6 +31,5 @@ public:
 
 protected:
   Real _integral_value;
-  Function & _func;
+  const Function & _func;
 };
-

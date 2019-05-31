@@ -39,7 +39,7 @@ ImageFunction::initialSetup()
 }
 
 Real
-ImageFunction::value(Real /*t*/, const Point & p)
+ImageFunction::value(Real /*t*/, const Point & p) const
 {
   return sample(p);
 }

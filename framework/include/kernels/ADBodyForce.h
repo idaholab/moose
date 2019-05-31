@@ -39,7 +39,7 @@ protected:
   const Real & _scale;
 
   /// Optional function value
-  Function & _function;
+  const Function & _function;
 
   /// Optional Postprocessor value
   const PostprocessorValue & _postprocessor;

@@ -44,15 +44,17 @@ MemoizedFunctionInterface::meshChanged()
 }
 
 Real
-MemoizedFunctionInterface::value(Real time, const Point & point)
+MemoizedFunctionInterface::value(Real time, const Point & point) const
 {
+  MemoizedFunctionInterface * ptr = const_cast<MemoizedFunctionInterface *>(this);
+
   if (_enable_cache)
   {
     // Start the cache over if we are at a new time step
     if (_respect_time && time != _current_time)
     {
       _current_time = time;
-      invalidateCache();
+      ptr->invalidateCache();
     }
 
     // Try to insert a new value into the cache
@@ -60,13 +62,13 @@ MemoizedFunctionInterface::value(Real time, const Point & point)
 
     // Evaluate and apply if the insertion worked, i.e. the element didn't exist
     if (result.second)
-      result.first->second = evaluateValue(time, point);
+      result.first->second = ptr->evaluateValue(time, point);
 
     // Return the cached value
     return result.first->second;
   }
 
-  return evaluateValue(time, point);
+  return ptr->evaluateValue(time, point);
 }
 
 void

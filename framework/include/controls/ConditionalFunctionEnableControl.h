@@ -30,5 +30,5 @@ protected:
 
 private:
   /// The function to give a true or false value
-  Function & _function;
+  const Function & _function;
 };

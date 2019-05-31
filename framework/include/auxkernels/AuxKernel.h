@@ -81,7 +81,7 @@ public:
    * Nodal or elemental kernel?
    * @return true if this is a nodal kernel, otherwise false
    */
-  bool isNodal() { return _nodal; }
+  bool isNodal() const { return _nodal; }
 
   /**
    * Get a reference to a variable this kernel is action on
@@ -306,4 +306,3 @@ AuxKernelTempl<ComputeValueType>::getUserObjectByName(const UserObjectName & nam
   _depend_uo.insert(name);
   return UserObjectInterface::getUserObjectByName<T>(name);
 }
-

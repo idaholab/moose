@@ -42,9 +42,8 @@ protected:
   const Real _gravity_value;
 
   /// Time and space dependent factor multiplying acceleration due to gravity
-  Function & _function;
+  const Function & _function;
 
   /// Map between boundary nodes and nodal mass
   std::map<dof_id_type, Real> _node_id_to_mass;
 };
-

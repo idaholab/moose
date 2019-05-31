@@ -52,7 +52,7 @@ WedgeFunction::WedgeFunction(const InputParameters & parameters)
 }
 
 Real
-WedgeFunction::value(Real /*t*/, const Point & p)
+WedgeFunction::value(Real /*t*/, const Point & p) const
 {
   const Real r = std::sqrt(p(0) * p(0) + p(1) * p(1));
   const Real theta = std::atan2(p(1), p(0));

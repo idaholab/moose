@@ -35,6 +35,5 @@ public:
 
 private:
   /// The function to execute
-  Function & _function;
+  const Function & _function;
 };
-

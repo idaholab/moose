@@ -68,7 +68,7 @@ protected:
   LinearInterpolation _sink_func;
 
   /// sink flux gets multiplied by this function
-  Function & _m_func;
+  const Function & _m_func;
 
   /// holds info about the names and values of richards variable in the simulation
   const RichardsVarNames & _richards_name_UO;

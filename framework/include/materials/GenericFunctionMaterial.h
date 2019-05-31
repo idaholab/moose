@@ -42,7 +42,7 @@ protected:
   std::vector<MaterialProperty<Real> *> _properties;
   std::vector<const MaterialProperty<Real> *> _properties_old;
   std::vector<const MaterialProperty<Real> *> _properties_older;
-  std::vector<Function *> _functions;
+  std::vector<const Function *> _functions;
 
 private:
   /**
@@ -53,4 +53,3 @@ private:
   /// Flag for calling declareProperyOld/Older
   bool _enable_stateful;
 };
-

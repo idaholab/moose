@@ -21,9 +21,8 @@ class PostprocessorFunction : public Function
 public:
   PostprocessorFunction(const InputParameters & parameters);
 
-  virtual Real value(Real t, const Point & p);
+  virtual Real value(Real t, const Point & p) const;
 
 protected:
   const PostprocessorValue & _pp;
 };
-

@@ -83,14 +83,14 @@ SolutionFunction::initialSetup()
 }
 
 Real
-SolutionFunction::value(Real t, const Point & p)
+SolutionFunction::value(Real t, const Point & p) const
 {
   return _scale_factor * (_solution_object_ptr->pointValue(t, p, _solution_object_var_index)) +
          _add_factor;
 }
 
 RealGradient
-SolutionFunction::gradient(Real t, const Point & p)
+SolutionFunction::gradient(Real t, const Point & p) const
 {
   return _scale_factor *
              (_solution_object_ptr->pointValueGradient(t, p, _solution_object_var_index)) +

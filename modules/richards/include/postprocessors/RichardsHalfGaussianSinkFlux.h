@@ -62,9 +62,8 @@ protected:
   unsigned int _pvar;
 
   /// the multiplier function
-  Function & _m_func;
+  const Function & _m_func;
 
   /// porepressure (or porepressure vector for multiphase problems)
   const MaterialProperty<std::vector<Real>> & _pp;
 };
-

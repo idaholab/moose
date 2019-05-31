@@ -32,7 +32,6 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned /*jvar*/) { return 0; }
-  Function & _ffn;
+  const Function & _ffn;
   MooseEnum _tau_type;
 };
-

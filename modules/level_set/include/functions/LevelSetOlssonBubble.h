@@ -25,9 +25,9 @@ class LevelSetOlssonBubble : public Function
 public:
   LevelSetOlssonBubble(const InputParameters & parameters);
 
-  virtual Real value(Real /*t*/, const Point & p) override;
+  virtual Real value(Real /*t*/, const Point & p) const override;
 
-  virtual RealGradient gradient(Real /*t*/, const Point & p) override;
+  virtual RealGradient gradient(Real /*t*/, const Point & p) const override;
 
 protected:
   /// The 'center' of the bubble
@@ -39,4 +39,3 @@ protected:
   /// The interface thickness
   const Real & _epsilon;
 };
-

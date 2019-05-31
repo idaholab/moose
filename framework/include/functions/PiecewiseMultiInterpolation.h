@@ -41,7 +41,7 @@ public:
   /**
    * Given t and p, return the interpolated value.
    */
-  virtual Real value(Real t, const Point & pt) override;
+  virtual Real value(Real t, const Point & pt) const override;
 
 protected:
   /**
@@ -49,7 +49,7 @@ protected:
    * on the grid (not the MOOSE simulation reference frame),
    * interpolate the gridded data to this point
    */
-  virtual Real sample(const std::vector<Real> & pt) = 0;
+  virtual Real sample(const std::vector<Real> & pt) const = 0;
 
   /// object to provide function evaluations at points on the grid
   std::unique_ptr<GriddedData> _gridded_data;
@@ -82,6 +82,5 @@ protected:
   void getNeighborIndices(std::vector<Real> in_arr,
                           Real x,
                           unsigned int & lower_x,
-                          unsigned int & upper_x);
+                          unsigned int & upper_x) const;
 };
-

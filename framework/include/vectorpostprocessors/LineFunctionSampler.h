@@ -45,7 +45,7 @@ protected:
   unsigned int _num_funcs;
 
   /// Pointers to the Functions
-  std::vector<Function *> _functions;
+  std::vector<const Function *> _functions;
 
   /// So we don't have to create and destroy this vector over and over again
   std::vector<Real> _values;
@@ -56,4 +56,3 @@ protected:
   /// The ID to use for each point (yes, this is Real on purpose)
   std::vector<Real> _ids;
 };
-

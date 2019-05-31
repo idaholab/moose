@@ -31,8 +31,7 @@ protected:
   virtual ADReal computeQpResidual() override;
 
   /// The function describing the Dirichlet condition
-  Function & _function;
+  const Function & _function;
 
   usingNodalBCMembers;
 };
-

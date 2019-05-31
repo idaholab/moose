@@ -25,9 +25,9 @@ class LevelSetOlssonVortex : public Function
 public:
   LevelSetOlssonVortex(const InputParameters & parameters);
 
-  Real value(Real t, const Point & p) override;
+  Real value(Real t, const Point & p) const override;
 
-  RealVectorValue vectorValue(Real t, const Point & p) override;
+  RealVectorValue vectorValue(Real t, const Point & p) const override;
 
 protected:
   /// Total time for the velocity field to complete reverse
@@ -39,13 +39,6 @@ protected:
   /// The vector component to return
   const MooseEnum & _component;
 
-  /// The velocity field computed
-  RealVectorValue _output;
-
-  /// The time reversal coefficient
-  Real _reverse_coefficient;
-
   // Convenience for libMesh::pi
   const Real _pi;
 };
-

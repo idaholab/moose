@@ -32,6 +32,5 @@ public:
   PiecewiseMultilinear(const InputParameters & parameters);
 
 protected:
-  virtual Real sample(const std::vector<Real> & pt) override;
+  virtual Real sample(const std::vector<Real> & pt) const override;
 };
-

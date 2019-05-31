@@ -30,6 +30,6 @@ protected:
   virtual Real computeQpResidual() override;
 
   /// The function being used for setting the value
-  Function & _exact_solution;
+  const Function & _exact_solution;
   const Real _coeff;
 };

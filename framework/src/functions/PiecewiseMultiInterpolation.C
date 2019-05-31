@@ -61,7 +61,7 @@ PiecewiseMultiInterpolation::PiecewiseMultiInterpolation(const InputParameters &
 PiecewiseMultiInterpolation::~PiecewiseMultiInterpolation() {}
 
 Real
-PiecewiseMultiInterpolation::value(Real t, const Point & p)
+PiecewiseMultiInterpolation::value(Real t, const Point & p) const
 {
   // convert the inputs to an input to the sample function using _axes
   std::vector<Real> pt_in_grid(_dim);
@@ -79,7 +79,7 @@ void
 PiecewiseMultiInterpolation::getNeighborIndices(std::vector<Real> in_arr,
                                                 Real x,
                                                 unsigned int & lower_x,
-                                                unsigned int & upper_x)
+                                                unsigned int & upper_x) const
 {
   int N = in_arr.size();
   if (x <= in_arr[0])

@@ -46,7 +46,7 @@ protected:
   virtual Real computeQpJacobian();
 
 private:
-  Function & _func;
+  const Function & _func;
 
   RealVectorValue _velocity;
 
@@ -54,4 +54,3 @@ private:
   Real _y;
   Real _z;
 };
-

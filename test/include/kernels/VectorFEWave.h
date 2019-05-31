@@ -36,8 +36,7 @@ protected:
   /// Holds the solution curl at the current quadrature points
   const VectorVariableCurl & _curl_u;
 
-  Function & _x_ffn;
-  Function & _y_ffn;
-  Function & _z_ffn;
+  const Function & _x_ffn;
+  const Function & _y_ffn;
+  const Function & _z_ffn;
 };
-

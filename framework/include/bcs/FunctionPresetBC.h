@@ -34,6 +34,5 @@ protected:
   virtual Real computeQpValue() override;
 
   /// Function being used for evaluation of this BC
-  Function & _func;
+  const Function & _func;
 };
-

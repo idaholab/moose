@@ -29,6 +29,5 @@ public:
 protected:
   virtual Real computeQpResidual();
 
-  SplineFunction & _fn;
+  const SplineFunction & _fn;
 };
-

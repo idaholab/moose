@@ -41,10 +41,9 @@ protected:
   virtual Real computeQpJacobian() override;
 
 private:
-  Function & _func;
+  const Function & _func;
 
   Real _epsilon;
   Real _sigma;
   const MaterialProperty<Real> & _diff;
 };
-

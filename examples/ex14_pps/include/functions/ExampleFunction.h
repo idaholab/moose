@@ -21,9 +21,8 @@ class ExampleFunction : public Function
 public:
   ExampleFunction(const InputParameters & parameters);
 
-  virtual Real value(Real t, const Point & p) override;
+  virtual Real value(Real t, const Point & p) const override;
 
 protected:
   Real _alpha;
 };
-

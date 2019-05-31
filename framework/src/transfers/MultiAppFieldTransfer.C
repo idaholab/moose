@@ -42,9 +42,9 @@ MultiAppFieldTransfer::MultiAppFieldTransfer(const InputParameters & parameters)
     _to_var_names(getParam<std::vector<AuxVariableName>>("variable")),
     _preserve_transfer(isParamValid("from_postprocessors_to_be_preserved")),
     _from_postprocessors_to_be_preserved(
-        parameters.get<std::vector<PostprocessorName>>("from_postprocessors_to_be_preserved")),
+        getParam<std::vector<PostprocessorName>>("from_postprocessors_to_be_preserved")),
     _to_postprocessors_to_be_preserved(
-        parameters.get<std::vector<PostprocessorName>>("to_postprocessors_to_be_preserved")),
+        getParam<std::vector<PostprocessorName>>("to_postprocessors_to_be_preserved")),
     _use_nearestpoint_pps(false)
 {
   if (_preserve_transfer)
@@ -53,8 +53,8 @@ MultiAppFieldTransfer::MultiAppFieldTransfer(const InputParameters & parameters)
      * Not sure how important to support multi variables
      * Let us handle the single variable case only right now if the conservative capability is on
      */
-    if (_to_var_name.size() != 1 && _from_var_names.size() != 1)
-      paramError("source_variable",
+    if (_to_var_names.size() != 1)
+      paramError("variable",
                  " Support single variable only when the conservative capability is on ");
 
     if (_direction == TO_MULTIAPP)
@@ -83,19 +83,16 @@ MultiAppFieldTransfer::MultiAppFieldTransfer(const InputParameters & parameters)
     }
   }
 
-  if (_to_var_names.size() != _from_var_names.size())
-    paramError("source_variable",
-               "Number of target variable should equal to the number of source variables ");
-
+  /* Have to specify at least one to-variable */
   if (_to_var_names.size() == 0)
     paramError("variable", "You need to specify at least one variable");
 
   /* Right now, most of transfers support one variable only */
-  if (_to_var_names.size() == 1 && _from_var_names.size())
-  {
+  if (_to_var_names.size() == 1)
     _to_var_name = _to_var_names[0];
+
+  if (_from_var_names.size() == 1)
     _from_var_name = _from_var_names[0];
-  }
 }
 
 void

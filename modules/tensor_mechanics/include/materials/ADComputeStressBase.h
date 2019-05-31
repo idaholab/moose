@@ -55,8 +55,7 @@ protected:
   ADMaterialProperty(RankTwoTensor) & _elastic_strain;
 
   /// initial stress components
-  std::vector<Function *> _initial_stress_fcn;
+  std::vector<const Function *> _initial_stress_fcn;
 
   usingMaterialMembers;
 };
-

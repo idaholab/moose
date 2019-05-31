@@ -32,11 +32,10 @@ protected:
 
   const Real _factor;
 
-  Function * const _function;
+  const Function * const _function;
 
   const PostprocessorValue * const _postprocessor;
 
   /// _alpha Parameter for HHT time integration scheme
   const Real _alpha;
 };
-

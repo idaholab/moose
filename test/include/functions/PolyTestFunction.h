@@ -21,9 +21,8 @@ class PolyTestFunction : public Function
 public:
   PolyTestFunction(const InputParameters & parameters);
 
-  virtual Real value(Real t, const Point & p) override;
+  virtual Real value(Real t, const Point & p) const override;
 
   const std::vector<Real> _coeffs;
   const bool _deriv;
 };
-

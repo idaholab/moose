@@ -30,7 +30,7 @@ public:
   /**
    * Static function to cast a Function to SeriesFunction
    */
-  static FunctionSeries & checkAndConvertFunction(Function & function,
+  static FunctionSeries & checkAndConvertFunction(const Function & function,
                                                   const std::string & typeName,
                                                   const std::string & objectName);
 
@@ -125,4 +125,3 @@ private:
    */
   static std::vector<std::size_t> convertOrders(const std::vector<unsigned int> & orders);
 };
-

@@ -39,6 +39,5 @@ public:
 
 protected:
   MooseVariableScalar & _var;
-  Function & _func;
+  const Function & _func;
 };
-

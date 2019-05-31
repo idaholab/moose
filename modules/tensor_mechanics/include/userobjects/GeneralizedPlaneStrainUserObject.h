@@ -45,11 +45,10 @@ protected:
 
   const SubblockIndexProvider * _subblock_id_provider;
 
-  Function & _out_of_plane_pressure;
+  const Function & _out_of_plane_pressure;
   const Real _factor;
   unsigned int _scalar_out_of_plane_strain_direction;
   std::vector<Real> _residual;
   std::vector<Real> _reference_residual;
   std::vector<Real> _jacobian;
 };
-

@@ -22,7 +22,7 @@ validParams<MTPiecewiseConst2D>()
 MTPiecewiseConst2D::MTPiecewiseConst2D(const InputParameters & parameters) : Function(parameters) {}
 
 Real
-MTPiecewiseConst2D::value(Real /*t*/, const Point & p)
+MTPiecewiseConst2D::value(Real /*t*/, const Point & p) const
 {
   Real val = 0;
   Real x = p(0);

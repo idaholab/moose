@@ -360,7 +360,7 @@ ADSingleVariableReturnMappingSolution<compute_stage>::updateBounds(const ADReal 
   // Update upper/lower bounds as applicable
   if (residual * init_resid_sign < 0.0 && scalar < scalar_upper_bound)
   {
-    scalar_upper_bound = MetaPhysicL::raw_value(scalar);
+    scalar_upper_bound = scalar;
     if (scalar_upper_bound < scalar_lower_bound)
     {
       scalar_upper_bound = scalar_lower_bound;
@@ -373,7 +373,7 @@ ADSingleVariableReturnMappingSolution<compute_stage>::updateBounds(const ADReal 
   // This ensures that if we encounter multiple roots, we pick the lowest one.
   else if (residual * init_resid_sign > 0.0 && scalar > scalar_lower_bound &&
            scalar < scalar_upper_bound)
-    scalar_lower_bound = MetaPhysicL::raw_value(scalar);
+    scalar_lower_bound = scalar;
 }
 
 template <ComputeStage compute_stage>

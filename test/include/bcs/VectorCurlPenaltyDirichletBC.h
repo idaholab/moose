@@ -25,9 +25,8 @@ protected:
   Real _penalty;
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
-  Function * _function;
-  Function & _function_x;
-  Function & _function_y;
-  Function & _function_z;
+  const Function * _function;
+  const Function & _function_x;
+  const Function & _function_y;
+  const Function & _function_z;
 };
-

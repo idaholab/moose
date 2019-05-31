@@ -31,7 +31,7 @@ TimestepSetupFunction::timestepSetup()
 }
 
 Real
-TimestepSetupFunction::value(Real /*t*/, const Point & /*p*/)
+TimestepSetupFunction::value(Real /*t*/, const Point & /*p*/) const
 {
   return _local_timestep;
 }

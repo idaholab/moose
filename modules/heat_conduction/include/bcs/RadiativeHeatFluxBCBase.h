@@ -42,9 +42,8 @@ protected:
   const Real _sigma_stefan_boltzmann;
 
   /// Function describing the temperature of the body irhs
-  Function & _tinf;
+  const Function & _tinf;
 
   /// Emissivity of the boundary
   const Real _eps_boundary;
 };
-

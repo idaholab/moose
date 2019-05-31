@@ -45,7 +45,6 @@ protected:
   virtual Real computeQpJacobian() override;
 
 private:
-  Function & _func;
+  const Function & _func;
   Real _p;
 };
-

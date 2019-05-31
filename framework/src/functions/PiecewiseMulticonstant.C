@@ -38,7 +38,7 @@ PiecewiseMulticonstant::PiecewiseMulticonstant(const InputParameters & parameter
 }
 
 Real
-PiecewiseMulticonstant::sample(const std::vector<Real> & pt)
+PiecewiseMulticonstant::sample(const std::vector<Real> & pt) const
 {
   std::vector<unsigned int> left(_dim);
   std::vector<unsigned int> right(_dim);

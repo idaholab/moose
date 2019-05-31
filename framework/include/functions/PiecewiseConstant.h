@@ -32,7 +32,7 @@ public:
    * \param pt The point in space (x,y,z) (unused)
    * \return The value of the function at the specified time
    */
-  virtual Real value(Real t, const Point & pt) override;
+  virtual Real value(Real t, const Point & pt) const override;
 
   /**
    * Get the time derivative of the function (based on time only)
@@ -40,11 +40,11 @@ public:
    * \param pt The point in space (x,y,z) (unused)
    * \return The time derivative of the function at the specified time
    */
-  virtual Real timeDerivative(Real t, const Point & pt) override;
+  virtual Real timeDerivative(Real t, const Point & pt) const override;
 
-  virtual Real integral() override;
+  virtual Real integral() const override;
 
-  virtual Real average() override;
+  virtual Real average() const override;
 
 private:
   enum DirectionEnum
@@ -57,4 +57,3 @@ private:
 
   const DirectionEnum _direction;
 };
-

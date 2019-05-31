@@ -37,10 +37,9 @@ protected:
   virtual Real computeQpJacobian();
 
   /// A vector function containing the components of k for the tensor
-  Function & _k_comp;
+  const Function & _k_comp;
 
 private:
   /** Compute the k Tensor from the vector function input */
   RealTensorValue computeConductivity(Real t, const Point & pt);
 };
-

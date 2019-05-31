@@ -199,8 +199,7 @@ protected:
   /**
     Parsed functions of front growth
    */
-  Function & _func_x;
-  Function & _func_y;
-  Function & _func_z;
+  const Function & _func_x;
+  const Function & _func_y;
+  const Function & _func_z;
 };
-

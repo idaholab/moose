@@ -21,11 +21,10 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
-  Function & _T_infinity;
+  const Function & _T_infinity;
   const Real _coefficient;
-  Function * const _coef_func;
+  const Function * const _coef_func;
 };
 
 template <>
 InputParameters validParams<ConvectiveFluxFunction>();
-

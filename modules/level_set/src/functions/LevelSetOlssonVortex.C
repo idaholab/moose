@@ -39,23 +39,24 @@ LevelSetOlssonVortex::LevelSetOlssonVortex(const InputParameters & parameters)
 }
 
 Real
-LevelSetOlssonVortex::value(Real t, const Point & p)
+LevelSetOlssonVortex::value(Real t, const Point & p) const
 {
   return vectorValue(t, p)(_component);
 }
 
 RealVectorValue
-LevelSetOlssonVortex::vectorValue(Real t, const Point & p)
+LevelSetOlssonVortex::vectorValue(Real t, const Point & p) const
 {
   // Compute the velocity field
-  _output(0) = std::sin(_pi * p(0)) * std::sin(_pi * p(0)) * std::sin(2 * _pi * p(1));
-  _output(1) = -std::sin(_pi * p(1)) * std::sin(_pi * p(1)) * std::sin(2 * _pi * p(0));
+  RealVectorValue output;
+  output(0) = std::sin(_pi * p(0)) * std::sin(_pi * p(0)) * std::sin(2 * _pi * p(1));
+  output(1) = -std::sin(_pi * p(1)) * std::sin(_pi * p(1)) * std::sin(2 * _pi * p(0));
 
   // Compute the coefficient used to reverse the flow
-  _reverse_coefficient = 1.0;
+  Real reverse_coefficient = 1.0;
   if (_reverse_type == 0 && t > _reverse_time / 2.)
-    _reverse_coefficient = -1.0;
+    reverse_coefficient = -1.0;
   else if (_reverse_type == 1)
-    _reverse_coefficient = std::cos(_pi * t / _reverse_time);
-  return _reverse_coefficient * _output;
+    reverse_coefficient = std::cos(_pi * t / _reverse_time);
+  return reverse_coefficient * output;
 }

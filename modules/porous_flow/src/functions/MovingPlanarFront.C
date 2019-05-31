@@ -73,7 +73,7 @@ MovingPlanarFront::MovingPlanarFront(const InputParameters & parameters)
 }
 
 Real
-MovingPlanarFront::value(Real t, const Point & p)
+MovingPlanarFront::value(Real t, const Point & p) const
 {
   if (t < _activation_time)
     return _false_value;

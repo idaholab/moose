@@ -21,11 +21,10 @@ class TimestepSetupFunction : public Function
 public:
   TimestepSetupFunction(const InputParameters & parameters);
 
-  virtual Real value(Real t, const Point & p);
+  virtual Real value(Real t, const Point & p) const;
 
   virtual void timestepSetup();
 
 private:
   unsigned int & _local_timestep;
 };
-

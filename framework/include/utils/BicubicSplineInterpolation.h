@@ -152,4 +152,3 @@ protected:
   /// File number for data dump
   static int _file_number;
 };
-

@@ -35,6 +35,6 @@ protected:
 
 private:
   const PostprocessorValue * const _postprocessor;
-  Function & _function;
+  const Function & _function;
   const Real _factor;
 };

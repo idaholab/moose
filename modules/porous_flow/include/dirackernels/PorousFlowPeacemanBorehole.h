@@ -40,7 +40,7 @@ protected:
    * pressure, and does nothing otherwise
    * The flow rate to/from the borehole is multiplied by |character|, so usually character = +/- 1
    */
-  Function & _character;
+  const Function & _character;
 
   /// Bottomhole pressure of borehole
   const Real _p_bot;
@@ -86,4 +86,3 @@ protected:
                                     Real & outflow,
                                     Real & outflowp) const override;
 };
-

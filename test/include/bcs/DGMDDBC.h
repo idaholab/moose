@@ -43,11 +43,10 @@ protected:
   virtual Real computeQpJacobian();
 
 private:
-  Function & _func;
+  const Function & _func;
 
   const MaterialProperty<Real> & _diff; // diffusivity
 
   Real _epsilon;
   Real _sigma;
 };
-

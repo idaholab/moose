@@ -49,8 +49,7 @@ protected:
   ADMaterialProperty(RankFourTensor) & _elasticity_tensor;
 
   /// prefactor function to multiply the elasticity tensor with
-  Function * const _prefactor_function;
+  const Function * const _prefactor_function;
 
   usingMaterialMembers;
 };
-

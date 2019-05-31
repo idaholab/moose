@@ -39,7 +39,7 @@ LinearCombinationFunction::LinearCombinationFunction(const InputParameters & par
   {
     if (name() == names[i])
       mooseError("A LinearCombinationFunction must not reference itself");
-    Function * const f = &getFunctionByName(names[i]);
+    const Function * const f = &getFunctionByName(names[i]);
     if (!f)
       mooseError("LinearCombinationFunction: The function ",
                  names[i],
@@ -51,7 +51,7 @@ LinearCombinationFunction::LinearCombinationFunction(const InputParameters & par
 }
 
 Real
-LinearCombinationFunction::value(Real t, const Point & p)
+LinearCombinationFunction::value(Real t, const Point & p) const
 {
   Real val = 0;
   for (unsigned i = 0; i < _f.size(); ++i)
@@ -60,7 +60,7 @@ LinearCombinationFunction::value(Real t, const Point & p)
 }
 
 RealGradient
-LinearCombinationFunction::gradient(Real t, const Point & p)
+LinearCombinationFunction::gradient(Real t, const Point & p) const
 {
   RealGradient g;
   for (unsigned i = 0; i < _f.size(); ++i)
@@ -69,7 +69,7 @@ LinearCombinationFunction::gradient(Real t, const Point & p)
 }
 
 RealVectorValue
-LinearCombinationFunction::vectorValue(Real t, const Point & p)
+LinearCombinationFunction::vectorValue(Real t, const Point & p) const
 {
   RealVectorValue v;
   for (unsigned i = 0; i < _f.size(); ++i)

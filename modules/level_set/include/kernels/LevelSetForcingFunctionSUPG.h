@@ -32,11 +32,10 @@ protected:
   virtual ADVectorResidual precomputeQpResidual() override;
 
   /// Function value
-  Function & _function;
+  const Function & _function;
 
   usingKernelGradMembers;
   using LevelSetVelocityInterface<ADKernelGrad<compute_stage>>::computeQpVelocity;
   using LevelSetVelocityInterface<ADKernelGrad<compute_stage>>::_velocity;
   using LevelSetVelocityInterface<ADKernelGrad<compute_stage>>::_q_point;
 };
-

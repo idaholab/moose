@@ -30,4 +30,19 @@
     requirement = 'The system shall be able to output the adjusting values in conservative transfers'
   [../]
 
+  [./conservative_transfer_userobject_transfer]
+    type = Exodiff
+    input = master_userobject.i
+    exodiff = 'master_userobject_out.e master_userobject_out_sub_app0.e master_userobject_out_sub_app1.e'
+    requirement = 'The system shall support conservative transfers in MultiAppUserObjectTransfer'
+  [../]
+
+  [./conservative_transfer_userobject_transfer_csv]
+    type = CSVDiff
+    input = 'master_userobject.i'
+    csvdiff = 'master_userobject_out_to_nearest_point_0001.csv master_userobject_out_to_nearest_point_element_0001.csv'
+    prereq = conservative_transfer_userobject_transfer
+    requirement = 'The system shall be able to output the adjusting values in conservative transfers for MultiAppUserObjectTransfer'
+  [../]
+
 []
