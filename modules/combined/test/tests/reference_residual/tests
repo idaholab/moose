@@ -6,7 +6,7 @@
     custom_cmp = 'reference_residual.cmp'
     scale_refine = 2
     design = 'ReferenceResidualProblem.md'
-    issues = 'r22364'
+    issues = '#12053'
     requirement = 'The reference residual based convergence checking system shall determine if convergence is achieved by comparing the residual to a set of physical displacement quantities.'
   [../]
   [./test_sm]
@@ -17,7 +17,7 @@
     custom_cmp = 'reference_residual.cmp'
     scale_refine = 2
     design = 'ReferenceResidualProblem.md'
-    issues = 'r22364'
+    issues = '#12053'
     requirement = 'The reference residual based convergence checking system shall determine if convergence is achieved by comparing the residual to physical displacement quantities in a solid mechanics module input file.'
     prereq = test
   [../]
