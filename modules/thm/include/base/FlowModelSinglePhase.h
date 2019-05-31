@@ -21,22 +21,6 @@ public:
   virtual void addMooseObjects() override;
 
 protected:
-  std::string _raw_suffix;
-  std::string _suffix;
-
-  VariableName _rhoA_name;
-  VariableName _rhouA_name;
-  VariableName _rhoEA_name;
-  VariableName _density_name;
-  VariableName _total_energy_density_name;
-  VariableName _momentum_density_name;
-  VariableName _velocity_name;
-  VariableName _pressure_name;
-  VariableName _specific_volume_name;
-  VariableName _specific_internal_energy_name;
-  VariableName _temperature_name;
-  VariableName _specific_total_enthalpy_name;
-
   void addRDGMooseObjects();
 
 public:
