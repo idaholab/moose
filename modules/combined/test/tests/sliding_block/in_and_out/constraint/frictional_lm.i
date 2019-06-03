@@ -1,15 +1,3 @@
-#  This is a benchmark test that checks constraint based frictional
-#  contact using the penalty method.  In this test a sinusoidal
-#  displacement is applied in the horizontal direction to simulate
-#  a small block come in and out of contact as it slides down a larger block.
-#
-#  The sinusoid is of the form 0.4sin(4t)+0.2 and a friction coefficient
-#  of 0.4 is used.  The gold file is run on one processor and the benchmark
-#  case is run on a minimum of 4 processors to ensure no parallel variability
-#  in the contact pressure and penetration results.  Further documentation can
-#  found in moose/modules/contact/doc/sliding_block/
-#
-
 [Mesh]
   file = sliding_elastic_blocks_2d.e
   patch_size = 80
@@ -41,14 +29,12 @@
   [../]
   [normal_lm]
     block = '30'
-    # family = MONOMIAL
-    # order = CONSTANT
   []
-  # [tangential_lm]
-  #   block = '30'
-  #   family = MONOMIAL
-  #   order = CONSTANT
-  # []
+  [tangential_lm]
+    block = '30'
+    family = MONOMIAL
+    order = CONSTANT
+  []
 []
 
 [BCs]
@@ -115,7 +101,7 @@
 [Executioner]
   type = Transient
   solve_type = 'PJFNK'
-  petsc_options = '-snes_converged_reason -ksp_converged_reason'
+  petsc_options = '-snes_converged_reason -ksp_converged_reason -snes_ksp_ew'
   petsc_options_iname = '-pc_type -mat_mffd_err -pc_factor_shift_type -pc_factor_shift_amount'
   petsc_options_value = 'lu       1e-5          NONZERO               1e-15'
   end_time = 15
@@ -132,11 +118,11 @@
 []
 
 [Outputs]
-  # sync_times = '1 2 3 4 5 6 7 8 9 10 11 12 13 14 15'
+  sync_times = '1 2 3 4 5 6 7 8 9 10 11 12 13 14 15'
   [exodus]
     type = Exodus
     file_base = frictional_lm_out
-    # sync_only = true
+    sync_only = true
   []
   [dof]
     execute_on = 'initial'
@@ -160,29 +146,19 @@
 []
 
 [Constraints]
-  # [normal_lm]
-  #   type = MortarNormalContactLM
-  #   master_boundary = '2'
-  #   slave_boundary = '3'
-  #   master_subdomain = '20'
-  #   slave_subdomain = '30'
-  #   variable = normal_lm
-  #   slave_variable = disp_x
-  #   slave_disp_y = disp_y
-  #   use_displaced_mesh = true
-  #   compute_primal_residuals = false
-  # []
   [./lm]
-    type = NodalNormalContactLM
+    type = NormalNodalLMMechanicalContact
     slave = 3
     master = 2
     variable = normal_lm
     master_variable = disp_x
     disp_y = disp_y
-    c = 1
+    ncp_function_type = min
+    use_displaced_mesh = true
+    c = 1e6 # relative scale difference between pressure and gap
   [../]
   [normal_x]
-    type = MortarNormalContact
+    type = NormalMortarMechanicalContact
     master_boundary = '2'
     slave_boundary = '3'
     master_subdomain = '20'
@@ -194,7 +170,7 @@
     compute_lm_residuals = false
   []
   [normal_y]
-    type = MortarNormalContact
+    type = NormalMortarMechanicalContact
     master_boundary = '2'
     slave_boundary = '3'
     master_subdomain = '20'
@@ -205,44 +181,46 @@
     use_displaced_mesh = true
     compute_lm_residuals = false
   []
-  # [tangential_lm]
-  #   type = MortarTangentialContactLM
-  #   master_boundary = '2'
-  #   slave_boundary = '3'
-  #   master_subdomain = '20'
-  #   slave_subdomain = '30'
-  #   variable = tangential_lm
-  #   slave_variable = disp_x
-  #   slave_disp_y = disp_y
-  #   use_displaced_mesh = true
-  #   compute_primal_residuals = false
-  #   contact_pressure = normal_lm
-  #   friction_coefficient = .4
-  # []
-  # [tangential_x]
-  #   type = MortarTangentialContact
-  #   master_boundary = '2'
-  #   slave_boundary = '3'
-  #   master_subdomain = '20'
-  #   slave_subdomain = '30'
-  #   variable = tangential_lm
-  #   slave_variable = disp_x
-  #   component = x
-  #   use_displaced_mesh = true
-  #   compute_lm_residuals = false
-  # []
-  # [tangential_y]
-  #   type = MortarTangentialContact
-  #   master_boundary = '2'
-  #   slave_boundary = '3'
-  #   master_subdomain = '20'
-  #   slave_subdomain = '30'
-  #   variable = tangential_lm
-  #   slave_variable = disp_y
-  #   component = y
-  #   use_displaced_mesh = true
-  #   compute_lm_residuals = false
-  # []
+  [tangential_lm]
+    type = TangentialMortarLMMechanicalContact
+    master_boundary = '2'
+    slave_boundary = '3'
+    master_subdomain = '20'
+    slave_subdomain = '30'
+    variable = tangential_lm
+    slave_variable = disp_x
+    slave_disp_y = disp_y
+    use_displaced_mesh = true
+    compute_primal_residuals = false
+    contact_pressure = normal_lm
+    friction_coefficient = .4
+    ncp_function_type = fb
+    c = 1000 # relative scale difference between pressure and velocity
+  []
+  [tangential_x]
+    type = TangentialMortarMechanicalContact
+    master_boundary = '2'
+    slave_boundary = '3'
+    master_subdomain = '20'
+    slave_subdomain = '30'
+    variable = tangential_lm
+    slave_variable = disp_x
+    component = x
+    use_displaced_mesh = true
+    compute_lm_residuals = false
+  []
+  [tangential_y]
+    type = TangentialMortarMechanicalContact
+    master_boundary = '2'
+    slave_boundary = '3'
+    master_subdomain = '20'
+    slave_subdomain = '30'
+    variable = tangential_lm
+    slave_variable = disp_y
+    component = y
+    use_displaced_mesh = true
+    compute_lm_residuals = false
+  []
 []
 
 [Postprocessors]
