@@ -55,7 +55,7 @@
 []
 
 [Functions]
-  [./m_dot_fn]
+  [./inlet_m_dot_fn]
     type = PiecewiseLinear
     x = '0  1'
     y = '0  0.5'
@@ -63,16 +63,11 @@
 []
 
 [Controls]
-  [./inlet_m_dot_fn]
-    type = GetFunctionValueControl
-    function = m_dot_fn
-  [../]
-
   [./set_inlet_value]
-    type = SetRealValueControl
+    type = TimeFunctionControl
     component = inlet
     parameter = m_dot
-    value = inlet_m_dot_fn:value
+    function = inlet_m_dot_fn
   [../]
 []
 
