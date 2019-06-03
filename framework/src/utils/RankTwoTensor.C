@@ -1040,7 +1040,7 @@ RankTwoTensorTempl<DualReal>::QR(RankTwoTensorTempl<DualReal> & Q,
       {
         unsigned int c = 3 - a - b;
         if (!MooseUtils::absoluteFuzzyEqual(R(c, i).value(), 0.0))
-          P = this->permutationTensor({a, b, c}, {c, b, a});
+          P = this->permutationTensor({{a, b, c}}, {{c, b, a}});
       }
 
       Q = Q * P.transpose();
