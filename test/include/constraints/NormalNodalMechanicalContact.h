@@ -13,39 +13,28 @@
 #include "NodeFaceConstraint.h"
 
 // Forward Declarations
-class NodalTangentialContactLM;
+class NormalNodalMechanicalContact;
 
 template <>
-InputParameters validParams<NodalTangentialContactLM>();
+InputParameters validParams<NormalNodalMechanicalContact>();
 
-class NodalTangentialContactLM : public NodeFaceConstraint
+class NormalNodalMechanicalContact : public NodeFaceConstraint
 {
 public:
-  NodalTangentialContactLM(const InputParameters & parameters);
+  NormalNodalMechanicalContact(const InputParameters & parameters);
+
+  void computeJacobian() override;
+  void computeOffDiagJacobian(unsigned int jvar) override;
 
 protected:
   virtual Real computeQpSlaveValue() override;
-
-  virtual void computeResidual() override;
-  virtual void computeJacobian() override;
-  virtual void computeOffDiagJacobian(unsigned jvar) override;
 
   virtual Real computeQpResidual(Moose::ConstraintType type) override;
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;
   virtual Real computeQpOffDiagJacobian(Moose::ConstraintJacobianType type, unsigned jvar) override;
 
-  const Real & _contact_pressure;
-  const unsigned _contact_pressure_id;
-
-  const Real & _disp_x_dot;
-  const Real & _disp_y_dot;
-
-  const unsigned _disp_y_id;
-
-  const VariableValue & _du_dot_du;
-
-  const Real _mu;
+  const Real & _lambda;
+  const unsigned _lambda_id;
   const Real _epsilon;
-
-  const MooseEnum _ncp_type;
+  const MooseEnum _component;
 };

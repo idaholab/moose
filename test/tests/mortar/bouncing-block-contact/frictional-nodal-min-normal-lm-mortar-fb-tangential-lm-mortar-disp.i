@@ -58,21 +58,8 @@ offset = 1e-2
 
 
 [Constraints]
-  # [normal_lm]
-  #   type = MechanicalContactLMTest
-  #   master_boundary = 20
-  #   slave_boundary = 10
-  #   master_subdomain = 4
-  #   slave_subdomain = 3
-  #   variable = normal_lm
-  #   slave_variable = disp_x
-  #   slave_disp_y = disp_y
-  #   use_displaced_mesh = true
-  #   compute_primal_residuals = false
-  #   ncp_function_type = fb
-  # []
   [normal_lm]
-    type = NodeLMConstraintTest
+    type = NormalNodalLMMechanicalContact
     slave = 10
     master = 20
     variable = normal_lm
@@ -81,7 +68,7 @@ offset = 1e-2
     ncp_function_type = min
   [../]
   [normal_x]
-    type = MechanicalContactTest
+    type = NormalMortarMechanicalContact
     master_boundary = 20
     slave_boundary = 10
     master_subdomain = 4
@@ -93,7 +80,7 @@ offset = 1e-2
     compute_lm_residuals = false
   []
   [normal_y]
-    type = MechanicalContactTest
+    type = NormalMortarMechanicalContact
     master_boundary = 20
     slave_boundary = 10
     master_subdomain = 4
@@ -105,7 +92,7 @@ offset = 1e-2
     compute_lm_residuals = false
   []
   [tangential_lm]
-    type = TangentialContactLMTest
+    type = TangentialMortarLMMechanicalContact
     master_boundary = 20
     slave_boundary = 10
     master_subdomain = 4
@@ -120,7 +107,7 @@ offset = 1e-2
     ncp_function_type = fb
   []
   [tangential_x]
-    type = TangentialContactTest
+    type = TangentialMortarMechanicalContact
     master_boundary = 20
     slave_boundary = 10
     master_subdomain = 4
@@ -132,7 +119,7 @@ offset = 1e-2
     compute_lm_residuals = false
   []
   [tangential_y]
-    type = TangentialContactTest
+    type = TangentialMortarMechanicalContact
     master_boundary = 20
     slave_boundary = 10
     master_subdomain = 4

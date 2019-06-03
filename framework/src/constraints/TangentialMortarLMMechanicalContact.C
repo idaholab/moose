@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "TangentialContactLMTest.h"
+#include "TangentialMortarLMMechanicalContact.h"
 
-registerADMooseObject("MooseTestApp", TangentialContactLMTest);
+registerADMooseObject("MooseApp", TangentialMortarLMMechanicalContact);
 
 defineADValidParams(
-    TangentialContactLMTest,
+    TangentialMortarLMMechanicalContact,
     ADMortarConstraint,
     params.addRequiredParam<NonlinearVariableName>("slave_disp_y",
                                                    "The y displacement variable on the slave face");
@@ -31,7 +31,8 @@ defineADValidParams(
                                "min or fb where fb stands for Fischer-Burmeister"););
 
 template <ComputeStage compute_stage>
-TangentialContactLMTest<compute_stage>::TangentialContactLMTest(const InputParameters & parameters)
+TangentialMortarLMMechanicalContact<compute_stage>::TangentialMortarLMMechanicalContact(
+    const InputParameters & parameters)
   : ADMortarConstraint<compute_stage>(parameters),
     _slave_disp_y(_subproblem.getStandardVariable(_tid, parameters.getMooseType("slave_disp_y"))),
     _master_disp_y(
@@ -53,7 +54,7 @@ TangentialContactLMTest<compute_stage>::TangentialContactLMTest(const InputParam
 
 template <ComputeStage compute_stage>
 ADReal
-TangentialContactLMTest<compute_stage>::computeQpResidual(Moose::MortarType mortar_type)
+TangentialMortarLMMechanicalContact<compute_stage>::computeQpResidual(Moose::MortarType mortar_type)
 {
   switch (mortar_type)
   {

@@ -46,7 +46,7 @@ offset = 1e-2
 
 [Constraints]
   [./lm]
-    type = NodeLMConstraintTest
+    type = NormalNodalLMMechanicalContact
     slave = 10
     master = 20
     variable = normal_lm
@@ -55,7 +55,7 @@ offset = 1e-2
     ncp_function_type = 'fb'
   [../]
   [normal_x]
-    type = MechanicalContactTest
+    type = NormalMortarMechanicalContact
     master_boundary = 20
     slave_boundary = 10
     master_subdomain = 4
@@ -67,7 +67,7 @@ offset = 1e-2
     compute_lm_residuals = false
   []
   [normal_y]
-    type = MechanicalContactTest
+    type = NormalMortarMechanicalContact
     master_boundary = 20
     slave_boundary = 10
     master_subdomain = 4

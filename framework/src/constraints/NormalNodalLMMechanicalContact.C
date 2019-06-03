@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NodeLMConstraintTest.h"
+#include "NormalNodalLMMechanicalContact.h"
 #include "PenetrationLocator.h"
 #include "PenetrationInfo.h"
 #include "SystemBase.h"
@@ -18,11 +18,11 @@
 using MetaPhysicL::DualNumber;
 using MetaPhysicL::NumberArray;
 
-registerMooseObject("MooseTestApp", NodeLMConstraintTest);
+registerMooseObject("MooseApp", NormalNodalLMMechanicalContact);
 
 template <>
 InputParameters
-validParams<NodeLMConstraintTest>()
+validParams<NormalNodalLMMechanicalContact>()
 {
   InputParameters params = validParams<NodeFaceConstraint>();
   params.set<bool>("use_displaced_mesh") = true;
@@ -42,7 +42,7 @@ validParams<NodeLMConstraintTest>()
   return params;
 }
 
-NodeLMConstraintTest::NodeLMConstraintTest(const InputParameters & parameters)
+NormalNodalLMMechanicalContact::NormalNodalLMMechanicalContact(const InputParameters & parameters)
   : NodeFaceConstraint(parameters),
     _disp_y_id(coupled("disp_y")),
     _disp_z_id(coupled("disp_z")),
@@ -56,13 +56,13 @@ NodeLMConstraintTest::NodeLMConstraintTest(const InputParameters & parameters)
 }
 
 Real
-NodeLMConstraintTest::computeQpSlaveValue()
+NormalNodalLMMechanicalContact::computeQpSlaveValue()
 {
   return _u_slave[_qp];
 }
 
 void
-NodeLMConstraintTest::computeResidual()
+NormalNodalLMMechanicalContact::computeResidual()
 {
   DenseVector<Number> & re = _assembly.residualBlock(_var.number());
 
@@ -72,7 +72,7 @@ NodeLMConstraintTest::computeResidual()
 }
 
 void
-NodeLMConstraintTest::computeJacobian()
+NormalNodalLMMechanicalContact::computeJacobian()
 {
   _Kee.resize(1, 1);
   _connected_dof_indices.clear();
@@ -84,7 +84,7 @@ NodeLMConstraintTest::computeJacobian()
 }
 
 void
-NodeLMConstraintTest::computeOffDiagJacobian(unsigned jvar)
+NormalNodalLMMechanicalContact::computeOffDiagJacobian(unsigned jvar)
 {
   if (jvar == _var.number())
   {
@@ -108,7 +108,7 @@ NodeLMConstraintTest::computeOffDiagJacobian(unsigned jvar)
     Ken(0, _j) += computeQpOffDiagJacobian(Moose::SlaveMaster, jvar);
 }
 
-Real NodeLMConstraintTest::computeQpResidual(Moose::ConstraintType /*type*/)
+Real NormalNodalLMMechanicalContact::computeQpResidual(Moose::ConstraintType /*type*/)
 {
   std::map<dof_id_type, PenetrationInfo *>::iterator found =
       _penetration_locator._penetration_info.find(_current_node->id());
@@ -132,7 +132,7 @@ Real NodeLMConstraintTest::computeQpResidual(Moose::ConstraintType /*type*/)
 // Note that the Jacobians below are inexact. To really make them exact, the most algorithmically
 // rigorous way will be to accomplish libmesh/libmesh#2121
 
-Real NodeLMConstraintTest::computeQpJacobian(Moose::ConstraintJacobianType /*type*/)
+Real NormalNodalLMMechanicalContact::computeQpJacobian(Moose::ConstraintJacobianType /*type*/)
 {
   std::map<dof_id_type, PenetrationInfo *>::iterator found =
       _penetration_locator._penetration_info.find(_current_node->id());
@@ -157,7 +157,8 @@ Real NodeLMConstraintTest::computeQpJacobian(Moose::ConstraintJacobianType /*typ
 }
 
 Real
-NodeLMConstraintTest::computeQpOffDiagJacobian(Moose::ConstraintJacobianType type, unsigned jvar)
+NormalNodalLMMechanicalContact::computeQpOffDiagJacobian(Moose::ConstraintJacobianType type,
+                                                         unsigned jvar)
 {
   std::map<dof_id_type, PenetrationInfo *>::iterator found =
       _penetration_locator._penetration_info.find(_current_node->id());

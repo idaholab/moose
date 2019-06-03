@@ -48,7 +48,7 @@ offset = 1e-2
 
 [Constraints]
   [normal_lm]
-    type = MechanicalContactLMTest
+    type = NormalMortarLMMechanicalContact
     master_boundary = 20
     slave_boundary = 10
     master_subdomain = 4
@@ -61,7 +61,7 @@ offset = 1e-2
     ncp_function_type = 'min'
   []
   [normal_x]
-    type = MechanicalContactTest
+    type = NormalMortarMechanicalContact
     master_boundary = 20
     slave_boundary = 10
     master_subdomain = 4
@@ -73,7 +73,7 @@ offset = 1e-2
     compute_lm_residuals = false
   []
   [normal_y]
-    type = MechanicalContactTest
+    type = NormalMortarMechanicalContact
     master_boundary = 20
     slave_boundary = 10
     master_subdomain = 4

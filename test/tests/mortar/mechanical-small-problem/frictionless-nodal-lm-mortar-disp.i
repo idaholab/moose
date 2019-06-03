@@ -78,7 +78,7 @@
 
 [Constraints]
   [./lm]
-    type = NodeLMConstraintTest
+    type = NormalNodalLMMechanicalContact
     slave = 1
     master = 2
     variable = lambda
@@ -86,7 +86,7 @@
     disp_y = disp_y
   [../]
   [x]
-    type = MechanicalContactTest
+    type = NormalMortarMechanicalContact
     master_boundary = '2'
     slave_boundary = '1'
     master_subdomain = '20'
@@ -98,7 +98,7 @@
     compute_lm_residuals = false
   []
   [y]
-    type = MechanicalContactTest
+    type = NormalMortarMechanicalContact
     master_boundary = '2'
     slave_boundary = '1'
     master_subdomain = '20'

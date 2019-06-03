@@ -13,15 +13,15 @@
 #include "NodeFaceConstraint.h"
 
 // Forward Declarations
-class NodeLMConstraintTest;
+class NormalNodalLMMechanicalContact;
 
 template <>
-InputParameters validParams<NodeLMConstraintTest>();
+InputParameters validParams<NormalNodalLMMechanicalContact>();
 
-class NodeLMConstraintTest : public NodeFaceConstraint
+class NormalNodalLMMechanicalContact : public NodeFaceConstraint
 {
 public:
-  NodeLMConstraintTest(const InputParameters & parameters);
+  NormalNodalLMMechanicalContact(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpSlaveValue() override;

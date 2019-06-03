@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MechanicalContactLMTest.h"
+#include "NormalMortarLMMechanicalContact.h"
 
-registerADMooseObject("MooseTestApp", MechanicalContactLMTest);
+registerADMooseObject("MooseTestApp", NormalMortarLMMechanicalContact);
 
 defineADValidParams(
-    MechanicalContactLMTest,
+    NormalMortarLMMechanicalContact,
     ADMortarConstraint,
     params.addParam<NonlinearVariableName>("slave_disp_y",
                                            "The y displacement variable on the slave face");
@@ -25,7 +25,7 @@ defineADValidParams(
                                "min or fb where fb stands for Fischer-Burmeister"););
 
 template <ComputeStage compute_stage>
-MechanicalContactLMTest<compute_stage>::MechanicalContactLMTest(const InputParameters & parameters)
+NormalMortarLMMechanicalContact<compute_stage>::NormalMortarLMMechanicalContact(const InputParameters & parameters)
   : ADMortarConstraint<compute_stage>(parameters),
     _slave_disp_y(isParamValid("slave_disp_y") ? &_subproblem.getStandardVariable(
                                                      _tid, parameters.getMooseType("slave_disp_y"))
@@ -55,7 +55,7 @@ MechanicalContactLMTest<compute_stage>::MechanicalContactLMTest(const InputParam
 
 template <>
 Real
-MechanicalContactLMTest<RESIDUAL>::computeQpResidual(Moose::MortarType mortar_type)
+NormalMortarLMMechanicalContact<RESIDUAL>::computeQpResidual(Moose::MortarType mortar_type)
 {
   switch (mortar_type)
   {
@@ -88,7 +88,7 @@ MechanicalContactLMTest<RESIDUAL>::computeQpResidual(Moose::MortarType mortar_ty
 
 template <>
 DualReal
-MechanicalContactLMTest<JACOBIAN>::computeQpResidual(Moose::MortarType mortar_type)
+NormalMortarLMMechanicalContact<JACOBIAN>::computeQpResidual(Moose::MortarType mortar_type)
 {
   switch (mortar_type)
   {

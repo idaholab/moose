@@ -80,7 +80,7 @@
 
 [Constraints]
   [lm]
-    type = MechanicalContactLMTest
+    type = NormalMortarLMMechanicalContact
     master_boundary = '2'
     slave_boundary = '1'
     master_subdomain = '20'
@@ -92,7 +92,7 @@
     compute_primal_residuals = false
   []
   [x]
-    type = MechanicalContactTest
+    type = NormalMortarMechanicalContact
     master_boundary = '2'
     slave_boundary = '1'
     master_subdomain = '20'
@@ -104,7 +104,7 @@
     compute_lm_residuals = false
   []
   [y]
-    type = MechanicalContactTest
+    type = NormalMortarMechanicalContact
     master_boundary = '2'
     slave_boundary = '1'
     master_subdomain = '20'

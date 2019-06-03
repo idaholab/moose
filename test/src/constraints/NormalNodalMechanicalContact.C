@@ -7,17 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NodalNormalContactTest.h"
+#include "NormalNodalMechanicalContact.h"
 #include "PenetrationLocator.h"
 #include "PenetrationInfo.h"
 #include "SystemBase.h"
 #include "Assembly.h"
 
-registerMooseObject("MooseTestApp", NodalNormalContactTest);
+registerMooseObject("MooseTestApp", NormalNodalMechanicalContact);
 
 template <>
 InputParameters
-validParams<NodalNormalContactTest>()
+validParams<NormalNodalMechanicalContact>()
 {
   InputParameters params = validParams<NodeFaceConstraint>();
   params.set<bool>("use_displaced_mesh") = true;
@@ -29,7 +29,7 @@ validParams<NodalNormalContactTest>()
   return params;
 }
 
-NodalNormalContactTest::NodalNormalContactTest(const InputParameters & parameters)
+NormalNodalMechanicalContact::NormalNodalMechanicalContact(const InputParameters & parameters)
   : NodeFaceConstraint(parameters),
     _lambda(getVar("lambda", 0)->nodalValue()),
     _lambda_id(coupled("lambda")),
@@ -40,18 +40,18 @@ NodalNormalContactTest::NodalNormalContactTest(const InputParameters & parameter
 }
 
 Real
-NodalNormalContactTest::computeQpSlaveValue()
+NormalNodalMechanicalContact::computeQpSlaveValue()
 {
   return _u_slave[_qp];
 }
 
 void
-NodalNormalContactTest::computeJacobian()
+NormalNodalMechanicalContact::computeJacobian()
 {
 }
 
 void
-NodalNormalContactTest::computeOffDiagJacobian(unsigned jvar)
+NormalNodalMechanicalContact::computeOffDiagJacobian(unsigned jvar)
 {
   // Our residual only strongly depends on the lagrange multiplier (the normal vector does indeed
   // depend on displacements but it's complicated and shouldn't be too strong of a dependence)
@@ -74,7 +74,7 @@ NodalNormalContactTest::computeOffDiagJacobian(unsigned jvar)
 }
 
 Real
-NodalNormalContactTest::computeQpResidual(Moose::ConstraintType type)
+NormalNodalMechanicalContact::computeQpResidual(Moose::ConstraintType type)
 {
   std::map<dof_id_type, PenetrationInfo *>::iterator found =
       _penetration_locator._penetration_info.find(_current_node->id());
@@ -101,10 +101,14 @@ NodalNormalContactTest::computeQpResidual(Moose::ConstraintType type)
   return 0;
 }
 
-Real NodalNormalContactTest::computeQpJacobian(Moose::ConstraintJacobianType /*type*/) { return 0; }
+Real NormalNodalMechanicalContact::computeQpJacobian(Moose::ConstraintJacobianType /*type*/)
+{
+  return 0;
+}
 
 Real
-NodalNormalContactTest::computeQpOffDiagJacobian(Moose::ConstraintJacobianType type, unsigned jvar)
+NormalNodalMechanicalContact::computeQpOffDiagJacobian(Moose::ConstraintJacobianType type,
+                                                       unsigned jvar)
 {
   std::map<dof_id_type, PenetrationInfo *>::iterator found =
       _penetration_locator._penetration_info.find(_current_node->id());

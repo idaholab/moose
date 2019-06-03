@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NodalTangentialContactLM.h"
+#include "TangentialNodalLMMechanicalContact.h"
 #include "PenetrationLocator.h"
 #include "PenetrationInfo.h"
 #include "SystemBase.h"
@@ -17,11 +17,11 @@
 using MetaPhysicL::DualNumber;
 using MetaPhysicL::NumberArray;
 
-registerMooseObject("MooseTestApp", NodalTangentialContactLM);
+registerMooseObject("MooseTestApp", TangentialNodalLMMechanicalContact);
 
 template <>
 InputParameters
-validParams<NodalTangentialContactLM>()
+validParams<TangentialNodalLMMechanicalContact>()
 {
   InputParameters params = validParams<NodeFaceConstraint>();
   params.set<bool>("use_displaced_mesh") = true;
@@ -51,7 +51,8 @@ validParams<NodalTangentialContactLM>()
   return params;
 }
 
-NodalTangentialContactLM::NodalTangentialContactLM(const InputParameters & parameters)
+TangentialNodalLMMechanicalContact::TangentialNodalLMMechanicalContact(
+    const InputParameters & parameters)
   : NodeFaceConstraint(parameters),
     _contact_pressure(getVar("contact_pressure", 0)->nodalValue()),
     _contact_pressure_id(coupled("contact_pressure")),
@@ -68,13 +69,13 @@ NodalTangentialContactLM::NodalTangentialContactLM(const InputParameters & param
 }
 
 Real
-NodalTangentialContactLM::computeQpSlaveValue()
+TangentialNodalLMMechanicalContact::computeQpSlaveValue()
 {
   return _u_slave[_qp];
 }
 
 void
-NodalTangentialContactLM::computeResidual()
+TangentialNodalLMMechanicalContact::computeResidual()
 {
   DenseVector<Number> & re = _assembly.residualBlock(_var.number());
 
@@ -84,7 +85,7 @@ NodalTangentialContactLM::computeResidual()
 }
 
 void
-NodalTangentialContactLM::computeJacobian()
+TangentialNodalLMMechanicalContact::computeJacobian()
 {
   _Kee.resize(1, 1);
   _connected_dof_indices.clear();
@@ -96,7 +97,7 @@ NodalTangentialContactLM::computeJacobian()
 }
 
 void
-NodalTangentialContactLM::computeOffDiagJacobian(unsigned jvar)
+TangentialNodalLMMechanicalContact::computeOffDiagJacobian(unsigned jvar)
 {
   if (jvar == _var.number())
   {
@@ -114,7 +115,7 @@ NodalTangentialContactLM::computeOffDiagJacobian(unsigned jvar)
   _Kee(0, 0) += computeQpOffDiagJacobian(Moose::SlaveSlave, jvar);
 }
 
-Real NodalTangentialContactLM::computeQpResidual(Moose::ConstraintType /*type*/)
+Real TangentialNodalLMMechanicalContact::computeQpResidual(Moose::ConstraintType /*type*/)
 {
   std::map<dof_id_type, PenetrationInfo *>::iterator found =
       _penetration_locator._penetration_info.find(_current_node->id());
@@ -152,7 +153,7 @@ Real NodalTangentialContactLM::computeQpResidual(Moose::ConstraintType /*type*/)
   return 0;
 }
 
-Real NodalTangentialContactLM::computeQpJacobian(Moose::ConstraintJacobianType /*type*/)
+Real TangentialNodalLMMechanicalContact::computeQpJacobian(Moose::ConstraintJacobianType /*type*/)
 {
   std::map<dof_id_type, PenetrationInfo *>::iterator found =
       _penetration_locator._penetration_info.find(_current_node->id());
@@ -194,8 +195,8 @@ Real NodalTangentialContactLM::computeQpJacobian(Moose::ConstraintJacobianType /
 }
 
 Real
-NodalTangentialContactLM::computeQpOffDiagJacobian(Moose::ConstraintJacobianType /*type*/,
-                                                   unsigned jvar)
+TangentialNodalLMMechanicalContact::computeQpOffDiagJacobian(Moose::ConstraintJacobianType /*type*/,
+                                                             unsigned jvar)
 {
   std::map<dof_id_type, PenetrationInfo *>::iterator found =
       _penetration_locator._penetration_info.find(_current_node->id());

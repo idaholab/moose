@@ -50,7 +50,7 @@ offset = 1e-2
 
 [Constraints]
   [./lm]
-    type = NodeLMConstraintTest
+    type = NormalNodalLMMechanicalContact
     slave = 10
     master = 20
     variable = normal_lm
@@ -59,7 +59,7 @@ offset = 1e-2
     ncp_function_type = 'fb'
   [../]
   [./disp_x]
-    type = NodalNormalContactTest
+    type = NormalNodalMechanicalContact
     slave = 10
     master = 20
     variable = disp_x
@@ -68,7 +68,7 @@ offset = 1e-2
     component = x
   [../]
   [./disp_y]
-    type = NodalNormalContactTest
+    type = NormalNodalMechanicalContact
     slave = 10
     master = 20
     variable = disp_y
