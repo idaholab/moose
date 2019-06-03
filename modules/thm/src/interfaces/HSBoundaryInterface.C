@@ -62,14 +62,14 @@ HSBoundaryInterface::getHSBoundaryName(const Component * const component) const
   switch (_hs_side)
   {
     case HeatStructureBase::OUTER:
-      if (hs.getTopBoundaryNames().size() > 0)
-        return hs.getTopBoundaryNames()[0];
+      if (hs.getOuterBoundaryNames().size() > 0)
+        return hs.getOuterBoundaryNames()[0];
       else
         return THMMesh::INVALID_BOUNDARY_ID;
 
     case HeatStructureBase::INNER:
-      if (hs.getBottomBoundaryNames().size() > 0)
-        return hs.getBottomBoundaryNames()[0];
+      if (hs.getInnerBoundaryNames().size() > 0)
+        return hs.getInnerBoundaryNames()[0];
       else
         return THMMesh::INVALID_BOUNDARY_ID;
 
