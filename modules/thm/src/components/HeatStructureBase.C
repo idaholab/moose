@@ -144,15 +144,15 @@ HeatStructureBase::build2DMesh()
       }
       _side_heat_node_ids[_names[j]].push_back(nd->id());
     }
-    _bottom_heat_node_ids.push_back(_node_ids[i][0]);
-    _top_heat_node_ids.push_back(_node_ids[i][_total_elem_number]);
+    _inner_heat_node_ids.push_back(_node_ids[i][0]);
+    _outer_heat_node_ids.push_back(_node_ids[i][_total_elem_number]);
   }
 
   // create elements from nodes
   unsigned int bc_id1 = getNextBoundaryId();
   unsigned int bc_id2 = getNextBoundaryId();
-  _bottom_bc_id.push_back(bc_id1);
-  _top_bc_id.push_back(bc_id2);
+  _inner_bc_id.push_back(bc_id1);
+  _outer_bc_id.push_back(bc_id2);
 
   _elem_ids.resize(_n_elem);
   for (unsigned int i = 0; i < _n_elem; i++)
@@ -210,15 +210,15 @@ HeatStructureBase::build2DMesh2ndOrder()
       }
       _side_heat_node_ids[_names[j]].push_back(nd->id());
     }
-    _bottom_heat_node_ids.push_back(_node_ids[i][0]);
-    _top_heat_node_ids.push_back(_node_ids[i][_total_elem_number * 2]);
+    _inner_heat_node_ids.push_back(_node_ids[i][0]);
+    _outer_heat_node_ids.push_back(_node_ids[i][_total_elem_number * 2]);
   }
 
   // create elements from nodes
   unsigned int bc_id1 = getNextBoundaryId();
   unsigned int bc_id2 = getNextBoundaryId();
-  _bottom_bc_id.push_back(bc_id1);
-  _top_bc_id.push_back(bc_id2);
+  _inner_bc_id.push_back(bc_id1);
+  _outer_bc_id.push_back(bc_id2);
 
   _elem_ids.resize(_n_elem);
   for (unsigned int i = 0; i < _n_elem; i++)
@@ -277,17 +277,17 @@ HeatStructureBase::buildMesh()
   else
     build2DMesh();
 
-  for (auto & bnd_id : _bottom_bc_id)
+  for (auto & bnd_id : _inner_bc_id)
   {
-    const BoundaryName boundary_name = genName(name(), "bottom");
+    const BoundaryName boundary_name = genName(name(), "inner");
     _mesh.setBoundaryName(bnd_id, boundary_name);
-    _boundary_names_bottom.push_back(boundary_name);
+    _boundary_names_inner.push_back(boundary_name);
   }
-  for (auto & bnd_id : _top_bc_id)
+  for (auto & bnd_id : _outer_bc_id)
   {
-    const BoundaryName boundary_name = genName(name(), "top");
+    const BoundaryName boundary_name = genName(name(), "outer");
     _mesh.setBoundaryName(bnd_id, boundary_name);
-    _boundary_names_top.push_back(boundary_name);
+    _boundary_names_outer.push_back(boundary_name);
   }
 }
 
@@ -347,25 +347,25 @@ HeatStructureBase::getSideNodeIds(const std::string & name) const
 }
 
 const std::vector<unsigned int> &
-HeatStructureBase::getTopNodeIds() const
+HeatStructureBase::getOuterNodeIds() const
 {
   checkSetupStatus(MESH_PREPARED);
 
-  return _top_heat_node_ids;
+  return _outer_heat_node_ids;
 }
 
 const std::vector<BoundaryName> &
-HeatStructureBase::getTopBoundaryNames() const
+HeatStructureBase::getOuterBoundaryNames() const
 {
   checkSetupStatus(MESH_PREPARED);
 
-  return _boundary_names_top;
+  return _boundary_names_outer;
 }
 
 const std::vector<BoundaryName> &
-HeatStructureBase::getBottomBoundaryNames() const
+HeatStructureBase::getInnerBoundaryNames() const
 {
   checkSetupStatus(MESH_PREPARED);
 
-  return _boundary_names_bottom;
+  return _boundary_names_inner;
 }
