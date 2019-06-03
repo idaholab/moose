@@ -71,9 +71,9 @@ The number of nodes in contact is 11
 
 | LM normal | LM tangential | Displacement | NCP function normal | NCP function tangential | Time (arbitrary units) | Time steps | Nonlinear iterations |
 | --------- | ------------  | ------------ | ------------------- | ----------------------- | ---------------------- | ---------- | -------------------- |
-| Mortar | Mortar | Mortar | FB | FB | 18.771 | 43 | 190 |
-| Mortar | Mortar | Mortar | min | FB | 18.281 | 41 | 194 |
-| Nodal | Mortar | Mortar | min | FB | 15.544 | 41 | 165 |
-| Mortar | Mortar | Mortar | Min | Min | 74.801 | 58 | 320 |
-| Nodal | Nodal | Mortar | Min | Min | 36.923 | 52 | 230 |
+| Mortar | Mortar | Mortar | FB | FB | 19.243 | 43 | 193 |
+| Mortar | Mortar | Mortar | min | FB | 18.126 | 41 | 194 |
+| Nodal | Mortar | Mortar | min | FB | 16.317 | 42 | 166 |
+| Mortar | Mortar | Mortar | Min | Min | 76.034 | 54 | 311 |
+| Nodal | Nodal | Mortar | Min | Min | 55.161 | 55 | 275 |
 | Nodal | Nodal | Mortar | FB | FB | NA | NA | NA |
