@@ -42,5 +42,7 @@ protected:
 
   const MooseEnum _ncp_type;
 
+  const Real _c;
+
   usingMortarConstraintMembers;
 };

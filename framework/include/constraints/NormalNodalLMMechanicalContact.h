@@ -36,8 +36,7 @@ protected:
 
   const unsigned _disp_y_id;
   const unsigned _disp_z_id;
-  const Real _c_gap;
-  const Real _c_lm;
+  const Real _c;
   const Real _epsilon;
 
   const MooseEnum _ncp_type;

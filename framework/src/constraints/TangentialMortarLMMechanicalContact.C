@@ -29,7 +29,10 @@ defineADValidParams(
     params.addParam<MooseEnum>("ncp_function_type",
                                ncp_type,
                                "The type of the nonlinear complimentarity function; options are "
-                               "min or fb where fb stands for Fischer-Burmeister"););
+                               "min or fb where fb stands for Fischer-Burmeister");
+    params.addParam<Real>("c",
+                          1,
+                          "Parameter for balancing the size of the velocity and the pressures"););
 
 template <ComputeStage compute_stage>
 TangentialMortarLMMechanicalContact<compute_stage>::TangentialMortarLMMechanicalContact(
@@ -49,7 +52,8 @@ TangentialMortarLMMechanicalContact<compute_stage>::TangentialMortarLMMechanical
     _master_y_dot(_master_disp_y.template adUDotNeighbor<compute_stage>()),
     _friction_coeff(adGetParam<Real>("friction_coefficient")),
     _epsilon(std::numeric_limits<Real>::epsilon()),
-    _ncp_type(adGetParam<MooseEnum>("ncp_function_type"))
+    _ncp_type(adGetParam<MooseEnum>("ncp_function_type")),
+    _c(adGetParam<Real>("c"))
 {
 }
 
@@ -81,6 +85,7 @@ TangentialMortarLMMechanicalContact<compute_stage>::computeQpResidual(Moose::Mor
             a = -std::abs(tangential_velocity);
           else
             a = std::abs(tangential_velocity);
+          a *= _c;
 
           // NCP part 2: require that the frictional force can never exceed the frictional
           // coefficient times the normal force

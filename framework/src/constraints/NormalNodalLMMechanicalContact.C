@@ -29,8 +29,7 @@ validParams<NormalNodalLMMechanicalContact>()
 
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
-  params.addParam<Real>("c_gap", 1, "The scale of the gap");
-  params.addParam<Real>("c_lm", 1, "The scale of the contact pressure/lagrange multiplier");
+  params.addParam<Real>("c", 1, "Parameter for balancing the size of the gap and contact pressure");
 
   MooseEnum ncp_function_type("min fb", "min");
   params.addParam<MooseEnum>(
@@ -46,8 +45,7 @@ NormalNodalLMMechanicalContact::NormalNodalLMMechanicalContact(const InputParame
   : NodeFaceConstraint(parameters),
     _disp_y_id(coupled("disp_y")),
     _disp_z_id(coupled("disp_z")),
-    _c_gap(getParam<Real>("c_gap")),
-    _c_lm(getParam<Real>("c_lm")),
+    _c(getParam<Real>("c")),
     _epsilon(std::numeric_limits<Real>::epsilon()),
     _ncp_type(getParam<MooseEnum>("ncp_function_type"))
 
@@ -117,8 +115,8 @@ Real NormalNodalLMMechanicalContact::computeQpResidual(Moose::ConstraintType /*t
     PenetrationInfo * pinfo = found->second;
     if (pinfo != NULL)
     {
-      Real a = -pinfo->_distance / _c_gap;
-      Real b = _u_slave[_qp] / _c_lm;
+      Real a = -pinfo->_distance * _c;
+      Real b = _u_slave[_qp];
 
       if (_ncp_type == "fb")
         return a + b - std::sqrt(a * a + b * b + _epsilon);
@@ -144,8 +142,8 @@ Real NormalNodalLMMechanicalContact::computeQpJacobian(Moose::ConstraintJacobian
       DualNumber<Real> dual_u_slave(_u_slave[_qp]);
       dual_u_slave.derivatives() = 1.;
 
-      auto a = -pinfo->_distance / _c_gap;
-      auto b = dual_u_slave / _c_lm;
+      auto a = -pinfo->_distance * _c;
+      auto b = dual_u_slave;
 
       if (_ncp_type == "fb")
         return (a + b - std::sqrt(a * a + b * b + _epsilon)).derivatives();
@@ -193,8 +191,8 @@ NormalNodalLMMechanicalContact::computeQpOffDiagJacobian(Moose::ConstraintJacobi
           mooseError("LMs do not have a master contribution.");
       }
 
-      auto a = gap / _c_gap;
-      auto b = _u_slave[_qp] / _c_lm;
+      auto a = gap * _c;
+      auto b = _u_slave[_qp];
 
       if (_ncp_type == "fb")
         return (a + b - std::sqrt(a * a + b * b + _epsilon)).derivatives();
