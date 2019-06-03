@@ -47,15 +47,19 @@ protected:
   VectorPostprocessorName _vpp_name;
 
   /// The order of the polynomial fit to be performed
-  unsigned int _order;
+  const unsigned int _order;
+
+  /// Whether to truncate the polynomial order if an insufficient number of points is provided
+  const bool _truncate_order;
 
   /// The name of the variables storing the x, y data
   const std::string _x_name;
   const std::string _y_name;
 
-  /// The variables with the x, y data to be fit
+  ///@{ The variables with the x, y data to be fit
   const VectorPostprocessorValue & _x_values;
   const VectorPostprocessorValue & _y_values;
+  ///@}
 
   ///@{ Values used to scale and or shift x and y data
   const Real _x_scale;
