@@ -712,7 +712,10 @@ class TestHarness:
                     self.options.results_storage = json.load(f)
 
                     # Adhere to previous input file syntax, or set the default
-                    self.options.input_file_name = self.options.results_storage.get('INPUT_FILE_NAME', 'tests')
+                    _input_file_name = 'tests'
+                    if self.options.input_file_name:
+                        _input_file_name = self.options.input_file_name
+                    self.options.input_file_name = self.options.results_storage.get('INPUT_FILE_NAME', _input_file_name)
 
                 except ValueError:
                     # This is a hidden file, controled by the TestHarness. So we probably shouldn't error
@@ -855,6 +858,9 @@ class TestHarness:
             sys.exit(1)
         if opts.queue_source_command and not os.path.exists(opts.queue_source_command):
             print('ERROR: pre-source supplied but path does not exist')
+            sys.exit(1)
+        if opts.failed_tests and not os.path.exists(self.results_storage):
+            print('ERROR: --failed-tests could not detect a previous run')
             sys.exit(1)
 
         # Flatten input_file_name from ['tests', 'speedtests'] to just tests if none supplied

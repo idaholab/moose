@@ -242,34 +242,28 @@ class QueueManager(Scheduler):
             else:
                 for job in job_data.jobs.getJobs():
                     tester = job.getTester()
-                    (status, caveats, status_message) = self._getTesterStatusAndCaveatsFromSession(job_data.json_data, tester)
+                    status, message, caveats = job.previousTesterStatus(self.options, job_data.json_data)
+                    tester.setStatus(status, message)
+                    if caveats:
+                        tester.addCaveats(caveats)
+                    status_message = tester.getStatusMessage()
 
                     # This single job will enter the runner thread pool
                     if status_message == "LAUNCHING":
                         tester.setStatus(tester.queued)
-                        tester.addCaveats(caveats)
 
-                    # This single job will be skipped for some reason
-                    else:
-                        tester.addCaveats(caveats)
-                        tester.setStatus(status, status_message)
                 is_ready = False
 
         # Job group not originally launched
         else:
             for job in job_data.jobs.getJobs():
                 tester = job.getTester()
-                # Entire job group was skipped, deleted, silent, etc
-                if job_data.json_data and job_data.json_data.get(job_data.job_dir, {}):
-                    (status, caveats, status_message) = self._getTesterStatusAndCaveatsFromSession(job_data.json_data, tester)
+                status, message, caveats = job.previousTesterStatus(self.options, job_data.json_data)
+                tester.setStatus(status, message)
+                if caveats:
                     tester.addCaveats(caveats)
-                    if status == tester.skip:
-                        tester.setStatus(tester.skip, status_message)
-                    else:
-                        tester.setStatus(tester.silent, status_message)
 
-                # Entire job group did not previously enter the Scheduler
-                else:
+                if tester.isNoStatus():
                     tester.setStatus(tester.silent)
             is_ready = False
 
@@ -350,9 +344,10 @@ class QueueManager(Scheduler):
 
                 if group_results.get(job.getTestName(), {}):
                     job_results = group_results[job.getTestName()]
-                    (status, caveats, status_message) = self._getTesterStatusAndCaveatsFromSession(results, tester)
-                    tester.addCaveats(caveats)
-                    tester.setStatus(status, status_message)
+                    status, message, caveats = job.previousTesterStatus(self.options, results)
+                    tester.setStatus(status, message)
+                    if caveats:
+                        tester.addCaveats(caveats)
 
                     # Recover useful job information from job results
                     job.setPreviousTime(job_results['TIMING'])
@@ -362,18 +357,6 @@ class QueueManager(Scheduler):
                 else:
                     tester.addCaveats('not originally launched')
                     tester.setStatus(tester.skip)
-
-    def _getTesterStatusAndCaveatsFromSession(self, session, tester):
-        """ re-create status for tester using the session file """
-        restored_status = tester.test_status.createStatus()
-        status_message = ''
-        caveats = []
-        if session and session.get(tester.getTestDir(), {}).get(tester.getTestName(), {}):
-            status_key = session[tester.getTestDir()][tester.getTestName()]['STATUS'].encode('ascii', 'ignore')
-            restored_status = tester.test_status.createStatus(status_key)
-            status_message = session[tester.getTestDir()][tester.getTestName()]['STATUS_MESSAGE'].encode('ascii', 'ignore')
-            caveats = session[tester.getTestDir()][tester.getTestName()]['CAVEATS']
-        return (restored_status, caveats, status_message)
 
     def _cleanupFiles(self, Jobs):
         """ Silence all Jobs and perform cleanup operations """

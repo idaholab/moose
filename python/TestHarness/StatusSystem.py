@@ -87,6 +87,20 @@ class StatusSystem(object):
                       running,
                       finished]
 
+    __exit_nonzero_statuses = [fail,
+                               diff,
+                               deleted,
+                               error,
+                               timeout]
+
+    __exit_zero_statuses = [success,
+                            skip,
+                            silent]
+
+    __pending_statuses = [hold,
+                          queued,
+                          running]
+
     def __init__(self):
         self.__status = self.no_status
 
@@ -101,6 +115,22 @@ class StatusSystem(object):
         Return the status object.
         """
         return self.__status
+
+    def getAllStatuses(self):
+        """ return list of named tuples containing all status types """
+        return self.__all_statuses
+
+    def getFailingStatuses(self):
+        """ return list of named tuples containing failing status types """
+        return self.__exit_nonzero_statuses
+
+    def getSuccessStatuses(self):
+        """ return list of named tuples containing exit code zero status types """
+        return self.__exit_zero_statuses
+
+    def getPendingStatuses(self):
+        """ return list of named tuples containing pending status types """
+        return self.__pending_statuses
 
     def setStatus(self, status=no_status):
         """

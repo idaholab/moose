@@ -267,6 +267,9 @@ class Job(object):
     def createStatus(self):
         return self.job_status.createStatus()
 
+    def previousTesterStatus(self, options, previous_results=None):
+        return self.__tester.previousTesterStatus(options, previous_results)
+
     def getStatusMessage(self):
         return self.__job_message
 
@@ -274,8 +277,8 @@ class Job(object):
     ### should now call job.isSomeStatus for the definitive answer.
     # the following are more job related...
     def isError(self):
-        _status = self.getStatus()
-        return _status == self.error or _status == self.timeout
+        return self.getStatus() in self.job_status.getFailingStatuses()
+
     def isSkip(self):
         _status = self.getStatus()
         return (_status == self.finished and self.__tester.isSkip()) \
