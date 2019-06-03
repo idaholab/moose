@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NODALTANGENTIALCONTACTLM_H
-#define NODALTANGENTIALCONTACTLM_H
+#pragma once
 
 // MOOSE includes
 #include "NodeFaceConstraint.h"
@@ -50,5 +49,3 @@ protected:
 
   const MooseEnum _ncp_type;
 };
-
-#endif

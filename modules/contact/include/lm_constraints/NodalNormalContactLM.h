@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NODALNORMALCONTACTLM_H
-#define NODALNORMALCONTACTLM_H
+#pragma once
 
 // MOOSE includes
 #include "NodeFaceConstraint.h"
@@ -40,5 +39,3 @@ protected:
   const Real _epsilon;
   const Real _c;
 };
-
-#endif

@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NODELMCONSTRAINTTEST_H
-#define NODELMCONSTRAINTTEST_H
+#pragma once
 
 // MOOSE includes
 #include "NodeFaceConstraint.h"
@@ -43,5 +42,3 @@ protected:
 
   const MooseEnum _ncp_type;
 };
-
-#endif
