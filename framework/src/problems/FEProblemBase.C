@@ -4623,27 +4623,25 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
   if (_displaced_problem)
   {
     _aux->compute(EXEC_PRE_DISPLACE);
-    _displaced_problem->updateMesh();
-    if (_mortar_data.hasDisplacedObjects())
+    try
     {
-      try
-      {
+      _displaced_problem->updateMesh();
+      if (_mortar_data.hasDisplacedObjects())
         updateMortarMesh();
-      }
-      catch (MooseException & e)
-      {
-        setException(e.what());
-      }
-      try
-      {
-        // Propagate the exception to all processes if we had one
-        checkExceptionAndStopSolve();
-      }
-      catch (MooseException &)
-      {
-        // Just end now. We've inserted our NaN into the residual vector
-        return;
-      }
+    }
+    catch (MooseException & e)
+    {
+      setException(e.what());
+    }
+    try
+    {
+      // Propagate the exception to all processes if we had one
+      checkExceptionAndStopSolve();
+    }
+    catch (MooseException &)
+    {
+      // Just end now. We've inserted our NaN into the residual vector
+      return;
     }
   }
 
