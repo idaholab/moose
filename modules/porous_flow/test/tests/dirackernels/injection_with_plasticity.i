@@ -43,6 +43,8 @@ porosity0 = 0.1
   porepressure = pp
   dictator_name = dictator
   fp = simple_fluid
+  add_darcy_aux = false
+  add_stress_aux = false
 []
 
 [Variables]
