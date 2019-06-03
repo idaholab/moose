@@ -42,4 +42,3 @@ declareADValidParams(ADVectorTimeKernelValue);
 
 #define usingTimeKernelValueMembers usingTemplTimeKernelValueMembers(Real)
 #define usingVectorTimeKernelValueMembers usingTemplTimeKernelValueMembers(RealVectorValue)
-

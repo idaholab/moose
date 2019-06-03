@@ -27,4 +27,3 @@ public:
 protected:
   FixedPoint _fixed_point;
 };
-
