@@ -57,7 +57,7 @@
 []
 
 [Functions]
-  [./T0_fn]
+  [./inlet_T0_fn]
     type = PiecewiseLinear
     x = '0   1'
     y = '300 350'
@@ -65,16 +65,11 @@
 []
 
 [Controls]
-  [./inlet_T0_fn]
-    type = GetFunctionValueControl
-    function = T0_fn
-  [../]
-
   [./set_inlet_value]
-    type = SetRealValueControl
+    type = TimeFunctionControl
     component = inlet
     parameter = T0
-    value = inlet_T0_fn:value
+    function = inlet_T0_fn
   [../]
 []
 

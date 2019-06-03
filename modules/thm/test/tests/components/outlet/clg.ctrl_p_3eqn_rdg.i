@@ -57,7 +57,7 @@
 []
 
 [Functions]
-  [./p_fn]
+  [./outlet_p_fn]
     type = PiecewiseLinear
     x = '0   1'
     y = '1e5 1.001e5'
@@ -65,16 +65,11 @@
 []
 
 [Controls]
-  [./outlet_p_fn]
-    type = GetFunctionValueControl
-    function = p_fn
-  [../]
-
   [./set_outlet_value]
-    type = SetRealValueControl
+    type = TimeFunctionControl
     component = outlet
     parameter = p
-    value = outlet_p_fn:value
+    function = outlet_p_fn
   [../]
 []
 
@@ -85,7 +80,6 @@
     parameter = p
   [../]
 []
-
 
 [Preconditioning]
   [./pc]
