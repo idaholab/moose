@@ -10,6 +10,18 @@
     requirement = 'We shall be able to run our canonical frictional sliding block problem with mortar Lagrange Multiplier contact'
     mesh_mode = 'replicated'
   []
+  [frictionless-ncp-lm]
+    type = 'Exodiff'
+    input = 'frictionless_lm.i'
+    exodiff = 'frictionless_lm_out.e'
+    heavy = true
+    abs_zero = 1e-8
+    design = 'Constraints/index.md'
+    issues = '#13080'
+    requirement = 'We shall be able to run our canonical frictional sliding block problem with lagrange multipliers and the mortar method'
+    mesh_mode = 'replicated'
+    cli_args = "Outputs/active='exodus'"
+  []
   [./frictional_mu02_penalty]
     type = 'Exodiff'
     input = 'frictional_02_penalty.i'

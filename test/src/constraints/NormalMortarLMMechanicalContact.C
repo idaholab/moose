@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NormalMortarLMMechanicalContact.h"
+#include "SubProblem.h"
 
 registerADMooseObject("MooseTestApp", NormalMortarLMMechanicalContact);
 
@@ -25,7 +26,8 @@ defineADValidParams(
                                "min or fb where fb stands for Fischer-Burmeister"););
 
 template <ComputeStage compute_stage>
-NormalMortarLMMechanicalContact<compute_stage>::NormalMortarLMMechanicalContact(const InputParameters & parameters)
+NormalMortarLMMechanicalContact<compute_stage>::NormalMortarLMMechanicalContact(
+    const InputParameters & parameters)
   : ADMortarConstraint<compute_stage>(parameters),
     _slave_disp_y(isParamValid("slave_disp_y") ? &_subproblem.getStandardVariable(
                                                      _tid, parameters.getMooseType("slave_disp_y"))
