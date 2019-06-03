@@ -362,4 +362,13 @@
     issues = "#12541"
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md'
   [../]
+  [./injection_with_plasticity]
+    type = 'Exodiff'
+    input = 'injection_with_plasticity.i'
+    exodiff = 'injection_with_plasticity_out.e'
+    threading = '!pthreads'
+    requirement = 'It shall be possible to use PorousFlow DiracKernels in simulations involving plastic deformation'
+    design = 'porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
+    issues = '#12962'
+  [../]
 []
