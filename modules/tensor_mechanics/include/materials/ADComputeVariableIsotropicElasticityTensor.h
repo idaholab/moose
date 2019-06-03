@@ -39,4 +39,3 @@ protected:
 
   usingComputeElasticityTensorBaseMembers;
 };
-

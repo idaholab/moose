@@ -34,4 +34,3 @@ protected:
   TagID _tag_id;
   NumericVector<Number> & _residual_previous;
 };
-

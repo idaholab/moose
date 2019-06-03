@@ -31,4 +31,3 @@ protected:
 
 #define usingTimeDerivativeMembers usingTemplTimeKernelValueMembers(Real)
 #define usingVectorTimeDerivativeMembers usingTemplTimeKernelValueMembers(RealVectorValue)
-
