@@ -10,6 +10,7 @@
     requirement = 'We shall be able to run our canonical frictional sliding block problem with mortar Lagrange Multiplier contact'
     mesh_mode = 'replicated'
     cli_args = "Outputs/active='exodus' Postprocessors/active=''"
+    allow_warnings = true
   []
   [frictionless-ncp-lm]
     type = 'Exodiff'

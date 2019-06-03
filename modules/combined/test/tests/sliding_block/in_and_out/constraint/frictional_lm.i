@@ -111,6 +111,11 @@
   nl_max_its = 20
   line_search = 'none'
   timestep_tolerance = 1e-6
+
+  [./Predictor]
+    type = SimplePredictor
+    scale = 1.0
+  [../]
 []
 
 [Debug]
