@@ -42,13 +42,13 @@ TangentialMortarMechanicalContact<compute_stage>::computeQpResidual(Moose::Morta
       // want to increase momentum in the system, which means we want an inflow of momentum, which
       // means we want the residual to be negative in that case. So the sign of this residual should
       // be the same as the sign of lambda
-      return _test_slave[_i][_qp] * _lambda[_qp] *
-             std::abs(_tangents[_qp][0](_component) / _tangents[_qp][0].norm());
+      return _test_slave[_i][_qp] * _lambda[_qp] * _tangents[_qp][0](_component) /
+             _tangents[_qp][0].norm();
 
     case Moose::MortarType::Master:
       // Equal and opposite reactions so we put a negative sign here
-      return -_test_master[_i][_qp] * _lambda[_qp] *
-             std::abs(_tangents[_qp][0](_component) / _tangents[_qp][0].norm());
+      return -_test_master[_i][_qp] * _lambda[_qp] * _tangents[_qp][0](_component) /
+             _tangents[_qp][0].norm();
 
     default:
       return 0;
