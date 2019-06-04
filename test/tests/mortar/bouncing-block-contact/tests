@@ -59,7 +59,6 @@
     requirement = 'We will solve the frictional bouncing block problem with mortar constraint enforcement, mortar application of forces, and min NCP function'
     cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 Postprocessors/active=''"
     max_parallel = 1
-    abs_zero = 1e-9
   []
   [frictional-mortar-fb-lm-mortar-disp-coarse]
     type = 'Exodiff'
@@ -78,6 +77,7 @@
     cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 Postprocessors/active=''"
     allow_warnings = True
     max_parallel = 1
+    method = 'OPT'
   []
   [frictional-nodal-min-normal-lm-mortar-fb-tangential-lm-mortar-disp-coarse]
     type = 'Exodiff'
