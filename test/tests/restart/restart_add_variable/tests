@@ -1,0 +1,21 @@
+[Tests]
+  design = 'restart_recover.md'
+  [./transient_with_stateful]
+    type = 'Exodiff'
+    input = 'transient_with_stateful.i'
+    exodiff = 'transient_with_stateful_out.e'
+
+    requirement = 'The systen shall support running and saving off a transient solution with stateful material properties for a restart test.'
+    issues = '#13438'
+  [../]
+
+  [./add_variable_restart]
+    type = 'Exodiff'
+    input = 'add_variable_restart.i'
+    exodiff = 'add_variable_restart_out.e'
+    prereq = 'transient_with_stateful'
+
+    requirement = 'The systen shall support restart with a solution containing only a subset of the variables in the restart simulation.'
+    issues = '#13438'
+  [../]
+[]

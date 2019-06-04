@@ -8,9 +8,8 @@
   xmax = 1
   ymin = -1
   ymax = 1
-  nx = 20
-  ny = 20
-  parallel_type = replicated
+  nx = 10
+  ny = 10
 []
 
 [Functions]
@@ -26,25 +25,37 @@
 []
 
 [Variables]
-  active = 'u'
-
   [./u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
-[Kernels]
-  active = 'ie diff ffn'
+[AuxVariables]
+  [./diffusivity]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
 
+[AuxKernels]
+  [./out_diffusivity]
+    type = MaterialRealAux
+    variable = diffusivity
+    property = diffusivity
+  [../]
+[]
+
+[Kernels]
   [./ie]
     type = TimeDerivative
     variable = u
   [../]
 
   [./diff]
-    type = Diffusion
+    type = MatDiffusionTest
     variable = u
+    prop_name = diffusivity
   [../]
 
   [./ffn]
@@ -63,18 +74,27 @@
   [../]
 []
 
+[Materials]
+  [./mat]
+    type = StatefulMaterial
+    block = 0
+    initial_diffusivity = 0.5
+  [../]
+[]
+
 [Executioner]
   type = Transient
-
   solve_type = 'PJFNK'
-
   dt = 0.2
   start_time = 0
   num_steps = 5
 []
 
 [Outputs]
-  file_base = out_part1
-  exodus = true
   checkpoint = true
+  [./out]
+    type = Exodus
+    elemental_as_nodal = true
+    execute_elemental_on = none
+  [../]
 []

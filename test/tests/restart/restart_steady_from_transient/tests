@@ -1,0 +1,21 @@
+[Tests]
+  design = 'restart_recover.md'
+  [./transient_solve]
+    type = 'Exodiff'
+    input = 'transient.i'
+    exodiff = 'transient_out.e'
+
+    requirement = 'The system shall support running and saving off a transient solution for using in a steady state restart.'
+    issues = '#13438'
+  [../]
+
+  [./steady_from_transient_restart]
+    type = 'Exodiff'
+    input = 'steady_from_transient_restart.i'
+    exodiff = 'steady_from_transient_restart_out.e'
+    prereq = 'transient_solve'
+
+    requirement = 'The system shall support restarting a steady state solve from a transient simulation solution.'
+    issues = '#13438'
+  [../]
+[]
