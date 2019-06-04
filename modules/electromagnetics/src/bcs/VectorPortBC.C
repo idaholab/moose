@@ -45,43 +45,43 @@ VectorPortBC::computeQpResidual()
 {
 
   // Initialize E components
-  std::complex<double> E0(0, 0);
-  std::complex<double> E1(0, 0);
-  std::complex<double> E2(0, 0);
+  std::complex<double> field_0(0, 0);
+  std::complex<double> field_1(0, 0);
+  std::complex<double> field_2(0, 0);
 
   // Create E and ncrossE for residual based on component parameter
   if (_component == elk::REAL)
   {
-    E0.real(_u[_qp](0));
-    E0.imag(_coupled_val[_qp](0));
+    field_0.real(_u[_qp](0));
+    field_0.imag(_coupled_val[_qp](0));
 
-    E1.real(_u[_qp](1));
-    E1.imag(_coupled_val[_qp](1));
+    field_1.real(_u[_qp](1));
+    field_1.imag(_coupled_val[_qp](1));
 
-    E2.real(_u[_qp](2));
-    E2.imag(_coupled_val[_qp](2));
+    field_2.real(_u[_qp](2));
+    field_2.imag(_coupled_val[_qp](2));
   }
   else
   {
-    E0.real(_coupled_val[_qp](0));
-    E0.imag(_u[_qp](0));
+    field_0.real(_coupled_val[_qp](0));
+    field_0.imag(_u[_qp](0));
 
-    E1.real(_coupled_val[_qp](1));
-    E1.imag(_u[_qp](1));
+    field_1.real(_coupled_val[_qp](1));
+    field_1.imag(_u[_qp](1));
 
-    E2.real(_coupled_val[_qp](2));
-    E2.imag(_u[_qp](2));
+    field_2.real(_coupled_val[_qp](2));
+    field_2.imag(_u[_qp](2));
   }
-  VectorValue<std::complex<double>> E(E0, E1, E2);
+  VectorValue<std::complex<double>> field(field_0, field_1, field_2);
 
-  // Creating vector, curl for E_inc before residual and Jacobian contributions
-  std::complex<double> E_inc0(_inc_real.vectorValue(_t, _q_point[_qp])(0),
+  // Creating vector, curl for field_inc before residual and Jacobian contributions
+  std::complex<double> field_inc_0(_inc_real.vectorValue(_t, _q_point[_qp])(0),
                               _inc_imag.vectorValue(_t, _q_point[_qp])(0));
-  std::complex<double> E_inc1(_inc_real.vectorValue(_t, _q_point[_qp])(1),
+  std::complex<double> field_inc_1(_inc_real.vectorValue(_t, _q_point[_qp])(1),
                               _inc_imag.vectorValue(_t, _q_point[_qp])(1));
-  std::complex<double> E_inc2(_inc_real.vectorValue(_t, _q_point[_qp])(2),
+  std::complex<double> field_inc_2(_inc_real.vectorValue(_t, _q_point[_qp])(2),
                               _inc_imag.vectorValue(_t, _q_point[_qp])(2));
-  VectorValue<std::complex<double>> E_inc(E_inc0, E_inc1, E_inc2);
+  VectorValue<std::complex<double>> field_inc(field_inc_0, field_inc_1, field_inc_2);
 
   std::complex<double> curl_inc0(_inc_real.vectorCurl(_t, _q_point[_qp])(0),
                                  _inc_imag.vectorCurl(_t, _q_point[_qp])(0));
@@ -92,16 +92,16 @@ VectorPortBC::computeQpResidual()
   VectorValue<std::complex<double>> curl_inc(curl_inc0, curl_inc1, curl_inc2);
 
   // Calculate incoming wave contribution to BC residual
-  std::complex<double> U_inc_dot_test =
+  std::complex<double> u_inc_dot_test =
       _test[_i][_qp].cross(_normals[_qp]) * curl_inc +
       _jay * _beta.value(_t, _q_point[_qp]) *
-          (_test[_i][_qp].cross(_normals[_qp]) * _normals[_qp].cross(E_inc));
+          (_test[_i][_qp].cross(_normals[_qp]) * _normals[_qp].cross(field_inc));
 
   // Calculate solution field contribution to BC residual (first order version)
-  std::complex<double> P_dot_test = _jay * _beta.value(_t, _q_point[_qp]) *
-                                    _test[_i][_qp].cross(_normals[_qp]) * _normals[_qp].cross(E);
+  std::complex<double> p_dot_test = _jay * _beta.value(_t, _q_point[_qp]) *
+                                    _test[_i][_qp].cross(_normals[_qp]) * _normals[_qp].cross(field);
 
-  std::complex<double> res = U_inc_dot_test - P_dot_test;
+  std::complex<double> res = u_inc_dot_test - p_dot_test;
 
   if (_component == elk::REAL)
   {

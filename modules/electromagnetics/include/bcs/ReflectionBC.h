@@ -33,7 +33,7 @@ private:
 
   Real _sign;
 
-  Real _RHS_coeff;
+  Real _rhs_coeff;
 };
 
 #endif // REFLECTIONBC_H

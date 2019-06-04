@@ -30,8 +30,8 @@ PEC::computeQpResidual()
   RealVectorValue field(_coupled_val_0[_qp], _coupled_val_1[_qp], _coupled_val_2[_qp]);
   RealVectorValue test(_test[_i][_qp], _test[_i][_qp], _test[_i][_qp]);
 
-  RealVectorValue NcF = _normals[_qp].cross(field);
-  RealVectorValue NcT = _normals[_qp].cross(test);
+  RealVectorValue n_cross_f = _normals[_qp].cross(field);
+  //RealVectorValue n_cross_t = _normals[_qp].cross(test);
 
-  return -test * NcF;
+  return -test * n_cross_f;
 }
