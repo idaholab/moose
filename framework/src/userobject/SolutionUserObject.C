@@ -257,9 +257,7 @@ SolutionUserObject::readExodusII()
   // Get the variable name lists as set; these need to be sets to perform set_intersection
   const std::vector<std::string> & all_nodal(_exodusII_io->get_nodal_var_names());
   const std::vector<std::string> & all_elemental(_exodusII_io->get_elem_var_names());
-
-  // Storage for the nodal and elemental variables to consider
-  std::vector<std::string> nodal, elemental;
+  const std::vector<std::string> & all_scalar(_exodusII_io->get_global_var_names());
 
   // Build nodal/elemental variable lists, limit to variables listed in 'system_variables', if
   // provided
@@ -268,23 +266,29 @@ SolutionUserObject::readExodusII()
     for (const auto & var_name : _system_variables)
     {
       if (std::find(all_nodal.begin(), all_nodal.end(), var_name) != all_nodal.end())
-        nodal.push_back(var_name);
+        _nodal_variables.push_back(var_name);
       if (std::find(all_elemental.begin(), all_elemental.end(), var_name) != all_elemental.end())
-        elemental.push_back(var_name);
+        _elemental_variables.push_back(var_name);
+      if (std::find(all_scalar.begin(), all_scalar.end(), var_name) != all_scalar.end())
+        _scalar_variables.push_back(var_name);
     }
   }
   else
   {
-    nodal = all_nodal;
-    elemental = all_elemental;
+    _nodal_variables = all_nodal;
+    _elemental_variables = all_elemental;
+    _scalar_variables = all_scalar;
   }
 
   // Add the variables to the system
-  for (const auto & var_name : nodal)
+  for (const auto & var_name : _nodal_variables)
     _system->add_variable(var_name, FIRST);
 
-  for (const auto & var_name : elemental)
+  for (const auto & var_name : _elemental_variables)
     _system->add_variable(var_name, CONSTANT, MONOMIAL);
+
+  for (const auto & var_name : _scalar_variables)
+    _system->add_variable(var_name, FIRST, SCALAR);
 
   // Initialize the equations systems
   _es->init();
@@ -298,11 +302,14 @@ SolutionUserObject::readExodusII()
     _system2 = &_es2->get_system(_system_name);
 
     // Add the variables to the system
-    for (const auto & var_name : nodal)
+    for (const auto & var_name : _nodal_variables)
       _system2->add_variable(var_name, FIRST);
 
-    for (const auto & var_name : elemental)
+    for (const auto & var_name : _elemental_variables)
       _system2->add_variable(var_name, CONSTANT, MONOMIAL);
+
+    for (const auto & var_name : _scalar_variables)
+      _system2->add_variable(var_name, FIRST, SCALAR);
 
     // Initialize
     _es2->init();
@@ -311,16 +318,24 @@ SolutionUserObject::readExodusII()
     updateExodusBracketingTimeIndices(0.0);
 
     // Copy the solutions from the first system
-    for (const auto & var_name : nodal)
+    for (const auto & var_name : _nodal_variables)
     {
       _exodusII_io->copy_nodal_solution(*_system, var_name, var_name, _exodus_index1 + 1);
       _exodusII_io->copy_nodal_solution(*_system2, var_name, var_name, _exodus_index2 + 1);
     }
 
-    for (const auto & var_name : elemental)
+    for (const auto & var_name : _elemental_variables)
     {
       _exodusII_io->copy_elemental_solution(*_system, var_name, var_name, _exodus_index1 + 1);
       _exodusII_io->copy_elemental_solution(*_system2, var_name, var_name, _exodus_index2 + 1);
+    }
+
+    if (_scalar_variables.size() > 0)
+    {
+      _exodusII_io->copy_scalar_solution(
+          *_system, _scalar_variables, _scalar_variables, _exodus_index1 + 1);
+      _exodusII_io->copy_scalar_solution(
+          *_system2, _scalar_variables, _scalar_variables, _exodus_index2 + 1);
     }
 
     // Update the systems
@@ -341,11 +356,15 @@ SolutionUserObject::readExodusII()
                  " time steps.");
 
     // Copy the values from the ExodusII file
-    for (const auto & var_name : nodal)
+    for (const auto & var_name : _nodal_variables)
       _exodusII_io->copy_nodal_solution(*_system, var_name, var_name, _exodus_time_index);
 
-    for (const auto & var_name : elemental)
+    for (const auto & var_name : _elemental_variables)
       _exodusII_io->copy_elemental_solution(*_system, var_name, var_name, _exodus_time_index);
+
+    if (_scalar_variables.size() > 0)
+      _exodusII_io->copy_scalar_solution(
+          *_system, _scalar_variables, _scalar_variables, _exodus_time_index);
 
     // Update the equations systems
     _system->update();
@@ -362,7 +381,10 @@ SolutionUserObject::directValue(const Node * node, const std::string & var_name)
 
   // Get the node id and associated dof
   dof_id_type node_id = node->id();
-  dof_id_type dof_id = _system->get_mesh().node_ref(node_id).dof_number(sys_num, var_num, 0);
+  const Node & sys_node = _system->get_mesh().node_ref(node_id);
+  mooseAssert(sys_node.n_dofs(sys_num, var_num) > 0,
+              "Variable " << var_name << " has no DoFs on node " << sys_node.id());
+  dof_id_type dof_id = sys_node.dof_number(sys_num, var_num, 0);
 
   // Return the desired value for the dof
   return directValue(dof_id);
@@ -377,7 +399,10 @@ SolutionUserObject::directValue(const Elem * elem, const std::string & var_name)
 
   // Get the element id and associated dof
   dof_id_type elem_id = elem->id();
-  dof_id_type dof_id = _system->get_mesh().elem_ptr(elem_id)->dof_number(sys_num, var_num, 0);
+  const Elem & sys_elem = _system->get_mesh().elem_ref(elem_id);
+  mooseAssert(sys_elem.n_dofs(sys_num, var_num) > 0,
+              "Variable " << var_name << " has no DoFs on element " << sys_elem.id());
+  dof_id_type dof_id = sys_elem.dof_number(sys_num, var_num, 0);
 
   // Return the desired value
   return directValue(dof_id);
@@ -446,7 +471,7 @@ SolutionUserObject::initialSetup()
   else
     mooseError("In SolutionUserObject, invalid file type (only .xda, .xdr, and .e supported)");
 
-  // Intilize the serial solution vector
+  // Initialize the serial solution vector
   _serialized_solution = NumericVector<Number>::build(_communicator);
   _serialized_solution->init(_system->n_dofs(), false, SERIAL);
 
@@ -498,17 +523,10 @@ SolutionUserObject::initialSetup()
     _mesh_function2->enable_out_of_mesh_mode(default_values);
   }
 
-  // Populate the data maps that indicate if the variable is nodal and the MeshFunction variable
-  // index
+  // Populate the MeshFunction variable index
   for (unsigned int i = 0; i < _system_variables.size(); ++i)
   {
     std::string name = _system_variables[i];
-    FEType type = _system->variable_type(name);
-    if (type.order == CONSTANT)
-      _local_variable_nodal[name] = false;
-    else
-      _local_variable_nodal[name] = true;
-
     _local_variable_index[name] = i;
   }
 
@@ -530,25 +548,25 @@ SolutionUserObject::updateExodusTimeInterpolation(Real time)
     if (updateExodusBracketingTimeIndices(time))
     {
 
-      for (const auto & var_name : _system_variables)
-      {
-        if (_local_variable_nodal[var_name])
-          _exodusII_io->copy_nodal_solution(*_system, var_name, var_name, _exodus_index1 + 1);
-        else
-          _exodusII_io->copy_elemental_solution(*_system, var_name, var_name, _exodus_index1 + 1);
-      }
+      for (const auto & var_name : _nodal_variables)
+        _exodusII_io->copy_nodal_solution(*_system, var_name, var_name, _exodus_index1 + 1);
+      for (const auto & var_name : _elemental_variables)
+        _exodusII_io->copy_elemental_solution(*_system, var_name, var_name, _exodus_index1 + 1);
+      if (_scalar_variables.size() > 0)
+        _exodusII_io->copy_scalar_solution(
+            *_system, _scalar_variables, _scalar_variables, _exodus_index1 + 1);
 
       _system->update();
       _es->update();
       _system->solution->localize(*_serialized_solution);
 
-      for (const auto & var_name : _system_variables)
-      {
-        if (_local_variable_nodal[var_name])
-          _exodusII_io->copy_nodal_solution(*_system2, var_name, var_name, _exodus_index2 + 1);
-        else
-          _exodusII_io->copy_elemental_solution(*_system2, var_name, var_name, _exodus_index2 + 1);
-      }
+      for (const auto & var_name : _nodal_variables)
+        _exodusII_io->copy_nodal_solution(*_system2, var_name, var_name, _exodus_index2 + 1);
+      for (const auto & var_name : _elemental_variables)
+        _exodusII_io->copy_elemental_solution(*_system2, var_name, var_name, _exodus_index2 + 1);
+      if (_scalar_variables.size() > 0)
+        _exodusII_io->copy_scalar_solution(
+            *_system2, _scalar_variables, _scalar_variables, _exodus_index2 + 1);
 
       _system2->update();
       _es2->update();
@@ -624,7 +642,8 @@ Real
 SolutionUserObject::pointValueWrapper(Real t,
                                       const Point & p,
                                       const std::string & var_name,
-                                      const MooseEnum & weighting_type) const
+                                      const MooseEnum & weighting_type,
+                                      const std::set<subdomain_id_type> * subdomain_ids) const
 {
   // first check if the FE type is continuous because in that case the value is
   // unique and we can take a short cut, the default weighting_type found_first also
@@ -638,7 +657,7 @@ SolutionUserObject::pointValueWrapper(Real t,
 
   if (weighting_type == 1 ||
       (family != L2_LAGRANGE && family != MONOMIAL && family != L2_HIERARCHIC))
-    return pointValue(t, p, var_name);
+    return pointValue(t, p, var_name, subdomain_ids);
 
   // the shape function is discontinuous so we need to compute a suitable unique value
   std::map<const Elem *, Real> values = discontinuousPointValue(t, p, var_name);
@@ -683,16 +702,20 @@ SolutionUserObject::pointValueWrapper(Real t,
 }
 
 Real
-SolutionUserObject::pointValue(Real t, const Point & p, const std::string & var_name) const
+SolutionUserObject::pointValue(Real t,
+                               const Point & p,
+                               const std::string & var_name,
+                               const std::set<subdomain_id_type> * subdomain_ids) const
 {
   const unsigned int local_var_index = getLocalVarIndex(var_name);
-  return pointValue(t, p, local_var_index);
+  return pointValue(t, p, local_var_index, subdomain_ids);
 }
 
 Real
 SolutionUserObject::pointValue(Real libmesh_dbg_var(t),
                                const Point & p,
-                               const unsigned int local_var_index) const
+                               const unsigned int local_var_index,
+                               const std::set<subdomain_id_type> * subdomain_ids) const
 {
   // Create copy of point
   Point pt(p);
@@ -716,14 +739,14 @@ SolutionUserObject::pointValue(Real libmesh_dbg_var(t),
   }
 
   // Extract the value at the current point
-  Real val = evalMeshFunction(pt, local_var_index, 1);
+  Real val = evalMeshFunction(pt, local_var_index, 1, subdomain_ids);
 
   // Interpolate
   if (_file_type == 1 && _interpolate_times)
   {
     mooseAssert(t == _interpolation_time,
                 "Time passed into value() must match time at last call to timestepSetup()");
-    Real val2 = evalMeshFunction(pt, local_var_index, 2);
+    Real val2 = evalMeshFunction(pt, local_var_index, 2, subdomain_ids);
     val = val + (val2 - val) * _interpolation_factor;
   }
 
@@ -733,16 +756,18 @@ SolutionUserObject::pointValue(Real libmesh_dbg_var(t),
 std::map<const Elem *, Real>
 SolutionUserObject::discontinuousPointValue(Real t,
                                             const Point & p,
-                                            const std::string & var_name) const
+                                            const std::string & var_name,
+                                            const std::set<subdomain_id_type> * subdomain_ids) const
 {
   const unsigned int local_var_index = getLocalVarIndex(var_name);
-  return discontinuousPointValue(t, p, local_var_index);
+  return discontinuousPointValue(t, p, local_var_index, subdomain_ids);
 }
 
 std::map<const Elem *, Real>
 SolutionUserObject::discontinuousPointValue(Real libmesh_dbg_var(t),
                                             Point pt,
-                                            const unsigned int local_var_index) const
+                                            const unsigned int local_var_index,
+                                            const std::set<subdomain_id_type> * subdomain_ids) const
 {
   // do the transformations
   for (unsigned int trans_num = 0; trans_num < _transformation_order.size(); ++trans_num)
@@ -763,7 +788,8 @@ SolutionUserObject::discontinuousPointValue(Real libmesh_dbg_var(t),
   }
 
   // Extract the value at the current point
-  std::map<const Elem *, Real> map = evalMultiValuedMeshFunction(pt, local_var_index, 1);
+  std::map<const Elem *, Real> map =
+      evalMultiValuedMeshFunction(pt, local_var_index, 1, subdomain_ids);
 
   // Interpolate
   if (_file_type == 1 && _interpolate_times)
@@ -791,17 +817,20 @@ SolutionUserObject::discontinuousPointValue(Real libmesh_dbg_var(t),
 }
 
 RealGradient
-SolutionUserObject::pointValueGradientWrapper(Real t,
-                                              const Point & p,
-                                              const std::string & var_name,
-                                              const MooseEnum & weighting_type) const
+SolutionUserObject::pointValueGradientWrapper(
+    Real t,
+    const Point & p,
+    const std::string & var_name,
+    const MooseEnum & weighting_type,
+    const std::set<subdomain_id_type> * subdomain_ids) const
 {
   // the default weighting_type found_first shortcuts out
   if (weighting_type == 1)
-    return pointValueGradient(t, p, var_name);
+    return pointValueGradient(t, p, var_name, subdomain_ids);
 
   // the shape function is discontinuous so we need to compute a suitable unique value
-  std::map<const Elem *, RealGradient> values = discontinuousPointValueGradient(t, p, var_name);
+  std::map<const Elem *, RealGradient> values =
+      discontinuousPointValueGradient(t, p, var_name, subdomain_ids);
   switch (weighting_type)
   {
     case 2:
@@ -843,16 +872,20 @@ SolutionUserObject::pointValueGradientWrapper(Real t,
 }
 
 RealGradient
-SolutionUserObject::pointValueGradient(Real t, const Point & p, const std::string & var_name) const
+SolutionUserObject::pointValueGradient(Real t,
+                                       const Point & p,
+                                       const std::string & var_name,
+                                       const std::set<subdomain_id_type> * subdomain_ids) const
 {
   const unsigned int local_var_index = getLocalVarIndex(var_name);
-  return pointValueGradient(t, p, local_var_index);
+  return pointValueGradient(t, p, local_var_index, subdomain_ids);
 }
 
 RealGradient
 SolutionUserObject::pointValueGradient(Real libmesh_dbg_var(t),
                                        Point pt,
-                                       const unsigned int local_var_index) const
+                                       const unsigned int local_var_index,
+                                       const std::set<subdomain_id_type> * subdomain_ids) const
 {
   // do the transformations
   for (unsigned int trans_num = 0; trans_num < _transformation_order.size(); ++trans_num)
@@ -873,14 +906,14 @@ SolutionUserObject::pointValueGradient(Real libmesh_dbg_var(t),
   }
 
   // Extract the value at the current point
-  RealGradient val = evalMeshFunctionGradient(pt, local_var_index, 1);
+  RealGradient val = evalMeshFunctionGradient(pt, local_var_index, 1, subdomain_ids);
 
   // Interpolate
   if (_file_type == 1 && _interpolate_times)
   {
     mooseAssert(t == _interpolation_time,
                 "Time passed into value() must match time at last call to timestepSetup()");
-    RealGradient val2 = evalMeshFunctionGradient(pt, local_var_index, 2);
+    RealGradient val2 = evalMeshFunctionGradient(pt, local_var_index, 2, subdomain_ids);
     val = val + (val2 - val) * _interpolation_factor;
   }
 
@@ -888,18 +921,22 @@ SolutionUserObject::pointValueGradient(Real libmesh_dbg_var(t),
 }
 
 std::map<const Elem *, RealGradient>
-SolutionUserObject::discontinuousPointValueGradient(Real t,
-                                                    const Point & p,
-                                                    const std::string & var_name) const
+SolutionUserObject::discontinuousPointValueGradient(
+    Real t,
+    const Point & p,
+    const std::string & var_name,
+    const std::set<subdomain_id_type> * subdomain_ids) const
 {
   const unsigned int local_var_index = getLocalVarIndex(var_name);
-  return discontinuousPointValueGradient(t, p, local_var_index);
+  return discontinuousPointValueGradient(t, p, local_var_index, subdomain_ids);
 }
 
 std::map<const Elem *, RealGradient>
-SolutionUserObject::discontinuousPointValueGradient(Real libmesh_dbg_var(t),
-                                                    Point pt,
-                                                    const unsigned int local_var_index) const
+SolutionUserObject::discontinuousPointValueGradient(
+    Real libmesh_dbg_var(t),
+    Point pt,
+    const unsigned int local_var_index,
+    const std::set<subdomain_id_type> * subdomain_ids) const
 {
   // do the transformations
   for (unsigned int trans_num = 0; trans_num < _transformation_order.size(); ++trans_num)
@@ -921,7 +958,7 @@ SolutionUserObject::discontinuousPointValueGradient(Real libmesh_dbg_var(t),
 
   // Extract the value at the current point
   std::map<const Elem *, RealGradient> map =
-      evalMultiValuedMeshFunctionGradient(pt, local_var_index, 1);
+      evalMultiValuedMeshFunctionGradient(pt, local_var_index, 1, subdomain_ids);
 
   // Interpolate
   if (_file_type == 1 && _interpolate_times)
@@ -929,7 +966,7 @@ SolutionUserObject::discontinuousPointValueGradient(Real libmesh_dbg_var(t),
     mooseAssert(t == _interpolation_time,
                 "Time passed into value() must match time at last call to timestepSetup()");
     std::map<const Elem *, RealGradient> map2 =
-        evalMultiValuedMeshFunctionGradient(pt, local_var_index, 1);
+        evalMultiValuedMeshFunctionGradient(pt, local_var_index, 1, subdomain_ids);
 
     if (map.size() != map2.size())
       mooseError("In SolutionUserObject::discontinuousPointValue map and map2 have different size");
@@ -964,7 +1001,8 @@ SolutionUserObject::directValue(dof_id_type dof_index) const
 Real
 SolutionUserObject::evalMeshFunction(const Point & p,
                                      const unsigned int local_var_index,
-                                     unsigned int func_num) const
+                                     unsigned int func_num,
+                                     const std::set<subdomain_id_type> * subdomain_ids) const
 {
   // Storage for mesh function output
   DenseVector<Number> output;
@@ -973,11 +1011,11 @@ SolutionUserObject::evalMeshFunction(const Point & p,
   {
     Threads::spin_mutex::scoped_lock lock(_solution_user_object_mutex);
     if (func_num == 1)
-      (*_mesh_function)(p, 0.0, output);
+      (*_mesh_function)(p, 0.0, output, subdomain_ids);
 
     // Extract a value from _mesh_function2
     else if (func_num == 2)
-      (*_mesh_function2)(p, 0.0, output);
+      (*_mesh_function2)(p, 0.0, output, subdomain_ids);
 
     else
       mooseError("The func_num must be 1 or 2");
@@ -1001,9 +1039,11 @@ SolutionUserObject::evalMeshFunction(const Point & p,
 }
 
 std::map<const Elem *, Real>
-SolutionUserObject::evalMultiValuedMeshFunction(const Point & p,
-                                                const unsigned int local_var_index,
-                                                unsigned int func_num) const
+SolutionUserObject::evalMultiValuedMeshFunction(
+    const Point & p,
+    const unsigned int local_var_index,
+    unsigned int func_num,
+    const std::set<subdomain_id_type> * subdomain_ids) const
 {
   // Storage for mesh function output
   std::map<const Elem *, DenseVector<Number>> temporary_output;
@@ -1012,11 +1052,11 @@ SolutionUserObject::evalMultiValuedMeshFunction(const Point & p,
   {
     Threads::spin_mutex::scoped_lock lock(_solution_user_object_mutex);
     if (func_num == 1)
-      _mesh_function->discontinuous_value(p, 0.0, temporary_output);
+      _mesh_function->discontinuous_value(p, 0.0, temporary_output, subdomain_ids);
 
     // Extract a value from _mesh_function2
     else if (func_num == 2)
-      _mesh_function2->discontinuous_value(p, 0.0, temporary_output);
+      _mesh_function2->discontinuous_value(p, 0.0, temporary_output, subdomain_ids);
 
     else
       mooseError("The func_num must be 1 or 2");
@@ -1043,8 +1083,7 @@ SolutionUserObject::evalMultiValuedMeshFunction(const Point & p,
   {
     mooseAssert(k.second.size() > local_var_index,
                 "In SolutionUserObject::evalMultiValuedMeshFunction variable with local_var_index "
-                    << local_var_index
-                    << " does not exist");
+                    << local_var_index << " does not exist");
     output[k.first] = k.second(local_var_index);
   }
 
@@ -1052,9 +1091,11 @@ SolutionUserObject::evalMultiValuedMeshFunction(const Point & p,
 }
 
 RealGradient
-SolutionUserObject::evalMeshFunctionGradient(const Point & p,
-                                             const unsigned int local_var_index,
-                                             unsigned int func_num) const
+SolutionUserObject::evalMeshFunctionGradient(
+    const Point & p,
+    const unsigned int local_var_index,
+    unsigned int func_num,
+    const std::set<subdomain_id_type> * subdomain_ids) const
 {
   // Storage for mesh function output
   std::vector<Gradient> output;
@@ -1063,11 +1104,11 @@ SolutionUserObject::evalMeshFunctionGradient(const Point & p,
   {
     Threads::spin_mutex::scoped_lock lock(_solution_user_object_mutex);
     if (func_num == 1)
-      _mesh_function->gradient(p, 0.0, output, libmesh_nullptr);
+      _mesh_function->gradient(p, 0.0, output, subdomain_ids);
 
     // Extract a value from _mesh_function2
     else if (func_num == 2)
-      _mesh_function2->gradient(p, 0.0, output, libmesh_nullptr);
+      _mesh_function2->gradient(p, 0.0, output, subdomain_ids);
 
     else
       mooseError("The func_num must be 1 or 2");
@@ -1091,9 +1132,11 @@ SolutionUserObject::evalMeshFunctionGradient(const Point & p,
 }
 
 std::map<const Elem *, RealGradient>
-SolutionUserObject::evalMultiValuedMeshFunctionGradient(const Point & p,
-                                                        const unsigned int local_var_index,
-                                                        unsigned int func_num) const
+SolutionUserObject::evalMultiValuedMeshFunctionGradient(
+    const Point & p,
+    const unsigned int local_var_index,
+    unsigned int func_num,
+    const std::set<subdomain_id_type> * subdomain_ids) const
 {
   // Storage for mesh function output
   std::map<const Elem *, std::vector<Gradient>> temporary_output;
@@ -1102,11 +1145,11 @@ SolutionUserObject::evalMultiValuedMeshFunctionGradient(const Point & p,
   {
     Threads::spin_mutex::scoped_lock lock(_solution_user_object_mutex);
     if (func_num == 1)
-      _mesh_function->discontinuous_gradient(p, 0.0, temporary_output);
+      _mesh_function->discontinuous_gradient(p, 0.0, temporary_output, subdomain_ids);
 
     // Extract a value from _mesh_function2
     else if (func_num == 2)
-      _mesh_function2->discontinuous_gradient(p, 0.0, temporary_output);
+      _mesh_function2->discontinuous_gradient(p, 0.0, temporary_output, subdomain_ids);
 
     else
       mooseError("The func_num must be 1 or 2");
@@ -1133,8 +1176,7 @@ SolutionUserObject::evalMultiValuedMeshFunctionGradient(const Point & p,
   {
     mooseAssert(k.second.size() > local_var_index,
                 "In SolutionUserObject::evalMultiValuedMeshFunction variable with local_var_index "
-                    << local_var_index
-                    << " does not exist");
+                    << local_var_index << " does not exist");
     output[k.first] = k.second[local_var_index];
   }
 
@@ -1150,7 +1192,17 @@ SolutionUserObject::variableNames() const
 bool
 SolutionUserObject::isVariableNodal(const std::string & var_name) const
 {
-  // Use iterator method, [] is not marked const
-  std::map<std::string, bool>::const_iterator it = _local_variable_nodal.find(var_name);
-  return it->second;
+  return std::find(_nodal_variables.begin(), _nodal_variables.end(), var_name) !=
+         _nodal_variables.end();
+}
+
+Real
+SolutionUserObject::scalarValue(Real /*t*/, const std::string & var_name) const
+{
+  unsigned int var_num = _system->variable_number(var_name);
+  const DofMap & dof_map = _system->get_dof_map();
+  std::vector<dof_id_type> dofs;
+  dof_map.SCALAR_dof_indices(dofs, var_num);
+  // We can handle only FIRST order scalar variables
+  return directValue(dofs[0]);
 }

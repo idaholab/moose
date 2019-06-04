@@ -1,0 +1,19 @@
+[Tests]
+  [./build]
+    type = 'RunApp'
+    input = 'build.i'
+    requirement = "The 'MOOSE_TEST_NAME' test shall create an output file for testing the 'SolutionScalarAux' object."
+    design = 'SolutionScalarAux.md'
+    issues = '#13356'
+  [../]
+
+  [./test]
+    type = 'CSVDiff'
+    input = 'solution_scalar_aux.i'
+    csvdiff = 'solution_scalar_aux_out.csv'
+    requirement = "The system shall read a scalar variable from an Exodus file and use its value."
+    design = 'SolutionScalarAux.md'
+    issues = '#13356'
+    prereq = 'build'
+  [../]
+[]

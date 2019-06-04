@@ -62,17 +62,12 @@ SolutionAux::initialSetup()
 
     // If there are more than one, throw an error
     if (vars.size() > 1)
-      mooseError("The SolutionUserObject contains multiple variables, in this case the "
-                 "SolutionFunction must specifiy the desired variable in the input file with "
-                 "'from_variable'");
+      mooseError("The SolutionUserObject contains multiple variables, please specifiy the desired "
+                 "variables in the input file with 'from_variable' parameter.");
 
     // Define the variable
     _var_name = vars[0];
   }
-
-  // Determine if 'from_variable' is elemental, if so then use direct extraction
-  if (!_solution_object.isVariableNodal(_var_name))
-    _direct = true;
 }
 
 Real

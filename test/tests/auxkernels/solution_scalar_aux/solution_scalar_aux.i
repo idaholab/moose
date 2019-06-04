@@ -1,13 +1,8 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 2
-  ny = 2
-  xmin = 1
-  xmax = 4
-  ymin = 1
-  ymax = 3
   # This test uses SolutionUserObject which doesn't work with DistributedMesh.
+  type = GeneratedMesh
+  dim = 1
+  nx = 1
   parallel_type = replicated
 []
 
@@ -19,9 +14,9 @@
 []
 
 [AuxVariables]
-  [./u_aux]
+  [./a]
+    family = SCALAR
     order = FIRST
-    family = LAGRANGE
   [../]
 []
 
@@ -32,22 +27,20 @@
   [../]
 []
 
-[AuxKernels]
-  [./initial_cond_aux]
-    type = SolutionAux
-    solution = xda_soln
-    execute_on = initial
-    variable = u_aux
-    direct = false
+[AuxScalarKernels]
+  [./a_sk]
+    type = SolutionScalarAux
+    variable = a
+    solution = solution_uo
+    from_variable = a
+    execute_on = 'initial timestep_begin'
   [../]
 []
 
 [UserObjects]
-  [./xda_soln]
+  [./solution_uo]
     type = SolutionUserObject
-    mesh = build_out_0001_mesh.xda
-    es = build_out_0001.xda
-    system_variables = u
+    mesh = build_out.e
   [../]
 []
 
@@ -56,23 +49,24 @@
     type = DirichletBC
     variable = u
     boundary = left
-    value = 0
+    value = 2
   [../]
   [./right]
     type = DirichletBC
     variable = u
     boundary = right
-    value = 1
+    value = 3
   [../]
 []
 
 [Executioner]
-  type = Steady
-  solve_type = 'PJFNK'
+  type = Transient
+  solve_type = 'NEWTON'
   nl_rel_tol = 1e-10
+  dt = 1
+  num_steps = 3
 []
 
 [Outputs]
-  exodus = true
-  xda = true
+  csv = true
 []
