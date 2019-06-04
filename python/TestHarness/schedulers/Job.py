@@ -11,6 +11,7 @@ import re, os, json
 import time
 from timeit import default_timer as clock
 from TestHarness.StatusSystem import StatusSystem
+from TestHarness.FileChecker import FileChecker
 
 
 class Timer(object):
@@ -32,7 +33,7 @@ class Timer(object):
         """ returns the total/cumulative time taken by the timer """
         diffs = [end - start for start, end in zip(self.starts, self.ends)]
         return sum(diffs)
-    def avgerageDur(self):
+    def averageDur(self):
         return self.cumulativeDur() / len(self.starts)
     def nRuns(self):
         return len(self.starts)
@@ -59,6 +60,9 @@ class Job(object):
         self.report_timer = None
         self.__slots = None
         self.__meta_data = {}
+
+        # Create a fileChecker object to be able to call filecheck methods
+        self.fileChecker = FileChecker()
 
         # List of files modified by this job.
         self.modifiedFiles = []
@@ -95,21 +99,13 @@ class Job(object):
         # Initialize jobs with a holding status
         self.setStatus(self.hold)
 
-    def getUpstream(self, a_job):
-        """ Method to return a list of all the jobs that need to be run before this job """
-        somejobs = self.getDAG()
-        t_list = []
-        for temp_job in somejobs.predecessors(a_job):
-            t_list.append(temp_job.getTestName())
-        return t_list
+    def getUpstreams(self):
+        """ Wrapper method to return a list of all the jobs that need to be run before the given job """
+        return self.__job_dag.getUpstreams(self)
 
-    def getDownstreams(self, a_job, graph):
-        """ Method to return a list of all the jobs that need to be run after this job """
-        somejobs = self.getDAG()
-        t_list = []
-        for temp_job in somejobs.all_downstreams(a_job):
-            t_list.append(temp_job.getTestName())
-        return t_list
+    def getDownstreams(self):
+        """ Wrapper method to return a list of all the jobs that need to be run after the given job """
+        return self.__job_dag.getDownstreams(self)
 
     def addUpsteamNode(self, node):
         """ Add a job to the list of jobs that are upstream from here """
@@ -220,15 +216,21 @@ class Job(object):
         A blocking method to handle the exit status of the process object while keeping track of the
         time the process was active. When the process exits, read the output and close the file.
         """
-        if self.options.testharness_diagnostics:
-            # Give some time so that file modified time has a distinct new value.
-            time.sleep(1)
-            # Before the job does anything, get the times files below it were last modified
-            self.__job_dag.get_all_files(self, self.__job_dag.originalTimes)
 
         # Do not execute app, but allow processResults to commence
         if not self.__tester.shouldExecute():
             return
+
+        if self.options.testharness_diagnostics:
+            # Record the time before we check everything so that we can wait properly.
+            before_check_time = clock()
+            # Before the job does anything, get the times files below it were last modified
+            self.fileChecker.get_all_files(self, self.fileChecker.getOriginalTimes())
+            # Get the time after we checked all the files so that we can wait properly.
+            after_check_time = clock()
+            # Give some time so that file modified time has a distinct new value.
+            while(after_check_time - before_check_time < 1):
+                after_check_time = clock()
 
         self.__tester.prepare(self.options)
 
@@ -240,9 +242,9 @@ class Job(object):
         self.__joined_out = self.__tester.joined_out
 
         if self.options.testharness_diagnostics:
-            ### Check if the files we checked on earlier were modified.
-            self.__job_dag.get_all_files(self, self.__job_dag.newTimes)
-            self.modifiedFiles = self.__job_dag.check_changes(self.__job_dag.originalTimes, self.__job_dag.newTimes)
+            # Check if the files we checked on earlier were modified.
+            self.fileChecker.get_all_files(self, self.fileChecker.getNewTimes())
+            self.modifiedFiles = self.fileChecker.check_changes(self.fileChecker.getOriginalTimes(), self.fileChecker.getNewTimes())
 
     def killProcess(self):
         """ Kill remaining process that may be running """

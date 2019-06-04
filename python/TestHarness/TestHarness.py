@@ -564,102 +564,6 @@ class TestHarness:
             # Perform any write-to-disc operations
             self.writeResults()
 
-    def findRacePartners(self):
-        """ Collect all the jobs that have race conditions """
-        raceConditionsExist = False
-        all_jobs = self.scheduler.retrieveJobs()
-
-        for job_a, job_b in itertools.combinations(all_jobs, 2):
-            for filesInA in job_a.modifiedFiles:
-                for filesInB in job_b.modifiedFiles:
-                    if (filesInA == filesInB):
-                        if not (job_a in job_b.getDownstreamNodes() or job_b in job_a.getDownstreamNodes()):
-                            job_a.racePartners.add(job_b)
-                            job_b.racePartners.add(job_a)
-                            raceConditionsExist = True
-        return raceConditionsExist
-
-    def printRaceConditionsByPrereq(self):
-        """ Print jobs with race conditions that share a prereq """
-        all_jobs = self.scheduler.retrieveJobs()
-
-        colissions = dict()
-        for job in all_jobs:
-            if len(job.racePartners) > 0:
-                prereq = str([x.getTestName() for x in job.getUpstreamNodes()])
-                shared = list()
-                shared.append(job.getTestName())
-                for partner in job.racePartners:
-                    if job.getUpstreamNodes() == partner.getUpstreamNodes():
-                        shared.append(partner.getTestName())
-                    colissions[prereq] = shared
-        for prereq in colissions:
-            if prereq != "[]":
-                print("The following share " + prereq + " for their prereq(s)")
-            else:
-                print("The following don't share any prereqs")
-            for job in colissions[prereq]:
-                print(job)
-        return
-
-    def printUniqueRacerSets(self):
-        """ Print the jobs that share race conditions within unique sets """
-        all_jobs = self.scheduler.retrieveJobs()
-
-        allOfRacers = set()
-        for job in all_jobs:
-            temp_set = set()
-
-            # Only jobs that have race conditions
-            if len(job.racePartners) > 0:
-                temp_set.add(job)
-                for partner in job.racePartners:
-                    temp_set.add(partner)
-                allOfRacers.add(frozenset(sorted(temp_set)))
-        setNumber = 0
-        # Keep the files that are modified.
-        racerModifiedFiles = set()
-
-        # If there are any jobs with race conditions, print them out.
-        if len(allOfRacers) > 0:
-            print("\nDiagnostic analysis shows that the members of the following unique sets exhibit race conditions:")
-
-            # Print each set of jobs with shared race conditions.
-            for racers in allOfRacers:
-                racerModifiedFiles.clear()
-                if racers:
-                    setNumber += 1
-                    print(" Set " + str(setNumber) + "\n- - - - -")
-                    for racer in racers:
-                        print("  --" + racer.getTestName())
-                    for a, b in itertools.combinations(racers, 2):
-                        for c in a.modifiedFiles:
-                            if c in b.modifiedFiles:
-                                racerModifiedFiles.add(c)
-                            else:
-                                try:
-                                    racerModifiedFiles.remove(c)
-                                except:
-                                    pass
-                    print("\n   Each of the tests in this set create or modify the all of the following files:")
-                    for file in racerModifiedFiles:
-                        print("    -->" + file)
-                    print("- - - - -\n\n")
-
-            if setNumber > 1:
-                print("There are a total of " + str(setNumber) + " sets of tests with unique race conditions. ")
-            else:
-                print("There is " + str(setNumber) + " set of tests with unique race conditions. ")
-            sys.exit("Please review the tests and either add any necessary prereqs, or create unique filenames " +
-            "for the outputs of each test.")
-
-        else:
-            print("There are no race conditions.")
-
-
-
-        return setNumber
-
     def writeResults(self):
         """ Don't update the results file when using the --failed-tests argument """
         if self.options.failed_tests:
@@ -673,7 +577,8 @@ class TestHarness:
         if self.options.testharness_diagnostics:
             checker = RaceChecker.RaceChecker(all_jobs)
             checker.findRacePartners()
-            checker.printUniqueRacerSets()
+            # Print the unique racer conditions.  If any are printed, then the error_code needs to be updated.
+            self.error_code = checker.printUniqueRacerSets()
 
         # Record the input file name that was used
         self.options.results_storage['INPUT_FILE_NAME'] = self.options.input_file_name

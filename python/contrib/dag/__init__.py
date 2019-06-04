@@ -27,48 +27,12 @@ class DAG(object):
         self.__cached_graph = None
         self.reset_graph()
 
-        # Added to keep track of the state of the files
-        self.originalTimes = dict()
-        self.newTimes = dict()
-
     # Added by the MOOSE group
     def __cacheGraph(self):
         """ Private method to cache the current state of the graph """
         if self.__cached_graph == None:
             self.__cached_graph = self.clone()
         return self.__cached_graph
-
-    # Added by the MOOSE group
-    def get_all_files(self, job, times):
-        """ Method to get the names and last_modified_times of all files within current test location """
-        for dirpath, dirnames, filenames in os.walk(job.getTestDir(), followlinks=True):
-            for file in filenames:
-                fullyQualifiedFile = os.path.join(dirpath, file)
-                try:
-                    lastModifiedTime = os.path.getmtime(fullyQualifiedFile)
-                    times[fullyQualifiedFile] = lastModifiedTime
-                except:
-                    pass
-        return times
-
-    # Added by the MOOSE group
-    def check_changes(self, originalTimes, newTimes):
-        """ Method to compare names of times kept kept in the two dictionaries created filled by get_all_files """
-        changed = []
-        # Are the new mod times different?
-        # Check if the key is there before accessing
-        for fullyQualifiedFile in originalTimes:
-            try:
-                if originalTimes[fullyQualifiedFile] != newTimes[fullyQualifiedFile]:
-                    changed.append(fullyQualifiedFile)
-            except:
-                pass
-
-        ##Going to need to check to see if any other items were added
-        for fullyQualifiedFile in newTimes:
-            if not fullyQualifiedFile in originalTimes:
-                changed.append(fullyQualifiedFile)
-        return changed
 
     # Added by the MOOSE group
     def serialize_dag(self, graph=None):

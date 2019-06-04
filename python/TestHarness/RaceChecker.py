@@ -11,11 +11,15 @@ import sys
 import itertools
 
 class RaceChecker(object):
-    """docstring for RaceChecker."""
+    """
+    Class with methods to check if two jobs have modified a file with the same name
+    while not having the proper dependencies to avoid race conditions.
+    """
 
     def __init__(self, all_jobs):
         """ Create a RaceChecker object that has all the jobs"""
         self.all_jobs = all_jobs
+        self.error_code = 0x0
 
 
     def findRacePartners(self):
@@ -23,10 +27,10 @@ class RaceChecker(object):
         raceConditionsExist = False
 
         for job_a, job_b in itertools.combinations(self.all_jobs, 2):
-            for filesInA in job_a.modifiedFiles:
-                for filesInB in job_b.modifiedFiles:
-                    if (filesInA == filesInB):
-                        if not (job_a in job_b.getDownstreamNodes() or job_b in job_a.getDownstreamNodes()):
+            for fileInA in job_a.modifiedFiles:
+                for fileInB in job_b.modifiedFiles:
+                    if (fileInA == fileInB):
+                        if not ((job_a in job_b.getDownstreamNodes()) or (job_b in job_a.getDownstreamNodes())):
                             job_a.racePartners.add(job_b)
                             job_b.racePartners.add(job_a)
                             raceConditionsExist = True
@@ -92,7 +96,7 @@ class RaceChecker(object):
                                     racerModifiedFiles.remove(c)
                                 except:
                                     pass
-                    print("\n   Each of the tests in this set create or modify the all of the following files:")
+                    print("\n   Each of the tests in this set create or modify each of the following files:")
                     for file in racerModifiedFiles:
                         print("    -->" + file)
                     print("- - - - -\n\n")
@@ -101,12 +105,13 @@ class RaceChecker(object):
                 print("There are a total of " + str(setNumber) + " sets of tests with unique race conditions. ")
             else:
                 print("There is " + str(setNumber) + " set of tests with unique race conditions. ")
-            sys.exit("Please review the tests and either add any necessary prereqs, or create unique filenames " +
+            print("Please review the tests and either add any necessary prereqs, or create unique filenames " +
             "for the outputs of each test.")
+            self.error_code = self.error_code | 0x85
 
         else:
             print("There are no race conditions.")
 
 
 
-        return setNumber
+        return self.error_code

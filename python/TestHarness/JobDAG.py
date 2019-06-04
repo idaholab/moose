@@ -204,6 +204,20 @@ class JobDAG(object):
                  or 'prereq' in self.options.ignored_caveats)):
             return True
 
+    def getUpstreams(self, a_job):
+        """ Method to return a list of all the jobs that need to be run before the given job """
+        t_list = []
+        for temp_job in self.__job_dag.predecessors(a_job):
+            t_list.append(temp_job.getTestName())
+        return t_list
+
+    def getDownstreams(self, a_job):
+        """ Method to return a list of all the jobs that need to be run after the given job """
+        t_list = []
+        for temp_job in self.__job_dag.all_downstreams(a_job):
+            t_list.append(temp_job.getTestName())
+        return t_list
+
     def _printDownstreams(self, job):
         """
         create a printable dependency chart of for supplied job
