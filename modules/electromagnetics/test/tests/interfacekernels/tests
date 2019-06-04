@@ -14,4 +14,9 @@
     input = 'combined_default.i'
     exodiff = 'combined_default_out.e'
   [../]
+  [./combined_props]
+    type = Exodiff
+    input = 'combined_props.i'
+    exodiff = 'combined_props_out.e'
+  [../]
 []
