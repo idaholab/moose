@@ -29,6 +29,8 @@ validParams<ContactDofSet>()
   params.addRequiredParam<SubdomainName>("subdomain", "The subdomain that the variable lives on");
   params.addParam<Real>(
       "tolerance", TOLERANCE, "The tolerance for accepting that the variable indicates contact");
+  params.addClassDescription("Outputs the number of dofs greater than a tolerance threshold "
+                             "indicating mechanical contact");
   return params;
 }
 

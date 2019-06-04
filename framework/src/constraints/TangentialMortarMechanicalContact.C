@@ -11,14 +11,16 @@
 
 registerADMooseObject("MooseApp", TangentialMortarMechanicalContact);
 
-defineADValidParams(TangentialMortarMechanicalContact,
-                    ADMortarConstraint,
+defineADValidParams(
+    TangentialMortarMechanicalContact,
+    ADMortarConstraint,
 
-                    MooseEnum component("x=0 y=1 z=2");
-                    params.addRequiredParam<MooseEnum>(
-                        "component",
-                        component,
-                        "The force component constraint that this object is supplying"););
+    MooseEnum component("x=0 y=1 z=2");
+    params.addRequiredParam<MooseEnum>(
+        "component", component, "The force component constraint that this object is supplying");
+    params.addClassDescription(
+        "Used to apply tangential stresses from frictional contact using lagrange multipliers");
+    params.set<bool>("compute_lm_residual") = false;);
 
 template <ComputeStage compute_stage>
 TangentialMortarMechanicalContact<compute_stage>::TangentialMortarMechanicalContact(

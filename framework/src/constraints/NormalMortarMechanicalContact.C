@@ -11,14 +11,16 @@
 
 registerADMooseObject("MooseApp", NormalMortarMechanicalContact);
 
-defineADValidParams(NormalMortarMechanicalContact,
-                    ADMortarConstraint,
+defineADValidParams(
+    NormalMortarMechanicalContact,
+    ADMortarConstraint,
 
-                    MooseEnum component("x=0 y=1 z=2");
-                    params.addRequiredParam<MooseEnum>(
-                        "component",
-                        component,
-                        "The force component constraint that this object is supplying"););
+    MooseEnum component("x=0 y=1 z=2");
+    params.addRequiredParam<MooseEnum>(
+        "component", component, "The force component constraint that this object is supplying");
+    params.addClassDescription(
+        "This class is used to apply normal contact forces using lagrange multipliers");
+    params.set<bool>("compute_lm_residual") = false;);
 
 template <ComputeStage compute_stage>
 NormalMortarMechanicalContact<compute_stage>::NormalMortarMechanicalContact(

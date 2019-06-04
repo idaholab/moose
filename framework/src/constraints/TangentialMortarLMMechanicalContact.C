@@ -25,14 +25,17 @@ defineADValidParams(
         "variable");
     params.addRequiredParam<Real>("friction_coefficient", "The friction coefficient");
 
-    MooseEnum ncp_type("min fb", "min");
+    MooseEnum ncp_type("min fb", "fb");
     params.addParam<MooseEnum>("ncp_function_type",
                                ncp_type,
                                "The type of the nonlinear complimentarity function; options are "
                                "min or fb where fb stands for Fischer-Burmeister");
     params.addParam<Real>("c",
                           1,
-                          "Parameter for balancing the size of the velocity and the pressures"););
+                          "Parameter for balancing the size of the velocity and the pressures");
+    params.set<bool>("compute_primal_residuals") = false;
+    params.addClassDescription("Ensures that the Karush-Kuhn-Tucker conditions of Coulomb "
+                               "frictional contact are satisfied"););
 
 template <ComputeStage compute_stage>
 TangentialMortarLMMechanicalContact<compute_stage>::TangentialMortarLMMechanicalContact(
