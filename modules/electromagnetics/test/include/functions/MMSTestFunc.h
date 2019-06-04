@@ -20,7 +20,7 @@ public:
   virtual Real value(Real t, const Point & p) const override;
 
 protected:
-  Real _L;
+  Real _length;
 
   const Function & _a;
   const Function & _b;
@@ -28,11 +28,11 @@ protected:
   Real _d;
   Real _h;
 
-  Real _g0_real;
-  Real _g0_imag;
+  Real _g_0_real;
+  Real _g_0_imag;
 
-  Real _gL_real;
-  Real _gL_imag;
+  Real _g_l_real;
+  Real _g_l_imag;
 
   MooseEnum _component;
 
