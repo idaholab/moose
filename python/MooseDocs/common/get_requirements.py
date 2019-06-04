@@ -41,8 +41,8 @@ class Requirement(object):
         self.label = None # added by get_requirements function
         self.satisfied = satisfied
         self.prerequisites = []
-        self.verification = False
-        self.validation = False
+        self.verification = None
+        self.validation = None
 
     def __str__(self):
         frmt = '{}:\n    Text: {}\n    Design: {}\n    Issues: {}'
@@ -115,8 +115,8 @@ def _add_requirements(out, location, filename):
                               issues_line=local_issues_line,
                               satisfied=satisfied)
 
-            req.verification = child.get('verification', False)
-            req.validation = child.get('validation', False)
+            req.verification = child.get('verification', None)
+            req.validation = child.get('validation', None)
 
             group = os.path.relpath(filename, location).split('/')[0]
 
