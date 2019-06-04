@@ -1,0 +1,7 @@
+[Tests]
+  [./parallel]
+    type = Exodiff
+    input = 'parallel.i'
+    exodiff = 'parallel_out.e'
+  [../]
+[]
