@@ -32,13 +32,13 @@ private:
 
   Real _theta;
 
-  Real _L;
+  Real _length;
 
   Real _k;
 
   Real _coeff;
 
-  Real _R;
+  Real _reflection_coefficient;
 };
 
 #endif // REFLECTIONCOEFFICIENT_H

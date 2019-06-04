@@ -33,7 +33,7 @@ ReflectionCoefficient::ReflectionCoefficient(const InputParameters & parameters)
 
     _coupled_imag(coupledValue("field_imag")),
     _theta(getParam<Real>("theta")),
-    _L(getParam<Real>("length")),
+    _length(getParam<Real>("length")),
     _k(getParam<Real>("k")),
     _coeff(getParam<Real>("coeff"))
 {
@@ -43,43 +43,43 @@ ReflectionCoefficient::ReflectionCoefficient(const InputParameters & parameters)
 void
 ReflectionCoefficient::initialize()
 {
-  _R = 0;
+  _reflection_coefficient = 0;
 }
 
 void
 ReflectionCoefficient::execute()
 {
-  _R = computeReflection();
+  _reflection_coefficient = computeReflection();
 }
 
 PostprocessorValue
 ReflectionCoefficient::getValue()
 {
-  return _R;
+  return _reflection_coefficient;
 }
 
 void
 ReflectionCoefficient::threadJoin(const UserObject & y)
 {
   const ReflectionCoefficient & pps = static_cast<const ReflectionCoefficient &>(y);
-  _R = pps._R;
+  _reflection_coefficient = pps._reflection_coefficient;
 }
 
 Real
 ReflectionCoefficient::computeReflection()
 {
-  Real _ref = 0;
+  Real ref = 0;
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
 
-    std::complex<double> _j(0, 1);
-    std::complex<double> _field(_u[_qp], _coupled_imag[_qp]);
+    std::complex<double> jay(0, 1);
+    std::complex<double> field(_u[_qp], _coupled_imag[_qp]);
 
-    std::complex<double> _R_complex =
-        (_field - _coeff * std::exp(_j * _k * _L * std::cos(_theta * libMesh::pi / 180.))) /
-        (_coeff * std::exp(-_j * _k * _L * std::cos(_theta * libMesh::pi / 180.)));
+    std::complex<double> reflection_coefficient_complex =
+        (field - _coeff * std::exp(jay * _k * _length * std::cos(_theta * libMesh::pi / 180.))) /
+        (_coeff * std::exp(-jay * _k * _length * std::cos(_theta * libMesh::pi / 180.)));
 
-    _ref = std::pow(std::abs(_R_complex), 2);
+    ref = std::pow(std::abs(reflection_coefficient_complex), 2);
   }
-  return _ref;
+  return ref;
 }
