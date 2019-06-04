@@ -1,5 +1,5 @@
 [Mesh]
-  file = out_part1_cp/LATEST
+  file = transient_out_cp/LATEST
   parallel_type = replicated
 []
 
@@ -16,8 +16,6 @@
 []
 
 [Variables]
-  active = 'u'
-
   [./u]
     order = FIRST
     family = LAGRANGE
@@ -25,8 +23,6 @@
 []
 
 [Kernels]
-  active = 'diff ffn'
-
   [./diff]
     type = Diffusion
     variable = u
@@ -55,10 +51,9 @@
 []
 
 [Outputs]
-  file_base = out_part2
   exodus = true
 []
 
 [Problem]
-  restart_file_base = out_part1_cp/LATEST
+  restart_file_base = transient_out_cp/LATEST
 []

@@ -1,0 +1,22 @@
+[Tests]
+   design = "restart_recover.md"
+  [steady]
+    type = 'Exodiff'
+    input = 'steady.i'
+    exodiff = 'steady_out.e'
+    recover = false
+
+    issues = "#563 #13438"
+    requirement = "The system shall support outputting a mesh with refinement to Exodus format for restart testing."
+  []
+
+  [restart_trans_from_steady]
+    type = 'Exodiff'
+    input = 'restart_from_steady.i'
+    exodiff = 'restart_from_steady_out.e'
+    prereq = 'steady'
+
+    issues = "#563 #13438"
+    requirement = "The system shall support restarting a transient simulation from a steady solution file."
+  []
+[]
