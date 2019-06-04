@@ -11,7 +11,7 @@
 
 #include "ADDiffusion.h"
 
-template <ComputeStage compute_stage>
+template <ComputeStage>
 class ADHeatConduction;
 
 declareADValidParams(ADHeatConduction);
@@ -29,4 +29,3 @@ protected:
 
   usingKernelGradMembers;
 };
-

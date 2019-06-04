@@ -16,10 +16,12 @@ defineADValidParams(
     ADMaterial,
     params.addClassDescription(
         "Material that implements the a function of one variable and its first derivative.");
-    MooseEnum functionEnum("F1 F2");
+    MooseEnum functionEnum("F1 F2 F3");
     params.addRequiredParam<MooseEnum>("function",
                                        functionEnum,
-                                       "F1 = 2 op^2 (1 - op)^2 - 0.2 op;  F2 = 0.1 * op^2 + 0.1");
+                                       "F1 = 2 op[0]^2 (1 - op[0])^2 - 0.2 op[0]; "
+                                       "F2 = 0.1 op[0]^2 + op[1]^2; "
+                                       "F3 = op[0] * op[1]");
     params.addParam<MaterialPropertyName>("f_name", "F", "function property name");
     params.addRequiredCoupledVar("op", "Order parameter variables"););
 
@@ -44,6 +46,8 @@ ADTestDerivativeFunction<compute_stage>::ADTestDerivativeFunction(
     paramError("op", "Specify exactly one variable to an F1 type function.");
   if (_function == FunctionEnum::F2 && _op.size() != 2)
     paramError("op", "Specify exactly two variables to an F2 type function.");
+  if (_function == FunctionEnum::F3 && _op.size() != 2)
+    paramError("op", "Specify exactly two variables to an F3 type function.");
 }
 
 template <ComputeStage compute_stage>
@@ -65,6 +69,15 @@ ADTestDerivativeFunction<compute_stage>::computeQpProperties()
       _prop_F[_qp] = 0.1 * a * a + b * b;
       (*_prop_dFdop[0])[_qp] = 0.2 * a;
       (*_prop_dFdop[1])[_qp] = 2.0 * b;
+      break;
+    }
+
+    case FunctionEnum::F3:
+    {
+      const ADReal & b = (*_op[1])[_qp];
+      _prop_F[_qp] = a * b;
+      (*_prop_dFdop[0])[_qp] = b;
+      (*_prop_dFdop[1])[_qp] = a;
       break;
     }
 
