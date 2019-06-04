@@ -5,6 +5,9 @@
     exodiff = 'reference_residual_out.e'
     custom_cmp = 'reference_residual.cmp'
     scale_refine = 2
+    design = 'ReferenceResidualProblem.md'
+    issues = '#12053'
+    requirement = 'The reference residual based convergence checking system shall determine if convergence is achieved by comparing the residual to a set of physical displacement quantities.'
   [../]
   [./test_sm]
     type = 'Exodiff'
@@ -13,43 +16,59 @@
     exodiff = 'reference_residual_out.e'
     custom_cmp = 'reference_residual.cmp'
     scale_refine = 2
+    design = 'ReferenceResidualProblem.md'
+    issues = '#12053'
+    requirement = 'The reference residual based convergence checking system shall determine if convergence is achieved by comparing the residual to physical displacement quantities in a solid mechanics module input file.'
     prereq = test
   [../]
-    [./test_scaling]
-      type = 'Exodiff'
-      input = 'reference_residual.i'
-      exodiff = 'reference_residual_out.e'
-      cli_args = 'Variables/disp_x/scaling=2
-                  Variables/disp_y/scaling=0.1
-                  Variables/disp_z/scaling=30
-                  Variables/temp/scaling=0.001'
-      prereq = test_sm
-    [../]
-    [./group_variables]
-      type = 'Exodiff'
-      input = 'group_variables.i'
-      exodiff = 'group_variables_out.e'
-      abs_zero = 1e-9
-      requirement = 'The reference residual based convergence checking system shall permit the norm of independent groups of either scalar and standard solution variables to be compared against reference quantities provided through the norms of groups of auxiliary variables.'
-      design = 'ReferenceResidualProblem.md'
-      issues = '#12053'
-    [../]
-    [./group_variables_duplicate_error_check]
-      type = 'RunException'
-      input = 'group_variables.i'
-      expect_err = "A variable cannot be included in multiple groups in the 'group_variables' parameter."
-      cli_args = 'Problem/group_variables="disp_x disp_y; disp_x scalar_strain_zz1"'
-      requirement = 'The reference residual based convergence checking system shall generate an error if a variable is added to multiple groups.'
-      design = 'ReferenceResidualProblem.md'
-      issues = '#12053'
-    [../]
-    [./group_variables_ungroup_error_check]
-      type = 'RunException'
-      input = 'group_variables.i'
-      expect_err = "In the 'group_variables' parameter, variable disp_x is not grouped with other variables."
-      cli_args = 'Problem/group_variables="disp_x; scalar_strain_zz1 scalar_strain_zz2"'
-      requirement = 'The reference residual based convergence checking system shall generate an error if a group containing a single variable is defined.'
-      design = 'ReferenceResidualProblem.md'
-      issues = '#12053'
-    [../]
+  [./test_scaling]
+    type = 'Exodiff'
+    input = 'reference_residual.i'
+    exodiff = 'reference_residual_out.e'
+    cli_args = 'Variables/disp_x/scaling=2
+                Variables/disp_y/scaling=0.1
+                Variables/disp_z/scaling=30
+                Variables/temp/scaling=0.001'
+    design = 'ReferenceResidualProblem.md'
+    issues = '#10403'
+    requirement = 'The reference residual based convergence checking system shall apply the variable scaling factor to the reference residual calculation if a scaling factor is applied to a variable.'
+    prereq = test_sm
+  [../]
+  [./group_variables]
+    type = 'Exodiff'
+    input = 'group_variables.i'
+    exodiff = 'group_variables_out.e'
+    abs_zero = 1e-9
+    requirement = 'The reference residual based convergence checking system shall permit the norm of independent groups of either scalar and standard solution variables to be compared against reference quantities provided through the norms of groups of auxiliary variables.'
+    design = 'ReferenceResidualProblem.md'
+    issues = '#12053'
+  [../]
+  [./test_with_perfgraph]
+    type = 'CSVDiff'
+    input = 'reference_residual_perfgraph.i'
+    csvdiff = 'reference_residual_perfgraph_out.csv'
+    rel_err = 1000 # checking only for the presence of the prefgraph postprocessor quantities in the CSV file, not the values
+    abs_zero = 1
+    requirement = 'The reference residual based convergence checking system shall run when used in conjunction with the functionality to output residual and jacobian calculation timing information.'
+    design = 'ReferenceResidualProblem.md'
+    issues = '#13495'
+  [../]
+  [./group_variables_duplicate_error_check]
+    type = 'RunException'
+    input = 'group_variables.i'
+    expect_err = "A variable cannot be included in multiple groups in the 'group_variables' parameter."
+    cli_args = 'Problem/group_variables="disp_x disp_y; disp_x scalar_strain_zz1"'
+    requirement = 'The reference residual based convergence checking system shall generate an error if a variable is added to multiple groups.'
+    design = 'ReferenceResidualProblem.md'
+    issues = '#12053'
+  [../]
+  [./group_variables_ungroup_error_check]
+    type = 'RunException'
+    input = 'group_variables.i'
+    expect_err = "In the 'group_variables' parameter, variable disp_x is not grouped with other variables."
+    cli_args = 'Problem/group_variables="disp_x; scalar_strain_zz1 scalar_strain_zz2"'
+    requirement = 'The reference residual based convergence checking system shall generate an error if a group containing a single variable is defined.'
+    design = 'ReferenceResidualProblem.md'
+    issues = '#12053'
+  [../]
 []
