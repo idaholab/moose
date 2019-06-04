@@ -4,4 +4,9 @@
     input = 'parallel.i'
     exodiff = 'parallel_out.e'
   [../]
+  [./perpendicular]
+    type = Exodiff
+    input = 'perpendicular.i'
+    exodiff = 'perpendicular_out.e'
+  [../]
 []
