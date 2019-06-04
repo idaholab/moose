@@ -38,13 +38,14 @@ template <ComputeStage compute_stage>
 TangentialMortarLMMechanicalContact<compute_stage>::TangentialMortarLMMechanicalContact(
     const InputParameters & parameters)
   : ADMortarConstraint<compute_stage>(parameters),
-    _slave_disp_y(_subproblem.getStandardVariable(_tid, parameters.getMooseType("slave_disp_y"))),
+    _slave_disp_y(
+        this->_subproblem.getStandardVariable(_tid, parameters.getMooseType("slave_disp_y"))),
     _master_disp_y(
         isParamValid("master_disp_y")
-            ? _subproblem.getStandardVariable(_tid, parameters.getMooseType("master_disp_y"))
-            : _subproblem.getStandardVariable(_tid, parameters.getMooseType("slave_disp_y"))),
+            ? this->_subproblem.getStandardVariable(_tid, parameters.getMooseType("master_disp_y"))
+            : this->_subproblem.getStandardVariable(_tid, parameters.getMooseType("slave_disp_y"))),
     _contact_pressure_var(
-        _subproblem.getStandardVariable(_tid, parameters.getMooseType("contact_pressure"))),
+        this->_subproblem.getStandardVariable(_tid, parameters.getMooseType("contact_pressure"))),
     _contact_pressure(_contact_pressure_var.template adSlnLower<compute_stage>()),
     _slave_x_dot(_slave_var.template adUDot<compute_stage>()),
     _master_x_dot(_master_var.template adUDotNeighbor<compute_stage>()),

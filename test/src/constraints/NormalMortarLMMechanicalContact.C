@@ -29,15 +29,15 @@ template <ComputeStage compute_stage>
 NormalMortarLMMechanicalContact<compute_stage>::NormalMortarLMMechanicalContact(
     const InputParameters & parameters)
   : ADMortarConstraint<compute_stage>(parameters),
-    _slave_disp_y(isParamValid("slave_disp_y") ? &_subproblem.getStandardVariable(
+    _slave_disp_y(isParamValid("slave_disp_y") ? &this->_subproblem.getStandardVariable(
                                                      _tid, parameters.getMooseType("slave_disp_y"))
                                                : nullptr),
     _master_disp_y(
         isParamValid("master_disp_y")
-            ? &_subproblem.getStandardVariable(_tid, parameters.getMooseType("master_disp_y"))
-            : isParamValid("slave_disp_y")
-                  ? &_subproblem.getStandardVariable(_tid, parameters.getMooseType("slave_disp_y"))
-                  : nullptr),
+            ? &this->_subproblem.getStandardVariable(_tid, parameters.getMooseType("master_disp_y"))
+            : isParamValid("slave_disp_y") ? &this->_subproblem.getStandardVariable(
+                                                 _tid, parameters.getMooseType("slave_disp_y"))
+                                           : nullptr),
     _computing_gap_dependence(false),
     _slave_disp_y_sln(nullptr),
     _master_disp_y_sln(nullptr),
