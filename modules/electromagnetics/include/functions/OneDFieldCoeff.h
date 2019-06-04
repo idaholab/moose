@@ -19,9 +19,9 @@ public:
 private:
   Real _theta;
 
-  const Function & _epsR;
+  const Function & _eps_r;
 
-  const Function & _InverseMuR;
+  const Function & _inverse_mu_r;
 };
 
 #endif // ONEDFIELDCOEFF_H
