@@ -28,4 +28,3 @@ protected:
   Real _coef;
   Real _p;
 };
-

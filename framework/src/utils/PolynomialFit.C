@@ -9,8 +9,11 @@
 
 #include "PolynomialFit.h"
 
+#include "MooseError.h"
+
 // C++ includes
 #include <fstream>
+#include <algorithm>
 
 int PolynomialFit::_file_number = 0;
 
@@ -20,21 +23,15 @@ PolynomialFit::PolynomialFit(const std::vector<Real> & x,
                              bool truncate_order)
   : LeastSquaresFitBase(x, y), _order(order), _truncate_order(truncate_order)
 {
-  if (_truncate_order) // && (_x.size() / 10) < _order)
+  if (_x.size() == 0)
+    mooseError("PolynomialFit does not allow empty input vectors");
+  if (_truncate_order)
   {
-    if (_x.size() == 1)
-      _order = 0;
-    else
-    {
-      _order = (_x.size() / 10) + 1;
-
-      if (_order > order)
-        _order = order;
-    }
+    if (_x.size() <= _order)
+      _order = _x.size() - 1;
   }
-  else if (_x.size() < order)
-    throw std::domain_error(
-        "Polynomial Fit requires an order less than the size of the input vector");
+  else if (_x.size() <= order)
+    mooseError("PolynomialFit requires an order less than the size of the input vector");
 
   _num_coeff = _order + 1;
 }

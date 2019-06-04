@@ -36,4 +36,3 @@ protected:
   // Holds pointers to the mesh smart pointers (to be populated later).
   std::vector<std::unique_ptr<MeshBase> *> _meshes;
 };
-

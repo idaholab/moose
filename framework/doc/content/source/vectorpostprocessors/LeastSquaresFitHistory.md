@@ -12,6 +12,8 @@ The polynomial coefficients are stored in a set of vectors named `coef_0` throug
 
 The vectors of values of the independent ($x$) and dependent ($y$) variables on which the least squares fit is performed are provided through another VectorPostprocessor, which must provide two equally-sized vectors of data upon which to operate.  The name of this VectorPostprocesor is provided using the `vectorpostprocessor` parameter, and the names of the data vectors are provided with the `x_name` and `y_name` parameters. The vectors of data can be shifted and/or scaled through the use of optional parameters.
 
+By default, if an insufficient number of points is provided in these data vectors, the order of the polynomial will be truncated to one less than the number of points. If the `truncate_order   parameter is set to `false`, an error will be generated in this case.
+
 !syntax parameters /VectorPostprocessors/LeastSquaresFitHistory
 
 !syntax inputs /VectorPostprocessors/LeastSquaresFitHistory

@@ -25,6 +25,11 @@ validParams<LeastSquaresFit>()
   params.addRequiredParam<std::string>("x_name", "The name of the independent variable");
   params.addRequiredParam<std::string>("y_name", "The name of the dependent variable");
   params.addRequiredParam<unsigned int>("order", "The order of the polynomial fit");
+  params.addParam<bool>(
+      "truncate_order",
+      true,
+      "Truncate the order of the fitted polynomial if an insufficient number of data points are "
+      "provided. If this is set to false, an error will be generated in that case.");
   params.addParam<unsigned int>("num_samples", "The number of samples to be output");
   params.addParam<Real>(
       "x_scale", 1.0, "Value used to scale x values (scaling is done after shifting)");
@@ -49,6 +54,7 @@ LeastSquaresFit::LeastSquaresFit(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
     _vpp_name(getParam<VectorPostprocessorName>("vectorpostprocessor")),
     _order(parameters.get<unsigned int>("order")),
+    _truncate_order(parameters.get<bool>("truncate_order")),
     _x_name(getParam<std::string>("x_name")),
     _y_name(getParam<std::string>("y_name")),
     _x_values(getVectorPostprocessorValue("vectorpostprocessor", _x_name)),
@@ -126,7 +132,7 @@ LeastSquaresFit::execute()
     y_values[i] = (y_values[i] + _y_shift) * _y_scale;
   }
 
-  PolynomialFit pf(x_values, y_values, _order, true);
+  PolynomialFit pf(x_values, y_values, _order, _truncate_order);
   pf.generate();
 
   if (_output_type == "Samples")
