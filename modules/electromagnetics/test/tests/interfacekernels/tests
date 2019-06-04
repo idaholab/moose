@@ -9,4 +9,9 @@
     input = 'perpendicular.i'
     exodiff = 'perpendicular_out.e'
   [../]
+  [./combined_default]
+    type = Exodiff
+    input = 'combined_default.i'
+    exodiff = 'combined_default_out.e'
+  [../]
 []
