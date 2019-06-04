@@ -19,10 +19,6 @@ public:
   virtual void addMooseObjects() override;
 
 protected:
-  /// The function describing the power in time
-  const FunctionName & _power_fn;
-  /// True if the power was specified as a constant
-  bool _const_power;
-  /// The value of power when specified as a constant
-  Real _power;
+  /// The value of power
+  const Real & _power;
 };

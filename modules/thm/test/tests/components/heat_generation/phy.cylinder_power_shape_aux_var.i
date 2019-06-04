@@ -52,7 +52,7 @@
 [Components]
   [./reactor]
     type = PrescribedReactorPower
-    function = 3.0e4
+    power = 3.0e4
   [../]
 
   [./CH1:solid]
