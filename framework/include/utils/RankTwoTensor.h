@@ -369,6 +369,12 @@ public:
   /// Print the rank two tensor
   void print(std::ostream & stm = Moose::out) const;
 
+  /// Print the Real part of the DualReal rank two tensor
+  void printReal(std::ostream & stm = Moose::out) const;
+
+  /// Print the Real part of the DualReal rank two tensor along with its first nDual dual numbers
+  void printDualReal(unsigned int nDual, std::ostream & stm = Moose::out) const;
+
   /// Add identity times a to _coords
   void addIa(const T & a);
 
@@ -386,6 +392,43 @@ public:
    * in ascending order in eigvals
    */
   void symmetricEigenvalues(std::vector<T> & eigvals) const;
+
+  /**
+   * computes and returns the permutation matrix P
+   * @param old_elements is the original row/column numbering
+   * @param new_elements is the permuted row/column numbering
+   * Dual numbers are permuted as well
+   * P * A permutes rows and A * P^T permutes columns
+   */
+  RankTwoTensorTempl<T>
+  permutationTensor(const std::array<unsigned int, LIBMESH_DIM> & old_elements,
+                    const std::array<unsigned int, LIBMESH_DIM> & new_elements) const;
+
+  /**
+   * computes and returns the Givens rotation matrix R
+   * @param row1 is the row number of the first component to rotate
+   * @param row2 is the row number of the second component to rotate
+   * @param col is the column number of the components to rotate
+   * consider a RankTwoTensor A = [ a11 a12 a13
+   *                                a21 a22 a23
+   *                                a31 a32 a33]
+   * and we want to rotate a21 and a31. Then row1 = 1, row2 = 2, col = 0.
+   * It retunrs the Givens rotation matrix R of this tensor A such that R * A rotates the second
+   * component to zero, i.e. R * A = [ a11 a12 a13
+   *                                     r a22 a23
+   *                                     0 a32 a33]
+   * A DualReal instantiation is available to rotate dual numbers as well.
+   */
+  RankTwoTensorTempl<T>
+  givensRotation(unsigned int row1, unsigned int row2, unsigned int col) const;
+
+  /// computes the Hessenberg form of this matrix A and its unitary transformation U such that A = U * H * U^T
+  void hessenberg(RankTwoTensorTempl<T> & H, RankTwoTensorTempl<T> & U) const;
+
+  /// computes the QR factorization such that A = Q * R, where Q is the unitary matrix and R an upper triangular matrix
+  void QR(RankTwoTensorTempl<T> & Q,
+          RankTwoTensorTempl<T> & R,
+          unsigned int dim = RankTwoTensorTempl<T>::N) const;
 
   /**
    * computes eigenvalues and eigenvectors, assuming tens is symmetric, and places them

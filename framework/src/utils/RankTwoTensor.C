@@ -829,6 +829,44 @@ RankTwoTensorTempl<T>::print(std::ostream & stm) const
   }
 }
 
+template <>
+void
+RankTwoTensorTempl<Real>::printReal(std::ostream & stm) const
+{
+  this->print(stm);
+}
+
+template <>
+void
+RankTwoTensorTempl<DualReal>::printReal(std::ostream & stm) const
+{
+  const RankTwoTensorTempl<DualReal> & a = *this;
+  for (unsigned int i = 0; i < N; ++i)
+  {
+    for (unsigned int j = 0; j < N; ++j)
+      stm << std::setw(15) << a(i, j).value() << ' ';
+    stm << std::endl;
+  }
+}
+
+template <>
+void
+RankTwoTensorTempl<DualReal>::printDualReal(unsigned int nDual, std::ostream & stm) const
+{
+  const RankTwoTensorTempl<DualReal> & a = *this;
+  for (unsigned int i = 0; i < N; ++i)
+  {
+    for (unsigned int j = 0; j < N; ++j)
+    {
+      stm << std::setw(15) << a(i, j).value() << " {";
+      for (unsigned int k = 0; k < nDual; ++k)
+        stm << std::setw(5) << a(i, j).derivatives()[k] << ' ';
+      stm << " }";
+    }
+    stm << std::endl;
+  }
+}
+
 template <typename T>
 void
 RankTwoTensorTempl<T>::addIa(const T & a)
@@ -887,6 +925,182 @@ RankTwoTensorTempl<T>::symmetricEigenvaluesEigenvectors(std::vector<T> & eigvals
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       eigvecs(j, i) = a[i * N + j];
+}
+
+template <typename T>
+RankTwoTensorTempl<T>
+RankTwoTensorTempl<T>::permutationTensor(
+    const std::array<unsigned int, LIBMESH_DIM> & old_elements,
+    const std::array<unsigned int, LIBMESH_DIM> & new_elements) const
+{
+  RankTwoTensorTempl<T> P;
+
+  for (unsigned int i = 0; i < N; ++i)
+    P(old_elements[i], new_elements[i]) = 1.0;
+
+  return P;
+}
+
+template <typename T>
+RankTwoTensorTempl<T>
+RankTwoTensorTempl<T>::givensRotation(unsigned int row1, unsigned int row2, unsigned int col) const
+{
+  T c, s;
+  T a = (*this)(row1, col);
+  T b = (*this)(row2, col);
+
+  if (MooseUtils::absoluteFuzzyEqual(b, 0.0) && MooseUtils::absoluteFuzzyEqual(a, 0.0))
+  {
+    c = a >= 0.0 ? 1.0 : -1.0;
+    s = 0.0;
+  }
+  else if (std::abs(a) > std::abs(b))
+  {
+    T t = b / a;
+    Real sgn = a >= 0.0 ? 1.0 : -1.0;
+    T u = sgn * std::sqrt(1.0 + t * t);
+    c = 1.0 / u;
+    s = c * t;
+  }
+  else
+  {
+    T t = a / b;
+    Real sgn = b >= 0.0 ? 1.0 : -1.0;
+    T u = sgn * std::sqrt(1.0 + t * t);
+    s = 1.0 / u;
+    c = s * t;
+  }
+
+  RankTwoTensorTempl<T> R(initIdentity);
+  R(row1, row1) = c;
+  R(row1, row2) = s;
+  R(row2, row1) = -s;
+  R(row2, row2) = c;
+
+  return R;
+}
+
+template <typename T>
+void
+RankTwoTensorTempl<T>::hessenberg(RankTwoTensorTempl<T> & H, RankTwoTensorTempl<T> & U) const
+{
+  H = *this;
+  U.zero();
+  U.addIa(1.0);
+
+  if (N < 3)
+    return;
+
+  RankTwoTensorTempl<T> R = this->givensRotation(N - 2, N - 1, 0);
+  H = R * H * R.transpose();
+  U = U * R.transpose();
+}
+
+template <typename T>
+void
+RankTwoTensorTempl<T>::QR(RankTwoTensorTempl<T> & Q,
+                          RankTwoTensorTempl<T> & R,
+                          unsigned int dim) const
+{
+  R = *this;
+  Q.zero();
+  Q.addIa(1.0);
+
+  for (unsigned int i = 0; i < dim - 1; i++)
+    for (unsigned int b = dim - 1; b > i; b--)
+    {
+      unsigned int a = b - 1;
+      RankTwoTensorTempl<T> CS = R.givensRotation(a, b, i);
+      R = CS * R;
+      Q = Q * CS.transpose();
+    }
+}
+
+template <>
+void
+RankTwoTensorTempl<DualReal>::QR(RankTwoTensorTempl<DualReal> & Q,
+                                 RankTwoTensorTempl<DualReal> & R,
+                                 unsigned int dim) const
+{
+  R = *this;
+  Q.zero();
+  Q.addIa(1.0);
+
+  for (unsigned int i = 0; i < dim - 1; i++)
+    for (unsigned int b = dim - 1; b > i; b--)
+    {
+      unsigned int a = b - 1;
+
+      // special case when both entries to rotate are zero
+      // in which case the dual numbers cannot be rotated
+      // therefore we need to find another nonzero entry to permute
+      RankTwoTensorTempl<DualReal> P(initIdentity);
+      if (MooseUtils::absoluteFuzzyEqual(R(a, i).value(), 0.0) &&
+          MooseUtils::absoluteFuzzyEqual(R(b, i).value(), 0.0))
+      {
+        unsigned int c = 3 - a - b;
+        if (!MooseUtils::absoluteFuzzyEqual(R(c, i).value(), 0.0))
+          P = this->permutationTensor({{a, b, c}}, {{c, b, a}});
+      }
+
+      Q = Q * P.transpose();
+      R = P * R;
+      RankTwoTensorTempl<DualReal> CS = R.givensRotation(a, b, i);
+      R = P.transpose() * CS * R;
+      Q = Q * CS.transpose() * P;
+    }
+}
+
+template <>
+void
+RankTwoTensorTempl<DualReal>::symmetricEigenvaluesEigenvectors(
+    std::vector<DualReal> & eigvals, RankTwoTensorTempl<DualReal> & eigvecs) const
+{
+  const Real eps = libMesh::TOLERANCE * libMesh::TOLERANCE;
+
+  eigvals.resize(N);
+  RankTwoTensorTempl<DualReal> D, Q, R;
+  this->hessenberg(D, eigvecs);
+
+  unsigned int iter = 0;
+  for (unsigned m = N - 1; m > 0; m--)
+    do
+    {
+      iter++;
+      DualReal shift = D(m, m);
+      D.addIa(-shift);
+      D.QR(Q, R, m + 1);
+      D = R * Q;
+      D.addIa(shift);
+      eigvecs = eigvecs * Q;
+    } while (std::abs(D(m, m - 1)) > eps);
+
+  for (unsigned int i = 0; i < N; i++)
+    eigvals[i] = D(i, i);
+
+  // Sort eigenvalues and corresponding vectors.
+  for (unsigned int i = 0; i < N - 1; i++)
+  {
+    unsigned int k = i;
+    DualReal p = eigvals[i];
+    for (unsigned int j = i + 1; j < N; j++)
+      if (eigvals[j] < p)
+      {
+        k = j;
+        p = eigvals[j];
+      }
+    if (k != i)
+    {
+      eigvals[k] = eigvals[i];
+      eigvals[i] = p;
+      for (unsigned int j = 0; j < N; j++)
+      {
+        p = eigvecs(j, i);
+        eigvecs(j, i) = eigvecs(j, k);
+        eigvecs(j, k) = p;
+      }
+    }
+  }
 }
 
 template <typename T>
@@ -982,8 +1196,8 @@ RankTwoTensorTempl<T>::syev(const char * calculation_type,
 
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
-      // a is destroyed by dsyev, and if calculation_type == "V" then eigenvectors are placed there
-      // Note the explicit symmeterisation
+      // a is destroyed by dsyev, and if calculation_type == "V" then eigenvectors are placed
+      // there Note the explicit symmeterisation
       a[i * N + j] = 0.5 * (this->operator()(i, j) + this->operator()(j, i));
 
   // compute the eigenvalues only (if calculation_type == "N"),
