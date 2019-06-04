@@ -34,8 +34,8 @@ VectorCurlPenaltyDirichletBC::computeQpResidual()
   RealVectorValue u_exact = {_exact_x.value(_t, _q_point[_qp]),
                              _exact_y.value(_t, _q_point[_qp]),
                              _exact_z.value(_t, _q_point[_qp])};
-  RealVectorValue Ncu = (_u[_qp] - u_exact).cross(_normals[_qp]);
-  return _penalty * Ncu * ((_test[_i][_qp]).cross(_normals[_qp]));
+  RealVectorValue u_cross_n = (_u[_qp] - u_exact).cross(_normals[_qp]);
+  return _penalty * u_cross_n * ((_test[_i][_qp]).cross(_normals[_qp]));
 }
 
 Real

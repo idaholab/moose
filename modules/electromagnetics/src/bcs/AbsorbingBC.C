@@ -41,20 +41,20 @@ Real
 AbsorbingBC::computeQpResidual()
 {
 
-  std::complex<double> _field(_field_real[_qp], _field_imag[_qp]);
-  std::complex<double> _func(_func_real.value(_t, _q_point[_qp]),
+  std::complex<double> field(_field_real[_qp], _field_imag[_qp]);
+  std::complex<double> func(_func_real.value(_t, _q_point[_qp]),
                              _func_imag.value(_t, _q_point[_qp]));
-  std::complex<double> _coeff(_coeff_real, _coeff_imag);
-  std::complex<double> _j(0, 1);
+  std::complex<double> coeff(_coeff_real, _coeff_imag);
+  std::complex<double> jay(0, 1);
 
-  std::complex<double> _val = -_j * _coeff * _func * _field;
+  std::complex<double> val = -jay * coeff * func * field;
 
   if (_component == elk::REAL)
   {
-    return _sign * _test[_i][_qp] * _val.real();
+    return _sign * _test[_i][_qp] * val.real();
   }
   else
   {
-    return _sign * _test[_i][_qp] * _val.imag();
+    return _sign * _test[_i][_qp] * val.imag();
   }
 }

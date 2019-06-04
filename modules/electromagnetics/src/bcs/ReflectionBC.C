@@ -36,7 +36,7 @@ ReflectionBC::ReflectionBC(const InputParameters & parameters)
     _coeff_real(getParam<Real>("coeff_real")),
     _coeff_imag(getParam<Real>("coeff_imag")),
     _sign(getParam<Real>("sign")),
-    _RHS_coeff(getParam<Real>("RHS_coeff"))
+    _rhs_coeff(getParam<Real>("RHS_coeff"))
 {
 }
 
@@ -44,23 +44,23 @@ Real
 ReflectionBC::computeQpResidual()
 {
 
-  std::complex<double> _field(_field_real[_qp], _field_imag[_qp]);
-  std::complex<double> _func(_func_real.value(_t, _q_point[_qp]),
+  std::complex<double> field(_field_real[_qp], _field_imag[_qp]);
+  std::complex<double> func(_func_real.value(_t, _q_point[_qp]),
                              _func_imag.value(_t, _q_point[_qp]));
-  std::complex<double> _coeff(_coeff_real, _coeff_imag);
-  std::complex<double> _j(0, 1);
+  std::complex<double> coeff(_coeff_real, _coeff_imag);
+  std::complex<double> jay(0, 1);
 
-  std::complex<double> _common = _j * _coeff * _func;
-  std::complex<double> _RHS = _RHS_coeff * _common * std::exp(_common * _q_point[_qp](0));
-  std::complex<double> _LHS = _common * _field;
-  std::complex<double> _diff = _RHS - _LHS;
+  std::complex<double> common = jay * coeff * func;
+  std::complex<double> rhs = _rhs_coeff * common * std::exp(common * _q_point[_qp](0));
+  std::complex<double> lhs = common * field;
+  std::complex<double> diff = rhs - lhs;
 
   if (_component == elk::REAL)
   {
-    return _sign * _test[_i][_qp] * _diff.real();
+    return _sign * _test[_i][_qp] * diff.real();
   }
   else
   {
-    return _sign * _test[_i][_qp] * _diff.imag();
+    return _sign * _test[_i][_qp] * diff.imag();
   }
 }
