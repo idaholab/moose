@@ -53,7 +53,7 @@ energy_change = ${fparse power_fraction * power * t}
   [../]
   [./reactor]
     type = PrescribedReactorPower
-    function = ${power}
+    power = ${power}
   [../]
 []
 

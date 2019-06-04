@@ -17,7 +17,7 @@
 [Components]
   [./reactor]
     type = PrescribedReactorPower
-    function = 10
+    power = 10
   [../]
 
   [./hs]
