@@ -32,15 +32,15 @@ MMSTestFunc::MMSTestFunc(const InputParameters & parameters)
   : Function(parameters),
     FunctionInterface(this),
 
-    _L(getParam<Real>("L")),
+    _length(getParam<Real>("L")),
     _a(getFunction("a")),
     _b(getFunction("b")),
     _d(getParam<Real>("d")),
     _h(getParam<Real>("h")),
-    _g0_real(getParam<Real>("g0_real")),
-    _g0_imag(getParam<Real>("g0_imag")),
-    _gL_real(getParam<Real>("gL_real")),
-    _gL_imag(getParam<Real>("gL_imag")),
+    _g_0_real(getParam<Real>("g0_real")),
+    _g_0_imag(getParam<Real>("g0_imag")),
+    _g_l_real(getParam<Real>("gL_real")),
+    _g_l_imag(getParam<Real>("gL_imag")),
     _component(getParam<MooseEnum>("component"))
 {
 }
@@ -49,42 +49,42 @@ Real
 MMSTestFunc::value(Real t, const Point & p) const
 {
 
-  Real _val = 0;
-  std::complex<double> _F(0, 0);
+  Real val = 0;
+  std::complex<double> F(0, 0);
 
-  std::complex<double> _g0(_g0_real, _g0_imag);
-  std::complex<double> _gL(_gL_real, _gL_imag);
+  std::complex<double> g_0(_g_0_real, _g_0_imag);
+  std::complex<double> g_l(_g_l_real, _g_l_imag);
 
-  Real _a_grad = _a.gradient(t, p)(0);
-  Real _b_grad = _b.gradient(t, p)(0);
-  // assuming a constant * (1 + x / _L)^2 structure for functions
-  Real _a_second = 2 * _a.value(t, 0) / (_L * _L);
-  Real _b_second = 2 * _b.value(t, 0) / (_L * _L);
+  Real a_grad = _a.gradient(t, p)(0);
+  Real b_grad = _b.gradient(t, p)(0);
+  // assuming a constant * (1 + x / _length)^2 structure for functions
+  Real a_second = 2 * _a.value(t, 0) / (_length * _length);
+  Real b_second = 2 * _b.value(t, 0) / (_length * _length);
 
-  std::complex<double> _c(_a.value(t, p), _b.value(t, p));
-  std::complex<double> _c_L(_a.value(t, _L), _b.value(t, _L));
+  std::complex<double> c(_a.value(t, p), _b.value(t, p));
+  std::complex<double> c_l(_a.value(t, _length), _b.value(t, _length));
 
-  std::complex<double> _c_grad(_a_grad, _b_grad);
-  std::complex<double> _c_second(_a_second, _b_second);
+  std::complex<double> c_grad(a_grad, b_grad);
+  std::complex<double> c_second(a_second, b_second);
 
-  std::complex<double> _C1 = _g0;
+  std::complex<double> c_1 = g_0;
 
-  std::complex<double> _C2 = (_gL - _g0 * std::cos(_c_L * _L)) / std::sin(_c_L * _L);
+  std::complex<double> c_2 = (g_l - g_0 * std::cos(c_l * _length)) / std::sin(c_l * _length);
 
-  _F = -_C1 * ((_c_second * p(0) + 2.0 * _c_grad) * std::sin(_c * p(0)) +
-               (std::pow(_c_grad * p(0), 2) + 2.0 * _c_grad * _c * p(0)) * std::cos(_c * p(0))) +
-       _C2 * ((_c_second * p(0) + 2.0 * _c_grad) * std::cos(_c * p(0)) -
-              (std::pow(_c_grad * p(0), 2) + 2.0 * _c_grad * _c * p(0)) * std::sin(_c * p(0)));
+  F = -c_1 * ((c_second * p(0) + 2.0 * c_grad) * std::sin(c * p(0)) +
+               (std::pow(c_grad * p(0), 2) + 2.0 * c_grad * c * p(0)) * std::cos(c * p(0))) +
+       c_2 * ((c_second * p(0) + 2.0 * c_grad) * std::cos(c * p(0)) -
+              (std::pow(c_grad * p(0), 2) + 2.0 * c_grad * c * p(0)) * std::sin(c * p(0)));
 
   if (_component == elk::REAL)
   {
-    _val = _F.real();
+    val = F.real();
   }
   else
   {
-    _val = _F.imag();
+    val = F.imag();
   }
 
   // sign flip because being used in -u'' - c^2 * u = -F(x) strong form
-  return -_val;
+  return -val;
 }
