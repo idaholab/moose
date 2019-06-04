@@ -28,11 +28,11 @@ RobinTestFunc::RobinTestFunc(const InputParameters & parameters)
   : Function(parameters),
     FunctionInterface(this),
 
-    _L(getParam<Real>("L")),
+    _length(getParam<Real>("L")),
     _a(getParam<Real>("a")),
     _b(getParam<Real>("b")),
-    _g0_real(getParam<Real>("g0_real")),
-    _g0_imag(getParam<Real>("g0_imag")),
+    _g_0_real(getParam<Real>("g0_real")),
+    _g_0_imag(getParam<Real>("g0_imag")),
     _func(getFunction("func")),
     _component(getParam<MooseEnum>("component"))
 {
@@ -41,24 +41,24 @@ RobinTestFunc::RobinTestFunc(const InputParameters & parameters)
 Real
 RobinTestFunc::value(Real t, const Point & p) const
 {
-  std::complex<double> _C1(0, 0);
-  std::complex<double> _C2(0, 0);
+  std::complex<double> c_1(0, 0);
+  std::complex<double> c_2(0, 0);
   std::complex<double> val(0, 0);
 
-  std::complex<double> _g0(_g0_real, _g0_imag);
-  std::complex<double> _c(_a, _b);
+  std::complex<double> g_0(_g_0_real, _g_0_imag);
+  std::complex<double> c(_a, _b);
 
-  std::complex<double> _j(0, 1);
+  std::complex<double> jay(0, 1);
 
-  Real _x = p(0);
+  Real x = p(0);
 
-  _C1 = _g0;
-  _C2 = (_func.value(t, _L) * _g0 * std::cos(_c * _L) -
-         2 * _func.value(t, _L) * std::exp(_j * _c * _L * _func.value(t, _L)) +
-         _j * _g0 * std::sin(_c * _L)) /
-        (-_func.value(t, _L) * std::sin(_c * _L) + _j * std::cos(_c * _L));
+  c_1 = g_0;
+  c_2 = (_func.value(t, _length) * g_0 * std::cos(c * _length) -
+         2 * _func.value(t, _length) * std::exp(jay * c * _length * _func.value(t, _length)) +
+         jay * g_0 * std::sin(c * _length)) /
+        (-_func.value(t, _length) * std::sin(c * _length) + jay * std::cos(c * _length));
 
-  val = _C1 * std::cos(_c * _x) + _C2 * std::sin(_c * _x);
+  val = c_1 * std::cos(c * x) + c_2 * std::sin(c * x);
 
   if (_component == elk::REAL)
   {
