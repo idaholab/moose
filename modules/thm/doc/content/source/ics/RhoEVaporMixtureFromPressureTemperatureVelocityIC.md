@@ -1,9 +1,0 @@
-# RhoEVaporMixtureFromPressureTemperatureVelocityIC
-
-!syntax description /ICs/RhoEVaporMixtureFromPressureTemperatureVelocityIC
-
-!syntax parameters /ICs/RhoEVaporMixtureFromPressureTemperatureVelocityIC
-
-!syntax inputs /ICs/RhoEVaporMixtureFromPressureTemperatureVelocityIC
-
-!syntax children /ICs/RhoEVaporMixtureFromPressureTemperatureVelocityIC
