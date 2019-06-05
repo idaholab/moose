@@ -71,3 +71,35 @@ TEST(CommandLine, parse)
               "astring anotherstring");
   }
 }
+
+TEST(CommandLine, initForMultiApp)
+{
+  int argc = 6;
+  const char * argv[6] = {
+      "--flag", "sub0:year=2011", "sub1:year=2013", "sub:month=1", "notsub:day=2", ":niner=9"};
+  {
+    CommandLine cl(argc, (char **)argv);
+
+    std::vector<std::string> gold = {
+        "--flag", "sub0:year=2011", "sub1:year=2013", "sub:month=1", "notsub:day=2", ":niner=9"};
+    EXPECT_EQ(cl.getArguments(), gold);
+
+    cl.initForMultiApp("sub0");
+    gold = {"--flag", "sub0:year=2011", "sub:month=1", ":niner=9"};
+    EXPECT_EQ(cl.getArguments(), gold);
+  }
+
+  {
+    CommandLine cl(argc, (char **)argv);
+    cl.initForMultiApp("sub1");
+    std::vector<std::string> gold = {"--flag", "sub1:year=2013", "sub:month=1", ":niner=9"};
+    EXPECT_EQ(cl.getArguments(), gold);
+  }
+
+  {
+    CommandLine cl(argc, (char **)argv);
+    cl.initForMultiApp("notsub0");
+    std::vector<std::string> gold = {"--flag", "notsub:day=2", ":niner=9"};
+    EXPECT_EQ(cl.getArguments(), gold);
+  }
+}

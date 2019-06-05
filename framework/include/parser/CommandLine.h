@@ -49,10 +49,23 @@ public:
   };
 
   CommandLine(int argc, char * argv[]);
+  CommandLine(const CommandLine & other);
   virtual ~CommandLine();
 
   void addArguments(int argc, char * argv[]);
   void addArgument(std::string);
+
+  /**
+   * Removes multiapp parameters not associated with the supplied name.
+   *
+   * When a sub-application is created the CommandLine object from the master application is
+   * copied and supplied to the sub-app. This method cleans up the copy so it is ready to
+   * be used for a sub-application by removing parameters that are not associated with the provided
+   * sub-application name.
+   *
+   * See MultiApp::createApp
+   */
+  void initForMultiApp(const std::string &);
 
   /**
    * Return the raw argv arguments as a vector.
@@ -114,7 +127,10 @@ protected:
   std::map<std::string, Option> _cli_options;
 
 private:
+  /// indices of CLI args that have been marked as used
   std::set<int> _used_hiti;
+
+  /// indices of CLI args that are HIT syntax parameters
   std::set<int> _hiti;
 
   /// Storage for the raw argv
@@ -175,4 +191,3 @@ CommandLine::search(const std::string & option_name, T & argument)
   }
   mooseError("Unrecognized option name");
 }
-
