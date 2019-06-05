@@ -1,4 +1,4 @@
-# fb stands for the Fischer-Burmeister function
+# An explanation and results for the full runs of these inputs files are given in the contact documentation
 
 [Tests]
   design = 'Constraints/index.md'

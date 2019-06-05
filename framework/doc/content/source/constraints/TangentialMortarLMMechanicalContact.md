@@ -4,11 +4,11 @@ The `TangentialMortarLMMechanicalContact` class is used to ensure that the
 Karush-Kuhn-Tucker conditions of Coulomb frictional contact are satisfied:
 
 \begin{equation}
-\begin{align}
-\phi &= \mu\lambda_N - \lvert \lambda_T \rvert \gte 0\\
-\gamma &= \frac{v_T}{\lambda_T} \gte 0\\
+\begin{aligned}
+\phi &= \mu\lambda_N - \lvert \lambda_T \rvert \ge 0\\
+\gamma &= \frac{v_T}{\lambda_T} \ge 0\\
 \gamma\phi &= 0
-\end{align}
+\end{aligned}
 \end{equation}
 
 where $\mu$ is the coefficient of friction, $\lambda_N$ is the Lagrange

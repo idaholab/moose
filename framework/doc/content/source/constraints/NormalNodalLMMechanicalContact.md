@@ -4,11 +4,11 @@ The `NormalNodalLMMechanicalContact` class is used to ensure that the
 Karush-Kuhn-Tucker conditions of mechanical contact are satisfied:
 
 \begin{equation}
-\begin{align}
-g &\gte 0\\
-\lambda &\gte 0\\
+\begin{aligned}
+g &\ge 0\\
+\lambda &\ge 0\\
 g\lambda &= 0
-\end{align}
+\end{aligned}
 \end{equation}
 
 where $g$ is the gap and $\lambda$ is the contact pressure, a Lagrange multipler
