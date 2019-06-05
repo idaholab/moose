@@ -9,7 +9,7 @@
 | Mortar | Mortar | Min | 14.454 | 40 | 106 |
 | Mortar | Mortar | FB | 19.027 | 40 | 136 |
 
-## Notes
+### Notes
 
 - Clearly having mortar mesh generation slows the simulation down, which is not surprising
 - The min NCP function is undeniably better (at least here in the frictionless case)
@@ -69,11 +69,16 @@ The number of nodes in contact is 11
 
 # Preliminary frictional contact algorithm comparison
 
-| LM normal | LM tangential | Displacement | NCP function normal | NCP function tangential | Time (arbitrary units) | Time steps | Nonlinear iterations |
-| --------- | ------------  | ------------ | ------------------- | ----------------------- | ---------------------- | ---------- | -------------------- |
-| Mortar | Mortar | Mortar | FB | FB | 19.243 | 43 | 193 |
-| Mortar | Mortar | Mortar | min | FB | 18.126 | 41 | 194 |
-| Nodal | Mortar | Mortar | min | FB | 16.317 | 42 | 166 |
-| Mortar | Mortar | Mortar | Min | Min | 76.034 | 54 | 311 |
-| Nodal | Nodal | Mortar | Min | Min | 55.161 | 55 | 275 |
-| Nodal | Nodal | Mortar | FB | FB | NA | NA | NA |
+| LM normal | LM tangential | Displacement | NCP function normal | NCP function tangential | Time (arbitrary units) | Time steps | Nonlinear iterations | CLI PETSc options |
+| --------- | ------------  | ------------ | ------------------- | ----------------------- | ---------------------- | ---------- | -------------------- | --- |
+| Mortar | Mortar | Mortar | FB | FB | 8.241 | 40 | 175 | None |
+| Mortar | Mortar | Mortar | min | FB | 7.928 | 40 | 159 | None |
+| Nodal | Mortar | Mortar | min | FB | 7.459 | 40 | 152 | None |
+| Mortar | Mortar | Mortar | Min | Min | 11.237 | 41 | 234 | None |
+| Nodal | Nodal | Mortar | Min | Min | 39.409 | 55 | 275 | `-snes_ksp_ew 0` |
+| Nodal | Nodal | Mortar | FB | FB | NA | NA | NA | None |
+
+### Notes
+
+- NA: solve did not converge
+- Timings run on a different machine than the frictionless cases
