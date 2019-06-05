@@ -1,19 +1,25 @@
 [Tests]
+  design = "Mesh/index.md"
+  issues = "#11891"
   [./1D]
     type = 'RunApp'
     input = 'test.i'
     cli_args = "BCs/Periodic/all/auto_direction='x' Mesh/dim=1"
+
+    requirement = "The system shall produce a valid periodic node map with only one periodic constraint direction."
   [../]
   [./2D]
     type = 'RunApp'
     input = 'test.i'
     cli_args = "BCs/Periodic/all/auto_direction='x y' Mesh/dim=2"
-    prereq = 1D
+
+    requirement = "The system shall produce a valid periodic node map with two periodic constraint directions."
   [../]
   [./3D]
     type = 'RunApp'
     input = 'test.i'
     cli_args = "BCs/Periodic/all/auto_direction='x y z' Mesh/dim=3"
-    prereq = 2D
+
+    requirement = "The system shall produce a valid periodic node map with three periodic constraint directions."
   [../]
 []

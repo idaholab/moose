@@ -1,4 +1,7 @@
 [Tests]
+  issues = "#8672 #8747 #8950 #8956"
+  design = 'Partitioner/index.md'
+
   [./subdomain_partitioner]
     # The METIS partitioner's random number generator changed (became
     # portable) in PETSc 3.8.0, so this test is no longer valid on
@@ -15,6 +18,8 @@
     # metis and parmetis will generate different partitions
     petsc_version_release = true
     petsc_version = '>=3.5.0&&<3.8.0'
+
+    requirement = 'The system shall produce a parallel partition based on mesh subdomains for the Mac platform.'
   [../]
 
   [./subdomain_partitioner_new_petsc]
@@ -31,6 +36,8 @@
     min_parallel = 4
     max_parallel = 4
     petsc_version = '>=3.8.0'
+
+    requirement = 'The system shall produce a parallel partition based on mesh subdomains agnostic of platform.'
   [../]
 
   [./subdomain_partitioner_linux]
@@ -48,5 +55,7 @@
     max_parallel = 4
     petsc_version_release = true
     petsc_version = '>=3.5.0&&<3.8.0'
+
+    requirement = 'The system shall produce a parallel partition based on mesh subdomains for the Linux platform.'
   [../]
 []

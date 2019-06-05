@@ -5,5 +5,9 @@
     exodiff = 'gmsh_test_in.e'
     cli_args = '--mesh-only'
     recover = false
+
+    requirement = 'The system shall read GMesh (.msh) format file meshes.'
+    issues = '#2105'
+    design = 'FileMesh.md'
   [../]
 []
