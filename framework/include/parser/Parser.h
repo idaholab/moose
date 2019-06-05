@@ -146,6 +146,9 @@ public:
 
   std::vector<std::string> listValidParams(std::string & section_name);
 
+  /**
+   * Marks MOOSE hit syntax from supplied command-line arguments
+   */
   std::string hitCLIFilter(std::string appname, const std::vector<std::string> & argv);
 
 protected:

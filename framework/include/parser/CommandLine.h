@@ -127,10 +127,10 @@ protected:
   std::map<std::string, Option> _cli_options;
 
 private:
-  /// CLI arguments that have been utilized
+  /// indices of CLI args that have been marked as used
   std::set<int> _used_hiti;
 
-  /// CLI arguments supplied
+  /// indices of CLI args that are HIT syntax parameters
   std::set<int> _hiti;
 
   /// Storage for the raw argv
