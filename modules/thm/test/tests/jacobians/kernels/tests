@@ -15,4 +15,13 @@
     max_threads = 1
     allow_test_objects = true
   [../]
+
+  [./one_d_mass_ncg_flux]
+    type = 'PetscJacobianTester'
+    input = 'one_d_mass_ncg_flux.i'
+    ratio_tol = 1e-9
+    difference_tol = 1e-8
+    max_threads = 1
+    allow_test_objects = true
+  [../]
 []
