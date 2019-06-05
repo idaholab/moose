@@ -295,7 +295,7 @@ class SQAVerificationCommand(command.CommandComponent):
         matrix = SQARequirementMatrix(parent)
         for requirements in self.extension.requirements.itervalues():
             for req in requirements:
-                if getattr(req, info['subcommand']):
+                if getattr(req, info['subcommand']) is not None:
                     self._addRequirement(matrix, info, page, req)
 
         return parent
@@ -325,7 +325,7 @@ class SQAVerificationCommand(command.CommandComponent):
 
         p = core.Paragraph(item)
         tokens.String(p, content=u'Details: ')
-        filename = u'{}/{}.md'.format(req.path, req.name)
+        filename = getattr(req, info['subcommand'])
         autolink.AutoLink(p, page=unicode(filename))
 
 
