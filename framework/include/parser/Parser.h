@@ -146,6 +146,11 @@ public:
 
   std::vector<std::string> listValidParams(std::string & section_name);
 
+  /**
+   * Marks MOOSE hit syntax from supplied command-line arguments
+   */
+  std::string hitCLIFilter(std::string appname, const std::vector<std::string> & argv);
+
 protected:
   /**
    * Helper functions for setting parameters of arbitrary types - bodies are in the .C file
@@ -266,6 +271,5 @@ protected:
 private:
   std::string _errmsg;
   std::string _warnmsg;
-  std::string hitCLIFilter(std::string appname, const std::vector<std::string> & argv);
   void walkRaw(std::string fullpath, std::string nodepath, hit::Node * n);
 };
