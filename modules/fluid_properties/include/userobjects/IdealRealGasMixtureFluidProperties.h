@@ -94,6 +94,35 @@ public:
                           std::vector<Real> & dT_dx) const override;
 
   /**
+   * Speed of sound from specific volume and specific internal energy
+   *
+   * @param[in] v   specific volume
+   * @param[in] e   specific internal energy
+   * @param[in] x   vapor mass fraction values
+   * @return        speed of sound
+   */
+  virtual Real c_from_v_e(Real v, Real e, const std::vector<Real> & x) const override;
+
+  /**
+   * Speed of sound and its derivatives from specific volume and specific internal energy
+   *
+   * @param[in] v   specific volume
+   * @param[in] e   specific internal energy
+   * @param[in] x   vapor mass fraction values
+   * @param[out] c       Speed of sound
+   * @param[out] dc_dv   derivative of temperature w.r.t. specific volume
+   * @param[out] dc_de   derivative of temperature w.r.t. specific internal energy
+   * @param[out] dc_dx   derivative of temperature w.r.t. vapor mass fraction values
+   */
+  virtual void c_from_v_e(Real v,
+                          Real e,
+                          const std::vector<Real> & x,
+                          Real & c,
+                          Real & dc_dv,
+                          Real & dc_de,
+                          std::vector<Real> & dc_dx) const override;
+
+  /**
    * Density from pressure and temperature
    *
    * @param[in] p   pressure
@@ -464,4 +493,3 @@ protected:
   /// maximum temperature of all components
   const Real _T_mix_max;
 };
-
