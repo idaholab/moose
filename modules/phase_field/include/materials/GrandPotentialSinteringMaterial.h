@@ -12,8 +12,7 @@
 /*             See COPYRIGHT for full restrictions              */
 /****************************************************************/
 
-#ifndef GRANDPOTENTIALSINTERINGMATERIAL_H
-#define GRANDPOTENTIALSINTERINGMATERIAL_H
+#pragma once
 
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
@@ -153,5 +152,3 @@ protected:
   /// Boltzmann constant
   const Real _kB;
 };
-
-#endif // GRANDPOTENTIALSINTERINGMATERIAL_H

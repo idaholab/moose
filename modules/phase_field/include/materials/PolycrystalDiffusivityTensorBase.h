@@ -12,8 +12,7 @@
 /*             See COPYRIGHT for full restrictions              */
 /****************************************************************/
 
-#ifndef POLYCRYSTALDIFFUSIVITYTENSORBASE_H
-#define POLYCRYSTALDIFFUSIVITYTENSORBASE_H
+#pragma once
 
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
@@ -55,5 +54,3 @@ protected:
   const Real _kb;
   const unsigned int _op_num;
 };
-
-#endif // POLYCRYSTALDIFFUSIVITYTENSORBASE_H

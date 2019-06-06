@@ -12,8 +12,7 @@
 /*             See COPYRIGHT for full restrictions              */
 /****************************************************************/
 
-#ifndef GRANDPOTENTIALTENSORMATERIAL_H
-#define GRANDPOTENTIALTENSORMATERIAL_H
+#pragma once
 
 #include "PolycrystalDiffusivityTensorBase.h"
 #include "DerivativeMaterialPropertyNameInterface.h"
@@ -73,5 +72,3 @@ protected:
   /// solid phase order parameters
   std::vector<NonlinearVariableName> _vals_name;
 };
-
-#endif // GRANDPOTENTIALTENSORMATERIAL_H
