@@ -412,6 +412,13 @@ public:
    */
   const bool & getImplicitTimeIntegrationFlag() { return _implicit_time_integration; }
 
+  /**
+   * Are initial conditions specified from a file
+   *
+   * @return true if initial conditions are specified from a file
+   */
+  bool hasInitialConditionsFromFile();
+
 protected:
   struct VariableInfo
   {
@@ -472,6 +479,12 @@ protected:
    * Setup equations to be solved in this simulation
    */
   void setupEquations();
+
+  /**
+   * Setup reading initial conditions from a specified file, see 'initial_from_file' and
+   * 'initial_from_file_timestep' parameters
+   */
+  void setupInitialConditionsFromFile();
 
   void setupInitialConditions();
 

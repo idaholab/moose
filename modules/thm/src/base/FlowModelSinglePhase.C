@@ -71,11 +71,8 @@ FlowModelSinglePhase::addInitialConditions()
 {
   FlowModel::addCommonInitialConditions();
 
-  bool ics_set = _flow_channel.isParamValid("initial_p") &&
-                 _flow_channel.isParamValid("initial_T") &&
-                 _flow_channel.isParamValid("initial_vel");
-
-  if (ics_set)
+  if (_flow_channel.isParamValid("initial_p") && _flow_channel.isParamValid("initial_T") &&
+      _flow_channel.isParamValid("initial_vel"))
   {
     const std::vector<SubdomainName> & block = _flow_channel.getSubdomainNames();
 

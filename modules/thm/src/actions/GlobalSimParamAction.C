@@ -44,6 +44,14 @@ validParams<GlobalSimParamAction>()
                         1e-6,
                         "Width of the exponential regions in the volume fraction remapper");
 
+  params.addParam<FileName>("initial_from_file",
+                            "The name of an exodus file with initial conditions");
+  params.addParam<std::string>(
+      "initial_from_file_timestep",
+      "LATEST",
+      "Gives the timestep (or \"LATEST\") for which to read a solution from a file "
+      "for a given variable. (Default: LATEST)");
+
   return params;
 }
 

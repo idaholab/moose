@@ -63,7 +63,8 @@ FlowChannel1Phase::check() const
   }
 
   bool ics_set =
-      isParamValid("initial_p") && isParamValid("initial_T") && isParamValid("initial_vel");
+      _sim.hasInitialConditionsFromFile() ||
+      (isParamValid("initial_p") && isParamValid("initial_T") && isParamValid("initial_vel"));
 
   if (!ics_set && !_app.isRestarting())
   {
