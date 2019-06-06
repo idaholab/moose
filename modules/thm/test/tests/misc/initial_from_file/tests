@@ -1,0 +1,15 @@
+[Tests]
+  [./steady_state]
+    type = 'RunApp'
+    input = 'steady_state.i'
+    recover = false
+  [../]
+
+  [./test]
+    type = 'Exodiff'
+    input = 'test.i'
+    exodiff = 'test_out.e'
+    prereq = steady_state
+    recover = false
+  [../]
+[]

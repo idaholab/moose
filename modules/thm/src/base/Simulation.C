@@ -405,6 +405,9 @@ Simulation::addInitialCondition(const std::string & type,
                                 const std::string & name,
                                 InputParameters params)
 {
+  if (hasInitialConditionsFromFile())
+    return;
+
   if (_ics.find(name) == _ics.end())
   {
     ICInfo ic(type, params);
@@ -419,6 +422,9 @@ Simulation::addConstantIC(const std::string & var_name,
                           Real value,
                           const SubdomainName & block_name)
 {
+  if (hasInitialConditionsFromFile())
+    return;
+
   std::string class_name = "ConstantIC";
   InputParameters params = _factory.getValidParams(class_name);
   params.set<VariableName>("variable") = var_name;
@@ -432,6 +438,9 @@ Simulation::addConstantIC(const std::string & var_name,
                           Real value,
                           const std::vector<SubdomainName> & block_names)
 {
+  if (hasInitialConditionsFromFile())
+    return;
+
   std::string blk_str = block_names[0];
   for (unsigned int i = 1; i < block_names.size(); i++)
     blk_str += ":" + block_names[i];
@@ -449,6 +458,9 @@ Simulation::addFunctionIC(const std::string & var_name,
                           const std::string & func_name,
                           const SubdomainName & block_name)
 {
+  if (hasInitialConditionsFromFile())
+    return;
+
   std::string class_name = "FunctionIC";
   InputParameters params = _factory.getValidParams(class_name);
   params.set<VariableName>("variable") = var_name;
@@ -462,6 +474,9 @@ Simulation::addFunctionIC(const std::string & var_name,
                           const std::string & func_name,
                           const std::vector<SubdomainName> & block_names)
 {
+  if (hasInitialConditionsFromFile())
+    return;
+
   std::string blk_str = block_names[0];
   for (unsigned int i = 1; i < block_names.size(); i++)
     blk_str += ":" + block_names[i];
@@ -477,6 +492,9 @@ Simulation::addFunctionIC(const std::string & var_name,
 void
 Simulation::addConstantScalarIC(const std::string & var_name, Real value)
 {
+  if (hasInitialConditionsFromFile())
+    return;
+
   std::string class_name = "ScalarConstantIC";
   InputParameters params = _factory.getValidParams(class_name);
   params.set<VariableName>("variable") = var_name;
@@ -487,6 +505,9 @@ Simulation::addConstantScalarIC(const std::string & var_name, Real value)
 void
 Simulation::addComponentScalarIC(const std::string & var_name, const std::vector<Real> & value)
 {
+  if (hasInitialConditionsFromFile())
+    return;
+
   std::string class_name = "ScalarComponentIC";
   InputParameters params = _factory.getValidParams(class_name);
   params.set<VariableName>("variable") = var_name;
@@ -561,7 +582,67 @@ Simulation::addVariables()
     }
   }
 
-  setupInitialConditions();
+  if (hasInitialConditionsFromFile())
+    setupInitialConditionsFromFile();
+  else
+    setupInitialConditions();
+}
+
+void
+Simulation::setupInitialConditionsFromFile()
+{
+  const UserObjectName suo_name = Component::genName("thm", "suo");
+  {
+    const std::string class_name = "SolutionUserObject";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<MeshFileName>("mesh") = getParam<FileName>("initial_from_file");
+    params.set<std::string>("timestep") = getParam<std::string>("initial_from_file_timestep");
+    _fe_problem->addUserObject(class_name, suo_name, params);
+  }
+
+  for (auto && v : _vars)
+  {
+    const std::string & var_name = v.first;
+    VariableInfo & vi = v.second;
+
+    if (vi._type.family == SCALAR)
+    {
+      std::string class_name = "ScalarSolutionInitialCondition";
+      InputParameters params = _factory.getValidParams(class_name);
+      params.set<VariableName>("variable") = var_name;
+      params.set<VariableName>("from_variable") = var_name;
+      params.set<UserObjectName>("solution_uo") = suo_name;
+      _fe_problem->addInitialCondition(class_name, Component::genName(var_name, "ic"), params);
+    }
+    else
+    {
+      if (vi._subdomain.size() > 0)
+      {
+        for (auto & sid : vi._subdomain)
+        {
+          SubdomainName block_name = _mesh->getSubdomainName(sid);
+
+          std::string class_name = "SolutionInitialCondition";
+          InputParameters params = _factory.getValidParams(class_name);
+          params.set<VariableName>("variable") = var_name;
+          params.set<VariableName>("from_variable") = var_name;
+          params.set<UserObjectName>("solution_uo") = suo_name;
+          params.set<std::vector<SubdomainName>>("block") = {block_name};
+          _fe_problem->addInitialCondition(
+              class_name, Component::genName(var_name, block_name, "ic"), params);
+        }
+      }
+      else
+      {
+        std::string class_name = "SolutionInitialCondition";
+        InputParameters params = _factory.getValidParams(class_name);
+        params.set<VariableName>("variable") = var_name;
+        params.set<VariableName>("from_variable") = var_name;
+        params.set<UserObjectName>("solution_uo") = suo_name;
+        _fe_problem->addInitialCondition(class_name, Component::genName(var_name, "ic"), params);
+      }
+    }
+  }
 }
 
 void
@@ -884,4 +965,10 @@ Simulation::getOutputsVector(const std::string & key) const
     mooseError("The outputs vector key '" + key_lowercase + "' is invalid");
 
   return outputs;
+}
+
+bool
+Simulation::hasInitialConditionsFromFile()
+{
+  return _pars.isParamValid("initial_from_file");
 }
