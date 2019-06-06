@@ -39,4 +39,10 @@
     csvdiff = 'combined_scalar_damage_mult_out.csv'
     abs_zero = 1.e-6
   [../]
+  [./scalar_damage_material]
+    type = 'CSVDiff'
+    input = 'scalar_material_damage.i'
+    csvdiff = 'scalar_material_damage_out.csv'
+    abs_zero = 1.e-6
+  [../]
 []

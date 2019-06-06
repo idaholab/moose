@@ -33,6 +33,8 @@ public:
 
   virtual void updateJacobianMultForDamage(RankFourTensor & jacobian_mult) override;
 
+  virtual void computeUndamagedOldStress(RankTwoTensor & stress_old) override;
+
   virtual Real computeTimeStepLimit() override;
 
   const Real & getQpDamageIndex(unsigned int qp);
@@ -49,6 +51,7 @@ protected:
   ///@{ Material property that provides the damage index
   MaterialProperty<Real> & _damage_index;
   const MaterialProperty<Real> & _damage_index_old;
+  const MaterialProperty<Real> & _damage_index_older;
   ///@}
 
   /// If true, use the damage index from the old state (rather than the current state)
@@ -60,4 +63,3 @@ protected:
   /// Maximum damage increment allowed for the time step
   const Real & _maximum_damage_increment;
 };
-
