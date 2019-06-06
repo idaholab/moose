@@ -170,6 +170,8 @@
 
 - /JacobianTest2Phase
 - /JacobianTest2Phase/JacobianTest2PhaseAction
+- /JacobianTest2PhaseNCG
+- /JacobianTest2PhaseNCG/JacobianTest2PhaseNCGAction
 
 - /JacobianTest2PhaseRDG
 
