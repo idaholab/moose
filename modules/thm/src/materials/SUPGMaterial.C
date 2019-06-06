@@ -25,8 +25,6 @@ validParams<SUPGMaterial>()
   // Actual density, momentum, and total energy values.  Will be the same as above in the
   // constant-area equations, but not the variable-area equations.
   params.addRequiredCoupledVar("rho", "Density");
-  params.addRequiredCoupledVar("rhou", "x-momentum");
-  params.addRequiredCoupledVar("rhoE", "total energy");
 
   // Coupled aux variables
   params.addRequiredCoupledVar("vel", "x-velocity");
@@ -74,12 +72,8 @@ SUPGMaterial::SUPGMaterial(const InputParameters & parameters)
     _arhoEA(coupledValue("arhoEA")),
 
     _area(coupledValue("A")),
-    // density, momentum, and total energy variables.  These will be the same as
-    // the arhoA, arhouA, and arhoEA variables above for the constant-area
-    // equations, but not the variable-area equations.
+
     _rho(coupledValue("rho")),
-    _rhou(coupledValue("rhou")),
-    _rhoE(coupledValue("rhoE")),
 
     // Aux variables
     _enthalpy(coupledValue("H")),
@@ -145,8 +139,13 @@ SUPGMaterial::computeProperties()
 
   for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
   {
-    Real rho = _rho[qp], rhou = _rhou[qp], rhoE = _rhoE[qp], u = _vel[qp], u2 = u * u,
-         H = _enthalpy[qp], p = _p[qp];
+    Real rho = _rho[qp];
+    Real rhou = _arhouA[qp] / _area[qp];
+    Real rhoE = _arhoEA[qp] / _area[qp];
+    Real u = _vel[qp];
+    Real u2 = u * u;
+    Real H = _enthalpy[qp];
+    Real p = _p[qp];
 
     // Fill in vector of conserved variable derivatives for convenience
     _dUdx[qp].zero();

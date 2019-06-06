@@ -60,8 +60,6 @@ SUPG::addMooseObjects(FlowModel & fm, InputParameters & pars) const
   const auto & blocks = pars.get<std::vector<SubdomainName>>("block");
   // coupling vectors
   std::vector<VariableName> cv_rho(1, FlowModelSinglePhase::DENSITY);
-  std::vector<VariableName> cv_rhou(1, FlowModelSinglePhase::MOMENTUM_DENSITY);
-  std::vector<VariableName> cv_rhoE(1, FlowModelSinglePhase::TOTAL_ENERGY_DENSITY);
   std::vector<VariableName> cv_vel(1, FlowModelSinglePhase::VELOCITY);
   std::vector<VariableName> cv_enthalpy(1, FlowModelSinglePhase::SPECIFIC_TOTAL_ENTHALPY);
   std::vector<VariableName> cv_temperature(1, FlowModelSinglePhase::TEMPERATURE);
@@ -83,11 +81,9 @@ SUPG::addMooseObjects(FlowModel & fm, InputParameters & pars) const
     params.set<std::vector<VariableName>>("arhouA") = cv_rhouA;
     params.set<std::vector<VariableName>>("arhoEA") = cv_rhoEA;
     params.set<std::vector<VariableName>>("rho") = cv_rho;
-    params.set<std::vector<VariableName>>("rhou") = cv_rhou;
     params.set<std::vector<VariableName>>("vel") = cv_vel;
     params.set<std::vector<VariableName>>("A") = cv_area;
     params.set<MaterialPropertyName>("D_h") = FlowModelSinglePhase::HYDRAULIC_DIAMETER;
-    params.set<std::vector<VariableName>>("rhoE") = cv_rhoE;
     params.set<std::vector<VariableName>>("H") = cv_enthalpy;
     params.set<std::vector<VariableName>>("T") = cv_temperature;
     params.set<std::vector<VariableName>>("P_hf") = cv_P_hf;
@@ -142,9 +138,6 @@ SUPG::addMooseObjects(FlowModel & fm, InputParameters & pars) const
       params.set<NonlinearVariableName>("variable") = vars[i];
       params.set<std::vector<SubdomainName>>("block") = blocks;
       params.set<UserObjectName>("fp") = pars.get<UserObjectName>("fp");
-      params.set<std::vector<VariableName>>("rho") = cv_rho;
-      params.set<std::vector<VariableName>>("rhou") = cv_rhou;
-      params.set<std::vector<VariableName>>("rhoE") = cv_rhoE;
       params.set<MaterialPropertyName>("SUPG_delta") = DELTA;
       params.set<MaterialPropertyName>("SUPG_R") = RESIDUAL;
       params.set<MaterialPropertyName>("SUPG_A") = MATRIX;
