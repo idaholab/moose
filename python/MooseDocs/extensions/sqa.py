@@ -391,10 +391,9 @@ class RenderSQARequirementText(components.RenderComponent):
 
 class RenderSQARequirementDesign(autolink.RenderLinkBase):
 
-    def findDesign(self, design, token):
+    def findDesign(self, design, req):
         node = self.translator.findPage(design, throw_on_zero=False)
         if node is None:
-            req = token.parent['requirement']
             msg = "Unable to locate the design page: {}\n    {}:{}" \
                   .format(design, req.filename, req.design_line)
             LOG.error(msg)
