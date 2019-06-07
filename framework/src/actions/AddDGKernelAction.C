@@ -39,5 +39,5 @@ AddDGKernelAction::act()
   }
 
   if (_current_task == "ready_to_init")
-    _problem->getNonlinearSystem().dofMap().set_implicit_neighbor_dofs(true);
+    _problem->getNonlinearSystemBase().dofMap().set_implicit_neighbor_dofs(true);
 }
