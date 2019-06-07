@@ -133,9 +133,10 @@
 [Executioner]
   type = Transient
   dt = 0.01
-  solve_type = PJFNK
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
+  solve_type = NEWTON
+  petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_factor_levels'
+  petsc_options_value = 'asm      3               9'
+  l_tol = 1e-8
   end_time = 10
   [./TimeStepper]
     type = IterationAdaptiveDT

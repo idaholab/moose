@@ -119,8 +119,8 @@
   num_steps = 100
   dt = 0.1
   solve_type = PJFNK
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
+  petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_factor_levels'
+  petsc_options_value = 'asm      3               9'
 []
 
 [Adaptivity]
