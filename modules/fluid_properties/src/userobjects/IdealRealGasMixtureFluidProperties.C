@@ -98,6 +98,47 @@ IdealRealGasMixtureFluidProperties::T_from_v_e(Real v,
 }
 
 Real
+IdealRealGasMixtureFluidProperties::c_from_v_e(Real v, Real e, const std::vector<Real> & x) const
+{
+  Real p, T;
+  p_T_from_v_e(v, e, x, p, T);
+  return c_from_T_v(T, v, x);
+}
+
+void
+IdealRealGasMixtureFluidProperties::c_from_v_e(Real v,
+                                               Real e,
+                                               const std::vector<Real> & x,
+                                               Real & c,
+                                               Real & dc_dv,
+                                               Real & dc_de,
+                                               std::vector<Real> & dc_dx) const
+{
+  Real p, T;
+  p_T_from_v_e(v, e, x, p, T);
+
+  // sound of speed and derivatives
+  Real dc_dT_v, dc_dv_T;
+  std::vector<Real> dc_dx_Tv;
+  c_from_T_v(T, v, x, c, dc_dT_v, dc_dv_T, dc_dx_Tv);
+
+  // internal energy and derivatives
+  Real e_unused, de_dT_v, de_dv_T;
+  std::vector<Real> de_dx_Tv;
+  e_from_T_v(T, v, x, e_unused, de_dT_v, de_dv_T, de_dx_Tv);
+
+  // Compute derivatives using the following rules:
+  dc_dv = dc_dv_T - dc_dT_v * de_dv_T / de_dT_v;
+  dc_de = dc_dT_v / de_dT_v;
+
+  // Derivatives with respect to mass fractions:
+  for (unsigned int i = 0; i < _n_secondary_vapors; i++)
+  {
+    dc_dx[i] = dc_dx_Tv[i] - dc_dT_v * de_dx_Tv[i] / de_dT_v;
+  }
+}
+
+Real
 IdealRealGasMixtureFluidProperties::rho_from_p_T(Real p, Real T, const std::vector<Real> & x) const
 {
   return 1.0 / v_from_p_T(p, T, x);
@@ -252,9 +293,10 @@ IdealRealGasMixtureFluidProperties::c_from_p_T(Real p,
   c = c_from_p_T(p, T, x);
   // For derived properties, we would need higher order derivatives;
   // therefore, numerical derivatives are used here
-  p_perturbed = p * 1.e-6;
+  Real dp = p * 1.e-6;
+  p_perturbed = p + dp;
   c_perturbed = c_from_p_T(p_perturbed, T, x);
-  dc_dp = (c_perturbed - c) / (p_perturbed - p);
+  dc_dp = (c_perturbed - c) / (dp);
 
   Real dT = 1.e-6;
   T_perturbed = T + dT;
@@ -651,9 +693,10 @@ IdealRealGasMixtureFluidProperties::c_from_T_v(Real T,
   c_perturbed = c_from_T_v(T_perturbed, v, x);
   dc_dT = (c_perturbed - c) / (dT);
 
-  v_perturbed = v * 1.e-6;
+  Real dv = v * 1.e-6;
+  v_perturbed = v + dv;
   c_perturbed = c_from_T_v(T, v_perturbed, x);
-  dc_dv = (c_perturbed - c) / (v_perturbed - v);
+  dc_dv = (c_perturbed - c) / (dv);
 
   dc_dx.resize(_n_secondary_vapors);
   for (unsigned int i = 0; i < _n_secondary_vapors; i++)

@@ -59,6 +59,14 @@ public:
                           Real & dT_dv,
                           Real & dT_de,
                           std::vector<Real> & dT_dx) const override;
+  virtual Real c_from_v_e(Real v, Real e, const std::vector<Real> & x) const override;
+  virtual void c_from_v_e(Real v,
+                          Real e,
+                          const std::vector<Real> & x,
+                          Real & c,
+                          Real & dc_dv,
+                          Real & dc_de,
+                          std::vector<Real> & dc_dx) const override;
   virtual Real rho_from_p_T(Real p, Real T, const std::vector<Real> & x) const override;
   virtual void rho_from_p_T(Real p,
                             Real T,
@@ -184,4 +192,3 @@ protected:
   /// Current guess for temperature (in case guess is chosen to be changed)
   mutable Real _T_guess;
 };
-
