@@ -74,8 +74,6 @@ VolumeJunctionOld::addMooseObjects()
   std::vector<VariableName> cv_rhouA(1, FlowModelSinglePhase::RHOUA);
   std::vector<VariableName> cv_rhoEA(1, FlowModelSinglePhase::RHOEA);
   std::vector<VariableName> cv_rho(1, FlowModelSinglePhase::DENSITY);
-  std::vector<VariableName> cv_rhou(1, FlowModelSinglePhase::MOMENTUM_DENSITY);
-  std::vector<VariableName> cv_rhoE(1, FlowModelSinglePhase::TOTAL_ENERGY_DENSITY);
   std::vector<VariableName> cv_v(1, FlowModelSinglePhase::SPECIFIC_VOLUME);
   std::vector<VariableName> cv_e(1, FlowModelSinglePhase::SPECIFIC_INTERNAL_ENERGY);
   std::vector<VariableName> cv_area(1, FlowModel::AREA);
