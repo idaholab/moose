@@ -43,8 +43,7 @@ validParams<EntropyViscosityCoefficients7EqnMaterial>()
   params.addRequiredParam<bool>("is_liquid", "choose the type of phase");
   // Coupled variables
   params.addRequiredCoupledVar("rho", "Density");
-  params.addRequiredCoupledVar("rhou", "Momentum density");
-  params.addRequiredCoupledVar("rhoE", "Total energy density");
+  params.addRequiredCoupledVar("vel", "Velocity");
   params.addRequiredCoupledVar("p", "Pressure of fluid");
   params.addRequiredCoupledVar("alpha", "Volume fraction");
   // Jump variables:
@@ -97,12 +96,9 @@ EntropyViscosityCoefficients7EqnMaterial::EntropyViscosityCoefficients7EqnMateri
     _rho_old(coupledValueOld("rho")),
     _rho_dot(coupledDot("rho")),
     _grad_rho(coupledGradient("rho")),
-    // Momentum:
-    _rhou(coupledValue("rhou")),
-    _rhou_old(coupledValueOld("rhou")),
-    // Total energy:
-    _rhoE(coupledValue("rhoE")),
-    _rhoE_old(coupledValueOld("rhoE")),
+    // velocity
+    _vel(coupledValue("vel")),
+    _vel_old(coupledValueOld("vel")),
     // Pressure:
     _press(coupledValue("p")),
     _press_dot(coupledDot("p")),
@@ -140,7 +136,7 @@ EntropyViscosityCoefficients7EqnMaterial::computeQpProperties()
   Real h = _current_elem->hmin();
 
   // Compute the velocity and mach number
-  Real vel = _rhou[_qp] / _rho[_qp];
+  Real vel = _vel[_qp];
   Real speed = std::fabs(vel);
   Real M = speed / _c[_qp];
 
