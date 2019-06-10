@@ -296,6 +296,11 @@ public:
   void computeJacobianTags(const std::set<TagID> & tags);
 
   /**
+   * Method used to obtain scaling factors for variables
+   */
+  void computeInitialJacobian(NonlinearImplicitSystem & sys);
+
+  /**
    * Associate jacobian to systemMatrixTag, and then form a matrix for all the tags
    */
   void computeJacobian(SparseMatrix<Number> & jacobian, const std::set<TagID> & tags);
@@ -851,6 +856,9 @@ protected:
   PerfID _compute_jacobian_blocks_timer;
   PerfID _compute_dampers_timer;
   PerfID _compute_dirac_timer;
+
+  /// Flag used to indicate whether we are computing the initial Jacobian
+  bool _computing_initial_jacobian;
 
 private:
   /// Functors for computing residuals from undisplaced mortar constraints

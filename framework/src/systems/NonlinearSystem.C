@@ -152,6 +152,10 @@ NonlinearSystem::solve()
       _fe_problem.needsPreviousNewtonIteration())
     _transient_sys.nonlinear_solver->postcheck = Moose::compute_postcheck;
 
+  // Do an initial Jacobian evaluation in order to determine variable scaling factors
+  // if (_fe_problem.automaticScaling())
+  computeInitialJacobian(_transient_sys);
+
   if (_fe_problem.solverParams()._type != Moose::ST_LINEAR)
   {
     // Calculate the initial residual for use in the convergence criterion.

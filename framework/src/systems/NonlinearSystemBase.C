@@ -163,7 +163,8 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _compute_jacobian_tags_timer(registerTimedSection("computeJacobianTags", 5)),
     _compute_jacobian_blocks_timer(registerTimedSection("computeJacobianBlocks", 3)),
     _compute_dampers_timer(registerTimedSection("computeDampers", 3)),
-    _compute_dirac_timer(registerTimedSection("computeDirac", 3))
+    _compute_dirac_timer(registerTimedSection("computeDirac", 3)),
+    _computing_initial_jacobian(false)
 {
   getResidualNonTimeVector();
   // Don't need to add the matrix - it already exists (for now)
@@ -3102,4 +3103,57 @@ NonlinearSystemBase::mortarJacobianConstraints(bool displaced)
             << mortar_interface.first.first << " and slave " << mortar_interface.first.second);
     it->second();
   }
+}
+
+void
+NonlinearSystemBase::computeInitialJacobian(NonlinearImplicitSystem & sys)
+{
+#ifdef LIBMESH_HAVE_PETSC
+  if (dynamic_cast<PetscMatrix<Real> *>(sys.matrix))
+  {
+    auto & petsc_matrix = *static_cast<PetscMatrix<Real> *>(sys.matrix);
+    _computing_initial_jacobian = true;
+    _fe_problem.computeJacobianSys(sys, *_current_solution, *sys.matrix);
+    _computing_initial_jacobian = false;
+
+    // container for repeated access of element global dof indices
+    std::vector<dof_id_type> dof_indices;
+
+    // Scaling for field variables
+    auto & field_variables = _vars[0].fieldVariables();
+    std::vector<Real> inverse_scaling_factors(field_variables.size(), 0);
+    auto & dof_map = dofMap();
+
+    for (const auto & elem : *mesh().getActiveLocalElementRange())
+    {
+      for (MooseIndex(field_variables) i = 0; i < field_variables.size(); ++i)
+      {
+        auto & field_variable = *field_variables[i];
+        dof_map.dof_indices(elem, dof_indices, field_variable.number());
+        for (auto dof_index : dof_indices)
+        {
+          // For now we will use the diagonal for determining scaling
+          auto mat_value = petsc_matrix(dof_index, dof_index);
+          inverse_scaling_factors[i] = std::max(inverse_scaling_factors[i], std::abs(mat_value));
+        }
+      }
+    }
+
+    // Get the maximum value across processes
+    for (auto & scaling_factor : inverse_scaling_factors)
+    {
+      _communicator.max(scaling_factor);
+
+      // We have to make sure that our scaling values are not zero
+      if (scaling_factor < std::numeric_limits<Real>::epsilon())
+        scaling_factor = 1;
+    }
+
+    // Now set the scaling factors for the variables
+    for (MooseIndex(field_variables) i = 0; i < field_variables.size(); ++i)
+    {
+      field_variables[i]->scalingFactor(1. / inverse_scaling_factors[i]);
+    }
+  }
+#endif
 }
