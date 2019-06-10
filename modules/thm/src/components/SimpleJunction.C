@@ -187,8 +187,6 @@ SimpleJunction::add2Phase()
   std::vector<VariableName> cv_arhouA_liquid(1, FlowModelTwoPhase::ALPHA_RHOU_A_LIQUID);
   std::vector<VariableName> cv_arhoEA_liquid(1, FlowModelTwoPhase::ALPHA_RHOE_A_LIQUID);
   std::vector<VariableName> cv_rho_liquid(1, FlowModelTwoPhase::DENSITY_LIQUID);
-  std::vector<VariableName> cv_rhou_liquid(1, FlowModelTwoPhase::MOMENTUM_DENSITY_LIQUID);
-  std::vector<VariableName> cv_rhoE_liquid(1, FlowModelTwoPhase::TOTAL_ENERGY_DENSITY_LIQUID);
   std::vector<VariableName> cv_vel_liquid(1, FlowModelTwoPhase::VELOCITY_LIQUID);
   std::vector<VariableName> cv_pressure_liquid(1, FlowModelTwoPhase::PRESSURE_LIQUID);
   std::vector<VariableName> cv_enthalpy_liquid(1,
@@ -199,8 +197,6 @@ SimpleJunction::add2Phase()
   std::vector<VariableName> cv_arhouA_vapor(1, FlowModelTwoPhase::ALPHA_RHOU_A_VAPOR);
   std::vector<VariableName> cv_arhoEA_vapor(1, FlowModelTwoPhase::ALPHA_RHOE_A_VAPOR);
   std::vector<VariableName> cv_rho_vapor(1, FlowModelTwoPhase::DENSITY_VAPOR);
-  std::vector<VariableName> cv_rhou_vapor(1, FlowModelTwoPhase::MOMENTUM_DENSITY_VAPOR);
-  std::vector<VariableName> cv_rhoE_vapor(1, FlowModelTwoPhase::TOTAL_ENERGY_DENSITY_VAPOR);
   std::vector<VariableName> cv_vel_vapor(1, FlowModelTwoPhase::VELOCITY_VAPOR);
   std::vector<VariableName> cv_pressure_vapor(1, FlowModelTwoPhase::PRESSURE_VAPOR);
   std::vector<VariableName> cv_enthalpy_vapor(1, FlowModelTwoPhase::SPECIFIC_TOTAL_ENTHALPY_VAPOR);
