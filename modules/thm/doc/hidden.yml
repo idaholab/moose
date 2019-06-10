@@ -301,9 +301,6 @@
 - /Stabilizations/EntropyViscosity
 - /Stabilizations/Rusanov
 - /Stabilizations/SUPG
-- /Stabilizations/StabilizationPressure
-
-- /Transfers/LaplaceProjectionTransfer
 
 - /UserObjects/CHFTable
 - /UserObjects/HeatExchangeCoefficientPartitioning
@@ -319,7 +316,6 @@
 - /UserObjects/NormalizationParameter
 - /UserObjects/Rusanov
 - /UserObjects/SUPG
-- /UserObjects/StabilizationPressure
 - /UserObjects/StabilizationSettings
 
 - /VectorPostprocessors/Sampler1DBase
