@@ -4,6 +4,8 @@ MOOSE contains objects that provide utility functionality, which may be used to 
 Examples of these utilities include interpolation objects, function "fit" objects, file readers, tensor objects, etc.
 These objects are documented here.
 
-[FormattedTable](FormattedTable.md)
+[FormattedTable.md]
 
-[MathUtils](MathUtils.md)
+[InputParameters.md]
+
+[MathUtils.md]
