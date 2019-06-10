@@ -54,9 +54,9 @@ class Tag(NodeBase):
         """
         Add to the existing class list.
         """
-        c = self.get('class', '').split(' ')
-        c += args
-        self.set('class', ' '.join(c))
+        c = self.get('class', '').strip().split(' ')
+        c += [a.strip() for a in args]
+        self.set('class', ' '.join(c).strip())
 
     def write(self):
         """Write the HTML as a string, e.g., <foo>...</foo>."""
