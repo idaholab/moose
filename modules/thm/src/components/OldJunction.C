@@ -75,9 +75,7 @@ OldJunction::addMooseObjects()
   std::vector<VariableName> cv_pressure(1, FlowModelSinglePhase::PRESSURE);
   std::vector<VariableName> cv_rho(1, FlowModelSinglePhase::DENSITY);
   std::vector<VariableName> cv_rhoA(1, FlowModelSinglePhase::RHOA);
-  std::vector<VariableName> cv_rhou(1, FlowModelSinglePhase::MOMENTUM_DENSITY);
   std::vector<VariableName> cv_rhouA(1, FlowModelSinglePhase::RHOUA);
-  std::vector<VariableName> cv_rhoE(1, FlowModelSinglePhase::TOTAL_ENERGY_DENSITY);
   std::vector<VariableName> cv_rhoEA(1, FlowModelSinglePhase::RHOEA);
   std::vector<VariableName> cv_enthalpy(1, FlowModelSinglePhase::SPECIFIC_TOTAL_ENTHALPY);
   std::vector<VariableName> cv_area(1, FlowModelSinglePhase::AREA);
