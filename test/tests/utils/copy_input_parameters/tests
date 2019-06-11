@@ -3,5 +3,9 @@
     type = 'RunException'
     input = 'do_not_copy_parameters.i'
     expect_err = 'Copying of the InputParameters object for the diff object is not allowed.'
+
+    requirement = 'The system shall prevent the user from copying InputParameters objects inside of MooseObject-derived objects.'
+    design = 'InputParameters.md'
+    issues = '#5439'
   [../]
 []

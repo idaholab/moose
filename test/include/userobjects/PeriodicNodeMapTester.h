@@ -17,7 +17,12 @@ template <>
 InputParameters validParams<PeriodicNodeMapTester>();
 
 /**
- * Test MooseMesh::buildPeriodicNodeMap()
+ * Test object to verify that the map built by MooseMesh::buildPeriodicNodeMap() contains all
+ * necessary entries. In particular this object is designed to verify corner cases (e.g. in 2D
+ * with both directions being assigned periodicity this object verifies that each corner maps to
+ * two other corners for a total of 8 corner entries, there are 27 in 3D). This object doesn't
+ * return anything but produces errors for missing entries and warnings for corner nodes with fewer
+ * than expected pairings.
  */
 class PeriodicNodeMapTester : public ElementUserObject
 {
@@ -34,10 +39,10 @@ public:
 
 protected:
   /// Coupled variable id
-  unsigned int _v_var;
+  const unsigned int _v_var;
 
   /// mesh dimension
-  unsigned int _dim;
+  const unsigned int _dim;
 
   ///@{ periodic size per component
   std::array<Real, LIBMESH_DIM> _periodic_min;
@@ -45,6 +50,5 @@ protected:
   ///@}
 
   /// We time the periodic node list build ourselves to ste the level to 1
-  PerfID _perf_buildmap;
+  const PerfID _perf_buildmap;
 };
-

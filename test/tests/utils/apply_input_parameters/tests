@@ -5,5 +5,9 @@
     type = 'Exodiff'
     input = 'apply_input_parameters.i'
     exodiff = 'apply_input_parameters_out.e'
+
+    requirement = 'The system shall provide a method for transferring common parameters from one object to another.'
+    issues = '#3352'
+    design = 'InputParameters.md'
   [../]
 []
