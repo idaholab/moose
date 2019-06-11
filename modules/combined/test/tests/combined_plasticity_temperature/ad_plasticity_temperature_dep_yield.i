@@ -47,6 +47,7 @@
     incremental = true
     add_variables = true
     generate_output = 'stress_yy plastic_strain_xx plastic_strain_yy plastic_strain_zz'
+    use_automatic_differentiation = true
   [../]
 []
 
@@ -77,7 +78,7 @@
 
 [Kernels]
   [./heat]
-    type = HeatConduction
+    type = ADHeatConduction
     variable = temp
   [../]
 []
@@ -123,15 +124,14 @@
     poissons_ratio = 0.3
   [../]
   [./creep_plas]
-    type = ComputeMultipleInelasticStress
-    tangent_operator = elastic
+    type = ADComputeMultipleInelasticStress
     block = 0
     inelastic_models = 'plasticity'
     max_iterations = 50
     absolute_tolerance = 1e-05
   [../]
   [./plasticity]
-    type = IsotropicPlasticityStressUpdate
+    type = ADIsotropicPlasticityStressUpdate
     block = 0
     hardening_constant = 0
     yield_stress_function = yield
@@ -147,11 +147,10 @@
 
 [Executioner]
   type = Transient
-  solve_type = 'PJFNK'
+  solve_type = 'NEWTON'
 
-  petsc_options = '-snes_ksp_ew'
-  petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
-  petsc_options_value = '201                hypre    boomeramg      4'
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
 
   line_search = 'none'
 
