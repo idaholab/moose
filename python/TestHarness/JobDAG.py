@@ -50,7 +50,7 @@ class JobDAG(object):
 
         # delete finished jobs
         next_jobs = set([])
-        for job in self.__job_dag.ind_nodes():
+        for job in list(self.__job_dag.ind_nodes()):
             if job.isFinished():
                 next_jobs.add(job)
                 self.__job_dag.delete_node(job)
@@ -140,7 +140,7 @@ class JobDAG(object):
 
     def _doSkippedDependencies(self):
         """ Determine which jobs in the DAG should be skipped """
-        for job in self.__job_dag.topological_sort():
+        for job in list(self.__job_dag.topological_sort()):
             dep_jobs = set([])
 
             if self.options.failed_tests:
