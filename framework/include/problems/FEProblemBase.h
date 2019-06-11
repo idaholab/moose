@@ -141,6 +141,8 @@ public:
   FEProblemBase(const InputParameters & parameters);
   virtual ~FEProblemBase();
 
+  bool automaticScaling() const { return _automatic_scaling; }
+
   virtual EquationSystems & es() override { return _eq; }
   virtual MooseMesh & mesh() override { return _mesh; }
   virtual const MooseMesh & mesh() const override { return _mesh; }
@@ -1989,6 +1991,9 @@ private:
 
   /// Whether old solution second time derivative needs to be stored
   bool _u_dotdot_old_requested;
+
+  /// Whether to automatically scale the variables
+  const bool _automatic_scaling;
 
   friend class AuxiliarySystem;
   friend class NonlinearSystemBase;

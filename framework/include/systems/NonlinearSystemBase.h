@@ -68,6 +68,8 @@ public:
 
   virtual void init() override;
 
+  bool computingInitialJacobian() const final { return _computing_initial_jacobian; }
+
   /**
    * Turn off the Jacobian (must be called before equation system initialization)
    */
@@ -333,7 +335,7 @@ public:
   /**
    * Computes the time derivative vector
    */
-  void computeTimeDerivatives();
+  void computeTimeDerivatives(bool jacobian_calculation = false);
 
   /**
    * Called at the beginning of the time step

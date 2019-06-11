@@ -151,6 +151,8 @@ validParams<FEProblemBase>()
                         false,
                         "True to skip the NonlinearSystem check for work to do (e.g. Make sure "
                         "that there are variables to solve for).");
+  params.addParam<bool>(
+      "automatic_scaling", true, "Whether to use automatic scaling for the variables.");
 
   /// One entry of coord system per block, the size of _blocks and _coord_sys has to match, except:
   /// 1. _blocks.size() == 0, then there needs to be just one entry in _coord_sys, which will
@@ -319,7 +321,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _u_dot_requested(false),
     _u_dotdot_requested(false),
     _u_dot_old_requested(false),
-    _u_dotdot_old_requested(false)
+    _u_dotdot_old_requested(false),
+    _automatic_scaling(getParam<bool>("automatic_scaling"))
 {
   // Possibly turn off default ghosting in libMesh
   _eq.enable_default_ghosting(_default_ghosting);
@@ -4716,6 +4719,12 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
       _all_materials.jacobianSetup(tid);
       _functions.jacobianSetup(tid);
     }
+
+    // When computing the initial Jacobian for automatic variable scaling we need to make sure that
+    // the time derivatives have been calculated. So we'll call down to the nonlinear system here.
+    // Note that if we are not doing this initial Jacobian calculation we will just exit in that
+    // class to avoid redundant calculation (the residual function also computes time derivatives)
+    _nl->computeTimeDerivatives(/*jacobian_calculation =*/true);
 
     _aux->compute(EXEC_NONLINEAR);
 

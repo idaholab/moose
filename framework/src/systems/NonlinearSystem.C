@@ -90,7 +90,8 @@ NonlinearSystem::NonlinearSystem(FEProblemBase & fe_problem, const std::string &
     _transient_sys(fe_problem.es().get_system<TransientNonlinearImplicitSystem>(name)),
     _nl_residual_functor(_fe_problem),
     _fd_residual_functor(_fe_problem),
-    _use_coloring_finite_difference(false)
+    _use_coloring_finite_difference(false),
+    _computed_scaling(false)
 {
   _sys.get_dof_map().add_coupling_functor(
       _sys.get_dof_map().default_coupling(),
@@ -153,8 +154,12 @@ NonlinearSystem::solve()
     _transient_sys.nonlinear_solver->postcheck = Moose::compute_postcheck;
 
   // Do an initial Jacobian evaluation in order to determine variable scaling factors
-  // if (_fe_problem.automaticScaling())
-  computeInitialJacobian(_transient_sys);
+  if (_fe_problem.automaticScaling())
+    // if (!_computed_scaling)
+    // {
+    computeInitialJacobian(_transient_sys);
+  //   _computed_scaling = true;
+  // }
 
   if (_fe_problem.solverParams()._type != Moose::ST_LINEAR)
   {

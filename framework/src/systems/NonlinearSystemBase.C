@@ -89,6 +89,7 @@
 // PETSc
 #ifdef LIBMESH_HAVE_PETSC
 #include "petscsnes.h"
+#include "petscmat.h"
 #if !PETSC_VERSION_LESS_THAN(3, 3, 0)
 #include <PetscDMMoose.h>
 EXTERN_C_BEGIN
@@ -818,8 +819,14 @@ NonlinearSystemBase::residualVector(TagID tag)
 }
 
 void
-NonlinearSystemBase::computeTimeDerivatives()
+NonlinearSystemBase::computeTimeDerivatives(bool jacobian_calculation)
 {
+  // If we're doing any Jacobian calculation other than the initial Jacobian calculation for
+  // automatic variable scaling, then we can just return because the residual function evaluation
+  // has already done this work for us
+  if (jacobian_calculation && !_computing_initial_jacobian)
+    return;
+
   if (_time_integrator)
   {
     _time_integrator->preStep();
@@ -3139,6 +3146,8 @@ NonlinearSystemBase::computeInitialJacobian(NonlinearImplicitSystem & sys)
       }
     }
 
+    MatView(petsc_matrix.mat(), NULL);
+
     // Get the maximum value across processes
     for (auto & scaling_factor : inverse_scaling_factors)
     {
@@ -3152,7 +3161,8 @@ NonlinearSystemBase::computeInitialJacobian(NonlinearImplicitSystem & sys)
     // Now set the scaling factors for the variables
     for (MooseIndex(field_variables) i = 0; i < field_variables.size(); ++i)
     {
-      field_variables[i]->scalingFactor(1. / inverse_scaling_factors[i]);
+      field_variables[i]->scalingFactor(1. / inverse_scaling_factors[i] *
+                                        field_variables[i]->scalingFactor());
     }
   }
 #endif
