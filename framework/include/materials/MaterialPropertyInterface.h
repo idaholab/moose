@@ -31,9 +31,11 @@ InputParameters validParams<MaterialPropertyInterface>();
 #define adGetADMaterialProperty this->template getADMaterialProperty
 #define adGetMaterialProperty this->template getMaterialProperty
 #define adGetMaterialPropertyOld this->template getMaterialPropertyOld
+#define adGetMaterialPropertyOlder this->template getMaterialPropertyOlder
 #define adGetADMaterialPropertyByName this->template getADMaterialPropertyByName
 #define adGetMaterialPropertyByName this->template getMaterialPropertyByName
 #define adGetMaterialPropertyOldByName this->template getMaterialPropertyOldByName
+#define adGetMaterialPropertyOlderByName this->template getMaterialPropertyOlderByName
 #define adHasMaterialProperty this->template hasMaterialProperty
 #define adHasMaterialPropertyByName this->template hasMaterialPropertyByName
 
@@ -536,4 +538,3 @@ MaterialPropertyInterface::getZeroMaterialProperty(const std::string & /*prop_na
 
   return zero;
 }
-

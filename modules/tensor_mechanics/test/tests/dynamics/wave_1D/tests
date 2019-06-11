@@ -34,6 +34,31 @@
                    " in a linear elastic material with both Rayleigh damping and"
                    " numerical damping resulting from Hilber-Hughes-Taylor (HHT) time integration."
   [../]
+  [./rayleigh_hht_ad]
+    type = 'Exodiff'
+    input = 'wave_rayleigh_hht_AD.i'
+    exodiff = 'wave_rayleigh_hht_out.e'
+    abs_zero = 1e-09
+    compiler = 'GCC CLANG'
+
+    requirement = "The mechanics system shall correctly predict 1D wave propagation"
+                   " in a linear elastic material with both Rayleigh damping and"
+                   " numerical damping resulting from Hilber-Hughes-Taylor (HHT)"
+                   " time integration when automatic differentiation is used."
+    prereq = "rayleigh_hht"
+  [../]
+  [./rayleigh_hht_ad_jac]
+    type = 'PetscJacobianTester'
+    input = 'wave_rayleigh_hht_AD.i'
+    compiler = 'GCC CLANG'
+
+    requirement = "The mechanics system shall correctly compute the Jacobian"
+                 " for 1D wave propagation in a linear elastic material with"
+                 " both Rayleigh damping and numerical damping resulting from"
+                 " Hilber-Hughes-Taylor (HHT) time integration when automatic"
+                 " differentiation is used."
+    prereq = "rayleigh_hht_ad"
+  [../]
   [./rayleigh_hht_ti]
     type = 'Exodiff'
     input = 'wave_rayleigh_hht_ti.i'
@@ -48,7 +73,7 @@
                    " when using the velocity and acceleration computed using the Newmark-Beta time"
                    " integrator."
     issues = "#12185"
-    prereq = "rayleigh_hht"
+    prereq = "rayleigh_hht_ad_jac"
   [../]
   [./rayleigh_newmark]
     type = 'Exodiff'
