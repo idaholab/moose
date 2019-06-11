@@ -3137,11 +3137,12 @@ NonlinearSystemBase::computeInitialJacobian(NonlinearImplicitSystem & sys)
         auto & field_variable = *field_variables[i];
         dof_map.dof_indices(elem, dof_indices, field_variable.number());
         for (auto dof_index : dof_indices)
-        {
-          // For now we will use the diagonal for determining scaling
-          auto mat_value = petsc_matrix(dof_index, dof_index);
-          inverse_scaling_factors[i] = std::max(inverse_scaling_factors[i], std::abs(mat_value));
-        }
+          if (dof_map.local_index(dof_index))
+          {
+            // For now we will use the diagonal for determining scaling
+            auto mat_value = petsc_matrix(dof_index, dof_index);
+            inverse_scaling_factors[i] = std::max(inverse_scaling_factors[i], std::abs(mat_value));
+          }
       }
     }
 
