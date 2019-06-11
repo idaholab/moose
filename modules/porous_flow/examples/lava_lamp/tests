@@ -1,0 +1,23 @@
+[Tests]
+  [./1phase_convection]
+    type = RunApp
+    input = 1phase_convection.i
+    check_input = true
+    threading = '!pthreads'
+    cli_args = 'Executioner/end_time=1'
+    requirement = "PorousFlow shall be able to model diffusion of CO2 into brine and the resulting density-driven convection"
+    issues = '#13239'
+    design = 'porous_flow/lava_lamp.md'
+  [../]
+  [./2phase_convection]
+    type = RunApp
+    input = 2phase_convection.i
+    check_input = true
+    threading = '!pthreads'
+    cli_args = 'Executioner/end_time=1'
+    prereq = 1phase_convection
+    requirement = "PorousFlow shall be able to model diffusion of CO2 into brine, when the CO2 is initialised in a gas and liquid states, and when the gaseous phase disappears, and the resulting density-driven convection"
+    issues = '#13239'
+    design = 'porous_flow/lava_lamp.md'
+  [../]
+[]

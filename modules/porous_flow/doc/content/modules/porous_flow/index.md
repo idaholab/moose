@@ -1,5 +1,7 @@
 # PorousFlow module
 
+!media porous_flow/1phase_convection.gif style=width:80%;margin-left:10px caption=Density driven convective mixing of CO2 in brine  id=1phase_convection_anim
+
 The PorousFlow module is a library of physics for fluid and heat flow in porous
 media. It is formulated in an extremely general manner, so is capable of solving
 problems with an arbitrary number of phases (gas, liquid, etc) and fluid components (species present in
@@ -33,6 +35,7 @@ and geomechanics.
 - [Flow in fractures](porous_flow/flow_through_fractured_media.md)
 - [Underground mining](porous_flow/coal_mining.md)
 - [CO$_2$ storage benchmark problems](porous_flow/co2_intercomparison.md)
+- [Convective mixing](porous_flow/lava_lamp.md)
 - [Restarting from previous simulation](porous_flow/restart.md)
 - [QA tests](porous_flow/tests.md)
 
