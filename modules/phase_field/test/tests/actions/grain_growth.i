@@ -16,6 +16,7 @@
 [Modules]
   [./PhaseField]
     [./GrainGrowth]
+      variable_mobility = false
     [../]
   [../]
 []
@@ -59,7 +60,8 @@
 [Executioner]
   type = Transient
   scheme = bdf2
-
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
   solve_type = 'NEWTON'
   l_tol = 1.0e-4
   l_max_its = 30
