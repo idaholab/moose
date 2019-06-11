@@ -3156,11 +3156,9 @@ NonlinearSystemBase::computeInitialJacobian(NonlinearImplicitSystem & sys)
     }
 
     // Now set the scaling factors for the variables
-    for (MooseIndex(field_variables) i = 0; i < field_variables.size(); ++i)
-    {
-      field_variables[i]->scalingFactor(1. / inverse_scaling_factors[i] *
-                                        field_variables[i]->scalingFactor());
-    }
+    applyScalingFactors(inverse_scaling_factors);
+    if (auto displaced_problem = _fe_problem.getDisplacedProblem().get())
+      displaced_problem->systemBaseNonlinear().applyScalingFactors(inverse_scaling_factors);
   }
 #endif
 }
