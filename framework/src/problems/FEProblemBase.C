@@ -152,7 +152,7 @@ validParams<FEProblemBase>()
                         "True to skip the NonlinearSystem check for work to do (e.g. Make sure "
                         "that there are variables to solve for).");
   params.addParam<bool>(
-      "automatic_scaling", true, "Whether to use automatic scaling for the variables.");
+      "automatic_scaling", false, "Whether to use automatic scaling for the variables.");
   params.addParam<bool>(
       "compute_scaling_once",
       true,
