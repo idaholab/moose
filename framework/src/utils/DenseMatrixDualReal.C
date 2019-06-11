@@ -103,13 +103,17 @@ DenseMatrix<DualReal>::DenseMatrix(const unsigned int new_m, const unsigned int 
 template class DenseMatrixBase<DualReal>;
 template class DenseMatrix<DualReal>;
 
-// Instantiations of these template methods needed for unit test
 template void DenseMatrix<DualReal>::vector_mult_add(DenseVector<DualReal> &,
                                                      const int,
                                                      const DenseVector<DualReal> &) const;
 template void DenseMatrix<DualReal>::vector_mult_add(DenseVector<DualReal> &,
                                                      const double,
                                                      const DenseVector<DualReal> &) const;
+
+template void DenseMatrix<Real>::vector_mult(DenseVector<DualReal> &,
+                                             const DenseVector<DualReal> &) const;
+template void DenseMatrix<DualReal>::vector_mult(DenseVector<DualReal> &,
+                                                 const DenseVector<Real> &) const;
 
 template void DenseMatrix<DualReal>::cholesky_solve(const DenseVector<DualReal> & b,
                                                     DenseVector<DualReal> & x);
