@@ -89,7 +89,6 @@
 // PETSc
 #ifdef LIBMESH_HAVE_PETSC
 #include "petscsnes.h"
-#include "petscmat.h"
 #if !PETSC_VERSION_LESS_THAN(3, 3, 0)
 #include <PetscDMMoose.h>
 EXTERN_C_BEGIN
@@ -3145,8 +3144,6 @@ NonlinearSystemBase::computeInitialJacobian(NonlinearImplicitSystem & sys)
         }
       }
     }
-
-    MatView(petsc_matrix.mat(), NULL);
 
     // Get the maximum value across processes
     for (auto & scaling_factor : inverse_scaling_factors)

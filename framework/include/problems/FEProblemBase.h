@@ -143,6 +143,8 @@ public:
 
   bool automaticScaling() const { return _automatic_scaling; }
 
+  bool computeScalingOnce() const { return _compute_scaling_once; }
+
   virtual EquationSystems & es() override { return _eq; }
   virtual MooseMesh & mesh() override { return _mesh; }
   virtual const MooseMesh & mesh() const override { return _mesh; }
@@ -1994,6 +1996,11 @@ private:
 
   /// Whether to automatically scale the variables
   const bool _automatic_scaling;
+
+  /// Whether the scaling factors should only be computed once at the beginning of the simulation
+  /// through an extra Jacobian evaluation. If this is set to false, then the scaling factors will
+  /// be computed during an extra Jacobian evaluation at the beginning of every time step.
+  const bool _compute_scaling_once;
 
   friend class AuxiliarySystem;
   friend class NonlinearSystemBase;
