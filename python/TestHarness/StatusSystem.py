@@ -64,6 +64,7 @@ class StatusSystem(object):
     diff = status(status='DIFF', color='YELLOW', code=0x81)
     deleted = status(status='DELETED', color='RED', code=0x83)
     error  = status(status='ERROR', color='RED', code=0x84)
+    race = status(status='RACE', color='RED', code=0x85)
     timeout  = status(status='TIMEOUT', color='RED', code=0x1)
 
     # Pending statuses

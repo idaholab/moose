@@ -84,8 +84,8 @@ class Scheduler(MooseObject):
         # A combination of processors + threads (-j/-n) currently in use, that a job requires
         self.slots_in_use = 0
 
-        # Set containing all scheduled jobs
-        self.__scheduled_jobs = set([])
+        # List of Lists containing all scheduled jobs
+        self.__scheduled_jobs = []
 
         # Set containing jobs entering the run_pool
         self.__job_bank = set([])
@@ -228,7 +228,7 @@ class Scheduler(MooseObject):
             self.__job_bank.update(j_dag.topological_sort())
 
         # Store all scheduled jobs
-        self.__scheduled_jobs.update(j_dag.topological_sort())
+        self.__scheduled_jobs.append(j_dag.topological_sort())
 
         # Launch these jobs to perform work
         self.queueJobs(Jobs, j_lock)

@@ -39,6 +39,15 @@ class JobDAG(object):
 
     def getJobs(self):
         """ return current job group """
+        # Suppress multiple jobs _if_ we are supposed to be running in serialized mode (--diag)
+        if self.options.testharness_diagnostics:
+            # So the way this works, is that getJobs is only called at the start, or once a job finishes, and only by
+            # getJobsAndAdvance (by the RunParallel scheduler). Due to that method already deleting the finished jobs,
+            # the only jobs (if any) remaining are on HOLD.
+            concurrent_jobs = self.__job_dag.ind_nodes()
+            if [x for x in concurrent_jobs if x.isHold()]:
+                return [[x for x in concurrent_jobs if x.isHold()][0]]
+
         return self.__job_dag.ind_nodes()
 
     def getJobsAndAdvance(self):
@@ -71,27 +80,25 @@ class JobDAG(object):
         if self.__job_dag.size():
 
             self._doMakeDependencies()
-            if self.options.testharness_diagnostics:
-                # If we run this, we need a copy of the DAG before the extra edges are added
-                for name in self.__name_to_job:
-                    temp_downstream_job_list = self.__job_dag.all_downstreams(self.__name_to_job[name])
-                    for job in temp_downstream_job_list:
-                        self.__name_to_job[name].addDownsteamNode(job)
-                    temp_upstream_job_list = self.__job_dag.predecessors(self.__name_to_job[name])
-                    for job in temp_upstream_job_list:
-                        self.__name_to_job[name].addUpsteamNode(job)
-
-                self._doMakeSerializeDependencies()
-
             self._doSkippedDependencies()
 
             # If there are race conditions, then there may be more skipped jobs
             if self._doRaceConditions():
                 self._doSkippedDependencies()
 
+            # Serialize the Jobs if running TestHarness Diagnostics
+            if self.options.testharness_diagnostics:
+                self._doMakeSerializeDependencies()
+
         return self.__job_dag
 
     def _doMakeSerializeDependencies(self):
+        """ Serialize the Jobs contained within the DAG  """
+        # Store the position of the job within the DAG
+        for job in self.__job_dag.topological_sort():
+            job.addDownsteamNodes(self.__job_dag.all_downstreams(job))
+            job.addUpsteamNodes(self.__job_dag.predecessors(job))
+
         return self.__job_dag.serialize_dag()
 
     def _doMakeDependencies(self):
@@ -252,3 +259,21 @@ class JobDAG(object):
         for d_job in downstreams:
             cyclic_path.append('%s -->'% (d_job.getTestNameShort()))
         return ' '.join(cyclic_path)
+
+    def printDAG(self):
+        """ Print the current structure of the DAG  """
+        job_order = []
+        cloned_dag = self.__job_dag.clone()
+        while cloned_dag.size():
+            concurrent_jobs = cloned_dag.ind_nodes(cloned_dag.graph)
+            if len(concurrent_jobs) > 1:
+                job_order.extend([x.getTestNameShort() for x in concurrent_jobs])
+            else:
+                if job_order:
+                    job_order.extend(['<--', concurrent_jobs[0].getTestNameShort()])
+                else:
+                    job_order.append(concurrent_jobs[0].getTestNameShort())
+            for job in concurrent_jobs:
+                cloned_dag.delete_node(job)
+
+        print '\n###### JOB ORDER ######\n', ' '.join(job_order)

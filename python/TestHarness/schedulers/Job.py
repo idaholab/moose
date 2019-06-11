@@ -67,11 +67,11 @@ class Job(object):
         # List of files modified by this job.
         self.modifiedFiles = []
 
-        # List of nodes that depend on this node.
-        self.__downstreamNodes = []
+        # Set of nodes that depend on this node.
+        self.__downstreamNodes = set([])
 
-        # List of jobs that this job depends on.
-        self.__upstreamNodes = []
+        # Set of jobs that this job depends on.
+        self.__upstreamNodes = set([])
 
         # Set of all jobs that this job races with.
         self.racePartners = set()
@@ -107,17 +107,27 @@ class Job(object):
         """ Wrapper method to return a list of all the jobs that need to be run after the given job """
         return self.__job_dag.getDownstreams(self)
 
-    def addUpsteamNode(self, node):
+    def addUpsteamNodes(self, *kwargs):
         """ Add a job to the list of jobs that are upstream from here """
-        return self.__upstreamNodes.append(node)
+        for i in [x for x in kwargs if x]:
+            if type(i) == type([]):
+                self.__upstreamNodes.update(i)
+            else:
+                self.__upstreamNodes.add(i)
+        return self.__upstreamNodes
 
     def getUpstreamNodes(self):
         """ Return the list of jobs that are upstream from here """
         return self.__upstreamNodes
 
-    def addDownsteamNode(self, node):
+    def addDownsteamNodes(self, *kwargs):
         """ Add a job to the list of jobs that are downstream from here """
-        return self.__downstreamNodes.append(node)
+        for i in [x for x in kwargs if x]:
+            if type(i) == type([]):
+                self.__downstreamNodes.update(i)
+            else:
+                self.__downstreamNodes.add(i)
+        return self.__downstreamNodes
 
     def removeDownsteamNode(self, node):
         """ Remove a job from the list of jobs that are downstream from here """
@@ -222,15 +232,9 @@ class Job(object):
             return
 
         if self.options.testharness_diagnostics:
-            # Record the time before we check everything so that we can wait properly.
-            before_check_time = clock()
             # Before the job does anything, get the times files below it were last modified
             self.fileChecker.get_all_files(self, self.fileChecker.getOriginalTimes())
-            # Get the time after we checked all the files so that we can wait properly.
-            after_check_time = clock()
-            # Give some time so that file modified time has a distinct new value.
-            while(after_check_time - before_check_time < 1):
-                after_check_time = clock()
+            time.sleep(1)
 
         self.__tester.prepare(self.options)
 
@@ -345,6 +349,7 @@ class Job(object):
         return (_status == self.finished and self.__tester.isSkip()) \
             or (_status == self.skip and self.isNoStatus()) \
             or (_status == self.skip and self.__tester.isSkip())
+
     def isHold(self):
         return self.getStatus() == self.hold
     def isQueued(self):

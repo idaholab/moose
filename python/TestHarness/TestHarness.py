@@ -584,28 +584,29 @@ class TestHarness:
         self.options.results_storage['INPUT_FILE_NAME'] = self.options.input_file_name
 
         # Write some useful data to our results_storage
-        for job in all_jobs:
-            # If queueing, do not store silent results in session file
-            if job.isSilent() and self.options.queueing:
-                continue
+        for job_group in all_jobs:
+            for job in job_group:
+                # If queueing, do not store silent results in session file
+                if job.isSilent() and self.options.queueing:
+                    continue
 
-            status, message, message_color, exit_code = job.getJointStatus()
+                status, message, message_color, exit_code = job.getJointStatus()
 
-            # Create empty key based on TestDir, or re-inialize with existing data so we can append to it
-            self.options.results_storage[job.getTestDir()] = self.options.results_storage.get(job.getTestDir(), {})
-            self.options.results_storage[job.getTestDir()][job.getTestName()] = {'NAME'           : job.getTestNameShort(),
-                                                                                 'LONG_NAME'      : job.getTestName(),
-                                                                                 'TIMING'         : job.getTiming(),
-                                                                                 'STATUS'         : status,
-                                                                                 'STATUS_MESSAGE' : message,
-                                                                                 'FAIL'           : job.isFail(),
-                                                                                 'COLOR'          : message_color,
-                                                                                 'CAVEATS'        : list(job.getCaveats()),
-                                                                                 'OUTPUT'         : job.getOutput(),
-                                                                                 'COMMAND'        : job.getCommand()}
+                # Create empty key based on TestDir, or re-inialize with existing data so we can append to it
+                self.options.results_storage[job.getTestDir()] = self.options.results_storage.get(job.getTestDir(), {})
+                self.options.results_storage[job.getTestDir()][job.getTestName()] = {'NAME'           : job.getTestNameShort(),
+                                                                                     'LONG_NAME'      : job.getTestName(),
+                                                                                     'TIMING'         : job.getTiming(),
+                                                                                     'STATUS'         : status,
+                                                                                     'STATUS_MESSAGE' : message,
+                                                                                     'FAIL'           : job.isFail(),
+                                                                                     'COLOR'          : message_color,
+                                                                                     'CAVEATS'        : list(job.getCaveats()),
+                                                                                     'OUTPUT'         : job.getOutput(),
+                                                                                     'COMMAND'        : job.getCommand()}
 
-            # Additional data to store (overwrites any previous matching keys)
-            self.options.results_storage[job.getTestDir()].update(job.getMetaData())
+                # Additional data to store (overwrites any previous matching keys)
+                self.options.results_storage[job.getTestDir()].update(job.getMetaData())
 
         if self.options.output_dir:
             self.results_storage = os.path.join(self.options.output_dir, self.results_storage)
@@ -630,42 +631,44 @@ class TestHarness:
             # Write one file, with verbose information (--file)
             if self.options.file:
                 with open(os.path.join(self.output_dir, self.options.file), 'w') as f:
-                    for job in all_jobs:
-                        # Do not write information about silent tests
-                        if job.isSilent():
-                            continue
+                    for job_group in all_jobs:
+                        for job in job_group:
+                            # Do not write information about silent tests
+                            if job.isSilent():
+                                continue
 
-                        formated_results = util.formatResult( job, self.options, result=job.getOutput(), color=False)
-                        f.write(formated_results + '\n')
+                            formated_results = util.formatResult( job, self.options, result=job.getOutput(), color=False)
+                            f.write(formated_results + '\n')
 
             # Write a separate file for each test with verbose information (--sep-files, --sep-files-ok, --sep-files-fail)
             if ((self.options.ok_files and self.num_passed)
                 or (self.options.fail_files and self.num_failed)):
-                for job in all_jobs:
-                    status, message, message_color, exit_code = job.getJointStatus()
+                for job_group in all_jobs:
+                    for job in job_group:
+                        status, message, message_color, exit_code = job.getJointStatus()
 
-                    if self.options.output_dir:
-                        output_dir = self.options.output_dir
-                    else:
-                        output_dir = job.getTestDir()
+                        if self.options.output_dir:
+                            output_dir = self.options.output_dir
+                        else:
+                            output_dir = job.getTestDir()
 
-                    # Yes, by design test dir will be apart of the output file name
-                    output_file = os.path.join(output_dir, '.'.join([os.path.basename(job.getTestDir()),
-                                                                     job.getTestNameShort(),
-                                                                     status,
-                                                                     'txt']))
+                        # Yes, by design test dir will be apart of the output file name
+                        output_file = os.path.join(output_dir, '.'.join([os.path.basename(job.getTestDir()),
+                                                                         job.getTestNameShort(),
+                                                                         status,
+                                                                         'txt']))
 
-                    formated_results = util.formatResult(job, self.options, result=job.getOutput(), color=False)
+                        formated_results = util.formatResult(job, self.options, result=job.getOutput(), color=False)
 
-                    # Passing tests
-                    if self.options.ok_files and job.isPass():
-                        with open(output_file, 'w') as f:
-                            f.write(formated_results)
+                        # Passing tests
+                        if self.options.ok_files and job.isPass():
+                            with open(output_file, 'w') as f:
+                                f.write(formated_results)
 
-                    # Failing tests
-                    if self.options.fail_files and job.isFail():
-                        with open(output_file, 'w') as f:
-                            f.write(formated_results)
+                        # Failing tests
+                        if self.options.fail_files and job.isFail():
+                            with open(output_file, 'w') as f:
+                                f.write(formated_results)
 
         except IOError:
             print('Permission error while writing results to disc')

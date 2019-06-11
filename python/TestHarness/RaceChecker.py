@@ -7,8 +7,8 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import sys
-import itertools
+import sys, itertools
+from StatusSystem import StatusSystem  # for proper error code
 
 class RaceChecker(object):
     """
@@ -19,21 +19,21 @@ class RaceChecker(object):
     def __init__(self, all_jobs):
         """ Create a RaceChecker object that has all the jobs"""
         self.all_jobs = all_jobs
-        self.error_code = 0x0
-
 
     def findRacePartners(self):
         """ Collect all the jobs that have race conditions """
         raceConditionsExist = False
+        for job_group in self.all_jobs:
+            for job_a, job_b in itertools.combinations(job_group, 2):
+                if job_a.isSkip() or job_b.isSkip():
+                    continue
 
-        for job_a, job_b in itertools.combinations(self.all_jobs, 2):
-            for fileInA in job_a.modifiedFiles:
-                for fileInB in job_b.modifiedFiles:
-                    if (fileInA == fileInB):
-                        if not ((job_a in job_b.getDownstreamNodes()) or (job_b in job_a.getDownstreamNodes())):
-                            job_a.racePartners.add(job_b)
-                            job_b.racePartners.add(job_a)
-                            raceConditionsExist = True
+                _matching = set(job_a.modifiedFiles).intersection(set(job_b.modifiedFiles))
+                if _matching and not ((job_a in job_b.getDownstreamNodes()) \
+                                      or (job_b in job_a.getDownstreamNodes())):
+                    job_a.racePartners.add(job_b)
+                    job_b.racePartners.add(job_a)
+                    raceConditionsExist = True
         return raceConditionsExist
 
     def printRaceConditionsByPrereq(self):
@@ -60,13 +60,18 @@ class RaceChecker(object):
 
     def printUniqueRacerSets(self):
         """ Print the jobs that share race conditions within unique sets """
+        status = StatusSystem()
+        exit_code = 0x0
 
         allOfRacers = set()
-        for job in self.all_jobs:
+        for job_group in self.all_jobs:
             temp_set = set()
+            for job in job_group:
 
-            # Only jobs that have race conditions
-            if len(job.racePartners) > 0:
+                # Only jobs that have race conditions
+                if not len(job.racePartners):
+                    continue
+
                 temp_set.add(job)
                 for partner in job.racePartners:
                     temp_set.add(partner)
@@ -107,11 +112,9 @@ class RaceChecker(object):
                 print("There is " + str(setNumber) + " set of tests with unique race conditions. ")
             print("Please review the tests and either add any necessary prereqs, or create unique filenames " +
             "for the outputs of each test.")
-            self.error_code = self.error_code | 0x85
+            exit_code = status.race.code
 
         else:
             print("There are no race conditions.")
 
-
-
-        return self.error_code
+        return exit_code
