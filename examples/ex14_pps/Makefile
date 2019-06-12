@@ -38,6 +38,6 @@ ex_deps     := $(patsubst %.C, %.$(obj-suffix).d, $(ex_srcfiles))
 # Additional special case targets should be added here
 
 test: all
-	$(call TEST_exodiff,ex14.i,ex14_out.e-s006)
+	$(call TEST_exodiff,ex14.i,ex14_out.e)
 	$(call TEST_exodiff,ex14_compare_solutions_1.i,ex14_compare_solutions_1_out.e)
 	$(call TEST_exodiff,ex14_compare_solutions_2.i,ex14_compare_solutions_2_out.e)
