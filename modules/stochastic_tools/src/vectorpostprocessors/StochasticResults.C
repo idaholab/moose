@@ -46,7 +46,6 @@ StochasticResults::initialize()
 VectorPostprocessorValue &
 StochasticResults::getVectorPostprocessorValueByGroup(unsigned int group)
 {
-  StochasticResults::initialize();
   if (group >= _sample_vectors.size())
     mooseError("The supplied sample index ", group, " does not exist.");
   return *_sample_vectors[group];
