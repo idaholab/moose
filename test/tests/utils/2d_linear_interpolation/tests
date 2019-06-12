@@ -1,8 +1,13 @@
 [Tests]
+  design = 'BilinearInterpolation.md'
+
   [./test]
     type = 'Exodiff'
     input = '2d_linear_interpolation_test.i'
     exodiff = 'out.e'
+
+    requirement = 'The system shall support a piecewise bilinear interpolation object to be constructed from x, y data read from an external file.'
+    issues = '#1405'
   [../]
 
   [./test_internal]
@@ -10,6 +15,9 @@
     input = '2d_linear_interpolation_test_internal.i'
     exodiff = 'out.e'
     prereq = 'test'
+
+    requirement = 'The system shall support a piecewise bilinear interpolation object to be constructed from x, y data.'
+    issues = '#5991'
   [../]
 
   [./data_file_and_xyz_error]
@@ -17,6 +25,9 @@
     input = '2d_linear_interpolation_test_internal.i'
     cli_args = 'Outputs/csv=false Functions/u/data_file=fred.csv'
     expect_err = "In PiecewiseBilinear: Cannot specify 'data_file' and 'x', 'y', or 'z' together"
+
+    requirement = 'The system shall error when a file and data are supplied simultaneously in the PiecewiseBilinear object.'
+    issues = '#5991'
   [../]
 
   [./size_xyz_error]
@@ -24,12 +35,17 @@
     input = '2d_linear_interpolation_test_internal.i'
     cli_args = "Outputs/exodus=false Functions/u/x='0 2 3 4'"
     expect_err = "In PiecewiseBilinear: Size of z should be the size of x times the size of y"
+
+    requirement = 'The system shall error when there is a mismatch in vector lengths in the PiecewiseBilinear object.'
+    issues = '#5991'
   [../]
 
   [./xyz_error]
     type = 'RunException'
     input = 'xyz_error.i'
     expect_err = "In PiecewiseBilinear: 'x' and 'y' and 'z' must be specified if any one is specified"
-  [../]
 
+    requirement = 'The system shall error when there are insufficient parameters supplied for the PiecewiseBilinear object.'
+    issues = '#5991'
+  [../]
 []

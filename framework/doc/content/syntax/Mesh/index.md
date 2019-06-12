@@ -142,3 +142,9 @@ that are currently representing the domain but doesn't include "coarse parents" 
 active during a coarsening step. The difference however is that unique_ids are never reused, but ids +might+ be.
 Generally the id is "good-enough" for almost all use, but if you need guarentees that an element id is never
 recycled (because it might be a key to an important map), you should use unique_id.
+
+## Periodic Node Map
+
+The MooseMesh object has a method for building a map (technically a multimap) of paired periodic nodes in the
+simulation. This map provides a quick lookup of all paired nodes on a periodic boundary. in the 2D and 3D cases
+each corner node will map to 2 or 3 other nodes (respectively).

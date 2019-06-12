@@ -1,17 +1,15 @@
 [Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'high_order_elems.i'
-    exodiff = 'high_order_elems_out.e'
-  [../]
-
   # 2D elements
+  issues = '#4989 #5021'
+  design = 'Mesh/index.md'
 
   [./test_quad4_refine]
     type = 'Exodiff'
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_quad4_refine_out.e'
     cli_args = 'Mesh/uniform_refine=1 Mesh/elem_type=QUAD4 Outputs/file_base=high_order_elems_quad4_refine_out'
+
+    requirement = 'The system shall support refinement of QUAD4 mesh elements.'
   [../]
 
   [./test_quad8_refine]
@@ -19,6 +17,8 @@
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_quad8_refine_out.e'
     cli_args = 'Mesh/uniform_refine=1 Mesh/elem_type=QUAD8 Variables/u/order=SECOND Outputs/file_base=high_order_elems_quad8_refine_out'
+
+    requirement = 'The system shall support refinement of QUAD8 mesh elements.'
   [../]
 
   [./test_quad9_refine]
@@ -26,6 +26,8 @@
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_quad9_refine_out.e'
     cli_args = 'Mesh/uniform_refine=1 Mesh/elem_type=QUAD9 Variables/u/order=SECOND Outputs/file_base=high_order_elems_quad9_refine_out'
+
+    requirement = 'The system shall support refinement of QUAD9 mesh elements.'
   [../]
 
   [./test_tri3_refine]
@@ -33,6 +35,8 @@
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_tri3_refine_out.e'
     cli_args = 'Mesh/uniform_refine=1 Mesh/elem_type=TRI3 Outputs/file_base=high_order_elems_tri3_refine_out'
+
+    requirement = 'The system shall support refinement of TRI3 mesh elements.'
   [../]
 
   [./test_tri6_refine]
@@ -40,6 +44,8 @@
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_tri6_refine_out.e'
     cli_args = 'Mesh/uniform_refine=1 Mesh/elem_type=TRI6 Variables/u/order=SECOND Outputs/file_base=high_order_elems_tri6_refine_out'
+
+    requirement = 'The system shall support refinement of TRI6 mesh elements.'
   [../]
 
   # 3D elements
@@ -49,6 +55,8 @@
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_hex8_refine_out.e'
     cli_args = 'Mesh/uniform_refine=1 Mesh/elem_type=HEX8 Mesh/dim=3 Mesh/nx=2 Mesh/ny=2 Mesh/nz=2 Outputs/file_base=high_order_elems_hex8_refine_out'
+
+    requirement = 'The system shall support refinement of HEX8 mesh elements.'
   [../]
 
   [./test_hex20_refine]
@@ -56,6 +64,8 @@
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_hex20_refine_out.e'
     cli_args = 'Mesh/uniform_refine=1 Mesh/elem_type=HEX20 Variables/u/order=SECOND Mesh/dim=3 Mesh/nx=2 Mesh/ny=2 Mesh/nz=2 Outputs/file_base=high_order_elems_hex20_refine_out'
+
+    requirement = 'The system shall support refinement of HEX20 mesh elements.'
   [../]
 
   [./test_hex27_refine]
@@ -63,6 +73,8 @@
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_hex27_refine_out.e'
     cli_args = 'Mesh/uniform_refine=1 Mesh/elem_type=HEX27 Variables/u/order=SECOND Mesh/dim=3 Mesh/nx=2 Mesh/ny=2 Mesh/nz=2 Outputs/file_base=high_order_elems_hex27_refine_out'
+
+    requirement = 'The system shall support refinement of HEX27 mesh elements.'
   [../]
 
   [./test_tet4_refine]
@@ -70,6 +82,8 @@
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_tet4_refine_out.e'
     cli_args = 'Mesh/uniform_refine=1 Mesh/elem_type=TET4 Mesh/dim=3 Mesh/nx=2 Mesh/ny=2 Mesh/nz=2 Outputs/file_base=high_order_elems_tet4_refine_out'
+
+    requirement = 'The system shall support refinement of TET4 mesh elements.'
   [../]
 
   [./test_tet10_refine]
@@ -77,6 +91,8 @@
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_tet10_refine_out.e'
     cli_args = 'Mesh/uniform_refine=1 Mesh/elem_type=TET10 Variables/u/order=SECOND Mesh/dim=3 Mesh/nx=1 Mesh/ny=1 Mesh/nz=1 Outputs/file_base=high_order_elems_tet10_refine_out'
+
+    requirement = 'The system shall support refinement of TET10 mesh elements.'
   [../]
 
   [./test_prism6_refine]
@@ -84,6 +100,8 @@
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_prism6_refine_out.e'
     cli_args = 'Mesh/uniform_refine=1 Mesh/elem_type=PRISM6 Mesh/dim=3 Mesh/nx=2 Mesh/ny=2 Mesh/nz=2 Outputs/file_base=high_order_elems_prism6_refine_out'
+
+    requirement = 'The system shall support refinement of PRISM6 mesh elements.'
   [../]
 
   [./test_prism15_refine]
@@ -91,6 +109,8 @@
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_prism15_refine_out.e'
     cli_args = 'Mesh/uniform_refine=1 Mesh/elem_type=PRISM15 Variables/u/order=SECOND Mesh/dim=3 Mesh/nx=2 Mesh/ny=2 Mesh/nz=2 Outputs/file_base=high_order_elems_prism15_refine_out'
+
+    requirement = 'The system shall support refinement of PRISM15 mesh elements.'
   [../]
 
   # Note: Paraview (as of version 4.1.0) does not correctly display Prism18 elements
@@ -99,6 +119,8 @@
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_prism18_refine_out.e'
     cli_args = 'Mesh/uniform_refine=1 Mesh/elem_type=PRISM18 Variables/u/order=SECOND Mesh/dim=3 Mesh/nx=2 Mesh/ny=2 Mesh/nz=2 Outputs/file_base=high_order_elems_prism18_refine_out'
+
+    requirement = 'The system shall support refinement of PRISM18 mesh elements.'
   [../]
 
   # Libmesh (still!) does not support uniform or adaptive refinement of pyramids
@@ -107,6 +129,8 @@
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_pyramid5_out.e'
     cli_args = 'Mesh/elem_type=PYRAMID5 Mesh/dim=3 Mesh/nx=2 Mesh/ny=2 Mesh/nz=2 Outputs/file_base=high_order_elems_pyramid5_out'
+
+    requirement = 'The system shall support refinement of PYRAMID5 mesh elements.'
   [../]
 
   # Libmesh (still!) does not support uniform or adaptive refinement of pyramids
@@ -116,6 +140,8 @@
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_pyramid13_out.e'
     cli_args = 'Mesh/elem_type=PYRAMID13 Variables/u/order=SECOND Mesh/dim=3 Mesh/nx=2 Mesh/ny=2 Mesh/nz=2 Outputs/file_base=high_order_elems_pyramid13_out'
+
+    requirement = 'The system shall support refinement of PYRAMID13 mesh elements.'
   [../]
 
   # Libmesh (still!) does not support uniform or adaptive refinement of pyramids
@@ -125,6 +151,8 @@
     input = 'high_order_elems.i'
     exodiff = 'high_order_elems_pyramid14_out.e'
     cli_args = 'Mesh/elem_type=PYRAMID14 Variables/u/order=SECOND Mesh/dim=3 Mesh/nx=2 Mesh/ny=2 Mesh/nz=2 Outputs/file_base=high_order_elems_pyramid14_out'
+
+    requirement = 'The system shall support refinement of PYRAMID14 mesh elements.'
   [../]
 
 []

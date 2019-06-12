@@ -4,5 +4,9 @@
     input = 'concentric_circle_mesh.i'
     exodiff = 'concentric_circle_mesh_out.e'
     mesh_mode = REPLICATED
+
+    requirement = 'The system shall generate a quadrilateral mesh consisting of concentric circles.'
+    issues = '#11656'
+    design = 'ConcentricCircleMesh.md'
   [../]
 []

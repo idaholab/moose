@@ -1,16 +1,21 @@
 [Tests]
+   design = "Mesh/index.md"
   [./test_names]
     type = 'Exodiff'
     input = 'named_entities_test.i'
     exodiff = 'named_entities_test_out.e'
-    max_parallel = 1
+
+    requirement = "The system shall support interchangeable use of integer and string identifiers for mesh entities."
+    issues = "#979"
   [../]
 
   [./test_names_xda]
     type = 'Exodiff'
     input = 'named_entities_test_xda.i'
     exodiff = 'named_entities_test_xda_out.e'
-    max_parallel = 1
+
+    requirement = "The system shall support interchangeable use of integer and string identifiers for mesh entities read from the XDA format."
+    issues = "#1055"
   [../]
 
   [./test_periodic_names]
@@ -20,11 +25,17 @@
     group = 'periodic'
     abs_zero = 1e-6
     rel_err = 1e-5
+
+    requirement = "The system shall support interchangeable use of integer and string identifiers within the BCs/Periodic block."
+    issues = "#979"
   [../]
 
   [./on_the_fly_test]
     type = 'Exodiff'
     input = 'name_on_the_fly.i'
     exodiff = 'name_on_the_fly_out.e'
+
+    requirement = "The system shall support the ability to assign and use string names to mesh entities during the simulation startup."
+    issues = "#979"
   [../]
 []

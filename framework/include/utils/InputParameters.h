@@ -613,6 +613,7 @@ public:
    */
   bool hasDefaultPostprocessorValue(const std::string & name) const;
 
+  // BEGIN APPLY PARAMETER METHODS
   /**
    * Method for applying common parameters
    * @param common The set of parameters to apply to the parameters stored in this object
@@ -668,6 +669,7 @@ public:
   void applyParameter(const InputParameters & common,
                       const std::string & common_name,
                       bool allow_private = false);
+  // END APPLY PARAMETER METHODS
 
   /**
    * Apply properties of a single coupled variable in common, to a single coupled variable stored in

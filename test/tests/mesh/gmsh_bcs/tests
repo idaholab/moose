@@ -3,5 +3,9 @@
     type = 'Exodiff'
     input = 'gmsh_bc_test.i'
     exodiff = 'gmsh_bc_test_out.e'
+
+    requirement = 'The system shall read GMesh (.msh) format file meshes containing multiple boundaries.'
+    issues = '#1402'
+    design = 'FileMesh.md'
   [../]
 []
