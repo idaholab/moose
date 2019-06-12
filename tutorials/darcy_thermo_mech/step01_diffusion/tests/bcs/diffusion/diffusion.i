@@ -8,31 +8,31 @@
 []
 
 [Variables]
-  [./pressure]
+  [pressure]
     #Adds a Linear Lagrange variable by default
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion # A Laplacian operator
     variable = pressure # Operate on the "pressure" variable from above
-  [../]
+  []
 []
 
 [BCs]
-  [./inlet]
+  [inlet]
     type = DirichletBC # Simple u=value BC
     variable = pressure
     boundary = left # Name of a sideset in the mesh
     value = 4000 # (Pa) From Figure 2 from paper.  First dot for 1mm spheres.
-  [../]
-  [./outlet]
+  []
+  [outlet]
     type = DirichletBC
     variable = pressure
     boundary = right
     value = 0 # (Pa) Gives the correct pressure drop from Figure 2 for 1mm spheres
-  [../]
+  []
 []
 
 [Problem]

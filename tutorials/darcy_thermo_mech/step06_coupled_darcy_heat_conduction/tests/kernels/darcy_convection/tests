@@ -1,7 +1,7 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'darcy_convection.i'
     exodiff = 'darcy_convection_out.e'
-  [../]
+  []
 []

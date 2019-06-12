@@ -8,52 +8,53 @@
 []
 
 [Variables]
-  [./temperature]
+  [temperature]
     initial_condition = 300 # Start at room temperature
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./pressure]
+  [pressure]
     initial_condition = 10000
-  [../]
+  []
 []
 
 [Kernels]
-  [./heat_conduction]
-    type = HeatConduction
+  [heat_conduction]
+    type = ADHeatConduction
     variable = temperature
-  [../]
-  [./heat_conduction_time_derivative]
-    type = HeatCapacityConductionTimeDerivative
+  []
+  [heat_conduction_time_derivative]
+    type = ADHeatConductionTimeDerivative
     variable = temperature
-  [../]
-  [./heat_convection]
+  []
+  [heat_convection]
     type = DarcyConvection
     variable = temperature
-    darcy_pressure = pressure
-  [../]
+    pressure = pressure
+  []
 []
 
 [BCs]
-  [./inlet_temperature]
+  [inlet_temperature]
     type = DirichletBC
     variable = temperature
     boundary = left
-    value = 350 # (C)
-  [../]
-  [./outlet_temperature]
+    value = 350
+  []
+  [outlet_temperature]
     type = HeatConductionOutflow
     variable = temperature
     boundary = right
-  [../]
+  []
 []
 
 [Materials]
-  [./column]
+  [column]
     type = PackedColumn
-    sphere_radius = 1
-  [../]
+    radius = 1
+    temperature = temperature
+  []
 []
 
 [Problem]

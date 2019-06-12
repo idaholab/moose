@@ -1,6 +1,6 @@
 [Tests]
-  [./step]
+  [step]
     type = RunApp
     input = 'step1.i'
-  [../]
+  []
 []

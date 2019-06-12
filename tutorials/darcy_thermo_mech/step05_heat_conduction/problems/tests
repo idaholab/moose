@@ -1,14 +1,14 @@
 [Tests]
-  [./step_a]
+  [step_a]
     type = RunApp
     input = 'step5a_steady.i'
-  [../]
-  [./step_b]
+  []
+  [step_b]
     type = RunApp
     input = 'step5b_transient.i'
-  [../]
-  [./step_c]
+  []
+  [step_c]
     type = RunApp
     input = 'step5c_outflow.i'
-  [../]
+  []
 []

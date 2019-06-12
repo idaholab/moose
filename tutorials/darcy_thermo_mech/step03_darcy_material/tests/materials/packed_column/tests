@@ -1,7 +1,7 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'packed_column.i'
     exodiff = 'packed_column_out.e'
-  [../]
+  []
 []

@@ -9,40 +9,35 @@
 
 #pragma once
 
-// Including the "Diffusion" Kernel here so we can extend it
-#include "Diffusion.h"
+// Including the "ADDiffusion" Kernel so it can be extended
+#include "ADDiffusion.h"
 
+// Forward declare the class being created and the validParams function
+template <ComputeStage>
 class DarcyPressure;
 
-template <>
-InputParameters validParams<DarcyPressure>();
+declareADValidParams(DarcyPressure);
 
 /**
  * Computes the residual contribution: K / mu * grad_u * grad_phi.
  *
- * We are inheriting from Diffusion instead of from Kernel because the
- * grad_u * grad_phi is already coded in there and all we need to do
- * is specialize that calculation by multiplying by K / mu.
+ * We are inheriting from ADDiffusion instead of from ADKernel because
+ * the grad_u * grad_phi is already coded and all that is
+ * needed is to specialize that calculation by multiplying by K / mu.
  */
-class DarcyPressure : public Diffusion
+template <ComputeStage compute_stage>
+class DarcyPressure : public ADDiffusion<compute_stage>
 {
 public:
   DarcyPressure(const InputParameters & parameters);
 
 protected:
-  /**
-   * Kernels _must_ override computeQpResidual()
-   */
-  virtual Real computeQpResidual() override;
+  /// ADKernelGrad objects must override precomputeQpResidual
+  virtual ADVectorResidual precomputeQpResidual() override;
 
-  /**
-   * This is optional (but recommended!)
-   */
-  virtual Real computeQpJacobian() override;
-
-  /// These references will be set by the initialization list so that
-  /// values can be pulled from the Material system.
+  /// References to be set from Material system
   const MaterialProperty<Real> & _permeability;
-  const MaterialProperty<Real> & _viscosity;
-};
+  const ADMaterialProperty(Real) & _viscosity;
 
+  usingKernelGradMembers;
+};

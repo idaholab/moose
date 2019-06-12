@@ -1,22 +1,22 @@
 [Tests]
-  [./step_a]
+  [step_a]
     type = RunApp
     input = 'step7a_coarse.i'
     cli_args = Executioner/num_steps=1
-  [../]
-  [./step_b]
+  []
+  [step_b]
     type = RunApp
     input = 'step7b_fine.i'
     cli_args = Executioner/num_steps=1
-  [../]
-  [./step_c]
+  []
+  [step_c]
     type = RunApp
     input = 'step7c_adapt.i'
     cli_args = Executioner/num_steps=1
-  [../]
-  [./step_d]
+  []
+  [step_d]
     type = RunApp
     input = 'step7d_adapt_blocks.i'
     cli_args = Executioner/num_steps=1
-  [../]
+  []
 []

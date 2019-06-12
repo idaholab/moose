@@ -1,7 +1,7 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'darcy_pressure.i'
     exodiff = 'darcy_pressure_out.e'
-  [../]
+  []
 []

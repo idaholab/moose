@@ -9,32 +9,22 @@
 
 #include "HeatConductionOutflow.h"
 
-registerMooseObject("DarcyThermoMechApp", HeatConductionOutflow);
+registerADMooseObject("DarcyThermoMechApp", HeatConductionOutflow);
 
-template <>
-InputParameters
-validParams<HeatConductionOutflow>()
-{
-  InputParameters params = validParams<IntegratedBC>();
-  return params;
-}
+defineADValidParams(HeatConductionOutflow,
+                    ADIntegratedBC,
+                    params.addClassDescription("Compute the outflow boundary condition."););
 
-HeatConductionOutflow::HeatConductionOutflow(const InputParameters & parameters)
-  : IntegratedBC(parameters),
-    // IntegratedBCs can retrieve material properties!
-    _thermal_conductivity(getMaterialProperty<Real>("thermal_conductivity"))
+template <ComputeStage compute_stage>
+HeatConductionOutflow<compute_stage>::HeatConductionOutflow(const InputParameters & parameters)
+  : ADIntegratedBC<compute_stage>(parameters),
+    _thermal_conductivity(adGetADMaterialProperty<Real>("thermal_conductivity"))
 {
 }
 
-Real
-HeatConductionOutflow::computeQpResidual()
+template <ComputeStage compute_stage>
+ADResidual
+HeatConductionOutflow<compute_stage>::computeQpResidual()
 {
   return -_test[_i][_qp] * _thermal_conductivity[_qp] * _grad_u[_qp] * _normals[_qp];
-}
-
-Real
-HeatConductionOutflow::computeQpJacobian()
-{
-  // Derivative of the residual with respect to "u"
-  return -_test[_i][_qp] * _thermal_conductivity[_qp] * _grad_phi[_j][_qp] * _normals[_qp];
 }

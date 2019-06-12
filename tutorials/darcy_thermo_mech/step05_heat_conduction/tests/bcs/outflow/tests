@@ -1,7 +1,7 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'outflow.i'
     exodiff = 'outflow_out.e'
-  [../]
+  []
 []

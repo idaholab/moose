@@ -9,42 +9,27 @@
 
 #include "DarcyPressure.h"
 
-registerMooseObject("DarcyThermoMechApp", DarcyPressure);
+registerADMooseObject("DarcyThermoMechApp", DarcyPressure);
 
-template <>
-InputParameters
-validParams<DarcyPressure>()
-{
-  // Start with the parameters from our parent
-  InputParameters params = validParams<Diffusion>();
+defineADValidParams(
+    DarcyPressure,
+    ADDiffusion,
+    params.addClassDescription("Compute the diffusion term for Darcy pressure ($p$) equation: "
+                               "-\\nabla \\cdot \\frac{\\mathbf{K}}{\\mu} \\nabla p = 0"););
 
-  // No parameters are necessary here because we're going to get
-  // permeability and viscosity from the Material
-  // so we just return params...
-  return params;
-}
-
-DarcyPressure::DarcyPressure(const InputParameters & parameters)
-  : Diffusion(parameters),
-
-    // Get the permeability and viscosity from the Material system
-    // This returns a MaterialProperty<Real> reference that we store
-    // in the class and then index into in computeQpResidual/Jacobian....
-    _permeability(getMaterialProperty<Real>("permeability")),
-    _viscosity(getMaterialProperty<Real>("viscosity"))
+template <ComputeStage compute_stage>
+DarcyPressure<compute_stage>::DarcyPressure(const InputParameters & parameters)
+  : ADDiffusion<compute_stage>(parameters),
+    _permeability(adGetMaterialProperty<Real>(
+        "permeability")), //#define adGetMaterialProperty this->template getMaterialProperty
+    _viscosity(adGetADMaterialProperty<Real>("viscosity"))
 {
 }
 
-Real
-DarcyPressure::computeQpResidual()
+template <ComputeStage compute_stage>
+ADVectorResidual
+DarcyPressure<compute_stage>::precomputeQpResidual()
 {
-  // Use the MaterialProperty references we stored earlier
-  return (_permeability[_qp] / _viscosity[_qp]) * Diffusion::computeQpResidual();
-}
-
-Real
-DarcyPressure::computeQpJacobian()
-{
-  // Use the MaterialProperty references we stored earlier
-  return (_permeability[_qp] / _viscosity[_qp]) * Diffusion::computeQpJacobian();
+  return (_permeability[_qp] / _viscosity[_qp]) *
+         ADDiffusion<compute_stage>::precomputeQpResidual();
 }

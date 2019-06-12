@@ -1,13 +1,13 @@
 [Tests]
-  [./default]
+  [default]
     type = 'Exodiff'
     input = 'corrosion.i'
     exodiff = 'corrosion_out.e-s005'
-  [../]
-  [./temp_dep]
+  []
+  [temp_dep]
     type = 'Exodiff'
     input = 'corrosion.i'
     cli_args = 'AuxKernels/corrosion/temperature=350 Outputs/file_base=corrosion_temp_dep'
     exodiff = 'corrosion_temp_dep.e-s005'
-  [../]
+  []
 []

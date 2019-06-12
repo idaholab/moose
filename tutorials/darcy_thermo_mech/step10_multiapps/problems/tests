@@ -1,13 +1,13 @@
 [Tests]
-  [./step_a]
+  [step_a]
     type = RunApp
     input = 'step10.i'
     cli_args = Executioner/num_steps=2
     min_parallel = 3
-  [../]
-  [./step_b]
+  []
+  [step_b]
     type = RunApp
     input = 'step10_micro.i'
     cli_args = Executioner/num_steps=2
-  [../]
+  []
 []

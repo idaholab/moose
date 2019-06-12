@@ -14,73 +14,74 @@
   cycles_per_step = 2
   initial_marker = error_marker
   marker = error_marker
-  [./Indicators]
-    [./phi_jump]
+  [Indicators]
+    [phi_jump]
       type = GradientJumpIndicator
       variable = phi
-    [../]
-  [../]
-  [./Markers]
-    [./error_marker]
+    []
+  []
+  [Markers]
+    [error_marker]
       type = ErrorFractionMarker
       indicator = phi_jump
       refine = 0.9
-    [../]
-  [../]
+    []
+  []
 []
 
 [Variables]
-  [./temperature]
+  [temperature]
     initial_condition = 300
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./phi]
-  [../]
+  [phi]
+  []
 []
 
 [AuxKernels]
-  [./corrosion]
+  [corrosion]
     type = RandomCorrosion
     execute_on = 'timestep_end'
     variable = phi
     reference_temperature = 300
     temperature = 301
-  [../]
+  []
 []
 
 [Kernels]
-  [./heat_conduction]
+  [heat_conduction]
     type = HeatConduction
     variable = temperature
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = PostprocessorDirichletBC
     variable = temperature
     boundary = left
     postprocessor = 301
-  [../]
-  [./right]
+  []
+  [right]
     type = NeumannBC
     variable = temperature
     boundary = right
     value = 100 # prescribed flux
 
-  [../]
+  []
 []
 
 [Materials]
-  [./column]
+  [column]
     type = PackedColumn
-    sphere_radius = 1 # mm
+    temperature = temperature
+    radius = 1 # mm
     phase = phi
     outputs = exodus
     output_properties = porosity
-  [../]
+  []
 []
 
 [Problem]
@@ -88,7 +89,7 @@
 []
 
 [Postprocessors]
-  [./k_eff]
+  [k_eff]
     type = ThermalConductivity
     variable = temperature
     T_hot = 301
@@ -96,7 +97,7 @@
     dx = 0.1
     boundary = right
     length_scale = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -111,18 +112,18 @@
 [Outputs]
   execute_on = 'initial timestep_end'
   exodus = true
-  [./console]
+  [console]
     type = Console
     execute_postprocessors_on = 'timestep_begin timestep_end'
-  [../]
+  []
 []
 
 [ICs]
-  [./close_pack]
+  [close_pack]
     radius = 0.01
     outvalue = 0 # water
     variable = phi
     invalue = 1 #steel
     type = ClosePackIC
-  [../]
+  []
 []
