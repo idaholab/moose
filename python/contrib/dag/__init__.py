@@ -1,6 +1,5 @@
 from copy import copy, deepcopy
 from collections import deque
-import os
 
 try:
     from collections import OrderedDict
