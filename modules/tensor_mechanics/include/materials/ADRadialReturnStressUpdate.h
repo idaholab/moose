@@ -15,8 +15,11 @@
 #define usingRadialReturnStressUpdateMembers                                                       \
   usingStressUpdateBaseMembers;                                                                    \
   usingSingleVariableReturnMappingSolutionMembers;                                                 \
+  using ADRadialReturnStressUpdate<compute_stage>::propagateQpStatefulPropertiesRadialReturn;      \
   using ADRadialReturnStressUpdate<compute_stage>::_three_shear_modulus;                           \
-  using ADRadialReturnStressUpdate<compute_stage>::propagateQpStatefulPropertiesRadialReturn
+  using ADRadialReturnStressUpdate<compute_stage>::_effective_inelastic_strain;                    \
+  using ADRadialReturnStressUpdate<compute_stage>::_effective_inelastic_strain_old;                \
+  using ADRadialReturnStressUpdate<compute_stage>::_max_inelastic_increment
 
 // Forward declarations
 template <ComputeStage>

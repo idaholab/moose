@@ -42,6 +42,9 @@ void
 Damper::checkMinDamping(const Real cur_damping) const
 {
   if (cur_damping < _min_damping)
-    throw MooseException("From damper: '" + name() + "' damping below min_damping: " +
-                         Moose::stringify(cur_damping) + " Cutting timestep.");
+    throw MooseException("From damper: '",
+                         name(),
+                         "' damping below min_damping: ",
+                         cur_damping,
+                         " Cutting timestep.");
 }
