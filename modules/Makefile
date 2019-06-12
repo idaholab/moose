@@ -42,7 +42,7 @@ ifneq ($(MOOSE_COLOR),true)
 endif
 
 .PHONY: builds $(MODULE_DIRS)
-builds: $(MODULE_DIRS)
+builds: all $(MODULE_DIRS)
 
 $(MODULE_DIRS): $(app_LIBS)
 	@$(MAKE) -C $@
