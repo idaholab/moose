@@ -1,10 +1,14 @@
 [Tests]
+  issues = '#4522'
+  design = 'tutorials/darcy_thermo_mech/index.md'
   [step]
     type = RunApp
     input = 'step3.i'
+    requirement = "The Darcy-Thermomechanics tutorial shall include a demonstration of creating material properties."
   []
   [stepb]
     type = RunApp
     input = 'step3b.i'
+    requirement = "The Darcy-Thermomechanics tutorial shall include a demonstration of creating material properties with variable inputs based on a function."
   []
 []

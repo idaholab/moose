@@ -1,1 +1,0 @@
-../../../../../step01_diffusion/tests/bcs/diffusion/gold/diffusion_out.e

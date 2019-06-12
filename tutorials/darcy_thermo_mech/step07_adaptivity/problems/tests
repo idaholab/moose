@@ -1,22 +1,28 @@
 [Tests]
+  issues = '#4522'
+  design = 'tutorials/darcy_thermo_mech/index.md'
   [step_a]
     type = RunApp
     input = 'step7a_coarse.i'
     cli_args = Executioner/num_steps=1
+    requirement = "The Darcy-Thermomechanics tutorial shall include a demonstration of problem on a coarse mesh."
   []
   [step_b]
     type = RunApp
     input = 'step7b_fine.i'
     cli_args = Executioner/num_steps=1
+    requirement = "The Darcy-Thermomechanics tutorial shall include a demonstration of problem on a fine mesh."
   []
   [step_c]
     type = RunApp
     input = 'step7c_adapt.i'
     cli_args = Executioner/num_steps=1
+    requirement = "The Darcy-Thermomechanics tutorial shall include a demonstration of problem using an adaptive mesh."
   []
   [step_d]
     type = RunApp
     input = 'step7d_adapt_blocks.i'
     cli_args = Executioner/num_steps=1
+    requirement = "The Darcy-Thermomechanics tutorial shall include a demonstration of problem using an adaptive mesh with multiple subdomains."
   []
 []

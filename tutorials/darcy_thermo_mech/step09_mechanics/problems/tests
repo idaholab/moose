@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#4522'
+  design = 'tutorials/darcy_thermo_mech/index.md'
   [step]
     type = RunApp
     input = 'step9.i'
     cli_args = Executioner/num_steps=1
+    requirement = "The Darcy-Thermomechanics tutorial shall include a demonstration of solving a solid mechanics problem using stress divergence and thermal expansion."
   []
 []

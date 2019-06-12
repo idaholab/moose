@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#4522'
+  design = 'tutorials/darcy_thermo_mech/index.md'
   [step]
     type = RunApp
     input = 'step8.i'
     cli_args = Executioner/num_steps=1
+    requirement = "The Darcy-Thermomechanics tutorial shall include a step the demonstrates postprocessing tools."
   []
 []

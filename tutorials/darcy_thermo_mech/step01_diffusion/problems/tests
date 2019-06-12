@@ -1,6 +1,9 @@
 [Tests]
+  issues = '#4522'
+  design = 'tutorials/darcy_thermo_mech/index.md'
   [step]
     type = RunApp
     input = 'step1.i'
+    requirement = "The Darcy-Thermomechanics tutorial shall include a step that solves a pure diffusion problem."
   []
 []

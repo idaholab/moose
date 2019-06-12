@@ -1,6 +1,9 @@
 [Tests]
+  issues = '#4522'
+  design = 'tutorials/darcy_thermo_mech/index.md'
   [step]
     type = RunApp
     input = 'step2.i'
+    requirement = "The Darcy-Thermomechanics tutorial shall include an step demonstrating the implementation of a diffusion term for computing pressure using the Darcy equation."
   []
 []

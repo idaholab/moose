@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#4586'
+  issues = '#4522'
   design = 'tutorials/darcy_thermo_mech/index.md'
   [step_a]
     type = RunApp
