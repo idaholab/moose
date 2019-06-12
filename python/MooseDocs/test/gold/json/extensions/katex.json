@@ -128,9 +128,8 @@
                 {
                     "attributes": {
                         "bookmark": "moose-equation-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
-                        "label": "", 
-                        "number": 1, 
-                        "numbered": true, 
+                        "label": null, 
+                        "number": null, 
                         "recursive": true, 
                         "tex": "a^2 + b^2 = c^2"
                     }, 
@@ -148,9 +147,8 @@
                 {
                     "attributes": {
                         "bookmark": "moose-equation-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
-                        "label": "", 
+                        "label": null, 
                         "number": null, 
-                        "numbered": false, 
                         "recursive": true, 
                         "tex": "G_{\\mu\\nu} = 8\\pi G(T_{\\mu\\nu} + \\rho_{\\Lambda} g_{\\mu\\nu})"
                     }, 
@@ -168,9 +166,8 @@
                 {
                     "attributes": {
                         "bookmark": "moose-equation-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
-                        "label": "", 
-                        "number": 2, 
-                        "numbered": true, 
+                        "label": null, 
+                        "number": null, 
                         "recursive": true, 
                         "tex": "t' = t \\frac{1}{\\sqrt{1 - \\frac{\\nu^2}{c^2}}}"
                     }, 
@@ -188,9 +185,8 @@
                 {
                     "attributes": {
                         "bookmark": "moose-equation-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
-                        "label": "", 
-                        "number": 3, 
-                        "numbered": true, 
+                        "label": null, 
+                        "number": null, 
                         "recursive": true, 
                         "tex": "F = ma"
                     }, 
@@ -217,8 +213,7 @@
                     "attributes": {
                         "bookmark": "moose-equation-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
                         "label": "calculus", 
-                        "number": 4, 
-                        "numbered": true, 
+                        "number": 1, 
                         "recursive": true, 
                         "tex": " \\int_a^b f'(x)dx = f(b) - f(a)"
                     }, 
@@ -371,9 +366,8 @@
                 {
                     "attributes": {
                         "bookmark": "moose-equation-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
-                        "label": "", 
-                        "number": 5, 
-                        "numbered": true, 
+                        "label": null, 
+                        "number": null, 
                         "recursive": true, 
                         "tex": "c = \\pm\\sqrt{a^2 + b^2}\\in\\RR"
                     }, 
@@ -391,9 +385,8 @@
                 {
                     "attributes": {
                         "bookmark": "moose-equation-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
-                        "label": "", 
-                        "number": 6, 
-                        "numbered": true, 
+                        "label": null, 
+                        "number": null, 
                         "recursive": true, 
                         "tex": "\\pf{T}{t} = c"
                     }, 
@@ -421,7 +414,7 @@
             "children": [
                 {
                     "attributes": {
-                        "content": "Eq. (4)", 
+                        "content": "Eq. (1)", 
                         "recursive": true
                     }, 
                     "children": [], 
