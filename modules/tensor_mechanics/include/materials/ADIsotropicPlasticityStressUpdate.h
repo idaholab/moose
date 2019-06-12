@@ -57,7 +57,7 @@ protected:
   virtual ADReal computeDerivative(const ADReal & effective_trial_stress,
                                    const ADReal & scalar) override;
   virtual void iterationFinalize(ADReal scalar) override;
-  virtual void computeStressFinalize(const ADRankTwoTensor & plasticStrainIncrement) override;
+  virtual void computeStressFinalize(const ADRankTwoTensor & plastic_strain_increment) override;
 
   virtual void computeYieldStress(const ADRankFourTensor & elasticity_tensor);
   virtual ADReal computeHardeningValue(const ADReal & scalar);

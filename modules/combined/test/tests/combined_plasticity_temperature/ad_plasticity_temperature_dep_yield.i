@@ -166,7 +166,5 @@
 []
 
 [Outputs]
-  [./out]
-    type = Exodus
-  [../]
+  exodus = true
 []

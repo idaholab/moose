@@ -147,9 +147,9 @@ ADIsotropicPlasticityStressUpdate<compute_stage>::iterationFinalize(ADReal scala
 template <ComputeStage compute_stage>
 void
 ADIsotropicPlasticityStressUpdate<compute_stage>::computeStressFinalize(
-    const ADRankTwoTensor & plasticStrainIncrement)
+    const ADRankTwoTensor & plastic_strain_increment)
 {
-  _plastic_strain[_qp] += plasticStrainIncrement;
+  _plastic_strain[_qp] += plastic_strain_increment;
 }
 
 template <ComputeStage compute_stage>
@@ -159,13 +159,13 @@ ADIsotropicPlasticityStressUpdate<compute_stage>::computeHardeningValue(const AD
   if (_hardening_function)
   {
     const Real strain_old = _effective_inelastic_strain_old[_qp];
-    Point p;
+    const Point p;
+    const Real t = strain_old + MetaPhysicL::raw_value(scalar);
 
-    Real t = strain_old + MetaPhysicL::raw_value(scalar);
     return _hardening_function->value(t, p) - _yield_stress;
   }
 
-  return _hardening_variable_old[_qp] + (_hardening_slope * scalar);
+  return _hardening_variable_old[_qp] + _hardening_slope * scalar;
 }
 
 template <>
@@ -175,16 +175,17 @@ ADIsotropicPlasticityStressUpdate<JACOBIAN>::computeHardeningValue(const DualRea
   if (_hardening_function)
   {
     const Real strain_old = _effective_inelastic_strain_old[_qp];
-    Point p;
+    const Point p;
+    const Real t = strain_old + MetaPhysicL::raw_value(scalar);
 
-    Real t = strain_old + MetaPhysicL::raw_value(scalar);
     DualReal hardening_function_value = _hardening_function->value(t, p);
     hardening_function_value.derivatives() =
         (strain_old + scalar).derivatives() * _hardening_function->timeDerivative(t, p);
+
     return hardening_function_value - _yield_stress;
   }
 
-  return _hardening_variable_old[_qp] + (_hardening_slope * scalar);
+  return _hardening_variable_old[_qp] + _hardening_slope * scalar;
 }
 
 template <ComputeStage compute_stage>
@@ -195,7 +196,7 @@ ADIsotropicPlasticityStressUpdate<compute_stage>::computeHardeningDerivative(
   if (_hardening_function)
   {
     const Real strain_old = _effective_inelastic_strain_old[_qp];
-    Point p; // Always (0,0,0)
+    const Point p; // Always (0,0,0)
 
     return _hardening_function->timeDerivative(strain_old, p);
   }
@@ -210,11 +211,11 @@ ADIsotropicPlasticityStressUpdate<compute_stage>::computeYieldStress(
 {
   if (_yield_stress_function)
   {
-    Point p;
+    const Point p;
     _yield_stress = _yield_stress_function->value(MetaPhysicL::raw_value(_temperature[_qp]), p);
     if (_yield_stress <= 0.0)
-      mooseError("The yield stress must be greater than zero, but during the simulation your yield "
-                 "stress became less than zero.");
+      mooseException(
+          "In ", _name, ": The calculated yield stress (", _yield_stress, ") is less than zero");
   }
 }
 
@@ -225,14 +226,18 @@ ADIsotropicPlasticityStressUpdate<JACOBIAN>::computeYieldStress(
 {
   if (_yield_stress_function)
   {
-    Point p;
+    const Point p;
+
     _yield_stress = _yield_stress_function->value(MetaPhysicL::raw_value(_temperature[_qp]), p);
     _yield_stress.derivatives() =
         _temperature[_qp].derivatives() *
         _yield_stress_function->timeDerivative(MetaPhysicL::raw_value(_temperature[_qp]), p);
 
     if (_yield_stress <= 0.0)
-      mooseError("The yield stress must be greater than zero, but during the simulation your yield "
-                 "stress became less than zero.");
+      mooseException("In ",
+                     _name,
+                     ": The calculated yield stress (",
+                     _yield_stress.value(),
+                     ") is less than zero");
   }
 }
