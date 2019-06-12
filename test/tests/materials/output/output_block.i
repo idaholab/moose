@@ -6,52 +6,52 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.5
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 2
-  [../]
+  []
 []
 
 [Materials]
-  [./block_1]
+  [block_1]
     type = OutputTestMaterial
     block = 1
     output_properties = 'real_property tensor_property'
     outputs = exodus
     variable = u
-  [../]
-  [./block_2]
+  []
+  [block_2]
     type = OutputTestMaterial
     block = 2
     output_properties = 'vector_property tensor_property'
     outputs = exodus
     variable = u
-  [../]
+  []
 []
 
 [Executioner]
