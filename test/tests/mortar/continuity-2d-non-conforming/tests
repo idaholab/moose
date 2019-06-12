@@ -23,5 +23,6 @@
     difference_tol = 1e-7
     mesh_mode = 'REPLICATED'
     requirement = 'The Jacobian for the solution continuity test case shall be perfect'
+    prereq = 'soln-continuity'
   []
 []

@@ -142,7 +142,7 @@
     type = 'RunApp'
     input = 'deprecated_param_test.i'
     expect_out = "The parameter \w+ is deprecated."
-    cli_args = 'Kernels/nan/deprecated_default=1'
+    cli_args = 'Kernels/nan/deprecated_default=1 Outputs/exodus=false'
     no_error_deprecated = true
 
     requirement = 'The system shall report a warning when a deprecated parameter with a default value is explicitly set by the user.'
@@ -153,7 +153,7 @@
     type = 'RunApp'
     input = 'deprecated_param_test.i'
     expect_out = "The parameter \w+ is deprecated."
-    cli_args = 'Kernels/nan/deprecated_no_default=1'
+    cli_args = 'Kernels/nan/deprecated_no_default=1 Outputs/exodus=false'
     no_error_deprecated = true
 
     requirement = 'The system shall report a warning when an optional deprecated parameter is explicitly set by the user.'
