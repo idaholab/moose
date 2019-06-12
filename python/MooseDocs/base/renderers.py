@@ -395,10 +395,9 @@ class RevealRenderer(HTMLRenderer):
     def __init__(self, *args, **kwargs):
         HTMLRenderer.__init__(self, *args, **kwargs)
         self.addCSS('reveal', "contrib/reveal/reveal.css")
-
         self.addCSS('reveal_theme', "contrib/reveal/{}.css".format(self.get('theme')), id_="theme")
+        self.addCSS('reveal_css', "css/reveal_moose.css")
         self.addCSS('prism', "contrib/prism/prism.min.css")
-        self.addCSS('reveal_css', "css/reveal_moose.css", location='>reveal_theme')
 
         self.addJavaScript('reveal', "contrib/reveal/reveal.js")
         self.addJavaScript('prism', "contrib/prism/prism.min.js")

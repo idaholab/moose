@@ -138,7 +138,7 @@ class CodeBlock(components.TokenComponent):
     RE = re.compile(r'(?:\A|\n{2,})^'         # start of string or empty line
                     r'`{3}(?P<settings>.*?)$' # start of code with key=value settings
                     r'(?P<code>.*?)^`{3}'     # code and end of fenced block
-                    r'(?=\n*\Z|\n{2,})',         # end of string or empty line
+                    r'(?=\n*\Z|\n{2,})',      # end of string or empty line
                     flags=re.UNICODE|re.MULTILINE|re.DOTALL)
 
     @staticmethod
@@ -312,7 +312,7 @@ class BreakInline(components.TokenComponent):
         return parent
 
 class LineBreakInline(components.TokenComponent):
-    RE = re.compile(r'(?P<break>\\{2}$)', flags=re.MULTILINE)
+    RE = re.compile(r'(?P<break>\\{2}[\s+$])', flags=re.MULTILINE)
     def createToken(self, parent, info, page):
         LineBreak(parent)
         return parent

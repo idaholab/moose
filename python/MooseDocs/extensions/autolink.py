@@ -11,6 +11,7 @@
 import os
 import re
 import logging
+import anytree
 import MooseDocs
 from MooseDocs import common
 from MooseDocs.base import components
@@ -133,7 +134,14 @@ class RenderLinkBase(components.RenderComponent):
 
         link = core.Link(None, url=url, info=token.info)
         if len(token.children) == 0:
-            head = heading.find_heading(self.translator, desired, bookmark)
+            head = None
+            if desired is page:
+                for n in anytree.PreOrderIter(token.root,
+                                              filter_=lambda n: bookmark == n.get('id', None)):
+                    head = n
+                    break
+            else:
+                head = heading.find_heading(self.translator, desired, bookmark)
 
             if head is not None:
                 head.copyToToken(link)
@@ -150,12 +158,13 @@ class RenderLinkBase(components.RenderComponent):
                                                 args=[latex.Bracket(string=l)])
         # Create optional content
         bookmark = token['bookmark']
+
         if desired is None:
             self._createOptionalContent(parent, token, page)
             return None
 
         url = unicode(desired.relativeDestination(page))
-        head = heading.find_heading(self.translator, desired, bookmark)#
+        head = heading.find_heading(self.translator, desired, bookmark)
 
         if head is None:
             msg = "The linked page ({}) does not contain a heading, so the filename " \

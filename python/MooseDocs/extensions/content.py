@@ -12,9 +12,10 @@ import os
 import uuid
 import collections
 import logging
+import anytree
 import mooseutils
 from MooseDocs.common import exceptions
-from MooseDocs.base import components, LatexRenderer
+from MooseDocs.base import components, renderers, LatexRenderer
 from MooseDocs.tree import pages, tokens, html, latex
 from MooseDocs.extensions import core, command, heading
 
@@ -25,6 +26,7 @@ def make_extension(**kwargs):
 
 ContentToken = tokens.newToken('ContentToken', location=u'', level=None)
 AtoZToken = tokens.newToken('AtoZToken', location=u'', level=None, buttons=bool)
+TableOfContents = tokens.newToken('TableOfContents', levels=list(), columns=1)
 
 LATEX_CONTENTLIST = """
 \\DeclareDocumentCommand{\\ContentItem}{mmm}{#3 (\\texttt{\\small #1})\\dotfill \\pageref{#2}\\\\}
@@ -47,11 +49,17 @@ class ContentExtension(command.CommandExtension):
         self.requires(core, heading, command)
         self.addCommand(reader, ContentCommand())
         self.addCommand(reader, AtoZCommand())
+        self.addCommand(reader, TableOfContentsCommand())
+
         renderer.add('AtoZToken', RenderAtoZ())
         renderer.add('ContentToken', RenderContentToken())
+        renderer.add('TableOfContents', RenderTableOfContents())
 
         if isinstance(renderer, LatexRenderer):
             renderer.addPreamble(LATEX_CONTENTLIST)
+
+        if isinstance(renderer, renderers.HTMLRenderer):
+            renderer.addCSS('content_moose', "css/content_moose.css")
 
     def binContent(self, page, location=None, method=None):
         """
@@ -125,6 +133,22 @@ class AtoZCommand(command.CommandComponent):
     def createToken(self, parent, info, page):
         AtoZToken(parent, level=self.settings['level'], buttons=self.settings['buttons'])
         return parent
+
+class TableOfContentsCommand(command.CommandComponent):
+    COMMAND = 'contents'
+    SUBCOMMAND = 'toc'
+
+    @staticmethod
+    def defaultSettings():
+        settings = command.CommandComponent.defaultSettings()
+        settings['levels'] = ([1], 'Heading level(s) to display.')
+        settings['columns'] = (1, 'The number of columns to display.')
+        return settings
+
+    def createToken(self, parent, info, page):
+        return TableOfContents(parent,
+                               levels=eval(self.settings['levels']),
+                               columns=int(self.settings['columns']))
 
 class RenderContentToken(components.RenderComponent):
 
@@ -223,3 +247,27 @@ class RenderAtoZ(components.RenderComponent):
                         latex.Brace(string=label, escape=False)]
                 latex.Command(parent, 'ContentItem', start='\n', args=args, string=text)
             latex.Command(parent, 'par', start='\n')
+
+class RenderTableOfContents(components.RenderComponent):
+
+    def createHTML(self, parent, token, page):
+        levels = token['levels']
+        toks = []
+        children = token.parent.parent.children
+        index = children.index(token.parent)
+        func = lambda n: n.name == 'Heading' and n['level'] in levels
+        for sibling in children[index+1:]:
+            toks += anytree.search.findall(sibling, filter_=func)
+
+        div = html.Tag(parent, 'div', class_='moose-table-of-contents')
+        div.addStyle('column-count:{}'.format(token['columns']))
+        for tok in toks:
+            id_ = tok['id']
+            bookmark = id_ if id_ else tok.text(u'-').lower()
+            link = core.Link(None, url='#{}'.format(bookmark))
+            tok.copyToToken(link)
+            core.LineBreak(link)
+            self.renderer.render(div, link, page)
+
+    def createLatex(self, parent, token, page):
+        return None
