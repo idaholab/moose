@@ -3167,14 +3167,12 @@ NonlinearSystemBase::computeInitialJacobian(NonlinearImplicitSystem & sys)
     }
 
     // Get the maximum value across processes
-    for (auto & scaling_factor : inverse_scaling_factors)
-    {
-      _communicator.max(scaling_factor);
+    _communicator.max(inverse_scaling_factors);
 
-      // We have to make sure that our scaling values are not zero
+    // We have to make sure that our scaling values are not zero
+    for (auto & scaling_factor : inverse_scaling_factors)
       if (scaling_factor < std::numeric_limits<Real>::epsilon())
         scaling_factor = 1;
-    }
 
     // Now set the scaling factors for the variables
     applyScalingFactors(inverse_scaling_factors);
