@@ -576,9 +576,9 @@ class TestHarness:
         # and only run when running --diag.
         if self.options.testharness_diagnostics:
             checker = RaceChecker.RaceChecker(all_jobs)
-            checker.findRacePartners()
-            # Print the unique racer conditions.  If any are printed, then the error_code needs to be updated.
-            self.error_code = checker.printUniqueRacerSets()
+            if checker.findRacePartners():
+                # Print the unique racer conditions and adjust our error code.
+                self.error_code = checker.printUniqueRacerSets()
 
         # Record the input file name that was used
         self.options.results_storage['INPUT_FILE_NAME'] = self.options.input_file_name
@@ -875,6 +875,9 @@ class TestHarness:
             sys.exit(1)
         if opts.failed_tests and not os.path.exists(self.results_storage):
             print('ERROR: --failed-tests could not detect a previous run')
+            sys.exit(1)
+        if opts.pbs and opts.testharness_diagnostics:
+            print('ERROR: --pbs and --diag (TestHarness Diagnostics) can not be used simultaneously')
             sys.exit(1)
 
         # Flatten input_file_name from ['tests', 'speedtests'] to just tests if none supplied
