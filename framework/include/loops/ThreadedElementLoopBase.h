@@ -29,7 +29,7 @@ public:
 
   virtual ~ThreadedElementLoopBase();
 
-  void operator()(const RangeType & range, bool bypass_threading = false);
+  virtual void operator()(const RangeType & range, bool bypass_threading = false);
 
   /**
    * Called before the element range loop
@@ -322,4 +322,3 @@ void
 ThreadedElementLoopBase<RangeType>::neighborSubdomainChanged()
 {
 }
-

@@ -20,6 +20,7 @@
 #include "MaterialData.h"
 #include "ComputeResidualThread.h"
 #include "ComputeJacobianThread.h"
+#include "ComputeJacobianForScalingThread.h"
 #include "ComputeFullJacobianThread.h"
 #include "ComputeJacobianBlocksThread.h"
 #include "ComputeDiracThread.h"
@@ -2243,6 +2244,25 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
   PARALLEL_TRY
   {
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+    if (_computing_initial_jacobian)
+    {
+      // Only compute Jacobians corresponding to the diagonals of volumetric compute objects because
+      // this typically gives us a good representation of the physics. NodalBCs and Constraints can
+      // introduce dramatically different scales (often order unity). IntegratedBCs and/or
+      // InterfaceKernels may use penalty factors. DGKernels may be ok, but they are almost always
+      // used in conjunction with Kernels
+      ComputeJacobianForScalingThread cj(_fe_problem, tags);
+      Threads::parallel_reduce(elem_range, cj);
+      unsigned int n_threads = libMesh::n_threads();
+      for (unsigned int i = 0; i < n_threads;
+           i++) // Add any Jacobian contributions still hanging around
+        _fe_problem.addCachedJacobian(i);
+
+      closeTaggedMatrices(tags);
+
+      return;
+    }
+
     switch (_fe_problem.coupling())
     {
       case Moose::COUPLING_DIAG:
