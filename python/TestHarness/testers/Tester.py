@@ -192,7 +192,7 @@ class Tester(MooseObject):
         return self.specs['moose_dir']
 
     def getTestDir(self):
-        """ return directory this tester is located """
+        """ return directory in which this tester is located """
         return self.specs['test_dir']
 
     def getMinReportTime(self):

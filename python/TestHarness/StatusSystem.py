@@ -38,10 +38,11 @@ class StatusSystem(object):
       success     exit code 0, passing
       skip        exit code 0, skipped
       silent      exit code 0, skipped and also silent
-      fail        exit code 0x80, an general error
+      fail        exit code 0x80, a general error
       diff        exit code 0x81, an error due to exodiff, csvdiff
       deleted     exit code 0x83, some tests are instructed not to run (never fixable), but when instructed to do so they fail
       error       exit code 0x84, an error caused by the TestHarness itself
+      race        exit code 0x85, an error for when race conditions are detected
       timeout     exit code 0x1, an error caused by a test exceeding it's max_time
       hold        exit code 0, used to identify the state of a test as it moves around in the TestHarness
       queued      exit code 0, used to identify the state of a test as it moves around in the TestHarness
@@ -62,7 +63,8 @@ class StatusSystem(object):
     fail = status(status='FAIL', color='RED', code=0x80)
     diff = status(status='DIFF', color='YELLOW', code=0x81)
     deleted = status(status='DELETED', color='RED', code=0x83)
-    error  = status(status='ERROR', color='RED', code=0x80)
+    error  = status(status='ERROR', color='RED', code=0x84)
+    race = status(status='RACE', color='RED', code=0x85)
     timeout  = status(status='TIMEOUT', color='RED', code=0x1)
 
     # Pending statuses

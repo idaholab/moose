@@ -12,8 +12,10 @@ if sys.version_info[0:2] != (2, 7):
     print("python 2.7 is required to run the test harness")
     sys.exit(1)
 
+import itertools
 import os, re, inspect, errno, copy, json
 import shlex
+import RaceChecker
 
 from socket import gethostname
 from FactorySystem.Factory import Factory
@@ -570,32 +572,41 @@ class TestHarness:
         """ write test results to disc in some fashion the user has requested """
         all_jobs = self.scheduler.retrieveJobs()
 
+        # Gather and print the jobs with race conditions after the jobs are finished
+        # and only run when running --diag.
+        if self.options.pedantic_checks:
+            checker = RaceChecker.RaceChecker(all_jobs)
+            if checker.findRacePartners():
+                # Print the unique racer conditions and adjust our error code.
+                self.error_code = checker.printUniqueRacerSets()
+
         # Record the input file name that was used
         self.options.results_storage['INPUT_FILE_NAME'] = self.options.input_file_name
 
         # Write some useful data to our results_storage
-        for job in all_jobs:
-            # If queueing, do not store silent results in session file
-            if job.isSilent() and self.options.queueing:
-                continue
+        for job_group in all_jobs:
+            for job in job_group:
+                # If queueing, do not store silent results in session file
+                if job.isSilent() and self.options.queueing:
+                    continue
 
-            status, message, message_color, exit_code = job.getJointStatus()
+                status, message, message_color, exit_code = job.getJointStatus()
 
-            # Create empty key based on TestDir, or re-inialize with existing data so we can append to it
-            self.options.results_storage[job.getTestDir()] = self.options.results_storage.get(job.getTestDir(), {})
-            self.options.results_storage[job.getTestDir()][job.getTestName()] = {'NAME'           : job.getTestNameShort(),
-                                                                                 'LONG_NAME'      : job.getTestName(),
-                                                                                 'TIMING'         : job.getTiming(),
-                                                                                 'STATUS'         : status,
-                                                                                 'STATUS_MESSAGE' : message,
-                                                                                 'FAIL'           : job.isFail(),
-                                                                                 'COLOR'          : message_color,
-                                                                                 'CAVEATS'        : list(job.getCaveats()),
-                                                                                 'OUTPUT'         : job.getOutput(),
-                                                                                 'COMMAND'        : job.getCommand()}
+                # Create empty key based on TestDir, or re-inialize with existing data so we can append to it
+                self.options.results_storage[job.getTestDir()] = self.options.results_storage.get(job.getTestDir(), {})
+                self.options.results_storage[job.getTestDir()][job.getTestName()] = {'NAME'           : job.getTestNameShort(),
+                                                                                     'LONG_NAME'      : job.getTestName(),
+                                                                                     'TIMING'         : job.getTiming(),
+                                                                                     'STATUS'         : status,
+                                                                                     'STATUS_MESSAGE' : message,
+                                                                                     'FAIL'           : job.isFail(),
+                                                                                     'COLOR'          : message_color,
+                                                                                     'CAVEATS'        : list(job.getCaveats()),
+                                                                                     'OUTPUT'         : job.getOutput(),
+                                                                                     'COMMAND'        : job.getCommand()}
 
-            # Additional data to store (overwrites any previous matching keys)
-            self.options.results_storage[job.getTestDir()].update(job.getMetaData())
+                # Additional data to store (overwrites any previous matching keys)
+                self.options.results_storage[job.getTestDir()].update(job.getMetaData())
 
         if self.options.output_dir:
             self.results_storage = os.path.join(self.options.output_dir, self.results_storage)
@@ -620,42 +631,44 @@ class TestHarness:
             # Write one file, with verbose information (--file)
             if self.options.file:
                 with open(os.path.join(self.output_dir, self.options.file), 'w') as f:
-                    for job in all_jobs:
-                        # Do not write information about silent tests
-                        if job.isSilent():
-                            continue
+                    for job_group in all_jobs:
+                        for job in job_group:
+                            # Do not write information about silent tests
+                            if job.isSilent():
+                                continue
 
-                        formated_results = util.formatResult( job, self.options, result=job.getOutput(), color=False)
-                        f.write(formated_results + '\n')
+                            formated_results = util.formatResult( job, self.options, result=job.getOutput(), color=False)
+                            f.write(formated_results + '\n')
 
             # Write a separate file for each test with verbose information (--sep-files, --sep-files-ok, --sep-files-fail)
             if ((self.options.ok_files and self.num_passed)
                 or (self.options.fail_files and self.num_failed)):
-                for job in all_jobs:
-                    status, message, message_color, exit_code = job.getJointStatus()
+                for job_group in all_jobs:
+                    for job in job_group:
+                        status, message, message_color, exit_code = job.getJointStatus()
 
-                    if self.options.output_dir:
-                        output_dir = self.options.output_dir
-                    else:
-                        output_dir = job.getTestDir()
+                        if self.options.output_dir:
+                            output_dir = self.options.output_dir
+                        else:
+                            output_dir = job.getTestDir()
 
-                    # Yes, by design test dir will be apart of the output file name
-                    output_file = os.path.join(output_dir, '.'.join([os.path.basename(job.getTestDir()),
-                                                                     job.getTestNameShort(),
-                                                                     status,
-                                                                     'txt']))
+                        # Yes, by design test dir will be apart of the output file name
+                        output_file = os.path.join(output_dir, '.'.join([os.path.basename(job.getTestDir()),
+                                                                         job.getTestNameShort(),
+                                                                         status,
+                                                                         'txt']))
 
-                    formated_results = util.formatResult(job, self.options, result=job.getOutput(), color=False)
+                        formated_results = util.formatResult(job, self.options, result=job.getOutput(), color=False)
 
-                    # Passing tests
-                    if self.options.ok_files and job.isPass():
-                        with open(output_file, 'w') as f:
-                            f.write(formated_results)
+                        # Passing tests
+                        if self.options.ok_files and job.isPass():
+                            with open(output_file, 'w') as f:
+                                f.write(formated_results)
 
-                    # Failing tests
-                    if self.options.fail_files and job.isFail():
-                        with open(output_file, 'w') as f:
-                            f.write(formated_results)
+                        # Failing tests
+                        if self.options.fail_files and job.isFail():
+                            with open(output_file, 'w') as f:
+                                f.write(formated_results)
 
         except IOError:
             print('Permission error while writing results to disc')
@@ -756,7 +769,6 @@ class TestHarness:
         parser.add_argument('--skip-config-checks', action='store_true', dest='skip_config_checks', help='Skip configuration checks (all tests will run regardless of restrictions)')
         parser.add_argument('--parallel', '-p', nargs='?', action='store', type=int, dest='parallel', const=1, help='Number of processors to use when running mpiexec')
         parser.add_argument('--n-threads', nargs=1, action='store', type=int, dest='nthreads', default=1, help='Number of threads to use when running mpiexec')
-        parser.add_argument('-d', action='store_true', dest='debug_harness', help='Turn on Test Harness debugging')
         parser.add_argument('--recover', action='store_true', dest='enable_recover', help='Run a test in recover mode')
         parser.add_argument('--recoversuffix', action='store', type=str, default='cpr', dest='recoversuffix', help='Set the file suffix for recover mode')
         parser.add_argument('--valgrind', action='store_const', dest='valgrind_mode', const='NORMAL', help='Run normal valgrind tests')
@@ -768,6 +780,7 @@ class TestHarness:
         parser.add_argument('--check-input', action='store_true', dest='check_input', help='Run check_input (syntax) tests only')
         parser.add_argument('--no-check-input', action='store_true', dest='no_check_input', help='Do not run check_input (syntax) tests')
         parser.add_argument('--spec-file', action='store', type=str, dest='spec_file', help='Supply a path to the tests spec file to run the tests found therein. Or supply a path to a directory in which the TestHarness will search for tests. You can further alter which tests spec files are found through the use of -i and --re')
+        parser.add_argument('-d', '--pedantic-checks', action='store_true', dest='pedantic_checks', help="Run pedantic checks of the Testers' file writes looking for race conditions.")
 
         # Options that pass straight through to the executable
         parser.add_argument('--parallel-mesh', action='store_true', dest='parallel_mesh', help='Deprecated, use --distributed-mesh instead')
@@ -861,6 +874,9 @@ class TestHarness:
             sys.exit(1)
         if opts.failed_tests and not os.path.exists(self.results_storage):
             print('ERROR: --failed-tests could not detect a previous run')
+            sys.exit(1)
+        if opts.pbs and opts.pedantic_checks:
+            print('ERROR: --pbs and --pedantic-checks  can not be used simultaneously')
             sys.exit(1)
 
         # Flatten input_file_name from ['tests', 'speedtests'] to just tests if none supplied

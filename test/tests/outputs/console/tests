@@ -133,6 +133,7 @@
     type = RunApp
     input = 'moose_console.i'
     expect_out = 'ConsoleMessageKernel::timestepSetup - time = 0\.4; t_step = 4'
+    cli_args = 'Outputs/exodus=false'
 
     requirement = 'The system shall support writing to a buffered console object from every MooseObject-derived object.'
     issues = '#3286'
@@ -142,6 +143,7 @@
     type = RunApp
     input = 'moose_console.i'
     expect_out = 'I am writing from a const method'
+    cli_args = 'Outputs/exodus=false'
 
     requirement = 'The system shall support writing to a buffered console object from const methods in MooseObject-derived objects.'
     issues = '#3286'

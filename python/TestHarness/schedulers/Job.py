@@ -8,8 +8,10 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import re, os, json
+import time
 from timeit import default_timer as clock
 from TestHarness.StatusSystem import StatusSystem
+from TestHarness.FileChecker import FileChecker
 
 
 class Timer(object):
@@ -31,7 +33,7 @@ class Timer(object):
         """ returns the total/cumulative time taken by the timer """
         diffs = [end - start for start, end in zip(self.starts, self.ends)]
         return sum(diffs)
-    def avgerageDur(self):
+    def averageDur(self):
         return self.cumulativeDur() / len(self.starts)
     def nRuns(self):
         return len(self.starts)
@@ -59,6 +61,21 @@ class Job(object):
         self.__slots = None
         self.__meta_data = {}
 
+        # Create a fileChecker object to be able to call filecheck methods
+        self.fileChecker = FileChecker()
+
+        # List of files modified by this job.
+        self.modifiedFiles = []
+
+        # Set of nodes that depend on this node.
+        self.__downstreamNodes = set([])
+
+        # Set of jobs that this job depends on.
+        self.__upstreamNodes = set([])
+
+        # Set of all jobs that this job races with.
+        self.racePartners = set()
+
         # Alternate text we want to print as part of our status instead of the
         # pre-formatted status text (LAUNCHED (pbs) instead of FINISHED for example)
         self.__job_message = ''
@@ -81,6 +98,44 @@ class Job(object):
 
         # Initialize jobs with a holding status
         self.setStatus(self.hold)
+
+    def getUpstreams(self):
+        """ Wrapper method to return a list of all the jobs that need to be run before the given job """
+        return self.__job_dag.getUpstreams(self)
+
+    def getDownstreams(self):
+        """ Wrapper method to return a list of all the jobs that need to be run after the given job """
+        return self.__job_dag.getDownstreams(self)
+
+    def addUpsteamNodes(self, *kwargs):
+        """ Add a job to the list of jobs that are upstream from here """
+        for i in [x for x in kwargs if x]:
+            if type(i) == type([]):
+                self.__upstreamNodes.update(i)
+            else:
+                self.__upstreamNodes.add(i)
+        return self.__upstreamNodes
+
+    def getUpstreamNodes(self):
+        """ Return the list of jobs that are upstream from here """
+        return self.__upstreamNodes
+
+    def addDownsteamNodes(self, *kwargs):
+        """ Add a job to the list of jobs that are downstream from here """
+        for i in [x for x in kwargs if x]:
+            if type(i) == type([]):
+                self.__downstreamNodes.update(i)
+            else:
+                self.__downstreamNodes.add(i)
+        return self.__downstreamNodes
+
+    def removeDownsteamNode(self, node):
+        """ Remove a job from the list of jobs that are downstream from here """
+        return self.__downstreamNodes.remove(node)
+
+    def getDownstreamNodes(self):
+        """ Return the list of jobs that are downstream from here """
+        return self.__downstreamNodes
 
     def getDAG(self):
         """ Return the DAG associated with this tester """
@@ -176,6 +231,11 @@ class Job(object):
         if not self.__tester.shouldExecute():
             return
 
+        if self.options.pedantic_checks:
+            # Before the job does anything, get the times files below it were last modified
+            self.fileChecker.get_all_files(self, self.fileChecker.getOriginalTimes())
+            time.sleep(1)
+
         self.__tester.prepare(self.options)
 
         self.__start_time = clock()
@@ -184,6 +244,11 @@ class Job(object):
         self.__start_time = self.timer.starts[0]
         self.__end_time = self.timer.ends[-1]
         self.__joined_out = self.__tester.joined_out
+
+        if self.options.pedantic_checks:
+            # Check if the files we checked on earlier were modified.
+            self.fileChecker.get_all_files(self, self.fileChecker.getNewTimes())
+            self.modifiedFiles = self.fileChecker.check_changes(self.fileChecker.getOriginalTimes(), self.fileChecker.getNewTimes())
 
     def killProcess(self):
         """ Kill remaining process that may be running """
@@ -284,6 +349,7 @@ class Job(object):
         return (_status == self.finished and self.__tester.isSkip()) \
             or (_status == self.skip and self.isNoStatus()) \
             or (_status == self.skip and self.__tester.isSkip())
+
     def isHold(self):
         return self.getStatus() == self.hold
     def isQueued(self):

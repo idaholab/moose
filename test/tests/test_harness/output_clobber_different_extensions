@@ -1,0 +1,27 @@
+[Tests]
+[./testA]
+  type = RunApp
+  input = output_csv_and_exodus.i
+  cli_args = 'Outputs/file_base=foo'
+[../]
+[./testB]
+  type = RunApp
+  input = output_csv_and_exodus.i
+  cli_args = 'Outputs/file_base=foo'
+  prereq = TestA
+[../]
+[./exo]
+  type = Exodiff
+  input = good.i
+  exodiff = good_exodiff_out.e
+  cli_args = 'Outputs/file_base=foo'
+  prereq = testB
+[../]
+[./csv]
+  type = CSVDiff
+  input = csvdiff_comparison_floor.i
+  csvdiff = csvdiff_comparison_floor_out.csv
+  cli_args = 'Outputs/file_base=foo'
+  prereq = testB
+[../]
+[]
