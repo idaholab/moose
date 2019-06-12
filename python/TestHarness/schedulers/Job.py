@@ -231,7 +231,7 @@ class Job(object):
         if not self.__tester.shouldExecute():
             return
 
-        if self.options.testharness_diagnostics:
+        if self.options.pedantic_checks:
             # Before the job does anything, get the times files below it were last modified
             self.fileChecker.get_all_files(self, self.fileChecker.getOriginalTimes())
             time.sleep(1)
@@ -245,7 +245,7 @@ class Job(object):
         self.__end_time = self.timer.ends[-1]
         self.__joined_out = self.__tester.joined_out
 
-        if self.options.testharness_diagnostics:
+        if self.options.pedantic_checks:
             # Check if the files we checked on earlier were modified.
             self.fileChecker.get_all_files(self, self.fileChecker.getNewTimes())
             self.modifiedFiles = self.fileChecker.check_changes(self.fileChecker.getOriginalTimes(), self.fileChecker.getNewTimes())

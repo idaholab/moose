@@ -297,10 +297,6 @@ def formatResult(job, options, result='', color=True, **kwargs):
     # join printable results in the order in which the user asked
     final_results = ' '.join([formatted_results[x][0] for x in terminal_format if formatted_results[x]])
 
-    # Decorate debuging
-    if options.debug_harness:
-        final_results += ' Start: ' + '%0.3f' % job.getStartTime() + ' End: ' + '%0.3f' % job.getEndTime()
-
     return final_results
 
 ## Color the error messages if the options permit, also do not color in bitten scripts because

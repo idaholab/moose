@@ -39,8 +39,8 @@ class JobDAG(object):
 
     def getJobs(self):
         """ return current job group """
-        # Suppress multiple jobs _if_ we are supposed to be running in serialized mode (--diag)
-        if self.options.testharness_diagnostics:
+        # Suppress multiple jobs _if_ we are supposed to be running in serialized mode (--pedantic-checks)
+        if self.options.pedantic_checks:
             # So the way this works, is that getJobs is only called at the start, or once a job finishes, and only by
             # getJobsAndAdvance (by the RunParallel scheduler). Due to that method already deleting the finished jobs,
             # the only jobs (if any) remaining are on HOLD.
@@ -86,8 +86,8 @@ class JobDAG(object):
             if self._doRaceConditions():
                 self._doSkippedDependencies()
 
-            # Serialize the Jobs if running TestHarness Diagnostics
-            if self.options.testharness_diagnostics:
+            # Serialize the Jobs if running pedantic checks
+            if self.options.pedantic_checks:
                 self._doMakeSerializeDependencies()
 
         return self.__job_dag
@@ -168,9 +168,9 @@ class JobDAG(object):
 
             if not job.getRunnable() or job.isFail() or job.isSkip():
                 job.setStatus(job.skip)
-                if not self.options.testharness_diagnostics:
+                if not self.options.pedantic_checks:
                     dep_jobs.update(self.__job_dag.all_downstreams(job))
-                # If running --diag, we need to use the original downstreams, rather
+                # If running pedantic checks, we need to use the original downstreams, rather
                 # than the downstreams in the current DAG
                 else:
                     dep_jobs.update(job.getDownstreamNodes())
@@ -187,7 +187,7 @@ class JobDAG(object):
                     d_job.setStatus(d_job.skip)
                     d_job.addCaveats('skipped dependency')
 
-                if not self.options.testharness_diagnostics:
+                if not self.options.pedantic_checks:
                     self.__job_dag.delete_edge_if_exists(job, d_job)
                 else:
                     try:

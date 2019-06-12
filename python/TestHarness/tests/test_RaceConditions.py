@@ -18,6 +18,6 @@ class TestHarnessTester(TestHarnessTestCase):
 
         # Check for the words 'Diagnostic analysis' which indicate that race conditions exist
         with self.assertRaises(subprocess.CalledProcessError) as cm:
-            self.runTests('--diag', '-i', 'output_clobber_simple')
+            self.runTests('--pedantic-checks', '-i', 'output_clobber_simple')
         e = cm.exception
         self.assertIn('Diagnostic analysis', e.output)

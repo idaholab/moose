@@ -574,7 +574,7 @@ class TestHarness:
 
         # Gather and print the jobs with race conditions after the jobs are finished
         # and only run when running --diag.
-        if self.options.testharness_diagnostics:
+        if self.options.pedantic_checks:
             checker = RaceChecker.RaceChecker(all_jobs)
             if checker.findRacePartners():
                 # Print the unique racer conditions and adjust our error code.
@@ -769,7 +769,6 @@ class TestHarness:
         parser.add_argument('--skip-config-checks', action='store_true', dest='skip_config_checks', help='Skip configuration checks (all tests will run regardless of restrictions)')
         parser.add_argument('--parallel', '-p', nargs='?', action='store', type=int, dest='parallel', const=1, help='Number of processors to use when running mpiexec')
         parser.add_argument('--n-threads', nargs=1, action='store', type=int, dest='nthreads', default=1, help='Number of threads to use when running mpiexec')
-        parser.add_argument('-d', action='store_true', dest='debug_harness', help='Turn on Test Harness debugging')
         parser.add_argument('--recover', action='store_true', dest='enable_recover', help='Run a test in recover mode')
         parser.add_argument('--recoversuffix', action='store', type=str, default='cpr', dest='recoversuffix', help='Set the file suffix for recover mode')
         parser.add_argument('--valgrind', action='store_const', dest='valgrind_mode', const='NORMAL', help='Run normal valgrind tests')
@@ -781,7 +780,7 @@ class TestHarness:
         parser.add_argument('--check-input', action='store_true', dest='check_input', help='Run check_input (syntax) tests only')
         parser.add_argument('--no-check-input', action='store_true', dest='no_check_input', help='Do not run check_input (syntax) tests')
         parser.add_argument('--spec-file', action='store', type=str, dest='spec_file', help='Supply a path to the tests spec file to run the tests found therein. Or supply a path to a directory in which the TestHarness will search for tests. You can further alter which tests spec files are found through the use of -i and --re')
-        parser.add_argument('--diag', action='store_true', dest='testharness_diagnostics', help='Run TestHarness diagnostics')
+        parser.add_argument('-d', '--pedantic-checks', action='store_true', dest='pedantic_checks', help="Run pedantic checks of the Testers' file writes looking for race conditions.")
 
         # Options that pass straight through to the executable
         parser.add_argument('--parallel-mesh', action='store_true', dest='parallel_mesh', help='Deprecated, use --distributed-mesh instead')
@@ -876,8 +875,8 @@ class TestHarness:
         if opts.failed_tests and not os.path.exists(self.results_storage):
             print('ERROR: --failed-tests could not detect a previous run')
             sys.exit(1)
-        if opts.pbs and opts.testharness_diagnostics:
-            print('ERROR: --pbs and --diag (TestHarness Diagnostics) can not be used simultaneously')
+        if opts.pbs and opts.pedantic_checks:
+            print('ERROR: --pbs and --pedantic-checks  can not be used simultaneously')
             sys.exit(1)
 
         # Flatten input_file_name from ['tests', 'speedtests'] to just tests if none supplied
