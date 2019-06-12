@@ -2243,7 +2243,13 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 
   PARALLEL_TRY
   {
+    // We can compute these up front because we want these included whether we are computing an
+    // ordinary Jacobian or a Jacobian for determining variable scaling factors
+    computeScalarKernelsJacobians(tags);
+
+    // Get our element range for looping over
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+
     if (_computing_initial_jacobian)
     {
       // Only compute Jacobians corresponding to the diagonals of volumetric compute objects because
@@ -2344,8 +2350,6 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
     }
 
     computeDiracContributions(tags, true);
-
-    computeScalarKernelsJacobians(tags);
 
     static bool first = true;
 
@@ -3145,11 +3149,13 @@ NonlinearSystemBase::computeInitialJacobian(NonlinearImplicitSystem & sys)
     // container for repeated access of element global dof indices
     std::vector<dof_id_type> dof_indices;
 
-    // Scaling for field variables
     auto & field_variables = _vars[0].fieldVariables();
-    std::vector<Real> inverse_scaling_factors(field_variables.size(), 0);
+    auto & scalar_variables = _vars[0].scalars();
+
+    std::vector<Real> inverse_scaling_factors(field_variables.size() + scalar_variables.size(), 0);
     auto & dof_map = dofMap();
 
+    // Compute our scaling factors for the spatial field variables
     for (const auto & elem : *mesh().getActiveLocalElementRange())
     {
       for (MooseIndex(field_variables) i = 0; i < field_variables.size(); ++i)
@@ -3164,6 +3170,23 @@ NonlinearSystemBase::computeInitialJacobian(NonlinearImplicitSystem & sys)
             inverse_scaling_factors[i] = std::max(inverse_scaling_factors[i], std::abs(mat_value));
           }
       }
+    }
+
+    auto offset = field_variables.size();
+
+    // Compute scalar factors for scalar variables
+    for (MooseIndex(scalar_variables) i = 0; i < scalar_variables.size(); ++i)
+    {
+      auto & scalar_variable = *scalar_variables[i];
+      dof_map.SCALAR_dof_indices(dof_indices, scalar_variable.number());
+      for (auto dof_index : dof_indices)
+        if (dof_map.local_index(dof_index))
+        {
+          // For now we will use the diagonal for determining scaling
+          auto mat_value = petsc_matrix(dof_index, dof_index);
+          inverse_scaling_factors[offset + i] =
+              std::max(inverse_scaling_factors[offset + i], std::abs(mat_value));
+        }
     }
 
     // Get the maximum value across processes
