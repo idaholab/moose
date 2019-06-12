@@ -140,10 +140,12 @@ void
 NonlinearEigenSystem::initialSetup()
 {
   NonlinearSystemBase::initialSetup();
-
+  // Regular kernels
   addEigenTagToMooseObjects(_kernels);
-
+  // Nodal BCs (we do not care about IBCs)
   addEigenTagToMooseObjects(_nodal_bcs);
+  // Scalar kernels
+  addEigenTagToMooseObjects(_scalar_kernels);
 }
 
 template <typename T>
