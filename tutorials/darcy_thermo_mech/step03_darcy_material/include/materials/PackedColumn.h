@@ -31,16 +31,16 @@ public:
   PackedColumn(const InputParameters & parameters);
 
 protected:
-  /**
-   * Necessary override.  This is where the values of the properties
-   * are computed.
-   */
+  /// Necessary override. This is where the values of the properties are computed.
   virtual void computeQpProperties() override;
 
   /// The radius of the spheres in the column
-  const Real & _sphere_radius;
+  const Function & _radius;
 
-  /// Based on the paper this will
+  /// Value of viscosity from the input file
+  const Real & _input_viscosity;
+
+  /// Compute permeability based on the radius (mm)
   LinearInterpolation _permeability_interpolation;
 
   /// The permeability (K)
@@ -48,10 +48,4 @@ protected:
 
   /// The viscosity of the fluid (mu)
   MaterialProperty<Real> & _viscosity;
-
-  /// Single value to store the interpolated permeability base on
-  /// sphere size.  The _sphere_radius is assumed to be constant, so
-  /// we only have to compute this once.
-  Real _interpolated_permeability;
 };
-

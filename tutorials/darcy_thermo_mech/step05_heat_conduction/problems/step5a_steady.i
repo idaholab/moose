@@ -8,38 +8,38 @@
 []
 
 [Variables]
-  [./temperature]
-  [../]
+  [temperature]
+  []
 []
 
 [Kernels]
-  [./heat_conduction]
+  [heat_conduction]
     type = HeatConduction
     variable = temperature
-  [../]
+  []
 []
 
 [BCs]
-  [./inlet_temperature]
+  [inlet_temperature]
     type = DirichletBC
     variable = temperature
     boundary = left
     value = 350 # (K)
-  [../]
-  [./outlet_temperature]
+  []
+  [outlet_temperature]
     type = DirichletBC
     variable = temperature
     boundary = right
     value = 300 # (K)
-  [../]
+  []
 []
 
 [Materials]
-  [./steel]
+  [steel]
     type = GenericConstantMaterial
     prop_names = thermal_conductivity
     prop_values = 18 # K: (W/m*K) from wikipedia @296K
-  [../]
+  []
 []
 
 [Problem]

@@ -1,1 +1,0 @@
-../../../../step08_postprocessors/tests/bcs/diffusion/diffusion.i

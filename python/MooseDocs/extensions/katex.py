@@ -12,9 +12,8 @@ import re
 import uuid
 import anytree
 from MooseDocs.base import components, renderers
-from MooseDocs.common import exceptions
 from MooseDocs.tree import tokens, html, latex
-from MooseDocs.extensions import core, floats
+from MooseDocs.extensions import command, core, floats
 
 def make_extension(**kwargs):
     """Create an instance of the Extension object."""
@@ -22,19 +21,18 @@ def make_extension(**kwargs):
 
 LatexBlockEquation = tokens.newToken('LatexBlockEquation',
                                      tex=r'',
-                                     label=u'',
+                                     label=None,
                                      number=None,
-                                     numbered=True,
                                      bookmark=None)
 LatexInlineEquation = tokens.newToken('LatexInlineEquation', tex=r'', bookmark=None)
 
-class KatexExtension(components.Extension):
+class KatexExtension(command.CommandExtension):
     """
     Extension object for parsing and rendering LaTeX equations with KaTeX.
     """
     @staticmethod
     def defaultConfig():
-        config = components.Extension.defaultConfig()
+        config = command.CommandExtension.defaultConfig()
         config['prefix'] = ('Eq.', r"The prefix to used when referring to an equation by " \
                                    r"the \\label content.")
         config['macros'] = (None, "Macro definitions to apply to equations.")
@@ -52,6 +50,7 @@ class KatexExtension(components.Extension):
         Add the necessary components for reading and rendering LaTeX.
         """
         self.requires(core, floats)
+        self.addCommand(reader, KatexBlockEquationCommand())
         reader.addInline(KatexBlockEquationComponent(), location='_begin')
         reader.addInline(KatexInlineEquationComponent(), location='_begin')
         renderer.add('LatexBlockEquation', RenderLatexEquation())
@@ -76,7 +75,7 @@ class KatexExtension(components.Extension):
     def postTokenize(self, ast, page, meta, reader):
         labels = set()
         count = 0
-        func = lambda n: (n.name == 'LatexBlockEquation') and n['numbered']
+        func = lambda n: (n.name == 'LatexBlockEquation') and (n['label'] is not None)
         for node in anytree.PreOrderIter(ast, filter_=func):
             count += 1
             node.set('number', count)
@@ -91,6 +90,29 @@ class KatexExtension(components.Extension):
 
         meta.setData('labels', labels)
 
+class KatexBlockEquationCommand(command.CommandComponent):
+    COMMAND = 'equation'
+    SUBCOMMAND = None
+
+    @staticmethod
+    def defaultSettings():
+        settings = command.CommandComponent.defaultSettings()
+        settings['id'] = (None, "The equation label for referencing within text, if provided " \
+                                 "the equation is numbered.")
+        return settings
+
+    def createToken(self, parent, info, page):
+
+        # Extract the TeX
+        tex = info['inline'] if 'inline' in info else info['block']
+        tex = r'{}'.format(tex.strip('\n').replace('\n', ' '))
+
+        # Define a unique equation ID for use by KaTeX
+        eq_id = 'moose-equation-{}'.format(uuid.uuid4())
+
+        # Build the token
+        LatexBlockEquation(parent, tex=tex, bookmark=eq_id, label=self.settings['id'])
+        return parent
 
 class KatexBlockEquationComponent(components.TokenComponent):
     """
@@ -104,6 +126,7 @@ class KatexBlockEquationComponent(components.TokenComponent):
 
     def createToken(self, parent, info, page):
         """Create a LatexBlockEquation token."""
+        # TODO: Deprecate this, auto format is needed first so I can update automatically
 
         # Raw LaTeX appropriate for passing to KaTeX render method
         tex = r'{}'.format(info['equation']).strip('\n').replace('\n', ' ')
@@ -112,17 +135,11 @@ class KatexBlockEquationComponent(components.TokenComponent):
         eq_id = 'moose-equation-{}'.format(uuid.uuid4())
 
         # Build the token
-        is_numbered = not info['cmd'].endswith('*')
-        token = LatexBlockEquation(parent, tex=tex, bookmark=eq_id, numbered=is_numbered)
+        token = LatexBlockEquation(parent, tex=tex, bookmark=eq_id)
 
         # Add a label
         label = self.LABEL_RE.search(info['equation'])
-        if label and not is_numbered:
-            msg = "TeX non-numbered equations (e.g., equations*) may not include a \\label, since" \
-                  "it will not be possible to refer to the equation."
-            raise exceptions.MooseDocsException(msg)
-
-        elif label:
+        if label:
             token.set('label', label.group('id'))
             token.set('tex', token['tex'].replace(label.group().encode('ascii'), ''))
 
@@ -163,7 +180,7 @@ class RenderLatexEquation(components.RenderComponent):
             html.Tag(div, 'span', class_='moose-katex-equation table-cell',
                      id_=token['bookmark'],
                      **token.attributes)
-            if token['numbered']:
+            if token['label'] is not None:
                 num = html.Tag(div, 'span', class_='moose-katex-equation-number')
                 html.String(num, content=u'({})'.format(token['number']))
 

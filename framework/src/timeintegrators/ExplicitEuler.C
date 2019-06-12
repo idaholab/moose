@@ -38,7 +38,7 @@ ExplicitEuler::computeTimeDerivatives()
 {
   if (!_sys.solutionUDot())
     mooseError("ExplicitEuler: Time derivative of solution (`u_dot`) is not stored. Please set "
-               "uDotRequested() to true in FEProblemBase befor requesting `u_dot`.");
+               "uDotRequested() to true in FEProblemBase before requesting `u_dot`.");
 
   NumericVector<Number> & u_dot = *_sys.solutionUDot();
   u_dot = *_solution;

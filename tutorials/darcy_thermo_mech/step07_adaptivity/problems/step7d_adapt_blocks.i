@@ -1,7 +1,7 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 30
+  nx = 40
   ny = 4
   xmax = 0.304 # Length of test chamber
   ymax = 0.0257 # Test chamber radius
@@ -9,119 +9,136 @@
 []
 
 [MeshModifiers]
-  [./bottom]
+  [bottom]
     type = SubdomainBoundingBox
     location = inside
     bottom_left = '0 0 0'
     top_right = '0.304 0.01285 0'
     block_id = 1
-  [../]
+  []
 []
 
 [Variables]
-  [./pressure]
-  [../]
-  [./temperature]
+  [pressure]
+    scaling = 1e11
+  []
+  [temperature]
     initial_condition = 300 # Start at room temperature
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./velocity_x]
+  [velocity_x]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./velocity_y]
+  []
+  [velocity_y]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./velocity_z]
+  []
+  [velocity_z]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
-  [./darcy_pressure]
+  [darcy_pressure]
     type = DarcyPressure
     variable = pressure
-  [../]
-  [./heat_conduction]
-    type = HeatConduction
+  []
+  [heat_conduction]
+    type = ADHeatConduction
     variable = temperature
-  [../]
-  [./heat_conduction_time_derivative]
-    type = HeatCapacityConductionTimeDerivative
+  []
+  [heat_conduction_time_derivative]
+    type = ADHeatConductionTimeDerivative
     variable = temperature
-  [../]
-  [./heat_convection]
+  []
+  [heat_convection]
     type = DarcyConvection
     variable = temperature
-    darcy_pressure = pressure
-  [../]
+    pressure = pressure
+  []
 []
 
 [AuxKernels]
-  [./velocity_x]
+  [velocity_x]
     type = DarcyVelocity
     variable = velocity_x
     component = x
     execute_on = timestep_end
-    darcy_pressure = pressure
-  [../]
-  [./velocity_y]
+    pressure = pressure
+  []
+  [velocity_y]
     type = DarcyVelocity
     variable = velocity_y
     component = y
     execute_on = timestep_end
-    darcy_pressure = pressure
-  [../]
-  [./velocity_z]
+    pressure = pressure
+  []
+  [velocity_z]
     type = DarcyVelocity
     variable = velocity_z
     component = z
     execute_on = timestep_end
-    darcy_pressure = pressure
-  [../]
+    pressure = pressure
+  []
 []
 
 [BCs]
-  [./inlet]
+  [inlet]
     type = DirichletBC
     variable = pressure
     boundary = left
     value = 4000 # (Pa) From Figure 2 from paper.  First data point for 1mm spheres.
-  [../]
-  [./outlet]
+  []
+  [outlet]
     type = DirichletBC
     variable = pressure
     boundary = right
     value = 0 # (Pa) Gives the correct pressure drop from Figure 2 for 1mm spheres
-  [../]
-  [./inlet_temperature]
-    type = DirichletBC
+  []
+  [inlet_temperature]
+    type = FunctionDirichletBC
     variable = temperature
     boundary = left
-    value = 350 # (C)
-  [../]
-  [./outlet_temperature]
-    type = HeatConductionBC
+    function = 'if(t<0,350+50*t,350)'
+  []
+  [outlet_temperature]
+    type = HeatConductionOutflow
     variable = temperature
     boundary = right
-  [../]
+  []
 []
 
 [Materials]
-  [./column_bottom]
+  viscosity_file = data/water_viscosity.csv
+  density_file = data/water_density.csv
+  thermal_conductivity_file = data/water_thermal_conductivity.csv
+  specific_heat_file = data/water_specific_heat.csv
+
+  [column_bottom]
     type = PackedColumn
     block = 1
-    sphere_radius = 1.5
-  [../]
-  [./column_top]
+    radius = 1.15
+    temperature = temperature
+    fluid_viscosity_file = ${viscosity_file}
+    fluid_density_file = ${density_file}
+    fluid_thermal_conductivity_file = ${thermal_conductivity_file}
+    fluid_specific_heat_file = ${specific_heat_file}
+  []
+  [column_top]
     type = PackedColumn
     block = 0
-    sphere_radius = 1
-  [../]
+    radius = 1
+    temperature = temperature
+    porosity = '0.25952 + 0.7*x/0.304'
+    fluid_viscosity_file = ${viscosity_file}
+    fluid_density_file = ${density_file}
+    fluid_thermal_conductivity_file = ${thermal_conductivity_file}
+    fluid_specific_heat_file = ${specific_heat_file}
+  []
 []
 
 [Problem]
@@ -132,44 +149,47 @@
 
 [Executioner]
   type = Transient
-  dt = 0.01
-  solve_type = PJFNK
+  solve_type = NEWTON
+
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
-  end_time = 10
-  [./TimeStepper]
-    type = IterationAdaptiveDT
-    linear_iteration_ratio = 5
-    cutback_factor = 0.4
-    dt = 0.01
-    growth_factor = 1.2
-    optimal_iterations = 4
-  [../]
+
+  end_time = 100
+  dt = 0.25
+  start_time = -1
+
+  steady_state_tolerance = 1e-5
+  steady_state_detection = true
+
+  [TimeStepper]
+    type = FunctionDT
+    function = 'if(t<0,0.1,0.25)'
+  []
 []
 
 [Adaptivity]
   marker = error_frac
   max_h_level = 3
-  [./Indicators]
-    [./temperature_jump]
+  [Indicators]
+    [temperature_jump]
       type = GradientJumpIndicator
       variable = temperature
       scale_by_flux_faces = true
-    [../]
-  [../]
-  [./Markers]
-    [./error_frac]
+    []
+  []
+  [Markers]
+    [error_frac]
       type = ErrorFractionMarker
-      coarsen = 0.1
+      coarsen = 0.025
       indicator = temperature_jump
-      refine = 0.6
-    [../]
-  [../]
+      refine = 0.9
+    []
+  []
 []
 
 [Outputs]
-  [./exodus]
+  [out]
     type = Exodus
     output_material_properties = true
-  [../]
+  []
 []

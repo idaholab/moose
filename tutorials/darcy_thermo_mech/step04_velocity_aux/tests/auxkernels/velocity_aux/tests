@@ -1,7 +1,17 @@
 [Tests]
-  [./test]
+  issues = '#4522'
+  design = 'tutorials/darcy_thermo_mech/index.md'
+  [test]
     type = 'Exodiff'
     input = 'velocity_aux.i'
     exodiff = 'velocity_aux_out.e'
-  [../]
+    requirement = "The Darcy-Thermomechanics tutorial shall include method for computing the velocity based pressure using Darcy equation."
+  []
+  [nodal_error]
+    type = 'RunException'
+    input = 'velocity_aux.i'
+    cli_args = "AuxVariables/velocity_x/order=FIRST AuxVariables/velocity_x/family=LAGRANGE"
+    expect_err = "velocity_x: Nodal variables do not have gradients"
+    requirement = "The Darcy-Thermomechanics tutorial object for computing velocity shall error if computed at nodes."
+  []
 []

@@ -603,7 +603,7 @@
                 }, 
                 {
                     "attributes": {
-                        "content": "\n\n\n\n\n\n\n\n\n#include \"Diffusion.h\"\n\nregisterMooseObject(\"MooseApp\", Diffusion);\n\ntemplate <>\nInputParameters\nvalidParams<Diffusion>()\n{\n  InputParameters params = validParams<Kernel>();\n  params.addClassDescription(\"The Laplacian operator ($-\\\\nabla \\\\cdot \\\\nabla u$), with the weak \"\n                             \"form of $(\\\\nabla \\\\phi_i, \\\\nabla u_h)$.\");\n  return params;\n}\n\nDiffusion::Diffusion(const InputParameters & parameters) : Kernel(parameters) {}\n\nReal\nDiffusion::computeQpResidual()\n{\n  return _grad_u[_qp] * _grad_test[_i][_qp];\n}\n\nReal\nDiffusion::computeQpJacobian()\n{\n  return _grad_phi[_j][_qp] * _grad_test[_i][_qp];\n}\n", 
+                        "content": "\n#include \"Diffusion.h\"\n\nregisterMooseObject(\"MooseApp\", Diffusion);\n\ntemplate <>\nInputParameters\nvalidParams<Diffusion>()\n{\n  InputParameters params = validParams<Kernel>();\n  params.addClassDescription(\"The Laplacian operator ($-\\\\nabla \\\\cdot \\\\nabla u$), with the weak \"\n                             \"form of $(\\\\nabla \\\\phi_i, \\\\nabla u_h)$.\");\n  return params;\n}\n\nDiffusion::Diffusion(const InputParameters & parameters) : Kernel(parameters) {}\n\nReal\nDiffusion::computeQpResidual()\n{\n  return _grad_u[_qp] * _grad_test[_i][_qp];\n}\n\nReal\nDiffusion::computeQpJacobian()\n{\n  return _grad_phi[_j][_qp] * _grad_test[_i][_qp];\n}\n", 
                         "escape": true, 
                         "language": "cpp", 
                         "recursive": true, 

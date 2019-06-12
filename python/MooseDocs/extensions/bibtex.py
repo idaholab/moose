@@ -153,7 +153,7 @@ class BibtexCommand(command.CommandComponent):
 
     def createToken(self, parent, token, page): #pylint: disable=unused-argument
         if self.settings['title']:
-            h = core.Heading(parent, level=self.settings['title-level'])
+            h = core.Heading(parent, level=int(self.settings['title-level']))
             self.reader.tokenize(h, self.settings['title'], page, MooseDocs.INLINE)
         BibtexBibliography(parent, bib_style=self.settings['style'])
         return parent
@@ -249,7 +249,8 @@ class RenderBibtexBibliography(components.RenderComponent):
         formatted_bibliography = style().format_bibliography(self.extension.database, citations)
         html_backend = find_plugin('pybtex.backends', 'html')
 
-        ol = html.Tag(parent, 'ol', class_='moose-bibliogrpahy')
+        div = html.Tag(parent, 'div', class_='moose-bibliography')
+        ol = html.Tag(div, 'ol')
 
         backend = html_backend(encoding='utf-8')
         for entry in formatted_bibliography:

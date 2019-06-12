@@ -35,7 +35,7 @@ validParams<RandomCorrosion>()
                         "Temperature at which corrosion begins, "
                         "the greater the 'temperature' drifts "
                         "from this the greater the amount of "
-                        "corrision locations that occurs.");
+                        "corrosion locations that occurs.");
   params.addParam<PostprocessorName>(
       "temperature",
       274.15,

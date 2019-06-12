@@ -7,77 +7,75 @@
   ymax = 0.0257 # Test chamber radius
 []
 
-[Variables]
-  [./pressure]
-  [../]
+[Variables/pressure]
 []
 
 [AuxVariables]
-  [./velocity_x]
+  [velocity_x]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./velocity_y]
+  []
+  [velocity_y]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./velocity_z]
+  []
+  [velocity_z]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
-  [./darcy_pressure]
+  [darcy_pressure]
     type = DarcyPressure
     variable = pressure
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./velocity_x]
+  [velocity_x]
     type = DarcyVelocity
     variable = velocity_x
     component = x
     execute_on = timestep_end
-    darcy_pressure = pressure
-  [../]
-  [./velocity_y]
+    pressure = pressure
+  []
+  [velocity_y]
     type = DarcyVelocity
     variable = velocity_y
     component = y
     execute_on = timestep_end
-    darcy_pressure = pressure
-  [../]
-  [./velocity_z]
+    pressure = pressure
+  []
+  [velocity_z]
     type = DarcyVelocity
     variable = velocity_z
     component = z
     execute_on = timestep_end
-    darcy_pressure = pressure
-  [../]
+    pressure = pressure
+  []
 []
 
 [BCs]
-  [./inlet]
+  [inlet]
     type = DirichletBC
     variable = pressure
     boundary = left
     value = 4000 # (Pa) From Figure 2 from paper.  First data point for 1mm spheres.
-  [../]
-  [./outlet]
+  []
+  [outlet]
     type = DirichletBC
     variable = pressure
     boundary = right
     value = 0 # (Pa) Gives the correct pressure drop from Figure 2 for 1mm spheres
-  [../]
+  []
 []
 
 [Materials]
-  [./column]
+  [column]
     type = PackedColumn
-    sphere_radius = 1
-  [../]
+    radius = 1
+  []
 []
 
 [Problem]
@@ -89,6 +87,7 @@
 [Executioner]
   type = Steady
   solve_type = PJFNK
+  #nl_rel_tol = 1e-12
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []

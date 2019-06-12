@@ -35,7 +35,7 @@ protected:
   virtual Real computeValue() override;
 
   /// Will hold 0, 1, or 2 corresponding to x, y, or z.
-  int _component;
+  const int _component;
 
   /// The gradient of a coupled variable
   const VariableGradient & _pressure_gradient;
@@ -44,4 +44,3 @@ protected:
   const MaterialProperty<Real> & _permeability;
   const MaterialProperty<Real> & _viscosity;
 };
-

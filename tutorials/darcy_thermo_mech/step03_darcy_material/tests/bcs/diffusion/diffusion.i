@@ -1,1 +1,0 @@
-../../../../step02_darcy_pressure/tests/bcs/diffusion/diffusion.i

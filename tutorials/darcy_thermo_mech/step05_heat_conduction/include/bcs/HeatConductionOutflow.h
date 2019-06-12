@@ -9,12 +9,14 @@
 
 #pragma once
 
-#include "IntegratedBC.h"
+// Include the base class so it can be extended
+#include "ADIntegratedBC.h"
 
+// Forward declare the class being created and the validParams function
+template <ComputeStage>
 class HeatConductionOutflow;
 
-template <>
-InputParameters validParams<HeatConductionOutflow>();
+declareADValidParams(HeatConductionOutflow);
 
 /**
  * An IntegratedBC representing the "No BC" boundary condition for
@@ -29,7 +31,8 @@ InputParameters validParams<HeatConductionOutflow>();
  * boundary condition.", International Journal for Numerical Methods
  * in Fluids, vol. 24, no. 4, 1997, pp. 393-411.
  */
-class HeatConductionOutflow : public IntegratedBC
+template <ComputeStage compute_stage>
+class HeatConductionOutflow : public ADIntegratedBC<compute_stage>
 {
 public:
   HeatConductionOutflow(const InputParameters & parameters);
@@ -38,15 +41,10 @@ protected:
   /**
    * This is called to integrate the residual across the boundary.
    */
-  virtual Real computeQpResidual() override;
-
-  /**
-   * Optional (but recommended!) to compute the derivative of the
-   * residual with respect to _this_ variable.
-   */
-  virtual Real computeQpJacobian() override;
+  virtual ADResidual computeQpResidual() override;
 
   /// Thermal conductivity of the material
-  const MaterialProperty<Real> & _thermal_conductivity;
-};
+  const ADMaterialProperty(Real) & _thermal_conductivity;
 
+  usingIntegratedBCMembers;
+};

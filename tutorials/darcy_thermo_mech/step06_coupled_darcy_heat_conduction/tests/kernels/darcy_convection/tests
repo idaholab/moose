@@ -1,7 +1,10 @@
 [Tests]
-  [./test]
+  issues = '#4522'
+  design = 'tutorials/darcy_thermo_mech/index.md'
+  [test]
     type = 'Exodiff'
     input = 'darcy_convection.i'
     exodiff = 'darcy_convection_out.e'
-  [../]
+    requirement = "The Darcy-Thermomechanics tutorial shall include an implementation of an advection operator coupled to pressure."
+  []
 []

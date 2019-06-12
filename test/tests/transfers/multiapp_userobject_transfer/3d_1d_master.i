@@ -27,43 +27,43 @@
 []
 
 [UserObjects]
-  [./master_uo]
+  [master_uo]
     type = LayeredAverage
     direction = z
     num_layers = 10
     variable = u
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./td]
+  []
+  [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = front
     value = -1
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = back
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -82,7 +82,7 @@
 []
 
 [MultiApps]
-  [./sub_app]
+  [sub_app]
     positions = '0.5 0.5 0.0'
     type = TransientMultiApp
     input_files = 3d_1d_sub.i
@@ -91,24 +91,24 @@
     bounding_box_inflation = 0
     use_displaced_mesh = true
     execute_on = TIMESTEP_END
-  [../]
+  []
 []
 
 [Transfers]
-  [./layered_transfer_to_sub_app]
+  [layered_transfer_to_sub_app]
     type = MultiAppUserObjectTransfer
     direction = to_multiapp
     user_object = master_uo
     variable = sub_app_var
     multi_app = sub_app
     displaced_target_mesh = true
-  [../]
-  [./layered_transfer_from_sub_app]
+  []
+  [layered_transfer_from_sub_app]
     type = MultiAppUserObjectTransfer
     direction = from_multiapp
     user_object = sub_app_uo
     variable = from_sub_app_var
     multi_app = sub_app
     displaced_source_mesh = true
-  [../]
+  []
 []
