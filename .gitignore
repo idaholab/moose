@@ -76,6 +76,8 @@ temp_print_trace.*
 *.tiff
 *.ps
 *.bmp
+*.mp4
+*.webm
 *.ico
 *.html
 *.xyz
