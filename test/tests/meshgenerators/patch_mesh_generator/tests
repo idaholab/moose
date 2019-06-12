@@ -1,0 +1,13 @@
+[Tests]
+  [./patch_mesh_generator_quad4]
+    type = 'Exodiff'
+    input = 'patch_mesh_generator.i'
+    cli_args = '--mesh-only patch_mesh_generator_quad4'
+    exodiff = 'patch_mesh_generator_quad4.e'
+    requirement = 'MOOSE shall be able to create a quad4 patch test mesh.'
+    design = 'meshgenerators/PatchMeshGenerator.md'
+    issues = '#13453'
+    mesh_mode = 'REPLICATED'
+    recover = false
+  [../]
+[]
