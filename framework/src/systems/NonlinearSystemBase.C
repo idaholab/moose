@@ -3146,10 +3146,13 @@ void
 NonlinearSystemBase::computeScalingJacobian(NonlinearImplicitSystem & sys)
 {
 #ifdef LIBMESH_HAVE_PETSC
-  TIME_SECTION(_compute_scaling_jacobian_timer);
 
   if (dynamic_cast<PetscMatrix<Real> *>(sys.matrix))
   {
+    _console << "\nPerforming automatic scaling calculation\n\n";
+
+    TIME_SECTION(_compute_scaling_jacobian_timer);
+
     auto & petsc_matrix = *static_cast<PetscMatrix<Real> *>(sys.matrix);
     _computing_initial_jacobian = true;
     _fe_problem.computeJacobianSys(sys, *_current_solution, *sys.matrix);
