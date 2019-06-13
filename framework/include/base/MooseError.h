@@ -58,13 +58,10 @@
     }                                                                                              \
   } while (0)
 
-#define mooseException(msg)                                                                        \
+#define mooseException(...)                                                                        \
   do                                                                                               \
   {                                                                                                \
-    std::ostringstream _exception_oss_;                                                            \
-    _exception_oss_ << msg;                                                                        \
-                                                                                                   \
-    throw MooseException(_exception_oss_.str());                                                   \
+    throw MooseException(__VA_ARGS__);                                                             \
   } while (0)
 
 #ifdef NDEBUG
@@ -253,4 +250,3 @@ mooseInfo(Args &&... args)
 {
   moose::internal::mooseInfoStream(Moose::out, std::forward<Args>(args)...);
 }
-

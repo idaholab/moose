@@ -29,17 +29,17 @@
 
 [Kernels]
   [heat_conduction]
-    type = HeatConduction
+    type = ADHeatConduction
     variable = temperature
   []
   [heat_conduction_time_derivative]
-    type = HeatCapacityConductionTimeDerivative
+    type = ADHeatConductionTimeDerivative
     variable = temperature
   []
   [heat_convection]
     type = DarcyConvection
     variable = temperature
-    darcy_pressure = pressure
+    pressure = pressure
   []
 []
 
@@ -48,7 +48,7 @@
     type = DirichletBC
     variable = temperature
     boundary = left
-    value = 350 # (C)
+    value = 350
   []
   [outlet_temperature]
     type = HeatConductionOutflow
@@ -60,7 +60,8 @@
 [Materials]
   [column]
     type = PackedColumn
-    sphere_radius = 1
+    radius = 1
+    temperature = 293.15 # 20C
   []
 []
 
@@ -74,7 +75,7 @@
   type = Transient
   num_steps = 300
   dt = 0.1
-  solve_type = PJFNK
+  solve_type = NEWTON
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []

@@ -57,7 +57,6 @@
   [../]
 []
 
-
 [AuxVariables]
   [./stress_yy]
     order = CONSTANT
@@ -76,7 +75,6 @@
     family = MONOMIAL
   [../]
 []
-
 
 [Functions]
   [./top_pull]
@@ -137,7 +135,6 @@
     index = 2
   [../]
 []
-
 
 [BCs]
   [./y_pull_function]
@@ -204,8 +201,6 @@
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   petsc_options = '-snes_ksp_ew'
@@ -213,7 +208,6 @@
   petsc_options_value = '201                hypre    boomeramg      4'
 
   line_search = 'none'
-
 
   l_max_its = 100
   nl_max_its = 100

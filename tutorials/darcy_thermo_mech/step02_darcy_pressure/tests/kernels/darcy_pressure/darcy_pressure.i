@@ -8,31 +8,31 @@
 []
 
 [Variables]
-  [./pressure]
-  [../]
+  [pressure]
+  []
 []
 
 [Kernels]
-  [./darcy_pressure]
+  [darcy_pressure]
     type = DarcyPressure
     variable = pressure
     permeability = 0.8451e-9 # (m^2) 1mm spheres.
-  [../]
+  []
 []
 
 [BCs]
-  [./inlet]
+  [inlet]
     type = DirichletBC
     variable = pressure
     boundary = left
     value = 4000 # (Pa) From Figure 2 from paper.  First dot for 1mm spheres.
-  [../]
-  [./outlet]
+  []
+  [outlet]
     type = DirichletBC
     variable = pressure
     boundary = right
     value = 0 # (Pa) Gives the correct pressure drop from Figure 2 for 1mm spheres
-  [../]
+  []
 []
 
 [Problem]

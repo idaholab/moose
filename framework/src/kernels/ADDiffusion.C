@@ -30,5 +30,4 @@ ADDiffusion<compute_stage>::precomputeQpResidual()
   return _grad_u[_qp];
 }
 
-template class ADDiffusion<RESIDUAL>;
-template class ADDiffusion<JACOBIAN>;
+adBaseClass(ADDiffusion);

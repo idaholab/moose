@@ -117,4 +117,3 @@ protected:
   /// The current gradient of the shape functions
   const typename VariablePhiGradientType<T, compute_stage>::type & _grad_phi;
 };
-

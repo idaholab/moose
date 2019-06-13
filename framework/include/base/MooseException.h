@@ -10,6 +10,7 @@
 #pragma once
 
 #include <exception>
+#include <sstream>
 
 /**
  * Provides a way for users to bail out of the current solve.
@@ -21,6 +22,24 @@ public:
    * @param message The message to display
    */
   MooseException(std::string message) : _message(message) {}
+
+  /**
+   * Set an explicit default constructor to avoid the variadic template constructor
+   * below catch the copy construction case.
+   */
+  MooseException(const MooseException &) = default;
+
+  /**
+   * @param args List of arguments that gets stringified and concatenated to form the message to
+   * display
+   */
+  template <typename... Args>
+  explicit MooseException(Args &&... args)
+  {
+    std::ostringstream ss;
+    streamArguments(ss, args...);
+    _message = ss.str();
+  }
 
   /**
    * For some reason, on GCC 4.6.3, I get 'error: looser throw
@@ -39,6 +58,14 @@ public:
   virtual const char * what() const throw() { return _message.c_str(); }
 
 protected:
+  void streamArguments(std::ostringstream &) {}
+
+  template <typename T, typename... Args>
+  void streamArguments(std::ostringstream & ss, T && val, Args &&... args)
+  {
+    ss << val;
+    streamArguments(ss, std::forward<Args>(args)...);
+  }
+
   std::string _message;
 };
-

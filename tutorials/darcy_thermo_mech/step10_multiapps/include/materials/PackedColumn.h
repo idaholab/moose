@@ -9,23 +9,24 @@
 
 #pragma once
 
-#include "Material.h"
+#include "ADMaterial.h"
 
 // A helper class from MOOSE that linear interpolates x,y data
 #include "LinearInterpolation.h"
 
+template <ComputeStage>
 class PackedColumn;
 
-template <>
-InputParameters validParams<PackedColumn>();
+declareADValidParams(PackedColumn);
 
 /**
- * Material objects inherit from Material and override computeQpProperties.
- *
- * Their job is to declare properties for use by other objects in the
- * calculation such as Kernels and BoundaryConditions.
+ * Material-derived objects override the computeQpProperties()
+ * function.  They must declare and compute material properties for
+ * use by other objects in the calculation such as Kernels and
+ * BoundaryConditions.
  */
-class PackedColumn : public Material
+template <ComputeStage compute_stage>
+class PackedColumn : public ADMaterial<compute_stage>
 {
 public:
   PackedColumn(const InputParameters & parameters);
@@ -37,11 +38,57 @@ protected:
    */
   virtual void computeQpProperties() override;
 
-  /// The radius of the spheres in the column
-  const Real & _sphere_radius;
+  /**
+   * Helper function for reading CSV data for use in an interpolator object.
+   */
+  bool initInputData(const std::string & param_name, ADLinearInterpolation & interp);
 
-  /// Based on the paper this will
+  /// The radius of the spheres in the column
+  const Function & _input_radius;
+
+  /// The input porosity
+  const Function & _input_porosity;
+
+  /// Temperature
+  const ADVariableValue & _temperature;
+
+  /// Compute permeability based on the radius (mm)
   LinearInterpolation _permeability_interpolation;
+
+  /// Fluid viscosity
+  bool _use_fluid_mu_interp;
+  const Real & _fluid_mu;
+  ADLinearInterpolation _fluid_mu_interpolation;
+
+  /// Fluid thermal conductivity
+  bool _use_fluid_k_interp = false;
+  const Real & _fluid_k;
+  ADLinearInterpolation _fluid_k_interpolation;
+
+  /// Fluid density
+  bool _use_fluid_rho_interp = false;
+  const Real & _fluid_rho;
+  ADLinearInterpolation _fluid_rho_interpolation;
+
+  /// Fluid specific heat
+  bool _use_fluid_cp_interp;
+  const Real & _fluid_cp;
+  ADLinearInterpolation _fluid_cp_interpolation;
+
+  /// Solid thermal conductivity
+  bool _use_solid_k_interp = false;
+  const Real & _solid_k;
+  ADLinearInterpolation _solid_k_interpolation;
+
+  /// Solid density
+  bool _use_solid_rho_interp = false;
+  const Real & _solid_rho;
+  ADLinearInterpolation _solid_rho_interpolation;
+
+  /// Fluid specific heat
+  bool _use_solid_cp_interp;
+  const Real & _solid_cp;
+  ADLinearInterpolation _solid_cp_interpolation;
 
   /// The permeability (K)
   MaterialProperty<Real> & _permeability;
@@ -50,16 +97,16 @@ protected:
   MaterialProperty<Real> & _porosity;
 
   /// The viscosity of the fluid (mu)
-  MaterialProperty<Real> & _viscosity;
+  ADMaterialProperty(Real) & _viscosity;
 
   /// The bulk thermal conductivity
-  MaterialProperty<Real> & _thermal_conductivity;
+  ADMaterialProperty(Real) & _thermal_conductivity;
 
   /// The bulk heat capacity
-  MaterialProperty<Real> & _heat_capacity;
+  ADMaterialProperty(Real) & _specific_heat;
 
   /// The bulk density
-  MaterialProperty<Real> & _density;
+  ADMaterialProperty(Real) & _density;
 
   /// Flag for using the phase for porosity
   bool _use_phase_variable;
@@ -73,9 +120,6 @@ protected:
   /// The coupled thermal conductivity
   const VariableValue & _conductivity_variable;
 
-  /// Single value to store the interpolated permeability base on
-  /// sphere size.  The _sphere_radius is assumed to be constant, so
-  /// we only have to compute this once.
-  Real _interpolated_permeability;
+  usingMaterialMembers;
+  using ADMaterial<compute_stage>::_communicator;
 };
-

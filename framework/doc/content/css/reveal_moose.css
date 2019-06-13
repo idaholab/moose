@@ -59,6 +59,10 @@
     font-size:18pt;
 }
 
+.reveal .katex{
+    font-family: KaTeX_Main;
+}
+
 .reveal strong{
     font-weight: 500;
 }
@@ -93,6 +97,21 @@
     text-align: center;
 }
 
+.reveal p{
+    margin-bottom:5pt;
+}
+
+.reveal ul,
+.reveal ol{
+    margin-left:48pt;
+    margin-top:9pt;
+}
+
+.reveal li > p{
+    margin-top:0;
+}
+
+
 .reveal section img{
     border: none;
     box-shadow: none;
@@ -102,7 +121,8 @@
     font-size:18pt;
 }
 
-.reveal .moose-katex-block-equation{
+.reveal .moose-katex-equation,
+{
     padding-top:10px;
     padding-bottom:10px;
 }
@@ -116,6 +136,15 @@
     font-size:medium;
 }
 
+.reveal .moose-bibliography{
+    overflow:scroll;
+    height:40vh;
+}
+
+.reveal .moose-bibliography li{
+    font-size:medium;
+    font-weight:100;
+}
 
 .reveal .moose-syntax-list-item-syntax{
     color: black;

@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MethaneFluidProperties.h"
-#include "Conversion.h"
 #include "MathUtils.h"
 #include "libmesh/utility.h"
 
@@ -83,8 +82,8 @@ MethaneFluidProperties::mu_from_p_T(Real /*pressure*/, Real temperature) const
 {
   // Check the temperature is in the range of validity (200 K <= T <= 1000 K)
   if (temperature <= 200.0 || temperature >= 1000.0)
-    throw MooseException("Temperature " + Moose::stringify(temperature) +
-                         "K out of range (200K, 1000K) in " + name() + ": mu_from_p_T()");
+    mooseException(
+        "Temperature ", temperature, "K out of range (200K, 1000K) in ", name(), ": mu_from_p_T()");
 
   Real viscosity = 0.0;
   for (std::size_t i = 0; i < _a.size(); ++i)
@@ -112,8 +111,8 @@ MethaneFluidProperties::k_from_p_T(Real /*pressure*/, Real temperature) const
 {
   // Check the temperature is in the range of validity (200 K <= T <= 1000 K)
   if (temperature <= 200.0 || temperature >= 1000.0)
-    throw MooseException("Temperature " + Moose::stringify(temperature) +
-                         "K out of range (200K, 1000K) in " + name() + ": k()");
+    mooseException(
+        "Temperature ", temperature, "K out of range (200K, 1000K) in ", name(), ": k()");
 
   Real kt = 0.0;
   for (std::size_t i = 0; i < _b.size(); ++i)
@@ -128,8 +127,8 @@ MethaneFluidProperties::k_from_p_T(
 {
   // Check the temperature is in the range of validity (200 K <= T <= 1000 K)
   if (temperature <= 200.0 || temperature >= 1000.0)
-    throw MooseException("Temperature " + Moose::stringify(temperature) +
-                         "K out of range (200K, 1000K) in " + name() + ": k()");
+    mooseException(
+        "Temperature ", temperature, "K out of range (200K, 1000K) in ", name(), ": k()");
 
   Real kt = 0.0, dkt_dT = 0.0;
 
@@ -148,7 +147,7 @@ Real
 MethaneFluidProperties::vaporPressure(Real temperature) const
 {
   if (temperature < _T_triple || temperature > _T_critical)
-    throw MooseException("Temperature is out of range in " + name() + ": vaporPressure()");
+    mooseException("Temperature is out of range in ", name(), ": vaporPressure()");
 
   const Real Tr = temperature / _T_critical;
   const Real theta = 1.0 - Tr;
@@ -182,7 +181,8 @@ Real
 MethaneFluidProperties::saturatedLiquidDensity(Real temperature) const
 {
   if (temperature < _T_triple || temperature > _T_critical)
-    throw MooseException("Temperature is out of range in " + name() + ": saturatedLiquidDensity()");
+    mooseException(
+        "Temperature ", temperature, " is out of range in ", name(), ": saturatedLiquidDensity()");
 
   const Real Tr = temperature / _T_critical;
   const Real theta = 1.0 - Tr;
@@ -197,7 +197,8 @@ Real
 MethaneFluidProperties::saturatedVaporDensity(Real temperature) const
 {
   if (temperature < _T_triple || temperature > _T_critical)
-    throw MooseException("Temperature is out of range in " + name() + ": saturatedVaporDensity()");
+    mooseException(
+        "Temperature ", temperature, " is out of range in ", name(), ": saturatedVaporDensity()");
 
   const Real Tr = temperature / _T_critical;
   const Real theta = 1.0 - Tr;

@@ -21,6 +21,7 @@
     cli_args = 'GlobalParams/order=FIRST Mesh/elem_type=QUAD4'
     requirement = "We shall automatically capture the dependence of things like JxW and grad_test on (first order) displacements"
     max_parallel = 2 # The finite differencing in `-snes_test_jacobian` is a little finicky. The above test failed **only** the distributed mesh sweep with p = 3 so we'll mark this one too
+    prereq = 'jxw_jacobian'
   [../]
   [./jxw_jacobian_cylindrical]
     type = 'PetscJacobianTester'
@@ -42,6 +43,7 @@
     cli_args = 'GlobalParams/order=FIRST Mesh/elem_type=QUAD4'
     requirement = "We shall automatically capture the dependence of things like JxW and grad_test on (first order) displacements for a cylindrical geometry"
     max_parallel = 2
+    prereq = 'jxw_jacobian_cylindrical'
   [../]
   [./jxw_jacobian_spherical]
     type = 'PetscJacobianTester'
@@ -63,5 +65,6 @@
     cli_args = 'GlobalParams/order=FIRST Mesh/elem_type=EDGE2'
     requirement = "We shall automatically capture the dependence of things like JxW and grad_test on (first order) displacements for a spherical geometry"
     max_parallel = 2
+    prereq = 'jxw_jacobian_spherical'
   [../]
 []

@@ -40,6 +40,7 @@
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
 []
+
 [Modules/TensorMechanics/Master]
   [./all]
     strain = FINITE
@@ -146,8 +147,6 @@
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   petsc_options = '-snes_ksp_ew'
@@ -168,7 +167,5 @@
 []
 
 [Outputs]
-  [./out]
-    type = Exodus
-  [../]
+  exodus = true
 []

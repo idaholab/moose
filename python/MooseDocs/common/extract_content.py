@@ -11,6 +11,8 @@
 import copy
 import re
 from regex import regex
+from exceptions import MooseDocsException
+
 
 def extractContentSettings():
     """Settings for extractContent function"""
@@ -44,6 +46,8 @@ def extractContentSettings():
                                  "is excluded in the displayed text.")
     settings['include-end'] = (False, "When True the texted captured by the 'end' setting is "
                                "included in the displayed text.")
+    settings['replace'] = (None, "List of replacement string pairs: ['foo','bar', 'boom','baam'] " \
+                                 "replaces 'foo' with 'bar' and 'boom' with 'baam'.")
     return settings
 
 
@@ -100,7 +104,7 @@ def prepareContent(content, settings): #pylint: disable=no-self-use
 
     # Strip header
     if settings['strip-header']:
-        content = re.sub(r'^((#\*)|(\/{2}\*)).*?$', '', content, flags=re.MULTILINE)
+        content = re.sub(r'^((#\*)|(\/{2}\*)).*?\n', '', content, flags=re.MULTILINE)
 
     # Strip leading/trailing white-space
     if settings['strip-leading-whitespace']:
@@ -129,6 +133,14 @@ def prepareContent(content, settings): #pylint: disable=no-self-use
     if settings['fix-moose-header']:
         content = fix_moose_header(content)
         content = re.sub(r'^//\*', '//', content, flags=re.MULTILINE|re.UNICODE)
+
+    if settings['replace']:
+        pairs = eval(settings['replace'])
+        if len(pairs) % 2:
+            msg = "The 'replace' input must be a list of replacement string pairs."
+            raise MooseDocsException(msg)
+        for f, r in [(pairs[i], pairs[i+1]) for i in xrange(0, len(pairs), 2)]:
+            content = content.replace(f, r)
 
     return content
 

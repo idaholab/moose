@@ -1,15 +1,19 @@
 [Tests]
+   design = "Eigenvalue.md"
+   issues = "#7398"
   [./test]
     type = 'CSVDiff'
     input = 'ipm.i'
     csvdiff = 'ipm_out_eigenvalues_0001.csv'
     slepc = true
+    requirement = "Eigenvalue system should support standard eigenvalue problems"
   [../]
   [./gipm_test]
     type = 'CSVDiff'
     input = 'gipm.i'
     csvdiff = 'gipm_out_eigenvalues_0001.csv'
     slepc = true
+    requirement = "Eigenvalue system should support generalized eigenvalue problems"
   [../]
 
   [./wrong_dirichlet_value_eigen]
@@ -18,6 +22,7 @@
     cli_args = 'BCs/homogeneous/value=1'
     expect_err = "Can.t set an inhomogeneous Dirichlet boundary condition for eigenvalue problems."
     slepc = true
+    requirement = "Eigenvalue system should not allow users to use inhomogeneous nodal boundary conditions"
   [../]
 
   [./wrong_boundary_type_eigen]
@@ -26,6 +31,7 @@
     cli_args = 'BCs/homogeneous/type=NeumannBC'
     expect_err = "Can.t set an inhomogeneous integrated boundary condition for eigenvalue problems."
     slepc = true
+    requirement = "Eigenvalue system should not allow users to use inhomogeneous integral boundary conditions"
   [../]
 
   [./wrong_NodalBC_type_eigen]
@@ -34,6 +40,7 @@
     cli_args = 'BCs/homogeneous/type=FunctionDirichletBC BCs/homogeneous/function=0'
     expect_err = "Invalid NodalBC for eigenvalue problems, please use homogeneous Dirichlet."
     slepc = true
+    requirement = "Eigenvalue system should use homogeneous boundary conditions only"
   [../]
 
   [./no_slepc]
@@ -42,6 +49,7 @@
     cli_args = 'Executioner/solve_type=NEWTON'
     expect_err = "Need to install SLEPc to solve eigenvalue problems, please reconfigure libMesh."
     slepc = false
+    requirement = "Eigenvalue system requires SLEPc installed"
   [../]
 
   [./nonlinear_power]
@@ -50,6 +58,7 @@
     cli_args = 'Executioner/solve_type=MF_NONLINEAR_POWER Outputs/file_base=nonlinear_power'
     csvdiff = 'nonlinear_power_eigenvalues_0001.csv'
     slepc_version = '>=3.8.0'
+    requirement = "Eigenvalue system should be able to solve a nonlinear eigenvalue problem"
   [../]
 
   [./monolith_newton]
@@ -58,6 +67,7 @@
     cli_args = 'Executioner/solve_type=MF_MONOLITH_NEWTON Outputs/file_base=monolith_newton'
     csvdiff = 'monolith_newton_eigenvalues_0001.csv'
     slepc_version = '>=3.8.0'
+    requirement = "Eigenvalue system should be able to solve a nonlinear eigenvalue problem using Newton"
   [../]
 
   [./ne_deficient]
@@ -65,6 +75,7 @@
     input = 'ne_deficient_b.i'
     csvdiff = 'ne_deficient_b_eigenvalues_0001.csv'
     slepc_version = '>=3.8.0'
+    requirement = "Eigenvalue system should be able to solve a deficient eigenvalue problem"
   [../]
 
   [./nonlinear_laplace]
@@ -72,11 +83,22 @@
     input = 'ane.i'
     csvdiff = 'ane_eigenvalues_0001.csv'
     slepc_version = '>=3.8.0'
+    requirement = "Eigenvalue system should be able to compute a nonlinear eigenvalue problem"
   [../]
+
   [./coupled_system]
     type = 'CSVDiff'
     input = 'ne_coupled.i'
     csvdiff = 'ne_coupled_eigenvalues_0001.csv'
     slepc_version = '>=3.8.0'
+    requirement = "Eigenvalue system should be able to compute a coupled nonlinear eigenvalue problem"
+  [../]
+
+  [./eigen_scalar_kernel]
+    type = 'CSVDiff'
+    input = 'scalar.i'
+    csvdiff = 'scalar_out_eigenvalues_0001.csv'
+    slepc_version = '>=3.8.0'
+    requirement = "Eigenvalue system should be able to handle scalar kernels"
   [../]
 []

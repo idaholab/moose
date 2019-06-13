@@ -1,14 +1,19 @@
 [Tests]
-  [./step_a]
+  issues = '#4522'
+  design = 'tutorials/darcy_thermo_mech/index.md'
+  [step_a]
     type = RunApp
     input = 'step5a_steady.i'
-  [../]
-  [./step_b]
+    requirement = "The Darcy-Thermomechanics tutorial shall include a demonstration of solving the steady-state heat equation."
+  []
+  [step_b]
     type = RunApp
     input = 'step5b_transient.i'
-  [../]
-  [./step_c]
+    requirement = "The Darcy-Thermomechanics tutorial shall include a demonstration of solving the transient heat equation."
+  []
+  [step_c]
     type = RunApp
     input = 'step5c_outflow.i'
-  [../]
+    requirement = "The Darcy-Thermomechanics tutorial shall include a demonstration of solving the transient heat equation with an outflow boundary condition."
+  []
 []

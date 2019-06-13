@@ -1,0 +1,16 @@
+[Tests]
+[./testA]
+  type = RunApp
+  input = output_csv_and_exodus.i
+[../]
+[./testB]
+  type = RunApp
+  input = output_csv_and_exodus.i
+  prereq = testA
+[../]
+[./testC]
+  type = RunApp
+  input = output_csv_and_exodus.i
+  prereq = testA
+[../]
+[]

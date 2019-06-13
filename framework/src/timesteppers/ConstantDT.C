@@ -17,6 +17,9 @@ validParams<ConstantDT>()
 {
   InputParameters params = validParams<TimeStepper>();
   params.addRequiredParam<Real>("dt", "Size of the time step");
+
+  // The addRangeCheckedParam and addClassDescription are used in MOOSE documentation, if you
+  // change the order or insert something you will mess it up.
   params.addRangeCheckedParam<Real>(
       "growth_factor",
       2,
@@ -24,6 +27,7 @@ validParams<ConstantDT>()
       "Maximum ratio of new to previous timestep sizes following a step that required the time"
       " step to be cut due to a failed solve.");
   params.addClassDescription("Timestepper that takes a constant time step size");
+
   return params;
 }
 

@@ -1,0 +1,12 @@
+# https://www.engineersedge.com/physics/water__density_viscosity_specific_weight_13146.htm
+# Temp (C), Viscosity (Pa-s)
+10,1.308e-3
+20,1.002e-3
+30,0.7978e-3
+40,0.6531e-3
+50,0.5471e-3
+60,0.4658e-3
+70,0.4004e-3
+80,0.3550e-3
+90,0.3150e-3
+100,0.2822e-3

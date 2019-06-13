@@ -105,6 +105,9 @@ class String(NodeBase):
         kwargs.setdefault('escape', u'')
         super(String, self).__init__('String', parent, **kwargs)
 
+        if self.get('content') is None:
+            self.set('content', u'')
+
     def write(self):
         if self.get('escape'):
             return cgi.escape(self.get('content'), quote=True)

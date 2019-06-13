@@ -15,6 +15,7 @@
     difference_tol = 1e-7
     mesh_mode = 'REPLICATED'
     requirement = 'The Jacobian for the gap conductance test case shall be perfect'
+    prereq = 'real_mortar_gap_conductance'
   []
   [gap_conductance_fine]
     type = Exodiff

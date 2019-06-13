@@ -106,8 +106,6 @@ Real
 IsotropicPlasticityStressUpdate::computeResidual(const Real effective_trial_stress,
                                                  const Real scalar)
 {
-  Real residual = 0.0;
-
   mooseAssert(_yield_condition != -1.0,
               "the yield stress was not updated by computeStressInitialize");
 
@@ -116,22 +114,22 @@ IsotropicPlasticityStressUpdate::computeResidual(const Real effective_trial_stre
     _hardening_slope = computeHardeningDerivative(scalar);
     _hardening_variable[_qp] = computeHardeningValue(scalar);
 
-    residual =
-        (effective_trial_stress - _hardening_variable[_qp] - _yield_stress) / _three_shear_modulus -
-        scalar;
+    return (effective_trial_stress - _hardening_variable[_qp] - _yield_stress) /
+               _three_shear_modulus -
+           scalar;
   }
-  return residual;
+
+  return 0.0;
 }
 
 Real
 IsotropicPlasticityStressUpdate::computeDerivative(const Real /*effective_trial_stress*/,
                                                    const Real /*scalar*/)
 {
-  Real derivative = 1.0;
   if (_yield_condition > 0.0)
-    derivative = -1.0 - _hardening_slope / _three_shear_modulus;
+    return -1.0 - _hardening_slope / _three_shear_modulus;
 
-  return derivative;
+  return 1.0;
 }
 
 void
@@ -142,36 +140,37 @@ IsotropicPlasticityStressUpdate::iterationFinalize(Real scalar)
 }
 
 void
-IsotropicPlasticityStressUpdate::computeStressFinalize(const RankTwoTensor & plasticStrainIncrement)
+IsotropicPlasticityStressUpdate::computeStressFinalize(
+    const RankTwoTensor & plastic_strain_increment)
 {
-  _plastic_strain[_qp] += plasticStrainIncrement;
+  _plastic_strain[_qp] += plastic_strain_increment;
 }
 
 Real
 IsotropicPlasticityStressUpdate::computeHardeningValue(Real scalar)
 {
-  Real value = _hardening_variable_old[_qp] + (_hardening_slope * scalar);
   if (_hardening_function)
   {
     const Real strain_old = _effective_inelastic_strain_old[_qp];
-    Point p;
+    const Point p;
 
-    value = _hardening_function->value(strain_old + scalar, p) - _yield_stress;
+    return _hardening_function->value(strain_old + scalar, p) - _yield_stress;
   }
-  return value;
+
+  return _hardening_variable_old[_qp] + _hardening_slope * scalar;
 }
 
 Real IsotropicPlasticityStressUpdate::computeHardeningDerivative(Real /*scalar*/)
 {
-  Real slope = _hardening_constant;
   if (_hardening_function)
   {
     const Real strain_old = _effective_inelastic_strain_old[_qp];
-    Point p; // Always (0,0,0)
+    const Point p; // Always (0,0,0)
 
-    slope = _hardening_function->timeDerivative(strain_old, p);
+    return _hardening_function->timeDerivative(strain_old, p);
   }
-  return slope;
+
+  return _hardening_constant;
 }
 
 void
@@ -179,10 +178,11 @@ IsotropicPlasticityStressUpdate::computeYieldStress(const RankFourTensor & /*ela
 {
   if (_yield_stress_function)
   {
-    Point p;
+    const Point p;
     _yield_stress = _yield_stress_function->value(_temperature[_qp], p);
+
     if (_yield_stress <= 0.0)
-      mooseError("The yield stress must be greater than zero, but during the simulation your yield "
-                 "stress became less than zero.");
+      mooseError(
+          "In ", _name, ": The calculated yield stress (", _yield_stress, ") is less than zero");
   }
 }

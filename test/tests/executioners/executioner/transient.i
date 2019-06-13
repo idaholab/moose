@@ -105,9 +105,7 @@
 [Executioner]
   type = Transient
   scheme = 'implicit-euler'
-
   solve_type = 'PJFNK'
-
   start_time = 0.0
   num_steps = 5
   dt = 0.1

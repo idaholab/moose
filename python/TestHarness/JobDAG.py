@@ -36,8 +36,18 @@ class JobDAG(object):
         """ return the running DAG object """
         return self.__job_dag
 
+
     def getJobs(self):
         """ return current job group """
+        # Suppress multiple jobs _if_ we are supposed to be running in serialized mode (--pedantic-checks)
+        if self.options.pedantic_checks:
+            # So the way this works, is that getJobs is only called at the start, or once a job finishes, and only by
+            # getJobsAndAdvance (by the RunParallel scheduler). Due to that method already deleting the finished jobs,
+            # the only jobs (if any) remaining are on HOLD.
+            concurrent_jobs = self.__job_dag.ind_nodes()
+            if [x for x in concurrent_jobs if x.isHold()]:
+                return [[x for x in concurrent_jobs if x.isHold()][0]]
+
         return self.__job_dag.ind_nodes()
 
     def getJobsAndAdvance(self):
@@ -47,8 +57,6 @@ class JobDAG(object):
         """
         # handle any skipped dependencies
         self._doSkippedDependencies()
-
-        # delete finished jobs
         next_jobs = set([])
         for job in list(self.__job_dag.ind_nodes()):
             if job.isFinished():
@@ -72,14 +80,26 @@ class JobDAG(object):
         if self.__job_dag.size():
 
             self._doMakeDependencies()
-
             self._doSkippedDependencies()
 
             # If there are race conditions, then there may be more skipped jobs
             if self._doRaceConditions():
                 self._doSkippedDependencies()
 
+            # Serialize the Jobs if running pedantic checks
+            if self.options.pedantic_checks:
+                self._doMakeSerializeDependencies()
+
         return self.__job_dag
+
+    def _doMakeSerializeDependencies(self):
+        """ Serialize the Jobs contained within the DAG  """
+        # Store the position of the job within the DAG
+        for job in self.__job_dag.topological_sort():
+            job.addDownsteamNodes(self.__job_dag.all_downstreams(job))
+            job.addUpsteamNodes(self.__job_dag.predecessors(job))
+
+        return self.__job_dag.serialize_dag()
 
     def _doMakeDependencies(self):
         """ Setup dependencies within the current Job DAG """
@@ -148,7 +168,12 @@ class JobDAG(object):
 
             if not job.getRunnable() or job.isFail() or job.isSkip():
                 job.setStatus(job.skip)
-                dep_jobs.update(self.__job_dag.all_downstreams(job))
+                if not self.options.pedantic_checks:
+                    dep_jobs.update(self.__job_dag.all_downstreams(job))
+                # If running pedantic checks, we need to use the original downstreams, rather
+                # than the downstreams in the current DAG
+                else:
+                    dep_jobs.update(job.getDownstreamNodes())
 
                 # Remove parent dependency so it can launch individually
                 for p_job in self.__job_dag.predecessors(job):
@@ -162,7 +187,13 @@ class JobDAG(object):
                     d_job.setStatus(d_job.skip)
                     d_job.addCaveats('skipped dependency')
 
-                self.__job_dag.delete_edge_if_exists(job, d_job)
+                if not self.options.pedantic_checks:
+                    self.__job_dag.delete_edge_if_exists(job, d_job)
+                else:
+                    try:
+                        job.removeDownsteamNode(d_job)
+                    except:
+                        pass
 
     def _doRaceConditions(self):
         """ Check for race condition errors within in the DAG"""
@@ -203,6 +234,20 @@ class JobDAG(object):
                  or 'prereq' in self.options.ignored_caveats)):
             return True
 
+    def getUpstreams(self, a_job):
+        """ Method to return a list of all the jobs that need to be run before the given job """
+        t_list = []
+        for temp_job in self.__job_dag.predecessors(a_job):
+            t_list.append(temp_job.getTestName())
+        return t_list
+
+    def getDownstreams(self, a_job):
+        """ Method to return a list of all the jobs that need to be run after the given job """
+        t_list = []
+        for temp_job in self.__job_dag.all_downstreams(a_job):
+            t_list.append(temp_job.getTestName())
+        return t_list
+
     def _printDownstreams(self, job):
         """
         create a printable dependency chart of for supplied job
@@ -214,3 +259,21 @@ class JobDAG(object):
         for d_job in downstreams:
             cyclic_path.append('%s -->'% (d_job.getTestNameShort()))
         return ' '.join(cyclic_path)
+
+    def printDAG(self):
+        """ Print the current structure of the DAG  """
+        job_order = []
+        cloned_dag = self.__job_dag.clone()
+        while cloned_dag.size():
+            concurrent_jobs = cloned_dag.ind_nodes(cloned_dag.graph)
+            if len(concurrent_jobs) > 1:
+                job_order.extend([x.getTestNameShort() for x in concurrent_jobs])
+            else:
+                if job_order:
+                    job_order.extend(['<--', concurrent_jobs[0].getTestNameShort()])
+                else:
+                    job_order.append(concurrent_jobs[0].getTestNameShort())
+            for job in concurrent_jobs:
+                cloned_dag.delete_node(job)
+
+        print '\n###### JOB ORDER ######\n', ' '.join(job_order)

@@ -1,0 +1,13 @@
+# https://www.engineeringtoolbox.com/water-liquid-gas-thermal-conductivity-temperature-pressure-d_2012.html
+# Temp (C), Thermal Conductivity (W/mK)
+0.01,0.55575
+10,0.57864
+20,0.59803
+30,0.61450
+40,0.62856
+50,0.64060
+60,0.65091
+70,0.65969
+80,0.66702
+90,0.67288
+99.6,0.67703

@@ -21,7 +21,7 @@
     type = 'Exodiff'
     input = 'picard_adaptive_master.i'
     exodiff = 'picard_adaptive_master_picard_max_its.e'
-    cli_args = "Executioner/dt=1.0 Executioner/num_steps=3 Executioner/picard_max_its=3 Executioner/TimeStepper/dt=1.0 Executioner/TimeStepper/time_dt='1.0 1.0 10' Executioner/TimeStepper/time_t='0 1.0 10' Outputs/file_base=picard_adaptive_master_picard_max_its"
+    cli_args = "Executioner/dt=1.0 Executioner/num_steps=3 Executioner/picard_max_its=3 Executioner/TimeStepper/dt=1.0 Executioner/TimeStepper/time_dt='1.0 1.0 10' Executioner/TimeStepper/time_t='0 1.0 10' Outputs/file_base=picard_adaptive_master_picard_max_its sub0:Outputs/exodus=false"
     design = 'timesteppers/IterationAdaptiveDT.md'
     issues = '#12618'
     requirement = "The system shall reject the solve if the maximum number of Picard iterations is reached without converging"

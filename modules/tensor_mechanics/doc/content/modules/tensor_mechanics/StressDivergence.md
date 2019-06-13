@@ -23,7 +23,7 @@ the unit normal to the boundary, $\boldsymbol{g}$ is the prescribed displacement
 on the boundary and $\boldsymbol{t}$ is the prescribed traction on the boundary.
 The weak form of the residual equation is expressed as:
 \begin{equation}
-  \mathbb{R} = \left( \boldsymbol{\sigma} + \boldsymbol{\sigma}_0), \nabla \phi_m \right) - \left< \boldsymbol{t}, \phi_m \right> - \left( \boldsymbol{b}, \phi_m \right)  = \boldsymbol{0}
+  \mathbb{R} = \left( \boldsymbol{\sigma} + \boldsymbol{\sigma}_0, \nabla \phi_m \right) - \left< \boldsymbol{t}, \phi_m \right> - \left( \boldsymbol{b}, \phi_m \right)  = \boldsymbol{0}
 \end{equation}
 where $(\cdot)$ and $\left< \cdot \right>$ represent volume and boundary integrals,
 respectively. The solution of the residual equation with Newton's method requires

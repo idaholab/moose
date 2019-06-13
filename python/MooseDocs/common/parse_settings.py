@@ -15,7 +15,7 @@ import copy
 
 from exceptions import MooseDocsException
 
-SETTINGS_RE = re.compile(r'(?P<key>[^\s=]+)=(?P<value>.*?)(?=(?:\s[^\s=]+=|$))',
+SETTINGS_RE = re.compile(r'(?P<key>[^\s\\=]+)=(?P<value>.*?)(?=(?:\s[^\s\\=]+=|$))',
                          flags=re.MULTILINE|re.UNICODE)
 
 def get_settings_as_dict(settings):
@@ -41,7 +41,7 @@ def match_settings(known, raw):
     for match in SETTINGS_RE.finditer(raw.replace('\n', ' ')):
 
         key = match.group('key').strip()
-        value = match.group('value').strip()
+        value = match.group('value').strip().replace(r'\=', '=')
 
         if value.lower() == 'true':
             value = True

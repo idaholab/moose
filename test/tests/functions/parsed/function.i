@@ -7,12 +7,12 @@
 []
 
 [AuxVariables]
-  [./f]
-  [../]
+  [f]
+  []
 []
 
 [AuxKernels]
-  [./function_aux]
+  [function_aux]
     type = FunctionAux
     variable = f
     function = fn
@@ -21,20 +21,20 @@
 []
 
 [Functions]
-  [./sin_fn]
+  [sin_fn]
     type = ParsedFunction
     value = sin(x)
-  [../]
-  [./cos_fn]
+  []
+  [cos_fn]
     type = ParsedFunction
     value = cos(x)
-  [../]
-  [./fn]
+  []
+  [fn]
     type = ParsedFunction
     value = 's/c'
     vars = 's c'
     vals = 'sin_fn cos_fn'
-  [../]
+  []
 []
 
 [Problem]

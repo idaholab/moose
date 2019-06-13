@@ -30,6 +30,8 @@ class RevealExtension(command.CommandExtension):
     @staticmethod
     def defaultConfig():
         config = command.CommandExtension.defaultConfig()
+        config['translate'] = (list(), "List of files that should be translated, this allows " \
+                                       "files that are included to only be translated when once.")
         return config
 
     def initMetaData(self, page, meta):
@@ -51,6 +53,11 @@ class RevealExtension(command.CommandExtension):
 
         self.addCommand(reader, RevealNotes())
         renderer.add('Notes', RenderNotes())
+
+    def postRead(self, content, page, meta):
+        names = self.get('translate')
+        if names and (page.name not in names):
+            meta.setData('active', False)
 
     def postTokenize(self, ast, page, meta, reader):
         ast.insert(0, Section(None))

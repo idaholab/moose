@@ -1,0 +1,113 @@
+[Tests]
+[./testA]
+  type = RunApp
+  input = output_csv_and_exodus.i
+  cli_args = 'Outputs/file_base=foo'
+  prereq = testB
+  skip = "Test"
+[../]
+[./testB]
+  type = RunApp
+  input = output_csv_and_exodus.i
+  cli_args = 'Outputs/file_base=foo'
+[../]
+[./testC]
+  type = RunApp
+  input = output_csv_and_exodus.i
+  cli_args = 'Outputs/file_base=foo'
+  prereq = testW
+[../]
+[./testD]
+  type = RunApp
+  input = output_csv_and_exodus.i
+  cli_args = 'Outputs/file_base=foo'
+  prereq = 'testB testS'
+[../]
+[./testE]
+  type = RunApp
+  input = output_csv_and_exodus.i
+  skip = "Test"
+  cli_args = 'Outputs/file_base=foo'
+[../]
+[./testF]
+  type = RunApp
+  input = output_csv_and_exodus.i
+  cli_args = 'Outputs/file_base=foo'
+  prereq = 'testS testB'
+[../]
+[./testG]
+  type = RunApp
+  input = output_csv_and_exodus.i
+  cli_args = 'Outputs/file_base=foo'
+  prereq = testB
+  skip = "Test"
+[../]
+[./testH]
+  type = RunApp
+  input = output_csv_and_exodus.i
+  skip = "Test"
+  cli_args = 'Outputs/file_base=foo'
+[../]
+[./testI]
+  type = RunApp
+  input = output_csv_and_exodus.i
+  cli_args = 'Outputs/file_base=foo'
+  prereq = testA
+[../]
+[./testR]
+  type = RunApp
+  input = output_csv_and_exodus.i
+  cli_args = 'Outputs/file_base=foo'
+  prereq = testB
+  skip = "Test"
+[../]
+[./testS]
+  type = RunApp
+  input = output_csv_and_exodus.i
+  cli_args = 'Outputs/file_base=foo'
+[../]
+[./testT]
+  type = RunApp
+  input = output_csv_and_exodus.i
+  cli_args = 'Outputs/file_base=foo'
+  prereq = testB
+[../]
+[./testU]
+  type = RunApp
+  input = output_csv_and_exodus.i
+  cli_args = 'Outputs/file_base=foo'
+  prereq = testB
+  skip = "Test"
+[../]
+[./testV]
+  type = RunApp
+  input = output_csv_and_exodus.i
+  skip = "Test"
+  cli_args = 'Outputs/file_base=foo'
+[../]
+[./testW]
+  type = RunApp
+  input = output_csv_and_exodus.i
+  cli_args = 'Outputs/file_base=foo'
+  prereq = testB
+[../]
+[./testX]
+  type = RunApp
+  input = output_csv_and_exodus.i
+  cli_args = 'Outputs/file_base=foo'
+  prereq = testB
+  skip = "Test"
+[../]
+[./testY]
+  type = RunApp
+  input = output_csv_and_exodus.i
+  skip = "Test"
+  cli_args = 'Outputs/file_base=foo'
+[../]
+[./testZ]
+  type = RunApp
+  input = output_csv_and_exodus.i
+  cli_args = 'Outputs/file_base=foo'
+  prereq = testB
+[../]
+[]
