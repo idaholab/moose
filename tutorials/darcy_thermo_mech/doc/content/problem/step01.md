@@ -4,18 +4,16 @@
 
 First, consider the steady-state diffusion equation on the domain $\Omega$: find $u$ such that
 
-\begin{equation*}
+!equation
 -\nabla \cdot \nabla u = 0 \in \Omega,
-\end{equation*}
 
 where $u = 1$ on the bottom, $u = 0$ on the top and with
 $\nabla u \cdot \hat{n} = 0$ on the remaining boundaries.
 
 The weak form of this equation, in inner-product notation, is given by:
 
-\begin{equation*}
+!equation
 \left(\nabla \phi_i, \nabla u_h\right) = 0 \quad \forall \phi_i,
-\end{equation*}
 
 where $\phi_i$ are the test functions and $u_h$ is the finite element solution.
 

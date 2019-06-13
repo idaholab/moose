@@ -128,9 +128,12 @@ class RenderLinkBase(components.RenderComponent):
             self._createOptionalContent(parent, token, page)
             return None
 
-        url = unicode(desired.relativeDestination(page))
-        if bookmark:
-            url += '#{}'.format(bookmark)
+        if desired is page:
+            url = '#{}'.format(bookmark) if bookmark else '#'
+        else:
+            url = unicode(desired.relativeDestination(page))
+            if bookmark:
+                url += '#{}'.format(bookmark)
 
         link = core.Link(None, url=url, info=token.info)
         if len(token.children) == 0:

@@ -53,7 +53,7 @@ a converged solution in the last converged step.
      where $p$ is the global convergence rate of the time stepping scheme.
    - If $e_{n} \ge e_{MAX}$, or if the solver fails, shrink $\Delta t$.
 
-Parameters $e_{TOL}$ and $$e_{MAX}$ can be specified in the input file as `e_tol` and `e_max` (in the `Executioner` block).
+Parameters $e_{TOL}$ and $e_{MAX}$ can be specified in the input file as `e_tol` and `e_max` (in the `Executioner` block).
 
 !---
 

@@ -201,7 +201,8 @@ class HTMLRenderer(Renderer):
     def getRoot(self):
         """Return the result node for inserting rendered html nodes."""
         root = html.Tag(None, '!DOCTYPE html', close=False)
-        html.Tag(root, 'head')
+        head = html.Tag(root, 'head')
+        html.Tag(head, 'meta', charset="UTF-8", close=False)
         return html.Tag(root, 'body')
 
     def addJavaScript(self, key, filename, location='_end', head=False, **kwargs):

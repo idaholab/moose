@@ -6,16 +6,13 @@
   xmax = 0.304 # Length of test chamber
   ymax = 0.0257 # Test chamber radius
   uniform_refine = 2
-  second_order = true
 []
 
 [Variables]
   [pressure]
     scaling = 1e11
-    order = SECOND
   []
   [temperature]
-    order = SECOND
     initial_condition = 300 # Start at room temperature
   []
 []
@@ -148,12 +145,8 @@
   type = Transient
   solve_type = NEWTON
 
-  #petsc_options_iname = '-pc_type -pc_hypre_type'
-  #petsc_options_value = 'hypre boomeramg'
-
-  petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_factor_levels'
-  petsc_options_value = 'asm      3               9'
-  l_tol = 1e-9
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
 
   end_time = 100
   dt = 0.25

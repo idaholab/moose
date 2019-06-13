@@ -48,6 +48,4 @@ Extensions:
         acronyms: !include framework/doc/acronyms.yml
     MooseDocs.extensions.listing:
         modal-link: False
-    MooseDocs.extensions.reveal:
-        translate:
-            - 'index.md'
+    MooseDocs.extensions.reveal: default
