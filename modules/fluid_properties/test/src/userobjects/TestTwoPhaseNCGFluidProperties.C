@@ -43,6 +43,8 @@ TestTwoPhaseNCGFluidProperties::TestTwoPhaseNCGFluidProperties(const InputParame
       InputParameters params = _app.getFactory().getValidParams(class_name);
       params.set<Real>("gamma") = 1.1;
       params.set<Real>("R") = 300;
+      params.set<Real>("T_c") = 100;
+      params.set<Real>("rho_c") = 300;
       _fe_problem.addUserObject(class_name, "test_fp_vapor", params);
     }
   }
@@ -61,7 +63,7 @@ TestTwoPhaseNCGFluidProperties::TestTwoPhaseNCGFluidProperties(const InputParame
   // create vapor mixture fluid properties
   if (_tid == 0)
   {
-    const std::string class_name = "GeneralVaporMixtureFluidProperties";
+    const std::string class_name = "IdealRealGasMixtureFluidProperties";
     InputParameters params = _app.getFactory().getValidParams(class_name);
     params.set<UserObjectName>("fp_primary") = getVaporName();
     params.set<std::vector<UserObjectName>>("fp_secondary") =

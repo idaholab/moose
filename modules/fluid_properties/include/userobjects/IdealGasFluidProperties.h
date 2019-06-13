@@ -67,6 +67,8 @@ public:
   virtual Real s_from_T_v(Real T, Real v) const override;
   virtual void s_from_T_v(Real T, Real v, Real & s, Real & ds_dT, Real & ds_dv) const override;
   virtual Real cv_from_T_v(Real T, Real v) const override;
+  virtual Real e_spndl_from_v(Real v) const override;
+  virtual void v_e_spndl_from_T(Real T, Real & v, Real & e) const override;
   virtual Real h_from_p_T(Real p, Real T) const override;
   virtual void h_from_p_T(Real p, Real T, Real & h, Real & dh_dp, Real & dh_dT) const override;
   virtual Real e_from_p_T(Real p, Real T) const override;
@@ -86,9 +88,14 @@ public:
   k_from_p_T(Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const override;
   virtual std::string fluidName() const override;
   virtual Real molarMass() const override;
+  virtual Real criticalTemperature() const override;
+  virtual Real criticalDensity() const override;
+  virtual Real criticalInternalEnergy() const override;
   virtual Real gamma_from_v_e(Real v, Real e) const override;
   virtual Real gamma_from_p_T(Real p, Real T) const override;
   virtual Real c_from_p_T(Real p, Real T) const override;
+
+  virtual Real pp_sat_from_p_T(Real /*p*/, Real /*T*/) const override;
 
   virtual Real henryConstant(Real temperature) const override;
   virtual void henryConstant(Real temperature, Real & Kh, Real & dKh_dT) const override;
@@ -113,9 +120,12 @@ protected:
   const Real _k;
   /// molar mass
   Real _molar_mass;
+  // properties at critical point (used by IdealRealGasMixtureFluidProperties (primary component))
+  Real _T_c;
+  Real _rho_c;
+  Real _e_c;
   /// Henry constant
   const Real _henry_constant;
 };
 
 #pragma GCC diagnostic pop
-
