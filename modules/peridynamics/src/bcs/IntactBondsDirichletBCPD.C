@@ -16,11 +16,13 @@ InputParameters
 validParams<IntactBondsDirichletBCPD>()
 {
   InputParameters params = validParams<NodalBC>();
-  params.addClassDescription("Class to apply Dirichlet BC based on the number of intact bonds "
-                             "associated with each material point.");
+  params.addClassDescription(
+      "Class to selectively apply a Dirichlet BC based on the number of intact "
+      "bonds associated with each material point. Used to stabilize nodes without "
+      "a sufficient number of connections to other material points.");
   params.addRequiredCoupledVar(
       "intact_bonds_variable",
-      "Name of auxiliary variable for number of intact bonds at each material point");
+      "Name of auxiliary variable containing the number of intact bonds at each material point");
 
   return params;
 }
@@ -29,7 +31,8 @@ IntactBondsDirichletBCPD::IntactBondsDirichletBCPD(const InputParameters & param
   : NodalBC(parameters),
     _pdmesh(dynamic_cast<PeridynamicsMesh &>(_mesh)),
     _u_old(_var.dofValuesOld()),
-    _intact_bonds_val(coupledValue("intact_bonds_variable"))
+    _intact_bonds_val(coupledValue("intact_bonds_variable")),
+    _max_intact_bonds(_pdmesh.dimension() - 1)
 {
 }
 
@@ -43,7 +46,7 @@ bool
 IntactBondsDirichletBCPD::shouldApply()
 {
   bool should_apply = false;
-  if (_intact_bonds_val[0] < _pdmesh.dimension())
+  if (_intact_bonds_val[0] <= _max_intact_bonds)
     should_apply = true;
 
   return should_apply;

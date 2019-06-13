@@ -20,8 +20,9 @@ validParams<FiniteStrainMechanicsNOSPD>()
 {
   InputParameters params = validParams<MechanicsBaseNOSPD>();
   params.addClassDescription(
-      "Class for calculating residual and Jacobian for Self-stabilized Non-Ordinary "
-      "State-based PeriDynamic (SNOSPD) formulation under finite strain assumptions");
+      "Class for calculating residual and Jacobian for the Self-stabilized "
+      "Non-Ordinary State-based PeriDynamic (SNOSPD) formulation under finite "
+      "strain assumptions");
 
   params.addRequiredParam<unsigned int>(
       "component",

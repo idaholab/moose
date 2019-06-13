@@ -53,6 +53,8 @@ MaterialBaseNOSPD::initQpStatefulProperties()
   _total_strain[_qp].zero();
   _deformation_gradient[_qp].zero();
   _deformation_gradient[_qp].addIa(1.0);
+  if (_qrule->n_points() < 2)
+    mooseError("NOSPD models require a minimum quadrature order of THIRD");
 }
 
 void

@@ -83,12 +83,13 @@ SmallStrainMechanicsNOSPD::computeNonlocalJacobian()
     std::vector<dof_id_type> bonds = _pdmesh.getAssocBonds(_current_elem->node_id(cur_nd));
     for (unsigned int k = 0; k < BAneighbors.size(); k++)
     {
-      Node * node_k = _pdmesh.nodePtr(neighbors[BAneighbors[k]]);
+      const Node * node_k = _pdmesh.nodePtr(neighbors[BAneighbors[k]]);
       dof[1] = node_k->dof_number(_sys.number(), _var.number(), 0);
-      Real vol_k = _pdmesh.getVolume(neighbors[BAneighbors[k]]);
+      const Real vol_k = _pdmesh.getVolume(neighbors[BAneighbors[k]]);
 
       // obtain bond ik's origin vector
-      RealGradient origin_vec_ijk = *node_k - *_pdmesh.nodePtr(_current_elem->node_id(cur_nd));
+      const RealGradient origin_vec_ijk =
+          *node_k - *_pdmesh.nodePtr(_current_elem->node_id(cur_nd));
 
       RankTwoTensor dFdUk;
       dFdUk.zero();
@@ -103,7 +104,7 @@ SmallStrainMechanicsNOSPD::computeNonlocalJacobian()
           (dFdUk.transpose() * _dgrad[cur_nd] + _dgrad[cur_nd].transpose() * dFdUk);
 
       // bond status for bond k
-      Real bond_status_ijk =
+      const Real bond_status_ijk =
           _bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[BAneighbors[k]]));
 
       _local_ke.resize(_test.size(), _phi.size());
@@ -196,12 +197,13 @@ SmallStrainMechanicsNOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_nu
       std::vector<dof_id_type> bonds = _pdmesh.getAssocBonds(_current_elem->node_id(cur_nd));
       for (unsigned int k = 0; k < BAneighbors.size(); k++)
       {
-        Node * node_k = _pdmesh.nodePtr(neighbors[BAneighbors[k]]);
+        const Node * node_k = _pdmesh.nodePtr(neighbors[BAneighbors[k]]);
         jvardofs_ijk[1] = node_k->dof_number(_sys.number(), jvar_num, 0);
-        Real vol_k = _pdmesh.getVolume(neighbors[BAneighbors[k]]);
+        const Real vol_k = _pdmesh.getVolume(neighbors[BAneighbors[k]]);
 
         // obtain bond k's origin vector
-        RealGradient origin_vec_ijk = *node_k - *_pdmesh.nodePtr(_current_elem->node_id(cur_nd));
+        const RealGradient origin_vec_ijk =
+            *node_k - *_pdmesh.nodePtr(_current_elem->node_id(cur_nd));
 
         RankTwoTensor dFdUk;
         dFdUk.zero();
@@ -216,7 +218,7 @@ SmallStrainMechanicsNOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_nu
             (dFdUk.transpose() * _dgrad[cur_nd] + _dgrad[cur_nd].transpose() * dFdUk);
 
         // bond status for bond k
-        Real bond_status_ijk =
+        const Real bond_status_ijk =
             _bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[BAneighbors[k]]));
 
         _local_ke.zero();

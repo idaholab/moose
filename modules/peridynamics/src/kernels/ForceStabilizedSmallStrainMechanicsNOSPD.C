@@ -20,11 +20,15 @@ validParams<ForceStabilizedSmallStrainMechanicsNOSPD>()
 {
   InputParameters params = validParams<MechanicsBasePD>();
   params.addClassDescription("Class for calculating residual and Jacobian for Non-Ordinary "
-                             "State-based PeriDynamic solid mechanics formulation");
+                             "State-based PeriDynamic solid mechanics formulation using a "
+                             "fictitious force method for stabilization.");
 
   params.addRequiredParam<unsigned int>(
       "component",
       "An integer corresponding to the variable this kernel acts on (0 for x, 1 for y, 2 for z)");
+  params.addParam<std::vector<MaterialPropertyName>>(
+      "eigenstrain_names",
+      "List of eigenstrains to be coupled in non-ordinary state-based mechanics kernels");
 
   return params;
 }
@@ -40,9 +44,14 @@ ForceStabilizedSmallStrainMechanicsNOSPD::ForceStabilizedSmallStrainMechanicsNOS
     _ddgraddv(getMaterialProperty<RankTwoTensor>("ddeformation_gradient_dv")),
     _ddgraddw(getMaterialProperty<RankTwoTensor>("ddeformation_gradient_dw")),
     _Cijkl(getMaterialProperty<RankFourTensor>("elasticity_tensor")),
+    _eigenstrain_names(getParam<std::vector<MaterialPropertyName>>("eigenstrain_names")),
+    _deigenstrain_dT(_eigenstrain_names.size()),
     _sf_coeff(getMaterialProperty<Real>("stabilization_force_coeff")),
     _component(getParam<unsigned int>("component"))
 {
+  for (unsigned int i = 0; i < _deigenstrain_dT.size(); ++i)
+    _deigenstrain_dT[i] =
+        &getMaterialPropertyDerivative<RankTwoTensor>(_eigenstrain_names[i], _temp_var->name());
 }
 
 void

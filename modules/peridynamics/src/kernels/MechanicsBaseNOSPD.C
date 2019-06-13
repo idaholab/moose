@@ -18,6 +18,9 @@ validParams<MechanicsBaseNOSPD>()
   InputParameters params = validParams<MechanicsBasePD>();
   params.addClassDescription("Base class for kernels using Self-stabilized Non-Ordinary "
                              "State-based PeriDynamic (SNOSPD) formulation");
+  params.addParam<std::vector<MaterialPropertyName>>(
+      "eigenstrain_names",
+      "List of eigenstrains to be coupled in non-ordinary state-based mechanics kernels");
 
   return params;
 }
@@ -31,8 +34,13 @@ MechanicsBaseNOSPD::MechanicsBaseNOSPD(const InputParameters & parameters)
     _ddgraddu(getMaterialProperty<RankTwoTensor>("ddeformation_gradient_du")),
     _ddgraddv(getMaterialProperty<RankTwoTensor>("ddeformation_gradient_dv")),
     _ddgraddw(getMaterialProperty<RankTwoTensor>("ddeformation_gradient_dw")),
-    _Jacobian_mult(getMaterialProperty<RankFourTensor>("Jacobian_mult"))
+    _Jacobian_mult(getMaterialProperty<RankFourTensor>("Jacobian_mult")),
+    _eigenstrain_names(getParam<std::vector<MaterialPropertyName>>("eigenstrain_names")),
+    _deigenstrain_dT(_eigenstrain_names.size())
 {
+  for (unsigned int i = 0; i < _deigenstrain_dT.size(); ++i)
+    _deigenstrain_dT[i] =
+        &getMaterialPropertyDerivative<RankTwoTensor>(_eigenstrain_names[i], _temp_var->name());
 }
 
 RankTwoTensor

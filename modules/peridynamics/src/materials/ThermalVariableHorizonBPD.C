@@ -28,7 +28,7 @@ ThermalVariableHorizonBPD::ThermalVariableHorizonBPD(const InputParameters & par
 }
 
 void
-ThermalVariableHorizonBPD::computePDMicroConductivity()
+ThermalVariableHorizonBPD::computePDMicroConductivity(const Real ave_thermal_conductivity)
 {
-  _Kij = _dim * _kappa * (1.0 / _nvsum[0] + 1.0 / _nvsum[1]) / _origin_length;
+  _Kij = _dim * ave_thermal_conductivity * (1.0 / _nvsum[0] + 1.0 / _nvsum[1]) / _origin_length;
 }

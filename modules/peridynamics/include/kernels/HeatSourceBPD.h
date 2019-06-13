@@ -27,8 +27,6 @@ public:
 protected:
   virtual void computeLocalResidual() override;
 
-  ///@{ Power density values
-  double _power_density;
-  const Function * _power_density_function;
-  ///@}
+  /// Power density function
+  const Function & _power_density;
 };

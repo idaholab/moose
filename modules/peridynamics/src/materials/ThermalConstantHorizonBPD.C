@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ThermalConstantHorizonBPD.h"
+#include "MathUtils.h"
 
 registerMooseObject("PeridynamicsApp", ThermalConstantHorizonBPD);
 
@@ -29,9 +30,9 @@ ThermalConstantHorizonBPD::ThermalConstantHorizonBPD(const InputParameters & par
 }
 
 void
-ThermalConstantHorizonBPD::computePDMicroConductivity()
+ThermalConstantHorizonBPD::computePDMicroConductivity(const Real ave_thermal_conductivity)
 {
-  _Kij = (6.0 * _kappa / (3.14159265358 * std::pow(_horizon[0], _dim + 1)) +
-          6.0 * _kappa / (3.14159265358 * std::pow(_horizon[1], _dim + 1))) /
-         2.0;
+  _Kij = 3.0 * ave_thermal_conductivity / M_PI *
+         (1.0 / (MathUtils::pow(_horizon[0], _dim + 1)) +
+          1.0 / (MathUtils::pow(_horizon[1], _dim + 1)));
 }

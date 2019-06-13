@@ -35,9 +35,6 @@ MaterialBasePD::MaterialBasePD(const InputParameters & parameters)
 void
 MaterialBasePD::computeProperties()
 {
-  if (_qrule->n_points() != _nnodes)
-    mooseError("In current implementation, the number of quadrature points should be the same as "
-               "number of element nodes (i.e., equal to 2)!");
 
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {

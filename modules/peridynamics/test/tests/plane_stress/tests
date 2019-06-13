@@ -7,6 +7,7 @@
     requirement = 'ComputePlaneStressIsotropicElasticityTensor shall provide elasticity tensor for plane stress model based on ordinary state-based peridynamic model.'
     design = 'modules/peridynamics/ComputePlaneStressIsotropicElasticityTensor.md'
     issues = '#11561'
+    allow_test_objects = true
   [../]
   [./conventional_plane_stress_nospd]
     type = 'Exodiff'
@@ -16,6 +17,7 @@
     requirement = 'ComputePlaneStressIsotropicElasticityTensor shall provide elasticity tensor for plane stress model based on non-ordinary state-based peridynamic model.'
     design = 'modules/peridynamics/ComputePlaneStressIsotropicElasticityTensor.md'
     issues = '#11561'
+    allow_test_objects = true
   [../]
   [./weak_plane_stress_nospd]
     type = 'Exodiff'

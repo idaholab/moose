@@ -57,11 +57,6 @@ protected:
   /// number of displacement components
   unsigned int _ndisp;
 
-  ///@{ Material point based material property for eigen strains
-  const std::vector<MaterialPropertyName> _eigenstrain_names;
-  std::vector<const MaterialProperty<RankTwoTensor> *> _deigenstrain_dT;
-  ///@}
-
   ///@{ Parameters for out-of-plane strain in weak plane stress formulation
   const bool _out_of_plane_strain_coupled;
   MooseVariableFEBase * _out_of_plane_strain_var;

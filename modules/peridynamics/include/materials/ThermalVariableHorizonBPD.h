@@ -26,5 +26,5 @@ public:
   ThermalVariableHorizonBPD(const InputParameters & parameters);
 
 protected:
-  virtual void computePDMicroConductivity() override;
+  void computePDMicroConductivity(const Real ave_thermal_conductivity) override;
 };
