@@ -144,17 +144,33 @@
 []
 
 [Materials]
+  viscosity_file = data/water_viscosity.csv
+  density_file = data/water_density.csv
+  thermal_conductivity_file = data/water_thermal_conductivity.csv
+  specific_heat_file = data/water_specific_heat.csv
+  thermal_expansion_file = data/water_thermal_expansion.csv
+
   [column_top]
     type = PackedColumn
     block = 0
     temperature = temperature
     radius = 1.15
+    fluid_viscosity_file = ${viscosity_file}
+    fluid_density_file = ${density_file}
+    fluid_thermal_conductivity_file = ${thermal_conductivity_file}
+    fluid_specific_heat_file = ${specific_heat_file}
+    fluid_thermal_expansion_file = ${thermal_expansion_file}
   []
   [column_bottom]
     type = PackedColumn
     block = 1
     temperature = temperature
     radius = 1
+    fluid_viscosity_file = ${viscosity_file}
+    fluid_density_file = ${density_file}
+    fluid_thermal_conductivity_file = ${thermal_conductivity_file}
+    fluid_specific_heat_file = ${specific_heat_file}
+    fluid_thermal_expansion_file = ${thermal_expansion_file}
   []
 
   [elasticity_tensor]
@@ -169,7 +185,6 @@
   [thermal_strain]
     type = ComputeThermalExpansionEigenstrain
     stress_free_temperature = 300
-    thermal_expansion_coeff = 1e-6
     eigenstrain_name = eigenstrain
     temperature = temperature
   []
@@ -187,6 +202,13 @@
   coord_type = RZ
 []
 
+[Preconditioning]
+  [smp]
+    type = SMP
+    full = true
+  []
+[]
+
 [Executioner]
   type = Transient
   start_time = -1
@@ -194,15 +216,11 @@
   steady_state_tolerance = 1e-7
   steady_state_detection = true
   dt = 0.25
-  #solve_type = NEWTON
-  #petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_factor_levels'
-  #petsc_options_value = 'asm      3               9'
-  #l_tol = 1e-9
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg 100'
   line_search = none
-  nl_rel_tol = 1e-7
+  nl_rel_tol = 1e-6
   [TimeStepper]
     type = FunctionDT
     function = 'if(t<0,0.1,0.25)'

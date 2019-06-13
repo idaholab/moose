@@ -61,6 +61,15 @@ defineADValidParams(
         "The name of a file containing fluid specific heat (J/(kgK) as a function of temperature "
         "(C); if provided the constant value is ignored.");
 
+    params.addParam<Real>(
+        "fluid_thermal_expansion",
+        2.07e-4,
+        "Fluid thermal expansion coefficient (1/K); default is for water at 20C).");
+    params.addParam<FileName>("fluid_thermal_expansion_file",
+                              "The name of a file containing fluid thermal expansion coefficient "
+                              "(1/K) as a function of temperature "
+                              "(C); if provided the constant value is ignored.");
+
     // Solid properties
     // https://en.wikipedia.org/wiki/Stainless_steel#Properties
     params.addParam<Real>("solid_thermal_conductivity",
@@ -89,6 +98,15 @@ defineADValidParams(
         "The name of a file containing solid specific heat (J/(kgK) as a function of temperature "
         "(C); if provided the constant value is ignored.");
 
+    params.addParam<Real>(
+        "solid_thermal_expansion",
+        17.3e-6,
+        "Solid thermal expansion coefficient (1/K); default is for water at 20C).");
+    params.addParam<FileName>("solid_thermal_expansion_file",
+                              "The name of a file containing solid thermal expansion coefficient "
+                              "(1/K) as a function of temperature "
+                              "(C); if provided the constant value is ignored.");
+
     // Optional phase variable
     params.addCoupledVar("phase",
                          "The variable indicating the phase (steel=1 or water=0). If "
@@ -113,11 +131,13 @@ PackedColumn<compute_stage>::PackedColumn(const InputParameters & parameters)
     _fluid_k(adGetParam<Real>("fluid_thermal_conductivity")),
     _fluid_rho(adGetParam<Real>("fluid_density")),
     _fluid_cp(adGetParam<Real>("fluid_specific_heat")),
+    _fluid_cte(adGetParam<Real>("fluid_thermal_expansion")),
 
     // Solid
     _solid_k(adGetParam<Real>("solid_thermal_conductivity")),
     _solid_rho(adGetParam<Real>("solid_density")),
     _solid_cp(adGetParam<Real>("solid_specific_heat")),
+    _solid_cte(adGetParam<Real>("solid_thermal_expansion")),
 
     // Material Properties being produced by this object
     _permeability(adDeclareProperty<Real>("permeability")),
@@ -126,6 +146,7 @@ PackedColumn<compute_stage>::PackedColumn(const InputParameters & parameters)
     _thermal_conductivity(adDeclareADProperty<Real>("thermal_conductivity")),
     _specific_heat(adDeclareADProperty<Real>("specific_heat")),
     _density(adDeclareADProperty<Real>("density")),
+    _thermal_expansion(adDeclareADProperty<Real>("thermal_expansion")),
 
     // Optional phase variable
     _use_phase_variable(isParamValid("phase")),
@@ -146,11 +167,13 @@ PackedColumn<compute_stage>::PackedColumn(const InputParameters & parameters)
   _use_fluid_k_interp = initInputData("fluid_thermal_conductivity_file", _fluid_k_interpolation);
   _use_fluid_rho_interp = initInputData("fluid_density_file", _fluid_rho_interpolation);
   _use_fluid_cp_interp = initInputData("fluid_specific_heat_file", _fluid_cp_interpolation);
+  _use_fluid_cte_interp = initInputData("fluid_thermal_expansion_file", _fluid_cte_interpolation);
 
   // Solid thermal conductivity, density, and specific heat
   _use_solid_k_interp = initInputData("solid_thermal_conductivity_file", _solid_k_interpolation);
   _use_solid_rho_interp = initInputData("solid_density_file", _solid_rho_interpolation);
   _use_solid_cp_interp = initInputData("solid_specific_heat_file", _solid_cp_interpolation);
+  _use_solid_cte_interp = initInputData("solid_thermal_expansion_file", _solid_cte_interpolation);
 }
 
 template <ComputeStage compute_stage>
@@ -182,10 +205,12 @@ PackedColumn<compute_stage>::computeQpProperties()
   _viscosity[_qp] = _use_fluid_mu_interp ? _fluid_mu_interpolation.sample(temp) : _fluid_mu;
   ADReal fluid_rho = _use_fluid_rho_interp ? _fluid_rho_interpolation.sample(temp) : _fluid_rho;
   ADReal fluid_cp = _use_fluid_cp_interp ? _fluid_cp_interpolation.sample(temp) : _fluid_cp;
+  ADReal fluid_cte = _use_fluid_cte_interp ? _fluid_cte_interpolation.sample(temp) : _fluid_cte;
 
   // Solid properties
   ADReal solid_rho = _use_solid_rho_interp ? _solid_rho_interpolation.sample(temp) : _solid_rho;
   ADReal solid_cp = _use_solid_cp_interp ? _solid_cp_interpolation.sample(temp) : _solid_cp;
+  ADReal solid_cte = _use_solid_cte_interp ? _solid_cte_interpolation.sample(temp) : _solid_cte;
 
   // Compute the heat conduction material properties as a linear combination of
   // the material properties for fluid and steel.
@@ -200,6 +225,7 @@ PackedColumn<compute_stage>::computeQpProperties()
 
   _density[_qp] = _porosity[_qp] * fluid_rho + (1.0 - _porosity[_qp]) * solid_rho;
   _specific_heat[_qp] = _porosity[_qp] * fluid_cp + (1.0 - _porosity[_qp]) * solid_cp;
+  _thermal_expansion[_qp] = _porosity[_qp] * fluid_cte + (1.0 - _porosity[_qp]) * solid_cte;
 }
 
 template <ComputeStage compute_stage>

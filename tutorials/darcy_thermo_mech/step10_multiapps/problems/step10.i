@@ -141,6 +141,7 @@
   viscosity_file = data/water_viscosity.csv
   density_file = data/water_density.csv
   specific_heat_file = data/water_specific_heat.csv
+  thermal_expansion_file = data/water_thermal_expansion.csv
   [column]
     type = PackedColumn
     temperature = temperature
@@ -149,6 +150,7 @@
     fluid_viscosity_file = ${viscosity_file}
     fluid_density_file = ${density_file}
     fluid_specific_heat_file = ${specific_heat_file}
+    fluid_thermal_expansion_file = ${thermal_expansion_file}
   []
 
   [elasticity_tensor]
