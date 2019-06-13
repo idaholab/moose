@@ -45,7 +45,8 @@ DEFAULT_EXTENSIONS = ['MooseDocs.extensions.core',
                       'MooseDocs.extensions.heading',
                       'MooseDocs.extensions.gallery',
                       'MooseDocs.extensions.navigation',
-                      'MooseDocs.extensions.template']
+                      'MooseDocs.extensions.template',
+                      'MooseDocs.extensions.comment']
 
 DEFAULT_READER = 'MooseDocs.base.MarkdownReader'
 DEFAULT_RENDERER = 'MooseDocs.base.MarkdownReader'
