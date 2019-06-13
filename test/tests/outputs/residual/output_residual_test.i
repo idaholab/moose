@@ -103,6 +103,8 @@
   start_time = 0.0
   num_steps = 5
   dt = 0.1
+
+  automatic_scaling = false # diffing converged residuals is very sensitive to solve history
 []
 
 [Outputs]

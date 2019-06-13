@@ -54,6 +54,8 @@
 
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
+
+  automatic_scaling = false # Small exodiffs if scaling is used
 []
 
 [Outputs]

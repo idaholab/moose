@@ -69,8 +69,6 @@
     type = SMP
     full = true
     solve_type = newton
-    petsc_options_iname = '-snes_type -snes_test_err'
-    petsc_options_value = 'test       1e-10'
   [../]
 []
 

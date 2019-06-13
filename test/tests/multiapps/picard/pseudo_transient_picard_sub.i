@@ -61,6 +61,7 @@
   steady_state_detection = true
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
+  automatic_scaling = false # Small exodiffs generated if automatic scaling is used for these tests
 []
 
 [Outputs]

@@ -125,6 +125,9 @@
   petsc_options_value = 'asm 100'
   petsc_options = '-ksp_converged_reason -ksp_monitor_true_residual -ksp_monitor_singular_value -snes_linesearch_monitor'
   line_search = 'bt'
+
+  automatic_scaling = false # Order 1e-4 relative exodiffs with scaling probably because
+                            # the large penalty factor
 []
 
 [Outputs]

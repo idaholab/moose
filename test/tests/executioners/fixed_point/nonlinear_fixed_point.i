@@ -64,6 +64,7 @@
   type = FixedPointSteady
   nl_rel_tol = 1e-2
   nl_abs_tol = 1e-12
+  automatic_scaling = false
 []
 
 [Outputs]

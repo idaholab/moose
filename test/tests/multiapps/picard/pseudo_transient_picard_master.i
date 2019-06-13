@@ -63,6 +63,7 @@
   petsc_options_value = 'hypre boomeramg'
   picard_max_its = 30
   picard_rel_tol = 1e-6
+  automatic_scaling = false # Small exodiffs generated if automatic scaling is used for these tests
 []
 
 [Outputs]

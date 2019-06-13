@@ -1,11 +1,15 @@
 [Tests]
   # Test the Crank-Nicolson time integration method for scalar variables.
+  issues = '#6289'
+  design = 'CrankNicolson.md'
   [./scalar]
     type = 'CSVDiff'
     input = 'scalar.i'
     csvdiff = 'scalar_out.csv'
     # This test features a single element mesh and a single ODE, so only run in serial.
     max_parallel = 1
+    requirement = 'Crank-Nicolson time integration shall converge to the correct value for a scalar variable problem'
+    cli_args = 'Executioner/automatic_scaling=false' # Diffing againt errors in very sensitive to the solve history
   [../]
   [./stiff_linear]
     type = 'CSVDiff'
@@ -14,6 +18,7 @@
     csvdiff = 'linear_stiff_out.csv'
     # This test features a single element mesh, so only run in serial.
     max_parallel = 1
+    requirement = 'Crank-Nicolson time integration shall converge to the correct value for a stiff scalar variable problem'
   [../]
   [./stiff_nonlinear]
     type = 'CSVDiff'
@@ -22,5 +27,6 @@
     csvdiff = 'nonlinear_stiff_out.csv'
     # This test features a single element mesh, so only run in serial.
     max_parallel = 1
+    requirement = 'Crank-Nicolson time integration shall converge to the correct value for a stiff and non-linear scalar variable problem'
   [../]
 []

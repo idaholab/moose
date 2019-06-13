@@ -79,7 +79,7 @@ class AnalyzeJacobian(FileTester):
             if (out_ok and self.exit_code != 0):
                 reason = 'OUT FOUND BUT CRASH'
             elif (not out_ok):
-                reason = 'NO EXPECTED OUT'
+                reason = 'EXPECTED OUTPUT NOT FOUND'
         if reason == '':
             if self.exit_code != 0 :
                 reason = 'CRASH'

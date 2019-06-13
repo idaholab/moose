@@ -63,8 +63,8 @@
 [Executioner]
   type = Steady
   solve_type = NEWTON
-  nl_abs_tol = 1e-10           # needed to get non-preconditioned version to fail
   auto_preconditioning = false # this is part of what is being tested, see "tests" file
+  nl_max_its = 8               # needed to get non-preconditioned version to fail
 []
 
 [Outputs]

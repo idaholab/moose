@@ -16,7 +16,7 @@
     issues = '#12601'
     design = 'FEProblemSolve.md'
     requirement = 'We shall not be able to solve a problem where the physics Jacobians are very large compared to the jacobian from a Dirichlet BC (unity)'
-    cli_args = 'Outputs/exodus=false'
+    cli_args = 'Outputs/exodus=false Executioner/automatic_scaling=false'
     max_parallel = 1 # no parallel svd preconditioner
   []
   [automatic-scaling-done-once]

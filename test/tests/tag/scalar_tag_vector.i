@@ -102,6 +102,8 @@
   solve_type = NEWTON
   nl_max_its = 2
   nl_abs_tol = 1.e-12 # This is an ODE, so nl_abs_tol makes sense.
+
+  automatic_scaling = false # This test's auxiliary solution relies on values in the residual vector
 []
 
 [Functions]

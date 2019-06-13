@@ -69,6 +69,7 @@
     scale = 1.0
     skip_times_old = '1.0'
   [../]
+  automatic_scaling = false # This test compares initial residuals
 []
 
 [Postprocessors]

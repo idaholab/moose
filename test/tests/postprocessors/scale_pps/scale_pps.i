@@ -68,6 +68,7 @@
 
 [Executioner]
   type = Steady
+  nl_rel_tol = 1e-12 # force two non-linear its
 []
 
 [Outputs]

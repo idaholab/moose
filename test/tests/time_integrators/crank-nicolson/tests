@@ -1,9 +1,12 @@
 [Tests]
+  design = 'CrankNicolson.md'
+  issues = '#2288'
   [./adapt]
     type = 'Exodiff'
     input = 'cranic_adapt.i'
     exodiff = 'cranic_adapt_out.e-s005'
     group = 'adaptive'
+    requirement = 'We shall be able to use a CrankNicolson time integrator with mesh adaptivity'
   [../]
 
   [./test]
@@ -11,5 +14,7 @@
     input = 'cranic.i'
     exodiff = 'cranic_out.e'
     max_parallel = 1
+    abs_zero = 1e-9
+    requirement = 'We shall reproduce the analytic solution using Crank-Nicolson time integration'
   [../]
 []

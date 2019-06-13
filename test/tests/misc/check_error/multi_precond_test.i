@@ -95,7 +95,7 @@
 
 
   solve_type = JFNK
-
+  automatic_scaling = false # No matrix to scale from
 []
 
 [Outputs]

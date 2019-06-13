@@ -61,8 +61,9 @@
     max_h_level = 2
   [../]
 
-  nl_rel_tol = 1e-6
-[]
+    nl_rel_tol = 1e-6
+    automatic_scaling = false
+  []
 
 [Outputs]
   file_base = repartitioned

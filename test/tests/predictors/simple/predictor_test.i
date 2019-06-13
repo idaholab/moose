@@ -69,6 +69,7 @@
     type = SimplePredictor
     scale = 1.0
   [../]
+  automatic_scaling = false # This test compares initial residuals
 []
 
 [Postprocessors]

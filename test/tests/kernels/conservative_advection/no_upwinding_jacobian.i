@@ -40,4 +40,5 @@
   petsc_options_value = 'test'
   dt = 2
   end_time = 2
+  automatic_scaling = false
 []

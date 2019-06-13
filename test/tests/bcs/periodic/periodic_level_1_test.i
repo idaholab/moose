@@ -76,6 +76,8 @@
     max_h_level = 4
     error_estimator = KellyErrorEstimator
   [../]
+
+  automatic_scaling = false # Small exodiffs for this test in parallel with scaling
 []
 
 [Outputs]

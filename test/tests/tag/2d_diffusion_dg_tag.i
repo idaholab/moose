@@ -128,6 +128,8 @@
 
   solve_type = 'NEWTON'
   nl_rel_tol = 1e-10
+
+  automatic_scaling = false # This test's auxiliary solution relies on values in the residual vector
 []
 
 [Postprocessors]

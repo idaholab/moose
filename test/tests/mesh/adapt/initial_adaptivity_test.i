@@ -71,6 +71,8 @@
     coarsen_fraction = 0.3
     max_h_level = 4
   [../]
+
+  automatic_scaling = false # 7e-6 order exodiffs with scaling
 []
 
 [Outputs]

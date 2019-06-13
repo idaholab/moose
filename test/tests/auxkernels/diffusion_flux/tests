@@ -5,7 +5,7 @@
     type = 'Exodiff'
     input = 'diffusion_flux.i'
     exodiff = 'diffusion_flux_out.e'
-    abs_zero = 1e-9
+    abs_zero = 1e-8
     requirement = "The `DiffusionFluxAux` object shall compute the components of the flux vector for diffusion problems."
   [../]
 []

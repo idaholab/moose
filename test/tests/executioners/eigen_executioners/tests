@@ -17,7 +17,7 @@
     type = 'Exodiff'
     input = 'ne.i'
     exodiff = 'ne.e'
-    abs_zero = 1e-09
+    abs_zero = 1e-08
 # because more outputs are generated in this test (see the next test),
 # we have to use one processor due to the the preconditioner change.
     max_parallel = 1
@@ -29,7 +29,7 @@
     type = 'Exodiff'
     input = 'ne.i'
     exodiff = 'ne_final.e'
-    abs_zero = 1e-09
+    abs_zero = 1e-08
 # because we only output the final solution, we can test with parallelization.
     cli_args = 'Executioner/output_after_power_iterations=false Executioner/output_before_normalization=false Outputs/file_base=ne_final Postprocessors/udiff/outputs=console'
     recover = false
@@ -41,7 +41,7 @@
     type = 'Exodiff'
     input = 'ne_mat.i'
     exodiff = 'ne_mat.e'
-    abs_zero = 1e-09
+    abs_zero = 1e-08
 # because more outputs are generated in this test (see the above test),
 # we have to use one processor due to the the preconditioner change.
     max_parallel = 1

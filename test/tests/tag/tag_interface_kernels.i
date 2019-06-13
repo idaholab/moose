@@ -164,6 +164,8 @@
 [Executioner]
   type = Steady
   solve_type = NEWTON
+
+  automatic_scaling = false # This test's auxiliary solution relies on values in the residual vector
 []
 
 [Outputs]

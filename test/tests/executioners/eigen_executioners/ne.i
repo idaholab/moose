@@ -52,6 +52,7 @@
 
 [Executioner]
   type = NonlinearEigen
+  automatic_scaling = false
 
   bx_norm = 'unorm'
   normalization = 'unorm'

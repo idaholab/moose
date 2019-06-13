@@ -80,6 +80,7 @@
   # and so that we can compare to larger numbers. This also means this test can run only
   # in serial, since parallel runs yield different convergence history.
   nl_rel_tol = 1e-4
+  automatic_scaling = false # This test does comparisons of converged residual norms which are very sensitive to the solve history
 []
 
 [Postprocessors]

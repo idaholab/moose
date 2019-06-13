@@ -1,9 +1,12 @@
 [Tests]
+  design = 'PhysicsBasedPreconditioner.md'
   [./test]
     type = 'Exodiff'
     input = 'pbp_test.i'
     exodiff = 'out.e'
     max_parallel = 1
+    requirement = 'We shall be able to do physics based preconditioning'
+    issues = '#477'
   [../]
 
   [./pbp_adapt_test]
@@ -12,6 +15,8 @@
     exodiff = 'out_pbp_adapt.e-s004'
     custom_cmp = 'pbp_adapt_test.cmp'
     group = 'adaptive'
+    requirement = 'We shall be able to do physics based preconditioning with adaptivity'
+    issues = '#477'
   [../]
 
   [./check_petsc_options_test]
@@ -19,6 +24,8 @@
     input = 'pbp_test_options.i'
     expect_out = 'Linear'
     max_parallel = 1
+    requirement = 'We shall be able to do physics based preconditioning with petsc options provided from the PBP block'
+    issues = '#477'
   [../]
 
   [./lots_of_variables]
@@ -34,5 +41,17 @@
     # It is related to communcators in VTK
     # We will fix it in the new release
     petsc_version_release = true
+    requirement = 'We shall be able to be build multiple matrix blocks in a single mesh sweep'
+    issues = '#3783'
   [../]
+
+  [check_scaling_warning]
+    type = 'RunException'
+    input = 'pbp_test.i'
+    cli_args = 'Outputs/exodus=false Executioner/automatic_scaling=true'
+    expect_err = "Automatic scaling isn't implemented for the case where you do not have a preconditioning matrix. No scaling will be applied"
+    issues = '#12601'
+    design = 'failed_solves.md'
+    requirement = 'We shall warn the user when they have explicitly requested automatic scaling in a context without a matrix'
+  []
 []

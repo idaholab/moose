@@ -106,6 +106,8 @@
   num_steps = 10
   nl_rel_tol = 1e-08
   dt = 0.01
+
+  automatic_scaling = false # This test's auxiliary solution relies on values in the residual vector
 []
 
 [Outputs]

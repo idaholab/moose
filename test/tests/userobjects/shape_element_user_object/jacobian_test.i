@@ -90,6 +90,7 @@
   petsc_options_value = 'test'
   dt = 0.1
   num_steps = 2
+  automatic_scaling = false # Doesn't play nicely with ShapeElementUserObject currently
 []
 
 [Outputs]

@@ -89,6 +89,8 @@
     max_h_level = 7
     cycles_per_step = 2
   [../]
+
+  automatic_scaling = false # Order 1e-5 relative exodiffs in parallel on u of size 1e-8
 []
 
 [Outputs]

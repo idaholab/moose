@@ -64,6 +64,7 @@
   petsc_options_value = 'hypre boomeramg'
   picard_max_its = 30
   nl_abs_tol = 1e-14
+  automatic_scaling = false # Reduced Picard iteration count if automatic scaling is used
 
   [./TimeStepper]
     type = IterationAdaptiveDT

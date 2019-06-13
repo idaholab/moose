@@ -26,6 +26,7 @@
   [./u]
     family = LAGRANGE
     order = SECOND
+    scaling = 10
   [../]
 []
 

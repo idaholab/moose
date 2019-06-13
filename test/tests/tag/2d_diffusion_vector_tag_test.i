@@ -106,12 +106,16 @@
   type = TagTestProblem
   extra_tag_vectors  = 'vec_tag1 vec_tag2'
   test_tag_vectors =  'vec_tag1 vec_tag2'
+  test_tag_matrices = 'mat_tag1'
+  extra_tag_matrices = 'mat_tag1'
 []
 
 [Executioner]
   type = Steady
 
   solve_type = 'NEWTON'
+
+  automatic_scaling = true
 []
 
 [Outputs]

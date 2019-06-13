@@ -158,6 +158,8 @@
   l_max_its = 100
   nl_max_its = 6
   nl_abs_tol = 1.e-13
+
+  automatic_scaling = false # This test's auxiliary solution relies on values in the residual vector
 []
 
 [Postprocessors]

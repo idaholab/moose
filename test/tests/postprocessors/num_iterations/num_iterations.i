@@ -54,6 +54,7 @@
   nl_abs_tol = 1e-8
   nl_rel_tol = 0
   nl_max_its = 5
+  automatic_scaling = false # this test is doing iteration counting
 []
 
 [Postprocessors]

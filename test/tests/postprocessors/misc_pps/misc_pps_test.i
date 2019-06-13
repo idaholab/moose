@@ -116,6 +116,7 @@
   start_time = 0.0
   num_steps = 10
   dt = 0.25
+  automatic_scaling = false # Throws off the iteration count if true
 []
 
 [Outputs]

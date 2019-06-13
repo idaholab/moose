@@ -77,6 +77,7 @@
   petsc_options_value = 'hypre boomeramg'
   picard_max_its = 30
   nl_abs_tol = 1e-14
+  automatic_scaling = false # Different number of Picard iterations (9 vs 10) in one time step if automatic scaling is used
 []
 
 [Outputs]
@@ -112,4 +113,3 @@
     variable = u
   [../]
 []
-

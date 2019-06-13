@@ -69,6 +69,7 @@
   nl_abs_tol = 1e-8
   l_max_its = 100
   nl_max_its = 10
+  automatic_scaling = false # Doesn't work with kinematic residual approach
 []
 
 [Outputs]

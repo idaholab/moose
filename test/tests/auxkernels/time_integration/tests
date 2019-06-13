@@ -6,5 +6,6 @@
     input = 'time_integration.i'
     exodiff = 'time_integration_out.e'
     requirement = "MOOSE shall include the ability to compute the integral of a variable over time."
+    abs_zero = 1e-9
   [../]
 []

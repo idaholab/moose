@@ -5,7 +5,7 @@
     type = RunApp
     input = 'ill_conditioned_field_scalar_system.i'
     expect_out = '1 of 4 singular values'
-    cli_args = 'Outputs/exodus=false'
+    cli_args = 'Outputs/exodus=false Executioner/automatic_scaling=false'
     max_parallel = 1 # no parallel svd
     requirement = 'We shall be able to show that without automatic scaling, this system is singular'
   []
