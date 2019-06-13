@@ -18,8 +18,9 @@ template <>
 InputParameters validParams<IntactBondsDirichletBCPD>();
 
 /**
- * Defines Dirichlet boundary condition based on number of intact bonds associated with each
- * material point
+ * Class to selectively apply a Dirichlet BC based on the number of intact
+ * bonds associated with each material point. Used to stabilize nodes without
+ * a sufficient number of connections to other material points.
  */
 class IntactBondsDirichletBCPD : public NodalBC
 {
@@ -38,4 +39,7 @@ protected:
 
   /// value of the AuxVariable for number of intact bonds associated with each material point
   const VariableValue & _intact_bonds_val;
+
+  /// Maximum number of intact bonds connected a node for this BC to be active
+  const unsigned int _max_intact_bonds;
 };

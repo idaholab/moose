@@ -17,7 +17,7 @@ template <>
 InputParameters validParams<GeneralizedPlaneStrainOffDiagNOSPD>();
 
 /**
- * Kernel class for coupled off diagonal jacobian entries of non-ordinary state-based peridynamic
+ * Kernel class for coupled off diagonal Jacobian entries of non-ordinary state-based peridynamic
  * generalized plane strain model
  */
 class GeneralizedPlaneStrainOffDiagNOSPD : public MechanicsBaseNOSPD
@@ -30,7 +30,7 @@ protected:
   virtual void computeOffDiagJacobianScalar(unsigned int jvar_num) override;
 
   /**
-   * Function to compute the full off diagonal jacobian for coupling between displacements and
+   * Function to compute the full off diagonal Jacobian for coupling between displacements and
    * scalar variable
    * @param component   The index of displacement component
    * @param jvar_num   The coupled scalar variable number
@@ -38,7 +38,7 @@ protected:
   void computeDispFullOffDiagJacobianScalar(unsigned int component, unsigned int jvar_num);
 
   /**
-   * Function to compute partial off diagonal jacobian for coupling between displacements and scalar
+   * Function to compute partial off diagonal Jacobian for coupling between displacements and scalar
    * variable
    * @param component   The index of displacement component
    * @param jvar_num   The coupled scalar variable number
@@ -46,7 +46,7 @@ protected:
   void computeDispPartialOffDiagJacobianScalar(unsigned int component, unsigned int jvar_num);
 
   /**
-   * Function to compute off disgonal jacobian for coupling between temperature and scalar variable
+   * Function to compute off disgonal Jacobian for coupling between temperature and scalar variable
    * @param jvar_num   The coupled scalar variable number
    */
   void computeTempOffDiagJacobianScalar(unsigned int jvar_num);

@@ -19,9 +19,6 @@ validParams<MechanicsBasePD>()
       "Base class for calculating residual and Jacobian for peridynamic mechanic kernels");
 
   params.addParam<VariableName>("temperature", "Nonlinear variable name for the temperature");
-  params.addParam<std::vector<MaterialPropertyName>>(
-      "eigenstrain_names",
-      "List of eigenstrains to be coupled in non-ordinary state-based mechanics kernels");
   params.addParam<VariableName>("out_of_plane_strain",
                                 "Nonlinear variable name for the out_of_plane strain for "
                                 "plane stress analysis using SNOSPD formulation");
@@ -35,8 +32,6 @@ MechanicsBasePD::MechanicsBasePD(const InputParameters & parameters)
     _temp_var(_temp_coupled ? &_subproblem.getVariable(_tid, getParam<VariableName>("temperature"))
                             : NULL),
     _ndisp(coupledComponents("displacements")),
-    _eigenstrain_names(getParam<std::vector<MaterialPropertyName>>("eigenstrain_names")),
-    _deigenstrain_dT(_eigenstrain_names.size()),
     _out_of_plane_strain_coupled(isParamValid("out_of_plane_strain")),
     _out_of_plane_strain_var(
         _out_of_plane_strain_coupled
@@ -49,10 +44,6 @@ MechanicsBasePD::MechanicsBasePD(const InputParameters & parameters)
 
   for (unsigned int i = 0; i < _ndisp; ++i)
     _disp_var.push_back(getVar("displacements", i));
-
-  for (unsigned int i = 0; i < _deigenstrain_dT.size(); ++i)
-    _deigenstrain_dT[i] =
-        &getMaterialPropertyDerivative<RankTwoTensor>(_eigenstrain_names[i], _temp_var->name());
 }
 
 void

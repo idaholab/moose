@@ -21,7 +21,7 @@ validParams<GeneralizedPlaneStrainOffDiagNOSPD>()
 {
   InputParameters params = validParams<MechanicsBaseNOSPD>();
   params.addClassDescription(
-      "Class for calculating off-diagonal jacobian corresponding to "
+      "Class for calculating off-diagonal Jacobian corresponding to "
       "coupling between displacements (or temperature) with scalar out-of-plane strain for "
       "generalized plane strain using SNOSPD formulation");
   params.addCoupledVar("scalar_out_of_plane_strain",
@@ -37,7 +37,7 @@ GeneralizedPlaneStrainOffDiagNOSPD::GeneralizedPlaneStrainOffDiagNOSPD(
 {
   // Consistency check
   if (_disp_var.size() != 2)
-    mooseError("GeneralizedPlaneStrain only works for two dimensional case!");
+    mooseError("GeneralizedPlaneStrain only works for two dimensional models!");
 }
 
 void

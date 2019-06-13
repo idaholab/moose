@@ -60,9 +60,9 @@ MechanicsOSPD::computeNonlocalResidual()
     std::vector<dof_id_type> bonds = _pdmesh.getAssocBonds(_current_elem->node_id(cur_nd));
     for (unsigned int k = 0; k < neighbors.size(); ++k)
     {
-      Node * node_k = _pdmesh.nodePtr(neighbors[k]);
+      const Node * node_k = _pdmesh.nodePtr(neighbors[k]);
       ivardofs[1 - cur_nd] = node_k->dof_number(_sys.number(), _var.number(), 0);
-      Real vol_k = _pdmesh.getVolume(neighbors[k]);
+      const Real vol_k = _pdmesh.getVolume(neighbors[k]);
 
       // obtain bond ik's origin length and current orientation
       RealGradient origin_ori_ijk = *node_k - *_pdmesh.nodePtr(_current_elem->node_id(cur_nd));
@@ -75,7 +75,7 @@ MechanicsOSPD::computeNonlocalResidual()
       cur_ori_ijk /= cur_ori_ijk.norm();
 
       // bond status for bond k
-      Real bond_status_ijk = _bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[k]));
+      const Real bond_status_ijk = _bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[k]));
 
       _local_re(0) = (cur_nd == 0 ? -1 : 1) * _bond_force_i_j[cur_nd] * vol_k /
                      origin_ori_ijk.norm() * cur_ori_ijk(_component) * _bond_status_ij *
@@ -107,7 +107,7 @@ MechanicsOSPD::computeNonlocalResidual()
 void
 MechanicsOSPD::computeLocalJacobian()
 {
-  Real val =
+  const Real val =
       _cur_ori_ij(_component) * _cur_ori_ij(_component) * _bond_dfdU_ij[0] +
       _bond_force_ij[0] * (1.0 - _cur_ori_ij(_component) * _cur_ori_ij(_component)) / _cur_len_ij;
 
@@ -128,7 +128,7 @@ MechanicsOSPD::computeLocalOffDiagJacobian(unsigned int coupled_component)
   }
   else
   {
-    Real val =
+    const Real val =
         _cur_ori_ij(_component) * _cur_ori_ij(coupled_component) * _bond_dfdU_ij[0] -
         _bond_force_ij[0] * _cur_ori_ij(_component) * _cur_ori_ij(coupled_component) / _cur_len_ij;
     for (_i = 0; _i < _test.size(); ++_i)
@@ -149,9 +149,9 @@ MechanicsOSPD::computeNonlocalJacobian()
     std::vector<dof_id_type> bonds = _pdmesh.getAssocBonds(_current_elem->node_id(cur_nd));
     for (unsigned int k = 0; k < neighbors.size(); ++k)
     {
-      Node * node_k = _pdmesh.nodePtr(neighbors[k]);
+      const Node * node_k = _pdmesh.nodePtr(neighbors[k]);
       ivardofs[1 - cur_nd] = node_k->dof_number(_sys.number(), _var.number(), 0);
-      Real vol_k = _pdmesh.getVolume(neighbors[k]);
+      const Real vol_k = _pdmesh.getVolume(neighbors[k]);
 
       // obtain bond ik's origin length and current orientation
       RealGradient origin_ori_ijk = *node_k - *_pdmesh.nodePtr(_current_elem->node_id(cur_nd));
@@ -164,10 +164,10 @@ MechanicsOSPD::computeNonlocalJacobian()
       cur_ori_ijk /= cur_ori_ijk.norm();
 
       // bond status for bond k
-      Real bond_status_ijk = _bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[k]));
+      const Real bond_status_ijk = _bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[k]));
 
-      Real val = (cur_nd == 0 ? 1 : -1) * cur_ori_ijk(_component) * _cur_ori_ij(_component) *
-                 _bond_dfdU_i_j[cur_nd];
+      const Real val = (cur_nd == 0 ? 1 : -1) * cur_ori_ijk(_component) * _cur_ori_ij(_component) *
+                       _bond_dfdU_i_j[cur_nd];
 
       _local_ke.zero();
       for (_i = 0; _i < _test.size(); ++_i)
@@ -199,13 +199,14 @@ MechanicsOSPD::computeNonlocalJacobian()
         }
       }
 
-      val = _bond_force_i_j[cur_nd] * (1.0 - cur_ori_ijk(_component) * cur_ori_ijk(_component)) /
-            cur_ori_ijk.norm();
+      const Real val2 = _bond_force_i_j[cur_nd] *
+                        (1.0 - cur_ori_ijk(_component) * cur_ori_ijk(_component)) /
+                        cur_ori_ijk.norm();
 
       _local_ke.zero();
       for (_i = 0; _i < _test.size(); ++_i)
         for (_j = 0; _j < _phi.size(); ++_j)
-          _local_ke(_i, _j) += (_i == _j ? 1 : -1) * val / origin_ori_ijk.norm() * vol_k *
+          _local_ke(_i, _j) += (_i == _j ? 1 : -1) * val2 / origin_ori_ijk.norm() * vol_k *
                                _bond_status_ij * bond_status_ijk;
 
       _assembly.cacheJacobianBlock(_local_ke, ivardofs, ivardofs, _var.scalingFactor());
@@ -251,10 +252,10 @@ MechanicsOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_num,
     std::vector<dof_id_type> bonds = _pdmesh.getAssocBonds(_current_elem->node_id(cur_nd));
     for (unsigned int k = 0; k < neighbors.size(); ++k)
     {
-      Node * node_k = _pdmesh.nodePtr(neighbors[k]);
+      const Node * node_k = _pdmesh.nodePtr(neighbors[k]);
       ivardofs[1 - cur_nd] = node_k->dof_number(_sys.number(), _var.number(), 0);
       jvardofs[1 - cur_nd] = node_k->dof_number(_sys.number(), jvar_num, 0);
-      Real vol_k = _pdmesh.getVolume(neighbors[k]);
+      const Real vol_k = _pdmesh.getVolume(neighbors[k]);
 
       // obtain bond k's origin length and current orientation
       RealGradient origin_ori_ijk = *node_k - *_pdmesh.nodePtr(_current_elem->node_id(cur_nd));
@@ -267,20 +268,21 @@ MechanicsOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_num,
       cur_ori_ijk /= cur_ori_ijk.norm();
 
       // bond status for bond k
-      Real bond_status_ijk = _bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[k]));
+      const Real bond_status_ijk = _bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[k]));
 
       _local_ke.zero();
       if (coupled_component == 3)
       {
-        Real val = cur_ori_ijk(_component) * _bond_dfdT_i_j[cur_nd] / origin_ori_ijk.norm() * vol_k;
+        const Real val =
+            cur_ori_ijk(_component) * _bond_dfdT_i_j[cur_nd] / origin_ori_ijk.norm() * vol_k;
         _local_ke(0, cur_nd) += (cur_nd == 0 ? -1 : 1) * val * _bond_status_ij * bond_status_ijk;
         _local_ke(1, cur_nd) += (cur_nd == 0 ? 1 : -1) * val * _bond_status_ij * bond_status_ijk;
       }
       else
       {
-        Real val = (cur_nd == 0 ? 1 : -1) * cur_ori_ijk(_component) *
-                   _cur_ori_ij(coupled_component) * _bond_dfdU_i_j[cur_nd] / origin_ori_ijk.norm() *
-                   vol_k;
+        const Real val = (cur_nd == 0 ? 1 : -1) * cur_ori_ijk(_component) *
+                         _cur_ori_ij(coupled_component) * _bond_dfdU_i_j[cur_nd] /
+                         origin_ori_ijk.norm() * vol_k;
         for (_i = 0; _i < _test.size(); ++_i)
           for (_j = 0; _j < _phi.size(); ++_j)
             _local_ke(_i, _j) += (_i == _j ? 1 : -1) * val * _bond_status_ij * bond_status_ijk;

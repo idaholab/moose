@@ -99,12 +99,13 @@ WeakPlaneStressNOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_num,
       std::vector<dof_id_type> bonds = _pdmesh.getAssocBonds(_current_elem->node_id(cur_nd));
       for (unsigned int k = 0; k < BAneighbors.size(); k++)
       {
-        Node * node_k = _pdmesh.nodePtr(neighbors[BAneighbors[k]]);
+        const Node * node_k = _pdmesh.nodePtr(neighbors[BAneighbors[k]]);
         jvardofs_ijk[1] = node_k->dof_number(_sys.number(), jvar_num, 0);
-        Real vol_k = _pdmesh.getVolume(neighbors[BAneighbors[k]]);
+        const Real vol_k = _pdmesh.getVolume(neighbors[BAneighbors[k]]);
 
         // obtain bond k's origin vector
-        RealGradient origin_vec_ijk = *node_k - *_pdmesh.nodePtr(_current_elem->node_id(cur_nd));
+        const RealGradient origin_vec_ijk =
+            *node_k - *_pdmesh.nodePtr(_current_elem->node_id(cur_nd));
 
         RankTwoTensor dFdUk;
         dFdUk.zero();

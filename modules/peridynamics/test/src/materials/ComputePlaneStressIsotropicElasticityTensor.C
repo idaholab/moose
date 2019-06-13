@@ -10,7 +10,7 @@
 #include "ComputePlaneStressIsotropicElasticityTensor.h"
 #include "ElasticityTensorTools.h"
 
-registerMooseObject("PeridynamicsApp", ComputePlaneStressIsotropicElasticityTensor);
+registerMooseObject("PeridynamicsTestApp", ComputePlaneStressIsotropicElasticityTensor);
 
 template <>
 InputParameters

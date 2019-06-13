@@ -18,10 +18,10 @@ validParams<KernelBasePD>()
   params.addClassDescription(
       "Base class for calculating residual and Jacobian for peridynamic kernels");
 
-  params.addParam<bool>(
-      "full_jacobian",
-      false,
-      "Parameter to set whether to use full jacobian for state based formulation or not");
+  params.addParam<bool>("full_jacobian",
+                        false,
+                        "Whether to include coupling terms with nodes connected to neighbors in "
+                        "the Jacobian matrix for state based formulations");
 
   return params;
 }
@@ -32,7 +32,7 @@ KernelBasePD::KernelBasePD(const InputParameters & parameters)
     _use_full_jacobian(getParam<bool>("full_jacobian")),
     _pdmesh(dynamic_cast<PeridynamicsMesh &>(_mesh)),
     _dim(_pdmesh.dimension()),
-    _nnodes(2) // Edge2 element has only two nodes
+    _nnodes(2) // This is designed specifically to work with EDGE2 elements, which have two nodes
 {
 }
 
@@ -65,7 +65,7 @@ KernelBasePD::computeResidual()
   prepare();
 
   DenseVector<Number> & re = _assembly.residualBlock(_var.number());
-  mooseAssert(re.size() == _nnodes, "Edge2 element has only two nodes");
+  mooseAssert(re.size() == _nnodes, "KernelBasePD is designed to only work with EDGE2 elements");
   _local_re.resize(re.size());
   _local_re.zero();
 

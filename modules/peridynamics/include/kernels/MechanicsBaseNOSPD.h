@@ -42,5 +42,9 @@ protected:
   const MaterialProperty<RankTwoTensor> & _ddgraddv;
   const MaterialProperty<RankTwoTensor> & _ddgraddw;
   const MaterialProperty<RankFourTensor> & _Jacobian_mult;
+  const std::vector<MaterialPropertyName> _eigenstrain_names;
+  std::vector<const MaterialProperty<RankTwoTensor> *> _deigenstrain_dT;
+  ///@}
+
   ///@}
 };

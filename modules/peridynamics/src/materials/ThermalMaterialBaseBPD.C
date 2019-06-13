@@ -10,6 +10,7 @@
 #include "ThermalMaterialBaseBPD.h"
 #include "MooseVariable.h"
 #include "Function.h"
+#include "Assembly.h"
 
 #include "libmesh/quadrature.h"
 
@@ -22,9 +23,8 @@ validParams<ThermalMaterialBaseBPD>()
 
   params.addRequiredParam<NonlinearVariableName>("temperature",
                                                  "Nonlinear variable name for the temperature");
-  params.addParam<Real>("thermal_conductivity", 0.0, "Value of material thermal conductivity");
-  params.addParam<FunctionName>(
-      "thermal_conductivity_function", "", "Thermal conductivity as a function of temperature");
+  params.addRequiredParam<MaterialPropertyName>("thermal_conductivity",
+                                                "Name of material defining thermal conductivity");
 
   return params;
 }
@@ -33,23 +33,10 @@ ThermalMaterialBaseBPD::ThermalMaterialBaseBPD(const InputParameters & parameter
   : MaterialBasePD(parameters),
     _temp_var(_subproblem.getVariable(_tid, getParam<NonlinearVariableName>("temperature"))),
     _temp(2),
-    _thermal_conductivity(getParam<Real>("thermal_conductivity")),
-    _thermal_conductivity_function(getParam<FunctionName>("thermal_conductivity_function") != ""
-                                       ? &getFunction("thermal_conductivity_function")
-                                       : NULL),
     _bond_heat_flow(declareProperty<Real>("bond_heat_flow")),
-    _bond_dQdT(declareProperty<Real>("bond_dQdT"))
+    _bond_dQdT(declareProperty<Real>("bond_dQdT")),
+    _thermal_conductivity(getMaterialProperty<Real>("thermal_conductivity"))
 {
-  if (_thermal_conductivity_function)
-  {
-    Point p;
-    _kappa = _thermal_conductivity_function->value((_temp[0] + _temp[1]) / 2.0, p);
-  }
-  else if (_thermal_conductivity)
-    _kappa = _thermal_conductivity;
-  else
-    mooseError("Neither thermal_conductivity nor thermal_conductivity_function is provided for "
-               "peridynamic thermal models: ThermalMaterialBaseBPD");
 }
 
 void
@@ -57,8 +44,13 @@ ThermalMaterialBaseBPD::computeProperties()
 {
   MaterialBasePD::computeProperties();
 
+  Real ave_thermal_conductivity = 0.0;
+  for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
+    ave_thermal_conductivity += _thermal_conductivity[qp] * _JxW[qp] * _coord[qp];
+  ave_thermal_conductivity /= _assembly.elemVolume();
+
   // compute peridynamic micro-conductivity: _Kij
-  computePDMicroConductivity();
+  computePDMicroConductivity(ave_thermal_conductivity);
 
   computeNodalTemperature();
 

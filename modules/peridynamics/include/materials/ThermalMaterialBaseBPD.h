@@ -40,19 +40,14 @@ protected:
 
   /**
    * Function to compute micro-conductivity
+   * @param ave_thermal_conductivity average thermal conductivity for the current element
    */
-  virtual void computePDMicroConductivity() = 0;
+  virtual void computePDMicroConductivity(const Real ave_thermal_conductivity) = 0;
 
   ///@{ Temperature variable and values
   MooseVariableFEBase & _temp_var;
   std::vector<Real> _temp;
   ///@}
-
-  /// Constant thermal conductivity
-  const Real _thermal_conductivity;
-
-  /// Functional thermal conductivity
-  const Function * _thermal_conductivity_function;
 
   ///@{ Material properties to be stored
   MaterialProperty<Real> & _bond_heat_flow;
@@ -60,7 +55,7 @@ protected:
   ///@}
 
   /// Thermal conductivity
-  Real _kappa;
+  const MaterialProperty<Real> & _thermal_conductivity;
 
   /// Micro-conductivity
   Real _Kij;
