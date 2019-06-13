@@ -140,6 +140,8 @@ void
 NonlinearEigenSystem::initialSetup()
 {
   NonlinearSystemBase::initialSetup();
+  // DG kernels
+  addEigenTagToMooseObjects(_dg_kernels);
   // Regular kernels
   addEigenTagToMooseObjects(_kernels);
   // Nodal BCs (we do not care about IBCs)

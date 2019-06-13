@@ -101,4 +101,12 @@
     slepc_version = '>=3.8.0'
     requirement = "Eigenvalue system should be able to handle scalar kernels"
   [../]
+
+  [./dg_krylovschur]
+    type = 'CSVDiff'
+    input = 'dg_krylovschur.i'
+    csvdiff = 'dg_krylovschur_out_eigenvalues_0001.csv'
+    slepc_version = '>=3.8.0'
+    requirement = "Eigenvalue system should be able to handle DG kernels"
+  []
 []
