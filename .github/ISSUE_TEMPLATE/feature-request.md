@@ -1,6 +1,6 @@
 ---
-name: Feature Request
-about: Suggest an idea for this project
+name: Feature or Enhancement Request
+about: New Features or enhancements to existing capabilities
 title: ''
 labels: 'T: task, P: normal'
 assignees: ''
@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 ## Reason
-<!--Why do you need this feature?-->
+<!--Why do you need this feature or what is the enhancement?-->
 
 ## Design
 <!--A concise description (design) of what you want to happen.--->

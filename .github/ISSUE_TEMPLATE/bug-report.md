@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Create a report to help us improve
+about: Report a bug that is preventing proper operation of the framework or an application
 title: ''
 labels: 'T: defect'
 assignees: ''
@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 ## Bug Description
-<!--A clear and concise description of the problem.-->
+<!--A clear and concise description of the problem (Note: A missing feature is not a bug).-->
 
 ## Steps to Reproduce
 <!--Steps to reproduce the behavior (input file, or modifications to an existing input file, etc.)-->
