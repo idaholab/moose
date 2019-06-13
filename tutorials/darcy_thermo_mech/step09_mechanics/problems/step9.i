@@ -69,7 +69,7 @@
     variable = temperature
   []
   [heat_convection]
-    type = DarcyConvection
+    type = DarcyAdvection
     variable = temperature
     pressure = pressure
   []

@@ -13,9 +13,9 @@
 
 // Forward Declaration
 template <ComputeStage>
-class DarcyConvection;
+class DarcyAdvection;
 
-declareADValidParams(DarcyConvection);
+declareADValidParams(DarcyAdvection);
 
 /**
  * Kernel which implements the convective term in the transient heat
@@ -23,10 +23,10 @@ declareADValidParams(DarcyConvection);
  * equation.
  */
 template <ComputeStage compute_stage>
-class DarcyConvection : public ADKernelValue<compute_stage>
+class DarcyAdvection : public ADKernelValue<compute_stage>
 {
 public:
-  DarcyConvection(const InputParameters & parameters);
+  DarcyAdvection(const InputParameters & parameters);
 
 protected:
   /// ADKernelValue objects must override precomputeQpResidual

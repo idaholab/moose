@@ -7,17 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "DarcyConvection.h"
+#include "DarcyAdvection.h"
 
-registerADMooseObject("DarcyThermoMechApp", DarcyConvection);
+registerADMooseObject("DarcyThermoMechApp", DarcyAdvection);
 
-defineADValidParams(DarcyConvection,
+defineADValidParams(DarcyAdvection,
                     ADKernelValue,
                     params.addRequiredCoupledVar("pressure",
                                                  "The variable representing the pressure."););
 
 template <ComputeStage compute_stage>
-DarcyConvection<compute_stage>::DarcyConvection(const InputParameters & parameters)
+DarcyAdvection<compute_stage>::DarcyAdvection(const InputParameters & parameters)
   : ADKernelValue<compute_stage>(parameters),
     // Couple to the gradient of the pressure
     _pressure_grad(adCoupledGradient("pressure")),
@@ -32,7 +32,7 @@ DarcyConvection<compute_stage>::DarcyConvection(const InputParameters & paramete
 
 template <ComputeStage compute_stage>
 ADResidual
-DarcyConvection<compute_stage>::precomputeQpResidual()
+DarcyAdvection<compute_stage>::precomputeQpResidual()
 {
   // See also: E. Majchrzak and L. Turchan, "The Finite Difference
   // Method For Transient Convection Diffusion", Scientific Research
