@@ -81,14 +81,8 @@ protected:
   const VariableValue & _arhoEA;
 
   const VariableValue & _area;
-  // The *actual* density, momentum, and total energy.  In the
-  // constant-area equations, these are identical to _arhoA,
-  // _arhouA, and _arhoEA defined above, in the
-  // variable-area equations, these are the actual _rho, _rhou, and
-  // _rhoE values.
+
   const VariableValue & _rho;
-  const VariableValue & _rhou;
-  const VariableValue & _rhoE;
 
   // Miscellaneous aux variables
   const VariableValue & _enthalpy;

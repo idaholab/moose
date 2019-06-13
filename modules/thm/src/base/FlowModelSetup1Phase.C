@@ -40,8 +40,6 @@ FlowModelSetup1Phase::FlowModelSetup1Phase(InputParameters params)
     _rhouA_name("rhouA"),
     _rhoEA_name("rhoEA"),
     _rho_name("rho"),
-    _rhou_name("rhou"),
-    _rhoE_name("rhoE"),
     _vel_name("vel"),
     _p_name("p"),
     _T_name("T"),
@@ -76,35 +74,6 @@ FlowModelSetup1Phase::addInitialConditions()
 
     _this_action_warehouse.addActionBlock(action);
   }
-  // rho*u
-  {
-    InputParameters params = _this_action_factory.getValidParams(class_name);
-    params.set<std::string>("type") = "VariableProductIC";
-
-    std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
-        _this_action_factory.create(class_name, _rhou_name + "_ic", params));
-
-    action->getObjectParams().set<VariableName>("variable") = _rhou_name;
-    action->getObjectParams().set<std::vector<VariableName>>("values") = {_rho_name, _vel_name};
-
-    _this_action_warehouse.addActionBlock(action);
-  }
-  // rho*E
-  {
-    InputParameters params = _this_action_factory.getValidParams(class_name);
-    params.set<std::string>("type") = "RhoEFromPressureTemperatureVelocityIC";
-
-    std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
-        _this_action_factory.create(class_name, _rhoE_name + "_ic", params));
-
-    action->getObjectParams().set<VariableName>("variable") = _rhoE_name;
-    action->getObjectParams().set<UserObjectName>("fp") = _fp_1phase_name;
-    action->getObjectParams().set<std::vector<VariableName>>("p") = {_p_name};
-    action->getObjectParams().set<std::vector<VariableName>>("T") = {_T_name};
-    action->getObjectParams().set<std::vector<VariableName>>("vel") = {_vel_name};
-
-    _this_action_warehouse.addActionBlock(action);
-  }
 
   // rho*A
   {
@@ -128,20 +97,25 @@ FlowModelSetup1Phase::addInitialConditions()
         _this_action_factory.create(class_name, _rhouA_name + "_ic", params));
 
     action->getObjectParams().set<VariableName>("variable") = _rhouA_name;
-    action->getObjectParams().set<std::vector<VariableName>>("values") = {_rhou_name, _A_name};
+    action->getObjectParams().set<std::vector<VariableName>>("values") = {
+        _rho_name, _vel_name, _A_name};
 
     _this_action_warehouse.addActionBlock(action);
   }
   // rho*E*A
   {
     InputParameters params = _this_action_factory.getValidParams(class_name);
-    params.set<std::string>("type") = "VariableProductIC";
+    params.set<std::string>("type") = "RhoEAFromPressureTemperatureVelocityIC";
 
     std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
         _this_action_factory.create(class_name, _rhoEA_name + "_ic", params));
 
     action->getObjectParams().set<VariableName>("variable") = _rhoEA_name;
-    action->getObjectParams().set<std::vector<VariableName>>("values") = {_rhoE_name, _A_name};
+    action->getObjectParams().set<UserObjectName>("fp") = _fp_1phase_name;
+    action->getObjectParams().set<std::vector<VariableName>>("p") = {_p_name};
+    action->getObjectParams().set<std::vector<VariableName>>("T") = {_T_name};
+    action->getObjectParams().set<std::vector<VariableName>>("vel") = {_vel_name};
+    action->getObjectParams().set<std::vector<VariableName>>("A") = {_A_name};
 
     _this_action_warehouse.addActionBlock(action);
   }
@@ -237,42 +211,6 @@ FlowModelSetup1Phase::addNonConstantAuxVariables()
 
     action->getObjectParams().set<AuxVariableName>("variable") = _rho_name;
     action->getObjectParams().set<std::vector<VariableName>>("numerator") = {_rhoA_name};
-    action->getObjectParams().set<std::vector<VariableName>>("denominator") = {_A_name};
-
-    _this_action_warehouse.addActionBlock(action);
-  }
-
-  // rho*u
-  addAuxVariable(_rhou_name);
-  {
-    const std::string class_name = "AddKernelAction";
-    InputParameters params = _this_action_factory.getValidParams(class_name);
-    params.set<std::string>("type") = "QuotientAux";
-    params.set<std::string>("task") = "add_aux_kernel";
-
-    std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
-        _this_action_factory.create(class_name, _rhou_name + "_aux", params));
-
-    action->getObjectParams().set<AuxVariableName>("variable") = _rhou_name;
-    action->getObjectParams().set<std::vector<VariableName>>("numerator") = {_rhouA_name};
-    action->getObjectParams().set<std::vector<VariableName>>("denominator") = {_A_name};
-
-    _this_action_warehouse.addActionBlock(action);
-  }
-
-  // rho*E
-  addAuxVariable(_rhoE_name);
-  {
-    const std::string class_name = "AddKernelAction";
-    InputParameters params = _this_action_factory.getValidParams(class_name);
-    params.set<std::string>("type") = "QuotientAux";
-    params.set<std::string>("task") = "add_aux_kernel";
-
-    std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
-        _this_action_factory.create(class_name, _rhoE_name + "_aux", params));
-
-    action->getObjectParams().set<AuxVariableName>("variable") = _rhoE_name;
-    action->getObjectParams().set<std::vector<VariableName>>("numerator") = {_rhoEA_name};
     action->getObjectParams().set<std::vector<VariableName>>("denominator") = {_A_name};
 
     _this_action_warehouse.addActionBlock(action);
