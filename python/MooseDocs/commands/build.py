@@ -186,10 +186,13 @@ def main(options):
                 ext.setActive(False)
 
     # Replace "home" with local server
+    home = options.home
     if options.serve:
+        home = 'http://127.0.0.1:{}'.format(options.port)
+    if home is not None:
         for ext in translator.extensions:
             if 'home' in ext:
-                ext.update(home='http://127.0.0.1:{}'.format(options.port), set_initial=True)
+                ext.update(home=home, set_initial=True)
 
     # Dump page tree
     if options.dump:
