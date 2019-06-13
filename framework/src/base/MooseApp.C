@@ -244,7 +244,7 @@ validParams<MooseApp>()
                                            "Pauses the application during startup for the "
                                            "specified time to allow for connection of debuggers.");
   params.addParam<bool>(
-      "automatic_automatic_scaling", true, "Whether to turn on automatic scaling by default.");
+      "automatic_automatic_scaling", false, "Whether to turn on automatic scaling by default.");
 
   params.addPrivateParam<std::string>("_app_name"); // the name passed to AppFactory::create
   params.addPrivateParam<std::string>("_type");
