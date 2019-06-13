@@ -28,7 +28,6 @@ public:
   static const std::string FRICTION_FACTOR_DARCY;
   static const std::string DYNAMIC_VISCOSITY;
   static const std::string HEAT_TRANSFER_COEFFICIENT_WALL;
-  static const std::string MOMENTUM_DENSITY;
   static const std::string PRESSURE;
   static const std::string RHOA;
   static const std::string RHOEA;
@@ -41,6 +40,5 @@ public:
   static const std::string SPECIFIC_VOLUME;
   static const std::string TEMPERATURE;
   static const std::string THERMAL_CONDUCTIVITY;
-  static const std::string TOTAL_ENERGY_DENSITY;
   static const std::string VELOCITY;
 };

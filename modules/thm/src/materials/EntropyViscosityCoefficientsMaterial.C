@@ -27,8 +27,10 @@ validParams<EntropyViscosityCoefficientsMaterial>()
                         "boolean to use parabolic regularization: Pe = Re = M^2");
   // Coupled variables
   params.addRequiredCoupledVar("rho", "Density");
-  params.addRequiredCoupledVar("rhou", "Momentum density");
-  params.addRequiredCoupledVar("rhoE", "Total energy density");
+  params.addRequiredCoupledVar("rhoA", "Solution variable: rhoA");
+  params.addRequiredCoupledVar("rhouA", "Solution variable: rhouA");
+  params.addRequiredCoupledVar("rhoEA", "Solution variable: rhoEA");
+  params.addRequiredCoupledVar("vel", "Velocity");
   params.addRequiredCoupledVar("p", "Pressure of fluid");
   // Jump variables:
   params.addCoupledVar("jump_pressure", "variable storing the jump of the pressure.");
@@ -61,10 +63,7 @@ EntropyViscosityCoefficientsMaterial::EntropyViscosityCoefficientsMaterial(
     _rho(coupledValue("rho")),
     _rho_dot(coupledDot("rho")),
     _grad_rho(coupledGradient("rho")),
-    // Momentum:
-    _rhou(coupledValue("rhou")),
-    // Total energy:
-    _rhoE(coupledValue("rhoE")),
+    _vel(coupledValue("vel")),
     // Pressure:
     _press_dot(coupledDot("p")),
     _grad_press(coupledGradient("p")),
@@ -76,9 +75,9 @@ EntropyViscosityCoefficientsMaterial::EntropyViscosityCoefficientsMaterial(
     _kappa(declareProperty<Real>("evm:kappa")),
 
     _mu(declareProperty<Real>("evm:mu")),
-    _dmu_drhoA(declarePropertyDerivativeTHM<Real>("evm:mu", "rho")),
-    _dmu_drhouA(declarePropertyDerivativeTHM<Real>("evm:mu", "rhou")),
-    _dmu_drhoEA(declarePropertyDerivativeTHM<Real>("evm:mu", "rhoE")),
+    _dmu_drhoA(declarePropertyDerivativeTHM<Real>("evm:mu", "rhoA")),
+    _dmu_drhouA(declarePropertyDerivativeTHM<Real>("evm:mu", "rhouA")),
+    _dmu_drhoEA(declarePropertyDerivativeTHM<Real>("evm:mu", "rhoEA")),
 
     _visc_max(declareProperty<Real>("evm:visc_max")),
 
@@ -115,7 +114,7 @@ EntropyViscosityCoefficientsMaterial::computeQpProperties()
   Real h = _current_elem->hmin();
 
   // Compute the velocity and mach number
-  Real vel = _rhou[_qp] / _rho[_qp];
+  Real vel = _vel[_qp];
   Real speed = std::fabs(vel);
   Real M = speed / _c[_qp];
   // Compute the normalization parameter

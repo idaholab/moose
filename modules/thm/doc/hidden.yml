@@ -152,9 +152,10 @@
 - /HeatStructureMaterials/AddHeatStructureMaterialAction
 - /HeatStructureMaterials/SolidMaterialProperties
 
+- /ICs/AlphaRhoEAFromPressureTemperatureVelocityIC
 - /ICs/BetaIC
 - /ICs/OppositePhaseIC
-- /ICs/RhoEFromPressureTemperatureVelocityIC
+- /ICs/RhoEAFromPressureTemperatureVelocityIC
 - /ICs/RhoFromPressureTemperatureIC
 - /ICs/ScalarSolutionInitialCondition
 - /ICs/SolutionInitialCondition
@@ -223,7 +224,6 @@
 - /Kernels/OneD7EqnVolumeFractionPressureRelaxation
 - /Kernels/OneD7EqnVolumeFractionTimeDerivative
 - /Kernels/OneD7EqnVolumeFractionWallMassTransfer
-- /Kernels/OneDArtificialDissipation
 - /Kernels/OneDEntropyMinimumArtificialDissipation
 - /Kernels/OneDRusanov
 - /Kernels/OneDSUPG
@@ -253,7 +253,6 @@
 - /Materials/InterfacialHeatTransferCoefSimpleMaterial
 - /Materials/InterfacialVelocityPressureCG7EqnMaterial
 - /Materials/InterphaseMassTransferMaterial
-- /Materials/LapidusCoefMaterial
 - /Materials/LaplacianPressureSmootherCoefMaterial
 - /Materials/LaplacianPressureSmootherVolumeFractionCoefMaterial
 - /Materials/LinearTestMaterial
@@ -301,12 +300,8 @@
 - /Stabilizations
 - /Stabilizations/AddStabilizationSettingsAction
 - /Stabilizations/EntropyViscosity
-- /Stabilizations/Lapidus
 - /Stabilizations/Rusanov
 - /Stabilizations/SUPG
-- /Stabilizations/StabilizationPressure
-
-- /Transfers/LaplaceProjectionTransfer
 
 - /UserObjects/CHFTable
 - /UserObjects/HeatExchangeCoefficientPartitioning
@@ -319,11 +314,9 @@
 - /UserObjects/EntropyViscosity
 - /UserObjects/JumpGradientInterface
 - /UserObjects/JunctionStagnationEnthalpyUserObject
-- /UserObjects/Lapidus
 - /UserObjects/NormalizationParameter
 - /UserObjects/Rusanov
 - /UserObjects/SUPG
-- /UserObjects/StabilizationPressure
 - /UserObjects/StabilizationSettings
 
 - /VectorPostprocessors/Sampler1DBase

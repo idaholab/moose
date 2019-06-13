@@ -274,8 +274,6 @@ EntropyViscosity::setup1Phase(FlowModelSinglePhase & /*fm*/, InputParameters & p
   std::vector<VariableName> cv_rhouA(1, FlowModelSinglePhase::RHOUA);
   std::vector<VariableName> cv_rhoEA(1, FlowModelSinglePhase::RHOEA);
   std::vector<VariableName> cv_rho(1, FlowModelSinglePhase::DENSITY);
-  std::vector<VariableName> cv_rhou(1, FlowModelSinglePhase::MOMENTUM_DENSITY);
-  std::vector<VariableName> cv_rhoE(1, FlowModelSinglePhase::TOTAL_ENERGY_DENSITY);
   std::vector<VariableName> cv_vel(1, FlowModelSinglePhase::VELOCITY);
   std::vector<VariableName> cv_area(1, FlowModel::AREA);
   std::vector<VariableName> cv_pressure(1, FlowModelSinglePhase::PRESSURE);
@@ -355,8 +353,10 @@ EntropyViscosity::setup1Phase(FlowModelSinglePhase & /*fm*/, InputParameters & p
     params.set<bool>("use_jump") = _use_jump;
 
     params.set<std::vector<VariableName>>("rho") = cv_rho;
-    params.set<std::vector<VariableName>>("rhou") = cv_rhou;
-    params.set<std::vector<VariableName>>("rhoE") = cv_rhoE;
+    params.set<std::vector<VariableName>>("rhoA") = cv_rhoA;
+    params.set<std::vector<VariableName>>("rhouA") = cv_rhouA;
+    params.set<std::vector<VariableName>>("rhoEA") = cv_rhoEA;
+    params.set<std::vector<VariableName>>("vel") = cv_vel;
     params.set<std::vector<VariableName>>("p") = cv_pressure;
     if (_use_jump)
     {
@@ -418,8 +418,6 @@ EntropyViscosity::setup2Phase(FlowModelTwoPhase & fm, InputParameters & pars) co
   std::vector<VariableName> cv_arhoEA_vapor(1, FlowModelTwoPhase::ALPHA_RHOE_A_VAPOR);
 
   std::vector<VariableName> cv_density_liquid(1, FlowModelTwoPhase::DENSITY_LIQUID);
-  std::vector<VariableName> cv_rhou_liquid(1, FlowModelTwoPhase::MOMENTUM_DENSITY_LIQUID);
-  std::vector<VariableName> cv_rhoE_liquid(1, FlowModelTwoPhase::TOTAL_ENERGY_DENSITY_LIQUID);
   std::vector<VariableName> cv_e_liquid(1, FlowModelTwoPhase::SPECIFIC_INTERNAL_ENERGY_LIQUID);
   std::vector<VariableName> cv_pressure_liquid(1, FlowModelTwoPhase::PRESSURE_LIQUID);
   std::vector<VariableName> cv_vel_liquid(1, FlowModelTwoPhase::VELOCITY_LIQUID);
@@ -429,8 +427,6 @@ EntropyViscosity::setup2Phase(FlowModelTwoPhase & fm, InputParameters & pars) co
   std::vector<VariableName> cv_jump_alpha(1, JUMP_ALPHA);
 
   std::vector<VariableName> cv_density_vapor(1, FlowModelTwoPhase::DENSITY_VAPOR);
-  std::vector<VariableName> cv_rhou_vapor(1, FlowModelTwoPhase::MOMENTUM_DENSITY_VAPOR);
-  std::vector<VariableName> cv_rhoE_vapor(1, FlowModelTwoPhase::TOTAL_ENERGY_DENSITY_VAPOR);
   std::vector<VariableName> cv_e_vapor(1, FlowModelTwoPhase::SPECIFIC_INTERNAL_ENERGY_VAPOR);
   std::vector<VariableName> cv_pressure_vapor(1, FlowModelTwoPhase::PRESSURE_VAPOR);
   std::vector<VariableName> cv_vel_vapor(1, FlowModelTwoPhase::VELOCITY_VAPOR);
@@ -590,8 +586,7 @@ EntropyViscosity::setup2Phase(FlowModelTwoPhase & fm, InputParameters & pars) co
     params.set<bool>("is_liquid") = true;
 
     params.set<std::vector<VariableName>>("rho") = cv_density_liquid;
-    params.set<std::vector<VariableName>>("rhou") = cv_rhou_liquid;
-    params.set<std::vector<VariableName>>("rhoE") = cv_rhoE_liquid;
+    params.set<std::vector<VariableName>>("vel") = cv_vel_liquid;
     params.set<std::vector<VariableName>>("p") = cv_pressure_liquid;
     params.set<std::vector<VariableName>>("alpha") = cv_alpha_liquid;
 
@@ -672,8 +667,7 @@ EntropyViscosity::setup2Phase(FlowModelTwoPhase & fm, InputParameters & pars) co
     params.set<bool>("is_liquid") = false;
 
     params.set<std::vector<VariableName>>("rho") = cv_density_vapor;
-    params.set<std::vector<VariableName>>("rhou") = cv_rhou_vapor;
-    params.set<std::vector<VariableName>>("rhoE") = cv_rhoE_vapor;
+    params.set<std::vector<VariableName>>("vel") = cv_vel_vapor;
     params.set<std::vector<VariableName>>("p") = cv_pressure_vapor;
     params.set<std::vector<VariableName>>("alpha") = cv_alpha_vapor;
 

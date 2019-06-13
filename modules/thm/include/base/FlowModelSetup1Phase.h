@@ -50,10 +50,6 @@ protected:
   const VariableName _rhoEA_name;
   /// Name of rho variable
   const VariableName _rho_name;
-  /// Name of rho*u variable
-  const VariableName _rhou_name;
-  /// Name of rho*E variable
-  const VariableName _rhoE_name;
   /// Name of velocity variable
   const VariableName _vel_name;
   /// Name of pressure variable

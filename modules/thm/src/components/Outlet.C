@@ -70,8 +70,6 @@ Outlet::add3EqnStaticPBC()
   std::vector<VariableName> cv_rhouA(1, FlowModelSinglePhase::RHOUA);
   std::vector<VariableName> cv_rhoEA(1, FlowModelSinglePhase::RHOEA);
   std::vector<VariableName> cv_rho(1, FlowModelSinglePhase::DENSITY);
-  std::vector<VariableName> cv_rhou(1, FlowModelSinglePhase::MOMENTUM_DENSITY);
-  std::vector<VariableName> cv_rhoE(1, FlowModelSinglePhase::TOTAL_ENERGY_DENSITY);
   Real p = getParam<Real>("p");
 
   {
@@ -222,8 +220,6 @@ Outlet::add3EqnStaticPBCLegacy()
   std::vector<VariableName> cv_rhouA(1, FlowModelSinglePhase::RHOUA);
   std::vector<VariableName> cv_rhoEA(1, FlowModelSinglePhase::RHOEA);
   std::vector<VariableName> cv_rho(1, FlowModelSinglePhase::DENSITY);
-  std::vector<VariableName> cv_rhou(1, FlowModelSinglePhase::MOMENTUM_DENSITY);
-  std::vector<VariableName> cv_rhoE(1, FlowModelSinglePhase::TOTAL_ENERGY_DENSITY);
   Real p = getParam<Real>("p");
 
   {
@@ -313,8 +309,6 @@ Outlet::add7EqnStaticPReverseBC()
   std::vector<VariableName> cv_arhouA_liquid(1, FlowModelTwoPhase::ALPHA_RHOU_A_LIQUID);
   std::vector<VariableName> cv_arhoEA_liquid(1, FlowModelTwoPhase::ALPHA_RHOE_A_LIQUID);
   std::vector<VariableName> cv_rho_liquid(1, FlowModelTwoPhase::DENSITY_LIQUID);
-  std::vector<VariableName> cv_rhou_liquid(1, FlowModelTwoPhase::MOMENTUM_DENSITY_LIQUID);
-  std::vector<VariableName> cv_rhoE_liquid(1, FlowModelTwoPhase::TOTAL_ENERGY_DENSITY_LIQUID);
   std::vector<VariableName> cv_vel_liquid(1, FlowModelTwoPhase::VELOCITY_LIQUID);
   std::vector<VariableName> cv_temperature_liquid(1, FlowModelTwoPhase::TEMPERATURE_LIQUID);
   std::vector<VariableName> cv_alpha_vapor(1, FlowModelTwoPhase::VOLUME_FRACTION_VAPOR);
@@ -322,8 +316,6 @@ Outlet::add7EqnStaticPReverseBC()
   std::vector<VariableName> cv_arhouA_vapor(1, FlowModelTwoPhase::ALPHA_RHOU_A_VAPOR);
   std::vector<VariableName> cv_arhoEA_vapor(1, FlowModelTwoPhase::ALPHA_RHOE_A_VAPOR);
   std::vector<VariableName> cv_rho_vapor(1, FlowModelTwoPhase::DENSITY_VAPOR);
-  std::vector<VariableName> cv_rhou_vapor(1, FlowModelTwoPhase::MOMENTUM_DENSITY_VAPOR);
-  std::vector<VariableName> cv_rhoE_vapor(1, FlowModelTwoPhase::TOTAL_ENERGY_DENSITY_VAPOR);
   std::vector<VariableName> cv_vel_vapor(1, FlowModelTwoPhase::VELOCITY_VAPOR);
   std::vector<VariableName> cv_temperature_vapor(1, FlowModelTwoPhase::TEMPERATURE_VAPOR);
 
@@ -446,8 +438,6 @@ Outlet::add7EqnStaticPBC()
   std::vector<VariableName> cv_arhouA_liquid(1, FlowModelTwoPhase::ALPHA_RHOU_A_LIQUID);
   std::vector<VariableName> cv_arhoEA_liquid(1, FlowModelTwoPhase::ALPHA_RHOE_A_LIQUID);
   std::vector<VariableName> cv_rho_liquid(1, FlowModelTwoPhase::DENSITY_LIQUID);
-  std::vector<VariableName> cv_rhou_liquid(1, FlowModelTwoPhase::MOMENTUM_DENSITY_LIQUID);
-  std::vector<VariableName> cv_rhoE_liquid(1, FlowModelTwoPhase::TOTAL_ENERGY_DENSITY_LIQUID);
   std::vector<VariableName> cv_vel_liquid(1, FlowModelTwoPhase::VELOCITY_LIQUID);
   std::vector<VariableName> cv_e_liquid(1, FlowModelTwoPhase::SPECIFIC_INTERNAL_ENERGY_LIQUID);
   std::vector<VariableName> cv_v_liquid(1, FlowModelTwoPhase::SPECIFIC_VOLUME_LIQUID);
@@ -460,8 +450,6 @@ Outlet::add7EqnStaticPBC()
   std::vector<VariableName> cv_arhouA_vapor(1, FlowModelTwoPhase::ALPHA_RHOU_A_VAPOR);
   std::vector<VariableName> cv_arhoEA_vapor(1, FlowModelTwoPhase::ALPHA_RHOE_A_VAPOR);
   std::vector<VariableName> cv_rho_vapor(1, FlowModelTwoPhase::DENSITY_VAPOR);
-  std::vector<VariableName> cv_rhou_vapor(1, FlowModelTwoPhase::MOMENTUM_DENSITY_VAPOR);
-  std::vector<VariableName> cv_rhoE_vapor(1, FlowModelTwoPhase::TOTAL_ENERGY_DENSITY_VAPOR);
   std::vector<VariableName> cv_vel_vapor(1, FlowModelTwoPhase::VELOCITY_VAPOR);
   std::vector<VariableName> cv_e_vapor(1, FlowModelTwoPhase::SPECIFIC_INTERNAL_ENERGY_VAPOR);
   std::vector<VariableName> cv_v_vapor(1, FlowModelTwoPhase::SPECIFIC_VOLUME_VAPOR);
@@ -642,8 +630,6 @@ Outlet::add7EqnStaticPBCLegacy()
   std::vector<VariableName> cv_arhouA_liquid(1, FlowModelTwoPhase::ALPHA_RHOU_A_LIQUID);
   std::vector<VariableName> cv_arhoEA_liquid(1, FlowModelTwoPhase::ALPHA_RHOE_A_LIQUID);
   std::vector<VariableName> cv_rho_liquid(1, FlowModelTwoPhase::DENSITY_LIQUID);
-  std::vector<VariableName> cv_rhou_liquid(1, FlowModelTwoPhase::MOMENTUM_DENSITY_LIQUID);
-  std::vector<VariableName> cv_rhoE_liquid(1, FlowModelTwoPhase::TOTAL_ENERGY_DENSITY_LIQUID);
   std::vector<VariableName> cv_vel_liquid(1, FlowModelTwoPhase::VELOCITY_LIQUID);
   std::vector<VariableName> cv_temperature_liquid(1, FlowModelTwoPhase::TEMPERATURE_LIQUID);
   std::vector<VariableName> cv_alpha_vapor(1, FlowModelTwoPhase::VOLUME_FRACTION_VAPOR);
@@ -651,8 +637,6 @@ Outlet::add7EqnStaticPBCLegacy()
   std::vector<VariableName> cv_arhouA_vapor(1, FlowModelTwoPhase::ALPHA_RHOU_A_VAPOR);
   std::vector<VariableName> cv_arhoEA_vapor(1, FlowModelTwoPhase::ALPHA_RHOE_A_VAPOR);
   std::vector<VariableName> cv_rho_vapor(1, FlowModelTwoPhase::DENSITY_VAPOR);
-  std::vector<VariableName> cv_rhou_vapor(1, FlowModelTwoPhase::MOMENTUM_DENSITY_VAPOR);
-  std::vector<VariableName> cv_rhoE_vapor(1, FlowModelTwoPhase::TOTAL_ENERGY_DENSITY_VAPOR);
   std::vector<VariableName> cv_vel_vapor(1, FlowModelTwoPhase::VELOCITY_VAPOR);
   std::vector<VariableName> cv_temperature_vapor(1, FlowModelTwoPhase::TEMPERATURE_VAPOR);
 

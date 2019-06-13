@@ -12,7 +12,6 @@ validParams<OneDStabilizationBase>()
   params.addRequiredCoupledVar("arhouA", "alpha*rho*u*A");
   params.addRequiredCoupledVar("arhoEA", "alpha*rho*E*A");
 
-  // The velocity aux's gradient is required if we need to do Lapidus
   params.addRequiredCoupledVar("vel", "x-velocity");
 
   params.addRequiredParam<MaterialPropertyName>(
@@ -91,15 +90,6 @@ OneDStabilizationBase::supg_residual_contribution(unsigned row)
 
   // Return sum scaled by d(phi)/dx
   return sum * _grad_test[_i][_qp] * _dir[_qp];
-
-  // // Do "Lapidus" stabilization instead of SUPG
-  // Real h = _current_elem->hmax();
-  // Real c_Lap = 2.0;
-  // Real coef = c_Lap * h * h * std::abs(_grad_vel[_qp](0));
-  //
-  // Real ret = coef * _grad_u[_qp](0) * _grad_test[_i][_qp](0);
-  // // _console << "Returning Lapidus value " << ret << std::endl;
-  // return ret;
 }
 
 Real

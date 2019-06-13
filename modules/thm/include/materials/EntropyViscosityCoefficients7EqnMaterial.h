@@ -45,13 +45,9 @@ protected:
   const VariableValue & _rho_dot;
   const VariableGradient & _grad_rho;
 
-  // Momentum of fluid
-  const VariableValue & _rhou;
-  const VariableValue & _rhou_old;
-
-  // Total energy of fluid
-  const VariableValue & _rhoE;
-  const VariableValue & _rhoE_old;
+  // Velocity fluid
+  const VariableValue & _vel;
+  const VariableValue & _vel_old;
 
   // Pressure of fluid
   const VariableValue & _press;
