@@ -69,8 +69,7 @@ validParams<FEProblemSolve>()
                         false,
                         "Use the residual norm computed *before* PresetBCs are imposed in relative "
                         "convergence check");
-  params.addParam<bool>(
-      "automatic_scaling", false, "Whether to use automatic scaling for the variables.");
+  params.addParam<bool>("automatic_scaling", "Whether to use automatic scaling for the variables.");
   params.addParam<bool>(
       "compute_scaling_once",
       true,

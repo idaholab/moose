@@ -675,6 +675,11 @@ public:
    */
   void setBackupObject(std::shared_ptr<Backup> backup);
 
+  /**
+   * Whether to enable automatic scaling by default
+   */
+  bool defaultAutomaticScaling() const { return _automatic_automatic_scaling; }
+
 protected:
   /**
    * Whether or not this MooseApp has cached a Backup to use for restart / recovery
@@ -924,6 +929,9 @@ private:
   PerfID _restore_cached_backup_timer;
   PerfID _create_minimal_app_timer;
 
+  /// Whether to turn on automatic scaling by default
+  const bool _automatic_automatic_scaling;
+
   // Allow FEProblemBase to set the recover/restart state, so make it a friend
   friend class FEProblemBase;
   friend class Restartable;
@@ -943,4 +951,3 @@ MooseApp::getParam(const std::string & name) const
 {
   return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
 }
-

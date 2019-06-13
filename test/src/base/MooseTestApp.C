@@ -31,6 +31,7 @@ validParams<MooseTestApp>()
                                    "--disallow-test-objects",
                                    false,
                                    "Don't register test objects and syntax");
+  params.set<bool>("automatic_automatic_scaling") = false;
   return params;
 }
 
