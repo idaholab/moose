@@ -15,15 +15,7 @@
 
 [AuxVariables]
   [pressure]
-  []
-[]
-
-[AuxKernels]
-  [pressure]
-    type = FunctionAux
-    variable = pressure
-    function = 't*x*x*y'
-    execute_on = timestep_end
+    initial_condition = 10000
   []
 []
 
@@ -61,7 +53,7 @@
   [column]
     type = PackedColumn
     radius = 1
-    temperature = 293.15 # 20C
+    temperature = temperature
   []
 []
 
@@ -73,9 +65,9 @@
 
 [Executioner]
   type = Transient
-  num_steps = 300
+  num_steps = 10
   dt = 0.1
-  solve_type = NEWTON
+  solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []

@@ -1,0 +1,1 @@
+../../../../step07_adaptivity/tests/kernels/darcy_advection/darcy_advection.i

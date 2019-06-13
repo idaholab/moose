@@ -1,1 +1,0 @@
-../../../../step08_postprocessors/tests/kernels/darcy_convection/darcy_convection.i
