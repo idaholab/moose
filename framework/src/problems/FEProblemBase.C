@@ -151,14 +151,6 @@ validParams<FEProblemBase>()
                         false,
                         "True to skip the NonlinearSystem check for work to do (e.g. Make sure "
                         "that there are variables to solve for).");
-  params.addParam<bool>(
-      "automatic_scaling", false, "Whether to use automatic scaling for the variables.");
-  params.addParam<bool>(
-      "compute_scaling_once",
-      true,
-      "Whether the scaling factors should only be computed once at the beginning of the simulation "
-      "through an extra Jacobian evaluation. If this is set to false, then the scaling factors "
-      "will be computed during an extra Jacobian evaluation at the beginning of every time step.");
 
   /// One entry of coord system per block, the size of _blocks and _coord_sys has to match, except:
   /// 1. _blocks.size() == 0, then there needs to be just one entry in _coord_sys, which will
@@ -327,9 +319,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _u_dot_requested(false),
     _u_dotdot_requested(false),
     _u_dot_old_requested(false),
-    _u_dotdot_old_requested(false),
-    _automatic_scaling(getParam<bool>("automatic_scaling")),
-    _compute_scaling_once(getParam<bool>("compute_scaling_once"))
+    _u_dotdot_old_requested(false)
 {
   // Possibly turn off default ghosting in libMesh
   _eq.enable_default_ghosting(_default_ghosting);

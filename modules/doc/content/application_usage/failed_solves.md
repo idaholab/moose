@@ -112,13 +112,10 @@ have nodal boundary conditions (which introduce values of unity on the diagonals
 entries from your physics (kernels) are very large. You want your condition number to be as close to
 unity as possible. To address the latter problem or poor relative scaling between variables, you
 can use MOOSE's automatic scaling feature which will bring different physics Jacobians as close to
-unity as possible. To turn on this feature, add this block to your input file:
-
-```
-[Problem]
-  automatic_scaling = true
-[]
-```
+unity as possible. To turn on this feature, set the `automatic_scaling`
+parameter in the `Executioner` block to `true`. Additionally, if you want to update scaling factors
+at every time step then set `Executioner/compute_scaling_once=false`. By default this latter
+parameter is set to `true` in order to save computational expense.
 
 ## Bad nonlinear convergence
 

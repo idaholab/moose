@@ -14,7 +14,7 @@
     input = 'ill_conditioned_field_scalar_system.i'
     exodiff = 'ill_conditioned_field_scalar_system_out.e'
     expect_out = '0 of 4 singular values'
-    cli_args = 'Problem/automatic_scaling=true'
+    cli_args = 'Executioner/automatic_scaling=true'
     max_parallel = 1 # no parallel svd
     requirement = 'We shall be able to show that with automatic scaling, this system is non-singular'
   []
@@ -22,7 +22,7 @@
     type = Exodiff
     input = 'ill_conditioned_field_scalar_system.i'
     exodiff = 'ill_conditioned_field_scalar_system_out.e'
-    cli_args = 'Problem/automatic_scaling=true -pc_type hypre -pc_hypre_type boomeramg'
+    cli_args = 'Executioner/automatic_scaling=true -pc_type hypre -pc_hypre_type boomeramg'
     prereq = auto-scaled-field-scalar-system
     requirement = 'We shall be able to show that with automatic scaling we can run this problem successfully in parallel'
   []
