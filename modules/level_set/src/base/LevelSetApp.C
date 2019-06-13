@@ -20,6 +20,7 @@ validParams<LevelSetApp>()
   InputParameters params = validParams<MooseApp>();
   params.addClassDescription(
       "Application containing object necessary to solve the level set equation.");
+  params.set<bool>("automatic_automatic_scaling") = false;
   return params;
 }
 

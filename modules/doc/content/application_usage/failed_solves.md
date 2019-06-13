@@ -101,6 +101,22 @@ Initial residual before setting preset BCs: 65444.1
 
 In this case you are likely to require many nonlinear iterations as well, but the reason is that your linear iterations don't drop. This could be due to missing terms or errors in your Jacobian or because the way you are applying your preconditioner in PETSc is not good for the problem. Make sure your Jacobian is correct and add off-diagonal terms for multivariable problems.
 
+An additional possible reason for a poor linear solve is that your problem is very poorly
+conditioned. You can inspect the condition number of your matrix for small problems (should be less
+than 1000 degrees of freedom) by running with the PETSc options `-pc_type svd
+-pc_svd_monitor`. These options will tell you your condition number as well as how many singular
+values you have. If you have any singular values, then you may have omitted a boundary condition,
+you may have a null space (all Neumann boundary conditions for example), or you may have very poor
+scaling between variables in a multi-physics simulation. You may even have run into issues if you
+have nodal boundary conditions (which introduce values of unity on the diagonals) and the Jacobian
+entries from your physics (kernels) are very large. You want your condition number to be as close to
+unity as possible. To address the latter problem or poor relative scaling between variables, you
+can use MOOSE's automatic scaling feature which will bring different physics Jacobians as close to
+unity as possible. To turn on this feature, set the `automatic_scaling`
+parameter in the `Executioner` block to `true`. Additionally, if you want to update scaling factors
+at every time step then set `Executioner/compute_scaling_once=false`. By default this latter
+parameter is set to `true` in order to save computational expense.
+
 ## Bad nonlinear convergence
 
 If your linear iterations are dropping fine but it takes lots of nonlinear iterations, then your problem is very nonlinear and it is just hard to solve. In this case, you should decrease the time step. However, if you have a multivariable problem, the two residuals may have very different magnitudes, which will make the system hard to solve. Print the nonlinear residuals using the debug block to check their relative magnitudes at the end of a solve. If they are more than an order of magnitude off, then use the `scaling` parameter in the variables block to scale the smaller variable up.

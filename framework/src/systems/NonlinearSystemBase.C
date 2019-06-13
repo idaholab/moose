@@ -20,6 +20,7 @@
 #include "MaterialData.h"
 #include "ComputeResidualThread.h"
 #include "ComputeJacobianThread.h"
+#include "ComputeJacobianForScalingThread.h"
 #include "ComputeFullJacobianThread.h"
 #include "ComputeJacobianBlocksThread.h"
 #include "ComputeDiracThread.h"
@@ -163,7 +164,9 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _compute_jacobian_tags_timer(registerTimedSection("computeJacobianTags", 5)),
     _compute_jacobian_blocks_timer(registerTimedSection("computeJacobianBlocks", 3)),
     _compute_dampers_timer(registerTimedSection("computeDampers", 3)),
-    _compute_dirac_timer(registerTimedSection("computeDirac", 3))
+    _compute_dirac_timer(registerTimedSection("computeDirac", 3)),
+    _compute_scaling_jacobian_timer(registerTimedSection("computeScalingJacobian", 2)),
+    _computing_initial_jacobian(false)
 {
   getResidualNonTimeVector();
   // Don't need to add the matrix - it already exists (for now)
@@ -214,6 +217,12 @@ NonlinearSystemBase::init()
   if (displaced_problem)
     displaced_problem->nlSys().assignMaxVarNDofsPerNode(_max_var_n_dofs_per_node);
   Moose::perf_log.pop("maxVarNDofsPerNode()", "Setup");
+
+  if (_fe_problem.automaticScaling())
+    // We don't need libMesh to do projections since we will always be filling this vector from the
+    // diagonal of the preconditioning matrix, hence false for our second argument. We also do not
+    // need ghosting
+    _pmat_diagonal = &addVector("pmat_diagonal", false, PARALLEL);
 }
 
 void
@@ -817,8 +826,14 @@ NonlinearSystemBase::residualVector(TagID tag)
 }
 
 void
-NonlinearSystemBase::computeTimeDerivatives()
+NonlinearSystemBase::computeTimeDerivatives(bool jacobian_calculation)
 {
+  // If we're doing any Jacobian calculation other than the initial Jacobian calculation for
+  // automatic variable scaling, then we can just return because the residual function evaluation
+  // has already done this work for us
+  if (jacobian_calculation && !_computing_initial_jacobian)
+    return;
+
   if (_time_integrator)
   {
     _time_integrator->preStep();
@@ -2235,7 +2250,32 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 
   PARALLEL_TRY
   {
+    // We can compute these up front because we want these included whether we are computing an
+    // ordinary Jacobian or a Jacobian for determining variable scaling factors
+    computeScalarKernelsJacobians(tags);
+
+    // Get our element range for looping over
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+
+    if (_computing_initial_jacobian)
+    {
+      // Only compute Jacobians corresponding to the diagonals of volumetric compute objects because
+      // this typically gives us a good representation of the physics. NodalBCs and Constraints can
+      // introduce dramatically different scales (often order unity). IntegratedBCs and/or
+      // InterfaceKernels may use penalty factors. DGKernels may be ok, but they are almost always
+      // used in conjunction with Kernels
+      ComputeJacobianForScalingThread cj(_fe_problem, tags);
+      Threads::parallel_reduce(elem_range, cj);
+      unsigned int n_threads = libMesh::n_threads();
+      for (unsigned int i = 0; i < n_threads;
+           i++) // Add any Jacobian contributions still hanging around
+        _fe_problem.addCachedJacobian(i);
+
+      closeTaggedMatrices(tags);
+
+      return;
+    }
+
     switch (_fe_problem.coupling())
     {
       case Moose::COUPLING_DIAG:
@@ -2317,8 +2357,6 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
     }
 
     computeDiracContributions(tags, true);
-
-    computeScalarKernelsJacobians(tags);
 
     static bool first = true;
 
@@ -3102,4 +3140,85 @@ NonlinearSystemBase::mortarJacobianConstraints(bool displaced)
             << mortar_interface.first.first << " and slave " << mortar_interface.first.second);
     it->second();
   }
+}
+
+void
+NonlinearSystemBase::computeScalingJacobian(NonlinearImplicitSystem & sys)
+{
+#ifdef LIBMESH_HAVE_PETSC
+
+  if (dynamic_cast<PetscMatrix<Real> *>(sys.matrix))
+  {
+    _console << "\nPerforming automatic scaling calculation\n\n";
+
+    TIME_SECTION(_compute_scaling_jacobian_timer);
+
+    auto & petsc_matrix = *static_cast<PetscMatrix<Real> *>(sys.matrix);
+    _computing_initial_jacobian = true;
+    _fe_problem.computeJacobianSys(sys, *_current_solution, *sys.matrix);
+    _computing_initial_jacobian = false;
+
+    // container for repeated access of element global dof indices
+    std::vector<dof_id_type> dof_indices;
+
+    auto & field_variables = _vars[0].fieldVariables();
+    auto & scalar_variables = _vars[0].scalars();
+
+    std::vector<Real> inverse_scaling_factors(field_variables.size() + scalar_variables.size(), 0);
+    auto & dof_map = dofMap();
+
+    // limit dereferencing
+    auto & diagonal = *_pmat_diagonal;
+
+    // fill our diagonal vector
+    petsc_matrix.get_diagonal(diagonal);
+
+    // Compute our scaling factors for the spatial field variables
+    for (const auto & elem : *mesh().getActiveLocalElementRange())
+    {
+      for (MooseIndex(field_variables) i = 0; i < field_variables.size(); ++i)
+      {
+        auto & field_variable = *field_variables[i];
+        dof_map.dof_indices(elem, dof_indices, field_variable.number());
+        for (auto dof_index : dof_indices)
+          if (dof_map.local_index(dof_index))
+          {
+            // For now we will use the diagonal for determining scaling
+            auto mat_value = diagonal(dof_index);
+            inverse_scaling_factors[i] = std::max(inverse_scaling_factors[i], std::abs(mat_value));
+          }
+      }
+    }
+
+    auto offset = field_variables.size();
+
+    // Compute scalar factors for scalar variables
+    for (MooseIndex(scalar_variables) i = 0; i < scalar_variables.size(); ++i)
+    {
+      auto & scalar_variable = *scalar_variables[i];
+      dof_map.SCALAR_dof_indices(dof_indices, scalar_variable.number());
+      for (auto dof_index : dof_indices)
+        if (dof_map.local_index(dof_index))
+        {
+          // For now we will use the diagonal for determining scaling
+          auto mat_value = diagonal(dof_index);
+          inverse_scaling_factors[offset + i] =
+              std::max(inverse_scaling_factors[offset + i], std::abs(mat_value));
+        }
+    }
+
+    // Get the maximum value across processes
+    _communicator.max(inverse_scaling_factors);
+
+    // We have to make sure that our scaling values are not zero
+    for (auto & scaling_factor : inverse_scaling_factors)
+      if (scaling_factor < std::numeric_limits<Real>::epsilon())
+        scaling_factor = 1;
+
+    // Now set the scaling factors for the variables
+    applyScalingFactors(inverse_scaling_factors);
+    if (auto displaced_problem = _fe_problem.getDisplacedProblem().get())
+      displaced_problem->systemBaseNonlinear().applyScalingFactors(inverse_scaling_factors);
+  }
+#endif
 }

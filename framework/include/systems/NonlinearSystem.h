@@ -97,5 +97,7 @@ private:
   void setupColoringFiniteDifferencedPreconditioner();
 
   bool _use_coloring_finite_difference;
-};
 
+  /// Whether we've computed the variable scaling factors
+  bool _computed_scaling;
+};

@@ -68,6 +68,8 @@ public:
 
   virtual void init() override;
 
+  bool computingInitialJacobian() const final { return _computing_initial_jacobian; }
+
   /**
    * Turn off the Jacobian (must be called before equation system initialization)
    */
@@ -296,6 +298,11 @@ public:
   void computeJacobianTags(const std::set<TagID> & tags);
 
   /**
+   * Method used to obtain scaling factors for variables
+   */
+  void computeScalingJacobian(NonlinearImplicitSystem & sys);
+
+  /**
    * Associate jacobian to systemMatrixTag, and then form a matrix for all the tags
    */
   void computeJacobian(SparseMatrix<Number> & jacobian, const std::set<TagID> & tags);
@@ -328,7 +335,7 @@ public:
   /**
    * Computes the time derivative vector
    */
-  void computeTimeDerivatives();
+  void computeTimeDerivatives(bool jacobian_calculation = false);
 
   /**
    * Called at the beginning of the time step
@@ -851,6 +858,13 @@ protected:
   PerfID _compute_jacobian_blocks_timer;
   PerfID _compute_dampers_timer;
   PerfID _compute_dirac_timer;
+  PerfID _compute_scaling_jacobian_timer;
+
+  /// Flag used to indicate whether we are computing the initial Jacobian
+  bool _computing_initial_jacobian;
+
+  /// A vector to be filled by the preconditioning matrix diagonal
+  NumericVector<Number> * _pmat_diagonal;
 
 private:
   /// Functors for computing residuals from undisplaced mortar constraints

@@ -1090,6 +1090,25 @@ SystemBase::name() const
   return system().name();
 }
 
+void
+SystemBase::applyScalingFactors(const std::vector<Real> & inverse_scaling_factors)
+{
+  for (MooseIndex(_vars) thread = 0; thread < _vars.size(); ++thread)
+  {
+    auto & field_variables = _vars[thread].fieldVariables();
+    for (MooseIndex(field_variables) i = 0; i < field_variables.size(); ++i)
+      field_variables[i]->scalingFactor(1. / inverse_scaling_factors[i] *
+                                        field_variables[i]->scalingFactor());
+
+    auto offset = field_variables.size();
+
+    auto & scalar_variables = _vars[thread].scalars();
+    for (MooseIndex(scalar_variables) i = 0; i < scalar_variables.size(); ++i)
+      scalar_variables[i]->scalingFactor(1. / inverse_scaling_factors[offset + i] *
+                                         scalar_variables[i]->scalingFactor());
+  }
+}
+
 template MooseVariableFE<Real> & SystemBase::getFieldVariable<Real>(THREAD_ID tid,
                                                                     const std::string & var_name);
 

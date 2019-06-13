@@ -4717,6 +4717,12 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
       _functions.jacobianSetup(tid);
     }
 
+    // When computing the initial Jacobian for automatic variable scaling we need to make sure that
+    // the time derivatives have been calculated. So we'll call down to the nonlinear system here.
+    // Note that if we are not doing this initial Jacobian calculation we will just exit in that
+    // class to avoid redundant calculation (the residual function also computes time derivatives)
+    _nl->computeTimeDerivatives(/*jacobian_calculation =*/true);
+
     _aux->compute(EXEC_NONLINEAR);
 
     computeUserObjects(EXEC_NONLINEAR, Moose::POST_AUX);

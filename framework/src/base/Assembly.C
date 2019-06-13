@@ -2986,7 +2986,12 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
   {
     std::vector<dof_id_type> di(idof_indices);
     std::vector<dof_id_type> dj(jdof_indices);
-    _dof_map.constrain_element_matrix(jac_block, di, dj, false);
+
+    // If we're computing the initial jacobian for automatically scaling variables we do not want to
+    // constrain the element matrix because it introduces 1s on the diagonal for the constrained
+    // dofs
+    if (!_sys.computingInitialJacobian())
+      _dof_map.constrain_element_matrix(jac_block, di, dj, false);
 
     if (scaling_factor != 1.0)
     {
@@ -3012,7 +3017,12 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block,
   {
     std::vector<dof_id_type> di(idof_indices);
     std::vector<dof_id_type> dj(jdof_indices);
-    _dof_map.constrain_element_matrix(jac_block, di, dj, false);
+
+    // If we're computing the initial jacobian for automatically scaling variables we do not want to
+    // constrain the element matrix because it introduces 1s on the diagonal for the constrained
+    // dofs
+    if (!_sys.computingInitialJacobian())
+      _dof_map.constrain_element_matrix(jac_block, di, dj, false);
 
     if (scaling_factor != 1.0)
       jac_block *= scaling_factor;
@@ -3040,7 +3050,12 @@ Assembly::cacheJacobianBlockNonlocal(DenseMatrix<Number> & jac_block,
   {
     std::vector<dof_id_type> di(idof_indices);
     std::vector<dof_id_type> dj(jdof_indices);
-    _dof_map.constrain_element_matrix(jac_block, di, dj, false);
+
+    // If we're computing the initial jacobian for automatically scaling variables we do not want to
+    // constrain the element matrix because it introduces 1s on the diagonal for the constrained
+    // dofs
+    if (!_sys.computingInitialJacobian())
+      _dof_map.constrain_element_matrix(jac_block, di, dj, false);
 
     if (scaling_factor != 1.0)
       jac_block *= scaling_factor;
@@ -3328,7 +3343,12 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
 
   // stick it into the matrix
   std::vector<dof_id_type> di(dof_indices);
-  dof_map.constrain_element_matrix(ke, di, false);
+
+  // If we're computing the initial jacobian for automatically scaling variables we do not want to
+  // constrain the element matrix because it introduces 1s on the diagonal for the constrained
+  // dofs
+  if (!_sys.computingInitialJacobian())
+    dof_map.constrain_element_matrix(ke, di, false);
 
   Real scaling_factor = _sys.getVariable(_tid, ivar).scalingFactor();
   if (scaling_factor != 1.0)
@@ -3353,7 +3373,12 @@ Assembly::addJacobianBlockNonlocal(SparseMatrix<Number> & jacobian,
 
   std::vector<dof_id_type> di(idof_indices);
   std::vector<dof_id_type> dg(jdof_indices);
-  dof_map.constrain_element_matrix(keg, di, dg, false);
+
+  // If we're computing the initial jacobian for automatically scaling variables we do not want to
+  // constrain the element matrix because it introduces 1s on the diagonal for the constrained
+  // dofs
+  if (!_sys.computingInitialJacobian())
+    dof_map.constrain_element_matrix(keg, di, dg, false);
 
   Real scaling_factor = _sys.getVariable(_tid, ivar).scalingFactor();
   if (scaling_factor != 1.0)
@@ -3381,11 +3406,18 @@ Assembly::addJacobianNeighbor(SparseMatrix<Number> & jacobian,
 
   std::vector<dof_id_type> di(dof_indices);
   std::vector<dof_id_type> dn(neighbor_dof_indices);
-  // stick it into the matrix
-  dof_map.constrain_element_matrix(kee, di, false);
-  dof_map.constrain_element_matrix(ken, di, dn, false);
-  dof_map.constrain_element_matrix(kne, dn, di, false);
-  dof_map.constrain_element_matrix(knn, dn, false);
+
+  // If we're computing the initial jacobian for automatically scaling variables we do not want to
+  // constrain the element matrix because it introduces 1s on the diagonal for the constrained
+  // dofs
+  if (!_sys.computingInitialJacobian())
+  {
+    // stick it into the matrix
+    dof_map.constrain_element_matrix(kee, di, false);
+    dof_map.constrain_element_matrix(ken, di, dn, false);
+    dof_map.constrain_element_matrix(kne, dn, di, false);
+    dof_map.constrain_element_matrix(knn, dn, false);
+  }
 
   Real scaling_factor = _sys.getVariable(_tid, ivar).scalingFactor();
   if (scaling_factor != 1.0)

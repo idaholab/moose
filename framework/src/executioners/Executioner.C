@@ -55,6 +55,11 @@ Executioner::Executioner(const InputParameters & parameters)
 {
   if (!_restart_file_base.empty())
     _fe_problem.setRestartFile(_restart_file_base);
+
+  _fe_problem.automaticScaling(isParamValid("automatic_scaling")
+                                   ? getParam<bool>("automatic_scaling")
+                                   : getMooseApp().defaultAutomaticScaling());
+  _fe_problem.computeScalingOnce(getParam<bool>("compute_scaling_once"));
 }
 
 Problem &

@@ -69,6 +69,13 @@ validParams<FEProblemSolve>()
                         false,
                         "Use the residual norm computed *before* PresetBCs are imposed in relative "
                         "convergence check");
+  params.addParam<bool>("automatic_scaling", "Whether to use automatic scaling for the variables.");
+  params.addParam<bool>(
+      "compute_scaling_once",
+      true,
+      "Whether the scaling factors should only be computed once at the beginning of the simulation "
+      "through an extra Jacobian evaluation. If this is set to false, then the scaling factors "
+      "will be computed during an extra Jacobian evaluation at the beginning of every time step.");
 
   params.addParamNamesToGroup("l_tol l_abs_step_tol l_max_its nl_max_its nl_max_funcs "
                               "nl_abs_tol nl_rel_tol nl_abs_step_tol nl_rel_step_tol "

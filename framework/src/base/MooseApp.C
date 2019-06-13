@@ -243,6 +243,8 @@ validParams<MooseApp>()
                                            30,
                                            "Pauses the application during startup for the "
                                            "specified time to allow for connection of debuggers.");
+  params.addParam<bool>(
+      "automatic_automatic_scaling", false, "Whether to turn on automatic scaling by default.");
 
   params.addPrivateParam<std::string>("_app_name"); // the name passed to AppFactory::create
   params.addPrivateParam<std::string>("_type");
@@ -311,7 +313,8 @@ MooseApp::MooseApp(InputParameters parameters)
     _execute_mesh_generators_timer(
         _perf_graph.registerSection("MooseApp::executeMeshGenerators", 1)),
     _restore_cached_backup_timer(_perf_graph.registerSection("MooseApp::restoreCachedBackup", 2)),
-    _create_minimal_app_timer(_perf_graph.registerSection("MooseApp::createMinimalApp", 3))
+    _create_minimal_app_timer(_perf_graph.registerSection("MooseApp::createMinimalApp", 3)),
+    _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling"))
 {
   Registry::addKnownLabel(_type);
   Moose::registerAll(_factory, _action_factory, _syntax);
