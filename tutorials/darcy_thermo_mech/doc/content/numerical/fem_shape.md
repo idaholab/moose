@@ -28,7 +28,7 @@ computer.
 
 ## Shape Functions
 
-The discretized expansion of $$u$$ takes on the following form:
+The discretized expansion of $u$ takes on the following form:
 
 !equation
 u \approx u_h = \sum_{j=1}^N u_j \phi_j,

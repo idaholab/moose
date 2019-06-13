@@ -48,7 +48,7 @@ Similar to `GradientJump`, except that a scalar coefficient (e.g. thermal conduc
 provided to produce a physical "flux" quantity.
 
 `LaplacianJumpIndicator`\\
-Jump in the second derivative of a variable. Only useful for $$C^1$$ shape functions.
+Jump in the second derivative of a variable. Only useful for $C^1$ shape functions.
 
 `AnalyticIndicator`\\
 Computes the difference between the finite element solution and a user-supplied `Function`
