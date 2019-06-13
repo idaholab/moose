@@ -862,6 +862,9 @@ protected:
   /// Flag used to indicate whether we are computing the initial Jacobian
   bool _computing_initial_jacobian;
 
+  /// A vector to be filled by the preconditioning matrix diagonal
+  NumericVector<Number> * _pmat_diagonal;
+
 private:
   /// Functors for computing residuals from undisplaced mortar constraints
   std::unordered_map<std::pair<BoundaryID, BoundaryID>,

@@ -216,6 +216,12 @@ NonlinearSystemBase::init()
   if (displaced_problem)
     displaced_problem->nlSys().assignMaxVarNDofsPerNode(_max_var_n_dofs_per_node);
   Moose::perf_log.pop("maxVarNDofsPerNode()", "Setup");
+
+  if (_fe_problem.automaticScaling())
+    // We don't need libMesh to do projections since we will always be filling this vector from the
+    // diagonal of the preconditioning matrix, hence false for our second argument. We also do not
+    // need ghosting
+    _pmat_diagonal = &addVector("pmat_diagonal", false, PARALLEL);
 }
 
 void
@@ -3155,6 +3161,12 @@ NonlinearSystemBase::computeInitialJacobian(NonlinearImplicitSystem & sys)
     std::vector<Real> inverse_scaling_factors(field_variables.size() + scalar_variables.size(), 0);
     auto & dof_map = dofMap();
 
+    // limit dereferencing
+    auto & diagonal = *_pmat_diagonal;
+
+    // fill our diagonal vector
+    petsc_matrix.get_diagonal(diagonal);
+
     // Compute our scaling factors for the spatial field variables
     for (const auto & elem : *mesh().getActiveLocalElementRange())
     {
@@ -3166,7 +3178,7 @@ NonlinearSystemBase::computeInitialJacobian(NonlinearImplicitSystem & sys)
           if (dof_map.local_index(dof_index))
           {
             // For now we will use the diagonal for determining scaling
-            auto mat_value = petsc_matrix(dof_index, dof_index);
+            auto mat_value = diagonal(dof_index);
             inverse_scaling_factors[i] = std::max(inverse_scaling_factors[i], std::abs(mat_value));
           }
       }
@@ -3183,7 +3195,7 @@ NonlinearSystemBase::computeInitialJacobian(NonlinearImplicitSystem & sys)
         if (dof_map.local_index(dof_index))
         {
           // For now we will use the diagonal for determining scaling
-          auto mat_value = petsc_matrix(dof_index, dof_index);
+          auto mat_value = diagonal(dof_index);
           inverse_scaling_factors[offset + i] =
               std::max(inverse_scaling_factors[offset + i], std::abs(mat_value));
         }
