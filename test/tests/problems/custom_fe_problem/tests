@@ -4,5 +4,9 @@
     input = 'custom_fe_problem_test.i'
     exodiff = 'custom_fe_problem_test_out.e'
     scale_refine = 4
+
+    requirement = 'The system shall support the ability to extend the basic "Problem" interface.'
+    issues = '#12060'
+    design = '/Problem/index.md'
   [../]
 []
