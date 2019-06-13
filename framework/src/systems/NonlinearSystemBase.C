@@ -165,6 +165,7 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _compute_jacobian_blocks_timer(registerTimedSection("computeJacobianBlocks", 3)),
     _compute_dampers_timer(registerTimedSection("computeDampers", 3)),
     _compute_dirac_timer(registerTimedSection("computeDirac", 3)),
+    _compute_scaling_jacobian_timer(registerTimedSection("computeScalingJacobian", 2)),
     _computing_initial_jacobian(false)
 {
   getResidualNonTimeVector();
@@ -3142,9 +3143,11 @@ NonlinearSystemBase::mortarJacobianConstraints(bool displaced)
 }
 
 void
-NonlinearSystemBase::computeInitialJacobian(NonlinearImplicitSystem & sys)
+NonlinearSystemBase::computeScalingJacobian(NonlinearImplicitSystem & sys)
 {
 #ifdef LIBMESH_HAVE_PETSC
+  TIME_SECTION(_compute_scaling_jacobian_timer);
+
   if (dynamic_cast<PetscMatrix<Real> *>(sys.matrix))
   {
     auto & petsc_matrix = *static_cast<PetscMatrix<Real> *>(sys.matrix);

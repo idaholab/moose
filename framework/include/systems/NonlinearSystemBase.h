@@ -300,7 +300,7 @@ public:
   /**
    * Method used to obtain scaling factors for variables
    */
-  void computeInitialJacobian(NonlinearImplicitSystem & sys);
+  void computeScalingJacobian(NonlinearImplicitSystem & sys);
 
   /**
    * Associate jacobian to systemMatrixTag, and then form a matrix for all the tags
@@ -858,6 +858,7 @@ protected:
   PerfID _compute_jacobian_blocks_timer;
   PerfID _compute_dampers_timer;
   PerfID _compute_dirac_timer;
+  PerfID _compute_scaling_jacobian_timer;
 
   /// Flag used to indicate whether we are computing the initial Jacobian
   bool _computing_initial_jacobian;

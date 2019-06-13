@@ -160,12 +160,12 @@ NonlinearSystem::solve()
     {
       if (!_computed_scaling)
       {
-        computeInitialJacobian(_transient_sys);
+        computeScalingJacobian(_transient_sys);
         _computed_scaling = true;
       }
     }
     else
-      computeInitialJacobian(_transient_sys);
+      computeScalingJacobian(_transient_sys);
   }
 
   if (_fe_problem.solverParams()._type != Moose::ST_LINEAR)
