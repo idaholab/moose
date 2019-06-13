@@ -1,1 +1,1 @@
-/Users/slauae/projects/moose/modules/doc/moosedocs.py
+../../../modules/doc/moosedocs.py
