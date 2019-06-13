@@ -37,6 +37,7 @@ FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(
   }
 
   _value = nullptr;
+  updatePropertyName();
 }
 
 FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor() : _value(nullptr) {}
@@ -48,7 +49,8 @@ FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(
     _dependent_vars(rhs._dependent_vars),
     _derivative_vars(rhs._derivative_vars),
     _value(nullptr),
-    _parent(rhs._parent)
+    _parent(rhs._parent),
+    _property_name(rhs._property_name)
 {
 }
 
@@ -59,7 +61,8 @@ FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(
     _dependent_vars(rhs._dependent_vars),
     _derivative_vars(rhs._derivative_vars),
     _value(nullptr),
-    _parent(parent)
+    _parent(parent),
+    _property_name(rhs._property_name)
 {
 }
 
@@ -78,6 +81,7 @@ FunctionMaterialPropertyDescriptor::addDerivative(const VariableName & var)
 {
   _derivative_vars.push_back(var);
   _value = nullptr;
+  updatePropertyName();
 }
 
 bool
@@ -132,6 +136,7 @@ FunctionMaterialPropertyDescriptor::parseDerivative(const std::string & expressi
 
         // remove function from the _derivative_vars vector
         _derivative_vars.erase(_derivative_vars.begin());
+        updatePropertyName();
 
         return;
       }
@@ -140,6 +145,7 @@ FunctionMaterialPropertyDescriptor::parseDerivative(const std::string & expressi
     {
       parseDependentVariables(arguments.substr(0, close2 + 1));
       MooseUtils::tokenize(arguments.substr(close2 + 2), _derivative_vars, 0, ",");
+      updatePropertyName();
       return;
     }
   }
@@ -209,4 +215,10 @@ FunctionMaterialPropertyDescriptor::value() const
   }
 
   return *_value;
+}
+
+void
+FunctionMaterialPropertyDescriptor::updatePropertyName()
+{
+  _property_name = derivativePropertyName(_base_name, _derivative_vars);
 }
