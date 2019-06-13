@@ -96,6 +96,7 @@ SamplerPostprocessorTransfer::finalizeFromMultiapp()
   // Update VPP
   if (processor_id() == 0)
   {
+    _results->initialize();
     const dof_id_type n = _sampler->getTotalNumberOfRows();
     for (MooseIndex(n) i = 0; i < n; i++)
     {
@@ -127,6 +128,9 @@ SamplerPostprocessorTransfer::execute()
 
   // Sum the PP values from all ranks
   _communicator.sum(_local_values);
+
+  // Initialize VPP
+  _results->initialize();
 
   // Update VPP
   for (unsigned int i = 0; i < n; i++)
