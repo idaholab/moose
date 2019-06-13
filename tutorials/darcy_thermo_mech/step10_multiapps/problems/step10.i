@@ -45,6 +45,7 @@
     add_variables = true
     strain = FINITE
     eigenstrain_names = eigenstrain
+    use_automatic_differentiation = true
     generate_output = 'vonmises_stress elastic_strain_xx elastic_strain_yy strain_xx strain_yy'
   []
 []
@@ -159,10 +160,10 @@
     poissons_ratio = .3 # from wikipedia
   []
   [elastic_stress]
-    type = ComputeFiniteStrainElasticStress
+    type = ADComputeFiniteStrainElasticStress
   []
   [thermal_strain]
-    type = ComputeThermalExpansionEigenstrain
+    type = ADComputeThermalExpansionEigenstrain
     stress_free_temperature = 300
     thermal_expansion_coeff = 1e-6
     eigenstrain_name = eigenstrain
@@ -177,28 +178,28 @@
   []
 []
 
-[Problem]
-  type = FEProblem
-  coord_type = RZ
+[Preconditioning/smp]
+  type = SMP
+  full = true
 []
 
 [Executioner]
   type = Transient
   start_time = -1
   end_time = 200
-  steady_state_tolerance = 8e-6
+  steady_state_tolerance = 1e-7
   steady_state_detection = true
   dt = 0.25
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
-  petsc_options_value = 'hypre boomeramg 100'
+  petsc_options_value = 'hypre boomeramg 500'
   line_search = none
-  nl_rel_tol = 1e-7
   [TimeStepper]
     type = FunctionDT
     function = 'if(t<0,0.1,0.25)'
   []
 []
+
 
 [MultiApps]
   [micro]

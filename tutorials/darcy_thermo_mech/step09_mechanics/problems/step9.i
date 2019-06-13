@@ -23,6 +23,7 @@
 
 [Variables]
   [pressure]
+    scaling = 1e11
   []
   [temperature]
     initial_condition = 300 # Start at room temperature
@@ -51,6 +52,7 @@
     add_variables = true
     strain = FINITE
     eigenstrain_names = eigenstrain
+    use_automatic_differentiation = true
     generate_output = 'vonmises_stress elastic_strain_xx elastic_strain_yy strain_xx strain_yy'
   []
 []
@@ -180,10 +182,10 @@
 
   []
   [elastic_stress]
-    type = ComputeFiniteStrainElasticStress
+    type = ADComputeFiniteStrainElasticStress
   []
   [thermal_strain]
-    type = ComputeThermalExpansionEigenstrain
+    type = ADComputeThermalExpansionEigenstrain
     stress_free_temperature = 300
     eigenstrain_name = eigenstrain
     temperature = temperature
@@ -202,11 +204,9 @@
   coord_type = RZ
 []
 
-[Preconditioning]
-  [smp]
-    type = SMP
-    full = true
-  []
+[Preconditioning/smp]
+  type = SMP
+  full = true
 []
 
 [Executioner]
@@ -218,9 +218,8 @@
   dt = 0.25
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
-  petsc_options_value = 'hypre boomeramg 100'
+  petsc_options_value = 'hypre boomeramg 500'
   line_search = none
-  nl_rel_tol = 1e-6
   [TimeStepper]
     type = FunctionDT
     function = 'if(t<0,0.1,0.25)'
