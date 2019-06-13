@@ -58,7 +58,7 @@ C\left( \frac{\partial T}{\partial t} + \underbrace{\epsilon \vec{u}\cdot\nabla 
 
 !---
 
-## Variable Scaling
+## Auto Variable Scaling
 
 To obtain an optimum numerical solution, the non-linear variables should be on the same
 scale. The condition number can be used to determine
@@ -66,7 +66,7 @@ scale. The condition number can be used to determine
 ```bash
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step06_coupled_darcy_heat_conduction
 make -j 12
-../darcy_thermo_mech-opt -i step6a_coupled.i Mesh/nx=50 Mesh/ny=3 Executioner/num_steps=1 Variables/pressure/scaling=1 -pc_type svd -pc_svd_monitor -ksp_view_pmat
+../darcy_thermo_mech-opt -i step6a_coupled.i Mesh/nx=50 Mesh/ny=3 Executioner/num_steps=1 Executioner/automatic_scaling=0 -pc_type svd -pc_svd_monitor -ksp_view_pmat
 ```
 
 !---

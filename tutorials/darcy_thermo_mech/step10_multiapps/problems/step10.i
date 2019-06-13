@@ -13,7 +13,6 @@
 
 [Variables]
   [pressure]
-    scaling = 1e11
   []
   [temperature]
     initial_condition = 300 # Start at room temperature
@@ -178,11 +177,6 @@
   []
 []
 
-[Preconditioning/smp]
-  type = SMP
-  full = true
-[]
-
 [Executioner]
   type = Transient
   start_time = -1
@@ -191,6 +185,8 @@
   steady_state_detection = true
   dt = 0.25
   solve_type = PJFNK
+  automatic_scaling = true
+  compute_scaling_once = false
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg 500'
   line_search = none
