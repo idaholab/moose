@@ -188,6 +188,7 @@
     stress_free_temperature = 300
     eigenstrain_name = eigenstrain
     temperature = temperature
+    thermal_expansion_coeff = 1e-6 # TM modules doesn't support material property, but it will
   []
 []
 
