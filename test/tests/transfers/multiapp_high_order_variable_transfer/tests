@@ -1,0 +1,18 @@
+[Tests]
+   design = "MultiAppMeshFunctionTransfer.md"
+   issues = "#13446"
+
+  [L2_Lagrange]
+    type = 'Exodiff'
+    input = 'master_L2_Lagrange.i'
+    exodiff = 'master_L2_Lagrange_out.e master_L2_Lagrange_out_sub0.e'
+    requirement = "The system shall support transfer first order elemental variable"
+  []
+
+  [L2_Lagrange_different_mesh]
+    type = 'Exodiff'
+    input = 'master_L2_Lagrange_diff.i'
+    exodiff = 'master_L2_Lagrange_diff_out.e master_L2_Lagrange_diff_out_sub0.e'
+    requirement = "The system shall support transfer first order elemental variable when a different mesh is used in sub"
+  []
+[]
