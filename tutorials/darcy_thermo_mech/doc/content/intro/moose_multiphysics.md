@@ -114,6 +114,7 @@ VectorPostprocessors\\
 !style halign=center
 Chemical Reactions\\
 Contact\\
+External PETSc Solver\\
 Fluid Properties\\
 Function Expansion Tools\\
 Heat Conduction\\
@@ -126,7 +127,7 @@ Stochastic Tools\\
 Tensor (solid) Mechanics\\
 XFEM\\
 Shallow Water (work in progress)\\
-Ray Tracing (work in progress)\\
+Ray Tracing (work in progress)
 
 !---
 

@@ -61,17 +61,21 @@ C\left( \frac{\partial T}{\partial t} + \underbrace{\epsilon \vec{u}\cdot\nabla 
 ## Auto Variable Scaling
 
 To obtain an optimum numerical solution, the non-linear variables should be on the same
-scale. The condition number can be used to determine
+scale.
+
+MOOSE includes the ability to automatically scale non-linear variables
+
+!---
+
+### Condition Number +without+ Scaling
+
+The condition number can be used to determine if variable scaling is required.
 
 ```bash
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step06_coupled_darcy_heat_conduction
 make -j 12
 ../darcy_thermo_mech-opt -i step6a_coupled.i Mesh/nx=50 Mesh/ny=3 Executioner/num_steps=1 Executioner/automatic_scaling=0 -pc_type svd -pc_svd_monitor -ksp_view_pmat
 ```
-
-!---
-
-### Pressure without Scaling
 
 ```bash
 Time Step 1, time = 0.1, dt = 0.1
@@ -93,7 +97,13 @@ row 4: (0, 4.01973e-12)  (1, 0.)  (2, 3.97056e-14)  (3, 0.)  (4, -6.43156e-11)  
 
 !---
 
-### Pressure with Scaling (1e11)
+### Condition Number +with+ Scaling
+
+```bash
+cd ~/projects/moose/tutorials/darcy-thermo_mech/step06_coupled_darcy_heat_conduction
+make -j 12
+../darcy_thermo_mech-opt -i step6a_coupled.i Mesh/nx=50 Mesh/ny=3 Executioner/num_steps=1 -pc_type svd -pc_svd_monitor -ksp_view_pmat
+```
 
 ```bash
 Time Step 1, time = 0.1, dt = 0.1

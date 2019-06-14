@@ -12,6 +12,7 @@ import chigger
 
 EXODUS = 'step9_out.e'
 PREFIX = 'step09'
+DISP = 50
 
 def frames():
     """Render frames"""
@@ -20,7 +21,7 @@ def frames():
     camera.SetPosition(0.1590705559, -0.0218861161, 0.1683082924)
     camera.SetFocalPoint(0.1590705559, -0.0218861161, 0.0000000000)
 
-    reader = chigger.exodus.ExodusReader(EXODUS, displacement_magnitude=5)
+    reader = chigger.exodus.ExodusReader(EXODUS, displacement_magnitude=DISP)
 
     temp_rot = chigger.filters.TransformFilter(rotate=[0,0,270])
     temp = chigger.exodus.ExodusResult(reader, camera=camera,
@@ -35,7 +36,7 @@ def frames():
                                        #component=1,
                                        viewport=[0, 0, 1, 0.5],
                                        filters=[disp_rot],
-                                       range=[0, 2.9e9],
+                                       range=[0, 1.8e8],
                                        cmap='plasma')
     cbar = chigger.exodus.ExodusColorBar(temp, disp,
                                          viewport=[0,0,1,1],
@@ -46,11 +47,12 @@ def frames():
                                               justification='center')
 
     tdisp = chigger.annotations.TextAnnotation(position=[0.5,0.05], font_size=48, text_color=[0,0,0],
-                                              text='5x Displacement', justification='center')
+                                               text='{}x Displacement'.format(DISP),
+                                               justification='center')
 
     cbar.setOptions('primary', title='Temperature (K)', font_size=48, font_color=[0,0,0], num_ticks=6)
-    cbar.setOptions('secondary', title='VonMises Stress (GPa)', font_size=48, font_color=[0,0,0],
-                    axis_scale=1e-9, num_ticks=5)
+    cbar.setOptions('secondary', title='VonMises Stress (MPa)', font_size=48, font_color=[0,0,0],
+                    axis_scale=1e-6, num_ticks=5)
 
     window = chigger.RenderWindow(temp, disp, cbar, time, tdisp, size=[1920, 1080],
                                   background=[1,1,1], motion_factor=0.2)
@@ -71,5 +73,5 @@ if __name__ == '__main__':
     if not os.path.isdir('output'):
         os.mkdir('output')
 
-    #frames()
+    frames()
     movie()
