@@ -75,6 +75,11 @@ protected:
   const Real & _fluid_cp;
   ADLinearInterpolation _fluid_cp_interpolation;
 
+  /// Fluid thermal expansion coefficient
+  bool _use_fluid_cte_interp;
+  const Real & _fluid_cte;
+  ADLinearInterpolation _fluid_cte_interpolation;
+
   /// Solid thermal conductivity
   bool _use_solid_k_interp = false;
   const Real & _solid_k;
@@ -89,6 +94,11 @@ protected:
   bool _use_solid_cp_interp;
   const Real & _solid_cp;
   ADLinearInterpolation _solid_cp_interpolation;
+
+  /// Solid thermal expansion coefficient
+  bool _use_solid_cte_interp;
+  const Real & _solid_cte;
+  ADLinearInterpolation _solid_cte_interpolation;
 
   /// The permeability (K)
   MaterialProperty<Real> & _permeability;
@@ -107,6 +117,9 @@ protected:
 
   /// The bulk density
   ADMaterialProperty(Real) & _density;
+
+  /// The bulk thermal expansion coefficient
+  ADMaterialProperty(Real) & _thermal_expansion;
 
   /// Flag for using the phase for porosity
   bool _use_phase_variable;
