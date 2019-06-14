@@ -65,7 +65,6 @@ validParams<FlowChannelBase>()
 FlowChannelBase::FlowChannelBase(const InputParameters & params)
   : GeometricalFlowComponent(params),
     _flow_model(nullptr),
-    _area_function(getParam<FunctionName>("A")),
     _closures_name(getParam<std::string>("closures")),
     _pipe_pars_transferred(getParam<bool>("pipe_pars_transferred")),
     _has_Dh(isParamValid("D_h")),
@@ -89,10 +88,27 @@ FlowChannelBase::getFlowModel() const
   return _flow_model;
 }
 
+const FunctionName &
+FlowChannelBase::getAreaFunctionName() const
+{
+  checkSetupStatus(INITIALIZED_PRIMARY);
+
+  return _area_function;
+}
+
+FunctionName
+FlowChannelBase::createAreaFunctionAndGetName()
+{
+  // Area function has already been created; just need to return its name
+  return getParam<FunctionName>("A");
+}
+
 void
 FlowChannelBase::init()
 {
   GeometricalFlowComponent::init();
+
+  _area_function = createAreaFunctionAndGetName();
 
   _flow_model = buildFlowModel();
   _flow_model->init();

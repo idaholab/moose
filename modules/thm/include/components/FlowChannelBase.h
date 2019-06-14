@@ -47,7 +47,12 @@ public:
    *
    * @return The name of the function describing the flow channel area
    */
-  const FunctionName & getAreaFunctionName() const { return _area_function; }
+  const FunctionName & getAreaFunctionName() const;
+
+  /**
+   * Creates the area function if needed and then stores the name
+   */
+  virtual FunctionName createAreaFunctionAndGetName();
 
   const std::vector<unsigned int> & getNodeIDs() const;
   const std::vector<unsigned int> & getElementIDs() const;
@@ -139,7 +144,7 @@ protected:
   std::shared_ptr<FlowModel> _flow_model;
 
   /// Function describing the flow channel area
-  const FunctionName & _area_function;
+  FunctionName _area_function;
 
   /// The name of used closures
   const std::string & _closures_name;
