@@ -67,12 +67,6 @@ class Job(object):
         # List of files modified by this job.
         self.modifiedFiles = []
 
-        # Set of nodes that depend on this node.
-        self.__downstreamNodes = set([])
-
-        # Set of jobs that this job depends on.
-        self.__upstreamNodes = set([])
-
         # Set of all jobs that this job races with.
         self.racePartners = set()
 

@@ -79,6 +79,4 @@ class RaceChecker(object):
             output += "\n\n\nA total of %d sets of tests with unique race conditions." % (i+1)
             output += "\nPlease review the tests and either add any necessary prereqs, or create unique filenames for the outputs of each test."
             print(output)
-        else:
-            print("There are no race conditions.")
         return exit_code

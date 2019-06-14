@@ -579,6 +579,8 @@ class TestHarness:
             if checker.findRacePartners():
                 # Print the unique racer conditions and adjust our error code.
                 self.error_code = checker.printUniqueRacerSets()
+            else:
+                print("There are no race conditions.")
 
         # Record the input file name that was used
         self.options.results_storage['INPUT_FILE_NAME'] = self.options.input_file_name
