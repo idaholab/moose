@@ -1,1 +1,1 @@
-../../../step06_coupled_darcy_heat_conduction/include/kernels/DarcyAdvection.h
+../../../step09_mechanics/include/kernels/DarcyAdvection.h

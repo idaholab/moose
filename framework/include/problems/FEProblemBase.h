@@ -594,6 +594,11 @@ public:
                                  Order order,
                                  Real scale_factor = 1.,
                                  const std::set<SubdomainID> * const active_subdomains = NULL);
+
+  virtual void addADKernel(const std::string & kernel_name,
+                           const std::string & name,
+                           InputParameters parameters);
+
   virtual void
   addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
   virtual void addNodalKernel(const std::string & kernel_name,
