@@ -18,7 +18,9 @@
 #include <thread>
 #include <future>
 
-#define CONSOLE_TIMED_PRINT(...) TimedPrint tpc(_console, std::chrono::duration<double>(1), std::chrono::duration<double>(1), __VA_ARGS__);
+#define CONSOLE_TIMED_PRINT(...)                                                                   \
+  TimedPrint tpc(                                                                                  \
+      _console, std::chrono::duration<double>(1), std::chrono::duration<double>(1), __VA_ARGS__);
 
 /**
  * Object to print a message after enough time has passed.
@@ -29,9 +31,9 @@
  * Use it as a scope guard.  As long as it is alive it
  * will print out periodically
  */
-class TimedPrint final {
+class TimedPrint final
+{
 public:
-
   /**
    * Start the timing and printing
    *
@@ -48,24 +50,23 @@ public:
              Args &&... args)
   {
     // This is using move assignment
-    _thread = std::thread{[&out, initial_wait, dot_interval, this, args...]
+    _thread = std::thread{[&out, initial_wait, dot_interval, this, args...] {
+      auto done_future = this->_done.get_future();
+
+      if (done_future.wait_for(initial_wait) == std::future_status::timeout)
       {
-        auto done_future = this->_done.get_future();
+        streamArguments(out, args...);
+        out << std::flush;
+      }
+      else // This means the section ended before we printed anything... so just exit
+        return;
 
-        if (done_future.wait_for(initial_wait) == std::future_status::timeout)
-        {
-          streamArguments(out, args...);
-          out << std::flush;
-        }
-        else // This means the section ended before we printed anything... so just exit
-          return;
+      while (done_future.wait_for(dot_interval) == std::future_status::timeout)
+        out << "." << std::flush;
 
-        while (done_future.wait_for(dot_interval) == std::future_status::timeout)
-          out << "." << std::flush;
-
-        // Finish the line
-        out << std::endl;
-      }};
+      // Finish the line
+      out << std::endl;
+    }};
   }
 
   /**
