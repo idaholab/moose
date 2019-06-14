@@ -27,11 +27,6 @@
 MooseInit::MooseInit(int argc, char * argv[], MPI_Comm COMM_WORLD_IN)
   : LibMeshInit(argc, argv, COMM_WORLD_IN)
 {
-  TimedPrint tp(std::cout,
-                std::chrono::duration<double>(1),
-                std::chrono::duration<double>(1),
-                "Starting MPI processes");
-
 #ifdef LIBMESH_HAVE_PETSC
   PetscPopSignalHandler(); // get rid of Petsc error handler
 #endif
@@ -45,6 +40,4 @@ MooseInit::MooseInit(int argc, char * argv[], MPI_Comm COMM_WORLD_IN)
 
   // Make sure that any calls to the global random number generator are consistent among processes
   MooseRandom::seed(0);
-
-  comm().barrier();
 }

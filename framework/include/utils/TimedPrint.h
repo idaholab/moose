@@ -46,7 +46,6 @@ public:
              std::chrono::duration<double> initial_wait,
              std::chrono::duration<double> dot_interval,
              Args &&... args)
-      :_printed_anything(false)
   {
     // This is using move assignment
     _thread = std::thread{[&out, initial_wait, dot_interval, this, args...]
@@ -55,7 +54,6 @@ public:
 
         if (done_future.wait_for(initial_wait) == std::future_status::timeout)
         {
-          this->_printed_anything = true;
           streamArguments(out, args...);
           out << std::flush;
         }
@@ -63,10 +61,7 @@ public:
           return;
 
         while (done_future.wait_for(dot_interval) == std::future_status::timeout)
-        {
-          this->_printed_anything = true;
           out << "." << std::flush;
-        }
 
         // Finish the line
         out << std::endl;
@@ -86,11 +81,6 @@ public:
   }
 
 protected:
-  /// Whether or not anything was printed
-  /// Does NOT need to be atomic because it's
-  /// only accessed after a join()
-  bool _printed_anything;
-
   std::promise<bool> _done;
   std::thread _thread;
 };
