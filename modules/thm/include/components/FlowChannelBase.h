@@ -147,9 +147,6 @@ protected:
   /// Closures object
   std::shared_ptr<ClosuresBase> _closures;
 
-  /// True if the user provided a function describing the area of the flow channel
-  bool _const_A;
-
   const bool & _pipe_pars_transferred;
 
   /// True if the user provided a function describing the hydraulic diameter of the flow channel

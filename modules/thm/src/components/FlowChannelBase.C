@@ -67,7 +67,6 @@ FlowChannelBase::FlowChannelBase(const InputParameters & params)
     _flow_model(nullptr),
     _area_function(getParam<FunctionName>("A")),
     _closures_name(getParam<std::string>("closures")),
-    _const_A(false),
     _pipe_pars_transferred(getParam<bool>("pipe_pars_transferred")),
     _has_Dh(isParamValid("D_h")),
     _Dh_function(_has_Dh ? getParam<FunctionName>("D_h") : ""),
@@ -99,8 +98,6 @@ FlowChannelBase::init()
   _flow_model->init();
 
   _closures = buildClosures();
-
-  _const_A = !_sim.hasFunction(_area_function);
 
   // initialize the stabilization object
   if (!_stabilization_uo_name.empty())
