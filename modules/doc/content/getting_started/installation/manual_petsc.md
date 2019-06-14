@@ -1,6 +1,6 @@
 ## PETSc
 
-Download PETSc !!package petsc_default!!
+Download PETSc [!package!petsc_default]
 
 !package code
 cd $STACK_SRC

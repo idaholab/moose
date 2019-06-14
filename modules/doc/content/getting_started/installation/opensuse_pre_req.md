@@ -17,7 +17,7 @@ sudo -E zypper install gcc-c++ \
 
 Download and install one our redistributable packages according to your version of OpenSUSE.
 
-- OpenSuSE: !!package name arch=opensuse15!!
+- OpenSuSE: [!package!name arch=opensuse15]
 
 Once downloaded, the package can be installed via the rpm utility:
 

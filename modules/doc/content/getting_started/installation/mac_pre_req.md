@@ -17,6 +17,6 @@
 
 - Install one of our redistributable packages pertaining to your OS X version:
 
-  - Mojave 10.14: !!package name arch=osx10.14!!
-  - High Sierra 10.13: !!package name arch=osx10.13!!
-  - Sierra 10.12: !!package name arch=osx10.12!!
+  - Mojave 10.14: [!package!name arch=osx10.14]
+  - High Sierra 10.13: [!package!name arch=osx10.13]
+  - Sierra 10.12: [!package!name arch=osx10.12]
