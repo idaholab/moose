@@ -87,12 +87,6 @@ class JobDAG(object):
             if self._doRaceConditions():
                 self._doSkippedDependencies()
 
-            # Store job position if running pedantic checks
-            if self.options.pedantic_checks:
-                for job in self.__job_dag.topological_sort():
-                    job.addDownsteamNodes(self.__job_dag.all_downstreams(job))
-                    job.addUpsteamNodes(self.__job_dag.predecessors(job))
-
         return self.__job_dag
 
     def _doMakeDependencies(self):
@@ -216,19 +210,13 @@ class JobDAG(object):
                  or 'prereq' in self.options.ignored_caveats)):
             return True
 
-    def getUpstreams(self, a_job):
+    def getUpstreams(self, job):
         """ Method to return a list of all the jobs that need to be run before the given job """
-        t_list = []
-        for temp_job in self.__job_dag.predecessors(a_job):
-            t_list.append(temp_job.getTestName())
-        return t_list
+        return self.__job_dag.predecessors(job)
 
-    def getDownstreams(self, a_job):
+    def getDownstreams(self, job):
         """ Method to return a list of all the jobs that need to be run after the given job """
-        t_list = []
-        for temp_job in self.__job_dag.all_downstreams(a_job):
-            t_list.append(temp_job.getTestName())
-        return t_list
+        return self.__job_dag.all_downstreams(job)
 
     def _printDownstreams(self, job):
         """

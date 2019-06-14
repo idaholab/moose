@@ -31,8 +31,8 @@ class RaceChecker(object):
                     continue
 
                 _matching = list(set(job_a.modifiedFiles).intersection(set(job_b.modifiedFiles)))
-                if _matching and not ((job_a in job_b.getDownstreamNodes()) \
-                                      or (job_b in job_a.getDownstreamNodes())):
+                if _matching and not ((job_a in job_b.getDownstreams()) \
+                                      or (job_b in job_a.getDownstreams())):
                     _jobs.update([job_a, job_b])
                     raceConditionsExist = True
             if _jobs:
@@ -45,11 +45,11 @@ class RaceChecker(object):
         colissions = dict()
         for job in self.all_jobs:
             if len(job.racePartners) > 0:
-                prereq = str([x.getTestName() for x in job.getUpstreamNodes()])
+                prereq = str([x.getTestName() for x in job.getUpstreams()])
                 shared = list()
                 shared.append(job.getTestName())
                 for partner in job.racePartners:
-                    if job.getUpstreamNodes() == partner.getUpstreamNodes():
+                    if job.getUpstreams() == partner.getUpstreams():
                         shared.append(partner.getTestName())
                     colissions[prereq] = shared
         for prereq in colissions:
@@ -66,17 +66,19 @@ class RaceChecker(object):
         status = StatusSystem()
         exit_code = 0x0
         if self.racer_lists:
-            output = ""
+            output = "\nDiagnostic analysis shows that the members of the following unique sets exhibit race conditions:"
             for i, racers in enumerate(self.racer_lists):
                 job_list, file_matches = racers
-                output += "\nSet %d\n" % (i+1)
-                output += "- "*4 + "\n\t--%s" % ('\n\t--'.join([x.getTestName() for x in job_list]))
-                output += "\n\nEach of the tests in this set create or modify each of the following files:"
-                output += "\n\t-->%s" % ('\n\t-->'.join(file_matches))
-                output += "\n" + "- "*4
+                output += "\n Set %d\n" % (i+1)
+                output += "- "*5 + "\n  --%s" % ('\n  --'.join([x.getTestName() for x in job_list]))
+                output += "\n\n   Each of the tests in this set create or modify each of the following files:"
+                output += "\n    -->%s" % ('\n    -->'.join(file_matches))
+                output += "\n" + "- "*5
             exit_code = status.race.code
         if output:
-            output += "\nThere are a total of %d sets of tests with unique race conditions." % (i+1)
+            output += "\n\n\nA total of %d sets of tests with unique race conditions." % (i+1)
             output += "\nPlease review the tests and either add any necessary prereqs, or create unique filenames for the outputs of each test."
             print(output)
+        else:
+            print("There are no race conditions.")
         return exit_code
