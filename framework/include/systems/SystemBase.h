@@ -106,6 +106,18 @@ public:
   virtual const SubProblem & subproblem() const { return _subproblem; }
 
   /**
+   * Applies scaling factors to the system's variables
+   * @param inverse_scaling_factors A vector containing the inverse of each variable's scaling
+   * factor, e.g. 1 / scaling_factor
+   */
+  void applyScalingFactors(const std::vector<Real> & inverse_scaling_factors);
+
+  /**
+   * Whether we are computing an initial Jacobian for automatic variable scaling
+   */
+  virtual bool computingInitialJacobian() const { return false; }
+
+  /**
    * Gets writeable reference to the dof map
    */
   virtual DofMap & dofMap();
@@ -785,4 +797,3 @@ protected:
 #define PARALLEL_TRY
 
 #define PARALLEL_CATCH _fe_problem.checkExceptionAndStopSolve();
-

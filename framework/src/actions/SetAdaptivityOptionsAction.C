@@ -28,6 +28,8 @@ validParams<SetAdaptivityOptionsAction>()
       "steps", 0, "The number of adaptive steps to use when doing a Steady simulation.");
   params.addParam<unsigned int>(
       "initial_steps", 0, "The number of adaptive steps to do based on the initial condition.");
+  params.addRangeCheckedParam<unsigned int>(
+      "interval", 1, "interval>0", "The number of time steps betweeen each adaptivity phase");
   params.addParam<MarkerName>(
       "initial_marker",
       "The name of the Marker to use to adapt the mesh during initial refinement.");
@@ -129,6 +131,7 @@ SetAdaptivityOptionsAction::act()
     adapt.setUseNewSystem();
 
     adapt.setTimeActive(getParam<Real>("start_time"), getParam<Real>("stop_time"));
+    adapt.setInterval(getParam<unsigned int>("interval"));
 
     adapt.setRecomputeMarkersFlag(getParam<bool>("recompute_markers_during_cycles"));
   }

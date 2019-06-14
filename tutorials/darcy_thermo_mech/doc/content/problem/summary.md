@@ -20,9 +20,8 @@
 The first step is to solve a simple "Diffusion" problem, which requires no code. This step
 will introduce the basic system of MOOSE.
 
-\begin{equation*}
+!equation
 -\nabla\cdot\nabla p = 0
-\end{equation*}
 
 !---
 
@@ -30,9 +29,8 @@ will introduce the basic system of MOOSE.
 
 In order to implement the Darcy pressure equation, a `Kernel` object is needed to represent:
 
-\begin{equation*}
+!equation
 -\nabla\cdot\frac{\mathbf{K}}{\mu}\nabla p = 0
-\end{equation*}
 
 !---
 
@@ -48,9 +46,8 @@ as well as be coupled to variables in the simulation.
 
 The velocity is computed from the pressure based on Darcy's law as:
 
-\begin{equation*}
+!equation
 \vec{u} = -\frac{\mathbf{K}}{\mu} \nabla p
-\end{equation*}
 
 This velocity can be computed using the Auxiliary system.
 
@@ -60,9 +57,8 @@ This velocity can be computed using the Auxiliary system.
 
 Solve the transient heat equation using the "heat conduction" module.
 
-\begin{equation*}
+!equation
 C \frac{\partial T}{\partial t} - \nabla \cdot k \nabla T = 0
-\end{equation*}
 
 !---
 
@@ -71,11 +67,10 @@ C \frac{\partial T}{\partial t} - \nabla \cdot k \nabla T = 0
 Solve the pressure and temperature in a coupled system of equations by adding the advection term
 to the heat equation.
 
-\begin{equation*}
+!equation
 -\nabla \cdot \frac{\mathbf{K}}{\mu} \nabla p  = 0
 \\
 C\left( \frac{\partial T}{\partial t} + \epsilon \vec{u}\cdot\nabla T \right) - \nabla \cdot k \nabla T = 0
-\end{equation*}
 
 !---
 

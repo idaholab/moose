@@ -16,9 +16,11 @@
       type = IdealGasFluidProperties
       gamma = 1.3
       R = 300
+      T_c = 126.19
+      rho_c = 313.189812
     [../]
     [./fp_vapor_mix]
-      type = GeneralVaporMixtureFluidProperties
+      type = IdealRealGasMixtureFluidProperties
       fp_primary = fp_primary
       fp_secondary = 'fp_nitrogen'
     [../]

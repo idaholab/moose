@@ -26,8 +26,20 @@ class CommentExtension(components.Extension):
         return config
 
     def extend(self, reader, renderer):
+        reader.addInline(HTMLCommentBlock(), location='_begin')
         reader.addInline(CommentInline(), location='_begin')
         reader.addBlock(CommentBlock(), location='_begin')
+
+class HTMLCommentBlock(components.TokenComponent):
+    """
+    HTML style comments (deprecated)
+    """
+    # TODO: Remove this in favor of !!! version
+    RE = re.compile(r'<!--(?P<content>.*?)-->', flags=re.UNICODE|re.MULTILINE|re.DOTALL)
+
+    def createToken(self, parent, info, page):
+        Comment(parent, content=info['content'])
+        return parent
 
 class CommentInline(components.TokenComponent):
     """
@@ -44,7 +56,7 @@ class CommentBlock(components.TokenComponent):
     """
     RE = re.compile(r'(?:\A|\n{2,})^'         # start of string or empty line
                     r'!{3}(?P<settings>.*?)$' # start of code with key=value settings
-                    r'(?P<content>.*?)^!{3}'    # code and end of fenced block
+                    r'(?P<content>.*?)^!{3}'  # code and end of comment block
                     r'(?=\n*\Z|\n{2,})',      # end of string or empty line
                     flags=re.UNICODE|re.MULTILINE|re.DOTALL)
 

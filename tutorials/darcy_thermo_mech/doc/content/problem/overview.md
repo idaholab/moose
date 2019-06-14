@@ -18,24 +18,18 @@ Pamuk and Ozdemir, [*"Friction factor, permeability, and inertial coefficient of
 
 Conservation of Mass:
 
-\begin{equation}
-\label{darcy_mass}
+!equation id=darcy_mass
 \nabla \cdot \vec{u} = 0
-\end{equation}
 
 Conservation of Energy:
 
-\begin{equation}
-\label{darcy_energy}
+!equation id=darcy_energy
 C\left( \frac{\partial T}{\partial t} + \epsilon \vec{u}\cdot\nabla T \right) - \nabla\cdot k \nabla T = 0
-\end{equation}
 
 Darcy's Law:
 
-\begin{equation}
-\label{darcy_velocity}
+!equation id=darcy_velocity
 \vec{u} = -\frac{\mathbf{K}}{\mu} (\nabla p - \rho \vec{g})
-\end{equation}
 
 where $\vec{u}$ is the fluid velocity, $\epsilon$ is porosity, $\mathbf{K}$ is the permeability
 tensor, $\mu$ is fluid viscosity, $p$ is the pressure, $\rho$ is the density, $\vec{g}$ is the
@@ -47,26 +41,23 @@ Assuming that $\vec{g}=0$ and imposing the divergence-free condition of [darcy_m
 to [darcy_velocity] leads to the following system of two equations in the unknowns
 $p$ and $T$:
 
-\begin{equation}
+!equation
 -\nabla \cdot \frac{\mathbf{K}}{\mu} \nabla p  = 0
-\end{equation}
 
-\begin{equation}
+!equation
 C\left( \frac{\partial T}{\partial t} + \epsilon \vec{u}\cdot\nabla T \right) - \nabla \cdot k \nabla T = 0
-\end{equation}
 
 !---
 
 The parameters $\rho$, $C$, and $k$ are the porosity-dependent density, heat capacity, and thermal
 conductivity of the combined fluid/solid medium, defined by:
 
-\begin{equation}
+!equation
 \rho \equiv \epsilon \rho_f + (1-\epsilon) \rho_s
 \\
 C \equiv \epsilon \rho_f {c_p}_f + (1-\epsilon) \rho_s {c_p}_s
 \\
 k \equiv \epsilon k_f + (1-\epsilon) k_s
-\end{equation}
 
  where $\epsilon$ is the porosity, $c_p$ is the specific heat, and the subscripts $f$ and $s$ refer
  to fluid and solid, respectively.

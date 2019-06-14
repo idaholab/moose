@@ -22,6 +22,9 @@ validParams<IdealGasFluidProperties>()
   params.addParam<Real>("mu", 18.23e-6, "Dynamic viscosity, Pa.s");
   params.addParam<Real>("k", 25.68e-3, "Thermal conductivity, W/(m-K)");
   params.addParam<Real>("molar_mass", 29.0e-3, "Constant molar mass of the fluid (kg/mol)");
+  params.addParam<Real>("T_c", 0, "Critical temperature, K");
+  params.addParam<Real>("rho_c", 0, "Critical density, kg/m3");
+  params.addParam<Real>("e_c", 0, "Internal energy at the critical point, J/kg");
   params.addRangeCheckedParam<Real>(
       "cv", 0.718e3, "cv > 0", "Constant specific heat capacity at constant volume (J/kg/K)");
   params.addParam<Real>(
@@ -47,6 +50,9 @@ IdealGasFluidProperties::IdealGasFluidProperties(const InputParameters & paramet
     _k(parameters.isParamSetByUser("thermal_conductivity") ? getParam<Real>("thermal_conductivity")
                                                            : getParam<Real>("k")),
     _molar_mass(getParam<Real>("molar_mass")),
+    _T_c(getParam<Real>("T_c")),
+    _rho_c(getParam<Real>("rho_c")),
+    _e_c(getParam<Real>("e_c")),
     _henry_constant(getParam<Real>("henry_constant"))
 {
   // If gamma is provided, calculate cp and cv using this
@@ -385,6 +391,15 @@ IdealGasFluidProperties::s_from_T_v(Real T, Real v, Real & s, Real & ds_dT, Real
 
 Real IdealGasFluidProperties::cv_from_T_v(Real /*T*/, Real /*v*/) const { return _cv; }
 
+Real IdealGasFluidProperties::e_spndl_from_v(Real /*v*/) const { return _e_c; }
+
+void
+IdealGasFluidProperties::v_e_spndl_from_T(Real /*T*/, Real & v, Real & e) const
+{
+  v = 1. / _rho_c;
+  e = _e_c;
+}
+
 Real
 IdealGasFluidProperties::h_from_p_T(Real /*p*/, Real T) const
 {
@@ -454,6 +469,24 @@ IdealGasFluidProperties::molarMass() const
 }
 
 Real
+IdealGasFluidProperties::criticalTemperature() const
+{
+  return _T_c;
+}
+
+Real
+IdealGasFluidProperties::criticalDensity() const
+{
+  return _rho_c;
+}
+
+Real
+IdealGasFluidProperties::criticalInternalEnergy() const
+{
+  return _e_c;
+}
+
+Real
 IdealGasFluidProperties::T_from_p_h(Real, Real h) const
 {
   return h / _gamma / _cv;
@@ -509,6 +542,12 @@ IdealGasFluidProperties::k_from_p_T(Real p, Real T, Real & k, Real & dk_dp, Real
   k = k_from_p_T(p, T);
   dk_dp = 0.0;
   dk_dT = 0.0;
+}
+
+Real IdealGasFluidProperties::pp_sat_from_p_T(Real /*p*/, Real /*T*/) const
+{
+  mooseError(
+      name(), ": ", __PRETTY_FUNCTION__, " not implemented. Use a real fluid property class!");
 }
 
 Real IdealGasFluidProperties::henryConstant(Real /*T*/) const { return _henry_constant; }

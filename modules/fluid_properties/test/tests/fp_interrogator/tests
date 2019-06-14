@@ -253,12 +253,12 @@ Thermal conductivity:                           0.02568  W/\(m-K\)'
     threading = '!pthreads'
     expect_out = 'Vapor mixture STATIC properties:
 --------------------------------------------------------------------------------
-Pressure:                              9.0404345588e\+05  Pa
+Pressure:                              9.0404345635e\+05  Pa
 Temperature:                                2547.214296  K
 Density:                                    1.187005237  kg/m\^3
 Specific volume:                           0.8424562661  m\^3/kg
 Specific internal energy:              2.4771659033e\+06  J/kg
-Specific enthalpy:                     3.2387829776e\+06  J/kg
+Specific enthalpy:                     3.2387829780e\+06  J/kg
 
 Sound speed:                                997.8878004  m/s
 Dynamic viscosity:                     1.8230000000e-05  Pa-s

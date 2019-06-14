@@ -58,10 +58,7 @@ public:
   void setSymbolName(const std::string & n) { _fparser_name = n; };
 
   /// get the property name
-  const std::string getPropertyName() const
-  {
-    return derivativePropertyName(_base_name, _derivative_vars);
-  };
+  const std::string & getPropertyName() const { return _property_name; };
 
   /// get the property reference
   const MaterialProperty<Real> & value() const;
@@ -79,8 +76,11 @@ public:
   /// builds a list of dependent variables (exactly all variabled for which depends on returns true)
   std::vector<VariableName> getDependentVariables();
 
-  // output the internal state of this descriptor for debugging purposes
+  /// output the internal state of this descriptor for debugging purposes
   void printDebug();
+
+  /// update the cached _property_name member
+  void updatePropertyName();
 
 private:
   void parseDerivative(const std::string &);
@@ -100,5 +100,7 @@ private:
 
   /// material object that owns this descriptor
   MooseObject * _parent;
-};
 
+  /// cache the final property name of the derivative
+  std::string _property_name;
+};
