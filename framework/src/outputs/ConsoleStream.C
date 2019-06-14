@@ -17,9 +17,14 @@ ConsoleStream::ConsoleStream(OutputWarehouse & output_warehouse)
 {
 }
 
-const ConsoleStream & ConsoleStream::operator<<(StandardEndLine /*manip*/) const
+const ConsoleStream &
+ConsoleStream::operator<<(const StandardEndLine & manip) const
 {
-  _oss << '\n';
+  if (manip == (std::basic_ostream<char> & (*)(std::basic_ostream<char> &)) & std::endl)
+    _oss << '\n';
+  else
+    _oss << manip;
+
   _output_warehouse.mooseConsole();
 
   return *this;
