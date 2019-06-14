@@ -16,7 +16,12 @@
   using ADIsotropicPlasticityStressUpdate<compute_stage>::computeYieldStress;                      \
   using ADIsotropicPlasticityStressUpdate<compute_stage>::computeHardeningValue;                   \
   using ADIsotropicPlasticityStressUpdate<compute_stage>::computeHardeningDerivative;              \
-  using ADIsotropicPlasticityStressUpdate<compute_stage>::_hardening_variable
+  using ADIsotropicPlasticityStressUpdate<compute_stage>::_yield_stress;                           \
+  using ADIsotropicPlasticityStressUpdate<compute_stage>::_yield_condition;                        \
+  using ADIsotropicPlasticityStressUpdate<compute_stage>::_plastic_strain;                         \
+  using ADIsotropicPlasticityStressUpdate<compute_stage>::_plastic_strain_old;                     \
+  using ADIsotropicPlasticityStressUpdate<compute_stage>::_hardening_variable;                     \
+  using ADIsotropicPlasticityStressUpdate<compute_stage>::_hardening_variable_old
 
 template <ComputeStage>
 class ADIsotropicPlasticityStressUpdate;
