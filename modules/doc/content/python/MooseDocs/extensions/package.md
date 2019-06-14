@@ -5,4 +5,4 @@ This is a MooseDocs developer level extension, more information will be added as
 system continues to grow.
 
 !devel example caption=Example use of inline "package" command.
-MOOSE Package (Darwin): !!package name arch=osx10.13!!
+MOOSE Package (Darwin): [!package!name arch=osx10.13]
