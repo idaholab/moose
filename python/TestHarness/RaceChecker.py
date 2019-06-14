@@ -26,6 +26,7 @@ class RaceChecker(object):
         raceConditionsExist = False
         for job_group in self.all_jobs:
             _jobs = set([])
+            _files = set([])
             for job_a, job_b in itertools.combinations(job_group, 2):
                 if job_a.isSkip() or job_b.isSkip():
                     continue
@@ -34,9 +35,10 @@ class RaceChecker(object):
                 if _matching and not ((job_a in job_b.getDownstreams()) \
                                       or (job_b in job_a.getDownstreams())):
                     _jobs.update([job_a, job_b])
+                    _files.update(_matching)
                     raceConditionsExist = True
             if _jobs:
-                self.racer_lists.append((sorted(_jobs), sorted(_matching)))
+                self.racer_lists.append((sorted(_jobs), sorted(_files)))
         return raceConditionsExist
 
     def printRaceConditionsByPrereq(self):
