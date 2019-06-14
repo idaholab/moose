@@ -16,7 +16,7 @@ validParams<ClosuresBase>()
 
 ClosuresBase::ClosuresBase(const InputParameters & params)
   : MooseObject(params),
-    LoggingInterface(dynamic_cast<THMApp &>(getMooseApp()), name()),
+    LoggingInterface(dynamic_cast<THMApp &>(getMooseApp())),
 
     _sim(*params.getCheckedPointerParam<Simulation *>("_sim")),
     _factory(_app.getFactory())

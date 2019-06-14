@@ -86,7 +86,7 @@ Component::split(const std::string & rname)
 
 Component::Component(const InputParameters & parameters)
   : THMObject(parameters),
-    LoggingInterface(dynamic_cast<THMApp &>(MooseObject::_app), name()),
+    LoggingInterface(dynamic_cast<THMApp &>(MooseObject::_app)),
 
     _gravity_vector(getParam<RealVectorValue>("gravity_vector")),
     _gravity_magnitude(_gravity_vector.norm()),
@@ -102,6 +102,15 @@ Component::Component(const InputParameters & parameters)
     _zero(_sim._zero),
     _component_setup_status(CREATED)
 {
+}
+
+const std::string &
+Component::cname() const
+{
+  if (_parent)
+    return _parent->cname();
+  else
+    return name();
 }
 
 void

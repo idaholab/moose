@@ -18,9 +18,8 @@ public:
    * Constructor
    *
    * @param[in] app   THM application
-   * @param[in] name  Name of the object performing logging
    */
-  LoggingInterface(THMApp & app, const std::string & name = "");
+  LoggingInterface(THMApp & app);
 
   /**
    * Logs an error
@@ -28,10 +27,18 @@ public:
   template <typename... Args>
   void logError(Args &&... args) const
   {
-    if (_logging_obj_has_name)
-      _logging_app.log().add(Logger::ERROR, _logging_obj_name, ": ", std::forward<Args>(args)...);
-    else
-      _logging_app.log().add(Logger::ERROR, std::forward<Args>(args)...);
+    _logging_app.log().add(Logger::ERROR, std::forward<Args>(args)...);
+  }
+
+  /**
+   * Logs an error for a component
+   *
+   * @param[in] component_name  Name of the component
+   */
+  template <typename... Args>
+  void logComponentError(const std::string & component_name, Args &&... args) const
+  {
+    _logging_app.log().add(Logger::ERROR, component_name, ": ", std::forward<Args>(args)...);
   }
 
   /**
@@ -40,19 +47,21 @@ public:
   template <typename... Args>
   void logWarning(Args &&... args) const
   {
-    if (_logging_obj_has_name)
-      _logging_app.log().add(Logger::WARNING, _logging_obj_name, ": ", std::forward<Args>(args)...);
-    else
-      _logging_app.log().add(Logger::WARNING, std::forward<Args>(args)...);
+    _logging_app.log().add(Logger::WARNING, std::forward<Args>(args)...);
+  }
+
+  /**
+   * Logs a warning for a component
+   *
+   * @param[in] component_name  Name of the component
+   */
+  template <typename... Args>
+  void logComponentWarning(const std::string & component_name, Args &&... args) const
+  {
+    _logging_app.log().add(Logger::WARNING, component_name, ": ", std::forward<Args>(args)...);
   }
 
 protected:
   /// THM application
   THMApp & _logging_app;
-
-  /// Name of the object for which the error or warning is logged
-  const std::string _logging_obj_name;
-
-  /// Does the logging object have a name that should be printed?
-  const bool _logging_obj_has_name;
 };
