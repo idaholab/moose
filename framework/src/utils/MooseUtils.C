@@ -441,7 +441,7 @@ indentMessage(const std::string & prefix,
   std::string curr_color = COLOR_DEFAULT; // tracks last color code before newline
   std::string line, color_code;
 
-  bool ends_in_newline = message.back() == '\n';
+  bool ends_in_newline = message.empty() ? true : message.back() == '\n';
 
   std::istringstream iss(message);
   for (std::string line; std::getline(iss, line);) // loop over each line

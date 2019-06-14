@@ -194,7 +194,7 @@ OutputWarehouse::mooseConsole()
       // cleared.
       std::string message = _console_buffer.str();
 
-      bool this_message_ends_in_newline = message.back() == '\n';
+      bool this_message_ends_in_newline = message.empty() ? true : message.back() == '\n';
 
       // If that last message ended in newline then this one may need
       // to start with indenting

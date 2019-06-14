@@ -651,7 +651,7 @@ Console::write(std::string message, bool indent /*=true*/)
   if (_write_file)
     _file_output_stream << message;
 
-  bool this_message_ends_in_newline = message.back() == '\n';
+  bool this_message_ends_in_newline = message.empty() ? true : message.back() == '\n';
 
   // Apply MultiApp indenting
   if (_last_message_ended_in_newline && indent && _app.multiAppLevel() > 0)
