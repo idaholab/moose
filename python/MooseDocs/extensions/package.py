@@ -63,7 +63,7 @@ class PackageCommand(command.CommandComponent):
             centos: moose-environment-1_centos.rpm
 
     Markdown Syntax:
-        !!package name arch=centos!!
+        [!package!name arch=centos]
     """
     COMMAND = 'package'
     SUBCOMMAND = 'name'
@@ -138,7 +138,7 @@ class PackageTextReplace(command.CommandComponent):
         gcc: 7.3.0
 
     Markdown Syntax:
-        This is a sentence with gcc-!!package gcc!!
+        This is a sentence with gcc-[!package!gcc]
 
     yields:
         "This is a sentence with gcc-7.3.0"
