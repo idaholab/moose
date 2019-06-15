@@ -1,6 +1,6 @@
 ## MPICH
 
-Download MPICH !!package mpich!!
+Download MPICH [!package!mpich]
 
 !package! code
 cd $STACK_SRC
