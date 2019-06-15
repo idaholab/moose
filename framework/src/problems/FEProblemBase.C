@@ -1899,6 +1899,16 @@ FEProblemBase::addKernel(const std::string & kernel_name,
 }
 
 void
+FEProblemBase::addADKernel(const std::string & kernel_name,
+                           const std::string & name,
+                           InputParameters parameters)
+{
+  addKernel(kernel_name + "<RESIDUAL>", name + "_residual", parameters);
+  addKernel(kernel_name + "<JACOBIAN>", name + "_jacobian", parameters);
+  haveADObjects(true);
+}
+
+void
 FEProblemBase::addNodalKernel(const std::string & kernel_name,
                               const std::string & name,
                               InputParameters parameters)

@@ -11,7 +11,7 @@
 [#step08]\\
 [#step09]\\
 [#step10]\\
-!![#step11]\\
+[#step11]
 
 !---
 
@@ -104,10 +104,9 @@ applications.
 This problem replaces the thermal conductivity calculated by the Material with a value computed by
 another application that runs a phase-based micro-structure simulation.
 
-!!!---
+!---
 
 ## [#step11]
 
 MOOSE includes a system to create custom input syntax for common tasks, in this step the syntax
 for the two equations and velocity auxiliary calculation are simplified for end-users.
-!!!

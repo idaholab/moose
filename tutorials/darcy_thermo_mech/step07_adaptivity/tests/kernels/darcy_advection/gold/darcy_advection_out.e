@@ -1,0 +1,1 @@
+../../../../../step06_coupled_darcy_heat_conduction/tests/kernels/darcy_advection/gold/darcy_advection_out.e

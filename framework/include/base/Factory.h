@@ -271,6 +271,7 @@ public:
    * @return Parameters of the object
    */
   InputParameters getValidParams(const std::string & name);
+  InputParameters getADValidParams(const std::string & name);
 
   /**
    * Build an object (must be registered) - THIS METHOD IS DEPRECATED (Use create<T>())
@@ -403,4 +404,3 @@ protected:
   /// object name registration where the label/appname is not identical.
   std::set<std::pair<std::string, std::string>> _objects_by_label;
 };
-

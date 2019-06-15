@@ -8,23 +8,23 @@ they are coupled together.
 !equation
 -\nabla \cdot \frac{\mathbf{K}}{\mu} \nabla p  = 0
 \\
-C\left( \frac{\partial T}{\partial t} + \underbrace{\epsilon \vec{u}\cdot\nabla T}_{\textrm{DarcyConvection}} \right) - \nabla \cdot k \nabla T = 0
+C\left( \frac{\partial T}{\partial t} + \underbrace{\epsilon \vec{u}\cdot\nabla T}_{\textrm{DarcyAdvection}} \right) - \nabla \cdot k \nabla T = 0
 
 - Objects have been created for everything except the $\vec{u}\cdot\nabla T$ term; a `Kernel`,
-  `DarcyConvection`, will be developed for this term.
+  `DarcyAdvection`, will be developed for this term.
 - A more sophisticated `Material` object will be created that includes temperature dependence
 
 !---
 
-## DarcyConvection.h
+## DarcyAdvection.h
 
-!listing step06_coupled_darcy_heat_conduction/include/kernels/DarcyConvection.h
+!listing step06_coupled_darcy_heat_conduction/include/kernels/DarcyAdvection.h
 
 !---
 
-## DarcyConvection.C
+## DarcyAdvection.C
 
-!listing step06_coupled_darcy_heat_conduction/src/kernels/DarcyConvection.C
+!listing step06_coupled_darcy_heat_conduction/src/kernels/DarcyAdvection.C
 
 !---
 

@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#4522'
+  design = 'tutorials/darcy_thermo_mech/index.md'
+  [test]
+    type = RunApp
+    input = 'step11.i'
+    cli_args = Executioner/num_steps=1
+    requirement = "The Darcy-Thermomechanics tutorial shall include a demonstration of create custom input syntax."
+  []
+[]

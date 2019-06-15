@@ -83,6 +83,12 @@ Factory::getValidParams(const std::string & obj_name)
   return params;
 }
 
+InputParameters
+Factory::getADValidParams(const std::string & obj_name)
+{
+  return getValidParams(obj_name + "<RESIDUAL>");
+}
+
 MooseObjectPtr
 Factory::create(const std::string & obj_name,
                 const std::string & name,
