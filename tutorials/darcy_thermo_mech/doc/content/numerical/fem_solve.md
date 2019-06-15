@@ -7,7 +7,7 @@
 The only remaining non-discretized parts of the weak form are the integrals. First, split the domain
 integral into a sum of integrals over elements:
 
-!equation
+!equation id=ref_elems
 \int_{\Omega} f(\vec{x}) \;\text{d}\vec{x} = \sum_e \int_{\Omega_e} f(\vec{x}) \;\text{d}\vec{x}
 
 Through a change of variables, the element integrals are mapped to integrals over the "reference"
@@ -19,24 +19,37 @@ elements $\hat{\Omega}_e$.
 
 where $\mathcal{J}_e$ is the Jacobian of the map from the physical element to the reference element.
 
+
 !---
+
+### Quadrature
 
 Quadrature, typically "Gaussian quadrature", is used to approximate the reference element integrals
 numerically.
 
 !equation
+\int_{\Omega} f(\vec{x})\;d\vec{x} \approx \sum_q w_q f(\vec{x}_q),
+
+where $w_q$ is the weight function at quadrature point $q$.
+
+Under certain common situations, the quadrature approximation is exact. For example, in 1 dimension,
+Gaussian Quadrature can exactly integrate polynomials of order $2n-1$ with $n$ quadrature points.
+
+!---
+
+Quadrature applied to [ref_elems] yields an equation that can be analyzed numerically:
+
+!equation
 \sum_e \int_{\hat{\Omega}_e} f(\vec{\xi}) \left|\mathcal{J}_e\right| \;\text{d}\vec{\xi} \approx
 \sum_e \sum_{q} w_{q} f( \vec{x}_{q}) \left|\mathcal{J}_e(\vec{x}_{q})\right|,
 
-where $\vec{x}_{q}$ is the spatial location of the $q$^th quadrature point and $w_{q}$ is its
+where $\vec{x}_{q}$ is the spatial location of the $q^\textrm{th}$ quadrature point and $w_{q}$ is its
 associated weight.
 
 MOOSE handles multiplication by the Jacobian ($\mathcal{J}_e$) and the weight ($w_{q}$)
 automatically, thus your `Kernel` object is only responsible for computing the $f(\vec{x}_{q})$
 part of the integrand.
 
-Under certain common situations, the quadrature approximation is exact. For example, in 1 dimension,
-Gaussian Quadrature can exactly integrate polynomials of order $2n-1$ with $n$ quadrature points.
 
 !---
 
@@ -113,7 +126,7 @@ $(\delta \vec{u}_{n+1})_k \rightarrow \delta \vec{u}_{n+1}$, $k=1,2,\ldots$
 The "linear residual" at step $k$ is defined as:
 
 !equation id=jfnk_linear_residual
-\vec{\rho}_k \equiv \mathbf{J}(\vec{u}_n)(\delta \vec{u}_{n+1})_k - \vec{R}(\vec{u}_n)
+\vec{\rho}_k \equiv \mathbf{J}(\vec{u}_n)(\delta \vec{u}_{n+1})_k + \vec{R}(\vec{u}_n)
 
 MOOSE prints the norm of this vector, $\|\vec{\rho}_k\|$, at each linear iteration and the
 "nonlinear residual" printed by MOOSE is $\|\vec{R}(\vec{u}_n)\|$.
@@ -163,7 +176,7 @@ Even though the Jacobian is never formed, JFNK methods still require preconditio
 
 !---
 
-Within MOOSE right preconditioning is used such that
+When using right preconditioning:
 
 !equation
 \mathbf{J} (\vec{u}_i) \mathbf{M}^{-1} (\mathbf{M}\delta \vec{u}_{i+1}) = -\vec{R}(\vec{u}_i)
@@ -174,7 +187,7 @@ the action of $\mathbf{M}^{-1}$ on a vector is required.
 When right-preconditioned, [jfnk_linear_residual] becomes:
 
 !equation id=pjfnk_linear_residual
-\vec{\rho}_k \equiv \mathbf{J} (\vec{u}_i) \mathbf{M}^{-1} (\mathbf{M}\delta \vec{u}_{i+1})_k - \vec{R}(\vec{u}_i),
+\vec{\rho}_k \equiv \mathbf{J} (\vec{u}_i) \mathbf{M}^{-1} (\mathbf{M}\delta \vec{u}_{i+1})_k + \vec{R}(\vec{u}_i),
 
 and [jfnk_jacobian] becomes:
 
@@ -194,10 +207,10 @@ The solve type is specified in the `[Executioner]` block within the input file:
 
 Available options include:
 
-- +PJFNK+: Preconditioned Jacobian Free Newton Krylov
+- +PJFNK+: Preconditioned Jacobian Free Newton Krylov (default)
 - +JFNK+: Jacobian Free Newton Krylov
 - +NEWTON+: Performs solve using exact Jacobian for preconditioning
-- +FD+: Same as NEWTON, but PETSc computes terms using a finite difference method
+- +FD+: PETSc computes terms using a finite difference method (debug)
 
 !---
 
@@ -254,12 +267,26 @@ the Jacobian matrix while still computing its action.
 
 !---
 
+## Automatic Jacobian Calculation
+
+MOOSE uses forward mode automatic differentiation from the MetaPhysicL package.
+
+Moving forward, the idea is for application developers to be able to develop entire apps without
+writing a single Jacobian statement. This has the potential to +decrease application development
+time+.
+
+In terms of computing performance, presently AD Jacobians are slower to compute than hand-coded
+Jacobians, but they parallelize extremely well and can benefit from using a `NEWTON` solve, which
+often results in decreased solve time overall.
+
+!---
+
 ## Manual Jacobian Calculation
 
 The remainder of the tutorial will focus on using [!ac!AD] for computing
 Jacobian terms, but it is possible to compute them manually.
 
-It is recommended that all new Kernel object use AD.
+It is recommended that all new Kernel objects use AD.
 
 !---
 

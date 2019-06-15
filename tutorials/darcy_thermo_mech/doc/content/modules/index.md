@@ -18,6 +18,13 @@ contact forces.
 
 !---
 
+## External PETSc Solver
+
+The External PETSc Solver module provides support for stand-alone native PETSc applications that
+to be coupled with moose-based applications.
+
+!---
+
 ## Fluid Properties
 
 The Fluid Properties module provides a consistent interface to fluid properties such as density,

@@ -188,7 +188,7 @@
     stress_free_temperature = 300
     eigenstrain_name = eigenstrain
     temperature = temperature
-    thermal_expansion_coeff = 1e-6 # TM modules doesn't support material property, but it will
+    thermal_expansion_coeff = 1e-5 # TM modules doesn't support material property, but it will
   []
 []
 
@@ -214,8 +214,10 @@
   solve_type = PJFNK
   automatic_scaling = true
   compute_scaling_once = false
-  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
-  petsc_options_value = 'hypre boomeramg 500'
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
+  #petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
+  #petsc_options_value = 'hypre boomeramg 500'
   line_search = none
   [TimeStepper]
     type = FunctionDT
