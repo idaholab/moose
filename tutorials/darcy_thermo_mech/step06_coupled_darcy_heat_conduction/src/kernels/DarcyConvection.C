@@ -22,8 +22,8 @@ DarcyConvection<compute_stage>::DarcyConvection(const InputParameters & paramete
     // Couple to the gradient of the pressure
     _pressure_grad(adCoupledGradient("pressure")),
     // Grab necessary material properties
-    _permeability(adGetMaterialProperty<Real>("permeability")),
-    _porosity(adGetMaterialProperty<Real>("porosity")),
+    _permeability(adGetADMaterialProperty<Real>("permeability")),
+    _porosity(adGetADMaterialProperty<Real>("porosity")),
     _viscosity(adGetADMaterialProperty<Real>("viscosity")),
     _density(adGetADMaterialProperty<Real>("density")),
     _specific_heat(adGetADMaterialProperty<Real>("specific_heat"))

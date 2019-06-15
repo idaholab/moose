@@ -37,8 +37,8 @@ protected:
 
   /// These references will be set by the initialization list so that
   /// values can be pulled from the Material system.
-  const MaterialProperty<Real> & _permeability;
-  const MaterialProperty<Real> & _porosity;
+  const ADMaterialProperty(Real) & _permeability;
+  const ADMaterialProperty(Real) & _porosity;
   const ADMaterialProperty(Real) & _viscosity;
   const ADMaterialProperty(Real) & _density;
   const ADMaterialProperty(Real) & _specific_heat;

@@ -31,7 +31,7 @@ DarcyPressure<compute_stage>::DarcyPressure(const InputParameters & parameters)
   : ADDiffusion<compute_stage>(parameters),
 
     // Get the parameters from the input file
-    _permeability(adGetParam<Real>("permeability")), //#define adGetParam this->template getParam
+    _permeability(adGetParam<Real>("permeability")),
     _viscosity(adGetParam<Real>("viscosity"))
 {
 }
