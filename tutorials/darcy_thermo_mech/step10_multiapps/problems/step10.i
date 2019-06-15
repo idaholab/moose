@@ -13,7 +13,6 @@
 
 [Variables]
   [pressure]
-    scaling = 1e11
   []
   [temperature]
     initial_condition = 300 # Start at room temperature
@@ -45,6 +44,7 @@
     add_variables = true
     strain = FINITE
     eigenstrain_names = eigenstrain
+    use_automatic_differentiation = true
     generate_output = 'vonmises_stress elastic_strain_xx elastic_strain_yy strain_xx strain_yy'
   []
 []
@@ -141,6 +141,7 @@
   viscosity_file = data/water_viscosity.csv
   density_file = data/water_density.csv
   specific_heat_file = data/water_specific_heat.csv
+  thermal_expansion_file = data/water_thermal_expansion.csv
   [column]
     type = PackedColumn
     temperature = temperature
@@ -149,6 +150,7 @@
     fluid_viscosity_file = ${viscosity_file}
     fluid_density_file = ${density_file}
     fluid_specific_heat_file = ${specific_heat_file}
+    fluid_thermal_expansion_file = ${thermal_expansion_file}
   []
 
   [elasticity_tensor]
@@ -157,10 +159,10 @@
     poissons_ratio = .3 # from wikipedia
   []
   [elastic_stress]
-    type = ComputeFiniteStrainElasticStress
+    type = ADComputeFiniteStrainElasticStress
   []
   [thermal_strain]
-    type = ComputeThermalExpansionEigenstrain
+    type = ADComputeThermalExpansionEigenstrain
     stress_free_temperature = 300
     thermal_expansion_coeff = 1e-6
     eigenstrain_name = eigenstrain
@@ -175,28 +177,25 @@
   []
 []
 
-[Problem]
-  type = FEProblem
-  coord_type = RZ
-[]
-
 [Executioner]
   type = Transient
   start_time = -1
   end_time = 200
-  steady_state_tolerance = 8e-6
+  steady_state_tolerance = 1e-7
   steady_state_detection = true
   dt = 0.25
   solve_type = PJFNK
+  automatic_scaling = true
+  compute_scaling_once = false
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
-  petsc_options_value = 'hypre boomeramg 100'
+  petsc_options_value = 'hypre boomeramg 500'
   line_search = none
-  nl_rel_tol = 1e-7
   [TimeStepper]
     type = FunctionDT
     function = 'if(t<0,0.1,0.25)'
   []
 []
+
 
 [MultiApps]
   [micro]

@@ -10,7 +10,6 @@
 
 [Variables]
   [pressure]
-    scaling = 1e11
   []
   [temperature]
     initial_condition = 300 # Start at room temperature
@@ -144,6 +143,7 @@
 [Executioner]
   type = Transient
   solve_type = NEWTON
+  automatic_scaling = true
 
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
