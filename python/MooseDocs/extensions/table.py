@@ -109,6 +109,7 @@ class TableComponent(components.TokenComponent):
     RE = re.compile(r'(?:\A|\n{2,})^(?P<table>\|.*?)(?=\Z|\n{2,})',
                     flags=re.MULTILINE|re.DOTALL|re.UNICODE)
     FORMAT_RE = re.compile(r'^(?P<format>\|[ \|:\-]+\|)$', flags=re.MULTILINE|re.UNICODE)
+    SPLIT_RE = re.compile(r'(?:\A| )\|(?: |\Z)')
 
     def createToken(self, parent, info, page):
         content = info['table']
@@ -146,7 +147,8 @@ class TableComponent(components.TokenComponent):
         for line in body.splitlines():
             if line:
                 row = TableRow(TableBody(table))
-                for i, content in enumerate([item.strip() for item in line.split('|') if item]):
+                items = [item.strip() for item in self.SPLIT_RE.split(line) if item]
+                for i, content in enumerate(items):
                     item = TableItem(row, align=form[i]) #pylint: disable=redefined-variable-type
                     self.reader.tokenize(item, content, page, MooseDocs.INLINE)
 
