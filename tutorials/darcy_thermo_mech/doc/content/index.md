@@ -231,9 +231,21 @@ www.mooseframework.org
 
 !include problem/step10.md start=end-intro
 
-!!---
+!---
 
-!!include problem/step11.md
+!include problem/step11.md end=end-intro
+
+!---
+
+!include systems/actions.md
+
+!---
+
+# Step 11: Custom Syntax id=step11b
+
+## (continued)
+
+!include problem/step11.md start=end-intro
 
 !---
 

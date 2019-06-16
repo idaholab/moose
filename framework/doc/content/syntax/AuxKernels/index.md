@@ -111,10 +111,10 @@ C\left( \frac{\partial T}{\partial t} + \epsilon \vec{u}\cdot\nabla T \right) - 
 \end{equation}
 where $T$ is temperature, $C$ is the heat capacity, $k$ is the thermal conductivity, and
 $\epsilon$ is the porosity. The advective term ($\epsilon\vec{u}\cdot\nabla T$) is computed in a
-kernel object ([step06_coupled_darcy_heat_conduction/src/kernels/DarcyConvection.C]) and requires
+kernel object ([step06_coupled_darcy_heat_conduction/src/kernels/DarcyAdvection.C]) and requires
 the pressure variable be provided as a variable:
 
-!listing step06_coupled_darcy_heat_conduction/src/kernels/DarcyConvection.C line=addRequiredCoupledVar
+!listing step06_coupled_darcy_heat_conduction/src/kernels/DarcyAdvection.C line=addRequiredCoupledVar
 
 For testing purposes is it not desirable to include the solve for the pressure variable when
 examining the correctness of the heat equation solve, so an auxiliary variable that is assigned an
