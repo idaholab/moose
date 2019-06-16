@@ -41,6 +41,26 @@ www.mooseframework.org
 
 !---
 
+!include cpp/01_basics.md
+
+!---
+
+!include cpp/02_scope.md
+
+!---
+
+!include cpp/03_types.md
+
+!---
+
+!include cpp/04_classes.md
+
+!---
+
+!include cpp/standards.md
+
+!---
+
 !include problem/step02.md end=end-intro
 
 !---
