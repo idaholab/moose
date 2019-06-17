@@ -13,6 +13,7 @@
 #include "ActionFactory.h"
 #include "Executioner.h"
 #include "MooseRandom.h"
+#include "TimedPrint.h"
 
 // PETSc
 #ifdef LIBMESH_HAVE_PETSC

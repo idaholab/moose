@@ -26,7 +26,7 @@ std::string
 SystemInfo::getInfo() const
 {
   std::stringstream oss;
-  oss << std::left << "Framework Information:\n"
+  oss << std::left << "\nFramework Information:\n"
       << std::setw(25) << "MOOSE Version: " << MOOSE_REVISION << '\n'
       << std::setw(25) << "LibMesh Version: " << LIBMESH_BUILD_VERSION << '\n';
 #ifdef LIBMESH_DETECTED_PETSC_VERSION_MAJOR

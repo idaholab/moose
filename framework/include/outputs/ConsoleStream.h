@@ -51,7 +51,7 @@ public:
   /**
    * This overload is here to handle the the std::endl manipulator
    */
-  const ConsoleStream & operator<<(StandardEndLine manip) const;
+  const ConsoleStream & operator<<(const StandardEndLine & manip) const;
 
   /**
    * Unset format flags
@@ -73,4 +73,3 @@ ConsoleStream::operator<<(const StreamType & s) const
   _oss << s;
   return *this;
 }
-

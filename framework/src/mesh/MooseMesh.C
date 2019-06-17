@@ -15,6 +15,7 @@
 #include "MooseApp.h"
 #include "RelationshipManager.h"
 #include "PointListAdaptor.h"
+#include "TimedPrint.h"
 
 #include <utility>
 
@@ -351,10 +352,16 @@ MooseMesh::prepare(bool force)
     // Call prepare_for_use() and don't mess with the renumbering
     // setting
     if (force || _needs_prepare_for_use)
+    {
+      CONSOLE_TIMED_PRINT("Preparing for use");
+
       getMesh().prepare_for_use();
+    }
   }
   else
   {
+    CONSOLE_TIMED_PRINT("Preparing for use");
+
     // Call prepare_for_use() and DO NOT allow renumbering
     getMesh().allow_renumbering(false);
     if (force || _needs_prepare_for_use)
@@ -633,6 +640,7 @@ void
 MooseMesh::buildNodeList()
 {
   TIME_SECTION(_build_node_list_timer);
+  CONSOLE_TIMED_PRINT("Building node lists");
 
   freeBndNodes();
 
@@ -667,6 +675,7 @@ void
 MooseMesh::buildBndElemList()
 {
   TIME_SECTION(_build_bnd_elem_list_timer);
+  CONSOLE_TIMED_PRINT("Building element lists");
 
   freeBndElems();
 
@@ -696,6 +705,7 @@ MooseMesh::nodeToElemMap()
     if (!_node_to_elem_map_built)
     {
       TIME_SECTION(_node_to_elem_map_timer);
+      CONSOLE_TIMED_PRINT("Building node to element map");
 
       for (const auto & elem : getMesh().active_element_ptr_range())
         for (unsigned int n = 0; n < elem->n_nodes(); n++)
@@ -716,6 +726,7 @@ MooseMesh::nodeToActiveSemilocalElemMap()
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
 
     TIME_SECTION(_node_to_active_semilocal_elem_map_timer);
+    CONSOLE_TIMED_PRINT("Building active semilocal element map");
 
     if (!_node_to_active_semilocal_elem_map_built)
     {
@@ -739,6 +750,7 @@ MooseMesh::getActiveLocalElementRange()
   if (!_active_local_elem_range)
   {
     TIME_SECTION(_get_active_local_element_range_timer);
+    CONSOLE_TIMED_PRINT("Caching active local element rage");
 
     _active_local_elem_range = libmesh_make_unique<ConstElemRange>(
         getMesh().active_local_elements_begin(), getMesh().active_local_elements_end(), GRAIN_SIZE);
@@ -753,6 +765,7 @@ MooseMesh::getActiveNodeRange()
   if (!_active_node_range)
   {
     TIME_SECTION(_get_active_node_range_timer);
+    CONSOLE_TIMED_PRINT("Caching active node range");
 
     _active_node_range = libmesh_make_unique<NodeRange>(
         getMesh().active_nodes_begin(), getMesh().active_nodes_end(), GRAIN_SIZE);
@@ -776,6 +789,7 @@ MooseMesh::getLocalNodeRange()
   if (!_local_node_range)
   {
     TIME_SECTION(_get_local_node_range_timer);
+    CONSOLE_TIMED_PRINT("Caching local node range");
 
     _local_node_range = libmesh_make_unique<ConstNodeRange>(
         getMesh().local_nodes_begin(), getMesh().local_nodes_end(), GRAIN_SIZE);
@@ -790,6 +804,8 @@ MooseMesh::getBoundaryNodeRange()
   if (!_bnd_node_range)
   {
     TIME_SECTION(_get_boundary_node_range_timer);
+    CONSOLE_TIMED_PRINT("Caching boundary node range");
+
     _bnd_node_range =
         libmesh_make_unique<ConstBndNodeRange>(bndNodesBegin(), bndNodesEnd(), GRAIN_SIZE);
   }
@@ -803,6 +819,8 @@ MooseMesh::getBoundaryElementRange()
   if (!_bnd_elem_range)
   {
     TIME_SECTION(_get_boundary_element_range_timer);
+    CONSOLE_TIMED_PRINT("Caching boundary element range");
+
     _bnd_elem_range =
         libmesh_make_unique<ConstBndElemRange>(bndElemsBegin(), bndElemsEnd(), GRAIN_SIZE);
   }
@@ -820,6 +838,7 @@ void
 MooseMesh::cacheInfo()
 {
   TIME_SECTION(_cache_info_timer);
+  CONSOLE_TIMED_PRINT("Caching mesh information");
 
   // TODO: Thread this!
   for (const auto & elem : getMesh().element_ptr_range())
@@ -2119,6 +2138,7 @@ MooseMesh::init()
     // sub-apps need to just build their mesh like normal
     {
       TIME_SECTION(_read_recovered_mesh_timer);
+      CONSOLE_TIMED_PRINT("Rcovering mesh");
       getMesh().read(_app.getRecoverFileBase() + "_mesh." + _app.getRecoverFileSuffix());
     }
 
@@ -2126,7 +2146,10 @@ MooseMesh::init()
     getMesh().skip_partitioning(skip_partitioning_later);
   }
   else // Normally just build the mesh
+  {
+    CONSOLE_TIMED_PRINT("Building mesh");
     buildMesh();
+  }
 }
 
 unsigned int
@@ -2140,7 +2163,8 @@ MooseMesh::effectiveSpatialDimension() const
 {
   const Real abs_zero = 1e-12;
 
-  // See if the mesh is completely containd in the z and y planes to calculate effective spatial dim
+  // See if the mesh is completely containd in the z and y planes to calculate effective spatial
+  // dim
   for (unsigned int dim = LIBMESH_DIM; dim >= 1; --dim)
     if (dimensionWidth(dim - 1) >= abs_zero)
       return dim;
@@ -2299,8 +2323,8 @@ MooseMesh::prepared(bool state)
   _is_prepared = state;
 
   /**
-   * If we are explicitly setting the mesh to not prepared, then we've likely modified the mesh and
-   * can no longer make assumptions about orthogonality. We really should recheck.
+   * If we are explicitly setting the mesh to not prepared, then we've likely modified the mesh
+   * and can no longer make assumptions about orthogonality. We really should recheck.
    */
   if (!state)
     _regular_orthogonal_mesh = false;
