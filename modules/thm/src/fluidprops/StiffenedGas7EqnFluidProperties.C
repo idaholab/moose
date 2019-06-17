@@ -30,6 +30,8 @@ validParams<StiffenedGas7EqnFluidProperties>()
   params.addParam<Real>("mu_vapor", 134.4e-7, "");
   params.addParam<Real>("M_vapor", 0.01801488, "");
 
+  params.addParam<Real>("rho_c", 322.0, "");
+
   return params;
 }
 
@@ -86,6 +88,7 @@ StiffenedGas7EqnFluidProperties::StiffenedGas7EqnFluidProperties(const InputPara
     params.set<Real>("k") = getParam<Real>("k_vapor");
     params.set<Real>("mu") = getParam<Real>("mu_vapor");
     params.set<Real>("M") = getParam<Real>("M_vapor");
+    params.set<Real>("rho_c") = getParam<Real>("rho_c");
     _fe_problem.addUserObject(class_name, _vapor_name, params);
   }
   _fp_vapor = &_fe_problem.getUserObject<SinglePhaseFluidProperties>(_vapor_name, _tid);
