@@ -20,7 +20,7 @@
 #include "UpdateDisplacedMeshThread.h"
 #include "Assembly.h"
 #include "DisplacedProblem.h"
-#include "TimedPrint.h"
+
 #include "libmesh/numeric_vector.h"
 
 registerMooseObject("MooseApp", DisplacedProblem);
@@ -175,7 +175,6 @@ void
 DisplacedProblem::updateMesh()
 {
   TIME_SECTION(_update_mesh_timer);
-  CONSOLE_TIMED_PRINT("Updating displaced mesh");
 
   syncSolutions();
 
@@ -215,7 +214,6 @@ DisplacedProblem::updateMesh(const NumericVector<Number> & soln,
                              const NumericVector<Number> & aux_soln)
 {
   TIME_SECTION(_update_mesh_timer);
-  CONSOLE_TIMED_PRINT("Updating displaced mesh");
 
   syncSolutions(soln, aux_soln);
 

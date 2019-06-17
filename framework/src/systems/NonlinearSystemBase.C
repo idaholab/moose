@@ -70,7 +70,6 @@
 #include "ADKernel.h"
 #include "ADPresetNodalBC.h"
 #include "Moose.h"
-#include "TimedPrint.h"
 
 // libMesh
 #include "libmesh/nonlinear_solver.h"
@@ -265,73 +264,63 @@ NonlinearSystemBase::restoreSolutions()
 void
 NonlinearSystemBase::initialSetup()
 {
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    CONSOLE_TIMED_PRINT("Initializing Kernels, BCs and Constraints");
+    _kernels.initialSetup(tid);
+    _ad_jacobian_kernels.initialSetup(tid);
+    _nodal_kernels.initialSetup(tid);
+    _dirac_kernels.initialSetup(tid);
+    if (_doing_dg)
+      _dg_kernels.initialSetup(tid);
+    _interface_kernels.initialSetup(tid);
+    _element_dampers.initialSetup(tid);
+    _nodal_dampers.initialSetup(tid);
+    _integrated_bcs.initialSetup(tid);
+  }
+  _scalar_kernels.initialSetup();
+  _constraints.initialSetup();
+  _general_dampers.initialSetup();
+  _nodal_bcs.initialSetup();
 
-    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-    {
-      _kernels.initialSetup(tid);
-      _ad_jacobian_kernels.initialSetup(tid);
-      _nodal_kernels.initialSetup(tid);
-      _dirac_kernels.initialSetup(tid);
-      if (_doing_dg)
-        _dg_kernels.initialSetup(tid);
-      _interface_kernels.initialSetup(tid);
+  // go over mortar interfaces and construct functors
+  const auto & undisplaced_mortar_interfaces = _fe_problem.getMortarInterfaces(/*displaced=*/false);
+  for (const auto & mortar_interface : undisplaced_mortar_interfaces)
+  {
+    auto master_slave_boundary_pair = mortar_interface.first;
+    const auto & mortar_generation_object = mortar_interface.second;
 
-      _element_dampers.initialSetup(tid);
-      _nodal_dampers.initialSetup(tid);
-      _integrated_bcs.initialSetup(tid);
-    }
-    _scalar_kernels.initialSetup();
-    _constraints.initialSetup();
-    _general_dampers.initialSetup();
-    _nodal_bcs.initialSetup();
+    auto & mortar_constraints =
+        _constraints.getActiveMortarConstraints(master_slave_boundary_pair, /*displaced=*/false);
+
+    _undisplaced_mortar_residual_functors.emplace(
+        master_slave_boundary_pair,
+        ComputeMortarFunctor<ComputeStage::RESIDUAL>(
+            mortar_constraints, mortar_generation_object, _fe_problem));
+    _undisplaced_mortar_jacobian_functors.emplace(
+        master_slave_boundary_pair,
+        ComputeMortarFunctor<ComputeStage::JACOBIAN>(
+            mortar_constraints, mortar_generation_object, _fe_problem));
   }
 
+  const auto & displaced_mortar_interfaces = _fe_problem.getMortarInterfaces(/*displaced=*/true);
+  for (const auto & mortar_interface : displaced_mortar_interfaces)
   {
-    CONSOLE_TIMED_PRINT("Initializing mortar interfaces");
+    mooseAssert(_fe_problem.getDisplacedProblem(),
+                "Cannot create displaced mortar functors when the displaced problem is null");
+    auto master_slave_boundary_pair = mortar_interface.first;
+    const auto & mortar_generation_object = mortar_interface.second;
 
-    // go over mortar interfaces and construct functors
-    const auto & undisplaced_mortar_interfaces =
-        _fe_problem.getMortarInterfaces(/*displaced=*/false);
-    for (const auto & mortar_interface : undisplaced_mortar_interfaces)
-    {
-      auto master_slave_boundary_pair = mortar_interface.first;
-      const auto & mortar_generation_object = mortar_interface.second;
+    auto & mortar_constraints =
+        _constraints.getActiveMortarConstraints(master_slave_boundary_pair, /*displaced=*/true);
 
-      auto & mortar_constraints =
-          _constraints.getActiveMortarConstraints(master_slave_boundary_pair, /*displaced=*/false);
-
-      _undisplaced_mortar_residual_functors.emplace(
-          master_slave_boundary_pair,
-          ComputeMortarFunctor<ComputeStage::RESIDUAL>(
-              mortar_constraints, mortar_generation_object, _fe_problem));
-      _undisplaced_mortar_jacobian_functors.emplace(
-          master_slave_boundary_pair,
-          ComputeMortarFunctor<ComputeStage::JACOBIAN>(
-              mortar_constraints, mortar_generation_object, _fe_problem));
-    }
-
-    const auto & displaced_mortar_interfaces = _fe_problem.getMortarInterfaces(/*displaced=*/true);
-    for (const auto & mortar_interface : displaced_mortar_interfaces)
-    {
-      mooseAssert(_fe_problem.getDisplacedProblem(),
-                  "Cannot create displaced mortar functors when the displaced problem is null");
-      auto master_slave_boundary_pair = mortar_interface.first;
-      const auto & mortar_generation_object = mortar_interface.second;
-
-      auto & mortar_constraints =
-          _constraints.getActiveMortarConstraints(master_slave_boundary_pair, /*displaced=*/true);
-
-      _displaced_mortar_residual_functors.emplace(
-          master_slave_boundary_pair,
-          ComputeMortarFunctor<ComputeStage::RESIDUAL>(
-              mortar_constraints, mortar_generation_object, *_fe_problem.getDisplacedProblem()));
-      _displaced_mortar_jacobian_functors.emplace(
-          master_slave_boundary_pair,
-          ComputeMortarFunctor<ComputeStage::JACOBIAN>(
-              mortar_constraints, mortar_generation_object, *_fe_problem.getDisplacedProblem()));
-    }
+    _displaced_mortar_residual_functors.emplace(
+        master_slave_boundary_pair,
+        ComputeMortarFunctor<ComputeStage::RESIDUAL>(
+            mortar_constraints, mortar_generation_object, *_fe_problem.getDisplacedProblem()));
+    _displaced_mortar_jacobian_functors.emplace(
+        master_slave_boundary_pair,
+        ComputeMortarFunctor<ComputeStage::JACOBIAN>(
+            mortar_constraints, mortar_generation_object, *_fe_problem.getDisplacedProblem()));
   }
 }
 
@@ -710,10 +699,7 @@ NonlinearSystemBase::computeResidualTags(const std::set<TagID> & tags)
     if (_has_nodalbc_save_in)
       _fe_problem.getAuxiliarySystem().solution().close();
     if (hasSaveIn())
-    {
-      CONSOLE_TIMED_PRINT("Updating auxiliary system for save_in")
       _fe_problem.getAuxiliarySystem().update();
-    }
   }
   catch (MooseException & e)
   {
@@ -743,48 +729,39 @@ NonlinearSystemBase::setInitialSolution()
   NumericVector<Number> & initial_solution(solution());
   if (_predictor.get() && _predictor->shouldApply())
   {
-    CONSOLE_TIMED_PRINT("Applying predictor")
-
     _predictor->apply(initial_solution);
     _fe_problem.predictorCleanup(initial_solution);
   }
 
   // do nodal BC
+  ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
+  for (const auto & bnode : bnd_nodes)
   {
-    CONSOLE_TIMED_PRINT("Applying BCs to initial condition");
+    BoundaryID boundary_id = bnode->_bnd_id;
+    Node * node = bnode->_node;
 
-    ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
-    for (const auto & bnode : bnd_nodes)
+    if (node->processor_id() == processor_id())
     {
-      BoundaryID boundary_id = bnode->_bnd_id;
-      Node * node = bnode->_node;
+      // reinit variables in nodes
+      _fe_problem.reinitNodeFace(node, boundary_id, 0);
 
-      if (node->processor_id() == processor_id())
+      if (_preset_nodal_bcs.hasActiveBoundaryObjects(boundary_id))
       {
-        // reinit variables in nodes
-        _fe_problem.reinitNodeFace(node, boundary_id, 0);
-
-        if (_preset_nodal_bcs.hasActiveBoundaryObjects(boundary_id))
-        {
-          const auto & preset_bcs = _preset_nodal_bcs.getActiveBoundaryObjects(boundary_id);
-          for (const auto & preset_bc : preset_bcs)
-            preset_bc->computeValue(initial_solution);
-        }
-        if (_ad_preset_nodal_bcs.hasActiveBoundaryObjects(boundary_id))
-        {
-          const auto & preset_bcs_res = _ad_preset_nodal_bcs.getActiveBoundaryObjects(boundary_id);
-          for (const auto & preset_bc : preset_bcs_res)
-            preset_bc->computeValue(initial_solution);
-        }
+        const auto & preset_bcs = _preset_nodal_bcs.getActiveBoundaryObjects(boundary_id);
+        for (const auto & preset_bc : preset_bcs)
+          preset_bc->computeValue(initial_solution);
+      }
+      if (_ad_preset_nodal_bcs.hasActiveBoundaryObjects(boundary_id))
+      {
+        const auto & preset_bcs_res = _ad_preset_nodal_bcs.getActiveBoundaryObjects(boundary_id);
+        for (const auto & preset_bc : preset_bcs_res)
+          preset_bc->computeValue(initial_solution);
       }
     }
   }
 
   _sys.solution->close();
-  {
-    CONSOLE_TIMED_PRINT("Updating ", name(), " after setting initial condition");
-    update();
-  }
+  update();
 
   // Set constraint slave values
   setConstraintSlaveValues(initial_solution, false);
@@ -921,8 +898,6 @@ NonlinearSystemBase::enforceNodalConstraintsJacobian()
 void
 NonlinearSystemBase::setConstraintSlaveValues(NumericVector<Number> & solution, bool displaced)
 {
-  CONSOLE_TIMED_PRINT("Setting constraint slave values for ", name())
-
   std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators =
       NULL;
 
@@ -2217,8 +2192,6 @@ NonlinearSystemBase::computeScalarKernelsJacobians(const std::set<TagID> & tags)
 void
 NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 {
-  CONSOLE_TIMED_PRINT("Computing jacobian");
-
   // Make matrix ready to use
   activeAllMatrixTags();
 
@@ -2596,7 +2569,6 @@ NonlinearSystemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks
                                            const std::set<TagID> & tags)
 {
   TIME_SECTION(_compute_jacobian_blocks_timer);
-  CONSOLE_TIMED_PRINT("Computing jacobian");
 
   FloatingPointExceptionGuard fpe_guard(_app);
 
@@ -2731,7 +2703,6 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
   if (_element_dampers.hasActiveObjects())
   {
     TIME_SECTION(_compute_dampers_timer);
-    CONSOLE_TIMED_PRINT("Computing damping");
 
     has_active_dampers = true;
     *_increment_vec = update;

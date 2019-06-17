@@ -16,7 +16,6 @@
 #include "MooseMesh.h"
 #include "NonlinearSystemBase.h"
 #include "UpdateErrorVectorsThread.h"
-#include "TimedPrint.h"
 
 // libMesh
 #include "libmesh/equation_systems.h"
@@ -219,8 +218,6 @@ void
 Adaptivity::uniformRefineWithProjection()
 {
   TIME_SECTION(_uniform_refine_with_projection);
-
-  CONSOLE_TIMED_PRINT("Uniformly refining mesh and reprojecting");
 
   // NOTE: we are using a separate object here, since adaptivity may not be on, but we need to be
   // able to do refinements

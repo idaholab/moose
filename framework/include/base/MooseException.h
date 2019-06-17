@@ -9,8 +9,6 @@
 
 #pragma once
 
-#include "StreamArguments.h"
-
 #include <exception>
 #include <sstream>
 
@@ -60,5 +58,14 @@ public:
   virtual const char * what() const throw() { return _message.c_str(); }
 
 protected:
+  void streamArguments(std::ostringstream &) {}
+
+  template <typename T, typename... Args>
+  void streamArguments(std::ostringstream & ss, T && val, Args &&... args)
+  {
+    ss << val;
+    streamArguments(ss, std::forward<Args>(args)...);
+  }
+
   std::string _message;
 };

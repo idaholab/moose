@@ -441,19 +441,13 @@ indentMessage(const std::string & prefix,
   std::string curr_color = COLOR_DEFAULT; // tracks last color code before newline
   std::string line, color_code;
 
-  bool ends_in_newline = message.empty() ? true : message.back() == '\n';
-
   std::istringstream iss(message);
   for (std::string line; std::getline(iss, line);) // loop over each line
   {
     const static pcrecpp::RE match_color(".*(\\33\\[3\\dm)((?!\\33\\[3\\d)[^\n])*");
     pcrecpp::StringPiece line_piece(line);
     match_color.FindAndConsume(&line_piece, &color_code);
-    colored_message += color + prefix + ": " + curr_color + line;
-
-    // Only add a newline to the last line if it had one to begin with!
-    if (!iss.eof() || ends_in_newline)
-      colored_message += "\n";
+    colored_message += color + prefix + ": " + curr_color + line + "\n";
 
     if (!color_code.empty())
       curr_color = color_code; // remember last color of this line

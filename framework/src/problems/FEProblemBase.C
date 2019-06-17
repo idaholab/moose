@@ -87,7 +87,6 @@
 #include "TimeIntegrator.h"
 #include "LineSearch.h"
 #include "FloatingPointExceptionGuard.h"
-#include "TimedPrint.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -593,17 +592,13 @@ FEProblemBase::initialSetup()
   }
 
   if ((_app.isRestarting() || _app.isRecovering()) && (_app.isUltimateMaster() || _force_restart))
-  {
-    CONSOLE_TIMED_PRINT("Restarting from file");
     _resurrector->restartFromFile();
-  }
   else
   {
     ExodusII_IO * reader = _mesh.exReader();
 
     if (reader)
     {
-      CONSOLE_TIMED_PRINT("Copying variables from Exodus");
       _nl->copyVars(*reader);
       _aux->copyVars(*reader);
     }
@@ -638,18 +633,10 @@ FEProblemBase::initialSetup()
   }
 
   // Do this just in case things have been done to the mesh
-  {
-    CONSOLE_TIMED_PRINT("Ghosting ghosted boundaries");
-    ghostGhostedBoundaries();
-  }
-
+  ghostGhostedBoundaries();
   _mesh.meshChanged();
-
   if (_displaced_problem)
-  {
-    CONSOLE_TIMED_PRINT("Updating displaced mesh");
     _displaced_mesh->meshChanged();
-  }
 
   unsigned int n_threads = libMesh::n_threads();
 
@@ -668,7 +655,6 @@ FEProblemBase::initialSetup()
   // check if jacobian calculation is done in userobject
   for (THREAD_ID tid = 0; tid < n_threads; ++tid)
     checkUserObjectJacobianRequirement(tid);
-
   // Check whether nonlocal couling is required or not
   checkNonlocalCoupling();
   if (_requires_nonlocal_coupling)
@@ -693,8 +679,6 @@ FEProblemBase::initialSetup()
     for (THREAD_ID tid = 0; tid < n_threads; tid++)
       _ics.initialSetup(tid);
     _scalar_ics.initialSetup();
-
-    CONSOLE_TIMED_PRINT("Projecting initial condition");
     projectSolution();
   }
 
@@ -711,7 +695,6 @@ FEProblemBase::initialSetup()
       _all_materials.initialSetup(tid);
     }
 
-    CONSOLE_TIMED_PRINT("Computing initial stateful property values");
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
     ComputeMaterialsObjectThread cmt(*this,
                                      _material_data,
@@ -751,7 +734,6 @@ FEProblemBase::initialSetup()
     if (n && !_app.isUltimateMaster() && _app.isRestarting())
       mooseError("Cannot perform initial adaptivity during restart on sub-apps of a MultiApp!");
 
-    CONSOLE_TIMED_PRINT("Adapting initial mesh");
     initialAdaptMesh();
   }
 
@@ -760,17 +742,13 @@ FEProblemBase::initialSetup()
   if (!_app.isRecovering() && !_app.isRestarting())
   {
     // During initial setup the solution is copied to solution_old and solution_older
-    CONSOLE_TIMED_PRINT("Copying soultions back");
     copySolutionsBackwards();
   }
 
   if (!_app.isRecovering())
   {
-    if (haveXFEM())
-    {
-      CONSOLE_TIMED_PRINT("Updating XFEM");
-      updateMeshXFEM();
-    }
+    if (haveXFEM() && updateMeshXFEM())
+      _console << "XFEM updated mesh on initializaton" << std::endl;
   }
 
   // Call initialSetup on the nonlinear system
@@ -822,25 +800,15 @@ FEProblemBase::initialSetup()
   {
     if (_app.hasCachedBackup()) // This happens when this app is a sub-app and has been given a
                                 // Backup
-    {
-      CONSOLE_TIMED_PRINT("Restoring cached backup");
-
       _app.restoreCachedBackup();
-    }
     else
-    {
-      CONSOLE_TIMED_PRINT("Restoring restart data");
-
       _resurrector->restartRestartableData();
-    }
 
     // We may have just clobbered initial conditions that were explicitly set
     // In a _restart_ scenario it is completely valid to specify new initial conditions
     // for some of the variables which should override what's coming from the restart file
     if (!_app.isRecovering())
     {
-      CONSOLE_TIMED_PRINT("Reprojecting initial conditions after restoring restart data");
-
       for (THREAD_ID tid = 0; tid < n_threads; tid++)
         _ics.initialSetup(tid);
       _scalar_ics.sort();
@@ -3347,7 +3315,6 @@ void
 FEProblemBase::reinitBecauseOfGhostingOrNewGeomObjects()
 {
   TIME_SECTION(_reinit_because_of_ghosting_or_new_geom_objects_timer);
-  CONSOLE_TIMED_PRINT("Reiniting because of ghosting");
 
   // Need to see if _any_ processor has ghosted elems or geometry objects.
   bool needs_reinit = !_ghosted_elems.empty();
@@ -4123,29 +4090,26 @@ FEProblemBase::init()
   TIME_SECTION(_init_timer);
 
   unsigned int n_vars = _nl->nVariables();
+  switch (_coupling)
   {
-    CONSOLE_TIMED_PRINT("Filling coupling matrix");
-    switch (_coupling)
-    {
-      case Moose::COUPLING_DIAG:
-        _cm = libmesh_make_unique<CouplingMatrix>(n_vars);
-        for (unsigned int i = 0; i < n_vars; i++)
-          for (unsigned int j = 0; j < n_vars; j++)
-            (*_cm)(i, j) = (i == j ? 1 : 0);
-        break;
+    case Moose::COUPLING_DIAG:
+      _cm = libmesh_make_unique<CouplingMatrix>(n_vars);
+      for (unsigned int i = 0; i < n_vars; i++)
+        for (unsigned int j = 0; j < n_vars; j++)
+          (*_cm)(i, j) = (i == j ? 1 : 0);
+      break;
 
-        // for full jacobian
-      case Moose::COUPLING_FULL:
-        _cm = libmesh_make_unique<CouplingMatrix>(n_vars);
-        for (unsigned int i = 0; i < n_vars; i++)
-          for (unsigned int j = 0; j < n_vars; j++)
-            (*_cm)(i, j) = 1;
-        break;
+    // for full jacobian
+    case Moose::COUPLING_FULL:
+      _cm = libmesh_make_unique<CouplingMatrix>(n_vars);
+      for (unsigned int i = 0; i < n_vars; i++)
+        for (unsigned int j = 0; j < n_vars; j++)
+          (*_cm)(i, j) = 1;
+      break;
 
-      case Moose::COUPLING_CUSTOM:
-        // do nothing, _cm was already set through couplingMatrix() call
-        break;
-    }
+    case Moose::COUPLING_CUSTOM:
+      // do nothing, _cm was already set through couplingMatrix() call
+      break;
   }
 
   _nl->dofMap()._dof_coupling = _cm.get();
@@ -4171,7 +4135,6 @@ FEProblemBase::init()
 
   {
     TIME_SECTION(_eq_init_timer);
-    CONSOLE_TIMED_PRINT("Initializing equation system")
     _eq.init();
   }
 
@@ -5040,7 +5003,6 @@ void
 FEProblemBase::updateGeomSearch(GeometricSearchData::GeometricSearchType type)
 {
   TIME_SECTION(_update_geometric_search_timer);
-  CONSOLE_TIMED_PRINT("Updating geometric search objects");
 
   _geometric_search_data.update(type);
 
@@ -5051,8 +5013,6 @@ FEProblemBase::updateGeomSearch(GeometricSearchData::GeometricSearchType type)
 void
 FEProblemBase::updateMortarMesh()
 {
-  CONSOLE_TIMED_PRINT("Updating mortar mesh");
-
   _mortar_data.update();
 }
 
@@ -5290,19 +5250,13 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
 
   if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
       _neighbor_material_props.hasStatefulProperties())
-  {
-    CONSOLE_TIMED_PRINT("Caching changed lists");
     _mesh.cacheChangedLists(); // Currently only used with adaptivity and stateful material
                                // properties
-  }
 
   // Clear these out because they corresponded to the old mesh
   _ghosted_elems.clear();
 
-  {
-    CONSOLE_TIMED_PRINT("Ghosting ghosted boundaries");
-    ghostGhostedBoundaries();
-  }
+  ghostGhostedBoundaries();
 
   // The mesh changed.  We notify the MooseMesh first, because
   // callbacks (e.g. for sparsity calculations) triggered by the

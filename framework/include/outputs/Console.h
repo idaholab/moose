@@ -234,6 +234,5 @@ private:
 private:
   /// A boolean for protecting _system_info_flags from being changed undesirably
   bool _allow_changing_sysinfo_flag;
-
-  bool _last_message_ended_in_newline;
 };
+

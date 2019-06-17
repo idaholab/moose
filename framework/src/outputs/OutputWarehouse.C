@@ -27,8 +27,7 @@ OutputWarehouse::OutputWarehouse(MooseApp & app)
     _buffer_action_console_outputs(false),
     _output_exec_flag(EXEC_CUSTOM),
     _force_output(false),
-    _logging_requested(false),
-    _last_message_ended_in_newline(true)
+    _logging_requested(false)
 {
   // Set the reserved names
   _reserved.insert("none"); // allows 'none' to be used as a keyword in 'outputs' parameter
@@ -193,19 +192,11 @@ OutputWarehouse::mooseConsole()
       // this will cause messages to console before its construction immediately flushed and
       // cleared.
       std::string message = _console_buffer.str();
-
-      bool this_message_ends_in_newline = message.empty() ? true : message.back() == '\n';
-
-      // If that last message ended in newline then this one may need
-      // to start with indenting
-      if (_last_message_ended_in_newline && _app.multiAppLevel() > 0)
+      if (_app.multiAppLevel() > 0)
         MooseUtils::indentMessage(_app.name(), message);
-
       Moose::out << message << std::flush;
       _console_buffer.clear();
       _console_buffer.str("");
-
-      _last_message_ended_in_newline = this_message_ends_in_newline;
     }
   }
 }

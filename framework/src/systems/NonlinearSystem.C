@@ -15,7 +15,6 @@
 #include "PetscSupport.h"
 #include "ComputeResidualFunctor.h"
 #include "ComputeFDResidualFunctor.h"
-#include "TimedPrint.h"
 
 #include "libmesh/nonlinear_solver.h"
 #include "libmesh/petsc_nonlinear_solver.h"
@@ -171,7 +170,6 @@ NonlinearSystem::solve()
 
   if (_fe_problem.solverParams()._type != Moose::ST_LINEAR)
   {
-    CONSOLE_TIMED_PRINT("Computing initial residual")
     // Calculate the initial residual for use in the convergence criterion.
     _computing_initial_residual = true;
     _fe_problem.computeResidualSys(_transient_sys, *_current_solution, *_transient_sys.rhs);

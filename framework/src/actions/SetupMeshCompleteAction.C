@@ -12,7 +12,6 @@
 #include "Moose.h"
 #include "Adaptivity.h"
 #include "MooseApp.h"
-#include "TimedPrint.h"
 
 registerMooseAction("MooseApp", SetupMeshCompleteAction, "prepare_mesh");
 
@@ -86,7 +85,6 @@ SetupMeshCompleteAction::act()
       if (_mesh->uniformRefineLevel())
       {
         TIME_SECTION(_uniform_refine_timer);
-        CONSOLE_TIMED_PRINT("Uniformly refining mesh");
 
         Adaptivity::uniformRefine(_mesh.get());
 
