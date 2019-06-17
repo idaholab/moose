@@ -4852,10 +4852,16 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
     _nl->computeJacobianTags(tags);
 
     _current_execute_on_flag = EXEC_NONE;
+
+    // For explicit Euler calculations for example we often compute the Jacobian one time and then
+    // re-use it over and over. If we're performing automatic scaling, we don't want to use that
+    // kernel, diagonal-block only Jacobian for our actual matrix when performing solves!
+    if (!_nl->computingScalingJacobian())
+      _has_jacobian = true;
+
     _currently_computing_jacobian = false;
     if (_displaced_problem)
       _displaced_problem->setCurrentlyComputingJacobian(false);
-    _has_jacobian = true;
     _safe_access_tagged_matrices = true;
   }
 }
