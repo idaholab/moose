@@ -116,11 +116,18 @@ BoundaryRestrictable::initializeBoundaryRestrictable(const MooseObject * moose_o
   if (_bnd_ids.find(Moose::ANY_BOUNDARY_ID) == _bnd_ids.end())
   {
     const std::set<BoundaryID> * valid_ids;
+    const char * message_ptr = nullptr;
 
     if (_bnd_nodal)
+    {
       valid_ids = &_bnd_mesh->meshNodesetIds();
+      message_ptr = "node set";
+    }
     else
+    {
       valid_ids = &_bnd_mesh->meshSidesetIds();
+      message_ptr = "side set";
+    }
 
     std::vector<BoundaryID> diff;
 
@@ -133,10 +140,19 @@ BoundaryRestrictable::initializeBoundaryRestrictable(const MooseObject * moose_o
     if (!diff.empty())
     {
       std::ostringstream msg;
-      msg << "The object '" << name
-          << "' contains the following boundary ids that do not exist on the mesh:";
+      msg << "The object '" << name << "' contains the following " << message_ptr
+          << " ids that do not exist on the mesh:";
       for (const auto & id : diff)
         msg << " " << id;
+
+      if (!_bnd_nodal)
+        // Diagnostic message
+        msg << "\n\nMOOSE distinguishes between \"node sets\" and \"side sets\" depending on "
+               "whether \nyou are using \"Nodal\" or \"Integrated\" BCs respectively. Node sets "
+               "corresponding \nto your side sets are constructed for you by default.\n\n"
+               "Try setting \"Mesh/construct_side_set_from_node_set=true\" if you see this error.\n"
+               "Note: If you are running with adaptivity you should prefer using side sets.";
+
       mooseError(msg.str());
     }
   }
