@@ -26,6 +26,10 @@ validParams<Density>()
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
 
+  params.addParam<std::string>("base_name",
+                               "Optional parameter that allows the user to define "
+                               "multiple material systems on the same block, "
+                               "e.g. for multiple phases");
   params.addRequiredParam<Real>("density", "Density");
   params.addClassDescription("Creates density material property");
 
@@ -37,8 +41,9 @@ Density::Density(const InputParameters & parameters)
     _is_coupled(true),
     _disp_r(isCoupled("displacements") ? coupledValue("displacements", 0)
                                        : (isCoupled("disp_r") ? coupledValue("disp_r") : _zero)),
+    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _orig_density(getParam<Real>("density")),
-    _density(declareProperty<Real>("density"))
+    _density(declareProperty<Real>(_base_name + "density"))
 {
   // new parameter scheme
   if (isCoupled("displacements"))
