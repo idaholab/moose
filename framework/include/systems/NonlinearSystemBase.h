@@ -300,7 +300,10 @@ public:
   /**
    * Method used to obtain scaling factors for variables
    */
-  void computeScalingJacobian(NonlinearImplicitSystem & sys);
+  virtual void computeScalingJacobian()
+  {
+    mooseError("Automatic scaling currently only implemented for non-linear systems");
+  }
 
   /**
    * Associate jacobian to systemMatrixTag, and then form a matrix for all the tags
