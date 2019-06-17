@@ -3098,10 +3098,10 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
       if (scaling_factor[i] != 1.0)
         sub *= scaling_factor[i];
 
-      // If we're computing the initial jacobian for automatically scaling variables we do not want
+      // If we're computing the jacobian for automatically scaling variables we do not want
       // to constrain the element matrix because it introduces 1s on the diagonal for the
       // constrained dofs
-      if (!_sys.computingInitialJacobian())
+      if (!_sys.computingScalingJacobian())
         _dof_map.constrain_element_matrix(sub, di, dj, false);
 
       jacobian.add_matrix(sub, di, dj);
@@ -3150,10 +3150,10 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block,
       if (scaling_factor[i] != 1.0)
         sub *= scaling_factor[i];
 
-      // If we're computing the initial jacobian for automatically scaling variables we do not want
+      // If we're computing the jacobian for automatically scaling variables we do not want
       // to constrain the element matrix because it introduces 1s on the diagonal for the
       // constrained dofs
-      if (!_sys.computingInitialJacobian())
+      if (!_sys.computingScalingJacobian())
         _dof_map.constrain_element_matrix(sub, di, dj, false);
 
       for (MooseIndex(di) i = 0; i < di.size(); i++)
@@ -3241,10 +3241,10 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block,
     std::vector<dof_id_type> di(idof_indices);
     std::vector<dof_id_type> dj(jdof_indices);
 
-    // If we're computing the initial jacobian for automatically scaling variables we do not want to
+    // If we're computing the jacobian for automatically scaling variables we do not want to
     // constrain the element matrix because it introduces 1s on the diagonal for the constrained
     // dofs
-    if (!_sys.computingInitialJacobian())
+    if (!_sys.computingScalingJacobian())
       _dof_map.constrain_element_matrix(jac_block, di, dj, false);
 
     if (scaling_factor != 1.0)
@@ -3570,10 +3570,10 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
     jj = 0;
 
   auto sub = ke.sub_matrix(i * indof, indof, jj * jndof, jndof);
-  // If we're computing the initial jacobian for automatically scaling variables we do not want to
+  // If we're computing the jacobian for automatically scaling variables we do not want to
   // constrain the element matrix because it introduces 1s on the diagonal for the constrained
   // dofs
-  if (!_sys.computingInitialJacobian())
+  if (!_sys.computingScalingJacobian())
     dof_map.constrain_element_matrix(sub, di, dj, false);
 
   if (scaling_factor[i] != 1.0)
@@ -3623,10 +3623,10 @@ Assembly::addJacobianBlockNonlocal(SparseMatrix<Number> & jacobian,
     jj = 0;
 
   auto sub = keg.sub_matrix(i * indof, indof, jj * jndof, jndof);
-  // If we're computing the initial jacobian for automatically scaling variables we do not want to
+  // If we're computing the jacobian for automatically scaling variables we do not want to
   // constrain the element matrix because it introduces 1s on the diagonal for the constrained
   // dofs
-  if (!_sys.computingInitialJacobian())
+  if (!_sys.computingScalingJacobian())
     dof_map.constrain_element_matrix(sub, di, dj, false);
 
   if (scaling_factor[i] != 1.0)
@@ -3679,10 +3679,10 @@ Assembly::addJacobianNeighbor(SparseMatrix<Number> & jacobian,
   auto subne = kne.sub_matrix(i * nndof, nndof, jj * cndof, cndof);
   auto subnn = knn.sub_matrix(i * nndof, nndof, jj * nndof, nndof);
 
-  // If we're computing the initial jacobian for automatically scaling variables we do not want to
+  // If we're computing the jacobian for automatically scaling variables we do not want to
   // constrain the element matrix because it introduces 1s on the diagonal for the constrained
   // dofs
-  if (!_sys.computingInitialJacobian())
+  if (!_sys.computingScalingJacobian())
   {
     dof_map.constrain_element_matrix(suben, dc, dn, false);
     dof_map.constrain_element_matrix(subne, dn, dc, false);

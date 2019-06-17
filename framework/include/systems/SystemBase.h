@@ -115,7 +115,7 @@ public:
   /**
    * Whether we are computing an initial Jacobian for automatic variable scaling
    */
-  virtual bool computingInitialJacobian() const { return false; }
+  virtual bool computingScalingJacobian() const { return false; }
 
   /**
    * Gets writeable reference to the dof map

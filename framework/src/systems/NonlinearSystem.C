@@ -425,14 +425,13 @@ NonlinearSystemBase::computeScalingJacobian()
     TIME_SECTION(_compute_scaling_jacobian_timer);
 
     auto & petsc_matrix = *static_cast<PetscMatrix<Real> *>(_transient_sys.matrix);
-
     if (!petsc_matrix.local_m())
       mooseError("MOOSE doesn't currently support automatic scaling when there are any processes "
                  "owning zero dofs. Check back soon :-)");
 
-    _computing_initial_jacobian = true;
-    _fe_problem.computeJacobianSys(sys, *_current_solution, *_transient_sys.matrix);
-    _computing_initial_jacobian = false;
+    _computing_scaling_jacobian = true;
+    _fe_problem.computeJacobianSys(_transient_sys, *_current_solution, *_transient_sys.matrix);
+    _computing_scaling_jacobian = false;
 
     // container for repeated access of element global dof indices
     std::vector<dof_id_type> dof_indices;

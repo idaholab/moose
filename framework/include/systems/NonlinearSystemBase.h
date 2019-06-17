@@ -68,7 +68,7 @@ public:
 
   virtual void init() override;
 
-  bool computingInitialJacobian() const final { return _computing_initial_jacobian; }
+  bool computingScalingJacobian() const final { return _computing_scaling_jacobian; }
 
   /**
    * Turn off the Jacobian (must be called before equation system initialization)
@@ -864,7 +864,7 @@ protected:
   PerfID _compute_scaling_jacobian_timer;
 
   /// Flag used to indicate whether we are computing the initial Jacobian
-  bool _computing_initial_jacobian;
+  bool _computing_scaling_jacobian;
 
   /// A vector to be filled by the preconditioning matrix diagonal
   NumericVector<Number> * _pmat_diagonal;

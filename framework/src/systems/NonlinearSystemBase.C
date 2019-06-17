@@ -167,7 +167,7 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _compute_dampers_timer(registerTimedSection("computeDampers", 3)),
     _compute_dirac_timer(registerTimedSection("computeDirac", 3)),
     _compute_scaling_jacobian_timer(registerTimedSection("computeScalingJacobian", 2)),
-    _computing_initial_jacobian(false)
+    _computing_scaling_jacobian(false)
 {
   getResidualNonTimeVector();
   // Don't need to add the matrix - it already exists (for now)
@@ -854,7 +854,7 @@ NonlinearSystemBase::computeTimeDerivatives(bool jacobian_calculation)
   // If we're doing any Jacobian calculation other than the initial Jacobian calculation for
   // automatic variable scaling, then we can just return because the residual function evaluation
   // has already done this work for us
-  if (jacobian_calculation && !_computing_initial_jacobian)
+  if (jacobian_calculation && !_computing_scaling_jacobian)
     return;
 
   if (_time_integrator)
@@ -2282,7 +2282,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
     // Get our element range for looping over
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
 
-    if (_computing_initial_jacobian)
+    if (_computing_scaling_jacobian)
     {
       // Only compute Jacobians corresponding to the diagonals of volumetric compute objects because
       // this typically gives us a good representation of the physics. NodalBCs and Constraints can
