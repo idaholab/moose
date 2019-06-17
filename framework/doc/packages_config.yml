@@ -51,5 +51,5 @@ moose_packages:
     ubuntu16: moose-environment_ubuntu-16.04_20190614_x86_64.deb
     ubuntu18: moose-environment_ubuntu-18.04_20190614_x86_64.deb
     opensuse15: moose-environment_opensuse-15.0_20190614_x86_64.rpm
-    fedora28: moose-environment_fedora-28_20190614_x86_64.rpm
+    fedora28: moose-environment_fedora-29_20190614_x86_64.rpm
     centos7: moose-environment_centos-7.6.1810_20190614_x86_64.rpm
