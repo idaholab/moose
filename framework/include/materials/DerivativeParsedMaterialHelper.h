@@ -29,17 +29,24 @@ public:
                                  VariableNameMappingMode map_mode = USE_PARAM_NAMES);
 
 protected:
+  struct Derivative;
+
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
 
   virtual void functionsPostParse();
   void assembleDerivatives();
-  MatPropDescriptorList::iterator findMatPropDerivative(const FunctionMaterialPropertyDescriptor &);
 
-  struct QueueItem;
-  struct Derivative;
+  void
+  recurseMatProps(unsigned int var, unsigned int order, const MatPropDescriptorList & parent_mpd);
 
-  /// The requested derivatives of the free energy
+  void
+  recurseDerivative(unsigned int var, unsigned int order, const Derivative & parent_derivative);
+
+  /// maximum derivative order
+  unsigned int _derivative_order;
+
+  /// The requested derivatives of the free energy (sorted by order)
   std::vector<Derivative> _derivatives;
 
   /// variable base name for the dynamically material property derivatives
@@ -47,25 +54,11 @@ protected:
 
   /// next available variable number for automatically created material property derivative variables
   unsigned int _dmatvar_index;
-
-  /// maximum derivative order
-  unsigned int _derivative_order;
-};
-
-struct DerivativeParsedMaterialHelper::QueueItem
-{
-  QueueItem() : _dargs(0) {}
-  QueueItem(ADFunctionPtr & F) : _F(F), _dargs(0) {}
-  QueueItem(const QueueItem & rhs) : _F(rhs._F), _dargs(rhs._dargs) {}
-
-  ADFunctionPtr _F;
-  std::vector<unsigned int> _dargs;
 };
 
 struct DerivativeParsedMaterialHelper::Derivative
 {
-  MaterialProperty<Real> * first;
-  ADFunctionPtr second;
-  std::vector<VariableName> darg_names;
+  MaterialProperty<Real> * _mat_prop;
+  ADFunctionPtr _F;
+  std::vector<VariableName> _darg_names;
 };
-

@@ -32,11 +32,11 @@ DerivativeParsedMaterialHelper::DerivativeParsedMaterialHelper(const InputParame
                                                                VariableNameMappingMode map_mode)
   : ParsedMaterialHelper(parameters, map_mode),
     //_derivative_order(getParam<unsigned int>("derivative_order"))
-    _dmatvar_base("matpropautoderiv"),
-    _dmatvar_index(0),
     _derivative_order(isParamValid("third_derivatives")
                           ? (getParam<bool>("third_derivatives") ? 3 : 2)
-                          : getParam<unsigned int>("derivative_order"))
+                          : getParam<unsigned int>("derivative_order")),
+    _dmatvar_base("matpropautoderiv"),
+    _dmatvar_index(0)
 {
 }
 
@@ -54,21 +54,98 @@ DerivativeParsedMaterialHelper::functionsPostParse()
     mpd.value();
 }
 
-ParsedMaterialHelper::MatPropDescriptorList::iterator
-DerivativeParsedMaterialHelper::findMatPropDerivative(const FunctionMaterialPropertyDescriptor & m)
+void
+DerivativeParsedMaterialHelper::recurseMatProps(unsigned int var,
+                                                unsigned int order,
+                                                const MatPropDescriptorList & parent_mpd_list)
 {
-  std::string name = m.getPropertyName();
-  for (MatPropDescriptorList::iterator i = _mat_prop_descriptors.begin();
-       i != _mat_prop_descriptors.end();
-       ++i)
-    if (i->getPropertyName() == name)
-      return i;
+  // quit if we have exceeded the requested derivative order
+  if (order > _derivative_order)
+    return;
 
-  return _mat_prop_descriptors.end();
+  // variable we are deriving w.r.t.
+  auto derivative_var = _variable_names[var];
+
+  // generate parent material property descriptors derivatives
+  MatPropDescriptorList mpd_list;
+  for (const auto & parent_mpd : parent_mpd_list)
+  {
+    // if this material property does not depend on the variable we are deriving w.r.t. skip it
+    if (!parent_mpd.dependsOn(derivative_var))
+      continue;
+
+    // otherwise add it to _mat_prop_descriptors
+    FunctionMaterialPropertyDescriptor mpd(parent_mpd);
+    mpd.addDerivative(derivative_var);
+
+    // create a new symbol name for it
+    std::string newvarname = _dmatvar_base + Moose::stringify(_dmatvar_index++);
+    mpd.setSymbolName(newvarname);
+
+    // add the new mpd and register it as the current variable derivative of the parent mpd
+    _func_F->AddVariable(newvarname);
+    _func_F->RegisterDerivative(parent_mpd.getSymbolName(), _variable_names[var], newvarname);
+
+    // append to list
+    mpd_list.push_back(mpd);
+  }
+
+  // append material property descriptors
+  for (const auto & mpd : mpd_list)
+    _mat_prop_descriptors.push_back(mpd);
+
+  // go one order deeper
+  for (unsigned int i = var; i < _nargs; ++i)
+    recurseMatProps(i, order + 1, mpd_list);
+}
+
+void
+DerivativeParsedMaterialHelper::recurseDerivative(unsigned int var,
+                                                  unsigned int order,
+                                                  const Derivative & parent_derivative)
+{
+  // quit if we have exceeded the requested derivative order
+  if (order > _derivative_order)
+    return;
+
+  // variable we are deriving w.r.t.
+  auto derivative_var = _variable_names[var];
+
+  // current derivative starts off of the parent function
+  Derivative current;
+  current._darg_names = parent_derivative._darg_names;
+  current._darg_names.push_back(derivative_var);
+  current._F = ADFunctionPtr(new ADFunction(*parent_derivative._F));
+
+  // execute derivative
+  if (current._F->AutoDiff(derivative_var) != -1)
+    mooseError("Failed to take order ", order, " derivative in material ", _name);
+
+  // optimize
+  if (!_disable_fpoptimizer)
+    current._F->Optimize();
+
+  // proceed only if the derivative is not zero
+  if (!current._F->isZero())
+  {
+    // compile
+    if (_enable_jit && !current._F->JITCompile())
+      mooseInfo("Failed to JIT compile expression, falling back to byte code interpretation.");
+
+    // go one order deeper
+    for (unsigned int i = var; i < _nargs; ++i)
+      recurseDerivative(i, order + 1, current);
+
+    // set up a material property for the derivative
+    current._mat_prop = &declarePropertyDerivative<Real>(_F_name, current._darg_names);
+
+    // save off current derivative
+    _derivatives.push_back(current);
+  }
 }
 
 /**
- * Perform a breadth first construction of all requested derivatives.
+ * Perform construction of all requested derivatives.
  */
 void
 DerivativeParsedMaterialHelper::assembleDerivatives()
@@ -90,12 +167,11 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
             warehouse.getActiveObject(name()));
 
     // copy parsers and declare properties
-    for (MooseIndex(master->_derivatives) i = 0; i < master->_derivatives.size(); ++i)
+    for (const auto & D : master->_derivatives)
     {
       Derivative newderivative;
-      newderivative.first =
-          &declarePropertyDerivative<Real>(_F_name, master->_derivatives[i].darg_names);
-      newderivative.second = ADFunctionPtr(new ADFunction(*master->_derivatives[i].second));
+      newderivative._mat_prop = &declarePropertyDerivative<Real>(_F_name, D._darg_names);
+      newderivative._F = ADFunctionPtr(new ADFunction(*D._F));
       _derivatives.push_back(newderivative);
     }
 
@@ -114,92 +190,16 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
     return;
   }
 
-  // set up job queue. We need a deque here to be able to iterate over the currently queued items.
-  std::deque<QueueItem> queue;
-  queue.push_back(QueueItem(_func_F));
+  // generate all coupled material property mappings
+  for (unsigned int i = 0; i < _nargs; ++i)
+    recurseMatProps(i, 1, _mat_prop_descriptors);
 
-  // generate derivatives until the queue is exhausted
-  while (!queue.empty())
-  {
-    QueueItem current = queue.front();
-
-    // Add necessary derivative steps. All permutations of one set of derivatives are equal, so we
-    // make sure to generate only one each.
-    for (auto i = current._dargs.empty() ? 0u : current._dargs.back(); i < _nargs; ++i)
-    {
-      // go through list of material properties and check if derivatives are needed
-      auto ndesc = _mat_prop_descriptors.size();
-      for (MooseIndex(_mat_prop_descriptors) jj = 0; jj < ndesc; ++jj)
-      {
-        FunctionMaterialPropertyDescriptor * j = &_mat_prop_descriptors[jj];
-
-        // take a property descriptor and check if it depends on the current derivative variable
-        if (j->dependsOn(_arg_names[i]))
-        {
-          FunctionMaterialPropertyDescriptor matderivative(*j);
-          matderivative.addDerivative(_arg_names[i]);
-
-          // search if this new derivative is not yet in the list of material properties
-          MatPropDescriptorList::iterator m = findMatPropDerivative(matderivative);
-          if (m == _mat_prop_descriptors.end())
-          {
-            // construct new variable name for the material property derivative as base name +
-            // number
-            std::string newvarname = _dmatvar_base + Moose::stringify(_dmatvar_index++);
-            matderivative.setSymbolName(newvarname);
-
-            // loop over all queue items to register the new dmatvar variable (includes 'current'
-            // which is popped below)
-            for (std::deque<QueueItem>::iterator k = queue.begin(); k != queue.end(); ++k)
-            {
-              k->_F->AddVariable(newvarname);
-              k->_F->RegisterDerivative(j->getSymbolName(), _arg_names[i], newvarname);
-            }
-
-            _mat_prop_descriptors.push_back(matderivative);
-          }
-        }
-      }
-
-      // construct new derivative
-      QueueItem newitem = current;
-      newitem._dargs.push_back(i);
-
-      // build derivative
-      newitem._F = ADFunctionPtr(new ADFunction(*current._F));
-      if (newitem._F->AutoDiff(_variable_names[i]) != -1)
-        mooseError(
-            "Failed to take order ", newitem._dargs.size(), " derivative in material ", _name);
-
-      // optimize and compile
-      if (!_disable_fpoptimizer)
-        newitem._F->Optimize();
-      if (_enable_jit && !newitem._F->JITCompile())
-        mooseInfo("Failed to JIT compile expression, falling back to byte code interpretation.");
-
-      // generate material property argument vector
-      std::vector<VariableName> darg_names(0);
-      for (unsigned int j = 0; j < newitem._dargs.size(); ++j)
-        darg_names.push_back(_arg_names[newitem._dargs[j]]);
-
-      // append to list of derivatives if the derivative is non-vanishing
-      if (!newitem._F->isZero())
-      {
-        Derivative newderivative;
-        newderivative.first = &declarePropertyDerivative<Real>(_F_name, darg_names);
-        newderivative.second = newitem._F;
-        newderivative.darg_names = darg_names;
-        _derivatives.push_back(newderivative);
-      }
-
-      // push item to queue if further differentiation is required
-      if (newitem._dargs.size() < _derivative_order)
-        queue.push_back(newitem);
-    }
-
-    // remove the 'current' element from the queue
-    queue.pop_front();
-  }
+  // generate all derivatives
+  Derivative root;
+  root._F = _func_F;
+  root._mat_prop = nullptr;
+  for (unsigned int i = 0; i < _nargs; ++i)
+    recurseDerivative(i, 1, root);
 
   // increase the parameter buffer to provide storage for the material property derivatives
   _func_params.resize(_nargs + _mat_prop_descriptors.size());
@@ -212,7 +212,7 @@ DerivativeParsedMaterialHelper::initQpStatefulProperties()
     (*_prop_F)[_qp] = 0.0;
 
   for (auto & D : _derivatives)
-    (*D.first)[_qp] = 0.0;
+    (*D._mat_prop)[_qp] = 0.0;
 }
 
 void
@@ -241,5 +241,5 @@ DerivativeParsedMaterialHelper::computeQpProperties()
 
   // set derivatives
   for (auto & D : _derivatives)
-    (*D.first)[_qp] = evaluate(D.second);
+    (*D._mat_prop)[_qp] = evaluate(D._F);
 }
