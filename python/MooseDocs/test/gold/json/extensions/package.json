@@ -178,14 +178,6 @@
                 }, 
                 {
                     "attributes": {
-                        "count": 1, 
-                        "recursive": true
-                    }, 
-                    "children": [], 
-                    "name": "Space"
-                }, 
-                {
-                    "attributes": {
                         "content": ".", 
                         "recursive": true
                     }, 
