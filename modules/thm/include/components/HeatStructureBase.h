@@ -125,8 +125,6 @@ protected:
   std::vector<BoundaryName> _boundary_names_outer;
   /// Boundary names of the inner side of the heat structure
   std::vector<BoundaryName> _boundary_names_inner;
-  /// Nodes generated for the heat structure
-  std::vector<std::vector<unsigned int>> _node_ids;
   /// Nodes on the side of the "block"
   std::map<std::string, std::vector<unsigned int>> _side_heat_node_ids;
   /// Nodes at the outer side of the generated heat structure

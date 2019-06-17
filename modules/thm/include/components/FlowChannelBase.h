@@ -54,7 +54,6 @@ public:
    */
   virtual FunctionName createAreaFunctionAndGetName();
 
-  const std::vector<unsigned int> & getNodeIDs() const;
   const std::vector<unsigned int> & getElementIDs() const;
   unsigned int getNodesetID() const;
   const BoundaryName & getNodesetName() const;
@@ -176,8 +175,6 @@ protected:
   /// Nodeset name for all flow channel nodes
   BoundaryName _nodeset_name;
 
-  /// Nodes ids of this flow channel component
-  std::vector<unsigned int> _node_ids;
   /// Elements ids of this flow channel component
   std::vector<unsigned int> _elem_ids;
 

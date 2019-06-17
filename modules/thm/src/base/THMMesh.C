@@ -1,4 +1,5 @@
 #include "THMMesh.h"
+#include "libmesh/node.h"
 
 registerMooseObject("THMApp", THMMesh);
 
@@ -14,11 +15,14 @@ validParams<THMMesh>()
 }
 
 THMMesh::THMMesh(const InputParameters & parameters)
-  : MooseMesh(parameters), _dim(getParam<MooseEnum>("dim"))
+  : MooseMesh(parameters), _dim(getParam<MooseEnum>("dim")), _next_node_id(0)
 {
 }
 
-THMMesh::THMMesh(const THMMesh & other_mesh) : MooseMesh(other_mesh), _dim(other_mesh._dim) {}
+THMMesh::THMMesh(const THMMesh & other_mesh)
+  : MooseMesh(other_mesh), _dim(other_mesh._dim), _next_node_id(other_mesh._next_node_id)
+{
+}
 
 unsigned int
 THMMesh::dimension() const
@@ -54,4 +58,20 @@ void
 THMMesh::prep()
 {
   prepare(true);
+}
+
+dof_id_type
+THMMesh::getNextNodeId()
+{
+  unsigned int id = _next_node_id++;
+  return id;
+}
+
+Node *
+THMMesh::addNode(const Point & pt)
+{
+  dof_id_type id = getNextNodeId();
+  Node * node = _mesh->add_point(pt, id);
+  node->set_unique_id() = id;
+  return node;
 }

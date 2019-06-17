@@ -65,17 +65,23 @@ GeometricalComponent::computeMeshTransformation()
                        RealVectorValue(cos(theta), 0.0, sin(theta)));
 }
 
+Node *
+GeometricalComponent::addNode(const Point & pt)
+{
+  auto node = _mesh.addNode(pt);
+  _node_ids.push_back(node->id());
+  return node;
+}
+
 void
 GeometricalComponent::setupMesh()
 {
   computeMeshTransformation();
   generateNodeLocations();
-  unsigned int first_node_id = _mesh.nNodes();
   buildMesh();
-  unsigned int last_node_id = _mesh.nNodes();
 
   // displace nodes
-  for (unsigned int node_id = first_node_id; node_id < last_node_id; node_id++)
+  for (auto && node_id : _node_ids)
   {
     Node & curr_node = _mesh.nodeRef(node_id);
     RealVectorValue p(curr_node(0), curr_node(1), curr_node(2));
@@ -221,4 +227,12 @@ GeometricalComponent::determineGravityAngleType(const Real & gravity_angle) cons
     return MOSTLY_HORIZONTAL;
   else
     return MOSTLY_VERTICAL;
+}
+
+const std::vector<unsigned int> &
+GeometricalComponent::getNodeIDs() const
+{
+  checkSetupStatus(MESH_PREPARED);
+
+  return _node_ids;
 }

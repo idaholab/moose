@@ -68,7 +68,10 @@ public:
    */
   virtual const EGravityAngleType & getGravityAngleType() const { return _gravity_angle_type; }
 
+  const std::vector<unsigned int> & getNodeIDs() const;
+
 protected:
+  Node * addNode(const Point & pt);
   virtual void check() const override;
   virtual void computeMeshTransformation();
   virtual void setupMesh() override;
@@ -148,6 +151,8 @@ protected:
   std::vector<SubdomainName> _subdomain_names;
   /// List of coordinate system for each subdomain
   std::vector<Moose::CoordinateSystemType> _coord_sys;
+  /// List of node IDs this components owns
+  std::vector<unsigned int> _node_ids;
 
   /// Rotational matrix about x-axis
   RealTensorValue _Rx;

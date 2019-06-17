@@ -180,14 +180,11 @@ FlowChannelBase::check() const
 void
 FlowChannelBase::buildMeshNodes()
 {
-  MeshBase & the_mesh = _mesh.getMesh();
-
   Point p(0, 0, 0);
   for (unsigned int i = 0; i < _node_locations.size(); i++)
   {
     p(0) = _node_locations[i];
-    const Node * nd = the_mesh.add_point(p);
-    _node_ids.push_back(nd->id());
+    addNode(p);
   }
 }
 
@@ -498,14 +495,6 @@ FlowChannelBase::getHeatTransferNamesSuffix(const std::string & ht_name) const
   // else, don't add a suffix; there is no need
   else
     return "";
-}
-
-const std::vector<unsigned int> &
-FlowChannelBase::getNodeIDs() const
-{
-  checkSetupStatus(MESH_PREPARED);
-
-  return _node_ids;
 }
 
 const std::vector<unsigned int> &
