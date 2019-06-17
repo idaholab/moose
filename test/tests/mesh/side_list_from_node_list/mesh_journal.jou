@@ -1,0 +1,26 @@
+reset
+create vertex 0 0 0
+create vertex 1 0 0
+create vertex 1 1 0
+create vertex 0 1 0
+create surface vertex 1 2 3 4
+volume 1  size auto factor 7
+volume 1  size auto factor 7
+surface 1  Scheme Auto
+mesh surface 1
+set duplicate block elements off
+block 1 add surface 1
+set exodus netcdf4 off
+set large exodus file on
+export Genesis  "/tmp/square_no_bounds.e" block 1
+nodeset 1 add curve 4
+nodeset 2 add curve 2
+set exodus netcdf4 off
+set large exodus file on
+export Genesis  "/tmp/square_nodesets_only.e" block 1
+delete Nodeset 1 2
+Sideset 1 add curve 4
+Sideset 2 add curve 2
+set exodus netcdf4 off
+set large exodus file on
+export Genesis  "/tmp/square_sidesets_only.e" block 1
