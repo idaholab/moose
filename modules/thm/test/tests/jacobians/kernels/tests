@@ -23,6 +23,5 @@
     difference_tol = 1e-8
     max_threads = 1
     allow_test_objects = true
-    skip = '#50'
   [../]
 []

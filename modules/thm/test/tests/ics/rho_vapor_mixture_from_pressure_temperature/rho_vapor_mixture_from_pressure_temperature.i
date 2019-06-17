@@ -21,7 +21,16 @@
 
 [FluidProperties]
   [./fp_steam]
-    type = IAPWS95VaporFluidProperties
+    type = StiffenedGasFluidProperties
+    gamma = 1.43
+    cv = 1040.0
+    q = 2.03e6
+    p_inf = 0.0
+    q_prime = -2.3e4
+    k = 0.026
+    mu = 134.4e-7
+    M = 0.01801488
+    rho_c = 322.0
   [../]
   [./fp_air]
     type = IdealGasFluidProperties
