@@ -70,8 +70,24 @@ public:
 
   const std::vector<unsigned int> & getNodeIDs() const;
 
+  const std::vector<unsigned int> & getElementIDs() const;
+
 protected:
   Node * addNode(const Point & pt);
+
+  Elem * addElementEdge2(dof_id_type node0, dof_id_type node1);
+  Elem * addElementEdge3(dof_id_type node0, dof_id_type node1, dof_id_type node2);
+  Elem *
+  addElementQuad4(dof_id_type node0, dof_id_type node1, dof_id_type node2, dof_id_type node3);
+  Elem * addElementQuad9(dof_id_type node0,
+                         dof_id_type node1,
+                         dof_id_type node2,
+                         dof_id_type node3,
+                         dof_id_type node4,
+                         dof_id_type node5,
+                         dof_id_type node6,
+                         dof_id_type node7,
+                         dof_id_type node8);
   virtual void check() const override;
   virtual void computeMeshTransformation();
   virtual void setupMesh() override;
@@ -153,6 +169,8 @@ protected:
   std::vector<Moose::CoordinateSystemType> _coord_sys;
   /// List of node IDs this components owns
   std::vector<unsigned int> _node_ids;
+  /// Elements ids of this flow channel component
+  std::vector<unsigned int> _elem_ids;
 
   /// Rotational matrix about x-axis
   RealTensorValue _Rx;

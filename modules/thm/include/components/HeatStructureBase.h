@@ -131,8 +131,6 @@ protected:
   std::vector<unsigned int> _outer_heat_node_ids;
   /// Nodes at the inner side of the generated heat structure
   std::vector<unsigned int> _inner_heat_node_ids;
-  /// Elements generated for hs (heat structure)
-  std::vector<std::vector<unsigned int>> _elem_ids;
 
 public:
   /// map of heat structure side string to enum
