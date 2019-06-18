@@ -104,6 +104,7 @@ TestAction::addMeshInternal(const unsigned int & nx)
 
     action->getObjectParams().set<MooseEnum>("dim") = 1;
     action->getObjectParams().set<unsigned int>("nx") = nx;
+    action->getObjectParams().set<bool>("allow_renumbering") = false;
 
     _awh.addActionBlock(action);
   }

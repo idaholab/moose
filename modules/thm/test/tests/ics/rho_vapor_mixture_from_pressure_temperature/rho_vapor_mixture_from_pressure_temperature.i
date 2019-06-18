@@ -17,6 +17,7 @@
   type = GeneratedMesh
   dim = 1
   nx = 1
+  allow_renumbering = false
 []
 
 [FluidProperties]

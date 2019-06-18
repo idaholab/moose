@@ -3,8 +3,6 @@
 #include "ConstantFunction.h"
 #include "Enums.h"
 #include "THMMesh.h"
-#include "libmesh/face_quad4.h"
-#include "libmesh/face_quad9.h"
 
 const std::map<std::string, HeatStructureBase::SideType> HeatStructureBase::_side_type_to_enum{
     {"INNER", INNER}, {"OUTER", OUTER}};
@@ -121,7 +119,10 @@ HeatStructureBase::build2DMesh()
 {
   // loop on flow channel nodes to create heat structure nodes
   unsigned int n_layers = _node_locations.size();
-  _node_ids.resize(n_layers);
+  std::vector<std::vector<unsigned int>> node_ids(
+      n_layers, std::vector<unsigned int>(_total_elem_number + 1));
+  // Elements generated for hs (heat structure)
+  std::vector<std::vector<unsigned int>> elem_ids;
 
   // loop over layers
   for (unsigned int i = 0; i < n_layers; i++)
@@ -129,23 +130,24 @@ HeatStructureBase::build2DMesh()
     Point p(_node_locations[i], 0, 0);
     p(1) += getAxialOffset();
 
-    const Node * nd = _mesh.getMesh().add_point(p);
-    _node_ids[i].push_back(nd->id());
+    Node * nd = addNode(p);
+    node_ids[i][0] = nd->id();
 
     // loop over all heat structures
+    unsigned int l = 1;
     for (unsigned int j = 0; j < _number_of_hs; j++)
     {
       Real elem_length = _width[j] / _n_part_elems[j];
-      for (unsigned int k = 0; k < _n_part_elems[j]; k++)
+      for (unsigned int k = 0; k < _n_part_elems[j]; k++, l++)
       {
         p(1) += elem_length;
-        nd = _mesh.getMesh().add_point(p);
-        _node_ids[i].push_back(nd->id());
+        nd = addNode(p);
+        node_ids[i][l] = nd->id();
       }
       _side_heat_node_ids[_names[j]].push_back(nd->id());
     }
-    _inner_heat_node_ids.push_back(_node_ids[i][0]);
-    _outer_heat_node_ids.push_back(_node_ids[i][_total_elem_number]);
+    _inner_heat_node_ids.push_back(node_ids[i][0]);
+    _outer_heat_node_ids.push_back(node_ids[i][_total_elem_number]);
   }
 
   // create elements from nodes
@@ -154,7 +156,7 @@ HeatStructureBase::build2DMesh()
   _inner_bc_id.push_back(bc_id1);
   _outer_bc_id.push_back(bc_id2);
 
-  _elem_ids.resize(_n_elem);
+  elem_ids.resize(_n_elem);
   for (unsigned int i = 0; i < _n_elem; i++)
   {
     unsigned int n = 0;
@@ -162,14 +164,11 @@ HeatStructureBase::build2DMesh()
     {
       for (unsigned int k = 0; k < _n_part_elems[j]; k++)
       {
-        Elem * elem = _mesh.getMesh().add_elem(new Quad4);
+        Elem * elem = addElementQuad4(
+            node_ids[i][n + 1], node_ids[i][n], node_ids[i + 1][n], node_ids[i + 1][n + 1]);
         elem->subdomain_id() = _subdomain_ids[j];
-        elem->set_node(0) = _mesh.getMesh().node_ptr(_node_ids[i][n + 1]);
-        elem->set_node(1) = _mesh.getMesh().node_ptr(_node_ids[i][n]);
-        elem->set_node(2) = _mesh.getMesh().node_ptr(_node_ids[i + 1][n]);
-        elem->set_node(3) = _mesh.getMesh().node_ptr(_node_ids[i + 1][n + 1]);
 
-        _elem_ids[i].push_back(elem->id());
+        elem_ids[i].push_back(elem->id());
 
         if (n == 0)
           _mesh.getMesh().boundary_info->add_side(elem, 1, bc_id1);
@@ -187,7 +186,10 @@ HeatStructureBase::build2DMesh2ndOrder()
 {
   // loop on flow channel nodes to create heat structure nodes
   unsigned int n_layers = _node_locations.size();
-  _node_ids.resize(n_layers);
+  std::vector<std::vector<unsigned int>> node_ids(
+      n_layers, std::vector<unsigned int>(2 * _total_elem_number + 1));
+  // Elements generated for hs (heat structure)
+  std::vector<std::vector<unsigned int>> elem_ids;
 
   // loop over layers
   for (unsigned int i = 0; i < n_layers; i++)
@@ -195,23 +197,24 @@ HeatStructureBase::build2DMesh2ndOrder()
     Point p(_node_locations[i], 0, 0);
     p(1) += getAxialOffset();
 
-    const Node * nd = _mesh.getMesh().add_point(p);
-    _node_ids[i].push_back(nd->id());
+    const Node * nd = addNode(p);
+    node_ids[i][0] = nd->id();
 
     // loop over all heat structures
+    unsigned int l = 1;
     for (unsigned int j = 0; j < _number_of_hs; j++)
     {
       Real elem_length = _width[j] / (2. * _n_part_elems[j]);
-      for (unsigned int k = 0; k < 2. * _n_part_elems[j]; k++)
+      for (unsigned int k = 0; k < 2. * _n_part_elems[j]; k++, l++)
       {
         p(1) += elem_length;
-        nd = _mesh.getMesh().add_point(p);
-        _node_ids[i].push_back(nd->id());
+        nd = addNode(p);
+        node_ids[i][l] = nd->id();
       }
       _side_heat_node_ids[_names[j]].push_back(nd->id());
     }
-    _inner_heat_node_ids.push_back(_node_ids[i][0]);
-    _outer_heat_node_ids.push_back(_node_ids[i][_total_elem_number * 2]);
+    _inner_heat_node_ids.push_back(node_ids[i][0]);
+    _outer_heat_node_ids.push_back(node_ids[i][_total_elem_number * 2]);
   }
 
   // create elements from nodes
@@ -220,7 +223,7 @@ HeatStructureBase::build2DMesh2ndOrder()
   _inner_bc_id.push_back(bc_id1);
   _outer_bc_id.push_back(bc_id2);
 
-  _elem_ids.resize(_n_elem);
+  elem_ids.resize(_n_elem);
   for (unsigned int i = 0; i < _n_elem; i++)
   {
     unsigned int n = 0;
@@ -228,22 +231,18 @@ HeatStructureBase::build2DMesh2ndOrder()
     {
       for (unsigned int k = 0; k < _n_part_elems[j]; k++)
       {
-        Elem * elem = _mesh.getMesh().add_elem(new Quad9);
+        Elem * elem = addElementQuad9(node_ids[2 * i][2 * n],
+                                      node_ids[2 * i][2 * (n + 1)],
+                                      node_ids[2 * (i + 1)][2 * (n + 1)],
+                                      node_ids[2 * (i + 1)][2 * n],
+                                      node_ids[2 * i][(2 * n) + 1],
+                                      node_ids[(2 * i) + 1][2 * (n + 1)],
+                                      node_ids[2 * (i + 1)][(2 * n) + 1],
+                                      node_ids[(2 * i) + 1][(2 * n)],
+                                      node_ids[(2 * i) + 1][(2 * n) + 1]);
         elem->subdomain_id() = _subdomain_ids[j];
-        // vertices
-        elem->set_node(0) = _mesh.getMesh().node_ptr(_node_ids[2 * i][2 * n]);
-        elem->set_node(1) = _mesh.getMesh().node_ptr(_node_ids[2 * i][2 * (n + 1)]);
-        elem->set_node(2) = _mesh.getMesh().node_ptr(_node_ids[2 * (i + 1)][2 * (n + 1)]);
-        elem->set_node(3) = _mesh.getMesh().node_ptr(_node_ids[2 * (i + 1)][2 * n]);
-        // mid-edges
-        elem->set_node(4) = _mesh.getMesh().node_ptr(_node_ids[2 * i][(2 * n) + 1]);
-        elem->set_node(5) = _mesh.getMesh().node_ptr(_node_ids[(2 * i) + 1][2 * (n + 1)]);
-        elem->set_node(6) = _mesh.getMesh().node_ptr(_node_ids[2 * (i + 1)][(2 * n) + 1]);
-        elem->set_node(7) = _mesh.getMesh().node_ptr(_node_ids[(2 * i) + 1][(2 * n)]);
-        // center
-        elem->set_node(8) = _mesh.getMesh().node_ptr(_node_ids[(2 * i) + 1][(2 * n) + 1]);
 
-        _elem_ids[i].push_back(elem->id());
+        elem_ids[i].push_back(elem->id());
 
         if (n == 0)
           _mesh.getMesh().boundary_info->add_side(elem, 3, bc_id1);
