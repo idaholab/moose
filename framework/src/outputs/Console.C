@@ -180,7 +180,8 @@ Console::Console(const InputParameters & parameters)
     _old_nonlinear_norm(std::numeric_limits<Real>::max()),
     _print_mesh_changed_info(getParam<bool>("print_mesh_changed_info")),
     _system_info_flags(getParam<MultiMooseEnum>("system_info")),
-    _allow_changing_sysinfo_flag(true)
+    _allow_changing_sysinfo_flag(true),
+    _last_message_ended_in_newline(true)
 {
   // Apply the special common console flags (print_...)
   ActionWarehouse & awh = _app.actionWarehouse();
