@@ -63,9 +63,17 @@ protected:
    */
   Real bboxMinDistance(const Point & p, const BoundingBox & bbox);
 
+  /**
+   * Get nearest node candidates.
+   * @param local_entities: space locatins and their associated elements
+   * @param local_comps: comp num for the unknowns on DofObject. It is useful
+   * for higher order method
+   */
   void getLocalEntities(MooseMesh * mesh,
                         std::vector<std::pair<Point, DofObject *>> & local_entities,
-                        bool nodal);
+                        std::vector<unsigned int> & local_comps,
+                        bool nodal,
+                        bool constant);
 
   /// If true then node connections will be cached
   bool _fixed_meshes;
@@ -83,4 +91,3 @@ protected:
   std::map<dof_id_type, unsigned int> & _cached_from_inds;
   std::map<dof_id_type, unsigned int> & _cached_qp_inds;
 };
-
