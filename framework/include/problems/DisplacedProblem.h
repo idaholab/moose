@@ -143,6 +143,10 @@ public:
   virtual void addAuxVariable(const std::string & var_name,
                               const FEType & type,
                               const std::set<SubdomainID> * const active_subdomains = NULL);
+  virtual void addAuxArrayVariable(const std::string & var_name,
+                                   const FEType & type,
+                                   unsigned int components,
+                                   const std::set<SubdomainID> * const active_subdomains = NULL);
   virtual void addScalarVariable(const std::string & var_name,
                                  Order order,
                                  Real scale_factor = 1.,
@@ -316,4 +320,3 @@ private:
   friend class UpdateDisplacedMeshThread;
   friend class Restartable;
 };
-

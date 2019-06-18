@@ -629,6 +629,10 @@ public:
   virtual void addAuxVariable(const std::string & var_name,
                               const FEType & type,
                               const std::set<SubdomainID> * const active_subdomains = NULL);
+  virtual void addAuxArrayVariable(const std::string & var_name,
+                                   const FEType & type,
+                                   unsigned int components,
+                                   const std::set<SubdomainID> * const active_subdomains = NULL);
   virtual void addAuxScalarVariable(const std::string & var_name,
                                     Order order,
                                     Real scale_factor = 1.,

@@ -2094,6 +2094,21 @@ FEProblemBase::addAuxVariable(const std::string & var_name,
 }
 
 void
+FEProblemBase::addAuxArrayVariable(const std::string & var_name,
+                                   const FEType & type,
+                                   unsigned int components,
+                                   const std::set<SubdomainID> * const active_subdomains)
+{
+  if (duplicateVariableCheck(var_name, type, /* is_aux = */ true))
+    return;
+
+  _aux->addArrayVariable(
+      var_name, type, components, std::vector<Real>(components, 1), active_subdomains);
+  if (_displaced_problem)
+    _displaced_problem->addAuxArrayVariable(var_name, type, components, active_subdomains);
+}
+
+void
 FEProblemBase::addAuxScalarVariable(const std::string & var_name,
                                     Order order,
                                     Real scale_factor,

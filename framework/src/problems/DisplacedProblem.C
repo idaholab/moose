@@ -424,6 +424,16 @@ DisplacedProblem::addAuxVariable(const std::string & var_name,
 }
 
 void
+DisplacedProblem::addAuxArrayVariable(const std::string & var_name,
+                                      const FEType & type,
+                                      unsigned int components,
+                                      const std::set<SubdomainID> * const active_subdomains)
+{
+  _displaced_aux.addArrayVariable(
+      var_name, type, components, std::vector<Real>(components, 1), active_subdomains);
+}
+
+void
 DisplacedProblem::addScalarVariable(const std::string & var_name,
                                     Order order,
                                     Real scale_factor,
