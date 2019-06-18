@@ -180,14 +180,11 @@ FlowChannelBase::check() const
 void
 FlowChannelBase::buildMeshNodes()
 {
-  MeshBase & the_mesh = _mesh.getMesh();
-
   Point p(0, 0, 0);
   for (unsigned int i = 0; i < _node_locations.size(); i++)
   {
     p(0) = _node_locations[i];
-    const Node * nd = the_mesh.add_point(p);
-    _node_ids.push_back(nd->id());
+    addNode(p);
   }
 }
 
@@ -242,20 +239,10 @@ FlowChannelBase::buildMesh()
   {
     Elem * elem = nullptr;
     if (usingSecondOrderMesh())
-    {
-      elem = the_mesh.add_elem(new Edge3);
-      elem->set_node(0) = the_mesh.node_ptr(_node_ids[2 * i]);
-      elem->set_node(1) = the_mesh.node_ptr(_node_ids[2 * i + 2]);
-      elem->set_node(2) = the_mesh.node_ptr(_node_ids[2 * i + 1]);
-    }
+      elem = addElementEdge3(_node_ids[2 * i], _node_ids[2 * i + 2], _node_ids[2 * i + 1]);
     else
-    {
-      elem = the_mesh.add_elem(new Edge2);
-      elem->set_node(0) = the_mesh.node_ptr(_node_ids[i]);
-      elem->set_node(1) = the_mesh.node_ptr(_node_ids[i + 1]);
-    }
+      elem = addElementEdge2(_node_ids[i], _node_ids[i + 1]);
     elem->subdomain_id() = _subdomain_id;
-    _elem_ids.push_back(elem->id());
 
     // BCs
     if (i == 0)
@@ -498,22 +485,6 @@ FlowChannelBase::getHeatTransferNamesSuffix(const std::string & ht_name) const
   // else, don't add a suffix; there is no need
   else
     return "";
-}
-
-const std::vector<unsigned int> &
-FlowChannelBase::getNodeIDs() const
-{
-  checkSetupStatus(MESH_PREPARED);
-
-  return _node_ids;
-}
-
-const std::vector<unsigned int> &
-FlowChannelBase::getElementIDs() const
-{
-  checkSetupStatus(MESH_PREPARED);
-
-  return _elem_ids;
 }
 
 unsigned int

@@ -54,8 +54,6 @@ public:
    */
   virtual FunctionName createAreaFunctionAndGetName();
 
-  const std::vector<unsigned int> & getNodeIDs() const;
-  const std::vector<unsigned int> & getElementIDs() const;
   unsigned int getNodesetID() const;
   const BoundaryName & getNodesetName() const;
   unsigned int getSubdomainID() const;
@@ -175,11 +173,6 @@ protected:
   unsigned int _nodeset_id;
   /// Nodeset name for all flow channel nodes
   BoundaryName _nodeset_name;
-
-  /// Nodes ids of this flow channel component
-  std::vector<unsigned int> _node_ids;
-  /// Elements ids of this flow channel component
-  std::vector<unsigned int> _elem_ids;
 
   /// Flag that flow channel is "horizontal"; else "vertical". The flow channel
   /// is considered "horizontal" if the angle between the flow channel orientation
