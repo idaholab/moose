@@ -125,7 +125,6 @@ TaggingInterface::prepareVectorTag(Assembly & assembly, unsigned int ivar)
     _re_blocks[i] = &assembly.residualBlock(ivar, *vector_tag);
 
   _local_re.resize(_re_blocks[0]->size());
-  _local_re.zero();
 }
 
 void
@@ -138,7 +137,6 @@ TaggingInterface::prepareVectorTagNeighbor(Assembly & assembly, unsigned int iva
     _re_blocks[i] = &assembly.residualBlockNeighbor(ivar, *vector_tag);
 
   _local_re.resize(_re_blocks[0]->size());
-  _local_re.zero();
 }
 
 void
@@ -151,7 +149,6 @@ TaggingInterface::prepareVectorTagLower(Assembly & assembly, unsigned int ivar)
     _re_blocks[i] = &assembly.residualBlockLower(ivar, *vector_tag);
 
   _local_re.resize(_re_blocks[0]->size());
-  _local_re.zero();
 }
 
 void
@@ -164,7 +161,6 @@ TaggingInterface::prepareMatrixTag(Assembly & assembly, unsigned int ivar, unsig
     _ke_blocks[i] = &assembly.jacobianBlock(ivar, jvar, *mat_vector);
 
   _local_ke.resize(_ke_blocks[0]->m(), _ke_blocks[0]->n());
-  _local_ke.zero();
 }
 
 void
@@ -180,7 +176,6 @@ TaggingInterface::prepareMatrixTagNeighbor(Assembly & assembly,
     _ke_blocks[i] = &assembly.jacobianBlockNeighbor(type, ivar, jvar, *mat_vector);
 
   _local_ke.resize(_ke_blocks[0]->m(), _ke_blocks[0]->n());
-  _local_ke.zero();
 }
 
 void
@@ -196,7 +191,6 @@ TaggingInterface::prepareMatrixTagLower(Assembly & assembly,
     _ke_blocks[i] = &assembly.jacobianBlockLower(type, ivar, jvar, *mat_vector);
 
   _local_ke.resize(_ke_blocks[0]->m(), _ke_blocks[0]->n());
-  _local_ke.zero();
 }
 
 void
