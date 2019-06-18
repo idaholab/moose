@@ -174,13 +174,25 @@ SystemBase::getVariableBlocks(unsigned int var_number)
 void
 SystemBase::addVariableToZeroOnResidual(std::string var_name)
 {
-  _vars_to_be_zeroed_on_residual.push_back(var_name);
+  unsigned int ncomp = getVariable(0, var_name).count();
+  if (ncomp > 1)
+    // need to push libMesh variable names for all components
+    for (unsigned int i = 0; i < ncomp; ++i)
+      _vars_to_be_zeroed_on_residual.push_back(_subproblem.arrayVariableComponent(var_name, i));
+  else
+    _vars_to_be_zeroed_on_residual.push_back(var_name);
 }
 
 void
 SystemBase::addVariableToZeroOnJacobian(std::string var_name)
 {
-  _vars_to_be_zeroed_on_jacobian.push_back(var_name);
+  unsigned int ncomp = getVariable(0, var_name).count();
+  if (ncomp > 1)
+    // need to push libMesh variable names for all components
+    for (unsigned int i = 0; i < ncomp; ++i)
+      _vars_to_be_zeroed_on_jacobian.push_back(_subproblem.arrayVariableComponent(var_name, i));
+  else
+    _vars_to_be_zeroed_on_jacobian.push_back(var_name);
 }
 
 void
@@ -734,6 +746,18 @@ SystemBase::hasVariable(const std::string & var_name) const
   if (system().has_variable(var_name))
     return system().variable_type(var_name).family != SCALAR;
   if (std::find(names.begin(), names.end(), var_name) != names.end())
+    // array variable
+    return true;
+  else
+    return false;
+}
+
+bool
+SystemBase::isArrayVariable(const std::string & var_name) const
+{
+  auto & names = getVariableNames();
+  if (!system().has_variable(var_name) &&
+      std::find(names.begin(), names.end(), var_name) != names.end())
     // array variable
     return true;
   else

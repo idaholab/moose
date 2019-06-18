@@ -94,7 +94,7 @@ ArrayDGKernel::ArrayDGKernel(const InputParameters & parameters)
   {
     MooseVariableFEBase * var = &_subproblem.getVariable(_tid,
                                                          _diag_save_in_strings[i],
-                                                         Moose::VarKindType::VAR_NONLINEAR,
+                                                         Moose::VarKindType::VAR_AUXILIARY,
                                                          Moose::VarFieldType::VAR_FIELD_ARRAY);
 
     if (_sys.hasVariable(_diag_save_in_strings[i]))
@@ -266,4 +266,26 @@ ArrayDGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, unsig
     mooseError("Vector variable cannot be coupled into array DG kernel currently");
 
   accumulateTaggedLocalMatrix();
+
+  if (_has_diag_save_in && (type == Moose::ElementElement || type == Moose::NeighborNeighbor) &&
+      _var.number() == jvar)
+  {
+    unsigned int rows = _local_ke.m();
+    DenseVector<Number> diag(rows);
+    for (unsigned int i = 0; i < rows; i++)
+      diag(i) = _local_ke(i, i);
+
+    Threads::spin_mutex::scoped_lock lock(_jacoby_vars_mutex);
+    for (const auto & var : _diag_save_in)
+    {
+      auto * avar = dynamic_cast<ArrayMooseVariable *>(var);
+      if (!avar)
+        mooseError("Save-in variable for an array kernel must be an array variable");
+
+      if (type == Moose::ElementElement)
+        avar->addSolution(diag);
+      else
+        avar->addSolutionNeighbor(diag);
+    }
+  }
 }

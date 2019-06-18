@@ -66,7 +66,7 @@ AddAuxVariableAction::act()
     _problem->addAuxScalarVariable(var_name, _fe_type.order);
 
   // Non-scalar variable
-  else
+  else if (_component == 1)
   {
     // Check that the order is valid (CONSTANT, FIRST, or SECOND)
     if (_fe_type.order > 9)
@@ -79,6 +79,20 @@ AddAuxVariableAction::act()
       _problem->addAuxVariable(var_name, _fe_type);
     else
       _problem->addAuxVariable(var_name, _fe_type, &blocks);
+  }
+  else
+  {
+    // Check that the order is valid (CONSTANT, FIRST, or SECOND)
+    if (_fe_type.order > 9)
+      mooseError("Non-scalar AuxVariables must be CONSTANT, FIRST, SECOND, THIRD, FOURTH, FIFTH, "
+                 "SIXTH, SEVENTH, EIGHTH or NINTH order (",
+                 _fe_type.order,
+                 " supplied)");
+
+    if (blocks.empty())
+      _problem->addAuxArrayVariable(var_name, _fe_type, _component);
+    else
+      _problem->addAuxArrayVariable(var_name, _fe_type, _component, &blocks);
   }
 
   // Create the initial condition

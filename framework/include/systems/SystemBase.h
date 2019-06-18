@@ -378,6 +378,11 @@ public:
                                 const std::vector<Real> & scale_factor,
                                 const std::set<SubdomainID> * const active_subdomains = nullptr);
 
+  /**
+   * If a variable is an array variable
+   */
+  virtual bool isArrayVariable(const std::string & var_name) const;
+
   ///@{
   /**
    * Query a system for a variable

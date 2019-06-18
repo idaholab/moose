@@ -45,6 +45,49 @@ ArrayKernel::ArrayKernel(const InputParameters & parameters)
     _count(_var.count())
 {
   addMooseVariableDependency(mooseVariable());
+
+  _save_in.resize(_save_in_strings.size());
+  _diag_save_in.resize(_diag_save_in_strings.size());
+
+  for (unsigned int i = 0; i < _save_in_strings.size(); i++)
+  {
+    ArrayMooseVariable * var = &_subproblem.getArrayVariable(_tid, _save_in_strings[i]);
+
+    if (_fe_problem.getNonlinearSystemBase().hasVariable(_save_in_strings[i]))
+      paramError("save_in", "cannot use solution variable as save-in variable");
+
+    if (var->feType() != _var.feType())
+      paramError(
+          "save_in",
+          "saved-in auxiliary variable is incompatible with the object's nonlinear variable: ",
+          moose::internal::incompatVarMsg(*var, _var));
+
+    _save_in[i] = var;
+    var->sys().addVariableToZeroOnResidual(_save_in_strings[i]);
+    addMooseVariableDependency(var);
+  }
+
+  _has_save_in = _save_in.size() > 0;
+
+  for (unsigned int i = 0; i < _diag_save_in_strings.size(); i++)
+  {
+    ArrayMooseVariable * var = &_subproblem.getArrayVariable(_tid, _diag_save_in_strings[i]);
+
+    if (_fe_problem.getNonlinearSystemBase().hasVariable(_diag_save_in_strings[i]))
+      paramError("diag_save_in", "cannot use solution variable as diag save-in variable");
+
+    if (var->feType() != _var.feType())
+      paramError(
+          "diag_save_in",
+          "saved-in auxiliary variable is incompatible with the object's nonlinear variable: ",
+          moose::internal::incompatVarMsg(*var, _var));
+
+    _diag_save_in[i] = var;
+    var->sys().addVariableToZeroOnJacobian(_diag_save_in_strings[i]);
+    addMooseVariableDependency(var);
+  }
+
+  _has_diag_save_in = _diag_save_in.size() > 0;
 }
 
 void
