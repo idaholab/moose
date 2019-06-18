@@ -18,6 +18,12 @@
 #include <thread>
 #include <future>
 
+#if defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ < 9) && !defined(__INTEL_COMPILER) &&  \
+    !defined(__clang__)
+// See note on GCC 4.8.4 workaround below
+#include <tuple>
+#endif
+
 #define CONSOLE_TIMED_PRINT(...)                                                                   \
   TimedPrint tpc(                                                                                  \
       _console, std::chrono::duration<double>(1), std::chrono::duration<double>(1), __VA_ARGS__);
@@ -47,15 +53,30 @@ public:
   TimedPrint(StreamType & out,
              std::chrono::duration<double> initial_wait,
              std::chrono::duration<double> dot_interval,
-             Args &&... args)
+             Args &&... args_in)
   {
+#if defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ < 9) && !defined(__INTEL_COMPILER) &&  \
+    !defined(__clang__)
+    /**
+     * There's a bug in GCC 4.8.4 (our current minimum compiler as of 6/18/2019) where we can't
+     * capture the argument pack in the thread lambda. The workaround is to copy the argument
+     * pack into a tuple. We want to avoid this for other compilers since it is a copy.
+     */
+    std::tuple<Args...> args(args_in...);
+#define ARGS args
+
+#else
+#define ARGS args_in...
+
+#endif
+
     // This is using move assignment
-    _thread = std::thread{[&out, initial_wait, dot_interval, this, args...] {
+    _thread = std::thread{[&out, initial_wait, dot_interval, this, ARGS] {
       auto done_future = this->_done.get_future();
 
       if (done_future.wait_for(initial_wait) == std::future_status::timeout)
       {
-        streamArguments(out, args...);
+        streamArguments(out, ARGS);
         out << std::flush;
       }
       else // This means the section ended before we printed anything... so just exit
