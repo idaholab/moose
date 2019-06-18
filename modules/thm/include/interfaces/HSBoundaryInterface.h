@@ -2,6 +2,7 @@
 
 #include "InputParameters.h"
 #include "HeatStructureBase.h"
+#include "LoggingInterface.h"
 
 class HSBoundaryInterface;
 class Component;

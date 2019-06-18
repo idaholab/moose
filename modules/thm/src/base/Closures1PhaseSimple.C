@@ -25,7 +25,8 @@ void
 Closures1PhaseSimple::check(const FlowChannelBase & flow_channel) const
 {
   if (!flow_channel.isParamValid("f"))
-    logError("When using simple closures, the parameter 'f' must be provided.");
+    logComponentError(flow_channel.cname(),
+                      "When using simple closures, the parameter 'f' must be provided.");
 }
 
 void
@@ -35,7 +36,8 @@ Closures1PhaseSimple::check(const HeatTransferBase & heat_transfer) const
       dynamic_cast<const HeatTransfer1PhaseBase &>(heat_transfer);
 
   if (!heat_transfer_1phase.isParamValid("Hw"))
-    logError("The parameter 'Hw' must be provided when using simple closures.");
+    logComponentError(heat_transfer.cname(),
+                      "The parameter 'Hw' must be provided when using simple closures.");
 }
 
 void

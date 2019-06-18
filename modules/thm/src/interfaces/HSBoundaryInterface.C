@@ -74,6 +74,6 @@ HSBoundaryInterface::getHSBoundaryName(const Component * const component) const
         return THMMesh::INVALID_BOUNDARY_ID;
 
     default:
-      mooseError(component->name(), ": Unknown side specified in the 'hs_side' parameter.");
+      mooseError(component->cname(), ": Unknown side specified in the 'hs_side' parameter.");
   }
 }
