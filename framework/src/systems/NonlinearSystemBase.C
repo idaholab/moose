@@ -921,8 +921,6 @@ NonlinearSystemBase::enforceNodalConstraintsJacobian()
 void
 NonlinearSystemBase::setConstraintSlaveValues(NumericVector<Number> & solution, bool displaced)
 {
-  CONSOLE_TIMED_PRINT("Setting constraint slave values for ", name())
-
   std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators =
       NULL;
 
@@ -2217,8 +2215,6 @@ NonlinearSystemBase::computeScalarKernelsJacobians(const std::set<TagID> & tags)
 void
 NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 {
-  CONSOLE_TIMED_PRINT("Computing jacobian");
-
   // Make matrix ready to use
   activeAllMatrixTags();
 
@@ -2596,8 +2592,6 @@ NonlinearSystemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks
                                            const std::set<TagID> & tags)
 {
   TIME_SECTION(_compute_jacobian_blocks_timer);
-  CONSOLE_TIMED_PRINT("Computing jacobian");
-
   FloatingPointExceptionGuard fpe_guard(_app);
 
   for (unsigned int i = 0; i < blocks.size(); i++)
@@ -2731,8 +2725,6 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
   if (_element_dampers.hasActiveObjects())
   {
     TIME_SECTION(_compute_dampers_timer);
-    CONSOLE_TIMED_PRINT("Computing damping");
-
     has_active_dampers = true;
     *_increment_vec = update;
     ComputeElemDampingThread cid(_fe_problem);
