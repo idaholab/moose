@@ -1,5 +1,5 @@
 #include "TestSetupStatusComponent.h"
-#include "FlowChannel.h"
+#include "FlowChannelBase.h"
 
 registerMooseObject("THMTestApp", TestSetupStatusComponent);
 

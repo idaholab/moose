@@ -126,6 +126,11 @@ FlowChannel::buildFlowModel()
     pars.set<bool>("interface_transfer") = getParam<bool>("interface_transfer");
     pars.set<bool>("wall_mass_transfer") = getParam<bool>("wall_mass_transfer");
     pars.set<UserObjectName>("rdg_int_var_uo_name") = _rdg_int_var_uo_name;
+    pars.set<FunctionName>("initial_alpha_vapor") = getParam<FunctionName>("initial_alpha_vapor");
+    pars.set<std::vector<Real>>("alpha_vapor_bounds") =
+        _sim.getParam<std::vector<Real>>("alpha_vapor_bounds");
+    pars.set<Real>("volume_fraction_remapper_exponential_region_width") =
+        _sim.getParam<Real>("volume_fraction_remapper_exponential_region_width");
   }
   return _factory.create<FlowModel>(class_name, name(), pars, 0);
 }
