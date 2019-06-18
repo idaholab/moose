@@ -32,6 +32,12 @@ public:
     CHECKED                ///< mesh set up, called both inits, checked
   };
 
+  /**
+   * Get the component name
+   * @return The name of the component. For composite component, return its parent name
+   */
+  const std::string & cname() const;
+
   unsigned int id() { return _id; }
 
   Component * parent() { return _parent; }
@@ -181,6 +187,24 @@ public:
    */
   template <typename T>
   void checkComponentOfTypeExistsByName(const std::string & comp_name) const;
+
+  /**
+   * Logs an error
+   */
+  template <typename... Args>
+  void logError(Args &&... args) const
+  {
+    logComponentError(cname(), std::forward<Args>(args)...);
+  }
+
+  /**
+   * Logs a warning
+   */
+  template <typename... Args>
+  void logWarning(Args &&... args) const
+  {
+    _logging_app.log().add(Logger::WARNING, std::forward<Args>(args)...);
+  }
 
 protected:
   /**
