@@ -80,8 +80,7 @@ DerivativeParsedMaterialHelper::recurseMatProps(unsigned int var,
     mpd.setSymbolName(newvarname);
 
     // add the new mpd and register it as the current variable derivative of the parent mpd
-    _func_F->AddVariable(newvarname);
-    _func_F->RegisterDerivative(parent_mpd.getSymbolName(), _variable_names[var], newvarname);
+    _bulk_rules.emplace_back(parent_mpd.getSymbolName(), _variable_names[var], newvarname);
 
     // append to list
     mpd_list.push_back(mpd);
@@ -191,6 +190,19 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
   // generate all coupled material property mappings
   for (unsigned int i = 0; i < _nargs; ++i)
     recurseMatProps(i, 1, _mat_prop_descriptors);
+
+  // bulk register material property derivative rules to avoid repeated calls
+  // to the (slow) AddVariable method
+  if (!_bulk_rules.empty())
+  {
+    std::string vars = _bulk_rules[0]._child;
+    for (MooseIndex(_bulk_rules) i = 1; i < _bulk_rules.size(); ++i)
+      vars += ',' + _bulk_rules[i]._child;
+    _func_F->AddVariable(vars);
+
+    for (const auto & rule : _bulk_rules)
+      _func_F->RegisterDerivative(rule._parent, rule._var, rule._child);
+  }
 
   // generate all derivatives
   Derivative root;

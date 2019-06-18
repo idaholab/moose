@@ -30,6 +30,7 @@ public:
 
 protected:
   struct Derivative;
+  struct MaterialPropertyDerivativeRule;
 
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
@@ -54,6 +55,10 @@ protected:
 
   /// next available variable number for automatically created material property derivative variables
   unsigned int _dmatvar_index;
+
+private:
+  // for bulk registration of material property derivatives
+  std::vector<MaterialPropertyDerivativeRule> _bulk_rules;
 };
 
 struct DerivativeParsedMaterialHelper::Derivative
@@ -61,4 +66,16 @@ struct DerivativeParsedMaterialHelper::Derivative
   MaterialProperty<Real> * _mat_prop;
   ADFunctionPtr _F;
   std::vector<VariableName> _darg_names;
+};
+
+struct DerivativeParsedMaterialHelper::MaterialPropertyDerivativeRule
+{
+  MaterialPropertyDerivativeRule(std::string p, std::string v, std::string c)
+    : _parent(p), _var(v), _child(c)
+  {
+  }
+
+  std::string _parent;
+  std::string _var;
+  std::string _child;
 };
