@@ -66,7 +66,6 @@
 - /InterfaceKernels/InterfaceDiffusionFluxMatch
 - /Kernels/ACGBPoly
 - /Kernels/ACGrGrElasticDrivingForce
-- /Kernels/ACGrGrPoly
 - /Kernels/ACInterfaceKobayashi2
 - /Kernels/ACSEDGPoly
 - /Kernels/CHPFCRFF

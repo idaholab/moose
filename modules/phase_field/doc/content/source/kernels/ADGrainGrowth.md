@@ -1,4 +1,11 @@
-# ACGrGrPoly
+# ADGrainGrowth
+
+!syntax description /Kernels/ADGrainGrowth
+
+ADGrainGrowth is the automatic differentiation version of the
+[ACGrGrPoly](/ACGrGrPoly.md) Kernel and can be activated in the
+[GrainGrowthAction](/GrainGrowthAction.md) through the
+`use_automatic_differentiation` parameter.
 
 The Kernel implements the bulk part of the grain growth model
 [cite!moelans_quantitative_2008] Allen-Cahn equation
@@ -12,22 +19,17 @@ grain boundary energy $\sigma$ as
 \sigma = g(\gamma)\sqrt{\kappa\mu},
 \end{equation}
 where $\kappa$ is the gradient energy coefficient from
-[ACInterface](/ACInterface.md) and $g$ is a function that needs to be
+[ADACInterface](/ADACInterface.md) and $g$ is a function that needs to be
 numerically determined (see [cite!moelans_quantitative_2008] for details).
 
 $\kappa_{i,j}$ and $\gamma_{i,j} could be defined for specific grain boundaries
 (grain pairs). This is provided by the [GBAnisotropy](/GBAnisotropy.md)
 material.
 
-An automatic differentiation version of this kernel is implemented in
-[ADGrainGrowth](/ADGrainGrowth.md).
+!syntax parameters /Kernels/ADGrainGrowth
 
-!syntax description /Kernels/ACGrGrPoly
+!syntax inputs /Kernels/ADGrainGrowth
 
-!syntax parameters /Kernels/ACGrGrPoly
-
-!syntax inputs /Kernels/ACGrGrPoly
-
-!syntax children /Kernels/ACGrGrPoly
+!syntax children /Kernels/ADGrainGrowth
 
 !bibtex bibliography
