@@ -15,4 +15,14 @@
     exodiff = 'master_L2_Lagrange_diff_out.e master_L2_Lagrange_diff_out_sub0.e'
     requirement = "The system shall support transfer first order elemental variable when a different mesh is used in sub"
   []
+
+  [L2_Lagrange_nearest_node]
+    type = 'Exodiff'
+    input = 'master_L2_Lagrange_nearest_node.i'
+    exodiff = 'master_L2_Lagrange_nearest_node_out.e master_L2_Lagrange_nearest_node_out_sub0.e'
+    # It is well-known that MultiAppNearestNodeTransfer could generate different results with different numbers of cores
+    max_parallel = 1
+    requirement = "The system shall support transfer first order elemental variable with MultiAppNearestNodeTransfer"
+  []
+
 []
