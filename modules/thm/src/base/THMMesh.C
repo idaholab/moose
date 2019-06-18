@@ -14,7 +14,8 @@ InputParameters
 validParams<THMMesh>()
 {
   InputParameters params = validParams<MooseMesh>();
-
+  // we do not allow renumbering, becuase we generate our meshes
+  params.set<bool>("allow_renumbering") = false;
   return params;
 }
 
