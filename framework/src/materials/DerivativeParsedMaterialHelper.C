@@ -63,20 +63,17 @@ DerivativeParsedMaterialHelper::recurseMatProps(unsigned int var,
   if (order > _derivative_order)
     return;
 
-  // variable we are deriving w.r.t.
-  auto derivative_var = _variable_names[var];
-
   // generate parent material property descriptors derivatives
   MatPropDescriptorList mpd_list;
   for (const auto & parent_mpd : parent_mpd_list)
   {
     // if this material property does not depend on the variable we are deriving w.r.t. skip it
-    if (!parent_mpd.dependsOn(derivative_var))
+    if (!parent_mpd.dependsOn(_arg_names[var]))
       continue;
 
     // otherwise add it to _mat_prop_descriptors
     FunctionMaterialPropertyDescriptor mpd(parent_mpd);
-    mpd.addDerivative(derivative_var);
+    mpd.addDerivative(_arg_names[var]);
 
     // create a new symbol name for it
     std::string newvarname = _dmatvar_base + Moose::stringify(_dmatvar_index++);
@@ -114,7 +111,8 @@ DerivativeParsedMaterialHelper::recurseDerivative(unsigned int var,
   // current derivative starts off of the parent function
   Derivative current;
   current._darg_names = parent_derivative._darg_names;
-  current._darg_names.push_back(derivative_var);
+  // the moose variable name goes into the derivative property name
+  current._darg_names.push_back(_arg_names[var]);
   current._F = ADFunctionPtr(new ADFunction(*parent_derivative._F));
 
   // execute derivative
