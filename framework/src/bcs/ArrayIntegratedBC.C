@@ -89,7 +89,7 @@ ArrayIntegratedBC::computeResidual()
       RealEigenVector residual = _JxW[_qp] * _coord[_qp] * computeQpResidual();
       mooseAssert(residual.size() == _count,
                   "Size of local residual is not equal to the number of array variable compoments");
-      saveLocalArrayResidual(_local_re, _i, _test.size(), residual);
+      _assembly.saveLocalArrayResidual(_local_re, _i, _test.size(), residual);
     }
 
   accumulateTaggedLocalResidual();
@@ -118,18 +118,15 @@ ArrayIntegratedBC::computeJacobian()
       for (_j = 0; _j < _phi.size(); _j++)
       {
         RealEigenVector v = _JxW[_qp] * _coord[_qp] * computeQpJacobian();
-        saveDiagLocalArrayJacobian(_local_ke, _i, _test.size(), _j, _phi.size(), v);
+        _assembly.saveDiagLocalArrayJacobian(
+            _local_ke, _i, _test.size(), _j, _phi.size(), _var.number(), v);
       }
 
   accumulateTaggedLocalMatrix();
 
   if (_has_diag_save_in)
   {
-    unsigned int rows = _local_ke.m();
-    DenseVector<Real> diag(rows);
-    for (unsigned int i = 0; i < rows; i++)
-      diag(i) = _local_ke(i, i);
-
+    DenseVector<Number> diag = _assembly.getJacobianDiagonal(_local_ke);
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for (const auto & var : _diag_save_in)
     {
@@ -146,6 +143,8 @@ void
 ArrayIntegratedBC::computeJacobianBlock(MooseVariableFEBase & jvar)
 {
   size_t jvar_num = jvar.number();
+  bool same_var = jvar_num == _var.number();
+
   prepareMatrixTag(_assembly, _var.number(), jvar_num);
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
@@ -153,18 +152,15 @@ ArrayIntegratedBC::computeJacobianBlock(MooseVariableFEBase & jvar)
       for (_j = 0; _j < jvar.phiFaceSize(); _j++)
       {
         RealEigenMatrix v = _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
-        saveFullLocalArrayJacobian(_local_ke, _i, _test.size(), _j, jvar.phiSize(), v);
+        _assembly.saveFullLocalArrayJacobian(
+            _local_ke, _i, _test.size(), _j, jvar.phiSize(), _var.number(), jvar.number(), v);
       }
 
   accumulateTaggedLocalMatrix();
 
-  if (_has_diag_save_in && jvar.number() == _var.number())
+  if (_has_diag_save_in && same_var)
   {
-    unsigned int rows = _local_ke.m();
-    DenseVector<Real> diag(rows);
-    for (unsigned int i = 0; i < rows; i++)
-      diag(i) = _local_ke(i, i);
-
+    DenseVector<Number> diag = _assembly.getJacobianDiagonal(_local_ke);
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for (const auto & var : _diag_save_in)
     {
@@ -187,7 +183,8 @@ ArrayIntegratedBC::computeJacobianBlockScalar(unsigned int jvar)
     for (_i = 0; _i < _test.size(); _i++)
     {
       RealEigenMatrix v = _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobianScalar(jv);
-      saveFullLocalArrayJacobian(_local_ke, _i, _test.size(), 0, 1, v);
+      _assembly.saveFullLocalArrayJacobian(
+          _local_ke, _i, _test.size(), 0, 1, _var.number(), jvar, v);
     }
 
   accumulateTaggedLocalMatrix();

@@ -1246,6 +1246,88 @@ public:
 
   void assignDisplacements(std::vector<unsigned> && disp_numbers) { _displacements = disp_numbers; }
 
+  /**
+   * Helper function for assembling residual contriubutions on local
+   * quadrature points for an array variable
+   * @param re The local residual
+   * @param i The local test function index
+   * @param ntest The number of test functions
+   * @param v The residual contribution on the current qp
+   */
+  void saveLocalArrayResidual(DenseVector<Number> & re,
+                              unsigned int i,
+                              unsigned int ntest,
+                              const RealEigenVector & v)
+  {
+    for (unsigned int j = 0; j < v.size(); ++j, i += ntest)
+      re(i) += v(j);
+  }
+
+  /**
+   * Helper function for assembling diagonal Jacobian contriubutions on local
+   * quadrature points for an array variable
+   * @param ke The local Jacobian
+   * @param i The local test function index
+   * @param ntest The number of test functions
+   * @param j The local shape function index
+   * @param nphi The number of shape functions
+   * @param v The diagonal Jacobian contribution on the current qp
+   */
+  void saveDiagLocalArrayJacobian(DenseMatrix<Number> & ke,
+                                  unsigned int i,
+                                  unsigned int ntest,
+                                  unsigned int j,
+                                  unsigned int nphi,
+                                  unsigned int ivar,
+                                  const RealEigenVector & v)
+  {
+    unsigned int pace = (_component_block_diagonal[ivar] ? 0 : nphi);
+    for (unsigned int k = 0; k < v.size(); ++k, i += ntest, j += pace)
+      ke(i, j) += v(k);
+  }
+
+  /**
+   * Helper function for assembling full Jacobian contriubutions on local
+   * quadrature points for an array variable
+   * @param ke The local Jacobian
+   * @param i The local test function index
+   * @param ntest The number of test functions
+   * @param j The local shape function index
+   * @param nphi The number of shape functions
+   * @param ivar The array variable index
+   * @param jvar The contributing variable index
+   * @param v The full Jacobian contribution from a variable on the current qp
+   */
+  void saveFullLocalArrayJacobian(DenseMatrix<Number> & ke,
+                                  unsigned int i,
+                                  unsigned int ntest,
+                                  unsigned int j,
+                                  unsigned int nphi,
+                                  unsigned int ivar,
+                                  unsigned int jvar,
+                                  const RealEigenMatrix & v)
+  {
+    unsigned int pace = ((ivar == jvar && _component_block_diagonal[ivar]) ? 0 : nphi);
+    unsigned int saved_j = j;
+    for (unsigned int k = 0; k < v.rows(); ++k, i += ntest)
+    {
+      j = saved_j;
+      for (unsigned int l = 0; l < v.cols(); ++l, j += pace)
+        ke(i, j) += v(k, l);
+    }
+  }
+
+  DenseVector<Real> getJacobianDiagonal(DenseMatrix<Number> & ke)
+  {
+    unsigned int rows = ke.m();
+    unsigned int cols = ke.n();
+    DenseVector<Real> diag(rows);
+    for (unsigned int i = 0; i < rows; i++)
+      // % operation is needed to account for cases of no component coupling of array variables
+      diag(i) = ke(i, i % cols);
+    return diag;
+  }
+
 protected:
   /**
    * Just an internal helper function to reinit the volume FE objects.
@@ -1832,7 +1914,10 @@ private:
   unsigned int _max_cached_jacobians;
 
   /// Will be true if our preconditioning matrix is a block-diagonal matrix.  Which means that we can take some shortcuts.
-  unsigned int _block_diagonal_matrix;
+  bool _block_diagonal_matrix;
+  /// An flag array Indiced by variable index to show if there is no component-wise
+  /// coupling for the variable.
+  std::vector<bool> _component_block_diagonal;
 
   /// Temporary work vector to keep from reallocating it
   std::vector<dof_id_type> _temp_dof_indices;

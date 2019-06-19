@@ -2039,6 +2039,9 @@ Assembly::init(const CouplingMatrix * cm)
   for (auto & ivar : vars)
   {
     auto i = ivar->number();
+    if (i >= _component_block_diagonal.size())
+      _component_block_diagonal.resize(i + 1, true);
+
     auto ivar_start = _cm_ff_entry.size();
     for (unsigned int k = 0; k < ivar->count(); ++k)
     {
@@ -2072,6 +2075,8 @@ Assembly::init(const CouplingMatrix * cm)
           //       do not set the flag to false.
           if (i != jvar.number())
             _block_diagonal_matrix = false;
+          else if (iv != j)
+            _component_block_diagonal[i] = false;
         }
       }
     }
@@ -2082,6 +2087,9 @@ Assembly::init(const CouplingMatrix * cm)
   for (auto & ivar : scalar_vars)
   {
     auto i = ivar->number();
+    if (i >= _component_block_diagonal.size())
+      _component_block_diagonal.resize(i + 1, true);
+
     for (const auto & j : ConstCouplingRow(i, *_cm))
       if (_sys.isScalarVariable(j))
       {
@@ -2239,10 +2247,12 @@ Assembly::prepareJacobianBlock()
     unsigned int vi = ivar.number();
     unsigned int vj = jvar.number();
 
+    unsigned int jcount = (vi == vj && _component_block_diagonal[vi]) ? 1 : jvar.count();
+
     for (MooseIndex(_jacobian_block_used) tag = 0; tag < _jacobian_block_used.size(); tag++)
     {
       jacobianBlock(vi, vj, tag)
-          .resize(ivar.dofIndices().size() * ivar.count(), jvar.dofIndices().size() * jvar.count());
+          .resize(ivar.dofIndices().size() * ivar.count(), jvar.dofIndices().size() * jcount);
       _jacobian_block_used[tag][vi][vj] = 0;
     }
   }
@@ -2275,13 +2285,14 @@ Assembly::prepareNonlocal()
     unsigned int vi = ivar.number();
     unsigned int vj = jvar.number();
 
+    unsigned int jcount = (vi == vj && _component_block_diagonal[vi]) ? 1 : jvar.count();
+
     for (MooseIndex(_jacobian_block_nonlocal_used) tag = 0;
          tag < _jacobian_block_nonlocal_used.size();
          tag++)
     {
       jacobianBlockNonlocal(vi, vj, tag)
-          .resize(ivar.dofIndices().size() * ivar.count(),
-                  jvar.allDofIndices().size() * jvar.count());
+          .resize(ivar.dofIndices().size() * ivar.count(), jvar.allDofIndices().size() * jcount);
       _jacobian_block_nonlocal_used[tag][vi][vj] = 0;
     }
   }
@@ -2298,13 +2309,14 @@ Assembly::prepareVariable(MooseVariableFEBase * var)
     unsigned int vi = ivar.number();
     unsigned int vj = jvar.number();
 
+    unsigned int jcount = (vi == vj && _component_block_diagonal[vi]) ? 1 : jvar.count();
+
     if (vi == var->number() || vj == var->number())
     {
       for (MooseIndex(_jacobian_block_used) tag = 0; tag < _jacobian_block_used.size(); tag++)
       {
         jacobianBlock(vi, vj, tag)
-            .resize(ivar.dofIndices().size() * ivar.count(),
-                    jvar.dofIndices().size() * jvar.count());
+            .resize(ivar.dofIndices().size() * ivar.count(), jvar.dofIndices().size() * jcount);
         _jacobian_block_used[tag][vi][vj] = 0;
       }
     }
@@ -2325,6 +2337,8 @@ Assembly::prepareVariableNonlocal(MooseVariableFEBase * var)
     unsigned int vi = ivar.number();
     unsigned int vj = jvar.number();
 
+    unsigned int jcount = (vi == vj && _component_block_diagonal[vi]) ? 1 : jvar.count();
+
     if (vi == var->number() || vj == var->number())
     {
       for (MooseIndex(_jacobian_block_nonlocal_used) tag = 0;
@@ -2332,8 +2346,7 @@ Assembly::prepareVariableNonlocal(MooseVariableFEBase * var)
            tag++)
       {
         jacobianBlockNonlocal(vi, vj, tag)
-            .resize(ivar.dofIndices().size() * ivar.count(),
-                    jvar.allDofIndices().size() * jvar.count());
+            .resize(ivar.dofIndices().size() * ivar.count(), jvar.allDofIndices().size() * jcount);
         _jacobian_block_nonlocal_used[tag][vi][vj] = 0;
       }
     }
@@ -2351,21 +2364,23 @@ Assembly::prepareNeighbor()
     unsigned int vi = ivar.number();
     unsigned int vj = jvar.number();
 
+    unsigned int jcount = (vi == vj && _component_block_diagonal[vi]) ? 1 : jvar.count();
+
     for (MooseIndex(_jacobian_block_neighbor_used) tag = 0;
          tag < _jacobian_block_neighbor_used.size();
          tag++)
     {
       jacobianBlockNeighbor(Moose::ElementNeighbor, vi, vj, tag)
           .resize(ivar.dofIndices().size() * ivar.count(),
-                  jvar.dofIndicesNeighbor().size() * jvar.count());
+                  jvar.dofIndicesNeighbor().size() * jcount);
 
       jacobianBlockNeighbor(Moose::NeighborElement, vi, vj, tag)
           .resize(ivar.dofIndicesNeighbor().size() * ivar.count(),
-                  jvar.dofIndices().size() * jvar.count());
+                  jvar.dofIndices().size() * jcount);
 
       jacobianBlockNeighbor(Moose::NeighborNeighbor, vi, vj, tag)
           .resize(ivar.dofIndicesNeighbor().size() * ivar.count(),
-                  jvar.dofIndicesNeighbor().size() * jvar.count());
+                  jvar.dofIndicesNeighbor().size() * jcount);
 
       _jacobian_block_neighbor_used[tag][vi][vj] = 0;
     }
@@ -2388,6 +2403,8 @@ Assembly::prepareLowerD()
     unsigned int vi = ivar.number();
     unsigned int vj = jvar.number();
 
+    unsigned int jcount = (vi == vj && _component_block_diagonal[vi]) ? 1 : jvar.count();
+
     for (MooseIndex(_jacobian_block_lower_used) tag = 0; tag < _jacobian_block_lower_used.size();
          tag++)
     {
@@ -2400,7 +2417,7 @@ Assembly::prepareLowerD()
       // derivatives w.r.t. lower dimensional residuals
       jacobianBlockLower(Moose::LowerLower, vi, vj, tag)
           .resize(ivar.dofIndicesLower().size() * ivar.count(),
-                  jvar.dofIndicesLower().size() * jvar.count());
+                  jvar.dofIndicesLower().size() * jcount);
 
       jacobianBlockLower(Moose::LowerSlave, vi, vj, tag)
           .resize(ivar.dofIndicesLower().size() * ivar.count(),
@@ -2437,6 +2454,9 @@ Assembly::prepareBlock(unsigned int ivar,
 {
   unsigned int icount = _sys.getVariable(_tid, ivar).count();
   unsigned int jcount = _sys.getVariable(_tid, jvar).count();
+  if (ivar == jvar && _component_block_diagonal[ivar])
+    jcount = 1;
+
   for (MooseIndex(_jacobian_block_used) tag = 0; tag < _jacobian_block_used.size(); tag++)
   {
     jacobianBlock(ivar, jvar, tag).resize(dof_indices.size() * icount, dof_indices.size() * jcount);
@@ -2455,6 +2475,9 @@ Assembly::prepareBlockNonlocal(unsigned int ivar,
 {
   unsigned int icount = _sys.getVariable(_tid, ivar).count();
   unsigned int jcount = _sys.getVariable(_tid, jvar).count();
+  if (ivar == jvar && _component_block_diagonal[ivar])
+    jcount = 1;
+
   for (MooseIndex(_jacobian_block_nonlocal_used) tag = 0;
        tag < _jacobian_block_nonlocal_used.size();
        tag++)
@@ -3054,7 +3077,9 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
   for (unsigned int i = 0; i < ivar.count(); ++i)
     for (unsigned int j = 0; j < jvar.count(); ++j)
     {
-      if (!(*_cm)(ivar.number() + i, jvar.number() + j))
+      unsigned int iv = ivar.number();
+      unsigned int jv = jvar.number();
+      if (!(*_cm)(iv + i, jv + j))
         continue;
 
       auto di = ivar.componentDofIndices(idof_indices, i);
@@ -3062,7 +3087,12 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
       auto indof = di.size();
       auto jndof = dj.size();
 
-      auto sub = jac_block.sub_matrix(i * indof, indof, j * jndof, jndof);
+      unsigned int jj = j;
+      if (iv == jv && _component_block_diagonal[iv])
+        // here i must be equal to j
+        jj = 0;
+
+      auto sub = jac_block.sub_matrix(i * indof, indof, jj * jndof, jndof);
       if (scaling_factor[i] != 1.0)
         sub *= scaling_factor[i];
 
@@ -3096,7 +3126,9 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block,
   for (unsigned int i = 0; i < ivar.count(); ++i)
     for (unsigned int j = 0; j < jvar.count(); ++j)
     {
-      if (!(*_cm)(ivar.number() + i, jvar.number() + j))
+      unsigned int iv = ivar.number();
+      unsigned int jv = jvar.number();
+      if (!(*_cm)(iv + i, jv + j))
         continue;
 
       auto di = ivar.componentDofIndices(idof_indices, i);
@@ -3104,7 +3136,12 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block,
       auto indof = di.size();
       auto jndof = dj.size();
 
-      auto sub = jac_block.sub_matrix(i * indof, indof, j * jndof, jndof);
+      unsigned int jj = j;
+      if (iv == jv && _component_block_diagonal[iv])
+        // here i must be equal to j
+        jj = 0;
+
+      auto sub = jac_block.sub_matrix(i * indof, indof, jj * jndof, jndof);
       if (scaling_factor[i] != 1.0)
         sub *= scaling_factor[i];
 
@@ -3146,7 +3183,9 @@ Assembly::cacheJacobianBlockNonzero(DenseMatrix<Number> & jac_block,
   for (unsigned int i = 0; i < ivar.count(); ++i)
     for (unsigned int j = 0; j < jvar.count(); ++j)
     {
-      if (!(*_cm)(ivar.number() + i, jvar.number() + j))
+      unsigned int iv = ivar.number();
+      unsigned int jv = jvar.number();
+      if (!(*_cm)(iv + i, jv + j))
         continue;
 
       auto di = ivar.componentDofIndices(idof_indices, i);
@@ -3154,7 +3193,12 @@ Assembly::cacheJacobianBlockNonzero(DenseMatrix<Number> & jac_block,
       auto indof = di.size();
       auto jndof = dj.size();
 
-      auto sub = jac_block.sub_matrix(i * indof, indof, j * jndof, jndof);
+      unsigned int jj = j;
+      if (iv == jv && _component_block_diagonal[iv])
+        // here i must be equal to j
+        jj = 0;
+
+      auto sub = jac_block.sub_matrix(i * indof, indof, jj * jndof, jndof);
       if (scaling_factor[i] != 1.0)
         sub *= scaling_factor[i];
 
@@ -3512,7 +3556,11 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
   auto indof = di.size();
   auto jndof = dj.size();
 
-  auto sub = ke.sub_matrix(i * indof, indof, j * jndof, jndof);
+  unsigned int jj = j;
+  if (ivar == jvar && _component_block_diagonal[iv.number()])
+    jj = 0;
+
+  auto sub = ke.sub_matrix(i * indof, indof, jj * jndof, jndof);
   // If we're computing the initial jacobian for automatically scaling variables we do not want to
   // constrain the element matrix because it introduces 1s on the diagonal for the constrained
   // dofs
@@ -3561,7 +3609,11 @@ Assembly::addJacobianBlockNonlocal(SparseMatrix<Number> & jacobian,
   auto indof = di.size();
   auto jndof = dj.size();
 
-  auto sub = keg.sub_matrix(i * indof, indof, j * jndof, jndof);
+  unsigned int jj = j;
+  if (ivar == jvar && _component_block_diagonal[iv.number()])
+    jj = 0;
+
+  auto sub = keg.sub_matrix(i * indof, indof, jj * jndof, jndof);
   // If we're computing the initial jacobian for automatically scaling variables we do not want to
   // constrain the element matrix because it introduces 1s on the diagonal for the constrained
   // dofs
@@ -3610,9 +3662,13 @@ Assembly::addJacobianNeighbor(SparseMatrix<Number> & jacobian,
   auto cndof = dc.size();
   auto nndof = dn.size();
 
-  auto suben = ken.sub_matrix(i * cndof, cndof, j * nndof, nndof);
-  auto subne = kne.sub_matrix(i * nndof, nndof, j * cndof, cndof);
-  auto subnn = knn.sub_matrix(i * nndof, nndof, j * nndof, nndof);
+  unsigned int jj = j;
+  if (ivar == jvar && _component_block_diagonal[iv.number()])
+    jj = 0;
+
+  auto suben = ken.sub_matrix(i * cndof, cndof, jj * nndof, nndof);
+  auto subne = kne.sub_matrix(i * nndof, nndof, jj * cndof, cndof);
+  auto subnn = knn.sub_matrix(i * nndof, nndof, jj * nndof, nndof);
 
   // If we're computing the initial jacobian for automatically scaling variables we do not want to
   // constrain the element matrix because it introduces 1s on the diagonal for the constrained

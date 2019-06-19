@@ -137,7 +137,7 @@ ArrayDGKernel::computeElemNeighResidual(Moose::DGResidualType type)
       RealEigenVector residual = _JxW[_qp] * _coord[_qp] * computeQpResidual(type);
       mooseAssert(residual.size() == _count,
                   "Size of local residual is not equal to the number of array variable compoments");
-      saveLocalArrayResidual(_local_re, _i, test_space.size(), residual);
+      _assembly.saveLocalArrayResidual(_local_re, _i, test_space.size(), residual);
     }
 
   accumulateTaggedLocalResidual();
@@ -177,18 +177,15 @@ ArrayDGKernel::computeElemNeighJacobian(Moose::DGJacobianType type)
       for (_j = 0; _j < loc_phi.size(); _j++)
       {
         RealEigenVector v = _JxW[_qp] * _coord[_qp] * computeQpJacobian(type);
-        saveDiagLocalArrayJacobian(_local_ke, _i, test_space.size(), _j, loc_phi.size(), v);
+        _assembly.saveDiagLocalArrayJacobian(
+            _local_ke, _i, test_space.size(), _j, loc_phi.size(), _var.number(), v);
       }
 
   accumulateTaggedLocalMatrix();
 
   if (_has_diag_save_in && (type == Moose::ElementElement || type == Moose::NeighborNeighbor))
   {
-    unsigned int rows = _local_ke.m();
-    DenseVector<Number> diag(rows);
-    for (unsigned int i = 0; i < rows; i++)
-      diag(i) = _local_ke(i, i);
-
+    DenseVector<Number> diag = _assembly.getJacobianDiagonal(_local_ke);
     Threads::spin_mutex::scoped_lock lock(_jacoby_vars_mutex);
     for (const auto & var : _diag_save_in)
     {
@@ -244,7 +241,8 @@ ArrayDGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, unsig
         for (_j = 0; _j < loc_phi.size(); _j++)
         {
           RealEigenMatrix v = _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(type, jv);
-          saveFullLocalArrayJacobian(_local_ke, _i, test_space.size(), _j, loc_phi.size(), v);
+          _assembly.saveFullLocalArrayJacobian(
+              _local_ke, _i, test_space.size(), _j, loc_phi.size(), _var.number(), jvar, v);
         }
   }
   else if (jv.fieldType() == Moose::VarFieldType::VAR_FIELD_ARRAY)
@@ -259,7 +257,8 @@ ArrayDGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, unsig
         for (_j = 0; _j < loc_phi.size(); _j++)
         {
           RealEigenMatrix v = _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(type, jv);
-          saveFullLocalArrayJacobian(_local_ke, _i, test_space.size(), _j, loc_phi.size(), v);
+          _assembly.saveFullLocalArrayJacobian(
+              _local_ke, _i, test_space.size(), _j, loc_phi.size(), _var.number(), jvar, v);
         }
   }
   else
@@ -270,11 +269,7 @@ ArrayDGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, unsig
   if (_has_diag_save_in && (type == Moose::ElementElement || type == Moose::NeighborNeighbor) &&
       _var.number() == jvar)
   {
-    unsigned int rows = _local_ke.m();
-    DenseVector<Number> diag(rows);
-    for (unsigned int i = 0; i < rows; i++)
-      diag(i) = _local_ke(i, i);
-
+    DenseVector<Number> diag = _assembly.getJacobianDiagonal(_local_ke);
     Threads::spin_mutex::scoped_lock lock(_jacoby_vars_mutex);
     for (const auto & var : _diag_save_in)
     {

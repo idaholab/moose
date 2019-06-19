@@ -123,11 +123,7 @@ Kernel::computeJacobian()
 
   if (_has_diag_save_in)
   {
-    unsigned int rows = _local_ke.m();
-    DenseVector<Number> diag(rows);
-    for (unsigned int i = 0; i < rows; i++)
-      diag(i) = _local_ke(i, i);
-
+    DenseVector<Number> diag = _assembly.getJacobianDiagonal(_local_ke);
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for (const auto & var : _diag_save_in)
       var->sys().solution().add_vector(diag, var->dofIndices());

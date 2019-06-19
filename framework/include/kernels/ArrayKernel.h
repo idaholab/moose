@@ -77,41 +77,6 @@ protected:
     return RealEigenMatrix::Zero(_var.count(), (unsigned int)jvar.order() + 1);
   }
 
-  /// for array kernel
-  void saveLocalArrayResidual(DenseVector<Number> & re,
-                              unsigned int i,
-                              unsigned int ntest,
-                              const RealEigenVector & v)
-  {
-    for (unsigned int j = 0; j < v.size(); ++j, i += ntest)
-      re(i) += v(j);
-  }
-  void saveDiagLocalArrayJacobian(DenseMatrix<Number> & ke,
-                                  unsigned int i,
-                                  unsigned int ntest,
-                                  unsigned int j,
-                                  unsigned int nphi,
-                                  const RealEigenVector & v)
-  {
-    for (unsigned int k = 0; k < v.size(); ++k, i += ntest, j += nphi)
-      ke(i, j) += v(k);
-  }
-  void saveFullLocalArrayJacobian(DenseMatrix<Number> & ke,
-                                  unsigned int i,
-                                  unsigned int ntest,
-                                  unsigned int j,
-                                  unsigned int nphi,
-                                  const RealEigenMatrix & v)
-  {
-    unsigned int saved_j = j;
-    for (unsigned int k = 0; k < v.rows(); ++k, i += ntest)
-    {
-      j = saved_j;
-      for (unsigned int l = 0; l < v.cols(); ++l, j += nphi)
-        ke(i, j) += v(k, l);
-    }
-  }
-
   /// This is an array kernel so we cast to a ArrayMooseVariable
   ArrayMooseVariable & _var;
 
