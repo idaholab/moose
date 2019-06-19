@@ -157,18 +157,12 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
         std::vector<Point> points;
         // for constant shape function, we take the element centroid
         if (is_constant)
-        {
           points.push_back(elem->centroid());
-        }
         // for higher order method, we take all nodes of element
         // this works for the first order L2 Lagrange.
         else
-        {
           for (auto & node : elem->node_ref_range())
-          {
             points.push_back(node);
-          }
-        }
 
         auto n_points = points.size();
         unsigned int offset = 0;

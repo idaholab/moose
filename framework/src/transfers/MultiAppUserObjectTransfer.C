@@ -98,7 +98,12 @@ MultiAppUserObjectTransfer::execute()
           else
             mesh = &_multi_app->appProblemBase(i).mesh().getMesh();
 
-          bool is_nodal = to_sys->variable_type(var_num).family == LAGRANGE;
+          auto & fe_type = to_sys->variable_type(var_num);
+          bool is_constant = fe_type.order == CONSTANT;
+          bool is_nodal = fe_type.family == LAGRANGE;
+
+          if (fe_type.order > FIRST && !is_nodal)
+            mooseError("We don't currently support second order or higher elemental variable ");
 
           const UserObject & user_object =
               _multi_app->problemBase().getUserObjectBase(_user_object_name);
@@ -124,15 +129,38 @@ MultiAppUserObjectTransfer::execute()
           {
             for (auto & elem : as_range(mesh->local_elements_begin(), mesh->local_elements_end()))
             {
-              Point centroid = elem->centroid();
+              // Skip this element if the variable has no dofs at it.
+              if (elem->n_dofs(sys_num, var_num) < 1)
+                continue;
 
-              if (elem->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this elem
+              // grap sample points
+              std::vector<Point> points;
+              // for constant shape function, we take the element centroid
+              if (is_constant)
+                points.push_back(elem->centroid());
+              // for higher order method, we take all nodes of element
+              // this works for the first order L2 Lagrange.
+              else
+                for (auto & node : elem->node_ref_range())
+                  points.push_back(node);
+
+              auto n_points = points.size();
+              unsigned int n_comp = elem->n_comp(sys_num, var_num);
+              // We assume each point corresponds to one component of elemental variable
+              if (n_points != n_comp)
+                mooseError(" Number of points ",
+                                n_points,
+                                " does not equal to number of variable components ",
+                                n_comp);
+
+              unsigned int offset = 0;
+              for (auto & point: points) // If this variable has dofs at this elem
               {
                 // The zero only works for LAGRANGE!
-                dof_id_type dof = elem->dof_number(sys_num, var_num, 0);
+                dof_id_type dof = elem->dof_number(sys_num, var_num, offset++);
 
                 swapper.forceSwap();
-                Real from_value = user_object.spatialValue(centroid + _multi_app->position(i));
+                Real from_value = user_object.spatialValue(point + _multi_app->position(i));
                 swapper.forceSwap();
 
                 solution.set(dof, from_value);
@@ -178,7 +206,12 @@ MultiAppUserObjectTransfer::execute()
       else
         to_mesh = &to_problem.mesh().getMesh();
 
-      bool is_nodal = to_sys.variable_type(to_var_num).family == LAGRANGE;
+      auto & fe_type = to_sys.variable_type(to_sys_num);
+      bool is_constant = fe_type.order == CONSTANT;
+      bool is_nodal = fe_type.family == LAGRANGE;
+
+      if (fe_type.order > FIRST && !is_nodal)
+        mooseError("We don't currently support second order or higher elemental variable ");
 
       if (_all_master_nodes_contained_in_sub_app)
       {
@@ -223,10 +256,33 @@ MultiAppUserObjectTransfer::execute()
         {
           for (auto & elem : as_range(to_mesh->elements_begin(), to_mesh->elements_end()))
           {
-            if (elem->n_dofs(to_sys_num, to_var_num) > 0) // If this variable has dofs at this elem
+            // Skip this element if the variable has no dofs at it.
+            if (elem->n_dofs(to_sys_num, to_var_num) < 1)
+              continue;
+
+            // grap sample points
+            std::vector<Point> points;
+            // for constant shape function, we take the element centroid
+            if (is_constant)
+              points.push_back(elem->centroid());
+            // for higher order method, we take all nodes of element
+            // this works for the first order L2 Lagrange.
+            else
+              for (auto & node : elem->node_ref_range())
+                points.push_back(node);
+
+            auto n_points = points.size();
+            unsigned int n_comp = elem->n_comp(to_sys_num, to_var_num);
+            // We assume each point corresponds to one component of elemental variable
+            if (n_points != n_comp)
+              mooseError(" Number of points ",
+                              n_points,
+                              " does not equal to number of variable components ",
+                              n_comp);
+
+            for (auto & point: points)
             {
               unsigned int elem_found_in_sub_app = 0;
-              Point centroid = elem->centroid();
 
               for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
               {
@@ -235,17 +291,17 @@ MultiAppUserObjectTransfer::execute()
 
                 BoundingBox app_box = _multi_app->getBoundingBox(i, _displaced_source_mesh);
 
-                if (app_box.contains_point(centroid))
+                if (app_box.contains_point(point))
                   ++elem_found_in_sub_app;
               }
 
               if (elem_found_in_sub_app == 0)
-                mooseError("MultiAppUserObjectTransfer: Master element with centroid at ",
-                           centroid,
+                mooseError("MultiAppUserObjectTransfer: Master element with node at ",
+                           point,
                            " not found within the bounding box of any of the sub applications.");
               else if (elem_found_in_sub_app > 1)
-                mooseError("MultiAppUserObjectTransfer: Master element with centroid at ",
-                           centroid,
+                mooseError("MultiAppUserObjectTransfer: Master element with node at ",
+                           point,
                            " found within the bounding box of two or more sub applications.");
             }
           }
@@ -294,25 +350,48 @@ MultiAppUserObjectTransfer::execute()
         {
           for (auto & elem : as_range(to_mesh->elements_begin(), to_mesh->elements_end()))
           {
-            if (elem->n_dofs(to_sys_num, to_var_num) > 0) // If this variable has dofs at this elem
-            {
-              Point centroid = elem->centroid();
+            // Skip this element if the variable has no dofs at it.
+            if (elem->n_dofs(to_sys_num, to_var_num) < 1)
+              continue;
 
+            // grap sample points
+            std::vector<Point> points;
+            // for constant shape function, we take the element centroid
+            if (is_constant)
+              points.push_back(elem->centroid());
+            // for higher order method, we take all nodes of element
+            // this works for the first order L2 Lagrange.
+            else
+              for (auto & node : elem->node_ref_range())
+                points.push_back(node);
+
+            auto n_points = points.size();
+            unsigned int n_comp = elem->n_comp(to_sys_num, to_var_num);
+            // We assume each point corresponds to one component of elemental variable
+            if (n_points != n_comp)
+              mooseError(" Number of points ",
+                              n_points,
+                              " does not equal to number of variable components ",
+                              n_comp);
+
+            unsigned int offset = 0;
+            for (auto & point: points) // If this variable has dofs at this elem
+            {
               // See if this elem falls in this bounding box
-              if (app_box.contains_point(centroid))
+              if (app_box.contains_point(point))
               {
-                dof_id_type dof = elem->dof_number(to_sys_num, to_var_num, 0);
+                dof_id_type dof = elem->dof_number(to_sys_num, to_var_num, offset++);
 
                 Real from_value = 0;
                 {
                   Moose::ScopedCommSwapper swapper(_multi_app->comm());
-                  from_value = user_object.spatialValue(centroid - app_position);
+                  from_value = user_object.spatialValue(point - app_position);
                 }
 
                 if (from_value == std::numeric_limits<Real>::infinity())
                   mooseError(
                       "MultiAppUserObjectTransfer: Point corresponding to element's centroid (",
-                      centroid,
+                      point,
                       ") not found in sub application.");
 
                 to_solution->set(dof, from_value);
