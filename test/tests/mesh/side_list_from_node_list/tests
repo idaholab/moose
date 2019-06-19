@@ -1,0 +1,23 @@
+[Tests]
+  [missing_side_set]
+    type = 'RunException'
+    input = 'side_list_from_node_list.i'
+    expect_err = 'The object \S+ contains the following side set ids that do not exist on the mesh: \d+'
+
+    requirement = 'The system shall issue a diagnostic when a referenced side set does not exist in the mesh.'
+    design = 'MooseMesh.md'
+    issues = '#13509'
+  []
+
+  [construct_side_sets]
+    type = 'Exodiff'
+    input = 'side_list_from_node_list.i'
+    cli_args = 'Mesh/construct_side_list_from_node_list=true'
+    exodiff = 'side_list_from_node_list_out.e'
+
+    requirement = 'The system shall have the ability to construct a side set from a set of nodes.'
+    design = 'MooseMesh.md'
+    issues = '#13509'
+  [../]
+
+[]
