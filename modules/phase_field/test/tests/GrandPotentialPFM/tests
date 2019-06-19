@@ -33,4 +33,12 @@
     design = '/GrandPotentialInterface.md'
     requirement = 'MOOSE shall provide a material to automatically compute grand potential model interface parameters based on provided interfacial free energies and widths'
   [../]
+  [./GrandPotentialAnisotropyAntitrap]
+    type = 'Exodiff'
+    input = 'GrandPotentialAnisotropyAntitrap.i'
+    exodiff = 'GrandPotentialAnisotropyAntitrap_out.e'
+    issues = '#13373'
+    design = '/AntitrappingCurrent.md'
+    requirement = 'MOOSE shall provide a Grand Potential based dendritic solidification capability for alloy with antitrapping current'
+  [../]
 []
