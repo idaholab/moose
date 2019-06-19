@@ -1592,8 +1592,7 @@ void
 MooseVariableData<OutputType>::addSolution(NumericVector<Number> & sol,
                                            const DenseVector<Number> & v) const
 {
-  if (_has_dof_values)
-    sol.add_vector(v, _dof_indices);
+  sol.add_vector(v, _dof_indices);
 }
 
 template <>
@@ -1601,15 +1600,12 @@ void
 MooseVariableData<RealEigenVector>::addSolution(NumericVector<Number> & sol,
                                                 const DenseVector<Number> & v) const
 {
-  if (_has_dof_values)
+  unsigned int p = 0;
+  for (unsigned int j = 0; j < _count; ++j)
   {
-    unsigned int p = 0;
-    for (unsigned int j = 0; j < _count; ++j)
-    {
-      unsigned int inc = (isNodal() ? j : j * _dof_indices.size());
-      for (unsigned int i = 0; i < _dof_indices.size(); ++i)
-        sol.add(_dof_indices[i] + inc, v(p++));
-    }
+    unsigned int inc = (isNodal() ? j : j * _dof_indices.size());
+    for (unsigned int i = 0; i < _dof_indices.size(); ++i)
+      sol.add(_dof_indices[i] + inc, v(p++));
   }
 }
 
