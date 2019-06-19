@@ -149,12 +149,12 @@ MultiAppUserObjectTransfer::execute()
               // We assume each point corresponds to one component of elemental variable
               if (n_points != n_comp)
                 mooseError(" Number of points ",
-                                n_points,
-                                " does not equal to number of variable components ",
-                                n_comp);
+                           n_points,
+                           " does not equal to number of variable components ",
+                           n_comp);
 
               unsigned int offset = 0;
-              for (auto & point: points) // If this variable has dofs at this elem
+              for (auto & point : points) // If this variable has dofs at this elem
               {
                 // The zero only works for LAGRANGE!
                 dof_id_type dof = elem->dof_number(sys_num, var_num, offset++);
@@ -206,7 +206,7 @@ MultiAppUserObjectTransfer::execute()
       else
         to_mesh = &to_problem.mesh().getMesh();
 
-      auto & fe_type = to_sys.variable_type(to_sys_num);
+      auto & fe_type = to_sys.variable_type(to_var_num);
       bool is_constant = fe_type.order == CONSTANT;
       bool is_nodal = fe_type.family == LAGRANGE;
 
@@ -276,11 +276,11 @@ MultiAppUserObjectTransfer::execute()
             // We assume each point corresponds to one component of elemental variable
             if (n_points != n_comp)
               mooseError(" Number of points ",
-                              n_points,
-                              " does not equal to number of variable components ",
-                              n_comp);
+                         n_points,
+                         " does not equal to number of variable components ",
+                         n_comp);
 
-            for (auto & point: points)
+            for (auto & point : points)
             {
               unsigned int elem_found_in_sub_app = 0;
 
@@ -370,12 +370,12 @@ MultiAppUserObjectTransfer::execute()
             // We assume each point corresponds to one component of elemental variable
             if (n_points != n_comp)
               mooseError(" Number of points ",
-                              n_points,
-                              " does not equal to number of variable components ",
-                              n_comp);
+                         n_points,
+                         " does not equal to number of variable components ",
+                         n_comp);
 
             unsigned int offset = 0;
-            for (auto & point: points) // If this variable has dofs at this elem
+            for (auto & point : points) // If this variable has dofs at this elem
             {
               // See if this elem falls in this bounding box
               if (app_box.contains_point(point))

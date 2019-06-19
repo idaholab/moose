@@ -32,4 +32,11 @@
     requirement = "The system shall support transfer first order elemental variable with MultiAppInterpolationTransfer"
   []
 
+  [L2_Lagrange_userobject]
+    type = 'Exodiff'
+    input = 'master_L2_Lagrange_userobject.i'
+    exodiff = 'master_L2_Lagrange_userobject_out.e master_L2_Lagrange_userobject_out_sub0.e'
+    requirement = "The system shall support transfer first order elemental variable with MultiAppUserObjectTransfer"
+  []
+
 []

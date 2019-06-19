@@ -160,12 +160,12 @@ MultiAppInterpolationTransfer::execute()
           // We assume each point corresponds to one component of elemental variable
           if (n_points != n_comp)
             mooseError(" Number of points ",
-                        n_points,
-                        " does not equal to number of variable components ",
-                        n_comp);
+                       n_points,
+                       " does not equal to number of variable components ",
+                       n_comp);
 
           unsigned int offset = 0;
-          for (auto & point: points)
+          for (auto & point : points)
           {
             dof_id_type from_dof = from_elem->dof_number(from_sys_num, from_var_num, offset++);
             src_pts.push_back(point);
@@ -243,21 +243,21 @@ MultiAppInterpolationTransfer::execute()
               std::vector<Point> points;
               if (to_is_constant)
                 points.push_back(elem->centroid());
-               else
-                 for (auto & node : elem->node_ref_range())
-                   points.push_back(node);
+              else
+                for (auto & node : elem->node_ref_range())
+                  points.push_back(node);
 
               auto n_points = points.size();
               unsigned int n_comp = elem->n_comp(sys_num, var_num);
               // We assume each point corresponds to one component of elemental variable
               if (n_points != n_comp)
                 mooseError(" Number of points ",
-                                n_points,
-                                " does not equal to number of variable components ",
-                                n_comp);
+                           n_points,
+                           " does not equal to number of variable components ",
+                           n_comp);
 
               unsigned int offset = 0;
-              for (auto & point: points)
+              for (auto & point : points)
               {
                 Point actual_position = point + _multi_app->position(i);
 
@@ -275,8 +275,8 @@ MultiAppInterpolationTransfer::execute()
 
                 solution.set(dof, value);
               } // point
-            } // auto elem
-          } // else
+            }   // auto elem
+          }     // else
 
           solution.close();
           to_sys->update();
@@ -425,18 +425,18 @@ MultiAppInterpolationTransfer::execute()
             // We assume each point corresponds to one component of elemental variable
             if (n_points != n_comp)
               mooseError(" Number of points ",
-                              n_points,
-                              " does not equal to number of variable components ",
-                              n_comp);
+                         n_points,
+                         " does not equal to number of variable components ",
+                         n_comp);
 
             for (auto & point : points)
             {
-               dof_id_type from_dof = from_element->dof_number(from_sys_num, from_var_num, offset++);
-               src_pts.push_back(point + app_position);
-               src_vals.push_back(from_solution(from_dof));
+              dof_id_type from_dof = from_element->dof_number(from_sys_num, from_var_num, offset++);
+              src_pts.push_back(point + app_position);
+              src_vals.push_back(from_solution(from_dof));
             } // point
-          } // from_element
-        } // else
+          }   // from_element
+        }     // else
       }
 
       // We have only set local values - prepare for use by gathering remote gata
@@ -490,12 +490,12 @@ MultiAppInterpolationTransfer::execute()
           // We assume each point corresponds to one component of elemental variable
           if (n_points != n_comp)
             mooseError(" Number of points ",
-                            n_points,
-                            " does not equal to number of variable components ",
-                            n_comp);
+                       n_points,
+                       " does not equal to number of variable components ",
+                       n_comp);
 
           unsigned int offset = 0;
-          for (auto & point: points)
+          for (auto & point : points)
           {
             std::vector<Point> pts;
             std::vector<Number> vals;
