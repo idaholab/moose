@@ -39,7 +39,7 @@ protected:
   std::vector<const VariableValue *> _disp;
   std::vector<const VariableGradient *> _grad_disp;
 
-  std::string _base_name;
+  const std::string _base_name;
 
   MaterialProperty<RankTwoTensor> & _mechanical_strain;
 

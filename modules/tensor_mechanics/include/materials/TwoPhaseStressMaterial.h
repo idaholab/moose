@@ -50,7 +50,7 @@ protected:
   const MaterialProperty<RankFourTensor> & _dstress_dstrain_B;
 
   // global material properties
-  std::string _base_name;
+  const std::string _base_name;
   MaterialProperty<RankTwoTensor> & _stress;
   MaterialProperty<RankFourTensor> & _dstress_dstrain;
 

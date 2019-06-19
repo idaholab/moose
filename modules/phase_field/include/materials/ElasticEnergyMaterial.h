@@ -38,7 +38,7 @@ protected:
   virtual Real computeDF(unsigned int i_var) override;
   virtual Real computeD2F(unsigned int i_var, unsigned int j_var) override;
 
-  std::string _base_name;
+  const std::string _base_name;
 
   /// Stress tensor
   const MaterialProperty<RankTwoTensor> & _stress;

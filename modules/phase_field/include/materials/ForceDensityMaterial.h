@@ -50,7 +50,7 @@ private:
   std::vector<RealGradient> _sum_grad_etas;
 
   /// type of force density material
-  std::string _base_name;
+  const std::string _base_name;
 
   /// force density material
   MaterialProperty<std::vector<RealGradient>> & _dF;

@@ -30,7 +30,7 @@ protected:
   virtual void computeQpProperties();
   virtual void computeQpExtraStress() = 0;
 
-  std::string _base_name;
+  const std::string _base_name;
   std::string _extra_stress_name;
 
   MaterialProperty<RankTwoTensor> & _extra_stress;

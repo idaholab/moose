@@ -35,7 +35,7 @@ public:
 
 protected:
   std::string _strength_prop_name;
-  std::string _base_name;
+  const std::string _base_name;
   const MaterialProperty<Real> & _strength;
   std::string _pk2_prop_name;
   const MaterialProperty<RankTwoTensor> & _pk2;

@@ -56,7 +56,7 @@ protected:
   std::vector<const VariableGradient *> _grad_vals;
 
   /// base name specifying type of force density material
-  std::string _base_name;
+  const std::string _base_name;
 
   /// getting userobject for calculating grain forces and torques
   const GrainForceAndTorqueInterface & _grain_force_torque;

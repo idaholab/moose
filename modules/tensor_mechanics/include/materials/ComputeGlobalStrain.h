@@ -35,7 +35,7 @@ protected:
   virtual void initQpStatefulProperties();
 
   ///Base name prepended to material property name
-  std::string _base_name;
+  const std::string _base_name;
   const VariableValue & _scalar_global_strain;
   MaterialProperty<RankTwoTensor> & _global_strain;
 

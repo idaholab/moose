@@ -39,7 +39,7 @@ public:
   virtual void computeAdditionalStress(){};
 
 protected:
-  std::string _base_name;
+  const std::string _base_name;
 
   const MaterialProperty<RankFourTensor> & _dstress_dstrain;
   const MaterialProperty<RankTwoTensor> & _stress;

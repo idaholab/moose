@@ -28,6 +28,7 @@ protected:
   std::vector<const VariableGradient *> _grad_disp;
   const VariableValue & _disp_r;
 
+  const std::string _base_name;
   const Real _orig_density;
   MaterialProperty<Real> & _density;
 };

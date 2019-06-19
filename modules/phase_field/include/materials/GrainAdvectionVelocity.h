@@ -53,7 +53,7 @@ private:
   const unsigned int _op_num;
 
   /// type of force density material
-  std::string _base_name;
+  const std::string _base_name;
 
   /// Material storing advection velocities of grains
   MaterialProperty<std::vector<RealGradient>> & _velocity_advection;

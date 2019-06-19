@@ -55,7 +55,7 @@ protected:
   std::vector<const ADVariableValue *> _disp;
   std::vector<const ADVariableGradient *> _grad_disp;
 
-  std::string _base_name;
+  const std::string _base_name;
 
   ADMaterialProperty(RankTwoTensor) & _mechanical_strain;
   ADMaterialProperty(RankTwoTensor) & _total_strain;
