@@ -96,14 +96,17 @@ ArrayKernel::computeResidual()
   prepareVectorTag(_assembly, _var.number());
 
   precalculateResidual();
-  for (_i = 0; _i < _test.size(); _i++)
-    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  {
+    initQpResidual();
+    for (_i = 0; _i < _test.size(); _i++)
     {
       RealEigenVector residual = _JxW[_qp] * _coord[_qp] * computeQpResidual();
       mooseAssert(residual.size() == _count,
                   "Size of local residual is not equal to the number of array variable compoments");
       _assembly.saveLocalArrayResidual(_local_re, _i, _test.size(), residual);
     }
+  }
 
   accumulateTaggedLocalResidual();
 
@@ -127,14 +130,17 @@ ArrayKernel::computeJacobian()
   prepareMatrixTag(_assembly, _var.number(), _var.number());
 
   precalculateJacobian();
-  for (_i = 0; _i < _test.size(); _i++)
-    for (_j = 0; _j < _phi.size(); _j++)
-      for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  {
+    initQpJacobian();
+    for (_i = 0; _i < _test.size(); _i++)
+      for (_j = 0; _j < _phi.size(); _j++)
       {
         RealEigenVector v = _JxW[_qp] * _coord[_qp] * computeQpJacobian();
         _assembly.saveDiagLocalArrayJacobian(
             _local_ke, _i, _test.size(), _j, _phi.size(), _var.number(), v);
       }
+  }
 
   accumulateTaggedLocalMatrix();
 
@@ -161,14 +167,17 @@ ArrayKernel::computeOffDiagJacobian(MooseVariableFEBase & jvar)
   prepareMatrixTag(_assembly, _var.number(), jvar.number());
 
   precalculateOffDiagJacobian(jvar.number());
-  for (_i = 0; _i < _test.size(); _i++)
-    for (_j = 0; _j < jvar.phiSize(); _j++)
-      for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  {
+    initQpJacobian();
+    for (_i = 0; _i < _test.size(); _i++)
+      for (_j = 0; _j < jvar.phiSize(); _j++)
       {
         RealEigenMatrix v = _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
         _assembly.saveFullLocalArrayJacobian(
             _local_ke, _i, _test.size(), _j, jvar.phiSize(), _var.number(), jvar.number(), v);
       }
+  }
 
   accumulateTaggedLocalMatrix();
 
@@ -193,8 +202,8 @@ ArrayKernel::computeOffDiagJacobianScalar(unsigned int jvar)
   MooseVariableScalar & jv = _sys.getScalarVariable(_tid, jvar);
   prepareMatrixTag(_assembly, _var.number(), jvar);
 
-  for (_i = 0; _i < _test.size(); _i++)
-    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    for (_i = 0; _i < _test.size(); _i++)
     {
       RealEigenMatrix v = _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobianScalar(jv);
       _assembly.saveFullLocalArrayJacobian(

@@ -77,6 +77,16 @@ protected:
     return RealEigenMatrix::Zero(_var.count(), (unsigned int)jvar.order() + 1);
   }
 
+  /**
+   * Put necessary evaluations depending on qp but independent on test functions here
+   */
+  virtual void initQpResidual() {}
+
+  /**
+   * Put necessary evaluations depending on qp but independent on test and shape functions here
+   */
+  virtual void initQpJacobian() {}
+
   ArrayMooseVariable & _var;
 
   /// normals at quadrature points

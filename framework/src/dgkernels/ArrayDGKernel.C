@@ -132,6 +132,8 @@ ArrayDGKernel::computeElemNeighResidual(Moose::DGResidualType type)
     prepareVectorTagNeighbor(_assembly, _var.number());
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  {
+    initQpResidual(type);
     for (_i = 0; _i < test_space.size(); _i++)
     {
       RealEigenVector residual = _JxW[_qp] * _coord[_qp] * computeQpResidual(type);
@@ -139,6 +141,7 @@ ArrayDGKernel::computeElemNeighResidual(Moose::DGResidualType type)
                   "Size of local residual is not equal to the number of array variable compoments");
       _assembly.saveLocalArrayResidual(_local_re, _i, test_space.size(), residual);
     }
+  }
 
   accumulateTaggedLocalResidual();
 
@@ -173,6 +176,8 @@ ArrayDGKernel::computeElemNeighJacobian(Moose::DGJacobianType type)
     prepareMatrixTagNeighbor(_assembly, _var.number(), _var.number(), type);
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  {
+    initQpJacobian(type);
     for (_i = 0; _i < test_space.size(); _i++)
       for (_j = 0; _j < loc_phi.size(); _j++)
       {
@@ -180,6 +185,7 @@ ArrayDGKernel::computeElemNeighJacobian(Moose::DGJacobianType type)
         _assembly.saveDiagLocalArrayJacobian(
             _local_ke, _i, test_space.size(), _j, loc_phi.size(), _var.number(), v);
       }
+  }
 
   accumulateTaggedLocalMatrix();
 
@@ -237,6 +243,8 @@ ArrayDGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, unsig
                                                                           : jv0.phiFaceNeighbor();
 
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    {
+      initQpJacobian(type);
       for (_i = 0; _i < test_space.size(); _i++)
         for (_j = 0; _j < loc_phi.size(); _j++)
         {
@@ -244,6 +252,7 @@ ArrayDGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, unsig
           _assembly.saveFullLocalArrayJacobian(
               _local_ke, _i, test_space.size(), _j, loc_phi.size(), _var.number(), jvar, v);
         }
+    }
   }
   else if (jv.fieldType() == Moose::VarFieldType::VAR_FIELD_ARRAY)
   {
@@ -253,6 +262,8 @@ ArrayDGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, unsig
                                                                           : jv1.phiFaceNeighbor();
 
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    {
+      initQpJacobian(type);
       for (_i = 0; _i < test_space.size(); _i++)
         for (_j = 0; _j < loc_phi.size(); _j++)
         {
@@ -260,6 +271,7 @@ ArrayDGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, unsig
           _assembly.saveFullLocalArrayJacobian(
               _local_ke, _i, test_space.size(), _j, loc_phi.size(), _var.number(), jvar, v);
         }
+    }
   }
   else
     mooseError("Vector variable cannot be coupled into array DG kernel currently");

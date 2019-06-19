@@ -84,6 +84,8 @@ ArrayIntegratedBC::computeResidual()
   prepareVectorTag(_assembly, _var.number());
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  {
+    initQpResidual();
     for (_i = 0; _i < _test.size(); _i++)
     {
       RealEigenVector residual = _JxW[_qp] * _coord[_qp] * computeQpResidual();
@@ -91,6 +93,7 @@ ArrayIntegratedBC::computeResidual()
                   "Size of local residual is not equal to the number of array variable compoments");
       _assembly.saveLocalArrayResidual(_local_re, _i, _test.size(), residual);
     }
+  }
 
   accumulateTaggedLocalResidual();
 
@@ -114,6 +117,8 @@ ArrayIntegratedBC::computeJacobian()
   prepareMatrixTag(_assembly, _var.number(), _var.number());
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  {
+    initQpJacobian();
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < _phi.size(); _j++)
       {
@@ -121,6 +126,7 @@ ArrayIntegratedBC::computeJacobian()
         _assembly.saveDiagLocalArrayJacobian(
             _local_ke, _i, _test.size(), _j, _phi.size(), _var.number(), v);
       }
+  }
 
   accumulateTaggedLocalMatrix();
 
@@ -148,6 +154,8 @@ ArrayIntegratedBC::computeJacobianBlock(MooseVariableFEBase & jvar)
   prepareMatrixTag(_assembly, _var.number(), jvar_num);
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  {
+    initQpJacobian();
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < jvar.phiFaceSize(); _j++)
       {
@@ -155,6 +163,7 @@ ArrayIntegratedBC::computeJacobianBlock(MooseVariableFEBase & jvar)
         _assembly.saveFullLocalArrayJacobian(
             _local_ke, _i, _test.size(), _j, jvar.phiSize(), _var.number(), jvar.number(), v);
       }
+  }
 
   accumulateTaggedLocalMatrix();
 

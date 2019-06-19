@@ -90,6 +90,16 @@ protected:
       return RealEigenMatrix::Zero(_var.count(), jvar.count());
   }
 
+  /**
+   * Put necessary evaluations depending on qp but independent on test functions here
+   */
+  virtual void initQpResidual(Moose::DGResidualType) {}
+
+  /**
+   * Put necessary evaluations depending on qp but independent on test and shape functions here
+   */
+  virtual void initQpJacobian(Moose::DGJacobianType) {}
+
   /// Variable this kernel operates on
   ArrayMooseVariable & _var;
   /// Holds the current solution at the current quadrature point on the face.
