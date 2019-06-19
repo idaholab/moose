@@ -16,7 +16,8 @@ sudo apt-get install build-essential \
   libnuma-dev \
   libcurl4-gnutls-dev \
   zlib1g-dev \
-  libhwloc-dev
+  libhwloc-dev \
+  libxml2-dev
 ```
 
 Download and install one of our redistributable packages according to your version of Ubuntu.

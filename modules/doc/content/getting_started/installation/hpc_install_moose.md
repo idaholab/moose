@@ -57,4 +57,5 @@ You will need to perform the above (`source $HOME/.moose_profile`) for every new
 
 !include manual_cleanup.md
 
-Head back over to the [getting_started/index.md] page to continue your tour of MOOSE.
+!include getting_started/installation/install_moose.md
+
