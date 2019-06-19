@@ -1089,10 +1089,10 @@ FEProblemBase::prepare(const Elem * elem, THREAD_ID tid)
 
   _nl->prepare(tid);
   _aux->prepare(tid);
-  if (!_has_jacobian || !_const_jacobian)
+  if ((!_has_jacobian || !_const_jacobian) && _currently_computing_jacobian)
     _assembly[tid]->prepareJacobianBlock();
   _assembly[tid]->prepareResidual();
-  if (_has_nonlocal_coupling)
+  if (_has_nonlocal_coupling && _currently_computing_jacobian)
     _assembly[tid]->prepareNonlocal();
 
   if (_displaced_problem && (_reinit_displaced_elem || _reinit_displaced_face))
@@ -4896,7 +4896,9 @@ FEProblemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
 
   _aux->compute(EXEC_NONLINEAR);
 
+  _currently_computing_jacobian = true;
   _nl->computeJacobianBlocks(blocks);
+  _currently_computing_jacobian = false;
 }
 
 void
