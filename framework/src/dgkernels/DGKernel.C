@@ -87,7 +87,7 @@ DGKernel::DGKernel(const InputParameters & parameters)
   {
     MooseVariableFEBase * var = &_subproblem.getVariable(_tid,
                                                          _diag_save_in_strings[i],
-                                                         Moose::VarKindType::VAR_NONLINEAR,
+                                                         Moose::VarKindType::VAR_AUXILIARY,
                                                          Moose::VarFieldType::VAR_FIELD_STANDARD);
 
     if (_sys.hasVariable(_diag_save_in_strings[i]))
