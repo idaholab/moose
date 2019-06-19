@@ -244,7 +244,7 @@
     postprocessor = lin
   []
   [contact]
-    type = ContactDofSet
+    type = ContactDOFSetSize
     variable = normal_lm
     subdomain = '30'
     execute_on = 'nonlinear timestep_end'

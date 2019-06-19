@@ -201,7 +201,7 @@ offset = 1e-2
     postprocessor = num_nl
   [../]
   [contact]
-    type = ContactDofSet
+    type = ContactDOFSetSize
     variable = normal_lm
     subdomain = '3'
     execute_on = 'nonlinear timestep_end'

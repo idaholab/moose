@@ -135,7 +135,7 @@
 
 [Postprocessors]
   [contact]
-    type = ContactDofSet
+    type = ContactDOFSetSize
     variable = lambda
     subdomain = '10'
     execute_on = 'nonlinear timestep_end'

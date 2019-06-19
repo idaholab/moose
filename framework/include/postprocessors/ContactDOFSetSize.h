@@ -12,7 +12,7 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
-class ContactDofSet;
+class ContactDOFSetSize;
 class MooseVariableFEBase;
 namespace libMesh
 {
@@ -20,12 +20,12 @@ class MeshBase;
 }
 
 template <>
-InputParameters validParams<ContactDofSet>();
+InputParameters validParams<ContactDOFSetSize>();
 
-class ContactDofSet : public GeneralPostprocessor
+class ContactDOFSetSize : public GeneralPostprocessor
 {
 public:
-  ContactDofSet(const InputParameters & parameters);
+  ContactDOFSetSize(const InputParameters & parameters);
 
   void initialize() override;
   void execute() override;

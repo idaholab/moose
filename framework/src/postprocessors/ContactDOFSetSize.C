@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ContactDofSet.h"
+#include "ContactDOFSetSize.h"
 
 // MOOSE includes
 #include "MooseVariable.h"
@@ -18,11 +18,11 @@
 
 #include "libmesh/mesh_base.h"
 
-registerMooseObject("MooseApp", ContactDofSet);
+registerMooseObject("MooseApp", ContactDOFSetSize);
 
 template <>
 InputParameters
-validParams<ContactDofSet>()
+validParams<ContactDOFSetSize>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<VariableName>("variable", "The name of the variable to test for contact");
@@ -34,7 +34,7 @@ validParams<ContactDofSet>()
   return params;
 }
 
-ContactDofSet::ContactDofSet(const InputParameters & parameters)
+ContactDOFSetSize::ContactDOFSetSize(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     _var(_fe_problem.getVariable(_tid,
                                  getParam<VariableName>("variable"),
@@ -47,13 +47,13 @@ ContactDofSet::ContactDofSet(const InputParameters & parameters)
 }
 
 void
-ContactDofSet::initialize()
+ContactDOFSetSize::initialize()
 {
   _count = 0;
 }
 
 void
-ContactDofSet::execute()
+ContactDOFSetSize::execute()
 {
   AllLocalDofIndicesThread aldit(_fe_problem.getNonlinearSystemBase().system(), {_var.name()});
 
@@ -76,7 +76,7 @@ ContactDofSet::execute()
 }
 
 PostprocessorValue
-ContactDofSet::getValue()
+ContactDOFSetSize::getValue()
 {
   return _count;
 }

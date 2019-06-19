@@ -1,6 +1,6 @@
-# ContactDofSet
+# ContactDOFSetSize
 
-The `ContactDofSet` class outputs the number of degrees of freedom greater than
+The `ContactDOFSetSize` class outputs the number of degrees of freedom greater than
 a certain tolerance (specified through the `tolerance` parameter; the default
 value is 1e-6). The usual application of this, as indicated by the class name,
 is to indicate how many nodes (if using first order Lagrange shape functions for
@@ -11,12 +11,12 @@ lives on.
 
 # Description and Syntax
 
-!syntax description /Postprocessors/ContactDofSet
+!syntax description /Postprocessors/ContactDOFSetSize
 
-!syntax parameters /Postprocessors/ContactDofSet
+!syntax parameters /Postprocessors/ContactDOFSetSize
 
-!syntax inputs /Postprocessors/ContactDofSet
+!syntax inputs /Postprocessors/ContactDOFSetSize
 
-!syntax children /Postprocessors/ContactDofSet
+!syntax children /Postprocessors/ContactDOFSetSize
 
 !bibtex bibliography
