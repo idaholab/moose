@@ -347,6 +347,9 @@ private:
   /// Indicates that performance logging has been requested by the console or some object (PerformanceData)
   bool _logging_requested;
 
+  /// Whether or not the last thing output by mooseConsole had a newline as the last character
+  bool _last_message_ended_in_newline;
+
   // Allow complete access:
   // FEProblemBase for calling initial, timestepSetup, outputStep, etc. methods
   friend class FEProblemBase;
@@ -445,4 +448,3 @@ OutputWarehouse::allowOutput(bool state)
   for (typename std::vector<T *>::iterator it = outputs.begin(); it != outputs.end(); ++it)
     (*it)->allowOutput(state);
 }
-

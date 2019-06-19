@@ -21,6 +21,7 @@
 #include "MooseUtils.h"
 #include "MooseApp.h"
 #include "Console.h"
+#include "TimedPrint.h"
 
 #include "libmesh/equation_systems.h"
 
@@ -164,6 +165,8 @@ Output::solveSetup()
 void
 Output::outputStep(const ExecFlagType & type)
 {
+  CONSOLE_TIMED_PRINT("Outputing ", name());
+
   // Output is not allowed
   if (!_allow_output && type != EXEC_FORCED)
     return;

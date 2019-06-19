@@ -15,6 +15,7 @@
 
 class Function;
 class PiecewiseBase;
+class PiecewiseLinear;
 
 /**
  * Adjust the timestep based on the number of iterations.
@@ -74,6 +75,8 @@ protected:
 
   const Function * _timestep_limiting_function;
   const PiecewiseBase * _piecewise_timestep_limiting_function;
+  const PiecewiseLinear * _piecewise_linear_timestep_limiting_function;
+
   /// time point defined in the piecewise function
   std::vector<Real> _times;
 

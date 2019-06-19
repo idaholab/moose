@@ -1,0 +1,20 @@
+create vertex 0,0,0
+create vertex  0, 44, 0
+create vertex 48, 60, 0
+create vertex 48, 44, 0
+
+create curve vertex 1, 2
+create curve vertex  2, 3
+create curve vertex  3, 4
+create curve vertex 4, 1
+
+create surface curve all
+
+block 1 surface 1
+sideset 1 curve 1
+sideset 2 curve 3
+
+surface 1  interval 41 
+mesh Surface 1
+
+
