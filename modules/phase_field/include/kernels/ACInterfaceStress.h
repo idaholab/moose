@@ -41,7 +41,7 @@ protected:
   const MaterialProperty<Real> & _L;
 
   ///@{ Strain base name and property
-  std::string _base_name;
+  const std::string _base_name;
   const MaterialProperty<RankTwoTensor> & _strain;
   ///@}
 

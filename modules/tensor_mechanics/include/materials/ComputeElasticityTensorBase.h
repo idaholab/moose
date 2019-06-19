@@ -32,7 +32,7 @@ protected:
   virtual void computeQpProperties();
   virtual void computeQpElasticityTensor() = 0;
 
-  std::string _base_name;
+  const std::string _base_name;
   std::string _elasticity_tensor_name;
 
   MaterialProperty<RankFourTensor> & _elasticity_tensor;

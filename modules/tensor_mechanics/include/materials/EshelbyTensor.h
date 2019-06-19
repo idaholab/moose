@@ -33,7 +33,7 @@ public:
   virtual void computeQpProperties() override;
 
 protected:
-  std::string _base_name;
+  const std::string _base_name;
 
   const MaterialProperty<Real> & _sed;
   MaterialProperty<RankTwoTensor> & _eshelby_tensor;

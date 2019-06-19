@@ -40,7 +40,7 @@ private:
   const Real _sh_coeff_B;
   const VariableValue & _T;
 
-  std::string _base_name;
+  const std::string _base_name;
   MaterialProperty<Real> & _electric_conductivity;
   MaterialProperty<Real> & _delectric_conductivity_dT;
 };

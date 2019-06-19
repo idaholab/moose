@@ -32,7 +32,7 @@ protected:
   virtual void computeQpProperties() override;
 
   /// optional parameter that allows multiple mechanics materials to be defined
-  std::string _base_name;
+  const std::string _base_name;
 
   /// plastic strain
   const MaterialProperty<RankTwoTensor> & _plastic_strain;

@@ -45,7 +45,7 @@ protected:
   virtual void computeAverageGradientTest();
   virtual void computeAverageGradientPhi();
 
-  std::string _base_name;
+  const std::string _base_name;
   bool _use_finite_deform_jacobian;
 
   const MaterialProperty<RankTwoTensor> & _stress;

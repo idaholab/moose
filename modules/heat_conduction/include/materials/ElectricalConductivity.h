@@ -37,7 +37,7 @@ private:
   const Real _ref_temp;
   const VariableValue & _T;
 
-  std::string _base_name;
+  const std::string _base_name;
   MaterialProperty<Real> & _electric_conductivity;
   MaterialProperty<Real> & _delectric_conductivity_dT;
 };

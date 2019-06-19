@@ -34,7 +34,7 @@ public:
   virtual void computeQpProperties() override;
 
 protected:
-  std::string _base_name;
+  const std::string _base_name;
 
   /// Whether the material model is a total or incremental model
   bool _incremental;
