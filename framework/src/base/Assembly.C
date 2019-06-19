@@ -3075,12 +3075,14 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
   auto & scaling_factor = ivar.arrayScalingFactor();
 
   for (unsigned int i = 0; i < ivar.count(); ++i)
-    for (unsigned int j = 0; j < jvar.count(); ++j)
+  {
+    unsigned int iv = ivar.number();
+    for (const auto & jt : ConstCouplingRow(iv + i, *_cm))
     {
-      unsigned int iv = ivar.number();
       unsigned int jv = jvar.number();
-      if (!(*_cm)(iv + i, jv + j))
+      if (jt < jv || jt >= jv + jvar.count())
         continue;
+      unsigned int j = jt - jv;
 
       auto di = ivar.componentDofIndices(idof_indices, i);
       auto dj = jvar.componentDofIndices(jdof_indices, j);
@@ -3104,6 +3106,7 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
 
       jacobian.add_matrix(sub, di, dj);
     }
+  }
 }
 
 void
@@ -3124,12 +3127,14 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block,
   auto & scaling_factor = ivar.arrayScalingFactor();
 
   for (unsigned int i = 0; i < ivar.count(); ++i)
-    for (unsigned int j = 0; j < jvar.count(); ++j)
+  {
+    unsigned int iv = ivar.number();
+    for (const auto & jt : ConstCouplingRow(iv + i, *_cm))
     {
-      unsigned int iv = ivar.number();
       unsigned int jv = jvar.number();
-      if (!(*_cm)(iv + i, jv + j))
+      if (jt < jv || jt >= jv + jvar.count())
         continue;
+      unsigned int j = jt - jv;
 
       auto di = ivar.componentDofIndices(idof_indices, i);
       auto dj = jvar.componentDofIndices(jdof_indices, j);
@@ -3159,6 +3164,7 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block,
           _cached_jacobian_cols[tag].push_back(dj[j]);
         }
     }
+  }
 
   jac_block.zero();
 }
@@ -3181,12 +3187,14 @@ Assembly::cacheJacobianBlockNonzero(DenseMatrix<Number> & jac_block,
   auto & scaling_factor = ivar.arrayScalingFactor();
 
   for (unsigned int i = 0; i < ivar.count(); ++i)
-    for (unsigned int j = 0; j < jvar.count(); ++j)
+  {
+    unsigned int iv = ivar.number();
+    for (const auto & jt : ConstCouplingRow(iv + i, *_cm))
     {
-      unsigned int iv = ivar.number();
       unsigned int jv = jvar.number();
-      if (!(*_cm)(iv + i, jv + j))
+      if (jt < jv || jt >= jv + jvar.count())
         continue;
+      unsigned int j = jt - jv;
 
       auto di = ivar.componentDofIndices(idof_indices, i);
       auto dj = jvar.componentDofIndices(jdof_indices, j);
@@ -3214,6 +3222,7 @@ Assembly::cacheJacobianBlockNonzero(DenseMatrix<Number> & jac_block,
             _cached_jacobian_cols[tag].push_back(dj[j]);
           }
     }
+  }
 
   jac_block.zero();
 }
