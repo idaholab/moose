@@ -25,4 +25,11 @@
     requirement = "The system shall support transfer first order elemental variable with MultiAppNearestNodeTransfer"
   []
 
+  [L2_Lagrange_interpolation]
+    type = 'Exodiff'
+    input = 'master_L2_Lagrange_interpolation.i'
+    exodiff = 'master_L2_Lagrange_interpolation_out.e master_L2_Lagrange_interpolation_out_sub0.e'
+    requirement = "The system shall support transfer first order elemental variable with MultiAppInterpolationTransfer"
+  []
+
 []

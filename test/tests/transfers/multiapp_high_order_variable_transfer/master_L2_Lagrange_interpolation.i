@@ -55,14 +55,14 @@
     type = FullSolveMultiApp
     app_type = MooseTestApp
     positions = '0 0 0'
-    input_files  = sub_L2_Lagrange_nearest_node.i
+    input_files  = sub_L2_Lagrange_interpolation.i
     execute_on = 'timestep_end'
   []
 []
 
 [Transfers]
   [p_to_sub]
-    type = MultiAppNearestNodeTransfer
+    type = MultiAppInterpolationTransfer
     direction = to_multiapp
     source_variable = power_density
     variable = power_density
