@@ -287,6 +287,26 @@ libmesh_update:
 	@echo ======================================================
 	$(MOOSE_DIR)/scripts/update_and_rebuild_libmesh.sh
 
+libmesh:
+	@echo ======================================================
+	@echo Updating libMesh
+	@echo ======================================================
+	$(MOOSE_DIR)/scripts/update_and_rebuild_libmesh.sh --fast
+
+show_libmesh_configs:
+	@echo "libmesh_CXX     :" $(libmesh_CXX)
+	@echo "libmesh_CC      :" $(libmesh_CC)
+	@echo "libmesh_F77     :" $(libmesh_F77)
+	@echo "libmesh_F90     :" $(libmesh_F90)
+	@echo "libmesh_INCLUDE :" $(libmesh_INCLUDE)
+	@echo "libmesh_CPPFLAGS:" $(libmesh_CPPFLAGS)
+	@echo "libmesh_CXXFLAGS:" $(libmesh_CXXFLAGS)
+	@echo "libmesh_CFLAGS  :" $(libmesh_CFLAGS)
+	@echo "libmesh_FFLAGS  :" $(libmesh_FFLAGS)
+	@echo "libmesh_LIBS    :" $(libmesh_LIBS)
+	@echo "libmesh_HOST    :" $(libmesh_HOST)
+	@echo "libmesh_LDFLAGS :" $(libmesh_LDFLAGS)
+
 #
 # Maintenance
 #
