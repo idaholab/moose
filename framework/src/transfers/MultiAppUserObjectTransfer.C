@@ -296,11 +296,16 @@ MultiAppUserObjectTransfer::execute()
               }
 
               if (elem_found_in_sub_app == 0)
-                mooseError("MultiAppUserObjectTransfer: Master element with node at ",
+                mooseError("MultiAppUserObjectTransfer: Master element with ",
+                           n_points > 1 ? "node" : "centroid",
+                           " at ",
                            point,
                            " not found within the bounding box of any of the sub applications.");
+
               else if (elem_found_in_sub_app > 1)
-                mooseError("MultiAppUserObjectTransfer: Master element with node at ",
+                mooseError("MultiAppUserObjectTransfer: Master element with ",
+                           n_points > 1 ? "node" : "centroid",
+                           " at ",
                            point,
                            " found within the bounding box of two or more sub applications.");
             }

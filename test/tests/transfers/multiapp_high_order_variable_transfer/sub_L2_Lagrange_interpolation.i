@@ -3,6 +3,7 @@
   dim = 2
   nx = 20
   ny = 20
+  parallel_type = replicated
 []
 
 [AuxVariables]

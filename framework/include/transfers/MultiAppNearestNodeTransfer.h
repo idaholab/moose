@@ -69,11 +69,15 @@ protected:
    * @param local_comps: comp num for the unknowns on DofObject. It is useful
    * for higher order method
    */
+  void getLocalEntitiesAndComponents(MooseMesh * mesh,
+                                     std::vector<std::pair<Point, DofObject *>> & local_entities,
+                                     std::vector<unsigned int> & local_comps,
+                                     bool nodal,
+                                     bool constant);
+
   void getLocalEntities(MooseMesh * mesh,
                         std::vector<std::pair<Point, DofObject *>> & local_entities,
-                        std::vector<unsigned int> & local_comps,
-                        bool nodal,
-                        bool constant);
+                        bool nodal);
 
   /// If true then node connections will be cached
   bool _fixed_meshes;
