@@ -1,8 +1,6 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 10
-  ny = 10
+  type = FileMesh
+  file = square_nodesets_only.e
 []
 
 [Variables]
@@ -21,29 +19,20 @@
   [./left]
     type = DirichletBC
     variable = u
-    boundary = left
+    boundary = 1
     value = 0
   [../]
   [./right]
-    type = DirichletBC
+    type = NeumannBC
     variable = u
-    boundary = right
-    value = 1
-  [../]
-  [./bc_with_undefined_boundary]
-    type = DirichletBC
-    variable = u
-    boundary = 10
+    boundary = 2
     value = 1
   [../]
 []
 
 [Executioner]
   type = Steady
-
-  solve_type = 'PJFNK'
-
-
+  solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []

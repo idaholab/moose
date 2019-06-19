@@ -3,10 +3,11 @@
     type = 'RunException'
     input = 'undefined_block_kernel.i'
     expect_err = "The object 'kernel_with_undefined_block' contains the following block ids that do not exist on the mesh: 10"
+
+    requirement = 'The system shall issue an error when a referenced subdomain does not exist in the mesh.'
+    design = 'MooseMesh.md'
+    issues = '#2757'
   [../]
-  [./boundary]
-    type = 'RunException'
-    input = 'undefined_boundary_bc.i'
-    expect_err = "The object 'bc_with_undefined_boundary' contains the following boundary ids that do not exist on the mesh: 10"
-  [../]
+  # For boundary restrictable undefined tests
+  # see mesh/side_list_from_node_list and mesh/node_list_from_side_list
 []
