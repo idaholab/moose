@@ -32,6 +32,7 @@ registerActions(Syntax & syntax)
   registerTask("THM:add_component_physics", true);
   registerTask("THM:integrity_check", true);
   registerTask("THM:control_data_integrity_check", true);
+  registerTask("THM:setup_quadrature", true);
 
   registerMooseObjectTask("THM:add_component", Component, false);
   registerMooseObjectTask("THM:add_heat_structure_material", SolidMaterialProperties, false);

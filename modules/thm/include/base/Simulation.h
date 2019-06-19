@@ -59,6 +59,11 @@ public:
   }
 
   /**
+   * Sets up quadrature rules
+   */
+  virtual void setupQuadrature();
+
+  /**
    * Sets the simulation up
    */
   virtual void build();
