@@ -3098,9 +3098,9 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
       if (scaling_factor[i] != 1.0)
         sub *= scaling_factor[i];
 
-      // If we're computing the initial jacobian for automatically scaling variables we do not want to
-      // constrain the element matrix because it introduces 1s on the diagonal for the constrained
-      // dofs
+      // If we're computing the initial jacobian for automatically scaling variables we do not want
+      // to constrain the element matrix because it introduces 1s on the diagonal for the
+      // constrained dofs
       if (!_sys.computingInitialJacobian())
         _dof_map.constrain_element_matrix(sub, di, dj, false);
 
@@ -3150,9 +3150,9 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block,
       if (scaling_factor[i] != 1.0)
         sub *= scaling_factor[i];
 
-      // If we're computing the initial jacobian for automatically scaling variables we do not want to
-      // constrain the element matrix because it introduces 1s on the diagonal for the constrained
-      // dofs
+      // If we're computing the initial jacobian for automatically scaling variables we do not want
+      // to constrain the element matrix because it introduces 1s on the diagonal for the
+      // constrained dofs
       if (!_sys.computingInitialJacobian())
         _dof_map.constrain_element_matrix(sub, di, dj, false);
 
