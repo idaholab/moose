@@ -90,6 +90,8 @@ protected:
   unsigned int _number_of_hs;
   /// Name of heat structure parts.
   const std::vector<std::string> & _names;
+  /// Names of each axial region
+  const std::vector<std::string> & _axial_region_names;
   /// Map from block name to block index
   std::map<std::string, unsigned int> _name_index;
   /// Material names
