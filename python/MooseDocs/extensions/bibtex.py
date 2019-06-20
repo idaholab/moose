@@ -45,13 +45,13 @@ class BibtexExtension(command.CommandExtension):
         command.CommandExtension.__init__(self, *args, **kwargs)
 
         self.__database = None
-        self.__citations = set()
+        self.__citations = list()
 
     def initMetaData(self, page, meta):
-        meta.initData('citations', set())
+        meta.initData('citations', list())
 
     def addCitations(self, *args):
-        self.__citations.update(args)
+        self.__citations.extend(args)
 
     def preExecute(self, content):
 
@@ -85,8 +85,8 @@ class BibtexExtension(command.CommandExtension):
 
     def postTokenize(self, ast, page, meta, reader):
         if self.__citations:
-            meta.getData('citations').update(self.__citations)
-            self.__citations.clear()
+            meta.getData('citations').extend(self.__citations)
+            del self.__citations[:] # TODO: In python 3 this should be a clear()
 
             has_bib = False
             for node in anytree.PreOrderIter(ast):
