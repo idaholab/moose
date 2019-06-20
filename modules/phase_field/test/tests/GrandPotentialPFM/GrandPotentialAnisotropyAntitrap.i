@@ -265,7 +265,7 @@
   l_tol = 1.0e-3
   nl_rel_tol = 1.0e-8
   nl_abs_tol = 1e-8
-  num_steps = 5
+  num_steps = 3
   [./TimeStepper]
     type = IterationAdaptiveDT
     dt = 0.001
