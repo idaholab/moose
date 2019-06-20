@@ -1,9 +1,14 @@
 [Tests]
+  issues = '#3312'
+  design = 'syntax/ICs/index.md'
+
   [./parsed_function]
     type = 'Exodiff'
     input = 'parsed_function.i'
     exodiff = 'parsed.e'
     recover = false #see #2295
+
+    requirement = 'The system shall support setting gradient values for shape functions that support them.'
   [../]
 
   [./spline_function]
@@ -11,5 +16,7 @@
     input = 'spline_function.i'
     exodiff = 'spline.e'
     recover = false #see #2295
+
+    requirement = 'The system shall support using a spline function to set both value and gradient values in an initial condition.'
   [../]
 []

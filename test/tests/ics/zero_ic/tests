@@ -3,5 +3,11 @@
     type = 'CSVDiff'
     input = 'test.i'
     csvdiff = 'test_out.csv'
+
+    requirement = 'The system should supply a special convenience "zero"'
+                  ' variable that can be indexed like a normal coupled'
+                  ' variable.'
+    design = 'FEProblemBase.md'
+    issues = '#11202'
   [../]
 []
