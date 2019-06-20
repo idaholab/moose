@@ -21,7 +21,7 @@ defineADValidParams(
 
 template <ComputeStage compute_stage>
 INSADMomentumViscous<compute_stage>::INSADMomentumViscous(const InputParameters & parameters)
-  : ADVectorKernelGrad<compute_stage>(parameters), _mu(adGetADMaterialProperty<Real>("mu_name"))
+  : ADVectorKernelGrad<compute_stage>(parameters), _mu(getADMaterialProperty<Real>("mu_name"))
 {
 }
 

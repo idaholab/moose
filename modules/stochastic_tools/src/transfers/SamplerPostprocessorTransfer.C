@@ -58,7 +58,7 @@ SamplerPostprocessorTransfer::SamplerPostprocessorTransfer(const InputParameters
 void
 SamplerPostprocessorTransfer::initialSetup()
 {
-  auto & uo = _fe_problem.getUserObject<UserObject>(_master_vpp_name);
+  auto & uo = _fe_problem.getUserObjectTempl<UserObject>(_master_vpp_name);
   _results = dynamic_cast<StochasticResults *>(&uo);
 
   if (!_results)

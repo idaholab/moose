@@ -80,8 +80,8 @@ protected:
 template <class T, class U>
 CompositeTensorBase<T, U>::CompositeTensorBase(const InputParameters & parameters)
   : DerivativeMaterialInterface<U>(parameters),
-    _tensor_names(this->template getParam<std::vector<MaterialPropertyName>>("tensors")),
-    _weight_names(this->template getParam<std::vector<MaterialPropertyName>>("weights")),
+    _tensor_names(this->template getParamTempl<std::vector<MaterialPropertyName>>("tensors")),
+    _weight_names(this->template getParamTempl<std::vector<MaterialPropertyName>>("weights")),
     _num_args(this->DerivativeMaterialInterface<U>::coupledComponents("args")),
     _num_comp(_tensor_names.size()),
     _dM(_num_args),
@@ -129,8 +129,8 @@ CompositeTensorBase<T, U>::initializeDerivativeProperties(const std::string name
   // setup input components and its derivatives
   for (unsigned int i = 0; i < _num_comp; ++i)
   {
-    _tensors[i] = &this->template getMaterialPropertyByName<T>(_tensor_names[i]);
-    _weights[i] = &this->template getMaterialPropertyByName<Real>(_weight_names[i]);
+    _tensors[i] = &this->template getMaterialPropertyByNameTempl<T>(_tensor_names[i]);
+    _weights[i] = &this->template getMaterialPropertyByNameTempl<Real>(_weight_names[i]);
 
     _dtensors[i].resize(_num_args);
     _dweights[i].resize(_num_args);
@@ -196,4 +196,3 @@ CompositeTensorBase<T, U>::computeQpTensorProperties(MaterialProperty<T> & M,
     }
   }
 }
-

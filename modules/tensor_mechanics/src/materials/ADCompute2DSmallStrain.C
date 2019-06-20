@@ -23,7 +23,7 @@ defineADValidParams(
 template <ComputeStage compute_stage>
 ADCompute2DSmallStrain<compute_stage>::ADCompute2DSmallStrain(const InputParameters & parameters)
   : ADComputeSmallStrain<compute_stage>(parameters),
-    _out_of_plane_direction(adGetParam<MooseEnum>("out_of_plane_direction"))
+    _out_of_plane_direction(getParam<MooseEnum>("out_of_plane_direction"))
 {
 }
 

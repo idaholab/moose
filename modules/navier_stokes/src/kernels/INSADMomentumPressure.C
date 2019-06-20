@@ -23,7 +23,7 @@ defineADValidParams(
 template <ComputeStage compute_stage>
 INSADMomentumPressure<compute_stage>::INSADMomentumPressure(const InputParameters & parameters)
   : ADVectorKernel<compute_stage>(parameters),
-    _integrate_p_by_parts(adGetParam<bool>("integrate_p_by_parts")),
+    _integrate_p_by_parts(getParam<bool>("integrate_p_by_parts")),
     _p(adCoupledValue("p")),
     _grad_p(adCoupledGradient("p"))
 {

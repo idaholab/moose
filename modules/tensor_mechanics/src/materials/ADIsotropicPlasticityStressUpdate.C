@@ -42,21 +42,21 @@ template <ComputeStage compute_stage>
 ADIsotropicPlasticityStressUpdate<compute_stage>::ADIsotropicPlasticityStressUpdate(
     const InputParameters & parameters)
   : ADRadialReturnStressUpdate<compute_stage>(parameters),
-    _plastic_prepend(adGetParam<std::string>("plastic_prepend")),
+    _plastic_prepend(getParam<std::string>("plastic_prepend")),
     _yield_stress_function(
         isParamValid("yield_stress_function") ? &getFunction("yield_stress_function") : NULL),
-    _yield_stress(adGetParam<Real>("yield_stress")),
-    _hardening_constant(adGetParam<Real>("hardening_constant")),
+    _yield_stress(getParam<Real>("yield_stress")),
+    _hardening_constant(getParam<Real>("hardening_constant")),
     _hardening_function(isParamValid("hardening_function") ? &getFunction("hardening_function")
                                                            : NULL),
     _yield_condition(-1.0), // set to a non-physical value to catch uninitalized yield condition
     _hardening_slope(0.0),
     _plastic_strain(
-        adDeclareADProperty<RankTwoTensor>(_base_name + _plastic_prepend + "plastic_strain")),
+        declareADProperty<RankTwoTensor>(_base_name + _plastic_prepend + "plastic_strain")),
     _plastic_strain_old(
-        adGetMaterialPropertyOld<RankTwoTensor>(_base_name + _plastic_prepend + "plastic_strain")),
-    _hardening_variable(adDeclareADProperty<Real>(_base_name + "hardening_variable")),
-    _hardening_variable_old(adGetMaterialPropertyOld<Real>(_base_name + "hardening_variable")),
+        getMaterialPropertyOld<RankTwoTensor>(_base_name + _plastic_prepend + "plastic_strain")),
+    _hardening_variable(declareADProperty<Real>(_base_name + "hardening_variable")),
+    _hardening_variable_old(getMaterialPropertyOld<Real>(_base_name + "hardening_variable")),
     _temperature(adCoupledValue("temperature"))
 {
   if (parameters.isParamSetByUser("yield_stress") && _yield_stress <= 0.0)

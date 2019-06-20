@@ -35,7 +35,7 @@ ADComputeFiniteStrain<compute_stage>::ADComputeFiniteStrain(const InputParameter
   : ADComputeIncrementalStrainBase<compute_stage>(parameters),
     _Fhat(_fe_problem.getMaxQps()),
     _decomposition_method(
-        adGetParam<MooseEnum>("decomposition_method").template getEnum<DecompMethod>())
+        getParam<MooseEnum>("decomposition_method").template getEnum<DecompMethod>())
 {
 }
 

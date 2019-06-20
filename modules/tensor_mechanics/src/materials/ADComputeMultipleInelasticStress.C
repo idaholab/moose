@@ -67,18 +67,17 @@ ADComputeMultipleInelasticStress<compute_stage>::ADComputeMultipleInelasticStres
     _max_iterations(parameters.get<unsigned int>("max_iterations")),
     _relative_tolerance(parameters.get<Real>("relative_tolerance")),
     _absolute_tolerance(parameters.get<Real>("absolute_tolerance")),
-    _internal_solve_full_iteration_history(
-        adGetParam<bool>("internal_solve_full_iteration_history")),
-    _perform_finite_strain_rotations(adGetParam<bool>("perform_finite_strain_rotations")),
-    _inelastic_strain(adDeclareADProperty<RankTwoTensor>(_base_name + "combined_inelastic_strain")),
+    _internal_solve_full_iteration_history(getParam<bool>("internal_solve_full_iteration_history")),
+    _perform_finite_strain_rotations(getParam<bool>("perform_finite_strain_rotations")),
+    _inelastic_strain(declareADProperty<RankTwoTensor>(_base_name + "combined_inelastic_strain")),
     _inelastic_strain_old(
-        adGetMaterialPropertyOld<RankTwoTensor>(_base_name + "combined_inelastic_strain")),
-    _num_models(adGetParam<std::vector<MaterialName>>("inelastic_models").size()),
+        getMaterialPropertyOld<RankTwoTensor>(_base_name + "combined_inelastic_strain")),
+    _num_models(getParam<std::vector<MaterialName>>("inelastic_models").size()),
     _inelastic_weights(isParamValid("combined_inelastic_strain_weights")
-                           ? adGetParam<std::vector<Real>>("combined_inelastic_strain_weights")
+                           ? getParam<std::vector<Real>>("combined_inelastic_strain_weights")
                            : std::vector<Real>(_num_models, true)),
-    _cycle_models(adGetParam<bool>("cycle_models")),
-    _matl_timestep_limit(adDeclareProperty<Real>("matl_timestep_limit"))
+    _cycle_models(getParam<bool>("cycle_models")),
+    _matl_timestep_limit(declareProperty<Real>("matl_timestep_limit"))
 {
   if (_inelastic_weights.size() != _num_models)
     paramError("combined_inelastic_strain_weights",
@@ -103,7 +102,7 @@ ADComputeMultipleInelasticStress<compute_stage>::initialSetup()
   _is_elasticity_tensor_guaranteed_isotropic =
       this->hasGuaranteedMaterialProperty(_elasticity_tensor_name, Guarantee::ISOTROPIC);
 
-  std::vector<MaterialName> models = adGetParam<std::vector<MaterialName>>("inelastic_models");
+  std::vector<MaterialName> models = getParam<std::vector<MaterialName>>("inelastic_models");
 
   for (unsigned int i = 0; i < _num_models; ++i)
   {

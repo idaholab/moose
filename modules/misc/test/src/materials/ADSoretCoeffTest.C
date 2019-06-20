@@ -20,7 +20,7 @@ ADSoretCoeffTest<compute_stage>::ADSoretCoeffTest(const InputParameters & parame
   : ADMaterial<compute_stage>(parameters),
     _coupled_var(adCoupledValue("coupled_var")),
     _temp(adCoupledValue("temperature")),
-    _soret_coeff(adDeclareADProperty<Real>("soret_coefficient"))
+    _soret_coeff(declareADProperty<Real>("soret_coefficient"))
 {
 }
 

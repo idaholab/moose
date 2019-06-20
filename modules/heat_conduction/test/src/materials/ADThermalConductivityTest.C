@@ -22,7 +22,7 @@ template <ComputeStage compute_stage>
 ADThermalConductivityTest<compute_stage>::ADThermalConductivityTest(
     const InputParameters & parameters)
   : ADMaterial<compute_stage>(parameters),
-    _diffusivity(adDeclareADProperty<Real>("thermal_conductivity")),
+    _diffusivity(declareADProperty<Real>("thermal_conductivity")),
     _temperature(adCoupledValue("temperature")),
     _c(adCoupledValue("c"))
 {

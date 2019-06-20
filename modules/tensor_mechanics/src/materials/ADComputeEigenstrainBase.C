@@ -33,10 +33,10 @@ template <ComputeStage compute_stage>
 ADComputeEigenstrainBase<compute_stage>::ADComputeEigenstrainBase(
     const InputParameters & parameters)
   : ADMaterial<compute_stage>(parameters),
-    _base_name(isParamValid("base_name") ? adGetParam<std::string>("base_name") + "_" : ""),
-    _eigenstrain_name(_base_name + adGetParam<std::string>("eigenstrain_name")),
-    _eigenstrain(adDeclareADProperty<RankTwoTensor>(_eigenstrain_name)),
-    _step_zero(adDeclareRestartableData<bool>("step_zero", true))
+    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
+    _eigenstrain_name(_base_name + getParam<std::string>("eigenstrain_name")),
+    _eigenstrain(declareADProperty<RankTwoTensor>(_eigenstrain_name)),
+    _step_zero(declareRestartableData<bool>("step_zero", true))
 {
 }
 

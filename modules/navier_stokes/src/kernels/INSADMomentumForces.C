@@ -18,9 +18,9 @@ defineADValidParams(INSADMomentumForces,
 template <ComputeStage compute_stage>
 INSADMomentumForces<compute_stage>::INSADMomentumForces(const InputParameters & parameters)
   : ADVectorKernelValue<compute_stage>(parameters),
-    _gravity_strong_residual(adGetADMaterialProperty<RealVectorValue>("gravity_strong_residual")),
+    _gravity_strong_residual(getADMaterialProperty<RealVectorValue>("gravity_strong_residual")),
     _mms_function_strong_residual(
-        adGetADMaterialProperty<RealVectorValue>("mms_function_strong_residual"))
+        getADMaterialProperty<RealVectorValue>("mms_function_strong_residual"))
 {
 }
 

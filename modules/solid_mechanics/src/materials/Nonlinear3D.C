@@ -27,7 +27,8 @@ Nonlinear3D::Nonlinear3D(SolidModel & solid_model,
     _grad_disp_x_old(coupledGradientOld("disp_x")),
     _grad_disp_y_old(coupledGradientOld("disp_y")),
     _grad_disp_z_old(coupledGradientOld("disp_z")),
-    _volumetric_locking_correction(_solid_model.getParam<bool>("volumetric_locking_correction"))
+    _volumetric_locking_correction(
+        _solid_model.getParamTempl<bool>("volumetric_locking_correction"))
 {
 }
 

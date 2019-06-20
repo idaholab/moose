@@ -55,7 +55,7 @@ template <ComputeStage compute_stage, typename T>
 ADAllenCahnBase<compute_stage, T>::ADAllenCahnBase(const InputParameters & parameters)
   : ADKernelValue<compute_stage>(parameters),
     DerivativeMaterialPropertyNameInterface(),
-    _prop_L(adGetADMaterialProperty<T>("mob_name"))
+    _prop_L(getADMaterialProperty<T>("mob_name"))
 {
 }
 
@@ -65,4 +65,3 @@ ADAllenCahnBase<compute_stage, T>::precomputeQpResidual()
 {
   return _prop_L[_qp] * computeDFDOP();
 }
-

@@ -25,9 +25,9 @@ ADComputeElasticityTensorBase<compute_stage>::ADComputeElasticityTensorBase(
     const InputParameters & parameters)
   : ADMaterial<compute_stage>(parameters),
     GuaranteeProvider(this),
-    _base_name(isParamValid("base_name") ? adGetParam<std::string>("base_name") + "_" : ""),
+    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _elasticity_tensor_name(_base_name + "elasticity_tensor"),
-    _elasticity_tensor(adDeclareADProperty<RankFourTensor>(_elasticity_tensor_name)),
+    _elasticity_tensor(declareADProperty<RankFourTensor>(_elasticity_tensor_name)),
     _prefactor_function(isParamValid("elasticity_tensor_prefactor")
                             ? &getFunction("elasticity_tensor_prefactor")
                             : nullptr)

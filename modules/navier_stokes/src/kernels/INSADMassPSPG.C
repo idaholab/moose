@@ -23,9 +23,9 @@ defineADValidParams(INSADMassPSPG,
 template <ComputeStage compute_stage>
 INSADMassPSPG<compute_stage>::INSADMassPSPG(const InputParameters & parameters)
   : ADKernelGrad<compute_stage>(parameters),
-    _rho(adGetADMaterialProperty<Real>("rho_name")),
-    _tau(adGetADMaterialProperty<Real>("tau")),
-    _momentum_strong_residual(adGetADMaterialProperty<RealVectorValue>("momentum_strong_residual"))
+    _rho(getADMaterialProperty<Real>("rho_name")),
+    _tau(getADMaterialProperty<Real>("tau")),
+    _momentum_strong_residual(getADMaterialProperty<RealVectorValue>("momentum_strong_residual"))
 {
 }
 

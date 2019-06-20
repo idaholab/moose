@@ -27,12 +27,12 @@ defineADValidParams(
 template <ComputeStage compute_stage>
 ADACInterface<compute_stage>::ADACInterface(const InputParameters & parameters)
   : ADKernel<compute_stage>(parameters),
-    _prop_L(adGetADMaterialProperty<Real>("mob_name")),
-    _name_L(adGetParam<MaterialPropertyName>("mob_name")),
-    _kappa(adGetADMaterialProperty<Real>("kappa_name")),
-    _variable_L(adGetParam<bool>("variable_L")),
+    _prop_L(getADMaterialProperty<Real>("mob_name")),
+    _name_L(getParam<MaterialPropertyName>("mob_name")),
+    _kappa(getADMaterialProperty<Real>("kappa_name")),
+    _variable_L(getParam<bool>("variable_L")),
     _dLdop(_variable_L
-               ? &adGetADMaterialProperty<Real>(derivativePropertyNameFirst(_name_L, _var.name()))
+               ? &getADMaterialProperty<Real>(derivativePropertyNameFirst(_name_L, _var.name()))
                : nullptr),
     _nvar(Coupleable::_coupled_standard_moose_vars.size()),
     _dLdarg(_nvar),
@@ -48,7 +48,7 @@ ADACInterface<compute_stage>::ADACInterface(const InputParameters & parameters)
         paramError("args",
                    "The kernel variable should not be specified in the coupled `args` parameter.");
 
-      _dLdarg[i] = &adGetADMaterialProperty<Real>(derivativePropertyNameFirst(_name_L, iname));
+      _dLdarg[i] = &getADMaterialProperty<Real>(derivativePropertyNameFirst(_name_L, iname));
       _gradarg[i] = &(ivar->adGradSln<compute_stage>());
     }
 }

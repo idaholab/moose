@@ -27,8 +27,8 @@ StochasticToolsTransfer::StochasticToolsTransfer(const InputParameters & paramet
   // running the execute flags must be removed. This is done automatically here, unless
   // 'execute_on' was modified by the user, which an error is produced.
   if (_multi_app->isParamValid("mode") &&
-      (_multi_app->getParam<MooseEnum>("mode") == "batch-reset" ||
-       _multi_app->getParam<MooseEnum>("mode") == "batch-restore"))
+      (_multi_app->getParamTempl<MooseEnum>("mode") == "batch-reset" ||
+       _multi_app->getParamTempl<MooseEnum>("mode") == "batch-restore"))
   {
     if (parameters.isParamSetByUser("execute_on"))
       paramError("execute_on",

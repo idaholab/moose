@@ -23,8 +23,8 @@ ADDensity<compute_stage>::ADDensity(const InputParameters & parameters)
   : ADMaterial<compute_stage>(parameters),
     _coord_system(getBlockCoordSystem()),
     _disp_r(adCoupledValue("displacements", 0)),
-    _initial_density(adGetParam<Real>("density")),
-    _density(adDeclareADProperty<Real>("density"))
+    _initial_density(getParam<Real>("density")),
+    _density(declareADProperty<Real>("density"))
 {
   // get coupled gradients
   const unsigned int ndisp = coupledComponents("displacements");

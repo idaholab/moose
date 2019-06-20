@@ -33,7 +33,7 @@ defineADValidParams(
 template <ComputeStage compute_stage>
 ADStressUpdateBase<compute_stage>::ADStressUpdateBase(const InputParameters & parameters)
   : ADMaterial<compute_stage>(parameters),
-    _base_name(isParamValid("base_name") ? adGetParam<std::string>("base_name") + "_" : "")
+    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "")
 {
 }
 

@@ -23,10 +23,10 @@ template <ComputeStage compute_stage>
 ADMathFreeEnergy<compute_stage>::ADMathFreeEnergy(const InputParameters & parameters)
   : ADMaterial<compute_stage>(parameters),
     _c(adCoupledValue("c")),
-    _f_name(adGetParam<MaterialPropertyName>("f_name")),
-    _prop_F(adDeclareADProperty<Real>(_f_name)),
-    _prop_dFdc(adDeclareADProperty<Real>(
-        derivativePropertyNameFirst(_f_name, this->getVar("c", 0)->name())))
+    _f_name(getParam<MaterialPropertyName>("f_name")),
+    _prop_F(declareADProperty<Real>(_f_name)),
+    _prop_dFdc(
+        declareADProperty<Real>(derivativePropertyNameFirst(_f_name, this->getVar("c", 0)->name())))
 {
 }
 

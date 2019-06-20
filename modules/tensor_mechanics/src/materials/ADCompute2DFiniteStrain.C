@@ -25,7 +25,7 @@ defineADValidParams(
 template <ComputeStage compute_stage>
 ADCompute2DFiniteStrain<compute_stage>::ADCompute2DFiniteStrain(const InputParameters & parameters)
   : ADComputeFiniteStrain<compute_stage>(parameters),
-    _out_of_plane_direction(adGetParam<MooseEnum>("out_of_plane_direction"))
+    _out_of_plane_direction(getParam<MooseEnum>("out_of_plane_direction"))
 {
 }
 

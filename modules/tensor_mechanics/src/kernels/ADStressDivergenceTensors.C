@@ -34,13 +34,13 @@ template <ComputeStage compute_stage>
 ADStressDivergenceTensors<compute_stage>::ADStressDivergenceTensors(
     const InputParameters & parameters)
   : ADKernel<compute_stage>(parameters),
-    _base_name(isParamValid("base_name") ? adGetParam<std::string>("base_name") + "_" : ""),
-    _stress(adGetADMaterialProperty<RankTwoTensor>(_base_name + "stress")),
-    _component(adGetParam<unsigned int>("component")),
+    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
+    _stress(getADMaterialProperty<RankTwoTensor>(_base_name + "stress")),
+    _component(getParam<unsigned int>("component")),
     _ndisp(coupledComponents("displacements")),
     _disp_var(_ndisp),
     _avg_grad_test(),
-    _volumetric_locking_correction(adGetParam<bool>("volumetric_locking_correction"))
+    _volumetric_locking_correction(getParam<bool>("volumetric_locking_correction"))
 {
   for (unsigned int i = 0; i < _ndisp; ++i)
     // the next line should be _disp_var[i] = coupled("displacements", i);

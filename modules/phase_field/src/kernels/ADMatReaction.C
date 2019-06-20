@@ -26,7 +26,7 @@ template <ComputeStage compute_stage>
 ADMatReaction<compute_stage>::ADMatReaction(const InputParameters & parameters)
   : ADKernel<compute_stage>(parameters),
     _v(isCoupled("v") ? adCoupledValue("v") : _u),
-    _mob(adGetADMaterialProperty<Real>("mob_name"))
+    _mob(getADMaterialProperty<Real>("mob_name"))
 {
 }
 
