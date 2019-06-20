@@ -78,14 +78,14 @@ THMMesh::prep()
 dof_id_type
 THMMesh::getNextNodeId()
 {
-  unsigned int id = _next_node_id++;
+  dof_id_type id = _next_node_id++;
   return id;
 }
 
 dof_id_type
 THMMesh::getNextElementId()
 {
-  unsigned int id = _next_element_id++;
+  dof_id_type id = _next_element_id++;
   return id;
 }
 
