@@ -16,7 +16,7 @@ defineADValidParams(
     ADDynamicStressDivergenceTensors,
     ADStressDivergenceTensors,
     params.addClassDescription(
-        "Residual due to stress related Rayleigh damping and HHT time integration terms ");
+        "Residual due to stress related Rayleigh damping and HHT time integration terms");
     params.addParam<MaterialPropertyName>("zeta",
                                           0.0,
                                           "Name of material property or a constant real "
@@ -60,12 +60,12 @@ ADDynamicStressDivergenceTensors<compute_stage>::computeQpResidual()
    *_alpha*_zeta/dt Div sigma_older
    */
 
-  ADResidual residual = 0.0;
+  ADResidual residual;
   if (_static_initialization && _t == _dt)
   {
     // If static inialization is true, then in the first step residual is only Ku which is
     // stress.grad(test).
-    residual += _stress[_qp].row(_component) * _grad_test[_i][_qp];
+    residual = _stress[_qp].row(_component) * _grad_test[_i][_qp];
 
     if (_volumetric_locking_correction)
       residual +=
@@ -73,7 +73,7 @@ ADDynamicStressDivergenceTensors<compute_stage>::computeQpResidual()
   }
   else if (_dt > 0)
   {
-    residual +=
+    residual =
         _stress[_qp].row(_component) * _grad_test[_i][_qp] *
             (1.0 + _alpha + (1.0 + _alpha) * _zeta[_qp] / _dt) -
         (_alpha + (1.0 + 2.0 * _alpha) * _zeta[_qp] / _dt) * _stress_old[_qp].row(_component) *
@@ -86,6 +86,8 @@ ADDynamicStressDivergenceTensors<compute_stage>::computeQpResidual()
                    (_alpha * _zeta[_qp] / _dt) * _stress_older[_qp].trace()) /
                   3.0 * (_avg_grad_test[_i] - _grad_test[_i][_qp](_component));
   }
+  else
+    residual = 0.0;
 
   return residual;
 }
