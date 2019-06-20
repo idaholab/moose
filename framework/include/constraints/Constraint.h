@@ -78,6 +78,7 @@ protected:
 
 #define usingConstraintMembers                                                                     \
   usingMooseObjectMembers;                                                                         \
+  usingUserObjectInterfaceMembers;                                                                 \
   usingTaggingInterfaceMembers;                                                                    \
   using Constraint::_i;                                                                            \
   using Constraint::_qp;                                                                           \
