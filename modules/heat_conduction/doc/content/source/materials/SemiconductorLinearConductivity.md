@@ -1,6 +1,7 @@
 # SemiconductorLinearConductivity
 
 !syntax description /Materials/SemiconductorLinearConductivity
+
 The [Steinhart-Hart equation](https://en.wikipedia.org/wiki/Steinhart%E2%80%93Hart_equation) is an empirical model for temperature dependent electrical resistance for semiconductors.  It is used in thermistor industry since it provides better expression of the temperature-resistance relationship.
 \begin{equation}
 \frac{1}{T}=A+B\ln(R)+C(\ln(R))^3
