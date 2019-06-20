@@ -1,7 +1,6 @@
 #pragma once
 
-#include "BoundaryBase.h"
-#include "HSBoundaryInterface.h"
+#include "HSBoundary.h"
 
 class HSBoundaryHeatFlux;
 
@@ -11,12 +10,11 @@ InputParameters validParams<HSBoundaryHeatFlux>();
 /**
  * Applies a specified heat flux to a heat structure boundary
  */
-class HSBoundaryHeatFlux : public BoundaryBase, public HSBoundaryInterface
+class HSBoundaryHeatFlux : public HSBoundary
 {
 public:
   HSBoundaryHeatFlux(const InputParameters & params);
 
-  virtual void check() const override;
   virtual void addMooseObjects() override;
 
 protected:

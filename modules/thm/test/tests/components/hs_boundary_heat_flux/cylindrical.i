@@ -51,8 +51,8 @@ E_change = ${fparse heat_flux * A * t}
 
   [./heat_flux_boundary]
     type = HSBoundaryHeatFlux
+    boundary = 'hs:outer'
     hs = hs
-    hs_side = outer
     q_function = q_fn
   [../]
 []

@@ -1,7 +1,6 @@
 #pragma once
 
-#include "BoundaryBase.h"
-#include "HSBoundaryInterface.h"
+#include "HSBoundary.h"
 
 class HSBoundaryAmbientConvection;
 
@@ -11,12 +10,11 @@ InputParameters validParams<HSBoundaryAmbientConvection>();
 /**
  * Boundary condition for heat transfer between heat structure and ambient environment
  */
-class HSBoundaryAmbientConvection : public BoundaryBase, public HSBoundaryInterface
+class HSBoundaryAmbientConvection : public HSBoundary
 {
 public:
   HSBoundaryAmbientConvection(const InputParameters & params);
 
-  virtual void check() const override;
   virtual void addMooseObjects() override;
 
 protected:
