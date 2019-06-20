@@ -21,11 +21,11 @@ Transient executioners solve the nonlinear system at least once per time step.
 
 | Option | Definition
 | :- | :- |
-|`dt` | Starting time step size |
-|`num_steps` | Number of time steps |
-|`start_time` | The start time of the simulation |
-|`end_time` | The end time of the simulation |
-|`scheme` | Time integration scheme (discussed next) |
+| `dt` | Starting time step size |
+| `num_steps` | Number of time steps |
+| `start_time` | The start time of the simulation |
+| `end_time` | The end time of the simulation |
+| `scheme` | Time integration scheme (discussed next) |
 
 
 !listing executioner/transient.i block=Executioner

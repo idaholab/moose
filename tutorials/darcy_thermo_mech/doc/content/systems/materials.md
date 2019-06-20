@@ -95,8 +95,8 @@ the output file.
 
 `Material` properties can be of arbitrary (C++) type, but not all types can be output.
 
-|Type | AuxKernel | Variable Name(s)|
-|:-|:-|:-|
-| Real| `MaterialRealAux`| prop |
+| Type | AuxKernel | Variable Name(s) |
+| :- | :- | :- |
+| Real | `MaterialRealAux` | prop |
 | RealVectorValue | `MaterialRealVectorValueAux` | prop_1, prop_2, and prop_3 |
 | RealTensorValue | `MaterialRealTensorValueAux` | prop_11, prop_12, prop_13, prop_21, etc. |

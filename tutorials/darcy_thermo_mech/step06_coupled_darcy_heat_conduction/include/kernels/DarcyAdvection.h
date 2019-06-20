@@ -30,7 +30,7 @@ public:
 
 protected:
   /// ADKernelValue objects must override precomputeQpResidual
-  virtual ADResidual precomputeQpResidual() override;
+  virtual ADReal precomputeQpResidual() override;
 
   /// The gradient of pressure
   const ADVariableGradient & _pressure_grad;

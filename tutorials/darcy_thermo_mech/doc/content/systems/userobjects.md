@@ -16,13 +16,10 @@ The UserObject system provides data and calculation results to other MOOSE objec
 
 UserObjects are computed at specified "times" by the execute_on option in the input file:
 
-```text
-execute_on = timestep_end
-execute_on = linear
-execute_on = nonlinear
-execute_on = timestep_begin
-execute_on = custom
-```
+`execute_on = 'initial timestep_end'`\\
+`execute_on = linear`\\
+`execute_on = nonlinear`\\
+`execute_on = 'timestep_begin final failed'`\\
 
 They can be restricted to specific blocks, sidesets, and nodesets
 
@@ -47,7 +44,7 @@ There are various types of UserObjects:
 Called once before beginning the `UserObject` calculation.
 
 `virtual void execute();`\\
-Called once on each geometric object (element, node, etc.) or once per calculation for a
+Called once on each geometric entity (element, node, etc.) or once per calculation for a
 `GeneralUserObject`.
 
 !---
