@@ -8,8 +8,7 @@ template <>
 InputParameters
 validParams<HSBoundaryAmbientConvection>()
 {
-  InputParameters params = validParams<BoundaryBase>();
-  params += validParams<HSBoundaryInterface>();
+  InputParameters params = validParams<HSBoundary>();
 
   params.addRequiredParam<Real>("htc_ambient", "Convective heat transfer coefficient with ambient");
   params.addRequiredParam<Real>("T_ambient", "Ambient temperature");
@@ -18,19 +17,11 @@ validParams<HSBoundaryAmbientConvection>()
 }
 
 HSBoundaryAmbientConvection::HSBoundaryAmbientConvection(const InputParameters & params)
-  : BoundaryBase(params),
-    HSBoundaryInterface(this),
+  : HSBoundary(params),
 
     _T_ambient(getParam<Real>("T_ambient")),
     _htc_ambient(getParam<Real>("htc_ambient"))
 {
-}
-
-void
-HSBoundaryAmbientConvection::check() const
-{
-  BoundaryBase::check();
-  HSBoundaryInterface::check(this);
 }
 
 void
@@ -44,7 +35,7 @@ HSBoundaryAmbientConvection::addMooseObjects()
         is_cylindrical ? "ConvectionHeatTransferRZBC" : "ConvectionHeatTransferBC";
     InputParameters pars = _factory.getValidParams(class_name);
     pars.set<NonlinearVariableName>("variable") = HeatConductionModel::TEMPERATURE;
-    pars.set<std::vector<BoundaryName>>("boundary") = {getHSBoundaryName(this)};
+    pars.set<std::vector<BoundaryName>>("boundary") = _boundary;
     pars.set<Real>("T_ambient") = _T_ambient;
     pars.set<Real>("htc_ambient") = _htc_ambient;
     if (is_cylindrical)
