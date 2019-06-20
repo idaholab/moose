@@ -16,6 +16,7 @@
 
 #define usingDGKernelMembers                                                                       \
   usingDGKernelBaseMembers;                                                                        \
+  usingUserObjectInterfaceMembers;                                                                 \
   using ADDGKernel<compute_stage>::_test;                                                          \
   using ADDGKernel<compute_stage>::_qp;                                                            \
   using ADDGKernel<compute_stage>::_i;                                                             \
@@ -71,4 +72,3 @@ protected:
   /// Holds the current solution gradient at the current quadrature point
   const ADVariableGradient & _grad_u_neighbor;
 };
-
