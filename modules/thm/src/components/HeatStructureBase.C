@@ -161,28 +161,38 @@ HeatStructureBase::build2DMesh()
 
   // create elements from nodes
   elem_ids.resize(_n_elem);
-  for (unsigned int i = 0; i < _n_elem; i++)
-  {
-    unsigned int j = 0;
-    for (unsigned int j_section = 0; j_section < _number_of_hs; j_section++)
+  unsigned int i = 0;
+  for (unsigned int i_section = 0; i_section < _n_sections; i_section++)
+    for (unsigned int i_local = 0; i_local < _n_elems[i_section]; i_local++)
     {
-      for (unsigned int j_local = 0; j_local < _n_part_elems[j_section]; j_local++)
-      {
-        Elem * elem = addElementQuad4(
-            node_ids[i][j + 1], node_ids[i][j], node_ids[i + 1][j], node_ids[i + 1][j + 1]);
-        elem->subdomain_id() = _subdomain_ids[j_section];
+      unsigned int j = 0;
+      for (unsigned int j_section = 0; j_section < _number_of_hs; j_section++)
+        for (unsigned int j_local = 0; j_local < _n_part_elems[j_section]; j_local++)
+        {
+          Elem * elem = addElementQuad4(
+              node_ids[i][j + 1], node_ids[i][j], node_ids[i + 1][j], node_ids[i + 1][j + 1]);
+          elem->subdomain_id() = _subdomain_ids[j_section];
 
-        elem_ids[i].push_back(elem->id());
+          elem_ids[i].push_back(elem->id());
 
-        if (j == 0)
-          _mesh.getMesh().boundary_info->add_side(elem, 1, _inner_bc_id[0]);
-        if (j == _total_elem_number - 1)
-          _mesh.getMesh().boundary_info->add_side(elem, 3, _outer_bc_id[0]);
+          if (j == 0)
+            _mesh.getMesh().boundary_info->add_side(elem, 1, _inner_bc_id[0]);
+          if (j == _total_elem_number - 1)
+            _mesh.getMesh().boundary_info->add_side(elem, 3, _outer_bc_id[0]);
 
-        j++;
-      }
+          if (_n_sections > 1 && _axial_region_names.size() == _n_sections)
+          {
+            if (j == 0)
+              _mesh.getMesh().boundary_info->add_side(elem, 1, _axial_inner_bc_id[i_section]);
+            if (j == _total_elem_number - 1)
+              _mesh.getMesh().boundary_info->add_side(elem, 3, _axial_outer_bc_id[i_section]);
+          }
+
+          j++;
+        }
+
+      i++;
     }
-  }
 }
 
 void
@@ -223,35 +233,45 @@ HeatStructureBase::build2DMesh2ndOrder()
 
   // create elements from nodes
   elem_ids.resize(_n_elem);
-  for (unsigned int i = 0; i < _n_elem; i++)
-  {
-    unsigned int j = 0;
-    for (unsigned int j_section = 0; j_section < _number_of_hs; j_section++)
+  unsigned int i = 0;
+  for (unsigned int i_section = 0; i_section < _n_sections; i_section++)
+    for (unsigned int i_local = 0; i_local < _n_elems[i_section]; i_local++)
     {
-      for (unsigned int j_local = 0; j_local < _n_part_elems[j_section]; j_local++)
-      {
-        Elem * elem = addElementQuad9(node_ids[2 * i][2 * j],
-                                      node_ids[2 * i][2 * (j + 1)],
-                                      node_ids[2 * (i + 1)][2 * (j + 1)],
-                                      node_ids[2 * (i + 1)][2 * j],
-                                      node_ids[2 * i][(2 * j) + 1],
-                                      node_ids[(2 * i) + 1][2 * (j + 1)],
-                                      node_ids[2 * (i + 1)][(2 * j) + 1],
-                                      node_ids[(2 * i) + 1][(2 * j)],
-                                      node_ids[(2 * i) + 1][(2 * j) + 1]);
-        elem->subdomain_id() = _subdomain_ids[j_section];
+      unsigned int j = 0;
+      for (unsigned int j_section = 0; j_section < _number_of_hs; j_section++)
+        for (unsigned int j_local = 0; j_local < _n_part_elems[j_section]; j_local++)
+        {
+          Elem * elem = addElementQuad9(node_ids[2 * i][2 * j],
+                                        node_ids[2 * i][2 * (j + 1)],
+                                        node_ids[2 * (i + 1)][2 * (j + 1)],
+                                        node_ids[2 * (i + 1)][2 * j],
+                                        node_ids[2 * i][(2 * j) + 1],
+                                        node_ids[(2 * i) + 1][2 * (j + 1)],
+                                        node_ids[2 * (i + 1)][(2 * j) + 1],
+                                        node_ids[(2 * i) + 1][(2 * j)],
+                                        node_ids[(2 * i) + 1][(2 * j) + 1]);
+          elem->subdomain_id() = _subdomain_ids[j_section];
 
-        elem_ids[i].push_back(elem->id());
+          elem_ids[i].push_back(elem->id());
 
-        if (j == 0)
-          _mesh.getMesh().boundary_info->add_side(elem, 3, _inner_bc_id[0]);
-        if (j == _total_elem_number - 1)
-          _mesh.getMesh().boundary_info->add_side(elem, 1, _outer_bc_id[0]);
+          if (j == 0)
+            _mesh.getMesh().boundary_info->add_side(elem, 3, _inner_bc_id[0]);
+          if (j == _total_elem_number - 1)
+            _mesh.getMesh().boundary_info->add_side(elem, 1, _outer_bc_id[0]);
 
-        j++;
-      }
+          if (_n_sections > 1 && _axial_region_names.size() == _n_sections)
+          {
+            if (j == 0)
+              _mesh.getMesh().boundary_info->add_side(elem, 1, _axial_inner_bc_id[i_section]);
+            if (j == _total_elem_number - 1)
+              _mesh.getMesh().boundary_info->add_side(elem, 3, _axial_outer_bc_id[i_section]);
+          }
+
+          j++;
+        }
+
+      i++;
     }
-  }
 }
 
 void
@@ -277,6 +297,16 @@ HeatStructureBase::buildMesh()
   _boundary_names_outer.push_back(genName(name(), "outer"));
   _mesh.setBoundaryName(_inner_bc_id[0], _boundary_names_inner[0]);
   _mesh.setBoundaryName(_outer_bc_id[0], _boundary_names_outer[0]);
+  if (_n_sections > 1 && _axial_region_names.size() == _n_sections)
+    for (unsigned int i = 0; i < _n_sections; i++)
+    {
+      _axial_inner_bc_id.push_back(getNextBoundaryId());
+      _axial_outer_bc_id.push_back(getNextBoundaryId());
+      _boundary_names_axial_inner.push_back(genName(name(), _axial_region_names[i], "inner"));
+      _boundary_names_axial_outer.push_back(genName(name(), _axial_region_names[i], "outer"));
+      _mesh.setBoundaryName(_axial_inner_bc_id[i], _boundary_names_axial_inner[i]);
+      _mesh.setBoundaryName(_axial_outer_bc_id[i], _boundary_names_axial_outer[i]);
+    }
 
   // Build the mesh
   if (usingSecondOrderMesh())

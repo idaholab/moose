@@ -1,0 +1,22 @@
+[Tests]
+  [./axial_regions]
+    type = Exodiff
+    input = 'axial_regions.i'
+    cli_args = "Components/hs/axial_region_names='region1 region2 region3'"
+    exodiff = 'axial_regions_out.e'
+    rel_err = 1e-5
+  [../]
+
+  [./missing_axial_regions_parameter]
+    type = RunException
+    input = 'axial_regions.i'
+    expect_err = "If there is more than 1 axial region, then the parameter 'axial_region_names' must be specified."
+  [../]
+
+  [./incorrect_size_axial_regions_parameter]
+    type = RunException
+    input = 'axial_regions.i'
+    cli_args = "Components/hs/axial_region_names='region1 region2'"
+    expect_err = "The number of entries in parameter 'axial_region_names' \(2\) must equal the number of entries of parameter 'length' \(3\)"
+  [../]
+[]

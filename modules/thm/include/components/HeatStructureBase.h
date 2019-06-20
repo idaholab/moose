@@ -123,10 +123,18 @@ protected:
   std::vector<unsigned int> _outer_bc_id;
   /// BC ID of the heat structure (inner)
   std::vector<unsigned int> _inner_bc_id;
+  /// BC ID of the axial regions of the outer boundary of the heat structure
+  std::vector<unsigned int> _axial_outer_bc_id;
+  /// BC ID of the axial regions of the inner boundary of the heat structure
+  std::vector<unsigned int> _axial_inner_bc_id;
   /// Boundary names of the outer side of the heat structure
   std::vector<BoundaryName> _boundary_names_outer;
   /// Boundary names of the inner side of the heat structure
   std::vector<BoundaryName> _boundary_names_inner;
+  /// Boundary names of the axial regions of the outer side of the heat structure
+  std::vector<BoundaryName> _boundary_names_axial_outer;
+  /// Boundary names of the axial regions of the inner side of the heat structure
+  std::vector<BoundaryName> _boundary_names_axial_inner;
   /// Nodes on the side of the "block"
   std::map<std::string, std::vector<unsigned int>> _side_heat_node_ids;
   /// Nodes at the outer side of the generated heat structure
