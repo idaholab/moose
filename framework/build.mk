@@ -63,12 +63,12 @@ ifneq (,$(findstring mpi,$(cxx_compiler)))
 	cxx_compiler := $(shell $(libmesh_CXX) -show)
 endif
 
-all::
+all:
 
 # Add all header symlinks as dependencies to this target
-header_symlinks::
+header_symlinks:
 
-unity_files::
+unity_files:
 
 #
 # C++ rules

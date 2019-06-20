@@ -95,7 +95,7 @@ endef
 $(eval $(call all_header_dir_rule, $(all_header_dir)))
 $(call symlink_rules, $(all_header_dir), $(include_files))
 
-header_symlinks:: $(all_header_dir) $(link_names)
+header_symlinks: $(all_header_dir) $(link_names)
 moose_INC_DIRS := $(all_header_dir)
 
 else # No Header Symlinks
@@ -205,7 +205,7 @@ app_DIRS     := $(FRAMEWORK_DIR)
 
 moose_revision_header := $(FRAMEWORK_DIR)/include/base/MooseRevision.h
 
-all:: libmesh_submodule_status header_symlinks $(moose_revision_header) moose
+all: libmesh_submodule_status header_symlinks $(moose_revision_header) moose
 
 # revision header
 moose_GIT_DIR := $(shell cd "$(FRAMEWORK_DIR)" && which git &> /dev/null && git rev-parse --show-toplevel)
@@ -259,7 +259,7 @@ $(moose_LIB): $(moose_objects) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB)
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(moose_LIB) $(FRAMEWORK_DIR)
 
 ## Clang static analyzer
-sa:: $(moose_analyzer)
+sa: $(moose_analyzer)
 
 # include MOOSE dep files. Note: must use -include for deps, since they don't exist for first time builds.
 -include $(moose_deps)
@@ -281,7 +281,7 @@ exodiff_includes := -I$(exodiff_DIR) $(libmesh_INCLUDE)
 # dependency files
 exodiff_deps := $(patsubst %.C, %.$(obj-suffix).d, $(exodiff_srcfiles))
 
-all:: exodiff
+all: exodiff
 
 # Target-specific Variable Values (See GNU-make manual)
 exodiff: app_INCLUDES := $(exodiff_includes)
@@ -313,7 +313,7 @@ app_deps := $(moose_deps) $(exodiff_deps) $(pcre_deps) $(gtest_deps) $(hit_deps)
 #    clean' will only clean debug object and executable files.
 # .) Calling 'make clean' in an app should not remove MOOSE object
 #    files, libraries, etc.
-clean::
+clean:
 	@$(libmesh_LIBTOOL) --mode=uninstall --quiet rm -f $(app_LIB) $(app_test_LIB)
 	@rm -rf $(app_EXEC) $(app_objects) $(main_object) $(app_deps) $(app_HEADER) $(app_test_objects) $(app_unity_srcfiles)
 	@rm -rf $(APPLICATION_DIR)/build
@@ -331,12 +331,12 @@ clean::
 # .) Running 'make clobberall' is a good way to clean up outdated
 #    dependency and object files when you upgrade OSX versions or as
 #    source files are deleted over time.
-clobber:: clean
+clobber: clean
 	@$(MOOSE_DIR)/scripts/clobber.py -v $(CURDIR)
 	@rm -rf $(APPLICATION_DIR)/build
 
 # cleanall runs 'make clean' in all dependent application directories
-cleanall:: clean
+cleanall: clean
 	@echo "Cleaning in:"
 	@for dir in $(app_DIRS); do \
           echo \ $$dir; \
@@ -344,7 +344,7 @@ cleanall:: clean
         done
 
 # clobberall runs 'make clobber' in all dependent application directories
-clobberall:: clobber
+clobberall: clobber
 	@echo "Clobbering in:"
 	@for dir in $(app_DIRS); do \
           echo \ $$dir; \
@@ -352,7 +352,7 @@ clobberall:: clobber
         done
 
 # clang_complete builds a clang configuration file for various clang-based autocompletion plugins
-.clang_complete::
+.clang_complete:
 	@echo "Building .clang_complete file"
 	@echo "-xc++" > .clang_complete
 	@echo "-std=c++11" >> .clang_complete
@@ -361,7 +361,7 @@ clobberall:: clobber
         done
 
 compile_commands_all_srcfiles := $(moose_srcfiles) $(srcfiles)
-compile_commands.json::
+compile_commands.json:
 ifeq (4.0,$(firstword $(sort $(MAKE_VERSION) 4.0)))
 	$(file > .compile_commands.json,$(CURDIR))
 	$(file >> .compile_commands.json,$(libmesh_CXX))
