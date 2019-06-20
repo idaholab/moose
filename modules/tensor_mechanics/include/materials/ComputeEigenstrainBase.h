@@ -36,7 +36,7 @@ protected:
   virtual void computeQpEigenstrain() = 0;
 
   ///Base name prepended to material property name
-  std::string _base_name;
+  const std::string _base_name;
 
   ///Material property name for the eigenstrain tensor
   std::string _eigenstrain_name;

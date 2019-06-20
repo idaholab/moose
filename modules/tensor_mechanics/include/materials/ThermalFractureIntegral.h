@@ -33,7 +33,7 @@ public:
   virtual void computeQpProperties() override;
 
 protected:
-  std::string _base_name;
+  const std::string _base_name;
   const std::vector<MaterialPropertyName> _eigenstrain_names;
   std::vector<const MaterialProperty<RankTwoTensor> *> _deigenstrain_dT;
   MaterialProperty<RankTwoTensor> & _total_deigenstrain_dT;

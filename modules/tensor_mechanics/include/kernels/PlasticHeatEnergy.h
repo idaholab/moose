@@ -36,7 +36,7 @@ protected:
   Real _coeff;
 
   /// optional parameter that allows multiple mechanics models to be defined
-  std::string _base_name;
+  const std::string _base_name;
 
   /// stress * plastic_strain_rate
   const MaterialProperty<Real> & _plastic_heat;

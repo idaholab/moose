@@ -31,7 +31,7 @@ protected:
   virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
   using Kernel::computeOffDiagJacobian;
 
-  std::string _base_name;
+  const std::string _base_name;
 
   const MaterialProperty<Real> & _axial_stress;
   const MaterialProperty<Real> & _e_over_l;

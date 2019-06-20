@@ -36,7 +36,7 @@ protected:
 
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-  std::string _base_name;
+  const std::string _base_name;
   const unsigned int _component;
 
   const bool _c_coupled;

@@ -44,7 +44,7 @@ protected:
   virtual void computeDispOffDiagJacobianScalar(unsigned int component, unsigned int jvar);
   virtual void computeTempOffDiagJacobianScalar(unsigned int jvar);
 
-  std::string _base_name;
+  const std::string _base_name;
 
   const MaterialProperty<RankFourTensor> & _Jacobian_mult;
   const std::vector<MaterialPropertyName> _eigenstrain_names;

@@ -42,7 +42,7 @@ protected:
   virtual void assignQpPropertiesForLevelSetPositive() = 0;
 
   /// global material properties
-  std::string _base_name;
+  const std::string _base_name;
 
   /// Property name
   std::string _prop_name;

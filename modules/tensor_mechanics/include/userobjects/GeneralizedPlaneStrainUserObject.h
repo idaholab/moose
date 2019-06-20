@@ -38,7 +38,7 @@ public:
   virtual Real returnJacobian(unsigned int scalar_var_id = 0) const;
 
 protected:
-  std::string _base_name;
+  const std::string _base_name;
 
   const MaterialProperty<RankFourTensor> & _Cijkl;
   const MaterialProperty<RankTwoTensor> & _stress;
