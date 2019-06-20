@@ -151,11 +151,6 @@ HeatStructureBase::build2DMesh()
   }
 
   // create elements from nodes
-  const unsigned int inner_bc_id = getNextBoundaryId();
-  const unsigned int outer_bc_id = getNextBoundaryId();
-  _inner_bc_id.push_back(inner_bc_id);
-  _outer_bc_id.push_back(outer_bc_id);
-
   elem_ids.resize(_n_elem);
   for (unsigned int i = 0; i < _n_elem; i++)
   {
@@ -171,9 +166,9 @@ HeatStructureBase::build2DMesh()
         elem_ids[i].push_back(elem->id());
 
         if (j == 0)
-          _mesh.getMesh().boundary_info->add_side(elem, 1, inner_bc_id);
+          _mesh.getMesh().boundary_info->add_side(elem, 1, _inner_bc_id[0]);
         if (j == _total_elem_number - 1)
-          _mesh.getMesh().boundary_info->add_side(elem, 3, outer_bc_id);
+          _mesh.getMesh().boundary_info->add_side(elem, 3, _outer_bc_id[0]);
 
         j++;
       }
@@ -218,11 +213,6 @@ HeatStructureBase::build2DMesh2ndOrder()
   }
 
   // create elements from nodes
-  const unsigned int inner_bc_id = getNextBoundaryId();
-  const unsigned int outer_bc_id = getNextBoundaryId();
-  _inner_bc_id.push_back(inner_bc_id);
-  _outer_bc_id.push_back(outer_bc_id);
-
   elem_ids.resize(_n_elem);
   for (unsigned int i = 0; i < _n_elem; i++)
   {
@@ -245,9 +235,9 @@ HeatStructureBase::build2DMesh2ndOrder()
         elem_ids[i].push_back(elem->id());
 
         if (j == 0)
-          _mesh.getMesh().boundary_info->add_side(elem, 3, inner_bc_id);
+          _mesh.getMesh().boundary_info->add_side(elem, 3, _inner_bc_id[0]);
         if (j == _total_elem_number - 1)
-          _mesh.getMesh().boundary_info->add_side(elem, 1, outer_bc_id);
+          _mesh.getMesh().boundary_info->add_side(elem, 1, _outer_bc_id[0]);
 
         j++;
       }
@@ -271,23 +261,19 @@ HeatStructureBase::buildMesh()
     setSubdomainInfo(sid, solid_block_name, Moose::COORD_XYZ);
   }
 
+  // Create boundary IDs and associate with boundary names
+  _inner_bc_id.push_back(getNextBoundaryId());
+  _outer_bc_id.push_back(getNextBoundaryId());
+  _boundary_names_inner.push_back(genName(name(), "inner"));
+  _boundary_names_outer.push_back(genName(name(), "outer"));
+  _mesh.setBoundaryName(_inner_bc_id[0], _boundary_names_inner[0]);
+  _mesh.setBoundaryName(_outer_bc_id[0], _boundary_names_outer[0]);
+
+  // Build the mesh
   if (usingSecondOrderMesh())
     build2DMesh2ndOrder();
   else
     build2DMesh();
-
-  for (auto & bnd_id : _inner_bc_id)
-  {
-    const BoundaryName boundary_name = genName(name(), "inner");
-    _mesh.setBoundaryName(bnd_id, boundary_name);
-    _boundary_names_inner.push_back(boundary_name);
-  }
-  for (auto & bnd_id : _outer_bc_id)
-  {
-    const BoundaryName boundary_name = genName(name(), "outer");
-    _mesh.setBoundaryName(bnd_id, boundary_name);
-    _boundary_names_outer.push_back(boundary_name);
-  }
 }
 
 void
