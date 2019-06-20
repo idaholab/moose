@@ -151,31 +151,31 @@ HeatStructureBase::build2DMesh()
   }
 
   // create elements from nodes
-  unsigned int bc_id1 = getNextBoundaryId();
-  unsigned int bc_id2 = getNextBoundaryId();
-  _inner_bc_id.push_back(bc_id1);
-  _outer_bc_id.push_back(bc_id2);
+  const unsigned int inner_bc_id = getNextBoundaryId();
+  const unsigned int outer_bc_id = getNextBoundaryId();
+  _inner_bc_id.push_back(inner_bc_id);
+  _outer_bc_id.push_back(outer_bc_id);
 
   elem_ids.resize(_n_elem);
   for (unsigned int i = 0; i < _n_elem; i++)
   {
-    unsigned int n = 0;
-    for (unsigned int j = 0; j < _number_of_hs; j++) // loop on all heat structures to add elements
+    unsigned int j = 0;
+    for (unsigned int j_section = 0; j_section < _number_of_hs; j_section++)
     {
-      for (unsigned int k = 0; k < _n_part_elems[j]; k++)
+      for (unsigned int j_local = 0; j_local < _n_part_elems[j_section]; j_local++)
       {
         Elem * elem = addElementQuad4(
-            node_ids[i][n + 1], node_ids[i][n], node_ids[i + 1][n], node_ids[i + 1][n + 1]);
-        elem->subdomain_id() = _subdomain_ids[j];
+            node_ids[i][j + 1], node_ids[i][j], node_ids[i + 1][j], node_ids[i + 1][j + 1]);
+        elem->subdomain_id() = _subdomain_ids[j_section];
 
         elem_ids[i].push_back(elem->id());
 
-        if (n == 0)
-          _mesh.getMesh().boundary_info->add_side(elem, 1, bc_id1);
-        if (n == _total_elem_number - 1)
-          _mesh.getMesh().boundary_info->add_side(elem, 3, bc_id2);
+        if (j == 0)
+          _mesh.getMesh().boundary_info->add_side(elem, 1, inner_bc_id);
+        if (j == _total_elem_number - 1)
+          _mesh.getMesh().boundary_info->add_side(elem, 3, outer_bc_id);
 
-        n++;
+        j++;
       }
     }
   }
@@ -218,38 +218,38 @@ HeatStructureBase::build2DMesh2ndOrder()
   }
 
   // create elements from nodes
-  unsigned int bc_id1 = getNextBoundaryId();
-  unsigned int bc_id2 = getNextBoundaryId();
-  _inner_bc_id.push_back(bc_id1);
-  _outer_bc_id.push_back(bc_id2);
+  const unsigned int inner_bc_id = getNextBoundaryId();
+  const unsigned int outer_bc_id = getNextBoundaryId();
+  _inner_bc_id.push_back(inner_bc_id);
+  _outer_bc_id.push_back(outer_bc_id);
 
   elem_ids.resize(_n_elem);
   for (unsigned int i = 0; i < _n_elem; i++)
   {
-    unsigned int n = 0;
-    for (unsigned int j = 0; j < _number_of_hs; j++) // loop on all heat structures to add elements
+    unsigned int j = 0;
+    for (unsigned int j_section = 0; j_section < _number_of_hs; j_section++)
     {
-      for (unsigned int k = 0; k < _n_part_elems[j]; k++)
+      for (unsigned int j_local = 0; j_local < _n_part_elems[j_section]; j_local++)
       {
-        Elem * elem = addElementQuad9(node_ids[2 * i][2 * n],
-                                      node_ids[2 * i][2 * (n + 1)],
-                                      node_ids[2 * (i + 1)][2 * (n + 1)],
-                                      node_ids[2 * (i + 1)][2 * n],
-                                      node_ids[2 * i][(2 * n) + 1],
-                                      node_ids[(2 * i) + 1][2 * (n + 1)],
-                                      node_ids[2 * (i + 1)][(2 * n) + 1],
-                                      node_ids[(2 * i) + 1][(2 * n)],
-                                      node_ids[(2 * i) + 1][(2 * n) + 1]);
-        elem->subdomain_id() = _subdomain_ids[j];
+        Elem * elem = addElementQuad9(node_ids[2 * i][2 * j],
+                                      node_ids[2 * i][2 * (j + 1)],
+                                      node_ids[2 * (i + 1)][2 * (j + 1)],
+                                      node_ids[2 * (i + 1)][2 * j],
+                                      node_ids[2 * i][(2 * j) + 1],
+                                      node_ids[(2 * i) + 1][2 * (j + 1)],
+                                      node_ids[2 * (i + 1)][(2 * j) + 1],
+                                      node_ids[(2 * i) + 1][(2 * j)],
+                                      node_ids[(2 * i) + 1][(2 * j) + 1]);
+        elem->subdomain_id() = _subdomain_ids[j_section];
 
         elem_ids[i].push_back(elem->id());
 
-        if (n == 0)
-          _mesh.getMesh().boundary_info->add_side(elem, 3, bc_id1);
-        if (n == _total_elem_number - 1)
-          _mesh.getMesh().boundary_info->add_side(elem, 1, bc_id2);
+        if (j == 0)
+          _mesh.getMesh().boundary_info->add_side(elem, 3, inner_bc_id);
+        if (j == _total_elem_number - 1)
+          _mesh.getMesh().boundary_info->add_side(elem, 1, outer_bc_id);
 
-        n++;
+        j++;
       }
     }
   }
