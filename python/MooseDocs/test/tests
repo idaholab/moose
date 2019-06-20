@@ -1,32 +1,34 @@
 [Tests]
   issues = '#6699'
   design = 'MooseDocs/index.md'
-  [materialize_barrier]
-    type = RunCommand
-    command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelBarrier'
-    requirement = "MooseDocs shall be able to convert markdown to HTML with Materialize support with the ParallelBarrier executioner."
+  [materialize]
+    requirement = "MooseDocs shall be able to translate markdown syntax using to HTML with Materialize support:"
+    [barrier]
+        type = RunCommand
+        command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelBarrier'
+        detail = "using a barrier-based parallel scheme;"
+    []
+    [serial]
+        type = RunCommand
+        command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.Serial'
+        detail = "using a serial scheme;"
+        prereq = barrier
+    []
+    [pipe]
+        type = RunCommand
+        command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelPipe'
+        #prereq = serial
+        skip = 'WIP'
+        detail = "using a pipe-based parallel scheme; and"
+    []
+    [demand]
+        type = RunCommand
+        command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelDemand'
+        #prereq = pipe
+        skip = 'WIP'
+        detail = "using a on-demand parser parallel scheme."
+    []
   []
-  [materialize_serial]
-    type = RunCommand
-    command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.Serial'
-    requirement = "MooseDocs shall be able to convert markdown to HTML with Materialize support with the Serial executioner."
-    prereq = materialize_barrier
-  []
-  [materialize_pipe]
-    type = RunCommand
-    command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelPipe'
-    requirement = "MooseDocs shall be able to convert markdown to HTML with Materialize support with the ParallelPipe executioner."
-    #prereq = materialize_serial
-    skip = 'WIP'
-  []
-  [materialize_demand]
-    type = RunCommand
-    command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelDemand'
-    requirement = "MooseDocs shall be able to convert markdown to HTML with Materialize support with the ParallelDemand executioner."
-    #prereq = materialize_pipe
-    skip = 'WIP'
-  []
-
 
   [html_barrier]
     type = RunCommand
