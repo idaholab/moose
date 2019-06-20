@@ -2,7 +2,8 @@
 
 #include "MooseObjectAction.h"
 #include "Transient.h"
-
+#include "HeatConductionModel.h"
+#include "HeatStructureBase.h"
 #include "FlowChannelBase.h"
 #include "FlowJunction.h"
 
@@ -83,6 +84,40 @@ Simulation::buildMesh()
 
   // store in parser
   _action_warehouse.mesh() = _mesh;
+}
+
+void
+Simulation::setupQuadrature()
+{
+  Order order = CONSTANT;
+  unsigned int n_flow_channels = 0;
+  unsigned int n_heat_structures = 0;
+
+  for (auto && comp : _components)
+  {
+    auto flow_channel = dynamic_cast<FlowChannelBase *>(comp.get());
+    if (flow_channel != nullptr)
+      n_flow_channels++;
+
+    auto heat_structure = dynamic_cast<HeatStructureBase *>(comp.get());
+    if (heat_structure != nullptr)
+      n_heat_structures++;
+  }
+
+  if (n_flow_channels > 0)
+  {
+    const FEType & fe_type = getFlowFEType();
+    if (fe_type.default_quadrature_order() > order)
+      order = fe_type.default_quadrature_order();
+  }
+  if (n_heat_structures > 0)
+  {
+    const FEType & fe_type = HeatConductionModel::feType();
+    if (fe_type.default_quadrature_order() > order)
+      order = fe_type.default_quadrature_order();
+  }
+
+  feproblem().createQRules(QGAUSS, order, order, order);
 }
 
 void
