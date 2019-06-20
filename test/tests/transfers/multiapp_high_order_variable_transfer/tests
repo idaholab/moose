@@ -30,8 +30,16 @@
 
   [L2_Lagrange_nearest_node]
     type = 'Exodiff'
-    input = 'master_L2_Lagrange_nearest_node.i'
-    exodiff = 'master_L2_Lagrange_nearest_node_out.e master_L2_Lagrange_nearest_node_out_sub0.e'
+    input = 'master_L2_Lagrange.i'
+    exodiff = 'master_L2_Lagrange_nearest_node_out.e master_L2_Lagrange_out_nearest_node_sub0.e'
+    cli_args = "Outputs/file_base=master_L2_Lagrange_nearest_node_out
+                MultiApps/nearest_node_sub/type=FullSolveMultiApp
+                MultiApps/nearest_node_sub/app_type=MooseTestApp
+                MultiApps/nearest_node_sub/positions='0 0 0'
+                MultiApps/nearest_node_sub/input_files=sub_L2_Lagrange.i
+                MultiApps/nearest_node_sub/execute_on='timestep_end'
+                MultiApps/active='nearest_node_sub'
+                Transfers/p_to_sub/multi_app=nearest_node_sub"
     # It is well-known that MultiAppNearestNodeTransfer could generate different results with different numbers of cores
     max_parallel = 1
     requirement = "The system shall support nearest node transfer with the first order elemental variable"
