@@ -6,14 +6,26 @@
     type = 'Exodiff'
     input = 'master_L2_Lagrange.i'
     exodiff = 'master_L2_Lagrange_out.e master_L2_Lagrange_out_sub0.e'
-    requirement = "The system shall support transfer first order elemental variable"
+    requirement = "The system shall support mesh to mesh interpolation with the first order elemental variable"
   []
 
   [L2_Lagrange_different_mesh]
     type = 'Exodiff'
-    input = 'master_L2_Lagrange_diff.i'
-    exodiff = 'master_L2_Lagrange_diff_out.e master_L2_Lagrange_diff_out_sub0.e'
-    requirement = "The system shall support transfer first order elemental variable when a different mesh is used in sub"
+    input = 'master_L2_Lagrange.i'
+    exodiff = 'master_L2_Lagrange_diff_out.e master_L2_Lagrange_out_diff_sub0.e'
+    cli_args = "Mesh/xmin=0.1
+                Mesh/xmax=1.1
+                Outputs/file_base=master_L2_Lagrange_diff_out
+                MultiApps/diff_sub/type=FullSolveMultiApp
+                MultiApps/diff_sub/app_type=MooseTestApp
+                MultiApps/diff_sub/positions='0 0 0'
+                MultiApps/diff_sub/input_files=sub_L2_Lagrange.i
+                MultiApps/diff_sub/execute_on='timestep_end'
+                MultiApps/active='diff_sub'
+                diff_sub:Mesh/ymin=0.1
+                diff_sub:Mesh/ymax=1.1
+                Transfers/p_to_sub/multi_app=diff_sub"
+    requirement = "The system shall support mesh to mesh interpolation with the first order elemental variable when a different mesh is used in sub"
   []
 
   [L2_Lagrange_nearest_node]
@@ -22,21 +34,21 @@
     exodiff = 'master_L2_Lagrange_nearest_node_out.e master_L2_Lagrange_nearest_node_out_sub0.e'
     # It is well-known that MultiAppNearestNodeTransfer could generate different results with different numbers of cores
     max_parallel = 1
-    requirement = "The system shall support transfer first order elemental variable with MultiAppNearestNodeTransfer"
+    requirement = "The system shall support nearest node transfer with the first order elemental variable"
   []
 
   [L2_Lagrange_interpolation]
     type = 'Exodiff'
     input = 'master_L2_Lagrange_interpolation.i'
     exodiff = 'master_L2_Lagrange_interpolation_out.e master_L2_Lagrange_interpolation_out_sub0.e'
-    requirement = "The system shall support transfer first order elemental variable with MultiAppInterpolationTransfer"
+    requirement = "The system shall support interpolation transfer with the first order elemental variable"
   []
 
   [L2_Lagrange_userobject]
     type = 'Exodiff'
     input = 'master_L2_Lagrange_userobject.i'
     exodiff = 'master_L2_Lagrange_userobject_out.e master_L2_Lagrange_userobject_out_sub0.e'
-    requirement = "The system shall support transfer first order elemental variable with MultiAppUserObjectTransfer"
+    requirement = "The system shall support user object transfer with the first order elemental variable"
   []
 
 []

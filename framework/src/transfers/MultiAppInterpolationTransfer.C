@@ -141,6 +141,7 @@ MultiAppInterpolationTransfer::execute()
       }
       else
       {
+        std::vector<Point> points;
         for (const auto & from_elem :
              as_range(from_mesh->local_elements_begin(), from_mesh->local_elements_end()))
         {
@@ -148,7 +149,7 @@ MultiAppInterpolationTransfer::execute()
           if (from_elem->n_dofs(from_sys_num, from_var_num) < 1)
             continue;
 
-          std::vector<Point> points;
+          points.clear();
           if (from_is_constant)
             points.push_back(from_elem->centroid());
           else
@@ -234,13 +235,14 @@ MultiAppInterpolationTransfer::execute()
           }
           else // Elemental
           {
+            std::vector<Point> points;
             for (auto & elem : as_range(mesh->local_elements_begin(), mesh->local_elements_end()))
             {
               // Skip this element if the variable has no dofs at it.
               if (elem->n_dofs(sys_num, var_num) < 1)
                 continue;
 
-              std::vector<Point> points;
+              points.clear();
               if (to_is_constant)
                 points.push_back(elem->centroid());
               else
@@ -401,6 +403,7 @@ MultiAppInterpolationTransfer::execute()
         }
         else
         {
+          std::vector<Point> points;
           for (auto & from_element :
                as_range(from_mesh->local_elements_begin(), from_mesh->local_elements_end()))
           {
@@ -408,8 +411,8 @@ MultiAppInterpolationTransfer::execute()
             if (from_element->n_comp(from_sys_num, from_var_num) == 0)
               continue;
 
+            points.clear();
             // grap sample points
-            std::vector<Point> points;
             // for constant shape function, we take the element centroid
             if (from_is_constant)
               points.push_back(from_element->centroid());

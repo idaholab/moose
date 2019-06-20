@@ -101,7 +101,7 @@ MultiAppNearestNodeTransfer::execute()
   std::vector<std::vector<Point>> outgoing_qps(n_processors());
   // When we get results back, node_index_map will tell us which results go with
   // which points
-  std::vector<std::map<std::pair<unsigned int, unsigned int>, unsigned int>> node_index_map(
+  std::vector<std::map<std::pair<unsigned int, dof_id_type>, dof_id_type>> node_index_map(
       n_processors());
 
   if (!_neighbors_cached)
@@ -176,7 +176,7 @@ MultiAppNearestNodeTransfer::execute()
 
               if (distance <= nearest_max_distance || bboxes[i_from].contains_point(*node))
               {
-                std::pair<unsigned int, unsigned int> key(i_to, node->id());
+                std::pair<unsigned int, dof_id_type> key(i_to, node->id());
                 node_index_map[i_proc][key] = outgoing_qps[i_proc].size();
                 outgoing_qps[i_proc].push_back(*node + _to_positions[i_to]);
                 qp_found = true;
@@ -253,8 +253,8 @@ MultiAppNearestNodeTransfer::execute()
                 Real distance = bboxMinDistance(point, bboxes[i_from]);
                 if (distance <= nearest_max_distance || bboxes[i_from].contains_point(point))
                 {
-                  std::pair<unsigned int, unsigned int> key(i_to,
-                                                            ptids[offset]); // Create an unique ID
+                  std::pair<unsigned int, dof_id_type> key(i_to,
+                                                           ptids[offset]); // Create an unique ID
                   // If this point already exist, we skip it
                   if (node_index_map[i_proc].find(key) != node_index_map[i_proc].end())
                     continue;
@@ -543,7 +543,7 @@ MultiAppNearestNodeTransfer::execute()
           Real min_dist = std::numeric_limits<Real>::max();
           for (unsigned int i_from = 0; i_from < incoming_evals.size(); i_from++)
           {
-            std::pair<unsigned int, unsigned int> key(i_to, node->id());
+            std::pair<unsigned int, dof_id_type> key(i_to, node->id());
             if (node_index_map[i_from].find(key) == node_index_map[i_from].end())
               continue;
             unsigned int qp_ind = node_index_map[i_from][key];
@@ -600,25 +600,24 @@ MultiAppNearestNodeTransfer::execute()
             ptids.push_back(node.id());
           }
 
-        auto n_points = points.size();
         unsigned int n_comp = elem->n_comp(sys_num, var_num);
         // We assume each point corresponds to one component of elemental variable
-        if (n_points != n_comp)
+        if (points.size() != n_comp)
           mooseError(" Number of points ",
-                     n_points,
+                     points.size(),
                      " does not equal to number of variable components ",
                      n_comp);
 
-        for (unsigned int offset = 0; offset < n_points; offset++)
+        for (MooseIndex(points) offset = 0; offset < points.size(); offset++)
         {
           dof_id_type point_id = ptids[offset];
           Real best_val = 0;
           if (!_neighbors_cached)
           {
             Real min_dist = std::numeric_limits<Real>::max();
-            for (unsigned int i_from = 0; i_from < incoming_evals.size(); i_from++)
+            for (MooseIndex(incoming_evals) i_from = 0; i_from < incoming_evals.size(); i_from++)
             {
-              std::pair<unsigned int, unsigned int> key(i_to, point_id);
+              std::pair<unsigned int, dof_id_type> key(i_to, point_id);
               if (node_index_map[i_from].find(key) == node_index_map[i_from].end())
                 continue;
 
@@ -770,6 +769,7 @@ MultiAppNearestNodeTransfer::getLocalEntitiesAndComponents(
     bool is_nodal,
     bool is_constant)
 {
+  mooseAssert(mesh, "mesh should not be a nullptr");
   mooseAssert(local_entities.empty(), "local_entities should be empty");
   const MeshBase & mesh_base = mesh->getMesh();
 

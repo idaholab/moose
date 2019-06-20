@@ -97,7 +97,7 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
   std::vector<unsigned int> froms_per_proc = getFromsPerProc();
 
   std::vector<std::vector<Point>> outgoing_points(n_processors());
-  std::vector<std::map<std::pair<unsigned int, unsigned int>, unsigned int>> point_index_map(
+  std::vector<std::map<std::pair<unsigned int, dof_id_type>, dof_id_type>> point_index_map(
       n_processors());
   // point_index_map[i_to, element_id] = index
   // outgoing_points[index] is the first quadrature point in element
@@ -136,7 +136,7 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
           {
             if (bboxes[i_from].contains_point(*node + _to_positions[i_to]))
             {
-              std::pair<unsigned int, unsigned int> key(i_to, node->id());
+              std::pair<unsigned int, dof_id_type> key(i_to, node->id());
               point_index_map[i_proc][key] = outgoing_points[i_proc].size();
               outgoing_points[i_proc].push_back(*node + _to_positions[i_to]);
               point_found = true;
@@ -147,15 +147,17 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
     }
     else // Elemental
     {
+      std::vector<Point> points;
+      std::vector<dof_id_type> point_ids;
       for (auto & elem : as_range(to_mesh->local_elements_begin(), to_mesh->local_elements_end()))
       {
         // Skip this element if the variable has no dofs at it.
         if (elem->n_dofs(sys_num, var_num) < 1)
           continue;
 
+        points.clear();
+        point_ids.clear();
         // grap sample points
-        std::vector<Point> points;
-        std::vector<dof_id_type> point_ids;
         // for constant shape function, we take the element centroid
         if (is_constant)
         {
@@ -189,7 +191,7 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
             {
               if (bboxes[i_from].contains_point(point + _to_positions[i_to]))
               {
-                std::pair<unsigned int, unsigned int> key(i_to, point_ids[offset]);
+                std::pair<unsigned int, dof_id_type> key(i_to, point_ids[offset]);
                 if (point_index_map[i_proc].find(key) != point_index_map[i_proc].end())
                   continue;
 
@@ -381,7 +383,7 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
         for (unsigned int i_proc = 0; i_proc < incoming_evals.size(); ++i_proc)
         {
           // Skip this proc if the node wasn't in it's bounding boxes.
-          std::pair<unsigned int, unsigned int> key(i_to, node->id());
+          std::pair<unsigned int, dof_id_type> key(i_to, node->id());
           if (point_index_map[i_proc].find(key) == point_index_map[i_proc].end())
             continue;
           unsigned int i_pt = point_index_map[i_proc][key];
@@ -411,20 +413,22 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
     }
     else // Elemental
     {
+      std::vector<Point> points;
+      std::vector<dof_id_type> point_ids;
       for (auto & elem : as_range(to_mesh->local_elements_begin(), to_mesh->local_elements_end()))
       {
         // Skip this element if the variable has no dofs at it.
         if (elem->n_dofs(sys_num, var_num) < 1)
           continue;
 
+        points.clear();
+        point_ids.clear();
         // grap sample points
-        std::vector<Point> points;
-        std::vector<dof_id_type> ptids;
         // for constant shape function, we take the element centroid
         if (is_constant)
         {
           points.push_back(elem->centroid());
-          ptids.push_back(elem->id());
+          point_ids.push_back(elem->id());
         }
         // for higher order method, we take all nodes of element
         // this works for the first order L2 Lagrange. Might not work
@@ -434,7 +438,7 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
           for (auto & node : elem->node_ref_range())
           {
             points.push_back(node);
-            ptids.push_back(node.id());
+            point_ids.push_back(node.id());
           }
         }
 
@@ -454,7 +458,7 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
           for (unsigned int i_proc = 0; i_proc < incoming_evals.size(); ++i_proc)
           {
             // Skip this proc if the elem wasn't in it's bounding boxes.
-            std::pair<unsigned int, unsigned int> key(i_to, ptids[offset]);
+            std::pair<unsigned int, dof_id_type> key(i_to, point_ids[offset]);
             if (point_index_map[i_proc].find(key) == point_index_map[i_proc].end())
               continue;
 
