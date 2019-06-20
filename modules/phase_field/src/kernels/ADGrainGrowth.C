@@ -34,3 +34,5 @@ ADGrainGrowth<compute_stage>::computeDFDOP()
 
   return _mu[_qp] * (_u[_qp] * _u[_qp] * _u[_qp] - _u[_qp] + 2.0 * _gamma[_qp] * _u[_qp] * SumEtaj);
 }
+
+adBaseClass(ADGrainGrowth);

@@ -11,6 +11,10 @@
 
 #include "ADGrainGrowthBase.h"
 
+#define usingGrainGrowthMembers                                                                    \
+  usingGrainGrowthBaseMembers;                                                                     \
+  using ADACInterface<compute_stage>::_gamma
+
 // Forward Declarations
 template <ComputeStage compute_stage>
 class ADGrainGrowth;
