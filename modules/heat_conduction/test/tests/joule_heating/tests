@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#8220'
+  design = 'JouleHeatingSource.md'
   [./test]
     type = 'Exodiff'
     input = 'transient_jouleheating.i'
     exodiff = 'transient_jouleheating_out.e'
+    requirement = 'The system shall compute Joule heating'
   [../]
 []

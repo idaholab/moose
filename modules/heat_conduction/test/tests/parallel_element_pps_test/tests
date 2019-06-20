@@ -1,9 +1,12 @@
 [Tests]
+  issues = '#861'
+  design = 'ElementIntegralVariablePostprocessor.md'
   [./test]
     type = 'Exodiff'
     input = 'parallel_element_pps_test.i'
     exodiff = 'out.e'
     min_parallel = 2
     platform = 'DARWIN'
+    requirement = 'The system shall computed an integrated value on elements in parallel'
   [../]
 []
