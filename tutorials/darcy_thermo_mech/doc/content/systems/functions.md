@@ -20,7 +20,7 @@ Many objects exist in MOOSE that utilize a function, such as:
 - `FunctionDirichletBC`
 - `FunctionNeumannBC`
 - `FunctionIC`
-- `UserForcingFunction`
+- `BodyForce`
 
 Each of these objects has a "function" parameter which is set in the input file, and controls which
 `Function` object is used.

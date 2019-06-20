@@ -46,7 +46,7 @@ make -j 12 # use number of processors for you system
 ## MMS Python Package
 
 ```bash
-export PYTHONPATH=~/projects/moose/python
+export PYTHONPATH=$PYTHONPATH:~/projects/moose/python
 ```
 
 !---

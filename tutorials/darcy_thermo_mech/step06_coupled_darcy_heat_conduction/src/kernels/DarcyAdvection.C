@@ -31,7 +31,7 @@ DarcyAdvection<compute_stage>::DarcyAdvection(const InputParameters & parameters
 }
 
 template <ComputeStage compute_stage>
-ADResidual
+ADReal
 DarcyAdvection<compute_stage>::precomputeQpResidual()
 {
   // See also: E. Majchrzak and L. Turchan, "The Finite Difference

@@ -64,3 +64,9 @@ An action designed to build one or many other MooseObjects, such as in the case 
 ## AddDamperAction.C
 
 !listing AddDamperAction.C
+
+!---
+
+## Moose.C
+
+!listing base/Moose.C line=Dampers/*

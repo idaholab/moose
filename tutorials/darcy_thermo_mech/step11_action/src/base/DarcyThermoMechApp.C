@@ -43,9 +43,7 @@ DarcyThermoMechApp::registerAll(Factory & factory, ActionFactory & action_factor
   Registry::registerActionsTo(action_factory, {"DarcyThermoMechApp"});
   ModulesApp::registerAll(factory, action_factory, syntax);
 
-  // registerSyntax("SetupDarcySimulation", "DarcyThermoMech");
   registerSyntaxTask("SetupDarcySimulation", "DarcyThermoMech", "add_aux_variable");
   registerSyntaxTask("SetupDarcySimulation", "DarcyThermoMech", "add_aux_kernel");
   registerSyntaxTask("SetupDarcySimulation", "DarcyThermoMech", "add_kernel");
-  // registerTask("setup_darcy", false);
 }

@@ -41,7 +41,7 @@ protected:
   /**
    * This is called to integrate the residual across the boundary.
    */
-  virtual ADResidual computeQpResidual() override;
+  virtual ADReal computeQpResidual() override;
 
   /// Thermal conductivity of the material
   const ADMaterialProperty(Real) & _thermal_conductivity;

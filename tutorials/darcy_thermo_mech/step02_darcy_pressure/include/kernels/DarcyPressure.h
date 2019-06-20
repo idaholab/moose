@@ -33,7 +33,7 @@ public:
 
 protected:
   /// ADKernelGrad objects must override precomputeQpResidual
-  virtual ADVectorResidual precomputeQpResidual() override;
+  virtual ADRealVectorValue precomputeQpResidual() override;
 
   /// References to be set from input file
   const Real & _permeability;

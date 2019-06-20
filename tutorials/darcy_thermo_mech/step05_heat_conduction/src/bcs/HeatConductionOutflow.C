@@ -23,7 +23,7 @@ HeatConductionOutflow<compute_stage>::HeatConductionOutflow(const InputParameter
 }
 
 template <ComputeStage compute_stage>
-ADResidual
+ADReal
 HeatConductionOutflow<compute_stage>::computeQpResidual()
 {
   return -_test[_i][_qp] * _thermal_conductivity[_qp] * _grad_u[_qp] * _normals[_qp];

@@ -15,7 +15,7 @@ defineADValidParams(
     DarcyPressure,
     ADDiffusion,
     params.addClassDescription("Compute the diffusion term for Darcy pressure ($p$) equation: "
-                               "-\\nabla \\cdot \\frac{\\mathbf{K}}{\\mu} \\nabla p = 0");
+                               "$-\\nabla \\cdot \\frac{\\mathbf{K}}{\\mu} \\nabla p = 0$");
 
     // Add a required parameter.  If this isn't provided in the input file MOOSE will error.
     params.addRequiredParam<Real>("permeability", "The permeability ($\\mathrm{K}$) of the fluid.");
@@ -37,7 +37,7 @@ DarcyPressure<compute_stage>::DarcyPressure(const InputParameters & parameters)
 }
 
 template <ComputeStage compute_stage>
-ADVectorResidual
+ADRealVectorValue
 DarcyPressure<compute_stage>::precomputeQpResidual()
 {
   return (_permeability / _viscosity) * ADDiffusion<compute_stage>::precomputeQpResidual();

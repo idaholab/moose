@@ -49,7 +49,7 @@ Initialize the reference using the `declareVector` method with a name
 
 ## Built-in VectorPostprocessor Types
 
-MOOSE includes a large number built-in `VectirPostprocessors`: `NodalValueSampler`,
+MOOSE includes a large number built-in `VectorPostprocessors`: `NodalValueSampler`,
 `LineValueSampler`, `PointValueSampler`, and many more.
 
 `VectorPostprocessors` output is optionally enabled using the `[Outputs]` block. A CSV file

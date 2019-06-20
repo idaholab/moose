@@ -110,8 +110,6 @@ Individual tests should run relatively quickly (2 second rule)
 
 Outputs or other generated files should not be checked into the repository
 
-- Do not check in the solution in the test directory!
-
 MOOSE developers rely on application tests when refactoring to verify correctness
 
 - +poor test coverage+ = +higher code failure rate+

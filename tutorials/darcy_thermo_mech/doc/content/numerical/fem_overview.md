@@ -189,12 +189,12 @@ where $\hat{n}$ is the outward normal vector for surface $s$. Combining [integra
 !equation
 -\psi \left(\nabla\cdot k\nabla u\right) + \psi\left(\vec{\beta} \cdot \nabla u\right) - \psi f = 0
 
+!---
+
 +(4)+ Integrate over the domain $\Omega$:
 
 !equation
 {-\int_\Omega\psi \left(\nabla\cdot k\nabla u\right)} + \int_\Omega\psi\left(\vec{\beta} \cdot \nabla u\right) - \displaystyle\int_\Omega\psi f = 0
-
-!---
 
 +(5)+ Integrate by parts and apply the divergence theorem, by using [int_and_div] on the left-most
       term of the PDE:

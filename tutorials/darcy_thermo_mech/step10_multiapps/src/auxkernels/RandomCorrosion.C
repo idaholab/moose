@@ -79,8 +79,8 @@ RandomCorrosion::computeValue()
 {
 
   // If the current node is at a "corrosion" point, set the phase variable to zero
-  for (std::vector<Point>::const_iterator it = _points.begin(); it != _points.end(); ++it)
-    if (_current_node->absolute_fuzzy_equals(*it, _nodal_tol))
+  for (const Point & pt : _points)
+    if (_current_node->absolute_fuzzy_equals(pt, _nodal_tol))
       return 0.0;
 
   // Do nothing to the phase variable if not at a "corrosion" point
