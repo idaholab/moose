@@ -53,6 +53,7 @@ declareADValidParams(ADVectorNodalBC);
 
 #define usingTemplNodalBCMembers(type)                                                             \
   usingMooseObjectMembers;                                                                         \
+  usingUserObjectInterfaceMembers;                                                                 \
   using ADNodalBCTempl<type, compute_stage>::_u;                                                   \
   using ADNodalBCTempl<type, compute_stage>::_var;                                                 \
   using ADNodalBCTempl<type, compute_stage>::_current_node;                                        \
@@ -65,4 +66,3 @@ declareADValidParams(ADVectorNodalBC);
 
 #define usingNodalBCMembers usingTemplNodalBCMembers(Real)
 #define usingVectorNodalBCMembers usingTemplNodalBCMembers(RealVectorValue)
-

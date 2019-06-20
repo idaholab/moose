@@ -73,6 +73,7 @@ declareADValidParams(ADVectorIntegratedBC);
 #define usingTemplIntegratedBCMembers(type)                                                        \
   usingMooseObjectMembers;                                                                         \
   usingCoupleableMembers;                                                                          \
+  usingUserObjectInterfaceMembers;                                                                 \
   using ADIntegratedBCTempl<type, compute_stage>::_test;                                           \
   using ADIntegratedBCTempl<type, compute_stage>::_qp;                                             \
   using ADIntegratedBCTempl<type, compute_stage>::_i;                                              \
@@ -95,4 +96,3 @@ declareADValidParams(ADVectorIntegratedBC);
 
 #define usingIntegratedBCMembers usingTemplIntegratedBCMembers(Real)
 #define usingVectorIntegratedBCMembers usingTemplIntegratedBCMembers(RealVectorValue)
-

@@ -17,7 +17,14 @@
 class InputParameters;
 class UserObject;
 
+// Template member functions can't be introduced through using declarations
 #define adGetUserObject this->template getUserObject
+#define adGetUserObjectByName this->template getUserObjectByName
+
+// But non-templates can be!
+#define usingUserObjectInterfaceMembers                                                            \
+  using UserObjectInterface::getUserObjectBase;                                                    \
+  using UserObjectInterface::getUserObjectBaseByName
 
 /**
  * Interface for objects that need to use UserObjects.
@@ -92,4 +99,3 @@ UserObjectInterface::getUserObjectByName(const std::string & name)
   unsigned int tid = needThreadedCopy(getUserObjectBaseByName(name)) ? _uoi_tid : 0;
   return _uoi_feproblem.getUserObject<T>(name, tid);
 }
-
