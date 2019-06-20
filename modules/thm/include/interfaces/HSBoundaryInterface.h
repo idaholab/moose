@@ -21,6 +21,11 @@ public:
   void check(const Component * const component) const;
 
 protected:
+  /**
+   * Gets the boundary name corresponding to the heat structure and side
+   *
+   * @param[in] component   Component pointer
+   */
   const BoundaryName & getHSBoundaryName(const Component * const component) const;
 
   /// Heat structure name

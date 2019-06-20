@@ -8,8 +8,7 @@ template <>
 InputParameters
 validParams<HSBoundaryHeatFlux>()
 {
-  InputParameters params = validParams<BoundaryBase>();
-  params += validParams<HSBoundaryInterface>();
+  InputParameters params = validParams<HSBoundary>();
 
   params.addRequiredParam<FunctionName>("q_function", "Heat flux function name");
 
@@ -19,18 +18,10 @@ validParams<HSBoundaryHeatFlux>()
 }
 
 HSBoundaryHeatFlux::HSBoundaryHeatFlux(const InputParameters & params)
-  : BoundaryBase(params),
-    HSBoundaryInterface(this),
+  : HSBoundary(params),
 
     _q_fn_name(getParam<FunctionName>("q_function"))
 {
-}
-
-void
-HSBoundaryHeatFlux::check() const
-{
-  BoundaryBase::check();
-  HSBoundaryInterface::check(this);
 }
 
 void
@@ -43,7 +34,7 @@ HSBoundaryHeatFlux::addMooseObjects()
     const std::string class_name = is_cylindrical ? "HSHeatFluxRZBC" : "HSHeatFluxBC";
     InputParameters pars = _factory.getValidParams(class_name);
     pars.set<NonlinearVariableName>("variable") = HeatConductionModel::TEMPERATURE;
-    pars.set<std::vector<BoundaryName>>("boundary") = {getHSBoundaryName(this)};
+    pars.set<std::vector<BoundaryName>>("boundary") = _boundary;
     pars.set<FunctionName>("function") = _q_fn_name;
     if (is_cylindrical)
     {

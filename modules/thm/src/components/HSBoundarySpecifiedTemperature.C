@@ -7,8 +7,7 @@ template <>
 InputParameters
 validParams<HSBoundarySpecifiedTemperature>()
 {
-  InputParameters params = validParams<BoundaryBase>();
-  params += validParams<HSBoundaryInterface>();
+  InputParameters params = validParams<HSBoundary>();
 
   params.addRequiredParam<Real>("T", "The value of temperature");
 
@@ -16,18 +15,10 @@ validParams<HSBoundarySpecifiedTemperature>()
 }
 
 HSBoundarySpecifiedTemperature::HSBoundarySpecifiedTemperature(const InputParameters & params)
-  : BoundaryBase(params),
-    HSBoundaryInterface(this),
+  : HSBoundary(params),
 
     _temperature(getParam<Real>("T"))
 {
-}
-
-void
-HSBoundarySpecifiedTemperature::check() const
-{
-  BoundaryBase::check();
-  HSBoundaryInterface::check(this);
 }
 
 void
@@ -37,7 +28,7 @@ HSBoundarySpecifiedTemperature::addMooseObjects()
     std::string class_name = "DirichletBC";
     InputParameters pars = _factory.getValidParams(class_name);
     pars.set<NonlinearVariableName>("variable") = HeatConductionModel::TEMPERATURE;
-    pars.set<std::vector<BoundaryName>>("boundary") = {getHSBoundaryName(this)};
+    pars.set<std::vector<BoundaryName>>("boundary") = _boundary;
     pars.set<Real>("value") = _temperature;
     _sim.addBoundaryCondition(class_name, genName(name(), "bc"), pars);
   }
