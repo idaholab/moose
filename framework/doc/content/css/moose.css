@@ -454,13 +454,8 @@ blockquote {
 }
 
 a.moose-bad-link,
-a.moose-unknown-reference,
-span.moose-sqa-error{
+a.moose-unknown-reference{
     color:red;
-}
-
-.moose-sqa-items a:not(:last-child):after{
-    content:"; "
 }
 
 /* Children/Input file lists */
@@ -724,26 +719,11 @@ footer.page-footer {
     padding: 5px;
 }
 
-/* REQUIREMENTS */
-.moose-requirements.collection.with-header .collection-header{
-    color:white;
-    background-color: var(--inl-blue);
-    font-size:larger;
-    font-weight:100;
-}
-
 .collection-header a
 {
     color:white;
 }
 
-.moose-requirements.collection .collection-item{
-    display:flex;
-}
-
-.moose-requirement-number{
-    margin-right:1em;
-}
 
 /* MOOSE SYNTAX LISTS */
 .collection.with-header .collection-header {

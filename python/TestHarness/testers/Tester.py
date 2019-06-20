@@ -88,6 +88,7 @@ class Tester(MooseObject):
         params.addParam("requirement", None, "The SQA requirement that this test satisfies (e.g., 'The Marker system shall provide means to mark elements for refinement within a box region.')")
         params.addParam("design", [], "The list of markdown files that contain the design(s) associated with this test (e.g., '/Markers/index.md /BoxMarker.md').")
         params.addParam("issues", [], "The list of github issues associated with this test (e.g., '#1234 #4321')")
+        params.addParam("detail", None, "Details of SQA requirement for use within sub-blocks.")
         params.addParam("validation", False, "Set to True to mark test as a validation problem.")
         params.addParam("verification", False, "Set to True to mark test as a verification problem.")
         return params

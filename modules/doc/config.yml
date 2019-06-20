@@ -130,6 +130,13 @@ Extensions:
             variables: syntax/Variables/index.md
             vectorpostprocessors: syntax/VectorPostprocessors/index.md
     MooseDocs.extensions.sqa:
+        categories:
+            Framework:
+                directories:
+                    - test/tests
+            Tensor Mechanics:
+                directories:
+                    - modules/tensor_mechanics/test/tests
         requirement-groups:
             dgkernels: DGKernel Objects
             interfacekernels: InterfaceKernel Objects
