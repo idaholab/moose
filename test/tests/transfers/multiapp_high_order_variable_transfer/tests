@@ -47,8 +47,16 @@
 
   [L2_Lagrange_interpolation]
     type = 'Exodiff'
-    input = 'master_L2_Lagrange_interpolation.i'
-    exodiff = 'master_L2_Lagrange_interpolation_out.e master_L2_Lagrange_interpolation_out_sub0.e'
+    input = 'master_L2_Lagrange.i'
+    exodiff = 'master_L2_Lagrange_interpolation_out.e master_L2_Lagrange_out_nterpolation_sub0.e'
+    cli_args = "Outputs/file_base=master_L2_Lagrange_interpolation_out
+                MultiApps/nterpolation_sub/type=FullSolveMultiApp
+                MultiApps/nterpolation_sub/app_type=MooseTestApp
+                MultiApps/nterpolation_sub/positions='0 0 0'
+                MultiApps/nterpolation_sub/input_files=sub_L2_Lagrange.i
+                MultiApps/nterpolation_sub/execute_on='timestep_end'
+                MultiApps/active='nterpolation_sub'
+                Transfers/p_to_sub/multi_app=nterpolation_sub"
     requirement = "The system shall support interpolation transfer with the first order elemental variable"
   []
 
