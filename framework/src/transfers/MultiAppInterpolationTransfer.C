@@ -471,14 +471,15 @@ MultiAppInterpolationTransfer::execute()
       }
       else // Elemental
       {
+        std::vector<Point> points;
         for (auto & elem : as_range(to_mesh->local_elements_begin(), to_mesh->local_elements_end()))
         {
           // Assuming LAGRANGE!
           if (elem->n_comp(to_sys_num, to_var_num) == 0)
             continue;
 
+          points.clear();
           // grap sample points
-          std::vector<Point> points;
           // for constant shape function, we take the element centroid
           if (is_constant)
             points.push_back(elem->centroid());

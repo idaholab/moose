@@ -205,20 +205,21 @@ MultiAppNearestNodeTransfer::execute()
         // which are successfully mapped to at least one domain where
         // the nearest neighbor might be found.
         std::set<Elem *> local_elems_found;
-
+        std::vector<Point> points;
+        std::vector<dof_id_type> point_ids;
         for (auto & elem : as_range(to_mesh->local_elements_begin(), to_mesh->local_elements_end()))
         {
           // Skip this element if the variable has no dofs at it.
           if (elem->n_dofs(sys_num, var_num) < 1)
             continue;
 
-          std::vector<Point> points;
-          std::vector<dof_id_type> ptids;
+          points.clear();
+          point_ids.clear();
           // For constant monomial, we take the centroid of element
           if (is_constant)
           {
             points.push_back(elem->centroid());
-            ptids.push_back(elem->id());
+            point_ids.push_back(elem->id());
           }
 
           // For L2_LAGRANGE, we take all the nodes of element
@@ -226,7 +227,7 @@ MultiAppNearestNodeTransfer::execute()
             for (auto & node : elem->node_ref_range())
             {
               points.push_back(node);
-              ptids.push_back(node.id());
+              point_ids.push_back(node.id());
             }
 
           unsigned int offset = 0;
@@ -253,8 +254,9 @@ MultiAppNearestNodeTransfer::execute()
                 Real distance = bboxMinDistance(point, bboxes[i_from]);
                 if (distance <= nearest_max_distance || bboxes[i_from].contains_point(point))
                 {
-                  std::pair<unsigned int, dof_id_type> key(i_to,
-                                                           ptids[offset]); // Create an unique ID
+                  std::pair<unsigned int, dof_id_type> key(
+                      i_to,
+                      point_ids[offset]); // Create an unique ID
                   // If this point already exist, we skip it
                   if (node_index_map[i_proc].find(key) != node_index_map[i_proc].end())
                     continue;
@@ -575,20 +577,22 @@ MultiAppNearestNodeTransfer::execute()
     }
     else // Elemental
     {
+      std::vector<Point> points;
+      std::vector<dof_id_type> point_ids;
       for (auto & elem : to_mesh.active_local_element_ptr_range())
       {
         // Skip this element if the variable has no dofs at it.
         if (elem->n_dofs(sys_num, var_num) < 1)
           continue;
 
+        points.clear();
+        point_ids.clear();
         // grap sample points
-        std::vector<Point> points;
-        std::vector<dof_id_type> ptids;
         // for constant shape function, we take the element centroid
         if (is_constant)
         {
           points.push_back(elem->centroid());
-          ptids.push_back(elem->id());
+          point_ids.push_back(elem->id());
         }
         // for higher order method, we take all nodes of element
         // this works for the first order L2 Lagrange. Might not work
@@ -597,7 +601,7 @@ MultiAppNearestNodeTransfer::execute()
           for (auto & node : elem->node_ref_range())
           {
             points.push_back(node);
-            ptids.push_back(node.id());
+            point_ids.push_back(node.id());
           }
 
         unsigned int n_comp = elem->n_comp(sys_num, var_num);
@@ -610,7 +614,7 @@ MultiAppNearestNodeTransfer::execute()
 
         for (MooseIndex(points) offset = 0; offset < points.size(); offset++)
         {
-          dof_id_type point_id = ptids[offset];
+          dof_id_type point_id = point_ids[offset];
           Real best_val = 0;
           if (!_neighbors_cached)
           {

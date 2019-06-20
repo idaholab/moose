@@ -127,14 +127,15 @@ MultiAppUserObjectTransfer::execute()
           }
           else // Elemental
           {
+            std::vector<Point> points;
             for (auto & elem : as_range(mesh->local_elements_begin(), mesh->local_elements_end()))
             {
               // Skip this element if the variable has no dofs at it.
               if (elem->n_dofs(sys_num, var_num) < 1)
                 continue;
 
+              points.clear();
               // grap sample points
-              std::vector<Point> points;
               // for constant shape function, we take the element centroid
               if (is_constant)
                 points.push_back(elem->centroid());
@@ -254,14 +255,15 @@ MultiAppUserObjectTransfer::execute()
         }
         else // elemental
         {
+          std::vector<Point> points;
           for (auto & elem : as_range(to_mesh->elements_begin(), to_mesh->elements_end()))
           {
             // Skip this element if the variable has no dofs at it.
             if (elem->n_dofs(to_sys_num, to_var_num) < 1)
               continue;
 
+            points.clear();
             // grap sample points
-            std::vector<Point> points;
             // for constant shape function, we take the element centroid
             if (is_constant)
               points.push_back(elem->centroid());
@@ -353,14 +355,15 @@ MultiAppUserObjectTransfer::execute()
         }
         else // Elemental
         {
+          std::vector<Point> points;
           for (auto & elem : as_range(to_mesh->elements_begin(), to_mesh->elements_end()))
           {
             // Skip this element if the variable has no dofs at it.
             if (elem->n_dofs(to_sys_num, to_var_num) < 1)
               continue;
 
+            points.clear();
             // grap sample points
-            std::vector<Point> points;
             // for constant shape function, we take the element centroid
             if (is_constant)
               points.push_back(elem->centroid());

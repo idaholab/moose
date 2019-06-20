@@ -81,7 +81,7 @@
     type = FullSolveMultiApp
     app_type = MooseTestApp
     positions = '0 0 0'
-    input_files  = sub_L2_Lagrange_userobject.i
+    input_files  = sub_L2_Lagrange.i
     execute_on = 'timestep_end'
   []
 []
@@ -99,6 +99,5 @@
 
 [Outputs]
   exodus = true
-  csv = true
   perf_graph = true
 []
