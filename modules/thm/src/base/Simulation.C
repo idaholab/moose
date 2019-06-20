@@ -89,6 +89,9 @@ Simulation::buildMesh()
 void
 Simulation::setupQuadrature()
 {
+  if (_components.size() == 0)
+    return;
+
   Order order = CONSTANT;
   unsigned int n_flow_channels = 0;
   unsigned int n_heat_structures = 0;
