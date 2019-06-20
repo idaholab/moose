@@ -41,6 +41,7 @@ class Requirement(object):
         self.label = None # added by get_requirements function
         self.satisfied = satisfied
         self.prerequisites = []
+        self.details = []
         self.verification = None
         self.validation = None
 
@@ -48,7 +49,22 @@ class Requirement(object):
         frmt = '{}:\n    Text: {}\n    Design: {}\n    Issues: {}'
         return frmt.format(self.name, self.text, repr(self.design), repr(self.issues))
 
-def get_requirements(directories, specs):
+
+class Detail(object):
+    """struct for storing Requirement detail information"""
+    def __init__(self,
+                 name=None,
+                 path=None,
+                 filename=None,
+                 text=None,
+                 text_line=None):
+        self.name = name
+        self.path = path
+        self.filename = filename
+        self.text = text
+        self.text_line = text_line
+
+def get_requirements(directories, specs, prefix='F', category=None):
     """
     Build requirements dictionary from the provided directories.
     """
@@ -63,9 +79,21 @@ def get_requirements(directories, specs):
 
     for i, requirements in enumerate(out.itervalues()):
         for j, req in enumerate(requirements):
-            req.label = "F{}.{}".format(i+1, j+1)
-
+            if category:
+                req.label = "{}{}.{}.{}".format(prefix, category, i+1, j+1)
+            else:
+                req.label = "{}{}.{}".format(prefix, i+1, j+1)
     return out
+
+def _check_extra_param(node, param_name, filename):
+    """Helper function for error messages in sub-blocks."""
+    param = node.get(param_name, None)
+    param_line = node.line(param_name, 0)
+    if param is not None:
+        msg = "{}:{}\n" \
+              "The '{}' parameter is not allowed within sub-blocks, all issues must " \
+              "must be provided in the top-level of the group."
+        LOG.error(msg, filename, param_line, param_name)
 
 def _add_requirements(out, location, filename):
     """Opens tests specification and extracts requirement items."""
@@ -123,5 +151,23 @@ def _add_requirements(out, location, filename):
             prereq = child.get('prereq', None)
             if prereq is not None:
                 req.prerequisites = set(prereq.split(' '))
+
+            for grandchild in child.children:
+                detail = grandchild.get('detail', None)
+                if detail is None:
+                    msg = "The 'detail' parameters is missing from '%s' in %s. It must be defined " \
+                          "for all sub-blocks within a test group."
+                    LOG.error(msg, grandchild.name, filename)
+
+                _check_extra_param(grandchild, 'requirement', filename)
+                _check_extra_param(grandchild, 'issues', filename)
+                _check_extra_param(grandchild, 'design', filename)
+
+                req.details.append(Detail(name=grandchild.name,
+                                          path=req.path,
+                                          filename=filename,
+                                          text=unicode(detail),
+                                          text_line=grandchild.line('detail')))
+
 
             out[group].append(req)

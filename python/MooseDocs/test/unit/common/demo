@@ -1,0 +1,64 @@
+[Tests]
+  issues = '#1234'
+  design = design.md
+  [r0]
+    requirement = "Requirement One"
+  []
+  [r1]
+    requirement = "Requirement Two"
+    issues = "#3456"
+  []
+  [r2]
+    requirement = "Requirement Three"
+    design = "override.md"
+  []
+  [r3]
+    requirement = "Requirement Four"
+    design = "override2.md"
+    issues = "#4567"
+  []
+
+  [group0]
+    requirement = "Requirement Group One"
+    [group0-a]
+       detail = 1D
+    []
+    [group0-b]
+       detail = 2D
+    []
+  []
+
+  [group1]
+    requirement = "Requirement Group Two"
+    issues = "#8910"
+    [group1-a]
+       detail = 3D
+    []
+    [group1-b]
+       detail = 4D
+    []
+  []
+
+  [group2]
+    requirement = "Requirement Group Three"
+    design = "override.md"
+    [group2-a]
+       detail = 5D
+    []
+    [group2-b]
+       detail = 6D
+    []
+  []
+
+  [group3]
+    requirement = "Requirement Group Four"
+    design = "override2.md"
+    issues = "#4321"
+    [group3-a]
+       detail = 7D
+    []
+    [group3-b]
+       detail = 8D
+    []
+  []
+[]
