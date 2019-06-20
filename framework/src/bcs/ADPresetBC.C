@@ -19,7 +19,7 @@ defineADValidParams(
 
 template <ComputeStage compute_stage>
 ADPresetBC<compute_stage>::ADPresetBC(const InputParameters & parameters)
-  : ADPresetNodalBC<compute_stage>(parameters), _value(adGetParam<Real>("value"))
+  : ADPresetNodalBC<compute_stage>(parameters), _value(getParam<Real>("value"))
 {
 }
 

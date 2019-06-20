@@ -38,10 +38,10 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object,
   // NodeFaceConstraint
   if (nfc)
   {
-    MooseMesh & mesh = nfc->getParam<FEProblemBase *>("_fe_problem_base")->mesh();
-    unsigned int slave = mesh.getBoundaryID(nfc->getParam<BoundaryName>("slave"));
+    MooseMesh & mesh = nfc->getParamTempl<FEProblemBase *>("_fe_problem_base")->mesh();
+    unsigned int slave = mesh.getBoundaryID(nfc->getParamTempl<BoundaryName>("slave"));
     bool displaced = nfc->parameters().have_parameter<bool>("use_displaced_mesh") &&
-                     nfc->getParam<bool>("use_displaced_mesh");
+                     nfc->getParamTempl<bool>("use_displaced_mesh");
 
     if (displaced)
       _displaced_node_face_constraints[slave].addObject(nfc);
@@ -52,11 +52,12 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object,
   // MortarConstraint
   else if (mc)
   {
-    MooseMesh & mesh = mc->getParam<FEProblemBase *>("_fe_problem_base")->mesh();
-    bool displaced = mc->getParam<bool>("use_displaced_mesh");
+    MooseMesh & mesh = mc->getParamTempl<FEProblemBase *>("_fe_problem_base")->mesh();
+    bool displaced = mc->getParamTempl<bool>("use_displaced_mesh");
 
-    auto slave_boundary_id = mesh.getBoundaryID(mc->getParam<BoundaryName>("slave_boundary"));
-    auto master_boundary_id = mesh.getBoundaryID(mc->getParam<BoundaryName>("master_boundary"));
+    auto slave_boundary_id = mesh.getBoundaryID(mc->getParamTempl<BoundaryName>("slave_boundary"));
+    auto master_boundary_id =
+        mesh.getBoundaryID(mc->getParamTempl<BoundaryName>("master_boundary"));
     auto key = std::make_pair(master_boundary_id, slave_boundary_id);
 
     if (displaced)
@@ -69,7 +70,7 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object,
   else if (ec)
   {
     bool displaced = ec->parameters().have_parameter<bool>("use_displaced_mesh") &&
-                     ec->getParam<bool>("use_displaced_mesh");
+                     ec->getParamTempl<bool>("use_displaced_mesh");
     const InterfaceID interface_id = ec->getInterfaceID();
 
     if (displaced)
@@ -81,11 +82,11 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object,
   // NodeElemConstraint
   else if (nec)
   {
-    MooseMesh & mesh = nec->getParam<FEProblemBase *>("_fe_problem_base")->mesh();
-    SubdomainID slave = mesh.getSubdomainID(nec->getParam<SubdomainName>("slave"));
-    SubdomainID master = mesh.getSubdomainID(nec->getParam<SubdomainName>("master"));
+    MooseMesh & mesh = nec->getParamTempl<FEProblemBase *>("_fe_problem_base")->mesh();
+    SubdomainID slave = mesh.getSubdomainID(nec->getParamTempl<SubdomainName>("slave"));
+    SubdomainID master = mesh.getSubdomainID(nec->getParamTempl<SubdomainName>("master"));
     bool displaced = nec->parameters().have_parameter<bool>("use_displaced_mesh") &&
-                     nec->getParam<bool>("use_displaced_mesh");
+                     nec->getParamTempl<bool>("use_displaced_mesh");
 
     if (displaced)
       _displaced_node_elem_constraints[std::make_pair(slave, master)].addObject(nec);

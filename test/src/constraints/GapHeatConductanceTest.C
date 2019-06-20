@@ -21,7 +21,7 @@ defineADValidParams(
 template <ComputeStage compute_stage>
 GapHeatConductanceTest<compute_stage>::GapHeatConductanceTest(const InputParameters & parameters)
   : ADMortarConstraint<compute_stage>(parameters),
-    _gap_conductance_constant(adGetParam<Real>("gap_conductance_constant"))
+    _gap_conductance_constant(getParam<Real>("gap_conductance_constant"))
 {
 }
 

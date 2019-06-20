@@ -68,7 +68,7 @@ PerfGraphOutput::shouldOutput(const ExecFlagType & type)
 void
 PerfGraphOutput::output(const ExecFlagType & /*type*/)
 {
-  if (!_app.getParam<bool>("no_timing"))
+  if (!_app.getParamTempl<bool>("no_timing"))
   {
     _app.perfGraph().print(_console, _level);
 

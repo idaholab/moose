@@ -23,7 +23,7 @@ defineADValidParams(
 
 template <ComputeStage compute_stage>
 EqualGradientConstraint<compute_stage>::EqualGradientConstraint(const InputParameters & parameters)
-  : ADMortarConstraint<compute_stage>(parameters), _component(adGetParam<unsigned int>("component"))
+  : ADMortarConstraint<compute_stage>(parameters), _component(getParam<unsigned int>("component"))
 {
 }
 

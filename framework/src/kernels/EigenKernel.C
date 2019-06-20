@@ -52,7 +52,7 @@ EigenKernel::EigenKernel(const InputParameters & parameters)
   {
     EigenExecutionerBase * exec = dynamic_cast<EigenExecutionerBase *>(_app.getExecutioner());
     if (exec)
-      eigen_pp_name = exec->getParam<PostprocessorName>("bx_norm");
+      eigen_pp_name = exec->getParamTempl<PostprocessorName>("bx_norm");
   }
 
   // If the postprocessor name was not provided and an EigenExecutionerBase is not being used,

@@ -21,9 +21,8 @@ defineADValidParams(
 template <ComputeStage compute_stage>
 ADCoupledMaterial<compute_stage>::ADCoupledMaterial(const InputParameters & parameters)
   : ADMaterial<compute_stage>(parameters),
-    _ad_mat_prop(adDeclareADProperty<Real>(adGetParam<MaterialPropertyName>("ad_mat_prop"))),
-    _regular_mat_prop(
-        adDeclareProperty<Real>(adGetParam<MaterialPropertyName>("regular_mat_prop"))),
+    _ad_mat_prop(declareADProperty<Real>(getParam<MaterialPropertyName>("ad_mat_prop"))),
+    _regular_mat_prop(declareProperty<Real>(getParam<MaterialPropertyName>("regular_mat_prop"))),
     _coupled_var(adCoupledValue("coupled_var"))
 {
 }

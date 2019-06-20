@@ -26,18 +26,53 @@ InputParameters validParams();
 template <>
 InputParameters validParams<MaterialPropertyInterface>();
 
-#define adDeclareADProperty this->template declareADProperty
-#define adDeclareProperty this->template declareProperty
-#define adGetADMaterialProperty this->template getADMaterialProperty
-#define adGetMaterialProperty this->template getMaterialProperty
-#define adGetMaterialPropertyOld this->template getMaterialPropertyOld
-#define adGetMaterialPropertyOlder this->template getMaterialPropertyOlder
-#define adGetADMaterialPropertyByName this->template getADMaterialPropertyByName
-#define adGetMaterialPropertyByName this->template getMaterialPropertyByName
-#define adGetMaterialPropertyOldByName this->template getMaterialPropertyOldByName
-#define adGetMaterialPropertyOlderByName this->template getMaterialPropertyOlderByName
-#define adHasMaterialProperty this->template hasMaterialProperty
-#define adHasMaterialPropertyByName this->template hasMaterialPropertyByName
+#define adDeclareADProperty                                                                        \
+  _Pragma("GCC warning \"adDeclareADProperty is deprecated. Simply use declareADProperty\"") this  \
+      ->template declareADPropertyTempl
+#define adDeclareProperty                                                                          \
+  _Pragma("GCC warning \"adDeclareProperty is deprecated. Simply use declareProperty\"") this      \
+      ->template declarePropertyTempl
+
+// clang-format off
+#define adGetADMaterialProperty \
+  _Pragma( \
+      "GCC warning \"adGetADMaterialProperty is deprecated. Simply use getADMaterialProperty\"") \
+  this->template getADMaterialPropertyTempl
+#define adGetADMaterialPropertyByName \
+  _Pragma( \
+      "GCC warning \"adGetADMaterialPropertyByName is deprecated. Simply use getADMaterialPropertyByName\"") \
+  this->template getADMaterialPropertyByNameTempl
+#define adGetMaterialPropertyByName \
+  _Pragma( \
+      "GCC warning \"adGetMaterialPropertyByName is deprecated. Simply use getMaterialPropertyByName\"") \
+  this->template getMaterialPropertyByNameTempl
+#define adGetMaterialPropertyOldByName \
+  _Pragma( \
+      "GCC warning \"adGetMaterialPropertyOldByName is deprecated. Simply use getMaterialPropertyOldByName\"") \
+  this->template getMaterialPropertyOldByNameTempl
+#define adGetMaterialPropertyOlderByName \
+  _Pragma( \
+      "GCC warning \"adGetMaterialPropertyOlderByName is deprecated. Simply use getMaterialPropertyOlderByName\"") \
+  this->template getMaterialPropertyOlderByNameTempl
+#define adHasMaterialProperty \
+  _Pragma( \
+      "GCC warning \"adHasMaterialProperty is deprecated. Simply use hasMaterialProperty\"") \
+  this->template hasMaterialPropertyTempl
+#define adHasMaterialPropertyByName \
+  _Pragma( \
+      "GCC warning \"adHasMaterialPropertyByName is deprecated. Simply use hasMaterialPropertyByName\"") \
+  this->template hasMaterialPropertyByNameTempl
+// clang-format on
+
+#define declareADProperty this->template declareADPropertyTempl
+#define declareProperty this->template declarePropertyTempl
+#define getADMaterialProperty this->template getADMaterialPropertyTempl
+#define getADMaterialPropertyByName this->template getADMaterialPropertyByNameTempl
+#define getMaterialPropertyByName this->template getMaterialPropertyByNameTempl
+#define getMaterialPropertyOldByName this->template getMaterialPropertyOldByNameTempl
+#define getMaterialPropertyOlderByName this->template getMaterialPropertyOlderByNameTempl
+#define hasMaterialProperty this->template hasMaterialPropertyTempl
+#define hasMaterialPropertyByName this->template hasMaterialPropertyByNameTempl
 
 /**
  * \class MaterialPropertyInterface
@@ -66,13 +101,13 @@ public:
    * @return Reference to the desired material property
    */
   template <typename T>
-  const MaterialProperty<T> & getMaterialProperty(const std::string & name);
+  const MaterialProperty<T> & getMaterialPropertyTempl(const std::string & name);
   template <typename T>
-  const ADMaterialPropertyObject<T> & getADMaterialProperty(const std::string & name);
+  const ADMaterialPropertyObject<T> & getADMaterialPropertyTempl(const std::string & name);
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
+  const MaterialProperty<T> & getMaterialPropertyOldTempl(const std::string & name);
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
+  const MaterialProperty<T> & getMaterialPropertyOlderTempl(const std::string & name);
   ///@}
 
   ///@{
@@ -83,14 +118,15 @@ public:
    * @return Reference to the material property with the name 'name'
    */
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyByName(const MaterialPropertyName & name);
+  const MaterialProperty<T> & getMaterialPropertyByNameTempl(const MaterialPropertyName & name);
   template <typename T>
   const ADMaterialPropertyObject<T> &
-  getADMaterialPropertyByName(const MaterialPropertyName & name);
+  getADMaterialPropertyByNameTempl(const MaterialPropertyName & name);
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyOldByName(const MaterialPropertyName & name);
+  const MaterialProperty<T> & getMaterialPropertyOldByNameTempl(const MaterialPropertyName & name);
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyOlderByName(const MaterialPropertyName & name);
+  const MaterialProperty<T> &
+  getMaterialPropertyOlderByNameTempl(const MaterialPropertyName & name);
   ///@}
 
   /**
@@ -172,9 +208,9 @@ public:
    * @return true if the property exists, otherwise false
    */
   template <typename T>
-  bool hasMaterialProperty(const std::string & name);
+  bool hasMaterialPropertyTempl(const std::string & name);
   template <typename T>
-  bool hasMaterialPropertyByName(const std::string & name);
+  bool hasMaterialPropertyByNameTempl(const std::string & name);
   ///@}
 
   /**
@@ -313,7 +349,7 @@ mooseSetToZero(T *&)
 
 template <typename T>
 const MaterialProperty<T> &
-MaterialPropertyInterface::getMaterialProperty(const std::string & name)
+MaterialPropertyInterface::getMaterialPropertyTempl(const std::string & name)
 {
   // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
@@ -328,7 +364,7 @@ MaterialPropertyInterface::getMaterialProperty(const std::string & name)
 
 template <typename T>
 const ADMaterialPropertyObject<T> &
-MaterialPropertyInterface::getADMaterialProperty(const std::string & name)
+MaterialPropertyInterface::getADMaterialPropertyTempl(const std::string & name)
 {
   // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
@@ -343,7 +379,7 @@ MaterialPropertyInterface::getADMaterialProperty(const std::string & name)
 
 template <typename T>
 const MaterialProperty<T> &
-MaterialPropertyInterface::getMaterialPropertyOld(const std::string & name)
+MaterialPropertyInterface::getMaterialPropertyOldTempl(const std::string & name)
 {
   if (!_stateful_allowed)
     mooseError("Stateful material properties not allowed for this object."
@@ -364,7 +400,7 @@ MaterialPropertyInterface::getMaterialPropertyOld(const std::string & name)
 
 template <typename T>
 const MaterialProperty<T> &
-MaterialPropertyInterface::getMaterialPropertyOlder(const std::string & name)
+MaterialPropertyInterface::getMaterialPropertyOlderTempl(const std::string & name)
 {
   if (!_stateful_allowed)
     mooseError("Stateful material properties not allowed for this object."
@@ -414,7 +450,7 @@ MaterialPropertyInterface::defaultADMaterialProperty<RealVectorValue>(const std:
 
 template <typename T>
 const MaterialProperty<T> &
-MaterialPropertyInterface::getMaterialPropertyByName(const MaterialPropertyName & name)
+MaterialPropertyInterface::getMaterialPropertyByNameTempl(const MaterialPropertyName & name)
 {
   checkExecutionStage();
   checkMaterialProperty(name);
@@ -432,7 +468,7 @@ MaterialPropertyInterface::getMaterialPropertyByName(const MaterialPropertyName 
 
 template <typename T>
 const ADMaterialPropertyObject<T> &
-MaterialPropertyInterface::getADMaterialPropertyByName(const MaterialPropertyName & name)
+MaterialPropertyInterface::getADMaterialPropertyByNameTempl(const MaterialPropertyName & name)
 {
   _mi_feproblem.usingADMatProps(true);
 
@@ -452,7 +488,7 @@ MaterialPropertyInterface::getADMaterialPropertyByName(const MaterialPropertyNam
 
 template <typename T>
 const MaterialProperty<T> &
-MaterialPropertyInterface::getMaterialPropertyOldByName(const MaterialPropertyName & name)
+MaterialPropertyInterface::getMaterialPropertyOldByNameTempl(const MaterialPropertyName & name)
 {
   if (!_stateful_allowed)
     mooseError("Stateful material properties not allowed for this object."
@@ -470,7 +506,7 @@ MaterialPropertyInterface::getMaterialPropertyOldByName(const MaterialPropertyNa
 
 template <typename T>
 const MaterialProperty<T> &
-MaterialPropertyInterface::getMaterialPropertyOlderByName(const MaterialPropertyName & name)
+MaterialPropertyInterface::getMaterialPropertyOlderByNameTempl(const MaterialPropertyName & name)
 {
   if (!_stateful_allowed)
     mooseError("Stateful material properties not allowed for this object."
@@ -505,7 +541,7 @@ MaterialPropertyInterface::getBlockMaterialProperty(const MaterialPropertyName &
 
 template <typename T>
 bool
-MaterialPropertyInterface::hasMaterialProperty(const std::string & name)
+MaterialPropertyInterface::hasMaterialPropertyTempl(const std::string & name)
 {
   // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
@@ -514,7 +550,7 @@ MaterialPropertyInterface::hasMaterialProperty(const std::string & name)
 
 template <typename T>
 bool
-MaterialPropertyInterface::hasMaterialPropertyByName(const std::string & name)
+MaterialPropertyInterface::hasMaterialPropertyByNameTempl(const std::string & name)
 {
   return _material_data->haveProperty<T>(name);
 }

@@ -998,7 +998,7 @@ MooseApp::getCheckpointDirectories() const
   // If file_base is set in CommonOutputAction, add this file to the list of potential checkpoint
   // files
   if (common->isParamValid("file_base"))
-    checkpoint_dirs.push_back(common->getParam<std::string>("file_base") + "_cp");
+    checkpoint_dirs.push_back(common->getParamTempl<std::string>("file_base") + "_cp");
   // Case for normal application or master in a Multiapp setting
   else if (getOutputFileBase().empty())
     checkpoint_dirs.push_back(FileOutput::getOutputFileBase(*this, "_out_cp"));
@@ -1018,10 +1018,10 @@ MooseApp::getCheckpointDirectories() const
     const InputParameters & params = moose_object_action->getObjectParams();
 
     // Loop through the actions and add the necessary directories to the list to check
-    if (moose_object_action->getParam<std::string>("type") == "Checkpoint")
+    if (moose_object_action->getParamTempl<std::string>("type") == "Checkpoint")
     {
       if (params.isParamValid("file_base"))
-        checkpoint_dirs.push_back(common->getParam<std::string>("file_base") + "_cp");
+        checkpoint_dirs.push_back(common->getParamTempl<std::string>("file_base") + "_cp");
       else
       {
         std::ostringstream oss;

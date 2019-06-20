@@ -21,15 +21,15 @@ ADStatefulMaterial<compute_stage>::ADStatefulMaterial(const InputParameters & pa
   : ADMaterial<compute_stage>(parameters),
 
     // Get a parameter value for the diffusivity
-    _initial_diffusivity(adGetParam<Real>("initial_diffusivity")),
+    _initial_diffusivity(getParam<Real>("initial_diffusivity")),
 
     // Declare that this material is going to have a Real
     // valued property named "diffusivity" that Kernels can use.
-    _diffusivity(adDeclareADProperty<Real>("diffusivity")),
+    _diffusivity(declareADProperty<Real>("diffusivity")),
 
     // Retrieve/use an old value of diffusivity.
     // Note: this is _expensive_ - only do this if you REALLY need it!
-    _diffusivity_old(adGetMaterialPropertyOld<Real>("diffusivity")),
+    _diffusivity_old(getMaterialPropertyOld<Real>("diffusivity")),
     _u(adCoupledValue("u"))
 {
 }

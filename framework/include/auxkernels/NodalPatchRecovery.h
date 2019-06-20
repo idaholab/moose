@@ -41,7 +41,7 @@ public:
    * element
    */
   template <typename T>
-  const MaterialProperty<T> & getMaterialProperty(const std::string & name);
+  const MaterialProperty<T> & getMaterialPropertyTempl(const std::string & name);
   /**
    * This function overrides the one implemented in AuxKernel.C to suppress warnings when retrieving
    * material properties
@@ -51,7 +51,7 @@ public:
    * at all qps on the current element
    */
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
+  const MaterialProperty<T> & getMaterialPropertyOldTempl(const std::string & name);
   /**
    * This function overrides the one implemented in AuxKernel.C to suppress warnings when retrieving
    * material properties
@@ -145,16 +145,16 @@ private:
 
 template <typename T>
 const MaterialProperty<T> &
-NodalPatchRecovery::getMaterialProperty(const std::string & name)
+NodalPatchRecovery::getMaterialPropertyTempl(const std::string & name)
 {
-  return MaterialPropertyInterface::getMaterialProperty<T>(name);
+  return MaterialPropertyInterface::getMaterialPropertyTempl<T>(name);
 }
 
 template <typename T>
 const MaterialProperty<T> &
-NodalPatchRecovery::getMaterialPropertyOld(const std::string & name)
+NodalPatchRecovery::getMaterialPropertyOldTempl(const std::string & name)
 {
-  return MaterialPropertyInterface::getMaterialPropertyOld<T>(name);
+  return MaterialPropertyInterface::getMaterialPropertyOldTempl<T>(name);
 }
 
 template <typename T>
@@ -163,4 +163,3 @@ NodalPatchRecovery::getMaterialPropertyOlder(const std::string & name)
 {
   return MaterialPropertyInterface::getMaterialPropertyOlder<T>(name);
 }
-

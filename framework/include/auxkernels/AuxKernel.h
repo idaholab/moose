@@ -27,6 +27,7 @@
 #include "MeshChangedInterface.h"
 #include "VectorPostprocessorInterface.h"
 #include "MooseVariableInterface.h"
+#include "MemberTemplateMacros.h"
 
 // forward declarations
 template <typename ComputeValueType>
@@ -101,16 +102,16 @@ public:
    * Override functions from MaterialPropertyInterface for error checking
    */
   template <typename T>
-  const MaterialProperty<T> & getMaterialProperty(const std::string & name);
+  const MaterialProperty<T> & getMaterialPropertyTempl(const std::string & name);
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
+  const MaterialProperty<T> & getMaterialPropertyOldTempl(const std::string & name);
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
 
   template <typename T>
-  const T & getUserObject(const std::string & name);
+  const T & getUserObjectTempl(const std::string & name);
   template <typename T>
-  const T & getUserObjectByName(const UserObjectName & name);
+  const T & getUserObjectByNameTempl(const UserObjectName & name);
 
   const UserObject & getUserObjectBase(const std::string & name);
 
@@ -241,7 +242,7 @@ protected:
 template <typename ComputeValueType>
 template <typename T>
 const MaterialProperty<T> &
-AuxKernelTempl<ComputeValueType>::getMaterialProperty(const std::string & name)
+AuxKernelTempl<ComputeValueType>::getMaterialPropertyTempl(const std::string & name)
 {
   if (isNodal())
     mooseError("Nodal AuxKernel '",
@@ -252,13 +253,13 @@ AuxKernelTempl<ComputeValueType>::getMaterialProperty(const std::string & name)
                _var.name(),
                "'.");
 
-  return MaterialPropertyInterface::getMaterialProperty<T>(name);
+  return MaterialPropertyInterface::getMaterialPropertyTempl<T>(name);
 }
 
 template <typename ComputeValueType>
 template <typename T>
 const MaterialProperty<T> &
-AuxKernelTempl<ComputeValueType>::getMaterialPropertyOld(const std::string & name)
+AuxKernelTempl<ComputeValueType>::getMaterialPropertyOldTempl(const std::string & name)
 {
   if (isNodal())
     mooseError("Nodal AuxKernel '",
@@ -269,7 +270,7 @@ AuxKernelTempl<ComputeValueType>::getMaterialPropertyOld(const std::string & nam
                _var.name(),
                "'.");
 
-  return MaterialPropertyInterface::getMaterialPropertyOld<T>(name);
+  return MaterialPropertyInterface::getMaterialPropertyOldTempl<T>(name);
 }
 
 template <typename ComputeValueType>
@@ -292,17 +293,17 @@ AuxKernelTempl<ComputeValueType>::getMaterialPropertyOlder(const std::string & n
 template <typename ComputeValueType>
 template <typename T>
 const T &
-AuxKernelTempl<ComputeValueType>::getUserObject(const std::string & name)
+AuxKernelTempl<ComputeValueType>::getUserObjectTempl(const std::string & name)
 {
   _depend_uo.insert(_pars.get<UserObjectName>(name));
-  return UserObjectInterface::getUserObject<T>(name);
+  return UserObjectInterface::getUserObjectTempl<T>(name);
 }
 
 template <typename ComputeValueType>
 template <typename T>
 const T &
-AuxKernelTempl<ComputeValueType>::getUserObjectByName(const UserObjectName & name)
+AuxKernelTempl<ComputeValueType>::getUserObjectByNameTempl(const UserObjectName & name)
 {
   _depend_uo.insert(name);
-  return UserObjectInterface::getUserObjectByName<T>(name);
+  return UserObjectInterface::getUserObjectByNameTempl<T>(name);
 }

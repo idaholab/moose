@@ -25,7 +25,7 @@ defineADValidParams(ADVectorKernelSUPG, ADVectorKernel, PGParams;);
 template <typename T, ComputeStage compute_stage>
 ADKernelSUPGTempl<T, compute_stage>::ADKernelSUPGTempl(const InputParameters & parameters)
   : ADKernelStabilizedTempl<T, compute_stage>(parameters),
-    _tau(adGetADMaterialProperty<Real>("tau_name")),
+    _tau(getADMaterialProperty<Real>("tau_name")),
     _velocity(adCoupledVectorValue("velocity"))
 {
 }
