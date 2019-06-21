@@ -7,7 +7,6 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-import re
 import uuid
 import logging
 
@@ -106,7 +105,6 @@ class BibtexExtension(command.CommandExtension):
 
         self.addCommand(reader, BibtexCommand())
         self.addCommand(reader, BibtexReferenceComponent())
-        reader.addInline(BibtexReferenceComponentDeprecated(), location='>FormatInline')
 
         renderer.add('BibtexCite', RenderBibtexCite())
         renderer.add('BibtexBibliography', RenderBibtexBibliography())
@@ -123,19 +121,6 @@ class BibtexReferenceComponent(command.CommandComponent):
     def createToken(self, parent, info, page):
         keys = [key.strip() for key in info['inline'].split(',')]
         BibtexCite(parent, keys=keys, cite=info['command'])
-        self.extension.addCitations(*keys)
-        return parent
-
-class BibtexReferenceComponentDeprecated(components.TokenComponent):
-    RE = re.compile(r'\['                                 # open
-                    r'(?P<cite>cite|citet|citep|nocite):' # cite prefix
-                    r'(?P<keys>.*?)'                      # list of keys
-                    r'\]',                                # closing ]
-                    flags=re.UNICODE)
-
-    def createToken(self, parent, info, page):
-        keys = [key.strip() for key in info['keys'].split(',')]
-        BibtexCite(parent, keys=keys, cite=info['cite'])
         self.extension.addCitations(*keys)
         return parent
 
