@@ -19,8 +19,8 @@ gradient term is neglected in the small strain definition to give:
 \end{equation}
 
 For more details on the linearized small strain assumption and derivation, see a
-Continuum Mechanics text such as [cite!malvern1969introduction] or
-[cite!bower2009applied], specifically
+Continuum Mechanics text such as [!cite](malvern1969introduction) or
+[!cite](bower2009applied), specifically
 [Chapter 2](http://solidmechanics.org/Text/Chapter2_1/Chapter2_1.php#Sect2_1_7).
 
 Total strain theories are path independent: in MOOSE, path independence means
@@ -30,7 +30,7 @@ other hand, use the increment of strain at timestep to calculate stress.
 Because the total strain formulation `ADComputeSmallStrain` is path independent,
 no old values of strain or stress from the previous timestep are stored in
 MOOSE. For a comparison of total strain vs incremental strain theories with
-experimental data, see [cite!shammamy1967incremental].
+experimental data, see [!cite](shammamy1967incremental).
 
 !syntax parameters /Materials/ADComputeSmallStrain
 

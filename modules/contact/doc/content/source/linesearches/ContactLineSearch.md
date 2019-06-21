@@ -23,7 +23,7 @@ contact set is resolved late in the Newton solve, the linear tolerance will retu
 tolerance set through the traditional `l_tol` parameter.
 
 This line search helps significantly with the phenomenon in the contact
-literature known as jamming or zig-zagging [citep!wriggers2006computational]
+literature known as jamming or zig-zagging [!citep](wriggers2006computational)
 where a Newton solve bounces back and forth between
 different contact sets. However, it is not a panacea. It will only partially
 assuage problems associated with "bad" linear solves which can arise during

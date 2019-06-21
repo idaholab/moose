@@ -3,17 +3,17 @@
 !syntax description /Modules/FluidProperties/CO2FluidProperties
 
 Fluid properties for CO$_2$ are mainly calculated using the Span and Wagner equation of state
-[citep!spanwagner1996]. This formulation uses density and temperature as the primary variables with
+[!citep](spanwagner1996). This formulation uses density and temperature as the primary variables with
 which to calculate properties such as density, enthalpy and internal energy. However, the Fluid
 Properties module uses pressure and temperature in its interface, which is suitable for use in the
 Porous Flow module. As a result, CO$_2$ properties are typically calculated by first calculating
 density iteratively for a given pressure and temperature. This density is then used to calculate the
 other properties, such as internal energy, directly.
 
-Viscosity is calculated using the formulation presented in [cite!fenghour1998], while
-thermal conductivity is taken from [cite!scalabrin2006].
+Viscosity is calculated using the formulation presented in [!cite](fenghour1998), while
+thermal conductivity is taken from [!cite](scalabrin2006).
 
-Dissolution of CO$_2$ into water is calculated using Henry's law [citep!iapws2004].
+Dissolution of CO$_2$ into water is calculated using Henry's law [!citep](iapws2004).
 
 ## Properties of CO$_2$
 

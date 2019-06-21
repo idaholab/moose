@@ -2,7 +2,7 @@
 
 ## Description
 
-This material implements the unified phase-field model for mechanics of damage and quasi-brittle failure from Jian-Ying Wu [cite:JYWu2017].
+This material implements the unified phase-field model for mechanics of damage and quasi-brittle failure from Jian-Ying Wu [!cite](JYWu2017).
 
 ## Crack Surface Energy
 
@@ -35,7 +35,7 @@ The elastic energy is defined as
 \Psi(\varepsilon,d) = \omega(d)\Psi_0(\varepsilon)
 \end{equation}
 
-The monotonically decreasing energetic function $w(d)\in[0,1]$ describes degradation of the initial strain energy $\Psi_0(\varepsilon)$ as the crack phase-field evolves, satisfying the following properties [cite:Miehe2015]
+The monotonically decreasing energetic function $w(d)\in[0,1]$ describes degradation of the initial strain energy $\Psi_0(\varepsilon)$ as the crack phase-field evolves, satisfying the following properties [!cite](Miehe2015)
 \begin{equation}
 \omega'(d) < 0~~~~~\text{and}~~~~~\omega(0)=1,~~~~~\omega(1) = 0,~~~~~\omega'(1)=0
 \end{equation}
@@ -208,7 +208,7 @@ The evolution equation for the damage parameter follows the Allen-Cahn equation
 \begin{equation}
 \dot{d} = -L \frac{\delta F}{\delta d} = -L \left( \frac{\partial f_{loc}}{\partial d} - \nabla \cdot \kappa \nabla d \right),
 \end{equation}
-where $L = (g_c \tilde\eta)^{-1}$ and $\kappa = 2g_cl/c_0$.The $\tilde\eta = \eta/g_c$ is scaled by the $g_c$ which is consistent with the definition given by Miehe at.al [cite:Miehe2015].
+where $L = (g_c \tilde\eta)^{-1}$ and $\kappa = 2g_cl/c_0$.The $\tilde\eta = \eta/g_c$ is scaled by the $g_c$ which is consistent with the definition given by Miehe at.al [!cite](Miehe2015).
 
 This equation follows the standard Allen-Cahn and thus can be implemented in MOOSE using the standard
 Allen-Cahn kernels, TimeDerivative, AllenCahn, and ACInterface. There is now an action that automatically generates these kernels:

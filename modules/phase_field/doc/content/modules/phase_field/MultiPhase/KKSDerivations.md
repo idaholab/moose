@@ -14,7 +14,7 @@ c =  [1-h(\eta)]c_a + h(\eta)c_b
 
 # Materials
 
-The KKS system ([cite!kim_phase-field_1999]) uses multiple MOOSE materials to provide
+The KKS system ([!cite](kim_phase-field_1999)) uses multiple MOOSE materials to provide
 values for free energy  functions, the switching function $h(\eta)$, and the double
 well function $g(\eta)$. Providing these as materials allows the functions to be
 bundled in a single place, while being used by multiple kernels. Furthermore the

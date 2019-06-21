@@ -1,7 +1,7 @@
 # LevelSetOlssonReinitialization
 
 This kernel implements the non-time portion of the conservative "re-initialization" algorithm
-of [cite!olsson2007conservative] that transforms $u_h$ into a smooth function in the range $[0, 1]$
+of [!cite](olsson2007conservative) that transforms $u_h$ into a smooth function in the range $[0, 1]$
 rather than a signed distance, which is useful for certain types of problems such as phase
 identification. The weak form of the re-initialization equation is: find $U_h$ such that
 

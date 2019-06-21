@@ -2,7 +2,7 @@
 
 The "Software Requirement Specification (SRS)" is created from a set of "requirements" that
 must be: correct, complete, consistent, unambiquous, ranked, verifiable,
-modifiable, and traceable [citep!ieee1998recommended].
+modifiable, and traceable [!citep](ieee1998recommended).
 
 Within MOOSE the decision was made that each test is a requirement. This relationship is not
 dictated by any standard, it was a decision that was made to allow for the above characteristics
@@ -24,7 +24,7 @@ perform to satisfy the test.
 ## Correct
 
 > An SRS is correct if, and only if, every requirement stated therein is one that the software
-> shall meet [citep!ieee1998recommended].
+> shall meet [!citep](ieee1998recommended).
 
 The definition of the SRS being "correct" necessitates that each requirement be satisfied, a
 one-to-one relationship between a test and a requirement makes verify the correctness a
@@ -35,7 +35,7 @@ are met, for the code to be merged into the stable (master) branch.
 
 > An SRS is complete if all requirements are acknowledged and treated, responses of the software
 > to all realizable classes of input (both invalid and valid) exist, and references to all figures,
-> tables, and diagrams in the SRS are valid [citep!ieee1998recommended].
+> tables, and diagrams in the SRS are valid [!citep](ieee1998recommended).
 
 Each requirement is clearly defined within the test specification allowing for the list of
 requirements to be automatically generated, therefore all requirements are guaranteed to be
@@ -52,7 +52,7 @@ valid, if they are not testing fails until these references are defined.
 ## Consistent
 
 > If an SRS does not agree with some higher-level document, it is not correct
-> [citep!ieee1998recommended].
+> [!citep](ieee1998recommended).
 
 The SRS and all associated documents that reference a requirement within MOOSE are automatically
 generated within the MooseDocs system. The system maintains the interconnection of these documents,
@@ -62,7 +62,7 @@ into the stable (master) branch.
 ## Unambiguous
 
 > An SRS is unambiguous if every requirement stated therein has only one interpretation
-> [citep!ieee1998recommended].
+> [!citep](ieee1998recommended).
 
 This characteristic, along with being "verifiable", is the driving factor for creating a
 one-to-one connection between a test and a requirement. Each test is created for a specific reason
@@ -73,7 +73,7 @@ the test, which is useful in general outside of the SRS.
 ## Ranked
 
 > An SRS is ranked for importance if each requirement in it has an identifier to indicate the
-> importance of stability of that particular requirement [citep!ieee1998recommended].
+> importance of stability of that particular requirement [!citep](ieee1998recommended).
 
 Within MOOSE tests/requirements are not ranked for importance. As stated above an SRS must be
 "correct", which necessitates that all requirements are met. Therefore, ranking is irrelevant.
@@ -81,7 +81,7 @@ Within MOOSE tests/requirements are not ranked for importance. As stated above a
 ## Verifiable
 
 > An SRS is verifiable if there exists some process with which a person or a machine can check that
-> the software product meets the requirement [citep!ieee1998recommended].
+> the software product meets the requirement [!citep](ieee1998recommended).
 
 This characteristic of an SRS is a driving factor behind the one-to-one relationship between
 a requirement and a test. With such a connection the SRS is verifiable by a machine simply by
@@ -90,7 +90,7 @@ having all the tests passing.
 ## Modifiable
 
 > An SRS is modifiable if changes to the requirements can be made easily, completely, and
-> consistently while retaining the structure and style [citep!ieee1998recommended].
+> consistently while retaining the structure and style [!citep](ieee1998recommended).
 
 Embedding the requirements within the test specifications treats the text for the requirement as
 code. Coupled with the automatic creating of documents using MooseDocs all changes to requirements
@@ -102,7 +102,7 @@ alterations.
 
 > An SRS is traceable if the origin of its requirements is clear and if it facilitates the
 > referencing of each requirement in future development or enhancement documentation
-> [citep!ieee1998recommended].
+> [!citep](ieee1998recommended).
 
 Each requirement is embedded in the code repository, which for the case of MOOSE, is a git
 repository. Then by its very nature of being treated as code the complete history each requirement

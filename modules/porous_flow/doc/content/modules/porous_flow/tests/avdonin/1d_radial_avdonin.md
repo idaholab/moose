@@ -3,7 +3,7 @@
 ## Description
 
 An analytical solution to the problem of 1D radial coupled heat and mass transport was initially
-developed by [citet!avdonin1964], and later by [citet!ross1982] (in a similar fashion as for the
+developed by [!citet](avdonin1964), and later by [!citet](ross1982) (in a similar fashion as for the
 1D Cartesian [model](1d_radial_avdonin.md)).
 
 The problem consists of a 1D radial model where cold water is injected into a warm semi-infinite reservoir
@@ -13,7 +13,7 @@ and adiabatic boundary conditions.
 
 For the simple case of a 1D radial model bounded on the upper and lower surfaces by no-flow
 and adiabatic boundaries, a simplified solution for the temperature profile $T(r, t)$ can be obtained
-[citep!updegraff1989]
+[!citep](updegraff1989)
 
 \begin{equation}
 \frac{T(r, t) - T(r, 0)}{T(0, t) - T(r, 0)} = \frac{\Gamma(\nu, \omega^2/(4 \tau))}{\Gamma(\nu)},
@@ -45,7 +45,7 @@ rate, and $h$ is the height of the reservoir.
 
 ## Model
 
-This problem was considered in a code comparison by [citet!updegraff1989], so we use identical parameters
+This problem was considered in a code comparison by [!citet](updegraff1989), so we use identical parameters
 in this verification problem, see [tab:res].
 
 !table id=tab:res caption=Model properties
@@ -78,10 +78,10 @@ between the analytical solution and the MOOSE results are observed.
 !media media/porous_flow/1d_radial_avdonin.png
        id=fig:avdonin
        style=width:80%;margin-left:10px;
-       caption=Comparison between [citet!avdonin1964] result and MOOSE at $t = 10^6$ s (left); and
+       caption=Comparison between [!citet](avdonin1964) result and MOOSE at $t = 10^6$ s (left); and
        $t = 10^9$ s (right).
 
-This model also admits a similarity solution $\zeta = r^2/t$ [citep:moridis1992]. Again, excellent
+This model also admits a similarity solution $\zeta = r^2/t$ [!citep](moridis1992). Again, excellent
 agreement between the analytical solution and the MOOSE results are observed, see [fig:avdonin_sim]
 
 !media media/porous_flow/1d_radial_avdonin_similarity.png

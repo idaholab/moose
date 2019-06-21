@@ -9,7 +9,7 @@ This page is part of a set of pages devoted to discussions of numerical stabiliz
 - [Numerical diffusion](numerical_diffusion.md)
 - [A worked example of Kuzmin-Turek stabilization](kt_worked.md)
 
-Kuzmin and Turek [citep!KuzminTurek2004] describe a method of stabilising advection while minimising artificial numerical diffusion.  In this page "Kuzmin and Turek" is abbreviatved to "KT".  This page will make much more sense if you read it in tandem with the KT paper!  KT consider a single scalar quantity $u$ that is being advected.  For sake of argument, in this page we think of $u$ as "heat".
+Kuzmin and Turek [!citep](KuzminTurek2004) describe a method of stabilising advection while minimising artificial numerical diffusion.  In this page "Kuzmin and Turek" is abbreviatved to "KT".  This page will make much more sense if you read it in tandem with the KT paper!  KT consider a single scalar quantity $u$ that is being advected.  For sake of argument, in this page we think of $u$ as "heat".
 
 In this page, the 1D example studied in the [numerical diffusion page](numerical_diffusion.md) is used to explicitly illustrate how their approach works.  The input file is
 

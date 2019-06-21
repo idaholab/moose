@@ -4,7 +4,7 @@
 
 The multiphase Grand Potential model is parameterized using a bulk free energy
 coefficient $\mu$, a gradient interface coefficient $\kappa$, and a set of
-interface pair coefficients $\gamma_{\alpha i \beta j}$ [cite!AagesenGP2018].
+interface pair coefficients $\gamma_{\alpha i \beta j}$ [!cite](AagesenGP2018).
 Note that this model is a multi phase / poly crystal model and the indices
 $\alpha$ and $\beta$ represent phases and $i$ and $j$ represent grains.
 
@@ -33,7 +33,7 @@ supplied in `sigma_index`. All other interface widths are a function of their
 respective interfacial free energies.
 
 With $\kappa$ and $\mu$ determined the remaining $\gamma_{\alpha i \beta j}$ can
-be computed using the fitted relation [cite!MoelansWeb]
+be computed using the fitted relation [!cite](MoelansWeb)
 
 \begin{equation}
 \begin{aligned}

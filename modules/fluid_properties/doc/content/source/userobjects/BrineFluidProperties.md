@@ -6,13 +6,13 @@ A high-precision and consistent formulation for fluid properties for binary salt
 mixtures at pressures and temperatures of interest.
 
 Density, enthalpy, internal energy and specific heat capacity are
-calculated using the formulations provided in [cite!driesner2007a] and [cite!driesner2007b].
+calculated using the formulations provided in [!cite](driesner2007a) and [!cite](driesner2007b).
 
-Viscosity and thermal conductivity of brine are calculated using the formulation of [cite!phillips1981].
+Viscosity and thermal conductivity of brine are calculated using the formulation of [!cite](phillips1981).
 
-Brine vapor pressure is calculated using the formulation presented in [cite!haas1976].
+Brine vapor pressure is calculated using the formulation presented in [!cite](haas1976).
 
-Solubility of solid salt (halite) in water is given by [cite!potter1977].
+Solubility of solid salt (halite) in water is given by [!cite](potter1977).
 
 By default, the BrineFluidProperties UserObject uses the [Water97FluidProperties](/Water97FluidProperties.md)
 and [NaClFluidProperties](/NaClFluidProperties.md) which are constructed internally, so do not have to be

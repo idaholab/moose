@@ -158,7 +158,7 @@ is shown in [spatial_plot].
 
 The legend of this plot includes the slope of each of the plotted lines. Both achieve the
 theoretical convergence rates of two and three for first and second order elements, respectively.
-For more information regarding convergence rates refer to [citet!fish2007first].
+For more information regarding convergence rates refer to [!citet](fish2007first).
 
 ## Temporal Convergence
 

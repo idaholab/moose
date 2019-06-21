@@ -1,7 +1,7 @@
 # Injection ala Buckley and Leverett
 
 PorousFlow is compared with a simple single-phase one-dimensional
-Buckley-Leverett problem [citep!buckley_leverett].  The single-phase fluid moves in a region
+Buckley-Leverett problem [!citep](buckley_leverett).  The single-phase fluid moves in a region
 $0\leq x\leq 15\,$m.  A fully-saturated front initially sits at
 position $x=5$, while the region $x>5$ is initially unsaturated.  With
 zero suction function $P_{c} = 0$, there is no diffusion of the sharp
