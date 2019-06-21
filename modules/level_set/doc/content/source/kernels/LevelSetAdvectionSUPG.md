@@ -1,7 +1,7 @@
 # LevelSetAdvectionSUPG
 
 This kernel adds the Streamline Upwind/Petrov-Galerkin (SUPG) stabilization
-term [citep!brooks1982streamline, donea2003finite] to the advection term of the level set equation.
+term [!citep](brooks1982streamline, donea2003finite) to the advection term of the level set equation.
 
 \begin{equation}
 \label{eq:LevelSetAdvectionSUPG:weak}

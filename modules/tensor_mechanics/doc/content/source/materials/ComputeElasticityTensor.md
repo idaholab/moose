@@ -53,7 +53,7 @@ tensor for a mechanics simulation that are discussed below.
 The fill method `symmetric21` is used to create the elasticity tensor for a linear hyperelastic
 material with 21 independent components: the symmetries shown in
 [eq:symmetric21_cijkl_cases] are used to determine the independent components
-[citep!slaughter2012linearized].
+[!citep](slaughter2012linearized).
 \begin{equation}
 \label{eq:symmetric21_cijkl_cases}
   \begin{aligned}
@@ -72,7 +72,7 @@ which shows the expected order of the elasticity tensor components in the input 
 ## Orthotropic Symmetry
 
 The fill method `symmetric9` is appropriate for materials with three orthotropic planes of symmetry
-[citep!malvern1969introduction], and is often used for simulations of anistropic materials such as
+[!citep](malvern1969introduction), and is often used for simulations of anistropic materials such as
 cubic crystals.  The enginering elasticity tensor notation, [eq:rank4tensor_aux_indices],
 for an orthotropic material is given in [eq:symmetric9_fill_method]
 \begin{equation}
@@ -120,7 +120,7 @@ where $e$ is the permutation tensor and $m$ is the summation index.
 
 ## Transverse Isotropic (Axisymmetric)
 
-The fill method `axisymmetric_rz` is used for materials which are isotropic with respect to an axis of symmetry, such as a material composed of fibers which are parallel to the axis of symmetry [citep!slaughter2012linearized].
+The fill method `axisymmetric_rz` is used for materials which are isotropic with respect to an axis of symmetry, such as a material composed of fibers which are parallel to the axis of symmetry [!citep](slaughter2012linearized).
 The engineering notation matrix in this case is shown by [eq:axisymmetric_rz_fill_method].
 \begin{equation}
 \label{eq:axisymmetric_rz_fill_method}

@@ -87,7 +87,7 @@ class AcronymExtension(command.CommandExtension):
             renderer.addPackage('tabulary')
 
 class AcronymComponent(command.CommandComponent):
-    COMMAND = ('acro', 'ac')
+    COMMAND = 'ac'
     SUBCOMMAND = '*'
 
     def createToken(self, parent, info, page):

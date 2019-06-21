@@ -22,7 +22,7 @@ radial return stress increment.  This isotropic plasticity class also computes
 the plastic strain as a stateful material property.
 
 This class is based on the implicit integration algorithm in
-[cite!dunne2005introduction] pg. 146--149. It uses forward mode automatic
+[!cite](dunne2005introduction) pg. 146--149. It uses forward mode automatic
 differentiation to provide all necessary material property derivatives to
 assemble a perfect Jacobian (this replaces the approximated tangent operator).
 

@@ -2,7 +2,7 @@
 
 !syntax description /ICs/VolumeWeightedWeibull
 
-The VolumeWeightedWeibull class generates a spatially randomized distribution of a variable following a Weibull distribution, but weighted by the element volume to account for the fact that larger volumes are more likely to contain defects, and would thus have a reduced strength. This class follows the approach documented in [cite!strack_aleatory_2015], and using it to describe local strength for fracture models minimizes mesh size dependence.
+The VolumeWeightedWeibull class generates a spatially randomized distribution of a variable following a Weibull distribution, but weighted by the element volume to account for the fact that larger volumes are more likely to contain defects, and would thus have a reduced strength. This class follows the approach documented in [!cite](strack_aleatory_2015), and using it to describe local strength for fracture models minimizes mesh size dependence.
 
 The randomized value of a given variable $\eta$ used to characterize a strength can be expressed as:
 \begin{equation}

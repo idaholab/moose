@@ -3,7 +3,7 @@
 ## Description
 
 An analytical solution to the problem of 1D coupled heat and mass transport was initially
-developed by [citet!avdonin1964], and later by [citet!ross1982].
+developed by [!citet](avdonin1964), and later by [!citet](ross1982).
 
 The problem consists of a 1D model where cold water is injected into a warm semi-infinite reservoir
 at a constant rate. The top and bottom surfaces of the reservoir are bounded by caprock which is
@@ -12,7 +12,7 @@ and adiabatic boundary conditions.
 
 For the simple case of a 1D Cartesian model bounded on the upper and lower surfaces by no-flow
 and adiabatic boundaries, a simplified solution for the temperature profile $T(x, t)$ can be obtained
-[citep!updegraff1989]
+[!citep](updegraff1989)
 
 \begin{equation}
 \frac{T(x, t) - T(x, 0)}{T(0, t) - T(x, 0)} = \frac{1}{2} \left[\mathrm{erfc}\left(\frac{x - vt}
@@ -41,7 +41,7 @@ saturated reservoir.
 
 ## Model
 
-This problem was considered in a code comparison by [citet!updegraff1989], so we use identical parameters
+This problem was considered in a code comparison by [!citet](updegraff1989), so we use identical parameters
 in this verification problem, see [tab:res].
 
 !table id=tab:res caption=Model properties
@@ -56,7 +56,7 @@ in this verification problem, see [tab:res].
 | Saturated thermal conductivity | 25 W m$^{-1}$ K |
 | Saturated specific heat capacity | 1,000 J kg$^{-1}$ K |
 
-Following [citet!updegraff1989], a constant fluid flow through the left boundary is obtained by
+Following [!citet](updegraff1989), a constant fluid flow through the left boundary is obtained by
 applying a constant pressure gradient over the model by fixing porepressure at the boundaries. The
 temperature of the water entering the model is fixed at 160 $^{\circ}$C by fixing enthalpy at the
 left boundary.
@@ -74,11 +74,11 @@ instructions at the top of the input file.
 
 The results for the temperature profile after 13,000 seconds are shown in [fig:avdonin]. Good agreement is
 shown, however some numerical diffusion is obvserved. Similar results are obtained using TOUGH2 for upstream
-weighting, see [citet!moridis1992].
+weighting, see [!citet](moridis1992).
 
 !media media/porous_flow/1d_avdonin.png
        id=fig:avdonin
        style=width:60%;margin-left:10px;
-       caption=Comparison between [citet!avdonin1964] result and MOOSE at t = 13,000 s.
+       caption=Comparison between [!citet](avdonin1964) result and MOOSE at t = 13,000 s.
 
 !bibtex bibliography

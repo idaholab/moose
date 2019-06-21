@@ -11,7 +11,7 @@ R = -\frac{\partial F_1}{\partial c_1} \left( \frac{\partial h_1}{\partial \eta_
 \end{equation}
 
 where $c_i$ is the phase concentration for phase $i$ and $h_i$ is the interpolation
-function for phase $i$ defined in [cite!Folch05] (referred to as $g_i$ there, but we use $h_i$ to maintain consistency with other interpolation functions in MOOSE). Since in the KKS model, chemical potentials are constrained to be equal at each position, $\frac{\partial F_1}{\partial c_1} = \frac{\partial F_2}{\partial c_2} = \frac{\partial F_3}{\partial c_3}$.
+function for phase $i$ defined in [!cite](Folch05) (referred to as $g_i$ there, but we use $h_i$ to maintain consistency with other interpolation functions in MOOSE). Since in the KKS model, chemical potentials are constrained to be equal at each position, $\frac{\partial F_1}{\partial c_1} = \frac{\partial F_2}{\partial c_2} = \frac{\partial F_3}{\partial c_3}$.
 
 ### Jacobian
 

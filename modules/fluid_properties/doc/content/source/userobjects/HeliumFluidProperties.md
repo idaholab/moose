@@ -5,7 +5,7 @@
 ## Description
 
 The `HeliumFluidProperties` class provides fluid properties for helium
-[cite:petersen].
+[!cite](petersen).
 
 The standard deviation $\sigma$ for density is approximately 0.03% at a pressure
 of 0.1 MPa and 0.3% at 10 MPa, or
@@ -38,7 +38,7 @@ approximately 1% at 273 K and 6% at 1800K, or
 \sigma=0.0035T\ \%
 \end{equation}
 
-where $T$ is in K. The speed of sound is calculated as [cite:harlow]
+where $T$ is in K. The speed of sound is calculated as [!cite](harlow)
 
 \begin{equation}
 c=\sqrt{\frac{-\left\lbrack\frac{P}{\rho^2}-\frac{C_v}{\left(\frac{\partial\rho}{\partial T}\right)_p}\right\rbrack}{C_v\left(\frac{\partial\rho}{\partial P}\right)_T\left(\frac{\partial T}{\partial \rho}\right)_P}}

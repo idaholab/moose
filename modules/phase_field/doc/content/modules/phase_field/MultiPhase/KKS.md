@@ -1,7 +1,7 @@
 # Kim-Kim-Suzuki Model
 
 The Kim-Kim-Suzuki (KKS) model in its current implementation is an implementation of the two-phase
-model presented in [cite!kim_phase-field_1999].  It features a single order parameter $\eta$, but
+model presented in [!cite](kim_phase-field_1999).  It features a single order parameter $\eta$, but
 has---compared to the [WBM](MultiPhase/WBM.md)---the added complexity of introducing
 phase-concentrations $(c_a, c_b)$, i.e. a concentration variable for each component and each phase,
 in addition to the global concentrations ($c$).

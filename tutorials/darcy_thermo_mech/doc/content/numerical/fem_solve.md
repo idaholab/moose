@@ -172,7 +172,7 @@ This form has many advantages:
 ## Preconditioned JFNK
 
 Krylov methods need preconditioning to be efficient (or even effective!),
-see [citet:knoll2004jacobian].
+see [!citet](knoll2004jacobian).
 
 - Reduces the total number of linear iterations
 - Krylov methods, in theory, converge in the number of linear iterations equal to the number of unknowns in the system

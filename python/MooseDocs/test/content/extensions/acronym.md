@@ -2,10 +2,10 @@
 
 !acronym list
 
-!!acro INL!!
+[!ac!INL]
 
-!!acro MTU!!
+[!ac!MTU]
 
-Some text !!acro INL!!
+Some text [!ac!INL]
 
-!!acro MTU!!
+[!ac!MTU]
