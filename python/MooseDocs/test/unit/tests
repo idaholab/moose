@@ -11,4 +11,10 @@
     input = test_comment.py
     requirement = "The documentation system shall support comments within markdown syntax."
   []
+  [acronym]
+    type = PythonUnitTest
+    input = test_acronym.py
+    requirement = "The documentation system shall support acronyms within markdown syntax."
+    issues = '#6699 #13611'
+  []
 []
