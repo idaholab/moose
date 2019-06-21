@@ -56,7 +56,7 @@ Substituting these expansions back into the example weak form ([example_weak_for
 \left(\psi_i, \vec{\beta} \cdot \nabla u_h\right) - \left(\psi_i, f\right) = 0, \quad i=1,\ldots,N
 
 The left-hand side of the equation above is referred to as the $i^{th}$ component of
-the "residual vector," $R_i(u_h)$.
+the "residual vector," $\vec{R}_i(u_h)$.
 
 !---
 
@@ -95,7 +95,7 @@ Example bi-quadratic basis functions defined on the Quad9 element:
 
 $\psi_0$ is associated to a "corner" node, it is zero on the opposite edges.\\
 $\psi_4$ is associated to a "mid-edge" node, it is zero on all other edges.\\
-$\psi_8$ is associated to the "center" node, it is symmetric and $\geq 0$ on the element.\\
+$\psi_8$ is associated to the "center" node, it is symmetric and $\geq 0$ on the element.
 
 !row!
 !col! width=33%
@@ -122,9 +122,3 @@ $\psi_8$
 !col-end!
 
 !row-end!
-
-!---
-
-## Finite Element (Quad9)
-
-!media fem_quad9_ref.png style=width:100%;margin-left:auto;margin-right:auto;display:block;

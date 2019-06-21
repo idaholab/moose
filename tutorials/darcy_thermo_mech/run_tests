@@ -2,6 +2,8 @@
 for dir in */
 do
     LOC="${dir%/}"
-    echo "${LOC}/run_tests $@"
-    (cd ${LOC} && ./run_tests "$@")
+    if [[ "${LOC}" == step* ]]; then
+        echo "${LOC}/run_tests $@"
+        (cd ${LOC} && ./run_tests "$@")
+    fi
 done

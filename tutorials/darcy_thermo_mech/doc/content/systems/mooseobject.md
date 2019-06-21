@@ -41,7 +41,7 @@ protected:
 
 registerMooseObject("CustomApp", CustomObject);
 
-templte<>
+template<>
 InputParameters
 validParams<CustomObject>()
 {

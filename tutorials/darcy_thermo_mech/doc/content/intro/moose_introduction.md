@@ -30,14 +30,11 @@ Multi-physics Object Oriented Simulation Environment
 
 !---
 
-## Code Platform
-
 !media moose_design.png style=width:80%;margin-left:auto;margin-right:auto;display:block;
-
 
 !---
 
-## Capabilities
+## FEM Capabilities
 
 - User code agnostic of dimension
 - Continuous and Discontinuous Galerkin
@@ -49,8 +46,6 @@ Multi-physics Object Oriented Simulation Environment
 - Massively Parallel (MPI+Threads)
 - User code agnostic of parallelism
 - User code agnostic of shape functions
-- Postprocessing
-- Visualization, testing, and documentation tools
 
 !---
 

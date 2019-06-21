@@ -57,7 +57,7 @@ cd problems
 
 ## Step 10: Multi-scale Input File
 
-!listing step10_multiapps/problems/step10_micro.i
+!listing step10_multiapps/problems/step10.i
 
 !---
 

@@ -11,6 +11,8 @@ fi
 for dir in */
 do
     LOC="${dir%/}"
-    echo "make -j ${JOBS} -C ${LOC}"
-    make -j ${JOBS} -C ${LOC} "$@"
+    if [[ "${LOC}" == step* ]]; then
+        echo "make -j ${JOBS} -C ${LOC}"
+        make -j ${JOBS} -C ${LOC} "$@"
+    fi
 done

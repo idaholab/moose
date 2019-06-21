@@ -7,7 +7,7 @@ First, consider the steady-state diffusion equation on the domain $\Omega$: find
 !equation
 -\nabla \cdot \nabla u = 0 \in \Omega,
 
-where $u = 1$ on the bottom, $u = 0$ on the top and with
+where $u = 0$ on the left, $u = 1$ on the right and with
 $\nabla u \cdot \hat{n} = 0$ on the remaining boundaries.
 
 The weak form of this equation, in inner-product notation, is given by:

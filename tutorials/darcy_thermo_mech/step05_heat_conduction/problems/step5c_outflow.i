@@ -15,11 +15,11 @@
 
 [Kernels]
   [heat_conduction]
-    type = HeatConduction
+    type = ADHeatConduction
     variable = temperature
   []
   [heat_conduction_time_derivative]
-    type = HeatConductionTimeDerivative
+    type = ADHeatConductionTimeDerivative
     variable = temperature
   []
 []
@@ -55,7 +55,7 @@
 [Executioner]
   type = Transient
   num_steps = 10
-  solve_type = PJFNK
+  solve_type = NEWTON
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []

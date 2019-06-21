@@ -83,4 +83,4 @@ Combine several of the above `Markers`.
 
 ## Input Syntax
 
-!listing error_fraction_marker_test.i block=Adaptivity
+!listing adaptivity/cycles_per_step/cycles_per_step.i block=Adaptivity

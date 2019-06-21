@@ -80,15 +80,7 @@ to change the file format, suffix, frequency of output, the number of checkpoint
 
 - Set `num_files` to at least 2 to minimize the chance of ending up with a corrupt restart file
 
-```text
-[Outputs]
-  [./my_checkpoint]
-    type = Checkpoint
-    num_files = 4
-    interval = 5
-  [../]
-[]
-```
+  !listing outputs/checkpoint/checkpoint_interval.i block=Outputs
 
 !---
 
@@ -139,5 +131,5 @@ command-line flag, but it +requires a checkpoint file+.
 
 ## Multiapp Restart
 
-When running a multiapp simulation you do **not** need to enable checkpoint output in each sub app
+When running a multiapp simulation you do +not+ need to enable checkpoint output in each sub app
 input file. The master app stores the restart data for all sub apps in its file.

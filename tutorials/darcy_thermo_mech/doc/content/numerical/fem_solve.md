@@ -19,6 +19,11 @@ elements $\hat{\Omega}_e$.
 
 where $\mathcal{J}_e$ is the Jacobian of the map from the physical element to the reference element.
 
+!---
+
+## Reference Element (Quad9)
+
+!media fem_quad9_ref.png style=width:100%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 
@@ -65,7 +70,7 @@ Thus, the weak form of [example_weak_form2] becomes:
 
 !equation id=example_weak_residual
 \begin{aligned}
-R_i(u_h) &= \sum_e \sum_{q} w_{q} \left|\mathcal{J}_e\right|\underbrace{\left[ \nabla\psi_i\cdot k \nabla u_h + \psi_i \left(\vec\beta\cdot \nabla u_h \right) - \psi_i f \right](\vec{x}_{q})}_{\textrm{Kernel Object(s)}} \\
+\vec{R}_i(u_h) &= \sum_e \sum_{q} w_{q} \left|\mathcal{J}_e\right|\underbrace{\left[ \nabla\psi_i\cdot k \nabla u_h + \psi_i \left(\vec\beta\cdot \nabla u_h \right) - \psi_i f \right](\vec{x}_{q})}_{\textrm{Kernel Object(s)}} \\
 &- \sum_f \sum_{q_{face}} w_{q_{face}} \left|\mathcal{J}_f\right|\underbrace{\left[\psi_i k \nabla u_h \cdot \vec{n} \right](\vec x_{q_{face}})}_{\textrm{BoundaryCondition Object(s)}}
 \end{aligned}
 
@@ -91,10 +96,10 @@ x_{n+1} &= x_n + \delta x_{n+1}
 
 ## Newton's Method in MOOSE
 
-The residual, $R_i(u_h)$, as defined by [example_weak_residual] is a nonlinear system of equations,
+The residual, $\vec{R}_i(u_h)$, as defined by [example_weak_residual] is a nonlinear system of equations,
 
 !equation
-R_i(u_h)=0, \qquad i=1,\ldots, N,
+\vec{R}_i(u_h)=0, \qquad i=1,\ldots, N,
 
 that is used to solve for the coefficients $u_j, j=1,\ldots,N$.
 
@@ -109,7 +114,7 @@ For this system of nonlinear equations Newton's method is defined as:
 where $\mathbf{J}(\vec{u}_n)$ is the Jacobian matrix evaluated at the current iterate:
 
 !equation
-J_{ij}(\vec{u}_n) = \frac{\partial R_i(\vec{u}_n)}{\partial u_j}
+J_{ij}(\vec{u}_n) = \frac{\partial \vec{R}_i(\vec{u}_n)}{\partial u_j}
 
 !---
 
@@ -315,7 +320,7 @@ Thus, the $i^{th}$ component of the residual vector is:
 
 !equation
 \begin{aligned}
-R_i(u_h) = \left(\nabla\psi_i, k\nabla u_h \right) - \langle\psi_i, k\nabla u_h\cdot \hat{n} \rangle +
+\vec{R}_i(u_h) = \left(\nabla\psi_i, k\nabla u_h \right) - \langle\psi_i, k\nabla u_h\cdot \hat{n} \rangle +
 \left(\psi_i, \vec{\beta} \cdot \nabla u_h\right) - \left(\psi_i, f\right)
 \end{aligned}
 
