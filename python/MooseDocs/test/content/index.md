@@ -21,7 +21,6 @@ links to test pages for the various extensions within MooseDocs.
 1. [extensions/common.md]
 1. [extensions/layout.md]
 1. [extensions/materialicon.md]
-1. [extensions/acronym.md]
 1. [extensions/content.md]
 1. [extensions/config.md]
 1. [extensions/graph.md]
