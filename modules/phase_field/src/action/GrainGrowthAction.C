@@ -16,6 +16,7 @@
 #include "Factory.h"
 #include "MooseObjectAction.h"
 #include "MooseMesh.h"
+#include "NonlinearSystemBase.h"
 
 #include "libmesh/string_to_enum.h"
 
@@ -23,6 +24,8 @@ registerMooseAction("PhaseFieldApp", GrainGrowthAction, "add_aux_variable");
 registerMooseAction("PhaseFieldApp", GrainGrowthAction, "add_aux_kernel");
 registerMooseAction("PhaseFieldApp", GrainGrowthAction, "add_variable");
 registerMooseAction("PhaseFieldApp", GrainGrowthAction, "add_kernel");
+registerMooseAction("PhaseFieldApp", GrainGrowthAction, "copy_nodal_vars");
+registerMooseAction("PhaseFieldApp", GrainGrowthAction, "check_copy_nodal_vars");
 
 template <>
 InputParameters
@@ -34,6 +37,13 @@ validParams<GrainGrowthAction>()
   params.addRequiredParam<unsigned int>("op_num",
                                         "specifies the number of order parameters to create");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
+  params.addParam<Real>(
+      "scaling", 1.0, "Specifies a scaling factor to apply to the order parameters");
+  params.addParam<bool>(
+      "initial_from_file",
+      false,
+      "Take the initial condition of all polycrystal variables from the mesh file");
+
   // Get MooseEnums for the possible order/family options for this variable
   MooseEnum families(AddVariableAction::getNonlinearVariableFamilies());
   MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
@@ -45,18 +55,13 @@ validParams<GrainGrowthAction>()
                              orders,
                              "Specifies the order of the FE "
                              "shape function to use for the order parameters");
+
   params.addParam<MaterialPropertyName>(
       "mobility", "L", "The isotropic mobility used with the kernels");
   params.addParam<MaterialPropertyName>("kappa", "kappa_op", "The kappa used with the kernels");
-  params.addParam<Real>(
-      "scaling", 1.0, "Specifies a scaling factor to apply to the order parameters");
-  params.addParam<bool>("implicit", true, "Whether kernels are implicit or not");
-  params.addParam<bool>(
-      "use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
-  params.addParam<bool>("use_automatic_differentiation",
-                        false,
-                        "Flag to use automatic differentiation (AD) objects when possible");
+
   params.addParam<VariableName>("c", "Name of coupled concentration variable");
+
   params.addParam<Real>("en_ratio", 1.0, "Ratio of surface to GB energy");
   params.addParam<unsigned int>("ndef", 0, "Specifies the number of deformed grains to create");
   params.addParam<bool>("variable_mobility",
@@ -65,6 +70,14 @@ validParams<GrainGrowthAction>()
                         "this is set to false, L must be constant over the "
                         "entire domain!)");
   params.addCoupledVar("args", "Vector of nonlinear variable arguments that L depends on");
+
+  params.addParam<bool>("implicit", true, "Whether kernels are implicit or not");
+  params.addParam<bool>(
+      "use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
+  params.addParam<bool>("use_automatic_differentiation",
+                        false,
+                        "Flag to use automatic differentiation (AD) objects when possible");
+
   params.addParamNamesToGroup("scaling implicit use_displaced_mesh", "Advanced");
   params.addParamNamesToGroup("c en_ratio ndef", "Multiphysics");
 
@@ -84,11 +97,27 @@ GrainGrowthAction::GrainGrowthAction(const InputParameters & params)
 void
 GrainGrowthAction::act()
 {
+  // take initial values from file?
+  bool initial_from_file = getParam<bool>("initial_from_file");
+
   // Loop over order parameters
   for (unsigned int op = 0; op < _op_num; op++)
   {
     // Create variable name
     std::string var_name = _var_name_base + Moose::stringify(op);
+
+    // Setup initial from file if requested
+    if (initial_from_file)
+    {
+      if (_current_task == "check_copy_nodal_vars")
+        _app.setFileRestart() = true;
+
+      if (_current_task == "copy_nodal_vars")
+      {
+        auto * system = &_problem->getNonlinearSystemBase();
+        system->addVariableToCopy(var_name, var_name, "LATEST");
+      }
+    }
 
     // Add variable
     if (_current_task == "add_variable")
