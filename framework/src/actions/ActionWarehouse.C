@@ -339,6 +339,9 @@ ActionWarehouse::executeAllActions()
     if (_final_task != "" && task == _final_task)
       break;
   }
+
+  if (_show_actions)
+    _console << "[DBG][ACT] Finished executing all actions" << std::endl;
 }
 
 void

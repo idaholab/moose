@@ -190,7 +190,7 @@ public:
   virtual ArrayMooseVariable & getArrayVariable(THREAD_ID tid, const std::string & var_name) = 0;
 
   /// Returns the variable name of a component of an array variable
-  static NonlinearVariableName arrayVariableComponent(const std::string & var_name, unsigned int i)
+  static std::string arrayVariableComponent(const std::string & var_name, unsigned int i)
   {
     return var_name + "_" + std::to_string(i);
   }
@@ -748,4 +748,3 @@ namespace Moose
 void initial_condition(EquationSystems & es, const std::string & system_name);
 
 } // namespace Moose
-
