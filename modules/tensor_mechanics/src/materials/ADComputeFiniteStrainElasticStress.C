@@ -60,3 +60,6 @@ ADComputeFiniteStrainElasticStress<compute_stage>::computeQpStress()
   // Assign value for elastic strain, which is equal to the mechanical strain
   _elastic_strain[_qp] = _mechanical_strain[_qp];
 }
+
+// explicit instantiation is required for AD base classes
+adBaseClass(ADComputeFiniteStrainElasticStress);
