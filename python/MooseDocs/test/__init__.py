@@ -60,6 +60,7 @@ class MooseDocsTestCase(unittest.TestCase):
         """Helper for rendering AST"""
         if args or kwargs or (self.__translator is None):
             self.setup(*args, **kwargs)
+            self.tokenize(u'')
         self.__result = self.__translator.executioner.render(self.__node, ast, self.__meta)
         return self.__result
 
@@ -69,10 +70,16 @@ class MooseDocsTestCase(unittest.TestCase):
         self.render(self.__ast)
         return self.__ast, self.__result
 
-    def assertToken(self, token, tname, **kwargs):
+    def assertToken(self, token, tname, string=None, size=None, **kwargs):
         """Helper for checking type and attributes of a token"""
         self.assertEqual(token.name, tname)
         self.assertAttributes(token, **kwargs)
+
+        if size is not None:
+            self.assertSize(token, size)
+        if string is not None:
+            self.assertSize(token, 1)
+            self.assertToken(token(0), 'String', content=string)
 
     def assertHTMLTag(self, tag, tname, string=None, size=None, **kwargs):
         """Helper for checking HTML tree nodes"""

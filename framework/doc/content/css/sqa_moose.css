@@ -12,11 +12,9 @@
     color:red;
 }
 
-
 .moose-sqa-items a:not(:last-child):after{
     content:"; "
 }
-
 
 .moose-sqa-requirements.collection.with-header .collection-header{
     color:white;
