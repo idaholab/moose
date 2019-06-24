@@ -90,7 +90,12 @@ MultiAppInterpolationTransfer::execute()
       unsigned int from_sys_num = from_sys.number();
       unsigned int from_var_num = from_sys.variable_number(from_var.name());
 
-      bool from_is_nodal = from_sys.variable_type(from_var_num).family == LAGRANGE;
+      auto & fe_type = from_sys.variable_type(from_var_num);
+      bool from_is_constant = fe_type.order == CONSTANT;
+      bool from_is_nodal = fe_type.family == LAGRANGE;
+
+      if (fe_type.order > FIRST && !from_is_nodal)
+        mooseError("We don't currently support second order or higher elemental variable ");
 
       // EquationSystems & from_es = from_sys.get_equation_systems();
 
@@ -136,14 +141,37 @@ MultiAppInterpolationTransfer::execute()
       }
       else
       {
+        std::vector<Point> points;
         for (const auto & from_elem :
              as_range(from_mesh->local_elements_begin(), from_mesh->local_elements_end()))
         {
-          // Assuming CONSTANT MONOMIAL
-          dof_id_type from_dof = from_elem->dof_number(from_sys_num, from_var_num, 0);
+          // Skip this element if the variable has no dofs at it.
+          if (from_elem->n_dofs(from_sys_num, from_var_num) < 1)
+            continue;
 
-          src_pts.push_back(from_elem->centroid());
-          src_vals.push_back(from_solution(from_dof));
+          points.clear();
+          if (from_is_constant)
+            points.push_back(from_elem->centroid());
+          else
+            for (auto & node : from_elem->node_ref_range())
+              points.push_back(node);
+
+          unsigned int n_comp = from_elem->n_comp(from_sys_num, from_var_num);
+          auto n_points = points.size();
+          // We assume each point corresponds to one component of elemental variable
+          if (n_points != n_comp)
+            mooseError(" Number of points ",
+                       n_points,
+                       " does not equal to number of variable components ",
+                       n_comp);
+
+          unsigned int offset = 0;
+          for (auto & point : points)
+          {
+            dof_id_type from_dof = from_elem->dof_number(from_sys_num, from_var_num, offset++);
+            src_pts.push_back(point);
+            src_vals.push_back(from_solution(from_dof));
+          }
         }
       }
 
@@ -170,9 +198,14 @@ MultiAppInterpolationTransfer::execute()
           else
             mesh = &_multi_app->appProblemBase(i).mesh().getMesh();
 
-          bool is_nodal = to_sys->variable_type(var_num).family == LAGRANGE;
+          auto & to_fe_type = to_sys->variable_type(var_num);
+          bool to_is_constant = to_fe_type.order == CONSTANT;
+          bool to_is_nodal = to_fe_type.family == LAGRANGE;
 
-          if (is_nodal)
+          if (to_fe_type.order > FIRST && !to_is_nodal)
+            mooseError("We don't currently support second order or higher elemental variable ");
+
+          if (to_is_nodal)
           {
             for (const auto & node : mesh->local_node_ptr_range())
             {
@@ -202,13 +235,34 @@ MultiAppInterpolationTransfer::execute()
           }
           else // Elemental
           {
+            std::vector<Point> points;
             for (auto & elem : as_range(mesh->local_elements_begin(), mesh->local_elements_end()))
             {
-              Point centroid = elem->centroid();
-              Point actual_position = centroid + _multi_app->position(i);
+              // Skip this element if the variable has no dofs at it.
+              if (elem->n_dofs(sys_num, var_num) < 1)
+                continue;
 
-              if (elem->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this elem
+              points.clear();
+              if (to_is_constant)
+                points.push_back(elem->centroid());
+              else
+                for (auto & node : elem->node_ref_range())
+                  points.push_back(node);
+
+              auto n_points = points.size();
+              unsigned int n_comp = elem->n_comp(sys_num, var_num);
+              // We assume each point corresponds to one component of elemental variable
+              if (n_points != n_comp)
+                mooseError(" Number of points ",
+                           n_points,
+                           " does not equal to number of variable components ",
+                           n_comp);
+
+              unsigned int offset = 0;
+              for (auto & point : points)
               {
+                Point actual_position = point + _multi_app->position(i);
+
                 std::vector<Point> pts;
                 std::vector<Number> vals;
 
@@ -219,12 +273,12 @@ MultiAppInterpolationTransfer::execute()
 
                 Real value = vals.front();
 
-                dof_id_type dof = elem->dof_number(sys_num, var_num, 0);
+                dof_id_type dof = elem->dof_number(sys_num, var_num, offset++);
 
                 solution.set(dof, value);
-              }
-            }
-          }
+              } // point
+            }   // auto elem
+          }     // else
 
           solution.close();
           to_sys->update();
@@ -263,7 +317,12 @@ MultiAppInterpolationTransfer::execute()
       else
         to_mesh = &to_problem.mesh().getMesh();
 
-      bool is_nodal = to_sys.variable_type(to_var_num).family == LAGRANGE;
+      auto & fe_type = to_sys.variable_type(to_var_num);
+      bool is_constant = fe_type.order == CONSTANT;
+      bool is_nodal = fe_type.family == LAGRANGE;
+
+      if (fe_type.order > FIRST && !is_nodal)
+        mooseError("We don't currently support second order or higher elemental variable ");
 
       InverseDistanceInterpolation<LIBMESH_DIM> * idi;
 
@@ -309,8 +368,12 @@ MultiAppInterpolationTransfer::execute()
 
         unsigned int from_var_num = from_sys.variable_number(from_var.name());
 
-        bool from_is_nodal = from_sys.variable_type(from_var_num).family == LAGRANGE;
+        auto & from_fe_type = from_sys.variable_type(from_var_num);
+        bool from_is_constant = from_fe_type.order == CONSTANT;
+        bool from_is_nodal = from_fe_type.family == LAGRANGE;
 
+        if (from_fe_type.order > FIRST && !is_nodal)
+          mooseError("We don't currently support second order or higher elemental variable ");
         // EquationSystems & from_es = from_sys.get_equation_systems();
 
         NumericVector<Number> & from_solution = *from_sys.solution;
@@ -340,6 +403,7 @@ MultiAppInterpolationTransfer::execute()
         }
         else
         {
+          std::vector<Point> points;
           for (auto & from_element :
                as_range(from_mesh->local_elements_begin(), from_mesh->local_elements_end()))
           {
@@ -347,12 +411,35 @@ MultiAppInterpolationTransfer::execute()
             if (from_element->n_comp(from_sys_num, from_var_num) == 0)
               continue;
 
-            dof_id_type from_dof = from_element->dof_number(from_sys_num, from_var_num, 0);
+            points.clear();
+            // grap sample points
+            // for constant shape function, we take the element centroid
+            if (from_is_constant)
+              points.push_back(from_element->centroid());
+            // for higher order method, we take all nodes of element
+            // this works for the first order L2 Lagrange.
+            else
+              for (auto & node : from_element->node_ref_range())
+                points.push_back(node);
 
-            src_pts.push_back(from_element->centroid() + app_position);
-            src_vals.push_back(from_solution(from_dof));
-          }
-        }
+            auto n_points = points.size();
+            unsigned int n_comp = from_element->n_comp(from_sys_num, from_var_num);
+            unsigned int offset = 0;
+            // We assume each point corresponds to one component of elemental variable
+            if (n_points != n_comp)
+              mooseError(" Number of points ",
+                         n_points,
+                         " does not equal to number of variable components ",
+                         n_comp);
+
+            for (auto & point : points)
+            {
+              dof_id_type from_dof = from_element->dof_number(from_sys_num, from_var_num, offset++);
+              src_pts.push_back(point + app_position);
+              src_vals.push_back(from_solution(from_dof));
+            } // point
+          }   // from_element
+        }     // else
       }
 
       // We have only set local values - prepare for use by gathering remote gata
@@ -384,23 +471,47 @@ MultiAppInterpolationTransfer::execute()
       }
       else // Elemental
       {
+        std::vector<Point> points;
         for (auto & elem : as_range(to_mesh->local_elements_begin(), to_mesh->local_elements_end()))
         {
-          Point centroid = elem->centroid();
+          // Assuming LAGRANGE!
+          if (elem->n_comp(to_sys_num, to_var_num) == 0)
+            continue;
 
-          if (elem->n_dofs(to_sys_num, to_var_num) > 0) // If this variable has dofs at this elem
+          points.clear();
+          // grap sample points
+          // for constant shape function, we take the element centroid
+          if (is_constant)
+            points.push_back(elem->centroid());
+          // for higher order method, we take all nodes of element
+          // this works for the first order L2 Lagrange.
+          else
+            for (auto & node : elem->node_ref_range())
+              points.push_back(node);
+
+          auto n_points = points.size();
+          unsigned int n_comp = elem->n_comp(to_sys_num, to_var_num);
+          // We assume each point corresponds to one component of elemental variable
+          if (n_points != n_comp)
+            mooseError(" Number of points ",
+                       n_points,
+                       " does not equal to number of variable components ",
+                       n_comp);
+
+          unsigned int offset = 0;
+          for (auto & point : points)
           {
             std::vector<Point> pts;
             std::vector<Number> vals;
 
-            pts.push_back(centroid);
+            pts.push_back(point);
             vals.resize(1);
 
             idi->interpolate_field_data(vars, pts, vals);
 
             Real value = vals.front();
 
-            dof_id_type dof = elem->dof_number(to_sys_num, to_var_num, 0);
+            dof_id_type dof = elem->dof_number(to_sys_num, to_var_num, offset++);
 
             to_solution.set(dof, value);
           }

@@ -97,7 +97,7 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
   std::vector<unsigned int> froms_per_proc = getFromsPerProc();
 
   std::vector<std::vector<Point>> outgoing_points(n_processors());
-  std::vector<std::map<std::pair<unsigned int, unsigned int>, unsigned int>> point_index_map(
+  std::vector<std::map<std::pair<unsigned int, dof_id_type>, dof_id_type>> point_index_map(
       n_processors());
   // point_index_map[i_to, element_id] = index
   // outgoing_points[index] is the first quadrature point in element
@@ -108,7 +108,12 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
     unsigned int sys_num = to_sys->number();
     unsigned int var_num = to_sys->variable_number(_to_var_names[i]);
     MeshBase * to_mesh = &_to_meshes[i_to]->getMesh();
-    bool is_nodal = to_sys->variable_type(var_num).family == LAGRANGE;
+    auto & fe_type = to_sys->variable_type(var_num);
+    bool is_constant = fe_type.order == CONSTANT;
+    bool is_nodal = fe_type.family == LAGRANGE;
+
+    if (fe_type.order > FIRST && !is_nodal)
+      mooseError("We don't currently support second order or higher elemental variable ");
 
     if (is_nodal)
     {
@@ -131,7 +136,7 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
           {
             if (bboxes[i_from].contains_point(*node + _to_positions[i_to]))
             {
-              std::pair<unsigned int, unsigned int> key(i_to, node->id());
+              std::pair<unsigned int, dof_id_type> key(i_to, node->id());
               point_index_map[i_proc][key] = outgoing_points[i_proc].size();
               outgoing_points[i_proc].push_back(*node + _to_positions[i_to]);
               point_found = true;
@@ -142,35 +147,64 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
     }
     else // Elemental
     {
+      std::vector<Point> points;
+      std::vector<dof_id_type> point_ids;
       for (auto & elem : as_range(to_mesh->local_elements_begin(), to_mesh->local_elements_end()))
       {
-        Point centroid = elem->centroid();
-
         // Skip this element if the variable has no dofs at it.
         if (elem->n_dofs(sys_num, var_num) < 1)
           continue;
 
-        // Loop over the "froms" on processor i_proc.  If the elem is found in
-        // any of the "froms", add that elem to the vector that will be sent to
-        // i_proc.
-        unsigned int from0 = 0;
-        for (processor_id_type i_proc = 0; i_proc < n_processors();
-             from0 += froms_per_proc[i_proc], ++i_proc)
+        points.clear();
+        point_ids.clear();
+        // grap sample points
+        // for constant shape function, we take the element centroid
+        if (is_constant)
         {
-          bool point_found = false;
-          for (unsigned int i_from = from0; i_from < from0 + froms_per_proc[i_proc] && !point_found;
-               ++i_from)
-          {
-            if (bboxes[i_from].contains_point(centroid + _to_positions[i_to]))
-            {
-              std::pair<unsigned int, unsigned int> key(i_to, elem->id());
-              point_index_map[i_proc][key] = outgoing_points[i_proc].size();
-              outgoing_points[i_proc].push_back(centroid + _to_positions[i_to]);
-              point_found = true;
-            }
-          }
+          points.push_back(elem->centroid());
+          point_ids.push_back(elem->id());
         }
-      }
+
+        // for higher order method, we take all nodes of element
+        // this works for the first order L2 Lagrange.
+        else
+          for (auto & node : elem->node_ref_range())
+          {
+            points.push_back(node);
+            point_ids.push_back(node.id());
+          }
+
+        unsigned int offset = 0;
+        for (auto & point : points)
+        {
+          // Loop over the "froms" on processor i_proc.  If the elem is found in
+          // any of the "froms", add that elem to the vector that will be sent to
+          // i_proc.
+          unsigned int from0 = 0;
+          for (processor_id_type i_proc = 0; i_proc < n_processors();
+               from0 += froms_per_proc[i_proc], ++i_proc)
+          {
+            bool point_found = false;
+            for (unsigned int i_from = from0;
+                 i_from < from0 + froms_per_proc[i_proc] && !point_found;
+                 ++i_from)
+            {
+              if (bboxes[i_from].contains_point(point + _to_positions[i_to]))
+              {
+                std::pair<unsigned int, dof_id_type> key(i_to, point_ids[offset]);
+                if (point_index_map[i_proc].find(key) != point_index_map[i_proc].end())
+                  continue;
+
+                point_index_map[i_proc][key] = outgoing_points[i_proc].size();
+                outgoing_points[i_proc].push_back(point + _to_positions[i_to]);
+                point_found = true;
+              } // if
+            }   // i_from
+          }     //  i_proc
+          offset++;
+        } // point
+
+      } // else
     }
   }
 
@@ -235,6 +269,7 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
   {
     if (i_proc == processor_id())
       continue;
+
     _communicator.send(i_proc, outgoing_points[i_proc], _send_points[i][i_proc]);
   }
 
@@ -330,8 +365,9 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
     }
 
     MeshBase * to_mesh = &_to_meshes[i_to]->getMesh();
-
-    bool is_nodal = to_sys->variable_type(var_num).family == LAGRANGE;
+    auto & fe_type = to_sys->variable_type(var_num);
+    bool is_constant = fe_type.order == CONSTANT;
+    bool is_nodal = fe_type.family == LAGRANGE;
 
     if (is_nodal)
     {
@@ -347,7 +383,7 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
         for (unsigned int i_proc = 0; i_proc < incoming_evals.size(); ++i_proc)
         {
           // Skip this proc if the node wasn't in it's bounding boxes.
-          std::pair<unsigned int, unsigned int> key(i_to, node->id());
+          std::pair<unsigned int, dof_id_type> key(i_to, node->id());
           if (point_index_map[i_proc].find(key) == point_index_map[i_proc].end())
             continue;
           unsigned int i_pt = point_index_map[i_proc][key];
@@ -377,45 +413,81 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
     }
     else // Elemental
     {
+      std::vector<Point> points;
+      std::vector<dof_id_type> point_ids;
       for (auto & elem : as_range(to_mesh->local_elements_begin(), to_mesh->local_elements_end()))
       {
         // Skip this element if the variable has no dofs at it.
         if (elem->n_dofs(sys_num, var_num) < 1)
           continue;
 
-        unsigned int lowest_app_rank = libMesh::invalid_uint;
-        Real best_val = 0;
-        bool point_found = false;
-        for (unsigned int i_proc = 0; i_proc < incoming_evals.size(); ++i_proc)
+        points.clear();
+        point_ids.clear();
+        // grap sample points
+        // for constant shape function, we take the element centroid
+        if (is_constant)
         {
-          // Skip this proc if the elem wasn't in it's bounding boxes.
-          std::pair<unsigned int, unsigned int> key(i_to, elem->id());
-          if (point_index_map[i_proc].find(key) == point_index_map[i_proc].end())
-            continue;
-          unsigned int i_pt = point_index_map[i_proc][key];
-
-          // Ignore this proc if it's app has a higher rank than the
-          // previously found lowest app rank.
-          if (_direction == FROM_MULTIAPP)
+          points.push_back(elem->centroid());
+          point_ids.push_back(elem->id());
+        }
+        // for higher order method, we take all nodes of element
+        // this works for the first order L2 Lagrange. Might not work
+        // with something higher than the first order
+        else
+        {
+          for (auto & node : elem->node_ref_range())
           {
-            if (incoming_app_ids[i_proc][i_pt] >= lowest_app_rank)
-              continue;
+            points.push_back(node);
+            point_ids.push_back(node.id());
           }
-
-          // Ignore this proc if the point was actually outside its meshes.
-          if (incoming_evals[i_proc][i_pt] == OutOfMeshValue)
-            continue;
-
-          best_val = incoming_evals[i_proc][i_pt];
-          point_found = true;
         }
 
-        if (_error_on_miss && !point_found)
-          mooseError("Point not found! ", elem->centroid() + _to_positions[i_to]);
+        auto n_points = points.size();
+        unsigned int n_comp = elem->n_comp(sys_num, var_num);
+        // We assume each point corresponds to one component of elemental variable
+        if (n_points != n_comp)
+          mooseError(" Number of points ",
+                     n_points,
+                     " does not equal to number of variable components ",
+                     n_comp);
+        for (unsigned int offset = 0; offset < n_points; offset++)
+        {
+          unsigned int lowest_app_rank = libMesh::invalid_uint;
+          Real best_val = 0;
+          bool point_found = false;
+          for (unsigned int i_proc = 0; i_proc < incoming_evals.size(); ++i_proc)
+          {
+            // Skip this proc if the elem wasn't in it's bounding boxes.
+            std::pair<unsigned int, dof_id_type> key(i_to, point_ids[offset]);
+            if (point_index_map[i_proc].find(key) == point_index_map[i_proc].end())
+              continue;
 
-        dof_id_type dof = elem->dof_number(sys_num, var_num, 0);
-        solution->set(dof, best_val);
-      }
+            unsigned int i_pt = point_index_map[i_proc][key];
+
+            // Ignore this proc if it's app has a higher rank than the
+            // previously found lowest app rank.
+            if (_direction == FROM_MULTIAPP)
+            {
+              if (incoming_app_ids[i_proc][i_pt] >= lowest_app_rank)
+                continue;
+            }
+
+            // Ignore this proc if the point was actually outside its meshes.
+            if (incoming_evals[i_proc][i_pt] == OutOfMeshValue)
+              continue;
+
+            best_val = incoming_evals[i_proc][i_pt];
+            point_found = true;
+          }
+
+          if (_error_on_miss && !point_found)
+            mooseError("Point not found! ", elem->centroid() + _to_positions[i_to]);
+
+          // Get the value for a dof
+          dof_id_type dof = elem->dof_number(sys_num, var_num, offset);
+          solution->set(dof, best_val);
+        } // point
+      }   // element
     }
     solution->close();
     to_sys->update();
