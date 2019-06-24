@@ -88,7 +88,7 @@ The `DEFAULT` option uses an enforcement algorithmn that moves th internal force
 
 The [mortar constraint system](Constraints/index.md) provides an alternative
 discretization technique for solving mechanical contact. The
-`moose/test/tests/mortar/bouncing-block-contact` directory provides a series of
+`contact/test/tests/bouncing-block-contact` directory provides a series of
 input files testing different algorithms for solving both normal and tangential
 frictional contact. Some results are summarized below.
 

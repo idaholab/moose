@@ -18,7 +18,7 @@
 
 #include "libmesh/mesh_base.h"
 
-registerMooseObject("MooseApp", ContactDOFSetSize);
+registerMooseObject("ContactApp", ContactDOFSetSize);
 
 template <>
 InputParameters

@@ -11,6 +11,7 @@
     # running with FD and PJFNK at the time step when we have 'resting contact' e.g. there is no
     # gap, but also no force
     abs_zero = '2e-8'
+    allow_test_objects = true
   []
   [frictionless-nodal-lm-mortar-disp]
     type = 'Exodiff'
@@ -18,5 +19,6 @@
     exodiff = 'frictionless-nodal-lm-mortar-disp_out.e'
     mesh_mode = 'REPLICATED'
     requirement = "We shall be able to do mechanical contact with mortar for the displacements and node enforcement of the constraints."
+    allow_test_objects = true
   []
 []

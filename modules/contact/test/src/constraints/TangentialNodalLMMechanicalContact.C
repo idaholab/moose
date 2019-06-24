@@ -17,7 +17,7 @@
 using MetaPhysicL::DualNumber;
 using MetaPhysicL::NumberArray;
 
-registerMooseObject("MooseTestApp", TangentialNodalLMMechanicalContact);
+registerMooseObject("ContactTestApp", TangentialNodalLMMechanicalContact);
 
 template <>
 InputParameters

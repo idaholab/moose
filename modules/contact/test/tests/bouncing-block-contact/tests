@@ -10,6 +10,7 @@
     mesh_mode = 'REPLICATED'
     requirement = 'We will solve the frictionless bouncing block problem with nodal constraint enforcement, mortar application of forces, and min NCP function'
     cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 Postprocessors/active=''"
+    allow_test_objects = true
   []
   [frictionless-nodal-fb-lm-mortar-disp-coarse]
     type = 'Exodiff'
@@ -18,6 +19,7 @@
     mesh_mode = 'REPLICATED'
     requirement = 'We will solve the frictionless bouncing block problem with nodal constraint enforcement, mortar application of forces, and fb NCP function'
     cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 Postprocessors/active=''"
+    allow_test_objects = true
   []
   [frictionless-nodal-min-lm-nodal-disp-coarse]
     type = 'Exodiff'
@@ -26,6 +28,7 @@
     mesh_mode = 'REPLICATED'
     requirement = 'We will solve the frictionless bouncing block problem with nodal constraint enforcement, nodal application of forces, and min NCP function'
     cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 Postprocessors/active=''"
+    allow_test_objects = true
   []
   [frictionless-nodal-fb-lm-nodal-disp-coarse]
     type = 'Exodiff'
@@ -34,8 +37,10 @@
     mesh_mode = 'REPLICATED'
     requirement = 'We will solve the frictionless bouncing block problem with nodal constraint enforcement, nodal application of forces, and fb NCP function'
     cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 Postprocessors/active=''"
+    allow_test_objects = true
   []
   [frictionless-mortar-min-lm-mortar-disp-coarse]
+    allow_test_objects = true
     type = 'Exodiff'
     input = 'frictionless-mortar-min-lm-mortar-disp.i'
     exodiff = 'frictionless-mortar-min-lm-mortar-disp_out.e'
@@ -50,6 +55,7 @@
     mesh_mode = 'REPLICATED'
     requirement = 'We will solve the frictionless bouncing block problem with mortar constraint enforcement, mortar application of forces, and fb NCP function'
     cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 Postprocessors/active=''"
+    allow_test_objects = true
   []
   [frictional-mortar-min-lm-mortar-disp-coarse]
     type = 'Exodiff'
@@ -59,6 +65,7 @@
     requirement = 'We will solve the frictional bouncing block problem with mortar constraint enforcement, mortar application of forces, and min NCP function'
     cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 Postprocessors/active=''"
     max_parallel = 1
+    allow_test_objects = true
   []
   [frictional-mortar-fb-lm-mortar-disp-coarse]
     type = 'Exodiff'
@@ -67,6 +74,7 @@
     mesh_mode = 'REPLICATED'
     requirement = 'We will solve the frictional bouncing block problem with mortar constraint enforcement, mortar application of forces, and fb NCP function'
     cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 Postprocessors/active=''"
+    allow_test_objects = true
   []
   [frictional-nodal-min-lm-mortar-disp-coarse]
     type = 'Exodiff'
@@ -78,6 +86,7 @@
     allow_warnings = True
     max_parallel = 1
     method = 'OPT'
+    allow_test_objects = true
   []
   [frictional-nodal-min-normal-lm-mortar-fb-tangential-lm-mortar-disp-coarse]
     type = 'Exodiff'
@@ -86,5 +95,6 @@
     mesh_mode = 'REPLICATED'
     requirement = 'We will solve the frictional bouncing block problem with nodal constraint enforcment for the normal LM using min NCP, mortar constraint enforcement of the tangential LM with fb, and mortar application of forces'
     cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 Postprocessors/active=''"
+    allow_test_objects = true
   []
 []
