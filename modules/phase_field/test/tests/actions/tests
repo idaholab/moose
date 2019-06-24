@@ -104,6 +104,29 @@
     design = 'action/GrainGrowthAction.md'
     requirement = 'The phase field module shall provide an action to set up grain growth problems'
   [../]
+  [./ad_grain_growth]
+    type = Exodiff
+    input = 'grain_growth.i'
+    exodiff = 'grain_growth_out.e'
+    issues = '#13539'
+    design = 'action/GrainGrowthAction.md'
+    requirement = 'The action to set up grain growth problems shall be able to set up an AD version of the problem which yields the same results as the non-AD version'
+    cli_args = 'Modules/PhaseField/GrainGrowth/use_automatic_differentiation=true'
+    prereq = 'grain_growth'
+  [../]
+  [./ad_grain_growth-jac]
+    type = 'PetscJacobianTester'
+    input = 'grain_growth.i'
+    issues = '#13539'
+    design = 'action/GrainGrowthAction.md'
+    method = 'OPT' # this is too slow for anything but opt
+    ratio_tol = 5e-8
+    difference_tol = 5e-5
+    run_sim = True
+    requirement = 'The action to set up grain growth problems shall be able to set up an AD version of the problem which yields the same results as the non-AD version'
+    cli_args = 'Modules/PhaseField/GrainGrowth/use_automatic_differentiation=true Executioner/num_steps=1 Mesh/nx=10 Mesh/ny=10'
+    prereq = 'ad_grain_growth'
+  [../]
   [./grain_growth_with_c]
     type = Exodiff
     input = 'grain_growth_with_c.i'

@@ -65,4 +65,3 @@ ADAllenCahnBase<compute_stage, T>::precomputeQpResidual()
 {
   return _prop_L[_qp] * computeDFDOP();
 }
-
