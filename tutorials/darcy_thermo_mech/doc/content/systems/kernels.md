@@ -1,13 +1,13 @@
 # Kernel System
 
-A system for computing the residual contribution from a volumetric term within a [!ac!PDE] using
+A system for computing the residual contribution from a volumetric term within a [!ac](PDE) using
 the Galerkin finite element method.
 
 !---
 
 ## Kernel Object
 
-A `Kernel` objects represents one or more terms in a [!ac!PDE].
+A `Kernel` objects represents one or more terms in a [!ac](PDE).
 
 A `Kernel` object is required to compute a residual at a quadrature point, which is done by
 calling the `computeQpResidual` method.
@@ -40,9 +40,9 @@ Current quadrature point index
 
 | Base | Override | Use |
 | :- | :- | :- |
-| Kernel\\ +ADKernel+ | computeQpResidual | Use when the term in the [!ac!PDE] is multiplied by both the test function and the gradient of the test function (`_test` and `_grad_test` must be applied) |
-| KernelValue\\ +ADKernelValue+ | precomputeQpResidual | Use when the term computed in the [!ac!PDE] is only multiplied by the test function (do not use `_test` in the override, it is applied automatically) |
-| KernelGrad\\ +ADKernelGrad+ | precomputeQpResidual | Use when the term computed in the [!ac!PDE] is only multiplied by the gradient of the test function (do not use `_grad_test` in the override, it is applied automatically) |
+| Kernel\\ +ADKernel+ | computeQpResidual | Use when the term in the [!ac](PDE) is multiplied by both the test function and the gradient of the test function (`_test` and `_grad_test` must be applied) |
+| KernelValue\\ +ADKernelValue+ | precomputeQpResidual | Use when the term computed in the [!ac](PDE) is only multiplied by the test function (do not use `_test` in the override, it is applied automatically) |
+| KernelGrad\\ +ADKernelGrad+ | precomputeQpResidual | Use when the term computed in the [!ac](PDE) is only multiplied by the gradient of the test function (do not use `_grad_test` in the override, it is applied automatically) |
 
 !---
 

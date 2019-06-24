@@ -288,7 +288,7 @@ often results in decreased solve time overall.
 
 ## Manual Jacobian Calculation
 
-The remainder of the tutorial will focus on using [!ac!AD] for computing
+The remainder of the tutorial will focus on using [!ac](AD) for computing
 Jacobian terms, but it is possible to compute them manually.
 
 It is recommended that all new Kernel objects use AD.

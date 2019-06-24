@@ -6,7 +6,7 @@ postprocessing, coupling, and proxy calculations.
 !---
 
 The term "nonlinear variable" is defined, in MOOSE language, as a variable that is being solved for
-using a nonlinear system of [!ac!PDEs] using `Kernel` and `BoundaryCondition` objects.
+using a nonlinear system of [!ac](PDEs) using `Kernel` and `BoundaryCondition` objects.
 
 
 The term "auxiliary variable" is defined, in MOOSE language, as a variable that is directly
