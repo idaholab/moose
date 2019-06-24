@@ -15,19 +15,15 @@
 class SodiumPropertiesTest : public MooseObjectUnitTest
 {
 public:
-  SodiumPropertiesTest() : MooseObjectUnitTest("MooseUnitApp")
-  {
-    buildObjects();
-  }
+  SodiumPropertiesTest() : MooseObjectUnitTest("MooseUnitApp") { buildObjects(); }
 
 protected:
   void buildObjects()
   {
     InputParameters uo_pars = _factory.getValidParams("SodiumProperties");
     _fe_problem->addUserObject("SodiumProperties", "fp", uo_pars);
-    _fp = &_fe_problem->getUserObject<SodiumProperties>("fp");
+    _fp = &_fe_problem->getUserObjectTempl<SodiumProperties>("fp");
   }
 
   const SodiumProperties * _fp;
 };
-

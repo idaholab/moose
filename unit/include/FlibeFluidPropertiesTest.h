@@ -22,7 +22,7 @@ protected:
   {
     InputParameters uo_pars = _factory.getValidParams("FlibeFluidProperties");
     _fe_problem->addUserObject("FlibeFluidProperties", "fp", uo_pars);
-    _fp = &_fe_problem->getUserObject<FlibeFluidProperties>("fp");
+    _fp = &_fe_problem->getUserObjectTempl<FlibeFluidProperties>("fp");
   }
 
   const FlibeFluidProperties * _fp;

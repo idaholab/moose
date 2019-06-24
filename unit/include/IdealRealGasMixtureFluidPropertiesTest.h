@@ -45,7 +45,7 @@ protected:
       params.set<Real>("rho_c") = 322.;
       params.set<Real>("e_c") = 2015734.52419;
       _fe_problem->addUserObject(class_name, fp_steam_name, params);
-      _fp_steam = &_fe_problem->getUserObject<StiffenedGasFluidProperties>(fp_steam_name);
+      _fp_steam = &_fe_problem->getUserObjectTempl<StiffenedGasFluidProperties>(fp_steam_name);
     }
 
     // nitrogen
@@ -57,7 +57,7 @@ protected:
       params.set<Real>("mu") = 0.0000222084; // at 400 K and 1.e5 Pa
       params.set<Real>("k") = 0.032806168;   // at 400 K and 1.e5 Pa
       _fe_problem->addUserObject(class_name, fp_nitrogen_name, params);
-      _fp_nitrogen = &_fe_problem->getUserObject<IdealGasFluidProperties>(fp_nitrogen_name);
+      _fp_nitrogen = &_fe_problem->getUserObjectTempl<IdealGasFluidProperties>(fp_nitrogen_name);
     }
 
     // mixture
@@ -67,7 +67,7 @@ protected:
       params.set<UserObjectName>("fp_primary") = fp_steam_name;
       params.set<std::vector<UserObjectName>>("fp_secondary") = {fp_nitrogen_name};
       _fe_problem->addUserObject(class_name, fp_mix_name, params);
-      _fp_mix = &_fe_problem->getUserObject<IdealRealGasMixtureFluidProperties>(fp_mix_name);
+      _fp_mix = &_fe_problem->getUserObjectTempl<IdealRealGasMixtureFluidProperties>(fp_mix_name);
     }
   }
 
@@ -75,4 +75,3 @@ protected:
   const IdealGasFluidProperties * _fp_nitrogen;
   const IdealRealGasMixtureFluidProperties * _fp_mix;
 };
-

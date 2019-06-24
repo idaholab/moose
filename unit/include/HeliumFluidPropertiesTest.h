@@ -22,7 +22,7 @@ protected:
   {
     InputParameters uo_pars = _factory.getValidParams("HeliumFluidProperties");
     _fe_problem->addUserObject("HeliumFluidProperties", "fp", uo_pars);
-    _fp = &_fe_problem->getUserObject<HeliumFluidProperties>("fp");
+    _fp = &_fe_problem->getUserObjectTempl<HeliumFluidProperties>("fp");
   }
 
   const HeliumFluidProperties * _fp;
