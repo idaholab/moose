@@ -44,9 +44,9 @@ ComputeBlockRotatedElasticityTensor::computeQpElasticityTensor()
 {
   EulerAngles angles;
   auto grain_id = _current_elem->subdomain_id();
-  if (grain_id == 0 && _offset != 0)
-    mooseError("Please set correct offset value ");
   grain_id = grain_id - _offset;
+  if (grain_id < 0 || grain_id > _euler.getGrainNum())
+    mooseError("Please set correct offset value ");
 
   if (grain_id < _euler.getGrainNum())
     angles = _euler.getEulerAngles(grain_id);
