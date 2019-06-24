@@ -1,6 +1,6 @@
 [Tests]
   issues = '#1234'
-  design = design.md
+  design = core.md
   [r0]
     requirement = "Requirement One"
   []
@@ -10,16 +10,19 @@
   []
   [r2]
     requirement = "Requirement Three"
-    design = "override.md"
+    design = bibtex.md
+    validation = alert.md
   []
   [r3]
     requirement = "Requirement Four"
-    design = "override2.md"
+    design = katex.md
     issues = "#4567"
+    verification = katex.md
   []
 
   [group0]
     requirement = "Requirement Group One"
+    verification = bibtex.md
     [group0-a]
        detail = 1D
     []
@@ -41,7 +44,8 @@
 
   [group2]
     requirement = "Requirement Group Three"
-    design = "override.md"
+    design = bibtex.md
+    validation = katex.md
     [group2-a]
        detail = 5D
     []
@@ -52,7 +56,7 @@
 
   [group3]
     requirement = "Requirement Group Four"
-    design = "override2.md"
+    design = katex.md
     issues = "#4321"
     [group3-a]
        detail = 7D

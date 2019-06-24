@@ -17,4 +17,10 @@
     requirement = "The documentation system shall support acronyms within markdown syntax."
     issues = '#6699 #13611'
   []
+  [sqa]
+    type = PythonUnitTest
+    input = test_sqa.py
+    requirement = "The documentation system shall include tools for building software quality documents."
+    issues = '#6699 #12049'
+  []
 []
