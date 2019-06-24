@@ -1,3 +1,4 @@
+
 //* This file is part of the MOOSE framework
 //* https://www.mooseframework.org
 //*
@@ -24,26 +25,28 @@ validParams<ComputeBlockRotatedElasticityTensor>()
       "fill_method", RankFourTensor::fillMethodEnum() = "symmetric9", "The fill method");
   params.addRequiredParam<UserObjectName>("euler_angle_provider",
                                           "Name of Euler angle provider user object");
+  params.addRequiredParam<int>("offset", "Offset value for grain_id");
+
   return params;
 }
 
-ComputeBlockRotatedElasticityTensor::ComputeBlockRotatedElasticityTensor(const InputParameters & parameters)
+ComputeBlockRotatedElasticityTensor::ComputeBlockRotatedElasticityTensor(
+    const InputParameters & parameters)
   : ComputeElasticityTensorBase(parameters),
-
     _C_ijkl(getParam<std::vector<Real>>("C_ijkl"),
             (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method")),
-    _euler(getUserObject<EulerAngleProvider>("euler_angle_provider"))
+    _euler(getUserObject<EulerAngleProvider>("euler_angle_provider")),
+    _offset(getParam<int>("offset"))
 {
 }
-
 void
 ComputeBlockRotatedElasticityTensor::computeQpElasticityTensor()
 {
   EulerAngles angles;
   auto grain_id = _current_elem->subdomain_id();
-  if (grain_id == 0)
-    mooseError("ZERO!!!!");
-  grain_id--;
+  if (grain_id == 0 && _offset != 0)
+    mooseError("Please set correct offset value ");
+  grain_id = grain_id - _offset;
 
   if (grain_id < _euler.getGrainNum())
     angles = _euler.getEulerAngles(grain_id);
