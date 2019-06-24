@@ -23,7 +23,7 @@
   [./HeatDiff]
     type = ADMatDiffusion
     variable = T
-    diffusivity = diffusivity
+    D_name = diffusivity
   [../]
 []
 

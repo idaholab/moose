@@ -27,10 +27,9 @@
 
 [Kernels]
   [./diff]
-    type = CoefDiffusion
+    type = ADMatDiffusion
     variable = T
-    coef = 0.9
-    function = 0.05
+    D_name = diffusivity
   [../]
   [./dt]
     type = CoefTimeDerivative
@@ -45,6 +44,14 @@
     variable = T
     boundary = 'left right'
     value = 0
+  [../]
+[]
+
+[Materials]
+  [./k]
+    type = GenericConstantMaterial
+    prop_names = 'diffusivity'
+    prop_values = '0.95'
   [../]
 []
 

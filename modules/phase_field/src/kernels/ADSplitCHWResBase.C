@@ -11,7 +11,7 @@
 
 defineADValidParams(
     ADSplitCHWResBase,
-    ADKernel,
+    ADKernelGrad,
     params.addClassDescription(
         "Split formulation Cahn-Hilliard Kernel for the chemical potential variable");
     params.addParam<MaterialPropertyName>("mob_name",
