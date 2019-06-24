@@ -28,28 +28,25 @@ public:
 
 protected:
   virtual void computeProperties() override;
-  virtual void computeQpProperties() override;
-
-  /**
-   * Function to compute the temperature at current two material points
-   */
-  void computeNodalTemperature();
-
   virtual void computeBondStretch() override;
 
   /**
-   * Function to compute the interaction force for a bond
+   * Function to compute force of a bond
    */
   virtual void computeBondForce() = 0;
 
-  /// Plane stress model or not
+  /**
+   * Function to compute material constants from elasticity tensor
+   */
+  void computeMaterialConstants();
+
+  /**
+   * Function to compute the micro-moduli for bond-based and ordinary state-based models
+   */
+  virtual void computePeridynamicsParams() = 0;
+
+  /// Plane stress problem or not
   const bool _plane_stress;
-
-  /// Young's modulus
-  const Real _youngs_modulus;
-
-  ///Poisson's Ratio
-  const Real _poissons_ratio;
 
   ///@{ Scalar out-of-plane component of strain tensor for generalized plane strain
   const bool _scalar_out_of_plane_strain_coupled;
@@ -63,6 +60,7 @@ protected:
   const Real _temp_ref;
 
   /// Thermal expension coefficient
+  Real _tec;
   Real _alpha;
 
   ///@{ Material properties to store
@@ -71,16 +69,14 @@ protected:
   MaterialProperty<Real> & _bond_dfdT_ij;
   MaterialProperty<Real> & _bond_dfdE_ij;
 
-  MaterialProperty<RankFourTensor> & _elasticity_tensor;
   MaterialProperty<Real> & _thermal_expansion_coeff;
   ///@}
 
-  /// Shear modulus calculated from Young's modulus and Poisson's Ratio
+  /// Material properties to fetch
+  const MaterialProperty<RankFourTensor> & _Cijkl;
+
+  Real _youngs_modulus;
+  Real _poissons_ratio;
   Real _shear_modulus;
-
-  /// Bulk modulus calculated from Young's modulus and Poisson's Ratio
   Real _bulk_modulus;
-
-  /// Elasticity tensor
-  RankFourTensor _Cijkl;
 };

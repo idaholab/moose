@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "MaterialBasePD.h"
+#include "PeridynamicsMaterialBase.h"
 
 class MechanicsMaterialBasePD;
 
@@ -19,16 +19,14 @@ InputParameters validParams<MechanicsMaterialBasePD>();
 /**
  * Base material class for peridynamic solid mechanics models
  */
-class MechanicsMaterialBasePD : public MaterialBasePD
+class MechanicsMaterialBasePD : public PeridynamicsMaterialBase
 {
 public:
   MechanicsMaterialBasePD(const InputParameters & parameters);
 
 protected:
-  virtual void computeProperties() override;
-
   /**
-   * Function to compute the current length of current bond
+   * Function to compute the current bond length
    */
   void computeBondCurrentLength();
 
@@ -39,11 +37,11 @@ protected:
 
   ///@{ Temperature variables
   const bool _has_temp;
-  MooseVariableFEBase * _temp_var;
+  MooseVariable * _temp_var;
   ///@}
 
   /// Bond_status variable
-  MooseVariableFEBase & _bond_status_var;
+  MooseVariable & _bond_status_var;
 
   ///@{ Material properties to store
   MaterialProperty<Real> & _total_stretch;
@@ -51,7 +49,7 @@ protected:
   ///@}
 
   /// Displacement variables
-  std::vector<MooseVariableFEBase *> _disp_var;
+  std::vector<MooseVariable *> _disp_var;
 
   /// Length of current bond
   Real _current_length;

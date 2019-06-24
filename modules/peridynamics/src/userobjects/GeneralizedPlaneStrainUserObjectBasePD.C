@@ -17,6 +17,9 @@ validParams<GeneralizedPlaneStrainUserObjectBasePD>()
   InputParameters params = validParams<ElementUserObjectBasePD>();
   params.addClassDescription("Base class for calculating the scalar residual and diagonal Jacobian "
                              "entry for generalized plane strain formulation");
+
+  MooseEnum strainType("SMALL FINITE", "SMALL");
+  params.addParam<MooseEnum>("strain", strainType, "Strain formulation");
   params.addParam<FunctionName>(
       "out_of_plane_pressure",
       "0",
@@ -30,6 +33,7 @@ validParams<GeneralizedPlaneStrainUserObjectBasePD>()
 GeneralizedPlaneStrainUserObjectBasePD::GeneralizedPlaneStrainUserObjectBasePD(
     const InputParameters & parameters)
   : ElementUserObjectBasePD(parameters),
+    _strain(getParam<MooseEnum>("strain")),
     _Cijkl(getMaterialProperty<RankFourTensor>("elasticity_tensor")),
     _pressure(getFunction("out_of_plane_pressure")),
     _factor(getParam<Real>("factor"))

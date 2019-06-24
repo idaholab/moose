@@ -1,8 +1,8 @@
 [Tests]
-  [./generalized_plane_strain_ordinary_state]
+  [./gps_OSPD]
     type = 'Exodiff'
-    input = 'generalized_plane_strain_ordinary_state.i'
-    exodiff = 'generalized_plane_strain_ordinary_state.e'
+    input = 'generalized_plane_strain_OSPD.i'
+    exodiff = 'generalized_plane_strain_OSPD.e'
     abs_zero = 1.5e-10
     map = false
     requirement = 'GeneralizedPlaneStrainUserObjectOSPD shall provide the residual and diagonal jacobian entry for ordinary state-based formulation of generalized plane strain problem.'
@@ -10,43 +10,43 @@
     issues = '#11561'
   [../]
 
-  [./generalized_plane_strain_ordinary_state_squares]
+  [./gps_squares_OSPD]
     type = 'Exodiff'
-    input = 'generalized_plane_strain_ordinary_state_squares.i'
-    exodiff = 'generalized_plane_strain_ordinary_state_squares.e'
+    input = 'generalized_plane_strain_squares_OSPD.i'
+    exodiff = 'generalized_plane_strain_squares_OSPD.e'
     map = false
     requirement = 'GeneralizedPlaneStrainUserObjectOSPD shall provide the residual and diagonal jacobian entry for ordinary state-based formulation of generalized plane strain problem.'
     design = 'modules/peridynamics/GeneralizedPlaneStrainUserObjectOSPD.md'
     issues = '#11561'
   [../]
 
-  [./out_of_plane_pressure_ordinary_state]
+  [./out_of_plane_pressure_OSPD]
     type = 'Exodiff'
-    input = 'out_of_plane_pressure_ordinary_state.i'
-    exodiff = 'out_of_plane_pressure_ordinary_state.e'
+    input = 'out_of_plane_pressure_OSPD.i'
+    exodiff = 'out_of_plane_pressure_OSPD.e'
     map = false
     requirement = 'GeneralizedPlaneStrainUserObjectOSPD shall consider the out-of-plane pressure for ordinary state-based formulation of generalized plane strain problem.'
     design = 'modules/peridynamics/GeneralizedPlaneStrainUserObjectOSPD.md'
     issues = '#11561'
   [../]
 
-  [./plane_strain_prescribed_ordinary_state]
+  [./planestrain_prescribed_OSPD]
     type = 'Exodiff'
-    input = 'plane_strain_prescribed_ordinary_state.i'
-    exodiff = 'plane_strain_prescribed_ordinary_state.e'
+    input = 'planestrain_prescribed_OSPD.i'
+    exodiff = 'planestrain_prescribed_OSPD.e'
     map = false
-    requirement = 'SmallStrainConstantHorizonOSPD shall incorporate prescribed out-of-plane strain for ordinary state-based formulation of generalized plane strain problem.'
-    design = 'modules/peridynamics/SmallStrainConstantHorizonOSPD.md'
+    requirement = 'ComputeSmallStrainConstantHorizonMaterialOSPD shall incorporate prescribed out-of-plane strain for ordinary state-based formulation of generalized plane strain problem.'
+    design = 'modules/peridynamics/ComputeSmallStrainConstantHorizonMaterialOSPD.md'
     issues = '#11561'
   [../]
 
-  [./generalized_plane_strain_non_ordinary_state]
+  [./gps_NOSPD]
     type = 'Exodiff'
-    input = 'generalized_plane_strain_non_ordinary_state.i'
-    exodiff = 'generalized_plane_strain_non_ordinary_state.e'
+    input = 'generalized_plane_strain_NOSPD.i'
+    exodiff = 'generalized_plane_strain_NOSPD.e'
     abs_zero = 1.5e-10
     map = false
-    requirement = 'GeneralizedPlaneStrainUserObjectOSPD shall provide the residual and diagonal jacobian entry for ordinary state-based formulation of generalized plane strain problem.'
+    requirement = 'GeneralizedPlaneStrainUserObjectNOSPD shall provide the residual and diagonal jacobian entry for non-ordinary state-based formulation of generalized plane strain problem.'
     design = 'modules/peridynamics/GeneralizedPlaneStrainUserObjectNOSPD.md'
     issues = '#11561'
   [../]

@@ -27,7 +27,6 @@ class PeridynamicsMesh : public MooseMesh
 public:
   PeridynamicsMesh(const InputParameters & parameters);
   PeridynamicsMesh(const PeridynamicsMesh & /* other_mesh */) = default;
-  virtual ~PeridynamicsMesh();
 
   PeridynamicsMesh & operator=(const PeridynamicsMesh & other_mesh) = delete;
   virtual std::unique_ptr<MooseMesh> safeClone() const override;
@@ -44,7 +43,7 @@ public:
    * Function to return number of PD Edge elements
    * @return Total number of PD bonds
    */
-  dof_id_type nPDElems() const;
+  dof_id_type nPDBonds() const;
 
   /**
    * Function to assign values to member variables (extra PD mesh data) of this class
@@ -61,19 +60,19 @@ public:
   std::vector<dof_id_type> getNeighbors(dof_id_type node_id);
 
   /**
-   * Function to return the neighbor index of node_j from node_i's neighbor list
+   * Function to return the local neighbor index of node_j from node_i's neighbor list
    * @param node_i   The ID of the node providing the neighbor list for query
    * @param node_j   The ID of the node querying the neighbor index
-   * @return The index in the neighbor list
+   * @return The local index in the neighbor list
    */
-  unsigned int getNeighborID(dof_id_type node_i, dof_id_type node_j);
+  unsigned int getNeighborIndex(dof_id_type node_i, dof_id_type node_j);
 
   /**
    * Function to return the bond number connected with node node_id
    * @param node_id   The querying node index
    * @return List of associated bond IDs
    */
-  std::vector<dof_id_type> getAssocBonds(dof_id_type node_id);
+  std::vector<dof_id_type> getBonds(dof_id_type node_id);
 
   /**
    * Function to return indices of neighbors used in formulation of bond-associated
@@ -83,29 +82,35 @@ public:
    * @return The neighbor list for calculation of bond-associated deformation gradient for the
    * neighbor
    */
-  std::vector<unsigned int> getBondAssocHorizonNeighbors(dof_id_type node_id,
-                                                         unsigned int neighbor_id);
+  std::vector<unsigned int> getDefGradNeighbors(dof_id_type node_id, unsigned int neighbor_id);
 
   /**
    * Function to return block ID for node node_id
    * @param node_id   The querying node index
-   * @return The block ID of the node
+   * @return The block ID of a node
    */
   unsigned int getNodeBlockID(dof_id_type node_id);
 
   /**
+   * Function to return coordinates for node node_id
+   * @param node_id   The querying node index
+   * @return The coordinates of a node
+   */
+  Point getPDNodeCoord(dof_id_type node_id);
+
+  /**
    * Function to return nodal volume for node node_id
    * @param node_id   The querying node index
-   * @return The volume of the node
+   * @return The volume of a node
    */
-  Real getVolume(dof_id_type node_id);
+  Real getPDNodeVolume(dof_id_type node_id);
 
   /**
    * Function to return summation of neighbor nodal volumes for node node_id
    * @param node_id   The querying node index
    * @return The summation of the volume of all the neighbors
    */
-  Real getHorizonVolume(dof_id_type node_id);
+  Real getHorizVolume(dof_id_type node_id);
 
   /**
    * Function to return summation of volumes of bond-associated neighbors used
@@ -116,29 +121,14 @@ public:
    * @return The volume used in the calculation of bond-associated deformation gradeint for the
    * querying neighbor
    */
-  Real getBondAssocHorizonVolume(dof_id_type node_id, unsigned int neighbor_id);
+  Real getDefGradVolFraction(dof_id_type node_id, unsigned int neighbor_id);
 
   /**
-   * Function to return summation of all bond associated horizon volume for node node_id
+   * Function to return the average spacing between node node_id with its most adjacent neighbors
    * @param node_id   The querying node index
-   * @return The summation of all volumes used in the calculation of bond-associated deformation
-   * gradients at the querying node
+   * @return The node average spacing
    */
-  Real getBondAssocHorizonVolumeSum(dof_id_type node_id);
-
-  /**
-   * Function to return number of neighbor for node node_id
-   * @param node_id   The querying node index
-   * @return The nubmber of neighbors
-   */
-  unsigned int getNNeighbors(dof_id_type node_id);
-
-  /**
-   * Function to return mesh spacing of node node_id
-   * @param node_id   The querying node index
-   * @return The mesh spacing
-   */
-  Real getMeshSpacing(dof_id_type node_id);
+  Real getNodeAvgSpacing(dof_id_type node_id);
 
   /**
    * Function to return horizon size
@@ -149,10 +139,10 @@ public:
 
 protected:
   ///@{ Horizon size control parameters
-  const Real _horizon_radius;
-  const bool _has_horizon_number;
-  const Real _horizon_number;
-  const Real _horizons_ratio;
+  const Real _horiz_rad;
+  const bool _has_horiz_num;
+  const Real _horiz_num;
+  const Real _bah_ratio;
   ///@}
 
   ///@{ Information for crack generation
@@ -166,45 +156,42 @@ protected:
   unsigned int & _dim;
 
   /// Number of total material points
-  unsigned int & _total_nodes;
+  unsigned int & _n_pdnodes;
 
   /// Number of total bonds
-  unsigned int & _total_bonds;
+  unsigned int & _n_pdbonds;
 
   ///@{ Data associated with each peridynamics node
-  std::vector<Point> _node_coord;
-  std::vector<Real> & _node_mesh_spacing;
-  std::vector<Real> & _node_horizon;
-  std::vector<Real> & _node_vol;
-  std::vector<Real> & _node_horizon_vol;
-  std::vector<unsigned int> & _node_blockID;
+  std::vector<Point> _pdnode_coord;
+  std::vector<Real> & _pdnode_avg_spacing;
+  std::vector<Real> & _pdnode_horiz_rad;
+  std::vector<Real> & _pdnode_vol;
+  std::vector<Real> & _pdnode_horiz_vol;
+  std::vector<unsigned int> & _pdnode_blockID;
   ///@}
 
   /// Neighbor lists for each material point determined using the horizon
-  std::vector<std::vector<dof_id_type>> & _horizon_neighbors;
+  std::vector<std::vector<dof_id_type>> & _pdnode_neighbors;
 
   /// Bond lists associated with material points
-  std::vector<std::vector<dof_id_type>> & _node_associated_bonds;
+  std::vector<std::vector<dof_id_type>> & _pdnode_bonds;
 
   /// Neighbor lists for deformation gradient calculation using bond-associated horizon
-  std::vector<std::vector<std::vector<unsigned int>>> & _bah_dgneighbors;
+  std::vector<std::vector<std::vector<unsigned int>>> & _dg_neighbors;
 
-  /// Total volume of each bond used in bond-associated deformation gradient
-  std::vector<std::vector<Real>> & _bah_vol;
-
-  /// Total volume of all bonds used in bond-associated deformation gradient
-  std::vector<Real> & _bah_vol_sum;
+  /// Volume fraction of deformation gradient region to its sum at a node
+  std::vector<std::vector<Real>> & _dg_vol_frac;
 
   /**
    * Function to create neighbors and other data for each material point with given horizon
    */
-  void createNodeHorizonBasedData();
+  void createNodeHorizBasedData();
 
   /**
-   * Function to create node neighbors and other data for each material point with given
-   * bond associated horizon in bond associated deformation gradient calculation
+   * Function to create node neighbors and other data for each material point based on
+   * NEIGHBOR_HORIZON based horizon partition for deformation gradient calculation
    */
-  void createBondAssocHorizonBasedData();
+  void createNeighborHorizonBasedData();
 
   /**
    * Function to check whether a material point falls within a given rectangular crack geometry

@@ -43,5 +43,5 @@ protected:
   ///@}
 
   /// Critical elemental aux variable
-  MooseVariableFEBase * _critical_var;
+  MooseVariable * _critical_var;
 };

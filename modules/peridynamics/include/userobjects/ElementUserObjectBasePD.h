@@ -27,7 +27,7 @@ public:
 
 protected:
   /// Bond status aux variable
-  MooseVariableFEBase & _bond_status_var;
+  MooseVariable & _bond_status_var;
 
   /// Reference to auxiliary system
   AuxiliarySystem & _aux;

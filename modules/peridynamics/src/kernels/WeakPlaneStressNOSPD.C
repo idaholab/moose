@@ -34,10 +34,8 @@ WeakPlaneStressNOSPD::WeakPlaneStressNOSPD(const InputParameters & parameters)
 void
 WeakPlaneStressNOSPD::computeLocalResidual()
 {
-  _local_re(0) =
-      _stress[0](2, 2) * _dg_bond_vsum_ij[0] / _dg_node_vsum_ij[0] * _vols_ij[0] * _bond_status_ij;
-  _local_re(1) =
-      _stress[1](2, 2) * _dg_bond_vsum_ij[1] / _dg_node_vsum_ij[1] * _vols_ij[1] * _bond_status_ij;
+  _local_re(0) = _stress[0](2, 2) * _dg_vol_frac_ij[0] * _vols_ij[0] * _bond_status_ij;
+  _local_re(1) = _stress[1](2, 2) * _dg_vol_frac_ij[1] * _vols_ij[1] * _bond_status_ij;
 }
 
 void
@@ -46,8 +44,7 @@ WeakPlaneStressNOSPD::computeLocalJacobian()
   for (_i = 0; _i < _test.size(); _i++)
     for (_j = 0; _j < _phi.size(); _j++)
       _local_ke(_i, _j) += (_i == _j ? 1 : 0) * _Jacobian_mult[_i](2, 2, 2, 2) *
-                           _dg_bond_vsum_ij[_i] / _dg_node_vsum_ij[_i] * _vols_ij[_i] *
-                           _bond_status_ij;
+                           _dg_vol_frac_ij[_i] * _vols_ij[_i] * _bond_status_ij;
 }
 
 void
@@ -63,8 +60,8 @@ WeakPlaneStressNOSPD::computeLocalOffDiagJacobian(unsigned int coupled_component
 
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < _phi.size(); _j++)
-        _local_ke(_i, _j) += (_i == _j ? 1 : 0) * dSdT[_i](2, 2) * _dg_bond_vsum_ij[_i] /
-                             _dg_node_vsum_ij[_i] * _vols_ij[_i] * _bond_status_ij;
+        _local_ke(_i, _j) += (_i == _j ? 1 : 0) * dSdT[_i](2, 2) * _dg_vol_frac_ij[_i] *
+                             _vols_ij[_i] * _bond_status_ij;
   }
   else // off-diagonal Jacobian with respect to coupled displacement variables
   {
@@ -73,8 +70,7 @@ WeakPlaneStressNOSPD::computeLocalOffDiagJacobian(unsigned int coupled_component
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < _phi.size(); _j++)
         _local_ke(_i, _j) += (_i == _j ? 1 : 0) * computeDSDU(coupled_component, _j)(2, 2) *
-                             _dg_bond_vsum_ij[_j] / _dg_node_vsum_ij[_j] * _vols_ij[_j] *
-                             _bond_status_ij;
+                             _dg_vol_frac_ij[_j] * _vols_ij[_j] * _bond_status_ij;
   }
 }
 
@@ -94,14 +90,14 @@ WeakPlaneStressNOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_num,
       unsigned int nb =
           std::find(neighbors.begin(), neighbors.end(), _current_elem->node_id(1 - cur_nd)) -
           neighbors.begin();
-      std::vector<unsigned int> BAneighbors =
-          _pdmesh.getBondAssocHorizonNeighbors(_current_elem->node_id(cur_nd), nb);
-      std::vector<dof_id_type> bonds = _pdmesh.getAssocBonds(_current_elem->node_id(cur_nd));
-      for (unsigned int k = 0; k < BAneighbors.size(); k++)
+      std::vector<unsigned int> dg_neighbors =
+          _pdmesh.getDefGradNeighbors(_current_elem->node_id(cur_nd), nb);
+      std::vector<dof_id_type> bonds = _pdmesh.getBonds(_current_elem->node_id(cur_nd));
+      for (unsigned int k = 0; k < dg_neighbors.size(); k++)
       {
-        const Node * node_k = _pdmesh.nodePtr(neighbors[BAneighbors[k]]);
+        const Node * node_k = _pdmesh.nodePtr(neighbors[dg_neighbors[k]]);
         jvardofs_ijk[1] = node_k->dof_number(_sys.number(), jvar_num, 0);
-        const Real vol_k = _pdmesh.getVolume(neighbors[BAneighbors[k]]);
+        const Real vol_k = _pdmesh.getPDNodeVolume(neighbors[dg_neighbors[k]]);
 
         // obtain bond k's origin vector
         const RealGradient origin_vec_ijk =
@@ -111,7 +107,7 @@ WeakPlaneStressNOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_num,
         dFdUk.zero();
         for (unsigned int j = 0; j < _dim; j++)
           dFdUk(coupled_component, j) =
-              _horizons_ij[cur_nd] / origin_vec_ijk.norm() * origin_vec_ijk(j) * vol_k;
+              _horiz_rad[cur_nd] / origin_vec_ijk.norm() * origin_vec_ijk(j) * vol_k;
 
         dFdUk *= _shape[cur_nd].inverse();
 
@@ -121,11 +117,11 @@ WeakPlaneStressNOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_num,
 
         // bond status for bond k
         Real bond_status_ijk =
-            _bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[BAneighbors[k]]));
+            _bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[dg_neighbors[k]]));
 
         _local_ke.zero();
-        _local_ke(cur_nd, 1) = dPdUk(2, 2) * _dg_bond_vsum_ij[cur_nd] / _dg_node_vsum_ij[cur_nd] *
-                               _vols_ij[cur_nd] * _bond_status_ij * bond_status_ijk;
+        _local_ke(cur_nd, 1) = dPdUk(2, 2) * _dg_vol_frac_ij[cur_nd] * _vols_ij[cur_nd] *
+                               _bond_status_ij * bond_status_ijk;
 
         _assembly.cacheJacobianBlock(_local_ke, _ivardofs_ij, jvardofs_ijk, _var.scalingFactor());
       }

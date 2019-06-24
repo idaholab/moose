@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "KernelBasePD.h"
+#include "PeridynamicsKernelBase.h"
 
 class HeatConductionBPD;
 
@@ -19,7 +19,7 @@ InputParameters validParams<HeatConductionBPD>();
 /**
  * Kernel class for peridynamic heat conduction models
  */
-class HeatConductionBPD : public KernelBasePD
+class HeatConductionBPD : public PeridynamicsKernelBase
 {
 public:
   HeatConductionBPD(const InputParameters & parameters);

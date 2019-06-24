@@ -18,6 +18,7 @@ validParams<NodalVariableIntegralPD>()
 {
   InputParameters params = validParams<NodalIntegralPostprocessorBasePD>();
   params.addClassDescription("Class for calculating the domain integral of stress_zz componnent");
+
   params.addRequiredParam<VariableName>(
       "variable", "The name of the variable that this postprocessor operates on");
 
@@ -26,7 +27,7 @@ validParams<NodalVariableIntegralPD>()
 
 NodalVariableIntegralPD::NodalVariableIntegralPD(const InputParameters & parameters)
   : NodalIntegralPostprocessorBasePD(parameters),
-    _var(_subproblem.getVariable(_tid, getParam<VariableName>("variable")))
+    _var(_subproblem.getStandardVariable(_tid, getParam<VariableName>("variable")))
 {
 }
 

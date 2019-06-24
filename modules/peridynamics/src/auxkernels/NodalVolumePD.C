@@ -18,6 +18,7 @@ validParams<NodalVolumePD>()
 {
   InputParameters params = validParams<AuxKernelBasePD>();
   params.addClassDescription("Class for output nodal area(2D) or nodal volume(3D)");
+
   params.set<ExecFlagEnum>("execute_on") = EXEC_INITIAL;
 
   return params;
@@ -32,5 +33,5 @@ NodalVolumePD::NodalVolumePD(const InputParameters & parameters) : AuxKernelBase
 Real
 NodalVolumePD::computeValue()
 {
-  return _pdmesh.getVolume(_current_node->id());
+  return _pdmesh.getPDNodeVolume(_current_node->id());
 }

@@ -23,6 +23,7 @@ validParams<GeneralUserObjectBasePD>()
 GeneralUserObjectBasePD::GeneralUserObjectBasePD(const InputParameters & parameters)
   : GeneralUserObject(parameters),
     _mesh(_subproblem.mesh()),
-    _pdmesh(dynamic_cast<PeridynamicsMesh &>(_mesh))
+    _pdmesh(dynamic_cast<PeridynamicsMesh &>(_mesh)),
+    _nnodes(2)
 {
 }

@@ -21,6 +21,7 @@ validParams<GeneralizedPlaneStrainPD>()
   InputParameters params = validParams<ScalarKernel>();
   params.addClassDescription("Class for claculating residual and diagonal Jacobian for"
                              "state-based peridynamic generalized plane strain formulation");
+
   params.addRequiredParam<UserObjectName>(
       "generalized_plane_strain_uo",
       "UserObject name of the GeneralizedPlaneStrainUserObjectBasePD");

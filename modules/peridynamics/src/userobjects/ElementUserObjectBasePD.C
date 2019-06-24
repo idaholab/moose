@@ -23,7 +23,7 @@ validParams<ElementUserObjectBasePD>()
 
 ElementUserObjectBasePD::ElementUserObjectBasePD(const InputParameters & parameters)
   : ElementUserObject(parameters),
-    _bond_status_var(_subproblem.getVariable(_tid, "bond_status")),
+    _bond_status_var(_subproblem.getStandardVariable(_tid, "bond_status")),
     _aux(_fe_problem.getAuxiliarySystem()),
     _aux_sln(_aux.solution()),
     _pdmesh(dynamic_cast<PeridynamicsMesh &>(_mesh))

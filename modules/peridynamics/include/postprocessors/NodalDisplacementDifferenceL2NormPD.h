@@ -42,5 +42,5 @@ protected:
   ///@}
 
   /// Displacement variables
-  std::vector<MooseVariableFEBase *> _disp_var;
+  std::vector<MooseVariable *> _disp_var;
 };

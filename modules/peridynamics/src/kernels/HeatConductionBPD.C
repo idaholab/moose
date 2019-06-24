@@ -15,7 +15,7 @@ template <>
 InputParameters
 validParams<HeatConductionBPD>()
 {
-  InputParameters params = validParams<KernelBasePD>();
+  InputParameters params = validParams<PeridynamicsKernelBase>();
   params.addClassDescription("Class for calculating residual and Jacobian for bond-based "
                              "peridynamic heat conduction formulation");
 
@@ -23,7 +23,7 @@ validParams<HeatConductionBPD>()
 }
 
 HeatConductionBPD::HeatConductionBPD(const InputParameters & parameters)
-  : KernelBasePD(parameters),
+  : PeridynamicsKernelBase(parameters),
     _bond_heat_flow(getMaterialProperty<Real>("bond_heat_flow")),
     _bond_dQdT(getMaterialProperty<Real>("bond_dQdT"))
 {
@@ -32,7 +32,7 @@ HeatConductionBPD::HeatConductionBPD(const InputParameters & parameters)
 void
 HeatConductionBPD::computeLocalResidual()
 {
-  _local_re(0) = -_bond_heat_flow[0] * _bond_status_ij;
+  _local_re(0) = _bond_heat_flow[0] * _bond_status_ij;
   _local_re(1) = -_local_re(0);
 }
 

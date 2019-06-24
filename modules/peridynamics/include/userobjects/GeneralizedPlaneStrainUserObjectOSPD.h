@@ -30,5 +30,5 @@ public:
 
 protected:
   /// Variable for out-of-plane stress component
-  MooseVariableFEBase & _out_of_plane_stress_var;
+  MooseVariable & _out_of_plane_stress_var;
 };

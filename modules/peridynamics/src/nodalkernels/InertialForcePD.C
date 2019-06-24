@@ -18,6 +18,7 @@ validParams<InertialForcePD>()
 {
   InputParameters params = validParams<NodalKernel>();
   params.addClassDescription("Class for calculating the residual for the interial force (M*accel)");
+
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<Real>("density", "Value of material density");
   params.addRequiredCoupledVar("velocity", "Velocity variable");
@@ -49,7 +50,7 @@ InertialForcePD::computeQpResidual()
                  (((_u[_qp] - _u_old[_qp]) / (_dt * _dt)) - _vel_old[_qp] / _dt -
                   _accel_old[_qp] * (0.5 - _beta));
 
-    return _pdmesh.getVolume(_current_node->id()) * _density * accel;
+    return _pdmesh.getPDNodeVolume(_current_node->id()) * _density * accel;
   }
 }
 
@@ -59,5 +60,5 @@ InertialForcePD::computeQpJacobian()
   if (_dt == 0)
     return 0;
   else
-    return _pdmesh.getVolume(_current_node->id()) * _density / (_beta * _dt * _dt);
+    return _pdmesh.getPDNodeVolume(_current_node->id()) * _density / (_beta * _dt * _dt);
 }
