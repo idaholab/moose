@@ -14,6 +14,7 @@
 #include "StressUpdateBase.h"
 
 class ComputeMultipleInelasticStress;
+class DamageBase;
 
 template <>
 InputParameters validParams<ComputeMultipleInelasticStress>();
@@ -175,5 +176,9 @@ protected:
 
   /// is the elasticity tensor guaranteed to be isotropic?
   bool _is_elasticity_tensor_guaranteed_isotropic;
-};
 
+  /// Pointer to the damage model
+  DamageBase * _damage_model;
+
+  RankTwoTensor _undamaged_stress_old;
+};

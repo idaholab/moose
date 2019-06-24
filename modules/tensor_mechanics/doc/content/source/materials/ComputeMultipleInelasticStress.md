@@ -180,7 +180,7 @@ As described in the Material Time Step Limiter section, the time step size
 involves a post processor to ensure that the current time step size is reasonable
 for each of the inelastic material models used in the simulation.
 
-At the end of the alogrithm, the final value of the elastic and inelastic
+At the end of the algorithm, the final value of the elastic and inelastic
 strain tensors are calculated as shown in the last element of [fig:multiple_materials].
 
 
@@ -201,14 +201,14 @@ With no need to iterate over multiple inelastic models, both the inner and outer
 iterations from [fig:multiple_materials] are removed from the algorithm in [fig:single_material].
 
 The initial elastic strain increment guess is assumed to be the initial mechanical
-strian increment, and the trial stress for the single inelastic model is calculated
+strain increment, and the trial stress for the single inelastic model is calculated
 from that elastic strain increment as in [eqn:trial_stress].
 These stress and strain values are passed directly to the inelastic material model.
 
 The material model computes the admissible stress and strain states, as indicated
 by the blue element in [fig:single_material]. An optional consistent tangent
 operator matrix is also returned by the inelastic material model.
-As in the multiple inelastic models alogrithm, the user may force the use of the
+As in the multiple inelastic models algorithm, the user may force the use of the
 Elastic option by setting `tangent_operator = elastic`.
 By default, the inelastic material model is allowed to compute the consistent
 tangent operator implemented in each individual inelastic model with the
@@ -283,27 +283,30 @@ Generally Partial consistent tangent operators should be implemented for
 non-yielding materials (e.g. volumetric swelling) and Full consistent tangent
 operators should be implemented for yielding material models (e.g. plasticity).
 
+### Include Damage Model
+Optionally, the effect of damage on the stress calculation can be included in the model. Another material that defines the evolution of damage should be coupled using parameter `damage_model`. Here, first the inelastic strains and corresponding effective stresses are calculated based on the undamaged properties. Afterwards, the damage index is applied on the effective stress to calculate the damaged stress. This captures the effect of damage in a material undergoing creep or plastic deformation.
+
 ### Material Time Step Limiter
 
 In some cases, particularly in creep, limits on the time step are required by the
 material model formulation. Each inelastic material model is responsible for
 calculating the maximum time step allowable for that material model.
 The [MaterialTimeStepPostprocessor](/MaterialTimeStepPostprocessor.md)
-finds the minumum time step size limits from the entire simulation domain. The
+finds the minimum time step size limits from the entire simulation domain. The
 postprocessor then interfaces with the [IterationAdaptiveDT](/IterationAdaptiveDT.md)
 to restrict the time step size based on the limit calculated in the previous
-time step.
+time step. When the damage model is included, the timestep is limited by the minimum timestep between the inelastic models and the damage model.
 
 
 ## Example Input Files
 
 The input settings for multiple inelastic material models and a single inelastic
-model are similiar, and examples of both are shown below.
+model are similar, and examples of both are shown below.
 
 ### Multiple Inelastic Models
 
 For multiple inelastic models, all of the inelastic material
-model names must be listed as arguements to the `inelastic_models` parameter.
+model names must be listed as arguments to the `inelastic_models` parameter.
 The inelastic material blocks must also be present.
 
 !listing modules/tensor_mechanics/test/tests/combined_creep_plasticity/combined_creep_plasticity.i block=Materials

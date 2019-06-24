@@ -48,6 +48,7 @@ public:
    */
   virtual void updateJacobianMultForDamage(RankFourTensor & jacobian_mult) = 0;
 
+  virtual void computeUndamagedOldStress(RankTwoTensor & stress_old) = 0;
   /**
    * Compute the limiting value of the time step for this material
    * @return Limiting time step
@@ -73,4 +74,3 @@ protected:
   /// Base name optionally used as prefix to material tensor names
   const std::string _base_name;
 };
-

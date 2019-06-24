@@ -42,6 +42,7 @@ ScalarDamageBase::ScalarDamageBase(const InputParameters & parameters)
     _damage_index_name(getParam<std::string>("damage_index_name")),
     _damage_index(declareProperty<Real>(_base_name + _damage_index_name)),
     _damage_index_old(getMaterialPropertyOld<Real>(_base_name + _damage_index_name)),
+    _damage_index_older(getMaterialPropertyOlder<Real>(_base_name + _damage_index_name)),
     _use_old_damage(getParam<bool>("use_old_damage")),
     _residual_stiffness_fraction(getParam<Real>("residual_stiffness_fraction")),
     _maximum_damage_increment(getParam<Real>("maximum_damage_increment"))
@@ -75,6 +76,16 @@ ScalarDamageBase::updateStressForDamage(RankTwoTensor & stress_new)
   // is slightly greater than 1.0
   stress_new *=
       std::max((1.0 - (_use_old_damage ? _damage_index_old[_qp] : _damage_index[_qp])), 0.0);
+}
+
+void
+ScalarDamageBase::computeUndamagedOldStress(RankTwoTensor & stress_old)
+{
+  Real damage_index_old =
+      std::max((1.0 - (_use_old_damage ? _damage_index_older[_qp] : _damage_index_old[_qp])), 0.0);
+
+  if (damage_index_old > 0.0)
+    stress_old /= damage_index_old;
 }
 
 void
