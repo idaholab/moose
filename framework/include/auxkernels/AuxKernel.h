@@ -106,7 +106,7 @@ public:
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOldTempl(const std::string & name);
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
+  const MaterialProperty<T> & getMaterialPropertyOlderTempl(const std::string & name);
 
   template <typename T>
   const T & getUserObjectTempl(const std::string & name);
@@ -276,7 +276,7 @@ AuxKernelTempl<ComputeValueType>::getMaterialPropertyOldTempl(const std::string 
 template <typename ComputeValueType>
 template <typename T>
 const MaterialProperty<T> &
-AuxKernelTempl<ComputeValueType>::getMaterialPropertyOlder(const std::string & name)
+AuxKernelTempl<ComputeValueType>::getMaterialPropertyOlderTempl(const std::string & name)
 {
   if (isNodal())
     mooseError("Nodal AuxKernel '",
@@ -287,7 +287,7 @@ AuxKernelTempl<ComputeValueType>::getMaterialPropertyOlder(const std::string & n
                _var.name(),
                "'.");
 
-  return MaterialPropertyInterface::getMaterialPropertyOlder<T>(name);
+  return MaterialPropertyInterface::getMaterialPropertyOlderTempl<T>(name);
 }
 
 template <typename ComputeValueType>

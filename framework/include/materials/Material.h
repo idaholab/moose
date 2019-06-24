@@ -105,7 +105,7 @@ public:
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOldTempl(const std::string & name);
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
+  const MaterialProperty<T> & getMaterialPropertyOlderTempl(const std::string & name);
   ///@}
 
   ///@{
@@ -120,7 +120,7 @@ public:
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOldByNameTempl(const std::string & prop_name);
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyOlderByName(const std::string & prop_name);
+  const MaterialProperty<T> & getMaterialPropertyOlderByNameTempl(const std::string & prop_name);
   ///@}
 
   ///@{
@@ -354,7 +354,7 @@ Material::getMaterialPropertyOldTempl(const std::string & name)
 
 template <typename T>
 const MaterialProperty<T> &
-Material::getMaterialPropertyOlder(const std::string & name)
+Material::getMaterialPropertyOlderTempl(const std::string & name)
 {
   // Check if the supplied parameter is a valid imput parameter key
   std::string prop_name = deducePropertyName(name);
@@ -401,10 +401,10 @@ Material::getMaterialPropertyOldByNameTempl(const std::string & prop_name)
 
 template <typename T>
 const MaterialProperty<T> &
-Material::getMaterialPropertyOlderByName(const std::string & prop_name)
+Material::getMaterialPropertyOlderByNameTempl(const std::string & prop_name)
 {
   registerPropName(prop_name, true, Material::OLDER);
-  return MaterialPropertyInterface::getMaterialPropertyOlderByName<T>(prop_name);
+  return MaterialPropertyInterface::getMaterialPropertyOlderByNameTempl<T>(prop_name);
 }
 
 template <typename T>

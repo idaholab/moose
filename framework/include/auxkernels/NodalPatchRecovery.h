@@ -61,7 +61,7 @@ public:
    * all qps on the current element
    */
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
+  const MaterialProperty<T> & getMaterialPropertyOlderTempl(const std::string & name);
 
 protected:
   /**
@@ -159,7 +159,7 @@ NodalPatchRecovery::getMaterialPropertyOldTempl(const std::string & name)
 
 template <typename T>
 const MaterialProperty<T> &
-NodalPatchRecovery::getMaterialPropertyOlder(const std::string & name)
+NodalPatchRecovery::getMaterialPropertyOlderTempl(const std::string & name)
 {
-  return MaterialPropertyInterface::getMaterialPropertyOlder<T>(name);
+  return MaterialPropertyInterface::getMaterialPropertyOlderTempl<T>(name);
 }
