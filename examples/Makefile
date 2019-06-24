@@ -23,7 +23,7 @@ dirlist := $(wildcard ex*/)
 .PHONY: examples test .depend $(dirlist)
 
 ## Moose Examples
-all:: examples
+all: examples
 
 # Build the example programs
 examples: $(dirlist)
