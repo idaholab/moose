@@ -10,6 +10,7 @@
 #pragma once
 
 #include "MaterialPropertyInterface.h"
+#include "MemberTemplateMacros.h"
 
 // Forward Declarations
 class MaterialData;
@@ -17,20 +18,6 @@ class TwoMaterialPropertyInterface;
 
 template <>
 InputParameters validParams<TwoMaterialPropertyInterface>();
-
-// clang-format off
-#define adGetNeighborMaterialProperty \
-  _Pragma( \
-    "GCC warning \"adGetNeighborMaterialProperty is deprecated. Simply use getNeighborMaterialProperty\"") \
-  this->template getNeighborMaterialPropertyTempl
-#define adGetNeighborADMaterialProperty \
-  _Pragma( \
-    "GCC warning \"adGetNeighborADMaterialProperty is deprecated. Simply use getNeighborADMaterialProperty\"") \
-  this->template getNeighborADMaterialPropertyTempl
-// clang-format on
-
-#define getNeighborMaterialProperty this->template getNeighborMaterialPropertyTempl
-#define getNeighborADMaterialProperty this->template getNeighborADMaterialPropertyTempl
 
 class TwoMaterialPropertyInterface : public MaterialPropertyInterface
 {

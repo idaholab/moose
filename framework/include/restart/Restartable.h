@@ -12,15 +12,7 @@
 // MOOSE includes
 #include "MooseTypes.h"
 #include "RestartableData.h"
-
-// clang-format off
-#define adDeclareRestartableData \
-  _Pragma( \
-    "GCC warning \"adDeclareRestartableData is deprecated. Simply use declareRestartableData\"") \
-  this->template declareRestartableDataTempl
-// clang-format on
-
-#define declareRestartableData this->template declareRestartableDataTempl
+#include "MemberTemplateMacros.h"
 
 // Forward declarations
 class PostprocessorData;
