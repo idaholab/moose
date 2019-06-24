@@ -83,11 +83,13 @@ SetupMeshCompleteAction::act()
      */
     if (_app.setFileRestart() == false && _app.isRecovering() == false)
     {
+      TIME_SECTION(_uniform_refine_timer);
+
+      auto & _communicator = *_app.getCommunicator();
+      CONSOLE_TIMED_PRINT("Uniformly refining mesh");
+
       if (_mesh->uniformRefineLevel())
       {
-        TIME_SECTION(_uniform_refine_timer);
-        CONSOLE_TIMED_PRINT("Uniformly refining mesh");
-
         Adaptivity::uniformRefine(_mesh.get());
 
         if (_displaced_mesh)

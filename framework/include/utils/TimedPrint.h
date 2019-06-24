@@ -12,6 +12,8 @@
 #include "ConsoleStream.h"
 #include "StreamArguments.h"
 
+#include "libmesh/auto_ptr.h" // libmesh_make_unique
+
 #include <atomic>
 #include <chrono>
 #include <iostream>
@@ -25,8 +27,13 @@
 #endif
 
 #define CONSOLE_TIMED_PRINT(...)                                                                   \
-  TimedPrint tpc(                                                                                  \
-      _console, std::chrono::duration<double>(1), std::chrono::duration<double>(1), __VA_ARGS__);
+  std::unique_ptr<TimedPrint> tpc =                                                                \
+      _communicator.rank() == 0                                                                    \
+          ? libmesh_make_unique<TimedPrint>(_console,                                              \
+                                            std::chrono::duration<double>(1),                      \
+                                            std::chrono::duration<double>(1),                      \
+                                            __VA_ARGS__)                                           \
+          : nullptr;
 
 /**
  * Object to print a message after enough time has passed.
