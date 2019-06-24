@@ -36,4 +36,7 @@ protected:
 
   /// object providing the Euler angles
   const EulerAngleProvider & _euler;
+  
+  // offsets the grain_id
+  int _offset;
 };
