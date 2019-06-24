@@ -7,7 +7,7 @@ equations, which computes a numerical flux from two solution values:
 \end{equation}
 where $\mathbf{n}$ is the normal unit vector in the direction of cell 2 from
 cell 1. This implementation is based on the work by Batten et al.
-[cite:batten1997average], but the equation of state is generalized instead of
+[!cite](batten1997average), but the equation of state is generalized instead of
 assuming ideal gas.
 
 !bibtex bibliography
