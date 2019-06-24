@@ -155,7 +155,7 @@ def _add_requirements(out, location, filename):
             for grandchild in child.children:
                 detail = grandchild.get('detail', None)
                 if detail is None:
-                    msg = "The 'detail' parameters is missing from '%s' in %s. It must be defined " \
+                    msg = "The 'detail' parameters is missing from '%s' in %s. It must be defined "\
                           "for all sub-blocks within a test group."
                     LOG.error(msg, grandchild.name, filename)
 
