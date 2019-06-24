@@ -58,6 +58,8 @@ public:
    */
   void unsetf(std::ios_base::fmtflags mask) const;
 
+  std::streampos tellp() const { return _oss.tellp(); }
+
 private:
   /// Reference to the OutputWarhouse that contains the Console output objects
   OutputWarehouse & _output_warehouse;
