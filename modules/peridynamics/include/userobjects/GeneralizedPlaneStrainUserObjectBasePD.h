@@ -42,6 +42,9 @@ public:
   Real returnJacobian() const;
 
 protected:
+  /// Option of strain formulation: SMALL or FINITE
+  const MooseEnum _strain;
+
   /// Elasticity tensor
   const MaterialProperty<RankFourTensor> & _Cijkl;
 

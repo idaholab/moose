@@ -1,11 +1,20 @@
 [Tests]
-  [./nodal_stress_strain_aux]
+  [./ranktwotensor_OSPD]
     type = 'Exodiff'
-    input = 'nodal_stress_strain_aux.i'
-    exodiff = 'nodal_stress_strain_aux.e'
+    input = 'planestrain_thermomechanics_ranktwotensor_OSPD.i'
+    exodiff = 'planestrain_thermomechanics_ranktwotensor_OSPD.e'
     map = false
-    requirement = 'NodalStressStrainPD shall calculate the stress/strain tensors at a material point for elastic material.'
-    design = 'modules/peridynamics/NodalStressStrainPD.md'
+    requirement = 'NodalRankTwoPD shall calculate the stress/strain tensors at a material point for elastic material.'
+    design = 'modules/peridynamics/NodalRankTwoPD.md'
+    issues = '#11561'
+  [../]
+  [./stretch_NOSPD]
+    type = 'Exodiff'
+    input = 'planestrain_thermomechanics_stretch_NOSPD.i'
+    exodiff = 'planestrain_thermomechanics_stretch_NOSPD.e'
+    map = false
+    requirement = 'ComputeStrainBaseNOSPD shall calculate the stretches of a bond.'
+    design = 'modules/peridynamics/ComputePlaneSmallStrainNOSPD.md'
     issues = '#11561'
   [../]
 []

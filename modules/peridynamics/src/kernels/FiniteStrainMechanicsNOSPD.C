@@ -48,8 +48,7 @@ FiniteStrainMechanicsNOSPD::computeLocalResidual()
   // P = J * Sigma * inv(F)^T.
   // Nodal force states are based on the first Piola-Kirchhoff stress tensors (P).
   // i.e., T = (J * Sigma * inv(F)^T) * inv(Shape) * xi * multi.
-  // Cauchy stress is calculated as Sigma_n+1 = Sigma_n + R * (C * dt * D) * R^T in the
-  // FiniteStrainNOSPD material class.
+  // Cauchy stress is calculated as Sigma_n+1 = Sigma_n + R * (C * dt * D) * R^T
 
   std::vector<RankTwoTensor> nodal_force(_nnodes);
   for (unsigned int nd = 0; nd < _nnodes; ++nd)
@@ -94,14 +93,14 @@ FiniteStrainMechanicsNOSPD::computeNonlocalJacobian()
     unsigned int nb =
         std::find(neighbors.begin(), neighbors.end(), _current_elem->node_id(1 - cur_nd)) -
         neighbors.begin();
-    std::vector<unsigned int> BAneighbors =
-        _pdmesh.getBondAssocHorizonNeighbors(_current_elem->node_id(cur_nd), nb);
-    std::vector<dof_id_type> bonds = _pdmesh.getAssocBonds(_current_elem->node_id(cur_nd));
-    for (unsigned int k = 0; k < BAneighbors.size(); ++k)
+    std::vector<unsigned int> dg_neighbors =
+        _pdmesh.getDefGradNeighbors(_current_elem->node_id(cur_nd), nb);
+    std::vector<dof_id_type> bonds = _pdmesh.getBonds(_current_elem->node_id(cur_nd));
+    for (unsigned int k = 0; k < dg_neighbors.size(); ++k)
     {
-      Node * node_k = _pdmesh.nodePtr(neighbors[BAneighbors[k]]);
+      Node * node_k = _pdmesh.nodePtr(neighbors[dg_neighbors[k]]);
       dof[1] = node_k->dof_number(_sys.number(), _var.number(), 0);
-      Real vol_k = _pdmesh.getVolume(neighbors[BAneighbors[k]]);
+      Real vol_k = _pdmesh.getPDNodeVolume(neighbors[dg_neighbors[k]]);
 
       // obtain bond ik's origin vector
       RealGradient origin_vec_ijk = *node_k - *_pdmesh.nodePtr(_current_elem->node_id(cur_nd));
@@ -110,7 +109,7 @@ FiniteStrainMechanicsNOSPD::computeNonlocalJacobian()
       dFdUk.zero();
       for (unsigned int j = 0; j < _dim; ++j)
         dFdUk(_component, j) =
-            _horizons_ij[cur_nd] / origin_vec_ijk.norm() * origin_vec_ijk(j) * vol_k;
+            _horiz_rad[cur_nd] / origin_vec_ijk.norm() * origin_vec_ijk(j) * vol_k;
 
       dFdUk *= _shape[cur_nd].inverse();
 
@@ -139,7 +138,7 @@ FiniteStrainMechanicsNOSPD::computeNonlocalJacobian()
 
       // bond status for bond k
       Real bond_status_ijk =
-          _bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[BAneighbors[k]]));
+          _bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[dg_neighbors[k]]));
 
       _local_ke.resize(_test.size(), _phi.size());
       _local_ke.zero();
@@ -219,14 +218,14 @@ FiniteStrainMechanicsNOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_n
       unsigned int nb =
           std::find(neighbors.begin(), neighbors.end(), _current_elem->node_id(1 - cur_nd)) -
           neighbors.begin();
-      std::vector<unsigned int> BAneighbors =
-          _pdmesh.getBondAssocHorizonNeighbors(_current_elem->node_id(cur_nd), nb);
-      std::vector<dof_id_type> bonds = _pdmesh.getAssocBonds(_current_elem->node_id(cur_nd));
-      for (unsigned int k = 0; k < BAneighbors.size(); ++k)
+      std::vector<unsigned int> dg_neighbors =
+          _pdmesh.getDefGradNeighbors(_current_elem->node_id(cur_nd), nb);
+      std::vector<dof_id_type> bonds = _pdmesh.getBonds(_current_elem->node_id(cur_nd));
+      for (unsigned int k = 0; k < dg_neighbors.size(); ++k)
       {
-        Node * node_k = _pdmesh.nodePtr(neighbors[BAneighbors[k]]);
+        Node * node_k = _pdmesh.nodePtr(neighbors[dg_neighbors[k]]);
         jvardofs_ijk[1] = node_k->dof_number(_sys.number(), jvar_num, 0);
-        Real vol_k = _pdmesh.getVolume(neighbors[BAneighbors[k]]);
+        Real vol_k = _pdmesh.getPDNodeVolume(neighbors[dg_neighbors[k]]);
 
         // obtain bond k's origin vector
         RealGradient origin_vec_ijk = *node_k - *_pdmesh.nodePtr(_current_elem->node_id(cur_nd));
@@ -235,7 +234,7 @@ FiniteStrainMechanicsNOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_n
         dFdUk.zero();
         for (unsigned int j = 0; j < _dim; ++j)
           dFdUk(coupled_component, j) =
-              _horizons_ij[cur_nd] / origin_vec_ijk.norm() * origin_vec_ijk(j) * vol_k;
+              _horiz_rad[cur_nd] / origin_vec_ijk.norm() * origin_vec_ijk(j) * vol_k;
 
         dFdUk *= _shape[cur_nd].inverse();
 
@@ -264,7 +263,7 @@ FiniteStrainMechanicsNOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_n
 
         // bond status for bond k
         Real bond_status_ijk =
-            _bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[BAneighbors[k]]));
+            _bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[dg_neighbors[k]]));
 
         _local_ke.zero();
         for (_i = 0; _i < _test.size(); ++_i)

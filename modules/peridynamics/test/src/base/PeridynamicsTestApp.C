@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "PeridynamicsTestApp.h"
 #include "PeridynamicsApp.h"
 #include "Moose.h"
@@ -17,6 +18,7 @@ InputParameters
 validParams<PeridynamicsTestApp>()
 {
   InputParameters params = validParams<PeridynamicsApp>();
+
   return params;
 }
 
@@ -46,6 +48,23 @@ PeridynamicsTestApp::registerApps()
 {
   registerApp(PeridynamicsApp);
   registerApp(PeridynamicsTestApp);
+}
+
+void
+PeridynamicsTestApp::registerObjects(Factory & factory)
+{
+  Registry::registerObjectsTo(factory, {"PeridynamicsTestApp"});
+}
+
+void
+PeridynamicsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
+{
+  Registry::registerActionsTo(action_factory, {"PeridynamicsTestApp"});
+}
+
+void
+PeridynamicsTestApp::registerExecFlags(Factory & /*factory*/)
+{
 }
 
 extern "C" void

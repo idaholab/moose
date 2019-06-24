@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NodalDisplacementDifferenceL2NormPD.h"
-#include "MooseVariableFEBase.h"
+#include "MooseVariable.h"
 #include "Function.h"
 
 registerMooseObject("PeridynamicsApp", NodalDisplacementDifferenceL2NormPD);
@@ -50,7 +50,7 @@ NodalDisplacementDifferenceL2NormPD::NodalDisplacementDifferenceL2NormPD(
     mooseError("Number of displacements component should not greater than problem dimension!");
 
   for (unsigned int i = 0; i < nl_vnames.size(); ++i)
-    _disp_var.push_back(&_subproblem.getVariable(_tid, nl_vnames[i]));
+    _disp_var.push_back(&_subproblem.getStandardVariable(_tid, nl_vnames[i]));
 }
 
 Real

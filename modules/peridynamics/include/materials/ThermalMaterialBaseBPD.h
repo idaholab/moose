@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "MaterialBasePD.h"
+#include "PeridynamicsMaterialBase.h"
 
 class ThermalMaterialBaseBPD;
 class Function;
@@ -20,7 +20,7 @@ InputParameters validParams<ThermalMaterialBaseBPD>();
 /**
  * Base material class for bond based peridynamic heat conduction models
  */
-class ThermalMaterialBaseBPD : public MaterialBasePD
+class ThermalMaterialBaseBPD : public PeridynamicsMaterialBase
 {
 public:
   ThermalMaterialBaseBPD(const InputParameters & parameters);
@@ -29,23 +29,13 @@ protected:
   virtual void computeProperties() override;
 
   /**
-   * Function to compute heat flow for a bond
-   */
-  void computeBondHeatFlow();
-
-  /**
-   * Function to fetch the nodal temperature value
-   */
-  void computeNodalTemperature();
-
-  /**
    * Function to compute micro-conductivity
    * @param ave_thermal_conductivity average thermal conductivity for the current element
    */
-  virtual void computePDMicroConductivity(const Real ave_thermal_conductivity) = 0;
+  virtual void computePeridynamicsParams(const Real ave_thermal_conductivity) = 0;
 
   ///@{ Temperature variable and values
-  MooseVariableFEBase & _temp_var;
+  MooseVariable & _temp_var;
   std::vector<Real> _temp;
   ///@}
 

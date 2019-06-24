@@ -42,7 +42,7 @@ SmallStrainMechanicsNOSPD::computeLocalResidual()
   // Piola-Kirchhoff stress (P), and the second Piola-Kirchhoff stress (S) are approximately the
   // same. Thus, the nodal force state tensors are calculated using the Cauchy stresses,
   // i.e., T = Sigma * inv(Shape) * xi * multi.
-  // Cauchy stress is calculated as Sigma = C * E in the SmallStrainNOSPD material class.
+  // Cauchy stress is calculated as Sigma = C * E in the ComputeSmallStrainNOSPD material class.
 
   std::vector<RankTwoTensor> nodal_force(_nnodes);
   for (unsigned int nd = 0; nd < _nnodes; nd++)
@@ -75,17 +75,19 @@ SmallStrainMechanicsNOSPD::computeNonlocalJacobian()
     std::vector<dof_id_type> dof(_nnodes);
     dof[0] = _current_elem->node_ptr(cur_nd)->dof_number(_sys.number(), _var.number(), 0);
     std::vector<dof_id_type> neighbors = _pdmesh.getNeighbors(_current_elem->node_id(cur_nd));
+    std::vector<dof_id_type> bonds = _pdmesh.getBonds(_current_elem->node_id(cur_nd));
+    // get deformation gradient neighbors
     unsigned int nb =
         std::find(neighbors.begin(), neighbors.end(), _current_elem->node_id(1 - cur_nd)) -
         neighbors.begin();
-    std::vector<unsigned int> BAneighbors =
-        _pdmesh.getBondAssocHorizonNeighbors(_current_elem->node_id(cur_nd), nb);
-    std::vector<dof_id_type> bonds = _pdmesh.getAssocBonds(_current_elem->node_id(cur_nd));
-    for (unsigned int k = 0; k < BAneighbors.size(); k++)
+    std::vector<unsigned int> dg_neighbors =
+        _pdmesh.getDefGradNeighbors(_current_elem->node_id(cur_nd), nb);
+
+    for (unsigned int k = 0; k < dg_neighbors.size(); ++k)
     {
-      const Node * node_k = _pdmesh.nodePtr(neighbors[BAneighbors[k]]);
+      const Node * node_k = _pdmesh.nodePtr(neighbors[dg_neighbors[k]]);
       dof[1] = node_k->dof_number(_sys.number(), _var.number(), 0);
-      const Real vol_k = _pdmesh.getVolume(neighbors[BAneighbors[k]]);
+      const Real vol_k = _pdmesh.getPDNodeVolume(neighbors[dg_neighbors[k]]);
 
       // obtain bond ik's origin vector
       const RealGradient origin_vec_ijk =
@@ -93,9 +95,9 @@ SmallStrainMechanicsNOSPD::computeNonlocalJacobian()
 
       RankTwoTensor dFdUk;
       dFdUk.zero();
-      for (unsigned int j = 0; j < _dim; j++)
+      for (unsigned int j = 0; j < _dim; ++j)
         dFdUk(_component, j) =
-            _horizons_ij[cur_nd] / origin_vec_ijk.norm() * origin_vec_ijk(j) * vol_k;
+            _horiz_rad[cur_nd] / origin_vec_ijk.norm() * origin_vec_ijk(j) * vol_k;
 
       dFdUk *= _shape[cur_nd].inverse();
 
@@ -105,7 +107,7 @@ SmallStrainMechanicsNOSPD::computeNonlocalJacobian()
 
       // bond status for bond k
       const Real bond_status_ijk =
-          _bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[BAneighbors[k]]));
+          _bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[dg_neighbors[k]]));
 
       _local_ke.resize(_test.size(), _phi.size());
       _local_ke.zero();
@@ -189,17 +191,19 @@ SmallStrainMechanicsNOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_nu
       std::vector<dof_id_type> jvardofs_ijk(_nnodes);
       jvardofs_ijk[0] = _current_elem->node_ptr(cur_nd)->dof_number(_sys.number(), jvar_num, 0);
       std::vector<dof_id_type> neighbors = _pdmesh.getNeighbors(_current_elem->node_id(cur_nd));
+      std::vector<dof_id_type> bonds = _pdmesh.getBonds(_current_elem->node_id(cur_nd));
+      // get deformation gradient neighbors
       unsigned int nb =
           std::find(neighbors.begin(), neighbors.end(), _current_elem->node_id(1 - cur_nd)) -
           neighbors.begin();
-      std::vector<unsigned int> BAneighbors =
-          _pdmesh.getBondAssocHorizonNeighbors(_current_elem->node_id(cur_nd), nb);
-      std::vector<dof_id_type> bonds = _pdmesh.getAssocBonds(_current_elem->node_id(cur_nd));
-      for (unsigned int k = 0; k < BAneighbors.size(); k++)
+      std::vector<unsigned int> dg_neighbors =
+          _pdmesh.getDefGradNeighbors(_current_elem->node_id(cur_nd), nb);
+
+      for (unsigned int k = 0; k < dg_neighbors.size(); k++)
       {
-        const Node * node_k = _pdmesh.nodePtr(neighbors[BAneighbors[k]]);
+        const Node * node_k = _pdmesh.nodePtr(neighbors[dg_neighbors[k]]);
         jvardofs_ijk[1] = node_k->dof_number(_sys.number(), jvar_num, 0);
-        const Real vol_k = _pdmesh.getVolume(neighbors[BAneighbors[k]]);
+        const Real vol_k = _pdmesh.getPDNodeVolume(neighbors[dg_neighbors[k]]);
 
         // obtain bond k's origin vector
         const RealGradient origin_vec_ijk =
@@ -209,7 +213,7 @@ SmallStrainMechanicsNOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_nu
         dFdUk.zero();
         for (unsigned int j = 0; j < _dim; j++)
           dFdUk(coupled_component, j) =
-              _horizons_ij[cur_nd] / origin_vec_ijk.norm() * origin_vec_ijk(j) * vol_k;
+              _horiz_rad[cur_nd] / origin_vec_ijk.norm() * origin_vec_ijk(j) * vol_k;
 
         dFdUk *= _shape[cur_nd].inverse();
 
@@ -219,7 +223,7 @@ SmallStrainMechanicsNOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_nu
 
         // bond status for bond k
         const Real bond_status_ijk =
-            _bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[BAneighbors[k]]));
+            _bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[dg_neighbors[k]]));
 
         _local_ke.zero();
         for (_i = 0; _i < _test.size(); _i++)

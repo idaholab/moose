@@ -1,0 +1,142 @@
+[GlobalParams]
+  displacements = 'disp_x disp_y'
+  temperature = temp
+[]
+
+[MeshGenerators]
+  [./gmg]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 8
+    ny = 8
+  [../]
+  [./gpd]
+    type = MeshGeneratorPD
+    input = gmg
+    retain_fe_mesh = false
+  [../]
+[]
+
+[Mesh]
+  type = PeridynamicsMesh
+  horizon_number = 3
+[]
+
+[Variables]
+  [./disp_x]
+  [../]
+  [./disp_y]
+  [../]
+[]
+
+[AuxVariables]
+  [./temp]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+
+  [./total_stretch]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./mechanical_stretch]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
+[Modules/Peridynamics/Mechanics/Master]
+  [./all]
+    formulation = NONORDINARY_STATE
+    eigenstrain_names = thermal_strain
+  [../]
+[]
+
+[AuxKernels]
+  [./tempfuncaux]
+    type = FunctionAux
+    variable = temp
+    function = tempfunc
+    use_displaced_mesh = false
+  [../]
+
+  [./total_stretch]
+    type = MaterialRealAux
+    variable = total_stretch
+    property = total_stretch
+  [../]
+  [./mechanical_stretch]
+    type = MaterialRealAux
+    variable = mechanical_stretch
+    property = mechanical_stretch
+  [../]
+[]
+
+[Functions]
+  [./tempfunc]
+    type = ParsedFunction
+    value = 'x*x+y*y'
+  [../]
+[]
+
+[BCs]
+  [./leftx]
+    type = PresetBC
+    boundary = 'left'
+    variable = disp_x
+    value = 0.0
+  [../]
+  [./bottomy]
+    type = PresetBC
+    boundary = 'bottom'
+    variable = disp_y
+    value = 0.0
+  [../]
+[]
+
+[Materials]
+  [./elasticity_tensor]
+    type = ComputeIsotropicElasticityTensor
+    poissons_ratio = 0.3
+    youngs_modulus = 1e6
+  [../]
+  [./strain]
+    type = ComputePlaneSmallStrainNOSPD
+    eigenstrain_names = thermal_strain
+    plane_strain = true
+  [../]
+  [./thermal_strain]
+    type = ComputeThermalExpansionEigenstrain
+    thermal_expansion_coeff = 0.0002
+    stress_free_temperature = 0.0
+    eigenstrain_name = thermal_strain
+  [../]
+  [./stress]
+    type = ComputeLinearElasticStress
+  [../]
+[]
+
+[Preconditioning]
+  [./SMP]
+    type = SMP
+    full = true
+  [../]
+[]
+
+[Executioner]
+  type = Transient
+
+  solve_type = PJFNK
+  line_search = none
+
+  l_tol = 1e-8
+  nl_rel_tol = 1e-10
+
+  start_time = 0.0
+  end_time = 1.0
+[]
+
+[Outputs]
+  exodus = true
+  file_base = planestrain_thermomechanics_stretch_NOSPD
+[]

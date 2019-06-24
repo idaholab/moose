@@ -18,6 +18,7 @@ validParams<MechanicsBaseNOSPD>()
   InputParameters params = validParams<MechanicsBasePD>();
   params.addClassDescription("Base class for kernels using Self-stabilized Non-Ordinary "
                              "State-based PeriDynamic (SNOSPD) formulation");
+
   params.addParam<std::vector<MaterialPropertyName>>(
       "eigenstrain_names",
       "List of eigenstrains to be coupled in non-ordinary state-based mechanics kernels");

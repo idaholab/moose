@@ -9,7 +9,7 @@
 
 #include "AuxiliarySystem.h"
 #include "PeridynamicsMesh.h"
-#include "MooseVariableFEBase.h"
+#include "MooseVariable.h"
 #include "MooseRandom.h"
 #include "RandomizeCriticalValuePD.h"
 
@@ -40,7 +40,8 @@ RandomizeCriticalValuePD::RandomizeCriticalValuePD(const InputParameters & param
     _aux_sln(_aux.solution()),
     _mean(getParam<Real>("mean")),
     _standard_deviation(getParam<Real>("standard_deviation")),
-    _critical_var(&_subproblem.getVariable(_tid, getParam<std::string>("critical_variable")))
+    _critical_var(
+        &_subproblem.getStandardVariable(_tid, getParam<std::string>("critical_variable")))
 {
   MooseRandom::seed(getParam<unsigned int>("seed"));
 }

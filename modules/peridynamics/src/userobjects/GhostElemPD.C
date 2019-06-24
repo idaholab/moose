@@ -36,34 +36,16 @@ GhostElemPD::meshChanged()
 void
 GhostElemPD::ghostElements()
 {
-  // scheme 1: loop through only the local elements and ghost only the nonlocal ones connected to
-  // current processor
+  // Loop through the active local elements and ghost elements from other processors due to
+  // formulation nonlocality
   const MeshBase::const_element_iterator end_elem = _mesh.getMesh().active_local_elements_end();
   for (MeshBase::const_element_iterator elem = _mesh.getMesh().active_local_elements_begin();
        elem != end_elem;
        ++elem)
-    for (unsigned int i = 0; i < 2; ++i)
-      for (unsigned int j = 0; j < _pdmesh.getNNeighbors((*elem)->node_id(i)); ++j)
-        _subproblem.addGhostedElem(_pdmesh.getAssocBonds((*elem)->node_id(i))[j]);
-
-  //  // scheme 2: loop through only the local nodes and ghost their neighbors and their neighbors' neighbor to current processor
-  //  //  this is currently NOT working !!!
-  // const MeshBase::const_node_iterator end_node = _mesh.getMesh().local_nodes_end();
-  // for (MeshBase::const_node_iterator node = _mesh.getMesh().local_nodes_begin(); node !=
-  // end_node; ++node)
-  //   for (unsigned int i = 0; i < _pdmesh.getNNeighbors((*node)->id()); ++i)
-  //   {
-  //     dof_id_type nb_i = _pdmesh.getNeighbors((*node)->id())[i];
-  //     if (_mesh.nodePtr(nb_i)->processor_id() != processor_id())
-  //       for (unsigned int j = 0; j < _pdmesh.getNNeighbors(nb_i); ++j)
-  //         _subproblem.addGhostedElem(_pdmesh.getAssocBonds(nb_i)[j]);
-  //   }
-
-  // // scheme 3: loop through all the nodes and ghost all the nonlocal ones
-  // // this will ghost all the elements
-  // const MeshBase::const_node_iterator end_node = _mesh.getMesh().nodes_end();
-  // for (MeshBase::const_node_iterator node = _mesh.getMesh().nodes_begin(); node != end_node;
-  // ++node)
-  //   for (unsigned int i = 0; i < _pdmesh.getNNeighbors((*node)->id()); ++i)
-  //     _subproblem.addGhostedElem(_pdmesh.getAssocBonds((*node)->id())[i]);
+    for (unsigned int i = 0; i < _nnodes; ++i)
+    {
+      std::vector<dof_id_type> neighbors = _pdmesh.getNeighbors((*elem)->node_id(i));
+      for (unsigned int j = 0; j < neighbors.size(); ++j)
+        _subproblem.addGhostedElem(_pdmesh.getBonds((*elem)->node_id(i))[j]);
+    }
 }

@@ -28,8 +28,8 @@ public:
 
 protected:
   /**
-   * Function to get the kernel name based on the value of member variables: _formulation and
-   * _stabilization
+   * Function to get the kernel name based on the value of member variables:
+   * _formulation and _stabilization
    * @return Kernel name
    */
   virtual std::string getKernelName();
@@ -46,14 +46,26 @@ protected:
   const unsigned int _ndisp;
   ///@}
 
-  /// Option of which peridynamic model needs to be setup: bond based, ordinary state based or non-ordinary state based
+  /// Option of which peridynamic model needs to be setup:
+  /// BOND, ORDINARY_STATE or NONORDINARY_STATE
   const MooseEnum _formulation;
 
-  /// Option of stabilization scheme for correspondence material model (non-ordinary state based): force or self stabilized
+  /// Option of stabilization scheme for correspondence material model (non-ordinary state based):
+  /// FORCE or SELF
   const MooseEnum _stabilization;
 
-  /// Option to set whether the correspondence material model is finite strain or not
-  const bool _finite_strain_formulation;
+  /// Option of strain formulation: SMALL or FINITE
+  const MooseEnum _strain;
+
+  /// vector of subdomain names from provided blocks
+  std::vector<SubdomainName> _subdomain_names;
+
+  /// set of subdomain IDs generated from the passed in vector of subdomain names
+  std::set<SubdomainID> _subdomain_ids;
+
+  /// set of SubdomainID generated from the combined block restrictions of
+  /// all TensorMechanics/Master action blocks
+  std::set<SubdomainID> _subdomain_id_union;
 
   ///@{ Residual debugging
   std::vector<AuxVariableName> _save_in;

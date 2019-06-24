@@ -53,24 +53,24 @@ MeshGeneratorPD::generate()
 
   // fetch data from created extra PD mesh data
   unsigned int dim = pd_data_mesh.dimension();
-  dof_id_type total_pdnodes = pd_data_mesh.nPDNodes();
-  dof_id_type total_pdbonds = pd_data_mesh.nPDElems();
+  dof_id_type n_pdnodes = pd_data_mesh.nPDNodes();
+  dof_id_type n_pdbonds = pd_data_mesh.nPDBonds();
 
   auto pd_mesh = _mesh->buildMeshBaseObject();
 
   pd_mesh->clear();
   pd_mesh->set_mesh_dimension(dim);
   pd_mesh->set_spatial_dimension(dim);
-  pd_mesh->reserve_nodes(total_pdnodes);
-  pd_mesh->reserve_elem(total_pdbonds);
+  pd_mesh->reserve_nodes(n_pdnodes);
+  pd_mesh->reserve_elem(n_pdbonds);
 
   // loop through all pd_nodes to generate PD mesh nodes structure
-  for (unsigned int i = 0; i < total_pdnodes; ++i)
+  for (unsigned int i = 0; i < n_pdnodes; ++i)
     pd_mesh->add_point(fe_mesh->elem_ptr(i)->centroid(), i);
 
   // generate PD mesh using created extra PD data
   unsigned int k = 0;
-  for (unsigned int i = 0; i < total_pdnodes; ++i)
+  for (unsigned int i = 0; i < n_pdnodes; ++i)
   {
     // get neighbors of current pdnode
     std::vector<dof_id_type> pdnode_neighbors = pd_data_mesh.getNeighbors(i);
@@ -125,6 +125,11 @@ MeshGeneratorPD::generate()
     for (std::set<dof_id_type>::iterator sit = elem_ids.begin(); sit != elem_ids.end(); ++sit)
       pd_boundary_info.add_node(pd_mesh->node_ptr(*sit), *bit);
   }
+
+  // create a nodeset to include all PD nodes
+  for (unsigned int i = 0; i < n_pdnodes; ++i)
+    pd_boundary_info.add_node(pd_mesh->node_ptr(i), 9999);
+  pd_boundary_info.nodeset_name(9999) = "all";
 
   fe_mesh.reset();
 

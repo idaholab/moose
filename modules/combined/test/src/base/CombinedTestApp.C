@@ -20,6 +20,7 @@
 #include "HeatConductionTestApp.h"
 #include "MiscTestApp.h"
 #include "NavierStokesTestApp.h"
+#include "PeridynamicsTestApp.h"
 #include "PhaseFieldTestApp.h"
 #include "RichardsTestApp.h"
 #include "SolidMechanicsTestApp.h"
@@ -63,6 +64,7 @@ CombinedTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool u
     HeatConductionTestApp::registerAll(f, af, s, use_test_objs);
     MiscTestApp::registerAll(f, af, s, use_test_objs);
     NavierStokesTestApp::registerAll(f, af, s, use_test_objs);
+    PeridynamicsTestApp::registerAll(f, af, s, use_test_objs);
     PhaseFieldTestApp::registerAll(f, af, s, use_test_objs);
     RichardsTestApp::registerAll(f, af, s, use_test_objs);
     SolidMechanicsTestApp::registerAll(f, af, s, use_test_objs);
@@ -92,6 +94,7 @@ CombinedTestApp::registerObjects(Factory & factory)
   HeatConductionTestApp::registerObjects(factory);
   MiscTestApp::registerObjects(factory);
   NavierStokesTestApp::registerObjects(factory);
+  PeridynamicsTestApp::registerObjects(factory);
   PhaseFieldTestApp::registerObjects(factory);
   RichardsTestApp::registerObjects(factory);
   SolidMechanicsTestApp::registerObjects(factory);
@@ -112,6 +115,7 @@ CombinedTestApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory
   HeatConductionTestApp::associateSyntax(syntax, action_factory);
   MiscTestApp::associateSyntax(syntax, action_factory);
   NavierStokesTestApp::associateSyntax(syntax, action_factory);
+  PeridynamicsTestApp::associateSyntax(syntax, action_factory);
   PhaseFieldTestApp::associateSyntax(syntax, action_factory);
   RichardsTestApp::associateSyntax(syntax, action_factory);
   SolidMechanicsTestApp::associateSyntax(syntax, action_factory);
@@ -132,6 +136,7 @@ CombinedTestApp::registerExecFlags(Factory & factory)
   HeatConductionTestApp::registerExecFlags(factory);
   MiscTestApp::registerExecFlags(factory);
   NavierStokesTestApp::registerExecFlags(factory);
+  PeridynamicsTestApp::registerExecFlags(factory);
   PhaseFieldTestApp::registerExecFlags(factory);
   RichardsTestApp::registerExecFlags(factory);
   SolidMechanicsTestApp::registerExecFlags(factory);

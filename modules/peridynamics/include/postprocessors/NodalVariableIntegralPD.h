@@ -28,5 +28,5 @@ protected:
   virtual Real computeNodalValue() override;
 
   /// Nodal variable to be integrated
-  MooseVariableFEBase & _var;
+  MooseVariable & _var;
 };

@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "KernelBasePD.h"
+#include "PeridynamicsKernelBase.h"
 #include "DerivativeMaterialInterface.h"
 
 class MechanicsBasePD;
@@ -20,7 +20,7 @@ InputParameters validParams<MechanicsBasePD>();
 /**
  * Base kernel class for peridynamic solid mechanics models
  */
-class MechanicsBasePD : public DerivativeMaterialInterface<KernelBasePD>
+class MechanicsBasePD : public DerivativeMaterialInterface<PeridynamicsKernelBase>
 {
 public:
   MechanicsBasePD(const InputParameters & parameters);
@@ -47,11 +47,11 @@ public:
 
 protected:
   /// displacement variables
-  std::vector<MooseVariableFEBase *> _disp_var;
+  std::vector<MooseVariable *> _disp_var;
 
   ///@{ Temperature variable
   const bool _temp_coupled;
-  MooseVariableFEBase * _temp_var;
+  MooseVariable * _temp_var;
   ///@}
 
   /// number of displacement components
@@ -59,7 +59,7 @@ protected:
 
   ///@{ Parameters for out-of-plane strain in weak plane stress formulation
   const bool _out_of_plane_strain_coupled;
-  MooseVariableFEBase * _out_of_plane_strain_var;
+  MooseVariable * _out_of_plane_strain_var;
   ///@}
 
   /// Vector of bond in current configuration

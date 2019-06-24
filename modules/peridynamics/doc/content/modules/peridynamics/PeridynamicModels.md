@@ -3,11 +3,11 @@
 !media peridynamic_models.png style=width:1000px;padding-left:20px;float:top;
        caption=Schematics of bond-based (a), ordinary (b) and non-ordinary (c) state based peridynamic material response
 
-The first peridynamic model, termed the bond-based peridynamic model (BPD), was proposed by Silling in the year of 2000 [citep:Silling2000bond]. In BPD, material points interact in a pair-wise fashion with neighboring material points that fall within their horizon. The interaction between two material points depends only on their own deformations.
+The first peridynamic model, termed the bond-based peridynamic model (BPD), was proposed by Silling in the year of 2000 [citep:](Silling2000bond). In BPD, material points interact in a pair-wise fashion with neighboring material points that fall within their horizon. The interaction between two material points depends only on their own deformations.
 
-Later, Silling et al. [citep:Silling2007states] generalized BPD model in what is termed state-based peridynamic models (SPD) by introducing the concept of states. In SPD, the force state between two material points depends not only on their own deformation states, but also on the deformation states of other material points within their horizons. Depending on the direction of force state between a material point pair, SPD models can be classified into ordinary state-based peridynamic (OSPD) and non-ordinary state-based peridynamic (NOSPD) models.
+Later, Silling et al. [citep:](Silling2007states) generalized BPD model in what is termed state-based peridynamic models (SPD) by introducing the concept of states. In SPD, the force state between two material points depends not only on their own deformation states, but also on the deformation states of other material points within their horizons. Depending on the direction of force state between a material point pair, SPD models can be classified into ordinary state-based peridynamic (OSPD) and non-ordinary state-based peridynamic (NOSPD) models.
 
-SPD models overcome several issues within BPD model, such as only permitting a fixed Poisson's ratio of 0.25, inconsistency in modeling plastic deformation for metals, and requiring a complete recast of standard continuum material models in terms of pairwise force function to permit their use within peridynamics. A review of BPD and SPD and their applications can be found in [cite:Bobaru2016handbook].
+SPD models overcome several issues within BPD model, such as only permitting a fixed Poisson's ratio of 0.25, inconsistency in modeling plastic deformation for metals, and requiring a complete recast of standard continuum material models in terms of pairwise force function to permit their use within peridynamics. A review of BPD and SPD and their applications can be found in [!citep](Bobaru2016handbook).
 
 In peridynamics theory, the Equation of Motion (EOM) for a material point $\mathbf{X}$ in the reference configuration at time $t$ is given by
 
@@ -129,7 +129,7 @@ for $\textbf{irregular non-uniform}$ spatial discretization
 \end{equation}
 with $\mu$ is the shear modulus.
 
-Reference for case of regular uniform spatial discretization can be found at [citet:Madenci2014book] and [citet:VanLe2018]. For case of irregular non-uniform spatial discretization can be found at [citet:Hu2018irregular].
+Reference for case of regular uniform spatial discretization can be found at [citep:](Madenci2014book) and [citep:](VanLe2018). For case of irregular non-uniform spatial discretization can be found at [citep:](Hu2018irregular).
 
 ## Non-ordinary state-based models
 
@@ -227,5 +227,3 @@ For non-ordinary state-based mechanics models, the mechanical strain tensor is t
 \end{equation}
 
 In return, the bond status determined from the mechanics models will affect the response between material points in peridynamic heat conduction models.
-
-!bibtex bibliography

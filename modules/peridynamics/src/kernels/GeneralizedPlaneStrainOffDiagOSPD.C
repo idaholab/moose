@@ -24,6 +24,7 @@ validParams<GeneralizedPlaneStrainOffDiagOSPD>()
       "Class for calculating off-diagonal Jacobian corresponding to "
       "coupling between displacements (or temperature) and scalar out-of-plane strain for "
       "generalized plane strain using OSPD formulation");
+
   params.addCoupledVar("scalar_out_of_plane_strain",
                        "Scalar variable for strain in the out-of-plane direction");
 
@@ -73,35 +74,35 @@ GeneralizedPlaneStrainOffDiagOSPD::computeDispFullOffDiagJacobianScalar(unsigned
 
   DenseMatrix<Number> & ken = _assembly.jacobianBlock(_var.number(), jvar_num);
   DenseMatrix<Number> & kne = _assembly.jacobianBlock(jvar_num, _var.number());
-  MooseVariableScalar & jv = _sys.getScalarVariable(_tid, jvar_num);
+  MooseVariableScalar & jvar = _sys.getScalarVariable(_tid, jvar_num);
 
   // LOCAL jacobian contribution
   // fill in the column corresponding to the scalar variable from bond ij
   for (_i = 0; _i < _test.size(); _i++)
-    for (_j = 0; _j < jv.order(); _j++)
+    for (_j = 0; _j < jvar.order(); _j++)
       ken(_i, _j) +=
           (_i == _j ? -1 : 1) * _cur_ori_ij(component) * _bond_dfdE_ij[0] * _bond_status_ij;
 
   // NONLOCAL jacobian contribution
-  std::vector<dof_id_type> dof(2), neighbors(2), bonds(2);
+  std::vector<dof_id_type> ivardofs(_nnodes), neighbors(_nnodes), bonds(_nnodes);
   // for off-diagonal low components
   RankTwoTensor delta(RankTwoTensor::initIdentity);
-  std::vector<RankTwoTensor> shape(2), dgrad(2);
+  std::vector<RankTwoTensor> shape(_nnodes), dgrad(_nnodes);
 
-  for (unsigned int cur_nd = 0; cur_nd < 2; cur_nd++)
+  for (unsigned int cur_nd = 0; cur_nd < _nnodes; cur_nd++)
   {
     if (_dim == 2)
       shape[cur_nd](2, 2) = dgrad[cur_nd](2, 2) = 1.0;
 
     // calculation of jacobian contribution to current node's neighbors
-    dof[cur_nd] = _ivardofs_ij[cur_nd];
+    ivardofs[cur_nd] = _ivardofs_ij[cur_nd];
     neighbors = _pdmesh.getNeighbors(_current_elem->node_id(cur_nd));
-    bonds = _pdmesh.getAssocBonds(_current_elem->node_id(cur_nd));
+    bonds = _pdmesh.getBonds(_current_elem->node_id(cur_nd));
     for (unsigned int k = 0; k < neighbors.size(); k++)
     {
       Node * node_k = _pdmesh.nodePtr(neighbors[k]);
-      dof[1 - cur_nd] = node_k->dof_number(_sys.number(), _var.number(), 0);
-      Real vol_k = _pdmesh.getVolume(neighbors[k]);
+      ivardofs[1 - cur_nd] = node_k->dof_number(_sys.number(), _var.number(), 0);
+      Real vol_k = _pdmesh.getPDNodeVolume(neighbors[k]);
 
       // obtain bond k's origin length and current orientation
       RealGradient origin_ori_k = *node_k - *_pdmesh.nodePtr(_current_elem->node_id(cur_nd));
@@ -121,9 +122,9 @@ GeneralizedPlaneStrainOffDiagOSPD::computeDispFullOffDiagJacobianScalar(unsigned
       for (unsigned int m = 0; m < _dim; m++)
         for (unsigned int n = 0; n < _dim; n++)
         {
-          shape[cur_nd](m, n) += vol_k * _horizons_ij[cur_nd] / origin_len_k * origin_ori_k(m) *
+          shape[cur_nd](m, n) += vol_k * _horiz_rad[cur_nd] / origin_len_k * origin_ori_k(m) *
                                  origin_ori_k(n) * bond_status_k;
-          dgrad[cur_nd](m, n) += vol_k * _horizons_ij[cur_nd] / origin_len_k * current_ori_k(m) *
+          dgrad[cur_nd](m, n) += vol_k * _horiz_rad[cur_nd] / origin_len_k * current_ori_k(m) *
                                  origin_ori_k(n) * bond_status_k;
         }
 
@@ -137,7 +138,7 @@ GeneralizedPlaneStrainOffDiagOSPD::computeDispFullOffDiagJacobianScalar(unsigned
                         _bond_dfdE_i_j[cur_nd] / origin_len_k * vol_k * bond_status_k *
                         _bond_status_ij;
 
-      _assembly.cacheJacobianBlock(_local_ke, dof, jv.dofIndices(), _var.scalingFactor());
+      _assembly.cacheJacobianBlock(_local_ke, ivardofs, jvar.dofIndices(), _var.scalingFactor());
     }
 
     // finalize the shape tensor and deformation gradient tensor for node_i
@@ -156,14 +157,14 @@ GeneralizedPlaneStrainOffDiagOSPD::computeDispFullOffDiagJacobianScalar(unsigned
   }
 
   // off-diagonal jacobian entries on the row
-  Real dEidUi = -_vols_ij[1] * _horizons_ij[0] / _origin_vec_ij.norm() *
+  Real dEidUi = -_vols_ij[1] * _horiz_rad[0] / _origin_vec_ij.norm() *
                 (_Cijkl[0](2, 2, 0, 0) *
                      (_origin_vec_ij(0) * shape[0](0, 0) + _origin_vec_ij(1) * shape[0](1, 0)) *
                      dgrad[0](component, 0) +
                  _Cijkl[0](2, 2, 1, 1) *
                      (_origin_vec_ij(0) * shape[0](0, 1) + _origin_vec_ij(1) * shape[0](1, 1)) *
                      dgrad[0](component, 1));
-  Real dEjdUj = _vols_ij[0] * _horizons_ij[1] / _origin_vec_ij.norm() *
+  Real dEjdUj = _vols_ij[0] * _horiz_rad[1] / _origin_vec_ij.norm() *
                 (_Cijkl[0](2, 2, 0, 0) *
                      (_origin_vec_ij(0) * shape[1](0, 0) + _origin_vec_ij(1) * shape[1](1, 0)) *
                      dgrad[1](component, 0) +
@@ -182,11 +183,11 @@ GeneralizedPlaneStrainOffDiagOSPD::computeDispPartialOffDiagJacobianScalar(unsig
 {
   DenseMatrix<Number> & ken = _assembly.jacobianBlock(_var.number(), jvar_num);
   DenseMatrix<Number> & kne = _assembly.jacobianBlock(jvar_num, _var.number());
-  MooseVariableScalar & jv = _sys.getScalarVariable(_tid, jvar_num);
+  MooseVariableScalar & jvar = _sys.getScalarVariable(_tid, jvar_num);
 
   // fill in the column corresponding to the scalar variable from bond ij
   for (_i = 0; _i < _test.size(); _i++)
-    for (_j = 0; _j < jv.order(); _j++)
+    for (_j = 0; _j < jvar.order(); _j++)
     {
       ken(_i, _j) +=
           (_i == _j ? -1 : 1) * _cur_ori_ij(component) * _bond_dfdE_ij[0] * _bond_status_ij;

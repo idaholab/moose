@@ -2,7 +2,7 @@
 
 ## Description
 
-Mesh generator `MeshGeneratorPD` converts finite element mesh to peridynamics mesh.
+Mesh generator `MeshGeneratorPD` converts finite element meshes to peridynamics meshes.
 
 !syntax parameters /MeshGenerators/MeshGeneratorPD
 

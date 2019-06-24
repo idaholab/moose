@@ -22,12 +22,10 @@ where $\mathbf{M}$ is the unit vector in deformed configuration.
 \end{equation}
 where $s$ is the bond stretch, $\theta$ is the dilatation at a material point, parameters $a$, $b$ and $d$ are model parameters which can be expressed in terms of the material constants.
 
-More details on the residual and Jacobian formulation can be found in Ref. [citet:Hu2018irregular].
+More details on the residual and Jacobian formulation can be found in Ref. [citep:](Hu2018irregular).
 
 !syntax parameters /Kernels/MechanicsOSPD
 
 !syntax inputs /Kernels/MechanicsOSPD
 
 !syntax children /Kernels/MechanicsOSPD
-
-!bibtex bibliography

@@ -15,10 +15,12 @@
 
 #include "libmesh/string_to_enum.h"
 
+registerMooseAction("PeridynamicsApp", MechanicsActionPD, "setup_mesh_complete");
+registerMooseAction("PeridynamicsApp", MechanicsActionPD, "create_problem_complete");
 registerMooseAction("PeridynamicsApp", MechanicsActionPD, "add_aux_variable");
-registerMooseAction("PeridynamicsApp", MechanicsActionPD, "add_kernel");
 registerMooseAction("PeridynamicsApp", MechanicsActionPD, "add_user_object");
-registerMooseAction("PeridynamicsApp", MechanicsActionPD, "setup_quadrature");
+registerMooseAction("PeridynamicsApp", MechanicsActionPD, "add_ic");
+registerMooseAction("PeridynamicsApp", MechanicsActionPD, "add_kernel");
 
 template <>
 InputParameters
@@ -26,14 +28,15 @@ validParams<MechanicsActionPD>()
 {
   InputParameters params = validParams<Action>();
   params.addClassDescription("Class for setting up peridynamic kernels");
+
   params.addRequiredParam<std::vector<VariableName>>(
       "displacements", "Nonlinear variable names for the displacements");
-  MooseEnum formulation_option("Bond OrdinaryState NonOrdinaryState", "Bond");
-  params.addParam<MooseEnum>("formulation",
-                             formulation_option,
-                             "Available peridynamic formulation options: " +
-                                 formulation_option.getRawNames());
-  MooseEnum stabilization_option("Force Self", "Self");
+  MooseEnum formulation_option("BOND ORDINARY_STATE NONORDINARY_STATE");
+  params.addRequiredParam<MooseEnum>("formulation",
+                                     formulation_option,
+                                     "Available peridynamic formulation options: " +
+                                         formulation_option.getRawNames());
+  MooseEnum stabilization_option("FORCE SELF", "SELF");
   params.addParam<MooseEnum>(
       "stabilization",
       stabilization_option,
@@ -43,17 +46,12 @@ validParams<MechanicsActionPD>()
       "full_jacobian",
       false,
       "Parameter to set whether to use full jacobian for state based formulation or not");
-  params.addParam<bool>("finite_strain_formulation",
-                        false,
-                        "Parameter to set whether the formulation is finite strain or not");
+  MooseEnum strain_type("SMALL FINITE", "SMALL");
+  params.addParam<MooseEnum>("strain", strain_type, "Strain formulation");
   params.addParam<VariableName>("temperature", "Nonlinear variable name for the temperature");
   params.addParam<VariableName>("out_of_plane_strain",
                                 "Nonlinear variable name for the out_of_plane strain for "
                                 "plane stress using SNOSPD formulation");
-  params.addParam<bool>(
-      "use_displaced_mesh",
-      false,
-      "Parameter to set whether to use the displaced mesh for computation or not");
   params.addParam<std::vector<SubdomainName>>("block",
                                               "List of ids of the blocks (subdomains) that the "
                                               "peridynamic mechanics kernel will be applied to");
@@ -73,7 +71,9 @@ MechanicsActionPD::MechanicsActionPD(const InputParameters & params)
     _ndisp(_displacements.size()),
     _formulation(getParam<MooseEnum>("formulation")),
     _stabilization(getParam<MooseEnum>("stabilization")),
-    _finite_strain_formulation(getParam<bool>("finite_strain_formulation")),
+    _strain(getParam<MooseEnum>("strain")),
+    _subdomain_names(getParam<std::vector<SubdomainName>>("block")),
+    _subdomain_ids(),
     _save_in(getParam<std::vector<AuxVariableName>>("save_in")),
     _diag_save_in(getParam<std::vector<AuxVariableName>>("diag_save_in"))
 {
@@ -91,47 +91,64 @@ MechanicsActionPD::MechanicsActionPD(const InputParameters & params)
 void
 MechanicsActionPD::act()
 {
-  if (_current_task == "add_aux_variable")
+  if (_current_task == "setup_mesh_complete")
   {
-    // add the bond_status aux variable which is not restricted to any specific block but for
-    // all peridynamic domains
+    // get subdomain IDs
+    for (auto & name : _subdomain_names)
+      _subdomain_ids.insert(_mesh->getSubdomainID(name));
+  }
+  else if (_current_task == "create_problem_complete")
+  {
+    // Gather info about all other master actions for adding (aux)variables
+    auto actions = _awh.getActions<MechanicsActionPD>();
+    for (const auto & action : actions)
+    {
+      const auto size_before = _subdomain_id_union.size();
+      const auto added_size = action->_subdomain_ids.size();
+      _subdomain_id_union.insert(action->_subdomain_ids.begin(), action->_subdomain_ids.end());
+      const auto size_after = _subdomain_id_union.size();
+
+      if (size_after != size_before + added_size)
+        mooseError("The block restrictions in the Peridynamics/Mechanics/Master actions must be "
+                   "non-overlapping.");
+
+      if (added_size == 0 && actions.size() > 1)
+        mooseError(
+            "No Peridynamics/Mechanics/Master action can be block unrestricted if more than one "
+            "Peridynamics/Mechanics/Master action is specified.");
+    }
+  }
+  else if (_current_task == "add_aux_variable")
+  {
+    // add the bond_status aux variable to all peridynamic domains
     _problem->addAuxVariable("bond_status",
                              FEType(Utility::string_to_enum<Order>("CONSTANT"),
-                                    Utility::string_to_enum<FEFamily>("MONOMIAL")));
-
-    // Set the initial value to unit using InitialConditionAction, following the coding in
-    // createInitialConditionAction() in AddVariableAction.C
-
-    // Set the parameters for the action
-    InputParameters action_params = _action_factory.getValidParams("AddOutputAction");
-    action_params.set<ActionWarehouse *>("awh") = &_awh;
-    action_params.set<std::string>("type") = "ConstantIC";
-    // Create the action
-    std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
-        _action_factory.create("AddInitialConditionAction", "bond_status_moose", action_params));
-    // Set the required parameters for the object to be created
-    action->getObjectParams().set<VariableName>("variable") = "bond_status";
-    action->getObjectParams().set<Real>("value") = 1.0;
-    // Store the action in the ActionWarehouse
-    _awh.addActionBlock(action);
+                                    Utility::string_to_enum<FEFamily>("MONOMIAL")),
+                             _subdomain_id_union.empty() ? nullptr : &_subdomain_id_union);
   }
-  else if (_current_task == "setup_quadrature") // set the quadrature type to GAUSS_LOBATTO and
-                                                // order to FIRST, such that the two quadrature
-                                                // points are the two end nodes of a Edge2 element
+  else if (_current_task == "add_ic")
   {
-    QuadratureType type = Moose::stringToEnum<QuadratureType>("GAUSS_LOBATTO");
-    Order order = Moose::stringToEnum<Order>("FIRST");
+    const std::string ic_type = "ConstantIC";
+    const std::string ic_name = name() + "bond_status";
 
-    _problem->createQRules(type, order, order, order);
+    InputParameters params = _factory.getValidParams(ic_type);
+    params.set<VariableName>("variable") = "bond_status";
+    params.set<Real>("value") = 1.0;
+
+    // check whether this object is restricted to certain block?
+    if (isParamValid("block"))
+      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
+
+    _problem->addInitialCondition(ic_type, ic_name, params);
   }
   else if (_current_task == "add_user_object")
   {
     // add ghosting UO
     const std::string uo_type = "GhostElemPD";
-    const std::string uo_name = "GhostElemPD";
+    const std::string uo_name = name() + "GhostElemPD";
 
     InputParameters params = _factory.getValidParams(uo_type);
-    params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
+    params.set<bool>("use_displaced_mesh") = (_strain == "FINITE");
 
     _problem->addUserObject(uo_type, uo_name, params);
   }
@@ -142,7 +159,7 @@ MechanicsActionPD::act()
 
     for (unsigned int i = 0; i < _ndisp; ++i)
     {
-      const std::string kernel_object_name = "Peridynamics_" + Moose::stringify(i);
+      const std::string kernel_object_name = name() + "Peridynamics_" + Moose::stringify(i);
 
       params.set<unsigned int>("component") = i;
       params.set<NonlinearVariableName>("variable") = _displacements[i];
@@ -164,28 +181,28 @@ MechanicsActionPD::getKernelName()
 {
   std::string name;
 
-  if (_formulation == "Bond")
+  if (_formulation == "BOND")
     name = "MechanicsBPD";
-  else if (_formulation == "OrdinaryState")
+  else if (_formulation == "ORDINARY_STATE")
     name = "MechanicsOSPD";
-  else if (_formulation == "NonOrdinaryState")
+  else if (_formulation == "NONORDINARY_STATE")
   {
-    if (_stabilization == "Force")
+    if (_stabilization == "FORCE")
       name = "ForceStabilizedSmallStrainMechanicsNOSPD";
-    else if (_stabilization == "Self")
+    else if (_stabilization == "SELF")
     {
-      if (_finite_strain_formulation)
+      if (_strain == "FINITE")
         name = "FiniteStrainMechanicsNOSPD";
       else
         name = "SmallStrainMechanicsNOSPD";
     }
     else
-      paramError("stabilization", "Unknown PD stabilization scheme. Choose from: Force Self");
+      paramError("stabilization", "Unknown PD stabilization scheme. Choose from: FORCE SELF");
   }
   else
     paramError(
         "formulation",
-        "Unsupported peridynamic formulation. Choose from: Bond OrdinaryState NonOrdinaryState");
+        "Unsupported peridynamic formulation. Choose from: BOND ORDINARY_STATE NONORDINARY_STATE");
 
   return name;
 }
@@ -194,27 +211,21 @@ InputParameters
 MechanicsActionPD::getKernelParameters(std::string name)
 {
   InputParameters params = _factory.getValidParams(name);
+
+  params.applyParameters(
+      parameters(),
+      {"displacements", "eigenstrain_names", "use_displaced_mesh", "save_in", "diag_save_in"});
+
   params.set<std::vector<VariableName>>("displacements") = _displacements;
 
-  if (isParamValid("temperature"))
-    params.set<VariableName>("temperature") = getParam<VariableName>("temperature");
+  // peridynamics modules are formulated based on initial configuration
+  params.set<bool>("use_displaced_mesh") = false;
 
-  if (isParamValid("out_of_plane_strain"))
-    params.set<VariableName>("out_of_plane_strain") = getParam<VariableName>("out_of_plane_strain");
-
-  params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
-
-  params.set<bool>("full_jacobian") = getParam<bool>("full_jacobian");
-
-  if (_formulation == "NonOrdinaryState")
+  if (_formulation == "NONORDINARY_STATE")
   {
     params.set<std::vector<MaterialPropertyName>>("eigenstrain_names") =
         getParam<std::vector<MaterialPropertyName>>("eigenstrain_names");
   }
-
-  // check whether this kernel is restricted to certain block?
-  if (isParamValid("block"))
-    params.set<std::vector<SubdomainName>>("block") = getParam<std::vector<SubdomainName>>("block");
 
   return params;
 }

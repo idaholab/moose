@@ -7,7 +7,7 @@ In peridynamics theory, material points separated by a finite distance interact 
 
 Horizon is usually denoted using the symbol of $\mathcal{H}$, and its size as $\delta$. Material points can have different horizon size, horizon for material point $\mathbf{X}$ is denoted as $\mathcal{H}_{\mathbf{X}}$.
 
-More discussion about $\textit{horizon}$ can be found in [cite:Bobaru2012horizon].
+More discussion about $\textit{horizon}$ can be found in [!citep](Bobaru2012horizon).
 
 # States
 
@@ -21,7 +21,7 @@ A state of order 1 is called a $\textit{vector state}$. The set of all vector st
 
 A state of order 0 is called a $\textit{scalar state}$. The set of all scalar states is denoted as $\mathcal{S}$, thus $\mathcal{S}=\mathcal{A}_{0}$. Scalar states are usually written as lower case, non-bold font with an underscore, e.g., $\underline{a}$.
 
-More information about $\textit{states}$ can be found in [cite:Silling2007states].
+More information about $\textit{states}$ can be found in [!citep](Silling2007states).
 
 The $\textit{relative position vector state}$ of two material points in reference configuration $\Omega_{r}$ is
 
@@ -51,5 +51,3 @@ with
   \mathbf{x}^{\prime} \left( \mathbf{X}^{\prime},t \right) = \mathbf{X}^{\prime} + \mathbf{u}\left( \mathbf{X}^{\prime},t \right)
 \end{equation}
 where $\mathbf{x}\left( \mathbf{X},t \right)$ and $\mathbf{x}^{\prime}\left( \mathbf{X}^{\prime},t\right)$ are the position vectors in the current configuration.
-
-!bibtex bibliography

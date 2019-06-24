@@ -28,4 +28,7 @@ protected:
 
   /// Reference to peridynamics mesh
   PeridynamicsMesh & _pdmesh;
+
+  /// number of nodes for a edge element
+  const unsigned int _nnodes;
 };
