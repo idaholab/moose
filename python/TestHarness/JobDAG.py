@@ -127,10 +127,8 @@ class JobDAG(object):
 
         # This job passed, but one of its dependents has not
         if status == tester.success and self._hasDownStreamsWithFailures(job):
-            tester.setStatus(tester.success)
-            # Do we care? I figure, we should at least mention something. This job is not actually going to re-execute an app.
-            tester.addCaveats('previous results: {}'.format(status.status))
-            job.setStatus(job.finished)
+            tester.addCaveats('re-running')
+            return
 
         # This job was skipped, passed or silent
         elif status in job.job_status.getSuccessStatuses():
