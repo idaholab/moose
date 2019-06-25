@@ -25,7 +25,7 @@ as:
 
 ## Example Syntax
 
-The [LevelSetCFLCondition](#) is added to the input file in the [`[Postprocessors]`](/Postprocessors/index.md) block
+The [LevelSetCFLCondition](#) is added to the input file in the [`Postprocessors`](/Postprocessors/index.md) block
 as follows.
 
 !listing modules/level_set/test/tests/reinitialization/master.i block=cfl prefix=[Postprocessors] indent=2
