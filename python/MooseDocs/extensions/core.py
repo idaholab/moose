@@ -284,10 +284,16 @@ class LinkInline(components.TokenComponent):
 
     Without the negative lookahead after the first "[" the match would capture the beginning at
     the shortcut link.
+
+    There is still a problem with this for the case above, if the text in the first
+    shortcut includes a non-word character the current regex fails. The simple fix is simply
+    to put the second link on a new-line.
+
+    https://regex101.com/r/LXjbHt/2
     """
 
     RE = re.compile(r'\[(?!\w+?\] )'                # start of link, see note above
-                    r'(?P<inline>[^[]*?)\]'         # link text (all except [) and end of text
+                    r'(?P<inline>.*?)\]'            # link text
                     r'\((?P<url>.*?)'               # link url
                     r'(?:\s+(?P<settings>.*?))?\)', # settings
                     flags=re.UNICODE)
