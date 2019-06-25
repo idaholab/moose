@@ -16,7 +16,7 @@ protected:
     params.set<UserObjectName>("fluid_properties") = _fp_name;
     _fe_problem->addUserObject(class_name, class_name, params);
     return static_cast<const NumericalFlux3EqnBase *>(
-        &_fe_problem->getUserObject<NumericalFlux3EqnCentered>(class_name));
+        &_fe_problem->getUserObjectTempl<NumericalFlux3EqnCentered>(class_name));
   }
 
   virtual std::vector<std::pair<std::vector<Real>, std::vector<Real>>>

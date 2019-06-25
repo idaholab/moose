@@ -14,9 +14,10 @@ protected:
   {
     InputParameters uo_pars = _factory.getValidParams("StiffenedGas7EqnFluidProperties");
     _fe_problem->addUserObject("StiffenedGas7EqnFluidProperties", "fp", uo_pars);
-    _fp = &_fe_problem->getUserObject<StiffenedGas7EqnFluidProperties>("fp");
-    _fp_liquid = &_fe_problem->getUserObject<StiffenedGasFluidProperties>(_fp->getLiquidName());
-    _fp_vapor = &_fe_problem->getUserObject<StiffenedGasFluidProperties>(_fp->getVaporName());
+    _fp = &_fe_problem->getUserObjectTempl<StiffenedGas7EqnFluidProperties>("fp");
+    _fp_liquid =
+        &_fe_problem->getUserObjectTempl<StiffenedGasFluidProperties>(_fp->getLiquidName());
+    _fp_vapor = &_fe_problem->getUserObjectTempl<StiffenedGasFluidProperties>(_fp->getVaporName());
   }
 
   const StiffenedGas7EqnFluidProperties * _fp;
