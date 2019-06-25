@@ -18,8 +18,7 @@ defineADValidParams(ADGrainGrowth,
 
 template <ComputeStage compute_stage>
 ADGrainGrowth<compute_stage>::ADGrainGrowth(const InputParameters & parameters)
-  : ADGrainGrowthBase<compute_stage>(parameters),
-    _gamma(adGetADMaterialProperty<Real>("gamma_asymm"))
+  : ADGrainGrowthBase<compute_stage>(parameters), _gamma(getADMaterialProperty<Real>("gamma_asymm"))
 {
 }
 
