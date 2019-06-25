@@ -14,7 +14,9 @@ defineADValidParams(
     ADKernelGrad,
     params.addClassDescription("Diffusion Kernel with a material property as diffusivity and "
                                "automatic differentiation to provide perfect Jacobians");
-    params.addParam<MaterialPropertyName>("D_name", "D", "The name of the diffusivity");
+    params.addParam<MaterialPropertyName>("diffusivity",
+                                          "D",
+                                          "The diffusivity value or material property");
     params.addCoupledVar("args", "Vector of arguments of the diffusivity");
     params.addCoupledVar("conc",
                          "Coupled concentration variable for kernel to operate on; if this "

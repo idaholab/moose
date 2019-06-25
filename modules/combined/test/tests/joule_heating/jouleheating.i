@@ -19,7 +19,7 @@
   [./HeatDiff]
     type = MatDiffusion
     variable = T
-    D_name = thermal_conductivity
+    diffusivity = thermal_conductivity
   [../]
   [./HeatTdot]
     type = HeatConductionTimeDerivative
@@ -33,7 +33,7 @@
   [./electric]
     type = MatDiffusion
     variable = elec
-    D_name = electrical_conductivity
+    diffusivity = electrical_conductivity
     args = 'T'
   [../]
 []

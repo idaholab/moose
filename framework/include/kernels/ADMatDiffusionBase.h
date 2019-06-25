@@ -52,7 +52,7 @@ protected:
 template <ComputeStage compute_stage, typename T>
 ADMatDiffusionBase<compute_stage, T>::ADMatDiffusionBase(const InputParameters & parameters)
   : ADKernelGrad<compute_stage>(parameters),
-    _D(adGetADMaterialProperty<T>("D_name")),
+    _D(adGetADMaterialProperty<T>("diffusivity")),
     _grad_conc(isCoupled("conc") ? adCoupledGradient("conc") : _grad_u)
 {
 }

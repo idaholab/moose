@@ -29,7 +29,7 @@
   [./diff]
     type = ADMatDiffusion
     variable = T
-    D_name = diffusivity
+    diffusivity = diffusivity
   [../]
   [./dt]
     type = CoefTimeDerivative

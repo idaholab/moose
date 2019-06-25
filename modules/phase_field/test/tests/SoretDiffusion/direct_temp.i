@@ -61,7 +61,7 @@
   [./HtCond]
     type = MatDiffusion
     variable = T
-    D_name = thermal_conductivity
+    diffusivity = thermal_conductivity
   [../]
 []
 

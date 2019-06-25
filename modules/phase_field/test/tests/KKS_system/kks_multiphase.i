@@ -225,19 +225,19 @@
   [./diff_c1]
     type = MatDiffusion
     variable = c
-    D_name = Dh1
+    diffusivity = Dh1
     conc = c1
   [../]
   [./diff_c2]
     type = MatDiffusion
     variable = c
-    D_name = Dh2
+    diffusivity = Dh2
     conc = c2
   [../]
   [./diff_c3]
     type = MatDiffusion
     variable = c
-    D_name = Dh3
+    diffusivity = Dh3
     conc = c3
   [../]
 

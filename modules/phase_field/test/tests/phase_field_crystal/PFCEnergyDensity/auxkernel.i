@@ -57,13 +57,13 @@
     type = MatDiffusion
     variable = n
     conc = u
-    D_name = C2
+    diffusivity = C2
   [../]
   [./v_term]
     type = MatDiffusion
     variable = n
     conc = v
-    D_name = C4
+    diffusivity = C4
   [../]
   [./u_rctn]
     type = Reaction

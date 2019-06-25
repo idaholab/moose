@@ -33,7 +33,7 @@
 [Kernels]
   [./c]
     type = Diffusion
-    #D_name = F
+    #diffusivity = F
     variable = c
   [../]
   [./dt]

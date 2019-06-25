@@ -43,13 +43,13 @@
 [Kernels]
   [./diff_u]
     type = MatDiffusion
-    D_name = D
+    diffusivity = D
     variable = u
     block = '0'
   [../]
   [./diff_v]
     type = MatDiffusion
-    D_name = D
+    diffusivity = D
     variable = v
     block = '1'
   [../]

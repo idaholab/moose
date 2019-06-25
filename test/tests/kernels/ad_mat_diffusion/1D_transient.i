@@ -29,7 +29,7 @@
   [./diff]
     type = MatDiffusion
     variable = T
-    D_name = 0.95
+    diffusivity = 0.95
   [../]
   [./dt]
     type = CoefTimeDerivative

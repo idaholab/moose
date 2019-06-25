@@ -61,13 +61,13 @@
     type = MatDiffusion
     variable = u
     block = '0'
-    D_name = D
+    diffusivity = D
   [../]
   [./diff_v]
     type = MatDiffusion
     variable = v
     block = '1'
-    D_name = D
+    diffusivity = D
   [../]
 []
 

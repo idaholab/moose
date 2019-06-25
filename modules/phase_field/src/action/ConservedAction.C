@@ -223,7 +223,8 @@ ConservedAction::act()
           InputParameters params = _factory.getValidParams(kernel_type);
           params.set<NonlinearVariableName>("variable") = _var_name;
           params.set<std::vector<VariableName>>("conc") = {_chempot_name};
-          params.set<MaterialPropertyName>("D_name") = getParam<MaterialPropertyName>("mobility");
+          params.set<MaterialPropertyName>("diffusivity") =
+              getParam<MaterialPropertyName>("mobility");
           params.applyParameters(parameters());
 
           _problem->addKernel(kernel_type, kernel_name, params);
@@ -236,7 +237,7 @@ ConservedAction::act()
           InputParameters params = _factory.getValidParams(kernel_type);
           params.set<NonlinearVariableName>("variable") = _chempot_name;
           params.set<std::vector<VariableName>>("conc") = {_var_name};
-          params.set<MaterialPropertyName>("D_name") = getParam<MaterialPropertyName>("kappa");
+          params.set<MaterialPropertyName>("diffusivity") = getParam<MaterialPropertyName>("kappa");
           params.applyParameters(parameters());
 
           _problem->addKernel(kernel_type, kernel_name, params);

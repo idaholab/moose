@@ -63,7 +63,13 @@ InputParameters
 MatDiffusionBase<T>::validParams()
 {
   InputParameters params = ::validParams<Kernel>();
-  params.addParam<MaterialPropertyName>("D_name", "D", "The name of the diffusivity");
+  params.addDeprecatedParam<MaterialPropertyName>(
+      "D_name",
+      "The name of the diffusivity",
+      "This parameter has been renamed to 'diffusivity', which is more mnemonic and more conducive "
+      "to passing a number literal");
+  params.addParam<MaterialPropertyName>(
+      "diffusivity", "D", "The diffusivity value or material property");
   params.addCoupledVar("args", "Vector of arguments of the diffusivity");
   params.addCoupledVar("conc",
                        "Coupled concentration variable for kernel to operate on; if this "
@@ -75,8 +81,10 @@ MatDiffusionBase<T>::validParams()
 template <typename T>
 MatDiffusionBase<T>::MatDiffusionBase(const InputParameters & parameters)
   : DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>(parameters),
-    _D(getMaterialProperty<T>("D_name")),
-    _dDdc(getMaterialPropertyDerivative<T>("D_name", _var.name())),
+    _D(isParamValid("D_name") ? getMaterialProperty<T>("D_name")
+                              : getMaterialProperty<T>("diffusivity")),
+    _dDdc(getMaterialPropertyDerivative<T>(isParamValid("D_name") ? "D_name" : "diffusivity",
+                                           _var.name())),
     _dDdarg(_coupled_moose_vars.size()),
     _is_coupled(isCoupled("conc")),
     _conc_var(_is_coupled ? coupled("conc") : _var.number()),
@@ -84,14 +92,16 @@ MatDiffusionBase<T>::MatDiffusionBase(const InputParameters & parameters)
 {
   // fetch derivatives
   for (unsigned int i = 0; i < _dDdarg.size(); ++i)
-    _dDdarg[i] = &getMaterialPropertyDerivative<T>("D_name", _coupled_moose_vars[i]->name());
+    _dDdarg[i] = &getMaterialPropertyDerivative<T>(
+        isParamValid("D_name") ? "D_name" : "diffusivity", _coupled_moose_vars[i]->name());
 }
 
 template <typename T>
 void
 MatDiffusionBase<T>::initialSetup()
 {
-  validateNonlinearCoupling<Real>("D_name");
+  validateNonlinearCoupling<Real>(parameters().isParamSetByUser("D_name") ? "D_name"
+                                                                          : "diffusivity");
 }
 
 template <typename T>
