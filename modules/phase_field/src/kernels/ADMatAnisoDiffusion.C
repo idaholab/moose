@@ -14,7 +14,7 @@ registerADMooseObject("MooseApp", ADMatAnisoDiffusion);
 defineADValidParams(
     ADMatAnisoDiffusion,
     ADMatDiffusionBase,
-    params.addClassDescription("Diffusion equation Kernel that takes an anisotropic Diffusivity "
+    params.addClassDescription("Diffusion equation kernel that takes an anisotropic diffusivity "
                                "from a material property"););
 
 template <ComputeStage compute_stage>

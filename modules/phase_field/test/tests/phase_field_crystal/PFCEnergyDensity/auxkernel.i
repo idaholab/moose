@@ -56,13 +56,13 @@
   [./u_term]
     type = MatDiffusion
     variable = n
-    conc = u
+    v = u
     diffusivity = C2
   [../]
   [./v_term]
     type = MatDiffusion
     variable = n
-    conc = v
+    v = v
     diffusivity = C4
   [../]
   [./u_rctn]

@@ -13,8 +13,8 @@
 
 #define usingMatDiffusionBaseMembers(T)                                                            \
   usingKernelGradMembers;                                                                          \
-  using ADMatDiffusionBase<compute_stage, T>::_D;                                                  \
-  using ADMatDiffusionBase<compute_stage, T>::_grad_conc
+  using ADMatDiffusionBase<compute_stage, T>::_diffusivity;                                        \
+  using ADMatDiffusionBase<compute_stage, T>::_grad_v
 
 // Forward declarations
 template <ComputeStage compute_stage, typename T = void>
@@ -41,10 +41,10 @@ protected:
   virtual ADRealVectorValue precomputeQpResidual() override;
 
   /// diffusion coefficient
-  const ADMaterialProperty(T) & _D;
+  const ADMaterialProperty(T) & _diffusivity;
 
   /// Gradient of the concentration
-  const ADVariableGradient & _grad_conc;
+  const ADVariableGradient & _grad_v;
 
   usingKernelGradMembers;
 };
@@ -52,8 +52,8 @@ protected:
 template <ComputeStage compute_stage, typename T>
 ADMatDiffusionBase<compute_stage, T>::ADMatDiffusionBase(const InputParameters & parameters)
   : ADKernelGrad<compute_stage>(parameters),
-    _D(adGetADMaterialProperty<T>("diffusivity")),
-    _grad_conc(isCoupled("conc") ? adCoupledGradient("conc") : _grad_u)
+    _diffusivity(getADMaterialProperty<T>("diffusivity")),
+    _grad_v(isCoupled("v") ? adCoupledGradient("v") : _grad_u)
 {
 }
 
@@ -61,5 +61,5 @@ template <ComputeStage compute_stage, typename T>
 ADVectorResidual
 ADMatDiffusionBase<compute_stage, T>::precomputeQpResidual()
 {
-  return _D[_qp] * _grad_conc[_qp];
+  return _diffusivity[_qp] * _grad_v[_qp];
 }

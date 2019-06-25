@@ -15,7 +15,7 @@ defineADValidParams(
     ADMatDiffusion,
     ADMatDiffusionBase,
     params.addClassDescription(
-        "Diffusion equation Kernel that takes an isotropic Diffusivity from a material property"););
+        "Diffusion equation kernel that takes an isotropic diffusivity from a material property"););
 
 template <ComputeStage compute_stage>
 ADMatDiffusion<compute_stage>::ADMatDiffusion(const InputParameters & parameters)

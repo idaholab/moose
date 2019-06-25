@@ -226,19 +226,19 @@
     type = MatDiffusion
     variable = c
     diffusivity = Dh1
-    conc = c1
+    v = c1
   [../]
   [./diff_c2]
     type = MatDiffusion
     variable = c
     diffusivity = Dh2
-    conc = c2
+    v = c2
   [../]
   [./diff_c3]
     type = MatDiffusion
     variable = c
     diffusivity = Dh3
-    conc = c3
+    v = c3
   [../]
 
   # Kernels for Allen-Cahn equation for eta1

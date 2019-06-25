@@ -55,7 +55,7 @@
     variable = u
     diffusivity = Dc
     args = d
-    conc = c
+    v = c
   [../]
 
   [./dtime]
@@ -77,7 +77,7 @@
     variable = w
     diffusivity = Dd
     args = c
-    conc = d
+    v = d
   [../]
 []
 
