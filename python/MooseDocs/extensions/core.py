@@ -280,19 +280,15 @@ class LinkInline(components.TokenComponent):
 
     The regex is a bit tricky for this when the line also contains a "shortcut link", as follows:
 
-       [shortcut link] and regular [link text](link address).
+       [shortcut] and regular [link text](link address).
 
     Without the negative lookahead after the first "[" the match would capture the beginning at
     the shortcut link.
 
-    There is still a problem with this for the case above, if the text in the first
-    shortcut includes a non-word character the current regex fails. The simple fix is simply
-    to put the second link on a new-line.
-
     https://regex101.com/r/LXjbHt/2
     """
 
-    RE = re.compile(r'\[(?!\w+?\] )'                # start of link, see note above
+    RE = re.compile(r'\[(?!\S+?\] )'                # start of link, see note above
                     r'(?P<inline>.*?)\]'            # link text
                     r'\((?P<url>.*?)'               # link url
                     r'(?:\s+(?P<settings>.*?))?\)', # settings
@@ -304,7 +300,7 @@ class LinkInline(components.TokenComponent):
 class ShortcutLinkInline(components.TokenComponent):
     """https://regex101.com/r/JLAaBU/1"""
     RE = re.compile(r'\['                        # opening [
-                    r'(?P<key>.+?)'              # key
+                    r'(?P<key>\S+?)'             # key (anything but space)
                     r'(?:\s+(?P<settings>.*?))?' # settings
                     r'\]',                       # closing ]
                     flags=re.UNICODE)
