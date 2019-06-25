@@ -68,14 +68,16 @@ NormalMortarLMMechanicalContact<RESIDUAL>::computeQpResidual(Moose::MortarType m
         auto gap_vec = _phys_points_master[_qp] - _phys_points_slave[_qp];
         auto gap = gap_vec * _normals[_qp];
 
+        const auto & a = _lambda[_qp];
+        const auto & b = gap;
+
         Real fb_function;
         if (_ncp_type == "fb")
           // The FB function (in its pure form) is not differentiable at (0, 0) but if we add some
           // constant > 0 into the root function, then it is
-          fb_function =
-              _lambda[_qp] + gap - std::sqrt(_lambda[_qp] * _lambda[_qp] + gap * gap + _epsilon);
+          fb_function = a + b - std::sqrt(a * a + b * b + _epsilon);
         else
-          fb_function = std::min(_lambda[_qp], gap);
+          fb_function = std::min(a, b);
 
         return _test[_i][_qp] * fb_function;
       }
@@ -110,14 +112,16 @@ NormalMortarLMMechanicalContact<JACOBIAN>::computeQpResidual(Moose::MortarType m
 
         auto gap = gap_vec * _normals[_qp];
 
+        const auto & a = _lambda[_qp];
+        const auto & b = gap;
+
         DualReal fb_function;
         if (_ncp_type == "fb")
           // The FB function (in its pure form) is not differentiable at (0, 0) but if we add some
           // constant > 0 into the root function, then it is
-          fb_function =
-              _lambda[_qp] + gap - std::sqrt(_lambda[_qp] * _lambda[_qp] + gap * gap + _epsilon);
+          fb_function = a + b - std::sqrt(a * a + b * b + _epsilon);
         else
-          fb_function = std::min(_lambda[_qp], gap);
+          fb_function = std::min(a, b);
 
         return _test[_i][_qp] * fb_function;
       }
