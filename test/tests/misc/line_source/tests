@@ -4,5 +4,9 @@
     input = 'line_source.i'
     exodiff = 'line_source_out.e'
     method = '!dbg'
+
+    requirement = 'The system shall support embedding a 1D block inside of a 3D block.'
+    issues = '#3990'
+    design = 'syntax/Mesh/index.md'
   [../]
 []

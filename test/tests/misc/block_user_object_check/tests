@@ -1,40 +1,60 @@
 [Tests]
+  design = 'sanity_checking.md'
+  issues = '#9889'
+
   [./variable_interface_run]
     type = RunApp
     input = block_check.i
     cli_args = 'Postprocessors/obj/block=1'
+
+    requirement = "The system shall verify that objects that use subdomain restricted variables "
+                  "are defined on a subset of the restricted domain area."
   [../]
   [./variable_interface_error_block_set]
     type = RunException
     input = block_check.i
     cli_args = "Postprocessors/obj/block='1 2'"
     expect_err = 'must be a subset'
+
+    requirement = "The system shall produce an error when an object's discretization area is "
+                  "explicitly set to a value greater than the area of the underlying variable "
+                  "used by the object."
   [../]
   [./variable_interface_error_block_any]
     type = RunException
     input = block_check.i
     expect_err = 'must be a subset'
-  [../]
-  [./coupleable_run]
-    type = RunApp
-    input = block_check.i
-    cli_args = 'Postprocessors/obj/block=1'
+
+    requirement = "The system shall produce an error when an object's discretization area is "
+                  "greater than the area of the underlying variable used by the object."
   [../]
   [./coupleable_error_block_set]
     type = RunException
     input = coupled_check.i
     cli_args = 'Kernels/obj/block=2'
     expect_err = 'must be a subset'
+
+    requirement = "The system shall produce an error when an object's discretization area is "
+                  "explicitly set to a different area than the area of a coupled variable "
+                  "used by the object."
   [../]
   [./coupleable_error_block_set2]
     type = RunException
     input = coupled_check.i
     cli_args = 'Kernels/obj/variable=var_2'
     expect_err = 'must be a subset'
+
+    requirement = "The system shall produce an error when an object's discretization area is "
+                  "different than an explicitly set variable on only defined on a different "
+                  "portion of the mesh."
   [../]
   [./coupleable_error_block_any]
     type = RunException
     input = coupled_check.i
     expect_err = 'must be a subset'
+
+    requirement = "The system shall produce an error when an object's discretization area is "
+                  "covers the whole mesh but a coupled variable only exists on a portion of "
+                  "the mesh."
   [../]
 []

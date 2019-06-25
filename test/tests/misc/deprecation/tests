@@ -1,10 +1,18 @@
 [Tests]
+  design = 'TestHarness.md'
+  issues = '#10745'
+
+  # Note: The no_error_deprecated flag prevents the TestHarness
+  # from passing the --error-deprecated flag to MOOSE.
+
   [./deprecated]
     type = 'RunApp'
     input = 'deprecation.i'
     cli_args = 'Kernels/diff/type=DeprecatedKernel'
     expect_out = 'Deprecated Object: DeprecatedKernel'
     no_error_deprecated = true
+
+    requirement = 'The system shall produce a warning when non-expired deprecated code is executed.'
   [../]
   [./expired]
     type = 'RunApp'
@@ -12,6 +20,8 @@
     cli_args = 'Kernels/diff/type=ExpiredKernel'
     expect_out = 'Expired on Mon Jan'
     no_error_deprecated = true
+
+    requirement = 'The system shall produce a warning when expired deprecated code is executed.'
   [../]
   [./expired_error]
     type = 'RunException'
@@ -19,6 +29,8 @@
     cli_args = 'Kernels/diff/type=ExpiredKernel'
     expect_err = 'ERROR.*Expired on Mon Jan'
     allow_deprecated = False
+
+    requirement = 'The system shall produce an error when the --no-deprecated-flag is passed and deprecated code is executed.'
   [../]
   [./renamed]
     type = 'RunApp'
@@ -26,5 +38,7 @@
     cli_args = 'Kernels/diff/type=OldNamedKernel'
     expect_out = 'Replace OldNamedKernel with RenamedKernel'
     no_error_deprecated = true
+
+    requirement = 'The system shall produce a warning indicating a possible replacement when deprecated code is superseded.'
   [../]
 []

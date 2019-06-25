@@ -1,22 +1,32 @@
 [Tests]
+  issues = '#9835 #5309 #9482'
+  design = 'sanity_checking.md'
   [bc_check]
     type = RunException
     input = 'bc_check.i'
     expect_err = "Material property 'prop', requested by 'bc_left' is not defined on boundary left"
+
+    requirement = 'The system shall report an error when a material property is not defined on a boundary.'
   []
   [side_uo_check]
     type = RunException
     input = 'side_uo_check.i'
     expect_err = "Material property 'foo', requested by 'side_uo' is not defined on boundary right"
+
+    requirement = 'The system shall report an error when a material property requested by a UserObject is not defined on a boundary.'
   []
   [dgkernel_check_boundary]
     type = RunException
     input = 'dgkernel_check_boundary.i'
     expect_err = "Material property 'foo', requested by 'dg' is not defined on boundary right"
+
+    requirement = 'The system shall report an error when a material property requested by a DGKernel is not defined on a boundary.'
   []
   [dgkernel_check_block]
     type = RunException
     input = 'dgkernel_check_block.i'
     expect_err = "Material property 'foo', requested by 'dg' is not defined on block 0"
+
+    requirement = 'The system shall report an error when a material property requested by a DGKernel is not defined on a subdomain.'
   []
 []

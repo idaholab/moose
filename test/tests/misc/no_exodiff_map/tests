@@ -4,5 +4,9 @@
     input = 'no_exodiff_map.i'
     exodiff = 'no_exodiff_map_out.e'
     map = false
+
+    requirement = 'The testing system shall support the ability to disable geometrical mapping of mesh elements for comparison purposes.'
+    issues = '#6011'
+    design = 'test_system.md'
   [../]
 []
