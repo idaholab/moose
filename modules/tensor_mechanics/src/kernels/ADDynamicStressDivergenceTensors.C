@@ -34,11 +34,11 @@ template <ComputeStage compute_stage>
 ADDynamicStressDivergenceTensors<compute_stage>::ADDynamicStressDivergenceTensors(
     const InputParameters & parameters)
   : ADStressDivergenceTensors<compute_stage>(parameters),
-    _stress_older(adGetMaterialPropertyOlder<RankTwoTensor>(_base_name + "stress")),
-    _stress_old(adGetMaterialPropertyOld<RankTwoTensor>(_base_name + "stress")),
-    _zeta(adGetMaterialProperty<Real>("zeta")),
-    _alpha(adGetParam<Real>("alpha")),
-    _static_initialization(adGetParam<bool>("static_initialization"))
+    _stress_older(getMaterialPropertyOlder<RankTwoTensor>(_base_name + "stress")),
+    _stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "stress")),
+    _zeta(getMaterialProperty<Real>("zeta")),
+    _alpha(getParam<Real>("alpha")),
+    _static_initialization(getParam<bool>("static_initialization"))
 {
 }
 

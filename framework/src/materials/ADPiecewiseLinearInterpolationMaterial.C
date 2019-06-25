@@ -36,10 +36,10 @@ template <ComputeStage compute_stage>
 ADPiecewiseLinearInterpolationMaterial<compute_stage>::ADPiecewiseLinearInterpolationMaterial(
     const InputParameters & parameters)
   : ADMaterial<compute_stage>(parameters),
-    _prop_name(adGetParam<std::string>("property")),
+    _prop_name(getParam<std::string>("property")),
     _coupled_var(adCoupledValue("variable")),
-    _scale_factor(adGetParam<Real>("scale_factor")),
-    _property(adDeclareADProperty<Real>(_prop_name))
+    _scale_factor(getParam<Real>("scale_factor")),
+    _property(declareADProperty<Real>(_prop_name))
 {
   std::vector<Real> x;
   std::vector<Real> y;
@@ -52,12 +52,12 @@ ADPiecewiseLinearInterpolationMaterial<compute_stage>::ADPiecewiseLinearInterpol
     if (parameters.isParamValid("xy_data"))
       mooseError("In ", _name, ": Cannot specify 'x', 'y', and 'xy_data' together.");
 
-    x = adGetParam<std::vector<Real>>("x");
-    y = adGetParam<std::vector<Real>>("y");
+    x = getParam<std::vector<Real>>("x");
+    y = getParam<std::vector<Real>>("y");
   }
   else if (parameters.isParamValid("xy_data"))
   {
-    std::vector<Real> xy = adGetParam<std::vector<Real>>("xy_data");
+    std::vector<Real> xy = getParam<std::vector<Real>>("xy_data");
     unsigned int xy_size = xy.size();
     if (xy_size % 2 != 0)
       mooseError("In ", _name, ": Length of data provided in 'xy_data' must be a multiple of 2.");

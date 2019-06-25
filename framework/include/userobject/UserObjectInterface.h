@@ -12,16 +12,12 @@
 // MOOSE includes
 #include "FEProblemBase.h"
 #include "MooseTypes.h"
+#include "MemberTemplateMacros.h"
 
 // Forward declarations
 class InputParameters;
 class UserObject;
 
-// Template member functions can't be introduced through using declarations
-#define adGetUserObject this->template getUserObject
-#define adGetUserObjectByName this->template getUserObjectByName
-
-// But non-templates can be!
 #define usingUserObjectInterfaceMembers                                                            \
   using UserObjectInterface::getUserObjectBase;                                                    \
   using UserObjectInterface::getUserObjectBaseByName
@@ -46,7 +42,7 @@ public:
    * @return The user object with name associated with the parameter 'name'
    */
   template <class T>
-  const T & getUserObject(const std::string & name);
+  const T & getUserObjectTempl(const std::string & name);
 
   /**
    * Get an user object with a given name
@@ -54,7 +50,7 @@ public:
    * @return The user object with the name
    */
   template <class T>
-  const T & getUserObjectByName(const std::string & name);
+  const T & getUserObjectByNameTempl(const std::string & name);
 
   /**
    * Get an user object with a given parameter name
@@ -86,16 +82,16 @@ private:
 
 template <class T>
 const T &
-UserObjectInterface::getUserObject(const std::string & name)
+UserObjectInterface::getUserObjectTempl(const std::string & name)
 {
   unsigned int tid = needThreadedCopy(getUserObjectBase(name)) ? _uoi_tid : 0;
-  return _uoi_feproblem.getUserObject<T>(_uoi_params.get<UserObjectName>(name), tid);
+  return _uoi_feproblem.getUserObjectTempl<T>(_uoi_params.get<UserObjectName>(name), tid);
 }
 
 template <class T>
 const T &
-UserObjectInterface::getUserObjectByName(const std::string & name)
+UserObjectInterface::getUserObjectByNameTempl(const std::string & name)
 {
   unsigned int tid = needThreadedCopy(getUserObjectBaseByName(name)) ? _uoi_tid : 0;
-  return _uoi_feproblem.getUserObject<T>(name, tid);
+  return _uoi_feproblem.getUserObjectTempl<T>(name, tid);
 }

@@ -62,11 +62,11 @@ public:
 
 protected:
   // Policy-based design requires us to specify which inherited members we are using
-  using IntegralBaseVariableUserObject::_JxW;
   using IntegralBaseVariableUserObject::_communicator;
   using IntegralBaseVariableUserObject::_console;
   using IntegralBaseVariableUserObject::_coord;
   using IntegralBaseVariableUserObject::_integral_value;
+  using IntegralBaseVariableUserObject::_JxW;
   using IntegralBaseVariableUserObject::_q_point;
   using IntegralBaseVariableUserObject::_qp;
   using IntegralBaseVariableUserObject::_variable;
@@ -116,9 +116,9 @@ FXIntegralBaseUserObject<IntegralBaseVariableUserObject>::FXIntegralBaseUserObje
   : IntegralBaseVariableUserObject(parameters),
     MutableCoefficientsInterface(this, parameters),
     _function_series(FunctionSeries::checkAndConvertFunction(
-        getFunction("function"), UserObject::getParam<std::string>("_moose_base"), name())),
-    _keep_history(UserObject::getParam<bool>("keep_history")),
-    _print_state(UserObject::getParam<bool>("print_state")),
+        getFunction("function"), UserObject::getParamTempl<std::string>("_moose_base"), name())),
+    _keep_history(UserObject::getParamTempl<bool>("keep_history")),
+    _print_state(UserObject::getParamTempl<bool>("print_state")),
     _standardized_function_volume(_function_series.getStandardizedFunctionVolume())
 {
   // Size the coefficient arrays
@@ -239,4 +239,3 @@ FXIntegralBaseUserObject<IntegralBaseVariableUserObject>::spatialValue(const Poi
 
   return _function_series.expand(_coefficients);
 }
-

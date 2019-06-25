@@ -23,14 +23,13 @@ protected:
   {
     InputParameters uo_pars = _factory.getValidParams("Water97FluidProperties");
     _fe_problem->addUserObject("Water97FluidProperties", "fp", uo_pars);
-    _fp = &_fe_problem->getUserObject<Water97FluidProperties>("fp");
+    _fp = &_fe_problem->getUserObjectTempl<Water97FluidProperties>("fp");
 
     InputParameters ad_uo_pars = _factory.getValidParams("Water97FluidProperties");
     _fe_problem->addUserObject("Water97FluidProperties", "ad_fp", ad_uo_pars);
-    _ad_fp = &_fe_problem->getUserObject<SinglePhaseFluidProperties>("ad_fp");
+    _ad_fp = &_fe_problem->getUserObjectTempl<SinglePhaseFluidProperties>("ad_fp");
   }
 
   const Water97FluidProperties * _fp;
   const SinglePhaseFluidProperties * _ad_fp;
 };
-

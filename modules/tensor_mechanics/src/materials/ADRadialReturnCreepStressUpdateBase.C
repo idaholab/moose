@@ -19,8 +19,8 @@ template <ComputeStage compute_stage>
 ADRadialReturnCreepStressUpdateBase<compute_stage>::ADRadialReturnCreepStressUpdateBase(
     const InputParameters & parameters)
   : ADRadialReturnStressUpdate<compute_stage>(parameters),
-    _creep_strain(adDeclareADProperty<RankTwoTensor>(_base_name + "creep_strain")),
-    _creep_strain_old(adGetMaterialPropertyOld<RankTwoTensor>(_base_name + "creep_strain"))
+    _creep_strain(declareADProperty<RankTwoTensor>(_base_name + "creep_strain")),
+    _creep_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "creep_strain"))
 {
 }
 

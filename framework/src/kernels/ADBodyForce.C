@@ -29,7 +29,7 @@ defineADValidParams(
 template <ComputeStage compute_stage>
 ADBodyForce<compute_stage>::ADBodyForce(const InputParameters & parameters)
   : ADKernelValue<compute_stage>(parameters),
-    _scale(adGetParam<Real>("value")),
+    _scale(getParam<Real>("value")),
     _function(getFunction("function")),
     _postprocessor(getPostprocessorValue("postprocessor"))
 {

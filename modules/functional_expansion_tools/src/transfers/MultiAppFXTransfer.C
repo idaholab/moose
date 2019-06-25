@@ -115,7 +115,7 @@ MultiAppFXTransfer::scanProblemBaseForObject(FEProblemBase & base,
   else if (base.hasUserObject(object_name))
   {
     // Get the non-const qualified UserObject, otherwise we would use getUserObject()
-    auto & user_object = base.getUserObject<UserObject>(object_name);
+    auto & user_object = base.getUserObjectTempl<UserObject>(object_name);
     interface = dynamic_cast<MutableCoefficientsInterface *>(&user_object);
 
     // Check to see if the userObject is a subclass of MutableCoefficientsInterface
@@ -147,7 +147,7 @@ MultiAppFXTransfer::getMutableCoefficientsUserOject(FEProblemBase & base,
                                                     THREAD_ID thread)
 {
   // Get the non-const qualified UserObject, otherwise we would use getUserObject()
-  auto & user_object = base.getUserObject<UserObject>(object_name, thread);
+  auto & user_object = base.getUserObjectTempl<UserObject>(object_name, thread);
   return dynamic_cast<MutableCoefficientsInterface &>(user_object);
 }
 

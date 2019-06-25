@@ -22,8 +22,8 @@ defineADValidParams(
 template <ComputeStage compute_stage>
 ADAllenCahn<compute_stage>::ADAllenCahn(const InputParameters & parameters)
   : ADAllenCahnBase<compute_stage, Real>(parameters),
-    _f_name(adGetParam<MaterialPropertyName>("f_name")),
-    _dFdEta(adGetADMaterialProperty<Real>(this->derivativePropertyNameFirst(_f_name, _var.name())))
+    _f_name(getParam<MaterialPropertyName>("f_name")),
+    _dFdEta(getADMaterialProperty<Real>(this->derivativePropertyNameFirst(_f_name, _var.name())))
 {
 }
 

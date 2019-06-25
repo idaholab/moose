@@ -45,7 +45,7 @@ MultiAppCommandLineControl::MultiAppCommandLineControl(const InputParameters & p
     _sampler(SamplerInterface::getSampler("sampler")),
     _param_names(getParam<std::vector<std::string>>("param_names"))
 {
-  if (!_sampler.getParam<ExecFlagEnum>("execute_on").contains(EXEC_PRE_MULTIAPP_SETUP))
+  if (!_sampler.getParamTempl<ExecFlagEnum>("execute_on").contains(EXEC_PRE_MULTIAPP_SETUP))
     _sampler.paramError(
         "execute_on",
         "The sampler object, '",
@@ -55,9 +55,9 @@ MultiAppCommandLineControl::MultiAppCommandLineControl(const InputParameters & p
         "' object, thus the 'execute_on' of the sampler must include 'PRE_MULTIAPP_SETUP'.");
 
   bool batch_reset = _multi_app->isParamValid("mode") &&
-                     (_multi_app->getParam<MooseEnum>("mode") == "batch-reset");
+                     (_multi_app->getParamTempl<MooseEnum>("mode") == "batch-reset");
   bool batch_restore = _multi_app->isParamValid("mode") &&
-                       (_multi_app->getParam<MooseEnum>("mode") == "batch-restore");
+                       (_multi_app->getParamTempl<MooseEnum>("mode") == "batch-restore");
   if (batch_reset)
     ; // Do not perform the App count test, because in batch mode there is only one
 

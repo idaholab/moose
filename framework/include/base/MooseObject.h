@@ -13,6 +13,7 @@
 #include "InputParameters.h"
 #include "ConsoleStreamInterface.h"
 #include "Registry.h"
+#include "MemberTemplateMacros.h"
 
 #include "libmesh/parallel_object.h"
 
@@ -33,8 +34,6 @@ InputParameters validParams<MooseObject>();
 #define adBaseClass(X)                                                                             \
   template class X<RESIDUAL>;                                                                      \
   template class X<JACOBIAN>
-
-#define adGetParam this->template getParam
 
 /**
  * Every object that can be built by the factory should be derived from this class.
@@ -70,7 +69,7 @@ public:
    * @return The value of the parameter
    */
   template <typename T>
-  const T & getParam(const std::string & name) const;
+  const T & getParamTempl(const std::string & name) const;
 
   /**
    * Verifies that the requested parameter exists and is not NULL and returns it to the caller.
@@ -105,7 +104,8 @@ public:
    * back to the normal behavior of mooseError - only printing a message using the given args.
    */
   template <typename... Args>
-  [[noreturn]] void paramError(const std::string & param, Args... args) {
+  [[noreturn]] void paramError(const std::string & param, Args... args)
+  {
     auto prefix = param + ": ";
     if (!_pars.inputLocation(param).empty())
       prefix = _pars.inputLocation(param) + ": (" + _pars.paramFullpath(param) + "):\n";
@@ -144,7 +144,8 @@ public:
   }
 
   template <typename... Args>
-  [[noreturn]] void mooseError(Args &&... args) const {
+  [[noreturn]] void mooseError(Args &&... args) const
+  {
     std::ostringstream oss;
     moose::internal::mooseStreamAll(oss, std::forward<Args>(args)...);
     std::string msg = oss.str();
@@ -188,8 +189,7 @@ protected:
 
 template <typename T>
 const T &
-MooseObject::getParam(const std::string & name) const
+MooseObject::getParamTempl(const std::string & name) const
 {
   return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
 }
-

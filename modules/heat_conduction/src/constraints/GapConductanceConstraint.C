@@ -24,7 +24,7 @@ defineADValidParams(
 template <ComputeStage compute_stage>
 GapConductanceConstraint<compute_stage>::GapConductanceConstraint(
     const InputParameters & parameters)
-  : ADMortarConstraint<compute_stage>(parameters), _k(adGetParam<Real>("k"))
+  : ADMortarConstraint<compute_stage>(parameters), _k(getParam<Real>("k"))
 {
 }
 

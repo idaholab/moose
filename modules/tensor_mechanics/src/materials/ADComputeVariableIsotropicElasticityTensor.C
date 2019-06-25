@@ -26,8 +26,8 @@ template <ComputeStage compute_stage>
 ADComputeVariableIsotropicElasticityTensor<
     compute_stage>::ADComputeVariableIsotropicElasticityTensor(const InputParameters & parameters)
   : ADComputeElasticityTensorBase<compute_stage>(parameters),
-    _youngs_modulus(adGetADMaterialProperty<Real>("youngs_modulus")),
-    _poissons_ratio(adGetADMaterialProperty<Real>("poissons_ratio"))
+    _youngs_modulus(getADMaterialProperty<Real>("youngs_modulus")),
+    _poissons_ratio(getADMaterialProperty<Real>("poissons_ratio"))
 {
   // all tensors created by this class are always isotropic
   issueGuarantee(_elasticity_tensor_name, Guarantee::ISOTROPIC);

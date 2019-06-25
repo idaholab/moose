@@ -25,7 +25,7 @@ template <ComputeStage compute_stage>
 ADThermoDiffusion<compute_stage>::ADThermoDiffusion(const InputParameters & parameters)
   : ADKernel<compute_stage>(parameters),
     _grad_temp(adCoupledGradient("temperature")),
-    _soret_coeff(adGetADMaterialProperty<Real>("soret_coefficient"))
+    _soret_coeff(getADMaterialProperty<Real>("soret_coefficient"))
 {
 }
 

@@ -24,14 +24,13 @@ protected:
     uo_pars.set<Real>("R") = 287.04;
     uo_pars.set<Real>("gamma") = 1.41;
     _fe_problem->addUserObject("IdealGasFluidProperties", "fp", uo_pars);
-    _fp = &_fe_problem->getUserObject<IdealGasFluidProperties>("fp");
+    _fp = &_fe_problem->getUserObjectTempl<IdealGasFluidProperties>("fp");
 
     InputParameters uo_pars_pT = _factory.getValidParams("IdealGasFluidProperties");
     _fe_problem->addUserObject("IdealGasFluidProperties", "fp_pT", uo_pars_pT);
-    _fp_pT = &_fe_problem->getUserObject<IdealGasFluidProperties>("fp_pT");
+    _fp_pT = &_fe_problem->getUserObjectTempl<IdealGasFluidProperties>("fp_pT");
   }
 
   const IdealGasFluidProperties * _fp;
   const IdealGasFluidProperties * _fp_pT;
 };
-

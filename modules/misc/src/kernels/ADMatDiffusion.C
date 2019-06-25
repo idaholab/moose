@@ -20,8 +20,7 @@ defineADValidParams(ADMatDiffusion,
 
 template <ComputeStage compute_stage>
 ADMatDiffusion<compute_stage>::ADMatDiffusion(const InputParameters & parameters)
-  : ADDiffusion<compute_stage>(parameters),
-    _diffusivity(adGetADMaterialProperty<Real>("diffusivity"))
+  : ADDiffusion<compute_stage>(parameters), _diffusivity(getADMaterialProperty<Real>("diffusivity"))
 {
 }
 

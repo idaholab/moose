@@ -101,7 +101,7 @@ ShapeUserObject<T>::ShapeUserObject(const InputParameters & parameters, ShapeTyp
     _phi(type == ShapeType::Element ? this->_assembly.phi() : this->_assembly.phiFace()),
     _grad_phi(type == ShapeType::Element ? this->_assembly.gradPhi()
                                          : this->_assembly.gradPhiFace()),
-    _compute_jacobians(MooseObject::getParam<bool>("compute_jacobians"))
+    _compute_jacobians(MooseObject::getParamTempl<bool>("compute_jacobians"))
 {
   mooseWarning("Jacobian calculation in UserObjects is an experimental capability with a "
                "potentially unstable interface.");
@@ -142,4 +142,3 @@ ShapeUserObject<T>::executeJacobianWrapper(unsigned int jvar,
     executeJacobian(jvar);
   }
 }
-

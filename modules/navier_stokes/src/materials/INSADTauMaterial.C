@@ -25,8 +25,8 @@ defineADValidParams(
 template <ComputeStage compute_stage>
 INSADTauMaterial<compute_stage>::INSADTauMaterial(const InputParameters & parameters)
   : INSADMaterial<compute_stage>(parameters),
-    _alpha(adGetParam<Real>("alpha")),
-    _tau(adDeclareADProperty<Real>("tau"))
+    _alpha(getParam<Real>("alpha")),
+    _tau(declareADProperty<Real>("tau"))
 {
 }
 

@@ -179,7 +179,7 @@ DerivativeMaterialInterface<T>::haveMaterialProperty(const std::string & prop_na
   return ((bnd && bnd->boundaryRestricted() &&
            bnd->template hasBoundaryMaterialProperty<U>(prop_name)) ||
           (blk && blk->template hasBlockMaterialProperty<U>(prop_name)) ||
-          (this->template hasMaterialProperty<U>(prop_name)));
+          (hasMaterialProperty<U>(prop_name)));
 }
 
 template <class T>
@@ -207,7 +207,7 @@ DerivativeMaterialInterface<T>::getDefaultMaterialPropertyByName(const std::stri
 {
   // if found return the requested property
   if (haveMaterialProperty<U>(prop_name))
-    return this->template getMaterialPropertyByName<U>(prop_name);
+    return getMaterialPropertyByName<U>(prop_name);
 
   return this->template getZeroMaterialProperty<U>(prop_name);
 }
@@ -218,7 +218,7 @@ MaterialProperty<U> &
 DerivativeMaterialInterface<T>::declarePropertyDerivative(const std::string & base,
                                                           const std::vector<VariableName> & c)
 {
-  return this->template declareProperty<U>(derivativePropertyName(base, c));
+  return declareProperty<U>(derivativePropertyName(base, c));
 }
 
 template <class T>
@@ -230,10 +230,10 @@ DerivativeMaterialInterface<T>::declarePropertyDerivative(const std::string & ba
                                                           const VariableName & c3)
 {
   if (c3 != "")
-    return this->template declareProperty<U>(derivativePropertyNameThird(base, c1, c2, c3));
+    return declareProperty<U>(derivativePropertyNameThird(base, c1, c2, c3));
   if (c2 != "")
-    return this->template declareProperty<U>(derivativePropertyNameSecond(base, c1, c2));
-  return this->template declareProperty<U>(derivativePropertyNameFirst(base, c1));
+    return declareProperty<U>(derivativePropertyNameSecond(base, c1, c2));
+  return declareProperty<U>(derivativePropertyNameFirst(base, c1));
 }
 
 template <class T>
@@ -426,7 +426,7 @@ void
 DerivativeMaterialInterface<T>::validateDerivativeMaterialPropertyBase(const std::string & base)
 {
   // resolve the input parameter name base to the actual material property name
-  const MaterialPropertyName prop_name = this->template getParam<MaterialPropertyName>(base);
+  const MaterialPropertyName prop_name = getParam<MaterialPropertyName>(base);
 
   // check if the material property does not exist on the blocks of the current object,
   // and check if it is not a plain number in the input file
@@ -456,4 +456,3 @@ DerivativeMaterialInterface<T>::isNotObjectVariable(const VariableName & name)
   // This interface is not templated on a class derived from either Kernel or BC
   return true;
 }
-

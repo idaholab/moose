@@ -26,7 +26,7 @@ template <ComputeStage compute_stage>
 INSADMomentumTimeDerivative<compute_stage>::INSADMomentumTimeDerivative(
     const InputParameters & parameters)
   : ADVectorTimeKernelValue<compute_stage>(parameters),
-    _rho(adGetADMaterialProperty<Real>("rho_name"))
+    _rho(getADMaterialProperty<Real>("rho_name"))
 {
 }
 

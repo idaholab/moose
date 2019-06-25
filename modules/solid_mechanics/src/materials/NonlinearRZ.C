@@ -27,7 +27,8 @@ NonlinearRZ::NonlinearRZ(SolidModel & solid_model,
     _grad_disp_z_old(coupledGradientOld("disp_z")),
     _disp_r(coupledValue("disp_r")),
     _disp_r_old(coupledValueOld("disp_r")),
-    _volumetric_locking_correction(_solid_model.getParam<bool>("volumetric_locking_correction"))
+    _volumetric_locking_correction(
+        _solid_model.getParamTempl<bool>("volumetric_locking_correction"))
 {
 }
 

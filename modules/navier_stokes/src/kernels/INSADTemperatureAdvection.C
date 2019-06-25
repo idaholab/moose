@@ -26,8 +26,8 @@ template <ComputeStage compute_stage>
 INSADTemperatureAdvection<compute_stage>::INSADTemperatureAdvection(
     const InputParameters & parameters)
   : ADKernelValue<compute_stage>(parameters),
-    _rho(adGetADMaterialProperty<Real>("rho_name")),
-    _cp(adGetADMaterialProperty<Real>("cp_name")),
+    _rho(getADMaterialProperty<Real>("rho_name")),
+    _cp(getADMaterialProperty<Real>("cp_name")),
     _U(adCoupledVectorValue("velocity"))
 {
 }
@@ -59,8 +59,8 @@ template <ComputeStage compute_stage>
 INSADTemperatureAdvectionSUPG<compute_stage>::INSADTemperatureAdvectionSUPG(
     const InputParameters & parameters)
   : ADKernelSUPG<compute_stage>(parameters),
-    _rho(adGetADMaterialProperty<Real>("rho_name")),
-    _cp(adGetADMaterialProperty<Real>("cp_name")),
+    _rho(getADMaterialProperty<Real>("rho_name")),
+    _cp(getADMaterialProperty<Real>("cp_name")),
     _U(adCoupledVectorValue("velocity"))
 {
 }

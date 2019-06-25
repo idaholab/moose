@@ -25,9 +25,9 @@ defineADValidParams(ADComputeEigenstrain,
 template <ComputeStage compute_stage>
 ADComputeEigenstrain<compute_stage>::ADComputeEigenstrain(const InputParameters & parameters)
   : ADComputeEigenstrainBase<compute_stage>(parameters),
-    _prefactor(adGetADMaterialProperty<Real>("prefactor"))
+    _prefactor(getADMaterialProperty<Real>("prefactor"))
 {
-  _eigen_base_tensor.fillFromInputVector(adGetParam<std::vector<Real>>("eigen_base"));
+  _eigen_base_tensor.fillFromInputVector(getParam<std::vector<Real>>("eigen_base"));
 }
 
 template <ComputeStage compute_stage>

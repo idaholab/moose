@@ -26,7 +26,7 @@ protected:
     uo_pars.set<Real>("gamma") = 1.41;
     uo_pars.set<bool>("allow_imperfect_jacobians") = allow_imperfect_jac;
     _fe_problem->addUserObject("IdealGasFluidProperties", name, uo_pars);
-    _fp = &_fe_problem->getUserObject<IdealGasFluidProperties>(name);
+    _fp = &_fe_problem->getUserObjectTempl<IdealGasFluidProperties>(name);
     return *_fp;
   }
 

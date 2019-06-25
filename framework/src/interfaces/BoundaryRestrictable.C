@@ -35,13 +35,15 @@ validParams<BoundaryRestrictable>()
 // Standard constructor
 BoundaryRestrictable::BoundaryRestrictable(const MooseObject * moose_object, bool nodal)
   : _bnd_feproblem(moose_object->isParamValid("_fe_problem_base")
-                       ? moose_object->getParam<FEProblemBase *>("_fe_problem_base")
+                       ? moose_object->getParamTempl<FEProblemBase *>("_fe_problem_base")
                        : NULL),
-    _bnd_mesh(moose_object->isParamValid("_mesh") ? moose_object->getParam<MooseMesh *>("_mesh")
-                                                  : NULL),
-    _bnd_dual_restrictable(moose_object->getParam<bool>("_dual_restrictable")),
+    _bnd_mesh(moose_object->isParamValid("_mesh")
+                  ? moose_object->getParamTempl<MooseMesh *>("_mesh")
+                  : NULL),
+    _bnd_dual_restrictable(moose_object->getParamTempl<bool>("_dual_restrictable")),
     _block_ids(_empty_block_ids),
-    _bnd_tid(moose_object->isParamValid("_tid") ? moose_object->getParam<THREAD_ID>("_tid") : 0),
+    _bnd_tid(moose_object->isParamValid("_tid") ? moose_object->getParamTempl<THREAD_ID>("_tid")
+                                                : 0),
     _bnd_material_data(_bnd_feproblem->getMaterialData(Moose::BOUNDARY_MATERIAL_DATA, _bnd_tid)),
     _bnd_nodal(nodal)
 {
@@ -53,13 +55,15 @@ BoundaryRestrictable::BoundaryRestrictable(const MooseObject * moose_object,
                                            const std::set<SubdomainID> & block_ids,
                                            bool nodal)
   : _bnd_feproblem(moose_object->isParamValid("_fe_problem_base")
-                       ? moose_object->getParam<FEProblemBase *>("_fe_problem_base")
+                       ? moose_object->getParamTempl<FEProblemBase *>("_fe_problem_base")
                        : NULL),
-    _bnd_mesh(moose_object->isParamValid("_mesh") ? moose_object->getParam<MooseMesh *>("_mesh")
-                                                  : NULL),
-    _bnd_dual_restrictable(moose_object->getParam<bool>("_dual_restrictable")),
+    _bnd_mesh(moose_object->isParamValid("_mesh")
+                  ? moose_object->getParamTempl<MooseMesh *>("_mesh")
+                  : NULL),
+    _bnd_dual_restrictable(moose_object->getParamTempl<bool>("_dual_restrictable")),
     _block_ids(block_ids),
-    _bnd_tid(moose_object->isParamValid("_tid") ? moose_object->getParam<THREAD_ID>("_tid") : 0),
+    _bnd_tid(moose_object->isParamValid("_tid") ? moose_object->getParamTempl<THREAD_ID>("_tid")
+                                                : 0),
     _bnd_material_data(_bnd_feproblem->getMaterialData(Moose::BOUNDARY_MATERIAL_DATA, _bnd_tid)),
     _bnd_nodal(nodal)
 {
@@ -70,7 +74,7 @@ void
 BoundaryRestrictable::initializeBoundaryRestrictable(const MooseObject * moose_object)
 {
   // The name and id of the object
-  const std::string & name = moose_object->getParam<std::string>("_object_name");
+  const std::string & name = moose_object->getParamTempl<std::string>("_object_name");
 
   // If the mesh pointer is not defined, but FEProblemBase is, get it from there
   if (_bnd_feproblem != NULL && _bnd_mesh == NULL)
@@ -85,7 +89,7 @@ BoundaryRestrictable::initializeBoundaryRestrictable(const MooseObject * moose_o
   if (moose_object->isParamValid("boundary"))
   {
     // Extract the blocks from the input
-    _boundary_names = moose_object->getParam<std::vector<BoundaryName>>("boundary");
+    _boundary_names = moose_object->getParamTempl<std::vector<BoundaryName>>("boundary");
 
     // Get the IDs from the supplied names
     std::vector<BoundaryID> vec_ids = _bnd_mesh->getBoundaryIDs(_boundary_names, true);

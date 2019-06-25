@@ -22,7 +22,7 @@ defineADValidParams(
 template <ComputeStage compute_stage>
 ADHeatConduction<compute_stage>::ADHeatConduction(const InputParameters & parameters)
   : ADDiffusion<compute_stage>(parameters),
-    _thermal_conductivity(adGetADMaterialProperty<Real>("thermal_conductivity"))
+    _thermal_conductivity(getADMaterialProperty<Real>("thermal_conductivity"))
 {
 }
 
