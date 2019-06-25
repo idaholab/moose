@@ -4,7 +4,7 @@ The FEProblemBase class is an intermediate base class containing all of the comm
 logic for running the various MOOSE simulations. MOOSE has two built-in types of
 problems [FEProblem.md] for solving "normal" physics problems and [EigenProblem.md]
 for solving Eigenvalue problems. Additionally, MOOSE contains an [ExternalProblem.md]
-problem useful for creating ("MOOSE-wrapped Apps")[moose_wrapped_apps.md].
+problem useful for creating ["MOOSE-wrapped Apps"](moose_wrapped_apps.md optional=True).
 
 ## Convenience Zeros
 
@@ -18,7 +18,7 @@ code. One of the ways MOOSE makes this possible is by making several different
 types of "zero" variables available. The following statements illustrate how
 optional coupling may be implemented with these zeros.
 
-```
+```cpp
 // In the constructor initialization list of a Kernel
 
   _velocity_vector(isParamValid("velocity_vector") ? coupledGradient("velocity_vector") : _grad_zero)

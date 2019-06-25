@@ -47,8 +47,6 @@ builds: all $(MODULE_DIRS)
 $(MODULE_DIRS): $(app_LIBS)
 	@$(MAKE) -C $@
 
-foobar: $(all_new)
-
 test_subs: all builds
 	@echo ======================================================
 	@echo Testing the following modules:
