@@ -11,6 +11,7 @@
 
 #include "StressUpdateBase.h"
 #include "MooseException.h"
+#include "DamageBase.h"
 
 registerMooseObject("TensorMechanicsApp", ComputeMultipleInelasticStress);
 
@@ -67,6 +68,8 @@ validParams<ComputeMultipleInelasticStress>()
                                      "parameter is set to 1 if the number of models = 1");
   params.addParam<bool>(
       "cycle_models", false, "At timestep N use only inelastic model N % num_models.");
+  params.addParam<MaterialName>("damage_model", "Name of the damage model");
+
   return params;
 }
 
@@ -92,7 +95,10 @@ ComputeMultipleInelasticStress::ComputeMultipleInelasticStress(const InputParame
     _consistent_tangent_operator(_num_models),
     _cycle_models(getParam<bool>("cycle_models")),
     _matl_timestep_limit(declareProperty<Real>("matl_timestep_limit")),
-    _identity_symmetric_four(RankFourTensor::initIdentitySymmetricFour)
+    _identity_symmetric_four(RankFourTensor::initIdentitySymmetricFour),
+    _damage_model(isParamValid("damage_model")
+                      ? dynamic_cast<DamageBase *>(&getMaterial("damage_model"))
+                      : nullptr)
 {
   if (_inelastic_weights.size() != _num_models)
     mooseError(
@@ -167,12 +173,37 @@ ComputeMultipleInelasticStress::initialSetup()
                  "operator are being combined. Either set tangent_operator to elastic, implement "
                  "the corrent tangent formulations, or use different models.");
   }
+
+  if (isParamValid("damage_model") && !_damage_model)
+    paramError("damage_model",
+               "Damage Model " + _damage_model->name() +
+                   " is not compatible with ComputeMultipleInelasticStress");
 }
 
 void
 ComputeMultipleInelasticStress::computeQpStress()
 {
+  if (_damage_model)
+  {
+    _undamaged_stress_old = _stress_old[_qp];
+    _damage_model->setQp(_qp);
+    _damage_model->computeUndamagedOldStress(_undamaged_stress_old);
+  }
   computeQpStressIntermediateConfiguration();
+
+  if (_damage_model)
+  {
+    _damage_model->setQp(_qp);
+    _damage_model->updateDamage();
+    _damage_model->updateStressForDamage(_stress[_qp]);
+    _damage_model->finiteStrainRotation(_rotation_increment[_qp]);
+    _damage_model->updateJacobianMultForDamage(_Jacobian_mult[_qp]);
+
+    const Real damage_timestep_limit = _damage_model->computeTimeStepLimit();
+    if (_matl_timestep_limit[_qp] > damage_timestep_limit)
+      _matl_timestep_limit[_qp] = damage_timestep_limit;
+  }
+
   if (_perform_finite_strain_rotations)
     finiteStrainRotation();
 }
@@ -192,8 +223,12 @@ ComputeMultipleInelasticStress::computeQpStressIntermediateConfiguration()
     if (_is_elasticity_tensor_guaranteed_isotropic || !_perform_finite_strain_rotations)
       _stress[_qp] = _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + _strain_increment[_qp]);
     else
-      _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * _strain_increment[_qp];
-
+    {
+      if (_damage_model)
+        _stress[_qp] = _undamaged_stress_old + _elasticity_tensor[_qp] * _strain_increment[_qp];
+      else
+        _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * _strain_increment[_qp];
+    }
     if (_fe_problem.currentlyComputingJacobian())
       _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
 
@@ -268,7 +303,12 @@ ComputeMultipleInelasticStress::updateQpState(RankTwoTensor & elastic_strain_inc
         _stress[_qp] =
             _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + elastic_strain_increment);
       else
-        _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * elastic_strain_increment;
+      {
+        if (_damage_model)
+          _stress[_qp] = _undamaged_stress_old + _elasticity_tensor[_qp] * elastic_strain_increment;
+        else
+          _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * elastic_strain_increment;
+      }
 
       // given a trial stress (_stress[_qp]) and a strain increment (elastic_strain_increment)
       // let the i^th model produce an admissible stress (as _stress[_qp]), and decompose
@@ -382,7 +422,12 @@ ComputeMultipleInelasticStress::updateQpStateSingleModel(
   if (_is_elasticity_tensor_guaranteed_isotropic || !_perform_finite_strain_rotations)
     _stress[_qp] = _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + elastic_strain_increment);
   else
-    _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * elastic_strain_increment;
+  {
+    if (_damage_model)
+      _stress[_qp] = _undamaged_stress_old + _elasticity_tensor[_qp] * elastic_strain_increment;
+    else
+      _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * elastic_strain_increment;
+  }
 
   computeAdmissibleState(model_number,
                          elastic_strain_increment,
@@ -419,15 +464,26 @@ ComputeMultipleInelasticStress::computeAdmissibleState(unsigned model_number,
                                                        RankFourTensor & consistent_tangent_operator)
 {
   const bool jac = _fe_problem.currentlyComputingJacobian();
-  _models[model_number]->updateState(elastic_strain_increment,
-                                     inelastic_strain_increment,
-                                     _rotation_increment[_qp],
-                                     _stress[_qp],
-                                     _stress_old[_qp],
-                                     _elasticity_tensor[_qp],
-                                     _elastic_strain_old[_qp],
-                                     (jac && _tangent_computation_flag[model_number]),
-                                     consistent_tangent_operator);
+  if (_damage_model)
+    _models[model_number]->updateState(elastic_strain_increment,
+                                       inelastic_strain_increment,
+                                       _rotation_increment[_qp],
+                                       _stress[_qp],
+                                       _undamaged_stress_old,
+                                       _elasticity_tensor[_qp],
+                                       _elastic_strain_old[_qp],
+                                       (jac && _tangent_computation_flag[model_number]),
+                                       consistent_tangent_operator);
+  else
+    _models[model_number]->updateState(elastic_strain_increment,
+                                       inelastic_strain_increment,
+                                       _rotation_increment[_qp],
+                                       _stress[_qp],
+                                       _stress_old[_qp],
+                                       _elasticity_tensor[_qp],
+                                       _elastic_strain_old[_qp],
+                                       (jac && _tangent_computation_flag[model_number]),
+                                       consistent_tangent_operator);
 
   if (jac && !_tangent_computation_flag[model_number])
   {

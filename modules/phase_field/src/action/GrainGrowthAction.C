@@ -20,11 +20,8 @@
 #include "libmesh/string_to_enum.h"
 
 registerMooseAction("PhaseFieldApp", GrainGrowthAction, "add_aux_variable");
-
 registerMooseAction("PhaseFieldApp", GrainGrowthAction, "add_aux_kernel");
-
 registerMooseAction("PhaseFieldApp", GrainGrowthAction, "add_variable");
-
 registerMooseAction("PhaseFieldApp", GrainGrowthAction, "add_kernel");
 
 template <>
@@ -56,6 +53,9 @@ validParams<GrainGrowthAction>()
   params.addParam<bool>("implicit", true, "Whether kernels are implicit or not");
   params.addParam<bool>(
       "use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
+  params.addParam<bool>("use_automatic_differentiation",
+                        false,
+                        "Flag to use automatic differentiation (AD) objects when possible");
   params.addParam<VariableName>("c", "Name of coupled concentration variable");
   params.addParam<Real>("en_ratio", 1.0, "Ratio of surface to GB energy");
   params.addParam<unsigned int>("ndef", 0, "Specifies the number of deformed grains to create");
@@ -76,7 +76,8 @@ GrainGrowthAction::GrainGrowthAction(const InputParameters & params)
     _op_num(getParam<unsigned int>("op_num")),
     _var_name_base(getParam<std::string>("var_name_base")),
     _fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
-             Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family")))
+             Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family"))),
+    _use_ad(getParam<bool>("use_automatic_differentiation"))
 {
 }
 
@@ -101,14 +102,15 @@ GrainGrowthAction::act()
       //
 
       {
-        std::string kernel_type = "TimeDerivative";
+        std::string kernel_type = _use_ad ? "ADTimeDerivative" : "TimeDerivative";
 
         std::string kernel_name = var_name + "_" + kernel_type;
-        InputParameters params = _factory.getValidParams(kernel_type);
+        InputParameters params =
+            _factory.getValidParams(kernel_type + (_use_ad ? "<RESIDUAL>" : ""));
         params.set<NonlinearVariableName>("variable") = var_name;
         params.applyParameters(parameters());
 
-        _problem->addKernel(kernel_type, kernel_name, params);
+        addKernel(kernel_type, kernel_name, params);
       }
 
       //
@@ -116,7 +118,7 @@ GrainGrowthAction::act()
       //
 
       {
-        std::string kernel_type = "ACGrGrPoly";
+        std::string kernel_type = _use_ad ? "ADGrainGrowth" : "ACGrGrPoly";
 
         // Make vector of order parameter names, excluding this one
         std::vector<VariableName> v;
@@ -128,13 +130,14 @@ GrainGrowthAction::act()
             v[ind++] = _var_name_base + Moose::stringify(j);
 
         std::string kernel_name = var_name + "_" + kernel_type;
-        InputParameters params = _factory.getValidParams(kernel_type);
+        InputParameters params =
+            _factory.getValidParams(kernel_type + (_use_ad ? "<RESIDUAL>" : ""));
         params.set<NonlinearVariableName>("variable") = var_name;
         params.set<std::vector<VariableName>>("v") = v;
         params.set<MaterialPropertyName>("mob_name") = getParam<MaterialPropertyName>("mobility");
         params.applyParameters(parameters());
 
-        _problem->addKernel(kernel_type, kernel_name, params);
+        addKernel(kernel_type, kernel_name, params);
       }
 
       //
@@ -142,17 +145,18 @@ GrainGrowthAction::act()
       //
 
       {
-        std::string kernel_type = "ACInterface";
+        std::string kernel_type = _use_ad ? "ADACInterface" : "ACInterface";
 
         std::string kernel_name = var_name + "_" + kernel_type;
-        InputParameters params = _factory.getValidParams(kernel_type);
+        InputParameters params =
+            _factory.getValidParams(kernel_type + (_use_ad ? "<RESIDUAL>" : ""));
         params.set<NonlinearVariableName>("variable") = var_name;
         params.set<MaterialPropertyName>("mob_name") = getParam<MaterialPropertyName>("mobility");
         params.set<MaterialPropertyName>("kappa_name") = getParam<MaterialPropertyName>("kappa");
         params.set<bool>("variable_L") = getParam<bool>("variable_mobility");
         params.applyParameters(parameters());
 
-        _problem->addKernel(kernel_type, kernel_name, params);
+        addKernel(kernel_type, kernel_name, params);
       }
 
       //
@@ -161,6 +165,9 @@ GrainGrowthAction::act()
 
       if (isParamValid("c"))
       {
+        if (_use_ad)
+          mooseError("AD version of ACGBPoly is not implemented");
+
         std::string kernel_type = "ACGBPoly";
 
         std::string kernel_name = var_name + "_" + kernel_type;
@@ -198,4 +205,19 @@ GrainGrowthAction::act()
 
     _problem->addAuxKernel(aux_kernel_type, aux_kernel_name, params);
   }
+}
+
+void
+GrainGrowthAction::addKernel(const std::string & kernel_type,
+                             const std::string & kernel_name,
+                             InputParameters params)
+{
+  if (_use_ad)
+  {
+    _problem->addKernel(kernel_type + "<RESIDUAL>", kernel_name + "_residual", params);
+    _problem->addKernel(kernel_type + "<JACOBIAN>", kernel_name + "_jacobian", params);
+    _problem->haveADObjects(true);
+  }
+  else
+    _problem->addKernel(kernel_type, kernel_name, params);
 }

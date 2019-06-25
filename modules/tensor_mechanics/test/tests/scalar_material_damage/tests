@@ -1,15 +1,19 @@
 [Tests]
+  design = '/ComputeDamageStress.md /ScalarMaterialDamage.md /ComputeMultipleInelasticStress.md'
+  issues = '#11041'
   [./scalar_damage_material]
     type = 'CSVDiff'
     input = 'scalar_material_damage.i'
     csvdiff = 'scalar_material_damage_out.csv'
     abs_zero = 1.e-6
+    requirement = "MOOSE shall calculate the effect of damage on the stress of a elastic material."
   [../]
   [./scalar_damage_material_old]
     type = 'CSVDiff'
     input = 'scalar_material_damage.i'
     cli_args = 'Materials/damage/use_old_damage=true Outputs/file_base=scalar_material_damage_old_out'
     csvdiff = 'scalar_material_damage_old_out.csv'
+    requirement = "MOOSE shall calculate damaged stress based on old damage index."
   [../]
   [./scalar_damage_material_out_of_bounds]
     type = 'RunException'
@@ -17,6 +21,7 @@
     input = 'scalar_material_damage.i'
     cli_args = 'Executioner/end_time=1.2'
     expect_err = 'damage_index must be between 0 and 1. Current value is:'
+    requirement = "MOOSE shall error out when damage index is greater than 1."
   [../]
   [./scalar_damage_incompatible_model]
     type = 'RunException'
@@ -25,12 +30,17 @@
     cli_args = 'Materials/stress/damage_model=damage_index' #Point it to an incompatible model
     expect_err = 'Damage Model damage_index is not compatible with ComputeDamageStress'
     allow_warnings = true #Avoid failing on another warning before hitting the error we're testing for
+    requirement = "MOOSE shall make sure that the damage model is derived from DamageBase
+                   and error out when incompatible damage model is used in conjunction
+                   with ComputeDamageStress"
   [../]
   [./combined_scalar_damage_max]
     type = 'CSVDiff'
     input = 'combined_scalar_damage.i'
     csvdiff = 'combined_scalar_damage_out.csv'
     abs_zero = 1.e-6
+    requirement = "MOOSE shall calculate the maximum value of the damage index
+                   comparing different damage models."
   [../]
   [./combined_scalar_damage_mult]
     type = 'CSVDiff'
@@ -38,5 +48,14 @@
     cli_args = 'Materials/damage/combination_type=Product Outputs/file_base=combined_scalar_damage_mult_out'
     csvdiff = 'combined_scalar_damage_mult_out.csv'
     abs_zero = 1.e-6
+    requirement = "MOOSE shall calculate the effective damage index from different damage models."
+  [../]
+  [./scalar_damage_material_inelastic]
+    type = 'CSVDiff'
+    input = 'scalar_material_damage_creep.i'
+    csvdiff = 'scalar_material_damage_creep_out.csv'
+    abs_zero = 1.e-6
+    requirement = "MOOSE shall calculate the effect of damage on the stress of a inelastic material
+                   in conjunction with the creep or plastic deformation."
   [../]
 []

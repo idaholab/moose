@@ -12,6 +12,17 @@
 #include "ADKernel.h"
 #include "DerivativeMaterialPropertyNameInterface.h"
 
+#define usingACInterfaceMembers                                                                    \
+  usingKernelMembers;                                                                              \
+  using ADACInterface<compute_stage>::_prop_L;                                                     \
+  using ADACInterface<compute_stage>::_name_L;                                                     \
+  using ADACInterface<compute_stage>::_kappa;                                                      \
+  using ADACInterface<compute_stage>::_variable_L;                                                 \
+  using ADACInterface<compute_stage>::_dLdop;                                                      \
+  using ADACInterface<compute_stage>::_nvar;                                                       \
+  using ADACInterface<compute_stage>::_dLdarg;                                                     \
+  using ADACInterface<compute_stage>::_gradarg
+
 template <ComputeStage>
 class ADACInterface;
 
@@ -55,4 +66,3 @@ protected:
 
   usingKernelMembers;
 };
-

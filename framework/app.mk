@@ -188,7 +188,7 @@ link_names := $(foreach i, $(include_files), $(all_header_dir)/$(notdir $(i)))
 $(eval $(call all_header_dir_rule, $(all_header_dir)))
 $(call symlink_rules, $(all_header_dir), $(include_files))
 
-header_symlinks:: $(all_header_dir) $(link_names)
+header_symlinks: $(all_header_dir) $(link_names)
 app_INCLUDE = -I$(all_header_dir)
 
 else # No Header Symlinks
@@ -266,15 +266,15 @@ $(eval $(call CXX_RULE_TEMPLATE,_with$(app_LIB_SUFFIX)))
 # If this is a matching module then build the exec, otherwise fall back and use the variable
 ifneq (,$(MODULE_NAME))
   ifeq ($(MODULE_NAME),$(APPLICATION_NAME))
-    all:: $(app_EXEC)
+    all: $(app_EXEC)
   else
-    all:: $(app_LIB)
+    all: $(app_LIB)
   endif
 else
   ifeq ($(BUILD_EXEC),yes)
-    all:: $(app_EXEC)
+    all: $(app_EXEC)
   else
-    all:: $(app_LIB)
+    all: $(app_LIB)
   endif
 
   BUILD_EXEC :=
@@ -371,6 +371,6 @@ $(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object) $(app_test_LIB) $(depend
 	@$(codesign)
 
 # Clang static analyzer
-sa:: $(app_analyzer)
+sa: $(app_analyzer)
 
 compile_commands_all_srcfiles += $(srcfiles)

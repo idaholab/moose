@@ -71,3 +71,5 @@ ADACInterface<compute_stage>::computeQpResidual()
 
   return _grad_u[_qp] * _kappa[_qp] * nabla_Lpsi;
 }
+
+adBaseClass(ADACInterface);
