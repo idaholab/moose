@@ -70,8 +70,13 @@
 []
 
 [Outputs]
+  [png]
+    type = PNGObject
+    PNGFile = "PNGTEST"
+    resolution = 250
+    inColor = false
+  []
   execute_on = 'timestep_end'
   file_base = out_wedge
   exodus = true
 []
-

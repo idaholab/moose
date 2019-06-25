@@ -16,6 +16,9 @@ ADDITIONAL_CPPFLAGS += -Wall -Wextra
 include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
+ADDITIONAL_LIBS := "-L/opt/moose/libpng-1.6.25/lib -lz -lpng16"
+ADDITIONAL_INCLUDES := "-I/opt/moose/libpng-1.6.25/include/libpng16"
+
 # dep apps
 APPLICATION_DIR    := $(MOOSE_DIR)/test
 APPLICATION_NAME   := moose_test

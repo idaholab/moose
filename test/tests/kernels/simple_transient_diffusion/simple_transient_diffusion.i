@@ -1,3 +1,13 @@
+[Outputs]
+  [png]
+    type = PNGObject
+    PNGFile = "PNGTEST"
+    resolution = 250
+    inColor = false
+  []
+  exodus = true
+[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -46,6 +56,6 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Outputs]
-  exodus = true
-[]
+#[Outputs]
+#  exodus = true
+#[]
