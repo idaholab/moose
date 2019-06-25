@@ -287,7 +287,7 @@ class LinkInline(components.TokenComponent):
     """
 
     RE = re.compile(r'\[(?!\w+?\] )'                # start of link, see note above
-                    r'(?P<inline>.*?)\]'            # link text and end of text
+                    r'(?P<inline>[^[]*?)\]'         # link text (all except [) and end of text
                     r'\((?P<url>.*?)'               # link url
                     r'(?:\s+(?P<settings>.*?))?\)', # settings
                     flags=re.UNICODE)
@@ -296,6 +296,7 @@ class LinkInline(components.TokenComponent):
         return Link(parent, url=info['url'], **self.attributes)
 
 class ShortcutLinkInline(components.TokenComponent):
+    """https://regex101.com/r/JLAaBU/1"""
     RE = re.compile(r'\['                        # opening [
                     r'(?P<key>.+?)'              # key
                     r'(?:\s+(?P<settings>.*?))?' # settings
