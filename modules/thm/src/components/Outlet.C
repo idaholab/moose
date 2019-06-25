@@ -298,7 +298,7 @@ Outlet::addMooseObjects3EqnRDG()
 void
 Outlet::add7EqnStaticPReverseBC()
 {
-  const TwoPhaseFluidProperties & tpfp = _sim.getUserObject<TwoPhaseFluidProperties>(_fp_name);
+  const TwoPhaseFluidProperties & tpfp = _sim.getUserObjectTempl<TwoPhaseFluidProperties>(_fp_name);
   const UserObjectName & fp_liquid = tpfp.getLiquidName();
   const UserObjectName & fp_vapor = tpfp.getVaporName();
 
@@ -457,7 +457,7 @@ Outlet::add7EqnStaticPBC()
   std::vector<VariableName> cv_temperature_vapor(1, FlowModelTwoPhase::TEMPERATURE_VAPOR);
   std::vector<VariableName> cv_enthalpy_vapor(1, FlowModelTwoPhase::SPECIFIC_TOTAL_ENTHALPY_VAPOR);
 
-  const TwoPhaseFluidProperties & tpfp = _sim.getUserObject<TwoPhaseFluidProperties>(_fp_name);
+  const TwoPhaseFluidProperties & tpfp = _sim.getUserObjectTempl<TwoPhaseFluidProperties>(_fp_name);
   const UserObjectName & fp_liquid = tpfp.getLiquidName();
   const UserObjectName & fp_vapor = tpfp.getVaporName();
 

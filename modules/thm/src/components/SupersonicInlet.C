@@ -35,7 +35,7 @@ SupersonicInlet::addMooseObjects()
   std::vector<VariableName> cv_area(1, FlowModel::AREA);
 
   const SinglePhaseFluidProperties & spfp =
-      _sim.getUserObject<SinglePhaseFluidProperties>(_fp_name);
+      _sim.getUserObjectTempl<SinglePhaseFluidProperties>(_fp_name);
 
   Real p = getParam<Real>("p");
   Real T = getParam<Real>("T");

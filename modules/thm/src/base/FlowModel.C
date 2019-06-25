@@ -76,9 +76,9 @@ FlowModel::FlowModel(const InputParameters & params)
     _spatial_discretization(_sim.getSpatialDiscretization()),
     _fp_name(params.get<UserObjectName>("fp")),
     _comp_name(name()),
-    _gravity_vector(_flow_channel.getParam<RealVectorValue>("gravity_vector")),
+    _gravity_vector(_flow_channel.getParamTempl<RealVectorValue>("gravity_vector")),
     _gravity_magnitude(_gravity_vector.norm()),
-    _lump_mass_matrix(_flow_channel.getParam<bool>("lump_mass_matrix")),
+    _lump_mass_matrix(_flow_channel.getParamTempl<bool>("lump_mass_matrix")),
     _A_linear_name(params.get<AuxVariableName>("A_linear_name")),
     _rdg_slope_reconstruction(params.get<MooseEnum>("rdg_slope_reconstruction")),
     _numerical_flux_name(params.get<UserObjectName>("numerical_flux"))
@@ -88,7 +88,7 @@ FlowModel::FlowModel(const InputParameters & params)
 const FunctionName &
 FlowModel::getVariableFn(const FunctionName & fn_param_name)
 {
-  const FunctionName & fn_name = _flow_channel.getParam<FunctionName>(fn_param_name);
+  const FunctionName & fn_name = _flow_channel.getParamTempl<FunctionName>(fn_param_name);
   const Function & fn = _sim.getFunction(fn_name);
 
   if (dynamic_cast<const ConstantFunction *>(&fn) != nullptr)

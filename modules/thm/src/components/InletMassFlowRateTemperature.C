@@ -182,7 +182,7 @@ InletMassFlowRateTemperature::setup2PhaseCG()
   Real m_dot_vapor = getParam<Real>("m_dot_vapor");
   Real T_liquid = getParam<Real>("T_liquid");
   Real T_vapor = getParam<Real>("T_vapor");
-  const TwoPhaseFluidProperties & tpfp = _sim.getUserObject<TwoPhaseFluidProperties>(_fp_name);
+  const TwoPhaseFluidProperties & tpfp = _sim.getUserObjectTempl<TwoPhaseFluidProperties>(_fp_name);
   const UserObjectName & fp_liquid = tpfp.getLiquidName();
   const UserObjectName & fp_vapor = tpfp.getVaporName();
 
