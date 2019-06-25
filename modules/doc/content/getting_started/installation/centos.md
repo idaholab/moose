@@ -4,6 +4,10 @@
 
 !include getting_started/installation/centos_pre_req.md
 
+!include getting_started/installation/post_linux_install.md
+
 !include getting_started/installation/bash_profile.md
+
+!include getting_started/installation/rod_packages.md
 
 !include getting_started/installation/install_moose.md
