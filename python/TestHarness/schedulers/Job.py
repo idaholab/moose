@@ -67,12 +67,6 @@ class Job(object):
         # List of files modified by this job.
         self.modifiedFiles = []
 
-        # Set of nodes that depend on this node.
-        self.__downstreamNodes = set([])
-
-        # Set of jobs that this job depends on.
-        self.__upstreamNodes = set([])
-
         # Set of all jobs that this job races with.
         self.racePartners = set()
 
@@ -100,42 +94,14 @@ class Job(object):
         self.setStatus(self.hold)
 
     def getUpstreams(self):
-        """ Wrapper method to return a list of all the jobs that need to be run before the given job """
-        return self.__job_dag.getUpstreams(self)
+        """ Return a list of all the jobs that needed to be completed before this job """
+        original_dag = self.__job_dag.getOriginalDAG()
+        return self.__job_dag.predecessors(self, original_dag)
 
     def getDownstreams(self):
-        """ Wrapper method to return a list of all the jobs that need to be run after the given job """
-        return self.__job_dag.getDownstreams(self)
-
-    def addUpsteamNodes(self, *kwargs):
-        """ Add a job to the list of jobs that are upstream from here """
-        for i in [x for x in kwargs if x]:
-            if type(i) == type([]):
-                self.__upstreamNodes.update(i)
-            else:
-                self.__upstreamNodes.add(i)
-        return self.__upstreamNodes
-
-    def getUpstreamNodes(self):
-        """ Return the list of jobs that are upstream from here """
-        return self.__upstreamNodes
-
-    def addDownsteamNodes(self, *kwargs):
-        """ Add a job to the list of jobs that are downstream from here """
-        for i in [x for x in kwargs if x]:
-            if type(i) == type([]):
-                self.__downstreamNodes.update(i)
-            else:
-                self.__downstreamNodes.add(i)
-        return self.__downstreamNodes
-
-    def removeDownsteamNode(self, node):
-        """ Remove a job from the list of jobs that are downstream from here """
-        return self.__downstreamNodes.remove(node)
-
-    def getDownstreamNodes(self):
-        """ Return the list of jobs that are downstream from here """
-        return self.__downstreamNodes
+        """ Return a list of all the jobs that need this job completed """
+        original_dag = self.__job_dag.getOriginalDAG()
+        return self.__job_dag.all_downstreams(self, original_dag)
 
     def getDAG(self):
         """ Return the DAG associated with this tester """

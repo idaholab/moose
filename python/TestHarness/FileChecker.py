@@ -15,7 +15,6 @@ class FileChecker(object):
     def getNewTimes(self):
         return self.__new_times
 
-    # Added by the MOOSE group
     def get_all_files(self, job, times):
         """ Method to get the names and last_modified_times of all files within current test location """
         for dirpath, dirnames, filenames in os.walk(job.getTestDir(), followlinks=True):
@@ -28,7 +27,6 @@ class FileChecker(object):
                     pass
         return times
 
-    # Added by the MOOSE group
     def check_changes(self, originalTimes, newTimes):
         """ Method to compare names of times kept kept in the two dictionaries created filled by get_all_files """
         changed = []

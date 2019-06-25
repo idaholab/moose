@@ -19,21 +19,26 @@ class RaceChecker(object):
     def __init__(self, all_jobs):
         """ Create a RaceChecker object that has all the jobs"""
         self.all_jobs = all_jobs
+        self.racer_lists = []
 
     def findRacePartners(self):
         """ Collect all the jobs that have race conditions """
         raceConditionsExist = False
         for job_group in self.all_jobs:
+            _jobs = set([])
+            _files = set([])
             for job_a, job_b in itertools.combinations(job_group, 2):
                 if job_a.isSkip() or job_b.isSkip():
                     continue
 
-                _matching = set(job_a.modifiedFiles).intersection(set(job_b.modifiedFiles))
-                if _matching and not ((job_a in job_b.getDownstreamNodes()) \
-                                      or (job_b in job_a.getDownstreamNodes())):
-                    job_a.racePartners.add(job_b)
-                    job_b.racePartners.add(job_a)
+                _matching = list(set(job_a.modifiedFiles).intersection(set(job_b.modifiedFiles)))
+                if _matching and not ((job_a in job_b.getDownstreams()) \
+                                      or (job_b in job_a.getDownstreams())):
+                    _jobs.update([job_a, job_b])
+                    _files.update(_matching)
                     raceConditionsExist = True
+            if _jobs:
+                self.racer_lists.append((sorted(_jobs), sorted(_files)))
         return raceConditionsExist
 
     def printRaceConditionsByPrereq(self):
@@ -42,11 +47,11 @@ class RaceChecker(object):
         colissions = dict()
         for job in self.all_jobs:
             if len(job.racePartners) > 0:
-                prereq = str([x.getTestName() for x in job.getUpstreamNodes()])
+                prereq = str([x.getTestName() for x in job.getUpstreams()])
                 shared = list()
                 shared.append(job.getTestName())
                 for partner in job.racePartners:
-                    if job.getUpstreamNodes() == partner.getUpstreamNodes():
+                    if job.getUpstreams() == partner.getUpstreams():
                         shared.append(partner.getTestName())
                     colissions[prereq] = shared
         for prereq in colissions:
@@ -62,59 +67,18 @@ class RaceChecker(object):
         """ Print the jobs that share race conditions within unique sets """
         status = StatusSystem()
         exit_code = 0x0
-
-        allOfRacers = set()
-        for job_group in self.all_jobs:
-            temp_set = set()
-            for job in job_group:
-
-                # Only jobs that have race conditions
-                if not len(job.racePartners):
-                    continue
-
-                temp_set.add(job)
-                for partner in job.racePartners:
-                    temp_set.add(partner)
-                allOfRacers.add(frozenset(sorted(temp_set)))
-        setNumber = 0
-        # Keep the files that are modified.
-        racerModifiedFiles = set()
-
-        # If there are any jobs with race conditions, print them out.
-        if len(allOfRacers) > 0:
-            print("\nDiagnostic analysis shows that the members of the following unique sets exhibit race conditions:")
-
-            # Print each set of jobs with shared race conditions.
-            for racers in allOfRacers:
-                racerModifiedFiles.clear()
-                if racers:
-                    setNumber += 1
-                    print(" Set " + str(setNumber) + "\n- - - - -")
-                    for racer in racers:
-                        print("  --" + racer.getTestName())
-                    for a, b in itertools.combinations(racers, 2):
-                        for c in a.modifiedFiles:
-                            if c in b.modifiedFiles:
-                                racerModifiedFiles.add(c)
-                            else:
-                                try:
-                                    racerModifiedFiles.remove(c)
-                                except:
-                                    pass
-                    print("\n   Each of the tests in this set create or modify each of the following files:")
-                    for file in racerModifiedFiles:
-                        print("    -->" + file)
-                    print("- - - - -\n\n")
-
-            if setNumber > 1:
-                print("There are a total of " + str(setNumber) + " sets of tests with unique race conditions. ")
-            else:
-                print("There is " + str(setNumber) + " set of tests with unique race conditions. ")
-            print("Please review the tests and either add any necessary prereqs, or create unique filenames " +
-            "for the outputs of each test.")
+        if self.racer_lists:
+            output = "\nDiagnostic analysis shows that the members of the following unique sets exhibit race conditions:"
+            for i, racers in enumerate(self.racer_lists):
+                job_list, file_matches = racers
+                output += "\n Set %d\n" % (i+1)
+                output += "- "*5 + "\n  --%s" % ('\n  --'.join([x.getTestName() for x in job_list]))
+                output += "\n\n   Each of the tests in this set create or modify each of the following files:"
+                output += "\n    -->%s" % ('\n    -->'.join(file_matches))
+                output += "\n" + "- "*5
             exit_code = status.race.code
-
-        else:
-            print("There are no race conditions.")
-
+        if output:
+            output += "\n\n\nA total of %d sets of tests with unique race conditions." % (i+1)
+            output += "\nPlease review the tests and either add any necessary prereqs, or create unique filenames for the outputs of each test."
+            print(output)
         return exit_code
