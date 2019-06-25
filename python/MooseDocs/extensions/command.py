@@ -154,6 +154,8 @@ class InlineCommand(CommandBase):
         [!command](content in here)
         [!command!subcommand key=value]
         [!command!subcommand key=value](content in here)
+
+    https://regex101.com/r/B7er21/1
     """
 
     RE = re.compile(r'\['                        # opening bracket "["
