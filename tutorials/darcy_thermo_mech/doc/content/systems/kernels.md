@@ -57,9 +57,9 @@ The weak form of this equation includes a volume integral, which in inner-produc
 is given by:
 
 !equation
-\left(\nabla \phi_i, \nabla u_h\right) = 0 \quad\forall  \phi_i,
+\left(\nabla \psi_i, \nabla u_h\right) = 0 \quad\forall  \psi_i,
 
-where $\phi_i$ are the test functions and $u_h$ is the finite element solution.
+where $\psi_i$ are the test functions and $u_h$ is the finite element solution.
 
 !---
 
