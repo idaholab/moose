@@ -1071,10 +1071,7 @@ RankTwoTensorTempl<DualReal>::symmetricEigenvaluesEigenvectors(
         mooseError("eigenvalue decomposition does not converge.");
       DualReal shift = D(m, m);
       if (MooseUtils::absoluteFuzzyEqual(shift.value(), 0.0))
-      {
-        shift = std::max(D(m, m), D(m - 1, m - 1));
-        shift = std::max(D(m - 1, m), shift);
-      }
+        shift = std::max(D(m - 1, m), D(m - 1, m - 1));
       D.addIa(-shift);
       D.QR(Q, R, m + 1);
       D = R * Q;
