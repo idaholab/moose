@@ -100,23 +100,23 @@ PackedColumn<compute_stage>::PackedColumn(const InputParameters & parameters)
     _temperature(adCoupledValue("temperature")),
 
     // Fluid
-    _fluid_mu(adGetParam<Real>("fluid_viscosity")),
-    _fluid_k(adGetParam<Real>("fluid_thermal_conductivity")),
-    _fluid_rho(adGetParam<Real>("fluid_density")),
-    _fluid_cp(adGetParam<Real>("fluid_specific_heat")),
+    _fluid_mu(getParam<Real>("fluid_viscosity")),
+    _fluid_k(getParam<Real>("fluid_thermal_conductivity")),
+    _fluid_rho(getParam<Real>("fluid_density")),
+    _fluid_cp(getParam<Real>("fluid_specific_heat")),
 
     // Solid
-    _solid_k(adGetParam<Real>("solid_thermal_conductivity")),
-    _solid_rho(adGetParam<Real>("solid_density")),
-    _solid_cp(adGetParam<Real>("solid_specific_heat")),
+    _solid_k(getParam<Real>("solid_thermal_conductivity")),
+    _solid_rho(getParam<Real>("solid_density")),
+    _solid_cp(getParam<Real>("solid_specific_heat")),
 
     // Material Properties being produced by this object
-    _permeability(adDeclareProperty<Real>("permeability")),
-    _porosity(adDeclareProperty<Real>("porosity")),
-    _viscosity(adDeclareADProperty<Real>("viscosity")),
-    _thermal_conductivity(adDeclareADProperty<Real>("thermal_conductivity")),
-    _specific_heat(adDeclareADProperty<Real>("specific_heat")),
-    _density(adDeclareADProperty<Real>("density"))
+    _permeability(declareProperty<Real>("permeability")),
+    _porosity(declareProperty<Real>("porosity")),
+    _viscosity(declareADProperty<Real>("viscosity")),
+    _thermal_conductivity(declareADProperty<Real>("thermal_conductivity")),
+    _specific_heat(declareADProperty<Real>("specific_heat")),
+    _density(declareADProperty<Real>("density"))
 {
   // Set data for permeability interpolation
   std::vector<Real> sphere_sizes = {1, 3};
@@ -180,7 +180,7 @@ PackedColumn<compute_stage>::initInputData(const std::string & param_name,
 {
   if (isParamValid(param_name))
   {
-    const std::string & filename = adGetParam<FileName>(param_name);
+    const std::string & filename = getParam<FileName>(param_name);
     MooseUtils::DelimitedFileReader reader(filename, &_communicator);
     reader.setComment("#");
     reader.read();

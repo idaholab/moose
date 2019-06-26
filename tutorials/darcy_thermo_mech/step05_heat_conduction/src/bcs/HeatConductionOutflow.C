@@ -18,7 +18,7 @@ defineADValidParams(HeatConductionOutflow,
 template <ComputeStage compute_stage>
 HeatConductionOutflow<compute_stage>::HeatConductionOutflow(const InputParameters & parameters)
   : ADIntegratedBC<compute_stage>(parameters),
-    _thermal_conductivity(adGetADMaterialProperty<Real>("thermal_conductivity"))
+    _thermal_conductivity(getADMaterialProperty<Real>("thermal_conductivity"))
 {
 }
 

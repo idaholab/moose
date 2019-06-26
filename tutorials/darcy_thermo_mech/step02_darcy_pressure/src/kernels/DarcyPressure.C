@@ -31,8 +31,8 @@ DarcyPressure<compute_stage>::DarcyPressure(const InputParameters & parameters)
   : ADDiffusion<compute_stage>(parameters),
 
     // Get the parameters from the input file
-    _permeability(adGetParam<Real>("permeability")),
-    _viscosity(adGetParam<Real>("viscosity"))
+    _permeability(getParam<Real>("permeability")),
+    _viscosity(getParam<Real>("viscosity"))
 {
 }
 

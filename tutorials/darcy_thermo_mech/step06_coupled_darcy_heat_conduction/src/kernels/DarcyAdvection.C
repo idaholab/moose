@@ -22,11 +22,11 @@ DarcyAdvection<compute_stage>::DarcyAdvection(const InputParameters & parameters
     // Couple to the gradient of the pressure
     _pressure_grad(adCoupledGradient("pressure")),
     // Grab necessary material properties
-    _permeability(adGetADMaterialProperty<Real>("permeability")),
-    _porosity(adGetADMaterialProperty<Real>("porosity")),
-    _viscosity(adGetADMaterialProperty<Real>("viscosity")),
-    _density(adGetADMaterialProperty<Real>("density")),
-    _specific_heat(adGetADMaterialProperty<Real>("specific_heat"))
+    _permeability(getADMaterialProperty<Real>("permeability")),
+    _porosity(getADMaterialProperty<Real>("porosity")),
+    _viscosity(getADMaterialProperty<Real>("viscosity")),
+    _density(getADMaterialProperty<Real>("density")),
+    _specific_heat(getADMaterialProperty<Real>("specific_heat"))
 {
 }
 

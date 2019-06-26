@@ -20,8 +20,8 @@ defineADValidParams(
 template <ComputeStage compute_stage>
 DarcyPressure<compute_stage>::DarcyPressure(const InputParameters & parameters)
   : ADDiffusion<compute_stage>(parameters),
-    _permeability(adGetMaterialProperty<Real>("permeability")),
-    _viscosity(adGetADMaterialProperty<Real>("viscosity"))
+    _permeability(getMaterialProperty<Real>("permeability")),
+    _viscosity(getADMaterialProperty<Real>("viscosity"))
 {
 }
 
