@@ -34,7 +34,7 @@ ADPresetNodalBC<compute_stage>::computeValue(NumericVector<Number> & current_sol
 }
 
 template <ComputeStage compute_stage>
-ADResidual
+ADReal
 ADPresetNodalBC<compute_stage>::computeQpResidual()
 {
   return _u - computeQpValue();

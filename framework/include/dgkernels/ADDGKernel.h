@@ -58,7 +58,7 @@ public:
 
 protected:
   /// Compute this Kernel's contribution to the residual at the current quadrature point
-  virtual ADResidual computeQpResidual(Moose::DGResidualType type) = 0;
+  virtual ADReal computeQpResidual(Moose::DGResidualType type) = 0;
 
   /// Holds the solution at current quadrature points
   const ADVariableValue & _u;

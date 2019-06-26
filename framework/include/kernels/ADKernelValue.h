@@ -44,7 +44,7 @@ protected:
   virtual typename OutputTools<typename Moose::ValueType<T, compute_stage>::type>::OutputValue
   precomputeQpResidual() = 0;
 
-  virtual ADResidual computeQpResidual() override final;
+  virtual ADReal computeQpResidual() override final;
 
   usingTemplKernelMembers(T);
 };

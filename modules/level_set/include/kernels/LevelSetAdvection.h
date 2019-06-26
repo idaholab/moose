@@ -33,7 +33,7 @@ public:
   LevelSetAdvection(const InputParameters & parameters);
 
 protected:
-  virtual ADResidual precomputeQpResidual() override;
+  virtual ADReal precomputeQpResidual() override;
 
   usingKernelValueMembers;
   using LevelSetVelocityInterface<ADKernelValue<compute_stage>>::computeQpVelocity;

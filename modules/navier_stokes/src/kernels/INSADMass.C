@@ -27,7 +27,7 @@ INSADMass<compute_stage>::INSADMass(const InputParameters & parameters)
 }
 
 template <ComputeStage compute_stage>
-ADResidual
+ADReal
 INSADMass<compute_stage>::precomputeQpResidual()
 {
   return _mass_strong_residual[_qp];

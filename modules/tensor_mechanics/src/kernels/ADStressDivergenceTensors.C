@@ -62,10 +62,10 @@ ADStressDivergenceTensors<compute_stage>::initialSetup()
 }
 
 template <ComputeStage compute_stage>
-ADResidual
+ADReal
 ADStressDivergenceTensors<compute_stage>::computeQpResidual()
 {
-  ADResidual residual = _stress[_qp].row(_component) * _grad_test[_i][_qp];
+  ADReal residual = _stress[_qp].row(_component) * _grad_test[_i][_qp];
 
   // volumetric locking correction
   if (_volumetric_locking_correction)

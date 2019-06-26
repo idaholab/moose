@@ -29,7 +29,7 @@ public:
   INSADMomentumViscous(const InputParameters & parameters);
 
 protected:
-  virtual ADTensorResidual precomputeQpResidual() override;
+  virtual ADRealTensorValue precomputeQpResidual() override;
 
   const ADMaterialProperty(Real) & _mu;
 

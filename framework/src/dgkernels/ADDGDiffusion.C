@@ -37,10 +37,10 @@ ADDGDiffusion<compute_stage>::ADDGDiffusion(const InputParameters & parameters)
 }
 
 template <ComputeStage compute_stage>
-ADResidual
+ADReal
 ADDGDiffusion<compute_stage>::computeQpResidual(Moose::DGResidualType type)
 {
-  ADResidual r = 0;
+  ADReal r = 0;
 
   const unsigned int elem_b_order = _var.order();
   const double h_elem =

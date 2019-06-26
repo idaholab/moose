@@ -28,7 +28,7 @@ public:
   LevelSetOlssonReinitialization(const InputParameters & parameters);
 
 protected:
-  virtual ADVectorResidual precomputeQpResidual() override;
+  virtual ADRealVectorValue precomputeQpResidual() override;
 
   /// Gradient of the level set variable at time, \tau = 0.
   const ADVariableGradient & _grad_levelset_0;

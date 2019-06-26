@@ -34,7 +34,7 @@ public:
   ADDGDiffusion(const InputParameters & parameters);
 
 protected:
-  virtual ADResidual computeQpResidual(Moose::DGResidualType type) override;
+  virtual ADReal computeQpResidual(Moose::DGResidualType type) override;
 
   Real _epsilon;
   Real _sigma;

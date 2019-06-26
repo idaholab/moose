@@ -23,7 +23,7 @@ public:
   ADMatHeatSource(const InputParameters & parameters);
 
 protected:
-  virtual ADResidual computeQpResidual();
+  virtual ADReal computeQpResidual();
 
   const Real _scalar;
   const ADMaterialProperty(Real) & _material_property;

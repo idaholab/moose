@@ -28,7 +28,7 @@ ADCoupledVectorConvection<compute_stage>::ADCoupledVectorConvection(
 }
 
 template <ComputeStage compute_stage>
-ADResidual
+ADReal
 ADCoupledVectorConvection<compute_stage>::computeQpResidual()
 {
   if (_use_grad)

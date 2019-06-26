@@ -161,7 +161,7 @@ ADKernelValueTempl<RealVectorValue, RESIDUAL>::computeADOffDiagJacobian()
 }
 
 template <typename T, ComputeStage compute_stage>
-ADResidual
+ADReal
 ADKernelValueTempl<T, compute_stage>::computeQpResidual()
 {
   mooseError("Override precomputeQpResidual() in your ADKernelValueTempl derived class!");

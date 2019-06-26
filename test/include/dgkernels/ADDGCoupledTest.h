@@ -28,7 +28,7 @@ public:
   ADDGCoupledTest(const InputParameters & parameters);
 
 protected:
-  virtual ADResidual computeQpResidual(Moose::DGResidualType type) override;
+  virtual ADReal computeQpResidual(Moose::DGResidualType type) override;
 
   MooseVariable & _v_var;
   const ADVariableValue & _v;

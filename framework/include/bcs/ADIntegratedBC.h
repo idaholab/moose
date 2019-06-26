@@ -32,7 +32,7 @@ protected:
   /**
    * Compute this IntegratedBC's contribution to the residual at the current quadrature point
    */
-  virtual ADResidual computeQpResidual() = 0;
+  virtual ADReal computeQpResidual() = 0;
 
   /// The variable that this IntegratedBC operates on
   MooseVariableFE<T> & _var;

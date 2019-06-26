@@ -35,7 +35,7 @@ ADHeatConductionTimeDerivative<compute_stage>::ADHeatConductionTimeDerivative(
 }
 
 template <ComputeStage compute_stage>
-ADResidual
+ADReal
 ADHeatConductionTimeDerivative<compute_stage>::precomputeQpResidual()
 {
   return _specific_heat[_qp] * _density[_qp] *

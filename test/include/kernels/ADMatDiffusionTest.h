@@ -25,7 +25,7 @@ public:
   ADMatDiffusionTest(const InputParameters & parameters);
 
 protected:
-  virtual ADResidual computeQpResidual();
+  virtual ADReal computeQpResidual();
 
   const ADMaterialProperty(Real) & _ad_diff_from_ad_prop;
   const MaterialProperty<Real> & _regular_diff_from_ad_prop;

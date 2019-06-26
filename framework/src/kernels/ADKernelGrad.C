@@ -163,7 +163,7 @@ ADKernelGradTempl<RealVectorValue, RESIDUAL>::computeADOffDiagJacobian()
 }
 
 template <typename T, ComputeStage compute_stage>
-ADResidual
+ADReal
 ADKernelGradTempl<T, compute_stage>::computeQpResidual()
 {
   mooseError("Override precomputeQpResidual() in your ADKernelGrad derived class!");

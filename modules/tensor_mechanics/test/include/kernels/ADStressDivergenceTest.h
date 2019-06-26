@@ -24,7 +24,7 @@ public:
   ADStressDivergenceTest(const InputParameters & parameters);
 
 protected:
-  virtual ADResidual computeQpResidual();
+  virtual ADReal computeQpResidual();
 
   const ADMaterialProperty(RankTwoTensor) & _stress;
   const unsigned int _component;

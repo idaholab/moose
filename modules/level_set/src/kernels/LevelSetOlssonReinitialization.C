@@ -31,7 +31,7 @@ LevelSetOlssonReinitialization<compute_stage>::LevelSetOlssonReinitialization(
 }
 
 template <ComputeStage compute_stage>
-ADVectorResidual
+ADRealVectorValue
 LevelSetOlssonReinitialization<compute_stage>::precomputeQpResidual()
 {
   ADReal s = _grad_levelset_0[_qp].norm() + std::numeric_limits<ADReal>::epsilon();

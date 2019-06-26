@@ -30,7 +30,7 @@ public:
   ADDynamicStressDivergenceTensors(const InputParameters & parameters);
 
 protected:
-  ADResidual computeQpResidual();
+  ADReal computeQpResidual();
 
   const MaterialProperty<RankTwoTensor> & _stress_older;
   const MaterialProperty<RankTwoTensor> & _stress_old;

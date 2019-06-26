@@ -23,7 +23,7 @@ public:
   ADVectorRobinBC(const InputParameters & parameters);
 
 protected:
-  ADResidual computeQpResidual() override;
+  ADReal computeQpResidual() override;
 
   usingVectorIntegratedBCMembers;
 };

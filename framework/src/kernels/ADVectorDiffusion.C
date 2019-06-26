@@ -26,7 +26,7 @@ ADVectorDiffusion<compute_stage>::ADVectorDiffusion(const InputParameters & para
 }
 
 template <ComputeStage compute_stage>
-ADResidual
+ADReal
 ADVectorDiffusion<compute_stage>::computeQpResidual()
 {
   return _grad_u[_qp].contract(_grad_test[_i][_qp]);

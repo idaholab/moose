@@ -23,7 +23,7 @@ public:
   ADConvectionPrecompute(const InputParameters & parameters);
 
 protected:
-  ADResidual precomputeQpResidual() override;
+  ADReal precomputeQpResidual() override;
 
 private:
   RealVectorValue _velocity;

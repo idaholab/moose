@@ -40,7 +40,7 @@ ADPressure<compute_stage>::ADPressure(const InputParameters & parameters)
 }
 
 template <ComputeStage compute_stage>
-ADResidual
+ADReal
 ADPressure<compute_stage>::computeQpResidual()
 {
   ADReal factor = _constant;

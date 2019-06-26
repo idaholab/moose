@@ -30,7 +30,7 @@ ADDGCoupledTest<compute_stage>::ADDGCoupledTest(const InputParameters & paramete
 }
 
 template <ComputeStage compute_stage>
-ADResidual
+ADReal
 ADDGCoupledTest<compute_stage>::computeQpResidual(Moose::DGResidualType type)
 {
   auto fake_flux = 5 * _u[_qp] - 4 * _u_neighbor[_qp] + 3 * _v[_qp] - 2 * _v_neighbor[_qp];

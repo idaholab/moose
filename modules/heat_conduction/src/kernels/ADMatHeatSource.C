@@ -28,7 +28,7 @@ ADMatHeatSource<compute_stage>::ADMatHeatSource(const InputParameters & paramete
 }
 
 template <ComputeStage compute_stage>
-ADResidual
+ADReal
 ADMatHeatSource<compute_stage>::computeQpResidual()
 {
   return -_scalar * _material_property[_qp] * _test[_i][_qp];

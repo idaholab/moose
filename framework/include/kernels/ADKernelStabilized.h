@@ -45,7 +45,7 @@ protected:
 
   virtual ADRealVectorValue computeQpStabilization() = 0;
 
-  virtual ADResidual computeQpResidual() override final;
+  virtual ADReal computeQpResidual() override final;
 
   usingTemplKernelMembers(T);
 };
