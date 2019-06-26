@@ -242,7 +242,7 @@ InletStagnationPressureTemperature::setup2PhaseCG()
 {
   // get names of fluid properties for each phase
   const TwoPhaseFluidProperties & two_phase_fp =
-      _sim.getUserObject<TwoPhaseFluidProperties>(_fp_name);
+      _sim.getUserObjectTempl<TwoPhaseFluidProperties>(_fp_name);
   UserObjectName fp_liquid_name = two_phase_fp.getLiquidName();
   UserObjectName fp_vapor_name = two_phase_fp.getVaporName();
 

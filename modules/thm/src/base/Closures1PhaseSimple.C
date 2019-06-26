@@ -77,7 +77,7 @@ Closures1PhaseSimple::addMooseObjects(const HeatTransferBase & heat_transfer)
 {
   const HeatTransfer1PhaseBase & heat_transfer_1phase =
       dynamic_cast<const HeatTransfer1PhaseBase &>(heat_transfer);
-  const FunctionName & Hw_fn_name = heat_transfer.getParam<FunctionName>("Hw");
+  const FunctionName & Hw_fn_name = heat_transfer.getParamTempl<FunctionName>("Hw");
 
   {
     const std::string class_name = "GenericFunctionMaterial";

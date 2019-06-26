@@ -43,7 +43,7 @@ public:
    * @return The value of the parameter
    */
   template <typename T>
-  const T & getParam(const std::string & name) const;
+  const T & getParamTempl(const std::string & name) const;
 
   /**
    * Gets the FE type for the flow in this simulation
@@ -312,9 +312,9 @@ public:
   bool hasUserObject(const UserObjectName & name) { return _fe_problem->hasUserObject(name); }
 
   template <class T>
-  const T & getUserObject(const UserObjectName & name)
+  const T & getUserObjectTempl(const UserObjectName & name)
   {
-    return _fe_problem->getUserObject<T>(name);
+    return _fe_problem->getUserObjectTempl<T>(name);
   }
 
   /**
@@ -526,7 +526,7 @@ public:
 
 template <typename T>
 const T &
-Simulation::getParam(const std::string & name) const
+Simulation::getParamTempl(const std::string & name) const
 {
   return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
 }

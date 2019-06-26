@@ -120,7 +120,7 @@ FlowChannelBase::init()
     if (_sim.hasUserObject(_stabilization_uo_name))
     {
       StabilizationSettings & stabilization = const_cast<StabilizationSettings &>(
-          _sim.getUserObject<StabilizationSettings>(_stabilization_uo_name));
+          _sim.getUserObjectTempl<StabilizationSettings>(_stabilization_uo_name));
       stabilization.initMooseObjects(*_flow_model);
     }
 }
@@ -291,7 +291,7 @@ FlowChannelBase::addVariables()
   if (!_stabilization_uo_name.empty())
   {
     const StabilizationSettings & stabilization =
-        _sim.getUserObject<StabilizationSettings>(_stabilization_uo_name);
+        _sim.getUserObjectTempl<StabilizationSettings>(_stabilization_uo_name);
     stabilization.addVariables(*_flow_model, _subdomain_id);
   }
 }
@@ -436,7 +436,7 @@ FlowChannelBase::addMooseObjects()
     pars.set<RealVectorValue>("gravity_vector") = _gravity_vector;
 
     const StabilizationSettings & stabilization =
-        _sim.getUserObject<StabilizationSettings>(_stabilization_uo_name);
+        _sim.getUserObjectTempl<StabilizationSettings>(_stabilization_uo_name);
     stabilization.addMooseObjects(*_flow_model, pars);
   }
 }

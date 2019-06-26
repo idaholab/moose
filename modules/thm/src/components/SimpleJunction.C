@@ -204,7 +204,7 @@ SimpleJunction::add2Phase()
   std::vector<VariableName> cv_area(1, FlowModel::AREA);
   std::vector<VariableName> cv_lambda(1, _lm_name);
 
-  const TwoPhaseFluidProperties & tpfp = _sim.getUserObject<TwoPhaseFluidProperties>(_fp_name);
+  const TwoPhaseFluidProperties & tpfp = _sim.getUserObjectTempl<TwoPhaseFluidProperties>(_fp_name);
   UserObjectName fp_liquid = tpfp.getLiquidName();
   UserObjectName fp_vapor = tpfp.getVaporName();
 
