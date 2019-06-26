@@ -3,5 +3,9 @@
     type = 'CSVDiff'
     input = 'function_scalar_ic.i'
     csvdiff = 'function_scalar_ic_out.csv'
+
+    requirement = 'The system shall support setting a scalar initial condition by evaluating a function.'
+    design = 'syntax/ICs/index.md'
+    issues = '#6309'
   [../]
 []

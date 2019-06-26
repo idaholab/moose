@@ -3,10 +3,21 @@
     type = CSVDiff
     input = 'order5.i'
     csvdiff = 'order5_out.csv'
+
+    requirement = 'The system shall support the ability to manually increase'
+                  ' the quadrature order used for numerical integration.'
+    issues = '#3380'
+    design = 'Quadrature/index.md'
   [../]
   [./elem5_side7]
     type = CSVDiff
     input = 'elem5_side7.i'
     csvdiff = 'elem5_side7_out.csv'
+
+    requirement = 'The system shall support the ability to control the'
+                  ' volumetric and side quadrature orders used for'
+                  ' numerical integration.'
+    issues = '#3380'
+    design = 'Quadrature/index.md'
   [../]
 []

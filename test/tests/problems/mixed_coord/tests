@@ -4,5 +4,9 @@
     input = 'mixed_coord_test.i'
     exodiff = 'out.e'
     scale_refine = 5
+
+    requirement = 'The system shall support different coordinate systems on different subdomains within the mesh.'
+    issues = '#1216'
+    design = '/Problem/index.md'
   [../]
 []

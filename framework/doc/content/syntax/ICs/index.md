@@ -23,6 +23,36 @@ and the time step from which to read the solution must be supplied.
 
 !listing from_exodus_solution/nodal_part2.i block=Variables
 
+## Initial Condition Coupling
+
+Initial Conditions objects in MOOSE can couple to other variables in the system. When this occurs
+MOOSE will automatically evaluate dependencies and evaluate initial conditions in an order that
+supports the valid inspection of variables when computing initial conditions for other variables.
+
+## Gradients
+
+Some shape function families support gradient degrees of freedom (Hermite). To properly initialize
+these DOFs, the initial condition system has an optional override for supplying gradient values.
+
+## Inspecting Current Node or Element Pointers
+
+The initial condition system uses a generic projection algorithm for setting the initial condition
+for each supported discritization scheme. In the general case, the projection system may choose
+to sample anywhere within the domain and not necessarily right on a mesh node or at an element center
+position. However, for common FE discritizations suchs as Lagrange, all of the initial condition
+samples are taken at nodes. To support these common cases, InitialCondition derived objects have
+access to pointers to both current nodes and current elements. These will be non-null when
+samples are taken at the corresponding mesh entity and null otherwise.
+
+## Sanity checks on ICs
+
+- Multiple initial conditions may not be applied to the same variable on the same block
+- Multiple initial conditions may not be applied to the same variable on the same boundary
+- Global initial conditions will conflict with subdomain or boundary restricted ICs on the same variable
+
+## Block/Boundary Restrictions
+
+The ICs system support both the [BlockRestrictable.md] and [BoundaryRestrictable.md] interfaces.
 
 !syntax list /ICs objects=True actions=False subsystems=False
 

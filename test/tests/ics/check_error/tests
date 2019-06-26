@@ -1,20 +1,28 @@
 [Tests]
+  design = 'syntax/ICs/index.md'
+  issues = '#6580'
   [./ics_on_same_boundary]
     type = RunException
     input = two_ics_on_same_boundary.i
     expect_err = "The initial condition 'left2' is being defined on a boundary that already has an initial condition defined."
+
+    requirement = 'The system shall report an error when multiple initial conditions are applied to the same boundary.'
   [../]
 
   [./ics_on_same_block]
     type = RunException
     input = two_ics_on_same_block.i
     expect_err = "The initial condition 'block2' is being defined on a block that already has an initial condition defined."
+
+    requirement = 'The system shall report an error when multiple initial conditions are applied to the same subdomain.'
   [../]
 
   [./ics_on_same_block_both_global]
     type = RunException
     input = two_ics_on_same_block_global.i
     expect_err = "The initial condition 'block2' is being defined on a block that already has an initial condition defined."
+
+    requirement = 'The system shall report an error when a global initial conditions overlap on the same variable.'
   [../]
 
   [./ics_on_same_block_first_global]
@@ -22,12 +30,7 @@
     input = two_ics_on_same_block_global.i
     expect_err = "The initial condition 'block2' is being defined on a block that already has an initial condition defined."
     cli_args = 'ICs/block/block=2'
-  [../]
 
-  [./ics_on_same_block_second_global]
-    type = RunException
-    input = two_ics_on_same_block_global.i
-    expect_err = "The initial condition 'block2' is being defined on a block that already has an initial condition defined."
-    cli_args = 'ICs/block2/block=2'
+    requirement = 'The system shall report an error when a global and subdomain restricted initial conditions overlap on the same variable.'
   [../]
 []

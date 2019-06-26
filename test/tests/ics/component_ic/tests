@@ -5,5 +5,9 @@
     exodiff = 'component_ic_out.e'
     max_parallel = 2
     max_threads = 2
+
+    requirement = 'The system shall support setting different values for each coefficient of higher-order scalar values.'
+    issues = '#2085'
+    design = 'syntax/ICs/index.md'
   [../]
 []

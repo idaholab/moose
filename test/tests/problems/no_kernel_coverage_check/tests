@@ -3,5 +3,10 @@
     type = 'Exodiff'
     input = 'no_coverage_check.i'
     exodiff = 'no_coverage_check_out.e'
+
+    requirement = 'The system shall support the ability to disable the check for'
+                  ' PDE operators in all or some parts of the domain.'
+    issues = '#2291'
+    design = 'sanity_checking.md'
   [../]
 []

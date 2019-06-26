@@ -273,7 +273,6 @@
 - /Problem/DynamicObjectRegistrationAction
 - /Problem/DisplacedProblem
 - /Problem/EigenProblem
-- /Problem/FEProblem
 - /Samplers/AddSamplerAction
 - /ScalarKernels
 - /ScalarKernels/AddScalarKernelAction

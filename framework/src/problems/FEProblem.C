@@ -22,6 +22,9 @@ InputParameters
 validParams<FEProblem>()
 {
   InputParameters params = validParams<FEProblemBase>();
+  params.addClassDescription("A normal (default) Problem object that contains a single "
+                             "NonlinearSystem and a single AuxiliarySystem object.");
+
   return params;
 }
 
