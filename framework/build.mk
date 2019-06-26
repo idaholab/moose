@@ -51,6 +51,7 @@ ifneq (, $(shell which pkg-config 2>/dev/null))
 
   ifeq (0,$(RET_CODE))
     png_LIB = $(shell pkg-config --libs libpng)
+    libmesh_CXXFLAGS += $(shell pkg-config --cflags-only-I libpng)
     libmesh_CXXFLAGS += -DMOOSE_HAVE_LIBPNG
   endif
 endif
