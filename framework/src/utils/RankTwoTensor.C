@@ -1068,7 +1068,7 @@ RankTwoTensorTempl<DualReal>::symmetricEigenvaluesEigenvectors(
     {
       iter++;
       if (iter > 100)
-        mooseError("eigenvalue decomposition does not converge.");
+        mooseException("RankTwoTensor::symmetricEigenvaluesEigenvectors() is not converging.");
       DualReal shift = D(m, m);
       if (MooseUtils::absoluteFuzzyEqual(shift.value(), 0.0))
         shift = std::max(D(m - 1, m), D(m - 1, m - 1));
