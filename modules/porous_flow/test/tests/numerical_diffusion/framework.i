@@ -66,6 +66,18 @@
   [../]
 []
 
+[Postprocessors]
+  [./mem_per_proc]
+    type = MemoryUsage
+    value_type = average
+  [../]
+  [./vmem_per_proc]
+    type = MemoryUsage
+    mem_type = virtual_memory
+    value_type = average
+  [../]
+[]
+
 [VectorPostprocessors]
   [./tracer]
     type = LineValueSampler
@@ -87,6 +99,11 @@
 []
 
 [Outputs]
+  [./perf]
+    type = PerfGraphOutput
+    heaviest_branch = true
+    level = 1
+  [../]
   [./out]
     type = CSV
     execute_on = final

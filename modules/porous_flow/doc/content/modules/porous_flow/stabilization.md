@@ -8,6 +8,7 @@ This page is part of a set of pages devoted to discussions of numerical stabiliz
 - [Kuzmin-Turek stabilization](kt.md)
 - [Numerical diffusion](numerical_diffusion.md)
 - [A worked example of Kuzmin-Turek stabilization](kt_worked.md)
+- [Memory and cpu-time scaling of Kuzmin-Turek stabilization](kt_scaling_study.md)
 
 Numerical stabilization is often necessary in PorousFlow simulations.  There are a number of issues to consider when choosing an appropriate stabilization scheme.
 

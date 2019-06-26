@@ -8,6 +8,7 @@ This page is part of a set of pages devoted to discussions of numerical stabiliz
 - [Kuzmin-Turek stabilization](kt.md)
 - [Numerical diffusion](numerical_diffusion.md)
 - [A worked example of Kuzmin-Turek stabilization](kt_worked.md)
+- [Memory and cpu-time scaling of Kuzmin-Turek stabilization](kt_scaling_study.md)
 
 Consider here just the fluid-flow equation, as the heat-energy equation is analogous.  The
 time-derivative term is discretised as

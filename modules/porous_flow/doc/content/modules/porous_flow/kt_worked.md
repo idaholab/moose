@@ -8,6 +8,7 @@ This page is part of a set of pages devoted to discussions of numerical stabiliz
 - [Kuzmin-Turek stabilization](kt.md)
 - [Numerical diffusion](numerical_diffusion.md)
 - [A worked example of Kuzmin-Turek stabilization](kt_worked.md)
+- [Memory and cpu-time scaling of Kuzmin-Turek stabilization](kt_scaling_study.md)
 
 Kuzmin and Turek [citep!KuzminTurek2004] describe a method of stabilising advection while minimising artificial numerical diffusion.  In this page "Kuzmin and Turek" is abbreviatved to "KT".  This page will make much more sense if you read it in tandem with the KT paper!  KT consider a single scalar quantity $u$ that is being advected.  For sake of argument, in this page we think of $u$ as "heat".
 

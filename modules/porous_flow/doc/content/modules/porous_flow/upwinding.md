@@ -8,6 +8,7 @@ This page is part of a set of pages devoted to discussions of numerical stabiliz
 - [Kuzmin-Turek stabilization](kt.md)
 - [Numerical diffusion](numerical_diffusion.md)
 - [A worked example of Kuzmin-Turek stabilization](kt_worked.md)
+- [Memory and cpu-time scaling of Kuzmin-Turek stabilization](kt_scaling_study.md)
 
 Numerical stabilization is necessary in scenarios with nonlinear advection, such as the physics modelled by PorousFlow.  One such stabilization is upwinding [citep!huyakorn1978, Dalen1979, helmig1998]. For multi-phase situations many upwinding schemes can lead to disaster as the algorithm attempts to withdraw fluid from a node where there is no fluid.  In situations where one phase disappears, or almost disappears, full upwinding is often advantageous, since it prevents such attempted withdrawls, and hence PorousFlow employs full upwinding by default.
 

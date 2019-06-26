@@ -32,8 +32,11 @@ validParams<PorousFlowFluxLimitedTVDAdvection>()
 PorousFlowFluxLimitedTVDAdvection::PorousFlowFluxLimitedTVDAdvection(
     const InputParameters & parameters)
   : Kernel(parameters),
+    PerfGraphInterface(_subproblem.getMooseApp().perfGraph(), "PorousFlowFluxLimitedTVDAdvection"),
     _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
-    _fluo(getUserObject<PorousFlowAdvectiveFluxCalculatorBase>("advective_flux_calculator"))
+    _fluo(getUserObject<PorousFlowAdvectiveFluxCalculatorBase>("advective_flux_calculator")),
+    _porous_flow_TVD_jacobian_timer(
+        registerTimedSection("PorousFlowFluxLimitedTVDAdvectionJacobian", 5))
 {
 }
 
@@ -70,6 +73,8 @@ PorousFlowFluxLimitedTVDAdvection::computeResidual()
 void
 PorousFlowFluxLimitedTVDAdvection::computeJacobian()
 {
+  TIME_SECTION(_porous_flow_TVD_jacobian_timer);
+
   prepareMatrixTag(_assembly, _var.number(), _var.number());
   precalculateJacobian();
 

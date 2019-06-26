@@ -8,6 +8,7 @@ This page is part of a set of pages devoted to discussions of numerical stabiliz
 - [Kuzmin-Turek stabilization](kt.md)
 - [Numerical diffusion](numerical_diffusion.md)
 - [A worked example of Kuzmin-Turek stabilization](kt_worked.md)
+- [Memory and cpu-time scaling of Kuzmin-Turek stabilization](kt_scaling_study.md)
 
 Numerical diffusion is the artifical smoothing of quantities, such as temperature and concentrations, as they are transported through a numerical model.  In the case of PorousFlow, it is usually the fluid that transports these quantities (the fluid "advects" temperature and chemical species).  Numerical diffusion can be the major source of inaccurate results in simulations, as MOOSE predicts that tracer breakthrough times (etc) are much shorter than they are in reality.
 

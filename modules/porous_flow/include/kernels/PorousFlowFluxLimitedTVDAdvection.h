@@ -11,6 +11,7 @@
 
 #include "Kernel.h"
 #include "PorousFlowAdvectiveFluxCalculatorBase.h"
+#include "PerfGraphInterface.h"
 
 // Forward Declaration
 class PorousFlowFluxLimitedTVDAdvection;
@@ -30,7 +31,7 @@ InputParameters validParams<PorousFlowFluxLimitedTVDAdvection>();
  * This is a simple class: it simply uses the quantities built and cached by
  * PorousFlowAdvectiveFluxCalculator to build the residual and Jacobian
  */
-class PorousFlowFluxLimitedTVDAdvection : public Kernel
+class PorousFlowFluxLimitedTVDAdvection : public Kernel, PerfGraphInterface
 {
 public:
   PorousFlowFluxLimitedTVDAdvection(const InputParameters & parameters);
@@ -45,5 +46,9 @@ protected:
 
   /// The user object that computes Kuzmin and Turek's K_ij, R+ and R-, etc quantities
   const PorousFlowAdvectiveFluxCalculatorBase & _fluo;
+
+private:
+  /// Timers
+  const PerfID _porous_flow_TVD_jacobian_timer;
 };
 
