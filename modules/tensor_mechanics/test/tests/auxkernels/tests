@@ -3,15 +3,24 @@
     type = 'Exodiff'
     input = 'ranktwoscalaraux.i'
     exodiff = 'ranktwoscalaraux_out.e'
+    design = 'RankTwoScalarAux.md'
+    issues = '#4774'
+    requirement = 'The system shall compute the VonMises value of a RankTwoTensor'
   [../]
   [./principalstress]
     type = 'Exodiff'
     input = 'principalstress.i'
     exodiff = 'principalstress_out.e'
+    design = 'RankTwoScalarAux.md'
+    issues = '#5516'
+    requirement = 'The system shall allow RankTwoScalarAux to output principal stresses'
   [../]
   [./tensorelasticenergyaux]
     type = 'Exodiff'
     input = 'tensorelasticenergyaux.i'
     exodiff = 'tensorelasticenergyaux_out.e'
+    design = 'ElasticEnergyAux.md'
+    issues = '#13635'
+    requirement = 'The system shall compute the local elastic energy'
   [../]
 []
