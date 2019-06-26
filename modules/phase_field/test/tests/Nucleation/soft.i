@@ -20,7 +20,6 @@
 [Kernels]
   [./c]
     type = Diffusion
-    #diffusivity = F
     variable = c
   [../]
   [./dt]

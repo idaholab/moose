@@ -70,7 +70,10 @@ MatDiffusionBase<T>::validParams()
       "to passing a number literal");
   params.addParam<MaterialPropertyName>(
       "diffusivity", "D", "The diffusivity value or material property");
-  params.addCoupledVar("args", "Vector of arguments of the diffusivity");
+  params.addCoupledVar("args",
+                       "Optional vector of arguments for the diffusivity. If provided and "
+                       "diffusivity is a derivative parsed material, Jacobian contributions from "
+                       "the diffusivity will be automatically computed");
   params.addCoupledVar("conc", "Deprecated! Use 'v' instead");
   params.addCoupledVar("v",
                        "Coupled concentration variable for kernel to operate on; if this "

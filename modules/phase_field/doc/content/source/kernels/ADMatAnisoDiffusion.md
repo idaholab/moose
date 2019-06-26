@@ -3,7 +3,7 @@
 !syntax description /Kernels/ADMatAnisoDiffusion
 
 This is anisotropic version of [`ADMatDiffusion`](/ADMatDiffusion.md), which
-expects a tensor valued diffusion coefficient $D$ (`D_name`).
+expects a tensor valued diffusion coefficient $D$ (`diffusivity`).
 
 !syntax parameters /Kernels/ADMatAnisoDiffusion
 
