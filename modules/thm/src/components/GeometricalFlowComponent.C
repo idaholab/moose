@@ -36,7 +36,7 @@ GeometricalFlowComponent::init()
 {
   GeometricalComponent::init();
 
-  _model_id = _app.getFlowModelID(_sim.getUserObject<FluidProperties>(_fp_name));
+  _model_id = _app.getFlowModelID(_sim.getUserObjectTempl<FluidProperties>(_fp_name));
 }
 
 bool

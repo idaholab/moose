@@ -39,7 +39,8 @@ protected:
 template <class T>
 VaporMixtureInterface<T>::VaporMixtureInterface(const InputParameters & parameters)
   : T(parameters),
-    _fp_vapor_mixture(T::template getUserObject<VaporMixtureFluidProperties>("fp_vapor_mixture")),
+    _fp_vapor_mixture(
+        T::template getUserObjectTempl<VaporMixtureFluidProperties>("fp_vapor_mixture")),
     _n_secondary_vapors(T::coupledComponents("x_secondary_vapors"))
 {
   for (unsigned int i = 0; i < _n_secondary_vapors; i++)

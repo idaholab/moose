@@ -50,7 +50,7 @@ Junction::addVariables()
   auto connected_subdomains = getConnectedSubdomainIDs();
 
   const SinglePhaseFluidProperties & spfp =
-      _sim.getUserObject<SinglePhaseFluidProperties>(_fp_name);
+      _sim.getUserObjectTempl<SinglePhaseFluidProperties>(_fp_name);
 
   const Real initial_rho = spfp.rho_from_p_T(_initial_p, _initial_T);
   const Real initial_e = spfp.e_from_p_rho(_initial_p, initial_rho);

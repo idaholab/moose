@@ -52,7 +52,7 @@ OldJunction::addVariables()
   _sim.addConstantScalarIC(_pressure_var_name, _initial_P);
 
   const SinglePhaseFluidProperties & spfp =
-      _sim.getUserObject<SinglePhaseFluidProperties>(_fp_name);
+      _sim.getUserObjectTempl<SinglePhaseFluidProperties>(_fp_name);
   Real initial_T = getParam<Real>("initial_T");
   Real initial_rho = spfp.rho_from_p_T(_initial_P, initial_T);
   Real initial_e = spfp.e_from_p_rho(_initial_P, initial_rho);
@@ -85,7 +85,7 @@ OldJunction::addMooseObjects()
   std::vector<OutputName> outputs = _sim.getOutputsVector("none");
 
   const SinglePhaseFluidProperties & spfp =
-      _sim.getUserObject<SinglePhaseFluidProperties>(_fp_name);
+      _sim.getUserObjectTempl<SinglePhaseFluidProperties>(_fp_name);
   Real initial_T = getParam<Real>("initial_T");
   Real initial_rho = spfp.rho_from_p_T(_initial_P, initial_T);
 

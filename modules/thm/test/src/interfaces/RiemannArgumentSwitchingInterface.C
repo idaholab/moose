@@ -23,6 +23,6 @@ validParams<RiemannArgumentSwitchingInterface>()
 
 RiemannArgumentSwitchingInterface::RiemannArgumentSwitchingInterface(
     const MooseObject * moose_object)
-  : _switch_left_and_right(moose_object->getParam<bool>("switch_left_and_right"))
+  : _switch_left_and_right(moose_object->getParamTempl<bool>("switch_left_and_right"))
 {
 }

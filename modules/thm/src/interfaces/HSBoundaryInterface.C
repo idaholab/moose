@@ -16,8 +16,8 @@ validParams<HSBoundaryInterface>()
 }
 
 HSBoundaryInterface::HSBoundaryInterface(const Component * const component)
-  : _hs_name(component->getParam<std::string>("hs")),
-    _hs_side_enum(component->getParam<MooseEnum>("hs_side")),
+  : _hs_name(component->getParamTempl<std::string>("hs")),
+    _hs_side_enum(component->getParamTempl<MooseEnum>("hs_side")),
     _hs_side(THM::stringToEnum<HeatStructureBase::SideType>(_hs_side_enum))
 {
   if (_hs_side == HeatStructureBase::OUTER || _hs_side == HeatStructureBase::INNER)

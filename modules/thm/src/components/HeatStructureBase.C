@@ -333,7 +333,7 @@ HeatStructureBase::addMooseObjects()
     for (unsigned int i = 0; i < _number_of_hs; i++)
     {
       const SolidMaterialProperties & smp =
-          _sim.getUserObject<SolidMaterialProperties>(_material_names[i]);
+          _sim.getUserObjectTempl<SolidMaterialProperties>(_material_names[i]);
 
       Component * comp = (_parent != nullptr) ? _parent : this;
       // if the values were given as constant, allow them to be controlled

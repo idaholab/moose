@@ -152,7 +152,7 @@ InletDensityVelocity::setup2Phase()
   Real rho_vapor = getParam<Real>("rho_vapor");
   Real vel_liquid = getParam<Real>("vel_liquid");
   Real vel_vapor = getParam<Real>("vel_vapor");
-  const TwoPhaseFluidProperties & tpfp = _sim.getUserObject<TwoPhaseFluidProperties>(_fp_name);
+  const TwoPhaseFluidProperties & tpfp = _sim.getUserObjectTempl<TwoPhaseFluidProperties>(_fp_name);
   const UserObjectName & fp_liquid = tpfp.getLiquidName();
   const UserObjectName & fp_vapor = tpfp.getVaporName();
 

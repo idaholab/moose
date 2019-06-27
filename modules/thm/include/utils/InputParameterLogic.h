@@ -44,7 +44,7 @@ getOneOrTwoPhaseParameters(const bool & is_two_phase,
     // get the one-phase parameter in case it is used as two-phase default
     // this must be guarded with isParamValid() because a default may not be provided
     const T * const one_phase_value =
-        params.isParamValid(one_phase_param) ? &object.getParam<T>(one_phase_param) : nullptr;
+        params.isParamValid(one_phase_param) ? &object.getParamTempl<T>(one_phase_param) : nullptr;
 
     // if one-phase value is provided, use it as default for all two-phase values
     // otherwise keep the two-phase parameter defaults

@@ -141,7 +141,7 @@ GeometricalComponent::check() const
   if (usingSecondOrderMesh())
   {
     auto actions = _app.actionWarehouse().getActionListByName("setup_quadrature");
-    const MooseEnum & quadrature_type = (*actions.begin())->getParam<MooseEnum>("type");
+    const MooseEnum & quadrature_type = (*actions.begin())->getParamTempl<MooseEnum>("type");
 
     if (quadrature_type == "TRAP")
       logError("Cannot use TRAP quadrature rule with 2nd order elements.  Use SIMPSON or GAUSS "
