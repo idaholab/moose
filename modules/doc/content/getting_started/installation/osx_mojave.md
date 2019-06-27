@@ -20,7 +20,7 @@ The following, is required to be installed before you can begin using MOOSE.
 
 - +Caveats+
 
-  - OS X Mojave, requires that an additional headers package be installed. Open a terminal, and run the following command:
+  - Mac OS Mojave, requires that an additional headers package be installed. Open a terminal, and run the following command:
 
     ```bash
     open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg
