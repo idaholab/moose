@@ -53,9 +53,9 @@
   [./cres]
     type = MatDiffusion
     variable = u
-    D_name = Dc
+    diffusivity = Dc
     args = d
-    conc = c
+    v = c
   [../]
 
   [./dtime]
@@ -75,9 +75,9 @@
   [./dres]
     type = MatDiffusion
     variable = w
-    D_name = Dd
+    diffusivity = Dd
     args = c
-    conc = d
+    v = d
   [../]
 []
 

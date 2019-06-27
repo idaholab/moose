@@ -20,7 +20,6 @@
 [Kernels]
   [./c]
     type = Diffusion
-    #D_name = F
     variable = c
   [../]
   [./dt]

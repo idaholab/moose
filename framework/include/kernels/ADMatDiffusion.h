@@ -9,24 +9,18 @@
 
 #pragma once
 
-#include "ADDiffusion.h"
+#include "ADMatDiffusionBase.h"
 
+/**
+ * Isotropic diffusion kernel that takes a diffusion coefficient of type
+ * Real. All logic is implemnted in the ADMatDiffusionBase class
+ * template.
+ */
 template <ComputeStage compute_stage>
-class ADMatDiffusion;
-
-declareADValidParams(ADMatDiffusion);
-
-template <ComputeStage compute_stage>
-class ADMatDiffusion : public ADDiffusion<compute_stage>
+class ADMatDiffusion : public ADMatDiffusionBase<compute_stage, Real>
 {
 public:
   ADMatDiffusion(const InputParameters & parameters);
-
-protected:
-  virtual ADVectorResidual precomputeQpResidual() override;
-
-  const ADMaterialProperty(Real) & _diffusivity;
-
-  usingKernelGradMembers;
 };
 
+declareADValidParams(ADMatDiffusion);

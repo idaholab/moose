@@ -148,7 +148,7 @@
   [./Diffusion]
     type = MatDiffusion
     variable = w
-    D_name = Dchi
+    diffusivity = Dchi
   [../]
   [./coupled_etaa0dot]
     type = CoupledSwitchingTimeDerivative

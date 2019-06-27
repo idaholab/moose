@@ -78,7 +78,7 @@
   [./diff]
     type = MatDiffusion
     variable = u
-    D_name = 'diffusion_coefficient'
+    diffusivity = diffusion_coefficient
   [../]
   [./time]
     type = TimeDerivative

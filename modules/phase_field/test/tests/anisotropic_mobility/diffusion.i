@@ -5,7 +5,6 @@
   ny = 15
   xmax = 15.0
   ymax = 15.0
-  elem_type = QUAD4
 []
 
 [Variables]
@@ -23,7 +22,7 @@
 [Kernels]
   [./cres]
     type = MatAnisoDiffusion
-    D_name = D
+    diffusivity = D
     variable = c
   [../]
   [./time]

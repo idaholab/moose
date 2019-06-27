@@ -17,7 +17,7 @@
   [./cres]
     type = MatDiffusion
     variable = u
-    D_name = Du
+    diffusivity = Du
   [../]
   [./ctime]
     type = TimeDerivative

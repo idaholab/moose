@@ -27,10 +27,9 @@
 
 [Kernels]
   [./diff]
-    type = CoefDiffusion
+    type = MatDiffusion
     variable = T
-    coef = 0.9
-    function = 0.05
+    diffusivity = 0.95
   [../]
   [./dt]
     type = CoefTimeDerivative
