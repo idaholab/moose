@@ -1,0 +1,2045 @@
+{
+    "attributes": {
+        "recursive": true
+    }, 
+    "children": [
+        {
+            "attributes": {
+                "class": "", 
+                "id": "", 
+                "level": 1, 
+                "recursive": true, 
+                "style": ""
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "Application", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "Syntax", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "Extension", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }
+            ], 
+            "name": "Heading"
+        }, 
+        {
+            "attributes": {
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "Sets", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "the", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "value", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "of", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "a", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "'", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Punctuation"
+                }, 
+                {
+                    "attributes": {
+                        "content": "Real", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "content": "'", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Punctuation"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "input", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "parameters", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "to", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "the", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "value", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "of", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "a", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "provided", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "function", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "content": ".", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Punctuation"
+                }
+            ], 
+            "name": "Paragraph"
+        }, 
+        {
+            "attributes": {
+                "level": 2, 
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "Input", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "Parameters", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }
+            ], 
+            "name": "Heading"
+        }, 
+        {
+            "attributes": {
+                "class": "", 
+                "groups": [], 
+                "hide": [], 
+                "id": "", 
+                "level": 2, 
+                "parameters": {
+                    "control_tags": {
+                        "basic_type": "Array:String", 
+                        "cpp_type": "std::vector<std::string>", 
+                        "deprecated": false, 
+                        "description": "Adds user-defined labels for accessing object parameters via control logic.", 
+                        "group_name": "Advanced", 
+                        "name": "control_tags", 
+                        "options": "", 
+                        "required": false
+                    }, 
+                    "depends_on": {
+                        "basic_type": "Array:String", 
+                        "cpp_type": "std::vector<std::string>", 
+                        "deprecated": false, 
+                        "description": "The Controls that this control relies upon (i.e. must execute before this one)", 
+                        "group_name": "", 
+                        "name": "depends_on", 
+                        "options": "", 
+                        "required": false
+                    }, 
+                    "enable": {
+                        "basic_type": "Boolean", 
+                        "cpp_type": "bool", 
+                        "default": "1", 
+                        "deprecated": false, 
+                        "description": "Set the enabled status of the MooseObject.", 
+                        "group_name": "Advanced", 
+                        "name": "enable", 
+                        "options": "", 
+                        "required": false
+                    }, 
+                    "execute_on": {
+                        "basic_type": "Array:String", 
+                        "cpp_type": "ExecFlagEnum", 
+                        "default": "INITIAL TIMESTEP_END", 
+                        "deprecated": false, 
+                        "description": "The list of flag(s) indicating when this object should be executed, the available options include NONE, INITIAL, LINEAR, NONLINEAR, TIMESTEP_END, TIMESTEP_BEGIN, FINAL, CUSTOM.", 
+                        "group_name": "", 
+                        "name": "execute_on", 
+                        "options": "NONE INITIAL LINEAR NONLINEAR TIMESTEP_END TIMESTEP_BEGIN FINAL CUSTOM PRE_MULTIAPP_SETUP", 
+                        "out_of_range_allowed": false, 
+                        "required": false
+                    }, 
+                    "function": {
+                        "basic_type": "String", 
+                        "cpp_type": "FunctionName", 
+                        "deprecated": false, 
+                        "description": "The function to use for controlling the specified parameter.", 
+                        "group_name": "", 
+                        "name": "function", 
+                        "options": "", 
+                        "required": true
+                    }, 
+                    "implicit": {
+                        "basic_type": "Boolean", 
+                        "cpp_type": "bool", 
+                        "default": "1", 
+                        "deprecated": false, 
+                        "description": "Determines whether this object is calculated using an implicit or explicit form", 
+                        "group_name": "Advanced", 
+                        "name": "implicit", 
+                        "options": "", 
+                        "required": false
+                    }, 
+                    "parameter": {
+                        "basic_type": "String", 
+                        "cpp_type": "std::string", 
+                        "deprecated": false, 
+                        "description": "The input parameter(s) to control. Specify a single parameter name and all parameters in all objects matching the name will be updated", 
+                        "group_name": "", 
+                        "name": "parameter", 
+                        "options": "", 
+                        "required": true
+                    }, 
+                    "type": {
+                        "basic_type": "String", 
+                        "cpp_type": "std::string", 
+                        "default": "RealFunctionControl", 
+                        "deprecated": false, 
+                        "description": "", 
+                        "group_name": "", 
+                        "name": "type", 
+                        "options": "", 
+                        "required": false
+                    }
+                }, 
+                "recursive": true, 
+                "show": [], 
+                "style": "", 
+                "syntax": "RealFunctionControl", 
+                "visible": [
+                    "required", 
+                    "optional"
+                ]
+            }, 
+            "children": [], 
+            "name": "InputParametersToken"
+        }, 
+        {
+            "attributes": {
+                "class": "", 
+                "groups": [
+                    "Advanced"
+                ], 
+                "hide": [
+                    "implicit"
+                ], 
+                "id": "", 
+                "level": 2, 
+                "parameters": {
+                    "control_tags": {
+                        "basic_type": "Array:String", 
+                        "cpp_type": "std::vector<std::string>", 
+                        "deprecated": false, 
+                        "description": "Adds user-defined labels for accessing object parameters via control logic.", 
+                        "group_name": "Advanced", 
+                        "name": "control_tags", 
+                        "options": "", 
+                        "required": false
+                    }, 
+                    "depends_on": {
+                        "basic_type": "Array:String", 
+                        "cpp_type": "std::vector<std::string>", 
+                        "deprecated": false, 
+                        "description": "The Controls that this control relies upon (i.e. must execute before this one)", 
+                        "group_name": "", 
+                        "name": "depends_on", 
+                        "options": "", 
+                        "required": false
+                    }, 
+                    "enable": {
+                        "basic_type": "Boolean", 
+                        "cpp_type": "bool", 
+                        "default": "1", 
+                        "deprecated": false, 
+                        "description": "Set the enabled status of the MooseObject.", 
+                        "group_name": "Advanced", 
+                        "name": "enable", 
+                        "options": "", 
+                        "required": false
+                    }, 
+                    "execute_on": {
+                        "basic_type": "Array:String", 
+                        "cpp_type": "ExecFlagEnum", 
+                        "default": "INITIAL TIMESTEP_END", 
+                        "deprecated": false, 
+                        "description": "The list of flag(s) indicating when this object should be executed, the available options include NONE, INITIAL, LINEAR, NONLINEAR, TIMESTEP_END, TIMESTEP_BEGIN, FINAL, CUSTOM.", 
+                        "group_name": "", 
+                        "name": "execute_on", 
+                        "options": "NONE INITIAL LINEAR NONLINEAR TIMESTEP_END TIMESTEP_BEGIN FINAL CUSTOM PRE_MULTIAPP_SETUP", 
+                        "out_of_range_allowed": false, 
+                        "required": false
+                    }, 
+                    "function": {
+                        "basic_type": "String", 
+                        "cpp_type": "FunctionName", 
+                        "deprecated": false, 
+                        "description": "The function to use for controlling the specified parameter.", 
+                        "group_name": "", 
+                        "name": "function", 
+                        "options": "", 
+                        "required": true
+                    }, 
+                    "implicit": {
+                        "basic_type": "Boolean", 
+                        "cpp_type": "bool", 
+                        "default": "1", 
+                        "deprecated": false, 
+                        "description": "Determines whether this object is calculated using an implicit or explicit form", 
+                        "group_name": "Advanced", 
+                        "name": "implicit", 
+                        "options": "", 
+                        "required": false
+                    }, 
+                    "parameter": {
+                        "basic_type": "String", 
+                        "cpp_type": "std::string", 
+                        "deprecated": false, 
+                        "description": "The input parameter(s) to control. Specify a single parameter name and all parameters in all objects matching the name will be updated", 
+                        "group_name": "", 
+                        "name": "parameter", 
+                        "options": "", 
+                        "required": true
+                    }, 
+                    "type": {
+                        "basic_type": "String", 
+                        "cpp_type": "std::string", 
+                        "default": "RealFunctionControl", 
+                        "deprecated": false, 
+                        "description": "", 
+                        "group_name": "", 
+                        "name": "type", 
+                        "options": "", 
+                        "required": false
+                    }
+                }, 
+                "recursive": true, 
+                "show": [], 
+                "style": "", 
+                "syntax": "RealFunctionControl", 
+                "visible": [
+                    "required", 
+                    "optional"
+                ]
+            }, 
+            "children": [], 
+            "name": "InputParametersToken"
+        }, 
+        {
+            "attributes": {
+                "level": 2, 
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "Input", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "Parameters", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }
+            ], 
+            "name": "Heading"
+        }, 
+        {
+            "attributes": {
+                "class": "", 
+                "groups": [], 
+                "hide": [], 
+                "id": "", 
+                "level": 2, 
+                "parameters": {
+                    "control_tags": {
+                        "basic_type": "Array:String", 
+                        "cpp_type": "std::vector<std::string>", 
+                        "deprecated": false, 
+                        "description": "Adds user-defined labels for accessing object parameters via control logic.", 
+                        "group_name": "Advanced", 
+                        "name": "control_tags", 
+                        "options": "", 
+                        "required": false
+                    }, 
+                    "depends_on": {
+                        "basic_type": "Array:String", 
+                        "cpp_type": "std::vector<std::string>", 
+                        "deprecated": false, 
+                        "description": "The Controls that this control relies upon (i.e. must execute before this one)", 
+                        "group_name": "", 
+                        "name": "depends_on", 
+                        "options": "", 
+                        "required": false
+                    }, 
+                    "enable": {
+                        "basic_type": "Boolean", 
+                        "cpp_type": "bool", 
+                        "default": "1", 
+                        "deprecated": false, 
+                        "description": "Set the enabled status of the MooseObject.", 
+                        "group_name": "Advanced", 
+                        "name": "enable", 
+                        "options": "", 
+                        "required": false
+                    }, 
+                    "execute_on": {
+                        "basic_type": "Array:String", 
+                        "cpp_type": "ExecFlagEnum", 
+                        "default": "INITIAL TIMESTEP_END", 
+                        "deprecated": false, 
+                        "description": "The list of flag(s) indicating when this object should be executed, the available options include NONE, INITIAL, LINEAR, NONLINEAR, TIMESTEP_END, TIMESTEP_BEGIN, FINAL, CUSTOM.", 
+                        "group_name": "", 
+                        "name": "execute_on", 
+                        "options": "NONE INITIAL LINEAR NONLINEAR TIMESTEP_END TIMESTEP_BEGIN FINAL CUSTOM PRE_MULTIAPP_SETUP", 
+                        "out_of_range_allowed": false, 
+                        "required": false
+                    }, 
+                    "function": {
+                        "basic_type": "String", 
+                        "cpp_type": "FunctionName", 
+                        "deprecated": false, 
+                        "description": "The function to use for controlling the specified parameter.", 
+                        "group_name": "", 
+                        "name": "function", 
+                        "options": "", 
+                        "required": true
+                    }, 
+                    "implicit": {
+                        "basic_type": "Boolean", 
+                        "cpp_type": "bool", 
+                        "default": "1", 
+                        "deprecated": false, 
+                        "description": "Determines whether this object is calculated using an implicit or explicit form", 
+                        "group_name": "Advanced", 
+                        "name": "implicit", 
+                        "options": "", 
+                        "required": false
+                    }, 
+                    "parameter": {
+                        "basic_type": "String", 
+                        "cpp_type": "std::string", 
+                        "deprecated": false, 
+                        "description": "The input parameter(s) to control. Specify a single parameter name and all parameters in all objects matching the name will be updated", 
+                        "group_name": "", 
+                        "name": "parameter", 
+                        "options": "", 
+                        "required": true
+                    }, 
+                    "type": {
+                        "basic_type": "String", 
+                        "cpp_type": "std::string", 
+                        "default": "RealFunctionControl", 
+                        "deprecated": false, 
+                        "description": "", 
+                        "group_name": "", 
+                        "name": "type", 
+                        "options": "", 
+                        "required": false
+                    }
+                }, 
+                "recursive": true, 
+                "show": [
+                    "function", 
+                    "enable"
+                ], 
+                "style": "", 
+                "syntax": "RealFunctionControl", 
+                "visible": [
+                    "required"
+                ]
+            }, 
+            "children": [], 
+            "name": "InputParametersToken"
+        }, 
+        {
+            "attributes": {
+                "level": 2, 
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "Available", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "Objects", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "content": ",", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Punctuation"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "Actions", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "content": ",", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Punctuation"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "and", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "Subsystems", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }
+            ], 
+            "name": "Heading"
+        }, 
+        {
+            "attributes": {
+                "class": "", 
+                "id": "", 
+                "recursive": true, 
+                "style": ""
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "group": "", 
+                        "header": true, 
+                        "recursive": true, 
+                        "syntax": ""
+                    }, 
+                    "children": [
+                        {
+                            "attributes": {
+                                "content": "Moose App", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "String"
+                        }
+                    ], 
+                    "name": "SyntaxListItem"
+                }, 
+                {
+                    "attributes": {
+                        "base": "Action", 
+                        "group": "MooseApp", 
+                        "header": false, 
+                        "recursive": true, 
+                        "syntax": "AddControlAction"
+                    }, 
+                    "children": [
+                        {
+                            "attributes": {
+                                "content": "AddControlAction", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "String"
+                        }
+                    ], 
+                    "name": "SyntaxListItem"
+                }, 
+                {
+                    "attributes": {
+                        "base": "MooseObject", 
+                        "group": "MooseApp", 
+                        "header": false, 
+                        "recursive": true, 
+                        "syntax": "ConditionalFunctionEnableControl"
+                    }, 
+                    "children": [
+                        {
+                            "attributes": {
+                                "content": "ConditionalFunctionEnableControl", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "String"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "Control", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "for", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "enabling", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "/", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Punctuation"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "disabling", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "objects", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "when", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "a", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "function", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "value", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "is", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "true", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }
+                    ], 
+                    "name": "SyntaxListItem"
+                }, 
+                {
+                    "attributes": {
+                        "base": "MooseObject", 
+                        "group": "MooseApp", 
+                        "header": false, 
+                        "recursive": true, 
+                        "syntax": "RealFunctionControl"
+                    }, 
+                    "children": [
+                        {
+                            "attributes": {
+                                "content": "RealFunctionControl", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "String"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "Sets", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "the", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "value", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "of", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "a", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "'", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Punctuation"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "Real", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "'", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Punctuation"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "input", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "parameters", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "to", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "the", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "value", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "of", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "a", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "provided", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "function", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": ".", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Punctuation"
+                        }
+                    ], 
+                    "name": "SyntaxListItem"
+                }, 
+                {
+                    "attributes": {
+                        "base": "MooseObject", 
+                        "group": "MooseApp", 
+                        "header": false, 
+                        "recursive": true, 
+                        "syntax": "TimePeriod"
+                    }, 
+                    "children": [
+                        {
+                            "attributes": {
+                                "content": "TimePeriod", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "String"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "Control", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "the", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "enabled", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "/", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Punctuation"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "disabled", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "state", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "of", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "objects", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "with", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "time", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": ".", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Punctuation"
+                        }
+                    ], 
+                    "name": "SyntaxListItem"
+                }
+            ], 
+            "name": "SyntaxList"
+        }, 
+        {
+            "attributes": {
+                "level": 2, 
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "Input", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "Files", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }
+            ], 
+            "name": "Heading"
+        }, 
+        {
+            "attributes": {
+                "browser_default": true, 
+                "class": "moose-list-inputs", 
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "recursive": true
+                    }, 
+                    "children": [
+                        {
+                            "attributes": {
+                                "class": "modal-trigger", 
+                                "recursive": true, 
+                                "url": "#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+                            }, 
+                            "children": [
+                                {
+                                    "attributes": {
+                                        "content": "test/tests/controls/real_function_control/real_function_control.i", 
+                                        "recursive": true
+                                    }, 
+                                    "children": [], 
+                                    "name": "String"
+                                }
+                            ], 
+                            "name": "SyntaxLink"
+                        }
+                    ], 
+                    "name": "ListItem"
+                }, 
+                {
+                    "attributes": {
+                        "recursive": true
+                    }, 
+                    "children": [
+                        {
+                            "attributes": {
+                                "class": "modal-trigger", 
+                                "recursive": true, 
+                                "url": "#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+                            }, 
+                            "children": [
+                                {
+                                    "attributes": {
+                                        "content": "modules/stochastic_tools/test/tests/transfers/sampler_transfer/errors/sub_wrong_control.i", 
+                                        "recursive": true
+                                    }, 
+                                    "children": [], 
+                                    "name": "String"
+                                }
+                            ], 
+                            "name": "SyntaxLink"
+                        }
+                    ], 
+                    "name": "ListItem"
+                }, 
+                {
+                    "attributes": {
+                        "recursive": true
+                    }, 
+                    "children": [
+                        {
+                            "attributes": {
+                                "class": "modal-trigger", 
+                                "recursive": true, 
+                                "url": "#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+                            }, 
+                            "children": [
+                                {
+                                    "attributes": {
+                                        "content": "test/tests/controls/real_function_control/multi_real_function_control.i", 
+                                        "recursive": true
+                                    }, 
+                                    "children": [], 
+                                    "name": "String"
+                                }
+                            ], 
+                            "name": "SyntaxLink"
+                        }
+                    ], 
+                    "name": "ListItem"
+                }, 
+                {
+                    "attributes": {
+                        "recursive": true
+                    }, 
+                    "children": [
+                        {
+                            "attributes": {
+                                "class": "modal-trigger", 
+                                "recursive": true, 
+                                "url": "#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+                            }, 
+                            "children": [
+                                {
+                                    "attributes": {
+                                        "content": "test/tests/controls/dependency/test.i", 
+                                        "recursive": true
+                                    }, 
+                                    "children": [], 
+                                    "name": "String"
+                                }
+                            ], 
+                            "name": "SyntaxLink"
+                        }
+                    ], 
+                    "name": "ListItem"
+                }, 
+                {
+                    "attributes": {
+                        "recursive": true
+                    }, 
+                    "children": [
+                        {
+                            "attributes": {
+                                "class": "modal-trigger", 
+                                "recursive": true, 
+                                "url": "#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+                            }, 
+                            "children": [
+                                {
+                                    "attributes": {
+                                        "content": "modules/stochastic_tools/test/tests/transfers/errors/sub_wrong_control.i", 
+                                        "recursive": true
+                                    }, 
+                                    "children": [], 
+                                    "name": "String"
+                                }
+                            ], 
+                            "name": "SyntaxLink"
+                        }
+                    ], 
+                    "name": "ListItem"
+                }
+            ], 
+            "name": "UnorderedList"
+        }, 
+        {
+            "attributes": {
+                "bookmark": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
+                "bottom": false, 
+                "close": true, 
+                "recursive": true, 
+                "url": "test/tests/controls/real_function_control/real_function_control.i"
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "recursive": true
+                    }, 
+                    "children": [
+                        {
+                            "attributes": {
+                                "content": "test/tests/controls/real_function_control/real_function_control.i", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "String"
+                        }
+                    ], 
+                    "name": "ModalLinkTitle"
+                }, 
+                {
+                    "attributes": {
+                        "recursive": true
+                    }, 
+                    "children": [
+                        {
+                            "attributes": {
+                                "content": "[Mesh]\n  type = GeneratedMesh\n  dim = 2\n  nx = 10\n  ny = 10\n[]\n\n[Variables]\n  [./u]\n  [../]\n[]\n\n[Kernels]\n  [./diff]\n    type = CoefDiffusion\n    variable = u\n    coef = 0.1\n  [../]\n  [./time]\n    type = TimeDerivative\n    variable = u\n  [../]\n[]\n\n[BCs]\n  [./left]\n    type = DirichletBC\n    variable = u\n    boundary = left\n    value = 0\n  [../]\n  [./right]\n    type = DirichletBC\n    variable = u\n    boundary = right\n    value = 1\n  [../]\n[]\n\n[Executioner]\n  type = Transient\n  num_steps = 10\n  dt = 0.1\n  dtmin = 0.1\n  solve_type = PJFNK\n  petsc_options_iname = '-pc_type -pc_hypre_type'\n  petsc_options_value = 'hypre boomeramg'\n[]\n\n[Outputs]\n  csv = true\n[]\n\n[Functions]\n  [./func_coef]\n    type = ParsedFunction\n    value = '2*t + 0.1'\n  [../]\n[]\n\n[Postprocessors]\n  [./coef]\n    type = RealControlParameterReporter\n    parameter = 'Kernels/diff/coef'\n  [../]\n[]\n\n[Controls]\n  [./func_control]\n    type = RealFunctionControl\n    parameter = '*/*/coef'\n    function = 'func_coef'\n    execute_on = 'initial timestep_begin'\n  [../]\n[]\n", 
+                                "escape": true, 
+                                "language": "text", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Code"
+                        }
+                    ], 
+                    "name": "ModalLinkContent"
+                }
+            ], 
+            "name": "ModalLink"
+        }, 
+        {
+            "attributes": {
+                "bookmark": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
+                "bottom": false, 
+                "close": true, 
+                "recursive": true, 
+                "url": "modules/stochastic_tools/test/tests/transfers/sampler_transfer/errors/sub_wrong_control.i"
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "recursive": true
+                    }, 
+                    "children": [
+                        {
+                            "attributes": {
+                                "content": "modules/stochastic_tools/test/tests/transfers/sampler_transfer/errors/sub_wrong_control.i", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "String"
+                        }
+                    ], 
+                    "name": "ModalLinkTitle"
+                }, 
+                {
+                    "attributes": {
+                        "recursive": true
+                    }, 
+                    "children": [
+                        {
+                            "attributes": {
+                                "content": "[Mesh]\n  type = GeneratedMesh\n  dim = 2\n  nx = 10\n  ny = 10\n[]\n\n[Variables]\n  [./u]\n  [../]\n[]\n\n[Kernels]\n  [./diff]\n    type = Diffusion\n    variable = u\n  [../]\n  [./time]\n    type = TimeDerivative\n    variable = u\n  [../]\n[]\n\n[BCs]\n  [./left]\n    type = DirichletBC\n    variable = u\n    boundary = left\n    value = 0\n  [../]\n  [./right]\n    type = DirichletBC\n    variable = u\n    boundary = right\n    value = 1\n  [../]\n[]\n\n[Executioner]\n  type = Transient\n  num_steps = 5\n  dt = 0.01\n  solve_type = PJFNK\n  petsc_options_iname = '-pc_type -pc_hypre_type'\n  petsc_options_value = 'hypre boomeramg'\n[]\n\n[Controls]\n  [./stochastic]\n    type = RealFunctionControl\n    function = '1'\n     parameter = 'BCs/left/value'\n  [../]\n[]\n\n[Outputs]\n  exodus = true\n[]\n", 
+                                "escape": true, 
+                                "language": "text", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Code"
+                        }
+                    ], 
+                    "name": "ModalLinkContent"
+                }
+            ], 
+            "name": "ModalLink"
+        }, 
+        {
+            "attributes": {
+                "bookmark": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
+                "bottom": false, 
+                "close": true, 
+                "recursive": true, 
+                "url": "test/tests/controls/real_function_control/multi_real_function_control.i"
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "recursive": true
+                    }, 
+                    "children": [
+                        {
+                            "attributes": {
+                                "content": "test/tests/controls/real_function_control/multi_real_function_control.i", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "String"
+                        }
+                    ], 
+                    "name": "ModalLinkTitle"
+                }, 
+                {
+                    "attributes": {
+                        "recursive": true
+                    }, 
+                    "children": [
+                        {
+                            "attributes": {
+                                "content": "###########################################################\n# This is a test of the Control Logic System. This test\n# uses the RealFunctionControl to change a multiple Kernel\n# coefficients based on an analytical function at the end\n# of each timestep.\n#\n# @Requirement F8.10\n###########################################################\n\n\n[Mesh]\n  type = GeneratedMesh\n  dim = 2\n  nx = 10\n  ny = 10\n[]\n\n[Variables]\n  [./u]\n  [../]\n  [./v]\n  [../]\n[]\n\n[Kernels]\n  [./diff_u]\n    type = CoefDiffusion\n    variable = u\n    coef = 0.1\n  [../]\n  [./time_u]\n    type = TimeDerivative\n    variable = u\n  [../]\n  [./diff_v]\n    type = CoefDiffusion\n    variable = v\n    coef = 0.2\n  [../]\n  [./time_v]\n    type = TimeDerivative\n    variable = v\n  [../]\n[]\n\n[BCs]\n  [./left]\n    type = DirichletBC\n    variable = u\n    boundary = left\n    value = 0\n  [../]\n  [./right]\n    type = DirichletBC\n    variable = u\n    boundary = right\n    value = 1\n  [../]\n[]\n\n[Executioner]\n  type = Transient\n  num_steps = 5\n  dt = 0.1\n  solve_type = PJFNK\n  petsc_options_iname = '-pc_type -pc_hypre_type'\n  petsc_options_value = 'hypre boomeramg'\n[]\n\n[Outputs]\n  csv = true\n[]\n\n[Functions]\n  [./func_coef]\n    type = ParsedFunction\n    value = '2*t + 0.1'\n  [../]\n[]\n\n[Postprocessors]\n  [./u_coef]\n    type = RealControlParameterReporter\n    parameter = 'Kernels/diff_u/coef'\n  [../]\n  [./v_coef]\n    type = RealControlParameterReporter\n    parameter = 'Kernels/diff_v/coef'\n  [../]\n[]\n\n[Controls]\n  [./func_control]\n    type = RealFunctionControl\n    parameter = '*/*/coef'\n    function = 'func_coef'\n    execute_on = 'timestep_begin'\n  [../]\n[]\n", 
+                                "escape": true, 
+                                "language": "text", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Code"
+                        }
+                    ], 
+                    "name": "ModalLinkContent"
+                }
+            ], 
+            "name": "ModalLink"
+        }, 
+        {
+            "attributes": {
+                "bookmark": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
+                "bottom": false, 
+                "close": true, 
+                "recursive": true, 
+                "url": "test/tests/controls/dependency/test.i"
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "recursive": true
+                    }, 
+                    "children": [
+                        {
+                            "attributes": {
+                                "content": "test/tests/controls/dependency/test.i", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "String"
+                        }
+                    ], 
+                    "name": "ModalLinkTitle"
+                }, 
+                {
+                    "attributes": {
+                        "recursive": true
+                    }, 
+                    "children": [
+                        {
+                            "attributes": {
+                                "content": "[Mesh]\n  type = GeneratedMesh\n  dim = 2\n  nx = 10\n  ny = 10\n[]\n\n[Variables]\n  [./u]\n  [../]\n[]\n\n[AuxVariables]\n  [./a]\n    family = SCALAR\n    order = FIRST\n  [../]\n[]\n\n[AuxScalarKernels]\n  [./a_sk]\n    type = ConstantScalarAux\n    variable = a\n    value = 0\n  [../]\n[]\n\n[Kernels]\n  [./diff]\n    type = CoefDiffusion\n    variable = u\n    coef = 0.1\n  [../]\n[]\n\n[BCs]\n  [./left]\n    type = DirichletBC\n    variable = u\n    boundary = left\n    value = 0\n  [../]\n  [./right]\n    type = DirichletBC\n    variable = u\n    boundary = right\n    value = 1\n  [../]\n[]\n\n[Executioner]\n  type = Steady\n  solve_type = PJFNK\n  petsc_options_iname = '-pc_type -pc_hypre_type'\n  petsc_options_value = 'hypre boomeramg'\n[]\n\n[Outputs]\n  csv = true\n[]\n\n[Functions]\n  [./func_coef]\n    type = ParsedFunction\n    value = 1\n  [../]\n[]\n\n[Controls]\n  # We start with a = 0, control2 sets its value to 1 and then control1 will multiply it by 3,\n  # so the end value has to be 3. If dependecy is broken, we multiply by 3 and then set to 1,\n  # which is wrong\n  [./control1]\n    type = TestControl\n    parameter = 'AuxScalarKernels/a_sk/value'\n    test_type = MULT\n    execute_on = 'initial timestep_begin'\n    depends_on = control2\n  [../]\n  [./control2]\n    type = RealFunctionControl\n    parameter = 'AuxScalarKernels/a_sk/value'\n    function = 'func_coef'\n    execute_on = 'initial timestep_begin'\n  [../]\n[]\n", 
+                                "escape": true, 
+                                "language": "text", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Code"
+                        }
+                    ], 
+                    "name": "ModalLinkContent"
+                }
+            ], 
+            "name": "ModalLink"
+        }, 
+        {
+            "attributes": {
+                "bookmark": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
+                "bottom": false, 
+                "close": true, 
+                "recursive": true, 
+                "url": "modules/stochastic_tools/test/tests/transfers/errors/sub_wrong_control.i"
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "recursive": true
+                    }, 
+                    "children": [
+                        {
+                            "attributes": {
+                                "content": "modules/stochastic_tools/test/tests/transfers/errors/sub_wrong_control.i", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "String"
+                        }
+                    ], 
+                    "name": "ModalLinkTitle"
+                }, 
+                {
+                    "attributes": {
+                        "recursive": true
+                    }, 
+                    "children": [
+                        {
+                            "attributes": {
+                                "content": "[Mesh]\n  type = GeneratedMesh\n  dim = 2\n  nx = 10\n  ny = 10\n[]\n\n[Variables]\n  [./u]\n  [../]\n[]\n\n[Kernels]\n  [./diff]\n    type = Diffusion\n    variable = u\n  [../]\n  [./time]\n    type = TimeDerivative\n    variable = u\n  [../]\n[]\n\n[BCs]\n  [./left]\n    type = DirichletBC\n    variable = u\n    boundary = left\n    value = 0\n  [../]\n  [./right]\n    type = DirichletBC\n    variable = u\n    boundary = right\n    value = 1\n  [../]\n[]\n\n[Executioner]\n  type = Transient\n  num_steps = 5\n  dt = 0.01\n  solve_type = PJFNK\n  petsc_options_iname = '-pc_type -pc_hypre_type'\n  petsc_options_value = 'hypre boomeramg'\n[]\n\n[Controls]\n  [./stochastic]\n    type = RealFunctionControl\n    function = '1'\n     parameter = 'BCs/left/value'\n  [../]\n[]\n\n[Outputs]\n  exodus = true\n[]\n", 
+                                "escape": true, 
+                                "language": "text", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Code"
+                        }
+                    ], 
+                    "name": "ModalLinkContent"
+                }
+            ], 
+            "name": "ModalLink"
+        }, 
+        {
+            "attributes": {
+                "level": 2, 
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "Child", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "Objects", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }
+            ], 
+            "name": "Heading"
+        }, 
+        {
+            "attributes": {
+                "browser_default": true, 
+                "class": "moose-list-children", 
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "recursive": true
+                    }, 
+                    "children": [
+                        {
+                            "attributes": {
+                                "class": "modal-trigger", 
+                                "recursive": true, 
+                                "url": "#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+                            }, 
+                            "children": [
+                                {
+                                    "attributes": {
+                                        "content": "framework/include/kernels/UserForcingFunction.h", 
+                                        "recursive": true
+                                    }, 
+                                    "children": [], 
+                                    "name": "String"
+                                }
+                            ], 
+                            "name": "SyntaxLink"
+                        }
+                    ], 
+                    "name": "ListItem"
+                }
+            ], 
+            "name": "UnorderedList"
+        }, 
+        {
+            "attributes": {
+                "bookmark": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
+                "bottom": false, 
+                "close": true, 
+                "recursive": true, 
+                "url": "framework/include/kernels/UserForcingFunction.h"
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "recursive": true
+                    }, 
+                    "children": [
+                        {
+                            "attributes": {
+                                "content": "framework/include/kernels/UserForcingFunction.h", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "String"
+                        }
+                    ], 
+                    "name": "ModalLinkTitle"
+                }, 
+                {
+                    "attributes": {
+                        "recursive": true
+                    }, 
+                    "children": [
+                        {
+                            "attributes": {
+                                "content": "// This file is part of the MOOSE framework\n// https://www.mooseframework.org\n//\n// All rights reserved, see COPYRIGHT for full restrictions\n// https://github.com/idaholab/moose/blob/master/COPYRIGHT\n//\n// Licensed under LGPL 2.1, please see LICENSE for details\n// https://www.gnu.org/licenses/lgpl-2.1.html\n\n#pragma once\n\n#include \"BodyForce.h\"\n\n/**\n * Deprecated, use BodyForce.\n */\nclass UserForcingFunction : public BodyForce\n{\npublic:\n  UserForcingFunction(const InputParameters & parameters);\n\nprotected:\n  Real f();\n};\n\ntemplate <>\nInputParameters validParams<UserForcingFunction>();\n\n", 
+                                "escape": true, 
+                                "language": "cpp", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Code"
+                        }
+                    ], 
+                    "name": "ModalLinkContent"
+                }
+            ], 
+            "name": "ModalLink"
+        }, 
+        {
+            "attributes": {
+                "key": "MOOSE", 
+                "link": "https:://mooseframework.org", 
+                "prefix": "", 
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "MOOSE", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "String"
+                }
+            ], 
+            "name": "Shortcut"
+        }, 
+        {
+            "attributes": {
+                "key": "libMesh", 
+                "link": "https://libmesh.github.io/", 
+                "prefix": "", 
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "libMesh", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "String"
+                }
+            ], 
+            "name": "Shortcut"
+        }
+    ], 
+    "name": null
+}
