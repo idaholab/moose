@@ -38,7 +38,9 @@ Extensions:
         repo: https://hpcgitlab.hpc.inl.gov/idaholab/thm
         home: https://hpcsc.inl.gov/ssl/THM/site/
         menu:
-            Systems: syntax/index.md
+            Documentation:
+                Tutorial: tutorial.md
+                Complete Syntax Listing: syntax/index.md
             Build Status: https://moosebuild.inl.gov/repo/idaholab/thm/
 
     MooseDocs.extensions.appsyntax:
