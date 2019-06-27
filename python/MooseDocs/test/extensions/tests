@@ -23,4 +23,11 @@
     requirement = "The documentation system shall include tools for building software quality documents."
     issues = '#6699 #12049'
   []
+  [autolink]
+    type = PythonUnitTest
+    input = test_autolink.py
+    requirement = "The documentation system shall include tools for automatically cross-linking files."
+    issues = '#6699 #13567'
+  []
+
 []
