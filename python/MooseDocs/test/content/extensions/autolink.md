@@ -25,3 +25,9 @@
 ## Optional Links
 
 [this is optional](not_a_real_file_name.md optional=True)
+
+## Full Option
+
+[index.md exact=True]
+
+[Home](index.md exact=True)
