@@ -1,5 +1,5 @@
 minimum_gcc: 4.8.4
-minimum_clang: 3.4.0
+minimum_clang: 3.5.1
 minimum_intel: 2017
 mpich: 3.3
 petsc_alt: 3.9.4
