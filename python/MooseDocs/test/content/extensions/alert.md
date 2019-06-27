@@ -29,3 +29,7 @@ An alert with some code.
 int x;
 ```
 !alert-end!
+
+
+!alert note title=[Google](https://google.com)
+Title with link.
