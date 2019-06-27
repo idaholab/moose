@@ -27,17 +27,17 @@ protected:
     pc_params.set<Real>("alpha") = 1.0e-4;
     pc_params.set<Real>("pc_max") = 1.0e5;
     _fe_problem->addUserObject("PorousFlowCapillaryPressureVG", "pc", pc_params);
-    _pc = &_fe_problem->getUserObject<PorousFlowCapillaryPressureVG>("pc");
+    _pc = &_fe_problem->getUserObjectTempl<PorousFlowCapillaryPressureVG>("pc");
 
     InputParameters water_params = _factory.getValidParams("Water97FluidProperties");
     _fe_problem->addUserObject("Water97FluidProperties", "water_fp", water_params);
-    _water_fp = &_fe_problem->getUserObject<Water97FluidProperties>("water_fp");
+    _water_fp = &_fe_problem->getUserObjectTempl<Water97FluidProperties>("water_fp");
 
     InputParameters uo_params = _factory.getValidParams("PorousFlowWaterVapor");
     uo_params.set<UserObjectName>("water_fp") = "water_fp";
     uo_params.set<UserObjectName>("capillary_pressure") = "pc";
     _fe_problem->addUserObject("PorousFlowWaterVapor", "fp", uo_params);
-    _fp = &_fe_problem->getUserObject<PorousFlowWaterVapor>("fp");
+    _fp = &_fe_problem->getUserObjectTempl<PorousFlowWaterVapor>("fp");
   }
 
   const PorousFlowCapillaryPressureVG * _pc;

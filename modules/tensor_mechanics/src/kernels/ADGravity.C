@@ -28,9 +28,9 @@ defineADValidParams(
 template <ComputeStage compute_stage>
 ADGravity<compute_stage>::ADGravity(const InputParameters & parameters)
   : ADKernelValue<compute_stage>(parameters),
-    _density(adGetADMaterialProperty<Real>("density")),
-    _value(adGetParam<Real>("value")),
-    _alpha(adGetParam<Real>("alpha"))
+    _density(getADMaterialProperty<Real>("density")),
+    _value(getParam<Real>("value")),
+    _alpha(getParam<Real>("alpha"))
 {
 }
 

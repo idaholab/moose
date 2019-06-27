@@ -15,19 +15,15 @@
 class CO2FluidPropertiesTest : public MooseObjectUnitTest
 {
 public:
-  CO2FluidPropertiesTest() : MooseObjectUnitTest("MooseUnitApp")
-  {
-    buildObjects();
-  }
+  CO2FluidPropertiesTest() : MooseObjectUnitTest("MooseUnitApp") { buildObjects(); }
 
 protected:
   void buildObjects()
   {
     InputParameters uo_pars = _factory.getValidParams("CO2FluidProperties");
     _fe_problem->addUserObject("CO2FluidProperties", "fp", uo_pars);
-    _fp = &_fe_problem->getUserObject<CO2FluidProperties>("fp");
+    _fp = &_fe_problem->getUserObjectTempl<CO2FluidProperties>("fp");
   }
 
   const CO2FluidProperties * _fp;
 };
-

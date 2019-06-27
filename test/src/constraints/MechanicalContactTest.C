@@ -22,7 +22,7 @@ defineADValidParams(MechanicalContactTest,
 
 template <ComputeStage compute_stage>
 MechanicalContactTest<compute_stage>::MechanicalContactTest(const InputParameters & parameters)
-  : ADMortarConstraint<compute_stage>(parameters), _component(adGetParam<MooseEnum>("component"))
+  : ADMortarConstraint<compute_stage>(parameters), _component(getParam<MooseEnum>("component"))
 {
 }
 

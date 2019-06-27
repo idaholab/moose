@@ -29,10 +29,10 @@ defineADValidParams(ADDGDiffusion,
 template <ComputeStage compute_stage>
 ADDGDiffusion<compute_stage>::ADDGDiffusion(const InputParameters & parameters)
   : ADDGKernel<compute_stage>(parameters),
-    _epsilon(adGetParam<Real>("epsilon")),
-    _sigma(adGetParam<Real>("sigma")),
-    _diff(adGetADMaterialProperty<Real>("diff")),
-    _diff_neighbor(adGetNeighborADMaterialProperty<Real>("diff"))
+    _epsilon(getParam<Real>("epsilon")),
+    _sigma(getParam<Real>("sigma")),
+    _diff(getADMaterialProperty<Real>("diff")),
+    _diff_neighbor(getNeighborADMaterialProperty<Real>("diff"))
 {
 }
 

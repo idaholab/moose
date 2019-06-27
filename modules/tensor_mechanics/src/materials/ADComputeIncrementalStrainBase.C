@@ -17,16 +17,15 @@ ADComputeIncrementalStrainBase<compute_stage>::ADComputeIncrementalStrainBase(
     const InputParameters & parameters)
   : ADComputeStrainBase<compute_stage>(parameters),
     _grad_disp_old(3),
-    _strain_rate(adDeclareADProperty<RankTwoTensor>(_base_name + "strain_rate")),
-    _strain_increment(adDeclareADProperty<RankTwoTensor>(_base_name + "strain_increment")),
-    _rotation_increment(adDeclareADProperty<RankTwoTensor>(_base_name + "rotation_increment")),
-    _mechanical_strain_old(
-        adGetMaterialPropertyOld<RankTwoTensor>(_base_name + "mechanical_strain")),
-    _total_strain_old(adGetMaterialPropertyOld<RankTwoTensor>(_base_name + "total_strain")),
+    _strain_rate(declareADProperty<RankTwoTensor>(_base_name + "strain_rate")),
+    _strain_increment(declareADProperty<RankTwoTensor>(_base_name + "strain_increment")),
+    _rotation_increment(declareADProperty<RankTwoTensor>(_base_name + "rotation_increment")),
+    _mechanical_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "mechanical_strain")),
+    _total_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "total_strain")),
     _eigenstrains_old(_eigenstrain_names.size())
 {
   for (unsigned int i = 0; i < _eigenstrains_old.size(); ++i)
-    _eigenstrains_old[i] = &adGetMaterialPropertyOld<RankTwoTensor>(_eigenstrain_names[i]);
+    _eigenstrains_old[i] = &getMaterialPropertyOld<RankTwoTensor>(_eigenstrain_names[i]);
 }
 
 template <ComputeStage compute_stage>

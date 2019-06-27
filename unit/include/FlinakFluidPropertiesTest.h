@@ -22,7 +22,7 @@ protected:
   {
     InputParameters uo_pars = _factory.getValidParams("FlinakFluidProperties");
     _fe_problem->addUserObject("FlinakFluidProperties", "fp", uo_pars);
-    _fp = &_fe_problem->getUserObject<FlinakFluidProperties>("fp");
+    _fp = &_fe_problem->getUserObjectTempl<FlinakFluidProperties>("fp");
   }
 
   const FlinakFluidProperties * _fp;

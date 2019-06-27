@@ -12,8 +12,7 @@
 // MOOSE includes
 #include "MooseTypes.h"
 #include "RestartableData.h"
-
-#define adDeclareRestartableData this->template declareRestartableData
+#include "MemberTemplateMacros.h"
 
 // Forward declarations
 class PostprocessorData;
@@ -75,7 +74,7 @@ protected:
    * @param data_name The name of the data (usually just use the same name as the member variable)
    */
   template <typename T>
-  T & declareRestartableData(std::string data_name);
+  T & declareRestartableDataTempl(std::string data_name);
 
   /**
    * Declare a piece of data as "restartable" and initialize it.
@@ -88,7 +87,7 @@ protected:
    * @param init_value The initial value of the data
    */
   template <typename T>
-  T & declareRestartableData(std::string data_name, const T & init_value);
+  T & declareRestartableDataTempl(std::string data_name, const T & init_value);
 
   /**
    * Declare a piece of data as "restartable".
@@ -200,14 +199,14 @@ private:
 
 template <typename T>
 T &
-Restartable::declareRestartableData(std::string data_name)
+Restartable::declareRestartableDataTempl(std::string data_name)
 {
   return declareRestartableDataWithContext<T>(data_name, nullptr);
 }
 
 template <typename T>
 T &
-Restartable::declareRestartableData(std::string data_name, const T & init_value)
+Restartable::declareRestartableDataTempl(std::string data_name, const T & init_value)
 {
   return declareRestartableDataWithContext<T>(data_name, init_value, nullptr);
 }
@@ -286,4 +285,3 @@ Restartable::declareRecoverableData(std::string data_name, const T & init_value)
 
   return declareRestartableDataWithContext<T>(data_name, init_value, nullptr);
 }
-

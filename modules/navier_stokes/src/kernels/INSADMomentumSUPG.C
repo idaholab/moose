@@ -19,7 +19,7 @@ defineADValidParams(
 template <ComputeStage compute_stage>
 INSADMomentumSUPG<compute_stage>::INSADMomentumSUPG(const InputParameters & parameters)
   : ADVectorKernelSUPG<compute_stage>(parameters),
-    _momentum_strong_residual(adGetADMaterialProperty<RealVectorValue>("momentum_strong_residual"))
+    _momentum_strong_residual(getADMaterialProperty<RealVectorValue>("momentum_strong_residual"))
 {
 }
 

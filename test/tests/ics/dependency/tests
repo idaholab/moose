@@ -1,9 +1,14 @@
 [Tests]
+  design = 'syntax/ICs/index.md'
+  issues = '#534'
   [./test]
     type = 'Exodiff'
     input = 'test.i'
     exodiff = 'test_out.e'
     scale_refine = 5
+
+    requirement = 'The system shall allow nodal initial condition objects to couple '
+                  ' to other nodal variables for computing values for the current variable.'
   [../]
 
   [./monomial]
@@ -11,5 +16,8 @@
     input = 'monomial.i'
     exodiff = 'monomial_out.e'
     scale_refine = 5
+
+    requirement = 'The system shall allow elemental initial condition objects to couple '
+                  ' to other elemental variables for computing values for the current variable.'
   [../]
 []

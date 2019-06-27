@@ -33,7 +33,8 @@ NonlinearPlaneStrain::NonlinearPlaneStrain(SolidModel & solid_model,
     _strain_zz_old(_have_strain_zz ? coupledValueOld("strain_zz") : _zero),
     _scalar_strain_zz_old(_have_scalar_strain_zz ? coupledScalarValueOld("scalar_strain_zz")
                                                  : _zero),
-    _volumetric_locking_correction(_solid_model.getParam<bool>("volumetric_locking_correction"))
+    _volumetric_locking_correction(
+        _solid_model.getParamTempl<bool>("volumetric_locking_correction"))
 {
 }
 

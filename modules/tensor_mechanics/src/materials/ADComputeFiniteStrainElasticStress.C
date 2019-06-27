@@ -22,14 +22,12 @@ ADComputeFiniteStrainElasticStress<compute_stage>::ADComputeFiniteStrainElasticS
   : ADComputeStressBase<compute_stage>(parameters),
     GuaranteeConsumer(this),
     _elasticity_tensor_name(_base_name + "elasticity_tensor"),
-    _elasticity_tensor(adGetADMaterialProperty<RankFourTensor>(_elasticity_tensor_name)),
-    _strain_increment(
-        adGetADMaterialPropertyByName<RankTwoTensor>(_base_name + "strain_increment")),
+    _elasticity_tensor(getADMaterialProperty<RankFourTensor>(_elasticity_tensor_name)),
+    _strain_increment(getADMaterialPropertyByName<RankTwoTensor>(_base_name + "strain_increment")),
     _rotation_increment(
-        adGetADMaterialPropertyByName<RankTwoTensor>(_base_name + "rotation_increment")),
-    _stress_old(adGetMaterialPropertyOldByName<RankTwoTensor>(_base_name + "stress")),
-    _elastic_strain_old(
-        adGetMaterialPropertyOldByName<RankTwoTensor>(_base_name + "elastic_strain"))
+        getADMaterialPropertyByName<RankTwoTensor>(_base_name + "rotation_increment")),
+    _stress_old(getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "stress")),
+    _elastic_strain_old(getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "elastic_strain"))
 {
 }
 

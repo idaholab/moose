@@ -130,7 +130,7 @@ PorousFlowBrine::PorousFlowBrine(const InputParameters & parameters)
     InputParameters params = _app.getFactory().getValidParams(class_name);
     _fe_problem.addUserObject(class_name, brine_name, params);
   }
-  _brine_fp = &_fe_problem.getUserObject<BrineFluidProperties>(brine_name);
+  _brine_fp = &_fe_problem.getUserObjectTempl<BrineFluidProperties>(brine_name);
 
   // Water properties UserObject
   _water_fp = &_brine_fp->getComponent(BrineFluidProperties::WATER);

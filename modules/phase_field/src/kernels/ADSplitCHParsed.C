@@ -23,8 +23,8 @@ defineADValidParams(
 template <ComputeStage compute_stage>
 ADSplitCHParsed<compute_stage>::ADSplitCHParsed(const InputParameters & parameters)
   : ADSplitCHCRes<compute_stage>(parameters),
-    _f_name(adGetParam<MaterialPropertyName>("f_name")),
-    _dFdc(adGetADMaterialProperty<Real>(derivativePropertyNameFirst(_f_name, _var.name())))
+    _f_name(getParam<MaterialPropertyName>("f_name")),
+    _dFdc(getADMaterialProperty<Real>(derivativePropertyNameFirst(_f_name, _var.name())))
 {
 }
 

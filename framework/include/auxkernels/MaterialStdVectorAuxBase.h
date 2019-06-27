@@ -42,7 +42,7 @@ protected:
 template <typename T>
 MaterialStdVectorAuxBase<T>::MaterialStdVectorAuxBase(const InputParameters & parameters)
   : MaterialAuxBase<std::vector<T>>(parameters),
-    _index(this->template getParam<unsigned int>("index"))
+    _index(this->template getParamTempl<unsigned int>("index"))
 {
 }
 
@@ -52,9 +52,6 @@ MaterialStdVectorAuxBase<T>::computeValue()
 {
   mooseAssert(_prop[_qp].size() > _index,
               "MaterialStdVectorRealGradientAux: You chose to extract component "
-                  << _index
-                  << " but your Material property only has size "
-                  << _prop[_qp].size());
+                  << _index << " but your Material property only has size " << _prop[_qp].size());
   return MaterialAuxBase<std::vector<T>>::computeValue();
 }
-

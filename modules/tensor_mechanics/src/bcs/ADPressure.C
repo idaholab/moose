@@ -30,12 +30,12 @@ defineADValidParams(
 template <ComputeStage compute_stage>
 ADPressure<compute_stage>::ADPressure(const InputParameters & parameters)
   : ADIntegratedBC<compute_stage>(parameters),
-    _component(adGetParam<unsigned int>("component")),
-    _constant(adGetParam<Real>("constant")),
+    _component(getParam<unsigned int>("component")),
+    _constant(getParam<Real>("constant")),
     _function(isParamValid("function") ? &this->getFunction("function") : nullptr),
     _postprocessor(isParamValid("postprocessor") ? &this->getPostprocessorValue("postprocessor")
                                                  : nullptr),
-    _alpha(adGetParam<Real>("alpha"))
+    _alpha(getParam<Real>("alpha"))
 {
 }
 

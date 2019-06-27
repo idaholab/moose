@@ -99,9 +99,6 @@ class DAG(object):
         if not graph:
             graph = self.graph
 
-        # Invalidate cached graph because a node was added
-        self.__cached_graph = None
-
         if dep_node not in graph:
             raise DAGEdgeDepError()
         if ind_node not in graph:

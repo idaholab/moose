@@ -38,28 +38,28 @@ ADComputeStrainBase<compute_stage>::ADComputeStrainBase(const InputParameters & 
     _ndisp(coupledComponents("displacements")),
     _disp(3),
     _grad_disp(3),
-    _base_name(isParamValid("base_name") ? adGetParam<std::string>("base_name") + "_" : ""),
-    _mechanical_strain(adDeclareADProperty<RankTwoTensor>(_base_name + "mechanical_strain")),
-    _total_strain(adDeclareADProperty<RankTwoTensor>(_base_name + "total_strain")),
-    _eigenstrain_names(adGetParam<std::vector<MaterialPropertyName>>("eigenstrain_names")),
+    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
+    _mechanical_strain(declareADProperty<RankTwoTensor>(_base_name + "mechanical_strain")),
+    _total_strain(declareADProperty<RankTwoTensor>(_base_name + "total_strain")),
+    _eigenstrain_names(getParam<std::vector<MaterialPropertyName>>("eigenstrain_names")),
     _eigenstrains(_eigenstrain_names.size()),
     _global_strain(isParamValid("global_strain")
-                       ? &adGetADMaterialProperty<RankTwoTensor>(_base_name + "global_strain")
+                       ? &getADMaterialProperty<RankTwoTensor>(_base_name + "global_strain")
                        : nullptr),
-    _volumetric_locking_correction(adGetParam<bool>("volumetric_locking_correction") &&
+    _volumetric_locking_correction(getParam<bool>("volumetric_locking_correction") &&
                                    !this->isBoundaryMaterial()),
     _current_elem_volume(_assembly.elemVolume())
 {
   for (unsigned int i = 0; i < _eigenstrains.size(); ++i)
   {
     _eigenstrain_names[i] = _base_name + _eigenstrain_names[i];
-    _eigenstrains[i] = &adGetADMaterialProperty<RankTwoTensor>(_eigenstrain_names[i]);
+    _eigenstrains[i] = &getADMaterialProperty<RankTwoTensor>(_eigenstrain_names[i]);
   }
 
   if (_ndisp == 1 && _volumetric_locking_correction)
     paramError("volumetric_locking_correction", "has to be set to false for 1-D problems.");
 
-  if (adGetParam<bool>("use_displaced_mesh"))
+  if (getParam<bool>("use_displaced_mesh"))
     paramError("use_displaced_mesh", "The strain calculator needs to run on the undisplaced mesh.");
 }
 

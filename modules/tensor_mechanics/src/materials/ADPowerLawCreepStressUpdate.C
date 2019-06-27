@@ -34,12 +34,12 @@ ADPowerLawCreepStressUpdate<compute_stage>::ADPowerLawCreepStressUpdate(
     const InputParameters & parameters)
   : ADRadialReturnCreepStressUpdateBase<compute_stage>(parameters),
     _temperature(isParamValid("temperature") ? &adCoupledValue("temperature") : nullptr),
-    _coefficient(adGetParam<Real>("coefficient")),
-    _n_exponent(adGetParam<Real>("n_exponent")),
-    _m_exponent(adGetParam<Real>("m_exponent")),
-    _activation_energy(adGetParam<Real>("activation_energy")),
-    _gas_constant(adGetParam<Real>("gas_constant")),
-    _start_time(adGetParam<Real>("start_time")),
+    _coefficient(getParam<Real>("coefficient")),
+    _n_exponent(getParam<Real>("n_exponent")),
+    _m_exponent(getParam<Real>("m_exponent")),
+    _activation_energy(getParam<Real>("activation_energy")),
+    _gas_constant(getParam<Real>("gas_constant")),
+    _start_time(getParam<Real>("start_time")),
     _exponential(1.0)
 {
   if (_start_time < this->_app.getStartTime() && (std::trunc(_m_exponent) != _m_exponent))

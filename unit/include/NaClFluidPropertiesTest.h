@@ -15,19 +15,15 @@
 class NaClFluidPropertiesTest : public MooseObjectUnitTest
 {
 public:
-  NaClFluidPropertiesTest() : MooseObjectUnitTest("MooseUnitApp")
-  {
-    buildObjects();
-  }
+  NaClFluidPropertiesTest() : MooseObjectUnitTest("MooseUnitApp") { buildObjects(); }
 
 protected:
   void buildObjects()
   {
     InputParameters uo_pars = _factory.getValidParams("NaClFluidProperties");
     _fe_problem->addUserObject("NaClFluidProperties", "fp", uo_pars);
-    _fp = &_fe_problem->getUserObject<NaClFluidProperties>("fp");
+    _fp = &_fe_problem->getUserObjectTempl<NaClFluidProperties>("fp");
   }
 
   const NaClFluidProperties * _fp;
 };
-

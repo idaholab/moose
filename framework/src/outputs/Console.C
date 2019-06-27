@@ -192,13 +192,13 @@ Console::Console(const InputParameters & parameters)
   // Honor the 'print_linear_residuals' option, only if 'execute_on' has not been set by the user
   if (!parameters.isParamSetByUser("execute_on"))
   {
-    if (common_action->getParam<bool>("print_linear_residuals"))
+    if (common_action->getParamTempl<bool>("print_linear_residuals"))
       _execute_on.push_back("linear");
     else
       _execute_on.erase("linear");
   }
 
-  if (!_pars.isParamSetByUser("perf_log") && common_action->getParam<bool>("print_perf_log"))
+  if (!_pars.isParamSetByUser("perf_log") && common_action->getParamTempl<bool>("print_perf_log"))
   {
     _perf_log = true;
     _solve_log = true;
@@ -206,12 +206,12 @@ Console::Console(const InputParameters & parameters)
 
   // Append the common 'execute_on' to the setting for this object
   // This is unique to the Console object, all other objects inherit from the common options
-  const ExecFlagEnum & common_execute_on = common_action->getParam<ExecFlagEnum>("execute_on");
+  const ExecFlagEnum & common_execute_on = common_action->getParamTempl<ExecFlagEnum>("execute_on");
   for (auto & mme : common_execute_on)
     _execute_on.push_back(mme);
 
   // If --show-outputs is used, enable it
-  if (_app.getParam<bool>("show_outputs"))
+  if (_app.getParamTempl<bool>("show_outputs"))
     _system_info_flags.push_back("output");
 }
 
@@ -256,7 +256,7 @@ Console::initialSetup()
 
   // Enable verbose output if Executioner has it enabled
   if (_app.getExecutioner()->isParamValid("verbose") &&
-      _app.getExecutioner()->getParam<bool>("verbose"))
+      _app.getExecutioner()->getParamTempl<bool>("verbose"))
     _verbose = true;
 
   // Display a message to indicate the application is running (useful for MultiApps)

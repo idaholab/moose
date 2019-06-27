@@ -1,11 +1,8 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # FEProblem
 
-!alert construction title=Undocumented Class
-The FEProblem has not been documented. The content contained on this page includes the
-typical automatic documentation associated with a MooseObject; however, what is contained is
-ultimately determined by what is necessary to make the documentation clear for users.
+The FEProblem class represents a normal (default) Problem class encompassing the
+necessary objects for the actual physics solve. The FEProblem object contains one
+[NonlinearSystem.md] and one [AuxiliarySystem.md].
 
 !syntax description /Problem/FEProblem
 

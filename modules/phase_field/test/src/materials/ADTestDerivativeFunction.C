@@ -29,16 +29,16 @@ template <ComputeStage compute_stage>
 ADTestDerivativeFunction<compute_stage>::ADTestDerivativeFunction(
     const InputParameters & parameters)
   : ADMaterial<compute_stage>(parameters),
-    _function(adGetParam<MooseEnum>("function").template getEnum<FunctionEnum>()),
+    _function(getParam<MooseEnum>("function").template getEnum<FunctionEnum>()),
     _op(coupledComponents("op")),
-    _f_name(adGetParam<MaterialPropertyName>("f_name")),
-    _prop_F(adDeclareADProperty<Real>(_f_name)),
+    _f_name(getParam<MaterialPropertyName>("f_name")),
+    _prop_F(declareADProperty<Real>(_f_name)),
     _prop_dFdop(coupledComponents("op"))
 {
   for (std::size_t i = 0; i < _op.size(); ++i)
   {
     _op[i] = &adCoupledValue("op", i);
-    _prop_dFdop[i] = &adDeclareADProperty<Real>(
+    _prop_dFdop[i] = &declareADProperty<Real>(
         derivativePropertyNameFirst(_f_name, this->getVar("op", i)->name()));
   }
 

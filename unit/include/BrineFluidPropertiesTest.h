@@ -26,11 +26,10 @@ protected:
   {
     InputParameters uo_pars = _factory.getValidParams("BrineFluidProperties");
     _fe_problem->addUserObject("BrineFluidProperties", "fp", uo_pars);
-    _fp = &_fe_problem->getUserObject<BrineFluidProperties>("fp");
+    _fp = &_fe_problem->getUserObjectTempl<BrineFluidProperties>("fp");
     _water_fp = &_fp->getComponent(BrineFluidProperties::WATER);
   }
 
   const BrineFluidProperties * _fp;
   const SinglePhaseFluidProperties * _water_fp;
 };
-

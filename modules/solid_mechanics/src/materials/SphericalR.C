@@ -20,7 +20,7 @@ SphericalR::SphericalR(SolidModel & solid_model,
                        const InputParameters & parameters)
   : Element(solid_model, name, parameters),
     _disp_r(coupledValue("disp_r")),
-    _large_strain(solid_model.getParam<bool>("large_strain")),
+    _large_strain(solid_model.getParamTempl<bool>("large_strain")),
     _grad_disp_r(coupledGradient("disp_r"))
 {
 }

@@ -38,17 +38,15 @@ class JobDAG(object):
 
 
     def getJobs(self):
-        """ return current job group """
-        # Suppress multiple jobs _if_ we are supposed to be running in serialized mode (--pedantic-checks)
-        if self.options.pedantic_checks:
-            # So the way this works, is that getJobs is only called at the start, or once a job finishes, and only by
-            # getJobsAndAdvance (by the RunParallel scheduler). Due to that method already deleting the finished jobs,
-            # the only jobs (if any) remaining are on HOLD.
-            concurrent_jobs = self.__job_dag.ind_nodes()
-            if [x for x in concurrent_jobs if x.isHold()]:
-                return [[x for x in concurrent_jobs if x.isHold()][0]]
-
+        """ Return concurrent available jobs """
         return self.__job_dag.ind_nodes()
+
+    def getJob(self):
+        """ Return a single available job """
+        concurrent_jobs = self.__job_dag.ind_nodes()
+        if [x for x in concurrent_jobs if x.isHold()]:
+            return [[x for x in concurrent_jobs if x.isHold()][0]]
+        return []
 
     def getJobsAndAdvance(self):
         """
@@ -63,7 +61,10 @@ class JobDAG(object):
                 next_jobs.add(job)
                 self.__job_dag.delete_node(job)
 
-        next_jobs.update(self.getJobs())
+        if self.options.pedantic_checks:
+            next_jobs.update(self.getJob())
+        else:
+            next_jobs.update(self.getJobs())
         return next_jobs
 
     def removeAllDependencies(self):
@@ -86,20 +87,7 @@ class JobDAG(object):
             if self._doRaceConditions():
                 self._doSkippedDependencies()
 
-            # Serialize the Jobs if running pedantic checks
-            if self.options.pedantic_checks:
-                self._doMakeSerializeDependencies()
-
         return self.__job_dag
-
-    def _doMakeSerializeDependencies(self):
-        """ Serialize the Jobs contained within the DAG  """
-        # Store the position of the job within the DAG
-        for job in self.__job_dag.topological_sort():
-            job.addDownsteamNodes(self.__job_dag.all_downstreams(job))
-            job.addUpsteamNodes(self.__job_dag.predecessors(job))
-
-        return self.__job_dag.serialize_dag()
 
     def _doMakeDependencies(self):
         """ Setup dependencies within the current Job DAG """
@@ -139,10 +127,8 @@ class JobDAG(object):
 
         # This job passed, but one of its dependents has not
         if status == tester.success and self._hasDownStreamsWithFailures(job):
-            tester.setStatus(tester.success)
-            # Do we care? I figure, we should at least mention something. This job is not actually going to re-execute an app.
-            tester.addCaveats('previous results: {}'.format(status.status))
-            job.setStatus(job.finished)
+            tester.addCaveats('re-running')
+            return
 
         # This job was skipped, passed or silent
         elif status in job.job_status.getSuccessStatuses():
@@ -168,12 +154,7 @@ class JobDAG(object):
 
             if not job.getRunnable() or job.isFail() or job.isSkip():
                 job.setStatus(job.skip)
-                if not self.options.pedantic_checks:
-                    dep_jobs.update(self.__job_dag.all_downstreams(job))
-                # If running pedantic checks, we need to use the original downstreams, rather
-                # than the downstreams in the current DAG
-                else:
-                    dep_jobs.update(job.getDownstreamNodes())
+                dep_jobs.update(self.__job_dag.all_downstreams(job))
 
                 # Remove parent dependency so it can launch individually
                 for p_job in self.__job_dag.predecessors(job):
@@ -186,14 +167,7 @@ class JobDAG(object):
                 elif not self._skipPrereqs():
                     d_job.setStatus(d_job.skip)
                     d_job.addCaveats('skipped dependency')
-
-                if not self.options.pedantic_checks:
-                    self.__job_dag.delete_edge_if_exists(job, d_job)
-                else:
-                    try:
-                        job.removeDownsteamNode(d_job)
-                    except:
-                        pass
+                self.__job_dag.delete_edge_if_exists(job, d_job)
 
     def _doRaceConditions(self):
         """ Check for race condition errors within in the DAG"""
@@ -233,20 +207,6 @@ class JobDAG(object):
             and ('all' in self.options.ignored_caveats
                  or 'prereq' in self.options.ignored_caveats)):
             return True
-
-    def getUpstreams(self, a_job):
-        """ Method to return a list of all the jobs that need to be run before the given job """
-        t_list = []
-        for temp_job in self.__job_dag.predecessors(a_job):
-            t_list.append(temp_job.getTestName())
-        return t_list
-
-    def getDownstreams(self, a_job):
-        """ Method to return a list of all the jobs that need to be run after the given job """
-        t_list = []
-        for temp_job in self.__job_dag.all_downstreams(a_job):
-            t_list.append(temp_job.getTestName())
-        return t_list
 
     def _printDownstreams(self, job):
         """

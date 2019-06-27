@@ -46,8 +46,8 @@ protected:
 template <ComputeStage compute_stage, typename T>
 ADSplitCHWResBase<compute_stage, T>::ADSplitCHWResBase(const InputParameters & parameters)
   : ADKernelGrad<compute_stage>(parameters),
-    _mob_name(adGetParam<MaterialPropertyName>("mob_name")),
-    _mob(adGetADMaterialProperty<T>("mob_name"))
+    _mob_name(getParam<MaterialPropertyName>("mob_name")),
+    _mob(getADMaterialProperty<T>("mob_name"))
 {
 }
 
@@ -57,4 +57,3 @@ ADSplitCHWResBase<compute_stage, T>::precomputeQpResidual()
 {
   return _mob[_qp] * _grad_u[_qp];
 }
-

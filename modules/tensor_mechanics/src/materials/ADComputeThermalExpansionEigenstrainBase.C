@@ -23,7 +23,7 @@ ADComputeThermalExpansionEigenstrainBase<compute_stage>::ADComputeThermalExpansi
     const InputParameters & parameters)
   : ADComputeEigenstrainBase<compute_stage>(parameters),
     _temperature(adCoupledValue("temperature")),
-    _deigenstrain_dT(adDeclareADProperty<RankTwoTensor>(
+    _deigenstrain_dT(declareADProperty<RankTwoTensor>(
         derivativePropertyNameFirst(_eigenstrain_name, this->getVar("temperature", 0)->name()))),
     _stress_free_temperature(adCoupledValue("stress_free_temperature"))
 {

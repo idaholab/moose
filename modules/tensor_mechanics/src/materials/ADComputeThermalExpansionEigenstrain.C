@@ -22,7 +22,7 @@ template <ComputeStage compute_stage>
 ADComputeThermalExpansionEigenstrain<compute_stage>::ADComputeThermalExpansionEigenstrain(
     const InputParameters & parameters)
   : ADComputeThermalExpansionEigenstrainBase<compute_stage>(parameters),
-    _thermal_expansion_coeff(adGetParam<Real>("thermal_expansion_coeff"))
+    _thermal_expansion_coeff(getParam<Real>("thermal_expansion_coeff"))
 {
 }
 

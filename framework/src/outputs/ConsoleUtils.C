@@ -267,7 +267,7 @@ outputExecutionInformation(const MooseApp & app, FEProblemBase & problem)
   if (mpc)
   {
     oss << std::setw(console_field_width)
-        << "  MOOSE Preconditioner: " << mpc->getParam<std::string>("_type");
+        << "  MOOSE Preconditioner: " << mpc->getParamTempl<std::string>("_type");
     if (mpc->name() == "_moose_auto")
       oss << " (auto)";
     oss << '\n';

@@ -10,6 +10,7 @@
 #pragma once
 
 #include "MaterialPropertyInterface.h"
+#include "MemberTemplateMacros.h"
 
 // Forward Declarations
 class MaterialData;
@@ -17,9 +18,6 @@ class TwoMaterialPropertyInterface;
 
 template <>
 InputParameters validParams<TwoMaterialPropertyInterface>();
-
-#define adGetNeighborMaterialProperty this->template getNeighborMaterialProperty
-#define adGetNeighborADMaterialProperty this->template getNeighborADMaterialProperty
 
 class TwoMaterialPropertyInterface : public MaterialPropertyInterface
 {
@@ -32,13 +30,13 @@ public:
    * Retrieve the property named "name"
    */
   template <typename T>
-  const MaterialProperty<T> & getNeighborMaterialProperty(const std::string & name);
+  const MaterialProperty<T> & getNeighborMaterialPropertyTempl(const std::string & name);
 
   /**
    * Retrieve the ADMaterialProperty named "name"
    */
   template <typename T>
-  const ADMaterialPropertyObject<T> & getNeighborADMaterialProperty(const std::string & name);
+  const ADMaterialPropertyObject<T> & getNeighborADMaterialPropertyTempl(const std::string & name);
 
   template <typename T>
   const MaterialProperty<T> & getNeighborMaterialPropertyOld(const std::string & name);
@@ -52,7 +50,7 @@ protected:
 
 template <typename T>
 const MaterialProperty<T> &
-TwoMaterialPropertyInterface::getNeighborMaterialProperty(const std::string & name)
+TwoMaterialPropertyInterface::getNeighborMaterialPropertyTempl(const std::string & name)
 {
   // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
@@ -67,7 +65,7 @@ TwoMaterialPropertyInterface::getNeighborMaterialProperty(const std::string & na
 
 template <typename T>
 const ADMaterialPropertyObject<T> &
-TwoMaterialPropertyInterface::getNeighborADMaterialProperty(const std::string & name)
+TwoMaterialPropertyInterface::getNeighborADMaterialPropertyTempl(const std::string & name)
 {
   // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
@@ -109,4 +107,3 @@ TwoMaterialPropertyInterface::getNeighborMaterialPropertyOlder(const std::string
   else
     return _neighbor_material_data->getPropertyOlder<T>(prop_name);
 }
-

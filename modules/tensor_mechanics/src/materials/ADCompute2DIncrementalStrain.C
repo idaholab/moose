@@ -26,7 +26,7 @@ template <ComputeStage compute_stage>
 ADCompute2DIncrementalStrain<compute_stage>::ADCompute2DIncrementalStrain(
     const InputParameters & parameters)
   : ADComputeIncrementalSmallStrain<compute_stage>(parameters),
-    _out_of_plane_direction(adGetParam<MooseEnum>("out_of_plane_direction"))
+    _out_of_plane_direction(getParam<MooseEnum>("out_of_plane_direction"))
 {
 }
 

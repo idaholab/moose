@@ -83,9 +83,9 @@ private:
 template <class T>
 SetupInterfaceCount<T>::SetupInterfaceCount(const InputParameters & parameters)
   : T(parameters),
-    _count_type(T::template getParam<MooseEnum>("count_type")),
+    _count_type(T::template getParamTempl<MooseEnum>("count_type")),
     _execute(0),
-    _counts(T::template declareRestartableData<std::map<std::string, unsigned int>>("counts"))
+    _counts(T::template declareRestartableDataTempl<std::map<std::string, unsigned int>>("counts"))
 {
   // Initialize the count storage map
   const std::vector<std::string> & names = _count_type.getNames();
@@ -174,4 +174,3 @@ protected:
   virtual void threadJoin(const UserObject & uo) { threadJoinHelper(uo); }
   virtual void subdomainSetup() { subdomainSetupHelper(); }
 };
-

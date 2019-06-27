@@ -55,16 +55,15 @@ public:
    * declare the ad property named "prop_name"
    */
   template <typename T>
-  ADMaterialPropertyObject<T> & declareADProperty(const std::string & prop_name);
+  ADMaterialPropertyObject<T> & declareADPropertyTempl(const std::string & prop_name);
 };
 
 template <ComputeStage compute_stage>
 template <typename T>
 ADMaterialPropertyObject<T> &
-ADMaterial<compute_stage>::declareADProperty(const std::string & prop_name)
+ADMaterial<compute_stage>::declareADPropertyTempl(const std::string & prop_name)
 {
   _fe_problem.usingADMatProps(true);
   registerPropName(prop_name, false, Material::CURRENT, compute_stage == JACOBIAN);
-  return _material_data->declareADProperty<T>(prop_name);
+  return _material_data->declareADPropertyTempl<T>(prop_name);
 }
-

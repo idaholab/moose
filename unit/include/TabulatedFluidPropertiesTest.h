@@ -26,13 +26,13 @@ protected:
   {
     InputParameters co2_uo_params = _factory.getValidParams("CO2FluidProperties");
     _fe_problem->addUserObject("CO2FluidProperties", "co2_fp", co2_uo_params);
-    _co2_fp = &_fe_problem->getUserObject<CO2FluidProperties>("co2_fp");
+    _co2_fp = &_fe_problem->getUserObjectTempl<CO2FluidProperties>("co2_fp");
 
     InputParameters tab_uo_params = _factory.getValidParams("TabulatedFluidProperties");
     tab_uo_params.set<UserObjectName>("fp") = "co2_fp";
     tab_uo_params.set<FileName>("fluid_property_file") = "data/csv/fluid_props.csv";
     _fe_problem->addUserObject("TabulatedFluidProperties", "tab_fp", tab_uo_params);
-    _tab_fp = &_fe_problem->getUserObject<TabulatedFluidProperties>("tab_fp");
+    _tab_fp = &_fe_problem->getUserObjectTempl<TabulatedFluidProperties>("tab_fp");
 
     InputParameters tab_gen_uo_params = _factory.getValidParams("TabulatedFluidProperties");
     tab_gen_uo_params.set<UserObjectName>("fp") = "co2_fp";
@@ -45,32 +45,32 @@ protected:
     MultiMooseEnum properties("density enthalpy internal_energy viscosity k cv cp entropy");
     tab_gen_uo_params.set<MultiMooseEnum>("interpolated_properties") = properties;
     _fe_problem->addUserObject("TabulatedFluidProperties", "tab_gen_fp", tab_gen_uo_params);
-    _tab_gen_fp = &_fe_problem->getUserObject<TabulatedFluidProperties>("tab_gen_fp");
+    _tab_gen_fp = &_fe_problem->getUserObjectTempl<TabulatedFluidProperties>("tab_gen_fp");
 
     InputParameters unordered_uo_params = _factory.getValidParams("TabulatedFluidProperties");
     unordered_uo_params.set<UserObjectName>("fp") = "co2_fp";
     unordered_uo_params.set<FileName>("fluid_property_file") = "data/csv/unordered_fluid_props.csv";
     _fe_problem->addUserObject("TabulatedFluidProperties", "unordered_fp", unordered_uo_params);
-    _unordered_fp = &_fe_problem->getUserObject<TabulatedFluidProperties>("unordered_fp");
+    _unordered_fp = &_fe_problem->getUserObjectTempl<TabulatedFluidProperties>("unordered_fp");
 
     InputParameters unequal_uo_params = _factory.getValidParams("TabulatedFluidProperties");
     unequal_uo_params.set<UserObjectName>("fp") = "co2_fp";
     unequal_uo_params.set<FileName>("fluid_property_file") = "data/csv/unequal_fluid_props.csv";
     _fe_problem->addUserObject("TabulatedFluidProperties", "unequal_fp", unequal_uo_params);
-    _unequal_fp = &_fe_problem->getUserObject<TabulatedFluidProperties>("unequal_fp");
+    _unequal_fp = &_fe_problem->getUserObjectTempl<TabulatedFluidProperties>("unequal_fp");
 
     InputParameters missing_col_uo_params = _factory.getValidParams("TabulatedFluidProperties");
     missing_col_uo_params.set<UserObjectName>("fp") = "co2_fp";
     missing_col_uo_params.set<FileName>("fluid_property_file") =
         "data/csv/missing_col_fluid_props.csv";
     _fe_problem->addUserObject("TabulatedFluidProperties", "missing_col_fp", missing_col_uo_params);
-    _missing_col_fp = &_fe_problem->getUserObject<TabulatedFluidProperties>("missing_col_fp");
+    _missing_col_fp = &_fe_problem->getUserObjectTempl<TabulatedFluidProperties>("missing_col_fp");
 
     InputParameters unknown_col_uo_params = _factory.getValidParams("TabulatedFluidProperties");
     unknown_col_uo_params.set<UserObjectName>("fp") = "co2_fp";
     unknown_col_uo_params.set<FileName>("fluid_property_file") = "data/csv/unknown_fluid_props.csv";
     _fe_problem->addUserObject("TabulatedFluidProperties", "unknown_col_fp", unknown_col_uo_params);
-    _unknown_col_fp = &_fe_problem->getUserObject<TabulatedFluidProperties>("unknown_col_fp");
+    _unknown_col_fp = &_fe_problem->getUserObjectTempl<TabulatedFluidProperties>("unknown_col_fp");
 
     InputParameters missing_data_uo_params = _factory.getValidParams("TabulatedFluidProperties");
     missing_data_uo_params.set<UserObjectName>("fp") = "co2_fp";
@@ -78,7 +78,8 @@ protected:
         "data/csv/missing_data_fluid_props.csv";
     _fe_problem->addUserObject(
         "TabulatedFluidProperties", "missing_data_fp", missing_data_uo_params);
-    _missing_data_fp = &_fe_problem->getUserObject<TabulatedFluidProperties>("missing_data_fp");
+    _missing_data_fp =
+        &_fe_problem->getUserObjectTempl<TabulatedFluidProperties>("missing_data_fp");
   }
 
   void TearDown()
@@ -97,4 +98,3 @@ protected:
   const TabulatedFluidProperties * _unknown_col_fp;
   const TabulatedFluidProperties * _missing_data_fp;
 };
-

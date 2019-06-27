@@ -29,8 +29,8 @@ template <ComputeStage compute_stage>
 ADHeatConductionTimeDerivative<compute_stage>::ADHeatConductionTimeDerivative(
     const InputParameters & parameters)
   : ADTimeDerivative<compute_stage>(parameters),
-    _specific_heat(adGetADMaterialProperty<Real>("specific_heat")),
-    _density(adGetADMaterialProperty<Real>("density_name"))
+    _specific_heat(getADMaterialProperty<Real>("specific_heat")),
+    _density(getADMaterialProperty<Real>("density_name"))
 {
 }
 

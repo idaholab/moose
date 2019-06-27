@@ -26,7 +26,8 @@ Nonlinear::Nonlinear(SolidModel & solid_model,
     _Uhat(3, 3)
 {
 
-  std::string increment_calculation = solid_model.getParam<std::string>("increment_calculation");
+  std::string increment_calculation =
+      solid_model.getParamTempl<std::string>("increment_calculation");
   std::transform(increment_calculation.begin(),
                  increment_calculation.end(),
                  increment_calculation.begin(),

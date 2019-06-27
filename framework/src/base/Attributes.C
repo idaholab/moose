@@ -213,7 +213,7 @@ AttribBoundaries::isEqual(const Attribute & other) const
 void
 AttribThread::initFrom(const MooseObject * obj)
 {
-  _val = obj->getParam<THREAD_ID>("_tid");
+  _val = obj->getParamTempl<THREAD_ID>("_tid");
 }
 bool
 AttribThread::isMatch(const Attribute & other) const

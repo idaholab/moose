@@ -19,7 +19,7 @@ ADGrainGrowthBase<compute_stage>::ADGrainGrowthBase(const InputParameters & para
   : ADAllenCahnBase<compute_stage, Real>(parameters),
     _op_num(coupledComponents("v")),
     _vals(_op_num),
-    _mu(adGetADMaterialProperty<Real>("mu"))
+    _mu(getADMaterialProperty<Real>("mu"))
 {
   // Loop through grains and load coupled variables into the arrays
   for (unsigned int i = 0; i < _op_num; ++i)

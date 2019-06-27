@@ -34,11 +34,11 @@ ADRadialReturnStressUpdate<compute_stage>::ADRadialReturnStressUpdate(
     const InputParameters & parameters)
   : ADStressUpdateBase<compute_stage>(parameters),
     ADSingleVariableReturnMappingSolution<compute_stage>(parameters),
-    _effective_inelastic_strain(adDeclareADProperty<Real>(
-        _base_name + adGetParam<std::string>("effective_inelastic_strain_name"))),
-    _effective_inelastic_strain_old(adGetMaterialPropertyOld<Real>(
-        _base_name + adGetParam<std::string>("effective_inelastic_strain_name"))),
-    _max_inelastic_increment(adGetParam<Real>("max_inelastic_increment"))
+    _effective_inelastic_strain(declareADProperty<Real>(
+        _base_name + getParam<std::string>("effective_inelastic_strain_name"))),
+    _effective_inelastic_strain_old(getMaterialPropertyOld<Real>(
+        _base_name + getParam<std::string>("effective_inelastic_strain_name"))),
+    _max_inelastic_increment(getParam<Real>("max_inelastic_increment"))
 {
 }
 

@@ -18,7 +18,7 @@ defineADValidParams(ADDGConvection,
 
 template <ComputeStage compute_stage>
 ADDGConvection<compute_stage>::ADDGConvection(const InputParameters & parameters)
-  : ADDGKernel<compute_stage>(parameters), _velocity(adGetParam<RealVectorValue>("velocity"))
+  : ADDGKernel<compute_stage>(parameters), _velocity(getParam<RealVectorValue>("velocity"))
 {
 }
 

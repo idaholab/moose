@@ -114,7 +114,7 @@ MaterialOutputAction::act()
 
     // Extract the property names that will actually be output
     std::vector<std::string> output_properties =
-        mat->getParam<std::vector<std::string>>("output_properties");
+        mat->getParamTempl<std::vector<std::string>>("output_properties");
 
     // Append the properties listed in the Outputs block
     if (outputs_has_properties)

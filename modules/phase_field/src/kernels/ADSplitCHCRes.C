@@ -19,7 +19,7 @@ defineADValidParams(
 template <ComputeStage compute_stage>
 ADSplitCHCRes<compute_stage>::ADSplitCHCRes(const InputParameters & parameters)
   : ADSplitCHBase<compute_stage>(parameters),
-    _kappa(adGetADMaterialProperty<Real>("kappa_name")),
+    _kappa(getADMaterialProperty<Real>("kappa_name")),
     _w(adCoupledValue("w"))
 {
 }

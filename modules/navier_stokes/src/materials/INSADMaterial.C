@@ -43,19 +43,18 @@ INSADMaterial<compute_stage>::INSADMaterial(const InputParameters & parameters)
     _velocity(adCoupledVectorValue("velocity")),
     _grad_velocity(adCoupledVectorGradient("velocity")),
     _grad_p(adCoupledGradient("pressure")),
-    _mu(adGetADMaterialProperty<Real>("mu_name")),
-    _rho(adGetADMaterialProperty<Real>("rho_name")),
-    _transient_term(adGetParam<bool>("transient_term")),
+    _mu(getADMaterialProperty<Real>("mu_name")),
+    _rho(getADMaterialProperty<Real>("rho_name")),
+    _transient_term(getParam<bool>("transient_term")),
     _velocity_dot(_transient_term ? &adCoupledVectorDot("velocity") : nullptr),
-    _integrate_p_by_parts(adGetParam<bool>("integrate_p_by_parts")),
-    _include_viscous_term_in_strong_form(adGetParam<bool>("include_viscous_term_in_strong_form")),
-    _mass_strong_residual(adDeclareADProperty<Real>("mass_strong_residual")),
-    _convective_strong_residual(adDeclareADProperty<RealVectorValue>("convective_strong_residual")),
-    _td_strong_residual(adDeclareADProperty<RealVectorValue>("td_strong_residual")),
-    _gravity_strong_residual(adDeclareADProperty<RealVectorValue>("gravity_strong_residual")),
-    _mms_function_strong_residual(
-        adDeclareProperty<RealVectorValue>("mms_function_strong_residual")),
-    _momentum_strong_residual(adDeclareADProperty<RealVectorValue>("momentum_strong_residual")),
+    _integrate_p_by_parts(getParam<bool>("integrate_p_by_parts")),
+    _include_viscous_term_in_strong_form(getParam<bool>("include_viscous_term_in_strong_form")),
+    _mass_strong_residual(declareADProperty<Real>("mass_strong_residual")),
+    _convective_strong_residual(declareADProperty<RealVectorValue>("convective_strong_residual")),
+    _td_strong_residual(declareADProperty<RealVectorValue>("td_strong_residual")),
+    _gravity_strong_residual(declareADProperty<RealVectorValue>("gravity_strong_residual")),
+    _mms_function_strong_residual(declareProperty<RealVectorValue>("mms_function_strong_residual")),
+    _momentum_strong_residual(declareADProperty<RealVectorValue>("momentum_strong_residual")),
     _x_vel_fn(getFunction("function_x")),
     _y_vel_fn(getFunction("function_y")),
     _z_vel_fn(getFunction("function_z"))
@@ -63,11 +62,11 @@ INSADMaterial<compute_stage>::INSADMaterial(const InputParameters & parameters)
   if (parameters.isParamSetByUser("gravity"))
   {
     _gravity_set = true;
-    _gravity = adGetParam<RealVectorValue>("gravity");
+    _gravity = getParam<RealVectorValue>("gravity");
   }
   else
     _gravity_set = false;
-  if (adGetParam<bool>("include_viscous_term_in_strong_form"))
+  if (getParam<bool>("include_viscous_term_in_strong_form"))
     mooseError("Sorry no TypeNTensor operations are currently implemented, so we cannot add the "
                "strong form contribution of the viscous term. Note that for linear elements, this "
                "introduces no error, and in general for bi-linear elements, the error is small");

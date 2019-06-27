@@ -22,9 +22,8 @@ protected:
   {
     InputParameters uo_pars = _factory.getValidParams("HydrogenFluidProperties");
     _fe_problem->addUserObject("HydrogenFluidProperties", "fp", uo_pars);
-    _fp = &_fe_problem->getUserObject<HydrogenFluidProperties>("fp");
+    _fp = &_fe_problem->getUserObjectTempl<HydrogenFluidProperties>("fp");
   }
 
   const HydrogenFluidProperties * _fp;
 };
-

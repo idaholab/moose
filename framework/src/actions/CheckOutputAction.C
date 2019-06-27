@@ -93,7 +93,7 @@ CheckOutputAction::checkConsoleOutput()
   std::vector<Console *> console_ptrs = _app.getOutputWarehouse().getOutputs<Console>();
   unsigned int num_screen_outputs = 0;
   for (const auto & console : console_ptrs)
-    if (console->getParam<bool>("output_screen"))
+    if (console->getParamTempl<bool>("output_screen"))
       num_screen_outputs++;
 
   if (num_screen_outputs > 1)
@@ -112,7 +112,7 @@ CheckOutputAction::checkPerfLogOutput()
   bool has_console = false;
   std::vector<Console *> ptrs = _app.getOutputWarehouse().getOutputs<Console>();
   for (const auto & console : ptrs)
-    if (console->getParam<bool>("output_screen"))
+    if (console->getParamTempl<bool>("output_screen"))
     {
       has_console = true;
       break;

@@ -13,6 +13,7 @@
 #include "ConsoleStreamInterface.h"
 #include "Registry.h"
 #include "PerfGraphInterface.h"
+#include "MemberTemplateMacros.h"
 
 #include <string>
 #include <ostream>
@@ -99,7 +100,7 @@ public:
    * @return The value of the parameter
    */
   template <typename T>
-  const T & getParam(const std::string & name) const;
+  const T & getParamTempl(const std::string & name) const;
   ///@}
 
   /**
@@ -123,7 +124,8 @@ public:
    * back to the normal behavior of mooseError - only printing a message using the given args.
    */
   template <typename... Args>
-  [[noreturn]] void paramError(const std::string & param, Args... args) {
+  [[noreturn]] void paramError(const std::string & param, Args... args)
+  {
     auto prefix = param + ": ";
     if (!_pars.inputLocation(param).empty())
       prefix = _pars.inputLocation(param) + ": (" + _pars.paramFullpath(param) + "):\n";
@@ -221,8 +223,7 @@ protected:
 
 template <typename T>
 const T &
-Action::getParam(const std::string & name) const
+Action::getParamTempl(const std::string & name) const
 {
   return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
 }
-
