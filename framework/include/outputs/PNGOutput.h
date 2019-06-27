@@ -23,11 +23,12 @@ InputParameters validParams<PNGOutput>();
 class PNGOutput : public Output
 {
 public:
-  //Basic constructor.  Takes parameters passed in to create a PNGOutput object.
+  // Basic constructor.  Takes parameters passed in to create a PNGOutput object.
   PNGOutput(const InputParameters & parameters);
+
 protected:
   // Method for assigning color values to the PNG
-  void setRGB(png_byte *rgb, Real selection);
+  void setRGB(png_byte * rgb, Real selection);
 
   // Function to create the mesh_function
   void makeMeshFunc();
@@ -69,5 +70,4 @@ protected:
 
   // Value of the colorrs that are outside of the libmesh bounds.
   Real outBoundsControlColor;
-
 };
