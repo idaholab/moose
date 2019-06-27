@@ -18,7 +18,7 @@ def find_heading(translator, node, bookmark=u''):
     """Helper for returning a copy of the heading tokens."""
 
     data = translator.getMetaData(node, 'heading')
-    h = data.get(bookmark, None)
+    h = data.get(bookmark, None) if data else None
     if h is not None:
         return h.copy()
 
