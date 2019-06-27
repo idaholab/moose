@@ -9,68 +9,40 @@
 
 #define nls _problem_ptr->getNonlinearSystem()
 #define scaledValue ((dv(0) + shiftValue) / scalingMax)
-#define reverseScale ((outBoundsControl * scalingMax) - shiftValue)
+#define reverseScale ((outBoundsControlColor * scalingMax) - shiftValue)
 
 #include <fstream>
-#include <png.h>
-#include "PNGObject.h"
+#include "PNGOutput.h"
 #include "libmesh/mesh_tools.h"
 
-registerMooseObject("MooseApp", PNGObject);
+registerMooseObject("MooseApp", PNGOutput);
 
 template <>
 InputParameters
-validParams<PNGObject>()
+validParams<PNGOutput>()
 {
   InputParameters params = validParams<Output>();
   params.addParam<Real>("resolution", 2000, "The resolution of the image.");
   params.addParam<std::string>("PNGFile", "Adam", "Root filename of the PNG to be created.");
   params.addParam<Real>("testStepToPNG", -1, "PNG to save.");
   params.addParam<bool>("inColor", false, "Show the image in color?");
+  params.addParam<Real>("outBoundsControlColor", .5, "Color for the parts of the image that are out of bounds");
   return params;
 }
 
-void PNGObject::setRGB(png_byte *rgb, float selection) {
- 	int color = (int)(selection * 767);
-  // Make sure everything is between 0 and 767.
-  if(color > 767)
-    color = 767;
-  if(color < 0)
-    color = 0;
- 	int magnitude = color % 256;
 
-  // Current color scheme: Blue->Red->Yellow->White
- 	if(color < 256)
-  {
-    rgb[0] = magnitude;
-    rgb[1] = 0;
-    rgb[2] = 255-magnitude;
-  }
- 	else if(color < 512)
-  {
- 		rgb[0] = 255;
-    rgb[1] = magnitude;
-    rgb[2] = 0;
-  }
- 	else
-  {
- 		rgb[0] = 255;
-    rgb[1] = 255;
-    rgb[2] = magnitude;
-  }
-}
-
-PNGObject::PNGObject(const InputParameters & parameters) :
+PNGOutput::PNGOutput(const InputParameters & parameters) :
 Output(parameters),
 resolution(getParam<Real>("resolution")),
 PNGFile(getParam<std::string>("PNGFile")),
 testStepToPNG(getParam<Real>("testStepToPNG")),
-inColor(getParam<bool>("inColor"))
+inColor(getParam<bool>("inColor")),
+outBoundsControlColor(getParam<Real>("outBoundsControlColor"))
 {
 }
 
 // Funtion for making the _mesh_function object.
-void PNGObject::makeMeshFunc() {
+void PNGOutput::makeMeshFunc() {
 
   const std::vector<unsigned int> var_nums = {0};
 
@@ -81,11 +53,14 @@ void PNGObject::makeMeshFunc() {
   _mesh_function = libmesh_make_unique<MeshFunction>(
       *_es_ptr, nls.serializedSolution(), nls.dofMap(), var_nums);
   _mesh_function->init();
-  Real outBoundsControl = 0.5;
+
+  // Need to enable out of mesh with the given control color scaled in reverse
+  // scaling is done, this value retains it's original value.
   _mesh_function->enable_out_of_mesh_mode(reverseScale);
 }
 
-void PNGObject::calculateRescalingValues()
+
+void PNGOutput::calculateRescalingValues()
 {
   // The min and max.
   scalingMin = nls.serializedSolution().min();
@@ -95,6 +70,8 @@ void PNGObject::calculateRescalingValues()
   // Get the shift value.
   if(scalingMin != 0)
   {
+    // Shiftvalue will be the same magnitude, but
+    // going in the opposite direction of the scalingMin
     shiftValue -= scalingMin;
   }
 
@@ -103,14 +80,53 @@ void PNGObject::calculateRescalingValues()
 
 }
 
-void PNGObject::output(const ExecFlagType & /*type*/)
+
+void PNGOutput::setRGB(png_byte *rgb, Real selection) {
+  // Using an RGB system with Red as 0 - 255, Green as 256 - 511 and
+  // Blue as 512 - 767 gives us our total colorSpectrum of 0 - 767.
+  const Real colorSpectrumMax = 767;
+  // We need to convert the
+  auto color = (int)(selection * colorSpectrumMax);
+  // Make sure everything is within our colorSpectrum.
+  if(color > colorSpectrumMax)
+    color = colorSpectrumMax;
+  if(color < 0)
+    color = 0;
+  Real magnitude = color % 256;
+
+  // Current color scheme: Blue->Red->Yellow->White
+  // Blue->Red
+  if(color < 256)
+  {
+    rgb[0] = magnitude;
+    rgb[1] = 0;
+    rgb[2] = 255-magnitude;
+  }
+  // Red->Yellow
+  else if(color < 512)
+  {
+    rgb[0] = 255;
+    rgb[1] = magnitude;
+    rgb[2] = 0;
+  }
+  // Yellow->White
+  else
+  {
+    rgb[0] = 255;
+    rgb[1] = 255;
+    rgb[2] = magnitude;
+  }
+}
+
+
+void PNGOutput::output(const ExecFlagType & /*type*/)
 {
   makeMeshFunc();
   box = MeshTools::create_bounding_box(*_mesh_ptr);
   makePNG();
 }
 
-void PNGObject::makePNG() {
+void PNGOutput::makePNG() {
   // Increment the testStep
   testStep++;
 
@@ -136,29 +152,31 @@ void PNGObject::makePNG() {
   Real width = distx*resolution;
   Real height = disty*resolution;
 
-  if(testStepToPNG != -1) {
-    if(testStep != testStepToPNG) {
-      std::cout << "Not the testStepToPNG one.";
+  if(testStepToPNG != -1)
+    if(testStep != testStepToPNG)
       return;
-    }
-    std::cout << "The testStepToPNG one." << PNGFile2;
-  }
-
-  else
-    std::cout << "Nothing selected.";
 
   fp = fopen(PNGFile2.c_str(), "wb");
 
   if(!fp)
+  {
+    mooseError("Failed to open the file for the PNG output.");
     return;
+  }
 
   pngp = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
   if(!pngp)
+  {
+    mooseError("Failed to make the pointer string for the png.");
     return;
+  }
 
   infop = png_create_info_struct(pngp);
   if(!infop)
+  {
+    mooseError("Failed to make an info pointer for the png.");
     return;
+  }
 
   png_init_io(pngp, fp);
 
@@ -203,7 +221,6 @@ void PNGObject::makePNG() {
   }
 
   png_write_end(pngp, nullptr);
-
   if (fp != nullptr) fclose(fp);
   if (infop != nullptr) png_free_data(pngp, infop, PNG_FREE_ALL, -1);
   if (pngp != nullptr) png_destroy_write_struct(&pngp, (png_infopp)nullptr);

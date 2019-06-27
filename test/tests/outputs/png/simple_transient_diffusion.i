@@ -47,5 +47,11 @@
 []
 
 [Outputs]
+  [png]
+    type = PNGOutput
+    PNGFile = "PNGTEST"
+    resolution = 250
+    inColor = false
+  []
   exodus = true
 []

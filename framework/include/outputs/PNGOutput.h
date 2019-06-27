@@ -10,21 +10,24 @@
 #pragma once
 
 // Forward declarations
-class PNGObject;
+class PNGOutput;
 
 template <>
-InputParameters validParams<PNGObject>();
+InputParameters validParams<PNGOutput>();
 
+// pnglib include
+#include <png.h>
 // MOOSE includes
 #include "Output.h"
-class PNGObject : public Output
+
+class PNGOutput : public Output
 {
 public:
-  //Basic constructor.  Takes parameters passed in to create a PNGCreator object.
-  PNGObject(const InputParameters & parameters);
-
+  //Basic constructor.  Takes parameters passed in to create a PNGOutput object.
+  PNGOutput(const InputParameters & parameters);
+protected:
   // Method for assigning color values to the PNG
-  void setRGB(png_byte *rgb, float selection);
+  void setRGB(png_byte *rgb, Real selection);
 
   // Function to create the mesh_function
   void makeMeshFunc();
@@ -63,5 +66,8 @@ public:
   Real scalingMin;
   Real scalingMax;
   Real shiftValue;
+
+  // Value of the colorrs that are outside of the libmesh bounds.
+  Real outBoundsControlColor;
 
 };
