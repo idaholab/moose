@@ -26,7 +26,7 @@
 [Kernels]
   [./cres]
     type = MatAnisoDiffusion
-    D_name = D
+    diffusivity = D
     variable = c
   [../]
   [./time]

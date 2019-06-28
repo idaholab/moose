@@ -225,20 +225,20 @@
   [./diff_c1]
     type = MatDiffusion
     variable = c
-    D_name = Dh1
-    conc = c1
+    diffusivity = Dh1
+    v = c1
   [../]
   [./diff_c2]
     type = MatDiffusion
     variable = c
-    D_name = Dh2
-    conc = c2
+    diffusivity = Dh2
+    v = c2
   [../]
   [./diff_c3]
     type = MatDiffusion
     variable = c
-    D_name = Dh3
-    conc = c3
+    diffusivity = Dh3
+    v = c3
   [../]
 
   # Kernels for Allen-Cahn equation for eta1

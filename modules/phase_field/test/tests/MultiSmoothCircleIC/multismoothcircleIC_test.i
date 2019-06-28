@@ -43,7 +43,7 @@
   [./diff]
     type = MatDiffusion
     variable = c
-    D_name = D_v
+    diffusivity = D_v
   [../]
 []
 

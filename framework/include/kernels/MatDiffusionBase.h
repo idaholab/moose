@@ -52,10 +52,10 @@ protected:
   const bool _is_coupled;
 
   /// int label for the Concentration
-  unsigned int _conc_var;
+  unsigned int _v_var;
 
   /// Gradient of the concentration
-  const VariableGradient & _grad_conc;
+  const VariableGradient & _grad_v;
 };
 
 template <typename T>
@@ -63,9 +63,19 @@ InputParameters
 MatDiffusionBase<T>::validParams()
 {
   InputParameters params = ::validParams<Kernel>();
-  params.addParam<MaterialPropertyName>("D_name", "D", "The name of the diffusivity");
-  params.addCoupledVar("args", "Vector of arguments of the diffusivity");
-  params.addCoupledVar("conc",
+  params.addDeprecatedParam<MaterialPropertyName>(
+      "D_name",
+      "The name of the diffusivity",
+      "This parameter has been renamed to 'diffusivity', which is more mnemonic and more conducive "
+      "to passing a number literal");
+  params.addParam<MaterialPropertyName>(
+      "diffusivity", "D", "The diffusivity value or material property");
+  params.addCoupledVar("args",
+                       "Optional vector of arguments for the diffusivity. If provided and "
+                       "diffusivity is a derivative parsed material, Jacobian contributions from "
+                       "the diffusivity will be automatically computed");
+  params.addCoupledVar("conc", "Deprecated! Use 'v' instead");
+  params.addCoupledVar("v",
                        "Coupled concentration variable for kernel to operate on; if this "
                        "is not specified, the kernel's nonlinear variable will be used as "
                        "usual");
@@ -75,37 +85,46 @@ MatDiffusionBase<T>::validParams()
 template <typename T>
 MatDiffusionBase<T>::MatDiffusionBase(const InputParameters & parameters)
   : DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>(parameters),
-    _D(getMaterialProperty<T>("D_name")),
-    _dDdc(getMaterialPropertyDerivative<T>("D_name", _var.name())),
+    _D(isParamValid("D_name") ? getMaterialProperty<T>("D_name")
+                              : getMaterialProperty<T>("diffusivity")),
+    _dDdc(getMaterialPropertyDerivative<T>(isParamValid("D_name") ? "D_name" : "diffusivity",
+                                           _var.name())),
     _dDdarg(_coupled_moose_vars.size()),
-    _is_coupled(isCoupled("conc")),
-    _conc_var(_is_coupled ? coupled("conc") : _var.number()),
-    _grad_conc(_is_coupled ? coupledGradient("conc") : _grad_u)
+    _is_coupled(isCoupled("v")),
+    _v_var(_is_coupled ? coupled("v") : (isCoupled("conc") ? coupled("conc") : _var.number())),
+    _grad_v(_is_coupled ? coupledGradient("v")
+                        : (isCoupled("conc") ? coupledGradient("conc") : _grad_u))
 {
+  // deprecated variable parameter conc
+  if (isCoupled("conc"))
+    mooseDeprecated("In '", name(), "' the parameter 'conc' is deprecated, please use 'v' instead");
+
   // fetch derivatives
   for (unsigned int i = 0; i < _dDdarg.size(); ++i)
-    _dDdarg[i] = &getMaterialPropertyDerivative<T>("D_name", _coupled_moose_vars[i]->name());
+    _dDdarg[i] = &getMaterialPropertyDerivative<T>(
+        isParamValid("D_name") ? "D_name" : "diffusivity", _coupled_moose_vars[i]->name());
 }
 
 template <typename T>
 void
 MatDiffusionBase<T>::initialSetup()
 {
-  validateNonlinearCoupling<Real>("D_name");
+  validateNonlinearCoupling<Real>(parameters().isParamSetByUser("D_name") ? "D_name"
+                                                                          : "diffusivity");
 }
 
 template <typename T>
 Real
 MatDiffusionBase<T>::computeQpResidual()
 {
-  return _D[_qp] * _grad_conc[_qp] * _grad_test[_i][_qp];
+  return _D[_qp] * _grad_v[_qp] * _grad_test[_i][_qp];
 }
 
 template <typename T>
 Real
 MatDiffusionBase<T>::computeQpJacobian()
 {
-  Real sum = _phi[_j][_qp] * _dDdc[_qp] * _grad_conc[_qp] * _grad_test[_i][_qp];
+  Real sum = _phi[_j][_qp] * _dDdc[_qp] * _grad_v[_qp] * _grad_test[_i][_qp];
   if (!_is_coupled)
     sum += computeQpCJacobian();
 
@@ -119,8 +138,8 @@ MatDiffusionBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
   // get the coupled variable jvar is referring to
   const unsigned int cvar = mapJvarToCvar(jvar);
 
-  Real sum = (*_dDdarg[cvar])[_qp] * _phi[_j][_qp] * _grad_conc[_qp] * _grad_test[_i][_qp];
-  if (_conc_var == jvar)
+  Real sum = (*_dDdarg[cvar])[_qp] * _phi[_j][_qp] * _grad_v[_qp] * _grad_test[_i][_qp];
+  if (_v_var == jvar)
     sum += computeQpCJacobian();
 
   return sum;

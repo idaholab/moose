@@ -50,7 +50,7 @@
   [./Diffusion]
     type = MatDiffusion
     variable = w
-    D_name = D
+    diffusivity = D
     args = ''
   [../]
   [./coupled_etadot]

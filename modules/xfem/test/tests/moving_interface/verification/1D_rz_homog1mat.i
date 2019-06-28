@@ -75,7 +75,7 @@
   [./heat_cond]
     type = MatDiffusion
     variable = u
-    D_name = 'diffusion_coefficient'
+    diffusivity = diffusion_coefficient
   [../]
   [./vol_heat_src]
     type = BodyForce

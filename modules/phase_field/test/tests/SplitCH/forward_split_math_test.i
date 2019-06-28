@@ -34,14 +34,14 @@
   [./grad_w]
     type = MatDiffusion
     variable = c
-    conc = w
-    D_name = 1.0
+    v = w
+    diffusivity = 1.0
   [../]
   [./grad_c]
     type = MatDiffusion
     variable = w
-    conc = c
-    D_name = 2.0
+    v = c
+    diffusivity = 2.0
   [../]
   [./w2]
     type = CoupledMaterialDerivative

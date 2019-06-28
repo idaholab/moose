@@ -138,7 +138,7 @@
   [./Diffusion]
     type = MatDiffusion
     variable = w
-    D_name = Dchi
+    diffusivity = Dchi
     args = ''
   [../]
   [./coupled_etaa0dot]

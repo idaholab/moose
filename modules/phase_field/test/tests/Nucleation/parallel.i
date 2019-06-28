@@ -8,7 +8,6 @@
   xmax = 20
   ymin = 0
   ymax = 20
-  elem_type = QUAD4
 []
 
 [GlobalParams]
@@ -33,7 +32,6 @@
 [Kernels]
   [./c]
     type = Diffusion
-    #D_name = F
     variable = c
   [../]
   [./dt]

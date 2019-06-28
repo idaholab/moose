@@ -9,8 +9,6 @@
 
 [Variables]
   [./c]
-    order = THIRD
-    family = HERMITE
     [./InitialCondition]
       type = CrossIC
       x1 = 0.0
@@ -23,57 +21,30 @@
 
 [Kernels]
   [./cres]
-    type = CahnHilliardAniso
+    type = ADMatAnisoDiffusion
+    diffusivity = D
     variable = c
-    mob_name = M
-    f_name = F
-  [../]
-  [./int]
-    type = CHInterfaceAniso
-    variable = c
-    kappa_name = kappa_c
-    mob_name = M
   [../]
   [./time]
-    type = TimeDerivative
+    type = ADTimeDerivative
     variable = c
   [../]
 []
 
 [Materials]
-  [./kappa]
-    type = GenericConstantMaterial
-    prop_names = 'kappa_c'
-    prop_values = '2.0'
-  [../]
-  [./mob]
+  [./D]
     type = ConstantAnisotropicMobility
     tensor = '0.1 0 0
               0   1 0
               0   0 0'
-    M_name = M
-  [../]
-  [./free_energy]
-    type = MathEBFreeEnergy
-    f_name = F
-    c = c
-  [../]
-[]
-
-[Preconditioning]
-  [./SMP]
-   type = SMP
-   full = true
+    M_name = D
   [../]
 []
 
 [Executioner]
   type = Transient
   scheme = 'BDF2'
-
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -pc_asm_overlap'
-  petsc_options_value = 'asm         31      lu      1'
 
   l_max_its = 30
   l_tol = 1.0e-4

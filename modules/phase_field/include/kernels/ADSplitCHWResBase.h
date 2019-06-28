@@ -13,7 +13,7 @@
 #include "DerivativeMaterialInterface.h"
 
 #define usingSplitCHWResBase(T)                                                                    \
-  usingKernelMembers;                                                                              \
+  usingKernelGradMembers;                                                                          \
   using ADSplitCHWResBase<compute_stage, T>::_mob_name;                                            \
   using ADSplitCHWResBase<compute_stage, T>::_mob
 
