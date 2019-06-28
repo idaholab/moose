@@ -426,6 +426,7 @@
                                 {
                                     "attributes": {
                                         "bookmark": "", 
+                                        "exact": false, 
                                         "optional": false, 
                                         "page": "extensions/core.md", 
                                         "recursive": true
@@ -460,6 +461,7 @@
                                 {
                                     "attributes": {
                                         "bookmark": "", 
+                                        "exact": false, 
                                         "optional": false, 
                                         "page": "extensions/autolink.md", 
                                         "recursive": true
@@ -494,6 +496,7 @@
                                 {
                                     "attributes": {
                                         "bookmark": "", 
+                                        "exact": false, 
                                         "optional": false, 
                                         "page": "extensions/include.md", 
                                         "recursive": true
@@ -528,6 +531,7 @@
                                 {
                                     "attributes": {
                                         "bookmark": "", 
+                                        "exact": false, 
                                         "optional": false, 
                                         "page": "extensions/style.md", 
                                         "recursive": true
@@ -562,6 +566,7 @@
                                 {
                                     "attributes": {
                                         "bookmark": "", 
+                                        "exact": false, 
                                         "optional": false, 
                                         "page": "extensions/media.md", 
                                         "recursive": true
@@ -596,6 +601,7 @@
                                 {
                                     "attributes": {
                                         "bookmark": "", 
+                                        "exact": false, 
                                         "optional": false, 
                                         "page": "extensions/gallery.md", 
                                         "recursive": true
@@ -630,6 +636,7 @@
                                 {
                                     "attributes": {
                                         "bookmark": "", 
+                                        "exact": false, 
                                         "optional": false, 
                                         "page": "extensions/listing.md", 
                                         "recursive": true
@@ -664,6 +671,7 @@
                                 {
                                     "attributes": {
                                         "bookmark": "", 
+                                        "exact": false, 
                                         "optional": false, 
                                         "page": "extensions/table.md", 
                                         "recursive": true
@@ -698,6 +706,7 @@
                                 {
                                     "attributes": {
                                         "bookmark": "", 
+                                        "exact": false, 
                                         "optional": false, 
                                         "page": "extensions/devel.md", 
                                         "recursive": true
@@ -732,6 +741,7 @@
                                 {
                                     "attributes": {
                                         "bookmark": "", 
+                                        "exact": false, 
                                         "optional": false, 
                                         "page": "extensions/package.md", 
                                         "recursive": true
@@ -766,6 +776,7 @@
                                 {
                                     "attributes": {
                                         "bookmark": "", 
+                                        "exact": false, 
                                         "optional": false, 
                                         "page": "extensions/alert.md", 
                                         "recursive": true
@@ -800,6 +811,7 @@
                                 {
                                     "attributes": {
                                         "bookmark": "", 
+                                        "exact": false, 
                                         "optional": false, 
                                         "page": "extensions/katex.md", 
                                         "recursive": true
@@ -834,6 +846,7 @@
                                 {
                                     "attributes": {
                                         "bookmark": "", 
+                                        "exact": false, 
                                         "optional": false, 
                                         "page": "extensions/bibtex.md", 
                                         "recursive": true
@@ -868,6 +881,7 @@
                                 {
                                     "attributes": {
                                         "bookmark": "", 
+                                        "exact": false, 
                                         "optional": false, 
                                         "page": "extensions/common.md", 
                                         "recursive": true
@@ -902,6 +916,7 @@
                                 {
                                     "attributes": {
                                         "bookmark": "", 
+                                        "exact": false, 
                                         "optional": false, 
                                         "page": "extensions/layout.md", 
                                         "recursive": true
@@ -936,6 +951,7 @@
                                 {
                                     "attributes": {
                                         "bookmark": "", 
+                                        "exact": false, 
                                         "optional": false, 
                                         "page": "extensions/materialicon.md", 
                                         "recursive": true
@@ -970,6 +986,7 @@
                                 {
                                     "attributes": {
                                         "bookmark": "", 
+                                        "exact": false, 
                                         "optional": false, 
                                         "page": "extensions/content.md", 
                                         "recursive": true
@@ -1004,6 +1021,7 @@
                                 {
                                     "attributes": {
                                         "bookmark": "", 
+                                        "exact": false, 
                                         "optional": false, 
                                         "page": "extensions/config.md", 
                                         "recursive": true
@@ -1038,6 +1056,7 @@
                                 {
                                     "attributes": {
                                         "bookmark": "", 
+                                        "exact": false, 
                                         "optional": false, 
                                         "page": "extensions/graph.md", 
                                         "recursive": true
@@ -1072,6 +1091,7 @@
                                 {
                                     "attributes": {
                                         "bookmark": "", 
+                                        "exact": false, 
                                         "optional": false, 
                                         "page": "extensions/navigation.md", 
                                         "recursive": true
@@ -1106,6 +1126,7 @@
                                 {
                                     "attributes": {
                                         "bookmark": "", 
+                                        "exact": false, 
                                         "optional": false, 
                                         "page": "extensions/appsyntax.md", 
                                         "recursive": true
@@ -1140,6 +1161,7 @@
                                 {
                                     "attributes": {
                                         "bookmark": "", 
+                                        "exact": false, 
                                         "optional": false, 
                                         "page": "extensions/template.md", 
                                         "recursive": true
@@ -1174,6 +1196,7 @@
                                 {
                                     "attributes": {
                                         "bookmark": "", 
+                                        "exact": false, 
                                         "optional": false, 
                                         "page": "extensions/sqa.md", 
                                         "recursive": true
