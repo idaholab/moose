@@ -26,7 +26,7 @@ model. For example, if only a single fluid phase is present, the primary variabl
 be the pressure, temperature and mass fraction of a component in the phase, see [variables]. If the phase state changes to a two-phase model, then the mass fraction
 variable is *switched* to now represent the saturation of one of the fluid phases.
 
-This approach has been used in several flow simulators, for example TOUGH2 [citep!pruess1999]
+This approach has been used in several flow simulators, for example TOUGH2 [!citep](pruess1999)
 
 ## Persistent set of primary variables
 

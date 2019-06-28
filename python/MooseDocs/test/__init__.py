@@ -1,7 +1,9 @@
 import unittest
+import collections
 from MooseDocs.common import load_extensions
 from MooseDocs import base
 from MooseDocs.tree import tokens, pages, html, latex
+from MooseDocs.extensions import command
 
 class MooseDocsTestCase(unittest.TestCase):
     """
@@ -20,32 +22,30 @@ class MooseDocsTestCase(unittest.TestCase):
         self.__result = None
         self.__translator = None
 
-    @property
-    def meta(self):
-        """Return the current Meta data"""
-        return self.__meta
-
-    @property
-    def ast(self):
-        """Return the current AST"""
-        return self.__ast
-
-    @property
-    def result(self):
-        """Return the current rendered result"""
-        return self.__result
-
     def setup(self, content=None, reader=None, renderer=None, extensions=None, executioner=None):
         """Helper method for setting up MOOSEDocs objects"""
+
+        command.CommandExtension.EXTENSION_COMMANDS.clear()
+
         content = content or []
         reader = self.READER() if reader is None else reader
         renderer = self.RENDERER() if renderer is None else renderer
         extensions = extensions or self.EXTENSIONS
         executioner = executioner or self.EXECUTIONER
 
-        ext = load_extensions(extensions)
+        config = dict()
+        for ext in extensions:
+            local = self.setupExtension(ext)
+            if local:
+                config[ext.__name__] = local
+
+        ext = load_extensions(extensions, config)
         self.__translator = base.Translator(content, reader, renderer, ext, executioner)
         self.__translator.init()
+
+    def setupExtension(self, ext):
+        """Virtual method for child objects to update extension configuration."""
+        pass
 
     def tokenize(self, text, *args, **kwargs):
         """Helper for tokenization"""
@@ -74,28 +74,47 @@ class MooseDocsTestCase(unittest.TestCase):
         self.assertEqual(token.name, tname)
         self.assertAttributes(token, **kwargs)
 
-    def assertHTMLTag(self, tag, tname, **kwargs):
+    def assertHTMLTag(self, tag, tname, string=None, size=None, **kwargs):
         """Helper for checking HTML tree nodes"""
         self.assertIsInstance(tag, html.Tag)
         self.assertEqual(tag.name, tname)
         self.assertAttributes(tag, **kwargs)
+
+        if size is not None:
+            self.assertSize(tag, size)
+        if string is not None:
+            self.assertSize(tag, 1)
+            self.assertHTMLString(tag(0), string)
 
     def assertHTMLString(self, node, content, **kwargs):
         self.assertIsInstance(node, html.String)
         self.assertEqual(node.get('content'), content)
         self.assertAttributes(node, **kwargs)
 
-    def assertLatex(self, node, tname, name, **kwargs):
+    def assertLatex(self, node, tname, name, string=None, size=None, **kwargs):
         self.assertEqual(node.__class__.__name__, tname)
         self.assertEqual(node.name, name)
         self.assertAttributes(node, **kwargs)
+
+        if size is not None:
+            self.assertSize(node, size)
+        if string is not None:
+            self.assertSize(node, 1)
+            self.assertLatexString(node(0), string)
 
     def assertLatexString(self, node, content, **kwargs):
         self.assertIsInstance(node, latex.String)
         self.assertEqual(node.get('content'), content)
         self.assertAttributes(node, **kwargs)
 
+    def assertLatexArg(self, node, index, tname, string=None, size=None, **kwargs):
+        arg = node['args'][index]
+        self.assertLatex(arg, tname, tname, string, size, **kwargs)
+
     def assertAttributes(self, node, **kwargs):
         for key, value in kwargs.iteritems():
             key = key.rstrip('_')
             self.assertEqual(node[key], value)
+
+    def assertSize(self, node, num):
+        self.assertEqual(len(node), num)

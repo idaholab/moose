@@ -3,7 +3,7 @@
 All user-facing objects in MOOSE derive from `MooseObject`, this allows for a common structure
 for all applications and is the basis for the modular design of MOOSE.
 
-There are two basic forms of a MooseObject, a basic form and a template form for [!ac!AD].
+There are two basic forms of a MooseObject, a basic form and a template form for [!ac](AD).
 
 !---
 

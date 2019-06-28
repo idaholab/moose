@@ -172,7 +172,7 @@ This form has many advantages:
 ## Preconditioned JFNK
 
 Krylov methods need preconditioning to be efficient (or even effective!),
-see [citet:knoll2004jacobian].
+see [!citet](knoll2004jacobian).
 
 - Reduces the total number of linear iterations
 - Krylov methods, in theory, converge in the number of linear iterations equal to the number of unknowns in the system
@@ -288,7 +288,7 @@ often results in decreased solve time overall.
 
 ## Manual Jacobian Calculation
 
-The remainder of the tutorial will focus on using [!ac!AD] for computing
+The remainder of the tutorial will focus on using [!ac](AD) for computing
 Jacobian terms, but it is possible to compute them manually.
 
 It is recommended that all new Kernel objects use AD.

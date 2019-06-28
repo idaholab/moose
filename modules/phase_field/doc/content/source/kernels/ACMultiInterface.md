@@ -16,7 +16,7 @@ mobility associated with the $\eta_i$ order parameter.
 
 ## Derivation
 
-The interfacial free energy density $f_{int}$ is implemented following [cite!Nest98] equations
+The interfacial free energy density $f_{int}$ is implemented following [!cite](Nest98) equations
  (7) and (8) (also see footnote 1)
 
 \begin{equation}

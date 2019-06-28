@@ -4,7 +4,7 @@ A system for performing multiple simulations within a master simulation.
 
 !---
 
-MOOSE was originally created to solve fully-coupled systems of [!ac!PDEs], but
+MOOSE was originally created to solve fully-coupled systems of [!ac](PDEs), but
 not all systems need to be/are fully coupled:
 
 - Multiscale systems are generally loosely coupled between scales

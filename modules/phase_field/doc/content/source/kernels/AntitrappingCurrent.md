@@ -2,7 +2,7 @@
 
 !syntax description /Kernels/AntitrappingCurrent
 
-Implements the antitrapping current term corresponding to alloy solidification [cite!plapp_unified_2011]. The weak form is
+Implements the antitrapping current term corresponding to alloy solidification [!cite](plapp_unified_2011). The weak form is
 
 \begin{equation}
 \left( F(u,v,a,b,\dots) \frac{\nabla v}{|\nabla v|} \frac{\partial v}{\partial t}, \nabla \psi \right),

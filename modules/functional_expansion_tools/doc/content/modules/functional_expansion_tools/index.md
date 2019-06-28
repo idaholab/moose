@@ -5,10 +5,10 @@ A MOOSE module for continuous, mesh-agnostic, high-fidelity, reduced-data MultiA
 ## Description
 
 Functional expansions (FXs) are a methodology that represent information as moments of a functional
-series [citep!Flusser2016]. This is is related to a Fourier series representation of cyclic
+series [!citep](Flusser2016). This is is related to a Fourier series representation of cyclic
 data. Moments are generated via numerical integration for each term in the functional series to
 represent the field of interest. These moments can then be used to reconstruct the field in a
-separate app [citep!Wendt2018a,Wendt2017c,Kerby2017].
+separate app [!citep](Wendt2018a,Wendt2017c,Kerby2017).
 
 Currently there are two main flavors of FX coupling available: interface and volumetric.
 
@@ -111,10 +111,10 @@ to support the newly-available series.
 
 ## Caveats
 
-1. FXs are not recommended for spanning spaces with discontinuities [citep!Ellis2017b].
+1. FXs are not recommended for spanning spaces with discontinuities [!citep](Ellis2017b).
    - One example would be a space containing two distinct materials with significantly different properties
    - Instead, using multiple FXs, each over its own region of continuity, is the recommended approach
-2. Increasing the order of an FX does not always result in an improved representation. Numerical integration of the FX moment can yield large errors if not enough quadrature points are included [citep!Griesheimer2005a].
+2. Increasing the order of an FX does not always result in an improved representation. Numerical integration of the FX moment can yield large errors if not enough quadrature points are included [!citep](Griesheimer2005a).
 
 !bibtex bibliography
 

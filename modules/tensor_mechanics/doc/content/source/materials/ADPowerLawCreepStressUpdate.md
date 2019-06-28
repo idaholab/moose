@@ -26,7 +26,7 @@ return stress increment. This isotropic plasticity class also computes the
 plastic strain as a stateful material property.
 
 This class is based on the implicit integration algorithm in
-[cite!dunne2005introduction] pg. 146 - 149.
+[!cite](dunne2005introduction) pg. 146 - 149.
 
 `ADPowerLawCreepStressUpdate` must be run in conjunction with an inelastic
 strain return mapping stress calculator such as

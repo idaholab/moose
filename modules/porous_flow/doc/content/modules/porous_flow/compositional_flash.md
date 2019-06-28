@@ -2,7 +2,7 @@
 
 The miscible flow models available in PorousFlow use a compositional flash to
 determine the amount of each fluid phase present for the given set of persistent
-primary variables using the Rachford-Rice equation [citep!rachford-rice1952]
+primary variables using the Rachford-Rice equation [!citep](rachford-rice1952)
 
 \begin{equation}
 \label{eq:rr}

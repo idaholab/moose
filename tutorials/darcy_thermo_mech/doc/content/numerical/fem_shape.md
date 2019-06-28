@@ -15,7 +15,7 @@ computer.
 !media fem_hat_function.png style=width:100%;
 
 !style fontsize=60%
-*Images copyright [citet!becker1981finite]*
+*Images copyright [!citet](becker1981finite)*
 
 !col-end!
 

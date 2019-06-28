@@ -108,7 +108,7 @@ respective functions.
 
 ## Simplified FEM
 
-FEM is a method for numerically approximating the solution to [!ac!PDEs].
+FEM is a method for numerically approximating the solution to [!ac](PDEs).
 
 FEM finds a solution function that is made up of "shape functions" multiplied by coefficients and
 added together, just like in polynomial fitting, except the functions are not typically as simple

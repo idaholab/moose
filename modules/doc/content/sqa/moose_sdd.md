@@ -5,17 +5,17 @@
 Frameworks are a software development construct aiming to simplify the creation of specific classes
 of applications through abstraction of low-level details. The main object of creating a framework is
 to provide an interface to application developers that saves time and provides advanced capabilities
-not attainable otherwise. The !!acro MOOSE!!, mission is
+not attainable otherwise. The [!ac](MOOSE), mission is
 just that: provide a framework for engineers and scientists to build state-of-the-art,
 computationally scalable finite element based simulation tools.
 
-!!acro MOOSE!! was conceived with one major objective: to be as easy and straightforward to use by
-scientists and engineers as possible. !!acro MOOSE!! is meant to be approachable by non-computational
-scientists who have systems of !!acro PDEs!! they need to solve. Every single
-aspect of !!acro MOOSE!! was driven by this singular principle from the build system to the API to
+[!ac](MOOSE) was conceived with one major objective: to be as easy and straightforward to use by
+scientists and engineers as possible. [!ac](MOOSE) is meant to be approachable by non-computational
+scientists who have systems of [!ac](PDEs) they need to solve. Every single
+aspect of [!ac](MOOSE) was driven by this singular principle from the build system to the API to
 the software development cycle.  At every turn, decisions were made to enable this class of users to
 be successful with the framework.  The pursuit of this goal has led to many of the unique features of
-!!acro MOOSE!!:
+[!ac](MOOSE):
 
 - A streamlined build system
 - An API aimed at extensible
@@ -36,12 +36,12 @@ those not trained in software development or computational science.
 
 Developing trust in a framework goes beyond utilizing "best practices" for the code developed, it is
 equally important that the framework itself is built upon tools that are trusted. For this reason,
-!!acro MOOSE!! relies on a well-established code base of libMesh and PETSc.  The libMesh library
+[!ac](MOOSE) relies on a well-established code base of libMesh and PETSc.  The libMesh library
 provides foundational capability for the finite element method and provides interfaces to
 leading-edge numerical solution packages such as PETSc.
 
 With these principles in mind, an open source, massively parallel, finite element, multiphysics
-framework has been conceived.  !!acro MOOSE!! is an on-going project started in 2008 aimed toward a
+framework has been conceived.  [!ac](MOOSE) is an on-going project started in 2008 aimed toward a
 common platform for creation of new multiphysics tools.  This document provides design details
 pertinent to application developers as well as framework developers.
 
@@ -105,4 +105,3 @@ request system on the Github.org website.
 !sqa cross-reference
 
 !template-end!
-

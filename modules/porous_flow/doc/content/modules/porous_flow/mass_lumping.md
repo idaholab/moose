@@ -26,7 +26,7 @@ etc) are evaluated at each quadrature point.  However, in PorousFlow, everything
 derivative is evaluated at the nodes.  Specifically, $M^{\kappa}$ at a node depends only on the
 independent variables at that node.  It has been shown in many studies that this lumping is
 advantageous for mass conservation and reduces spurious oscillations of the pressure around sharp
-fronts [citep!celia1990].
+fronts [!citep](celia1990).
 
 The cause of oscillations around sharp fronts, and how mass lumping removes the oscillations, can be
 illustrated through a simple example.

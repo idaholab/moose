@@ -22,7 +22,7 @@ The comparison between PorousFlow and this analytical solution is presented in [
 
 ## Hydrodynamic dispersion
 
-The PorousFlow results are compared to known analytical solutions for simple problems in order to verify that the MOOSE implementation is working properly. For a simple 1D model with no diffusion and constant velocity $v$, an analytical solution for the mass fraction profile is given by [citep!javendel]
+The PorousFlow results are compared to known analytical solutions for simple problems in order to verify that the MOOSE implementation is working properly. For a simple 1D model with no diffusion and constant velocity $v$, an analytical solution for the mass fraction profile is given by [!citep](javendel)
 \begin{equation}
 \begin{array}{rcl}
 C(x, t) & = & C_0 \left\{ \frac{1}{2} \mathrm{erfc}\,\left(\frac{x- v t}{2 \sqrt{D t}}\right) + \left(\frac{v^2 t}{\pi D}\right)^{1/2}

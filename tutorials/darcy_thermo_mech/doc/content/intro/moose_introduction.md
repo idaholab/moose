@@ -39,7 +39,7 @@ Multi-physics Object Oriented Simulation Environment
 - User code agnostic of dimension
 - Continuous and Discontinuous Galerkin
 - Fully Coupled, Fully Implicit (and explicit)
-- [!ac!AD]
+- [!ac](AD)
 - Unstructured mesh with FEM shapes (Quads, Tris, Hexes, Tets, Pyramids, Wedges,...)
 - Higher order geometry (curvilinear, etc.)
 - Mesh Adaptivity (refinement and coarsening)

@@ -30,7 +30,7 @@ that $P_{\mathrm{c}}'(S)<0$.
 
 The analytic solution of this nonlinear diffusion-advection relevant
 to constant infiltration to groundwater has been derived by Broadbridge
-and White [citep!broadbridge1988] for certain functions
+and White [!citep](broadbridge1988) for certain functions
 $D$ and $K$.   Broadbridge and White
 assume the hydraulic conductivity is
 \begin{equation}
@@ -103,7 +103,7 @@ Two tests are part of the automatic test suite (one is marked
 
 ## The two-phase analytic drainage solution
 
-Warrick, Lomen and Islas [citep!warrick1990] extended
+Warrick, Lomen and Islas [!citep](warrick1990) extended
 the analysis of Broadbridge and White to include
 the case of drainage from a medium.
 
@@ -137,7 +137,7 @@ Two tests are part of the automatic test suite (one is marked
 
 ## Single-phase infiltration and drainage
 
-Forsyth, Wu and Pruess [citep!forsyth1995] describe a HYDRUS simulation of an
+Forsyth, Wu and Pruess [!citep](forsyth1995) describe a HYDRUS simulation of an
 experiment involving infiltration (experiment 1) and subsequent
 drainage (experiment 2) in a large caisson.  The simulation is
 effectively one dimensional, and is shown in
@@ -208,7 +208,7 @@ The input file for the latter 96 days of Experiment 2:
 An analytic solution of the two-phase Richards' equations with
 gravity on a
 semi-infinite line $z\geq 0$, with a constant water infiltration flux
-at $z=0$ has been derived by [citep!rsc1983] (Unfortunately there must be a typo in the RSC paper
+at $z=0$ has been derived by [!citep](rsc1983) (Unfortunately there must be a typo in the RSC paper
   as for nonzero gravity their results are clearly incorrect.).  The authors
 assume incompressible fluids; linear relative permeability
 relationships; the "oil" (or "gas") viscosity is larger than the

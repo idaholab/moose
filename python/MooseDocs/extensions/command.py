@@ -63,8 +63,6 @@ class CommandExtension(components.Extension):
         self.requires(core)
         reader.addBlock(BlockBlockCommand(), location='_begin')
         reader.addBlock(BlockInlineCommand(), location='<BlockBlockCommand')
-        reader.addInline(OlderInlineCommand(), location='_begin') #TODO: add deprecated message
-        reader.addInline(OldInlineCommand(), location='_begin')   #TODO: add deprecated message
         reader.addInline(InlineCommand(), location='_begin')
 
 class CommandComponent(components.TokenComponent): #pylint: disable=abstract-method
@@ -150,21 +148,14 @@ class BlockBlockCommand(CommandBase):
                     r'(?=\n*\Z|\n{2,})',         # ends with empty line or end of string
                     flags=re.UNICODE|re.MULTILINE|re.DOTALL)
 
-class OlderInlineCommand(CommandBase):
-    RE = re.compile(r'!{2}(?P<command>\w+) *(?P<subcommand>\w+)? *(?P<settings>.*?)!{2}',
-                    flags=re.UNICODE)
-
-class OldInlineCommand(CommandBase):
-    RE = re.compile(r'\[(?P<command>\w+)!(?!(?P<subcommand>\w+)!)?(?P<inline>.*?)'
-                    r' *(?P<settings>\w+=.*?)?\]',
-                    flags=re.UNICODE)
-
 class InlineCommand(CommandBase):
     """Inline commands as:
-        [command key=value]
-        [command](content in here)
-        [command!subcommand key=value]
-        [command!subcommand key=value](content in here)
+        [!command key=value]
+        [!command](content in here)
+        [!command!subcommand key=value]
+        [!command!subcommand key=value](content in here)
+
+    https://regex101.com/r/B7er21/1
     """
 
     RE = re.compile(r'\['                        # opening bracket "["
