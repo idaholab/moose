@@ -116,7 +116,7 @@ def _get_module(ext):
     return name, ext
 
 def _yaml_load_executioner(config):
-    """Load the Executioner objecte for the translator."""
+    """Load the Executioner object for the translator."""
 
 def _yaml_load_extensions(config):
     """Load extensions from the Extensions block of the YAML configuration file."""

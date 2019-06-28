@@ -1,6 +1,6 @@
 # Density-driven convective mixing
 
-PorousFlow may be used to study the convective mixing of fluids.  In this page we discuss the density-driven convective mixing of CO$_{2}$ into brine.  CO$_{2}$ exists initially in both the liquid and gas phase.  As the CO$_{2}$ diffuses into the brine, the gaseous CO$_{2}$ disappears and the brine's density increases, which drives convective mixing of the two fluids and accelerates the dissolution of the gas phase [citep!emami]. Input files for similar situations may be found [here](https://github.com/idaholab/moose/blob/master/modules/porous_flow/examples/lava_lamp).
+PorousFlow may be used to study the convective mixing of fluids.  In this page we discuss the density-driven convective mixing of CO$_{2}$ into brine.  CO$_{2}$ exists initially in both the liquid and gas phase.  As the CO$_{2}$ diffuses into the brine, the gaseous CO$_{2}$ disappears and the brine's density increases, which drives convective mixing of the two fluids and accelerates the dissolution of the gas phase [!citep](emami). Input files for similar situations may be found [here](https://github.com/idaholab/moose/blob/master/modules/porous_flow/examples/lava_lamp).
 
 Because this problem involves the disappearance of the gaseous phase, the simulation utilises persistent primary variables and a vapor-liquid flash.
 

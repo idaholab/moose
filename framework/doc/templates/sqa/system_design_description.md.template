@@ -58,16 +58,16 @@ Add or revise spcific defintions.
 - +Baseline+: A specification or product (e.g., project plan, maintenance and operations (M&O) plan,
   requirements, or design) that has been formally reviewed and agreed upon, that thereafter serves as
   the basis for use and further development, and that can be changed only by using an approved change
-  control process [citep!ASME-NQA-1-2008].
+  control process [!citep](ASME-NQA-1-2008).
 
 - +Validation+: Confirmation, through the provision of objective evidence (e.g., acceptance test),
   that the requirements for a specific intended use or application have been fulfilled
-  [citep!ISO-systems-software].
+  [!citep](ISO-systems-software).
 
 - +Verification+: (1) The process of: evaluating a system or component to determine whether the
   products of a given development phase satisfy the conditions imposed at the start of that
   phase. (2) Formal proof of program correctness (e.g., requirements, design, implementation reviews,
-  system tests) [citep!ISO-systems-software].
+  system tests) [!citep](ISO-systems-software).
 
 !sqa-end!
 

@@ -90,13 +90,13 @@ subtracted from the total strain in the Compute Strain classes.
 \begin{equation}
 \epsilon_{mechanical} = \epsilon_{total} - \epsilon_{eigen}
 \end{equation}
-Chapter 3 of [cite!qu2006fundamentals] describes the relationship between total, elastic, and eigen- strains and
+Chapter 3 of [!cite](qu2006fundamentals) describes the relationship between total, elastic, and eigen- strains and
 provides examples using thermal expansion and dislocations.
 
 Eigenstrains are also referred to as residual strains, stress-free strains, or intrinsic strains;
 translated from German, [Eigen](http://dict.tu-chemnitz.de/deutsch-englisch/Eigen....html) means own
 or intrinsic in English.  The term eigenstrain was introduced by
-[cite!mura1982general]:
+[!cite](mura1982general):
 
 > Eigenstrain is a generic name given to such nonelastic strains as thermal expansion, phase
 > transformation, initial strains, plastic, misfit strains. Eigenstress is a generic name given to

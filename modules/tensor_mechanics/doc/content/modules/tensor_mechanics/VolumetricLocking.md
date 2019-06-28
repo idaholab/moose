@@ -5,7 +5,7 @@ incompressible (Poisson's ratio $\nu$ nearing 0.5). This stiffening happens when
 (such as Hex8 elements with 8 quadrature points or Quad4 elements with 4 quadrature points) is
 used. This is a numerical artifact introduced because shape functions used in finite element analysis
 cannot properly approximate the incompressibility condition throughout the element. To avoid this
-locking of elements, B-bar correction [cite!hughes1987finite] is implemented in MOOSE.
+locking of elements, B-bar correction [!cite](hughes1987finite) is implemented in MOOSE.
 
 ## Theory
 
@@ -46,7 +46,7 @@ The modified equation of motion is:
 \int_V \sigma(\bar{\epsilon})\bar{\delta \epsilon} dV - \int_V b \delta v dV - \int_{\partial V} t \delta v dA = 0
 \end{aligned}
 \end{equation}
-More details about this method can be found in [Section 8.6](http://solidmechanics.org/Text/Chapter8_6/Chapter8_6.php) of [cite!bower2009applied].
+More details about this method can be found in [Section 8.6](http://solidmechanics.org/Text/Chapter8_6/Chapter8_6.php) of [!cite](bower2009applied).
 
 When finite strain formulation is used, the volumetric component of the strain is separated using the
 determinant of the deformation matrix.
@@ -68,7 +68,7 @@ the following pre-conditioner block may be used:
 
 ## Verification of locking correction on Cook's membrane
 
-A 2D trapezoidal membrane [fig_cook] with Poisson's ratio of 0.4999 is fixed at the left edge and sheared at the right edge. Locking behavior of the membrane is observed with the use of first order (Quad4) elements with no volumetric locking correction. This locking results in much lower vertical displacement at Point A than that observed in other scenarios [fig_cook_results]. Locking can be avoided with the use of Quad4 elements along with volumetric locking correction or with the use of second order elements (Quad8) with or without volumetric locking correction. These results match with that presented in Fig. 6 of [cite!nakshatrala2008fem].  
+A 2D trapezoidal membrane [fig_cook] with Poisson's ratio of 0.4999 is fixed at the left edge and sheared at the right edge. Locking behavior of the membrane is observed with the use of first order (Quad4) elements with no volumetric locking correction. This locking results in much lower vertical displacement at Point A than that observed in other scenarios [fig_cook_results]. Locking can be avoided with the use of Quad4 elements along with volumetric locking correction or with the use of second order elements (Quad8) with or without volumetric locking correction. These results match with that presented in Fig. 6 of [!cite](nakshatrala2008fem).  
 
 !row!
 

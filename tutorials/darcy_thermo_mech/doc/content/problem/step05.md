@@ -117,7 +117,7 @@ cd problems
 ## Outflow Boundary Condition (5c)
 
 The flow is assumed to exit the pipe into a large tank, which is modeled with the "No BC" boundary
-condition of [cite!griffiths1997no].
+condition of [!cite](griffiths1997no).
 
 The boundary term, $-\left < k \nabla T \cdot \mathbf{n}, \psi_i \right >$, is computed implicitly
 rather than being replaced with a known flux, as is done in a `NeumannBC`.

@@ -6,7 +6,7 @@
 
 This class is used to compute the strain increment, total strain, and
 incremental rotation for finite strain problems. The finite strain approach used
-is the incremental corotational form [citep!rashid1993incremental]. This
+is the incremental corotational form [!citep](rashid1993incremental). This
 approach computes logarithmic strains and strain increments. This material
 supplies material properties with all derivatives required to form an exact
 Jacobian.
@@ -28,7 +28,7 @@ the previous and the current incremental configurations.
 
 The deformation gradient represents the change in a material element from the
 reference configuration to the current configuration
-[citep!malvern1969introduction]. In the incremental formulation used in the
+[!citep](malvern1969introduction). In the incremental formulation used in the
 `ADComputeFiniteStrain` class, the incremental deformation gradient represents
 the change in the material element from the previous configuration, $\kappa_n$,
 to the current configuration, $\kappa_{n+1}$. Mathematically this relationship
@@ -48,7 +48,7 @@ incremental deformation gradient of $\kappa_{n+1}$ with respect to $\kappa_n$.
 Thus $\hat{\boldsymbol{F}} = \boldsymbol{F}_{n+1} \boldsymbol{F}_n^{-1}$, where
 $\boldsymbol{F}_n$ is the total deformation gradient at time $t_n$.
 
-Following the explanation of this procedure given by [cite!zhang2018modified],
+Following the explanation of this procedure given by [!cite](zhang2018modified),
 the incremental deformation gradient can be multiplicatively decomposed into an
 incremental rotation tensor, $\boldsymbol{\hat{R}}$, and the incremental right
 stretch tensor, $\boldsymbol{\hat{U}}$
@@ -63,7 +63,7 @@ stretch tensor, $\boldsymbol{\hat{U}}$, is symmetric and positive definite. The
 incremental right Cauchy-Green deformation tensor, $\boldsymbol{\hat{C}}$, can
 be given in terms of $\boldsymbol{\hat{U}}$ by subsituting
 [eqn:polar_decomposition_deform_grad] into the definition for
-$\boldsymbol{\hat{C}}$ from [cite!malvern1969introduction]:
+$\boldsymbol{\hat{C}}$ from [!cite](malvern1969introduction):
 
 \begin{equation}
   \label{eqn:right_green_cauchy_deformation_tensor}
@@ -83,7 +83,7 @@ which can be evaluated by performing a spectral decomposition of
 $\boldsymbol{\hat{C}}$. Once $\boldsymbol{\hat{U}}$ has been computed, the
 multiplicative decomposition of the deformation graidient is used to find the
 incremental rotation tensor $\boldsymbol{\hat{R}}$ and the stretching rate
-$\boldsymbol{D}$. Following [cite!rashid1993incremental], the stretching rate
+$\boldsymbol{D}$. Following [!cite](rashid1993incremental), the stretching rate
 tensor can be expressed in terms of the 'incremental' right Cauchy-Green
 deformation tensor
 
@@ -106,7 +106,7 @@ options to perform this calculation either way, and the
 
 The stretching rate tensor $\boldsymbol{D}$ and incremental rotation matrix
 $\hat{\boldsymbol{R}}$ can be approximated using Taylor expansion as
-[cite!rashid1993incremental]: the approximated stretching rate tensor
+[!cite](rashid1993incremental): the approximated stretching rate tensor
 
 \begin{equation}
 \boldsymbol{D}^{a} = \frac{1}{\Delta t}\left[ -\frac{1}{2}(\hat{\boldsymbol{C}}^{-1} - \boldsymbol{I}) + \frac{1}{4}(\hat{\boldsymbol{C}}^{-1} - \boldsymbol{I})^{2} - \frac{1}{6}(\hat{\boldsymbol{C}}^{-1} - \boldsymbol{I})^{3} + ... \right]

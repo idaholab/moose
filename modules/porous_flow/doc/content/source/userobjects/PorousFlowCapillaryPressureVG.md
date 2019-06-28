@@ -2,7 +2,7 @@
 
 !syntax description /UserObjects/PorousFlowCapillaryPressureVG
 
-van Genuchten's capillary-pressure relationship [citep!vangenuchten1980]
+van Genuchten's capillary-pressure relationship [!citep](vangenuchten1980)
 
 \begin{equation}
 S_{\mathrm{eff}} =

@@ -33,7 +33,7 @@ Without numerical stabilization the corresponding Jacobian is given by
 Advective flow is notoriously prone to physically-incorrect overshoots
 and undershoots, so in many simulations some numerical stabilization
 is used to reduce or eliminate this spurious behaviour.
-Full-upwinding [cite!dalen1979,adhikary2011] is an example of
+Full-upwinding [!cite](dalen1979,adhikary2011) is an example of
 numerical stabilization and this essentially adds numerical diffusion
 to completely eliminate overshoots and undershoots.  Full-upwinding is
 available in `ConservativeAdvection` by setting the `upwinding_type`

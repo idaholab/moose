@@ -212,7 +212,7 @@ drains from the sample, and the porepressure is zero.  As the fluid
 drains from the sample's sides the plattens move slowly towards each
 other.
 
-The solution for porepressure and displacements is given in [citet!doi:10.1002/nag.1610120508].  The solution involves
+The solution for porepressure and displacements is given in [!citet](doi:10.1002/nag.1610120508).  The solution involves
 rather lengthy infinite series, so I will not write it here.
 
 As is common in the literature, this is simulated by considering the

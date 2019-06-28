@@ -9,7 +9,7 @@ When viewing on the website a tooltip is created for the the acronyms, the
 full name will appear when the mouse is placed over the acronym.
 
 !devel example id=acronym-example caption=Example use of acronyms.
-The !!acro INL!! was founded in 1949 and has changed names many times, but !!acro INL!! has
+The [!ac](INL) was founded in 1949 and has changed names many times, but [!ac](INL) has
 been used since 2005.
 
 ## Acronym List

@@ -78,6 +78,7 @@ class AcronymExtension(command.CommandExtension):
 
     def extend(self, reader, renderer):
         self.requires(command, table, floats)
+        self.addCommand(reader, AcronymComponentOld())
         self.addCommand(reader, AcronymComponent())
         self.addCommand(reader, AcronymListComponent())
         renderer.add('AcronymToken', RenderAcronymToken())
@@ -86,12 +87,20 @@ class AcronymExtension(command.CommandExtension):
         if isinstance(renderer, renderers.LatexRenderer):
             renderer.addPackage('tabulary')
 
-class AcronymComponent(command.CommandComponent):
-    COMMAND = ('acro', 'ac')
+class AcronymComponentOld(command.CommandComponent):
+    COMMAND = 'ac'
     SUBCOMMAND = '*'
 
     def createToken(self, parent, info, page):
         AcronymToken(parent, acronym=info['subcommand'])
+        return parent
+
+class AcronymComponent(command.CommandComponent):
+    COMMAND = 'ac'
+    SUBCOMMAND = None
+
+    def createToken(self, parent, info, page):
+        AcronymToken(parent, acronym=info['inline'])
         return parent
 
 class AcronymListComponent(command.CommandComponent):

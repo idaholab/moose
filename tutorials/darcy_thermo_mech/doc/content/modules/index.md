@@ -6,7 +6,7 @@
 
 The chemical reactions module provides a set of tools for the calculation of multicomponent aqueous
 reactive transport in porous media, originally developed as the MOOSE application RAT
-[citep!guo2013].
+[!citep](guo2013).
 
 !---
 
@@ -39,10 +39,10 @@ swapping the name of the Fluid Properties UserObject in a plug-and-play manner.
 A MOOSE module for continuous, mesh-agnostic, high-fidelity, reduced-data MultiApp coupling
 
 Functional expansions (FXs) are a methodology that represent information as moments of a functional
-series [citep!Flusser2016]. This is is related to a Fourier series representation of cyclic
+series [!citep](Flusser2016). This is is related to a Fourier series representation of cyclic
 data. Moments are generated via numerical integration for each term in the functional series to
 represent the field of interest. These moments can then be used to reconstruct the field in a
-separate app [citep!Wendt2018a,Wendt2017c,Kerby2017].
+separate app [!citep](Wendt2018a,Wendt2017c,Kerby2017).
 
 !---
 

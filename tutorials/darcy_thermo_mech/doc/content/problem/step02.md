@@ -13,7 +13,7 @@ to diffusion equation.
 where $\textbf{K}$ is the permeability tensor and $\mu$ is the fluid viscosity.
 
 A `Kernel` is C++ class, which inherits from `MooseObject` that is used by MOOSE for coding
-volume integrals of a [!ac!PDE].
+volume integrals of a [!ac](PDE).
 
 !!end-intro
 

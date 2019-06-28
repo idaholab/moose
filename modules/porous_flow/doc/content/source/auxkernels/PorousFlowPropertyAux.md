@@ -26,9 +26,9 @@ The fluid phase and fluid component are specified in the `phase` and
 related to chemical reactions, the `secondary_species` and
 `mineral_species` parameters are relevant.
 
-!!! note:
-    As this `AuxKernel` uses material properties, only elemental (`Monomial`) `AuxVariables`
-    can be used.
+!alert note
+As this `AuxKernel` uses material properties, only elemental (`Monomial`) `AuxVariables`
+can be used.
 
 !syntax parameters /AuxKernels/PorousFlowPropertyAux
 

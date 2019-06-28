@@ -4,7 +4,7 @@
 
 ## Description
 
-This model computes the Eshelby energy-momentum tensor $\Sigma$ [citep!eshelby_energy_1999],
+This model computes the Eshelby energy-momentum tensor $\Sigma$ [!citep](eshelby_energy_1999),
 used in fracture integral calculations:
 \begin{equation}
 \boldsymbol{\Sigma} = W\boldsymbol{I} - \boldsymbol{H}^T\boldsymbol{P}
