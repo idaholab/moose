@@ -2,6 +2,5 @@
                project=MOOSE
 
 !template! item key=requirements-traceability-matrix
-!sqa requirements
+!sqa requirements category=Framework
 !template-end!
-
