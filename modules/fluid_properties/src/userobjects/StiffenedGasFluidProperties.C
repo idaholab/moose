@@ -16,6 +16,9 @@ InputParameters
 validParams<StiffenedGasFluidProperties>()
 {
   InputParameters params = validParams<SinglePhaseFluidProperties>();
+  params += validParams<NaNInterface>();
+  params.addParam<bool>(
+      "allow_nonphysical_states", true, "Allows for non-physical states, e.g., negative density.");
   params.addRequiredParam<Real>("gamma", "Heat capacity ratio");
   params.addRequiredParam<Real>("cv", "Constant volume specific heat");
   params.addRequiredParam<Real>("q", "Parameter defining zero point of internal energy");
@@ -33,6 +36,8 @@ validParams<StiffenedGasFluidProperties>()
 
 StiffenedGasFluidProperties::StiffenedGasFluidProperties(const InputParameters & parameters)
   : SinglePhaseFluidProperties(parameters),
+    NaNInterface(this),
+    _allow_nonphysical_states(getParam<bool>("allow_nonphysical_states")),
     _gamma(getParam<Real>("gamma")),
     _cv(getParam<Real>("cv")),
     _q(getParam<Real>("q")),
@@ -83,21 +88,58 @@ StiffenedGasFluidProperties::T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, 
 Real
 StiffenedGasFluidProperties::c_from_v_e(Real v, Real e) const
 {
-  return std::sqrt(_gamma * (p_from_v_e(v, e) + _p_inf) * v);
+  if (_allow_nonphysical_states)
+    return std::sqrt(_gamma * (p_from_v_e(v, e) + _p_inf) * v);
+  else
+  {
+    const Real radicant = _gamma * (p_from_v_e(v, e) + _p_inf) * v;
+    if (radicant < 0.)
+    {
+      return getNaN();
+    }
+    else
+    {
+      return std::sqrt(radicant);
+    }
+  }
 }
 
 void
 StiffenedGasFluidProperties::c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real & dc_de) const
 {
-  Real p, dp_dv, dp_de;
-  p_from_v_e(v, e, p, dp_dv, dp_de);
+  if (_allow_nonphysical_states)
+  {
+    Real p, dp_dv, dp_de;
+    p_from_v_e(v, e, p, dp_dv, dp_de);
 
-  c = c_from_v_e(v, e);
-  const Real dc_dp = 0.5 / c * _gamma * v;
-  const Real dc_dv_partial = 0.5 / c * _gamma * (p + _p_inf);
+    c = std::sqrt(_gamma * (p_from_v_e(v, e) + _p_inf) * v);
+    const Real dc_dp = 0.5 / c * _gamma * v;
+    const Real dc_dv_partial = 0.5 / c * _gamma * (p + _p_inf);
 
-  dc_dv = dc_dv_partial + dc_dp * dp_dv;
-  dc_de = dc_dp * dp_de;
+    dc_dv = dc_dv_partial + dc_dp * dp_dv;
+    dc_de = dc_dp * dp_de;
+  }
+  else
+  {
+    const Real radicant = _gamma * (p_from_v_e(v, e) + _p_inf) * v;
+    if (radicant < 0.)
+    {
+      c = getNaN();
+      dc_dv = getNaN();
+      dc_de = getNaN();
+    }
+    else
+    {
+      Real p, dp_dv, dp_de;
+      p_from_v_e(v, e, p, dp_dv, dp_de);
+      c = std::sqrt(radicant);
+      const Real dc_dp = 0.5 / c * _gamma * v;
+      const Real dc_dv_partial = 0.5 / c * _gamma * (p + _p_inf);
+
+      dc_dv = dc_dv_partial + dc_dp * dp_dv;
+      dc_de = dc_dp * dp_de;
+    }
+  }
 }
 
 Real StiffenedGasFluidProperties::cp_from_v_e(Real, Real) const { return _cp; }
@@ -124,8 +166,9 @@ StiffenedGasFluidProperties::s_from_v_e(Real v, Real e) const
   Real p = p_from_v_e(v, e);
   Real n = std::pow(T, _gamma) / std::pow(p + _p_inf, _gamma - 1.0);
   if (n <= 0.0)
-    throw MooseException(name() + ": Negative argument in the ln() function.");
-  return _cv * std::log(n) + _q_prime;
+    return getNaN();
+  else
+    return _cv * std::log(n) + _q_prime;
 }
 
 void
@@ -139,18 +182,24 @@ StiffenedGasFluidProperties::s_from_v_e(Real v, Real e, Real & s, Real & ds_dv, 
 
   const Real n = std::pow(T, _gamma) / std::pow(p + _p_inf, _gamma - 1.0);
   if (n <= 0.0)
-    throw MooseException(name() + ": Negative argument in the ln() function.");
+  {
+    s = getNaN();
+    ds_dv = getNaN();
+    ds_de = getNaN();
+  }
+  else
+  {
+    s = _cv * std::log(n) + _q_prime;
 
-  s = _cv * std::log(n) + _q_prime;
+    const Real dn_dT = _gamma * std::pow(T, _gamma - 1.0) / std::pow(p + _p_inf, _gamma - 1.0);
+    const Real dn_dp = std::pow(T, _gamma) * (1.0 - _gamma) * std::pow(p + _p_inf, -_gamma);
 
-  const Real dn_dT = _gamma * std::pow(T, _gamma - 1.0) / std::pow(p + _p_inf, _gamma - 1.0);
-  const Real dn_dp = std::pow(T, _gamma) * (1.0 - _gamma) * std::pow(p + _p_inf, -_gamma);
+    const Real dn_dv = dn_dT * dT_dv + dn_dp * dp_dv;
+    const Real dn_de = dn_dT * dT_de + dn_dp * dp_de;
 
-  const Real dn_dv = dn_dT * dT_dv + dn_dp * dp_dv;
-  const Real dn_de = dn_dT * dT_de + dn_dp * dp_de;
-
-  ds_dv = _cv / n * dn_dv;
-  ds_de = _cv / n * dn_de;
+    ds_dv = _cv / n * dn_dv;
+    ds_de = _cv / n * dn_de;
+  }
 }
 
 Real
@@ -158,8 +207,9 @@ StiffenedGasFluidProperties::s_from_h_p(Real h, Real p) const
 {
   const Real aux = (p + _p_inf) * std::pow((h - _q) / (_gamma * _cv), -_gamma / (_gamma - 1));
   if (aux <= 0.0)
-    throw MooseException(name() + ": Non-positive argument in the ln() function.");
-  return _q_prime - (_gamma - 1) * _cv * std::log(aux);
+    return getNaN();
+  else
+    return _q_prime - (_gamma - 1) * _cv * std::log(aux);
 }
 
 void
@@ -167,16 +217,22 @@ StiffenedGasFluidProperties::s_from_h_p(Real h, Real p, Real & s, Real & ds_dh, 
 {
   const Real aux = (p + _p_inf) * std::pow((h - _q) / (_gamma * _cv), -_gamma / (_gamma - 1));
   if (aux <= 0.0)
-    throw MooseException(name() + ": Non-positive argument in the ln() function.");
+  {
+    s = getNaN();
+    ds_dh = getNaN();
+    ds_dp = getNaN();
+  }
+  else
+  {
+    const Real daux_dh = (p + _p_inf) *
+                         std::pow((h - _q) / (_gamma * _cv), -_gamma / (_gamma - 1) - 1) *
+                         (-_gamma / (_gamma - 1)) / (_gamma * _cv);
+    const Real daux_dp = std::pow((h - _q) / (_gamma * _cv), -_gamma / (_gamma - 1));
 
-  const Real daux_dh = (p + _p_inf) *
-                       std::pow((h - _q) / (_gamma * _cv), -_gamma / (_gamma - 1) - 1) *
-                       (-_gamma / (_gamma - 1)) / (_gamma * _cv);
-  const Real daux_dp = std::pow((h - _q) / (_gamma * _cv), -_gamma / (_gamma - 1));
-
-  s = _q_prime - (_gamma - 1) * _cv * std::log(aux);
-  ds_dh = -(_gamma - 1) * _cv / aux * daux_dh;
-  ds_dp = -(_gamma - 1) * _cv / aux * daux_dp;
+    s = _q_prime - (_gamma - 1) * _cv * std::log(aux);
+    ds_dh = -(_gamma - 1) * _cv / aux * daux_dh;
+    ds_dp = -(_gamma - 1) * _cv / aux * daux_dp;
+  }
 }
 
 Real
@@ -184,8 +240,9 @@ StiffenedGasFluidProperties::s_from_p_T(Real p, Real T) const
 {
   Real n = std::pow(T, _gamma) / std::pow(p + _p_inf, _gamma - 1.0);
   if (n <= 0.0)
-    throw MooseException(name() + ": Negative argument in the ln() function.");
-  return _cv * std::log(n) + _q_prime;
+    return getNaN();
+  else
+    return _cv * std::log(n) + _q_prime;
 }
 
 void
@@ -193,15 +250,21 @@ StiffenedGasFluidProperties::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, 
 {
   const Real n = std::pow(T, _gamma) / std::pow(p + _p_inf, _gamma - 1.0);
   if (n <= 0.0)
-    throw MooseException(name() + ": Negative argument in the ln() function.");
+  {
+    s = getNaN();
+    ds_dp = getNaN();
+    ds_dT = getNaN();
+  }
+  else
+  {
+    s = _cv * std::log(n) + _q_prime;
 
-  s = _cv * std::log(n) + _q_prime;
+    const Real dn_dT = _gamma * std::pow(T, _gamma - 1.0) / std::pow(p + _p_inf, _gamma - 1.0);
+    const Real dn_dp = std::pow(T, _gamma) * (1.0 - _gamma) * std::pow(p + _p_inf, -_gamma);
 
-  const Real dn_dT = _gamma * std::pow(T, _gamma - 1.0) / std::pow(p + _p_inf, _gamma - 1.0);
-  const Real dn_dp = std::pow(T, _gamma) * (1.0 - _gamma) * std::pow(p + _p_inf, -_gamma);
-
-  ds_dp = _cv / n * dn_dp;
-  ds_dT = _cv / n * dn_dT;
+    ds_dp = _cv / n * dn_dp;
+    ds_dT = _cv / n * dn_dT;
+  }
 }
 
 Real
@@ -209,7 +272,11 @@ StiffenedGasFluidProperties::rho_from_p_s(Real p, Real s) const
 {
   Real a = (s - _q_prime + _cv * std::log(std::pow(p + _p_inf, _gamma - 1.0))) / _cv;
   Real T = std::pow(std::exp(a), 1.0 / _gamma);
-  return rho_from_p_T(p, T);
+  Real rho = rho_from_p_T(p, T);
+  if (!_allow_nonphysical_states && rho <= 0.)
+    return getNaN();
+  else
+    return rho;
 }
 
 void
@@ -247,7 +314,7 @@ StiffenedGasFluidProperties::e_from_v_h(Real v, Real h) const
 void
 StiffenedGasFluidProperties::e_from_v_h(Real v, Real h, Real & e, Real & de_dv, Real & de_dh) const
 {
-  e = e_from_v_h(v, h);
+  e = (h + (_gamma - 1.0) * _q + _gamma * _p_inf * v) / _gamma;
   de_dv = _p_inf;
   de_dh = 1.0 / _gamma;
 }
@@ -256,16 +323,29 @@ Real
 StiffenedGasFluidProperties::rho_from_p_T(Real p, Real T) const
 {
   mooseAssert(((_gamma - 1.0) * _cv * T) != 0.0, "Invalid gamma or cv or temperature detected!");
-  return (p + _p_inf) / ((_gamma - 1.0) * _cv * T);
+  Real rho = (p + _p_inf) / ((_gamma - 1.0) * _cv * T);
+  if (!_allow_nonphysical_states && rho <= 0.)
+    return getNaN();
+  else
+    return rho;
 }
 
 void
 StiffenedGasFluidProperties::rho_from_p_T(
     Real p, Real T, Real & rho, Real & drho_dp, Real & drho_dT) const
 {
-  rho = rho_from_p_T(p, T);
-  drho_dp = 1. / ((_gamma - 1.0) * _cv * T);
-  drho_dT = -(p + _p_inf) / ((_gamma - 1.0) * _cv * T * T);
+  mooseAssert(((_gamma - 1.0) * _cv * T) != 0.0, "Invalid gamma or cv or temperature detected!");
+  rho = (p + _p_inf) / ((_gamma - 1.0) * _cv * T);
+  if (!_allow_nonphysical_states && rho <= 0.)
+  {
+    drho_dp = getNaN();
+    drho_dT = getNaN();
+  }
+  else
+  {
+    drho_dp = 1. / ((_gamma - 1.0) * _cv * T);
+    drho_dT = -(p + _p_inf) / ((_gamma - 1.0) * _cv * T * T);
+  }
 }
 
 Real
