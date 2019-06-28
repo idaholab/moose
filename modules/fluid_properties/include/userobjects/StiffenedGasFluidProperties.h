@@ -10,6 +10,7 @@
 #pragma once
 
 #include "SinglePhaseFluidProperties.h"
+#include "NaNInterface.h"
 
 class StiffenedGasFluidProperties;
 
@@ -22,7 +23,7 @@ InputParameters validParams<StiffenedGasFluidProperties>();
 /**
  * Stiffened gas fluid properties
  */
-class StiffenedGasFluidProperties : public SinglePhaseFluidProperties
+class StiffenedGasFluidProperties : public SinglePhaseFluidProperties, public NaNInterface
 {
 public:
   StiffenedGasFluidProperties(const InputParameters & parameters);
@@ -92,6 +93,8 @@ public:
   virtual Real pp_sat_from_p_T(Real /*p*/, Real /*T*/) const override;
 
 protected:
+  bool _allow_nonphysical_states;
+
   Real _gamma;
   Real _cv;
   Real _q;
@@ -109,4 +112,3 @@ protected:
 };
 
 #pragma GCC diagnostic pop
-
