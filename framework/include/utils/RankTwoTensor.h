@@ -419,16 +419,22 @@ public:
    *                                     0 a32 a33]
    * A DualReal instantiation is available to rotate dual numbers as well.
    */
-  RankTwoTensorTempl<T>
-  givensRotation(unsigned int row1, unsigned int row2, unsigned int col) const;
+  RankTwoTensorTempl<T> givensRotation(unsigned int row1,
+                                       unsigned int row2,
+                                       unsigned int col,
+                                       const Real eps = libMesh::TOLERANCE *
+                                                        libMesh::TOLERANCE) const;
 
   /// computes the Hessenberg form of this matrix A and its unitary transformation U such that A = U * H * U^T
-  void hessenberg(RankTwoTensorTempl<T> & H, RankTwoTensorTempl<T> & U) const;
+  void hessenberg(RankTwoTensorTempl<T> & H,
+                  RankTwoTensorTempl<T> & U,
+                  const Real eps = libMesh::TOLERANCE * libMesh::TOLERANCE) const;
 
   /// computes the QR factorization such that A = Q * R, where Q is the unitary matrix and R an upper triangular matrix
   void QR(RankTwoTensorTempl<T> & Q,
           RankTwoTensorTempl<T> & R,
-          unsigned int dim = RankTwoTensorTempl<T>::N) const;
+          unsigned int dim = RankTwoTensorTempl<T>::N,
+          const Real eps = libMesh::TOLERANCE * libMesh::TOLERANCE) const;
 
   /**
    * computes eigenvalues and eigenvectors, assuming tens is symmetric, and places them
