@@ -28,3 +28,4 @@ links to test pages for the various extensions within MooseDocs.
 1. [extensions/appsyntax.md]
 1. [extensions/template.md]
 1. [extensions/sqa.md]
+1. [extensions/acronym.md]
