@@ -54,10 +54,10 @@ TangentialMortarLMMechanicalContact<compute_stage>::TangentialMortarLMMechanical
     _master_x_dot(_master_var.template adUDotNeighbor<compute_stage>()),
     _slave_y_dot(_slave_disp_y.template adUDot<compute_stage>()),
     _master_y_dot(_master_disp_y.template adUDotNeighbor<compute_stage>()),
-    _friction_coeff(adGetParam<Real>("friction_coefficient")),
+    _friction_coeff(getParam<Real>("friction_coefficient")),
     _epsilon(std::numeric_limits<Real>::epsilon()),
-    _ncp_type(adGetParam<MooseEnum>("ncp_function_type")),
-    _c(adGetParam<Real>("c"))
+    _ncp_type(getParam<MooseEnum>("ncp_function_type")),
+    _c(getParam<Real>("c"))
 {
 }
 

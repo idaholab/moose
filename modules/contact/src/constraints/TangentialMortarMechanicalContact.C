@@ -25,7 +25,7 @@ defineADValidParams(
 template <ComputeStage compute_stage>
 TangentialMortarMechanicalContact<compute_stage>::TangentialMortarMechanicalContact(
     const InputParameters & parameters)
-  : ADMortarConstraint<compute_stage>(parameters), _component(adGetParam<MooseEnum>("component"))
+  : ADMortarConstraint<compute_stage>(parameters), _component(getParam<MooseEnum>("component"))
 {
 }
 

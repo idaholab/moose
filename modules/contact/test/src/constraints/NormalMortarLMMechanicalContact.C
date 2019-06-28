@@ -42,7 +42,7 @@ NormalMortarLMMechanicalContact<compute_stage>::NormalMortarLMMechanicalContact(
     _slave_disp_y_sln(nullptr),
     _master_disp_y_sln(nullptr),
     _epsilon(std::numeric_limits<Real>::epsilon()),
-    _ncp_type(adGetParam<MooseEnum>("ncp_function_type"))
+    _ncp_type(getParam<MooseEnum>("ncp_function_type"))
 {
   if (_slave_disp_y)
   {
