@@ -1,4 +1,5 @@
 - /AuxKernels/CopyValueAux
+- /AuxKernels/ConvectiveHeatFlux1PhaseAux
 - /AuxKernels/PrandtlNumberAux
 - /AuxKernels/PressureAux
 - /AuxKernels/ReynoldsNumberAux
