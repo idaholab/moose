@@ -102,6 +102,6 @@ request system on the Github.org website.
 
 !template! item key=requirements-cross-reference
 
-!sqa cross-reference
+!sqa cross-reference category=Framework
 
 !template-end!
