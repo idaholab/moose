@@ -103,6 +103,7 @@
                 {
                     "attributes": {
                         "bookmark": "", 
+                        "exact": false, 
                         "optional": false, 
                         "page": "folder/folder.md", 
                         "recursive": true

@@ -57,6 +57,7 @@
                                 {
                                     "attributes": {
                                         "bookmark": "", 
+                                        "exact": false, 
                                         "optional": false, 
                                         "page": "core.md", 
                                         "recursive": true
@@ -100,6 +101,7 @@
                                 {
                                     "attributes": {
                                         "bookmark": "", 
+                                        "exact": false, 
                                         "optional": false, 
                                         "page": "autolink.md", 
                                         "recursive": true

@@ -776,6 +776,111 @@
         }, 
         {
             "attributes": {
+                "brand": "note", 
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "brand": "note", 
+                        "prefix": true, 
+                        "recursive": true
+                    }, 
+                    "children": [
+                        {
+                            "attributes": {
+                                "class": "", 
+                                "id": "", 
+                                "recursive": true, 
+                                "style": "", 
+                                "url": "https://google.com"
+                            }, 
+                            "children": [
+                                {
+                                    "attributes": {
+                                        "content": "Google", 
+                                        "recursive": true
+                                    }, 
+                                    "children": [], 
+                                    "name": "Word"
+                                }
+                            ], 
+                            "name": "Link"
+                        }
+                    ], 
+                    "name": "AlertTitle"
+                }, 
+                {
+                    "attributes": {
+                        "brand": "note", 
+                        "icon": true, 
+                        "recursive": true
+                    }, 
+                    "children": [
+                        {
+                            "attributes": {
+                                "recursive": true
+                            }, 
+                            "children": [
+                                {
+                                    "attributes": {
+                                        "content": "Title", 
+                                        "recursive": true
+                                    }, 
+                                    "children": [], 
+                                    "name": "Word"
+                                }, 
+                                {
+                                    "attributes": {
+                                        "count": 1, 
+                                        "recursive": true
+                                    }, 
+                                    "children": [], 
+                                    "name": "Space"
+                                }, 
+                                {
+                                    "attributes": {
+                                        "content": "with", 
+                                        "recursive": true
+                                    }, 
+                                    "children": [], 
+                                    "name": "Word"
+                                }, 
+                                {
+                                    "attributes": {
+                                        "count": 1, 
+                                        "recursive": true
+                                    }, 
+                                    "children": [], 
+                                    "name": "Space"
+                                }, 
+                                {
+                                    "attributes": {
+                                        "content": "link", 
+                                        "recursive": true
+                                    }, 
+                                    "children": [], 
+                                    "name": "Word"
+                                }, 
+                                {
+                                    "attributes": {
+                                        "content": ".", 
+                                        "recursive": true
+                                    }, 
+                                    "children": [], 
+                                    "name": "Punctuation"
+                                }
+                            ], 
+                            "name": "Paragraph"
+                        }
+                    ], 
+                    "name": "AlertContent"
+                }
+            ], 
+            "name": "AlertToken"
+        }, 
+        {
+            "attributes": {
                 "key": "MOOSE", 
                 "link": "https:://mooseframework.org", 
                 "prefix": "", 
