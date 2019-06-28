@@ -1,17 +1,26 @@
 [Tests]
+  issues = '#4490'
+  design = 'SystemBase.md'
+
   [./test]
     type = 'Exodiff'
     input = 'serialized_solution.i'
     exodiff = 'serialized_solution_out.e'
+
+    requirement = 'The system shall make a serialized solution vector available when requested by objects in the system.'
   [../]
   [./uniform_refine]
     type = 'Exodiff'
     input = 'uniform_refine.i'
     exodiff = 'uniform_refine_out.e'
+
+    requirement = 'The system shall make a serialized solution vector available when requested by objects in the system when uniform refinement is active.'
   [../]
   [./adapt]
     type = 'Exodiff'
     input = 'adapt.i'
     exodiff = 'adapt_out.e-s003'
+
+    requirement = 'The system shall make a serialized solution vector available when requested by objects in the system when adaptivity is active.'
   [../]
 []
