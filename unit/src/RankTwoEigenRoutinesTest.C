@@ -142,10 +142,80 @@ TEST(RankTwoEigenRoutines, symmetricEigenvaluesEigenvectors_AD_consistency)
   m(0, 2).derivatives()[0] = m(2, 0).derivatives()[0] = 2;
   m(0, 1).derivatives()[0] = m(1, 0).derivatives()[0] = -9;
 
-  // case of three distinct eigenvalues
+  // case of three nonzero eigenvalues
+  m(0, 0).value() = 39.8271858233381;
+  m(1, 1).value() = 20.5533974737178;
+  m(2, 2).value() = -2.38058329705591;
+  m(1, 2).value() = m(2, 1).value() = 4.30639905389877;
+  m(0, 2).value() = m(2, 0).value() = 8.41377713759714;
+  m(0, 1).value() = m(1, 0).value() = -4.30188957211253;
+
+  m.symmetricEigenvaluesEigenvectors(eigvals, eigvecs);
+  D_ad.fillFromInputVector(eigvals);
+  m_ad = eigvecs * D_ad * eigvecs.transpose();
+
+  std::cout << "=====================\n";
+  m_ad.printDualReal(1);
+
+  // m_ad should be equal to m in values and dual numbers!
+  for (unsigned i = 0; i < 3; i++)
+    for (unsigned j = 0; j < 3; j++)
+    {
+      EXPECT_NEAR(m(i, j).value(), m_ad(i, j).value(), 0.0001);
+      EXPECT_NEAR(m(i, j).derivatives()[0], m_ad(i, j).derivatives()[0], 0.0001);
+    }
+
+  // case of two nonzero eigenvalues
+  m(0, 0).value() = 40.0251805997219;
+  m(1, 1).value() = 20.7441889367721;
+  m(2, 2).value() = 2.23063046350594;
+  m(1, 2).value() = m(2, 1).value() = 3.36843305247129;
+  m(0, 2).value() = m(2, 0).value() = 7.45826877165760;
+  m(0, 1).value() = m(1, 0).value() = -4.10752982045755;
+
+  m.symmetricEigenvaluesEigenvectors(eigvals, eigvecs);
+  D_ad.fillFromInputVector(eigvals);
+  m_ad = eigvecs * D_ad * eigvecs.transpose();
+
+  std::cout << "=====================\n";
+  m_ad.printDualReal(1);
+
+  // m_ad should be equal to m in values and dual numbers!
+  for (unsigned i = 0; i < 3; i++)
+    for (unsigned j = 0; j < 3; j++)
+    {
+      EXPECT_NEAR(m(i, j).value(), m_ad(i, j).value(), 0.0001);
+      EXPECT_NEAR(m(i, j).derivatives()[0], m_ad(i, j).derivatives()[0], 0.0001);
+    }
+
+  // case of one nonzero eigenvalues
+  m(0, 0).value() = 39.7135173210679;
+  m(1, 1).value() = 1.09102616320067;
+  m(2, 2).value() = 1.19545651573143;
+  m(1, 2).value() = m(2, 1).value() = -1.14204830704822;
+  m(0, 2).value() = m(2, 0).value() = 6.89026726942313;
+  m(0, 1).value() = m(1, 0).value() = -6.58243772701330;
+
+  m.symmetricEigenvaluesEigenvectors(eigvals, eigvecs);
+  D_ad.fillFromInputVector(eigvals);
+  m_ad = eigvecs * D_ad * eigvecs.transpose();
+
+  std::cout << "=====================\n";
+  m_ad.printDualReal(1);
+
+  // m_ad should be equal to m in values and dual numbers!
+  for (unsigned i = 0; i < 3; i++)
+    for (unsigned j = 0; j < 3; j++)
+    {
+      EXPECT_NEAR(m(i, j).value(), m_ad(i, j).value(), 0.0001);
+      // FIXME: does not work yet
+      // EXPECT_NEAR(m(i, j).derivatives()[0], m_ad(i, j).derivatives()[0], 0.0001);
+    }
+
+  // case of diagonal matrix
   m(0, 0).value() = 42;
   m(1, 1).value() = 21;
-  m(2, 2).value() = -5;
+  m(2, 2).value() = 0;
   m(1, 2).value() = m(2, 1).value() = 0;
   m(0, 2).value() = m(2, 0).value() = 0;
   m(0, 1).value() = m(1, 0).value() = 0;
@@ -154,41 +224,41 @@ TEST(RankTwoEigenRoutines, symmetricEigenvaluesEigenvectors_AD_consistency)
   D_ad.fillFromInputVector(eigvals);
   m_ad = eigvecs * D_ad * eigvecs.transpose();
 
+  std::cout << "=====================\n";
   m_ad.printDualReal(1);
 
   // m_ad should be equal to m in values and dual numbers!
-  // for (unsigned i = 0; i < 3; i++)
-  //   for (unsigned j = 0; j < 3; j++)
-  //   {
-  //     EXPECT_NEAR(m(i, j).value(), m_ad(i, j).value(), 0.0001);
-  //     EXPECT_NEAR(m(i, j).derivatives()[0], m_ad(i, j).derivatives()[0], 0.0001);
-  //     EXPECT_NEAR(m(i, j).derivatives()[1], m_ad(i, j).derivatives()[1], 0.0001);
-  //     EXPECT_NEAR(m(i, j).derivatives()[2], m_ad(i, j).derivatives()[2], 0.0001);
-  //   }
+  for (unsigned i = 0; i < 3; i++)
+    for (unsigned j = 0; j < 3; j++)
+    {
+      EXPECT_NEAR(m(i, j).value(), m_ad(i, j).value(), 0.0001);
+      // FIXME: does not work yet
+      // EXPECT_NEAR(m(i, j).derivatives()[0], m_ad(i, j).derivatives()[0], 0.0001);
+    }
 
-  // case of two repeated eigenvalues
-  m(0, 0).value() = 42;
-  m(1, 1).value() = 42;
-  m(2, 2).value() = 21;
+  // case of purely offdiagonal matrix
+  m(0, 0).value() = 0;
+  m(1, 1).value() = 0;
+  m(2, 2).value() = 0;
   m(1, 2).value() = m(2, 1).value() = 0;
   m(0, 2).value() = m(2, 0).value() = 0;
-  m(0, 1).value() = m(1, 0).value() = 0;
+  m(0, 1).value() = m(1, 0).value() = 5;
 
   m.symmetricEigenvaluesEigenvectors(eigvals, eigvecs);
   D_ad.fillFromInputVector(eigvals);
   m_ad = eigvecs * D_ad * eigvecs.transpose();
 
+  std::cout << "=====================\n";
   m_ad.printDualReal(1);
 
   // m_ad should be equal to m in values and dual numbers!
-  // for (unsigned i = 0; i < 3; i++)
-  //   for (unsigned j = 0; j < 3; j++)
-  //   {
-  //     EXPECT_NEAR(m(i, j).value(), m_ad(i, j).value(), 0.0001);
-  //     EXPECT_NEAR(m(i, j).derivatives()[0], m_ad(i, j).derivatives()[0], 0.0001);
-  //     EXPECT_NEAR(m(i, j).derivatives()[1], m_ad(i, j).derivatives()[1], 0.0001);
-  //     EXPECT_NEAR(m(i, j).derivatives()[2], m_ad(i, j).derivatives()[2], 0.0001);
-  //   }
+  for (unsigned i = 0; i < 3; i++)
+    for (unsigned j = 0; j < 3; j++)
+    {
+      EXPECT_NEAR(m(i, j).value(), m_ad(i, j).value(), 0.0001);
+      // FIXME: does not work yet
+      // EXPECT_NEAR(m(i, j).derivatives()[0], m_ad(i, j).derivatives()[0], 0.0001);
+    }
 }
 
 TEST(RankTwoEigenRoutines, dsymmetricEigenvalues)

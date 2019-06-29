@@ -433,7 +433,7 @@ public:
   /// computes the QR factorization such that A = Q * R, where Q is the unitary matrix and R an upper triangular matrix
   void QR(RankTwoTensorTempl<T> & Q,
           RankTwoTensorTempl<T> & R,
-          unsigned int dim = RankTwoTensorTempl<T>::N,
+          const unsigned int dim = RankTwoTensorTempl<T>::N,
           const Real eps = libMesh::TOLERANCE * libMesh::TOLERANCE) const;
 
   /**

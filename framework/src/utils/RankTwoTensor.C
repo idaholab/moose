@@ -964,14 +964,17 @@ RankTwoTensorTempl<T>::givensRotation(unsigned int row1,
   T c, s;
   T a = (*this)(row1, col);
   T b = (*this)(row2, col);
+  RankTwoTensorTempl<T> R(initIdentity);
 
-  if (MooseUtils::absoluteFuzzyEqual(b, 0.0, eps) && MooseUtils::absoluteFuzzyEqual(a, 0.0, eps))
+  if (std::abs(b) < eps)
   {
-    std::cout << "bad rotation (" << row1 << ", " << col << ")-(" << row2 << ", " << col
-              << "), given\n";
-    this->printDualReal(1);
     c = a >= 0.0 ? 1.0 : -1.0;
     s = 0.0;
+  }
+  else if (std::abs(a) < eps)
+  {
+    s = b >= 0.0 ? 1.0 : -1.0;
+    c = 0.0;
   }
   else if (std::abs(a) > std::abs(b))
   {
@@ -990,7 +993,6 @@ RankTwoTensorTempl<T>::givensRotation(unsigned int row1,
     c = s * t;
   }
 
-  RankTwoTensorTempl<T> R(initIdentity);
   R(row1, row1) = c;
   R(row1, row2) = s;
   R(row2, row1) = -s;
@@ -1012,9 +1014,9 @@ RankTwoTensorTempl<T>::hessenberg(RankTwoTensorTempl<T> & H,
   if (N < 3)
     return;
 
-  RankTwoTensorTempl<T> R = this->givensRotation(N - 2, N - 1, 0, eps);
-  H = R * H * R.transpose();
-  U = U * R.transpose();
+  RankTwoTensorTempl<T> CS = H.givensRotation(N - 2, N - 1, 0, eps);
+  H = CS * H * CS.transpose();
+  U = U * CS.transpose();
 }
 
 template <typename T>
@@ -1058,20 +1060,11 @@ RankTwoTensorTempl<DualReal>::QR(RankTwoTensorTempl<DualReal> & Q,
       // in which case the dual numbers cannot be rotated
       // therefore we need to find another nonzero entry to permute
       RankTwoTensorTempl<DualReal> P(initIdentity);
-      if (MooseUtils::absoluteFuzzyEqual(R(a, i), 0.0, eps) &&
-          MooseUtils::absoluteFuzzyEqual(R(b, i), 0.0, eps))
+      if (std::abs(R(a, i)) < eps && std::abs(R(b, i)) < eps)
       {
         unsigned int c = 3 - a - b;
-        if (!MooseUtils::absoluteFuzzyEqual(R(c, i), 0.0, eps))
-        {
-          // P = this->permutationTensor({{a, b, c}}, {{c, b, a}});
-          Real sine = std::sqrt(2.0) / 2.0;
-          Real cosine = std::sqrt(1.0 - sine * sine);
-          P(c, c) = cosine;
-          P(c, a) = sine;
-          P(a, c) = -sine;
-          P(a, a) = cosine;
-        }
+        if (std::abs(R(c, i)) > eps)
+          P = this->permutationTensor({{a, b, c}}, {{c, b, a}});
       }
 
       Q = Q * P.transpose();
@@ -1101,43 +1094,56 @@ RankTwoTensorTempl<DualReal>::symmetricEigenvaluesEigenvectors(
                libMesh::TOLERANCE * libMesh::TOLERANCE);
 
   eigvals.resize(N);
-  RankTwoTensorTempl<DualReal> D, Q, R;
+  RankTwoTensorTempl<DualReal> D, Q, R, U;
 
-  // preshift
   D = *this;
-  Real preshift = 0.0;
-  if (MooseUtils::absoluteFuzzyEqual(D(0, 0), 0.0, eps))
-    preshift = 1.0;
-  D.addIa(preshift);
-  this->hessenberg(D, eigvecs, eps);
+  eigvecs.zero();
+  eigvecs.addIa(1.0);
+
+  D.hessenberg(D, U, eps);
+  eigvecs = eigvecs * U;
 
   unsigned int iter = 0;
   for (unsigned m = N - 1; m > 0; m--)
-    do
+  {
+    bool converged = false;
+    while (!converged)
     {
-      iter++;
-      if (iter > 30)
-        break;
+      // DualReal shift = D(m, m);
+      // if (std::abs(shift) < eps)
+      // {
+      //   shift = std::max(std::abs(D(m - 1, m)), std::abs(D(m - 1, m - 1)));
+      //   if (std::abs(shift) < eps)
+      //     shift = 1.0;
+      // }
+      // if (std::abs(D(m - 1, m - 1) - shift) < eps)
+      // shift = 0.0;
+
+      // DualReal d = (D(m - 1, m - 1) - D(m, m)) / 2.0;
+      // Real dsign = d >= 0.0 ? 1.0 : -1.0;
+      // DualReal shift = D(m, m) - dsign * D(m, m - 1) * D(m, m - 1) /
+      //                                (std::abs(d) + std::sqrt(d * d + D(m, m - 1) * D(m, m -
+      //                                1)));
 
       DualReal shift = D(m, m);
-      if (MooseUtils::absoluteFuzzyEqual(shift, 0.0, eps))
-      {
-        shift = std::max(std::abs(D(m - 1, m)), std::abs(D(m - 1, m - 1)));
-        if (MooseUtils::absoluteFuzzyEqual(shift, 0.0, eps))
-          shift = 1.0;
-      }
-      if (MooseUtils::absoluteFuzzyEqual(D(m - 1, m - 1) - shift, 0.0, eps))
-        shift = 0.0;
+      if (std::abs(shift) < eps)
+        shift = std::max(D(m - 1, m), D(m - 1, m - 1));
 
       D.addIa(-shift);
       D.QR(Q, R, m + 1, eps);
       D = R * Q;
       D.addIa(shift);
-
       eigvecs = eigvecs * Q;
-    } while (!MooseUtils::absoluteFuzzyEqual(D(m, m - 1), 0.0, eps));
 
-  D.addIa(-preshift);
+      // check for convergence
+      converged = std::abs(D(m, m - 1)) > eps ? false : true;
+
+      iter++;
+      if (iter > 30)
+        converged = true;
+    }
+  }
+
   for (unsigned int i = 0; i < N; i++)
     eigvals[i] = D(i, i);
 
