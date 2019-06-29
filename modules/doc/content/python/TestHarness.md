@@ -7,6 +7,24 @@ the `run_tests` script and how to create your own tests.
 The ideas behind testing are described over the in the [MOOSE Test System](test_system.md)
 documentation.
 
+# Testers
+
+Testers represent inidividual tests in MOOSE. Testers encompass a set of instructions for performing
+a task and then verifying the result. There are several built-in testers in the framework but the
+Tester system is completely pluggable and extendable. The list of default testers is listed here:
+
+[RunApp](RunApp.md)
+Exodiff
+CSVDiff
+FileTester
+AnalyzeJacobian
+CheckFiles
+ImageDiff
+PetscJacobianTester
+RunCommand
+RunException
+VTKDiff
+
 ## run_tests
 
 `run_tests` is a small Python script that can be found in every MOOSE-based application and in the

@@ -4,5 +4,9 @@
     input = 'stop_for_debugger.i'
     cli_args = '--stop-for-debugger=2'
     expect_out = 'Stopping for 2 seconds to allow attachment from a debugger.'
+
+    requirement = 'The system shall support pausing execution for the purpose of attaching a debugger after launch.'
+    issues = '#11166'
+    design = 'application_development/debugging.md'
   [../]
 []

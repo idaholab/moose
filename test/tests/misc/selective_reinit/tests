@@ -8,5 +8,9 @@
     compiler = 'GCC CLANG'
     method = '!DBG'
     valgrind = 'NONE'
+
+    requirement = 'The system shall only reinitialize variables values that are consumed by other active objects in the system.'
+    design = 'FEProblemBase.md'
+    issues = '#1386'
   [../]
 []

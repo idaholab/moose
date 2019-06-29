@@ -3,5 +3,9 @@
     type = 'Exodiff'
     input = 'execute_on_test.i'
     exodiff = 'execute_on_test_out.e'
+
+    requirement = 'The system shall maintain a flag available for inspection indicating the current "execution stage" enumeration.'
+    issues = '#8610'
+    design = 'SetupInterface.md'
   [../]
 []

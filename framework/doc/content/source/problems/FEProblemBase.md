@@ -29,6 +29,12 @@ optional coupling may be implemented with these zeros.
   return _test[_i][_qp] * (_velocity_vector[_qp] * _grad_u[_qp]);
 ```
 
+## Selective Reinit
+
+The system automatically determines which variables should be made available for use on the
+current element ("reinit"-ed). Each variable is tracked on calls through the coupling interface.
+Variables that are not needed are simply not prepared. This can save significant amounts
+of time on systems that have several active variables.
 
 !syntax description /Problem/FEProblem
 
