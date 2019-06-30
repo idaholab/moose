@@ -174,7 +174,7 @@ Outlet::add3EqnStaticPReverseBC()
     params.set<std::vector<VariableName>>("vel") = cv_vel;
     std::string nm = genName(name(), "rhoA", "rev");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, nm, "p", "p");
+    connectObject(params, nm, "p");
   }
   {
     std::string class_name = "OneDMomentumStaticPressureReverseBC";
@@ -190,7 +190,7 @@ Outlet::add3EqnStaticPReverseBC()
     params.set<std::vector<VariableName>>("T") = cv_temperature;
     std::string nm = genName(name(), "rhouA", "rev");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, nm, "p", "p");
+    connectObject(params, nm, "p");
   }
   {
     std::string class_name = "OneD7EqnEnergyStaticPressureReverseBC";
@@ -205,7 +205,7 @@ Outlet::add3EqnStaticPReverseBC()
     params.set<std::vector<VariableName>>("T") = cv_temperature;
     std::string nm = genName(name(), "rhoEA", "rev");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, nm, "p", "p");
+    connectObject(params, nm, "p");
   }
 }
 
