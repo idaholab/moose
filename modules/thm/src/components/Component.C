@@ -2,7 +2,6 @@
 #include "ConstantFunction.h"
 #include "Numerics.h"
 
-unsigned int Component::subdomain_ids = 0;
 unsigned int Component::bc_ids = 0;
 
 template <>
@@ -139,13 +138,6 @@ Component::executeSetupMesh()
 {
   setupMesh();
   _component_setup_status = MESH_PREPARED;
-}
-
-unsigned int
-Component::getNextSubdomainId()
-{
-  unsigned int id = subdomain_ids++;
-  return id;
 }
 
 unsigned int

@@ -18,7 +18,7 @@ public:
   virtual void initialize();
   virtual void finalize();
 
-  virtual void addVariables(FlowModel & fm, unsigned int subdomain_id) const = 0;
+  virtual void addVariables(FlowModel & fm, SubdomainID subdomain_id) const = 0;
   virtual void initMooseObjects(FlowModel & fm) = 0;
   virtual void addMooseObjects(FlowModel & fm, InputParameters & pars) const = 0;
 

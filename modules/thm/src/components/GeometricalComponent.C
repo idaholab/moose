@@ -149,7 +149,7 @@ GeometricalComponent::check() const
   }
 }
 
-const std::vector<unsigned int> &
+const std::vector<SubdomainID> &
 GeometricalComponent::getSubdomainIds() const
 {
   checkSetupStatus(MESH_PREPARED);
@@ -240,7 +240,7 @@ GeometricalComponent::getVariableFn(const FunctionName & fn_param_name)
 }
 
 void
-GeometricalComponent::setSubdomainInfo(unsigned int subdomain_id,
+GeometricalComponent::setSubdomainInfo(SubdomainID subdomain_id,
                                        const std::string & subdomain_name,
                                        const Moose::CoordinateSystemType & coord_system)
 {

@@ -231,7 +231,7 @@ FlowChannelBase::buildMesh()
   }
 
   // elems
-  _subdomain_id = getNextSubdomainId();
+  _subdomain_id = _mesh.getNextSubdomainId();
   setSubdomainInfo(_subdomain_id, name());
   unsigned int bc_id_in = getNextBoundaryId();  // boundary id for inlet
   unsigned int bc_id_out = getNextBoundaryId(); // boundary id for outlet
@@ -503,7 +503,7 @@ FlowChannelBase::getNodesetName() const
   return _nodeset_name;
 }
 
-unsigned int
+SubdomainID
 FlowChannelBase::getSubdomainID() const
 {
   checkSetupStatus(MESH_PREPARED);

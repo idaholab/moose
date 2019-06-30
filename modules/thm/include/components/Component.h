@@ -434,9 +434,6 @@ protected:
 
   const Real & _zero;
 
-  /// Gets the next subdomain ID
-  virtual unsigned int getNextSubdomainId();
-
   /// Gets the next nodeset or sideset ID
   virtual unsigned int getNextBoundaryId();
 
@@ -449,7 +446,6 @@ protected:
 
 private:
   // Do not want users to touch these, they _must_ use the API
-  static unsigned int subdomain_ids;
   static unsigned int bc_ids;
 
   /// Component setup status

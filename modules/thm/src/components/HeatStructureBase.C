@@ -284,7 +284,7 @@ HeatStructureBase::buildMesh()
   for (unsigned int i = 0; i < _number_of_hs; i++)
   {
     const std::string solid_block_name = genName(_name, _names[i]);
-    unsigned int sid = getNextSubdomainId();
+    SubdomainID sid = _mesh.getNextSubdomainId();
     // set the coordinate system for MOOSE, we do the RZ intergration ourselves until we can set
     // arbitrary number of axis symmetries in MOOSE
     setSubdomainInfo(sid, solid_block_name, Moose::COORD_XYZ);

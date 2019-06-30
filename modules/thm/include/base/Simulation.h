@@ -142,12 +142,12 @@ public:
   void addVariable(bool nl,
                    const std::string & name,
                    FEType type,
-                   unsigned int subdomain_id,
+                   SubdomainID subdomain_id,
                    Real scaling_factor = 1.);
   void addVariable(bool nl,
                    const std::string & name,
                    FEType type,
-                   const std::vector<unsigned int> & subdomain_ids,
+                   const std::vector<SubdomainID> & subdomain_ids,
                    Real scaling_factor = 1.);
 
   void addConstantIC(const std::string & var_name, Real value, const SubdomainName & block_name);

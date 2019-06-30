@@ -20,7 +20,11 @@ validParams<THMMesh>()
 }
 
 THMMesh::THMMesh(const InputParameters & parameters)
-  : MooseMesh(parameters), _dim(getParam<MooseEnum>("dim")), _next_node_id(0), _next_element_id(0)
+  : MooseMesh(parameters),
+    _dim(getParam<MooseEnum>("dim")),
+    _next_node_id(0),
+    _next_element_id(0),
+    _next_subdomain_id(0)
 {
 }
 
@@ -28,7 +32,8 @@ THMMesh::THMMesh(const THMMesh & other_mesh)
   : MooseMesh(other_mesh),
     _dim(other_mesh._dim),
     _next_node_id(other_mesh._next_node_id),
-    _next_element_id(other_mesh._next_element_id)
+    _next_element_id(other_mesh._next_element_id),
+    _next_subdomain_id(other_mesh._next_subdomain_id)
 {
 }
 
@@ -175,4 +180,11 @@ THMMesh::addElementQuad9(dof_id_type node0,
   elem->set_node(8) = _mesh->node_ptr(node8);
 
   return elem;
+}
+
+SubdomainID
+THMMesh::getNextSubdomainId()
+{
+  SubdomainID id = _next_subdomain_id++;
+  return id;
 }
