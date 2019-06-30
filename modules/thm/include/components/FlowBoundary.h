@@ -45,8 +45,6 @@ protected:
   /// Name of the boundary this component attaches to
   BoundaryName _input;
 
-  /// Linear cross-sectional area variable name
-  AuxVariableName _A_linear_name;
   /// Numerical flux user object name
   UserObjectName _numerical_flux_name;
   /// rDG interfacial variables user object name

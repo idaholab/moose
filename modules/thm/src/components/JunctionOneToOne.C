@@ -25,6 +25,8 @@ JunctionOneToOne::check() const
 
   if ((_flow_model_id != THM::FM_SINGLE_PHASE) && (_flow_model_id != THM::FM_TWO_PHASE))
     logModelNotImplementedError(_flow_model_id);
+  if (_spatial_discretization != FlowModel::rDG)
+    logSpatialDiscretizationNotImplementedError(_spatial_discretization);
 
   // Check that there are exactly 2 connections
   checkNumberOfConnections(2);
@@ -97,7 +99,7 @@ JunctionOneToOne::addMooseObjects1Phase() const
       params.set<UserObjectName>("junction_uo") = junction_uo_name;
       params.set<unsigned int>("connection_index") = i;
       params.set<std::vector<VariableName>>("A_elem") = {FlowModel::AREA};
-      params.set<std::vector<VariableName>>("A_linear") = {_A_linear_names[i]};
+      params.set<std::vector<VariableName>>("A_linear") = {FlowModel::AREA_LINEAR};
       params.set<std::vector<VariableName>>("rhoA") = {FlowModelSinglePhase::RHOA};
       params.set<std::vector<VariableName>>("rhouA") = {FlowModelSinglePhase::RHOUA};
       params.set<std::vector<VariableName>>("rhoEA") = {FlowModelSinglePhase::RHOEA};
@@ -158,7 +160,7 @@ JunctionOneToOne::addMooseObjects2Phase() const
       params.set<UserObjectName>("junction_uo") = junction_uo_name;
       params.set<unsigned int>("connection_index") = i;
       params.set<std::vector<VariableName>>("A_elem") = {FlowModel::AREA};
-      params.set<std::vector<VariableName>>("A_linear") = {_A_linear_names[i]};
+      params.set<std::vector<VariableName>>("A_linear") = {FlowModel::AREA_LINEAR};
       params.set<std::vector<VariableName>>("beta") = {FlowModelTwoPhase::BETA};
       params.set<std::vector<VariableName>>("arhoA_liquid") = {
           FlowModelTwoPhase::ALPHA_RHO_A_LIQUID};

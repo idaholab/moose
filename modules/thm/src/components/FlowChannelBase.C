@@ -343,7 +343,7 @@ FlowChannelBase::addCommonObjects()
       {
         std::string class_name = "FunctionAux";
         InputParameters params = _factory.getValidParams(class_name);
-        params.set<AuxVariableName>("variable") = _A_linear_name;
+        params.set<AuxVariableName>("variable") = FlowModel::AREA_LINEAR;
         params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
         params.set<FunctionName>("function") = _area_function;
         params.set<ExecFlagEnum>("execute_on") = ts_execute_on;
@@ -356,7 +356,7 @@ FlowChannelBase::addCommonObjects()
         InputParameters params = _factory.getValidParams(class_name);
         params.set<AuxVariableName>("variable") = FlowModel::AREA;
         params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-        params.set<std::vector<VariableName>>("source") = {_A_linear_name};
+        params.set<std::vector<VariableName>>("source") = {FlowModel::AREA_LINEAR};
         params.set<ExecFlagEnum>("execute_on") = ts_execute_on;
         const std::string aux_kernel_name = genName(name(), "area_aux");
         _sim.addAuxKernel(class_name, aux_kernel_name, params);

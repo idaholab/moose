@@ -117,9 +117,6 @@ protected:
   /// Lump the mass matrix
   const bool _lump_mass_matrix;
 
-  /// Linear cross-sectional area variable name
-  const AuxVariableName _A_linear_name;
-
   /// Slope reconstruction type for rDG
   const MooseEnum _rdg_slope_reconstruction;
 
@@ -151,6 +148,7 @@ protected:
 
 public:
   static const std::string AREA;
+  static const std::string AREA_LINEAR;
   static const std::string HEAT_FLUX_WALL;
   static const std::string HEAT_FLUX_PERIMETER;
   static const std::string HYDRAULIC_DIAMETER;
