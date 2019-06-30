@@ -24,7 +24,8 @@ THMMesh::THMMesh(const InputParameters & parameters)
     _dim(getParam<MooseEnum>("dim")),
     _next_node_id(0),
     _next_element_id(0),
-    _next_subdomain_id(0)
+    _next_subdomain_id(0),
+    _next_boundary_id(0)
 {
 }
 
@@ -33,7 +34,8 @@ THMMesh::THMMesh(const THMMesh & other_mesh)
     _dim(other_mesh._dim),
     _next_node_id(other_mesh._next_node_id),
     _next_element_id(other_mesh._next_element_id),
-    _next_subdomain_id(other_mesh._next_subdomain_id)
+    _next_subdomain_id(other_mesh._next_subdomain_id),
+    _next_boundary_id(other_mesh._next_boundary_id)
 {
 }
 
@@ -186,5 +188,12 @@ SubdomainID
 THMMesh::getNextSubdomainId()
 {
   SubdomainID id = _next_subdomain_id++;
+  return id;
+}
+
+BoundaryID
+THMMesh::getNextBoundaryId()
+{
+  BoundaryID id = _next_boundary_id++;
   return id;
 }

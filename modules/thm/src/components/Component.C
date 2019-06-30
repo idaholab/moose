@@ -2,8 +2,6 @@
 #include "ConstantFunction.h"
 #include "Numerics.h"
 
-unsigned int Component::bc_ids = 0;
-
 template <>
 InputParameters
 validParams<Component>()
@@ -138,13 +136,6 @@ Component::executeSetupMesh()
 {
   setupMesh();
   _component_setup_status = MESH_PREPARED;
-}
-
-unsigned int
-Component::getNextBoundaryId()
-{
-  unsigned int id = bc_ids++;
-  return id;
 }
 
 void

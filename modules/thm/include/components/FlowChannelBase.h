@@ -170,7 +170,7 @@ protected:
   /// Subdomain id this flow channel defined
   SubdomainID _subdomain_id;
   /// Nodeset id for all flow channel nodes
-  unsigned int _nodeset_id;
+  BoundaryID _nodeset_id;
   /// Nodeset name for all flow channel nodes
   BoundaryName _nodeset_name;
 

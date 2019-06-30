@@ -434,9 +434,6 @@ protected:
 
   const Real & _zero;
 
-  /// Gets the next nodeset or sideset ID
-  virtual unsigned int getNextBoundaryId();
-
   /**
    * Split the control logic name into "section name" and "property name"
    * @param rname
@@ -445,9 +442,6 @@ protected:
   static std::vector<std::string> split(const std::string & rname);
 
 private:
-  // Do not want users to touch these, they _must_ use the API
-  static unsigned int bc_ids;
-
   /// Component setup status
   mutable EComponentSetupStatus _component_setup_status;
 
