@@ -32,7 +32,8 @@
 #include "libmesh/mesh_communication.h"
 #include "libmesh/partitioner.h"
 
-XFEM::XFEM(const InputParameters & params) : XFEMInterface(params), _efa_mesh(Moose::out)
+XFEM::XFEM(const InputParameters & params)
+  : XFEMInterface(params), _efa_mesh(Moose::out), _debug_output_level(1)
 {
 #ifndef LIBMESH_ENABLE_UNIQUE_ID
   mooseError("MOOSE requires unique ids to be enabled in libmesh (configure with "
@@ -923,11 +924,14 @@ XFEM::healMesh()
   std::set<Node *> nodes_to_delete;
   std::set<Node *> nodes_to_delete_displaced;
   std::set<unsigned int> cutelems_to_delete;
+  unsigned int deleted_elem_count = 0;
+  std::vector<std::string> healed_geometric_cuts;
 
   for (unsigned int i = 0; i < _geometric_cuts.size(); ++i)
   {
     if (_geometric_cuts[i]->shouldHealMesh())
     {
+      healed_geometric_cuts.push_back(_geometric_cuts[i]->name());
       for (auto & it : _sibling_elems[_geometric_cuts[i]->getInterfaceID()])
       {
         Elem * elem1 = const_cast<Elem *>(it.first);
@@ -996,7 +1000,13 @@ XFEM::healMesh()
         _mesh->boundary_info->remove(elem2);
         unsigned int deleted_elem_id = elem2->id();
         _mesh->delete_elem(elem2);
-        _console << "XFEM healing deleted element: " << deleted_elem_id << "\n";
+        if (_debug_output_level > 1)
+        {
+          if (deleted_elem_count == 0)
+            _console << "\n";
+          _console << "XFEM healing deleted element: " << deleted_elem_id << "\n";
+        }
+        ++deleted_elem_count;
         mesh_changed = true;
       }
     }
@@ -1008,10 +1018,9 @@ XFEM::healMesh()
     dof_id_type deleted_node_id = node_to_delete->id();
     _mesh->boundary_info->remove(node_to_delete);
     _mesh->delete_node(node_to_delete);
-    _console << "XFEM healing deleted node: " << deleted_node_id << "\n";
+    if (_debug_output_level > 1)
+      _console << "XFEM healing deleted node: " << deleted_node_id << "\n";
   }
-
-  _console << std::flush;
 
   if (_displaced_mesh)
   {
@@ -1049,6 +1058,18 @@ XFEM::healMesh()
     _cut_elem_map.erase(ceh->unique_id());
   }
 
+  if (!healed_geometric_cuts.empty() && _debug_output_level > 0)
+  {
+    _console << "\nXFEM mesh healing complete\n";
+    _console << "Names of healed geometric cut objects: ";
+    for (auto geomcut : healed_geometric_cuts)
+      _console << geomcut << " ";
+    _console << "\n";
+    _console << "# deleted nodes:    " << nodes_to_delete.size() << "\n";
+    _console << "# deleted elements: " << deleted_elem_count << "\n";
+    _console << std::flush;
+  }
+
   return mesh_changed;
 }
 
@@ -1062,12 +1083,22 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
   _cached_aux_solution.clear();
 
   _efa_mesh.updatePhysicalLinksAndFragments();
-  // DEBUG
-  //_efa_mesh.printMesh();
+
+  if (_debug_output_level > 2)
+  {
+    _console << "\nXFEM Element fragment algorithm mesh prior to cutting:\n";
+    _console << std::flush;
+    _efa_mesh.printMesh();
+  }
 
   _efa_mesh.updateTopology();
-  // DEBUG
-  //_efa_mesh.printMesh();
+
+  if (_debug_output_level > 2)
+  {
+    _console << "\nXFEM Element fragment algorithm mesh after cutting:\n";
+    _console << std::flush;
+    _efa_mesh.printMesh();
+  }
 
   const std::vector<EFANode *> new_nodes = _efa_mesh.getNewNodes();
   const std::vector<EFAElement *> new_elements = _efa_mesh.getChildElements();
@@ -1080,6 +1111,8 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
   {
     nl.serializeSolution();
     aux.serializeSolution();
+    if (_debug_output_level > 1)
+      _console << "\n";
   }
   NumericVector<Number> & current_solution = *nl.system().current_local_solution;
   NumericVector<Number> & old_solution = nl.solutionOld();
@@ -1104,7 +1137,8 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
 
     new_node->set_n_systems(parent_node->n_systems());
     efa_id_to_new_node.insert(std::make_pair(new_node_id, new_node));
-    _console << "XFEM added new node: " << new_node->id() << "\n";
+    if (_debug_output_level > 1)
+      _console << "XFEM added new node: " << new_node->id() << "\n";
     if (_displaced_mesh)
     {
       const Node * parent_node2 = _displaced_mesh->node_ptr(parent_id);
@@ -1281,7 +1315,8 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
       _elem_crack_origin_direction_map[libmesh_elem] = crack_data;
     }
 
-    _console << "XFEM added new element: " << libmesh_elem->id() << "\n";
+    if (_debug_output_level > 1)
+      _console << "XFEM added new element: " << libmesh_elem->id() << "\n";
 
     XFEMCutElem * xfce = NULL;
     if (_mesh->mesh_dimension() == 2)
@@ -1372,7 +1407,8 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
     _mesh->boundary_info->remove(elem_to_delete);
     unsigned int deleted_elem_id = elem_to_delete->id();
     _mesh->delete_elem(elem_to_delete);
-    _console << "XFEM deleted element: " << deleted_elem_id << "\n";
+    if (_debug_output_level > 1)
+      _console << "XFEM deleted element: " << deleted_elem_id << "\n";
 
     if (_displaced_mesh)
     {
@@ -1451,7 +1487,14 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
       }
     }
   }
-  _console << std::flush;
+  if (_debug_output_level > 0)
+  {
+    _console << "\nXFEM mesh cutting with element fragment algorithm complete\n";
+    _console << "# new nodes:        " << new_nodes.size() << "\n";
+    _console << "# new elements:     " << new_elements.size() << "\n";
+    _console << "# deleted elements: " << delete_elements.size() << "\n";
+    _console << std::flush;
+  }
 
   // store virtual nodes
   // store cut edge info
@@ -1698,6 +1741,12 @@ XFEM::setCrackGrowthMethod(bool use_crack_growth_increment, Real crack_growth_in
 {
   _use_crack_growth_increment = use_crack_growth_increment;
   _crack_growth_increment = crack_growth_increment;
+}
+
+void
+XFEM::setDebugOutputLevel(unsigned int debug_output_level)
+{
+  _debug_output_level = debug_output_level;
 }
 
 bool
