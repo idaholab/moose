@@ -162,7 +162,7 @@ class Translator(mixins.ConfigObject):
         """Return the rendered tree for the supplied page."""
         return self.__executioner.getResultTree(page)
 
-    def findPages(self, arg):
+    def findPages(self, arg, exact=False):
         """
         Locate all Page objects that operates on a string or uses a filter.
 
@@ -173,6 +173,7 @@ class Translator(mixins.ConfigObject):
         Inputs:
             name[str|unicode|lambda]: The partial name to search against or the function to use
                                       to test for matches.
+            exact[bool]: (False) When True an exact path match is required.
         """
         if MooseDocs.LOG_LEVEL == logging.DEBUG:
             common.check_type('name', arg, (str, unicode, types.FunctionType))
@@ -180,7 +181,8 @@ class Translator(mixins.ConfigObject):
         if isinstance(arg, (str, unicode)):
             items = self.__page_cache.get(arg, None)
             if items is None:
-                func = lambda p: (p.local == arg) or  p.local.endswith(os.sep + arg.lstrip(os.sep))
+                func = lambda p: (p.local == arg) or \
+                                 (not exact and p.local.endswith(os.sep + arg.lstrip(os.sep)))
                 items = [page for page in self.__content if func(page)]
                 self.__page_cache[arg] = items
 
@@ -189,14 +191,14 @@ class Translator(mixins.ConfigObject):
 
         return items
 
-    def findPage(self, arg, throw_on_zero=True):
+    def findPage(self, arg, throw_on_zero=True, exact=False):
         """
         Locate a single Page object that has a local name ending with the supplied name.
 
         Inputs:
             see findPages
         """
-        nodes = self.findPages(arg)
+        nodes = self.findPages(arg, exact)
         if len(nodes) == 0:
             if throw_on_zero:
                 msg = "Unable to locate a page that ends with the name '{}'.".format(arg)

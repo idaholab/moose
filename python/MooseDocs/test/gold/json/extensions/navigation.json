@@ -47,6 +47,7 @@
                 {
                     "attributes": {
                         "bookmark": "", 
+                        "exact": false, 
                         "optional": false, 
                         "page": "folder/index.md", 
                         "recursive": true

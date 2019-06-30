@@ -3,14 +3,6 @@
     --inl-blue-light: rgba(0, 104, 179, 1.0);
     --dark-blue: rgba(0, 44, 78, 1.0);
     --gray: rgba(117, 117, 117, 1.0);
-    --alert-error: rgba(153, 0, 0, 1.0);
-    --alert-error-content: rgba(153, 0, 0, 0.1);
-    --alert-note: rgba(0, 88, 151, 1.0);
-    --alert-note-content: rgba(0, 88, 151, 0.1);
-    --alert-warning: rgba(255, 255, 51, 1.0);
-    --alert-warning-content: rgba(255, 255, 51, 0.1);
-    --alert-construction: rgba(255, 114, 33, 1.0);
-    --alert-construction-content: rgba(255, 114, 33, 0.1);
 }
 
 main {
@@ -27,7 +19,6 @@ main {
   font-weight: 400;
   src: url('../contrib/fonts/material-icons/material-icons.woff2') format('woff2');
 }
-
 
 .material-icons {
   font-family: 'Material Icons';
@@ -94,13 +85,6 @@ a {
 	background-color: var(--inl-blue);
 }
 
-/*
-  Set a margin between <p> tags, if two or more paragraphs exist within an alert
- */
-.card .card-content p + p
-{
-  margin-top:10px;
-}
 
 .card .card-content{
     padding:10px;
@@ -110,9 +94,6 @@ a {
     width:100%;
 }
 
-.card-content .moose-alert-content img{
-    width:auto;
-}
 
 .moose-exception {
   color: red;
@@ -454,13 +435,8 @@ blockquote {
 }
 
 a.moose-bad-link,
-a.moose-unknown-reference,
-span.moose-sqa-error{
+a.moose-unknown-reference{
     color:red;
-}
-
-.moose-sqa-items a:not(:last-child):after{
-    content:"; "
 }
 
 /* Children/Input file lists */
@@ -724,26 +700,11 @@ footer.page-footer {
     padding: 5px;
 }
 
-/* REQUIREMENTS */
-.moose-requirements.collection.with-header .collection-header{
-    color:white;
-    background-color: var(--inl-blue);
-    font-size:larger;
-    font-weight:100;
-}
-
 .collection-header a
 {
     color:white;
 }
 
-.moose-requirements.collection .collection-item{
-    display:flex;
-}
-
-.moose-requirement-number{
-    margin-right:1em;
-}
 
 /* MOOSE SYNTAX LISTS */
 .collection.with-header .collection-header {
@@ -802,75 +763,6 @@ li p {
   padding-bottom: 6px;
 }
 
-/* ALERTS */
-.moose-alert .card-content{
-  padding:0;
-}
-
-.moose-alert .card-content .card-title{
-  margin: 0;
-  margin-bottom: 0;
-}
-
-.moose-alert-title, .moose-alert-content{
-  padding:10pt;
-}
-
-
-.moose-alert-error .moose-alert-title{
-  color: white;
-  background-color: var(--alert-error);
-}
-
-.moose-alert-error .moose-alert-content{
-  background-color: var(--alert-error-content);
-}
-
-.moose-alert-warning .moose-alert-title{
-  color: black;
-  background-color: var(--alert-warning);
-}
-
-.moose-alert-warning .moose-alert-content{
-  background-color: var(--alert-warning-content);
-}
-
-.moose-alert-note .moose-alert-title{
-  color: white;
-  background-color: var(--alert-note);
-}
-
-.moose-alert-note .moose-alert-content{
-  background-color: var(--alert-note-content);
-}
-
-.moose-alert-construction .moose-alert-title{
-  color: white;
-  background-color: var(--alert-construction);
-}
-
-.moose-alert-construction .moose-alert-content{
-    background-color: var(--alert-construction-content);
-    min-height:120px;
-}
-
-.moose-alert-construction-img{
-    float:left;
-    margin-right:10px;
-    height:100px;
-    width:unset;
-}
-
-.card-content .moose-alert-content img
-{
-    width:unset;
-}
-
-.moose-alert-title-brand{
-  text-transform: uppercase;
-  padding-right: 1ex;
-  font-weight: 400;
-}
 
 .moose-error,
 .moose-katex-error{

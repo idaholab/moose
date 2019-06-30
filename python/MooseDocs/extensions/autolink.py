@@ -26,7 +26,7 @@ LOG = logging.getLogger(__name__)
 
 SourceLink = tokens.newToken('SourceLink')
 LocalLink = tokens.newToken('LocalLink', bookmark=u'')
-AutoLink = tokens.newToken('AutoLink', page=u'', bookmark=u'', optional=False)
+AutoLink = tokens.newToken('AutoLink', page=u'', bookmark=u'', optional=False, exact=False)
 
 class AutoLinkExtension(components.Extension):
     """
@@ -52,18 +52,18 @@ class AutoLinkExtension(components.Extension):
         renderer.add('AutoLink', RenderAutoLink())
         renderer.add('SourceLink', RenderSourceLink())
 
-def createTokenHelper(key, parent, info, page, use_key_in_modal=False, optional=False):
+def createTokenHelper(key, parent, info, page, use_key_in_modal=False, optional=False, exact=False):
     match = PAGE_LINK_RE.search(info[key])
     bookmark = match.group('bookmark')[1:] if match.group('bookmark') else u''
     filename = match.group('filename')
 
     # The link is local (i.e., [#foo]), the heading will be gathered on render because it
     # could be after the current position.
-    if (filename is None) and (bookmark != u''):
+    if (filename is None) and (bookmark != u'' or (match.group('bookmark') == u'#')):
         return LocalLink(parent, bookmark=bookmark)
 
     elif filename is not None:
-        return AutoLink(parent, page=filename, bookmark=bookmark, optional=optional)
+        return AutoLink(parent, page=filename, bookmark=bookmark, optional=optional, exact=exact)
 
     else:
         source = common.project_find(info[key])
@@ -90,12 +90,14 @@ class PageShortcutLinkComponent(core.ShortcutLinkInline):
     def defaultSettings():
         settings = core.ShortcutLinkInline.defaultSettings()
         settings['optional'] = (False, "Toggle the link as optional when file doesn't exist.")
+        settings['exact'] = (False, "Enable/disable exact match for markdown file.")
         return settings
 
     def createToken(self, parent, info, page):
         token = createTokenHelper('key', parent, info, page,
                                   use_key_in_modal=True,
-                                  optional=self.settings['optional'])
+                                  optional=self.settings['optional'],
+                                  exact=self.settings['exact'])
         if token is None:
             return core.ShortcutLinkInline.createToken(self, parent, info, page)
         return token
@@ -110,10 +112,12 @@ class PageLinkComponent(core.LinkInline):
     def defaultSettings():
         settings = core.LinkInline.defaultSettings()
         settings['optional'] = (False, "Toggle the link as optional when file doesn't exist.")
+        settings['exact'] = (False, "Enable/disable exact match for markdown file.")
         return settings
 
     def createToken(self, parent, info, page):
-        token = createTokenHelper('url', parent, info, page, optional=self.settings['optional'])
+        token = createTokenHelper('url', parent, info, page, optional=self.settings['optional'],
+                                  exact=self.settings['exact'])
         if token is None:
             return core.LinkInline.createToken(self, parent, info, page)
         return token
@@ -149,6 +153,7 @@ class RenderLinkBase(components.RenderComponent):
             if head is not None:
                 head.copyToToken(link)
             else:
+                link['class'] = 'moose-error'
                 tokens.String(link, content=url)
         else:
             token.copyToToken(link)
@@ -169,30 +174,34 @@ class RenderLinkBase(components.RenderComponent):
         url = unicode(desired.relativeDestination(page))
         head = heading.find_heading(self.translator, desired, bookmark)
 
+        tok = tokens.Token(None)
         if head is None:
             msg = "The linked page ({}) does not contain a heading, so the filename " \
                   "is being utilized.".format(desired.local)
-            LOG.warning(common.report_error(msg, page.source, token.info.line, token.info[0],
+            LOG.warning(common.report_error(msg, page.source,
+                                            token.info.line if token.info else None,
+                                            token.info[0] if token.info else token.text(),
                                             prefix='WARNING'))
+            latex.String(parent, content=page.local)
 
         else:
             label = head.get('id') or re.sub(r' +', r'-', head.text().lower())
             href = func(parent, token, url, label)
 
-            tok = tokens.Token(None)
-            if len(token.children) == 0:
+            if len(token) == 0:
                 head.copyToToken(tok)
             else:
                 token.copyToToken(tok)
 
             self.renderer.render(href, tok, page)
-
         return None
 
     def _createOptionalContent(self, parent, token, page):
         """Renders text without link for optional link."""
         tok = tokens.Token(None)
         token.copyToToken(tok)
+        if len(tok) == 0: # Use filename if no children exist
+            tokens.String(tok, content=page.local)
         self.renderer.render(parent, tok, page)
 
 class RenderLocalLink(RenderLinkBase):
@@ -210,11 +219,13 @@ class RenderAutoLink(RenderLinkBase):
     Create link to another page and extract the heading for the text, if no children provided.
     """
     def createHTML(self, parent, token, page):
-        desired = self.translator.findPage(token['page'], throw_on_zero=not token['optional'])
+        desired = self.translator.findPage(token['page'], throw_on_zero=not token['optional'],
+                                           exact=token['exact'])
         return self.createHTMLHelper(parent, token, page, desired)
 
     def createLatex(self, parent, token, page):
-        desired = self.translator.findPage(token['page'], throw_on_zero=not token['optional'])
+        desired = self.translator.findPage(token['page'], throw_on_zero=not token['optional'],
+                                           exact=token['exact'])
         return self.createLatexHelper(parent, token, page, desired)
 
 class RenderSourceLink(components.RenderComponent):

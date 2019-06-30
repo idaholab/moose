@@ -210,7 +210,7 @@ class RenderModalLink(core.RenderLink):
         return None
 
     def createHTML(self, parent, token, page):
-        return parent
+        return None
 
     def createMaterialize(self, parent, token, page):
 
@@ -227,7 +227,7 @@ class RenderModalLink(core.RenderLink):
 class RenderModalLinkTitle(components.RenderComponent):
 
     def createHTML(self, parent, token, page):
-        return parent
+        return None
 
     def createMaterialize(self, parent, token, page):
         return html.Tag(parent, 'h4')
@@ -238,6 +238,9 @@ class RenderModalLinkTitle(components.RenderComponent):
 class RenderModalLinkContent(components.RenderComponent):
 
     def createHTML(self, parent, token, page):
+        return None
+
+    def createMaterialize(self, parent, token, page):
         return parent
 
     def createLatex(self, parent, token, page):

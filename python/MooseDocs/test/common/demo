@@ -1,0 +1,68 @@
+[Tests]
+  issues = '#1234'
+  design = core.md
+  [r0]
+    requirement = "Requirement One"
+  []
+  [r1]
+    requirement = "Requirement Two"
+    issues = "#3456"
+  []
+  [r2]
+    requirement = "Requirement Three"
+    design = bibtex.md
+    validation = alert.md
+  []
+  [r3]
+    requirement = "Requirement Four"
+    design = katex.md
+    issues = "#4567"
+    verification = katex.md
+  []
+
+  [group0]
+    requirement = "Requirement Group One"
+    verification = bibtex.md
+    [group0-a]
+       detail = 1D
+    []
+    [group0-b]
+       detail = 2D
+    []
+  []
+
+  [group1]
+    requirement = "Requirement Group Two"
+    issues = "#8910"
+    [group1-a]
+       detail = 3D
+    []
+    [group1-b]
+       detail = 4D
+    []
+  []
+
+  [group2]
+    requirement = "Requirement Group Three"
+    design = bibtex.md
+    validation = katex.md
+    [group2-a]
+       detail = 5D
+    []
+    [group2-b]
+       detail = 6D
+    []
+  []
+
+  [group3]
+    requirement = "Requirement Group Four"
+    design = katex.md
+    issues = "#4321"
+    [group3-a]
+       detail = 7D
+    []
+    [group3-b]
+       detail = 8D
+    []
+  []
+[]

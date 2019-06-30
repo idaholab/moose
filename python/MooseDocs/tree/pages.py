@@ -72,17 +72,12 @@ class Page(mooseutils.AutoPropertyMixin):
         return '{}: {}, {}'.format(mooseutils.colorText(self.__class__.__name__, self.COLOR),
                                    self.local, self.source)
 
+@mooseutils.addProperty('content', ptype=unicode, default=u'')
 class Text(Page):
     """Text only Page node for unit testing."""
     COLOR = 'GREEN'
-    def __init__(self, content, **kwargs):
-        super(Text, self).__init__('text', source='text')
-        self.__content = content
-
-    @property
-    def content(self):
-        """Return the supplied string."""
-        return self.__content
+    def __init__(self, **kwargs):
+        super(Text, self).__init__('_text_', source='_text_', **kwargs)
 
 class Directory(Page):
     """
