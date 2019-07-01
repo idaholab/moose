@@ -38,7 +38,7 @@ public:
    *
    * @return vector of subdomain IDs for this component
    */
-  virtual const std::vector<unsigned int> & getSubdomainIds() const;
+  virtual const std::vector<SubdomainID> & getSubdomainIds() const;
 
   /**
    * Gets the subdomain names for this component
@@ -109,7 +109,7 @@ protected:
    * @param[in] coord_system  type of coordinate system
    */
   virtual void
-  setSubdomainInfo(unsigned int subdomain_id,
+  setSubdomainInfo(SubdomainID subdomain_id,
                    const std::string & subdomain_name,
                    const Moose::CoordinateSystemType & coord_system = Moose::COORD_XYZ);
 
@@ -162,7 +162,7 @@ protected:
   std::vector<Real> _node_locations;
 
   /// List of subdomain IDs this components owns
-  std::vector<unsigned int> _subdomain_ids;
+  std::vector<SubdomainID> _subdomain_ids;
   /// List of subdomain names this components owns
   std::vector<SubdomainName> _subdomain_names;
   /// List of coordinate system for each subdomain

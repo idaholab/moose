@@ -197,7 +197,7 @@ FlowChannelBase::buildMesh()
   BoundaryInfo & boundary_info = the_mesh.get_boundary_info();
 
   // create nodeset for all nodes for this component
-  _nodeset_id = getNextBoundaryId();
+  _nodeset_id = _mesh.getNextBoundaryId();
   _nodeset_name = name();
   boundary_info.nodeset_name(_nodeset_id) = _nodeset_name;
 
@@ -231,10 +231,10 @@ FlowChannelBase::buildMesh()
   }
 
   // elems
-  _subdomain_id = getNextSubdomainId();
+  _subdomain_id = _mesh.getNextSubdomainId();
   setSubdomainInfo(_subdomain_id, name());
-  unsigned int bc_id_in = getNextBoundaryId();  // boundary id for inlet
-  unsigned int bc_id_out = getNextBoundaryId(); // boundary id for outlet
+  BoundaryID bc_id_inlet = _mesh.getNextBoundaryId();
+  BoundaryID bc_id_outlet = _mesh.getNextBoundaryId();
   for (unsigned int i = 0; i < _n_elem; i++)
   {
     Elem * elem = nullptr;
@@ -248,16 +248,18 @@ FlowChannelBase::buildMesh()
     if (i == 0)
     {
       Point pt = _position;
-      _connections[FlowConnection::IN].push_back(Connection(pt, elem->node_ptr(0), bc_id_in, -1));
-      boundary_info.add_side(elem, 0, bc_id_in);
-      _mesh.setBoundaryName(bc_id_in, genName(name(), "in"));
+      _connections[FlowConnection::IN].push_back(
+          Connection(pt, elem->node_ptr(0), bc_id_inlet, -1));
+      boundary_info.add_side(elem, 0, bc_id_inlet);
+      _mesh.setBoundaryName(bc_id_inlet, genName(name(), "in"));
     }
     if (i == (_n_elem - 1))
     {
       Point pt = _position + _length * _dir;
-      _connections[FlowConnection::OUT].push_back(Connection(pt, elem->node_ptr(1), bc_id_out, 1));
-      boundary_info.add_side(elem, 1, bc_id_out);
-      _mesh.setBoundaryName(bc_id_out, genName(name(), "out"));
+      _connections[FlowConnection::OUT].push_back(
+          Connection(pt, elem->node_ptr(1), bc_id_outlet, 1));
+      boundary_info.add_side(elem, 1, bc_id_outlet);
+      _mesh.setBoundaryName(bc_id_outlet, genName(name(), "out"));
     }
   }
 }
@@ -503,7 +505,7 @@ FlowChannelBase::getNodesetName() const
   return _nodeset_name;
 }
 
-unsigned int
+SubdomainID
 FlowChannelBase::getSubdomainID() const
 {
   checkSetupStatus(MESH_PREPARED);

@@ -40,6 +40,10 @@ public:
                          dof_id_type node6,
                          dof_id_type node7,
                          dof_id_type node8);
+  /// Gets the next subdomain ID
+  virtual SubdomainID getNextSubdomainId();
+  /// Gets the next nodeset or sideset ID
+  virtual BoundaryID getNextBoundaryId();
 
 protected:
   /// Gets the next node ID
@@ -54,6 +58,10 @@ protected:
   dof_id_type _next_node_id;
   /// The next element ID in the mesh (used for mesh generation)
   dof_id_type _next_element_id;
+  /// The next subdomain ID in the mesh (used for mesh generation)
+  SubdomainID _next_subdomain_id;
+  /// The next boundary ID in the mesh (used for mesh generation)
+  BoundaryID _next_boundary_id;
 
 public:
   static const BoundaryName INVALID_BOUNDARY_ID;

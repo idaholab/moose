@@ -284,15 +284,15 @@ HeatStructureBase::buildMesh()
   for (unsigned int i = 0; i < _number_of_hs; i++)
   {
     const std::string solid_block_name = genName(_name, _names[i]);
-    unsigned int sid = getNextSubdomainId();
+    SubdomainID sid = _mesh.getNextSubdomainId();
     // set the coordinate system for MOOSE, we do the RZ intergration ourselves until we can set
     // arbitrary number of axis symmetries in MOOSE
     setSubdomainInfo(sid, solid_block_name, Moose::COORD_XYZ);
   }
 
   // Create boundary IDs and associate with boundary names
-  _inner_bc_id.push_back(getNextBoundaryId());
-  _outer_bc_id.push_back(getNextBoundaryId());
+  _inner_bc_id.push_back(_mesh.getNextBoundaryId());
+  _outer_bc_id.push_back(_mesh.getNextBoundaryId());
   _boundary_names_inner.push_back(genName(name(), "inner"));
   _boundary_names_outer.push_back(genName(name(), "outer"));
   _mesh.setBoundaryName(_inner_bc_id[0], _boundary_names_inner[0]);
@@ -300,8 +300,8 @@ HeatStructureBase::buildMesh()
   if (_n_sections > 1 && _axial_region_names.size() == _n_sections)
     for (unsigned int i = 0; i < _n_sections; i++)
     {
-      _axial_inner_bc_id.push_back(getNextBoundaryId());
-      _axial_outer_bc_id.push_back(getNextBoundaryId());
+      _axial_inner_bc_id.push_back(_mesh.getNextBoundaryId());
+      _axial_outer_bc_id.push_back(_mesh.getNextBoundaryId());
       _boundary_names_axial_inner.push_back(genName(name(), _axial_region_names[i], "inner"));
       _boundary_names_axial_outer.push_back(genName(name(), _axial_region_names[i], "outer"));
       _mesh.setBoundaryName(_axial_inner_bc_id[i], _boundary_names_axial_inner[i]);

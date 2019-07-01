@@ -78,7 +78,7 @@ FlowConnection::init()
             _sim.getComponentByName<GeometricalFlowComponent>(comp_name);
 
         // add to list of subdomain IDs
-        const std::vector<unsigned int> & ids = comp.getSubdomainIds();
+        const std::vector<SubdomainID> & ids = comp.getSubdomainIds();
         _connected_subdomain_ids.insert(_connected_subdomain_ids.end(), ids.begin(), ids.end());
 
         fp_names.push_back(comp.getFluidPropertiesName());

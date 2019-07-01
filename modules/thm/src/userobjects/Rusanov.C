@@ -19,7 +19,7 @@ validParams<Rusanov>()
 Rusanov::Rusanov(const InputParameters & parameters) : StabilizationSettings(parameters) {}
 
 void
-Rusanov::addVariables(FlowModel &, unsigned int) const
+Rusanov::addVariables(FlowModel &, SubdomainID) const
 {
 }
 

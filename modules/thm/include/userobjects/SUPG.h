@@ -12,7 +12,7 @@ class SUPG : public StabilizationSettings
 public:
   SUPG(const InputParameters & parameters);
 
-  virtual void addVariables(FlowModel & fm, unsigned int subdomain_id) const;
+  virtual void addVariables(FlowModel & fm, SubdomainID subdomain_id) const;
   virtual void initMooseObjects(FlowModel & fm);
   virtual void addMooseObjects(FlowModel & fm, InputParameters & pars) const;
 

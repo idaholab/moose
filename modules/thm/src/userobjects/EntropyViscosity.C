@@ -194,7 +194,7 @@ EntropyViscosity::EntropyViscosity(const InputParameters & parameters)
 }
 
 void
-EntropyViscosity::addVariables(FlowModel & fm, unsigned int subdomain_id) const
+EntropyViscosity::addVariables(FlowModel & fm, SubdomainID subdomain_id) const
 {
   if (dynamic_cast<FlowModelSinglePhase *>(&fm) != NULL)
   {

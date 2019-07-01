@@ -292,7 +292,7 @@ Simulation::addIterationCountPostprocessors()
 
 void
 Simulation::addVariable(
-    bool nl, const std::string & name, FEType type, unsigned int subdomain_id, Real scaling_factor)
+    bool nl, const std::string & name, FEType type, SubdomainID subdomain_id, Real scaling_factor)
 {
   if (_vars.find(name) == _vars.end())
   {
@@ -317,7 +317,7 @@ void
 Simulation::addVariable(bool nl,
                         const std::string & name,
                         FEType type,
-                        const std::vector<unsigned int> & subdomain_ids,
+                        const std::vector<SubdomainID> & subdomain_ids,
                         Real scaling_factor /* = 1.*/)
 {
   for (auto && sid : subdomain_ids)
@@ -757,7 +757,7 @@ Simulation::setupCoordinateSystem()
     GeometricalComponent * gc = dynamic_cast<GeometricalComponent *>(comp.get());
     if (gc != NULL && gc->parent() == nullptr)
     {
-      const std::vector<unsigned int> & subdomains = gc->getSubdomainIds();
+      const std::vector<SubdomainID> & subdomains = gc->getSubdomainIds();
       const std::vector<Moose::CoordinateSystemType> & coord_sys = gc->getCoordSysTypes();
 
       for (unsigned int i = 0; i < subdomains.size(); i++)

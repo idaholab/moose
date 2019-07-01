@@ -66,7 +66,7 @@ public:
   /**
    * Gets the vector of connected subdomain IDs
    */
-  const std::vector<unsigned int> & getConnectedSubdomainIDs() const
+  const std::vector<SubdomainID> & getConnectedSubdomainIDs() const
   {
     return _connected_subdomain_ids;
   }
@@ -166,7 +166,7 @@ protected:
   /// Vector of connected component names
   std::vector<std::string> _connected_component_names;
   /// Vector of subdomain IDs of the connected geometrical flow components
-  std::vector<unsigned int> _connected_subdomain_ids;
+  std::vector<SubdomainID> _connected_subdomain_ids;
 };
 
 template <typename T>
