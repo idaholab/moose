@@ -34,10 +34,6 @@ class TestInlineComment(MooseDocsTestCase):
         self.assertLatexString(res(6), u' ')
         self.assertLatexString(res(7), u'not')
 
-    def testJSON(self):
-        _, res = self.execute(self.TEXT, renderer=base.JSONRenderer())
-        self._assertAST(res)
-
     def testReveal(self):
         _, res = self.execute(self.TEXT, renderer=base.RevealRenderer())
         self._assertHTML(res)

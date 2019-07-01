@@ -24,6 +24,10 @@ class TestTokens(unittest.TestCase):
         self.assertFalse(token['recursive'])
         self.assertEqual(token['foo'], 'foo')
 
+    def testToDict(self):
+        token = Test(None)
+        self.assertEqual(token.toDict(),
+                         {'attributes': {'foo': 'bar', 'recursive': True}, 'children': [], 'name': 'Test'})
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

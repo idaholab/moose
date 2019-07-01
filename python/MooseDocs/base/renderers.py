@@ -19,7 +19,7 @@ import anytree
 import MooseDocs
 from MooseDocs import common
 from MooseDocs.common import exceptions, mixins
-from MooseDocs.tree import html, latex, pages, tokens
+from MooseDocs.tree import html, latex, pages
 
 LOG = logging.getLogger(__name__)
 
@@ -419,29 +419,3 @@ class RevealRenderer(HTMLRenderer):
         else:
             msg = "The component object {} does not have a {} method."
             raise exceptions.MooseDocsException(msg, type(component), self.METHOD)
-
-
-class JSONRenderer(Renderer):
-    """
-    Render the AST as a JSON file.
-    """
-    METHOD = 'dummy' # The AST can write JSON directly.
-    EXTENSION = '.json'
-
-    def getRoot(self): #pylint: disable=unused-argument
-        """
-        Return LaTeX root node.
-        """
-        return tokens.Token()
-
-    def _method(self, component):
-        """
-        Do not call any methods on the component, just create a new tree for writing JSON.
-        """
-        return self.__function
-
-    @staticmethod
-    def __function(parent, token, page):
-        """Replacement for Component function (see _method)."""
-        token.parent = parent
-        return token

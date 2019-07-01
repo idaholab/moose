@@ -18,10 +18,6 @@ class TestInlineAcronym(MooseDocsTestCase):
         ast = self.tokenize(self.TEXT)
         self._assertAST(ast)
 
-    def testJSON(self):
-        _, res = self.execute(self.TEXT, renderer=base.JSONRenderer())
-        self._assertAST(res)
-
     def testHTML(self):
         _, res = self.execute(self.TEXT)
         self._assertHTML(res)
@@ -86,10 +82,6 @@ class TestAcronymList(MooseDocsTestCase):
     def testAST(self):
         ast = self.tokenize(self.TEXT)
         self._assertAST(ast)
-
-    def testJSON(self):
-        _, res = self.execute(self.TEXT, renderer=base.JSONRenderer())
-        self._assertAST(res)
 
     def testHTML(self):
         _, res = self.execute(self.TEXT)
