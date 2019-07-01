@@ -18,6 +18,7 @@ from eval_path import eval_path
 from sqa_check import sqa_check, check_requirement
 from compute_requirement_stats import compute_requirement_stats, SQAStats
 from AutoPropertyMixin import AutoPropertyMixin, Property, addProperty
+from levenshtein import levenshtein, levenshteinDistance
 import parallel
 
 try:

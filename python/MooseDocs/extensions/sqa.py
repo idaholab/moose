@@ -36,7 +36,7 @@ SQARequirementMatrixItem = tokens.newToken('SQARequirementMatrixItem', label=Non
 SQARequirementMatrixListItem = tokens.newToken('SQARequirementMatrixListItem', label=None)
 SQARequirementText = tokens.newToken('SQARequirementText')
 SQARequirementDesign = tokens.newToken('SQARequirementDesign', design=[], line=None, filename=None)
-SQARequirementIssues = tokens.newToken('SQARequirementIssues', issues=[])
+SQARequirementIssues = tokens.newToken('SQARequirementIssues', issues=[], line=None, filename=None)
 SQARequirementSpecification = tokens.newToken('SQARequirementSpecification',
                                               spec_name=None, spec_path=None)
 SQARequirementPrequisites = tokens.newToken('SQARequirementPrequisites', specs=[])
@@ -69,6 +69,10 @@ class SQAExtension(command.CommandExtension):
         config['categories'] = (dict(), "A dictionary of category names that includes a " \
                                         "dictionary with 'directories' and optionally 'specs'.")
         config['requirement-groups'] = (dict(), "Allows requirement group names to be changed.")
+        #config['dependencies'] = (list(), "A list of filename prefixes for SQA documentation " \
+        #                                  "inheritance, e.g. 'tensor_mechanics' will pull in " \
+        #                                  "'tensor_mechanics_rtm.md' in the " \
+        #                                  "'!sqa dependencies suffix=rtm' command.")
         return config
 
     def __init__(self, *args, **kwargs):
@@ -115,6 +119,7 @@ class SQAExtension(command.CommandExtension):
         self.addCommand(reader, SQARequirementsMatrixCommand())
         self.addCommand(reader, SQAVerificationCommand())
         self.addCommand(reader, SQACrossReferenceCommand())
+        self.addCommand(reader, SQADependenciesCommand())
 
         renderer.add('SQARequirementMatrix', RenderSQARequirementMatrix())
         renderer.add('SQARequirementMatrixItem', RenderSQARequirementMatrixItem())
@@ -142,7 +147,7 @@ class SQARequirementsCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         config = command.CommandComponent.defaultSettings()
-        config['category'] = (None, "Provide the category.")
+        config['category'] = ('main', "Provide the category.")
         config['link'] = (True, "Enable/disable the linking of test specifications and " \
                                  "test files.")
         config['link-spec'] = (True, "Enable/disable the link of the test specification only, " \
@@ -211,7 +216,8 @@ class SQARequirementsCommand(command.CommandComponent):
                                          line=req.design_line)
 
             if self.settings['link-issues'] and req.issues:
-                p = SQARequirementIssues(item, issues=req.issues)
+                p = SQARequirementIssues(item, filename=req.filename, issues=req.issues,
+                                         line=req.issues_line)
 
             if self.settings.get('link-prerequisites', False) and req.prerequisites:
                 labels = []
@@ -233,7 +239,7 @@ class SQACrossReferenceCommand(SQARequirementsCommand):
     @staticmethod
     def defaultSettings():
         config = SQARequirementsCommand.defaultSettings()
-        config['category'] = (None, "Provide the category.")
+        config['category'] = ('main', "Provide the category.")
         config.pop('link-prerequisites')
         return config
 
@@ -272,7 +278,7 @@ class SQARequirementsMatrixCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         config = command.CommandComponent.defaultSettings()
-        config['category'] = (None, "Provide the category.")
+        config['category'] = ('main', "Provide the category.")
         config['prefix'] = (None, "The letter prefix (e.g., 'P' for performance) for the type of "
                                   "requirement.")
         config['heading'] = (None, "Requirement matrix heading.")
@@ -320,7 +326,7 @@ class SQAVerificationCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         config = command.CommandComponent.defaultSettings()
-        config['category'] = (None, "Provide the category.")
+        config['category'] = ('main', "Provide the category.")
         return config
 
     def createToken(self, parent, info, page):
@@ -361,6 +367,20 @@ class SQAVerificationCommand(command.CommandComponent):
         tokens.String(p, content=u'Documentation: ')
         filename = getattr(req, info['subcommand'])
         autolink.AutoLink(p, page=unicode(filename))
+
+class SQADependenciesCommand(command.CommandComponent):
+    COMMAND = 'sqa'
+    SUBCOMMAND = 'dependencies'
+
+    @staticmethod
+    def defaultSettings():
+        config = command.CommandComponent.defaultSettings()
+        config['suffix'] = (None, "Provide the filename suffix to include.")
+        return config
+
+    def createToken(self, parent, info, page):
+        tokens.String(parent, content=u"Dependencies...")
+        return parent
 
 
 class RenderSQARequirementMatrix(core.RenderUnorderedList):
@@ -513,9 +533,8 @@ class RenderSQARequirementIssues(components.RenderComponent):
             url = u"{}/{}/commit/{}".format(base, repo, issue[1:])
 
         if (url is None) and (issue != u''):
-            req = token.parent['requirement']
             msg = "Unknown issue number or commit (commit SHA-1 must be at least 10 digits): "\
-                  "{}\n    {}:{}".format(issue, req.filename, req.issues_line)
+                  "{}\n    {}:{}".format(issue, token['filename'], token['line'])
             LOG.error(msg)
 
         return url
