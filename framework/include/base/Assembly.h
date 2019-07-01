@@ -258,6 +258,12 @@ public:
    */
   const MooseArray<Point> & normals() const { return _current_normals; }
 
+  /**
+   * Returns the array of tangents for quadrature points on a current side
+   * @return A _reference_.  Make sure to store this as a reference!
+   */
+  const MooseArray<std::vector<Point>> & tangents() const { return _current_tangents; }
+
   template <ComputeStage compute_stage>
   const ADPoint & adNormals() const
   {
@@ -1409,6 +1415,8 @@ private:
   MooseArray<Real> _current_JxW_face;
   /// The current Normal vectors at the quadrature points.
   MooseArray<Point> _current_normals;
+  /// The current tangent vectors at the quadrature points
+  MooseArray<std::vector<Point>> _current_tangents;
   /// Holds face qrules for each dimension
   std::map<unsigned int, QBase *> _holder_qrule_face;
   /// Holds pointers to the dimension's q_points on a face
@@ -1864,4 +1872,3 @@ Assembly::adGradPhi<RealVectorValue, ComputeStage::JACOBIAN>(
 
 template <>
 const MooseArray<typename Moose::RealType<RESIDUAL>::type> & Assembly::adJxW<RESIDUAL>() const;
-

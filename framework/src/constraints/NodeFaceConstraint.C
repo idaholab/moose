@@ -206,6 +206,8 @@ NodeFaceConstraint::computeOffDiagJacobian(unsigned int jvar)
 
   _qp = 0;
 
+  auto master_jsize = _sys.getVariable(0, jvar).dofIndicesNeighbor().size();
+
   // Fill up _phi_slave so that it is 1 when j corresponds to this dof and 0 for every other dof
   // This corresponds to evaluating all of the connected shape functions at _this_ node
   for (unsigned int j = 0; j < _connected_dof_indices.size(); j++)
@@ -224,7 +226,7 @@ NodeFaceConstraint::computeOffDiagJacobian(unsigned int jvar)
       _Kee(_i, _j) += computeQpOffDiagJacobian(Moose::SlaveSlave, jvar);
 
   for (_i = 0; _i < _test_slave.size(); _i++)
-    for (_j = 0; _j < _phi_master.size(); _j++)
+    for (_j = 0; _j < master_jsize; _j++)
       Ken(_i, _j) += computeQpOffDiagJacobian(Moose::SlaveMaster, jvar);
 
   if (_Kne.m() && _Kne.n())
@@ -234,7 +236,7 @@ NodeFaceConstraint::computeOffDiagJacobian(unsigned int jvar)
         _Kne(_i, _j) += computeQpOffDiagJacobian(Moose::MasterSlave, jvar);
 
   for (_i = 0; _i < _test_master.size(); _i++)
-    for (_j = 0; _j < _phi_master.size(); _j++)
+    for (_j = 0; _j < master_jsize; _j++)
       Knn(_i, _j) += computeQpOffDiagJacobian(Moose::MasterMaster, jvar);
 }
 

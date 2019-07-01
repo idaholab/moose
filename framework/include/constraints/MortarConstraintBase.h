@@ -124,6 +124,9 @@ protected:
   /// the normals along the slave face
   const MooseArray<Point> & _normals;
 
+  /// the tangents along the slave face
+  const MooseArray<std::vector<Point>> & _tangents;
+
   /// The element Jacobian times weights
   const std::vector<Real> & _JxW_msm;
 
@@ -165,4 +168,7 @@ protected:
   using ADMortarConstraint<compute_stage>::_test_master;                                           \
   using ADMortarConstraint<compute_stage>::_grad_test_slave;                                       \
   using ADMortarConstraint<compute_stage>::_grad_test_master;                                      \
-  using ADMortarConstraint<compute_stage>::_normals
+  using ADMortarConstraint<compute_stage>::_normals;                                               \
+  using ADMortarConstraint<compute_stage>::_tangents;                                              \
+  using ADMortarConstraint<compute_stage>::_slave_var;                                             \
+  using ADMortarConstraint<compute_stage>::_master_var

@@ -1,4 +1,29 @@
 [Tests]
+  [frictional-ncp-lm]
+    type = 'Exodiff'
+    input = 'frictional_lm.i'
+    exodiff = 'frictional_lm_out.e'
+    heavy = true
+    abs_zero = 1e-8
+    design = 'Constraints/index.md'
+    issues = '#13080'
+    requirement = 'We shall be able to run our canonical frictional sliding block problem with mortar Lagrange Multiplier contact'
+    mesh_mode = 'replicated'
+    cli_args = "Outputs/active='exodus' Postprocessors/active=''"
+    allow_warnings = true
+  []
+  [frictionless-ncp-lm]
+    type = 'Exodiff'
+    input = 'frictionless_lm.i'
+    exodiff = 'frictionless_lm_out.e'
+    heavy = true
+    abs_zero = 1e-8
+    design = 'Constraints/index.md'
+    issues = '#13080'
+    requirement = 'We shall be able to run our canonical frictional sliding block problem with lagrange multipliers and the mortar method'
+    mesh_mode = 'replicated'
+    cli_args = "Outputs/active='exodus'"
+  []
   [./frictional_mu02_penalty]
     type = 'Exodiff'
     input = 'frictional_02_penalty.i'
@@ -8,6 +33,9 @@
     abs_zero = 1e-7
     max_time = 800
     deleted = '#6139'
+    issues = '#2816'
+    design = 'MechanicalContactConstraint.md'
+    requirement = 'We shall be able to solve the Coulomb friction sliding block problem using the penalty method and a friction coefficient of .2'
   [../]
   [./frictional_mu04_penalty]
     type = 'Exodiff'
@@ -18,6 +46,9 @@
     abs_zero = 1e-7
     max_time = 800
     deleted = '#6139'
+    issues = '#2816'
+    design = 'MechanicalContactConstraint.md'
+    requirement = 'We shall be able to solve the Coulomb friction sliding block problem using the penalty method and a friction coefficient of .4'
   [../]
   [./frictionless_kinematic]
     type = 'Exodiff'
@@ -28,6 +59,9 @@
     abs_zero = 1e-7
     max_time = 800
     custom_cmp = 'frictionless_kinematic_out.cmp'
+    issues = '#2816'
+    design = 'MechanicalContactConstraint.md'
+    requirement = 'We shall be able to solve the frictionless sliding block problem using a kinematic constraint formulation.'
   [../]
   [./frictionless_kinematic_scaled]
     type = 'Exodiff'
@@ -54,6 +88,9 @@
     min_parallel = 4
     abs_zero = 1e-7
     max_time = 800
+    issues = '#2816'
+    design = 'MechanicalContactConstraint.md'
+    requirement = 'We shall be able to solve the frictionless sliding block problem using a penalty constraint formulation.'
   [../]
   [./frictionless_penalty_contact_line_search]
     type = 'Exodiff'
@@ -66,5 +103,8 @@
     max_time = 800
     # The linesearch used by this test requires PETSc >= 3.6.0.
     petsc_version = '>=3.6.0'
+    issues = '#10950'
+    design = 'ContactLineSearch.md'
+    requirement = 'We shall be able to solve the frictionless sliding block problem with a line serach customized for mechanical contact.'
   [../]
 []

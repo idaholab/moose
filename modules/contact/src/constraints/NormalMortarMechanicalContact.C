@@ -7,28 +7,31 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MechanicalContactTest.h"
+#include "NormalMortarMechanicalContact.h"
 
-registerADMooseObject("MooseTestApp", MechanicalContactTest);
+registerADMooseObject("MooseApp", NormalMortarMechanicalContact);
 
-defineADValidParams(MechanicalContactTest,
-                    ADMortarConstraint,
+defineADValidParams(
+    NormalMortarMechanicalContact,
+    ADMortarConstraint,
 
-                    MooseEnum component("x=0 y=1 z=2");
-                    params.addRequiredParam<MooseEnum>(
-                        "component",
-                        component,
-                        "The force component constraint that this object is supplying"););
+    MooseEnum component("x=0 y=1 z=2");
+    params.addRequiredParam<MooseEnum>(
+        "component", component, "The force component constraint that this object is supplying");
+    params.addClassDescription(
+        "This class is used to apply normal contact forces using lagrange multipliers");
+    params.set<bool>("compute_lm_residual") = false;);
 
 template <ComputeStage compute_stage>
-MechanicalContactTest<compute_stage>::MechanicalContactTest(const InputParameters & parameters)
+NormalMortarMechanicalContact<compute_stage>::NormalMortarMechanicalContact(
+    const InputParameters & parameters)
   : ADMortarConstraint<compute_stage>(parameters), _component(getParam<MooseEnum>("component"))
 {
 }
 
 template <ComputeStage compute_stage>
 ADReal
-MechanicalContactTest<compute_stage>::computeQpResidual(Moose::MortarType type)
+NormalMortarMechanicalContact<compute_stage>::computeQpResidual(Moose::MortarType type)
 {
   switch (type)
   {

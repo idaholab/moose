@@ -88,6 +88,7 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     _compute_lm_residuals(!_var ? false : getParam<bool>("compute_lm_residuals")),
     _test_dummy(),
     _normals(_assembly.normals()),
+    _tangents(_assembly.tangents()),
     _JxW_msm(_assembly.jxWMortar()),
     _coord(_assembly.coordTransformation()),
     _qrule_msm(_assembly.qRuleMortar()),
