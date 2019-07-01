@@ -3180,6 +3180,7 @@ NonlinearSystemBase::computeScalingJacobian(NonlinearImplicitSystem & sys)
 
   if (dynamic_cast<PetscMatrix<Real> *>(sys.matrix))
   {
+#if !PETSC_VERSION_LESS_THAN(3, 9, 0)
     _console << "\nPerforming automatic scaling calculation\n\n";
 
     TIME_SECTION(_compute_scaling_jacobian_timer);
@@ -3254,6 +3255,11 @@ NonlinearSystemBase::computeScalingJacobian(NonlinearImplicitSystem & sys)
     // Now it's essential that we reset the sparsity pattern of the matrix
     auto ierr = MatResetPreallocation(petsc_matrix.mat());
     LIBMESH_CHKERR(ierr);
+
+#else
+    mooseWarning("Automatic scaling requires a PETSc version of 3.8.0 or greater, so no automatic "
+                 "scaling is going to be performed");
+#endif
   }
 
 #endif
