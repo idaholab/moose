@@ -21,14 +21,15 @@ validParams<ElementPropertyReadFile>()
 {
   InputParameters params = validParams<GeneralUserObject>();
   params.addClassDescription("User Object to read property data from an external file and assign "
-                             "to elements: Works only for Rectangular geometry (2D-3D)");
+                             "to elements.");
   params.addParam<FileName>("prop_file_name", "", "Name of the property file name");
   params.addRequiredParam<unsigned int>("nprop", "Number of tabulated property values");
   params.addParam<unsigned int>("ngrain", 0, "Number of grains");
-  params.addParam<MooseEnum>("read_type",
-                             MooseEnum("element grain none", "none"),
-                             "Type of property distribution: element:element by element property "
-                             "variation; grain:voronoi grain structure");
+  params.addRequiredParam<MooseEnum>(
+      "read_type",
+      MooseEnum("element grain"),
+      "Type of property distribution: element:element by element property "
+      "variation; grain:voronoi grain structure");
   params.addParam<unsigned int>("rand_seed", 2000, "random seed");
   params.addParam<MooseEnum>(
       "rve_type",
@@ -70,9 +71,6 @@ ElementPropertyReadFile::ElementPropertyReadFile(const InputParameters & paramet
     case 1:
       readGrainData();
       break;
-
-    default:
-      mooseError("Error ElementPropertyReadFile: Provide valid read type");
   }
 }
 
@@ -143,14 +141,10 @@ ElementPropertyReadFile::getElementData(const Elem * elem, unsigned int prop_num
   unsigned int jelem = elem->id();
   mooseAssert(jelem < _nelem,
               "Error ElementPropertyReadFile: Element "
-                  << jelem
-                  << " greater than than total number of element in mesh "
-                  << _nelem);
+                  << jelem << " greater than than total number of element in mesh " << _nelem);
   mooseAssert(prop_num < _nprop,
               "Error ElementPropertyReadFile: Property number "
-                  << prop_num
-                  << " greater than than total number of properties "
-                  << _nprop);
+                  << prop_num << " greater than than total number of properties " << _nprop);
   return _data[jelem * _nprop + prop_num];
 }
 
@@ -159,9 +153,7 @@ ElementPropertyReadFile::getGrainData(const Elem * elem, unsigned int prop_num) 
 {
   mooseAssert(prop_num < _nprop,
               "Error ElementPropertyReadFile: Property number "
-                  << prop_num
-                  << " greater than than total number of properties "
-                  << _nprop
+                  << prop_num << " greater than than total number of properties " << _nprop
                   << "\n");
 
   Point centroid = elem->centroid();

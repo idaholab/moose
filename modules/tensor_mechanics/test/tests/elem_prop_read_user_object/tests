@@ -1,12 +1,18 @@
 [Tests]
+  issues = '#4066'
+
   [./test_elem]
     type = 'Exodiff'
     input = 'prop_elem_read.i'
     exodiff = 'prop_elem_read_out.e'
+    design = 'ElementPropertyReadFile.md'
+    requirement = 'The system shall provide an object to read values from a file and map them onto a mesh besed on mesh element IDs'
   [../]
   [./test_grain]
     type = 'Exodiff'
     input = 'prop_grain_read.i'
     exodiff = 'prop_grain_read_out.e'
+    design = 'ElementPropertyReadFile.md'
+    requirement = 'The system shall provide an object to read values from a file and map them onto a mesh besed on grain IDs determined by a random Voronoi tessellation'
   [../]
 []
