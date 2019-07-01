@@ -84,7 +84,6 @@
 - /UserObjects/CrystalPlasticitySlipResistanceGSS
 - /UserObjects/CrystalPlasticityStateVarRateComponentGSS
 - /UserObjects/CrystalPlasticityStateVariable
-- /UserObjects/ElementPropertyReadFile
 - /UserObjects/EulerAngleFileReader
 - /UserObjects/HEVPEqvPlasticStrain
 - /UserObjects/HEVPEqvPlasticStrainRate
