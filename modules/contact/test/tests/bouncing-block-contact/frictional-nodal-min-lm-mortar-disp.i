@@ -164,7 +164,11 @@ offset = 1e-2
 []
 
 [Outputs]
-  exodus = true
+  [exodus]
+    type = Exodus
+    sync_times = '0 5 10 15 20 25 30 35 40 45 50'
+    file_base = frictional-nodal-min-lm-mortar-disp_out
+  []
   [dof]
     type = DOFMap
     execute_on = 'initial'
