@@ -1,6 +1,6 @@
 [Tests]
-  issues = 'svn'
-  design = 'This is a deprecated system that has been replaced by the user object based plasticity and should be removed.'
+  issues = ''
+  design = 'tensor_mechanics/index.md'
   [./test]
     type = 'Exodiff'
     input = 'crysp.i'

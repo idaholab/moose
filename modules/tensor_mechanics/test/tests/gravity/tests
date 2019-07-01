@@ -27,7 +27,7 @@
     petsc_version = '>=3.9.4'
     requirement = 'The Jacobian for the AD gravity problem shall be perfect'
     issues = '#13100'
-    design = 'jacobian_definitions.md'
+    design = 'ADGravity.md'
     cli_args = "Outputs/active=''"
   [../]
 []

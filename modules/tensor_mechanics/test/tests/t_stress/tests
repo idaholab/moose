@@ -1,6 +1,6 @@
 [Tests]
 design = 'syntax/DomainIntegral/index.md'
-issues = '4276'
+issues = '#4276'
  [./2d]
    type = 'CSVDiff'
    input = 't_stress_crack_infinite_plate_2d.i'

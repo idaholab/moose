@@ -35,7 +35,6 @@
     difference_tol = 1e-5
     petsc_version = '>=3.9.4'
     issues = '#12650'
-    design = 'jacobian_definitions.md'
     requirement = 'The ComputeIsotropicElasticityTensor class shall correctly compute the elasticity tensor from the lambda and shear modulus for an isotropic material using AD formulations and produce a perfect Jacobian.'
   [../]
   [./youngs_poissons-jac]
@@ -46,7 +45,6 @@
     difference_tol = 1e-5
     petsc_version = '>=3.9.4'
     issues = '#12650'
-    design = 'jacobian_definitions.md'
     requirement = "The ComputeIsotropicElasticityTensor class shall correctly compute the elasticity tensor from the Young's modulus and Poisson's ratio for an isotropic material using AD formulations and produce a perfect Jacobian."
   [../]
   [./bulk_shear-jac]
@@ -57,7 +55,6 @@
     difference_tol = 1e-5
     petsc_version = '>=3.9.4'
     issues = '#12650'
-    design = 'jacobian_definitions.md'
     requirement = 'The ComputeIsotropicElasticityTensor class shall correctly compute the elasticity tensor from their bulk modulus and shear modulus for an isotropic material using AD formulations and produce a perfect Jacobian.'
   [../]
   [./axisymmetric_rz-jac]
@@ -68,7 +65,6 @@
     difference_tol = 1e-1
     petsc_version = '>=3.9.4'
     issues = '#12650'
-    design = 'jacobian_definitions.md'
     requirement = 'The ComputeElasticityTensor class shall correctly compute the elasticity tensor for an isotropic axisymmetric problem and produce a perfect Jacobian.'
   [../]
 []
