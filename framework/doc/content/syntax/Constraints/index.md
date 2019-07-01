@@ -5,7 +5,7 @@
 ### Overview
 
 An excellent overview of the conservative mortar constraint implementation in MOOSE is given in
-[cite!osti_1468630]. We have verified that the MOOSE mortar implementation satisfies *a priori*
+[!cite](osti_1468630). We have verified that the MOOSE mortar implementation satisfies *a priori*
 error estimates (see discussion and plots on
 [this github issue](https://github.com/idaholab/moose/issues/13080)):
 

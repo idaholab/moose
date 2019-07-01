@@ -4625,9 +4625,16 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
     _aux->compute(EXEC_PRE_DISPLACE);
     try
     {
-      _displaced_problem->updateMesh();
-      if (_mortar_data.hasDisplacedObjects())
-        updateMortarMesh();
+      try
+      {
+        _displaced_problem->updateMesh();
+        if (_mortar_data.hasDisplacedObjects())
+          updateMortarMesh();
+      }
+      catch (libMesh::LogicError & e)
+      {
+        throw MooseException("We caught a libMesh error");
+      }
     }
     catch (MooseException & e)
     {

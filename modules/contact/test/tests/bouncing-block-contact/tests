@@ -82,7 +82,7 @@
     exodiff = 'frictional-nodal-min-lm-mortar-disp_out.e'
     mesh_mode = 'REPLICATED'
     requirement = 'We will solve the frictional bouncing block problem with nodal constraint enforcement, mortar application of forces, and min NCP function'
-    cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 Postprocessors/active=''"
+    cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 Postprocessors/active='' Outputs/exodus/sync_only=true --redirect-output output.log"
     allow_warnings = True
     max_parallel = 1
     method = 'OPT'
