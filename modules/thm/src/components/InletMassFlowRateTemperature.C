@@ -100,7 +100,7 @@ InletMassFlowRateTemperature::setup1PhaseCG()
     params.set<Real>("m_dot") = m_dot_in;
     std::string nm = genName(name(), "rhoA_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, nm, "m_dot", "m_dot");
+    connectObject(params, nm, "m_dot");
   }
   {
     std::string class_name = "OneDMomentumMassFlowRateTemperatureBC";
@@ -111,7 +111,7 @@ InletMassFlowRateTemperature::setup1PhaseCG()
     params.set<Real>("m_dot") = m_dot_in;
     std::string nm = genName(name(), "rhouA_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, nm, "m_dot", "m_dot");
+    connectObject(params, nm, "m_dot");
   }
   {
     std::string class_name = "OneDEnergyMassFlowRateTemperatureBC";
@@ -130,8 +130,8 @@ InletMassFlowRateTemperature::setup1PhaseCG()
     params.set<UserObjectName>("fp") = _fp_name;
     std::string nm = genName(name(), "rhoEA_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, nm, "m_dot", "m_dot");
-    connectObject(params, nm, "T", "T");
+    connectObject(params, nm, "m_dot");
+    connectObject(params, nm, "T");
   }
 }
 
@@ -153,7 +153,7 @@ InletMassFlowRateTemperature::setup1PhaseRDG()
     params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
     _sim.addUserObject(class_name, boundary_flux_name, params);
     connectObject(params, boundary_flux_name, "m_dot", "mass_flow_rate");
-    connectObject(params, boundary_flux_name, "T", "T");
+    connectObject(params, boundary_flux_name, "T");
   }
 
   // BCs

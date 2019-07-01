@@ -115,7 +115,7 @@ InletDensityVelocity::setup1Phase()
     std::string nm = genName(name(), "rhouA_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
     connectObject(params, nm, "rho");
-    connectObject(params, nm, "vel", "vel");
+    connectObject(params, nm, "vel");
   }
   {
     std::string class_name = "OneDEnergyDensityVelocityBC";
@@ -132,7 +132,7 @@ InletDensityVelocity::setup1Phase()
     std::string nm = genName(name(), "rhoEA_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
     connectObject(params, nm, "rho");
-    connectObject(params, nm, "vel", "vel");
+    connectObject(params, nm, "vel");
   }
 }
 
