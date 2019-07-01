@@ -53,11 +53,6 @@ public:
   const THM::FlowModelID & getFlowModelID() const;
 
   /**
-   * Gets the linear cross-sectional area variable name
-   */
-  const UserObjectName & getLinearAreaName() const { return _A_linear_name; }
-
-  /**
    * Gets the numerical flux user object name
    */
   const UserObjectName & getNumericalFluxUserObjectName() const { return _numerical_flux_name; }
@@ -88,9 +83,6 @@ protected:
 
   /// Name of fluid properties user object
   const UserObjectName & _fp_name;
-
-  /// Linear cross-sectional area variable name
-  const UserObjectName _A_linear_name;
 
   /// Numerical flux user object name
   const UserObjectName _numerical_flux_name;

@@ -252,9 +252,10 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
     params.set<std::vector<VariableName>>("arhoA") = {RHOA};
     params.set<std::vector<VariableName>>("arhouA") = {RHOUA};
-    // Since rDG uses this kernel and rDG usually uses elemental area by default,
-    // a linear area variable must be used specifically.
-    params.set<std::vector<VariableName>>("A") = {_A_linear_name};
+    if (_spatial_discretization == CG)
+      params.set<std::vector<VariableName>>("A") = {AREA};
+    else if (_spatial_discretization == rDG)
+      params.set<std::vector<VariableName>>("A") = {AREA_LINEAR};
     params.set<MaterialPropertyName>("direction") = DIRECTION;
     params.set<MaterialPropertyName>("p") = PRESSURE;
     params.set<MaterialPropertyName>("alpha") = UNITY;
@@ -429,7 +430,7 @@ FlowModelSinglePhase::addRDGMooseObjects()
     params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
     params.set<MooseEnum>("scheme") = _rdg_slope_reconstruction;
     params.set<std::vector<VariableName>>("A_elem") = {AREA};
-    params.set<std::vector<VariableName>>("A_linear") = {_A_linear_name};
+    params.set<std::vector<VariableName>>("A_linear") = {AREA_LINEAR};
     params.set<std::vector<VariableName>>("rhoA") = {RHOA};
     params.set<std::vector<VariableName>>("rhouA") = {RHOUA};
     params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
@@ -446,7 +447,7 @@ FlowModelSinglePhase::addRDGMooseObjects()
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = RHOA;
     params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
-    params.set<std::vector<VariableName>>("A_linear") = {_A_linear_name};
+    params.set<std::vector<VariableName>>("A_linear") = {AREA_LINEAR};
     params.set<std::vector<VariableName>>("rhoA") = {RHOA};
     params.set<std::vector<VariableName>>("rhouA") = {RHOUA};
     params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};

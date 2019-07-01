@@ -42,7 +42,6 @@ FlowChannel1Phase::buildFlowModel()
   pars.set<FlowChannelBase *>("_flow_channel") = this;
   pars.set<UserObjectName>("fp") = _fp_name;
   pars.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
-  pars.set<AuxVariableName>("A_linear_name") = _A_linear_name;
   pars.set<MooseEnum>("rdg_slope_reconstruction") = _rdg_slope_reconstruction;
   return _factory.create<FlowModel>(class_name, name(), pars, 0);
 }
