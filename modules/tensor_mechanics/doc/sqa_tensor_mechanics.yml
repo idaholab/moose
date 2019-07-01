@@ -1,0 +1,4 @@
+directories:
+    - modules/tensor_mechanics/test/tests
+specs:
+    - tests

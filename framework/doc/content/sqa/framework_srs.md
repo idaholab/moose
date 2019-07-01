@@ -147,7 +147,7 @@ follow this format.
 !template-end!
 
 !template! item key=functional-requirements
-!sqa requirements link=False category=Framework
+!sqa requirements link=False
 !template-end!
 
 !template! item key=useability-requirements
