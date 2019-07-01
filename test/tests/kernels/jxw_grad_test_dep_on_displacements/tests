@@ -1,5 +1,5 @@
 [Tests]
-  design = 'jacobian_definition.md'
+  design = 'DisplacedProblem.md'
   issues = '#5658'
   [./jxw_jacobian]
     type = 'PetscJacobianTester'

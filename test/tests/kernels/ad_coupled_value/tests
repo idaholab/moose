@@ -1,10 +1,10 @@
 [Tests]
+  design = "Coupleable.md"
   [test]
     type = 'Exodiff'
     input = 'ad_coupled_value.i'
     exodiff = 'ad_coupled_value_out.e'
     requirement = "Coupled variable value Jacobian entries generated with AD shall be accurate"
-    design = "jacobian_definition.md"
     issues = "#5658"
   []
   [test_coupled_aux]
@@ -12,7 +12,6 @@
     input = 'ad_aux_coupled_value.i'
     exodiff = 'ad_aux_coupled_value_out.e'
     requirement = "We shall be able to get aux variable values through adCoupledValue with the knowledge that the derivatives will always be zero"
-    design = "jacobian_definition.md"
     issues = "#12852"
     max_parallel = 4
   []
@@ -25,7 +24,6 @@
     max_parallel = 4
     cli_args = 'Outputs/exodus=false'
     requirement = "Getting a *constant* aux variable through adCoupledValue shall not destroy our Jacobian"
-    design = "jacobian_definition.md"
     issues = "#12852"
   []
   [test_coupled_dot_aux]
@@ -33,7 +31,6 @@
     input = 'ad_aux_coupled_time_value.i'
     exodiff = 'ad_aux_coupled_time_value_out.e'
     requirement = "We shall be able to get dot aux variable values through adCoupledValue with the knowledge that the time derivatives will always be zero"
-    design = "jacobian_definition.md"
     issues = "#12996"
     max_parallel = 4
   []

@@ -1,10 +1,10 @@
 [Tests]
+  design = "ADDGKernel.md"
   [./test]
     type = 'Exodiff'
     input = '2d_diffusion_ad_dg_test.i'
     exodiff = '2d_diffusion_ad_dg_test_out.e  2d_diffusion_ad_dg_test_out.e-s003'
     requirement = "MOOSE should support AD in DG Kernels"
-    design = "jacobian_definition.md"
     issues = "#5658"
   [../]
 []

@@ -1,5 +1,5 @@
 [Tests]
-  design = 'random_number_generation.md'
+  design = 'RandomInterface.md'
   issues = '#2088 #5476'
 
   # AuxKernel Tests

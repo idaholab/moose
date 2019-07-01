@@ -7,3 +7,6 @@ LGPL: GNU Library General Public License
 PDE: partial differential equation
 PDEs: partial differential equations
 AD: automatic differentiation
+SRS: Software Requirement Specification
+RTM: Requirement Traceability Matrix
+SDD: Software Design Description

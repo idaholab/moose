@@ -1,5 +1,4 @@
-!template load file=system_design_description.template.md
-               project=MOOSE
+!template load file=sdd.md.template category=framework
 
 !template! item key=introduction
 Frameworks are a software development construct aiming to simplify the creation of specific classes
@@ -102,6 +101,6 @@ request system on the Github.org website.
 
 !template! item key=requirements-cross-reference
 
-!sqa cross-reference
+!sqa cross-reference category=framework
 
 !template-end!

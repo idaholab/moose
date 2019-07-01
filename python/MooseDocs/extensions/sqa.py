@@ -22,7 +22,7 @@ import MooseDocs
 from MooseDocs import common
 from MooseDocs.common import exceptions
 from MooseDocs.base import components, LatexRenderer, HTMLRenderer
-from MooseDocs.extensions import core, command, floats, autolink
+from MooseDocs.extensions import core, command, floats, autolink, template
 from MooseDocs.tree import tokens, html, latex
 
 LOG = logging.getLogger(__name__)
@@ -66,13 +66,10 @@ class SQAExtension(command.CommandExtension):
                          "Repository for linking issues and commits.")
         config['repo'] = (u"idaholab/moose",
                           "The default repository location to append to the given url.")
+        config['main'] = (None, "The name of the primary category for building requirement lists.")
         config['categories'] = (dict(), "A dictionary of category names that includes a " \
                                         "dictionary with 'directories' and optionally 'specs'.")
         config['requirement-groups'] = (dict(), "Allows requirement group names to be changed.")
-        #config['dependencies'] = (list(), "A list of filename prefixes for SQA documentation " \
-        #                                  "inheritance, e.g. 'tensor_mechanics' will pull in " \
-        #                                  "'tensor_mechanics_rtm.md' in the " \
-        #                                  "'!sqa dependencies suffix=rtm' command.")
         return config
 
     def __init__(self, *args, **kwargs):
@@ -120,6 +117,7 @@ class SQAExtension(command.CommandExtension):
         self.addCommand(reader, SQAVerificationCommand())
         self.addCommand(reader, SQACrossReferenceCommand())
         self.addCommand(reader, SQADependenciesCommand())
+        self.addCommand(reader, SQADocumentCommand())
 
         renderer.add('SQARequirementMatrix', RenderSQARequirementMatrix())
         renderer.add('SQARequirementMatrixItem', RenderSQARequirementMatrixItem())
@@ -147,7 +145,7 @@ class SQARequirementsCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         config = command.CommandComponent.defaultSettings()
-        config['category'] = ('main', "Provide the category.")
+        config['category'] = (None, "Provide the category.")
         config['link'] = (True, "Enable/disable the linking of test specifications and " \
                                  "test files.")
         config['link-spec'] = (True, "Enable/disable the link of the test specification only, " \
@@ -162,7 +160,7 @@ class SQARequirementsCommand(command.CommandComponent):
         return config
 
     def createToken(self, parent, info, page):
-        category = self.settings['category']
+        category = self.settings.get('category') or self.extension.get('main')
         group_map = self.extension.get('group_map', dict())
         for group, requirements in self.extension.requirements(category).iteritems():
             group = group_map.get(group, group.replace('_', ' ').title())
@@ -239,13 +237,13 @@ class SQACrossReferenceCommand(SQARequirementsCommand):
     @staticmethod
     def defaultSettings():
         config = SQARequirementsCommand.defaultSettings()
-        config['category'] = ('main', "Provide the category.")
+        config['category'] = (None, "Provide the category.")
         config.pop('link-prerequisites')
         return config
 
     def createToken(self, parent, info, page):
         design = collections.defaultdict(list)
-        category = self.settings['category']
+        category = self.settings.get('category') or self.extension.get('main')
         for requirements in self.extension.requirements(category).itervalues():
             for req in requirements:
                 for d in req.design:
@@ -278,7 +276,7 @@ class SQARequirementsMatrixCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         config = command.CommandComponent.defaultSettings()
-        config['category'] = ('main', "Provide the category.")
+        config['category'] = (None, "Provide the category.")
         config['prefix'] = (None, "The letter prefix (e.g., 'P' for performance) for the type of "
                                   "requirement.")
         config['heading'] = (None, "Requirement matrix heading.")
@@ -326,13 +324,14 @@ class SQAVerificationCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         config = command.CommandComponent.defaultSettings()
-        config['category'] = ('main', "Provide the category.")
+        config['category'] = (None, "Provide the category.")
         return config
 
     def createToken(self, parent, info, page):
 
         matrix = SQARequirementMatrix(parent)
-        for requirements in self.extension.requirements(self.settings['category']).itervalues():
+        category = self.settings.get('category') or self.extension.get('main')
+        for requirements in self.extension.requirements(category).itervalues():
             for req in requirements:
                 if getattr(req, info['subcommand']) is not None:
                     self._addRequirement(matrix, info, page, req)
@@ -370,7 +369,7 @@ class SQAVerificationCommand(command.CommandComponent):
 
 class SQADependenciesCommand(command.CommandComponent):
     COMMAND = 'sqa'
-    SUBCOMMAND = 'dependencies'
+    SUBCOMMAND = '_dependencies'
 
     @staticmethod
     def defaultSettings():
@@ -379,9 +378,33 @@ class SQADependenciesCommand(command.CommandComponent):
         return config
 
     def createToken(self, parent, info, page):
-        tokens.String(parent, content=u"Dependencies...")
+        suffix = self.settings['suffix']
+        main = self.extension.get('main')
+        ul = core.UnorderedList(parent)
+        for category in self.extension.get('categories'):
+            if category != main:
+                autolink.AutoLink(core.ListItem(ul), page=u'sqa/{}_{}.md'.format(category, suffix),
+                                  optional=True, warning=True, class_='moose-sqa-dependency')
         return parent
 
+class SQADocumentCommand(command.CommandComponent):
+    COMMAND = 'sqa'
+    SUBCOMMAND = '_document'
+
+    @staticmethod
+    def defaultSettings():
+        config = command.CommandComponent.defaultSettings()
+        config['suffix'] = (None, "Provide the filename suffix to include.")
+        config['title'] = (None, "The document title")
+        return config
+
+    def createToken(self, parent, info, page):
+        main = self.extension.get('main')
+        suffix = self.settings.get('suffix')
+        title = self.settings.get('title')
+        #li = core.ListItem(parent, class_='moose-sqa-document')
+        return autolink.AutoLink(parent, page=u'sqa/{}_{}.md'.format(main, suffix),
+                                 optional=True, warning=True)
 
 class RenderSQARequirementMatrix(core.RenderUnorderedList):
 
@@ -459,7 +482,7 @@ class RenderSQARequirementMatrixHeading(core.RenderListItem):
 
     def createMaterialize(self, parent, token, page):
         tag = html.Tag(parent, 'li', class_='collection-header')
-        category = token['category']
+        category = token.get('category')
         if category:
             tag.insert(0, html.String(content='{}: '.format(category)))
         return tag

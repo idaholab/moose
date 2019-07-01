@@ -1,10 +1,10 @@
 [Tests]
+  design = 'Variables/index.md'
   [./vector_fe]
     type = Exodiff
     input = 'vector_kernel.i'
     exodiff = 'vector_kernel_out.e'
     abs_zero = 1e-8
-    design = "moose_variables.md"
     issues = "#10049"
     requirement = "MOOSE shall be able to solve a curl-curl problem using NEDELEC_ONE elements"
   [../]
@@ -14,7 +14,6 @@
     exodiff = 'coupled_scalar_vector_out.e'
     abs_zero = 6e-8
     rel_err = 3e-5
-    design = "moose_variables.md"
     issues = "#10049"
     requirement = "MOOSE shall be able to couple a vector variable into a standard kernel"
   [../]
@@ -22,7 +21,6 @@
     type = Exodiff
     input = 'coupled_scalar_default_vector_value.i'
     exodiff = 'coupled_scalar_default_vector_value_out.e'
-    design = "moose_variables.md"
     issues = '#10049'
     requirement = "MOOSE shall be able to assign a default value for a vector variable from the source file"
   [../]
@@ -33,7 +31,6 @@
     allow_warnings = True
     cli_args = "Kernels/advection/efield='.3 .3' Outputs/file_base=coupled_scalar_default_vector_value_alt_out"
     expect_out = "You supplied less than 3 arguments for the default vector value for variable efield"
-    design = "moose_variables.md"
     issues = '#10049'
     requirement = "MOOSE shall warn when assigning a default value with number of components less than LIBMESH_DIM "
                   "and it shall be able to assign the default value from the input file"
@@ -45,7 +42,6 @@
     difference_tol = 1e-6
     run_sim = True
     cli_args = 'Mesh/nx=3 Mesh/ny=3 Outputs/exodus=false'
-    design = "moose_variables.md"
     issues = '#10049'
     requirement = "MOOSE shall be able to assign a default value for a vector variable from the input file and still have the correct jacobian"
   [../]
@@ -54,7 +50,6 @@
     input = 'lagrange_vec.i'
     exodiff = 'lagrange_vec_out.e'
     abs_zero = 1e-8
-    design = "moose_variables.md"
     issues = "#10049"
     requirement = "MOOSE shall be able to solve multi-dimensional problems with LAGRANGE_VEC variables"
   [../]
@@ -63,7 +58,6 @@
     input = 'lagrange_vec_1d.i'
     exodiff = 'lagrange_vec_1d_out.e'
     abs_zero = 1e-8
-    design = "moose_variables.md"
     issues = "#10049"
     requirement = "MOOSE shall be able to solve one-dimensional problems with LAGRANGE_VEC variables"
   [../]
@@ -72,7 +66,6 @@
     input = 'lagrange_vec_1d.i'
     ratio_tol = 1e-7
     difference_tol = 1e-6
-    design = "moose_variables.md"
     issues = "#10049"
     cli_args = 'Outputs/exodus=false Mesh/nx=3'
     requirement = "MOOSE shall be able to solve one-dimensional problems with LAGRANGE_VEC variables and produce the correct Jacobian"
@@ -82,7 +75,7 @@
     input = 'ad_lagrange_vec.i'
     exodiff = 'lagrange_vec_out.e'
     abs_zero = 1e-7
-    design = "jacobian_definition.md ADVectorFunctionDirichletBC.md"
+    design = "ADVectorFunctionDirichletBC.md"
     issues = "#5658"
     requirement = "MOOSE shall be able to solve multi-d LAGRANGE_VEC problems with automatic differentiation and reproduce the hand-coded result"
     prereq = 'lagrange_vec'
@@ -94,7 +87,7 @@
     ratio_tol = 1e-7
     difference_tol = 1e-6
     run_sim = True
-    design = "jacobian_definition.md ADVectorFunctionDirichletBC.md"
+    design = "ADVectorFunctionDirichletBC.md"
     issues = "#5658"
     requirement = "MOOSE shall be able to solve multi-d LAGRANGE_VEC problems with automatic differentiation and have a perfect Jacobian"
     cli_args = 'Mesh/nx=2 Mesh/ny=2'
@@ -106,7 +99,7 @@
     state = 'const_positive'
     ratio_tol = 1e-7
     difference_tol = 5e-6
-    design = "moose_variables.md"
+    design = "Variables/index.md "
     issues = "#10049"
     requirement = "MOOSE shall be able to couple a vector variable into a standard kernel and produced the correct Jacobian"
   [../]
@@ -116,7 +109,7 @@
     exodiff = 'electromagnetic_coulomb_gauge_out.e'
     abs_zero = 6e-8
     rel_err = 3e-5
-    design = "moose_variables.md VectorBodyForce.md"
+    design = "Variables/index.md  VectorBodyForce.md"
     issues = "#10861"
     requirement = "MOOSE shall be able to couple a standard variable into a vector kernel. Additionally, MOOSE shall be able to calculate time derivatives of variable gradients."
   [../]
@@ -128,7 +121,7 @@
     ratio_tol = 1e-7
     difference_tol = 5e-6
     cli_args = 'BCs/active="" Mesh/nx=4 Mesh/ny=4 Outputs/exodus=false Executioner/num_steps=1'
-    design = "moose_variables.md VectorBodyForce.md"
+    design = "Variables/index.md VectorBodyForce.md"
     issues = "#10861"
     requirement = "MOOSE shall be able to compute the correct Jacobian when coupling a standard variable into a vector kernel and taking time derivatives of variable gradients."
   [../]
@@ -136,7 +129,7 @@
     type = Exodiff
     input = 'coupled_vector_gradient.i'
     exodiff = 'coupled_vector_gradient_out.e'
-    design = "moose_variables.md VectorDiffusion.md VectorDirichletBC.md VectorFunctionDirichletBC.md"
+    design = "Variables/index.md VectorDiffusion.md VectorDirichletBC.md VectorFunctionDirichletBC.md"
     issues = "#11150"
     requirement = "1) MOOSE shall be able to assign dirichlet boundary conditions for LAGRANGE_VEC variables 2) MOOSE shall be able to obtain coupled vector variable gradients 3) MOOSE shall correctly initialize both volume and face curl shape functions when the curl of a variable is requested"
   [../]

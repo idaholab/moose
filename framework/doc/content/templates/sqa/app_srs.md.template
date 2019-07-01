@@ -1,0 +1,18 @@
+## {{app}} System Requirement Specification
+
+## Introduction id=introduction
+
+!template field key=introduction
+The {{app}} module ...
+
+## Dependencies
+
+!template field key=dependencies-intro required=False
+The {{app}} application is developed using MOOSE and is based on various modules, as such
+the [!ac](SRS) for {{app}} is dependent upon the following documents.
+
+!sqa _dependencies suffix=srs
+
+## Requirements
+
+!sqa requirements link=False category={{category}}

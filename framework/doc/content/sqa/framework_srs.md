@@ -1,5 +1,4 @@
-!template load file=system_requirement_specification.template.md
-               project=MOOSE
+!template load file=srs.md.template category=framework
 
 !template! item key=system-purpose
 The [!ac](MOOSE) is a tool for solving complex coupled
@@ -115,8 +114,6 @@ will be command line based with no assumptions requiring advanced terminal capab
 coloring and line control.
 !template-end!
 
-!template item key=definitions-and-acronyms
-
 !template! item key=definitions
 - +Verification+: (1) The process of: evaluating a system or component to determine whether the
   products of a given development phase satisfy the conditions imposed at the start of that
@@ -147,7 +144,7 @@ follow this format.
 !template-end!
 
 !template! item key=functional-requirements
-!sqa requirements link=False
+!sqa requirements link=False category={{category}}
 !template-end!
 
 !template! item key=useability-requirements

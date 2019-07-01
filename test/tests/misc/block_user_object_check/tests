@@ -1,5 +1,5 @@
 [Tests]
-  design = 'sanity_checking.md'
+  design = 'Problem/index.md'
   issues = '#9889'
 
   [./variable_interface_run]

@@ -12,6 +12,7 @@ import codecs
 import logging
 import anytree
 
+import MooseDocs
 from MooseDocs import common
 from MooseDocs.common import exceptions
 from MooseDocs.base import components
@@ -37,6 +38,7 @@ class TemplateExtension(include.IncludeExtension):
     @staticmethod
     def defaultConfig():
         config = include.IncludeExtension.defaultConfig()
+        config['args'] = (dict(), "Template arguments to be applied to templates.")
         return config
 
     def extend(self, reader, renderer):
@@ -65,6 +67,28 @@ class TemplateExtension(include.IncludeExtension):
             msg = "Unknown template item(s): {}".format(', '.join(unknown_items))
             raise exceptions.MooseDocsException(msg)
 
+    def applyTemplateArguments(self, content, **kwargs):
+        """
+        Helper for applying template args (e.g., {{app}})
+        """
+        if not isinstance(content, (str, unicode)):
+            return content
+
+        template_args = self.get('args', dict())
+        template_args.update(**kwargs)
+
+        def sub(match):
+            key = match.group('key')
+            arg = template_args.get(key, None)
+            if key is None:
+                msg = "The template argument '{}' was not defined in the !template load command."
+                raise exceptions.MooseDocsException(msg, key)
+            return arg
+
+        content = re.sub(ur'{{(?P<key>.*?)}}', sub, content)
+        return content
+
+
 class TemplateLoadCommand(command.CommandComponent):
     """
     Loads a markdown file as a template.
@@ -86,23 +110,14 @@ class TemplateLoadCommand(command.CommandComponent):
         return settings
 
     def createToken(self, parent, info, page):
-        settings, template_args = common.match_settings(self.defaultSettings(), info['settings'])
+        settings, t_args = common.match_settings(self.defaultSettings(), info['settings'])
 
         location = self.translator.findPage(settings['file'])
         self.extension.addDependency(location)
         with codecs.open(location.source, 'r', encoding='utf-8') as fid:
             content = fid.read()
 
-        def sub(match):
-            key = match.group('key')
-            arg = template_args.get(key, None)
-            if key is None:
-                msg = "The template argument '{}' was not defined in the !sqa load command."
-                raise exceptions.MooseDocsException(msg, key)
-            return arg
-
-        content = re.sub(r'{{(?P<key>.*?)}}', sub, content)
-
+        content = self.extension.applyTemplateArguments(content, **t_args)
         self.reader.tokenize(parent, content, page, line=info.line)
         return parent
 
@@ -131,7 +146,12 @@ class TemplateItemCommand(command.CommandComponent):
         return config
 
     def createToken(self, parent, info, page):
-        return TemplateItem(parent, key=self.settings['key'])
+        item = TemplateItem(parent, key=self.settings['key'])
+        group = MooseDocs.INLINE if MooseDocs.INLINE in info else MooseDocs.BLOCK
+        content = self.extension.applyTemplateArguments(info[group])
+        if content:
+            self.reader.tokenize(item, content, page, line=info.line, group=group)
+        return parent
 
 class TemplateFieldContentCommand(command.CommandComponent):
     COMMAND = 'template'

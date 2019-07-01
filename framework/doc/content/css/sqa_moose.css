@@ -30,3 +30,8 @@
 .moose-sqa-details-list{
     list-style-type:lower-alpha;
 }
+
+p.moose-sqa-document,
+p.moose-sqa-dependency{
+    color:var(--error);
+}

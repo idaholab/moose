@@ -1,0 +1,5 @@
+# {{app}} Software Quality Assurance
+
+- [!sqa!_document suffix=sdd](Software Design Document (SDD))
+- [!sqa!_document suffix=srs](Software Requirement Specification (SRS))
+- [!sqa!_document suffix=rtm](Requirement Traceability Matrix (RTM))

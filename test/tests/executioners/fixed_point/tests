@@ -1,6 +1,6 @@
 [Tests]
   issues = '#9669'
-  design = '/tagging.md'
+  design = 'interfaces/TaggingInterface.md'
   [./test_fixed_point]
     type = 'Exodiff'
     input = '2d_diffusion_fixed_point.i'

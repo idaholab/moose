@@ -99,7 +99,7 @@ specification would then have to change accordingly.
 
 ## Definitions and Acronyms id=definitions-and-acronyms
 
-!template field key=definitions-and-acronyms
+!template field key=definitions-and-acronyms required=False
 This section defines, or provides the definition of, all terms and acronyms required to properly
 understand this specification.
 
@@ -107,7 +107,7 @@ understand this specification.
 ### Definitions id=definitions
 
 !template! field key=definitions
-Add or revise spcific defintions.
+Add or revise specific defintions.
 
 - +Baseline+: A specification or product (e.g., project plan, maintenance and operations (M&O) plan,
   requirements, or design) that has been formally reviewed and agreed upon, that thereafter serves as

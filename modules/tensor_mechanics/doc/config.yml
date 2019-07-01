@@ -22,7 +22,11 @@ Extensions:
         shortcuts: !include framework/doc/globals.yml
     MooseDocs.extensions.acronym:
         acronyms: !include framework/doc/acronyms.yml
+    MooseDocs.extensions.template:
+        args:
+            app: Tensor Mechanics
     MooseDocs.extensions.sqa:
+        main: tensor_mechanics
         categories:
-            main: !include modules/tensor_mechanics/doc/sqa_tensor_mechanics.yml
+            tensor_mechanics: !include modules/tensor_mechanics/doc/sqa_tensor_mechanics.yml
             framework: !include framework/doc/sqa_framework.yml
