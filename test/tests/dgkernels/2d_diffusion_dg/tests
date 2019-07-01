@@ -15,4 +15,13 @@
     issues = '#11766'
     design = 'DGKernels/index.md'
   [../]
+  [no_mallocs_during_scaling]
+    type = 'RunApp'
+    input = '2d_diffusion_dg_test.i'
+    cli_args = 'Executioner/automatic_scaling=true Outputs/exodus=false Outputs/csv=false -snes_view'
+    absent_out = 'MatSetValues calls =12'
+    requirement = 'We shall not do any mallocs in MatSetValues because of automatic scaling'
+    issues = '#12601'
+    design = 'failed_solves.md'
+  []
 []

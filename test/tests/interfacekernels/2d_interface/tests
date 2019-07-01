@@ -55,4 +55,14 @@
     design = "InterfaceKernels/index.md"
     requirement = "The InterfaceKernel system shall support Vector Finite Elements in 2D."
     [../]
+
+  [no_mallocs_during_scaling]
+    type = 'RunApp'
+    input = 'coupled_value_coupled_flux.i'
+    cli_args = 'Executioner/automatic_scaling=true Outputs/exodus=false -snes_view'
+    absent_out = 'MatSetValues calls =11'
+    requirement = 'We shall not do any mallocs in MatSetValues because of automatic scaling'
+    issues = '#12601'
+    design = 'failed_solves.md'
+  []
 []

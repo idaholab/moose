@@ -61,7 +61,7 @@ CrankNicolson::init()
   _du_dot_du = 0;
 
   // compute residual for the initial time step
-  // Note: we can not directly pass _residual_old in computeResidualType because
+  // Note: we can not directly pass _residual_old in computeResidualTag because
   //       the function will call postResidual, which will cause _residual_old
   //       to be added on top of itself prohibited by PETSc.
   //       Objects executed on initial have been executed by FEProblem,

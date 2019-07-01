@@ -3250,6 +3250,11 @@ NonlinearSystemBase::computeScalingJacobian(NonlinearImplicitSystem & sys)
     applyScalingFactors(inverse_scaling_factors);
     if (auto displaced_problem = _fe_problem.getDisplacedProblem().get())
       displaced_problem->systemBaseNonlinear().applyScalingFactors(inverse_scaling_factors);
+
+    // Now it's essential that we reset the sparsity pattern of the matrix
+    auto ierr = MatResetPreallocation(petsc_matrix.mat());
+    LIBMESH_CHKERR(ierr);
   }
+
 #endif
 }
