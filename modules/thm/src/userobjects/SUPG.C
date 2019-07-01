@@ -32,7 +32,7 @@ SUPG::SUPG(const InputParameters & parameters)
 }
 
 void
-SUPG::addVariables(FlowModel &, unsigned int) const
+SUPG::addVariables(FlowModel &, SubdomainID) const
 {
   // no extra variables needed for SUPG
 }

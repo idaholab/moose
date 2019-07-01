@@ -102,7 +102,7 @@ FlowModel::getVariableFn(const FunctionName & fn_param_name)
 void
 FlowModel::addCommonVariables()
 {
-  unsigned int subdomain_id = _flow_channel.getSubdomainID();
+  SubdomainID subdomain_id = _flow_channel.getSubdomainID();
 
   _sim.addVariable(false, AREA, _fe_type, subdomain_id);
   _sim.addVariable(false, HEAT_FLUX_PERIMETER, _fe_type, subdomain_id);
