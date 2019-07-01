@@ -23,8 +23,6 @@ GeometricalFlowComponent::GeometricalFlowComponent(const InputParameters & param
   : GeometricalComponent(parameters),
     _spatial_discretization(_sim.getSpatialDiscretization()),
     _fp_name(getParam<UserObjectName>("fp")),
-    _A_linear_name(_spatial_discretization == FlowModel::rDG ? FlowModel::AREA + "_linear"
-                                                             : FlowModel::AREA),
     _numerical_flux_name(genName(name(), "numerical_flux")),
     _rdg_int_var_uo_name(genName(name(), "rdg_int_var_uo")),
     _rdg_slope_reconstruction(getParam<MooseEnum>("rdg_slope_reconstruction"))

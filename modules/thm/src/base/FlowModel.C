@@ -13,8 +13,6 @@ validParams<FlowModel>()
   params.addRequiredParam<UserObjectName>(
       "fp", "The name of the user object that defines fluid properties");
   params.addRequiredParam<UserObjectName>("numerical_flux", "Numerical flux user object name");
-  params.addRequiredParam<AuxVariableName>("A_linear_name",
-                                           "Linear cross-sectional area variable name");
   params.addRequiredParam<MooseEnum>("rdg_slope_reconstruction",
                                      "Slope reconstruction type for rDG");
   params.registerBase("THM:flow_model");
@@ -58,6 +56,7 @@ THM::stringToEnum(const std::string & s)
 }
 
 const std::string FlowModel::AREA = "A";
+const std::string FlowModel::AREA_LINEAR = "A_linear";
 const std::string FlowModel::HEAT_FLUX_WALL = "q_wall";
 const std::string FlowModel::HEAT_FLUX_PERIMETER = "P_hf";
 const std::string FlowModel::HYDRAULIC_DIAMETER = "D_h";
@@ -79,7 +78,6 @@ FlowModel::FlowModel(const InputParameters & params)
     _gravity_vector(_flow_channel.getParamTempl<RealVectorValue>("gravity_vector")),
     _gravity_magnitude(_gravity_vector.norm()),
     _lump_mass_matrix(_flow_channel.getParamTempl<bool>("lump_mass_matrix")),
-    _A_linear_name(params.get<AuxVariableName>("A_linear_name")),
     _rdg_slope_reconstruction(params.get<MooseEnum>("rdg_slope_reconstruction")),
     _numerical_flux_name(params.get<UserObjectName>("numerical_flux"))
 {
@@ -108,7 +106,7 @@ FlowModel::addCommonVariables()
   _sim.addVariable(false, HEAT_FLUX_PERIMETER, _fe_type, subdomain_id);
 
   if (_spatial_discretization == rDG)
-    _sim.addVariable(false, _A_linear_name, FEType(FIRST, LAGRANGE), subdomain_id);
+    _sim.addVariable(false, AREA_LINEAR, FEType(FIRST, LAGRANGE), subdomain_id);
 }
 
 void
@@ -124,7 +122,7 @@ FlowModel::addCommonInitialConditions()
       const Function & fn = _sim.getFunction(area_function);
       _sim.addConstantIC(AREA, fn.value(0, Point()), block);
       if (_spatial_discretization == rDG)
-        _sim.addConstantIC(_A_linear_name, fn.value(0, Point()), block);
+        _sim.addConstantIC(AREA_LINEAR, fn.value(0, Point()), block);
       // FIXME: eventually use Component::makeFunctionControllableIfConstant
       if (dynamic_cast<const ConstantFunction *>(&fn) != nullptr)
         _flow_channel.connectObject(fn.parameters(), area_function, "Area", "value");
@@ -133,7 +131,7 @@ FlowModel::addCommonInitialConditions()
     {
       if (_spatial_discretization == rDG)
       {
-        _sim.addFunctionIC(_A_linear_name, area_function, block);
+        _sim.addFunctionIC(AREA_LINEAR, area_function, block);
 
         {
           const std::string class_name = "FunctionNodalAverageIC";
