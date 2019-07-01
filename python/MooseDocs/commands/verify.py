@@ -27,7 +27,7 @@ def command_line_options(subparser, parent):
     """Command line options for 'verify' command."""
     parser = subparser.add_parser('verify', parents=[parent], help="Testing only, do not use.")
     parser.add_argument('-f', '--form', default='materialize',
-                        choices=['materialize', 'html', 'json', 'latex'],
+                        choices=['materialize', 'html', 'latex'],
                         help="The desired output format to verify.")
     parser.add_argument('--disable', nargs='*', default=[],
                         help="A list of extensions to disable.")
@@ -130,8 +130,6 @@ def main(options):
     # Setup extensions
     if options.form in ['materialize', 'html']:
         extensions = ['.html']
-    elif options.form == 'json':
-        extensions = ['.json']
     elif options.form == 'latex':
         extensions = ['.tex']
 

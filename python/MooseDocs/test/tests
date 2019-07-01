@@ -57,36 +57,6 @@
   []
 
 
-
-  [json_barrier]
-    type = RunCommand
-    command = 'python moosedocs.py verify --form json --executioner MooseDocs.base.ParallelBarrier'
-    requirement = "MooseDocs shall be able to convert markdown to an abstract syntax tree represented in JSON files with the ParallelBarrier executioner."
-  []
-  [json_serial]
-    type = RunCommand
-    command = 'python moosedocs.py verify --form json --executioner MooseDocs.base.Serial'
-    requirement = "MooseDocs shall be able to convert markdown to an abstract syntax tree represented in JSON files with the Serial executioner."
-    prereq = json_barrier
-    skip = 'WIP'
-  []
-  [json_pipe]
-    type = RunCommand
-    command = 'python moosedocs.py verify --form json --executioner MooseDocs.base.ParallelPipe'
-    requirement = "MooseDocs shall be able to convert markdown to an abstract syntax tree represented in JSON files with the ParallelPipe executioner."
-    #prereq = json_serial
-    skip = 'WIP'
-  []
-  [json_demand]
-    type = RunCommand
-    command = 'python moosedocs.py verify --form json --executioner MooseDocs.base.ParallelDemand'
-    requirement = "MooseDocs shall be able to convert markdown to an abstract syntax tree represented in JSON files with the ParallelDemand executioner."
-    #prereq = json_pipe
-    skip = 'WIP'
-  []
-
-
-
   [latex_barrier]
     type = RunCommand
     command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelBarrier'
