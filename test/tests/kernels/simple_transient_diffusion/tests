@@ -75,4 +75,14 @@
     prereq = 'automatic-scaling-done-per-time-step'
     max_parallel = 2 # Can't reset preallocation in PETSc when there are no dofs on a process
   []
+  [auto-scaling-cant-have-zero-local-dofs]
+    type = RunException
+    input = ill_conditioned_simple_diffusion.i
+    cli_args = "Executioner/automatic_scaling=true Outputs/exodus=false"
+    min_parallel = 3
+    issues = '#12601'
+    requirement = 'We shall error out when trying to do automatic scaling and we have any process with zero dofs'
+    design = 'failed_solves.md'
+    expect_err = "MOOSE doesn't currently support automatic scaling when there are any processes owning zero dofs"
+  []
 []
