@@ -53,5 +53,4 @@
     resolution = 250
     inColor = false
   []
-  exodus = true
 []

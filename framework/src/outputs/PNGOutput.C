@@ -8,8 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #define nls _problem_ptr->getNonlinearSystem()
-#define scaledValue ((dv(0) + shiftValue) / scalingMax)
-#define reverseScale ((outBoundsControlColor * scalingMax) - shiftValue)
+#define scaledValue ((dv(0) + _shift_value) / _scaling_max)
+#define reverseScale ((_out_bounds_shade * _scaling_max) - _shift_value)
 
 #include <fstream>
 #include "PNGOutput.h"
@@ -21,23 +21,24 @@ template <>
 InputParameters
 validParams<PNGOutput>()
 {
-  InputParameters params = validParams<Output>();
-  params.addParam<Real>("resolution", 2000, "The resolution of the image.");
+  InputParameters params = validParams<FileOutput>();
+  params.addParam<unsigned int>("resolution", 2000, "The resolution of the image.");
   params.addParam<std::string>("PNGFile", "Adam", "Root filename of the PNG to be created.");
-  params.addParam<Real>("testStepToPNG", -1, "PNG to save.");
   params.addParam<bool>("inColor", false, "Show the image in color?");
-  params.addParam<Real>(
-      "outBoundsControlColor", .5, "Color for the parts of the image that are out of bounds");
+  params.addRangeCheckedParam<Real>("_out_bounds_shade",
+                                    .5,
+                                    "_out_bounds_shade>=0 & _out_bounds_shade<=1",
+                                    "Color for the parts of the image that are out of bounds."
+                                    "Value is between 1 and 0.");
   return params;
 }
 
 PNGOutput::PNGOutput(const InputParameters & parameters)
-  : Output(parameters),
-    resolution(getParam<Real>("resolution")),
-    PNGFile(getParam<std::string>("PNGFile")),
-    testStepToPNG(getParam<Real>("testStepToPNG")),
-    inColor(getParam<bool>("inColor")),
-    outBoundsControlColor(getParam<Real>("outBoundsControlColor"))
+  : FileOutput(parameters),
+    _resolution(getParam<unsigned int>("resolution")),
+    _png_file(getParam<std::string>("PNGFile")),
+    _color(getParam<bool>("inColor")),
+    _out_bounds_shade(getParam<Real>("_out_bounds_shade"))
 {
 }
 
@@ -65,20 +66,20 @@ void
 PNGOutput::calculateRescalingValues()
 {
   // The min and max.
-  scalingMin = nls.serializedSolution().min();
-  scalingMax = nls.serializedSolution().max();
-  shiftValue = 0;
+  _scaling_min = nls.serializedSolution().min();
+  _scaling_max = nls.serializedSolution().max();
+  _shift_value = 0;
 
   // Get the shift value.
-  if (scalingMin != 0)
+  if (_scaling_min != 0)
   {
     // Shiftvalue will be the same magnitude, but
     // going in the opposite direction of the scalingMin
-    shiftValue -= scalingMin;
+    _shift_value -= _scaling_min;
   }
 
   // Shift the max.
-  scalingMax += shiftValue;
+  _scaling_max += _shift_value;
 }
 
 void
@@ -86,15 +87,15 @@ PNGOutput::setRGB(png_byte * rgb, Real selection)
 {
   // Using an RGB system with Red as 0 - 255, Green as 256 - 511 and
   // Blue as 512 - 767 gives us our total colorSpectrum of 0 - 767.
-  const Real colorSpectrumMax = 767;
+  const auto color_spectrum_max = 767;
   // We need to convert the
-  auto color = (int)(selection * colorSpectrumMax);
+  auto color = (int)(selection * color_spectrum_max);
   // Make sure everything is within our colorSpectrum.
-  if (color > colorSpectrumMax)
-    color = colorSpectrumMax;
+  if (color > color_spectrum_max)
+    color = color_spectrum_max;
   if (color < 0)
     color = 0;
-  Real magnitude = color % 256;
+  auto magnitude = color % 256;
 
   // Current color scheme: Blue->Red->Yellow->White
   // Blue->Red
@@ -124,62 +125,47 @@ void
 PNGOutput::output(const ExecFlagType & /*type*/)
 {
   makeMeshFunc();
-  box = MeshTools::create_bounding_box(*_mesh_ptr);
-  makePNG();
+  _box = MeshTools::create_bounding_box(*_mesh_ptr);
+  if (processor_id() == 0)
+    makePNG();
 }
 
 void
 PNGOutput::makePNG()
 {
-  // Increment the testStep
-  testStep++;
 
   // Get the max and min of the BoundingBox
-  Point maxPoint = box.max();
-  Point minPoint = box.min();
+  Point maxPoint = _box.max();
+  Point minPoint = _box.min();
 
   // The the total distance on the x and y axes.
-  Real distx = maxPoint(0) - minPoint(0);
-  Real disty = maxPoint(1) - minPoint(1);
+  Real dist_x = maxPoint(0) - minPoint(0);
+  Real dist_y = maxPoint(1) - minPoint(1);
 
   // Create the filename based on base and the test step number.
-  std::string PNGFile2 = PNGFile;
-  PNGFile2 += std::to_string((int)testStep);
-  PNGFile2 += ".png";
+  std::string png_file2 = _file_base;
+  png_file2 += ".png";
 
   FILE * fp = nullptr;
   png_structrp pngp = nullptr;
   png_infop infop = nullptr;
   png_bytep row = nullptr;
   Real depth = 8;
-  Real width = distx * resolution;
-  Real height = disty * resolution;
+  Real width = dist_x * _resolution;
+  Real height = dist_y * _resolution;
 
-  if (testStepToPNG != -1)
-    if (testStep != testStepToPNG)
-      return;
-
-  fp = fopen(PNGFile2.c_str(), "wb");
+  fp = fopen(png_file2.c_str(), "wb");
 
   if (!fp)
-  {
     mooseError("Failed to open the file for the PNG output.");
-    return;
-  }
 
   pngp = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
   if (!pngp)
-  {
     mooseError("Failed to make the pointer string for the png.");
-    return;
-  }
 
   infop = png_create_info_struct(pngp);
   if (!infop)
-  {
     mooseError("Failed to make an info pointer for the png.");
-    return;
-  }
 
   png_init_io(pngp, fp);
 
@@ -189,7 +175,7 @@ PNGOutput::makePNG()
                width,
                height,
                depth,
-               (inColor ? PNG_COLOR_TYPE_RGB : PNG_COLOR_TYPE_GRAY),
+               (_color ? PNG_COLOR_TYPE_RGB : PNG_COLOR_TYPE_GRAY),
                PNG_INTERLACE_NONE,
                PNG_COMPRESSION_TYPE_DEFAULT,
                PNG_FILTER_TYPE_DEFAULT);
@@ -199,21 +185,25 @@ PNGOutput::makePNG()
   // Allocate resources.
   row = new png_byte[(width * 3) + 1];
 
-  Point pt(1, 1, 0);
+  // Initiallizing the point that will be used for populating the mesh values.
+  // Initializing x, y, z to zero so that we don't access the point before it's
+  // been set.  z = 0 for all the png's.
+  Point pt(0, 0, 0);
 
   DenseVector<Number> dv(0);
 
   // Loop through to create the image.
-  for (Real y = maxPoint(1); y >= minPoint(1); y -= 1 / resolution)
+  for (Real y = maxPoint(1); y >= minPoint(1); y -= 1. / _resolution)
   {
+    pt(1) = y;
     int indx = 0;
-    for (Real x = minPoint(0); x <= maxPoint(0); x += 1 / resolution)
+    for (Real x = minPoint(0); x <= maxPoint(0); x += 1. / _resolution)
     {
       pt(0) = x;
       (*_mesh_function)(pt, _time, dv, nullptr);
 
       // Determine whether to create the PNG in color or grayscale
-      if (inColor)
+      if (_color)
         setRGB(&row[indx * 3], scaledValue);
       else
         row[indx] = scaledValue * 255;
@@ -221,7 +211,6 @@ PNGOutput::makePNG()
       indx++;
     }
 
-    pt(1) = y;
     png_write_row(pngp, row);
   }
 
