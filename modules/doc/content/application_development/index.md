@@ -29,3 +29,5 @@ These documentation pages are meant to be used by developers who are developing 
 [RelationshipManagers](/relationship_managers.md) - Telling MOOSE about extra geomatric or algebraic information needed in parallel
 
 [Moose-Wrapped Apps](/moose_wrapped_apps.md) - Coupling external codes to MOOSE
+
+[Profiling](/profiling.md) - How to profile your application in order to determine what functions are hogging compute time.
