@@ -419,9 +419,9 @@ public:
    *                                     0 a32 a33]
    * A DualReal instantiation is available to rotate dual numbers as well.
    */
-  RankTwoTensorTempl<T> givensRotation(unsigned int row1,
-                                       unsigned int row2,
-                                       unsigned int col,
+  RankTwoTensorTempl<T> givensRotation(const unsigned int row1,
+                                       const unsigned int row2,
+                                       const unsigned int col,
                                        const Real eps = libMesh::TOLERANCE *
                                                         libMesh::TOLERANCE) const;
 
@@ -433,6 +433,7 @@ public:
   /// computes the QR factorization such that A = Q * R, where Q is the unitary matrix and R an upper triangular matrix
   void QR(RankTwoTensorTempl<T> & Q,
           RankTwoTensorTempl<T> & R,
+          RankTwoTensorTempl<T> & U,
           const unsigned int dim = RankTwoTensorTempl<T>::N,
           const Real eps = libMesh::TOLERANCE * libMesh::TOLERANCE) const;
 

@@ -552,8 +552,8 @@ TEST_F(RankTwoTensorTest, HessenbergTransformation)
 TEST_F(RankTwoTensorTest, QRFactorization)
 {
   RankTwoTensor a(1, 3, 4, 2, 5, 12, 3, 6, 1);
-  RankTwoTensor Q, R;
-  a.QR(Q, R);
+  RankTwoTensor Q, R, U;
+  a.QR(Q, R, U);
 
   EXPECT_NEAR(0.1961, std::abs(Q(0, 0)), 0.0001);
   EXPECT_NEAR(0.5883, std::abs(Q(1, 0)), 0.0001);

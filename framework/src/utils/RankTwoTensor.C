@@ -956,39 +956,34 @@ RankTwoTensorTempl<T>::permutationTensor(
 
 template <typename T>
 RankTwoTensorTempl<T>
-RankTwoTensorTempl<T>::givensRotation(unsigned int row1,
-                                      unsigned int row2,
-                                      unsigned int col,
+RankTwoTensorTempl<T>::givensRotation(const unsigned int row1,
+                                      const unsigned int row2,
+                                      const unsigned int col,
                                       const Real eps) const
 {
   T c, s;
-  T a = (*this)(row1, col);
-  T b = (*this)(row2, col);
+  const T a = (*this)(row1, col);
+  const T b = (*this)(row2, col);
   RankTwoTensorTempl<T> R(initIdentity);
 
-  if (std::abs(b) < eps)
+  if (std::abs(b) < eps && std::abs(a) < eps)
   {
-    c = a >= 0.0 ? 1.0 : -1.0;
+    c = 1.0;
     s = 0.0;
-  }
-  else if (std::abs(a) < eps)
-  {
-    s = b >= 0.0 ? 1.0 : -1.0;
-    c = 0.0;
   }
   else if (std::abs(a) > std::abs(b))
   {
-    T t = b / a;
-    Real sgn = a >= 0.0 ? 1.0 : -1.0;
-    T u = sgn * std::sqrt(1.0 + t * t);
+    const T t = b / a;
+    const Real sgn = a >= 0.0 ? 1.0 : -1.0;
+    const T u = sgn * std::sqrt(1.0 + t * t);
     c = 1.0 / u;
     s = c * t;
   }
   else
   {
-    T t = a / b;
-    Real sgn = b >= 0.0 ? 1.0 : -1.0;
-    T u = sgn * std::sqrt(1.0 + t * t);
+    const T t = a / b;
+    const Real sgn = b >= 0.0 ? 1.0 : -1.0;
+    const T u = sgn * std::sqrt(1.0 + t * t);
     s = 1.0 / u;
     c = s * t;
   }
@@ -1014,27 +1009,45 @@ RankTwoTensorTempl<T>::hessenberg(RankTwoTensorTempl<T> & H,
   if (N < 3)
     return;
 
-  RankTwoTensorTempl<T> CS = H.givensRotation(N - 2, N - 1, 0, eps);
-  H = CS * H * CS.transpose();
-  U = U * CS.transpose();
+  // special case when both entries to rotate are zero
+  // in which case the dual numbers cannot be rotated
+  // therefore we need to find another nonzero entry to permute
+  RankTwoTensorTempl<T> R(initIdentity);
+  if (std::abs(H(N - 1, 0)) < eps && std::abs(H(N - 2, 0)) < eps)
+  {
+    const Real c = std::sqrt(2.0) / 2.0;
+    const Real s = c;
+    R(0, 0) = c;
+    R(0, 1) = s;
+    R(1, 0) = -s;
+    R(1, 1) = c;
+  }
+
+  H = R * H * R.transpose();
+  const RankTwoTensorTempl<T> G = H.givensRotation(N - 2, N - 1, 0, eps);
+  H = G * H * G.transpose();
+  U = U * R.transpose() * G.transpose();
 }
 
 template <typename T>
 void
 RankTwoTensorTempl<T>::QR(RankTwoTensorTempl<T> & Q,
                           RankTwoTensorTempl<T> & R,
-                          unsigned int dim,
+                          RankTwoTensorTempl<T> & U,
+                          const unsigned int dim,
                           const Real eps) const
 {
   R = *this;
   Q.zero();
   Q.addIa(1.0);
+  U.zero();
+  U.addIa(1.0);
 
   for (unsigned int i = 0; i < dim - 1; i++)
     for (unsigned int b = dim - 1; b > i; b--)
     {
-      unsigned int a = b - 1;
-      RankTwoTensorTempl<T> CS = R.givensRotation(a, b, i, eps);
+      const unsigned int a = b - 1;
+      const RankTwoTensorTempl<T> CS = R.givensRotation(a, b, i, eps);
       R = CS * R;
       Q = Q * CS.transpose();
     }
@@ -1044,35 +1057,60 @@ template <>
 void
 RankTwoTensorTempl<DualReal>::QR(RankTwoTensorTempl<DualReal> & Q,
                                  RankTwoTensorTempl<DualReal> & R,
+                                 RankTwoTensorTempl<DualReal> & U,
                                  unsigned int dim,
                                  const Real eps) const
 {
   R = *this;
   Q.zero();
   Q.addIa(1.0);
+  U.zero();
+  U.addIa(1.0);
 
   for (unsigned int i = 0; i < dim - 1; i++)
-    for (unsigned int b = dim - 1; b > i; b--)
-    {
-      unsigned int a = b - 1;
+  {
+    unsigned int a = i;
+    unsigned int b = a + 1;
 
-      // special case when both entries to rotate are zero
-      // in which case the dual numbers cannot be rotated
-      // therefore we need to find another nonzero entry to permute
-      RankTwoTensorTempl<DualReal> P(initIdentity);
-      if (std::abs(R(a, i)) < eps && std::abs(R(b, i)) < eps)
+    // special case when both entries to rotate are zero
+    // in which case the dual numbers cannot be rotated
+    // therefore we need to find another nonzero entry to permute
+    RankTwoTensorTempl<DualReal> P(initIdentity);
+    if (std::abs(R(a, i)) < eps && std::abs(R(b, i)) < eps)
+    {
+      unsigned int j = i;
+
+      if (i == 0 && b == 2)
       {
-        unsigned int c = 3 - a - b;
-        if (std::abs(R(c, i)) > eps)
-          P = this->permutationTensor({{a, b, c}}, {{c, b, a}});
+        if (abs(R(a, 1)) > eps || abs(R(b, 1)) > eps)
+          j = 1;
+        else if (abs(R(b, 2)) > eps)
+          j = 2;
+      }
+      else if (i == 0 && b == 1 && dim == 2)
+      {
+        if (abs(R(b, 1)) > eps)
+          j = 1;
+      }
+      else if (i == 2)
+      {
+        if (abs(R(b, 2)) > eps)
+          j = 2;
       }
 
-      Q = Q * P.transpose();
-      R = P * R;
-      RankTwoTensorTempl<DualReal> CS = R.givensRotation(a, b, i, eps);
-      R = P.transpose() * CS * R;
-      Q = Q * CS.transpose() * P;
+      if (i != j)
+      {
+        unsigned int k = 3 - i - j;
+        P = this->permutationTensor({{i, j, k}}, {{j, i, k}});
+        P = P.transpose();
+      }
     }
+
+    RankTwoTensorTempl<DualReal> G = R.givensRotation(a, b, i, eps);
+    R = G * R * P;
+    Q = Q * G.transpose();
+    U = U * P;
+  }
 }
 
 template <>
@@ -1080,66 +1118,63 @@ void
 RankTwoTensorTempl<DualReal>::symmetricEigenvaluesEigenvectors(
     std::vector<DualReal> & eigvals, RankTwoTensorTempl<DualReal> & eigvecs) const
 {
-  DualReal maximum_absolute_offdiag_entry;
+  Real maximum_absolute_offdiag_entry;
   if (N == 2)
-    maximum_absolute_offdiag_entry = std::abs((*this)(1, 0));
+    maximum_absolute_offdiag_entry = std::abs((*this)(1, 0).value());
   else if (N == 3)
-    maximum_absolute_offdiag_entry = std::max(
-        std::max(std::abs((*this)(1, 0)), std::abs((*this)(2, 0))), std::abs((*this)(2, 1)));
+    maximum_absolute_offdiag_entry =
+        std::max(std::max(std::abs((*this)(1, 0).value()), std::abs((*this)(2, 0).value())),
+                 std::abs((*this)(2, 1).value()));
   else
     mooseException("RankTwoTensor::symmetricEigenvaluesEigenvectors(): unsupported N.");
 
   const Real eps =
-      std::max(libMesh::TOLERANCE * libMesh::TOLERANCE * maximum_absolute_offdiag_entry.value(),
+      std::max(libMesh::TOLERANCE * libMesh::TOLERANCE * maximum_absolute_offdiag_entry,
                libMesh::TOLERANCE * libMesh::TOLERANCE);
 
   eigvals.resize(N);
   RankTwoTensorTempl<DualReal> D, Q, R, U;
 
   D = *this;
-  eigvecs.zero();
-  eigvecs.addIa(1.0);
+  D.hessenberg(D, eigvecs, eps);
 
-  D.hessenberg(D, U, eps);
-  eigvecs = eigvecs * U;
-
-  unsigned int iter = 0;
   for (unsigned m = N - 1; m > 0; m--)
   {
+    unsigned int iter = 0;
     bool converged = false;
     while (!converged)
     {
-      // DualReal shift = D(m, m);
-      // if (std::abs(shift) < eps)
-      // {
-      //   shift = std::max(std::abs(D(m - 1, m)), std::abs(D(m - 1, m - 1)));
-      //   if (std::abs(shift) < eps)
-      //     shift = 1.0;
-      // }
-      // if (std::abs(D(m - 1, m - 1) - shift) < eps)
-      // shift = 0.0;
-
-      // DualReal d = (D(m - 1, m - 1) - D(m, m)) / 2.0;
-      // Real dsign = d >= 0.0 ? 1.0 : -1.0;
-      // DualReal shift = D(m, m) - dsign * D(m, m - 1) * D(m, m - 1) /
-      //                                (std::abs(d) + std::sqrt(d * d + D(m, m - 1) * D(m, m -
-      //                                1)));
-
       DualReal shift = D(m, m);
       if (std::abs(shift) < eps)
-        shift = std::max(D(m - 1, m), D(m - 1, m - 1));
+      {
+        shift = std::max(std::abs(D(m - 1, m)), std::abs(D(m - 1, m - 1)));
+        if (std::abs(shift) < eps)
+          shift = 1.0;
+      }
+      if (std::abs(D(m - 1, m - 1) - shift) < eps)
+        shift = 0.0;
 
       D.addIa(-shift);
-      D.QR(Q, R, m + 1, eps);
-      D = R * Q;
+      D.QR(Q, R, U, m + 1, eps);
+      if (abs(R(m - 1, m - 1)) < eps)
+      {
+        D.addIa(shift);
+        shift = m == N - 1 ? R(0, 0) : R(N - 1, N - 1);
+        D.addIa(-shift);
+        D.QR(Q, R, U, m + 1, eps);
+      }
+      D = U * R * Q;
       D.addIa(shift);
-      eigvecs = eigvecs * Q;
+      eigvecs = eigvecs * Q * U.transpose();
 
       // check for convergence
       converged = std::abs(D(m, m - 1)) > eps ? false : true;
+      for (unsigned int i = 0; i < AD_MAX_DOFS_PER_ELEM; i++)
+        if (std::abs(D(m, m - 1).derivatives()[i]) > eps)
+          converged = false;
 
       iter++;
-      if (iter > 30)
+      if (iter > 15)
         converged = true;
     }
   }
