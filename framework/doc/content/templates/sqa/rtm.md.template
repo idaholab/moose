@@ -1,4 +1,4 @@
-# {{project}} System Requirements and Traceability Matrix
+# {{project}} Requirements Traceability Matrix
 
 ## Introduction id=introduction
 
@@ -110,4 +110,3 @@ control, system configuration, event logging and communications.
 1. Requirements should address functionality, usability, performance, system interfaces, reliability,
    and security.
 !template-end!
-

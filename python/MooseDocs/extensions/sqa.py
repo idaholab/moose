@@ -246,6 +246,9 @@ class SQACrossReferenceCommand(SQARequirementsCommand):
     def createToken(self, parent, info, page):
         design = collections.defaultdict(list)
         category = self.settings.get('category')
+        if category == '_empty_':
+            return parent
+
         for requirements in self.extension.requirements(category).itervalues():
             for req in requirements:
                 for d in req.design:
@@ -333,6 +336,9 @@ class SQAVerificationCommand(command.CommandComponent):
 
         matrix = SQARequirementMatrix(parent)
         category = self.settings.get('category')
+        if category == '_empty_':
+            return parent
+
         for requirements in self.extension.requirements(category).itervalues():
             for req in requirements:
                 if getattr(req, info['subcommand']) is not None:
