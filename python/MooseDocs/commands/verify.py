@@ -27,7 +27,7 @@ def command_line_options(subparser, parent):
     """Command line options for 'verify' command."""
     parser = subparser.add_parser('verify', parents=[parent], help="Testing only, do not use.")
     parser.add_argument('-f', '--form', default='materialize',
-                        choices=['materialize', 'html', 'json', 'latex'],
+                        choices=['materialize', 'html', 'latex'],
                         help="The desired output format to verify.")
     parser.add_argument('--disable', nargs='*', default=[],
                         help="A list of extensions to disable.")
@@ -64,12 +64,10 @@ def replace_tmp_file(content):
 
 def update_gold_helper(gold, out_content):
     """Update the gold files."""
-    dirname = os.path.dirname(gold)
-    if not os.path.isdir(dirname):
-        os.makedirs(dirname)
-    with open(gold, 'w') as fid:
-        print "WRITING GOLD: {}".format(gold)
-        fid.write(out_content)
+    if os.path.exists(gold):
+        with open(gold, 'w') as fid:
+            print "WRITING GOLD: {}".format(gold)
+            fid.write(out_content)
 
 def compare(out_fname, out_dir, gold_dir, update_gold=False):
     """Compare supplied file with gold counter part."""
@@ -86,8 +84,14 @@ def compare(out_fname, out_dir, gold_dir, update_gold=False):
         update_gold_helper(gold_fname, out_content)
 
     if not os.path.exists(gold_fname):
-        print mooseutils.colorText('MISSING GOLD: {}'.format(gold_fname), 'RED')
-        errno = 1
+        # The verify command is going away because work is being done to move all testing to be
+        # unittest based; but the test pages are still useful for development and will be used to
+        # make sure the various executioner types achieve the same results.
+        #
+        # To allow test pages to exist without testing assume that if a gold doesn't exist then
+        # it should not be tested.
+        pass
+
     else:
         with open(gold_fname, 'r') as fid:
             gold_content = fid.read()
@@ -126,8 +130,6 @@ def main(options):
     # Setup extensions
     if options.form in ['materialize', 'html']:
         extensions = ['.html']
-    elif options.form == 'json':
-        extensions = ['.json']
     elif options.form == 'latex':
         extensions = ['.tex']
 

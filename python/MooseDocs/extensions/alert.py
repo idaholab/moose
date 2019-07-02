@@ -10,7 +10,7 @@
 
 import os
 import MooseDocs
-from MooseDocs.base import components, LatexRenderer
+from MooseDocs.base import components, LatexRenderer, HTMLRenderer
 from MooseDocs.extensions import command
 from MooseDocs.tree import tokens, html, latex
 
@@ -67,6 +67,9 @@ class AlertExtension(command.CommandExtension):
             renderer.addPreamble(u'\\definecolor{alert-warning}{RGB}{220,200,100}')
             renderer.addPreamble(u'\\definecolor{alert-construction}{RGB}{255,114,33}')
             renderer.addPreamble(ALERT_LATEX)
+
+        if isinstance(renderer, HTMLRenderer):
+            renderer.addCSS('alert_moose', "css/alert_moose.css")
 
 class AlertCommand(command.CommandComponent):
     COMMAND = 'alert'

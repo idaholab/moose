@@ -16,18 +16,18 @@ class MooseDocsTestCase(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super(MooseDocsTestCase, self).__init__(*args, **kwargs)
-        self.__node = None
         self.__ast = None
         self.__meta = None
         self.__result = None
         self.__translator = None
+        self.__text = pages.Text()
 
-    def setup(self, content=None, reader=None, renderer=None, extensions=None, executioner=None):
-        """Helper method for setting up MOOSEDocs objects"""
+    def __setup(self, reader=None, renderer=None, extensions=None, executioner=None):
+        """Helper method for setting up MOOSEDocs objects. This is called automatically."""
 
         command.CommandExtension.EXTENSION_COMMANDS.clear()
 
-        content = content or []
+        content = [self.__text] + (self.setupContent() or [])
         reader = self.READER() if reader is None else reader
         renderer = self.RENDERER() if renderer is None else renderer
         extensions = extensions or self.EXTENSIONS
@@ -42,25 +42,32 @@ class MooseDocsTestCase(unittest.TestCase):
         ext = load_extensions(extensions, config)
         self.__translator = base.Translator(content, reader, renderer, ext, executioner)
         self.__translator.init()
+        self.__translator.execute() # This is required to setup the meta data
 
     def setupExtension(self, ext):
         """Virtual method for child objects to update extension configuration."""
         pass
 
+    def setupContent(self):
+        """Virtual method for populating Content section in configuration."""
+        pass
+
     def tokenize(self, text, *args, **kwargs):
         """Helper for tokenization"""
         if args or kwargs or (self.__translator is None):
-            self.setup(*args, **kwargs)
+            self.__setup(*args, **kwargs)
 
-        self.__node = pages.Text(text)
-        self.__ast, self.__meta = self.__translator.executioner.tokenize(self.__node)
+        self.__text.content = text
+        self.__ast, self.__meta = self.__translator.executioner.tokenize(self.__text)
+        self.__text.content = u''
         return self.__ast
 
     def render(self, ast, *args, **kwargs):
         """Helper for rendering AST"""
         if args or kwargs or (self.__translator is None):
-            self.setup(*args, **kwargs)
-        self.__result = self.__translator.executioner.render(self.__node, ast, self.__meta)
+            self.__setup(*args, **kwargs)
+            self.tokenize(u'')
+        self.__result = self.__translator.executioner.render(self.__text, ast, self.__meta)
         return self.__result
 
     def execute(self, text, *args, **kwargs):
@@ -69,10 +76,16 @@ class MooseDocsTestCase(unittest.TestCase):
         self.render(self.__ast)
         return self.__ast, self.__result
 
-    def assertToken(self, token, tname, **kwargs):
+    def assertToken(self, token, tname, string=None, size=None, **kwargs):
         """Helper for checking type and attributes of a token"""
         self.assertEqual(token.name, tname)
         self.assertAttributes(token, **kwargs)
+
+        if size is not None:
+            self.assertSize(token, size)
+        if string is not None:
+            self.assertSize(token, 1)
+            self.assertToken(token(0), 'String', content=string)
 
     def assertHTMLTag(self, tag, tname, string=None, size=None, **kwargs):
         """Helper for checking HTML tree nodes"""
@@ -91,7 +104,7 @@ class MooseDocsTestCase(unittest.TestCase):
         self.assertEqual(node.get('content'), content)
         self.assertAttributes(node, **kwargs)
 
-    def assertLatex(self, node, tname, name, string=None, size=None, **kwargs):
+    def assertLatex(self, node, tname, name, string=None, size=None, nargs=None, **kwargs):
         self.assertEqual(node.__class__.__name__, tname)
         self.assertEqual(node.name, name)
         self.assertAttributes(node, **kwargs)
@@ -101,6 +114,8 @@ class MooseDocsTestCase(unittest.TestCase):
         if string is not None:
             self.assertSize(node, 1)
             self.assertLatexString(node(0), string)
+        if nargs is not None:
+            self.assertEqual(len(node['args']), nargs)
 
     def assertLatexString(self, node, content, **kwargs):
         self.assertIsInstance(node, latex.String)

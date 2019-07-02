@@ -89,7 +89,7 @@ class NodeBase(anytree.NodeMixin):
         """
         Print the complete tree beginning at this node.
         """
-        return str(anytree.RenderTree(self))
+        return '\n' + str(anytree.RenderTree(self))
 
     def __call__(self, index):
         """

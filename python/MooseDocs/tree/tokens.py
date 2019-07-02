@@ -8,7 +8,6 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 import logging
-import json
 import copy
 import anytree
 import MooseDocs
@@ -99,15 +98,6 @@ class Token(NodeBase):
             child.copy(_parent=tok)
         return tok
 
-    def write(self): #pylint: disable=arguments-differ
-        """
-        Return a dict() appropriate for JSON output.
-
-        Inputs:
-            _raw[bool]: An internal flag for skipping json conversion while building containers
-        """
-        return json.dumps(self.toDict(), sort_keys=True, indent=4)
-
     def copyToToken(self, token):
         """Copy the children from this token to the supplied parent."""
         for child in self.copy():
@@ -115,14 +105,9 @@ class Token(NodeBase):
 
     def toDict(self):
         """Convert tree into a dict."""
-        return Token.__toDict(self)
-
-    @staticmethod
-    def __toDict(node):
-        """Helper for JSON dump."""
-        return dict(name=node.name,
-                    attributes=node.attributes,
-                    children=[Token.__toDict(child) for child in node.children])
+        return dict(name=self.name,
+                    attributes=self.attributes,
+                    children=[child.toDict() for child in self.children])
 
 String = newToken(u'String', content=u'')
 ErrorToken = newToken(u'ErrorToken', message=u'', traceback=None)

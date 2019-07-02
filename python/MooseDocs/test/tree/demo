@@ -1,0 +1,22 @@
+[Tests]
+  issues = '#1980'
+  design = core.md
+  [r0]
+    requirement = "Tree One"
+  []
+  [r1]
+    requirement = "Tree Two"
+    issues = "#2011"
+  []
+  [r2]
+    requirement = "Tree Three"
+    design = "bibtex.md"
+    prereq = r1
+  []
+  [r3]
+    requirement = "Tree Four"
+    design = "katex.md"
+    issues = "#2013"
+    prereq = r1
+  []
+[]

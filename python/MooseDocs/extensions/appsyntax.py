@@ -36,9 +36,9 @@ InputParametersToken = tokens.newToken('InputParametersToken',
                                        parameters=dict(),
                                        level=2,
                                        groups=list(),
-                                       hide=set(),
-                                       show=set(),
-                                       visible=set())
+                                       hide=list(),
+                                       show=list(),
+                                       visible=list())
 ParameterToken = tokens.newToken('ParameterToken',
                                  inline=False,
                                  parameter=None,
@@ -98,7 +98,7 @@ class AppSyntaxExtension(command.CommandExtension):
                             "List of directories to interrogate for input files using an object.")
         config['hide'] = (None, "Dictionary of syntax to hide.")
         config['remove'] = (None, "List or Dictionary of lists of syntax to remove.")
-        config['visible'] = (set(['required', 'optional']),
+        config['visible'] = (['required', 'optional'],
                              "Parameter groups to show as un-collapsed.")
         config['alias'] = (None, "List of Dictionary of lists of syntax aliases.")
         config['allow-test-objects'] = (False, "Enable the test objects.")
@@ -336,14 +336,14 @@ class SyntaxParametersCommand(SyntaxCommandHeadingBase):
             token['groups'] = [group.strip() for group in self.settings['groups'].split(' ')]
 
         if self.settings['hide']:
-            token['hide'] = set([param.strip() for param in self.settings['hide'].split(' ')])
+            token['hide'] = [param.strip() for param in self.settings['hide'].split(' ')]
 
         if self.settings['show']:
-            token['show'] = set([param.strip() for param in self.settings['show'].split(' ')])
+            token['show'] = [param.strip() for param in self.settings['show'].split(' ')]
 
         if self.settings['visible'] is not None:
-            token['visible'] = set([group.strip().lower() for group in \
-                                    self.settings['visible'].split(' ')])
+            token['visible'] = [group.strip().lower() for group in \
+                                self.settings['visible'].split(' ')]
         else:
             token['visible'] = self.extension.get('visible')
 
