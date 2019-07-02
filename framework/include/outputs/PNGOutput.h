@@ -11,16 +11,19 @@
 
 #pragma once
 
+// pnglib includes
+#include <png.h>
+// MOOSE includes
+#include "FileOutput.h"
+// libmesh includes
+#include "libmesh/mesh_function.h"
+#include "libmesh/bounding_box.h"
+
 // Forward declarations
 class PNGOutput;
 
 template <>
 InputParameters validParams<PNGOutput>();
-
-// pnglib include
-#include <png.h>
-// MOOSE includes
-#include "FileOutput.h"
 
 class PNGOutput : public FileOutput
 {
@@ -38,6 +41,12 @@ protected:
   // Function to populate values to the variables used for scaling
   void calculateRescalingValues();
 
+  // Function for applying scaling to given values.
+  Real applyScale(Real value_to_scale);
+
+  // Function for reversing the applyScale function.
+  Real reverseScale(Real value_to_unscale);
+
   // Function that creates the PNG
   void makePNG();
 
@@ -52,9 +61,6 @@ protected:
 
   // Way to specify color vs grayscale image creation.
   bool _color;
-
-  // Way to track the number test step number and the associated png, if created.
-  //Real _timestep = 0;
 
   /// Pointer the libMesh::MeshFunction object that the read data is stored
   std::unique_ptr<MeshFunction> _mesh_function;

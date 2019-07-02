@@ -7,12 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#define nls _problem_ptr->getNonlinearSystem()
-#define scaledValue ((dv(0) + _shift_value) / _scaling_max)
-#define reverseScale ((_out_bounds_shade * _scaling_max) - _shift_value)
-
 #include <fstream>
 #include "PNGOutput.h"
+#include "FEProblemBase.h"
+#include "NonlinearSystem.h"
 #include "libmesh/mesh_tools.h"
 
 registerMooseObject("MooseApp", PNGOutput);
@@ -54,20 +52,23 @@ PNGOutput::makeMeshFunc()
 
   // Set up the mesh_function
   _mesh_function =
-      libmesh_make_unique<MeshFunction>(*_es_ptr, nls.serializedSolution(), nls.dofMap(), var_nums);
+      libmesh_make_unique<MeshFunction>(*_es_ptr,
+                                        _problem_ptr->getNonlinearSystem().serializedSolution(),
+                                        _problem_ptr->getNonlinearSystem().dofMap(),
+                                        var_nums);
   _mesh_function->init();
 
   // Need to enable out of mesh with the given control color scaled in reverse
   // scaling is done, this value retains it's original value.
-  _mesh_function->enable_out_of_mesh_mode(reverseScale);
+  _mesh_function->enable_out_of_mesh_mode(reverseScale(_out_bounds_shade));
 }
 
 void
 PNGOutput::calculateRescalingValues()
 {
   // The min and max.
-  _scaling_min = nls.serializedSolution().min();
-  _scaling_max = nls.serializedSolution().max();
+  _scaling_min = _problem_ptr->getNonlinearSystem().serializedSolution().min();
+  _scaling_max = _problem_ptr->getNonlinearSystem().serializedSolution().max();
   _shift_value = 0;
 
   // Get the shift value.
@@ -80,6 +81,18 @@ PNGOutput::calculateRescalingValues()
 
   // Shift the max.
   _scaling_max += _shift_value;
+}
+
+inline Real
+PNGOutput::applyScale(Real value_to_scale)
+{
+  return ((value_to_scale + _shift_value) / _scaling_max);
+}
+
+inline Real
+PNGOutput::reverseScale(Real value_to_unscale)
+{
+  return ((value_to_unscale * _scaling_max) - _shift_value);
 }
 
 void
@@ -143,8 +156,8 @@ PNGOutput::makePNG()
   Real dist_y = maxPoint(1) - minPoint(1);
 
   // Create the filename based on base and the test step number.
-  std::string png_file2 = _file_base;
-  png_file2 += ".png";
+  std::ostringstream png_file;
+  png_file << _file_base << "_" << std::setfill('0') << std::setw(3) << _t_step << ".png";
 
   FILE * fp = nullptr;
   png_structrp pngp = nullptr;
@@ -154,10 +167,11 @@ PNGOutput::makePNG()
   Real width = dist_x * _resolution;
   Real height = dist_y * _resolution;
 
-  fp = fopen(png_file2.c_str(), "wb");
+  // Check if we can open and write to the file.
+  MooseUtils::checkFileWriteable(png_file.str());
 
-  if (!fp)
-    mooseError("Failed to open the file for the PNG output.");
+  // Open the file with write and bit modes.
+  fp = fopen(png_file.str().c_str(), "wb");
 
   pngp = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
   if (!pngp)
@@ -204,9 +218,9 @@ PNGOutput::makePNG()
 
       // Determine whether to create the PNG in color or grayscale
       if (_color)
-        setRGB(&row[indx * 3], scaledValue);
+        setRGB(&row[indx * 3], applyScale(dv(0)));
       else
-        row[indx] = scaledValue * 255;
+        row[indx] = applyScale(dv(0)) * 255;
 
       indx++;
     }
