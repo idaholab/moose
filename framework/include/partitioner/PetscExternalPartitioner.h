@@ -20,7 +20,8 @@ template <>
 InputParameters validParams<PetscExternalPartitioner>();
 
 /**
- * Partitions a mesh using a regular grid.
+ * Partitions a mesh using external petsc partitioners such as parmetis, ptscotch, chaco, party,
+ * etc.
  */
 class PetscExternalPartitioner : public MoosePartitioner
 {
@@ -52,4 +53,3 @@ private:
   bool _apply_element_weight;
   bool _apply_side_weight;
 };
-

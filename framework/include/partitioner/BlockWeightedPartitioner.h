@@ -35,11 +35,10 @@ public:
   virtual dof_id_type computeElementWeight(Elem & elm) override;
 
 private:
-
   /// Vector the block names supplied by the user via the input file
   std::vector<SubdomainName> _blocks;
   /// Block weights
-  std::vector<dof_id_type>   _weights;
+  std::vector<dof_id_type> _weights;
   /// A map from subdomain to weight
   std::unordered_map<SubdomainID, dof_id_type> _blocks_to_weights;
   /// Moose mesh

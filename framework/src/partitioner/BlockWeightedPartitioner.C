@@ -28,30 +28,36 @@ validParams<BlockWeightedPartitioner>()
 
   params.set<bool>("apply_element_weight") = true;
 
-  params.addClassDescription(
-      "Partition mesh by weighting blocks");
+  params.addClassDescription("Partition mesh by weighting blocks");
 
   return params;
 }
 
 BlockWeightedPartitioner::BlockWeightedPartitioner(const InputParameters & params)
   : PetscExternalPartitioner(params),
-  _blocks(getParam<std::vector<SubdomainName>>("block")),
-  _weights(getParam<std::vector<dof_id_type>>("weight")),
-  _mesh(*getParam<MooseMesh *>("mesh"))
+    _blocks(getParam<std::vector<SubdomainName>>("block")),
+    _weights(getParam<std::vector<dof_id_type>>("weight")),
+    _mesh(*getParam<MooseMesh *>("mesh"))
 {
   if (_blocks.size() != _weights.size())
-    paramError("block", "Number of weights ",_weights.size(), " does not match with the number of blocks ", _blocks.size());
+    paramError("block",
+               "Number of weights ",
+               _weights.size(),
+               " does not match with the number of blocks ",
+               _blocks.size());
 
   // Get the IDs from the supplied names
   auto block_ids = _mesh.getSubdomainIDs(_blocks);
 
   if (block_ids.size() != _blocks.size())
-    mooseError("Number of block ids ", block_ids.size(), " does not match with the number of blocks ", _blocks.size());
+    mooseError("Number of block ids ",
+               block_ids.size(),
+               " does not match with the number of blocks ",
+               _blocks.size());
 
   _blocks_to_weights.reserve(_weights.size());
 
-  for (MooseIndex(block_ids.size()) i = 0; i<block_ids.size(); i++)
+  for (MooseIndex(block_ids.size()) i = 0; i < block_ids.size(); i++)
   {
     _blocks_to_weights[block_ids[i]] = _weights[i];
   }
@@ -69,7 +75,7 @@ BlockWeightedPartitioner::computeElementWeight(Elem & elem)
   auto blockid_to_weight = _blocks_to_weights.find(elem.subdomain_id());
 
   if (blockid_to_weight == _blocks_to_weights.end())
-    mooseError("Can not find a weight for block id ",elem.subdomain_id());
+    mooseError("Can not find a weight for block id ", elem.subdomain_id());
 
   return blockid_to_weight->second;
 }
