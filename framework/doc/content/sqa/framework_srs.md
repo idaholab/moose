@@ -1,4 +1,4 @@
-!template load file=srs.md.template category=framework
+!template load file=srs.md.template category=framework project=MOOSE
 
 !template! item key=system-purpose
 The [!ac](MOOSE) is a tool for solving complex coupled

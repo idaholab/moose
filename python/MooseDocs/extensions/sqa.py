@@ -22,7 +22,7 @@ import MooseDocs
 from MooseDocs import common
 from MooseDocs.common import exceptions
 from MooseDocs.base import components, LatexRenderer, HTMLRenderer
-from MooseDocs.extensions import core, command, floats, autolink, template
+from MooseDocs.extensions import core, command, floats, autolink
 from MooseDocs.tree import tokens, html, latex
 
 LOG = logging.getLogger(__name__)
@@ -401,8 +401,6 @@ class SQADocumentCommand(command.CommandComponent):
     def createToken(self, parent, info, page):
         main = self.extension.get('main')
         suffix = self.settings.get('suffix')
-        title = self.settings.get('title')
-        #li = core.ListItem(parent, class_='moose-sqa-document')
         return autolink.AutoLink(parent, page=u'sqa/{}_{}.md'.format(main, suffix),
                                  optional=True, warning=True)
 

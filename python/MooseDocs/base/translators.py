@@ -16,7 +16,6 @@ import os
 import logging
 import multiprocessing
 import types
-import copy
 
 import mooseutils
 
@@ -216,7 +215,8 @@ class Translator(mixins.ConfigObject):
 
                     dist = self.__levenshtein_cache.get(arg, None)
                     if dist is None:
-                        dist = mooseutils.levenshteinDistance(arg, self.__markdown_file_list, number=num)
+                        dist = mooseutils.levenshteinDistance(arg, self.__markdown_file_list,
+                                                              number=num)
                         self.__levenshtein_cache[arg] = dist
                     msg += " Did you mean one of the following:\n"
                     for d in dist:
@@ -246,7 +246,7 @@ class Translator(mixins.ConfigObject):
             parts = local.split(os.path.sep)
             n = len(parts)
             for i in xrange(n, 0, -1):
-               self.__markdown_file_list.add(os.path.join(*parts[n-i:n]))
+                self.__markdown_file_list.add(os.path.join(*parts[n-i:n]))
 
     def init(self):
         """
