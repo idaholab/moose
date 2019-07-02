@@ -1,4 +1,4 @@
-!template load file=sqa/app_srs.md.template app=MOOSE category=framework
+!template load file=sqa/app_srs.md.template app=MOOSE category=_empty_
 
 !template item key=introduction
 MOOSE itself is comprised of the framework and a set of physics modules. As such, the [!ac](SRS)

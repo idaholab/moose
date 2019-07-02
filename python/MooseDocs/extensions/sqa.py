@@ -160,6 +160,9 @@ class SQARequirementsCommand(command.CommandComponent):
 
     def createToken(self, parent, info, page):
         category = self.settings.get('category', None)
+        if category == '_empty_':
+            return parent
+
         group_map = self.extension.get('group_map', dict())
         for group, requirements in self.extension.requirements(category).iteritems():
             group = group_map.get(group, group.replace('_', ' ').title())
