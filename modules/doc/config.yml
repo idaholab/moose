@@ -129,6 +129,9 @@ Extensions:
             utils: framework_development/utils/index.md
             variables: syntax/Variables/index.md
             vectorpostprocessors: syntax/VectorPostprocessors/index.md
+    MooseDocs.extensions.civet:
+        repo: moose
+        owner: idaholab
     MooseDocs.extensions.sqa:
         categories:
             framework: !include framework/doc/sqa_framework.yml

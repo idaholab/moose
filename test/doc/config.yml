@@ -23,6 +23,9 @@ Extensions:
         shortcuts: !include framework/doc/globals.yml
     MooseDocs.extensions.acronym:
         acronyms: !include framework/doc/acronyms.yml
+    MooseDocs.extensions.civet:
+        repo: moose
+        owner: idaholab
     MooseDocs.extensions.sqa:
         categories:
             framework: !include framework/doc/sqa_framework.yml
