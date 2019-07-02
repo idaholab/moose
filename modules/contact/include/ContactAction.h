@@ -13,6 +13,22 @@
 #include "MooseTypes.h"
 #include "MooseEnum.h"
 
+enum class ContactModel
+{
+  FRICTIONLESS,
+  GLUED,
+  COULOMB,
+};
+
+enum class ContactFormulation
+{
+  KINEMATIC,
+  PENALTY,
+  AUGMENTED_LAGRANGE,
+  TANGENTIAL_PENALTY,
+  MORTAR
+};
+
 class ContactAction;
 
 template <>

@@ -120,7 +120,8 @@ ContactMaster::ContactMaster(const InputParameters & parameters)
     _penetration_locator.setNormalSmoothingMethod(
         parameters.get<MooseEnum>("normal_smoothing_method"));
 
-  if (_model == CM_GLUED || (_model == CM_COULOMB && _formulation == CF_KINEMATIC))
+  if (_model == ContactModel::GLUED ||
+      (_model == ContactModel::COULOMB && _formulation == ContactFormulation::KINEMATIC))
     _penetration_locator.setUpdate(false);
 
   if (_friction_coefficient < 0)
@@ -218,7 +219,7 @@ ContactMaster::computeContactForce(PenetrationInfo * pinfo, bool update_contact_
 
     // Increment the lock count every time the node comes back into contact from not being in
     // contact.
-    if (_formulation == CF_KINEMATIC)
+    if (_formulation == ContactFormulation::KINEMATIC)
       ++pinfo->_locked_this_step;
   }
 
@@ -231,17 +232,17 @@ ContactMaster::computeContactForce(PenetrationInfo * pinfo, bool update_contact_
   if (_normalize_penalty)
     pen_force *= area;
 
-  if (_model == CM_FRICTIONLESS)
+  if (_model == ContactModel::FRICTIONLESS)
   {
     switch (_formulation)
     {
-      case CF_KINEMATIC:
+      case ContactFormulation::KINEMATIC:
         pinfo->_contact_force = -pinfo->_normal * (pinfo->_normal * res_vec);
         break;
-      case CF_PENALTY:
+      case ContactFormulation::PENALTY:
         pinfo->_contact_force = pinfo->_normal * (pinfo->_normal * pen_force);
         break;
-      case CF_AUGMENTED_LAGRANGE:
+      case ContactFormulation::AUGMENTED_LAGRANGE:
         pinfo->_contact_force =
             (pinfo->_normal *
              (pinfo->_normal * (pen_force + pinfo->_lagrange_multiplier * pinfo->_normal)));
@@ -252,7 +253,7 @@ ContactMaster::computeContactForce(PenetrationInfo * pinfo, bool update_contact_
     }
     pinfo->_mech_status = PenetrationInfo::MS_SLIPPING;
   }
-  else if (_model == CM_COULOMB && _formulation == CF_PENALTY)
+  else if (_model == ContactModel::COULOMB && _formulation == ContactFormulation::PENALTY)
   {
     distance_vec =
         pinfo->_incremental_slip +
@@ -287,17 +288,18 @@ ContactMaster::computeContactForce(PenetrationInfo * pinfo, bool update_contact_
       pinfo->_mech_status = PenetrationInfo::MS_STICKING;
     }
   }
-  else if (_model == CM_GLUED || (_model == CM_COULOMB && _formulation == CF_KINEMATIC))
+  else if (_model == ContactModel::GLUED ||
+           (_model == ContactModel::COULOMB && _formulation == ContactFormulation::KINEMATIC))
   {
     switch (_formulation)
     {
-      case CF_KINEMATIC:
+      case ContactFormulation::KINEMATIC:
         pinfo->_contact_force = -res_vec;
         break;
-      case CF_PENALTY:
+      case ContactFormulation::PENALTY:
         pinfo->_contact_force = pen_force;
         break;
-      case CF_AUGMENTED_LAGRANGE:
+      case ContactFormulation::AUGMENTED_LAGRANGE:
         pinfo->_contact_force =
             pen_force + pinfo->_lagrange_multiplier * distance_vec / distance_vec.norm();
         break;
@@ -313,8 +315,8 @@ ContactMaster::computeContactForce(PenetrationInfo * pinfo, bool update_contact_
   }
 
   // Release
-  if (update_contact_set && _model != CM_GLUED && pinfo->isCaptured() && !newly_captured &&
-      _tension_release >= 0 && pinfo->_locked_this_step < 2)
+  if (update_contact_set && _model != ContactModel::GLUED && pinfo->isCaptured() &&
+      !newly_captured && _tension_release >= 0 && pinfo->_locked_this_step < 2)
   {
     const Real contact_pressure = -(pinfo->_normal * pinfo->_contact_force) / area;
     if (-contact_pressure >= _tension_release)
@@ -324,7 +326,7 @@ ContactMaster::computeContactForce(PenetrationInfo * pinfo, bool update_contact_
     }
   }
 
-  if (_formulation == CF_AUGMENTED_LAGRANGE && pinfo->isCaptured())
+  if (_formulation == ContactFormulation::AUGMENTED_LAGRANGE && pinfo->isCaptured())
     pinfo->_lagrange_multiplier -= getPenalty(*pinfo) * gap_size;
 }
 
@@ -347,14 +349,14 @@ ContactMaster::computeQpJacobian()
 
   switch (_model)
   {
-    case CM_FRICTIONLESS:
+    case ContactModel::FRICTIONLESS:
       switch (_formulation)
       {
-        case CF_KINEMATIC:
+        case ContactFormulation::KINEMATIC:
           return 0;
           break;
-        case CF_PENALTY:
-        case CF_AUGMENTED_LAGRANGE:
+        case ContactFormulation::PENALTY:
+        case ContactFormulation::AUGMENTED_LAGRANGE:
           return _test[_i][_qp] * penalty * _phi[_j][_qp] * pinfo->_normal(_component) *
                  pinfo->_normal(_component);
           break;
@@ -363,15 +365,15 @@ ContactMaster::computeQpJacobian()
           break;
       }
       break;
-    case CM_GLUED:
-    case CM_COULOMB:
+    case ContactModel::GLUED:
+    case ContactModel::COULOMB:
       switch (_formulation)
       {
-        case CF_KINEMATIC:
+        case ContactFormulation::KINEMATIC:
           return 0;
           break;
-        case CF_PENALTY:
-        case CF_AUGMENTED_LAGRANGE:
+        case ContactFormulation::PENALTY:
+        case ContactFormulation::AUGMENTED_LAGRANGE:
           return _test[_i][_qp] * penalty * _phi[_j][_qp];
           break;
         default:

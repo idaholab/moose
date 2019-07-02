@@ -12,10 +12,10 @@
 // MOOSE includes
 #include "NodeFaceConstraint.h"
 
-#include "ContactMaster.h"
-
 // Forward Declarations
 class MultiDContactConstraint;
+enum class ContactModel;
+enum class ContactFormulation;
 
 template <>
 InputParameters validParams<MultiDContactConstraint>();
@@ -62,4 +62,3 @@ protected:
 
   std::vector<unsigned int> _vars;
 };
-

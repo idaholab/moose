@@ -165,17 +165,17 @@ SlaveConstraint::computeQpResidual()
 
   const Real area = nodalArea(*pinfo);
 
-  if (_formulation == CF_KINEMATIC)
+  if (_formulation == ContactFormulation::KINEMATIC)
   {
     RealVectorValue distance_vec(_mesh.nodeRef(node->id()) - pinfo->_closest_point);
     RealVectorValue pen_force(_penalty * distance_vec);
     if (_normalize_penalty)
       pen_force *= area;
 
-    if (_model == CM_FRICTIONLESS)
+    if (_model == ContactModel::FRICTIONLESS)
       resid += pinfo->_normal(_component) * pinfo->_normal * pen_force;
 
-    else if (_model == CM_GLUED || _model == CM_COULOMB)
+    else if (_model == ContactModel::GLUED || _model == ContactModel::COULOMB)
       resid += pen_force(_component);
   }
 
@@ -220,7 +220,7 @@ SlaveConstraint::computeQpJacobian()
 
   Real term(0);
 
-  if (CM_FRICTIONLESS == _model)
+  if (ContactModel::FRICTIONLESS == _model)
   {
 
     const Real nnTDiag = normal(_component) * normal(_component);
@@ -289,7 +289,7 @@ SlaveConstraint::computeQpJacobian()
     else
       term += penalty * (1 - nnTDiag + AinvDAT33);
   }
-  else if (CM_GLUED == _model || CM_COULOMB == _model)
+  else if (ContactModel::GLUED == _model || ContactModel::COULOMB == _model)
   {
     normal.zero();
     normal(_component) = 1;

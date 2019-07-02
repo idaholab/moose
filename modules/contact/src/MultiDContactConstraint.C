@@ -131,11 +131,11 @@ MultiDContactConstraint::updateContactSet()
     // Real resid = 0;
     switch (_model)
     {
-      case CM_FRICTIONLESS:
+      case ContactModel::FRICTIONLESS:
         // resid = pinfo->_normal * res_vec;
         break;
 
-      case CM_GLUED:
+      case ContactModel::GLUED:
         // resid = pinfo->_normal * res_vec;
         break;
 
@@ -227,11 +227,11 @@ MultiDContactConstraint::computeQpResidual(Moose::ConstraintType type)
     case Moose::Slave:
       switch (_model)
       {
-        case CM_FRICTIONLESS:
+        case ContactModel::FRICTIONLESS:
           resid = pinfo->_normal(_component) * (pinfo->_normal * (pen_force - res_vec));
           break;
 
-        case CM_GLUED:
+        case ContactModel::GLUED:
           resid = pen_force(_component) - res_vec(_component);
           break;
 
@@ -243,11 +243,11 @@ MultiDContactConstraint::computeQpResidual(Moose::ConstraintType type)
     case Moose::Master:
       switch (_model)
       {
-        case CM_FRICTIONLESS:
+        case ContactModel::FRICTIONLESS:
           resid = pinfo->_normal(_component) * (pinfo->_normal * res_vec);
           break;
 
-        case CM_GLUED:
+        case ContactModel::GLUED:
           resid = res_vec(_component);
           break;
 
@@ -271,7 +271,7 @@ MultiDContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
     case Moose::SlaveSlave:
       switch (_model)
       {
-        case CM_FRICTIONLESS:
+        case ContactModel::FRICTIONLESS:
 
           slave_jac = pinfo->_normal(_component) * pinfo->_normal(_component) *
                       (_penalty * _phi_slave[_j][_qp] -
@@ -279,7 +279,7 @@ MultiDContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
                                     _connected_dof_indices[_j]));
           break;
 
-        case CM_GLUED:
+        case ContactModel::GLUED:
           // resid = pen_force(_component) - res_vec(_component);
           break;
 
@@ -292,13 +292,13 @@ MultiDContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
     case Moose::SlaveMaster:
       switch (_model)
       {
-        case CM_FRICTIONLESS:
+        case ContactModel::FRICTIONLESS:
 
           slave_jac = pinfo->_normal(_component) * pinfo->_normal(_component) *
                       (-_penalty * _phi_master[_j][_qp]);
           break;
 
-        case CM_GLUED:
+        case ContactModel::GLUED:
           /*
                 resid = pen_force(_component)
                   - res_vec(_component)

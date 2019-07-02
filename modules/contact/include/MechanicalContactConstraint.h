@@ -11,11 +11,13 @@
 
 // MOOSE includes
 #include "NodeFaceConstraint.h"
-#include "ContactMaster.h"
+#include "PenetrationLocator.h"
 
 // Forward Declarations
 class MechanicalContactConstraint;
 class ContactLineSearchBase;
+enum class ContactModel;
+enum class ContactFormulation;
 
 template <>
 InputParameters validParams<MechanicalContactConstraint>();
@@ -93,7 +95,7 @@ protected:
   Real getTangentialPenalty(PenetrationInfo & pinfo);
 
   const unsigned int _component;
-  ContactModel _model;
+  const ContactModel _model;
   const ContactFormulation _formulation;
   const bool _normalize_penalty;
 
@@ -139,4 +141,3 @@ protected:
   const bool _print_contact_nodes;
   static Threads::spin_mutex _contact_set_mutex;
 };
-

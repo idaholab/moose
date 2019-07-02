@@ -13,21 +13,13 @@
 #include "DiracKernel.h"
 #include "PenetrationLocator.h"
 
-enum ContactModel
-{
-  CM_FRICTIONLESS,
-  CM_GLUED,
-  CM_COULOMB,
-};
+// Forward Declarations
+class ContactMaster;
+enum class ContactModel;
+enum class ContactFormulation;
 
-enum ContactFormulation
-{
-  CF_KINEMATIC,
-  CF_PENALTY,
-  CF_AUGMENTED_LAGRANGE,
-  CF_TANGENTIAL_PENALTY,
-  MORTAR
-};
+template <>
+InputParameters validParams<ContactMaster>();
 
 class ContactMaster : public DiracKernel
 {
@@ -70,6 +62,3 @@ protected:
   SystemBase & _aux_system;
   const NumericVector<Number> * _aux_solution;
 };
-
-template <>
-InputParameters validParams<ContactMaster>();
