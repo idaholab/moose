@@ -3187,10 +3187,7 @@ NonlinearSystemBase::computeScalingJacobian(NonlinearImplicitSystem & sys)
 
     auto & petsc_matrix = *static_cast<PetscMatrix<Real> *>(sys.matrix);
 
-    PetscInt m, n;
-    auto ierr = MatGetLocalSize(petsc_matrix.mat(), &m, &n);
-    LIBMESH_CHKERR(ierr);
-    if (!m)
+    if (!petsc_matrix.local_m())
       mooseError("MOOSE doesn't currently support automatic scaling when there are any processes "
                  "owning zero dofs. Check back soon :-)");
 
@@ -3261,8 +3258,7 @@ NonlinearSystemBase::computeScalingJacobian(NonlinearImplicitSystem & sys)
       displaced_problem->systemBaseNonlinear().applyScalingFactors(inverse_scaling_factors);
 
     // Now it's essential that we reset the sparsity pattern of the matrix
-    ierr = MatResetPreallocation(petsc_matrix.mat());
-    LIBMESH_CHKERR(ierr);
+    petsc_matrix.reset_preallocation();
 
 #else
     mooseWarning("Automatic scaling requires a PETSc version of 3.8.0 or greater, so no automatic "
