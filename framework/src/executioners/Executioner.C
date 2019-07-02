@@ -56,9 +56,20 @@ Executioner::Executioner(const InputParameters & parameters)
   if (!_restart_file_base.empty())
     _fe_problem.setRestartFile(_restart_file_base);
 
-  _fe_problem.automaticScaling(isParamValid("automatic_scaling")
-                                   ? getParam<bool>("automatic_scaling")
-                                   : getMooseApp().defaultAutomaticScaling());
+  // Check whether the user has explicitly requested automatic scaling and is using a solve type
+  // without a matrix. If so, then we warn them
+  if ((_pars.isParamSetByUser("automatic_scaling") && getParam<bool>("automatic_scaling")) &&
+      _fe_problem.solverParams()._type == Moose::ST_JFNK)
+  {
+    mooseWarning("Automatic scaling isn't implemented for the case where you do not have a "
+                 "preconditioning matrix. No scaling will be applied");
+    _fe_problem.automaticScaling(false);
+  }
+  else
+    _fe_problem.automaticScaling(isParamValid("automatic_scaling")
+                                     ? getParam<bool>("automatic_scaling")
+                                     : getMooseApp().defaultAutomaticScaling());
+
   _fe_problem.computeScalingOnce(getParam<bool>("compute_scaling_once"));
 }
 

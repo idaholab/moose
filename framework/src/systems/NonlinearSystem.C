@@ -412,11 +412,22 @@ NonlinearSystem::converged()
   return _transient_sys.nonlinear_solver->converged;
 }
 
+namespace Moose
+{
+void
+nonPetscMatrixWarning()
+{
+  mooseWarning("Automatic scaling is only currently implemented for PETSc matrix types. Please "
+               "contact the moose-users list (moose-users@googlegroups.com) if you would like "
+               "scaling implemented for another matrix type. No scaling will be applied in the "
+               "current context.");
+}
+}
+
 void
 NonlinearSystemBase::computeScalingJacobian()
 {
 #ifdef LIBMESH_HAVE_PETSC
-
   if (dynamic_cast<PetscMatrix<Real> *>(_transient_sys.matrix))
   {
 #if !PETSC_VERSION_LESS_THAN(3, 9, 0)
@@ -498,11 +509,15 @@ NonlinearSystemBase::computeScalingJacobian()
     // Now it's essential that we reset the sparsity pattern of the matrix
     petsc_matrix.reset_preallocation();
 
-#else
+#else // petsc version less than 3.9
     mooseWarning("Automatic scaling requires a PETSc version of 3.9.0 or greater, so no automatic "
                  "scaling is going to be performed");
 #endif
   }
+  else // non-PetscMatrix type
+    Moose::nonPetscMatrixWarning();
 
+#else // libmesh doesn't have PETSc
+  Moose::nonPetscMatrixWarning();
 #endif
 }
