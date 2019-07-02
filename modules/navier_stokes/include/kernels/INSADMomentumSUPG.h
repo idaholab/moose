@@ -29,7 +29,7 @@ public:
   INSADMomentumSUPG(const InputParameters & parameters);
 
 protected:
-  virtual ADVectorResidual precomputeQpStrongResidual() override;
+  virtual ADRealVectorValue precomputeQpStrongResidual() override;
 
   const ADMaterialProperty(RealVectorValue) & _momentum_strong_residual;
 

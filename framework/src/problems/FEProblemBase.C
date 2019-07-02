@@ -3354,8 +3354,9 @@ FEProblemBase::reinitBecauseOfGhostingOrNewGeomObjects()
   needs_reinit = needs_reinit || !_geometric_search_data._nearest_node_locators.empty() ||
                  _mortar_data.hasObjects();
   needs_reinit =
-      needs_reinit ||
-      (_displaced_problem && !_displaced_problem->geomSearchData()._nearest_node_locators.empty());
+      needs_reinit || (_displaced_problem &&
+                       (!_displaced_problem->geomSearchData()._nearest_node_locators.empty() ||
+                        _mortar_data.hasDisplacedObjects()));
   _communicator.max(needs_reinit);
 
   if (needs_reinit)
@@ -4622,9 +4623,33 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
   if (_displaced_problem)
   {
     _aux->compute(EXEC_PRE_DISPLACE);
-    _displaced_problem->updateMesh();
-    if (_mortar_data.hasDisplacedObjects())
-      updateMortarMesh();
+    try
+    {
+      try
+      {
+        _displaced_problem->updateMesh();
+        if (_mortar_data.hasDisplacedObjects())
+          updateMortarMesh();
+      }
+      catch (libMesh::LogicError & e)
+      {
+        throw MooseException("We caught a libMesh error");
+      }
+    }
+    catch (MooseException & e)
+    {
+      setException(e.what());
+    }
+    try
+    {
+      // Propagate the exception to all processes if we had one
+      checkExceptionAndStopSolve();
+    }
+    catch (MooseException &)
+    {
+      // Just end now. We've inserted our NaN into the residual vector
+      return;
+    }
   }
 
   for (THREAD_ID tid = 0; tid < n_threads; tid++)

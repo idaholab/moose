@@ -33,7 +33,7 @@ INSADTemperatureAdvection<compute_stage>::INSADTemperatureAdvection(
 }
 
 template <ComputeStage compute_stage>
-ADResidual
+ADReal
 INSADTemperatureAdvection<compute_stage>::precomputeQpResidual()
 {
   return _rho[_qp] * _cp[_qp] * _U[_qp] * _grad_u[_qp];
@@ -66,7 +66,7 @@ INSADTemperatureAdvectionSUPG<compute_stage>::INSADTemperatureAdvectionSUPG(
 }
 
 template <ComputeStage compute_stage>
-ADResidual
+ADReal
 INSADTemperatureAdvectionSUPG<compute_stage>::precomputeQpStrongResidual()
 {
   return _rho[_qp] * _cp[_qp] * _U[_qp] * _grad_u[_qp];

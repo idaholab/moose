@@ -75,9 +75,10 @@ NearestNodeThread::operator()(const NodeIdRange & range)
         if (std::isnan((*cur_node)(0)) || std::isinf((*cur_node)(0)) ||
             std::isnan((*cur_node)(1)) || std::isinf((*cur_node)(1)) ||
             std::isnan((*cur_node)(2)) || std::isinf((*cur_node)(2)))
-          mooseError("Failure in NearestNodeThread because solution contains inf or not-a-number "
-                     "entries.  This is likely due to a failed factorization of the Jacobian "
-                     "matrix.");
+          throw MooseException(
+              "Failure in NearestNodeThread because solution contains inf or not-a-number "
+              "entries.  This is likely due to a failed factorization of the Jacobian "
+              "matrix.");
       }
       mooseError("Unable to find nearest node!");
     }

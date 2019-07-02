@@ -26,7 +26,7 @@ LevelSetTimeDerivativeSUPG<compute_stage>::LevelSetTimeDerivativeSUPG(
 }
 
 template <ComputeStage compute_stage>
-ADVectorResidual
+ADRealVectorValue
 LevelSetTimeDerivativeSUPG<compute_stage>::precomputeQpResidual()
 {
   computeQpVelocity();

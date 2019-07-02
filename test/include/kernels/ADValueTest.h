@@ -23,7 +23,7 @@ public:
   ADValueTest(const InputParameters & parameters);
 
 protected:
-  virtual ADResidual computeQpResidual();
+  virtual ADReal computeQpResidual();
 
   usingKernelMembers;
 };

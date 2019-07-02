@@ -44,10 +44,10 @@ ADStressDivergenceRZTensors<compute_stage>::initialSetup()
 }
 
 template <ComputeStage compute_stage>
-ADResidual
+ADReal
 ADStressDivergenceRZTensors<compute_stage>::computeQpResidual()
 {
-  ADResidual div = 0.0;
+  ADReal div = 0.0;
   if (_component == 0)
   {
     div = _grad_test[_i][_qp](0) * _stress[_qp](0, 0) +

@@ -26,7 +26,7 @@ ADConvectionPrecompute<compute_stage>::ADConvectionPrecompute(const InputParamet
 }
 
 template <ComputeStage compute_stage>
-ADResidual
+ADReal
 ADConvectionPrecompute<compute_stage>::precomputeQpResidual()
 {
   // velocity * _grad_u[_qp] is actually doing a dot product

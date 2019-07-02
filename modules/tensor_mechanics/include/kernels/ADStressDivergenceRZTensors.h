@@ -32,7 +32,7 @@ public:
 protected:
   void initialSetup() override;
 
-  ADResidual computeQpResidual() override;
+  ADReal computeQpResidual() override;
   void precalculateResidual() override;
 
   usingStressDivergenceTensorsMembers;

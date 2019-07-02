@@ -23,7 +23,7 @@ public:
   ADCoupledValueTest(const InputParameters & parameters);
 
 protected:
-  virtual ADResidual computeQpResidual();
+  virtual ADReal computeQpResidual();
 
   const ADVariableValue & _v;
 

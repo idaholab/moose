@@ -35,7 +35,7 @@ ADGravity<compute_stage>::ADGravity(const InputParameters & parameters)
 }
 
 template <ComputeStage compute_stage>
-ADResidual
+ADReal
 ADGravity<compute_stage>::precomputeQpResidual()
 {
   return -_density[_qp] * _value;

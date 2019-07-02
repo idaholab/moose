@@ -4,7 +4,7 @@
     input = 'power_law_creep.i'
     exodiff = 'power_law_creep_out.e'
     issues = "#8642"
-    design = 'ADPowerLawCreep.md'
+    design = 'ADPowerLawCreepStressUpdate.md'
     requirement = 'Moose shall be able to calculate a coupled thermo-mechanics solve with power law
                    creep and finite strain using the AD formulation and match non-AD formulation
                    results'
@@ -14,7 +14,7 @@
     input = 'power_law_creep_restart1.i'
     recover = false
     issues = "#8642"
-    design = "ADPowerLawCreep.md"
+    design = "ADPowerLawCreepStressUpdate.md"
     requirement = 'Moose shall be able to restart a thermo-mechanics solve with power law creep and
                    finite strain using the AD formulation and match non-AD formulations (precurser)'
   [../]
@@ -26,7 +26,7 @@
     cli_args = 'Outputs/file_base=power_law_creep_restart2_tm_out'
     exodiff_opts = '-TM'
     issues = "#8642"
-    design = "ADPowerLawCreep.md"
+    design = "ADPowerLawCreepStressUpdate.md"
     requirement = 'Moose shall be able to restart a thermo-mechanics solve with power law creep and
                    finite strain using the AD formulation and match non-AD formulations'
   [../]
@@ -35,7 +35,7 @@
     input = 'power_law_creep_smallstrain.i'
     exodiff = 'power_law_creep_smallstrain_out.e'
     issues = "#8642"
-    design = "ADPowerLawCreep.md"
+    design = "ADPowerLawCreepStressUpdate.md"
     requirement = 'Moose shall be able to calculate a coupled thermo-mechanics solve with power law
                    creep and small strain using the AD formulation and match non-AD formulation
                    results'
@@ -50,7 +50,7 @@
     run_sim = True
     petsc_version = '>=3.9.4'
     issues = '#12650'
-    design = 'jacobian_definitions.md'
+    design = 'ADPowerLawCreepStressUpdate.md'
     requirement = 'Moose shall be able to calculate a coupled thermo-mechanics solve with power law
                    creep and finite strain using the AD formulation and calculate a perfect Jacobian'
   [../]
@@ -64,7 +64,7 @@
     run_sim = True
     petsc_version = '>=3.9.4'
     issues = '#12650'
-    design = 'jacobian_definitions.md'
+    design = 'ADPowerLawCreepStressUpdate.md'
     requirement = 'Moose shall be able to calculate a coupled thermo-mechanics solve with power law
                    creep and finite strain using the AD formulation and calculate a perfect Jacobian'
   [../]
@@ -77,7 +77,7 @@
     run_sim = True
     petsc_version = '>=3.9.4'
     issues = '#12650'
-    design = 'jacobian_definitions.md'
+    design = 'ADPowerLawCreepStressUpdate.md'
     requirement = 'Moose shall be able to calculate a coupled thermo-mechanics solve with power law
                    creep and small strain using the AD formulation and calculate a perfect Jacobian'
   [../]

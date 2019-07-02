@@ -29,7 +29,7 @@ public:
   INSADMomentumAdvection(const InputParameters & parameters);
 
 protected:
-  virtual ADVectorResidual precomputeQpResidual() override;
+  virtual ADRealVectorValue precomputeQpResidual() override;
 
   const ADMaterialProperty(RealVectorValue) & _convective_strong_residual;
 

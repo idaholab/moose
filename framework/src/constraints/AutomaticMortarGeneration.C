@@ -25,12 +25,14 @@ using MetaPhysicL::DualNumber;
 const std::string AutomaticMortarGeneration::system_name = "Nodal Normals";
 
 AutomaticMortarGeneration::AutomaticMortarGeneration(
+    MooseApp & app,
     MeshBase & mesh_in,
     const std::pair<BoundaryID, BoundaryID> & boundary_key,
     const std::pair<SubdomainID, SubdomainID> & subdomain_key,
     bool on_displaced,
     bool periodic)
-  : mesh(mesh_in),
+  : ConsoleStreamInterface(app),
+    mesh(mesh_in),
     mortar_segment_mesh(mesh_in.comm()),
     h_max(0.),
     _debug(false),
@@ -348,11 +350,16 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       orientation2_valid = (slave_node_cps[1] * master_node_cps[0] > 0.);
     }
 
-    // Verify that both orientations are not simultaneously valid/invalid.
+    // Verify that both orientations are not simultaneously valid/invalid. If they are not, then we
+    // are going to throw an exception instead of erroring out since we can easily reach this point
+    // if we have one bad linear solve. It's better in general to catch the error and then try a
+    // smaller time-step
     if (orientation1_valid && orientation2_valid)
-      mooseError("Both orientations cannot simultaneously be valid.");
+      throw MooseException(
+          "AutomaticMortarGeneration: Both orientations cannot simultaneously be valid.");
     if (!orientation1_valid && !orientation2_valid)
-      mooseError("Both orientations cannot simultaneously be invalid.");
+      throw MooseException(
+          "AutomaticMortarGeneration: Both orientations cannot simultaneously be invalid.");
 
     // If orientation 2 was valid, swap the left and right masters.
     if (orientation2_valid)
@@ -695,6 +702,8 @@ AutomaticMortarGeneration::projectSlaveNodesSinglePair(
               const std::vector<const Elem *> & master_node_neighbors =
                   this->nodes_to_master_elem_map.at(master_node->id());
 
+              std::vector<bool> master_elems_mapped(master_node_neighbors.size(), false);
+
               // Add entries to slave_node_and_elem_to_xi2_master_elem container.
               //
               // First, determine "on left" vs. "on right" orientation of the nodal neighbors.
@@ -736,6 +745,7 @@ AutomaticMortarGeneration::projectSlaveNodesSinglePair(
                   if (slave_node_neighbor_cps[snn] * master_node_neighbor_cps[mnn] > 0)
                   {
                     found_match = true;
+                    master_elems_mapped[mnn] = true;
 
                     // Figure out xi^(2) value by looking at which node master_node is
                     // of the current master node neighbor.
@@ -758,6 +768,20 @@ AutomaticMortarGeneration::projectSlaveNodesSinglePair(
               if (!found_match)
                 mooseError(
                     "Could not associate master/slave neighbors on either side of slave_node.");
+
+              // We need to handle the case where we've exactly projected a slave node onto a master
+              // node, but our slave node is at one of the slave face endpoints and our master node
+              // is not.
+              if (slave_node_neighbors.size() == 1 && master_node_neighbors.size() == 2)
+                for (auto it = master_elems_mapped.begin(); it != master_elems_mapped.end(); ++it)
+                  if (*it == false)
+                  {
+                    auto index = std::distance(master_elems_mapped.begin(), it);
+                    master_node_and_elem_to_xi1_slave_elem.insert(std::make_pair(
+                        std::make_tuple(
+                            master_node->id(), master_node, master_node_neighbors[index]),
+                        std::make_pair(1, nullptr)));
+                  }
             }
             else // Point falls somewhere in the middle of the Elem.
             {
@@ -794,9 +818,10 @@ AutomaticMortarGeneration::projectSlaveNodesSinglePair(
 
       if (!projection_succeeded && _debug)
       {
-        mooseInfo("Failed to find master Elem into which slave node ",
-                  static_cast<const Point &>(*slave_node),
-                  " was projected.");
+        _console << "Failed to find master Elem into which slave node "
+                 << static_cast<const Point &>(*slave_node) << " was projected." << std::endl
+                 << std::endl;
+        ;
       }
     } // loop over side nodes
   }   // end loop over lower-dimensional elements
@@ -831,7 +856,7 @@ AutomaticMortarGeneration::projectMasterNodesSinglePair(
     if (master_side_elem->subdomain_id() != lower_dimensional_master_subdomain_id)
       continue;
 
-    // For each node on this side, find the nearest node on the master side using the KDTree, then
+    // For each node on this side, find the nearest node on the slave side using the KDTree, then
     // search in nearby elements for where it projects along the nodal normal direction.
     for (MooseIndex(master_side_elem->n_vertices()) n = 0; n < master_side_elem->n_vertices(); ++n)
     {
@@ -946,8 +971,8 @@ AutomaticMortarGeneration::projectMasterNodesSinglePair(
               // Special case: xi1=+/-1.
               // We shouldn't get here, because this master node should already
               // have been mapped during the project_slave_nodes() routine.
-              mooseError("We should never get here, aligned master nodes should already "
-                         "have been mapped.");
+              throw MooseException("We should never get here, aligned master nodes should already "
+                                   "have been mapped.");
             }
             else // somewhere in the middle of the Elem
             {
@@ -987,9 +1012,9 @@ AutomaticMortarGeneration::projectMasterNodesSinglePair(
 
       if (!projection_succeeded && _debug)
       {
-        mooseInfo("Failed to find point from which master node ",
-                  static_cast<const Point &>(*master_node),
-                  " was projected.");
+        _console << "Failed to find point from which master node "
+                 << static_cast<const Point &>(*master_node) << " was projected." << std::endl
+                 << std::endl;
       }
     } // loop over side nodes
   }   // end loop over elements for finding where master points would have projected from.

@@ -43,7 +43,7 @@ ADDynamicStressDivergenceTensors<compute_stage>::ADDynamicStressDivergenceTensor
 }
 
 template <ComputeStage compute_stage>
-ADResidual
+ADReal
 ADDynamicStressDivergenceTensors<compute_stage>::computeQpResidual()
 {
   /**
@@ -60,7 +60,7 @@ ADDynamicStressDivergenceTensors<compute_stage>::computeQpResidual()
    *_alpha*_zeta/dt Div sigma_older
    */
 
-  ADResidual residual;
+  ADReal residual;
   if (_static_initialization && _t == _dt)
   {
     // If static inialization is true, then in the first step residual is only Ku which is

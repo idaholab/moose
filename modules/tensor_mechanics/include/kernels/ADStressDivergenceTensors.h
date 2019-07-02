@@ -43,7 +43,7 @@ public:
 protected:
   void initialSetup() override;
 
-  ADResidual computeQpResidual() override;
+  ADReal computeQpResidual() override;
   void precalculateResidual() override;
 
   const std::string _base_name;

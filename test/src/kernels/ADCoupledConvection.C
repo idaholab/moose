@@ -26,7 +26,7 @@ ADCoupledConvection<compute_stage>::ADCoupledConvection(const InputParameters & 
 }
 
 template <ComputeStage compute_stage>
-ADResidual
+ADReal
 ADCoupledConvection<compute_stage>::computeQpResidual()
 {
   return _scale * _test[_i][_qp] * _velocity_vector[_qp] * _grad_u[_qp];

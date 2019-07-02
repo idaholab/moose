@@ -24,7 +24,7 @@ INSADMomentumSUPG<compute_stage>::INSADMomentumSUPG(const InputParameters & para
 }
 
 template <ComputeStage compute_stage>
-ADVectorResidual
+ADRealVectorValue
 INSADMomentumSUPG<compute_stage>::precomputeQpStrongResidual()
 {
   return _momentum_strong_residual[_qp];

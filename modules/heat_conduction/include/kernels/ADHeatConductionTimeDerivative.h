@@ -23,7 +23,7 @@ public:
   ADHeatConductionTimeDerivative(const InputParameters & parameters);
 
 protected:
-  virtual ADResidual precomputeQpResidual() override;
+  virtual ADReal precomputeQpResidual() override;
 
   /// Specific heat material property
   const ADMaterialProperty(Real) & _specific_heat;

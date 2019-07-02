@@ -41,7 +41,7 @@ ADMatDiffusionTest<compute_stage>::ADMatDiffusionTest(const InputParameters & pa
 }
 
 template <ComputeStage compute_stage>
-ADResidual
+ADReal
 ADMatDiffusionTest<compute_stage>::computeQpResidual()
 {
   if (_prop_to_use == "AdAd")

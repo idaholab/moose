@@ -29,10 +29,13 @@ MortarData::createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boun
       _displaced_periodic_map.insert(periodic_map_iterator, std::make_pair(boundary_key, periodic));
 
     if (_displaced_mortar_interfaces.find(boundary_key) == _displaced_mortar_interfaces.end())
-      _displaced_mortar_interfaces.emplace(
-          boundary_key,
-          AutomaticMortarGeneration(
-              subproblem.mesh().getMesh(), boundary_key, subdomain_key, on_displaced, periodic));
+      _displaced_mortar_interfaces.emplace(boundary_key,
+                                           AutomaticMortarGeneration(subproblem.getMooseApp(),
+                                                                     subproblem.mesh().getMesh(),
+                                                                     boundary_key,
+                                                                     subdomain_key,
+                                                                     on_displaced,
+                                                                     periodic));
   }
   else
   {
@@ -44,10 +47,13 @@ MortarData::createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boun
       _periodic_map.insert(periodic_map_iterator, std::make_pair(boundary_key, periodic));
 
     if (_mortar_interfaces.find(boundary_key) == _mortar_interfaces.end())
-      _mortar_interfaces.emplace(
-          boundary_key,
-          AutomaticMortarGeneration(
-              subproblem.mesh().getMesh(), boundary_key, subdomain_key, on_displaced, periodic));
+      _mortar_interfaces.emplace(boundary_key,
+                                 AutomaticMortarGeneration(subproblem.getMooseApp(),
+                                                           subproblem.mesh().getMesh(),
+                                                           boundary_key,
+                                                           subdomain_key,
+                                                           on_displaced,
+                                                           periodic));
   }
 }
 

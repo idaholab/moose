@@ -80,18 +80,19 @@
 
 [Constraints]
   [lm]
-    type = MechanicalContactLMTest
+    type = NormalMortarLMMechanicalContact
     master_boundary = '2'
     slave_boundary = '1'
     master_subdomain = '20'
     slave_subdomain = '10'
     variable = lambda
     slave_variable = disp_x
+    slave_disp_y = disp_y
     use_displaced_mesh = true
     compute_primal_residuals = false
   []
   [x]
-    type = MechanicalContactTest
+    type = NormalMortarMechanicalContact
     master_boundary = '2'
     slave_boundary = '1'
     master_subdomain = '20'
@@ -103,7 +104,7 @@
     compute_lm_residuals = false
   []
   [y]
-    type = MechanicalContactTest
+    type = NormalMortarMechanicalContact
     master_boundary = '2'
     slave_boundary = '1'
     master_subdomain = '20'
@@ -125,11 +126,11 @@
 []
 
 [Executioner]
-  solve_type = NEWTON
+  solve_type = PJFNK
   type = Transient
   num_steps = 10
   dt = 1
-  petsc_options = '-snes_fd'
+  dtmin = 1
   petsc_options_iname = '-pc_type -snes_linesearch_type -pc_factor_shift_type -pc_factor_shift_amount'
   petsc_options_value = 'lu       basic                 NONZERO               1e-15'
 []

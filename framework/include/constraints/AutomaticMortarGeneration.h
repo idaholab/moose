@@ -11,6 +11,7 @@
 
 #include "MortarSegmentInfo.h"
 #include "MooseHashing.h"
+#include "ConsoleStreamInterface.h"
 
 // libMesh includes
 #include "libmesh/id_types.h"
@@ -50,7 +51,7 @@ typedef subdomain_id_type SubdomainID;
  * This class is a container/interface for the objects involved in
  * automatic generation of mortar spaces.
  */
-class AutomaticMortarGeneration
+class AutomaticMortarGeneration : public ConsoleStreamInterface
 {
 public:
   /**
@@ -63,7 +64,8 @@ public:
    * Must be constructed with a reference to the Mesh we are
    * generating mortar spaces for.
    */
-  AutomaticMortarGeneration(MeshBase & mesh_in,
+  AutomaticMortarGeneration(MooseApp & app,
+                            MeshBase & mesh_in,
                             const std::pair<BoundaryID, BoundaryID> & boundary_key,
                             const std::pair<SubdomainID, SubdomainID> & subdomain_key,
                             bool on_displaced,

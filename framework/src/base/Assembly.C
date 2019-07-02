@@ -1772,6 +1772,8 @@ Assembly::reinitElemFaceRef(const Elem * elem,
       const_cast<std::vector<Point> &>((*_holder_fe_face_helper[elem_dim])->get_xyz()));
   _current_normals.shallowCopy(
       const_cast<std::vector<Point> &>((*_holder_fe_face_helper[elem_dim])->get_normals()));
+  _current_tangents.shallowCopy(const_cast<std::vector<std::vector<Point>> &>(
+      (*_holder_fe_face_helper[elem_dim])->get_tangents()));
   // Note that if the user did pass in points and not weights to this method, JxW will be garbage
   // and should not be used
   _current_JxW_face.shallowCopy(

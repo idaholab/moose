@@ -30,7 +30,7 @@ ADThermoDiffusion<compute_stage>::ADThermoDiffusion(const InputParameters & para
 }
 
 template <ComputeStage compute_stage>
-ADResidual
+ADReal
 ADThermoDiffusion<compute_stage>::computeQpResidual()
 {
   return _soret_coeff[_qp] * _grad_temp[_qp] * _grad_test[_i][_qp];

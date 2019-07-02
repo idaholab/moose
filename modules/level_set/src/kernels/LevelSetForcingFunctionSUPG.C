@@ -28,7 +28,7 @@ LevelSetForcingFunctionSUPG<compute_stage>::LevelSetForcingFunctionSUPG(
 }
 
 template <ComputeStage compute_stage>
-ADVectorResidual
+ADRealVectorValue
 LevelSetForcingFunctionSUPG<compute_stage>::precomputeQpResidual()
 {
   computeQpVelocity();
