@@ -259,7 +259,7 @@ GrandPotentialKernelAction::act()
     params.set<NonlinearVariableName>("variable") = w_names[i];
     params.set<bool>("implicit") = implicity;
     params.set<bool>("use_displaced_mesh") = displaced_mesh;
-    params.set<MaterialPropertyName>("D_name") = M[i];
+    params.set<MaterialPropertyName>("diffusivity") = M[i];
     kernel_name = "MatDif_" + w_names[i];
     if (aniso)
       _problem->addKernel("MatAnisoDiffusion", kernel_name, params);
