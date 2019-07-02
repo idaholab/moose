@@ -12,6 +12,7 @@
 #include "SystemBase.h"
 #include "PenetrationLocator.h"
 #include "MooseMesh.h"
+#include "ContactAction.h"
 
 #include "libmesh/string_to_enum.h"
 #include "libmesh/sparse_matrix.h"
@@ -42,7 +43,7 @@ validParams<MultiDContactConstraint>()
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
 
-  params.addParam<std::string>("model", "frictionless", "The contact model to use");
+  params.addParam<MooseEnum>("model", ContactAction::getModelEnum(), "The contact model to use");
   params.addParam<Real>(
       "penalty",
       1e8,
@@ -59,7 +60,7 @@ MultiDContactConstraint::MultiDContactConstraint(const InputParameters & paramet
     _residual_copy(_sys.residualGhosted()),
     _jacobian_update(getParam<bool>("jacobian_update")),
     _component(getParam<unsigned int>("component")),
-    _model(ContactMaster::contactModel(getParam<std::string>("model"))),
+    _model(getParam<MooseEnum>("model").getEnum<ContactModel>()),
     _penalty(getParam<Real>("penalty")),
     _mesh_dimension(_mesh.dimension()),
     _vars(3, libMesh::invalid_uint)

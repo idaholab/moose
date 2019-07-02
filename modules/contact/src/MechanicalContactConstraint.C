@@ -21,6 +21,7 @@
 #include "Executioner.h"
 #include "AddVariableAction.h"
 #include "ContactLineSearchBase.h"
+#include "ContactAction.h"
 
 #include "libmesh/string_to_enum.h"
 #include "libmesh/sparse_matrix.h"
@@ -31,9 +32,9 @@ template <>
 InputParameters
 validParams<MechanicalContactConstraint>()
 {
-  MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
-
   InputParameters params = validParams<NodeFaceConstraint>();
+  params += ContactAction::commonParameters();
+
   params.addRequiredParam<BoundaryName>("boundary", "The master boundary");
   params.addRequiredParam<BoundaryName>("slave", "The slave boundary");
   params.addRequiredParam<unsigned int>("component",
@@ -50,7 +51,6 @@ validParams<MechanicalContactConstraint>()
       "The displacements appropriate for the simulation geometry and coordinate system");
 
   params.addRequiredCoupledVar("nodal_area", "The nodal area");
-  params.addParam<std::string>("model", "frictionless", "The contact model to use");
 
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<Real>(
@@ -62,12 +62,6 @@ validParams<MechanicalContactConstraint>()
                         "Tangential distance to extend edges of contact surfaces");
   params.addParam<Real>(
       "capture_tolerance", 0, "Normal distance from surface within which nodes are captured");
-  params.addParam<Real>(
-      "normal_smoothing_distance",
-      "Distance from edge in parametric coordinates over which to smooth contact normal");
-  params.addParam<std::string>("normal_smoothing_method",
-                               "Method to use to smooth normals (edge_based|nodal_normal_based)");
-  params.addParam<MooseEnum>("order", orders, "The finite element order");
 
   params.addParam<Real>("tension_release",
                         0.0,
@@ -75,7 +69,6 @@ validParams<MechanicalContactConstraint>()
                         "will not be released if its tensile load is below "
                         "this value.  No tension release if negative.");
 
-  params.addParam<std::string>("formulation", "default", "The contact formulation");
   params.addParam<bool>(
       "normalize_penalty",
       false,
@@ -89,9 +82,7 @@ validParams<MechanicalContactConstraint>()
       "Whether to include jacobian entries coupling nodes connected to slave nodes.");
   params.addParam<bool>("non_displacement_variables_jacobian",
                         true,
-                        "Whether to include jacobian "
-                        "entries coupling with "
-                        "variables that are not "
+                        "Whether to include jacobian entries coupling with variables that are not "
                         "displacement variables.");
   params.addParam<unsigned int>("stick_lock_iterations",
                                 std::numeric_limits<unsigned int>::max(),
@@ -121,8 +112,8 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
     _displaced_problem(parameters.get<FEProblemBase *>("_fe_problem_base")->getDisplacedProblem()),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
     _component(getParam<unsigned int>("component")),
-    _model(ContactMaster::contactModel(getParam<std::string>("model"))),
-    _formulation(ContactMaster::contactFormulation(getParam<std::string>("formulation"))),
+    _model(getParam<MooseEnum>("model").getEnum<ContactModel>()),
+    _formulation(getParam<MooseEnum>("formulation").getEnum<ContactFormulation>()),
     _normalize_penalty(getParam<bool>("normalize_penalty")),
     _penalty(getParam<Real>("penalty")),
     _friction_coefficient(getParam<Real>("friction_coefficient")),

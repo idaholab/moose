@@ -14,6 +14,7 @@
 #include "PenetrationInfo.h"
 #include "MooseMesh.h"
 #include "Executioner.h"
+#include "ContactAction.h"
 
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/string_to_enum.h"
@@ -24,9 +25,9 @@ template <>
 InputParameters
 validParams<ContactMaster>()
 {
-  MooseEnum orders("CONSTANT FIRST SECOND THIRD FOURTH", "FIRST");
-
   InputParameters params = validParams<DiracKernel>();
+  params += ContactAction::commonParameters();
+
   params.addRequiredParam<BoundaryName>("boundary", "The master boundary");
   params.addRequiredParam<BoundaryName>("slave", "The slave boundary");
   params.addRequiredParam<unsigned int>("component",
@@ -43,7 +44,6 @@ validParams<ContactMaster>()
       "The displacements appropriate for the simulation geometry and coordinate system");
 
   params.addRequiredCoupledVar("nodal_area", "The nodal area");
-  params.addParam<std::string>("model", "frictionless", "The contact model to use");
 
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<Real>(
@@ -55,12 +55,6 @@ validParams<ContactMaster>()
                         "Tangential distance to extend edges of contact surfaces");
   params.addParam<Real>(
       "capture_tolerance", 0, "Normal distance from surface within which nodes are captured");
-  params.addParam<Real>(
-      "normal_smoothing_distance",
-      "Distance from edge in parametric coordinates over which to smooth contact normal");
-  params.addParam<std::string>("normal_smoothing_method",
-                               "Method to use to smooth normals (edge_based|nodal_normal_based)");
-  params.addParam<MooseEnum>("order", orders, "The finite element order");
 
   params.addParam<Real>("tension_release",
                         0.0,
@@ -68,7 +62,6 @@ validParams<ContactMaster>()
                         "will not be released if its tensile load is below "
                         "this value.  No tension release if negative.");
 
-  params.addParam<std::string>("formulation", "default", "The contact formulation");
   params.addParam<bool>(
       "normalize_penalty",
       false,
@@ -79,8 +72,8 @@ validParams<ContactMaster>()
 ContactMaster::ContactMaster(const InputParameters & parameters)
   : DiracKernel(parameters),
     _component(getParam<unsigned int>("component")),
-    _model(contactModel(getParam<std::string>("model"))),
-    _formulation(contactFormulation(getParam<std::string>("formulation"))),
+    _model(getParam<MooseEnum>("model").getEnum<ContactModel>()),
+    _formulation(getParam<MooseEnum>("formulation").getEnum<ContactFormulation>()),
     _normalize_penalty(getParam<bool>("normalize_penalty")),
     _penetration_locator(
         getPenetrationLocator(getParam<BoundaryName>("boundary"),
@@ -125,9 +118,9 @@ ContactMaster::ContactMaster(const InputParameters & parameters)
 
   if (parameters.isParamValid("normal_smoothing_method"))
     _penetration_locator.setNormalSmoothingMethod(
-        parameters.get<std::string>("normal_smoothing_method"));
+        parameters.get<MooseEnum>("normal_smoothing_method"));
 
-  if (_model == CM_GLUED || (_model == CM_COULOMB && _formulation == CF_DEFAULT))
+  if (_model == CM_GLUED || (_model == CM_COULOMB && _formulation == CF_KINEMATIC))
     _penetration_locator.setUpdate(false);
 
   if (_friction_coefficient < 0)
@@ -242,7 +235,7 @@ ContactMaster::computeContactForce(PenetrationInfo * pinfo, bool update_contact_
   {
     switch (_formulation)
     {
-      case CF_DEFAULT:
+      case CF_KINEMATIC:
         pinfo->_contact_force = -pinfo->_normal * (pinfo->_normal * res_vec);
         break;
       case CF_PENALTY:
@@ -294,11 +287,11 @@ ContactMaster::computeContactForce(PenetrationInfo * pinfo, bool update_contact_
       pinfo->_mech_status = PenetrationInfo::MS_STICKING;
     }
   }
-  else if (_model == CM_GLUED || (_model == CM_COULOMB && _formulation == CF_DEFAULT))
+  else if (_model == CM_GLUED || (_model == CM_COULOMB && _formulation == CF_KINEMATIC))
   {
     switch (_formulation)
     {
-      case CF_DEFAULT:
+      case CF_KINEMATIC:
         pinfo->_contact_force = -res_vec;
         break;
       case CF_PENALTY:
@@ -357,7 +350,7 @@ ContactMaster::computeQpJacobian()
     case CM_FRICTIONLESS:
       switch (_formulation)
       {
-        case CF_DEFAULT:
+        case CF_KINEMATIC:
           return 0;
           break;
         case CF_PENALTY:
@@ -374,7 +367,7 @@ ContactMaster::computeQpJacobian()
     case CM_COULOMB:
       switch (_formulation)
       {
-        case CF_DEFAULT:
+        case CF_KINEMATIC:
           return 0;
           break;
         case CF_PENALTY:
@@ -411,48 +404,6 @@ ContactMaster::computeQpJacobian()
 
     return _test[_i][_qp]*pinfo->_normal(_component)*jac_mag;
   */
-}
-
-ContactModel
-ContactMaster::contactModel(std::string name)
-{
-  ContactModel model(CM_INVALID);
-  std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-
-  if ("frictionless" == name)
-    model = CM_FRICTIONLESS;
-  else if ("glued" == name)
-    model = CM_GLUED;
-  else if ("coulomb" == name)
-    model = CM_COULOMB;
-  else
-    ::mooseError("Invalid contact model found: ", name);
-
-  return model;
-}
-
-ContactFormulation
-ContactMaster::contactFormulation(std::string name)
-{
-  ContactFormulation formulation(CF_INVALID);
-  std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-
-  if ("default" == name || "kinematic" == name)
-    formulation = CF_DEFAULT;
-
-  else if ("penalty" == name)
-    formulation = CF_PENALTY;
-
-  else if ("augmented_lagrange" == name)
-    formulation = CF_AUGMENTED_LAGRANGE;
-
-  else if ("tangential_penalty" == name)
-    formulation = CF_TANGENTIAL_PENALTY;
-
-  if (formulation == CF_INVALID)
-    ::mooseError("Invalid formulation found: ", name);
-
-  return formulation;
 }
 
 Real

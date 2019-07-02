@@ -12,6 +12,7 @@
 // Moose includes
 #include "SystemBase.h"
 #include "MooseMesh.h"
+#include "ContactAction.h"
 
 #include "libmesh/plane.h"
 #include "libmesh/sparse_matrix.h"
@@ -23,9 +24,9 @@ template <>
 InputParameters
 validParams<SlaveConstraint>()
 {
-  MooseEnum orders("CONSTANT FIRST SECOND THIRD FOURTH", "FIRST");
-
   InputParameters params = validParams<DiracKernel>();
+  params += ContactAction::commonParameters();
+
   params.addRequiredParam<BoundaryName>("boundary", "The slave boundary");
   params.addRequiredParam<BoundaryName>("master", "The master boundary");
   params.addRequiredParam<unsigned int>("component",
@@ -42,7 +43,6 @@ validParams<SlaveConstraint>()
       "The displacements appropriate for the simulation geometry and coordinate system");
 
   params.addRequiredCoupledVar("nodal_area", "The nodal area");
-  params.addParam<std::string>("model", "frictionless", "The contact model to use");
 
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<Real>(
@@ -52,13 +52,6 @@ validParams<SlaveConstraint>()
   params.addParam<Real>("friction_coefficient", 0, "The friction coefficient");
   params.addParam<Real>("tangential_tolerance",
                         "Tangential distance to extend edges of contact surfaces");
-  params.addParam<Real>(
-      "normal_smoothing_distance",
-      "Distance from edge in parametric coordinates over which to smooth contact normal");
-  params.addParam<std::string>("normal_smoothing_method",
-                               "Method to use to smooth normals (edge_based|nodal_normal_based)");
-  params.addParam<MooseEnum>("order", orders, "The finite element order");
-  params.addParam<std::string>("formulation", "default", "The contact formulation");
   params.addParam<bool>(
       "normalize_penalty",
       false,
@@ -69,8 +62,8 @@ validParams<SlaveConstraint>()
 SlaveConstraint::SlaveConstraint(const InputParameters & parameters)
   : DiracKernel(parameters),
     _component(getParam<unsigned int>("component")),
-    _model(ContactMaster::contactModel(getParam<std::string>("model"))),
-    _formulation(ContactMaster::contactFormulation(getParam<std::string>("formulation"))),
+    _model(getParam<MooseEnum>("model").getEnum<ContactModel>()),
+    _formulation(getParam<MooseEnum>("formulation").getEnum<ContactFormulation>()),
     _normalize_penalty(getParam<bool>("normalize_penalty")),
     _penetration_locator(
         getPenetrationLocator(getParam<BoundaryName>("master"),
@@ -172,7 +165,7 @@ SlaveConstraint::computeQpResidual()
 
   const Real area = nodalArea(*pinfo);
 
-  if (_formulation == CF_DEFAULT)
+  if (_formulation == CF_KINEMATIC)
   {
     RealVectorValue distance_vec(_mesh.nodeRef(node->id()) - pinfo->_closest_point);
     RealVectorValue pen_force(_penalty * distance_vec);
