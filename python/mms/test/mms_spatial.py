@@ -9,8 +9,9 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import mms
-df1 = mms.run_spatial('mms_spatial.i', 4, console=False)
-df2 = mms.run_spatial('mms_spatial.i', 4, 'Mesh/second_order=true', 'Variables/u/order=SECOND', console=False)
+df1 = mms.run_spatial('mms_spatial.i', 4, console=False, executable='../../../test')
+df2 = mms.run_spatial('mms_spatial.i', 4, 'Mesh/second_order=true', 'Variables/u/order=SECOND',
+                      console=False, executable='../../../test')
 
 fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
 fig.plot(df1, label='1st Order', marker='o', markersize=8)

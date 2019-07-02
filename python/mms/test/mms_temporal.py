@@ -9,8 +9,9 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import mms
-df1 = mms.run_temporal('mms_temporal.i', 4, console=False)
-df2 = mms.run_temporal('mms_temporal.i', 4, 'Executioner/scheme=bdf2', console=False)
+df1 = mms.run_temporal('mms_temporal.i', 4, console=False, executable='../../../test')
+df2 = mms.run_temporal('mms_temporal.i', 4, 'Executioner/scheme=bdf2', console=False,
+                       executable='../../../test')
 
 fig = mms.ConvergencePlot(xlabel='$\Delta t$', ylabel='$L_2$ Error')
 fig.plot(df1, label='1st Order (Implicit Euler)', marker='o', markersize=8)
