@@ -20,7 +20,7 @@ ADVectorRobinBC<compute_stage>::ADVectorRobinBC(const InputParameters & paramete
 }
 
 template <ComputeStage compute_stage>
-ADResidual
+ADReal
 ADVectorRobinBC<compute_stage>::computeQpResidual()
 {
   return _test[_i][_qp] * 2. * _u[_qp];

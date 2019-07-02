@@ -28,7 +28,7 @@ public:
   ADPressure(const InputParameters & parameters);
 
 protected:
-  ADResidual computeQpResidual() override;
+  ADReal computeQpResidual() override;
 
   /// displacement component to apply the kernel to
   const int _component;

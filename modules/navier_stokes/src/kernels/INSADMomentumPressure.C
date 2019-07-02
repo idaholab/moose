@@ -30,7 +30,7 @@ INSADMomentumPressure<compute_stage>::INSADMomentumPressure(const InputParameter
 }
 
 template <ComputeStage compute_stage>
-ADResidual
+ADReal
 INSADMomentumPressure<compute_stage>::computeQpResidual()
 {
   if (_integrate_p_by_parts)

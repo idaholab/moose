@@ -26,7 +26,7 @@ INSADMomentumViscous<compute_stage>::INSADMomentumViscous(const InputParameters 
 }
 
 template <ComputeStage compute_stage>
-ADTensorResidual
+ADRealTensorValue
 INSADMomentumViscous<compute_stage>::precomputeQpResidual()
 {
   return _mu[_qp] * _grad_u[_qp];

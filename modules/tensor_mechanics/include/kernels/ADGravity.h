@@ -23,7 +23,7 @@ public:
   ADGravity(const InputParameters & parameters);
 
 protected:
-  ADResidual precomputeQpResidual() override;
+  ADReal precomputeQpResidual() override;
 
 private:
   const ADMaterialProperty(Real) & _density;

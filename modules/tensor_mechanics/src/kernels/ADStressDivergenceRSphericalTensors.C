@@ -42,7 +42,7 @@ ADStressDivergenceRSphericalTensors<compute_stage>::initialSetup()
 }
 
 template <ComputeStage compute_stage>
-ADResidual
+ADReal
 ADStressDivergenceRSphericalTensors<compute_stage>::computeQpResidual()
 {
   return _grad_test[_i][_qp](0) * _stress[_qp](0, 0) +                 // stress_{rr} part 1

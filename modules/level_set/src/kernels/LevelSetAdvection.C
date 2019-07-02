@@ -27,7 +27,7 @@ LevelSetAdvection<compute_stage>::LevelSetAdvection(const InputParameters & para
 }
 
 template <ComputeStage compute_stage>
-ADResidual
+ADReal
 LevelSetAdvection<compute_stage>::precomputeQpResidual()
 {
   computeQpVelocity();

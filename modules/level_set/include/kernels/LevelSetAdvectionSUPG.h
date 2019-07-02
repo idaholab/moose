@@ -29,7 +29,7 @@ public:
   LevelSetAdvectionSUPG(const InputParameters & parameters);
 
 protected:
-  virtual ADVectorResidual precomputeQpResidual() override;
+  virtual ADRealVectorValue precomputeQpResidual() override;
 
   usingKernelGradMembers;
   using LevelSetVelocityInterface<ADKernelGrad<compute_stage>>::computeQpVelocity;

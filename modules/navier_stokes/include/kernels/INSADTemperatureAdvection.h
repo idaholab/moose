@@ -28,7 +28,7 @@ public:
   INSADTemperatureAdvection(const InputParameters & parameters);
 
 protected:
-  virtual ADResidual precomputeQpResidual() override;
+  virtual ADReal precomputeQpResidual() override;
 
   const ADMaterialProperty(Real) & _rho;
   const ADMaterialProperty(Real) & _cp;
@@ -56,7 +56,7 @@ public:
   INSADTemperatureAdvectionSUPG(const InputParameters & parameters);
 
 protected:
-  virtual ADResidual precomputeQpStrongResidual() override;
+  virtual ADReal precomputeQpStrongResidual() override;
 
   const ADMaterialProperty(Real) & _rho;
   const ADMaterialProperty(Real) & _cp;

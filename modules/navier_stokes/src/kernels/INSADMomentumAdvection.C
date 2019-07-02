@@ -25,7 +25,7 @@ INSADMomentumAdvection<compute_stage>::INSADMomentumAdvection(const InputParamet
 }
 
 template <ComputeStage compute_stage>
-ADVectorResidual
+ADRealVectorValue
 INSADMomentumAdvection<compute_stage>::precomputeQpResidual()
 {
   return _convective_strong_residual[_qp];

@@ -29,7 +29,7 @@ public:
   LevelSetForcingFunctionSUPG(const InputParameters & parameters);
 
 protected:
-  virtual ADVectorResidual precomputeQpResidual() override;
+  virtual ADRealVectorValue precomputeQpResidual() override;
 
   /// Function value
   const Function & _function;

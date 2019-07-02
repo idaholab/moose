@@ -29,7 +29,7 @@ public:
   INSADMomentumPressure(const InputParameters & parameters);
 
 protected:
-  virtual ADResidual computeQpResidual() override;
+  virtual ADReal computeQpResidual() override;
 
   const bool _integrate_p_by_parts;
   const ADVariableValue & _p;

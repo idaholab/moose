@@ -20,7 +20,7 @@ ADValueTest<compute_stage>::ADValueTest(const InputParameters & parameters)
 }
 
 template <ComputeStage compute_stage>
-ADResidual
+ADReal
 ADValueTest<compute_stage>::computeQpResidual()
 {
   return -_u[_qp] * _test[_i][_qp];

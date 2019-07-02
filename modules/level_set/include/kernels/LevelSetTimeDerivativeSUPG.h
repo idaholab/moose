@@ -29,7 +29,7 @@ public:
   LevelSetTimeDerivativeSUPG(const InputParameters & parameters);
 
 protected:
-  virtual ADVectorResidual precomputeQpResidual() override;
+  virtual ADRealVectorValue precomputeQpResidual() override;
 
   usingTimeKernelGradMembers;
   using LevelSetVelocityInterface<ADTimeKernelGrad<compute_stage>>::computeQpVelocity;

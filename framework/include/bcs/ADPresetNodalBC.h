@@ -33,7 +33,7 @@ public:
   void computeValue(NumericVector<Number> & current_solution);
 
 protected:
-  virtual ADResidual computeQpResidual() override;
+  virtual ADReal computeQpResidual() override;
   virtual ADReal computeQpValue() = 0;
 
   usingNodalBCMembers;

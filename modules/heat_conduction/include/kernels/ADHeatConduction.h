@@ -23,7 +23,7 @@ public:
   ADHeatConduction(const InputParameters & parameters);
 
 protected:
-  virtual ADVectorResidual precomputeQpResidual() override;
+  virtual ADRealVectorValue precomputeQpResidual() override;
 
   const ADMaterialProperty(Real) & _thermal_conductivity;
 

@@ -22,7 +22,7 @@ ADCoupledValueTest<compute_stage>::ADCoupledValueTest(const InputParameters & pa
 }
 
 template <ComputeStage compute_stage>
-ADResidual
+ADReal
 ADCoupledValueTest<compute_stage>::computeQpResidual()
 {
   return _test[_i][_qp] * -_v[_qp];

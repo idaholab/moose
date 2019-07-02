@@ -20,7 +20,7 @@ ADRobinBC<compute_stage>::ADRobinBC(const InputParameters & parameters)
 }
 
 template <ComputeStage compute_stage>
-ADResidual
+ADReal
 ADRobinBC<compute_stage>::computeQpResidual()
 {
   return _test[_i][_qp] * 2. * _u[_qp];

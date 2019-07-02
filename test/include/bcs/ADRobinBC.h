@@ -23,7 +23,7 @@ public:
   ADRobinBC(const InputParameters & parameters);
 
 protected:
-  ADResidual computeQpResidual() override;
+  ADReal computeQpResidual() override;
 
   usingIntegratedBCMembers;
 };

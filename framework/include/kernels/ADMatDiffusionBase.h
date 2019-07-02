@@ -58,7 +58,7 @@ ADMatDiffusionBase<compute_stage, T>::ADMatDiffusionBase(const InputParameters &
 }
 
 template <ComputeStage compute_stage, typename T>
-ADVectorResidual
+ADRealVectorValue
 ADMatDiffusionBase<compute_stage, T>::precomputeQpResidual()
 {
   return _diffusivity[_qp] * _grad_v[_qp];

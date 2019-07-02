@@ -25,7 +25,7 @@ INSADMomentumForces<compute_stage>::INSADMomentumForces(const InputParameters & 
 }
 
 template <ComputeStage compute_stage>
-ADVectorResidual
+ADRealVectorValue
 INSADMomentumForces<compute_stage>::precomputeQpResidual()
 {
   return _gravity_strong_residual[_qp] + _mms_function_strong_residual[_qp];
