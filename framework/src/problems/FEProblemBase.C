@@ -735,6 +735,13 @@ FEProblemBase::initialSetup()
       _has_initialized_stateful = true;
   }
 
+  // This is done to make sure initial adaptivity can be run based on aux variable values
+  if (!_app.isRecovering())
+  {
+    _aux->initialSetup();
+    computeAuxiliaryKernels(EXEC_INITIAL);
+  }
+
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {
     _internal_side_indicators.initialSetup(tid);

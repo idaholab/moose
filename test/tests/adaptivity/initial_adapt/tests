@@ -1,10 +1,16 @@
 [Tests]
-  issues = '#1700'
+  issues = '#1700 #9668'
   design = "syntax/Adaptivity/index.md syntax/Adaptivity/Markers/index.md"
   [./test]
     type = 'Exodiff'
     input = 'initial_adapt.i'
     exodiff = 'initial_adapt_out.e'
     requirement = "The Adaptivity system shall support mesh adaptivity during initial setup."
+  [../]
+  [./test_aux]
+    type = 'Exodiff'
+    input = 'initial_adapt_aux.i'
+    exodiff = 'initial_adapt_aux_out.e initial_adapt_aux_out.e-s002'
+    requirement = "The Adaptivity system shall support initial mesh adaptivity based on aux variables."
   [../]
 []
