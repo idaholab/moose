@@ -14,18 +14,18 @@ As an example, consider
 \begin{equation}
 \int_V div(F) dV = \int_{dS} F \cdot \hat{n} dS
 \end{equation}
-where F is a field, $\hat{n}$ is the normal of the surface, V is the volume of the domain, and S is
+where $F$ is a field, $\hat{n}$ is the normal of the surface, $V$ is the volume of the domain, and $S$ is
 the surface of the domain.
 
 For simplicity in this example, we choose
 \begin{equation}
-F = \left[ x, 0, 0 \right]^T \quad then \quad div(F) = 1
+F = \left[ x, 0, 0 \right]^T \quad \text{then} \quad div(F) = 1
 \end{equation}
 
 such that the integral becomes
 
 \begin{equation}
-\int_V dV = int_{dS} x \cdot n[0] dS
+\int_V dV = \int_{dS} x \cdot n[0] dS
 \end{equation}
 
 The volume of the domain is the integral over the surface of the domain of the x position of the

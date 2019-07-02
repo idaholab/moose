@@ -1,17 +1,22 @@
 [Tests]
+  issues = '#8045'
+  design = 'GeneralizedPlaneStrainAction.md'
   [./axisymmetric_gps_incremental]
     type = 'Exodiff'
     input = 'axisymmetric_gps_incremental.i'
     exodiff = 'axisymmetric_gps_incremental_out.e'
+    requirement = 'The system shall support generalized plane strain with incremental strain for 1D meshes.'
   [../]
   [./axisymmetric_gps_small]
     type = 'Exodiff'
     input = 'axisymmetric_gps_small.i'
     exodiff = 'axisymmetric_gps_small_out.e'
+    requirement = 'The system shall support generalized plane strain with small strain for 1D meshes.'
   [../]
   [./axisymmetric_gps_finite]
     type = 'Exodiff'
     input = 'axisymmetric_gps_finite.i'
     exodiff = 'axisymmetric_gps_finite_out.e'
+    requirement = 'The system shall support generalized plane strain with finite strain for 1D meshes.'
   [../]
 []
