@@ -1,5 +1,7 @@
 # Citing MOOSE
 
+## Framework
+
 If you use MOOSE for your publication, please cite the following:
 
 ```
@@ -26,6 +28,10 @@ If you use MOOSE for your publication, please cite the following:
   publisher={Elsevier}
 }
 ```
+
+## Modules
+
+### Navier-Stokes
 
 If you use the incompressible portion of the Navier Stokes module, please cite:
 
