@@ -66,7 +66,6 @@ class SQAExtension(command.CommandExtension):
                          "Repository for linking issues and commits.")
         config['repo'] = (u"idaholab/moose",
                           "The default repository location to append to the given url.")
-        config['main'] = (None, "The name of the primary category for building requirement lists.")
         config['categories'] = (dict(), "A dictionary of category names that includes a " \
                                         "dictionary with 'directories' and optionally 'specs'.")
         config['requirement-groups'] = (dict(), "Allows requirement group names to be changed.")
@@ -160,7 +159,7 @@ class SQARequirementsCommand(command.CommandComponent):
         return config
 
     def createToken(self, parent, info, page):
-        category = self.settings.get('category') or self.extension.get('main')
+        category = self.settings.get('category', None)
         group_map = self.extension.get('group_map', dict())
         for group, requirements in self.extension.requirements(category).iteritems():
             group = group_map.get(group, group.replace('_', ' ').title())
@@ -243,7 +242,7 @@ class SQACrossReferenceCommand(SQARequirementsCommand):
 
     def createToken(self, parent, info, page):
         design = collections.defaultdict(list)
-        category = self.settings.get('category') or self.extension.get('main')
+        category = self.settings.get('category')
         for requirements in self.extension.requirements(category).itervalues():
             for req in requirements:
                 for d in req.design:
@@ -330,7 +329,7 @@ class SQAVerificationCommand(command.CommandComponent):
     def createToken(self, parent, info, page):
 
         matrix = SQARequirementMatrix(parent)
-        category = self.settings.get('category') or self.extension.get('main')
+        category = self.settings.get('category')
         for requirements in self.extension.requirements(category).itervalues():
             for req in requirements:
                 if getattr(req, info['subcommand']) is not None:
@@ -369,7 +368,7 @@ class SQAVerificationCommand(command.CommandComponent):
 
 class SQADependenciesCommand(command.CommandComponent):
     COMMAND = 'sqa'
-    SUBCOMMAND = '_dependencies'
+    SUBCOMMAND = 'dependencies'
 
     @staticmethod
     def defaultSettings():
@@ -379,29 +378,29 @@ class SQADependenciesCommand(command.CommandComponent):
 
     def createToken(self, parent, info, page):
         suffix = self.settings['suffix']
-        main = self.extension.get('main')
         ul = core.UnorderedList(parent)
         for category in self.extension.get('categories'):
-            if category != main:
-                autolink.AutoLink(core.ListItem(ul), page=u'sqa/{}_{}.md'.format(category, suffix),
+            fname = '{}_{}.md'.format(category, suffix)
+            if not page.local.endswith(fname):
+                autolink.AutoLink(core.ListItem(ul), page=u'sqa/{}'.format(fname),
                                   optional=True, warning=True, class_='moose-sqa-dependency')
         return parent
 
 class SQADocumentCommand(command.CommandComponent):
     COMMAND = 'sqa'
-    SUBCOMMAND = '_document'
+    SUBCOMMAND = 'document'
 
     @staticmethod
     def defaultSettings():
         config = command.CommandComponent.defaultSettings()
         config['suffix'] = (None, "Provide the filename suffix to include.")
-        config['title'] = (None, "The document title")
+        config['category'] = (None, "Provide the category.")
         return config
 
     def createToken(self, parent, info, page):
-        main = self.extension.get('main')
+        category = self.settings.get('category')
         suffix = self.settings.get('suffix')
-        return autolink.AutoLink(parent, page=u'sqa/{}_{}.md'.format(main, suffix),
+        return autolink.AutoLink(parent, page=u'sqa/{}_{}.md'.format(category, suffix),
                                  optional=True, warning=True)
 
 class RenderSQARequirementMatrix(core.RenderUnorderedList):

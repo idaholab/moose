@@ -1,4 +1,4 @@
-!template load file=sdd.md.template category=framework
+!template load file=sdd.md.template category=framework project=Framework
 
 !template! item key=introduction
 Frameworks are a software development construct aiming to simplify the creation of specific classes

@@ -1,1 +1,1 @@
-!template load file=stp.md.template
+!template load file=stp.md.template category=framework project=Framework

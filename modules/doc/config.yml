@@ -135,6 +135,7 @@ Extensions:
     MooseDocs.extensions.sqa:
         categories:
             framework: !include framework/doc/sqa_framework.yml
+            tensor_mechanics: !include modules/tensor_mechanics/doc/sqa_tensor_mechanics.yml
         requirement-groups:
             dgkernels: DGKernel Objects
             interfacekernels: InterfaceKernel Objects

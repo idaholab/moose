@@ -4,7 +4,7 @@
     input = 'ad_value.i'
     exodiff = 'ad_value_out.e'
     requirement = "Jacobian entries generated with AD shall match hand-coded Jacobian entries as measured through save-in values"
-    design = "Kernels/index.md"
+    design = "syntax/Kernels/index.md"
     issues = "#5658"
   [../]
 []

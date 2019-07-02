@@ -8,4 +8,4 @@ are provided for convenience when running and testing this locally.
 
 [syntax/index.md]
 
-[sqa/index.md]
+[sqa/framework_srs.md]

@@ -1,1 +1,1 @@
-!template load file=vvr.md.template
+!template load file=vvr.md.template category=framework project=Framework

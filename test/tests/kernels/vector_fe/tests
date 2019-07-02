@@ -1,5 +1,5 @@
 [Tests]
-  design = 'Variables/index.md'
+  design = 'syntax/Variables/index.md'
   [./vector_fe]
     type = Exodiff
     input = 'vector_kernel.i'
@@ -99,7 +99,7 @@
     state = 'const_positive'
     ratio_tol = 1e-7
     difference_tol = 5e-6
-    design = "Variables/index.md "
+    design = "syntax/Variables/index.md "
     issues = "#10049"
     requirement = "MOOSE shall be able to couple a vector variable into a standard kernel and produced the correct Jacobian"
   [../]
@@ -109,7 +109,7 @@
     exodiff = 'electromagnetic_coulomb_gauge_out.e'
     abs_zero = 6e-8
     rel_err = 3e-5
-    design = "Variables/index.md  VectorBodyForce.md"
+    design = "syntax/Variables/index.md  VectorBodyForce.md"
     issues = "#10861"
     requirement = "MOOSE shall be able to couple a standard variable into a vector kernel. Additionally, MOOSE shall be able to calculate time derivatives of variable gradients."
   [../]
@@ -121,7 +121,7 @@
     ratio_tol = 1e-7
     difference_tol = 5e-6
     cli_args = 'BCs/active="" Mesh/nx=4 Mesh/ny=4 Outputs/exodus=false Executioner/num_steps=1'
-    design = "Variables/index.md VectorBodyForce.md"
+    design = "syntax/Variables/index.md VectorBodyForce.md"
     issues = "#10861"
     requirement = "MOOSE shall be able to compute the correct Jacobian when coupling a standard variable into a vector kernel and taking time derivatives of variable gradients."
   [../]
@@ -129,7 +129,7 @@
     type = Exodiff
     input = 'coupled_vector_gradient.i'
     exodiff = 'coupled_vector_gradient_out.e'
-    design = "Variables/index.md VectorDiffusion.md VectorDirichletBC.md VectorFunctionDirichletBC.md"
+    design = "syntax/Variables/index.md VectorDiffusion.md VectorDirichletBC.md VectorFunctionDirichletBC.md"
     issues = "#11150"
     requirement = "1) MOOSE shall be able to assign dirichlet boundary conditions for LAGRANGE_VEC variables 2) MOOSE shall be able to obtain coupled vector variable gradients 3) MOOSE shall correctly initialize both volume and face curl shape functions when the curl of a variable is requested"
   [../]
