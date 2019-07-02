@@ -3,20 +3,52 @@
     type = CSVDiff
     input = 'thermal_expansion_function_finite_const_alpha_test.i'
     csvdiff = 'finite_const_alpha_out.csv'
+    design = 'ComputeMeanThermalExpansionFunctionEigenstrain.md'
+    requirement = 'The tensor mechanics module Computes eigenstrain due to '
+                  'thermal expansion using a function that describes the mean '
+                  'thermal expansion as a function of temperature. '
+                  'This version of the test uses large deformation theory and a'
+                  'constant alpha.'
+
+    issues = '#13634'
   [../]
   [./finite_linear_alpha]
     type = CSVDiff
     input = 'thermal_expansion_function_finite_linear_alpha_test.i'
     csvdiff = 'finite_linear_alpha_out.csv'
+    design ='ComputeMeanThermalExpansionFunctionEigenstrain.md'
+    requirement = 'The tensor mechanics module Computes eigenstrain due to '
+                  'thermal expansion using a function that describes the mean '
+                  'thermal expansion as a function of temperature. '
+                  'This version of the test uses large deformation theory and a'
+                  'linear function for alpha.'
+
+    issues = '#13634'
   [../]
   [./small_const_alpha]
     type = CSVDiff
     input = 'thermal_expansion_function_small_const_alpha_test.i'
     csvdiff = 'small_const_alpha_out.csv'
+    design ='ComputeMeanThermalExpansionFunctionEigenstrain.md'
+    requirement = 'The tensor mechanics module Computes eigenstrain due to '
+                  'thermal expansion using a function that describes the mean '
+                  'thermal expansion as a function of temperature. '
+                  'This version of the test uses small deformation theory and a'
+                  'constant alpha.'
+
+    issues = '#13634'
   [../]
   [./small_linear_alpha]
     type = CSVDiff
     input = 'thermal_expansion_function_small_linear_alpha_test.i'
     csvdiff = 'small_linear_alpha_out.csv'
+    design = 'ComputeMeanThermalExpansionFunctionEigenstrain.md'
+    requirement = 'The tensor mechanics module Computes eigenstrain due to '
+                  'thermal expansion using a function that describes the mean '
+                  'thermal expansion as a function of temperature. '
+                  'This version of the test uses small deformation theory and a'
+                  'linear function for alpha.'
+
+    issues = '#13634'
   [../]
 []
