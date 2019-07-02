@@ -1,0 +1,15 @@
+[Tests]
+  design = '/PetscExternalPartitioner.md'
+  issues = '#13675'
+
+  [./block_weighted_partitioner]
+    requirement = 'The system shall support block weighted partitioner'
+    type = 'Exodiff'
+    input = 'block_weighted_partitioner.i'
+    exodiff = 'block_weighted_partitioner_out.e'
+    petsc_version = '>=3.10.0'
+    min_parallel = 4
+    max_parallel = 4
+  [../]
+  
+[]
