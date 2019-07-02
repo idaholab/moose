@@ -89,4 +89,3 @@ private:
   //  friend void FEProblemBase::registerRandomInterface(RandomInterface *random_interface, const
   //  std::string & name, ExecFlagType exec_flag);
 };
-
