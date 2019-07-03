@@ -15,7 +15,6 @@ import logging
 
 import anytree
 
-import MooseDocs
 from MooseDocs import common
 from MooseDocs.tree import syntax
 from MooseDocs.common import exceptions
@@ -218,6 +217,11 @@ def _check_page_for_stub(node, app_name, filename, update):
             msg = "A MOOSE generated stub page for %s exists, but no content was " \
                   "added. Add documentation content to %s."
             LOG.warning(msg, node.fullpath, filename)
+
+    elif content and node.hidden:
+        msg = "A page for %s exists, but it is still listed as hidden."
+        LOG.error(msg, node.fullpath)
+
 
 def _default_content(node):
     """
