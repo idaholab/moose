@@ -15,7 +15,7 @@ from mooseutils import run_profile, list_files, git_commit
 from message import mooseDebug, mooseWarning, mooseMessage, mooseError
 from MooseException import MooseException
 from eval_path import eval_path
-from sqa_check import sqa_check, check_requirement
+from sqa_check import sqa_check, check_requirement, sqa_check_requirement_duplicates
 from compute_requirement_stats import compute_requirement_stats, SQAStats
 from AutoPropertyMixin import AutoPropertyMixin, Property, addProperty
 from levenshtein import levenshtein, levenshteinDistance
