@@ -16,6 +16,7 @@
 #include "SetupInterface.h"
 #include "TransientInterface.h"
 #include "UserObjectInterface.h"
+#include "PostprocessorInterface.h"
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "FunctionInterface.h"
 #include "Restartable.h"
@@ -39,6 +40,7 @@ class InterfaceKernelBase : public MooseObject,
                             public TransientInterface,
                             public FunctionInterface,
                             public UserObjectInterface,
+                            public PostprocessorInterface,
                             public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
                             public Restartable,
                             public MeshChangedInterface,
