@@ -139,7 +139,7 @@ ADKernelTempl<T, compute_stage>::computeJacobian()
 
   accumulateTaggedLocalMatrix();
 
-  if (_has_diag_save_in)
+  if (_has_diag_save_in && !_sys.computingScalingJacobian())
   {
     unsigned int rows = _local_ke.m();
     DenseVector<Number> diag(rows);
