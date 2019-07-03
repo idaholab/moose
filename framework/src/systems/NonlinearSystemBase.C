@@ -167,7 +167,8 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _compute_dampers_timer(registerTimedSection("computeDampers", 3)),
     _compute_dirac_timer(registerTimedSection("computeDirac", 3)),
     _compute_scaling_jacobian_timer(registerTimedSection("computeScalingJacobian", 2)),
-    _computing_scaling_jacobian(false)
+    _computing_scaling_jacobian(false),
+    _computed_scaling(false)
 {
   getResidualNonTimeVector();
   // Don't need to add the matrix - it already exists (for now)
@@ -219,7 +220,7 @@ NonlinearSystemBase::init()
     displaced_problem->nlSys().assignMaxVarNDofsPerNode(_max_var_n_dofs_per_node);
   Moose::perf_log.pop("maxVarNDofsPerNode()", "Setup");
 
-  if (_fe_problem.automaticScaling())
+  if (_automatic_scaling)
     // We don't need libMesh to do projections since we will always be filling this vector from the
     // diagonal of the preconditioning matrix, hence false for our second argument. We also do not
     // need ghosting

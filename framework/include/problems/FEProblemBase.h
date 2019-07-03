@@ -141,15 +141,6 @@ public:
   FEProblemBase(const InputParameters & parameters);
   virtual ~FEProblemBase();
 
-  bool automaticScaling() const { return _automatic_scaling; }
-  void automaticScaling(bool automatic_scaling) { _automatic_scaling = automatic_scaling; }
-
-  bool computeScalingOnce() const { return _compute_scaling_once; }
-  void computeScalingOnce(bool compute_scaling_once)
-  {
-    _compute_scaling_once = compute_scaling_once;
-  }
-
   virtual EquationSystems & es() override { return _eq; }
   virtual MooseMesh & mesh() override { return _mesh; }
   virtual const MooseMesh & mesh() const override { return _mesh; }
@@ -2015,14 +2006,6 @@ private:
 
   /// Whether old solution second time derivative needs to be stored
   bool _u_dotdot_old_requested;
-
-  /// Whether to automatically scale the variables
-  bool _automatic_scaling;
-
-  /// Whether the scaling factors should only be computed once at the beginning of the simulation
-  /// through an extra Jacobian evaluation. If this is set to false, then the scaling factors will
-  /// be computed during an extra Jacobian evaluation at the beginning of every time step.
-  bool _compute_scaling_once;
 
   friend class AuxiliarySystem;
   friend class NonlinearSystemBase;
