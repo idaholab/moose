@@ -68,9 +68,12 @@ Executioner::Executioner(const InputParameters & parameters)
     nl.automaticScaling(false);
   }
   else
-    nl.automaticScaling(isParamValid("automatic_scaling")
-                            ? getParam<bool>("automatic_scaling")
-                            : getMooseApp().defaultAutomaticScaling());
+    // Check to see whether automatic_scaling has been specified anywhere, including at the
+    // application level. No matter what: if we don't have a matrix, we don't do scaling
+    nl.automaticScaling((isParamValid("automatic_scaling")
+                             ? getParam<bool>("automatic_scaling")
+                             : getMooseApp().defaultAutomaticScaling()) &&
+                        (_fe_problem.solverParams()._type != Moose::ST_JFNK));
 
   nl.computeScalingOnce(getParam<bool>("compute_scaling_once"));
 }
