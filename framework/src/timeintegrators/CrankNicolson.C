@@ -60,9 +60,9 @@ CrankNicolson::init()
   u_dot.zero();
   _du_dot_du = 0;
 
-  if (_fe_problem.automaticScaling())
+  if (_nl.automaticScaling())
   {
-    if (!_fe_problem.computeScalingOnce())
+    if (!_nl.computeScalingOnce())
       mooseError("Cannot change variable scaling factors over time because the time integration "
                  "scheme relies on old data");
     else

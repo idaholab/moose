@@ -91,8 +91,7 @@ NonlinearSystem::NonlinearSystem(FEProblemBase & fe_problem, const std::string &
     _transient_sys(fe_problem.es().get_system<TransientNonlinearImplicitSystem>(name)),
     _nl_residual_functor(_fe_problem),
     _fd_residual_functor(_fe_problem),
-    _use_coloring_finite_difference(false),
-    _computed_scaling(false)
+    _use_coloring_finite_difference(false)
 {
   nonlinearSolver()->residual_object = &_nl_residual_functor;
   nonlinearSolver()->jacobian = Moose::compute_jacobian;
@@ -149,18 +148,6 @@ NonlinearSystem::solve()
   if (_fe_problem.hasDampers() || _fe_problem.shouldUpdateSolution() ||
       _fe_problem.needsPreviousNewtonIteration())
     _transient_sys.nonlinear_solver->postcheck = Moose::compute_postcheck;
-
-  // Do an initial Jacobian evaluation in order to determine variable scaling factors
-  if (_fe_problem.automaticScaling())
-  {
-    if (_fe_problem.computeScalingOnce())
-    {
-      if (!_computed_scaling)
-        computeScalingJacobian();
-    }
-    else
-      computeScalingJacobian();
-  }
 
   if (_fe_problem.solverParams()._type != Moose::ST_LINEAR)
   {
