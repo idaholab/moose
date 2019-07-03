@@ -1,10 +1,1 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
-# NodalKernels System
-
-!syntax list /NodalKernels objects=True actions=False subsystems=False
-
-!syntax list /NodalKernels objects=False actions=False subsystems=True
-
-!syntax list /NodalKernels objects=False actions=True subsystems=False
-
+!template load file=stubs/moose_system.md.template name=NodalKernels syntax=/NodalKernels
