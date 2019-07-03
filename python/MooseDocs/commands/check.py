@@ -20,7 +20,7 @@ from MooseDocs.tree import syntax
 from MooseDocs.common import exceptions
 
 LOG = logging.getLogger(__name__)
-STUB_HEADER = '<!-- MOOSE Documentation Stub: Remove this when content is added. -->'
+STUB_HEADER = 'MOOSE Documentation Stub'
 
 def command_line_options(subparser, parent):
     """Define the 'check' command."""
@@ -223,36 +223,10 @@ def _default_content(node):
     """
     Markdown stub content.
     """
-    stub = STUB_HEADER + '\n\n'
     if isinstance(node, syntax.SyntaxNode):
-        stub += '# {} System\n\n'.format(node.name)
-        stub += '!syntax list {} objects=True actions=False subsystems=False\n\n' \
-                .format(node.fullpath)
-        stub += '!syntax list {} objects=False actions=False subsystems=True\n\n' \
-                .format(node.fullpath)
-        stub += '!syntax list {} objects=False actions=True subsystems=False\n\n' \
-                .format(node.fullpath)
-
+        tname = 'moose_system.md.template'
     elif isinstance(node, syntax.MooseObjectNode):
-        template_filename = os.path.join(MooseDocs.MOOSE_DIR, 'framework', 'doc', 'templates',
-                                         'moose_object.md.template')
-        with open(template_filename, 'r') as fid:
-            template_content = fid.read()
-
-        template_content = template_content.replace('FullPathCodeClassName',
-                                                    '{}'.format(node.fullpath))
-        template_content = template_content.replace('CodeClassName', '{}'.format(node.name))
-        stub += template_content
-
+        tname = 'moose_object.md.template'
     elif isinstance(node, syntax.ActionNode):
-        template_filename = os.path.join(MooseDocs.MOOSE_DIR, 'framework', 'doc', 'templates',
-                                         'action_object.md.template')
-        with open(template_filename, 'r') as fid:
-            template_content = fid.read()
-
-        template_content = template_content.replace('FullPathCodeActionName',
-                                                    '{}'.format(node.fullpath))
-        template_content = template_content.replace('CodeActionName', '{}'.format(node.name))
-        stub += template_content
-
-    return stub
+        tname = 'moose_action.md.template'
+    return '!template load file=stubs/{} name={} syntax={}'.format(tname, node.name, node.fullpath)
