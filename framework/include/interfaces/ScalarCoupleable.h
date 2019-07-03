@@ -25,6 +25,8 @@ class InputParameters;
 class MooseObject;
 class MooseVariableScalar;
 
+#define adCoupledScalarValue this->template adCoupledScalarValueTempl<compute_stage>
+
 /**
  * Interface for objects that needs scalar coupling capabilities
  *
@@ -100,6 +102,16 @@ protected:
    * @return Reference to a VariableValue for the coupled variable
    */
   virtual VariableValue & coupledScalarValue(const std::string & var_name, unsigned int comp = 0);
+
+  /**
+   * Returns AD value of a scalar coupled variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a ADVariableValue for the coupled variable
+   */
+  template <ComputeStage compute_stage>
+  const ADVariableValue & adCoupledScalarValueTempl(const std::string & var_name,
+                                                    unsigned int comp = 0);
 
   /**
    * Returns value of a scalar coupled variable
@@ -200,6 +212,9 @@ protected:
   /// Will hold the default value for optional coupled scalar variables.
   std::map<std::string, VariableValue *> _default_value;
 
+  /// Will hold the default AD value for optional coupled scalar variables.
+  std::map<std::string, DualVariableValue *> _dual_default_value;
+
   /// Vector of coupled variables
   std::vector<MooseVariableScalar *> _coupled_moose_scalar_vars;
 
@@ -228,6 +243,15 @@ protected:
    * @return VariableValue * a pointer to the associated VarirableValue.
    */
   VariableValue * getDefaultValue(const std::string & var_name);
+
+  /**
+   * Helper method to return (and insert if necessary) the AD default value
+   * for an uncoupled variable.
+   * @param var_name the name of the variable for which to retrieve a default value
+   * @return ADVariableValue * a pointer to the associated ADVariableValue.
+   */
+  template <ComputeStage compute_stage>
+  ADVariableValue * getADDefaultValue(const std::string & var_name);
 
   /**
    * Check that the right kind of variable is being coupled in
@@ -261,3 +285,10 @@ private:
   std::set<TagID> _sc_coupleable_matrix_tags;
 };
 
+template <>
+VariableValue *
+ScalarCoupleable::getADDefaultValue<ComputeStage::RESIDUAL>(const std::string & var_name);
+
+template <>
+DualVariableValue *
+ScalarCoupleable::getADDefaultValue<ComputeStage::JACOBIAN>(const std::string & var_name);

@@ -643,10 +643,10 @@ DisplacedProblem::reinitNeighborPhys(const Elem * neighbor,
 }
 
 void
-DisplacedProblem::reinitScalars(THREAD_ID tid)
+DisplacedProblem::reinitScalars(THREAD_ID tid, bool reinit_for_derivative_reordering /*=false*/)
 {
-  _displaced_nl.reinitScalars(tid);
-  _displaced_aux.reinitScalars(tid);
+  _displaced_nl.reinitScalars(tid, reinit_for_derivative_reordering);
+  _displaced_aux.reinitScalars(tid, reinit_for_derivative_reordering);
 }
 
 void

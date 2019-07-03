@@ -71,6 +71,11 @@ ScalarCoupleable::~ScalarCoupleable()
     it.second->release();
     delete it.second;
   }
+  for (auto & it : _dual_default_value)
+  {
+    it.second->release();
+    delete it.second;
+  }
 }
 
 const std::vector<MooseVariableScalar *> &
@@ -141,6 +146,54 @@ ScalarCoupleable::coupledScalarValue(const std::string & var_name, unsigned int 
 
   MooseVariableScalar * var = getScalarVar(var_name, comp);
   return (_sc_is_implicit) ? var->sln() : var->slnOld();
+}
+
+template <ComputeStage compute_stage>
+const ADVariableValue &
+ScalarCoupleable::adCoupledScalarValueTempl(const std::string & var_name, unsigned int comp)
+{
+  checkVar(var_name);
+  if (!isCoupledScalar(var_name, comp))
+    return *getADDefaultValue<compute_stage>(var_name);
+
+  MooseVariableScalar * var = getScalarVar(var_name, comp);
+
+  if (_sc_is_implicit)
+    return var->adSln<compute_stage>();
+  else
+    mooseError("adCoupledValue for non-implicit calculations is not currently supported. Use "
+               "coupledValue instead for non-implicit");
+}
+
+template <>
+VariableValue *
+ScalarCoupleable::getADDefaultValue<ComputeStage::RESIDUAL>(const std::string & var_name)
+{
+  std::map<std::string, VariableValue *>::iterator default_value_it = _default_value.find(var_name);
+  if (default_value_it == _default_value.end())
+  {
+    VariableValue * value = new VariableValue(_sc_fe_problem.getMaxScalarOrder(),
+                                              _coupleable_params.defaultCoupledValue(var_name));
+    default_value_it = _default_value.insert(std::make_pair(var_name, value)).first;
+  }
+
+  return default_value_it->second;
+}
+
+template <>
+DualVariableValue *
+ScalarCoupleable::getADDefaultValue<ComputeStage::JACOBIAN>(const std::string & var_name)
+{
+  std::map<std::string, DualVariableValue *>::iterator default_value_it =
+      _dual_default_value.find(var_name);
+  if (default_value_it == _dual_default_value.end())
+  {
+    DualVariableValue * value = new DualVariableValue(
+        _sc_fe_problem.getMaxScalarOrder(), _coupleable_params.defaultCoupledValue(var_name));
+    default_value_it = _dual_default_value.insert(std::make_pair(var_name, value)).first;
+  }
+
+  return default_value_it->second;
 }
 
 VariableValue &
@@ -305,3 +358,12 @@ ScalarCoupleable::coupledScalarComponents(const std::string & var_name)
 {
   return _coupled_scalar_vars[var_name].size();
 }
+
+// Explicit instantiations
+template const VariableValue &
+ScalarCoupleable::adCoupledScalarValueTempl<ComputeStage::RESIDUAL>(const std::string & var_name,
+                                                                    unsigned int comp);
+
+template const DualVariableValue &
+ScalarCoupleable::adCoupledScalarValueTempl<ComputeStage::JACOBIAN>(const std::string & var_name,
+                                                                    unsigned int comp);
