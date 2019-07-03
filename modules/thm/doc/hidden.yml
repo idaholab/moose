@@ -17,7 +17,7 @@
 
 - /AuxScalarKernels/TotalInternalEnergyRateIntoJunctionAux
 - /AuxScalarKernels/TotalMassFlowRateIntoJunctionAux
-- /AuxScalarKernels/VolumeJunctionPressureAux
+- /AuxScalarKernels/VolumeJunctionOldPressureAux
 
 - /BCs/BoundaryFlux7EqnNCGBC
 - /BCs/ConvectionHeatTransferBC

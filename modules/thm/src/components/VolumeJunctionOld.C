@@ -231,7 +231,7 @@ VolumeJunctionOld::addMooseObjects()
     connectObject(params, nm, "A_ref", "ref_area");
   }
   {
-    std::string class_name = "VolumeJunctionPressureAux";
+    std::string class_name = "VolumeJunctionOldPressureAux";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<AuxVariableName>("variable") = _pressure_var_name;
     params.set<UserObjectName>("fp") = _fp_name;
