@@ -31,6 +31,20 @@ InputParameters validParams<SinglePhaseFluidProperties>();
     val = want##_from_##prop1##_##prop2(prop1, prop2);                                             \
   }                                                                                                \
                                                                                                    \
+  virtual void want##_from_##prop1##_##prop2(const DualReal & prop1,                               \
+                                             const DualReal & prop2,                               \
+                                             DualReal & val,                                       \
+                                             DualReal & d##want##d1,                               \
+                                             DualReal & d##want##d2) const                         \
+  {                                                                                                \
+    fluidPropError(name(), ": ", __PRETTY_FUNCTION__, " derivative derivatives not implemented."); \
+    Real dummy, tmp1, tmp2;                                                                        \
+    val = want##_from_##prop1##_##prop2(prop1, prop2);                                             \
+    want##_from_##prop1##_##prop2(prop1.value(), prop2.value(), dummy, tmp1, tmp2);                \
+    d##want##d1 = tmp1;                                                                            \
+    d##want##d2 = tmp2;                                                                            \
+  }                                                                                                \
+                                                                                                   \
   FPDualReal want##_from_##prop1##_##prop2(const FPDualReal & p1, const FPDualReal & p2) const     \
   {                                                                                                \
     Real x = 0;                                                                                    \
