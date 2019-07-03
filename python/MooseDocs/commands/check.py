@@ -9,6 +9,7 @@
 
 """Developer tools for MooseDocs."""
 import os
+import re
 import collections
 import logging
 
@@ -20,7 +21,6 @@ from MooseDocs.tree import syntax
 from MooseDocs.common import exceptions
 
 LOG = logging.getLogger(__name__)
-STUB_HEADER = 'MOOSE Documentation Stub'
 
 def command_line_options(subparser, parent):
     """Define the 'check' command."""
@@ -206,9 +206,9 @@ def _check_page_for_stub(node, app_name, filename, update):
     Helper method to check if a page is a stub.
     """
     with open(filename, 'r') as fid:
-        lines = fid.readlines()
+        content = fid.read()
 
-    if lines and STUB_HEADER in lines[0]:
+    if content and re.search(r'(stubs\/moose_(object|action|system).md.template)', content):
         if update and (app_name in node.groups):
             LOG.info("Updating stub page for %s in file %s.", node.fullpath, filename)
             with open(filename, 'w') as fid:
