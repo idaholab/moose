@@ -10,7 +10,6 @@
 - /Materials/AnisoHeatConductionMaterial
 - /Materials/ElectricalConductivity
 - /Materials/GapConductance
-- /Materials/SemiconductorLinearConductivity
 - /Postprocessors/HomogenizedThermalConductivity
 - /Postprocessors/ThermalConductivity
 - /ThermalContact
