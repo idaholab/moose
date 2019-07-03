@@ -163,7 +163,6 @@
 - /MultiApps/FullSolveMultiApp
 - /MultiApps/TransientMultiApp
 - /Modules
-- /Modules/PhaseField/MortarPeriodicity
 - /NodalKernels
 - /NodalKernels/AddNodalKernelAction
 - /NodalKernels/ConstantRate
