@@ -27,6 +27,11 @@ class TestSQARequirementsAST(MooseDocsTestCase):
         self._assertAST_tree(ast(0), item_size=1)
         self._assertAST_common(ast(1), item_size=1)
 
+    def testEmptyCategory(self):
+        text = u"!sqa requirements category=_empty_"
+        ast = self.tokenize(text)
+        self.assertSize(ast, 0)
+
     def testASTSpecLink(self):
         text = u"!sqa requirements category=Demo link=True link-spec=True link-design=False link-issues=False link-prerequisites=False"
         ast = self.tokenize(text)
@@ -241,6 +246,17 @@ class TestSQAVerificationAndValidation(MooseDocsTestCase):
         self.assertToken(ast(1)(1), 'ModalLinkContent', size=1)
         self.assertToken(ast(1)(1)(0), 'Code', size=0)
 
+    def testEmptyCategory(self):
+        text = u"!sqa verification category=_empty_"
+        ast = self.tokenize(text)
+        print ast
+        self.assertSize(ast, 0)
+
+        text = u"!sqa validation category=_empty_"
+        ast = self.tokenize(text)
+        self.assertSize(ast, 0)
+
+
 class TestSQARequirementsMatrix(MooseDocsTestCase):
     EXTENSIONS = [core, command, floats, autolink, heading, sqa]
 
@@ -292,6 +308,46 @@ class TestSQARequirementsCrossReference(MooseDocsTestCase):
         self.assertToken(ast(0)(1)(2), 'SQARequirementDesign', size=0, design=['bibtex.md'])
         self.assertToken(ast(0)(1)(3), 'SQARequirementIssues', size=0, issues=['#1980'])
 
+    def testEmptyCategory(self):
+        text = u"!sqa cross-reference category=_empty_"
+        ast = self.tokenize(text)
+        self.assertSize(ast, 0)
+
+class TestSQADependencies(MooseDocsTestCase):
+    EXTENSIONS = [core, command, floats, autolink, heading, sqa]
+
+    def setupExtension(self, ext):
+        if ext == sqa:
+            return dict(categories=dict(Demo=dict(directories=['python/MooseDocs/test'],
+                                                  specs=['demo']),
+                                        Demo2=dict(directories=['python/MooseDocs/test'],
+                                                  specs=['demo'])))
+
+    def testCommand(self):
+        text = u"!sqa dependencies suffix=foo"
+        ast = self.tokenize(text)
+
+        self.assertSize(ast, 1)
+        self.assertToken(ast(0), 'UnorderedList', size=2)
+        self.assertToken(ast(0)(0), 'ListItem', size=1)
+        self.assertToken(ast(0)(0)(0), 'AutoLink', page=u'sqa/Demo2_foo.md', optional=True, warning=True)
+        self.assertToken(ast(0), 'UnorderedList', size=2)
+        self.assertToken(ast(0)(1), 'ListItem', size=1)
+        self.assertToken(ast(0)(1)(0), 'AutoLink', page=u'sqa/Demo_foo.md', optional=True, warning=True)
+
+class TestSQADocument(MooseDocsTestCase):
+    EXTENSIONS = [core, command, floats, autolink, heading, sqa]
+
+    def setupExtension(self, ext):
+        if ext == sqa:
+            return dict(categories=dict(Demo=dict(directories=['python/MooseDocs/test'],
+                                                  specs=['demo'])))
+
+    def testCommand(self):
+        text = u"!sqa document suffix=foo category=Demo"
+        ast = self.tokenize(text)
+        self.assertSize(ast, 1)
+        self.assertToken(ast(0), 'AutoLink', page=u'sqa/Demo_foo.md', optional=True, warning=True)
 
 class TestSQARequirementsRender(MooseDocsTestCase):
     EXTENSIONS = [core, command, floats, autolink, heading, sqa]
