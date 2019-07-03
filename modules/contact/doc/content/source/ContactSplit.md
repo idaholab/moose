@@ -1,18 +1,1 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
-# ContactSplit
-
-!alert construction title=Undocumented Class
-The ContactSplit has not been documented. The content contained on this page
-includes the basic documentation associated with a MooseObject; however, what is contained is
-ultimately determined by what is necessary to make the documentation clear for users.
-
-!syntax description /Preconditioning/ContactSplit
-
-!syntax parameters /Preconditioning/ContactSplit
-
-!syntax inputs /Preconditioning/ContactSplit
-
-!syntax children /Preconditioning/ContactSplit
-
-!bibtex bibliography
+!template load file=stubs/moose_object.md.template name=ContactSplit syntax=/Preconditioning/ContactSplit
