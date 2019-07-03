@@ -115,7 +115,15 @@ public:
   /**
    * Whether we are computing an initial Jacobian for automatic variable scaling
    */
-  virtual bool computingScalingJacobian() const { return false; }
+  bool computingScalingJacobian() const { return _computing_scaling_jacobian; }
+
+  /**
+   * Setter for whether we're computing the scaling jacobian
+   */
+  void computingScalingJacobian(bool computing_scaling_jacobian)
+  {
+    _computing_scaling_jacobian = computing_scaling_jacobian;
+  }
 
   /**
    * Gets writeable reference to the dof map
@@ -824,6 +832,9 @@ protected:
 
   /// Map variable number to its pointer
   std::vector<std::vector<MooseVariableFEBase *>> _numbered_vars;
+
+  /// Flag used to indicate whether we are computing the scaling Jacobian
+  bool _computing_scaling_jacobian;
 };
 
 #define PARALLEL_TRY

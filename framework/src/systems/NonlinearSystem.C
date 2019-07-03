@@ -10,6 +10,7 @@
 // moose includes
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
+#include "DisplacedProblem.h"
 #include "TimeIntegrator.h"
 #include "FiniteDifferencePreconditioner.h"
 #include "PetscSupport.h"
@@ -428,8 +429,14 @@ NonlinearSystemBase::computeScalingJacobian()
                  "owning zero dofs. Check back soon :-)");
 
     _computing_scaling_jacobian = true;
+    if (_fe_problem.getDisplacedProblem())
+      _fe_problem.getDisplacedProblem()->nlSys().computingScalingJacobian(true);
+
     _fe_problem.computeJacobianSys(_transient_sys, *_current_solution, *_transient_sys.matrix);
+
     _computing_scaling_jacobian = false;
+    if (_fe_problem.getDisplacedProblem())
+      _fe_problem.getDisplacedProblem()->nlSys().computingScalingJacobian(false);
 
     // container for repeated access of element global dof indices
     std::vector<dof_id_type> dof_indices;

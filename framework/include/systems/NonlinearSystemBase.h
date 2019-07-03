@@ -68,7 +68,6 @@ public:
 
   virtual void init() override;
 
-  bool computingScalingJacobian() const final { return _computing_scaling_jacobian; }
   bool computedScalingJacobian() const { return _computed_scaling; }
 
   /**
@@ -869,9 +868,6 @@ protected:
   PerfID _compute_dampers_timer;
   PerfID _compute_dirac_timer;
   PerfID _compute_scaling_jacobian_timer;
-
-  /// Flag used to indicate whether we are computing the scaling Jacobian
-  bool _computing_scaling_jacobian;
 
   /// Flag used to indicate whether we have already computed the scaling Jacobian
   bool _computed_scaling;

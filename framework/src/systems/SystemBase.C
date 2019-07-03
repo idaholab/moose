@@ -98,7 +98,8 @@ SystemBase::SystemBase(SubProblem & subproblem,
     _var_kind(var_kind),
     _max_var_n_dofs_per_elem(0),
     _max_var_n_dofs_per_node(0),
-    _time_integrator(nullptr)
+    _time_integrator(nullptr),
+    _computing_scaling_jacobian(false)
 {
 }
 
