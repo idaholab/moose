@@ -3,7 +3,7 @@ offset = 1e-2
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
-  D_name = 1e0
+  diffusivity = 1e0
   scaling = 1e0
 []
 
