@@ -56,9 +56,6 @@ protected:
   // Variable to determine the size, or resolution, of the image.
   unsigned int _resolution;
 
-  // Name of file to which the PNG will be written.
-  std::string _png_file;
-
   // Way to specify color vs grayscale image creation.
   bool _color;
 

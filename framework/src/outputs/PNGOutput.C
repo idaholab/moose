@@ -21,8 +21,7 @@ validParams<PNGOutput>()
 {
   InputParameters params = validParams<FileOutput>();
   params.addParam<unsigned int>("resolution", 2000, "The resolution of the image.");
-  params.addParam<std::string>("PNGFile", "Adam", "Root filename of the PNG to be created.");
-  params.addParam<bool>("inColor", false, "Show the image in color?");
+  params.addParam<bool>("color", false, "Show the image in color?");
   params.addRangeCheckedParam<Real>("_out_bounds_shade",
                                     .5,
                                     "_out_bounds_shade>=0 & _out_bounds_shade<=1",
@@ -34,8 +33,7 @@ validParams<PNGOutput>()
 PNGOutput::PNGOutput(const InputParameters & parameters)
   : FileOutput(parameters),
     _resolution(getParam<unsigned int>("resolution")),
-    _png_file(getParam<std::string>("PNGFile")),
-    _color(getParam<bool>("inColor")),
+    _color(getParam<bool>("color")),
     _out_bounds_shade(getParam<Real>("_out_bounds_shade"))
 {
 }
@@ -132,6 +130,22 @@ PNGOutput::setRGB(png_byte * rgb, Real selection)
     rgb[1] = 255;
     rgb[2] = magnitude;
   }
+
+  // // Color Scheme: Blue->Cream->Red
+  // // Blue->Cream
+  // if (color < 256)
+  // {
+  //   rgb[0] = magnitude - (40/(256-magnitude));
+  //   rgb[1] = magnitude - (5/(256-magnitude));
+  //   rgb[2] = 255 - (40/(256-magnitude));
+  // }
+  // // Cream->Red
+  // else
+  // {
+  //   rgb[0] = 255 - (40/(256-magnitude));
+  //   rgb[1] = (255 - (5/(magnitude+1))) - (magnitude + (5/(magnitude+1)));
+  //   rgb[2] = (255 - (40/(magnitude+1))) - (magnitude + (40/(magnitude+1)));
+  // }
 }
 
 void
@@ -162,10 +176,12 @@ PNGOutput::makePNG()
   FILE * fp = nullptr;
   png_structrp pngp = nullptr;
   png_infop infop = nullptr;
-  png_bytep row = nullptr;
+  // Required depth for image clarity.
   Real depth = 8;
   Real width = dist_x * _resolution;
   Real height = dist_y * _resolution;
+  // Allocate resources.
+  std::vector<png_byte> row ((width * 3) + 1);
 
   // Check if we can open and write to the file.
   MooseUtils::checkFileWriteable(png_file.str());
@@ -196,8 +212,6 @@ PNGOutput::makePNG()
 
   png_write_info(pngp, infop);
 
-  // Allocate resources.
-  row = new png_byte[(width * 3) + 1];
 
   // Initiallizing the point that will be used for populating the mesh values.
   // Initializing x, y, z to zero so that we don't access the point before it's
@@ -218,16 +232,16 @@ PNGOutput::makePNG()
 
       // Determine whether to create the PNG in color or grayscale
       if (_color)
-        setRGB(&row[indx * 3], applyScale(dv(0)));
+        setRGB(&row.data()[indx * 3], applyScale(dv(0)));
       else
-        row[indx] = applyScale(dv(0)) * 255;
+        row.data()[indx] = applyScale(dv(0)) * 255;
 
       indx++;
     }
-
-    png_write_row(pngp, row);
+    png_write_row(pngp, row.data());
   }
 
+  // Close the file and take care of some other png end stuff.
   png_write_end(pngp, nullptr);
   if (fp != nullptr)
     fclose(fp);
@@ -235,6 +249,4 @@ PNGOutput::makePNG()
     png_free_data(pngp, infop, PNG_FREE_ALL, -1);
   if (pngp != nullptr)
     png_destroy_write_struct(&pngp, (png_infopp) nullptr);
-  if (row != nullptr)
-    delete[] row;
 }

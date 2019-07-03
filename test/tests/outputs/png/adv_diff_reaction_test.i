@@ -115,8 +115,7 @@
 [Outputs]
   [png]
     type = PNGOutput
-    PNGFile = "PNGTEST"
-    resolution = 50
-    inColor = false
+    resolution = 500
+    color = true
   []
 []
