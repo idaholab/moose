@@ -1,0 +1,8 @@
+[Tests]
+  [exo]
+    type = Exodiff
+    input = 'ad_coupled_scalar.i'
+    exodiff = 'ad_coupled_scalar_out.e'
+    cli_args = '-snes_fd'
+  []
+[]
