@@ -4,7 +4,6 @@
 - /Constraints/MultiDContactConstraint
 - /Constraints/OneDContactConstraint
 - /Constraints/SparsityBasedContactConstraint
-- /Contact
 - /Contact/ContactAction
 - /Contact/ContactPenetrationAuxAction
 - /Contact/ContactPenetrationVarAction
