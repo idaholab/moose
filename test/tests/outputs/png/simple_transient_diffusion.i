@@ -50,6 +50,6 @@
   [png]
     type = PNGOutput
     resolution = 250
-    color = false
+    color = RWB
   []
 []

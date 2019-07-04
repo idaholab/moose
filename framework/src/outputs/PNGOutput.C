@@ -21,7 +21,8 @@ validParams<PNGOutput>()
 {
   InputParameters params = validParams<FileOutput>();
   params.addParam<unsigned int>("resolution", 2000, "The resolution of the image.");
-  params.addParam<bool>("color", false, "Show the image in color?");
+  MooseEnum color("GRAY BRYW BCR RWB BR");
+  params.addParam<MooseEnum>("color", color, "Choose the color scheme to use.");
   params.addRangeCheckedParam<Real>("_out_bounds_shade",
                                     .5,
                                     "_out_bounds_shade>=0 & _out_bounds_shade<=1",
@@ -33,7 +34,7 @@ validParams<PNGOutput>()
 PNGOutput::PNGOutput(const InputParameters & parameters)
   : FileOutput(parameters),
     _resolution(getParam<unsigned int>("resolution")),
-    _color(getParam<bool>("color")),
+    _color(parameters.get<MooseEnum>("color")),
     _out_bounds_shade(getParam<Real>("_out_bounds_shade"))
 {
 }
@@ -61,6 +62,7 @@ PNGOutput::makeMeshFunc()
   _mesh_function->enable_out_of_mesh_mode(reverseScale(_out_bounds_shade));
 }
 
+// Function to find the min and max values so that all the values can be scaled between the two.
 void
 PNGOutput::calculateRescalingValues()
 {
@@ -81,24 +83,47 @@ PNGOutput::calculateRescalingValues()
   _scaling_max += _shift_value;
 }
 
+// Function to apply the scale to the data points.
+// Needed to be able to see accurate images that cover the appropriate color spectrum.
 inline Real
 PNGOutput::applyScale(Real value_to_scale)
 {
   return ((value_to_scale + _shift_value) / _scaling_max);
 }
 
+// Function to reverse the scaling that happens to a value.
+// Needed to be able to accurately control the _out_bounds_shade.
 inline Real
 PNGOutput::reverseScale(Real value_to_unscale)
 {
   return ((value_to_unscale * _scaling_max) - _shift_value);
 }
 
+// Function that controls the colorization of the png image for non-grayscale images.
 void
 PNGOutput::setRGB(png_byte * rgb, Real selection)
 {
   // Using an RGB system with Red as 0 - 255, Green as 256 - 511 and
   // Blue as 512 - 767 gives us our total colorSpectrum of 0 - 767.
-  const auto color_spectrum_max = 767;
+  // Depending on the color scheme we're using, we may want to use a subset
+  // of the colorSpectrum.
+  auto color_spectrum_max = 767;
+  switch (_color)
+  {
+    // BRYW.  Keep the spectum as is.
+    case 1:
+      break;
+    // BCR.  Change spectrum.
+    case 2:
+    // RWB.  Change spectrum.
+    case 3:
+      color_spectrum_max = 511;
+      break;
+    case 4:
+      color_spectrum_max = 255;
+      break;
+  }
+
   // We need to convert the
   auto color = (int)(selection * color_spectrum_max);
   // Make sure everything is within our colorSpectrum.
@@ -108,44 +133,77 @@ PNGOutput::setRGB(png_byte * rgb, Real selection)
     color = 0;
   auto magnitude = color % 256;
 
-  // Current color scheme: Blue->Red->Yellow->White
-  // Blue->Red
-  if (color < 256)
+  switch (_color)
   {
-    rgb[0] = magnitude;
-    rgb[1] = 0;
-    rgb[2] = 255 - magnitude;
-  }
-  // Red->Yellow
-  else if (color < 512)
-  {
-    rgb[0] = 255;
-    rgb[1] = magnitude;
-    rgb[2] = 0;
-  }
-  // Yellow->White
-  else
-  {
-    rgb[0] = 255;
-    rgb[1] = 255;
-    rgb[2] = magnitude;
-  }
+    // Current color scheme: Blue->Red->Yellow->White
+    case 1:
+      // Blue->Red
+      if (color < 256)
+      {
+        rgb[0] = magnitude;
+        rgb[1] = 0;
+        rgb[2] = 255 - magnitude;
+      }
+      // Red->Yellow
+      else if (color < 512)
+      {
+        rgb[0] = 255;
+        rgb[1] = magnitude;
+        rgb[2] = 0;
+      }
+      // Yellow->White
+      else
+      {
+        rgb[0] = 255;
+        rgb[1] = 255;
+        rgb[2] = magnitude;
+      }
+      break;
 
-  // // Color Scheme: Blue->Cream->Red
-  // // Blue->Cream
-  // if (color < 256)
-  // {
-  //   rgb[0] = magnitude - (40/(256-magnitude));
-  //   rgb[1] = magnitude - (5/(256-magnitude));
-  //   rgb[2] = 255 - (40/(256-magnitude));
-  // }
-  // // Cream->Red
-  // else
-  // {
-  //   rgb[0] = 255 - (40/(256-magnitude));
-  //   rgb[1] = (255 - (5/(magnitude+1))) - (magnitude + (5/(magnitude+1)));
-  //   rgb[2] = (255 - (40/(magnitude+1))) - (magnitude + (40/(magnitude+1)));
-  // }
+    // Color Scheme: Blue->Cream->Red
+    case 2:
+      // Blue->Cream
+      if (color < 256)
+      {
+        rgb[0] = magnitude;
+        rgb[1] = magnitude - (5 / (256 - magnitude));
+        rgb[2] = 255 - (40 / (256 - magnitude));
+      }
+      // Cream->Red
+      else
+      {
+        rgb[0] = 255;
+        rgb[1] = (255 - (5 / (magnitude + 1))) - (magnitude + (5 / (magnitude + 1)));
+        rgb[2] = (255 - (40 / (magnitude + 1))) - (magnitude + (40 / (magnitude + 1)));
+      }
+      break;
+
+    // Red->White->Blue
+    case 3:
+      // Red->White
+      if (color < 256)
+      {
+        rgb[0] = 255;
+        rgb[1] = magnitude;
+        rgb[2] = magnitude;
+      }
+      // White->Blue
+      else
+      {
+        rgb[0] = 255 - magnitude;
+        rgb[1] = 255 - magnitude;
+        rgb[2] = 255;
+      }
+      break;
+
+    // Blue->Red
+    case 4:
+      // Blue->Red
+      rgb[0] = magnitude;
+      rgb[1] = 0;
+      rgb[2] = 255 - magnitude;
+      break;
+  }
 }
 
 void
@@ -153,10 +211,13 @@ PNGOutput::output(const ExecFlagType & /*type*/)
 {
   makeMeshFunc();
   _box = MeshTools::create_bounding_box(*_mesh_ptr);
+
+  // Make sure this happens on processor 0
   if (processor_id() == 0)
     makePNG();
 }
 
+// Function the writes the PNG out to the appropriate filename.
 void
 PNGOutput::makePNG()
 {
@@ -173,15 +234,16 @@ PNGOutput::makePNG()
   std::ostringstream png_file;
   png_file << _file_base << "_" << std::setfill('0') << std::setw(3) << _t_step << ".png";
 
+  // libpng is built on C, so by default it takes FILE*.
   FILE * fp = nullptr;
   png_structrp pngp = nullptr;
   png_infop infop = nullptr;
-  // Required depth for image clarity.
+  // Required depth for proper image clarity.
   Real depth = 8;
   Real width = dist_x * _resolution;
   Real height = dist_y * _resolution;
   // Allocate resources.
-  std::vector<png_byte> row ((width * 3) + 1);
+  std::vector<png_byte> row((width * 3) + 1);
 
   // Check if we can open and write to the file.
   MooseUtils::checkFileWriteable(png_file.str());
@@ -197,6 +259,7 @@ PNGOutput::makePNG()
   if (!infop)
     mooseError("Failed to make an info pointer for the png.");
 
+  // Initializes the IO for the png.  Needs FILE* to compile.
   png_init_io(pngp, fp);
 
   // Set up the PNG header.
@@ -212,12 +275,12 @@ PNGOutput::makePNG()
 
   png_write_info(pngp, infop);
 
-
   // Initiallizing the point that will be used for populating the mesh values.
   // Initializing x, y, z to zero so that we don't access the point before it's
   // been set.  z = 0 for all the png's.
   Point pt(0, 0, 0);
 
+  // Dense vector that we can pass into the _mesh_function to fill with a value for a given point.
   DenseVector<Number> dv(0);
 
   // Loop through to create the image.

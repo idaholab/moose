@@ -15,6 +15,7 @@
 #include <png.h>
 // MOOSE includes
 #include "FileOutput.h"
+#include "MooseEnum.h"
 // libmesh includes
 #include "libmesh/mesh_function.h"
 #include "libmesh/bounding_box.h"
@@ -57,7 +58,7 @@ protected:
   unsigned int _resolution;
 
   // Way to specify color vs grayscale image creation.
-  bool _color;
+  MooseEnum _color;
 
   /// Pointer the libMesh::MeshFunction object that the read data is stored
   std::unique_ptr<MeshFunction> _mesh_function;
