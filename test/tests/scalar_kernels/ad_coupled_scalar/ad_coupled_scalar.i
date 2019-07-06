@@ -57,11 +57,13 @@
     variable = u
     diffusivity = 1
     boundary = 'left'
+    execute_on = 'initial nonlinear linear timestep_end'
   []
   [scale_flux]
     type = ScalePostprocessor
     scaling_factor = -1
     value = flux
+    execute_on = 'initial nonlinear linear timestep_end'
   []
 []
 
@@ -69,9 +71,14 @@
   type = Transient
   dt = .1
   end_time = 1
-  solve_type = NEWTON
+  solve_type = PJFNK
+  nl_rel_tol = 1e-12
 []
 
 [Outputs]
   exodus = true
+  [dof]
+    type = DOFMap
+    execute_on = 'initial'
+  []
 []
