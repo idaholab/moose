@@ -39,6 +39,11 @@ public:
   virtual void computeJacobian() = 0;
   virtual void computeOffDiagJacobian(unsigned int jvar) = 0;
 
+  /**
+   * Compute the off-diagonal contributions from scalar variables
+   */
+  virtual void computeOffDiagJacobianScalar(unsigned int /*jvar*/) {}
+
 protected:
   /// The aux variables to save the residual contributions to
   bool _has_save_in;
@@ -50,4 +55,3 @@ protected:
   std::vector<MooseVariableFEBase *> _diag_save_in;
   std::vector<AuxVariableName> _diag_save_in_strings;
 };
-

@@ -26,6 +26,7 @@ public:
   void computeResidual() override;
   void computeJacobian() override;
   void computeOffDiagJacobian(unsigned int jvar) override;
+  void computeOffDiagJacobianScalar(unsigned int jvar) override;
 
 protected:
   /**

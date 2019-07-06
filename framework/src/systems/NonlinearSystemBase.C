@@ -2513,7 +2513,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
           const auto & coupled_scalar_vars = bc->getCoupledMooseScalarVars();
           for (const auto & jvariable : coupled_scalar_vars)
             if (hasScalarVariable(jvariable->name()))
-              bc->computeOffDiagJacobian(jvariable->number());
+              bc->computeOffDiagJacobianScalar(jvariable->number());
         }
       }
     } // end loop over boundary nodes
