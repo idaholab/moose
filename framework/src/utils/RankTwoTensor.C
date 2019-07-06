@@ -1156,7 +1156,7 @@ RankTwoTensorTempl<DualReal>::symmetricEigenvaluesEigenvectors(
 
       D.addIa(-shift);
       D.QR(Q, R, U, m + 1, eps);
-      if (abs(R(m - 1, m - 1)) < eps)
+      if (std::abs(R(m - 1, m - 1)) < eps)
       {
         D.addIa(shift);
         shift = m == N - 1 ? R(0, 0) : R(N - 1, N - 1);
