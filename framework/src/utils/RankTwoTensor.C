@@ -1082,19 +1082,19 @@ RankTwoTensorTempl<DualReal>::QR(RankTwoTensorTempl<DualReal> & Q,
 
       if (i == 0 && b == 2)
       {
-        if (abs(R(a, 1)) > eps || abs(R(b, 1)) > eps)
+        if (std::abs(R(a, 1)) > eps || std::abs(R(b, 1)) > eps)
           j = 1;
-        else if (abs(R(b, 2)) > eps)
+        else if (std::abs(R(b, 2)) > eps)
           j = 2;
       }
       else if (i == 0 && b == 1 && dim == 2)
       {
-        if (abs(R(b, 1)) > eps)
+        if (std::abs(R(b, 1)) > eps)
           j = 1;
       }
       else if (i == 2)
       {
-        if (abs(R(b, 2)) > eps)
+        if (std::abs(R(b, 2)) > eps)
           j = 2;
       }
 
