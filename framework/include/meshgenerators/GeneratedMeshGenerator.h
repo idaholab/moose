@@ -52,4 +52,3 @@ protected:
   /// _bias_x > 1 implies cells are growing in the x-direction.
   Real _bias_x, _bias_y, _bias_z;
 };
-

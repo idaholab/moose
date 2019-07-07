@@ -78,4 +78,3 @@ private:
   /// A nullptr to use for when inputs aren't specified
   std::unique_ptr<MeshBase> _null_mesh = nullptr;
 };
-
