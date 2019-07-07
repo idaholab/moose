@@ -1,0 +1,57 @@
+[Tests]
+  [./enclosure]
+    type = 'Exodiff'
+    input = 'simple_square.i'
+    cli_args = '--mesh-only'
+    exodiff = 'simple_square_in.e'
+    requirement = 'MOOSE shall be able to generate a mesh with Triangle for an enclosure.'
+    design = 'meshgenerators/TriangleMesher.md'
+    issues = '#11695'
+    mesh_mode = 'REPLICATED'
+    recover = false
+  [../]
+  [./enclosure_with_holes]
+    type = 'Exodiff'
+    input = 'simple_square_with_holes.i'
+    cli_args = '--mesh-only'
+    exodiff = 'simple_square_with_holes_in.e'
+    requirement = 'MOOSE shall be able to put holes in a mesh with Triangle.'
+    design = 'meshgenerators/TriangleMesher.md'
+    issues = '#11695'
+    mesh_mode = 'REPLICATED'
+    recover = false
+  [../]
+  [./enclosure_with_boundaries]
+    type = 'Exodiff'
+    input = 'simple_square_with_ids.i'
+    cli_args = '--mesh-only'
+    exodiff = 'simple_square_with_ids_in.e'
+    requirement = 'MOOSE shall be able to assign boundaries for a mesh generated with Triangle.'
+    design = 'meshgenerators/TriangleMesher.md'
+    issues = '#11695'
+    mesh_mode = 'REPLICATED'
+    recover = false
+  [../]
+  [./enclosure_with_subdomains]
+    type = 'Exodiff'
+    input = 'square_with_subdomains.i'
+    cli_args = '--mesh-only'
+    exodiff = 'square_with_subdomains_in.e'
+    requirement = 'MOOSE shall be able to assign subdomains for a mesh generated with Triangle.'
+    design = 'meshgenerators/TriangleMesher.md'
+    issues = '#11695'
+    mesh_mode = 'REPLICATED'
+    recover = false
+  [../]
+  [./enclosure_with_mesh_hole]
+    type = 'Exodiff'
+    input = 'enclosure_with_mesh_hole.i'
+    cli_args = '--mesh-only'
+    exodiff = 'enclosure_with_mesh_hole_in.e'
+    requirement = 'MOOSE shall be able to create a hole for a mesh generated with Triangle from another mesh.'
+    design = 'meshgenerators/TriangleMesher.md'
+    issues = '#11695'
+    mesh_mode = 'REPLICATED'
+    recover = false
+  [../]
+[]
