@@ -1,8 +1,13 @@
 [Tests]
+  issues = '#1927'
+  design = 'Debug/index.md'
+
   [./test]
     type = 'Exodiff'
     input = 'output_residual_test.i'
     exodiff = 'out.e'
     expect_out = '|residual|_2 of individual variables:'
+
+    requirement = "The system shall support the ability to output the residual norms of individual variables."
   [../]
 []

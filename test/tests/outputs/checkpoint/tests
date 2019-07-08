@@ -48,7 +48,6 @@
       input = 'checkpoint_interval.i'
       exodiff = 'checkpoint_interval_out.e'
       prereq = 'test_files'
-      issues = '#2395'
       detail = "be capable of restarting a simulation from previously exported data at this interval."
     []
   []

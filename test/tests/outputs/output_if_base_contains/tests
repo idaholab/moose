@@ -1,4 +1,7 @@
 [Tests]
+  issues = '#1927'
+  design = 'Outputs/index.md'
+
   [./dt_from_master]
     type = 'CheckFiles'
     input = 'dt_from_master_master.i'
@@ -11,5 +14,7 @@
     check_not_exists = 'dt_from_master_master_out_sub0_sub0.e
                         dt_from_master_master_out_sub1_sub0.e'
     recover = false
+
+    requirement = "The system shall support the ability to limit output to certain sub-applications based on name."
   [../]
 []

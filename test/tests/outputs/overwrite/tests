@@ -1,8 +1,11 @@
 [Tests]
+  issues = '#5857'
+  design = 'outputs/Exodus.md'
   [./test]
-    # Test that the overwrite flag results in only the final timestep being output
     type = 'Exodiff'
     input = 'overwrite.i'
     exodiff = 'overwrite_out.e'
+
+    requirement = "The system shall include the ability to overwrite existing timesteps when writing ExodusII format."
   [../]
 []

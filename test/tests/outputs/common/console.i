@@ -86,7 +86,6 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  console = true
 []
 
 [ICs]

@@ -1,26 +1,38 @@
 [Tests]
+  issues = '#1927'
+  design = 'Outputs/index.md'
   [./duplicate_objects]
-    # Test error when two outputs with the same name are created (two blocks)
     type = RunException
     input = duplicate_outputs.i
     expect_err = "'exodus' already exists"
+
+    requirement = "The system shall error when two outputs with the same name are created."
   [../]
   [./duplicate_output_files]
-    # Test error when two outputs with the same name are created (two blocks)
     type = RunException
     input = duplicate_output_files.i
     expect_err = 'An output file with the name, duplicate_output_files_out.e, already exists.'
+
+    requirement = "The system shall error when two outputs produce a file with the same name."
   [../]
-  [./none_reserved]
-    # Test that the "none" keyword is actually reserved
-    type = RunException
-    input = none_reserved.i
-    expect_err = "The name 'none' is a reserved name for output objects"
-  [../]
-  [./all_reserved]
-    # Test that the "all" keyword is actually reserved
-    type = RunException
-    input = all_reserved.i
-    expect_err = "The name 'all' is a reserved name for output objects"
-  [../]
+
+  [reserved]
+    requirement = "The system shall reserve names for output objects:"
+
+    [none_reserved]
+      type = RunException
+      input = none_reserved.i
+      expect_err = "The name 'none' is a reserved name for output objects"
+
+      detail = '"none" and '
+    []
+    [all_reserved]
+      # Test that the "all" keyword is actually reserved
+      type = RunException
+      input = all_reserved.i
+      expect_err = "The name 'all' is a reserved name for output objects"
+
+      detail = '"all."'
+    []
+  []
 []

@@ -1,7 +1,12 @@
 [Tests]
+  issues = '#3249'
+  design = 'Outputs/index.md'
+
   [./test]
     type = 'Exodiff'
     input = 'subdir_output.i'
     exodiff = 'sub1/sub2/subdir_output_out.e'
+
+    requirement = "The system shall support writing file to sub-directories."
   [../]
 []

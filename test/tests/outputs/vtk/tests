@@ -1,50 +1,71 @@
 [Tests]
-  [./files_serial]
-    # Check that the files are being created (serial)
-    type = 'CheckFiles'
-    input = 'vtk_serial.i'
-    check_files = 'vtk_serial_out_000.vtk vtk_serial_out_000_0.vtu vtk_serial_out_001.vtk vtk_serial_out_001_0.vtu vtk_serial_out_002.vtk vtk_serial_out_002_0.vtu vtk_serial_out_003.vtk vtk_serial_out_003_0.vtu vtk_serial_out_004.vtk vtk_serial_out_004_0.vtu vtk_serial_out_005.vtk vtk_serial_out_005_0.vtu'
-    max_parallel = 1
-    vtk = true
-  [../]
-  [./files_parallel]
-    # Check that the files are being created (parallel)
-    type = 'CheckFiles'
-    input = 'vtk_parallel.i'
-    check_files = 'vtk_parallel_out_000.pvtu vtk_parallel_out_000_0.vtu vtk_parallel_out_000_1.vtu vtk_parallel_out_001.pvtu vtk_parallel_out_001_0.vtu vtk_parallel_out_001_1.vtu vtk_parallel_out_002.pvtu vtk_parallel_out_002_0.vtu vtk_parallel_out_002_1.vtu vtk_parallel_out_003.pvtu vtk_parallel_out_003_0.vtu vtk_parallel_out_003_1.vtu vtk_parallel_out_004.pvtu vtk_parallel_out_004_0.vtu vtk_parallel_out_004_1.vtu vtk_parallel_out_005.pvtu vtk_parallel_out_005_0.vtu vtk_parallel_out_005_1.vtu'
-    max_parallel = 2
-    min_parallel = 2
-    vtk = true
-  [../]
-  [./diff_serial_mesh]
-    # Check that actual solution, requires serial due to VTK parallel output
-    type = VTKDiff
-    vtkdiff = 'vtk_diff_out_005.vtk vtk_diff_out_005_0.vtu'
-    input = vtk_diff.i
-    max_parallel = 1
-    vtk = true
-    mesh_mode = REPLICATED
-  [../]
-  [./diff_serial_mesh_parallel]
-    # Check that actual solution, in parallel with serial mesh
-    type = VTKDiff
-    vtkdiff = 'vtk_diff_serial_mesh_parallel_out_005.pvtu vtk_diff_serial_mesh_parallel_out_005_0.vtu vtk_diff_serial_mesh_parallel_out_005_1.vtu'
-    input = vtk_diff_serial_mesh_parallel.i
-    max_parallel = 2
-    min_parallel = 2
-    vtk = true
-    mesh_mode = REPLICATED
-  [../]
-  [./diff_parallel_mesh]
-    # Check that actual solution, in parallel with parallel mesh
-    type = VTKDiff
-    vtkdiff = 'vtk_diff_parallel_mesh_out_005.pvtu vtk_diff_parallel_mesh_out_005_0.vtu vtk_diff_parallel_mesh_out_005_1.vtu'
-    input = vtk_diff.i
-    max_parallel = 2
-    min_parallel = 2
-    vtk = true
-    cli_args = Outputs/file_base=vtk_diff_parallel_mesh_out
-    mesh_mode = DISTRIBUTED
-    deleted = "#6149"
-  [../]
+  issues = '#1927'
+  design = 'outputs/VTKOutput.md'
+
+  [files]
+     requirement = "The system shall optionally support output of files using the VTK format:"
+
+     [serial]
+       # Check that the files are being created (serial)
+       type = 'CheckFiles'
+       input = 'vtk_serial.i'
+       check_files = 'vtk_serial_out_000.vtk vtk_serial_out_000_0.vtu vtk_serial_out_001.vtk vtk_serial_out_001_0.vtu vtk_serial_out_002.vtk vtk_serial_out_002_0.vtu vtk_serial_out_003.vtk vtk_serial_out_003_0.vtu vtk_serial_out_004.vtk vtk_serial_out_004_0.vtu vtk_serial_out_005.vtk vtk_serial_out_005_0.vtu'
+       max_parallel = 1
+       vtk = true
+
+       detail = 'in serial and'
+     []
+     [parallel]
+       # Check that the files are being created (parallel)
+       type = 'CheckFiles'
+       input = 'vtk_parallel.i'
+       check_files = 'vtk_parallel_out_000.pvtu vtk_parallel_out_000_0.vtu vtk_parallel_out_000_1.vtu vtk_parallel_out_001.pvtu vtk_parallel_out_001_0.vtu vtk_parallel_out_001_1.vtu vtk_parallel_out_002.pvtu vtk_parallel_out_002_0.vtu vtk_parallel_out_002_1.vtu vtk_parallel_out_003.pvtu vtk_parallel_out_003_0.vtu vtk_parallel_out_003_1.vtu vtk_parallel_out_004.pvtu vtk_parallel_out_004_0.vtu vtk_parallel_out_004_1.vtu vtk_parallel_out_005.pvtu vtk_parallel_out_005_0.vtu vtk_parallel_out_005_1.vtu'
+       max_parallel = 2
+       min_parallel = 2
+       vtk = true
+
+       detail = 'in parallel.'
+     []
+  []
+  [solution]
+     requirement = "The system shall optionally support output of solution data using the VTK format:"
+
+     [./diff_serial_mesh]
+       # Check that actual solution, requires serial due to VTK parallel output
+       type = VTKDiff
+       vtkdiff = 'vtk_diff_out_005.vtk vtk_diff_out_005_0.vtu'
+       input = vtk_diff.i
+       max_parallel = 1
+       vtk = true
+       mesh_mode = REPLICATED
+
+       detail = 'in serial with a replicated mesh,'
+     [../]
+     [./diff_serial_mesh_parallel]
+       # Check that actual solution, in parallel with serial mesh
+       type = VTKDiff
+       vtkdiff = 'vtk_diff_serial_mesh_parallel_out_005.pvtu vtk_diff_serial_mesh_parallel_out_005_0.vtu vtk_diff_serial_mesh_parallel_out_005_1.vtu'
+       input = vtk_diff_serial_mesh_parallel.i
+       max_parallel = 2
+       min_parallel = 2
+       vtk = true
+       mesh_mode = REPLICATED
+
+       detail = 'in parallel with a replicated mesh, and'
+     [../]
+     [./diff_parallel_mesh]
+       # Check that actual solution, in parallel with parallel mesh
+       type = VTKDiff
+       vtkdiff = 'vtk_diff_parallel_mesh_out_005.pvtu vtk_diff_parallel_mesh_out_005_0.vtu vtk_diff_parallel_mesh_out_005_1.vtu'
+       input = vtk_diff.i
+       max_parallel = 2
+       min_parallel = 2
+       vtk = true
+       cli_args = Outputs/file_base=vtk_diff_parallel_mesh_out
+       mesh_mode = DISTRIBUTED
+       skip = "#6149"
+
+       detail = 'in parallel with a distributed mesh.'
+     [../]
+  []
 []

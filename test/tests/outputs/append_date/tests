@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#6001'
+  design = 'outputs/FileOutput.md'
   [./test]
     type = RunApp
     input = append_date.i
     recover = false # Steady
+    requirement = "The system shall support the ability to append the date to output filenames."
   [../]
 []

@@ -1,21 +1,25 @@
 [Tests]
+  issues = '#1927'
+  design = 'Outputs/index.md'
   [./time_step]
-    # Test outputting at intervals set at the sub-block level
+    #
     type = 'Exodiff'
     input = 'intervals.i'
     exodiff = 'intervals_out.e'
     cli_args = 'Outputs/out/interval=5'
+
+    requirement = "The system shall support specifying an output interval for an output input file block."
   [../]
   [./common_time_step]
-    # Same as above, but uses interval set via the common parameters
     type = 'Exodiff'
     input = 'intervals.i'
     exodiff = 'intervals_out.e'
     cli_args = 'Outputs/interval=5'
     prereq = 'time_step'
+
+    requirement = "The system shall support specifying an output interval for all outputs."
   [../]
   [./output_final]
-    # Tests the final step output
     type = 'Exodiff'
     input = 'output_final.i'
     exodiff = 'output_final_out.e'
@@ -23,36 +27,46 @@
     # There is no timestep output at all during the first stage of this test
     # so recover does not work with this input file.
     recover = false
+
+    requirement = "The system shall support limiting output to the final timestep of a simulation."
   [../]
   [./sync_times]
-    # Test useage of sync times in an output object
     type = 'Exodiff'
     input = 'sync_times.i'
     exodiff = 'sync_times_out.e'
+
+    requirement = "The system shall support output at specific simulation times."
   [../]
   [./multiple_sync_times]
     # Tests the use of different sync times for outputs
     type = 'Exodiff'
     input = 'multiple_sync_times.i'
     exodiff = 'multiple_sync_times_out_3.e multiple_sync_times_out_5.e multiple_sync_times_sync_0.e multiple_sync_times_sync_1.e'
+
+    requirement = "The system shall support multiple output objects that have different simulation synchronization times specified."
   [../]
   [./no_output]
-    # Test if all output being disabled works
     type = RunException
     input = no_output.i
 #    check_not_exists = no_output_out.e
     expect_err = "The current settings results in only the input file and no variables being output to the Exodus file, this is not supported."
+
+    requirement = "The system shall support the disabling of an output object by restricting the execution settings."
   [../]
   [./no_intermediate]
     # Test that intermediate steps may be disabled
     type = Exodiff
     input = no_intermediate.i
     exodiff = no_intermediate_out.e
+
+    requirement = "The system shall support the ability to limit output objects only at the beginning and end of a simulation."
   [../]
   [./no_final_repeat]
     # Test that the final time step is not repeated
     type = Exodiff
     input = no_final_repeat.i
     exodiff = no_final_repeat_out.e
+
+    requirement = "The system shall not output the same information multiple times when an output object is defined to operate on the end of each timestep and the final timestep."
   [../]
 []

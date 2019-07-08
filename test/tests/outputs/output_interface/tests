@@ -1,12 +1,21 @@
 [Tests]
-  [./indicators]
-    type = 'Exodiff'
-    input = 'indicator.i'
-    exodiff = 'indicator_indicators.e indicator_no_indicators.e'
-  [../]
-  [./markers]
-    type = 'Exodiff'
-    input = 'marker.i'
-    exodiff = 'marker_markers.e marker_no_markers.e'
-  [../]
+  design = 'OutputInterface.md'
+  issues = '#3702'
+  [group]
+    requirement = "The system shall include the ability to limit automatic output of adaptivity objects, including"
+    [indicators]
+      type = 'Exodiff'
+      input = 'indicator.i'
+      exodiff = 'indicator_indicators.e indicator_no_indicators.e'
+
+      detail = "indicators and"
+    []
+    [markers]
+      type = 'Exodiff'
+      input = 'marker.i'
+      exodiff = 'marker_markers.e marker_no_markers.e'
+
+      detail = "markers."
+    []
+  []
 []
