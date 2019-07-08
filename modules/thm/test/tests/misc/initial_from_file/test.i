@@ -61,8 +61,7 @@
 
   [./junction]
     type = VolumeJunction1Phase
-    inputs  = 'pipe1:out'
-    outputs = 'pipe2:in'
+    connections = 'pipe1:out pipe2:in'
     volume = 1
     position = '1 0 0'
 

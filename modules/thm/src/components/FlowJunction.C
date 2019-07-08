@@ -8,18 +8,23 @@ validParams<FlowJunction>()
 {
   InputParameters params = validParams<FlowConnection>();
   params.addPrivateParam<std::string>("component_type", "flow_junction");
-  params.addRequiredParam<std::vector<BoundaryName>>("inputs", "Inputs of this junction");
-  params.addRequiredParam<std::vector<BoundaryName>>("outputs", "Outputs of this junction");
+  params.addDeprecatedParam<std::vector<BoundaryName>>(
+      "inputs",
+      "Inputs of this junction",
+      "Use 'connections' parameter instead. Put 'inputs' and 'outputs' in it.");
+  params.addDeprecatedParam<std::vector<BoundaryName>>(
+      "outputs",
+      "Outputs of this junction",
+      "Use 'connections' parameter instead. Put 'inputs' and 'outputs' in it.");
+  params.addRequiredParam<std::vector<BoundaryName>>("connections", "Junction connections");
   return params;
 }
 
 FlowJunction::FlowJunction(const InputParameters & params) : FlowConnection(params)
 {
-  const std::vector<BoundaryName> & inputs = getParam<std::vector<BoundaryName>>("inputs");
-  const std::vector<BoundaryName> & outputs = getParam<std::vector<BoundaryName>>("outputs");
-  for (const auto & connection_string : inputs)
-    addConnection(connection_string);
-  for (const auto & connection_string : outputs)
+  const std::vector<BoundaryName> & connections =
+      getParam<std::vector<BoundaryName>>("connections");
+  for (const auto & connection_string : connections)
     addConnection(connection_string);
 }
 
