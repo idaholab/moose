@@ -1,13 +1,11 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # RadialDisplacementSphereAux
 
-!alert construction title=Undocumented Class
-The RadialDisplacementSphereAux has not been documented. The content contained on this page
-includes the basic documentation associated with a MooseObject; however, what is contained is
-ultimately determined by what is necessary to make the documentation clear for users.
-
 !syntax description /AuxKernels/RadialDisplacementSphereAux
+
+Computing the radial displacement for spherically symmetric models is simply a matter
+of reporting $u_r$.
+
+For a 2D and 3D spherical models, the vector from the origin to a node is $p_{n0} = p_n - p_0$.  The radial displacement is then $u_r = u_n \cdot \frac{p_{n0}}{\left\lVert{p_{n0}}\right\rVert}$.
 
 !syntax parameters /AuxKernels/RadialDisplacementSphereAux
 

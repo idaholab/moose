@@ -22,7 +22,7 @@ InputParameters
 validParams<WeakPlaneStress>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addClassDescription("Plane stress kernel to provide out-of-plane strain contribution");
+  params.addClassDescription("Plane stress kernel to provide out-of-plane strain contribution.");
   params.addCoupledVar("displacements",
                        "The string of displacements suitable for the problem statement");
   params.addCoupledVar("temperature",
