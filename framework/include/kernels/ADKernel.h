@@ -115,7 +115,7 @@ protected:
   /// The current shape functions
   const ADTemplateVariablePhiValue & _phi;
 
-  ADResidual _r;
+  ADReal _r;
   std::vector<DualReal> _residuals;
 
   /// The current gradient of the shape functions
