@@ -1,0 +1,11 @@
+[Tests]
+  [./heatConduction_test]
+    type = 'Exodiff'
+    input = 'heatConduction2D.i'
+    exodiff = 'heatConduction2D_out.e'
+    max_parallel = 1
+    design = 'HomogenizedHeatConduction.md'
+    requirement = 'The system shall compute homogenized thermal conductivity using the asymptotic expansion homogenization approach'
+    issues = '#6750'
+  [../]
+[]
