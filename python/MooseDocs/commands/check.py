@@ -217,7 +217,7 @@ def _check_page_for_stub(node, app_name, filename, update):
         elif not node.hidden:
             msg = "A MOOSE generated stub page for %s exists, but no content was " \
                   "added. Add documentation content to %s."
-            LOG.error(msg, node.fullpath, filename)
+            LOG.warning(msg, node.fullpath, filename)
 
 def _default_content(node):
     """
