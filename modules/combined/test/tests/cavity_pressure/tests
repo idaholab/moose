@@ -1,10 +1,13 @@
 [Tests]
+  issues = '#2703'
+  design = 'CavityPressure/index.md'
   [./test]
     type = 'Exodiff'
     input = 'cavity_pressure.i'
     exodiff = 'cavity_pressure_out.e'
     abs_zero = 1e-10
     rel_err = 1e-5
+    requirement = 'The system shall compute a cavity pressure based on the ideal gas law'
   [../]
 
   [./test_init_temp]
@@ -13,6 +16,7 @@
     exodiff = 'cavity_pressure_init_temp_out.e'
     abs_zero = 1e-10
     rel_err = 1e-5
+    requirement = 'The system shall compute a cavity pressure based on the ideal gas law where the initial temperature of the cavity is independently specified'
   [../]
 
   [./test_rz]
@@ -21,6 +25,7 @@
     exodiff = 'cavity_pressure_rz_out.e'
     abs_zero = 1e-10
     recover = false
+    requirement = 'The system shall compute a cavity pressure based on the ideal gas law for an axisymmetric model'
   [../]
 
   [./test_rz_restart1]
@@ -29,6 +34,7 @@
     input = 'cavity_pressure_rz.i'
     cli_args = 'Executioner/num_steps=1'
     recover = false
+    requirement = 'The system shall write a restart file with cavity pressure information'
   [../]
 
   [./test_rz_restart2]
@@ -37,12 +43,14 @@
     input = 'cavity_pressure_rz.i'
     exodiff = 'cavity_pressure_rz_out.e'
     delete_output_before_running = false
+    requirement = 'The system shall restart properly when running with cavity pressure'
   [../]
 
   [./rz_negative_moles_check]
     type = RunException
     input = 'cavity_pressure_negative_volume.i'
     expect_err = 'Negative number of moles calculated as an input for the cavity pressure'
+    requirement = 'The system shall report an error if a negative volume is supplied to the cavity pressure calculation'
   [../]
 
   [./test_vector_input]
@@ -51,5 +59,6 @@
     exodiff = 'cavity_pressure_vector_out.e'
     abs_zero = 1e-10
     rel_err = 1e-5
+    requirement = 'The system shall compute a cavity pressure based on the ideal gas law when given a set of internal volumes to sum'
   [../]
 []
