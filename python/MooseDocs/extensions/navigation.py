@@ -427,7 +427,7 @@ class NavigationExtension(components.Extension):
 
     def _findPath(self, page, path):
         """Locates page based on supplied path."""
-        node = self.translator.findPage(path)
+        node = self.translator.findPage(path.lstrip('/'), exact=path.startswith('/'))
         if node is None:
             msg = 'Failed to locate navigation item: {}.'.format(path)
             LOG.error(msg)

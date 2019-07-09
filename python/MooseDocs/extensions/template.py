@@ -39,6 +39,9 @@ class TemplateExtension(include.IncludeExtension):
     def defaultConfig():
         config = include.IncludeExtension.defaultConfig()
         config['args'] = (dict(), "Template arguments to be applied to templates.")
+
+        # Disable by default to allow for updates to applications
+        config['active'] = (False, config['active'][1])
         return config
 
     def extend(self, reader, renderer):

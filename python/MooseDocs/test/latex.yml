@@ -42,8 +42,10 @@ Extensions:
         draft: True
     MooseDocs.extensions.heading: default
     MooseDocs.extensions.gallery: disable
-    MooseDocs.extensions.template: default
+    MooseDocs.extensions.template:
+        active: True
     MooseDocs.extensions.sqa:
+        active: True
         categories:
             MooseDocs:
                 directories:

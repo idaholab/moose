@@ -45,8 +45,10 @@ Extensions:
     MooseDocs.extensions.heading: default
     MooseDocs.extensions.gallery: default
     MooseDocs.extensions.pdf: default
-    MooseDocs.extensions.template: default
+    MooseDocs.extensions.template:
+        active: True
     MooseDocs.extensions.sqa:
+        active: True
         categories:
             MooseDocs:
                 directories:

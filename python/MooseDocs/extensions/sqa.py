@@ -69,6 +69,9 @@ class SQAExtension(command.CommandExtension):
         config['categories'] = (dict(), "A dictionary of category names that includes a " \
                                         "dictionary with 'directories' and optionally 'specs'.")
         config['requirement-groups'] = (dict(), "Allows requirement group names to be changed.")
+
+        # Disable by default to allow for updates to applications
+        config['active'] = (False, config['active'][1])
         return config
 
     def __init__(self, *args, **kwargs):

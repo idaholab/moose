@@ -132,7 +132,10 @@ Extensions:
     MooseDocs.extensions.civet:
         repo: moose
         owner: idaholab
+    MooseDocs.extensions.template:
+        active: True
     MooseDocs.extensions.sqa:
+        active: True
         categories:
             framework: !include framework/doc/sqa_framework.yml
             tensor_mechanics: !include modules/tensor_mechanics/doc/sqa_tensor_mechanics.yml
