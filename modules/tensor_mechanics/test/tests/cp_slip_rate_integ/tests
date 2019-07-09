@@ -1,8 +1,11 @@
 [Tests]
+  issues = '#5683 #6973'
+  design = 'FiniteStrainCPSlipRateRes.md'
   [./test_one_elem]
     type = 'Exodiff'
     input = 'crysp.i'
     exodiff = 'out.e'
+    requirement = 'The system shall compute the stress and strain response of a single crystal using the Kalidindi constitutive equation for hardening as a function of slip rate on each slip system.'
   [../]
   [./test_substep]
     type = 'Exodiff'
@@ -11,6 +14,8 @@
     allow_warnings = true
     max_time = 350
     valgrind = HEAVY
+    issues = '#5082 #5683'
+    requirement = 'The system shall compute the stress and strain response of a single crystal using the Kalidindi constitutive equation for hardening as a function of slip rate on each slip system with the substepping capability that reduces the intermediate time step size to aid with convergence within the crystal plasticity hardening model.'
   [../]
   [./test_with_linesearch]
     type = 'Exodiff'
@@ -19,5 +24,6 @@
     allow_warnings = true
     max_time = 350
     valgrind = HEAVY
+    requirement = 'The system shall compute the stress and strain response of a single crystal using the Kalidindi constitutive equation for hardening as a function of slip rate on each slip system with the bisection line search method within the crystal plasticity hardening model to aid with convergence.'
   [../]
 []

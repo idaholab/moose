@@ -7,13 +7,10 @@
 
 [Variables]
   [./disp_x]
-    block = 0
   [../]
   [./disp_y]
-    block = 0
   [../]
   [./disp_z]
-    block = 0
   [../]
 []
 
@@ -21,22 +18,18 @@
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
   [../]
   [./fp_zz]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
   [../]
   [./e_zz]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
   [../]
   [./gss1]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
   [../]
 []
 
@@ -62,7 +55,6 @@
     index_j = 2
     index_i = 2
     execute_on = timestep_end
-    block = 0
   [../]
   [./fp_zz]
     type = RankTwoAux
@@ -71,7 +63,6 @@
     index_j = 2
     index_i = 2
     execute_on = timestep_end
-    block = 0
   [../]
   [./e_zz]
     type = RankTwoAux
@@ -80,7 +71,6 @@
     index_j = 2
     index_i = 2
     execute_on = timestep_end
-    block = 0
   [../]
   [./gss1]
     type = MaterialStdVectorAux
@@ -88,7 +78,6 @@
     property = gss
     index = 0
     execute_on = timestep_end
-    block = 0
   [../]
 []
 
@@ -122,7 +111,6 @@
 [Materials]
   [./crysp]
     type = FiniteStrainCPSlipRateRes
-    block = 0
     gtol = 1e-2
     rtol = 1e-8
     abs_tol = 1e-15
@@ -137,13 +125,11 @@
   [../]
   [./elasticity_tensor]
     type = ComputeElasticityTensorCP
-    block = 0
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     fill_method = symmetric9
   [../]
   [./strain]
     type = ComputeFiniteStrain
-    block = 0
     displacements = 'disp_x disp_y disp_z'
   [../]
 []
@@ -152,22 +138,18 @@
   [./stress_zz]
     type = ElementAverageValue
     variable = stress_zz
-    block = 'ANY_BLOCK_ID 0'
   [../]
   [./fp_zz]
     type = ElementAverageValue
     variable = fp_zz
-    block = 'ANY_BLOCK_ID 0'
   [../]
   [./e_zz]
     type = ElementAverageValue
     variable = e_zz
-    block = 'ANY_BLOCK_ID 0'
   [../]
   [./gss1]
     type = ElementAverageValue
     variable = gss1
-    block = 'ANY_BLOCK_ID 0'
   [../]
 []
 
@@ -180,8 +162,6 @@
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   petsc_options_iname = '-pc_type'
