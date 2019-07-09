@@ -47,4 +47,3 @@ protected:
   /// every derivative given by a list of variables to derive w.r.t
   std::map<MaterialPropertyName, std::vector<VariableName>> _derivatives;
 };
-

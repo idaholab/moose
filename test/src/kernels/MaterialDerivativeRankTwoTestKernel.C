@@ -9,7 +9,7 @@
 
 #include "MaterialDerivativeRankTwoTestKernel.h"
 
-registerMooseObject("MooseApp", MaterialDerivativeRankTwoTestKernel);
+registerMooseObject("MooseTestApp", MaterialDerivativeRankTwoTestKernel);
 
 template <>
 InputParameters

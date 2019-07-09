@@ -1,19 +1,18 @@
 Content:
     - framework/doc/content
-    - MooseTestApp:
-          root_dir: test/doc/content
-          content:
-              - index.md
+    - test/doc/content
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
     name: MooseTestApp
     repo: https://github.com/idaholab/moose
     home: /
+
 Extensions:
     MooseDocs.extensions.navigation:
         active: False
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/test
+        allow-test-objects: True
         hide:
             framework: !include framework/doc/hidden.yml
         remove:
@@ -21,6 +20,7 @@ Extensions:
             moose_test: !include test/doc/remove.yml
         includes:
             - framework/include
+            - test/include
     MooseDocs.extensions.common:
         shortcuts: !include framework/doc/globals.yml
     MooseDocs.extensions.acronym:
@@ -28,8 +28,6 @@ Extensions:
     MooseDocs.extensions.civet:
         repo: moose
         owner: idaholab
-    MooseDocs.extensions.template:
-        active: True
     MooseDocs.extensions.sqa:
         active: True
         categories:

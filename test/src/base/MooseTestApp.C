@@ -51,8 +51,8 @@ MooseTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_
 
   if (use_test_objs)
   {
-    auto & syntax = s;  // for resiterSyntax macros
-    auto & factory = f; // for resiterSyntax macros
+    auto & syntax = s;  // for registerSyntax macros
+    auto & factory = f; // for registerSyntax macros
 
     registerExecFlag(EXEC_JUST_GO);
 
@@ -67,6 +67,10 @@ MooseTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_
     registerSyntax("MetaNodalNormalsAction", "MetaNodalNormals");
     // For testing the ability to create problems in user defined Actions
     registerSyntax("CreateSpecialProblemAction", "TestProblem");
+
+    // Material derivative test
+    registerSyntaxTask("EmptyAction", "Debug/MaterialDerivativeTest", "no_action"); // placeholder
+    registerSyntax("MaterialDerivativeTestAction", "Debug/MaterialDerivativeTest/*");
   }
 }
 
