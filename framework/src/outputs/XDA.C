@@ -27,7 +27,7 @@ validParams<XDA>()
   InputParameters params = validParams<OversampleOutput>();
 
   // Add description for the XDA class
-  params.addClassDescription("Object for outputting data in the XDA/XDR format");
+  params.addClassDescription("Object for outputting data in the XDA/XDR format.");
 
   /* Set a private parameter for controlling the output type (XDR = binary), the value
      of this parameter is set by the AddOutputAction*/

@@ -22,7 +22,7 @@ validParams<SolutionHistory>()
 {
   // Get the parameters from the parent object
   InputParameters params = validParams<FileOutput>();
-  params.addClassDescription("Output for the nonlinear solution history.");
+  params.addClassDescription("Outputs the non-linear and linear iteration solve history.");
 
   // Return the parameters
   return params;

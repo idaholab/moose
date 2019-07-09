@@ -280,7 +280,7 @@ class SyntaxCommandHeadingBase(SyntaxCommandBase):
         settings = settings or self.settings
         heading = settings['heading']
         if heading is not None:
-            h = core.Heading(parent, level=int(settings['heading-level']))
+            h = core.Heading(parent, level=int(settings['heading-level']), id_=settings['id'])
             self.reader.tokenize(h, heading, page, MooseDocs.INLINE)
 
 class SyntaxDescriptionCommand(SyntaxCommandBase):
@@ -535,7 +535,7 @@ class SyntaxCompleteCommand(SyntaxListCommand):
 
             if child.groups.intersection(groups):
                 url = os.path.join('syntax', child.markdown())
-                h = core.Heading(parent, level=level)
+                h = core.Heading(parent, level=level, id_=self.settings['id'])
                 autolink.AutoLink(h, page=url, string=unicode(child.fullpath.strip('/')))
 
             SyntaxListCommand.createTokenFromSyntax(self, parent, info, page, child)
@@ -603,12 +603,17 @@ class RenderInputParametersToken(components.RenderComponent):
     def createMaterialize(self, parent, token, page):
 
         groups = self._getParameters(token, token['parameters'])
-        for group, params in groups.iteritems():
 
+        n_groups = 0
+        for group, params in groups.iteritems():
+            if len(params):
+                n_groups += 1
+
+        for group, params in groups.iteritems():
             if not params:
                 continue
 
-            if len(groups) > 1: # only create a sub-section if more than one exists
+            if n_groups > 1: # only create a sub-section if more than one exists
                 h = html.Tag(parent, 'h{}'.format(token['level'] + 1),
                              string=unicode('{} Parameters'.format(group.title())))
                 if group.lower() in token['visible']:

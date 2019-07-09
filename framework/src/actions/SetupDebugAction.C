@@ -38,7 +38,7 @@ validParams<SetupDebugAction>()
       "Print out the material properties supplied for each block, face, neighbor, and/or sideset");
 
   params.addClassDescription(
-      "Adds various debugging type Outputters to the simulation system based on user parameters");
+      "Adds various debugging type Output objects to the simulation system.");
 
   return params;
 }

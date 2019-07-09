@@ -28,6 +28,7 @@ InputParameters
 validParams<AddOutputAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
+  params.addClassDescription("Action responsible for creating Output objects.");
   return params;
 }
 

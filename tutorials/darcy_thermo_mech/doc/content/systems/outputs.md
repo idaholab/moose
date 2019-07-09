@@ -76,17 +76,4 @@ The use of 'file_base' anywhere in the `[Outputs]` block disables all default na
 !---
 
 !style fontsize=85%
-| Short-cut | Sub-block ("type=") | Description |
-| :- | :- | :- |
-| console    | Console | Writes to the screen and optionally a file |
-| exodus     | Exodus  | The most common,well supported, and controllable output type |
-| vtk        | VTK     | Visual Analysis Toolkit format, requires `--enable-vtk` when building libMesh|
-| gmv        | GMV     | General Mesh Viewer format |
-| nemesis    | Nemesis | Parallel ExodusII format |
-| tecplot    | Tecplot | Requires `--enable-tecplot` when building libMesh |
-| xda        | XDA     | libMesh internal format (ascii) |
-| xdr        | XDR     | libMesh internal format (binary) |
-| csv        | CSV     | Comma separated scalar values |
-| gnuplot    | GNUPlot | Only support scalar outputs |
-| checkpoint | Checkpoint | MOOSE internal format used for restart and recovery |
-| solution_history | SolutionHistory | MOOSE internal format used for writing solution history |
+!include output_types.md
