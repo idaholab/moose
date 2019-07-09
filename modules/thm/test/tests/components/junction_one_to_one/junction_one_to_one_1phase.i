@@ -65,8 +65,7 @@
 
   [./junction]
     type = JunctionOneToOne
-    inputs = 'left_channel:out'
-    outputs = 'right_channel:in'
+    connections = 'left_channel:out right_channel:in'
   [../]
 
   [./right_channel]
