@@ -1,9 +1,12 @@
 [Tests]
+design = 'source/materials/ComputeSmearedCrackingStress.md'
+issues = '#6815 #9227'
   [./cracking]
     type = Exodiff
     input = cracking.i
     exodiff = cracking_out.e
     custom_cmp = cracking.cmp
+    requirement = 'The MOOSE TensorMechanics module shall simulate cracking on a specimen under tension in cartesian coordinates.'
   [../]
   [./cracking_deprecated]
     type = Exodiff
@@ -12,18 +15,21 @@
     custom_cmp = cracking.cmp
     prereq = cracking
     allow_deprecated = true
+    requirement = 'The MOOSE TensorMechanics module shall simulate cracking on a specimen under tension in cartesian coordinates using the deprecated input file.'
   [../]
   [./cracking_rz]
     type = Exodiff
     input = cracking_rz.i
     exodiff = cracking_rz_out.e
     custom_cmp = cracking_rz.cmp
+    requirement = 'The MOOSE TensorMechanics module shall simulate cracking on a specimen under tension in rz coordinates.'
   [../]
   [./cracking_function]
     type = Exodiff
     input = cracking_function.i
     exodiff = cracking_function_out.e
     custom_cmp = cracking_function.cmp
+    requirement = 'The MOOSE TensorMechanics module shall simulate cracking while the cracking strength is prescribed by an elemental AuxVariable.'
   [../]
   [./exponential]
     type = Exodiff
@@ -31,6 +37,7 @@
     exodiff = cracking_exponential_out.e
     custom_cmp = cracking_exponential.cmp
     use_old_floor = true
+    requirement = 'The MOOSE TensorMechanics module shall simulate exponential stress release.'
   [../]
   [./exponential_deprecated]
     type = Exodiff
@@ -40,22 +47,26 @@
     use_old_floor = true
     prereq = exponential
     allow_deprecated = true
+    requirement = 'The MOOSE TensorMechanics module shall simulate exponential stress relase, using the deprecated input file.'
   [../]
   [./rz_exponential]
     type = Exodiff
     input = cracking_rz_exponential.i
     exodiff = cracking_rz_exponential_out.e
     custom_cmp = cracking_rz_exp.cmp
+    requirement = 'The MOOSE TensorMechanics module shall simulate exponential stress relase while using the rz coordinate system.'
   [../]
   [./power]
     type = Exodiff
     input = cracking_power.i
     exodiff = cracking_power_out.e
+    requirement = 'The MOOSE TensorMechanics module shall demonstrate softening using the power law for smeared cracking.'
   [../]
   [./multiple_softening]
     type = Exodiff
     input = cracking_multiple_softening.i
     exodiff = cracking_multiple_softening_out.e
+    requirement = 'The MOOSE TensorMechanics module shall demonstrate the prescribed softening laws in three directions, power law (x), exponential (y), and abrupt (z).'
   [../]
   [./xyz]
     type = Exodiff
@@ -63,6 +74,7 @@
     exodiff = cracking_xyz_out.e
     use_old_floor = true
     custom_cmp = cracking_xyz.cmp
+    requirement = 'The MOOSE TensorMechanics module shall simulate smeared cracking in the x y and z directions.'
   [../]
   [./plane_stress]
     type = Exodiff
@@ -70,6 +82,7 @@
     exodiff = cracking_plane_stress_out.e
     use_old_floor = true
     custom_cmp = cracking_pln_str.cmp
+    requirement = 'The MOOSE TensorMechanics module shall simulate smeared cracking under plane stress conditions.'
   [../]
   [./cracking_rotation]
     type = Exodiff
@@ -78,6 +91,7 @@
     use_old_floor = true
     custom_cmp = cracking_rotation.cmp
     max_parallel = 1
+    requirement = 'The MOOSE TensorMechanics module shall demonstrate that the smeared cracking model correctly handles finite rotation of cracked elements.'
   [../]
   [./cracking_rotation_pres_dir_x]
     type = Exodiff
@@ -89,6 +103,7 @@
     cli_args = 'Materials/cracking_stress/prescribed_crack_directions=x AuxKernels/crack_flags3/component=1 AuxKernels/crack_flags2/component=2'
     max_parallel = 1
     prereq = cracking_rotation
+    requirement = 'The MOOSE TensorMechanics module shall demonstrate the finite rotation of cracked elements where the crack is prescribed in x.'
   [../]
   [./cracking_rotation_pres_dir_z]
     type = Exodiff
@@ -100,6 +115,7 @@
     cli_args = 'Materials/cracking_stress/prescribed_crack_directions=z AuxKernels/crack_flags3/component=1 AuxKernels/crack_flags2/component=2'
     max_parallel = 1
     prereq = cracking_rotation_pres_dir_x
+    requirement = 'The MOOSE TensorMechanics module shall demonstrate the finite rotation of cracked elements where the crack is prescribed in z.'
   [../]
   [./cracking_rotation_pres_dir_xz]
     type = Exodiff
@@ -111,5 +127,6 @@
     cli_args = "Materials/cracking_stress/prescribed_crack_directions='x z' AuxKernels/crack_flags3/component=0 AuxKernels/crack_flags2/component=1 AuxKernels/crack_flags1/component=2"
     max_parallel = 1
     prereq = cracking_rotation_pres_dir_z
+    requirement = 'The MOOSE TensorMechanics module shall demonstrate the finite rotation of cracked elements where two cracks are prescribed in x and z.'
   [../]
 []
