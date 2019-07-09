@@ -1,4 +1,5 @@
 [Tests]
+  design = 'MaterialTimeStepPostprocessor.md'
   [./test5a_lim]
     type = 'Exodiff'
     input = 'nafems_test5a_lim.i'
@@ -6,6 +7,8 @@
     rel_err = 1e-5
     abs_zero = 1e-8
     superlu = true
+    issues = '#8553'
+    requirement = 'The system shall compute a timestep size that is limited by a power law creep model and a specified maximum inelastic strain increment.'
   [../]
   [./test5a_lim_on_initial]
     type = 'CSVDiff'
@@ -17,5 +20,7 @@
     override_columns = '_dt'
     override_rel_err = '1e-5'
     override_abs_zero = '1e-8'
+    issues = '#10382'
+    requirement = 'The system shall not impose a limit on the time step during the initial evaluation when the creep limiting time step option is used.'
   [../]
 []

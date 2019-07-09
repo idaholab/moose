@@ -84,6 +84,7 @@ InterfaceKernelBase::InterfaceKernelBase(const InputParameters & parameters)
     TransientInterface(this),
     FunctionInterface(this),
     UserObjectInterface(this),
+    PostprocessorInterface(this),
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, false, false),
     Restartable(this, "InterfaceKernels"),
     MeshChangedInterface(parameters),

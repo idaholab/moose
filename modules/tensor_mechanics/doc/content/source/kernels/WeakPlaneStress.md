@@ -1,13 +1,16 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # WeakPlaneStress
 
-!alert construction title=Undocumented Class
-The WeakPlaneStress has not been documented. The content contained on this page
-includes the basic documentation associated with a MooseObject; however, what is contained is
-ultimately determined by what is necessary to make the documentation clear for users.
-
 !syntax description /Kernels/WeakPlaneStress
+
+## Description
+
+In 2D plane stress conditions, the out-of-plane stress is zero.  The `WeakPlaneStress` kernel
+operates on an out-of-plane strain variable and computes the following residual:
+\begin{equation}
+  \int \phi \; \sigma_{zz} \; \textrm{dV}.
+\end{equation}
+Thus, the out-of-plane stress is driven toward zero but may not be strictly zero everywhere.
+The computed out-of-plane strain may vary at different points on the plane.
 
 !syntax parameters /Kernels/WeakPlaneStress
 

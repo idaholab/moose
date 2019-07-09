@@ -1,21 +1,26 @@
 [Tests]
+  issues = '#7902'
+  design = 'WeakPlaneStress.md'
   [./weak_plane_stress_elastic_jacobian]
     type = 'PetscJacobianTester'
     input = 'weak_plane_stress_elastic_jacobian.i'
     ratio_tol = 1E-12
     difference_tol = 1E10
+    requirement = 'The system shall compute the correct Jacobian for plane stress conditions'
   [../]
 
   [./weak_plane_stress_small]
     type = 'Exodiff'
     input = 'weak_plane_stress_small.i'
     exodiff = 'weak_plane_stress_small_out.e'
+    requirement = 'The system shall compute plane stress conditions with small strains'
   [../]
 
   [./weak_plane_stress_incremental]
     type = 'Exodiff'
     input = 'weak_plane_stress_incremental.i'
     exodiff = 'weak_plane_stress_incremental_out.e'
+    requirement = 'The system shall compute plane stress conditions with incremental strains'
   [../]
 
   [./weak_plane_stress_finite]
@@ -23,5 +28,6 @@
     input = 'weak_plane_stress_finite.i'
     exodiff = 'weak_plane_stress_finite_out.e'
     abs_zero = 1e-9
+    requirement = 'The system shall compute plane stress conditions with finite strains'
   [../]
 []
