@@ -18,24 +18,36 @@ validParams<IdealGasFluidProperties>()
 {
   InputParameters params = validParams<SinglePhaseFluidProperties>();
   params.addRangeCheckedParam<Real>("gamma", 1.4, "gamma > 1", "gamma value (cp/cv)");
-  params.addRangeCheckedParam<Real>("R", 286.7, "R > 0", "Specific gas constant");
+  params.addDeprecatedParam<Real>(
+      "R",
+      286.7,
+      "Specific gas constant",
+      "The parameter 'R' is now computed from the provided values for 'gamma' and 'molar_mass'.");
   params.addParam<Real>("mu", 18.23e-6, "Dynamic viscosity, Pa.s");
   params.addParam<Real>("k", 25.68e-3, "Thermal conductivity, W/(m-K)");
   params.addParam<Real>("molar_mass", 29.0e-3, "Constant molar mass of the fluid (kg/mol)");
   params.addParam<Real>("T_c", 0, "Critical temperature, K");
   params.addParam<Real>("rho_c", 0, "Critical density, kg/m3");
   params.addParam<Real>("e_c", 0, "Internal energy at the critical point, J/kg");
-  params.addRangeCheckedParam<Real>(
-      "cv", 0.718e3, "cv > 0", "Constant specific heat capacity at constant volume (J/kg/K)");
-  params.addParam<Real>(
-      "cp", 1.005e3, "Constant specific heat capacity at constant pressure (J/kg/K)");
-  params.addParam<Real>("henry_constant", 0.0, "Henry constant for dissolution in water");
-  params.addDeprecatedParam<Real>("viscosity", "Dynamic viscosity (Pa.s)", "Use mu instead");
   params.addDeprecatedParam<Real>(
-      "thermal_conductivity", "Thermal conductivity, W/(m-K)", "Use k instead");
+      "cv",
+      0.718e3,
+      "Constant specific heat capacity at constant volume (J/kg/K)",
+      "The parameter 'cv' is now computed from the provided values for 'gamma' and 'molar_mass'.");
+  params.addDeprecatedParam<Real>(
+      "cp",
+      1.005e3,
+      "Constant specific heat capacity at constant pressure (J/kg/K)",
+      "The parameter 'cp' is now computed from the provided values for 'gamma' and 'molar_mass'.");
+  params.addParam<Real>("henry_constant", 0.0, "Henry constant for dissolution in water");
+  params.addDeprecatedParam<Real>("viscosity", "Dynamic viscosity (Pa.s)", "Use 'mu' instead");
+  params.addDeprecatedParam<Real>(
+      "thermal_conductivity", "Thermal conductivity, W/(m-K)", "Use 'k' instead");
   params.addDeprecatedParam<Real>(
       "specific_entropy", "Constant specific entropy (J/kg/K)", "This parameter is no longer used");
+
   params.addClassDescription("Fluid properties for an ideal gas");
+
   return params;
 }
 
