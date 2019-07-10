@@ -36,4 +36,13 @@
     design = "MultiAppUserObjectTransfer.md"
     issues = "#10313"
   [../]
+
+  [./two_pipes]
+    type = 'Exodiff'
+    input = 'two_pipe_master.i'
+    exodiff = 'two_pipe_master_out.e'
+    requirement = "MultiAppUserObjectTransfer shall allow skipping the bounding box test."
+    design = "MultiAppUserObjectTransfer.md"
+    issues = "#13701"
+  [../]
 []
