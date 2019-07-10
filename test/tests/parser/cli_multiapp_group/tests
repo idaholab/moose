@@ -1,4 +1,7 @@
 [Tests]
+  design = 'CommandLine.md'
+  issues = '#2137'
+
   [./cli_override_group]
     type = 'Exodiff'
     input = 'dt_from_master.i'
@@ -7,5 +10,7 @@
 
     # Only sub apps separately
     cli_args = 'sub_left:BCs/right/value=5 sub_right:BCs/right/value=10'
+
+    requirement = "The system shall support the ability to change a whole MultiApp's (multiple SubApps) input file syntax from the command line."
   [../]
 []

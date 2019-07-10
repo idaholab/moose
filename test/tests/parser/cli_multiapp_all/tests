@@ -1,4 +1,7 @@
 [Tests]
+  design = 'CommandLine.md'
+  issues = '#2137'
+
   [./cli_override_all]
     type = 'Exodiff'
     input = 'dt_from_master.i'
@@ -7,5 +10,7 @@
 
     # Global Multiapp Override
     cli_args = ':BCs/right/value=10'
+
+    requirement = 'The system shall support the ability to globally change MultiApp input file syntax from the command line.'
   [../]
 []
