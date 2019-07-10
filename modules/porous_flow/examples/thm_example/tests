@@ -1,0 +1,14 @@
+[Tests]
+  [./2D]
+    type = Exodiff
+    input = '2D.i'
+    exodiff = '2D_out.e'
+    cli_args = 'Mesh/nx=50 Mesh/bias_x=1.2 Executioner/end_time=100'
+    abs_zero = 1E-4
+    heavy = true
+    threading = '!pthreads'
+    issues = '#11110'
+    design = 'thm_example.md'
+    requirement = 'An example of a 2-phase THM benchmark problem shall be demonstrated in PorousFlow'
+  [../]
+[]
