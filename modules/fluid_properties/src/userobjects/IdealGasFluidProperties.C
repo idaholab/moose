@@ -40,11 +40,6 @@ validParams<IdealGasFluidProperties>()
       "Constant specific heat capacity at constant pressure (J/kg/K)",
       "The parameter 'cp' is now computed from the provided values for 'gamma' and 'molar_mass'.");
   params.addParam<Real>("henry_constant", 0.0, "Henry constant for dissolution in water");
-  params.addDeprecatedParam<Real>("viscosity", "Dynamic viscosity (Pa.s)", "Use 'mu' instead");
-  params.addDeprecatedParam<Real>(
-      "thermal_conductivity", "Thermal conductivity, W/(m-K)", "Use 'k' instead");
-  params.addDeprecatedParam<Real>(
-      "specific_entropy", "Constant specific entropy (J/kg/K)", "This parameter is no longer used");
 
   params.addClassDescription("Fluid properties for an ideal gas");
 
@@ -57,10 +52,8 @@ IdealGasFluidProperties::IdealGasFluidProperties(const InputParameters & paramet
     _R_specific(getParam<Real>("R")),
     _cv(getParam<Real>("cv")),
     _cp(getParam<Real>("cp")),
-    _mu(parameters.isParamSetByUser("viscosity") ? getParam<Real>("viscosity")
-                                                 : getParam<Real>("mu")),
-    _k(parameters.isParamSetByUser("thermal_conductivity") ? getParam<Real>("thermal_conductivity")
-                                                           : getParam<Real>("k")),
+    _mu(getParam<Real>("mu")),
+    _k(getParam<Real>("k")),
     _molar_mass(getParam<Real>("molar_mass")),
     _T_c(getParam<Real>("T_c")),
     _rho_c(getParam<Real>("rho_c")),
