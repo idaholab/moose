@@ -17,6 +17,7 @@
 !col! small=12 medium=6 large=4
 ## [Application Development [!icon!link]](application_development/index.md)
 
+- [Workshop](https://mooseframework.org/workshop)
 - [Source Pages](source/index.md)
 - [Jacobian Definition](/jacobian_definition.md)
 - [Hypre/BoomerAMG Preconditioning](hypre.md)
@@ -27,8 +28,8 @@
 
 - [Contributing](framework_development/contributing.md)
 - [Code Standards](code_standards.md)
-- [MOOSE Doxygen](http://mooseframework.org/docs/doxygen/moose/classes.html)
-- [libMesh Doxygen](http://mooseframework.org/docs/doxygen/libmesh/classes.html)
+- [MOOSE Doxygen](https://mooseframework.org/docs/doxygen/moose/classes.html)
+- [libMesh Doxygen](https://mooseframework.org/docs/doxygen/libmesh/classes.html)
 !col-end!
 
 !col! small=12 medium=6 large=4
@@ -44,7 +45,7 @@
 - [Build System](/build_system.md)
 - [Test System](/test_system.md)
 - [Benchmarking](/performance_benchmarking.md)
-- [Test Timing](http://mooseframework.org/docs/timing/)
+- [Test Timing](https://mooseframework.org/docs/timing/)
 
 !col-end!
 !row-end!
