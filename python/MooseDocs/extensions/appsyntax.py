@@ -20,7 +20,6 @@ import mooseutils
 
 import MooseDocs
 from MooseDocs import common
-from MooseDocs.common import exceptions
 from MooseDocs.base import components, LatexRenderer
 from MooseDocs.tree import html, tokens, syntax, latex, app_syntax
 from MooseDocs.extensions import core, floats, table, autolink, materialicon
@@ -291,13 +290,12 @@ class SyntaxDescriptionCommand(SyntaxCommandBase):
     def createTokenFromSyntax(self, parent, info, page, obj):
 
         if obj.description is None:
+            msg = "The class description is missing for %s, it can be added using the " \
+                  "'addClassDescription' method from within the objects validParams function."
             if not obj.hidden:
-                msg = "The class description is missing for {}, it can be added using the " \
-                      "'addClassDescription' method from within the objects validParams function."
-                raise exceptions.MooseDocsException(msg, obj.fullpath)
-            else:
-                core.Paragraph(parent, string=unicode(info[0]), class_='moose-error')
-                return parent
+                LOG.warning(msg, obj.fullpath)
+            core.Paragraph(parent, string=unicode(info[0]), class_='moose-error')
+            return parent
 
         else:
             p = core.Paragraph(parent)

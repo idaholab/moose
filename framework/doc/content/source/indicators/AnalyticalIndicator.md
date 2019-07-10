@@ -1,18 +1,1 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
-# AnalyticalIndicator
-
-!alert construction title=Undocumented Class
-The AnalyticalIndicator has not been documented. The content contained on this page includes the
-typical automatic documentation associated with a MooseObject; however, what is contained is
-ultimately determined by what is necessary to make the documentation clear for users.
-
-!syntax description /Adaptivity/Indicators/AnalyticalIndicator
-
-!syntax parameters /Adaptivity/Indicators/AnalyticalIndicator
-
-!syntax inputs /Adaptivity/Indicators/AnalyticalIndicator
-
-!syntax children /Adaptivity/Indicators/AnalyticalIndicator
-
-!bibtex bibliography
+!template load file=stubs/moose_object.md.template name=AnalyticalIndicator syntax=/Adaptivity/Indicators/AnalyticalIndicator

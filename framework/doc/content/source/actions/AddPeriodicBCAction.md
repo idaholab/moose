@@ -1,6 +1,6 @@
 # AddPeriodicBCAction
 
-Periodic boundary conditions enforce value constraints on seperate boundaries in the mesh.
+Periodic boundary conditions enforce value constraints on separate boundaries in the mesh.
 This capability is useful for modeling quasi-infinite domains and systems with conserved
 quantities.
 

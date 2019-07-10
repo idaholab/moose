@@ -1,0 +1,39 @@
+# {{name}}
+
+!alert! construction title=Undocumented Class
+The {{name}} has not been documented. The content listed below should be used as a starting point for
+documenting the class, which includes the typical automatic documentation associated with a
+MooseObject; however, what is contained is ultimately determined by what is necessary to make the
+documentation clear for users.
+
+```markdown
+# {{name}}
+
+!syntax description {{syntax}} !! Loads content from addClassDescription method
+
+## Overview
+
+!! Replace these lines with information regarding the {{name}} object, be sure to include mathmatical
+!! definitions such as the strong and weak form for Kernel objects.
+
+## Example Input File Syntax
+
+!! Describe and include an example of how to use the {{name}} object.
+
+!! The following lines automatically list the available parameters, tests, child objects.
+
+!syntax parameters {{syntax}}
+
+!syntax inputs {{syntax}}
+
+!syntax children {{syntax}}
+```
+!alert-end!
+
+!syntax description {{syntax}}
+
+!syntax parameters {{syntax}}
+
+!syntax inputs {{syntax}}
+
+!syntax children {{syntax}}

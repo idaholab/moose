@@ -34,6 +34,8 @@ def get_options():
                         help="The name of the specification files to consider.")
     parser.add_argument('--skip', nargs='+', default=[],
                         help="Partial directory paths to ignore.")
+    parser.add_argument('--duplicates', action='store_true',
+                        help='Enable duplicate requirement check')
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -44,4 +46,8 @@ if __name__ == '__main__':
     subprocess.call(cmd)
 
     count = mooseutils.sqa_check(opt.directory, opt.remote, opt.branch, opt.specs, opt.skip)
+
+    if opt.duplicates:
+        count += mooseutils.sqa_check_requirement_duplicates(opt.directory, opt.specs, opt.skip)
+
     sys.exit(count)

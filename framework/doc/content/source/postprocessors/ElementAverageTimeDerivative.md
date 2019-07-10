@@ -1,18 +1,1 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
-# ElementAverageTimeDerivative
-
-!alert construction title=Undocumented Class
-The ElementAverageTimeDerivative has not been documented. The content contained on this page includes the
-typical automatic documentation associated with a MooseObject; however, what is contained is
-ultimately determined by what is necessary to make the documentation clear for users.
-
-!syntax description /Postprocessors/ElementAverageTimeDerivative
-
-!syntax parameters /Postprocessors/ElementAverageTimeDerivative
-
-!syntax inputs /Postprocessors/ElementAverageTimeDerivative
-
-!syntax children /Postprocessors/ElementAverageTimeDerivative
-
-!bibtex bibliography
+!template load file=stubs/moose_object.md.template name=ElementAverageTimeDerivative syntax=/Postprocessors/ElementAverageTimeDerivative

@@ -1,10 +1,1 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
-# PoroMechanics System
-
-!syntax list /Kernels/PoroMechanics objects=True actions=False subsystems=False
-
-!syntax list /Kernels/PoroMechanics objects=False actions=False subsystems=True
-
-!syntax list /Kernels/PoroMechanics objects=False actions=True subsystems=False
-
+!template load file=stubs/moose_system.md.template name=PoroMechanics syntax=/Kernels/PoroMechanics

@@ -1,10 +1,1 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
-# XFEM System
-
-!syntax list /XFEM objects=True actions=False subsystems=False
-
-!syntax list /XFEM objects=False actions=False subsystems=True
-
-!syntax list /XFEM objects=False actions=True subsystems=False
-
+!template load file=stubs/moose_system.md.template name=XFEM syntax=/XFEM
