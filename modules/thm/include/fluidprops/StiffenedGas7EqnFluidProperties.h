@@ -2,6 +2,7 @@
 
 #include "TwoPhaseFluidProperties.h"
 #include "LinearInterpolation.h"
+#include "NaNInterface.h"
 
 class StiffenedGas7EqnFluidProperties;
 class StiffenedGasFluidProperties;
@@ -12,7 +13,7 @@ InputParameters validParams<StiffenedGas7EqnFluidProperties>();
 /**
  * Stiffened gas for two phase 7-equation formulation
  */
-class StiffenedGas7EqnFluidProperties : public TwoPhaseFluidProperties
+class StiffenedGas7EqnFluidProperties : public TwoPhaseFluidProperties, public NaNInterface
 {
 public:
   StiffenedGas7EqnFluidProperties(const InputParameters & parameters);
