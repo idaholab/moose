@@ -60,6 +60,8 @@ class Translator(mixins.ConfigObject):
         config['destination'] = (os.path.join(os.getenv('HOME'), '.local', 'share', 'moose',
                                               'site'),
                                  "The output directory.")
+        config['number_of_suggestions'] = (5, "The number of page names to suggest when a file " \
+                                              "cannot be found.")
         return config
 
     def __init__(self, content, reader, renderer, extensions, executioner=None, **kwargs):
@@ -86,6 +88,10 @@ class Translator(mixins.ConfigObject):
 
         # Caching for page searches (see findPages)
         self.__page_cache = dict()
+
+        # Cache for looking up markdown files for levenshtein distance
+        self.__markdown_file_list = None
+        self.__levenshtein_cache = dict()
 
     @property
     def extensions(self):
@@ -191,7 +197,7 @@ class Translator(mixins.ConfigObject):
 
         return items
 
-    def findPage(self, arg, throw_on_zero=True, exact=False):
+    def findPage(self, arg, throw_on_zero=True, exact=False, warn_on_zero=False):
         """
         Locate a single Page object that has a local name ending with the supplied name.
 
@@ -200,18 +206,47 @@ class Translator(mixins.ConfigObject):
         """
         nodes = self.findPages(arg, exact)
         if len(nodes) == 0:
-            if throw_on_zero:
+            if throw_on_zero or warn_on_zero:
                 msg = "Unable to locate a page that ends with the name '{}'.".format(arg)
-                raise exceptions.MooseDocsException(msg)
+                num = self.get('number_of_suggestions', 0)
+                if num:
+                    if self.__markdown_file_list is None:
+                        self.__buildMarkdownFileCache()
+
+                    dist = self.__levenshtein_cache.get(arg, None)
+                    if dist is None:
+                        dist = mooseutils.levenshteinDistance(arg, self.__markdown_file_list,
+                                                              number=num)
+                        self.__levenshtein_cache[arg] = dist
+                    msg += " Did you mean one of the following:\n"
+                    for d in dist:
+                        msg += "     {}\n".format(d)
+
+                if warn_on_zero:
+                    LOG.warning(msg)
+                    return None
+                else:
+                    raise exceptions.MooseDocsException(msg)
             else:
                 return None
 
         elif len(nodes) > 1:
             msg = "Multiple pages with a name that ends with '{}' were found:".format(arg)
             for node in nodes:
-                msg += '\n  {} (source: {})'.format(node.local, node.source)
+                msg += '\n  {}'.format(node.local)
             raise exceptions.MooseDocsException(msg)
         return nodes[0]
+
+    def __buildMarkdownFileCache(self):
+        """Builds a list of markdown files, including the short-hand version for error reports."""
+
+        self.__markdown_file_list = set()
+        for local in [page.local for page in self.__content if isinstance(page, pages.Source)]:
+            self.__markdown_file_list.add(local)
+            parts = local.split(os.path.sep)
+            n = len(parts)
+            for i in xrange(n, 0, -1):
+                self.__markdown_file_list.add(os.path.join(*parts[n-i:n]))
 
     def init(self):
         """

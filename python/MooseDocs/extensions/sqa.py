@@ -36,7 +36,7 @@ SQARequirementMatrixItem = tokens.newToken('SQARequirementMatrixItem', label=Non
 SQARequirementMatrixListItem = tokens.newToken('SQARequirementMatrixListItem', label=None)
 SQARequirementText = tokens.newToken('SQARequirementText')
 SQARequirementDesign = tokens.newToken('SQARequirementDesign', design=[], line=None, filename=None)
-SQARequirementIssues = tokens.newToken('SQARequirementIssues', issues=[])
+SQARequirementIssues = tokens.newToken('SQARequirementIssues', issues=[], line=None, filename=None)
 SQARequirementSpecification = tokens.newToken('SQARequirementSpecification',
                                               spec_name=None, spec_path=None)
 SQARequirementPrequisites = tokens.newToken('SQARequirementPrequisites', specs=[])
@@ -69,6 +69,9 @@ class SQAExtension(command.CommandExtension):
         config['categories'] = (dict(), "A dictionary of category names that includes a " \
                                         "dictionary with 'directories' and optionally 'specs'.")
         config['requirement-groups'] = (dict(), "Allows requirement group names to be changed.")
+
+        # Disable by default to allow for updates to applications
+        config['active'] = (False, config['active'][1])
         return config
 
     def __init__(self, *args, **kwargs):
@@ -115,6 +118,8 @@ class SQAExtension(command.CommandExtension):
         self.addCommand(reader, SQARequirementsMatrixCommand())
         self.addCommand(reader, SQAVerificationCommand())
         self.addCommand(reader, SQACrossReferenceCommand())
+        self.addCommand(reader, SQADependenciesCommand())
+        self.addCommand(reader, SQADocumentCommand())
 
         renderer.add('SQARequirementMatrix', RenderSQARequirementMatrix())
         renderer.add('SQARequirementMatrixItem', RenderSQARequirementMatrixItem())
@@ -157,7 +162,10 @@ class SQARequirementsCommand(command.CommandComponent):
         return config
 
     def createToken(self, parent, info, page):
-        category = self.settings['category']
+        category = self.settings.get('category', None)
+        if category == '_empty_':
+            return parent
+
         group_map = self.extension.get('group_map', dict())
         for group, requirements in self.extension.requirements(category).iteritems():
             group = group_map.get(group, group.replace('_', ' ').title())
@@ -211,7 +219,8 @@ class SQARequirementsCommand(command.CommandComponent):
                                          line=req.design_line)
 
             if self.settings['link-issues'] and req.issues:
-                p = SQARequirementIssues(item, issues=req.issues)
+                p = SQARequirementIssues(item, filename=req.filename, issues=req.issues,
+                                         line=req.issues_line)
 
             if self.settings.get('link-prerequisites', False) and req.prerequisites:
                 labels = []
@@ -239,7 +248,10 @@ class SQACrossReferenceCommand(SQARequirementsCommand):
 
     def createToken(self, parent, info, page):
         design = collections.defaultdict(list)
-        category = self.settings['category']
+        category = self.settings.get('category')
+        if category == '_empty_':
+            return parent
+
         for requirements in self.extension.requirements(category).itervalues():
             for req in requirements:
                 for d in req.design:
@@ -326,7 +338,11 @@ class SQAVerificationCommand(command.CommandComponent):
     def createToken(self, parent, info, page):
 
         matrix = SQARequirementMatrix(parent)
-        for requirements in self.extension.requirements(self.settings['category']).itervalues():
+        category = self.settings.get('category')
+        if category == '_empty_':
+            return parent
+
+        for requirements in self.extension.requirements(category).itervalues():
             for req in requirements:
                 if getattr(req, info['subcommand']) is not None:
                     self._addRequirement(matrix, info, page, req)
@@ -362,6 +378,42 @@ class SQAVerificationCommand(command.CommandComponent):
         filename = getattr(req, info['subcommand'])
         autolink.AutoLink(p, page=unicode(filename))
 
+class SQADependenciesCommand(command.CommandComponent):
+    COMMAND = 'sqa'
+    SUBCOMMAND = 'dependencies'
+
+    @staticmethod
+    def defaultSettings():
+        config = command.CommandComponent.defaultSettings()
+        config['suffix'] = (None, "Provide the filename suffix to include.")
+        return config
+
+    def createToken(self, parent, info, page):
+        suffix = self.settings['suffix']
+        ul = core.UnorderedList(parent)
+        for category in self.extension.get('categories'):
+            fname = '{}_{}.md'.format(category, suffix)
+            if not page.local.endswith(fname):
+                autolink.AutoLink(core.ListItem(ul), page=u'sqa/{}'.format(fname),
+                                  optional=True, warning=True, class_='moose-sqa-dependency')
+        return parent
+
+class SQADocumentCommand(command.CommandComponent):
+    COMMAND = 'sqa'
+    SUBCOMMAND = 'document'
+
+    @staticmethod
+    def defaultSettings():
+        config = command.CommandComponent.defaultSettings()
+        config['suffix'] = (None, "Provide the filename suffix to include.")
+        config['category'] = (None, "Provide the category.")
+        return config
+
+    def createToken(self, parent, info, page):
+        category = self.settings.get('category')
+        suffix = self.settings.get('suffix')
+        return autolink.AutoLink(parent, page=u'sqa/{}_{}.md'.format(category, suffix),
+                                 optional=True, warning=True)
 
 class RenderSQARequirementMatrix(core.RenderUnorderedList):
 
@@ -439,7 +491,7 @@ class RenderSQARequirementMatrixHeading(core.RenderListItem):
 
     def createMaterialize(self, parent, token, page):
         tag = html.Tag(parent, 'li', class_='collection-header')
-        category = token['category']
+        category = token.get('category')
         if category:
             tag.insert(0, html.String(content='{}: '.format(category)))
         return tag
@@ -513,9 +565,8 @@ class RenderSQARequirementIssues(components.RenderComponent):
             url = u"{}/{}/commit/{}".format(base, repo, issue[1:])
 
         if (url is None) and (issue != u''):
-            req = token.parent['requirement']
             msg = "Unknown issue number or commit (commit SHA-1 must be at least 10 digits): "\
-                  "{}\n    {}:{}".format(issue, req.filename, req.issues_line)
+                  "{}\n    {}:{}".format(issue, token['filename'], token['line'])
             LOG.error(msg)
 
         return url

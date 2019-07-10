@@ -5,7 +5,7 @@
     max_time = 10
 
     requirement = "The system shall support a testing mechanism that fails intermittently."
-    design = "TestHarness.md"
+    design = "framework_stp.md"
     issues = "#13334"
 
     valgrind = 'NONE'

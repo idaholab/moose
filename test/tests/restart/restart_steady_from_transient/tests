@@ -1,5 +1,5 @@
 [Tests]
-  design = 'restart_recover.md'
+  design = "Restartable.md DataIO.md"
   [./transient_solve]
     type = 'Exodiff'
     input = 'transient.i'

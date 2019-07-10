@@ -130,14 +130,16 @@ Extensions:
             utils: framework_development/utils/index.md
             variables: syntax/Variables/index.md
             vectorpostprocessors: syntax/VectorPostprocessors/index.md
+    MooseDocs.extensions.civet:
+        repo: moose
+        owner: idaholab
+    MooseDocs.extensions.template:
+        active: True
     MooseDocs.extensions.sqa:
+        active: True
         categories:
-            Framework:
-                directories:
-                    - test/tests
-            Tensor Mechanics:
-                directories:
-                    - modules/tensor_mechanics/test/tests
+            framework: !include framework/doc/sqa_framework.yml
+            tensor_mechanics: !include modules/tensor_mechanics/doc/sqa_tensor_mechanics.yml
         requirement-groups:
             dgkernels: DGKernel Objects
             interfacekernels: InterfaceKernel Objects

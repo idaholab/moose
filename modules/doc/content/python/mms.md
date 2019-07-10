@@ -67,7 +67,7 @@ function (the sympy package can be installed via [pip](https://pip.pypa.io) or
 For example, the following python script computes and prints the forcing function for the current
 example.
 
-!listing tests/mms/mms_exact.py end=ft
+!listing mms/test/mms_exact.py end=ft
 
 The "mms.print_fparser" function will output the forcing function as needed for
 use with a [MooseParsedFunction.md] object within a MOOSE input file. The calls to the
@@ -144,7 +144,7 @@ python package. The code in [mms_spatial_script] demonstrates the use of the `ru
 to perform 4 levels of refinement for both first and second order finite elements.
 
 
-!listing tests/mms/mms_spatial.py end=TESTING id=mms_spatial_script
+!listing mms/test/mms_spatial.py end=TESTING id=mms_spatial_script
                         caption=Python script for performing and plotting a spatial convergence
                                 study.
 
@@ -180,7 +180,7 @@ f = 3xyt^2
 Again, the MOOSE "mms" package can be used for computing the input file syntax needed to represent
 these functions as follows.
 
-!listing tests/mms/mms_exact.py start=ft,st
+!listing mms/test/mms_exact.py start=ft,st
 
 The output of this script, as shown below, prints the forcing function as well as the MOOSE input
 file blocks needed to represent both the forcing function and the exact solution. The complete input
@@ -231,8 +231,8 @@ achieved using by creating a "tests" file within the test directory of an applic
 For example, the following "tests" file is contained within MOOSE for executing the scripts
 presented in the above examples.
 
-!listing test/tests/mms/tests id=mms_tests caption=Test specification within MOOSE for running the
-                                                   example MMS convergence study scripts.
+!listing mms/test/tests id=mms_tests caption=Test specification within MOOSE for running the
+                                             example MMS convergence study scripts.
 
 This specification includes tests that check for the output of the resulting convergence plot image
 as well as performs a "diff" with the data generated from the calls to the `run_spatial` and
@@ -240,7 +240,7 @@ as well as performs a "diff" with the data generated from the calls to the `run_
 method on the object returned from the run functions. For example, the spatial script contains
 the following lines at the end of the script to create the files that is tested.
 
-!listing tests/mms/mms_spatial.py start=TESTING include-start=False
+!listing mms/test/mms_spatial.py start=TESTING include-start=False
 
 
 !bibtex bibliography

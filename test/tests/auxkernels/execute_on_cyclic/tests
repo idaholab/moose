@@ -1,5 +1,5 @@
 [Tests]
-  design = 'framework_development/dependency_resolution.md'
+  design = 'DependencyResolverInterface.md'
   issues = '#7626'
   [./run]
     type = RunApp

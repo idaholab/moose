@@ -6,7 +6,7 @@
     mesh_mode = replicated
     max_parallel = 1 #This restriction will be removed once #12036 is resolved.
     requirement = "The Zienkiewicz-Zhu patch shall calculate the stress components at the nodes, with equivalent results in both serial and parallel simulations, in a small strain application."
-    design = 'finite_element_concepts/nodal_patch_recovery.md AuxKernels/RankTwoAux.md'
+    design = 'auxkernels/RankTwoAux.md'
     issues = '#11880'
   [../]
   [./patch_finite_strain]
@@ -16,7 +16,7 @@
     mesh_mode = replicated
     max_parallel = 1 #This restriction will be removed once #12036 is resolved.
     requirement = "The Zienkiewicz-Zhu patch shall calculate the stress components at the nodes, with equivalent results in both serial and parallel simulations, in a finite strain application."
-    design = 'finite_element_concepts/nodal_patch_recovery.md AuxKernels/RankTwoAux.md'
+    design = 'auxkernels/RankTwoAux.md'
     issues = '#12036'
   [../]
 []

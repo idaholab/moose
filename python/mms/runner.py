@@ -56,6 +56,10 @@ def _runner(input_file, num_refinements, *args, **kwargs):
     # Locate the executable
     if executable is None:
         executable = mooseutils.find_moose_executable_recursive(os.getcwd())
+    elif os.path.isdir(executable):
+        executable = mooseutils.find_moose_executable(executable)
+    elif not os.path.isfile(executable):
+        raise IOError("Unable to locate executable: {}".format(executable))
 
     if executable is None:
         raise IOError("No application executable found.")

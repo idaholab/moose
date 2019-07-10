@@ -7,6 +7,6 @@
     requirement = 'The system shall support the ability to disable the check for'
                   ' active materials in all parts of the domain.'
     issues = '#5306'
-    design = 'sanity_checking.md'
+    design = 'Problem/index.md'
   [../]
 []

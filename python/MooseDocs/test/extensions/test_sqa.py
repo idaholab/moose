@@ -14,7 +14,8 @@ class TestSQARequirementsAST(MooseDocsTestCase):
 
     def setupExtension(self, ext):
         if ext == sqa:
-            return dict(categories=dict(Demo=dict(directories=['python/MooseDocs/test'],
+            return dict(active=True,
+                        categories=dict(Demo=dict(directories=['python/MooseDocs/test'],
                                                   specs=['demo'])))
 
     def testASTNoLink(self):
@@ -161,7 +162,8 @@ class TestSQAVerificationAndValidation(MooseDocsTestCase):
 
     def setupExtension(self, ext):
         if ext == sqa:
-            return dict(categories=dict(Demo=dict(directories=['python/MooseDocs/test'],
+            return dict(active=True,
+                        categories=dict(Demo=dict(directories=['python/MooseDocs/test'],
                                                   specs=['demo'])))
     def testVerification(self):
         text = u"!sqa verification category=Demo"
@@ -244,7 +246,8 @@ class TestSQARequirementsMatrix(MooseDocsTestCase):
 
     def setupExtension(self, ext):
         if ext == sqa:
-            return dict(categories=dict(Demo=dict(directories=['python/MooseDocs/test'],
+            return dict(active=True,
+                        categories=dict(Demo=dict(directories=['python/MooseDocs/test'],
                                                   specs=['demo'])))
     def testCommand(self):
         text = u"!sqa requirements-matrix prefix=Z\n- One\n- Two"
@@ -264,7 +267,8 @@ class TestSQARequirementsCrossReference(MooseDocsTestCase):
 
     def setupExtension(self, ext):
         if ext == sqa:
-            return dict(categories=dict(Demo=dict(directories=['python/MooseDocs/test'],
+            return dict(active=True,
+                        categories=dict(Demo=dict(directories=['python/MooseDocs/test'],
                                                   specs=['demo'])))
 
     @mock.patch.object(base.translators.Translator, 'findPage', side_effect=lambda x: TestSQARequirementsCrossReference.NodeProxy(local=x))
@@ -294,7 +298,8 @@ class TestSQARequirementsRender(MooseDocsTestCase):
 
     def setupExtension(self, ext):
         if ext == sqa:
-            return dict(categories=dict(Demo=dict(directories=['python/MooseDocs/test'],
+            return dict(active=True,
+                        categories=dict(Demo=dict(directories=['python/MooseDocs/test'],
                                                   specs=['demo'])))
 
     def testCompleteRender(self):

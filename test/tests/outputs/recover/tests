@@ -1,4 +1,5 @@
 [Tests]
+  design = "Restartable.md DataIO.md"
   [./part1]
     # Run simple transient problem to 5 time steps, with checkpoint files enabled
     type = 'CheckFiles'
@@ -8,7 +9,6 @@
     cli_args = 'Executioner/num_steps=5'
 
     requirement = 'Correctly set up initial recover files for the part2 test.'
-    design = 'application_usage/restart_recover.md'
     issues = '#2661'
   [../]
   [./part2]
@@ -23,7 +23,6 @@
     recover = false
 
     requirement = 'A simulation executed using the "--recover" flag successfully runs a simulation using the specified recover file argument.'
-    design = 'application_usage/restart_recover.md'
     issues = '#2661'
   [../]
   [./part1_latest]
@@ -36,7 +35,6 @@
     prereq = part2
 
     requirement = 'Correctly set up initial recover files for the part2_latest test.'
-    design = 'application_usage/restart_recover.md'
     issues = '#10494 #12403'
   [../]
   [./part2_latest]
@@ -51,7 +49,6 @@
     recover = false
 
     requirement = 'A simulation executed using the "--recover" flag with a file argument using the placeholder "LATEST" successfully runs a simulation using most recent checkpoint/recover file from the specified directory.'
-    design = 'application_usage/restart_recover.md'
     issues = '#10494 #12403'
   [../]
 []

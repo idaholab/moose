@@ -35,7 +35,7 @@
     mesh_mode = replicated
 
     requirement = "MOOSE shall utilize the minimum of ghosting necessary for the problem"
-    design = 'GhostingAux.md relationship_managers.md'
+    design = 'GhostingAux.md RelationshipManager.md'
     issues = '#12327'
   [../]
 []

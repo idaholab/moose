@@ -4,7 +4,7 @@
     input = 'finite_strain_elastic_new_test.i'
     exodiff = 'finite_strain_elastic_new_test_out.e'
     issues = '#4716 #7555'
-    design = 'source/Materials/ComputeFiniteStrainElasticStress.md source/Materials/ComputeFiniteStrain.md syntax/Modules/TensorMechanics/Master/index.md'
+    design = 'source/materials/ComputeFiniteStrainElasticStress.md source/materials/ComputeFiniteStrain.md syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The ComputeFiniteStrainElasticStress class shall compute the elastic stress for a finite strain formulation found with the Taylor expansion from Rashid(1993) on a unit 3D cube in a Cartesian system using the TensorMechanicsMaster action.'
   [../]
   [./new_Bbar]
@@ -14,7 +14,7 @@
     cli_args = 'GlobalParams/volumetric_locking_correction=true'
     prereq = 'new'
     issues = '#8235 #4716'
-    design = 'source/Materials/ComputeFiniteStrainElasticStress.md source/Materials/ComputeFiniteStrain.md tensor_mechanics/VolumetricLocking.md'
+    design = 'source/materials/ComputeFiniteStrainElasticStress.md source/materials/ComputeFiniteStrain.md tensor_mechanics/VolumetricLocking.md'
     requirement = 'The ComputeFiniteStrainElasticStress class shall compute the elastic stress for a finite strain formulation found with the Taylor expansion from Rashid(1993) on a unit 3D cube in a Cartesian system using the volumetric locking correction b-bar formulation.'
   [../]
   [./fake_plastic]
@@ -22,7 +22,7 @@
     input = 'finite_strain_fake_plastic.i'
     exodiff = 'finite_strain_fake_plastic_out.e'
     issues = '#9212 #7555'
-    design = 'source/Materials/ComputeMultiPlasticityStress tensor_mechanics/VolumetricLocking.md'
+    design = 'source/materials/ComputeMultiPlasticityStress.md tensor_mechanics/VolumetricLocking.md'
     requirement = 'The ComputeMultiPlasticityStress class shall, when supplied with no plastic models, reduce to and produce the solely elastic stress solution for a finite strain fomulation, using the TensorMechanicsMaster action.'
   [../]
   [./fake_plastic_Bbar]
@@ -32,7 +32,7 @@
     cli_args = 'GlobalParams/volumetric_locking_correction=true'
     prereq = 'fake_plastic'
     issues = '#9212 #8235'
-    design = 'source/Materials/ComputeMultiPlasticityStress tensor_mechanics/VolumetricLocking.md'
+    design = 'source/materials/ComputeMultiPlasticityStress.md tensor_mechanics/VolumetricLocking.md'
     requirement = 'The ComputeMultiPlasticityStress class shall, when supplied with no plastic models, reduce to and produce the solely elastic stress solution for a finite strain fomulation, using the volumetric locking correction b-bar formulation.'
   [../]
   [./rotation_new]
@@ -40,7 +40,7 @@
     input = 'elastic_rotation_test.i'
     exodiff = 'elastic_rotation_test_out.e'
     issues = '#4716 #7555'
-    design = 'source/Materials/ComputeFiniteStrainElasticStress.md syntax/Modules/TensorMechanics/Master/index.md'
+    design = 'source/materials/ComputeFiniteStrainElasticStress.md syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The ComputeFiniteStrainElasticStress class shall compute the elastic stress based on a finite strain fomulation and then follow the stress as the mesh is rotated 90 degrees in accordance with Kamojjala et al.(2015) using the TensorMechanicsMaster action.'
   [../]
   [./rotation_new_Bbar]
@@ -50,7 +50,7 @@
     cli_args = 'GlobalParams/volumetric_locking_correction=true'
     prereq = 'rotation_new'
     issues = '#4716 #8235'
-    design = 'source/Materials/ComputeFiniteStrainElasticStress.md tensor_mechanics/VolumetricLocking.md'
+    design = 'source/materials/ComputeFiniteStrainElasticStress.md tensor_mechanics/VolumetricLocking.md'
     requirement = 'The ComputeFiniteStrainElasticStress class shall compute the elastic stress based on a finite strain fomulation and then follow the stress as the mesh is rotated 90 degrees in accordance with Kamojjala et al.(2015) using the volumetric locking correction b-bar formulation.'
   [../]
   [./eigen_sol]
@@ -58,7 +58,7 @@
     input = 'finite_strain_elastic_eigen_sol.i'
     exodiff = 'finite_strain_elastic_eigen_sol_out.e'
     issues = '#4716 #7555'
-    design = 'source/Materials/ComputeFiniteStrainElasticStress.md source/Materials/ComputeFiniteStrain.md syntax/Modules/TensorMechanics/Master/index.md'
+    design = 'source/materials/ComputeFiniteStrainElasticStress.md source/materials/ComputeFiniteStrain.md syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The ComputeFiniteStrainElasticStress class shall compute the elastic stress for a finite strain formulation using a direct eigensolution to perform the polar decomposition of stretch and rotation on a unit 3D cube in a Cartesian system using the TensorMechanicsMaster action.'
   [../]
   [./eigen_sol_Bbar]
@@ -68,7 +68,7 @@
     cli_args = 'GlobalParams/volumetric_locking_correction=true'
     prereq = 'eigen_sol'
     issues = '#8235 #4716'
-    design = 'source/Materials/ComputeFiniteStrainElasticStress.md source/Materials/ComputeFiniteStrain.md tensor_mechanics/VolumetricLocking.md'
+    design = 'source/materials/ComputeFiniteStrainElasticStress.md source/materials/ComputeFiniteStrain.md tensor_mechanics/VolumetricLocking.md'
     requirement = 'The ComputeFiniteStrainElasticStress class shall compute the elastic stress for a finite strain formulation using a direct eigensolution to perform the polar decomposition of stretch and rotation on a unit 3D cube in a Cartesian system using the volumetric locking correction b-bar formulation.'
   [../]
   [./stress_errorcheck]
@@ -76,7 +76,7 @@
     input = 'finite_strain_stress_errorcheck.i'
     expect_err = 'This linear elastic stress calculation only works for small strains; use ComputeFiniteStrainElasticStress for simulations using incremental and finite strains.'
     issues = '#4716 #7555'
-    design = 'source/Materials/ComputeFiniteStrainElasticStress.md source/Materials/ComputeLinearElasticStress.md syntax/Modules/TensorMechanics/Master/index.md'
+    design = 'source/materials/ComputeFiniteStrainElasticStress.md source/materials/ComputeLinearElasticStress.md syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The ComputeLinearElasticStress class shall generate an error if a user attempts to run a problem using ComputeLinearElasticStress with a finite strain formulation.'
   [../]
 []

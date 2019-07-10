@@ -1,0 +1,14 @@
+## {{app}} System Test Plan
+
+## Introduction id=introduction
+
+!template field key=introduction required=False
+The [!ac](STP) details the objectives, resources, and processes utilized for testing {{app}}.
+
+## Dependencies id=dependencies
+
+!template field key=dependencies-intro required=False
+The {{app}} application is developed using MOOSE and is based on various modules, as such
+the [!ac](STP) for {{app}} is dependent upon the following documents.
+
+!sqa dependencies suffix=stp

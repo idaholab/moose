@@ -7,6 +7,6 @@
     requirement = 'The system shall support the ability to disable the check for'
                   ' PDE operators in all or some parts of the domain.'
     issues = '#2291'
-    design = 'sanity_checking.md'
+    design = 'Problem/index.md'
   [../]
 []

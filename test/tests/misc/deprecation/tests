@@ -1,5 +1,5 @@
 [Tests]
-  design = 'TestHarness.md'
+  design = 'MooseApp.md'
   issues = '#10745'
 
   # Note: The no_error_deprecated flag prevents the TestHarness

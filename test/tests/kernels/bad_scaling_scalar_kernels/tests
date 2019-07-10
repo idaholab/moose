@@ -1,6 +1,6 @@
 [Tests]
   issues = '#12601'
-  design = 'failed_solves.md'
+  design = 'Executioner.md FEProblemSolve.md'
   [poorly-conditioned-field-scalar-system]
     type = RunApp
     input = 'ill_conditioned_field_scalar_system.i'

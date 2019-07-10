@@ -1,4 +1,6 @@
 [Tests]
+  design = 'MooseApp.md'
+
   [./hit_registry]
     # Make sure --registry-hit CLI option is working
     type = RunApp
@@ -9,7 +11,6 @@
     method = '!DBG'
 
     requirement = "The system shall output all registered objects in HIT format."
-    design = 'command_line_usage.md'
     issues = '#10952'
   [../]
   [./registry]
@@ -22,7 +23,6 @@
     method = '!DBG'
 
     requirement = "The system shall output all registered objects in single line format."
-    design = 'command_line_usage.md'
     issues = '#10952'
   [../]
 []

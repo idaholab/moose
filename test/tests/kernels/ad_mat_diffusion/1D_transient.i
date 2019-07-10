@@ -1,5 +1,5 @@
 # This test solves a 1D transient heat equation
-# The error is caclulated by comparing to the analytical solution
+# The error is calculated by comparing to the analytical solution
 # The problem setup and analytical solution are taken from "Advanced Engineering
 # Mathematics, 10th edition" by Erwin Kreyszig.
 # http://www.amazon.com/Advanced-Engineering-Mathematics-Erwin-Kreyszig/dp/0470458364

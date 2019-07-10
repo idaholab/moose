@@ -1,8 +1,8 @@
 [Tests]
+  design = 'ADDGKernel.md'
   [exo]
     type = 'PetscJacobianTester'
     input = 'ad_dg_convection.i'
-    design = 'jacobian_definition.md'
     issues = '#5658'
     requirement = 'We shall be able to use constant monomials with AD'
     run_sim = True

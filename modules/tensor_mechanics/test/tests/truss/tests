@@ -1,5 +1,5 @@
 [Tests]
-  design = "source/kernels/LinearElasticTruss.md source/materials/StressDivergenceTensorsTruss.md LineElementAction.md"
+  design = "source/materials/LinearElasticTruss.md source/kernels/StressDivergenceTensorsTruss.md LineElementAction.md"
   issues = "#6789 #2460 #10313"
   [./truss_3d]
     type = 'Exodiff'
@@ -53,7 +53,7 @@
     cli_args='Modules/TensorMechanics/LineElementMaster/block/area=area'
     prereq = 'truss_2d'
     requirement = "The LineElementAction shall correctly create the objects required for"
-                  " modeling the response of a mechanics system using 2D truss elements." 
+                  " modeling the response of a mechanics system using 2D truss elements."
   [../]
   [./action_error_1]
     type = 'RunException'
