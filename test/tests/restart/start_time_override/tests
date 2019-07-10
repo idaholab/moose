@@ -1,4 +1,5 @@
 [Tests]
+  design = "Restartable.md DataIO.md"
   [steady]
     type = 'RunApp'
     input = 'transient.i'
@@ -6,7 +7,6 @@
 
     issues = "#563"
     requirement = "The system shall support outputting a mesh to checkpoint format for restart testing with \"start_time\"."
-    design = "restart_recover.md"
   [../]
 
   [default_start_timestart]
@@ -18,7 +18,6 @@
 
     issues = "#13182"
     requirement = "The system shall use the the final time as the \"start_time\" from the restart file."
-    design = "restart_recover.md"
   []
 
   [start_time_override_zero]
@@ -31,7 +30,6 @@
 
     issues = "#13182"
     requirement = "The system shall support resetting \"start_time\" when restarting from a checkpoint mesh format."
-    design = "restart_recover.md"
   []
 
   [start_time_override_non_zero]
@@ -44,6 +42,5 @@
 
     issues = "#13182"
     requirement = "The system shall support overriding \"start_time\" when restarting from a checkpoint mesh format to an arbitrary time."
-    design = "restart_recover.md"
   []
 []

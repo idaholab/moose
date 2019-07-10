@@ -1,10 +1,10 @@
 [Tests]
+  design = 'ADMatDiffusion.md'
   [./1D_transient]
     type = 'Exodiff'
     input = '1D_transient.i'
     exodiff = '1D_transient_out.e'
     requirement = "Diffusion with a material property diffusivity shall match the answer from an analytical solution"
-    design = "/MatDiffusion.md"
     issues = "#2582"
   [../]
   [./ad_1D_transient]
@@ -12,7 +12,6 @@
     input = 'ad_1D_transient.i'
     exodiff = 'ad_1D_transient_out.e'
     requirement = "Diffusion with a material property diffusivity from an AD kernel shall get the same answer as a traditional kernel"
-    design = "/ADMatDiffusion.md"
     issues = "#5658 #12633 #13632"
   [../]
   [./ad_1D_transient_jacobian]
@@ -25,7 +24,6 @@
     method = 'OPT'
     cli_args = 'Executioner/num_steps=5'
     requirement = 'AD Diffusion with a material property diffusivity and the Jacobian shall be beautiful'
-    design = "jacobian_definition.md"
     issues = "#5658 #12633 #13632"
   [../]
 
@@ -34,7 +32,6 @@
     input = '2d_steady_state.i'
     exodiff = '2d_steady_state_out.e'
     requirement = "Diffusion with a material property diffusivity shall match the answer from an analytical solution"
-    design = "/MatDiffusion.md"
     issues = "#2582"
   [../]
   [./ad_2D_steady_state]
@@ -42,7 +39,6 @@
     input = 'ad_2d_steady_state.i'
     exodiff = 'ad_2d_steady_state_out.e'
     requirement = "Diffusion with a material property diffusivity from an AD kernel shall get the same answer as a traditional kernel"
-    design = "/ADMatDiffusion.md"
     issues = "#5658 #12633 #13632"
   [../]
   [./ad_2D_steady_state_jacobian]
@@ -54,7 +50,6 @@
     petsc_version = '>=3.9.4'
     method = 'OPT'
     requirement = 'AD Diffusion with a material property diffusivity shall have a perfect Jacobian'
-    design = "jacobian_definition.md"
     issues = "#5658 #12633 #13632"
   [../]
 []

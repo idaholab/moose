@@ -1,0 +1,115 @@
+[Tests]
+  design = 'RandomInterface.md'
+  issues = '#2088 #5476'
+
+  # AuxKernel Tests
+  [./test]
+    type = 'Exodiff'
+    input = 'random.i'
+    exodiff = 'random_out.e'
+    max_threads = 1
+
+    requirement = 'The system shall produce parallel-agnostic random number fields on a single processor.'
+  [../]
+
+  [./parallel_verification]
+    type = 'Exodiff'
+    input = 'random.i'
+    exodiff = 'random_out.e'
+    prereq = 'test'
+    min_parallel = 2
+    max_threads = 1
+
+    requirement = 'The system shall produce parallel-agnostic random number fields on two or more processors.'
+  [../]
+
+  [./threads_verification]
+    type = 'Exodiff'
+    input = 'random.i'
+    exodiff = 'random_out.e'
+    prereq = 'parallel_verification'
+    min_threads = 2
+
+    requirement = 'The system shall produce parallel-agnostic random number fields on two or more threads.'
+  [../]
+
+  # Parallel Mesh Tests
+  # AuxKernel Tests
+  [./test_par_mesh]
+    type = 'Exodiff'
+    input = 'random.i'
+    exodiff = 'parallel_mesh_out.e'
+    min_parallel = 2
+    max_parallel = 2
+    cli_args = 'Mesh/parallel_type=distributed Outputs/file_base=parallel_mesh_out'
+    prereq = 'threads_verification'
+
+    requirement = 'The system shall produce a parallel field without repeating patterns on distributed meshes.'
+  [../]
+
+  # User Object Tests
+  [./test_uo]
+    type = 'Exodiff'
+    input = 'random_uo.i'
+    exodiff = 'random_uo_out.e'
+    max_threads = 1
+
+    requirement = 'The system shall produce parallel-agnostic random number fields via the user defined (UserObject) system.'
+  [../]
+
+  [./parallel_verification_uo]
+    type = 'Exodiff'
+    input = 'random_uo.i'
+    exodiff = 'random_uo_out.e'
+    prereq = 'test_uo test'
+    min_parallel = 2
+    max_threads = 1
+
+    requirement = 'The system shall produce parallel-agnostic random number fields via the user defined (UserObject) system on two or more processors.'
+  [../]
+
+  [./threads_verification_uo]
+    type = 'Exodiff'
+    input = 'random_uo.i'
+    exodiff = 'random_uo_out.e'
+    prereq = 'parallel_verification_uo'
+    min_threads = 2
+
+    requirement = 'The system shall produce parallel-agnostic random number fields via the user defined (UserObject) system on two or more threads.'
+
+  [../]
+
+  # User Object Tests
+  [./test_uo_par_mesh]
+    type = 'Exodiff'
+    input = 'random_uo.i'
+    exodiff = 'parallel_mesh_uo_out.e'
+    min_parallel = 2
+    max_parallel = 2
+    cli_args = 'Mesh/parallel_type=distributed Outputs/file_base=parallel_mesh_uo_out'
+    prereq = 'threads_verification_uo'
+
+    requirement = 'The system shall produce a parallel field without repeating patterns via the user defined (UserObject) system.'
+  [../]
+
+  # Material Tests
+  [./material_serial]
+    type = 'Exodiff'
+    input = 'random_material.i'
+    exodiff = 'random_material_out.e'
+    max_threads = 1
+
+    requirement = 'The system shall produce a parallel-agnostic random number via the material system.'
+  [../]
+
+  [./material_parallel]
+    type = 'Exodiff'
+    input = 'random_material.i'
+    exodiff = 'random_material_out.e'
+    prereq = 'material_serial'
+    min_parallel = 2
+    max_threads = 1
+
+    requirement = 'The system shall produce a parallel-agnostic random number via the material system on two or more processors.'
+  [../]
+[]

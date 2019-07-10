@@ -1,6 +1,6 @@
 [Tests]
   design = "Strains.md Stresses.md"
-  issues = "8235"
+  issues = "#8235"
   [./smallstrain_3D]
     type = 'PetscJacobianTester'
     input = 'jacobian_test_3D.i'

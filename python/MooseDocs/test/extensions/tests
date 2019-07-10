@@ -29,5 +29,10 @@
     requirement = "The documentation system shall include tools for automatically cross-linking files."
     issues = '#6699 #13567'
   []
-
+  [civet]
+    type = PythonUnitTest
+    input = test_civet.py
+    requirement = "The documentation system shall include tools for linking to continuous integration testing results."
+    issues = '#12049'
+  []
 []

@@ -1,6 +1,6 @@
 [Tests]
   issues = '#7215'
-  design = 'RunApp.md'
+  design = 'framework_stp.md'
 
   [./execute]
     type = 'RunApp'

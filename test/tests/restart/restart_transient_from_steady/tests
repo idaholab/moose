@@ -1,5 +1,5 @@
 [Tests]
-   design = "restart_recover.md"
+  design = "Restartable.md DataIO.md"
   [steady]
     type = 'Exodiff'
     input = 'steady.i'

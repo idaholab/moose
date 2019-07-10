@@ -1,0 +1,4 @@
+directories:
+    - test/tests
+specs:
+    - tests

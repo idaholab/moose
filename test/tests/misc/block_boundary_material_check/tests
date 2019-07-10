@@ -1,6 +1,6 @@
 [Tests]
   issues = '#9835 #5309 #9482'
-  design = 'sanity_checking.md'
+  design = 'Problem/index.md'
   [bc_check]
     type = RunException
     input = 'bc_check.i'

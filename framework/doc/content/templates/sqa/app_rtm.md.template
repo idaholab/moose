@@ -1,0 +1,24 @@
+# {{app}} Requirement Traceability Matrix
+
+## Introduction id=introduction
+
+!template field key=introduction required=False
+The [!ac](RTM) for {{app}} captures all requirements and maps each to the associated design
+documentation and associated test case.
+
+## Dependencies id=dependencies
+
+!template field key=dependencies-intro required=False
+The {{app}} application is developed using MOOSE and is based on various modules, as such
+the [!ac](RTM) for {{app}} is dependent upon the following documents.
+
+!sqa dependencies suffix=rtm
+
+## Requirements
+
+!template field key=requirements-intro required=False
+The following is a complete list for all the functional requirements including links to the
+design documents and test cases for {{app}}.
+
+!template field key=requirements required=False
+!sqa requirements link=True category={{category}}

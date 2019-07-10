@@ -1,4 +1,5 @@
 [Tests]
+  design = "Restartable.md DataIO.md"
   [./uniform_refine_test_1]
     type = 'Exodiff'
     input = 'exodus_refined_restart_1_test.i'
@@ -7,7 +8,6 @@
 
     issues = "#563"
     requirement = "The system shall support outputting a mesh with refinement to Exodus format for restart testing."
-    design = "restart_recover.md"
   [../]
 
   [./uniform_refine_test_2]
@@ -19,7 +19,6 @@
     # Note: This test is not strictly a "restart" capability. However reading solution information is related to restart.
     issues = "#563"
     requirement = "The system shall support reading solution information from an Exodus file."
-    design = "restart_recover.md"
   [../]
 
   [./uniform_refine_refine_test_2]
@@ -31,7 +30,6 @@
     # Note: This test is not strictly a "restart" capability. However reading solution information is related to restart.
     issues = "#563"
     requirement = "The system shall support reading solution information from an Exodus file with initial uniform refinement."
-    design = "restart_recover.md"
   [../]
 
   [./steady_1]
@@ -41,7 +39,6 @@
 
     issues = "#563"
     requirement = "The system shall support outputting a mesh to checkpoint format for restart testing."
-    design = "restart_recover.md"
   [../]
 
   [./trans_from_steady]
@@ -53,7 +50,6 @@
     # Note: This test is not strictly a "restart" capability. However reading solution information is related to restart.
     issues = "#563"
     requirement = "The system shall support starting a transient simulation from a steady simulation result."
-    design = "restart_recover.md"
   [../]
 
   [./restart_with_variable_rename]
@@ -64,7 +60,6 @@
 
     issues = "#4965"
     requirement = "The system shall support renaming a variable read from a solution file upon restart."
-    design = "restart_recover.md"
   [../]
 
   # Restart using "LAST"
@@ -74,7 +69,6 @@
 
     issues = "#5748"
     requirement = "The system shall support writting out several timesteps to a solution file to test reading from a specific point."
-    design = "restart_recover.md"
   [../]
 
   [./restart_use_end_part2]
@@ -85,7 +79,6 @@
 
     issues = "#5748"
     requirement = "The system shall support restarting from the last timestep using the keyword \"LATEST\"."
-    design = "restart_recover.md"
   [../]
 
   [./restart_use_end_error_check]
@@ -98,6 +91,5 @@
 
     issues = "#5748"
     requirement = "The system shall issue a useful error message stating the valid options when a user requests an invalid time step number or keyword."
-    design = "restart_recover.md"
   [../]
 []

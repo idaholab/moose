@@ -14,7 +14,7 @@
     expect_err = 'Solve failed and timestep already at or below dtmin'
     expect_out = '1 of 3 singular values'
     issues = '#12601'
-    design = 'failed_solves.md'
+    design = 'FEProblemSolve.md'
     requirement = 'We shall not be able to solve a problem where the physics Jacobians are very large compared to the jacobian from a Dirichlet BC (unity)'
     cli_args = 'Outputs/exodus=false'
     max_parallel = 1 # no parallel svd preconditioner
@@ -25,7 +25,7 @@
     exodiff = 'ill_conditioned_simple_diffusion_out.e'
     absent_out = '1 of 3 singular values'
     issues = '#12601'
-    design = 'failed_solves.md'
+    design = 'FEProblemSolve.md'
     requirement = "We shall be able to solve an initially poorly scaled problem by using MOOSE's automatic scaling feature"
     cli_args = 'Executioner/automatic_scaling=true'
     max_parallel = 1 # no parallel svd preconditioner
@@ -35,7 +35,7 @@
     input = 'ill_conditioned_simple_diffusion.i'
     exodiff = 'ill_conditioned_simple_diffusion_out.e'
     issues = '#12601'
-    design = 'failed_solves.md'
+    design = 'FEProblemSolve.md'
     requirement = "We shall be able to solve an initially poorly scaled problem by using MOOSE's automatic scaling feature in parallel"
     cli_args = 'Executioner/automatic_scaling=true -pc_type hypre -pc_hypre_type boomeramg'
     prereq = 'automatic-scaling-done-once'
@@ -46,7 +46,7 @@
     expect_err = 'Solve failed and timestep already at or below dtmin'
     expect_out = '1 of 3 singular values'
     issues = '#12601'
-    design = 'failed_solves.md'
+    design = 'FEProblemSolve.md'
     requirement = 'We shall not be able to solve a problem where the physics has large changes over time if we only scale once'
     cli_args = "Executioner/automatic_scaling=true Materials/active='function' Executioner/num_steps=10 BCs/right/function='ramp' Outputs/exodus=false"
     max_parallel = 1 # no parallel svd preconditioner
@@ -57,7 +57,7 @@
     exodiff = 'transient.e'
     absent_out = '1 of 3 singular values'
     issues = '#12601'
-    design = 'failed_solves.md'
+    design = 'FEProblemSolve.md'
     requirement = 'We shall be able to solve a problem where the physics has large changes over time if we scale on every time step'
     cli_args = "Executioner/automatic_scaling=true Executioner/compute_scaling_once=false Materials/active='function' Executioner/num_steps=10 BCs/right/function='ramp' Outputs/file_base=transient"
     max_parallel = 1 # no parallel svd preconditioner
@@ -68,7 +68,7 @@
     exodiff = 'transient.e'
     absent_out = '1 of 3 singular values'
     issues = '#12601'
-    design = 'failed_solves.md'
+    design = 'FEProblemSolve.md'
     requirement = 'We shall be able to solve a problem where the physics has large changes over time if we scale on every time step in parallel'
     cli_args = "Executioner/automatic_scaling=true Executioner/compute_scaling_once=false Materials/active='function' Executioner/num_steps=10 BCs/right/function='ramp' Outputs/file_base=transient -pc_type hypre -pc_hypre_type boomeramg"
     prereq = 'automatic-scaling-done-per-time-step'

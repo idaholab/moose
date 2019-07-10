@@ -26,7 +26,8 @@ LOG = logging.getLogger(__name__)
 
 SourceLink = tokens.newToken('SourceLink')
 LocalLink = tokens.newToken('LocalLink', bookmark=u'')
-AutoLink = tokens.newToken('AutoLink', page=u'', bookmark=u'', optional=False, exact=False)
+AutoLink = tokens.newToken('AutoLink', page=u'', bookmark=u'', optional=False, warning=False,
+                           exact=False)
 
 class AutoLinkExtension(components.Extension):
     """
@@ -219,12 +220,16 @@ class RenderAutoLink(RenderLinkBase):
     Create link to another page and extract the heading for the text, if no children provided.
     """
     def createHTML(self, parent, token, page):
-        desired = self.translator.findPage(token['page'], throw_on_zero=not token['optional'],
+        desired = self.translator.findPage(token['page'],
+                                           throw_on_zero=not token['optional'],
+                                           warn_on_zero=token['warning'],
                                            exact=token['exact'])
         return self.createHTMLHelper(parent, token, page, desired)
 
     def createLatex(self, parent, token, page):
-        desired = self.translator.findPage(token['page'], throw_on_zero=not token['optional'],
+        desired = self.translator.findPage(token['page'],
+                                           throw_on_zero=not token['optional'],
+                                           warn_on_zero=token['warning'],
                                            exact=token['exact'])
         return self.createLatexHelper(parent, token, page, desired)
 

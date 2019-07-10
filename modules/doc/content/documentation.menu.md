@@ -36,7 +36,7 @@
 
 - [MooseDocs/specification.md]
 - [MooseDocs/generate.md]
-- [Software Quality](sqa/index.md)
+- [Software Quality](sqa/index.md exact=True)
 
 ## Infrastructure
 

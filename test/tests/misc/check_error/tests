@@ -1,5 +1,5 @@
 [Tests]
-  design = 'sanity_checking.md'
+  design = 'Problem/index.md'
   [./steady_no_converge]
     type = 'RunApp'
     input = 'steady_no_converge.i'

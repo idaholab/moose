@@ -46,7 +46,7 @@
     recover = false
     requirement = 'MOOSE shall provide a tester that checks hand-coded Jacobian against finite difference Jacobian using -snes_type=test option.'
     issues = '#2337'
-    design = '2018_07.md'
+    design = 'framework_stp.md'
   [../]
 
   [./test_force_iteration]

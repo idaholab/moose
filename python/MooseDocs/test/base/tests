@@ -16,4 +16,9 @@
     input = test_readers.py
     requirement = "MooseDocs shall include reader object for reading files."
   []
+  [translator]
+    type = PythonUnitTest
+    input = test_translator.py
+    requirement = "MooseDocs shall include a translator for converting documentation formats."
+  []
 []

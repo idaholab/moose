@@ -1,4 +1,6 @@
 [Tests]
+  design = "RelationshipManager.md"
+  issues = "#10455"
   [./geometric_edge_neighbor]
     type = 'Exodiff'
     input = 'geometric_edge_neighbors.i'
@@ -8,9 +10,7 @@
     min_parallel = 3
     max_parallel = 3
 
-    design = "relationship_managers.md"
     requirement = "MOOSE shall ghost additional neighboring elements without also supplying solution information when a developer registers a RelationshipManager with an optional second argument to restrict functionality"
-    issues = "#10455"
   [../]
 
   [./geometric_edge_neighbor_3D]
@@ -24,8 +24,6 @@
     min_parallel = 3
     max_parallel = 3
 
-    design = "relationship_managers.md"
     requirement = "MOOSE shall ghost additional neighboring elements without also supplying solution information when a developer registers a RelationshipManager with an optional second argument to restrict functionality in 3D"
-    issues = "#10455"
   [../]
 []

@@ -1,4 +1,5 @@
 MOOSE: Multiphysics Object Oriented Simulation Environment
+CIVET: Continous Integration for Verification, Enhancement, and Testing
 INL: Idaho National Laboratory
 JFNK: Jacobian-Free Newton-Krylov
 FEM: Finite Element Method
@@ -7,3 +8,8 @@ LGPL: GNU Library General Public License
 PDE: partial differential equation
 PDEs: partial differential equations
 AD: automatic differentiation
+SRS: Software Requirement Specification
+RTM: Requirement Traceability Matrix
+SDD: Software Design Description
+STP: Software Test Plan
+VVR: Verification and Validation Report

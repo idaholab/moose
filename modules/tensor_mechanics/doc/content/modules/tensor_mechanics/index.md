@@ -105,3 +105,8 @@ The tensor mechanics module uses code syntax based on tensor forms. This approac
 allows the constitutive tensor equations to be implemented, clearly and concisely,
 in the same format as written in mathematical notation.
 Follow the MOOSE standards for [contributing code and documentation](MooseDocs/generate.md optional=True).
+
+## Software Quality
+
+The Tensor Mechanics module follows strict software quality guidelines, refer to
+[tensor_mechanics/sqa/index.md] for more information.

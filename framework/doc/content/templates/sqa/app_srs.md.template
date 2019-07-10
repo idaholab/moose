@@ -1,0 +1,23 @@
+# {{app}} System Requirement Specification
+
+## Introduction id=introduction
+
+!template field key=introduction required=False
+The [!ac](SRS) for {{app}} describes the system functional and non-functional requirements that
+describe the expected interactions that the software shall provide.
+
+## Dependencies id=dependencies
+
+!template field key=dependencies-intro required=False
+The {{app}} application is developed using MOOSE and is based on various modules, as such
+the [!ac](SRS) for {{app}} is dependent upon the following documents.
+
+!sqa dependencies suffix=srs
+
+## Requirements
+
+!template field key=requirements-intro required=False
+The following is a complete list for all the functional requirements for {{app}}.
+
+!template field key=requirements required=False
+!sqa requirements link=False category={{category}}

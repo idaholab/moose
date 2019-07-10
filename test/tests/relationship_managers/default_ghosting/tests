@@ -5,7 +5,7 @@
     expect_out = "Default:\s+libMesh::"
 
     requirement = 'The system shall indicate when libMesh Ghosting Functors are in use.'
-    design = "relationship_managers.md"
+    design = "RelationshipManager.md"
     issues = '#13206'
   [../]
 []

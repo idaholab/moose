@@ -6,7 +6,7 @@
 
     requirement = "The ComputeThermalExpansionEigenstrainBeam class shall correctly calculate eigenstrains"
                   " due to changes in temperature."
-    design = "ComputeThermalEigenstrainBeam.md"
+    design = "ComputeThermalExpansionEigenstrainBeam.md"
     issues = "#10313"
   [../]
   [./eigenstrain_from_var]

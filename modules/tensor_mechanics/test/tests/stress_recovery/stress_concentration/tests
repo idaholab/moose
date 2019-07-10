@@ -7,7 +7,7 @@
     max_parallel = 1 #This restriction will be removed once #12036 is resolved.
     mesh_mode = replicated
     requirement = "In areas of high concentration gradients, the Zienkiewicz-Zhu implementation shall recover the specified material property."
-    design = 'finite_element_concepts/nodal_patch_recovery.md AuxKernels/RankTwoAux.md'
+    design = 'auxkernels/RankTwoAux.md'
     issues = '#11880'
   [../]
 []

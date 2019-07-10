@@ -340,6 +340,13 @@ def is_git_repo(working_dir=os.getcwd()):
     """
     return os.path.isdir(os.path.join(working_dir, '.git'))
 
+def git_commit(working_dir=os.getcwd()):
+    """
+    Return the current SHA from git.
+    """
+    out = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=working_dir)
+    return out.strip(' \n')
+
 def git_ls_files(working_dir=os.getcwd()):
     """
     Return a list of files via 'git ls-files'.
