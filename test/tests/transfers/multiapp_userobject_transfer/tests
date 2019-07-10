@@ -48,4 +48,14 @@
     requirement = "MultiAppUserObjectTransfer shall generate an error if a master node/element is "
                   "not contained within any sub application domains."
   []
+
+  [./two_pipes]
+    type = 'Exodiff'
+    input = 'two_pipe_master.i'
+    exodiff = 'two_pipe_master_out.e'
+    requirement = "MultiAppUserObjectTransfer shall allow skipping the bounding box test."
+    mesh_mode = replicated
+    issues = "#13701"
+    recover = false
+  [../]
 []
