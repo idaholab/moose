@@ -1,21 +1,30 @@
 [Tests]
+  issues = '#1169'
+  design = 'DataIO.md Restartable.md'
+
   [./pointer_store_error]
     type = 'RunException'
     input = 'pointer_store_error.i'
     expect_err = 'Attempting to store a raw pointer type:'
+
+    requirement = 'The system shall produce an error when an attempt is made to serialize a type without a serialization (dataStore) routine when that data is declared as restartable.'
   [../]
 
   [./pointer_load_error]
     type = 'RunApp'
     input = 'pointer_load_error.i'
     max_parallel = 1 # Sometimes times out in parallel after producing correct message
+
+    requirement = 'The system shall store a custom type that contains a data serialization routine that is declared as restartable.'
   [../]
 
   [./pointer_load_error2]
     type = 'RunException'
     input = 'pointer_load_error2.i'
     expect_err = 'Attempting to load a raw pointer type:'
-    prereq = pointer_load_error
+    prereq = 'pointer_load_error'
     max_parallel = 1 # Sometimes times out in parallel after producing correct message
+
+    requirement = 'The system shall produce an error when an attempt is made to deserialize a type without a deserialization (dataLoad) routine when that data is declared as restartable during a restart or recover operation.'
   [../]
 []

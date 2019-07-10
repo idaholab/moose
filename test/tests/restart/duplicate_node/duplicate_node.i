@@ -1,5 +1,6 @@
 [Mesh]
   type = FileMesh
+  # Contains multiple nodes in the same positions
   file = duplicate_nodes.e
   dim = 2
 []

@@ -1,13 +1,20 @@
 [Tests]
+  design = 'DataIO.md Restartable.md'
+  issues = '#2304'
+
   [./test_part1]
     type = 'RunApp'
     input = 'new_dt.i'
+
+    requirement = 'The system shall support running a transient test for the purposed of changing a restart time step size.'
   [../]
 
   [./test_restart]
     type = 'Exodiff'
     input = 'new_dt_restart.i'
     exodiff = 'new_dt_restart_exodus.e'
-    prereq = test_part1
+    prereq = 'test_part1'
+
+    requirement = 'The system shall support changing the time step size during a recover operation.'
   [../]
 []
