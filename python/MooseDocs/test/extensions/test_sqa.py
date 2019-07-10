@@ -318,7 +318,8 @@ class TestSQADependencies(MooseDocsTestCase):
 
     def setupExtension(self, ext):
         if ext == sqa:
-            return dict(categories=dict(Demo=dict(directories=['python/MooseDocs/test'],
+            return dict(active=True,
+                        categories=dict(Demo=dict(directories=['python/MooseDocs/test'],
                                                   specs=['demo']),
                                         Demo2=dict(directories=['python/MooseDocs/test'],
                                                   specs=['demo'])))
@@ -340,7 +341,8 @@ class TestSQADocument(MooseDocsTestCase):
 
     def setupExtension(self, ext):
         if ext == sqa:
-            return dict(categories=dict(Demo=dict(directories=['python/MooseDocs/test'],
+            return dict(active=True,
+                        categories=dict(Demo=dict(directories=['python/MooseDocs/test'],
                                                   specs=['demo'])))
 
     def testCommand(self):
