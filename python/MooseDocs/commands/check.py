@@ -220,7 +220,7 @@ def _check_page_for_stub(node, app_name, filename, update):
 
     elif content and node.hidden:
         msg = "A page for %s exists, but it is still listed as hidden."
-        LOG.error(msg, node.fullpath)
+        LOG.warning(msg, node.fullpath)
 
 
 def _default_content(node):
