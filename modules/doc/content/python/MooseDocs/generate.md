@@ -132,7 +132,7 @@ These items are provided in the associated "tests" file. For example,
 
 ```
 [Tests]
-  [./my_test]
+  [my_test]
     type = 'CSVDiff'
     input = 'my_test.i'
     csvdiff = 'my_test.csv'
@@ -141,7 +141,7 @@ These items are provided in the associated "tests" file. For example,
                   "multiple lines."
     design = 'MyObject.md some_relevant_file.md'
     issues = '#1234 #1235 #1236'
-  [../]
+  []
 []
 ```
 
