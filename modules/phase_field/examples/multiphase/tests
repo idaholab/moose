@@ -4,4 +4,9 @@
     input = 'DerivativeMultiPhaseMaterial.i'
     check_input = True
   [../]
+  [./GrandPotential3Phase]
+    type = RunApp
+    input = 'GrandPotential3Phase.i'
+    check_input = True
+  [../]
 []
