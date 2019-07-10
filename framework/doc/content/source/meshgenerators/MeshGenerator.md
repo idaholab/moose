@@ -3,7 +3,7 @@
 This is the base class of all the `MeshGenerators` systems.
 There are two types of MeshGenerators :
 
-- Those who create a mesh (such as `AnnularMeshGenerator`, `FileMeshGenerator`,...). They are usually similar to the `Mesh` objects.
+- Those who create a mesh (such as `AnnularMeshGenerator`, `FileMeshGenerator`, `TriangleMesher`,...). They are usually similar to the `Mesh` objects.
 - Those who modify an existing mesh (such as `MeshExtruderGenerator`, `StitchedMeshGenerator`,...). They are usually similar to `MeshModifier` objects.
 
 The point of these objects is to create complex meshes using only one input file. Indeed, you can use several MeshGenerator blocks in your input file. Those represent the different steps necessary to create your complex mesh.
