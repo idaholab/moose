@@ -31,6 +31,7 @@ LOG = logging.getLogger(__name__)
 def make_extension(**kwargs):
     return AppSyntaxExtension(**kwargs)
 
+ParameterToken = tokens.newToken('ParameterToken', parameter=None)
 InputParametersToken = tokens.newToken('InputParametersToken',
                                        parameters=dict(),
                                        level=2,
@@ -38,13 +39,7 @@ InputParametersToken = tokens.newToken('InputParametersToken',
                                        hide=list(),
                                        show=list(),
                                        visible=list())
-ParameterToken = tokens.newToken('ParameterToken',
-                                 inline=False,
-                                 parameter=None,
-                                 description=True,
-                                 default=True,
-                                 options=True,
-                                 cpp_type=True)
+
 SyntaxList = tokens.newToken('SyntaxList')
 SyntaxListItem = tokens.newToken('SyntaxListItem', syntax=u'', group=u'', header=False)
 SyntaxLink = tokens.newToken('SyntaxLink', core.Link)
@@ -347,22 +342,20 @@ class SyntaxParametersCommand(SyntaxCommandHeadingBase):
 
         return parent
 
-class SyntaxParameterCommand(SyntaxCommandHeadingBase):
-    SUBCOMMAND = 'parameter'
-    NODE_TYPE = None # allows SyntaxNode objects to report combined action parameters
+class SyntaxParameterCommand(command.CommandComponent):
+    COMMAND = 'param'
+    SUBCOMMAND = None
 
     @staticmethod
     def defaultSettings():
         settings = SyntaxCommandHeadingBase.defaultSettings()
-        settings['name'] = (None, "The name of the parameter to display.")
-        settings['description'] = (True, "Show the description.")
-        settings['default'] = (True, "Show the default value.")
-        settings['cpptype'] = (True, "Show the C++ type.")
-        settings['options'] = (True, "Show the available options.")
         return settings
 
-    def createTokenFromSyntax(self, parent, info, page, obj):
+    def createToken(self, parent, info, page):
 
+        obj_syntax, param_name = info[MooseDocs.INLINE].rsplit('/', 1)
+
+        obj = self.extension.find(obj_syntax)
         parameters = dict()
         if isinstance(obj, syntax.SyntaxNode):
             for action in obj.actions():
@@ -370,12 +363,16 @@ class SyntaxParameterCommand(SyntaxCommandHeadingBase):
         elif obj.parameters:
             parameters.update(obj.parameters)
 
-        return ParameterToken(parent,
-                              description=self.settings['description'],
-                              default=self.settings['default'],
-                              cpp_type=self.settings['cpptype'],
-                              options=self.settings['options'],
-                              parameter=parameters[self.settings['name']])
+        if param_name not in parameters:
+            results = mooseutils.levenshteinDistance(param_name, parameters.keys(), 5)
+            msg = "Unable to locate the parameter '{}/{}', did you mean:\n"
+            for res in results:
+                msg += '    {}/{}\n'.format(obj_syntax, res)
+            raise common.MooseDocsException(msg, param_name, obj_syntax)
+
+        ParameterToken(parent, parameter=parameters[param_name],
+                       string=u'"{}"'.format(param_name))
+        return parent
 
 
 class SyntaxChildrenCommand(SyntaxCommandHeadingBase):
@@ -695,36 +692,19 @@ class RenderInputParametersToken(components.RenderComponent):
 class RenderParameterToken(components.RenderComponent):
 
     def createHTML(self, parent, token, page):
-        param = token['parameter']
-        if token['inline']:
-            html.Tag(parent, 'span', string=param['name'], class_='moose-parameter-name')
-        else:
-            div = html.Tag(parent, 'div', class_='moose-parameter')
-            html.Tag(div, 'span', string=param['name'], class_='moose-parameter-name')
-            self._addParamInfo(parent, token, 'description', param)
-            self._addParamInfo(parent, token, 'default', param)
-            self._addParamInfo(parent, token, 'cpp_type', param, title='C++ Type')
-            self._addParamInfo(parent, token, 'options', param)
-        return parent
+        return html.Tag(parent, 'span', class_='moose-parameter-name')
 
     def createMaterialize(self, parent, token, page):
-        pass
+        span = self.createHTML(parent, token, page)
+        param = token['parameter']
+        span.addClass('tooltipped')
+        span['data-tooltip'] = param['description']
+        span['data-position'] = 'bottom'
+        span['data-delay'] = 5
+        return span
 
     def createLatex(self, parent, token, page):
         pass
-
-    @staticmethod
-    def _addParamInfo(parent, token, key, param, title=None):
-
-        value = param.get(key, None)
-        if value and token[key]:
-            key = key.replace('_', '')
-            title = key.title() if title is None else title
-            div = html.Tag(parent, 'div', class_='moose-parameter-{}'.format(key))
-            html.Tag(div, 'span', string='{}: '.format(title),
-                     class_='moose-parameter-{}-title'.format(key))
-            html.Tag(div, 'span', string=value,
-                     class_='moose-parameter-{}-content'.format(key))
 
 
 class RenderSyntaxLink(core.RenderLink):
