@@ -12,6 +12,8 @@ InputParameters validParams<HeliumFluidProperties>();
  */
 class HeliumFluidProperties : public SinglePhaseFluidProperties
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
 public:
   HeliumFluidProperties(const InputParameters & parameters);
 
@@ -320,3 +322,4 @@ protected:
   /// specific heat at constant pressure
   const Real _cp;
 };
+#pragma GCC diagnostic pop
