@@ -1,7 +1,5 @@
 - /AuxKernels/AccumulateAux
 - /AuxKernels/ElasticEnergyAux
-- /AuxKernels/RadialDisplacementCylinderAux
-- /AuxKernels/RadialDisplacementSphereAux
 - /BCs
 - /BCs/DashpotBC
 - /BCs/PresetVelocity
@@ -11,7 +9,6 @@
 - /Kernels/PhaseFieldFractureMechanicsOffDiag
 - /Kernels/PlasticHeatEnergy
 - /Kernels/PoroMechanicsCoupling
-- /Kernels/WeakPlaneStress
 - /Kernels/PoroMechanics
 - /Kernels/PoroMechanics/PoroMechanicsAction
 - /Materials/CappedDruckerPragerCosseratStressUpdate
@@ -31,8 +28,6 @@
 - /Materials/ComputeMultiPlasticityStress
 - /Materials/ComputeMultipleInelasticCosseratStress
 - /Materials/ComputePlasticHeatEnergy
-- /Materials/FiniteStrainCPSlipRateRes
-- /Materials/FiniteStrainCrystalPlasticity
 - /Materials/FiniteStrainHyperElasticViscoPlastic
 - /Materials/FiniteStrainPlasticMaterial
 - /Materials/FluxBasedStrainIncrement
