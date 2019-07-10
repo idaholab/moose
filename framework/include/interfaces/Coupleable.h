@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include <map>
+#include <unordered_map>
 #include "MooseTypes.h"
 #include "MooseArray.h"
 #include "MooseVariableFE.h"
@@ -70,15 +70,10 @@ public:
   Coupleable(const MooseObject * moose_object, bool nodal);
 
   /**
-   * Destructor for object
-   */
-  virtual ~Coupleable();
-
-  /**
    * Get the list of coupled variables
    * @return The list of coupled variables
    */
-  const std::map<std::string, std::vector<MooseVariableFEBase *>> & getCoupledVars()
+  const std::unordered_map<std::string, std::vector<MooseVariableFEBase *>> & getCoupledVars()
   {
     return _coupled_vars;
   }
@@ -841,7 +836,7 @@ protected:
   FEProblemBase & _c_fe_problem;
 
   /// Coupled vars whose values we provide
-  std::map<std::string, std::vector<MooseVariableFEBase *>> _coupled_vars;
+  std::unordered_map<std::string, std::vector<MooseVariableFEBase *>> _coupled_vars;
 
   /// Vector of all coupled variables
   std::vector<MooseVariableFEBase *> _coupled_moose_vars;
@@ -865,19 +860,20 @@ protected:
   THREAD_ID _c_tid;
 
   /// Will hold the default value for optional coupled variables.
-  std::map<std::string, std::vector<VariableValue *>> _default_value;
+  std::unordered_map<std::string, std::vector<std::unique_ptr<VariableValue>>> _default_value;
 
   /// Will hold the default value for optional coupled variables for automatic differentiation.
-  std::map<std::string, MooseArray<DualReal> *> _ad_default_value;
+  std::unordered_map<std::string, std::unique_ptr<MooseArray<DualReal>>> _ad_default_value;
 
   /// Will hold the default value for optional vector coupled variables.
-  std::map<std::string, VectorVariableValue *> _default_vector_value;
+  std::unordered_map<std::string, std::unique_ptr<VectorVariableValue>> _default_vector_value;
 
   /// Will hold the default value for optional array coupled variables.
   std::map<std::string, ArrayVariableValue *> _default_array_value;
 
   /// Will hold the default value for optional vector coupled variables for automatic differentiation.
-  std::map<std::string, MooseArray<DualRealVectorValue> *> _ad_default_vector_value;
+  std::unordered_map<std::string, std::unique_ptr<MooseArray<DualRealVectorValue>>>
+      _ad_default_vector_value;
 
   /**
    * This will always be zero because the default values for optionally coupled variables is always
@@ -1079,10 +1075,10 @@ private:
   unsigned int _coupleable_max_qps;
 
   /// Unique indices for optionally coupled vars that weren't provided
-  std::map<std::string, std::vector<unsigned int>> _optional_var_index;
+  std::unordered_map<std::string, std::vector<unsigned int>> _optional_var_index;
 
   /// Scalar variables coupled into this object (for error checking)
-  std::map<std::string, std::vector<MooseVariableScalar *>> _c_coupled_scalar_vars;
+  std::unordered_map<std::string, std::vector<MooseVariableScalar *>> _c_coupled_scalar_vars;
 
   std::set<TagID> _fe_coupleable_vector_tags;
 
@@ -1317,16 +1313,15 @@ template <ComputeStage compute_stage>
 ADVariableValue *
 Coupleable::getADDefaultValue(const std::string & var_name)
 {
-  std::map<std::string, MooseArray<DualReal> *>::iterator default_value_it =
-      _ad_default_value.find(var_name);
+  auto default_value_it = _ad_default_value.find(var_name);
   if (default_value_it == _ad_default_value.end())
   {
-    ADVariableValue * value =
-        new ADVariableValue(_coupleable_max_qps, _c_parameters.defaultCoupledValue(var_name));
-    default_value_it = _ad_default_value.insert(std::make_pair(var_name, value)).first;
+    auto value = libmesh_make_unique<ADVariableValue>(_coupleable_max_qps,
+                                                      _c_parameters.defaultCoupledValue(var_name));
+    default_value_it = _ad_default_value.insert(std::make_pair(var_name, std::move(value))).first;
   }
 
-  return default_value_it->second;
+  return default_value_it->second.get();
 }
 
 template <>
@@ -1336,18 +1331,18 @@ template <ComputeStage compute_stage>
 ADVectorVariableValue *
 Coupleable::getADDefaultVectorValue(const std::string & var_name)
 {
-  std::map<std::string, MooseArray<DualRealVectorValue> *>::iterator default_value_it =
-      _ad_default_vector_value.find(var_name);
+  auto default_value_it = _ad_default_vector_value.find(var_name);
   if (default_value_it == _ad_default_vector_value.end())
   {
     RealVectorValue default_vec;
     for (unsigned int i = 0; i < _c_parameters.numberDefaultCoupledValues(var_name); ++i)
       default_vec(i) = _c_parameters.defaultCoupledValue(var_name, i);
-    ADVectorVariableValue * value = new ADVectorVariableValue(_coupleable_max_qps, default_vec);
-    default_value_it = _ad_default_vector_value.insert(std::make_pair(var_name, value)).first;
+    auto value = libmesh_make_unique<ADVectorVariableValue>(_coupleable_max_qps, default_vec);
+    default_value_it =
+        _ad_default_vector_value.insert(std::make_pair(var_name, std::move(value))).first;
   }
 
-  return default_value_it->second;
+  return default_value_it->second.get();
 }
 
 template <>
@@ -1410,4 +1405,3 @@ template <>
 const VariableGradient & Coupleable::adZeroGradientTemplate<RESIDUAL>();
 template <>
 const VariableSecond & Coupleable::adZeroSecondTemplate<RESIDUAL>();
-

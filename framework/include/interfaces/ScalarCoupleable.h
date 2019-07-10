@@ -15,7 +15,7 @@
 #include "MooseVariableBase.h"
 
 // C++ includes
-#include <map>
+#include <unordered_map>
 #include <string>
 #include <vector>
 
@@ -39,11 +39,6 @@ public:
    * @param parameters Parameters that come from constructing the object
    */
   ScalarCoupleable(const MooseObject * moose_object);
-
-  /**
-   * Destructor for object
-   */
-  virtual ~ScalarCoupleable();
 
   /**
    * Get the list of coupled scalar variables
@@ -207,13 +202,13 @@ protected:
   FEProblemBase & _sc_fe_problem;
 
   /// Coupled vars whose values we provide
-  std::map<std::string, std::vector<MooseVariableScalar *>> _coupled_scalar_vars;
+  std::unordered_map<std::string, std::vector<MooseVariableScalar *>> _coupled_scalar_vars;
 
   /// Will hold the default value for optional coupled scalar variables.
-  std::map<std::string, VariableValue *> _default_value;
+  std::unordered_map<std::string, std::unique_ptr<VariableValue>> _default_value;
 
   /// Will hold the default AD value for optional coupled scalar variables.
-  std::map<std::string, DualVariableValue *> _dual_default_value;
+  std::unordered_map<std::string, std::unique_ptr<DualVariableValue>> _dual_default_value;
 
   /// Vector of coupled variables
   std::vector<MooseVariableScalar *> _coupled_moose_scalar_vars;
@@ -278,7 +273,7 @@ protected:
 
 private:
   /// Field variables coupled into this object (for error checking)
-  std::map<std::string, std::vector<MooseVariableFEBase *>> _sc_coupled_vars;
+  std::unordered_map<std::string, std::vector<MooseVariableFEBase *>> _sc_coupled_vars;
 
   std::set<TagID> _sc_coupleable_vector_tags;
 

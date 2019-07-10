@@ -28,8 +28,6 @@ public:
    */
   NeighborCoupleable(const MooseObject * moose_object, bool nodal, bool neighbor_nodal);
 
-  virtual ~NeighborCoupleable();
-
   // neighbor
   virtual const VariableValue & coupledNeighborValue(const std::string & var_name,
                                                      unsigned int comp = 0);

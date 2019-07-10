@@ -34,8 +34,7 @@ FunctionMaterialBase::FunctionMaterialBase(const InputParameters & parameters)
        ++it)
   {
     // find the variable in the list of coupled variables
-    std::map<std::string, std::vector<MooseVariableFEBase *>>::iterator vars =
-        _coupled_vars.find(*it);
+    auto vars = _coupled_vars.find(*it);
 
     // no MOOSE variable was provided for this coupling, add to a list of variables set to constant
     // default values
