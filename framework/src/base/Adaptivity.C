@@ -31,6 +31,7 @@
 Adaptivity::Adaptivity(FEProblemBase & subproblem)
   : ConsoleStreamInterface(subproblem.getMooseApp()),
     PerfGraphInterface(subproblem.getMooseApp().perfGraph(), "Adaptivity"),
+    ParallelObject(subproblem.getMooseApp()),
     _subproblem(subproblem),
     _mesh(_subproblem.mesh()),
     _mesh_refinement_on(false),

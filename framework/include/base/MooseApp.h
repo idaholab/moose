@@ -681,6 +681,9 @@ public:
    */
   bool defaultAutomaticScaling() const { return _automatic_automatic_scaling; }
 
+  // Return the communicator for this application
+  const std::shared_ptr<Parallel::Communicator> getCommunicator() const { return _comm; }
+
 protected:
   /**
    * Whether or not this MooseApp has cached a Backup to use for restart / recovery

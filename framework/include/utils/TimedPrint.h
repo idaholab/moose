@@ -12,6 +12,8 @@
 #include "ConsoleStream.h"
 #include "StreamArguments.h"
 
+#include "libmesh/auto_ptr.h" // libmesh_make_unique
+
 #include <atomic>
 #include <chrono>
 #include <iostream>
@@ -25,8 +27,13 @@
 #endif
 
 #define CONSOLE_TIMED_PRINT(...)                                                                   \
-  TimedPrint tpc(                                                                                  \
-      _console, std::chrono::duration<double>(1), std::chrono::duration<double>(1), __VA_ARGS__);
+  std::unique_ptr<TimedPrint> tpc =                                                                \
+      _communicator.rank() == 0                                                                    \
+          ? libmesh_make_unique<TimedPrint>(_console,                                              \
+                                            std::chrono::duration<double>(1),                      \
+                                            std::chrono::duration<double>(1),                      \
+                                            __VA_ARGS__)                                           \
+          : nullptr;
 
 /**
  * Object to print a message after enough time has passed.
@@ -72,20 +79,44 @@ public:
 
     // This is using move assignment
     _thread = std::thread{[&out, initial_wait, dot_interval, this, ARGS] {
+      const unsigned int WRAP_LENGTH = 90; // Leave a few characters for the duration
       auto done_future = this->_done.get_future();
+      auto start = std::chrono::steady_clock::now();
 
+      unsigned int offset = 0;
       if (done_future.wait_for(initial_wait) == std::future_status::timeout)
       {
         streamArguments(out, ARGS);
-        out << std::flush;
+        offset = out.tellp();
+
+        out << ' ' << std::flush;
+        ++offset;
       }
       else // This means the section ended before we printed anything... so just exit
         return;
 
       while (done_future.wait_for(dot_interval) == std::future_status::timeout)
-        out << "." << std::flush;
+      {
+        if (offset >= WRAP_LENGTH)
+        {
+          out << '\n';
+          offset = 0;
+        }
+        out << '.' << std::flush;
+        ++offset;
+      }
 
       // Finish the line
+      if (offset)
+      {
+        auto end = std::chrono::steady_clock::now();
+        std::chrono::duration<double> duration = end - start;
+
+        out << std::setw(WRAP_LENGTH - offset) << ' ' << " [" << COLOR_YELLOW << std::setw(6)
+            << std::fixed << std::setprecision(2) << duration.count() << " s" << COLOR_DEFAULT
+            << ']';
+      }
+
       out << std::endl;
     }};
   }
