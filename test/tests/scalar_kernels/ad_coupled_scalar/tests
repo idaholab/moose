@@ -1,5 +1,5 @@
 [Tests]
-  design = 'jacobian_definition.md'
+  design = 'ScalarKernels/index.md'
   issues = '#13703'
   [exo]
     type = Exodiff
