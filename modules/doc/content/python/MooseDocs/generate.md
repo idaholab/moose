@@ -126,6 +126,8 @@ must provide three items with each test of the test specification.
 1. +issues+: A list of [github issues](https://github.com/idaholab/moose/issues/) that are
    associated with the test and items being tested.
 
+For more information regarding writing the requirement test see [what_is_a_requirement.md].
+
 These items are provided in the associated "tests" file. For example,
 
 ```
@@ -155,16 +157,51 @@ values are overridden.
     type = CSVDiff
     input = one.i
     csvdiff = one_out.csv
-    requirement = "MyObject must compute the correct value."
+    requirement = "The system shall must compute a value."
   []
   [two]
     type = RunException
     input = two.i
     expect_err = "You can not do that"
-    requirement = "MyObject shall produce an error when a parameter is wrong."
+    requirement = "The system shall produce an error when the 'foo' parameter is wrong."
     issues = "#54321"
   []
 []
 ```
 
-For more information regarding writing the requirement test see [what_is_a_requirement.md].
+Multiple tests may be associated with a single requirement that is tested in
+multiple ways, such as in 1D, 2D, and 3D. For this case, the tests within a
+specification may be grouped into a single requirement with each test within the group providing
+additional details via the "detail" parameter. It is important that the requirement text
+and each of the details are a complete sentence when combined, as shown in the following example.
+
+```
+[Tests]
+  [group] # this is an arbitrary name that is not used
+    issues = "#1235"
+    design = "MyObject.md"
+    requirement = "The system shall solve the Laplace equation in:"
+    [1D]
+      type = Exodiff
+      input = input_1D.i
+      exodiff = input_1D_out.e
+
+      detail = "in 1D,"
+    []
+    [2D]
+      type = Exodiff
+      input = input_2D.i
+      exodiff = input_2D_out.e
+
+      detail = "in 2D, and"
+    []
+    [3D]
+      type = Exodiff
+      input = input_3D.i
+      exodiff = input_3D_out.e
+
+      detail = "in 3D."
+    []
+  []
+[]
+```
