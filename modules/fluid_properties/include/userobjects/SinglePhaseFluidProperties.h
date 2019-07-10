@@ -556,7 +556,7 @@ private:
   void fluidPropError(Args... args) const
   {
     if (_allow_imperfect_jacobians)
-      mooseWarning(std::forward<Args>(args)...);
+      mooseDoOnce(mooseWarning(std::forward<Args>(args)...));
     else
       mooseError(std::forward<Args>(args)...);
   }
