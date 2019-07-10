@@ -13,6 +13,22 @@
 #include "MooseTypes.h"
 #include "MooseEnum.h"
 
+enum class ContactModel
+{
+  FRICTIONLESS,
+  GLUED,
+  COULOMB,
+};
+
+enum class ContactFormulation
+{
+  KINEMATIC,
+  PENALTY,
+  AUGMENTED_LAGRANGE,
+  TANGENTIAL_PENALTY,
+  MORTAR
+};
+
 class ContactAction;
 
 template <>
@@ -25,11 +41,17 @@ public:
 
   virtual void act() override;
 
+  static MooseEnum getModelEnum();
+  static MooseEnum getFormulationEnum();
+  static MooseEnum getSystemEnum();
+  static MooseEnum getSmoothingEnum();
+
+  static InputParameters commonParameters();
+
 protected:
   const BoundaryName _master;
   const BoundaryName _slave;
-  const std::string _model;
-  const std::string _formulation;
+  const MooseEnum _model;
+  const MooseEnum _formulation;
   const MooseEnum _system;
 };
-

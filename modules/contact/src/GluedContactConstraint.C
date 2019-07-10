@@ -11,7 +11,7 @@
 
 #include "SystemBase.h"
 #include "PenetrationLocator.h"
-#include "AddVariableAction.h"
+#include "ContactAction.h"
 
 #include "libmesh/string_to_enum.h"
 #include "libmesh/sparse_matrix.h"
@@ -22,9 +22,9 @@ template <>
 InputParameters
 validParams<GluedContactConstraint>()
 {
-  MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
-
   InputParameters params = validParams<SparsityBasedContactConstraint>();
+  params += ContactAction::commonParameters();
+
   params.addRequiredParam<BoundaryName>("boundary", "The master boundary");
   params.addRequiredParam<BoundaryName>("slave", "The slave boundary");
   params.addRequiredParam<unsigned int>("component",
@@ -41,7 +41,6 @@ validParams<GluedContactConstraint>()
       "The displacements appropriate for the simulation geometry and coordinate system");
 
   params.addRequiredCoupledVar("nodal_area", "The nodal area");
-  params.addParam<std::string>("model", "frictionless", "The contact model to use");
 
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<Real>(
@@ -51,28 +50,20 @@ validParams<GluedContactConstraint>()
   params.addParam<Real>("friction_coefficient", 0.0, "The friction coefficient");
   params.addParam<Real>("tangential_tolerance",
                         "Tangential distance to extend edges of contact surfaces");
-  params.addParam<Real>(
-      "normal_smoothing_distance",
-      "Distance from edge in parametric coordinates over which to smooth contact normal");
-  params.addParam<std::string>("normal_smoothing_method",
-                               "Method to use to smooth normals (edge_based|nodal_normal_based)");
-  params.addParam<MooseEnum>("order", orders, "The finite element order");
-
   params.addParam<Real>("tension_release",
                         0.0,
                         "Tension release threshold.  A node in contact "
                         "will not be released if its tensile load is below "
                         "this value.  Must be positive.");
 
-  params.addParam<std::string>("formulation", "default", "The contact formulation");
   return params;
 }
 
 GluedContactConstraint::GluedContactConstraint(const InputParameters & parameters)
   : SparsityBasedContactConstraint(parameters),
     _component(getParam<unsigned int>("component")),
-    _model(ContactMaster::contactModel(getParam<std::string>("model"))),
-    _formulation(ContactMaster::contactFormulation(getParam<std::string>("formulation"))),
+    _model(getParam<MooseEnum>("model").getEnum<ContactModel>()),
+    _formulation(getParam<MooseEnum>("formulation").getEnum<ContactFormulation>()),
     _penalty(getParam<Real>("penalty")),
     _friction_coefficient(getParam<Real>("friction_coefficient")),
     _tension_release(getParam<Real>("tension_release")),
@@ -91,7 +82,7 @@ GluedContactConstraint::GluedContactConstraint(const InputParameters & parameter
 
   if (parameters.isParamValid("normal_smoothing_method"))
     _penetration_locator.setNormalSmoothingMethod(
-        parameters.get<std::string>("normal_smoothing_method"));
+        parameters.get<MooseEnum>("normal_smoothing_method"));
 
   if (isParamValid("displacements"))
   {

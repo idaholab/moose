@@ -13,23 +13,13 @@
 #include "DiracKernel.h"
 #include "PenetrationLocator.h"
 
-enum ContactModel
-{
-  CM_INVALID,
-  CM_FRICTIONLESS,
-  CM_GLUED,
-  CM_COULOMB,
-};
+// Forward Declarations
+class ContactMaster;
+enum class ContactModel;
+enum class ContactFormulation;
 
-enum ContactFormulation
-{
-  CF_INVALID,
-  CF_DEFAULT,
-  CF_KINEMATIC = CF_DEFAULT,
-  CF_PENALTY,
-  CF_AUGMENTED_LAGRANGE,
-  CF_TANGENTIAL_PENALTY
-};
+template <>
+InputParameters validParams<ContactMaster>();
 
 class ContactMaster : public DiracKernel
 {
@@ -44,9 +34,6 @@ public:
   virtual Real computeQpJacobian() override;
 
   virtual void updateContactStatefulData();
-
-  static ContactFormulation contactFormulation(std::string name);
-  static ContactModel contactModel(std::string name);
 
 protected:
   Real nodalArea(PenetrationInfo & pinfo);
@@ -75,10 +62,3 @@ protected:
   SystemBase & _aux_system;
   const NumericVector<Number> * _aux_solution;
 };
-
-ContactModel contactModel(const std::string & the_name);
-ContactFormulation contactFormulation(const std::string & the_name);
-
-template <>
-InputParameters validParams<ContactMaster>();
-

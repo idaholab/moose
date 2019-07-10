@@ -9,14 +9,14 @@
 
 #pragma once
 
-#include "ContactMaster.h" // For the ContactModel
-
 // Moose Includes
 #include "DiracKernel.h"
 #include "PenetrationLocator.h"
 
 // Forward Declarations
 class SlaveConstraint;
+enum class ContactModel;
+enum class ContactFormulation;
 
 template <>
 InputParameters validParams<SlaveConstraint>();
@@ -54,4 +54,3 @@ protected:
   SystemBase & _aux_system;
   const NumericVector<Number> * _aux_solution;
 };
-
