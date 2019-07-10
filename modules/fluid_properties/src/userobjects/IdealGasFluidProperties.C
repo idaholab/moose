@@ -55,6 +55,12 @@ IdealGasFluidProperties::IdealGasFluidProperties(const InputParameters & paramet
     _e_c(getParam<Real>("e_c")),
     _henry_constant(getParam<Real>("henry_constant"))
 {
+  // If R is provided, calculate molar mass using this
+  if (parameters.isParamSetByUser("R"))
+    _molar_mass = _R / _R_specific;
+  else
+    _R_specific = _R / _molar_mass;
+
   // If gamma is provided, calculate cp and cv using this
   if (parameters.isParamSetByUser("gamma"))
   {
@@ -63,10 +69,6 @@ IdealGasFluidProperties::IdealGasFluidProperties(const InputParameters & paramet
   }
   else
     _gamma = _cp / _cv;
-
-  // If R is provided, calculate molar mass using this
-  if (parameters.isParamSetByUser("R"))
-    _molar_mass = _R / _R_specific;
 }
 
 IdealGasFluidProperties::~IdealGasFluidProperties() {}
