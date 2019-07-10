@@ -23,9 +23,6 @@ public:
 protected:
   virtual void computeQpProperties();
 
-  /// Heat flux perimeter
-  const VariableValue & _P_hf;
-
   /// Wall temperature
   const MaterialProperty<Real> & _T_wall;
   /// Heat convective transfer coefficient of liquid
