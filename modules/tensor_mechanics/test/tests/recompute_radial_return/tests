@@ -1,9 +1,12 @@
 [Tests]
+  issues = '#5481 #11239'
   [./isotropic_plasticity_incremental]
     type = Exodiff
     input = 'isotropic_plasticity_incremental_strain.i'
     exodiff = 'isotropic_plasticity_incremental_strain_out.e'
     compiler = 'CLANG GCC'
+    design = 'IsotropicPlasticityStressUpdate.md ComputeMultipleInelasticStress.md'
+    requirement = 'The system shall compute the J2 isotropic plasticity stress and plastic strain response under tensile loading within the small incremental strain formulation.'
   [../]
   [./isotropic_plasticity_incremental_base_name]
     type = Exodiff
@@ -14,6 +17,8 @@
     exodiff_opts = '-allow_name_mismatch'
     compiler = 'CLANG GCC'
     prereq = isotropic_plasticity_incremental
+    design = 'IsotropicPlasticityStressUpdate.md ComputeMultipleInelasticStress.md'
+    requirement = 'The system shall compute the J2 isotropic plasticity stress and plastic strain response under tensile loading within the small incremental strain formulation while prescribing a base name for the isotropic plasticity material properties.'
   [../]
   [./isotropic_plasticity_incremental_Bbar]
     type = Exodiff
@@ -22,12 +27,16 @@
     compiler = 'CLANG GCC'
     cli_args = 'GlobalParams/volumetric_locking_correction=true'
     prereq = 'isotropic_plasticity_incremental_base_name'
+    design = 'IsotropicPlasticityStressUpdate.md ComputeMultipleInelasticStress.md'
+    requirement = 'The system shall compute the J2 isotropic plasticity stress and plastic strain response under tensile loading within the small incremental strain formulation and using the b-bar element volume correction.'
   [../]
   [./isotropic_plasticity_finite]
     type = Exodiff
     input = 'isotropic_plasticity_finite_strain.i'
     exodiff = 'isotropic_plasticity_finite_strain_out.e'
     compiler = 'CLANG GCC'
+    design = 'IsotropicPlasticityStressUpdate.md ComputeMultipleInelasticStress.md'
+    requirement = 'The system shall compute the J2 isotropic plasticity stress and plastic strain response under tensile loading within the finite incremental strain formulation.'
   [../]
   [./isotropic_plasticity_finite_Bbar]
     type = Exodiff
@@ -36,12 +45,16 @@
     compiler = 'CLANG GCC'
     cli_args = 'GlobalParams/volumetric_locking_correction=true'
     prereq = 'isotropic_plasticity_finite'
+    design = 'IsotropicPlasticityStressUpdate.md ComputeMultipleInelasticStress.md'
+    requirement = 'The system shall compute the J2 isotropic plasticity stress and plastic strain response under tensile loading within the finite incremental strain formulation and using the b-bar element volume correction.'
   [../]
   [./uniaxial_viscoplasticity]
     type = Exodiff
     input = 'uniaxial_viscoplasticity_incrementalstrain.i'
     exodiff = 'uniaxial_viscoplasticity_incrementalstrain_out.e'
     compiler = 'CLANG GCC'
+    design = 'HyperbolicViscoplasticityStressUpdate.md'
+    requirement = 'The system shall compute the hyperbolic visoplastic stress response for a time-dependent linear strain hardening plasticity model in a small incremental strain formulation in a manner equivalent to the ABAQUS result.'
   [../]
 
   [./isotropic_plasticity_error1]
@@ -53,6 +66,8 @@
                 Materials/elasticity_tensor/type=ComputeIsotropicElasticityTensor Materials/elasticity_tensor/youngs_modulus=2.1e5
                 Materials/elasticity_tensor/poissons_ratio=0.0'
     expect_err = 'Only the hardening_constant or only the hardening_function can be defined but not both'
+    design = 'IsotropicPlasticityStressUpdate.md'
+    requirement = 'The system shall only allow the calculation of a J2 isotropic plasticity stress response with only one but not both of a hardening function or hardening constant specified to define the evolving yield surface.'
   [../]
   [./isotropic_plasticity_error2]
     type = 'RunException'
@@ -62,6 +77,8 @@
                 Materials/elasticity_tensor/poissons_ratio=0.0'
     expect_err = 'Either hardening_constant or hardening_function must be defined'
     prereq = 'isotropic_plasticity_error1'
+    design = 'IsotropicPlasticityStressUpdate.md'
+    requirement = 'The system shall only calculate the J2 isotropic plasticity stress response when either a hardening function or a hardening constant is specified to define the evolving yield surface.'
   [../]
   [./isotropic_plasticity_error3]
     type = 'RunException'
@@ -71,6 +88,8 @@
                 Materials/elasticity_tensor/poissons_ratio=0.0'
     expect_err = 'Either yield_stress or yield_stress_function must be given'
     prereq = 'isotropic_plasticity_error2'
+    design = 'IsotropicPlasticityStressUpdate.md'
+    requirement = 'The system shall only calculate the J2 isotropic plasticity stress response when either a constant yield stress or a yield stress function is specified to define the initial yield surface.'
   [../]
   [./isotropic_plasticity_error4]
     type = 'RunException'
@@ -81,6 +100,8 @@
                 Materials/isotropic_plasticity/yield_stress=-5.0'
     expect_err = 'Yield stress must be greater than zero'
     prereq = 'isotropic_plasticity_error3'
+    design = 'IsotropicPlasticityStressUpdate.md'
+    requirement = 'The system shall return an error if a negative yield stress is supplied when calculating the J2 isotropic plasticity stress response.'
   [../]
   [./isotropic_plasticity_error5]
     type = 'RunException'
@@ -91,11 +112,15 @@
                 Materials/elasticity_tensor/C_ijkl="1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21"'
     expect_err = 'Model isotropic_plasticity requires an isotropic elasticity tensor, but the one supplied is not guaranteed isotropic'
     prereq = 'isotropic_plasticity_error4'
+    design = 'IsotropicPlasticityStressUpdate.md'
+    requirement = 'The system shall return an error if anisotropic elasticity tensor is supplied when the J2 isotropic plasticity stress response calculation is requested.'
   [../]
   [./affine_plasticity]
     type = Exodiff
     input = 'affine_plasticity.i'
     exodiff = 'affine_plasticity_out.e'
     custom_cmp = 'affine_plasticity.exodiff'
+    design = 'IsotropicPlasticityStressUpdate.md ComputeMultipleInelasticStress.md'
+    requirement = 'The system shall calculate, with J2 isotropic plasticity, the transient stress eigenvalues with stationary eigenvectors verification test from K. Jamojjala, R. Brannon, A. Sadeghirad, J. Guilkey, Verification tests in solid mechanics, Engineering with Computers, Vol 31., p. 193-213.'
   [../]
 []

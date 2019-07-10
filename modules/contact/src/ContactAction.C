@@ -28,12 +28,8 @@ template <>
 InputParameters
 validParams<ContactAction>()
 {
-  MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
-  MooseEnum formulation("DEFAULT KINEMATIC PENALTY AUGMENTED_LAGRANGE TANGENTIAL_PENALTY",
-                        "DEFAULT");
-  MooseEnum system("DiracKernel Constraint", "DiracKernel");
-
   InputParameters params = validParams<Action>();
+  params += ContactAction::commonParameters();
 
   params.addRequiredParam<BoundaryName>("master", "The master surface");
   params.addRequiredParam<BoundaryName>("slave", "The slave surface");
@@ -56,31 +52,23 @@ validParams<ContactAction>()
                         "Tension release threshold.  A node in contact "
                         "will not be released if its tensile load is below "
                         "this value.  No tension release if negative.");
-  params.addParam<std::string>("model", "frictionless", "The contact model to use");
+  params.addParam<MooseEnum>("model", ContactAction::getModelEnum(), "The contact model to use");
   params.addParam<Real>("tangential_tolerance",
                         "Tangential distance to extend edges of contact surfaces");
   params.addParam<Real>(
-      "capture_tolerance", 0, "Normal distance from surface within which nodes are captured");
+      "capture_tolerance", 0.0, "Normal distance from surface within which nodes are captured");
   params.addParam<Real>(
       "normal_smoothing_distance",
       "Distance from edge in parametric coordinates over which to smooth contact normal");
-  params.addParam<std::string>("normal_smoothing_method",
-                               "Method to use to smooth normals (edge_based|nodal_normal_based)");
-  params.addParam<MooseEnum>("order", orders, "The finite element order: FIRST, SECOND, etc.");
+
   params.addParam<MooseEnum>(
-      "formulation",
-      formulation,
-      "The contact formulation: default, penalty, augmented_lagrange, tangential_penalty");
-  params.addParam<MooseEnum>("system",
-                             system,
-                             "System to use for constraint enforcement.  Options are: " +
-                                 system.getRawNames());
+      "system", ContactAction::getSystemEnum(), "System to use for constraint enforcement");
   params.addParam<bool>("normalize_penalty",
                         false,
                         "Whether to normalize the penalty parameter with the nodal area.");
   params.addParam<bool>("master_slave_jacobian",
                         true,
-                        "Whether to include jacobian entries coupling master and slave nodes.");
+                        "Whether to include Jacobian entries coupling master and slave nodes.");
   params.addParam<Real>("al_penetration_tolerance",
                         "The tolerance of the penetration for augmented Lagrangian method.");
   params.addParam<Real>("al_incremental_slip_tolerance",
@@ -95,17 +83,19 @@ ContactAction::ContactAction(const InputParameters & params)
   : Action(params),
     _master(getParam<BoundaryName>("master")),
     _slave(getParam<BoundaryName>("slave")),
-    _model(getParam<std::string>("model")),
+    _model(getParam<MooseEnum>("model")),
     _formulation(getParam<MooseEnum>("formulation")),
     _system(getParam<MooseEnum>("system"))
 {
   if (_formulation == "tangential_penalty")
   {
     if (_system != "Constraint")
-      mooseError(
+      paramError(
+          "formulation",
           "The 'tangential_penalty' formulation can only be used with the 'Constraint' system");
     if (_model != "coulomb")
-      mooseError("The 'tangential_penalty' formulation can only be used with the 'coulomb' model");
+      paramError("formulation",
+                 "The 'tangential_penalty' formulation can only be used with the 'coulomb' model");
   }
 }
 
@@ -161,8 +151,7 @@ ContactAction::act()
     if (_system == "Constraint")
     {
       InputParameters params = _factory.getValidParams("MechanicalContactConstraint");
-      params.applyParameters(parameters(), {"displacements", "formulation"});
-      params.set<std::string>("formulation") = _formulation;
+      params.applyParameters(parameters(), {"displacements"});
       params.set<std::vector<VariableName>>("nodal_area") = {"nodal_area_" + name()};
       params.set<std::vector<VariableName>>("displacements") = coupled_displacements;
       params.set<BoundaryName>("boundary") = _master;
@@ -183,8 +172,7 @@ ContactAction::act()
     {
       {
         InputParameters params = _factory.getValidParams("ContactMaster");
-        params.applyParameters(parameters(), {"displacements", "formulation"});
-        params.set<std::string>("formulation") = _formulation;
+        params.applyParameters(parameters(), {"displacements"});
         params.set<std::vector<VariableName>>("nodal_area") = {"nodal_area_" + name()};
         params.set<std::vector<VariableName>>("displacements") = coupled_displacements;
         params.set<BoundaryName>("boundary") = _master;
@@ -201,8 +189,7 @@ ContactAction::act()
 
       {
         InputParameters params = _factory.getValidParams("SlaveConstraint");
-        params.applyParameters(parameters(), {"displacements", "formulation"});
-        params.set<std::string>("formulation") = _formulation;
+        params.applyParameters(parameters(), {"displacements"});
         params.set<std::vector<VariableName>>("nodal_area") = {"nodal_area_" + name()};
         params.set<std::vector<VariableName>>("displacements") = coupled_displacements;
         params.set<BoundaryName>("boundary") = _slave;
@@ -218,4 +205,51 @@ ContactAction::act()
       }
     }
   }
+}
+
+MooseEnum
+ContactAction::getModelEnum()
+{
+  return MooseEnum("frictionless glued coulomb", "frictionless");
+}
+
+MooseEnum
+ContactAction::getFormulationEnum()
+{
+  return MooseEnum("kinematic penalty augmented_lagrange tangential_penalty mortar", "kinematic");
+}
+
+MooseEnum
+ContactAction::getSystemEnum()
+{
+  return MooseEnum("DiracKernel Constraint", "DiracKernel");
+}
+
+MooseEnum
+ContactAction::getSmoothingEnum()
+{
+  return MooseEnum("edge_based nodal_normal_based", "");
+}
+
+InputParameters
+ContactAction::commonParameters()
+{
+  InputParameters params = emptyInputParameters();
+
+  MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
+  params.addParam<MooseEnum>("order", orders, "The finite element order: FIRST, SECOND, etc.");
+
+  params.addParam<MooseEnum>("normal_smoothing_method",
+                             ContactAction::getSmoothingEnum(),
+                             "Method to use to smooth normals");
+  params.addParam<Real>(
+      "normal_smoothing_distance",
+      "Distance from edge in parametric coordinates over which to smooth contact normal");
+
+  params.addParam<MooseEnum>(
+      "formulation", ContactAction::getFormulationEnum(), "The contact formulation");
+
+  params.addParam<MooseEnum>("model", ContactAction::getModelEnum(), "The contact model to use");
+
+  return params;
 }

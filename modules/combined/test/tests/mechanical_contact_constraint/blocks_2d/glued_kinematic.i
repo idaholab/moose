@@ -166,7 +166,6 @@
     master = 2
     slave = 3
     model = glued
-    formulation = default
     penalty = 1e+6
   [../]
 []

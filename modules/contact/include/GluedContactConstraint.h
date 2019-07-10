@@ -12,10 +12,10 @@
 // MOOSE includes
 #include "SparsityBasedContactConstraint.h"
 
-#include "ContactMaster.h"
-
 // Forward Declarations
 class GluedContactConstraint;
+enum class ContactModel;
+enum class ContactFormulation;
 
 template <>
 InputParameters validParams<GluedContactConstraint>();
@@ -72,4 +72,3 @@ protected:
   SystemBase & _aux_system;
   const NumericVector<Number> * _aux_solution;
 };
-
