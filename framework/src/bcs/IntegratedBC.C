@@ -129,17 +129,18 @@ void
 IntegratedBC::computeJacobianBlock(MooseVariableFEBase & jvar)
 {
   size_t jvar_num = jvar.number();
+  if (jvar_num == _var.number())
+  {
+    computeJacobian();
+    return;
+  }
+
   prepareMatrixTag(_assembly, _var.number(), jvar_num);
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < jvar.phiFaceSize(); _j++)
-      {
-        if (_var.number() == jvar_num)
-          _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
-        else
-          _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar_num);
-      }
+        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar_num);
 
   accumulateTaggedLocalMatrix();
 }

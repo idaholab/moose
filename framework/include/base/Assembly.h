@@ -52,6 +52,7 @@ class MooseVariableFE;
 class MooseVariableScalar;
 typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<RealVectorValue> VectorMooseVariable;
+typedef MooseVariableFE<RealEigenVector> ArrayMooseVariable;
 class XFEMInterface;
 class SubProblem;
 
@@ -258,6 +259,11 @@ public:
    */
   const MooseArray<Point> & normals() const { return _current_normals; }
 
+  /***
+   * Returns the array of normals for quadrature points on a current side
+   */
+  const std::vector<Eigen::Map<RealDIMValue>> & mappedNormals() const { return _mapped_normals; }
+
   /**
    * Returns the array of tangents for quadrature points on a current side
    * @return A _reference_.  Make sure to store this as a reference!
@@ -354,7 +360,11 @@ public:
    * Returns the reference to the current neighbor volume
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const Real & neighborVolume() const;
+  const Real & neighborVolume()
+  {
+    _need_neighbor_elem_volume = true;
+    return _current_neighbor_volume;
+  }
 
   /**
    * Returns the reference to the current quadrature being used on a current neighbor
@@ -540,9 +550,6 @@ public:
    */
   void init(const CouplingMatrix * cm);
 
-  /// Deprecated init method
-  void init();
-
   /// Create pair of variables requiring nonlocal jacobian contributions
   void initNonlocalCoupling();
 
@@ -590,15 +597,39 @@ public:
   void copyNeighborShapes(MooseVariableFE<T> & v);
   void copyNeighborShapes(unsigned int var);
 
+  /**
+   * Add local residuals of all field variables for a tag onto a given global residual vector.
+   */
   void addResidual(NumericVector<Number> & residual, TagID tag_id = 0);
+  /**
+   * Add local residuals of all field variables for a set of tags onto the global residual vectors
+   * associated with the tags.
+   */
   void addResidual(const std::map<TagName, TagID> & tags);
+  /**
+   * Add local neighbor residuals of all field variables for a tag onto a given global residual
+   * vector.
+   */
   void addResidualNeighbor(NumericVector<Number> & residual, TagID tag_id = 0);
+  /**
+   * Add local neighbor residuals of all field variables for a set of tags onto the global residual
+   * vectors associated with the tags.
+   */
   void addResidualNeighbor(const std::map<TagName, TagID> & tags);
+  /**
+   * Add residuals of all scalar variables for a tag onto the global residual vector associated
+   * with the tag.
+   */
   void addResidualScalar(TagID tag_id);
+  /**
+   * Add residuals of all scalar variables for a set of tags onto the global residual vectors
+   * associated with the tags.
+   */
   void addResidualScalar(const std::map<TagName, TagID> & tags);
 
   /**
-   * Takes the values that are currently in _sub_Re and appends them to the cached values.
+   * Takes the values that are currently in _sub_Re of all field variables and appends them to
+   * the cached values.
    */
   void cacheResidual();
 
@@ -630,7 +661,8 @@ public:
                           TagID tag = 0);
 
   /**
-   * Takes the values that are currently in _sub_Rn and appends them to the cached values.
+   * Takes the values that are currently in _sub_Rn of all field variables and appends them to
+   * the cached values.
    */
   void cacheResidualNeighbor();
 
@@ -639,6 +671,9 @@ public:
    */
   void cacheResidualLower();
 
+  /**
+   * Pushes all cached residuals to the global residual vectors.
+   */
   void addCachedResiduals();
 
   /**
@@ -649,26 +684,25 @@ public:
    */
   void addCachedResidual(NumericVector<Number> & residual, TagID tag_id);
 
+  /**
+   * Sets local residuals of all field variables to the global residual vector for a tag.
+   */
   void setResidual(NumericVector<Number> & residual, TagID tag_id = 0);
+
+  /**
+   * Sets local neighbor residuals of all field variables to the global residual vector for a tag.
+   */
   void setResidualNeighbor(NumericVector<Number> & residual, TagID tag_id = 0);
 
-  void addJacobian();
   /**
-   * Adds element matrix for ivar rows and jvar columns
+   * Adds all local Jacobian to the global Jacobian matrices.
    */
-  void addJacobianCoupledVarPair(MooseVariableBase * ivar, MooseVariableBase * jvar);
+  void addJacobian();
+
+  /**
+   * Adds non-local Jacobian to the global Jacobian matrices.
+   */
   void addJacobianNonlocal();
-  void addJacobianBlock(SparseMatrix<Number> & jacobian,
-                        unsigned int ivar,
-                        unsigned int jvar,
-                        const DofMap & dof_map,
-                        std::vector<dof_id_type> & dof_indices);
-  void addJacobianBlockNonlocal(SparseMatrix<Number> & jacobian,
-                                unsigned int ivar,
-                                unsigned int jvar,
-                                const DofMap & dof_map,
-                                const std::vector<dof_id_type> & idof_indices,
-                                const std::vector<dof_id_type> & jdof_indices);
 
   /**
    * Add ElementNeighbor, NeighborElement, and NeighborNeighbor portions of the Jacobian for compute
@@ -677,20 +711,52 @@ public:
   void addJacobianNeighbor();
 
   /**
+   * Add Jacobians for pairs of scalar variables into the global Jacobian matrices.
+   */
+  void addJacobianScalar();
+
+  /**
+   * Add Jacobians for a scalar variables with all other field variables into the global Jacobian
+   * matrices.
+   */
+  void addJacobianOffDiagScalar(unsigned int ivar);
+
+  /**
+   * Adds element matrix for ivar rows and jvar columns to the global Jacobian matrix.
+   */
+  void addJacobianBlock(SparseMatrix<Number> & jacobian,
+                        unsigned int ivar,
+                        unsigned int jvar,
+                        const DofMap & dof_map,
+                        std::vector<dof_id_type> & dof_indices);
+
+  /**
+   * Adds non-local element matrix for ivar rows and jvar columns to the global Jacobian matrix.
+   */
+  void addJacobianBlockNonlocal(SparseMatrix<Number> & jacobian,
+                                unsigned int ivar,
+                                unsigned int jvar,
+                                const DofMap & dof_map,
+                                const std::vector<dof_id_type> & idof_indices,
+                                const std::vector<dof_id_type> & jdof_indices);
+
+  /**
    * Add LowerLower, LowerSlave (LowerElement), LowerMaster (LowerNeighbor), SlaveLower
    * (ElementLower), and MasterLower (NeighborLower) portions of the Jacobian for compute objects
    * like MortarConstraints
    */
   void addJacobianLower();
 
+  /**
+   * Adds three neighboring element matrices for ivar rows and jvar columns to the global Jacobian
+   * matrix.
+   */
   void addJacobianNeighbor(SparseMatrix<Number> & jacobian,
                            unsigned int ivar,
                            unsigned int jvar,
                            const DofMap & dof_map,
                            std::vector<dof_id_type> & dof_indices,
                            std::vector<dof_id_type> & neighbor_dof_indices);
-  void addJacobianScalar();
-  void addJacobianOffDiagScalar(unsigned int ivar);
 
   /**
    * Takes the values that are currently in _sub_Kee and appends them to the cached values.
@@ -700,7 +766,7 @@ public:
   /**
    * Caches element matrix for ivar rows and jvar columns
    */
-  void cacheJacobianCoupledVarPair(MooseVariableBase * ivar, MooseVariableBase * jvar);
+  void cacheJacobianCoupledVarPair(const MooseVariableBase & ivar, const MooseVariableBase & jvar);
 
   /**
    * Takes the values that are currently in _sub_Keg and appends them to the cached values.
@@ -719,28 +785,58 @@ public:
    *
    * Note that this will also clear the cache.
    */
-  void addCachedJacobian(SparseMatrix<Number> & jacobian);
-
   void addCachedJacobian();
 
+  /**
+   * Same as addCachedJacobian but deprecated.
+   */
+  void addCachedJacobian(SparseMatrix<Number> & jacobian);
+
+  /**
+   * Get local residual block for a variable and a tag.
+   */
   DenseVector<Number> & residualBlock(unsigned int var_num, TagID tag_id = 0)
   {
     return _sub_Re[tag_id][var_num];
   }
 
+  /**
+   * Get local neighbor residual block for a variable and a tag.
+   */
   DenseVector<Number> & residualBlockNeighbor(unsigned int var_num, TagID tag_id = 0)
   {
     return _sub_Rn[tag_id][var_num];
   }
 
+  /**
+   * Get residual block for lower.
+   */
   DenseVector<Number> & residualBlockLower(unsigned int var_num, TagID tag_id = 0)
   {
     return _sub_Rl[tag_id][var_num];
   }
 
-  DenseMatrix<Number> & jacobianBlock(unsigned int ivar, unsigned int jvar, TagID tag = 0);
+  /**
+   * Get local Jacobian block for a pair of variables and a tag.
+   */
+  DenseMatrix<Number> & jacobianBlock(unsigned int ivar, unsigned int jvar, TagID tag = 0)
+  {
+    _jacobian_block_used[tag][ivar][jvar] = 1;
+    return _sub_Kee[tag][ivar][_block_diagonal_matrix ? 0 : jvar];
+  }
 
-  DenseMatrix<Number> & jacobianBlockNonlocal(unsigned int ivar, unsigned int jvar, TagID tag = 0);
+  /**
+   * Get local Jacobian block from non-local contribution for a pair of variables and a tag.
+   */
+  DenseMatrix<Number> & jacobianBlockNonlocal(unsigned int ivar, unsigned int jvar, TagID tag = 0)
+  {
+    _jacobian_block_nonlocal_used[tag][ivar][jvar] = 1;
+    return _sub_Keg[tag][ivar][_block_diagonal_matrix ? 0 : jvar];
+  }
+
+  /**
+   * Get local Jacobian block of a DG Jacobian type for a pair of variables and a tag.
+   */
   DenseMatrix<Number> & jacobianBlockNeighbor(Moose::DGJacobianType type,
                                               unsigned int ivar,
                                               unsigned int jvar,
@@ -759,11 +855,6 @@ public:
                           const std::vector<dof_id_type> & jdof_indices,
                           Real scaling_factor,
                           TagID tag = 0);
-  void cacheJacobianBlockNonlocal(DenseMatrix<Number> & jac_block,
-                                  const std::vector<dof_id_type> & idof_indices,
-                                  const std::vector<dof_id_type> & jdof_indices,
-                                  Real scaling_factor,
-                                  TagID tag = 0);
 
   std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> & couplingEntries()
   {
@@ -905,6 +996,7 @@ public:
     return _second_phi_face_neighbor;
   }
 
+  // Writeable references with vector variable
   VectorVariablePhiValue & phi(const VectorMooseVariable &) { return _vector_phi; }
   VectorVariablePhiGradient & gradPhi(const VectorMooseVariable &) { return _vector_grad_phi; }
   VectorVariablePhiSecond & secondPhi(const VectorMooseVariable &) { return _vector_second_phi; }
@@ -934,7 +1026,6 @@ public:
   {
     return _vector_curl_phi_neighbor;
   }
-
   VectorVariablePhiValue & phiFaceNeighbor(const VectorMooseVariable &)
   {
     return _vector_phi_face_neighbor;
@@ -950,6 +1041,29 @@ public:
   VectorVariablePhiCurl & curlPhiFaceNeighbor(const VectorMooseVariable &)
   {
     return _vector_curl_phi_face_neighbor;
+  }
+
+  // Writeable references with array variable
+  VariablePhiValue & phi(const ArrayMooseVariable &) { return _phi; }
+  VariablePhiGradient & gradPhi(const ArrayMooseVariable &) { return _grad_phi; }
+  VariablePhiSecond & secondPhi(const ArrayMooseVariable &) { return _second_phi; }
+
+  VariablePhiValue & phiFace(const ArrayMooseVariable &) { return _phi_face; }
+  VariablePhiGradient & gradPhiFace(const ArrayMooseVariable &) { return _grad_phi_face; }
+  VariablePhiSecond & secondPhiFace(const ArrayMooseVariable &) { return _second_phi_face; }
+
+  VariablePhiValue & phiNeighbor(const ArrayMooseVariable &) { return _phi_neighbor; }
+  VariablePhiGradient & gradPhiNeighbor(const ArrayMooseVariable &) { return _grad_phi_neighbor; }
+  VariablePhiSecond & secondPhiNeighbor(const ArrayMooseVariable &) { return _second_phi_neighbor; }
+
+  VariablePhiValue & phiFaceNeighbor(const ArrayMooseVariable &) { return _phi_face_neighbor; }
+  VariablePhiGradient & gradPhiFaceNeighbor(const ArrayMooseVariable &)
+  {
+    return _grad_phi_face_neighbor;
+  }
+  VariablePhiSecond & secondPhiFaceNeighbor(const ArrayMooseVariable &)
+  {
+    return _second_phi_face_neighbor;
   }
 
   template <typename OutputType>
@@ -1132,6 +1246,88 @@ public:
 
   void assignDisplacements(std::vector<unsigned> && disp_numbers) { _displacements = disp_numbers; }
 
+  /**
+   * Helper function for assembling residual contriubutions on local
+   * quadrature points for an array variable
+   * @param re The local residual
+   * @param i The local test function index
+   * @param ntest The number of test functions
+   * @param v The residual contribution on the current qp
+   */
+  void saveLocalArrayResidual(DenseVector<Number> & re,
+                              unsigned int i,
+                              unsigned int ntest,
+                              const RealEigenVector & v)
+  {
+    for (unsigned int j = 0; j < v.size(); ++j, i += ntest)
+      re(i) += v(j);
+  }
+
+  /**
+   * Helper function for assembling diagonal Jacobian contriubutions on local
+   * quadrature points for an array variable
+   * @param ke The local Jacobian
+   * @param i The local test function index
+   * @param ntest The number of test functions
+   * @param j The local shape function index
+   * @param nphi The number of shape functions
+   * @param v The diagonal Jacobian contribution on the current qp
+   */
+  void saveDiagLocalArrayJacobian(DenseMatrix<Number> & ke,
+                                  unsigned int i,
+                                  unsigned int ntest,
+                                  unsigned int j,
+                                  unsigned int nphi,
+                                  unsigned int ivar,
+                                  const RealEigenVector & v)
+  {
+    unsigned int pace = (_component_block_diagonal[ivar] ? 0 : nphi);
+    for (unsigned int k = 0; k < v.size(); ++k, i += ntest, j += pace)
+      ke(i, j) += v(k);
+  }
+
+  /**
+   * Helper function for assembling full Jacobian contriubutions on local
+   * quadrature points for an array variable
+   * @param ke The local Jacobian
+   * @param i The local test function index
+   * @param ntest The number of test functions
+   * @param j The local shape function index
+   * @param nphi The number of shape functions
+   * @param ivar The array variable index
+   * @param jvar The contributing variable index
+   * @param v The full Jacobian contribution from a variable on the current qp
+   */
+  void saveFullLocalArrayJacobian(DenseMatrix<Number> & ke,
+                                  unsigned int i,
+                                  unsigned int ntest,
+                                  unsigned int j,
+                                  unsigned int nphi,
+                                  unsigned int ivar,
+                                  unsigned int jvar,
+                                  const RealEigenMatrix & v)
+  {
+    unsigned int pace = ((ivar == jvar && _component_block_diagonal[ivar]) ? 0 : nphi);
+    unsigned int saved_j = j;
+    for (unsigned int k = 0; k < v.rows(); ++k, i += ntest)
+    {
+      j = saved_j;
+      for (unsigned int l = 0; l < v.cols(); ++l, j += pace)
+        ke(i, j) += v(k, l);
+    }
+  }
+
+  DenseVector<Real> getJacobianDiagonal(DenseMatrix<Number> & ke)
+  {
+    unsigned int rows = ke.m();
+    unsigned int cols = ke.n();
+    DenseVector<Real> diag(rows);
+    for (unsigned int i = 0; i < rows; i++)
+      // % operation is needed to account for cases of no component coupling of array variables
+      diag(i) = ke(i, i % cols);
+    return diag;
+  }
+
 protected:
   /**
    * Just an internal helper function to reinit the volume FE objects.
@@ -1165,26 +1361,75 @@ protected:
 
   void computeCurrentNeighborVolume();
 
+  /**
+   * Appling scaling, constraints to the local residual block and populate the full DoF indices
+   * for array variable.
+   */
+  void processLocalResidual(DenseVector<Number> & res_block,
+                            std::vector<dof_id_type> & dof_indices,
+                            const std::vector<Real> & scaling_factor,
+                            bool is_nodal);
+  /**
+   * Add a local residual block to a global residual vector with proper scaling.
+   */
   void addResidualBlock(NumericVector<Number> & residual,
                         DenseVector<Number> & res_block,
                         const std::vector<dof_id_type> & dof_indices,
-                        Real scaling_factor);
+                        const std::vector<Real> & scaling_factor,
+                        bool is_nodal);
+  /**
+   * Push a local residual block with proper scaling into cache.
+   */
   void cacheResidualBlock(std::vector<Real> & cached_residual_values,
                           std::vector<dof_id_type> & cached_residual_rows,
                           DenseVector<Number> & res_block,
                           const std::vector<dof_id_type> & dof_indices,
-                          Real scaling_factor);
+                          const std::vector<Real> & scaling_factor,
+                          bool is_nodal);
 
+  /**
+   * Set a local residual block to a global residual vector with proper scaling.
+   */
   void setResidualBlock(NumericVector<Number> & residual,
                         DenseVector<Number> & res_block,
                         const std::vector<dof_id_type> & dof_indices,
-                        Real scaling_factor);
+                        const std::vector<Real> & scaling_factor,
+                        bool is_nodal);
 
+  /**
+   * Add a local Jacobian block to a global Jacobian with proper scaling.
+   */
   void addJacobianBlock(SparseMatrix<Number> & jacobian,
                         DenseMatrix<Number> & jac_block,
+                        const MooseVariableBase & ivar,
+                        const MooseVariableBase & jvar,
                         const std::vector<dof_id_type> & idof_indices,
-                        const std::vector<dof_id_type> & jdof_indices,
-                        Real scaling_factor);
+                        const std::vector<dof_id_type> & jdof_indices);
+
+  /**
+   * Push a local Jacobian block with proper scaling into cache for a certain tag.
+   */
+  void cacheJacobianBlock(DenseMatrix<Number> & jac_block,
+                          const MooseVariableBase & ivar,
+                          const MooseVariableBase & jvar,
+                          const std::vector<dof_id_type> & idof_indices,
+                          const std::vector<dof_id_type> & jdof_indices,
+                          TagID tag = 0);
+
+  /**
+   * Push non-zeros of a local Jacobian block with proper scaling into cache for a certain tag.
+   */
+  void cacheJacobianBlockNonzero(DenseMatrix<Number> & jac_block,
+                                 const MooseVariableBase & ivar,
+                                 const MooseVariableBase & jvar,
+                                 const std::vector<dof_id_type> & idof_indices,
+                                 const std::vector<dof_id_type> & jdof_indices,
+                                 TagID tag = 0);
+
+  /**
+   * Adds element matrices for ivar rows and jvar columns to the global Jacobian matrices.
+   */
+  void addJacobianCoupledVarPair(const MooseVariableBase & ivar, const MooseVariableBase & jvar);
 
   /**
    * Clear any currently cached jacobian contributions
@@ -1215,7 +1460,7 @@ protected:
       unsigned int n_qp,
       typename VariableTestGradientType<OutputType, ComputeStage::JACOBIAN>::type & grad_phi,
       FEGenericBase<OutputType> * fe);
-  void resizeMappingObjects(unsigned int n_qp, unsigned int dim);
+  void resizeADMappingObjects(unsigned int n_qp, unsigned int dim);
   void computeAffineMapAD(const Elem * elem,
                           const std::vector<Real> & qw,
                           unsigned int n_qp,
@@ -1415,6 +1660,8 @@ private:
   MooseArray<Real> _current_JxW_face;
   /// The current Normal vectors at the quadrature points.
   MooseArray<Point> _current_normals;
+  /// Mapped normals
+  std::vector<Eigen::Map<RealDIMValue>> _mapped_normals;
   /// The current tangent vectors at the quadrature points
   MooseArray<std::vector<Point>> _current_tangents;
   /// Holds face qrules for each dimension
@@ -1518,16 +1765,33 @@ private:
   /// This will be filled up with the physical points passed into reinitAtPhysical() if it is called.  Invalid at all other times.
   MooseArray<Point> _current_physical_points;
 
-  /// residual contributions for each variable from the element
+  /*
+   * Residual contributions <Tag, ivar>
+   * When ivar corresponds to an array variable, the dense vector is in size of ndof * count,
+   * where count is the number of components of the array variable. The local residual is ordered
+   * as (r_i,j, i = 1,...,ndof; j = 1,...,count).
+   *
+   * Dense vectors for variables (ivar+i, i = 1,...,count) are empty.
+   */
   std::vector<std::vector<DenseVector<Number>>> _sub_Re;
-  /// residual contributions for each variable from the neighbor
   std::vector<std::vector<DenseVector<Number>>> _sub_Rn;
   /// residual contributions for each variable from the lower dimensional element
   std::vector<std::vector<DenseVector<Number>>> _sub_Rl;
+
   /// auxiliary vector for scaling residuals (optimization to avoid expensive construction/destruction)
   DenseVector<Number> _tmp_Re;
 
-  /// jacobian contributions <Tag, ivar, jvar>
+  /*
+   * Jacobian contributions <Tag, ivar, jvar>
+   * When ivar corresponds to an array variable, the number of rows of the dense matrix is in size
+   * of indof * icount, where icount is the number of components of ivar. When jvar corresponds to
+   * an array variable, the number of columns of the dense matrix is in size of jndof * jcount,
+   * where jcount is the number of components of jvar. The local residual is ordered as
+   * (K_(i,j,k,l), k=1,...,jndof; l = 1,...,jcout; i = 1,...,indof; j = 1,...,icount).
+   *
+   * Dense matrices for variables (ivar+i, i = 1,...,icount) or (jvar+j, j = 1,...,jcount) are
+   * empty.
+   */
   std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Kee;
   std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Keg;
 
@@ -1650,7 +1914,10 @@ private:
   unsigned int _max_cached_jacobians;
 
   /// Will be true if our preconditioning matrix is a block-diagonal matrix.  Which means that we can take some shortcuts.
-  unsigned int _block_diagonal_matrix;
+  bool _block_diagonal_matrix;
+  /// An flag array Indiced by variable index to show if there is no component-wise
+  /// coupling for the variable.
+  std::vector<bool> _component_block_diagonal;
 
   /// Temporary work vector to keep from reallocating it
   std::vector<dof_id_type> _temp_dof_indices;

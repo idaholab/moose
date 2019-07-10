@@ -168,6 +168,35 @@ dataStore(std::ostream & stream, std::stringstream *& s, void * context)
   dataStore(stream, *s, context);
 }
 
+template <>
+void
+dataStore(std::ostream & stream, RealEigenVector & v, void * context)
+{
+  unsigned int m = v.size();
+  stream.write((char *)&m, sizeof(m));
+  for (unsigned int i = 0; i < v.size(); i++)
+  {
+    Real r = v(i);
+    dataStore(stream, r, context);
+  }
+}
+
+template <>
+void
+dataStore(std::ostream & stream, RealEigenMatrix & v, void * context)
+{
+  unsigned int m = v.rows();
+  stream.write((char *)&m, sizeof(m));
+  unsigned int n = v.cols();
+  stream.write((char *)&n, sizeof(n));
+  for (unsigned int i = 0; i < m; i++)
+    for (unsigned int j = 0; j < n; j++)
+    {
+      Real r = v(i, j);
+      dataStore(stream, r, context);
+    }
+}
+
 template <typename T>
 void
 dataStore(std::ostream & stream, TensorValue<T> & v, void * context)
@@ -376,6 +405,39 @@ void
 dataLoad(std::istream & stream, std::stringstream *& s, void * context)
 {
   dataLoad(stream, *s, context);
+}
+
+template <>
+void
+dataLoad(std::istream & stream, RealEigenVector & v, void * context)
+{
+  unsigned int n = 0;
+  stream.read((char *)&n, sizeof(n));
+  v.resize(n);
+  for (unsigned int i = 0; i < n; i++)
+  {
+    Real r = 0;
+    dataLoad(stream, r, context);
+    v(i) = r;
+  }
+}
+
+template <>
+void
+dataLoad(std::istream & stream, RealEigenMatrix & v, void * context)
+{
+  unsigned int m = 0;
+  stream.read((char *)&m, sizeof(m));
+  unsigned int n = 0;
+  stream.read((char *)&n, sizeof(n));
+  v.resize(m, n);
+  for (unsigned int i = 0; i < m; i++)
+    for (unsigned int j = 0; j < n; j++)
+    {
+      Real r = 0;
+      dataLoad(stream, r, context);
+      v(i, j) = r;
+    }
 }
 
 template <typename T>

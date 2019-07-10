@@ -354,6 +354,15 @@ DisplacedProblem::getVectorVariable(THREAD_ID tid, const std::string & var_name)
   return _displaced_aux.getFieldVariable<RealVectorValue>(tid, var_name);
 }
 
+ArrayMooseVariable &
+DisplacedProblem::getArrayVariable(THREAD_ID tid, const std::string & var_name)
+{
+  if (!_displaced_nl.hasVariable(var_name))
+    mooseError("No variable with name '" + var_name + "'");
+
+  return _displaced_nl.getFieldVariable<RealEigenVector>(tid, var_name);
+}
+
 bool
 DisplacedProblem::hasScalarVariable(const std::string & var_name) const
 {
@@ -397,11 +406,31 @@ DisplacedProblem::addVariable(const std::string & var_name,
 }
 
 void
+DisplacedProblem::addArrayVariable(const std::string & var_name,
+                                   const FEType & type,
+                                   unsigned int components,
+                                   const std::vector<Real> & scale_factor,
+                                   const std::set<SubdomainID> * const active_subdomains)
+{
+  _displaced_nl.addArrayVariable(var_name, type, components, scale_factor, active_subdomains);
+}
+
+void
 DisplacedProblem::addAuxVariable(const std::string & var_name,
                                  const FEType & type,
                                  const std::set<SubdomainID> * const active_subdomains)
 {
   _displaced_aux.addVariable(var_name, type, 1.0, active_subdomains);
+}
+
+void
+DisplacedProblem::addAuxArrayVariable(const std::string & var_name,
+                                      const FEType & type,
+                                      unsigned int components,
+                                      const std::set<SubdomainID> * const active_subdomains)
+{
+  _displaced_aux.addArrayVariable(
+      var_name, type, components, std::vector<Real>(components, 1), active_subdomains);
 }
 
 void

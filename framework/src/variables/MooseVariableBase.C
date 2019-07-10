@@ -20,7 +20,8 @@ MooseVariableBase::MooseVariableBase(unsigned int var_num,
                                      const FEType & fe_type,
                                      SystemBase & sys,
                                      Moose::VarKindType var_kind,
-                                     THREAD_ID tid)
+                                     THREAD_ID tid,
+                                     unsigned int count)
   : _var_num(var_num),
     _fe_type(fe_type),
     _var_kind(var_kind),
@@ -29,9 +30,20 @@ MooseVariableBase::MooseVariableBase(unsigned int var_num,
     _variable(sys.system().variable(_var_num)),
     _dof_map(sys.dofMap()),
     _mesh(_subproblem.mesh()),
-    _scaling_factor(1.0),
-    _tid(tid)
+    _tid(tid),
+    _count(count),
+    _scaling_factor(std::vector<Real>(_count, 1.0))
 {
+  if (_count > 1)
+  {
+    auto name0 = _sys.system().variable(_var_num).name();
+    std::size_t found = name0.find_last_of("_");
+    if (found == std::string::npos)
+      mooseError("");
+    _name = name0.substr(0, found);
+  }
+  else
+    _name = _sys.system().variable(_var_num).name();
 }
 
 MooseVariableBase::~MooseVariableBase() {}
@@ -39,7 +51,7 @@ MooseVariableBase::~MooseVariableBase() {}
 const std::string &
 MooseVariableBase::name() const
 {
-  return _sys.system().variable(_var_num).name();
+  return _name;
 }
 
 const std::vector<dof_id_type> &
@@ -58,4 +70,24 @@ Order
 MooseVariableBase::order() const
 {
   return _fe_type.order;
+}
+
+std::vector<dof_id_type>
+MooseVariableBase::componentDofIndices(const std::vector<dof_id_type> & dof_indices,
+                                       unsigned int component) const
+{
+  std::vector<dof_id_type> new_dof_indices(dof_indices);
+  if (component != 0)
+  {
+    if (isNodal())
+      for (auto & id : new_dof_indices)
+        id += component;
+    else
+    {
+      unsigned int n = dof_indices.size();
+      for (auto & id : new_dof_indices)
+        id += component * n;
+    }
+  }
+  return new_dof_indices;
 }

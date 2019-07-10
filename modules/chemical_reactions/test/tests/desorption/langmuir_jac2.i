@@ -54,6 +54,8 @@
   [./nothing] # when any block contains a material, all blocks need to
     type = GenericConstantMaterial
     block = 'left_block centre_block right_block'
+    prop_names = ''
+    prop_values = ''
   [../]
   [./langmuir_params]
     type = MollifiedLangmuirMaterial

@@ -32,7 +32,8 @@ public:
                     const FEType & fe_type,
                     SystemBase & sys,
                     Moose::VarKindType var_kind,
-                    THREAD_ID tid);
+                    THREAD_ID tid,
+                    unsigned int count = 1);
   virtual ~MooseVariableBase();
 
   /**
@@ -70,12 +71,14 @@ public:
   /**
    * Set the scaling factor for this variable
    */
-  void scalingFactor(Real factor) { _scaling_factor = factor; }
+  void scalingFactor(Real factor) { _scaling_factor.assign(_count, factor); }
+  void scalingFactor(const std::vector<Real> & factor) { _scaling_factor = factor; }
 
   /**
    * Get the scaling factor for this variable
    */
-  Real scalingFactor() const { return _scaling_factor; }
+  Real scalingFactor() const { return _scaling_factor[0]; }
+  const std::vector<Real> & arrayScalingFactor() const { return _scaling_factor; }
 
   /**
    * Get the order of this variable
@@ -84,14 +87,36 @@ public:
   Order order() const;
 
   /**
+   * Get the number of components
+   * Note: For standard and vector variables, the number is one.
+   */
+  unsigned int count() const { return _count; }
+
+  /**
+   * Is this variable nodal
+   * @return true if it nodal, otherwise false
+   */
+  virtual bool isNodal() const { return true; }
+
+  /**
    * The DofMap associated with the system this variable is in.
    */
   const DofMap & dofMap() const { return _dof_map; }
 
-  /// Get local DoF indices
+  /**
+   * Get local DoF indices
+   */
   virtual const std::vector<dof_id_type> & dofIndices() const { return _dof_indices; }
 
-  /// Get the number of local DoFs
+  /**
+   * Obtain DoF indices of a component with the indices of the 0th component
+   */
+  std::vector<dof_id_type> componentDofIndices(const std::vector<dof_id_type> & dof_indices,
+                                               unsigned int component) const;
+
+  /**
+   * Get the number of local DoFs
+   */
   virtual unsigned int numberOfDofs() const { return _dof_indices.size(); }
 
 protected:
@@ -118,10 +143,14 @@ protected:
   /// mesh the variable is active in
   MooseMesh & _mesh;
 
-  /// scaling factor for this variable
-  Real _scaling_factor;
-
   /// Thread ID
   THREAD_ID _tid;
-};
 
+  /// Number of variables in the array
+  const unsigned int _count;
+
+  /// scaling factor for this variable
+  std::vector<Real> _scaling_factor;
+
+  std::string _name;
+};

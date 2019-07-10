@@ -1,0 +1,10 @@
+[Tests]
+  [./vector_constant_ic]
+    type = 'Exodiff'
+    input = 'array_function_ic_test.i'
+    exodiff = 'array_function_ic_test_out.e'
+    design = 'ArrayFunctionIC.md'
+    requirement = 'The system shall allow to set initial conditions for an array variable based on functions.'
+    issues = '#6881'
+  [../]
+[]

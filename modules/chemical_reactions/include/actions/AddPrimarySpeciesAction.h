@@ -27,6 +27,5 @@ private:
   /// Primary species to add
   const std::vector<NonlinearVariableName> _vars;
   /// Variable scaling
-  const Real _scaling;
+  const std::vector<Real> _scaling;
 };
-

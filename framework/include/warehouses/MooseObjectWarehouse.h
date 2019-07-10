@@ -110,6 +110,13 @@ MooseObjectWarehouse<T>::addObject(std::shared_ptr<T> object,
       if (mvi)
         _variable_objects[mvi->mooseVariable()->number()].addObject(object, tid, false);
     }
+
+    {
+      auto mvi = std::dynamic_pointer_cast<MooseVariableInterface<RealEigenVector>>(object);
+
+      if (mvi)
+        _variable_objects[mvi->mooseVariable()->number()].addObject(object, tid, false);
+    }
   }
 }
 
@@ -205,4 +212,3 @@ MooseObjectWarehouse<T>::updateActive(THREAD_ID tid)
   for (auto & it : _variable_objects)
     it.second.updateActive(tid);
 }
-

@@ -18,10 +18,10 @@ InputParameters
 validParams<GenericConstantMaterial>()
 {
   InputParameters params = validParams<Material>();
-  params.addParam<std::vector<std::string>>("prop_names",
-                                            "The names of the properties this material will have");
-  params.addParam<std::vector<Real>>("prop_values",
-                                     "The values associated with the named properties");
+  params.addRequiredParam<std::vector<std::string>>(
+      "prop_names", "The names of the properties this material will have");
+  params.addRequiredParam<std::vector<Real>>("prop_values",
+                                             "The values associated with the named properties");
   params.declareControllable("prop_values");
   return params;
 }

@@ -63,8 +63,7 @@ ComputeNodalKernelBCJacobiansThread::onNode(ConstBndNodeRange::const_iterator & 
 
   BoundaryID boundary_id = bnode->_bnd_id;
 
-  std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> & ce =
-      _fe_problem.couplingEntries(_tid);
+  auto & ce = _fe_problem.couplingEntries(_tid);
   for (const auto & it : ce)
   {
     MooseVariableFEBase & ivariable = *(it.first);

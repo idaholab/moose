@@ -2473,8 +2473,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
     // which variables are "coupled" as far as the preconditioner is
     // concerned, not what variables a boundary condition specifically
     // depends on.
-    std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> & coupling_entries =
-        _fe_problem.couplingEntries(/*_tid=*/0);
+    auto & coupling_entries = _fe_problem.couplingEntries(/*_tid=*/0);
 
     // Compute Jacobians for NodalBCBases
     ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();

@@ -29,7 +29,9 @@ validParams<AddAuxVariableAction>()
                              "Specifies the order of the FE shape function to use "
                              "for this variable (additional orders not listed are "
                              "allowed)");
-  params.addParam<Real>("initial_condition", "Specifies the initial condition for this variable");
+  params.addParam<unsigned int>("component", 1, "Number of component for an array variable");
+  params.addParam<std::vector<Real>>("initial_condition",
+                                     "Specifies the initial condition for this variable");
   params.addParam<std::vector<SubdomainName>>("block", "The block id where this variable lives");
 
   return params;
@@ -64,7 +66,7 @@ AddAuxVariableAction::act()
     _problem->addAuxScalarVariable(var_name, _fe_type.order);
 
   // Non-scalar variable
-  else
+  else if (_component == 1)
   {
     // Check that the order is valid (CONSTANT, FIRST, or SECOND)
     if (_fe_type.order > 9)
@@ -77,6 +79,20 @@ AddAuxVariableAction::act()
       _problem->addAuxVariable(var_name, _fe_type);
     else
       _problem->addAuxVariable(var_name, _fe_type, &blocks);
+  }
+  else
+  {
+    // Check that the order is valid (CONSTANT, FIRST, or SECOND)
+    if (_fe_type.order > 9)
+      mooseError("Non-scalar AuxVariables must be CONSTANT, FIRST, SECOND, THIRD, FOURTH, FIFTH, "
+                 "SIXTH, SEVENTH, EIGHTH or NINTH order (",
+                 _fe_type.order,
+                 " supplied)");
+
+    if (blocks.empty())
+      _problem->addAuxArrayVariable(var_name, _fe_type, _component);
+    else
+      _problem->addAuxArrayVariable(var_name, _fe_type, _component, &blocks);
   }
 
   // Create the initial condition

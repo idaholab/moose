@@ -26,6 +26,8 @@ template <>
 InputParameters validParams<InitialConditionTempl<Real>>();
 template <>
 InputParameters validParams<InitialConditionTempl<RealVectorValue>>();
+template <>
+InputParameters validParams<InitialConditionTempl<RealEigenVector>>();
 
 /**
  * This is a template class that implements the workhorse `compute` and `computeNodal` methods. The
@@ -37,9 +39,11 @@ template <typename T>
 class InitialConditionTempl : public InitialConditionBase
 {
 public:
-  typedef FEGenericBase<T> FEBaseType;
   typedef typename OutputTools<T>::OutputShape ValueType;
   typedef typename OutputTools<T>::OutputGradient GradientType;
+  typedef typename OutputTools<T>::OutputShapeGradient GradientShapeType;
+  typedef typename OutputTools<T>::OutputData DataType;
+  typedef FEGenericBase<ValueType> FEBaseType;
 
   /**
    * Constructor
@@ -60,7 +64,7 @@ public:
    *
    * This must be overridden by derived classes.
    */
-  virtual ValueType value(const Point & p) = 0;
+  virtual T value(const Point & p) = 0;
 
   /**
    * The gradient of the variable at a point.
@@ -69,6 +73,8 @@ public:
    * want to use an initial condition that defines this!
    */
   virtual GradientType gradient(const Point & /*p*/) { return GradientType(); };
+
+  T gradientComponent(GradientType grad, unsigned int i);
 
   /**
    * set the temporary solution vector for node projections of C0 variables
@@ -87,12 +93,25 @@ public:
    * Helps perform multiplication of GradientTypes: a normal dot product for vectors and a
    * contraction for tensors
    */
-  Real dotHelper(const GradientType & op1, const GradientType & op2);
+  Real dotHelper(const RealGradient & op1, const RealGradient & op2) { return op1 * op2; }
+  Real dotHelper(const RealTensor & op1, const RealTensor & op2) { return op1.contract(op2); }
+  RealEigenVector dotHelper(const RealVectorArrayValue & op1, const RealGradient & op2)
+  {
+    RealEigenVector v = op1.col(0) * op2(0);
+    for (unsigned int i = 1; i < LIBMESH_DIM; ++i)
+      v += op1.col(i) * op2(i);
+    return v;
+  }
 
   /**
    * Perform the cholesky solves for edge, side, and interior projections
    */
   void choleskySolve(bool is_volume);
+
+  /**
+   * Assemble a small local system for cholesky solve
+   */
+  void choleskyAssembly(bool is_volume);
 
 protected:
   FEProblemBase & _fe_problem;
@@ -123,9 +142,9 @@ protected:
   /// Matrix storage member
   DenseMatrix<Real> _Ke;
   /// Linear b vector
-  DenseVector<Number> _Fe;
+  DenseVector<DataType> _Fe;
   /// Linear solution vector
-  DenseVector<Number> _Ue;
+  DenseVector<DataType> _Ue;
 
   /// The finite element type for the IC variable
   const FEType & _fe_type;
@@ -157,7 +176,7 @@ protected:
   /// pointers to shape functions
   const std::vector<std::vector<ValueType>> * _phi;
   /// pointers to shape function gradients
-  const std::vector<std::vector<GradientType>> * _dphi;
+  const std::vector<std::vector<GradientShapeType>> * _dphi;
   /// pointers to the Jacobian * quadrature weights for current element
   const std::vector<Real> * _JxW;
   /// pointers to the xyz coordinates of the quadrature points for the current element
@@ -171,3 +190,4 @@ protected:
 
 typedef InitialConditionTempl<Real> InitialCondition;
 typedef InitialConditionTempl<RealVectorValue> VectorInitialCondition;
+typedef InitialConditionTempl<RealEigenVector> ArrayInitialCondition;

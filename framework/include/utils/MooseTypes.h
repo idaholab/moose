@@ -22,6 +22,9 @@
 // BOOST include
 #include "bitmask_operators.h"
 
+#include "libmesh/ignore_warnings.h"
+#include "Eigen/Core"
+#include "libmesh/restore_warnings.h"
 #include "libmesh/tensor_tools.h"
 
 #include <string>
@@ -126,6 +129,11 @@ namespace libMesh
 template <typename>
 class VectorValue;
 typedef VectorValue<Real> RealVectorValue;
+typedef Eigen::Matrix<Real, LIBMESH_DIM, 1> RealDIMValue;
+typedef Eigen::Matrix<Real, Eigen::Dynamic, 1> RealEigenVector;
+typedef Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM> RealVectorArrayValue;
+typedef Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM * LIBMESH_DIM> RealTensorArrayValue;
+typedef Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic> RealEigenMatrix;
 template <typename>
 class TypeVector;
 template <typename>
@@ -136,6 +144,27 @@ class TypeTensor;
 template <unsigned int, typename>
 class TypeNTensor;
 class Point;
+
+namespace TensorTools
+{
+template <>
+struct IncrementRank<Eigen::Matrix<Real, Eigen::Dynamic, 1>>
+{
+  typedef Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM> type;
+};
+
+template <>
+struct IncrementRank<Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM>>
+{
+  typedef Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM * LIBMESH_DIM> type;
+};
+
+template <>
+struct DecrementRank<Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM>>
+{
+  typedef Eigen::Matrix<Real, Eigen::Dynamic, 1> type;
+};
+}
 }
 
 /**
@@ -165,32 +194,100 @@ typedef unsigned int PerfID;
 typedef StoredRange<std::vector<dof_id_type>::iterator, dof_id_type> NodeIdRange;
 typedef StoredRange<std::vector<const Elem *>::iterator, const Elem *> ConstElemPointerRange;
 
+enum ComputeStage
+{
+  RESIDUAL,
+  JACOBIAN
+};
+
+namespace Moose
+{
+template <ComputeStage compute_stage>
+struct RealType
+{
+  typedef Real type;
+};
+template <>
+struct RealType<JACOBIAN>
+{
+  typedef DualReal type;
+};
+
+template <typename T, ComputeStage compute_stage>
+struct ValueType
+{
+  typedef typename RealType<compute_stage>::type type;
+};
+
+template <ComputeStage compute_stage>
+struct ValueType<Real, compute_stage>
+{
+  typedef typename RealType<compute_stage>::type type;
+};
+
+template <ComputeStage compute_stage, template <typename> class W>
+struct ValueType<W<Real>, compute_stage>
+{
+  typedef W<typename RealType<compute_stage>::type> type;
+};
+
+template <typename OutputType>
+struct ShapeType
+{
+  typedef OutputType type;
+};
+template <>
+struct ShapeType<Eigen::Matrix<Real, Eigen::Dynamic, 1>>
+{
+  typedef Real type;
+};
+
+template <typename OutputType>
+struct DOFType
+{
+  typedef OutputType type;
+};
+template <>
+struct DOFType<RealVectorValue>
+{
+  typedef Real type;
+};
+} // MOOSE
+
 template <typename OutputType>
 struct OutputTools
 {
-  typedef OutputType OutputShape;
-  typedef OutputType OutputValue;
-  typedef typename TensorTools::IncrementRank<OutputShape>::type OutputGradient;
+  typedef typename TensorTools::IncrementRank<OutputType>::type OutputGradient;
   typedef typename TensorTools::IncrementRank<OutputGradient>::type OutputSecond;
-  typedef typename TensorTools::DecrementRank<OutputShape>::type OutputDivergence;
+  typedef typename TensorTools::DecrementRank<OutputType>::type OutputDivergence;
 
-  typedef MooseArray<OutputShape> VariableValue;
+  typedef MooseArray<OutputType> VariableValue;
   typedef MooseArray<OutputGradient> VariableGradient;
   typedef MooseArray<OutputSecond> VariableSecond;
-  typedef MooseArray<OutputShape> VariableCurl;
+  typedef MooseArray<OutputType> VariableCurl;
   typedef MooseArray<OutputDivergence> VariableDivergence;
 
+  typedef typename Moose::ShapeType<OutputType>::type OutputShape;
+  typedef typename TensorTools::IncrementRank<OutputShape>::type OutputShapeGradient;
+  typedef typename TensorTools::IncrementRank<OutputShapeGradient>::type OutputShapeSecond;
+  typedef typename TensorTools::DecrementRank<OutputShape>::type OutputShapeDivergence;
+
   typedef MooseArray<std::vector<OutputShape>> VariablePhiValue;
-  typedef MooseArray<std::vector<OutputGradient>> VariablePhiGradient;
-  typedef MooseArray<std::vector<OutputSecond>> VariablePhiSecond;
+  typedef MooseArray<std::vector<OutputShapeGradient>> VariablePhiGradient;
+  typedef MooseArray<std::vector<OutputShapeSecond>> VariablePhiSecond;
   typedef MooseArray<std::vector<OutputShape>> VariablePhiCurl;
-  typedef MooseArray<std::vector<OutputDivergence>> VariablePhiDivergence;
+  typedef MooseArray<std::vector<OutputShapeDivergence>> VariablePhiDivergence;
 
   typedef MooseArray<std::vector<OutputShape>> VariableTestValue;
-  typedef MooseArray<std::vector<OutputGradient>> VariableTestGradient;
-  typedef MooseArray<std::vector<OutputSecond>> VariableTestSecond;
+  typedef MooseArray<std::vector<OutputShapeGradient>> VariableTestGradient;
+  typedef MooseArray<std::vector<OutputShapeSecond>> VariableTestSecond;
   typedef MooseArray<std::vector<OutputShape>> VariableTestCurl;
-  typedef MooseArray<std::vector<OutputDivergence>> VariableTestDivergence;
+  typedef MooseArray<std::vector<OutputShapeDivergence>> VariableTestDivergence;
+
+  // DoF value type for the template class OutputType
+  typedef typename Moose::DOFType<OutputType>::type OutputData;
+  typedef MooseArray<OutputData> DoFValue;
+  typedef OutputType OutputValue;
 };
 
 // types for standard variable
@@ -221,6 +318,21 @@ typedef typename OutputTools<RealVectorValue>::VariableTestGradient VectorVariab
 typedef typename OutputTools<RealVectorValue>::VariableTestSecond VectorVariableTestSecond;
 typedef typename OutputTools<RealVectorValue>::VariableTestCurl VectorVariableTestCurl;
 
+// types for array variable
+typedef typename OutputTools<RealEigenVector>::VariableValue ArrayVariableValue;
+typedef typename OutputTools<RealEigenVector>::VariableGradient ArrayVariableGradient;
+typedef typename OutputTools<RealEigenVector>::VariableSecond ArrayVariableSecond;
+typedef typename OutputTools<RealEigenVector>::VariableCurl ArrayVariableCurl;
+typedef typename OutputTools<RealEigenVector>::VariablePhiValue ArrayVariablePhiValue;
+typedef typename OutputTools<RealEigenVector>::VariablePhiGradient ArrayVariablePhiGradient;
+typedef std::vector<std::vector<Eigen::Map<RealDIMValue>>> MappedArrayVariablePhiGradient;
+typedef typename OutputTools<RealEigenVector>::VariablePhiSecond ArrayVariablePhiSecond;
+typedef typename OutputTools<RealEigenVector>::VariablePhiCurl ArrayVariablePhiCurl;
+typedef typename OutputTools<RealEigenVector>::VariableTestValue ArrayVariableTestValue;
+typedef typename OutputTools<RealEigenVector>::VariableTestGradient ArrayVariableTestGradient;
+typedef typename OutputTools<RealEigenVector>::VariableTestSecond ArrayVariableTestSecond;
+typedef typename OutputTools<RealEigenVector>::VariableTestCurl ArrayVariableTestCurl;
+
 template <template <class> class W>
 using TemplateDN = W<DualReal>;
 
@@ -229,40 +341,6 @@ typedef TemplateDN<TensorValue> DualRealTensorValue;
 
 typedef DualRealVectorValue DualRealGradient;
 typedef DualRealTensorValue ADRealTensor;
-
-enum ComputeStage
-{
-  RESIDUAL,
-  JACOBIAN
-};
-
-namespace Moose
-{
-template <ComputeStage compute_stage>
-struct RealType
-{
-  typedef Real type;
-};
-template <>
-struct RealType<JACOBIAN>
-{
-  typedef DualReal type;
-};
-
-template <typename T, ComputeStage compute_stage>
-struct ValueType;
-template <ComputeStage compute_stage>
-struct ValueType<Real, compute_stage>
-{
-  typedef typename RealType<compute_stage>::type type;
-};
-
-template <ComputeStage compute_stage, template <typename> class W>
-struct ValueType<W<Real>, compute_stage>
-{
-  typedef W<typename RealType<compute_stage>::type> type;
-};
-} // MOOSE
 
 template <typename T, ComputeStage compute_stage>
 struct VariableValueType
@@ -488,6 +566,7 @@ enum VarFieldType
   VAR_FIELD_STANDARD,
   VAR_FIELD_SCALAR,
   VAR_FIELD_VECTOR,
+  VAR_FIELD_ARRAY,
   VAR_FIELD_ANY
 };
 
