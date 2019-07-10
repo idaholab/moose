@@ -119,8 +119,7 @@ ComputeFullJacobianThread::computeJacobian()
           if (kernel->isImplicit())
           {
             // now, get the list of coupled scalar vars and compute their off-diag jacobians
-            const std::vector<MooseVariableScalar *> coupled_scalar_vars =
-                kernel->getCoupledMooseScalarVars();
+            const auto & coupled_scalar_vars = kernel->getCoupledMooseScalarVars();
 
             // Do: dvar / dscalar_var, only want to process only nl-variables (not aux ones)
             for (const auto & jvariable : coupled_scalar_vars)

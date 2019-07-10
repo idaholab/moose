@@ -188,7 +188,7 @@ public:
   virtual void reinitNeighborPhys(const Elem * neighbor,
                                   const std::vector<Point> & physical_points,
                                   THREAD_ID tid) override;
-  virtual void reinitScalars(THREAD_ID tid) override;
+  virtual void reinitScalars(THREAD_ID tid, bool reinit_for_derivative_reordering = false) override;
   virtual void reinitOffDiagScalars(THREAD_ID tid) override;
 
   /// Fills "elems" with the elements that should be looped over for Dirac Kernels
@@ -309,4 +309,3 @@ private:
   friend class UpdateDisplacedMeshThread;
   friend class Restartable;
 };
-

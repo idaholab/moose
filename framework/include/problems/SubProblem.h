@@ -350,7 +350,13 @@ public:
   virtual void reinitNeighborPhys(const Elem * neighbor,
                                   const std::vector<Point> & physical_points,
                                   THREAD_ID tid) = 0;
-  virtual void reinitScalars(THREAD_ID tid) = 0;
+  /**
+   * fills the VariableValue arrays for scalar variables from the solution vector
+   * @param tid The thread id
+   * @param reinit_for_derivative_reordering A flag indicating whether we are reinitializing for the
+   *        purpose of re-ordering derivative information for ADNodalBCs
+   */
+  virtual void reinitScalars(THREAD_ID tid, bool reinit_for_derivative_reordering = false) = 0;
   virtual void reinitOffDiagScalars(THREAD_ID tid) = 0;
 
   /**
@@ -738,4 +744,3 @@ namespace Moose
 void initial_condition(EquationSystems & es, const std::string & system_name);
 
 } // namespace Moose
-

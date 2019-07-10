@@ -145,6 +145,47 @@ ADNodalBCTempl<RealVectorValue, RESIDUAL>::computeOffDiagJacobian(unsigned int)
 {
 }
 
+template <typename T, ComputeStage compute_stage>
+void
+ADNodalBCTempl<T, compute_stage>::computeOffDiagJacobianScalar(unsigned int jvar)
+{
+  auto ad_offset = jvar * _sys.getMaxVarNDofsPerNode();
+  auto residual = computeQpResidual();
+  const std::vector<dof_id_type> & cached_rows = _var.dofIndices();
+
+  std::vector<dof_id_type> scalar_dof_indices;
+
+  _sys.dofMap().SCALAR_dof_indices(scalar_dof_indices, jvar);
+
+  // Our residuals rely on returning a single scalar and we don't provide any arguments to
+  // computeQpResidual so I think it only makes sense to assume that our SCALAR variable should be
+  // order one
+  mooseAssert(scalar_dof_indices.size() == 1,
+              "ADNodalBC only allows coupling of first order SCALAR variables");
+
+  // Cache the user's computeQpJacobian() value for later use.
+  for (auto tag : _matrix_tags)
+    if (_sys.hasMatrix(tag))
+      for (size_t i = 0; i < cached_rows.size(); ++i)
+        _fe_problem.assembly(0).cacheJacobianContribution(
+            cached_rows[i],
+            scalar_dof_indices[0],
+            conversionHelper(residual, i).derivatives()[ad_offset + i],
+            tag);
+}
+
+template <>
+void
+ADNodalBCTempl<Real, RESIDUAL>::computeOffDiagJacobianScalar(unsigned int)
+{
+}
+
+template <>
+void
+ADNodalBCTempl<RealVectorValue, RESIDUAL>::computeOffDiagJacobianScalar(unsigned int)
+{
+}
+
 template class ADNodalBCTempl<Real, RESIDUAL>;
 template class ADNodalBCTempl<Real, JACOBIAN>;
 template class ADNodalBCTempl<RealVectorValue, RESIDUAL>;

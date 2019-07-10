@@ -419,11 +419,11 @@ SystemBase::reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, THREAD_I
 }
 
 void
-SystemBase::reinitScalars(THREAD_ID tid)
+SystemBase::reinitScalars(THREAD_ID tid, bool reinit_for_derivative_reordering /*=false*/)
 {
   const std::vector<MooseVariableScalar *> & vars = _vars[tid].scalars();
   for (const auto & var : vars)
-    var->reinit();
+    var->reinit(reinit_for_derivative_reordering);
 }
 
 void

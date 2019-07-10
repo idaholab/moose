@@ -35,10 +35,22 @@ public:
                       THREAD_ID tid);
   virtual ~MooseVariableScalar();
 
-  void reinit();
+  /**
+   * Fill out the VariableValue arrays from the system solution vector
+   * @param reinit_for_derivative_reordering A flag indicating whether we are reinitializing for the
+   *        purpose of re-ordering derivative information for ADNodalBCs
+   */
+  void reinit(bool reinit_for_derivative_reordering = false);
 
   //
   VariableValue & sln() { return _u; }
+
+  /**
+   * Return the solution with derivative information
+   */
+  template <ComputeStage compute_stage>
+  const ADVariableValue & adSln() const;
+
   VariableValue & slnOld() { return _u_old; }
   VariableValue & slnOlder() { return _u_older; }
   VariableValue & vectorTagSln(TagID tag)
@@ -159,5 +171,26 @@ protected:
   bool _need_u_dotdot_old;
   bool _need_du_dot_du;
   bool _need_du_dotdot_du;
+
+  /// Whether any dual number calculations are needed
+  mutable bool _need_dual;
+  /// whether dual_u is needed
+  mutable bool _need_dual_u;
+  /// The scalar solution with derivative information
+  DualVariableValue _dual_u;
+
+private:
+  /**
+   * Adds derivative information to the scalar variable value arrays
+   * @param nodal_ordering Whether we are doing a nodal ordering of the derivative vector, e.g.
+   *        whether the spacing between variable groups in the derivative vector is equal to the
+   *        number of dofs per node or the number of dofs per elem
+   */
+  void computeAD(bool nodal_ordering);
 };
 
+template <>
+const VariableValue & MooseVariableScalar::adSln<ComputeStage::RESIDUAL>() const;
+
+template <>
+const DualVariableValue & MooseVariableScalar::adSln<ComputeStage::JACOBIAN>() const;

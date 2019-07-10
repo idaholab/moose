@@ -32,7 +32,9 @@ MooseVariableScalar::MooseVariableScalar(unsigned int var_num,
     _need_u_dot_old(false),
     _need_u_dotdot_old(false),
     _need_du_dot_du(false),
-    _need_du_dotdot_du(false)
+    _need_du_dotdot_du(false),
+    _need_dual(false),
+    _need_dual_u(false)
 {
   auto num_vector_tags = _sys.subproblem().numVectorTags();
 
@@ -70,8 +72,17 @@ MooseVariableScalar::~MooseVariableScalar()
 }
 
 void
-MooseVariableScalar::reinit()
+MooseVariableScalar::reinit(bool reinit_for_derivative_reordering /* = false*/)
 {
+  if (reinit_for_derivative_reordering)
+  {
+    // We've already calculated everything in an earlier reinit. All we have to do is re-sort the
+    // derivative vector for AD calculations
+    if (_need_dual && _subproblem.currentlyComputingJacobian())
+      computeAD(/*nodal_ordering=*/true);
+    return;
+  }
+
   const NumericVector<Real> & current_solution = *_sys.currentSolution();
   const NumericVector<Real> & solution_old = _sys.solutionOld();
   const NumericVector<Real> & solution_older = _sys.solutionOlder();
@@ -90,7 +101,7 @@ MooseVariableScalar::reinit()
 
   _dof_map.SCALAR_dof_indices(_dof_indices, _var_num);
 
-  unsigned int n = _dof_indices.size();
+  auto n = _dof_indices.size();
   _u.resize(n);
   _u_old.resize(n);
   _u_older.resize(n);
@@ -271,6 +282,28 @@ MooseVariableScalar::reinit()
       }
     }
   }
+
+  // Automatic differentiation
+  if (_need_dual && _subproblem.currentlyComputingJacobian())
+    computeAD(/*nodal_ordering=*/false);
+}
+
+void
+MooseVariableScalar::computeAD(bool nodal_ordering)
+{
+  auto ad_offset =
+      _var_num * (nodal_ordering ? _sys.getMaxVarNDofsPerNode() : _sys.getMaxVarNDofsPerElem());
+  auto n_dofs = _dof_indices.size();
+
+  if (_need_dual_u)
+  {
+    _dual_u.resize(n_dofs);
+    for (MooseIndex(n_dofs) i = 0; i < n_dofs; ++i)
+    {
+      _dual_u[i] = _u[i];
+      _dual_u[i].derivatives()[ad_offset + i] = 1;
+    }
+  }
 }
 
 void
@@ -315,4 +348,19 @@ MooseVariableScalar::insert(NumericVector<Number> & soln)
   const dof_id_type end_dof = _dof_map.end_dof();
   if (_dof_indices.size() > 0 && first_dof <= _dof_indices[0] && _dof_indices[0] < end_dof)
     soln.insert(&_u[0], _dof_indices);
+}
+
+template <>
+const VariableValue &
+MooseVariableScalar::adSln<ComputeStage::RESIDUAL>() const
+{
+  return _u;
+}
+
+template <>
+const DualVariableValue &
+MooseVariableScalar::adSln<ComputeStage::JACOBIAN>() const
+{
+  _need_dual = _need_dual_u = true;
+  return _dual_u;
 }

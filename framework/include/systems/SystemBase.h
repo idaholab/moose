@@ -602,8 +602,10 @@ public:
   /**
    * Reinit scalar varaibles
    * @param tid Thread ID
+   * @param reinit_for_derivative_reordering A flag indicating whether we are reinitializing for the
+   *        purpose of re-ordering derivative information for ADNodalBCs
    */
-  virtual void reinitScalars(THREAD_ID tid);
+  virtual void reinitScalars(THREAD_ID tid, bool reinit_for_derivative_reordering = false);
 
   /**
    * Add info about variable that will be copied

@@ -270,6 +270,8 @@ struct VariableValueType
   typedef
       typename OutputTools<typename Moose::ValueType<T, compute_stage>::type>::VariableValue type;
 };
+typedef typename VariableValueType<Real, ComputeStage::JACOBIAN>::type DualVariableValue;
+
 template <typename T, ComputeStage compute_stage>
 struct VariableGradientType
 {

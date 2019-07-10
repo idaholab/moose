@@ -1570,13 +1570,13 @@ FEProblemBase::reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, THREA
 }
 
 void
-FEProblemBase::reinitScalars(THREAD_ID tid)
+FEProblemBase::reinitScalars(THREAD_ID tid, bool reinit_for_derivative_reordering /*=false*/)
 {
   if (_displaced_problem && _reinit_displaced_elem)
-    _displaced_problem->reinitScalars(tid);
+    _displaced_problem->reinitScalars(tid, reinit_for_derivative_reordering);
 
-  _nl->reinitScalars(tid);
-  _aux->reinitScalars(tid);
+  _nl->reinitScalars(tid, reinit_for_derivative_reordering);
+  _aux->reinitScalars(tid, reinit_for_derivative_reordering);
 
   _assembly[tid]->prepareScalar();
 }
