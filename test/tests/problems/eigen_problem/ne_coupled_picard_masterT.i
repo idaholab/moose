@@ -49,7 +49,7 @@
 [Executioner]
   type = Steady
   picard_max_its = 30
-  picard_rel_tol = 1e-60
+  picard_rel_tol = 1e-6
 []
 
 [MultiApps]

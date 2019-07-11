@@ -108,5 +108,13 @@
     csvdiff = 'dg_krylovschur_out_eigenvalues_0001.csv'
     slepc_version = '>=3.8.0'
     requirement = "Eigenvalue system should be able to handle DG kernels"
-  []
+  [../]
+
+  [./as_subapp]
+    type = 'CSVDiff'
+    input = 'ne_coupled_picard_masterT.i'
+    csvdiff = 'ne_coupled_picard_masterT_out_sub0_eigenvalues_0001.csv'
+    slepc_version = '>=3.8.0'
+    requirement = "Eigenvalue system should be able to run as a subapp"
+  [../]
 []

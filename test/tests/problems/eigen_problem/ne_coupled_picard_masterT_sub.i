@@ -108,6 +108,6 @@
 
 [Outputs]
   csv = true
-  file_base = ne_coupled
-  execute_on = 'timestep_end'
+  # have to comment out the following line
+#  execute_on = 'timestep_end'
 []
