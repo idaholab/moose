@@ -34,7 +34,7 @@ FlowModelSetup::addSolutionVariable(const VariableName & var_name, const Real & 
 {
   const std::string class_name = "AddVariableAction";
   InputParameters params = _this_action_factory.getValidParams(class_name);
-  params.set<Real>("scaling") = scaling;
+  params.set<std::vector<Real>>("scaling") = {scaling};
   params.set<MooseEnum>("family") = _fe_family;
   params.set<MooseEnum>("order") = _fe_order;
 
