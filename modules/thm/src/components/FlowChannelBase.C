@@ -433,7 +433,7 @@ FlowChannelBase::addMooseObjects()
   {
     InputParameters pars = emptyInputParameters();
     pars.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-    pars.set<Component *>("component") = _parent == nullptr ? this : _parent;
+    pars.set<Component *>("component") = this;
     pars.set<UserObjectName>("fp") = getParam<UserObjectName>("fp");
     pars.set<RealVectorValue>("gravity_vector") = _gravity_vector;
 
