@@ -21,7 +21,7 @@ protected:
   void buildObjects()
   {
     InputParameters uo_pars = _factory.getValidParams("IdealGasFluidProperties");
-    uo_pars.set<Real>("R") = 287.04;
+    uo_pars.set<Real>("molar_mass") = 0.028966206103678928;
     uo_pars.set<Real>("gamma") = 1.41;
     _fe_problem->addUserObject("IdealGasFluidProperties", "fp", uo_pars);
     _fp = &_fe_problem->getUserObjectTempl<IdealGasFluidProperties>("fp");

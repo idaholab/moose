@@ -52,8 +52,8 @@ protected:
     {
       const std::string class_name = "IdealGasFluidProperties";
       InputParameters params = _factory.getValidParams(class_name);
-      params.set<Real>("R") = 296.81;
       params.set<Real>("gamma") = 1.4;
+      params.set<Real>("molar_mass") = 0.028012734746133888;
       params.set<Real>("mu") = 0.0000222084; // at 400 K and 1.e5 Pa
       params.set<Real>("k") = 0.032806168;   // at 400 K and 1.e5 Pa
       _fe_problem->addUserObject(class_name, fp_nitrogen_name, params);

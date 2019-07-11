@@ -15,19 +15,6 @@
  */
 TEST_F(IdealGasFluidPropertiesTest, fluidName) { EXPECT_EQ(_fp->fluidName(), "ideal_gas"); }
 
-/**
- * Verify that the default molar mass is correctly returned
- */
-TEST_F(IdealGasFluidPropertiesTest, molarMass)
-{
-  // Test calculation of molar mass given R_specific
-  const Real molar_mass = 8.3144598 / 287.04;
-  ABS_TEST(_fp->molarMass(), molar_mass, REL_TOL_SAVED_VALUE);
-
-  // Test default molar mass when R_specific isn't specified
-  ABS_TEST(_fp_pT->molarMass(), 2.9e-2, REL_TOL_SAVED_VALUE);
-}
-
 TEST_F(IdealGasFluidPropertiesTest, testAll)
 {
   // Test when R and gamma are provided
