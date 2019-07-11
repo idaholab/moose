@@ -17,7 +17,7 @@
       csvdiff = 'transferred_scalar_variable_out.csv'
 
       # This is here because the both use the same input file
-      prereq = 'test'
+      prereq = 'exodus'
 
       detail = 'CSV format.'
     []
