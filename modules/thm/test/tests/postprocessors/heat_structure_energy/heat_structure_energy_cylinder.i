@@ -53,7 +53,7 @@
     type = HeatStructureCylindrical
     num_rods = 5
 
-    position = '0 0 0'
+    position = '0 2 0'
     orientation = '1 0 0'
     inner_radius = 2.0
     length = 2.0
@@ -73,8 +73,9 @@
     type = HeatStructureEnergyRZ
     block = 'heat_structure:region2'
     n_units = 5
-    axis_point = '0 0 0'
+    axis_point = '0 2 0'
     axis_dir = '1 0 0'
+    offset = 2.0
     execute_on = 'initial'
   [../]
 []

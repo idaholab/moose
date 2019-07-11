@@ -64,13 +64,6 @@ public:
    */
   Real getNumberOfUnits() const { return _num_rods; }
 
-  /**
-   * Get the axial offset when generating a heat structure mesh
-   *
-   * @returns The axial offset of the mesh
-   */
-  virtual Real getAxialOffset() const;
-
 protected:
   virtual std::shared_ptr<HeatConductionModel> buildModel();
   virtual void init() override;

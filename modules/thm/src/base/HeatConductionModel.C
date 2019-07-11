@@ -4,6 +4,7 @@
 #include "Component.h"
 #include "THMApp.h"
 #include "HeatStructureBase.h"
+#include "HeatStructureCylindrical.h"
 
 template <>
 InputParameters
@@ -100,9 +101,12 @@ HeatConductionModel::addHeatEquationXYZ()
 void
 HeatConductionModel::addHeatEquationRZ()
 {
-  const auto & blocks = _hs.getSubdomainNames();
-  const auto & position = _hs.getPosition();
-  const auto & direction = _hs.getDirection();
+  HeatStructureCylindrical & hs_cyl = dynamic_cast<HeatStructureCylindrical &>(_hs);
+
+  const auto & blocks = hs_cyl.getSubdomainNames();
+  const auto & position = hs_cyl.getPosition();
+  const auto & direction = hs_cyl.getDirection();
+  const auto & inner_radius = hs_cyl.getInnerRadius();
 
   // add transient term
   {
@@ -115,6 +119,7 @@ HeatConductionModel::addHeatEquationRZ()
     pars.set<bool>("use_displaced_mesh") = false;
     pars.set<Point>("axis_point") = position;
     pars.set<RealVectorValue>("axis_dir") = direction;
+    pars.set<Real>("offset") = inner_radius;
     _sim.addKernel(class_name, Component::genName(_comp_name, "td"), pars);
   }
   // add diffusion term
@@ -127,6 +132,7 @@ HeatConductionModel::addHeatEquationRZ()
     pars.set<bool>("use_displaced_mesh") = false;
     pars.set<Point>("axis_point") = position;
     pars.set<RealVectorValue>("axis_dir") = direction;
+    pars.set<Real>("offset") = inner_radius;
     _sim.addKernel(class_name, Component::genName(_comp_name, "hc"), pars);
   }
 }

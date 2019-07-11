@@ -117,12 +117,6 @@ HeatStructureBase::usingSecondOrderMesh() const
   return HeatConductionModel::feType().order == SECOND;
 }
 
-Real
-HeatStructureBase::getAxialOffset() const
-{
-  return 0.;
-}
-
 void
 HeatStructureBase::build2DMesh()
 {
@@ -137,7 +131,6 @@ HeatStructureBase::build2DMesh()
   for (unsigned int i = 0; i < n_layers; i++)
   {
     Point p(_node_locations[i], 0, 0);
-    p(1) += getAxialOffset();
 
     Node * nd = addNode(p);
     node_ids[i][0] = nd->id();
@@ -209,7 +202,6 @@ HeatStructureBase::build2DMesh2ndOrder()
   for (unsigned int i = 0; i < n_layers; i++)
   {
     Point p(_node_locations[i], 0, 0);
-    p(1) += getAxialOffset();
 
     const Node * nd = addNode(p);
     node_ids[i][0] = nd->id();
