@@ -9,6 +9,50 @@
     design = 'LineSegmentCutSetUserObject.md LevelSetCutUserObject.md'
     issues = '#11259'
   [../]
+  [./moving_interface_debug_output_0]
+    prereq = moving_interface
+    type = RunApp
+    input = moving_level_set.i
+    cli_args = 'XFEM/debug_output_level=0'
+    unique_id = true
+    absent_out = 'XFEM mesh cutting with element fragment algorithm complete'
+    requirement = 'The XFEM module shall not output summary information on mesh changes when debug_output_level=0'
+    design = 'XFEM/index.md'
+    issues = '#13666'
+  [../]
+  [./moving_interface_debug_output_1]
+    prereq = moving_interface_debug_output_0
+    type = RunApp
+    input = moving_level_set.i
+    cli_args = 'XFEM/debug_output_level=1'
+    unique_id = true
+    expect_out = 'XFEM mesh cutting with element fragment algorithm complete'
+    requirement = 'The XFEM module shall output summary information on mesh changes when debug_output_level=1'
+    design = 'XFEM/index.md'
+    issues = '#13666'
+  [../]
+  [./moving_interface_debug_output_2]
+    prereq = moving_interface_debug_output_1
+    type = RunApp
+    input = moving_level_set.i
+    cli_args = 'XFEM/debug_output_level=2'
+    unique_id = true
+    expect_out = 'XFEM added new node:'
+    requirement = 'The XFEM module shall output detailed information on mesh changes when debug_output_level=2'
+    design = 'XFEM/index.md'
+    issues = '#13666'
+  [../]
+  [./moving_interface_debug_output_3]
+    prereq = moving_interface_debug_output_2
+    type = RunApp
+    input = moving_level_set.i
+    cli_args = 'XFEM/debug_output_level=3'
+    unique_id = true
+    expect_out = 'XFEM Element fragment algorithm mesh prior to cutting:'
+    requirement = 'The XFEM module shall output detailed information on mesh changes when debug_output_level=3'
+    design = 'XFEM/index.md'
+    issues = '#13666'
+  [../]
   [./moving_bimaterials]
     type = Exodiff
     input = moving_bimaterial.i
