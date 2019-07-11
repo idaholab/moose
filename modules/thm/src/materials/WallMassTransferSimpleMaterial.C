@@ -11,7 +11,6 @@ validParams<WallMassTransferSimpleMaterial>()
 {
   InputParameters params = validParams<Material>();
 
-  params.addRequiredCoupledVar("P_hf", "Heat flux perimeter");
   params.addRequiredCoupledVar("beta", "Remapped volume fraction of liquid (two-phase only)");
   params.addRequiredCoupledVar("arhoA_liquid", "Liquid mass equation variable: alpha*rho*A");
   params.addRequiredCoupledVar("arhouA_liquid", "Liquid momentum equation variable: alpha*rho*u*A");
@@ -38,7 +37,6 @@ validParams<WallMassTransferSimpleMaterial>()
 
 WallMassTransferSimpleMaterial::WallMassTransferSimpleMaterial(const InputParameters & parameters)
   : DerivativeMaterialInterfaceTHM<Material>(parameters),
-    _P_hf(coupledValue("P_hf")),
     _T_wall(getMaterialProperty<Real>("T_wall")),
     _Hw_liquid(getMaterialProperty<Real>("Hw_liquid")),
     _kappa_liquid(getMaterialProperty<Real>("heat_flux_partitioning_liquid")),
@@ -104,7 +102,7 @@ WallMassTransferSimpleMaterial::computeQpProperties()
 
   Real q_wall_liquid = _kappa_liquid[_qp] * _Hw_liquid[_qp] * (_T_wall[_qp] - _T_liquid[_qp]);
   Real h = hIV - h_liquid;
-  _Gamma_wall[_qp] = _f_boil[_qp] * q_wall_liquid / h * _P_hf[_qp];
+  _Gamma_wall[_qp] = _f_boil[_qp] * q_wall_liquid / h;
 
   // derivatives of q_wall_liquid
   Real dq_wall_liquid_dbeta =
@@ -132,27 +130,20 @@ WallMassTransferSimpleMaterial::computeQpProperties()
 
   _d_Gamma_wall_dbeta[_qp] =
       (_df_boil_dbeta[_qp] * q_wall_liquid / h - _f_boil[_qp] * q_wall_liquid * dh_dbeta / h / h +
-       _f_boil[_qp] * dq_wall_liquid_dbeta / h) *
-      _P_hf[_qp];
+       _f_boil[_qp] * dq_wall_liquid_dbeta / h);
   _d_Gamma_wall_darhoAL[_qp] = (_df_boil_darhoA_liquid[_qp] * q_wall_liquid / h -
                                 _f_boil[_qp] * q_wall_liquid * dh_darhoAL / h / h +
-                                _f_boil[_qp] * dq_wall_liquid_darhoAL / h) *
-                               _P_hf[_qp];
+                                _f_boil[_qp] * dq_wall_liquid_darhoAL / h);
   _d_Gamma_wall_darhouAL[_qp] = (_df_boil_darhouA_liquid[_qp] * q_wall_liquid / h -
                                  _f_boil[_qp] * q_wall_liquid * dh_darhouAL / h / h +
-                                 _f_boil[_qp] * dq_wall_liquid_darhouAL / h) *
-                                _P_hf[_qp];
+                                 _f_boil[_qp] * dq_wall_liquid_darhouAL / h);
   _d_Gamma_wall_darhoEAL[_qp] = (_df_boil_darhoEA_liquid[_qp] * q_wall_liquid / h -
                                  _f_boil[_qp] * q_wall_liquid * dh_darhoEAL / h / h +
-                                 _f_boil[_qp] * dq_wall_liquid_darhoEAL / h) *
-                                _P_hf[_qp];
+                                 _f_boil[_qp] * dq_wall_liquid_darhoEAL / h);
   _d_Gamma_wall_darhoAV[_qp] = (-_f_boil[_qp] * q_wall_liquid * dh_darhoAV / h / h +
-                                _f_boil[_qp] * dq_wall_liquid_darhoAV / h) *
-                               _P_hf[_qp];
+                                _f_boil[_qp] * dq_wall_liquid_darhoAV / h);
   _d_Gamma_wall_darhouAV[_qp] = (-_f_boil[_qp] * q_wall_liquid * dh_darhouAV / h / h +
-                                 _f_boil[_qp] * dq_wall_liquid_darhouAV / h) *
-                                _P_hf[_qp];
+                                 _f_boil[_qp] * dq_wall_liquid_darhouAV / h);
   _d_Gamma_wall_darhoEAV[_qp] = (-_f_boil[_qp] * q_wall_liquid * dh_darhoEAV / h / h +
-                                 _f_boil[_qp] * dq_wall_liquid_darhoEAV / h) *
-                                _P_hf[_qp];
+                                 _f_boil[_qp] * dq_wall_liquid_darhoEAV / h);
 }
