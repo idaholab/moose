@@ -44,8 +44,8 @@ AsymptoticExpansionHomogenizationKernel::AsymptoticExpansionHomogenizationKernel
     _elasticity_tensor(getMaterialPropertyByName<RankFourTensor>(_base_name + "elasticity_tensor")),
     _component(getParam<unsigned int>("component")),
     _column(getParam<MooseEnum>("column")),
-    _k_index({0, 1, 2, 1, 0, 0}),
-    _l_index({0, 1, 2, 2, 2, 1}),
+    _k_index({{0, 1, 2, 1, 0, 0}}),
+    _l_index({{0, 1, 2, 2, 2, 1}}),
     _k(_k_index[_column]),
     _l(_l_index[_column])
 {
