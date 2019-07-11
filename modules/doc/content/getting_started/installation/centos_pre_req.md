@@ -11,8 +11,10 @@ sudo -E yum install gcc \
   blas-devel \
   lapack-devel \
   gcc-gfortran \
-  tcl-devel
-  libX11-devel
+  tcl-devel \
+  libX11-devel \
+  git \
+  zlib-devel
 ```
 
 Download and install one our redistributable packages according to your version of CentOS

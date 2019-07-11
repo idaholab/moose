@@ -4,16 +4,25 @@
 First you need to install the MOOSE framework. To do this, click the link below corresponding to
 your operating system/platform and follow the instructions:
 
-- [getting_started/installation/mac_os.md]
-- [getting_started/installation/ubuntu.md]
-- [getting_started/installation/mint.md]
-- [getting_started/installation/opensuse.md]
-- [getting_started/installation/fedora.md]
-- [getting_started/installation/centos.md]
+- +MacOS+:
+
+  - [Mojave](getting_started/installation/osx_mojave.md)
+  - [High Sierra or older](getting_started/installation/osx_other.md)
+
+- +Linux+:
+
+  - [getting_started/installation/ubuntu.md]
+  - [getting_started/installation/mint.md]
+  - [getting_started/installation/opensuse.md]
+  - [getting_started/installation/fedora.md]
+  - [getting_started/installation/centos.md]
+
 - [getting_started/installation/windows10.md]
-- [getting_started/installation/hpc_install_moose.md]
-- [getting_started/installation/manual_installation_gcc.md]
-- [getting_started/installation/manual_installation_llvm.md]
+- Advanced Instructions:
+
+  - [getting_started/installation/hpc_install_moose.md]
+  - [getting_started/installation/manual_installation_gcc.md]
+  - [getting_started/installation/manual_installation_llvm.md]
 
 When installation is complete, return to this page to continue.
 
