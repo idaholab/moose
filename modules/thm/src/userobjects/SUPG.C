@@ -49,13 +49,14 @@ SUPG::addMooseObjects(FlowModel & fm, InputParameters & pars) const
     mooseError("SUPG is not implemented with 2-phase flow model.");
 
   Component * comp = pars.getCheckedPointerParam<Component *>("component");
-  std::string comp_name = comp->name();
+  std::string comp_name = comp->cname();
 
   FlowChannelBase * fch = dynamic_cast<FlowChannelBase *>(comp);
   if (fch == nullptr)
-    mooseError(
-        name(),
-        ": Trying to use SUPG stabilization with a component that is not a FlowChannelBase.");
+    mooseError(name(),
+               ": Trying to use SUPG stabilization with a component '",
+               comp_name,
+               "' that is not a FlowChannelBase.");
 
   const auto & blocks = pars.get<std::vector<SubdomainName>>("block");
   // coupling vectors
