@@ -72,7 +72,8 @@
 [Outputs]
   [png]
     type = PNGOutput
-    resolution = 250
+    resolution = 500
+    transparency = 1
     color = RWB
   []
 []

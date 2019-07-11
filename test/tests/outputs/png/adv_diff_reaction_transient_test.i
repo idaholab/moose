@@ -1,6 +1,6 @@
 [Mesh]
   dim              = 2
-  file             = Mesh24.e
+  file             = Mesh12.e
 []
 
 [Variables]
@@ -15,7 +15,12 @@
 
 [Kernels]
 
-  active = 'advection diffusion source'
+  active = 'trans advection diffusion source'
+
+  [./trans]
+    type     = TimeDerivative
+    variable = phi
+  [../]
 
   [./advection]
     type     = Advection0
@@ -103,19 +108,26 @@
 []
 
 [Executioner]
-  type                 = Steady
-  nl_rel_tol               = 1.e-10
+  type                 = Transient #Steady
+  scheme               = bdf2
+  nl_rel_tol           = 1e-10
 
   solve_type = 'PJFNK'
 
-  petsc_options_iname  = '-pc_type -pc_factor_levels -pc_factor_mat_ordering_type'
-  petsc_options_value  = 'ilu 20 rcm'
+  petsc_options_iname  = '-pc_factor_levels -pc_factor_mat_ordering_type'
+  petsc_options_value  = '20 rcm'
+
+  start_time      = 0.0
+  end_time        = 1.
+  num_steps       = 60000
+  dt              = .2
+  n_startup_steps = 0
 []
 
 [Outputs]
   [png]
     type = PNGOutput
     resolution = 250
-    color = BCR
+    color = RWB
   []
 []

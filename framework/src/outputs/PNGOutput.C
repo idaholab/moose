@@ -7,6 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifdef MOOSE_HAVE_LIBPNG
+
 #include <fstream>
 #include "PNGOutput.h"
 #include "FEProblemBase.h"
@@ -20,14 +22,23 @@ InputParameters
 validParams<PNGOutput>()
 {
   InputParameters params = validParams<FileOutput>();
+  params.addParam<bool>(
+      "transparent", true, "Determination of whether the background will be transparent.");
   params.addParam<unsigned int>("resolution", 2000, "The resolution of the image.");
   MooseEnum color("GRAY BRYW BCR RWB BR");
   params.addParam<MooseEnum>("color", color, "Choose the color scheme to use.");
-  params.addRangeCheckedParam<Real>("_out_bounds_shade",
+  params.addRangeCheckedParam<Real>("out_bounds_shade",
                                     .5,
-                                    "_out_bounds_shade>=0 & _out_bounds_shade<=1",
+                                    "out_bounds_shade>=0 & out_bounds_shade<=1",
                                     "Color for the parts of the image that are out of bounds."
                                     "Value is between 1 and 0.");
+  params.addRangeCheckedParam<Real>("transparency",
+                                    1,
+                                    "transparency>=0 & transparency<=1",
+                                    "Value is between 1 and 0"
+                                    "where 1 is completely opaque and 0 is completely transparent"
+                                    "Default transparency of the image is no transparency.");
+
   return params;
 }
 
@@ -35,7 +46,9 @@ PNGOutput::PNGOutput(const InputParameters & parameters)
   : FileOutput(parameters),
     _resolution(getParam<unsigned int>("resolution")),
     _color(parameters.get<MooseEnum>("color")),
-    _out_bounds_shade(getParam<Real>("_out_bounds_shade"))
+    _transparent(getParam<bool>("transparent")),
+    _transparency(getParam<Real>("transparency")),
+    _out_bounds_shade(getParam<Real>("out_bounds_shade"))
 {
 }
 
@@ -46,6 +59,9 @@ PNGOutput::makeMeshFunc()
 
   const std::vector<unsigned int> var_nums = {0};
 
+  // If we want the background to be transparent, we need a number over 1.
+  if (_transparent)
+    _out_bounds_shade = 2;
   // Find the values that will be used for rescaling purposes.
   calculateRescalingValues();
 
@@ -117,7 +133,7 @@ PNGOutput::setRGB(png_byte * rgb, Real selection)
     case 2:
     // RWB.  Change spectrum.
     case 3:
-      color_spectrum_max = 511;
+      color_spectrum_max = 1013; // 511;
       break;
     case 4:
       color_spectrum_max = 255;
@@ -126,9 +142,14 @@ PNGOutput::setRGB(png_byte * rgb, Real selection)
 
   // We need to convert the
   auto color = (int)(selection * color_spectrum_max);
+  auto tran = (int)(_transparency * 255);
   // Make sure everything is within our colorSpectrum.
+
   if (color > color_spectrum_max)
+  {
     color = color_spectrum_max;
+    tran = 0;
+  }
   if (color < 0)
     color = 0;
   auto magnitude = color % 256;
@@ -142,7 +163,7 @@ PNGOutput::setRGB(png_byte * rgb, Real selection)
       {
         rgb[0] = magnitude;
         rgb[1] = 0;
-        rgb[2] = 255 - magnitude;
+        rgb[2] = 50; // 255 - magnitude;
       }
       // Red->Yellow
       else if (color < 512)
@@ -166,33 +187,46 @@ PNGOutput::setRGB(png_byte * rgb, Real selection)
       if (color < 256)
       {
         rgb[0] = magnitude;
-        rgb[1] = magnitude - (5 / (256 - magnitude));
-        rgb[2] = 255 - (40 / (256 - magnitude));
+        rgb[1] = magnitude - (int)(5.0 / (256.0 - (float)magnitude));
+        rgb[2] = 255 - (int)(40.0 / (256.0 - (float)magnitude));
       }
       // Cream->Red
       else
       {
         rgb[0] = 255;
-        rgb[1] = (255 - (5 / (magnitude + 1))) - (magnitude + (5 / (magnitude + 1)));
-        rgb[2] = (255 - (40 / (magnitude + 1))) - (magnitude + (40 / (magnitude + 1)));
+        rgb[1] = 255 - (5 / (magnitude + 1)) - (magnitude + (5 / (magnitude + 1)));
+        rgb[2] = 255 - (40 / (magnitude + 1)) - (magnitude + (40 / (magnitude + 1)));
       }
       break;
 
+    // Inverted form.
     // Red->White->Blue
     case 3:
       // Red->White
       if (color < 256)
       {
+        rgb[0] = magnitude + (int)(100 / (magnitude + 1));
+        rgb[1] = 0;
+        rgb[2] = 0;
+      }
+      else if (color < 512)
+      {
         rgb[0] = 255;
-        rgb[1] = magnitude;
-        rgb[2] = magnitude;
+        rgb[1] = magnitude - (int)(100.0 * ((float)magnitude / 255.0));
+        rgb[2] = magnitude - (int)(100.0 * ((float)magnitude / 255.0));
       }
       // White->Blue
+      else if (color < 768)
+      {
+        rgb[0] = 255 - (int)(100.0 * (1.0 + ((float)magnitude) / (100.0 * (255.0 / 155.0))));
+        rgb[1] = 255 - (int)(100.0 * (1.0 + ((float)magnitude) / (100.0 * (255.0 / 155.0))));
+        rgb[2] = 255;
+      }
       else
       {
-        rgb[0] = 255 - magnitude;
-        rgb[1] = 255 - magnitude;
-        rgb[2] = 255;
+        rgb[0] = 0;
+        rgb[1] = 0;
+        rgb[2] = 255 - (int)(magnitude / (255 / 100));
       }
       break;
 
@@ -204,6 +238,8 @@ PNGOutput::setRGB(png_byte * rgb, Real selection)
       rgb[2] = 255 - magnitude;
       break;
   }
+  // Add any transparency.
+  rgb[3] = tran;
 }
 
 void
@@ -236,14 +272,14 @@ PNGOutput::makePNG()
 
   // libpng is built on C, so by default it takes FILE*.
   FILE * fp = nullptr;
-  png_structrp pngp = nullptr;
+  png_structp pngp = nullptr;
   png_infop infop = nullptr;
   // Required depth for proper image clarity.
   Real depth = 8;
   Real width = dist_x * _resolution;
   Real height = dist_y * _resolution;
   // Allocate resources.
-  std::vector<png_byte> row((width * 3) + 1);
+  std::vector<png_byte> row((width * 4) + 1);
 
   // Check if we can open and write to the file.
   MooseUtils::checkFileWriteable(png_file.str());
@@ -268,7 +304,7 @@ PNGOutput::makePNG()
                width,
                height,
                depth,
-               (_color ? PNG_COLOR_TYPE_RGB : PNG_COLOR_TYPE_GRAY),
+               (_color ? PNG_COLOR_TYPE_RGBA : PNG_COLOR_TYPE_GRAY),
                PNG_INTERLACE_NONE,
                PNG_COMPRESSION_TYPE_DEFAULT,
                PNG_FILTER_TYPE_DEFAULT);
@@ -295,7 +331,7 @@ PNGOutput::makePNG()
 
       // Determine whether to create the PNG in color or grayscale
       if (_color)
-        setRGB(&row.data()[indx * 3], applyScale(dv(0)));
+        setRGB(&row.data()[indx * 4], applyScale(dv(0)));
       else
         row.data()[indx] = applyScale(dv(0)) * 255;
 
@@ -313,3 +349,5 @@ PNGOutput::makePNG()
   if (pngp != nullptr)
     png_destroy_write_struct(&pngp, (png_infopp) nullptr);
 }
+
+#endif

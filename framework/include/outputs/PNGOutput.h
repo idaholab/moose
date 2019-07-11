@@ -60,6 +60,10 @@ protected:
   // Way to specify color vs grayscale image creation.
   MooseEnum _color;
 
+  // Indicates whether to make the background transparent.
+  bool _transparent;
+  Real _transparency;
+
   /// Pointer the libMesh::MeshFunction object that the read data is stored
   std::unique_ptr<MeshFunction> _mesh_function;
 
