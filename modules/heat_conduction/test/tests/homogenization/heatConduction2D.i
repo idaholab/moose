@@ -117,12 +117,6 @@
     thermal_conductivity = 100
   [../]
 
-  [./density]
-    type = Density
-    block = '1 2'
-    density = 0.283
-  [../]
-
 [] # Materials
 
 [Executioner]
