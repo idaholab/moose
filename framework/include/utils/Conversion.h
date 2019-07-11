@@ -67,6 +67,9 @@ stringify(const T & t)
 /// Convert solve type into human readable string
 std::string stringify(const SolveType & t);
 
+/// Convert variable field type into human readable string
+std::string stringify(const VarFieldType & t);
+
 /// Add no-op stringify if the argument already is a string (must use overloading)
 std::string stringify(const std::string & s);
 

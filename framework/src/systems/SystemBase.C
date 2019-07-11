@@ -118,17 +118,14 @@ SystemBase::getVariable(THREAD_ID tid, const std::string & var_name)
 MooseVariableFEBase &
 SystemBase::getVariable(THREAD_ID tid, unsigned int var_number)
 {
-  MooseVariableFEBase * var =
-      dynamic_cast<MooseVariableFEBase *>(_vars[tid].getVariable(var_number));
-  if (!var)
-  {
-    std::stringstream errMsg;
-    errMsg << "Variable '" << Moose::stringify(var_number) << "' does not exist in this system"
-           << std::endl;
-    throw std::runtime_error(errMsg.str().c_str());
-    // mooseError("variable #" + Moose::stringify(var_number) + " does not exist in this system");
-  }
-  return *var;
+  if (var_number < _numbered_vars[tid].size())
+    if (_numbered_vars[tid][var_number])
+      return *_numbered_vars[tid][var_number];
+
+  std::stringstream errMsg;
+  errMsg << "Variable #'" << Moose::stringify(var_number) << "' does not exist in this system"
+         << std::endl;
+  throw std::runtime_error(errMsg.str().c_str());
 }
 
 template <typename T>
@@ -177,13 +174,25 @@ SystemBase::getVariableBlocks(unsigned int var_number)
 void
 SystemBase::addVariableToZeroOnResidual(std::string var_name)
 {
-  _vars_to_be_zeroed_on_residual.push_back(var_name);
+  unsigned int ncomp = getVariable(0, var_name).count();
+  if (ncomp > 1)
+    // need to push libMesh variable names for all components
+    for (unsigned int i = 0; i < ncomp; ++i)
+      _vars_to_be_zeroed_on_residual.push_back(_subproblem.arrayVariableComponent(var_name, i));
+  else
+    _vars_to_be_zeroed_on_residual.push_back(var_name);
 }
 
 void
 SystemBase::addVariableToZeroOnJacobian(std::string var_name)
 {
-  _vars_to_be_zeroed_on_jacobian.push_back(var_name);
+  unsigned int ncomp = getVariable(0, var_name).count();
+  if (ncomp > 1)
+    // need to push libMesh variable names for all components
+    for (unsigned int i = 0; i < ncomp; ++i)
+      _vars_to_be_zeroed_on_jacobian.push_back(_subproblem.arrayVariableComponent(var_name, i));
+  else
+    _vars_to_be_zeroed_on_jacobian.push_back(var_name);
 }
 
 void
@@ -419,11 +428,11 @@ SystemBase::reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, THREAD_I
 }
 
 void
-SystemBase::reinitScalars(THREAD_ID tid)
+SystemBase::reinitScalars(THREAD_ID tid, bool reinit_for_derivative_reordering /*=false*/)
 {
   const std::vector<MooseVariableScalar *> & vars = _vars[tid].scalars();
   for (const auto & var : vars)
-    var->reinit();
+    var->reinit(reinit_for_derivative_reordering);
 }
 
 void
@@ -615,12 +624,13 @@ SystemBase::addVariable(const std::string & var_name,
                         Real scale_factor,
                         const std::set<SubdomainID> * const active_subdomains)
 {
+  _numbered_vars.resize(libMesh::n_threads());
   unsigned int var_num = system().add_variable(var_name, type, active_subdomains);
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     // FIXME: we cannot refer fetype in libMesh at this point, so we will just make a copy in
     // MooseVariableBase.
-    MooseVariableBase * var;
+    MooseVariableFEBase * var;
     if (type == FEType(0, MONOMIAL))
       var = new MooseVariableConstMonomial(
           var_num, type, *this, _subproblem.assembly(tid), _var_kind, tid);
@@ -632,12 +642,77 @@ SystemBase::addVariable(const std::string & var_name,
 
     var->scalingFactor(scale_factor);
     _vars[tid].add(var_name, var);
+
+    if (var_num >= _numbered_vars[tid].size())
+      _numbered_vars[tid].resize(var_num + 1);
+    _numbered_vars[tid][var_num] = var;
   }
   if (active_subdomains == nullptr)
     _var_map[var_num] = std::set<SubdomainID>();
   else
     for (const auto subdomain_id : *active_subdomains)
       _var_map[var_num].insert(subdomain_id);
+}
+
+void
+SystemBase::addArrayVariable(const std::string & var_name,
+                             const FEType & type,
+                             unsigned int components,
+                             const std::vector<Real> & scale_factor,
+                             const std::set<SubdomainID> * const active_subdomains)
+{
+  if (type == FEType(FIRST, NEDELEC_ONE) || type.family == LAGRANGE_VEC)
+    mooseError("Vector family type cannot be used in an array variable");
+
+  _numbered_vars.resize(libMesh::n_threads());
+
+  // Turn off automatic variable group identification so that we can be sure that this variable
+  // group will be ordered exactly like it should be
+  system().identify_variable_groups(false);
+
+  // Build up the variable names
+  std::vector<std::string> var_names;
+  for (unsigned int i = 0; i < components; i++)
+    var_names.push_back(SubProblem::arrayVariableComponent(var_name, i));
+
+  // The number returned by libMesh is the _last_ variable number... we want to hold onto the
+  // _first_
+  unsigned int var_num =
+      system().add_variables(var_names, type, active_subdomains) - (components - 1);
+
+  if (active_subdomains == NULL)
+  {
+    unsigned int vn = var_num;
+    for (unsigned int i = 0; i < components; i++)
+      _var_map[vn++] = std::set<SubdomainID>();
+  }
+  else
+  {
+    unsigned int vn = var_num;
+    for (unsigned int i = 0; i < components; i++)
+    {
+      for (auto & sid : *active_subdomains)
+        _var_map[vn].insert(sid);
+      ++vn;
+    }
+  }
+
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  {
+    // FIXME: we cannot refer fetype in libMesh at this point, so we will just make a copy in
+    // MooseVariableBase.
+    // ArrayMooseVariable is defined in MooseTypes.h
+    ArrayMooseVariable * var = new ArrayMooseVariable(
+        var_num, type, *this, _subproblem.assembly(tid), _var_kind, tid, components);
+    var->scalingFactor(scale_factor);
+    _vars[tid].add(var_name, var);
+
+    unsigned int end_var_num = var_num + components;
+    if (end_var_num > _numbered_vars[tid].size())
+      _numbered_vars[tid].resize(end_var_num);
+    for (unsigned int i = var_num; i < end_var_num; ++i)
+      _numbered_vars[tid][i] = var;
+  }
 }
 
 void
@@ -667,8 +742,24 @@ SystemBase::addScalarVariable(const std::string & var_name,
 bool
 SystemBase::hasVariable(const std::string & var_name) const
 {
+  auto & names = getVariableNames();
   if (system().has_variable(var_name))
     return system().variable_type(var_name).family != SCALAR;
+  if (std::find(names.begin(), names.end(), var_name) != names.end())
+    // array variable
+    return true;
+  else
+    return false;
+}
+
+bool
+SystemBase::isArrayVariable(const std::string & var_name) const
+{
+  auto & names = getVariableNames();
+  if (!system().has_variable(var_name) &&
+      std::find(names.begin(), names.end(), var_name) != names.end())
+    // array variable
+    return true;
   else
     return false;
 }
@@ -691,7 +782,12 @@ SystemBase::isScalarVariable(unsigned int var_num) const
 unsigned int
 SystemBase::nVariables() const
 {
-  return _vars[0].names().size();
+  unsigned int n = 0;
+  for (auto & var : _vars[0].fieldVariables())
+    n += var->count();
+  n += _vars[0].scalars().size();
+
+  return n;
 }
 
 /**
@@ -1115,8 +1211,14 @@ template MooseVariableFE<Real> & SystemBase::getFieldVariable<Real>(THREAD_ID ti
 template MooseVariableFE<RealVectorValue> &
 SystemBase::getFieldVariable<RealVectorValue>(THREAD_ID tid, const std::string & var_name);
 
+template MooseVariableFE<RealEigenVector> &
+SystemBase::getFieldVariable<RealEigenVector>(THREAD_ID tid, const std::string & var_name);
+
 template MooseVariableFE<Real> & SystemBase::getFieldVariable<Real>(THREAD_ID tid,
                                                                     unsigned int var_number);
 
 template MooseVariableFE<RealVectorValue> &
 SystemBase::getFieldVariable<RealVectorValue>(THREAD_ID tid, unsigned int var_number);
+
+template MooseVariableFE<RealEigenVector> &
+SystemBase::getFieldVariable<RealEigenVector>(THREAD_ID tid, unsigned int var_number);

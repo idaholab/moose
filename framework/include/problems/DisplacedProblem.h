@@ -124,6 +124,8 @@ public:
   virtual MooseVariable & getStandardVariable(THREAD_ID tid, const std::string & var_name) override;
   virtual VectorMooseVariable & getVectorVariable(THREAD_ID tid,
                                                   const std::string & var_name) override;
+  virtual ArrayMooseVariable & getArrayVariable(THREAD_ID tid,
+                                                const std::string & var_name) override;
   virtual bool hasScalarVariable(const std::string & var_name) const override;
   virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid,
                                                   const std::string & var_name) override;
@@ -133,9 +135,18 @@ public:
                            const FEType & type,
                            Real scale_factor,
                            const std::set<SubdomainID> * const active_subdomains = NULL);
+  virtual void addArrayVariable(const std::string & var_name,
+                                const FEType & type,
+                                unsigned int components,
+                                const std::vector<Real> & scale_factor,
+                                const std::set<SubdomainID> * const active_subdomains = NULL);
   virtual void addAuxVariable(const std::string & var_name,
                               const FEType & type,
                               const std::set<SubdomainID> * const active_subdomains = NULL);
+  virtual void addAuxArrayVariable(const std::string & var_name,
+                                   const FEType & type,
+                                   unsigned int components,
+                                   const std::set<SubdomainID> * const active_subdomains = NULL);
   virtual void addScalarVariable(const std::string & var_name,
                                  Order order,
                                  Real scale_factor = 1.,
@@ -188,7 +199,7 @@ public:
   virtual void reinitNeighborPhys(const Elem * neighbor,
                                   const std::vector<Point> & physical_points,
                                   THREAD_ID tid) override;
-  virtual void reinitScalars(THREAD_ID tid) override;
+  virtual void reinitScalars(THREAD_ID tid, bool reinit_for_derivative_reordering = false) override;
   virtual void reinitOffDiagScalars(THREAD_ID tid) override;
 
   /// Fills "elems" with the elements that should be looped over for Dirac Kernels
@@ -309,4 +320,3 @@ private:
   friend class UpdateDisplacedMeshThread;
   friend class Restartable;
 };
-

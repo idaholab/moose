@@ -33,6 +33,7 @@ template <typename>
 class MooseVariableFE;
 typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<RealVectorValue> VectorMooseVariable;
+typedef MooseVariableFE<RealEigenVector> ArrayMooseVariable;
 class RestartableDataValue;
 class SystemBase;
 
@@ -161,7 +162,7 @@ public:
    */
   virtual std::map<TagName, TagID> & getMatrixTags() { return _matrix_tag_name_to_tag_id; }
 
-  // Variables /////
+  /// Whether or not this problem has the variable
   virtual bool hasVariable(const std::string & var_name) const = 0;
 
   /**
@@ -184,6 +185,15 @@ public:
 
   /// Returns the variable reference for requested VectorMooseVariable which may be in any system
   virtual VectorMooseVariable & getVectorVariable(THREAD_ID tid, const std::string & var_name) = 0;
+
+  /// Returns the variable reference for requested ArrayMooseVariable which may be in any system
+  virtual ArrayMooseVariable & getArrayVariable(THREAD_ID tid, const std::string & var_name) = 0;
+
+  /// Returns the variable name of a component of an array variable
+  static std::string arrayVariableComponent(const std::string & var_name, unsigned int i)
+  {
+    return var_name + "_" + std::to_string(i);
+  }
 
   /// Returns a Boolean indicating whether any system contains a variable with the name provided
   virtual bool hasScalarVariable(const std::string & var_name) const = 0;
@@ -350,7 +360,13 @@ public:
   virtual void reinitNeighborPhys(const Elem * neighbor,
                                   const std::vector<Point> & physical_points,
                                   THREAD_ID tid) = 0;
-  virtual void reinitScalars(THREAD_ID tid) = 0;
+  /**
+   * fills the VariableValue arrays for scalar variables from the solution vector
+   * @param tid The thread id
+   * @param reinit_for_derivative_reordering A flag indicating whether we are reinitializing for the
+   *        purpose of re-ordering derivative information for ADNodalBCs
+   */
+  virtual void reinitScalars(THREAD_ID tid, bool reinit_for_derivative_reordering = false) = 0;
   virtual void reinitOffDiagScalars(THREAD_ID tid) = 0;
 
   /**
@@ -738,4 +754,3 @@ namespace Moose
 void initial_condition(EquationSystems & es, const std::string & system_name);
 
 } // namespace Moose
-

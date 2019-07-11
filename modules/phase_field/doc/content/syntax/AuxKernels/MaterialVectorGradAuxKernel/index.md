@@ -1,10 +1,1 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
-# MaterialVectorGradAuxKernel System
-
-!syntax list /AuxKernels/MaterialVectorGradAuxKernel objects=True actions=False subsystems=False
-
-!syntax list /AuxKernels/MaterialVectorGradAuxKernel objects=False actions=False subsystems=True
-
-!syntax list /AuxKernels/MaterialVectorGradAuxKernel objects=False actions=True subsystems=False
-
+!template load file=stubs/moose_system.md.template name=MaterialVectorGradAuxKernel syntax=/AuxKernels/MaterialVectorGradAuxKernel

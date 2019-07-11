@@ -336,12 +336,11 @@ class SQAVerificationCommand(command.CommandComponent):
         return config
 
     def createToken(self, parent, info, page):
-
-        matrix = SQARequirementMatrix(parent)
         category = self.settings.get('category')
         if category == '_empty_':
             return parent
 
+        matrix = SQARequirementMatrix(parent)
         for requirements in self.extension.requirements(category).itervalues():
             for req in requirements:
                 if getattr(req, info['subcommand']) is not None:

@@ -1346,22 +1346,9 @@ CrackFrontDefinition::calculateTangentialStrainAlongFront()
   for (unsigned int i = 0; i < num_crack_front_nodes; ++i)
     _strain_along_front[i] = -std::numeric_limits<Real>::max();
 
-  MooseVariableFEBase & disp_x_var =
-      _subproblem.getVariable(_tid,
-                              _disp_x_var_name,
-                              Moose::VarKindType::VAR_NONLINEAR,
-                              Moose::VarFieldType::VAR_FIELD_STANDARD);
-  MooseVariableFEBase & disp_y_var =
-      _subproblem.getVariable(_tid,
-                              _disp_y_var_name,
-                              Moose::VarKindType::VAR_NONLINEAR,
-                              Moose::VarFieldType::VAR_FIELD_STANDARD);
-
-  MooseVariableFEBase & disp_z_var =
-      _subproblem.getVariable(_tid,
-                              _disp_z_var_name,
-                              Moose::VarKindType::VAR_NONLINEAR,
-                              Moose::VarFieldType::VAR_FIELD_STANDARD);
+  MooseVariable & disp_x_var = _subproblem.getStandardVariable(_tid, _disp_x_var_name);
+  MooseVariable & disp_y_var = _subproblem.getStandardVariable(_tid, _disp_y_var_name);
+  MooseVariable & disp_z_var = _subproblem.getStandardVariable(_tid, _disp_z_var_name);
 
   current_node = getCrackFrontNodePtr(0);
   if (current_node->processor_id() == processor_id())

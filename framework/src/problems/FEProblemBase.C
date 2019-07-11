@@ -1089,10 +1089,10 @@ FEProblemBase::prepare(const Elem * elem, THREAD_ID tid)
 
   _nl->prepare(tid);
   _aux->prepare(tid);
-  if (!_has_jacobian || !_const_jacobian)
+  if ((!_has_jacobian || !_const_jacobian) && _currently_computing_jacobian)
     _assembly[tid]->prepareJacobianBlock();
   _assembly[tid]->prepareResidual();
-  if (_has_nonlocal_coupling)
+  if (_has_nonlocal_coupling && _currently_computing_jacobian)
     _assembly[tid]->prepareNonlocal();
 
   if (_displaced_problem && (_reinit_displaced_elem || _reinit_displaced_face))
@@ -1570,13 +1570,13 @@ FEProblemBase::reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, THREA
 }
 
 void
-FEProblemBase::reinitScalars(THREAD_ID tid)
+FEProblemBase::reinitScalars(THREAD_ID tid, bool reinit_for_derivative_reordering /*=false*/)
 {
   if (_displaced_problem && _reinit_displaced_elem)
-    _displaced_problem->reinitScalars(tid);
+    _displaced_problem->reinitScalars(tid, reinit_for_derivative_reordering);
 
-  _nl->reinitScalars(tid);
-  _aux->reinitScalars(tid);
+  _nl->reinitScalars(tid, reinit_for_derivative_reordering);
+  _aux->reinitScalars(tid, reinit_for_derivative_reordering);
 
   _assembly[tid]->prepareScalar();
 }
@@ -1880,6 +1880,22 @@ FEProblemBase::addVariable(const std::string & var_name,
 }
 
 void
+FEProblemBase::addArrayVariable(const std::string & var_name,
+                                const FEType & type,
+                                unsigned int components,
+                                const std::vector<Real> & scale_factor,
+                                const std::set<SubdomainID> * const active_subdomains)
+{
+  if (duplicateVariableCheck(var_name, type, /* is_aux = */ false))
+    return;
+
+  _nl->addArrayVariable(var_name, type, components, scale_factor, active_subdomains);
+  if (_displaced_problem)
+    _displaced_problem->addArrayVariable(
+        var_name, type, components, scale_factor, active_subdomains);
+}
+
+void
 FEProblemBase::addScalarVariable(const std::string & var_name,
                                  Order order,
                                  Real scale_factor,
@@ -2075,6 +2091,21 @@ FEProblemBase::addAuxVariable(const std::string & var_name,
   _aux->addVariable(var_name, type, 1.0, active_subdomains);
   if (_displaced_problem)
     _displaced_problem->addAuxVariable(var_name, type, active_subdomains);
+}
+
+void
+FEProblemBase::addAuxArrayVariable(const std::string & var_name,
+                                   const FEType & type,
+                                   unsigned int components,
+                                   const std::set<SubdomainID> * const active_subdomains)
+{
+  if (duplicateVariableCheck(var_name, type, /* is_aux = */ true))
+    return;
+
+  _aux->addArrayVariable(
+      var_name, type, components, std::vector<Real>(components, 1), active_subdomains);
+  if (_displaced_problem)
+    _displaced_problem->addAuxArrayVariable(var_name, type, components, active_subdomains);
 }
 
 void
@@ -2282,6 +2313,8 @@ FEProblemBase::addInitialCondition(const std::string & ic_name,
         ic = _factory.create<InitialCondition>(ic_name, name, parameters, tid);
       else if (dynamic_cast<VectorMooseVariable *>(&var))
         ic = _factory.create<VectorInitialCondition>(ic_name, name, parameters, tid);
+      else if (dynamic_cast<ArrayMooseVariable *>(&var))
+        ic = _factory.create<ArrayInitialCondition>(ic_name, name, parameters, tid);
       else
         mooseError("Your FE variable in initial condition ",
                    name,
@@ -3836,6 +3869,17 @@ FEProblemBase::getVectorVariable(THREAD_ID tid, const std::string & var_name)
   return _aux->getFieldVariable<RealVectorValue>(tid, var_name);
 }
 
+ArrayMooseVariable &
+FEProblemBase::getArrayVariable(THREAD_ID tid, const std::string & var_name)
+{
+  if (_nl->hasVariable(var_name))
+    return _nl->getFieldVariable<RealEigenVector>(tid, var_name);
+  else if (!_aux->hasVariable(var_name))
+    mooseError("Unknown variable " + var_name);
+
+  return _aux->getFieldVariable<RealEigenVector>(tid, var_name);
+}
+
 bool
 FEProblemBase::hasScalarVariable(const std::string & var_name) const
 {
@@ -4068,31 +4112,31 @@ FEProblemBase::setNonlocalCouplingMatrix()
   {
     for (const auto & kernel : nonlocal_kernel)
     {
-      unsigned int i = ivar->number();
-      if (i == kernel->variable().number())
-        for (const auto & jvar : vars)
-        {
-          const auto it = _var_dof_map.find(jvar->name());
-          if (it != _var_dof_map.end())
+      for (unsigned int i = ivar->number(); i < ivar->number() + ivar->count(); ++i)
+        if (i == kernel->variable().number())
+          for (const auto & jvar : vars)
           {
-            unsigned int j = jvar->number();
-            _nonlocal_cm(i, j) = 1;
+            const auto it = _var_dof_map.find(jvar->name());
+            if (it != _var_dof_map.end())
+            {
+              unsigned int j = jvar->number();
+              _nonlocal_cm(i, j) = 1;
+            }
           }
-        }
     }
     for (const auto & integrated_bc : nonlocal_integrated_bc)
     {
-      unsigned int i = ivar->number();
-      if (i == integrated_bc->variable().number())
-        for (const auto & jvar : vars)
-        {
-          const auto it = _var_dof_map.find(jvar->name());
-          if (it != _var_dof_map.end())
+      for (unsigned int i = ivar->number(); i < ivar->number() + ivar->count(); ++i)
+        if (i == integrated_bc->variable().number())
+          for (const auto & jvar : vars)
           {
-            unsigned int j = jvar->number();
-            _nonlocal_cm(i, j) = 1;
+            const auto it = _var_dof_map.find(jvar->name());
+            if (it != _var_dof_map.end())
+            {
+              unsigned int j = jvar->number();
+              _nonlocal_cm(i, j) = 1;
+            }
           }
-        }
     }
   }
 }
@@ -4852,7 +4896,9 @@ FEProblemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
 
   _aux->compute(EXEC_NONLINEAR);
 
+  _currently_computing_jacobian = true;
   _nl->computeJacobianBlocks(blocks);
+  _currently_computing_jacobian = false;
 }
 
 void

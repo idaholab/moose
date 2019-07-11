@@ -1,0 +1,17 @@
+[Tests]
+  design = 'ScalarKernels/index.md'
+  issues = '#13703'
+  [exo]
+    type = Exodiff
+    input = 'ad_coupled_scalar.i'
+    exodiff = 'ad_coupled_scalar_out.e'
+    requirement = 'We shall be able to couple a scalar variable into AD objects and do some meaningful physics: depleting boundary source diffusion problem'
+  []
+  [jac]
+    type = PetscJacobianTester
+    input = 'ad_coupled_scalar.i'
+    difference_tol = 5e-7
+    cli_args = "Executioner/num_steps=1 ScalarKernels/active='time'"
+    requirement = 'We shall be able to couple a scalar variable into AD objects and get the correct Jacobian'
+  []
+[]

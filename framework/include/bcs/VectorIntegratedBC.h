@@ -42,9 +42,19 @@ public:
 
 protected:
   /**
-   * method for computing the residual at quadrature points
+   * Method for computing the residual at quadrature points
    */
   virtual Real computeQpResidual() = 0;
+
+  /**
+   * Method for computing the diagonal Jacobian at quadrature points
+   */
+  virtual Real computeQpJacobian() { return 0; }
+
+  /**
+   * Method for computing an off-diagonal jacobian component at quadrature points.
+   */
+  virtual Real computeQpOffDiagJacobian(unsigned int /*jvar*/) { return 0; }
 
   VectorMooseVariable & _var;
 
@@ -66,4 +76,3 @@ protected:
   /// the values of the unknown variable this BC is acting on
   const VectorVariableValue & _u;
 };
-

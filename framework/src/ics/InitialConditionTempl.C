@@ -28,6 +28,13 @@ validParams<InitialConditionTempl<RealVectorValue>>()
   return validParams<InitialConditionBase>();
 }
 
+template <>
+InputParameters
+validParams<InitialConditionTempl<RealEigenVector>>()
+{
+  return validParams<InitialConditionBase>();
+}
+
 template <typename T>
 InitialConditionTempl<T>::InitialConditionTempl(const InputParameters & parameters)
   : InitialConditionBase(parameters),
@@ -90,7 +97,7 @@ InitialConditionTempl<T>::compute()
 
   if (_cont == C_ONE)
   {
-    const std::vector<std::vector<GradientType>> & ref_dphi = fe->get_dphi();
+    const std::vector<std::vector<GradientShapeType>> & ref_dphi = fe->get_dphi();
     _dphi = &ref_dphi;
   }
 
@@ -228,31 +235,12 @@ InitialConditionTempl<T>::compute()
 
   NumericVector<Number> & solution = _var.sys().solution();
 
-  // 'first' and 'last' are no longer used, see note about subdomain-restricted variables below
-  // const dof_id_type
-  //   first = solution.first_local_index(),
-  //   last  = solution.last_local_index();
-
   // Lock the new_vector since it is shared among threads.
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
 
-    for (unsigned int i = 0; i < n_dofs; i++)
-    // We may be projecting a new zero value onto
-    // an old nonzero approximation - RHS
-    // if (_Ue(i) != 0.)
-
-    // This is commented out because of subdomain restricted variables.
-    // It can be the case that if a subdomain restricted variable's boundary
-    // aligns perfectly with a processor boundary that the variable will get
-    // no value.  To counteract this we're going to let every processor set a
-    // value at every node and then let PETSc figure it out.
-    // Later we can choose to do something different / better.
-    //      if ((_dof_indices[i] >= first) && (_dof_indices[i] < last))
-    {
-      solution.set(_dof_indices[i], _Ue(i));
-    }
     _var.setDofValues(_Ue);
+    _var.insert(solution);
   }
 }
 
@@ -286,6 +274,27 @@ InitialConditionTempl<RealVectorValue>::setCZeroVertices()
 }
 
 template <typename T>
+T
+InitialConditionTempl<T>::gradientComponent(GradientType grad, unsigned int i)
+{
+  return grad(i);
+}
+
+template <>
+RealVectorValue
+InitialConditionTempl<RealVectorValue>::gradientComponent(GradientType grad, unsigned int i)
+{
+  return grad.row(i);
+}
+
+template <>
+RealEigenVector
+InitialConditionTempl<RealEigenVector>::gradientComponent(GradientType grad, unsigned int i)
+{
+  return grad.col(i);
+}
+
+template <typename T>
 void
 InitialConditionTempl<T>::setHermiteVertices()
 {
@@ -295,9 +304,9 @@ InitialConditionTempl<T>::setHermiteVertices()
   _Ue(_current_dof) = value(*_current_node);
   _dof_is_fixed[_current_dof] = true;
   _current_dof++;
-  Gradient grad = gradient(*_current_node);
+  GradientType grad = gradient(*_current_node);
   // x derivative
-  _Ue(_current_dof) = grad(0);
+  _Ue(_current_dof) = gradientComponent(grad, 0);
   _dof_is_fixed[_current_dof] = true;
   _current_dof++;
   if (_dim > 1)
@@ -306,35 +315,38 @@ InitialConditionTempl<T>::setHermiteVertices()
     Point nxminus = _current_elem->point(_n), nxplus = _current_elem->point(_n);
     nxminus(0) -= TOLERANCE;
     nxplus(0) += TOLERANCE;
-    Gradient gxminus = gradient(nxminus);
-    Gradient gxplus = gradient(nxplus);
+    GradientType gxminus = gradient(nxminus);
+    GradientType gxplus = gradient(nxplus);
     // y derivative
-    _Ue(_current_dof) = grad(1);
+    _Ue(_current_dof) = gradientComponent(grad, 1);
     _dof_is_fixed[_current_dof] = true;
     _current_dof++;
     // xy derivative
-    _Ue(_current_dof) = (gxplus(1) - gxminus(1)) / 2. / TOLERANCE;
+    _Ue(_current_dof) =
+        (gradientComponent(gxplus, 1) - gradientComponent(gxminus, 1)) / 2. / TOLERANCE;
     _dof_is_fixed[_current_dof] = true;
     _current_dof++;
 
     if (_dim > 2)
     {
       // z derivative
-      _Ue(_current_dof) = grad(2);
+      _Ue(_current_dof) = gradientComponent(grad, 2);
       _dof_is_fixed[_current_dof] = true;
       _current_dof++;
       // xz derivative
-      _Ue(_current_dof) = (gxplus(2) - gxminus(2)) / 2. / TOLERANCE;
+      _Ue(_current_dof) =
+          (gradientComponent(gxplus, 2) - gradientComponent(gxminus, 2)) / 2. / TOLERANCE;
       _dof_is_fixed[_current_dof] = true;
       _current_dof++;
       // We need new points for yz
       Point nyminus = _current_elem->point(_n), nyplus = _current_elem->point(_n);
       nyminus(1) -= TOLERANCE;
       nyplus(1) += TOLERANCE;
-      Gradient gyminus = gradient(nyminus);
-      Gradient gyplus = gradient(nyplus);
+      GradientType gyminus = gradient(nyminus);
+      GradientType gyplus = gradient(nyplus);
       // xz derivative
-      _Ue(_current_dof) = (gyplus(2) - gyminus(2)) / 2. / TOLERANCE;
+      _Ue(_current_dof) =
+          (gradientComponent(gyplus, 2) - gradientComponent(gyminus, 2)) / 2. / TOLERANCE;
       _dof_is_fixed[_current_dof] = true;
       _current_dof++;
       // Getting a 2nd order xyz is more tedious
@@ -348,12 +360,14 @@ InitialConditionTempl<T>::setHermiteVertices()
       nxpym(1) -= TOLERANCE;
       nxpyp(0) += TOLERANCE;
       nxpyp(1) += TOLERANCE;
-      Gradient gxmym = gradient(nxmym);
-      Gradient gxmyp = gradient(nxmyp);
-      Gradient gxpym = gradient(nxpym);
-      Gradient gxpyp = gradient(nxpyp);
-      Number gxzplus = (gxpyp(2) - gxmyp(2)) / 2. / TOLERANCE;
-      Number gxzminus = (gxpym(2) - gxmym(2)) / 2. / TOLERANCE;
+      GradientType gxmym = gradient(nxmym);
+      GradientType gxmyp = gradient(nxmyp);
+      GradientType gxpym = gradient(nxpym);
+      GradientType gxpyp = gradient(nxpyp);
+      DataType gxzplus =
+          (gradientComponent(gxpyp, 2) - gradientComponent(gxmyp, 2)) / 2. / TOLERANCE;
+      DataType gxzminus =
+          (gradientComponent(gxpym, 2) - gradientComponent(gxmym, 2)) / 2. / TOLERANCE;
       // xyz derivative
       _Ue(_current_dof) = (gxzplus - gxzminus) / 2. / TOLERANCE;
       _dof_is_fixed[_current_dof] = true;
@@ -380,10 +394,10 @@ InitialConditionTempl<T>::setOtherCOneVertices()
   _Ue(_current_dof) = value(*_current_node);
   _dof_is_fixed[_current_dof] = true;
   _current_dof++;
-  Gradient grad = gradient(*_current_node);
+  GradientType grad = gradient(*_current_node);
   for (unsigned int i = 0; i != _dim; ++i)
   {
-    _Ue(_current_dof) = grad(i);
+    _Ue(_current_dof) = gradientComponent(grad, i);
     _dof_is_fixed[_current_dof] = true;
     _current_dof++;
   }
@@ -396,31 +410,9 @@ InitialConditionTempl<RealVectorValue>::setOtherCOneVertices()
 }
 
 template <typename T>
-Real
-InitialConditionTempl<T>::dotHelper(const GradientType & op1, const GradientType & op2)
-{
-  return op1 * op2;
-}
-
-template <>
-Real
-InitialConditionTempl<RealVectorValue>::dotHelper(const GradientType & op1,
-                                                  const GradientType & op2)
-{
-  return op1.contract(op2);
-}
-
-template <typename T>
 void
-InitialConditionTempl<T>::choleskySolve(bool is_volume)
+InitialConditionTempl<T>::choleskyAssembly(bool is_volume)
 {
-  _Ke.resize(_free_dofs, _free_dofs);
-  _Ke.zero();
-  _Fe.resize(_free_dofs);
-  _Fe.zero();
-  // The new edge coefficients
-  DenseVector<Number> U(_free_dofs);
-
   // Loop over the quadrature points
   for (_qp = 0; _qp < _n_qp; _qp++)
   {
@@ -464,6 +456,21 @@ InitialConditionTempl<T>::choleskySolve(bool is_volume)
       freei++;
     }
   }
+}
+
+template <typename T>
+void
+InitialConditionTempl<T>::choleskySolve(bool is_volume)
+{
+  _Ke.resize(_free_dofs, _free_dofs);
+  _Ke.zero();
+  _Fe.resize(_free_dofs);
+  _Fe.zero();
+
+  choleskyAssembly(is_volume);
+
+  // The new edge coefficients
+  DenseVector<DataType> U(_free_dofs);
 
   _Ke.cholesky_solve(_Fe, U);
 
@@ -471,8 +478,46 @@ InitialConditionTempl<T>::choleskySolve(bool is_volume)
   for (unsigned int i = 0; i != _free_dofs; ++i)
   {
     auto the_dof = is_volume ? _free_dof[i] : _side_dofs[_free_dof[i]];
-    Number & ui = _Ue(the_dof);
+    DataType & ui = _Ue(the_dof);
     libmesh_assert(std::abs(ui) < TOLERANCE || std::abs(ui - U(i)) < TOLERANCE);
+    ui = U(i);
+    _dof_is_fixed[the_dof] = true;
+  }
+}
+
+template <>
+void
+InitialConditionTempl<RealEigenVector>::choleskySolve(bool is_volume)
+{
+  _Ke.resize(_free_dofs, _free_dofs);
+  _Ke.zero();
+  _Fe.resize(_free_dofs);
+  for (unsigned int i = 0; i < _free_dofs; ++i)
+    _Fe(i).setZero(_var.count());
+
+  choleskyAssembly(is_volume);
+
+  // The new edge coefficients
+  DenseVector<DataType> U = _Fe;
+
+  for (unsigned int i = 0; i < _var.count(); ++i)
+  {
+    DenseVector<Real> v(_free_dofs), x(_free_dofs);
+    for (unsigned int j = 0; j < _free_dofs; ++j)
+      v(j) = _Fe(j)(i);
+
+    _Ke.cholesky_solve(v, x);
+
+    for (unsigned int j = 0; j < _free_dofs; ++j)
+      U(j)(i) = x(j);
+  }
+
+  // Transfer new edge solutions to element
+  for (unsigned int i = 0; i != _free_dofs; ++i)
+  {
+    auto the_dof = is_volume ? _free_dof[i] : _side_dofs[_free_dof[i]];
+    DataType & ui = _Ue(the_dof);
+    libmesh_assert(ui.matrix().norm() < TOLERANCE || (ui - U(i)).matrix().norm() < TOLERANCE);
     ui = U(i);
     _dof_is_fixed[the_dof] = true;
   }
@@ -498,3 +543,4 @@ InitialConditionTempl<T>::computeNodal(const Point & p)
 
 template class InitialConditionTempl<Real>;
 template class InitialConditionTempl<RealVectorValue>;
+template class InitialConditionTempl<RealEigenVector>;

@@ -174,3 +174,4 @@ NeighborMooseVariableInterface<T>::neighborSecondPhi()
 
 template class NeighborMooseVariableInterface<Real>;
 template class NeighborMooseVariableInterface<RealVectorValue>;
+template class NeighborMooseVariableInterface<RealEigenVector>;

@@ -1,18 +1,1 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
-# PostprocessorDT
-
-!alert construction title=Undocumented Class
-The PostprocessorDT has not been documented. The content contained on this page includes the
-typical automatic documentation associated with a MooseObject; however, what is contained is
-ultimately determined by what is necessary to make the documentation clear for users.
-
-!syntax description /Executioner/TimeStepper/PostprocessorDT
-
-!syntax parameters /Executioner/TimeStepper/PostprocessorDT
-
-!syntax inputs /Executioner/TimeStepper/PostprocessorDT
-
-!syntax children /Executioner/TimeStepper/PostprocessorDT
-
-!bibtex bibliography
+!template load file=stubs/moose_object.md.template name=PostprocessorDT syntax=/Executioner/TimeStepper/PostprocessorDT

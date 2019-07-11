@@ -882,6 +882,22 @@ void Parser::setScalarParameter<Point, Point>(const std::string & full_name,
                                               GlobalParamsAction * global_block);
 
 template <>
+void Parser::setScalarParameter<RealEigenVector, RealEigenVector>(
+    const std::string & full_name,
+    const std::string & short_name,
+    InputParameters::Parameter<RealEigenVector> * param,
+    bool in_global,
+    GlobalParamsAction * global_block);
+
+template <>
+void Parser::setScalarParameter<RealEigenMatrix, RealEigenMatrix>(
+    const std::string & full_name,
+    const std::string & short_name,
+    InputParameters::Parameter<RealEigenMatrix> * param,
+    bool in_global,
+    GlobalParamsAction * global_block);
+
+template <>
 void Parser::setScalarParameter<PostprocessorName, PostprocessorName>(
     const std::string & full_name,
     const std::string & short_name,
@@ -1141,6 +1157,8 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       // Moose Compound Scalars
       setscalar(RealVectorValue, RealVectorValue);
       setscalar(Point, Point);
+      setscalar(RealEigenVector, RealEigenVector);
+      setscalar(RealEigenMatrix, RealEigenMatrix);
       setscalar(MooseEnum, MooseEnum);
       setscalar(MultiMooseEnum, MultiMooseEnum);
       setscalar(RealTensorValue, RealTensorValue);
@@ -1626,6 +1644,90 @@ Parser::setScalarParameter<Point, Point>(const std::string & full_name,
                                          GlobalParamsAction * global_block)
 {
   setScalarComponentParameter(full_name, short_name, param, in_global, global_block);
+}
+
+template <>
+void
+Parser::setScalarParameter<RealEigenVector, RealEigenVector>(
+    const std::string & full_name,
+    const std::string & short_name,
+    InputParameters::Parameter<RealEigenVector> * param,
+    bool in_global,
+    GlobalParamsAction * global_block)
+{
+  std::vector<double> vec;
+  try
+  {
+    vec = _root->param<std::vector<double>>(full_name);
+  }
+  catch (hit::Error & err)
+  {
+    _errmsg += hit::errormsg(_input_filename, _root->find(full_name), err.what()) + "\n";
+    return;
+  }
+
+  RealEigenVector value(vec.size());
+  for (unsigned int i = 0; i < vec.size(); ++i)
+    value(i) = Real(vec[i]);
+
+  param->set() = value;
+  if (in_global)
+  {
+    global_block->remove(short_name);
+    global_block->setScalarParam<RealEigenVector>(short_name) = value;
+  }
+}
+
+template <>
+void
+Parser::setScalarParameter<RealEigenMatrix, RealEigenMatrix>(
+    const std::string & full_name,
+    const std::string & short_name,
+    InputParameters::Parameter<RealEigenMatrix> * param,
+    bool in_global,
+    GlobalParamsAction * global_block)
+{
+  // Get the full string assigned to the variable full_name
+  std::string buffer = _root->param<std::string>(full_name);
+
+  // split vector at delim ;
+  // NOTE: the substrings are _not_ of type T yet
+  std::vector<std::string> first_tokenized_vector;
+  MooseUtils::tokenize(buffer, first_tokenized_vector, 1, ";");
+
+  std::vector<std::vector<Real>> values(first_tokenized_vector.size());
+
+  for (unsigned j = 0; j < first_tokenized_vector.size(); ++j)
+  {
+    if (!MooseUtils::tokenizeAndConvert<Real>(first_tokenized_vector[j], values[j]))
+    {
+      _errmsg +=
+          hit::errormsg(
+              _input_filename, _root->find(full_name), "invalid format for parameter ", full_name) +
+          "\n";
+      return;
+    }
+    if (j != 0 && values[j].size() != values[0].size())
+    {
+      _errmsg +=
+          hit::errormsg(
+              _input_filename, _root->find(full_name), "invalid format for parameter ", full_name) +
+          "\n";
+      return;
+    }
+  }
+
+  RealEigenMatrix value(values.size(), values[0].size());
+  for (unsigned int i = 0; i < values.size(); ++i)
+    for (unsigned int j = 0; j < values[i].size(); ++j)
+      value(i, j) = values[i][j];
+
+  param->set() = value;
+  if (in_global)
+  {
+    global_block->remove(short_name);
+    global_block->setScalarParam<RealEigenMatrix>(short_name) = value;
+  }
 }
 
 template <>

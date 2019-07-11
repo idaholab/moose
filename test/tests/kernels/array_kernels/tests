@@ -1,0 +1,48 @@
+[Tests]
+  issues = '#6881'
+  design = '/variables/ArrayMooseVariable.md'
+  [./test]
+    type = 'Exodiff'
+    input = 'array_diffusion_test.i'
+    exodiff = 'array_diffusion_test_out.e'
+    requirement = 'MOOSE shall provide array diffusion kernels on an array variable.'
+  [../]
+  [./test_diffusion_reaction]
+    type = 'Exodiff'
+    input = 'array_diffusion_reaction.i'
+    exodiff = 'array_diffusion_reaction_out.e'
+    requirement = 'MOOSE shall provide array reaction kernels on an array variable.'
+  [../]
+  [./test_diffusion_reaction_dg]
+    type = 'Exodiff'
+    input = 'array_diffusion_reaction_dg.i'
+    exodiff = 'array_diffusion_reaction_dg_out.e'
+    requirement = 'MOOSE shall provide array DG diffusion kernels on an elemental array variable.'
+  [../]
+  [./test_diffusion_reaction_coupling]
+    type = 'Exodiff'
+    input = 'array_diffusion_reaction_coupling.i'
+    exodiff = 'array_diffusion_reaction_coupling_out.e'
+    requirement = 'MOOSE shall provide coupling of standard variables in array kernels.'
+  [../]
+  [./test_diffusion_reaction_other_coupling]
+    type = 'Exodiff'
+    input = 'array_diffusion_reaction_other_coupling.i'
+    exodiff = 'array_diffusion_reaction_other_coupling_out.e'
+    requirement = 'MOOSE shall provide coupling of array variables in standard kernels.'
+  [../]
+  [./test_save_in]
+    type = 'Exodiff'
+    input = 'array_save_in.i'
+    exodiff = 'array_save_in_out.e'
+    requirement = 'MOOSE shall provide residual save-in and Jacobian diagonal save-in on an array variable.'
+  [../]
+  [./test_standard_save_in]
+    # using standard variables to produce the exact output of the previous test
+    type = 'Exodiff'
+    input = 'standard_save_in.i'
+    exodiff = 'array_save_in_out.e'
+    requirement = 'MOOSE shall provide residual save-in and Jacobian diagonal save-in on an array variable.'
+    prereq = test_save_in
+  [../]
+[]

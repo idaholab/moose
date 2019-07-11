@@ -88,6 +88,17 @@ protected:
   /// Compute this Kernel's contribution to the residual at the current quadrature point
   virtual ADReal computeQpResidual() = 0;
 
+  /**
+   * Compute this Kernel's contribution to the Jacobian at the current quadrature point
+   */
+  virtual Real computeQpJacobian() { return 0; }
+
+  /**
+   * This is the virtual that derived classes should override for computing an off-diagonal Jacobian
+   * component.
+   */
+  virtual Real computeQpOffDiagJacobian(unsigned int /*jvar*/) { return 0; }
+
   /// This is a regular kernel so we cast to a regular MooseVariable
   MooseVariableFE<T> & _var;
 

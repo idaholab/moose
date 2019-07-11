@@ -361,7 +361,27 @@ public:
   virtual void addVariable(const std::string & var_name,
                            const FEType & type,
                            Real scale_factor,
-                           const std::set<SubdomainID> * const active_subdomains = NULL);
+                           const std::set<SubdomainID> * const active_subdomains = nullptr);
+
+  /**
+   * Adds an array variable to the system
+   *
+   * @param var_name Name of the array variable
+   * @param type FE type of the array variable
+   * @param components Number of components for this array variable
+   * @param scale_factor The scaling factors for the array variable
+   * @param active_subdomains A list of subdomain ids this array variable is active on
+   */
+  virtual void addArrayVariable(const std::string & var_name,
+                                const FEType & type,
+                                unsigned int components,
+                                const std::vector<Real> & scale_factor,
+                                const std::set<SubdomainID> * const active_subdomains = nullptr);
+
+  /**
+   * If a variable is an array variable
+   */
+  virtual bool isArrayVariable(const std::string & var_name) const;
 
   ///@{
   /**
@@ -602,8 +622,10 @@ public:
   /**
    * Reinit scalar varaibles
    * @param tid Thread ID
+   * @param reinit_for_derivative_reordering A flag indicating whether we are reinitializing for the
+   *        purpose of re-ordering derivative information for ADNodalBCs
    */
-  virtual void reinitScalars(THREAD_ID tid);
+  virtual void reinitScalars(THREAD_ID tid, bool reinit_for_derivative_reordering = false);
 
   /**
    * Add info about variable that will be copied
@@ -792,6 +814,9 @@ protected:
 
   /// Time integrator
   std::shared_ptr<TimeIntegrator> _time_integrator;
+
+  /// Map variable number to its pointer
+  std::vector<std::vector<MooseVariableFEBase *>> _numbered_vars;
 };
 
 #define PARALLEL_TRY

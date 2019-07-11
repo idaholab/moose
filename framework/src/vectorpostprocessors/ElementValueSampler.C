@@ -59,7 +59,7 @@ void
 ElementValueSampler::execute()
 {
   for (unsigned int i = 0; i < _coupled_moose_vars.size(); i++)
-    _values[i] = _coupled_moose_vars[i]->getElementalValue(_current_elem);
+    _values[i] = _coupled_standard_moose_vars[i]->getElementalValue(_current_elem);
 
   SamplerBase::addSample(_current_elem->centroid(), _current_elem->id(), _values);
 }

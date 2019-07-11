@@ -123,11 +123,7 @@ Kernel::computeJacobian()
 
   if (_has_diag_save_in)
   {
-    unsigned int rows = _local_ke.m();
-    DenseVector<Number> diag(rows);
-    for (unsigned int i = 0; i < rows; i++)
-      diag(i) = _local_ke(i, i);
-
+    DenseVector<Number> diag = _assembly.getJacobianDiagonal(_local_ke);
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for (const auto & var : _diag_save_in)
       var->sys().solution().add_vector(diag, var->dofIndices());
@@ -148,10 +144,27 @@ Kernel::computeOffDiagJacobian(MooseVariableFEBase & jvar)
       return;
 
     precalculateOffDiagJacobian(jvar_num);
-    for (_i = 0; _i < _test.size(); _i++)
-      for (_j = 0; _j < jvar.phiSize(); _j++)
-        for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-          _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar_num);
+    if (jvar.count() == 1)
+    {
+      for (_i = 0; _i < _test.size(); _i++)
+        for (_j = 0; _j < jvar.phiSize(); _j++)
+          for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+            _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar_num);
+    }
+    else
+    {
+      unsigned int n = jvar.phiSize();
+      for (_i = 0; _i < _test.size(); _i++)
+        for (_j = 0; _j < n; _j++)
+          for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+          {
+            RealEigenVector v =
+                _JxW[_qp] * _coord[_qp] *
+                computeQpOffDiagJacobianArray(static_cast<ArrayMooseVariable &>(jvar));
+            for (unsigned int k = 0; k < v.size(); ++k)
+              _local_ke(_i, _j + k * n) += v(k);
+          }
+    }
 
     accumulateTaggedLocalMatrix();
   }

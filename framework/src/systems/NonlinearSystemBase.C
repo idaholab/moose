@@ -2462,13 +2462,18 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
       }
     }
 
+    // reinit scalar variables again. This reinit does not re-fill any of the scalar variable
+    // solution arrays because that was done above. It only will reorder the derivative information
+    // for AD calculations to be suitable for NodalBC calculations
+    for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+      _fe_problem.reinitScalars(tid, true);
+
     // Get variable coupling list.  We do all the NodalBCBase stuff on
     // thread 0...  The couplingEntries() data structure determines
     // which variables are "coupled" as far as the preconditioner is
     // concerned, not what variables a boundary condition specifically
     // depends on.
-    std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> & coupling_entries =
-        _fe_problem.couplingEntries(/*_tid=*/0);
+    auto & coupling_entries = _fe_problem.couplingEntries(/*_tid=*/0);
 
     // Compute Jacobians for NodalBCBases
     ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
@@ -2503,6 +2508,11 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
             if ((bc->variable().number() == ivar) && var_set.count(jvar) && bc->shouldApply())
               bc->computeOffDiagJacobian(jvar);
           }
+
+          const auto & coupled_scalar_vars = bc->getCoupledMooseScalarVars();
+          for (const auto & jvariable : coupled_scalar_vars)
+            if (hasScalarVariable(jvariable->name()))
+              bc->computeOffDiagJacobianScalar(jvariable->number());
         }
       }
     } // end loop over boundary nodes

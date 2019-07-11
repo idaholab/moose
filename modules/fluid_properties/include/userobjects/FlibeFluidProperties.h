@@ -12,6 +12,8 @@ InputParameters validParams<FlibeFluidProperties>();
  */
 class FlibeFluidProperties : public SinglePhaseFluidProperties
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
 public:
   FlibeFluidProperties(const InputParameters & parameters);
 
@@ -287,3 +289,4 @@ protected:
   /// derivative of pressure with respect to temperature at constant specific volume
   const Real _dp_dT_at_constant_v;
 };
+#pragma GCC diagnostic pop

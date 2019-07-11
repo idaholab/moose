@@ -148,6 +148,8 @@
   [./dummy_1]
     type = GenericConstantMaterial
     block = 1
+    prop_names = ''
+    prop_values = ''
   [../]
 []
 ############################################################

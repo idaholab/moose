@@ -181,8 +181,7 @@ ADKernelTempl<T, compute_stage>::computeADOffDiagJacobian()
       _residuals[_i] += _r * computeQpResidual();
   }
 
-  std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> & ce =
-      _assembly.couplingEntries();
+  auto & ce = _assembly.couplingEntries();
   for (const auto & it : ce)
   {
     MooseVariableFEBase & ivariable = *(it.first);

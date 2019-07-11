@@ -95,6 +95,15 @@ IdealGasFluidProperties::p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real
   dp_de = (_gamma - 1.0) / v;
 }
 
+void
+IdealGasFluidProperties::p_from_v_e(
+    const DualReal & v, const DualReal & e, DualReal & p, DualReal & dp_dv, DualReal & dp_de) const
+{
+  p = SinglePhaseFluidProperties::p_from_v_e(v, e);
+  dp_dv = -(_gamma - 1.0) * e / v / v;
+  dp_de = (_gamma - 1.0) / v;
+}
+
 Real
 IdealGasFluidProperties::T_from_v_e(Real /*v*/, Real e) const
 {
@@ -105,6 +114,15 @@ void
 IdealGasFluidProperties::T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Real & dT_de) const
 {
   T = T_from_v_e(v, e);
+  dT_dv = 0.0;
+  dT_de = 1.0 / _cv;
+}
+
+void
+IdealGasFluidProperties::T_from_v_e(
+    const DualReal & v, const DualReal & e, DualReal & T, DualReal & dT_dv, DualReal & dT_de) const
+{
+  T = SinglePhaseFluidProperties::T_from_v_e(v, e);
   dT_dv = 0.0;
   dT_de = 1.0 / _cv;
 }
@@ -303,6 +321,18 @@ Real
 IdealGasFluidProperties::rho_from_p_T(Real p, Real T) const
 {
   return p * _molar_mass / (_R * T);
+}
+
+void
+IdealGasFluidProperties::rho_from_p_T(const DualReal & p,
+                                      const DualReal & T,
+                                      DualReal & rho,
+                                      DualReal & drho_dp,
+                                      DualReal & drho_dT) const
+{
+  rho = SinglePhaseFluidProperties::rho_from_p_T(p, T);
+  drho_dp = _molar_mass / (_R * T);
+  drho_dT = -p * _molar_mass / (_R * T * T);
 }
 
 void

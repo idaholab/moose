@@ -9,7 +9,6 @@
 
 #include "BoundaryCondition.h"
 #include "Problem.h"
-#include "SubProblem.h"
 #include "SystemBase.h"
 #include "MooseVariableFE.h"
 
@@ -61,16 +60,4 @@ BoundaryCondition::BoundaryCondition(const InputParameters & parameters, bool no
     _assembly(_subproblem.assembly(_tid)),
     _mesh(_subproblem.mesh())
 {
-}
-
-SubProblem &
-BoundaryCondition::subProblem()
-{
-  return _subproblem;
-}
-
-bool
-BoundaryCondition::shouldApply()
-{
-  return true;
 }

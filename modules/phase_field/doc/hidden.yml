@@ -1,4 +1,3 @@
-- /AuxKernels
 - /AuxKernels/BndsCalcAux
 - /AuxKernels/CrossTermGradientFreeEnergy
 - /AuxKernels/EBSDReaderAvgDataAux
@@ -19,12 +18,10 @@
 - /AuxKernels/MaterialVectorAuxKernel/MaterialVectorAuxKernelAction
 - /AuxKernels/MaterialVectorGradAuxKernel
 - /AuxKernels/MaterialVectorGradAuxKernel/MaterialVectorGradAuxKernelAction
-- /AuxVariables
 - /AuxVariables/MultiAuxVariables
 - /AuxVariables/MultiAuxVariables/MultiAuxVariablesAction
 - /BCs/CahnHilliardAnisoFluxBC
 - /BCs/CahnHilliardFluxBC
-- /ICs
 - /ICs/BimodalInverseSuperellipsoidsIC
 - /ICs/BimodalSuperellipsoidsIC
 - /ICs/ClosePackIC
@@ -35,7 +32,6 @@
 - /ICs/PFCFreezingIC
 - /ICs/PolycrystalColoringIC
 - /ICs/PolycrystalRandomIC
-- /ICs/PolycrystalVoronoiVoidIC
 - /ICs/RampIC
 - /ICs/ReconPhaseVarIC
 - /ICs/RndBoundingBoxIC
@@ -73,7 +69,6 @@
 - /Kernels/CHSplitConcentration
 - /Kernels/CHSplitFlux
 - /Kernels/CoupledSwitchingTimeDerivative
-- /Kernels/MaskedBodyForce
 - /Kernels/MultiGrainRigidBodyMotion
 - /Kernels/SingleGrainRigidBodyMotion
 - /Kernels/SoretDiffusion
@@ -149,7 +144,6 @@
 - /UserObjects/GrainForceAndTorqueSum
 - /UserObjects/MaskedGrainForceAndTorque
 - /UserObjects/RandomEulerAngleProvider
-- /Variables
 - /Variables/CHPFCRFFSplitVariables
 - /Variables/CHPFCRFFSplitVariables/CHPFCRFFSplitVariablesAction
 - /Variables/HHPFCRFFSplitVariables

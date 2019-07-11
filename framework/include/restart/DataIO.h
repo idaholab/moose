@@ -343,6 +343,10 @@ template <>
 void dataStore(std::ostream & stream, std::stringstream *& s, void * context);
 template <>
 void dataStore(std::ostream & stream, DualReal & dn, void * context);
+template <>
+void dataStore(std::ostream & stream, RealEigenVector & v, void * context);
+template <>
+void dataStore(std::ostream & stream, RealEigenMatrix & v, void * context);
 
 template <std::size_t N>
 inline void
@@ -597,6 +601,10 @@ template <>
 void dataLoad(std::istream & stream, std::stringstream *& s, void * context);
 template <>
 void dataLoad(std::istream & stream, DualReal & dn, void * context);
+template <>
+void dataLoad(std::istream & stream, RealEigenVector & v, void * context);
+template <>
+void dataLoad(std::istream & stream, RealEigenMatrix & v, void * context);
 
 template <typename T>
 void
@@ -891,4 +899,3 @@ public:
 } // namespace Parallel
 
 } // namespace libMesh
-

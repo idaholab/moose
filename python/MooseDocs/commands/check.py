@@ -9,18 +9,17 @@
 
 """Developer tools for MooseDocs."""
 import os
+import re
 import collections
 import logging
 
 import anytree
 
-import MooseDocs
 from MooseDocs import common
 from MooseDocs.tree import syntax
 from MooseDocs.common import exceptions
 
 LOG = logging.getLogger(__name__)
-STUB_HEADER = '<!-- MOOSE Documentation Stub: Remove this when content is added. -->'
 
 def command_line_options(subparser, parent):
     """Define the 'check' command."""
@@ -206,9 +205,9 @@ def _check_page_for_stub(node, app_name, filename, update):
     Helper method to check if a page is a stub.
     """
     with open(filename, 'r') as fid:
-        lines = fid.readlines()
+        content = fid.read()
 
-    if lines and STUB_HEADER in lines[0]:
+    if content and re.search(r'(stubs\/moose_(object|action|system).md.template)', content):
         if update and (app_name in node.groups):
             LOG.info("Updating stub page for %s in file %s.", node.fullpath, filename)
             with open(filename, 'w') as fid:
@@ -219,40 +218,19 @@ def _check_page_for_stub(node, app_name, filename, update):
                   "added. Add documentation content to %s."
             LOG.warning(msg, node.fullpath, filename)
 
+    elif content and node.hidden:
+        msg = "A page for %s exists, but it is still listed as hidden."
+        LOG.warning(msg, node.fullpath)
+
+
 def _default_content(node):
     """
     Markdown stub content.
     """
-    stub = STUB_HEADER + '\n\n'
     if isinstance(node, syntax.SyntaxNode):
-        stub += '# {} System\n\n'.format(node.name)
-        stub += '!syntax list {} objects=True actions=False subsystems=False\n\n' \
-                .format(node.fullpath)
-        stub += '!syntax list {} objects=False actions=False subsystems=True\n\n' \
-                .format(node.fullpath)
-        stub += '!syntax list {} objects=False actions=True subsystems=False\n\n' \
-                .format(node.fullpath)
-
+        tname = 'moose_system.md.template'
     elif isinstance(node, syntax.MooseObjectNode):
-        template_filename = os.path.join(MooseDocs.MOOSE_DIR, 'framework', 'doc', 'templates',
-                                         'moose_object.md.template')
-        with open(template_filename, 'r') as fid:
-            template_content = fid.read()
-
-        template_content = template_content.replace('FullPathCodeClassName',
-                                                    '{}'.format(node.fullpath))
-        template_content = template_content.replace('CodeClassName', '{}'.format(node.name))
-        stub += template_content
-
+        tname = 'moose_object.md.template'
     elif isinstance(node, syntax.ActionNode):
-        template_filename = os.path.join(MooseDocs.MOOSE_DIR, 'framework', 'doc', 'templates',
-                                         'action_object.md.template')
-        with open(template_filename, 'r') as fid:
-            template_content = fid.read()
-
-        template_content = template_content.replace('FullPathCodeActionName',
-                                                    '{}'.format(node.fullpath))
-        template_content = template_content.replace('CodeActionName', '{}'.format(node.name))
-        stub += template_content
-
-    return stub
+        tname = 'moose_action.md.template'
+    return '!template load file=stubs/{} name={} syntax={}'.format(tname, node.name, node.fullpath)
