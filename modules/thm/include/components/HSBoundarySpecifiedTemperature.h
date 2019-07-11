@@ -18,6 +18,6 @@ public:
   virtual void addMooseObjects() override;
 
 protected:
-  /// The value of temperature imposed at the boundary
-  const Real & _temperature;
+  /// The function prescribing the temperature at the boundary
+  const FunctionName & _T_func;
 };
