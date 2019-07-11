@@ -18,6 +18,8 @@ InputParameters
 validParams<HomogenizedThermalConductivity>()
 {
   InputParameters params = validParams<ElementAverageValue>();
+  params.addClassDescription(
+      "Postprocessor for asymptotic expansion homogenization for thermal conductivity");
   params.addRequiredCoupledVar("temp_x", "solution in x");
   params.addCoupledVar("temp_y", "solution in y");
   params.addCoupledVar("temp_z", "solution in z");

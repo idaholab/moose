@@ -16,6 +16,8 @@ InputParameters
 validParams<HomogenizedHeatConduction>()
 {
   InputParameters params = validParams<Kernel>();
+  params.addClassDescription(
+      "Kernel for asymptotic expansion homogenization for thermal conductivity");
   params.addParam<MaterialPropertyName>(
       "diffusion_coefficient",
       "thermal_conductivity",

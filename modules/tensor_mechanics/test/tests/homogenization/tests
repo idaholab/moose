@@ -1,0 +1,18 @@
+[Tests]
+  design = 'AsymptoticExpansionHomogenizationKernel.md'
+  issues = '#6750'
+  [./longFiber]
+    type = 'Exodiff'
+    input = 'anisoLongFiber.i'
+    exodiff = 'anisoLongFiber_out.e'
+    requirement = 'The system shall compute homogenized elastic constants using the asymptotic expansion homogenization approach and match values for the so-called long fiber problem'
+  [../]
+  [./shortFiber]
+    type = 'Exodiff'
+    input = 'anisoShortFiber.i'
+    exodiff = 'anisoShortFiber_out.e'
+    custom_cmp = 'anisoShortFiber.exodiff'
+    compiler = 'GCC CLANG'
+    requirement = 'The system shall compute homogenized elastic constants using the asymptotic expansion homogenization approach and match values for the so-called short fiber problem'
+  [../]
+[]
