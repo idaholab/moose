@@ -58,4 +58,34 @@ Eigenvalue::execute()
   Moose::SlepcSupport::slepcSetOptions(_eigen_problem, _pars);
 #endif
   Steady::execute();
+
+  // print eigenvalues
+  std::ostringstream ss;
+  ss << '\n';
+  ss << "*******************************************************\n";
+  ss << " Eigenvalues";
+  ss << std::fixed << std::setprecision(10);
+  auto & eigen_sys = _eigen_problem.getNonlinearEigenSystem();
+  auto & eigenvalues = eigen_sys.getAllConvergedEigenvalues();
+  if (eigenvalues.size() == 1)
+  {
+    auto & eigenvalue = *eigenvalues.begin();
+    ss << " = " << eigenvalue.first;
+    if (eigenvalue.second != 0)
+      ss << "+" << eigenvalue.second << "i";
+    ss << "\n";
+  }
+  else
+  {
+    ss << ":\n";
+    for (auto & eigenvalue : eigenvalues)
+    {
+      ss << "   " << eigenvalue.first;
+      if (eigenvalue.second != 0)
+        ss << "+" << eigenvalue.second << "i";
+      ss << "\n";
+    }
+  }
+  ss << "*******************************************************";
+  _console << ss.str() << std::endl;
 }
