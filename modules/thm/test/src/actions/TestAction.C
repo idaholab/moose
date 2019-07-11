@@ -223,7 +223,7 @@ TestAction::addSolutionVariable(const VariableName & var_name,
   InputParameters params = _action_factory.getValidParams(class_name);
   params.set<MooseEnum>("family") = family;
   params.set<MooseEnum>("order") = order;
-  params.set<Real>("scaling") = scaling;
+  params.set<std::vector<Real>>("scaling") = {scaling};
 
   std::shared_ptr<Action> action =
       std::static_pointer_cast<Action>(_action_factory.create(class_name, var_name, params));
