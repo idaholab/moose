@@ -22,6 +22,6 @@
     absent_out = 'MatSetValues calls =12'
     requirement = 'We shall not do any mallocs in MatSetValues because of automatic scaling'
     issues = '#12601'
-    design = 'failed_solves.md'
+    design = 'FEProblemSolve.md'
   []
 []

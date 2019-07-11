@@ -82,7 +82,7 @@
     min_parallel = 3
     issues = '#12601'
     requirement = 'We shall error out when trying to do automatic scaling and we have any process with zero dofs'
-    design = 'failed_solves.md'
+    design = 'FEProblemSolve.md'
     expect_err = "MOOSE doesn't currently support automatic scaling when there are any processes owning zero dofs"
   []
 []
