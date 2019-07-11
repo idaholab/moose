@@ -102,6 +102,13 @@
     initial_T = Ts_init
   [../]
 
+  [./temp_outside]
+    type = HSBoundarySpecifiedTemperature
+    hs = hs
+    boundary = hs:outer
+    T = Ts_init
+  [../]
+
   [./inlet]
     type = InletMassFlowRateTemperature
     input = 'pipe1:in'
@@ -112,15 +119,6 @@
     type = Outlet
     input = 'pipe2:out'
     p = 6e6
-  [../]
-[]
-
-[BCs]
-  [./top]
-    type = FunctionDirichletBC
-    variable = T_solid
-    boundary = hs:outer
-    function = Ts_init
   [../]
 []
 
