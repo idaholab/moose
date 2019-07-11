@@ -1,6 +1,6 @@
 [Tests]
   issues = '#1927'
-  design = 'Outputs/index.md'
+  design = 'syntax/Outputs/index.md'
 
   [./dt_from_master]
     type = 'CheckFiles'

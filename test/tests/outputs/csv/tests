@@ -1,6 +1,6 @@
 [Tests]
   issues = '#1927'
-  design = 'Outputs/index.md outputs/CSV.md'
+  design = 'syntax/Outputs/index.md outputs/CSV.md'
   [./steady]
     type = CSVDiff
     input = 'csv.i'

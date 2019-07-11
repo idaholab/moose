@@ -74,7 +74,7 @@ problem.
 
 ### Output
 
-Finally, the [Outputs](/Outputs/index.md) defines a single types of output. The exodus output
+Finally, the [Outputs](/syntax/Outputs/index.md) defines a single types of output. The exodus output
 contains the mesh and field data for the simulation.
 
 !listing modules/level_set/examples/circle/circle_16.i block=Outputs

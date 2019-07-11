@@ -1,6 +1,6 @@
 [Tests]
   issues = '#9923'
-  design = 'VectorPostprocessors/index.md Outputs/index.md'
+  design = 'VectorPostprocessors/index.md syntax/Outputs/index.md'
   [execute_on_final]
     type = CSVDiff
     input = execute_on_final.i

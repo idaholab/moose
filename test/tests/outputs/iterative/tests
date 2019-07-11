@@ -1,6 +1,6 @@
 [Tests]
   issues = '#2617'
-  design = 'Outputs/index.md'
+  design = 'syntax/Outputs/index.md'
   [./exodus]
     type = 'Exodiff'
     input = 'iterative.i'

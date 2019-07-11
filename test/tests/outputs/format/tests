@@ -111,7 +111,7 @@
     allow_warnings = true
     max_parallel = 1 # warning can mix on multiple processes
     issues = '#1426'
-    design = 'Outputs/index.md'
+    design = 'syntax/Outputs/index.md'
     requirement = 'If a postprocessor utilizes the "outputs" parameter, but postprocessor output is disable for the console object, we shall warn the user'
   [../]
 

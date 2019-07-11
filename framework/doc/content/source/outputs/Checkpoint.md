@@ -12,7 +12,7 @@ restart or recovery operations with a MOOSE-base application.
 ## Example Input Syntax
 
 The simplest method for enabling checkpoint files is to use the short-cut syntax
-(see [Outputs/index.md]) as follows. This will write checkpoint files at every timestep, but only
+(see [syntax/Outputs/index.md]) as follows. This will write checkpoint files at every timestep, but only
 keep the most recent two sets of files to avoid excessive data storage.
 
 ```text

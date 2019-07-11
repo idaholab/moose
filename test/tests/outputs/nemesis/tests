@@ -7,7 +7,7 @@
     max_parallel = 1
 
     requirement = "The Nemesis Output object shall output separate files per process for visualization purposes."
-    design = 'Outputs/index.md'
+    design = 'syntax/Outputs/index.md'
     issues = '#2122'
   [../]
   [./nemesis_elemental_replicated]
@@ -25,7 +25,7 @@
     # We require a recent version of PETSc so that a version of METIS/ParMETIS with a portable RNG is used.
     petsc_version = '>=3.8.0'
     requirement = "The Nemesis Output object shall support writing elemental variables."
-    design = 'Outputs/index.md'
+    design = 'syntax/Outputs/index.md'
     issues = '#2122'
   [../]
   [./nemesis_elemental_distributed]
@@ -39,7 +39,7 @@
     # We require a recent version of PETSc so that a version of METIS/ParMETIS with a portable RNG is used.
     petsc_version = '>=3.8.0'
     requirement = "The Nemesis Output object shall support writing elemental variables with the same numbering on DistributedMesh."
-    design = 'Outputs/index.md'
+    design = 'syntax/Outputs/index.md'
     issues = '#2122'
   [../]
   [./nemesis_scalar_replicated]
@@ -57,7 +57,7 @@
     # We require a recent version of PETSc so that a version of METIS/ParMETIS with a portable RNG is used.
     petsc_version = '>=3.8.0'
     requirement = "The Nemesis Ouput object shall support writing scalar variables."
-    design = 'Outputs/index.md'
+    design = 'syntax/Outputs/index.md'
     issues = '#2122'
     recover = false
   [../]
@@ -72,7 +72,7 @@
     # We require a recent version of PETSc so that a version of METIS/ParMETIS with a portable RNG is used.
     petsc_version = '>=3.8.0'
     requirement = "The Nemesis Ouput object shall support writing scalar variables when using DistributedMesh."
-    design = 'Outputs/index.md'
+    design = 'syntax/Outputs/index.md'
     issues = '#2122'
     recover = false
   [../]
