@@ -22,10 +22,12 @@ InputParameters validParams<NaNInterfaceTestFluidProperties>();
  */
 class NaNInterfaceTestFluidProperties : public SinglePhaseFluidProperties, public NaNInterface
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
 public:
   NaNInterfaceTestFluidProperties(const InputParameters & parameters);
 
   virtual Real p_from_v_e(Real v, Real e) const override;
   virtual void p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real & dp_de) const override;
 };
-
+#pragma GCC diagnostic pop
