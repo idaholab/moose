@@ -1,7 +1,11 @@
 [Tests]
+  issues = '#9205'
+  design = 'outputs/Exodus.md'
   [./test]
     type = 'Exodiff'
     input = 'output_dimension.i'
     exodiff = 'output_dimension_out.e'
+
+    requirement = "The system shall support the ability to specify the output dimension when outputting in ExodusII format."
   [../]
 []

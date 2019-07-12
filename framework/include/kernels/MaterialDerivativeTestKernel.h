@@ -29,4 +29,3 @@ protected:
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 };
-

@@ -8,7 +8,7 @@
     recover = false
     max_parallel = 1
     requirement = "The system shall be able to output the ~displaced~ mesh for a model with adaptive mesh refinement."
-    design = "Outputs/index.md syntax/Adaptivity/index.md"
+    design = "syntax/Outputs/index.md syntax/Adaptivity/index.md"
     issues = "#1927"
   [../]
 
@@ -17,7 +17,7 @@
     input = 'non_displaced_fallback.i'
     expect_err = "Parameter 'use_displaced' ignored, there is no displaced problem in your simulation."
     requirement = "If the user requested the output of a displaced problem and there is none present, the system shall fallback to using the non-displaced problem."
-    design = "Outputs/index.md"
+    design = "syntax/Outputs/index.md"
     issues = "#11309"
   [../]
 

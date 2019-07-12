@@ -1,5 +1,5 @@
 [Tests]
-  design = 'Outputs/index.md Console.md'
+  design = 'syntax/Outputs/index.md Console.md'
   issues = '#2173'
   [./basic]
     type = RunApp

@@ -25,6 +25,7 @@ InputParameters
 validParams<VariableResidualNormsDebugOutput>()
 {
   InputParameters params = validParams<PetscOutput>();
+  params.addClassDescription("Reports the residual norm for each variable.");
 
   // By default this outputs on every nonlinear iteration
   params.set<ExecFlagEnum>("execute_on") = EXEC_NONLINEAR;

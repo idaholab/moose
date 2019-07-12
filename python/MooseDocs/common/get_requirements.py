@@ -90,8 +90,8 @@ def _check_extra_param(node, param_name, filename):
     param = node.get(param_name, None)
     param_line = node.line(param_name, 0)
     if param is not None:
-        msg = "{}:{}\n" \
-              "The '{}' parameter is not allowed within sub-blocks, all issues must " \
+        msg = "%s:%s\n" \
+              "The '%s' parameter is not allowed within sub-blocks, all issues must " \
               "must be provided in the top-level of the group."
         LOG.error(msg, filename, param_line, param_name)
 

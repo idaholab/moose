@@ -33,4 +33,3 @@ protected:
   const unsigned int _component_i;
   const unsigned int _component_j;
 };
-

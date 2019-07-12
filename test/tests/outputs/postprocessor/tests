@@ -1,31 +1,41 @@
 [Tests]
+  issues = '#1927'
+  design = 'syntax/Outputs/index.md OutputInterface.md'
+
   [./limit]
-    # Test the postprocessor limiting functions operate correctly
     type = 'Exodiff'
     input = 'postprocessor.i'
     exodiff = 'postprocessor_exodus.e postprocessor_exodus2.e'
+
+    requirement = "The system shall support the ability to specify the output object for postprocessor data from within the input file block defining the postprocessor."
   [../]
   [./invalid_outputs]
-    # Test that an invalid outputer name in the "output" parameter is caught
     type = 'RunException'
     input = 'postprocessor_invalid.i'
     expect_err = "The output object 'garbage' is not a defined output object"
     cli_args = 'Postprocessors/num_dofs/outputs=garbage'
+
+    requirement = "The system shall error if an invalid output name is provided within the postprocessor input file block."
   [../]
   [./console]
-    # Test that "outputs=console" is working correctly with multiple execute_on items
     type = 'CSVDiff'
     input = 'postprocessor_console.i'
     csvdiff = 'postprocessor_console_out.csv'
+
+    requirement = "The system shall support limiting postprocessor output to the screen."
   [../]
   [./show_hide]
     type = 'CSVDiff'
     input = 'show_hide.i'
     csvdiff = 'show_hide_out.csv'
+
+    requirement = "The system shall support limiting postprocessor output to from within the input file syntax of an output object."
   [../]
   [./test_hidden_shown]
     type = 'RunException'
     input = 'output_pps_hidden_shown_check.i'
     expect_err = 'Output\(s\) specified to be both shown and hidden: elem_56'
+
+    requirement = "The system shall error if a postprocessor variable is listed for suppression and inclusion within an output object block in the input file."
   [../]
 []

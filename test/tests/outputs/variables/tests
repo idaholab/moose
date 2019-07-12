@@ -1,40 +1,52 @@
 [Tests]
+  design = 'syntax/Outputs/index.md'
+  issues = '#1927'
   [./test]
     type = 'Exodiff'
     input = 'output_vars_test.i'
     exodiff = 'output_vars_test_out.e'
+
+    requirement = "The system shall support outputting field and scalar data to the ExodusII format."
   [../]
 
   [./test_hidden_shown]
     type = 'RunException'
     input = 'output_vars_hidden_shown_check.i'
     expect_err = 'Output\(s\) specified to be both shown and hidden: u'
+
+    requirement = "The system shall error if a variable is marked for output and output suppression."
   [../]
 
   [./test_nonexistent]
     type = 'RunException'
     input = 'output_vars_nonexistent.i'
     expect_err = 'Output\(s\) do not exist \(must be variable, scalar, postprocessor, or vector postprocessor\): foo1 foo2'
+
+    requirement = "The system shall error if a variable is perscribed for output but does not exist."
   [../]
 
   [./block_hide]
-    # Test that the "outputs = none" works from AuxVariables and Variables blocks
     type = 'Exodiff'
     input = 'hide_output_via_variables_block.i'
     exodiff = 'hide_output_via_variables_block_out.e'
+
+    requirement = "The system shall test that output of an auxiliary field can be disabled within the input block defining the variable."
   [../]
 
   [./show_single_vars]
-    # Tests that show/hide works when only a single variable for each type exists
     type = 'Exodiff'
     input = show_single_vars.i
     exodiff = show_single_vars_out.e
+
+    requirement = "The system shall support a system for including or suppressing output variables the operates when only a single variable for each type exists."
   [../]
 
   [./show_hide]
     type = 'Exodiff'
     input = show_hide.i
     exodiff = show_hide_out.e
+
+    requirement = "The system shall support a system for including or suppressing output variables."
   [../]
 
   [./nemesis_hide]
@@ -45,8 +57,8 @@
     exodiff = 'nemesis_hide_out.e.2.0 nemesis_hide_out.e.2.1'
     compiler = 'CLANG'
     platform = 'DARWIN'
+
     requirement = "The variables specified in an Output object's 'hide = ' list shall not appear in the output file."
-    design = 'Outputs/index.md'
     issues = '#1895'
   [../]
 []

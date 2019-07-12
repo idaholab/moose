@@ -1,8 +1,11 @@
 [Tests]
+  issues = "#1927"
+  design = "outputs/GMVOutput.md"
   [./test]
-    # Tests the for existence of GMV files
     type = 'CheckFiles'
     input = 'gmv.i'
     check_files = 'gmv_out_0000.gmv gmv_out_0001.gmv'
+
+    requirement = "The system shall support outputting data to the general mesh viewer format."
   [../]
 []

@@ -1,6 +1,7 @@
 [Tests]
+  issues = '#2617'
+  design = 'syntax/Outputs/index.md'
   [./exodus]
-    # Test the output of linear and nonlinear iterations to Exodus
     type = 'Exodiff'
     input = 'iterative.i'
     exodiff = 'iterative_out.e'
@@ -8,42 +9,51 @@
     # This test relies on number of residuals being the same, so run it serially
     max_parallel = 1
     max_threads = 1
-  [../]
-  [./exodus_steady]
-    # Test the output of linear and nonlinear iterations to Exodus for a Steady Executioner
-    type = 'Exodiff'
-    input = 'iterative_steady.i'
-    exodiff = 'iterative_steady_out.e'
 
-    # This test relies on number of residuals being the same, so run it serially
-    max_parallel = 1
-    max_threads = 1
+    requirement = "The system shall support output during linear and non-linear iterations during transient simulations using the ExodusII format."
   [../]
-  [./exodus_steady_sequence]
-    # Test the output of linear and nonlinear iterations to Exodus for a Steady Executioner
-    type = 'Exodiff'
-    input = 'iterative_steady_sequence.i'
-    exodiff = 'iterative_steady_sequence_out.e
-               iterative_steady_sequence_out.e-s002
-               iterative_steady_sequence_out.e-s003
-               iterative_steady_sequence_out.e-s004
-               iterative_steady_sequence_out.e-s005
-               iterative_steady_sequence_out.e-s006
-               iterative_steady_sequence_out.e-s007
-               iterative_steady_sequence_out.e-s008
-               iterative_steady_sequence_out.e-s009
-               iterative_steady_sequence_out.e-s010
-               iterative_steady_sequence_out.e-s011
-               iterative_steady_sequence_out.e-s012
-               iterative_steady_sequence_out.e-s013
-               iterative_steady_sequence_out.e-s014'
 
-    # This test relies on number of residuals being the same, so run it serially
-    max_parallel = 1
-    max_threads = 1
-  [../]
+  [iterative]
+    requirement = "The system shall support output during linear and non-linear iterations during steady simulations using the ExodusII format:"
+
+    [./exodus_steady]
+      type = 'Exodiff'
+      input = 'iterative_steady.i'
+      exodiff = 'iterative_steady_out.e'
+
+      # This test relies on number of residuals being the same, so run it serially
+      max_parallel = 1
+      max_threads = 1
+
+      detail = 'in a single file or'
+    [../]
+    [./exodus_steady_sequence]
+      # Test the output of linear and nonlinear iterations to Exodus for a Steady Executioner
+      type = 'Exodiff'
+      input = 'iterative_steady_sequence.i'
+      exodiff = 'iterative_steady_sequence_out.e
+                 iterative_steady_sequence_out.e-s002
+                 iterative_steady_sequence_out.e-s003
+                 iterative_steady_sequence_out.e-s004
+                 iterative_steady_sequence_out.e-s005
+                 iterative_steady_sequence_out.e-s006
+                 iterative_steady_sequence_out.e-s007
+                 iterative_steady_sequence_out.e-s008
+                 iterative_steady_sequence_out.e-s009
+                 iterative_steady_sequence_out.e-s010
+                 iterative_steady_sequence_out.e-s011
+                 iterative_steady_sequence_out.e-s012
+                 iterative_steady_sequence_out.e-s013
+                 iterative_steady_sequence_out.e-s014'
+
+      # This test relies on number of residuals being the same, so run it serially
+      max_parallel = 1
+      max_threads = 1
+
+      detail = 'in a sequence of files.'
+    [../]
+  []
   [./vtk]
-    # Test the output of linear and nonlinear iterations to VTK
     type = 'VTKDiff'
     input = 'iterative_vtk.i'
     vtkdiff = 'iterative_vtk_out_003_0.vtu'
@@ -53,9 +63,10 @@
     max_threads = 1
     vtk = true
     mesh_mode = REPLICATED
+
+    requirement = "The system shall support output during linear and non-linear iterations during transient simulations using the VTK format."
   [../]
   [./csv]
-    # Test the output of linear and nonlinear iterations to CSV
     type = 'CSVDiff'
     input = 'iterative_csv.i'
     csvdiff = 'iterative_csv_out.csv'
@@ -70,43 +81,59 @@
     petsc_version = '>=3.5.0'
     petsc_version_release = true
     compiler = '!INTEL'
-  [../]
-  [./exodus_inline]
-    # Test the output of linear and nonlinear iterations to Exodus with inline start times
-    type = 'Exodiff'
-    input = 'iterative_inline.i'
-    exodiff = 'iterative_inline_out.e'
 
-    # This test relies on number of residuals being the same, so run it serially
-    max_parallel = 1
-    max_threads = 1
+    requirement = "The system shall support output during linear and non-linear iterations during transient simulations using the CSV format."
   [../]
-  [./exodus_start_time]
-    # Test that the nonlinear residuals will operate with only a start time
-    type = 'Exodiff'
-    input = 'iterative_start_time.i'
-    exodiff = 'iterative_start_time_out.e'
 
-    # This test relies on number of residuals being the same, so run it serially
-    max_parallel = 1
-    max_threads = 1
-  [../]
-  [./output_step_window]
-    # Test that outputs are done during the specified window
-    type = 'Exodiff'
-    input = 'output_step_window.i'
-    exodiff = 'output_step_window_out.e'
-  [../]
-  [./output_start_step]
-    # Test that outputs are done during following a specified step
-    type = 'Exodiff'
-    input = 'output_start_step.i'
-    exodiff = 'output_start_step_out.e'
-  [../]
-  [./output_end_step]
-    # Test that outputs stop at a specified step
-    type = 'Exodiff'
-    input = 'output_end_step.i'
-    exodiff = 'output_end_step_out.e'
-  [../]
+  [start_stop]
+    requirement = "The system shall support output during linear and non-linear iterations during transient simulations:"
+    [exodus_inline]
+      # Test the output of linear and nonlinear iterations to Exodus with inline start times
+      type = 'Exodiff'
+      input = 'iterative_inline.i'
+      exodiff = 'iterative_inline_out.e'
+
+      # This test relies on number of residuals being the same, so run it serially
+      max_parallel = 1
+      max_threads = 1
+
+      detail = "with both the start and end times defined,"
+    []
+    [exodus_start_time]
+      # Test that the nonlinear residuals will operate with only a start time
+      type = 'Exodiff'
+      input = 'iterative_start_time.i'
+      exodiff = 'iterative_start_time_out.e'
+
+      # This test relies on number of residuals being the same, so run it serially
+      max_parallel = 1
+      max_threads = 1
+
+      detail = "with only the start time defined,"
+    []
+    [output_step_window]
+      # Test that outputs are done during the specified window
+      type = 'Exodiff'
+      input = 'output_step_window.i'
+      exodiff = 'output_step_window_out.e'
+
+      detail = "with the start and end timestep provided,"
+    []
+    [output_start_step]
+      # Test that outputs are done during following a specified step
+      type = 'Exodiff'
+      input = 'output_start_step.i'
+      exodiff = 'output_start_step_out.e'
+
+      detail = "with the start timestep given, and"
+    []
+    [output_end_step]
+      # Test that outputs stop at a specified step
+      type = 'Exodiff'
+      input = 'output_end_step.i'
+      exodiff = 'output_end_step_out.e'
+
+      detail = "with the end timestep provided."
+    []
+  []
 []

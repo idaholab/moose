@@ -73,4 +73,3 @@ private:
   /// The set of Output object names listed in the 'outputs' parameter
   std::set<OutputName> _oi_outputs;
 };
-

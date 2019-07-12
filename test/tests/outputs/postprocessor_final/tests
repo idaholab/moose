@@ -1,13 +1,24 @@
 [Tests]
-  [./test]
-    type = CSVDiff
-    input = postprocessor_final.i
-    csvdiff = postprocessor_final_test_vpp_0021.csv
-  [../]
+  issues = '#1927'
+  design = 'syntax/Outputs/index.md'
 
-  [./execute_pps_on_final]
-    type = CSVDiff
-    input = execute_pps_on_final.i
-    csvdiff = execute_pps_on_final_out.csv
-  [../]
+  [group]
+    requirement = "The system shall support limiting the output of comma seperated value data to the final timestep:"
+
+    [test]
+      type = CSVDiff
+      input = postprocessor_final.i
+      csvdiff = postprocessor_final_test_vpp_0021.csv
+
+      detail = "for all scalar data and"
+    []
+
+    [execute_pps_on_final]
+      type = CSVDiff
+      input = execute_pps_on_final.i
+      csvdiff = execute_pps_on_final_out.csv
+
+      detail = "for postprocessor data only."
+    []
+  []
 []

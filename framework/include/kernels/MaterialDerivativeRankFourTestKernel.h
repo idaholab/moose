@@ -35,4 +35,3 @@ protected:
   const unsigned int _component_k;
   const unsigned int _component_l;
 };
-

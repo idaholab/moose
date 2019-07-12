@@ -29,6 +29,8 @@ InputParameters
 validParams<MaterialDerivativeTestAction>()
 {
   InputParameters params = validParams<Action>();
+  params.addClassDescription(
+      "Action for setting up the necessary objects for debugging material property derivatives.");
   params.addParam<std::vector<VariableName>>("args",
                                              "Variables the tested material property depends on.");
   params.addRequiredParam<MaterialPropertyName>(

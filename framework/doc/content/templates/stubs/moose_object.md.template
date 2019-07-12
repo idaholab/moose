@@ -9,18 +9,16 @@ documentation clear for users.
 ```markdown
 # {{name}}
 
-!syntax description {{syntax}} !! Loads content from addClassDescription method
+!syntax description {{syntax}}
 
 ## Overview
 
-!! Replace these lines with information regarding the {{name}} object, be sure to include mathmatical
+!! Replace these lines with information regarding the {{name}} object, be sure to include mathematical
 !! definitions such as the strong and weak form for Kernel objects.
 
 ## Example Input File Syntax
 
 !! Describe and include an example of how to use the {{name}} object.
-
-!! The following lines automatically list the available parameters, tests, child objects.
 
 !syntax parameters {{syntax}}
 
