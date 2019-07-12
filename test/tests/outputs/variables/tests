@@ -1,6 +1,6 @@
 [Tests]
   design = 'syntax/Outputs/index.md'
-  isseus = '#1927'
+  issues = '#1927'
   [./test]
     type = 'Exodiff'
     input = 'output_vars_test.i'
