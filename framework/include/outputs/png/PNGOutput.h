@@ -61,7 +61,9 @@ protected:
   MooseEnum _color;
 
   // Indicates whether to make the background transparent.
-  bool _transparent;
+  bool _transparent_background;
+
+  // Controls transparency level for the general image.
   Real _transparency;
 
   /// Pointer the libMesh::MeshFunction object that the read data is stored

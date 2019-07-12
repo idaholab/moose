@@ -22,9 +22,10 @@ InputParameters
 validParams<PNGOutput>()
 {
   InputParameters params = validParams<FileOutput>();
-  params.addParam<bool>(
-      "transparent", true, "Determination of whether the background will be transparent.");
-  params.addParam<unsigned int>("resolution", 2000, "The resolution of the image.");
+  params.addParam<bool>("transparent_background",
+                        false,
+                        "Determination of whether the background will be transparent.");
+  params.addParam<unsigned int>("resolution", 1, "The resolution of the image.");
   MooseEnum color("GRAY BRYW BCR RWB BR");
   params.addParam<MooseEnum>("color", color, "Choose the color scheme to use.");
   params.addRangeCheckedParam<Real>("out_bounds_shade",
@@ -46,7 +47,7 @@ PNGOutput::PNGOutput(const InputParameters & parameters)
   : FileOutput(parameters),
     _resolution(getParam<unsigned int>("resolution")),
     _color(parameters.get<MooseEnum>("color")),
-    _transparent(getParam<bool>("transparent")),
+    _transparent_background(getParam<bool>("transparent_background")),
     _transparency(getParam<Real>("transparency")),
     _out_bounds_shade(getParam<Real>("out_bounds_shade"))
 {
@@ -60,7 +61,7 @@ PNGOutput::makeMeshFunc()
   const std::vector<unsigned int> var_nums = {0};
 
   // If we want the background to be transparent, we need a number over 1.
-  if (_transparent)
+  if (_transparent_background)
     _out_bounds_shade = 2;
   // Find the values that will be used for rescaling purposes.
   calculateRescalingValues();
