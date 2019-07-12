@@ -108,6 +108,7 @@ HeatGeneration::addMooseObjects()
     {
       pars.set<Point>("axis_point") = hs.getPosition();
       pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
+      pars.set<Real>("offset") = hs_cyl->getInnerRadius();
     }
     std::string mon = genName(name(), "heat_src");
     _sim.addKernel(class_name, mon, pars);
@@ -137,6 +138,7 @@ HeatGeneration::addMooseObjects()
       {
         pars.set<Point>("axis_point") = hs.getPosition();
         pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
+        pars.set<Real>("offset") = hs_cyl->getInnerRadius();
       }
       pars.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL};
       // TODO: This seems to produce incorrect output files, even though this is the line
@@ -162,6 +164,7 @@ HeatGeneration::addMooseObjects()
       {
         pars.set<Point>("axis_point") = hs.getPosition();
         pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
+        pars.set<Real>("offset") = hs_cyl->getInnerRadius();
       }
       else
       {
