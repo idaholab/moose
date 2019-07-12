@@ -24,4 +24,6 @@ protected:
   RealVectorValue _axis_point;
   /// The direction of the axis of symmetry
   const RealVectorValue & _axis_dir;
+  /// Radial offset of the axis of symmetry
+  const Real & _offset;
 };

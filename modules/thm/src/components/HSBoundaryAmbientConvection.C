@@ -28,7 +28,8 @@ void
 HSBoundaryAmbientConvection::addMooseObjects()
 {
   const HeatStructureBase & hs = getComponent<HeatStructureBase>("hs");
-  const bool is_cylindrical = dynamic_cast<const HeatStructureCylindrical *>(&hs);
+  const HeatStructureCylindrical * hs_cyl = dynamic_cast<const HeatStructureCylindrical *>(&hs);
+  const bool is_cylindrical = hs_cyl != nullptr;
 
   {
     const std::string class_name =
@@ -42,6 +43,7 @@ HSBoundaryAmbientConvection::addMooseObjects()
     {
       pars.set<Point>("axis_point") = hs.getPosition();
       pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
+      pars.set<Real>("offset") = hs_cyl->getInnerRadius();
     }
 
     _sim.addBoundaryCondition(class_name, genName(name(), "bc"), pars);
