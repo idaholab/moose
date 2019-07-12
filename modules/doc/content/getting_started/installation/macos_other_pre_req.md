@@ -1,11 +1,3 @@
-# Mac OS High Sierra or Older
-
-!alert! note title=Consider updating to Mojave
-Due to the unfortunate difficulty Apple has placed on its users wishing to develop on platforms older than Mojave, it is strongly encouraged users upgrade to Mojave.
-!alert-end!
-
-!include getting_started/minimum_requirements.md
-
 ## Prerequisites
 
 The following, is required to be installed before you can begin using MOOSE.
@@ -26,9 +18,3 @@ The following, is required to be installed before you can begin using MOOSE.
 
   - High Sierra 10.13: [!package!name arch=osx10.13]
   - Sierra 10.12: [!package!name arch=osx10.12]
-
-!include getting_started/installation/mac_bash_profile.md
-
-!include getting_started/installation/rod_packages.md
-
-!include getting_started/installation/install_moose.md
