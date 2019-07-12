@@ -1,7 +1,3 @@
-# Mac OS Mojave
-
-!include getting_started/minimum_requirements.md
-
 ## Prerequisites
 
 The following, is required to be installed before you can begin using MOOSE.
@@ -31,9 +27,3 @@ The following, is required to be installed before you can begin using MOOSE.
 - +Download and install [XQuartz](https://www.xquartz.org/)+
 
 - +Mojave 10.14+: [!package!name arch=osx10.14]
-
-!include getting_started/installation/mac_bash_profile.md
-
-!include getting_started/installation/rod_packages.md
-
-!include getting_started/installation/install_moose.md

@@ -6,8 +6,8 @@ your operating system/platform and follow the instructions:
 
 - +MacOS+:
 
-  - [Mojave](getting_started/installation/osx_mojave.md)
-  - [High Sierra or older](getting_started/installation/osx_other.md)
+  - [Mojave](getting_started/installation/macos_mojave.md)
+  - [High Sierra or older](getting_started/installation/macos_other.md)
 
 - +Linux+:
 
