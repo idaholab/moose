@@ -48,6 +48,9 @@
       input = 'checkpoint_interval.i'
       exodiff = 'checkpoint_interval_out.e'
       prereq = 'test_files'
+      recover = false
+      max_parallel = 1
+      max_threads = 1
       detail = "be capable of restarting a simulation from previously exported data at this interval."
     []
   []
@@ -81,6 +84,10 @@
                           checkpoint_out_cp/0003.rd-0
                           checkpoint_out_cp/0003_mesh.cpr/1/header.cpr'
 
+      # The suffixes of these files change when running in parallel or with threads
+      max_parallel = 1
+      max_threads = 1
+
       detail = "at every timestep while maintaining the most recent two files and"
     []
     [recover]
@@ -88,8 +95,9 @@
       type = Exodiff
       input = checkpoint.i
       exodiff = checkpoint_out.e
-      cli_args = '--recover'
       recover = false
+      max_parallel = 1
+      max_threads = 1
       prereq = recover_half_transient
       delete_output_before_running = false
       detail = "be capable of restarting a simulation from the output data."
@@ -127,6 +135,10 @@
                           checkpoint_block_out_cp/0003.rd-0
                           checkpoint_block_out_cp/0003_mesh.cpr/1/header.cpr'
 
+      # The suffixes of these files change when running in parallel or with threads
+      max_parallel = 1
+      max_threads = 1
+
 
     []
     [recover_with_checkpoint_block]
@@ -136,6 +148,8 @@
       exodiff = checkpoint_block_out.e
       cli_args = '--recover'
       recover = false
+      max_parallel = 1
+      max_threads = 1
       delete_output_before_running = false
       prereq = recover_with_checkpoint_block_half_transient
       detail = "be capable of restarting a simulation from the output data."
