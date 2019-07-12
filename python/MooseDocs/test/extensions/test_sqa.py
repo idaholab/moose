@@ -249,7 +249,6 @@ class TestSQAVerificationAndValidation(MooseDocsTestCase):
     def testEmptyCategory(self):
         text = u"!sqa verification category=_empty_"
         ast = self.tokenize(text)
-        print ast
         self.assertSize(ast, 0)
 
         text = u"!sqa validation category=_empty_"
