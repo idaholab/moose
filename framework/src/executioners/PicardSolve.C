@@ -403,7 +403,7 @@ PicardSolve::solveStep(Real begin_norm_old,
 
   if (_problem.haveXFEM() && (_xfem_update_count < _max_xfem_update) && _problem.updateMeshXFEM())
   {
-    _console << "XFEM modifying mesh, repeating step" << std::endl;
+    _console << "\nXFEM modified mesh, repeating step" << std::endl;
     _xfem_repeat_step = true;
     ++_xfem_update_count;
   }
@@ -413,7 +413,7 @@ PicardSolve::solveStep(Real begin_norm_old,
     {
       _xfem_repeat_step = false;
       _xfem_update_count = 0;
-      _console << "XFEM not modifying mesh, continuing" << std::endl;
+      _console << "\nXFEM did not modify mesh, continuing" << std::endl;
     }
 
     _problem.onTimestepEnd();
