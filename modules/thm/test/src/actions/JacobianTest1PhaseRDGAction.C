@@ -304,7 +304,7 @@ JacobianTest1PhaseRDGAction::addUserObjects()
         _action_factory.create(class_name, _fp_name, params));
 
     action->getObjectParams().set<Real>("gamma") = 1.5;
-    action->getObjectParams().set<Real>("R") = 10;
+    action->getObjectParams().set<Real>("molar_mass") = 0.83144598;
 
     _awh.addActionBlock(action);
   }

@@ -36,12 +36,12 @@
   [./fp_air]
     type = IdealGasFluidProperties
     gamma = 1.4
-    R = 287.05
+    molar_mass = 28.965197004e-3
   [../]
   [./fp_helium]
     type = IdealGasFluidProperties
     gamma = 1.66
-    R = 2077.1
+    molar_mass = 4.002917432959e-3
   [../]
   [./fp_vapor_mixture]
     type = IdealRealGasMixtureFluidProperties
