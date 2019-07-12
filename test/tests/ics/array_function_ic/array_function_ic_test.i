@@ -12,7 +12,7 @@
 
 [Variables]
   [u]
-    component = 2
+    components = 2
   []
   [u0]
   []

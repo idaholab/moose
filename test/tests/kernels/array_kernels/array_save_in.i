@@ -18,7 +18,7 @@
   [u]
     order = FIRST
     family = L2_LAGRANGE
-    component = 2
+    components = 2
   []
 []
 
@@ -26,33 +26,33 @@
   [u_diff_save_in]
     order = FIRST
     family = L2_LAGRANGE
-    component = 2
+    components = 2
   []
   [u_vacuum_save_in]
     order = FIRST
     family = L2_LAGRANGE
-    component = 2
+    components = 2
   []
   [u_dg_save_in]
     order = FIRST
     family = L2_LAGRANGE
-    component = 2
+    components = 2
   []
 
   [u_diff_diag_save_in]
     order = FIRST
     family = L2_LAGRANGE
-    component = 2
+    components = 2
   []
   [u_vacuum_diag_save_in]
     order = FIRST
     family = L2_LAGRANGE
-    component = 2
+    components = 2
   []
   [u_dg_diag_save_in]
     order = FIRST
     family = L2_LAGRANGE
-    component = 2
+    components = 2
   []
 []
 
