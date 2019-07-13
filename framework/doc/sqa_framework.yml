@@ -1,4 +1,4 @@
 directories:
-    - test/tests
+    - ${MOOSE_DIR}/test/tests
 specs:
     - tests

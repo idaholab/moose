@@ -83,10 +83,13 @@ class SQAExtension(command.CommandExtension):
             specs = info.get('specs', ['tests'])
             directories = []
             for d in info.get('directories'):
-                path = os.path.join(MooseDocs.ROOT_DIR, d)
+                path = mooseutils.eval_path(d)
+                if not os.path.isdir(path):
+                    path = os.path.join(MooseDocs.ROOT_DIR, d)
                 if not os.path.isdir(path):
                     msg = "Input directory does not exist: %s"
                     LOG.error(msg, path)
+
                 directories.append(path)
 
             # Create requirement database

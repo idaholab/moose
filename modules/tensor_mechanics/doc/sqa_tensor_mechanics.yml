@@ -1,4 +1,4 @@
 directories:
-    - modules/tensor_mechanics/test/tests
+    - ${MOOSE_DIR}/modules/tensor_mechanics/test/tests
 specs:
     - tests
