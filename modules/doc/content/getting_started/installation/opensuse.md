@@ -8,6 +8,4 @@
 
 !include getting_started/installation/bash_profile.md
 
-!include getting_started/installation/rod_packages.md
-
 !include getting_started/installation/install_moose.md
