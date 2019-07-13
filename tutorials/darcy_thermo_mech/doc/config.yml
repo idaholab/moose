@@ -9,6 +9,7 @@ Content:
             - css/**
             - js/**
             - bib/**
+            - syntax/Outputs/output_types.md
     chemical_reactions:
         root_dir: ${MOOSE_DIR}/modules/chemical_reactions/doc/content
         content:

@@ -1,1 +1,15 @@
-!template load file=stubs/moose_object.md.template name=SolutionHistory syntax=/Outputs/SolutionHistory
+# SolutionHistory
+
+!syntax description /Outputs/SolutionHistory !! Loads content from addClassDescription method
+
+## Overview
+
+The SolutionHistory output is a simple output format that writes the non-linear and linear
+solve history to a file.
+
+
+!syntax parameters /Outputs/SolutionHistory
+
+!syntax inputs /Outputs/SolutionHistory
+
+!syntax children /Outputs/SolutionHistory

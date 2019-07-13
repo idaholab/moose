@@ -1,29 +1,42 @@
 [Tests]
-  [./simple]
-    # Test basic operation
-    type = CheckFiles
-    input = simple.i
-    check_files = 'simple_out.json'
-    file_expect_out = '{"ndof": 242'
-  [../]
-  [./simple_screen]
-    # Test the ability to write to the screen
-    type = RunApp
-    input = simple_screen.i
-    expect_out = '{"ndof": 242'
-  [../]
-  [./uniform_refine]
-    # Test basic operation
-    type = CheckFiles
-    input = simple.i
-    cli_args = 'Mesh/uniform_refine=1 Outputs/file_base=simple_dofmap_refine'
-    check_files = 'simple_dofmap_refine.json'
-    file_expect_out = '{"ndof": 882'
-  [../]
-  [./transient]
-    # Test that transient with adaptivity operates
-    type = CheckFiles
-    input = simple_transient.i
-    check_files = 'simple_transient_dofmap.json simple_transient_dofmap_1.json'
-  [../]
+  issues = '#3847'
+  design = 'DOFMapOutput.md'
+
+  [group]
+    requirement = "The system shall support the ability to output the degree-of-freedom information:"
+
+    [./simple]
+      # Test basic operation
+      type = CheckFiles
+      input = simple.i
+      check_files = 'simple_out.json'
+      file_expect_out = '{"ndof": 242'
+
+      detail = "to a json file,"
+    [../]
+    [./simple_screen]
+      # Test the ability to write to the screen
+      type = RunApp
+      input = simple_screen.i
+      expect_out = '{"ndof": 242'
+
+      detail = "to the screen,"
+    [../]
+    [./uniform_refine]
+      type = CheckFiles
+      input = simple.i
+      cli_args = 'Mesh/uniform_refine=1 Outputs/file_base=simple_dofmap_refine'
+      check_files = 'simple_dofmap_refine.json'
+      file_expect_out = '{"ndof": 882'
+
+      detail = "with uniform refinement, and"
+    [../]
+    [./transient]
+      type = CheckFiles
+      input = simple_transient.i
+      check_files = 'simple_transient_dofmap.json simple_transient_dofmap_1.json'
+
+      detail = "with transient adaptivity."
+    [../]
+  []
 []

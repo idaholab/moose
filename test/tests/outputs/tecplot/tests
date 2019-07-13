@@ -1,15 +1,21 @@
 [Tests]
+  issues = '#440 #1927'
+  design = 'Tecplot.md'
   [./test]
     # Tests the for existence of ASCII tecplot files
     type = 'CheckFiles'
     input = 'tecplot.i'
     check_files = 'tecplot_out_0000.dat tecplot_out_0001.dat'
+
+    requirement = "The system shall support Tecplot output."
   [../]
 
   [./test_append]
     type = 'CheckFiles'
     input = 'tecplot_append.i'
     check_files = 'tecplot_append_out.dat'
+
+    requirement = "The system shall support appending Tecplot output files."
   [../]
 
   [./test_binary]
@@ -19,5 +25,7 @@
     input = 'tecplot_binary.i'
     check_files = 'tecplot_binary_out_0000.plt tecplot_binary_out_0001.plt'
     tecplot = true
+
+    requirement = "The system shall optionally support writing binary Teckplot files."
   [../]
 []

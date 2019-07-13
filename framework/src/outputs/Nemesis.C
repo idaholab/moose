@@ -30,7 +30,7 @@ validParams<Nemesis>()
   params += AdvancedOutput::enableOutputTypes("scalar postprocessor input");
 
   // Add description for the Nemesis class
-  params.addClassDescription("Object for output data in the Nemesis format");
+  params.addClassDescription("Object for output data in the Nemesis (parallel ExodusII) format.");
 
   // Return the InputParameters
   return params;

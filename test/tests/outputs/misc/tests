@@ -1,10 +1,14 @@
 [Tests]
+  issues = '#2885'
+  design = 'OutputWarehouse.md'
   [./getOutput]
     type = RunException
     input = warehouse_access.i
     cli_args = 'Outputs/test/test_type=getOutput'
     expect_err = "getOutput test passed"
     max_parallel = 1
+
+    requirement = "The system shall provide an API for retrieving an output object by type and name."
   [../]
   [./getOutputs]
     type = RunException
@@ -12,6 +16,8 @@
     cli_args = 'Outputs/test/test_type=getOutputs'
     expect_err = "getOutputs test passed"
     max_parallel = 1
+
+    requirement = "The system shall provide an API for retrieving all output objects of a type."
   [../]
   [./getOutputs_with_names]
     type = RunException
@@ -19,6 +25,8 @@
     cli_args = 'Outputs/test/test_type=getOutputs-names'
     expect_err = "getOutputs-names test passed"
     max_parallel = 1
+
+    requirement = "The system shall provide an API for retrieving output objects for the given names and type."
   [../]
   [./getOutputNames]
     type = RunException
@@ -26,11 +34,15 @@
     cli_args = 'Outputs/test/test_type=getOutputNames'
     expect_err = "getOutputsNames test passed"
     max_parallel = 1
+
+    requirement = "The system shall provide an API for retrieving all output object names of a type."
   [../]
   [./default_names]
     type = CheckFiles
     input = default_names.i
     check_files = 'default_names_out.e default_names_oversample.e'
     recover = false
+
+    requirement = "The system shall support the naming of output files based on the input file block name."
   [../]
 []

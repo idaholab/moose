@@ -1,20 +1,28 @@
 [Tests]
-  [./exodus]
-    # Test that the default, exodus = true, output is working
+  issues = '#1927'
+  design = 'syntax/Outputs/index.md'
+  [exodus]
     type = Exodiff
     input = exodus.i
     exodiff = 'exodus_out.e'
-  [../]
-  [./postprocessors]
-    # Tests if the header line for the postprocessor values table is correct
-    type = RunApp
-    input = 'console.i'
-    expect_out = '\| time\s*\| num_aux\s*\| num_vars\s*\|\n'
-  [../]
-  [./scalar_variables]
-    # Test that the first header line for the wrapped scalar AuxVariable table is correct
-    type = RunApp
-    input = 'console.i'
-    expect_out = '\| time\s*?\| aux0_0\s*?\| aux0_1\s*?\| aux1\s*?\| aux2\s*?\|\n'
-  [../]
+
+    requirement = "The system shall support outputting of simulation data using the ExodusII format using simplified input file syntax."
+  []
+
+  [console]
+    requirement = "The system shall by default display data on the console from:"
+
+    [postprocessors]
+      type = RunApp
+      input = 'console.i'
+      expect_out = '\| time\s*\| num_aux\s*\| num_vars\s*\|\n'
+      detail = "the Postprocessor system and"
+    []
+    [scalar_variables]
+      type = RunApp
+      input = 'console.i'
+      expect_out = '\| time\s*?\| aux0_0\s*?\| aux0_1\s*?\| aux1\s*?\| aux2\s*?\|\n'
+      detail = "the scalar variable system."
+    []
+  []
 []

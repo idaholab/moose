@@ -477,6 +477,10 @@ li{
     font-weight:600;
 }
 
+.moose-parameter-name{
+    color:var(--inl-blue);
+}
+
 .collapsible-header .moose-parameter-header-default{
     color:var(--gray);
     font-weight:100;

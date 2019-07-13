@@ -1,12 +1,14 @@
 [Tests]
+  issues = '#1927'
+  design = 'syntax/Outputs/index.md outputs/CSV.md'
   [./steady]
-    # Tests output of postprocessors and scalars to CSV files for steady state problems
     type = CSVDiff
     input = 'csv.i'
     csvdiff = 'csv_out.csv'
+
+    requirement =  "The system shall support the output of postprocessors and scalars to CSV files for steady state problems."
   [../]
   [./transient]
-    # Tests output of postprocessors and scalars to CSV files for transient propblems
     type = CSVDiff
     input = 'csv_transient.i'
     csvdiff = 'csv_transient_out.csv'
@@ -14,50 +16,62 @@
     # high processor counts; see
     # https://github.com/idaholab/moose/issues/9026
     max_parallel = 1
+
+    requirement = "The system shall support the output of postprocessors and scalars to CSV files for transient propblems."
   [../]
   [./no_time]
-    # Tests output of postprocessors and scalars to CSV files for transient propblems without a time column
     type = CSVDiff
     input = 'csv_no_time.i'
     csvdiff = 'csv_no_time_out.csv'
     # SumNodalValuesAux is unreliable at high processor counts
     max_parallel = 1
+
+    requirement = "The system shall support the output of postprocessors and scalars to CSV files for transient problems without a time column."
   [../]
   [./transient_exodus]
-    # Tests output of postprocessors and scalars to Exodus files for transient propblems
     type = Exodiff
     input = 'csv_transient.i'
     exodiff = 'csv_transient_out.e'
     cli_args = 'Outputs/csv=false Outputs/exodus=true'
     prereq = transient
     max_parallel = 1
+
+    requirement = "The system shall support the output of postprocessors and scalars to Exodus files for transient problems."
   [../]
-  [./restart_part1]
-    # First part of CSV restart test, CSV files should not append
-    type = CSVDiff
-    input = csv_restart_part1.i
-    csvdiff = 'csv_restart_part1_out.csv'
-  [../]
-  [./restart_part2]
-    # Second part of CSV restart test
-    type = CSVDiff
-    input = csv_restart_part2.i
-    csvdiff = 'csv_restart_part2_out.csv'
-    prereq = restart_part1
-  [../]
-  [./restart_part2_append]
-    # Second part of CSV restart test, with CSV file appending
-    type = CSVDiff
-    input = csv_restart_part2.i
-    csvdiff = 'csv_restart_part2_append_out.csv'
-    prereq = restart_part2
-    cli_args = 'Outputs/csv/file_base=csv_restart_part2_append_out Outputs/csv/append_restart=true'
-  [../]
+  [restart]
+    requirement = "The system shall support the output of CSV data:"
+    [restart_part1]
+      type = CSVDiff
+      input = csv_restart_part1.i
+      csvdiff = 'csv_restart_part1_out.csv'
+      detail = "with checkpoint enabled and"
+    []
+    [restart_part2]
+      type = CSVDiff
+      input = csv_restart_part2.i
+      csvdiff = 'csv_restart_part2_out.csv'
+      prereq = restart_part1
+      detail = "when restarted creates a new output file or"
+    []
+    [restart_part2_append]
+      type = CSVDiff
+      input = csv_restart_part2.i
+      csvdiff = 'csv_restart_part2_append_out.csv'
+      prereq = restart_part2
+      cli_args = 'Outputs/csv/file_base=csv_restart_part2_append_out Outputs/csv/append_restart=true'
+
+      detail = "optionally appends the existing file from the first part."
+    []
+  []
+
   [./align]
     # Test the alignment, delimiter, and precision settings
     type = CSVDiff
     input = csv_align.i
     csvdiff = 'csv_align_out.csv'
+
+    requirement = "The system shall support CSV output aligned columns and a custom delimiter."
+    issues = "#3229"
   [../]
   [./sort]
     # Tests that csv output can be sorted
@@ -65,5 +79,8 @@
     input = 'csv_sort.i'
     check_files = csv_sort_out.csv
     file_expect_out = "time,aux0_0,aux0_1,aux1,aux2,num_aux,num_vars"
+
+    requirement = "The system shall support CSV output to the console that is sorted by the variable name."
+    issues = "#8974"
   [../]
 []

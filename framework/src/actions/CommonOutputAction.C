@@ -31,10 +31,11 @@ InputParameters
 validParams<CommonOutputAction>()
 {
   InputParameters params = validParams<Action>();
+  params.addClassDescription("Adds short-cut syntax and common parameters to the Outputs block.");
 
   // Short-cut methods for typical output objects
   params.addParam<bool>(
-      "exodus", false, "Output the results using the default settings for Exodus output");
+      "exodus", false, "Output the results using the default settings for Exodus output.");
   params.addParam<bool>(
       "nemesis", false, "Output the results using the default settings for Nemesis output");
   params.addParam<bool>(
@@ -75,7 +76,7 @@ validParams<CommonOutputAction>()
                                             "strings.  This is helpful in outputting only a subset "
                                             "of outputs when using MultiApps.");
   params.addParam<unsigned int>(
-      "interval", 1, "The interval at which timesteps are output to the solution file");
+      "interval", 1, "The interval at which timesteps are output to the solution file.");
   params.addParam<std::vector<Real>>("sync_times",
                                      std::vector<Real>(),
                                      "Times at which the output and solution is forced to occur");

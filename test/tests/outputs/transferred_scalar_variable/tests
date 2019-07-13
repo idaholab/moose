@@ -1,16 +1,25 @@
 [Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'transferred_scalar_variable.i'
-    exodiff = 'transferred_scalar_variable_out.e'
-  [../]
+  issues = '#4474'
+  design = 'OutputWarehouse.md'
+  [group]
+    requirement = "The system shall guarantee that scalar variables are in the proper state for output when outputting:"
+    [exodus]
+      type = 'Exodiff'
+      input = 'transferred_scalar_variable.i'
+      exodiff = 'transferred_scalar_variable_out.e'
 
-  [./csv_test]
-    type = 'CSVDiff'
-    input = 'transferred_scalar_variable.i'
-    csvdiff = 'transferred_scalar_variable_out.csv'
+      detail = 'ExodusII format and'
+    []
 
-    # This is here because the both use the same input file
-    prereq = 'test'
-  [../]
+    [csv]
+      type = 'CSVDiff'
+      input = 'transferred_scalar_variable.i'
+      csvdiff = 'transferred_scalar_variable_out.csv'
+
+      # This is here because the both use the same input file
+      prereq = 'exodus'
+
+      detail = 'CSV format.'
+    []
+  []
 []

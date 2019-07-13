@@ -25,7 +25,9 @@ validParams<SetupResidualDebugAction>()
 {
   InputParameters params = validParams<Action>();
   params.addParam<std::vector<NonlinearVariableName>>(
-      "show_var_residual", "Variables for which residuals will be sent to the output file");
+      "show_var_residual", "Variables for which residuals will be sent to the output file.");
+  params.addClassDescription(
+      "Adds the necessary objects for computing the residuals for individual variables.");
   return params;
 }
 
@@ -41,7 +43,8 @@ SetupResidualDebugAction::act()
   if (_problem.get() == NULL)
     return;
 
-  _problem->getNonlinearSystemBase().debuggingResiduals(true);
+  if (!_show_var_residual.empty())
+    _problem->getNonlinearSystemBase().debuggingResiduals(true);
 
   // debug variable residuals
   for (const auto & var_name : _show_var_residual)

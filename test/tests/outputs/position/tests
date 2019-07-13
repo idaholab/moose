@@ -1,8 +1,12 @@
 [Tests]
+  issues = '#1927'
+  design = syntax/Outputs/index.md
   [./test]
     type = 'Exodiff'
     input = 'position.i'
     exodiff = 'position_out.e'
     recover = false #see #2295
+
+    requirement = "The system shall support offseting the spatial position of a domain during output."
   [../]
 []
