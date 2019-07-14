@@ -244,7 +244,7 @@ ArrayDGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, unsig
 
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {
-      initQpJacobian(type);
+      initQpOffDiagJacobian(type, jv);
       for (_i = 0; _i < test_space.size(); _i++)
         for (_j = 0; _j < loc_phi.size(); _j++)
         {
@@ -263,7 +263,7 @@ ArrayDGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, unsig
 
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {
-      initQpJacobian(type);
+      initQpOffDiagJacobian(type, jv);
       for (_i = 0; _i < test_space.size(); _i++)
         for (_j = 0; _j < loc_phi.size(); _j++)
         {

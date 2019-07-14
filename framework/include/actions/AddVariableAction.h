@@ -75,9 +75,8 @@ protected:
   bool _scalar_var;
 
   /// Number of components for an array variable
-  unsigned int _component;
+  unsigned int _components;
 
   /// Absolute zero tolerance
   static const Real _abs_zero_tol;
 };
-

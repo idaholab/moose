@@ -51,7 +51,7 @@ validParams<AddVariableAction>()
                              "for this variable (additional orders not listed are "
                              "allowed)");
   params.addRangeCheckedParam<unsigned int>(
-      "component", 1, "component>0", "Number of component for an array variable");
+      "components", 1, "components>0", "Number of components for an array variable");
   params.addParam<std::vector<Real>>("initial_condition",
                                      "Specifies the initial condition for this variable");
   params.addParam<std::vector<SubdomainName>>("block", "The block id where this variable lives");
@@ -71,7 +71,7 @@ AddVariableAction::AddVariableAction(InputParameters params)
     _fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
              Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family"))),
     _scalar_var(_fe_type.family == SCALAR),
-    _component(getParam<unsigned int>("component"))
+    _components(getParam<unsigned int>("components"))
 {
 }
 
@@ -118,7 +118,7 @@ AddVariableAction::createInitialConditionAction()
 
   if (_scalar_var)
     action_params.set<std::string>("type") = "ScalarConstantIC";
-  else if (_component == 1)
+  else if (_components == 1)
     action_params.set<std::string>("type") = "ConstantIC";
   else
     action_params.set<std::string>("type") = "ArrayConstantIC";
@@ -130,12 +130,12 @@ AddVariableAction::createInitialConditionAction()
   // Set the required parameters for the object to be created
   action->getObjectParams().set<VariableName>("variable") = var_name;
   auto value = getParam<std::vector<Real>>("initial_condition");
-  if (value.size() != _component)
+  if (value.size() != _components)
     mooseError("Size of 'initial_condition' is not consistent");
-  if (_component > 1)
+  if (_components > 1)
   {
-    RealEigenVector v(_component);
-    for (unsigned int i = 0; i < _component; ++i)
+    RealEigenVector v(_components);
+    for (unsigned int i = 0; i < _components; ++i)
       v(i) = value[i];
     action->getObjectParams().set<RealEigenVector>("value") = v;
   }
@@ -151,8 +151,8 @@ AddVariableAction::addVariable(const std::string & var_name)
 {
   std::set<SubdomainID> blocks = getSubdomainIDs();
   std::vector<Real> scale_factor = isParamValid("scaling") ? getParam<std::vector<Real>>("scaling")
-                                                           : std::vector<Real>(_component, 1);
-  if (scale_factor.size() != _component)
+                                                           : std::vector<Real>(_components, 1);
+  if (scale_factor.size() != _components)
     mooseError("Size of 'scaling' is not consistent");
 
   // Scalar variable
@@ -160,7 +160,7 @@ AddVariableAction::addVariable(const std::string & var_name)
     _problem->addScalarVariable(var_name, _fe_type.order, scale_factor[0]);
 
   // Block restricted variable
-  else if (_component == 1)
+  else if (_components == 1)
   {
     if (blocks.empty())
       _problem->addVariable(var_name, _fe_type, scale_factor[0]);
@@ -172,11 +172,11 @@ AddVariableAction::addVariable(const std::string & var_name)
   else
   {
     if (blocks.empty())
-      _problem->addArrayVariable(var_name, _fe_type, _component, scale_factor);
+      _problem->addArrayVariable(var_name, _fe_type, _components, scale_factor);
 
     // Non-block restricted variable
     else
-      _problem->addArrayVariable(var_name, _fe_type, _component, scale_factor, &blocks);
+      _problem->addArrayVariable(var_name, _fe_type, _components, scale_factor, &blocks);
   }
 
   if (getParam<bool>("eigen"))

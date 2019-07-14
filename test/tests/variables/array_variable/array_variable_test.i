@@ -14,37 +14,37 @@
   [./u]
     order = FIRST
     family = LAGRANGE
-    component = 4
+    components = 4
     initial_condition = '1 2 3 4'
   [../]
   [./uu]
     order = FIRST
     family = LAGRANGE
-    component = 2
+    components = 2
     initial_condition = '1 2'
   [../]
   [./v]
     order = FIRST
     family = LAGRANGE
-    component = 2
+    components = 2
     initial_condition = '5 6'
   [../]
   [./w]
     order = CONSTANT
     family = MONOMIAL
-    component = 3
+    components = 3
     initial_condition = '7 8 9'
   [../]
   [./x]
     order = THIRD
     family = MONOMIAL
-    component = 2
+    components = 2
     initial_condition = '10 11'
   [../]
   [./y]
     order = FIRST
     family = L2_LAGRANGE
-    component = 3
+    components = 3
     initial_condition = '12 13 14'
   [../]
 []
