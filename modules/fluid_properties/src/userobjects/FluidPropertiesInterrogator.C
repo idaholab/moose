@@ -23,6 +23,7 @@ validParams<FluidPropertiesInterrogator>()
   InputParameters params = validParams<GeneralUserObject>();
   params.addRequiredParam<UserObjectName>("fp",
                                           "The name of the fluid properties object to query.");
+  params.addParam<bool>("json", false, "Output in JSON format");
   params.addParam<Real>("rho", "Density");
   params.addParam<Real>("rhou", "Momentum density; rho * u");
   params.addParam<Real>("rhoE", "Total energy density; rho * E");
@@ -41,6 +42,7 @@ validParams<FluidPropertiesInterrogator>()
 
 FluidPropertiesInterrogator::FluidPropertiesInterrogator(const InputParameters & parameters)
   : GeneralUserObject(parameters),
+    _json(getParam<bool>("json")),
     _fp(&getUserObject<FluidProperties>("fp")),
     _fp_1phase(dynamic_cast<const SinglePhaseFluidProperties * const>(_fp)),
     _fp_2phase(dynamic_cast<const TwoPhaseFluidProperties * const>(_fp)),
@@ -79,20 +81,100 @@ FluidPropertiesInterrogator::execute()
 {
   if (_has_2phase_ncg)
   {
-    execute2Phase();
-    execute1Phase(_fp_liquid, "LIQUID phase", false);
-    executeVaporMixture(false);
+    InputParameters pars_2phase = compute2Phase();
+    InputParameters pars_liquid = compute1Phase(_fp_liquid, false);
+    InputParameters pars_mixture = computeVaporMixture(false);
+
+    if (_json)
+    {
+      moosecontrib::Json::Value json;
+
+      auto & json_2phase = json["2-phase"];
+      buildJSON2Phase(json_2phase, pars_2phase);
+      auto & json_liquid = json["liquid"];
+      buildJSON1Phase(json_liquid, pars_liquid);
+      auto & json_mixture = json["vapor-mixture"];
+      buildJSONVaporMixture(json_mixture, pars_mixture);
+
+      Moose::out << "**START JSON DATA**\n";
+      Moose::out << json << "\n";
+      Moose::out << "**END JSON DATA**\n";
+    }
+    else
+    {
+      outputASCII2Phase(pars_2phase);
+      outputASCII1Phase("LIQUID phase", pars_liquid);
+      outputASCIIVaporMixture(pars_mixture);
+    }
   }
   else if (_has_2phase)
   {
-    execute2Phase();
-    execute1Phase(_fp_liquid, "LIQUID phase", false);
-    execute1Phase(_fp_vapor, "VAPOR phase", false);
+    InputParameters pars_2phase = compute2Phase();
+    InputParameters pars_liquid = compute1Phase(_fp_liquid, false);
+    InputParameters pars_vapor = compute1Phase(_fp_vapor, false);
+
+    if (_json)
+    {
+      moosecontrib::Json::Value json;
+
+      auto & json_2phase = json["2-phase"];
+      buildJSON2Phase(json_2phase, pars_2phase);
+      if (pars_liquid.have_parameter<bool>("specified"))
+      {
+        auto & json_liquid = json["liquid"];
+        buildJSON1Phase(json_liquid, pars_liquid);
+      }
+      if (pars_vapor.have_parameter<bool>("specified"))
+      {
+        auto & json_vapor = json["vapor"];
+        buildJSON1Phase(json_vapor, pars_vapor);
+      }
+
+      Moose::out << "**START JSON DATA**\n";
+      Moose::out << json << "\n";
+      Moose::out << "**END JSON DATA**\n";
+    }
+    else
+    {
+      outputASCII2Phase(pars_2phase);
+      if (pars_liquid.have_parameter<bool>("specified"))
+        outputASCII1Phase("LIQUID phase", pars_liquid);
+      if (pars_vapor.have_parameter<bool>("specified"))
+        outputASCII1Phase("VAPOR phase", pars_vapor);
+    }
   }
   else if (_has_vapor_mixture)
-    executeVaporMixture(true);
+  {
+    InputParameters pars_mixture = computeVaporMixture(true);
+    if (_json)
+    {
+      moosecontrib::Json::Value json;
+      buildJSONVaporMixture(json, pars_mixture);
+
+      Moose::out << "**START JSON DATA**\n";
+      Moose::out << json << "\n";
+      Moose::out << "**END JSON DATA**\n";
+    }
+    else
+      outputASCIIVaporMixture(pars_mixture);
+  }
   else
-    execute1Phase(_fp_1phase, "Single-phase", true);
+  {
+    InputParameters pars_1phase = compute1Phase(_fp_1phase, true);
+
+    if (_json)
+    {
+      moosecontrib::Json::Value json;
+
+      buildJSON1Phase(json, pars_1phase);
+
+      Moose::out << "**START JSON DATA**\n";
+      Moose::out << json << "\n";
+      Moose::out << "**END JSON DATA**\n";
+    }
+    else
+      outputASCII1Phase("Single-phase", pars_1phase);
+  }
 }
 
 void
@@ -100,11 +182,12 @@ FluidPropertiesInterrogator::finalize()
 {
 }
 
-void
-FluidPropertiesInterrogator::execute1Phase(const SinglePhaseFluidProperties * const fp_1phase,
-                                           const std::string & description,
+InputParameters
+FluidPropertiesInterrogator::compute1Phase(const SinglePhaseFluidProperties * const fp_1phase,
                                            bool throw_error_if_no_match)
 {
+  InputParameters params = emptyInputParameters();
+
   // reset NaN flag
   _nan_encountered = false;
 
@@ -116,7 +199,7 @@ FluidPropertiesInterrogator::execute1Phase(const SinglePhaseFluidProperties * co
 
   // compute/determine rho, e, p, T, vel
 
-  Real rho, e, p, T, vel;
+  Real rho, e, p, T, vel = 0;
   bool specified_a_set = false;
   if (specified["rho,e"])
   {
@@ -172,15 +255,56 @@ FluidPropertiesInterrogator::execute1Phase(const SinglePhaseFluidProperties * co
 
   if (specified_a_set)
   {
-    // output static property values
-    outputHeader(description + " STATIC properties");
-    outputStaticProperties(fp_1phase, rho, e, p, T);
+    params.set<bool>("specified") = true;
 
-    // output stagnation property values
+    const Real v = 1.0 / rho;
+
+    params.set<Real>("rho") = rho;
+    params.set<Real>("e") = e;
+    params.set<Real>("p") = p;
+    params.set<Real>("T") = T;
+    params.set<Real>("v") = v;
+    params.set<Real>("h") = fp_1phase->h_from_p_T(p, T);
+    params.set<Real>("s") = fp_1phase->s_from_v_e(v, e);
+    params.set<Real>("c") = fp_1phase->c_from_v_e(v, e);
+    params.set<Real>("mu") = fp_1phase->mu_from_v_e(v, e);
+    params.set<Real>("cp") = fp_1phase->cp_from_v_e(v, e);
+    params.set<Real>("cv") = fp_1phase->cv_from_v_e(v, e);
+    params.set<Real>("k") = fp_1phase->k_from_v_e(v, e);
+    params.set<Real>("beta") = fp_1phase->beta_from_p_T(p, T);
+
     if (isParamValid("vel") || specified["rho,rhou,rhoE"])
     {
-      outputHeader(description + " STAGNATION properties");
-      outputStagnationProperties(fp_1phase, rho, e, p, T, vel);
+      const Real s = fp_1phase->s_from_v_e(v, e);
+      const Real s0 = s;
+      const Real h = fp_1phase->h_from_p_T(p, T);
+      const Real h0 = h + 0.5 * vel * vel;
+      const Real p0 = fp_1phase->p_from_h_s(h0, s0);
+      const Real rho0 = fp_1phase->rho_from_p_s(p0, s0);
+      const Real e0 = fp_1phase->e_from_p_rho(p0, rho0);
+      const Real v0 = 1.0 / rho0;
+      const Real T0 = fp_1phase->T_from_v_e(v0, e0);
+      const Real c0 = fp_1phase->c_from_v_e(v0, e0);
+      const Real mu0 = fp_1phase->mu_from_v_e(v0, e0);
+      const Real cp0 = fp_1phase->cp_from_v_e(v0, e0);
+      const Real cv0 = fp_1phase->cv_from_v_e(v0, e0);
+      const Real k0 = fp_1phase->k_from_v_e(v0, e0);
+      const Real beta0 = fp_1phase->beta_from_p_T(p0, T0);
+
+      params.set<Real>("vel") = vel;
+      params.set<Real>("rho0") = rho0;
+      params.set<Real>("s0") = s0;
+      params.set<Real>("v0") = v0;
+      params.set<Real>("e0") = e0;
+      params.set<Real>("h0") = h0;
+      params.set<Real>("p0") = p0;
+      params.set<Real>("T0") = T0;
+      params.set<Real>("c0") = c0;
+      params.set<Real>("mu0") = mu0;
+      params.set<Real>("cp0") = cp0;
+      params.set<Real>("cv0") = cv0;
+      params.set<Real>("k0") = k0;
+      params.set<Real>("beta0") = beta0;
     }
 
     // warn if NaN encountered
@@ -193,11 +317,69 @@ FluidPropertiesInterrogator::execute1Phase(const SinglePhaseFluidProperties * co
           "     (for example, the supplied state is outside of the valid state space\n",
           "     that was programmed in the package).");
   }
+
+  return params;
 }
 
-void
-FluidPropertiesInterrogator::executeVaporMixture(bool throw_error_if_no_match)
+InputParameters
+FluidPropertiesInterrogator::compute2Phase()
 {
+  InputParameters params = emptyInputParameters();
+
+  // reset NaN flag
+  _nan_encountered = false;
+
+  // determine how state is specified
+  std::vector<std::vector<std::string>> parameter_sets = {{"p", "T"}, {"p"}, {"T"}};
+  auto specified = getSpecifiedSetMap(parameter_sets, "two-phase", true);
+
+  const Real p_critical = _fp_2phase->p_critical();
+  params.set<Real>("p_critical") = p_critical;
+  if (specified["p"])
+  {
+    const Real p = getParam<Real>("p");
+    const Real T_sat = _fp_2phase->T_sat(p);
+    const Real h_lat = _fp_2phase->h_lat(p, T_sat);
+
+    params.set<Real>("p") = p;
+    params.set<Real>("T_sat") = T_sat;
+    params.set<Real>("h_lat") = h_lat;
+  }
+  else if (specified["T"])
+  {
+    const Real T = getParam<Real>("T");
+    const Real p_sat = _fp_2phase->p_sat(T);
+    const Real h_lat = _fp_2phase->h_lat(p_sat, T);
+    const Real sigma = _fp_2phase->sigma_from_T(T);
+
+    params.set<Real>("T") = T;
+    params.set<Real>("p_sat") = p_sat;
+    params.set<Real>("h_lat") = h_lat;
+    params.set<Real>("sigma") = sigma;
+  }
+  else if (specified["p,T"])
+  {
+    const Real p = getParam<Real>("p");
+    const Real T = getParam<Real>("T");
+    const Real h_lat = _fp_2phase->h_lat(p, T);
+
+    params.set<Real>("p") = p;
+    params.set<Real>("T") = T;
+    params.set<Real>("h_lat") = h_lat;
+  }
+
+  // warn if NaN encountered
+  if (_nan_encountered)
+    mooseWarning("At least one NaN was encountered.");
+
+  return params;
+}
+
+InputParameters
+FluidPropertiesInterrogator::computeVaporMixture(bool throw_error_if_no_match)
+{
+  InputParameters params = emptyInputParameters();
+
   // reset NaN flag
   _nan_encountered = false;
 
@@ -210,7 +392,7 @@ FluidPropertiesInterrogator::executeVaporMixture(bool throw_error_if_no_match)
 
   // compute/determine rho, e, p, T, vel
 
-  Real rho, e, p, T, vel;
+  Real rho, e, p, T, vel = 0;
   bool specified_a_set = false;
   if (specified["rho,e,x_ncg"])
   {
@@ -254,15 +436,34 @@ FluidPropertiesInterrogator::executeVaporMixture(bool throw_error_if_no_match)
 
   if (specified_a_set)
   {
-    // output static property values
-    outputHeader("Vapor mixture STATIC properties");
-    outputVaporMixtureStaticProperties(rho, e, p, T, x_ncg);
+    params.set<bool>("specified") = true;
 
-    // output stagnation property values
+    const Real v = 1.0 / rho;
+    const Real h = e + p / rho;
+    const Real c = _fp_vapor_mixture->c_from_p_T(p, T, x_ncg);
+    const Real mu = _fp_vapor_mixture->mu_from_p_T(p, T, x_ncg);
+    const Real cp = _fp_vapor_mixture->cp_from_p_T(p, T, x_ncg);
+    const Real cv = _fp_vapor_mixture->cv_from_p_T(p, T, x_ncg);
+    const Real k = _fp_vapor_mixture->k_from_p_T(p, T, x_ncg);
+
+    params.set<Real>("p") = p;
+    params.set<Real>("T") = T;
+    params.set<Real>("rho") = rho;
+    params.set<Real>("e") = e;
+    params.set<Real>("v") = v;
+    params.set<Real>("h") = h;
+    params.set<Real>("c") = c;
+    params.set<Real>("mu") = mu;
+    params.set<Real>("cp") = cp;
+    params.set<Real>("cv") = cv;
+    params.set<Real>("k") = k;
+
     if (isParamValid("vel") || specified["rho,rhou,rhoE,x_ncg"])
     {
-      outputHeader("Vapor mixture STAGNATION properties");
-      outputVaporMixtureStagnationProperties(rho, e, p, T, x_ncg, vel);
+      const Real h = e + p / rho;
+      const Real h0 = h + 0.5 * vel * vel;
+
+      params.set<Real>("h0") = h0;
     }
 
     // warn if NaN encountered
@@ -275,54 +476,102 @@ FluidPropertiesInterrogator::executeVaporMixture(bool throw_error_if_no_match)
           "     (for example, the supplied state is outside of the valid state space\n",
           "     that was programmed in the package).");
   }
+
+  return params;
 }
 
 void
-FluidPropertiesInterrogator::execute2Phase()
+FluidPropertiesInterrogator::buildJSON1Phase(moosecontrib::Json::Value & json,
+                                             const InputParameters & params)
 {
-  // reset NaN flag
-  _nan_encountered = false;
+  for (auto p : {"rho", "e", "p", "T", "v", "h", "s", "c", "mu", "cp", "cv", "k", "beta"})
+    json["static"][p] = params.get<Real>(p);
 
-  // determine how state is specified
-  std::vector<std::vector<std::string>> parameter_sets = {{"p", "T"}, {"p"}, {"T"}};
-  auto specified = getSpecifiedSetMap(parameter_sets, "two-phase", true);
+  if (params.have_parameter<Real>("vel"))
+    for (auto p : {"vel",
+                   "rho0",
+                   "s0",
+                   "v0",
+                   "e0",
+                   "h0",
+                   "p0",
+                   "T0",
+                   "c0",
+                   "mu0",
+                   "cp0",
+                   "cv0",
+                   "k0",
+                   "beta0"})
+      json["stagnation"][p] = params.get<Real>(p);
+}
 
-  // output the requested quantities
+void
+FluidPropertiesInterrogator::buildJSON2Phase(moosecontrib::Json::Value & json,
+                                             const InputParameters & params)
+{
+  json["p_critical"] = params.get<Real>("p_critical");
+  for (auto p : {"T_sat", "p_sat", "h_lat", "sigma"})
+    if (params.have_parameter<Real>(p))
+      json[p] = params.get<Real>(p);
+}
 
+void
+FluidPropertiesInterrogator::buildJSONVaporMixture(moosecontrib::Json::Value & json,
+                                                   const InputParameters & params)
+{
+  for (auto p : {"p", "T", "rho", "e", "v", "h", "c", "mu", "cp", "cv", "k"})
+    if (params.have_parameter<Real>(p))
+      json["static"][p] = params.get<Real>(p);
+
+  if (params.have_parameter<Real>("vel"))
+    json["stagnation"]["h0"] = params.get<Real>("h0");
+}
+
+void
+FluidPropertiesInterrogator::outputASCII1Phase(const std::string & description,
+                                               const InputParameters & params)
+{
+  // output static property values
+  outputHeader(description + " STATIC properties");
+  outputStaticProperties(params);
+
+  // output stagnation property values
+  if (params.have_parameter<Real>("vel"))
+  {
+    outputHeader(description + " STAGNATION properties");
+    outputStagnationProperties(params);
+  }
+}
+
+void
+FluidPropertiesInterrogator::outputASCII2Phase(const InputParameters & params)
+{
   outputHeader("TWO-PHASE properties");
-
-  const Real p_critical = _fp_2phase->p_critical();
-  outputProperty("Critical pressure", p_critical, "Pa");
-  if (specified["p"])
-  {
-    const Real p = getParam<Real>("p");
-    const Real T_sat = _fp_2phase->T_sat(p);
-    const Real h_lat = _fp_2phase->h_lat(p, T_sat);
-    outputProperty("Saturation temperature", T_sat, "K");
-    outputProperty("Latent heat of vaporization", h_lat, "J/kg");
-  }
-  if (specified["T"])
-  {
-    const Real T = getParam<Real>("T");
-    const Real p_sat = _fp_2phase->p_sat(T);
-    const Real h_lat = _fp_2phase->h_lat(p_sat, T);
-    const Real sigma = _fp_2phase->sigma_from_T(T);
-    outputProperty("Saturation pressure", p_sat, "Pa");
-    outputProperty("Latent heat of vaporization", h_lat, "J/kg");
-    outputProperty("Surface tension", sigma, "N/m");
-  }
-  if (specified["p,T"])
-  {
-    const Real p = getParam<Real>("p");
-    const Real T = getParam<Real>("T");
-    const Real h_lat = _fp_2phase->h_lat(p, T);
-    outputProperty("Latent heat of vaporization", h_lat, "J/kg");
-  }
+  outputProperty("Critical pressure", params.get<Real>("p_critical"), "Pa");
+  if (params.have_parameter<Real>("T_sat"))
+    outputProperty("Saturation temperature", params.get<Real>("T_sat"), "K");
+  if (params.have_parameter<Real>("p_sat"))
+    outputProperty("Saturation pressure", params.get<Real>("p_sat"), "Pa");
+  if (params.have_parameter<Real>("h_lat"))
+    outputProperty("Latent heat of vaporization", params.get<Real>("h_lat"), "J/kg");
+  if (params.have_parameter<Real>("sigma"))
+    outputProperty("Surface tension", params.get<Real>("sigma"), "N/m");
   _console << std::endl;
+}
 
-  // warn if NaN encountered
-  if (_nan_encountered)
-    mooseWarning("At least one NaN was encountered.");
+void
+FluidPropertiesInterrogator::outputASCIIVaporMixture(const InputParameters & params)
+{
+  // output static property values
+  outputHeader("Vapor mixture STATIC properties");
+  outputVaporMixtureStaticProperties(params);
+
+  // output stagnation property values
+  if (params.have_parameter<Real>("vel"))
+  {
+    outputHeader("Vapor mixture STAGNATION properties");
+    outputVaporMixtureStagnationProperties(params);
+  }
 }
 
 std::map<std::string, bool>
@@ -447,123 +696,66 @@ FluidPropertiesInterrogator::outputProperty(const std::string & name,
 }
 
 void
-FluidPropertiesInterrogator::outputStaticProperties(const SinglePhaseFluidProperties * const fp,
-                                                    const Real & rho,
-                                                    const Real & e,
-                                                    const Real & p,
-                                                    const Real & T)
+FluidPropertiesInterrogator::outputStaticProperties(const InputParameters & params)
 {
-  const Real v = 1.0 / rho;
-  const Real h = fp->h_from_p_T(p, T);
-  const Real s = fp->s_from_v_e(v, e);
-  const Real c = fp->c_from_v_e(v, e);
-  const Real mu = fp->mu_from_v_e(v, e);
-  const Real cp = fp->cp_from_v_e(v, e);
-  const Real cv = fp->cv_from_v_e(v, e);
-  const Real k = fp->k_from_v_e(v, e);
-  const Real beta = fp->beta_from_p_T(p, T);
-
-  outputProperty("Pressure", p, "Pa");
-  outputProperty("Temperature", T, "K");
-  outputProperty("Density", rho, "kg/m^3");
-  outputProperty("Specific volume", v, "m^3/kg");
-  outputProperty("Specific internal energy", e, "J/kg");
-  outputProperty("Specific enthalpy", h, "J/kg");
-  outputProperty("Specific entropy", s, "J/kg");
+  outputProperty("Pressure", params.get<Real>("p"), "Pa");
+  outputProperty("Temperature", params.get<Real>("T"), "K");
+  outputProperty("Density", params.get<Real>("rho"), "kg/m^3");
+  outputProperty("Specific volume", params.get<Real>("v"), "m^3/kg");
+  outputProperty("Specific internal energy", params.get<Real>("e"), "J/kg");
+  outputProperty("Specific enthalpy", params.get<Real>("h"), "J/kg");
+  outputProperty("Specific entropy", params.get<Real>("s"), "J/kg");
   _console << std::endl;
-  outputProperty("Sound speed", c, "m/s");
-  outputProperty("Dynamic viscosity", mu, "Pa-s");
-  outputProperty("Specific heat at constant pressure", cp, "J/(kg-K)");
-  outputProperty("Specific heat at constant volume", cv, "J/(kg-K)");
-  outputProperty("Thermal conductivity", k, "W/(m-K)");
-  outputProperty("Volumetric expansion coefficient", beta, "1/K");
+  outputProperty("Sound speed", params.get<Real>("c"), "m/s");
+  outputProperty("Dynamic viscosity", params.get<Real>("mu"), "Pa-s");
+  outputProperty("Specific heat at constant pressure", params.get<Real>("cp"), "J/(kg-K)");
+  outputProperty("Specific heat at constant volume", params.get<Real>("cv"), "J/(kg-K)");
+  outputProperty("Thermal conductivity", params.get<Real>("k"), "W/(m-K)");
+  outputProperty("Volumetric expansion coefficient", params.get<Real>("beta"), "1/K");
   _console << std::endl;
 }
 
 void
-FluidPropertiesInterrogator::outputStagnationProperties(const SinglePhaseFluidProperties * const fp,
-                                                        const Real & rho,
-                                                        const Real & e,
-                                                        const Real & p,
-                                                        const Real & T,
-                                                        const Real & vel)
+FluidPropertiesInterrogator::outputStagnationProperties(const InputParameters & params)
 {
-  const Real v = 1.0 / rho;
-  const Real s = fp->s_from_v_e(v, e);
-  const Real s0 = s;
-  const Real h = fp->h_from_p_T(p, T);
-  const Real h0 = h + 0.5 * vel * vel;
-  const Real p0 = fp->p_from_h_s(h0, s0);
-  const Real rho0 = fp->rho_from_p_s(p0, s0);
-  const Real e0 = fp->e_from_p_rho(p0, rho0);
-  const Real v0 = 1.0 / rho0;
-  const Real T0 = fp->T_from_v_e(v0, e0);
-  const Real c0 = fp->c_from_v_e(v0, e0);
-  const Real mu0 = fp->mu_from_v_e(v0, e0);
-  const Real cp0 = fp->cp_from_v_e(v0, e0);
-  const Real cv0 = fp->cv_from_v_e(v0, e0);
-  const Real k0 = fp->k_from_v_e(v0, e0);
-  const Real beta0 = fp->beta_from_p_T(p0, T0);
-
-  outputProperty("Pressure", p0, "Pa");
-  outputProperty("Temperature", T0, "K");
-  outputProperty("Density", rho0, "kg/m^3");
-  outputProperty("Specific volume", v0, "m^3/kg");
-  outputProperty("Specific internal energy", e0, "J/kg");
-  outputProperty("Specific enthalpy", h0, "J/kg");
-  outputProperty("Specific entropy", s0, "J/kg");
+  outputProperty("Pressure", params.get<Real>("p0"), "Pa");
+  outputProperty("Temperature", params.get<Real>("T0"), "K");
+  outputProperty("Density", params.get<Real>("rho0"), "kg/m^3");
+  outputProperty("Specific volume", params.get<Real>("v0"), "m^3/kg");
+  outputProperty("Specific internal energy", params.get<Real>("e0"), "J/kg");
+  outputProperty("Specific enthalpy", params.get<Real>("h0"), "J/kg");
+  outputProperty("Specific entropy", params.get<Real>("s0"), "J/kg");
   _console << std::endl;
-  outputProperty("Sound speed", c0, "m/s");
-  outputProperty("Dynamic viscosity", mu0, "Pa-s");
-  outputProperty("Specific heat at constant pressure", cp0, "J/(kg-K)");
-  outputProperty("Specific heat at constant volume", cv0, "J/(kg-K)");
-  outputProperty("Thermal conductivity", k0, "W/(m-K)");
-  outputProperty("Volumetric expansion coefficient", beta0, "1/K");
+  outputProperty("Sound speed", params.get<Real>("c0"), "m/s");
+  outputProperty("Dynamic viscosity", params.get<Real>("mu0"), "Pa-s");
+  outputProperty("Specific heat at constant pressure", params.get<Real>("cp0"), "J/(kg-K)");
+  outputProperty("Specific heat at constant volume", params.get<Real>("cv0"), "J/(kg-K)");
+  outputProperty("Thermal conductivity", params.get<Real>("k0"), "W/(m-K)");
+  outputProperty("Volumetric expansion coefficient", params.get<Real>("beta0"), "1/K");
   _console << std::endl;
 }
 
 void
-FluidPropertiesInterrogator::outputVaporMixtureStaticProperties(const Real & rho,
-                                                                const Real & e,
-                                                                const Real & p,
-                                                                const Real & T,
-                                                                const std::vector<Real> & x_ncg)
+FluidPropertiesInterrogator::outputVaporMixtureStaticProperties(const InputParameters & params)
 {
-  const Real v = 1.0 / rho;
-  const Real h = e + p / rho;
-  const Real c = _fp_vapor_mixture->c_from_p_T(p, T, x_ncg);
-  const Real mu = _fp_vapor_mixture->mu_from_p_T(p, T, x_ncg);
-  const Real cp = _fp_vapor_mixture->cp_from_p_T(p, T, x_ncg);
-  const Real cv = _fp_vapor_mixture->cv_from_p_T(p, T, x_ncg);
-  const Real k = _fp_vapor_mixture->k_from_p_T(p, T, x_ncg);
-
-  outputProperty("Pressure", p, "Pa");
-  outputProperty("Temperature", T, "K");
-  outputProperty("Density", rho, "kg/m^3");
-  outputProperty("Specific volume", v, "m^3/kg");
-  outputProperty("Specific internal energy", e, "J/kg");
-  outputProperty("Specific enthalpy", h, "J/kg");
+  outputProperty("Pressure", params.get<Real>("p"), "Pa");
+  outputProperty("Temperature", params.get<Real>("T"), "K");
+  outputProperty("Density", params.get<Real>("rho"), "kg/m^3");
+  outputProperty("Specific volume", params.get<Real>("v"), "m^3/kg");
+  outputProperty("Specific internal energy", params.get<Real>("e"), "J/kg");
+  outputProperty("Specific enthalpy", params.get<Real>("h"), "J/kg");
   _console << std::endl;
-  outputProperty("Sound speed", c, "m/s");
-  outputProperty("Dynamic viscosity", mu, "Pa-s");
-  outputProperty("Specific heat at constant pressure", cp, "J/(kg-K)");
-  outputProperty("Specific heat at constant volume", cv, "J/(kg-K)");
-  outputProperty("Thermal conductivity", k, "W/(m-K)");
+  outputProperty("Sound speed", params.get<Real>("c"), "m/s");
+  outputProperty("Dynamic viscosity", params.get<Real>("mu"), "Pa-s");
+  outputProperty("Specific heat at constant pressure", params.get<Real>("cp"), "J/(kg-K)");
+  outputProperty("Specific heat at constant volume", params.get<Real>("cv"), "J/(kg-K)");
+  outputProperty("Thermal conductivity", params.get<Real>("k"), "W/(m-K)");
   _console << std::endl;
 }
 
 void
-FluidPropertiesInterrogator::outputVaporMixtureStagnationProperties(
-    const Real & rho,
-    const Real & e,
-    const Real & p,
-    const Real & /*T*/,
-    const std::vector<Real> & /*x_ncg*/,
-    const Real & vel)
+FluidPropertiesInterrogator::outputVaporMixtureStagnationProperties(const InputParameters & params)
 {
-  const Real h = e + p / rho;
-  const Real h0 = h + 0.5 * vel * vel;
-
-  outputProperty("Specific enthalpy", h0, "J/kg");
+  outputProperty("Specific enthalpy", params.get<Real>("h0"), "J/kg");
   _console << std::endl;
 }

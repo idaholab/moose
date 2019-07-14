@@ -10,6 +10,7 @@
 #pragma once
 
 #include "GeneralUserObject.h"
+#include "json/json.h"
 
 class FluidPropertiesInterrogator;
 class FluidProperties;
@@ -37,27 +38,29 @@ protected:
   /**
    * Queries a 1-phase fluid properties object
    *
+   * @return Input parameters holding the computed values
    * @param[in] fp_1phase     1-phase fluid properties
-   * @param[in] description   String describing the 1-phase fluid properties
    * @param[in] throw_error_if_no_match   Option to throw an error if no sets
    *                                      match the inputs
    */
-  void execute1Phase(const SinglePhaseFluidProperties * const fp_1phase,
-                     const std::string & description,
-                     bool throw_error_if_no_match);
+  InputParameters compute1Phase(const SinglePhaseFluidProperties * const fp_1phase,
+                                bool throw_error_if_no_match);
 
   /**
    * Queries a vapor mixture fluid properties object
    *
+   * @return Input parameters holding the computed values
    * @param[in] throw_error_if_no_match   Option to throw an error if no sets
    *                                      match the inputs
    */
-  void executeVaporMixture(bool throw_error_if_no_match);
+  InputParameters computeVaporMixture(bool throw_error_if_no_match);
 
   /**
    * Queries a 2-phase fluid properties object
+   *
+   * @return Input parameters holding the computed values
    */
-  void execute2Phase();
+  InputParameters compute2Phase();
 
   /**
    * Gets a map of a parameter set to a flag telling whether that set was provided
@@ -76,6 +79,43 @@ protected:
                      bool throw_error_if_no_match) const;
 
   /**
+   * Build 1-phase fluid properties in JSON format
+   */
+  void buildJSON1Phase(moosecontrib::Json::Value & json, const InputParameters & params);
+
+  /**
+   * Build 2-phase fluid properties in JSON format
+   */
+  void buildJSON2Phase(moosecontrib::Json::Value & json, const InputParameters & params);
+
+  /**
+   * Build vapor mixture fluid properties in JSON format
+   */
+  void buildJSONVaporMixture(moosecontrib::Json::Value & json, const InputParameters & params);
+
+  /**
+   * Output 1-phase fluid properties in plain text format
+   *
+   * @param[in] description   String describing the 1-phase fluid properties
+   * @param[in] params        Input parameters with values to print
+   */
+  void outputASCII1Phase(const std::string & description, const InputParameters & params);
+
+  /**
+   * Output 2-phase fluid properties in plain text format
+   *
+   * @param[in] params        Input parameters with values to print
+   */
+  void outputASCII2Phase(const InputParameters & params);
+
+  /**
+   * Output vapor mixture fluid properties in plain text format
+   *
+   * @param[in] params        Input parameters with values to print
+   */
+  void outputASCIIVaporMixture(const InputParameters & params);
+
+  /**
    * Outputs a header for a section of properties
    */
   void outputHeader(const std::string & header) const;
@@ -88,67 +128,33 @@ protected:
   /**
    * Outputs static properties for a single-phase fluid properties object
    *
-   * @param[in] fp    Single-phase fluid properties
-   * @param[in] rho   Density
-   * @param[in] e     Specific internal energy
-   * @param[in] p     Pressure
-   * @param[in] T     Temperature
+   * @param[in] params        Input parameters with values to print
    */
-  void outputStaticProperties(const SinglePhaseFluidProperties * const fp,
-                              const Real & rho,
-                              const Real & e,
-                              const Real & p,
-                              const Real & T);
+  void outputStaticProperties(const InputParameters & params);
 
   /**
    * Outputs stagnation properties for a single-phase fluid properties object
    *
-   * @param[in] fp    Single-phase fluid properties
-   * @param[in] rho   Density
-   * @param[in] e     Specific internal energy
-   * @param[in] p     Pressure
-   * @param[in] T     Temperature
-   * @param[in] vel   Velocity
+   * @param[in] params        Input parameters with values to print
    */
-  void outputStagnationProperties(const SinglePhaseFluidProperties * const fp,
-                                  const Real & rho,
-                                  const Real & e,
-                                  const Real & p,
-                                  const Real & T,
-                                  const Real & vel);
+  void outputStagnationProperties(const InputParameters & params);
 
   /**
    * Outputs static properties for a vapor mixture fluid properties object
    *
-   * @param[in] rho   Density
-   * @param[in] e     Specific internal energy
-   * @param[in] p     Pressure
-   * @param[in] T     Temperature
-   * @param[in] x_ncg   Mass fractions of NCGs
+   * @param[in] params        Input parameters with values to print
    */
-  void outputVaporMixtureStaticProperties(const Real & rho,
-                                          const Real & e,
-                                          const Real & p,
-                                          const Real & T,
-                                          const std::vector<Real> & x_ncg);
+  void outputVaporMixtureStaticProperties(const InputParameters & params);
 
   /**
    * Outputs stagnation properties for a vapor mixture fluid properties object
    *
-   * @param[in] rho   Density
-   * @param[in] e     Specific internal energy
-   * @param[in] p     Pressure
-   * @param[in] T     Temperature
-   * @param[in] x_ncg   Mass fractions of NCGs
-   * @param[in] vel   Velocity
+   * @param[in] params        Input parameters with values to print
    */
-  void outputVaporMixtureStagnationProperties(const Real & rho,
-                                              const Real & e,
-                                              const Real & p,
-                                              const Real & T,
-                                              const std::vector<Real> & x_ncg,
-                                              const Real & vel);
+  void outputVaporMixtureStagnationProperties(const InputParameters & params);
 
+  /// true if the output should use JSON format
+  const bool & _json;
   /// pointer to fluid properties object
   const FluidProperties * const _fp;
   /// pointer to 1-phase fluid properties object (if provided 1-phase object)
@@ -180,4 +186,3 @@ protected:
   /// Precision used for printing values
   const unsigned int & _precision;
 };
-

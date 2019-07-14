@@ -40,6 +40,7 @@ validParams<AddFluidPropertiesInterrogatorAction>()
   params.addParam<Real>("vel", "Velocity");
   params.addParam<std::vector<Real>>("x_ncg", "Mass fractions of NCGs");
   params.addParam<unsigned int>("precision", 10, "Precision for printing values");
+  params.addParam<bool>("json", false, "Output in JSON format");
 
   params.addClassDescription("Action that sets up the fluid properties interrogator");
 
@@ -154,5 +155,6 @@ AddFluidPropertiesInterrogatorAction::addFluidPropertiesInterrogatorObject() con
   if (isParamValid("x_ncg"))
     params.set<std::vector<Real>>("x_ncg") = getParam<std::vector<Real>>("x_ncg");
   params.set<unsigned int>("precision") = getParam<unsigned int>("precision");
+  params.set<bool>("json") = getParam<bool>("json");
   _problem->addUserObject(class_name, "fp_interrogator", params);
 }
