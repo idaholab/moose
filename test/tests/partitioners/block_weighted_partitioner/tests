@@ -1,5 +1,5 @@
 [Tests]
-  design = '/PetscExternalPartitioner.md'
+  design = '/BlockWeightedPartitioner.md'
   issues = '#13675'
 
   [./block_weighted_partitioner]
@@ -10,6 +10,21 @@
     petsc_version = '>=3.10.0'
     min_parallel = 4
     max_parallel = 4
+    # different mode generates different partition
+    mesh_mode = REPLICATED
   [../]
-  
+
+  [./block_weighted_partitioner_distributed]
+    requirement = 'The system shall support block weighted partitioner with distributed mesh'
+    type = 'Exodiff'
+    input = 'block_weighted_partitioner.i'
+    exodiff = 'block_weighted_partitioner_out_distributed.e'
+    cli_args = 'Outputs/file_base=block_weighted_partitioner_out_distributed'
+    petsc_version = '>=3.10.0'
+    min_parallel = 4
+    max_parallel = 4
+    # different mode generates different partition
+    mesh_mode = DISTRIBUTED
+  [../]
+
 []
