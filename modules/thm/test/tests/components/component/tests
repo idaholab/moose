@@ -1,0 +1,8 @@
+[Tests]
+  [./err:nonexisting_component]
+    type = 'RunException'
+    input = 'err.nonexisting_component.i'
+    expect_err = "cmp: The component 'pipe' does not exist"
+    allow_test_objects = true
+  [../]
+[]
