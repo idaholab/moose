@@ -99,5 +99,5 @@ Here are some important details about how brace-expressions are evaluated:
 
 ## Overridding input parameters from the command line.
 
-See the [CommandLine] object for information on how input parameters can be
+See the [CommandLine.md] object for information on how input parameters can be
 changed on the command line.
