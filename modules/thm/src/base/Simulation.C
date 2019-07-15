@@ -130,7 +130,11 @@ Simulation::init()
   DependencyResolver<std::shared_ptr<Component>> dependency_resolver;
   for (const auto & comp : _components)
     for (const auto & dep : comp->getDependencies())
-      dependency_resolver.insertDependency(comp, _comp_by_name[dep]);
+    {
+      if (hasComponent(dep))
+        dependency_resolver.insertDependency(comp, _comp_by_name[dep]);
+    }
+
   std::sort(_components.begin(), _components.end(), dependency_resolver);
 }
 
