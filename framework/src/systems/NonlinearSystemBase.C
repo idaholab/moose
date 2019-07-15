@@ -3261,7 +3261,7 @@ NonlinearSystemBase::computeScalingJacobian(NonlinearImplicitSystem & sys)
     petsc_matrix.reset_preallocation();
 
 #else
-    mooseWarning("Automatic scaling requires a PETSc version of 3.8.0 or greater, so no automatic "
+    mooseWarning("Automatic scaling requires a PETSc version of 3.9.0 or greater, so no automatic "
                  "scaling is going to be performed");
 #endif
   }

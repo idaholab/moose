@@ -1076,6 +1076,12 @@ public:
   virtual void computeResidualTag(const NumericVector<Number> & soln,
                                   NumericVector<Number> & residual,
                                   TagID tag);
+  /**
+   * Form a residual vector for a given tag and "residual" tag
+   */
+  virtual void computeResidualType(const NumericVector<Number> & soln,
+                                   NumericVector<Number> & residual,
+                                   TagID tag);
 
   /**
    * Form a residual vector for a set of tags. It should not be called directly
