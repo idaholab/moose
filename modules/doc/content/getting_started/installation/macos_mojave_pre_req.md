@@ -12,7 +12,7 @@ The following, is required to be installed before you can begin using MOOSE.
 
   If by chance, `xcode-select --install` states you already have Xcode installed, your best bet is to continue on with the instructions.
 
-- +Xcode+. Using the App Store, search for and install Xcode.
+- +Xcode+. Using the App Store, search for and install Xcode. Once installed, you must open and run Xcode to finish the installation.
 
 - +Caveats+
 
