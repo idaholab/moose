@@ -1,10 +1,9 @@
 #############################################################
-# This input file demonstrates the use of the active/inactive
-# block level parameters that can be used to toggle individual
-# blocks on/off for every block in a MOOSE-based input file.
-#
-# "active" and "inactive" cannot be used within the same block
+# This input file demonstrates the use of inactive at the
+# top level.
 ##############################################################
+inactive = 'Executioner' # This will produce an error about missing Executioner
+
 [Mesh]
   type = GeneratedMesh
   dim = 2

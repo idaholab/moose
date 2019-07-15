@@ -132,6 +132,7 @@ public:
   void
   addRequiredParam(const std::string & name, const T & moose_enum, const std::string & doc_string);
 
+  ///@{
   /**
    * These methods add an option parameter and a documentation string to the InputParameters object.
    * The first version of this function takes a default value which is used if the parameter is not
@@ -142,7 +143,10 @@ public:
   void addParam(const std::string & name, const S & value, const std::string & doc_string);
   template <typename T>
   void addParam(const std::string & name, const std::string & doc_string);
+  ///@}
 
+  ///@{
+  // BEGIN RANGE CHECKED PARAMETER METHODS
   /**
    * These methods add an range checked parameters. A lower and upper bound can be supplied and the
    * supplied parameter will be checked to fall within that range.
@@ -160,6 +164,8 @@ public:
   void addRangeCheckedParam(const std::string & name,
                             const std::string & parsed_function,
                             const std::string & doc_string);
+  // END RANGE CHECKED PARAMETER METHODS
+  ///@}
 
   /**
    * These methods add an option parameter and with a customer type to the InputParameters object.

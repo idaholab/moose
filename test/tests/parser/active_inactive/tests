@@ -1,29 +1,48 @@
 [Tests]
-  [./inactive_active]
+  issues = '#9411 #9571'
+  design = 'Parser.md'
+
+  [inactive_active]
     type = Exodiff
     input = 'active_inactive.i'
     exodiff = 'active_inactive_out.e'
     cli_args = 'Outputs/exodus=true'
-  [../]
 
-  [./active_section_missing]
+    requirement = 'The system shall support active/inactive parameters to selectively enable/disable subblocks within all input file blocks.'
+  []
+
+  [active_section_missing]
     type = RunException
     input = 'active_inactive.i'
     cli_args = 'AuxKernels/active=aux5'
     expect_err = "variables listed as active"
-  [../]
 
-  [./inactive_section_missing]
+    requirement = 'The system shall produce an error when the active parameter refers to a non-exiseant block.'
+  []
+
+  [inactive_section_missing]
     type = RunException
     input = 'active_inactive.i'
     cli_args = 'Kernels/inactive=convection BCs/inactive=top'
     expect_err = "variables listed as inactive"
-  [../]
 
-  [./inactive_active_combo]
+    requirement = 'The system shall produce an error when the inactive parameter refers to a non-existent block.'
+  []
+
+  [inactive_active_combo]
     type = RunException
     input = 'active_inactive.i'
     cli_args = 'AuxKernels/inactive=aux2'
     expect_err = "'active' and 'inactive' parameters both provided in section"
-  [../]
+
+    requirement = 'The system shall produce an error when both the active and inactive parameters are present in the same block.'
+  []
+
+  [top_level]
+    type = RunException
+    input = 'top_level.i'
+    expect_err = '"Executioner" does not exist'
+
+    requirement = 'The system shall honor the active or inactive parameters at the top (root) level.'
+  []
 []
