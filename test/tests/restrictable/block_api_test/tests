@@ -1,0 +1,97 @@
+[Tests]
+  issues = '#2096'
+  design = 'BlockRestrictable.md'
+
+  [block_solution_working]
+    type = 'Exodiff'
+    input = 'block_restrictable.i'
+    cli_args = "Outputs/file_base=solution_working_out"
+    exodiff = 'solution_working_out.e'
+
+    requirement = "The system shall include an interface to allow objects to be restricted to subdomains."
+  []
+
+  [block_undefined_var_block]
+    type = 'RunException'
+    input = 'block_restrictable.i'
+    cli_args = "Variables/u/block=1"
+    expect_err = "The 'block' parameter of the object 'diff' must be a subset of the 'block' parameter of the variable 'u'"
+
+    requirement = "The system shall error if an object is restricted to a set of subdomains that differs from a dependant object."
+  []
+
+  [ids]
+    requirement = "The system shall include an interface that provides a method for returning all associated subdomains:"
+
+    [blocks]
+      type = 'RunException'
+      input = 'block_restrictable.i'
+      cli_args = "Kernels/diff/test=blocks"
+      expect_err = "Blocks testing passed"
+
+      detail = "as a list of names or"
+    []
+
+    [hasBlocks]
+      type = 'RunException'
+      input = 'block_restrictable.i'
+      cli_args = "Kernels/diff/test=hasBlocks"
+      expect_err = "hasBlocks testing passed"
+
+      detail = "as a list of ids."
+    []
+  []
+
+  [has]
+    requirement = "The system shall include an interface that provides methods for indicating if the supplied subdomain identifier(s) exists on the object:"
+
+    [hasBlocks_ANY_BLOCK_ID]
+      type = 'RunException'
+      input = 'block_restrictable.i'
+      cli_args = 'Kernels/diff/test=hasBlocks_ANY_BLOCK_ID Kernels/diff/block=ANY_BLOCK_ID'
+      expect_err = "hasBlocks_ANY_BLOCK_ID test passed"
+
+      detail = "if a single subdomain is supplied ant the object is not restricted;"
+    []
+
+    [blockIDs]
+      type = 'RunException'
+      input = 'block_restrictable.i'
+      cli_args = "Kernels/diff/test=blockIDs"
+      expect_err = "blockIDs testing passed"
+
+      detail = "if a single subdoman is supplied and the object is restricted to a set of subdomains; and"
+    []
+
+    [isBlockSubset]
+      type = 'RunException'
+      input = 'block_restrictable.i'
+      cli_args = "Kernels/diff/test=isBlockSubset"
+      expect_err = "isBlockSubset testing passed"
+
+      detail = "if multiple boundaries are supplied and the object is restricted to a set of subdomains."
+    []
+  []
+
+  [mat]
+    requirement = "The system shall include an interface that provides a method for indicating if the supplied material property exists on the same subdomains as the object:"
+
+    [hasBlockMaterialProperty_true]
+      type = 'RunException'
+      input = 'block_restrictable.i'
+      cli_args = "Kernels/diff/test=hasBlockMaterialProperty_true"
+      expect_err = "hasBlockMaterialProperty is true, test passed"
+
+      detail = "the method shall return true if the property subdomains match with the object subdomains and"
+    []
+
+    [hasBlockMaterialProperty_false]
+      type = 'RunException'
+      input = 'block_restrictable.i'
+      cli_args = "Kernels/diff/test=hasBlockMaterialProperty_false"
+      expect_err = "hasBlockMaterialProperty is false, test passed"
+
+      detail = "the method shall return false if the property subdomains dot not match with the object subdomains."
+    []
+  []
+[]

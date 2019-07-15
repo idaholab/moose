@@ -1,0 +1,70 @@
+[Tests]
+  issues = '#2149'
+  design = 'BoundaryRestrictable.md'
+
+  [ids]
+    requirement = "The system shall include an interface that provides a method for returning all associated boundaries:"
+
+    [boundary]
+      type = 'RunException'
+      input = 'boundary_restrictable.i'
+      cli_args = "BCs/left/test=boundaryNames"
+      expect_err = "boundaryNames test passed"
+
+      detail = "as a list of names or"
+    []
+
+    [boundaryIDs]
+      type = 'RunException'
+      input = 'boundary_restrictable.i'
+      cli_args = "BCs/left/test=boundaryIDs"
+      expect_err = "boundaryIDs test passed"
+
+      detail = "as a list of ids."
+    []
+  []
+
+  [has]
+    requirement = "The system shall include an interface that provides methods for indicating if the supplied boundary identifier(s) exists on the object:"
+
+    [hasBoundary]
+      type = 'RunException'
+      input = 'boundary_restrictable.i'
+      cli_args = "BCs/left/test=hasBoundary"
+      expect_err = "hasBoundary testing passed"
+
+      detail = "if a single boundary is supplied and the object is restricted to a set of boundaries and"
+    []
+
+    [isBoundarySubset]
+      type = 'RunException'
+      input = 'boundary_restrictable.i'
+      cli_args = "BCs/left/test=isBoundarySubset"
+      expect_err = "isBoundarySubset test passed"
+
+      detail = "if multiple boundaries are supplied."
+    []
+  []
+
+  [mat]
+    requirement = "The system shall include an interface that provides a method for indicating if the supplied material property exists on the same boundaries as the object:"
+
+    [hasBoundaryMaterialProperty_true]
+      type = 'RunException'
+      input = 'boundary_restrictable.i'
+      cli_args = "BCs/left/test=hasBoundaryMaterialProperty_true"
+      expect_err = "hasBoundaryMaterialProperty is true, test passed"
+
+      detail = "the method shall return true if the property boundaries match with the object boundaries and"
+    []
+
+    [hasBoundaryMaterialProperty_false]
+      type = 'RunException'
+      input = 'boundary_restrictable.i'
+      cli_args = "BCs/left/test=hasBoundaryMaterialProperty_false"
+      expect_err = "hasBoundaryMaterialProperty is false, test passed"
+
+      detail = "the method shall return false if the property boundaries dot not match with the object boundaries."
+    []
+  []
+[]
