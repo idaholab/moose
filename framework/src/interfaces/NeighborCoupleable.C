@@ -22,8 +22,6 @@ NeighborCoupleable::NeighborCoupleable(const MooseObject * moose_object,
 {
 }
 
-NeighborCoupleable::~NeighborCoupleable() {}
-
 const VariableValue &
 NeighborCoupleable::coupledNeighborValue(const std::string & var_name, unsigned int comp)
 {
