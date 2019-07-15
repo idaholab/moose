@@ -16,7 +16,9 @@ template <>
 InputParameters
 validParams<AddIndicatorAction>()
 {
-  return validParams<MooseObjectAction>();
+  InputParameters params = validParams<MooseObjectAction>();
+  params.addClassDescription("Action for adding Indicator object to a simulation.");
+  return params;
 }
 
 AddIndicatorAction::AddIndicatorAction(InputParameters params) : MooseObjectAction(params) {}

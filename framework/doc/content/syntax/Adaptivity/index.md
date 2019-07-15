@@ -17,9 +17,9 @@ reverse, children are deleted and the "parent" element is reactivated. The origi
 refinement level 0. Each time an element is split, the children are assigned a refinement level one
 higher than their parents.
 
-!media media/adaptivity/element_adaptivity.png
-       style=width:30%;margin-left:auto;margin-right:auto;
-       caption=Self-similar refinement pattern utilized by MOOSE for adaptivity.
+!media framework/adaptivity.png
+       caption=Self-similar refinement pattern utilized by MOOSE for adaptivity for 1D linear,
+               2D quadrilatrel, and 3D hexahedron elements.
 
 !syntax parameters /Adaptivity
 
