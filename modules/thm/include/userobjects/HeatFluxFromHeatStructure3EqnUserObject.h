@@ -17,13 +17,6 @@ class HeatFluxFromHeatStructure3EqnUserObject
 public:
   HeatFluxFromHeatStructure3EqnUserObject(const InputParameters & parameters);
 
-  virtual void execute() override;
-
-  const std::vector<std::vector<dof_id_type>> & getDofs(dof_id_type elem_id) const
-  {
-    return _dofs.at(elem_id);
-  }
-
 protected:
   virtual Real computeQpHeatFlux() override;
   virtual DenseVector<Real> computeQpHeatFluxJacobian() override;
@@ -35,6 +28,4 @@ protected:
   const MaterialProperty<Real> & _dT_drhoA;
   const MaterialProperty<Real> & _dT_drhouA;
   const MaterialProperty<Real> & _dT_drhoEA;
-
-  std::map<dof_id_type, std::vector<std::vector<dof_id_type>>> _dofs;
 };
