@@ -34,8 +34,6 @@ protected:
 
   /// User object that computes the heat flux
   const HeatFluxFromHeatStructure3EqnUserObject & _q_uo;
-  /// Heat flux perimeter
-  const VariableValue & _P_hf;
 
   /// Flow channel rho*A coupled variable index
   const unsigned int _rhoA_jvar;

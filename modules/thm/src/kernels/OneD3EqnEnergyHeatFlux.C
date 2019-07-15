@@ -14,7 +14,6 @@ validParams<OneD3EqnEnergyHeatFlux>()
   InputParameters params = validParams<Kernel>();
   params.addRequiredParam<UserObjectName>(
       "q_uo", "The name of the user object that computed the heat flux");
-  params.addRequiredCoupledVar("P_hf", "Heat flux perimeter");
   params.addRequiredCoupledVar("rhoA", "rho*A of the flow channel");
   params.addRequiredCoupledVar("rhouA", "rhou*A of the flow channel");
   params.addRequiredCoupledVar("rhoEA", "rhoE*A of the flow channel");
@@ -25,7 +24,6 @@ OneD3EqnEnergyHeatFlux::OneD3EqnEnergyHeatFlux(const InputParameters & parameter
   : Kernel(parameters),
     _phi_neighbor(_assembly.phiNeighbor(_var)),
     _q_uo(getUserObject<HeatFluxFromHeatStructure3EqnUserObject>("q_uo")),
-    _P_hf(coupledValue("P_hf")),
     _rhoA_jvar(coupled("rhoA")),
     _rhouA_jvar(coupled("rhouA")),
     _rhoEA_jvar(coupled("rhoEA")),
@@ -37,7 +35,8 @@ Real
 OneD3EqnEnergyHeatFlux::computeQpResidual()
 {
   const std::vector<Real> & q_wall = _q_uo.getHeatFlux(_current_elem->id());
-  return -q_wall[_qp] * _test[_i][_qp];
+  const std::vector<Real> & P_hf = _q_uo.getHeatedPerimeter(_current_elem->id());
+  return -q_wall[_qp] * P_hf[_qp] * _test[_i][_qp];
 }
 
 void
@@ -102,7 +101,8 @@ OneD3EqnEnergyHeatFlux::computeQpOffDiagJacobian(unsigned int jvar)
   if ((it = _jvar_map.find(jvar)) != _jvar_map.end())
   {
     const std::vector<DenseVector<Real>> & dq_wall = _q_uo.getHeatFluxJacobian(_current_elem->id());
-    return -dq_wall[_qp](it->second) * _phi[_j][_qp] * _test[_i][_qp];
+    const std::vector<Real> & P_hf = _q_uo.getHeatedPerimeter(_current_elem->id());
+    return -dq_wall[_qp](it->second) * P_hf[_qp] * _phi[_j][_qp] * _test[_i][_qp];
   }
   else
     return 0.;
@@ -115,7 +115,8 @@ OneD3EqnEnergyHeatFlux::computeQpOffDiagJacobianNeighbor(unsigned int jvar)
   if ((it = _jvar_map.find(jvar)) != _jvar_map.end())
   {
     const std::vector<DenseVector<Real>> & dq_wall = _q_uo.getHeatFluxJacobian(_current_elem->id());
-    return -dq_wall[_qp](it->second) * _phi_neighbor[_j][_qp] * _test[_i][_qp];
+    const std::vector<Real> & P_hf = _q_uo.getHeatedPerimeter(_current_elem->id());
+    return -dq_wall[_qp](it->second) * P_hf[_qp] * _phi_neighbor[_j][_qp] * _test[_i][_qp];
   }
   else
     return 0.;

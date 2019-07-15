@@ -29,7 +29,6 @@ protected:
   virtual DenseVector<Real> computeQpHeatFluxJacobian() override;
 
   const VariableValue & _T_wall;
-  const VariableValue & _P_hf;
 
   const MaterialProperty<Real> & _Hw;
   const MaterialProperty<Real> & _T;

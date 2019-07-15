@@ -29,6 +29,7 @@ public:
   virtual void finalize() override;
   virtual void threadJoin(const UserObject & y) override;
 
+  const std::vector<Real> & getHeatedPerimeter(dof_id_type element_id) const;
   const std::vector<Real> & getHeatFlux(dof_id_type element_id) const;
   const std::vector<DenseVector<Real>> & getHeatFluxJacobian(dof_id_type element_id) const;
 
@@ -55,8 +56,12 @@ protected:
   std::map<dof_id_type, dof_id_type> _nearest_elem_ids;
   /// How qpoint indices are mapped from slave side to master side per element
   std::map<dof_id_type, std::vector<unsigned int>> _elem_qp_map;
+  /// Cached heated perimeter
+  std::map<dof_id_type, std::vector<Real>> _heated_perimeter;
   /// Cached heat flux
   std::map<dof_id_type, std::vector<Real>> _heat_flux;
   /// Cached heat flux jacobians
   std::map<dof_id_type, std::vector<DenseVector<Real>>> _heat_flux_jacobian;
+  /// Coupled heated perimeter variable
+  const VariableValue & _P_hf;
 };
