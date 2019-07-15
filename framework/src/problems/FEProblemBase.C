@@ -4588,6 +4588,37 @@ FEProblemBase::computeResidualInternal(const NumericVector<Number> & soln,
 }
 
 void
+FEProblemBase::computeResidualType(const NumericVector<Number> & soln,
+                                   NumericVector<Number> & residual,
+                                   TagID tag)
+{
+  TIME_SECTION(_compute_residual_type_timer);
+
+  try
+  {
+    _nl->setSolution(soln);
+
+    _nl->associateVectorToTag(residual, _nl->residualVectorTag());
+
+    computeResidualTags({tag, _nl->residualVectorTag()});
+
+    _nl->disassociateVectorFromTag(residual, _nl->residualVectorTag());
+  }
+  catch (MooseException & e)
+  {
+    // If a MooseException propagates all the way to here, it means
+    // that it was thrown from a MOOSE system where we do not
+    // (currently) properly support the throwing of exceptions, and
+    // therefore we have no choice but to error out.  It may be
+    // *possible* to handle exceptions from other systems, but in the
+    // meantime, we don't want to silently swallow any unhandled
+    // exceptions here.
+    mooseError("An unhandled MooseException was raised during residual computation.  Please "
+               "contact the MOOSE team for assistance.");
+  }
+}
+
+void
 FEProblemBase::computeTransientImplicitResidual(Real time,
                                                 const NumericVector<Number> & u,
                                                 const NumericVector<Number> & udot,

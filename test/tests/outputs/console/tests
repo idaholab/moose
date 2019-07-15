@@ -132,7 +132,7 @@
     # Test the used of MooseObject::_console method
     type = RunApp
     input = 'moose_console.i'
-    expect_out = 'ConsoleMessageKernel::timestepSetup - time = 0\.4; t_step = 4'
+    expect_out = 'ConsoleMessageKernel::timestepSetup - time = 0\.4[0-9]*; t_step = 4'
     cli_args = 'Outputs/exodus=false'
 
     requirement = 'The system shall support writing to a buffered console object from every MooseObject-derived object.'
