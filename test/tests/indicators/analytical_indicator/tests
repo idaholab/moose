@@ -1,8 +1,13 @@
 [Tests]
+  issues = '#1275'
+  design = 'AnalyticalIndicator.md'
+
   [./test]
     type = 'Exodiff'
     input = 'analytical_indicator_test.i'
     exodiff = 'analytical_indicator_test_out.e'
     scale_refine = 2
+
+    requirement = "The system shall include the ability to compute the square of the difference between a solution variable and an analytical function for the purpose of performing automatic mesh adaptivity."
   [../]
 []
