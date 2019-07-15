@@ -155,7 +155,7 @@ ArrayIntegratedBC::computeJacobianBlock(MooseVariableFEBase & jvar)
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
-    initQpJacobian();
+    initQpOffDiagJacobian(jvar);
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < jvar.phiFaceSize(); _j++)
       {

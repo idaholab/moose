@@ -100,6 +100,12 @@ protected:
    */
   virtual void initQpJacobian(Moose::DGJacobianType) {}
 
+  /**
+   * Put necessary evaluations depending on qp but independent on test and shape functions here for
+   * off-diagonal Jacobian assembly
+   */
+  virtual void initQpOffDiagJacobian(Moose::DGJacobianType, MooseVariableFEBase &) {}
+
   /// Variable this kernel operates on
   ArrayMooseVariable & _var;
   /// Holds the current solution at the current quadrature point on the face.

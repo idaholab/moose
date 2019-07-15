@@ -9,7 +9,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
-    component = 2
+    components = 2
   []
   [v]
   []

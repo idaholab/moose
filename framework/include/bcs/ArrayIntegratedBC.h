@@ -87,6 +87,12 @@ protected:
    */
   virtual void initQpJacobian() {}
 
+  /**
+   * Put necessary evaluations depending on qp but independent on test and shape functions here for
+   * off-diagonal Jacobian assembly
+   */
+  virtual void initQpOffDiagJacobian(MooseVariableFEBase &) {}
+
   ArrayMooseVariable & _var;
 
   /// normals at quadrature points

@@ -169,7 +169,7 @@ ArrayKernel::computeOffDiagJacobian(MooseVariableFEBase & jvar)
   precalculateOffDiagJacobian(jvar.number());
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
-    initQpJacobian();
+    initQpOffDiagJacobian(jvar);
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < jvar.phiSize(); _j++)
       {

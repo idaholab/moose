@@ -18,7 +18,7 @@
   [u]
     order = FIRST
     family = L2_LAGRANGE
-    component = 2
+    components = 2
   []
 []
 

@@ -90,6 +90,7 @@ SystemBase::SystemBase(SubProblem & subproblem,
     _name(name),
     _vars(libMesh::n_threads()),
     _var_map(),
+    _max_var_number(0),
     _saved_old(NULL),
     _saved_older(NULL),
     _saved_dot_old(NULL),
@@ -652,6 +653,9 @@ SystemBase::addVariable(const std::string & var_name,
   else
     for (const auto subdomain_id : *active_subdomains)
       _var_map[var_num].insert(subdomain_id);
+
+  if (var_num > _max_var_number)
+    _max_var_number = var_num;
 }
 
 void
@@ -713,6 +717,9 @@ SystemBase::addArrayVariable(const std::string & var_name,
     for (unsigned int i = var_num; i < end_var_num; ++i)
       _numbered_vars[tid][i] = var;
   }
+
+  if (var_num > _max_var_number)
+    _max_var_number = var_num;
 }
 
 void
@@ -737,6 +744,9 @@ SystemBase::addScalarVariable(const std::string & var_name,
   else
     for (const auto subdomain_id : *active_subdomains)
       _var_map[var_num].insert(subdomain_id);
+
+  if (var_num > _max_var_number)
+    _max_var_number = var_num;
 }
 
 bool

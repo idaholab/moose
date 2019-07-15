@@ -743,6 +743,11 @@ public:
 
   const std::vector<VariableName> & getVariableNames() const { return _vars[0].names(); }
 
+  /**
+   * Returns the maximum number of all variables on the system
+   */
+  unsigned int getMaxVariableNumber() const { return _max_var_number; }
+
   virtual void computeVariables(const NumericVector<Number> & /*soln*/) {}
 
   void copyVars(ExodusII_IO & io);
@@ -779,6 +784,8 @@ protected:
   std::vector<VariableWarehouse> _vars;
   /// Map of variables (variable id -> array of subdomains where it lives)
   std::map<unsigned int, std::set<SubdomainID>> _var_map;
+  /// Maximum variable number
+  unsigned int _max_var_number;
 
   std::vector<std::string> _vars_to_be_zeroed_on_residual;
   std::vector<std::string> _vars_to_be_zeroed_on_jacobian;
