@@ -779,6 +779,8 @@ Outlet::addMooseObjects7EqnRDG()
     params.set<UserObjectName>("vfm") = FlowModelTwoPhase::VOLUME_FRACTION_MAPPER;
     params.set<ExecFlagEnum>("execute_on") = execute_on;
     _sim.addUserObject(class_name, boundary_flux_name, params);
+    connectObject(params, boundary_flux_name, "p_liquid");
+    connectObject(params, boundary_flux_name, "p_vapor");
   }
 
   // BCs
