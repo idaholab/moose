@@ -37,14 +37,17 @@ Real
 HeatFlux3EqnBC::computeQpResidual()
 {
   const std::vector<Real> & q_wall = _q_uo.getHeatFlux(_current_elem->id());
-  return -_hs_scale * q_wall[_qp] * _test[_i][_qp];
+  const std::vector<Real> & P_hf = _q_uo.getHeatedPerimeter(_current_elem->id());
+  return -_hs_scale * q_wall[_qp] * P_hf[_qp] * _test[_i][_qp];
 }
 
 Real
 HeatFlux3EqnBC::computeQpJacobian()
 {
   const std::vector<DenseVector<Real>> & dq_wall = _q_uo.getHeatFluxJacobian(_current_elem->id());
-  return -_hs_scale * dq_wall[_qp](_jvar_map.at(_var.number())) * _phi[_j][_qp] * _test[_i][_qp];
+  const std::vector<Real> & P_hf = _q_uo.getHeatedPerimeter(_current_elem->id());
+  return -_hs_scale * dq_wall[_qp](_jvar_map.at(_var.number())) * P_hf[_qp] * _phi[_j][_qp] *
+         _test[_i][_qp];
 }
 
 Real
@@ -54,7 +57,9 @@ HeatFlux3EqnBC::computeQpOffDiagJacobianNeighbor(unsigned int jvar)
   if ((it = _jvar_map.find(jvar)) != _jvar_map.end())
   {
     const std::vector<DenseVector<Real>> & dq_wall = _q_uo.getHeatFluxJacobian(_current_elem->id());
-    return -_hs_scale * dq_wall[_qp](it->second) * _phi_neighbor[_j][_qp] * _test[_i][_qp];
+    const std::vector<Real> & P_hf = _q_uo.getHeatedPerimeter(_current_elem->id());
+    return -_hs_scale * dq_wall[_qp](it->second) * P_hf[_qp] * _phi_neighbor[_j][_qp] *
+           _test[_i][_qp];
   }
   else
     return 0.;
