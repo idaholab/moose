@@ -9,7 +9,7 @@ clear for users.
 ```markdown
 # {{name}}
 
-!syntax description {{syntax}} !! Loads content from addClassDescription method
+!syntax description {{syntax}}
 
 ## Overview
 
@@ -18,8 +18,6 @@ clear for users.
 ## Example Input File Syntax
 
 !! Describe and include an example of how to use the {{name}} action.
-
-!! The following line automatically lists the available parameters.
 
 !syntax parameters {{syntax}}
 ```

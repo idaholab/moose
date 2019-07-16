@@ -17,8 +17,6 @@ documentation clear for users.
 
 !! Describe and include an example of how to use the {{name}} system.
 
-!! The following lines automatically list syntax associated with the system
-
 !syntax list {{syntax}} objects=True actions=False subsystems=False
 
 !syntax list {{syntax}} objects=False actions=False subsystems=True

@@ -92,5 +92,14 @@
  */
 .card .card-content p + p
 {
-  margin-top:10px;
+  margin-top:5px;
+}
+
+.moose-alert{
+    box-shadow: none;
+}
+
+.moose-alert-title{
+    padding-top:6px;
+    padding-bottom:6px;
 }
