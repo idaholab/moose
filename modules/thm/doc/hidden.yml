@@ -230,7 +230,6 @@
 - /Kernels/OneD7EqnVolumeFractionTimeDerivative
 - /Kernels/OneD7EqnVolumeFractionWallMassTransfer
 - /Kernels/OneDEntropyMinimumArtificialDissipation
-- /Kernels/OneDRusanov
 - /Kernels/OneDSUPG
 - /Kernels/OneDShockCapturing
 - /Kernels/OneDStabilizationBase
@@ -306,7 +305,6 @@
 - /Stabilizations
 - /Stabilizations/AddStabilizationSettingsAction
 - /Stabilizations/EntropyViscosity
-- /Stabilizations/Rusanov
 - /Stabilizations/SUPG
 
 - /UserObjects/BoundaryFlux7EqnNCGGhostWall
@@ -325,7 +323,6 @@
 - /UserObjects/JumpGradientInterface
 - /UserObjects/JunctionStagnationEnthalpyUserObject
 - /UserObjects/NormalizationParameter
-- /UserObjects/Rusanov
 - /UserObjects/SUPG
 - /UserObjects/StabilizationSettings
 - /UserObjects/WaveSpeeds7EqnNCGHLLC
