@@ -1,22 +1,33 @@
 [Tests]
-  [./test_failure]
-    type = 'Exodiff'
-    input = 'master.i'
-    exodiff = 'master_out.e master_out_sub0.e'
-    allow_warnings = true
-  [../]
+  issues = '#1880'
+  design = 'syntax/MultiApps/index.md'
 
-  [./test_failure_max_procs]
-    type = 'RunApp'
-    input = 'failure_with_max_procs_set.i'
+  [group]
+    requirement = "The system shall support the failure of sub-application that operates with differing time steps than the master application."
 
-    # This test is designed to make sure MOOSE doesn't hang when
-    # sub apps fail due to communicators in a bad state
-    max_time = 60
-    min_parallel = 2
-    prereq = test_failure
-    superlu = true
-    allow_warnings = true
-    compiler = 'INTEL GCC' # 6855
-  [../]
+    [./test_failure]
+      type = 'Exodiff'
+      input = 'master.i'
+      exodiff = 'master_out.e master_out_sub0.e'
+      allow_warnings = true
+
+      detail = "The simulation shall continue by reducing the time step and"
+    []
+
+    [test_failure_max_procs]
+      type = 'RunApp'
+      input = 'failure_with_max_procs_set.i'
+
+      # This test is designed to make sure MOOSE doesn't hang when
+      # sub apps fail due to communicators in a bad state
+      max_time = 60
+      min_parallel = 2
+      prereq = test_failure
+      superlu = true
+      allow_warnings = true
+      compiler = 'INTEL GCC' # 6855
+
+      detail = "support the failure and the ability to limit the number of processors for the sub-application."
+    []
+  []
 []
