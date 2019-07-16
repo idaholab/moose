@@ -69,11 +69,11 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = CentroidMultiApp
     input_files = 'sub_app.i'
     output_in_position = true
-  [../]
+  []
 []
 
 [Transfers]

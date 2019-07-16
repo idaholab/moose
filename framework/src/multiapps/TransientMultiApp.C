@@ -31,6 +31,8 @@ validParams<TransientMultiApp>()
 {
   InputParameters params = validParams<MultiApp>();
   params += validParams<TransientInterface>();
+  params.addClassDescription("MultiApp for performing coupled simulations with the master and "
+                             "sub-application both progressing in time.");
 
   params.addParam<bool>("sub_cycling",
                         false,

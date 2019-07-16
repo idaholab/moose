@@ -1,12 +1,3 @@
-###########################################################
-# This is a test of the Multiapp System. This test solves
-# four independent applications spaced throughout a
-# master domain interleaved with a master solve.
-#
-# @Requirement F7.10
-###########################################################
-
-
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -61,10 +52,13 @@
 []
 
 [MultiApps]
-  [./sub_app]
-    positions = '0 0 0  0.5 0.5 0  0.6 0.6 0  0.7 0.7 0'
+  [sub_app]
     type = TransientMultiApp
-    input_files = 'dt_from_master_sub.i'
     app_type = MooseTestApp
-  [../]
+    input_files = 'dt_from_master_sub.i'
+    positions = '0   0   0
+                 0.5 0.5 0
+                 0.6 0.6 0
+                 0.7 0.7 0'
+  []
 []
