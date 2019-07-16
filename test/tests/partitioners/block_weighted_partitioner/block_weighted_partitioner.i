@@ -7,7 +7,6 @@
     block = '1 2 3'
     weight = '3 1 10'
   []
-#  parallel_type = distributed
 []
 
 [Variables]

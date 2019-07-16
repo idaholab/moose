@@ -50,10 +50,7 @@ BlockWeightedPartitioner::BlockWeightedPartitioner(const InputParameters & param
   auto block_ids = _mesh.getSubdomainIDs(_blocks);
 
   if (block_ids.size() != _blocks.size())
-    mooseError("Number of block ids ",
-               block_ids.size(),
-               " does not match with the number of blocks ",
-               _blocks.size());
+    paramError("block", "One or more specified blocks was not found on the mesh ");
 
   _blocks_to_weights.reserve(_weights.size());
 
