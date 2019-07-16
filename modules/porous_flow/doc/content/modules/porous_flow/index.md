@@ -36,6 +36,7 @@ and geomechanics.
 - [Underground mining](porous_flow/coal_mining.md)
 - [CO$_2$ storage benchmark problems](porous_flow/co2_intercomparison.md)
 - [Convective mixing](porous_flow/lava_lamp.md)
+- [Two-phase THM injection benchmark example](porous_flow/thm_example.md)
 - [Restarting from previous simulation](porous_flow/restart.md)
 - [QA tests](porous_flow/tests.md)
 

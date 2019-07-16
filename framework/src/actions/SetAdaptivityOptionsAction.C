@@ -22,6 +22,7 @@ InputParameters
 validParams<SetAdaptivityOptionsAction>()
 {
   InputParameters params = validParams<Action>();
+  params.addClassDescription("Action for defining adaptivity parameters.");
   params.addParam<MarkerName>("marker",
                               "The name of the Marker to use to actually adapt the mesh.");
   params.addParam<unsigned int>(

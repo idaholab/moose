@@ -1,8 +1,13 @@
 [Tests]
+  issues = '#3279'
+  design = 'Markers/index.md'
+
   [./test]
     type = 'Exodiff'
     input = 'q_point_marker.i'
     exodiff = 'q_point_marker_out.e'
     scale_refine = 2
+
+    requirement = "The system shall support access to finite element quadrature point locations during the calculation of refinement marker flags."
   [../]
 []
