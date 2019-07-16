@@ -29,7 +29,7 @@ validParams<PorousFlow1PhaseMD_Gaussian>()
       "bulk_modulus", "bulk_modulus>0", "The constant bulk modulus of the fluid phase");
   params.addClassDescription("This Material is used for the single-phase situation where "
                              "log(mass-density) is the primary variable.  calculates the 1 "
-                             "porepressure and the 1 saturation in a 1-phase isothermal situation, "
+                             "porepressure and the 1 saturation in a 1-phase situation, "
                              "and derivatives of these with respect to the PorousFlowVariables.  A "
                              "gaussian capillary function is assumed");
   return params;
