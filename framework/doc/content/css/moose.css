@@ -161,7 +161,7 @@ pre.moose-pre{
 code, kbd, pre, samp {
     font-family: monospace, monospace;
     font-size: 1em;
-    background-color: #9e9e9e24;
+    /*background-color: #9e9e9e24;*/
 }
 
 .moose-disabled{
@@ -234,6 +234,10 @@ body{
     counter-reset:h2count;
 }
 
+.section{
+    padding-bottom:0;
+}
+
 h1 {
     font-size:200%;
     font-weight:500;
@@ -248,13 +252,15 @@ h1:first-of-type{
 h2{
     font-size:180%;
     font-weight:400;
-    margin-bottom: 8px;
+    padding-bottom: 0;
+    margin-bottom: 0;
 }
 
 h3 {
     font-size:160%;
     font-weight:20000;
-    margin-bottom: 6px;
+    margin-bottom: 0;
+    padding-bottom: 0;
 }
 
 h4 {
@@ -557,7 +563,8 @@ footer.page-footer {
 }
 
 .container{
-    width:90%;
+    width:70%;
+    max-width:900px;
 }
 
 .side-nav .collapsible li,
