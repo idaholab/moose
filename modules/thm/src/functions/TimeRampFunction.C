@@ -25,6 +25,8 @@ TimeRampFunction::TimeRampFunction(const InputParameters & parameters)
     _final_value(getParam<Real>("final_value")),
     _ramp_duration(getParam<Real>("ramp_duration")),
     _initial_time(getParam<Real>("initial_time")),
+
+    _ramp_end_time(_initial_time + _ramp_duration),
     _ramp_slope((_final_value - _initial_value) / _ramp_duration)
 {
 }
@@ -32,12 +34,11 @@ TimeRampFunction::TimeRampFunction(const InputParameters & parameters)
 Real
 TimeRampFunction::value(Real t, const Point & /*p*/) const
 {
-  if (t < _initial_time)
-    mooseError("Time is less than this object's 'initial_time' parameter.");
-
   const Real elapsed_time = t - _initial_time;
 
-  if (elapsed_time > _ramp_duration)
+  if (t < _initial_time)
+    return _initial_value;
+  else if (t > _ramp_end_time)
     return _final_value;
   else
     return _initial_value + _ramp_slope * elapsed_time;
