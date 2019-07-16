@@ -70,7 +70,9 @@
 []
 
 [Outputs]
-  execute_on = 'timestep_end'
-  file_base = out_wedge
-  exodus = true
+  [png]
+    type = PNGOutput
+    resolution = 1
+    color = RWB
+  []
 []

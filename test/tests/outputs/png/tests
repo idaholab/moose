@@ -1,0 +1,31 @@
+[Tests]
+  [image_tests]
+    requirement = 'MOOSE shall be able to produce png images:'
+    issues = '#12846'
+    design = 'PNGOutput.md'
+
+    [square_domain]
+      type = 'CheckFiles'
+      input = 'simple_transient_diffusion.i'
+      check_files = 'simple_transient_diffusion_png_001.png'
+      
+      detail = 'for 2D square images,'
+    []
+    
+    [adv_diff_reaction]
+      type = 'CheckFiles'
+      input = 'adv_diff_reaction_test.i'
+      check_files = 'adv_diff_reaction_test_png_001.png'
+      max_parallel = 1 # Test uses PETSc options that require a serial run
+      
+      detail = 'arbitrary shapped domains,'
+    []
+    [wedge]
+      type = 'CheckFiles'
+      input = 'wedge.i'
+      check_files = 'wedge_png_001.png'
+      
+      detail = 'and complex shapes with periodic boudary conditions.'
+    []
+  []  
+[]
