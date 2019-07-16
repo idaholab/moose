@@ -199,6 +199,8 @@ addActionTypes(Syntax & syntax)
 
   registerTask("add_algebraic_rm", false);
   registerTask("attach_algebraic_rm", true);
+  registerTask("add_coupling_rm", false);
+  registerTask("attach_coupling_rm", true);
   registerTask("init_problem", true);
   registerTask("check_copy_nodal_vars", true);
   registerTask("copy_nodal_vars", true);
@@ -225,9 +227,6 @@ addActionTypes(Syntax & syntax)
   registerTask("setup_function_complete", false);
   registerTask("setup_variable_complete", false);
   registerTask("ready_to_init", true);
-  appendMooseObjectTask("ready_to_init", InterfaceKernel);
-  appendMooseObjectTask("ready_to_init", VectorInterfaceKernel);
-  appendMooseObjectTask("ready_to_init", DGKernel);
 
   // Output related actions
   registerTask("add_output_aux_variables", true);
@@ -306,7 +305,9 @@ addActionTypes(Syntax & syntax)
                            "(add_material)"
                            "(add_output_aux_variables)"
                            "(add_algebraic_rm)"
+                           "(add_coupling_rm)"
                            "(attach_algebraic_rm)"
+                           "(attach_coupling_rm)"
                            "(init_problem)"
                            "(delete_remote_elements_post_equation_systems_init)"
                            "(add_output)"

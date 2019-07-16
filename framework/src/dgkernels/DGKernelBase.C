@@ -59,7 +59,8 @@ validParams<DGKernelBase>()
   // DG Kernels always need one layer of ghosting
   params.addRelationshipManager("ElementSideNeighborLayers",
                                 Moose::RelationshipManagerType::GEOMETRIC |
-                                    Moose::RelationshipManagerType::ALGEBRAIC);
+                                    Moose::RelationshipManagerType::ALGEBRAIC |
+                                    Moose::RelationshipManagerType::COUPLING);
   params.registerBase("DGKernel");
 
   return params;

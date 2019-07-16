@@ -33,6 +33,8 @@ public:
   virtual std::string getInfo() const override;
   virtual bool operator==(const RelationshipManager & rhs) const override;
 
+  void dofmap_reinit() override;
+
 protected:
   virtual void internalInit() override;
 
@@ -40,4 +42,3 @@ protected:
   /// applicable and necessary when using DistributedMesh.
   unsigned short _layers;
 };
-

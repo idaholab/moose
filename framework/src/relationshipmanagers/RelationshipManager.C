@@ -67,6 +67,7 @@ RelationshipManager::RelationshipManager(const InputParameters & parameters)
         "mesh",
         "Mesh is null in RelationshipManager constructor. This could well be because No mesh file "
         "was supplied and no generation block was provided")),
+    _dof_map(nullptr),
     _attach_geometric_early(getParam<bool>("attach_geometric_early")),
     _rm_type(getParam<Moose::RelationshipManagerType>("rm_type")),
     _use_displaced_mesh(getParam<bool>("use_displaced_mesh"))

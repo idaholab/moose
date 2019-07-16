@@ -57,7 +57,7 @@ ProxyRelationshipManager::operator()(const MeshBase::const_element_iterator & /*
         (*(*gf_it))(other_elements_begin, other_elements_end, p, other_coupled_elements);
   }
 
-  // If we're geometric - run all the algebraic ghosting functors from the other system
+  // If we're algebraic - run all the algebraic ghosting functors from the other system
   if (isType(Moose::RelationshipManagerType::ALGEBRAIC))
   {
     auto gf_it = _other_system->get_dof_map().algebraic_ghosting_functors_begin();
