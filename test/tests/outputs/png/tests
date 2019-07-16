@@ -16,6 +16,7 @@
       type = 'CheckFiles'
       input = 'adv_diff_reaction_test.i'
       check_files = 'adv_diff_reaction_test_png_001.png'
+      max_parallel = 1 # Test uses PETSc options that require a serial run
       
       detail = 'arbitrary shapped domains,'
     []
