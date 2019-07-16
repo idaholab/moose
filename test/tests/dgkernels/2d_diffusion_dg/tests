@@ -24,5 +24,6 @@
     issues = '#12601'
     design = 'FEProblemSolve.md'
     allow_warnings = True # for PETSc versions < 3.9
+    max_parallel = 4 # Can't have zero dofs on any process for MatResetPreallocation
   []
 []
