@@ -16,6 +16,11 @@ MOOSE input file syntax basically works like this:
   field6 = 42.42 # floating point number
   field7 = true # boolean (false, on, off - case insensitive)
 
+  field8 = 'item0 item1 item2' # array of items (strings or numbers)
+  field9 = 'item00 item01 ;
+            item10 item11 ;
+            item20' # double indexed array (can even be jagged)
+
   [subsection]
     foo = 42
   [] # close subsection
@@ -92,3 +97,7 @@ Here are some important details about how brace-expressions are evaluated:
 - If there are no arguments in the brace-expression beyond the "cmd" (e.g. `${foo}`), then the
   `replace` command is implied: e.g. `${foo}` means `${replace foo}`.
 
+## Overridding input parameters from the command line.
+
+See the [CommandLine.md] object for information on how input parameters can be
+changed on the command line.

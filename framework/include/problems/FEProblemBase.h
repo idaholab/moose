@@ -1082,6 +1082,7 @@ public:
   virtual void computeResidualType(const NumericVector<Number> & soln,
                                    NumericVector<Number> & residual,
                                    TagID tag);
+
   /**
    * Form a residual vector for a set of tags. It should not be called directly
    * by users.

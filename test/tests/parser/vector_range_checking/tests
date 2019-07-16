@@ -1,56 +1,87 @@
 [Tests]
-  [./realvectorlength]
-    type = 'RunException'
-    input = 'all_pass.i'
-    expect_err = "Range check failed for parameter Materials/vecrangecheck/rv3"
-    cli_args = 'Materials/vecrangecheck/rv3="1.0 2.0"'
-  [../]
-  [./intvectorlength]
-    type = 'RunException'
-    input = 'all_pass.i'
-    expect_err = "Range check failed for parameter Materials/vecrangecheck/iv3"
-    cli_args = 'Materials/vecrangecheck/iv3="1 2"'
-  [../]
-  [./allelementcheck]
-    type = 'RunException'
-    input = 'all_pass.i'
-    expect_err = "Range check failed for parameter Materials/vecrangecheck/rvp\n\tExpression: rvp > 0\n\t Component: 1"
-    cli_args = 'Materials/vecrangecheck/rvp="1.0 -2.0 3.0"'
-  [../]
-  [./elementcompare_unsigned_int]
-    type = 'RunException'
-    input = 'all_pass.i'
-    expect_err = "Range check failed for parameter Materials/vecrangecheck/uvg"
-    cli_args = 'Materials/vecrangecheck/uvg="1 2"'
-  [../]
-  [./elementcompare_long]
-    type = 'RunException'
-    input = 'all_pass.i'
-    expect_err = "Range check failed for parameter Materials/vecrangecheck/lvg"
-    cli_args = 'Materials/vecrangecheck/lvg="1 2"'
-  [../]
-  [./elementcompare_int]
-    type = 'RunException'
-    input = 'all_pass.i'
-    expect_err = "Range check failed for parameter Materials/vecrangecheck/ivg"
-    cli_args = 'Materials/vecrangecheck/ivg="1 2"'
-  [../]
-  [./elementcompare_real]
-    type = 'RunException'
-    input = 'all_pass.i'
-    expect_err = "Range check failed for parameter Materials/vecrangecheck/rvg"
-    cli_args = 'Materials/vecrangecheck/rvg="1.0 2.0"'
-  [../]
-  [./outofbounds]
+  issues = '#3988'
+  design = 'InputParameters.md'
+
+  [vector_len_checks]
+     requirement = 'The system shall support vector size checking on input parameter vectors:'
+
+     [realvectorlength]
+       type = 'RunException'
+       input = 'all_pass.i'
+       expect_err = "Range check failed for parameter Materials/vecrangecheck/rv3"
+       cli_args = 'Materials/vecrangecheck/rv3="1.0 2.0"'
+
+       detail = 'for ints,'
+     []
+     [intvectorlength]
+       type = 'RunException'
+       input = 'all_pass.i'
+       expect_err = "Range check failed for parameter Materials/vecrangecheck/iv3"
+       cli_args = 'Materials/vecrangecheck/iv3="1 2"'
+
+       detail = 'for Reals.'
+     []
+  []
+
+  [vector_elem_checks]
+    requirement = 'The system shall support vector element checking:'
+
+    [all_element_check]
+      type = 'RunException'
+      input = 'all_pass.i'
+      expect_err = "Range check failed for parameter Materials/vecrangecheck/rvp\n\tExpression: rvp > 0\n\t Component: 1"
+      cli_args = 'Materials/vecrangecheck/rvp="1.0 -2.0 3.0"'
+
+      detail = 'against constant expressions,'
+    []
+    [elementcompare_unsigned_int]
+      type = 'RunException'
+      input = 'all_pass.i'
+      expect_err = "Range check failed for parameter Materials/vecrangecheck/uvg"
+      cli_args = 'Materials/vecrangecheck/uvg="1 2"'
+
+      detail = 'against other unsigned int vector elements,'
+    []
+    [elementcompare_long]
+      type = 'RunException'
+      input = 'all_pass.i'
+      expect_err = "Range check failed for parameter Materials/vecrangecheck/lvg"
+      cli_args = 'Materials/vecrangecheck/lvg="1 2"'
+
+      detail = 'against other long vector elements,'
+    []
+    [elementcompare_int]
+      type = 'RunException'
+      input = 'all_pass.i'
+      expect_err = "Range check failed for parameter Materials/vecrangecheck/ivg"
+      cli_args = 'Materials/vecrangecheck/ivg="1 2"'
+
+      detail = 'against other int vector elements, and'
+    []
+    [elementcompare_real]
+      type = 'RunException'
+      input = 'all_pass.i'
+      expect_err = "Range check failed for parameter Materials/vecrangecheck/rvg"
+      cli_args = 'Materials/vecrangecheck/rvg="1.0 2.0"'
+
+      detail = 'against other Real vector elements.'
+    []
+  []
+
+  [outofbounds]
     type = 'RunException'
     input = 'all_pass.i'
     expect_err = "Error parsing expression: rvl_10 > 0\nOut of range variable rvl_10"
     cli_args = 'Materials/vecrangecheck/rvl="1.0 2.0"'
-  [../]
-  [./checkempty]
+
+    requirement = 'The system shall support vector bounds checking on input parameter vectors.'
+  []
+  [checkempty]
     type = 'RunException'
     input = 'all_pass.i'
     expect_err = "Range checking empty vector: rvp > 0"
     cli_args = 'Materials/vecrangecheck/rvp=""'
-  [../]
+
+    requirement = 'The system shall support checking for non-empty input parameter vectors.'
+  []
 []

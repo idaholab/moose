@@ -1,4 +1,7 @@
 [Tests]
+  design = 'Parser.md'
+  issues = '#5649'
+
   [./param_substitution_cli]
     type = 'Exodiff'
     input = 'param_substitution.i'
@@ -6,6 +9,8 @@
     # Here we provide the parameter we want to sub on the Command line
     cli_args = 'FILENAME=special_string'
     exodiff = 'out_special_string.e'
+
+    requirement = 'The system shall support parameter substitution in input files using command line variable expressions.'
   [../]
 
   [./param_substitution_in_file]
@@ -14,5 +19,7 @@
 
     exodiff = 'out_special_string.e'
     prereq = 'param_substitution_cli'
+
+    requirement = 'The system shall support parameter substitution in input files using variable expressions from within the same input file.'
   [../]
 []

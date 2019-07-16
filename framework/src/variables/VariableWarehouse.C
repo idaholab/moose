@@ -71,7 +71,7 @@ VariableWarehouse::addBoundaryVar(const std::set<BoundaryID> & boundary_ids,
 void
 VariableWarehouse::addBoundaryVars(
     const std::set<BoundaryID> & boundary_ids,
-    const std::map<std::string, std::vector<MooseVariableFEBase *>> & vars)
+    const std::unordered_map<std::string, std::vector<MooseVariableFEBase *>> & vars)
 {
   for (const auto & bid : boundary_ids)
     for (const auto & it : vars)

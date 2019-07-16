@@ -1,8 +1,13 @@
 [Tests]
+  design = 'CommandLine.md'
+  issues = '#581'
+
   [./test]
     type = 'Exodiff'
     input = 'cli_arg_test.i'
     exodiff = 'out.e'
     cli_args = 'BCs/left/value=2 Materials/empty/block=1'
+
+    requirement = 'The system shall support the ability to override input file parameters from the command line.'
   [../]
 []

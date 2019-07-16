@@ -102,46 +102,10 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal)
   _ad_default_vector_gradient.resize(_coupleable_max_qps);
 }
 
-Coupleable::~Coupleable()
-{
-  for (auto & it : _default_value)
-    for (auto itt : it.second)
-    {
-      itt->release();
-      delete itt;
-    }
-  for (auto & it : _default_vector_value)
-  {
-    it.second->release();
-    delete it.second;
-  }
-  for (auto & it : _ad_default_value)
-  {
-    it.second->release();
-    delete it.second;
-  }
-  for (auto & it : _ad_default_vector_value)
-  {
-    it.second->release();
-    delete it.second;
-  }
-
-  _default_value_zero.release();
-  _default_gradient.release();
-  _default_second.release();
-  _default_vector_value_zero.release();
-  _default_vector_gradient.release();
-  _default_vector_curl.release();
-  _ad_default_gradient.release();
-  _ad_default_second.release();
-  _ad_default_vector_gradient.release();
-}
-
 bool
 Coupleable::isCoupled(const std::string & var_name, unsigned int i)
 {
-  std::map<std::string, std::vector<MooseVariableFEBase *>>::iterator it =
-      _coupled_vars.find(var_name);
+  auto it = _coupled_vars.find(var_name);
   if (it != _coupled_vars.end())
     return (i < it->second.size());
   else
@@ -297,29 +261,27 @@ Coupleable::getDefaultValue(const std::string & var_name, unsigned int comp)
                var_name,
                " is out of range.");
 
-  std::map<std::string, std::vector<VariableValue *>>::iterator default_value_it =
-      _default_value.find(var_name);
+  auto default_value_it = _default_value.find(var_name);
   if (default_value_it == _default_value.end())
   {
-    _default_value[var_name] = {
-        new VariableValue(_coupleable_max_qps, _c_parameters.defaultCoupledValue(var_name, 0))};
+    _default_value[var_name].emplace_back(libmesh_make_unique<VariableValue>(
+        _coupleable_max_qps, _c_parameters.defaultCoupledValue(var_name, 0)));
     for (unsigned int j = 1; j < _c_parameters.numberDefaultCoupledValues(var_name); ++j)
-      _default_value[var_name].push_back(
-          new VariableValue(_coupleable_max_qps, _c_parameters.defaultCoupledValue(var_name, j)));
+      _default_value[var_name].emplace_back(libmesh_make_unique<VariableValue>(
+          _coupleable_max_qps, _c_parameters.defaultCoupledValue(var_name, j)));
     default_value_it = _default_value.find(var_name);
   }
 
-  return default_value_it->second[comp];
+  return default_value_it->second[comp].get();
 }
 
 VectorVariableValue *
 Coupleable::getDefaultVectorValue(const std::string & var_name)
 {
-  std::map<std::string, VectorVariableValue *>::iterator default_value_it =
-      _default_vector_value.find(var_name);
+  auto default_value_it = _default_vector_value.find(var_name);
   if (default_value_it == _default_vector_value.end())
   {
-    VectorVariableValue * value = new VectorVariableValue(_coupleable_max_qps, 0);
+    auto value = libmesh_make_unique<VectorVariableValue>(_coupleable_max_qps, 0);
     bool already_warned = false;
     for (unsigned int qp = 0; qp < _coupleable_max_qps; ++qp)
       for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
@@ -341,10 +303,11 @@ Coupleable::getDefaultVectorValue(const std::string & var_name)
           (*value)[qp](i) = 0;
         }
       }
-    default_value_it = _default_vector_value.insert(std::make_pair(var_name, value)).first;
+    default_value_it =
+        _default_vector_value.insert(std::make_pair(var_name, std::move(value))).first;
   }
 
-  return default_value_it->second;
+  return default_value_it->second.get();
 }
 
 ArrayVariableValue *

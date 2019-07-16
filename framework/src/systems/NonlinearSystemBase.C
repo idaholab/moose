@@ -3180,11 +3180,17 @@ NonlinearSystemBase::computeScalingJacobian(NonlinearImplicitSystem & sys)
 
   if (dynamic_cast<PetscMatrix<Real> *>(sys.matrix))
   {
+#if !PETSC_VERSION_LESS_THAN(3, 9, 0)
     _console << "\nPerforming automatic scaling calculation\n\n";
 
     TIME_SECTION(_compute_scaling_jacobian_timer);
 
     auto & petsc_matrix = *static_cast<PetscMatrix<Real> *>(sys.matrix);
+
+    if (!petsc_matrix.local_m())
+      mooseError("MOOSE doesn't currently support automatic scaling when there are any processes "
+                 "owning zero dofs. Check back soon :-)");
+
     _computing_initial_jacobian = true;
     _fe_problem.computeJacobianSys(sys, *_current_solution, *sys.matrix);
     _computing_initial_jacobian = false;
@@ -3250,6 +3256,15 @@ NonlinearSystemBase::computeScalingJacobian(NonlinearImplicitSystem & sys)
     applyScalingFactors(inverse_scaling_factors);
     if (auto displaced_problem = _fe_problem.getDisplacedProblem().get())
       displaced_problem->systemBaseNonlinear().applyScalingFactors(inverse_scaling_factors);
+
+    // Now it's essential that we reset the sparsity pattern of the matrix
+    petsc_matrix.reset_preallocation();
+
+#else
+    mooseWarning("Automatic scaling requires a PETSc version of 3.9.0 or greater, so no automatic "
+                 "scaling is going to be performed");
+#endif
   }
+
 #endif
 }

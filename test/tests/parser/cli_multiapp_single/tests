@@ -1,4 +1,7 @@
 [Tests]
+  design = 'CommandLine.md'
+  issues = '#2137'
+
   [./cli_override_single]
     type = 'Exodiff'
     input = 'dt_from_master.i'
@@ -6,15 +9,19 @@
 
     # Multiapp Overrides
     cli_args = 'sub_app1:BCs/right/value=10 sub_app3:BCs/right/value=30'
+
+    requirement = 'The system shall support the ability to change individual SubApp input file syntax from the command line.'
   [../]
 
   [./cli_override_error_check]
-    type = RunException
+    type = 'RunException'
     input = 'dt_from_master.i'
     expect_err = "unused command line parameter 'sub_app4:BCs/right/value=10'"
 
     # Multiapp Overrides (out of range value)
     cli_args = 'sub_app4:BCs/right/value=10'
-    prereq = cli_override_single
+    prereq = 'cli_override_single'
+
+    requirement = 'The system shall produce an error when a SubApp command line override index is not valid.'
   [../]
 []

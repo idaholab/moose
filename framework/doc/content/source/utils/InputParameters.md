@@ -19,3 +19,11 @@ applying or transferring common parameters to avoid several manual lines for set
 and corresponding documentation here:
 
 !listing framework/include/utils/InputParameters.h  start=BEGIN APPLY PARAMETER METHODS end=END APPLY PARAMETER METHODS
+
+## Range Checked Parameters
+
+The InputParameters object supports parsed expressions for various bounds checking of the user input so that
+custom logic does not need to be implemented in every end-user object. The range checking expression is always
+the second to last paramter right before the doc string.
+
+!listing framework/include/utils/InputParameters.h  start=BEGIN RANGE CHECKED PARAMETER METHODS end=END RANGE CHECKED PARAMETER METHODS
