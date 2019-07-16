@@ -68,7 +68,8 @@ validParams<InterfaceKernelBase>()
   // Need one layer of ghosting
   params.addRelationshipManager("ElementSideNeighborLayers",
                                 Moose::RelationshipManagerType::GEOMETRIC |
-                                    Moose::RelationshipManagerType::ALGEBRAIC);
+                                    Moose::RelationshipManagerType::ALGEBRAIC |
+                                    Moose::RelationshipManagerType::COUPLING);
 
   return params;
 }
