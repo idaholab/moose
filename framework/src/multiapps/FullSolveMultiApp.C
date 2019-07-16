@@ -21,6 +21,7 @@ InputParameters
 validParams<FullSolveMultiApp>()
 {
   InputParameters params = validParams<MultiApp>();
+  params.addClassDescription("Performs a complete simulation during each execution.");
   params.addParam<bool>(
       "no_backup_and_restore",
       false,

@@ -16,7 +16,10 @@ template <>
 InputParameters
 validParams<AddMultiAppAction>()
 {
-  return validParams<MooseObjectAction>();
+  InputParameters params = validParams<MooseObjectAction>();
+  params.addClassDescription(
+      "MooseObjectAction for creating objects from sub-blocks within the MultiApps block.");
+  return params;
 }
 
 AddMultiAppAction::AddMultiAppAction(InputParameters params) : MooseObjectAction(params) {}
