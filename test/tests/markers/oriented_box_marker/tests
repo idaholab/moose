@@ -1,7 +1,12 @@
 [Tests]
+  issues = '#2514'
+  design = 'OrientedBoxMarker.md'
+
   [./obm]
     type = 'Exodiff'
     input = 'obm.i'
     exodiff = 'obm_out.e'
+
+    requirement = "The system shall support the ability to mark elements for mesh adaptivity based on a bounding box with arbitrary orientation."
   [../]
 []

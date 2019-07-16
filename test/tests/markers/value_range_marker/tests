@@ -1,8 +1,13 @@
 [Tests]
+  issues = '#1815'
+  design = 'ValueRangeMarker.md'
+
   [./test]
     type = 'Exodiff'
     input = 'value_range_marker_test.i'
     exodiff = 'value_range_marker_test_out.e'
     scale_refine = 2
+
+    requirement = "The system shall include the ability to mark elements within a finite element mesh for adaptivity based on if the value of a variable is within a specific range."
   [../]
 []

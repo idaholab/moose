@@ -59,13 +59,13 @@
 []
 
 [Adaptivity]
-  [./Indicators]
-    [./error]
+  [Indicators]
+    [error]
       type = LaplacianJumpIndicator
       variable = u
       scale_by_flux_faces = true
-    [../]
-  [../]
+    []
+  []
 []
 
 [Executioner]

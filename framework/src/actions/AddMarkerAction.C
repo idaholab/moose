@@ -16,7 +16,9 @@ template <>
 InputParameters
 validParams<AddMarkerAction>()
 {
-  return validParams<MooseObjectAction>();
+  InputParameters params = validParams<MooseObjectAction>();
+  params.addClassDescription("Action for adding Marker object to a simulation.");
+  return params;
 }
 
 AddMarkerAction::AddMarkerAction(InputParameters params) : MooseObjectAction(params) {}

@@ -21,6 +21,7 @@ InputParameters
 validParams<AddElementalFieldAction>()
 {
   InputParameters params = validParams<Action>();
+  params.addClassDescription("Adds elemental auxiliary variable for adaptivity system.");
   params.addParam<std::vector<SubdomainName>>("block", "The block id where this object lives.");
 
   return params;

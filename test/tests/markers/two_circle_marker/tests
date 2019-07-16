@@ -1,18 +1,31 @@
 [Tests]
-  [./two_circle_marker]
-    type = 'Exodiff'
-    input = 'two_circle_marker.i'
-    exodiff = 'two_circle_marker_out.e'
-  [../]
-  [./two_circle_marker_coarsen]
-    type = 'Exodiff'
-    input = 'two_circle_marker_coarsen.i'
-    exodiff = 'two_circle_marker_coarsen_out.e-s002'
-  [../]
-  [./two_circle_marker_gaussian_ic]
-    type = 'Exodiff'
-    input = 'two_circle_marker_gaussian_ic.i'
-    exodiff = 'two_circle_marker_gaussian_ic_out.e-s002'
-    max_parallel = 6 # Diffs with distributed mesh on 7-10 processors
-  [../]
+  issues = '#8890'
+  design = 'Markers/index.md'
+
+  [group]
+    requirement = "The system shall support the capability of creating a tool for marking finite elements for mesh refinement, for example:"
+
+    [two_circle_marker]
+      type = 'Exodiff'
+      input = 'two_circle_marker.i'
+      exodiff = 'two_circle_marker_out.e'
+
+      detail = "adding elements within the intersection of two circles;"
+    []
+    [two_circle_marker_coarsen]
+      type = 'Exodiff'
+      input = 'two_circle_marker_coarsen.i'
+      exodiff = 'two_circle_marker_coarsen_out.e-s002'
+
+      detail = "adding elements within the intersection of two circles and removing elements outside the circles; and"
+    []
+    [two_circle_marker_gaussian_ic]
+      type = 'Exodiff'
+      input = 'two_circle_marker_gaussian_ic.i'
+      exodiff = 'two_circle_marker_gaussian_ic_out.e-s002'
+      max_parallel = 6 # Diffs with distributed mesh on 7-10 processors
+
+      detail = "performing adaptivity when a non-uniform initial condition is defined."
+    []
+  []
 []

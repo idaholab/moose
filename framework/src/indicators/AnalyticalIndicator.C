@@ -18,8 +18,8 @@ validParams<AnalyticalIndicator>()
 {
   InputParameters params = validParams<ElementIntegralIndicator>();
   params.addRequiredParam<FunctionName>("function", "The analytic solution to compare against");
-  params.addClassDescription(
-      "Compute the difference between an unknown variable and an analytical solution.");
+  params.addClassDescription("Compute the square of the error as the difference between an unknown "
+                             "variable and an analytical solution.");
   return params;
 }
 

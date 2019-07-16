@@ -1,8 +1,12 @@
 [Tests]
+  issues = '#1566'
+  design = 'UniformMarker.md'
+
   [./test]
     type = 'Exodiff'
     input = 'uniform_marker.i'
     exodiff = 'uniform_marker_out.e'
-    group = 'requirements'
+
+    requirement = "The system shall support marking the entire finite element mesh for refinement."
   [../]
 []

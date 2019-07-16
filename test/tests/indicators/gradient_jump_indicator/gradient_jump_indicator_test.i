@@ -60,12 +60,12 @@
 
 # Mesh Indicator System
 [Adaptivity]
-  [./Indicators]
-    [./error]
+  [Indicators]
+    [error]
       type = GradientJumpIndicator
       variable = u
-    [../]
-  [../]
+    []
+  []
 []
 
 [Executioner]

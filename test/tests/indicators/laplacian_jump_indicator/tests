@@ -1,18 +1,31 @@
 [Tests]
-  [./test_biharmonic]
-    type = 'Exodiff'
-    input = 'biharmonic.i'
-    exodiff = 'biharmonic_out.e'
-  [../]
-  [./test_biharmonic_weak_bc]
-    type = 'Exodiff'
-    input = 'biharmonic.i'
-    exodiff = 'biharmonic_weak_bc_out.e'
-    cli_args = "BCs/active='all_value all_laplacian' Outputs/file_base=biharmonic_weak_bc_out"
-  [../]
-  [./test_biharmonic_transient]
-    type = 'Exodiff'
-    input = 'biharmonic_transient.i'
-    exodiff = 'biharmonic_transient_out.e'
-  [../]
+  issues = '#1275'
+  design = 'LaplacianJumpIndicator.md'
+
+  [group]
+  requirement = "The system shall include the ability to compute the square of the change in the Laplacian of a variable across element boundaries for the purpose of performing automatic mesh adaptivity:"
+
+    [test_biharmonic]
+      type = 'Exodiff'
+      input = 'biharmonic.i'
+      exodiff = 'biharmonic_out.e'
+
+      detail = "with a penalty based flux boundary condition; "
+    []
+    [test_biharmonic_weak_bc]
+      type = 'Exodiff'
+      input = 'biharmonic.i'
+      exodiff = 'biharmonic_weak_bc_out.e'
+      cli_args = "BCs/active='all_value all_laplacian' Outputs/file_base=biharmonic_weak_bc_out"
+
+      detail = "with a weakly imposed flux boundary condition; and"
+    []
+    [test_biharmonic_transient]
+      type = 'Exodiff'
+      input = 'biharmonic_transient.i'
+      exodiff = 'biharmonic_transient_out.e'
+
+      detail = "for transient calculations."
+    []
+  []
 []

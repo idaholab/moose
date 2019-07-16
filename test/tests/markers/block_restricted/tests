@@ -1,7 +1,12 @@
 [Tests]
+  issues = '#6665'
+  design = 'Markers/index.md'
+
   [./test]
     type = Exodiff
     input = marker_block.i
     exodiff = marker_block_out.e
+
+    requirement = "The system shall include the ability to mark a mesh subdomain for uniform refinement."
   [../]
 []

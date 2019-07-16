@@ -1,8 +1,13 @@
 [Tests]
+  issues = '#1275'
+  design = 'syntax/Adaptivity/index.md BoxMarker.md'
+
   [./test]
     type = 'Exodiff'
     input = 'dont_mark_test.i'
     exodiff = 'dont_mark_test_out.e'
     scale_refine = 2
+
+    requirement = "The system shall include the ability to mark elements within a subdomain to be unchanged for mesh adaptivity."
   [../]
 []
