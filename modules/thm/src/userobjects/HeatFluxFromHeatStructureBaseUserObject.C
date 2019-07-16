@@ -12,6 +12,7 @@ validParams<HeatFluxFromHeatStructureBaseUserObject>()
                                                      "Boundary name on the flow channel mesh");
   params.addRequiredParam<BoundaryName>("master_boundary",
                                         "Boundary name on the heat structure mesh");
+  params.addRequiredCoupledVar("P_hf", "Heat flux perimeter");
   params.addClassDescription(
       "Base class for caching heat flux between flow channels and heat structures.");
   return params;
@@ -19,7 +20,7 @@ validParams<HeatFluxFromHeatStructureBaseUserObject>()
 
 HeatFluxFromHeatStructureBaseUserObject::HeatFluxFromHeatStructureBaseUserObject(
     const InputParameters & parameters)
-  : ElementUserObject(parameters)
+  : ElementUserObject(parameters), _P_hf(coupledValue("P_hf"))
 {
   // master element centroids
   std::vector<Point> master_points;
@@ -127,6 +128,9 @@ HeatFluxFromHeatStructureBaseUserObject::execute()
   unsigned int n_qpts = _qrule->n_points();
   dof_id_type nearest_elem_id = _nearest_elem_ids[_current_elem->id()];
 
+  _heated_perimeter[_current_elem->id()].resize(n_qpts);
+  _heated_perimeter[nearest_elem_id].resize(n_qpts);
+
   _heat_flux[_current_elem->id()].resize(n_qpts);
   _heat_flux[nearest_elem_id].resize(n_qpts);
   for (_qp = 0; _qp < n_qpts; _qp++)
@@ -136,6 +140,9 @@ HeatFluxFromHeatStructureBaseUserObject::execute()
 
     _heat_flux[_current_elem->id()][_qp] = q_wall;
     _heat_flux[nearest_elem_id][nearest_qp] = q_wall;
+
+    _heated_perimeter[_current_elem->id()][_qp] = _P_hf[_qp];
+    _heated_perimeter[nearest_elem_id][nearest_qp] = _P_hf[_qp];
   }
 
   if (_fe_problem.currentlyComputingJacobian())
@@ -163,10 +170,24 @@ HeatFluxFromHeatStructureBaseUserObject::threadJoin(const UserObject & y)
 {
   const HeatFluxFromHeatStructureBaseUserObject & uo =
       static_cast<const HeatFluxFromHeatStructureBaseUserObject &>(y);
+  for (auto & it : uo._heated_perimeter)
+    _heated_perimeter[it.first] = it.second;
   for (auto & it : uo._heat_flux)
     _heat_flux[it.first] = it.second;
   for (auto & it : uo._heat_flux_jacobian)
     _heat_flux_jacobian[it.first] = it.second;
+}
+
+const std::vector<Real> &
+HeatFluxFromHeatStructureBaseUserObject::getHeatedPerimeter(dof_id_type element_id) const
+{
+  Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+  auto it = _heated_perimeter.find(element_id);
+  if (it != _heated_perimeter.end())
+    return it->second;
+  else
+    mooseError(
+        name(), ": Requested heated perimeter for element ", element_id, " was not computed.");
 }
 
 const std::vector<Real> &
