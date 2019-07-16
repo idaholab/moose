@@ -1,27 +1,30 @@
 [Tests]
-  [adv_diff_reaction]
-    type = 'CheckFiles'
-    input = 'adv_diff_reaction_test.i'
-    design = 'PNGOutput.md'
-    check_files = 'adv_diff_reaction_test_png_001.png'
+  [image_tests]
+    requirement = 'MOOSE shall be able to produce png images:'
     issues = '#12846'
-    requirement = 'MOOSE shall be able to produce png images'
-    max_parallel = 1
-  []
-  [simple_transient_diff]
-    type = 'CheckFiles'
-    input = 'simple_transient_diffusion.i'
     design = 'PNGOutput.md'
-    check_files = 'simple_transient_diffusion_png_001.png'
-    issues = '#12846'
-    requirement = 'MOOSE shall be able to produce png images'
-  []
-  [wedge]
-    type = 'CheckFiles'
-    input = 'wedge.i'
-    design = 'PNGOutput.md'
-    check_files = 'wedge_png_001.png'
-    issues = '#12846'
-    requirement = 'MOOSE shall be able to produce png images'
-  []
+
+    [square_domain]
+      type = 'CheckFiles'
+      input = 'simple_transient_diffusion.i'
+      check_files = 'simple_transient_diffusion_png_001.png'
+      
+      detail = 'for 2D square images,'
+    []
+    
+    [adv_diff_reaction]
+      type = 'CheckFiles'
+      input = 'adv_diff_reaction_test.i'
+      check_files = 'adv_diff_reaction_test_png_001.png'
+      
+      detail = 'arbitrary shapped domains,'
+    []
+    [wedge]
+      type = 'CheckFiles'
+      input = 'wedge.i'
+      check_files = 'wedge_png_001.png'
+      
+      detail = 'and complex shapes with periodic boudary conditions.'
+    []
+  []  
 []
