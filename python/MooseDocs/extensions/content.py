@@ -105,7 +105,7 @@ class ContentExtension(command.CommandExtension):
         return headings
 
 class ContentCommand(command.CommandComponent):
-    COMMAND = 'contents' #TODO: Change this to content after format is working
+    COMMAND = ('content', 'contents') #TODO: Change this to content after format is working
     SUBCOMMAND = None
 
     @staticmethod
@@ -120,22 +120,24 @@ class ContentCommand(command.CommandComponent):
         return parent
 
 class AtoZCommand(command.CommandComponent):
-    COMMAND = 'contents'
+    COMMAND = ('content', 'contents')
     SUBCOMMAND = 'a-to-z'
 
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
+        settings['location'] = (u'', "The markdown content directory to build contents.")
         settings['level'] = (2, 'Heading level for A, B,... headings.')
         settings['buttons'] = (True, 'Display buttons linking to the A, B,... headings.')
         return settings
 
     def createToken(self, parent, info, page):
-        AtoZToken(parent, level=self.settings['level'], buttons=self.settings['buttons'])
+        AtoZToken(parent, location=self.settings['location'], level=self.settings['level'],
+                  buttons=self.settings['buttons'])
         return parent
 
 class TableOfContentsCommand(command.CommandComponent):
-    COMMAND = 'contents'
+    COMMAND = ('content', 'contents')
     SUBCOMMAND = 'toc'
 
     @staticmethod
