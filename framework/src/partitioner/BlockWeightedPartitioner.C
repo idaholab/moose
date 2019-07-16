@@ -34,29 +34,31 @@ validParams<BlockWeightedPartitioner>()
 }
 
 BlockWeightedPartitioner::BlockWeightedPartitioner(const InputParameters & params)
-  : PetscExternalPartitioner(params),
-    _blocks(getParam<std::vector<SubdomainName>>("block")),
-    _weights(getParam<std::vector<dof_id_type>>("weight")),
-    _mesh(*getParam<MooseMesh *>("mesh"))
+  : PetscExternalPartitioner(params), _mesh(*getParam<MooseMesh *>("mesh"))
 {
-  if (_blocks.size() != _weights.size())
+  // Vector the block names supplied by the user via the input file
+  auto blocks = getParam<std::vector<SubdomainName>>("block");
+  // Block weights
+  auto weights = getParam<std::vector<dof_id_type>>("weight");
+
+  if (blocks.size() != weights.size())
     paramError("block",
                "Number of weights ",
-               _weights.size(),
+               weights.size(),
                " does not match with the number of blocks ",
-               _blocks.size());
+               blocks.size());
 
   // Get the IDs from the supplied names
-  auto block_ids = _mesh.getSubdomainIDs(_blocks);
+  auto block_ids = _mesh.getSubdomainIDs(blocks);
 
-  if (block_ids.size() != _blocks.size())
+  if (block_ids.size() != blocks.size())
     paramError("block", "One or more specified blocks was not found on the mesh ");
 
-  _blocks_to_weights.reserve(_weights.size());
+  _blocks_to_weights.reserve(weights.size());
 
   for (MooseIndex(block_ids.size()) i = 0; i < block_ids.size(); i++)
   {
-    _blocks_to_weights[block_ids[i]] = _weights[i];
+    _blocks_to_weights[block_ids[i]] = weights[i];
   }
 }
 
