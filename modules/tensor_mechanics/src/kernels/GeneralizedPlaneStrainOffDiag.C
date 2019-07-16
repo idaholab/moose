@@ -118,8 +118,7 @@ GeneralizedPlaneStrainOffDiag::computeDispOffDiagJacobianScalar(unsigned int com
   if (jvar == _scalar_out_of_plane_strain_var)
   {
     DenseMatrix<Number> & ken = _assembly.jacobianBlock(_var.number(), jvar);
-    DenseMatrix<Number> kne(ken.n(), ken.m());
-    kne.zero();
+    DenseMatrix<Number> & kne = _assembly.jacobianBlock(jvar, _var.number());
     MooseVariableScalar & jv = _sys.getScalarVariable(_tid, jvar);
 
     // Set appropriate components for scalar kernels, including in the cases where a planar model is
@@ -146,13 +145,6 @@ GeneralizedPlaneStrainOffDiag::computeDispOffDiagJacobianScalar(unsigned int com
                                              component) *
                          _grad_test[_i][_qp](component);
         }
-
-    unsigned int nnodes = _current_elem->n_nodes();
-    std::vector<dof_id_type> ivdofs(nnodes);
-    for (unsigned int i = 0; i < nnodes; ++i)
-      ivdofs[i] = _current_elem->node_ptr(i)->dof_number(_sys.number(), _var.number(), 0);
-
-    _assembly.cacheJacobianBlock(kne, jv.dofIndices(), ivdofs, jv.scalingFactor());
   }
 }
 
