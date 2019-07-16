@@ -9,14 +9,14 @@
     [./fp_liquid]
       type = IdealGasFluidProperties
       gamma = 1.4
-      R = 286.7
+      molar_mass = 0.02900055737704918
       mu = 1.823e-05
       k = 0.02568
     [../]
     [./fp_vapor]
       type = IdealGasFluidProperties
       gamma = 1.1
-      R = 300
+      molar_mass = 0.027714866
       mu = 1.7e-05
       k = 0.05
     [../]

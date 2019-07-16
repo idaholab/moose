@@ -10,7 +10,7 @@
     [./fp]
       type = IdealGasFluidProperties
       gamma = 1.4
-      R = 0.71428571428571428571
+      molar_mass = 11.640243719999999
     [../]
   [../]
 []

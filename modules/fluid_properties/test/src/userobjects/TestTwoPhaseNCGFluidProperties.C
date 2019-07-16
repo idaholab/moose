@@ -35,14 +35,14 @@ TestTwoPhaseNCGFluidProperties::TestTwoPhaseNCGFluidProperties(const InputParame
       const std::string class_name = "IdealGasFluidProperties";
       InputParameters params = _app.getFactory().getValidParams(class_name);
       params.set<Real>("gamma") = 1.4;
-      params.set<Real>("R") = 270;
+      params.set<Real>("molar_mass") = 0.030794295555555556;
       _fe_problem.addUserObject(class_name, "test_fp_liquid", params);
     }
     {
       const std::string class_name = "IdealGasFluidProperties";
       InputParameters params = _app.getFactory().getValidParams(class_name);
       params.set<Real>("gamma") = 1.1;
-      params.set<Real>("R") = 300;
+      params.set<Real>("molar_mass") = 0.027714866;
       params.set<Real>("T_c") = 100;
       params.set<Real>("rho_c") = 300;
       _fe_problem.addUserObject(class_name, "test_fp_vapor", params);
