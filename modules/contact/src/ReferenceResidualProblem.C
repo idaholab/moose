@@ -229,7 +229,8 @@ ReferenceResidualProblem::initialSetup()
   {
     for (unsigned int i = 0; i < _group_variables.size(); ++i)
     {
-      bool same_variable = true;
+      unsigned int num_scalar_vars = 0;
+      unsigned int num_field_vars = 0;
       if (_group_variables[i].size() > 1)
       {
         for (unsigned int j = 0; j < _group_variables[i].size(); ++j)
@@ -238,18 +239,16 @@ ReferenceResidualProblem::initialSetup()
           {
             if (_group_variables[i][j] == s.variable_name(var_num))
             {
-              if (j == 0)
-                same_variable = nonlinear_sys.isScalarVariable(_soln_vars[var_num]);
+              if (nonlinear_sys.isScalarVariable(_soln_vars[var_num]))
+                ++num_scalar_vars;
               else
-                same_variable =
-                    (same_variable == nonlinear_sys.isScalarVariable(_soln_vars[var_num]) ? true
-                                                                                          : false);
+                ++num_field_vars;
               break;
             }
           }
         }
       }
-      if (!same_variable)
+      if (num_scalar_vars > 0 && num_field_vars > 0)
         mooseWarning("In the 'group_variables' parameter, standard variables and scalar variables "
                      "are grouped together in group ",
                      i);
