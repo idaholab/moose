@@ -59,6 +59,8 @@ protected:
 
   /// initial conditions option
   const MooseEnum _ic_option;
+  /// area function name
+  const FunctionName & _A_fn_name;
 
   /// option to use slope reconstruction
   const bool _use_slope_reconstruction;

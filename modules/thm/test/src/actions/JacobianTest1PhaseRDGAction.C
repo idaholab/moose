@@ -26,6 +26,8 @@ validParams<JacobianTest1PhaseRDGAction>()
   MooseEnum ic_option("constant riemann_L riemann_LM riemann_RM riemann_R");
   params.addRequiredParam<MooseEnum>("ic_option", ic_option, "IC option");
 
+  params.addParam<FunctionName>("A_function", "2.0", "Area function");
+
   params.addParam<bool>("use_slope_reconstruction", true, "Use slope reconstruction?");
 
   params.set<std::string>("fe_family") = "MONOMIAL";
@@ -46,6 +48,7 @@ JacobianTest1PhaseRDGAction::JacobianTest1PhaseRDGAction(InputParameters params)
     _numerical_flux_name(getParam<UserObjectName>("numerical_flux")),
     _boundary_flux_name(getParam<UserObjectName>("boundary_flux")),
     _ic_option(getParam<MooseEnum>("ic_option")),
+    _A_fn_name(getParam<FunctionName>("A_function")),
     _use_slope_reconstruction(getParam<bool>("use_slope_reconstruction")),
     _reconstruction_material_name("reconstruction_material"),
     _direction_name("direction"),
@@ -225,9 +228,9 @@ void
 JacobianTest1PhaseRDGAction::addAuxVariables()
 {
   addAuxVariable(_A_name, _fe_family, _fe_order);
-  addConstantIC(_A_name, 2.0);
+  addFunctionIC(_A_name, _A_fn_name);
   addAuxVariable(_A_linear_name, "LAGRANGE", "FIRST");
-  addConstantIC(_A_linear_name, 2.0);
+  addFunctionIC(_A_linear_name, _A_fn_name);
 }
 
 void
