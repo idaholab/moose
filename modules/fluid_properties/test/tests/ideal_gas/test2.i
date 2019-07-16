@@ -125,8 +125,7 @@
   [./FluidProperties]
     [./idealgas]
       type = IdealGasFluidProperties
-      cp = 938.75
-      cv = 669.8
+      gamma = 1.401537772469394
       molar_mass = 0.0319988
     [../]
   []
