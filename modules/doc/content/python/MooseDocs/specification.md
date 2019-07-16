@@ -42,32 +42,32 @@ tables. [user-ext] provides a list of extensions that are useful for those writi
 !table id=user-ext caption=List of extensions useful for writing "MooseDown".
 | Extension | Description |
 | :- | :- |
-| [/core.md] | Basic markdown syntax such as code blocks, lists, and bold text. |
-| [/autolink.md] | Automatic linking across pages within markdown. |
-| [/table.md] | Provides means for implementing tables using traditional markdown format. |
-| [/katex.md] | Enables use of KaTeX rendered equations. |
-| [/bibtex.md] | Enables use of BibTeX citations and bibliographies. |
-| [/common.md] | Defines a means for defining global shortcut syntax. |
-| [/listing.md] | Provides commands for including source code directly from the repository. |
-| [/include.md] | Allows for markdown files to be included in other markdown files. |
-| [/alert.md] | Creates alert boxes to draw attention to content. |
-| [/media.md] | Extension for including images and movies. |
-| [/appsyntax.md] | Enables the use of MOOSE application syntax within markdown files. |
-| [/sqa.md] | Provides tools for writing software quality documentation using templates. |
-| [/layout.md] | Provides tools for creating columns and tabs via markdown. |
-| [/acronym.md] | Provides means for defining and listing acronyms across pages. |
-| [/graph.md] | Adds [plotly](https://plot.ly) support for creating charts. |
-| [/gallery.md] | Tools for building image galleries. |
-| [/style.md] | Command for setting text styling. |
+| [extensions/core.md] | Basic markdown syntax such as code blocks, lists, and bold text. |
+| [extensions/autolink.md] | Automatic linking across pages within markdown. |
+| [extensions/table.md] | Provides means for implementing tables using traditional markdown format. |
+| [extensions/katex.md] | Enables use of KaTeX rendered equations. |
+| [extensions/bibtex.md] | Enables use of BibTeX citations and bibliographies. |
+| [extensions/common.md] | Defines a means for defining global shortcut syntax. |
+| [extensions/listing.md] | Provides commands for including source code directly from the repository. |
+| [extensions/include.md] | Allows for markdown files to be included in other markdown files. |
+| [extensions/alert.md] | Creates alert boxes to draw attention to content. |
+| [extensions/media.md] | Extension for including images and movies. |
+| [extensions/appsyntax.md] | Enables the use of MOOSE application syntax within markdown files. |
+| [extensions/sqa.md] | Provides tools for writing software quality documentation using templates. |
+| [extensions/layout.md] | Provides tools for creating columns and tabs via markdown. |
+| [extensions/acronym.md] | Provides means for defining and listing acronyms across pages. |
+| [extensions/graph.md] | Adds [plotly](https://plot.ly) support for creating charts. |
+| [extensions/gallery.md] | Tools for building image galleries. |
+| [extensions/style.md] | Command for setting text styling. |
 
 !table id=devel-ext caption=List of extensions useful for writing extensions for "MooseDown".
 | Extension | Description |
 | :- | :- |
-| [/command.md] | Basis for creating extensions that rely on commands (see [/appsyntax.md]). |
-| [/floats.md] | Tools for creating numbered and/or captioned content (see [/media.md]). |
-| [/devel.md] | Tools for documenting MooseDocs extensions. |
-| [/package.md] | Tools for linking to MOOSE environment packages. |
-| [/contents.md] | Creates complete list of markdown pages within a directory. |
+| [extensions/command.md] | Basis for creating extensions that rely on commands (see [extensions/appsyntax.md]). |
+| [extensions/floats.md] | Tools for creating numbered and/or captioned content (see [extensions/media.md]). |
+| [extensions/devel.md] | Tools for documenting MooseDocs extensions. |
+| [extensions/package.md] | Tools for linking to MOOSE environment packages. |
+| [extensions/content.md] | Creates complete list of markdown pages within a directory. |
 
 [AST]: https://en.wikipedia.org/wiki/Abstract_syntax_tree
 
