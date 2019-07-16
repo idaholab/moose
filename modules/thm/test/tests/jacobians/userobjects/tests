@@ -1,0 +1,245 @@
+[Tests]
+  # free inflow boundary flux
+  [./boundary_flux_3eqn_free_inflow]
+    type = 'PetscJacobianTester'
+    input = 'boundary_flux_3eqn_free_inflow.i'
+    ratio_tol = 1e-12
+    difference_tol = 1e-12
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./boundary_flux_3eqn_ghost_free_inflow]
+    type = 'PetscJacobianTester'
+    input = 'boundary_flux_3eqn_ghost_free_inflow.i'
+    ratio_tol = 1e-6
+    difference_tol = 1e-6
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+
+  # free outflow boundary flux
+  [./boundary_flux_3eqn_free_outflow]
+    type = 'PetscJacobianTester'
+    input = 'boundary_flux_3eqn_free_outflow.i'
+    ratio_tol = 1e-6
+    difference_tol = 1e-5
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./boundary_flux_3eqn_ghost_free_outflow]
+    type = 'PetscJacobianTester'
+    input = 'boundary_flux_3eqn_ghost_free_outflow.i'
+    ratio_tol = 1e-6
+    difference_tol = 1e-5
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./boundary_flux_7eqn_ghost_free_outflow]
+    type = 'PetscJacobianTester'
+    input = 'boundary_flux_7eqn_ghost_free_outflow.i'
+    ratio_tol = 1e-6
+    difference_tol = 1e-4
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+
+  # mass flow rate and temperature boundary flux
+  [./boundary_flux_3eqn_ghost_mass_flow_rate_temperature]
+    type = 'PetscJacobianTester'
+    input = 'boundary_flux_3eqn_ghost_mass_flow_rate_temperature.i'
+    ratio_tol = 1e-6
+    difference_tol = 1e-6
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./boundary_flux_7eqn_ghost_mass_flow_rate_temperature]
+    type = 'PetscJacobianTester'
+    input = 'boundary_flux_7eqn_ghost_mass_flow_rate_temperature.i'
+    ratio_tol = 1e-6
+    difference_tol = 1000
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+
+  # pressure boundary flux
+  [./boundary_flux_3eqn_ghost_pressure]
+    type = 'PetscJacobianTester'
+    input = 'boundary_flux_3eqn_ghost_pressure.i'
+    ratio_tol = 1e-6
+    difference_tol = 1e-6
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+
+  [./boundary_flux_7eqn_ghost_pressure]
+    type = 'PetscJacobianTester'
+    input = 'boundary_flux_7eqn_ghost_pressure.i'
+    ratio_tol = 1e-6
+    difference_tol = 1e-4
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+
+  # stagnation pressure and temperature boundary flux
+  [./boundary_flux_3eqn_ghost_stagnation_pressure_temperature]
+    type = 'PetscJacobianTester'
+    input = 'boundary_flux_3eqn_ghost_stagnation_pressure_temperature.i'
+    ratio_tol = 1e-6
+    difference_tol = 1e-6
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+
+  [./boundary_flux_7eqn_ghost_stagnation_pressure_temperature]
+    type = 'PetscJacobianTester'
+    input = 'boundary_flux_7eqn_ghost_stagnation_pressure_temperature.i'
+    ratio_tol = 1e-6
+    difference_tol = 1e-5
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+
+  # wall boundary flux
+  [./boundary_flux_3eqn_ghost_wall]
+    type = 'PetscJacobianTester'
+    input = 'boundary_flux_3eqn_ghost_wall.i'
+    ratio_tol = 1e-6
+    difference_tol = 1e-6
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+
+  [./boundary_flux_7eqn_ghost_wall]
+    type = 'PetscJacobianTester'
+    input = 'boundary_flux_7eqn_ghost_wall.i'
+    ratio_tol = 1e-6
+    difference_tol = 1e-5
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+
+  # centered flux
+  [./numerical_flux_3eqn_centered]
+    type = 'PetscJacobianTester'
+    input = 'numerical_flux_3eqn_centered.i'
+    ratio_tol = 1e-6
+    difference_tol = 1e-6
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+
+  [./numerical_flux_7eqn_conservative_centered_rdg]
+    type = 'PetscJacobianTester'
+    input = 'numerical_flux_7eqn_conservative_centered_rdg.i'
+    ratio_tol = 1e-6
+    difference_tol = 1e-5
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+
+  # non-conservative flux
+  [./numerical_flux_7eqn_nonconservative]
+    type = 'PetscJacobianTester'
+    input = 'numerical_flux_7eqn_nonconservative.i'
+    ratio_tol = 1e-6
+    difference_tol = 1e-5
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+
+  # sum flux
+  [./numerical_flux_7eqn_sum]
+    type = 'PetscJacobianTester'
+    input = 'numerical_flux_7eqn_sum.i'
+    ratio_tol = 1e-6
+    difference_tol = 1e-5
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+
+  # HLLC flux with frozen acoustic wave speeds
+
+  # left region
+  [./numerical_flux_3eqn_hllc_frozen_left]
+    type = 'PetscJacobianTester'
+    input = 'numerical_flux_3eqn_hllc.i'
+    cli_args = 'JacobianTest1PhaseRDG/ic_option=riemann_L'
+    ratio_tol = 1e-6
+    difference_tol = 1e-5
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  # left star region
+  [./numerical_flux_3eqn_hllc_frozen_left_star]
+    type = 'PetscJacobianTester'
+    input = 'numerical_flux_3eqn_hllc.i'
+    cli_args = 'JacobianTest1PhaseRDG/ic_option=riemann_LM'
+    ratio_tol = 1
+    difference_tol = 25
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  # right star region
+  [./numerical_flux_3eqn_hllc_frozen_right_star]
+    type = 'PetscJacobianTester'
+    input = 'numerical_flux_3eqn_hllc.i'
+    cli_args = 'JacobianTest1PhaseRDG/ic_option=riemann_RM'
+    ratio_tol = 1
+    difference_tol = 25
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  # right region
+  [./numerical_flux_3eqn_hllc_frozen_right]
+    type = 'PetscJacobianTester'
+    input = 'numerical_flux_3eqn_hllc.i'
+    cli_args = 'JacobianTest1PhaseRDG/ic_option=riemann_R'
+    ratio_tol = 1e-5
+    difference_tol = 1e-5
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+
+  # HLLC flux with no approximation
+
+  # left region
+  [./numerical_flux_3eqn_hllc_left]
+    type = 'PetscJacobianTester'
+    input = 'numerical_flux_3eqn_hllc.i'
+    cli_args = 'JacobianTest1PhaseRDG/ic_option=riemann_L UserObjects/flux/use_approximate_jacobian=false'
+    ratio_tol = 1e-5
+    difference_tol = 1e-5
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  # left star region
+  [./numerical_flux_3eqn_hllc_left_star]
+    type = 'PetscJacobianTester'
+    input = 'numerical_flux_3eqn_hllc.i'
+    cli_args = 'JacobianTest1PhaseRDG/ic_option=riemann_LM UserObjects/flux/use_approximate_jacobian=false'
+    ratio_tol = 1e-5
+    difference_tol = 1e-5
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  # right star region
+  [./numerical_flux_3eqn_hllc_right_star]
+    type = 'PetscJacobianTester'
+    input = 'numerical_flux_3eqn_hllc.i'
+    cli_args = 'JacobianTest1PhaseRDG/ic_option=riemann_RM UserObjects/flux/use_approximate_jacobian=false'
+    ratio_tol = 1e-5
+    difference_tol = 1e-5
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  # right region
+  [./numerical_flux_3eqn_hllc_right]
+    type = 'PetscJacobianTester'
+    input = 'numerical_flux_3eqn_hllc.i'
+    cli_args = 'JacobianTest1PhaseRDG/ic_option=riemann_R UserObjects/flux/use_approximate_jacobian=false'
+    ratio_tol = 1e-5
+    difference_tol = 1e-5
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+[]
