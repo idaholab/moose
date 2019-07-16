@@ -6,7 +6,7 @@
     input = 'picard_master.i'
     exodiff = 'picard_master_out.e'
     rel_err = 5e-5  # Loosened for recovery tests
-    requirement = 'MOOSE shall provide an ability to do Picard iteration.'
+    requirement = 'The system shall provide an ability to perform iterative solves with sub-applications.'
   [../]
 
   [./master_relaxed]
@@ -14,7 +14,7 @@
     input = 'picard_relaxed_master.i'
     exodiff = 'picard_relaxed_master_out.e'
     rel_err = 5e-5  # Loosened for recovery tests
-    requirement = 'MOOSE shall provide an ability to relex solutions for Picard iteration.'
+    requirement = 'The system shall provide an ability to relax solutions with iterative solves with sub-applications.'
   [../]
 
   [./sub_relaxed]
@@ -22,13 +22,13 @@
     input = 'sub_relaxed_master.i'
     exodiff = 'sub_relaxed_master_out.e'
     rel_err = 5e-5  # Loosened for recovery tests
-    requirement = 'MOOSE shall provide an ability to relex subapp solutions along with the master solution for Picard iteration.'
+    requirement = 'The system shall provide an ability to relax sub-applications solutions along with the master solution for during iterative solves.'
   [../]
 
   [./bad_relax_factor]
     type = 'RunException'
     input = 'bad_relax_factor_master.i'
     expect_err = 'Expression: relaxation_factor>0 & relaxation_factor<2'
-    requirement = 'MOOSE shall error out if provided relaxation factor is less than or equal to 0 or greater than or equal to 2.'
+    requirement = 'The system shall error if provided relaxation factor that is less than or equal to 0 or greater than or equal to 2.'
   [../]
 []

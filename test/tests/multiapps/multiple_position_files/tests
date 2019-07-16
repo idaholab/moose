@@ -1,7 +1,12 @@
 [Tests]
+  issues = '#5784'
+  design = 'syntax/MultiApps/index.md'
+
   [./test]
     type = 'Exodiff'
     input = 'multiple_position_files.i'
     exodiff = 'multiple_position_files_out.e multiple_position_files_out_multi0.e multiple_position_files_out_multi1.e multiple_position_files_out_multi2.e multiple_position_files_out_multi3.e'
+
+    requirement = "The system shall be capable of running multiple sub-applications that are defined by input and position file pairs."
   [../]
 []

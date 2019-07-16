@@ -1,13 +1,24 @@
 [Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'master.i'
-    exodiff = 'master_out_sub0.e'
-  [../]
+  issues = '#1888'
+  design = 'syntax/MultiApps/index.md'
 
-  [./multilevel]
-    type = 'Exodiff'
-    input = 'multilevel_master.i'
-    exodiff = 'multilevel_master_out_sub0_sub0.e'
-  [../]
+  [group]
+    requirement = "The system shall support outputting sub-application data in a specified position"
+
+    [test]
+      type = 'Exodiff'
+      input = 'master.i'
+      exodiff = 'master_out_sub0.e'
+
+      detail = "for single and"
+    []
+
+    [multilevel]
+      type = 'Exodiff'
+      input = 'multilevel_master.i'
+      exodiff = 'multilevel_master_out_sub0_sub0.e'
+
+      detail = "multi-level sub-applications."
+    []
+  []
 []

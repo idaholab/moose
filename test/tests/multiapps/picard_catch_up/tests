@@ -1,4 +1,7 @@
 [Tests]
+  issues = '#10337'
+  design = 'syntax/MultiApps/index.md'
+
   [./test]
     type = 'Exodiff'
     input = 'master.i'
@@ -10,5 +13,7 @@
     allow_warnings = true
     petsc_version_release = true
     compiler = '!INTEL'
+
+    requirement = 'The system shall support performing iterative solves of sub-applications that perform additional time steps to maintain time step consistency with the master application.'
   [../]
 []

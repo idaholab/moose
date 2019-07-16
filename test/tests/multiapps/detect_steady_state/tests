@@ -1,7 +1,12 @@
 [Tests]
+  issues = '#1893'
+  design = 'syntax/MultiApps/index.md'
+
   [./test]
     type = 'Exodiff'
     input = 'master.i'
     exodiff = 'master_out.e master_out_sub0.e'
+
+    requirement = "The system shall include the ability to halt the execution of sub-applications when steady-state is detected."
   [../]
 []

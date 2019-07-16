@@ -1,15 +1,25 @@
 [Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'master.i'
-    exodiff = 'master_out_sub0.e-s002'
-    recover = false
-  [../]
+  issues = '#1970'
+  design = 'syntax/MultiApps/index.md'
 
-  [./multilevel]
-    type = 'Exodiff'
-    input = 'multilevel_master.i'
-    exodiff = 'multilevel_master_out.e multilevel_master_out_sub0.e multilevel_master_out_sub0.e-s002 multilevel_master_out_sub0_sub0.e multilevel_master_out_sub0_sub0.e-s002'
-    recover = false
-  [../]
+  [group]
+    requirement = "The system shall support the ability to reset a sub-application at a specified time during the simultation"
+    [test]
+      type = 'Exodiff'
+      input = 'master.i'
+      exodiff = 'master_out_sub0.e-s002'
+      recover = false
+
+      detail = "for single and"
+    []
+
+    [multilevel]
+      type = 'Exodiff'
+      input = 'multilevel_master.i'
+      exodiff = 'multilevel_master_out.e multilevel_master_out_sub0.e multilevel_master_out_sub0.e-s002 multilevel_master_out_sub0_sub0.e multilevel_master_out_sub0_sub0.e-s002'
+      recover = false
+
+      detail = "multi-level sub-applications."
+    []
+  []
 []

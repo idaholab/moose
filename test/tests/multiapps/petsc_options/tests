@@ -1,8 +1,13 @@
 [Tests]
+  issues = '#1872'
+  design = 'syntax/MultiApps/index.md'
+
   [./test]
     type = 'Exodiff'
     input = 'master.i'
     exodiff = 'master_out.e master_out_sub0.e'
     expect_out = '8 Linear'
+
+    requirement = "The system shall support the the ability to set solver options within sub-applications."
   [../]
 []
