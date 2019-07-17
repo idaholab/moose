@@ -164,7 +164,7 @@ def runCommand(cmd, cwd=None):
 def resultCharacterCount(results_dict):
     # { formatted_result_key : ( text, color ) }
     printable_items = []
-    for result_key, printable in results_dict.iteritems():
+    for result_key, printable in results_dict.items():
         if printable:
             printable_items.append(printable[0])
     return len(' '.join(printable_items))
@@ -184,7 +184,7 @@ def formatStatusMessage(job, status, message, options):
 
     # Add caveats if requested
     if job.isPass() and options.extra_info:
-        for check in options._checks.keys():
+        for check in list(options._checks.keys()):
             if job.specs.isValid(check) and not 'ALL' in job.specs[check]:
                 job.addCaveats(check)
 
@@ -285,7 +285,7 @@ def formatResult(job, options, result='', color=True, **kwargs):
 
     # If color, decorate those items which support it
     if color:
-        for format_rule, printable in formatted_results.iteritems():
+        for format_rule, printable in formatted_results.items():
             if printable and (printable[0] and printable[1]):
                 formatted_results[format_rule] = (colorText(printable[0], printable[1], **color_opts), printable[1])
 
@@ -344,7 +344,7 @@ def runExecutable(libmesh_dir, location, bin, args):
         libmesh_exe = libmesh_uninstalled2
 
     else:
-        print("Error! Could not find '" + bin + "' in any of the usual libmesh's locations!")
+        print(("Error! Could not find '" + bin + "' in any of the usual libmesh's locations!"))
         exit(1)
 
     return runCommand(libmesh_exe + " " + args).rstrip()
@@ -396,7 +396,7 @@ def getPetscVersion(libmesh_dir):
     minor_version = getLibMeshConfigOption(libmesh_dir, 'petsc_minor')
     subminor_version = getLibMeshConfigOption(libmesh_dir, 'petsc_subminor')
     if len(major_version) != 1 or len(minor_version) != 1:
-        print "Error determining PETSC version"
+        print("Error determining PETSC version")
         exit(1)
 
     return major_version.pop() + '.' + minor_version.pop() + '.' + subminor_version.pop()
@@ -419,13 +419,13 @@ def checkLogicVersionSingle(checks, iversion, package):
             return False
 
     # Logical match
-    if logic == '>' and map(int, checks[package].split(".")) > map(int, version.split(".")):
+    if logic == '>' and list(map(int, checks[package].split("."))) > list(map(int, version.split("."))):
         return True
-    elif logic == '>=' and map(int, checks[package].split(".")) >= map(int, version.split(".")):
+    elif logic == '>=' and list(map(int, checks[package].split("."))) >= list(map(int, version.split("."))):
         return True
-    elif logic == '<' and map(int, checks[package].split(".")) < map(int, version.split(".")):
+    elif logic == '<' and list(map(int, checks[package].split("."))) < list(map(int, version.split("."))):
         return True
-    elif logic == '<=' and map(int, checks[package].split(".")) <= map(int, version.split(".")):
+    elif logic == '<=' and list(map(int, checks[package].split("."))) <= list(map(int, version.split("."))):
         return True
 
     return False
@@ -507,7 +507,7 @@ def getLibMeshConfigOption(libmesh_dir, option):
             m = re.search(info['re_option'], contents)
             if m != None:
                 if 'options' in info:
-                    for value, option in info['options'].iteritems():
+                    for value, option in info['options'].items():
                         if m.group(1) == option:
                             option_set.add(value)
                 else:
@@ -523,7 +523,7 @@ def getLibMeshConfigOption(libmesh_dir, option):
             pass
 
     if success == 0:
-        print "Error! Could not find libmesh_config.h in any of the usual locations!"
+        print("Error! Could not find libmesh_config.h in any of the usual locations!")
         exit(1)
 
     return option_set
@@ -568,7 +568,7 @@ def addObjectsFromBlock(objs, node, block_name):
     """
     data = node.get(block_name, {})
     if data: # could be None so we can't just iterate over items
-        for name, block in data.iteritems():
+        for name, block in data.items():
             objs.add(name)
             addObjectNames(objs, block)
 
@@ -644,7 +644,7 @@ def deleteFilesAndFolders(test_dir, paths, delete_folders=True):
             try:
                 os.remove(full_path)
             except:
-                print("Unable to remove file: " + full_path)
+                print(("Unable to remove file: " + full_path))
 
     # Now try to delete directories that might have been created
     if delete_folders:
