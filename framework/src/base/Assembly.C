@@ -1092,7 +1092,7 @@ Assembly::reinitFEFace(const Elem * elem, unsigned int side)
   _current_normals.shallowCopy(
       const_cast<std::vector<Point> &>((*_holder_fe_face_helper[dim])->get_normals()));
 
-  _mapped_normals.resize(_current_normals.size(), nullptr);
+  _mapped_normals.resize(_current_normals.size(), Eigen::Map<RealDIMValue>(nullptr));
   for (unsigned int i = 0; i < _current_normals.size(); i++)
     // Note: this does NOT do any allocation.  It is "reconstructing" the object in place
     new (&_mapped_normals[i]) Eigen::Map<RealDIMValue>(const_cast<Real *>(&_current_normals[i](0)));

@@ -678,7 +678,7 @@ MooseVariableData<RealEigenVector>::computeValues()
     _mapped_grad_phi.resize(num_dofs);
     for (unsigned int i = 0; i < num_dofs; i++)
     {
-      _mapped_grad_phi[i].resize(nqp, nullptr);
+      _mapped_grad_phi[i].resize(nqp, Eigen::Map<RealDIMValue>(nullptr));
       for (unsigned int qp = 0; qp < nqp; qp++)
         // Note: this does NOT do any allocation.  It is "reconstructing" the object in place
         new (&_mapped_grad_phi[i][qp])
@@ -690,7 +690,7 @@ MooseVariableData<RealEigenVector>::computeValues()
     _mapped_grad_phi_face.resize(num_dofs);
     for (unsigned int i = 0; i < num_dofs; i++)
     {
-      _mapped_grad_phi_face[i].resize(nqp, nullptr);
+      _mapped_grad_phi_face[i].resize(nqp, Eigen::Map<RealDIMValue>(nullptr));
       for (unsigned int qp = 0; qp < nqp; qp++)
         // Note: this does NOT do any allocation.  It is "reconstructing" the object in place
         new (&_mapped_grad_phi_face[i][qp])
