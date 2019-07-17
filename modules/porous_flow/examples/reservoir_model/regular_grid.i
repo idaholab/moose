@@ -28,7 +28,7 @@
 []
 
 [Functions]
-  [./perm_md]
+  [./perm_md_fcn]
     type = PiecewiseMultilinear
     data_file = spe10_case1.data
   [../]
@@ -79,7 +79,7 @@
 [AuxKernels]
   [./perm_md]
     type = FunctionAux
-    function = perm_md
+    function = perm_md_fcn
     variable = perm_md
     execute_on = initial
   [../]
