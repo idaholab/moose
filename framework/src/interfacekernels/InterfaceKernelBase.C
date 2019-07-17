@@ -65,12 +65,11 @@ validParams<InterfaceKernelBase>()
       "length as diag_save_in. This vector specifies whether the corresponding aux_var should "
       "save-in jacobian contributions from the master ('m') or slave side ('s').");
 
-  // Need one layer of ghosting
+  // InterfaceKernels always need one layer of ghosting.
   params.addRelationshipManager("ElementSideNeighborLayers",
                                 Moose::RelationshipManagerType::GEOMETRIC |
                                     Moose::RelationshipManagerType::ALGEBRAIC |
                                     Moose::RelationshipManagerType::COUPLING);
-
   return params;
 }
 
