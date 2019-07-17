@@ -1,0 +1,12 @@
+[Tests]
+[./gravity_eq]
+  type = Exodiff
+  input = regular_grid.i
+  exodiff = regular_grid_out.e
+  threading = '!pthreads'
+  cli_args = 'Mesh/nx=10 Mesh/ny=10'
+  requirement = "PorousFlow shall be able to create a heterogeneous model using supplied heterogeneity data"
+  issues = '#13XXX'
+  design = 'porous_flow/heterogeneous_models.md'
+[../]
+[]
