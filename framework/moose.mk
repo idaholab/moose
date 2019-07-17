@@ -39,8 +39,8 @@ pyhit_srcfiles  := $(hit_DIR)/hit.cpp $(hit_DIR)/lex.cc $(hit_DIR)/parse.cc $(hi
 pyhit_LIB       := $(FRAMEWORK_DIR)/../python/hit.so
 
 # some systems have python2 but no python2-config command - fall back to python-config for them
-pyconfig := python2-config
-ifeq (, $(shell which python2-config 2>/dev/null))
+pyconfig := python3-config
+ifeq (, $(shell which python3-config 2>/dev/null))
   pyconfig := python-config
 endif
 

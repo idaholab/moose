@@ -8,7 +8,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import sys, itertools
-from StatusSystem import StatusSystem  # for proper error code
+from .StatusSystem import StatusSystem  # for proper error code
 
 class RaceChecker(object):
     """
@@ -56,7 +56,7 @@ class RaceChecker(object):
                     colissions[prereq] = shared
         for prereq in colissions:
             if prereq != "[]":
-                print("The following share " + prereq + " for their prereq(s)")
+                print(("The following share " + prereq + " for their prereq(s)"))
             else:
                 print("The following don't share any prereqs")
             for job in colissions[prereq]:

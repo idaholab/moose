@@ -145,7 +145,7 @@ cdef class Node:
     def kind(self):
         if self.type() != NodeType.Field:
             return FieldKind.NotField
-        
+
         f = <chit.Field *> self._cnode
         k = <int>f.kind()
         if k == <int>chit.Int:
@@ -220,9 +220,9 @@ cdef _initpynode(chit.Node* n, own=False):
     pyn = Node(own=own)
     pyn._cnode = n
     return pyn
-    
+
 def parse(fname, input):
-    cdef chit.Node* node = chit.parse(fname, input)
+    cdef chit.Node* node = chit.parse(fname.encode('utf-8'), input.encode('utf-8'))
     return _initpynode(node, own=True)
 
 cpdef explode(Node n):
@@ -231,4 +231,3 @@ cpdef explode(Node n):
 
 cpdef merge(Node src, Node dst):
     chit.merge(src._cnode, dst._cnode)
-

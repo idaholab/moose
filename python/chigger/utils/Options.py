@@ -8,7 +8,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 from __future__ import print_function
 import sys
 import textwrap

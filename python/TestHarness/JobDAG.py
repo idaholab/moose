@@ -7,7 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from schedulers.Job import Job
+from .schedulers.Job import Job
 from contrib import dag
 
 class JobDAG(object):
@@ -180,14 +180,14 @@ class JobDAG(object):
                     output_to_job[output_file].append(job)
 
         # Remove jobs which have accurate dependencies
-        for outfile, job_list in output_to_job.iteritems():
+        for outfile, job_list in output_to_job.items():
             for job in list(job_list):
                 for match_job in self.__job_dag.all_downstreams(job):
                     if match_job in job_list:
                         job_list.remove(match_job)
 
         # Left over multiple items in job_list are problematic
-        for outfile, job_list in output_to_job.iteritems():
+        for outfile, job_list in output_to_job.items():
             # Same test has duplicate output files
             if len(job_list) > 1 and len(set(job_list)) == 1:
                 job_list[0].setOutput('Duplicate output files:\n\t%s\n' % (outfile))
@@ -236,4 +236,4 @@ class JobDAG(object):
             for job in concurrent_jobs:
                 cloned_dag.delete_node(job)
 
-        print '\n###### JOB ORDER ######\n', ' '.join(job_order)
+        print('\n###### JOB ORDER ######\n', ' '.join(job_order))

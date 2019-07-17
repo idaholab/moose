@@ -8,20 +8,16 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import sys
-if sys.version_info[0:2] != (2, 7):
-    print("python 2.7 is required to run the test harness")
-    sys.exit(1)
-
 import itertools
 import os, re, inspect, errno, copy, json
 import shlex
-import RaceChecker
+from . import RaceChecker
 
 from socket import gethostname
 from FactorySystem.Factory import Factory
 from FactorySystem.Parser import Parser
 from FactorySystem.Warehouse import Warehouse
-import util
+from . import util
 import hit
 from mooseutils import HitNode, hit_parse
 
@@ -113,7 +109,7 @@ class TestHarness:
         self.error_code = 0x0
         self.keyboard_talk = True
         # Assume libmesh is a peer directory to MOOSE if not defined
-        if os.environ.has_key("LIBMESH_DIR"):
+        if "LIBMESH_DIR" in os.environ:
             self.libmesh_dir = os.environ['LIBMESH_DIR']
         else:
             self.libmesh_dir = os.path.join(self.moose_dir, 'libmesh', 'installed')
@@ -380,7 +376,7 @@ class TestHarness:
 
         if params.isValid('prereq'):
             if type(params['prereq']) != list:
-                print("Option 'prereq' needs to be of type list in " + params['test_name'])
+                print(("Option 'prereq' needs to be of type list in " + params['test_name']))
                 sys.exit(1)
             params['prereq'] = [relative_path.replace('/tests/', '') + '.' + item for item in params['prereq']]
 
@@ -470,7 +466,7 @@ class TestHarness:
                 self.printOutput(job, color)
 
                 # Print status with caveats
-                print(util.formatResult(job, self.options, caveats=True))
+                print((util.formatResult(job, self.options, caveats=True)))
 
                 timing = job.getTiming()
 
@@ -490,7 +486,7 @@ class TestHarness:
 
             # Just print current status without saving results
             else:
-                print(util.formatResult(job, self.options, result='RUNNING', caveats=False))
+                print((util.formatResult(job, self.options, result='RUNNING', caveats=False)))
 
     # Print final results, close open files, and exit with the correct error code
     def cleanup(self):
@@ -505,18 +501,18 @@ class TestHarness:
         # Print the results table again if a bunch of output was spewed to the screen between
         # tests as they were running
         if len(self.parse_errors) > 0:
-            print('\n\nParser Errors:\n' + ('-' * (util.TERM_COLS)))
+            print(('\n\nParser Errors:\n' + ('-' * (util.TERM_COLS))))
             for err in self.parse_errors:
-                print(util.colorText(err, 'RED', html=True, colored=self.options.colored, code=self.options.code))
+                print((util.colorText(err, 'RED', html=True, colored=self.options.colored, code=self.options.code)))
 
         if (self.options.verbose or (self.num_failed != 0 and not self.options.quiet)) and not self.options.dry_run:
-            print('\n\nFinal Test Results:\n' + ('-' * (util.TERM_COLS)))
+            print(('\n\nFinal Test Results:\n' + ('-' * (util.TERM_COLS))))
             for (job, exit_code, timing) in sorted(self.test_table, key=lambda x: x[1]):
-                print(util.formatResult(job, self.options, caveats=True))
+                print((util.formatResult(job, self.options, caveats=True)))
 
         time = clock() - self.start_time
 
-        print('-' * (util.TERM_COLS))
+        print(('-' * (util.TERM_COLS)))
 
         # Mask off TestHarness error codes to report parser errors
         fatal_error = ''
@@ -526,19 +522,19 @@ class TestHarness:
 
         # Alert the user to their session file
         if self.options.queueing:
-            print('Your session file is %s' % self.results_storage)
+            print(('Your session file is %s' % self.results_storage))
 
         # Print a different footer when performing a dry run
         if self.options.dry_run:
-            print('Processed %d tests in %.1f seconds.' % (self.num_passed+self.num_skipped, time))
+            print(('Processed %d tests in %.1f seconds.' % (self.num_passed+self.num_skipped, time)))
             summary = '<b>%d would run</b>'
             summary += ', <b>%d would be skipped</b>'
             summary += fatal_error
-            print(util.colorText( summary % (self.num_passed, self.num_skipped),  "", html = True, \
-                             colored=self.options.colored, code=self.options.code ))
+            print((util.colorText( summary % (self.num_passed, self.num_skipped),  "", html = True, \
+                             colored=self.options.colored, code=self.options.code )))
 
         else:
-            print('Ran %d tests in %.1f seconds.' % (self.num_passed+self.num_failed, time))
+            print(('Ran %d tests in %.1f seconds.' % (self.num_passed+self.num_failed, time)))
 
             if self.num_passed:
                 summary = '<g>%d passed</g>'
@@ -559,8 +555,8 @@ class TestHarness:
 
             summary += fatal_error
 
-            print(util.colorText( summary % (self.num_passed, self.num_skipped, self.num_pending, self.num_failed),  "", html = True, \
-                             colored=self.options.colored, code=self.options.code ))
+            print((util.colorText( summary % (self.num_passed, self.num_skipped, self.num_pending, self.num_failed),  "", html = True, \
+                             colored=self.options.colored, code=self.options.code )))
 
             # Perform any write-to-disc operations
             self.writeResults()
@@ -737,7 +733,7 @@ class TestHarness:
                     # This is a hidden file, controled by the TestHarness. So we probably shouldn't error
                     # and exit. Perhaps a warning instead, and create a new file? Down the road, when
                     # we use this file for PBS etc, this should probably result in an exception.
-                    print('INFO: Previous %s file is damaged. Creating a new one...' % (self.results_storage))
+                    print(('INFO: Previous %s file is damaged. Creating a new one...' % (self.results_storage)))
 
     def useExistingStorage(self):
         """ reasons for returning bool if we should use a previous results_storage file """
@@ -834,7 +830,7 @@ class TestHarness:
         self.options.runtags = [tag for tag in self.options.run.split(',') if tag != '']
 
         # Convert all list based options of length one to scalars
-        for key, value in vars(self.options).items():
+        for key, value in list(vars(self.options).items()):
             if type(value) == list and len(value) == 1:
                 setattr(self.options, key, value[0])
 
@@ -893,7 +889,7 @@ class TestHarness:
 
         # Update any keys from the environment as necessary
         if not self.options.method:
-            if os.environ.has_key('METHOD'):
+            if 'METHOD' in os.environ:
                 self.options.method = os.environ['METHOD']
             else:
                 self.options.method = 'opt'

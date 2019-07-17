@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -353,7 +353,7 @@ def verifyArgs(args):
         problems.append('Incorrect positional arguments, or you are trying to perform a diff and show a summary (can only do one or the other)')
 
     elif args.summary and args.comparison_file:
-        print 'Ignoring request to use config file while being asked to display a summary\n'
+        print('Ignoring request to use config file while being asked to display a summary\n')
 
     # Check if all custom args are populated correctly
     unify_custom_args = [x for x in [args.custom_columns, args.custom_abs_zero, args.custom_rel_err] if x != None]
@@ -367,7 +367,7 @@ def verifyArgs(args):
         problems.append('When supplying a config file (--comparison-file|-c), you can not use any --custom-* args')
 
     for a_problem in problems:
-        print a_problem
+        print(a_problem)
     if problems:
         sys.exit(1)
 
@@ -400,10 +400,10 @@ if __name__ == '__main__':
             errors = csv_differ.getNumErrors()
 
     for a_message in messages:
-        print a_message
+        print(a_message)
 
     if not errors and not args.summary:
-        print "Files are the same"
+        print("Files are the same")
 
     if errors:
         sys.exit(1)

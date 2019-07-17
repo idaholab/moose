@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -118,8 +118,8 @@ class TestrPostprocessorReader(unittest.TestCase):
         output, imports = data.repr()
 
         # Append testing content
-        output += ["print 'SHAPE:', data.data.shape"]
-        output += ["print 'VALUE:', data['snow_depth_set_1'][10]"]
+        output += ["print('SHAPE:', data.data.shape)"]
+        output += ["print('VALUE:', data['snow_depth_set_1'][10])"]
 
         # Write the test script
         script = '{}_repr.py'.format(self.__class__.__name__)

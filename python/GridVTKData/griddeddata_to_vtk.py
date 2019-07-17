@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -174,4 +174,3 @@ for i in range(len(t)):
 
 
 sys.exit(0)
-

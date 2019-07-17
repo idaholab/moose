@@ -1,7 +1,7 @@
 import os
 from mooseutils import colorText, git_ls_files, git_root_dir
 try:
-    from hit_load import hit_load
+    from .hit_load import hit_load
 except:
     raise ImportError('hit package failed to load, but it is required.')
 
