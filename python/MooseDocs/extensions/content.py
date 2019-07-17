@@ -205,7 +205,7 @@ class RenderAtoZ(components.RenderComponent):
 
         # Initialized alphabetized storage
         headings = self.extension.binContent(page, token['location'], ContentExtension.LETTER)
-        for letter in 'abcdefghijklmnopqrstuvwxyz':
+        for letter in '0123456789abcdefghijklmnopqrstuvwxyz':
             if letter not in headings:
                 headings[letter] = set()
 
@@ -215,7 +215,8 @@ class RenderAtoZ(components.RenderComponent):
             buttons.parent = None
 
         # Build lists
-        for letter, items in headings.iteritems():
+        for letter in sorted(headings.keys()):
+            items = headings[letter]
             id_ = uuid.uuid4()
             btn = html.Tag(buttons, 'a',
                            string=unicode(letter.upper()),
