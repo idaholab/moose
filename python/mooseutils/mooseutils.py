@@ -7,7 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from __future__ import print_function
+
 import os
 import re
 import collections
@@ -18,7 +18,7 @@ import time
 import cProfile as profile
 import pstats
 try:
-    from StringIO import StringIO
+    from io import StringIO
 except ImportError:
     from io import StringIO
 
@@ -61,7 +61,7 @@ def colorText(string, color, **kwargs):
         color_codes['CYAN']  = '\033[36m'
         color_codes['MAGENTA'] = '\033[35m'
 
-    if colored and not (os.environ.has_key('BITTEN_NOCOLOR') and os.environ['BITTEN_NOCOLOR'] == 'true'):
+    if colored and not ('BITTEN_NOCOLOR' in os.environ and os.environ['BITTEN_NOCOLOR'] == 'true'):
         if html:
             string = string.replace('<r>', color_codes['BOLD']+color_codes['RED'])
             string = string.replace('<c>', color_codes['BOLD']+color_codes['CYAN'])
@@ -142,7 +142,7 @@ def find_moose_executable_recursive(loc=os.getcwd(), **kwargs):
     Inputs: see 'find_moose_executable'
     """
     loc = loc.split(os.path.sep)
-    for i in xrange(len(loc), 0, -1):
+    for i in range(len(loc), 0, -1):
         current = os.path.sep + os.path.join(*loc[0:i])
         executable = find_moose_executable(current, show_error=False)
         if executable is not None:
@@ -253,7 +253,7 @@ def make_chunks(local, num=multiprocessing.cpu_count()):
         num[int]: The number of chunks (defaults to number of threads available)
     """
     k, m = divmod(len(local), num)
-    return (local[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in xrange(num))
+    return (local[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(num))
 
 def camel_to_space(text):
     """
@@ -277,9 +277,9 @@ def text_diff(text, gold):
     """
 
     # Convert to line
-    if isinstance(text, (str, unicode)):
+    if isinstance(text, str):
         text = text.splitlines(True)
-    if isinstance(gold, (str, unicode)):
+    if isinstance(gold, str):
         gold = gold.splitlines(True)
 
     # Perform diff

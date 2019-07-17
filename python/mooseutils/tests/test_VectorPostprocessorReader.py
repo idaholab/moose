@@ -62,7 +62,7 @@ class TestVectorPostprocessorReader(unittest.TestCase):
         self.assertEqual(data.data.shape, (3,6,3))
 
         # Check that times are loaded
-        self.assertEqual(list(data.data.keys().values), [1,3,7])
+        self.assertEqual(list(list(data.data.keys()).values), [1,3,7])
 
         # Check data
         y = data['y']
@@ -84,7 +84,7 @@ class TestVectorPostprocessorReader(unittest.TestCase):
         self.assertEqual(data.data.shape, (3,6,3))
 
         # Check that times are loaded
-        self.assertEqual(list(data.data.keys().values), [0,1,2])
+        self.assertEqual(list(list(data.data.keys()).values), [0,1,2])
 
         # Check data
         y = data['y']
@@ -110,7 +110,7 @@ class TestVectorPostprocessorReader(unittest.TestCase):
 
         # Check axis organized correctly
         self.assertEqual(data.data.shape, (3,6,3))
-        self.assertEqual(list(data.data.keys().values), [1,3,7])
+        self.assertEqual(list(list(data.data.keys()).values), [1,3,7])
         y = data['y']
         self.assertEqual(y[3][4], 8)
         self.assertEqual(y[7][4], 16)
@@ -142,7 +142,7 @@ class TestVectorPostprocessorReader(unittest.TestCase):
         data.update()
         self.assertTrue(data)
         self.assertEqual(data.data.shape, (2,6,3))
-        self.assertEqual(list(data.data.keys().values), [1,3])
+        self.assertEqual(list(list(data.data.keys()).values), [1,3])
 
         # Test data
         y = data['y']
@@ -173,7 +173,7 @@ class TestVectorPostprocessorReader(unittest.TestCase):
         data.update()
         self.assertTrue(data)
         self.assertEqual(data.data.shape, (2,6,3))
-        self.assertEqual(list(data.data.keys().values), [1,7])
+        self.assertEqual(list(list(data.data.keys()).values), [1,7])
 
         # Test data
         y = data['y']
