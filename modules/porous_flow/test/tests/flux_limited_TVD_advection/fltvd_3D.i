@@ -19,6 +19,10 @@
   [../]
 []
 
+[Problem]
+  error_on_jacobian_nonzero_reallocation=true
+[]
+
 [ICs]
   [./tracer]
     type = FunctionIC

@@ -38,7 +38,8 @@ validParams<AdvectiveFluxCalculatorBase>()
 
   params.addRelationshipManager("ElementPointNeighborLayers",
                                 Moose::RelationshipManagerType::GEOMETRIC |
-                                    Moose::RelationshipManagerType::ALGEBRAIC,
+                                    Moose::RelationshipManagerType::ALGEBRAIC |
+                                    Moose::RelationshipManagerType::COUPLING,
                                 [](const InputParameters &, InputParameters & rm_params) {
                                   rm_params.set<unsigned short>("layers") = 2;
                                 });
