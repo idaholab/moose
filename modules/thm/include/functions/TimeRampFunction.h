@@ -32,6 +32,9 @@ protected:
   const Real & _ramp_duration;
   /// Initial time
   const Real & _initial_time;
+
+  /// Ramp end time
+  const Real _ramp_end_time;
   /// Ramp slope
   const Real _ramp_slope;
 };
