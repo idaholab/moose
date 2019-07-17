@@ -1,8 +1,13 @@
 [Tests]
+  issues = '#10337'
+  design = 'syntax/MultiApps/index.md'
+
   [./test]
     type = 'Exodiff'
     input = 'master.i'
     exodiff = 'master_out_sub0.e master_out.e'
     allow_warnings = true
+
+    requirement = "The system shall support performing iterative solves of sub-applications that perform additional time steps to maintain time step consistency with the master application that re-uses the previous solution as the initial condition for subsequent iterations."
   [../]
 []

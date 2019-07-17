@@ -2,9 +2,18 @@
 
 !syntax description /MultiApps/CentroidMultiApp
 
-Creates a sub-app at the centroid of every element in the master app.  Extremely useful for doing multiscale solves
+## Description
 
-No special parameters, but this is BlockRestrictable so that you can restrict the sub-apps to only being generated on certain subdomains.
+Creates a sub-app at the centroid of every element in the master app, which can be leveraged for
+doing multiscale solves. This object requires no special parameters, but this is
+[block restrictable](BlockRestrictable.md) so that the sub-applications can be restricted to only
+be generated on specified subdomains.
+
+## Example Input Syntax
+
+The following code snippet demonstrates the creation of a CentroidMultiApp object.
+
+!listing centroid_multiapp/centroid_multiapp.i block=MultiApps
 
 !syntax parameters /MultiApps/CentroidMultiApp
 
