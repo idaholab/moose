@@ -12,9 +12,6 @@ PYTHONPREFIX ?= `$(pyconfig) --prefix`
 PYTHONCFLAGS ?= `$(pyconfig) --cflags`
 PYTHONLDFLAGS ?= `$(pyconfig) --ldflags`
 
-#PYTHONLDFLAGS ?= -L/Users/slauae/.conda/envs/python3/lib/python3.7/config-3.7m-darwin -lpython3.7m -ldl -framework CoreFoundation -framework CoreFoundation
-
-
 hit: main.cc parse.cc lex.cc braceexpr.cc braceexpr.h lex.h parse.h
 	$(CXX) -std=c++11 -g $(CXXFLAGS) $< parse.cc lex.cc braceexpr.cc -o $@
 
