@@ -32,13 +32,13 @@
     [./fp1]
       type = IdealGasFluidProperties
       gamma = 1.4
-      R = 290
+      molar_mass = 0.02867055103448276
     [../]
     # rho2 = 0.6666666667 kg/m^3
     [./fp2]
       type = IdealGasFluidProperties
       gamma = 1.2
-      R = 500
+      molar_mass = 0.0166289196
     [../]
     [./fp_2phase]
       type = TwoPhaseFluidPropertiesIndependent

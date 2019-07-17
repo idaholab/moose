@@ -10,12 +10,12 @@
     [./fp_nitrogen]
       type = IdealGasFluidProperties
       gamma = 1.4
-      R = 290
+      molar_mass = 0.02867055103448276
     [../]
     [./fp_primary]
       type = IdealGasFluidProperties
       gamma = 1.3
-      R = 300
+      molar_mass = 0.027714866
       T_c = 126.19
       rho_c = 313.189812
     [../]
