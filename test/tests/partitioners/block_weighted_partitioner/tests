@@ -1,6 +1,6 @@
-[Tests]  
+[Tests]
   [block_weight_partitioner]
-    requirement = 'The system shall support a block-weighted partitioner' 
+    requirement = 'The system shall support a block-weighted partitioner'
     design = '/BlockWeightedPartitioner.md'
     issues = '#13675'
 
@@ -13,7 +13,9 @@
       max_parallel = 4
       # different mode generates different partition
       mesh_mode = REPLICATED
-      
+      parmetis = true
+      # Parmetis generates different results when using 32 bit or 64 bit integers
+      dof_id_bytes = 4
       detail = 'when using ReplicatedMesh'
     []
 
@@ -27,7 +29,8 @@
       max_parallel = 4
       # different mode generates different partition
       mesh_mode = DISTRIBUTED
-      
+      parmetis = true
+      dof_id_bytes = 4
       detail = 'and when using DistributedMesh.'
     []
   []
