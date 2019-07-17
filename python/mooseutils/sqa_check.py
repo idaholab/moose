@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -97,11 +97,11 @@ def sqa_check_requirement_duplicates(working_dir=os.getcwd(), specs=['tests'], s
     for key, value in requirements.iteritems():
         if len(value) > 1:
             if count == 0:
-                print colorText('Duplicate Requirements Found:\n', 'YELLOW')
+                print(colorText('Duplicate Requirements Found:\n', 'YELLOW'))
             count += 1
             if len(key) > 80:
-                print colorText('{}...'.format(key[:80]), 'YELLOW')
+                print(colorText('{}...'.format(key[:80]), 'YELLOW'))
             for filename, path, line in value:
-                print '    {}:{}'.format(filename, line)
+                print('    {}:{}'.format(filename, line))
 
     return count

@@ -8,7 +8,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 """Wrapper for hit parser."""
-from __future__ import print_function
+
 import os
 import hit
 from . import message
@@ -199,7 +199,7 @@ def hit_load(filename):
     if os.path.exists(filename):
         with open(filename, 'r') as fid:
             content = fid.read()
-    elif isinstance(filename, (str, unicode)):
+    elif isinstance(filename, str):
         content = filename
     else:
         message.mooseError("Unable to load the hit file ", filename)
