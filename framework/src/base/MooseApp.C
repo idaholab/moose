@@ -1780,13 +1780,15 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
             dof_map.add_coupling_functor(*rm);
             rm->setDofMap(dof_map);
           }
-          else // algebraic
+          // If this rm is algebraic AND coupling, then in the case of the non-linear system there
+          // is no reason to add it to the DofMap twice. In the case of the aux system, it actually
+          // would be disastrous to add this rm because it's going to set a coupling matrix based on
+          // the non-linear system. So we don't add this rm to either system here if its also a
+          // coupling functor
+          else if (rm_type == Moose::RelationshipManagerType::ALGEBRAIC &&
+                   !rm->isType(Moose::RelationshipManagerType::COUPLING))
           {
-            // If we added this relationship manager as a coupling functor, there's no need to
-            // duplicate it as an algebraic ghosting functor
-            if (!rm->isType(Moose::RelationshipManagerType::COUPLING))
-              problem.getDisplacedProblem()->nlSys().dofMap().add_algebraic_ghosting_functor(*rm);
-
+            problem.getDisplacedProblem()->nlSys().dofMap().add_algebraic_ghosting_functor(*rm);
             problem.getDisplacedProblem()->auxSys().dofMap().add_algebraic_ghosting_functor(*rm);
           }
         }
@@ -1798,13 +1800,15 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
             dof_map.add_coupling_functor(*rm);
             rm->setDofMap(dof_map);
           }
-          else // algebraic
+          // If this rm is algebraic AND coupling, then in the case of the non-linear system there
+          // is no reason to add it to the DofMap twice. In the case of the aux system, it actually
+          // would be disastrous to add this rm because it's going to set a coupling matrix based on
+          // the non-linear system. So we don't add this rm to either system here if its also a
+          // coupling functor
+          else if (rm_type == Moose::RelationshipManagerType::ALGEBRAIC &&
+                   !rm->isType(Moose::RelationshipManagerType::COUPLING))
           {
-            // If we added this relationship manager as a coupling functor, there's no need to
-            // duplicate it as an algebraic ghosting functor
-            if (!rm->isType(Moose::RelationshipManagerType::COUPLING))
-              problem.getNonlinearSystemBase().dofMap().add_algebraic_ghosting_functor(*rm);
-
+            problem.getNonlinearSystemBase().dofMap().add_algebraic_ghosting_functor(*rm);
             problem.getAuxiliarySystem().dofMap().add_algebraic_ghosting_functor(*rm);
           }
         }

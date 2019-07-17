@@ -59,7 +59,7 @@ ElementSideNeighborLayers::operator==(const RelationshipManager & rhs) const
   if (!rm)
     return false;
   else
-    return _layers == rm->_layers && isType(rm->_rm_type);
+    return _layers == rm->_layers && isType(rm->_rm_type) && isSystemType(rm->_system_type);
 }
 
 void
