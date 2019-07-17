@@ -1,3 +1,13 @@
+# This test will show 2 layers of geometric ghosting and 1 layer of evaluable
+# ghosting. The 2 layers of geometric ghosting corresponds to the 2 layers we
+# have explicitly requested. The 1 layer of evaluable ghosting is generated
+# implicitly by libMesh. There are actually no algebraic ghosting functors in
+# this problem. However, we do have a default coupling functor that ordinarily
+# has an _n_layers of 0. **However**, because all the variables in our system
+# are discontinuous, libMesh is "smart" and assumes we are doing DG/FVM and
+# bumps the _n_layers for the default coupling functor to 1. When we add
+# remote dofs to the send_list, we examine both algebraic and coupling functors
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
