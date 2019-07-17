@@ -94,6 +94,10 @@ NonlinearSystem::NonlinearSystem(FEProblemBase & fe_problem, const std::string &
     _use_coloring_finite_difference(false),
     _computed_scaling(false)
 {
+  // The default coupling functor does not actually ghost any elements because it has _n_levels set
+  // to zero. What it DOES do is actually adds sparsity coupling between dofs within an element,
+  // which you might say is pretty important. Without this, even kernels would cause mallocs in
+  // MatSetValues
   _sys.get_dof_map().add_coupling_functor(
       _sys.get_dof_map().default_coupling(),
       false); // The false keeps it from getting added to the mesh
