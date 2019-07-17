@@ -55,16 +55,16 @@ protected:
   virtual void output(const ExecFlagType & type);
 
   // Variable to determine the size, or resolution, of the image.
-  unsigned int _resolution;
+  const unsigned int _resolution;
 
   // Way to specify color vs grayscale image creation.
-  MooseEnum _color;
+  const MooseEnum _color;
 
   // Indicates whether to make the background transparent.
-  bool _transparent_background;
+  const bool _transparent_background;
 
   // Controls transparency level for the general image.
-  Real _transparency;
+  const Real _transparency;
 
   /// Pointer the libMesh::MeshFunction object that the read data is stored
   std::unique_ptr<MeshFunction> _mesh_function;

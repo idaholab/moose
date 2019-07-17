@@ -36,8 +36,8 @@ validParams<PNGOutput>()
   params.addRangeCheckedParam<Real>("transparency",
                                     1,
                                     "transparency>=0 & transparency<=1",
-                                    "Value is between 1 and 0"
-                                    "where 1 is completely opaque and 0 is completely transparent"
+                                    "Value is between 0 and 1"
+                                    "where 0 is completely transparent and 1 is completely opaque. "
                                     "Default transparency of the image is no transparency.");
 
   return params;
@@ -258,7 +258,6 @@ PNGOutput::output(const ExecFlagType & /*type*/)
 void
 PNGOutput::makePNG()
 {
-
   // Get the max and min of the BoundingBox
   Point maxPoint = _box.max();
   Point minPoint = _box.min();
@@ -280,7 +279,7 @@ PNGOutput::makePNG()
   Real width = dist_x * _resolution;
   Real height = dist_y * _resolution;
   // Allocate resources.
-  std::vector<png_byte> row((width * 4) + 1);
+  std::vector<png_byte> row((width + 1) * 4);
 
   // Check if we can open and write to the file.
   MooseUtils::checkFileWriteable(png_file.str());
@@ -324,7 +323,7 @@ PNGOutput::makePNG()
   for (Real y = maxPoint(1); y >= minPoint(1); y -= 1. / _resolution)
   {
     pt(1) = y;
-    int indx = 0;
+    unsigned int index = 0;
     for (Real x = minPoint(0); x <= maxPoint(0); x += 1. / _resolution)
     {
       pt(0) = x;
@@ -332,11 +331,11 @@ PNGOutput::makePNG()
 
       // Determine whether to create the PNG in color or grayscale
       if (_color)
-        setRGB(&row.data()[indx * 4], applyScale(dv(0)));
+        setRGB(&row.data()[index * 4], applyScale(dv(0)));
       else
-        row.data()[indx] = applyScale(dv(0)) * 255;
+        row.data()[index] = applyScale(dv(0)) * 255;
 
-      indx++;
+      index++;
     }
     png_write_row(pngp, row.data());
   }
@@ -348,7 +347,7 @@ PNGOutput::makePNG()
   if (infop != nullptr)
     png_free_data(pngp, infop, PNG_FREE_ALL, -1);
   if (pngp != nullptr)
-    png_destroy_write_struct(&pngp, (png_infopp) nullptr);
+    png_destroy_write_struct(&pngp, &infop);
 }
 
 #endif
