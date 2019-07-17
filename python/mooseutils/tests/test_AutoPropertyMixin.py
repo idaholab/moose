@@ -128,9 +128,9 @@ class Test(unittest.TestCase):
         self.assertEqual(node.prop, 12345)
 
         filename = 'tmpNodeData.pk1'
-        with open(filename, 'w+') as fid:
-            pickle.dump(node, fid, -1)
-        with open(filename, 'r') as fid:
+        with open(filename, 'wb') as fid:
+            pickle.dump(node, fid, protocol=pickle.HIGHEST_PROTOCOL)
+        with open(filename, 'rb') as fid:
             node1 = pickle.load(fid)
         os.remove(filename)
 

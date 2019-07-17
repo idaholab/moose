@@ -201,7 +201,7 @@ class AutoPropertyMixin(object):
             self.__properties[prop.name] = prop.default
 
         # Update the properties from the key value pairs
-        for key, value in kwargs.iteritems():
+        for key, value in kwargs.items():
             key = key.strip('_')
             if value is None:
                 continue
@@ -222,7 +222,7 @@ class AutoPropertyMixin(object):
     def __setstate__(self, state):
         """Re-create the properties after a pickle load."""
         self.__dict__ = state
-        for key, value in self.__properties.iteritems():
+        for key, value in self.__properties.items():
             setattr(self, key, value)
 
     def __getitem__(self, key):
