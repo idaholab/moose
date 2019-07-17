@@ -35,4 +35,10 @@
     requirement = "The documentation system shall include tools for linking to continuous integration testing results."
     issues = '#12049'
   []
+  [content]
+    type = PythonUnitTest
+    input = test_content.py
+    requirement = "The documentation system shall include tools for listing and linking to content within and across documents."
+    issues = '#9638'
+  []
 []
