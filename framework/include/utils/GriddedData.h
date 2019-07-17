@@ -13,7 +13,6 @@
 
 using namespace libMesh;
 
-// C++ includes
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -83,13 +82,52 @@ private:
   std::vector<Real> _fcn;
   std::vector<unsigned int> _step;
 
+  /**
+   * parse the file_name extracting information.
+   * Here is an example file:
+   * # this is a comment line at start of file
+   * AXIS Y
+   * -1.5 0
+   * # there is no reason why the x axis can't be second
+   * AXIS X
+   * 1 2 3
+   * # This example has a 3D grid, but the 3rd direction is time
+   * AXIS T
+   * 0 199
+   * # now some data
+   * DATA
+   * # following for x=1, t=0
+   * 1 2
+   * # following for x=2, t=0
+   * 2 3
+   * # following for x=3, t=0
+   * 2 3
+   * # following for x=1, t=199
+   * 89 900
+   * # following for x=2, t=199, and x=3, t=199
+   * 1 -3 -5 -6.898
+   * # end of file
+   */
   void parse(unsigned int & dim,
              std::vector<int> & axes,
              std::vector<std::vector<Real>> & grid,
              std::vector<Real> & f,
              std::vector<unsigned int> & step,
              std::string file_name);
+
+  /**
+   * Extracts the next line from file_stream that is:
+   *  - not empty
+   *  - does not start with #
+   * Returns true if such a line was found,
+   * otherwise returns false
+   */
   bool getSignificantLine(std::ifstream & file_stream, std::string & line);
+
+  /**
+   * Splits an input_string using space as the separator
+   * Converts the resulting items to Real, and adds these
+   * to the end of output_vec
+   */
   void splitToRealVec(const std::string & input_string, std::vector<Real> & output_vec);
 };
-
