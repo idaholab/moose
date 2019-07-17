@@ -17,11 +17,11 @@ The design:
 
 The following map is useful for understanding the template:
 
-| OutputType          |OutputShape           |OutputData|
-|-|-|-|
-| Real                |Real                  |Real|
-| RealVectorValue     |RealVectorValue       |Real|
-| RealEigenVector     |Real                  |RealEigenVector|
+| OutputType          | OutputShape           | OutputData |
+| :- | :- | :- |
+| Real                | Real                  | Real |
+| RealVectorValue     | RealVectorValue       | Real |
+| RealEigenVector     | Real                  | RealEigenVector |
 
 The three rows correspond to standard, vector and array variables.
 OutputType is the data type used for templating.
