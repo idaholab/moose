@@ -11,6 +11,7 @@
 
 #include "MooseTypes.h"
 #include "MooseArray.h"
+#include "Restartable.h"
 
 #include "libmesh/fe_type.h"
 
@@ -25,7 +26,7 @@ class SubProblem;
 class SystemBase;
 class MooseMesh;
 
-class MooseVariableBase
+class MooseVariableBase : public Restartable
 {
 public:
   MooseVariableBase(unsigned int var_num,
@@ -150,7 +151,7 @@ protected:
   const unsigned int _count;
 
   /// scaling factor for this variable
-  std::vector<Real> _scaling_factor;
+  std::vector<Real> & _scaling_factor;
 
   std::string _name;
 };

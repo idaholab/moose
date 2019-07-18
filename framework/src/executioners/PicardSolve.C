@@ -167,7 +167,7 @@ PicardSolve::solve()
   {
     if (_nl.computeScalingOnce())
     {
-      if (!_nl.computedScalingJacobian())
+      if (!_nl.computedScalingJacobian() && !_app.isRecovering() && !_app.isRestarting())
         _nl.computeScalingJacobian();
     }
     else

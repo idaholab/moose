@@ -413,7 +413,7 @@ nonPetscMatrixWarning()
 }
 
 void
-NonlinearSystemBase::computeScalingJacobian()
+NonlinearSystem::computeScalingJacobian()
 {
 #ifdef LIBMESH_HAVE_PETSC
   if (dynamic_cast<PetscMatrix<Real> *>(_transient_sys.matrix))
@@ -514,4 +514,6 @@ NonlinearSystemBase::computeScalingJacobian()
 #else // libmesh doesn't have PETSc
   Moose::nonPetscMatrixWarning();
 #endif
+
+  _computed_scaling = true;
 }

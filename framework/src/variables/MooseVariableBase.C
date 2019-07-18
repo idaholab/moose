@@ -22,7 +22,8 @@ MooseVariableBase::MooseVariableBase(unsigned int var_num,
                                      Moose::VarKindType var_kind,
                                      THREAD_ID tid,
                                      unsigned int count)
-  : _var_num(var_num),
+  : Restartable(this, "MooseVariableBase"),
+    _var_num(var_num),
     _fe_type(fe_type),
     _var_kind(var_kind),
     _subproblem(sys.subproblem()),
@@ -32,7 +33,8 @@ MooseVariableBase::MooseVariableBase(unsigned int var_num,
     _mesh(_subproblem.mesh()),
     _tid(tid),
     _count(count),
-    _scaling_factor(std::vector<Real>(_count, 1.0))
+    _scaling_factor(
+        declareRestartableData<std::vector<Real>>("scaling_factor", std::vector<Real>(_count, 1.0)))
 {
   if (_count > 1)
   {
