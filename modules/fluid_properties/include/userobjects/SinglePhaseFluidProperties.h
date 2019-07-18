@@ -392,48 +392,13 @@ public:
    */
   ///@{
   virtual Real rho(Real p, Real T) const;
-  virtual void rho_dpT(Real p, Real T, Real & rho, Real & drho_dp, Real & drho_dT) const;
-
   virtual Real mu(Real p, Real T) const;
-  virtual void mu_dpT(Real p, Real T, Real & mu, Real & dmu_dp, Real & dmu_dT) const;
-
   virtual Real h(Real p, Real T) const;
-  virtual void h_dpT(Real p, Real T, Real & h, Real & dh_dp, Real & dh_dT) const;
-
   virtual Real e(Real p, Real T) const;
-  virtual void e_dpT(Real p, Real T, Real & e, Real & de_dp, Real & de_dT) const;
-
   virtual Real k(Real p, Real T) const;
-  virtual void k_dpT(Real p, Real T, Real & k, Real & dk_dp, Real & dk_dT) const;
-
   virtual Real c(Real p, Real T) const;
-
   virtual Real beta(Real p, Real T) const;
-
   virtual Real s(Real p, Real T) const;
-
-  virtual void rho_mu(Real p, Real T, Real & rho, Real & mu) const;
-  virtual void rho_mu_dpT(Real p,
-                          Real T,
-                          Real & rho,
-                          Real & drho_dp,
-                          Real & drho_dT,
-                          Real & mu,
-                          Real & dmu_dp,
-                          Real & dmu_dT) const;
-
-  virtual void vaporPressure_dT(Real T, Real & psat, Real & dpsat_dT) const;
-
-  virtual void henryConstant_dT(Real T, Real & Kh, Real & dKh_dT) const;
-
-  virtual void rho_e_dpT(Real p,
-                         Real T,
-                         Real & rho,
-                         Real & drho_dp,
-                         Real & drho_dT,
-                         Real & e,
-                         Real & de_dp,
-                         Real & de_dT) const;
   ///@}
 
 protected:
@@ -445,8 +410,6 @@ protected:
    */
   virtual Real henryConstantIAPWS(Real T, Real A, Real B, Real C) const;
   virtual void henryConstantIAPWS(Real T, Real & Kh, Real & dKh_dT, Real A, Real B, Real C) const;
-  virtual void
-  henryConstantIAPWS_dT(Real T, Real & Kh, Real & dKh_dT, Real A, Real B, Real C) const;
 
 private:
   template <typename... Args>
