@@ -82,6 +82,12 @@ There are also some optional parameters that can be supplied to
 
 At present, either the `slave_variable` or `master_variable` parameter must be supplied.
 
+### Limitations
+
+Unfortunately the mortar system does not currently work in three dimensions. It
+is on the to-do list, but it will require a significant amount of work to get
+all the projections correct.
+
 !syntax list /Constraints objects=True actions=False subsystems=False
 
 !syntax list /Constraints objects=False actions=False subsystems=True
