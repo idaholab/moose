@@ -60,26 +60,6 @@ InputParameters validParams<MultiComponentFluidProperties>();
           p1.derivatives()[i] * dxd1 + p2.derivatives()[i] * dxd2 + p3.derivatives()[i] * dxd3;    \
                                                                                                    \
     return result;                                                                                 \
-  }                                                                                                \
-                                                                                                   \
-  virtual FPDualReal want##_from_##prop1##_##prop2##_##prop3(                                      \
-      const FPDualReal & p1, const FPDualReal & p2, const FPDualReal & p3) const                   \
-  {                                                                                                \
-    const Real raw1 = p1.value();                                                                  \
-    const Real raw2 = p2.value();                                                                  \
-    const Real raw3 = p3.value();                                                                  \
-    Real x = 0.0;                                                                                  \
-    Real dxd1 = 0.0;                                                                               \
-    Real dxd2 = 0.0;                                                                               \
-    Real dxd3 = 0.0;                                                                               \
-    want##_from_##prop1##_##prop2##_##prop3(raw1, raw2, raw3, x, dxd1, dxd2, dxd3);                \
-                                                                                                   \
-    FPDualReal result = x;                                                                         \
-    for (std::size_t i = 0; i < p1.derivatives().size(); ++i)                                      \
-      result.derivatives()[i] =                                                                    \
-          p1.derivatives()[i] * dxd1 + p2.derivatives()[i] * dxd2 + p3.derivatives()[i] * dxd3;    \
-                                                                                                   \
-    return result;                                                                                 \
   }
 
 /**
@@ -278,4 +258,3 @@ public:
    */
   virtual const SinglePhaseFluidProperties & getComponent(unsigned int component) const;
 };
-
