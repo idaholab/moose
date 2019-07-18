@@ -31,6 +31,11 @@ public:
   MultiAppCopyTransfer(const InputParameters & parameters);
 
   /**
+   * Performs basic error checking that the variable exists on MultiApp.
+   */
+  virtual void initialSetup() override;
+
+  /**
    * Performs the transfer of a variable (Nonlinear or Auxiliary) to/from the Multiapp.
    */
   virtual void execute() override;
