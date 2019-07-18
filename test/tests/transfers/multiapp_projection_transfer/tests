@@ -1,29 +1,46 @@
 [Tests]
-  [./tosub]
-    type = 'Exodiff'
-    input = 'tosub_master.i'
-    exodiff = 'tosub_master_out_sub0.e tosub_master_out_sub1.e'
-  [../]
+  issues = '#1913'
+  design = 'MultiAppProjectionTransfer.md'
 
-  [./fromsub]
-    type = 'Exodiff'
-    input = 'fromsub_master.i'
-    exodiff = 'fromsub_master_out.e'
-    use_old_floor = true
-    abs_zero = 1e-9  # 6e-10 failure w/ --distributed-mesh, np 11
-  [../]
+  [transfer]
+    requirement = "The system shall support the transfer of field data using L2 projection:"
+    [tosub]
+      type = 'Exodiff'
+      input = 'tosub_master.i'
+      exodiff = 'tosub_master_out_sub0.e tosub_master_out_sub1.e'
 
-  [./high_order]
+      detail = "from the master application to sub-applications and"
+    []
+
+    [fromsub]
+      type = 'Exodiff'
+      input = 'fromsub_master.i'
+      exodiff = 'fromsub_master_out.e'
+      use_old_floor = true
+      abs_zero = 1e-9 # 6e-10 failure w/ --distributed-mesh, np 11
+
+      detail = "to the master application from sub-applications."
+    []
+  []
+
+  [high_order]
     type = 'Exodiff'
     input = 'high_order_master.i'
     exodiff = 'high_order_master_out.e high_order_master_out_sub0.e'
     recover = false # This is because the sub-app is Steady
-  [../]
 
-  [./fixed_meshes]
+    requirement = "The system shall support the transfer of field data using L2 projection for first "
+                  "order shaped monomial shape functions."
+  []
+
+  [fixed_meshes]
     type = 'Exodiff'
     input = 'fixed_meshes_master.i'
     exodiff = 'fixed_meshes_master_out.e fixed_meshes_master_out_sub0.e'
-    abs_zero = 1e-9  # sometimes needed for n_procs > 3
-  [../]
+    abs_zero = 1e-9 # sometimes needed for n_procs > 3
+
+    issues = '#1913'
+    requirement = "The system shall support the transfer of field data using L2 projection and "
+                  "include optimization for non deforming meshes."
+  []
 []
