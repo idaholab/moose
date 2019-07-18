@@ -49,6 +49,15 @@ validParams<KernelBase>()
                         "the case this is true but no displacements "
                         "are provided in the Mesh block the "
                         "undisplaced mesh will still be used.");
+
+  // Kernels do not need any ghosting, but they do need to tell the sparsity pattern that there is
+  // coupling between intra-element dofs. This is done through the coupling functor
+  params.addRelationshipManager("ElementSideNeighborLayers",
+                                Moose::RelationshipManagerType::COUPLING,
+                                [](const InputParameters &, InputParameters & rm_params) {
+                                  rm_params.set<unsigned short>("layers") = 0;
+                                });
+
   params.addParamNamesToGroup(" diag_save_in save_in use_displaced_mesh", "Advanced");
   params.addCoupledVar("displacements", "The displacements");
 

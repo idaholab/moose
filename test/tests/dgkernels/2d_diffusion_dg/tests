@@ -19,7 +19,7 @@
     type = 'RunApp'
     input = '2d_diffusion_dg_test.i'
     cli_args = 'Executioner/automatic_scaling=true Outputs/exodus=false Outputs/csv=false -snes_view'
-    absent_out = 'MatSetValues calls =12'
+    absent_out = 'MatSetValues calls =[1-9]'
     requirement = 'We shall not do any mallocs in MatSetValues because of automatic scaling'
     issues = '#12601'
     design = 'FEProblemSolve.md'

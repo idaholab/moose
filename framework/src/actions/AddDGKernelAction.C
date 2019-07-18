@@ -12,7 +12,6 @@
 #include "NonlinearSystem.h"
 
 registerMooseAction("MooseApp", AddDGKernelAction, "add_dg_kernel");
-registerMooseAction("MooseApp", AddDGKernelAction, "ready_to_init");
 
 template <>
 InputParameters
@@ -37,7 +36,4 @@ AddDGKernelAction::act()
     else
       _problem->addDGKernel(_type, _name, _moose_object_pars);
   }
-
-  if (_current_task == "ready_to_init")
-    _problem->getNonlinearSystemBase().dofMap().set_implicit_neighbor_dofs(true);
 }

@@ -94,10 +94,6 @@ NonlinearSystem::NonlinearSystem(FEProblemBase & fe_problem, const std::string &
     _use_coloring_finite_difference(false),
     _computed_scaling(false)
 {
-  _sys.get_dof_map().add_coupling_functor(
-      _sys.get_dof_map().default_coupling(),
-      false); // The false keeps it from getting added to the mesh
-
   nonlinearSolver()->residual_object = &_nl_residual_functor;
   nonlinearSolver()->jacobian = Moose::compute_jacobian;
   nonlinearSolver()->bounds = Moose::compute_bounds;

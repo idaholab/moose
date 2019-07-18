@@ -59,7 +59,7 @@ ElementSideNeighborLayers::operator==(const RelationshipManager & rhs) const
   if (!rm)
     return false;
   else
-    return _layers == rm->_layers && isType(rm->_rm_type);
+    return _layers == rm->_layers && isType(rm->_rm_type) && isSystemType(rm->_system_type);
 }
 
 void
@@ -85,4 +85,11 @@ ElementSideNeighborLayers::internalInit()
   }
 
   _functor = std::move(functor);
+}
+
+void
+ElementSideNeighborLayers::dofmap_reinit()
+{
+  if (_dof_map)
+    static_cast<DefaultCoupling *>(_functor.get())->set_dof_coupling(_dof_map->_dof_coupling);
 }

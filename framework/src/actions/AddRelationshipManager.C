@@ -13,6 +13,7 @@
 
 registerMooseAction("MooseApp", AddRelationshipManager, "attach_geometric_rm");
 registerMooseAction("MooseApp", AddRelationshipManager, "attach_algebraic_rm");
+registerMooseAction("MooseApp", AddRelationshipManager, "attach_coupling_rm");
 
 template <>
 InputParameters
@@ -26,9 +27,13 @@ AddRelationshipManager::AddRelationshipManager(InputParameters params) : Action(
 void
 AddRelationshipManager::act()
 {
-  Moose::RelationshipManagerType rm_type =
-      (_current_task == "attach_geometric_rm" ? Moose::RelationshipManagerType::GEOMETRIC
-                                              : Moose::RelationshipManagerType::ALGEBRAIC);
+  Moose::RelationshipManagerType rm_type;
+  if (_current_task == "attach_geometric_rm")
+    rm_type = Moose::RelationshipManagerType::GEOMETRIC;
+  else if (_current_task == "attach_algebraic_rm")
+    rm_type = Moose::RelationshipManagerType::ALGEBRAIC;
+  else
+    rm_type = Moose::RelationshipManagerType::COUPLING;
 
   const auto & all_action_ptrs = _awh.allActionBlocks();
   for (const auto & action_ptr : all_action_ptrs)
