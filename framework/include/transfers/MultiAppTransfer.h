@@ -50,7 +50,7 @@ public:
   int direction() { return _direction; }
 
   /**
-   * Utility to verify that the vEariable in the destination system exists.
+   * Utility to verify that the variable in the destination system exists.
    */
   void variableIntegrityCheck(const AuxVariableName & var_name) const;
 
