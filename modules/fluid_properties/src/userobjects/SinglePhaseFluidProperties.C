@@ -267,16 +267,6 @@ SinglePhaseFluidProperties::henryConstantIAPWS(
   dKh_dT = (p * dlnkh_dT + dp_dT) * std::exp(lnkh);
 }
 
-void
-SinglePhaseFluidProperties::henryConstantIAPWS_dT(
-    Real T, Real & Kh, Real & dKh_dT, Real A, Real B, Real C) const
-{
-  mooseDeprecated(name(),
-                  ":henryConstantIAPWS_dT() is deprecated. Use henryConstantIAPWS() instead");
-
-  henryConstantIAPWS(T, Kh, dKh_dT, A, B, C);
-}
-
 Real SinglePhaseFluidProperties::henryConstant(Real) const
 {
   mooseError(name(), ": henryConstant() is not implemented");
@@ -286,14 +276,6 @@ void
 SinglePhaseFluidProperties::henryConstant(Real, Real &, Real &) const
 {
   mooseError(name(), ": henryConstant() is not implemented");
-}
-
-void
-SinglePhaseFluidProperties::henryConstant_dT(Real T, Real & Kh, Real & dKh_dT) const
-{
-  mooseDeprecated(name(), ": henryConstant_dT() is deprecated. Use henryConstant() instead");
-
-  henryConstant(T, Kh, dKh_dT);
 }
 
 Real SinglePhaseFluidProperties::vaporPressure(Real) const
@@ -308,14 +290,6 @@ SinglePhaseFluidProperties::vaporPressure(Real T, Real & p, Real & dp_dT) const
 
   dp_dT = 0.0;
   p = vaporPressure(T);
-}
-
-void
-SinglePhaseFluidProperties::vaporPressure_dT(Real T, Real & psat, Real & dpsat_dT) const
-{
-  mooseDeprecated(name(), ": vaporPressure_dT() is deprecated. Use vaporPressure() instead");
-
-  vaporPressure(T, psat, dpsat_dT);
 }
 
 DualReal
@@ -364,29 +338,12 @@ SinglePhaseFluidProperties::vaporTemperature(const DualReal & p) const
   return result;
 }
 
-void
-SinglePhaseFluidProperties::rho_dpT(
-    Real p, Real T, Real & rho, Real & drho_dp, Real & drho_dT) const
-{
-  mooseDeprecated(name(), ": rho_dpT() is deprecated. Use rho_from_p_T() instead");
-
-  rho_from_p_T(p, T, rho, drho_dp, drho_dT);
-}
-
 Real
 SinglePhaseFluidProperties::e(Real p, Real T) const
 {
   mooseDeprecated(name(), ": e() is deprecated. Use e_from_p_T() instead");
 
   return e_from_p_T(p, T);
-}
-
-void
-SinglePhaseFluidProperties::e_dpT(Real p, Real T, Real & e, Real & de_dp, Real & de_dT) const
-{
-  mooseDeprecated(name(), ": e_dpT() is deprecated. Use e_from_p_T() instead");
-
-  e_from_p_T(p, T, e, de_dp, de_dT);
 }
 
 void
@@ -401,21 +358,6 @@ SinglePhaseFluidProperties::rho_e_from_p_T(Real p,
 {
   rho_from_p_T(p, T, rho, drho_dp, drho_dT);
   e_from_p_T(p, T, e, de_dp, de_dT);
-}
-
-void
-SinglePhaseFluidProperties::rho_e_dpT(Real p,
-                                      Real T,
-                                      Real & rho,
-                                      Real & drho_dp,
-                                      Real & drho_dT,
-                                      Real & e,
-                                      Real & de_dp,
-                                      Real & de_dT) const
-{
-  mooseDeprecated(name(), ": rho_e_dpT() is deprecated. Use rho_e_from_p_T() instead");
-
-  rho_e_from_p_T(p, T, rho, drho_dp, drho_dT, e, de_dp, de_dT);
 }
 
 Real
@@ -435,41 +377,10 @@ SinglePhaseFluidProperties::mu(Real p, Real T) const
 }
 
 void
-SinglePhaseFluidProperties::mu_dpT(Real p, Real T, Real & mu, Real & dmu_dp, Real & dmu_dT) const
-{
-  mooseDeprecated(name(), ": mu_dpT() is deprecated. Use mu_from_p_T() instead");
-
-  mu_from_p_T(p, T, mu, dmu_dp, dmu_dT);
-}
-
-void
-SinglePhaseFluidProperties::rho_mu(Real p, Real T, Real & rho, Real & mu) const
-{
-  mooseDeprecated(name(), ": rho_mu() is deprecated. Use rho_mu_from_p_T() instead");
-
-  rho_mu_from_p_T(p, T, rho, mu);
-}
-
-void
 SinglePhaseFluidProperties::rho_mu_from_p_T(Real p, Real T, Real & rho, Real & mu) const
 {
   rho = rho_from_p_T(p, T);
   mu = mu_from_p_T(p, T);
-}
-
-void
-SinglePhaseFluidProperties::rho_mu_dpT(Real p,
-                                       Real T,
-                                       Real & rho,
-                                       Real & drho_dp,
-                                       Real & drho_dT,
-                                       Real & mu,
-                                       Real & dmu_dp,
-                                       Real & dmu_dT) const
-{
-  mooseDeprecated(name(), ": rho_mu_dpT() is deprecated. Use rho_mu_from_p_T() instead");
-
-  rho_mu_from_p_T(p, T, rho, drho_dp, drho_dT, mu, dmu_dp, dmu_dT);
 }
 
 void
@@ -494,14 +405,6 @@ SinglePhaseFluidProperties::k(Real p, Real T) const
   return k_from_p_T(p, T);
 }
 
-void
-SinglePhaseFluidProperties::k_dpT(Real p, Real T, Real & k, Real & dk_dp, Real & dk_dT) const
-{
-  mooseDeprecated(name(), ": k_dpT() is deprecated. Use k_from_p_T() instead");
-
-  k_from_p_T(p, T, k, dk_dp, dk_dT);
-}
-
 Real
 SinglePhaseFluidProperties::s(Real p, Real T) const
 {
@@ -516,14 +419,6 @@ SinglePhaseFluidProperties::h(Real p, Real T) const
   mooseDeprecated(name(), ": h() is deprecated. Use h_from_p_T() instead");
 
   return h_from_p_T(p, T);
-}
-
-void
-SinglePhaseFluidProperties::h_dpT(Real p, Real T, Real & h, Real & dh_dp, Real & dh_dT) const
-{
-  mooseDeprecated(name(), ": h_dpT() is deprecated. Use h_from_p_T() instead");
-
-  h_from_p_T(p, T, h, dh_dp, dh_dT);
 }
 
 Real
