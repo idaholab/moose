@@ -29,11 +29,6 @@ public:
 
 protected:
   /**
-   * Sets up a ProxyRelationshipManager that copies coupling functor ghosting from->to
-   */
-  void addProxyCouplingRelationshipManagers(SystemBase & to, SystemBase & from);
-
-  /**
    * Sets up a ProxyRelationshipManager that copies algebraic ghosting from->to
    */
   void addProxyAlgebraicRelationshipManagers(SystemBase & to, SystemBase & from);
@@ -48,7 +43,8 @@ private:
    * Generic adder of ProxyRelationshipManagers
    * @param to The system to add RelationshipManagers for
    * @param from The system to copy RelationshipManagers over from
-   * @param rm_type The Moose::RelationshipManagerType, e.g. GEOMETRIC, ALGEBRAIC, or COUPLING
+   * @param rm_type The Moose::RelationshipManagerType, e.g. GEOMETRIC or ALGEBRAIC (COUPLING
+   *                doesn't need to be copied back and forth)
    * @param type A string form of the type, e.g. "geometric", "algebraic", or "coupling"
    */
   void addProxyRelationshipManagers(SystemBase & to,

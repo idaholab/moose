@@ -78,13 +78,6 @@ CreateDisplacedProblemAction::addProxyRelationshipManagers(SystemBase & to,
 }
 
 void
-CreateDisplacedProblemAction::addProxyCouplingRelationshipManagers(SystemBase & to,
-                                                                   SystemBase & from)
-{
-  addProxyRelationshipManagers(to, from, Moose::RelationshipManagerType::COUPLING, "coupling");
-}
-
-void
 CreateDisplacedProblemAction::addProxyAlgebraicRelationshipManagers(SystemBase & to,
                                                                     SystemBase & from)
 {
@@ -138,16 +131,16 @@ CreateDisplacedProblemAction::act()
       auto & displaced_nl = displaced_problem_ptr->nlSys();
       auto & displaced_aux = displaced_problem_ptr->auxSys();
 
+      // Note that there is no reason to copy coupling factors back and forth because the displaced
+      // systems do not have their own matrices (they are constructed with their libMesh::System of
+      // type TransientExplicitSystem)
+
       // Note the "to" system doesn't actually matter much - the GF will
       // get added to both systems on the receiving side
       addProxyAlgebraicRelationshipManagers(undisplaced_nl, displaced_nl);
       addProxyAlgebraicRelationshipManagers(displaced_nl, undisplaced_nl);
       addProxyAlgebraicRelationshipManagers(undisplaced_aux, displaced_aux);
       addProxyAlgebraicRelationshipManagers(displaced_aux, undisplaced_aux);
-
-      // There should be no need for couping in the aux system, so only do the non-linears
-      addProxyCouplingRelationshipManagers(undisplaced_nl, displaced_nl);
-      addProxyCouplingRelationshipManagers(displaced_nl, undisplaced_nl);
 
       addProxyGeometricRelationshipManagers(undisplaced_nl, displaced_nl);
       addProxyGeometricRelationshipManagers(displaced_nl, undisplaced_nl);
