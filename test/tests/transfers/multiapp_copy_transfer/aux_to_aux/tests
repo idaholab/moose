@@ -1,0 +1,46 @@
+[Tests]
+  issues = '#13754'
+  design = 'MultiAppCopyTransfer.md'
+
+  [transfer]
+    requirement = "The system shall support the transfer of auxiliary field variables between identical meshes:"
+    [from_sub_to_master]
+      type = Exodiff
+      input = from_sub.i
+      exodiff = 'from_sub_out.e from_sub_out_sub0.e'
+      recover = false # uses output on final
+
+      detail = 'from a sub-application and'
+    []
+
+    [to_sub_to_master]
+      type = Exodiff
+      input = to_sub.i
+      exodiff = 'to_sub_out.e to_sub_out_sub0.e'
+      recover = false # uses output on final
+
+      detail = 'to a sub-application.'
+    []
+  []
+
+  [errors]
+    requirement = "The system shall error if a variable, during a direct copy of auxiliary field variables, does not exist"
+    [error_from_sub_to_master]
+      type = RunException
+      input = from_sub.i
+      cli_args = 'sub0:AuxVariables/active="" sub0:Outputs/exodus=false'
+      expect_err = "The variable 'aux' does not exist."
+
+      detail = "in the sub-application when transferring form it and"
+    []
+
+    [error_to_sub_to_master]
+      type = RunException
+      input = to_sub.i
+      cli_args = 'AuxVariables/active="" Outputs/exodus=false'
+      expect_err = "The variable 'x' does not exist."
+
+      detail = "in the master application when transferring for it."
+    []
+  []
+[]
