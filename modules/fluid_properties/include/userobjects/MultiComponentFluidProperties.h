@@ -139,30 +139,6 @@ public:
        */
       virtual std::string fluidName() const;
 
-  // Deprecated density. Use rho_from_p_T_X() instead
-  virtual Real rho(Real pressure, Real temperature, Real xmass) const;
-
-  // Deprecated density. Use rho_from_p_T_X() instead
-  virtual void rho_dpTx(Real pressure,
-                        Real temperature,
-                        Real xmass,
-                        Real & rho,
-                        Real & drho_dp,
-                        Real & drho_dT,
-                        Real & drho_dx) const;
-
-  // Deprecated viscosity. Use mu_from_p_T_X() instead
-  virtual Real mu(Real pressure, Real temperature, Real xmass) const;
-
-  // Deprecated viscosity. Use mu_from_p_T_X() instead
-  virtual void mu_dpTx(Real pressure,
-                       Real temperature,
-                       Real xmass,
-                       Real & mu,
-                       Real & dmu_dp,
-                       Real & dmu_dT,
-                       Real & dmu_dx) const;
-
   /**
    * Density and viscosity
    * @param pressure fluid pressure (Pa)
@@ -202,52 +178,6 @@ public:
                                  Real & dmu_dp,
                                  Real & dmu_dT,
                                  Real & dmu_dx) const;
-
-  // Deprecated density and viscosity. Use rho_mu_from_p_T_X() instead
-  virtual void rho_mu(Real pressure, Real temperature, Real xmass, Real & rho, Real & mu) const;
-
-  // Deprecated density and viscosity. Use rho_mu_from_p_T_X() instead
-  virtual void rho_mu_dpTx(Real pressure,
-                           Real temperature,
-                           Real xmass,
-                           Real & rho,
-                           Real & drho_dp,
-                           Real & drho_dT,
-                           Real & drho_dx,
-                           Real & mu,
-                           Real & dmu_dp,
-                           Real & dmu_dT,
-                           Real & dmu_dx) const;
-
-  // Deprecated enthalpy. Use h_from_p_T_X() instead
-  virtual Real h(Real pressure, Real temperature, Real xmass) const;
-
-  // Deprecated enthalpy. Use h_from_p_T_X() instead
-  virtual void h_dpTx(Real pressure,
-                      Real temperature,
-                      Real xmass,
-                      Real & h,
-                      Real & dh_dp,
-                      Real & dh_dT,
-                      Real & dh_dx) const;
-
-  // Deprecated isobaric heat capacity. Use cp_from_p_T_X() instead
-  virtual Real cp(Real pressure, Real temperature, Real xmass) const;
-
-  // Deprecated internal energy. Use e_from_p_T_X() instead
-  virtual Real e(Real pressure, Real temperature, Real xmass) const;
-
-  // Deprecated internal energy. Use e_from_p_T_X() instead
-  virtual void e_dpTx(Real pressure,
-                      Real temperature,
-                      Real xmass,
-                      Real & e,
-                      Real & de_dp,
-                      Real & de_dT,
-                      Real & de_dx) const;
-
-  // Deprecated thermal conductivity. Use k_from_p_T_X() instead
-  virtual Real k(Real pressure, Real temperature, Real xmass) const;
 
   /**
    * Get UserObject for specified component
