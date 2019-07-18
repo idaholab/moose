@@ -264,3 +264,17 @@ MultiAppTransfer::getTransferVector(unsigned int i_local, std::string var_name)
 
   return _multi_app->appTransferVector(_local2global_map[i_local], var_name);
 }
+
+void
+MultiAppTransfer::checkVariable(const FEProblemBase & fe_problem,
+                                const VariableName & var_name,
+                                const std::string & param_name) const
+{
+  if (!fe_problem.hasVariable(var_name))
+  {
+    if (param_name.empty())
+      mooseError("The variable '", var_name, "' does not exist.");
+    else
+      paramError(param_name, "The variable '", var_name, "' does not exist.");
+  }
+}

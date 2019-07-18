@@ -66,11 +66,8 @@ void
 MultiAppCopyTransfer::transfer(FEProblemBase & to_problem, FEProblemBase & from_problem)
 {
   // Perform error checking
-  if (!to_problem.hasVariable(_to_var_name))
-    paramError("variable", "The variable '", _to_var_name, "' does not exist.");
-
-  if (!from_problem.hasVariable(_from_var_name))
-    paramError("source_variable", "The variable '", _from_var_name, "' does not exist.");
+  checkVariable(to_problem, _to_var_name, "variable");
+  checkVariable(from_problem, _from_var_name, "source_variable");
 
   // Populate the to/from variables needed to perform the transfer
   MooseVariableFEBase & to_var = to_problem.getVariable(
