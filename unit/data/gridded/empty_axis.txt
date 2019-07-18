@@ -1,0 +1,4 @@
+# This file is missing axes data for AXIS Y
+AXIS X
+-1.0  0.0 2.0
+AXIS Y
