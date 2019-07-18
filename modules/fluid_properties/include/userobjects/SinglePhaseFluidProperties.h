@@ -548,9 +548,6 @@ protected:
   virtual void
   henryConstantIAPWS_dT(Real temperature, Real & Kh, Real & dKh_dT, Real A, Real B, Real C) const;
 
-  /// Universal gas constant (J/mol/K)
-  const Real _R;
-
 private:
   template <typename... Args>
   void fluidPropError(Args... args) const
