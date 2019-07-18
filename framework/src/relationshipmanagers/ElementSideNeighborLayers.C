@@ -74,7 +74,7 @@ ElementSideNeighborLayers::internalInit()
   if (executioner_ptr)
   {
     auto & fe_problem = executioner_ptr->feProblem();
-    auto & nl_sys = fe_problem.getNonlinearSystem();
+    auto & nl_sys = fe_problem.getNonlinearSystemBase();
     auto & dof_map = nl_sys.dofMap();
     auto periodic_boundaries_ptr = dof_map.get_periodic_boundaries();
 
