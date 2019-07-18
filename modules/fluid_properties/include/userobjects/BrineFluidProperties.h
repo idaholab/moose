@@ -71,7 +71,7 @@ public:
 
   FPDualReal rho_from_p_T_X(const FPDualReal & pressure,
                             const FPDualReal & temperature,
-                            const FPDualReal & xnacl) const override;
+                            const FPDualReal & xnacl) const;
 
   virtual void rho_from_p_T_X(Real pressure,
                               Real temperature,
@@ -93,7 +93,7 @@ public:
 
   FPDualReal h_from_p_T_X(const FPDualReal & pressure,
                           const FPDualReal & temperature,
-                          const FPDualReal & xnacl) const override;
+                          const FPDualReal & xnacl) const;
 
   virtual Real h_from_p_T_X(Real pressure, Real temperature, Real xnacl) const override;
 
@@ -109,7 +109,7 @@ public:
 
   FPDualReal e_from_p_T_X(const FPDualReal & pressure,
                           const FPDualReal & temperature,
-                          const FPDualReal & xnacl) const override;
+                          const FPDualReal & xnacl) const;
 
   virtual Real e_from_p_T_X(Real pressure, Real temperature, Real xnacl) const override;
 
@@ -187,4 +187,3 @@ protected:
 };
 
 #pragma GCC diagnostic pop
-
