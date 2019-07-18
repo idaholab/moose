@@ -18,7 +18,7 @@ validParams<SinglePhaseFluidProperties>()
 }
 
 SinglePhaseFluidProperties::SinglePhaseFluidProperties(const InputParameters & parameters)
-  : FluidProperties(parameters), _R(8.3144598)
+  : FluidProperties(parameters)
 {
 }
 
