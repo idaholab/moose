@@ -1,8 +1,13 @@
 # PolycrystalVoronoi
 
-The PolycrystalVoronoi UserObject either generates a set of random points or reads a set of grain centroids from a file and performs a Voronoi tesslation to produce a grain structure. The number of grains may be set by the user but a suitable number must be chosen that is supported by the mesh resolution and grain boundary width. Once the grain structure has been generated, a coloring algorithm is used to assign order parameters to grains so that a reduced number of order parameters may be used. Typical numbers are given here:
+The PolycrystalVoronoi UserObject either generates a set of random points or
+reads a set of grain centroids from a file and performs a Voronoi tesslation to
+produce a grain structure. The number of grains may be set by the user but a
+suitable number must be chosen that is supported by the mesh resolution and
+grain boundary width. Once the grain structure has been generated, a coloring
+algorithm is used to assign order parameters to grains so that a reduced number
+of order parameters may be used. Typical numbers are given here:
 
-!table style=border:4px solid black;width:350px;
 | Dimension | Recommended OPs |
 |-----------|-----------------|
 | 2D        | 8               |

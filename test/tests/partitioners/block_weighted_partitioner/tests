@@ -1,0 +1,37 @@
+[Tests]
+  [block_weight_partitioner]
+    requirement = 'The system shall support a block-weighted partitioner'
+    design = '/BlockWeightedPartitioner.md'
+    issues = '#13675'
+
+    [replicated_mesh]
+      type = 'Exodiff'
+      input = 'block_weighted_partitioner.i'
+      exodiff = 'block_weighted_partitioner_out.e'
+      petsc_version = '>=3.10.0'
+      min_parallel = 4
+      max_parallel = 4
+      # different mode generates different partition
+      mesh_mode = REPLICATED
+      parmetis = true
+      # Parmetis generates different results when using 32 bit or 64 bit integers
+      dof_id_bytes = 4
+      detail = 'when using ReplicatedMesh'
+    []
+
+    [distributed_mesh]
+      type = 'Exodiff'
+      input = 'block_weighted_partitioner.i'
+      exodiff = 'block_weighted_partitioner_out_distributed.e'
+      cli_args = 'Outputs/file_base=block_weighted_partitioner_out_distributed'
+      petsc_version = '>=3.10.0'
+      min_parallel = 4
+      max_parallel = 4
+      # different mode generates different partition
+      mesh_mode = DISTRIBUTED
+      parmetis = true
+      dof_id_bytes = 4
+      detail = 'and when using DistributedMesh.'
+    []
+  []
+[]

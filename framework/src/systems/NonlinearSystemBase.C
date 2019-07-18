@@ -2187,6 +2187,8 @@ NonlinearSystemBase::computeScalarKernelsJacobians(const std::set<TagID> & tags)
 
     _fe_problem.reinitScalars(/*tid=*/0);
 
+    _fe_problem.reinitOffDiagScalars(/*_tid*/ 0);
+
     bool have_scalar_contributions = false;
     for (const auto & kernel : scalars)
     {

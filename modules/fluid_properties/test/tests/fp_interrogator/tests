@@ -28,6 +28,35 @@ Volumetric expansion coefficient:        0.003333333333  1/K'
     design = 'FluidPropertiesInterrogator.md'
   [../]
 
+  [./1ph.p_T.json]
+    type = 'RunApp'
+    input = '1ph.p_T.i'
+    cli_args = 'FluidPropertiesInterrogator/json=true'
+    allow_warnings = true
+    method = 'OPT'
+    threading = '!pthreads'
+    expect_out = '{\n\t"static" :\s+{
+\s+"T" : 300.0,
+\s+"beta" : 0.0033333333333333335,
+\s+"c" : 347.00720453615946,
+\s+"cp" : 1003.45,
+\s+"cv" : 716.75000000000011,
+\s+"e" : 215025.00000000006,
+\s+"h" : 301035.0,
+\s+"k" : 0.025680000000000001,
+\s+"mu" : 1.823e-05,
+\s+"p" : 100000.0,
+\s+"rho" : 1.162655505173817,
+\s+"s" : 2422.7047933868012,
+\s+"v" : 0.86009999999999998
+\s+}\s+}'
+
+    requirement = "The fluid properties interrogator shall output static-state "
+      "fluid properties for (p, T) input in JSON format."
+    issues = '#13741'
+    design = 'FluidPropertiesInterrogator.md'
+  [../]
+
   [./1ph.rho_e]
     type = 'RunApp'
     input = '1ph.rho_e.i'
@@ -57,6 +86,35 @@ Volumetric expansion coefficient:        0.003333333333  1/K'
     design = 'FluidPropertiesInterrogator.md'
   [../]
 
+  [./1ph.rho_e.json]
+    type = 'RunApp'
+    input = '1ph.rho_e.i'
+    cli_args = 'FluidPropertiesInterrogator/json=true'
+    allow_warnings = true
+    method = 'OPT'
+    threading = '!pthreads'
+    expect_out = '{\s+"static" : \s+{
+\s+"T" : 299.99999999999994,
+\s+"beta" : 0.0033333333333333344,
+\s+"c" : 347.00720453615941,
+\s+"cp" : 1003.45,
+\s+"cv" : 716.75000000000011,
+\s+"e" : 215025.0,
+\s+"h" : 301034.99999999994,
+\s+"k" : 0.025680000000000001,
+\s+"mu" : 1.823e-05,
+\s+"p" : 86009.999999999985,
+\s+"rho" : 1.0,
+\s+"s" : 2465.9123806024636,
+\s+"v" : 1.0
+\s+}\s+}'
+
+    requirement = "The fluid properties interrogator shall output static-state "
+      "fluid properties for (rho, e) input in JSON format."
+    issues = '#13741'
+    design = 'FluidPropertiesInterrogator.md'
+  [../]
+
   [./1ph.rho_p]
     type = 'RunApp'
     input = '1ph.rho_p.i'
@@ -83,6 +141,35 @@ Volumetric expansion coefficient:              0.002867  1/K'
     requirement = "The fluid properties interrogator shall output static-state "
       "fluid properties for (rho, p) input."
     issues = '#12995'
+    design = 'FluidPropertiesInterrogator.md'
+  [../]
+
+  [./1ph.rho_p.json]
+    type = 'RunApp'
+    input = '1ph.rho_p.i'
+    cli_args = 'FluidPropertiesInterrogator/json=true'
+    allow_warnings = true
+    method = 'OPT'
+    threading = '!pthreads'
+    expect_out = '{\s+"static" :\s+{
+\s+"T" : 348.79665155214514,
+\s+"beta" : 0.0028669999999999998,
+\s+"c" : 374.16573867739413,
+\s+"cp" : 1003.45,
+\s+"cv" : 716.75000000000011,
+\s+"e" : 250000.00000000006,
+\s+"h" : 350000.00000000006,
+\s+"k" : 0.025680000000000001,
+\s+"mu" : 1.823e-05,
+\s+"p" : 100000.0,
+\s+"rho" : 1.0,
+\s+"s" : 2573.9313486416199,
+\s+"v" : 1.0
+\s+}\s+}'
+
+    requirement = "The fluid properties interrogator shall output static-state "
+      "fluid properties for (rho, p) input in JSON format."
+    issues = '#13741'
     design = 'FluidPropertiesInterrogator.md'
   [../]
 
@@ -131,6 +218,52 @@ Volumetric expansion coefficient:          0.3333333333  1/K'
     requirement = "The fluid properties interrogator shall output static-state "
       "and stagnation-state fluid properties for (rho, rhou, rhoE) input with a single-phase fluid properties object."
     issues = '#12995'
+    design = 'FluidPropertiesInterrogator.md'
+  [../]
+
+  [./1ph.rho_rhou_rhoE.json]
+    type = 'RunApp'
+    input = '1ph.rho_rhou_rhoE.i'
+    cli_args = 'FluidPropertiesInterrogator/json=true'
+    allow_warnings = true
+    method = 'OPT'
+    threading = '!pthreads'
+    expect_out = '{\s+"stagnation" :\s+{
+\s+"T0" : 2.9999999999999982,
+\s+"beta0" : 0.33333333333333354,
+\s+"c0" : 1.7320508075688767,
+\s+"cp0" : 2.5000000000000004,
+\s+"cv0" : 1.7857142857142863,
+\s+"e0" : 5.3571428571428559,
+\s+"h0" : 7.4999999999999982,
+\s+"k0" : 0.025680000000000001,
+\s+"mu0" : 1.823e-05,
+\s+"p0" : 1.2731256902954322,
+\s+"rho0" : 0.59412532213786862,
+\s+"s0" : 2.5740485429528954,
+\s+"v0" : 1.6831465731870403,
+\s+"vel" : 1.0
+\s+},
+\s+"static" : \s+{
+\s+"T" : 2.7999999999999989,
+\s+"beta" : 0.35714285714285732,
+\s+"c" : 1.6733200530681507,
+\s+"cp" : 2.5000000000000004,
+\s+"cv" : 1.7857142857142863,
+\s+"e" : 5.0,
+\s+"h" : 6.9999999999999982,
+\s+"k" : 0.025680000000000001,
+\s+"mu" : 1.823e-05,
+\s+"p" : 0.99999999999999978,
+\s+"rho" : 0.5,
+\s+"s" : 2.5740485429528954,
+\s+"v" : 2.0
+\s+}\s+}'
+
+    requirement = "The fluid properties interrogator shall output static-state "
+      "and stagnation-state fluid properties for (rho, rhou, rhoE) input with "
+      "a single-phase fluid properties object in JSON format."
+    issues = '#13741'
     design = 'FluidPropertiesInterrogator.md'
   [../]
 
@@ -190,6 +323,56 @@ Volumetric expansion coefficient:        0.003333333333  1/K'
     design = 'FluidPropertiesInterrogator.md'
   [../]
 
+  [./2ph.p_T.json]
+    type = 'RunApp'
+    input = '2ph.p_T.i'
+    cli_args = 'FluidPropertiesInterrogator/json=true'
+    allow_test_objects = true
+    allow_warnings = true
+    method = 'OPT'
+    threading = '!pthreads'
+    expect_out = '{\s+"2-phase" :\s+{
+\s+"h_lat" : 688964.99999999919,
+\s+"p_critical" : 25.0
+\s+},
+\s+"liquid" : \s+{\s+"static" : \s+{
+\s+"T" : 300.0,
+\s+"beta" : 0.0033333333333333335,
+\s+"c" : 347.00720453615946,
+\s+"cp" : 1003.45,
+\s+"cv" : 716.75000000000011,
+\s+"e" : 215025.00000000006,
+\s+"h" : 301035.0,
+\s+"k" : 0.025680000000000001,
+\s+"mu" : 1.823e-05,
+\s+"p" : 100000.0,
+\s+"rho" : 1.162655505173817,
+\s+"s" : 2422.7047933868012,
+\s+"v" : 0.86009999999999998
+\s+}\s+},
+\s+"vapor" : \s+{\s+"static" : \s+{
+\s+"T" : 300.0,
+\s+"beta" : 0.0033333333333333331,
+\s+"c" : 314.64265445104542,
+\s+"cp" : 3299.9999999999973,
+\s+"cv" : 2999.9999999999973,
+\s+"e" : 899999.99999999907,
+\s+"h" : 989999.99999999919,
+\s+"k" : 0.050000000000000003,
+\s+"mu" : 1.7e-05,
+\s+"p" : 100000.0,
+\s+"rho" : 1.1111111111111112,
+\s+"s" : 15368.60452687438,
+\s+"v" : 0.89999999999999991
+\s+}\s+}\s+}'
+
+    requirement = "The fluid properties interrogator shall output two-phase and "
+      "static-state, single-phase fluid properties for (p, T) input with a "
+      "two-phase fluid properties object in JSON format."
+    issues = '#13741'
+    design = 'FluidPropertiesInterrogator.md'
+  [../]
+
   [./2ph_ncg_p_T]
     type = 'RunApp'
     input = '2ph_ncg_p_T.i'
@@ -244,6 +427,54 @@ Thermal conductivity:                           0.02568  W/\(m-K\)'
     design = 'FluidPropertiesInterrogator.md'
   [../]
 
+  [./2ph_ncg_p_T.json]
+    type = 'RunApp'
+    input = '2ph_ncg_p_T.i'
+    cli_args = 'FluidPropertiesInterrogator/json=true'
+    allow_test_objects = true
+    allow_warnings = true
+    method = 'OPT'
+    threading = '!pthreads'
+    expect_out = '{\s+"2-phase" :\s+{
+\s+"h_lat" : 877840.21255949896,
+\s+"p_critical" : 25.0
+\s+},
+\s+"liquid" : \s+{\s+"static" : \s+{
+\s+"T" : 372.75592890000001,
+\s+"beta" : 0.00268272057523268,
+\s+"c" : 375.36880680765148,
+\s+"cp" : 945.00000000000023,
+\s+"cv" : 675.00000000000023,
+\s+"e" : 251610.25200750006,
+\s+"h" : 352254.35281050007,
+\s+"k" : 0.025680000000000001,
+\s+"mu" : 1.823e-05,
+\s+"p" : 100000.0,
+\s+"rho" : 0.9936002130491407,
+\s+"s" : 2486.7831715469661,
+\s+"v" : 1.0064410080300001
+\s+}\s+\s+},
+\s+"vapor-mixture" :\s+\s+{\s+"static" : \s+{
+\s+"T" : 372.75592890000001,
+\s+"c" : 351.38834822907705,
+\s+"cp" : 3071.4999999999977,
+\s+"cv" : 2772.4999999999977,
+\s+"e" : 1033465.8128752492,
+\s+"h" : 1144919.8356163495,
+\s+"k" : 0.025680000000000001,
+\s+"mu" : 1.8230000000000003e-05,
+\s+"p" : 100000.0,
+\s+"rho" : 0.89723096161627924,
+\s+"v" : 1.1145402274110021
+\s+}\s+}\s+}'
+
+    requirement = "The fluid properties interrogator shall output two-phase "
+      "and static-state, single-phase fluid properties for (p, T) input with "
+      "a two-phase NCG fluid properties object in JSON format."
+    issues = '#13741'
+    design = 'FluidPropertiesInterrogator.md'
+  [../]
+
   [./vapor_mixture_rho_e]
     type = 'RunApp'
     input = 'vapor_mixture_rho_e.i'
@@ -272,6 +503,35 @@ Thermal conductivity:                           0.02568  W/\(m-K\)'
     design = 'FluidPropertiesInterrogator.md'
   [../]
 
+  [./vapor_mixture_rho_e.json]
+    type = 'RunApp'
+    input = 'vapor_mixture_rho_e.i'
+    cli_args = 'FluidPropertiesInterrogator/json=true'
+    allow_test_objects = true
+    allow_warnings = true
+    method = 'OPT'
+    threading = '!pthreads'
+    expect_out = '{\s+"static" :\s+{
+\s+"T" : 2547.2142964755967,
+\s+"c" : 997.88780036684204,
+\s+"cp" : 1271.4999999999998,
+\s+"cv" : 972.49999999999977,
+\s+"e" : 2477165.9033225174,
+\s+"h" : 3238782.9779687207,
+\s+"k" : 0.025680000000000001,
+\s+"mu" : 1.8230000000000003e-05,
+\s+"p" : 904043.45635087707,
+\s+"rho" : 1.1870052372064208,
+\s+"v" : 0.84245626611847835
+\s+}\s+}'
+
+    requirement = "The fluid properties interrogator shall output static-state, "
+      "single-phase fluid properties for (rho, e) input with a vapor mixture "
+      "fluid properties object in JSON format."
+    issues = '#13741'
+    design = 'FluidPropertiesInterrogator.md'
+  [../]
+
   [./2ph_p]
   type = 'RunApp'
   input = '2ph.p.i'
@@ -288,6 +548,27 @@ Latent heat of vaporization:           4.5931000000e\+08  J/kg'
     requirement = "The fluid properties interrogator shall output two-phase "
       "fluid properties for (p) input with a two-phase fluid properties object."
     issues = '#12995'
+    design = 'FluidPropertiesInterrogator.md'
+  [../]
+
+  [./2ph_p.json]
+    type = 'RunApp'
+    input = '2ph.p.i'
+    cli_args = 'FluidPropertiesInterrogator/json=true'
+    allow_test_objects = true
+    allow_warnings = true
+    method = 'OPT'
+    threading = '!pthreads'
+    expect_out = '{\s+"2-phase" :\s+{
+\s+"T_sat" : 200000.0,
+\s+"h_lat" : 459309999.9999994,
+\s+"p_critical" : 25.0
+\s+}\s+}'
+
+    requirement = "The fluid properties interrogator shall output two-phase "
+      "fluid properties for (p) input with a two-phase fluid properties "
+      "object in JSON format."
+    issues = '#13741'
     design = 'FluidPropertiesInterrogator.md'
   [../]
 
@@ -308,6 +589,28 @@ Surface tension:                                   1500  N/m'
     requirement = "The fluid properties interrogator shall output two-phase "
       "fluid properties for (T) input with a two-phase fluid properties object."
     issues = '#12995'
+    design = 'FluidPropertiesInterrogator.md'
+  [../]
+
+  [./2ph_T.json]
+    type = 'RunApp'
+    input = '2ph.T.i'
+    cli_args = 'FluidPropertiesInterrogator/json=true'
+    allow_test_objects = true
+    allow_warnings = true
+    method = 'OPT'
+    threading = '!pthreads'
+    expect_out = '{\s+"2-phase" :\s+{
+\s+"h_lat" : 688964.99999999919,
+\s+"p_critical" : 25.0,
+\s+"p_sat" : 900.0,
+\s+"sigma" : 1500.0
+\s+}\s+}'
+
+    requirement = "The fluid properties interrogator shall output two-phase "
+      "fluid properties for (T) input with a two-phase fluid properties "
+      "object in JSON format."
+    issues = '#13741'
     design = 'FluidPropertiesInterrogator.md'
   [../]
 

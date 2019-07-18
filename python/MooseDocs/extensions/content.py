@@ -14,6 +14,7 @@ import collections
 import logging
 import anytree
 import mooseutils
+from MooseDocs import common
 from MooseDocs.common import exceptions
 from MooseDocs.base import components, renderers, LatexRenderer
 from MooseDocs.tree import pages, tokens, html, latex
@@ -25,8 +26,8 @@ def make_extension(**kwargs):
     return ContentExtension(**kwargs)
 
 ContentToken = tokens.newToken('ContentToken', location=u'', level=None)
-AtoZToken = tokens.newToken('AtoZToken', location=u'', level=None, buttons=bool)
-TableOfContents = tokens.newToken('TableOfContents', levels=list(), columns=1)
+AtoZToken = tokens.newToken('AtoZToken', location=u'', level=None, buttons=True)
+TableOfContents = tokens.newToken('TableOfContents', levels=list(), columns=1, hide=[])
 
 LATEX_CONTENTLIST = """
 \\DeclareDocumentCommand{\\ContentItem}{mmm}{#3 (\\texttt{\\small #1})\\dotfill \\pageref{#2}\\\\}
@@ -105,58 +106,72 @@ class ContentExtension(command.CommandExtension):
         return headings
 
 class ContentCommand(command.CommandComponent):
-    COMMAND = 'contents' #TODO: Change this to content after format is working
-    SUBCOMMAND = None
+    COMMAND = ('content', 'contents') #TODO: Change this to content after format is working
+    SUBCOMMAND = (None, 'list')
 
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings['location'] = (None, "The markdown content directory to build contents.")
+        settings['location'] = (u'', "The markdown content directory to build contents.")
         settings['level'] = (2, 'Heading level for top-level headings.')
         return settings
 
     def createToken(self, parent, info, page):
+        if info['command'] == 'contents':
+            msg = 'The command "!contents" is deprecated, please use "!content list".'
+            LOG.warning(common.report_error(msg, page.source, info.line, info[0], prefix='WARNING'))
         ContentToken(parent, location=self.settings['location'], level=self.settings['level'])
         return parent
 
 class AtoZCommand(command.CommandComponent):
-    COMMAND = 'contents'
+    COMMAND = ('content', 'contents')
     SUBCOMMAND = 'a-to-z'
 
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
+        settings['location'] = (u'', "The markdown content directory to build contents.")
         settings['level'] = (2, 'Heading level for A, B,... headings.')
         settings['buttons'] = (True, 'Display buttons linking to the A, B,... headings.')
         return settings
 
     def createToken(self, parent, info, page):
-        AtoZToken(parent, level=self.settings['level'], buttons=self.settings['buttons'])
+        if info['command'] == 'contents':
+            msg = 'The command "!contents a-to-z" is deprecated, please use "!content a-to-z".'
+            LOG.warning(common.report_error(msg, page.source, info.line, info[0], prefix='WARNING'))
+        AtoZToken(parent, location=self.settings['location'], level=self.settings['level'],
+                  buttons=self.settings['buttons'])
         return parent
 
 class TableOfContentsCommand(command.CommandComponent):
-    COMMAND = 'contents'
+    COMMAND = ('content', 'contents')
     SUBCOMMAND = 'toc'
 
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings['levels'] = ([1], 'Heading level(s) to display.')
+        settings['levels'] = (1, 'Heading level(s) to display.')
         settings['columns'] = (1, 'The number of columns to display.')
+        settings['hide'] = ('', "A list of heading ids to hide.")
         return settings
 
     def createToken(self, parent, info, page):
+        if info['command'] == 'contents':
+            msg = 'The command "!contents toc" is deprecated, please use "!content toc".'
+            LOG.warning(common.report_error(msg, page.source, info.line, info[0], prefix='WARNING'))
+
+        levels = self.settings['levels']
+        if isinstance(levels, (str, unicode)):
+            levels = [int(l) for l in levels.split()]
+
         return TableOfContents(parent,
-                               levels=eval(self.settings['levels']),
+                               hide=self.settings['hide'].split(),
+                               levels=levels,
                                columns=int(self.settings['columns']))
 
 class RenderContentToken(components.RenderComponent):
 
     def createHTML(self, parent, token, page):
-        pass
-
-    def createMaterialize(self, parent, token, page):
-
         headings = self.extension.binContent(page, token['location'], ContentExtension.FOLDER)
         links = self.extension.get('source_links')
 
@@ -169,8 +184,7 @@ class RenderContentToken(components.RenderComponent):
                 if head in links:
                     p = self.translator.findPage(links[head])
                     dest = p.relativeDestination(page)
-                    a = html.Tag(h, 'a', href=dest, string=unicode(head) + u' ')
-                    html.Tag(a, 'i', string='link', class_='small material-icons moose-inline-icon')
+                    html.Tag(h, 'a', href=dest, string=unicode(head) + u' ')
                 else:
                     html.String(h, content=unicode(head))
 
@@ -197,13 +211,17 @@ class RenderContentToken(components.RenderComponent):
 class RenderAtoZ(components.RenderComponent):
 
     def createHTML(self, parent, token, page):
-        pass
+        token['buttons'] = False
+        self.createHTMLHelper(parent, token, page)
 
     def createMaterialize(self, parent, token, page):
+        self.createHTMLHelper(parent, token, page)
+
+    def createHTMLHelper(self, parent, token, page):
 
         # Initialized alphabetized storage
         headings = self.extension.binContent(page, token['location'], ContentExtension.LETTER)
-        for letter in 'abcdefghijklmnopqrstuvwxyz':
+        for letter in '0123456789abcdefghijklmnopqrstuvwxyz':
             if letter not in headings:
                 headings[letter] = set()
 
@@ -213,7 +231,8 @@ class RenderAtoZ(components.RenderComponent):
             buttons.parent = None
 
         # Build lists
-        for letter, items in headings.iteritems():
+        for letter in sorted(headings.keys()):
+            items = headings[letter]
             id_ = uuid.uuid4()
             btn = html.Tag(buttons, 'a',
                            string=unicode(letter.upper()),
@@ -251,13 +270,11 @@ class RenderAtoZ(components.RenderComponent):
 class RenderTableOfContents(components.RenderComponent):
 
     def createHTML(self, parent, token, page):
+        hide = token['hide']
         levels = token['levels']
-        toks = []
-        children = token.parent.parent.children
-        index = children.index(token.parent)
-        func = lambda n: n.name == 'Heading' and n['level'] in levels
-        for sibling in children[index+1:]:
-            toks += anytree.search.findall(sibling, filter_=func)
+        func = lambda n: (n.name == 'Heading') and (n['level'] in levels) and (n is not token) \
+               and (n['id'] not in hide)
+        toks = anytree.search.findall(token.root, filter_=func)
 
         div = html.Tag(parent, 'div', class_='moose-table-of-contents')
         div.addStyle('column-count:{}'.format(token['columns']))

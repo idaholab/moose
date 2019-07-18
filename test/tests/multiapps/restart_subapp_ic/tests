@@ -1,14 +1,25 @@
 [Tests]
-  [./first]
-    type = 'RunApp'
-    input = 'master.i'
-  [../]
+  issues = '#6087'
+  design = 'syntax/MultiApps/index.md'
 
-  [./second]
-    type = 'Exodiff'
-    prereq = 'first'
-    input = 'master2.i'
-    exodiff = 'master2_out_sub_app0.e'
-    abs_zero = 1e-8
-  [../]
+  [group]
+    requirement = "The system shall support simulations that"
+
+    [first]
+      type = 'RunApp'
+      input = 'master.i'
+
+      detail = "that executes sub-applications, which"
+    []
+
+    [second]
+      type = 'Exodiff'
+      prereq = 'first'
+      input = 'master2.i'
+      exodiff = 'master2_out_sub_app0.e'
+      abs_zero = 1e-8
+
+      detail = "can restart from a previous simulation and project the initial condition from the previous solution to the current, restarted simulation."
+    []
+  []
 []

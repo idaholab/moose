@@ -24,6 +24,7 @@ and geomechanics.
 - [Flow models](porous_flow/flow_models.md)
 - [Additional objects](porous_flow/additional_objects.md)
 - [Full system documentation](porous_flow/systems.md)
+- [A to Z Index](porous_flow/contents.md)
 
 !col-end!
 
@@ -38,6 +39,7 @@ and geomechanics.
 - [Convective mixing](porous_flow/lava_lamp.md)
 - [Two-phase THM injection benchmark example](porous_flow/thm_example.md)
 - [Restarting from previous simulation](porous_flow/restart.md)
+- [Heterogeneous models](porous_flow/heterogeneous_models.md)
 - [QA tests](porous_flow/tests.md)
 
 !col-end!

@@ -1,0 +1,37 @@
+[Tests]
+  [image_tests]
+    requirement = 'MOOSE shall be able to produce png images:'
+    issues = '#12846'
+    design = 'PNGOutput.md'
+
+    # The PNGOutputter does not current work with static builds
+    # due to an unresolved linkage issue. There is currently no
+    # plans (ticket) to resolve this issue.
+    [square_domain]
+      type = 'CheckFiles'
+      input = 'simple_transient_diffusion.i'
+      check_files = 'simple_transient_diffusion_png_001.png'
+      library_mode = 'DYNAMIC'
+
+      detail = 'for 2D square images,'
+    []
+
+    [adv_diff_reaction]
+      type = 'CheckFiles'
+      input = 'adv_diff_reaction_test.i'
+      check_files = 'adv_diff_reaction_test_png_001.png'
+      max_parallel = 1 # Test uses PETSc options that require a serial run
+      library_mode = 'DYNAMIC'
+
+      detail = 'arbitrary shapped domains,'
+    []
+    [wedge]
+      type = 'CheckFiles'
+      input = 'wedge.i'
+      check_files = 'wedge_png_001.png'
+      library_mode = 'DYNAMIC'
+
+      detail = 'and complex shapes with periodic boudary conditions.'
+    []
+  []
+[]

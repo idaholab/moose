@@ -10,7 +10,7 @@
     [./fp_nitrogen]
       type = IdealGasFluidProperties
       gamma = 1.4
-      R = 290
+      molar_mass = 0.02867055103448276
     [../]
     [./fp_2phase_ncg]
       type = TestTwoPhaseNCGFluidProperties
