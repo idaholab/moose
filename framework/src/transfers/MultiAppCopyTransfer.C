@@ -44,15 +44,6 @@ MultiAppCopyTransfer::MultiAppCopyTransfer(const InputParameters & parameters)
 }
 
 void
-MultiAppCopyTransfer::initialSetup()
-{
- if (_direction == TO_MULTIAPP)
-   variableIntegrityCheck(_to_var_name);
- else if (_direction == FROM_MULTIAPP)
-   variableIntegrityCheck(_from_var_name);
-}
-
-void
 MultiAppCopyTransfer::transferDofObject(libMesh::DofObject * to_object,
                                         libMesh::DofObject * from_object,
                                         MooseVariableFEBase & to_var,
@@ -74,6 +65,13 @@ MultiAppCopyTransfer::transferDofObject(libMesh::DofObject * to_object,
 void
 MultiAppCopyTransfer::transfer(FEProblemBase & to_problem, FEProblemBase & from_problem)
 {
+  // Perform error checking
+  if (!to_problem.hasVariable(_to_var_name))
+    paramError("variable", "The variable '", _to_var_name, "' does not exist.");
+
+  if (!from_problem.hasVariable(_from_var_name))
+    paramError("source_variable", "The variable '", _from_var_name, "' does not exist.");
+
   // Populate the to/from variables needed to perform the transfer
   MooseVariableFEBase & to_var = to_problem.getVariable(
       0, _to_var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
