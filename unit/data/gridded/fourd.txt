@@ -1,0 +1,13 @@
+AXIS X
+0 1
+AXIS Y
+0 1
+AXIS Z
+0 1
+# Time points
+AXIS T
+3 7
+# function values
+DATA
+1 2 3 4 5 6 7 8
+8 7 6 5 4 3 2 1
