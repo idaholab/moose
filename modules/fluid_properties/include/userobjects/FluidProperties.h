@@ -39,9 +39,10 @@ public:
   virtual void subdomainSetup() final {}
 
 protected:
+  /// Universal gas constant (J/mol/K)
+  const Real _R;
   /// Conversion of temperature from Celsius to Kelvin
   const Real _T_c2k;
   /// Flag to set unimplemented Jacobian entries to zero
   const bool _allow_imperfect_jacobians;
 };
-

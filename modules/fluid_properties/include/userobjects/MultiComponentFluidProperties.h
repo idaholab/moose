@@ -60,26 +60,6 @@ InputParameters validParams<MultiComponentFluidProperties>();
           p1.derivatives()[i] * dxd1 + p2.derivatives()[i] * dxd2 + p3.derivatives()[i] * dxd3;    \
                                                                                                    \
     return result;                                                                                 \
-  }                                                                                                \
-                                                                                                   \
-  virtual FPDualReal want##_from_##prop1##_##prop2##_##prop3(                                      \
-      const FPDualReal & p1, const FPDualReal & p2, const FPDualReal & p3) const                   \
-  {                                                                                                \
-    const Real raw1 = p1.value();                                                                  \
-    const Real raw2 = p2.value();                                                                  \
-    const Real raw3 = p3.value();                                                                  \
-    Real x = 0.0;                                                                                  \
-    Real dxd1 = 0.0;                                                                               \
-    Real dxd2 = 0.0;                                                                               \
-    Real dxd3 = 0.0;                                                                               \
-    want##_from_##prop1##_##prop2##_##prop3(raw1, raw2, raw3, x, dxd1, dxd2, dxd3);                \
-                                                                                                   \
-    FPDualReal result = x;                                                                         \
-    for (std::size_t i = 0; i < p1.derivatives().size(); ++i)                                      \
-      result.derivatives()[i] =                                                                    \
-          p1.derivatives()[i] * dxd1 + p2.derivatives()[i] * dxd2 + p3.derivatives()[i] * dxd3;    \
-                                                                                                   \
-    return result;                                                                                 \
   }
 
 /**
@@ -159,30 +139,6 @@ public:
        */
       virtual std::string fluidName() const;
 
-  // Deprecated density. Use rho_from_p_T_X() instead
-  virtual Real rho(Real pressure, Real temperature, Real xmass) const;
-
-  // Deprecated density. Use rho_from_p_T_X() instead
-  virtual void rho_dpTx(Real pressure,
-                        Real temperature,
-                        Real xmass,
-                        Real & rho,
-                        Real & drho_dp,
-                        Real & drho_dT,
-                        Real & drho_dx) const;
-
-  // Deprecated viscosity. Use mu_from_p_T_X() instead
-  virtual Real mu(Real pressure, Real temperature, Real xmass) const;
-
-  // Deprecated viscosity. Use mu_from_p_T_X() instead
-  virtual void mu_dpTx(Real pressure,
-                       Real temperature,
-                       Real xmass,
-                       Real & mu,
-                       Real & dmu_dp,
-                       Real & dmu_dT,
-                       Real & dmu_dx) const;
-
   /**
    * Density and viscosity
    * @param pressure fluid pressure (Pa)
@@ -223,52 +179,6 @@ public:
                                  Real & dmu_dT,
                                  Real & dmu_dx) const;
 
-  // Deprecated density and viscosity. Use rho_mu_from_p_T_X() instead
-  virtual void rho_mu(Real pressure, Real temperature, Real xmass, Real & rho, Real & mu) const;
-
-  // Deprecated density and viscosity. Use rho_mu_from_p_T_X() instead
-  virtual void rho_mu_dpTx(Real pressure,
-                           Real temperature,
-                           Real xmass,
-                           Real & rho,
-                           Real & drho_dp,
-                           Real & drho_dT,
-                           Real & drho_dx,
-                           Real & mu,
-                           Real & dmu_dp,
-                           Real & dmu_dT,
-                           Real & dmu_dx) const;
-
-  // Deprecated enthalpy. Use h_from_p_T_X() instead
-  virtual Real h(Real pressure, Real temperature, Real xmass) const;
-
-  // Deprecated enthalpy. Use h_from_p_T_X() instead
-  virtual void h_dpTx(Real pressure,
-                      Real temperature,
-                      Real xmass,
-                      Real & h,
-                      Real & dh_dp,
-                      Real & dh_dT,
-                      Real & dh_dx) const;
-
-  // Deprecated isobaric heat capacity. Use cp_from_p_T_X() instead
-  virtual Real cp(Real pressure, Real temperature, Real xmass) const;
-
-  // Deprecated internal energy. Use e_from_p_T_X() instead
-  virtual Real e(Real pressure, Real temperature, Real xmass) const;
-
-  // Deprecated internal energy. Use e_from_p_T_X() instead
-  virtual void e_dpTx(Real pressure,
-                      Real temperature,
-                      Real xmass,
-                      Real & e,
-                      Real & de_dp,
-                      Real & de_dT,
-                      Real & de_dx) const;
-
-  // Deprecated thermal conductivity. Use k_from_p_T_X() instead
-  virtual Real k(Real pressure, Real temperature, Real xmass) const;
-
   /**
    * Get UserObject for specified component
    * @param component fluid component
@@ -278,4 +188,3 @@ public:
    */
   virtual const SinglePhaseFluidProperties & getComponent(unsigned int component) const;
 };
-
