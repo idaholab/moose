@@ -48,9 +48,6 @@ FlowConnection::setupMesh()
         _nodes.push_back(conn._node->id());
         _normals.push_back(conn._normal);
         _boundary_ids.push_back(conn._boundary_id);
-
-        // add connection's node to nodeset of all boundary nodes
-        _mesh.getMesh().boundary_info->add_node(conn._node, THM::bnd_nodeset_id);
       }
     }
     else
