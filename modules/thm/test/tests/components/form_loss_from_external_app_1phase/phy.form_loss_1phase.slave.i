@@ -43,7 +43,7 @@
     flow_channel = pipe
   [../]
   [./inlet]
-    type = InletMassFlowRateTemperature
+    type = InletMassFlowRateTemperature1Phase
     input = 'pipe:in'
     m_dot = 680
     T = 300

@@ -41,7 +41,7 @@
   [../]
 
   [./inlet]
-    type = InletMassFlowRateTemperature
+    type = InletMassFlowRateTemperature1Phase
     input = 'pipe:in'
     m_dot = 0
     T = 300

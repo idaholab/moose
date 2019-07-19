@@ -62,7 +62,7 @@ delta_t_open = 0.1
 
 [Components]
   [./inlet]
-    type = InletMassFlowRateTemperature
+    type = InletMassFlowRateTemperature1Phase
     input = 'pipe1:in'
     m_dot = ${m_dot}
     T = ${T}

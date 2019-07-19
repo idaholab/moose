@@ -99,6 +99,8 @@
 - /Components/InletDensityVelocity1Phase
 - /Components/InletDensityVelocity2Phase
 - /Components/InletMassFlowRateTemperature
+- /Components/InletMassFlowRateTemperature1Phase
+- /Components/InletMassFlowRateTemperature2Phase
 - /Components/InletStagnationEnthalpyMomentum
 - /Components/InletStagnationEnthalpyMomentum1Phase
 - /Components/InletStagnationEnthalpyMomentum2Phase
