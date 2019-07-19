@@ -96,6 +96,8 @@
 - /Components/HeatTransferFromSpecifiedTemperature2Phase
 - /Components/Inlet
 - /Components/InletDensityVelocity
+- /Components/InletDensityVelocity1Phase
+- /Components/InletDensityVelocity2Phase
 - /Components/InletMassFlowRateTemperature
 - /Components/InletStagnationEnthalpyMomentum
 - /Components/InletStagnationPressureTemperature
