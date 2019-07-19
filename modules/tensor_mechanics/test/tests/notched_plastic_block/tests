@@ -1,0 +1,74 @@
+[Tests]
+  [confined_uniaxial]
+    issues = '#13766'
+    design = 'tensor_mechanics/Stresses.md'
+    requirement = 'TensorMechanics shall be able to simulate the confined, uniaxial extension of a notched block which has constitutive law described by:'
+    [./cmc_planar]
+      type = 'CSVDiff'
+      input = 'cmc_planar.i'
+      csvdiff = 'cmc_planar.csv'
+      heavy = true
+      cli_args = 'Executioner/end_time=1 Postprocessors/active=s_zz'
+      detail = 'unsmoothed capped-Mohr-Coulomb plasticity'
+    [../]
+    [./cmc_smooth]
+      type = 'CSVDiff'
+      input = 'cmc_smooth.i'
+      csvdiff = 'cmc_smooth.csv'
+      heavy = true
+      cli_args = 'Executioner/end_time=1 Postprocessors/active=s_zz'
+      detail = 'smoothed capped-Mohr-Coulomb plasticity, with smoothing performed by the novel MOOSE smoothing method described in Wilkins et al'
+    [../]
+    [./biaxial_planar]
+      type = 'CSVDiff'
+      input = 'biaxial_planar.i'
+      csvdiff = 'biaxial_planar.csv'
+      heavy = true
+      cli_args = 'Executioner/end_time=1 Postprocessors/active=s_zz'
+      detail = 'unsmoothed Mohr-Coulomb plasticity'
+    [../]
+    [./biaxial_abbo]
+      type = 'CSVDiff'
+      input = 'biaxial_abbo.i'
+      csvdiff = 'biaxial_abbo.csv'
+      heavy = true
+      cli_args = 'Executioner/end_time=1 Postprocessors/active=s_zz'
+      detail = 'smoothed Mohr-Coulomb plasticity, with smoothing performed by the Abbo et al method'
+    [../]
+    [./biaxial_smooth_cos]
+      type = 'CSVDiff'
+      input = 'biaxial_smooth.i'
+      csvdiff = 'biaxial_smooth_cos.csv'
+      heavy = true
+      cli_args = 'Executioner/end_time=1 Materials/mc/smoother_function_type=cos Outputs/file_base=biaxial_smooth_cos Postprocessors/active=s_zz'
+      detail = 'smoothed Mohr-Coulomb plasticity, with smoothing performed by the novel MOOSE smoothing method described in Wilkins et al, using the cosine smoother'
+    [../]
+    [./biaxial_smooth_poly1]
+      type = 'CSVDiff'
+      input = 'biaxial_smooth.i'
+      csvdiff = 'biaxial_smooth_poly1.csv'
+      heavy = true
+      cli_args = 'Executioner/end_time=1 Materials/mc/smoother_function_type=poly1 Outputs/file_base=biaxial_smooth_poly1 Postprocessors/active=s_zz'
+      prereq = 'biaxial_smooth_cos'
+      detail = 'smoothed Mohr-Coulomb plasticity, with smoothing performed by the novel MOOSE smoothing method described in Wilkins et al, using the poly1 smoother'
+    [../]
+    [./biaxial_smooth_poly2]
+      type = 'CSVDiff'
+      input = 'biaxial_smooth.i'
+      csvdiff = 'biaxial_smooth_poly2.csv'
+      heavy = true
+      cli_args = 'Executioner/end_time=1 Materials/mc/smoother_function_type=poly2 Outputs/file_base=biaxial_smooth_poly2 Postprocessors/active=s_zz'
+      prereq = 'biaxial_smooth_cos biaxial_smooth_poly1'
+      detail = 'smoothed Mohr-Coulomb plasticity, with smoothing performed by the novel MOOSE smoothing method described in Wilkins et al, using the poly2 smoother'
+    [../]
+    [./biaxial_smooth_poly3]
+      type = 'CSVDiff'
+      input = 'biaxial_smooth.i'
+      csvdiff = 'biaxial_smooth_poly3.csv'
+      heavy = true
+      cli_args = 'Executioner/end_time=1 Materials/mc/smoother_function_type=poly3 Outputs/file_base=biaxial_smooth_poly3 Postprocessors/active=s_zz'
+      prereq = 'biaxial_smooth_cos biaxial_smooth_poly1 biaxial_smooth_poly2'
+      detail = 'smoothed Mohr-Coulomb plasticity, with smoothing performed by the novel MOOSE smoothing method described in Wilkins et al, using the poly3 smoother'
+    [../]
+  []
+[]
