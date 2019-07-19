@@ -1,4 +1,4 @@
-# Example of using the IdealGasFluidPropertiesPT userobject to provide fluid
+# Example of using the IdealGasFluidProperties userobject to provide fluid
 # properties for an ideal gas. Use values for hydrogen (H2) at 1 MPa and 50 C.
 #
 # Input values:
