@@ -70,7 +70,7 @@
   [../]
 
   [./outlet]
-    type = Outlet
+    type = Outlet1Phase
     input = 'pipe:out'
     p = 1e5
   [../]

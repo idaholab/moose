@@ -116,7 +116,7 @@
     T = 500
   [../]
   [./outlet]
-    type = Outlet
+    type = Outlet1Phase
     input = 'pipe2:out'
     p = 6e6
   [../]

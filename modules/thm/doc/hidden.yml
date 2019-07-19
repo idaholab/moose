@@ -112,6 +112,8 @@
 - /Components/JunctionWithLossesBase
 - /Components/OldJunction
 - /Components/Outlet
+- /Components/Outlet1Phase
+- /Components/Outlet2Phase
 - /Components/PeriodicJunction
 - /Components/Pipe
 - /Components/PipeConnectable

@@ -60,7 +60,7 @@
   [../]
 
   [./outlet]
-    type = Outlet
+    type = Outlet2Phase
     input = 'pipe:out'
     p_liquid = 1e5
     p_vapor = 1e5
