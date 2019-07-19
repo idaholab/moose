@@ -156,6 +156,9 @@ protected:
   /// Smoothing tolerance: edges of the yield surface get smoothed by this amount
   const Real _smoothing_tol;
 
+  /// Square of the smoothing tolerance
+  const Real _smoothing_tol2;
+
   /// The yield-function tolerance
   const Real _f_tol;
 
@@ -192,6 +195,12 @@ protected:
 
   /// Number of Newton-Raphson iterations used in the return-map
   MaterialProperty<Real> & _iter;
+
+  /// Maximum number of Newton-Raphson iterations used in the return-map during the course of the entire simulation
+  MaterialProperty<Real> & _max_iter_used;
+
+  /// Old value of maximum number of Newton-Raphson iterations used in the return-map during the course of the entire simulation
+  const MaterialProperty<Real> & _max_iter_used_old;
 
   /// Whether a line-search was needed in the latest Newton-Raphson process (1 if true, 0 otherwise)
   MaterialProperty<Real> & _linesearch_needed;
@@ -724,5 +733,17 @@ private:
    * The current values of the internal params during the Newton-Raphson
    */
   std::vector<Real> _current_intnl;
+
+private:
+  /**
+   * The type of smoother function
+   */
+  enum class SmootherFunctionType
+  {
+    cos,
+    poly1,
+    poly2,
+    poly3
+  } _smoother_function_type;
 };
 
