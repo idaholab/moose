@@ -384,23 +384,6 @@ public:
                               Real & de_dp,
                               Real & de_dT) const;
 
-  /**
-   * Deprecated methods. These methods have been superseded by the methods above.
-   * Calling them will cause a deprecated warning with a message letting the user
-   * know the new method name to use, before passing calculation to the updated
-   * method. All property names are described above.
-   */
-  ///@{
-  virtual Real rho(Real p, Real T) const;
-  virtual Real mu(Real p, Real T) const;
-  virtual Real h(Real p, Real T) const;
-  virtual Real e(Real p, Real T) const;
-  virtual Real k(Real p, Real T) const;
-  virtual Real c(Real p, Real T) const;
-  virtual Real beta(Real p, Real T) const;
-  virtual Real s(Real p, Real T) const;
-  ///@}
-
 protected:
   /**
    * IAPWS formulation of Henry's law constant for dissolution in water
