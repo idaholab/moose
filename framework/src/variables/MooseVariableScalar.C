@@ -19,6 +19,8 @@
 
 #include <limits>
 
+registerMooseObject("MooseApp", MooseVariableScalar);
+
 template <>
 InputParameters
 validParams<MooseVariableScalar>()

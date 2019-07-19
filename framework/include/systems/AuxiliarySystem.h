@@ -53,13 +53,9 @@ public:
   virtual void jacobianSetup();
   virtual void updateActive(THREAD_ID tid);
 
-  /*
-  virtual void addVariable(const std::string & var_name,
-                           const FEType & type,
-                           Real scale_factor,
-                           const std::set<SubdomainID> * const active_subdomains = NULL);
-  */
-  virtual void addVariable(const std::string & var_type, const std::string & name, InputParameters parameters) override;
+  virtual void addVariable(const std::string & var_type,
+                           const std::string & name,
+                           InputParameters parameters) override;
   /**
    * Add a time integrator
    * @param type Type of the integrator
@@ -265,4 +261,3 @@ public:
   friend class ComputeNodalKernelJacobiansThread;
   friend class ComputeNodalKernelBCJacobiansThread;
 };
-

@@ -186,11 +186,14 @@ AuxiliarySystem::addVariable(const std::string & var_type,
                              InputParameters parameters)
 {
   SystemBase::addVariable(var_type, name, parameters);
+
+  auto type = parameters.get<FEType>("fe_type");
+
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     if (type.family == LAGRANGE_VEC || type.family == NEDELEC_ONE)
     {
-      VectorMooseVariable * var = _vars[tid].getFieldVariable<RealVectorValue>(var_name);
+      VectorMooseVariable * var = _vars[tid].getFieldVariable<RealVectorValue>(name);
       if (var)
       {
         _nodal_vars[tid].push_back(var);
@@ -200,7 +203,7 @@ AuxiliarySystem::addVariable(const std::string & var_type,
 
     else
     {
-      MooseVariable * var = _vars[tid].getFieldVariable<Real>(var_name);
+      MooseVariable * var = _vars[tid].getFieldVariable<Real>(name);
 
       if (var)
       {
@@ -218,26 +221,6 @@ AuxiliarySystem::addVariable(const std::string & var_type,
     }
   }
 }
-
-// void
-// AuxiliarySystem::addVariable(const std::string & var_name,
-//                             const FEType & type,
-//                             Real scale_factor,
-//                             const std::set<SubdomainID> * const active_subdomains /* = NULL*/)
-//{
-//  SystemBase::addVariable(var_name, type, scale_factor, active_subdomains);
-//  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-//  {
-//    MooseVariable * var = dynamic_cast<MooseVariable *>(_vars[tid].getVariable(var_name));
-//    if (var != NULL)
-//    {
-//      if (var->feType().family == LAGRANGE)
-//        _nodal_vars[tid][var_name] = var;
-//      else
-//        _elem_vars[tid][var_name] = var;
-//    }
-//  }
-//}
 
 void
 AuxiliarySystem::addTimeIntegrator(const std::string & type,

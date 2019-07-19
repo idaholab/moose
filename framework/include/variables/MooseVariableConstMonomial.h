@@ -12,6 +12,7 @@
 #include "MooseVariableFE.h"
 
 class MooseVariableConstMonomial;
+
 template <>
 InputParameters validParams<MooseVariableConstMonomial>();
 

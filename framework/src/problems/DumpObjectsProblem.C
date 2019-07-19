@@ -83,7 +83,7 @@ DumpObjectsProblem::addAuxScalarVariable(const std::string & var_name,
 void
 DumpObjectsProblem::addFunction(std::string type,
                                 const std::string & name,
-                                InputParameters parameters)
+                                InputParameters & parameters)
 {
   dumpObjectHelper("Functions", type, name, parameters);
   FEProblemBase::addFunction(type, name, parameters);
@@ -92,7 +92,7 @@ DumpObjectsProblem::addFunction(std::string type,
 void
 DumpObjectsProblem::addKernel(const std::string & type,
                               const std::string & name,
-                              InputParameters parameters)
+                              InputParameters & parameters)
 {
   dumpObjectHelper("Kernels", type, name, parameters);
   FEProblemBase::addKernel(type, name, parameters);
@@ -101,7 +101,7 @@ DumpObjectsProblem::addKernel(const std::string & type,
 void
 DumpObjectsProblem::addNodalKernel(const std::string & type,
                                    const std::string & name,
-                                   InputParameters parameters)
+                                   InputParameters & parameters)
 {
   dumpObjectHelper("NodalKernel", type, name, parameters);
   FEProblemBase::addNodalKernel(type, name, parameters);
@@ -110,7 +110,7 @@ DumpObjectsProblem::addNodalKernel(const std::string & type,
 void
 DumpObjectsProblem::addScalarKernel(const std::string & type,
                                     const std::string & name,
-                                    InputParameters parameters)
+                                    InputParameters & parameters)
 {
   dumpObjectHelper("ScalarKernels", type, name, parameters);
   FEProblemBase::addScalarKernel(type, name, parameters);
@@ -119,7 +119,7 @@ DumpObjectsProblem::addScalarKernel(const std::string & type,
 void
 DumpObjectsProblem::addBoundaryCondition(const std::string & type,
                                          const std::string & name,
-                                         InputParameters parameters)
+                                         InputParameters & parameters)
 {
   dumpObjectHelper("BCs", type, name, parameters);
   FEProblemBase::addBoundaryCondition(type, name, parameters);
@@ -128,7 +128,7 @@ DumpObjectsProblem::addBoundaryCondition(const std::string & type,
 void
 DumpObjectsProblem::addConstraint(const std::string & type,
                                   const std::string & name,
-                                  InputParameters parameters)
+                                  InputParameters & parameters)
 {
   dumpObjectHelper("Constraints", type, name, parameters);
   FEProblemBase::addConstraint(type, name, parameters);
@@ -137,7 +137,7 @@ DumpObjectsProblem::addConstraint(const std::string & type,
 void
 DumpObjectsProblem::addAuxKernel(const std::string & type,
                                  const std::string & name,
-                                 InputParameters parameters)
+                                 InputParameters & parameters)
 {
   dumpObjectHelper("AuxKernels", type, name, parameters);
   FEProblemBase::addAuxKernel(type, name, parameters);
@@ -146,7 +146,7 @@ DumpObjectsProblem::addAuxKernel(const std::string & type,
 void
 DumpObjectsProblem::addAuxScalarKernel(const std::string & type,
                                        const std::string & name,
-                                       InputParameters parameters)
+                                       InputParameters & parameters)
 {
   dumpObjectHelper("AuxScalarKernels", type, name, parameters);
   FEProblemBase::addAuxScalarKernel(type, name, parameters);
@@ -155,7 +155,7 @@ DumpObjectsProblem::addAuxScalarKernel(const std::string & type,
 void
 DumpObjectsProblem::addDiracKernel(const std::string & type,
                                    const std::string & name,
-                                   InputParameters parameters)
+                                   InputParameters & parameters)
 {
   dumpObjectHelper("DiracKernels", type, name, parameters);
   FEProblemBase::addDiracKernel(type, name, parameters);
@@ -164,7 +164,7 @@ DumpObjectsProblem::addDiracKernel(const std::string & type,
 void
 DumpObjectsProblem::addDGKernel(const std::string & type,
                                 const std::string & name,
-                                InputParameters parameters)
+                                InputParameters & parameters)
 {
   dumpObjectHelper("DGKernels", type, name, parameters);
   FEProblemBase::addDGKernel(type, name, parameters);
@@ -173,7 +173,7 @@ DumpObjectsProblem::addDGKernel(const std::string & type,
 void
 DumpObjectsProblem::addInterfaceKernel(const std::string & type,
                                        const std::string & name,
-                                       InputParameters parameters)
+                                       InputParameters & parameters)
 {
   dumpObjectHelper("InterfaceKernels", type, name, parameters);
   FEProblemBase::addInterfaceKernel(type, name, parameters);
@@ -182,7 +182,7 @@ DumpObjectsProblem::addInterfaceKernel(const std::string & type,
 void
 DumpObjectsProblem::addInitialCondition(const std::string & type,
                                         const std::string & name,
-                                        InputParameters parameters)
+                                        InputParameters & parameters)
 {
   dumpObjectHelper("ICs", type, name, parameters);
   FEProblemBase::addInitialCondition(type, name, parameters);
@@ -191,7 +191,7 @@ DumpObjectsProblem::addInitialCondition(const std::string & type,
 void
 DumpObjectsProblem::addMaterial(const std::string & type,
                                 const std::string & name,
-                                InputParameters parameters)
+                                InputParameters & parameters)
 {
   dumpObjectHelper("Materials", type, name, parameters);
   FEProblemBase::addMaterial(type, name, parameters);

@@ -14,6 +14,15 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("MooseApp", MooseVariableConstMonomial);
+
+template <>
+InputParameters
+validParams<MooseVariableConstMonomial>()
+{
+  return validParams<MooseVariableBase>();
+}
+
 MooseVariableConstMonomial::MooseVariableConstMonomial(const InputParameters & parameters)
   : MooseVariable(parameters)
 {

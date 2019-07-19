@@ -15,6 +15,10 @@
 #include "Assembly.h"
 #include "MooseVariableData.h"
 
+registerMooseObject("MooseApp", MooseVariable);
+registerMooseObject("MooseApp", VectorMooseVariable);
+registerMooseObject("MooseApp", ArrayMooseVariable);
+
 #define variableValidParams(type)                                                                  \
   template <>                                                                                      \
   InputParameters validParams<MooseVariableFE<type>>()                                             \
@@ -31,8 +35,8 @@ MooseVariableFE<OutputType>::MooseVariableFE(const InputParameters & parameters)
   : MooseVariableFEBase(parameters)
 {
   _element_data = libmesh_make_unique<MooseVariableData<OutputType>>(*this,
-                                                                     sys,
-                                                                     tid,
+                                                                     _sys,
+                                                                     _tid,
                                                                      Moose::ElementType::Element,
                                                                      _assembly.qRule(),
                                                                      _assembly.qRuleFace(),
@@ -40,8 +44,8 @@ MooseVariableFE<OutputType>::MooseVariableFE(const InputParameters & parameters)
                                                                      _assembly.elem());
   _neighbor_data =
       libmesh_make_unique<MooseVariableData<OutputType>>(*this,
-                                                         sys,
-                                                         tid,
+                                                         _sys,
+                                                         _tid,
                                                          Moose::ElementType::Neighbor,
                                                          _assembly.qRuleNeighbor(), // Place holder
                                                          _assembly.qRuleNeighbor(),
@@ -49,8 +53,8 @@ MooseVariableFE<OutputType>::MooseVariableFE(const InputParameters & parameters)
                                                          _assembly.neighbor());
   _lower_data =
       libmesh_make_unique<MooseVariableData<OutputType>>(*this,
-                                                         sys,
-                                                         tid,
+                                                         _sys,
+                                                         _tid,
                                                          Moose::ElementType::Lower,
                                                          _assembly.qRuleFace(),
                                                          _assembly.qRuleFace(), // Place holder

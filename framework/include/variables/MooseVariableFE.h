@@ -15,7 +15,6 @@
 #include "MooseTypes.h"
 #include "MooseVariableFEBase.h"
 #include "SubProblem.h"
-#include "SystemBase.h"
 #include "MooseMesh.h"
 #include "MooseVariableData.h"
 
@@ -29,6 +28,9 @@
 class TimeIntegrator;
 template <typename>
 class MooseVariableFE;
+typedef MooseVariableFE<Real> MooseVariable;
+typedef MooseVariableFE<RealVectorValue> VectorMooseVariable;
+typedef MooseVariableFE<RealEigenVector> ArrayMooseVariable;
 
 template <>
 InputParameters validParams<MooseVariableFE<Real>>();
@@ -634,8 +636,6 @@ public:
   virtual void computeNodalNeighborValues() override;
 
 protected:
-  const Assembly & _assembly;
-
   /// Holder for all the data associated with the "main" element
   std::unique_ptr<MooseVariableData<OutputType>> _element_data;
 

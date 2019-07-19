@@ -25,6 +25,7 @@
 #include "MooseUtils.h"
 
 #include "libmesh/dof_map.h"
+#include "libmesh/string_to_enum.h"
 
 /// Free function used for a libMesh callback
 void
@@ -620,49 +621,28 @@ SystemBase::removeVector(TagID tag_id)
 }
 
 void
-SystemBase::addVariable(const std::string & var_name,
-                        const FEType & type,
-                        Real scale_factor,
-                        const std::set<SubdomainID> * const active_subdomains)
-{
-  _numbered_vars.resize(libMesh::n_threads());
-  unsigned int var_num = system().add_variable(var_name, type, active_subdomains);
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-  {
-    // FIXME: we cannot refer fetype in libMesh at this point, so we will just make a copy in
-    // MooseVariableBase.
-    MooseVariableFEBase * var;
-    if (type == FEType(0, MONOMIAL))
-      var = new MooseVariableConstMonomial(
-          var_num, type, *this, _subproblem.assembly(tid), _var_kind, tid);
-    else if (type == FEType(FIRST, NEDELEC_ONE) || type.family == LAGRANGE_VEC)
-      var =
-          new VectorMooseVariable(var_num, type, *this, _subproblem.assembly(tid), _var_kind, tid);
-    else
-      var = new MooseVariable(var_num, type, *this, _subproblem.assembly(tid), _var_kind, tid);
-
-    var->scalingFactor(scale_factor);
-    _vars[tid].add(var_name, var);
-
-    if (var_num >= _numbered_vars[tid].size())
-      _numbered_vars[tid].resize(var_num + 1);
-    _numbered_vars[tid][var_num] = var;
-  }
-  if (active_subdomains == nullptr)
-    _var_map[var_num] = std::set<SubdomainID>();
-  else
-    for (const auto subdomain_id : *active_subdomains)
-      _var_map[var_num].insert(subdomain_id);
-
-  if (var_num > _max_var_number)
-    _max_var_number = var_num;
-}
-
-void
 SystemBase::addVariable(const std::string & var_type,
                         const std::string & name,
                         InputParameters parameters)
 {
+  // Convert the std::vector parameter provided by the user into a std::set for use by libMesh's
+  // System::add_variable method
+  std::set<SubdomainID> blocks;
+  const auto & block_param = parameters.get<std::vector<SubdomainName>>("block");
+  for (const auto & subdomain_name : block_param)
+  {
+    SubdomainID blk_id = _mesh.getSubdomainID(subdomain_name);
+    blocks.insert(blk_id);
+  }
+
+  // Add the variable to the libMesh System object
+  auto fe_type = FEType(Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")),
+                        Utility::string_to_enum<FEFamily>(parameters.get<MooseEnum>("family")));
+  auto var_num = system().add_variable(name, fe_type, &blocks);
+  parameters.set<unsigned int>("_var_num") = var_num;
+
+  _numbered_vars.resize(libMesh::n_threads());
+
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     parameters.set<SystemBase *>("_system_base") = this;
@@ -678,107 +658,8 @@ SystemBase::addVariable(const std::string & var_type,
     else
       _var_map[var->number()] = std::set<SubdomainID>();
   }
-}
 
-void
-SystemBase::addArrayVariable(const std::string & var_name,
-                             const FEType & type,
-                             unsigned int components,
-                             const std::vector<Real> & scale_factor,
-                             const std::set<SubdomainID> * const active_subdomains)
-{
-  if (type == FEType(FIRST, NEDELEC_ONE) || type.family == LAGRANGE_VEC)
-    mooseError("Vector family type cannot be used in an array variable");
-
-  _numbered_vars.resize(libMesh::n_threads());
-
-  // Turn off automatic variable group identification so that we can be sure that this variable
-  // group will be ordered exactly like it should be
-  system().identify_variable_groups(false);
-
-  // Build up the variable names
-  std::vector<std::string> var_names;
-  for (unsigned int i = 0; i < components; i++)
-    var_names.push_back(SubProblem::arrayVariableComponent(var_name, i));
-
-  // The number returned by libMesh is the _last_ variable number... we want to hold onto the
-  // _first_
-  unsigned int var_num =
-      system().add_variables(var_names, type, active_subdomains) - (components - 1);
-
-  if (active_subdomains == NULL)
-  {
-    unsigned int vn = var_num;
-    for (unsigned int i = 0; i < components; i++)
-      _var_map[vn++] = std::set<SubdomainID>();
-  }
-  else
-  {
-    unsigned int vn = var_num;
-    for (unsigned int i = 0; i < components; i++)
-    {
-      for (auto & sid : *active_subdomains)
-        _var_map[vn].insert(sid);
-      ++vn;
-    }
-  }
-
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-  {
-    // FIXME: we cannot refer fetype in libMesh at this point, so we will just make a copy in
-    // MooseVariableBase.
-    // ArrayMooseVariable is defined in MooseTypes.h
-    ArrayMooseVariable * var = new ArrayMooseVariable(
-        var_num, type, *this, _subproblem.assembly(tid), _var_kind, tid, components);
-    var->scalingFactor(scale_factor);
-    _vars[tid].add(var_name, var);
-
-    unsigned int end_var_num = var_num + components;
-    if (end_var_num > _numbered_vars[tid].size())
-      _numbered_vars[tid].resize(end_var_num);
-    for (unsigned int i = var_num; i < end_var_num; ++i)
-      _numbered_vars[tid][i] = var;
-  }
-
-  if (var_num > _max_var_number)
-    _max_var_number = var_num;
-}
-
-/*
-void
-SystemBase::addScalarVariable(const std::string & var_type, const std::string & name,
-InputParameters parameters)
-{
- for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
- {
-   std::shared_ptr<MooseVariableBase> var =
-         _factory.create<MooseVariableBase>(var_type, name, parameters, tid);
-}
-*/
-
-void
-SystemBase::addScalarVariable(const std::string & var_name,
-                              Order order,
-                              Real scale_factor,
-                              const std::set<SubdomainID> * const active_subdomains)
-{
-  FEType type(order, SCALAR);
-  unsigned int var_num = system().add_variable(var_name, type, active_subdomains);
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-  {
-    // FIXME: we cannot refer fetype in libMesh at this point, so we will just make a copy in
-    // MooseVariableBase.
-    MooseVariableScalar * var =
-        new MooseVariableScalar(var_num, type, *this, _subproblem.assembly(tid), _var_kind, tid);
-    var->scalingFactor(scale_factor);
-    _vars[tid].add(var_name, var);
-  }
-  if (active_subdomains == nullptr)
-    _var_map[var_num] = std::set<SubdomainID>();
-  else
-    for (const auto subdomain_id : *active_subdomains)
-      _var_map[var_num].insert(subdomain_id);
-
+  // getMaxVariableNumber is an API method used in Rattlesnake
   if (var_num > _max_var_number)
     _max_var_number = var_num;
 }

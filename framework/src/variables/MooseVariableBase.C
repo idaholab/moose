@@ -27,22 +27,28 @@ validParams<MooseVariableBase>()
   InputParameters params = validParams<MooseObject>();
   params += validParams<BlockRestrictable>();
 
-  MooseEnum order("CONSTANT=0 FIRST=1 SECOND=2 THIRD=3 FOURTH=4", "FIRST", true);
+  MooseEnum order(
+      "CONSTANT FIRST SECOND THIRD FOURTH FIFTH SIXTH SEVENTH EIGHTH NINTH", "FIRST", true);
   params.addParam<MooseEnum>("order",
                              order,
                              "Order of the FE shape function to use for this variable (additional "
                              "orders not listed here are allowed, depending on the family).");
 
-  MooseEnum family("LAGRANGE=0 MONOMIAL=2 HERMITE=22 SCALAR=31 HIERARCHIC=1 CLOUGH=21 XYZ=5 "
-                   "SZABAB=4 BERNSTEIN=3 L2_LAGRANGE=7 L2_HIERARCHIC=6",
+  MooseEnum family("LAGRANGE MONOMIAL HERMITE SCALAR HIERARCHIC CLOUGH XYZ SZABAB BERNSTEIN "
+                   "L2_LAGRANGE L2_HIERARCHIC NEDELEC_ONE LAGRANGE_VEC",
                    "LAGRANGE");
   params.addParam<MooseEnum>(
       "family", family, "Specifies the family of FE shape functions to use for this variable.");
 
-  params.addParam<Real>("initial_condition", "Specifies the initial condition for this variable");
+  params.addParam<std::vector<Real>>("initial_condition",
+                                     "Specifies the initial condition for this variable");
+  // ArrayVariable capability
+  params.addRangeCheckedParam<unsigned int>(
+      "components", 1, "components>0", "Number of components for an array variable");
 
   // Advanced input options
-  params.addParam<Real>("scaling", 1.0, "Specifies a scaling factor to apply to this variable");
+  params.addParam<std::vector<Real>>("scaling",
+                                     "Specifies a scaling factor to apply to this variable");
   params.addParam<bool>("eigen", false, "True to make this variable an eigen variable");
   params.addParamNamesToGroup("scaling eigen", "Advanced");
 

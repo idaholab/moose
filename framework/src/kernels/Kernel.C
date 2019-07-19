@@ -96,10 +96,7 @@ Kernel::computeResidual()
   precalculateResidual();
   for (_i = 0; _i < _test.size(); _i++)
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-    {
-      std::cout << _local_re.size() << " " << _i << std::endl;
       _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual();
-    }
 
   accumulateTaggedLocalResidual();
 

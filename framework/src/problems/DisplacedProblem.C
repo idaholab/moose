@@ -399,7 +399,7 @@ DisplacedProblem::getSystem(const std::string & var_name)
 void
 DisplacedProblem::addVariable(const std::string & var_type,
                               const std::string & name,
-                              InputParameters parameters)
+                              InputParameters & parameters)
 {
   _displaced_nl.addVariable(var_type, name, parameters);
 }
@@ -407,67 +407,10 @@ DisplacedProblem::addVariable(const std::string & var_type,
 void
 DisplacedProblem::addAuxVariable(const std::string & var_type,
                                  const std::string & name,
-                                 InputParameters parameters)
+                                 InputParameters & parameters)
 {
   _displaced_aux.addVariable(var_type, name, parameters);
 }
-
-/*
-void
-DisplacedProblem::addVariable(const std::string & var_name,
-                              const FEType & type,
-                              Real scale_factor,
-                              const std::set<SubdomainID> * const active_subdomains)
-{
-  _displaced_nl.addVariable(var_name, type, scale_factor, active_subdomains);
-}
-
-void
-DisplacedProblem::addArrayVariable(const std::string & var_name,
-                                   const FEType & type,
-                                   unsigned int components,
-                                   const std::vector<Real> & scale_factor,
-                                   const std::set<SubdomainID> * const active_subdomains)
-{
-  _displaced_nl.addArrayVariable(var_name, type, components, scale_factor, active_subdomains);
-}
-
-void
-DisplacedProblem::addAuxVariable(const std::string & var_name,
-                                 const FEType & type,
-                                 const std::set<SubdomainID> * const active_subdomains)
-{
-  _displaced_aux.addVariable(var_name, type, 1.0, active_subdomains);
-}
-
-void
-DisplacedProblem::addAuxArrayVariable(const std::string & var_name,
-                                      const FEType & type,
-                                      unsigned int components,
-                                      const std::set<SubdomainID> * const active_subdomains)
-{
-  _displaced_aux.addArrayVariable(
-      var_name, type, components, std::vector<Real>(components, 1), active_subdomains);
-}
-
-void
-DisplacedProblem::addScalarVariable(const std::string & var_name,
-                                    Order order,
-                                    Real scale_factor,
-                                    const std::set<SubdomainID> * const active_subdomains)
-{
-  _displaced_nl.addScalarVariable(var_name, order, scale_factor, active_subdomains);
-}
-
-void
-DisplacedProblem::addAuxScalarVariable(const std::string & var_name,
-                                       Order order,
-                                       Real scale_factor,
-                                       const std::set<SubdomainID> * const active_subdomains)
-{
-  _displaced_aux.addScalarVariable(var_name, order, scale_factor, active_subdomains);
-}
-*/
 
 void
 DisplacedProblem::prepare(const Elem * elem, THREAD_ID tid)

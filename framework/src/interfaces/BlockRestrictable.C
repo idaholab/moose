@@ -28,7 +28,7 @@ validParams<BlockRestrictable>()
   params.addParam<std::vector<SubdomainName>>(
       "block", "The list of block ids (SubdomainID) that this object will be applied");
 
-  // A parameter for disabling error message for objec #10601ts restrictable by boundary and block,
+  // A parameter for disabling error message for objects restrictable by boundary and block,
   // if the parameter is valid it was already set so don't do anything
   if (!params.have_parameter<bool>("_dual_restrictable"))
     params.addPrivateParam<bool>("_dual_restrictable", false);
@@ -76,7 +76,7 @@ BlockRestrictable::BlockRestrictable(const MooseObject * moose_object,
 void
 BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
 {
-  // If the mesh pointer is not defined, but FEProblemBase is, get it fxbrom there
+  // If the mesh pointer is not defined, but FEProblemBase is, get it from there
   if (_blk_feproblem != NULL && _blk_mesh == NULL)
     _blk_mesh = &_blk_feproblem->mesh();
 

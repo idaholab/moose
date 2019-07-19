@@ -9,6 +9,13 @@
 
 #include "MooseVariableFE.h"
 
+template <>
+InputParameters
+validParams<MooseVariableFEBase>()
+{
+  return validParams<MooseVariableBase>();
+}
+
 MooseVariableFEBase::MooseVariableFEBase(const InputParameters & parameters)
   : MooseVariableBase(parameters)
 {

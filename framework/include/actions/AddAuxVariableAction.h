@@ -29,8 +29,6 @@ public:
    */
   AddAuxVariableAction(InputParameters params);
 
-  virtual void act() override;
-
   /**
    * Returns available families for AuxVariables
    * @return MooseEnum with the valid familes for AuxVariables
@@ -42,5 +40,7 @@ public:
    * @return MooseEnum with valid orders
    */
   static MooseEnum getAuxVariableOrders();
-};
 
+protected:
+  void init() override;
+};

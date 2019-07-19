@@ -468,10 +468,11 @@ public:
   virtual void transient(bool trans) { _transient = trans; }
   virtual bool isTransient() const override { return _transient; }
 
+  virtual void addTimeIntegrator(const std::string & type,
+                                 const std::string & name,
+                                 InputParameters & parameters);
   virtual void
-  addTimeIntegrator(const std::string & type, const std::string & name, InputParameters parameters);
-  virtual void
-  addPredictor(const std::string & type, const std::string & name, InputParameters parameters);
+  addPredictor(const std::string & type, const std::string & name, InputParameters & parameters);
 
   virtual void copySolutionsBackwards();
 
@@ -541,7 +542,8 @@ public:
 #endif // LIBMESH_HAVE_PETSC
 
   // Function /////
-  virtual void addFunction(std::string type, const std::string & name, InputParameters parameters);
+  virtual void
+  addFunction(std::string type, const std::string & name, InputParameters & parameters);
   virtual bool hasFunction(const std::string & name, THREAD_ID tid = 0);
   virtual Function & getFunction(const std::string & name, THREAD_ID tid = 0);
 
@@ -567,13 +569,13 @@ public:
    * The following functions will enable MOOSE to have the capability to import distributions
    */
   virtual void
-  addDistribution(std::string type, const std::string & name, InputParameters parameters);
+  addDistribution(std::string type, const std::string & name, InputParameters & parameters);
   virtual Distribution & getDistribution(const std::string & name);
 
   /**
    * The following functions will enable MOOSE to have the capability to import Samplers
    */
-  virtual void addSampler(std::string type, const std::string & name, InputParameters parameters);
+  virtual void addSampler(std::string type, const std::string & name, InputParameters & parameters);
   virtual Sampler & getSampler(const std::string & name, THREAD_ID tid = 0);
 
   // NL /////
@@ -587,6 +589,15 @@ public:
   virtual SystemBase & systemBaseAuxiliary() override;
 
   virtual NonlinearSystem & getNonlinearSystem();
+
+  /**
+   * Canonical method for adding a non-linear variable
+   * @param var_type the type of the variable, e.g. MooseVariableScalar
+   * @param var_name the variable name, e.g. 'u'
+   * @param params the InputParameters from which to construct the variable
+   */
+  virtual void
+  addVariable(const std::string & var_type, const std::string & var_name, InputParameters & params);
 
   virtual void addVariable(const std::string & var_name,
                            const FEType & type,
@@ -604,21 +615,22 @@ public:
 
   virtual void addADKernel(const std::string & kernel_name,
                            const std::string & name,
-                           InputParameters parameters);
+                           InputParameters & parameters);
 
-  virtual void
-  addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+  virtual void addKernel(const std::string & kernel_name,
+                         const std::string & name,
+                         InputParameters & parameters);
   virtual void addNodalKernel(const std::string & kernel_name,
                               const std::string & name,
-                              InputParameters parameters);
+                              InputParameters & parameters);
   virtual void addScalarKernel(const std::string & kernel_name,
                                const std::string & name,
-                               InputParameters parameters);
+                               InputParameters & parameters);
   virtual void addBoundaryCondition(const std::string & bc_name,
                                     const std::string & name,
-                                    InputParameters parameters);
+                                    InputParameters & parameters);
   virtual void
-  addConstraint(const std::string & c_name, const std::string & name, InputParameters parameters);
+  addConstraint(const std::string & c_name, const std::string & name, InputParameters & parameters);
 
   virtual void setInputParametersFEProblem(InputParameters & parameters)
   {
@@ -626,6 +638,17 @@ public:
   }
 
   // Aux /////
+
+  /**
+   * Canonical method for adding an auxiliary variable
+   * @param var_type the type of the variable, e.g. MooseVariableScalar
+   * @param var_name the variable name, e.g. 'u'
+   * @param params the InputParameters from which to construct the variable
+   */
+  virtual void addAuxVariable(const std::string & var_type,
+                              const std::string & var_name,
+                              InputParameters & params);
+
   virtual void addAuxVariable(const std::string & var_name,
                               const FEType & type,
                               const std::set<SubdomainID> * const active_subdomains = NULL);
@@ -639,49 +662,49 @@ public:
                                     const std::set<SubdomainID> * const active_subdomains = NULL);
   virtual void addAuxKernel(const std::string & kernel_name,
                             const std::string & name,
-                            InputParameters parameters);
+                            InputParameters & parameters);
   virtual void addAuxScalarKernel(const std::string & kernel_name,
                                   const std::string & name,
-                                  InputParameters parameters);
+                                  InputParameters & parameters);
 
   AuxiliarySystem & getAuxiliarySystem() { return *_aux; }
 
   // Dirac /////
   virtual void addDiracKernel(const std::string & kernel_name,
                               const std::string & name,
-                              InputParameters parameters);
+                              InputParameters & parameters);
 
   // DG /////
   virtual void addDGKernel(const std::string & kernel_name,
                            const std::string & name,
-                           InputParameters parameters);
+                           InputParameters & parameters);
 
   // Interface /////
   virtual void addInterfaceKernel(const std::string & kernel_name,
                                   const std::string & name,
-                                  InputParameters parameters);
+                                  InputParameters & parameters);
 
   // IC /////
   virtual void addInitialCondition(const std::string & ic_name,
                                    const std::string & name,
-                                   InputParameters parameters);
+                                   InputParameters & parameters);
 
   void projectSolution();
 
   // Materials /////
   virtual void addMaterial(const std::string & kernel_name,
                            const std::string & name,
-                           InputParameters parameters);
+                           InputParameters & parameters);
   virtual void addADResidualMaterial(const std::string & kernel_name,
                                      const std::string & name,
-                                     InputParameters parameters);
+                                     InputParameters & parameters);
   virtual void addADJacobianMaterial(const std::string & kernel_name,
                                      const std::string & name,
-                                     InputParameters parameters);
+                                     InputParameters & parameters);
   virtual void addMaterialHelper(std::vector<MaterialWarehouse *> warehouse,
                                  const std::string & kernel_name,
                                  const std::string & name,
-                                 InputParameters parameters);
+                                 InputParameters & parameters);
 
   /**
    * Add the MooseVariables that the current materials depend on to the dependency list.
@@ -705,11 +728,12 @@ public:
 
   // Postprocessors /////
   virtual void
-  addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters);
+  addPostprocessor(std::string pp_name, const std::string & name, InputParameters & parameters);
 
   // VectorPostprocessors /////
-  virtual void
-  addVectorPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters);
+  virtual void addVectorPostprocessor(std::string pp_name,
+                                      const std::string & name,
+                                      InputParameters & parameters);
 
   /**
    * Initializes the postprocessor data
@@ -721,8 +745,9 @@ public:
   void initVectorPostprocessorData(const std::string & name);
 
   // UserObjects /////
-  virtual void
-  addUserObject(std::string user_object_name, const std::string & name, InputParameters parameters);
+  virtual void addUserObject(std::string user_object_name,
+                             const std::string & name,
+                             InputParameters & parameters);
 
   // TODO: delete this function after apps have been updated to not call it
   const ExecuteMooseObjectWarehouse<UserObject> & getUserObjects() const
@@ -919,7 +944,7 @@ public:
 
   // Dampers /////
   virtual void
-  addDamper(std::string damper_name, const std::string & name, InputParameters parameters);
+  addDamper(std::string damper_name, const std::string & name, InputParameters & parameters);
   void setupDampers();
 
   /**
@@ -929,18 +954,18 @@ public:
 
   // Indicators /////
   void
-  addIndicator(std::string indicator_name, const std::string & name, InputParameters parameters);
+  addIndicator(std::string indicator_name, const std::string & name, InputParameters & parameters);
 
   // Markers //////
   virtual void
-  addMarker(std::string marker_name, const std::string & name, InputParameters parameters);
+  addMarker(std::string marker_name, const std::string & name, InputParameters & parameters);
 
   /**
    * Add a MultiApp to the problem.
    */
   virtual void addMultiApp(const std::string & multi_app_name,
                            const std::string & name,
-                           InputParameters parameters);
+                           InputParameters & parameters);
 
   /**
    * Get a MultiApp object by name.
@@ -1015,7 +1040,7 @@ public:
    */
   virtual void addTransfer(const std::string & transfer_name,
                            const std::string & name,
-                           InputParameters parameters);
+                           InputParameters & parameters);
 
   /**
    * Execute the Transfers associated with the ExecFlagType
@@ -1593,7 +1618,7 @@ public:
   /**
    * Adds an Output object.
    */
-  void addOutput(const std::string &, const std::string &, InputParameters);
+  void addOutput(const std::string &, const std::string &, InputParameters &);
 
   inline TheWarehouse & theWarehouse() const { return _app.theWarehouse(); }
 
