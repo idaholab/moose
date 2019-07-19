@@ -103,6 +103,8 @@
 - /Components/InletStagnationEnthalpyMomentum1Phase
 - /Components/InletStagnationEnthalpyMomentum2Phase
 - /Components/InletStagnationPressureTemperature
+- /Components/InletStagnationPressureTemperature1Phase
+- /Components/InletStagnationPressureTemperature2Phase
 - /Components/Junction
 - /Components/JunctionBase
 - /Components/JunctionWithLossesBase
