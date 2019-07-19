@@ -8,7 +8,7 @@ which to calculate properties such as density, enthalpy and internal energy.
 
 When used with the pressure and temperature interface, which is the case in the Porous Flow module, methane properties are typically calculated by first calculating density iteratively for a given pressure and temperature. This density is then used to calculate the other properties, such as internal energy, directly. The computational expense associated with the iterative calculation can be mitigated using [TabulatedFluidProperties](/TabulatedFluidProperties.md).
 
-For low pressures (typically less than 10 MPa), the properties of methane can be approximated using an [ideal gas](/IdealGasFluidPropertiesPT.md), which are much faster to calculate. However, at higher pressures, this approximation can lead to large differences, see [methane_density].
+For low pressures (typically less than 10 MPa), the properties of methane can be approximated using an [ideal gas](/IdealGasFluidProperties.md), which are much faster to calculate. However, at higher pressures, this approximation can lead to large differences, see [methane_density].
 
 !media media/fluid_properties/methane_density.png
        id=methane_density
