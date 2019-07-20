@@ -52,7 +52,6 @@ FormLoss1PhaseBase::addMooseObjects()
     params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
     params.set<MaterialPropertyName>("rho") = FlowModelSinglePhase::DENSITY;
     params.set<MaterialPropertyName>("vel") = FlowModelSinglePhase::VELOCITY;
-    _sim.addKernel(
-        class_name, Component::genName(name(), FlowModelSinglePhase::RHOUA, "form_loss"), params);
+    _sim.addKernel(class_name, genName(name(), FlowModelSinglePhase::RHOUA, "form_loss"), params);
   }
 }

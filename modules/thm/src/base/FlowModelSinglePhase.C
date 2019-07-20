@@ -89,7 +89,7 @@ FlowModelSinglePhase::addInitialConditions()
       params.set<std::vector<VariableName>>("p") = {PRESSURE};
       params.set<std::vector<VariableName>>("T") = {TEMPERATURE};
       params.set<UserObjectName>("fp") = _fp_name;
-      _sim.addInitialCondition(class_name, Component::genName(_comp_name, "rho_ic"), params);
+      _sim.addInitialCondition(class_name, genName(_comp_name, "rho_ic"), params);
     }
 
     {
@@ -98,7 +98,7 @@ FlowModelSinglePhase::addInitialConditions()
       params.set<VariableName>("variable") = RHOA;
       params.set<std::vector<SubdomainName>>("block") = block;
       params.set<std::vector<VariableName>>("values") = {DENSITY, FlowModel::AREA};
-      _sim.addInitialCondition(class_name, Component::genName(_comp_name, "rhoA_ic"), params);
+      _sim.addInitialCondition(class_name, genName(_comp_name, "rhoA_ic"), params);
     }
     {
       std::string class_name = "VariableProductIC";
@@ -106,7 +106,7 @@ FlowModelSinglePhase::addInitialConditions()
       params.set<VariableName>("variable") = RHOUA;
       params.set<std::vector<SubdomainName>>("block") = block;
       params.set<std::vector<VariableName>>("values") = {DENSITY, VELOCITY, FlowModel::AREA};
-      _sim.addInitialCondition(class_name, Component::genName(_comp_name, "rhouA_ic"), params);
+      _sim.addInitialCondition(class_name, genName(_comp_name, "rhouA_ic"), params);
     }
     {
       std::string class_name = "RhoEAFromPressureTemperatureVelocityIC";
@@ -118,7 +118,7 @@ FlowModelSinglePhase::addInitialConditions()
       params.set<std::vector<VariableName>>("vel") = {VELOCITY};
       params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
       params.set<UserObjectName>("fp") = _fp_name;
-      _sim.addInitialCondition(class_name, Component::genName(_comp_name, "rhoEA_ic"), params);
+      _sim.addInitialCondition(class_name, genName(_comp_name, "rhoEA_ic"), params);
     }
 
     {
@@ -128,7 +128,7 @@ FlowModelSinglePhase::addInitialConditions()
       params.set<std::vector<SubdomainName>>("block") = block;
       params.set<std::vector<VariableName>>("rhoA") = {RHOA};
       params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
-      _sim.addInitialCondition(class_name, Component::genName(_comp_name, "v_ic"), params);
+      _sim.addInitialCondition(class_name, genName(_comp_name, "v_ic"), params);
     }
     {
       std::string class_name = "SpecificInternalEnergyIC";
@@ -138,7 +138,7 @@ FlowModelSinglePhase::addInitialConditions()
       params.set<std::vector<VariableName>>("rhoA") = {RHOA};
       params.set<std::vector<VariableName>>("rhouA") = {RHOUA};
       params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
-      _sim.addInitialCondition(class_name, Component::genName(_comp_name, "u_ic"), params);
+      _sim.addInitialCondition(class_name, genName(_comp_name, "u_ic"), params);
     }
     {
       std::string class_name = "SpecificTotalEnthalpyIC";
@@ -149,7 +149,7 @@ FlowModelSinglePhase::addInitialConditions()
       params.set<std::vector<VariableName>>("rhoA") = {RHOA};
       params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
       params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
-      _sim.addInitialCondition(class_name, Component::genName(_comp_name, "H_ic"), params);
+      _sim.addInitialCondition(class_name, genName(_comp_name, "H_ic"), params);
     }
   }
 }
@@ -183,7 +183,7 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<VariableName>>("rhouA") = {RHOUA};
     params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
     params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
-    _sim.addMaterial(class_name, Component::genName(_comp_name, "fp_mat"), params);
+    _sim.addMaterial(class_name, genName(_comp_name, "fp_mat"), params);
   }
 
   ////////////////////////////////////////////////////////
@@ -198,7 +198,7 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
     if (_lump_mass_matrix)
       params.set<bool>("lumping") = true;
-    _sim.addKernel(class_name, Component::genName(_comp_name, "rho_ie"), params);
+    _sim.addKernel(class_name, genName(_comp_name, "rho_ie"), params);
   }
   if (_spatial_discretization == CG)
   {
@@ -213,7 +213,7 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<MaterialPropertyName>("alpha") = UNITY;
     params.set<MaterialPropertyName>("rho") = DENSITY;
     params.set<MaterialPropertyName>("vel") = VELOCITY;
-    _sim.addKernel(class_name, Component::genName(_comp_name, "rho_if"), params);
+    _sim.addKernel(class_name, genName(_comp_name, "rho_if"), params);
   }
 
   // Momentum equation, for 1-D flow channel, x-momentum equation only
@@ -225,7 +225,7 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
     if (_lump_mass_matrix)
       params.set<bool>("lumping") = true;
-    _sim.addKernel(class_name, Component::genName(_comp_name, "rhou_ie"), params);
+    _sim.addKernel(class_name, genName(_comp_name, "rhou_ie"), params);
   }
   if (_spatial_discretization == CG)
   {
@@ -243,7 +243,7 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<MaterialPropertyName>("rho") = DENSITY;
     params.set<MaterialPropertyName>("vel") = VELOCITY;
     params.set<MaterialPropertyName>("p") = PRESSURE;
-    _sim.addKernel(class_name, Component::genName(_comp_name, "rhou_if"), params);
+    _sim.addKernel(class_name, genName(_comp_name, "rhou_if"), params);
   }
   {
     std::string class_name = "OneDMomentumAreaGradient";
@@ -260,7 +260,7 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<MaterialPropertyName>("p") = PRESSURE;
     params.set<MaterialPropertyName>("alpha") = UNITY;
     params.set<std::vector<VariableName>>("arhoEA") = {RHOEA};
-    _sim.addKernel(class_name, Component::genName(_comp_name, "rhou_ps"), params);
+    _sim.addKernel(class_name, genName(_comp_name, "rhou_ps"), params);
   }
   {
     std::string class_name = "OneDMomentumFriction";
@@ -277,7 +277,7 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<MaterialPropertyName>("vel") = VELOCITY;
     params.set<MaterialPropertyName>("f_D") = FRICTION_FACTOR_DARCY;
     params.set<MaterialPropertyName>("2phase_multiplier") = UNITY;
-    _sim.addKernel(class_name, Component::genName(_comp_name, "rhou_friction"), params);
+    _sim.addKernel(class_name, genName(_comp_name, "rhou_friction"), params);
   }
   {
     std::string class_name = "OneDMomentumGravity";
@@ -290,7 +290,7 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<MaterialPropertyName>("alpha") = UNITY;
     params.set<MaterialPropertyName>("rho") = DENSITY;
     params.set<RealVectorValue>("gravity_vector") = _gravity_vector;
-    _sim.addKernel(class_name, Component::genName(_comp_name, "rhou_gravity"), params);
+    _sim.addKernel(class_name, genName(_comp_name, "rhou_gravity"), params);
   }
 
   // Total energy equation
@@ -302,7 +302,7 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
     if (_lump_mass_matrix)
       params.set<bool>("lumping") = true;
-    _sim.addKernel(class_name, Component::genName(_comp_name, "rhoE_ie"), params);
+    _sim.addKernel(class_name, genName(_comp_name, "rhoE_ie"), params);
   }
   if (_spatial_discretization == CG)
   {
@@ -320,7 +320,7 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<MaterialPropertyName>("vel") = VELOCITY;
     params.set<MaterialPropertyName>("e") = SPECIFIC_INTERNAL_ENERGY;
     params.set<MaterialPropertyName>("p") = PRESSURE;
-    _sim.addKernel(class_name, Component::genName(_comp_name, "rhoE_if"), params);
+    _sim.addKernel(class_name, genName(_comp_name, "rhoE_if"), params);
   }
   {
     std::string class_name = "OneDEnergyGravity";
@@ -335,7 +335,7 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<MaterialPropertyName>("rho") = DENSITY;
     params.set<MaterialPropertyName>("vel") = VELOCITY;
     params.set<RealVectorValue>("gravity_vector") = _gravity_vector;
-    _sim.addKernel(class_name, Component::genName(_comp_name, "rhoE_gravity"), params);
+    _sim.addKernel(class_name, genName(_comp_name, "rhoE_gravity"), params);
   }
 
   //////////////////////////////////////
@@ -353,7 +353,7 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
     params.set<std::vector<VariableName>>("numerator") = {RHOUA};
     params.set<std::vector<VariableName>>("denominator") = {RHOA};
-    _sim.addAuxKernel(class_name, Component::genName(_comp_name, "vel"), params);
+    _sim.addAuxKernel(class_name, genName(_comp_name, "vel"), params);
   }
 
   {
@@ -363,7 +363,7 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
     params.set<std::vector<VariableName>>("numerator") = {RHOA};
     params.set<std::vector<VariableName>>("denominator") = {AREA};
-    _sim.addAuxKernel("QuotientAux", Component::genName(_comp_name, "rho_auxkernel"), params);
+    _sim.addAuxKernel("QuotientAux", genName(_comp_name, "rho_auxkernel"), params);
   }
 
   {
@@ -373,7 +373,7 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
     params.set<std::vector<VariableName>>("rhoA") = {RHOA};
     params.set<std::vector<VariableName>>("A") = {AREA};
-    _sim.addAuxKernel(class_name, Component::genName(_comp_name, "v_aux"), params);
+    _sim.addAuxKernel(class_name, genName(_comp_name, "v_aux"), params);
   }
   {
     std::string class_name = "THMSpecificInternalEnergyAux";
@@ -383,7 +383,7 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<VariableName>>("rhoA") = {RHOA};
     params.set<std::vector<VariableName>>("rhouA") = {RHOUA};
     params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
-    _sim.addAuxKernel(class_name, Component::genName(_comp_name, "e_aux"), params);
+    _sim.addAuxKernel(class_name, genName(_comp_name, "e_aux"), params);
   }
 
   {
@@ -394,7 +394,7 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<VariableName>>("e") = {SPECIFIC_INTERNAL_ENERGY};
     params.set<std::vector<VariableName>>("v") = {SPECIFIC_VOLUME};
     params.set<UserObjectName>("fp") = _fp_name;
-    _sim.addAuxKernel(class_name, Component::genName(_comp_name, "pressure_uv_auxkernel"), params);
+    _sim.addAuxKernel(class_name, genName(_comp_name, "pressure_uv_auxkernel"), params);
   }
   {
     std::string class_name = "TemperatureAux";
@@ -404,7 +404,7 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<VariableName>>("e") = {SPECIFIC_INTERNAL_ENERGY};
     params.set<std::vector<VariableName>>("v") = {SPECIFIC_VOLUME};
     params.set<UserObjectName>("fp") = _fp_name;
-    _sim.addAuxKernel(class_name, Component::genName(_comp_name, "T_auxkernel"), params);
+    _sim.addAuxKernel(class_name, genName(_comp_name, "T_auxkernel"), params);
   }
 
   {
@@ -416,7 +416,7 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
     params.set<std::vector<VariableName>>("p") = {PRESSURE};
     params.set<std::vector<VariableName>>("A") = {AREA};
-    _sim.addAuxKernel(class_name, Component::genName(_comp_name, "H_auxkernel"), params);
+    _sim.addAuxKernel(class_name, genName(_comp_name, "H_auxkernel"), params);
   }
 }
 
@@ -437,7 +437,7 @@ FlowModelSinglePhase::addRDGMooseObjects()
     params.set<MaterialPropertyName>("direction") = DIRECTION;
     params.set<UserObjectName>("fluid_properties") = _fp_name;
     params.set<bool>("implicit") = _sim.getImplicitTimeIntegrationFlag();
-    _sim.addMaterial(class_name, Component::genName(_comp_name, "rdg_3egn_mat"), params);
+    _sim.addMaterial(class_name, genName(_comp_name, "rdg_3egn_mat"), params);
   }
 
   // advection
@@ -453,14 +453,14 @@ FlowModelSinglePhase::addRDGMooseObjects()
     params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
     params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
     params.set<bool>("implicit") = _sim.getImplicitTimeIntegrationFlag();
-    _sim.addDGKernel(class_name, Component::genName(_comp_name, "mass_advection"), params);
+    _sim.addDGKernel(class_name, genName(_comp_name, "mass_advection"), params);
 
     // momentum
     params.set<NonlinearVariableName>("variable") = RHOUA;
-    _sim.addDGKernel(class_name, Component::genName(_comp_name, "momentum_advection"), params);
+    _sim.addDGKernel(class_name, genName(_comp_name, "momentum_advection"), params);
 
     // energy
     params.set<NonlinearVariableName>("variable") = RHOEA;
-    _sim.addDGKernel(class_name, Component::genName(_comp_name, "energy_advection"), params);
+    _sim.addDGKernel(class_name, genName(_comp_name, "energy_advection"), params);
   }
 }

@@ -32,6 +32,6 @@ FormLossFromFunction1Phase::addMooseObjects()
     params.set<std::vector<SubdomainName>>("block") = _flow_channel_subdomains;
     params.set<std::vector<std::string>>("prop_names") = {"K_prime"};
     params.set<std::vector<FunctionName>>("prop_values") = {getParam<FunctionName>("K_prime")};
-    _sim.addMaterial(class_name, Component::genName(name(), "k_prime_material"), params);
+    _sim.addMaterial(class_name, genName(name(), "k_prime_material"), params);
   }
 }

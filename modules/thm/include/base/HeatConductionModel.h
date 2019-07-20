@@ -6,6 +6,7 @@ class Factory;
 class HeatStructureBase;
 
 #include "MooseObject.h"
+#include "NamingInterface.h"
 #include "libmesh/fe_type.h"
 
 /**
@@ -13,7 +14,7 @@ class HeatStructureBase;
  *
  * This is a proxy class for the MOOSE Modules' heat conduction model
  */
-class HeatConductionModel : public MooseObject
+class HeatConductionModel : public MooseObject, public NamingInterface
 {
 public:
   HeatConductionModel(const InputParameters & params);

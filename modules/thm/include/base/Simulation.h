@@ -5,6 +5,7 @@
 #include "FlowModel.h"
 #include "ControlData.h"
 #include "LoggingInterface.h"
+#include "NamingInterface.h"
 
 class ActionWarehouse;
 class Component;
@@ -13,7 +14,7 @@ class THMMesh;
 /**
  * Main class for simulation (the driver of the simulation)
  */
-class Simulation : public LoggingInterface
+class Simulation : public LoggingInterface, public NamingInterface
 {
 public:
   Simulation(ActionWarehouse & action_warehouse);

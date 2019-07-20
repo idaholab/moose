@@ -139,7 +139,7 @@ FlowModel::addCommonInitialConditions()
           params.set<VariableName>("variable") = AREA;
           params.set<std::vector<SubdomainName>>("block") = block;
           params.set<FunctionName>("function") = area_function;
-          _sim.addInitialCondition(class_name, Component::genName(_comp_name, AREA, "ic"), params);
+          _sim.addInitialCondition(class_name, genName(_comp_name, AREA, "ic"), params);
         }
       }
       else
@@ -159,6 +159,6 @@ FlowModel::addCommonMooseObjects()
     params.set<std::string>("property_name") = FlowModel::UNITY;
     params.set<Real>("value") = 1.0;
     params.set<std::vector<VariableName>>("derivative_vars") = _derivative_vars;
-    _sim.addMaterial(class_name, Component::genName(_comp_name, FlowModel::UNITY), params);
+    _sim.addMaterial(class_name, genName(_comp_name, FlowModel::UNITY), params);
   }
 }
