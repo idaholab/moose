@@ -176,7 +176,7 @@ VolumeJunction1Phase::addMooseObjects()
       const std::string class_name = "ODETimeDerivative";
       InputParameters params = _factory.getValidParams(class_name);
       params.set<NonlinearVariableName>("variable") = var_names[i];
-      _sim.addScalarKernel(class_name, genName(name(), var_names[i], class_name), params);
+      _sim.addScalarKernel(class_name, genName(name(), var_names[i], "td"), params);
     }
     {
       const std::string class_name = "VolumeJunctionAdvectionScalarKernel";
@@ -184,7 +184,7 @@ VolumeJunction1Phase::addMooseObjects()
       params.set<NonlinearVariableName>("variable") = var_names[i];
       params.set<UserObjectName>("volume_junction_uo") = volume_junction_uo_name;
       params.set<unsigned int>("equation_index") = i;
-      _sim.addScalarKernel(class_name, genName(name(), var_names[i], class_name), params);
+      _sim.addScalarKernel(class_name, genName(name(), var_names[i], "vja_sk"), params);
     }
   }
 }
