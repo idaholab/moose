@@ -109,7 +109,7 @@
 
 [UserObjects]
   [./grain_tracker]
-    type = GrainTracker
+    type = FauxGrainTracker
     connecting_threshold = 0.05
     compute_var_to_feature_map = true
     flood_entity_type = elemental

@@ -51,7 +51,7 @@ EulerAngleProvider2RGBAux::EulerAngleProvider2RGBAux(const InputParameters & par
     _output_type(getParam<MooseEnum>("output_type")),
     _euler(getUserObject<EulerAngleProvider>("euler_angle_provider")),
     _ebsd_reader(isParamValid("phase") ? dynamic_cast<const EBSDReader *>(&_euler) : nullptr),
-    _grain_tracker(getUserObject<GrainTracker>("grain_tracker")),
+    _grain_tracker(getUserObject<GrainTrackerInterface>("grain_tracker")),
     _no_grain_color(getParam<Point>("no_grain_color"))
 {
 }
