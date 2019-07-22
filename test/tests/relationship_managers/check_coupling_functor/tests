@@ -1,0 +1,9 @@
+[Tests]
+  [run]
+    type = RunApp
+    input = 'check_no_mallocs.i'
+    design = "RelationshipManager.md"
+    issues = "#13736"
+    requirement = "The CouplingFunctorCheckAction shall add a default coupling functor if it's needed and hasn't already been added by another Action"
+  []
+[]
