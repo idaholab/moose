@@ -2,9 +2,9 @@
 
 !alert warning title=Deprecated Action
 This legacy action will soon be deprecated in favor of the more inclusive
-+[TensorMechanics/Master](/Master/index.md)+.
++[TensorMechanics/Master](/Modules/TensorMechanics/Master/index.md)+.
 See the description, example use, and parameters on the
-+[TensorMechanics/Master](/Master/index.md)+ action system page.
++[TensorMechanics/Master](/Modules/TensorMechanics/Master/index.md)+ action system page.
 
 ## Description
 

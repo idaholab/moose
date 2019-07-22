@@ -22,8 +22,8 @@ where the volumetric material is defined as a separate material model
 !listing modules/tensor_mechanics/test/tests/volumetric_eigenstrain/volumetric_eigenstrain.i
          block=Materials/volumetric_change
 
-The `eigenstrain_name` parameter value must also be set for the strain calculator. When the 
-[TensorMechanics/Master](/Master/index.md) Action is used, it automatically creates the strain
+The `eigenstrain_name` parameter value must also be set for the strain calculator. When the
+[TensorMechanics/Master](/Modules/TensorMechanics/Master/index.md) Action is used, it automatically creates the strain
 calculator. In that case, the `eigenstrain_name` is specified in the Master action block, and
 passed in to the strain calculator as shown:
 

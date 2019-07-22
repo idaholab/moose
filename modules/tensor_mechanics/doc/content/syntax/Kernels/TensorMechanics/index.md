@@ -4,9 +4,9 @@
 
 !alert warning title=Deprecated Action
 This legacy action will soon be deprecated in favor of the more inclusive
-+[TensorMechanics/MasterAction](/Master/index.md)+.
++[TensorMechanics/MasterAction](/Modules/TensorMechanics/Master/index.md)+.
 See the description, example use, and parameters on the
-+[TensorMechanics/Master](/Master/index.md)+ action system page.
++[TensorMechanics/Master](/Modules/TensorMechanics/Master/index.md)+ action system page.
 
 ## Description
 
@@ -31,7 +31,7 @@ Pay particular attention to the setting of the `use_displaced_mesh` parameter
 discussion; this parameter depends on the strain formulation used in the simulation.
 
 !alert note title=Use of the Tensor Mechanics MasterAction Recommended
-We recommend that users employ the +[TensorMechanics/MasterAction](/Master/index.md)+
+We recommend that users employ the +[TensorMechanics/MasterAction](/Modules/TensorMechanics/Master/index.md)+
 whenever possible to ensure consistency between the test function gradients and
 the strain formulation selected.
 
