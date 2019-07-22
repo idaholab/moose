@@ -1776,8 +1776,11 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
         {
           if (rm_type == Moose::RelationshipManagerType::COUPLING)
           {
-            auto & dof_map = problem.getDisplacedProblem()->nlSys().dofMap();
-            dof_map.add_coupling_functor(*rm);
+            // We actually need to add this to the FEProblemBase NonlinearSystemBase's DofMap
+            // because the DisplacedProblem "nonlinear" DisplacedSystem doesn't have any matrices
+            // for which to do coupling
+            auto & dof_map = problem.getNonlinearSystemBase().dofMap();
+            dof_map.add_coupling_functor(*rm, /*to_mesh = */ false);
             rm->setDofMap(dof_map);
           }
           // If this rm is algebraic AND coupling, then in the case of the non-linear system there
