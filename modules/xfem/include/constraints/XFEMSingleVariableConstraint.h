@@ -18,6 +18,8 @@ class XFEMSingleVariableConstraint;
 
 class XFEM;
 
+class Function;
+
 template <>
 InputParameters validParams<XFEMSingleVariableConstraint>();
 
@@ -44,7 +46,7 @@ protected:
   Real _jump;
 
   /// Vector normal to the internal interface
-  Real _jump_flux;
+  const Function & _jump_flux;
 
   /// Use penalty formulation
   bool _use_penalty;
@@ -52,4 +54,3 @@ protected:
   /// Pointer to the XFEM controller object
   std::shared_ptr<XFEM> _xfem;
 };
-

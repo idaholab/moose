@@ -15,6 +15,7 @@
 #include "FEProblem.h"
 #include "GeometricCutUserObject.h"
 #include "XFEM.h"
+#include "Function.h"
 
 #include "libmesh/quadrature.h"
 
@@ -27,7 +28,10 @@ validParams<XFEMSingleVariableConstraint>()
   InputParameters params = validParams<ElemElemConstraint>();
   params.addParam<Real>("alpha", 100, "Stablization parameter in Nitsche's formulation.");
   params.addParam<Real>("jump", 0, "Jump at the interface.");
-  params.addParam<Real>("jump_flux", 0, "Flux jump at the interface.");
+  params.addParam<FunctionName>("jump_flux",
+                                0,
+                                "Flux jump at the interface. "
+                                "Can be a Real or FunctionName.");
   params.addParam<UserObjectName>(
       "geometric_cut_userobject",
       "Name of GeometricCutUserObject associated with this constraint.");
@@ -42,7 +46,7 @@ XFEMSingleVariableConstraint::XFEMSingleVariableConstraint(const InputParameters
   : ElemElemConstraint(parameters),
     _alpha(getParam<Real>("alpha")),
     _jump(getParam<Real>("jump")),
-    _jump_flux(getParam<Real>("jump_flux")),
+    _jump_flux(getFunction("jump_flux")),
     _use_penalty(getParam<bool>("use_penalty"))
 {
   _xfem = std::dynamic_pointer_cast<XFEM>(_fe_problem.getXFEM());
@@ -83,7 +87,7 @@ XFEMSingleVariableConstraint::computeQpResidual(Moose::DGResidualType type)
         r -= (_u[_qp] - _u_neighbor[_qp]) * 0.5 * _grad_test[_i][_qp] * _interface_normal;
         r += 0.5 * _grad_test[_i][_qp] * _interface_normal * _jump;
       }
-      r += 0.5 * _test[_i][_qp] * _jump_flux;
+      r += 0.5 * _test[_i][_qp] * _jump_flux.value(_t, _u[_qp]);
       r += _alpha * (_u[_qp] - _u_neighbor[_qp] - _jump) * _test[_i][_qp];
       break;
 
@@ -96,7 +100,7 @@ XFEMSingleVariableConstraint::computeQpResidual(Moose::DGResidualType type)
         r -= (_u[_qp] - _u_neighbor[_qp]) * 0.5 * _grad_test_neighbor[_i][_qp] * _interface_normal;
         r += 0.5 * _grad_test_neighbor[_i][_qp] * _interface_normal * _jump;
       }
-      r += 0.5 * _test_neighbor[_i][_qp] * _jump_flux;
+      r += 0.5 * _test_neighbor[_i][_qp] * _jump_flux.value(_t, _u_neighbor[_qp]);
       r -= _alpha * (_u[_qp] - _u_neighbor[_qp] - _jump) * _test_neighbor[_i][_qp];
       break;
   }
