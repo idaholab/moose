@@ -577,7 +577,21 @@ public:
   {
     return _nodal_dampers;
   }
-  const ConstraintWarehouse & getConstraintWarehouse() const { return _constraints; };
+  const ConstraintWarehouse & getConstraintWarehouse() const { return _constraints; }
+
+  /**
+   * Return the NodalBCBase warehouse
+   */
+  const MooseObjectTagWarehouse<NodalBCBase> & getNodalBCWarehouse() const { return _nodal_bcs; }
+
+  /**
+   * Return the IntegratedBCBase warehouse
+   */
+  const MooseObjectTagWarehouse<IntegratedBCBase> & getIntegratedBCWarehouse() const
+  {
+    return _integrated_bcs;
+  }
+
   //@}
 
   /**

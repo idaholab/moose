@@ -684,6 +684,14 @@ public:
   // Return the communicator for this application
   const std::shared_ptr<Parallel::Communicator> getCommunicator() const { return _comm; }
 
+  /**
+   * Return the container of relationship managers
+   */
+  const std::vector<std::shared_ptr<RelationshipManager>> & relationshipManagers() const
+  {
+    return _relationship_managers;
+  }
+
 protected:
   /**
    * Whether or not this MooseApp has cached a Backup to use for restart / recovery

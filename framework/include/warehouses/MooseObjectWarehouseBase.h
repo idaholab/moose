@@ -48,7 +48,7 @@ public:
   /**
    * Return how many kernels we store in the current warehouse
    */
-  unsigned int size(THREAD_ID tid = 0);
+  unsigned int size(THREAD_ID tid = 0) const;
 
   ///@{
   /**
@@ -231,7 +231,7 @@ MooseObjectWarehouseBase<T>::~MooseObjectWarehouseBase()
 
 template <typename T>
 unsigned int
-MooseObjectWarehouseBase<T>::size(THREAD_ID tid /* =0 */)
+MooseObjectWarehouseBase<T>::size(THREAD_ID tid /* =0 */) const
 {
   checkThreadID(tid);
   return _all_objects[tid].size();
@@ -697,4 +697,3 @@ MooseObjectWarehouseBase<T>::checkThreadID(THREAD_ID libmesh_dbg_var(tid)) const
                   << tid << ") greater than the number allowed by the storage item ("
                   << _num_threads << ")");
 }
-
