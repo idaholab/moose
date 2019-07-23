@@ -298,6 +298,9 @@ AuxiliarySystem::reinitElemFace(const Elem * /*elem*/,
 NumericVector<Number> &
 AuxiliarySystem::serializedSolution()
 {
+  if (!_serialized_solution.initialized())
+    _serialized_solution.init(_sys.n_dofs(), false, SERIAL);
+
   _need_serialized_solution = true;
   return _serialized_solution;
 }
