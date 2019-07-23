@@ -43,6 +43,14 @@ validParams<RelationshipManager>()
   params.addPrivateParam<Moose::RelationshipManagerType>("rm_type");
 
   /**
+   * This parameter is used to indicate which system and subsequent DofMap this relationship manager
+   * should be applied to. This parameter is not meaningful when the RM is of geometric type only.
+   * If this parameter is equal to ANY, then this RM can be applied to both non-linear and aux
+   * systems.
+   */
+  params.addPrivateParam<Moose::VarKindType>("system_type", Moose::VarKindType::VAR_ANY);
+
+  /**
    * The name of the object (or Action) requesting this RM
    */
   params.addRequiredParam<std::string>("for_whom", "What object is requesting this RM?");
@@ -67,9 +75,11 @@ RelationshipManager::RelationshipManager(const InputParameters & parameters)
         "mesh",
         "Mesh is null in RelationshipManager constructor. This could well be because No mesh file "
         "was supplied and no generation block was provided")),
+    _dof_map(nullptr),
     _attach_geometric_early(getParam<bool>("attach_geometric_early")),
     _rm_type(getParam<Moose::RelationshipManagerType>("rm_type")),
-    _use_displaced_mesh(getParam<bool>("use_displaced_mesh"))
+    _use_displaced_mesh(getParam<bool>("use_displaced_mesh")),
+    _system_type(getParam<Moose::VarKindType>("system_type"))
 {
   _for_whom.push_back(getParam<std::string>("for_whom"));
 }

@@ -1,16 +1,15 @@
-# Example of using the IdealGasFluidPropertiesPT userobject to provide fluid
+# Example of using the IdealGasFluidProperties userobject to provide fluid
 # properties for an ideal gas. Use values for hydrogen (H2) at 1 MPa and 50 C.
 #
 # Input values:
-# Cv = 10260 J/kg/K
-# Cp = 14400 J/kg/K
 # M = 2.01588e-3 kg/mol
+# gamma = 1.4
 # viscosity = 9.4393e-6 Pa.s
 #
 # Expected output:
 # density = 750.2854 kg/m^3
-# internal energy = 3315.52e3 J/kg
-# enthalpy = 4653.36e3 J/kg
+# internal energy = 3.33 MJ/kg
+# enthalpy = 4.66 MJ/kg
 
 [Mesh]
   type = GeneratedMesh
@@ -55,8 +54,7 @@
     [./idealgas]
       type = IdealGasFluidProperties
       molar_mass = 2.01588e-3
-      cv = 10260
-      cp = 14400
+      gamma = 1.4
       mu = 9.4393e-6
     [../]
   [../]

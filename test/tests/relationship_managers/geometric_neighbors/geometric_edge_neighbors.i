@@ -1,3 +1,8 @@
+# This test will show 2 layers of geometric ghosting and 0 layers of evaluable
+# ghosting. The 2 layers of geometric ghosting corresponds to the 2 layers we
+# have explicitly requested. There is no evaulable ghosting because we have not
+# requested any algebraic or coupling functors.
+
 [Mesh]
   type = GeneratedMesh
   dim = 2

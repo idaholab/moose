@@ -45,6 +45,26 @@ public:
    */
   void timedAct();
 
+private:
+  /**
+   * Method for adding a single relationship manager
+   * @param input_rm_type What relationship manager type we are currently adding
+   * @param moose_object_pars The parameters of the MooseObject that requested the RM
+   * @param rm_name The class type of the RM, e.g. ElementSideNeighborLayers
+   * @param rm_type The RelationshipManagerType, e.g. geometric, algebraic, coupling
+   * @param rm_input_parameter_func The RM callback function, typically a lambda defined in the
+   *                                requesting MooseObject's validParams function
+   * @param sys_type A VarKindType that can be used to limit the systems and consequent dof_maps
+   *                 that the RM can be attached to
+   */
+  void
+  addRelationshipManager(Moose::RelationshipManagerType input_rm_type,
+                         const InputParameters & moose_object_pars,
+                         std::string rm_name,
+                         Moose::RelationshipManagerType rm_type,
+                         Moose::RelationshipManagerInputParameterCallback rm_input_parameter_func,
+                         Moose::VarKindType sys_type);
+
 protected:
   /**
    * Method to add a relationship manager for the objects being added to the system. Relationship

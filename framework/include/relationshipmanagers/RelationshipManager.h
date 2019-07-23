@@ -38,8 +38,9 @@ public:
    */
   void init()
   {
+    if (!_inited)
+      internalInit();
     _inited = true;
-    internalInit();
   }
 
   /**
@@ -77,6 +78,15 @@ public:
     return (_rm_type & type) == type;
   }
 
+  /**
+   * Check to see whether the passed in system type is a sub-set of the system types this RM can
+   * cover
+   */
+  bool isSystemType(Moose::VarKindType system_type) const
+  {
+    return _system_type == Moose::VarKindType::VAR_ANY ? true : (system_type == _system_type);
+  }
+
   virtual bool operator==(const RelationshipManager & /*rhs*/) const
   {
     mooseError("Comparison operator required for this RelationshipManager required");
@@ -97,6 +107,11 @@ public:
    */
   bool useDisplacedMesh() const { return _use_displaced_mesh; }
 
+  /**
+   * Set the dof map
+   */
+  void setDofMap(const DofMap & dof_map) { _dof_map = &dof_map; }
+
 protected:
   /**
    * Called before this RM is attached.  Only called once
@@ -108,6 +123,10 @@ protected:
 
   /// Reference to the Mesh object
   MooseMesh & _mesh;
+
+  /// Pointer to DofMap (may be null if this is geometric only). This is useful for setting coupling
+  /// matrices in call-backs from DofMap::reinit
+  const DofMap * _dof_map;
 
   /// Boolean indicating whether this RM can be attached early (e.g. all parameters are known
   /// without the need for inspecting things like variables or other parts of the system that
@@ -123,5 +142,7 @@ protected:
 
   /// Which system this should go to (undisplaced or displaced)
   const bool _use_displaced_mesh;
-};
 
+  /// What type of systems this RM can be applied to
+  const Moose::VarKindType _system_type;
+};

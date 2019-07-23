@@ -68,8 +68,8 @@
     [./idealgas]
       type = IdealGasFluidProperties
       molar_mass = 1.4
+      gamma = 1.2
       mu = 1.2
-      cv = 1.3
     [../]
   [../]
 []

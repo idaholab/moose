@@ -60,4 +60,3 @@ protected:
   /// Name of variable transfering from
   const VariableName & _from_var_name;
 };
-

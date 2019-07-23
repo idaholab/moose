@@ -136,7 +136,15 @@ BrineFluidProperties::rho_from_p_T_X(const FPDualReal & pressure,
   // Note: convert Tv to Kelvin to calculate water density
   FPDualReal water_density;
   if (_water_fp_derivs)
-    water_density = _water_fp->rho_from_p_T(pressure, Tv + _T_c2k);
+  {
+    Real rho, drho_dp, drho_dT;
+    _water_fp->rho_from_p_T(pressure.value(), Tv.value() + _T_c2k, rho, drho_dp, drho_dT);
+    water_density = rho;
+
+    for (std::size_t i = 0; i < pressure.derivatives().size(); ++i)
+      water_density.derivatives()[i] =
+          pressure.derivatives()[i] * drho_dp + Tv.derivatives()[i] * drho_dT;
+  }
   else
     water_density = _water_fp->rho_from_p_T(pressure.value(), Tv.value() + _T_c2k);
 
@@ -275,7 +283,14 @@ BrineFluidProperties::h_from_p_T_X(const FPDualReal & pressure,
   // Note: water enthalpy requires temperature in Kelvin
   FPDualReal enthalpy;
   if (_water_fp_derivs)
-    enthalpy = _water_fp->h_from_p_T(pressure, Th + _T_c2k);
+  {
+    Real h, dh_dp, dh_dT;
+    _water_fp->h_from_p_T(pressure.value(), Th.value() + _T_c2k, h, dh_dp, dh_dT);
+    enthalpy = h;
+
+    for (std::size_t i = 0; i < pressure.derivatives().size(); ++i)
+      enthalpy.derivatives()[i] = pressure.derivatives()[i] * dh_dp + Th.derivatives()[i] * dh_dT;
+  }
   else
     enthalpy = _water_fp->h_from_p_T(pressure.value(), Th.value() + _T_c2k);
 
