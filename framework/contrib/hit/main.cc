@@ -5,6 +5,7 @@
 #include <fstream>
 #include <map>
 #include <set>
+#include <memory>
 
 #include "parse.h"
 #include "braceexpr.h"
@@ -39,7 +40,7 @@ main(int argc, char ** argv)
     for (std::string line; std::getline(std::cin, line);)
       ss << line << std::endl;
 
-    hit::BraceExpander expander;
+    hit::BraceExpander expander("STDIN");
     hit::EnvEvaler env;
     hit::RawEvaler raw;
     expander.registerEvaler("env", env);
