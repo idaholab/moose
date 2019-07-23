@@ -1,15 +1,28 @@
 [Tests]
-  [./defaults]
-    # Test the the default value for old values of the Reciever are set
-    type = 'Exodiff'
-    input = 'defaults.i'
-    exodiff = 'defaults_out.e'
-  [../]
-  [./defaults_no_old_initialize]
-    # Test the the default value for old values of the Reciever are able to be disabled
-    type = 'Exodiff'
-    input = 'defaults.i'
-    exodiff = 'defaults_no_old_initialize_out.e'
-    cli_args = 'Postprocessors/receiver/initialize_old=false Outputs/file_base=defaults_no_old_initialize_out'
-  [../]
+  issues = '#5106'
+  design = 'Receiver.md'
+
+  [defaults]
+    requirement = 'The system shall support the ability to report a scalar value set by arbitrary '
+                  'objects in the simulation'
+    [no_old_initialize]
+      # Test the the default value for old values of the Reciever are able to be disabled
+      type = 'Exodiff'
+      input = 'defaults.i'
+      exodiff = 'defaults_no_old_initialize_out.e'
+      cli_args = 'Postprocessors/receiver/initialize_old=false '
+                 'Outputs/file_base=defaults_no_old_initialize_out'
+
+      detail = 'with an initial default value and'
+    []
+
+    [initial_only]
+      # Test the the default value for old values of the Reciever are set
+      type = 'Exodiff'
+      input = 'defaults.i'
+      exodiff = 'defaults_out.e'
+
+      detail = 'with a default previous (older) value.'
+    []
+  []
 []

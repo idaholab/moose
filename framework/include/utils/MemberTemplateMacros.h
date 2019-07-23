@@ -27,8 +27,10 @@
       "GCC warning \"adGetUserObjectByName is deprecated. Simply use getUserObjectByName\"") this  \
       ->template getUserObjectByNameTempl
 
+// doco-user-object-interface-begin
 #define getUserObjectByName this->template getUserObjectByNameTempl
 #define getUserObject this->template getUserObjectTempl
+// doco-user-object-interface-end
 
 // MaterialPropertyInterface
 

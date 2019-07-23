@@ -19,6 +19,9 @@ validParams<Receiver>()
   params.addParam<Real>("default", "The default value");
   params.addParam<bool>(
       "initialize_old", true, "Initialize the old postprocessor value with the default value");
+
+  params.addClassDescription("Reports the value stored in this processor, which is usually filled "
+                             "in by another object. The Receiver does not compute its own value.");
   return params;
 }
 

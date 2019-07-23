@@ -3,5 +3,9 @@
     type = 'Exodiff'
     input = 'side_flux_average.i'
     exodiff = 'side_flux_average_out.e'
+
+    design = 'SideFluxAverage.md'
+    issues = '#2201'
+    requirement = 'The system shall be capable of computing the average of the integral through a specified boundary on the mesh.'
   [../]
 []

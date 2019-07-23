@@ -1,25 +1,44 @@
 [Tests]
-  [./test_nodal_aux_var_value]
-    type = 'Exodiff'
-    input = 'nodal_aux_var_value.i'
-    exodiff = 'out_nodal_aux_var_value.e'
-  [../]
+  issues = '#2281'
+  design = '/NodalVariableValue.md'
 
-  [./pps_output_test]
-    type = 'Exodiff'
-    input = 'pps_output_test.i'
-    exodiff = 'pps_output_test_out.e'
-  [../]
+  [nodal_var_value]
+    requirement = 'The system shall report the value of a variable at a specified node'
 
-  [./screen_output_test]
-    type = 'RunApp'
-    input = 'screen_output_test.i'
-    expect_out = '^:\s+:.*\n(?:^\|\s+\d\.\d.*\n){2}^\+(-+\+)+'
-  [../]
+    [test_nodal_aux_var_value]
+      type = 'Exodiff'
+      input = 'nodal_aux_var_value.i'
+      exodiff = 'out_nodal_aux_var_value.e'
 
-  [./test_nodal_var_value]
-    type = 'Exodiff'
-    input = 'nodal_var_value.i'
-    exodiff = 'out_nodal_var_value.e'
-  [../]
+      detail = 'for auxiliary variables and'
+    []
+
+    [test_nodal_var_value]
+      type = 'Exodiff'
+      input = 'nodal_var_value.i'
+      exodiff = 'out_nodal_var_value.e'
+
+      detail = 'for primary (nonlinear) variables.'
+    []
+  []
+
+  [nodal_var_value_output]
+    requirement = 'The system shall support selecting the output for a single Postprocessor'
+
+    [pps_output_test]
+      type = 'Exodiff'
+      input = 'pps_output_test.i'
+      exodiff = 'pps_output_test_out.e'
+
+      detail = 'to a file and'
+    []
+
+    [screen_output_test]
+      type = 'RunApp'
+      input = 'screen_output_test.i'
+      expect_out = '^:\s+:.*\n(?:^\|\s+\d\.\d.*\n){2}^\+(-+\+)+'
+
+      detail = 'to the console.'
+    []
+  []
 []

@@ -1,21 +1,36 @@
 [Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'default_value.i'
-    exodiff = 'default_value_out.e'
-  [../]
+  issues = '#2374 #2907 #2879'
+  design = 'InputParameters.md'
 
-  [./default_error]
+  [default_value]
+    requirement = 'The system shall the substitution of a constant value in place of an optional '
+                  'Postprocessor coupling value'
+    [test]
+      type = 'Exodiff'
+      input = 'default_value.i'
+      exodiff = 'default_value_out.e'
+
+      detail = 'when that value is supplied as a default in the coupling declaration'
+    []
+
+    # This test verifies that we can override a pps with a real value from the input file
+    [real_override]
+      type = 'Exodiff'
+      input = 'real_value_override.i'
+      exodiff = 'real_value_override_out.e'
+
+      detail = 'or when that value is supplied in the input file.'
+    []
+  []
+
+  [default_error]
     type = 'RunException'
     input = 'default_value.i'
     cli_args = 'Kernels/diff/test_default_error=true'
-    expect_err = 'A default PostprcessorValue does not exist for the given name: invalid_postprocessor_name'
-  [../]
+    expect_err = 'A default PostprcessorValue does not exist for the given name: '
+                 'invalid_postprocessor_name'
 
-  # This test verifies that we can override a pps with a real value from the input file
-  [./real_override]
-    type = 'Exodiff'
-    input = 'real_value_override.i'
-    exodiff = 'real_value_override_out.e'
-  [../]
+    requirement = 'The system shall report an error when a request for a non-existant Postprocessor '
+                  'value is made.'
+  []
 []

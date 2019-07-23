@@ -120,3 +120,12 @@ v = '1 actual_var 3'
 ```
 
 is not supported.
+
+## Coupled Solution DOFs
+
+It is possible to retrieve the solution DOFs of an element in an elemental loop. This is different than the
+"value" type coupling which holds the interpolated values of the shape functions themselves. Obtaining the raw
+DOFs all the user to perform their own integration or other evaluation without going through the interpolation
+process. These functions can be found here:
+
+!listing moose/framework/include/interfaces/Coupleable.h start=coupled-dof-values-begin end=coupled-dof-values-end include-start=false
