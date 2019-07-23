@@ -1,13 +1,25 @@
 [Tests]
-  [./test_avg_nodal_var_value]
-    type = 'Exodiff'
-    input = 'avg_nodal_var_value.i'
-    exodiff = 'out_avg_nodal_var_value.e'
-  [../]
+  issues = '#2281'
+  design = 'AverageNodalVariableValue.md'
 
-  [./test_avg_nodal_var_value_ts_begin]
-    type = 'Exodiff'
-    input = 'avg_nodal_var_value_ts_begin.i'
-    exodiff = 'out_avg_nodal_var_value_ts_begin.e'
-  [../]
+  [avg_nodal_value]
+    requirement = 'The system shall compute the average value of a field variable over time'
+    [test_avg_nodal_var_value]
+      type = 'Exodiff'
+      input = 'avg_nodal_var_value.i'
+      exodiff = 'out_avg_nodal_var_value.e'
+
+      detail = 'at the end of a time step and'
+    []
+
+    [test_avg_nodal_var_value_ts_begin]
+      type = 'Exodiff'
+      input = 'avg_nodal_var_value.i'
+      cli_args = 'Outputs/file_base=out_avg_nodal_var_value_ts_begin '
+                 'Postprocessors/node1/execute_on=TIMESTEP_BEGIN'
+      exodiff = 'out_avg_nodal_var_value_ts_begin.e'
+
+      detail = 'and at the beginning of the time step.'
+    []
+  []
 []

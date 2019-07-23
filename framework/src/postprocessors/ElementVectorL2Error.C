@@ -23,6 +23,9 @@ validParams<ElementVectorL2Error>()
   params.addRequiredCoupledVar("var_x", "The FE solution in x direction");
   params.addCoupledVar("var_y", 0, "The FE solution in y direction");
   params.addCoupledVar("var_z", 0, "The FE solution in z direction");
+
+  params.addClassDescription("Computes the Vector L2 difference of up to three variables "
+                             "simultaneously (normally x, y, z)");
   return params;
 }
 

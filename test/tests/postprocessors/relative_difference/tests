@@ -1,13 +1,25 @@
 [Tests]
-  [./relative_difference]
-    type = 'CSVDiff'
-    input = 'relative_difference.i'
-    csvdiff = 'relative_difference_out.csv'
-  [../]
-  [./relative_difference_zero]
-    type = 'CSVDiff'
-    input = 'relative_difference.i'
-    csvdiff = 'relative_difference_zero_out.csv'
-    cli_args = 'Postprocessors/relative_difference/value2=zero Outputs/out/file_base=relative_difference_zero_out'
-  [../]
+  design = 'RelativeDifferencePostprocessor.md'
+  issues = '#10148'
+
+  [relative_difference]
+    requirement = 'The system shall support computing the relative difference between two scalar '
+                  'values (Postprocessors)'
+    [non_zero]
+      type = 'CSVDiff'
+      input = 'relative_difference.i'
+      csvdiff = 'relative_difference_out.csv'
+
+      detail = 'when values are non-zero, and'
+    []
+    [close_to_zero]
+      type = 'CSVDiff'
+      input = 'relative_difference.i'
+      csvdiff = 'relative_difference_zero_out.csv'
+      cli_args = 'Postprocessors/relative_difference/value2=zero '
+                 'Outputs/out/file_base=relative_difference_zero_out'
+
+      detail = 'when values are approximately zero.'
+    []
+  []
 []

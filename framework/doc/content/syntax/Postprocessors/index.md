@@ -43,10 +43,10 @@ Postprocessor Values:
 ## Coupling Example Code
 
 The values computed within a Postprocessor object may be used within other objects that inherit
-from the [PostprocessorInterface.md], which is nearly every system within MOOSE. For example, the
-the [PostprocessorNeumannBC.md] object allows for a Neumann boundary condition to be set to
-a value computed from a postprocessor; this object will be used as example to demonstrate how
-coupling is performed.
+from the [PostprocessorInterface](interfaces/PostprocessorInterface.md), which is nearly every
+system within MOOSE. For example, the the [PostprocessorNeumannBC.md] object allows for a
+Neumann boundary condition to be set to a value computed from a postprocessor; this object will
+be used as example to demonstrate how coupling is performed.
 
 To understand how the coupling is coded it is beneficial to first see how the coupling is defined
 via the input file. The following input file snippet shows that a [PointValue.md] postprocessor
@@ -76,6 +76,14 @@ in the computation of the residual.
 !listing PostprocessorNeumannBC.h line=PostprocessorValue
 
 !listing PostprocessorNeumannBC.C start=PostprocessorNeumannBC:: end=} include-end=true
+
+### Coupling to other values
+
+Just as Postprocessor values can be used in other objects, Postprocessors themselves can couple to
+Functions and Scalar Variables. See the following example that couples a scalar variable into a
+Postprocessor:
+
+!listing scalar_coupled_postprocessor_test.i block=Postprocessors
 
 ## Creating a `Postprocessor` Object
 
@@ -156,13 +164,19 @@ from the other threads.
 
 !listing AverageNodalVariableValue.C start=doco-thread-start end=doco-thread-end include-start=false
 
-
 ## Execute On... id=execute-on
 
 Postprocessor objects inherit from the [SetupInterface.md] that allows the objects to execute and
 varying and multiple times during a simulation, such as during initialization and at the end of
 each time step. Refer to the [SetupInterface.md] for additional information.
 
+## Using Old and Older values
+
+MOOSE maintains previously computed values in the postprocessor system for using lagged information
+in a computation. Both the previous time step's value and the value computed two steps back may
+be retrieved. One reason you might use older values is to break cyclic dependencies. MOOSE does
+not consider a dependence on an old value when considering the order of evaluation among objects
+with dependencies.
 
 !syntax list /Postprocessors objects=True actions=False subsystems=False
 

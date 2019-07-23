@@ -1,7 +1,12 @@
 [Tests]
+  issues = '#5197'
+  design = 'FunctionValuePostprocessor.md'
+
   [./test]
     type = 'CSVDiff'
     input = 'function_value_pps.i'
     csvdiff = 'function_value_pps_out.csv'
+
+    requirement = 'The system shall support evaluating a function of space and time at a single point as a Postprocessor value.'
   [../]
 []

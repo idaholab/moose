@@ -1,20 +1,24 @@
 [Tests]
-  [./pps_old_test]
-    type = 'Exodiff'
-    input = 'pps_old_value.i'
-    exodiff = 'pps_old_value_out.e'
-  [../]
+  issues = '#1405'
+  design = 'ElementIntegralVariablePostprocessor.md'
 
-  [./pps_old_residual_test]
-    type = 'Exodiff'
-    input = 'pps_old_value.i'
-    exodiff = 'pps_old_value_out.e'
-    prereq = pps_old_test
-  [../]
+  [element_integral]
+    requirement = 'The system shall support computing the integral of a variable quantity over the domain on the mesh'
 
-  [./test_inital]
-    type = 'Exodiff'
-    input = 'initial_pps.i'
-    exodiff = 'out_initial_pps.e'
-  [../]
+    [test_inital]
+      type = 'Exodiff'
+      input = 'initial_pps.i'
+      exodiff = 'out_initial_pps.e'
+
+      detail = 'during the initial setup step and'
+    []
+
+    [pps_old_test]
+      type = 'Exodiff'
+      input = 'pps_old_value.i'
+      exodiff = 'pps_old_value_out.e'
+
+      detail = 'at the end of each time step.'
+    []
+  []
 []

@@ -1,0 +1,12 @@
+[Tests]
+  design = 'NodalExtremeValue.md'
+  issues = '#2026'
+
+  [./nodal_extreme]
+    type = 'Exodiff'
+    input = 'nodal_extreme_pps_test.i'
+    exodiff = 'nodal_extreme_pps_test_out.e'
+
+    requirement = 'The system shall compute the the extreme (min/max) values of a nodal field variable over the domain.'
+  [../]
+[]

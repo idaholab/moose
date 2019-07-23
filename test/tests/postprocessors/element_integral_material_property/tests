@@ -1,7 +1,10 @@
 [Tests]
+  design = 'syntax/Postprocessors/index.md'
+  issues = '#2201'
   [./test]
     type = 'Exodiff'
     input = 'element_integral_material_property.i'
     exodiff = 'element_integral_material_property_out.e'
+    requirement = 'The system shall compute the average integral quantity over an element of a scalar material property.'
   [../]
 []

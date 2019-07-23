@@ -1,1 +1,9 @@
-!template load file=stubs/moose_object.md.template name=NodalSum syntax=/Postprocessors/NodalSum
+# NodalSum
+
+Computes the sum of all of the nodal values of a specified variable.
+
+!syntax parameters /Postprocessors/NodalSum
+
+!syntax inputs /Postprocessors/NodalSum
+
+!syntax children /Postprocessors/NodalSum

@@ -1,20 +1,33 @@
 [Tests]
-  [./test_interval]
-    type = 'Exodiff'
-    input = 'pps_out_interval.i'
-    exodiff = 'pps_out_interval.e'
-  [../]
+  issues = '#1405'
+  design = 'syntax/Outputs/index.md'
 
-  [./test_interval_mismatch]
+  [interval_output]
+    requirement = 'The system shall support outputting the scalar Postprocessor values at specific '
+                  'intervals'
+    [test_interval]
+      type = 'Exodiff'
+      input = 'pps_out_interval.i'
+      exodiff = 'pps_out_interval.e'
+
+      detail = 'to a file and'
+    []
+    [test_interval_verify]
+      type = 'RunApp'
+      input = 'pps_out_interval.i'
+      expect_out = '(?:^\|\s+\d\.\d.*\n){11}'
+      prereq = 'test_interval'
+
+      detail = 'to the console.'
+    []
+  []
+
+  [test_interval_mismatch]
     type = 'Exodiff'
     input = 'pps_interval_mismatch.i'
     exodiff = 'pps_interval_mismatch_out.e'
-  [../]
 
-  [./test_interval_verify]
-    type = 'RunApp'
-    input = 'pps_out_interval.i'
-    expect_out = '(?:^\|\s+\d\.\d.*\n){11}'
-    prereq = 'test_interval'
-  [../]
+    requirement = 'The system shall support outputting the scalar Postprocessor values to multiple '
+                  'locations with different intervals.'
+  []
 []

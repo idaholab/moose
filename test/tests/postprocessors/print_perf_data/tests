@@ -1,8 +1,12 @@
 [Tests]
+  design = 'PerfGraph.md'
   [./csv_log]
     type = CheckFiles
     input = print_perf_data.i
     check_files = print_perf_data_out.csv
+
+    issues = '#1771'
+    requirement = 'The system shall have the ability to output performance data to a file.'
   [../]
 
   [./use_log_data_no_print]
@@ -29,6 +33,9 @@
     #   need that doesn't match.
     #   Make sure that you don't cross lines by not allowing the throwaway content to have newlines.
     absent_out = '(\s(\S+)\s\|\n)[^\n]*\1'
+
+    issues = '#7951'
+    requirement = "The system shall calculate performance time when the data is only used by a Postprocessor."
   [../]
 
   [./check_more_values]
@@ -37,5 +44,8 @@
 
     cli_args = 'Outputs/exodus=false Outputs/csv=false'
     absent_out = '(\s(\S+)\s\|\n)[^\n]*\1.*Performance Graph'
+
+    issues = '#10196'
+    requirement = "The system shall calculate performance time even when the performance graph isn't printed to any output format."
   [../]
 []

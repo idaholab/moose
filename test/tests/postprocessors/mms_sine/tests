@@ -1,25 +1,40 @@
 [Tests]
-  [./test3dMesh]
-    type = 'Exodiff'
-    input = '3_d_mms_sine_test.i'
-    exodiff = '3_d_out.e'
-  [../]
+  issues = '#1410'
+  design = 'ElementL2Error.md'
 
-  [./test2dMesh]
-    type = 'Exodiff'
-    input = '2_d_mms_sine_test.i'
-    exodiff = '2_d_out.e'
-  [../]
+  [mms_tests]
+    requirement = 'The system shall verify calculations using the method of manufactured solutions using sine functions for linear elements:'
 
-  [./test3dCSV]
-    type = 'CSVDiff'
-    input = '3_d_mms_sine_postprocessor_test.i'
-    csvdiff = '3_d_postprocessor_out.csv'
-  [../]
+    [3D_mesh]
+      type = 'Exodiff'
+      input = '3_d_mms_sine_test.i'
+      exodiff = '3_d_out.e'
 
-  [./test2dCSV]
-    type = 'CSVDiff'
-    input = '2_d_mms_sine_postprocessor_test.i'
-    csvdiff = '2_d_postprocessor_out.csv'
-  [../]
+      detail = 'on a 3D mesh'
+    []
+
+    [3D_pps]
+      type = 'CSVDiff'
+      input = '3_d_mms_sine_postprocessor_test.i'
+      csvdiff = '3_d_postprocessor_out.csv'
+
+      detail = 'verified with an analytical 3D solution and'
+    []
+
+    [2D_mesh]
+      type = 'Exodiff'
+      input = '2_d_mms_sine_test.i'
+      exodiff = '2_d_out.e'
+
+      detail = 'on a 2D mesh'
+    []
+
+    [2D_pps]
+      type = 'CSVDiff'
+      input = '2_d_mms_sine_postprocessor_test.i'
+      csvdiff = '2_d_postprocessor_out.csv'
+
+      detail = 'verified with an analytical 2D solution.'
+    []
+  []
 []

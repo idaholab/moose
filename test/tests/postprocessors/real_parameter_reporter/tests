@@ -1,23 +1,36 @@
 [Tests]
-  [./test]
+  issues = '#4604 #5680 #9087 #6934'
+  design = 'syntax/Postprocessors/index.md'
+
+  [test]
     type = 'CSVDiff'
     input = 'real_parameter_reporter.i'
     csvdiff = 'real_parameter_reporter_out.csv'
-  [../]
 
-  [./bad_name_error]
-    # Test Error when complete name is not provided
-    type = 'RunException'
-    input = 'real_parameter_reporter.i'
-    cli_args = 'Postprocessors/coef_value/parameter=*/diff/coef'
-    expect_err = "Unknown InputParameters object \*/diff"
-  [../]
+    requirement = 'The system shall support the ability to report an input parameter on the screen or to an input file.'
+  []
 
-  [./no_param_error]
-    # Test Error when complete name is not provided
-    type = 'RunException'
-    input = 'real_parameter_reporter.i'
-    cli_args = 'Postprocessors/coef_value/parameter=Kernels/diff/coef2'
-    expect_err = "Unable to locate the parameter: Kernels/diff/coef2."
-  [../]
+  [error_report]
+    requirement = 'The system shall report an error when a requested parameter for reporting does not exist.'
+
+    [bad_name_error]
+      # Test Error when complete name is not provided
+      type = 'RunException'
+      input = 'real_parameter_reporter.i'
+      cli_args = 'Postprocessors/coef_value/parameter=*/diff/coef'
+      expect_err = "Unknown InputParameters object \*/diff"
+
+      detail = ''
+    []
+
+    [no_param_error]
+      # Test Error when complete name is not provided
+      type = 'RunException'
+      input = 'real_parameter_reporter.i'
+      cli_args = 'Postprocessors/coef_value/parameter=Kernels/diff/coef2'
+      expect_err = "Unable to locate the parameter: Kernels/diff/coef2."
+
+      detail = ''
+    []
+  []
 []

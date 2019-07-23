@@ -1,9 +1,14 @@
 [Tests]
+  issues = '#5037'
+  design = 'source/executioners/Executioner.md'
+
   [./reporting]
     # Tests that a value may be reported from an Executioner via addAttributeReporter
     type = 'Exodiff'
     input = 'execution_attribute_reporter.i'
     exodiff = 'execution_attribute_reporter_out.e'
+
+    requirement = 'The system shall support an attribute (scalar value) reporter through the "Execution" system.'
   [../]
 
   [./use_error]
@@ -12,5 +17,7 @@
     input = 'execution_attribute_reporter_error.i'
     expect_err = 'Invalid pointer to an attribute, this object should only be created via Executioner::addAttributeReporter'
     match_literal = true
+
+    requirement = 'The system shall report an error when the special "attribute reporting" Postprocessor is added manually to the simulation.'
   [../]
 []

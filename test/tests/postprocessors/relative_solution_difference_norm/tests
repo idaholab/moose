@@ -1,7 +1,12 @@
 [Tests]
+  design = 'RelativeSolutionDifferenceNorm.md'
+  issues = '#7118'
+
   [./test]
     type = 'Exodiff'
     input = 'test.i'
     exodiff = 'test_out.e'
+
+    requirement = 'The system shall be capable of computing the relative norm of the solution difference between two consecutive time steps.'
   [../]
 []

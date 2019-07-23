@@ -1,25 +1,50 @@
 [Tests]
-  [./change_with_respect_to_initial_error_dependent]
-    type = 'RunException'
-    input = 'change_over_time.i'
-    cli_args = "Postprocessors/change_over_time/change_with_respect_to_initial=true Postprocessors/my_postprocessor/execute_on='timestep_end'"
-    expect_err = "When 'change_with_respect_to_initial' is specified to be true, 'execute_on' for the dependent post-processor \('my_postprocessor'\) must include 'initial'"
-  [../]
-  [./change_with_respect_to_initial_error_this]
-    type = 'RunException'
-    input = 'change_over_time.i'
-    cli_args = "Postprocessors/change_over_time/change_with_respect_to_initial=true Postprocessors/change_over_time/execute_on='timestep_end'"
-    expect_err = "When 'change_with_respect_to_initial' is specified to be true, 'execute_on' for the ChangeOverTimePostprocessor \('change_over_time'\) must include 'initial'"
-  [../]
-  [./change_with_respect_to_previous]
-    type = 'CSVDiff'
-    input = 'change_over_time.i'
-    csvdiff = 'change_over_time_previous.csv'
-  [../]
-  [./change_with_respect_to_initial]
-    type = 'CSVDiff'
-    input = 'change_over_time.i'
-    cli_args = "Postprocessors/change_over_time/change_with_respect_to_initial=true Outputs/file_base='change_over_time_initial'"
-    csvdiff = 'change_over_time_initial.csv'
-  [../]
+  issues = '#10327'
+  design = 'ChangeOverTimePostprocessor.md'
+
+  [change_over_time]
+    requirement = 'The system shall support calculating the value change over time'
+
+    [change_with_respect_to_previous]
+      type = 'CSVDiff'
+      input = 'change_over_time.i'
+      csvdiff = 'change_over_time_previous.csv'
+
+      detail = 'with respect to the previous calculation and'
+    []
+    [change_with_respect_to_initial]
+      type = 'CSVDiff'
+      input = 'change_over_time.i'
+      cli_args = "Postprocessors/change_over_time/change_with_respect_to_initial=true "
+                 "Outputs/file_base='change_over_time_initial'"
+      csvdiff = 'change_over_time_initial.csv'
+
+      detail = 'with respect to the initial calculation.'
+    []
+  []
+
+  [change_over_time_error]
+    requirement = 'The system shall issue an error when the dependent "change of time" calculation'
+
+    [change_with_respect_to_initial_error_dependent]
+      type = 'RunException'
+      input = 'change_over_time.i'
+      cli_args = "Postprocessors/change_over_time/change_with_respect_to_initial=true "
+                 "Postprocessors/my_postprocessor/execute_on='timestep_end'"
+      expect_err = "When 'change_with_respect_to_initial' is specified to be true, 'execute_on' for "
+                   "the dependent post-processor \('my_postprocessor'\) must include 'initial'"
+
+      detail = "\"with respect to initial\" isn't calculated at the initial step and"
+    []
+    [change_with_respect_to_initial_error_this]
+      type = 'RunException'
+      input = 'change_over_time.i'
+      cli_args = "Postprocessors/change_over_time/change_with_respect_to_initial=true "
+                 "Postprocessors/change_over_time/execute_on='timestep_end'"
+      expect_err = "When 'change_with_respect_to_initial' is specified to be true, 'execute_on' for "
+                   "the ChangeOverTimePostprocessor \('change_over_time'\) must include 'initial'"
+
+      detail = "\"with respect to previous\" isn't calculated at the previous step."
+    []
+  []
 []

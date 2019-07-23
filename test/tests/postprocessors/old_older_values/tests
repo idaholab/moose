@@ -1,15 +1,26 @@
 [Tests]
-  [./test_old]
-    type = 'Exodiff'
-    input = 'old_value.i'
-    cli_args = 'Postprocessors/grow/test_type=grow'
-    exodiff = 'old_value_out.e'
-  [../]
+  issues = '#5117'
+  design = 'syntax/Postprocessors/index.md'
 
-  [./test_older]
-    type = 'Exodiff'
-    input = 'old_value.i'
-    cli_args = 'Postprocessors/grow/test_type=use_older_value Outputs/file_base=older_value_out'
-    exodiff = 'older_value_out.e'
-  [../]
+  [old_older]
+     requirement = 'The system shall support the ability to retrieve previously computed Postprocessor values within a Postprocessor calculation:'
+
+    [test_old]
+      type = 'Exodiff'
+      input = 'old_value.i'
+      cli_args = 'Postprocessors/grow/test_type=grow'
+      exodiff = 'old_value_out.e'
+
+      detail = 'old (one timestep back) and'
+    []
+
+    [test_older]
+      type = 'Exodiff'
+      input = 'old_value.i'
+      cli_args = 'Postprocessors/grow/test_type=use_older_value Outputs/file_base=older_value_out'
+      exodiff = 'older_value_out.e'
+
+      detail = 'older (two timesteps back).'
+    []
+  []
 []

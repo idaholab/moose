@@ -19,6 +19,10 @@ validParams<NodalSum>()
 {
   InputParameters params = validParams<NodalVariablePostprocessor>();
   params.set<bool>("unique_node_execute") = true;
+
+  params.addClassDescription("Computes the sum of all of the nodal values of the specified "
+                             "variable. Note: This object sets the default \"unique_node_execute\" "
+                             "flag to true to avoid double counting nodes between shared blocks.");
   return params;
 }
 

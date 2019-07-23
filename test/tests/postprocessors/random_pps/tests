@@ -1,26 +1,40 @@
 [Tests]
-  [./random_pps]
-    type = CSVDiff
-    input = random_pps.i
-    csvdiff = random_pps_out.csv
-    group = random_pps
-  [../]
-  [./random_pps_half_transient]
-    type = RunApp
-    input = random_pps.i
-    cli_args = 'Outputs/checkpoint=true --half-transient'
-    recover = false
-    prereq = random_pps
-    group = random_pps
-  [../]
-  [./random_pps_recover]
-    type = CSVDiff
-    input = random_pps.i
-    csvdiff = random_pps_out.csv
-    cli_args = '--recover'
-    recover = false
-    prereq = random_pps_half_transient
-    delete_output_before_running = false
-    group = random_pps
-  [../]
+  issues = '#8225'
+  design = 'RandomInterface.md'
+
+  [random_pps]
+    requirement = 'The system shall compute parallel-agnostic random numbers in the Postprocessor '
+                  'system'
+    [full_sim]
+      type = CSVDiff
+      input = random_pps.i
+      csvdiff = random_pps_out.csv
+      group = random_pps
+
+      detail = 'when running a complete simulation, or'
+    []
+    [half_transient]
+      type = RunApp
+      input = random_pps.i
+      cli_args = 'Outputs/checkpoint=true --half-transient'
+      recover = false
+      prereq = full_sim
+      group = random_pps
+
+      detail = 'when running the first half of the simulation and'
+    []
+    [recover]
+      type = CSVDiff
+      input = random_pps.i
+      csvdiff = random_pps_out.csv
+      cli_args = '--recover'
+      recover = false
+      prereq = half_transient
+      delete_output_before_running = false
+      group = random_pps
+
+      detail = 'running the second half of the simulation with recovery and receiving the same '
+               'values.'
+    []
+  []
 []

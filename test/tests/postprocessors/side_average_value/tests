@@ -1,7 +1,12 @@
 [Tests]
+  issues = '#1405'
+  design = 'SideAverageValue.md'
+
   [./test]
     type = 'Exodiff'
     input = 'side_average_value_test.i'
     exodiff = 'out.e'
+
+    requirement = 'The system shall compute the area-weighted average of the integral of a variable over a side.'
   [../]
 []

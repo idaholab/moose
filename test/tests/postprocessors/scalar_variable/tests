@@ -1,0 +1,11 @@
+[Tests]
+  [./scalar_pps]
+    type = 'CSVDiff'
+    input = 'scalar_variable_pps.i'
+    csvdiff = 'scalar_variable_pps_out.csv'
+
+    issues = '#726'
+    design = 'ScalarVariable.md'
+    requirement = 'The system shall support reporting scalar variables as Postprocessor (scalar output) values.'
+  [../]
+[]

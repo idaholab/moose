@@ -1,7 +1,12 @@
 [Tests]
+  issues = '#1405'
+  design = 'ElementH1Error.md'
+
   [./test]
     type = 'CSVDiff'
     input = 'element_h1_error_pp_test.i'
     csvdiff = 'out.csv'
+
+    requirement = 'The system shall compute the H1-seminorm between a field variable and a analytical function.'
   [../]
 []

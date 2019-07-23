@@ -1,8 +1,13 @@
 [Tests]
+  issues = '#7976'
+  design = 'CumulativeValuePostprocessor.md'
+
   [./cumulative_value_postprocessor]
     type = 'CSVDiff'
     input = 'cumulative_value_postprocessor.i'
     csvdiff = 'cumulative_value_postprocessor_out.csv'
     max_parallel = 1 # LU is used
+
+    requirement = 'The system shall have the ability to accumulate a scalar value over time.'
   [../]
 []

@@ -18,6 +18,9 @@ validParams<ElementL2Difference>()
 {
   InputParameters params = validParams<ElementIntegralVariablePostprocessor>();
   params.addRequiredCoupledVar("other_variable", "The variable to compare to");
+
+  params.addClassDescription("Computes the element-wise L2 difference between the current variable "
+                             "and a coupled variable.");
   return params;
 }
 

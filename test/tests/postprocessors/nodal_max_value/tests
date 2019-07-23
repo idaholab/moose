@@ -1,8 +1,24 @@
 [Tests]
-  [./test_nodal_max]
-    type = 'Exodiff'
-    input = 'nodal_max_value_test.i'
-    exodiff = 'out_nodal_max.e'
-    abs_zero = 1e-8
-  [../]
+  issues = '#658'
+  design = 'NodalMaxValue.md'
+
+  [nodal_max]
+    requirement = 'The system shall compute the maximum value of a field variable by sampling nodes'
+    [test_nodal_max]
+      type = 'Exodiff'
+      input = 'nodal_max_value_test.i'
+      exodiff = 'out_nodal_max.e'
+      abs_zero = 1e-8
+
+      detail = 'over the whole domain and'
+    []
+
+    [test]
+      type = 'Exodiff'
+      input = 'block_nodal_pps_test.i'
+      exodiff = 'block_nodal_pps_test_out.e'
+
+      detail = 'within a subdomain.'
+    []
+  []
 []

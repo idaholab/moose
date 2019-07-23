@@ -1,8 +1,13 @@
 [Tests]
+  issues = '#1405'
+  design = 'ElementL2Error.md'
+
   [./test]
     type = 'CSVDiff'
     input = 'element_l2_error_pp_test.i'
     csvdiff = 'out.csv'
     group = 'requirements'
+
+    requirement = 'The system shall compute the L2-error (Euclidean) between a field variable and a analytical function.'
   [../]
 []

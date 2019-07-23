@@ -1,17 +1,27 @@
 [Tests]
+  design = 'syntax/Adaptivity/index.md'
   [./num_adaptivity_cycles]
     type = 'CSVDiff'
     input = 'num_adaptivity_cycles.i'
     csvdiff = 'num_adaptivity_cycles_out.csv'
+
+    issues = '#7646'
+    requirement = 'The system shall be capable of running multiple adaptivity cycles in a single solve step.'
   [../]
   [./num_adaptivity_cycles_toggle_adaptivity]
     type = 'CSVDiff'
     input = 'num_adaptivity_cycles_toggle_adaptivity.i'
     csvdiff = 'num_adaptivity_cycles_toggle_adaptivity_out.csv'
+
+    issues = '#9746'
+    requirement = 'They system shall be capable of toggling adaptivity at the start of the simulation.'
   [../]
   [./num_adaptivity_cycles_toggle_adaptivity_wait]
     type = 'CSVDiff'
     input = 'num_adaptivity_cycles_toggle_adaptivity_wait.i'
     csvdiff = 'num_adaptivity_cycles_toggle_adaptivity_wait_out.csv'
+
+    issues = '#9746'
+    requirement = 'They system shall be capable of toggling adaptivity during the simulation.'
   [../]
 []

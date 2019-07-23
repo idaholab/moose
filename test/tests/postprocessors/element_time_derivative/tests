@@ -1,12 +1,19 @@
 [Tests]
+  issues = '#1820'
+  design = 'ElementAverageTimeDerivative.md'
+
   [./element_time_derivative_test]
     type = 'CSVDiff'
     input = 'element_time_derivative_test.i'
     csvdiff = 'out_elm_time_deriv.csv'
+
+    requirement = 'The system shall compute the average time derivative of a solution value computed per element in 2D.'
   [../]
   [./el_time_deriv_1d_test]
     type = 'CSVDiff'
     input = 'el_time_deriv_1d_test.i'
     csvdiff = 'out_el_time_deriv_1d.csv'
+
+    requirement = 'The system shall compute the average time derivative of a solution value computed per element in 1D.'
   [../]
 []

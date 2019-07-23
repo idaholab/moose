@@ -32,6 +32,7 @@ public:
 
   ///@{
   /**
+   * doco-normal-methods-begin
    * Retrieve the value of a Postprocessor or one of it's old or older values
    * @param name The name of the Postprocessor parameter (see below)
    * @return A reference to the desired value
@@ -46,6 +47,8 @@ public:
   const PostprocessorValue & getPostprocessorValue(const std::string & name);
   const PostprocessorValue & getPostprocessorValueOld(const std::string & name);
   const PostprocessorValue & getPostprocessorValueOlder(const std::string & name);
+  // doco-normal-methods-end
+
   ///@}
 
   ///@{
@@ -100,4 +103,3 @@ private:
   /// Reference the the FEProblemBase class
   FEProblemBase & _pi_feproblem;
 };
-

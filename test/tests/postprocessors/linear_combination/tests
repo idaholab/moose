@@ -1,7 +1,12 @@
 [Tests]
+  design = 'LinearCombinationPostprocessor.md'
+  issues = '#10145'
+
   [./linear_combination]
     type = 'CSVDiff'
     input = 'linear_combination.i'
     csvdiff = 'linear_combination_out.csv'
+
+    requirement = 'The system shall support the ability to compute a linear combination of scalar values (Postprocessors).'
   [../]
 []

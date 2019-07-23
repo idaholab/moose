@@ -25,6 +25,8 @@ validParams<VariableResidual>()
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<VariableName>("variable",
                                         "The name of the variable to compute the residual for");
+
+  params.addClassDescription("Computes the Residual of a single variable in the solution vector.");
   return params;
 }
 

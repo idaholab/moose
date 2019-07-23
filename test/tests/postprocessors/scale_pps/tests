@@ -1,7 +1,12 @@
 [Tests]
+  design = 'ScalePostprocessor.md'
+  issues = '#5954'
+
   [./test]
     type = 'Exodiff'
     input = 'scale_pps.i'
     exodiff = 'scale_pps_out.e'
+
+    requirement = 'The system shall support the scaling of a post processor quantity by another post processor quantity.'
   [../]
 []

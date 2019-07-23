@@ -1,15 +1,26 @@
 [Tests]
-  [./elemental]
-    type = 'Exodiff'
-    input = 'elemental.i'
-    exodiff = 'elemental_out.e'
-    recover = false
-  [../]
+  issues = '#5750'
+  design = 'syntax/Mesh/index.md'
 
-  [./side]
-    type = 'Exodiff'
-    input = 'side.i'
-    exodiff = 'side_out.e'
-    recover = false
-  [../]
+  [displaced_tests]
+    requirement = 'The system shall support running Postprocessors on the the mesh containing displacements:'
+
+    [elemental]
+      type = 'Exodiff'
+      input = 'elemental.i'
+      exodiff = 'elemental_out.e'
+      recover = false
+
+      detail = 'elemental and'
+    []
+
+    [side]
+      type = 'Exodiff'
+      input = 'side.i'
+      exodiff = 'side_out.e'
+      recover = false
+
+      detail = 'side.'
+    []
+  []
 []

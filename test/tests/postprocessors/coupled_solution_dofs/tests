@@ -5,5 +5,9 @@
     csvdiff = 'coupled_solution_dofs_out.csv'
     max_parallel = 3
     max_threads = 3
+
+    design = 'Coupleable.md'
+    issues = '#9690 #9758'
+    requirement = 'The system shall allow for the retrieval of raw elemental degree-of-freedom values directly for elemental evaluations.'
   [../]
 []
