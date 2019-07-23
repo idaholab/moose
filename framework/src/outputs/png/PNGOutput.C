@@ -13,6 +13,7 @@
 #include "PNGOutput.h"
 #include "FEProblemBase.h"
 #include "NonlinearSystem.h"
+#include "AuxiliarySystem.h"
 #include "libmesh/mesh_tools.h"
 
 registerMooseObject("MooseApp", PNGOutput);
@@ -25,8 +26,12 @@ validParams<PNGOutput>()
   params.addParam<bool>("transparent_background",
                         false,
                         "Determination of whether the background will be transparent.");
-  params.addParam<unsigned int>("resolution", 1, "The resolution of the image.");
-  MooseEnum color("GRAY BRYW BCR RWB BR");
+  params.addParam<unsigned int>("resolution", 25, "The resolution of the image.");
+  params.addParam<std::string>(
+      "variable", "None", "The name of the variable to use when creating the image");
+  params.addParam<Real>("max", -1000, "The maximum for the variable we want to use");
+  params.addParam<Real>("min", 1000, "The minimum for the variable we want to use");
+  MooseEnum color("GRAY BRYW BWR RWB BR");
   params.addParam<MooseEnum>("color", color, "Choose the color scheme to use.");
   params.addRangeCheckedParam<Real>("out_bounds_shade",
                                     .5,
@@ -49,6 +54,9 @@ PNGOutput::PNGOutput(const InputParameters & parameters)
     _color(parameters.get<MooseEnum>("color")),
     _transparent_background(getParam<bool>("transparent_background")),
     _transparency(getParam<Real>("transparency")),
+    _variable(getParam<std::string>("variable")),
+    _max(getParam<Real>("max")),
+    _min(getParam<Real>("min")),
     _out_bounds_shade(getParam<Real>("out_bounds_shade"))
 {
 }
@@ -58,24 +66,62 @@ void
 PNGOutput::makeMeshFunc()
 {
 
-  const std::vector<unsigned int> var_nums = {0};
+  if (processor_id() != 0)
+    mooseError("PNGOutput does not currently function in parallel.");
+
+  // By default _use_aux is false.
+  _use_aux = false;
+  // The number assigned to the variable.  Used to build the correct mesh.  Default is 0.
+  unsigned int variable_number = 0;
+
+  // If a specific variable name isn't provided, skip this if statement and use the default
+  // varaible.
+  if (_variable != "None")
+  {
+    if (_problem_ptr->getAuxiliarySystem().hasVariable(_variable))
+    {
+      variable_number =
+          _problem_ptr->getAuxiliarySystem().getVariable(processor_id(), _variable).number();
+      _use_aux = true;
+    }
+
+    else if (_problem_ptr->getNonlinearSystem().hasVariable(_variable))
+      variable_number =
+          _problem_ptr->getNonlinearSystem().getVariable(processor_id(), _variable).number();
+
+    else
+      mooseError("The given input variable '",
+                 _variable,
+                 "' is not in the auxiliary nor nonlinear systems.\n",
+                 "Please use a different variable name in the input file.");
+  }
+
+  const std::vector<unsigned int> var_nums = {variable_number};
 
   // If we want the background to be transparent, we need a number over 1.
   if (_transparent_background)
     _out_bounds_shade = 2;
+
   // Find the values that will be used for rescaling purposes.
   calculateRescalingValues();
 
   // Set up the mesh_function
-  _mesh_function =
-      libmesh_make_unique<MeshFunction>(*_es_ptr,
-                                        _problem_ptr->getNonlinearSystem().serializedSolution(),
-                                        _problem_ptr->getNonlinearSystem().dofMap(),
-                                        var_nums);
+  if (_use_aux)
+    _mesh_function =
+        libmesh_make_unique<MeshFunction>(*_es_ptr,
+                                          _problem_ptr->getAuxiliarySystem().solution(),
+                                          _problem_ptr->getAuxiliarySystem().dofMap(),
+                                          var_nums);
+  else
+    _mesh_function =
+        libmesh_make_unique<MeshFunction>(*_es_ptr,
+                                          _problem_ptr->getNonlinearSystem().solution(),
+                                          _problem_ptr->getNonlinearSystem().dofMap(),
+                                          var_nums);
   _mesh_function->init();
 
   // Need to enable out of mesh with the given control color scaled in reverse
-  // scaling is done, this value retains it's original value.
+  // so when scaling is done, this value retains it's original value.
   _mesh_function->enable_out_of_mesh_mode(reverseScale(_out_bounds_shade));
 }
 
@@ -83,9 +129,30 @@ PNGOutput::makeMeshFunc()
 void
 PNGOutput::calculateRescalingValues()
 {
-  // The min and max.
-  _scaling_min = _problem_ptr->getNonlinearSystem().serializedSolution().min();
-  _scaling_max = _problem_ptr->getNonlinearSystem().serializedSolution().max();
+  // The max and min.
+  // If the max value wasn't specified in the input file, find it from the system.
+  if (_max == (Real)(-1000))
+  {
+    if (_use_aux)
+      _scaling_max = _problem_ptr->getAuxiliarySystem().solution().max();
+    else
+      _scaling_max = _problem_ptr->getNonlinearSystem().solution().max();
+  }
+  else
+    _scaling_max = _max;
+
+  // If the min value wasn't specified in the input file, find it from the system.
+  if (_min == (Real)1000)
+  {
+    if (_use_aux)
+      _scaling_min = _problem_ptr->getAuxiliarySystem().solution().min();
+    else
+      _scaling_min = _problem_ptr->getNonlinearSystem().solution().min();
+  }
+  else
+    _scaling_min = _min;
+
+  // The amount the values will need to be shifted.
   _shift_value = 0;
 
   // Get the shift value.
@@ -134,8 +201,9 @@ PNGOutput::setRGB(png_byte * rgb, Real selection)
     case 2:
     // RWB.  Change spectrum.
     case 3:
-      color_spectrum_max = 1013; // 511;
+      color_spectrum_max = 511;
       break;
+    // BR.   Change spectrum
     case 4:
       color_spectrum_max = 255;
       break;
@@ -182,52 +250,40 @@ PNGOutput::setRGB(png_byte * rgb, Real selection)
       }
       break;
 
-    // Color Scheme: Blue->Cream->Red
+    // Color Scheme: Blue->White->Red
+    // Using the RGB values found in Paraview
     case 2:
-      // Blue->Cream
+      // Blue->White
       if (color < 256)
       {
-        rgb[0] = magnitude;
-        rgb[1] = magnitude - (int)(5.0 / (256.0 - (float)magnitude));
-        rgb[2] = 255 - (int)(40.0 / (256.0 - (float)magnitude));
+        rgb[0] = (int)(255.0 * (0.231373 + (0.002485 * (float)magnitude)));
+        rgb[1] = (int)(255.0 * (0.298039 + (0.002223 * (float)magnitude)));
+        rgb[2] = (int)(255.0 * (0.752941 + (0.000439 * (float)magnitude)));
       }
-      // Cream->Red
+      // White->Red
       else
       {
-        rgb[0] = 255;
-        rgb[1] = 255 - (5 / (magnitude + 1)) - (magnitude + (5 / (magnitude + 1)));
-        rgb[2] = 255 - (40 / (magnitude + 1)) - (magnitude + (40 / (magnitude + 1)));
+        rgb[0] = (int)(255.0 * (0.865003 - (0.000624 * (float)magnitude)));
+        rgb[1] = (int)(255.0 * (0.865003 - (0.003331 * (float)magnitude)));
+        rgb[2] = (int)(255.0 * (0.865003 - (0.002808 * (float)magnitude)));
       }
       break;
 
-    // Inverted form.
     // Red->White->Blue
     case 3:
       // Red->White
       if (color < 256)
       {
-        rgb[0] = magnitude + (int)(100 / (magnitude + 1));
-        rgb[1] = 0;
-        rgb[2] = 0;
-      }
-      else if (color < 512)
-      {
         rgb[0] = 255;
-        rgb[1] = magnitude - (int)(100.0 * ((float)magnitude / 255.0));
-        rgb[2] = magnitude - (int)(100.0 * ((float)magnitude / 255.0));
+        rgb[1] = magnitude;
+        rgb[2] = magnitude;
       }
       // White->Blue
-      else if (color < 768)
-      {
-        rgb[0] = 255 - (int)(100.0 * (1.0 + ((float)magnitude) / (100.0 * (255.0 / 155.0))));
-        rgb[1] = 255 - (int)(100.0 * (1.0 + ((float)magnitude) / (100.0 * (255.0 / 155.0))));
-        rgb[2] = 255;
-      }
       else
       {
-        rgb[0] = 0;
-        rgb[1] = 0;
-        rgb[2] = 255 - (int)(magnitude / (255 / 100));
+        rgb[0] = 255 - magnitude;
+        rgb[1] = 255 - magnitude;
+        rgb[2] = 255;
       }
       break;
 
@@ -259,12 +315,34 @@ void
 PNGOutput::makePNG()
 {
   // Get the max and min of the BoundingBox
-  Point maxPoint = _box.max();
-  Point minPoint = _box.min();
+  Point max_point = _box.max();
+  Point min_point = _box.min();
 
   // The the total distance on the x and y axes.
-  Real dist_x = maxPoint(0) - minPoint(0);
-  Real dist_y = maxPoint(1) - minPoint(1);
+  Real dist_x = max_point(0) - min_point(0);
+  Real dist_y = max_point(1) - min_point(1);
+
+  // Width and height for the PNG image.
+  Real width;
+  Real height;
+
+  // Variable to record the resolution variable after normalized to work with pixels in longest
+  // direction.
+  Real normalized_resolution;
+
+  // The longer dimension becomes the value to which we scale the other.
+  if (dist_x > dist_y)
+  {
+    width = _resolution;
+    height = (_resolution / dist_x) * dist_y;
+    normalized_resolution = (((Real)_resolution) / dist_x);
+  }
+  else
+  {
+    height = _resolution;
+    width = (_resolution / dist_y) * dist_x;
+    normalized_resolution = (((Real)_resolution) / dist_y);
+  }
 
   // Create the filename based on base and the test step number.
   std::ostringstream png_file;
@@ -276,8 +354,6 @@ PNGOutput::makePNG()
   png_infop infop = nullptr;
   // Required depth for proper image clarity.
   Real depth = 8;
-  Real width = dist_x * _resolution;
-  Real height = dist_y * _resolution;
   // Allocate resources.
   std::vector<png_byte> row((width + 1) * 4);
 
@@ -320,11 +396,11 @@ PNGOutput::makePNG()
   DenseVector<Number> dv(0);
 
   // Loop through to create the image.
-  for (Real y = maxPoint(1); y >= minPoint(1); y -= 1. / _resolution)
+  for (Real y = max_point(1); y >= min_point(1); y -= 1. / normalized_resolution)
   {
     pt(1) = y;
     unsigned int index = 0;
-    for (Real x = minPoint(0); x <= maxPoint(0); x += 1. / _resolution)
+    for (Real x = min_point(0); x <= max_point(0); x += 1. / normalized_resolution)
     {
       pt(0) = x;
       (*_mesh_function)(pt, _time, dv, nullptr);

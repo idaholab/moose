@@ -17,6 +17,20 @@
   [../]
 []
 
+[AuxVariables]
+  [bnds]
+  []
+[]
+
+[AuxKernels]
+  [bnds]
+    type = ParsedAux
+    variable = bnds
+    args = 'u'
+    function = '2*u'
+  []
+[]
+
 [Variables]
   active = 'u'
 
@@ -72,7 +86,8 @@
 [Outputs]
   [png]
     type = PNGOutput
-    resolution = 1
+    resolution = 2500
     color = RWB
+    variable = 'bnds'
   []
 []

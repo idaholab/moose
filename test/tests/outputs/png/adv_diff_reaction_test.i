@@ -115,7 +115,7 @@
 [Outputs]
   [png]
     type = PNGOutput
-    resolution = 1
-    color = BCR
+    resolution = 500
+    color = RWB
   []
 []
