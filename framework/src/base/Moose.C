@@ -222,6 +222,7 @@ addActionTypes(Syntax & syntax)
   registerTask("deprecated_block", false);
   registerTask("set_adaptivity_options", false);
   registerTask("add_mortar_interface", false);
+  registerTask("coupling_functor_check", true);
 
   // Dummy Actions (useful for sync points in the dependencies)
   registerTask("setup_function_complete", false);
@@ -317,6 +318,7 @@ addActionTypes(Syntax & syntax)
                            "(add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel,"
                            " add_nodal_kernel, add_dg_kernel, add_interface_kernel,"
                            " add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker)"
+                           "(coupling_functor_check)"
                            "(add_control)"
                            "(check_output)"
                            "(check_integrity)");
