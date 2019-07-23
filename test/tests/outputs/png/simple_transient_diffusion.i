@@ -49,7 +49,7 @@
 [Outputs]
   [png]
     type = PNGOutput
-    resolution = 1
+    resolution = 1000
     color = RWB
   []
 []
