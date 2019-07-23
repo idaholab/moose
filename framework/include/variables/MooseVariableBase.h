@@ -11,6 +11,7 @@
 
 #include "MooseObject.h"
 #include "BlockRestrictable.h"
+#include "OutputInterface.h"
 #include "MooseTypes.h"
 #include "MooseArray.h"
 
@@ -33,11 +34,10 @@ class SubProblem;
 class SystemBase;
 class MooseMesh;
 
-class MooseVariableBase : public MooseObject, public BlockRestrictable
+class MooseVariableBase : public MooseObject, public BlockRestrictable, public OutputInterface
 {
 public:
   MooseVariableBase(const InputParameters & parameters);
-  virtual ~MooseVariableBase();
 
   /**
    * Get variable number coming from libMesh

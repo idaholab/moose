@@ -34,7 +34,6 @@ InputParameters
 validParams<AddVariableAction>()
 {
   auto params = validParams<MooseObjectAction>();
-  params += validParams<OutputInterface>();
 
   // The user may specify a type in the Variables block, but if they don't we'll just use all the
   // parameters available from MooseVariableBase
@@ -42,10 +41,7 @@ validParams<AddVariableAction>()
   return params;
 }
 
-AddVariableAction::AddVariableAction(InputParameters params)
-  : MooseObjectAction(params), OutputInterface(params)
-{
-}
+AddVariableAction::AddVariableAction(InputParameters params) : MooseObjectAction(params) {}
 
 MooseEnum
 AddVariableAction::getNonlinearVariableFamilies()
@@ -157,14 +153,14 @@ AddVariableAction::addVariable(const std::string & var_name)
     if (_components > 1)
       mooseError("Vector finite element families do not currently have ArrayVariable support");
     else
-      _type = "MooseVariableFE<RealVectorValue>";
+      _type = "VectorMooseVariable";
   }
   else
   {
     if (_components > 1)
-      _type = "MooseVariableFE<RealEigenVector>";
+      _type = "ArrayMooseVariable";
     else
-      _type = "MooseVariableFE<Real>";
+      _type = "MooseVariable";
   }
 
   _problem_add_var_method(*_problem, _type, _name, _moose_object_pars);

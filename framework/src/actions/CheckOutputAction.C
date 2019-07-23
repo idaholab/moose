@@ -13,7 +13,10 @@
 #include "MooseApp.h"
 #include "Console.h"
 #include "CommonOutputAction.h"
-#include "AddVariableAction.h"
+#include "MooseVariableFEBase.h"
+#include "MooseVariableScalar.h"
+#include "AuxiliarySystem.h"
+#include "NonlinearSystemBase.h"
 
 registerMooseAction("MooseApp", CheckOutputAction, "check_output");
 
@@ -41,24 +44,41 @@ CheckOutputAction::act()
 void
 CheckOutputAction::checkVariableOutput(const std::string & task)
 {
-  // Loop through the actions for the given task
-  const auto & actions = _awh.getActionListByName(task);
-  for (const auto & act : actions)
+  if (_problem.get() == nullptr)
+    return;
+
+  if (task == "add_variable")
   {
-    // Cast the object to AddVariableAction so that that
-    // OutputInterface::buildOutputHideVariableList may be called
-    AddVariableAction * ptr = dynamic_cast<AddVariableAction *>(act);
+    const auto & field_vars = _problem->getNonlinearSystemBase().getVariables(/*tid =*/0);
+    for (const auto & var : field_vars)
+    {
+      std::set<OutputName> outputs = var->getOutputs();
+      _app.getOutputWarehouse().checkOutputs(outputs);
+    }
 
-    // If the cast fails move to the next action, this is the case with NodalNormals which is also
-    // associated with
-    // the "add_aux_variable" task.
-    if (ptr == NULL)
-      continue;
+    const auto & scalar_vars = _problem->getNonlinearSystemBase().getScalarVariables(/*tid =*/0);
+    for (const auto & var : scalar_vars)
+    {
+      std::set<OutputName> outputs = var->getOutputs();
+      _app.getOutputWarehouse().checkOutputs(outputs);
+    }
+  }
 
-    // Create the hide list for the action
-    std::set<std::string> names_set;
-    names_set.insert(ptr->name());
-    ptr->buildOutputHideVariableList(names_set);
+  else if (task == "add_aux_variable")
+  {
+    const auto & field_vars = _problem->getAuxiliarySystem().getVariables(/*tid =*/0);
+    for (const auto & var : field_vars)
+    {
+      std::set<OutputName> outputs = var->getOutputs();
+      _app.getOutputWarehouse().checkOutputs(outputs);
+    }
+
+    const auto & scalar_vars = _problem->getAuxiliarySystem().getScalarVariables(/*tid =*/0);
+    for (const auto & var : scalar_vars)
+    {
+      std::set<OutputName> outputs = var->getOutputs();
+      _app.getOutputWarehouse().checkOutputs(outputs);
+    }
   }
 }
 

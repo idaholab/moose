@@ -100,7 +100,7 @@ public:
                                    OutputDimension output_dim = OutputDimension::DEFAULT);
 
   /// Reset Exodus output
-  void clear() { _exodus_io_ptr.reset(); }
+  void clear();
 
 protected:
   /**
@@ -191,4 +191,3 @@ private:
   /// Flag to output discontinuous format in Exodus
   bool _discontinuous;
 };
-

@@ -94,6 +94,7 @@
 #include "libmesh/coupling_matrix.h"
 #include "libmesh/nonlinear_solver.h"
 #include "libmesh/sparse_matrix.h"
+#include "libmesh/string_to_enum.h"
 
 // Anonymous namespace for helper function
 namespace
@@ -1870,7 +1871,10 @@ FEProblemBase::addVariable(const std::string & var_type,
                            const std::string & var_name,
                            InputParameters & params)
 {
-  if (duplicateVariableCheck(var_name, params.get<FEType>("fe_type"), /* is_aux = */ false))
+  auto fe_type = FEType(Utility::string_to_enum<Order>(params.get<MooseEnum>("order")),
+                        Utility::string_to_enum<FEFamily>(params.get<MooseEnum>("family")));
+
+  if (duplicateVariableCheck(var_name, fe_type, /* is_aux = */ false))
     return;
 
   params.set<FEProblemBase *>("_fe_problem_base") = this;
@@ -2149,7 +2153,10 @@ FEProblemBase::addAuxVariable(const std::string & var_type,
                               const std::string & var_name,
                               InputParameters & params)
 {
-  if (duplicateVariableCheck(var_name, params.get<FEType>("fe_type"), /* is_aux = */ true))
+  auto fe_type = FEType(Utility::string_to_enum<Order>(params.get<MooseEnum>("order")),
+                        Utility::string_to_enum<FEFamily>(params.get<MooseEnum>("family")));
+
+  if (duplicateVariableCheck(var_name, fe_type, /* is_aux = */ true))
     return;
 
   params.set<FEProblemBase *>("_fe_problem_base") = this;

@@ -22,7 +22,7 @@ InputParameters validParams<AddVariableAction>();
 /**
  * Adds nonlinear variable
  */
-class AddVariableAction : public MooseObjectAction, public OutputInterface
+class AddVariableAction : public MooseObjectAction
 {
 public:
   /**

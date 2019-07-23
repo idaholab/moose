@@ -108,12 +108,7 @@ SystemBase::getVariable(THREAD_ID tid, const std::string & var_name)
 {
   MooseVariableFEBase * var = dynamic_cast<MooseVariableFEBase *>(_vars[tid].getVariable(var_name));
   if (!var)
-  {
-    std::stringstream errMsg;
-    errMsg << "Variable '" << var_name << "' does not exist in this system" << std::endl;
-    throw std::runtime_error(errMsg.str().c_str());
-    // mooseError("Variable '" + var_name + "' does not exist in this system");
-  }
+    mooseError("Variable '", var_name, "' does not exist in this system");
   return *var;
 }
 
@@ -124,10 +119,7 @@ SystemBase::getVariable(THREAD_ID tid, unsigned int var_number)
     if (_numbered_vars[tid][var_number])
       return *_numbered_vars[tid][var_number];
 
-  std::stringstream errMsg;
-  errMsg << "Variable #'" << Moose::stringify(var_number) << "' does not exist in this system"
-         << std::endl;
-  throw std::runtime_error(errMsg.str().c_str());
+  mooseError("Variable #", Moose::stringify(var_number), " does not exist in this system");
 }
 
 template <typename T>
@@ -640,17 +632,24 @@ SystemBase::addVariable(const std::string & var_type,
                         Utility::string_to_enum<FEFamily>(parameters.get<MooseEnum>("family")));
   auto var_num = system().add_variable(name, fe_type, &blocks);
   parameters.set<unsigned int>("_var_num") = var_num;
+  parameters.set<SystemBase *>("_system_base") = this;
 
   _numbered_vars.resize(libMesh::n_threads());
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    parameters.set<SystemBase *>("_system_base") = this;
-
+    parameters.set<THREAD_ID>("tid") = tid;
     std::shared_ptr<MooseVariableBase> var =
         _factory.create<MooseVariableBase>(var_type, name, parameters, tid);
 
-    _vars[tid].add(name, var.get());
+    _vars[tid].add(name, var);
+
+    if (auto fe_var = std::dynamic_pointer_cast<MooseVariableFEBase>(var))
+    {
+      if (var_num >= _numbered_vars[tid].size())
+        _numbered_vars[tid].resize(var_num + 1);
+      _numbered_vars[tid][var_num] = fe_var.get();
+    }
 
     if (var->blockRestricted())
       for (const SubdomainID & id : var->blockIDs())

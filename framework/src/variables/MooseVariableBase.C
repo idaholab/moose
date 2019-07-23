@@ -20,12 +20,16 @@
 #include "libmesh/fe_type.h"
 #include "libmesh/string_to_enum.h"
 
+// Users should never actually create this object
+registerMooseObject("MooseApp", MooseVariableBase);
+
 template <>
 InputParameters
 validParams<MooseVariableBase>()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<BlockRestrictable>();
+  params += validParams<OutputInterface>();
 
   MooseEnum order(
       "CONSTANT FIRST SECOND THIRD FOURTH FIFTH SIXTH SEVENTH EIGHTH NINTH", "FIRST", true);
@@ -57,12 +61,14 @@ validParams<MooseVariableBase>()
   params.addPrivateParam<FEProblemBase *>("_fe_problem_base");
   params.addPrivateParam<Moose::VarKindType>("_var_kind");
   params.addPrivateParam<unsigned int>("_var_num");
+  params.addPrivateParam<THREAD_ID>("tid");
   return params;
 }
 
 MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
   : MooseObject(parameters),
     BlockRestrictable(this),
+    OutputInterface(parameters),
     _sys(*getParam<SystemBase *>("_system_base")), // TODO: get from _fe_problem_base
     _fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
              Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family"))),
@@ -73,6 +79,7 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
     _assembly(_subproblem.assembly(getParam<THREAD_ID>("_tid"))),
     _dof_map(_sys.dofMap()),
     _mesh(_subproblem.mesh()),
+    _tid(getParam<THREAD_ID>("tid")),
     _count(getParam<unsigned int>("components")),
     _scaling_factor(std::vector<Real>(_count, 1.))
 {
@@ -86,8 +93,6 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
   }
   else
     _var_name = _sys.system().variable(_var_num).name();
-
-  std::cout << "Variable " << _name << " " << _var_num << " " << number() << std::endl;
 }
 
 const std::vector<dof_id_type> &
