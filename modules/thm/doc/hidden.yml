@@ -214,7 +214,6 @@
 - /Kernels/OneD7EqnEnergyWallHeatFlux
 - /Kernels/OneD7EqnEnergyWallHeatTransfer
 - /Kernels/OneD7EqnEnergyWallMassTransfer
-- /Kernels/OneD7EqnEntropyMinimumArtificialDissipation
 - /Kernels/OneD7EqnMassInterfacialMassTransfer
 - /Kernels/OneD7EqnMassWallMassTransfer
 - /Kernels/OneD7EqnMomentumFormLoss
@@ -229,7 +228,6 @@
 - /Kernels/OneD7EqnVolumeFractionPressureRelaxation
 - /Kernels/OneD7EqnVolumeFractionTimeDerivative
 - /Kernels/OneD7EqnVolumeFractionWallMassTransfer
-- /Kernels/OneDEntropyMinimumArtificialDissipation
 - /Kernels/OneDSUPG
 - /Kernels/OneDShockCapturing
 - /Kernels/OneDStabilizationBase
@@ -247,8 +245,6 @@
 - /Materials/WallFrictionChurchillMaterial
 - /Materials/WeightedAverageMaterial
 - /Materials/AverageWallTemperature7EqnMaterial
-- /Materials/EntropyViscosityCoefficients7EqnMaterial
-- /Materials/EntropyViscosityCoefficientsMaterial
 - /Materials/FluidProperties7EqnMaterial
 - /Materials/GradientPressureSmootherCoefMaterial
 - /Materials/GradientPressureSmootherVolumeFractionCoefMaterial
@@ -320,9 +316,7 @@
 - /UserObjects/RiemannSolver7EqnNCGHLLC
 - /UserObjects/VolumeFractionMapper
 - /UserObjects/EntropyViscosity
-- /UserObjects/JumpGradientInterface
 - /UserObjects/JunctionStagnationEnthalpyUserObject
-- /UserObjects/NormalizationParameter
 - /UserObjects/SUPG
 - /UserObjects/StabilizationSettings
 - /UserObjects/WaveSpeeds7EqnNCGHLLC
