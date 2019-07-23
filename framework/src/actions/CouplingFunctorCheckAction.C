@@ -32,6 +32,10 @@ CouplingFunctorCheckAction::CouplingFunctorCheckAction(InputParameters parameter
 void
 CouplingFunctorCheckAction::act()
 {
+  // If we're doing Jacobian-free, then we have no matrix and we can just return
+  if (_problem->solverParams()._type == Moose::ST_JFNK)
+    return;
+
   auto & nl = _problem->getNonlinearSystemBase();
   auto & kernels = nl.getKernelWarehouse();
   auto & nbcs = nl.getNodalBCWarehouse();
