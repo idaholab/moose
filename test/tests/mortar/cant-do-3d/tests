@@ -1,0 +1,11 @@
+[Tests]
+  [except]
+    type = RunException
+    expect_err = 'Mortar cannot currently be run in three dimensions'
+    input = periodic.i
+    issues = '#13080'
+    design = 'Constraints/index.md'
+    requirement = "We shall tell the user that mortar doesn't currently work in 3D"
+    mesh_mode = 'REPLICATED'
+  []
+[]

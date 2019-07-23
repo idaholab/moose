@@ -100,6 +100,9 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     _phys_points_slave(_assembly.qPointsFace()),
     _phys_points_master(_assembly.qPointsFaceNeighbor())
 {
+  if (_mesh.dimension() == 3)
+    mooseError("Mortar cannot currently be run in three dimensions. It's on the to-do list!");
+
   _fe_problem.createMortarInterface(std::make_pair(_master_id, _slave_id),
                                     std::make_pair(_master_subdomain_id, _slave_subdomain_id),
                                     getParam<bool>("use_displaced_mesh"),
