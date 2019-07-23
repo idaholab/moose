@@ -50,14 +50,19 @@ CouplingFunctorCheckAction::act()
     // coupling functor object (ElementSideNeighborLayers with n_levels of 0)
     addRelationshipManagers(Moose::RelationshipManagerType::COUPLING, validParams<Kernel>());
 
-    // See whether we've actually added anything new. If we have, then unfortunately we need to
-    // reinit our libMesh::ImplicitSystem in order to update the sparsity
+    // See whether we've actually added anything new
     if (original_size != _app.relationshipManagers().size())
     {
       // There's no concern of duplicating functors previously added here since functors are stored
       // as std::sets
       _app.attachRelationshipManagers(Moose::RelationshipManagerType::COUPLING);
 
+      // Make sure that coupling matrices are attached to the coupling functors
+      _app.dofMapReinitForRMs();
+
+      // Reinit the libMesh (Implicit)System. This re-computes the sparsity pattern and then applies
+      // it to the ImplicitSystem's matrices. Note that does NOT make a call to DofMap::reinit,
+      // hence we have to call GhostingFunctor::dofmap_reinit ourselves in the call above
       nl.system().reinit();
     }
   }

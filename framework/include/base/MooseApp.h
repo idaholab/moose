@@ -692,6 +692,16 @@ public:
     return _relationship_managers;
   }
 
+  /**
+   * Loop through RMs and call dofmap_reinit
+   */
+  void dofMapReinitForRMs();
+
+  /**
+   * Loop through RMs and call mesh_reinit
+   */
+  void meshReinitForRMs();
+
 protected:
   /**
    * Whether or not this MooseApp has cached a Backup to use for restart / recovery

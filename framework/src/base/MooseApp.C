@@ -1870,3 +1870,17 @@ MooseApp::getRelationshipManagerInfo() const
 
   return info_strings;
 }
+
+void
+MooseApp::dofMapReinitForRMs()
+{
+  for (auto & rm : _relationship_managers)
+    rm->dofmap_reinit();
+}
+
+void
+MooseApp::meshReinitForRMs()
+{
+  for (auto & rm : _relationship_managers)
+    rm->mesh_reinit();
+}
