@@ -16,6 +16,45 @@ class SinglePhaseFluidProperties;
 template <>
 InputParameters validParams<SinglePhaseFluidProperties>();
 
+/**
+ * Adds AD versions of each fluid property. These functions use the Real versions of these methods
+ * to compute the AD variables complete with derivatives. Typically, these do not need to be
+ * overriden in derived classes.
+ */
+#define propfuncAD(want, prop1, prop2)                                                             \
+  virtual DualReal want##_from_##prop1##_##prop2(const DualReal & p1, const DualReal & p2) const   \
+  {                                                                                                \
+    Real x = 0;                                                                                    \
+    Real raw1 = p1.value();                                                                        \
+    Real raw2 = p2.value();                                                                        \
+    Real dxd1 = 0;                                                                                 \
+    Real dxd2 = 0;                                                                                 \
+    want##_from_##prop1##_##prop2(raw1, raw2, x, dxd1, dxd2);                                      \
+                                                                                                   \
+    DualReal result = x;                                                                           \
+    for (size_t i = 0; i < p1.derivatives().size(); i++)                                           \
+      result.derivatives()[i] = p1.derivatives()[i] * dxd1 + p2.derivatives()[i] * dxd2;           \
+    return result;                                                                                 \
+  }                                                                                                \
+                                                                                                   \
+  virtual void want##_from_##prop1##_##prop2(const DualReal & prop1,                               \
+                                             const DualReal & prop2,                               \
+                                             DualReal & val,                                       \
+                                             DualReal & d##want##d1,                               \
+                                             DualReal & d##want##d2) const                         \
+  {                                                                                                \
+    fluidPropError(name(), ": ", __PRETTY_FUNCTION__, " derivative derivatives not implemented."); \
+    Real dummy, tmp1, tmp2;                                                                        \
+    val = want##_from_##prop1##_##prop2(prop1, prop2);                                             \
+    want##_from_##prop1##_##prop2(prop1.value(), prop2.value(), dummy, tmp1, tmp2);                \
+    d##want##d1 = tmp1;                                                                            \
+    d##want##d2 = tmp2;                                                                            \
+  }
+
+/**
+ * Adds function definitions with not implemented error. These functions should be overriden in
+ * derived classes where required. AD versions are constructed automatically using propfuncAD.
+ */
 #define propfunc(want, prop1, prop2)                                                               \
   virtual Real want##_from_##prop1##_##prop2(Real, Real) const                                     \
   {                                                                                                \
@@ -31,34 +70,19 @@ InputParameters validParams<SinglePhaseFluidProperties>();
     val = want##_from_##prop1##_##prop2(prop1, prop2);                                             \
   }                                                                                                \
                                                                                                    \
-  virtual void want##_from_##prop1##_##prop2(const DualReal & prop1,                               \
-                                             const DualReal & prop2,                               \
-                                             DualReal & val,                                       \
-                                             DualReal & d##want##d1,                               \
-                                             DualReal & d##want##d2) const                         \
-  {                                                                                                \
-    fluidPropError(name(), ": ", __PRETTY_FUNCTION__, " derivative derivatives not implemented."); \
-    Real dummy, tmp1, tmp2;                                                                        \
-    val = want##_from_##prop1##_##prop2(prop1, prop2);                                             \
-    want##_from_##prop1##_##prop2(prop1.value(), prop2.value(), dummy, tmp1, tmp2);                \
-    d##want##d1 = tmp1;                                                                            \
-    d##want##d2 = tmp2;                                                                            \
-  }                                                                                                \
+  propfuncAD(want, prop1, prop2)
+
+/**
+ * Adds Real declarations of functions that have a default implementation.
+ * Important: properties declared using this macro must be defined in SinglePhaseFluidProperties.C.
+ * AD versions are constructed automatically using propfuncAD.
+ */
+#define propfuncWithDefault(want, prop1, prop2)                                                    \
+  virtual Real want##_from_##prop1##_##prop2(Real, Real) const;                                    \
+  virtual void want##_from_##prop1##_##prop2(                                                      \
+      Real prop1, Real prop2, Real & val, Real & d##want##d1, Real & d##want##d2) const;           \
                                                                                                    \
-  DualReal want##_from_##prop1##_##prop2(const DualReal & p1, const DualReal & p2) const           \
-  {                                                                                                \
-    Real x = 0;                                                                                    \
-    Real raw1 = p1.value();                                                                        \
-    Real raw2 = p2.value();                                                                        \
-    Real dxd1 = 0;                                                                                 \
-    Real dxd2 = 0;                                                                                 \
-    want##_from_##prop1##_##prop2(raw1, raw2, x, dxd1, dxd2);                                      \
-                                                                                                   \
-    DualReal result = x;                                                                           \
-    for (size_t i = 0; i < p1.derivatives().size(); i++)                                           \
-      result.derivatives()[i] = p1.derivatives()[i] * dxd1 + p2.derivatives()[i] * dxd2;           \
-    return result;                                                                                 \
-  }
+  propfuncAD(want, prop1, prop2)
 
 /**
  * Common class for single phase fluid properties
@@ -78,9 +102,10 @@ public:
    *
    * For all functions, the first two arguments are the given properties that define the fluid
    * state.  For the two-argument variants, the desired property is the return value.
-   * The five-argument variants also provide partial derivatives dx/da and dx/db where x is the desired property being
-   * computed, a is the first given property, and b is the second given property.  The desired
-   * property, dx/da, and dx/db are stored into the 3rd, 4th, and 5th arguments respectively.
+   * The five-argument variants also provide partial derivatives dx/da and dx/db where x is the
+   * desired property being computed, a is the first given property, and b is the second given
+   * property.  The desired property, dx/da, and dx/db are stored into the 3rd, 4th, and 5th
+   * arguments respectively.
    *
    * Properties/parameters used in these function are listed below with their units:
    *
@@ -100,6 +125,7 @@ public:
    * beta   volumetric thermal expansion coefficient [1/K]
    * g      Gibbs free energy [J]
    * pp_sat partial pressure at saturation [Pa]
+   * gamma  Adiabatic ratio (cp/cv) [-]
    * @endcode
    *
    * As an example:
@@ -114,9 +140,9 @@ public:
    * your_fluid_properties_object.p_from_v_e(specific_vol, specific_energy, pressure, dp_dv, dp_de);
    * @endcode
    *
-   * Automatic differentiation (AD) support is provided through x_from_a_b(DualReal a, DualReal b) versions
-   * of the functions where a and b must be ADReal/DualNumber's calculated using all AD-supporting
-   * values:
+   * Automatic differentiation (AD) support is provided through x_from_a_b(DualReal a, DualReal b) and
+   * x_from_a_b(DualReal a, DualReal b, DualReal x, DualReal dx_da, DualReal dx_db) versions of the
+   * functions where a and b must be ADReal/DualNumber's calculated using all AD-supporting values:
    *
    * @begincode
    * auto v = 1/rho; // rho must be an AD non-linear variable.
@@ -157,11 +183,19 @@ public:
   propfunc(h, p, T)
   propfunc(p, h, s)
   propfunc(g, v, e)
+  propfuncWithDefault(T, p, h)
+  propfuncWithDefault(beta, p, T)
+  propfuncWithDefault(v, p, T)
+  propfuncWithDefault(e, p, T)
+  propfuncWithDefault(gamma, v, e)
+  propfuncWithDefault(gamma, p, T)
   ///@}
 
   // clang-format on
 
 #undef propfunc
+#undef propfuncWithDefault
+#undef propfuncAD
 
       /**
        * Fluid name
@@ -212,53 +246,6 @@ public:
   virtual Real triplePointTemperature() const;
 
   /**
-   * Methods with default implementations.
-   * The following methods have default implementations, so cannot
-   * be implemented using the propfunc macro.
-   */
-
-  /**
-   * Volumetric thermal expansion coefficient
-   *
-   * @param p   pressure (Pa)
-   * @param T   temperature (K)
-   * @return    volumetric thermal expansion coefficient (1/K)
-   */
-  virtual Real beta_from_p_T(Real p, Real T) const;
-
-  /**
-   * Volumetric thermal expansion coefficient
-   *
-   * @param p                pressure (Pa)
-   * @param T                temperature (K)
-   * @param[out] beta        volumetric thermal expansion coefficient (1/K)
-   * @param[out] dbeta_dp    derivative of beta w.r.t. pressure
-   * @param[out] dbeta_dT    derivative of beta w.r.t. temperature
-   */
-
-  virtual void beta_from_p_T(Real p, Real T, Real & beta, Real & dbeta_dp, Real & dbeta_dT) const;
-  DualReal beta_from_p_T(const DualReal & p, const DualReal & T) const;
-  /**
-   * Specific volume from pressure and temperature
-   *
-   * @param[in] p   pressure
-   * @param[in] T   temperature
-   */
-  virtual Real v_from_p_T(Real p, Real T) const;
-  virtual DualReal v_from_p_T(const DualReal & p, const DualReal & T) const;
-
-  /**
-   * Specific volume and its derivatives from pressure and temperature
-   *
-   * @param[in] p          pressure
-   * @param[in] T          temperature
-   * @param[out] v         specific volume
-   * @param[out] dv_dp     derivative of specific volume w.r.t. pressure
-   * @param[out] dv_dT     derivative of specific volume w.r.t. temperature
-   */
-  virtual void v_from_p_T(Real p, Real T, Real & v, Real & dv_dp, Real & dv_dT) const;
-
-  /**
    * Specific internal energy from temperature and specific volume
    *
    * @param[in] T     temperature
@@ -273,54 +260,6 @@ public:
    * @param[in] v     specific volume
    */
   virtual void v_e_spndl_from_T(Real T, Real & v, Real & e) const;
-
-  /**
-   * Internal energy from pressure and temperature
-   *
-   * @param[in] p   pressure (Pa)
-   * @param[in] T   temperature (K)
-   * @return internal energy (J/kg)
-   */
-  virtual Real e_from_p_T(Real p, Real T) const;
-  DualReal e_from_p_T(const DualReal & p, const DualReal & T) const;
-
-  /**
-   * Internal energy and its derivatives from pressure and temperature
-   *
-   * @param[in] p        pressure (Pa)
-   * @param[in] T        temperature (K)
-   * @param[out] e       internal energy (J/kg)
-   * @param[out] de_dp   derivative of internal energy w.r.t. pressure
-   * @param[out] de_dT   derivative of internal energy w.r.t. temperature
-   */
-  virtual void e_from_p_T(Real p, Real T, Real & e, Real & de_dp, Real & de_dT) const;
-
-  /**
-   * Temperature from pressure and specific enthalpy
-   *
-   * @param[in] p pressure (Pa)
-   * @param[in] h enthalpy (J/kg)
-   * @return temperature (K)
-   */
-  virtual Real T_from_p_h(Real p, Real h) const;
-  virtual void T_from_p_h(Real p, Real h, Real & T, Real & dT_dp, Real & dT_dh) const;
-  DualReal T_from_p_h(const DualReal & p, const DualReal & h) const;
-
-  /**
-   * Adiabatic index - ratio of specific heats
-   * @param v specific volume
-   * @param e specific internal energy
-   * @return gamma (-)
-   */
-  virtual Real gamma_from_v_e(Real v, Real e) const;
-
-  /**
-   * Adiabatic index - ratio of specific heats
-   * @param p fluid pressure (Pa)
-   * @param T fluid temperature (K)
-   * @return gamma (-)
-   */
-  virtual Real gamma_from_p_T(Real p, Real T) const;
 
   /**
    * Henry's law constant for dissolution in water and derivative wrt temperature
@@ -342,7 +281,7 @@ public:
    */
   virtual Real vaporPressure(Real T) const;
   virtual void vaporPressure(Real T, Real & psat, Real & dpsat_dT) const;
-  DualReal vaporPressure(const DualReal & temperature) const;
+  DualReal vaporPressure(const DualReal & T) const;
 
   /**
    * Vapor temperature. Used to delineate liquid and gas phases.
@@ -355,7 +294,7 @@ public:
    */
   virtual Real vaporTemperature(Real p) const;
   virtual void vaporTemperature(Real p, Real & Tsat, Real & dTsat_dp) const;
-  DualReal vaporTemperature(const DualReal & pressure) const;
+  DualReal vaporTemperature(const DualReal & p) const;
 
   /**
    * Combined methods. These methods are particularly useful for the PorousFlow
