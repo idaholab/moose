@@ -115,7 +115,8 @@
 [Outputs]
   [png]
     type = PNGOutput
-    resolution = 500
+    resolution = 25
     color = RWB
+    variable = 'u'
   []
 []

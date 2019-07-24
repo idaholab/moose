@@ -26,13 +26,14 @@ validParams<PNGOutput>()
   params.addParam<bool>("transparent_background",
                         false,
                         "Determination of whether the background will be transparent.");
-  params.addParam<unsigned int>("resolution", 25, "The resolution of the image.");
-  params.addParam<std::string>(
-      "variable", "None", "The name of the variable to use when creating the image");
-  params.addParam<Real>("max", -1000, "The maximum for the variable we want to use");
-  params.addParam<Real>("min", 1000, "The minimum for the variable we want to use");
+  params.addRequiredParam<VariableName>("variable",
+                                        "The name of the variable to use when creating the image");
+  params.addParam<Real>("max", 1, "The maximum for the variable we want to use");
+  params.addParam<Real>("min", 0, "The minimum for the variable we want to use");
   MooseEnum color("GRAY BRYW BWR RWB BR");
-  params.addParam<MooseEnum>("color", color, "Choose the color scheme to use.");
+  params.addRequiredParam<MooseEnum>("color", color, "Choose the color scheme to use.");
+  params.addRangeCheckedParam<unsigned int>(
+      "resolution", 25, "resolution>0", "The length of the longest side of the image in pixels.");
   params.addRangeCheckedParam<Real>("out_bounds_shade",
                                     .5,
                                     "out_bounds_shade>=0 & out_bounds_shade<=1",
@@ -54,7 +55,8 @@ PNGOutput::PNGOutput(const InputParameters & parameters)
     _color(parameters.get<MooseEnum>("color")),
     _transparent_background(getParam<bool>("transparent_background")),
     _transparency(getParam<Real>("transparency")),
-    _variable(getParam<std::string>("variable")),
+    _use_aux(false),
+    _variable(getParam<VariableName>("variable")),
     _max(getParam<Real>("max")),
     _min(getParam<Real>("min")),
     _out_bounds_shade(getParam<Real>("out_bounds_shade"))
@@ -66,35 +68,29 @@ void
 PNGOutput::makeMeshFunc()
 {
 
-  if (processor_id() != 0)
-    mooseError("PNGOutput does not currently function in parallel.");
-
-  // By default _use_aux is false.
-  _use_aux = false;
   // The number assigned to the variable.  Used to build the correct mesh.  Default is 0.
   unsigned int variable_number = 0;
 
-  // If a specific variable name isn't provided, skip this if statement and use the default
-  // varaible.
-  if (_variable != "None")
+  // PNGOutput does not currently scale for running in parallel.
+  if (processor_id() != 0)
+    mooseInfo("PNGOutput is not currently scalable.");
+
+  if (_problem_ptr->getAuxiliarySystem().hasVariable(_variable))
   {
-    if (_problem_ptr->getAuxiliarySystem().hasVariable(_variable))
-    {
-      variable_number =
-          _problem_ptr->getAuxiliarySystem().getVariable(processor_id(), _variable).number();
-      _use_aux = true;
-    }
-
-    else if (_problem_ptr->getNonlinearSystem().hasVariable(_variable))
-      variable_number =
-          _problem_ptr->getNonlinearSystem().getVariable(processor_id(), _variable).number();
-
-    else
-      mooseError("The given input variable '",
-                 _variable,
-                 "' is not in the auxiliary nor nonlinear systems.\n",
-                 "Please use a different variable name in the input file.");
+    variable_number =
+        _problem_ptr->getAuxiliarySystem().getVariable(processor_id(), _variable).number();
+    _use_aux = true;
   }
+
+  else if (_problem_ptr->getNonlinearSystem().hasVariable(_variable))
+    variable_number =
+        _problem_ptr->getNonlinearSystem().getVariable(processor_id(), _variable).number();
+
+  else
+    paramError("The given input variable '",
+               _variable,
+               "' is not in the auxiliary nor nonlinear systems.\n",
+               "Please use a different variable name in the input file.");
 
   const std::vector<unsigned int> var_nums = {variable_number};
 
@@ -109,13 +105,13 @@ PNGOutput::makeMeshFunc()
   if (_use_aux)
     _mesh_function =
         libmesh_make_unique<MeshFunction>(*_es_ptr,
-                                          _problem_ptr->getAuxiliarySystem().solution(),
+                                          _problem_ptr->getAuxiliarySystem().serializedSolution(),
                                           _problem_ptr->getAuxiliarySystem().dofMap(),
                                           var_nums);
   else
     _mesh_function =
         libmesh_make_unique<MeshFunction>(*_es_ptr,
-                                          _problem_ptr->getNonlinearSystem().solution(),
+                                          _problem_ptr->getNonlinearSystem().serializedSolution(),
                                           _problem_ptr->getNonlinearSystem().dofMap(),
                                           var_nums);
   _mesh_function->init();
@@ -131,23 +127,23 @@ PNGOutput::calculateRescalingValues()
 {
   // The max and min.
   // If the max value wasn't specified in the input file, find it from the system.
-  if (_max == (Real)(-1000))
+  if (_pars.isParamSetByUser("max"))
   {
     if (_use_aux)
-      _scaling_max = _problem_ptr->getAuxiliarySystem().solution().max();
+      _scaling_max = _problem_ptr->getAuxiliarySystem().serializedSolution().max();
     else
-      _scaling_max = _problem_ptr->getNonlinearSystem().solution().max();
+      _scaling_max = _problem_ptr->getNonlinearSystem().serializedSolution().max();
   }
   else
     _scaling_max = _max;
 
   // If the min value wasn't specified in the input file, find it from the system.
-  if (_min == (Real)1000)
+  if (_pars.isParamSetByUser("min"))
   {
     if (_use_aux)
-      _scaling_min = _problem_ptr->getAuxiliarySystem().solution().min();
+      _scaling_min = _problem_ptr->getAuxiliarySystem().serializedSolution().min();
     else
-      _scaling_min = _problem_ptr->getNonlinearSystem().solution().min();
+      _scaling_min = _problem_ptr->getNonlinearSystem().serializedSolution().min();
   }
   else
     _scaling_min = _min;

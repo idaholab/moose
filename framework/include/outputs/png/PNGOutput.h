@@ -76,7 +76,7 @@ protected:
   bool _use_aux;
 
   // The name of the variable to use to create the png.
-  std::string _variable;
+  VariableName _variable;
 
   // Variables that store the max and min of the values in the variable used.
   // Used for creating the scaling values.

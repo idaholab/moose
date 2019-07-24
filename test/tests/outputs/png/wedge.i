@@ -18,14 +18,14 @@
 []
 
 [AuxVariables]
-  [bnds]
+  [tew_u]
   []
 []
 
 [AuxKernels]
-  [bnds]
+  [tew_u]
     type = ParsedAux
-    variable = bnds
+    variable = tew_u
     args = 'u'
     function = '2*u'
   []
@@ -86,8 +86,8 @@
 [Outputs]
   [png]
     type = PNGOutput
-    resolution = 2500
+    resolution = 25
     color = RWB
-    variable = 'bnds'
+    variable = 'tew_u'
   []
 []
