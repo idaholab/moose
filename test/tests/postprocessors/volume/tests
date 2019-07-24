@@ -1,8 +1,13 @@
 [Tests]
+  issues = '#1609'
+  design = 'VolumePostprocessor.md'
+
   [./test]
     type = 'Exodiff'
     input = 'sphere1D.i'
     exodiff = 'sphere1D_out.e'
     max_parallel = 1   # This test uses LU
+
+    requirement = 'The system shall have the capability of computing the volume of the mesh domain.'
   [../]
 []

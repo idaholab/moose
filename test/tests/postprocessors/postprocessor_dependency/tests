@@ -1,7 +1,12 @@
 [Tests]
+  issues = '#5972'
+  design = 'DependencyResolverInterface.md'
+
   [./element_side_test]
     type = 'CSVDiff'
     input = 'element_side_pp.i'
     csvdiff = 'out.csv'
+
+    requirement = 'The system shall support evaluating Postprocessors (UserObjects) in the following order: Elemental, Side, Internal Side, Nodal, and General.'
   [../]
 []

@@ -18,6 +18,9 @@ InputParameters
 validParams<AverageNodalVariableValue>()
 {
   InputParameters params = validParams<NodalVariablePostprocessor>();
+
+  params.addClassDescription("Computes the average value of a field by sampling all nodal "
+                             "solutions on the domain or within a subdomain");
   return params;
 }
 
@@ -56,7 +59,6 @@ AverageNodalVariableValue::finalize()
 {
   gatherSum(_sum);
   gatherSum(_n);
-
 }
 // doco-final-end
 

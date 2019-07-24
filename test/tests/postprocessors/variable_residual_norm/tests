@@ -1,9 +1,14 @@
 [Tests]
+  issues = '#7206'
+  design = 'VariableResidual.md'
+
   [./variable_residual_test]
     type = 'CSVDiff'
     input = 'variable_residual.i'
     csvdiff = 'variable_residual_out.csv'
     max_threads = 1
     max_parallel = 1
+
+    requirement = 'The system shall compute the difference between the test and trial functions (Residual) for a specified variable.'
   [../]
 []

@@ -1,7 +1,12 @@
 [Tests]
+  issues = '#5771'
+  design = 'ElementL2Difference.md'
+
   [./test]
     type = 'Exodiff'
     input = 'element_l2_difference.i'
     exodiff = 'element_l2_difference_out.e'
+
+    requirement = 'The system shall compute the element-wise L2 difference between two field variables.'
   [../]
 []

@@ -1,7 +1,12 @@
 [Tests]
-  [./test]
+  design = 'ElementExtremeValue.md'
+  issues = '#2776'
+
+  [./elemental_extreme]
     type = 'Exodiff'
     input = 'element_extreme_value.i'
     exodiff = 'element_extreme_value_out.e'
+
+    requirement = 'The system shall compute the the extreme (min/max) values of an elemental field variable over the domain.'
   [../]
 []

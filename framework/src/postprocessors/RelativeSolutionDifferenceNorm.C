@@ -17,6 +17,10 @@ InputParameters
 validParams<RelativeSolutionDifferenceNorm>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
+
+  params.addClassDescription(
+      "Computes the relative norm of the solution difference of two consecutive time steps.");
+
   return params;
 }
 

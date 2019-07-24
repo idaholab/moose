@@ -1,7 +1,0 @@
-[Tests]
-  [./test_elem_multi_block]
-    type = 'Exodiff'
-    input = 'elem_pps_multi_block_test.i'
-    exodiff = 'elem_pps_multi_block_test_out.e'
-  [../]
-[]

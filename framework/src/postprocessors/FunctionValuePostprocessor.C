@@ -24,7 +24,8 @@ validParams<FunctionValuePostprocessor>()
   params.addParam<Real>("scale_factor", 1, "A scale factor to be applied to the function");
 
   params.declareControllable("point scale_factor");
-
+  params.addClassDescription(
+      "Computes the value of a supplied function at a single point (scalable)");
   return params;
 }
 
