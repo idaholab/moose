@@ -1776,8 +1776,11 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
         {
           if (rm_type == Moose::RelationshipManagerType::COUPLING)
           {
-            auto & dof_map = problem.getDisplacedProblem()->nlSys().dofMap();
-            dof_map.add_coupling_functor(*rm);
+            // We actually need to add this to the FEProblemBase NonlinearSystemBase's DofMap
+            // because the DisplacedProblem "nonlinear" DisplacedSystem doesn't have any matrices
+            // for which to do coupling
+            auto & dof_map = problem.getNonlinearSystemBase().dofMap();
+            dof_map.add_coupling_functor(*rm, /*to_mesh = */ false);
             rm->setDofMap(dof_map);
           }
           // If this rm is algebraic AND coupling, then in the case of the non-linear system there
@@ -1788,8 +1791,10 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
           else if (rm_type == Moose::RelationshipManagerType::ALGEBRAIC &&
                    !rm->isType(Moose::RelationshipManagerType::COUPLING))
           {
-            problem.getDisplacedProblem()->nlSys().dofMap().add_algebraic_ghosting_functor(*rm);
-            problem.getDisplacedProblem()->auxSys().dofMap().add_algebraic_ghosting_functor(*rm);
+            problem.getDisplacedProblem()->nlSys().dofMap().add_algebraic_ghosting_functor(
+                *rm, /*to_mesh = */ false);
+            problem.getDisplacedProblem()->auxSys().dofMap().add_algebraic_ghosting_functor(
+                *rm, /*to_mesh = */ false);
           }
         }
         else // undisplaced
@@ -1797,7 +1802,7 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
           if (rm_type == Moose::RelationshipManagerType::COUPLING)
           {
             auto & dof_map = problem.getNonlinearSystemBase().dofMap();
-            dof_map.add_coupling_functor(*rm);
+            dof_map.add_coupling_functor(*rm, /*to_mesh = */ false);
             rm->setDofMap(dof_map);
           }
           // If this rm is algebraic AND coupling, then in the case of the non-linear system there
@@ -1808,8 +1813,10 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
           else if (rm_type == Moose::RelationshipManagerType::ALGEBRAIC &&
                    !rm->isType(Moose::RelationshipManagerType::COUPLING))
           {
-            problem.getNonlinearSystemBase().dofMap().add_algebraic_ghosting_functor(*rm);
-            problem.getAuxiliarySystem().dofMap().add_algebraic_ghosting_functor(*rm);
+            problem.getNonlinearSystemBase().dofMap().add_algebraic_ghosting_functor(
+                *rm, /*to_mesh = */ false);
+            problem.getAuxiliarySystem().dofMap().add_algebraic_ghosting_functor(
+                *rm, /*to_mesh = */ false);
           }
         }
       }
@@ -1862,4 +1869,18 @@ MooseApp::getRelationshipManagerInfo() const
   }
 
   return info_strings;
+}
+
+void
+MooseApp::dofMapReinitForRMs()
+{
+  for (auto & rm : _relationship_managers)
+    rm->dofmap_reinit();
+}
+
+void
+MooseApp::meshReinitForRMs()
+{
+  for (auto & rm : _relationship_managers)
+    rm->mesh_reinit();
 }
