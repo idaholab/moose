@@ -3,5 +3,9 @@
     type = 'CSVDiff'
     input = 'least_squares_fit_history.i'
     csvdiff = 'out_least_squares_fit_coeffs.csv out_shift_and_scale_x_least_squares_fit_coeffs.csv out_shift_and_scale_y_least_squares_fit_coeffs.csv'
+
+    requirement = 'The system shall support computing the least squares fit of a set of time values obtained from an aggregate operation defined by the developer.'
+    issues = '#11709'
+    design = 'LeastSquaresFitHistory.md'
   [../]
 []

@@ -3,5 +3,9 @@
     type = 'CSVDiff'
     input = 'statistics_vector_postprocessor.i'
     csvdiff = 'statistics_vector_postprocessor_out_stats_0001.csv'
+
+    issues = '#11217'
+    design = 'StatisticsVectorPostprocessor.md'
+    requirement = 'The system shall be capable of computing the statics of a vector of data.'
   [../]
 []
