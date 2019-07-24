@@ -41,7 +41,7 @@ protected:
 
   /// Stabilization parameter in Nitsche's formulation and penalty factor in the
   /// Penalty Method
-   Real _alpha;
+  Real _alpha;
 
   /// Change in variable value ot the interface
   Real _jump;
