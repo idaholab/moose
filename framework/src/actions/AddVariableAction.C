@@ -41,7 +41,10 @@ validParams<AddVariableAction>()
   return params;
 }
 
-AddVariableAction::AddVariableAction(InputParameters params) : MooseObjectAction(params) {}
+AddVariableAction::AddVariableAction(InputParameters params)
+  : MooseObjectAction(params), _components(1)
+{
+}
 
 MooseEnum
 AddVariableAction::getNonlinearVariableFamilies()
@@ -85,7 +88,7 @@ AddVariableAction::act()
   addVariable(var_name);
 
   // Set the initial condition
-  if (isParamValid("initial_condition"))
+  if (_moose_object_pars.isParamValid("initial_condition"))
     createInitialConditionAction();
 }
 

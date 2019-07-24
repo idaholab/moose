@@ -314,9 +314,9 @@ DisplacedProblem::numMatrixTags() const
 bool
 DisplacedProblem::hasVariable(const std::string & var_name) const
 {
-  if (_displaced_nl.hasVariable(var_name))
+  if (_displaced_nl.hasVariable(var_name + "_displaced"))
     return true;
-  else if (_displaced_aux.hasVariable(var_name))
+  else if (_displaced_aux.hasVariable(var_name + "_displaced"))
     return true;
   else
     return false;
@@ -328,8 +328,12 @@ DisplacedProblem::getVariable(THREAD_ID tid,
                               Moose::VarKindType expected_var_type,
                               Moose::VarFieldType expected_var_field_type)
 {
-  return getVariableHelper(
-      tid, var_name, expected_var_type, expected_var_field_type, _displaced_nl, _displaced_aux);
+  return getVariableHelper(tid,
+                           var_name + "_displaced",
+                           expected_var_type,
+                           expected_var_field_type,
+                           _displaced_nl,
+                           _displaced_aux);
 }
 
 MooseVariable &
@@ -366,9 +370,9 @@ DisplacedProblem::getArrayVariable(THREAD_ID tid, const std::string & var_name)
 bool
 DisplacedProblem::hasScalarVariable(const std::string & var_name) const
 {
-  if (_displaced_nl.hasScalarVariable(var_name))
+  if (_displaced_nl.hasScalarVariable(var_name + "_displaced"))
     return true;
-  else if (_displaced_aux.hasScalarVariable(var_name))
+  else if (_displaced_aux.hasScalarVariable(var_name + "_displaced"))
     return true;
   else
     return false;

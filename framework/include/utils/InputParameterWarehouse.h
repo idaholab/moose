@@ -118,7 +118,7 @@ private:
    * able to call this method.
    */
   InputParameters &
-  addInputParameters(const std::string & name, InputParameters parameters, THREAD_ID tid = 0);
+  addInputParameters(const std::string & name, InputParameters & parameters, THREAD_ID tid = 0);
 
   /**
    * Allows for the deletion and cleanup of an object while the simulation is running.

@@ -121,7 +121,7 @@ public:
    */
   void addTimeIntegrator(const std::string & type,
                          const std::string & name,
-                         InputParameters parameters) override;
+                         InputParameters & parameters) override;
   using SystemBase::addTimeIntegrator;
 
   /**
@@ -136,8 +136,9 @@ public:
    * @param name The name of the kernel
    * @param parameters Kernel parameters
    */
-  virtual void
-  addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+  virtual void addKernel(const std::string & kernel_name,
+                         const std::string & name,
+                         InputParameters & parameters);
 
   /**
    * Adds a NodalKernel
@@ -147,7 +148,7 @@ public:
    */
   virtual void addNodalKernel(const std::string & kernel_name,
                               const std::string & name,
-                              InputParameters parameters);
+                              InputParameters & parameters);
 
   /**
    * Adds a scalar kernel
@@ -157,7 +158,7 @@ public:
    */
   void addScalarKernel(const std::string & kernel_name,
                        const std::string & name,
-                       InputParameters parameters);
+                       InputParameters & parameters);
 
   /**
    * Adds a boundary condition
@@ -167,7 +168,7 @@ public:
    */
   void addBoundaryCondition(const std::string & bc_name,
                             const std::string & name,
-                            InputParameters parameters);
+                            InputParameters & parameters);
 
   /**
    * Adds a Constraint
@@ -176,7 +177,7 @@ public:
    * @param parameters Constraint parameters
    */
   void
-  addConstraint(const std::string & c_name, const std::string & name, InputParameters parameters);
+  addConstraint(const std::string & c_name, const std::string & name, InputParameters & parameters);
 
   /**
    * Adds a Dirac kernel
@@ -186,7 +187,7 @@ public:
    */
   void addDiracKernel(const std::string & kernel_name,
                       const std::string & name,
-                      InputParameters parameters);
+                      InputParameters & parameters);
 
   /**
    * Adds a DG kernel
@@ -195,7 +196,7 @@ public:
    * @param parameters DG kernel parameters
    */
   void
-  addDGKernel(std::string dg_kernel_name, const std::string & name, InputParameters parameters);
+  addDGKernel(std::string dg_kernel_name, const std::string & name, InputParameters & parameters);
 
   /**
    * Adds an interface kernel
@@ -205,7 +206,7 @@ public:
    */
   void addInterfaceKernel(std::string interface_kernel_name,
                           const std::string & name,
-                          InputParameters parameters);
+                          InputParameters & parameters);
 
   /**
    * Adds a damper
@@ -213,8 +214,9 @@ public:
    * @param name The name of the damper
    * @param parameters Damper parameters
    */
-  void
-  addDamper(const std::string & damper_name, const std::string & name, InputParameters parameters);
+  void addDamper(const std::string & damper_name,
+                 const std::string & name,
+                 InputParameters & parameters);
 
   /**
    * Adds a split
@@ -223,7 +225,7 @@ public:
    * @param parameters Split parameters
    */
   void
-  addSplit(const std::string & split_name, const std::string & name, InputParameters parameters);
+  addSplit(const std::string & split_name, const std::string & name, InputParameters & parameters);
 
   /**
    * Retrieves a split by name

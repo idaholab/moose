@@ -361,7 +361,7 @@ public:
    */
   virtual void addVariable(const std::string & var_type,
                            const std::string & var_name,
-                           InputParameters parameters);
+                           InputParameters & parameters);
 
   /**
    * If a variable is an array variable
@@ -733,7 +733,7 @@ public:
 
   virtual void addTimeIntegrator(const std::string & /*type*/,
                                  const std::string & /*name*/,
-                                 InputParameters /*parameters*/)
+                                 InputParameters & /*parameters*/)
   {
   }
 

@@ -27,6 +27,7 @@
 #include "libmesh/node_range.h"
 #include "libmesh/numeric_vector.h"
 #include "libmesh/default_coupling.h"
+#include "libmesh/string_to_enum.h"
 
 // AuxiliarySystem ////////
 
@@ -183,15 +184,19 @@ AuxiliarySystem::updateActive(THREAD_ID tid)
 void
 AuxiliarySystem::addVariable(const std::string & var_type,
                              const std::string & name,
-                             InputParameters parameters)
+                             InputParameters & parameters)
 {
   SystemBase::addVariable(var_type, name, parameters);
 
-  auto type = parameters.get<FEType>("fe_type");
+  auto fe_type = FEType(Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")),
+                        Utility::string_to_enum<FEFamily>(parameters.get<MooseEnum>("family")));
+
+  if (var_type == "MooseVariableScalar" || var_type == "ArrayMooseVariable")
+    return;
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    if (type.family == LAGRANGE_VEC || type.family == NEDELEC_ONE)
+    if (fe_type.family == LAGRANGE_VEC || fe_type.family == NEDELEC_ONE)
     {
       VectorMooseVariable * var = _vars[tid].getFieldVariable<RealVectorValue>(name);
       if (var)
@@ -225,7 +230,7 @@ AuxiliarySystem::addVariable(const std::string & var_type,
 void
 AuxiliarySystem::addTimeIntegrator(const std::string & type,
                                    const std::string & name,
-                                   InputParameters parameters)
+                                   InputParameters & parameters)
 {
   parameters.set<SystemBase *>("_sys") = this;
   _time_integrator = _factory.create<TimeIntegrator>(type, name, parameters);
@@ -234,7 +239,7 @@ AuxiliarySystem::addTimeIntegrator(const std::string & type,
 void
 AuxiliarySystem::addKernel(const std::string & kernel_name,
                            const std::string & name,
-                           InputParameters parameters)
+                           InputParameters & parameters)
 {
   parameters.set<AuxiliarySystem *>("_aux_sys") = this;
 
@@ -265,7 +270,7 @@ AuxiliarySystem::addKernel(const std::string & kernel_name,
 void
 AuxiliarySystem::addScalarKernel(const std::string & kernel_name,
                                  const std::string & name,
-                                 InputParameters parameters)
+                                 InputParameters & parameters)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {

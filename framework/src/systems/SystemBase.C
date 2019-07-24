@@ -615,8 +615,12 @@ SystemBase::removeVector(TagID tag_id)
 void
 SystemBase::addVariable(const std::string & var_type,
                         const std::string & name,
-                        InputParameters parameters)
+                        InputParameters & parameters)
 {
+  _numbered_vars.resize(libMesh::n_threads());
+
+  auto components = parameters.get<unsigned int>("components");
+
   // Convert the std::vector parameter provided by the user into a std::set for use by libMesh's
   // System::add_variable method
   std::set<SubdomainID> blocks;
@@ -627,14 +631,34 @@ SystemBase::addVariable(const std::string & var_type,
     blocks.insert(blk_id);
   }
 
-  // Add the variable to the libMesh System object
   auto fe_type = FEType(Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")),
                         Utility::string_to_enum<FEFamily>(parameters.get<MooseEnum>("family")));
-  auto var_num = system().add_variable(name, fe_type, &blocks);
+
+  unsigned int var_num;
+
+  if (var_type == "ArrayMooseVariable")
+  {
+    if (fe_type.family == NEDELEC_ONE || fe_type.family == LAGRANGE_VEC)
+      mooseError("Vector family type cannot be used in an array variable");
+
+    // Turn off automatic variable group identification so that we can be sure that this variable
+    // group will be ordered exactly like it should be
+    system().identify_variable_groups(false);
+
+    // Build up the variable names
+    std::vector<std::string> var_names;
+    for (unsigned int i = 0; i < components; i++)
+      var_names.push_back(SubProblem::arrayVariableComponent(name, i));
+
+    // The number returned by libMesh is the _last_ variable number... we want to hold onto the
+    // _first_
+    var_num = system().add_variables(var_names, fe_type, &blocks) - (components - 1);
+  }
+  else
+    var_num = system().add_variable(name, fe_type, &blocks);
+
   parameters.set<unsigned int>("_var_num") = var_num;
   parameters.set<SystemBase *>("_system_base") = this;
-
-  _numbered_vars.resize(libMesh::n_threads());
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -644,18 +668,22 @@ SystemBase::addVariable(const std::string & var_type,
 
     _vars[tid].add(name, var);
 
-    if (auto fe_var = std::dynamic_pointer_cast<MooseVariableFEBase>(var))
+    if (auto fe_var = dynamic_cast<MooseVariableFEBase *>(var.get()))
     {
-      if (var_num >= _numbered_vars[tid].size())
-        _numbered_vars[tid].resize(var_num + 1);
-      _numbered_vars[tid][var_num] = fe_var.get();
+      auto required_size = var_num + components;
+      if (required_size > _numbered_vars[tid].size())
+        _numbered_vars[tid].resize(required_size);
+      for (MooseIndex(components) component = 0; component < components; ++component)
+        _numbered_vars[tid][var_num + component] = fe_var;
     }
 
     if (var->blockRestricted())
       for (const SubdomainID & id : var->blockIDs())
-        _var_map[var->number()].insert(id);
+        for (MooseIndex(components) component = 0; component < components; ++component)
+          _var_map[var_num + component].insert(id);
     else
-      _var_map[var->number()] = std::set<SubdomainID>();
+      for (MooseIndex(components) component = 0; component < components; ++component)
+        _var_map[var_num + component] = std::set<SubdomainID>();
   }
 
   // getMaxVariableNumber is an API method used in Rattlesnake

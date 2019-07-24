@@ -9,18 +9,18 @@
 
 #pragma once
 
-#include "Action.h"
+#include "AddVariableAction.h"
 
 class AddElementalFieldAction;
 
 template <>
 InputParameters validParams<AddElementalFieldAction>();
 
-class AddElementalFieldAction : public Action
+class AddElementalFieldAction : public AddVariableAction
 {
 public:
   AddElementalFieldAction(InputParameters params);
 
   virtual void act() override;
+  void init() override;
 };
-

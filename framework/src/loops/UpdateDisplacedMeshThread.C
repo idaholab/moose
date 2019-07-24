@@ -72,7 +72,7 @@ UpdateDisplacedMeshThread::init()
 
   for (unsigned int i = 0; i < num_displacements; i++)
   {
-    std::string displacement_name = displacement_variables[i];
+    std::string displacement_name = displacement_variables[i] + "_displaced";
 
     if (_displaced_problem._displaced_nl.sys().has_variable(displacement_name))
     {

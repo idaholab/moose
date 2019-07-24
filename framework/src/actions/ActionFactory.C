@@ -40,7 +40,7 @@ ActionFactory::reg(const std::string & name,
 std::shared_ptr<Action>
 ActionFactory::create(const std::string & action,
                       const std::string & action_name,
-                      InputParameters parameters)
+                      InputParameters & parameters)
 {
   parameters.addPrivateParam("_moose_app", &_app);
   parameters.addPrivateParam("action_type", action);

@@ -127,6 +127,7 @@ addActionTypes(Syntax & syntax)
 
   registerMooseObjectTask("add_variable",                 MooseVariableBase,      false);
   registerMooseObjectTask("add_aux_variable",             MooseVariableBase,      false);
+  registerMooseObjectTask("add_elemental_field_variable", MooseVariableBase,      false);
 
   registerMooseObjectTask("add_nodal_kernel",             NodalKernel,            false);
 
@@ -139,7 +140,7 @@ addActionTypes(Syntax & syntax)
 
   registerMooseObjectTask("add_aux_kernel",               AuxKernel,              false);
   appendMooseObjectTask  ("add_aux_kernel",               VectorAuxKernel);
-  registerMooseObjectTask("add_elemental_field_variable", AuxKernel,              false);
+  appendMooseObjectTask  ("add_elemental_field_variable", AuxKernel);
 
   registerMooseObjectTask("add_scalar_kernel",            ScalarKernel,           false);
   registerMooseObjectTask("add_aux_scalar_kernel",        AuxScalarKernel,        false);
