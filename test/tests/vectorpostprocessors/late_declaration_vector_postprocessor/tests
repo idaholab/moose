@@ -3,5 +3,9 @@
     type = 'CSVDiff'
     input = 'late_declaration_vector_postprocessor.i'
     csvdiff = 'late_declaration_vector_postprocessor_out_constant_0001.csv'
+
+    requirement = 'The system shall have late binding producers of vector quantities (VectorPostprocessors) that may be declared after system initialization.'
+    design = 'syntax/VectorPostprocessors/index.md'
+    issues = '#7809 #7819'
   [../]
 []

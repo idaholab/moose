@@ -3,5 +3,9 @@
     type = CSVDiff
     input = volume_histogram.i
     csvdiff = 'volume_histogram_out_histo_0002.csv'
+
+    requirement = 'The system shall allow support the creation of histogram or binned data of volume fractions with respect to variable values.'
+    issues = '#7803 #7801'
+    design = 'VolumeHistogram.md'
   [../]
 []

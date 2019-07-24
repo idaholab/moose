@@ -3,5 +3,9 @@
     type = 'CSVDiff'
     input = 'constant_vector_postprocessor.i'
     csvdiff = 'constant_vector_postprocessor_out_constant_0001.csv'
+
+    issues = '#3087'
+    design = 'syntax/VectorPostprocessors/index.md'
+    requirement = 'The system shall be able to produce arbitrary vectors of values for use in other calculations.'
   [../]
 []

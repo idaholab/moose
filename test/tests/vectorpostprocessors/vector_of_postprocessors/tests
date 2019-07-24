@@ -3,5 +3,9 @@
     type = 'CSVDiff'
     input = 'vector_of_postprocessors.i'
     csvdiff = 'vector_of_postprocessors_out_min_max_0001.csv'
+
+    issues = '#4176'
+    design = 'VectorOfPostprocessors.md'
+    requirement = 'The system shall be able to aggregate an arbitrary set of scalar data producers (Postprocessors) into a single vector of Postprocessors.'
   [../]
 []

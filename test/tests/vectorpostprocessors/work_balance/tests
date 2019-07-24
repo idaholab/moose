@@ -1,20 +1,32 @@
 [Tests]
-  [./test]
-    type = 'CSVDiff'
-    input = 'work_balance.i'
-    csvdiff = 'work_balance_out_all_wb_0000.csv	work_balance_out_aux_wb_0000.csv work_balance_out_nl_wb_0000.csv'
-    min_parallel = 2
-    max_parallel = 2
-    mesh_mode = replicated
-  [../]
+  issues = '#11209 #11274'
+  design = 'WorkBalance.md'
 
-  [./distributed]
-    type = 'CSVDiff'
-    input = 'work_balance.i'
-    cli_args = 'Outputs/file_base=distributed'
-    csvdiff = 'distributed_all_wb_0000.csv distributed_aux_wb_0000.csv distributed_nl_wb_0000.csv'
-    min_parallel = 2
-    max_parallel = 2
-    mesh_mode = distributed
-  [../]
+  [work_balance]
+    requirement = 'The system shall have the ability to compute several statistics related to the '
+                  'balance of the mesh partitioning'
+    [replicated]
+      type = 'CSVDiff'
+      input = 'work_balance.i'
+      csvdiff = 'work_balance_out_all_wb_0000.csv work_balance_out_aux_wb_0000.csv '
+                'work_balance_out_nl_wb_0000.csv'
+      min_parallel = 2
+      max_parallel = 2
+      mesh_mode = replicated
+
+      detail = 'on replicated meshes, and'
+    []
+
+    [distributed]
+      type = 'CSVDiff'
+      input = 'work_balance.i'
+      cli_args = 'Outputs/file_base=distributed'
+      csvdiff = 'distributed_all_wb_0000.csv distributed_aux_wb_0000.csv distributed_nl_wb_0000.csv'
+      min_parallel = 2
+      max_parallel = 2
+      mesh_mode = distributed
+
+      detail = 'on distributed meshes.'
+    []
+  []
 []

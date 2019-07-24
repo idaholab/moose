@@ -1,17 +1,34 @@
 [Tests]
-  [./basic]
+  issues = '#8436'
+  design = 'MaterialVectorPostprocessor.md'
+
+  [basic]
     type = 'CSVDiff'
     input = 'basic.i'
     csvdiff = 'basic_out_vpp_0001.csv'
-  [../]
-  [./boundary-err]
-    type = 'RunException'
-    input = 'boundary-err.i'
-    expect_err = 'cannot be used'
-  [../]
-  [./block-restrict-err]
-    type = 'RunException'
-    input = 'block-restrict-err.i'
-    expect_err = 'is not defined on element'
-  [../]
+
+    requirement = 'The system shall be able to output material properties calculated at quadrature '
+                  'points on user-defined elements in a comma separated format.'
+  []
+
+  [errors]
+    requirement = 'The system shall issue an error if material output samples are attempted for '
+                  'elements:'
+
+    [boundary_restrict]
+      type = 'RunException'
+      input = 'boundary-err.i'
+      expect_err = 'cannot be used'
+
+      detail = 'but the material is restricted to a boundary, or'
+    []
+
+    [block_restrict]
+      type = 'RunException'
+      input = 'block-restrict-err.i'
+      expect_err = 'is not defined on element'
+
+      detail = 'the material is restricted to a block not containing the desired elements.'
+    []
+  []
 []

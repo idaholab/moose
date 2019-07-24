@@ -1,15 +1,26 @@
 [Tests]
-  [./element_value_sampler]
-    type = 'CSVDiff'
-    input = 'element_value_sampler.i'
-    csvdiff = 'element_value_sampler_element_value_sampler_0000.csv'
-    mesh_mode = REPLICATED
-  [../]
-  [./not_elemental]
-    type = 'RunException'
-    input = 'element_value_sampler.i'
-    cli_args = 'AuxVariables/u/family=LAGRANGE AuxVariables/u/order=FIRST'
-    expect_err = "The variable 'u' is not elemental"
-    mesh_mode = REPLICATED
-  [../]
+  issues = '#11594'
+  design = 'ElementValueSampler.md'
+
+  [element_value_sampler]
+    requirement = 'The system shall support sampling of a field variable at the centroid of every '
+                  'element in the domain'
+    [monomial]
+      type = 'CSVDiff'
+      input = 'element_value_sampler.i'
+      csvdiff = 'element_value_sampler_element_value_sampler_0000.csv'
+      mesh_mode = REPLICATED
+
+      detail = 'for elemental variables and'
+    []
+    [lagrange]
+      type = 'RunException'
+      input = 'element_value_sampler.i'
+      cli_args = 'AuxVariables/u/family=LAGRANGE AuxVariables/u/order=FIRST'
+      expect_err = "The variable 'u' is not elemental"
+      mesh_mode = REPLICATED
+
+      detail = 'nodal variables.'
+    []
+  []
 []

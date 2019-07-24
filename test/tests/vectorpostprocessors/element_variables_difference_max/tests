@@ -1,16 +1,28 @@
 [Tests]
-  [./TrueMaximum]
-    type = CSVDiff
-    input = element_variables_difference_max.i
-    cli_args = 'VectorPostprocessors/difference/furthest_from_zero=false Outputs/file_base=element_variables_difference_max_true_max_out'
-    csvdiff = 'element_variables_difference_max_true_max_out_difference_0002.csv'
-    group = element_variables_difference_max
-  [../]
-  [./AbsoluteMaximum]
-    type = CSVDiff
-    input = element_variables_difference_max.i
-    cli_args = 'VectorPostprocessors/difference/furthest_from_zero=true Outputs/file_base=element_variables_difference_max_absolute_max_out'
-    csvdiff = 'element_variables_difference_max_absolute_max_out_difference_0002.csv'
-    group = element_variables_difference_max
-  [../]
+  issues = '#9231'
+  design = 'ElementVariablesDifferenceMax.md'
+
+  [max_difference]
+    requirement = 'The system shall be capable of locating the maximum distances (the element) '
+                  'between two field variables:'
+
+    [true]
+      type = CSVDiff
+      input = element_variables_difference_max.i
+      cli_args = 'VectorPostprocessors/difference/furthest_from_zero=false '
+                 'Outputs/file_base=element_variables_difference_max_true_max_out'
+      csvdiff = 'element_variables_difference_max_true_max_out_difference_0002.csv'
+
+      detail = 'the true maximum involving a simple difference, and'
+    []
+    [absolute]
+      type = CSVDiff
+      input = element_variables_difference_max.i
+      cli_args = 'VectorPostprocessors/difference/furthest_from_zero=true '
+                 'Outputs/file_base=element_variables_difference_max_absolute_max_out'
+      csvdiff = 'element_variables_difference_max_absolute_max_out_difference_0002.csv'
+
+      detail = 'the absolute maximum involving the difference between absolute values.'
+    []
+  []
 []

@@ -3,5 +3,9 @@
     type = 'CSVDiff'
     input = 'histogram_vector_postprocessor.i'
     csvdiff = 'histogram_vector_postprocessor_out_histo_0001.csv'
+
+    issues = '#11218'
+    design = 'HistogramVectorPostprocessor.md'
+    requirement = 'The system shall be able to compute a histogram of each vector of data produced by a vector data producer (VectorPostprocessor).'
   [../]
 []

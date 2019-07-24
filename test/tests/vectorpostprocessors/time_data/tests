@@ -3,5 +3,9 @@
     type = CSVDiff
     input = time_data.i
     csvdiff = 'time_data_out_line_sample_time.csv'
+
+    issues = '#6618'
+    design = 'syntax/VectorPostprocessors/index.md'
+    requirement = 'The system shall support the ability to output a separate comma separated value file containing time and time time information corresponding to vector Postprocessor output.'
   [../]
 []

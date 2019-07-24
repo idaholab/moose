@@ -84,6 +84,10 @@ params.set<bool>("_is_broadcast") = true;
 
 This tells MOOSE that the data is already replicated and there is no need to broadcast it if another object is asking for it to be broadcast.
 
+## TimeData
+
+The `time_data` parameter produces an additional CSV file containing just the real time and the corresponding time step for any VectorPostprocessor output information. This file may be useful in producing animations or your simulation results.
+
 # VectorPostprocessor List
 
 !syntax list /VectorPostprocessors objects=True actions=False subsystems=False

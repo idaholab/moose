@@ -1,13 +1,20 @@
 [Tests]
+  issues = '#3087'
+  design = 'PointValueSampler.md'
+
   [./test]
     type = 'CSVDiff'
     input = 'point_value_sampler.i'
     csvdiff = 'point_value_sampler_out_point_sample_0001.csv'
+
+    requirement = 'The system shall support the ability to sample field variables at user specified points.'
   [../]
 
   [./error]
-    type = RunException
-    input = not_found.i
+    type = 'RunException'
+    input = 'not_found.i'
     expect_err = "sample point not found"
+
+    requirement = 'The system shall report an error when requested sample points do not fall within the mesh domain.'
   [../]
 []

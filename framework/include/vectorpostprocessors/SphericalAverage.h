@@ -17,7 +17,7 @@ template <>
 InputParameters validParams<SphericalAverage>();
 
 /**
- * Compute a spherical average of a variableas a function of radius throughout the
+ * Compute a spherical average of a variable as a function of radius throughout the
  * simulation domain.
  */
 class SphericalAverage : public SpatialAverageBase
@@ -26,7 +26,6 @@ public:
   SphericalAverage(const InputParameters & parameters);
 
 protected:
-  /// compute the distance of the current quadarature point for binning
+  /// compute the distance of the current quadrature point for binning
   virtual Real computeDistance() override;
 };
-

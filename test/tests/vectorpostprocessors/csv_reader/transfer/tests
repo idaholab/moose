@@ -6,5 +6,9 @@
     type = RunException
     input = master.i
     expect_err = 'data does not satisfy the Spatial UserObject interface!'
+
+    issues = '#9860'
+    design = 'CSVReader.md'
+    requirement = 'The system shall issue an error if the CSVReader is used in a UserObjectTransfer because the former does not have any notion of "spatial" information.'
   [../]
 []

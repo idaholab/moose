@@ -1,8 +1,13 @@
 [Tests]
+  issues = '#9167'
+  design = 'CSVReader.md'
+
   [./read]
     type = CSVDiff
     input = read.i
     csvdiff = 'read_out_reader_0000.csv'
+
+    requirement = 'The system shall support the ability to read a comma separated file into an object and make it accessible through easy to use standard C++ containers.'
   [../]
   [./parallel]
     # Tests that data that CSV data that is read on processor 0 is broadcast to other ranks. This
@@ -12,6 +17,8 @@
     input = read.i
     cli_args = 'UserObjects/tester/rank=1 Outputs/csv=false'
     min_parallel = 2
+
+    requirement = 'The system shall support the ability to read CSV data on only one processor and broadcast it to other ranks.'
   [../]
   [./tester_fail]
     type = RunException
@@ -19,5 +26,7 @@
     cli_args = "UserObjects/tester/rank=1 UserObjects/tester/gold='1 2 3' Outputs/csv=false"
     min_parallel = 2
     expect_err = "The supplied gold data does not match the VPP data on the given rank."
+
+    requirement = 'The system shall error if the broadcast CSV data does not match on all ranks in a parallel job.'
   [../]
 []

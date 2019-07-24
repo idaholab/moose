@@ -18,9 +18,9 @@ validParams<TestCSVReader>()
   InputParameters params = validParams<GeneralUserObject>();
 
   params.addRequiredParam<VectorPostprocessorName>("vectorpostprocessor",
-                                                   "The vector posptorcessor to examine.");
+                                                   "The vector postprocessor to examine.");
   params.addRequiredParam<std::string>("vector",
-                                       "The vector to consider from the VectorPosptorcessor.");
+                                       "The vector to consider from the VectorPostprocessor.");
   params.addRequiredParam<processor_id_type>("rank", "The CPU rank to compare.");
   params.addRequiredParam<std::vector<double>>("gold", "The data to compare against.");
 
