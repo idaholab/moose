@@ -31,23 +31,6 @@ SinglePhaseFluidProperties::e_from_p_T(Real p, Real T) const
   return e_from_p_rho(p, rho);
 }
 
-DualReal
-SinglePhaseFluidProperties::e_from_p_T(const DualReal & p, const DualReal & T) const
-{
-  Real e = 0.0;
-  Real pressure = p.value();
-  Real temperature = T.value();
-  Real de_dp = 0.0;
-  Real de_dT = 0.0;
-  e_from_p_T(pressure, temperature, e, de_dp, de_dT);
-
-  DualReal result = e;
-  for (size_t i = 0; i < p.derivatives().size(); ++i)
-    result.derivatives()[i] = p.derivatives()[i] * de_dp + T.derivatives()[i] * de_dT;
-
-  return result;
-}
-
 void
 SinglePhaseFluidProperties::e_from_p_T(Real p, Real T, Real & e, Real & de_dp, Real & de_dT) const
 {
@@ -73,22 +56,6 @@ SinglePhaseFluidProperties::v_from_p_T(Real p, Real T) const
   return 1.0 / rho;
 }
 
-DualReal
-SinglePhaseFluidProperties::v_from_p_T(const DualReal & p, const DualReal & T) const
-{
-  Real rawv = 0;
-  Real rawp = p.value();
-  Real rawT = T.value();
-  Real dvdp = 0;
-  Real dvdT = 0;
-  v_from_p_T(rawp, rawT, rawv, dvdp, dvdT);
-
-  DualReal result = rawv;
-  for (size_t i = 0; i < p.derivatives().size(); i++)
-    result.derivatives()[i] = p.derivatives()[i] * dvdp + T.derivatives()[i] * dvdT;
-  return result;
-}
-
 void
 SinglePhaseFluidProperties::v_from_p_T(Real p, Real T, Real & v, Real & dv_dp, Real & dv_dT) const
 {
@@ -106,23 +73,6 @@ void
 SinglePhaseFluidProperties::beta_from_p_T(Real, Real, Real &, Real &, Real &) const
 {
   mooseError(name(), ": ", __PRETTY_FUNCTION__, " is not implemented.");
-}
-
-DualReal
-SinglePhaseFluidProperties::beta_from_p_T(const DualReal & p, const DualReal & T) const
-{
-  Real beta = 0.0;
-  Real pressure = p.value();
-  Real temperature = T.value();
-  Real dbeta_dp = 0.0;
-  Real dbeta_dT = 0.0;
-  beta_from_p_T(pressure, temperature, beta, dbeta_dp, dbeta_dT);
-
-  DualReal result = beta;
-  for (size_t i = 0; i < p.derivatives().size(); ++i)
-    result.derivatives()[i] = p.derivatives()[i] * dbeta_dp + T.derivatives()[i] * dbeta_dT;
-
-  return result;
 }
 
 Real
@@ -143,7 +93,7 @@ SinglePhaseFluidProperties::beta_from_p_T(Real p, Real T) const
 Real
 SinglePhaseFluidProperties::molarMass() const
 {
-  mooseError(name(), ": molarMass is not implemented");
+  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
 }
 
 std::string
@@ -155,37 +105,37 @@ SinglePhaseFluidProperties::fluidName() const
 Real
 SinglePhaseFluidProperties::criticalPressure() const
 {
-  mooseError(name(), ": criticalPressure() is not implemented");
+  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
 }
 
 Real
 SinglePhaseFluidProperties::criticalTemperature() const
 {
-  mooseError(name(), ": criticalTemperature() is not implemented");
+  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
 }
 
 Real
 SinglePhaseFluidProperties::criticalDensity() const
 {
-  mooseError(name(), ": criticalDensity() is not implemented");
+  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
 }
 
 Real
 SinglePhaseFluidProperties::criticalInternalEnergy() const
 {
-  mooseError(name(), ": criticalInternalEnergy() is not implemented");
+  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
 }
 
 Real
 SinglePhaseFluidProperties::triplePointPressure() const
 {
-  mooseError(name(), ": triplePointPressure() is not implemented");
+  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
 }
 
 Real
 SinglePhaseFluidProperties::triplePointTemperature() const
 {
-  mooseError(name(), ": triplePointTemperature() is not implemented");
+  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
 }
 
 Real
@@ -194,10 +144,32 @@ SinglePhaseFluidProperties::gamma_from_v_e(Real v, Real e) const
   return cp_from_v_e(v, e) / cv_from_v_e(v, e);
 }
 
+void
+SinglePhaseFluidProperties::gamma_from_v_e(
+    Real v, Real e, Real & gamma, Real & dgamma_dv, Real & dgamma_de) const
+{
+  fluidPropError(name(), ": ", __PRETTY_FUNCTION__, " derivatives not implemented.");
+
+  dgamma_dv = 0.0;
+  dgamma_de = 0.0;
+  gamma = gamma_from_v_e(v, e);
+}
+
 Real
 SinglePhaseFluidProperties::gamma_from_p_T(Real p, Real T) const
 {
   return cp_from_p_T(p, T) / cv_from_p_T(p, T);
+}
+
+void
+SinglePhaseFluidProperties::gamma_from_p_T(
+    Real p, Real T, Real & gamma, Real & dgamma_dp, Real & dgamma_dT) const
+{
+  fluidPropError(name(), ": ", __PRETTY_FUNCTION__, " derivatives not implemented.");
+
+  dgamma_dp = 0.0;
+  dgamma_dT = 0.0;
+  gamma = gamma_from_p_T(p, T);
 }
 
 Real
@@ -261,18 +233,18 @@ SinglePhaseFluidProperties::henryConstantIAPWS(
 
 Real SinglePhaseFluidProperties::henryConstant(Real) const
 {
-  mooseError(name(), ": henryConstant() is not implemented");
+  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
 }
 
 void
 SinglePhaseFluidProperties::henryConstant(Real, Real &, Real &) const
 {
-  mooseError(name(), ": henryConstant() is not implemented");
+  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
 }
 
 Real SinglePhaseFluidProperties::vaporPressure(Real) const
 {
-  mooseError(name(), ": vaporPressure() is not implemented");
+  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
 }
 
 void
@@ -302,7 +274,7 @@ SinglePhaseFluidProperties::vaporPressure(const DualReal & T) const
 
 Real SinglePhaseFluidProperties::vaporTemperature(Real) const
 {
-  mooseError(name(), ": vaporTemperature() is not implemented");
+  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
 }
 
 void
@@ -394,21 +366,4 @@ SinglePhaseFluidProperties::T_from_p_h(Real p, Real h, Real & T, Real & dT_dp, R
   dT_dp = 0.0;
   dT_dh = 0.0;
   T = T_from_p_h(p, h);
-}
-
-DualReal
-SinglePhaseFluidProperties::T_from_p_h(const DualReal & p, const DualReal & h) const
-{
-  Real T = 0.0;
-  Real pressure = p.value();
-  Real enthalpy = h.value();
-  Real dT_dp = 0.0;
-  Real dT_dh = 0.0;
-  T_from_p_h(pressure, enthalpy, T, dT_dp, dT_dh);
-
-  DualReal result = T;
-  for (size_t i = 0; i < p.derivatives().size(); ++i)
-    result.derivatives()[i] = p.derivatives()[i] * dT_dp + h.derivatives()[i] * dT_dh;
-
-  return result;
 }
