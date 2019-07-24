@@ -26,7 +26,12 @@ InputParameters
 validParams<XFEMSingleVariableConstraint>()
 {
   InputParameters params = validParams<ElemElemConstraint>();
-  params.addParam<Real>("alpha", 100, "Stablization parameter in Nitsche's formulation.");
+  params.addParam<Real>("alpha",
+      100,
+      "Stabilization parameter in Nitsche's formulation and penalty factor "
+      "in the Penalty Method. In Nitsche's formulation this should be as "
+      "small as possible while the method is still stable; while in the "
+      "Penalty Method you want this to be quite large (e.g. 1e6).");
   params.addParam<Real>("jump", 0, "Jump at the interface.");
   params.addParam<FunctionName>("jump_flux",
                                 0,
@@ -38,7 +43,7 @@ validParams<XFEMSingleVariableConstraint>()
   params.addParam<bool>(
       "use_penalty",
       false,
-      "Use the Penalty instead of Nitsche (Nitsche only works for simple diffusion problem).");
+      "Use the Penalty instead of Nitsche (Nitsche only works for simple diffusion problems).");
   return params;
 }
 
