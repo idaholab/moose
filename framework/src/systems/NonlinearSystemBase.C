@@ -3037,22 +3037,6 @@ NonlinearSystemBase::checkKernelCoverage(const std::set<SubdomainID> & mesh_subd
 
   std::set<VariableName> variables(getVariableNames().begin(), getVariableNames().end());
 
-  // With moving MooseVariables to inherit from MooseObject, we can no longer give them duplicate
-  // names between reference and displaced problems. Consequently we append the "_displaced" string
-  // to displaced problem variables. We need to make sure we count kernels applied to the displaced
-  // variable version towards the coverage check
-  for (auto it = kernel_variables.begin(); it != kernel_variables.end(); ++it)
-  {
-    auto original_string = *it;
-    auto modified_string = *it;
-    removeSubstring(modified_string, "_displaced");
-    if (original_string != modified_string)
-    {
-      it = kernel_variables.erase(it);
-      it = kernel_variables.insert(it, modified_string);
-    }
-  }
-
   std::set<VariableName> difference;
   std::set_difference(variables.begin(),
                       variables.end(),

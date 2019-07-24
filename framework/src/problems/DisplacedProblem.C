@@ -45,11 +45,11 @@ DisplacedProblem::DisplacedProblem(const InputParameters & parameters)
     _displacements(getParam<std::vector<std::string>>("displacements")),
     _displaced_nl(*this,
                   _mproblem.getNonlinearSystemBase(),
-                  _mproblem.getNonlinearSystemBase().name() + "_displaced",
+                  _mproblem.getNonlinearSystemBase().name(),
                   Moose::VAR_NONLINEAR),
     _displaced_aux(*this,
                    _mproblem.getAuxiliarySystem(),
-                   _mproblem.getAuxiliarySystem().name() + "_displaced",
+                   _mproblem.getAuxiliarySystem().name(),
                    Moose::VAR_AUXILIARY),
     _geometric_search_data(_mproblem, _mesh),
     _eq_init_timer(registerTimedSection("eq::init", 2)),
@@ -314,9 +314,9 @@ DisplacedProblem::numMatrixTags() const
 bool
 DisplacedProblem::hasVariable(const std::string & var_name) const
 {
-  if (_displaced_nl.hasVariable(var_name + "_displaced"))
+  if (_displaced_nl.hasVariable(var_name))
     return true;
-  else if (_displaced_aux.hasVariable(var_name + "_displaced"))
+  else if (_displaced_aux.hasVariable(var_name))
     return true;
   else
     return false;
@@ -328,12 +328,8 @@ DisplacedProblem::getVariable(THREAD_ID tid,
                               Moose::VarKindType expected_var_type,
                               Moose::VarFieldType expected_var_field_type)
 {
-  return getVariableHelper(tid,
-                           var_name + "_displaced",
-                           expected_var_type,
-                           expected_var_field_type,
-                           _displaced_nl,
-                           _displaced_aux);
+  return getVariableHelper(
+      tid, var_name, expected_var_type, expected_var_field_type, _displaced_nl, _displaced_aux);
 }
 
 MooseVariable &
@@ -370,9 +366,9 @@ DisplacedProblem::getArrayVariable(THREAD_ID tid, const std::string & var_name)
 bool
 DisplacedProblem::hasScalarVariable(const std::string & var_name) const
 {
-  if (_displaced_nl.hasScalarVariable(var_name + "_displaced"))
+  if (_displaced_nl.hasScalarVariable(var_name))
     return true;
-  else if (_displaced_aux.hasScalarVariable(var_name + "_displaced"))
+  else if (_displaced_aux.hasScalarVariable(var_name))
     return true;
   else
     return false;

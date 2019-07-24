@@ -1883,7 +1883,7 @@ FEProblemBase::addVariable(const std::string & var_type,
   _nl->addVariable(var_type, var_name, params);
   if (_displaced_problem)
     // MooseObjects need to be unique so change the name here
-    _displaced_problem->addVariable(var_type, var_name + "_displaced", params);
+    _displaced_problem->addVariable(var_type, var_name, params);
 }
 
 void
@@ -2166,7 +2166,7 @@ FEProblemBase::addAuxVariable(const std::string & var_type,
   _aux->addVariable(var_type, var_name, params);
   if (_displaced_problem)
     // MooseObjects need to be unique so change the name here
-    _displaced_problem->addAuxVariable(var_type, var_name + "_displaced", params);
+    _displaced_problem->addAuxVariable(var_type, var_name, params);
 }
 
 void
