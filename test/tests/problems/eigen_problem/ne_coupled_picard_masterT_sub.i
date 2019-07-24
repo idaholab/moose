@@ -49,7 +49,6 @@
     variable = power
     source_variable = u
     normalization = unorm
-    # this coefficient will affect the eigenvalue.
     normal_factor = 10
     execute_on = timestep_end
   [../]
