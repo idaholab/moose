@@ -11,6 +11,7 @@
 
 // MOOSE Includes
 #include "FEProblemBase.h"
+#include "Eigenvalue.h"
 
 // Forward declarations
 class EigenProblem;
@@ -46,6 +47,8 @@ public:
   virtual void checkProblemIntegrity() override;
 #if LIBMESH_HAVE_SLEPC
   void setEigenproblemType(Moose::EigenProblemType eigen_problem_type);
+
+  virtual Real computeResidualL2Norm() override;
 
   /**
    * Form a Jacobian matrix for all kernels and BCs with a given tag
@@ -85,7 +88,7 @@ protected:
   unsigned int _n_eigen_pairs_required;
   bool _generalized_eigenvalue_problem;
   std::shared_ptr<NonlinearEigenSystem> _nl_eigen;
-
+  unsigned int _active_eigen_index;
   /// Timers
   PerfID _compute_jacobian_tag_timer;
   PerfID _compute_jacobian_ab_timer;
@@ -93,4 +96,3 @@ protected:
   PerfID _compute_residual_ab_timer;
   PerfID _solve_timer;
 };
-

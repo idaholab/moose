@@ -31,6 +31,16 @@ InputParameters
 validParams<EigenProblem>()
 {
   InputParameters params = validParams<FEProblemBase>();
+  params.addParam<unsigned int>(
+      "active_eigen_index", 0, "Which eigen vector is used to compute residual and also associateed to nonlinear variable");
+
+  // Grab parameters from eigenvalue excutioner
+#ifdef LIBMESH_HAVE_SLEPC
+  Moose::SlepcSupport::getSlepcValidParams(params);
+
+  params += Moose::SlepcSupport::getSlepcEigenProblemValidParams();
+#endif
+
   return params;
 }
 
@@ -40,6 +50,7 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
     _n_eigen_pairs_required(1),
     _generalized_eigenvalue_problem(false),
     _nl_eigen(std::make_shared<NonlinearEigenSystem>(*this, "eigen0")),
+    _active_eigen_index(getParam<unsigned int>("active_eigen_index")),
     _compute_jacobian_tag_timer(registerTimedSection("computeJacobianTag", 3)),
     _compute_jacobian_ab_timer(registerTimedSection("computeJacobianAB", 3)),
     _compute_residual_tag_timer(registerTimedSection("computeResidualTag", 3)),
@@ -56,6 +67,7 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
 
   _eq.parameters.set<EigenProblem *>("_eigen_problem") = this;
 
+  Moose::SlepcSupport::storeSlepcOptions(*this, parameters);
 #else
   mooseError("Need to install SLEPc to solve eigenvalue problems, please reconfigure\n");
 #endif /* LIBMESH_HAVE_SLEPC */
@@ -208,6 +220,25 @@ EigenProblem::computeResidualAB(const NumericVector<Number> & soln,
   _nl_eigen->disassociateVectorFromTag(residualB, tagB);
 }
 
+Real
+EigenProblem::computeResidualL2Norm()
+{
+  computeResidualAB(*_nl_eigen->currentSolution(), _nl_eigen->ResidualVectorAX(), _nl_eigen->ResidualVectorBX(), _nl_eigen->nonEigenVectorTag(), _nl_eigen->eigenVectorTag());
+
+  Real eigenvalue = 1.0;
+
+  if (_active_eigen_index<_nl_eigen->getNumConvergedEigenvalues())
+    eigenvalue = _nl_eigen->getNthConvergedEigenvalue(_active_eigen_index).first;
+
+  // Scale BX with eigenvalue
+  _nl_eigen->ResidualVectorBX() *= eigenvalue;
+
+  // Compute entire residual
+  _nl_eigen->ResidualVectorAX() -= _nl_eigen->ResidualVectorBX();
+
+  return _nl_eigen->ResidualVectorAX().l2_norm();
+}
+
 #endif
 
 void
@@ -220,6 +251,9 @@ EigenProblem::checkProblemIntegrity()
 void
 EigenProblem::solve()
 {
+#if LIBMESH_HAVE_SLEPC
+  Moose::SlepcSupport::slepcSetOptions(*this, _pars);
+#endif
   if (_solve)
   {
     TIME_SECTION(_solve_timer);

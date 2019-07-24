@@ -43,7 +43,7 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
 {
 // Extract and store SLEPc options
 #if LIBMESH_HAVE_SLEPC
-  Moose::SlepcSupport::storeSlepcOptions(_fe_problem, _pars);
+  Moose::SlepcSupport::storeSlepcOptions(_fe_problem, parameters);
 
   Moose::SlepcSupport::storeSlepcEigenProblemOptions(_eigen_problem, parameters);
   _eigen_problem.setEigenproblemType(_eigen_problem.solverParams()._eigen_problem_type);
@@ -56,6 +56,11 @@ Eigenvalue::execute()
 #if LIBMESH_HAVE_SLEPC
   // Make sure the SLEPc options are setup for this app
   Moose::SlepcSupport::slepcSetOptions(_eigen_problem, _pars);
+
+  PetscOptionsView(NULL,NULL);
 #endif
+
+  std::cout<<"Eigenvalue::execute()"<<std::endl;
+
   Steady::execute();
 }
