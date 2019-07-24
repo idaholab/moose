@@ -1,22 +1,37 @@
 [Tests]
-  [./toggle_mesh_adaptivity]
-    type = 'Exodiff'
-    input = 'toggle_mesh_adaptivity.i'
-    exodiff = 'toggle_mesh_adaptivity_out.e'
-  [../]
-  [./toggle_mesh_adaptivity_gaussian_ic]
-    type = 'Exodiff'
-    input = 'toggle_mesh_adaptivity_gaussian_ic.i'
-    exodiff = 'toggle_mesh_adaptivity_gaussian_ic_out.e'
-  [../]
-  [./toggle_mesh_adaptivity_gaussian_ic_stop_time]
-    type = 'Exodiff'
-    input = 'toggle_mesh_adaptivity_gaussian_ic_stop_time.i'
-    exodiff = 'toggle_mesh_adaptivity_gaussian_ic_stop_time_out.e'
-  [../]
-  [./toggle_mesh_adaptivity_wait]
-    type = 'Exodiff'
-    input = 'toggle_mesh_adaptivity_wait.i'
-    exodiff = 'toggle_mesh_adaptivity_wait_out.e-s002'
-  [../]
+  issues = '#9652 #9694'
+  design = 'syntax/Adaptivity/index.md'
+
+  [toggle_mesh_adaptivity]
+    requirement = 'The system shall support the ability to toggle mesh adaptivity:'
+
+    [toggle_mesh_adaptivity]
+      type = 'Exodiff'
+      input = 'toggle_mesh_adaptivity.i'
+      exodiff = 'toggle_mesh_adaptivity_out.e'
+
+      detail = 'off when it has been turned on in the input file,'
+    []
+    [toggle_mesh_adaptivity_gaussian_ic]
+      type = 'Exodiff'
+      input = 'toggle_mesh_adaptivity_gaussian_ic.i'
+      exodiff = 'toggle_mesh_adaptivity_gaussian_ic_out.e'
+
+      detail = 'off when we are using initial adaptivity in the input file,'
+    []
+    [toggle_mesh_adaptivity_gaussian_ic_stop_time]
+      type = 'Exodiff'
+      input = 'toggle_mesh_adaptivity_gaussian_ic_stop_time.i'
+      exodiff = 'toggle_mesh_adaptivity_gaussian_ic_stop_time_out.e'
+
+      detail = 'off after a specific time, or'
+    []
+    [toggle_mesh_adaptivity_wait]
+      type = 'Exodiff'
+      input = 'toggle_mesh_adaptivity_wait.i'
+      exodiff = 'toggle_mesh_adaptivity_wait_out.e-s002'
+
+      detail = 'off after some number of steps.'
+    []
+  []
 []

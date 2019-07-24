@@ -1,0 +1,11 @@
+[Tests]
+  [kernel_coupling]
+    type = 'Exodiff'
+    input = 'user_object_test.i'
+    exodiff = 'out.e'
+
+    issues = '#1405'
+    design = 'UserObjects/index.md'
+    requirement = 'The system shall support the use of data produced by a custom user object calculations within a kernel object.'
+  []
+[]

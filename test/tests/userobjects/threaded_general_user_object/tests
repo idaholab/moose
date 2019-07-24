@@ -1,81 +1,108 @@
 [Tests]
-  [./th1]
-    type = 'CSVDiff'
-    input = 'test.i'
-    cli_args = 'Outputs/file_base=th1'
-    min_threads = 1
-    max_threads = 1
-    csvdiff = 'th1.csv'
-    threading = '!pthreads'
-  [../]
+  design = 'ThreadedGeneralUserObject.md'
+  issues = '#11834'
 
-  [./th2]
-    type = 'CSVDiff'
-    input = 'test.i'
-    cli_args = 'Outputs/file_base=th2'
-    min_threads = 2
-    max_threads = 2
-    csvdiff = 'th2.csv'
-    threading = '!pthreads'
-  [../]
+  [thread_copies_guo]
 
-  [./th3]
-    type = 'CSVDiff'
-    input = 'test.i'
-    cli_args = 'Outputs/file_base=th3'
-    min_threads = 3
-    max_threads = 3
-    csvdiff = 'th3.csv'
-    threading = '!pthreads'
-  [../]
+    requirement = 'The system shall support creating n-thread copies of user-defined objects '
+                  '(GeneralUserObjects) for the purpose of running multiple related calculations '
+                  'simultaneously, avoiding thread locks during common look-up operations, where '
+                  'individual thread ids may be used to calculate a quantity based on the number of '
+                  'threads for:'
+    [th1]
+      type = 'CSVDiff'
+      input = 'test.i'
+      cli_args = 'Outputs/file_base=th1'
+      min_threads = 1
+      max_threads = 1
+      csvdiff = 'th1.csv'
+      threading = '!pthreads'
 
-  [./th4]
-    type = 'CSVDiff'
-    input = 'test.i'
-    cli_args = 'Outputs/file_base=th4'
-    min_threads = 4
-    max_threads = 4
-    csvdiff = 'th4.csv'
-    threading = '!pthreads'
-  [../]
+      detail = 'one thread,'
+    []
 
-  [./th5]
-    type = 'CSVDiff'
-    input = 'test.i'
-    cli_args = 'Outputs/file_base=th5'
-    min_threads = 5
-    max_threads = 5
-    csvdiff = 'th5.csv'
-    threading = '!pthreads'
-  [../]
+    [th2]
+      type = 'CSVDiff'
+      input = 'test.i'
+      cli_args = 'Outputs/file_base=th2'
+      min_threads = 2
+      max_threads = 2
+      csvdiff = 'th2.csv'
+      threading = '!pthreads'
 
-  [./th6]
-    type = 'CSVDiff'
-    input = 'test.i'
-    cli_args = 'Outputs/file_base=th6'
-    min_threads = 6
-    max_threads = 6
-    csvdiff = 'th6.csv'
-    threading = '!pthreads'
-  [../]
+      detail = 'two threads,'
+    []
 
-  [./th7]
-    type = 'CSVDiff'
-    input = 'test.i'
-    cli_args = 'Outputs/file_base=th7'
-    min_threads = 7
-    max_threads = 7
-    csvdiff = 'th7.csv'
-    threading = '!pthreads'
-  [../]
+    [th3]
+      type = 'CSVDiff'
+      input = 'test.i'
+      cli_args = 'Outputs/file_base=th3'
+      min_threads = 3
+      max_threads = 3
+      csvdiff = 'th3.csv'
+      threading = '!pthreads'
 
-  [./th8]
-    type = 'CSVDiff'
-    input = 'test.i'
-    cli_args = 'Outputs/file_base=th8'
-    min_threads = 8
-    max_threads = 8
-    csvdiff = 'th8.csv'
-    threading = '!pthreads'
-  [../]
+      detail = 'three threads,'
+    []
+
+    [th4]
+      type = 'CSVDiff'
+      input = 'test.i'
+      cli_args = 'Outputs/file_base=th4'
+      min_threads = 4
+      max_threads = 4
+      csvdiff = 'th4.csv'
+      threading = '!pthreads'
+
+      detail = 'four threads,'
+    []
+
+    [th5]
+      type = 'CSVDiff'
+      input = 'test.i'
+      cli_args = 'Outputs/file_base=th5'
+      min_threads = 5
+      max_threads = 5
+      csvdiff = 'th5.csv'
+      threading = '!pthreads'
+
+      detail = 'five threads,'
+    []
+
+    [th6]
+      type = 'CSVDiff'
+      input = 'test.i'
+      cli_args = 'Outputs/file_base=th6'
+      min_threads = 6
+      max_threads = 6
+      csvdiff = 'th6.csv'
+      threading = '!pthreads'
+
+      detail = 'six threads,'
+    []
+
+    [th7]
+      type = 'CSVDiff'
+      input = 'test.i'
+      cli_args = 'Outputs/file_base=th7'
+      min_threads = 7
+      max_threads = 7
+      csvdiff = 'th7.csv'
+      threading = '!pthreads'
+
+      detail = 'seven threads, and'
+    []
+
+    [th8]
+      type = 'CSVDiff'
+      input = 'test.i'
+      cli_args = 'Outputs/file_base=th8'
+      min_threads = 8
+      max_threads = 8
+      csvdiff = 'th8.csv'
+      threading = '!pthreads'
+
+      detail = 'eight threads.'
+    []
+  []
 []

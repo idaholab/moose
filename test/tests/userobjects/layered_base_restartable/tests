@@ -3,5 +3,9 @@
     type = 'Exodiff'
     input = 'layered_base_restartable.i'
     exodiff = 'layered_base_restartable_out.e'
+
+    issues = '#7570 #11711'
+    design = '/LayeredBase.md'
+    requirement = 'The system shall have the ability to maintain persistent generic user data stored in "layers" that may persist across invocations in the form of file data.'
   [../]
 []

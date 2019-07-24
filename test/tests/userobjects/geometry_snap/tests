@@ -3,5 +3,9 @@
     type = 'Exodiff'
     input = 'geometrysphere.i'
     exodiff = 'geometrysphere_out.e-s004'
+
+    design = 'GeometrySphere.md'
+    issues = '#9578'
+    requirement = 'The system shall support "snapping" or moving new nodes and sides created by mesh adaptivity to the surface of a geometric sphere to capture high fidelity features on curved geometries.'
   [../]
 []

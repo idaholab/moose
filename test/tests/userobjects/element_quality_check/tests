@@ -1,19 +1,33 @@
 [Tests]
-  [./failure_warning]
-    type = 'RunException'
-    input = 'failure_warning.i'
-    expect_err = "List of failed element IDs: "
-  [../]
+  issues = '#10377'
+  design = 'ElementQualityChecker.md'
 
-  [./failure_error]
-    type = 'RunException'
-    input = 'failure_error.i'
-    expect_err = "List of failed element IDs: "
-  [../]
+  [quality_checks]
+    requirement = 'The system shall evaluate the quality of all the mesh elements and report'
+    [failure_warning]
+      type = 'RunApp'
+      input = 'failure_warning.i'
+      expect_out = "List of failed element IDs: "
+      allow_warnings = true
 
-  [./bypass_warning]
-    type = 'RunException'
-    input = 'bypass_warning.i'
-    expect_err = "Provided quality metric doesn't apply to following element type: "
-  [../]
+      detail = 'a warning when the "warning" option is selected,'
+    []
+
+    [failure_error]
+      type = 'RunException'
+      input = 'failure_error.i'
+      expect_err = "List of failed element IDs: "
+
+      detail = 'an error when the "error" option is selected, or'
+    []
+
+    [bypass_warning]
+      type = 'RunApp'
+      input = 'bypass_warning.i'
+      expect_out = "Provided quality metric doesn't apply to following element type:"
+      allow_warnings = true
+
+      detail = 'a message when the selected metric does not apply to the element type being examined.'
+    []
+  []
 []
