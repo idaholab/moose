@@ -361,9 +361,26 @@ SinglePhaseFluidProperties::T_from_p_h(Real p, Real h) const
 void
 SinglePhaseFluidProperties::T_from_p_h(Real p, Real h, Real & T, Real & dT_dp, Real & dT_dh) const
 {
-  fluidPropError(name(), ": ", __PRETTY_FUNCTION__, " derivatives not implemented.");
+  Real s, ds_dh, ds_dp;
+  s_from_h_p(h, p, s, ds_dh, ds_dp);
 
-  dT_dp = 0.0;
-  dT_dh = 0.0;
-  T = T_from_p_h(p, h);
+  Real rho, drho_dp_partial, drho_ds;
+  rho_from_p_s(p, s, rho, drho_dp_partial, drho_ds);
+  const Real drho_dp = drho_dp_partial + drho_ds * ds_dp;
+  const Real drho_dh = drho_ds * ds_dh;
+
+  const Real v = 1.0 / rho;
+  const Real dv_drho = -1.0 / (rho * rho);
+  const Real dv_dp = dv_drho * drho_dp;
+  const Real dv_dh = dv_drho * drho_dh;
+
+  Real e, de_dv, de_dh_partial;
+  e_from_v_h(v, h, e, de_dv, de_dh_partial);
+  const Real de_dp = de_dv * dv_dp;
+  const Real de_dh = de_dh_partial + de_dv * dv_dh;
+
+  Real dT_dv, dT_de;
+  T_from_v_e(v, e, T, dT_dv, dT_de);
+  dT_dp = dT_dv * dv_dp + dT_de * de_dp;
+  dT_dh = dT_dv * dv_dh + dT_de * de_dh;
 }
