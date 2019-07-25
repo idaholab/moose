@@ -1,26 +1,37 @@
 [tests]
-  [./boundary]
-    type = RunException
-    input = 'get_material_property_boundary_names.i'
-    expect_err = 'TEST PASSED: The retrieved names are the same as the names expected'
-    max_parallel = 1 # Expect error test
-  [../]
-  [./block]
-    type = RunException
-    input = 'get_material_property_block_names.i'
-    expect_err = 'TEST PASSED: The retrieved names are the same as the names expected'
-    max_parallel = 1 # Expect error test
-  [../]
-  [./any_boundary]
-    type = RunException
-    input = 'get_material_property_any_boundary_id.i'
-    expect_err = 'TEST PASSED: The retrieved names are the same as the names expected'
-    max_parallel = 1 # Expect error test
-  [../]
-  [./any_block]
-    type = RunException
-    input = 'get_material_property_any_block_id.i'
-    expect_err = 'TEST PASSED: The retrieved names are the same as the names expected'
-    max_parallel = 1 # Expect error test
-  [../]
+  issues = '#4420'
+  design = 'syntax/Materials/index.md'
+
+  [get_prop_names]
+    requirement = 'The system shall report the retrieval of material properties by names:'
+
+    [boundary]
+      type = RunException
+      input = 'get_material_property_boundary_names.i'
+      expect_err = 'TEST PASSED: The retrieved names are the same as the names expected'
+
+      detail = 'on boundaries,'
+    []
+    [block]
+      type = RunException
+      input = 'get_material_property_block_names.i'
+      expect_err = 'TEST PASSED: The retrieved names are the same as the names expected'
+
+      detail = 'on blocks,'
+    []
+    [any_boundary]
+      type = RunException
+      input = 'get_material_property_any_boundary_id.i'
+      expect_err = 'TEST PASSED: The retrieved names are the same as the names expected'
+
+      detail = 'on the all mesh boundaries, and'
+    []
+    [any_block]
+      type = RunException
+      input = 'get_material_property_any_block_id.i'
+      expect_err = 'TEST PASSED: The retrieved names are the same as the names expected'
+
+      detail = 'on the all mesh blocks.'
+    []
+  []
 []

@@ -11,5 +11,9 @@
     petsc_version = '>=3.5.0'
     petsc_version_release = true
     compiler = '!INTEL'
+
+    design = 'syntax/Materials/index.md'
+    issues = '#8444'
+    requirement = 'The system shall only compute material properties when they are needed (consumed by other objects).'
   [../]
 []

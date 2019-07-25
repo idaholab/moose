@@ -89,4 +89,5 @@
 [Outputs]
   file_base = out
   exodus = true
+  csv = true
 []

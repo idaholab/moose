@@ -1,14 +1,21 @@
 [Tests]
+  issues = '#1386 #6760'
+  design = 'syntax/Materials/index.md'
+
   [./var_coupling]
     type = 'Exodiff'
     input = 'var_coupling.i'
     exodiff = 'var_coupling_out.e'
     recover = false
+
+    requirement = 'The system shall only prepare or setup field variables on each element when they are used by a material object.'
   [../]
 
   [./var_stateful_coupling]
     type = 'Exodiff'
     input = 'var_stateful_coupling.i'
     exodiff = 'var_stateful_coupling_out.e'
+
+    requirement = 'The system shall support coupling in a nonlinear field variable for use in initializing stateful material properties.'
   [../]
 []
