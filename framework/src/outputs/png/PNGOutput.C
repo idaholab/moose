@@ -77,17 +77,15 @@ PNGOutput::makeMeshFunc()
 
   if (_problem_ptr->getAuxiliarySystem().hasVariable(_variable))
   {
-    variable_number =
-        _problem_ptr->getAuxiliarySystem().getVariable(processor_id(), _variable).number();
+    variable_number = _problem_ptr->getAuxiliarySystem().getVariable(0, _variable).number();
     _use_aux = true;
   }
 
   else if (_problem_ptr->getNonlinearSystem().hasVariable(_variable))
-    variable_number =
-        _problem_ptr->getNonlinearSystem().getVariable(processor_id(), _variable).number();
+    variable_number = _problem_ptr->getNonlinearSystem().getVariable(0, _variable).number();
 
   else
-    paramError(_variable);
+    paramError("variable", "This doesn't exist.");
 
   const std::vector<unsigned int> var_nums = {variable_number};
 
