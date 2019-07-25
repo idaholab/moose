@@ -35,7 +35,9 @@ validParams<ElementUOAux>()
 
 ElementUOAux::ElementUOAux(const InputParameters & params)
   : AuxKernel(params),
+    // doco-get-user-object-begin
     _elem_uo(getUserObject<ElementUOProvider>("element_user_object")),
+    // doco-get-user-object-end
     _field_name(isParamValid("field_name") ? getParam<std::string>("field_name") : "default"),
     _field_type(getParam<MooseEnum>("field_type"))
 {

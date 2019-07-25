@@ -778,6 +778,7 @@ protected:
    */
   virtual const VariableValue & coupledNodalDotDotOld(const std::string & var_name,
                                                       unsigned int comp = 0);
+  // coupled-dof-values-begin
   /**
    * Returns DoFs in the current solution vector of a coupled variable for the local element
    * @param var_name Name of coupled variable
@@ -804,6 +805,7 @@ protected:
    */
   virtual const VariableValue & coupledDofValuesOlder(const std::string & var_name,
                                                       unsigned int comp = 0);
+  // coupled-dof-values-end
 
   /**
    * Template method that returns _zero to RESIDUAL computing objects and _ad_zero to JACOBIAN

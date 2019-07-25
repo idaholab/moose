@@ -1,7 +1,10 @@
 [Tests]
+  design = 'AxisymmetricCenterlineAverageValue.md'
+  issues = '#7528'
   [./test]
     type = 'Exodiff'
     input = 'axisymmetric_centerline_average_value_test.i'
     exodiff = 'out.e'
+    requirement = 'The system shall compute the average value of a quantity along the axis of rotation in an axisymmetric coordinate system.'
   [../]
 []

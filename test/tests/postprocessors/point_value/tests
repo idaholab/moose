@@ -1,13 +1,21 @@
 [Tests]
+  design = 'PointValue.md'
+
   [./test]
     type = 'CSVDiff'
     input = 'point_value.i'
     csvdiff = 'point_value_out.csv'
+
+    issues = '#1776'
+    requirement = 'The system shall support the ability to sample a field variable value anywhere within the domain.'
   [../]
 
   [./error]
     type = 'RunException'
     input = 'point_value_error.i'
     expect_err = 'No element located at'
+
+    issues = '#3475'
+    requirement = 'The system shall report an error when a field variable sample location is outside of the domain.'
   [../]
 []

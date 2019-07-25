@@ -1,1 +1,9 @@
-!template load file=stubs/moose_object.md.template name=FunctionValuePostprocessor syntax=/Postprocessors/FunctionValuePostprocessor
+# FunctionValuePostprocessor
+
+!syntax description /Postprocessors/FunctionValuePostprocessor
+
+!syntax parameters /Postprocessors/FunctionValuePostprocessor
+
+!syntax inputs /Postprocessors/FunctionValuePostprocessor
+
+!syntax children /Postprocessors/FunctionValuePostprocessor

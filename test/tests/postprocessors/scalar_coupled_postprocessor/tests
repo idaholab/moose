@@ -1,7 +1,12 @@
 [Tests]
+  issues = '#7198'
+  design = 'syntax/Postprocessors/index.md'
+
   [./test]
     type = 'CSVDiff'
     input = 'scalar_coupled_postprocessor_test.i'
     csvdiff = 'scalar_coupled_postprocessor_test_out.csv'
+
+    requirement = 'The system shall support coupling in a scalar variable to the Postprocessing system for calculating values.'
   [../]
 []

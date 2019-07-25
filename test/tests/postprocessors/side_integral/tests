@@ -1,7 +1,11 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'side_integral_test.i'
     exodiff = 'out.e'
-  [../]
+
+    issues = '#1405'
+    design = 'SideIntegralVariablePostprocessor.md'
+    requirement = 'The system shall support computing the integral of a variable quantity over a side on the mesh.'
+  []
 []

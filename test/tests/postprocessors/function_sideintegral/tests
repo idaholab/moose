@@ -1,7 +1,12 @@
 [Tests]
+  issues = '#4799'
+  design = 'FunctionSideIntegral.md'
+
   [./function_sideintegral]
     type = 'CSVDiff'
     input = 'function_sideintegral.i'
     csvdiff = 'function_sideintegral.csv'
+
+    requirement = 'The system shall compute the integral of a function over a boundary.'
   [../]
 []

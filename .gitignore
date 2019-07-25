@@ -183,6 +183,9 @@ tmp_jit_*
 # Do not store ipython notebook checkpoints
 *-checkpoint.ipynb*
 
+# HIT
+framework/contrib/hit/hit
+
 # MooseDocs
 site
 python/MooseDocs/test/output

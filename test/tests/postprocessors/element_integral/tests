@@ -1,13 +1,24 @@
 [Tests]
-  [./test]
-    type = 'CSVDiff'
-    input = 'element_integral_test.i'
-    csvdiff = 'out.csv'
-  [../]
+  design = 'ElementIntegralVariablePostprocessor.md'
+  issues = '#1405'
 
-  [./block_test]
-    type = 'CSVDiff'
-    input = 'element_block_integral_test.i'
-    csvdiff = 'out_block.csv'
-  [../]
+  [element_integral]
+    requirement = 'The system shall compute the element integral of a variable'
+
+    [test]
+      type = 'CSVDiff'
+      input = 'element_integral_test.i'
+      csvdiff = 'out.csv'
+
+      detail = 'over the whole domain and'
+    []
+
+    [block_test]
+      type = 'CSVDiff'
+      input = 'element_block_integral_test.i'
+      csvdiff = 'out_block.csv'
+
+      detail = 'over a subset of the domain.'
+    []
+  []
 []

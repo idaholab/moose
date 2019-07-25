@@ -1,10 +1,24 @@
 [Tests]
   design = 'source/postprocessors/ElementAverageValue.md'
-  [./test]
-    type = 'CSVDiff'
-    input = 'element_average_value_test.i'
-    csvdiff = 'out.csv'
-    issues = ''
-    requirement = "The system shall contain a `Postprocessor` that computes the average value of a variable."
-  [../]
+  issues = '#2281'
+
+  [elem_average_value]
+    requirement = 'The system shall contain a "Postprocessor" that computes the average value of a variable'
+
+    [single_block]
+      type = 'CSVDiff'
+      input = 'element_average_value_test.i'
+      csvdiff = 'out.csv'
+
+      detail = 'one a single block and'
+    []
+
+    [test_elem_multi_block]
+      type = 'Exodiff'
+      input = 'elem_pps_multi_block_test.i'
+      exodiff = 'elem_pps_multi_block_test_out.e'
+
+      detail = 'on multiple blocks.'
+    []
+  []
 []

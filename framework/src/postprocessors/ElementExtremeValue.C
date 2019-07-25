@@ -30,6 +30,9 @@ validParams<ElementExtremeValue>()
                              "returns the maximum value. 'min' returns "
                              "the minimum value.");
 
+  params.addClassDescription(
+      "Finds either the min or max elemental value of a a variable over the domain.");
+
   return params;
 }
 
