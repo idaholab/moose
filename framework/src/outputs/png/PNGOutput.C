@@ -87,10 +87,7 @@ PNGOutput::makeMeshFunc()
         _problem_ptr->getNonlinearSystem().getVariable(processor_id(), _variable).number();
 
   else
-    paramError("The given input variable '",
-               _variable,
-               "' is not in the auxiliary nor nonlinear systems.\n",
-               "Please use a different variable name in the input file.");
+    paramError(_variable);
 
   const std::vector<unsigned int> var_nums = {variable_number};
 

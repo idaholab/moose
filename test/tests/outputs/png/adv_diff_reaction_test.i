@@ -117,6 +117,6 @@
     type = PNGOutput
     resolution = 25
     color = RWB
-    variable = 'u'
+    variable = 'phi'
   []
 []
