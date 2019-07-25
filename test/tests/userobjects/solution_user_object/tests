@@ -1,13 +1,20 @@
 [Tests]
+  issues = '#7244'
+  design = 'SolutionUserObject.md'
+
   [./discontinuous_value_solution_uo_p1]
     type = 'Exodiff'
     input = 'discontinuous_value_solution_uo_p1.i'
     exodiff = 'discontinuous_value_solution_uo_p1.e'
+
+    requirement = 'The system shall be capable of writing out a solution file with both continuous and discontinuous fields for the purpose of verifying that ability to read those solutions back into a new simulation.'
   [../]
   [./discontinuous_value_solution_uo_p2]
     type = 'CSVDiff'
     input = 'discontinuous_value_solution_uo_p2.i'
     csvdiff = 'discontinuous_value_solution_uo_p2.csv'
     prereq = discontinuous_value_solution_uo_p1
+
+    requirement = 'The system shall be capable of reading in field information and producing gradient values from both continuous and discontinuous fields.'
   [../]
 []

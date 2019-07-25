@@ -1,63 +1,83 @@
 [Tests]
-  [./shape_element_user_object]
+  issues = '#5913 #7980'
+  design = 'ShapeElementUserObject.md'
+
+  [shape_element_user_object]
     type = RunApp
     input = 'shape_element_user_object.i'
     recover = false
     allow_warnings = true
     max_threads = 1
-  [../]
 
-  [./simple_shape_element_uo]
-    type = PetscJacobianTester
-    input = 'simple_shape_element_uo_test.i'
-    #difference_tol = 5e-8
-    #ratio_tol = 1E-7
-    difference_tol = 1E10
-    recover = false
-    allow_warnings = true
-    max_threads = 1
-  [../]
+    requirement = 'The system shall support optionally initializing shape function data structures '
+                  'for use in custom algorithm (UserObject) calculations.'
+  []
 
-  [./jacobian_test1]
-    type = PetscJacobianTester
-    input = 'jacobian.i'
-    #difference_tol = 1.2e-8
-    #ratio_tol = 1E-7
-    difference_tol = 1E10
-    recover = false
-    allow_warnings = true
-    max_threads = 1
-  [../]
+  [shape_user_object]
+    requirement = 'The system shall compute the proper shape functions which can be used to verify '
+                  'Residual and Jacobian calculations'
+    [simple_shape_element_uo]
+      type = PetscJacobianTester
+      input = 'simple_shape_element_uo_test.i'
+      #difference_tol = 5e-8
+      #ratio_tol = 1E-7
+      difference_tol = 1E10
+      recover = false
+      allow_warnings = true
+      max_threads = 1
 
-  [./jacobian_test2]
-    type = PetscJacobianTester
-    input = 'jacobian_test.i'
-    #difference_tol = 1.2e-8
-    #ratio_tol = 1E-7
-    difference_tol = 1E10
-    recover = false
-    allow_warnings = true
-    max_threads = 1
-  [../]
+      detail = 'of a single variable,'
+    []
 
-  [./shape_side_uo_jac_test]
-    type = PetscJacobianTester
-    input = 'shape_side_uo_jac_test.i'
-    difference_tol = 1.3e-7
-    ratio_tol = 3e-8
-    recover = false
-    allow_warnings = true
-    # This tests sometimes reports an incorrect jacobian when run
-    # with multiple threads.
-    max_threads = 1
-    petsc_version = '>=3.5.0'
-  [../]
-  [./shape_side_uo_physics_test]
-    type = 'Exodiff'
-    input = 'shape_side_uo_physics_test.i'
-    exodiff = 'shape_side_uo_physics_test_out.e'
-    allow_warnings = true
-    recover = false
-    max_threads = 1
-  [../]
+    [jacobian_test1]
+      type = PetscJacobianTester
+      input = 'jacobian.i'
+      #difference_tol = 1.2e-8
+      #ratio_tol = 1E-7
+      difference_tol = 1E10
+      recover = false
+      allow_warnings = true
+      max_threads = 1
+
+      detail = 'of two coupled variables with explicit off-diagonals requested,'
+    []
+
+    [jacobian_test2]
+      type = PetscJacobianTester
+      input = 'jacobian_test.i'
+      #difference_tol = 1.2e-8
+      #ratio_tol = 1E-7
+      difference_tol = 1E10
+      recover = false
+      allow_warnings = true
+      max_threads = 1
+
+      detail = 'of two coupled variables with a full Jacobian matrix'
+    []
+
+    [shape_side_uo_jac_test]
+      type = PetscJacobianTester
+      input = 'shape_side_uo_jac_test.i'
+      difference_tol = 1.3e-7
+      ratio_tol = 3e-8
+      recover = false
+      allow_warnings = true
+      # This tests sometimes reports an incorrect jacobian when run
+      # with multiple threads.
+      max_threads = 1
+      petsc_version = '>=3.5.0'
+
+      detail = 'on the side of elements, and'
+    []
+    [shape_side_uo_physics_test]
+      type = 'Exodiff'
+      input = 'shape_side_uo_physics_test.i'
+      exodiff = 'shape_side_uo_physics_test_out.e'
+      allow_warnings = true
+      recover = false
+      max_threads = 1
+
+      detail = 'for a full physics test.'
+    []
+  []
 []

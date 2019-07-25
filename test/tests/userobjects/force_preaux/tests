@@ -1,7 +1,12 @@
 [Tests]
+  issues = '#10360'
+  design = '/GeneralUserObject.md'
+
   [./test_force_preaux]
     type = 'CSVDiff'
     input = 'force_preaux.i'
     csvdiff = 'force_preaux_out.csv'
+
+    requirement = 'The system shall support overriding the inter-system dependency resolution to allow for developers to decide when specific calculations should be forced into a specific order.'
   [../]
 []

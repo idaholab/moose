@@ -1,5 +1,5 @@
 # The following tests are designed to count how often the setup methods are called (initialSetup, etc.),
-# which requires that the threading be disabeled because the counts can differ.
+# which requires that the threading be disabled because the counts may differ.
 #
 # GeneralUserObject must also be restricted for a certain MPI because
 # their methods will be called on each processor, since they are not
@@ -11,40 +11,56 @@
 # partitioning assigns local elements.  We'll just run them all in
 # serial.
 [Tests]
-  [./GeneralUserObject]
-    type = CSVDiff
-    input = general.i
-    csvdiff = general_out.csv
-    max_threads = 1
-    min_parallel = 2
-    max_parallel = 2
-  [../]
-  [./ElementUserObject]
-    type = CSVDiff
-    input = element.i
-    csvdiff = element_out.csv
-    max_threads = 1
-    max_parallel = 1
-  [../]
-  [./SideUserObject]
-    type = CSVDiff
-    input = side.i
-    csvdiff = side_out.csv
-    max_threads = 1
-    max_parallel = 1
-  [../]
-  [./InternalSideUserObject]
-    type = CSVDiff
-    input = internal_side.i
-    csvdiff = internal_side_out.csv
-    max_threads = 1
-    max_parallel = 1
-  [../]
-  [./NodalSideUserObject]
-    type = CSVDiff
-    input = nodal.i
-    csvdiff = nodal_out.csv
-    max_threads = 1
-    max_parallel = 1
-  [../]
+  [setup_interface_count]
+    design = '/SetupInterface.md'
+    issues = '#5680 #9422'
+    requirement = 'The system shall execute objects associated with mesh entities corresponding to the number of times those objects appear:'
+
+    [GeneralUserObject]
+      type = CSVDiff
+      input = general.i
+      csvdiff = general_out.csv
+      max_threads = 1
+      min_parallel = 2
+      max_parallel = 2
+
+      detail = 'once for general user objects,'
+    []
+    [ElementUserObject]
+      type = CSVDiff
+      input = element.i
+      csvdiff = element_out.csv
+      max_threads = 1
+      max_parallel = 1
+
+      detail = 'for each element,'
+    []
+    [SideUserObject]
+      type = CSVDiff
+      input = side.i
+      csvdiff = side_out.csv
+      max_threads = 1
+      max_parallel = 1
+
+      detail = 'for each side,'
+    []
+    [InternalSideUserObject]
+      type = CSVDiff
+      input = internal_side.i
+      csvdiff = internal_side_out.csv
+      max_threads = 1
+      max_parallel = 1
+
+      detail = 'for each internal side, and'
+    []
+    [NodalSideUserObject]
+      type = CSVDiff
+      input = nodal.i
+      csvdiff = nodal_out.csv
+      max_threads = 1
+      max_parallel = 1
+
+      detail = 'for each node.'
+    []
+  []
 []

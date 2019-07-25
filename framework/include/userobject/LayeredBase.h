@@ -33,7 +33,7 @@ template <>
 InputParameters validParams<LayeredBase>();
 
 /**
- * This UserObject (????? this isn't a userobject) computes volume integrals of a variable storing
+ * This base class computes volume integrals of a variable storing
  * partial sums for the specified number of intervals in a direction
  * (x,y,z).
  */
@@ -134,4 +134,3 @@ private:
   /// List of SubdomainIDs, if given
   std::vector<SubdomainID> _layer_bounding_blocks;
 };
-
