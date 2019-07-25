@@ -53,6 +53,8 @@ validParams<FEProblemSolve>()
   params += Moose::PetscSupport::getPetscValidParams();
 #endif // LIBMESH_HAVE_PETSC
   params.addParam<Real>("l_tol", 1.0e-5, "Linear Tolerance");
+  params.addDeprecatedParam<Real>(
+      "l_abs_step_tol", -1, "Linear Absolute Step Tolerance", "Please use l_abs_tol instead");
   params.addParam<Real>("l_abs_tol", 1.0e-50, "Linear Absolute Tolerance");
   params.addParam<unsigned int>("l_max_its", 10000, "Max Linear Iterations");
   params.addParam<unsigned int>("nl_max_its", 50, "Max Nonlinear Iterations");
@@ -77,7 +79,7 @@ validParams<FEProblemSolve>()
       "through an extra Jacobian evaluation. If this is set to false, then the scaling factors "
       "will be computed during an extra Jacobian evaluation at the beginning of every time step.");
 
-  params.addParamNamesToGroup("l_tol l_abs_tol l_max_its nl_max_its nl_max_funcs "
+  params.addParamNamesToGroup("l_tol l_abs_tol l_abs_step_tol l_max_its nl_max_its nl_max_funcs "
                               "nl_abs_tol nl_rel_tol nl_abs_step_tol nl_rel_step_tol "
                               "snesmf_reuse_base compute_initial_residual_before_preset_bcs",
                               "Solver");
