@@ -2031,11 +2031,6 @@ MooseMesh::buildMeshBaseObject(ParallelType override_type)
                  "running with a DistributedMesh");
 
     mesh = libmesh_make_unique<DistributedMesh>(_communicator, dim);
-    if (_partitioner_name != "default" && _partitioner_name != "parmetis")
-    {
-      _partitioner_name = "parmetis";
-      _partitioner_overridden = true;
-    }
   }
   else
   {
