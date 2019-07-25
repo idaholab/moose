@@ -1,12 +1,22 @@
 [Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'internal_side_user_object.i'
-    exodiff = 'internal_side_user_object_out.e'
-  [../]
-  [./get_neighbor_test]
-    type = 'Exodiff'
-    input = 'internal_side_user_object_two_materials.i'
-    exodiff = 'internal_side_user_object_two_materials_out.e'
-  [../]
+  issues = '#1859 #3961'
+  design = 'InternalSideUserObject.md'
+
+  [internal_side]
+    requirement = 'The system shall support executing custom algorithms on all internal sides of the mesh where properties retrieved on that side come from:'
+    [test]
+      type = 'Exodiff'
+      input = 'internal_side_user_object.i'
+      exodiff = 'internal_side_user_object_out.e'
+
+      detail = 'the same subdomain, or'
+    []
+    [get_neighbor_test]
+      type = 'Exodiff'
+      input = 'internal_side_user_object_two_materials.i'
+      exodiff = 'internal_side_user_object_two_materials_out.e'
+
+      detail = 'different subdomains.'
+    []
+  []
 []

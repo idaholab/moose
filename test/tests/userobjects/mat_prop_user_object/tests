@@ -1,7 +1,12 @@
 [Tests]
+  issues = '#1656'
+  design = 'Materials/index.md'
+
   [./test]
     type = 'Exodiff'
     input = 'mat_prop_user_object.i'
     exodiff = 'uo_material.e'
+
+    requirement = 'The system shall support late binding of material properties to other objects so that those objects may be created first, or material property retrieval may be delayed until the system is initialized.'
   [../]
 []
