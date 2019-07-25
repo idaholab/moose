@@ -92,6 +92,7 @@ public:
   virtual void p_from_h_s(Real h, Real s, Real & p, Real & dp_dh, Real & dp_ds) const override;
   virtual Real g_from_v_e(Real v, Real e) const override;
   virtual Real T_from_p_h(Real p, Real h) const override;
+  virtual void T_from_p_h(Real p, Real h, Real & T, Real & dT_dp, Real & dT_dh) const override;
   virtual Real cv_from_p_T(Real p, Real T) const override;
   virtual void cv_from_p_T(Real p, Real T, Real & cv, Real & dcv_dp, Real & dcv_dT) const override;
   virtual Real cp_from_p_T(Real p, Real T) const override;
