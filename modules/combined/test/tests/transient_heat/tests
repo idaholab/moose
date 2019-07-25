@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#7759'
+  design = 'SpecificHeatConductionTimeDerivative.md'
   [./test]
     type = 'Exodiff'
-    input = 'transient_heat_test.i'
-    exodiff = 'out.e'
+    input = 'transient_heat.i'
+    exodiff = 'transient_heat_out.e'
+    requirement = 'The system shall compute the time derivative term of the heat equation'
   [../]
 []

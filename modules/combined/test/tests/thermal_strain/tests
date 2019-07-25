@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#6848'
+  design = 'ComputeThermalExpansionEigenstrain.md'
   [./thermal_strain_test]
     type = 'Exodiff'
     input = 'thermal_strain.i'
@@ -6,6 +8,7 @@
     abs_zero = 1e-07
     scale_refine = 1
     max_parallel = 1
+    requirement = 'The system shall compute uniform thermal strain for a uniform change in temperature'
   [../]
 
   [./thermal_strain_test_sm]
@@ -17,5 +20,6 @@
     scale_refine = 1
     max_parallel = 1
     prereq = 'thermal_strain_test'
+    requirement = 'The system shall compute uniform thermal strain for a uniform change in temperature in the solid_mechanics module'
   [../]
 []
