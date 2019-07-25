@@ -15,6 +15,7 @@
 #include "AddVariableAction.h"
 #include "Conversion.h"
 #include "DirichletBC.h"
+#include "AddVariableAction.h"
 
 #include <sstream>
 #include <stdexcept>
@@ -37,18 +38,27 @@ template <>
 InputParameters
 validParams<AddLotsOfDiffusion>()
 {
-  MooseEnum families(AddVariableAction::getNonlinearVariableFamilies());
-  MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
+  InputParameters params = validParams<Action>();
 
-  InputParameters params = validParams<AddVariableAction>();
+  MooseEnum order(
+      "CONSTANT FIRST SECOND THIRD FOURTH FIFTH SIXTH SEVENTH EIGHTH NINTH", "FIRST", true);
+  params.addParam<MooseEnum>("order",
+                             order,
+                             "Order of the FE shape function to use for this variable (additional "
+                             "orders not listed here are allowed, depending on the family).");
+
+  MooseEnum family("LAGRANGE MONOMIAL HERMITE SCALAR HIERARCHIC CLOUGH XYZ SZABAB BERNSTEIN "
+                   "L2_LAGRANGE L2_HIERARCHIC NEDELEC_ONE LAGRANGE_VEC",
+                   "LAGRANGE");
+  params.addParam<MooseEnum>(
+      "family", family, "Specifies the family of FE shape functions to use for this variable.");
+
   params.addRequiredParam<unsigned int>("number", "The number of variables to add");
 
   return params;
 }
 
-AddLotsOfDiffusion::AddLotsOfDiffusion(const InputParameters & params) : AddVariableAction(params)
-{
-}
+AddLotsOfDiffusion::AddLotsOfDiffusion(const InputParameters & params) : Action(params) {}
 
 void
 AddLotsOfDiffusion::act()
@@ -57,10 +67,17 @@ AddLotsOfDiffusion::act()
 
   if (_current_task == "add_variable")
   {
+    auto fe_type = AddVariableAction::feType(_pars);
+    auto type = AddVariableAction::determineType(fe_type, 1);
+    auto var_params = _factory.getValidParams(type);
+
+    var_params.set<MooseEnum>("family") = getParam<MooseEnum>("family");
+    var_params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
+
     for (unsigned int cur_num = 0; cur_num < number; cur_num++)
     {
       std::string var_name = name() + Moose::stringify(cur_num);
-      addVariable(var_name);
+      _problem->addVariable(type, var_name, var_params);
     }
   }
   else if (_current_task == "add_kernel")

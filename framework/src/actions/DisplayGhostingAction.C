@@ -50,13 +50,16 @@ DisplayGhostingAction::act()
 
   if (_current_task == "add_aux_variable")
   {
-    FEType fe_type(CONSTANT, MONOMIAL);
+    auto params = _factory.getValidParams("MooseVariableConstMonomial");
+    params.set<MooseEnum>("order") = "CONSTANT";
+    params.set<MooseEnum>("family") = "MONOMIAL";
 
     for (unsigned int i = 0; i < 2; ++i)
     {
       std::string var_name_base = (i == 0 ? "geometric" : "algebraic");
       for (decltype(n_procs) proc_id = 0; proc_id < n_procs; ++proc_id)
-        _problem->addAuxVariable(var_name_base + std::to_string(proc_id), fe_type);
+        _problem->addAuxVariable(
+            "MooseVariableConstMonomial", var_name_base + std::to_string(proc_id), params);
     }
   }
   else if (_current_task == "add_aux_kernel")

@@ -44,6 +44,16 @@ public:
    */
   static MooseEnum getNonlinearVariableOrders();
 
+  /**
+   * determine the FEType by examining family and order in the provided parameters
+   */
+  static FEType feType(const InputParameters & params);
+
+  /**
+   * determine the variable type given an FEType and number of components
+   */
+  static std::string determineType(const FEType & fe_type, unsigned int components);
+
 protected:
   /**
    * Initialize the action's member variables

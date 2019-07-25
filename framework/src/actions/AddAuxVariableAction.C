@@ -39,6 +39,12 @@ AddAuxVariableAction::init()
 {
   AddVariableAction::init();
 
+  if (_fe_type.order > NINTH && !_scalar_var)
+    mooseError("Non-scalar AuxVariables must be CONSTANT, FIRST, SECOND, THIRD, FOURTH, FIFTH, "
+               "SIXTH, SEVENTH, EIGHTH or NINTH order (",
+               _fe_type.order,
+               " supplied)");
+
   // Need static_cast to resolve overloads
   _problem_add_var_method = static_cast<void (FEProblemBase::*)(
       const std::string &, const std::string &, InputParameters &)>(&FEProblemBase::addAuxVariable);

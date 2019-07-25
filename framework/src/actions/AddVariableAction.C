@@ -60,6 +60,13 @@ AddVariableAction::getNonlinearVariableOrders()
   return MooseEnum("CONSTANT FIRST SECOND THIRD FOURTH", "FIRST", true);
 }
 
+FEType
+AddVariableAction::feType(const InputParameters & params)
+{
+  return {Utility::string_to_enum<Order>(params.get<MooseEnum>("order")),
+          Utility::string_to_enum<FEFamily>(params.get<MooseEnum>("family"))};
+}
+
 void
 AddVariableAction::init()
 {
@@ -67,8 +74,7 @@ AddVariableAction::init()
   if (_components == 0)
     mooseError("There must be at least one variable component, but somehow 0 has been specified");
 
-  _fe_type = FEType(Utility::string_to_enum<Order>(_moose_object_pars.get<MooseEnum>("order")),
-                    Utility::string_to_enum<FEFamily>(_moose_object_pars.get<MooseEnum>("family")));
+  _fe_type = feType(_moose_object_pars);
 
   _scalar_var = _fe_type.family == SCALAR;
 
@@ -137,34 +143,37 @@ AddVariableAction::createInitialConditionAction()
   _awh.addActionBlock(action);
 }
 
+std::string
+AddVariableAction::determineType(const FEType & fe_type, unsigned int components)
+{
+  if (components > 1)
+  {
+    if (fe_type.family == LAGRANGE_VEC || fe_type.family == NEDELEC_ONE)
+      mooseError("Vector finite element families do not currently have ArrayVariable support");
+    else
+      return "ArrayMooseVariable";
+  }
+  else if (fe_type == FEType(0, MONOMIAL))
+    return "MooseVariableConstMonomial";
+  else if (fe_type.family == SCALAR)
+    return "MooseVariableScalar";
+  else if (fe_type.family == LAGRANGE_VEC || fe_type.family == NEDELEC_ONE)
+    return "VectorMooseVariable";
+  else
+    return "MooseVariable";
+}
+
 void
 AddVariableAction::addVariable(const std::string & var_name)
 {
   // Compare sizes of scaling_factor and components for Array Variables
   const auto & scale_factor = _moose_object_pars.isParamValid("scaling")
-                                  ? getParam<std::vector<Real>>("scaling")
+                                  ? _moose_object_pars.get<std::vector<Real>>("scaling")
                                   : std::vector<Real>(_components, 1);
   if (scale_factor.size() != _components)
     mooseError("Size of 'scaling' is not consistent");
 
-  if (_fe_type == FEType(0, MONOMIAL))
-    _type = "MooseVariableConstMonomial";
-  else if (_fe_type.family == SCALAR)
-    _type = "MooseVariableScalar";
-  else if (_fe_type.family == LAGRANGE_VEC || _fe_type.family == NEDELEC_ONE)
-  {
-    if (_components > 1)
-      mooseError("Vector finite element families do not currently have ArrayVariable support");
-    else
-      _type = "VectorMooseVariable";
-  }
-  else
-  {
-    if (_components > 1)
-      _type = "ArrayMooseVariable";
-    else
-      _type = "MooseVariable";
-  }
+  _type = determineType(_fe_type, _components);
 
   _problem_add_var_method(*_problem, _type, _name, _moose_object_pars);
 

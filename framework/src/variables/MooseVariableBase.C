@@ -81,14 +81,15 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
     _mesh(_subproblem.mesh()),
     _tid(getParam<THREAD_ID>("tid")),
     _count(getParam<unsigned int>("components")),
-    _scaling_factor(std::vector<Real>(_count, 1.))
+    _scaling_factor(isParamValid("scaling") ? getParam<std::vector<Real>>("scaling")
+                                            : std::vector<Real>(_count, 1.))
 {
   if (_count > 1)
   {
     auto name0 = _sys.system().variable(_var_num).name();
     std::size_t found = name0.find_last_of("_");
     if (found == std::string::npos)
-      mooseError("");
+      mooseError("Error creating ArrayMooseVariable name with base name ", name0);
     _var_name = name0.substr(0, found);
   }
   else

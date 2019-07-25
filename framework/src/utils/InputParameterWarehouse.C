@@ -34,20 +34,18 @@ InputParameterWarehouse::addInputParameters(const std::string & name,
   // determining the uniqueness of the name
   MooseObjectName unique_name(base, name, "::");
 
-  // Check that the Parameters do not already exist
-  auto it = _input_parameters[tid].find(unique_name);
-  if (it != _input_parameters[tid].end())
-  {
-    // We require duplicates of MooseVariableBase for displaced problems
-    if (base == "MooseVariableBase")
-      return *it->second;
-    else
-      mooseError("A '",
-                 unique_name.tag(),
-                 "' object already exists with the name '",
-                 unique_name.name(),
-                 "'.\n");
-  }
+  // Check that the Parameters do not already exist. We allow duplicate unique_names for
+  // MooseVariableBase objects because we require duplication of the variable for reference and
+  // displaced problems. We must also have std::pair(reference_var, reference_params) AND
+  // std::pair(displaced_var, displaced_params) elements because the two vars will have different
+  // values for _sys. It's a good thing we are using a multi-map as our underlying storage
+  if (_input_parameters[tid].find(unique_name) != _input_parameters[tid].end() &&
+      base != "MooseVariableBase")
+    mooseError("A '",
+               unique_name.tag(),
+               "' object already exists with the name '",
+               unique_name.name(),
+               "'.\n");
 
   // Store the parameters according to the base name
   _input_parameters[tid].insert(

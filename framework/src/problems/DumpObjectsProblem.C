@@ -41,43 +41,21 @@ DumpObjectsProblem::DumpObjectsProblem(const InputParameters & parameters)
 }
 
 void
-DumpObjectsProblem::addVariable(const std::string & var_name,
-                                const FEType & type,
-                                Real scale_factor,
-                                const std::set<SubdomainID> * const active_subdomains)
+DumpObjectsProblem::addVariable(const std::string & var_type,
+                                const std::string & var_name,
+                                InputParameters & params)
 {
-  dumpVariableHelper(
-      "Variables", var_name, type.family, type.order, scale_factor, active_subdomains);
-  FEProblemBase::addVariable(var_name, type, scale_factor, active_subdomains);
+  dumpObjectHelper("Variables", var_type, var_name, params);
+  FEProblemBase::addVariable(var_type, var_name, params);
 }
 
 void
-DumpObjectsProblem::addScalarVariable(const std::string & var_name,
-                                      Order order,
-                                      Real scale_factor,
-                                      const std::set<SubdomainID> * const active_subdomains)
+DumpObjectsProblem::addAuxVariable(const std::string & var_type,
+                                   const std::string & var_name,
+                                   InputParameters & params)
 {
-  dumpVariableHelper("Variables", var_name, SCALAR, order, scale_factor, active_subdomains);
-  FEProblemBase::addScalarVariable(var_name, order, scale_factor, active_subdomains);
-}
-
-void
-DumpObjectsProblem::addAuxVariable(const std::string & var_name,
-                                   const FEType & type,
-                                   const std::set<SubdomainID> * const active_subdomains)
-{
-  dumpVariableHelper("AuxVariables", var_name, type.family, type.order, 1.0, active_subdomains);
-  FEProblemBase::addAuxVariable(var_name, type, active_subdomains);
-}
-
-void
-DumpObjectsProblem::addAuxScalarVariable(const std::string & var_name,
-                                         Order order,
-                                         Real scale_factor,
-                                         const std::set<SubdomainID> * const active_subdomains)
-{
-  dumpVariableHelper("AuxVariables", var_name, SCALAR, order, 1.0, active_subdomains);
-  FEProblemBase::addScalarVariable(var_name, order, scale_factor, active_subdomains);
+  dumpObjectHelper("AuxVariables", var_type, var_name, params);
+  FEProblemBase::addAuxVariable(var_type, var_name, params);
 }
 
 void

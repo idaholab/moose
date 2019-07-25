@@ -163,7 +163,7 @@ private:
   ///@{
   /// The factory is allowed to call addInputParameters and removeInputParameters.
   friend MooseObjectPtr
-  Factory::create(const std::string &, const std::string &, InputParameters, THREAD_ID, bool);
+  Factory::create(const std::string &, const std::string &, InputParameters &, THREAD_ID, bool);
   friend void Factory::releaseSharedObjects(const MooseObject &, THREAD_ID);
   ///@}
 

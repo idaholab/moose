@@ -25,21 +25,15 @@ class DumpObjectsProblem : public FEProblemBase
 public:
   DumpObjectsProblem(const InputParameters & parameters);
 
-  void addVariable(const std::string & var_name,
-                   const FEType & type,
-                   Real scale_factor,
-                   const std::set<SubdomainID> * const active_subdomains = NULL) override;
-  void addScalarVariable(const std::string & var_name,
-                         Order order,
-                         Real scale_factor = 1.,
-                         const std::set<SubdomainID> * const active_subdomains = NULL) override;
-  void addAuxVariable(const std::string & var_name,
-                      const FEType & type,
-                      const std::set<SubdomainID> * const active_subdomains = NULL) override;
-  void addAuxScalarVariable(const std::string & var_name,
-                            Order order,
-                            Real scale_factor = 1.,
-                            const std::set<SubdomainID> * const active_subdomains = NULL) override;
+  using FEProblemBase::addVariable;
+  void addVariable(const std::string & var_type,
+                   const std::string & var_name,
+                   InputParameters & params) override;
+
+  using FEProblemBase::addAuxVariable;
+  void addAuxVariable(const std::string & var_type,
+                      const std::string & var_name,
+                      InputParameters & params) override;
 
   void
   addFunction(std::string type, const std::string & name, InputParameters & parameters) override;
