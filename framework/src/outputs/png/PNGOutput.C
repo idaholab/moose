@@ -122,7 +122,7 @@ PNGOutput::calculateRescalingValues()
 {
   // The max and min.
   // If the max value wasn't specified in the input file, find it from the system.
-  if (_pars.isParamSetByUser("max"))
+  if (!_pars.isParamSetByUser("max"))
   {
     if (_use_aux)
       _scaling_max = _problem_ptr->getAuxiliarySystem().serializedSolution().max();
@@ -133,7 +133,7 @@ PNGOutput::calculateRescalingValues()
     _scaling_max = _max;
 
   // If the min value wasn't specified in the input file, find it from the system.
-  if (_pars.isParamSetByUser("min"))
+  if (!_pars.isParamSetByUser("min"))
   {
     if (_use_aux)
       _scaling_min = _problem_ptr->getAuxiliarySystem().serializedSolution().min();
@@ -178,33 +178,48 @@ PNGOutput::reverseScale(Real value_to_unscale)
 void
 PNGOutput::setRGB(png_byte * rgb, Real selection)
 {
-  // Using an RGB system with Red as 0 - 255, Green as 256 - 511 and
-  // Blue as 512 - 767 gives us our total colorSpectrum of 0 - 767.
-  // Depending on the color scheme we're using, we may want to use a subset
-  // of the colorSpectrum.
-  auto color_spectrum_max = 767;
+  // With this system we have a color we start with when the value is 0 and another it approaches as
+  // the value increases all the way to 255.  If we want it to approach another color from that new
+  // color, it will do so for the next 255, so the transition is from 256 - 511.  For each
+  // additional color we want to transition to, we need another 255. Transitioning from no color, or
+  // black to Red then Green then Blue then the values of from black as it becomes Red would be 0 -
+  // 255, Red to Green as 256 - 511 and then Green to Blue as 512 - 767 which gives us our total
+  // colorSpectrum of 0 - 767, which includes those colors and each of their states in the
+  // transistion.
+  unsigned int number_of_destination_colors;
   switch (_color)
   {
-    // BRYW.  Keep the spectum as is.
+    // BRYW.  Three destination colors (R,Y,W).
     case 1:
+      number_of_destination_colors = 3;
       break;
-    // BCR.  Change spectrum.
+
+    // BWR.  Two destination colors (W,R).
     case 2:
-    // RWB.  Change spectrum.
-    case 3:
-      color_spectrum_max = 511;
+      number_of_destination_colors = 2;
       break;
-    // BR.   Change spectrum
+
+    // RWB.  Two destination colors (W,B).
+    case 3:
+      number_of_destination_colors = 2;
+      break;
+
+    // BR.   One destination color (R).
     case 4:
-      color_spectrum_max = 255;
+      number_of_destination_colors = 1;
       break;
   }
 
-  // We need to convert the
-  auto color = (int)(selection * color_spectrum_max);
-  auto tran = (int)(_transparency * 255);
-  // Make sure everything is within our colorSpectrum.
+  // We need to convert the number of colors into the spectrum max, then convert the value from the
+  // mesh to a point somewhere in the range of 0 to color_spectrum_max.
+  auto color_spectrum_max = (256 * number_of_destination_colors) - 1;
+  auto color = (unsigned int)(selection * color_spectrum_max);
 
+  // Unless we specifically say some part is transparent, we want the whole image to be opaque.
+  auto tran = (unsigned int)(_transparency * 255);
+
+  // Make sure everything is within our colorSpectrum.  If it's bigger, then we want a
+  // transparent background.
   if (color > color_spectrum_max)
   {
     color = color_spectrum_max;
