@@ -1,0 +1,10 @@
+[Tests]
+  design = 'source/postprocessors/AverageElementSize.md'
+  [./test]
+    type = 'CSVDiff'
+    input = 'average_element_size_test.i'
+    csvdiff = 'out.csv'
+    issues = ''
+    requirement = "The system shall contain a `Postprocessor` that computes the average length of the elements in a mesh."
+  [../]
+[]
