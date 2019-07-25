@@ -113,6 +113,7 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _initial_residual_after_preset_bcs(0.),
     _current_nl_its(0),
     _compute_initial_residual_before_preset_bcs(true),
+    _verbose(false),
     _current_solution(NULL),
     _residual_ghosted(NULL),
     _serialized_solution(*NumericVector<Number>::build(_communicator).release()),
@@ -3252,6 +3253,24 @@ NonlinearSystemBase::computeScalingJacobian(NonlinearImplicitSystem & sys)
     for (auto & scaling_factor : inverse_scaling_factors)
       if (scaling_factor < std::numeric_limits<Real>::epsilon())
         scaling_factor = 1;
+
+    if (_verbose)
+    {
+      _console << "Automatic scaling factors:\n";
+      for (MooseIndex(field_variables) i = 0; i < field_variables.size(); ++i)
+      {
+        auto & field_variable = *field_variables[i];
+        _console << "  " << field_variable.name() << ": " << 1.0 / inverse_scaling_factors[i]
+                 << "\n";
+      }
+      for (MooseIndex(scalar_variables) i = 0; i < scalar_variables.size(); ++i)
+      {
+        auto & scalar_variable = *scalar_variables[i];
+        _console << "  " << scalar_variable.name() << ": "
+                 << 1.0 / inverse_scaling_factors[offset + i] << "\n";
+      }
+      _console << "\n\n";
+    }
 
     // Now set the scaling factors for the variables
     applyScalingFactors(inverse_scaling_factors);

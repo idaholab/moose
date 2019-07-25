@@ -78,6 +78,7 @@ validParams<FEProblemSolve>()
       "Whether the scaling factors should only be computed once at the beginning of the simulation "
       "through an extra Jacobian evaluation. If this is set to false, then the scaling factors "
       "will be computed during an extra Jacobian evaluation at the beginning of every time step.");
+  params.addParam<bool>("verbose", false, "Set to true to print additional information");
 
   params.addParamNamesToGroup("l_tol l_abs_tol l_abs_step_tol l_max_its nl_max_its nl_max_funcs "
                               "nl_abs_tol nl_rel_tol nl_abs_step_tol nl_rel_step_tol "
@@ -125,6 +126,8 @@ FEProblemSolve::FEProblemSolve(Executioner * ex)
 
   _nl._compute_initial_residual_before_preset_bcs =
       getParam<bool>("compute_initial_residual_before_preset_bcs");
+
+  _nl._verbose = getParam<bool>("verbose");
 
   _problem.setSNESMFReuseBase(getParam<bool>("snesmf_reuse_base"),
                               _pars.isParamSetByUser("snesmf_reuse_base"));

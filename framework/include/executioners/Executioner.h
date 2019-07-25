@@ -113,6 +113,12 @@ public:
   /// Augmented Picard convergence check that to be called by PicardSolve and can be overridden by derived executioners
   virtual bool augmentedPicardConvergenceCheck() const { return false; }
 
+  /**
+   * Get the verbose output flag
+   * @return The verbose output flag
+   */
+  bool & verbose() { return _verbose; }
+
 protected:
   /**
    * Adds a postprocessor to report a Real class attribute
@@ -131,5 +137,7 @@ protected:
 
   // Restart
   std::string _restart_file_base;
-};
 
+  /// True if printing out additional information
+  bool _verbose;
+};

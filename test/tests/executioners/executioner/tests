@@ -31,4 +31,23 @@
     group = 'requirements'
     requirement = "MOOSE shall be capable of solving a transient diffusion problem."
   [../]
+
+  [./test_print_automatic_scaling_factors_true]
+    type = 'RunApp'
+    input = 'steady.i'
+    cli_args = "Executioner/automatic_scaling=true Executioner/verbose=true Outputs/exodus=false"
+    expect_out = "Automatic scaling factors:
+  u: 0.175781"
+    petsc_version = '>=3.9.0'
+    requirement = "MOOSE shall print automatic scaling factors if specified."
+  [../]
+
+  [./test_print_automatic_scaling_factors_false]
+    type = 'RunApp'
+    input = 'steady.i'
+    cli_args = "Executioner/automatic_scaling=true Outputs/exodus=false"
+    absent_out = "Automatic scaling factors:"
+    petsc_version = '>=3.9.0'
+    requirement = "MOOSE shall not print automatic scaling factors if not specified."
+  [../]
 []
