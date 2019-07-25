@@ -280,9 +280,5 @@
 []
 
 [Outputs]
-  file_base = thermal_strain_out
-  [./exodus]
-    type = Exodus
-    elemental_as_nodal = true
-  [../]
+  exodus = true
 []
