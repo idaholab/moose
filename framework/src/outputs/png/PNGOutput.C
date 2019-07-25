@@ -225,8 +225,7 @@ PNGOutput::setRGB(png_byte * rgb, Real selection)
     color = color_spectrum_max;
     tran = 0;
   }
-  if (color < 0)
-    color = 0;
+
   auto magnitude = color % 256;
 
   switch (_color)
