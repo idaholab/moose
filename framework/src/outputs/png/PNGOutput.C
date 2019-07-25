@@ -186,7 +186,7 @@ PNGOutput::setRGB(png_byte * rgb, Real selection)
   // 255, Red to Green as 256 - 511 and then Green to Blue as 512 - 767 which gives us our total
   // colorSpectrum of 0 - 767, which includes those colors and each of their states in the
   // transistion.
-  unsigned int number_of_destination_colors;
+  unsigned int number_of_destination_colors = 1;
   switch (_color)
   {
     // BRYW.  Three destination colors (R,Y,W).
