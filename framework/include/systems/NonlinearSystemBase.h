@@ -636,7 +636,6 @@ public:
   // FIXME: make these protected and create getters/setters
   Real _last_rnorm;
   Real _last_nl_rnorm;
-  Real _l_abs_step_tol;
   Real _initial_residual_before_preset_bcs;
   Real _initial_residual_after_preset_bcs;
   std::vector<unsigned int> _current_l_its;

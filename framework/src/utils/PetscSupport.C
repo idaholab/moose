@@ -581,7 +581,7 @@ petscSetKSPDefaults(FEProblemBase & problem, KSP ksp)
   auto & es = problem.es();
 
   PetscReal rtol = es.parameters.get<Real>("linear solver tolerance");
-  PetscReal atol = es.parameters.get<Real>("linear solver absolute step tolerance");
+  PetscReal atol = es.parameters.get<Real>("linear solver absolute tolerance");
 
   // MOOSE defaults this to -1 for some dumb reason
   if (atol < 0)

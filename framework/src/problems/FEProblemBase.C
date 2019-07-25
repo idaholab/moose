@@ -5933,12 +5933,6 @@ FEProblemBase::checkLinearConvergence(std::string & /*msg*/,
   else
     system._last_rnorm = rnorm;
 
-  // If the linear residual norm is less than the System's linear absolute
-  // step tolerance, we consider it to be converged and set the reason as
-  // MooseLinearConvergenceReason::CONVERGED_RTOL.
-  if (std::abs(rnorm - system._last_rnorm) < system._l_abs_step_tol)
-    reason = MooseLinearConvergenceReason::CONVERGED_RTOL;
-
   // If we hit max its, then we consider that converged (rather than
   // KSP_DIVERGED_ITS).
   if (n >= maxits)
