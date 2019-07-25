@@ -602,16 +602,16 @@ public:
   virtual void addVariable(const std::string & var_name,
                            const FEType & type,
                            Real scale_factor,
-                           const std::set<SubdomainID> * const active_subdomains = NULL);
+                           const std::set<SubdomainID> * const active_subdomains = nullptr);
   virtual void addArrayVariable(const std::string & var_name,
                                 const FEType & type,
                                 unsigned int components,
                                 const std::vector<Real> & scale_factor,
-                                const std::set<SubdomainID> * const active_subdomains = NULL);
+                                const std::set<SubdomainID> * const active_subdomains = nullptr);
   virtual void addScalarVariable(const std::string & var_name,
                                  Order order,
                                  Real scale_factor = 1.,
-                                 const std::set<SubdomainID> * const active_subdomains = NULL);
+                                 const std::set<SubdomainID> * const active_subdomains = nullptr);
 
   virtual void addADKernel(const std::string & kernel_name,
                            const std::string & name,

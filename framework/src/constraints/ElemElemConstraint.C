@@ -15,6 +15,7 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 #include "MooseVariableFE.h"
+#include "SystemBase.h"
 
 #include "libmesh/quadrature.h"
 

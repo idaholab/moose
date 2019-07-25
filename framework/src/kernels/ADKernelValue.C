@@ -9,6 +9,7 @@
 
 #include "ADKernelValue.h"
 #include "Assembly.h"
+#include "SystemBase.h"
 
 // libmesh includes
 #include "libmesh/threads.h"

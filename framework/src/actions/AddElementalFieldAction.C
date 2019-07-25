@@ -39,6 +39,8 @@ AddElementalFieldAction::init()
 
   _fe_type = FEType(CONSTANT, MONOMIAL);
 
+  _type = "MooseVariableConstMonomial";
+
   _scalar_var = false;
 
   // Need static_cast to resolve overloads

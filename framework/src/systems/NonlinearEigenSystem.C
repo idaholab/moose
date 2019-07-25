@@ -18,6 +18,8 @@
 #include "NodalBC.h"
 #include "TimeIntegrator.h"
 #include "SlepcSupport.h"
+#include "DGKernelBase.h"
+#include "ScalarKernel.h"
 
 #include "libmesh/eigen_system.h"
 #include "libmesh/libmesh_config.h"

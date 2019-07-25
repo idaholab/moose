@@ -38,6 +38,17 @@ validParams<AddVariableAction>()
   // The user may specify a type in the Variables block, but if they don't we'll just use all the
   // parameters available from MooseVariableBase
   params.set<std::string>("type") = "MooseVariableBase";
+
+  // The below is for backwards compatibility
+  MooseEnum families(AddVariableAction::getNonlinearVariableFamilies());
+  MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
+  params.addParam<MooseEnum>(
+      "family", families, "Specifies the family of FE shape functions to use for this variable");
+  params.addParam<MooseEnum>("order",
+                             orders,
+                             "Specifies the order of the FE shape function to use "
+                             "for this variable (additional orders not listed are "
+                             "allowed)");
   return params;
 }
 
@@ -75,6 +86,9 @@ AddVariableAction::init()
     mooseError("There must be at least one variable component, but somehow 0 has been specified");
 
   _fe_type = feType(_moose_object_pars);
+
+  // Determine the MooseVariable type
+  _type = determineType(_fe_type, _components);
 
   _scalar_var = _fe_type.family == SCALAR;
 
@@ -172,8 +186,6 @@ AddVariableAction::addVariable(const std::string & var_name)
                                   : std::vector<Real>(_components, 1);
   if (scale_factor.size() != _components)
     mooseError("Size of 'scaling' is not consistent");
-
-  _type = determineType(_fe_type, _components);
 
   _problem_add_var_method(*_problem, _type, _name, _moose_object_pars);
 
