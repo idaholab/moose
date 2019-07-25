@@ -840,6 +840,9 @@ MooseMesh::cacheInfo()
   TIME_SECTION(_cache_info_timer);
   CONSOLE_TIMED_PRINT("Caching mesh information");
 
+  _subdomain_boundary_ids.clear();
+  _block_node_list.clear();
+
   // TODO: Thread this!
   for (const auto & elem : getMesh().element_ptr_range())
   {

@@ -50,7 +50,7 @@
      # Test that top residuals are displayed using DebugOutput object via Debug block
      type = RunApp
      input = show_top_residuals_debug.i
-     expect_out = "'u' in subdomain\(s\) {'block_zero', 'block_one'}.*at node.*'v' in subdomain\(s\) {'block_one'}.*at element.*'w' \(SCALAR\)"
+     expect_out = "'u' in subdomain\(s\) {'block_one'}.*at node.*'v' in subdomain\(s\) {'block_one'}.*at element.*'w' \(SCALAR\)"
      max_parallel = 1
 
      requirement = "The system shall include debug syntax that includes the ability to enable variable residual information."
