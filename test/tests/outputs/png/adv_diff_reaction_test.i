@@ -115,7 +115,8 @@
 [Outputs]
   [png]
     type = PNGOutput
-    resolution = 1
-    color = BCR
+    resolution = 25
+    color = RWB
+    variable = 'phi'
   []
 []

@@ -17,6 +17,20 @@
   [../]
 []
 
+[AuxVariables]
+  [two_u]
+  []
+[]
+
+[AuxKernels]
+  [two_u]
+    type = ParsedAux
+    variable = two_u
+    args = 'u'
+    function = '2*u'
+  []
+[]
+
 [Variables]
   active = 'u'
 
@@ -72,7 +86,8 @@
 [Outputs]
   [png]
     type = PNGOutput
-    resolution = 1
+    resolution = 25
     color = RWB
+    variable = 'two_u'
   []
 []

@@ -66,18 +66,29 @@ protected:
   // Controls transparency level for the general image.
   const Real _transparency;
 
-  /// Pointer the libMesh::MeshFunction object that the read data is stored
+  // Pointer to the libMesh::MeshFunction object in which the read data is stored.
   std::unique_ptr<MeshFunction> _mesh_function;
 
   // The boundaries of the image.
   BoundingBox _box;
+
+  // Variable to determine wether to use the AuxiliarySystem or NonlinearSystem.
+  bool _use_aux;
+
+  // The name of the variable to use to create the png.
+  VariableName _variable;
+
+  // Variables that store the max and min of the values in the variable used.
+  // Used for creating the scaling values.
+  Real _max;
+  Real _min;
 
   // Values used for rescaling the image.
   Real _scaling_min;
   Real _scaling_max;
   Real _shift_value;
 
-  // Value of the colorrs that are outside of the libmesh bounds.
+  // Value of the colors that are outside of the libmesh bounds.
   Real _out_bounds_shade;
 };
 
