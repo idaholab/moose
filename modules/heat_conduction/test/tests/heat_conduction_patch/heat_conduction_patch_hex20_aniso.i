@@ -60,7 +60,7 @@
 
 
 [Mesh]#Comment
-  file = heat_conduction_patch_hex20_test.e
+  file = heat_conduction_patch_hex20.e
 [] # Mesh
 
 [Functions]
@@ -111,12 +111,6 @@
     thermal_conductivity_z = 4.85e-4
   [../]
 
-  [./density]
-    type = Density
-    block = 1
-    density = 0.283
-  [../]
-
 [] # Materials
 
 [Executioner]
@@ -126,18 +120,13 @@
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-
-
   petsc_options_iname = '-pc_type -ksp_gmres_restart'
   petsc_options_value = 'lu       101'
 
-
   line_search = 'none'
-
 
   nl_abs_tol = 1e-11
   nl_rel_tol = 1e-10
-
 
   l_max_its = 20
 
@@ -148,6 +137,6 @@
 [] # Executioner
 
 [Outputs]
-  file_base = out_hex20
+  file_base = heat_conduction_patch_hex20_out
   exodus = true
 [] # Output

@@ -230,8 +230,5 @@
 
 [Outputs]
   file_base = elastic_thermal_patch_rz_out
-  [./exodus]
-    type = Exodus
-    elemental_as_nodal = true
-  [../]
+  exodus = true
 []
