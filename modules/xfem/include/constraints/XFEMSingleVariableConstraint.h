@@ -18,6 +18,8 @@ class XFEMSingleVariableConstraint;
 
 class XFEM;
 
+class Function;
+
 template <>
 InputParameters validParams<XFEMSingleVariableConstraint>();
 
@@ -37,14 +39,15 @@ protected:
   /// Vector normal to the internal interface
   Point _interface_normal;
 
-  /// Stabilization parameter in Nitsche's formulation
+  /// Stabilization parameter in Nitsche's formulation and penalty factor in the
+  /// Penalty Method
   Real _alpha;
 
-  /// Vector normal to the internal interface
-  Real _jump;
+  /// Change in variable value at the interface
+  const Function & _jump;
 
-  /// Vector normal to the internal interface
-  Real _jump_flux;
+  /// Change in flux of variable value at the interface
+  const Function & _jump_flux;
 
   /// Use penalty formulation
   bool _use_penalty;
@@ -52,4 +55,3 @@ protected:
   /// Pointer to the XFEM controller object
   std::shared_ptr<XFEM> _xfem;
 };
-
