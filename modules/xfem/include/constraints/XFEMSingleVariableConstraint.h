@@ -43,8 +43,8 @@ protected:
   /// Penalty Method
   Real _alpha;
 
-  /// Change in variable value ot the interface
-  Real _jump;
+  /// Change in variable value at the interface
+  const Function & _jump;
 
   /// Change in flux of variable value at the interface
   const Function & _jump_flux;

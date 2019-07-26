@@ -26,18 +26,12 @@
 #       20       746.75                  746.7235521
 #       40       893.05                  893.0379081
 #       60      1040.15                 1040.1527530
-#       80      1188.05                 1188.0481376
-#      100      1336.75                 1336.8094604
-#      120      1486.25                 1486.1949347
 #
 #  Right Boundary (x=1):
 #     Time    Expected Temperature    XFEM Calculated Temperature
 #       20       720                     719.9708681
 #       40       840                     839.9913293
 #       60       960                     960.0100886
-#       80      1080                    1080.0098733
-#      100      1200                    1187.0159352
-#      120      1320                    1319.8162670
 #
 # IMPORTANT NOTE:
 #   When running this input file, add the --allow-test-objects tag!!!
@@ -225,7 +219,7 @@
 
   start_time = 0.0
   dt = 20
-  end_time = 120.0
+  end_time = 60.0
   max_xfem_update = 2
 []
 

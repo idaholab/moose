@@ -50,7 +50,7 @@
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     unique_id = true
-    requirement = 'The XFEM module shall provide an ability to apply a zero-jump, nonzero-flux-jump defined by a given Real value constraint on a stationary interface for one variable.'
+    requirement = 'The XFEM module shall provide an ability to apply a zero-jump, nonzero-flux-jump (defined by a Real value) constraint on a stationary interface for one variable.'
     design = 'XFEMSingleVariableConstraint.md'
     issues = '#6572'
   [../]
@@ -61,7 +61,7 @@
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     unique_id = true
-    requirement = 'The XFEM module shall provide an ability to apply a zero-jump, nonzero-flux-jump defined by a function constraint on a stationary interface for one variable.'
+    requirement = 'The XFEM module shall provide an ability to apply a zero-jump, nonzero-flux-jump (defined by a function) constraint on a stationary interface for one variable.'
     design = 'XFEMSingleVariableConstraint.md'
     issues = '#13756'
   [../]
@@ -72,9 +72,20 @@
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     unique_id = true
-    requirement = 'The XFEM module shall provide an ability to apply a nonzero-jump, zero-flux-jump constraint on a stationary interface for one variable.'
+    requirement = 'The XFEM module shall provide an ability to apply a nonzero-jump (defined by a Real value), zero-flux-jump constraint on a stationary interface for one variable.'
     design = 'XFEMSingleVariableConstraint.md'
     issues = '#6572'
+  [../]
+  [./stationary_jump_func]
+    type = Exodiff
+    input = stationary_jump_func.i
+    exodiff = 'stationary_jump_func_out.e'
+    map = false
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
+    requirement = 'The XFEM module shall provide an ability to apply a nonzero-jump (defined by a function), zero-flux-jump constraint on a stationary interface for one variable.'
+    design = 'XFEMSingleVariableConstraint.md'
+    issues = '#13756'
   [../]
   [./stationary_jump_fluxjump]
     type = Exodiff

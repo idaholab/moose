@@ -32,11 +32,12 @@ validParams<XFEMSingleVariableConstraint>()
                         "in the Penalty Method. In Nitsche's formulation this should be as "
                         "small as possible while the method is still stable; while in the "
                         "Penalty Method you want this to be quite large (e.g. 1e6).");
-  params.addParam<Real>("jump", 0, "Jump at the interface.");
+  params.addParam<FunctionName>("jump",
+                                0,
+                                "Jump at the interface. Can be a Real or FunctionName.");
   params.addParam<FunctionName>("jump_flux",
                                 0,
-                                "Flux jump at the interface. "
-                                "Can be a Real or FunctionName.");
+                                "Flux jump at the interface. Can be a Real or FunctionName.");
   params.addParam<UserObjectName>(
       "geometric_cut_userobject",
       "Name of GeometricCutUserObject associated with this constraint.");
@@ -50,7 +51,7 @@ validParams<XFEMSingleVariableConstraint>()
 XFEMSingleVariableConstraint::XFEMSingleVariableConstraint(const InputParameters & parameters)
   : ElemElemConstraint(parameters),
     _alpha(getParam<Real>("alpha")),
-    _jump(getParam<Real>("jump")),
+    _jump(getFunction("jump")),
     _jump_flux(getFunction("jump_flux")),
     _use_penalty(getParam<bool>("use_penalty"))
 {
@@ -90,10 +91,10 @@ XFEMSingleVariableConstraint::computeQpResidual(Moose::DGResidualType type)
               0.5 * _grad_u_neighbor[_qp] * _interface_normal) *
              _test[_i][_qp];
         r -= (_u[_qp] - _u_neighbor[_qp]) * 0.5 * _grad_test[_i][_qp] * _interface_normal;
-        r += 0.5 * _grad_test[_i][_qp] * _interface_normal * _jump;
+        r += 0.5 * _grad_test[_i][_qp] * _interface_normal * _jump.value(_t, _u[_qp]);
       }
       r += 0.5 * _test[_i][_qp] * _jump_flux.value(_t, _u[_qp]);
-      r += _alpha * (_u[_qp] - _u_neighbor[_qp] - _jump) * _test[_i][_qp];
+      r += _alpha * (_u[_qp] - _u_neighbor[_qp] - _jump.value(_t, _u[_qp])) * _test[_i][_qp];
       break;
 
     case Moose::Neighbor:
@@ -103,10 +104,10 @@ XFEMSingleVariableConstraint::computeQpResidual(Moose::DGResidualType type)
               0.5 * _grad_u_neighbor[_qp] * _interface_normal) *
              _test_neighbor[_i][_qp];
         r -= (_u[_qp] - _u_neighbor[_qp]) * 0.5 * _grad_test_neighbor[_i][_qp] * _interface_normal;
-        r += 0.5 * _grad_test_neighbor[_i][_qp] * _interface_normal * _jump;
+        r += 0.5 * _grad_test_neighbor[_i][_qp] * _interface_normal * _jump.value(_t, _u_neighbor[_qp]);
       }
       r += 0.5 * _test_neighbor[_i][_qp] * _jump_flux.value(_t, _u_neighbor[_qp]);
-      r -= _alpha * (_u[_qp] - _u_neighbor[_qp] - _jump) * _test_neighbor[_i][_qp];
+      r -= _alpha * (_u[_qp] - _u_neighbor[_qp] - _jump.value(_t, _u_neighbor[_qp])) * _test_neighbor[_i][_qp];
       break;
   }
   return r;
