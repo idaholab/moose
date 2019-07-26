@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#6848'
+  design = 'ComputeThermalExpansionEigenstrain.md'
   [./elastic_thermal_patch]
     type = 'Exodiff'
     input = 'elastic_thermal_patch.i'
@@ -6,6 +8,17 @@
     abs_zero = 1e-08
     use_old_floor = True
     prereq = 'elastic_thermal_patch_sm'
+    requirement = 'The system shall compute uniform thermal strain for a uniform change in temperature'
+  [../]
+
+  [./elastic_thermal_patch_rz]
+    type = 'Exodiff'
+    input = 'elastic_thermal_patch_rz.i'
+    exodiff = 'elastic_thermal_patch_rz_out.e'
+    use_old_floor = True
+    max_parallel = 1
+    prereq = 'elastic_thermal_patch_rz_sm'
+    requirement = 'The system shall compute uniform thermal strain for a uniform change in temperature in axisymmetric coordinates'
   [../]
 
   [./elastic_thermal_jacobian_rz_smp]
@@ -16,15 +29,7 @@
     use_old_floor = True
     max_parallel = 1
     prereq = 'elastic_thermal_jacobian_rz_smp_sm'
-  [../]
-
-  [./elastic_thermal_patch_rz]
-    type = 'Exodiff'
-    input = 'elastic_thermal_patch_rz.i'
-    exodiff = 'elastic_thermal_patch_rz_out.e'
-    use_old_floor = True
-    max_parallel = 1
-    prereq = 'elastic_thermal_patch_rz_sm'
+    requirement = 'The system shall compute consistent nonlinear solver behavior for thermal strain problems'
   [../]
 
   [./elastic_thermal_patch_rz_smp]
@@ -35,6 +40,7 @@
     use_old_floor = True
     max_parallel = 1
     prereq = 'elastic_thermal_patch_rz_smp_sm'
+    requirement = 'The system shall compute uniform thermal strain for a uniform change in temperature in axisymmetric coordinates with a full preconditioning matrix'
   [../]
 
   [./elastic_thermal_patch_sm]
@@ -43,6 +49,7 @@
     exodiff = 'elastic_thermal_patch_out.e'
     abs_zero = 1e-08
     use_old_floor = True
+    requirement = 'The system shall compute uniform thermal strain for a uniform change in temperature for the solid_mechanics module'
   [../]
 
   [./elastic_thermal_jacobian_rz_smp_sm]
@@ -52,6 +59,7 @@
     custom_cmp = 'elastic_thermal_patch.cmp'
     use_old_floor = True
     max_parallel = 1
+    requirement = 'The system shall compute consistent nonlinear solver behavior for thermal strain problems for the solid_mechanics module'
   [../]
 
   [./elastic_thermal_patch_rz_sm]
@@ -60,6 +68,7 @@
     exodiff = 'elastic_thermal_patch_rz_out.e'
     use_old_floor = True
     max_parallel = 1
+    requirement = 'The system shall compute uniform thermal strain for a uniform change in temperature in axisymmetric coordinates for the solid_mechanics module'
   [../]
 
   [./elastic_thermal_patch_rz_smp_sm]
@@ -69,6 +78,7 @@
     custom_cmp = 'elastic_thermal_patch.cmp'
     use_old_floor = True
     max_parallel = 1
+    requirement = 'The system shall compute uniform thermal strain for a uniform change in temperature in axisymmetric coordinates with a full preconditioning matrix for the solid_mechanics module'
   [../]
 
   [./elastic_thermal_weak_plane_stress_jacobian]
@@ -76,5 +86,6 @@
     input = 'elastic_thermal_weak_plane_stress_jacobian.i'
     ratio_tol = 1E-12
     difference_tol = 1E10
+    requirement = 'The system shall compute thermal strain in conjunction with weak plane stress'
   [../]
 []

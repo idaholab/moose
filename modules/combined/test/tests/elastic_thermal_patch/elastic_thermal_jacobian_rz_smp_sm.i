@@ -205,7 +205,6 @@
   file_base = elastic_thermal_jacobian_rz_smp_out
   [./exodus]
     type = Exodus
-    elemental_as_nodal = true
     execute_on = 'initial timestep_end nonlinear'
     nonlinear_residual_dt_divisor = 100
   [../]
