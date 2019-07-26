@@ -75,7 +75,6 @@
 
 [AuxVariables]
   # AuxVariables
-active = ''
   [./stress_xx]
     order = CONSTANT
     family = MONOMIAL
@@ -85,14 +84,6 @@ active = ''
     family = MONOMIAL
   [../]
   [./stress_xy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_zx]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -106,40 +97,25 @@ active = ''
 
 [AuxKernels]
   # AuxKernels
-active = ''
   [./stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xx
-    index_i = 1
-    index_j = 1
+    index_i = 0
+    index_j = 0
   [../]
   [./stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
-    index_i = 2
-    index_j = 2
+    index_i = 1
+    index_j = 1
   [../]
   [./stress_xy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xy
-    index_i = 1
-    index_j = 2
-  [../]
-  [./stress_yz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yz
-    index_i = 2
-    index_j = 3
-  [../]
-  [./stress_zx]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_zx
-    index_i = 3
+    index_i = 0
     index_j = 1
   [../]
 []
@@ -220,6 +196,21 @@ active = ''
   [../]
 []
 
+[Postprocessors]
+  [./stress_xx]
+    type = ElementAverageValue
+    variable = stress_xx
+  [../]
+  [./stress_yy]
+    type = ElementAverageValue
+    variable = stress_yy
+  [../]
+  [./stress_xy]
+    type = ElementAverageValue
+    variable = stress_xy
+  [../]
+[]
+
 [Preconditioning]
   [./SMP]
     type = SMP
@@ -233,7 +224,6 @@ active = ''
 
   solve_type = 'NEWTON'
 
-
   petsc_options_iname = '-pc_type '
   petsc_options_value = 'lu'
   nl_rel_tol = 1e-30
@@ -244,19 +234,6 @@ active = ''
   end_time = 2.0
 []
 
-[Postprocessors]
-active = ''
-  [./stress_xx]
-    type = ElementAverageValue
-    variable = stress_xx
-  [../]
-  [./stress_yy]
-    type = ElementAverageValue
-    variable = stress_yy
-  [../]
-[]
-
 [Outputs]
-  file_base = elastic_rotation
   exodus = true
 [] # Outputs
