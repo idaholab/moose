@@ -3,5 +3,9 @@
     type = 'CSVDiff'
     input = 'line_function_sampler.i'
     csvdiff = 'line_function_sampler_out_func_vals_0001.csv'
+
+    requirement = 'The system shall support sampling one or more spatial functions along a line with fixed sampling intervals.'
+    design = 'LineFunctionSampler.md'
+    issues = '#6438'
   [../]
 []

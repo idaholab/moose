@@ -3,5 +3,9 @@
     type = CSVDiff
     input = spherical_average.i
     csvdiff = 'spherical_average_out_average_0001.csv'
+
+    issues = '#7810'
+    design = 'SphericalAverage.md'
+    requirement = 'The system shall support computing the spherical average of a variable as a function of radius throughout the mesh domain.'
   [../]
 []
