@@ -1,0 +1,44 @@
+[Tests]
+  issues = '#6750'
+  design = 'HeatConduction.md'
+  [./test]
+    type = 'Exodiff'
+    input = 'heat_conduction_patch.i'
+    exodiff = 'heat_conduction_patch_out.e'
+    max_parallel = 1
+    requirement = 'The system shall compute a tri-linear temperature field'
+  [../]
+
+  [./test_rz_quad8]
+    type = 'Exodiff'
+    input = 'heat_conduction_patch_rz_quad8.i'
+    exodiff = 'heat_conduction_patch_rz_quad8_out.e'
+    max_parallel = 1
+    requirement = 'The system shall compute a bi-linear temperature field for an axisymmetric problem with quad8 elements'
+  [../]
+
+  [./test_rz]
+    type = 'Exodiff'
+    input = 'heat_conduction_patch_rz.i'
+    exodiff = 'heat_conduction_patch_rz_out.e'
+    max_parallel = 1
+    requirement = 'The system shall compute a bi-linear temperature field for an axisymmetric problem'
+  [../]
+
+  [./test_hex20]
+    type = 'Exodiff'
+    input = 'heat_conduction_patch_hex20.i'
+    exodiff = 'heat_conduction_patch_hex20_out.e'
+    max_parallel = 1
+    requirement = 'The system shall compute a tri-linear temperature field with hex20 elements'
+  [../]
+
+  [./test_hex20_aniso]
+    type = 'Exodiff'
+    input = 'heat_conduction_patch_hex20_aniso.i'
+    exodiff = 'heat_conduction_patch_hex20_out.e'
+    max_parallel = 1
+    prereq = test_hex20
+    requirement = 'The system shall compute a tri-linear temperature field with hex20 elements using an anisotropic thermal conductivity model with isotropic thermal conductivities supplied'
+  [../]
+[]
