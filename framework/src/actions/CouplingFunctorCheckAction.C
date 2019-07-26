@@ -12,6 +12,7 @@
 #include "MooseApp.h"
 #include "FEProblemBase.h"
 #include "NonlinearSystemBase.h"
+#include "DGKernelBase.h"
 
 #include "libmesh/system.h"
 
@@ -40,30 +41,39 @@ CouplingFunctorCheckAction::act()
   auto & kernels = nl.getKernelWarehouse();
   auto & nbcs = nl.getNodalBCWarehouse();
   auto & ibcs = nl.getIntegratedBCWarehouse();
+  auto & dgs = nl.getDGKernelWarehouse();
+  auto & iks = nl.getInterfaceKernelWarehouse();
 
-  // If we have any of these, we need default coupling (e.g. element intra-dof coupling)
-  if (kernels.size() || nbcs.size() || ibcs.size())
-  {
-    auto original_size = _app.relationshipManagers().size();
+  auto original_size = _app.relationshipManagers().size();
 
+  // If we have any DGKernels or InterfaceKernels we need one layer of sparsity
+  if (dgs.size() || iks.size())
+    // It doesn't really matter what T is in validParams<T> as long as it will add our single layer
+    // of coupling
+    addRelationshipManagers(Moose::RelationshipManagerType::COUPLING, validParams<DGKernelBase>());
+
+  // If we have any of these, we need default coupling, e.g. 0 layers of sparsity, otherwise known
+  // as element intra-dof coupling. The `else if` below is important; if we already added 1 layer of
+  // sparsity above, then we don't need to add another coupling functor that is a subset of the
+  // previous one
+  else if (kernels.size() || nbcs.size() || ibcs.size())
     // It doesn't really matter what T is in validParams<T> as long as it will add our default
     // coupling functor object (ElementSideNeighborLayers with n_levels of 0)
     addRelationshipManagers(Moose::RelationshipManagerType::COUPLING, validParams<Kernel>());
 
-    // See whether we've actually added anything new
-    if (original_size != _app.relationshipManagers().size())
-    {
-      // There's no concern of duplicating functors previously added here since functors are stored
-      // as std::sets
-      _app.attachRelationshipManagers(Moose::RelationshipManagerType::COUPLING);
+  // See whether we've actually added anything new
+  if (original_size != _app.relationshipManagers().size())
+  {
+    // There's no concern of duplicating functors previously added here since functors are stored
+    // as std::sets
+    _app.attachRelationshipManagers(Moose::RelationshipManagerType::COUPLING);
 
-      // Make sure that coupling matrices are attached to the coupling functors
-      _app.dofMapReinitForRMs();
+    // Make sure that coupling matrices are attached to the coupling functors
+    _app.dofMapReinitForRMs();
 
-      // Reinit the libMesh (Implicit)System. This re-computes the sparsity pattern and then applies
-      // it to the ImplicitSystem's matrices. Note that does NOT make a call to DofMap::reinit,
-      // hence we have to call GhostingFunctor::dofmap_reinit ourselves in the call above
-      nl.system().reinit();
-    }
+    // Reinit the libMesh (Implicit)System. This re-computes the sparsity pattern and then applies
+    // it to the ImplicitSystem's matrices. Note that does NOT make a call to DofMap::reinit,
+    // hence we have to call GhostingFunctor::dofmap_reinit ourselves in the call above
+    nl.system().reinit();
   }
 }
