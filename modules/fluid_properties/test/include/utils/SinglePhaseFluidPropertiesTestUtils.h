@@ -14,11 +14,11 @@
 // Relative perturbation for derivative tests
 #define REL_PERTURBATION 1e-6
 
-// Macro for performing a derivative test
-#define DERIV_TEST(f, a, b, tol)                                                                   \
+// Macro for performing a derivative test with a custom perturbation
+#define DERIV_TEST_CUSTOM_PERTURBATION(f, a, b, tol, rel_pert)                                     \
   {                                                                                                \
-    const Real da = REL_PERTURBATION * a;                                                          \
-    const Real db = REL_PERTURBATION * b;                                                          \
+    const Real da = rel_pert * a;                                                                  \
+    const Real db = rel_pert * b;                                                                  \
     const Real df_da_fd = (f(a + da, b) - f(a - da, b)) / (2 * da);                                \
     const Real df_db_fd = (f(a, b + db) - f(a, b - db)) / (2 * db);                                \
     Real f_value, df_da, df_db;                                                                    \
@@ -26,6 +26,12 @@
     REL_TEST(f(a, b), f_value, REL_TOL_CONSISTENCY);                                               \
     REL_TEST(df_da, df_da_fd, tol);                                                                \
     REL_TEST(df_db, df_db_fd, tol);                                                                \
+  }
+
+// Macro for performing a derivative test
+#define DERIV_TEST(f, a, b, tol)                                                                   \
+  {                                                                                                \
+    DERIV_TEST_CUSTOM_PERTURBATION(f, a, b, tol, REL_PERTURBATION);                                \
   }
 
 // Macro for performing a derivative test (1d function)
@@ -65,4 +71,3 @@
       EXPECT_TRUE(msg.find("not implemented") != std::string::npos);                               \
     }                                                                                              \
   }
-
