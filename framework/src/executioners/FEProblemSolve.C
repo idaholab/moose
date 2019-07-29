@@ -127,7 +127,7 @@ FEProblemSolve::FEProblemSolve(Executioner * ex)
   _nl._compute_initial_residual_before_preset_bcs =
       getParam<bool>("compute_initial_residual_before_preset_bcs");
 
-  _nl._verbose = getParam<bool>("verbose");
+  _nl.setVerboseFlag(getParam<bool>("verbose"));
 
   _problem.setSNESMFReuseBase(getParam<bool>("snesmf_reuse_base"),
                               _pars.isParamSetByUser("snesmf_reuse_base"));

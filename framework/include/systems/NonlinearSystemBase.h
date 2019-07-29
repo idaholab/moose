@@ -630,6 +630,12 @@ public:
 
   virtual TagID systemMatrixTag() override { return _Ke_system_tag; }
 
+  /**
+   * Sets the verbose flag
+   * @param[in] verbose   Verbose flag
+   */
+  void setVerboseFlag(const bool & verbose) { _verbose = verbose; }
+
 public:
   FEProblemBase & _fe_problem;
   System & _sys;
@@ -641,9 +647,6 @@ public:
   std::vector<unsigned int> _current_l_its;
   unsigned int _current_nl_its;
   bool _compute_initial_residual_before_preset_bcs;
-
-  /// True if printing out additional information
-  bool _verbose;
 
 protected:
   /**
@@ -694,6 +697,9 @@ protected:
   void mortarJacobianConstraints(bool displaced);
 
 protected:
+  /// True if printing out additional information
+  bool _verbose;
+
   /// solution vector from nonlinear solver
   const NumericVector<Number> * _current_solution;
   /// ghosted form of the residual
