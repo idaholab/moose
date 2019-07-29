@@ -16,7 +16,10 @@
 #include "libmesh/elem.h"
 #include "libmesh/fe_base.h"
 
-registerMooseObject("MooseApp", ParsedAddSideset);
+registerMooseObjectReplaced("MooseApp",
+                            ParsedAddSideset,
+                            "08/12/2019 00:00",
+                            ParsedGenerateSideset);
 
 template <>
 InputParameters

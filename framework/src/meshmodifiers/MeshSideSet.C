@@ -13,7 +13,7 @@
 #include "libmesh/mesh_modification.h"
 #include "libmesh/elem.h"
 
-registerMooseObject("MooseApp", MeshSideSet);
+registerMooseObjectReplaced("MooseApp", MeshSideSet, "08/12/2019 00:00", MeshSideSetGenerator);
 
 template <>
 InputParameters

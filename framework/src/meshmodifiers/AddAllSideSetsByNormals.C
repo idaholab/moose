@@ -20,7 +20,10 @@
 #include "libmesh/point_locator_base.h"
 #include "libmesh/elem.h"
 
-registerMooseObject("MooseApp", AddAllSideSetsByNormals);
+registerMooseObjectReplaced("MooseApp",
+                            AddAllSideSetsByNormals,
+                            "08/12/2019 00:00",
+                            AllSideSetsByNormalsGenerator);
 
 template <>
 InputParameters

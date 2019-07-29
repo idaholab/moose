@@ -12,7 +12,10 @@
 
 #include "libmesh/elem.h"
 
-registerMooseObject("MooseApp", AssignSubdomainID);
+registerMooseObjectReplaced("MooseApp",
+                            AssignSubdomainID,
+                            "08/12/2019 00:00",
+                            SubdomainIDGenerator);
 
 template <>
 InputParameters
