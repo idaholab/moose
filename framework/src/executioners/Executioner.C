@@ -51,7 +51,8 @@ Executioner::Executioner(const InputParameters & parameters)
         "_fe_problem_base", "This might happen if you don't have a mesh")),
     _feproblem_solve(this),
     _picard_solve(this),
-    _restart_file_base(getParam<FileNameNoExtension>("restart_file_base"))
+    _restart_file_base(getParam<FileNameNoExtension>("restart_file_base")),
+    _verbose(getParam<bool>("verbose"))
 {
   if (!_restart_file_base.empty())
     _fe_problem.setRestartFile(_restart_file_base);

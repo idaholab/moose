@@ -172,12 +172,6 @@ public:
   Real & timestepTol() { return _timestep_tolerance; }
 
   /**
-   * Get the verbose output flag
-   * @return The verbose output flag
-   */
-  bool & verbose() { return _verbose; }
-
-  /**
    * Is the current step at a sync point (sync times, time interval, target time, etc)?
    * @return Bool indicataing whether we are at a sync point
    */
@@ -254,9 +248,6 @@ protected:
   Real & _target_time;
   bool _use_multiapp_dt;
 
-  ///should detailed diagnostic output be printed
-  bool _verbose;
-
   Real _solution_change_norm;
 
   /// The difference of current and old solutions
@@ -266,4 +257,3 @@ protected:
 
   PerfID _final_timer;
 };
-
