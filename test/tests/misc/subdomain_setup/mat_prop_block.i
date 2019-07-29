@@ -1,35 +1,42 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 2
-  ny = 2
+  type = MeshGeneratorMesh
 []
 
 [Debug]
   show_material_props = true
 []
 
-[MeshModifiers]
+[MeshGenerators]
+  [./generator]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 2
+    ny = 2
+  [../]
   [./subdomain1]
-    type = SubdomainBoundingBox
+    type = SubdomainBoundingBoxGenerator
+    input = generator
     bottom_left = '0 0 0'
     top_right = '0.5 0.5 0'
     block_id = 1
   [../]
   [./subdomain2]
-    type = SubdomainBoundingBox
+    type = SubdomainBoundingBoxGenerator
+    input = subdomain1
     bottom_left = '0.5 0 0'
     top_right = '1 0.5 0'
     block_id = 2
   [../]
   [./subdomain3]
-    type = SubdomainBoundingBox
+    type = SubdomainBoundingBoxGenerator
+    input = subdomain2
     bottom_left = '0 0.5 0'
     top_right = '0.5 1 0'
     block_id = 3
   [../]
   [./subdomain4]
-    type = SubdomainBoundingBox
+    type = SubdomainBoundingBoxGenerator
+    input = subdomain3
     bottom_left = '0.5 0.5 0'
     top_right = '1 1 0'
     block_id = 4
