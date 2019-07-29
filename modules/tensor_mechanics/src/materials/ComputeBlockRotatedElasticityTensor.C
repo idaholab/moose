@@ -44,15 +44,10 @@ ComputeBlockRotatedElasticityTensor::computeQpElasticityTensor()
 {
   EulerAngles angles;
   auto grain_id = _current_elem->subdomain_id();
-  if (grain_id == 0 && _offset != 0)
-    mooseError("Please set correct offset value ");
   grain_id = grain_id - _offset;
-
-  if (grain_id < _euler.getGrainNum())
-    angles = _euler.getEulerAngles(grain_id);
-  else
-    mooseError(
-        "invalid block id ", grain_id, " (only have ", _euler.getGrainNum(), " Eulerangles)");
+  if (grain_id < 0 || grain_id>_euler.getGrainNum())
+    mooseError("Set correct offset value, block id ", grain_id, " (only have ", _euler.getGrainNum(), " Eulerangles)");
+  angles = _euler.getEulerAngles(grain_id);
 
   RankFourTensor C_ijkl = _C_ijkl;
   C_ijkl.rotate(RotationTensor(RealVectorValue(angles)));
