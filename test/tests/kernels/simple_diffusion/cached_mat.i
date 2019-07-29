@@ -7,13 +7,15 @@
 [Materials]
   [m1]
     type = IncrementMaterial
+    prop_names = 'a'
+    prop_values = '0'
   []
-  [parsedmat]
-    type = ParsedMaterial
-    material_property_names = 'm1'
-    f_name = parsedmat
-    function = 'm1*0 + 1'
-  []
+  #[parsedmat]
+  #  type = ParsedMaterial
+  #  material_property_names = 'm1'
+  #  f_name = parsedmat
+  #  function = 'm1*0 + 1'
+  #[]
 []
 
 [Variables]
@@ -33,14 +35,16 @@
     type = MaterialRealAux
     variable = matvals
     property = mat_prop
+    #execute_on = 'nonlinear timestep_begin'
   []
 []
 
 [Kernels]
   [diff]
-    type = MatDiffusion
+    #type = MatDiffusion
+    type = Diffusion
     variable = u
-    D_name = parsedmat
+    #D_name = parsedmat
   []
   [time]
     type = TimeDerivative
@@ -76,8 +80,8 @@
 [UserObjects]
   [u1]
     type = ResetMaterialCache
-    #execute_on = 'timestep_begin nonlinear'
-    execute_on = 'timestep_begin'
+    execute_on = 'timestep_begin nonlinear'
+    #execute_on = 'timestep_begin'
   []
 []
 
