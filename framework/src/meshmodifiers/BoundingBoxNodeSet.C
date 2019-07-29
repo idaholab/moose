@@ -12,7 +12,10 @@
 
 #include "libmesh/node.h"
 
-registerMooseObject("MooseApp", BoundingBoxNodeSet);
+registerMooseObjectReplaced("MooseApp",
+                            BoundingBoxNodeSet,
+                            "08/12/2019 00:00",
+                            BoundingBoxNodeSetGenerator);
 
 template <>
 InputParameters

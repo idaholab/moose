@@ -16,7 +16,10 @@
 
 #include "libmesh/elem.h"
 
-registerMooseObject("MooseApp", ImageSubdomain);
+registerMooseObjectReplaced("MooseApp",
+                            ImageSubdomain,
+                            "08/12/2019 00:00",
+                            ImageSubdomainGenerator);
 
 template <>
 InputParameters

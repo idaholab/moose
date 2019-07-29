@@ -14,7 +14,10 @@
 
 #include "libmesh/elem.h"
 
-registerMooseObject("MooseApp", BreakBoundaryOnSubdomain);
+registerMooseObjectReplaced("MooseApp",
+                            BreakBoundaryOnSubdomain,
+                            "08/12/2019 00:00",
+                            BreakBoundaryOnSubdomainGenerator);
 
 template <>
 InputParameters
