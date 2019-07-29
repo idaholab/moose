@@ -39,6 +39,7 @@
     expect_out = "Automatic scaling factors:
   u: 0.175781"
     petsc_version = '>=3.9.0'
+    max_parallel = 4
     requirement = "MOOSE shall print automatic scaling factors if specified."
   [../]
 
@@ -48,6 +49,7 @@
     cli_args = "Executioner/automatic_scaling=true Outputs/exodus=false"
     absent_out = "Automatic scaling factors:"
     petsc_version = '>=3.9.0'
+    max_parallel = 4
     requirement = "MOOSE shall not print automatic scaling factors if not specified."
   [../]
 []
