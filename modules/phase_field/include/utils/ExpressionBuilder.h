@@ -375,6 +375,9 @@ public:
     EBTerm(Real number) : _root(new EBNumberNode<Real>(number)) {}
     EBTerm(const char * symbol) : _root(new EBSymbolNode(symbol)) {}
 
+    typedef std::vector<EBTerm> EBTermVector;
+    static EBTermVector CreateEBTermVector(const std::vector<const char *> symbol);
+
     // concatenate terms to form a parameter list with (()) syntax (those need to be out-of-class!)
     friend EBTermList operator,(const ExpressionBuilder::EBTerm & larg,
                                 const ExpressionBuilder::EBTerm & rarg);
@@ -699,4 +702,3 @@ ExpressionBuilder::EBSubstitutionRuleTyped<Node_T>::apply(
   else
     return substitute(*match_node);
 }
-

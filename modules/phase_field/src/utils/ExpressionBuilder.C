@@ -182,8 +182,8 @@ ExpressionBuilder::EBFunction::operator=(const ExpressionBuilder::EBFunction & f
 ExpressionBuilder::EBFunction::operator ExpressionBuilder::EBTerm() const
 {
   unsigned int narg = _arguments.size();
-  if (narg != _eval_arguments.size())
-    mooseError("EBFunction is used wth a different number of arguments than it was defined with.");
+  //if (narg != _eval_arguments.size())
+  //  mooseError("EBFunction is used wth a different number of arguments than it was defined with.");
 
   // prepare a copy of the function term to perform the substitution on
   EBTerm result(_term);
@@ -473,4 +473,14 @@ ExpressionBuilder::EBLogPlogSubstitution::substitute(const EBUnaryFuncTermNode &
         node.getSubnode()->clone(), _epsilon->clone(), EBBinaryFuncTermNode::PLOG);
   else
     return NULL;
+}
+
+ExpressionBuilder::EBTerm::EBTermVector
+ExpressionBuilder::EBTerm::CreateEBTermVector(const std::vector<const char *> symbol)
+{
+  EBTermVector vec;
+  for(std::vector<const char *>::const_iterator it = symbol.begin();
+      it != symbol.end(); ++it)
+      vec.push_back(*it);
+  return vec;
 }

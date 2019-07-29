@@ -961,6 +961,12 @@ protected:
   template <typename T>
   MooseVariableFE<T> * getVarHelper(const std::string & var_name, unsigned int comp);
 
+  std::vector<MooseVariable *>
+  getCoupledVector(const std::string & var_name, unsigned int _nvariables);
+
+  std::vector<const char *>
+  getCoupledVectorNames(const std::string & var_name, unsigned int _nvariables);
+
   /**
    * Extract pointer to a coupled variable
    * @param var_name Name of parameter desired

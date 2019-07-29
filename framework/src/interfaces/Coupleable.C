@@ -201,6 +201,29 @@ Coupleable::getVarHelper(const std::string & var_name, unsigned int comp)
   return nullptr;
 }
 
+std::vector<MooseVariable *>
+Coupleable::getCoupledVector(const std::string & var_name, unsigned int _nvariables)
+{
+  std::vector<MooseVariable *> _variables_to_return;
+  for(unsigned int i = 0; i < _nvariables; ++i)
+  {
+    _variables_to_return.push_back(getVarHelper<Real>(var_name, i));
+  }
+  return _variables_to_return;
+}
+
+std::vector<const char *>
+Coupleable::getCoupledVectorNames(const std::string & var_name, unsigned int _nvariables)
+{
+  std::vector<MooseVariable *> _variables_to_name = getCoupledVector(var_name,_nvariables);
+  std::vector<const char *> _names_to_return;
+  for(unsigned int i = 0; i < _nvariables; ++i)
+  {
+    _names_to_return.push_back(getVarHelper<Real>(var_name, i)->name().c_str());
+  }
+  return _names_to_return;
+}
+
 MooseVariable *
 Coupleable::getVar(const std::string & var_name, unsigned int comp)
 {
