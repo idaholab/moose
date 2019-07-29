@@ -117,7 +117,7 @@ public:
    * Get the verbose output flag
    * @return The verbose output flag
    */
-  bool & verbose() { return _verbose; }
+  const bool & verbose() const { return _verbose; }
 
 protected:
   /**
@@ -139,5 +139,5 @@ protected:
   std::string _restart_file_base;
 
   /// True if printing out additional information
-  bool _verbose;
+  const bool & _verbose;
 };
