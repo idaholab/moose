@@ -52,7 +52,7 @@
     type = 'RunException'
     input = 'optionally_coupled.i'
     cli_args = 'Kernels/wrong_index/type=CoupledForceWrongIndex Kernels/wrong_index/variable=u'
-    expect_err = 'Requested component 2 of coupled value v is out of range.'
+    expect_err = 'v: component 2 is out of range for this variable \(max 1\)'
     requirement = "The system shall report an error when requested default vector value is out of range."
     design = 'Coupleable.md'
     issues = '#11920'
@@ -62,7 +62,7 @@
     type = 'RunException'
     input = 'optionally_coupled.i'
     cli_args = 'Kernels/wrong_index/type=CoupledForceWrongIndex Kernels/wrong_index/variable=u Kernels/wrong_index/access_value=false'
-    expect_err = 'Requested component 2 of coupled value v is out of range.'
+    expect_err = 'v: component 2 is out of range for this variable \(max 1\)'
     requirement = "The system shall report an error when requested default vector value is out of range."
     design = 'Coupleable.md'
     issues = '#11920'
