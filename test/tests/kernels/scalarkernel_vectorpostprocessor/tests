@@ -3,5 +3,9 @@
     type = 'Exodiff'
     input = 'scalarkernel_vectorpostprocessor.i'
     exodiff = 'scalarkernel_vectorpostprocessor_out.e'
+
+    issues = '#7425'
+    design = 'syntax/Kernels/index.md'
+    requirement = 'The system shall support retrieving a vector of values in a kernel object for the purpose of computing a residual statement.'
   [../]
 []
