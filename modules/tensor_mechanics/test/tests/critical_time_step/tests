@@ -1,0 +1,10 @@
+[Tests]
+  design = 'source/postprocessors/CriticalTimeStep.md'
+  [./test]
+    type = 'CSVDiff'
+    input = 'critical_time_step_test.i'
+    csvdiff = 'out.csv'
+    issues = ''
+    requirement = "The system shall contain a `Postprocessor` that computes the critical time step of an explicit solver."
+  [../]
+[]
