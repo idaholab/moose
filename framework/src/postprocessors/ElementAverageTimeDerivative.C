@@ -16,6 +16,8 @@ InputParameters
 validParams<ElementAverageTimeDerivative>()
 {
   InputParameters params = validParams<ElementAverageValue>();
+  params.addClassDescription(
+      "Computes a volume integral of the time derivative of a given variable");
   return params;
 }
 

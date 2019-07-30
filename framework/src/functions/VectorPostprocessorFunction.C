@@ -29,6 +29,10 @@ validParams<VectorPostprocessorFunction>()
                                        "VectorPostprocessor column tabulating the "
                                        "ordinate (function values) of the sampled "
                                        "function");
+
+  params.addClassDescription(
+      "Provides piecewise linear interpolation of from two columns of a VectorPostprocessor");
+
   return params;
 }
 

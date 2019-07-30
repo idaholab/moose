@@ -17,6 +17,8 @@ InputParameters
 validParams<LineMaterialRealSampler>()
 {
   InputParameters params = validParams<LineMaterialSamplerBase<Real>>();
+  params.addClassDescription("Samples real-valued material properties for all quadrature points in "
+                             "all elements that are intersected by a specified line");
   return params;
 }
 
