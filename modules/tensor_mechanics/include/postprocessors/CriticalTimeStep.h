@@ -10,6 +10,7 @@
 #pragma once
 
 #include "ElementPostprocessor.h"
+#include "ComputeStressBase.h"
 
 // Forward Declarations
 class CriticalTimeStep;
@@ -32,6 +33,15 @@ public:
   virtual void threadJoin(const UserObject & y) override;
 
 protected:
+
+
+  virtual void computeQpStress();
+
+  /// Name of the elasticity tensor material property
+  const std::string _elasticity_tensor_name;
+  /// Elasticity tensor material property
+  const MaterialProperty<RankFourTensor> & _elasticity_tensor;
+
   Real _total_size;
   int _elems;
   Real _poiss_rat;

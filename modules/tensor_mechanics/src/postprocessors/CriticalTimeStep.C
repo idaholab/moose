@@ -29,6 +29,8 @@ validParams<CriticalTimeStep>()
 
 CriticalTimeStep::CriticalTimeStep(const InputParameters & parameters)
   : ElementPostprocessor(parameters),
+  _elasticity_tensor_name(_sc_name + "elasticity_tensor"),
+  _elasticity_tensor(getMaterialPropertyByName<RankFourTensor>(_elasticity_tensor_name)),
   _poiss_rat(getParam<Real>("poisson_ratio")),
   _young_mod(getParam<Real>("youngs_modulus")),
   _mat_dens(getParam<Real>("material_density"))
@@ -38,14 +40,14 @@ CriticalTimeStep::CriticalTimeStep(const InputParameters & parameters)
 void
 CriticalTimeStep::initialize()
 {
-  _total_size = 0;
+  _total_size = 1e10;
   _elems = 0;
 }
 
 void
 CriticalTimeStep::execute()
 {
-  _total_size += _current_elem->hmin();
+  _total_size = std::min(_current_elem->hmin(), _total_size);
   _elems++;
 }
 
@@ -55,10 +57,9 @@ CriticalTimeStep::getValue()
   gatherSum(_total_size);
   gatherSum(_elems);
 
-  Real ele_length = _total_size / _elems;
   Real ele_c = std::sqrt((_young_mod*(1-_poiss_rat))/((1+_poiss_rat)*(1-2*_poiss_rat)*_mat_dens));
 
-  return ele_length/ele_c;
+  return _total_size/ele_c;
 }
 
 void
@@ -67,4 +68,9 @@ CriticalTimeStep::threadJoin(const UserObject & y)
   const CriticalTimeStep & pps = static_cast<const CriticalTimeStep &>(y);
   _total_size += pps._total_size;
   _elems += pps._elems;
+}
+void
+CriticalTimeStep::computeQpStress()
+{
+  std::cout << _elasticity_tensor[_qp](0,0,2,2) << std::endl;
 }
