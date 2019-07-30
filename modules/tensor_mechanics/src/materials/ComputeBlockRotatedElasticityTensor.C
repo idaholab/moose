@@ -25,7 +25,7 @@ validParams<ComputeBlockRotatedElasticityTensor>()
       "fill_method", RankFourTensor::fillMethodEnum() = "symmetric9", "The fill method");
   params.addRequiredParam<UserObjectName>("euler_angle_provider",
                                           "Name of Euler angle provider user object");
-  params.addRequiredParam<int>("offset", "Offset value for grain_id");
+  params.addRequiredParam<int>("offset", "offset value for grain_id");
 
   return params;
 }
