@@ -46,12 +46,6 @@
     inputs = 'layer1 layer2 layer3 layer4'
     bottom_height = 4
   []
-
-
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Outputs]

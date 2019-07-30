@@ -14,10 +14,6 @@
   []
 []
 
-[Mesh]
-  type = MeshGeneratorMesh
-[]
-
 [Variables]
   [./u]
     block = 0

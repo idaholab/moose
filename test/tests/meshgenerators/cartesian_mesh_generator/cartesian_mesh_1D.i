@@ -7,7 +7,3 @@
     subdomain_id = '0 2 1'
   [../]
 []
-
-[Mesh]
-  type = MeshGeneratorMesh
-[]

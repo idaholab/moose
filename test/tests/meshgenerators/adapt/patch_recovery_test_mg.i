@@ -6,10 +6,6 @@
   []
 []
 
-[Mesh]
-  type = MeshGeneratorMesh
-[]
-
 [Variables]
   active = 'u v'
 

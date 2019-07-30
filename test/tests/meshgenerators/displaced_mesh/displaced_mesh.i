@@ -10,7 +10,3 @@
     nt = 20
   []
 []
-
-[Mesh]
-  type = MeshGeneratorMesh
-[]

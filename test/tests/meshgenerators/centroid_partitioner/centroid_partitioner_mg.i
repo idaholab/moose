@@ -25,10 +25,6 @@
   []
 []
 
-[Mesh]
-  type = MeshGeneratorMesh
-[]
-
 [Variables]
   active = 'u'
 

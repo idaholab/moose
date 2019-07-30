@@ -16,10 +16,6 @@
   []
 []
 
-[Mesh]
-  type = MeshGeneratorMesh
-[]
-
 [Variables]
   [./u]
   [../]

@@ -23,7 +23,3 @@
                        0 3'
   []
 []
-
-[Mesh]
-  type = MeshGeneratorMesh
-[]

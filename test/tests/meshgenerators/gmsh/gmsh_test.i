@@ -4,7 +4,3 @@
     file = sample.msh
   []
 []
-
-[Mesh]
-  type = MeshGeneratorMesh
-[]

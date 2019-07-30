@@ -1,7 +1,3 @@
-[Mesh]
-  type = MeshGeneratorMesh
-[]
-
 [MeshGenerators]
   [gen]
     type = GeneratedMeshGenerator

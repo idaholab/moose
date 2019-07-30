@@ -26,10 +26,6 @@
   []
 []
 
-[Mesh]
-  type = MeshGeneratorMesh
-[]
-
 [Problem]
   type = FEProblem
   solve = false

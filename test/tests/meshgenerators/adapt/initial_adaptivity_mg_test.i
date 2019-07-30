@@ -12,10 +12,6 @@
   []
 []
 
-[Mesh]
-  type = MeshGeneratorMesh
-[]
-
 [Functions]
   [./exact_fn]
     type = ParsedFunction

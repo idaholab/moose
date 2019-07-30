@@ -7,10 +7,6 @@
   []
 []
 
-[Mesh]
-  type = MeshGeneratorMesh
-[]
-
 [Functions]
   [./aux_v_fn]
     type = ParsedFunction

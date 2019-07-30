@@ -43,10 +43,6 @@
   []
 []
 
-[Mesh]
-  type = MeshGeneratorMesh
-[]
-
 [Variables]
   [./c_volume]
     [./InitialCondition]

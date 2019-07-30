@@ -1,7 +1,3 @@
-[Mesh]
-  type = MeshGeneratorMesh
-[]
-
 [Debug]
   show_material_props = true
 []

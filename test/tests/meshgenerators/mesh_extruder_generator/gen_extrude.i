@@ -20,10 +20,6 @@
   []
 []
 
-[Mesh]
-  type = MeshGeneratorMesh
-[]
-
 [Variables]
   [./u]
     order = FIRST

@@ -7,10 +7,6 @@
   []
 []
 
-[Mesh]
-  type = MeshGeneratorMesh
-[]
-
 [Outputs]
   exodus = true
 []

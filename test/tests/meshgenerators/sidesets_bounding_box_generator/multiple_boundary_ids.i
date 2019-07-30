@@ -26,10 +26,6 @@
   [../]
 []
 
-[Mesh]
-  type = MeshGeneratorMesh
-[]
-
 [Variables]
   [./u]
   [../]
@@ -67,4 +63,3 @@
 [Outputs]
   exodus = true
 []
-

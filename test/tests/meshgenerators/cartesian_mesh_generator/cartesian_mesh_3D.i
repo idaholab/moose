@@ -22,7 +22,3 @@
                     '
   [../]
 []
-
-[Mesh]
-  type = MeshGeneratorMesh
-[]
