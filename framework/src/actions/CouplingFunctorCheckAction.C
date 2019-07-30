@@ -8,11 +8,11 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CouplingFunctorCheckAction.h"
-#include "Kernel.h"
 #include "MooseApp.h"
 #include "FEProblemBase.h"
 #include "NonlinearSystemBase.h"
-#include "DGKernelBase.h"
+#include "InputParameters.h"
+#include "MooseGhosting.h"
 
 #include "libmesh/system.h"
 
@@ -50,7 +50,8 @@ CouplingFunctorCheckAction::act()
   if (dgs.size() || iks.size())
     // It doesn't really matter what T is in validParams<T> as long as it will add our single layer
     // of coupling
-    addRelationshipManagers(Moose::RelationshipManagerType::COUPLING, validParams<DGKernelBase>());
+    addRelationshipManagers(Moose::RelationshipManagerType::COUPLING,
+                            Moose::oneLayerGhosting(Moose::RelationshipManagerType::COUPLING));
 
   // If we have any of these, we need default coupling, e.g. 0 layers of sparsity, otherwise known
   // as element intra-dof coupling. The `else if` below is important; if we already added 1 layer of
@@ -59,7 +60,8 @@ CouplingFunctorCheckAction::act()
   else if (kernels.size() || nbcs.size() || ibcs.size())
     // It doesn't really matter what T is in validParams<T> as long as it will add our default
     // coupling functor object (ElementSideNeighborLayers with n_levels of 0)
-    addRelationshipManagers(Moose::RelationshipManagerType::COUPLING, validParams<Kernel>());
+    addRelationshipManagers(Moose::RelationshipManagerType::COUPLING,
+                            Moose::zeroLayerGhosting(Moose::RelationshipManagerType::COUPLING));
 
   // See whether we've actually added anything new
   if (original_size != _app.relationshipManagers().size())
