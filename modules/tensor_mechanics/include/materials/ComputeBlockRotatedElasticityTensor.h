@@ -32,12 +32,12 @@ public:
 protected:
   virtual void computeQpElasticityTensor();
 
-  /// unrotated elasticity tensor
+  /// Unrotated elasticity tensor
   RankFourTensor _C_ijkl;
 
-  /// object providing the Euler angles
+  /// Object providing the Euler angles
   const EulerAngleProvider & _euler;
 
-  // offsets the grain id
+  // Offsets the grain id
   int _offset;
 };
