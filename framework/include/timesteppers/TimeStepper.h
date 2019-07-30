@@ -133,7 +133,7 @@ protected:
   Real & _timestep_tolerance;
 
   ///should detailed diagnostic output be printed
-  bool & _verbose;
+  const bool & _verbose;
 
   /// Whether or not the previous solve converged.
   bool _converged;
@@ -148,4 +148,3 @@ private:
   /// Size of the current time step as computed by the Stepper.  Note that the actual dt that was taken might be smaller if the Executioner constrained it.
   Real & _current_dt;
 };
-

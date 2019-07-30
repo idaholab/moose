@@ -630,6 +630,12 @@ public:
 
   virtual TagID systemMatrixTag() override { return _Ke_system_tag; }
 
+  /**
+   * Sets the verbose flag
+   * @param[in] verbose   Verbose flag
+   */
+  void setVerboseFlag(const bool & verbose) { _verbose = verbose; }
+
 public:
   FEProblemBase & _fe_problem;
   System & _sys;
@@ -691,6 +697,9 @@ protected:
   void mortarJacobianConstraints(bool displaced);
 
 protected:
+  /// True if printing out additional information
+  bool _verbose;
+
   /// solution vector from nonlinear solver
   const NumericVector<Number> * _current_solution;
   /// ghosted form of the residual

@@ -124,7 +124,6 @@ validParams<Transient>()
 
   params.addParamNamesToGroup("time_periods time_period_starts time_period_ends", "Time Periods");
 
-  params.addParam<bool>("verbose", false, "Print detailed diagnostics on timestep calculation");
   return params;
 }
 
@@ -159,7 +158,6 @@ Transient::Transient(const InputParameters & parameters)
     _timestep_tolerance(getParam<Real>("timestep_tolerance")),
     _target_time(declareRecoverableData<Real>("target_time", -1)),
     _use_multiapp_dt(getParam<bool>("use_multiapp_dt")),
-    _verbose(getParam<bool>("verbose")),
     _sln_diff(_nl.addVector("sln_diff", false, PARALLEL)),
     _final_timer(registerTimedSection("final", 1))
 {
