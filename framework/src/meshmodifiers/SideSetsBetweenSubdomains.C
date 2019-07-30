@@ -14,7 +14,10 @@
 
 #include "libmesh/remote_elem.h"
 
-registerMooseObject("MooseApp", SideSetsBetweenSubdomains);
+registerMooseObjectReplaced("MooseApp",
+                            SideSetsBetweenSubdomains,
+                            "08/12/2019 00:00",
+                            SideSetsBetweenSubdomainGenerator);
 
 template <>
 InputParameters

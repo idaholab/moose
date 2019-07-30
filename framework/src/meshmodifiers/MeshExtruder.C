@@ -15,7 +15,7 @@
 #include "libmesh/elem.h"
 #include "libmesh/boundary_info.h"
 
-registerMooseObject("MooseApp", MeshExtruder);
+registerMooseObjectReplaced("MooseApp", MeshExtruder, "08/12/2019 00:00", MeshExtruderGenerator);
 
 template <>
 InputParameters

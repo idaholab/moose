@@ -5,11 +5,10 @@
     nx = 2
     ny = 2
   []
-[]
 
-[MeshModifiers]
   [rotate]
-    type = Transform
+    type = TransformGenerator
+    input = gmg
     transform = ROTATE
     vector_value = '0 90 0'
   []

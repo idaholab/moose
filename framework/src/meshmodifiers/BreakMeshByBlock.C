@@ -12,7 +12,10 @@
 
 #include "libmesh/elem.h"
 
-registerMooseObject("MooseApp", BreakMeshByBlock);
+registerMooseObjectReplaced("MooseApp",
+                            BreakMeshByBlock,
+                            "08/12/2019 00:00",
+                            BreakMeshByBlockGenerator);
 
 template <>
 InputParameters

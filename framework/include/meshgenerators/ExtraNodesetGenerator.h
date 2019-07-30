@@ -17,9 +17,6 @@ class ExtraNodesetGenerator;
 template <>
 InputParameters validParams<ExtraNodesetGenerator>();
 
-/**
- *
- */
 class ExtraNodesetGenerator : public MeshGenerator
 {
 public:
@@ -30,4 +27,3 @@ public:
 protected:
   std::unique_ptr<MeshBase> & _input;
 };
-

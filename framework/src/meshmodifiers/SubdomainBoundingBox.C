@@ -13,7 +13,10 @@
 
 #include "libmesh/elem.h"
 
-registerMooseObject("MooseApp", SubdomainBoundingBox);
+registerMooseObjectReplaced("MooseApp",
+                            SubdomainBoundingBox,
+                            "08/12/2019 00:00",
+                            SubdomainBoundingBoxGenerator);
 
 template <>
 InputParameters
