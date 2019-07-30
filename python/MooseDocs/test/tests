@@ -12,7 +12,7 @@
         type = RunCommand
         command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.Serial'
         detail = "using a serial scheme;"
-        prereq = barrier
+        prereq = 'materialize/barrier'
     []
     [pipe]
         type = RunCommand

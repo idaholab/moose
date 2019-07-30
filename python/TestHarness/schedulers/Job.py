@@ -350,8 +350,8 @@ class Job(object):
         Return the most accurate message possible, based on the statuses of both the Tester and Job.
         Most of the time, we want to return a Tester status. As this class will have the most detail.
         """
-        # Tester has no status, use a job status instead
-        if self.isTimeout() or self.isNoStatus():
+        # Job has failed, or tester has no status
+        if self.isError() or self.isNoStatus():
             return (self.getStatus().status,
                     self.getStatusMessage(),
                     self.getStatus().color,
