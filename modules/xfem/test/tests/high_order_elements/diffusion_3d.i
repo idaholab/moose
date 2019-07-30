@@ -21,6 +21,7 @@
 [XFEM]
   qrule = volfrac
   output_cut_plane = true
+  min_weight_multiplier = 0.0
 []
 
 [UserObjects]
