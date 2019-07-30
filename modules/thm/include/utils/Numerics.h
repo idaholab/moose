@@ -325,6 +325,20 @@ void E_from_arhoA_arhoEA(Real arhoA, Real arhoEA, Real & E, Real & dE_darhoA, Re
 void E_from_e_vel(Real e, Real vel, Real & E, Real & dE_de, Real & dE_dvel);
 
 /**
+ * Computes specific enthalpy and its derivatives from specific internal energy, pressure, and
+ * density
+ *
+ * @param[in] e          specific internal energy
+ * @param[in] p          pressure
+ * @param[in] rho        density
+ * @param[out] h         specific enthalpy
+ * @param[out] dh_de     derivative of specific enthalpy w.r.t. specific internal energy
+ * @param[out] dh_dp     derivative of specific enthalpy w.r.t. pressure
+ * @param[out] dh_drho   derivative of specific enthalpy w.r.t. density
+ */
+void h_from_e_p_rho(Real e, Real p, Real rho, Real & h, Real & dh_de, Real & dh_dp, Real & dh_drho);
+
+/**
  * Determine if inlet boundary condition should be applied
  *
  * @return true if the flow conditions are inlet, false otherwise

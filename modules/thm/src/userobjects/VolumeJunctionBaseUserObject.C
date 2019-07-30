@@ -33,6 +33,7 @@ VolumeJunctionBaseUserObject::VolumeJunctionBaseUserObject(
 
     _scalar_dofs(_n_scalar_eq),
     _flow_channel_dofs(_n_connections),
+    _phi_face_values(_n_connections, std::vector<std::vector<Real>>(_n_flux_eq)),
 
     _residual(_n_scalar_eq),
     _residual_jacobian_scalar_vars(_n_scalar_eq, DenseMatrix<Real>(1, _n_scalar_eq)),
@@ -70,14 +71,20 @@ VolumeJunctionBaseUserObject::execute()
   const unsigned int c = getBoundaryIDIndex();
   _connection_indices.push_back(c);
 
-  // Get flow channel Dofs
+  // Get flow channel Dofs and basic function values
   _flow_channel_dofs[c].clear();
   for (unsigned int j = 0; j < _n_flux_eq; j++)
   {
     MooseVariable * var = getVar(_flow_variable_names[j], 0);
+
     auto && dofs = var->dofIndices();
     for (unsigned int k = 0; k < dofs.size(); k++)
       _flow_channel_dofs[c].push_back(dofs[k]);
+
+    const VariablePhiValue & phi = var->phiFace();
+    _phi_face_values[c][j].resize(phi.size());
+    for (unsigned int k = 0; k < phi.size(); k++)
+      _phi_face_values[c][j][k] = phi[k][0];
   }
 
   // Perform the computations
@@ -95,11 +102,9 @@ VolumeJunctionBaseUserObject::computeScalarJacobianWRTFlowDofs(const DenseMatrix
     unsigned int jk = 0;
     for (unsigned int j = 0; j < _n_flux_eq; j++)
     {
-      MooseVariable * var = getVar(_flow_variable_names[j], 0);
-      const VariablePhiValue & phi = var->phiFace();
-      for (unsigned int k = 0; k < phi.size(); k++)
+      for (unsigned int k = 0; k < _phi_face_values[c][j].size(); k++)
       {
-        _residual_jacobian_flow_channel_vars[c][i](0, jk) = jac(i, j) * phi[k][0];
+        _residual_jacobian_flow_channel_vars[c][i](0, jk) = jac(i, j) * _phi_face_values[c][j][k];
         jk++;
       }
     }
@@ -121,6 +126,7 @@ VolumeJunctionBaseUserObject::threadJoin(const UserObject & uo)
     _flux_jacobian_scalar_vars[c] = volume_junction_uo._flux_jacobian_scalar_vars[c];
     _flux_jacobian_flow_channel_vars[c] = volume_junction_uo._flux_jacobian_flow_channel_vars[c];
     _flow_channel_dofs[c] = volume_junction_uo._flow_channel_dofs[c];
+    _phi_face_values[c] = volume_junction_uo._phi_face_values[c];
     _residual_jacobian_flow_channel_vars[c] =
         volume_junction_uo._residual_jacobian_flow_channel_vars[c];
   }

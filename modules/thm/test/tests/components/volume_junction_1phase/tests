@@ -1,0 +1,34 @@
+[Tests]
+  [./equal_area_x_direction]
+    type = 'CSVDiff'
+    input = 'equal_area_with_junction.i'
+    cli_args = 'Components/junction/volume=1.0'
+    # The gold file was actually produced with equal_area_no_junction.i and
+    # then renamed to equal_area_with_junction_out.csv.
+    csvdiff = 'equal_area_with_junction_out.csv'
+  [../]
+  [./equal_area_not_x_direction]
+    type = 'CSVDiff'
+    input = 'equal_area_with_junction.i'
+    cli_args = '
+      Components/junction/volume=1.0
+      Functions/T0/axis=y
+      Components/pipe1/orientation="0 1 0"
+      Components/junction/position="0 1.02 0"
+      Components/junction/initial_vel_x=0
+      Components/junction/initial_vel_y=1
+      Components/pipe2/position="0 1.04 0"
+      Components/pipe2/orientation="0 1 0"
+      Postprocessors/junction_rhou/variable=junction:rhovV'
+    csvdiff = 'equal_area_with_junction_out.csv'
+    prereq = 'equal_area_x_direction'
+  [../]
+
+  # Tests conservation of mass and energy for 1-phase flow.
+  [./conservation_1phase]
+    type = 'CSVDiff'
+    input = 't_junction_1phase.i'
+    csvdiff = 't_junction_1phase_out.csv'
+    abs_zero = 1e-10
+  [../]
+[]
