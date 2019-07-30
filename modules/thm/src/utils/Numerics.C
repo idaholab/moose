@@ -207,6 +207,15 @@ E_from_e_vel(Real e, Real vel, Real & E, Real & dE_de, Real & dE_dvel)
   dE_dvel = vel;
 }
 
+void
+h_from_e_p_rho(Real e, Real p, Real rho, Real & h, Real & dh_de, Real & dh_dp, Real & dh_drho)
+{
+  h = e + p / rho;
+  dh_de = 1.0;
+  dh_dp = 1.0 / rho;
+  dh_drho = -p / (rho * rho);
+}
+
 bool
 isInlet(Real vel, Real normal)
 {

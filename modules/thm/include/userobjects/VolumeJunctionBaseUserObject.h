@@ -122,6 +122,8 @@ protected:
   std::vector<dof_id_type> _scalar_dofs;
   /// Degrees of freedom for flow channel variables, for each connection
   std::vector<std::vector<dof_id_type>> _flow_channel_dofs;
+  /// Face phi values: [connection][local flow eq][local phi]
+  std::vector<std::vector<std::vector<Real>>> _phi_face_values;
 
   /// Cached flux vector for each connection
   std::vector<std::vector<Real>> _flux;
