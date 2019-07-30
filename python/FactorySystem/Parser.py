@@ -140,6 +140,9 @@ class Parser:
             # Get the valid Params for this type
             params = self.factory.validParams(moose_type)
 
+            # Record full path of node
+            params.addParam('hit_path', node.fullpath(), 'HIT path to test in spec file')
+
             # Apply any new defaults
             for key, value in default_values.iterparams():
                 if key in params.keys():
