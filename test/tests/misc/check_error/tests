@@ -485,6 +485,16 @@
     issues = '#1405'
   [../]
 
+  [./missing_mesh_and_gen_block]
+    type = 'RunException'
+    input = 'missing_mesh_and_gen_block.i'
+    expect_err = "Your input file should contain either a [Mesh] or [MeshGenerators] block."
+    match_literal = true
+
+    requirement = 'The system shall report an error when the input file contains no block to open or create a mesh.'
+    issues = '#13825'
+  [../]
+
   [./missing_req_par_action_obj_test]
     type = 'RunException'
     input = 'missing_req_par_action_obj_test.i'

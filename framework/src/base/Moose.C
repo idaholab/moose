@@ -233,6 +233,7 @@ addActionTypes(Syntax & syntax)
   registerTask("add_output_aux_variables", true);
   registerTask("check_output", true);
 
+  registerTask("create_mesh_default", true);
   registerTask("create_problem_default", true);
   registerTask("create_problem_custom", false);
   registerTask("create_problem_complete", false);
@@ -254,6 +255,7 @@ addActionTypes(Syntax & syntax)
                            "(common_output)"
                            "(set_global_params)"
                            "(setup_recover_file_base)"
+                           "(create_mesh_default)"
                            "(setup_mesh)"
                            "(add_mesh_generator)"
                            "(execute_mesh_generators)"

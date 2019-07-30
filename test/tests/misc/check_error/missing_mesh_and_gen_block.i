@@ -1,37 +1,38 @@
-# No Mesh Block!
-
+# No Mesh or MeshGenerator block
 [Variables]
-  [u]
-  []
+  [./u]
+    order = FIRST
+    family = LAGRANGE
+  [../]
 []
 
 [Kernels]
-  [diff]
+  [./diff]
     type = Diffusion
     variable = u
-  []
+  [../]
 []
 
 [BCs]
-  [leftBC]
+  [./left]
     type = DirichletBC
     variable = u
-    boundary = 10
-    value = 1
-  []
-  [rightBC]
-    type = DirichletBC
-    variable = u
-    boundary = 11
+    boundary = 1
     value = 0
-  []
+  [../]
+
+  [./right]
+    type = DirichletBC
+    variable = u
+    boundary = 2
+    value = 1
+  [../]
 []
 
 [Executioner]
   type = Steady
+
   solve_type = 'PJFNK'
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
 []
 
 [Outputs]

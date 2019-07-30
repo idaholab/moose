@@ -1552,6 +1552,23 @@ MooseApp::clearMeshGenerators()
   _mesh_generators.clear();
 }
 
+std::unique_ptr<MeshBase>
+MooseApp::getMeshGeneratorMesh(bool check_unique)
+{
+  if (_final_generated_meshes.empty())
+    mooseError("No generated mesh to retrieve. Your input file should contain either a [Mesh] or "
+               "[MeshGenerators] block.");
+
+  auto mesh_unique_ptr_ptr = _final_generated_meshes.front();
+  _final_generated_meshes.pop_front();
+
+  if (check_unique && !_final_generated_meshes.empty())
+    mooseError("Multiple generated meshes exist while retrieving the final Mesh. This means that "
+               "the selection of the final mesh is non-deterministic.");
+
+  return std::move(*mesh_unique_ptr_ptr);
+}
+
 void
 MooseApp::setRestart(const bool & value)
 {

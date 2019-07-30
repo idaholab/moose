@@ -23,7 +23,7 @@
   type = MeshGeneratorMesh
 []
 
- [Variables]
+[Variables]
   [./u]
     order = FIRST
     family = LAGRANGE
