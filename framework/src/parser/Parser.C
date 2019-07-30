@@ -427,22 +427,23 @@ Parser::hitCLIFilter(std::string appname, const std::vector<std::string> & argv)
     else if (appname != "main") // app we are loading is a multiapp subapp
     {
       std::string name;
-      std::string num;
+      int num;
       pcrecpp::RE("(.*?)"  // Match the multiapp name
                   "(\\d+)" // math the multiapp number
                   )
           .FullMatch(appname, &name, &num);
-      auto pos = arg.find(":", 0);
-      if (pos == 0)
-        ; // cli param is ":" prefixed meaning global for all main+subapps
-      else if (pos == std::string::npos) // param is for main app - skip
-        continue;
-      else if (arg.substr(0, pos) != appname &&
-               arg.substr(0, pos) != name) // param is for different multiapp - skip
+      switch (hitArgCmp(arg, name, num))
       {
-        _app.commandLine()->markHitParam(i);
-        continue;
+        case GLOBAL:
+        case MATCH:
+          break;
+        case WRONG:
+          _app.commandLine()->markHitParam(i);
+          continue;
+        case MAIN:
+          continue;
       }
+      auto pos = arg.find(":", 0);
       arg = arg.substr(pos + 1, arg.size() - pos - 1); // trim off subapp name prefix
     }
 

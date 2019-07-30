@@ -75,20 +75,7 @@ CommandLine::initForMultiApp(const std::string & subapp_full_name)
   // an erase is needed to actually remove the items
   auto new_end =
       std::remove_if(_argv.begin(), _argv.end(), [&sub_name, sub_num](const std::string & arg) {
-        // Determine if the current command line argument ('arg') and extract the sub-application
-        // name and number. If 'arg' is not command line argument for sub-application then the regex
-        // match fails and the argument is retained.
-        std::string arg_sub_name;
-        int arg_sub_num = -1;
-        pcrecpp::RE("(\\S*?)(\\d*):").PartialMatch(arg, &arg_sub_name, &arg_sub_num);
-        if (!arg_sub_name.empty())
-        {
-          // The argument should be retained if names match and the current argument doesn't have
-          // a number or the supplied sub-application number and the current argument number match
-          bool keep = (sub_name == arg_sub_name && (arg_sub_num == -1 || arg_sub_num == sub_num));
-          return !keep;
-        }
-        return false;
+        return hitArgCmp(arg, sub_name, sub_num) == WRONG;
       });
   _argv.erase(new_end, _argv.end());
 
@@ -247,4 +234,18 @@ void
 CommandLine::setArgument<std::string>(std::stringstream & stream, std::string & argument)
 {
   argument = stream.str();
+}
+
+HitCmpResult hitArgCmp(std::string arg, std::string app_name, int app_num)
+{
+  int arg_num = -1;
+  std::string arg_name;
+  auto pos = arg.find(":", 0);
+  if (pos == 0)
+    return GLOBAL;
+  if (pos == std::string::npos)
+    return MAIN;
+  pcrecpp::RE("(\\S*?)(\\d*):").PartialMatch(arg, &arg_name, &arg_num);
+  if (app_name == arg_name && (arg_num == -1 || arg_num == app_num)) return MATCH;
+  return WRONG;
 }
