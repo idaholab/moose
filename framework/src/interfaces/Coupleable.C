@@ -223,14 +223,18 @@ Coupleable::getVarHelper(const std::string & var_name, unsigned int comp)
   {
     for (auto & var : _coupled_standard_moose_vars)
       if (var->name() == var_name)
-        mooseError("The coupled call is not for coupled standard variables");
+        mooseError("The named variable is a standard variable, try a "
+                   "'coupled[Value/Gradient/Dot/etc]...' function instead");
     for (auto & var : _coupled_vector_moose_vars)
       if (var->name() == var_name)
-        mooseError("The coupled call is not for coupled vector variables");
+        mooseError("The named variable is a vector variable, try a "
+                   "'coupledVector[Value/Gradient/Dot/etc]...' function instead");
     for (auto & var : _coupled_array_moose_vars)
       if (var->name() == var_name)
-        mooseError("The coupled call is not for coupled array variables");
-    mooseError("Error for coupling variable ", var_name);
+        mooseError("The named variable is an array variable, try a "
+                   "'coupledArray[Value/Gradient/Dot/etc]...' function instead");
+    mooseError(
+        "Variable '", var_name, "' is of a different C++ type than you tried to fetch it as.");
   }
 }
 
