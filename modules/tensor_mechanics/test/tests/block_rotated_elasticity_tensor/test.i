@@ -1,7 +1,8 @@
 [Tests]
   issues = '#13496'
   design = 'ComputeBlockRotatedElasticityTensor.md'
-
+  
+  
   [./block_rotated_elasticity_tensor]
     type = Exodiff
     input = 'block_rotated_elasticity_tensor_test.i'
