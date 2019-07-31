@@ -46,6 +46,11 @@ validParams<MultiAppUserObjectTransfer>()
                         "the subApps during a transfer from sub App to Master App. If master node "
                         "cannot be found within bounding boxes of any of the subApps, an error is "
                         "generated.");
+
+  params.addClassDescription(
+      "Samples a variable's value in the Master domain at the point where the MultiApp is and "
+      "copies that value into a post-processor in the MultiApp");
+
   return params;
 }
 
