@@ -63,6 +63,7 @@ Action::Action(InputParameters parameters)
             (parameters.isParamValid("task") && parameters.get<std::string>("task") != ""
                  ? std::string("::") + parameters.get<std::string>("task")
                  : "")),
+    ParallelObject(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
     _pars(parameters),
     _registered_identifier(isParamValid("registered_identifier")
                                ? getParam<std::string>("registered_identifier")
@@ -193,6 +194,8 @@ void
 Action::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type,
                                 const InputParameters & moose_object_pars)
 {
+  typedef RelationshipManager RM;
+
   const auto & buildable_types = moose_object_pars.getBuildableRelationshipManagerTypes();
 
   for (const auto & buildable_type : buildable_types)
@@ -210,10 +213,9 @@ Action::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type,
     // ensuring that a non-null CouplingMatrix (reflecting coupling in the nonlinear system) doesn't
     // get applied to the auxiliary system
 
-    bool is_algebraic = (rm_type & Moose::RelationshipManagerType::ALGEBRAIC) ==
-                        Moose::RelationshipManagerType::ALGEBRAIC;
-    bool is_coupleable = (rm_type & Moose::RelationshipManagerType::COUPLING) ==
-                         Moose::RelationshipManagerType::COUPLING;
+    bool is_algebraic = RM::isAlgebraic(rm_type);
+    bool is_coupleable = RM::isCoupling(rm_type);
+
     auto sys_type = (is_algebraic || is_coupleable) ? Moose::RMSystemType::NONLINEAR
                                                     : Moose::RMSystemType::NONE;
 

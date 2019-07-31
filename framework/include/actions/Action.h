@@ -15,6 +15,8 @@
 #include "PerfGraphInterface.h"
 #include "MemberTemplateMacros.h"
 
+#include "libmesh/parallel_object.h"
+
 #include <string>
 #include <ostream>
 
@@ -33,7 +35,9 @@ InputParameters validParams<Action>();
 /**
  * Base class for actions.
  */
-class Action : public ConsoleStreamInterface, public PerfGraphInterface
+class Action : public ConsoleStreamInterface,
+               public PerfGraphInterface,
+               public libMesh::ParallelObject
 {
 public:
   Action(InputParameters parameters);

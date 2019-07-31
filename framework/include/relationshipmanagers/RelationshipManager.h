@@ -136,4 +136,47 @@ protected:
 
   /// What type of systems this RM can be applied to
   const Moose::RMSystemType _system_type;
+
+public:
+  /**
+   * Whether \p input_rm is geometric
+   */
+  static bool isGeometric(Moose::RelationshipManagerType input_rm);
+
+  /**
+   * Whether \p input_rm is algebraic
+   */
+  static bool isAlgebraic(Moose::RelationshipManagerType input_rm);
+
+  /**
+   * Whether \p input_rm is coupling
+   */
+  static bool isCoupling(Moose::RelationshipManagerType input_rm);
+
+  /**
+   * A relationship manager type that is geometric and algebraic
+   */
+  static Moose::RelationshipManagerType geo_and_alg;
+
+  /**
+   * A relationship manager type that is geometric, algebraic, and coupling
+   */
+  static Moose::RelationshipManagerType geo_alg_and_coupl;
+
+  /**
+   * This returns an \p InputParameters object containing an \p ElementSideNeighborLayers
+   * relationship manager with zero layers of ghosting. While zero layers may seem foolish, this is
+   * actually very useful for building the correct sparsity pattern between intra-element degrees of
+   * freedom. Since this object only has meaning for building the sparsity pattern, the relationsip
+   * manager type contained within the returned \p InputParameters object will be COUPLING
+   */
+  static InputParameters zeroLayerGhosting();
+
+  /**
+   * This returns an \p InputParameters object containing an \p ElementSideNeighborLayers
+   * relationship manager with one side layer of ghosting.
+   * @param rm_type The type of relationship manager that should be added. This can be GEOMETRIC,
+   *                ALGEBRAIC, COUPLING or a combination of the three
+   */
+  static InputParameters oneLayerGhosting(Moose::RelationshipManagerType rm_type);
 };

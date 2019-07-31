@@ -26,14 +26,16 @@
 #include <tuple>
 #endif
 
-#define CONSOLE_TIMED_PRINT(...)                                                                   \
+#define CONTROLLED_CONSOLE_TIMED_PRINT(initial_wait, dot_interval, ...)                            \
   std::unique_ptr<TimedPrint> tpc =                                                                \
       _communicator.rank() == 0                                                                    \
           ? libmesh_make_unique<TimedPrint>(_console,                                              \
-                                            std::chrono::duration<double>(1),                      \
-                                            std::chrono::duration<double>(1),                      \
+                                            std::chrono::duration<double>(initial_wait),           \
+                                            std::chrono::duration<double>(dot_interval),           \
                                             __VA_ARGS__)                                           \
           : nullptr;
+
+#define CONSOLE_TIMED_PRINT(...) CONTROLLED_CONSOLE_TIMED_PRINT(1, 1, __VA_ARGS__)
 
 /**
  * Object to print a message after enough time has passed.
