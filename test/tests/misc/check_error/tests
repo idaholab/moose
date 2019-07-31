@@ -388,7 +388,7 @@
   [./invalid_elemental_to_nodal_couple_test]
     type = 'RunException'
     input = 'invalid_aux_coupling_test.i'
-    expect_err = "You cannot couple an elemental variable to a nodal variable"
+    expect_err = "cannot couple elemental variables into nodal objects"
 
     requirement = 'The system shall report an error when an elemental variable (no $C_0$ continuity) is coupled to a variable with $C_0$ continuity.'
     issues = '#1405'
@@ -704,7 +704,7 @@
   [./old_integrity_check]
     type = 'RunException'
     input = 'old_integrity_check.i'
-    expect_err = 'Calling \'coupledGradientOld\' on variable \S+ when using a \"Steady\" executioner is not allowed. This value is available only in transient simulations.'
+    expect_err = 'Calling "coupled\[Vector\]\[Gradient/Dot\]Old\[er\]" on variable "\S+" when using a \"Steady\" executioner is not allowed. This value is available only in transient simulations.'
 
     requirement = 'The system shall report an error when coupling to old temporal solution vectors in a Steady (no time) Executioner.'
     issues = '#380'
@@ -713,7 +713,7 @@
   [./dot_integrity_check]
     type = 'RunException'
     input = 'dot_integrity_check.i'
-    expect_err = 'Calling \'coupledDot\' on variable \S+ when using a \"Steady\" executioner is not allowed. This value is available only in transient simulations.'
+    expect_err = 'Calling "coupled\[Vector\]\[Gradient/Dot\]Old\[er\]" on variable "\S+" when using a \"Steady\" executioner is not allowed. This value is available only in transient simulations.'
 
     requirement = 'The system shall report an error when coupling to a time derivative solution vector in a Steady (no time) Executioner.'
     issues = '#10810'
@@ -841,7 +841,7 @@
   [./coupling_scalar_into_field]
     type = 'RunException'
     input = 'coupling_scalar_into_field.i'
-    expect_err = "coupled: Trying to couple a scalar variable where field variable is expected, 'v = a'"
+    expect_err = "cannot couple 'v' to a scalar variable \( a\) where field variable is expected"
 
     requirement = 'The system shall report an error when a field variable is used where a scalar variable is expected.'
     issues = '#10398'
@@ -850,7 +850,7 @@
   [./coupling_nonexistent_field]
     type = 'RunException'
     input = 'coupling_nonexistent_field.i'
-    expect_err = "coupled: Coupled variable 'a' was not found"
+    expect_err = "coupled variable 'a' was not found"
 
     requirement = 'The system shall report an error when an invalid coupled spatial variable is requested.'
     issues = '#10398'
@@ -859,7 +859,7 @@
   [./coupling_nonexistent_scalar]
     type = 'RunException'
     input = 'coupling_nonexistent_scalar.i'
-    expect_err = "slm: Coupled variable 'b' was not found"
+    expect_err = "coupled variable 'b' was not found"
 
     requirement = 'The system shall report an error when an invalid coupled scalar variable is requested.'
     issues = '#10398'
