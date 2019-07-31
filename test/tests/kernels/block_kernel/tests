@@ -1,15 +1,26 @@
 [Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'block_kernel_test.i'
-    exodiff = 'out.e'
-    scale_refine = 4
-  [../]
+  issues = '#1405'
+  design = '/BlockRestrictable.md'
 
-  [./testvars]
-    type = 'Exodiff'
-    input = 'block_vars.i'
-    exodiff = 'out_vars.e'
-    scale_refine = 4
-  [../]
+  [block_restriction]
+    requirement = 'The system shall support the ability to apply a kernel to a subset of the domain'
+
+    [kernel]
+      type = 'Exodiff'
+      input = 'block_kernel_test.i'
+      exodiff = 'out.e'
+      scale_refine = 4
+
+      detail = 'through a subdomain restriction on the kernel, and'
+    []
+
+    [variable]
+      type = 'Exodiff'
+      input = 'block_vars.i'
+      exodiff = 'out_vars.e'
+      scale_refine = 4
+
+      detail = 'through a subdomain restriction on the variable.'
+    []
+  []
 []
