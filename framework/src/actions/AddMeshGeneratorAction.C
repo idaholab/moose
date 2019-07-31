@@ -30,8 +30,8 @@ AddMeshGeneratorAction::AddMeshGeneratorAction(InputParameters params) : MooseOb
 void
 AddMeshGeneratorAction::act()
 {
-  // Don't do mesh generators when recovering!
-  if (_app.isRecovering())
+  // Don't do mesh generators when recovering or using master mesh!
+  if (_app.isRecovering() || _app.masterMesh())
     return;
 
   if (!_mesh)
