@@ -92,7 +92,11 @@
 []
 
 [Postprocessors]
+  active = 'num_rm'
   [num_rm]
     type = NumRelationshipManagers
+  []
+  [num_internal_sides]
+    type = NumInternalSides
   []
 []
