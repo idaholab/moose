@@ -1,23 +1,8 @@
-###########################################################
-# This is a test of the Discontinuous Galerkin System.
-# Discontinous basis functions are used (Monomials) and
-# a the Laplacian DGKernel contributes to the
-# internal edges around each element. Jumps are allowed
-# by penalized by this method.
-#
-# @Requirement F3.60
-###########################################################
-
-
 [Mesh]
   type = GeneratedMesh
   dim = 2
   nx = 2
   ny = 2
-#  xmin = -1
-#  xmax = 1
-#  ymin = -1
-#  ymax = 1
   xmin = 0
   xmax = 1
   ymin = 0
@@ -26,12 +11,9 @@
 []
 
 [Variables]
-  active = 'u'
-
   [./u]
     order = FIRST
     family = MONOMIAL
-
     [./InitialCondition]
       type = ConstantIC
       value = 1
@@ -39,55 +21,36 @@
   [../]
 []
 
-[Functions]
-  active = 'forcing_fn exact_fn'
+[AuxVariables]
+  [v]
+    order = FIRST
+    family = MONOMIAL
+  []
+[]
 
+[Functions]
   [./forcing_fn]
     type = ParsedFunction
-#    function = -4.0+(x*x)+(y*y)
-#    function = x
-#    function = (x*x)-2.0
     value = 2*pow(e,-x-(y*y))*(1-2*y*y)
-#    function = (x*x*x)-6.0*x
   [../]
-
   [./exact_fn]
     type = ParsedGradFunction
-#    function = x
-#    grad_x = 1
-#    grad_y = 0
-
-#    function = (x*x)+(y*y)
-#    grad_x = 2*x
-#    grad_y = 2*y
-
-#    function = (x*x)
-#    grad_x = 2*x
-#    grad_y = 0
-
     value = pow(e,-x-(y*y))
     grad_x = -pow(e,-x-(y*y))
     grad_y = -2*y*pow(e,-x-(y*y))
 
-#    function = (x*x*x)
-#    grad_x = 3*x*x
-#    grad_y = 0
   [../]
 []
 
 [Kernels]
-  active = 'diff abs forcing'
-
   [./diff]
     type = Diffusion
     variable = u
   [../]
-
   [./abs]          # u * v
     type = Reaction
     variable = u
   [../]
-
   [./forcing]
     type = BodyForce
     variable = u
@@ -99,11 +62,12 @@
   variable = u
   epsilon = -1
   sigma = 6
+  # We couple in an auxiliary variable in order to ensure that we've properly
+  # ghosted  both non-linear and auxiliary solution vectors
+  coupled_var = v
 []
 
 [BCs]
-  active = 'all'
-
   [./all]
     type = DGFunctionDiffusionDirichletBC
     variable = u
@@ -116,47 +80,10 @@
 
 [Executioner]
   type = Steady
-
-  solve_type = 'PJFNK'
-#  petsc_options = '-snes_mf'
-#  petsc_options_iname = '-pc_type -pc_hypre_type'
-#  petsc_options_value = 'hypre    boomeramg'
-
-#  petsc_options = '-snes_mf'
-#  max_r_steps = 2
-  [./Adaptivity]
-    steps = 2
-    refine_fraction = 1.0
-    coarsen_fraction = 0
-    max_h_level = 8
-  [../]
-
-  nl_rel_tol = 1e-10
-
-#  nl_rel_tol = 1e-12
-[]
-
-[Postprocessors]
-  active = 'h dofs l2_err'
-
-  [./h]
-    type = AverageElementSize
-  [../]
-
-  [./dofs]
-    type = NumDOFs
-  [../]
-
-  [./l2_err]
-    type = ElementL2Error
-    variable = u
-    function = exact_fn
-  [../]
 []
 
 [Outputs]
   exodus = true
-  csv = true
 []
 
 [Problem]

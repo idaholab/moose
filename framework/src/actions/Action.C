@@ -207,8 +207,9 @@ Action::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type,
     auto evaluable_coupleable =
         Moose::RelationshipManagerType::COUPLING | Moose::RelationshipManagerType::ALGEBRAIC;
     auto is_evaluable_and_coupleable = (rm_type & evaluable_coupleable) == evaluable_coupleable;
-    auto sys_type = is_evaluable_and_coupleable ? Moose::VarKindType::VAR_NONLINEAR
-                                                : Moose::VarKindType::VAR_ANY;
+    auto is_coupleable = (rm_type & Moose::RelationshipManagerType::COUPLING) ==
+                         Moose::RelationshipManagerType::COUPLING;
+    auto sys_type = is_coupleable ? Moose::VarKindType::VAR_NONLINEAR : Moose::VarKindType::VAR_ANY;
 
     addRelationshipManager(
         input_rm_type, moose_object_pars, rm_name, rm_type, rm_input_parameter_func, sys_type);

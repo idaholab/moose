@@ -25,6 +25,9 @@ validParams<AddDGDiffusion>()
   params.addRequiredParam<Real>("epsilon", "epsilon");
   params.addParam<MaterialPropertyName>(
       "diff", "The diffusion (or thermal conductivity or viscosity) coefficient.");
+  params.addRequiredParam<VariableName>("coupled_var",
+                                        "The coupled variable that will determine the diffusion "
+                                        "rate from the DGCoupledConvection dgkernel");
 
   return params;
 }
@@ -34,11 +37,22 @@ AddDGDiffusion::AddDGDiffusion(const InputParameters & params) : Action(params) 
 void
 AddDGDiffusion::act()
 {
-  auto params = _factory.getValidParams("DGDiffusion");
-  params.set<NonlinearVariableName>("variable") = _pars.get<NonlinearVariableName>("variable");
-  params.set<Real>("sigma") = _pars.get<Real>("sigma");
-  params.set<Real>("epsilon") = _pars.get<Real>("epsilon");
-  if (_pars.isParamValid("diff"))
-    params.set<MaterialPropertyName>("diff") = _pars.get<MaterialPropertyName>("diff");
-  _problem->addDGKernel("DGDiffusion", "dg_diffusion", params);
+  // add DGDiffusion
+  {
+    auto params = _factory.getValidParams("DGDiffusion");
+    params.set<NonlinearVariableName>("variable") = _pars.get<NonlinearVariableName>("variable");
+    params.set<Real>("sigma") = _pars.get<Real>("sigma");
+    params.set<Real>("epsilon") = _pars.get<Real>("epsilon");
+    if (_pars.isParamValid("diff"))
+      params.set<MaterialPropertyName>("diff") = _pars.get<MaterialPropertyName>("diff");
+    _problem->addDGKernel("DGDiffusion", "dg_diffusion", params);
+  }
+
+  // add DGCoupledDiffusion
+  {
+    auto params = _factory.getValidParams("DGCoupledDiffusion");
+    params.set<NonlinearVariableName>("variable") = _pars.get<NonlinearVariableName>("variable");
+    params.set<std::vector<VariableName>>("v") = {_pars.get<VariableName>("coupled_var")};
+    _problem->addDGKernel("DGCoupledDiffusion", "dg_coupled_diffusion", params);
+  }
 }

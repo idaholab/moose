@@ -26,12 +26,12 @@
     allow_warnings = True # for PETSc versions < 3.9
     max_parallel = 4 # Can't have zero dofs on any process for MatResetPreallocation
   []
-  [no_mallocs_with_action]
+  [proper_ghosting_with_action]
     type = 'Exodiff'
     input = 'no_mallocs_with_action.i'
-    exodiff = 'no_mallocs_with_action_out.e-s003'
+    exodiff = 'no_mallocs_with_action_out.e'
     issues = '#13736'
     design = 'RelationshipManager.md'
-    requirement = 'When objects that need one layer of coupling (like DGKernels) are added via action, we shall ensure that we have added a proper relationship manager and thus incur no mallocs during calls to MatSetValues'
+    requirement = 'When objects that need one layer of coupling (like DGKernels) are added via action, we shall ensure that we have added a proper relationship manager and thus incur no mallocs during calls to MatSetValues. Morever the solution vectors shall also be propery ghosted'
   []
 []

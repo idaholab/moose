@@ -10,6 +10,7 @@
 #include "CouplingFunctorCheckAction.h"
 #include "MooseApp.h"
 #include "FEProblemBase.h"
+#include "DisplacedProblem.h"
 #include "NonlinearSystemBase.h"
 #include "InputParameters.h"
 #include "MooseGhosting.h"
@@ -31,6 +32,30 @@ CouplingFunctorCheckAction::CouplingFunctorCheckAction(InputParameters parameter
 }
 
 void
+redistributeDofs(System & system)
+{
+  // Localize the vectors
+  system.re_update();
+
+  // Determine what dofs should be ghosted
+  system.get_dof_map().distribute_dofs(system.get_mesh());
+
+  // Recreate any constraints
+  system.reinit_constraints();
+
+  // Reinitialize the vectors with the new send_lists. I know the method name below is not perfectly
+  // indicative of that...
+  system.prolong_vectors();
+}
+
+void
+redistributeDofs(SubProblem & problem)
+{
+  redistributeDofs(problem.systemBaseNonlinear().system());
+  redistributeDofs(problem.systemBaseAuxiliary().system());
+}
+
+void
 CouplingFunctorCheckAction::act()
 {
   // If we're doing Jacobian-free, then we have no matrix and we can just return
@@ -44,38 +69,85 @@ CouplingFunctorCheckAction::act()
   auto & dgs = nl.getDGKernelWarehouse();
   auto & iks = nl.getInterfaceKernelWarehouse();
 
-  auto original_size = _app.relationshipManagers().size();
+  auto size = _app.relationshipManagers().size();
 
   // If we have any DGKernels or InterfaceKernels we need one layer of sparsity
   if (dgs.size() || iks.size())
-    // It doesn't really matter what T is in validParams<T> as long as it will add our single layer
-    // of coupling
+  {
+    // We are going to add the algebraic ghosting and coupling functors one at a time because then
+    // we can keep track of whether we need to redistribute the dofs or not
+
+    // Add the algebraic ghosting functors
+    addRelationshipManagers(Moose::RelationshipManagerType::ALGEBRAIC,
+                            Moose::oneLayerGhosting(Moose::RelationshipManagerType::ALGEBRAIC));
+
+    // Flag to indicate where we need to call dofmap_reinit() on our ghosting functors. If
+    // DofMap::reinit gets called then we can toggle this to false
+    bool need_ghosting_reinit = true;
+
+    if (size != _app.relationshipManagers().size())
+    {
+      // Reassign the size because we're going to call addRelationshipManagers again for COUPLING
+      size = _app.relationshipManagers().size();
+
+      // Attach the algebraic ghosting functors to the DofMaps
+      _app.attachRelationshipManagers(Moose::RelationshipManagerType::ALGEBRAIC);
+
+      // If you didn't do the ghosting with your own actions, you're going to pay the price now.
+      // We have to reinit all the DofMaps so we can be sure that we've ghosted the necessary
+      // vector entries
+      {
+        redistributeDofs(*_problem);
+        if (auto displaced_problem = _problem->getDisplacedProblem())
+          redistributeDofs(*displaced_problem);
+      }
+
+      // DofMap::reinit calls through to the ghosting functors dofmap_reinit method, so we're
+      // covered
+      need_ghosting_reinit = false;
+    }
+
+    // Add the coupling functor
     addRelationshipManagers(Moose::RelationshipManagerType::COUPLING,
                             Moose::oneLayerGhosting(Moose::RelationshipManagerType::COUPLING));
+    if (size != _app.relationshipManagers().size())
+    {
+      _app.attachRelationshipManagers(Moose::RelationshipManagerType::COUPLING);
 
-  // If we have any of these, we need default coupling, e.g. 0 layers of sparsity, otherwise known
-  // as element intra-dof coupling. The `else if` below is important; if we already added 1 layer of
-  // sparsity above, then we don't need to add another coupling functor that is a subset of the
-  // previous one
+      if (need_ghosting_reinit)
+        // Make sure that coupling matrices are attached to the coupling functors
+        _app.dofMapReinitForRMs();
+
+      // Reinit the libMesh (Implicit)System. This re-computes the sparsity pattern and then
+      // applies it to the ImplicitSystem's matrices. Note that does NOT make a call to
+      // DofMap::reinit, hence we have to call GhostingFunctor::dofmap_reinit ourselves in the
+      // call above
+      nl.system().reinit();
+    }
+  }
+
+  // If we have any of these, we need default coupling, e.g. 0 layers of sparsity, otherwise
+  // known as element intra-dof coupling. The `else if` below is important; if we already
+  // added 1 layer of sparsity above, then we don't need to add another coupling functor that
+  // is a subset of the previous one
   else if (kernels.size() || nbcs.size() || ibcs.size())
-    // It doesn't really matter what T is in validParams<T> as long as it will add our default
-    // coupling functor object (ElementSideNeighborLayers with n_levels of 0)
+  {
     addRelationshipManagers(Moose::RelationshipManagerType::COUPLING,
                             Moose::zeroLayerGhosting(Moose::RelationshipManagerType::COUPLING));
 
-  // See whether we've actually added anything new
-  if (original_size != _app.relationshipManagers().size())
-  {
-    // There's no concern of duplicating functors previously added here since functors are stored
-    // as std::sets
-    _app.attachRelationshipManagers(Moose::RelationshipManagerType::COUPLING);
+    // See whether we've actually added anything new
+    if (size != _app.relationshipManagers().size())
+    {
+      _app.attachRelationshipManagers(Moose::RelationshipManagerType::COUPLING);
 
-    // Make sure that coupling matrices are attached to the coupling functors
-    _app.dofMapReinitForRMs();
+      // Make sure that coupling matrices are attached to the coupling functors
+      _app.dofMapReinitForRMs();
 
-    // Reinit the libMesh (Implicit)System. This re-computes the sparsity pattern and then applies
-    // it to the ImplicitSystem's matrices. Note that does NOT make a call to DofMap::reinit,
-    // hence we have to call GhostingFunctor::dofmap_reinit ourselves in the call above
-    nl.system().reinit();
+      // Reinit the libMesh (Implicit)System. This re-computes the sparsity pattern and then
+      // applies it to the ImplicitSystem's matrices. Note that does NOT make a call to
+      // DofMap::reinit, hence we have to call GhostingFunctor::dofmap_reinit ourselves in the
+      // call above
+      nl.system().reinit();
+    }
   }
 }
