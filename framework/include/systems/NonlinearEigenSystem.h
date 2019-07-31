@@ -57,12 +57,12 @@ public:
   /*
    *  A residual vector at MOOSE side for AX
    */
-  NumericVector<Number> & ResidualVectorAX();
+  NumericVector<Number> & residualVectorAX();
 
   /*
    * A residual vector at MOOSE side for BX
    */
-  NumericVector<Number> & ResidualVectorBX();
+  NumericVector<Number> & residualVectorBX();
 
   /**
    * Add the eigen tag to the right kernels

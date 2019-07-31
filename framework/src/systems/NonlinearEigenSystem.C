@@ -130,8 +130,8 @@ NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const s
     _transient_sys(eigen_problem.es().get_system<TransientEigenSystem>(name)),
     _eigen_problem(eigen_problem),
     _n_eigen_pairs_required(eigen_problem.getNEigenPairsRequired()),
-    _work_rhs_vector_AX(addVector("work_rhs_vector_Ax",false,PARALLEL)),
-    _work_rhs_vector_BX(addVector("work_rhs_vector_Bx",false,PARALLEL))
+    _work_rhs_vector_AX(addVector("work_rhs_vector_Ax", false, PARALLEL)),
+    _work_rhs_vector_BX(addVector("work_rhs_vector_Bx", false, PARALLEL))
 {
   sys().attach_assemble_function(Moose::assemble_matrix);
 
@@ -254,13 +254,13 @@ NonlinearEigenSystem::RHS()
 }
 
 NumericVector<Number> &
-NonlinearEigenSystem::ResidualVectorAX()
+NonlinearEigenSystem::residualVectorAX()
 {
   return _work_rhs_vector_AX;
 }
 
 NumericVector<Number> &
-NonlinearEigenSystem::ResidualVectorBX()
+NonlinearEigenSystem::residualVectorBX()
 {
   return _work_rhs_vector_BX;
 }

@@ -37,7 +37,10 @@ validParams<EigenProblem>()
                         "Using a negative sign makes eigenvalue kernels consistent with "
                         "a nonlinear solver");
 
-  params.addParam<unsigned int>("active_eigen_index", 0, "Which eigen vector is used to compute residual and also associateed to nonlinear variable");
+  params.addParam<unsigned int>(
+      "active_eigen_index",
+      0,
+      "Which eigen vector is used to compute residual and also associateed to nonlinear variable");
 
   return params;
 }
@@ -220,20 +223,27 @@ EigenProblem::computeResidualAB(const NumericVector<Number> & soln,
 Real
 EigenProblem::computeResidualL2Norm()
 {
-  computeResidualAB(*_nl_eigen->currentSolution(), _nl_eigen->ResidualVectorAX(), _nl_eigen->ResidualVectorBX(), _nl_eigen->nonEigenVectorTag(), _nl_eigen->eigenVectorTag());
+  computeResidualAB(*_nl_eigen->currentSolution(),
+                    _nl_eigen->residualVectorAX(),
+                    _nl_eigen->residualVectorBX(),
+                    _nl_eigen->nonEigenVectorTag(),
+                    _nl_eigen->eigenVectorTag());
 
   Real eigenvalue = 1.0;
 
-  if (_active_eigen_index<_nl_eigen->getNumConvergedEigenvalues())
+  if (_active_eigen_index < _nl_eigen->getNumConvergedEigenvalues())
     eigenvalue = _nl_eigen->getNthConvergedEigenvalue(_active_eigen_index).first;
 
   // Scale BX with eigenvalue
-  _nl_eigen->ResidualVectorBX() *= eigenvalue;
+  _nl_eigen->residualVectorBX() *= eigenvalue;
 
   // Compute entire residual
-  _nl_eigen->ResidualVectorAX() -= _nl_eigen->ResidualVectorBX();
+  if (_negative_sign_eigen_kernel)
+    _nl_eigen->residualVectorAX() += _nl_eigen->residualVectorBX();
+  else
+    _nl_eigen->residualVectorAX() -= _nl_eigen->residualVectorBX();
 
-  return _nl_eigen->ResidualVectorAX().l2_norm();
+  return _nl_eigen->residualVectorAX().l2_norm();
 }
 
 #endif
@@ -248,7 +258,7 @@ EigenProblem::checkProblemIntegrity()
 void
 EigenProblem::solve()
 {
-#if PETSC_RELEASE_LESS_THAN(3, 12, 0)
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   PetscOptionsPush(_petsc_option_data_base);
 #endif
 
@@ -264,8 +274,8 @@ EigenProblem::solve()
   if (_displaced_problem)
     _displaced_problem->syncSolutions();
 
-#if PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  PetscOptionsPop(_petsc_option_data_base);
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  PetscOptionsPop();
 #endif
 }
 

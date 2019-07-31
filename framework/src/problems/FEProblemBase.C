@@ -387,7 +387,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   PetscOptionsCreate(&_petsc_option_data_base);
 #endif
-
 }
 
 void
@@ -478,6 +477,10 @@ FEProblemBase::~FEProblemBase()
     _ad_grad_zero[i].release();
     _ad_second_zero[i].release();
   }
+
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  PetscOptionsDestroy(&_petsc_option_data_base);
+#endif
 }
 
 Moose::CoordinateSystemType
@@ -4469,9 +4472,7 @@ FEProblemBase::solve()
     _displaced_problem->syncSolutions();
 
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  PetscOptionsView(_petsc_option_data_base, NULL);
   PetscOptionsPop();
-  PetscOptionsView(NULL, NULL);
 #endif
 }
 

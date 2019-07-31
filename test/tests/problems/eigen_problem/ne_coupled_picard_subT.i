@@ -55,7 +55,7 @@
 [MultiApps]
   [./sub]
     type = FullSolveMultiApp
-    input_files = ne_coupled_picard_masterT_sub.i
+    input_files = ne_coupled_picard_subT_sub.i
     execute_on = timestep_end
   [../]
 []

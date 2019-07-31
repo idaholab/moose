@@ -63,11 +63,10 @@ Eigenvalue::execute()
     PetscOptionsPush(_eigen_problem.petscOptionsDatabase());
     Moose::SlepcSupport::slepcSetOptions(_eigen_problem, _pars);
     PetscOptionsPop();
+    _eigen_problem.petscOptionsInserted() = true;
   }
 #endif
 #endif
-
-  std::cout<<"Eigenvalue::execute()"<<std::endl;
 
   Steady::execute();
 }
