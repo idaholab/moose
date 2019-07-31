@@ -1,19 +1,33 @@
 [Tests]
-  [./test_monomial_constant_1d]
-    type = 'Exodiff'
-    input = 'monomial-const-1d.i'
-    exodiff = 'monomial-const-1d_out.e'
-  [../]
+  issues = '#1405'
+  design = 'syntax/Variables/index.md'
 
-  [./test_monomial_constant_3d]
-    type = 'Exodiff'
-    input = 'monomial-const-3d.i'
-    exodiff = 'monomial-const-3d_out.e'
-  [../]
+  [constant_monomial]
+    requirement = 'The system shall support the constant Monomial family of shape functions on mesh '
+                  'elements:'
 
-  [./test_monomial_constant_2d]
-    type = 'Exodiff'
-    input = 'monomial-const-2d.i'
-    exodiff = 'monomial-const-2d_out.e'
-  [../]
+    [test_monomial_constant_1d]
+      type = 'Exodiff'
+      input = 'monomial-const-1d.i'
+      exodiff = 'monomial-const-1d_out.e'
+
+      detail = 'in one dimension,'
+    []
+
+    [test_monomial_constant_3d]
+      type = 'Exodiff'
+      input = 'monomial-const-3d.i'
+      exodiff = 'monomial-const-3d_out.e'
+
+      detail = 'in two dimensions, and'
+    []
+
+    [test_monomial_constant_2d]
+      type = 'Exodiff'
+      input = 'monomial-const-2d.i'
+      exodiff = 'monomial-const-2d_out.e'
+
+      detail = 'in three dimensions.'
+    []
+  []
 []

@@ -1,17 +1,28 @@
 [Tests]
-  [./test_hermite_converge_periodic]
-    type = 'Exodiff'
-    input = 'hermite_converge_periodic.i'
-    exodiff = 'hermite_converge_periodic_out.e-s003'
-    group = 'periodic'
-    valgrind = 'HEAVY'
-  [../]
+  issues = '#2190'
+  design = 'syntax/Variables/index.md'
 
-  [./test_hermite_converge_dirichlet]
-    type = 'Exodiff'
-    input = 'hermite_converge_dirichlet.i'
-    exodiff = 'hermite_converge_dirichlet_out.e-s003'
-    valgrind = 'HEAVY'
-    abs_zero = 1e-09
-  [../]
+  [hermite_convergance]
+    requirement = 'The system shall produce the correct convergence rate for third-order Hermite '
+                  'shape function discretizations as mesh refinement is performed:'
+    [periodic]
+      type = 'Exodiff'
+      input = 'hermite_converge_periodic.i'
+      exodiff = 'hermite_converge_periodic_out.e-s003'
+      group = 'periodic'
+      valgrind = 'HEAVY'
+
+      detail = 'when using periodic boundary conditions, and'
+    []
+
+    [dirichlet]
+      type = 'Exodiff'
+      input = 'hermite_converge_dirichlet.i'
+      exodiff = 'hermite_converge_dirichlet_out.e-s003'
+      valgrind = 'HEAVY'
+      abs_zero = 1e-09
+
+      detail = 'when using Dirichlet boundary conditions.'
+    []
+  []
 []
