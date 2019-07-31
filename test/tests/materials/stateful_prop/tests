@@ -17,7 +17,7 @@
       input = 'stateful_prop_test.i'
       csvdiff = 'out.csv'
 
-      prereq = 'exodiff_old'
+      prereq = 'stateful_old/exodiff_old'
       delete_output_before_running = false
       should_execute = false
 
@@ -40,7 +40,7 @@
       input = 'stateful_prop_test_older.i'
       csvdiff = 'out_older.csv'
 
-      prereq = 'exodiff_older'
+      prereq = 'stateful_older/exodiff_older'
       delete_output_before_running = false
       should_execute = false
 
