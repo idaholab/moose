@@ -33,5 +33,35 @@
     issues = '#13736'
     design = 'RelationshipManager.md'
     requirement = 'When objects that need one layer of coupling (like DGKernels) are added via action, we shall ensure that we have added a proper relationship manager and thus incur no mallocs during calls to MatSetValues. Morever the solution vectors shall also be propery ghosted'
+    mesh_mode = replicated
+  []
+  [no_additional_rms]
+    type = 'Exodiff'
+    input = 'no_functor_additions.i'
+    exodiff = 'no_functor_additions_out.e'
+    issues = '#13736'
+    design = 'RelationshipManager.md'
+    requirement = 'If a RelationshipManager with sufficient coverage has already been added through a MooseObjectAction, then the CouplingFunctorCheck action shall not add any relationship managers, avoiding reinitialization of system vectors and the system matrix'
+    mesh_mode = replicated
+  []
+  [proper_ghosting_with_action_distributed]
+    type = 'Exodiff'
+    input = 'no_mallocs_with_action.i'
+    exodiff = 'no_mallocs_with_action_distributed.e'
+    cli_args = 'Outputs/file_base=no_mallocs_with_action_distributed'
+    issues = '#13736'
+    design = 'RelationshipManager.md'
+    requirement = 'This test shall have one more rm than its replicated counter part because of the geometric-only GhostPointNeighbors rm, also demonstrating no mallocs'
+    mesh_mode = distributed
+  []
+  [no_additional_rms_distributed]
+    type = 'Exodiff'
+    input = 'no_functor_additions.i'
+    exodiff = 'no_functor_additions_distributed.e'
+    cli_args = 'Outputs/file_base=no_functor_additions_distributed'
+    issues = '#13736'
+    design = 'RelationshipManager.md'
+    requirement = 'This test shall have one more rm than its replicated counter part because of the geometric-only GhostPointNeighbors rm, also demonstrating no addition of rms by the CouplingFunctorCheckAction'
+    mesh_mode = distributed
   []
 []

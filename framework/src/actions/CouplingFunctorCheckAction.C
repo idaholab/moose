@@ -29,6 +29,7 @@ validParams<CouplingFunctorCheckAction>()
 CouplingFunctorCheckAction::CouplingFunctorCheckAction(InputParameters parameters)
   : Action(parameters)
 {
+  _name = "coupling_functor_check";
 }
 
 void

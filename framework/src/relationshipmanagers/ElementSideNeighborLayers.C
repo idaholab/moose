@@ -63,7 +63,7 @@ ElementSideNeighborLayers::operator==(const RelationshipManager & rhs) const
   else
     // We use a >= comparison instead of == for _layers because if we already have more ghosting
     // than the new RM provides, then that's an indication that we should *not* add the new one
-    return _layers >= rm->_layers && isType(rm->_rm_type) && isSystemType(rm->_system_type);
+    return _layers >= rm->_layers && isType(rm->_rm_type) && _system_type == rm->_system_type;
 }
 
 void

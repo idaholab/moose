@@ -58,12 +58,18 @@
   [../]
 []
 
+[DGKernels]
+  [regular_dg_diffusion]
+    type = DGDiffusion
+    variable = u
+    epsilon = -1
+    sigma = 6
+  []
+[]
+
 [DGDiffusionAction]
   variable = u
-  epsilon = -1
-  sigma = 6
-  # We couple in an auxiliary variable in order to ensure that we've properly
-  # ghosted  both non-linear and auxiliary solution vectors
+  kernels_to_add = 'COUPLED'
   coupled_var = v
 []
 

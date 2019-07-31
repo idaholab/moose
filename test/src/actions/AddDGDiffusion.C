@@ -21,13 +21,16 @@ validParams<AddDGDiffusion>()
   auto params = validParams<Action>();
   params.addRequiredParam<NonlinearVariableName>("variable",
                                                  "The variable on which the dgkernel will act");
-  params.addRequiredParam<Real>("sigma", "sigma");
-  params.addRequiredParam<Real>("epsilon", "epsilon");
+  params.addParam<Real>("sigma", "sigma");
+  params.addParam<Real>("epsilon", "epsilon");
   params.addParam<MaterialPropertyName>(
-      "diff", "The diffusion (or thermal conductivity or viscosity) coefficient.");
-  params.addRequiredParam<VariableName>("coupled_var",
-                                        "The coupled variable that will determine the diffusion "
-                                        "rate from the DGCoupledConvection dgkernel");
+      "diff", 1, "The diffusion (or thermal conductivity or viscosity) coefficient.");
+  params.addParam<VariableName>("coupled_var",
+                                "The coupled variable that will determine the diffusion "
+                                "rate from the DGCoupledConvection dgkernel");
+  MooseEnum kernels_to_add("BOTH REGULAR COUPLED", "BOTH");
+  params.addParam<MooseEnum>(
+      "kernels_to_add", kernels_to_add, "What dgkernels to add from this action");
 
   return params;
 }
@@ -37,18 +40,18 @@ AddDGDiffusion::AddDGDiffusion(const InputParameters & params) : Action(params) 
 void
 AddDGDiffusion::act()
 {
+  auto && kernels_to_add = _pars.get<MooseEnum>("kernels_to_add");
+
   // add DGDiffusion
+  if (kernels_to_add == "BOTH" || kernels_to_add == "REGULAR")
   {
     auto params = _factory.getValidParams("DGDiffusion");
-    params.set<NonlinearVariableName>("variable") = _pars.get<NonlinearVariableName>("variable");
-    params.set<Real>("sigma") = _pars.get<Real>("sigma");
-    params.set<Real>("epsilon") = _pars.get<Real>("epsilon");
-    if (_pars.isParamValid("diff"))
-      params.set<MaterialPropertyName>("diff") = _pars.get<MaterialPropertyName>("diff");
+    params.applySpecificParameters(_pars, {"variable", "sigma", "epsilon", "diff"});
     _problem->addDGKernel("DGDiffusion", "dg_diffusion", params);
   }
 
   // add DGCoupledDiffusion
+  if (kernels_to_add == "BOTH" || kernels_to_add == "COUPLED")
   {
     auto params = _factory.getValidParams("DGCoupledDiffusion");
     params.set<NonlinearVariableName>("variable") = _pars.get<NonlinearVariableName>("variable");

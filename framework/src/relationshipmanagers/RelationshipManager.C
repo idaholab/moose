@@ -48,7 +48,7 @@ validParams<RelationshipManager>()
    * If this parameter is equal to ANY, then this RM can be applied to both non-linear and aux
    * systems.
    */
-  params.addPrivateParam<Moose::VarKindType>("system_type", Moose::VarKindType::VAR_ANY);
+  params.addPrivateParam<Moose::RMSystemType>("system_type", Moose::RMSystemType::NONE);
 
   /**
    * The name of the object (or Action) requesting this RM
@@ -79,7 +79,7 @@ RelationshipManager::RelationshipManager(const InputParameters & parameters)
     _attach_geometric_early(getParam<bool>("attach_geometric_early")),
     _rm_type(getParam<Moose::RelationshipManagerType>("rm_type")),
     _use_displaced_mesh(getParam<bool>("use_displaced_mesh")),
-    _system_type(getParam<Moose::VarKindType>("system_type"))
+    _system_type(getParam<Moose::RMSystemType>("system_type"))
 {
   _for_whom.push_back(getParam<std::string>("for_whom"));
 }

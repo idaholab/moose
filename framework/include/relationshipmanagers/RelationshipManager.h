@@ -78,15 +78,6 @@ public:
     return (_rm_type & type) == type;
   }
 
-  /**
-   * Check to see whether the passed in system type is a sub-set of the system types this RM can
-   * cover
-   */
-  bool isSystemType(Moose::VarKindType system_type) const
-  {
-    return _system_type == Moose::VarKindType::VAR_ANY ? true : (system_type == _system_type);
-  }
-
   virtual bool operator==(const RelationshipManager & /*rhs*/) const
   {
     mooseError("Comparison operator required for this RelationshipManager required");
@@ -144,5 +135,5 @@ protected:
   const bool _use_displaced_mesh;
 
   /// What type of systems this RM can be applied to
-  const Moose::VarKindType _system_type;
+  const Moose::RMSystemType _system_type;
 };
