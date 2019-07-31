@@ -1,70 +1,90 @@
 [Tests]
-  [./use_default]
+  [use_default]
     type = 'Exodiff'
     input = 'optionally_coupled.i'
     exodiff = 'optionally_coupled_out.e'
-  [../]
+    requirement = 'Allow optional variable coupling where a default constant value is assumed when '
+                  'the user omits specifying a variable.'
+    design = 'Coupleable.md'
+    issues = '#2358'
+  []
 
-  [./use_real_input_param]
+  [use_real_input_param]
     type = 'Exodiff'
     input = 'optionally_coupled.i'
     exodiff = 'optionally_coupled_real_out.e'
     cli_args = 'Kernels/optional_coupling/v=2.2 Outputs/file_base=optionally_coupled_real_out'
-  [../]
+    requirement = 'Users are allowed to provide constant numeric values as input to an optionally '
+                  'coupled variable in addition to variable names that overrides the default '
+                  'constant value specified in code.'
+    design = 'Coupleable.md'
+    issues = '#2435'
+  []
 
-  [./optionally_coupled_system]
+  [optionally_coupled_system]
     type = 'Exodiff'
     input = 'optionally_coupled_system.i'
     exodiff = 'optionally_coupled_system_out.e'
-  [../]
+    requirement = 'Simulations with second derivative variable coupling shall not crash due to '
+                  'access to uninitialized data structures.'
+    design = 'Coupleable.md'
+    issues = '#4964'
+  []
 
-  [./two_coupled_default_1]
+  [two_coupled_default_1]
     type = 'Exodiff'
     input = 'optionally_coupled_twovar.i'
     exodiff = 'two_coupled_default_1.e'
     cli_args = 'Outputs/file_base=two_coupled_default_1'
-    requirement = "Coupleable shall provide an interface that allows providing default values for a vector of coupled variables"
+    requirement = "Coupleable shall provide an interface that allows providing default values for a "
+                  "vector of coupled variables"
     design = 'Coupleable.md'
     issues = '#11920'
-  [../]
+  []
 
-  [./two_coupled_default_2]
+  [two_coupled_default_2]
     type = 'Exodiff'
     input = 'optionally_coupled_twovar.i'
     exodiff = 'two_coupled_default_2.e'
     cli_args = 'Kernels/optional_coupling/v="3 5" Outputs/file_base=two_coupled_default_2'
-    requirement = "Coupleable shall provide an interface that allows providing default values for a vector of coupled variables"
+    requirement = "Coupleable shall provide an interface that allows providing default values for a "
+                  "vector of coupled variables"
     design = 'Coupleable.md'
     issues = '#11920'
-  [../]
+  []
 
-  [./two_coupled_default_fail_mixed_input]
+  [two_coupled_default_fail_mixed_input]
     type = 'RunException'
     input = 'optionally_coupled_twovar.i'
     cli_args = 'Kernels/optional_coupling/v="3 v"'
-    expect_err = 'MOOSE does not currently support a coupled vector where some parameters are reals and others are variables'
-    requirement = "The system shall report an error when users couple constant values and variables together"
+    expect_err = 'MOOSE does not currently support a coupled vector where some parameters are reals '
+                 'and others are variables'
+    requirement = "The system shall report an error when users couple constant values and variables "
+                  "together"
     design = 'Coupleable.md'
     issues = '#11920'
-  [../]
+  []
 
-  [./catch_out_of_bound_default_access_coupledValue]
+  [catch_out_of_bound_default_access_coupledValue]
     type = 'RunException'
     input = 'optionally_coupled.i'
     cli_args = 'Kernels/wrong_index/type=CoupledForceWrongIndex Kernels/wrong_index/variable=u'
     expect_err = 'v: component 2 is out of range for this variable \(max 1\)'
-    requirement = "The system shall report an error when requested default vector value is out of range."
+    requirement = "The system shall report an error when requested default vector value is out of "
+                  "range."
     design = 'Coupleable.md'
     issues = '#11920'
-  [../]
+  []
 
-  [./catch_out_of_bound_default_access_coupled]
+  [catch_out_of_bound_default_access_coupled]
     type = 'RunException'
     input = 'optionally_coupled.i'
-    cli_args = 'Kernels/wrong_index/type=CoupledForceWrongIndex Kernels/wrong_index/variable=u Kernels/wrong_index/access_value=false'
+    cli_args = 'Kernels/wrong_index/type=CoupledForceWrongIndex Kernels/wrong_index/variable=u '
+               'Kernels/wrong_index/access_value=false'
     expect_err = 'v: component 2 is out of range for this variable \(max 1\)'
-    requirement = "The system shall report an error when requested default vector value is out of range."
+    requirement = "The system shall report an error when requested default vector value is out of "
+                  "range."
     design = 'Coupleable.md'
     issues = '#11920'
-  [../]
+  []
 []
