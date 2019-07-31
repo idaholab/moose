@@ -114,7 +114,7 @@ addActionTypes(Syntax & syntax)
   // would normally be used to construct an object.
   registerMooseObjectTask("determine_system_type",        Executioner,            true);
 
-  registerMooseObjectTask("setup_mesh",                   MooseMesh,              false);
+  registerMooseObjectTask("setup_mesh",                   MooseMesh,              true);
   registerMooseObjectTask("set_mesh_base",                MooseMesh,              false);
   registerMooseObjectTask("init_mesh",                    MooseMesh,              false);
   registerMooseObjectTask("add_mesh_modifier",            MeshModifier,           false);
@@ -233,7 +233,6 @@ addActionTypes(Syntax & syntax)
   registerTask("add_output_aux_variables", true);
   registerTask("check_output", true);
 
-  registerTask("create_mesh_default", true);
   registerTask("create_problem_default", true);
   registerTask("create_problem_custom", false);
   registerTask("create_problem_complete", false);
@@ -255,7 +254,6 @@ addActionTypes(Syntax & syntax)
                            "(common_output)"
                            "(set_global_params)"
                            "(setup_recover_file_base)"
-                           "(create_mesh_default)"
                            "(setup_mesh)"
                            "(add_mesh_generator)"
                            "(execute_mesh_generators)"

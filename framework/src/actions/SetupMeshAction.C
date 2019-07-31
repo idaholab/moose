@@ -167,6 +167,25 @@ SetupMeshAction::act()
   // Create the mesh object and tell it to build itself
   if (_current_task == "setup_mesh")
   {
+    /**
+     * MOOSE has long supported a legacy syntax where the [Mesh] block doesn't require a "type" if
+     * the user wants a FileMesh type. This behavior combined with the fact that "setup_mesh" is a
+     * required task, means that the SetupMeshAction might be auto-built by the Parser to satisfy
+     * that task if no other Action registers to satisfy that task. However, we'd like to avoid
+     * requiring that users include a [Mesh] block if they are generating the mesh through the
+     * [MeshGeneraotrs] system. In the case where only the [MeshGenerators] block exists in the
+     * input file, this Action would have been constructed, but the "type" would be set to the
+     * (wrong) default (e.g. FileMesh). We'll attempt to detect that case by seeing if this task
+     * was AutoBuilt or not. If it is, we'll quietly switch the type and give it an empty
+     * InputParameters object to "properly" attempt to construct the right MooseMesh type when
+     * the "setup_mesh" task executes to handle mesh generators.
+     */
+    if (_pars.get<std::string>("registered_identifier") == "(AutoBuilt)")
+    {
+      _type = "MeshGeneratorMesh";
+      _moose_object_pars = _factory.getValidParams("MeshGeneratorMesh");
+    }
+
     // switch non-file meshes to be a file-mesh if using a pre-split mesh configuration.
     if (_app.isUseSplit())
     {
