@@ -262,6 +262,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _parallel_barrier_messaging(getParam<bool>("parallel_barrier_messaging")),
     _current_execute_on_flag(EXEC_NONE),
     _control_warehouse(_app.getExecuteOnEnum(), /*threaded=*/false),
+    _is_petsc_options_inserted(false),
     _line_search(nullptr),
     _using_ad_mat_props(false),
     _error_on_jacobian_nonzero_reallocation(
@@ -382,6 +383,11 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
 
   if (!_default_ghosting)
     _mesh.getMesh().remove_ghosting_functor(_mesh.getMesh().default_ghosting());
+
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  PetscOptionsCreate(&_petsc_option_data_base);
+#endif
+
 }
 
 void
@@ -4425,7 +4431,19 @@ FEProblemBase::solve()
   TIME_SECTION(_solve_timer);
 
 #ifdef LIBMESH_HAVE_PETSC
+#if PETSC_RELEASE_LESS_THAN(3, 12, 0)
   Moose::PetscSupport::petscSetOptions(*this); // Make sure the PETSc options are setup for this app
+#else
+  // Now this database will be the default
+  // Each app should have only one database
+  PetscOptionsPush(_petsc_option_data_base);
+  // We did not add petsc options to database yet
+  if (!_is_petsc_options_inserted)
+  {
+    Moose::PetscSupport::petscSetOptions(*this);
+    _is_petsc_options_inserted = true;
+  }
+#endif
 #endif
 
   Moose::setSolverDefaults(*this);
@@ -4449,6 +4467,12 @@ FEProblemBase::solve()
   // sync solutions in displaced problem
   if (_displaced_problem)
     _displaced_problem->syncSolutions();
+
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  PetscOptionsView(_petsc_option_data_base, NULL);
+  PetscOptionsPop();
+  PetscOptionsView(NULL, NULL);
+#endif
 }
 
 void

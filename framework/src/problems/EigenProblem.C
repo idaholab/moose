@@ -226,6 +226,10 @@ EigenProblem::checkProblemIntegrity()
 void
 EigenProblem::solve()
 {
+#if PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  PetscOptionsPush(_petsc_option_data_base);
+#endif
+
   if (_solve)
   {
     TIME_SECTION(_solve_timer);
@@ -237,6 +241,10 @@ EigenProblem::solve()
   // sync solutions in displaced problem
   if (_displaced_problem)
     _displaced_problem->syncSolutions();
+
+#if PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  PetscOptionsPop(_petsc_option_data_base);
+#endif
 }
 
 bool

@@ -54,8 +54,17 @@ void
 Eigenvalue::execute()
 {
 #if LIBMESH_HAVE_SLEPC
+#if PETSC_RELEASE_LESS_THAN(3, 12, 0)
   // Make sure the SLEPc options are setup for this app
   Moose::SlepcSupport::slepcSetOptions(_eigen_problem, _pars);
+#else
+  if (!_eigen_problem.petscOptionsInserted())
+  {
+    PetscOptionsPush(_eigen_problem.petscOptionsDatabase());
+    Moose::SlepcSupport::slepcSetOptions(_eigen_problem, _pars);
+    PetscOptionsPop();
+  }
+#endif
 #endif
   Steady::execute();
 }
