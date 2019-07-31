@@ -2048,6 +2048,7 @@ MooseMesh::buildMeshBaseObject(ParallelType override_type)
 
     mesh = libmesh_make_unique<ReplicatedMesh>(_communicator, dim);
   }
+  mesh->remove_ghosting_functor(mesh->default_ghosting());
 
   if (!getParam<bool>("allow_renumbering"))
     mesh->allow_renumbering(false);
