@@ -16,6 +16,7 @@ InputParameters
 validParams<VolumePostprocessor>()
 {
   InputParameters params = validParams<ElementIntegralPostprocessor>();
+  params.addClassDescription("Computes the volume of a specified block");
   return params;
 }
 

@@ -25,6 +25,8 @@ validParams<LineValueSampler>()
   params.addRequiredParam<unsigned int>("num_points",
                                         "The number of points to sample along the line");
 
+  params.addClassDescription("Samples variable(s) along a specified line");
+
   return params;
 }
 

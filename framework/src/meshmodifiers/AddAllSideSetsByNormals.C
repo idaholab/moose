@@ -30,6 +30,9 @@ InputParameters
 validParams<AddAllSideSetsByNormals>()
 {
   InputParameters params = validParams<AddSideSetsBase>();
+
+  params.addClassDescription("Adds sidesets to the entire mesh based on unique normals");
+
   return params;
 }
 

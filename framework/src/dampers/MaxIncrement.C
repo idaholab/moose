@@ -24,6 +24,9 @@ validParams<MaxIncrement>()
       increment_type,
       "Type of increment to compare against max_increment. 'absolute': use variable increment. "
       "'fractional': use variable increment divided by the variable value.");
+
+  params.addClassDescription("Limits a variable's update by some max fraction");
+
   return params;
 }
 
