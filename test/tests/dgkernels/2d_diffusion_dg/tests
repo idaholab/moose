@@ -64,15 +64,4 @@
     requirement = 'This test shall have one more rm than its replicated counter part because of the geometric-only GhostPointNeighbors rm, also demonstrating no addition of rms by the CouplingFunctorCheckAction'
     mesh_mode = distributed
   []
-  [demo_need_for_user_geom_ghosting]
-    type = 'RunApp'
-    input = 'no_mallocs_with_action.i'
-    cli_args = 'Outputs/exodus=false' # turn off point neighbor ghosting for exodus
-    min_parallel = 2
-    mesh_mode = distributed
-    should_crash = true
-    design = 'RelationshipManager.md'
-    issues = '#13736 #12327'
-    requirement = 'We shall demonstrate that there is no default geometric ghosting, and consequently if the user does not add any, the simulation will fail if any algebraic ghosting is needed'
-  []
 []
