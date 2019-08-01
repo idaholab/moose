@@ -44,7 +44,8 @@
     type = RunException
     input = no_negative_jacobian.i
     prereq = no_negative_jacobian
-    cli_args = 'Kernels/diff/use_displaced_mesh=true'
+    # num_steps takes precendence over the end_time in the input file.
+    cli_args = 'Kernels/diff/use_displaced_mesh=true Executioner/num_steps=2'
     expect_err = 'ERROR: negative Jacobian 0 at point \(x,y,z\)=\(       0, 0.211325, 0.211325\) in element 0'
     should_crash = False
     issues = '#9740'
@@ -54,7 +55,8 @@
     type = RunException
     input = no_negative_jacobian.i
     prereq = no_negative_jacobian
-    cli_args = 'Kernels/diff/use_displaced_mesh=true Executioner/dt=0.8'
+    # num_steps takes precendence over the end_time in the input file.
+    cli_args = 'Kernels/diff/use_displaced_mesh=true Executioner/dt=0.8 Executioner/num_steps=2'
     expect_err = 'ERROR: negative Jacobian -0.0625 at point \(x,y,z\)=\(-0.105662, 0.211325, 0.211325\) in element 0'
     should_crash = False
     issues = '#9740'
