@@ -434,13 +434,13 @@ Parser::hitCLIFilter(std::string appname, const std::vector<std::string> & argv)
           .FullMatch(appname, &name, &num);
       switch (hitArgCmp(arg, name, num))
       {
-        case GLOBAL:
-        case MATCH:
+        case HitCmpResult::GLOBAL:
+        case HitCmpResult::MATCH:
           break;
-        case WRONG:
+        case HitCmpResult::WRONG:
           _app.commandLine()->markHitParam(i);
           continue;
-        case MAIN:
+        case HitCmpResult::MAIN:
           continue;
       }
       auto pos = arg.find(":", 0);

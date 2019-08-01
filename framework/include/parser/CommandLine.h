@@ -192,7 +192,7 @@ CommandLine::search(const std::string & option_name, T & argument)
   mooseError("Unrecognized option name");
 }
 
-enum HitCmpResult
+enum class HitCmpResult
 {
 	GLOBAL,
 	MAIN,

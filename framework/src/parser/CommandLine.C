@@ -75,7 +75,7 @@ CommandLine::initForMultiApp(const std::string & subapp_full_name)
   // an erase is needed to actually remove the items
   auto new_end =
       std::remove_if(_argv.begin(), _argv.end(), [&sub_name, sub_num](const std::string & arg) {
-        return hitArgCmp(arg, sub_name, sub_num) == WRONG;
+        return hitArgCmp(arg, sub_name, sub_num) == HitCmpResult::WRONG;
       });
   _argv.erase(new_end, _argv.end());
 
@@ -242,10 +242,10 @@ HitCmpResult hitArgCmp(std::string arg, std::string app_name, int app_num)
   std::string arg_name;
   auto pos = arg.find(":", 0);
   if (pos == 0)
-    return GLOBAL;
+    return HitCmpResult::GLOBAL;
   if (pos == std::string::npos)
-    return MAIN;
+    return HitCmpResult::MAIN;
   pcrecpp::RE("(\\S*?)(\\d*):").PartialMatch(arg, &arg_name, &arg_num);
-  if (app_name == arg_name && (arg_num == -1 || arg_num == app_num)) return MATCH;
-  return WRONG;
+  if (app_name == arg_name && (arg_num == -1 || arg_num == app_num)) return HitCmpResult::MATCH;
+  return HitCmpResult::WRONG;
 }
