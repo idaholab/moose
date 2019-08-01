@@ -34,17 +34,13 @@ public:
 
 protected:
 
-
-  virtual void computeQpStress();
-
   /// Name of the elasticity tensor material property
   const std::string _elasticity_tensor_name;
   /// Elasticity tensor material property
   const MaterialProperty<RankFourTensor> & _elasticity_tensor;
 
+  const MaterialProperty<Real> & _mat_dens;
+
   Real _total_size;
   int _elems;
-  Real _poiss_rat;
-  Real _young_mod;
-  Real _mat_dens;
 };

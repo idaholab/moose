@@ -17,23 +17,14 @@ validParams<CriticalTimeStep>()
 {
   InputParameters params = validParams<ElementPostprocessor>();
   params.addClassDescription("Computes and reports the critical time step for the explicit solver.");
-  params.addRequiredParam<Real>(
-      "youngs_modulus", "Young's or elasticity modulus of the material.");
-  params.addRequiredParam<Real>(
-      "poisson_ratio", "Poisson's ratio of the material.");
-  params.addRequiredParam<Real>(
-      "material_density", "Density of the material.");
-
   return params;
 }
 
 CriticalTimeStep::CriticalTimeStep(const InputParameters & parameters)
   : ElementPostprocessor(parameters),
-  _elasticity_tensor_name(_sc_name + "elasticity_tensor"),
+  _elasticity_tensor_name("elasticity_tensor"),
   _elasticity_tensor(getMaterialPropertyByName<RankFourTensor>(_elasticity_tensor_name)),
-  _poiss_rat(getParam<Real>("poisson_ratio")),
-  _young_mod(getParam<Real>("youngs_modulus")),
-  _mat_dens(getParam<Real>("material_density"))
+  _mat_dens(getMaterialPropertyByName<Real>("density"))
 {
 }
 
@@ -57,7 +48,18 @@ CriticalTimeStep::getValue()
   gatherSum(_total_size);
   gatherSum(_elems);
 
-  Real ele_c = std::sqrt((_young_mod*(1-_poiss_rat))/((1+_poiss_rat)*(1-2*_poiss_rat)*_mat_dens));
+//  std::cout <<  << std::endl;
+
+  Real lame_1 = _elasticity_tensor[0](0,0,1,1);
+  Real lame_2 = _elasticity_tensor[0](0,1,0,1);
+  Real dens = _mat_dens[0];
+
+  Real elas_mod = lame_2*(3*lame_1+2*lame_2)/(lame_1+lame_2);
+  Real poiss_rat = lame_1/(2*(lame_1+lame_2));
+
+  Real ele_c = std::sqrt((elas_mod*(1-poiss_rat))/((1+poiss_rat)*(1-2*poiss_rat) * (dens)));
+
+  std::cout << _total_size/ele_c << std::endl;
 
   return _total_size/ele_c;
 }
@@ -68,9 +70,4 @@ CriticalTimeStep::threadJoin(const UserObject & y)
   const CriticalTimeStep & pps = static_cast<const CriticalTimeStep &>(y);
   _total_size += pps._total_size;
   _elems += pps._elems;
-}
-void
-CriticalTimeStep::computeQpStress()
-{
-  std::cout << _elasticity_tensor[_qp](0,0,2,2) << std::endl;
 }
