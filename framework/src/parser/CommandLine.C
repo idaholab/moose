@@ -75,7 +75,7 @@ CommandLine::initForMultiApp(const std::string & subapp_full_name)
   // an erase is needed to actually remove the items
   auto new_end =
       std::remove_if(_argv.begin(), _argv.end(), [&sub_name, sub_num](const std::string & arg) {
-        return hitArgCmp(arg, sub_name, sub_num) == HitCmpResult::WRONG;
+        return hitArgComparison(arg, sub_name, sub_num) == HitCmpResult::WRONG;
       });
   _argv.erase(new_end, _argv.end());
 
@@ -236,7 +236,7 @@ CommandLine::setArgument<std::string>(std::stringstream & stream, std::string & 
   argument = stream.str();
 }
 
-HitCmpResult hitArgCmp(const std::string & arg, const std::string & app_name, int app_num)
+HitCmpResult hitArgComparison(const std::string & arg, const std::string & app_name, int app_num)
 {
   int arg_num = -1;
   std::string arg_name;

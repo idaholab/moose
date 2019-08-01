@@ -432,7 +432,7 @@ Parser::hitCLIFilter(std::string appname, const std::vector<std::string> & argv)
                   "(\\d+)" // math the multiapp number
                   )
           .FullMatch(appname, &name, &num);
-      switch (hitArgCmp(arg, name, num))
+      switch (hitArgComparison(arg, name, num))
       {
         case HitCmpResult::GLOBAL:
         case HitCmpResult::MATCH:
