@@ -56,25 +56,25 @@
   [./left]
     type = FunctionDirichletBC
     variable = temp
-    boundary = left
+    boundary = 1003
     function = analytical_sol
   [../]
   [./bottom]
     type = FunctionDirichletBC
     variable = temp
-    boundary = bottom
+    boundary = 1000
     function = analytical_sol
   [../]
   [./right]
     type = FunctionDirichletBC
     variable = temp
-    boundary = right
+    boundary = 1001
     function = analytical_sol
   [../]
   [./top]
     type = FunctionDirichletBC
     variable = temp
-    boundary = top
+    boundary = 1002
     function = analytical_sol
   [../]
 []

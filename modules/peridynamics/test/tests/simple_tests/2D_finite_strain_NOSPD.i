@@ -30,22 +30,22 @@
 []
 
 [BCs]
-  [./left_dx]
+  [./left_x]
     type = DirichletBC
     variable = disp_x
-    boundary = left
+    boundary = 1003
     value = 0.0
   [../]
-  [./left_dy]
+  [./left_y]
     type = DirichletBC
     variable = disp_y
-    boundary = left
+    boundary = 1003
     value = 0.0
   [../]
-  [./right_dx]
+  [./right_x]
     type = FunctionPresetBC
     variable = disp_x
-    boundary = right
+    boundary = 1001
     function = '0.01*t'
   [../]
 []
@@ -84,6 +84,11 @@
   line_search = none
   start_time = 0
   end_time = 1
+
+  [./Quadrature]
+    type = GAUSS_LOBATTO
+    order = FIRST
+  [../]
 []
 
 [Outputs]

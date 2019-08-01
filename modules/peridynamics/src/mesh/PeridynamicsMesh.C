@@ -52,6 +52,7 @@ PeridynamicsMesh::PeridynamicsMesh(const InputParameters & parameters)
     _pdnode_vol(declareRestartableData<std::vector<Real>>("pdnode_vol")),
     _pdnode_horiz_vol(declareRestartableData<std::vector<Real>>("pdnode_horiz_vol")),
     _pdnode_blockID(declareRestartableData<std::vector<unsigned int>>("pdnode_blockID")),
+    _pdnode_elemID(declareRestartableData<std::vector<unsigned int>>("pdnode_elemID")),
     _pdnode_neighbors(
         declareRestartableData<std::vector<std::vector<dof_id_type>>>("pdnode_neighbors")),
     _pdnode_bonds(declareRestartableData<std::vector<std::vector<dof_id_type>>>("pdnode_bonds")),
@@ -128,46 +129,50 @@ PeridynamicsMesh::nPDBonds() const
 }
 
 void
-PeridynamicsMesh::createExtraPeridynamicsMeshData(MeshBase & fe_mesh)
+PeridynamicsMesh::createPeridynamicsMeshData(MeshBase & fe_mesh,
+                                             std::vector<dof_id_type> converted_elem_id)
 {
-  // create unconventional mesh data for peridynamics mesh
-  _n_pdnodes = fe_mesh.n_elem();
   _dim = fe_mesh.mesh_dimension();
+  _n_pdnodes = converted_elem_id.size();
 
+  // initialize data size
   _pdnode_coord.resize(_n_pdnodes);
   _pdnode_avg_spacing.resize(_n_pdnodes);
   _pdnode_horiz_rad.resize(_n_pdnodes);
   _pdnode_vol.resize(_n_pdnodes);
   _pdnode_horiz_vol.resize(_n_pdnodes);
   _pdnode_blockID.resize(_n_pdnodes);
+  _pdnode_elemID.resize(_n_pdnodes);
   _pdnode_neighbors.resize(_n_pdnodes);
   _pdnode_bonds.resize(_n_pdnodes);
   _dg_neighbors.resize(_n_pdnodes);
   _dg_vol_frac.resize(_n_pdnodes);
 
-  Real dist = 0.0;
-  // loop through all fe elements to generate PD nodes structure
-  for (MeshBase::element_iterator it = fe_mesh.elements_begin(); it != fe_mesh.elements_end(); ++it)
+  // loop through converted fe elements to generate PD nodes structure
+  unsigned int id = 0; // make pd nodes start at 0 in the new mesh
+  for (unsigned int i = 0; i < _n_pdnodes; ++i)
   {
-    Elem * fe_elem = *it;
+    Elem * fe_elem = fe_mesh.elem_ptr(converted_elem_id[i]);
     // calculate the nodes spacing as average distance between fe element with its neighbors
     unsigned int n_fe_neighbors = 0;
     Real dist_sum = 0.0;
-    for (unsigned int i = 0; i < fe_elem->n_neighbors(); ++i)
-      if (fe_elem->neighbor_ptr(i) != NULL)
+    for (unsigned int j = 0; j < fe_elem->n_neighbors(); ++j)
+      if (fe_elem->neighbor_ptr(j) != NULL)
       {
-        dist = (fe_elem->centroid() - fe_elem->neighbor_ptr(i)->centroid()).norm();
-        dist_sum += dist;
+        dist_sum += (fe_elem->centroid() - fe_elem->neighbor_ptr(j)->centroid()).norm();
         n_fe_neighbors++;
       }
 
-    _pdnode_coord[fe_elem->id()] = fe_elem->centroid();
-    _pdnode_avg_spacing[fe_elem->id()] = dist_sum / n_fe_neighbors;
-    _pdnode_horiz_rad[fe_elem->id()] =
-        (_has_horiz_num ? _horiz_num * dist_sum / n_fe_neighbors : _horiz_rad);
-    _pdnode_vol[fe_elem->id()] = fe_elem->volume();
-    _pdnode_horiz_vol[fe_elem->id()] = 0.0;
-    _pdnode_blockID[fe_elem->id()] = fe_elem->subdomain_id();
+    _pdnode_coord[id] = fe_elem->centroid();
+    _pdnode_avg_spacing[id] = dist_sum / n_fe_neighbors;
+    _pdnode_horiz_rad[id] = (_has_horiz_num ? _horiz_num * dist_sum / n_fe_neighbors : _horiz_rad);
+    _pdnode_vol[id] = fe_elem->volume();
+    _pdnode_horiz_vol[id] = 0.0;
+    _pdnode_blockID[id] = fe_elem->subdomain_id() + 1000; // set new subdomain id for PD mesh in
+                                                          //  case FE mesh is retained
+    _pdnode_elemID[id] = fe_elem->id();
+
+    ++id;
   }
 
   // search node neighbors and create other nodal data
@@ -206,8 +211,8 @@ PeridynamicsMesh::createNodeHorizBasedData()
       if (_pdnode_blockID[i] == _pdnode_blockID[j] && dis <= 1.0001 * _pdnode_horiz_rad[i] &&
           j != i)
       {
-        // check whether pdnode i falls in the region whose bonds may need to be removed due to the
-        // pre-existing cracks
+        // check whether pdnode i falls in the region whose bonds may need to be removed due to
+        // the pre-existing cracks
         bool intersect = false;
         for (unsigned int k = 0; k < _cracks_start.size(); ++k)
         {
@@ -340,6 +345,12 @@ PeridynamicsMesh::getPDNodeCoord(dof_id_type node_id)
     mooseError("Querying node ID exceeds the total number of PD nodes!");
 
   return _pdnode_coord[node_id];
+}
+
+std::vector<unsigned int>
+PeridynamicsMesh::getPDNodeIDToFiniteElemIDMap()
+{
+  return _pdnode_elemID;
 }
 
 Real

@@ -55,11 +55,11 @@
   [./Master]
     [./block1]
       formulation = ORDINARY_STATE
-      block = 1
+      block = 1001
     [../]
     [./block2]
       formulation = ORDINARY_STATE
-      block = 2
+      block = 1002
     [../]
   [../]
   [./GeneralizedPlaneStrain]
@@ -67,13 +67,13 @@
       formulation = ORDINARY_STATE
       scalar_out_of_plane_strain = scalar_strain_zz1
       out_of_plane_stress_variable = stress_zz1
-      block = 1
+      block = 1001
     [../]
     [./block2]
       formulation = ORDINARY_STATE
       scalar_out_of_plane_strain = scalar_strain_zz2
       out_of_plane_stress_variable = stress_zz2
-      block = 2
+      block = 1002
     [../]
   [../]
 []
@@ -101,7 +101,7 @@
     output_type = component
     index_i = 2
     index_j = 2
-    block = 1
+    block = 1001
   [../]
 
   [./stress_zz2]
@@ -119,7 +119,7 @@
     output_type = component
     index_i = 2
     index_j = 2
-    block = 2
+    block = 1002
   [../]
 []
 
@@ -127,12 +127,12 @@
   [./react_z1]
     type = NodalVariableIntegralPD
     variable = stress_zz1
-    block = 1
+    block = 1001
   [../]
   [./react_z2]
     type = NodalVariableIntegralPD
     variable = stress_zz2
-    block = 2
+    block = 1002
   [../]
 []
 
@@ -144,28 +144,28 @@
 []
 
 [BCs]
-  [./bottom1x]
+  [./bottom1_x]
     type = PresetBC
-    boundary = 1
+    boundary = 1001
     variable = disp_x
     value = 0.0
   [../]
-  [./bottom1y]
+  [./bottom1_y]
     type = PresetBC
-    boundary = 1
+    boundary = 1001
     variable = disp_y
     value = 0.0
   [../]
 
-  [./bottom2x]
+  [./bottom2_x]
     type = PresetBC
-    boundary = 2
+    boundary = 1002
     variable = disp_x
     value = 0.0
   [../]
-  [./bottom2y]
+  [./bottom2_y]
     type = PresetBC
-    boundary = 2
+    boundary = 1002
     variable = disp_y
     value = 0.0
   [../]
@@ -176,7 +176,7 @@
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.3
     youngs_modulus = 1e6
-    block = '1 2'
+    block = '1001 1002'
   [../]
 
   [./force_density1]
@@ -185,7 +185,7 @@
     thermal_expansion_coeff = 0.02
     stress_free_temperature = 0.5
     scalar_out_of_plane_strain = scalar_strain_zz1
-    block = 1
+    block = 1001
   [../]
   [./force_density2]
     type = ComputeSmallStrainVariableHorizonMaterialOSPD
@@ -193,7 +193,7 @@
     thermal_expansion_coeff = 0.02
     stress_free_temperature = 0.5
     scalar_out_of_plane_strain = scalar_strain_zz2
-    block = 2
+    block = 1002
   [../]
 []
 

@@ -19,22 +19,22 @@
 []
 
 [BCs]
-  [./left_dx]
+  [./left_x]
     type = PresetBC
     variable = disp_x
-    boundary = left
+    boundary = 1003
     value = 0.0
   [../]
-  [./left_dy]
+  [./left_y]
     type = PresetBC
     variable = disp_y
-    boundary = left
+    boundary = 1003
     value = 0.0
   [../]
-  [./right_dx]
+  [./right_x]
     type = PresetBC
     variable = disp_x
-    boundary = right
+    boundary = 1001
     value = 0.001
   [../]
 []
@@ -69,6 +69,11 @@
 [Executioner]
   type = Steady
   solve_type = PJFNK
+
+  [./Quadrature]
+    type = GAUSS_LOBATTO
+    order = FIRST
+  [../]
 []
 
 [Outputs]

@@ -105,6 +105,7 @@
   end_time = 1
   dt = 1
   num_steps = 1
+
   [./Quadrature]
     type = GAUSS_LOBATTO
     order = FIRST

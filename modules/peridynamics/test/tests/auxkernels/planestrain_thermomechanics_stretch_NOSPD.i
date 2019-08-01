@@ -80,15 +80,15 @@
 []
 
 [BCs]
-  [./leftx]
+  [./left_x]
     type = PresetBC
-    boundary = 'left'
+    boundary = 1003
     variable = disp_x
     value = 0.0
   [../]
-  [./bottomy]
+  [./bottom_y]
     type = PresetBC
-    boundary = 'bottom'
+    boundary = 1000
     variable = disp_y
     value = 0.0
   [../]
@@ -134,6 +134,11 @@
 
   start_time = 0.0
   end_time = 1.0
+
+  [./Quadrature]
+    type = GAUSS_LOBATTO
+    order = FIRST
+  [../]
 []
 
 [Outputs]

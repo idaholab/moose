@@ -22,4 +22,52 @@
     design = 'modules/peridynamics/PeridynamicsMesh.md'
     issues = '#11561'
   [../]
+
+  [./convert_one_delete]
+    type = 'Exodiff'
+    input = '2D_mesh_conversion_one_delete.i'
+    cli_args = '--mesh-only'
+    exodiff = '2D_mesh_conversion_one_delete_in.e'
+    recover = false
+    map = false
+    requirement = 'MeshGeneratorPD shall generate peridynamic mesh for given mesh block and delete the converted FE mesh.'
+    design = 'modules/peridynamics/MeshGeneratorPD.md'
+    issues = '#11561'
+  [../]
+
+  [./convert_one_retain]
+    type = 'Exodiff'
+    input = '2D_mesh_conversion_one_retain.i'
+    cli_args = '--mesh-only'
+    exodiff = '2D_mesh_conversion_one_retain_in.e'
+    recover = false
+    map = false
+    requirement = 'MeshGeneratorPD shall generate peridynamic mesh for given mesh block and retain the converted FE mesh.'
+    design = 'modules/peridynamics/MeshGeneratorPD.md'
+    issues = '#11561'
+  [../]
+
+  [./convert_all_delete]
+    type = 'Exodiff'
+    input = '2D_mesh_conversion_all_delete.i'
+    cli_args = '--mesh-only'
+    exodiff = '2D_mesh_conversion_all_delete_in.e'
+    recover = false
+    map = false
+    requirement = 'MeshGeneratorPD shall generate peridynamic meshes for given mesh blocks and delete the converted FE meshes.'
+    design = 'modules/peridynamics/MeshGeneratorPD.md'
+    issues = '#11561'
+  [../]
+
+  [./convert_all_retain]
+    type = 'Exodiff'
+    input = '2D_mesh_conversion_all_retain.i'
+    cli_args = '--mesh-only'
+    exodiff = '2D_mesh_conversion_all_retain_in.e'
+    recover = false
+    map = false
+    requirement = 'MeshGeneratorPD shall generate peridynamic meshs for given mesh blocks and retain the converted FE meshes.'
+    design = 'modules/peridynamics/MeshGeneratorPD.md'
+    issues = '#11561'
+  [../]
 []
