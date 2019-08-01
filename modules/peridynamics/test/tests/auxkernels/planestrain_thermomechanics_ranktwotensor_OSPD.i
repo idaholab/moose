@@ -228,15 +228,15 @@
 []
 
 [BCs]
-  [./leftx]
+  [./left_x]
     type = PresetBC
-    boundary = left
+    boundary = 1003
     variable = disp_x
     value = 0.0
   [../]
-  [./bottomy]
+  [./bottom_y]
     type = PresetBC
-    boundary = bottom
+    boundary = 1000
     variable = disp_y
     value = 0.0
   [../]

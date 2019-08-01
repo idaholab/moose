@@ -42,10 +42,11 @@ GhostElemPD::ghostElements()
   for (MeshBase::const_element_iterator elem = _mesh.getMesh().active_local_elements_begin();
        elem != end_elem;
        ++elem)
-    for (unsigned int i = 0; i < _nnodes; ++i)
-    {
-      std::vector<dof_id_type> neighbors = _pdmesh.getNeighbors((*elem)->node_id(i));
-      for (unsigned int j = 0; j < neighbors.size(); ++j)
-        _subproblem.addGhostedElem(_pdmesh.getBonds((*elem)->node_id(i))[j]);
-    }
+    if ((*elem)->type() == 0) // only ghost neighbors for Edge2 elems
+      for (unsigned int i = 0; i < _nnodes; ++i)
+      {
+        std::vector<dof_id_type> neighbors = _pdmesh.getNeighbors((*elem)->node_id(i));
+        for (unsigned int j = 0; j < neighbors.size(); ++j)
+          _subproblem.addGhostedElem(_pdmesh.getBonds((*elem)->node_id(i))[j]);
+      }
 }

@@ -37,22 +37,22 @@
 []
 
 [BCs]
-  [./left_dx]
+  [./left_x]
     type = DirichletBC
     variable = disp_x
-    boundary = left
+    boundary = 1003
     value = 0.0
   [../]
-  [./top_dy]
+  [./top_y]
     type = DirichletBC
     variable = disp_y
-    boundary = top
+    boundary = 1002
     value = 0.0
   [../]
-  [./bottom_dy]
+  [./bottom_y]
     type = FunctionPresetBC
     variable = disp_y
-    boundary = bottom
+    boundary = 1000
     function = '-0.001 * t'
   [../]
 []

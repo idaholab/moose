@@ -60,8 +60,11 @@ ComputeStrainBaseNOSPD::initQpStatefulProperties()
   _total_strain[_qp].zero();
   _deformation_gradient[_qp].zero();
   _deformation_gradient[_qp].addIa(1.0);
-  if (_qrule->n_points() < 2)
-    mooseError("NOSPD models require a minimum quadrature order of THIRD");
+
+  if (_qrule->n_points() < 2) // Gauss_Lobatto: order = 2n-3 (n is number of qp)
+    mooseError(
+        "NOSPD models require Gauss_Lobatto rule and a minimum of 2 quadrature points, i.e., "
+        "order of FIRST");
 }
 
 void

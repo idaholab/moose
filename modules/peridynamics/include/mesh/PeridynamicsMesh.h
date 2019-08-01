@@ -46,11 +46,12 @@ public:
   dof_id_type nPDBonds() const;
 
   /**
-   * Function to assign values to member variables (extra PD mesh data) of this class
+   * Function to assign values to member variables (PD mesh data) of this class
    * this function will be called in the PD mesh generator class
    * @param fe_mesh   The finite element mesh based on which the peridynamics mesh will be created
+   * @param converted_elem_id  The IDs of finite elements to be converted to peridynamics mesh
    */
-  void createExtraPeridynamicsMeshData(MeshBase & fe_mesh);
+  void createPeridynamicsMeshData(MeshBase & fe_mesh, std::vector<dof_id_type> converted_elem_id);
 
   /**
    * Function to return neighbor nodes indices for node node_id
@@ -97,6 +98,12 @@ public:
    * @return The coordinates of a node
    */
   Point getPDNodeCoord(dof_id_type node_id);
+
+  /**
+   * Function to return the correspondence between PD node IDs and FE element IDs
+   * @return The coordinates of a node
+   */
+  std::vector<unsigned int> getPDNodeIDToFiniteElemIDMap();
 
   /**
    * Function to return nodal volume for node node_id
@@ -168,6 +175,7 @@ protected:
   std::vector<Real> & _pdnode_vol;
   std::vector<Real> & _pdnode_horiz_vol;
   std::vector<unsigned int> & _pdnode_blockID;
+  std::vector<unsigned int> & _pdnode_elemID;
   ///@}
 
   /// Neighbor lists for each material point determined using the horizon

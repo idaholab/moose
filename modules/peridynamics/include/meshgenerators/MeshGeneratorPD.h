@@ -35,6 +35,10 @@ protected:
   /// Reference to the input finite element mesh
   std::unique_ptr<MeshBase> & _input;
 
+  /// block ID(s) of input FE mesh when only certain block(s) needs to be converted to PD mesh
+  bool _has_block_id;
+  std::set<SubdomainID> _conv_block_ids;
+
   /// flag to specify whether the FE mesh should be retained or not
   /// in addition to newly created PD mesh
   bool _retain_fe_mesh;
