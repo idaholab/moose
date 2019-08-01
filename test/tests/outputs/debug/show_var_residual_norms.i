@@ -70,10 +70,9 @@
     variable = u
   [../]
   [./test1]
-    type = CoupledKernelGradTest
+    type = CoupledConvection
     variable = u
-    var2 = v
-    vel = '0.1 0.1'
+    velocity_vector = v
   [../]
   [./diff2]
     type = Diffusion

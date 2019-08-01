@@ -70,13 +70,12 @@
     variable = u
   [../]
   [./test1]
-    type = CoupledKernelGradTest
+    type = CoupledConvection
     variable = u
-    var2 = v
-    vel = '0.1 0.1'
+    velocity_vector = v
 
     # Trigger the error in this class
-    test_coupling_error = true
+    test_coupling_declaration_error = true
   [../]
   [./diff2]
     type = Diffusion

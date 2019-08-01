@@ -21,6 +21,12 @@ validParams<CoupledConvection>()
       "lag_coupling",
       false,
       "Tells the object to use the old velocity vector instead of the current vector");
+
+  params.addParam<bool>("test_coupling_declaration_error",
+                        false,
+                        "Set to true to verify that error messages are "
+                        "produced if a coupling is requested that wasn't "
+                        "declared");
   return params;
 }
 
@@ -29,6 +35,9 @@ CoupledConvection::CoupledConvection(const InputParameters & parameters)
     _velocity_vector(getParam<bool>("lag_coupling") ? coupledGradientOld("velocity_vector")
                                                     : coupledGradient("velocity_vector"))
 {
+  // Test coupling error
+  if (getParam<bool>("test_coupling_declaration_error"))
+    coupledGradient("var_undeclared");
 }
 
 Real
