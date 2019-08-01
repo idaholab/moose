@@ -171,6 +171,53 @@ SetupMeshAction::setupMesh(MooseMesh * mesh)
     mesh->getMesh().skip_partitioning(getParam<bool>("skip_partitioning"));
 }
 
+std::string
+SetupMeshAction::modifyParamsForUseSplit(InputParameters & moose_object_params) const
+{
+  auto split_file = _app.parameters().get<std::string>("split_file");
+
+  // Get the split_file extension, if there is one, and use that to decide
+  // between .cpr and .cpa
+  std::string split_file_ext;
+  auto pos = split_file.rfind(".");
+  if (pos != std::string::npos)
+    split_file_ext = split_file.substr(pos + 1, std::string::npos);
+
+  // If split_file already has the .cpr or .cpa extension, we go with
+  // that, otherwise we strip off the extension and append ".cpr".
+  if (split_file != "" && split_file_ext != "cpr" && split_file_ext != "cpa")
+    split_file = MooseUtils::stripExtension(split_file) + ".cpr";
+
+  if (_type != "FileMesh")
+  {
+    if (split_file == "")
+    {
+      if (_app.processor_id() == 0)
+        mooseError("Cannot use split mesh for a non-file mesh without specifying --split-file on "
+                   "command line");
+    }
+
+    auto new_pars = validParams<FileMesh>();
+
+    // Keep existing parameters where possible
+    new_pars.applyParameters(_moose_object_pars);
+
+    new_pars.set<MeshFileName>("file") = split_file;
+    new_pars.set<MooseApp *>("_moose_app") = moose_object_params.get<MooseApp *>("_moose_app");
+    moose_object_params = new_pars;
+  }
+  else
+  {
+    if (split_file != "")
+      moose_object_params.set<MeshFileName>("file") = split_file;
+    else
+      moose_object_params.set<MeshFileName>("file") =
+          MooseUtils::stripExtension(moose_object_params.get<MeshFileName>("file")) + ".cpr";
+  }
+
+  return "FileMesh";
+}
+
 void
 SetupMeshAction::act()
 {
@@ -178,58 +225,19 @@ SetupMeshAction::act()
   if (_current_task == "setup_mesh")
   {
     // If the [Mesh] block contains mesh generators, change the default type to construct
-    if (_awh.hasActions("add_mesh_generator") && !_pars.isParamSetByUser("type"))
+    if (_awh.hasActions("add_mesh_generator"))
     {
+      if (_pars.isParamSetByUser("type") && _type != "MeshGeneratedMesh")
+        mooseWarning("Mesh Generators present but the [Mesh] block is set to construct a \"",
+                     _type,
+                     "\" mesh.");
+
       _type = "MeshGeneratorMesh";
       _moose_object_pars = _factory.getValidParams("MeshGeneratorMesh");
     }
-
     // switch non-file meshes to be a file-mesh if using a pre-split mesh configuration.
     if (_app.isUseSplit())
-    {
-      auto split_file = _app.parameters().get<std::string>("split_file");
-
-      // Get the split_file extension, if there is one, and use that to decide
-      // between .cpr and .cpa
-      std::string split_file_ext;
-      auto pos = split_file.rfind(".");
-      if (pos != std::string::npos)
-        split_file_ext = split_file.substr(pos + 1, std::string::npos);
-
-      // If split_file already has the .cpr or .cpa extension, we go with
-      // that, otherwise we strip off the extension and append ".cpr".
-      if (split_file != "" && split_file_ext != "cpr" && split_file_ext != "cpa")
-        split_file = MooseUtils::stripExtension(split_file) + ".cpr";
-
-      if (_type != "FileMesh")
-      {
-        if (split_file == "")
-        {
-          if (_app.processor_id() == 0)
-            mooseError(
-                "Cannot use split mesh for a non-file mesh without specifying --split-file on "
-                "command line");
-        }
-
-        _type = "FileMesh";
-        auto new_pars = validParams<FileMesh>();
-
-        // Keep existing parameters where possible
-        new_pars.applyParameters(_moose_object_pars);
-
-        new_pars.set<MeshFileName>("file") = split_file;
-        new_pars.set<MooseApp *>("_moose_app") = _moose_object_pars.get<MooseApp *>("_moose_app");
-        _moose_object_pars = new_pars;
-      }
-      else
-      {
-        if (split_file != "")
-          _moose_object_pars.set<MeshFileName>("file") = split_file;
-        else
-          _moose_object_pars.set<MeshFileName>("file") =
-              MooseUtils::stripExtension(_moose_object_pars.get<MeshFileName>("file")) + ".cpr";
-      }
-    }
+      _type = modifyParamsForUseSplit(_moose_object_pars);
 
     _mesh = _factory.create<MooseMesh>(_type, "mesh", _moose_object_pars);
   }
