@@ -124,7 +124,8 @@ public:
     WRONG
   };
 
-  static HitCmpResult hitArgComparison(const std::string & arg, const std::string & appname, int appnum);
+  static HitCmpResult
+  hitArgComparison(const std::string & arg, const std::string & appname, int appnum);
 
 protected:
   /**
