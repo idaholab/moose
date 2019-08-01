@@ -200,25 +200,6 @@ NonlinearSystemBase::init()
   if (_need_residual_copy)
     _residual_copy.init(_sys.n_dofs(), false, SERIAL);
 
-  Moose::perf_log.push("maxVarNDofsPerElem()", "Setup");
-  MaxVarNDofsPerElem mvndpe(_fe_problem, *this);
-  Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), mvndpe);
-  _max_var_n_dofs_per_elem = mvndpe.max();
-  _communicator.max(_max_var_n_dofs_per_elem);
-  auto displaced_problem = _fe_problem.getDisplacedProblem();
-  if (displaced_problem)
-    displaced_problem->nlSys().assignMaxVarNDofsPerElem(_max_var_n_dofs_per_elem);
-  Moose::perf_log.pop("maxVarNDofsPerElem()", "Setup");
-
-  Moose::perf_log.push("maxVarNDofsPerNode()", "Setup");
-  MaxVarNDofsPerNode mvndpn(_fe_problem, *this);
-  Threads::parallel_reduce(*_mesh.getLocalNodeRange(), mvndpn);
-  _max_var_n_dofs_per_node = mvndpn.max();
-  _communicator.max(_max_var_n_dofs_per_node);
-  if (displaced_problem)
-    displaced_problem->nlSys().assignMaxVarNDofsPerNode(_max_var_n_dofs_per_node);
-  Moose::perf_log.pop("maxVarNDofsPerNode()", "Setup");
-
   if (_fe_problem.automaticScaling())
     // We don't need libMesh to do projections since we will always be filling this vector from the
     // diagonal of the preconditioning matrix, hence false for our second argument. We also do not
@@ -265,6 +246,25 @@ NonlinearSystemBase::restoreSolutions()
 void
 NonlinearSystemBase::initialSetup()
 {
+  if (_fe_problem.haveADObjects())
+  {
+    CONSOLE_TIMED_PRINT("Computing max dofs per elem/node");
+
+    MaxVarNDofsPerElem mvndpe(_fe_problem, *this);
+    Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), mvndpe);
+    _max_var_n_dofs_per_elem = mvndpe.max();
+    _communicator.max(_max_var_n_dofs_per_elem);
+    auto displaced_problem = _fe_problem.getDisplacedProblem();
+    if (displaced_problem)
+      displaced_problem->nlSys().assignMaxVarNDofsPerElem(_max_var_n_dofs_per_elem);
+
+    MaxVarNDofsPerNode mvndpn(_fe_problem, *this);
+    Threads::parallel_reduce(*_mesh.getLocalNodeRange(), mvndpn);
+    _max_var_n_dofs_per_node = mvndpn.max();
+    _communicator.max(_max_var_n_dofs_per_node);
+    if (displaced_problem)
+      displaced_problem->nlSys().assignMaxVarNDofsPerNode(_max_var_n_dofs_per_node);
+  }
   {
     CONSOLE_TIMED_PRINT("Initializing Kernels, BCs and Constraints");
 
