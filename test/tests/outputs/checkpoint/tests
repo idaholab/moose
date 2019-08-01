@@ -47,7 +47,7 @@
       type = 'Exodiff'
       input = 'checkpoint_interval.i'
       exodiff = 'checkpoint_interval_out.e'
-      prereq = 'test_files'
+      prereq = 'interval/test_files'
       recover = false
       max_parallel = 1
       max_threads = 1
@@ -98,7 +98,7 @@
       recover = false
       max_parallel = 1
       max_threads = 1
-      prereq = recover_half_transient
+      prereq = 'default/recover_half_transient'
       delete_output_before_running = false
       detail = "be capable of restarting a simulation from the output data."
     []
@@ -151,7 +151,7 @@
       max_parallel = 1
       max_threads = 1
       delete_output_before_running = false
-      prereq = recover_with_checkpoint_block_half_transient
+      prereq = 'block/recover_with_checkpoint_block_half_transient'
       detail = "be capable of restarting a simulation from the output data."
     []
   []

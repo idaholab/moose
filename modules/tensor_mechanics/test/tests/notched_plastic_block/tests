@@ -49,7 +49,7 @@
       csvdiff = 'biaxial_smooth_poly1.csv'
       heavy = true
       cli_args = 'Executioner/end_time=1 Materials/mc/smoother_function_type=poly1 Outputs/file_base=biaxial_smooth_poly1 Postprocessors/active=s_zz'
-      prereq = 'biaxial_smooth_cos'
+      prereq = 'confined_uniaxial/biaxial_smooth_cos'
       detail = 'smoothed Mohr-Coulomb plasticity, with smoothing performed by the novel MOOSE smoothing method described in Wilkins et al, using the poly1 smoother'
     [../]
     [./biaxial_smooth_poly2]
@@ -58,7 +58,7 @@
       csvdiff = 'biaxial_smooth_poly2.csv'
       heavy = true
       cli_args = 'Executioner/end_time=1 Materials/mc/smoother_function_type=poly2 Outputs/file_base=biaxial_smooth_poly2 Postprocessors/active=s_zz'
-      prereq = 'biaxial_smooth_cos biaxial_smooth_poly1'
+      prereq = 'confined_uniaxial/biaxial_smooth_poly1'
       detail = 'smoothed Mohr-Coulomb plasticity, with smoothing performed by the novel MOOSE smoothing method described in Wilkins et al, using the poly2 smoother'
     [../]
     [./biaxial_smooth_poly3]
@@ -67,7 +67,7 @@
       csvdiff = 'biaxial_smooth_poly3.csv'
       heavy = true
       cli_args = 'Executioner/end_time=1 Materials/mc/smoother_function_type=poly3 Outputs/file_base=biaxial_smooth_poly3 Postprocessors/active=s_zz'
-      prereq = 'biaxial_smooth_cos biaxial_smooth_poly1 biaxial_smooth_poly2'
+      prereq = 'confined_uniaxial/biaxial_smooth_poly2'
       detail = 'smoothed Mohr-Coulomb plasticity, with smoothing performed by the novel MOOSE smoothing method described in Wilkins et al, using the poly3 smoother'
     [../]
   []
