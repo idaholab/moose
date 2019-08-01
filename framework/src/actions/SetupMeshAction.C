@@ -24,7 +24,17 @@ InputParameters
 validParams<SetupMeshAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
-  params.set<std::string>("type") = "FileMesh";
+
+  // Here we are setting the default type of the mesh to construct to "FileMesh". This is to support
+  // the very long-running legacy syntax where only a file parameter is required to determine the
+  // type of the "Mesh" block. We are re-adding it though so that we can detect whether or not the
+  // user has explicitly set the type in an input file. We do this because we want to support
+  // automatically building a "MeshGeneratorMesh" type when MeshGenerators are added to the
+  // simulation.
+  params.addParam<std::string>(
+      "type",
+      "FileMesh",
+      "A string representing the Moose Object that will be built by this Action");
 
   params.addParam<bool>("second_order",
                         false,
@@ -167,6 +177,13 @@ SetupMeshAction::act()
   // Create the mesh object and tell it to build itself
   if (_current_task == "setup_mesh")
   {
+    // If the [Mesh] block contains mesh generators, change the default type to construct
+    if (_awh.hasActions("add_mesh_generator") && !_pars.isParamSetByUser("type"))
+    {
+      _type = "MeshGeneratorMesh";
+      _moose_object_pars = _factory.getValidParams("MeshGeneratorMesh");
+    }
+
     // switch non-file meshes to be a file-mesh if using a pre-split mesh configuration.
     if (_app.isUseSplit())
     {
