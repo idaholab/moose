@@ -227,7 +227,7 @@ SetupMeshAction::act()
     // If the [Mesh] block contains mesh generators, change the default type to construct
     if (_awh.hasActions("add_mesh_generator"))
     {
-      if (_pars.isParamSetByUser("type") && _type != "MeshGeneratedMesh")
+      if (_pars.isParamSetByUser("type") && _type != "MeshGeneratorMesh")
         mooseWarning("Mesh Generators present but the [Mesh] block is set to construct a \"",
                      _type,
                      "\" mesh.");
