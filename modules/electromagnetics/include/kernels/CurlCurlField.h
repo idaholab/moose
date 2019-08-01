@@ -26,7 +26,7 @@ protected:
   /// Holds the solution curl at the current quadrature points
   const VectorVariableCurl & _curl_u;
 
-  Real _sign;
+  Real _coeff;
 };
 
 #endif // CURLCURLFIELD_H
