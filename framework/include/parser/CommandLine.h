@@ -118,10 +118,10 @@ public:
 
   enum class HitCmpResult
   {
-	GLOBAL,
-	MAIN,
-	MATCH,
-	WRONG
+    GLOBAL,
+    MAIN,
+    MATCH,
+    WRONG
   };
 
   static HitCmpResult hitArgComparison(const std::string & arg, const std::string & appname, int appnum);
