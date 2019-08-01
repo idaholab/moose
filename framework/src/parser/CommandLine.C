@@ -75,7 +75,7 @@ CommandLine::initForMultiApp(const std::string & subapp_full_name)
   // an erase is needed to actually remove the items
   auto new_end =
       std::remove_if(_argv.begin(), _argv.end(), [&sub_name, sub_num](const std::string & arg) {
-        return hitArgComparison(arg, sub_name, sub_num) == HitCmpResult::WRONG;
+        return CommandLine::hitArgComparison(arg, sub_name, sub_num) == CommandLine::HitCmpResult::WRONG;
       });
   _argv.erase(new_end, _argv.end());
 
@@ -236,16 +236,17 @@ CommandLine::setArgument<std::string>(std::stringstream & stream, std::string & 
   argument = stream.str();
 }
 
-HitCmpResult hitArgComparison(const std::string & arg, const std::string & app_name, int app_num)
+CommandLine::HitCmpResult 
+CommandLine::hitArgComparison(const std::string & arg, const std::string & app_name, int app_num)
 {
   int arg_num = -1;
   std::string arg_name;
   auto pos = arg.find(":", 0);
   if (pos == 0)
-    return HitCmpResult::GLOBAL;
+    return CommandLine::HitCmpResult::GLOBAL;
   if (pos == std::string::npos)
-    return HitCmpResult::MAIN;
+    return CommandLine::HitCmpResult::MAIN;
   pcrecpp::RE("(\\S*?)(\\d*):").PartialMatch(arg, &arg_name, &arg_num);
-  if (app_name == arg_name && (arg_num == -1 || arg_num == app_num)) return HitCmpResult::MATCH;
-  return HitCmpResult::WRONG;
+  if (app_name == arg_name && (arg_num == -1 || arg_num == app_num)) return CommandLine::HitCmpResult::MATCH;
+  return CommandLine::HitCmpResult::WRONG;
 }

@@ -116,6 +116,16 @@ public:
     return unused;
   }
 
+  enum class HitCmpResult
+  {
+	GLOBAL,
+	MAIN,
+	MATCH,
+	WRONG
+  };
+
+  static HitCmpResult hitArgComparison(const std::string & arg, const std::string & appname, int appnum);
+
 protected:
   /**
    * Used to set the argument value, allows specialization
@@ -191,13 +201,3 @@ CommandLine::search(const std::string & option_name, T & argument)
   }
   mooseError("Unrecognized option name");
 }
-
-enum class HitCmpResult
-{
-	GLOBAL,
-	MAIN,
-	MATCH,
-	WRONG
-};
-
-HitCmpResult hitArgComparison(const std::string & arg, const std::string & appname, int appnum);
