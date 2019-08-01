@@ -200,4 +200,4 @@ enum class HitCmpResult
 	WRONG
 };
 
-HitCmpResult hitArgCmp(std::string arg, std::string appname, int appnum);
+HitCmpResult hitArgCmp(const std::string & arg, const std::string & appname, int appnum);

@@ -236,7 +236,7 @@ CommandLine::setArgument<std::string>(std::stringstream & stream, std::string & 
   argument = stream.str();
 }
 
-HitCmpResult hitArgCmp(std::string arg, std::string app_name, int app_num)
+HitCmpResult hitArgCmp(const std::string & arg, const std::string & app_name, int app_num)
 {
   int arg_num = -1;
   std::string arg_name;
