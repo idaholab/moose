@@ -9,6 +9,7 @@
 
 #include "PorousFlowWaterNCG.h"
 #include "SinglePhaseFluidProperties.h"
+#include "Water97FluidProperties.h"
 #include "Conversion.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowWaterNCG);
@@ -27,12 +28,13 @@ validParams<PorousFlowWaterNCG>()
 
 PorousFlowWaterNCG::PorousFlowWaterNCG(const InputParameters & parameters)
   : PorousFlowFluidStateMultiComponentBase(parameters),
-    _water_fp(getUserObject<SinglePhaseFluidProperties>("water_fp")),
+    _water_fp(getUserObject<Water97FluidProperties>("water_fp")),
     _ncg_fp(getUserObject<SinglePhaseFluidProperties>("gas_fp")),
     _Mh2o(_water_fp.molarMass()),
     _Mncg(_ncg_fp.molarMass()),
     _water_triple_temperature(_water_fp.triplePointTemperature()),
-    _water_critical_temperature(_water_fp.criticalTemperature())
+    _water_critical_temperature(_water_fp.criticalTemperature()),
+    _ncg_henry(_ncg_fp.henryCoefficients())
 {
   // Check that the correct FluidProperties UserObjects have been provided
   if (_water_fp.fluidName() != "water")
@@ -470,7 +472,7 @@ PorousFlowWaterNCG::equilibriumMassFractions(Real pressure,
   // Equilibrium constants for each component (Henry's law for the NCG
   // component, and Raoult's law for water).
   Real Kh, dKh_dT, psat, dpsat_dT;
-  _ncg_fp.henryConstant(temperature, Kh, dKh_dT);
+  _water_fp.henryConstant(temperature, _ncg_henry, Kh, dKh_dT);
   _water_fp.vaporPressure(temperature, psat, dpsat_dT);
   const Real Kncg = Kh / pressure;
   const Real Kh2o = psat / pressure;
@@ -528,7 +530,7 @@ PorousFlowWaterNCG::enthalpyOfDissolution(Real temperature, Real & hdis, Real & 
 {
   // Henry's constant
   Real Kh, dKh_dT;
-  _ncg_fp.henryConstant(temperature, Kh, dKh_dT);
+  _water_fp.henryConstant(temperature, _ncg_henry, Kh, dKh_dT);
 
   hdis = -_R * temperature * temperature * dKh_dT / Kh / _Mncg;
 
@@ -536,7 +538,7 @@ PorousFlowWaterNCG::enthalpyOfDissolution(Real temperature, Real & hdis, Real & 
   // Henry's constant wrt temperature. For simplicity, approximate this numerically
   const Real dT = temperature * 1.0e-8;
   const Real t2 = temperature + dT;
-  _ncg_fp.henryConstant(t2, Kh, dKh_dT);
+  _water_fp.henryConstant(t2, _ncg_henry, Kh, dKh_dT);
 
   dhdis_dT = (-_R * t2 * t2 * dKh_dT / Kh / _Mncg - hdis) / dT;
 }

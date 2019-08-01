@@ -108,7 +108,6 @@ TEST_F(IdealGasFluidPropertiesTest, testAll)
   const Real thermal_conductivity = 0.02568;
   const Real entropy = 1767.24985689;
   const Real viscosity = 18.23e-6;
-  Real henry = 0.0;
   const Real R = 8.3144598;
 
   const Real tol = REL_TOL_CONSISTENCY;
@@ -129,17 +128,12 @@ TEST_F(IdealGasFluidPropertiesTest, testAll)
   REL_TEST(_fp_pT->mu_from_p_T(p, T), viscosity, tol);
   REL_TEST(_fp_pT->mu_from_p_T(p, T), viscosity, tol);
   REL_TEST(_fp_pT->h_from_p_T(p, T), cp * T, tol);
-  ABS_TEST(_fp_pT->henryConstant(T), henry, tol);
 
   DERIV_TEST(_fp_pT->rho_from_p_T, p, T, REL_TOL_DERIVATIVE);
   DERIV_TEST(_fp_pT->mu_from_p_T, p, T, REL_TOL_DERIVATIVE);
   DERIV_TEST(_fp_pT->e_from_p_T, p, T, REL_TOL_DERIVATIVE);
   DERIV_TEST(_fp_pT->h_from_p_T, p, T, REL_TOL_DERIVATIVE);
   DERIV_TEST(_fp_pT->k_from_p_T, p, T, REL_TOL_DERIVATIVE);
-
-  Real dhenry_dT;
-  _fp_pT->henryConstant(T, henry, dhenry_dT);
-  ABS_TEST(dhenry_dT, 0.0, tol);
 }
 
 /**

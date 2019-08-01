@@ -36,7 +36,6 @@ TEST_F(SimpleFluidPropertiesTest, properties)
   const Real entropy = 300.0;
   const Real visc = 1.0E-3;
   const Real density0 = 1000.0;
-  const Real henry = 0.0;
   const Real pp_coef = 0.0;
 
   const Real tol = REL_TOL_CONSISTENCY;
@@ -57,7 +56,6 @@ TEST_F(SimpleFluidPropertiesTest, properties)
   ABS_TEST(_fp->mu_from_p_T(p, T), visc, tol);
   ABS_TEST(_fp->h_from_p_T(p, T), cv * T + p / _fp->rho_from_p_T(p, T), tol);
   ABS_TEST(_fp2->h_from_p_T(p, T), cv * T + p * pp_coef / _fp2->rho_from_p_T(p, T), tol);
-  ABS_TEST(_fp->henryConstant(T), henry, tol);
 
   p = 1.0E7;
   T = 300.0;
@@ -74,7 +72,6 @@ TEST_F(SimpleFluidPropertiesTest, properties)
   ABS_TEST(_fp->mu_from_p_T(p, T), visc, tol);
   ABS_TEST(_fp->h_from_p_T(p, T), cv * T + p / _fp->rho_from_p_T(p, T), tol);
   ABS_TEST(_fp2->h_from_p_T(p, T), cv * T + p * pp_coef / _fp2->rho_from_p_T(p, T), tol);
-  ABS_TEST(_fp->henryConstant(T), henry, tol);
 }
 
 /**
@@ -104,10 +101,6 @@ TEST_F(SimpleFluidPropertiesTest, derivatives)
   DERIV_TEST(_fp->h_from_p_T, p, T, tol);
   DERIV_TEST(_fp->k_from_p_T, p, T, tol);
   DERIV_TEST(_fp->cp_from_p_T, p, T, tol);
-
-  Real henry, dhenry_dT;
-  _fp->henryConstant(T, henry, dhenry_dT);
-  ABS_TEST(dhenry_dT, 0.0, tol);
 }
 
 /**

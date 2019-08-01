@@ -13,6 +13,7 @@
 
 class BrineFluidProperties;
 class SinglePhaseFluidProperties;
+class Water97FluidProperties;
 class PorousFlowBrineCO2;
 
 template <>
@@ -521,8 +522,6 @@ protected:
   const BrineFluidProperties & _brine_fp;
   /// Fluid properties UserObject for the CO2
   const SinglePhaseFluidProperties & _co2_fp;
-  /// Fluid properties UserObject for H20
-  const SinglePhaseFluidProperties & _water_fp;
   /// Molar mass of water (kg/mol)
   const Real _Mh2o;
   /// Inverse of molar mass of H2O (mol/kg)
@@ -540,5 +539,6 @@ protected:
   /// Minimum Z - below this value all CO2 will be dissolved. This reduces the
   /// computational burden when small values of Z are present
   const Real _Zmin;
+  /// Henry's coefficeients for CO2
+  const std::vector<Real> _co2_henry;
 };
-

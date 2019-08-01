@@ -647,3 +647,33 @@ TEST_F(Water97FluidPropertiesTest, combined)
   ABS_TEST(de_dp, de2_dp, tol);
   ABS_TEST(de_dT, de2_dT, tol);
 }
+
+/**
+ * Verify calculation of Henry's constant using data from
+ * Guidelines on the Henry's constant and vapour liquid distribution constant
+ * for gases in H20 and D20 at high temperatures, IAPWS (2004).
+ */
+TEST_F(Water97FluidPropertiesTest, henry)
+{
+  const Real tol = REL_TOL_EXTERNAL_VALUE;
+
+  // CO2 constants
+  const std::vector<Real> co2{-8.55445, 4.01195, 9.52345};
+  REL_TEST(_fp->henryConstant(300.0, co2), 173.63e6, tol);
+  REL_TEST(_fp->henryConstant(500.0, co2), 520.79e6, tol);
+
+  // CH4 constants
+  const std::vector<Real> ch4{-10.44708, 4.66491, 12.1298};
+  REL_TEST(_fp->henryConstant(400.0, ch4), 6017.1e6, REL_TOL_EXTERNAL_VALUE);
+  REL_TEST(_fp->henryConstant(600.0, ch4), 801.8e6, REL_TOL_EXTERNAL_VALUE);
+
+  // Test derivative of Henry's constant wrt temperature
+  const Real dT = 1.0e-4;
+  const Real dKh_dT_fd =
+      (_fp->henryConstant(500.0 + dT, co2) - _fp->henryConstant(500.0 - dT, co2)) / (2.0 * dT);
+
+  Real Kh = 0.0, dKh_dT = 0.0;
+  _fp->henryConstant(500.0, co2, Kh, dKh_dT);
+  REL_TEST(Kh, _fp->henryConstant(500.0, co2), REL_TOL_CONSISTENCY);
+  REL_TEST(dKh_dT_fd, dKh_dT, REL_TOL_DERIVATIVE);
+}
