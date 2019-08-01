@@ -10,6 +10,7 @@ MOOSE.  Click on each one for further information
 | [memory_logger.md] | Tool for gathering memory usage of a running process. |
 | [CSVDiff.md] | Tool for computing differences between comma separated value (CSV) files. |
 | [mms.md] | Utilities for verifying solves with the method of manufactured solutions. |
+| [free_energy.py](/CALPHAD_free_energies.md) | Tool for extracting MOOSE parsed function expressions from thermodynamic database files. |
 
 ## Setup
 

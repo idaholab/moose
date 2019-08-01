@@ -18,15 +18,21 @@ Usage:
 If no list of phases is supplied all phases are exported.
 """
 
+import os
 import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
 from pycalphad import Database, Model
-from utils.fparser import fparser
+from mms.fparser import fparser
 
 # get commandline arguments
 try:
     db_filename = sys.argv[1]
 except IndexError:
-    print "usage:\n\tfree_energy.py database.tdb [list of phases]"
+    print "usage:\n\t%s database.tdb [list of phases]\n" % sys.argv[0]
+    print "Generate MOOSE input blocks for free energies from a supplied thermodynamic"
+    print "database (.tdb) file. Further documentation can be found at"
+    print "moose/modules/doc/content/python/CALPHAD_free_energies.md"
     sys.exit(1)
 
 phases = sys.argv[2:]
@@ -53,7 +59,6 @@ else:
 for phase in phases:
     print '  [./F_%s]' % phase
     print '    type = DerivativeParsedMaterial'
-    print '    block = 0'
 
     # get constituents
     constituents = list(set([i for c in db.phases[phase].constituents for i in c]))
@@ -62,7 +67,7 @@ for phase in phases:
     m = Model(db, constituents, phase)
 
     # export fparser expression
-    print "    function = '%s'" % fparser(m.ast)[2]
+    print "    function = '%s'" % fparser(m.ast)
 
     # print variables
     print "    args = '%s'" % " ".join([v.name for v in m.variables])
