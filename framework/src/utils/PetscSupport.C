@@ -946,7 +946,11 @@ colorAdjacencyMatrix(PetscScalar * adjacency_matrix,
 
   PetscInt nn;
   IS * is;
+#if PETSC_RELEASE_LESS_THAN(3, 12, 0)
   ISColoringGetIS(iscoloring, &nn, &is);
+#else
+  ISColoringGetIS(iscoloring, PETSC_USE_POINTER, &nn, &is);
+#endif
 
   if (nn > static_cast<PetscInt>(colors))
     throw std::runtime_error("Not able to color with designated number of colors");
