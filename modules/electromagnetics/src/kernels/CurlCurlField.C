@@ -9,8 +9,10 @@ validParams<CurlCurlField>()
 {
   InputParameters params = validParams<VectorKernel>();
   params.addClassDescription(
-      "Weak form term corresponding to $\\nabla \\times \\nabla \\times \\vec{E}$.");
-  params.addParam<Real>("sign", 1.0, "Sign in weak form.");
+      "Weak form term corresponding to $\\nabla \\times (a \\nabla \\times "
+      "\\vec{E})$, where $a$ is a coefficient parameter (in EM, usually tied to "
+      "the medium being modeled).");
+  params.addParam<Real>("coeff", 1.0, "Weak form coefficient (default = 1.0).");
   return params;
 }
 
@@ -19,18 +21,18 @@ CurlCurlField::CurlCurlField(const InputParameters & parameters)
     _curl_test(_var.curlPhi()),
     _curl_phi(_assembly.curlPhi(_var)),
     _curl_u(_is_implicit ? _var.curlSln() : _var.curlSlnOld()),
-    _sign(getParam<Real>("sign"))
+    _coeff(getParam<Real>("coeff"))
 {
 }
 
 Real
 CurlCurlField::computeQpResidual()
 {
-  return _sign * _curl_u[_qp] * _curl_test[_i][_qp];
+  return _coeff * _curl_u[_qp] * _curl_test[_i][_qp];
 }
 
 Real
 CurlCurlField::computeQpJacobian()
 {
-  return _sign * _curl_phi[_j][_qp] * _curl_test[_i][_qp];
+  return _coeff * _curl_phi[_j][_qp] * _curl_test[_i][_qp];
 }
