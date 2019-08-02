@@ -2519,8 +2519,12 @@ DMCreate_Moose(DM dm)
 
   dm->ops->refine = 0;        // DMRefine_Moose;
   dm->ops->coarsen = 0;       // DMCoarsen_Moose;
+#if PETSC_RELEASE_LESS_THAN(3, 12, 0)
   dm->ops->getinjection = 0;  // DMGetInjection_Moose;
   dm->ops->getaggregates = 0; // DMGetAggregates_Moose;
+#else
+  dm->ops->createinjection = 0;
+#endif
 
 #if PETSC_VERSION_LT(3, 4, 0)
   dm->ops->createfielddecompositiondm = DMCreateFieldDecompositionDM_Moose;
