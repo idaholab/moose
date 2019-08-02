@@ -38,7 +38,7 @@
 
     [exodustimesequence]
       type = 'Exodiff'
-      prereq = timesequence_no_start_time
+      prereq = 'time_sequence/timesequence_no_start_time'
       input = 'exodustimesequence.i'
       exodiff = 'exodustimesequence_out.e'
 
@@ -47,7 +47,7 @@
 
     [csvtimesequence]
       type = 'Exodiff'
-      prereq = timesequence_no_start_time
+      prereq = 'time_sequence/timesequence_no_start_time'
       input = 'csvtimesequence.i'
       exodiff = 'csvtimesequence_out.e'
 
@@ -85,7 +85,7 @@
       exodiff = 'timesequence_restart2.e'
       cli_args = 'Outputs/file_base=timesequence_restart2'
       recover = false
-      prereq = timesequence_restart1
+      prereq = 'restart/timesequence_restart1'
 
       detail = 'when restarting where the time sequence is identical, and'
     []
@@ -96,7 +96,7 @@
       exodiff = 'timesequence_restart3.e'
       cli_args = 'Outputs/file_base=timesequence_restart3'
       recover = false
-      prereq = timesequence_restart1
+      prereq = 'restart/timesequence_restart1'
 
       detail = 'when restarting where the time sequence is different after the point of the '
                'checkpoint.'
@@ -126,7 +126,7 @@
       input = 'timesequence_restart_failure.i'
       expect_err = "The timesequence provided in the restart file must be identical"
       recover = false
-      prereq = timesequence_restart_failure_1
+      prereq = 'restart_failure/timesequence_restart_failure_1'
       max_threads = 1
       max_parallel = 1
 

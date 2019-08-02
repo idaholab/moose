@@ -32,7 +32,6 @@ PorousFlowBrineCO2::PorousFlowBrineCO2(const InputParameters & parameters)
     _salt_component(getParam<unsigned int>("salt_component")),
     _brine_fp(getUserObject<BrineFluidProperties>("brine_fp")),
     _co2_fp(getUserObject<SinglePhaseFluidProperties>("co2_fp")),
-    _water_fp(_brine_fp.getComponent(BrineFluidProperties::WATER)),
     _Mh2o(_brine_fp.molarMassH2O()),
     _invMh2o(1.0 / _Mh2o),
     _Mco2(_co2_fp.molarMass()),
@@ -40,7 +39,8 @@ PorousFlowBrineCO2::PorousFlowBrineCO2(const InputParameters & parameters)
     _Rbar(_R * 10.0),
     _Tlower(372.15),
     _Tupper(382.15),
-    _Zmin(1.0e-4)
+    _Zmin(1.0e-4),
+    _co2_henry(_co2_fp.henryCoefficients())
 {
   // Check that the correct FluidProperties UserObjects have been provided
   if (_co2_fp.fluidName() != "co2")
@@ -1469,7 +1469,7 @@ PorousFlowBrineCO2::henryConstant(
 {
   // Henry's constant for dissolution in water
   Real Kh_h2o, dKh_h2o_dT;
-  _co2_fp.henryConstant(temperature, Kh_h2o, dKh_h2o_dT);
+  _brine_fp.henryConstant(temperature, _co2_henry, Kh_h2o, dKh_h2o_dT);
 
   // The correction to salt is obtained through the salting out coefficient
   const std::vector<Real> b{1.19784e-1, -7.17823e-4, 4.93854e-6, -1.03826e-8, 1.08233e-11};

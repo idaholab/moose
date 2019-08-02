@@ -365,7 +365,8 @@ class TestHarness:
                 relative_path = relative_path.replace('/' + infile + '/', ':')
                 break
         relative_path = re.sub('^[/:]*', '', relative_path)  # Trim slashes and colons
-        formatted_name = relative_path + '.' + tester.name()
+        relative_hitpath = os.path.join(*params['hit_path'].split(os.sep)[1:])  # Trim root node "[Tests]"
+        formatted_name = relative_path + '.' + relative_hitpath
 
         params['test_name'] = formatted_name
         params['test_dir'] = test_dir

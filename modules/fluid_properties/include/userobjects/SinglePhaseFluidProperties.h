@@ -262,15 +262,6 @@ public:
   virtual void v_e_spndl_from_T(Real T, Real & v, Real & e) const;
 
   /**
-   * Henry's law constant for dissolution in water and derivative wrt temperature
-   * @param T fluid temperature (K)
-   * @param[out] Kh Henry's constant
-   * @param[out] dKh_dT derivative of Kh wrt temperature
-   */
-  virtual Real henryConstant(Real T) const;
-  virtual void henryConstant(Real T, Real & Kh, Real & dKh_dT) const;
-
-  /**
    * Vapor pressure. Used to delineate liquid and gas phases.
    * Valid for temperatures between the triple point temperature
    * and the critical temperature
@@ -295,6 +286,12 @@ public:
   virtual Real vaporTemperature(Real p) const;
   virtual void vaporTemperature(Real p, Real & Tsat, Real & dTsat_dp) const;
   DualReal vaporTemperature(const DualReal & p) const;
+
+  /**
+   * Henry's law coefficients for dissolution in water
+   * @return Henry's constant coefficients
+   */
+  virtual std::vector<Real> henryCoefficients() const;
 
   /**
    * Combined methods. These methods are particularly useful for the PorousFlow
@@ -322,16 +319,6 @@ public:
                               Real & e,
                               Real & de_dp,
                               Real & de_dT) const;
-
-protected:
-  /**
-   * IAPWS formulation of Henry's law constant for dissolution in water
-   * From Guidelines on the Henry's constant and vapour
-   * liquid distribution constant for gases in H20 and D20 at high
-   * temperatures, IAPWS (2004)
-   */
-  virtual Real henryConstantIAPWS(Real T, Real A, Real B, Real C) const;
-  virtual void henryConstantIAPWS(Real T, Real & Kh, Real & dKh_dT, Real A, Real B, Real C) const;
 
 private:
   template <typename... Args>

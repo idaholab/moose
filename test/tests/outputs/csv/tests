@@ -50,14 +50,14 @@
       type = CSVDiff
       input = csv_restart_part2.i
       csvdiff = 'csv_restart_part2_out.csv'
-      prereq = restart_part1
+      prereq = 'restart/restart_part1'
       detail = "when restarted creates a new output file or"
     []
     [restart_part2_append]
       type = CSVDiff
       input = csv_restart_part2.i
       csvdiff = 'csv_restart_part2_append_out.csv'
-      prereq = restart_part2
+      prereq = 'restart/restart_part2'
       cli_args = 'Outputs/csv/file_base=csv_restart_part2_append_out Outputs/csv/append_restart=true'
 
       detail = "optionally appends the existing file from the first part."

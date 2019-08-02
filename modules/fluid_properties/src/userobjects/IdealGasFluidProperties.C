@@ -39,7 +39,6 @@ validParams<IdealGasFluidProperties>()
       1.005e3,
       "Constant specific heat capacity at constant pressure (J/kg/K)",
       "The parameter 'cp' is now computed from the provided values for 'gamma' and 'molar_mass'.");
-  params.addParam<Real>("henry_constant", 0.0, "Henry constant for dissolution in water");
 
   params.addClassDescription("Fluid properties for an ideal gas");
 
@@ -57,8 +56,7 @@ IdealGasFluidProperties::IdealGasFluidProperties(const InputParameters & paramet
     _molar_mass(getParam<Real>("molar_mass")),
     _T_c(getParam<Real>("T_c")),
     _rho_c(getParam<Real>("rho_c")),
-    _e_c(getParam<Real>("e_c")),
-    _henry_constant(getParam<Real>("henry_constant"))
+    _e_c(getParam<Real>("e_c"))
 {
   // If R is provided, calculate molar mass using this
   if (parameters.isParamSetByUser("R"))
@@ -593,13 +591,4 @@ Real IdealGasFluidProperties::pp_sat_from_p_T(Real /*p*/, Real /*T*/) const
 {
   mooseError(
       name(), ": ", __PRETTY_FUNCTION__, " not implemented. Use a real fluid property class!");
-}
-
-Real IdealGasFluidProperties::henryConstant(Real /*T*/) const { return _henry_constant; }
-
-void
-IdealGasFluidProperties::henryConstant(Real /*T*/, Real & Kh, Real & dKh_dT) const
-{
-  Kh = _henry_constant;
-  dKh_dT = 0.0;
 }

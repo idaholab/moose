@@ -39,13 +39,10 @@ public:
   SimpleFluidProperties(const InputParameters & parameters);
   virtual ~SimpleFluidProperties();
 
-  /// Fluid name
   virtual std::string fluidName() const override;
 
-  /// Molar mass (kg/mol)
   virtual Real molarMass() const override;
 
-  /// Thermal expansion coefficient (1/K)
   virtual Real beta_from_p_T(Real pressure, Real temperature) const override;
 
   virtual void beta_from_p_T(Real pressure,
@@ -54,40 +51,30 @@ public:
                              Real & dbeta_dp,
                              Real & dbeta_dT) const override;
 
-  /// Isobaric specific heat capacity (J/kg/K)
   virtual Real cp_from_p_T(Real pressure, Real temperature) const override;
 
   virtual void cp_from_p_T(
       Real pressure, Real temperature, Real & cp, Real & dcp_dp, Real & dcp_dT) const override;
 
-  /// Isochoric specific heat capacity (J/kg/K)
   virtual Real cv_from_p_T(Real pressure, Real temperature) const override;
 
-  /// Speed of sound (m/s)
   virtual Real c_from_p_T(Real pressure, Real temperature) const override;
 
-  /// Thermal conductivity (W/m/K)
   virtual Real k_from_p_T(Real pressure, Real temperature) const override;
 
-  /// Thermal conductivity and its derivatives wrt pressure and temperature
   virtual void
   k_from_p_T(Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const override;
 
-  /// Specific entropy (J/kg/K)
   virtual Real s_from_p_T(Real pressure, Real temperature) const override;
   virtual void s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const override;
 
-  /// Density from pressure and temperature (kg/m^3)
   virtual Real rho_from_p_T(Real pressure, Real temperature) const override;
 
-  /// Density from pressure and temperature and its derivatives wrt pressure and temperature
   virtual void rho_from_p_T(
       Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const override;
 
-  /// Internal energy from pressure and temperature (J/kg)
   virtual Real e_from_p_T(Real pressure, Real temperature) const override;
 
-  /// Internal energy and its derivatives wrt pressure and temperature
   virtual void
   e_from_p_T(Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const override;
 
@@ -96,18 +83,10 @@ public:
   virtual void mu_from_p_T(
       Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const override;
 
-  /// Specific enthalpy (J/kg)
   virtual Real h_from_p_T(Real p, Real T) const override;
 
-  /// Specific enthalpy and its derivatives
   virtual void
   h_from_p_T(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const override;
-
-  /// Henry's law constant for dissolution in water
-  virtual Real henryConstant(Real temperature) const override;
-
-  /// Henry's law constant for dissolution in water and derivative wrt temperature
-  virtual void henryConstant(Real temperature, Real & Kh, Real & dKh_dT) const override;
 
 protected:
   /// molar mass
@@ -137,12 +116,8 @@ protected:
   /// density at zero pressure and temperature
   const Real _density0;
 
-  /// Henry constant
-  const Real _henry_constant;
-
   /// Porepressure coefficient: enthalpy = internal_energy + porepressure / density * _pp_coeff
   const Real _pp_coeff;
 };
 
 #pragma GCC diagnostic pop
-
