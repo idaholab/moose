@@ -34,7 +34,7 @@ public:
                                 Real enthalpy,
                                 unsigned int qp,
                                 FluidStatePhaseEnum & phase_state,
-                                std::vector<FluidStatePropertiesAD> & fsp) const override;
+                                std::vector<FluidStateProperties> & fsp) const override;
 
 protected:
   /// Fluid properties UserObject for water
