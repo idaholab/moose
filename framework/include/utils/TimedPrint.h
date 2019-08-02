@@ -86,7 +86,8 @@ public:
       auto start = std::chrono::steady_clock::now();
 
       unsigned int offset = 0;
-      if (done_future.wait_for(initial_wait) == std::future_status::timeout)
+      if (done_future.wait_for(initial_wait) == std::future_status::timeout ||
+          initial_wait == std::chrono::duration<double>::zero())
       {
         streamArguments(out, ARGS);
         offset = out.tellp();
