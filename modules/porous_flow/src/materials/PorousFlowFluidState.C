@@ -107,7 +107,11 @@ PorousFlowFluidState::PorousFlowFluidState(const InputParameters & parameters)
 
     _T_c2k(getParam<MooseEnum>("temperature_unit") == 0 ? 0.0 : 273.15),
     _is_initqp(false),
-    _pc(getUserObject<PorousFlowCapillaryPressure>("capillary_pressure"))
+    _pc(getUserObject<PorousFlowCapillaryPressure>("capillary_pressure")),
+    _pidx(_fs.getPressureIndex()),
+    _Tidx(_fs.getTemperatureIndex()),
+    _Zidx(_fs.getZIndex()),
+    _Xidx(_fs.getXIndex())
 {
   // Check that the number of phases in the fluidstate class is also provided in the Dictator
   if (_fs.numPhases() != _num_phases)
@@ -166,12 +170,14 @@ PorousFlowFluidState::initQpStatefulProperties()
 
     for (unsigned int ph = 0; ph < _num_phases; ++ph)
     {
-      _saturation[_qp][ph] = _fsp[ph].saturation;
-      _porepressure[_qp][ph] = _fsp[ph].pressure;
-      _fluid_density[_qp][ph] = _fsp[ph].density;
-      _fluid_viscosity[_qp][ph] = _fsp[ph].viscosity;
-      _fluid_enthalpy[_qp][ph] = _fsp[ph].enthalpy;
-      _mass_frac[_qp][ph] = _fsp[ph].mass_fraction;
+      _saturation[_qp][ph] = _fsp[ph].saturation.value();
+      _porepressure[_qp][ph] = _fsp[ph].pressure.value();
+      _fluid_density[_qp][ph] = _fsp[ph].density.value();
+      _fluid_viscosity[_qp][ph] = _fsp[ph].viscosity.value();
+      _fluid_enthalpy[_qp][ph] = _fsp[ph].enthalpy.value();
+
+      for (unsigned int comp = 0; comp < _num_components; ++comp)
+        _mass_frac[_qp][ph][comp] = _fsp[ph].mass_fraction[comp].value();
     }
   }
 }
@@ -191,22 +197,24 @@ PorousFlowFluidState::computeQpProperties()
 
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
   {
-    _saturation[_qp][ph] = _fsp[ph].saturation;
-    _porepressure[_qp][ph] = _fsp[ph].pressure;
-    _fluid_density[_qp][ph] = _fsp[ph].density;
-    _fluid_viscosity[_qp][ph] = _fsp[ph].viscosity;
-    _fluid_enthalpy[_qp][ph] = _fsp[ph].enthalpy;
-    _mass_frac[_qp][ph] = _fsp[ph].mass_fraction;
+    _saturation[_qp][ph] = _fsp[ph].saturation.value();
+    _porepressure[_qp][ph] = _fsp[ph].pressure.value();
+    _fluid_density[_qp][ph] = _fsp[ph].density.value();
+    _fluid_viscosity[_qp][ph] = _fsp[ph].viscosity.value();
+    _fluid_enthalpy[_qp][ph] = _fsp[ph].enthalpy.value();
+
+    for (unsigned int comp = 0; comp < _num_components; ++comp)
+      _mass_frac[_qp][ph][comp] = _fsp[ph].mass_fraction[comp].value();
   }
 
   // Derivative of saturation wrt variables
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
   {
-    _dsaturation_dvar[_qp][ph][_Zvar[0]] = _fsp[ph].dsaturation_dZ;
-    _dsaturation_dvar[_qp][ph][_pvar] = _fsp[ph].dsaturation_dp;
+    _dsaturation_dvar[_qp][ph][_Zvar[0]] = _fsp[ph].saturation.derivatives()[_Zidx];
+    _dsaturation_dvar[_qp][ph][_pvar] = _fsp[ph].saturation.derivatives()[_pidx];
   }
   // Derivative of capillary pressure
-  Real dpc = _pc.dCapillaryPressure(_fsp[_aqueous_phase_number].saturation);
+  const Real dpc = _pc.dCapillaryPressure(_fsp[_aqueous_phase_number].saturation.value());
 
   // Derivative of porepressure wrt variables
   if (_dictator.isPorousFlowVariable(_gas_porepressure_varnum))
@@ -247,19 +255,25 @@ PorousFlowFluidState::computeQpProperties()
     for (unsigned int ph = 0; ph < _num_phases; ++ph)
     {
       // Derivative of density in each phase
-      _dfluid_density_dvar[_qp][ph][v] = _fsp[ph].ddensity_dp * _dporepressure_dvar[_qp][ph][v];
-      _dfluid_density_dvar[_qp][ph][v] += _fsp[ph].ddensity_dT * _dtemperature_dvar[_qp][v];
-      _dfluid_density_dvar[_qp][ph][v] += _fsp[ph].ddensity_dZ * dZ_dvar[v];
+      _dfluid_density_dvar[_qp][ph][v] =
+          _fsp[ph].density.derivatives()[_pidx] * _dporepressure_dvar[_qp][ph][v];
+      _dfluid_density_dvar[_qp][ph][v] +=
+          _fsp[ph].density.derivatives()[_Tidx] * _dtemperature_dvar[_qp][v];
+      _dfluid_density_dvar[_qp][ph][v] += _fsp[ph].density.derivatives()[_Zidx] * dZ_dvar[v];
 
       // Derivative of viscosity in each phase
-      _dfluid_viscosity_dvar[_qp][ph][v] = _fsp[ph].dviscosity_dp * _dporepressure_dvar[_qp][ph][v];
-      _dfluid_viscosity_dvar[_qp][ph][v] += _fsp[ph].dviscosity_dT * _dtemperature_dvar[_qp][v];
-      _dfluid_viscosity_dvar[_qp][ph][v] += _fsp[ph].dviscosity_dZ * dZ_dvar[v];
+      _dfluid_viscosity_dvar[_qp][ph][v] =
+          _fsp[ph].viscosity.derivatives()[_pidx] * _dporepressure_dvar[_qp][ph][v];
+      _dfluid_viscosity_dvar[_qp][ph][v] +=
+          _fsp[ph].viscosity.derivatives()[_Tidx] * _dtemperature_dvar[_qp][v];
+      _dfluid_viscosity_dvar[_qp][ph][v] += _fsp[ph].viscosity.derivatives()[_Zidx] * dZ_dvar[v];
 
       // Derivative of enthalpy in each phase
-      _dfluid_enthalpy_dvar[_qp][ph][v] = _fsp[ph].denthalpy_dp * _dporepressure_dvar[_qp][ph][v];
-      _dfluid_enthalpy_dvar[_qp][ph][v] += _fsp[ph].denthalpy_dT * _dtemperature_dvar[_qp][v];
-      _dfluid_enthalpy_dvar[_qp][ph][v] += _fsp[ph].denthalpy_dZ * dZ_dvar[v];
+      _dfluid_enthalpy_dvar[_qp][ph][v] =
+          _fsp[ph].enthalpy.derivatives()[_pidx] * _dporepressure_dvar[_qp][ph][v];
+      _dfluid_enthalpy_dvar[_qp][ph][v] +=
+          _fsp[ph].enthalpy.derivatives()[_Tidx] * _dtemperature_dvar[_qp][v];
+      _dfluid_enthalpy_dvar[_qp][ph][v] += _fsp[ph].enthalpy.derivatives()[_Zidx] * dZ_dvar[v];
     }
 
   // The derivative of the mass fractions for each fluid component in each phase.
@@ -268,9 +282,9 @@ PorousFlowFluidState::computeQpProperties()
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
     for (unsigned int comp = 0; comp < _num_components; ++comp)
     {
-      _dmass_frac_dvar[_qp][ph][comp][_pvar] = _fsp[ph].dmass_fraction_dp[comp];
+      _dmass_frac_dvar[_qp][ph][comp][_pvar] = _fsp[ph].mass_fraction[comp].derivatives()[_pidx];
       _dmass_frac_dvar[_qp][ph][comp][_Zvar[0]] =
-          _fsp[ph].dmass_fraction_dZ[comp] * dZ_dvar[_Zvar[0]];
+          _fsp[ph].mass_fraction[comp].derivatives()[_Zidx] * dZ_dvar[_Zvar[0]];
     }
 
   // If the material properties are being evaluated at the qps, calculate the
@@ -280,7 +294,7 @@ PorousFlowFluidState::computeQpProperties()
   if (!_nodal_material)
   {
     // Second derivative of capillary pressure
-    Real d2pc = _pc.d2CapillaryPressure(_fsp[_aqueous_phase_number].saturation);
+    Real d2pc = _pc.d2CapillaryPressure(_fsp[_aqueous_phase_number].saturation.value(), _qp);
 
     (*_grads_qp)[_qp][_aqueous_phase_number] =
         _dsaturation_dvar[_qp][_aqueous_phase_number][_pvar] * _gas_gradp_qp[_qp] +
@@ -299,15 +313,17 @@ PorousFlowFluidState::computeQpProperties()
         _dsaturation_dvar[_qp][_aqueous_phase_number][_Zvar[0]];
 
     (*_grad_mass_frac_qp)[_qp][_aqueous_phase_number][_aqueous_fluid_component] =
-        _fsp[_aqueous_phase_number].dmass_fraction_dp[_aqueous_fluid_component] *
+        _fsp[_aqueous_phase_number].mass_fraction[_aqueous_fluid_component].derivatives()[_pidx] *
             _gas_gradp_qp[_qp] +
-        _fsp[_aqueous_phase_number].dmass_fraction_dZ[_aqueous_fluid_component] *
+        _fsp[_aqueous_phase_number].mass_fraction[_aqueous_fluid_component].derivatives()[_Zidx] *
             (*_gradZ_qp[0])[_qp];
     (*_grad_mass_frac_qp)[_qp][_aqueous_phase_number][_gas_fluid_component] =
         -(*_grad_mass_frac_qp)[_qp][_aqueous_phase_number][_aqueous_fluid_component];
     (*_grad_mass_frac_qp)[_qp][_gas_phase_number][_aqueous_fluid_component] =
-        _fsp[_gas_phase_number].dmass_fraction_dp[_aqueous_fluid_component] * _gas_gradp_qp[_qp] +
-        _fsp[_gas_phase_number].dmass_fraction_dZ[_aqueous_fluid_component] * (*_gradZ_qp[0])[_qp];
+        _fsp[_gas_phase_number].mass_fraction[_aqueous_fluid_component].derivatives()[_pidx] *
+            _gas_gradp_qp[_qp] +
+        _fsp[_gas_phase_number].mass_fraction[_aqueous_fluid_component].derivatives()[_Zidx] *
+            (*_gradZ_qp[0])[_qp];
     (*_grad_mass_frac_qp)[_qp][_gas_phase_number][_gas_fluid_component] =
         -(*_grad_mass_frac_qp)[_qp][_gas_phase_number][_aqueous_fluid_component];
   }
@@ -319,10 +335,7 @@ PorousFlowFluidState::computeQpProperties()
   {
     // Derivative of saturation wrt variables
     for (unsigned int ph = 0; ph < _num_phases; ++ph)
-      _dsaturation_dvar[_qp][ph][_Xvar] = _fsp[ph].dsaturation_dX;
-
-    // Derivative of capillary pressure
-    Real dpc = _pc.dCapillaryPressure(_fsp[_aqueous_phase_number].saturation, _qp);
+      _dsaturation_dvar[_qp][ph][_Xvar] = _fsp[ph].saturation.derivatives()[_Xidx];
 
     // Derivative of porepressure wrt variables
     if (_dictator.isPorousFlowVariable(_gas_porepressure_varnum))
@@ -350,10 +363,10 @@ PorousFlowFluidState::computeQpProperties()
       for (unsigned int ph = 0; ph < _num_phases; ++ph)
       {
         // Derivative of density in each phase
-        _dfluid_density_dvar[_qp][ph][v] += _fsp[ph].ddensity_dX * dX_dvar[v];
+        _dfluid_density_dvar[_qp][ph][v] += _fsp[ph].density.derivatives()[_Xidx] * dX_dvar[v];
 
         // Derivative of viscosity in each phase
-        _dfluid_viscosity_dvar[_qp][ph][v] += _fsp[ph].dviscosity_dX * dX_dvar[v];
+        _dfluid_viscosity_dvar[_qp][ph][v] += _fsp[ph].viscosity.derivatives()[_Xidx] * dX_dvar[v];
       }
 
     // The derivative of the mass fractions for each fluid component in each phase.
@@ -361,7 +374,7 @@ PorousFlowFluidState::computeQpProperties()
     // capillary pressure effect, and hence no need to multiply by _dporepressure_dvar
     for (unsigned int ph = 0; ph < _num_phases; ++ph)
       for (unsigned int comp = 0; comp < _num_components; ++comp)
-        _dmass_frac_dvar[_qp][ph][comp][_Xvar] = _fsp[ph].dmass_fraction_dX[comp];
+        _dmass_frac_dvar[_qp][ph][comp][_Xvar] = _fsp[ph].mass_fraction[comp].derivatives()[_Xidx];
 
     // If the material properties are being evaluated at the qps, add the contribution
     // to the gradients as well. Note: only nodal properties are evaluated in
@@ -370,7 +383,7 @@ PorousFlowFluidState::computeQpProperties()
     if (!_nodal_material)
     {
       // Second derivative of capillary pressure
-      Real d2pc = _pc.d2CapillaryPressure(_fsp[_aqueous_phase_number].saturation, _qp);
+      Real d2pc = _pc.d2CapillaryPressure(_fsp[_aqueous_phase_number].saturation.value(), _qp);
 
       (*_grads_qp)[_qp][_aqueous_phase_number] +=
           _dsaturation_dvar[_qp][_aqueous_phase_number][_Xvar] * _grad_Xnacl_qp[_qp];
@@ -387,15 +400,17 @@ PorousFlowFluidState::computeQpProperties()
 
       (*_grad_mass_frac_qp)[_qp][_aqueous_phase_number][_salt_component] = _grad_Xnacl_qp[_qp];
       (*_grad_mass_frac_qp)[_qp][_aqueous_phase_number][_aqueous_fluid_component] +=
-          _fsp[_aqueous_phase_number].dmass_fraction_dX[_aqueous_fluid_component] *
+          _fsp[_aqueous_phase_number].mass_fraction[_aqueous_fluid_component].derivatives()[_Xidx] *
           _grad_Xnacl_qp[_qp];
       (*_grad_mass_frac_qp)[_qp][_aqueous_phase_number][_gas_fluid_component] -=
-          _fsp[_aqueous_phase_number].dmass_fraction_dX[_aqueous_fluid_component] *
+          _fsp[_aqueous_phase_number].mass_fraction[_aqueous_fluid_component].derivatives()[_Xidx] *
           _grad_Xnacl_qp[_qp];
       (*_grad_mass_frac_qp)[_qp][_gas_phase_number][_aqueous_fluid_component] +=
-          _fsp[_gas_phase_number].dmass_fraction_dX[_aqueous_fluid_component] * _grad_Xnacl_qp[_qp];
+          _fsp[_gas_phase_number].mass_fraction[_aqueous_fluid_component].derivatives()[_Xidx] *
+          _grad_Xnacl_qp[_qp];
       (*_grad_mass_frac_qp)[_qp][_gas_phase_number][_gas_fluid_component] -=
-          _fsp[_gas_phase_number].dmass_fraction_dX[_aqueous_fluid_component] * _grad_Xnacl_qp[_qp];
+          _fsp[_gas_phase_number].mass_fraction[_aqueous_fluid_component].derivatives()[_Xidx] *
+          _grad_Xnacl_qp[_qp];
     }
   }
 }
@@ -407,6 +422,9 @@ PorousFlowFluidState::setMaterialVectorSize() const
   _fluid_viscosity[_qp].assign(_num_phases, 0.0);
   _fluid_enthalpy[_qp].assign(_num_phases, 0.0);
   _mass_frac[_qp].resize(_num_phases);
+
+  for (unsigned int ph = 0; ph < _num_phases; ++ph)
+    _mass_frac[_qp][ph].resize(_num_components);
 
   // Derivatives and gradients are not required in initQpStatefulProperties
   if (!_is_initqp)
