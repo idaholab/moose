@@ -1930,3 +1930,19 @@ Water97FluidProperties::henryConstant(Real temperature,
   Kh = p * std::exp(lnkh);
   dKh_dT = (p * dlnkh_dT + dp_dT) * std::exp(lnkh);
 }
+
+DualReal
+Water97FluidProperties::henryConstant(const DualReal & temperature,
+                                      const std::vector<Real> & coeffs) const
+{
+  const Real T = temperature.value();
+  Real Kh_real = 0.0;
+  Real dKh_dT_real = 0.0;
+  henryConstant(T, coeffs, Kh_real, dKh_dT_real);
+
+  DualReal Kh = Kh_real;
+  for (size_t i = 0; i < temperature.derivatives().size(); ++i)
+    Kh.derivatives()[i] = temperature.derivatives()[i] * dKh_dT_real;
+
+  return Kh;
+}
