@@ -273,6 +273,16 @@ SinglePhaseFluidProperties::rho_mu_from_p_T(Real p,
   mu_from_p_T(p, T, mu, dmu_dp, dmu_dT);
 }
 
+void
+SinglePhaseFluidProperties::rho_mu_from_p_T(const DualReal & p,
+                                            const DualReal & T,
+                                            DualReal & rho,
+                                            DualReal & mu) const
+{
+  rho = rho_from_p_T(p, T);
+  mu = mu_from_p_T(p, T);
+}
+
 Real SinglePhaseFluidProperties::e_spndl_from_v(Real) const
 {
   mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");

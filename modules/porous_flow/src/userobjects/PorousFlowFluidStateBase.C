@@ -40,9 +40,3 @@ PorousFlowFluidStateBase::clearFluidStateProperties(std::vector<FluidStateProper
 {
   std::fill(fsp.begin(), fsp.end(), FluidStateProperties(_num_components));
 }
-
-void
-PorousFlowFluidStateBase::clearFluidStateProperties(std::vector<FluidStatePropertiesAD> & fsp) const
-{
-  std::fill(fsp.begin(), fsp.end(), FluidStatePropertiesAD(_num_components));
-}

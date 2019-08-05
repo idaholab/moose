@@ -255,6 +255,7 @@ public:
   Real henryConstant(Real temperature, const std::vector<Real> & coeffs) const;
   void
   henryConstant(Real temperature, const std::vector<Real> & coeffs, Real & Kh, Real & dKh_dT) const;
+  DualReal henryConstant(const DualReal & temperature, const std::vector<Real> & coeffs) const;
 
 protected:
   /**
@@ -1336,4 +1337,3 @@ protected:
 };
 
 #pragma GCC diagnostic pop
-

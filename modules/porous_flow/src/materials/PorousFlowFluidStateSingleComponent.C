@@ -132,7 +132,7 @@ PorousFlowFluidStateSingleComponent::PorousFlowFluidStateSingleComponent(
                "correct");
 
   // Set the size of the FluidStateProperties vector
-  _fsp.resize(_num_phases, FluidStatePropertiesAD(_num_components));
+  _fsp.resize(_num_phases, FluidStateProperties(_num_components));
 }
 
 void
@@ -236,13 +236,11 @@ PorousFlowFluidStateSingleComponent::computeQpProperties()
     const Real dp = 1.0e-2;
     const Real dh = 1.0e-2;
 
-    std::vector<FluidStatePropertiesAD> fsp_dp(_num_phases,
-                                               FluidStatePropertiesAD(_num_components));
+    std::vector<FluidStateProperties> fsp_dp(_num_phases, FluidStateProperties(_num_components));
     _fs.thermophysicalProperties(
         _liquid_porepressure[_qp] + dp, _enthalpy[_qp], _qp, _phase_state, fsp_dp);
 
-    std::vector<FluidStatePropertiesAD> fsp_dh(_num_phases,
-                                               FluidStatePropertiesAD(_num_components));
+    std::vector<FluidStateProperties> fsp_dh(_num_phases, FluidStateProperties(_num_components));
     _fs.thermophysicalProperties(
         _liquid_porepressure[_qp], _enthalpy[_qp] + dh, _qp, _phase_state, fsp_dh);
 

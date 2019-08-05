@@ -515,3 +515,17 @@ BrineFluidProperties::henryConstant(Real temperature,
 {
   _water97_fp->henryConstant(temperature, coeffs, Kh, dKh_dT);
 }
+
+DualReal
+BrineFluidProperties::henryConstant(const DualReal & temperature,
+                                    const std::vector<Real> & coeffs) const
+{
+  Real Kh, dKh_dT;
+  henryConstant(temperature.value(), coeffs, Kh, dKh_dT);
+
+  DualReal henry = Kh;
+  for (std::size_t i = 0; i < temperature.derivatives().size(); ++i)
+    henry.derivatives()[i] = temperature.derivatives()[i] * dKh_dT;
+
+  return henry;
+}

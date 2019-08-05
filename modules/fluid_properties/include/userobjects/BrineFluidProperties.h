@@ -68,6 +68,7 @@ public:
   Real molarMassH2O() const;
 
   virtual Real rho_from_p_T_X(Real pressure, Real temperature, Real xnacl) const override;
+  using MultiComponentFluidProperties::rho_from_p_T_X;
 
   FPDualReal rho_from_p_T_X(const FPDualReal & pressure,
                             const FPDualReal & temperature,
@@ -82,6 +83,7 @@ public:
                               Real & drho_dx) const override;
 
   virtual Real mu_from_p_T_X(Real pressure, Real temperature, Real xnacl) const override;
+  using MultiComponentFluidProperties::mu_from_p_T_X;
 
   virtual void mu_from_p_T_X(Real pressure,
                              Real temperature,
@@ -96,6 +98,7 @@ public:
                           const FPDualReal & xnacl) const;
 
   virtual Real h_from_p_T_X(Real pressure, Real temperature, Real xnacl) const override;
+  using MultiComponentFluidProperties::h_from_p_T_X;
 
   virtual void h_from_p_T_X(Real pressure,
                             Real temperature,
@@ -162,6 +165,7 @@ public:
   Real henryConstant(Real temperature, const std::vector<Real> & coeffs) const;
   void
   henryConstant(Real temperature, const std::vector<Real> & coeffs, Real & Kh, Real & dKh_dT) const;
+  DualReal henryConstant(const DualReal & temperature, const std::vector<Real> & coeffs) const;
 
   /// Fluid component numbers for water and NaCl
   static const unsigned int WATER = 0;
