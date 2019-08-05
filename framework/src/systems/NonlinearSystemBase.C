@@ -87,6 +87,7 @@
 #include "libmesh/dof_map.h"
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/petsc_matrix.h"
+#include "libmesh/default_coupling.h"
 
 // PETSc
 #ifdef LIBMESH_HAVE_PETSC
@@ -178,6 +179,13 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
   _fe_problem.addMatrixTag("TIME");
 
   _Re_tag = _fe_problem.addVectorTag("RESIDUAL");
+
+  if (!_fe_problem.defaultGhosting())
+  {
+    auto & dof_map = _sys.get_dof_map();
+    dof_map.remove_algebraic_ghosting_functor(dof_map.default_algebraic_ghosting());
+    dof_map.set_implicit_neighbor_dofs(false);
+  }
 }
 
 NonlinearSystemBase::~NonlinearSystemBase()
@@ -2629,7 +2637,7 @@ NonlinearSystemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks
     if (!_fe_problem.errorOnJacobianNonzeroReallocation())
       MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
                    MAT_NEW_NONZERO_ALLOCATION_ERR,
-                   PETSC_FALSE);
+                   PETSC_TRUE);
 #endif
 
 #endif

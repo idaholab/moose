@@ -66,9 +66,6 @@ CouplingFunctorCheckAction::act()
     return;
 
   auto & nl = _problem->getNonlinearSystemBase();
-  auto & kernels = nl.getKernelWarehouse();
-  auto & nbcs = nl.getNodalBCWarehouse();
-  auto & ibcs = nl.getIntegratedBCWarehouse();
   auto & dgs = nl.getDGKernelWarehouse();
   auto & iks = nl.getInterfaceKernelWarehouse();
 
@@ -130,35 +127,6 @@ CouplingFunctorCheckAction::act()
       if (need_ghosting_reinit)
         // Make sure that coupling matrices are attached to the coupling functors
         _app.dofMapReinitForRMs();
-
-      // Reinit the libMesh (Implicit)System. This re-computes the sparsity pattern and then
-      // applies it to the ImplicitSystem's matrices. Note that does NOT make a call to
-      // DofMap::reinit, hence we have to call GhostingFunctor::dofmap_reinit ourselves in the
-      // call above
-      nl.system().reinit();
-    }
-  }
-
-  // If we have any of these, we need default coupling, e.g. 0 layers of sparsity, otherwise
-  // known as element intra-dof coupling. The `else if` below is important; if we already
-  // added 1 layer of sparsity above, then we don't need to add another coupling functor that
-  // is a subset of the previous one
-  else if (kernels.size() || nbcs.size() || ibcs.size())
-  {
-    // Add the coupling functor. This plays a role regardless of whether we are running serially or
-    // in parallel
-    addRelationshipManagers(coupling, RelationshipManager::zeroLayerGhosting());
-
-    // See whether we've actually added anything new
-    if (size != _app.relationshipManagers().size())
-    {
-      CONTROLLED_CONSOLE_TIMED_PRINT(
-          0, 1, "Reinitializing sparsity pattern because of late coupling addition");
-
-      _app.attachRelationshipManagers(coupling);
-
-      // Make sure that coupling matrices are attached to the coupling functors
-      _app.dofMapReinitForRMs();
 
       // Reinit the libMesh (Implicit)System. This re-computes the sparsity pattern and then
       // applies it to the ImplicitSystem's matrices. Note that does NOT make a call to
