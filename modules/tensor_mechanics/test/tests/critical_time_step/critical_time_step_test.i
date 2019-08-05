@@ -3,8 +3,20 @@
 []
 
 [Mesh]
-  type = FileMesh
-  file = circ_emb_level4.e
+  type = GeneratedMesh
+  dim = 3
+  nx = 10
+  ny = 10
+  nz = 15
+
+  xmin = 0
+  xmax = 2
+
+  ymin = 0
+  ymax = 2
+
+  zmin = 0
+  zmax = 1
 []
 
 [Variables]
@@ -45,8 +57,8 @@
 [Materials]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
-    fill_method = symmetric_isotropic
-    C_ijkl = '0.7E7 1E7'
+    C_ijkl = '1.684e5 0.176e5 0.176e5 1.684e5 0.176e5 1.684e5 0.754e5 0.754e5 0.754e5'
+  fill_method = symmetric9
   [../]
   [./strain]
     type = ComputeSmallStrain
@@ -55,8 +67,9 @@
     type = ComputeLinearElasticStress
   [../]
   [./density]
-    type = Density
-    density = 8050.0
+    type = GenericConstantMaterial
+    prop_names = 'density'
+    prop_values = '8050.0'
   [../]
 []
 

@@ -11,6 +11,8 @@
 
 #include "ElementPostprocessor.h"
 #include "ComputeStressBase.h"
+// #include "ComputeElasticityTensorBase.h"
+#include "GuaranteeProvider.h"
 
 // Forward Declarations
 class CriticalTimeStep;
@@ -21,7 +23,7 @@ InputParameters validParams<CriticalTimeStep>();
 /**
  * This postprocessor computes an average element size (h) for the whole domain.
  */
-class CriticalTimeStep : public ElementPostprocessor
+class CriticalTimeStep : public ElementPostprocessor, public GuaranteeProvider
 {
 public:
   CriticalTimeStep(const InputParameters & parameters);
