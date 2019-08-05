@@ -32,5 +32,6 @@ protected:
 
   const unsigned int _dim;
   const bool _outflow;
+  const unsigned int _coupled_components;
   std::vector<const VariableValue *> _velocity;
 };
