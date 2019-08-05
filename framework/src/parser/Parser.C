@@ -407,16 +407,16 @@ Parser::hitCLIFilter(std::string appname, const std::vector<std::string> & argv)
     else if (arg.find("=", 0) != std::string::npos)
       afterDoubleDash = true;
 
+    // skip over args that don't look like or are before hit parameters
+    if (!afterDoubleDash)
+      continue;
     // skip arguments with no equals sign
     if (arg.find("=", 0) == std::string::npos)
       continue;
     // skip cli flags (i.e. start with dash)
-    else if (arg.find("-", 0) == 0)
+    if (arg.find("-", 0) == 0)
       continue;
-    // skip over args that don't look like or are before hit parameters
-    else if (!afterDoubleDash)
-      continue;
-    else if (appname == "main")
+    if (appname == "main")
     {
       auto pos = arg.find(":", 0);
       if (pos == 0) // trim leading colon
@@ -424,7 +424,7 @@ Parser::hitCLIFilter(std::string appname, const std::vector<std::string> & argv)
       else if (pos != std::string::npos && pos < arg.find("=", 0)) // param is for non-main subapp
         continue;
     }
-    else if (appname != "main") // app we are loading is a multiapp subapp
+    else // app we are loading is a multiapp subapp
     {
       std::string name;
       std::string num;
