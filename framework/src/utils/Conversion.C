@@ -363,6 +363,8 @@ stringify(const RelationshipManagerType & t)
     return "ALGEBRAIC";
   if (t == (RelationshipManagerType::GEOMETRIC | RelationshipManagerType::ALGEBRAIC))
     return "GEOMETRIC and ALGEBRAIC";
+  if (t == (RelationshipManagerType::ALGEBRAIC | RelationshipManagerType::COUPLING))
+    return "ALGEBRAIC and COUPLING";
   if (t == (RelationshipManagerType::GEOMETRIC | RelationshipManagerType::ALGEBRAIC |
             RelationshipManagerType::COUPLING))
     return "GEOMETRIC and ALGEBRAIC and COUPLING";

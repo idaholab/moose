@@ -48,7 +48,7 @@ validParams<RelationshipManager>()
    * If this parameter is equal to ANY, then this RM can be applied to both non-linear and aux
    * systems.
    */
-  params.addPrivateParam<Moose::VarKindType>("system_type", Moose::VarKindType::VAR_ANY);
+  params.addPrivateParam<Moose::RMSystemType>("system_type", Moose::RMSystemType::NONE);
 
   /**
    * The name of the object (or Action) requesting this RM
@@ -79,7 +79,63 @@ RelationshipManager::RelationshipManager(const InputParameters & parameters)
     _attach_geometric_early(getParam<bool>("attach_geometric_early")),
     _rm_type(getParam<Moose::RelationshipManagerType>("rm_type")),
     _use_displaced_mesh(getParam<bool>("use_displaced_mesh")),
-    _system_type(getParam<Moose::VarKindType>("system_type"))
+    _system_type(getParam<Moose::RMSystemType>("system_type"))
 {
   _for_whom.push_back(getParam<std::string>("for_whom"));
+}
+
+bool
+RelationshipManager::isGeometric(Moose::RelationshipManagerType input_rm)
+{
+  return (input_rm & Moose::RelationshipManagerType::GEOMETRIC) ==
+         Moose::RelationshipManagerType::GEOMETRIC;
+}
+
+bool
+RelationshipManager::isAlgebraic(Moose::RelationshipManagerType input_rm)
+{
+  return (input_rm & Moose::RelationshipManagerType::ALGEBRAIC) ==
+         Moose::RelationshipManagerType::ALGEBRAIC;
+}
+
+bool
+RelationshipManager::isCoupling(Moose::RelationshipManagerType input_rm)
+{
+  return (input_rm & Moose::RelationshipManagerType::COUPLING) ==
+         Moose::RelationshipManagerType::COUPLING;
+}
+
+Moose::RelationshipManagerType RelationshipManager::geo_and_alg =
+    Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC;
+
+Moose::RelationshipManagerType RelationshipManager::geo_alg_and_coupl =
+    Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+    Moose::RelationshipManagerType::COUPLING;
+
+InputParameters
+dummyParams()
+{
+  auto params = emptyInputParameters();
+  params.set<std::string>("_moose_base") = "dummy";
+  return params;
+}
+
+InputParameters
+RelationshipManager::zeroLayerGhosting()
+{
+  auto params = dummyParams();
+  params.addRelationshipManager("ElementSideNeighborLayers",
+                                Moose::RelationshipManagerType::COUPLING,
+                                [](const InputParameters &, InputParameters & rm_params) {
+                                  rm_params.set<unsigned short>("layers") = 0;
+                                });
+  return params;
+}
+
+InputParameters
+RelationshipManager::oneLayerGhosting(Moose::RelationshipManagerType rm_type)
+{
+  auto params = dummyParams();
+  params.addRelationshipManager("ElementSideNeighborLayers", rm_type);
+  return params;
 }

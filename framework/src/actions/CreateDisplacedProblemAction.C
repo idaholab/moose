@@ -107,6 +107,7 @@ CreateDisplacedProblemAction::act()
           getParam<std::vector<std::string>>("displacements");
       object_params.set<MooseMesh *>("mesh") = _displaced_mesh.get();
       object_params.set<FEProblemBase *>("_fe_problem_base") = _problem.get();
+      object_params.set<bool>("default_ghosting") = _problem->defaultGhosting();
 
       // Create the object
       std::shared_ptr<DisplacedProblem> disp_problem =
