@@ -19,8 +19,6 @@ validParams<AdvectionBC>()
   InputParameters params = validParams<IntegratedBC>();
   params.addClassDescription("Boundary conditions for outflow/outflow of advected quantities:"
                              "\n phi * velocity * normal, where phi is the advected quantitiy");
-  params.addParam<bool>(
-      "outflow", true, "Determines if this BC is applied on inflow or outflow BCs");
   params.addRequiredCoupledVar("velocity_vector",
                                "The components of the velocity vector up to problem dimension");
   return params;
@@ -29,7 +27,6 @@ validParams<AdvectionBC>()
 AdvectionBC::AdvectionBC(const InputParameters & parameters)
   : IntegratedBC(parameters),
     _dim(_mesh.dimension()),
-    _outflow(getParam<bool>("outflow")),
     _coupled_components(coupledComponents("velocity_vector"))
 {
   if (_dim > _coupled_components)
@@ -51,7 +48,7 @@ AdvectionBC::computeQpResidual()
   RealVectorValue vel;
   for (unsigned int j = 0; j < _coupled_components; ++j)
     vel(j) = (*_velocity[j])[_qp];
-  if ((vel * _normals[_qp] > 0) == _outflow)
+  if (vel * _normals[_qp] > 0)
     return _test[_i][_qp] * _u[_qp] * vel * _normals[_qp];
   return 0;
 }
@@ -62,7 +59,7 @@ AdvectionBC::computeQpJacobian()
   RealVectorValue vel;
   for (unsigned int j = 0; j < _coupled_components; ++j)
     vel(j) = (*_velocity[j])[_qp];
-  if ((vel * _normals[_qp] > 0) == _outflow)
+  if (vel * _normals[_qp] > 0)
     return _test[_i][_qp] * _phi[_j][_qp] * vel * _normals[_qp];
   return 0;
 }
