@@ -1,33 +1,58 @@
 [Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'coupled_scalar.i'
-    exodiff = 'coupled_scalar_out.e'
-  [../]
+  design = 'syntax/Variables/index.md'
 
-  [./old]
-    type = 'Exodiff'
-    input = 'coupled_scalar_old.i'
-    cli_args = 'AuxKernels/coupled/lag=old AuxKernels/coupled_1/lag=old Outputs/file_base=coupled_scalar_old_out'
-    exodiff = 'coupled_scalar_old_out.e'
-  [../]
+  [coupled_scalar]
+    issues = '#9462 #4253'
+    requirement = 'The system shall support the ability to couple a scalar auxiliary calculation for '
+                  'use in a field auxiliary calculation:'
 
-  [./older]
-    type = 'Exodiff'
-    input = 'coupled_scalar_old.i'
-    cli_args = 'AuxKernels/coupled/lag=older AuxKernels/coupled_1/lag=older Outputs/file_base=coupled_scalar_older_out'
-    exodiff = 'coupled_scalar_older_out.e'
-  [../]
+    [test]
+      type = 'Exodiff'
+      input = 'coupled_scalar.i'
+      exodiff = 'coupled_scalar_out.e'
 
-  [./test_default]
+      detail = 'using current scalar values,'
+    []
+
+    [old]
+      type = 'Exodiff'
+      input = 'coupled_scalar_old.i'
+      cli_args = 'AuxKernels/coupled/lag=old AuxKernels/coupled_1/lag=old '
+                 'Outputs/file_base=coupled_scalar_old_out'
+      exodiff = 'coupled_scalar_old_out.e'
+
+      detail = 'using previously calculated scalar values (old), and'
+    []
+
+    [older]
+      type = 'Exodiff'
+      input = 'coupled_scalar_old.i'
+      cli_args = 'AuxKernels/coupled/lag=older AuxKernels/coupled_1/lag=older '
+                 'Outputs/file_base=coupled_scalar_older_out'
+      exodiff = 'coupled_scalar_older_out.e'
+
+      detail = 'using values calculated from two steps back (older).'
+    []
+  []
+
+  [test_default]
     type = 'Exodiff'
     input = 'coupled_scalar_default.i'
     exodiff = 'coupled_scalar_default_out.e'
-  [../]
 
-  [./from_ic]
+    issues = '#4762'
+    requirement = 'The system shall support the ability to use a default value when an optional '
+                  'scalar coupling is requested but not supplied.'
+  []
+
+  [from_ic]
     type = 'Exodiff'
     input = 'coupled_scalar_from_ic.i'
     exodiff = 'coupled_scalar_from_ic_out.e'
-  [../]
+
+    issues = '#11717'
+    requirement = 'The system shall support the ability to use the initial value of a scalar '
+                  'auxiliary calculation when it is coupled into another object that executes at the '
+                  'beginning of the simulation.'
+  []
 []

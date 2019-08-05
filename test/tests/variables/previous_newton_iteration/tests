@@ -1,4 +1,7 @@
 [Tests]
+  issues = '#6101'
+  design = 'syntax/Variables/index.md'
+
   [./test]
     type = Exodiff
     input = 'test.i'
@@ -7,5 +10,7 @@
     # which would cause diffs at some NL iterations
     max_parallel = 1
     max_threads = 1
+
+    requirement = 'The system shall support the ability to couple to a previous field variable calculation to produce another field such that there is no Jacobian contribution due to the lagged coupling.'
   [../]
 []
