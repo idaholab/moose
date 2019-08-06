@@ -120,8 +120,8 @@ public:
   {
     GLOBAL,
     MAIN,
-    MATCH,
-    WRONG
+    MULTIAPP_MATCH,
+    MULTIAPP_WRONG
   };
 
   static HitCmpResult
