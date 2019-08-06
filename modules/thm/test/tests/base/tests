@@ -1,0 +1,43 @@
+[Tests]
+  [./err:model_progression_order]
+    type = 'RunException'
+    input = 'err.model_progression_order.i'
+    expect_err = "THM assumes the following model progression order"
+  [../]
+  [./initial_vf_not_within_bounds]
+    type = 'RunException'
+    input = 'initial_vf_not_within_bounds.i'
+    expect_err = "The specified vapor volume fraction .* is not within the specified bounds"
+  [../]
+  [./loop_identification]
+    type = 'RunApp'
+    input = 'loop_identification.i'
+    cli_args = '--print-component-loops'
+    expect_out = "Loop 1:
+\s+corechannel
+\s+hx:primary
+\s+j1
+\s+j2
+\s+j3
+\s+j4
+\s+pipe1
+\s+pipe2
+
+\s+Loop 2:
+\s+hx:secondary
+\s+inlet
+\s+outlet"
+  [../]
+  [./err:old_connection_format]
+    type = 'RunException'
+    input = 'err.connection_format.i'
+    expect_err = "You are using the old connection format 'comp_name\(end\)'\. Please update your input file to the new one 'comp_name:end'\."
+    cli_args = "Components/left_wall/input='pipe(in)'"
+  [../]
+  [./err:incorrect_connection_format]
+    type = 'RunException'
+    input = 'err.connection_format.i'
+    expect_err = "Incorrect connection specified 'pipe_in'\. Valid connection format is 'component_name:end_type'\."
+    cli_args = "Components/left_wall/input='pipe_in'"
+  [../]
+[]

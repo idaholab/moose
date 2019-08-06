@@ -107,13 +107,13 @@
   [../]
 
   [./inlet]
-    type = InletMassFlowRateTemperature
+    type = InletMassFlowRateTemperature1Phase
     input = 'pipe1:in'
     m_dot = 0.1
     T = 500
   [../]
   [./outlet]
-    type = Outlet
+    type = Outlet1Phase
     input = 'pipe2:out'
     p = 6e6
   [../]

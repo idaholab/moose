@@ -5,7 +5,6 @@
 #include "TwoPhaseFluidProperties.h"
 #include "VaporMixtureFluidProperties.h"
 #include "TwoPhaseNCGFluidProperties.h"
-#include "InputParameterLogic.h"
 #include "StabilizationSettings.h"
 #include "HeatTransferBase.h"
 #include "HeatTransfer1PhaseBase.h"

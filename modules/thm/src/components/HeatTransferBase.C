@@ -1,5 +1,4 @@
 #include "HeatTransferBase.h"
-#include "InputParameterLogic.h"
 #include "FlowModelSinglePhase.h"
 #include "FlowModelTwoPhase.h"
 #include "FlowChannelBase.h"

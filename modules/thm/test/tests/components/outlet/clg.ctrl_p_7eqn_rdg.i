@@ -50,7 +50,7 @@
   [../]
 
   [./inlet]
-    type = InletStagnationPressureTemperature
+    type = InletStagnationPressureTemperature2Phase
     input = 'pipe:in'
     p0_liquid = 1.001e5
     p0_vapor = 1.001e5
@@ -60,7 +60,7 @@
   [../]
 
   [./outlet]
-    type = Outlet
+    type = Outlet2Phase
     input = 'pipe:out'
     p_liquid = 1e5
     p_vapor = 1e5
