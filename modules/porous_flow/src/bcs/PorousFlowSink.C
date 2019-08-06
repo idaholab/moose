@@ -171,7 +171,8 @@ PorousFlowSink::PorousFlowSink(const InputParameters & parameters)
     _dthermal_conductivity_dvar(_has_thermal_conductivity
                                     ? &getMaterialProperty<std::vector<RealTensorValue>>(
                                           "dPorousFlow_thermal_conductivity_qp_dvar")
-                                    : nullptr)
+                                    : nullptr),
+    _perm_derivs(_dictator.usePermDerivs())
 {
   if (_involves_fluid && _ph >= _dictator.numPhases())
     paramError("fluid_phase",
@@ -277,12 +278,18 @@ PorousFlowSink::jac(unsigned int jvar) const
   {
     const Real k = ((*_permeability)[_qp] * _normals[_qp]) * _normals[_qp];
     const Real mob = (*_fluid_density_node)[_i][_ph] * k / (*_fluid_viscosity)[_i][_ph];
-    RealTensorValue ktprime = (*_dpermeability_dvar)[_qp][pvar] * _phi[_j][_qp];
-    for (unsigned i = 0; i < LIBMESH_DIM; ++i)
-      ktprime += (*_dpermeability_dgradvar)[_qp][i][pvar] * _grad_phi[_j][_qp](i);
-    const Real kprime = (ktprime * _normals[_qp]) * _normals[_qp];
 
-    Real mobprime = (*_fluid_density_node)[_i][_ph] * kprime / (*_fluid_viscosity)[_i][_ph];
+    Real mobprime = 0.0;
+    if (_perm_derivs)
+    {
+      RealTensorValue ktprime = (*_dpermeability_dvar)[_qp][pvar] * _phi[_j][_qp];
+      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+        ktprime += (*_dpermeability_dgradvar)[_qp][i][pvar] * _grad_phi[_j][_qp](i);
+      const Real kprime = (ktprime * _normals[_qp]) * _normals[_qp];
+
+      mobprime += (*_fluid_density_node)[_i][_ph] * kprime / (*_fluid_viscosity)[_i][_ph];
+    }
+
     mobprime +=
         (_i != _j
              ? 0.0

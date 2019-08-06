@@ -68,6 +68,7 @@ PorousFlowDarcyBase::PorousFlowDarcyBase(const InputParameters & parameters)
     _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
     _num_phases(_dictator.numPhases()),
     _gravity(getParam<RealVectorValue>("gravity")),
+    _perm_derivs(_dictator.usePermDerivs()),
     _full_upwind_threshold(getParam<unsigned>("full_upwind_threshold")),
     _fallback_scheme(getParam<MooseEnum>("fallback_scheme").getEnum<FallbackEnum>()),
     _proto_flux(_num_phases),
@@ -104,14 +105,22 @@ PorousFlowDarcyBase::darcyQpJacobian(unsigned int jvar, unsigned int ph) const
     return 0.0;
 
   const unsigned int pvar = _dictator.porousFlowVariableNum(jvar);
-  RealVectorValue deriv = _dpermeability_dvar[_qp][pvar] * _phi[_j][_qp] *
-                          (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph] * _gravity);
-  for (unsigned i = 0; i < LIBMESH_DIM; ++i)
-    deriv += _dpermeability_dgradvar[_qp][i][pvar] * _grad_phi[_j][_qp](i) *
-             (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph] * _gravity);
-  deriv += _permeability[_qp] * (_grad_phi[_j][_qp] * _dgrad_p_dgrad_var[_qp][ph][pvar] -
-                                 _phi[_j][_qp] * _dfluid_density_qp_dvar[_qp][ph][pvar] * _gravity);
+
+  RealVectorValue deriv =
+      _permeability[_qp] * (_grad_phi[_j][_qp] * _dgrad_p_dgrad_var[_qp][ph][pvar] -
+                            _phi[_j][_qp] * _dfluid_density_qp_dvar[_qp][ph][pvar] * _gravity);
+
   deriv += _permeability[_qp] * (_dgrad_p_dvar[_qp][ph][pvar] * _phi[_j][_qp]);
+
+  if (_perm_derivs)
+  {
+    deriv += _dpermeability_dvar[_qp][pvar] * _phi[_j][_qp] *
+             (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph] * _gravity);
+    for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+      deriv += _dpermeability_dgradvar[_qp][i][pvar] * _grad_phi[_j][_qp](i) *
+               (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph] * _gravity);
+  }
+
   return _grad_test[_i][_qp] * deriv;
 }
 
