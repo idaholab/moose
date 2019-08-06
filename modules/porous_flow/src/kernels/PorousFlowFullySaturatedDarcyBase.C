@@ -55,7 +55,8 @@ PorousFlowFullySaturatedDarcyBase::PorousFlowFullySaturatedDarcyBase(
     _dgrad_p_dvar(getMaterialProperty<std::vector<std::vector<RealGradient>>>(
         "dPorousFlow_grad_porepressure_qp_dvar")),
     _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
-    _gravity(getParam<RealVectorValue>("gravity"))
+    _gravity(getParam<RealVectorValue>("gravity")),
+    _perm_derivs(_dictator.usePermDerivs())
 {
   if (_dictator.numPhases() != 1)
     mooseError("PorousFlowFullySaturatedDarcyBase should not be used for multi-phase scenarios as "
@@ -89,18 +90,24 @@ PorousFlowFullySaturatedDarcyBase::computeQpOffDiagJacobian(unsigned int jvar)
 
   const Real mob = mobility();
   const Real dmob = dmobility(pvar) * _phi[_j][_qp];
-  ;
 
   const RealVectorValue flow =
       _permeability[_qp] * (_grad_p[_qp][ph] - _density[_qp][ph] * _gravity);
-  RealVectorValue dflow = _dpermeability_dvar[_qp][pvar] * _phi[_j][_qp] *
-                          (_grad_p[_qp][ph] - _density[_qp][ph] * _gravity);
-  for (unsigned i = 0; i < LIBMESH_DIM; ++i)
-    dflow += _dpermeability_dgradvar[_qp][i][pvar] * _grad_phi[_j][_qp](i) *
-             (_grad_p[_qp][ph] - _density[_qp][ph] * _gravity);
-  dflow += _permeability[_qp] * (_grad_phi[_j][_qp] * _dgrad_p_dgrad_var[_qp][ph][pvar] -
-                                 _phi[_j][_qp] * _ddensity_dvar[_qp][ph][pvar] * _gravity);
+
+  RealVectorValue dflow =
+      _permeability[_qp] * (_grad_phi[_j][_qp] * _dgrad_p_dgrad_var[_qp][ph][pvar] -
+                            _phi[_j][_qp] * _ddensity_dvar[_qp][ph][pvar] * _gravity);
   dflow += _permeability[_qp] * (_dgrad_p_dvar[_qp][ph][pvar] * _phi[_j][_qp]);
+
+  if (_perm_derivs)
+  {
+    dflow += _dpermeability_dvar[_qp][pvar] * _phi[_j][_qp] *
+             (_grad_p[_qp][ph] - _density[_qp][ph] * _gravity);
+    for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+      dflow += _dpermeability_dgradvar[_qp][i][pvar] * _grad_phi[_j][_qp](i) *
+               (_grad_p[_qp][ph] - _density[_qp][ph] * _gravity);
+  }
+
   return _grad_test[_i][_qp] * (dmob * flow + mob * dflow);
 }
 

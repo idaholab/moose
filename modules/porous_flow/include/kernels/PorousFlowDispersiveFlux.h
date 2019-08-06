@@ -123,5 +123,7 @@ protected:
 
   /// Transverse dispersivity for each phase
   const std::vector<Real> _disp_trans;
-};
 
+  /// Flag to check whether permeabiity derivatives are non-zero
+  const bool _perm_derivs;
+};

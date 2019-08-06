@@ -89,6 +89,10 @@ PorousFlowDictator::PorousFlowDictator(const InputParameters & parameters)
   if ((_num_phases > 0) && (_aqueous_phase_number >= _num_phases))
     mooseError("PorousflowDictator: The aqueous phase number must be less than the number of fluid "
                "phases.  The Dictator does not appreciate jokes.");
+
+  // Don't include permeabiity derivatives in the Jacobian by default (overwrite using
+  // usePermDerivs()) when necessary in permeabiity material classes
+  _perm_derivs = false;
 }
 
 unsigned int
