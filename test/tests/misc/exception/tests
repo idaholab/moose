@@ -101,4 +101,13 @@
     requirement = 'The system shall support throwing an error during a Jacobian '
                   'calculation, which will terminate the solve.'
   [../]
+
+  [./skip_exception_check]
+    type = 'Exodiff'
+    input = '2d_diffusion_skip_exception.i'
+    exodiff = '2d_diffusion_skip_exception_out.e'
+    expect_out = 'MOOSE may fail to catch an exception when the "skip_exception_check" parameter is used. If you receive a terse MPI error during execution, remove this parameter and rerun your simulation'
+    allow_warnings = true
+    requirement = "The system shall allow users to skip exception checks to avoid global communication."
+  [../]
 []

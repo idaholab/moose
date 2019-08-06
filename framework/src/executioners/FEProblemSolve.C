@@ -67,6 +67,8 @@ validParams<FEProblemSolve>()
       "snesmf_reuse_base",
       true,
       "Specifies whether or not to reuse the base vector for matrix-free calculation");
+  params.addParam<bool>(
+      "skip_exception_check", false, "Specifies whether or not to skip exception check");
   params.addParam<bool>("compute_initial_residual_before_preset_bcs",
                         false,
                         "Use the residual norm computed *before* PresetBCs are imposed in relative "
@@ -131,6 +133,8 @@ FEProblemSolve::FEProblemSolve(Executioner * ex)
 
   _problem.setSNESMFReuseBase(getParam<bool>("snesmf_reuse_base"),
                               _pars.isParamSetByUser("snesmf_reuse_base"));
+
+  _problem.skipExceptionCheck(getParam<bool>("skip_exception_check"));
 
   _nl.setDecomposition(_splitting);
 }

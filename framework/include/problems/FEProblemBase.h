@@ -1611,6 +1611,14 @@ public:
   bool useSNESMFReuseBase() { return _snesmf_reuse_base; }
 
   /**
+   * Set a flag that indicates if we want to skip exception and stop solve
+   */
+  void skipExceptionCheck(bool skip_exception_check)
+  {
+    _skip_exception_check = skip_exception_check;
+  }
+
+  /**
    * Return a flag to indicate if _snesmf_reuse_base is set by users
    */
   bool isSNESMFReuseBaseSetbyUser() { return _snesmf_reuse_base_set_by_user; }
@@ -1868,6 +1876,9 @@ protected:
 
   /// If or not to resuse the base vector for matrix-free calculation
   bool _snesmf_reuse_base;
+
+  /// If or not skip 'exception and stop solve'
+  bool _skip_exception_check;
 
   /// If or not _snesmf_reuse_base is set by user
   bool _snesmf_reuse_base_set_by_user;

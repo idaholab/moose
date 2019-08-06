@@ -241,6 +241,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _has_dampers(false),
     _has_constraints(false),
     _snesmf_reuse_base(true),
+    _skip_exception_check(false),
     _snesmf_reuse_base_set_by_user(false),
     _has_initialized_stateful(false),
     _const_jacobian(false),
@@ -572,6 +573,11 @@ void
 FEProblemBase::initialSetup()
 {
   TIME_SECTION(_initial_setup_timer);
+
+  if (_skip_exception_check)
+    mooseWarning("MOOSE may fail to catch an exception when the \"skip_exception_check\" parameter "
+                 "is used. If you receive a terse MPI error during execution, remove this "
+                 "parameter and rerun your simulation");
 
   // set state flag indicating that we are in or beyond initialSetup.
   // This can be used to throw errors in methods that _must_ be called at construction time.
@@ -4281,6 +4287,9 @@ FEProblemBase::setException(const std::string & message)
 void
 FEProblemBase::checkExceptionAndStopSolve()
 {
+  if (_skip_exception_check)
+    return;
+
   TIME_SECTION(_check_exception_and_stop_solve_timer);
 
   // See if any processor had an exception.  If it did, get back the
