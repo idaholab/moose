@@ -69,8 +69,9 @@ DerivativeParsedMaterialHelper::recurseMatProps(unsigned int var,
   {
     // if this material property does not depend on the variable we are deriving w.r.t. skip it
     if (!parent_mpd.dependsOn(_arg_names[var]))
+    {
       continue;
-
+    }
     // otherwise add it to _mat_prop_descriptors
     FunctionMaterialPropertyDescriptor mpd(parent_mpd);
     mpd.addDerivative(_arg_names[var]);
@@ -228,15 +229,32 @@ DerivativeParsedMaterialHelper::initQpStatefulProperties()
 void
 DerivativeParsedMaterialHelper::computeQpProperties()
 {
+  Real a;
+  Real b;
+  Real c;
+  Real d;
+  
   // fill the parameter vector, apply tolerances
-  for (unsigned int i = 0; i < _nargs; ++i)
+  for (unsigned int i = 0; i < _nargs/4; ++i)
   {
+    _func_params.resize(_nargs);
     if (_tol[i] < 0.0)
-      _func_params[i] = (*_args[i])[_qp];
+    {
+      _func_params[4*i] = (*_args[i])[_qp];
+      _func_params[4*i+1] = ((*_grad_args[i])[_qp])(0);
+      _func_params[4*i+2] = ((*_grad_args[i])[_qp])(1);
+      _func_params[4*i+3] = ((*_grad_args[i])[_qp])(2);
+    }
     else
     {
-      Real a = (*_args[i])[_qp];
-      _func_params[i] = a < _tol[i] ? _tol[i] : (a > 1.0 - _tol[i] ? 1.0 - _tol[i] : a);
+      a = (*_args[i])[_qp];
+      b = ((*_grad_args[i])[_qp])(0);
+      c = ((*_grad_args[i])[_qp])(1);
+      d = ((*_grad_args[i])[_qp])(2);
+      _func_params[4*i] = a < _tol[i] ? _tol[i] : (a > 1.0 - _tol[i] ? 1.0 - _tol[i] : a);
+      _func_params[4*i+1] = b < _tol[i] ? _tol[i] : (b > 1.0 - _tol[i] ? 1.0 - _tol[i] : b);
+      _func_params[4*i+2] = c < _tol[i] ? _tol[i] : (c > 1.0 - _tol[i] ? 1.0 - _tol[i] : c);
+      _func_params[4*i+3] = d < _tol[i] ? _tol[i] : (d > 1.0 - _tol[i] ? 1.0 - _tol[i] : d);
     }
   }
 

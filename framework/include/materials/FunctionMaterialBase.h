@@ -13,25 +13,25 @@
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
+template <class T>
 class FunctionMaterialBase;
-
-template <>
-InputParameters validParams<FunctionMaterialBase>();
 
 /**
  * %Material base class central for all Materials that provide a Function as a
  * material property value.
  */
+template <class T>
 class FunctionMaterialBase : public DerivativeMaterialInterface<Material>
 {
 public:
   FunctionMaterialBase(const InputParameters & parameters);
 
+  InputParameters validParams();
 protected:
   /**
    * FunctionMaterialBase keeps an internal list of all the variables the derivatives are taken
    * w.r.t.
-   * We provide the MOOSE variable bames in _arg_names, the libMesh variable numbers in
+   * We provide the MOOSE variable names in _arg_names, the libMesh variable numbers in
    * _arg_numbers, and the
    * input file parameter names in _arg_param_names. All are indexed by the argument index.
    * This method returns the argument index for a given the libMesh variable number.
@@ -52,6 +52,7 @@ protected:
 
   /// Coupled variables for function arguments
   std::vector<const VariableValue *> _args;
+  std::vector<const VariableGradient *> _grad_args;
 
   /**
    * Name of the function value material property and used as a base name to
@@ -82,7 +83,7 @@ protected:
   bool _third_derivatives;
 
   /// Material property to store the function value.
-  MaterialProperty<Real> * _prop_F;
+  MaterialProperty<T> * _prop_F;
 
 private:
   /// map the variable numbers to an even/odd interspersed pattern

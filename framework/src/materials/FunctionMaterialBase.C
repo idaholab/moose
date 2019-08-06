@@ -11,7 +11,7 @@
 
 template <>
 InputParameters
-validParams<FunctionMaterialBase>()
+validParams<FunctionMaterialBase<T> >()
 {
   InputParameters params = validParams<Material>();
   params.addClassDescription("Material to provide a function (such as a free energy)");
@@ -22,6 +22,7 @@ validParams<FunctionMaterialBase>()
   return params;
 }
 
+template <class T>
 FunctionMaterialBase::FunctionMaterialBase(const InputParameters & parameters)
   : DerivativeMaterialInterface<Material>(parameters),
     _F_name(getParam<std::string>("f_name")),
@@ -77,6 +78,7 @@ FunctionMaterialBase::FunctionMaterialBase(const InputParameters & parameters)
 
       // get variable value
       _args.push_back(&coupledValue(*it, j));
+      _grad_args.push_back(&coupledGradient(*it, j));
     }
   }
 

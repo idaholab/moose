@@ -28,8 +28,18 @@ ParsedMaterialHelper::ParsedMaterialHelper(const InputParameters & parameters,
     _variable_names(_nargs),
     _mat_prop_descriptors(0),
     _tol(0),
-    _map_mode(map_mode)
+    _map_mode(map_mode),
+    func_F(0)
 {
+}
+
+void ParsedMaterialHelper::functionParse(const std::vector<std::string> & function_expressions)
+{
+  for(int i = 0; 0 < function_expressions.size(), ++i)
+  {
+    functionParse(function_expressions[i]);
+    _funcs_F.append(func_F);
+  }
 }
 
 void
@@ -62,6 +72,7 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
                                     const std::vector<std::string> & tol_names,
                                     const std::vector<Real> & tol_values)
 {
+  std::string function = function_expression;
   // build base function object
   _func_F = ADFunctionPtr(new ADFunction());
 
@@ -86,13 +97,33 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
       break;
 
     case USE_PARAM_NAMES:
-    for (unsigned i = 0; i < _nargs; ++i)
-    {
-      if(_arg_param_numbers[i] < 0)
-        _variable_names[i] = _arg_param_names[i];
-      else
-        _variable_names[i] = getVar(_arg_param_names[i],_arg_param_numbers[i])->name();
-    }
+      _variable_names.resize(_nargs * 4);
+      for (unsigned int i = 0; i < _nargs; ++i)
+      {
+        if(_arg_param_numbers[i] < 0)
+        {
+          _variable_names[4*i] = _arg_param_names[i];
+          _variable_names[4*i+1] = _variable_names[i] + "x";
+          _variable_names[4*i+2] = _variable_names[i] + "y";
+          _variable_names[4*i+3] = _variable_names[i] + "z";
+        }
+        else
+        {
+          _variable_names[4*i] = getVar(_arg_param_names[i],_arg_param_numbers[i])->name();
+          _variable_names[4*i+1] = _variable_names[i] + "x";
+          _variable_names[4*i+2] = _variable_names[i] + "y";
+          _variable_names[4*i+3] = _variable_names[i] + "z";
+          std::string to_replace = _arg_param_names[i] + std::to_string(i);
+          std::size_t variable_location = function.find(to_replace);
+          while(variable_location != std::string::npos)
+          {
+            function.replace(variable_location,to_replace.length(),_variable_names[i]);
+            variable_location = function.find(to_replace);
+          }
+        }
+      }
+      _arg_names = _variable_names;
+      _nargs *= 4;
       break;
 
     default:
@@ -121,7 +152,7 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
   // build 'variables' argument for fparser
   std::string variables;
   for (unsigned i = 0; i < _nargs; ++i)
-    variables += "," + _variable_names[i];
+      variables += "," + _variable_names[i];
 
   // get all material properties
   unsigned int nmat_props = mat_prop_expressions.size();
@@ -134,14 +165,14 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
     // get the fparser symbol name for the new material property
     variables += "," + _mat_prop_descriptors[i].getSymbolName();
   }
-
+  std::cout << function << std::endl;
+  std::cout << variables << std::endl;
   // erase leading comma
   variables.erase(0, 1);
-
   // build the base function
-  if (_func_F->Parse(function_expression, variables) >= 0)
+  if (_func_F->Parse(function, variables) >= 0)
     mooseError("Invalid function\n",
-               function_expression,
+               function,
                '\n',
                variables,
                "\nin ParsedMaterialHelper.\n",
@@ -185,16 +216,31 @@ void
 ParsedMaterialHelper::computeQpProperties()
 {
   Real a;
+  Real b;
+  Real c;
+  Real d;
 
   // fill the parameter vector, apply tolerances
+  unsigned int j = 0;
   for (unsigned int i = 0; i < _nargs; ++i)
   {
     if (_tol[i] < 0.0)
-      _func_params[i] = (*_args[i])[_qp];
+    {
+      _func_params[4*i] = (*_args[i])[_qp];
+      _func_params[4*i+1] = ((*_grad_args[i])[_qp])(0);
+      _func_params[4*i+2] = ((*_grad_args[i])[_qp])(1);
+      _func_params[4*i+3] = ((*_grad_args[i])[_qp])(2);
+    }
     else
     {
       a = (*_args[i])[_qp];
-      _func_params[i] = a < _tol[i] ? _tol[i] : (a > 1.0 - _tol[i] ? 1.0 - _tol[i] : a);
+      b = ((*_grad_args[i])[_qp])(0);
+      c = ((*_grad_args[i])[_qp])(1);
+      d = ((*_grad_args[i])[_qp])(2);
+      _func_params[4*i] = a < _tol[i] ? _tol[i] : (a > 1.0 - _tol[i] ? 1.0 - _tol[i] : a);
+      _func_params[4*i+1] = b < _tol[i] ? _tol[i] : (b > 1.0 - _tol[i] ? 1.0 - _tol[i] : b);
+      _func_params[4*i+2] = c < _tol[i] ? _tol[i] : (c > 1.0 - _tol[i] ? 1.0 - _tol[i] : c);
+      _func_params[4*i+3] = d < _tol[i] ? _tol[i] : (d > 1.0 - _tol[i] ? 1.0 - _tol[i] : d);
     }
   }
 
@@ -204,6 +250,9 @@ ParsedMaterialHelper::computeQpProperties()
     _func_params[i + _nargs] = _mat_prop_descriptors[i].value()[_qp];
 
   // set function value
-  if (_prop_F)
+  if (_prop_F && _funcs_F.size() == 0)
     (*_prop_F)[_qp] = evaluate(_func_F);
+  else if(_prop_F)
+    for(unsigned int i = 0; i < 3; ++i)
+      ((*_prop_F)[i])[_qp] = evaluate(_funcs_F[i]);
 }

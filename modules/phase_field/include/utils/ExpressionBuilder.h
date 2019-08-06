@@ -53,6 +53,8 @@ public:
   class EBTerm;
   class EBTermNode;
   class EBFunction;
+  class EBMatrixFunction;
+  class EBQuaternionFunction;
   class EBSubstitutionRule;
   typedef std::vector<EBTerm> EBTermList;
   typedef std::vector<EBTermNode *> EBTermNodeList;
@@ -146,7 +148,8 @@ public:
       LOG10,
       EXP,
       SINH,
-      COSH
+      COSH,
+      SQRT
     } _type;
 
     EBUnaryFuncTermNode(EBTermNode * subnode, NodeType type)
@@ -435,6 +438,7 @@ public:
     friend EBTerm exp(const EBTerm &);
     friend EBTerm sinh(const EBTerm &);
     friend EBTerm cosh(const EBTerm &);
+    friend EBTerm sqrt(const EBTerm &);
 
 /*
  * Binary operators (including number,term operations)
@@ -631,6 +635,109 @@ public:
     EBTerm _term;
   };
 
+  class EBMatrixFunction
+  {
+  public:
+    EBMatrixFunction();
+    EBMatrixFunction(std::vector<std::vector<EBTerm> > FunctionMatrix);
+    EBMatrixFunction(unsigned int i, unsigned int j);
+
+    //operator EBQuaternionFunction();
+    operator std::vector<std::vector<std::string> >() const;
+    friend EBMatrixFunction & operator*(const EBMatrixFunction & lhs, const EBMatrixFunction & rhs);
+    friend EBMatrixFunction & operator*(const Real & lhs, const EBMatrixFunction & rhs);
+    friend EBMatrixFunction & operator*(const EBMatrixFunction & lhs, const Real & rhs);
+    friend EBMatrixFunction & operator*(const EBTerm & lhs, const EBMatrixFunction & rhs);
+    friend EBMatrixFunction & operator*(const EBMatrixFunction & lhs, const EBTerm & rhs);
+    friend EBMatrixFunction & operator/(const EBMatrixFunction & lhs, const EBTerm & rhs);
+    friend EBMatrixFunction & operator/(const EBMatrixFunction & lhs, const Real & rhs);
+    friend EBMatrixFunction & operator+(const EBMatrixFunction & lhs, const EBMatrixFunction & rhs);
+    friend EBMatrixFunction & operator-(const EBMatrixFunction & lhs, const EBMatrixFunction & rhs);
+    EBMatrixFunction & operator+=(const EBMatrixFunction & rhs);
+    EBMatrixFunction & operator-();
+    std::vector<EBTerm> & operator[](unsigned int i);
+    const std::vector<EBTerm> & operator[](unsigned int i) const;
+    EBMatrixFunction & operator!(); //Implemented as a transpose function
+
+    unsigned int rowNum() const;
+    unsigned int colNum() const;
+    void setSize(const unsigned int i, const unsigned int j); //Erases the entire matrix
+
+  private:
+    void checkMultSize(const EBMatrixFunction & lhs, const EBMatrixFunction & rhs);
+    void checkAddSize(const EBMatrixFunction & lhs, const EBMatrixFunction & rhs);
+    void checkSize();
+
+    std::vector<std::vector<EBTerm> > FunctionMatrix;
+    unsigned int _rowNum;
+    unsigned int _colNum;
+  };
+
+  class EBVectorFunction //3D vectors only, else use EBMatrixFunction
+  {
+  public:
+    EBVectorFunction() {
+      FunctionVector = std::vector<EBTerm>(3);
+    };
+    EBVectorFunction(std::vector<EBTerm> FunctionVector);
+    EBVectorFunction(std::vector<std::string> FunctionNameVector);
+
+    operator std::vector<std::string>() const;
+    friend EBTerm & operator*(const EBVectorFunction & lhs, const EBVectorFunction & rhs); // This defines a dot product
+    friend EBVectorFunction & operator*(const EBVectorFunction & lhs, const Real & rhs);
+    friend EBVectorFunction & operator*(const Real & lhs, const EBVectorFunction & rhs);
+    friend EBVectorFunction & operator*(const EBTerm & lhs, const EBVectorFunction & rhs);
+    friend EBVectorFunction & operator*(const EBVectorFunction & lhs, const EBTerm & rhs);
+    friend EBVectorFunction & operator*(const EBVectorFunction & lhs, const EBMatrixFunction & rhs); // We assume the vector is 1 x 3 here
+    friend EBVectorFunction & operator*(const EBMatrixFunction & lhs, const EBVectorFunction & rhs); // We assume the vector is 3 x 1 here
+    friend EBVectorFunction & operator/(const EBVectorFunction & lhs, const Real & rhs);
+    friend EBVectorFunction & operator/(const EBVectorFunction & lhs, const EBTerm & rhs);
+    friend EBVectorFunction & operator+(const EBVectorFunction & lhs, const EBVectorFunction & rhs);
+    friend EBVectorFunction & operator-(const EBVectorFunction & lhs, const EBVectorFunction & rhs);
+    EBVectorFunction & operator+=(const EBVectorFunction & rhs);
+    EBVectorFunction & operator-();
+    EBTerm & operator[](unsigned int i);
+    const EBTerm & operator[](unsigned int i) const;
+    //operator EBMatrixFunction();
+
+    EBVectorFunction & cross(const EBVectorFunction & lhs, const EBVectorFunction & rhs);
+    EBTerm norm(const EBVectorFunction & rhs);
+
+  private:
+    void checkSize(std::vector<std::string> FunctionVector);
+    void checkSize(std::vector<EBTerm> FunctionVector);
+
+    std::vector<EBTerm> FunctionVector;
+  };
+
+  class EBQuaternionFunction
+  {
+  public:
+    EBQuaternionFunction() {
+      FunctionQuat = std::vector<EBTerm>(4);
+    };
+    EBQuaternionFunction(std::vector<EBTerm> FunctionQuat);
+
+    friend EBQuaternionFunction & operator*(const EBQuaternionFunction & lhs, const EBQuaternionFunction & rhs);
+    friend EBQuaternionFunction & operator*(const EBQuaternionFunction & lhs, const Real & rhs);
+    friend EBQuaternionFunction & operator*(const Real & lhs, const EBQuaternionFunction & rhs);
+    friend EBQuaternionFunction & operator*(const EBQuaternionFunction & lhs, const EBTerm & rhs);
+    friend EBQuaternionFunction & operator*(const EBTerm & lhs, const EBQuaternionFunction & rhs);
+    friend EBQuaternionFunction & operator/(const EBQuaternionFunction & lhs, const Real & rhs);
+    friend EBQuaternionFunction & operator/(const EBQuaternionFunction & lhs, const EBTerm & rhs);
+    friend EBQuaternionFunction & operator+(const EBQuaternionFunction & lhs, const EBQuaternionFunction & rhs);
+    friend EBQuaternionFunction & operator-(const EBQuaternionFunction & lhs, const EBQuaternionFunction & rhs);
+    EBQuaternionFunction & operator-(const EBQuaternionFunction & rhs);
+    EBTerm & operator[](unsigned int i);
+    const EBTerm & operator[](unsigned int i) const;
+
+    EBTerm norm(const EBQuaternionFunction & rhs);
+
+  private:
+    void checkSize(std::vector<EBTerm> FunctionQuat);
+
+    std::vector<EBTerm> FunctionQuat;
+  };
 /*
  * Binary operators
  */
