@@ -69,6 +69,9 @@ PorousFlowPermeabilityExponential::PorousFlowPermeabilityExponential(
       _BB = _B;
       break;
   }
+
+  // Make sure that derivatives are included in the Jacobian calculations
+  _dictator.usePermDerivs(true);
 }
 
 void

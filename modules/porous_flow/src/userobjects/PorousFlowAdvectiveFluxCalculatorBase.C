@@ -73,8 +73,8 @@ PorousFlowAdvectiveFluxCalculatorBase::PorousFlowAdvectiveFluxCalculatorBase(
     _dkij_dvar(),
     _dflux_out_dvars(),
     _triples_to_receive(),
-    _triples_to_send()
-
+    _triples_to_send(),
+    _perm_derivs(_dictator.usePermDerivs())
 {
   if (_phase >= _dictator.numPhases())
     paramError("phase",
@@ -119,15 +119,21 @@ PorousFlowAdvectiveFluxCalculatorBase::executeOnElement(
     const dof_id_type global_k = _current_elem->node_id(local_k);
     for (unsigned pvar = 0; pvar < _num_vars; ++pvar)
     {
-      RealVectorValue deriv = _dpermeability_dvar[qp][pvar] * _phi[local_k][qp] *
-                              (_grad_p[qp][_phase] - _fluid_density_qp[qp][_phase] * _gravity);
-      for (unsigned i = 0; i < LIBMESH_DIM; ++i)
-        deriv += _dpermeability_dgradvar[qp][i][pvar] * _grad_phi[local_k][qp](i) *
-                 (_grad_p[qp][_phase] - _fluid_density_qp[qp][_phase] * _gravity);
-      deriv += _permeability[qp] *
-               (_grad_phi[local_k][qp] * _dgrad_p_dgrad_var[qp][_phase][pvar] -
-                _phi[local_k][qp] * _dfluid_density_qp_dvar[qp][_phase][pvar] * _gravity);
+      RealVectorValue deriv =
+          _permeability[qp] *
+          (_grad_phi[local_k][qp] * _dgrad_p_dgrad_var[qp][_phase][pvar] -
+           _phi[local_k][qp] * _dfluid_density_qp_dvar[qp][_phase][pvar] * _gravity);
       deriv += _permeability[qp] * (_dgrad_p_dvar[qp][_phase][pvar] * _phi[local_k][qp]);
+
+      if (_perm_derivs)
+      {
+        deriv += _dpermeability_dvar[qp][pvar] * _phi[local_k][qp] *
+                 (_grad_p[qp][_phase] - _fluid_density_qp[qp][_phase] * _gravity);
+        for (unsigned i = 0; i < LIBMESH_DIM; ++i)
+          deriv += _dpermeability_dgradvar[qp][i][pvar] * _grad_phi[local_k][qp](i) *
+                   (_grad_p[qp][_phase] - _fluid_density_qp[qp][_phase] * _gravity);
+      }
+
       _dkij_dvar[sequential_i][j][global_k][pvar] +=
           _JxW[qp] * _coord[qp] * (-_grad_phi[local_i][qp] * deriv * _phi[local_j][qp]);
     }
