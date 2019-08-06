@@ -124,6 +124,12 @@ public:
     MULTIAPP_WRONG
   };
 
+  /**
+   * Determines whether the given arg string follows the pattern for a Hit parameter that is
+   * applicable either: globally to all master and multiapp subapps, only to the main/master app,
+   * only to the specified multiapp/subapp (via appname and appnum), or to another different
+   * multiapp/subapp.
+   */
   static HitCmpResult
   hitArgComparison(const std::string & arg, const std::string & appname, int appnum);
 
