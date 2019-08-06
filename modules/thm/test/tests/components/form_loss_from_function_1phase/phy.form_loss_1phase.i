@@ -67,13 +67,13 @@
     K_prime = 0.25
   [../]
   [./inlet]
-    type = InletDensityVelocity
+    type = InletDensityVelocity1Phase
     input = 'pipe:in'
     rho = 996.5563397
     vel = 0.5
   [../]
   [./outlet]
-    type = Outlet
+    type = Outlet1Phase
     input = 'pipe:out'
     p = 1e5
     legacy = true

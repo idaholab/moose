@@ -63,14 +63,14 @@
   [../]
 
   [./inlet]
-    type = InletStagnationPressureTemperature
+    type = InletStagnationPressureTemperature1Phase
     input = 'pipe:in'
     p0 = 1e5
     T0 = 300
   [../]
 
   [./outlet]
-    type = Outlet
+    type = Outlet1Phase
     input = 'pipe:out'
     p = 1e5
   [../]

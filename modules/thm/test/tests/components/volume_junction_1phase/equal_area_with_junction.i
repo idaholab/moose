@@ -47,7 +47,7 @@
 
 [Components]
   [./inlet]
-    type = InletStagnationPressureTemperature
+    type = InletStagnationPressureTemperature1Phase
     input = 'pipe1:in'
     # Stagnation property with p = 1e5 Pa, T = 250 K, vel = 1 m/s
     p0 = 100000.68965687
@@ -98,7 +98,7 @@
   [../]
 
   [./outlet]
-    type = Outlet
+    type = Outlet1Phase
     input = 'pipe2:out'
     p = 1e5
   [../]
