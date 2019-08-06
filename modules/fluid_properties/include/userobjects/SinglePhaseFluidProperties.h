@@ -310,6 +310,8 @@ public:
                                Real & mu,
                                Real & dmu_dp,
                                Real & dmu_dT) const;
+  virtual void
+  rho_mu_from_p_T(const DualReal & p, const DualReal & T, DualReal & rho, DualReal & mu) const;
 
   virtual void rho_e_from_p_T(Real p,
                               Real T,

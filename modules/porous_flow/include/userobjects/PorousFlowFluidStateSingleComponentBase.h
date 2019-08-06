@@ -39,7 +39,7 @@ public:
                                         Real enthalpy,
                                         unsigned int qp,
                                         FluidStatePhaseEnum & phase_state,
-                                        std::vector<FluidStatePropertiesAD> & fsp) const = 0;
+                                        std::vector<FluidStateProperties> & fsp) const = 0;
 
   unsigned int getPressureIndex() const { return _pidx; };
   unsigned int getEnthalpyIndex() const { return _hidx; };
