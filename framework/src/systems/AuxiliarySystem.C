@@ -26,6 +26,7 @@
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/node_range.h"
 #include "libmesh/numeric_vector.h"
+#include "libmesh/default_coupling.h"
 
 // AuxiliarySystem ////////
 
@@ -59,6 +60,13 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
   _elem_vars.resize(libMesh::n_threads());
   _elem_std_vars.resize(libMesh::n_threads());
   _elem_vec_vars.resize(libMesh::n_threads());
+
+  if (!_fe_problem.defaultGhosting())
+  {
+    auto & dof_map = _sys.get_dof_map();
+    dof_map.remove_algebraic_ghosting_functor(dof_map.default_algebraic_ghosting());
+    dof_map.set_implicit_neighbor_dofs(false);
+  }
 }
 
 AuxiliarySystem::~AuxiliarySystem() { delete &_serialized_solution; }

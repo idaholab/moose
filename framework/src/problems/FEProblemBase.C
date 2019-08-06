@@ -322,9 +322,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _u_dot_old_requested(false),
     _u_dotdot_old_requested(false)
 {
-  // Possibly turn off default ghosting in libMesh
-  _eq.enable_default_ghosting(_default_ghosting);
-
   _time = 0.0;
   _time_old = 0.0;
   _t_step = 0;
@@ -377,6 +374,9 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _console << "\nUsing " << restart_file_base << " for restart.\n\n";
     setRestartFile(restart_file_base);
   }
+
+  if (!_default_ghosting)
+    _mesh.getMesh().remove_ghosting_functor(_mesh.getMesh().default_ghosting());
 }
 
 void

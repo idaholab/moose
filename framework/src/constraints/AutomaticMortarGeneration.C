@@ -513,6 +513,9 @@ AutomaticMortarGeneration::computeNodalNormals()
     // Which side of the parent are we? We need to know this to know
     // which side to reinit.
     const Elem * interior_parent = slave_elem->interior_parent();
+    mooseAssert(interior_parent,
+                "No interior parent exists for element "
+                    << slave_elem->id() << ". There may be a problem with your sideset set-up.");
 
     // Look up which side of the interior parent slave_elem is.
     auto s = interior_parent->which_side_am_i(slave_elem);

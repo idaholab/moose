@@ -798,6 +798,13 @@ enum class RelationshipManagerType : unsigned char
   COUPLING = 1 << 2
 };
 
+enum RMSystemType
+{
+  NONLINEAR,
+  AUXILIARY,
+  NONE
+};
+
 /**
  * The type for the callback to set RelationshipManager parameters
  */

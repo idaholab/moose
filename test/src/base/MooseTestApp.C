@@ -67,6 +67,7 @@ MooseTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_
     registerSyntax("MetaNodalNormalsAction", "MetaNodalNormals");
     // For testing the ability to create problems in user defined Actions
     registerSyntax("CreateSpecialProblemAction", "TestProblem");
+    registerSyntax("AddDGDiffusion", "DGDiffusionAction");
   }
 }
 

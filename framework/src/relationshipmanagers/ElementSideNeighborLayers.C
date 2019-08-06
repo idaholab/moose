@@ -52,6 +52,8 @@ ElementSideNeighborLayers::getInfo() const
   return oss.str();
 }
 
+// the LHS ("this" object) in MooseApp::addRelationshipManager is the existing RelationshipManager
+// object to which we are comparing the rhs to determine whether it should get added
 bool
 ElementSideNeighborLayers::operator==(const RelationshipManager & rhs) const
 {
@@ -59,7 +61,9 @@ ElementSideNeighborLayers::operator==(const RelationshipManager & rhs) const
   if (!rm)
     return false;
   else
-    return _layers == rm->_layers && isType(rm->_rm_type) && isSystemType(rm->_system_type);
+    // We use a >= comparison instead of == for _layers because if we already have more ghosting
+    // than the new RM provides, then that's an indication that we should *not* add the new one
+    return _layers >= rm->_layers && isType(rm->_rm_type) && _system_type == rm->_system_type;
 }
 
 void

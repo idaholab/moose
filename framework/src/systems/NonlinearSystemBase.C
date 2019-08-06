@@ -87,6 +87,7 @@
 #include "libmesh/dof_map.h"
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/petsc_matrix.h"
+#include "libmesh/default_coupling.h"
 
 // PETSc
 #ifdef LIBMESH_HAVE_PETSC
@@ -178,6 +179,13 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
   _fe_problem.addMatrixTag("TIME");
 
   _Re_tag = _fe_problem.addVectorTag("RESIDUAL");
+
+  if (!_fe_problem.defaultGhosting())
+  {
+    auto & dof_map = _sys.get_dof_map();
+    dof_map.remove_algebraic_ghosting_functor(dof_map.default_algebraic_ghosting());
+    dof_map.set_implicit_neighbor_dofs(false);
+  }
 }
 
 NonlinearSystemBase::~NonlinearSystemBase()
@@ -199,25 +207,6 @@ NonlinearSystemBase::init()
 
   if (_need_residual_copy)
     _residual_copy.init(_sys.n_dofs(), false, SERIAL);
-
-  Moose::perf_log.push("maxVarNDofsPerElem()", "Setup");
-  MaxVarNDofsPerElem mvndpe(_fe_problem, *this);
-  Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), mvndpe);
-  _max_var_n_dofs_per_elem = mvndpe.max();
-  _communicator.max(_max_var_n_dofs_per_elem);
-  auto displaced_problem = _fe_problem.getDisplacedProblem();
-  if (displaced_problem)
-    displaced_problem->nlSys().assignMaxVarNDofsPerElem(_max_var_n_dofs_per_elem);
-  Moose::perf_log.pop("maxVarNDofsPerElem()", "Setup");
-
-  Moose::perf_log.push("maxVarNDofsPerNode()", "Setup");
-  MaxVarNDofsPerNode mvndpn(_fe_problem, *this);
-  Threads::parallel_reduce(*_mesh.getLocalNodeRange(), mvndpn);
-  _max_var_n_dofs_per_node = mvndpn.max();
-  _communicator.max(_max_var_n_dofs_per_node);
-  if (displaced_problem)
-    displaced_problem->nlSys().assignMaxVarNDofsPerNode(_max_var_n_dofs_per_node);
-  Moose::perf_log.pop("maxVarNDofsPerNode()", "Setup");
 
   if (_fe_problem.automaticScaling())
     // We don't need libMesh to do projections since we will always be filling this vector from the
@@ -265,6 +254,25 @@ NonlinearSystemBase::restoreSolutions()
 void
 NonlinearSystemBase::initialSetup()
 {
+  if (_fe_problem.haveADObjects())
+  {
+    CONSOLE_TIMED_PRINT("Computing max dofs per elem/node");
+
+    MaxVarNDofsPerElem mvndpe(_fe_problem, *this);
+    Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), mvndpe);
+    _max_var_n_dofs_per_elem = mvndpe.max();
+    _communicator.max(_max_var_n_dofs_per_elem);
+    auto displaced_problem = _fe_problem.getDisplacedProblem();
+    if (displaced_problem)
+      displaced_problem->nlSys().assignMaxVarNDofsPerElem(_max_var_n_dofs_per_elem);
+
+    MaxVarNDofsPerNode mvndpn(_fe_problem, *this);
+    Threads::parallel_reduce(*_mesh.getLocalNodeRange(), mvndpn);
+    _max_var_n_dofs_per_node = mvndpn.max();
+    _communicator.max(_max_var_n_dofs_per_node);
+    if (displaced_problem)
+      displaced_problem->nlSys().assignMaxVarNDofsPerNode(_max_var_n_dofs_per_node);
+  }
   {
     CONSOLE_TIMED_PRINT("Initializing Kernels, BCs and Constraints");
 
@@ -2629,7 +2637,7 @@ NonlinearSystemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks
     if (!_fe_problem.errorOnJacobianNonzeroReallocation())
       MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
                    MAT_NEW_NONZERO_ALLOCATION_ERR,
-                   PETSC_FALSE);
+                   PETSC_TRUE);
 #endif
 
 #endif
