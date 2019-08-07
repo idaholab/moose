@@ -41,6 +41,7 @@ class PorousFlowMaterial : public Material
 {
 public:
   PorousFlowMaterial(const InputParameters & parameters);
+  virtual void initialSetup() override;
 
 protected:
   /// Correctly sizes nodal materials, then initialises using Material::initStatefulProperties
@@ -50,10 +51,10 @@ protected:
   virtual void computeProperties() override;
 
   /**
-   * Makes property with name prop_name to be size equal to
+   * Resizes property with ID prop_id to be equal to
    * max(number of nodes, number of quadpoints) in the current element
    */
-  void sizeNodalProperty(const std::string & prop_name);
+  void sizeNodalProperty(unsigned int prop_id);
 
   /**
    * Makes all supplied properties for this material to be size
@@ -81,5 +82,7 @@ protected:
   const VariableName _saturation_variable_name;
   const VariableName _temperature_variable_name;
   const VariableName _mass_fraction_variable_name;
-};
 
+  /// Unique Ids of supplied material properties
+  std::set<unsigned int> _prop_ids;
+};
