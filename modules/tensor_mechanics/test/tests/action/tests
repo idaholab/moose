@@ -1,5 +1,14 @@
 [Tests]
   issues = '#7555'
+  [./two_block_base_name]
+    type = Exodiff
+    input = 'two_block_base_name.i'
+    exodiff = 'two_block_base_name_out.e'
+    issues = '#13860'
+    design = 'syntax/Modules/TensorMechanics/Master/index.md'
+    requirement = 'The TensorMechanics MasterAction shall support changing the base name when creating a consistent strain calculator material and stress divergence kernel and shall generate different sets of outputs for different mesh subblocks with the appropriate base name.'
+  [../]
+
   [./two_block_new]
     type = Exodiff
     input = 'two_block_new.i'
