@@ -42,6 +42,8 @@ InputParameters
 validParams<MultiAppProjectionTransfer>()
 {
   InputParameters params = validParams<MultiAppFieldTransfer>();
+  params.addClassDescription(
+      "Perform a projection between a master and sub-application mesh of a field variable.");
 
   MooseEnum proj_type("l2", "l2");
   params.addParam<MooseEnum>("proj_type", proj_type, "The type of the projection.");

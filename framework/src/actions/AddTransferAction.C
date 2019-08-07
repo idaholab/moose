@@ -16,7 +16,9 @@ template <>
 InputParameters
 validParams<AddTransferAction>()
 {
-  return validParams<MooseObjectAction>();
+  InputParameters params = validParams<MooseObjectAction>();
+  params.addClassDescription("Action for creating Transfer objects.");
+  return params;
 }
 
 AddTransferAction::AddTransferAction(InputParameters params) : MooseObjectAction(params) {}

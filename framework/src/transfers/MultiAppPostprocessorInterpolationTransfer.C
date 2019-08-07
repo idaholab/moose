@@ -27,6 +27,8 @@ InputParameters
 validParams<MultiAppPostprocessorInterpolationTransfer>()
 {
   InputParameters params = validParams<MultiAppTransfer>();
+  params.addClassDescription("Transfer postprocessor data from sub-application into field data on "
+                             "the master application.");
   params.addRequiredParam<AuxVariableName>(
       "variable", "The auxiliary variable to store the transferred values in.");
   params.addRequiredParam<PostprocessorName>("postprocessor", "The Postprocessor to interpolate.");
