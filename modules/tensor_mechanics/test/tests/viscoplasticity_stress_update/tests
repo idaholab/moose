@@ -1,0 +1,10 @@
+[Tests]
+  [./single]
+    type = CSVDiff
+    input = 'single_lps.i'
+    csvdiff = 'single_lps_out.csv'
+    #issues = ''
+    design = 'source/materials/ViscoPlasticityStressUpdate.md source/materials/ComputeMultiplePorousInelasticStress.md '
+    #requirement = 'The ComputeRSphericalFiniteStrain class, called through the TensorMechanicsMaster action, shall find the finite incremental strain displacement of a thick walled hollow isotropic elastic sphere under an applied load using a 1D spherical symmetric fomulation with incremental finite strain assumptions.'
+  [../]
+[]
