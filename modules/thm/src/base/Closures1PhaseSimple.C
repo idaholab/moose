@@ -103,5 +103,5 @@ Closures1PhaseSimple::addWallTemperatureFromHeatFluxMaterial(
   params.set<MaterialPropertyName>("T") = FlowModelSinglePhase::TEMPERATURE;
   params.set<MaterialPropertyName>("q_wall") = FlowModel::HEAT_FLUX_WALL;
   params.set<MaterialPropertyName>("Hw") = FlowModelSinglePhase::HEAT_TRANSFER_COEFFICIENT_WALL;
-  _sim.addMaterial(class_name, Component::genName(flow_channel.name(), class_name), params);
+  _sim.addMaterial(class_name, Component::genName(flow_channel.name(), "T_wall_mat"), params);
 }

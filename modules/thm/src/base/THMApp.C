@@ -196,11 +196,3 @@ THMApp__registerApps()
 {
   THMApp::registerApps();
 }
-
-namespace THM
-{
-
-// This is chosen to be an arbitrarily large number so that it can be safely
-// assumed that it is unique; other boundary ID's are counted up from zero.
-boundary_id_type bnd_nodeset_id = std::numeric_limits<boundary_id_type>::max() - 1;
-}

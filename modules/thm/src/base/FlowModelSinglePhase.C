@@ -437,7 +437,7 @@ FlowModelSinglePhase::addRDGMooseObjects()
     params.set<MaterialPropertyName>("direction") = DIRECTION;
     params.set<UserObjectName>("fluid_properties") = _fp_name;
     params.set<bool>("implicit") = _sim.getImplicitTimeIntegrationFlag();
-    _sim.addMaterial(class_name, Component::genName(_comp_name, class_name), params);
+    _sim.addMaterial(class_name, Component::genName(_comp_name, "rdg_3egn_mat"), params);
   }
 
   // advection

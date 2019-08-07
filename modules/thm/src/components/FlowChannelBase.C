@@ -130,7 +130,8 @@ FlowChannelBase::buildClosures()
   const std::string class_name = _app.getClosuresClassName(_closures_name, _model_id);
   InputParameters params = _factory.getValidParams(class_name);
   params.set<Simulation *>("_sim") = &_sim;
-  return _factory.create<ClosuresBase>(class_name, genName(name(), class_name), params);
+  return _factory.create<ClosuresBase>(
+      class_name, genName(name(), "closure", _closures_name), params);
 }
 
 void
@@ -406,7 +407,7 @@ FlowChannelBase::addCommonObjects()
       params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
       params.set<std::vector<MaterialPropertyName>>("values") = _q_wall_names;
       params.set<std::vector<VariableName>>("weights") = _P_hf_names;
-      _sim.addMaterial(class_name, genName(name(), class_name, FlowModel::HEAT_FLUX_WALL), params);
+      _sim.addMaterial(class_name, genName(name(), FlowModel::HEAT_FLUX_WALL, "w_avg_mat"), params);
     }
     else if (_n_heat_transfer_connections == 0)
     {
@@ -415,7 +416,7 @@ FlowChannelBase::addCommonObjects()
       params.set<std::string>("property_name") = FlowModel::HEAT_FLUX_WALL;
       params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
       params.set<Real>("value") = 0;
-      _sim.addMaterial(class_name, genName(name(), class_name, FlowModel::HEAT_FLUX_WALL), params);
+      _sim.addMaterial(class_name, genName(name(), FlowModel::HEAT_FLUX_WALL, "zero_mat"), params);
     }
   }
 }

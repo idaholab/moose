@@ -36,8 +36,6 @@ extern FlowModelID FM_TWO_PHASE_NCG;
 // This is the upper limit on variable length given by exodusII
 static const size_t MAX_VARIABLE_LENGTH = 31;
 
-/// special nodeset id for nodes on boundaries
-extern boundary_id_type bnd_nodeset_id;
 }
 
 template <>
