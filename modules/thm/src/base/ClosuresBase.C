@@ -33,7 +33,7 @@ ClosuresBase::addZeroMaterial(const FlowChannelBase & flow_channel,
   params.set<std::string>("property_name") = property_name;
   params.set<Real>("value") = 0;
   _sim.addMaterial(
-      class_name, Component::genName(flow_channel.name(), class_name, property_name), params);
+      class_name, Component::genName(flow_channel.name(), "const_mat", property_name), params);
 }
 
 void
@@ -49,7 +49,7 @@ ClosuresBase::addWeightedAverageMaterial(const FlowChannelBase & flow_channel,
   params.set<std::vector<MaterialPropertyName>>("values") = values;
   params.set<std::vector<VariableName>>("weights") = weights;
   _sim.addMaterial(
-      class_name, Component::genName(flow_channel.name(), class_name, property_name), params);
+      class_name, Component::genName(flow_channel.name(), "wavg_mat", property_name), params);
 }
 
 void
@@ -60,5 +60,5 @@ ClosuresBase::addWallTemperatureFromAuxMaterial(const FlowChannelBase & flow_cha
   params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
   params.set<MaterialPropertyName>("prop_name") = {FlowModel::TEMPERATURE_WALL};
   params.set<std::vector<VariableName>>("coupled_variable") = {FlowModel::TEMPERATURE_WALL};
-  _sim.addMaterial(class_name, Component::genName(flow_channel.name(), class_name), params);
+  _sim.addMaterial(class_name, Component::genName(flow_channel.name(), "coupled_var_mat"), params);
 }
