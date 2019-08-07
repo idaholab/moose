@@ -75,7 +75,6 @@ validParams<FlowChannel>()
                         1e-6,
                         "Width of the exponential regions in the volume fraction remapper");
   // 7-equation 2-phase flow global parameter
-  params.addParam<bool>("phase_interaction", true, "Phase interaction on");
   params.addParam<bool>("pressure_relaxation", true, "Pressure relaxation on");
   params.addParam<bool>("velocity_relaxation", true, "True for using velocity relaxation");
   params.addParam<bool>("interface_transfer", true, "interface heat/mass transfer");
@@ -119,7 +118,6 @@ FlowChannel::buildFlowModel()
   pars.set<MooseEnum>("rdg_slope_reconstruction") = _rdg_slope_reconstruction;
   if (_model_id == THM::FM_TWO_PHASE || _model_id == THM::FM_TWO_PHASE_NCG)
   {
-    pars.set<bool>("phase_interaction") = getParam<bool>("phase_interaction");
     pars.set<bool>("pressure_relaxation") = getParam<bool>("pressure_relaxation");
     pars.set<bool>("velocity_relaxation") = getParam<bool>("velocity_relaxation");
     pars.set<bool>("interface_transfer") = getParam<bool>("interface_transfer");
