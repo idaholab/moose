@@ -72,7 +72,8 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
     _strain(getParam<MooseEnum>("strain").getEnum<Strain>()),
     _planar_formulation(getParam<MooseEnum>("planar_formulation").getEnum<PlanarFormulation>()),
     _out_of_plane_direction(
-        getParam<MooseEnum>("out_of_plane_direction").getEnum<OutOfPlaneDirection>())
+        getParam<MooseEnum>("out_of_plane_direction").getEnum<OutOfPlaneDirection>()),
+    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "")
 {
   // determine if incremental strains are to be used
   if (isParamValid("incremental"))
@@ -387,7 +388,7 @@ TensorMechanicsAction::actOutputGeneration()
     for (auto out : _generate_output)
     {
       // Create output helper aux variables
-      _problem->addAuxVariable(out,
+      _problem->addAuxVariable(_base_name + out,
                                FEType(Utility::string_to_enum<Order>("CONSTANT"),
                                       Utility::string_to_enum<FEFamily>("MONOMIAL")),
                                _subdomain_id_union.empty() ? nullptr : &_subdomain_id_union);
@@ -413,7 +414,7 @@ TensorMechanicsAction::actOutputGeneration()
             {
               type = "RankTwoAux";
               params = _factory.getValidParams(type);
-              params.set<MaterialPropertyName>("rank_two_tensor") = r2a.second;
+              params.set<MaterialPropertyName>("rank_two_tensor") = _base_name + r2a.second;
               params.set<unsigned int>("index_i") = a;
               params.set<unsigned int>("index_j") = b;
             }
@@ -428,7 +429,7 @@ TensorMechanicsAction::actOutputGeneration()
             {
               type = "RankTwoScalarAux";
               params = _factory.getValidParams(type);
-              params.set<MaterialPropertyName>("rank_two_tensor") = r2a->second;
+              params.set<MaterialPropertyName>("rank_two_tensor") = _base_name + r2a->second;
               params.set<MooseEnum>("scalar_type") = r2sa.second.first;
             }
             else
@@ -439,9 +440,9 @@ TensorMechanicsAction::actOutputGeneration()
       if (type != "")
       {
         params.applyParameters(parameters());
-        params.set<AuxVariableName>("variable") = out;
+        params.set<AuxVariableName>("variable") = _base_name + out;
         params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
-        _problem->addAuxKernel(type, out + '_' + name(), params);
+        _problem->addAuxKernel(type, _base_name + out + '_' + name(), params);
       }
       else
         mooseError("Unable to add output AuxKernel");
