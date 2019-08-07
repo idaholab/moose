@@ -78,6 +78,8 @@ PorousFlowBrineCO2::PorousFlowBrineCO2(const InputParameters & parameters)
     paramError("salt_component",
                "The value provided is larger than the possible number of fluid components",
                _num_components);
+
+  _empty_fsp = FluidStateProperties(_num_components);
 }
 
 std::string
