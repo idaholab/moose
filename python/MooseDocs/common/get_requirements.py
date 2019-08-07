@@ -118,6 +118,15 @@ def _add_requirements(out, location, filename):
                 LOG.error(msg, filename, requirement_line, child.name, local_deprecated_line)
                 continue
 
+            # Deprecation
+            local_deprecated = child.get('deprecated', deprecated)
+            local_deprecated_line = child.line('deprecated', deprecated_line)
+            if local_deprecated:
+                msg = "The 'requirment' parameter is specified for %s, but the test is marked as " \
+                      "deprecated on line %s."
+                LOG.error(msg, child.name, local_deprecated_line)
+                continue
+
             local_design = child.get('design', design)
             local_design_line = child.line('design', design_line)
             if local_design is None:
