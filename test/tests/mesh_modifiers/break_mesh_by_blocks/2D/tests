@@ -1,4 +1,6 @@
 [Tests]
+  deprecated = True
+
 ## all the tests have the attribute 'recover = false' because
 ## by modyfing the number of nodes the --recover option fails (expected).
 ## Furthermore, all the tests have the attribute 'mesh_mode = REPLICATED' because
@@ -24,9 +26,6 @@
   exodiff = 'TestBreakMesh_2DJunction_Auto_in.e'
   mesh_mode = REPLICATED
   recover = false
-  requirement = "check the results of BreakMeshByBlock for a 2D case"
-  design = 'BreakMeshByBlock.md'
-  issues = '#11775'
 [../]
 
 [./2D4ElementJunctionBreakMeshtingCompare_test]
@@ -37,10 +36,6 @@
   exodiff = 'TestBreakMesh_2DJunction_ManualAuto_Comparison.e'
   mesh_mode = REPLICATED
   recover = false
-  requirement = "compare results obtained with the manual autoamtic mesh split"
-                "procedure matches for the 2D Case"
-  design = 'BreakMeshByBlock.md'
-  issues = '#11775'
 [../]
 
 ## multiple interface tests
@@ -63,10 +58,6 @@
   exodiff = 'TestBreakMesh_2DJunction_splitTrue_Auto_in.e'
   mesh_mode = REPLICATED
   recover = false
-  requirement = "same as 2D4ElementJunctionBreakMeshAuto_test but with "
-                "the prameter split_interface=true"
-  design = 'BreakMeshByBlock.md'
-  issues = '#11775'
 [../]
 
 [./2DPolyCrystalBreakMesh_test]
@@ -77,9 +68,6 @@
   exodiff = 'TestBreakMesh_2D_polycrystal_in.e'
   mesh_mode = REPLICATED
   recover = false
-  requirement = "For a 2D case, the MeshModifier should break the mesh into multiple unconnected grains and create an interface on all grain boundaries"
-  design = 'BreakMeshByBlock.md'
-  issues = '#12033'
 [../]
 
 [./2D4ElementJunctionBreakMeshSplitInterfaceCompare_test]
@@ -90,10 +78,6 @@
   exodiff = 'TestBreakMesh_2DJunction_splitTrue_ManualAuto_Comparison.e'
   mesh_mode = REPLICATED
   recover = false
-  requirement = "same as 2D4ElementJunctionBreakMeshtingCompare_test but with "
-                "the prameter split_interface=true"
-  design = 'BreakMeshByBlock.md'
-  issues = '#11775'
 [../]
 
 []

@@ -1,4 +1,5 @@
 [Tests]
+  deprecated = True
   [./2d]
     # Test ability to read in a single 20x20 image and assign subdomain ids based on image
     type = Exodiff

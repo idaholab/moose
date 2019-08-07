@@ -1,4 +1,5 @@
 [Tests]
+  deprecated = True
   [./rename1]
     type = 'Exodiff'
     input = 'rename1.i'
