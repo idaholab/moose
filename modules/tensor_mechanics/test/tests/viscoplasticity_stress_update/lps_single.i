@@ -5,8 +5,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 2
-  ny = 2
+  nx = 1
+  ny = 1
   xmax = 0.002
   ymax = 0.002
 []
@@ -53,7 +53,7 @@
   [./coef]
     type = ParsedMaterial
     f_name = coef
-    function = '1e-20 * exp(-4e4 / 1.987 / 1200)'
+    function = '1e-18 * exp(-4e4 / 1.987 / 1200)'
   [../]
 []
 
@@ -121,7 +121,7 @@
     type = NumNonlinearIterations
     outputs = console
   [../]
-  [./lps_eff_creep_strain]
+  [./eff_creep_strain]
     type = ElementAverageValue
     variable = lps_effective_viscoplasticity
   [../]

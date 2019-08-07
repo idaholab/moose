@@ -24,7 +24,7 @@ validParams<ViscoPlasticityStressUpdate>()
       "viscoplastic responce due to creep in porous materials. This material must be used in "
       "conjunction with ComputeMultiplePorousInelasticStress");
   params.addParam<MooseEnum>(
-      "model", ViscoPlasticityStressUpdate::getModelEnum(), "The viscoplastic model to use");
+      "viscoplasticity_model", ViscoPlasticityStressUpdate::getModelEnum(), "The viscoplastic model to use");
   params.addParam<Real>("max_inelastic_increment",
                         1.0e-4,
                         "The maximum inelastic strain increment allowed in a time step");
@@ -47,7 +47,7 @@ validParams<ViscoPlasticityStressUpdate>()
 ViscoPlasticityStressUpdate::ViscoPlasticityStressUpdate(const InputParameters & parameters)
   : StressUpdateBase(parameters),
     SingleVariableReturnMappingSolution(parameters),
-    _model(getParam<MooseEnum>("model")),
+    _model(getParam<MooseEnum>("viscoplasticity_model")),
     _total_strain_base_name(isParamValid("total_strain_base_name")
                                 ? getParam<std::string>("total_strain_base_name") + "_"
                                 : ""),
@@ -77,7 +77,7 @@ ViscoPlasticityStressUpdate::ViscoPlasticityStressUpdate(const InputParameters &
 MooseEnum
 ViscoPlasticityStressUpdate::getModelEnum()
 {
-  return MooseEnum("LPS GTN", "LPS");
+  return MooseEnum("LPS_SPHERICAL LPS_CYLINDRICAL GTN", "LPS_SPHERICAL");
 }
 
 void
@@ -106,7 +106,10 @@ ViscoPlasticityStressUpdate::updateState(RankTwoTensor & elastic_strain_incremen
                                          RankFourTensor & /*tangent_operator*/)
 {
   // Compute initial hydrostatic stress and porosity
-  _hydro_stress = stress.trace() / 3.0;
+  if (_model == "LPS_CYLINDRICAL")
+    _hydro_stress = (stress(0,0) + stress(1,1)) / 2.0;
+  else
+    _hydro_stress = stress.trace() / 3.0;
 
   // Subtract elastic strain from strain increment to find all inelastic strain increments
   // calculated so far except the one that we're about to calculate
@@ -211,7 +214,7 @@ ViscoPlasticityStressUpdate::outputIterationSummary(std::stringstream * iter_out
 Real
 ViscoPlasticityStressUpdate::computeResidual(const Real equiv_stress, const Real trial_gauge)
 {
-  const Real M = 1.5 * std::abs(_hydro_stress) / trial_gauge;
+  const Real M = std::abs(_hydro_stress) / trial_gauge;
   const Real dM_dtrial_gauge = -M / trial_gauge;
 
   const Real residual_left = Utility::pow<2>(equiv_stress / trial_gauge);
@@ -220,7 +223,13 @@ ViscoPlasticityStressUpdate::computeResidual(const Real equiv_stress, const Real
   Real residual = residual_left;
   _derivative = dresidual_left_dtrial_gauge;
 
-  if (_model == "lps")
+  if (_model == "gtn")
+  {
+    residual +=
+        2.0 * _intermediate_porosity * std::cosh(1.5 * M) - 1.0 - Utility::pow<2>(_intermediate_porosity);
+    _derivative += 2.0 * _intermediate_porosity * 1.5 * std::sinh(1.5 * M) * dM_dtrial_gauge;
+  }
+  else
   {
     const Real h = computeH(_power, M);
     const Real dh_dM = computeH(_power, M, true);
@@ -230,14 +239,6 @@ ViscoPlasticityStressUpdate::computeResidual(const Real equiv_stress, const Real
     const Real dresidual_dh = _intermediate_porosity * (1.0 - _power_factor / Utility::pow<2>(h));
     _derivative += dresidual_dh * dh_dM * dM_dtrial_gauge;
   }
-  else if (_model == "gtn")
-  {
-    residual +=
-        2.0 * _intermediate_porosity * std::cosh(M) - 1.0 - Utility::pow<2>(_intermediate_porosity);
-    _derivative += 2.0 * _intermediate_porosity * std::sinh(M) * dM_dtrial_gauge;
-  }
-  else
-    mooseError("In ", _name, ": Incorrect model selected");
 
   // Compute the derivative of the residual with respect to the trial gauge
 
@@ -256,9 +257,20 @@ ViscoPlasticityStressUpdate::computeResidual(const Real equiv_stress, const Real
 Real
 ViscoPlasticityStressUpdate::computeH(const Real n, const Real & M, const bool derivative)
 {
-  const Real mod = std::pow(M, (n + 1.0) / n) / n;
+  Real mod_M = 1.5;
+  if (_model == "LPS_CYLINDRICAL")
+    mod_M = std::sqrt(3.0);
+
+  const Real shaped_M = M * mod_M;
+
+  const Real mod = std::pow(shaped_M, (n + 1.0) / n) / n;
   if (derivative)
-    return (n + 1.0) / n * std::pow(M, 1.0 / n) * std::pow(1.0 + mod, n - 1.0);
+  {
+    const Real derivative =
+        (n + 1.0) / n * std::pow(shaped_M, 1.0 / n) * std::pow(1.0 + mod, n - 1.0);
+    return derivative * mod_M;
+  }
+
   return std::pow(1.0 + mod, n);
 }
 
@@ -270,7 +282,7 @@ ViscoPlasticityStressUpdate::computeDGaugeDSigma(const Real & gauge_stress,
 {
   // Compute the derivative of the gauge stress with respect to the equilvalent and hydrostatic
   // stress components
-  const Real M = 1.5 * std::abs(_hydro_stress) / gauge_stress;
+  const Real M = std::abs(_hydro_stress) / gauge_stress;
   const Real h = computeH(_power, M);
 
   // Compute the derviative of the residual with respect to the hydrostatic stress
@@ -278,15 +290,16 @@ ViscoPlasticityStressUpdate::computeDGaugeDSigma(const Real & gauge_stress,
   if (_hydro_stress)
   {
     const Real dM_dhydro_stress = M / _hydro_stress;
-    if (_model == "lps")
+    if (_model == "gtn")
+    {
+      dresidual_dhydro_stress = 2.0 * _intermediate_porosity * 1.5 * std::sinh(1.5 * M) * dM_dhydro_stress;
+    }
+    else
     {
       const Real dresidual_dh = _intermediate_porosity * (1.0 - _power_factor / Utility::pow<2>(h));
       const Real dh_dM = computeH(_power, M, true);
       dresidual_dhydro_stress = dresidual_dh * dh_dM * dM_dhydro_stress;
     }
-    else if (_model == "gtn")
-      dresidual_dhydro_stress =
-          2.0 * _intermediate_porosity * std::sinh(M) * dresidual_dhydro_stress;
   }
 
   // Compute the derivative of the residual with respect to the equilvalent stress
@@ -328,10 +341,10 @@ ViscoPlasticityStressUpdate::computeInelasticStrainIncrement(
     gauge_stress = equiv_stress;
     if (_intermediate_porosity)
     {
-      if (_model == "lps")
-        gauge_stress /= std::sqrt(1.0 + _power_factor * Utility::pow<2>(_intermediate_porosity));
-      else if (_model == "gtn")
+      if (_model == "gtn")
         gauge_stress /= std::sqrt(1.0 + Utility::pow<2>(_intermediate_porosity));
+      else
+        gauge_stress /= std::sqrt(1.0 + _power_factor * Utility::pow<2>(_intermediate_porosity));
     }
   }
   else

@@ -1,10 +1,52 @@
 [Tests]
-  [./single]
+  issues = '#13494'
+  design = 'source/materials/ViscoPlasticityStressUpdate.md source/materials/ComputeMultiplePorousInelasticStress.md'
+  [./regular_creep]
     type = CSVDiff
-    input = 'single_lps.i'
-    csvdiff = 'single_lps_out.csv'
-    #issues = ''
-    design = 'source/materials/ViscoPlasticityStressUpdate.md source/materials/ComputeMultiplePorousInelasticStress.md '
-    #requirement = 'The ComputeRSphericalFiniteStrain class, called through the TensorMechanicsMaster action, shall find the finite incremental strain displacement of a thick walled hollow isotropic elastic sphere under an applied load using a 1D spherical symmetric fomulation with incremental finite strain assumptions.'
+    input = creep.i
+    csvdiff = creep_out.csv
+    cli_args = "Materials/active='elasticity_tensor regular_stress porosity creep'"
+    design = 'source/materials/PowerLawCreepStressUpdate.md source/materials/ComputeMultipleInelasticStress.md'
+    requirement = 'The PowerLawCreepStressUpdate, called through the ComputeMultipleInelasticStress, shall compute a creep strain based on an extrenal loading'
+  [../]
+  [./porous_creep]
+    type = CSVDiff
+    input = creep.i
+    csvdiff = creep_out.csv
+    cli_args = "Materials/active='elasticity_tensor porous_stress creep'"
+    prereq = regular_creep
+    requirement = 'The PowerLawCreepStressUpdate, called through the ComputeMultiplePorousInelasticStress, shall compute a creep strain based on an extrenal loading, and match the values computed instead with ComputeMultipleInelasticStress'
+  [../]
+  [./lps_exact_spherical]
+    type = CSVDiff
+    input = lps_exact.i
+    csvdiff = lps_exact_spherical_out.csv
+    requirement = 'The ViscoPlasticityStressUpdate class shall compute a ratio between the gauge stress, equilvalent stress, and hydrostatic stress across a wide swath of exponents and stress states using spherical pore geometry'
+  [../]
+  [./lps_exact_cylindrical]
+    type = CSVDiff
+    input = lps_exact.i
+    csvdiff = lps_exact_cylindrical_out.csv
+    cli_args = 'GlobalParams/viscoplasticity_model=LPS_CYLINDRICAL Outputs/file_base=lps_exact_cylindrical_out'
+    prereq = lps_exact_spherical
+    requirement = 'The ViscoPlasticityStressUpdate class shall compute a ratio between the gauge stress, equilvalent stress, and hydrostatic stress across a wide swath of exponents and stress states using spherical pore geometry'
+  [../]
+  [./lps_single]
+    type = CSVDiff
+    input = 'lps_single.i'
+    csvdiff = 'lps_single_out.csv'
+    requirement = 'The ViscoPlasticityStressUpdate class shall compute the viscoplastic responce using a single model with LPS spherical formulation that increases the porosity due to an external strain'
+  [../]
+  [./lps_dual]
+    type = CSVDiff
+    input = 'lps_dual.i'
+    csvdiff = 'lps_dual_out.csv'
+    requirement = 'The ViscoPlasticityStressUpdate class shall compute the viscoplastic responce using two LPS models with spherical formulations that increases the porosity due to an external strain'
+  [../]
+  [./gtn_single]
+    type = CSVDiff
+    input = 'gtn_single.i'
+    csvdiff = 'gtn_single_out.csv'
+    requirement = 'The ViscoPlasticityStressUpdate class shall compute the viscoplastic responce using a single model with GTN formulation that increases the porosity due to an external strain'
   [../]
 []
