@@ -20,7 +20,9 @@ template <>
 InputParameters
 validParams<MooseVariableConstMonomial>()
 {
-  return validParams<MooseVariableBase>();
+  auto params = validParams<MooseVariableBase>();
+  params.addClassDescription("Specialization for constant monomials that avoids unnecessary loops");
+  return params;
 }
 
 MooseVariableConstMonomial::MooseVariableConstMonomial(const InputParameters & parameters)

@@ -25,7 +25,9 @@ template <>
 InputParameters
 validParams<MooseVariableScalar>()
 {
-  return validParams<MooseVariableBase>();
+  auto params = validParams<MooseVariableBase>();
+  params.addClassDescription("Moose wrapper class around scalar variables");
+  return params;
 }
 
 MooseVariableScalar::MooseVariableScalar(const InputParameters & parameters)

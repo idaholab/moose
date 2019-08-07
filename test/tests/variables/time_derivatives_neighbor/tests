@@ -4,7 +4,7 @@
     input = 'test.i'
     exodiff = 'test_out.e'
     requirement = 'The system shall compute time derivatives on a neighbor element for constant monomials'
-    design = 'MooseVariableConstantMonomial.md'
+    design = 'MooseVariableConstMonomial.md'
     issues = '#9836 #12185'
   [../]
 []

@@ -62,6 +62,9 @@ validParams<MooseVariableBase>()
   params.addPrivateParam<Moose::VarKindType>("_var_kind");
   params.addPrivateParam<unsigned int>("_var_num");
   params.addPrivateParam<THREAD_ID>("tid");
+
+  params.addClassDescription(
+      "Base class for Moose variables. This should never be the terminal object type");
   return params;
 }
 

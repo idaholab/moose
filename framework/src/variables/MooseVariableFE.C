@@ -15,21 +15,6 @@
 #include "Assembly.h"
 #include "MooseVariableData.h"
 
-registerMooseObject("MooseApp", MooseVariable);
-registerMooseObject("MooseApp", VectorMooseVariable);
-registerMooseObject("MooseApp", ArrayMooseVariable);
-
-#define variableValidParams(type)                                                                  \
-  template <>                                                                                      \
-  InputParameters validParams<MooseVariableFE<type>>()                                             \
-  {                                                                                                \
-    return validParams<MooseVariableFEBase>();                                                     \
-  }
-
-variableValidParams(Real)
-variableValidParams(RealVectorValue)
-variableValidParams(RealEigenVector)
-
 template <typename OutputType>
 MooseVariableFE<OutputType>::MooseVariableFE(const InputParameters & parameters)
   : MooseVariableFEBase(parameters)

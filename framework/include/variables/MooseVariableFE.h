@@ -33,11 +33,11 @@ typedef MooseVariableFE<RealVectorValue> VectorMooseVariable;
 typedef MooseVariableFE<RealEigenVector> ArrayMooseVariable;
 
 template <>
-InputParameters validParams<MooseVariableFE<Real>>();
+InputParameters validParams<MooseVariable>();
 template <>
-InputParameters validParams<MooseVariableFE<RealVectorValue>>();
+InputParameters validParams<VectorMooseVariable>();
 template <>
-InputParameters validParams<MooseVariableFE<RealEigenVector>>();
+InputParameters validParams<ArrayMooseVariable>();
 
 /**
  * Class for stuff related to variables
