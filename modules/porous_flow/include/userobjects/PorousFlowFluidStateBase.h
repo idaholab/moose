@@ -135,4 +135,6 @@ protected:
   const Real _T_c2k;
   /// Capillary pressure UserObject
   const PorousFlowCapillaryPressure & _pc;
+  /// Empty FluidStateProperties object
+  FluidStateProperties _empty_fsp;
 };

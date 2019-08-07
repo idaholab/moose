@@ -54,6 +54,8 @@ PorousFlowWaterVapor::PorousFlowWaterVapor(const InputParameters & parameters)
     paramError("liquid_fluid_component",
                "This value is larger than the possible number of fluid components",
                _num_components);
+
+  _empty_fsp = FluidStateProperties(_num_components);
 }
 
 std::string
