@@ -105,7 +105,7 @@
     type = 'Exodiff'
     input = 'particle.i'
     exodiff = 'particle_out.e-s005'
-    abs_zero = 1e-8
+    custom_cmp = 'particle_out.cmp'
     requirement = 'The grain boundary evolution model shall provide coupling to conserved order parameters'
     design = 'ACGBPoly.md'
     issues = 'SVN'

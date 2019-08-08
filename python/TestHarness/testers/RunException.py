@@ -16,7 +16,7 @@ class RunException(RunApp):
     def validParams():
         params = RunApp.validParams()
 
-        params.addParam('expect_err', "A regular expression that must occur in the ouput. (Test may terminiate unexpectedly and be considered passing)")
+        params.addParam('expect_err', "A regular expression or literal string that must occur in the ouput (see match_literal). (Test may terminiate unexpectedly and be considered passing)")
         params.addParam('expect_assert', "DEBUG MODE ONLY: A regular expression that must occur in the ouput. (Test may terminiate unexpectedly and be considered passing)")
         params.addParam('should_crash', True, "Inidicates that the test is expected to crash or otherwise terminate early")
 
@@ -45,31 +45,13 @@ class RunException(RunApp):
             util.deleteFilesAndFolders(self.specs['test_dir'], file_paths, False)
 
     def processResults(self, moose_dir, options, output):
-        reason = ''
-        specs = self.specs
-
+        # Exceptions are written to stderr, which can be interleaved so we normally redirect these
+        # separate files. Here we must gather those file outputs before processing
         if self.hasRedirectedOutput(options):
             redirected_output = util.getOutputFromFiles(self, options)
             output += redirected_output
 
-        # Expected errors and assertions might do a lot of things including crash so we
-        # will handle them seperately
-        if specs.isValid('expect_err'):
-            if not util.checkOutputForPattern(output, specs['expect_err']):
-                reason = 'EXPECTED ERROR MISSING'
-        elif specs.isValid('expect_assert'):
-            if options.method in ['dbg', 'devel']:  # Only check asserts in debug and devel modes
-                if not util.checkOutputForPattern(output, specs['expect_assert']):
-                    reason = 'EXPECTED ASSERT MISSING'
-
-        # If we've set a reason right here, we should report the pattern that we were unable to match.
-        if reason != '':
-            output += "#"*80 + "\n\nUnable to match the following pattern against the program's output:\n\n" + specs['expect_err'] + "\n"
-
-        if reason == '':
-            RunApp.testFileOutput(self, moose_dir, options, output)
-
-        if reason != '':
-            self.setStatus(self.fail, reason)
+        output += self.testFileOutput(moose_dir, options, output)
+        self.testExitCodes(moose_dir, options, output)
 
         return output

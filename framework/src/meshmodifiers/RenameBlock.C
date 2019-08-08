@@ -12,7 +12,7 @@
 
 #include "libmesh/elem.h"
 
-registerMooseObject("MooseApp", RenameBlock);
+registerMooseObjectReplaced("MooseApp", RenameBlock, "08/12/2019 00:00", RenameBlockGenerator);
 
 template <>
 InputParameters

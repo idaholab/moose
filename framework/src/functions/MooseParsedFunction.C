@@ -24,6 +24,9 @@ validParams<MooseParsedFunction>()
   params += validParams<MooseParsedFunctionBase>();
   params.addRequiredCustomTypeParam<std::string>(
       "value", "FunctionExpression", "The user defined function.");
+
+  params.addClassDescription("Function created by parsing a string");
+
   return params;
 }
 

@@ -11,7 +11,7 @@
     type = 'RunException'
     input = 'velocity_aux.i'
     cli_args = "AuxVariables/velocity_x/order=FIRST AuxVariables/velocity_x/family=LAGRANGE"
-    expect_err = "velocity_x: Nodal variables do not have gradients"
+    expect_err = "velocity_x: nodal variables do not have gradients"
     requirement = "The Darcy-Thermomechanics tutorial object for computing velocity shall error if computed at nodes."
   []
 []

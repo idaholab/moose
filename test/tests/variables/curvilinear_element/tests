@@ -1,7 +1,12 @@
 [Tests]
+  issues = '#1405'
+  design = 'syntax/Variables/index.md'
+
   [./test]
     type = 'CSVDiff'
     input = 'curvilinear_element_test.i'
     csvdiff = 'out.csv'
+
+    requirement = 'The system shall support "curvilinear" elements (elements that contain curved edges.'
   [../]
 []

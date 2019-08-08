@@ -145,9 +145,7 @@ public:
 
   virtual Real p_from_rho_T(Real density, Real temperature) const override;
 
-  virtual Real henryConstant(Real temperature) const override;
-
-  virtual void henryConstant(Real temperature, Real & Kh, Real & dKh_dT) const override;
+  virtual std::vector<Real> henryCoefficients() const override;
 
   /**
    * Partial density of dissolved CO2

@@ -107,7 +107,7 @@ protected:
   /// Flag to indicate whether to calculate stateful properties
   bool _is_initqp;
   /// FluidStateProperties data structure
-  std::vector<FluidStatePropertiesAD> _fsp;
+  std::vector<FluidStateProperties> _fsp;
   /// FluidStatePhaseEnum
   FluidStatePhaseEnum _phase_state;
   /// Capillary pressure UserObject

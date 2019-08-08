@@ -16,7 +16,7 @@
 #include "libmesh/mesh_smoother_laplace.h"
 #include "libmesh/unstructured_mesh.h"
 
-registerMooseObject("MooseApp", SmoothMesh);
+registerMooseObjectReplaced("MooseApp", SmoothMesh, "08/12/2019 00:00", SmoothMeshGeneraotr);
 
 template <>
 InputParameters

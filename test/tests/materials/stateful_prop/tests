@@ -1,94 +1,131 @@
 [Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'stateful_prop_test.i'
-    exodiff = 'out.e'
-  [../]
+  issues = '#1927 #8278 #4268 #5658 #3277 #3414 #808 #8450'
+  design = 'syntax/Materials/index.md'
 
-  [./implicit_stateful]
+  [stateful_old]
+    requirement = 'The system shall be able to generate up to three states of material properties '
+                  'for use in other calculations: current, old and older'
+    [exodiff_old]
+      type = 'Exodiff'
+      input = 'stateful_prop_test.i'
+      exodiff = 'out.e'
+
+      detail = 'where properties are stored in auxiliary spatial fields, and'
+    []
+    [csvdiff_old]
+      type = 'CSVDiff'
+      input = 'stateful_prop_test.i'
+      csvdiff = 'out.csv'
+
+      prereq = 'stateful_old/exodiff_old'
+      delete_output_before_running = false
+      should_execute = false
+
+      detail = 'when those properties are averaged and output to a comma-separated value file.'
+    []
+  []
+
+  [stateful_older]
+    requirement = 'The system shall verify that the oldest material property (older) can be coupled '
+                  'to other objects for use in another calculation:'
+    [exodiff_older]
+      type = 'Exodiff'
+      input = 'stateful_prop_test_older.i'
+      exodiff = 'out_older.e'
+
+      detail = 'where properties are stored in auxiliary spatial fields, and'
+    []
+    [csvdiff_older]
+      type = 'CSVDiff'
+      input = 'stateful_prop_test_older.i'
+      csvdiff = 'out_older.csv'
+
+      prereq = 'stateful_older/exodiff_older'
+      delete_output_before_running = false
+      should_execute = false
+
+      detail = 'when those properties are averaged and output to a comma-separated value file.'
+    []
+  []
+
+  [implicit_stateful]
     type = 'Exodiff'
     input = 'implicit_stateful.i'
     exodiff = 'implicit_stateful_out.e'
     allow_warnings = true
-  [../]
 
-  [./test_csv]
-    type = 'CSVDiff'
-    input = 'stateful_prop_test.i'
-    cli_args = 'Outputs/csv=true'
-    csvdiff = 'out.csv'
-    prereq = 'test'
-  [../]
+    requirement = 'The system shall be able to promote normal material properties to stateful when '
+                  'old/older properties are requested.'
+  []
 
-  [./computing_initial_residual_test]
+  [computing_initial_residual_test]
     type = 'Exodiff'
     input = 'computing_initial_residual_test.i'
     exodiff = 'computing_initial_residual_test_out.e'
-  [../]
 
-  [./test_older]
-    type = 'Exodiff'
-    input = 'stateful_prop_test_older.i'
-    exodiff = 'out_older.e'
-  [../]
+    requirement = 'The system shall make material property calculations available during the '
+                  'computation of the initial Residual vector.'
+  []
 
-  [./test_older_mpi_threads]
-    type = 'Exodiff'
-    input = 'stateful_prop_test_older.i'
-    exodiff = 'out_older.e'
-    min_parallel = 2
-    min_threads = 2
-    prereq = 'test_older test_older_csv'
-  [../]
+  [storage]
+    requirement = 'The system shall store stateful properties that vary at every calculation point '
+                  '(quadrature point) similarly to a normal field variable even though they are not '
+                  'interpolatory:'
 
-  [./spatial_test]
-    type = 'Exodiff'
-    input = 'stateful_prop_spatial_test.i'
-    exodiff = 'out_spatial.e'
-    cli_args = '--error'
-  [../]
+    [spatial_test]
+      type = 'Exodiff'
+      input = 'stateful_prop_spatial_test.i'
+      exodiff = 'out_spatial.e'
 
-  [./spatial_bnd_only]
-    type = 'Exodiff'
-    input = 'stateful_prop_on_bnd_only.i'
-    exodiff = 'out_bnd_only.e'
-    allow_warnings = true
-  [../]
+      detail = 'on blocks, and'
+    []
 
-  [./stateful_copy]
+    [spatial_bnd_only]
+      type = 'Exodiff'
+      input = 'stateful_prop_on_bnd_only.i'
+      exodiff = 'out_bnd_only.e'
+      allow_warnings = true
+
+      detail = 'on boundaries.'
+    []
+  []
+
+  [stateful_copy]
     type = 'Exodiff'
     input = 'stateful_prop_copy_test.i'
     exodiff = 'out_stateful_copy.e'
     max_parallel = 1
-    cli_args = '--error'
-  [../]
 
-  [./test_older_csv]
-    type = 'CSVDiff'
-    input = 'stateful_prop_test_older.i'
-    csvdiff = 'out_older.csv'
-    cli_args = 'Outputs/csv=true --error'
-    max_parallel = 1
-    prereq = 'test_older'
-  [../]
+    requirement = 'The system shall support the ability to copy stored stateful data from one '
+                  'element to another element.'
+  []
 
-  [./adaptivity]
-    type = 'Exodiff'
-    input = 'stateful_prop_adaptivity_test.i'
-    exodiff = 'stateful_prop_adaptivity_test_out.e-s003'
-    cli_args = '--error'
-  [../]
+  [adaptivity]
+    requirement = 'The system shall handle storing stateful properties related to elements on the '
+                  'mesh as the mesh is adapting:'
+    [spatially_const]
+      type = 'Exodiff'
+      input = 'stateful_prop_adaptivity_test.i'
+      exodiff = 'stateful_prop_adaptivity_test_out.e-s003'
 
-  [./spatial_adaptivity]
-    type = 'Exodiff'
-    input = 'spatial_adaptivity_test.i'
-    exodiff = 'spatial_adaptivity_test_out.e-s003'
-    cli_args = '--error'
-  [../]
+      detail = 'when properties are spatially constant, and'
+    []
 
-  [./many_stateful_props]
+    [spatially_varying]
+      type = 'Exodiff'
+      input = 'spatial_adaptivity_test.i'
+      exodiff = 'spatial_adaptivity_test_out.e-s003'
+
+      detail = 'when properties vary spatially.'
+    []
+  []
+
+  [many_stateful_props]
     type = 'Exodiff'
     input = 'many_stateful_props.i'
     exodiff = 'many_stateful_props_out.e'
-  [../]
+
+    requirement = 'The system shall not store any stateful material properties that are declared but '
+                  'never used.'
+  []
 []

@@ -1,54 +1,88 @@
 [Tests]
-  [./newton_iteration]
-    # Test the ability to compute material properties in an iterative manner
-    # Solves f(x) = x*x for x: f(x)= 0, so x = 0
-    type = 'Exodiff'
-    input = 'recompute.i'
-    exodiff = 'recompute_out.e'
-  [../]
+  issues = '#5166 #6533'
+  design = 'syntax/Materials/index.md'
 
-  [./newton_iteration2]
-    # Test the ability to compute material properties in an iterative manner
-    # Solves f(x) = x*x - 3 for x: f(x)= 0, so x = sqrt(3)
-    type = 'Exodiff'
-    input = 'recompute2.i'
-    exodiff = 'recompute2_out.e'
-  [../]
+  [newton_iteration]
+    requirement = 'The system shall support the ability for materials to force immediate execution '
+                  'of other (discrete)  materials:'
+    [eq1]
+      # Test the ability to compute material properties in an iterative manner
+      # Solves f(x) = x*x for x: f(x)= 0, so x = 0
+      type = 'Exodiff'
+      input = 'recompute.i'
+      exodiff = 'recompute_out.e'
 
-  [./newton_no_calc]
+      detail = 'for a simple monomial expression, and'
+    []
+
+    [eq2]
+      # Test the ability to compute material properties in an iterative manner
+      # Solves f(x) = x*x - 3 for x: f(x)= 0, so x = sqrt(3)
+      type = 'Exodiff'
+      input = 'recompute2.i'
+      exodiff = 'recompute2_out.e'
+
+      detail = 'for a simple polynomial expression.'
+    []
+  []
+
+  [newton_no_calc]
     # Test that no calculations are performed if computeProperties is not called explicitly on Material
     type = 'Exodiff'
     input = 'recompute_no_calc.i'
     exodiff = 'recompute_no_calc_out.e'
-  [../]
 
-  [./newton_warning]
+    requirement = 'The system shall not calculate materials that are meant to be controlled by other '
+                  'materials (discrete) materials.'
+  []
+
+  [newton_warning]
     # Test warning message when trying getting a Material object that has 'compute = true'
     type = 'RunException'
     input = 'recompute_warning.i'
-    expect_err = "You are retrieving a Material object \(recompute_props\), but its compute flag is set to true"
+    expect_err = "You are retrieving a Material object \(recompute_props\), but its compute flag is "
+                 "set to true"
     cli_args = '--error'
-  [../]
 
-  [./block_incompatible]
-    # Test error message when blocks are incompatible
-    type = RunException
-    input = recompute_block_error.i
-    expect_err = "The Material object 'recompute_props' is defined on blocks that are incompatible with the retrieving object 'newton':\n\s*recompute_props\s0\n\s*newton\s0\s10"
-  [../]
+    requirement = 'The system shall issue a warning when a "discrete" material object is retrieved '
+                  'for use in a controlling material but it is set to auto-execute.'
+  []
 
-  [./boundary_incompatible]
-    # Test error message when boundary are incompatible
-    type = RunException
-    input = recompute_boundary_error.i
-    expect_err = "The Material object 'recompute_props' is defined on boundaries that are incompatible with the retrieving object 'newton':\n\s*recompute_props\s3\n\s*newton\s1\s3"
-  [../]
+  [coverage_check]
+    requirement = 'The system shall verify that a material being retrieved is defined everywhere '
+                  'that the retrieving material is defined:'
 
-  [./reset_warning]
+    [block_incompatible]
+      # Test error message when blocks are incompatible
+      type = RunException
+      input = recompute_block_error.i
+      expect_err = "The Material object 'recompute_props' is defined on blocks that are incompatible "
+                   "with the retrieving object 'newton':\n\s*recompute_props\s0\n\s*newton\s0\s10"
+
+      detail = 'on compatible blocks, and'
+    []
+
+    [boundary_incompatible]
+      # Test error message when boundary are incompatible
+      type = RunException
+      input = recompute_boundary_error.i
+      expect_err = "The Material object 'recompute_props' is defined on boundaries that are "
+                   "incompatible with the retrieving object "
+                   "'newton':\n\s*recompute_props\s3\n\s*newton\s1\s3"
+
+      detail = 'on compatible boundaries.'
+    []
+  []
+
+  [reset_warning]
     # Test that the resetQpProperties warning is produced with setting "compute = false" w/o defining this method
     type = RunException
     input = reset_warning.i
-    expect_err = "You disabled the computation of this \(mat\) material by MOOSE, but have not overridden the 'resetQpProperties' method"
+    expect_err = "You disabled the computation of this \(mat\) material by MOOSE, but have not "
+                 "overridden the 'resetQpProperties' method"
     cli_args = '--error'
-  [../]
+
+    requirement = 'The system shall issue a warning when a "discrete" material\'s "reset" method is '
+                  'not defined.'
+  []
 []

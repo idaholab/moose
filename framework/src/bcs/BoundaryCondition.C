@@ -31,15 +31,6 @@ validParams<BoundaryCondition>()
                         "displacements are provided in the Mesh block "
                         "the undisplaced mesh will still be used.");
 
-  // BoundaryConditions do not need any ghosting, but they do need to tell the sparsity pattern that
-  // there is coupling between intra-element dofs or at nodes. This is done through the coupling
-  // functor
-  params.addRelationshipManager("ElementSideNeighborLayers",
-                                Moose::RelationshipManagerType::COUPLING,
-                                [](const InputParameters &, InputParameters & rm_params) {
-                                  rm_params.set<unsigned short>("layers") = 0;
-                                });
-
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
   params.addCoupledVar("displacements", "The displacements");
   params.declareControllable("enable");

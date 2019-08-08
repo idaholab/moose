@@ -1,8 +1,11 @@
 [Tests]
   [./test]
-  type = 'RunException'
+    type = 'RunException'
     input = 'test.i'
     expect_err = "Time stepper computed zero time step size on initial which is not allowed."
-    recover = false
+
+    issues = '#10553'
+    design = 'Executioner/TimeStepper/index.md'
+    requirement = 'The system shall report an error if the initial time step size is calculated to be zero.'
   [../]
 []

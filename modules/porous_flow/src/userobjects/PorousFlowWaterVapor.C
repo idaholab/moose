@@ -54,6 +54,8 @@ PorousFlowWaterVapor::PorousFlowWaterVapor(const InputParameters & parameters)
     paramError("liquid_fluid_component",
                "This value is larger than the possible number of fluid components",
                _num_components);
+
+  _empty_fsp = FluidStateProperties(_num_components);
 }
 
 std::string
@@ -67,10 +69,10 @@ PorousFlowWaterVapor::thermophysicalProperties(Real pressure,
                                                Real enthalpy,
                                                unsigned int qp,
                                                FluidStatePhaseEnum & phase_state,
-                                               std::vector<FluidStatePropertiesAD> & fsp) const
+                                               std::vector<FluidStateProperties> & fsp) const
 {
-  FluidStatePropertiesAD & liquid = fsp[_aqueous_phase_number];
-  FluidStatePropertiesAD & gas = fsp[_gas_phase_number];
+  FluidStateProperties & liquid = fsp[_aqueous_phase_number];
+  FluidStateProperties & gas = fsp[_gas_phase_number];
 
   // AD versions of primary variables
   DualReal p = pressure;

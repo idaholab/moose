@@ -17,7 +17,10 @@
 
 #include <set>
 
-registerMooseObject("MooseApp", LowerDBlockFromSideset);
+registerMooseObjectReplaced("MooseApp",
+                            LowerDBlockFromSideset,
+                            "08/12/2019 00:00",
+                            LowerDBlockFromSidesetGenerator);
 
 template <>
 InputParameters

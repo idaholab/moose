@@ -12,6 +12,7 @@
 #include "PorousFlowFluidStateMultiComponentBase.h"
 
 class SinglePhaseFluidProperties;
+class Water97FluidProperties;
 class PorousFlowWaterNCG;
 
 template <>
@@ -48,70 +49,110 @@ public:
    * law (for water).
    *
    * @param pressure phase pressure (Pa)
-   * @param temperature phase temperature (C)
+   * @param temperature phase temperature (K)
    * @param[out] Xncg mass fraction of NCG in liquid (kg/kg)
-   * @param[out] dXncg_dp derivative of mass fraction of NCG in liquid wrt pressure
-   * @param[out] dXncg_dT derivative of mass fraction of NCG in liqiud wrt temperature
    * @param[out] Yh2o mass fraction of H2O in gas (kg/kg)
-   * @param[out] dYh2o_dp derivative of mass fraction of NCG in gas wrt pressure
-   * @param[out] dYh2o_dT derivative of mass fraction of NCG in gas wrt temperature
    */
-  void equilibriumMassFractions(Real pressure,
-                                Real temperature,
-                                Real & Xncg,
-                                Real & dXncg_dp,
-                                Real & dXncg_dT,
-                                Real & Yh2o,
-                                Real & dYh2o_dp,
-                                Real & dYh2o_dT) const;
+  void equilibriumMassFractions(const DualReal & pressure,
+                                const DualReal & temperature,
+                                DualReal & Xncg,
+                                DualReal & Yh2o) const;
 
   /**
    * Mass fractions of NCG and H2O in both phases, as well as derivatives wrt
    * PorousFlow variables. Values depend on the phase state (liquid, gas or two phase)
    *
    * @param pressure phase pressure (Pa)
-   * @param temperature phase temperature (C)
+   * @param temperature phase temperature (K)
    * @param Z total mass fraction of NCG component
    * @param[out] PhaseStateEnum current phase state
    * @param[out] FluidStateMassFractions data structure
    */
-  void massFractions(Real pressure,
-                     Real temperature,
-                     Real Z,
+  void massFractions(const DualReal & pressure,
+                     const DualReal & temperature,
+                     const DualReal & Z,
                      FluidStatePhaseEnum & phase_state,
                      std::vector<FluidStateProperties> & fsp) const;
 
   /**
-   * Gas density
+   * Gas properties - density, viscosity and enthalpy
    *
    * @param pressure gas pressure (Pa)
-   * @param temperature temperature (C)
-   * @param[out] FluidStateDensity data structure
+   * @param temperature temperature (K)
+   * @param[out] FluidStateProperties data structure
    */
-  void
-  gasProperties(Real pressure, Real temperature, std::vector<FluidStateProperties> & fsp) const;
-
+  void gasProperties(const DualReal & pressure,
+                     const DualReal & temperature,
+                     std::vector<FluidStateProperties> & fsp) const;
   /**
-   * Liquid density
+   * Liquid properties - density, viscosity and enthalpy
+   * Note: The pressure here is the liquid pressure. In this class, enthalpy includes a
+   * contribution due to the enthalpy of dissolution of the NCG into the liquid phase. As
+   * a result, the derivatives can include a dependence on the capillary pressure, so this
+   * method should be called after the saturation is calculated for the two phase case
+   * ie: after calling saturation(). For the single phase liquid case, it is ok to
+   * call this method by itself, as gas saturation is initialized to zero.
    *
    * @param pressure liquid pressure (Pa)
-   * @param temperature temperature (C)
-   * @param[out] FluidStateDensity data structure
+   * @param temperature temperature (K)
+   * @param[out] FluidStateProperties data structure
    */
-  void
-  liquidProperties(Real pressure, Real temperature, std::vector<FluidStateProperties> & fsp) const;
+  void liquidProperties(const DualReal & pressure,
+                        const DualReal & temperature,
+                        std::vector<FluidStateProperties> & fsp) const;
 
   /**
-   * Gas and liquid saturation in the two-phase region
+   * Density of the liquid phase
+   * Note: The pressure here is the gas pressure. As a result, the liquid pressure can
+   * include a dependence on saturation due to the capillary pressure, so this
+   * method should be called after the saturation is calculated for the two phase case
+   * ie: after calling saturation(). For the single phase liquid case, it is ok to
+   * call this method by itself, as gas saturation is initialized to zero.
    *
    * @param pressure gas pressure (Pa)
-   * @param temperature phase temperature (C)
-   * @param Z total mass fraction of NCG component
-   * @param[out] FluidStateSaturation data structure
+   * @param temperature temperature (K)
+   * @return liquid density (kg/m^3)
    */
-  void saturationTwoPhase(Real pressure,
-                          Real temperature,
-                          Real Z,
+  DualReal liquidDensity(const DualReal & pressure, const DualReal & temperature) const;
+
+  /**
+   * Density of the gas phase
+   *
+   * @param pressure pressure (Pa)
+   * @param temperature temperature (K)
+   * @return gas density (kg/m^3)
+   */
+  DualReal gasDensity(const DualReal & pressure,
+                      const DualReal & temperature,
+                      std::vector<FluidStateProperties> & fsp) const;
+
+  /**
+   * Gas saturation in the two-phase region
+   *
+   * @param pressure gas pressure (Pa)
+   * @param temperature phase temperature (K)
+   * @param Z total mass fraction of NCG component
+   * @param[out] FluidStateProperties data structure
+   * @return gas saturation (-)
+   */
+  DualReal saturation(const DualReal & pressure,
+                      const DualReal & temperature,
+                      const DualReal & Z,
+                      std::vector<FluidStateProperties> & fsp) const;
+
+  /**
+   * Gas and liquid properties in the two-phase region
+   *
+   * @param pressure gas pressure (Pa)
+   * @param temperature phase temperature (K)
+   * @param Z total mass fraction of NCG component
+   * @param qp quadpoint for capillary pressure
+   * @param[out] FluidStateProperties data structure
+   */
+  void twoPhaseProperties(const DualReal & pressure,
+                          const DualReal & temperature,
+                          const DualReal & Z,
+                          unsigned int qp,
                           std::vector<FluidStateProperties> & fsp) const;
 
   /**
@@ -120,10 +161,9 @@ public:
    * in water from the freezing to the near critical point, J. Phys. Chem. 63 (1959)
    *
    * @param temperature fluid temperature (K)
-   * @param[out] hdis enthalpy of dissolution (J/kg)
-   * @param[out] dhdis_dT derivative of enthalpy of dissolution wrt temperature
+   * @return enthalpy of dissolution (J/kg)
    */
-  void enthalpyOfDissolution(Real temperature, Real & hdis, Real & dhdis_dT) const;
+  DualReal enthalpyOfDissolution(const DualReal & temperature) const;
 
   virtual Real totalMassFraction(
       Real pressure, Real temperature, Real Xnacl, Real saturation, unsigned int qp) const override;
@@ -134,7 +174,7 @@ protected:
    * @param xmol mole fraction
    * @return mass fraction
    */
-  Real moleFractionToMassFraction(Real xmol) const;
+  DualReal moleFractionToMassFraction(const DualReal & xmol) const;
 
   /**
    * Check that the temperature is between the triple and critical values
@@ -144,6 +184,8 @@ protected:
 
   /// Fluid properties UserObject for water
   const SinglePhaseFluidProperties & _water_fp;
+  /// Fluid properties UserObject for water (used to access Henry's law)
+  const Water97FluidProperties & _water97_fp;
   /// Fluid properties UserObject for the NCG
   const SinglePhaseFluidProperties & _ncg_fp;
   /// Molar mass of water (kg/mol)
@@ -154,5 +196,6 @@ protected:
   const Real _water_triple_temperature;
   /// Critical temperature of water (K)
   const Real _water_critical_temperature;
+  /// Henry's coefficients for the NCG
+  const std::vector<Real> _ncg_henry;
 };
-

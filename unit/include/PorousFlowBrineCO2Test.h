@@ -27,7 +27,7 @@ protected:
   {
     InputParameters pc_params = _factory.getValidParams("PorousFlowCapillaryPressureVG");
     pc_params.set<Real>("m") = 0.5;
-    pc_params.set<Real>("alpha") = 0.1;
+    pc_params.set<Real>("alpha") = 1.0e-4;
     _fe_problem->addUserObject("PorousFlowCapillaryPressureVG", "pc", pc_params);
     _pc = &_fe_problem->getUserObjectTempl<PorousFlowCapillaryPressureVG>("pc");
 
@@ -41,19 +41,29 @@ protected:
 
     InputParameters co2_params = _factory.getValidParams("CO2FluidProperties");
     _fe_problem->addUserObject("CO2FluidProperties", "co2_fp", co2_params);
-    _co2_fp = &_fe_problem->getUserObjectTempl<CO2FluidProperties>("co2_fp");
+    _co2_fp = &_fe_problem->getUserObjectTempl<SinglePhaseFluidProperties>("co2_fp");
 
     InputParameters uo_params = _factory.getValidParams("PorousFlowBrineCO2");
     uo_params.set<UserObjectName>("brine_fp") = "brine_fp";
     uo_params.set<UserObjectName>("co2_fp") = "co2_fp";
     uo_params.set<UserObjectName>("capillary_pressure") = "pc";
-    _fe_problem->addUserObject("PorousFlowBrineCO2", "fp", uo_params);
-    _fp = &_fe_problem->getUserObjectTempl<PorousFlowBrineCO2>("fp");
+    _fe_problem->addUserObject("PorousFlowBrineCO2", "fs", uo_params);
+    _fs = &_fe_problem->getUserObjectTempl<PorousFlowBrineCO2>("fs");
+
+    // Indices for derivatives
+    _pidx = _fs->getPressureIndex();
+    _Tidx = _fs->getTemperatureIndex();
+    _Zidx = _fs->getZIndex();
+    _Xidx = _fs->getXIndex();
   }
 
   const PorousFlowCapillaryPressureVG * _pc;
-  const PorousFlowBrineCO2 * _fp;
+  const PorousFlowBrineCO2 * _fs;
   const BrineFluidProperties * _brine_fp;
   const Water97FluidProperties * _water_fp;
-  const CO2FluidProperties * _co2_fp;
+  const SinglePhaseFluidProperties * _co2_fp;
+  unsigned int _pidx;
+  unsigned int _Tidx;
+  unsigned int _Zidx;
+  unsigned int _Xidx;
 };

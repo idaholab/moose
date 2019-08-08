@@ -172,77 +172,13 @@ SinglePhaseFluidProperties::gamma_from_p_T(
   gamma = gamma_from_p_T(p, T);
 }
 
-Real
-SinglePhaseFluidProperties::henryConstantIAPWS(Real T, Real A, Real B, Real C) const
-{
-  const Real Tr = T / 647.096;
-  const Real tau = 1.0 - Tr;
-
-  const Real lnkh =
-      A / Tr + B * std::pow(tau, 0.355) / Tr + C * std::pow(Tr, -0.41) * std::exp(tau);
-
-  // The vapor pressure used in this formulation
-  const std::vector<Real> a{
-      -7.85951783, 1.84408259, -11.7866497, 22.6807411, -15.9618719, 1.80122502};
-  const std::vector<Real> b{1.0, 1.5, 3.0, 3.5, 4.0, 7.5};
-  Real sum = 0.0;
-
-  for (std::size_t i = 0; i < a.size(); ++i)
-    sum += a[i] * std::pow(tau, b[i]);
-
-  return 22.064e6 * std::exp(sum / Tr) * std::exp(lnkh);
-}
-
-void
-SinglePhaseFluidProperties::henryConstantIAPWS(
-    Real T, Real & Kh, Real & dKh_dT, Real A, Real B, Real C) const
-{
-  const Real pc = 22.064e6;
-  const Real Tc = 647.096;
-
-  const Real Tr = T / Tc;
-  const Real tau = 1.0 - Tr;
-
-  const Real lnkh =
-      A / Tr + B * std::pow(tau, 0.355) / Tr + C * std::pow(Tr, -0.41) * std::exp(tau);
-  const Real dlnkh_dT =
-      (-A / Tr / Tr - B * std::pow(tau, 0.355) / Tr / Tr - 0.355 * B * std::pow(tau, -0.645) / Tr -
-       0.41 * C * std::pow(Tr, -1.41) * std::exp(tau) - C * std::pow(Tr, -0.41) * std::exp(tau)) /
-      Tc;
-
-  // The vapor pressure used in this formulation
-  const std::vector<Real> a{
-      -7.85951783, 1.84408259, -11.7866497, 22.6807411, -15.9618719, 1.80122502};
-  const std::vector<Real> b{1.0, 1.5, 3.0, 3.5, 4.0, 7.5};
-  Real sum = 0.0;
-  Real dsum = 0.0;
-
-  for (std::size_t i = 0; i < a.size(); ++i)
-  {
-    sum += a[i] * std::pow(tau, b[i]);
-    dsum += a[i] * b[i] * std::pow(tau, b[i] - 1.0);
-  }
-
-  const Real p = pc * std::exp(sum / Tr);
-  const Real dp_dT = -p / Tc / Tr * (sum / Tr + dsum);
-
-  // Henry's constant and its derivative wrt temperature
-  Kh = p * std::exp(lnkh);
-  dKh_dT = (p * dlnkh_dT + dp_dT) * std::exp(lnkh);
-}
-
-Real SinglePhaseFluidProperties::henryConstant(Real) const
-{
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
-}
-
-void
-SinglePhaseFluidProperties::henryConstant(Real, Real &, Real &) const
-{
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
-}
-
 Real SinglePhaseFluidProperties::vaporPressure(Real) const
+{
+  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+}
+
+std::vector<Real>
+SinglePhaseFluidProperties::henryCoefficients() const
 {
   mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
 }
@@ -335,6 +271,16 @@ SinglePhaseFluidProperties::rho_mu_from_p_T(Real p,
 {
   rho_from_p_T(p, T, rho, drho_dp, drho_dT);
   mu_from_p_T(p, T, mu, dmu_dp, dmu_dT);
+}
+
+void
+SinglePhaseFluidProperties::rho_mu_from_p_T(const DualReal & p,
+                                            const DualReal & T,
+                                            DualReal & rho,
+                                            DualReal & mu) const
+{
+  rho = rho_from_p_T(p, T);
+  mu = mu_from_p_T(p, T);
 }
 
 Real SinglePhaseFluidProperties::e_spndl_from_v(Real) const

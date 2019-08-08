@@ -945,8 +945,27 @@ protected:
    *
    * @param var_name The name of the coupled variable
    */
-  void checkVar(const std::string & var_name);
+  bool checkVar(const std::string & var_name, unsigned int comp = 0, unsigned int comp_bound = 0);
 
+private:
+  enum class FuncAge
+  {
+    Curr,
+    Old,
+    Older,
+  };
+
+  enum class VarType
+  {
+    Ignore,
+    Gradient,
+    GradientDot,
+    Dot,
+  };
+
+  void checkFuncType(const std::string var_name, VarType t, FuncAge age);
+
+protected:
   /**
    * Extract pointer to a base finite element coupled variable
    * @param var_name Name of parameter desired
@@ -1077,7 +1096,7 @@ private:
    * Get nodal default value
    */
   template <typename T>
-  const T & getNodalDefaultValue(const std::string & var_name, unsigned int comp = 0);
+  const T & getDefaultNodalValue(const std::string & var_name, unsigned int comp = 0);
 
   /// Maximum qps for any element in this system
   unsigned int _coupleable_max_qps;
@@ -1091,100 +1110,63 @@ private:
   std::set<TagID> _fe_coupleable_vector_tags;
 
   std::set<TagID> _fe_coupleable_matrix_tags;
+
+private:
+  const MooseObject * _obj;
 };
 
 template <ComputeStage compute_stage>
 const ADVariableValue &
 Coupleable::adCoupledValueTemplate(const std::string & var_name, unsigned int comp)
 {
-  if (!isCoupled(var_name))
-    return *getADDefaultValue<compute_stage>(var_name);
-
-  coupledCallback(var_name, false);
   MooseVariable * var = getVar(var_name, comp);
+  if (!var)
+    return *getADDefaultValue<compute_stage>(var_name);
+  checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
+
+  if (_c_nodal)
+    mooseError("Not implemented");
+  if (!_c_is_implicit)
+    mooseError("Not implemented");
 
   if (!_coupleable_neighbor)
-  {
-    if (_c_nodal)
-      mooseError("Not implemented");
-    else
-    {
-      if (_c_is_implicit)
-        return var->adSln<compute_stage>();
-      else
-        mooseError("Not implemented");
-    }
-  }
-  else
-  {
-    if (_c_nodal)
-      mooseError("Not implemented");
-    else
-    {
-      if (_c_is_implicit)
-        return var->adSlnNeighbor<compute_stage>();
-      else
-        mooseError("Not implemented");
-    }
-  }
+    return var->adSln<compute_stage>();
+  return var->adSlnNeighbor<compute_stage>();
 }
 
 template <ComputeStage compute_stage>
 const ADVariableGradient &
 Coupleable::adCoupledGradientTemplate(const std::string & var_name, unsigned int comp)
 {
-  if (!isCoupled(var_name)) // Return default 0
-    return getADDefaultGradient<compute_stage>();
-
-  coupledCallback(var_name, false);
-  if (_c_nodal)
-    mooseError("Nodal variables do not have gradients");
-
   MooseVariable * var = getVar(var_name, comp);
+  if (!var)
+    return getADDefaultGradient<compute_stage>();
+  checkFuncType(var_name, VarType::Gradient, FuncAge::Curr);
+
+  if (!_c_is_implicit)
+    mooseError("Not implemented");
 
   if (!_coupleable_neighbor)
-  {
-    if (_c_is_implicit)
-      return var->adGradSln<compute_stage>();
-    else
-      mooseError("Not implemented");
-  }
-  else
-  {
-    if (_c_is_implicit)
-      return var->adGradSlnNeighbor<compute_stage>();
-    else
-      mooseError("Not implemented");
-  }
+    return var->adGradSln<compute_stage>();
+  return var->adGradSlnNeighbor<compute_stage>();
 }
 
 template <ComputeStage compute_stage>
 const ADVariableSecond &
 Coupleable::adCoupledSecondTemplate(const std::string & var_name, unsigned int comp)
 {
-  if (!isCoupled(var_name)) // Return default 0
-    return getADDefaultSecond<compute_stage>();
-
-  coupledCallback(var_name, false);
-  if (_c_nodal)
-    mooseError("Nodal variables do not have second derivatives");
-
   MooseVariable * var = getVar(var_name, comp);
+  if (!var)
+    return getADDefaultSecond<compute_stage>();
+  checkFuncType(var_name, VarType::Gradient, FuncAge::Curr);
+
+  if (!_c_is_implicit)
+    mooseError("Not implemented");
 
   if (!_coupleable_neighbor)
-  {
-    if (_c_is_implicit)
-      return var->adSecondSln<compute_stage>();
-    else
-      mooseError("Not implemented");
-  }
+    return var->adSecondSln<compute_stage>();
   else
-  {
-    if (_c_is_implicit)
-      return var->adSecondSlnNeighbor<compute_stage>();
-    else
-      mooseError("Not implemented");
-  }
+    return var->adSecondSlnNeighbor<compute_stage>();
 }
 
 template <ComputeStage compute_stage>
@@ -1199,122 +1181,70 @@ template <ComputeStage compute_stage>
 const ADVariableValue &
 Coupleable::adCoupledDotTemplate(const std::string & var_name, unsigned int comp)
 {
-  checkVar(var_name);
-  if (!isCoupled(var_name)) // Return default 0
-    return *getADDefaultValue<compute_stage>(var_name);
-
   MooseVariable * var = getVar(var_name, comp);
-  if (var == nullptr)
-    mooseError("Call corresponding vector variable method");
+  if (!var)
+    return *getADDefaultValue<compute_stage>(var_name);
+  checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
+
+  if (_c_nodal)
+    mooseError("Not implemented");
 
   if (!_coupleable_neighbor)
-  {
-    if (_c_nodal)
-      mooseError("Not implemented");
-    else
-      return var->adUDot<compute_stage>();
-  }
-  else
-  {
-    if (_c_nodal)
-      mooseError("Not implemented");
-    else
-      return var->adUDotNeighbor<compute_stage>();
-  }
+    return var->adUDot<compute_stage>();
+  return var->adUDotNeighbor<compute_stage>();
 }
 
 template <ComputeStage compute_stage>
 const ADVectorVariableValue &
 Coupleable::adCoupledVectorDotTemplate(const std::string & var_name, unsigned int comp)
 {
-  checkVar(var_name);
-  if (!isCoupled(var_name)) // Return default 0
-    return *getADDefaultVectorValue<compute_stage>(var_name);
-
   VectorMooseVariable * var = getVectorVar(var_name, comp);
-  if (var == nullptr)
-    mooseError("Try calling corresponding standard variable method");
+  if (!var)
+    return *getADDefaultVectorValue<compute_stage>(var_name);
+  checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
+
+  if (_c_nodal)
+    mooseError("Not implemented");
 
   if (!_coupleable_neighbor)
-  {
-    if (_c_nodal)
-      mooseError("Not implemented");
-    else
-      return var->adUDot<compute_stage>();
-  }
-  else
-  {
-    if (_c_nodal)
-      mooseError("Not implemented");
-    else
-      return var->adUDotNeighbor<compute_stage>();
-  }
+    return var->adUDot<compute_stage>();
+  return var->adUDotNeighbor<compute_stage>();
 }
 
 template <ComputeStage compute_stage>
 const ADVectorVariableValue &
 Coupleable::adCoupledVectorValueTemplate(const std::string & var_name, unsigned int comp)
 {
-  if (!isCoupled(var_name))
-    return *getADDefaultVectorValue<compute_stage>(var_name);
-
-  coupledCallback(var_name, false);
   VectorMooseVariable * var = getVectorVar(var_name, comp);
+  if (!var)
+    return *getADDefaultVectorValue<compute_stage>(var_name);
+  checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
+
+  if (_c_nodal)
+    mooseError("Not implemented");
+  if (!_c_is_implicit)
+    mooseError("Not implemented");
 
   if (!_coupleable_neighbor)
-  {
-    if (_c_nodal)
-      mooseError("Not implemented");
-    else
-    {
-      if (_c_is_implicit)
-        return var->adSln<compute_stage>();
-      else
-        mooseError("Not implemented");
-    }
-  }
-  else
-  {
-    if (_c_nodal)
-      mooseError("Not implemented");
-    else
-    {
-      if (_c_is_implicit)
-        return var->adSlnNeighbor<compute_stage>();
-      else
-        mooseError("Not implemented");
-    }
-  }
+    return var->adSln<compute_stage>();
+  return var->adSlnNeighbor<compute_stage>();
 }
 
 template <ComputeStage compute_stage>
 const ADVectorVariableGradient &
 Coupleable::adCoupledVectorGradientTemplate(const std::string & var_name, unsigned int comp)
 {
-
-  if (!isCoupled(var_name)) // Return default 0
-    return getADDefaultVectorGradient<compute_stage>();
-
-  coupledCallback(var_name, false);
-  if (_c_nodal)
-    mooseError("Nodal variables do not have gradients");
-
   VectorMooseVariable * var = getVectorVar(var_name, comp);
+  if (!var)
+    return getADDefaultVectorGradient<compute_stage>();
+  checkFuncType(var_name, VarType::Gradient, FuncAge::Curr);
+
+  if (!_c_is_implicit)
+    mooseError("Not implemented");
 
   if (!_coupleable_neighbor)
-  {
-    if (_c_is_implicit)
-      return var->adGradSln<compute_stage>();
-    else
-      mooseError("Not implemented");
-  }
-  else
-  {
-    if (_c_is_implicit)
-      return var->adGradSlnNeighbor<compute_stage>();
-    else
-      mooseError("Not implemented");
-  }
+    return var->adGradSln<compute_stage>();
+  return var->adGradSlnNeighbor<compute_stage>();
 }
 
 template <ComputeStage compute_stage>

@@ -20,13 +20,19 @@
 #include "libmesh/point_locator_base.h"
 #include "libmesh/elem.h"
 
-registerMooseObject("MooseApp", AddAllSideSetsByNormals);
+registerMooseObjectReplaced("MooseApp",
+                            AddAllSideSetsByNormals,
+                            "08/12/2019 00:00",
+                            AllSideSetsByNormalsGenerator);
 
 template <>
 InputParameters
 validParams<AddAllSideSetsByNormals>()
 {
   InputParameters params = validParams<AddSideSetsBase>();
+
+  params.addClassDescription("Adds sidesets to the entire mesh based on unique normals");
+
   return params;
 }
 

@@ -18,6 +18,9 @@ validParams<ScalePostprocessor>()
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<PostprocessorName>("value", "The postprocessor to be scaled");
   params.addParam<Real>("scaling_factor", 1.0, "The scaling factor");
+
+  params.addClassDescription("Scales a post-processor by a value");
+
   return params;
 }
 

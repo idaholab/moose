@@ -33,7 +33,8 @@ class VTKDiff(RunApp):
             util.deleteFilesAndFolders(self.specs['test_dir'], self.specs['vtkdiff'])
 
     def processResults(self, moose_dir, options, output):
-        RunApp.testFileOutput(self, moose_dir, options, output)
+        output += self.testFileOutput(moose_dir, options, output)
+        self.testExitCodes(moose_dir, options, output)
 
         # Skip
         specs = self.specs

@@ -243,7 +243,6 @@
 - /VectorPostprocessors/ElementVariablesDifferenceMax
 - /VectorPostprocessors/IntersectionPointsAlongLine
 - /VectorPostprocessors/LineFunctionSampler
-- /VectorPostprocessors/LineMaterialRealSampler
 - /VectorPostprocessors/MaterialVectorPostprocessor
 - /VectorPostprocessors/PointValueSampler
 - /VectorPostprocessors/SideValueSampler

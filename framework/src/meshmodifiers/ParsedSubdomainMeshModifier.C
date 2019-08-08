@@ -15,7 +15,10 @@
 #include "libmesh/fparser_ad.hh"
 #include "libmesh/elem.h"
 
-registerMooseObject("MooseApp", ParsedSubdomainMeshModifier);
+registerMooseObjectReplaced("MooseApp",
+                            ParsedSubdomainMeshModifier,
+                            "08/12/2019 00:00",
+                            ParsedSubdomainMeshGenerator);
 
 template <>
 InputParameters
