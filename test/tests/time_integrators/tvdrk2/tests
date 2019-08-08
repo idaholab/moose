@@ -1,30 +1,52 @@
 [Tests]
-  [./1d-linear]
-    type = 'Exodiff'
-    input = '1d-linear.i'
-    exodiff = '1d-linear_out.e'
-  [../]
+  design = ExplicitTVDRK2.md
+  issues = '#1953'
 
-  [./1d-linear_num-of-jacobian-calls]
-    # Test how many times compute_jacobian() has been called
-    type = RunApp
-    input = '1d-linear.i'
-    expect_out = 'computeJacobianInternal\s*|\s*1'
-    cli_args = 'Outputs/exodus=false'
-  [../]
+  [group]
+    requirement = "The system shall support the use of an total variation diminishing Runge-Kutta "
+                  "time integration schemefor"
 
-  [./2d-quadratic]
-    type = 'Exodiff'
-    input = '2d-quadratic.i'
-    exodiff = '2d-quadratic_out.e'
-    abs_zero = 1e-8
-  [../]
+    [1d-linear]
+      type = 'Exodiff'
+      input = '1d-linear.i'
+      exodiff = '1d-linear_out.e'
 
-  [./2d-quadratic_num-of-jacobian-calls]
-    # Test how many times compute_jacobian() has been called
-    type = RunApp
-    input = '2d-quadratic.i'
-    expect_out = 'computeJacobianInternal\s*|\s*1'
-    cli_args = 'Outputs/exodus=false'
-  [../]
+      detail = "1D elements with linear finite element shape functions and"
+    []
+
+    [2d-quadratic]
+      type = 'Exodiff'
+      input = '2d-quadratic.i'
+      exodiff = '2d-quadratic_out.e'
+      abs_zero = 1e-8
+
+      detail = "2D elements with quadratic finite element shape functions."
+    []
+  []
+
+  [jacobian]
+    requirement = "The system shall compute the Jacobian during total variation diminishing "
+                  "Runge-Kutta time integration for"
+
+    [1d-linear_num-of-jacobian-calls]
+      # Test how many times compute_jacobian() has been called
+      type = RunApp
+      input = '1d-linear.i'
+      expect_out = 'computeJacobianInternal\s*|\s*1'
+      cli_args = 'Outputs/exodus=false'
+
+      detail = "1D elements with linear finite element shape functions and"
+
+    []
+
+    [2d-quadratic_num-of-jacobian-calls]
+      # Test how many times compute_jacobian() has been called
+      type = RunApp
+      input = '2d-quadratic.i'
+      expect_out = 'computeJacobianInternal\s*|\s*1'
+      cli_args = 'Outputs/exodus=false'
+
+      detail = "2D elements with quadratic finite element shape functions."
+    []
+  []
 []

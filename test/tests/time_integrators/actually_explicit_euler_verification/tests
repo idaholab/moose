@@ -9,53 +9,63 @@
   design = '/ActuallyExplicitEuler.md'
   issues = '#10837'
 
-  [./1d-linear]
-    type = 'Exodiff'
-    input = 'ee-1d-linear.i'
-    exodiff = 'ee-1d-linear_out.e'
-    requirement = 'MOOSE shall allow efficient execution of explicit solves'
-  [../]
+  [group]
+    requirement = "The system shall correctly solve a time dependent Laplace equation using an explicit first-order, forward Euler scheme with:"
 
-  [./1d-quadratic]
-    type = 'Exodiff'
-    input = 'ee-1d-quadratic.i'
-    exodiff = 'ee-1d-quadratic_out.e'
-    requirement = 'MOOSE shall allow efficient execution of explicit solves'
-  [../]
+    [1d-linear]
+      type = 'Exodiff'
+      input = 'ee-1d-linear.i'
+      exodiff = 'ee-1d-linear_out.e'
 
-  [./1d-quadratic-neumann]
-    type = 'Exodiff'
-    input = 'ee-1d-quadratic-neumann.i'
-    exodiff = 'ee-1d-quadratic-neumann_out.e'
-    requirement = 'MOOSE shall allow efficient execution of explicit solves'
-  [../]
+      detail = "for a 1D problem using linear Lagrange elements and Dirichlet boundary conditions;"
+    []
 
-  [./2d-linear]
-    type = 'Exodiff'
-    input = 'ee-2d-linear.i'
-    exodiff = 'ee-2d-linear_out.e'
-    requirement = 'MOOSE shall allow efficient execution of explicit solves'
-  [../]
+    [1d-quadratic]
+      type = 'Exodiff'
+      input = 'ee-1d-quadratic.i'
+      exodiff = 'ee-1d-quadratic_out.e'
 
-  [./2d-linear-adapt]
-    type = 'Exodiff'
-    input = 'ee-2d-linear-adapt.i'
-    exodiff = 'ee-2d-linear-adapt_out.e ee-2d-linear-adapt_out.e-s003'
-    abs_zero = 1e-8
-    requirement = 'MOOSE shall allow efficient execution of explicit solves'
-  [../]
+      detail = "for a 1D problem using second-order Lagrange elements and Dirichlet boundary conditions;"
+    []
 
-  [./2d-quadratic]
-    type = 'Exodiff'
-    input = 'ee-2d-quadratic.i'
-    exodiff = 'ee-2d-quadratic_out.e'
-    requirement = 'MOOSE shall allow efficient execution of explicit solves'
-  [../]
+    [1d-quadratic-neumann]
+      type = 'Exodiff'
+      input = 'ee-1d-quadratic-neumann.i'
+      exodiff = 'ee-1d-quadratic-neumann_out.e'
 
-  [./ode]
+      detail = "for a 1D problem using second-order Lagrange elements and Neumann boundary conditions;"
+    []
+
+    [2d-linear]
+      type = 'Exodiff'
+      input = 'ee-2d-linear.i'
+      exodiff = 'ee-2d-linear_out.e'
+
+      detail = "for a 2D problem using linear Lagrange elements and Dirichlet boundary conditions;"
+    []
+
+    [2d-linear-adapt]
+      type = 'Exodiff'
+      input = 'ee-2d-linear-adapt.i'
+      exodiff = 'ee-2d-linear-adapt_out.e ee-2d-linear-adapt_out.e-s003'
+      abs_zero = 1e-8
+
+      detail = "for a 2D problem using linear Lagrange elements, Dirichlet boundary conditions, and mesh adaptivity;"
+    []
+
+    [2d-quadratic]
+      type = 'Exodiff'
+      input = 'ee-2d-quadratic.i'
+      exodiff = 'ee-2d-quadratic_out.e'
+
+      detail = "for a 2D problem using second-order Lagrange elements and Dirichlet boundary conditions;"
+    []
+  []
+
+  [ode]
     type = 'CSVDiff'
     input = 'ee-ode.i'
     csvdiff = 'ee-ode_out.csv'
-    requirement = 'MOOSE shall allow efficient execution of explicit solves'
-  [../]
+    requirement = "The system shall correctly solve a time dependent ordinary differential equation using an explicit first-order, forward Euler scheme."
+  []
 []
