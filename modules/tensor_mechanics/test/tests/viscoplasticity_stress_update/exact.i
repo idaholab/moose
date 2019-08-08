@@ -39,6 +39,18 @@
     x = '0 0.1'
     y = '0 1e-5'
   [../]
+  [./Q_gtn]
+    type = ParsedFunction
+    vars = 'avg_vonmises gtn_gauge_stress'
+    vals = 'avg_vonmises gtn_gauge_stress'
+    value = 'avg_vonmises/gtn_gauge_stress'
+  [../]
+  [./M_gtn]
+    type = ParsedFunction
+    vars = 'avg_hydro gtn_gauge_stress'
+    vals = 'avg_hydro gtn_gauge_stress'
+    value = 'abs(avg_hydro) / gtn_gauge_stress'
+  [../]
   [./Q_ten]
     type = ParsedFunction
     vars = 'avg_vonmises ten_gauge_stress'
@@ -121,11 +133,20 @@
   [../]
   [./strain]
     type = ComputeMultiplePorousInelasticStress
-    inelastic_models = 'lps_ten lps_five lps_three lps_two lps_onepointfive lps_one'
+    inelastic_models = 'gtn lps_ten lps_five lps_three lps_two lps_onepointfive lps_one'
     initial_porosity = 1e-3
     outputs = all
   [../]
 
+  [./gtn]
+    type = ViscoPlasticityStressUpdate
+    coefficient = 0
+    power = 1 # arbitrary
+    viscoplasticity_model = GTN
+    base_name = gtn
+    outputs = all
+    relative_tolerance = 1e-30
+  [../]
   [./lps_ten]
     type = ViscoPlasticityStressUpdate
     coefficient = 0
@@ -232,6 +253,19 @@
   [./avg_vonmises]
     type = ElementAverageValue
     variable = vonmises_stress
+  [../]
+  [./gtn_gauge_stress]
+    type = ElementAverageValue
+    variable = gtn_gauge_stress
+    outputs = none
+  [../]
+  [./0Q_gtn]
+    type = FunctionValuePostprocessor
+    function = Q_gtn
+  [../]
+  [./0M_gtn]
+    type = FunctionValuePostprocessor
+    function = M_gtn
   [../]
   [./ten_gauge_stress]
     type = ElementAverageValue
