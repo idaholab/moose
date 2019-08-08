@@ -50,7 +50,11 @@ public:
    */
   bool requiresIsotropicTensor() override { return true; }
 
+  /// List of enums for choosing which viscoplastic model to use
   static MooseEnum getModelEnum();
+
+  /// List of enums for choosing which pore shape model to use
+  static MooseEnum getPoreShapeEnum();
 
 protected:
   virtual void initQpStatefulProperties() override;
@@ -120,6 +124,12 @@ protected:
 
   /// Enum to choose which viscoplastic model to use
   const MooseEnum _model;
+
+  /// Enum to choose which pore shape model to use
+  const MooseEnum _pore_shape;
+
+  /// Pore shape factor depending on pore shape model
+  const Real _pore_shape_factor;
 
   // String designating the base name of the total strain
   const std::string _total_strain_base_name;

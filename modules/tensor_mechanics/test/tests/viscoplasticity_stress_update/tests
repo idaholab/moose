@@ -17,18 +17,18 @@
     prereq = regular_creep
     requirement = 'The PowerLawCreepStressUpdate, called through the ComputeMultiplePorousInelasticStress, shall compute a creep strain based on an extrenal loading, and match the values computed instead with ComputeMultipleInelasticStress'
   [../]
-  [./lps_exact_spherical]
+  [./exact_spherical]
     type = CSVDiff
-    input = lps_exact.i
-    csvdiff = lps_exact_spherical_out.csv
+    input = exact.i
+    csvdiff = exact_spherical_out.csv
     requirement = 'The ViscoPlasticityStressUpdate class shall compute a ratio between the gauge stress, equilvalent stress, and hydrostatic stress across a wide swath of exponents and stress states using spherical pore geometry'
   [../]
-  [./lps_exact_cylindrical]
+  [./exact_cylindrical]
     type = CSVDiff
-    input = lps_exact.i
-    csvdiff = lps_exact_cylindrical_out.csv
-    cli_args = 'GlobalParams/viscoplasticity_model=LPS_CYLINDRICAL Outputs/file_base=lps_exact_cylindrical_out'
-    prereq = lps_exact_spherical
+    input = exact.i
+    csvdiff = exact_cylindrical_out.csv
+    cli_args = 'GlobalParams/pore_shape_model=CYLINDRICAL Outputs/file_base=exact_cylindrical_out'
+    prereq = exact_spherical
     requirement = 'The ViscoPlasticityStressUpdate class shall compute a ratio between the gauge stress, equilvalent stress, and hydrostatic stress across a wide swath of exponents and stress states using spherical pore geometry'
   [../]
   [./lps_single]

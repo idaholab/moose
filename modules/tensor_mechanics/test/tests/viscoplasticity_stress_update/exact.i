@@ -1,6 +1,6 @@
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
-  viscoplasticity_model = LPS_SPHERICAL
+  pore_shape_model = spherical
 []
 
 [MeshGenerators]
@@ -205,7 +205,7 @@
   [./Pressure]
     [./asdf]
       boundary = 'top right front'
-      function = '10^(t/2.5)'
+      function = '10^(t/4.5)'
     [../]
   [../]
 []
@@ -219,8 +219,9 @@
 
 [Executioner]
   type = Transient
+  solve_type = FD
   num_steps = 10
-  nl_abs_tol = 1e-10
+  nl_abs_tol = 1e-8
 []
 
 [Postprocessors]
@@ -314,5 +315,5 @@
 
 [Outputs]
   csv = true
-  file_base = lps_exact_spherical_out
+  file_base = exact_spherical_out
 []
