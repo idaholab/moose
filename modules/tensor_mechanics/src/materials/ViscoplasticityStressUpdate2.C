@@ -7,15 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ViscoPlasticityStressUpdate.h"
+#include "ViscoplasticityStressUpdate.h"
 
 #include "libmesh/utility.h"
 
-registerMooseObject("TensorMechanicsApp", ViscoPlasticityStressUpdate);
+registerMooseObject("TensorMechanicsApp", ViscoplasticityStressUpdate);
 
 template <>
 InputParameters
-validParams<ViscoPlasticityStressUpdate>()
+validParams<ViscoplasticityStressUpdate>()
 {
   InputParameters params = validParams<StressUpdateBase>();
   params += validParams<SingleVariableReturnMappingSolution>();
@@ -24,10 +24,10 @@ validParams<ViscoPlasticityStressUpdate>()
       "viscoplastic responce due to creep in porous materials. This material must be used in "
       "conjunction with ComputeMultiplePorousInelasticStress");
   params.addParam<MooseEnum>("viscoplasticity_model",
-                             ViscoPlasticityStressUpdate::getModelEnum(),
+                             ViscoplasticityStressUpdate::getModelEnum(),
                              "Which viscoplastic model to use");
   params.addParam<MooseEnum>("pore_shape_model",
-                             ViscoPlasticityStressUpdate::getPoreShapeEnum(),
+                             ViscoplasticityStressUpdate::getPoreShapeEnum(),
                              "Which pore shape model to use");
   params.addParam<Real>("max_inelastic_increment",
                         1.0e-4,
@@ -49,7 +49,7 @@ validParams<ViscoPlasticityStressUpdate>()
   return params;
 }
 
-ViscoPlasticityStressUpdate::ViscoPlasticityStressUpdate(const InputParameters & parameters)
+ViscoplasticityStressUpdate::ViscoplasticityStressUpdate(const InputParameters & parameters)
   : StressUpdateBase(parameters),
     SingleVariableReturnMappingSolution(parameters),
     _model(getParam<MooseEnum>("viscoplasticity_model")),
@@ -82,33 +82,33 @@ ViscoPlasticityStressUpdate::ViscoPlasticityStressUpdate(const InputParameters &
 }
 
 MooseEnum
-ViscoPlasticityStressUpdate::getModelEnum()
+ViscoplasticityStressUpdate::getModelEnum()
 {
   return MooseEnum("LPS GTN", "LPS");
 }
 
 MooseEnum
-ViscoPlasticityStressUpdate::getPoreShapeEnum()
+ViscoplasticityStressUpdate::getPoreShapeEnum()
 {
   return MooseEnum("spherical cylindrical", "spherical");
 }
 
 void
-ViscoPlasticityStressUpdate::initQpStatefulProperties()
+ViscoplasticityStressUpdate::initQpStatefulProperties()
 {
   _effective_inelastic_strain[_qp] = 0.0;
   _creep_strain[_qp].zero();
 }
 
 void
-ViscoPlasticityStressUpdate::propagateQpStatefulProperties()
+ViscoplasticityStressUpdate::propagateQpStatefulProperties()
 {
   _effective_inelastic_strain[_qp] = _effective_inelastic_strain_old[_qp];
   _creep_strain[_qp] = _creep_strain_old[_qp];
 }
 
 void
-ViscoPlasticityStressUpdate::updateState(RankTwoTensor & elastic_strain_increment,
+ViscoplasticityStressUpdate::updateState(RankTwoTensor & elastic_strain_increment,
                                          RankTwoTensor & inelastic_strain_increment,
                                          const RankTwoTensor & /*rotation_increment*/,
                                          RankTwoTensor & stress,
@@ -173,7 +173,7 @@ ViscoPlasticityStressUpdate::updateState(RankTwoTensor & elastic_strain_incremen
 }
 
 Real
-ViscoPlasticityStressUpdate::computeReferenceResidual(const Real /*effective_trial_stress*/,
+ViscoplasticityStressUpdate::computeReferenceResidual(const Real /*effective_trial_stress*/,
                                                       const Real gauge_stress)
 {
   // Use gauge stress for relative tolerance criteria, defined as:
@@ -182,26 +182,26 @@ ViscoPlasticityStressUpdate::computeReferenceResidual(const Real /*effective_tri
 }
 
 Real
-ViscoPlasticityStressUpdate::initialGuess(const Real effective_trial_stress)
+ViscoplasticityStressUpdate::initialGuess(const Real effective_trial_stress)
 {
   // Use equilvalent stress as an initial guess for the gauge stress
   return effective_trial_stress;
 }
 
 Real
-ViscoPlasticityStressUpdate::maximumPermissibleValue(const Real effective_trial_stress) const
+ViscoplasticityStressUpdate::maximumPermissibleValue(const Real effective_trial_stress) const
 {
   return effective_trial_stress * 1.0e6;
 }
 
 Real
-ViscoPlasticityStressUpdate::minimumPermissibleValue(const Real effective_trial_stress) const
+ViscoplasticityStressUpdate::minimumPermissibleValue(const Real effective_trial_stress) const
 {
   return effective_trial_stress;
 }
 
 Real
-ViscoPlasticityStressUpdate::computeTimeStepLimit()
+ViscoplasticityStressUpdate::computeTimeStepLimit()
 {
   const Real scalar_inelastic_strain_incr =
       _effective_inelastic_strain[_qp] - _effective_inelastic_strain_old[_qp];
@@ -213,7 +213,7 @@ ViscoPlasticityStressUpdate::computeTimeStepLimit()
 }
 
 void
-ViscoPlasticityStressUpdate::outputIterationSummary(std::stringstream * iter_output,
+ViscoplasticityStressUpdate::outputIterationSummary(std::stringstream * iter_output,
                                                     const unsigned int total_it)
 {
   if (iter_output)
@@ -225,7 +225,7 @@ ViscoPlasticityStressUpdate::outputIterationSummary(std::stringstream * iter_out
 }
 
 Real
-ViscoPlasticityStressUpdate::computeResidual(const Real equiv_stress, const Real trial_gauge)
+ViscoplasticityStressUpdate::computeResidual(const Real equiv_stress, const Real trial_gauge)
 {
   const Real M = std::abs(_hydro_stress) / trial_gauge;
   const Real dM_dtrial_gauge = -M / trial_gauge;
@@ -269,7 +269,7 @@ ViscoPlasticityStressUpdate::computeResidual(const Real equiv_stress, const Real
 }
 
 Real
-ViscoPlasticityStressUpdate::computeH(const Real n, const Real & M, const bool derivative)
+ViscoplasticityStressUpdate::computeH(const Real n, const Real & M, const bool derivative)
 {
   const Real mod = std::pow(M * _pore_shape_factor, (n + 1.0) / n);
 
@@ -284,7 +284,7 @@ ViscoPlasticityStressUpdate::computeH(const Real n, const Real & M, const bool d
 }
 
 RankTwoTensor
-ViscoPlasticityStressUpdate::computeDGaugeDSigma(const Real & gauge_stress,
+ViscoplasticityStressUpdate::computeDGaugeDSigma(const Real & gauge_stress,
                                                  const Real & equiv_stress,
                                                  const RankTwoTensor & dev_stress,
                                                  const RankTwoTensor & stress)
@@ -334,7 +334,7 @@ ViscoPlasticityStressUpdate::computeDGaugeDSigma(const Real & gauge_stress,
 }
 
 void
-ViscoPlasticityStressUpdate::computeInelasticStrainIncrement(
+ViscoplasticityStressUpdate::computeInelasticStrainIncrement(
     Real & gauge_stress,
     Real & dpsi_dgauge,
     RankTwoTensor & inelastic_strain_increment,

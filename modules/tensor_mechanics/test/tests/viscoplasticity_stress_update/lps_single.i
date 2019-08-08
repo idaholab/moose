@@ -42,7 +42,7 @@
   [../]
 
   [./lps]
-    type = ViscoPlasticityStressUpdate
+    type = ViscoplasticityStressUpdate
     total_strain_base_name = 'asdf'
     coefficient = 'coef'
     power = 3

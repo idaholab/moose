@@ -45,7 +45,7 @@
   [../]
 
   [./lps_1]
-    type = ViscoPlasticityStressUpdate
+    type = ViscoplasticityStressUpdate
     coefficient = 'coef'
     power = 3
     base_name = 'lps_1'
@@ -53,7 +53,7 @@
     relative_tolerance = 1e-11
   [../]
   [./lps_2]
-    type = ViscoPlasticityStressUpdate
+    type = ViscoplasticityStressUpdate
     coefficient = 'coef'
     power = 3
     base_name = 'lps_2'

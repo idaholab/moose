@@ -12,16 +12,16 @@
 #include "StressUpdateBase.h"
 #include "SingleVariableReturnMappingSolution.h"
 
-class ViscoPlasticityStressUpdate;
+class ViscoplasticityStressUpdate;
 
 template <>
-InputParameters validParams<ViscoPlasticityStressUpdate>();
+InputParameters validParams<ViscoplasticityStressUpdate>();
 
-class ViscoPlasticityStressUpdate : public StressUpdateBase,
+class ViscoplasticityStressUpdate : public StressUpdateBase,
                                     public SingleVariableReturnMappingSolution
 {
 public:
-  ViscoPlasticityStressUpdate(const InputParameters & parameters);
+  ViscoplasticityStressUpdate(const InputParameters & parameters);
 
   virtual void updateState(RankTwoTensor & elastic_strain_increment,
                            RankTwoTensor & inelastic_strain_increment,

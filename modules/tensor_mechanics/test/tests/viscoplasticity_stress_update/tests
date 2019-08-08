@@ -1,6 +1,6 @@
 [Tests]
   issues = '#13494'
-  design = 'source/materials/ViscoPlasticityStressUpdate.md source/materials/ComputeMultiplePorousInelasticStress.md'
+  design = 'source/materials/ViscoplasticityStressUpdate.md source/materials/ComputeMultiplePorousInelasticStress.md'
   [./regular_creep]
     type = CSVDiff
     input = creep.i
@@ -21,7 +21,7 @@
     type = CSVDiff
     input = exact.i
     csvdiff = exact_spherical_out.csv
-    requirement = 'The ViscoPlasticityStressUpdate class shall compute a ratio between the gauge stress, equilvalent stress, and hydrostatic stress across a wide swath of exponents and stress states using spherical pore geometry'
+    requirement = 'The ViscoplasticityStressUpdate class shall compute a ratio between the gauge stress, equilvalent stress, and hydrostatic stress across a wide swath of exponents and stress states using spherical pore geometry'
   [../]
   [./exact_cylindrical]
     type = CSVDiff
@@ -29,24 +29,24 @@
     csvdiff = exact_cylindrical_out.csv
     cli_args = 'GlobalParams/pore_shape_model=CYLINDRICAL Outputs/file_base=exact_cylindrical_out'
     prereq = exact_spherical
-    requirement = 'The ViscoPlasticityStressUpdate class shall compute a ratio between the gauge stress, equilvalent stress, and hydrostatic stress across a wide swath of exponents and stress states using spherical pore geometry'
+    requirement = 'The ViscoplasticityStressUpdate class shall compute a ratio between the gauge stress, equilvalent stress, and hydrostatic stress across a wide swath of exponents and stress states using spherical pore geometry'
   [../]
   [./lps_single]
     type = CSVDiff
     input = 'lps_single.i'
     csvdiff = 'lps_single_out.csv'
-    requirement = 'The ViscoPlasticityStressUpdate class shall compute the viscoplastic responce using a single model with LPS spherical formulation that increases the porosity due to an external strain'
+    requirement = 'The ViscoplasticityStressUpdate class shall compute the viscoplastic responce using a single model with LPS spherical formulation that increases the porosity due to an external strain'
   [../]
   [./lps_dual]
     type = CSVDiff
     input = 'lps_dual.i'
     csvdiff = 'lps_dual_out.csv'
-    requirement = 'The ViscoPlasticityStressUpdate class shall compute the viscoplastic responce using two LPS models with spherical formulations that increases the porosity due to an external strain'
+    requirement = 'The ViscoplasticityStressUpdate class shall compute the viscoplastic responce using two LPS models with spherical formulations that increases the porosity due to an external strain'
   [../]
   [./gtn_single]
     type = CSVDiff
     input = 'gtn_single.i'
     csvdiff = 'gtn_single_out.csv'
-    requirement = 'The ViscoPlasticityStressUpdate class shall compute the viscoplastic responce using a single model with GTN formulation that increases the porosity due to an external strain'
+    requirement = 'The ViscoplasticityStressUpdate class shall compute the viscoplastic responce using a single model with GTN formulation that increases the porosity due to an external strain'
   [../]
 []
