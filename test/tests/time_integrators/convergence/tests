@@ -1,12 +1,16 @@
 [Tests]
-  design = 'TimeIntegrators.md'
+  design = 'TimeIntegrator/index.md'
   issues = '#1929'
   [explicit]
+    requirement = "The system shall include explicit time integration"
+
     [run]
       type = 'CSVDiff'
       command = 'explicit_convergence.py'
       csvdiff = 'explicit_convergence_heun.csv explicit_convergence_ralston.csv '
                 'explicit_convergence_midpoint.csv explicit_convergence_euler.csv'
+
+      detail = "that demonstrate the correct temporal convergence rates for"
     []
 
     [heun]
@@ -16,6 +20,8 @@
       exodiff = 'heun_0.e heun_1.e heun_2.e'
       delete_output_before_running = False
       prereq = explicit/run
+
+      detail = "the Heun method,"
     []
 
     [ralston]
@@ -25,6 +31,8 @@
       exodiff = 'ralston_0.e ralston_1.e ralston_2.e'
       delete_output_before_running = False
       prereq = explicit/run
+
+      detail = "the Ralston method,"
     []
 
     [midpoint]
@@ -34,6 +42,8 @@
       exodiff = 'explicitmidpoint_0.e explicitmidpoint_1.e explicitmidpoint_2.e'
       delete_output_before_running = False
       prereq = explicit/run
+
+      detail = "the midpoint method, and"
     []
 
     [euler]
@@ -43,10 +53,14 @@
       exodiff = 'expliciteuler_0.e expliciteuler_1.e expliciteuler_2.e'
       delete_output_before_running = False
       prereq = explicit/run
+
+      detail = "the Euler method."
     []
   []
 
   [implicit]
+    requirement = "The system shall include implicit time integration"
+
     [run]
       type = 'CSVDiff'
       command = 'implicit_convergence.py'
@@ -55,6 +69,8 @@
                 'implicit_convergence_lstabledirk4.csv '
                 'implicit_convergence_astabledirk4.csv '
                 'implicit_convergence_astabledirk4_bootstrap.csv'
+
+      detail = "that demonstrate the correct temporal convergence rates for"
     []
 
     [midpoint]
@@ -64,6 +80,8 @@
       exodiff = 'implicitmidpoint_0.e implicitmidpoint_1.e implicitmidpoint_2.e'
       delete_output_before_running = False
       prereq = implicit/run
+
+      detail = "the midpoint method,"
     []
 
     [lstabledirk3]
@@ -73,24 +91,38 @@
       exodiff = 'lstabledirk3_0.e lstabledirk3_1.e lstabledirk3_2.e'
       delete_output_before_running = False
       prereq = implicit/run
+
+      detail = "the L-stable DIRK3 method,"
     []
 
     [lstabledirk4]
+      # Test the LStableDirk4 time integration method.  On this test, the
+      # end_time=1.  This method is slightly more expensive, so we do
+      # fewer timesteps.
       type = 'Exodiff'
       should_execute = False
       input = ''
       exodiff = 'lstabledirk4_0.e lstabledirk4_1.e lstabledirk4_2.e'
       delete_output_before_running = False
       prereq = implicit/run
+
+      detail = "the L-stable DIRK4 method,"
     []
 
     [astabledirk4]
+      # Test the AStableDirk4 time integration method "bootstrapped" with
+      # LStableDirk4.  This is the default behavior for the AStableDirk4
+      # TimeIntegrator.  We use relatively large timesteps here, since
+      # there is not much difference in the final results of AStableDirk4
+      # and bootstrapped AStableDirk4 as dt->0.
       type = 'Exodiff'
       should_execute = False
       input = ''
       exodiff = 'astabledirk4_0.e astabledirk4_1.e astabledirk4_2.e'
       delete_output_before_running = False
       prereq = implicit/run
+
+      detail = "the A-stable DIRK4 method, and"
     []
 
     [astabledirk4_bootstrap]
@@ -100,62 +132,8 @@
       exodiff = 'astabledirk4_bootstrap_0.e astabledirk4_bootstrap_1.e astabledirk4_bootstrap_2.e'
       delete_output_before_running = False
       prereq = implicit/run
+
+      detail = "the A-stable DIRK4 method bootstrapped with L-stable DIRK."
     []
   []
-
-
-  ## Test the AStableDirk4 time integration method.  On this test, the end_time=1.
-  #[./test_astabledirk4_1]
-  #  type = 'Exodiff'
-  #  input = 'implicit_convergence.i'
-  #  exodiff = 'astabledirk4_1.e'
-  #  cli_args = 'Outputs/file_base=astabledirk4_1 Executioner/TimeIntegrator/type=AStableDirk4 Executioner/TimeIntegrator/safe_start=false Executioner/dt=0.0625'
-  #[../]
-
-  ## Same thing with 1/2 timestep.
-  #[./test_astabledirk4_2]
-  #  type = 'Exodiff'
-  #  input = 'implicit_convergence.i'
-  #  exodiff = 'astabledirk4_2.e'
-  #  cli_args = 'Outputs/file_base=astabledirk4_2 Executioner/TimeIntegrator/type=AStableDirk4 Executioner/TimeIntegrator/safe_start=false Executioner/dt=0.03125'
-  #[../]
-
-  ## Same thing with 1/4 timestep.
-  #[./test_astabledirk4_3]
-  #  type = 'Exodiff'
-  #  input = 'implicit_convergence.i'
-  #  exodiff = 'astabledirk4_3.e'
-  #  cli_args = 'Outputs/file_base=astabledirk4_3 Executioner/TimeIntegrator/type=AStableDirk4 Executioner/TimeIntegrator/safe_start=false Executioner/dt=0.015625'
-  #[../]
-
-
-  ## Test the AStableDirk4 time integration method "bootstrapped" with
-  ## LStableDirk4.  This is the default behavior for the AStableDirk4
-  ## TimeIntegrator.  We use relatively large timesteps here, since
-  ## there is not much difference in the final results of AStableDirk4
-  ## and bootstrapped AStableDirk4 as dt->0.
-  #[./test_astabledirk4_bootstrap_1]
-  #  type = 'Exodiff'
-  #  input = 'implicit_convergence.i'
-  #  exodiff = 'astabledirk4_bootstrap_1.e'
-  #  cli_args = 'Outputs/file_base=astabledirk4_bootstrap_1 Executioner/TimeIntegrator/type=AStableDirk4 Executioner/dt=0.5'
-  #[../]
-
-  ## Same thing with 1/2 timestep.
-  #[./test_astabledirk4_bootstrap_2]
-  #  type = 'Exodiff'
-  #  input = 'implicit_convergence.i'
-  #  exodiff = 'astabledirk4_bootstrap_2.e'
-  #  cli_args = 'Outputs/file_base=astabledirk4_bootstrap_2 Executioner/TimeIntegrator/type=AStableDirk4 Executioner/dt=0.25'
-  #[../]
-
-  ## Same thing with 1/4 timestep.
-  #[./test_astabledirk4_bootstrap_3]
-  #  type = 'Exodiff'
-  #  input = 'implicit_convergence.i'
-  #  exodiff = 'astabledirk4_bootstrap_3.e'
-  #  cli_args = 'Outputs/file_base=astabledirk4_bootstrap_3 Executioner/TimeIntegrator/type=AStableDirk4 Executioner/dt=0.125'
-  #[../]
->>>>>>> e44c38883c... Update convergence tests to use MMS tools
-
 []
