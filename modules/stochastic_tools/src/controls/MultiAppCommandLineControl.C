@@ -94,7 +94,7 @@ void
 MultiAppCommandLineControl::execute()
 {
   std::vector<std::string> cli_args;
-  std::vector<DenseMatrix<Real>> samples = _sampler.getSamples();
+  std::vector<DenseMatrix<Real>> & samples = _sampler.getSamples();
 
   for (const DenseMatrix<Real> & matrix : samples)
   {

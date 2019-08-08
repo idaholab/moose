@@ -101,7 +101,6 @@ SamplerTransfer::initializeToMultiapp()
 void
 SamplerTransfer::executeToMultiapp()
 {
-
   SamplerReceiver * ptr = getReceiver(processor_id());
   std::vector<Real> row = getRow(_global_index);
   ptr->transfer(_parameter_names, row);

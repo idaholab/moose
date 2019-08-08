@@ -1,14 +1,42 @@
 
 [Tests]
+  design = 'MonteCarloSampler.md'
+
   [./uniform]
     type = 'CSVDiff'
     input = 'monte_carlo_uniform.i'
     csvdiff = 'monte_carlo_uniform_out_data_0000.csv monte_carlo_uniform_out_data_0001.csv'
+    issues = '#8863'
+    requirement = "The 'stocastic_tools' module shall be able to generate a normal distribution using a traditional Monte Carlo sampling."
   [../]
+
+  [./uniform_dist]
+    type = 'CSVDiff'
+    input = 'monte_carlo_uniform.i'
+    cli_args = Samplers/sample/sample_data_distributed=true
+    csvdiff = 'monte_carlo_uniform_out_data_0000.csv monte_carlo_uniform_out_data_0001.csv'
+    prereq = uniform
+    issues = '#13879'
+    requirement = "The 'stocastic_tools' module shall be able to generate a normal distribution using a traditional Monte Carlo sampling where the sampling data is distributed across all processors."
+  [../]
+
   [./weibull]
     type = 'CSVDiff'
     input = 'monte_carlo_weibull.i'
     csvdiff = 'monte_carlo_weibull_out_data_0000.csv monte_carlo_weibull_out_data_0001.csv'
     boost = true
+    issues = '#8863'
+    requirement = "The 'stocastic_tools' module shall be able to generate a Weibull distribution using a traditional Monte Carlo sampling."
+  [../]
+
+  [./weibull_dist]
+    type = 'CSVDiff'
+    input = 'monte_carlo_weibull.i'
+    cli_args = Samplers/sample/sample_data_distributed=true
+    csvdiff = 'monte_carlo_weibull_out_data_0000.csv monte_carlo_weibull_out_data_0001.csv'
+    boost = true
+    prereq = weibull
+    issues = '#13879'
+    requirement = "The 'stocastic_tools' module shall be able to generate a Weibull distribution using a traditional Monte Carlo sampling where the sampling data is distributed across all processors."
   [../]
 []

@@ -97,7 +97,7 @@ SamplerPostprocessorTransfer::finalizeFromMultiapp()
   if (processor_id() == 0)
   {
     _results->initialize();
-    const dof_id_type n = _sampler->getTotalNumberOfRows();
+    const dof_id_type n = (_sampler->getNumberOfMatrices()) * (_sampler->getNumberOfSamples());
     for (MooseIndex(n) i = 0; i < n; i++)
     {
       Sampler::Location loc = _sampler->getLocation(i);

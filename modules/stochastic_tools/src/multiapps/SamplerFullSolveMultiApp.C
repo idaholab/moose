@@ -146,25 +146,46 @@ SamplerFullSolveMultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
   // Since we only store param_names in cli_args, we need to find the values for each param from
   // sampler data and combine them to get full command line option strings.
 
-  std::vector<DenseMatrix<Real>> samples = _sampler.getSamples();
+  std::vector<DenseMatrix<Real>> & samples = _sampler.getSamples();
   std::ostringstream oss;
+  Sampler::Location loc =
+      _sampler.getLocation(_local_batch_app_index + _sampler.getLocalRowBegin());
+  DenseMatrix<Real> & matrix = samples[loc.sample()];
 
-  for (unsigned int i = 0; i < samples.size(); ++i)
+  const std::vector<std::string> & cli_args_name = MooseUtils::split(_cli_args[loc.sample()], ";");
+
+  unsigned int local_i = 0;
+  if (_sampler.isSampleDataDistributed())
   {
-    DenseMatrix<Real> matrix = samples[i];
-    const std::vector<std::string> & cli_args_name = MooseUtils::split(_cli_args[i], ";");
+    for (unsigned int i = 0; i < loc.sample(); ++i)
+      local_i += samples[i].m();
 
-    for (unsigned int col = 0; col < matrix.n(); ++col)
+    local_i = _local_batch_app_index - local_i;
+  }
+
+  for (unsigned int col = 0; col < matrix.n(); ++col)
+  {
+    if (col > 0)
+      oss << ";";
+
+    if (_mode == StochasticTools::MultiAppMode::BATCH_RESET)
     {
-      if (col > 0)
-        oss << ";";
-
-      if (_mode == StochasticTools::MultiAppMode::BATCH_RESET)
-        oss << cli_args_name[col] << "="
-            << Moose::stringify(matrix(_local_batch_app_index + _sampler.getLocalRowBegin(), col));
+      if (_sampler.isSampleDataDistributed())
+        oss << cli_args_name[col] << "=" << Moose::stringify(matrix(local_i, col));
       else
-        oss << cli_args_name[col] << "="
-            << Moose::stringify(matrix(local_app + _first_local_app, col));
+      {
+        oss << cli_args_name[col] << "=" << Moose::stringify(matrix(loc.row(), col));
+        if (loc.row() >= matrix.m())
+          oss.str("");
+      }
+    }
+    else
+    {
+      oss << cli_args_name[col] << "="
+          << Moose::stringify(matrix(local_app + _first_local_app, col));
+
+      if ((local_app + _first_local_app) >= matrix.m())
+        oss.str("");
     }
   }
 

@@ -84,7 +84,7 @@ public:
   /**
    * Return the sampled distribution data.
    */
-  std::vector<DenseMatrix<Real>> getSamples();
+  std::vector<DenseMatrix<Real>> & getSamples();
 
   /**
    * Return the sample names, by default 'sample_0, sample_1, etc.' is used.
@@ -137,6 +137,21 @@ public:
    */
   dof_id_type getLocalRowEnd();
 
+  /**
+   * Return true if the sample data is distributed among all processors.
+   */
+  bool isSampleDataDistributed() { return _is_distributed_sample_data; };
+
+  /**
+   * Return the number of samples.
+   */
+  dof_id_type getNumberOfSamples() { return _num_samples; };
+
+  /**
+   * Return the number of matrices.
+   */
+  dof_id_type getNumberOfMatrices() { return _num_matrices; };
+
 protected:
   /**
    * Get the next random number from the generator.
@@ -152,7 +167,7 @@ protected:
    *
    * @return The list of samples for the Sampler.
    */
-  virtual std::vector<DenseMatrix<Real>> sample() = 0;
+  virtual std::vector<DenseMatrix<Real>> & sample() = 0;
 
   /**
    * Set the number of seeds required by the sampler. The Sampler will generate
@@ -163,10 +178,15 @@ protected:
   void setNumberOfRequiedRandomSeeds(const std::size_t & number);
 
   /**
-   * Reinitialize the offsets and row counts.
-   * @param data Samples, as returned from getSamples(), to use for re-computing size information
+   * Set the number of matrices for the sampler.
+   * @param number The number of matrices.
    */
-  void reinit(const std::vector<DenseMatrix<Real>> & data);
+  void setNumberOfMatrices(const dof_id_type number) { _num_matrices = number; };
+
+  /**
+   * Reinitialize the offsets and row counts.
+   */
+  void reinit();
 
   /// Map used to store the perturbed parameters and their corresponding distributions
   std::vector<Distribution const *> _distributions;
@@ -176,6 +196,21 @@ protected:
 
   /// Sample names
   std::vector<std::string> _sample_names;
+
+  /// Sampler data is distributed among all processors
+  bool _is_distributed_sample_data;
+
+  /// Number of samples
+  dof_id_type _num_samples;
+
+  /// Number of matrices
+  dof_id_type _num_matrices;
+
+  /// Compute the sample data once
+  bool _compute_sample_once;
+
+  /// Sampler data
+  std::vector<DenseMatrix<Real>> _sample_data;
 
 private:
   /// Random number generator, don't give users access we want to control it via the interface

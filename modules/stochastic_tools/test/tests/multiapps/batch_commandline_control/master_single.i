@@ -51,6 +51,11 @@
   [storage]
     type = StochasticResults
   []
+  [./sampler_data]
+    type = SamplerData
+    sampler = sample
+    execute_on = 'INITIAL'
+  [../]
 []
 
 [Controls]

@@ -38,9 +38,11 @@ StochasticResults::initialize()
 
   // Resize and zero vectors to the correct size, this allows the SamplerPostprocessorTransfer
   // to set values in the vector directly.
-  std::vector<DenseMatrix<Real>> data = _sampler->getSamples();
-  for (MooseIndex(data) i = 0; i < data.size(); ++i)
-    _sample_vectors[i]->resize(data[i].m(), 0);
+  unsigned int num_matrices = _sampler->getNumberOfMatrices();
+  unsigned int num_samples = _sampler->getNumberOfSamples();
+
+  for (unsigned i = 0; i < num_matrices; ++i)
+    _sample_vectors[i]->resize(num_samples, 0);
 }
 
 VectorPostprocessorValue &
@@ -56,7 +58,7 @@ StochasticResults::init(Sampler & sampler)
 {
   _sampler = &sampler;
   /* TODO: getSamples must be called to initialized the names, this shouldn't be the case */
-  std::vector<DenseMatrix<Real>> data = _sampler->getSamples();
+  _sampler->getSamples();
   const std::vector<std::string> & names = _sampler->getSampleNames();
   _sample_vectors.resize(names.size());
   for (MooseIndex(names) i = 0; i < names.size(); ++i)

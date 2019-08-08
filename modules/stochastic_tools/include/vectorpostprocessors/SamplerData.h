@@ -27,6 +27,7 @@ public:
   SamplerData(const InputParameters & parameters);
   void virtual initialize() override;
   void virtual execute() override;
+  void virtual finalize() override;
 
 protected:
   /// Storage for declared vectors
@@ -38,4 +39,3 @@ protected:
   /// Whether to output the number of rows and columns in the first two rows of output
   const bool & _output_col_row_sizes;
 };
-

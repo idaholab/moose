@@ -51,7 +51,7 @@ SamplerData::initialize()
 void
 SamplerData::execute()
 {
-  std::vector<DenseMatrix<Real>> data = _sampler.getSamples();
+  std::vector<DenseMatrix<Real>> & data = _sampler.getSamples();
   auto n = data.size();
   if (_sample_vectors.empty())
   {
@@ -76,5 +76,18 @@ SamplerData::execute()
     std::copy(data[i].get_values().begin(),
               data[i].get_values().end(),
               _sample_vectors[i]->begin() + offset);
+  }
+}
+
+void
+SamplerData::finalize()
+{
+  if (_sampler.isSampleDataDistributed())
+  {
+    std::vector<DenseMatrix<Real>> & data = _sampler.getSamples();
+
+    auto n = data.size();
+    for (MooseIndex(data) i = 0; i < n; ++i)
+      _communicator.gather(0, *_sample_vectors[i]);
   }
 }

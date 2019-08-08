@@ -30,6 +30,12 @@ validParams<Sampler>()
   params.addRequiredParam<std::vector<DistributionName>>(
       "distributions", "The names of distributions that you want to sample.");
   params.addParam<unsigned int>("seed", 0, "Random number generator initial seed");
+  params.addParam<bool>("sample_data_distributed",
+                        false,
+                        "Return true if sample data is distributed across all processors.");
+  params.addRequiredParam<dof_id_type>(
+      "n_samples", "Number of samples to perform for each distribution within each matrix.");
+  params.addParam<bool>("compute_sample_once", false, "Compute sample data only once.");
   params.registerBase("Sampler");
   return params;
 }
@@ -39,6 +45,9 @@ Sampler::Sampler(const InputParameters & parameters)
     SetupInterface(this),
     DistributionInterface(this),
     _distribution_names(getParam<std::vector<DistributionName>>("distributions")),
+    _is_distributed_sample_data(getParam<bool>("sample_data_distributed")),
+    _num_samples(getParam<dof_id_type>("n_samples")),
+    _compute_sample_once(getParam<bool>("compute_sample_once")),
     _seed(getParam<unsigned int>("seed")),
     _total_rows(0)
 {
@@ -51,23 +60,23 @@ void
 Sampler::execute()
 {
   // Get the samples then save the state so that subsequent calls to getSamples returns the same
-  // random numbers until this execute command is called again.
-  std::vector<DenseMatrix<Real>> data = getSamples();
   _generator.saveState();
-  reinit(data);
+  reinit();
 }
 
 void
-Sampler::reinit(const std::vector<DenseMatrix<Real>> & data)
+Sampler::reinit()
 {
   // Update offsets and total number of rows
   _total_rows = 0;
   _offsets.clear();
-  _offsets.reserve(data.size() + 1);
+  unsigned int num_matrices = getNumberOfMatrices();
+  unsigned int num_samples = getNumberOfSamples();
+  _offsets.reserve(num_matrices + 1);
   _offsets.push_back(_total_rows);
-  for (const DenseMatrix<Real> & mat : data)
+  for (unsigned int i = 0; i < num_matrices; i++)
   {
-    _total_rows += mat.m();
+    _total_rows += num_samples;
     _offsets.push_back(_total_rows);
   }
 
@@ -76,12 +85,12 @@ Sampler::reinit(const std::vector<DenseMatrix<Real>> & data)
       _total_rows, n_processors(), processor_id(), _local_rows, _local_row_begin, _local_row_end);
 }
 
-std::vector<DenseMatrix<Real>>
+std::vector<DenseMatrix<Real>> &
 Sampler::getSamples()
 {
   _generator.restoreState();
   sampleSetUp();
-  std::vector<DenseMatrix<Real>> output = sample();
+  std::vector<DenseMatrix<Real>> & output = sample();
   sampleTearDown();
 
   if (_sample_names.empty())
@@ -137,7 +146,7 @@ Sampler::Location
 Sampler::getLocation(dof_id_type global_index)
 {
   if (_offsets.empty())
-    reinit(getSamples());
+    reinit();
 
   mooseAssert(_offsets.size() > 1,
               "The getSamples method returned an empty vector, if you are seeing this you have "
@@ -157,7 +166,7 @@ dof_id_type
 Sampler::getTotalNumberOfRows()
 {
   if (_total_rows == 0)
-    reinit(getSamples());
+    reinit();
   return _total_rows;
 }
 
@@ -168,7 +177,7 @@ dof_id_type
 Sampler::getLocalNumerOfRows()
 {
   if (_total_rows == 0)
-    reinit(getSamples());
+    reinit();
   return _local_rows;
 }
 
@@ -179,7 +188,7 @@ dof_id_type
 Sampler::getLocalRowBegin()
 {
   if (_total_rows == 0)
-    reinit(getSamples());
+    reinit();
   return _local_row_begin;
 }
 
@@ -190,6 +199,6 @@ dof_id_type
 Sampler::getLocalRowEnd()
 {
   if (_total_rows == 0)
-    reinit(getSamples());
+    reinit();
   return _local_row_end;
 }

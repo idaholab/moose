@@ -17,17 +17,13 @@ validParams<SobolSampler>()
 {
   InputParameters params = validParams<Sampler>();
   params.addClassDescription("Sobol variance-based sensitivity analysis Sampler.");
-  params.addRequiredParam<unsigned int>(
-      "n_samples", "Number of Monte Carlo samples to perform for each distribution.");
   return params;
 }
 
 SobolSampler::SobolSampler(const InputParameters & parameters)
-  : Sampler(parameters),
-    _num_samples(getParam<unsigned int>("n_samples")),
-    _a_matrix(0, 0),
-    _b_matrix(0, 0)
+  : Sampler(parameters), _a_matrix(0, 0), _b_matrix(0, 0)
 {
+  setNumberOfMatrices(_distributions.size() + 2);
   setNumberOfRequiedRandomSeeds(2);
 }
 
@@ -51,12 +47,17 @@ SobolSampler::sampleTearDown()
   _b_matrix.resize(0, 0);
 }
 
-std::vector<DenseMatrix<Real>>
+std::vector<DenseMatrix<Real>> &
 SobolSampler::sample()
 {
-  // Create the output vector
+  if (_compute_sample_once && _sample_data.size() != 0)
+    return _sample_data;
+
+  std::vector<DenseMatrix<Real>> output(_num_matrices);
+
+  // Create the sample_data vector
   auto n = _distributions.size() + 2;
-  std::vector<DenseMatrix<Real>> output(n);
+  output.resize(n);
 
   // Include the A and B matrices
   output[0] = _a_matrix;
@@ -70,5 +71,7 @@ SobolSampler::sample()
       output[idx](i, idx - 2) = _b_matrix(i, idx - 2);
   }
 
-  return output;
+  _sample_data = output;
+
+  return _sample_data;
 }
