@@ -22,6 +22,9 @@ def check_requirement(filename):
     design = root.children[0].get('design', None)
     issues = root.children[0].get('issues', None)
     for child in root.children[0]:
+        if 'deprecated' in child:
+            continue
+
         if 'requirement' not in child:
             messages.append("    'requirement' parameter is missing in '{}' block.".format(child.name))
 
