@@ -72,16 +72,6 @@ protected:
   }
 
   /**
-   * Calculate the derivative of the strain increment with respect to the updated stress.
-   * @param effective_trial_stress Effective trial stress
-   * @param scalar                 Inelastic strain increment magnitude being solved for
-   */
-  virtual Real computeStressDerivative(const Real /*effective_trial_stress*/, const Real /*scalar*/)
-  {
-    return 0.0;
-  }
-
-  /**
    * Compute an initial guess for the value of the scalar. For some cases, an
    * intellegent starting point can provide enhanced robustness in the Newton
    * iterations. This is also an opportunity for classes that derive from this
@@ -105,8 +95,6 @@ protected:
 
   void outputIterationSummary(std::stringstream * iter_output,
                               const unsigned int total_it) override;
-
-  virtual Real computeSwellingIncrement(const Real & /*hydrostatic_stress*/) { return 0.0; }
 
   Real computeH(const Real n, const Real & gauge_stress, const bool derivative = false);
 
