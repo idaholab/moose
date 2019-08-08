@@ -19,6 +19,9 @@ validParams<TimeStepper>()
   InputParameters params = validParams<MooseObject>();
   params.addParam<bool>(
       "reset_dt", false, "Use when restarting a calculation to force a change in dt.");
+  params.addParam<Real>("cutback_factor_at_failure",
+                        0.5,
+                        "Factor to apply to timestep if it a time step fails to convergence.");
 
   params.registerBase("TimeStepper");
 
@@ -44,6 +47,7 @@ TimeStepper::TimeStepper(const InputParameters & parameters)
     _timestep_tolerance(_executioner.timestepTol()),
     _verbose(_executioner.verbose()),
     _converged(true),
+    _cutback_factor_at_failure(getParam<Real>("cutback_factor_at_failure")),
     _reset_dt(getParam<bool>("reset_dt")),
     _has_reset_dt(false),
     _current_dt(declareRestartableData("current_dt", 1.0))
@@ -184,10 +188,10 @@ TimeStepper::computeFailedDT()
   if (_dt <= _dt_min)
     mooseError("Solve failed and timestep already at or below dtmin, cannot continue!");
 
-  // cut the time step in a half
-  if (0.5 * _dt >= _dt_min)
-    return 0.5 * _dt;
-  else // (0.5 * _current_dt < _dt_min)
+  // cut the time step
+  if (_cutback_factor_at_failure * _dt >= _dt_min)
+    return _cutback_factor_at_failure * _dt;
+  else // (_cutback_factor_at_failure * _current_dt < _dt_min)
     return _dt_min;
 }
 

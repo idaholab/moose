@@ -138,6 +138,9 @@ protected:
   /// Whether or not the previous solve converged.
   bool _converged;
 
+  /// Cutback factor if a time step fails to converge
+  const Real & _cutback_factor_at_failure;
+
   /// If true then the next dt will be computed by computeInitialDT()
   bool _reset_dt;
 

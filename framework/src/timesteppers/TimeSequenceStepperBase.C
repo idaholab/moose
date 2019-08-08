@@ -138,7 +138,7 @@ TimeSequenceStepperBase::computeFailedDT()
     mooseError("Solve failed and timestep already at or below dtmin, cannot continue!");
 
   // cut the time step in a half if possible
-  Real dt = 0.5 * computeDT();
+  Real dt = _cutback_factor_at_failure * computeDT();
   if (dt < _dt_min)
     dt = _dt_min;
   _time_sequence.insert(_time_sequence.begin() + _current_step + 1,
