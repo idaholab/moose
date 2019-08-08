@@ -22,7 +22,7 @@ InputParameters validParams<GasFreeEnergyBase>();
  * Material class that provides the free energy of an ideal gas with the expression builder
  * and uses automatic differentiation to get the derivatives.
  */
-class GasFreeEnergyBase : public DerivativeParsedMaterialHelper, public ExpressionBuilder
+class GasFreeEnergyBase : public DerivativeParsedMaterialHelper<>, public ExpressionBuilder
 {
 public:
   GasFreeEnergyBase(const InputParameters & parameters);
@@ -51,4 +51,3 @@ protected:
   /// quantum concentration
   const EBTerm _nq;
 };
-

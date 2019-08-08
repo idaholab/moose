@@ -23,9 +23,8 @@ InputParameters validParams<ParsedMaterial>();
  * FunctionMaterialBase child class to evaluate a parsed function. The function
  * can access non-linear and aux variables (unlike MooseParsedFunction).
  */
-class ParsedMaterial : public ParsedMaterialHelper, public ParsedMaterialBase
+class ParsedMaterial : public ParsedMaterialHelper<Real>, public ParsedMaterialBase
 {
 public:
   ParsedMaterial(const InputParameters & parameters);
 };
-

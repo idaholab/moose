@@ -11,7 +11,7 @@
 
 template <>
 InputParameters
-validParams<FunctionMaterialBase<T> >()
+validParams<FunctionMaterialBase<> >()
 {
   InputParameters params = validParams<Material>();
   params.addClassDescription("Material to provide a function (such as a free energy)");
@@ -22,11 +22,11 @@ validParams<FunctionMaterialBase<T> >()
   return params;
 }
 
-template <class T>
-FunctionMaterialBase::FunctionMaterialBase(const InputParameters & parameters)
+template <typename T>
+FunctionMaterialBase<T>::FunctionMaterialBase(const InputParameters & parameters)
   : DerivativeMaterialInterface<Material>(parameters),
     _F_name(getParam<std::string>("f_name")),
-    _prop_F(&declareProperty<Real>(_F_name))
+    _prop_F(&declareProperty<T>(_F_name))
 {
   // fetch names and numbers of all coupled variables
   _mapping_is_unique = true;

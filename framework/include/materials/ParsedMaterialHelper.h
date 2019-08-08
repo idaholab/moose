@@ -16,16 +16,18 @@
 #include "libmesh/fparser_ad.hh"
 
 // forward declatration
+template <typename T = Real>
 class ParsedMaterialHelper;
 
 template <>
-InputParameters validParams<ParsedMaterialHelper>();
+InputParameters validParams<ParsedMaterialHelper<> >();
 
 /**
  * Helper class to perform the parsing and optimization of the
  * function expression.
  */
-class ParsedMaterialHelper : public FunctionMaterialBase, public FunctionParserUtils
+template <typename T>
+class ParsedMaterialHelper : public FunctionMaterialBase<T>, public FunctionParserUtils
 {
 public:
   enum VariableNameMappingMode
@@ -36,12 +38,22 @@ public:
 
   ParsedMaterialHelper(const InputParameters & parameters, VariableNameMappingMode map_mode);
 
-  void functionParse(const std::vector<std::string> & function_expressions);
   void functionParse(const std::string & function_expression);
   void functionParse(const std::string & function_expression,
                      const std::vector<std::string> & constant_names,
                      const std::vector<std::string> & constant_expressions);
   void functionParse(const std::string & function_expression,
+                     const std::vector<std::string> & constant_names,
+                     const std::vector<std::string> & constant_expressions,
+                     const std::vector<std::string> & mat_prop_names,
+                     const std::vector<std::string> & tol_names,
+                     const std::vector<Real> & tol_values);
+
+  void functionParse(const std::vector<std::string> & function_expression);
+  void functionParse(const std::vector<std::string> & function_expression,
+                     const std::vector<std::string> & constant_names,
+                     const std::vector<std::string> & constant_expressions);
+  void functionParse(const std::vector<std::string> & function_expression,
                      const std::vector<std::string> & constant_names,
                      const std::vector<std::string> & constant_expressions,
                      const std::vector<std::string> & mat_prop_names,
@@ -57,10 +69,10 @@ protected:
 
   // run FPOptimizer on the parsed function
   virtual void functionsOptimize();
+  virtual void functionValue();
 
   /// The undiffed free energy function parser object.
-  ADFunctionPtr _func_F;
-  std::vector<ADFunctionPtr> _funcs_F;
+  std::vector<ADFunctionPtr> _func_F;
 
   /// variable names used in the expression (depends on the map_mode)
   std::vector<std::string> _variable_names;
@@ -81,7 +93,4 @@ protected:
    * parsing the FParser expression.
    */
   const VariableNameMappingMode _map_mode;
-
-  std::vector<bool> _in_function;
-  bool _gradient_function;
 };

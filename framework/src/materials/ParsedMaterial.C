@@ -15,14 +15,14 @@ template <>
 InputParameters
 validParams<ParsedMaterial>()
 {
-  InputParameters params = validParams<ParsedMaterialHelper>();
+  InputParameters params = validParams<ParsedMaterialHelper<Real> >();
   params += validParams<ParsedMaterialBase>();
   params.addClassDescription("Parsed Function Material.");
   return params;
 }
 
 ParsedMaterial::ParsedMaterial(const InputParameters & parameters)
-  : ParsedMaterialHelper(parameters, USE_MOOSE_NAMES), ParsedMaterialBase(parameters)
+  : ParsedMaterialHelper<Real>(parameters, USE_MOOSE_NAMES), ParsedMaterialBase(parameters)
 {
   // Build function and optimize
   functionParse(_function,

@@ -15,7 +15,7 @@ template <>
 InputParameters
 validParams<RegularSolutionFreeEnergy>()
 {
-  InputParameters params = validParams<DerivativeParsedMaterialHelper>();
+  InputParameters params = validParams<DerivativeParsedMaterialHelper<> >();
   params.addClassDescription("Material that implements the free energy of a regular solution");
   params.addRequiredCoupledVar("c", "Concentration variable");
   params.addCoupledVar("T", 300, "Temperature variable");
@@ -27,7 +27,7 @@ validParams<RegularSolutionFreeEnergy>()
 }
 
 RegularSolutionFreeEnergy::RegularSolutionFreeEnergy(const InputParameters & parameters)
-  : DerivativeParsedMaterialHelper(parameters),
+  : DerivativeParsedMaterialHelper<>(parameters),
     _c("c"),
     _T("T"),
     _omega(getParam<Real>("omega")),

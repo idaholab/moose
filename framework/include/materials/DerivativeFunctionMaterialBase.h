@@ -32,7 +32,7 @@ InputParameters validParams<DerivativeFunctionMaterialBase>();
  * \see DerivativeParsedMaterial
  * \see DerivativeMaterialInterface
  */
-class DerivativeFunctionMaterialBase : public FunctionMaterialBase
+class DerivativeFunctionMaterialBase : public FunctionMaterialBase<Real>
 {
 public:
   DerivativeFunctionMaterialBase(const InputParameters & parameters);
@@ -99,4 +99,3 @@ protected:
   /// Material properties to store the third derivatives.
   std::vector<std::vector<std::vector<MaterialProperty<Real> *>>> _prop_d3F;
 };
-

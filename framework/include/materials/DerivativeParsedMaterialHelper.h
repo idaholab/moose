@@ -14,32 +14,34 @@
 #include "libmesh/fparser_ad.hh"
 
 // Forward Declarations
+template <typename T = Real>
 class DerivativeParsedMaterialHelper;
 
 template <>
-InputParameters validParams<DerivativeParsedMaterialHelper>();
+InputParameters validParams<DerivativeParsedMaterialHelper<> >();
 
 /**
  * Helper class to perform the auto derivative taking.
  */
-class DerivativeParsedMaterialHelper : public ParsedMaterialHelper
+template <typename T>
+class DerivativeParsedMaterialHelper : public ParsedMaterialHelper<T>
 {
 public:
   DerivativeParsedMaterialHelper(const InputParameters & parameters,
-                                 VariableNameMappingMode map_mode = USE_PARAM_NAMES);
+                                 typename ParsedMaterialHelper<T>::VariableNameMappingMode map_mode = ParsedMaterialHelper<T>::USE_PARAM_NAMES);
 
 protected:
   struct Derivative;
   struct MaterialPropertyDerivativeRule;
 
   virtual void initQpStatefulProperties();
-  virtual void computeQpProperties();
+  virtual void functionValue();
 
   virtual void functionsPostParse();
   void assembleDerivatives();
 
   void
-  recurseMatProps(unsigned int var, unsigned int order, const MatPropDescriptorList & parent_mpd);
+  recurseMatProps(unsigned int var, unsigned int order, const typename ParsedMaterialHelper<T>::MatPropDescriptorList & parent_mpd);
 
   void
   recurseDerivative(unsigned int var, unsigned int order, const Derivative & parent_derivative);
@@ -61,14 +63,16 @@ private:
   std::vector<MaterialPropertyDerivativeRule> _bulk_rules;
 };
 
-struct DerivativeParsedMaterialHelper::Derivative
+template <typename T>
+struct DerivativeParsedMaterialHelper<T>::Derivative
 {
-  MaterialProperty<Real> * _mat_prop;
-  ADFunctionPtr _F;
+  MaterialProperty<T> * _mat_prop;
+  std::vector<typename ParsedMaterialHelper<T>::ADFunctionPtr> _F;
   std::vector<VariableName> _darg_names;
 };
 
-struct DerivativeParsedMaterialHelper::MaterialPropertyDerivativeRule
+template <typename T>
+struct DerivativeParsedMaterialHelper<T>::MaterialPropertyDerivativeRule
 {
   MaterialPropertyDerivativeRule(std::string p, std::string v, std::string c)
     : _parent(p), _var(v), _child(c)

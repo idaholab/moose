@@ -15,7 +15,7 @@ template <>
 InputParameters
 validParams<SwitchingFunction3PhaseMaterial>()
 {
-  InputParameters params = validParams<DerivativeParsedMaterialHelper>();
+  InputParameters params = validParams<DerivativeParsedMaterialHelper<> >();
   params.addClassDescription("Material for switching function that prevents formation of a third "
                              "phase at a two-phase interface: h_i = eta_i^2/4 * [15 (1-eta_i) [1 + "
                              "eta_i - (eta_k - eta_j)^2] + eta_i * (9eta_i^2 - 5)]");
@@ -26,7 +26,7 @@ validParams<SwitchingFunction3PhaseMaterial>()
 }
 
 SwitchingFunction3PhaseMaterial::SwitchingFunction3PhaseMaterial(const InputParameters & parameters)
-  : DerivativeParsedMaterialHelper(parameters), _eta_i("eta_i"), _eta_j("eta_j"), _eta_k("eta_k")
+  : DerivativeParsedMaterialHelper<>(parameters), _eta_i("eta_i"), _eta_j("eta_j"), _eta_k("eta_k")
 {
   EBFunction h_i;
   // Definition of the switching function for the expression builder

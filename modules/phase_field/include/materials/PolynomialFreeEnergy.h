@@ -22,7 +22,7 @@ InputParameters validParams<PolynomialFreeEnergy>();
  * Derivative free energy material defining polynomial free energies for single component materials,
  * with derivatives from ExpressionBuilder
  */
-class PolynomialFreeEnergy : public DerivativeParsedMaterialHelper, public ExpressionBuilder
+class PolynomialFreeEnergy : public DerivativeParsedMaterialHelper<>, public ExpressionBuilder
 {
 public:
   PolynomialFreeEnergy(const InputParameters & parameters);
@@ -40,4 +40,3 @@ protected:
   ///Polynomial order
   MooseEnum _order;
 };
-

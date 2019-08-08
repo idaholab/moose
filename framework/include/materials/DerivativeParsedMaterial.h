@@ -22,9 +22,8 @@ InputParameters validParams<DerivativeParsedMaterial>();
  * DerivativeFunctionMaterialBase child class to evaluate a parsed function (for
  * example a free energy) and automatically provide all derivatives.
  */
-class DerivativeParsedMaterial : public DerivativeParsedMaterialHelper, public ParsedMaterialBase
+class DerivativeParsedMaterial : public DerivativeParsedMaterialHelper<>, public ParsedMaterialBase
 {
 public:
   DerivativeParsedMaterial(const InputParameters & parameters);
 };
-

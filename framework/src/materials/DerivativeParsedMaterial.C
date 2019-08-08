@@ -15,14 +15,14 @@ template <>
 InputParameters
 validParams<DerivativeParsedMaterial>()
 {
-  InputParameters params = validParams<DerivativeParsedMaterialHelper>();
+  InputParameters params = validParams<DerivativeParsedMaterialHelper<> >();
   params += validParams<ParsedMaterialBase>();
   params.addClassDescription("Parsed Function Material with automatic derivatives.");
   return params;
 }
 
 DerivativeParsedMaterial::DerivativeParsedMaterial(const InputParameters & parameters)
-  : DerivativeParsedMaterialHelper(parameters, USE_MOOSE_NAMES), ParsedMaterialBase(parameters)
+  : DerivativeParsedMaterialHelper<>(parameters, USE_MOOSE_NAMES), ParsedMaterialBase(parameters)
 {
   // Build function, take derivatives, optimize
   functionParse(_function,

@@ -13,7 +13,7 @@ template <>
 InputParameters
 validParams<GasFreeEnergyBase>()
 {
-  InputParameters params = validParams<DerivativeParsedMaterialHelper>();
+  InputParameters params = validParams<DerivativeParsedMaterialHelper<> >();
   params.addRequiredCoupledVar("T", "Temperature");
   // MooseEnum molecule("MONOATOMIC DIATOMIC", "MONOATOMIC");
   // params.addParam<MooseEnum>("molecule", molecule, "Gas molecule size");
@@ -36,7 +36,7 @@ validParams<GasFreeEnergyBase>()
 }
 
 GasFreeEnergyBase::GasFreeEnergyBase(const InputParameters & parameters)
-  : DerivativeParsedMaterialHelper(parameters),
+  : DerivativeParsedMaterialHelper<>(parameters),
     _T("T"),
     _c("c"),
     _omega(getParam<Real>("omega")),

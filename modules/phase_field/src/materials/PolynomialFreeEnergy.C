@@ -15,7 +15,7 @@ template <>
 InputParameters
 validParams<PolynomialFreeEnergy>()
 {
-  InputParameters params = validParams<DerivativeParsedMaterialHelper>();
+  InputParameters params = validParams<DerivativeParsedMaterialHelper<> >();
   params.addClassDescription("Polynomial free energy for single component systems");
   MooseEnum poly_order("4 6 8");
   params.addRequiredParam<MooseEnum>(
@@ -29,7 +29,7 @@ validParams<PolynomialFreeEnergy>()
 }
 
 PolynomialFreeEnergy::PolynomialFreeEnergy(const InputParameters & parameters)
-  : DerivativeParsedMaterialHelper(parameters),
+  : DerivativeParsedMaterialHelper<>(parameters),
     _c("c"),
     _a("c_eq_name"),
     _W("W_name"),

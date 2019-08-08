@@ -15,7 +15,7 @@ template <>
 InputParameters
 validParams<DerivativeFunctionMaterialBase>()
 {
-  InputParameters params = validParams<FunctionMaterialBase>();
+  InputParameters params = validParams<FunctionMaterialBase<Real> >();
   params.addClassDescription("Material to provide a function (such as a free energy) and its "
                              "derivatives w.r.t. the coupled variables");
   params.addDeprecatedParam<bool>("third_derivatives",
@@ -29,7 +29,7 @@ validParams<DerivativeFunctionMaterialBase>()
 }
 
 DerivativeFunctionMaterialBase::DerivativeFunctionMaterialBase(const InputParameters & parameters)
-  : FunctionMaterialBase(parameters),
+  : FunctionMaterialBase<Real>(parameters),
     _third_derivatives(getParam<unsigned int>("derivative_order") == 3)
 {
   // reserve space for material properties and explicitly initialize to NULL

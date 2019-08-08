@@ -13,14 +13,17 @@
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
-template <class T>
+template <typename T = Real>
 class FunctionMaterialBase;
+
+template <>
+InputParameters validParams<FunctionMaterialBase<> >();
 
 /**
  * %Material base class central for all Materials that provide a Function as a
  * material property value.
  */
-template <class T>
+ template <typename T>
 class FunctionMaterialBase : public DerivativeMaterialInterface<Material>
 {
 public:

@@ -23,7 +23,7 @@ InputParameters validParams<SwitchingFunction3PhaseMaterial>();
  * third phase at a two-phase interface. See Folch and Plapp, Phys. Rev. E, v. 72,
  * 011602 (2005).
  */
-class SwitchingFunction3PhaseMaterial : public DerivativeParsedMaterialHelper,
+class SwitchingFunction3PhaseMaterial : public DerivativeParsedMaterialHelper<>,
                                         public ExpressionBuilder
 {
 public:
@@ -35,4 +35,3 @@ protected:
   EBTerm _eta_j;
   EBTerm _eta_k;
 };
-

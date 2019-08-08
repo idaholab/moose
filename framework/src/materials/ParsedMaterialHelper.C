@@ -13,44 +13,37 @@
 
 template <>
 InputParameters
-validParams<ParsedMaterialHelper>()
+validParams<ParsedMaterialHelper<> >()
 {
-  InputParameters params = validParams<FunctionMaterialBase>();
+  InputParameters params = validParams<FunctionMaterialBase<> >();
   params += validParams<FunctionParserUtils>();
   params.addClassDescription("Parsed Function Material.");
   return params;
 }
 
-ParsedMaterialHelper::ParsedMaterialHelper(const InputParameters & parameters,
+template <typename T>
+ParsedMaterialHelper<T>::ParsedMaterialHelper(const InputParameters & parameters,
                                            VariableNameMappingMode map_mode)
-  : FunctionMaterialBase(parameters),
+  : FunctionMaterialBase<T>(parameters),
     FunctionParserUtils(parameters),
-    _variable_names(_nargs),
+    _variable_names(this->_nargs),
     _mat_prop_descriptors(0),
     _tol(0),
-    _map_mode(map_mode),
-    func_F(0)
+    _map_mode(map_mode)
 {
 }
 
-void ParsedMaterialHelper::functionParse(const std::vector<std::string> & function_expressions)
-{
-  for(int i = 0; 0 < function_expressions.size(), ++i)
-  {
-    functionParse(function_expressions[i]);
-    _funcs_F.append(func_F);
-  }
-}
-
+template <typename T>
 void
-ParsedMaterialHelper::functionParse(const std::string & function_expression)
+ParsedMaterialHelper<T>::functionParse(const std::string & function_expression)
 {
   std::vector<std::string> empty_string_vector;
   functionParse(function_expression, empty_string_vector, empty_string_vector);
 }
 
+template <typename T>
 void
-ParsedMaterialHelper::functionParse(const std::string & function_expression,
+ParsedMaterialHelper<T>::functionParse(const std::string & function_expression,
                                     const std::vector<std::string> & constant_names,
                                     const std::vector<std::string> & constant_expressions)
 {
@@ -64,66 +57,117 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
                 empty_real_vector);
 }
 
+template <typename T>
 void
-ParsedMaterialHelper::functionParse(const std::string & function_expression,
+ParsedMaterialHelper<T>::functionParse(const std::string & function_expression,
                                     const std::vector<std::string> & constant_names,
                                     const std::vector<std::string> & constant_expressions,
                                     const std::vector<std::string> & mat_prop_expressions,
                                     const std::vector<std::string> & tol_names,
                                     const std::vector<Real> & tol_values)
 {
-  std::string function = function_expression;
+  std::vector<std::string> function_expressions;
+  function_expressions.push_back(function_expression);
+  functionParse(function_expressions,
+                constant_names,
+                constant_expressions,
+                mat_prop_expressions,
+                tol_names,
+                tol_values);
+}
+
+template <typename T>
+void
+ParsedMaterialHelper<T>::functionParse(const std::vector<std::string> & function_expressions)
+{
+  std::vector<std::string> empty_string_vector;
+  functionParse(function_expressions, empty_string_vector, empty_string_vector);
+}
+
+template <typename T>
+void
+ParsedMaterialHelper<T>::functionParse(const std::vector<std::string> & function_expressions,
+                                    const std::vector<std::string> & constant_names,
+                                    const std::vector<std::string> & constant_expressions)
+{
+  std::vector<std::string> empty_string_vector;
+  std::vector<Real> empty_real_vector;
+  functionParse(function_expressions,
+                constant_names,
+                constant_expressions,
+                empty_string_vector,
+                empty_string_vector,
+                empty_real_vector);
+}
+
+template <typename T>
+void
+ParsedMaterialHelper<T>::functionParse(const std::vector<std::string> & function_expressions,
+                                       const std::vector<std::string> & constant_names,
+                                       const std::vector<std::string> & constant_expressions,
+                                       const std::vector<std::string> & mat_prop_expressions,
+                                       const std::vector<std::string> & tol_names,
+                                       const std::vector<Real> & tol_values)
+{
+  std::vector<std::string> function = function_expressions;
   // build base function object
-  _func_F = ADFunctionPtr(new ADFunction());
+  _func_F.resize(function_expressions.size());
+  for(unsigned int i = 0; i < function_expressions.size(); ++i)
+  {
+    _func_F[i] = ADFunctionPtr(new ADFunction());
 
   // set FParser internal feature flags
-  setParserFeatureFlags(_func_F);
+    setParserFeatureFlags(_func_F[i]);
 
   // initialize constants
-  addFParserConstants(_func_F, constant_names, constant_expressions);
-
+    addFParserConstants(_func_F[i], constant_names, constant_expressions);
+  }
   // add further constants coming from default value coupling
   if (_map_mode == USE_PARAM_NAMES)
-    for (const auto & acd : _arg_constant_defaults)
-      if (!_func_F->AddConstant(acd, _pars.defaultCoupledValue(acd)))
-        mooseError("Invalid constant name in parsed function object");
+    for (const auto & acd : this->_arg_constant_defaults)
+      for(unsigned int i = 0; i < _func_F.size(); ++i)
+        if (!_func_F[i]->AddConstant(acd, this->_pars.defaultCoupledValue(acd)))
+          mooseError("Invalid constant name in parsed function object");
 
   // set variable names based on map_mode
   switch (_map_mode)
   {
     case USE_MOOSE_NAMES:
-      for (unsigned int i = 0; i < _nargs; ++i)
-        _variable_names[i] = _arg_names[i];
+      for (unsigned int i = 0; i < this->_nargs; ++i)
+        _variable_names[i] = this->_arg_names[i];
       break;
 
     case USE_PARAM_NAMES:
-      _variable_names.resize(_nargs * 4);
-      for (unsigned int i = 0; i < _nargs; ++i)
+      _variable_names.resize(this->_nargs * 4);
+      for (unsigned int i = 0; i < this->_nargs; ++i)
       {
-        if(_arg_param_numbers[i] < 0)
+        if(this->_arg_param_numbers[i] < 0)
         {
-          _variable_names[4*i] = _arg_param_names[i];
+          _variable_names[4*i] = this->_arg_param_names[i];
           _variable_names[4*i+1] = _variable_names[i] + "x";
           _variable_names[4*i+2] = _variable_names[i] + "y";
           _variable_names[4*i+3] = _variable_names[i] + "z";
         }
         else
         {
-          _variable_names[4*i] = getVar(_arg_param_names[i],_arg_param_numbers[i])->name();
+          _variable_names[4*i] = Coupleable::getVar(this->_arg_param_names[i],this->_arg_param_numbers[i])->name();
           _variable_names[4*i+1] = _variable_names[i] + "x";
           _variable_names[4*i+2] = _variable_names[i] + "y";
           _variable_names[4*i+3] = _variable_names[i] + "z";
-          std::string to_replace = _arg_param_names[i] + std::to_string(i);
-          std::size_t variable_location = function.find(to_replace);
-          while(variable_location != std::string::npos)
+          std::string to_replace = this->_arg_param_names[i] + std::to_string(i);
+          for(unsigned int j = 0; j < function.size(); ++j)
           {
-            function.replace(variable_location,to_replace.length(),_variable_names[i]);
-            variable_location = function.find(to_replace);
+            std::size_t variable_location = function[j].find(to_replace);
+            while(variable_location != std::string::npos)
+            {
+              function[j].replace(variable_location,to_replace.length(),_variable_names[j]);
+              variable_location = function[j].find(to_replace);
+            }
           }
         }
       }
-      _arg_names = _variable_names;
-      _nargs *= 4;
+      this->_arg_names = _variable_names;
+      this->_nargs *= 4;
       break;
 
     default:
@@ -135,8 +179,8 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
     mooseError("The parameter vectors tol_names and tol_values must have equal length.");
 
   // set tolerances
-  _tol.resize(_nargs);
-  for (unsigned int i = 0; i < _nargs; ++i)
+  _tol.resize(this->_nargs);
+  for (unsigned int i = 0; i < this->_nargs; ++i)
   {
     _tol[i] = -1.0;
 
@@ -151,7 +195,7 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
 
   // build 'variables' argument for fparser
   std::string variables;
-  for (unsigned i = 0; i < _nargs; ++i)
+  for (unsigned i = 0; i < this->_nargs; ++i)
       variables += "," + _variable_names[i];
 
   // get all material properties
@@ -165,28 +209,28 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
     // get the fparser symbol name for the new material property
     variables += "," + _mat_prop_descriptors[i].getSymbolName();
   }
-  std::cout << function << std::endl;
-  std::cout << variables << std::endl;
   // erase leading comma
   variables.erase(0, 1);
   // build the base function
-  if (_func_F->Parse(function, variables) >= 0)
-    mooseError("Invalid function\n",
-               function,
-               '\n',
-               variables,
-               "\nin ParsedMaterialHelper.\n",
-               _func_F->ErrorMsg());
+  for(unsigned int i = 0; i < _func_F.size(); ++i)
+    if (_func_F[i]->Parse(function[i], variables) >= 0)
+      mooseError("Invalid function\n",
+                 function[i],
+                 '\n',
+                 variables,
+                 "\nin ParsedMaterialHelper.\n",
+                 _func_F[i]->ErrorMsg());
 
   // create parameter passing buffer
-  _func_params.resize(_nargs + nmat_props);
+  _func_params.resize(this->_nargs + nmat_props);
 
   // perform next steps (either optimize or take derivatives and then optimize)
   functionsPostParse();
 }
 
+template <typename T>
 void
-ParsedMaterialHelper::functionsPostParse()
+ParsedMaterialHelper<T>::functionsPostParse()
 {
   functionsOptimize();
 
@@ -195,25 +239,31 @@ ParsedMaterialHelper::functionsPostParse()
     mpd.value();
 }
 
+template <typename T>
 void
-ParsedMaterialHelper::functionsOptimize()
+ParsedMaterialHelper<T>::functionsOptimize()
 {
-  // base function
-  if (!_disable_fpoptimizer)
-    _func_F->Optimize();
-  if (_enable_jit && !_func_F->JITCompile())
-    mooseInfo("Failed to JIT compile expression, falling back to byte code interpretation.");
+  for(unsigned int i = 0; i < _func_F.size(); ++i)
+  {
+    // base function
+    if (!_disable_fpoptimizer)
+      _func_F[i]->Optimize();
+    if (_enable_jit && !_func_F[i]->JITCompile())
+      mooseInfo("Failed to JIT compile expression, falling back to byte code interpretation.");
+  }
 }
 
+template <typename T>
 void
-ParsedMaterialHelper::initQpStatefulProperties()
+ParsedMaterialHelper<T>::initQpStatefulProperties()
 {
-  if (_prop_F)
-    (*_prop_F)[_qp] = 0.0;
+  if (this->_prop_F)
+    (*this->_prop_F)[this->_qp] = 0.0;
 }
 
+template <typename T>
 void
-ParsedMaterialHelper::computeQpProperties()
+ParsedMaterialHelper<T>::computeQpProperties()
 {
   Real a;
   Real b;
@@ -221,22 +271,21 @@ ParsedMaterialHelper::computeQpProperties()
   Real d;
 
   // fill the parameter vector, apply tolerances
-  unsigned int j = 0;
-  for (unsigned int i = 0; i < _nargs; ++i)
+  for (unsigned int i = 0; i < this->_nargs/4; ++i)
   {
     if (_tol[i] < 0.0)
     {
-      _func_params[4*i] = (*_args[i])[_qp];
-      _func_params[4*i+1] = ((*_grad_args[i])[_qp])(0);
-      _func_params[4*i+2] = ((*_grad_args[i])[_qp])(1);
-      _func_params[4*i+3] = ((*_grad_args[i])[_qp])(2);
+      _func_params[4*i] = (*this->_args[i])[this->_qp];
+      _func_params[4*i+1] = ((*this->_grad_args[i])[this->_qp])(0);
+      _func_params[4*i+2] = ((*this->_grad_args[i])[this->_qp])(1);
+      _func_params[4*i+3] = ((*this->_grad_args[i])[this->_qp])(2);
     }
     else
     {
-      a = (*_args[i])[_qp];
-      b = ((*_grad_args[i])[_qp])(0);
-      c = ((*_grad_args[i])[_qp])(1);
-      d = ((*_grad_args[i])[_qp])(2);
+      a = (*this->_args[i])[this->_qp];
+      b = ((*this->_grad_args[i])[this->_qp])(0);
+      c = ((*this->_grad_args[i])[this->_qp])(1);
+      d = ((*this->_grad_args[i])[this->_qp])(2);
       _func_params[4*i] = a < _tol[i] ? _tol[i] : (a > 1.0 - _tol[i] ? 1.0 - _tol[i] : a);
       _func_params[4*i+1] = b < _tol[i] ? _tol[i] : (b > 1.0 - _tol[i] ? 1.0 - _tol[i] : b);
       _func_params[4*i+2] = c < _tol[i] ? _tol[i] : (c > 1.0 - _tol[i] ? 1.0 - _tol[i] : c);
@@ -247,12 +296,27 @@ ParsedMaterialHelper::computeQpProperties()
   // insert material property values
   auto nmat_props = _mat_prop_descriptors.size();
   for (MooseIndex(_mat_prop_descriptors) i = 0; i < nmat_props; ++i)
-    _func_params[i + _nargs] = _mat_prop_descriptors[i].value()[_qp];
+    _func_params[i + this->_nargs] = _mat_prop_descriptors[i].value()[this->_qp];
 
   // set function value
-  if (_prop_F && _funcs_F.size() == 0)
-    (*_prop_F)[_qp] = evaluate(_func_F);
-  else if(_prop_F)
-    for(unsigned int i = 0; i < 3; ++i)
-      ((*_prop_F)[i])[_qp] = evaluate(_funcs_F[i]);
+  functionValue();
 }
+
+template <>
+void
+ParsedMaterialHelper<Real>::functionValue()
+{
+  if (this->_prop_F)
+    (*this->_prop_F)[this->_qp] = evaluate(_func_F[0]);
+}
+
+template<>
+void ParsedMaterialHelper<RealVectorValue>::functionValue()
+{
+  if(this->_prop_F)
+    for(unsigned int i = 0; i < 3; ++i)
+      ((*_prop_F)[_qp])(i) = evaluate(_func_F[i]);
+}
+
+template class ParsedMaterialHelper<Real>;
+template class ParsedMaterialHelper<RealVectorValue>;
