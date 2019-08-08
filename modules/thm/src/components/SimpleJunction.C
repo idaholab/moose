@@ -3,6 +3,7 @@
 #include "FlowModelTwoPhase.h"
 #include "FlowModelTwoPhaseNCG.h"
 #include "TwoPhaseFluidProperties.h"
+#include "THMIndices7Eqn.h"
 
 registerMooseObject("THMApp", SimpleJunction);
 
@@ -41,16 +42,12 @@ SimpleJunction::addVariables()
   }
   else if (_flow_model_id == THM::FM_TWO_PHASE)
   {
-    if (_phase_interaction)
-      _sim.addVariable(
-          true, _lm_name, FEType(SEVENTH, SCALAR), connected_subdomains, _scaling_factor);
-    else
-      _sim.addVariable(
-          true, _lm_name, FEType(SIXTH, SCALAR), connected_subdomains, _scaling_factor);
+    _sim.addVariable(
+        true, _lm_name, FEType(SEVENTH, SCALAR), connected_subdomains, _scaling_factor);
   }
   else if (_flow_model_id == THM::FM_TWO_PHASE_NCG)
   {
-    unsigned int n_vars = _phase_interaction ? 7 : 6;
+    unsigned int n_vars = THM7Eqn::N_EQ;
     auto fm_ncg = dynamic_cast<const FlowModelTwoPhaseNCG *>(_flow_model.get());
     if (fm_ncg != nullptr)
       n_vars += fm_ncg->getNCGSolutionVars().size();
@@ -379,7 +376,6 @@ SimpleJunction::add2Phase()
     }
 
     // volume fraction
-    if (_phase_interaction)
     {
       InputParameters params = _factory.getValidParams("OneDEqualValueConstraintBC");
       params.set<NonlinearVariableName>("variable") = FlowModelTwoPhase::BETA;
@@ -395,7 +391,7 @@ SimpleJunction::add2Phase()
     {
       const FlowModelTwoPhaseNCG & fm = dynamic_cast<const FlowModelTwoPhaseNCG &>(*_flow_model);
       const std::vector<VariableName> & vars = fm.getNCGSolutionVars();
-      unsigned int n_2phase_vars = _phase_interaction ? 7 : 6;
+      unsigned int n_2phase_vars = THM7Eqn::N_EQ;
 
       for (std::size_t j = 0; j < vars.size(); j++)
       {
@@ -427,15 +423,13 @@ SimpleJunction::add2Phase()
   }
 
   {
-    std::vector<VariableName> cv_var;
-    cv_var.push_back(FlowModelTwoPhase::ALPHA_RHO_A_LIQUID);
-    cv_var.push_back(FlowModelTwoPhase::ALPHA_RHOU_A_LIQUID);
-    cv_var.push_back(FlowModelTwoPhase::ALPHA_RHOE_A_LIQUID);
-    cv_var.push_back(FlowModelTwoPhase::ALPHA_RHO_A_VAPOR);
-    cv_var.push_back(FlowModelTwoPhase::ALPHA_RHOU_A_VAPOR);
-    cv_var.push_back(FlowModelTwoPhase::ALPHA_RHOE_A_VAPOR);
-    if (_phase_interaction)
-      cv_var.push_back(FlowModelTwoPhase::BETA);
+    std::vector<VariableName> cv_var = {FlowModelTwoPhase::ALPHA_RHO_A_LIQUID,
+                                        FlowModelTwoPhase::ALPHA_RHOU_A_LIQUID,
+                                        FlowModelTwoPhase::ALPHA_RHOE_A_LIQUID,
+                                        FlowModelTwoPhase::ALPHA_RHO_A_VAPOR,
+                                        FlowModelTwoPhase::ALPHA_RHOU_A_VAPOR,
+                                        FlowModelTwoPhase::ALPHA_RHOE_A_VAPOR,
+                                        FlowModelTwoPhase::BETA};
 
     if (_flow_model_id == THM::FM_TWO_PHASE_NCG)
     {
