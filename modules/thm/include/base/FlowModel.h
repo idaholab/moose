@@ -2,6 +2,7 @@
 
 #include "MooseObject.h"
 #include "InputParameters.h"
+#include "NamingInterface.h"
 #include "Enums.h"
 #include "libmesh/fe_type.h"
 
@@ -18,7 +19,7 @@ InputParameters validParams<FlowModel>();
 /**
  * Provides functions to setup the flow model.  Should be used by components that has flow in them
  */
-class FlowModel : public MooseObject
+class FlowModel : public MooseObject, public NamingInterface
 {
 public:
   FlowModel(const InputParameters & params);

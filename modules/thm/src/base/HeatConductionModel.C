@@ -66,7 +66,7 @@ HeatConductionModel::addMaterials()
     params.set<std::vector<SubdomainName>>("block") = {blocks[i]};
     params.set<std::vector<VariableName>>("T") = {TEMPERATURE};
     params.set<UserObjectName>("properties") = material_names[i];
-    _sim.addMaterial(class_name, Component::genName(_comp_name, names[i], "mat"), params);
+    _sim.addMaterial(class_name, genName(_comp_name, names[i], "mat"), params);
   }
 }
 
@@ -84,7 +84,7 @@ HeatConductionModel::addHeatEquationXYZ()
     pars.set<MaterialPropertyName>("specific_heat") = SPECIFIC_HEAT_CONSTANT_PRESSURE;
     pars.set<MaterialPropertyName>("density_name") = DENSITY;
     pars.set<bool>("use_displaced_mesh") = false;
-    _sim.addKernel(class_name, Component::genName(_comp_name, "td"), pars);
+    _sim.addKernel(class_name, genName(_comp_name, "td"), pars);
   }
   // add diffusion term
   {
@@ -94,7 +94,7 @@ HeatConductionModel::addHeatEquationXYZ()
     pars.set<std::vector<SubdomainName>>("block") = blocks;
     pars.set<MaterialPropertyName>("diffusion_coefficient") = THERMAL_CONDUCTIVITY;
     pars.set<bool>("use_displaced_mesh") = false;
-    _sim.addKernel(class_name, Component::genName(_comp_name, "hc"), pars);
+    _sim.addKernel(class_name, genName(_comp_name, "hc"), pars);
   }
 }
 
@@ -120,7 +120,7 @@ HeatConductionModel::addHeatEquationRZ()
     pars.set<Point>("axis_point") = position;
     pars.set<RealVectorValue>("axis_dir") = direction;
     pars.set<Real>("offset") = inner_radius;
-    _sim.addKernel(class_name, Component::genName(_comp_name, "td"), pars);
+    _sim.addKernel(class_name, genName(_comp_name, "td"), pars);
   }
   // add diffusion term
   {
@@ -133,6 +133,6 @@ HeatConductionModel::addHeatEquationRZ()
     pars.set<Point>("axis_point") = position;
     pars.set<RealVectorValue>("axis_dir") = direction;
     pars.set<Real>("offset") = inner_radius;
-    _sim.addKernel(class_name, Component::genName(_comp_name, "hc"), pars);
+    _sim.addKernel(class_name, genName(_comp_name, "hc"), pars);
   }
 }

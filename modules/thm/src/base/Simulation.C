@@ -472,7 +472,7 @@ Simulation::addConstantIC(const std::string & var_name,
   params.set<VariableName>("variable") = var_name;
   params.set<Real>("value") = value;
   params.set<std::vector<SubdomainName>>("block") = {block_name};
-  addInitialCondition(class_name, Component::genName(var_name, block_name, "ic"), params);
+  addInitialCondition(class_name, genName(var_name, block_name, "ic"), params);
 }
 
 void
@@ -492,7 +492,7 @@ Simulation::addConstantIC(const std::string & var_name,
   params.set<VariableName>("variable") = var_name;
   params.set<Real>("value") = value;
   params.set<std::vector<SubdomainName>>("block") = block_names;
-  addInitialCondition(class_name, Component::genName(var_name, blk_str, "ic"), params);
+  addInitialCondition(class_name, genName(var_name, blk_str, "ic"), params);
 }
 
 void
@@ -508,7 +508,7 @@ Simulation::addFunctionIC(const std::string & var_name,
   params.set<VariableName>("variable") = var_name;
   params.set<std::vector<SubdomainName>>("block") = {block_name};
   params.set<FunctionName>("function") = func_name;
-  addInitialCondition(class_name, Component::genName(var_name, block_name, "ic"), params);
+  addInitialCondition(class_name, genName(var_name, block_name, "ic"), params);
 }
 
 void
@@ -528,7 +528,7 @@ Simulation::addFunctionIC(const std::string & var_name,
   params.set<VariableName>("variable") = var_name;
   params.set<std::vector<SubdomainName>>("block") = block_names;
   params.set<FunctionName>("function") = func_name;
-  addInitialCondition(class_name, Component::genName(var_name, blk_str, "ic"), params);
+  addInitialCondition(class_name, genName(var_name, blk_str, "ic"), params);
 }
 
 void
@@ -541,7 +541,7 @@ Simulation::addConstantScalarIC(const std::string & var_name, Real value)
   InputParameters params = _factory.getValidParams(class_name);
   params.set<VariableName>("variable") = var_name;
   params.set<Real>("value") = value;
-  addInitialCondition(class_name, Component::genName(var_name, "ic"), params);
+  addInitialCondition(class_name, genName(var_name, "ic"), params);
 }
 
 void
@@ -554,7 +554,7 @@ Simulation::addComponentScalarIC(const std::string & var_name, const std::vector
   InputParameters params = _factory.getValidParams(class_name);
   params.set<VariableName>("variable") = var_name;
   params.set<std::vector<Real>>("values") = value;
-  addInitialCondition(class_name, Component::genName(var_name, "ic"), params);
+  addInitialCondition(class_name, genName(var_name, "ic"), params);
 }
 
 void
@@ -633,7 +633,7 @@ Simulation::addVariables()
 void
 Simulation::setupInitialConditionsFromFile()
 {
-  const UserObjectName suo_name = Component::genName("thm", "suo");
+  const UserObjectName suo_name = genName("thm", "suo");
   {
     const std::string class_name = "SolutionUserObject";
     InputParameters params = _factory.getValidParams(class_name);
@@ -654,7 +654,7 @@ Simulation::setupInitialConditionsFromFile()
       params.set<VariableName>("variable") = var_name;
       params.set<VariableName>("from_variable") = var_name;
       params.set<UserObjectName>("solution_uo") = suo_name;
-      _fe_problem->addInitialCondition(class_name, Component::genName(var_name, "ic"), params);
+      _fe_problem->addInitialCondition(class_name, genName(var_name, "ic"), params);
     }
     else
     {
@@ -670,8 +670,7 @@ Simulation::setupInitialConditionsFromFile()
           params.set<VariableName>("from_variable") = var_name;
           params.set<UserObjectName>("solution_uo") = suo_name;
           params.set<std::vector<SubdomainName>>("block") = {block_name};
-          _fe_problem->addInitialCondition(
-              class_name, Component::genName(var_name, block_name, "ic"), params);
+          _fe_problem->addInitialCondition(class_name, genName(var_name, block_name, "ic"), params);
         }
       }
       else
@@ -681,7 +680,7 @@ Simulation::setupInitialConditionsFromFile()
         params.set<VariableName>("variable") = var_name;
         params.set<VariableName>("from_variable") = var_name;
         params.set<UserObjectName>("solution_uo") = suo_name;
-        _fe_problem->addInitialCondition(class_name, Component::genName(var_name, "ic"), params);
+        _fe_problem->addInitialCondition(class_name, genName(var_name, "ic"), params);
       }
     }
   }

@@ -23,67 +23,10 @@ validParams<Component>()
  */
 static unsigned int comp_id = 0;
 
-std::string
-Component::genName(const std::string & prefix, unsigned int id, const std::string & suffix)
-{
-  std::stringstream ss;
-  ss << prefix << ":" << id;
-  if (!suffix.empty())
-    ss << ":" << suffix;
-  return ss.str();
-}
-
-std::string
-Component::genName(const std::string & prefix,
-                   unsigned int i,
-                   unsigned int j,
-                   const std::string & suffix)
-{
-  std::stringstream ss;
-  ss << prefix << ":" << i << ":" << j;
-  if (!suffix.empty())
-    ss << ":" << suffix;
-  return ss.str();
-}
-
-std::string
-Component::genName(const std::string & prefix,
-                   const std::string & middle,
-                   const std::string & suffix)
-{
-  std::stringstream ss;
-  ss << prefix << ":" << middle;
-  if (!suffix.empty())
-    ss << ":" << suffix;
-  return ss.str();
-}
-
-std::vector<std::string>
-Component::split(const std::string & rname)
-{
-  std::vector<std::string> splitted;
-  MooseUtils::tokenize(rname, splitted, 1, ":");
-
-  std::string section_name("");
-  for (unsigned int i = 0; i < splitted.size() - 1; i++)
-  {
-    if (i > 0)
-      section_name.append(":");
-    section_name.append(splitted[i]);
-  }
-  std::string prop_name = splitted[splitted.size() - 1];
-
-  // construct the 2 element array with section and property name
-  std::vector<std::string> result(2);
-  result[0] = section_name;
-  result[1] = prop_name;
-
-  return result;
-}
-
 Component::Component(const InputParameters & parameters)
   : THMObject(parameters),
     LoggingInterface(dynamic_cast<THMApp &>(MooseObject::_app)),
+    NamingInterface(),
 
     _gravity_vector(getParam<RealVectorValue>("gravity_vector")),
     _gravity_magnitude(_gravity_vector.norm()),

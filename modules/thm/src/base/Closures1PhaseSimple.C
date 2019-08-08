@@ -87,7 +87,7 @@ Closures1PhaseSimple::addMooseObjects(const HeatTransferBase & heat_transfer)
     params.set<std::vector<std::string>>("prop_names") = {
         heat_transfer_1phase.getWallHeatTransferCoefficient1PhaseName()};
     params.set<std::vector<FunctionName>>("prop_values") = {Hw_fn_name};
-    _sim.addMaterial(class_name, Component::genName(heat_transfer.name(), "Hw_material"), params);
+    _sim.addMaterial(class_name, genName(heat_transfer.name(), "Hw_material"), params);
   }
 
   heat_transfer.makeFunctionControllableIfConstant(Hw_fn_name, "Hw");
@@ -103,5 +103,5 @@ Closures1PhaseSimple::addWallTemperatureFromHeatFluxMaterial(
   params.set<MaterialPropertyName>("T") = FlowModelSinglePhase::TEMPERATURE;
   params.set<MaterialPropertyName>("q_wall") = FlowModel::HEAT_FLUX_WALL;
   params.set<MaterialPropertyName>("Hw") = FlowModelSinglePhase::HEAT_TRANSFER_COEFFICIENT_WALL;
-  _sim.addMaterial(class_name, Component::genName(flow_channel.name(), "T_wall_mat"), params);
+  _sim.addMaterial(class_name, genName(flow_channel.name(), "T_wall_mat"), params);
 }

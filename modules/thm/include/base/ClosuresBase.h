@@ -2,6 +2,7 @@
 
 #include "MooseObject.h"
 #include "LoggingInterface.h"
+#include "NamingInterface.h"
 
 class ClosuresBase;
 class FlowChannelBase;
@@ -19,7 +20,7 @@ InputParameters validParams<ClosuresBase>();
  * uses them. Examples of responsibilities will be to provide material properties
  * for friction factors and heat transfer coefficients.
  */
-class ClosuresBase : public MooseObject, public LoggingInterface
+class ClosuresBase : public MooseObject, public LoggingInterface, public NamingInterface
 {
 public:
   ClosuresBase(const InputParameters & params);

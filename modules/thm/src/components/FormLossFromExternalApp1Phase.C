@@ -36,6 +36,6 @@ FormLossFromExternalApp1Phase::addMooseObjects()
     params.set<std::vector<SubdomainName>>("block") = _flow_channel_subdomains;
     params.set<MaterialPropertyName>("prop_name") = "K_prime";
     params.set<std::vector<VariableName>>("coupled_variable") = {_K_prime_var_name};
-    _sim.addMaterial(class_name, Component::genName(name(), "k_prime_material"), params);
+    _sim.addMaterial(class_name, genName(name(), "k_prime_material"), params);
   }
 }
