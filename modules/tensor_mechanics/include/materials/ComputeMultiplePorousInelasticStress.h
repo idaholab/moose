@@ -17,7 +17,9 @@ template <>
 InputParameters validParams<ComputeMultiplePorousInelasticStress>();
 
 /**
- * todo
+ * Compute state (stress and internal parameters such as plastic
+ * strains and internal parameters) using an iterative process. A porosity material property
+ * is defined and is calcuated from the trace of inelastic strain increment.
  */
 
 class ComputeMultiplePorousInelasticStress : public ComputeMultipleInelasticStress
@@ -29,7 +31,11 @@ protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
+  ///@{ Material property for porosity
   MaterialProperty<Real> & _porosity;
   const MaterialProperty<Real> & _porosity_old;
+  ///@}
+
+  /// Initial porosity value. Must be greater than zero.
   const Real _initial_porosity;
 };

@@ -131,9 +131,10 @@ protected:
   /// Pore shape factor depending on pore shape model
   const Real _pore_shape_factor;
 
-  // String designating the base name of the total strain
+  /// String designating the base name of the total strain
   const std::string _total_strain_base_name;
 
+  /// Material property for the total strain increment
   const MaterialProperty<RankTwoTensor> & _strain_increment;
 
   ///@{ Effective inelastic strain material property
@@ -150,24 +151,21 @@ protected:
   Real _max_inelastic_increment;
 
   /// Exponent on the effective stress
-  // const std::vector<Real> _powers;
   const Real _power;
 
+  /// Power factor used for LPS model
   const Real _power_factor;
 
-  /// Number of total models
-  // const unsigned int _num_models;
-
   /// Leading coefficient
-  // std::vector<const MaterialProperty<Real> *> _coefficients;
   const MaterialProperty<Real> & _coefficient;
 
   /// Gauge stress
-  // std::vector<MaterialProperty<Real> *> _gauge_stresses;
   MaterialProperty<Real> & _gauge_stress;
 
+  /// Container for the porosity calculated from all other intelastic models except the current model
   Real _intermediate_porosity;
 
+  /// Material property for the old porosity
   const MaterialProperty<Real> & _porosity_old;
 
   /// Flag to enable verbose output

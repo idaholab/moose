@@ -18,7 +18,10 @@ InputParameters
 validParams<ComputeMultiplePorousInelasticStress>()
 {
   InputParameters params = validParams<ComputeMultipleInelasticStress>();
-  params.addClassDescription("todo.");
+  params.addClassDescription(
+      "Compute state (stress and internal parameters such as plastic "
+      "strains and internal parameters) using an iterative process. A porosity material property "
+      "is defined and is calcuated from the trace of inelastic strain increment.");
 
   params.addParam<MaterialPropertyName>(
       "porosity_name", "porosity", "Name of porosity material property");
