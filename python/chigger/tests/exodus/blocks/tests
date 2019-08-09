@@ -48,4 +48,9 @@
     imagediff = 'combo.png'
     allowed_linux = 0.95
   [../]
+  [partial]
+    type = ImageDiff
+    command = partial.py
+    imagediff = 'partial.png'
+  []
 []
