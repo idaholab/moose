@@ -34,11 +34,6 @@
 []
 
 [Functions]
-  [./pull]
-    type = PiecewiseLinear
-    x = '0 0.1'
-    y = '0 1e-5'
-  [../]
   [./Q_gtn]
     type = ParsedFunction
     vars = 'avg_vonmises gtn_gauge_stress'
@@ -242,7 +237,7 @@
   type = Transient
   solve_type = FD
   num_steps = 10
-  nl_abs_tol = 1e-8
+  nl_abs_tol = 5e-10
 []
 
 [Postprocessors]

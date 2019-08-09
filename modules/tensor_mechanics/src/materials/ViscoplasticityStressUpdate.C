@@ -68,7 +68,7 @@ ViscoplasticityStressUpdate::ViscoplasticityStressUpdate(const InputParameters &
     _creep_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "creep_strain")),
     _max_inelastic_increment(getParam<Real>("max_inelastic_increment")),
     _power(getParam<Real>("power")),
-    _power_factor((_power - 1.0) / (_power + 1.0)),
+    _power_factor(_model == "LPS" ? (_power - 1.0) / (_power + 1.0) : 1.0),
     _coefficient(getMaterialProperty<Real>("coefficient")),
     _gauge_stress(declareProperty<Real>(_base_name + "gauge_stress")),
     _intermediate_porosity(0.0),
@@ -147,8 +147,8 @@ ViscoplasticityStressUpdate::updateState(RankTwoTensor & elastic_strain_incremen
   _creep_strain[_qp] = _creep_strain_old[_qp];
   inelastic_strain_increment.zero();
 
-  // If equivalent stress or hydrostatic stress is present, calculate creep strain increment
-  if (equiv_stress || _hydro_stress)
+  // If equivalent stress is present, calculate creep strain increment
+  if (equiv_stress)
   {
     // Initalize stress potential
     Real dpsi_dgauge(0);
@@ -184,7 +184,6 @@ ViscoplasticityStressUpdate::computeReferenceResidual(const Real /*effective_tri
 Real
 ViscoplasticityStressUpdate::initialGuess(const Real effective_trial_stress)
 {
-  // Use equilvalent stress as an initial guess for the gauge stress
   return effective_trial_stress;
 }
 
@@ -236,6 +235,12 @@ ViscoplasticityStressUpdate::computeResidual(const Real equiv_stress, const Real
   Real residual = residual_left;
   _derivative = dresidual_left_dtrial_gauge;
 
+  if (_pore_shape == "spherical")
+  {
+    residual *= 1.0 + _intermediate_porosity / 1.5;
+    _derivative *= 1.0 + _intermediate_porosity / 1.5;
+  }
+
   if (_model == "GTN")
   {
     residual += 2.0 * _intermediate_porosity * std::cosh(_pore_shape_factor * M) - 1.0 -
@@ -253,8 +258,6 @@ ViscoplasticityStressUpdate::computeResidual(const Real equiv_stress, const Real
     const Real dresidual_dh = _intermediate_porosity * (1.0 - _power_factor / Utility::pow<2>(h));
     _derivative += dresidual_dh * dh_dM * dM_dtrial_gauge;
   }
-
-  // Compute the derivative of the residual with respect to the trial gauge
 
   if (_verbose)
   {
@@ -313,14 +316,12 @@ ViscoplasticityStressUpdate::computeDGaugeDSigma(const Real & gauge_stress,
   }
 
   // Compute the derivative of the residual with respect to the equilvalent stress
-  Real dresidual_dequiv_stress = 0.0;
-  if (equiv_stress)
-    dresidual_dequiv_stress = 2.0 * equiv_stress / Utility::pow<2>(gauge_stress);
+  Real dresidual_dequiv_stress = 2.0 * equiv_stress / Utility::pow<2>(gauge_stress);
+  if (_pore_shape == "spherical")
+    dresidual_dequiv_stress *= 1.0 + _intermediate_porosity / 1.5;
 
   // Compute the derivative of the equilvalent stress to the deviatoric stress
-  RankTwoTensor dequiv_stress_dsigma;
-  if (equiv_stress)
-    dequiv_stress_dsigma = 1.5 * dev_stress / equiv_stress;
+  const RankTwoTensor dequiv_stress_dsigma = 1.5 * dev_stress / equiv_stress;
 
   // Compute the derivative of the residual with the stress
   const RankTwoTensor dresidual_dsigma = dresidual_dhydro_stress * _dhydro_stress_dsigma +
@@ -343,28 +344,15 @@ ViscoplasticityStressUpdate::computeInelasticStrainIncrement(
     const RankTwoTensor & stress)
 {
   // If hydrostatic stress and porosity present, compute non-linear gauge stress
-  if (_hydro_stress && _intermediate_porosity)
-    returnMappingSolve(equiv_stress, gauge_stress, _console);
-  // If equivalent stress present, compute traditional creep strain
-  else if (equiv_stress)
-  {
+  if (!_intermediate_porosity)
     gauge_stress = equiv_stress;
-    if (_intermediate_porosity)
-    {
-      if (_model == "GTN")
-        gauge_stress /= std::sqrt(1.0 + Utility::pow<2>(_intermediate_porosity));
-      else
-        gauge_stress /= std::sqrt(1.0 + _power_factor * Utility::pow<2>(_intermediate_porosity));
-    }
-  }
+  else if (_hydro_stress)
+    returnMappingSolve(equiv_stress, gauge_stress, _console);
   else
-    mooseError("In ",
-               _name,
-               ": Zero stress state computed or porosity is zero. Unable to compute gauge stress");
+    gauge_stress /= std::sqrt(1.0 + _power_factor * Utility::pow<2>(_intermediate_porosity));
 
-  if (gauge_stress < 0.0)
-    mooseException(
-        "In ", _name, ": Gauge stress calculated in inner Newton solve is less than zero.");
+  mooseAssert(gauge_stress > equiv_stress,
+              "Gauge stress calculated in inner Newton solve is less than equilvalent.");
 
   // Compute stress potential
   dpsi_dgauge = _coefficient[_qp] * std::pow(gauge_stress, _power);

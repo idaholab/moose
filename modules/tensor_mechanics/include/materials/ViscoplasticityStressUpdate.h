@@ -168,6 +168,6 @@ protected:
   /// Derivative of hydrostatic stress with respect to the stress tensor
   const RankTwoTensor _dhydro_stress_dsigma;
 
-  /// Container for _derivative
+  /// Container for derivative of the residual with respect to the trial gauge
   Real _derivative;
 };
