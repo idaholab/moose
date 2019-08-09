@@ -153,64 +153,43 @@
   [./temperature]
     type = PorousFlowTemperature
     temperature = temp
-    at_nodes = true
-  [../]
-  [./temperature_qp]
-    type = PorousFlowTemperature
-    at_nodes = false
-    temperature = temp
-  [../]
-  [./ppss_nodal]
-    type = PorousFlow2PhasePP
-    phase0_porepressure = ppwater
-    phase1_porepressure = ppgas
-    at_nodes = true
-    capillary_pressure = pc
   [../]
   [./ppss]
     type = PorousFlow2PhasePP
     phase0_porepressure = ppwater
     phase1_porepressure = ppgas
-    at_nodes = false
     capillary_pressure = pc
   [../]
   [./massfrac]
     type = PorousFlowMassFraction
     mass_fraction_vars = 'massfrac_ph0_sp0 massfrac_ph0_sp1 massfrac_ph1_sp0 massfrac_ph1_sp1'
-    at_nodes = true
   [../]
   [./simple_fluid0]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid0
-    at_nodes = true
     phase = 0
   [../]
   [./simple_fluid1]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid1
-    at_nodes = true
     phase = 1
   [../]
   [./permeability]
     type = PorousFlowPermeabilityConst
-    at_nodes = false
     permeability = '1 0 0 0 2 0 0 0 3'
   [../]
   [./relperm0]
     type = PorousFlowRelativePermeabilityCorey
     n = 2
     phase = 0
-    at_nodes = true
   [../]
   [./relperm1]
     type = PorousFlowRelativePermeabilityCorey
     n = 3
     phase = 1
-    at_nodes = true
   [../]
   [./thermal_conductivity]
     type = PorousFlowThermalConductivityIdeal
-    at_nodes = false
     dry_thermal_conductivity = '0.1 0.2 0.3 0.2 0 0.1 0.3 0.1 0.1'
   [../]
 []

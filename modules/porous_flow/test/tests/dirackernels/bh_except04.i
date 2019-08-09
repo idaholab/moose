@@ -62,7 +62,7 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
-    at_nodes = true
+    at_nodes = true # Needed to force exepected error
   [../]
   [./ppss]
     type = PorousFlow1PhaseP

@@ -77,7 +77,6 @@
   [../]
   [./permeability]
     type = PorousFlowPermeabilityConst
-    at_nodes = false
     permeability = '1 0 0 0 2 0 0 0 3'
   [../]
   [./PS]
