@@ -34,6 +34,11 @@ SystemInfo::getInfo() const
       << LIBMESH_DETECTED_PETSC_VERSION_MINOR << '.' << LIBMESH_DETECTED_PETSC_VERSION_SUBMINOR
       << '\n';
 #endif
+#ifdef LIBMESH_DETECTED_SLEPC_VERSION_MAJOR
+  oss << std::setw(25) << "SLEPc Version: " << LIBMESH_DETECTED_SLEPC_VERSION_MAJOR << '.'
+      << LIBMESH_DETECTED_SLEPC_VERSION_MINOR << '.' << LIBMESH_DETECTED_SLEPC_VERSION_SUBMINOR
+      << '\n';
+#endif
 
   // Current Time
   oss << std::setw(25) << "Current Time: " << getTimeStamp() << "\n";
