@@ -4,7 +4,6 @@ Content:
     - modules/tensor_mechanics/doc/content
     - modules/fluid_properties/doc/content
     - modules/chemical_reactions/doc/content
-    - modules/rdg/doc/content
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
@@ -28,7 +27,6 @@ Extensions:
             - modules/tensor_mechanics/include
             - modules/fluid_properties/include
             - modules/chemical_reactions/include
-            - modules/rdg/include
     MooseDocs.extensions.common:
         shortcuts: !include framework/doc/globals.yml
     MooseDocs.extensions.acronym:
