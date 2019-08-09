@@ -21,8 +21,10 @@ def check_requirement(filename):
     root = hit_load(filename)
     design = root.children[0].get('design', None)
     issues = root.children[0].get('issues', None)
+    deprecated = root.children[0].get('deprecated', False)
+
     for child in root.children[0]:
-        if 'deprecated' in child:
+        if child.get('deprecated', deprecated):
             continue
 
         if 'requirement' not in child:
