@@ -19,6 +19,24 @@
     design = 'ADComputeLinearElasticStress.md'
   [../]
 
+  [./extra_stresses]
+    type = 'Exodiff'
+    input = 'extra_stresses.i'
+    exodiff = 'extra_stresses_out.e'
+    requirement = 'We shall be able to introduce extra stresses into the stress calculators using automatic differentiation.'
+    design = 'ADComputeLinearElasticStress.md'
+  [../]
+  [./extra_stresses-jac]
+    type = 'PetscJacobianTester'
+    input = 'extra_stresses.i'
+    run_sim = 'True'
+    petsc_version = '>=3.9.4'
+    ratio_tol = 1e-7
+    difference_tol = 1e-1
+    requirement = 'The Jacobian for the AD linear elastic stress problem shall be perfect'
+    design = 'ADComputeLinearElasticStress.md'
+  [../]
+
   [./applied_strain]
     type = 'Exodiff'
     input = 'applied_strain.i'
