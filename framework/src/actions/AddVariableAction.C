@@ -55,7 +55,10 @@ validParams<AddVariableAction>()
 }
 
 AddVariableAction::AddVariableAction(InputParameters params)
-  : MooseObjectAction(params), _components(1)
+  : MooseObjectAction(params),
+    _fe_type(feType(params)),
+    _scalar_var(_fe_type.family == SCALAR),
+    _components(1)
 {
 }
 
@@ -123,12 +126,8 @@ AddVariableAction::init()
 
   _moose_object_pars.applySpecificParameters(_pars, {"order", "family", "scaling"});
 
-  _fe_type = feType(_moose_object_pars);
-
   // Determine the MooseVariable type
   _type = determineType(_fe_type, _components);
-
-  _scalar_var = _fe_type.family == SCALAR;
 
   // Need static_cast to resolve overloads
   _problem_add_var_method = static_cast<void (FEProblemBase::*)(
