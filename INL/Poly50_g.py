@@ -24,30 +24,23 @@ coordinates=mat[:,0]
 print(coordinates)
 norm_x=[]
 norm_y=[]
-temp=[]
+temp_x=[]
+temp_y=[]
 max = thickness.index(max(thickness))
 for t in range(0,len(thickness)):
         diff.append(np.array(data[t])-np.array(data[max]))
-print(diff)
-for t in range(0,len(thickness)):
-    if t==max:
-        diff.append(np.array(data[t])-np.array(data[max]))
-        #norm_x.append(np.linalg.norm(diff[:,0]))
-        #norm_y.append(np.linalg.norm(diff[:,1]))
-        continue
-    diff.append(np.array(data[t])-np.array(data[max]))
-    #norm_x.append(np.linalg.norm(diff[:,0]))
-    #norm_y.append(np.linalg.norm(diff[:,1]))
+        if t==max:
+            continue
+        temp_x.append(abs((diff[t][:,1])))
+        temp_y.append(abs((diff[t][:,2])))
+print(len(coordinates))
+print(temp_x)
+print(temp_y)
 
-temp=(diff[:,1],diff[:,2])
-print(temp)
-norm_x=sort_list(norm_x,thickness)
-norm_y=sort_list(norm_y,thickness)
-thickness.sort()
-print(thickness)
-print(norm_x)
-print(norm_y)
-plt.plot(thickness,norm_x,norm_y)
-plt.show()
+for t in range(0,len(thickness)-1):
+    sort_list(coordinates,temp_x[t])
+    coordinates.sort()
+    plt.plot(coordinates,temp_x[t])
+    plt.show()
 #plt.plot(thickness,norm_y)
 #plt.show()
