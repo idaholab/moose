@@ -77,12 +77,10 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
-    at_nodes = false
     temperature = temp
   [../]
   [./thermal_conductivity]
     type = PorousFlowThermalConductivityIdeal
-    at_nodes = false
     dry_thermal_conductivity = '1.1 0.1 0.3 0.1 2.2 0 0.3 0 3.3'
     wet_thermal_conductivity = '2.1 0.1 0.3 0.1 1.2 0 0.3 0 1.1'
     exponent = 1.7
@@ -90,7 +88,6 @@
   [../]
   [./ppss]
     type = PorousFlow2PhasePP
-    at_nodes = false
     phase0_porepressure = pwater
     phase1_porepressure = pgas
     capillary_pressure = pc

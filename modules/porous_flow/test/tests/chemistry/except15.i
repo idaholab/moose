@@ -60,17 +60,14 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
-    at_nodes = true
   [../]
   [./ppss]
     type = PorousFlow1PhaseFullySaturated
     porepressure = pressure
-    at_nodes = true
   [../]
   [./massfrac]
     type = PorousFlowMassFraction
     mass_fraction_vars = 'a b'
-    at_nodes = true
   [../]
   [./predis]
     type = PorousFlowAqueousPreDisChemistry
@@ -83,22 +80,18 @@
     kinetic_rate_constant = 1.0e-8
     activation_energy = 1.5e4
     molar_volume = 1
-    at_nodes = true
   [../]
   [./mineral]
     type = PorousFlowAqueousPreDisMineral
-    at_nodes = true
   [../]
   [./porosity]
     type = PorousFlowPorosity
     porosity_zero = 0.1
-    at_nodes = true
   [../]
   [./simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-    at_nodes = true
   [../]
 []
 

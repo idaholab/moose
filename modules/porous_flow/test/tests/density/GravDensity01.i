@@ -120,27 +120,22 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
-    at_nodes = false
   [../]
   [./ppss_qp]
     type = PorousFlow1PhaseFullySaturated
-    at_nodes = false
     porepressure = pp
   [../]
   [./simple_fluid]
     type = PorousFlowSingleComponentFluid
-    at_nodes = false
     fp = simple_fluid
     phase = 0
   [../]
   [./porosity]
     type = PorousFlowPorosityConst
-    at_nodes = false
     porosity = 0.1
   [../]
   [./density]
     type = PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity
-    at_nodes = false
     rho_s = 3
   [../]
 []

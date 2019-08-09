@@ -234,20 +234,8 @@
   [./temperature]
     type = PorousFlowTemperature
     temperature = temp
-    at_nodes = true
-  [../]
-  [./temperature_qp]
-    type = PorousFlowTemperature
-    temperature = temp
   [../]
   [./ppss]
-    type = PorousFlow2PhasePS
-    at_nodes = true
-    phase0_porepressure = pwater
-    phase1_saturation = sgas
-    capillary_pressure = pc
-  [../]
-  [./ppss_qp]
     type = PorousFlow2PhasePS
     phase0_porepressure = pwater
     phase1_saturation = sgas
@@ -255,27 +243,14 @@
   [../]
   [./massfrac]
     type = PorousFlowMassFraction
-    at_nodes = true
     mass_fraction_vars = 'massfrac_ph0_sp0 massfrac_ph1_sp0'
   [../]
-  [./water_at_nodes]
-    type = PorousFlowSingleComponentFluid
-    fp = water
-    phase = 0
-    at_nodes = true
-  [../]
-  [./water_at_qp]
+  [./water]
     type = PorousFlowSingleComponentFluid
     fp = water
     phase = 0
   [../]
-  [./gas_at_nodes]
-    type = PorousFlowSingleComponentFluid
-    fp = co2
-    phase = 1
-    at_nodes = true
-  [../]
-  [./gas_at_qp]
+  [./gas]
     type = PorousFlowSingleComponentFluid
     fp = co2
     phase = 1
@@ -283,7 +258,6 @@
   [./porosity_reservoir]
     type = PorousFlowPorosityConst
     porosity = 0.2
-    at_nodes = true
   [../]
   [./permeability_reservoir]
     type = PorousFlowPermeabilityConst
@@ -291,7 +265,6 @@
   [../]
   [./relperm_liquid]
     type = PorousFlowRelativePermeabilityCorey
-    at_nodes = true
     n = 4
     phase = 0
     s_res = 0.200
@@ -299,7 +272,6 @@
   [../]
   [./relperm_gas]
     type = PorousFlowRelativePermeabilityBC
-    at_nodes = true
     phase = 1
     s_res = 0.205
     sum_s_res = 0.405
@@ -341,10 +313,6 @@
     type = ComputeLinearElasticStress
   [../]
   [./eff_fluid_pressure]
-    type = PorousFlowEffectiveFluidPressure
-    at_nodes = true
-  [../]
-  [./eff_fluid_pressure_qp]
     type = PorousFlowEffectiveFluidPressure
   [../]
   [./vol_strain]

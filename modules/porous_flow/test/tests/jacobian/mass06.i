@@ -57,11 +57,9 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
-    at_nodes = true
   [../]
   [./ppss]
     type = PorousFlow1PhaseMD_Gaussian
-    at_nodes = true
     mass_density = md
     al = 1.1
     density_P0 = 0.8
@@ -69,17 +67,14 @@
   [../]
   [./massfrac]
     type = PorousFlowMassFraction
-    at_nodes = true
   [../]
   [./simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
-    at_nodes = true
     phase = 0
   [../]
   [./porosity]
     type = PorousFlowPorosityConst
-    at_nodes = true
     porosity = 0.1
   [../]
 []

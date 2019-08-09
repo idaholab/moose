@@ -72,7 +72,6 @@
   # Specific heat capacity
   [./rock_heat]
     type = PorousFlowMatrixInternalEnergy
-    at_nodes = true
     specific_heat_capacity = 850
     density = 2700
   [../]
@@ -84,12 +83,7 @@
   [../]
 
   # Porosity
-  [./porosity_nodal]
-    type = PorousFlowPorosityConst
-    at_nodes = true
-    porosity = 0.3
-  [../]
-  [./porosity_qp]
+  [./porosity]
     type = PorousFlowPorosityConst
     porosity = 0.3
   [../]

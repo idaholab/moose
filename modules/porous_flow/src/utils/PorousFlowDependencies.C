@@ -71,6 +71,21 @@ PorousFlowDependencies::PorousFlowDependencies()
   _deps.insertDependency("PorousFlowSink", "permeability_qp");
   _deps.insertDependency("PorousFlowSink", "thermal_conductivity_qp");
 
+  // Dirac kernel dependencies
+  _deps.insertDependency("PorousFlowPeacemanBorehole", "PorousFlowLineSink");
+  _deps.insertDependency("PorousFlowPolyLineSink", "PorousFlowLineSink");
+
+  _deps.insertDependency("PorousFlowLineSink", "pressure_saturation_qp");
+  _deps.insertDependency("PorousFlowLineSink", "temperature_qp");
+  _deps.insertDependency("PorousFlowLineSink", "thermal_conductivity_qp");
+  _deps.insertDependency("PorousFlowLineSink", "relative_permeability_nodal");
+  _deps.insertDependency("PorousFlowLineSink", "density_nodal");
+  _deps.insertDependency("PorousFlowLineSink", "viscosity_nodal");
+  _deps.insertDependency("PorousFlowLineSink", "enthalpy_nodal");
+  _deps.insertDependency("PorousFlowLineSink", "internal_energy_nodal");
+  _deps.insertDependency("PorousFlowLineSink", "relative_permeability_nodal");
+  _deps.insertDependency("PorousFlowLineSink", "mass_fraction_nodal");
+
   // Kernel dependencies
   _deps.insertDependency("PorousFlowAdvectiveFlux", "PorousFlowDarcyBase");
   _deps.insertDependency("PorousFlowAdvectiveFlux", "mass_fraction_nodal");
@@ -170,17 +185,6 @@ PorousFlowDependencies::PorousFlowDependencies()
   _deps.insertDependency("PorousFlowPreDis", "chemistry_nodal");
   _deps.insertDependency("PorousFlowPreDis", "mineral_nodal");
 
-  // Postprocessor dependencies
-  _deps.insertDependency("PorousFlowFluidMass", "porosity_nodal");
-  _deps.insertDependency("PorousFlowFluidMass", "density_nodal");
-  _deps.insertDependency("PorousFlowFluidMass", "mass_fraction_nodal");
-  _deps.insertDependency("PorousFlowFluidMass", "pressure_saturation_nodal");
-  _deps.insertDependency("PorousFlowHeatEnergy", "porosity_nodal");
-  _deps.insertDependency("PorousFlowHeatEnergy", "matrix_internal_energy_nodal");
-  _deps.insertDependency("PorousFlowHeatEnergy", "density_nodal");
-  _deps.insertDependency("PorousFlowHeatEnergy", "internal_energy_nodal");
-  _deps.insertDependency("PorousFlowHeatEnergy", "pressure_saturation_nodal");
-
   // Material dependencies
   _deps.insertDependency("density_qp", "fluid_properties_qp");
   _deps.insertDependency("density_nodal", "fluid_properties_nodal");
@@ -255,6 +259,17 @@ PorousFlowDependencies::PorousFlowDependencies()
   _deps.insertDependency("porosity_qp", "pressure_saturation_qp");
   _deps.insertDependency("porosity_qp", "temperature_qp");
   //_deps.insertDependency("porosity_qp", "volumetric_strain_qp");
+
+  // Postprocessor dependencies
+  _deps.insertDependency("PorousFlowFluidMass", "porosity_nodal");
+  _deps.insertDependency("PorousFlowFluidMass", "density_nodal");
+  _deps.insertDependency("PorousFlowFluidMass", "mass_fraction_nodal");
+  _deps.insertDependency("PorousFlowFluidMass", "pressure_saturation_nodal");
+  _deps.insertDependency("PorousFlowHeatEnergy", "porosity_nodal");
+  _deps.insertDependency("PorousFlowHeatEnergy", "matrix_internal_energy_nodal");
+  _deps.insertDependency("PorousFlowHeatEnergy", "density_nodal");
+  _deps.insertDependency("PorousFlowHeatEnergy", "internal_energy_nodal");
+  _deps.insertDependency("PorousFlowHeatEnergy", "pressure_saturation_nodal");
 
   // UserObject dependencies
   _deps.insertDependency("PorousFlowAdvectiveFluxCalculatorBase", "permeability_qp");

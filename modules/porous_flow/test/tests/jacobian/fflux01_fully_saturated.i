@@ -101,12 +101,10 @@
   [./simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
-    at_nodes = false
     phase = 0
   [../]
   [./permeability]
     type = PorousFlowPermeabilityConst
-    at_nodes = false
     permeability = '1 0 0 0 2 0 0 0 3'
   [../]
 []

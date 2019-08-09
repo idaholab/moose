@@ -101,11 +101,6 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
-    at_nodes = false
-  [../]
-  [./temperature_nodal]
-    type = PorousFlowTemperature
-    at_nodes = true
   [../]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
@@ -121,51 +116,33 @@
   [../]
   [./vol_strain]
     type = PorousFlowVolumetricStrain
-    at_nodes = false
   [../]
   [./porosity]
     type = PorousFlowPorosity
     fluid = true
     mechanical = true
-    at_nodes = false
     porosity_zero = 0.1
     biot_coefficient = 0.5
     solid_bulk = 1
   [../]
   [./p_eff]
     type = PorousFlowEffectiveFluidPressure
-    at_nodes = false
   [../]
   [./ppss]
     type = PorousFlow1PhaseP
-    at_nodes = false
     porepressure = pp
-    capillary_pressure = pc
-  [../]
-  [./ppss_nodal]
-    type = PorousFlow1PhaseP
-    porepressure = pp
-    at_nodes = true
     capillary_pressure = pc
   [../]
   [./massfrac]
     type = PorousFlowMassFraction
-    at_nodes = true
   [../]
   [./simple_fluid]
-    type = PorousFlowSingleComponentFluid
-    fp = simple_fluid
-    at_nodes = true
-    phase = 0
-  [../]
-  [./simple_fluid_qp]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
   [../]
   [./permeability]
     type = PorousFlowPermeabilityKozenyCarman
-    at_nodes = false
     poroperm_function = kozeny_carman_phi0
     k_anisotropy = '1 0 0 0 2 0 0 0 3'
     phi0 = 0.1
@@ -175,7 +152,6 @@
   [../]
   [./relperm]
     type = PorousFlowRelativePermeabilityCorey
-    at_nodes = true
     n = 2
     phase = 0
   [../]

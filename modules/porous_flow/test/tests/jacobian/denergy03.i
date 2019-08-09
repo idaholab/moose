@@ -135,7 +135,6 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
-    at_nodes = true
     temperature = temp
   [../]
   [./elasticity_tensor]
@@ -157,13 +156,11 @@
     type = PorousFlowPorosity
     thermal = true
     mechanical = true
-    at_nodes = true
     porosity_zero = 0.7
     thermal_expansion_coeff = 0.5
   [../]
   [./p_eff]
     type = PorousFlowEffectiveFluidPressure
-    at_nodes = true
   [../]
   [./rock_heat]
     type = PorousFlowMatrixInternalEnergy
@@ -172,7 +169,6 @@
   [../]
   [./ppss]
     type = PorousFlow2PhasePP
-    at_nodes = true
     phase0_porepressure = pwater
     phase1_porepressure = pgas
     capillary_pressure = pc
@@ -181,13 +177,11 @@
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid0
     phase = 0
-    at_nodes = true
   [../]
   [./simple_fluid1]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid1
     phase = 1
-    at_nodes = true
   [../]
 []
 

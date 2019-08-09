@@ -67,12 +67,6 @@
     porepressure = pp
     capillary_pressure = pc
   [../]
-  [./ppss_qp]
-    type = PorousFlow1PhaseP
-    at_nodes = false
-    porepressure = pp
-    capillary_pressure = pc
-  [../]
   [./massfrac]
     type = PorousFlowMassFraction
   [../]
@@ -93,7 +87,7 @@
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-    at_nodes = false
+    at_nodes = false # Needed to force expected error
   [../]
 []
 

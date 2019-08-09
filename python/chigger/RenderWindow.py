@@ -65,6 +65,7 @@ class RenderWindow(base.ChiggerObject):
         super(RenderWindow, self).__init__(**kwargs)
 
         self._results = [misc.ChiggerBackground()]
+        self._groups = []
         self.__active = None
 
         self.__watermark = annotations.ImageAnnotation(filename='chigger_white.png',
@@ -104,6 +105,7 @@ class RenderWindow(base.ChiggerObject):
             mooseutils.mooseDebug('RenderWindow.append {}'.format(type(result).__name__))
             if isinstance(result, base.ResultGroup):
                 self.append(*result.getResults())
+                self._groups.append(result)
             elif not isinstance(result, self.RESULT_TYPE):
                 n = result.__class__.__name__
                 t = self.RESULT_TYPE.__name__
@@ -228,6 +230,10 @@ class RenderWindow(base.ChiggerObject):
 
         # Setup the result objects
         n = self.__vtkwindow.GetNumberOfLayers()
+        for group in self._groups:
+            if group.needsUpdate():
+                group.update()
+
         for result in self._results:
             renderer = result.getVTKRenderer()
             if self.isOptionValid('antialiasing'):

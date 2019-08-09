@@ -95,21 +95,7 @@
     type = PorousFlowTemperature
     temperature = 50
   [../]
-  [./temperature_nodal]
-    type = PorousFlowTemperature
-    temperature = 50
-    at_nodes = true
-  [../]
   [./waterncg]
-    type = PorousFlowFluidState
-    gas_porepressure = pgas
-    z = z
-    at_nodes = true
-    temperature_unit = Celsius
-    capillary_pressure = pc
-    fluid_state = fs
-  [../]
-  [./waterncg_qp]
     type = PorousFlowFluidState
     gas_porepressure = pgas
     z = z
@@ -125,18 +111,15 @@
     type = PorousFlowRelativePermeabilityCorey
     n = 2
     phase = 0
-    at_nodes = true
   [../]
   [./relperm1]
     type = PorousFlowRelativePermeabilityCorey
     n = 2
     phase = 1
-    at_nodes = true
   [../]
   [./porosity]
     type = PorousFlowPorosityConst
     porosity = 0.1
-    at_nodes = true
   [../]
 []
 
