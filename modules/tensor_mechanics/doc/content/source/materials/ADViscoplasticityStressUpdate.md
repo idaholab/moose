@@ -1,16 +1,16 @@
-conjunction# Viscoplasticity Stress Update
+# AD Viscoplasticity Stress Update
 
-!syntax description /Materials/ViscoplasticityStressUpdate
+!syntax description /Materials/ADViscoplasticityStressUpdate
 
 ## Description
 
-`ViscoplasticityStressUpdate` implements the [Gurson-Tvergaard-Needleman](Gurson:1977gg) (GTN) and
+`ADViscoplasticityStressUpdate` implements the [Gurson-Tvergaard-Needleman](Gurson:1977gg) (GTN) and
 [Leblond-Perrin-Suqeut](Leblond:1994kl) (LPS) following the theory described above.
-`ViscoplasticityStressUpdate` uses similar techniques as
-[RadialReturnStressUpdate](RadialReturnStressUpdate) to compute the gauge stress in order to
-correctly calculate the plastic strain in a porous material. `ViscoplasticityStressUpdate` must be
+`ADViscoplasticityStressUpdate` uses similar techniques as
+[ADRadialReturnStressUpdate](ADRadialReturnStressUpdate.md) to compute the gauge stress in order to
+correctly calculate the plastic strain in a porous material. `ADViscoplasticityStressUpdate` must be
 used in conjunction with
-[ComputeMultiplePorousInelasticStress](ComputeMultiplePorousInelasticStress.md) in order to capture
+[ADComputeMultiplePorousInelasticStress](ADComputeMultiplePorousInelasticStress.md) in order to capture
 the porosity evolution.
 
 ### Notation
@@ -165,10 +165,10 @@ Once a solution for $\Lambda_n$ is found, the strain rate can be determined usin
 
 !listing modules/tensor_mechanics/test/tests/viscoplasticity_stress_update/lps_dual.i block=Materials
 
-!syntax parameters /Materials/ViscoplasticityStressUpdate
+!syntax parameters /Materials/ADViscoplasticityStressUpdate
 
-!syntax inputs /Materials/ViscoplasticityStressUpdate
+!syntax inputs /Materials/ADViscoplasticityStressUpdate
 
-!syntax children /Materials/ViscoplasticityStressUpdate
+!syntax children /Materials/ADViscoplasticityStressUpdate
 
 !bibtex bibliography
