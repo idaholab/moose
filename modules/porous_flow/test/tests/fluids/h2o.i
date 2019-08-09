@@ -47,17 +47,14 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
-    at_nodes = false
     temperature = temp
   [../]
   [./ppss]
     type = PorousFlow1PhaseFullySaturated
-    at_nodes = false
     porepressure = pp
   [../]
   [./water]
     type = PorousFlowSingleComponentFluid
-    at_nodes = false
     temperature_unit = Kelvin
     fp = water
     phase = 0

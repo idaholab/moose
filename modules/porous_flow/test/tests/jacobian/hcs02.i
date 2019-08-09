@@ -46,9 +46,8 @@
 []
 
 [Materials]
-  [./temperature_nodal]
+  [./temperature]
     type = PorousFlowTemperature
-    at_nodes = true
     temperature = temp
   [../]
 []

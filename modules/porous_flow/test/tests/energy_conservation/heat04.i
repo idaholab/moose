@@ -277,12 +277,6 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
-    at_nodes = true
-    temperature = temp
-  [../]
-  [./temperature_qp]
-    type = PorousFlowTemperature
-    at_nodes = false
     temperature = temp
   [../]
   [./elasticity_tensor]
@@ -316,7 +310,6 @@
   [../]
   [./rock_heat]
     type = PorousFlowMatrixInternalEnergy
-    at_nodes = true
     specific_heat_capacity = 0.2
     density = 5.0
   [../]

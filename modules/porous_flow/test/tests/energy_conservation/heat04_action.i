@@ -183,27 +183,13 @@
     fluid = true
     mechanical = true
     ensure_positive = false
-    at_nodes = true
     biot_coefficient = 1.0
     porosity_zero = 0.5
-    thermal_expansion_coeff = 0.25
-    solid_bulk = 2
-  [../]
-  [./porosity_qp]
-    type = PorousFlowPorosity
-    at_nodes = false
-    thermal = true
-    fluid = true
-    mechanical = true
-    ensure_positive = false
-    porosity_zero = 0.5
-    biot_coefficient = 1.0
     thermal_expansion_coeff = 0.25
     solid_bulk = 2
   [../]
   [./rock_heat]
     type = PorousFlowMatrixInternalEnergy
-    at_nodes = true
     specific_heat_capacity = 0.2
     density = 5.0
   [../]
