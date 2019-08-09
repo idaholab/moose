@@ -49,6 +49,8 @@ validParams<AddVariableAction>()
                              "Specifies the order of the FE shape function to use "
                              "for this variable (additional orders not listed are "
                              "allowed)");
+  params.addParam<std::vector<Real>>("scaling",
+                                     "Specifies a scaling factor to apply to this variable");
   return params;
 }
 
@@ -84,6 +86,42 @@ AddVariableAction::init()
   _components = _moose_object_pars.get<unsigned int>("components");
   if (_components == 0)
     mooseError("There must be at least one variable component, but somehow 0 has been specified");
+
+  // We have to do some sanity checks because of our work to maintain backwards compatibility.
+  // `family`, `order`, and `scaling` are all parameters duplicated between this action and the
+  // `MooseVariable*` object itself. Consequently during input file parsing, the params objects for
+  // both the action and MooseVariable object can be populated with the exact same parameters.
+  // However, some applications actually create their variables solely through creation and setting
+  // of `AddVariableAction` parameters which means that the `MooseVariableBase*` params will never
+  // be populated. So we should apply the parameters directly from the action. There should be no
+  // case in which both params objects get set by the user and they have different values
+
+  if (_pars.isParamSetByUser("family") && _moose_object_pars.isParamSetByUser("family") &&
+      !_pars.get<MooseEnum>("family").compareCurrent(_moose_object_pars.get<MooseEnum>("family")))
+    mooseError("Both the MooseVariable* and Add*VariableAction parameters objects have had the "
+               "`family` parameter set, and they are different values: ",
+               _moose_object_pars.get<MooseEnum>("family"),
+               " and ",
+               _pars.get<MooseEnum>("family"),
+               " respectively. I don't know how you achieved this, but you need to rectify it.");
+
+  if (_pars.isParamSetByUser("order") && _moose_object_pars.isParamSetByUser("order") &&
+      !_pars.get<MooseEnum>("order").compareCurrent(_moose_object_pars.get<MooseEnum>("order")))
+    mooseError("Both the MooseVariable* and Add*VariableAction parameters objects have had the "
+               "`order` parameter set, and they are different values: ",
+               _moose_object_pars.get<MooseEnum>("order"),
+               " and ",
+               _pars.get<MooseEnum>("order"),
+               " respectively. I don't know how you achieved this, but you need to rectify it.");
+
+  if (_pars.isParamSetByUser("scaling") && _moose_object_pars.isParamSetByUser("scaling") &&
+      _pars.get<std::vector<Real>>("scaling") !=
+          _moose_object_pars.get<std::vector<Real>>("scaling"))
+    mooseError("Both the MooseVariable* and Add*VariableAction parameters objects have had the "
+               "`scaling` parameter set, and they are different values. I don't know how you "
+               "achieved this, but you need to rectify it.");
+
+  _moose_object_pars.applySpecificParameters(_pars, {"order", "family", "scaling"});
 
   _fe_type = feType(_moose_object_pars);
 
