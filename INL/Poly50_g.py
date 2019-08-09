@@ -24,18 +24,23 @@ coordinates=mat[:,0]
 print(coordinates)
 norm_x=[]
 norm_y=[]
-tem=[]
+temp=[]
 max = thickness.index(max(thickness))
 for t in range(0,len(thickness)):
+        diff.append(np.array(data[t])-np.array(data[max]))
+print(diff)
+for t in range(0,len(thickness)):
     if t==max:
-        diff.append(np.array(data[max])-np.array(data[max]))
+        diff.append(np.array(data[t])-np.array(data[max]))
         #norm_x.append(np.linalg.norm(diff[:,0]))
         #norm_y.append(np.linalg.norm(diff[:,1]))
         continue
     diff.append(np.array(data[t])-np.array(data[max]))
     #norm_x.append(np.linalg.norm(diff[:,0]))
     #norm_y.append(np.linalg.norm(diff[:,1]))
-print(diff)
+
+temp=(diff[:,1],diff[:,2])
+print(temp)
 norm_x=sort_list(norm_x,thickness)
 norm_y=sort_list(norm_y,thickness)
 thickness.sort()
