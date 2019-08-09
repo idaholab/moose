@@ -16,7 +16,6 @@ class ADComputeMultiplePorousInelasticStress;
 
 declareADValidParams(ADComputeMultiplePorousInelasticStress);
 
-
 /**
  * Compute state (stress and internal parameters such as plastic
  * strains and internal parameters) using an iterative process. A porosity material property
@@ -24,7 +23,8 @@ declareADValidParams(ADComputeMultiplePorousInelasticStress);
  */
 
 template <ComputeStage compute_stage>
-class ADComputeMultiplePorousInelasticStress : public ADComputeMultipleInelasticStress<compute_stage>
+class ADComputeMultiplePorousInelasticStress
+  : public ADComputeMultipleInelasticStress<compute_stage>
 {
 public:
   ADComputeMultiplePorousInelasticStress(const InputParameters & parameters);

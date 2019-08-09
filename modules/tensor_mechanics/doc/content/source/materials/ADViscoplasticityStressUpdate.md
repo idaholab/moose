@@ -29,14 +29,20 @@ Stress exponent: $n$
 
 ## Theory
 
+As pores nucleate within a material system, the dissipative potential that governs overall
+stress-strain response and drives local void growth mechanisms is enhanced. Simply put, +the
+constitutive behavior of a material and the evolution of porosity within are highly coupled
+processes+.  In high-temperature and other extreme environments, this potential should include
+effects of viscoplasticity and diffusion.
+
 Homogenization of a composite material's plastic potential can be accomplished using the
 [!cite](Bishop:1951fb) upper-bound theorem for dissipation, which says that any possible dissipation
 field solved at the macroscopic level is an upper bound to the volume average of local dissipation
-within a material system Simply put, +the constitutive behavior of a material and the evolution of
-porosity within are highly coupled processes+. As pores nucleate within a material system, the
-dissipative potential that governs overall stress-strain response and drives local void growth
-mechanisms is enhanced. In high-temperature and irradiated environments, this potential should
-include effects of viscoplasticity and diffusion.
+within a material system.
+
+\begin{equation}
+  \boldsymbol{\Sigma}:\dot{\mathbf{E}} \geq \langle \boldsymbol{\sigma}:\boldsymbol{\dot{\epsilon}} \rangle = \int_V \boldsymbol{\sigma}:\boldsymbol{\dot{\epsilon}} \text{d}V.
+\end{equation}
 
 In many continuum level modeling problems, the simulation length scale is larger than individual
 voids themselves, and therefore methods in homogenization are required to model the voided material
@@ -48,15 +54,6 @@ behavior of the porous material system.
       style=width:80%;margin-left:5%;
       id=true_vs_homo
       caption=Schematic comparing the true sub-material response and the homogenized response and showing that the two methods match energy dissipation.
-
-Homogenization of a composite material's plastic potential can be accomplished using the
-[!cite](Bishop:1951fb) upper-bound theorem for dissipation, which says that any possible dissipation
-field solved at the macroscopic level is an upper bound to the volume average of local dissipation
-within a material system:
-
-\begin{equation}
-  \boldsymbol{\Sigma}:\dot{\mathbf{E}} \geq \langle \boldsymbol{\sigma}:\boldsymbol{\dot{\epsilon}} \rangle = \int_V \boldsymbol{\sigma}:\boldsymbol{\dot{\epsilon}} \text{d}V.
-\end{equation}
 
 [!cite](Gurson:1977gg) employed this approach to solve for dissipation in a purely-plastic
 (rate-insensitive) material, and derived an exact expression for the velocity and strain fields
@@ -97,7 +94,7 @@ a single dissipative potential, described by a Norton-type power law:
 \end{equation}
 Here, the gauge stress, $\Lambda_n$,  is used to translate applied stress and porosity to strain rate response in a power law creeping material with rate-sensitivity factor $n$, is given via the minimization of the residual $\mathcal{R}$:
 \begin{equation}
-  \mathcal{R} = \left(\frac{\Sigma_{eq}}{\Lambda_n(\boldsymbol{\Sigma},f)}\right)^2 + f\left[h_n\left(\frac{\Sigma_m}{\Lambda_n(\boldsymbol{\Sigma},f)}\right) + \frac{n-1}{n+1}\frac{1}{h_n\left(\frac{\Sigma_m}{\Lambda_n(\boldsymbol{\Sigma},f)}\right)}\right] - 1-\frac{n-1}{n+1}f^2 = 0
+  \mathcal{R} = \left(\frac{\Sigma_{eq}}{\Lambda_n(\boldsymbol{\Sigma},f)}\right)^2 + f\left[h_n + \frac{n-1}{n+1}\frac{1}{h_n}\right] - 1-\frac{n-1}{n+1}f^2 = 0
 \end{equation}
 where $h_n$ is a rate sensitivity factor.
 
@@ -124,13 +121,13 @@ providing a clear link between traditional power law creep solves; by replacing 
 
 Using the LPS model, the gauge stress can be calculated by minimizing the residual,
 \begin{equation}
-  \mathcal{R} = \left(\frac{\Sigma_{eq}}{\Lambda_n(\boldsymbol{\Sigma},f)}\right)^2 + f\left[h_n\left(\frac{\Sigma_m}{\Lambda_n(\boldsymbol{\Sigma},f)}\right) + \frac{n-1}{n+1}\frac{1}{h_n\left(\frac{\Sigma_m}{\Lambda_n(\boldsymbol{\Sigma},f)}\right)}\right] - 1-\frac{n-1}{n+1}f^2 = 0
+  \mathcal{R} = \left(\frac{\Sigma_{eq}}{\Lambda_n(\boldsymbol{\Sigma},f)}\right)^2 + f\left[h_n + \frac{n-1}{n+1}\frac{1}{h_n}\right] - 1-\frac{n-1}{n+1}f^2 = 0
   \label{eq:residual}
 \end{equation}
 
 The rate sensitivity factor $h_n$ is a function of the strain rate stress exponent, gauge stress, and equivalent stress,
 \begin{equation}
-  h_n = \left(1+\frac{1}{n}\frac{s_f|\Sigma_m|}{\Lambda_n(\boldsymbol{\Sigma},f)}^{\frac{n+1}{n}}\right)^n
+  h_n = \left(1+\frac{1}{n}\left(s_f\frac{|\Sigma_m|}{\Lambda_n(\boldsymbol{\Sigma},f)}\right)^{\frac{n+1}{n}}\right)^n
 \label{eq:h}
 \end{equation}
 where $s_f$ is a shape factor that depends on the pore shape:
@@ -153,7 +150,7 @@ In addition, the mean stress utilized in [eq:residual] and [eq:h] is different d
 
 The GTN can be solved in exactly the same manner as the LPS model by taking $n\rightarrow \infty$ in [eq:residual] and [eq:shape_factor], reducing $\mathcal{R}$ to,
 \begin{equation}
-  \mathcal{R} = \left(\frac{\Sigma_{eq}}{\Lambda_n(\boldsymbol{\Sigma},f)}\right)^2 + 2f \cosh\left(\frac{s_f\Sigma_m}{\Lambda_{\infty}}\right) - 1 - f^2 = 0
+  \mathcal{R} = \left(\frac{\Sigma_{eq}}{\Lambda_n(\boldsymbol{\Sigma},f)}\right)^2 + 2f \cosh\left(s_f\frac{\Sigma_m}{\Lambda_{\infty}}\right) - 1 - f^2 = 0
 \end{equation}
 
 Once a solution for $\Lambda_n$ is found, the strain rate can be determined using [eq:strain_rate] with the relationship,
@@ -163,7 +160,7 @@ Once a solution for $\Lambda_n$ is found, the strain rate can be determined usin
 
 ## Example Input Files
 
-!listing modules/tensor_mechanics/test/tests/viscoplasticity_stress_update/lps_dual.i block=Materials
+!listing modules/tensor_mechanics/test/tests/ad_viscoplasticity_stress_update/lps_dual.i block=Materials
 
 !syntax parameters /Materials/ADViscoplasticityStressUpdate
 

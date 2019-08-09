@@ -1,13 +1,13 @@
 [Tests]
   issues = '#13494'
-  design = 'source/materials/ViscoplasticityStressUpdate.md source/materials/ComputeMultiplePorousInelasticStress.md'
+  design = 'source/materials/ADViscoplasticityStressUpdate.md source/materials/ADComputeMultiplePorousInelasticStress.md'
   [./regular_creep]
     type = CSVDiff
     input = creep.i
     csvdiff = creep_out.csv
     cli_args = "Materials/active='elasticity_tensor regular_stress porosity creep'"
-    design = 'source/materials/PowerLawCreepStressUpdate.md source/materials/ComputeMultipleInelasticStress.md'
-    requirement = 'The PowerLawCreepStressUpdate, called through the ComputeMultipleInelasticStress, shall compute a creep strain based on an extrenal loading'
+    design = 'source/materials/ADPowerLawCreepStressUpdate.md source/materials/ADComputeMultipleInelasticStress.md'
+    requirement = 'The ADPowerLawCreepStressUpdate, called through the ADComputeMultipleInelasticStress, shall compute a creep strain based on an extrenal loading'
   [../]
   [./porous_creep]
     type = CSVDiff
@@ -15,13 +15,13 @@
     csvdiff = creep_out.csv
     cli_args = "Materials/active='elasticity_tensor porous_stress creep'"
     prereq = regular_creep
-    requirement = 'The PowerLawCreepStressUpdate, called through the ComputeMultiplePorousInelasticStress, shall compute a creep strain based on an extrenal loading, and match the values computed instead with ComputeMultipleInelasticStress'
+    requirement = 'The PowerLawCreepStressUpdate, called through the ADComputeMultiplePorousInelasticStress, shall compute a creep strain based on an extrenal loading, and match the values computed instead with ADComputeMultipleInelasticStress'
   [../]
   [./exact_spherical]
     type = CSVDiff
     input = exact.i
     csvdiff = exact_spherical_out.csv
-    requirement = 'The ViscoplasticityStressUpdate class shall compute a ratio between the gauge stress, equilvalent stress, and hydrostatic stress across a wide swath of exponents and stress states using spherical pore geometry'
+    requirement = 'The ADViscoplasticityStressUpdate class shall compute a ratio between the gauge stress, equilvalent stress, and hydrostatic stress across a wide swath of exponents and stress states using spherical pore geometry'
   [../]
   [./exact_cylindrical]
     type = CSVDiff
@@ -29,24 +29,24 @@
     csvdiff = exact_cylindrical_out.csv
     cli_args = 'GlobalParams/pore_shape_model=CYLINDRICAL Outputs/file_base=exact_cylindrical_out'
     prereq = exact_spherical
-    requirement = 'The ViscoplasticityStressUpdate class shall compute a ratio between the gauge stress, equilvalent stress, and hydrostatic stress across a wide swath of exponents and stress states using spherical pore geometry'
+    requirement = 'The ADViscoplasticityStressUpdate class shall compute a ratio between the gauge stress, equilvalent stress, and hydrostatic stress across a wide swath of exponents and stress states using spherical pore geometry'
   [../]
   [./lps_single]
     type = CSVDiff
     input = 'lps_single.i'
     csvdiff = 'lps_single_out.csv'
-    requirement = 'The ViscoplasticityStressUpdate class shall compute the viscoplastic responce using a single model with LPS spherical formulation that increases the porosity due to an external strain'
+    requirement = 'The ADViscoplasticityStressUpdate class shall compute the viscoplastic responce using a single model with LPS spherical formulation that increases the porosity due to an external strain'
   [../]
   [./lps_dual]
     type = CSVDiff
     input = 'lps_dual.i'
     csvdiff = 'lps_dual_out.csv'
-    requirement = 'The ViscoplasticityStressUpdate class shall compute the viscoplastic responce using two LPS models with spherical formulations that increases the porosity due to an external strain'
+    requirement = 'The ADViscoplasticityStressUpdate class shall compute the viscoplastic responce using two LPS models with spherical formulations that increases the porosity due to an external strain'
   [../]
   [./gtn_single]
     type = CSVDiff
     input = 'gtn_single.i'
     csvdiff = 'gtn_single_out.csv'
-    requirement = 'The ViscoplasticityStressUpdate class shall compute the viscoplastic responce using a single model with GTN formulation that increases the porosity due to an external strain'
+    requirement = 'The ADViscoplasticityStressUpdate class shall compute the viscoplastic responce using a single model with GTN formulation that increases the porosity due to an external strain'
   [../]
 []

@@ -374,8 +374,8 @@ ADViscoplasticityStressUpdate<compute_stage>::computeInelasticStrainIncrement(
   else
     gauge_stress /= std::sqrt(1.0 + _power_factor * Utility::pow<2>(_intermediate_porosity));
 
-    mooseAssert(gauge_stress > equiv_stress,
-                "Gauge stress calculated in inner Newton solve is less than equilvalent.");
+  mooseAssert(gauge_stress > equiv_stress,
+              "Gauge stress calculated in inner Newton solve is less than equilvalent.");
 
   // Compute stress potential
   dpsi_dgauge = _coefficient[_qp] * std::pow(gauge_stress, _power);
