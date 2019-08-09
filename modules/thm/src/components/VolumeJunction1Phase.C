@@ -43,7 +43,10 @@ VolumeJunction1Phase::VolumeJunction1Phase(const InputParameters & params)
     _rhouV_var_name(genName(name(), "rhouV")),
     _rhovV_var_name(genName(name(), "rhovV")),
     _rhowV_var_name(genName(name(), "rhowV")),
-    _rhoEV_var_name(genName(name(), "rhoEV"))
+    _rhoEV_var_name(genName(name(), "rhoEV")),
+    _pressure_var_name(genName(name(), "p")),
+    _temperature_var_name(genName(name(), "T")),
+    _velocity_var_name(genName(name(), "vel"))
 {
 }
 
@@ -102,6 +105,13 @@ VolumeJunction1Phase::addVariables()
   _sim.addVariable(
       true, _rhoEV_var_name, FEType(FIRST, SCALAR), connected_subdomains, _scaling_factor_rhoEV);
   _sim.addConstantScalarIC(_rhoEV_var_name, initial_rho * initial_E * _volume);
+
+  _sim.addVariable(false, _pressure_var_name, FEType(FIRST, SCALAR), connected_subdomains);
+  _sim.addConstantScalarIC(_pressure_var_name, initial_p);
+  _sim.addVariable(false, _temperature_var_name, FEType(FIRST, SCALAR), connected_subdomains);
+  _sim.addConstantScalarIC(_temperature_var_name, initial_T);
+  _sim.addVariable(false, _velocity_var_name, FEType(FIRST, SCALAR), connected_subdomains);
+  _sim.addConstantScalarIC(_velocity_var_name, vel.norm());
 }
 
 void
@@ -186,5 +196,42 @@ VolumeJunction1Phase::addMooseObjects()
       params.set<unsigned int>("equation_index") = i;
       _sim.addScalarKernel(class_name, genName(name(), var_names[i], "vja_sk"), params);
     }
+  }
+
+  {
+    const std::string class_name = "VolumeJunction1PhasePressureAux";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<AuxVariableName>("variable") = _pressure_var_name;
+    params.set<Real>("volume") = _volume;
+    params.set<std::vector<VariableName>>("rhoV") = {_rhoV_var_name};
+    params.set<std::vector<VariableName>>("rhouV") = {_rhouV_var_name};
+    params.set<std::vector<VariableName>>("rhovV") = {_rhovV_var_name};
+    params.set<std::vector<VariableName>>("rhowV") = {_rhowV_var_name};
+    params.set<std::vector<VariableName>>("rhoEV") = {_rhoEV_var_name};
+    params.set<UserObjectName>("fp") = _fp_name;
+    _sim.addAuxScalarKernel(class_name, genName(name(), "pressure_aux"), params);
+  }
+  {
+    const std::string class_name = "VolumeJunction1PhaseTemperatureAux";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<AuxVariableName>("variable") = _temperature_var_name;
+    params.set<Real>("volume") = _volume;
+    params.set<std::vector<VariableName>>("rhoV") = {_rhoV_var_name};
+    params.set<std::vector<VariableName>>("rhouV") = {_rhouV_var_name};
+    params.set<std::vector<VariableName>>("rhovV") = {_rhovV_var_name};
+    params.set<std::vector<VariableName>>("rhowV") = {_rhowV_var_name};
+    params.set<std::vector<VariableName>>("rhoEV") = {_rhoEV_var_name};
+    params.set<UserObjectName>("fp") = _fp_name;
+    _sim.addAuxScalarKernel(class_name, genName(name(), "temperature_aux"), params);
+  }
+  {
+    const std::string class_name = "VolumeJunction1PhaseVelocityMagnitudeAux";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<AuxVariableName>("variable") = _velocity_var_name;
+    params.set<std::vector<VariableName>>("rhoV") = {_rhoV_var_name};
+    params.set<std::vector<VariableName>>("rhouV") = {_rhouV_var_name};
+    params.set<std::vector<VariableName>>("rhovV") = {_rhovV_var_name};
+    params.set<std::vector<VariableName>>("rhowV") = {_rhowV_var_name};
+    _sim.addAuxScalarKernel(class_name, genName(name(), "velmag_aux"), params);
   }
 }
