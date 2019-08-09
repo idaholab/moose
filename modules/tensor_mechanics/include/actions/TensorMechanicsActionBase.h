@@ -34,4 +34,3 @@ public:
 protected:
   const bool _use_ad;
 };
-
