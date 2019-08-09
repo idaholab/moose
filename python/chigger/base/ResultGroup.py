@@ -47,8 +47,7 @@ class ResultGroup(ChiggerResult):
         """
         Call update on all children.
         """
-        for result in self._results:
-            result.update(**kwargs)
+        pass
 
     def setOptions(self, *args, **kwargs):
         """

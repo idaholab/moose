@@ -89,7 +89,7 @@ class ExodusSource(base.ChiggerSource):
 
     def getVTKSource(self):
         """
-        Returns the vtkExtractBlock object used for pulling subdomsin/sideset/nodeset data from the
+        Returns the vtkExtractBlock object used for pulling subdomain/sideset/nodeset data from the
         reader. (override)
 
         Returns:
