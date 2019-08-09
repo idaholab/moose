@@ -17,7 +17,9 @@
   using ADComputeMultipleInelasticStress<compute_stage>::finiteStrainRotation;                     \
   using ADComputeMultipleInelasticStress<compute_stage>::updateQpState;                            \
   using ADComputeMultipleInelasticStress<compute_stage>::updateQpStateSingleModel;                 \
-  using ADComputeMultipleInelasticStress<compute_stage>::computeAdmissibleState;
+  using ADComputeMultipleInelasticStress<compute_stage>::computeAdmissibleState;                   \
+  using ADComputeMultipleInelasticStress<compute_stage>::_inelastic_strain;                        \
+  using ADComputeMultipleInelasticStress<compute_stage>::_inelastic_strain_old
 
 // Forward Declarations
 template <ComputeStage>
@@ -159,4 +161,3 @@ protected:
 
   usingComputeFiniteStrainElasticStressMembers;
 };
-

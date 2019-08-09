@@ -54,6 +54,9 @@ protected:
   ADMaterialProperty(RankTwoTensor) & _stress;
   ADMaterialProperty(RankTwoTensor) & _elastic_strain;
 
+  /// Extra stress tensors
+  std::vector<const MaterialProperty<RankTwoTensor> *> _extra_stresses;
+
   /// initial stress components
   std::vector<const Function *> _initial_stress_fcn;
 
