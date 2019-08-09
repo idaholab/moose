@@ -49,6 +49,7 @@ PeriodicJunction::addMooseObjects()
   else if (_flow_model_id == THM::FM_TWO_PHASE)
   {
     std::vector<VariableName> variables{
+        FlowModelTwoPhase::BETA,
         FlowModelTwoPhase::ALPHA_RHO_A_LIQUID,
         FlowModelTwoPhase::ALPHA_RHOU_A_LIQUID,
         FlowModelTwoPhase::ALPHA_RHOE_A_LIQUID,
@@ -56,9 +57,6 @@ PeriodicJunction::addMooseObjects()
         FlowModelTwoPhase::ALPHA_RHOU_A_VAPOR,
         FlowModelTwoPhase::ALPHA_RHOE_A_VAPOR,
     };
-
-    if (_phase_interaction)
-      variables.push_back(FlowModelTwoPhase::BETA);
 
     addPeriodicBC(variables);
   }

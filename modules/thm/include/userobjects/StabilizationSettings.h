@@ -2,6 +2,7 @@
 
 #include "GeneralUserObject.h"
 #include "FlowModel.h"
+#include "NamingInterface.h"
 
 class StabilizationSettings;
 class Simulation;
@@ -9,7 +10,7 @@ class Simulation;
 template <>
 InputParameters validParams<StabilizationSettings>();
 
-class StabilizationSettings : public GeneralUserObject
+class StabilizationSettings : public GeneralUserObject, public NamingInterface
 {
 public:
   StabilizationSettings(const InputParameters & parameters);

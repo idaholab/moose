@@ -93,11 +93,6 @@ Inlet::check() const
     if (isParamValid("m_dot_liquid") && isParamValid("T_liquid") && isParamValid("m_dot_vapor") &&
         isParamValid("T_vapor") && isParamValid("alpha_vapor"))
       bct.insert(BC_TYPE_MASS_FLOW_RATE);
-
-    const FlowModelTwoPhase & fm = dynamic_cast<const FlowModelTwoPhase &>(*_flow_model);
-    bool phase_interaction = fm.getPhaseInteraction();
-    if (phase_interaction && !isParamValid("alpha_vapor"))
-      logError("The 7-eqn model requires 'alpha_vapor' parameter to be specified.");
   }
   else
   {

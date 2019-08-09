@@ -54,4 +54,10 @@ protected:
   const std::string _rhowV_var_name;
   /// rho*E*V variable name for junction
   const std::string _rhoEV_var_name;
+  /// pressure variable name for junction
+  const std::string _pressure_var_name;
+  /// temperature variable name for junction
+  const std::string _temperature_var_name;
+  /// velocity variable name for junction
+  const std::string _velocity_var_name;
 };

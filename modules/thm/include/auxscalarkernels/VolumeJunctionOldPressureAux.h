@@ -2,19 +2,19 @@
 
 #include "AuxScalarKernel.h"
 
-class VolumeJunctionPressureAux;
+class VolumeJunctionOldPressureAux;
 class SinglePhaseFluidProperties;
 
 template <>
-InputParameters validParams<VolumeJunctionPressureAux>();
+InputParameters validParams<VolumeJunctionOldPressureAux>();
 
 /**
  * Computes pressure for the volume junction component
  */
-class VolumeJunctionPressureAux : public AuxScalarKernel
+class VolumeJunctionOldPressureAux : public AuxScalarKernel
 {
 public:
-  VolumeJunctionPressureAux(const InputParameters & parameters);
+  VolumeJunctionOldPressureAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue();

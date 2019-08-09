@@ -13,6 +13,7 @@ validParams<StabilizationSettings>()
 
 StabilizationSettings::StabilizationSettings(const InputParameters & parameters)
   : GeneralUserObject(parameters),
+    NamingInterface(),
     _m_sim(*getCheckedPointerParam<Simulation *>("_sim")),
     _m_app(_m_sim.getApp()),
     _m_factory(_m_app.getFactory())

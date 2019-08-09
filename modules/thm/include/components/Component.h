@@ -6,6 +6,7 @@
 #include "InputParameterWarehouse.h"
 #include "THMApp.h"
 #include "LoggingInterface.h"
+#include "NamingInterface.h"
 
 class Component;
 class FEProblem;
@@ -17,7 +18,7 @@ InputParameters validParams<Component>();
 /**
  * Base class for THM components
  */
-class Component : public THMObject, public LoggingInterface
+class Component : public THMObject, public LoggingInterface, public NamingInterface
 {
 public:
   Component(const InputParameters & parameters);
@@ -148,15 +149,6 @@ public:
    * @param[in] status   Setup status that this component must have reached
    */
   void checkSetupStatus(const EComponentSetupStatus & status) const;
-
-  static std::string
-  genName(const std::string & prefix, unsigned int id, const std::string & suffix = "");
-  static std::string genName(const std::string & prefix,
-                             unsigned int i,
-                             unsigned int j,
-                             const std::string & suffix = "");
-  static std::string
-  genName(const std::string & prefix, const std::string & middle, const std::string & suffix = "");
 
   /**
    * Gets gravity magnitude
@@ -433,13 +425,6 @@ protected:
   THMMesh & _mesh;
 
   const Real & _zero;
-
-  /**
-   * Split the control logic name into "section name" and "property name"
-   * @param rname
-   * @return
-   */
-  static std::vector<std::string> split(const std::string & rname);
 
 private:
   /// Component setup status

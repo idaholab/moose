@@ -26,7 +26,7 @@ Closures1PhaseBase::addWallFrictionFunctionMaterial(const FlowChannel1Phase & fl
   params.set<std::vector<VariableName>>("arhoA") = {FlowModelSinglePhase::RHOA};
   params.set<std::vector<VariableName>>("arhouA") = {FlowModelSinglePhase::RHOUA};
   params.set<std::vector<VariableName>>("arhoEA") = {FlowModelSinglePhase::RHOEA};
-  _sim.addMaterial(class_name, Component::genName(flow_channel.name(), "f_wall_fn_mat"), params);
+  _sim.addMaterial(class_name, genName(flow_channel.name(), "f_wall_fn_mat"), params);
 }
 
 void
@@ -43,6 +43,5 @@ Closures1PhaseBase::addAverageWallTemperatureMaterial(const FlowChannel1Phase & 
   params.set<MaterialPropertyName>("Hw_average") =
       FlowModelSinglePhase::HEAT_TRANSFER_COEFFICIENT_WALL;
   params.set<std::vector<VariableName>>("T_fluid") = {FlowModelSinglePhase::TEMPERATURE};
-  _sim.addMaterial(
-      class_name, Component::genName(flow_channel.name(), "avg_T_wall_3eqn_mat"), params);
+  _sim.addMaterial(class_name, genName(flow_channel.name(), "avg_T_wall_3eqn_mat"), params);
 }
