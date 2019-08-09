@@ -207,7 +207,8 @@ def _check_page_for_stub(node, app_name, filename, update):
     with open(filename, 'r') as fid:
         content = fid.read()
 
-    if content and re.search(r'(stubs\/moose_(object|action|system).md.template)', content):
+    if content and re.search(r'(stubs\/moose_(object|action|system).md.template)', content) or \
+       ('MOOSE Documentation Stub' in content):
         if update and (app_name in node.groups):
             LOG.info("Updating stub page for %s in file %s.", node.fullpath, filename)
             with open(filename, 'w') as fid:
