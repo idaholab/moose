@@ -20,6 +20,8 @@ validParams<PorousFlowBrine>()
       "compute_density_and_viscosity", true, "Compute the fluid density and viscosity");
   params.addParam<bool>("compute_internal_energy", true, "Compute the fluid internal energy");
   params.addParam<bool>("compute_enthalpy", true, "Compute the fluid enthalpy");
+  params.addParam<UserObjectName>("water_fp",
+                                  "The name of the FluidProperties UserObject for water");
   params.addCoupledVar("xnacl", 0, "The salt mass fraction in the brine (kg/kg)");
   params.addClassDescription(
       "This Material calculates fluid properties for brine at the quadpoints or nodes");
@@ -123,17 +125,27 @@ PorousFlowBrine::PorousFlowBrine(const InputParameters & parameters)
 
     _xnacl(_nodal_material ? coupledDofValues("xnacl") : coupledValue("xnacl"))
 {
-  // BrineFluidProperties UserObject
-  std::string brine_name = name() + ":brine";
+  if (parameters.isParamSetByUser("water_fp"))
   {
-    std::string class_name = "BrineFluidProperties";
+    _water_fp = &getUserObject<SinglePhaseFluidProperties>("water_fp");
+
+    // Check that a water userobject has actually been supplied
+    if (_water_fp->fluidName() != "water")
+      paramError("water_fp", "A water FluidProperties UserObject must be supplied");
+  }
+
+  // BrineFluidProperties UserObject
+  const std::string brine_name = name() + ":brine";
+  {
+    const std::string class_name = "BrineFluidProperties";
     InputParameters params = _app.getFactory().getValidParams(class_name);
+
+    if (parameters.isParamSetByUser("water_fp"))
+      params.set<UserObjectName>("water_fp") = _water_fp->name();
+
     _fe_problem.addUserObject(class_name, brine_name, params);
   }
   _brine_fp = &_fe_problem.getUserObjectTempl<BrineFluidProperties>(brine_name);
-
-  // Water properties UserObject
-  _water_fp = &_brine_fp->getComponent(BrineFluidProperties::WATER);
 }
 
 void
