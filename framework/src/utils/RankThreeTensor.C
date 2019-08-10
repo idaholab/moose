@@ -22,8 +22,7 @@
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
 
-#include "metaphysicl/numberarray.h"
-#include "metaphysicl/dualnumber.h"
+#include "metaphysicl/dualsemidynamicsparsenumberarray.h"
 
 // C++ includes
 #include <iomanip>

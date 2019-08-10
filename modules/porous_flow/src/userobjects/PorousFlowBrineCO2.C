@@ -104,13 +104,13 @@ PorousFlowBrineCO2::thermophysicalProperties(Real pressure,
 
   // AD versions of primary variables
   DualReal p = pressure;
-  p.derivatives()[_pidx] = 1.0;
+  p.derivatives().insert(_pidx) = 1.0;
   DualReal T = temperature;
-  T.derivatives()[_Tidx] = 1.0;
+  T.derivatives().insert(_Tidx) = 1.0;
   DualReal Zco2 = Z;
-  Zco2.derivatives()[_Zidx] = 1.0;
+  Zco2.derivatives().insert(_Zidx) = 1.0;
   DualReal X = Xnacl;
-  X.derivatives()[_Xidx] = 1.0;
+  X.derivatives().insert(_Xidx) = 1.0;
 
   // Clear all of the FluidStateProperties data
   clearFluidStateProperties(fsp);
@@ -201,13 +201,13 @@ PorousFlowBrineCO2::massFractions(const DualReal & pressure,
       Yco2 = 0.0;
       Xh2o = 1.0 - Z;
       Yh2o = 0.0;
-      Xco2.derivatives()[_pidx] = 0.0;
-      Xco2.derivatives()[_Tidx] = 0.0;
-      Xco2.derivatives()[_Xidx] = 0.0;
-      Xco2.derivatives()[_Zidx] = 1.0;
-      Yco2.derivatives()[_pidx] = 0.0;
-      Yco2.derivatives()[_Tidx] = 0.0;
-      Yco2.derivatives()[_Xidx] = 0.0;
+      Xco2.derivatives().insert(_pidx) = 0.0;
+      Xco2.derivatives().insert(_Tidx) = 0.0;
+      Xco2.derivatives().insert(_Xidx) = 0.0;
+      Xco2.derivatives().insert(_Zidx) = 1.0;
+      Yco2.derivatives().insert(_pidx) = 0.0;
+      Yco2.derivatives().insert(_Tidx) = 0.0;
+      Yco2.derivatives().insert(_Xidx) = 0.0;
       break;
     }
 
@@ -216,13 +216,13 @@ PorousFlowBrineCO2::massFractions(const DualReal & pressure,
       Xco2 = 0.0;
       Yco2 = Z;
       Yh2o = 1.0 - Z;
-      Xco2.derivatives()[_pidx] = 0.0;
-      Xco2.derivatives()[_Tidx] = 0.0;
-      Xco2.derivatives()[_Xidx] = 0.0;
-      Yco2.derivatives()[_pidx] = 0.0;
-      Yco2.derivatives()[_Tidx] = 0.0;
-      Yco2.derivatives()[_Xidx] = 0.0;
-      Yco2.derivatives()[_Zidx] = 1.0;
+      Xco2.derivatives().insert(_pidx) = 0.0;
+      Xco2.derivatives().insert(_Tidx) = 0.0;
+      Xco2.derivatives().insert(_Xidx) = 0.0;
+      Yco2.derivatives().insert(_pidx) = 0.0;
+      Yco2.derivatives().insert(_Tidx) = 0.0;
+      Yco2.derivatives().insert(_Xidx) = 0.0;
+      Yco2.derivatives().insert(_Zidx) = 1.0;
       break;
     }
 
@@ -687,7 +687,7 @@ PorousFlowBrineCO2::equilibriumMoleFractions(const DualReal & pressure,
 
     // Equilibrium mole fractions and derivatives at the lower temperature
     DualReal Tlower = _Tlower;
-    Tlower.derivatives()[_Tidx] = 1.0;
+    Tlower.derivatives().insert(_Tidx) = 1.0;
 
     DualReal xco2_lower, yh2o_lower;
     equilibriumMoleFractionsLowTemp(pressure, Tlower, Xnacl, xco2_lower, yh2o_lower);
@@ -729,14 +729,14 @@ PorousFlowBrineCO2::equilibriumMoleFractions(const DualReal & pressure,
         Tint, yh2o_lower.value(), dyh2o_dT_lower, yh2o_upper, dyh2o_dT_upper, yh2or, dyh2o_dT);
 
     xco2 = xco2r;
-    xco2.derivatives()[_pidx] = xco2_lower.derivatives()[_pidx];
-    xco2.derivatives()[_Tidx] = dxco2_dT;
-    xco2.derivatives()[_Xidx] = xco2_lower.derivatives()[_Xidx];
+    xco2.derivatives().insert(_pidx) = xco2_lower.derivatives()[_pidx];
+    xco2.derivatives().insert(_Tidx) = dxco2_dT;
+    xco2.derivatives().insert(_Xidx) = xco2_lower.derivatives()[_Xidx];
 
     yh2o = yh2or;
-    yh2o.derivatives()[_pidx] = yh2o_lower.derivatives()[_pidx];
-    yh2o.derivatives()[_Tidx] = dyh2o_dT;
-    yh2o.derivatives()[_Xidx] = yh2o_lower.derivatives()[_Xidx];
+    yh2o.derivatives().insert(_pidx) = yh2o_lower.derivatives()[_pidx];
+    yh2o.derivatives().insert(_Tidx) = dyh2o_dT;
+    yh2o.derivatives().insert(_Xidx) = yh2o_lower.derivatives()[_Xidx];
   }
   else
   {
@@ -773,14 +773,14 @@ PorousFlowBrineCO2::equilibriumMoleFractions(const DualReal & pressure,
     const Real dxco2_dX = dB_dX * (1.0 - yh2or) - B * dyh2o_dX;
 
     xco2 = xco2r;
-    xco2.derivatives()[_pidx] = dxco2_dp;
-    xco2.derivatives()[_Tidx] = dxco2_dT;
-    xco2.derivatives()[_Xidx] = dxco2_dX;
+    xco2.derivatives().insert(_pidx) = dxco2_dp;
+    xco2.derivatives().insert(_Tidx) = dxco2_dT;
+    xco2.derivatives().insert(_Xidx) = dxco2_dX;
 
     yh2o = yh2or;
-    yh2o.derivatives()[_pidx] = dyh2o_dp;
-    yh2o.derivatives()[_Tidx] = dyh2o_dT;
-    yh2o.derivatives()[_Xidx] = dyh2o_dX;
+    yh2o.derivatives().insert(_pidx) = dyh2o_dp;
+    yh2o.derivatives().insert(_Tidx) = dyh2o_dT;
+    yh2o.derivatives().insert(_Xidx) = dyh2o_dX;
   }
 }
 
@@ -1122,7 +1122,7 @@ PorousFlowBrineCO2::enthalpyOfDissolutionGas(const DualReal & temperature,
       dX;
 
   for (std::size_t i = 0; i < temperature.derivatives().size(); ++i)
-    hdis.derivatives()[i] =
+    hdis.derivatives().insert(i) =
         temperature.derivatives()[i] * dhdis_dT + Xnacl.derivatives()[i] * dhdis_dX;
 
   return hdis;

@@ -1356,7 +1356,7 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
 
     // NOTE!  You have to do this AFTER setting the value!
     if (_var.kind() == Moose::VAR_NONLINEAR)
-      _ad_dof_values[i].derivatives()[ad_offset + i] = 1.0;
+      _ad_dof_values[i].derivatives().insert(ad_offset + i) = 1.0;
 
     if (_need_ad_u_dot && _time_integrator)
     {
@@ -2334,7 +2334,7 @@ MooseVariableData<OutputType>::fetchADDoFValues()
   {
     _ad_dof_values[i] = _dof_values[i];
     if (_var.kind() == Moose::VAR_NONLINEAR)
-      _ad_dof_values[i].derivatives()[ad_offset + i] = 1.;
+      _ad_dof_values[i].derivatives().insert(ad_offset + i) = 1.;
     assignADNodalValue(_ad_dof_values[i], i);
   }
 }

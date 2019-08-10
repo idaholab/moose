@@ -20,7 +20,7 @@ class FluidProperties;
 // module, FPDualReal, which is suitable for up to five variables.
 // This is useful for the cases where we wish to use AD to compute the derivatives
 // rather than hand-coding them in derived classes.
-typedef DualNumber<Real, NumberArray<5, Real>> FPDualReal;
+typedef DualNumber<Real, SemiDynamicSparseNumberArray<Real, unsigned int, NWrapper<5>>> FPDualReal;
 
 template <>
 InputParameters validParams<FluidProperties>();

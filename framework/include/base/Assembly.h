@@ -18,8 +18,7 @@
 #include "libmesh/fe_type.h"
 #include "libmesh/point.h"
 
-#include "metaphysicl/numberarray.h"
-#include "metaphysicl/dualnumber.h"
+#include "metaphysicl/dualsemidynamicsparsenumberarray.h"
 
 // libMesh forward declarations
 namespace libMesh

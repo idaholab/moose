@@ -13,10 +13,9 @@
 #include "SystemBase.h"
 #include "Assembly.h"
 
-#include "metaphysicl/dualnumberarray.h"
+#include "metaphysicl/dualsemidynamicsparsenumberarray.h"
 
 using MetaPhysicL::DualNumber;
-using MetaPhysicL::NumberArray;
 
 registerMooseObject("MooseApp", NormalNodalLMMechanicalContact);
 

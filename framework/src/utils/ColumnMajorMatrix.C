@@ -10,8 +10,7 @@
 // MOOSE includes
 #include "ColumnMajorMatrix.h"
 
-#include "metaphysicl/numberarray.h"
-#include "metaphysicl/dualnumber.h"
+#include "metaphysicl/dualsemidynamicsparsenumberarray.h"
 
 #include "libmesh/petsc_macro.h"
 

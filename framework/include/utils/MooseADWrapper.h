@@ -20,8 +20,7 @@
 #include "libmesh/tensor_value.h"
 #include "libmesh/dense_matrix.h"
 
-#include "metaphysicl/numberarray.h"
-#include "metaphysicl/dualnumber.h"
+#include "metaphysicl/dualsemidynamicsparsenumberarray.h"
 
 #include <typeinfo>
 

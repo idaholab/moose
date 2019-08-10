@@ -11,8 +11,7 @@
 
 #include "DGKernelBase.h"
 
-#include "metaphysicl/numberarray.h"
-#include "metaphysicl/dualnumber.h"
+#include "metaphysicl/dualsemidynamicsparsenumberarray.h"
 
 #define usingDGKernelMembers                                                                       \
   usingDGKernelBaseMembers;                                                                        \

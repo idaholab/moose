@@ -9,6 +9,8 @@
 
 #include "DimensionlessFlowNumbers.h"
 
+#include "metaphysicl/dualsemidynamicsparsenumberarray.h"
+
 namespace fp
 {
 

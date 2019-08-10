@@ -35,7 +35,7 @@ TEST_F(PorousFlowBrineCO2Test, indices)
 TEST_F(PorousFlowBrineCO2Test, equilibriumConstants)
 {
   DualReal T = 350.0;
-  T.derivatives()[_Tidx] = 1.0;
+  T.derivatives().insert(_Tidx) = 1.0;
 
   const Real dT = 1.0e-6;
 
@@ -55,7 +55,7 @@ TEST_F(PorousFlowBrineCO2Test, equilibriumConstants)
 
   // Test the high temperature formulation
   T = 450.0;
-  T.derivatives()[_Tidx] = 1.0;
+  T.derivatives().insert(_Tidx) = 1.0;
 
   K0H2O = _fs->equilibriumConstantH2O(T);
   K0CO2 = _fs->equilibriumConstantCO2(T);
@@ -79,13 +79,13 @@ TEST_F(PorousFlowBrineCO2Test, fugacityCoefficients)
 {
   // Test the low temperature formulation
   DualReal p = 40.0e6;
-  p.derivatives()[_pidx] = 1.0;
+  p.derivatives().insert(_pidx) = 1.0;
 
   DualReal T = 350.0;
-  T.derivatives()[_Tidx] = 1.0;
+  T.derivatives().insert(_Tidx) = 1.0;
 
   DualReal Xnacl = 0.0;
-  Xnacl.derivatives()[_Xidx] = 1.0;
+  Xnacl.derivatives().insert(_Xidx) = 1.0;
 
   DualReal co2_density = _co2_fp->rho_from_p_T(p, T);
 
@@ -147,13 +147,13 @@ TEST_F(PorousFlowBrineCO2Test, activityCoefficients)
 TEST_F(PorousFlowBrineCO2Test, activityCoefficientCO2Brine)
 {
   DualReal p = 10.0e6;
-  p.derivatives()[_pidx] = 1.0;
+  p.derivatives().insert(_pidx) = 1.0;
 
   DualReal T = 350.0;
-  T.derivatives()[_Tidx] = 1.0;
+  T.derivatives().insert(_Tidx) = 1.0;
 
   DualReal Xnacl = 0.1;
-  Xnacl.derivatives()[_Xidx] = 1.0;
+  Xnacl.derivatives().insert(_Xidx) = 1.0;
 
   const Real dp = 1.0e-1;
   const Real dT = 1.0e-6;
@@ -180,7 +180,7 @@ TEST_F(PorousFlowBrineCO2Test, activityCoefficientCO2Brine)
 
   // High temperature regime
   T = 523.15;
-  T.derivatives()[_Tidx] = 1.0;
+  T.derivatives().insert(_Tidx) = 1.0;
 
   gamma = _fs->activityCoefficientHighTemp(T, Xnacl);
   ABS_TEST(gamma.value(), 1.50047006243, 1.0e-8);
@@ -210,7 +210,7 @@ TEST_F(PorousFlowBrineCO2Test, activityCoefficientCO2Brine)
 TEST_F(PorousFlowBrineCO2Test, partialDensity)
 {
   DualReal T = 473.15;
-  T.derivatives()[_Tidx] = 1.0;
+  T.derivatives().insert(_Tidx) = 1.0;
 
   const Real dT = 1.0e-6;
 
@@ -230,13 +230,13 @@ TEST_F(PorousFlowBrineCO2Test, equilibriumMassFraction)
 {
   // Low temperature regime
   DualReal p = 1.0e6;
-  p.derivatives()[_pidx] = 1.0;
+  p.derivatives().insert(_pidx) = 1.0;
 
   DualReal T = 350.0;
-  T.derivatives()[_Tidx] = 1.0;
+  T.derivatives().insert(_Tidx) = 1.0;
 
   DualReal Xnacl = 0.1;
-  Xnacl.derivatives()[_Xidx] = 1.0;
+  Xnacl.derivatives().insert(_Xidx) = 1.0;
 
   const Real dp = 1.0e-2;
   const Real dT = 1.0e-6;
@@ -281,10 +281,10 @@ TEST_F(PorousFlowBrineCO2Test, equilibriumMassFraction)
 
   // High temperature regime
   p = 10.0e6;
-  p.derivatives()[_pidx] = 1.0;
+  p.derivatives().insert(_pidx) = 1.0;
 
   T = 525.15;
-  T.derivatives()[_Tidx] = 1.0;
+  T.derivatives().insert(_Tidx) = 1.0;
 
   _fs->equilibriumMassFractions(p, T, Xnacl, X, Y);
 
@@ -299,13 +299,13 @@ TEST_F(PorousFlowBrineCO2Test, equilibriumMassFraction)
 TEST_F(PorousFlowBrineCO2Test, MassFraction)
 {
   DualReal p = 1.0e6;
-  p.derivatives()[_pidx] = 1.0;
+  p.derivatives().insert(_pidx) = 1.0;
 
   DualReal T = 350.0;
-  T.derivatives()[_Tidx] = 1.0;
+  T.derivatives().insert(_Tidx) = 1.0;
 
   DualReal Xnacl = 0.1;
-  Xnacl.derivatives()[_Xidx] = 1.0;
+  Xnacl.derivatives().insert(_Xidx) = 1.0;
 
   FluidStatePhaseEnum phase_state;
   const unsigned int np = _fs->numPhases();
@@ -314,7 +314,7 @@ TEST_F(PorousFlowBrineCO2Test, MassFraction)
 
   // Liquid region
   DualReal Z = 0.0001;
-  Z.derivatives()[_Zidx] = 1.0;
+  Z.derivatives().insert(_Zidx) = 1.0;
 
   _fs->massFractions(p, T, Xnacl, Z, phase_state, fsp);
   EXPECT_EQ(phase_state, FluidStatePhaseEnum::LIQUID);
@@ -344,7 +344,7 @@ TEST_F(PorousFlowBrineCO2Test, MassFraction)
 
   // Gas region
   Z = 0.995;
-  Z.derivatives()[_Zidx] = 1.0;
+  Z.derivatives().insert(_Zidx) = 1.0;
 
   _fs->massFractions(p, T, Xnacl, Z, phase_state, fsp);
   EXPECT_EQ(phase_state, FluidStatePhaseEnum::GAS);
@@ -376,7 +376,7 @@ TEST_F(PorousFlowBrineCO2Test, MassFraction)
   // be verified using the equilibrium mass fraction derivatives that have
   // been verified above
   Z = 0.45;
-  Z.derivatives()[_Zidx] = 1.0;
+  Z.derivatives().insert(_Zidx) = 1.0;
 
   _fs->massFractions(p, T, Xnacl, Z, phase_state, fsp);
   EXPECT_EQ(phase_state, FluidStatePhaseEnum::TWOPHASE);
@@ -417,13 +417,13 @@ TEST_F(PorousFlowBrineCO2Test, MassFraction)
 TEST_F(PorousFlowBrineCO2Test, gasProperties)
 {
   DualReal p = 1.0e6;
-  p.derivatives()[_pidx] = 1.0;
+  p.derivatives().insert(_pidx) = 1.0;
 
   DualReal T = 350.0;
-  T.derivatives()[_Tidx] = 1.0;
+  T.derivatives().insert(_Tidx) = 1.0;
 
   DualReal Xnacl = 0.1;
-  Xnacl.derivatives()[_Xidx] = 1.0;
+  Xnacl.derivatives().insert(_Xidx) = 1.0;
 
   FluidStatePhaseEnum phase_state;
   const unsigned int np = _fs->numPhases();
@@ -432,7 +432,7 @@ TEST_F(PorousFlowBrineCO2Test, gasProperties)
 
   // Gas region
   DualReal Z = 0.995;
-  Z.derivatives()[_Zidx] = 1.0;
+  Z.derivatives().insert(_Zidx) = 1.0;
 
   _fs->massFractions(p, T, Xnacl, Z, phase_state, fsp);
   EXPECT_EQ(phase_state, FluidStatePhaseEnum::GAS);
@@ -507,13 +507,13 @@ TEST_F(PorousFlowBrineCO2Test, gasProperties)
 TEST_F(PorousFlowBrineCO2Test, liquidProperties)
 {
   DualReal p = 1.0e6;
-  p.derivatives()[_pidx] = 1.0;
+  p.derivatives().insert(_pidx) = 1.0;
 
   DualReal T = 350.0;
-  T.derivatives()[_Tidx] = 1.0;
+  T.derivatives().insert(_Tidx) = 1.0;
 
   DualReal Xnacl = 0.1;
-  Xnacl.derivatives()[_Xidx] = 1.0;
+  Xnacl.derivatives().insert(_Xidx) = 1.0;
 
   FluidStatePhaseEnum phase_state;
   const unsigned int np = _fs->numPhases();
@@ -522,7 +522,7 @@ TEST_F(PorousFlowBrineCO2Test, liquidProperties)
 
   // Liquid region
   DualReal Z = 0.0001;
-  Z.derivatives()[_Zidx] = 1.0;
+  Z.derivatives().insert(_Zidx) = 1.0;
 
   _fs->massFractions(p, T, Xnacl, Z, phase_state, fsp);
   EXPECT_EQ(phase_state, FluidStatePhaseEnum::LIQUID);
@@ -619,7 +619,7 @@ TEST_F(PorousFlowBrineCO2Test, liquidProperties)
 
   // Two-phase region
   Z = 0.045;
-  Z.derivatives()[_Zidx] = 1.0;
+  Z.derivatives().insert(_Zidx) = 1.0;
 
   _fs->massFractions(p, T, Xnacl, Z, phase_state, fsp);
   EXPECT_EQ(phase_state, FluidStatePhaseEnum::TWOPHASE);
@@ -706,13 +706,13 @@ TEST_F(PorousFlowBrineCO2Test, liquidProperties)
 TEST_F(PorousFlowBrineCO2Test, saturation)
 {
   DualReal p = 1.0e6;
-  p.derivatives()[_pidx] = 1.0;
+  p.derivatives().insert(_pidx) = 1.0;
 
   DualReal T = 350.0;
-  T.derivatives()[_Tidx] = 1.0;
+  T.derivatives().insert(_Tidx) = 1.0;
 
   DualReal Xnacl = 0.1;
-  Xnacl.derivatives()[_Xidx] = 1.0;
+  Xnacl.derivatives().insert(_Xidx) = 1.0;
 
   FluidStatePhaseEnum phase_state;
   const unsigned int np = _fs->numPhases();
@@ -723,7 +723,7 @@ TEST_F(PorousFlowBrineCO2Test, saturation)
   // a temporary value of Z can be used (as long as it corresponds to the two-phase
   // region)
   DualReal Z = 0.45;
-  Z.derivatives()[_Zidx] = 1.0;
+  Z.derivatives().insert(_Zidx) = 1.0;
 
   _fs->massFractions(p, T, Xnacl, Z, phase_state, fsp);
   EXPECT_EQ(phase_state, FluidStatePhaseEnum::TWOPHASE);
@@ -829,19 +829,19 @@ TEST_F(PorousFlowBrineCO2Test, totalMassFraction)
 TEST_F(PorousFlowBrineCO2Test, henryConstant)
 {
   DualReal T = 373.15;
-  T.derivatives()[_Tidx] = 1.0;
+  T.derivatives().insert(_Tidx) = 1.0;
 
   DualReal Xnacl = 0.1;
-  Xnacl.derivatives()[_Xidx] = 1.0;
+  Xnacl.derivatives().insert(_Xidx) = 1.0;
 
   DualReal Kh = _fs->henryConstant(T, Xnacl);
   REL_TEST(Kh.value(), 7.46559e+08, 1.0e-3);
 
   T = 473.15;
-  T.derivatives()[_Tidx] = 1.0;
+  T.derivatives().insert(_Tidx) = 1.0;
 
   Xnacl = 0.2;
-  Xnacl.derivatives()[_Xidx] = 1.0;
+  Xnacl.derivatives().insert(_Xidx) = 1.0;
 
   Kh = _fs->henryConstant(T, Xnacl);
   REL_TEST(Kh.value(), 1.66069e+09, 1.0e-3);
@@ -870,10 +870,10 @@ TEST_F(PorousFlowBrineCO2Test, enthalpyOfDissolutionGas)
 {
   // T = 50C
   DualReal T = 323.15;
-  T.derivatives()[_Tidx] = 1.0;
+  T.derivatives().insert(_Tidx) = 1.0;
 
   DualReal Xnacl = 0.1;
-  Xnacl.derivatives()[_Xidx] = 1.0;
+  Xnacl.derivatives().insert(_Xidx) = 1.0;
 
   // Enthalpy of dissolution of CO2 in brine
   DualReal hdis = _fs->enthalpyOfDissolutionGas(T, Xnacl);
@@ -881,7 +881,7 @@ TEST_F(PorousFlowBrineCO2Test, enthalpyOfDissolutionGas)
 
   // T = 350C
   T = 623.15;
-  T.derivatives()[_Tidx] = 1.0;
+  T.derivatives().insert(_Tidx) = 1.0;
 
   // Enthalpy of dissolution of CO2 in brine
   hdis = _fs->enthalpyOfDissolutionGas(T, Xnacl);
@@ -912,7 +912,7 @@ TEST_F(PorousFlowBrineCO2Test, enthalpyOfDissolution)
 {
   // T = 50C
   DualReal T = 323.15;
-  T.derivatives()[_Tidx] = 1.0;
+  T.derivatives().insert(_Tidx) = 1.0;
 
   // Enthalpy of dissolution of CO2 in water
   DualReal hdis = _fs->enthalpyOfDissolution(T);
@@ -920,7 +920,7 @@ TEST_F(PorousFlowBrineCO2Test, enthalpyOfDissolution)
 
   // T = 350C
   T = 623.15;
-  T.derivatives()[_Tidx] = 1.0;
+  T.derivatives().insert(_Tidx) = 1.0;
 
   // Enthalpy of dissolution of CO2 in water
   hdis = _fs->enthalpyOfDissolution(T);
