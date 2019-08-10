@@ -872,7 +872,7 @@ void
 Water97FluidProperties::vaporTemperature(Real pressure, Real & Tsat, Real & dTsat_dp) const
 {
   FPDualReal p = pressure;
-  p.derivatives()[0] = 1.0;
+  p.derivatives().insert(0) = 1.0;
 
   const FPDualReal T = vaporTemperature_ad(p);
 
@@ -1686,9 +1686,9 @@ Water97FluidProperties::T_from_p_h(
     Real pressure, Real enthalpy, Real & temperature, Real & dT_dp, Real & dT_dh) const
 {
   FPDualReal p = pressure;
-  p.derivatives()[0] = 1.0;
+  p.derivatives().insert(0) = 1.0;
   FPDualReal h = enthalpy;
-  h.derivatives()[1] = 1.0;
+  h.derivatives().insert(1) = 1.0;
 
   const FPDualReal T = T_from_p_h_ad(p, h);
 
@@ -1942,7 +1942,7 @@ Water97FluidProperties::henryConstant(const DualReal & temperature,
 
   DualReal Kh = Kh_real;
   for (size_t i = 0; i < temperature.derivatives().size(); ++i)
-    Kh.derivatives()[i] = temperature.derivatives()[i] * dKh_dT_real;
+    Kh.derivatives().insert(i) = temperature.derivatives()[i] * dKh_dT_real;
 
   return Kh;
 }

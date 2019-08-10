@@ -13,7 +13,7 @@
 #include "libmesh/dense_matrix_base_impl.h"
 #include "libmesh/dense_matrix_impl.h"
 
-#include "metaphysicl/dualnumberarray.h"
+#include "metaphysicl/dualsemidynamicsparsenumberarray.h"
 
 namespace libMesh
 {

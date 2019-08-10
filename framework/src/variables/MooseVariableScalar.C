@@ -307,7 +307,7 @@ MooseVariableScalar::computeAD(bool nodal_ordering)
     for (MooseIndex(n_dofs) i = 0; i < n_dofs; ++i)
     {
       _dual_u[i] = _u[i];
-      _dual_u[i].derivatives()[ad_offset + i] = 1;
+      _dual_u[i].derivatives().insert(ad_offset + i) = 1;
     }
   }
 }

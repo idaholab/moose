@@ -33,7 +33,7 @@ InputParameters validParams<SinglePhaseFluidProperties>();
                                                                                                    \
     DualReal result = x;                                                                           \
     for (size_t i = 0; i < p1.derivatives().size(); i++)                                           \
-      result.derivatives()[i] = p1.derivatives()[i] * dxd1 + p2.derivatives()[i] * dxd2;           \
+      result.derivatives().insert(i) = p1.derivatives()[i] * dxd1 + p2.derivatives()[i] * dxd2;    \
     return result;                                                                                 \
   }                                                                                                \
                                                                                                    \

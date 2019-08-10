@@ -790,7 +790,9 @@ Assembly::computeAffineMapAD(const Elem * elem,
         VectorValue<DualReal> elem_point = *elem_nodes[i];
         unsigned dimension = 0;
         for (const auto & disp_num : _displacements)
-          elem_point(dimension++).derivatives()[disp_num * _sys.getMaxVarNDofsPerElem() + i] = 1.;
+          elem_point(dimension++)
+              .derivatives()
+              .insert(disp_num * _sys.getMaxVarNDofsPerElem() + i) = 1.;
 
         _ad_q_points[p].add_scaled(elem_point, phi_map[i][p]);
       }
@@ -861,7 +863,9 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
         libMesh::VectorValue<DualReal> elem_point = *elem_nodes[i];
         unsigned dimension = 0;
         for (const auto & disp_num : _displacements)
-          elem_point(dimension++).derivatives()[disp_num * _sys.getMaxVarNDofsPerElem() + i] = 1.;
+          elem_point(dimension++)
+              .derivatives()
+              .insert(disp_num * _sys.getMaxVarNDofsPerElem() + i) = 1.;
 
         _ad_dxyzdxi_map[p].add_scaled(elem_point, dphidxi_map[i][p]);
 
@@ -908,7 +912,9 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
         libMesh::VectorValue<DualReal> elem_point = *elem_nodes[i];
         unsigned dimension = 0;
         for (const auto & disp_num : _displacements)
-          elem_point(dimension++).derivatives()[disp_num * _sys.getMaxVarNDofsPerElem() + i] = 1.;
+          elem_point(dimension++)
+              .derivatives()
+              .insert(disp_num * _sys.getMaxVarNDofsPerElem() + i) = 1.;
 
         _ad_dxyzdxi_map[p].add_scaled(elem_point, dphidxi_map[i][p]);
         _ad_dxyzdeta_map[p].add_scaled(elem_point, dphideta_map[i][p]);
@@ -982,7 +988,9 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
         libMesh::VectorValue<DualReal> elem_point = *elem_nodes[i];
         unsigned dimension = 0;
         for (const auto & disp_num : _displacements)
-          elem_point(dimension++).derivatives()[disp_num * _sys.getMaxVarNDofsPerElem() + i] = 1.;
+          elem_point(dimension++)
+              .derivatives()
+              .insert(disp_num * _sys.getMaxVarNDofsPerElem() + i) = 1.;
 
         _ad_dxyzdxi_map[p].add_scaled(elem_point, dphidxi_map[i][p]);
         _ad_dxyzdeta_map[p].add_scaled(elem_point, dphideta_map[i][p]);
@@ -1147,7 +1155,8 @@ Assembly::computeFaceMap(unsigned dim, const std::vector<Real> & qw, const Elem 
         unsigned dimension = 0;
         for (const auto & disp_num : _displacements)
           side_point(dimension++)
-              .derivatives()[disp_num * _sys.getMaxVarNDofsPerElem() + element_node_number] = 1.;
+              .derivatives()
+              .insert(disp_num * _sys.getMaxVarNDofsPerElem() + element_node_number) = 1.;
       }
 
       for (unsigned int p = 0; p < n_qp; p++)
@@ -1191,7 +1200,8 @@ Assembly::computeFaceMap(unsigned dim, const std::vector<Real> & qw, const Elem 
         unsigned dimension = 0;
         for (const auto & disp_num : _displacements)
           side_point(dimension++)
-              .derivatives()[disp_num * _sys.getMaxVarNDofsPerElem() + element_node_number] = 1.;
+              .derivatives()
+              .insert(disp_num * _sys.getMaxVarNDofsPerElem() + element_node_number) = 1.;
 
         for (unsigned int p = 0; p < n_qp; p++)
         {
@@ -1257,7 +1267,8 @@ Assembly::computeFaceMap(unsigned dim, const std::vector<Real> & qw, const Elem 
         unsigned dimension = 0;
         for (const auto & disp_num : _displacements)
           side_point(dimension++)
-              .derivatives()[disp_num * _sys.getMaxVarNDofsPerElem() + element_node_number] = 1.;
+              .derivatives()
+              .insert(disp_num * _sys.getMaxVarNDofsPerElem() + element_node_number) = 1.;
 
         for (unsigned int p = 0; p < n_qp; p++)
         {

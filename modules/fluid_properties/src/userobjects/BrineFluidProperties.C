@@ -156,7 +156,7 @@ BrineFluidProperties::rho_from_p_T_X(const FPDualReal & pressure,
     water_density = rho;
 
     for (std::size_t i = 0; i < pressure.derivatives().size(); ++i)
-      water_density.derivatives()[i] =
+      water_density.derivatives().insert(i) =
           pressure.derivatives()[i] * drho_dp + Tv.derivatives()[i] * drho_dT;
   }
   else
@@ -192,11 +192,11 @@ BrineFluidProperties::rho_from_p_T_X(Real pressure,
 {
   // Initialise the AD value and derivatives
   FPDualReal p = pressure;
-  p.derivatives()[0] = 1.0;
+  p.derivatives().insert(0) = 1.0;
   FPDualReal T = temperature;
-  T.derivatives()[1] = 1.0;
+  T.derivatives().insert(1) = 1.0;
   FPDualReal x = xnacl;
-  x.derivatives()[2] = 1.0;
+  x.derivatives().insert(2) = 1.0;
 
   _water_fp_derivs = true;
   FPDualReal ad_rho = this->rho_from_p_T_X(p, T, x);
@@ -303,7 +303,8 @@ BrineFluidProperties::h_from_p_T_X(const FPDualReal & pressure,
     enthalpy = h;
 
     for (std::size_t i = 0; i < pressure.derivatives().size(); ++i)
-      enthalpy.derivatives()[i] = pressure.derivatives()[i] * dh_dp + Th.derivatives()[i] * dh_dT;
+      enthalpy.derivatives().insert(i) =
+          pressure.derivatives()[i] * dh_dp + Th.derivatives()[i] * dh_dT;
   }
   else
     enthalpy = _water_fp->h_from_p_T(pressure.value(), Th.value() + _T_c2k);
@@ -334,11 +335,11 @@ BrineFluidProperties::h_from_p_T_X(Real pressure,
 {
   // Initialise the AD value and derivatives
   FPDualReal p = pressure;
-  p.derivatives()[0] = 1.0;
+  p.derivatives().insert(0) = 1.0;
   FPDualReal T = temperature;
-  T.derivatives()[1] = 1.0;
+  T.derivatives().insert(1) = 1.0;
   FPDualReal x = xnacl;
-  x.derivatives()[2] = 1.0;
+  x.derivatives().insert(2) = 1.0;
 
   _water_fp_derivs = true;
   FPDualReal ad_h = h_from_p_T_X(p, T, x);
@@ -417,11 +418,11 @@ BrineFluidProperties::e_from_p_T_X(Real pressure,
 {
   // Initialise the AD value and derivatives
   FPDualReal p = pressure;
-  p.derivatives()[0] = 1.0;
+  p.derivatives().insert(0) = 1.0;
   FPDualReal T = temperature;
-  T.derivatives()[1] = 1.0;
+  T.derivatives().insert(1) = 1.0;
   FPDualReal x = xnacl;
-  x.derivatives()[2] = 1.0;
+  x.derivatives().insert(2) = 1.0;
 
   _water_fp_derivs = true;
   FPDualReal ad_e = e_from_p_T_X(p, T, x);
@@ -525,7 +526,7 @@ BrineFluidProperties::henryConstant(const DualReal & temperature,
 
   DualReal henry = Kh;
   for (std::size_t i = 0; i < temperature.derivatives().size(); ++i)
-    henry.derivatives()[i] = temperature.derivatives()[i] * dKh_dT;
+    henry.derivatives().insert(i) = temperature.derivatives()[i] * dKh_dT;
 
   return henry;
 }

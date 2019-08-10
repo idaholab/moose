@@ -11,8 +11,7 @@
 
 #include "DualReal.h"
 
-#include "metaphysicl/numberarray.h"
-#include "metaphysicl/dualnumber.h"
+#include "metaphysicl/dualsemidynamicsparsenumberarray.h"
 #include "libmesh/libmesh_common.h"
 
 using namespace libMesh;
@@ -99,4 +98,3 @@ Real peclet(Real vel, Real L, Real diffusivity);
 DualReal peclet(DualReal vel, DualReal L, DualReal diffusivity);
 
 } // namespace fp
-
