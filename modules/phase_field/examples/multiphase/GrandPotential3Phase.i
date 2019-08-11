@@ -60,11 +60,6 @@
   [../]
 []
 
-
-[BCs]
-
-[]
-
 [Kernels]
 # Order parameter eta_alpha0
   [./ACa0_bulk]
@@ -140,7 +135,7 @@
     type = SusceptibilityTimeDerivative
     variable = w
     f_name = chi
-    args = '' # in this case chi (the susceptibility) is simply a constant
+    args = 'etaa0 etab0 etad0'
   [../]
   [./Diffusion]
     type = MatDiffusion
@@ -262,8 +257,9 @@
   [./chi]
     type = DerivativeParsedMaterial
     f_name = chi
-    material_property_names = 'Vm ha ka hb kb hd kd'
+    material_property_names = 'Vm ha(etaa0,etab0,etad0) ka hb(etaa0,etab0,etad0) kb hd(etaa0,etab0,etad0) kd'
     function = '(ha/ka + hb/kb + hd/kd) / Vm^2'
+    args = 'etaa0 etab0 etad0'
     derivative_order = 2
   [../]
 []
@@ -306,11 +302,9 @@
 []
 
 [Executioner]
-  # Preconditioned JFNK (default)
   type = Transient
   nl_max_its = 15
   scheme = bdf2
-  #solve_type = NEWTON
   solve_type = PJFNK
   petsc_options_iname = -pc_type
   petsc_options_value = asm
