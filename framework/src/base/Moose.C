@@ -425,11 +425,11 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   // Deprecated MeshGeneratorSyntax
   registerSyntax("AddMeshGeneratorAction", "MeshGenerators/*");
-  syntax.deprecateActionSyntax(
-      "MeshGenerators/*",
-      "The top-level [MeshGenerators] syntax is deprecated, please use [Mesh/Generators]");
+  syntax.deprecateActionSyntax("MeshGenerators/*",
+                               "The top-level [MeshGenerators] syntax is deprecated, please nest "
+                               "your generators under [Mesh]");
 
-  registerSyntax("AddMeshGeneratorAction", "Mesh/Generators/*");
+  registerSyntax("AddMeshGeneratorAction", "Mesh/*");
 
   registerSyntax("AddFunctionAction", "Functions/*");
   syntax.registerSyntaxType("Functions/*", "FunctionName");
