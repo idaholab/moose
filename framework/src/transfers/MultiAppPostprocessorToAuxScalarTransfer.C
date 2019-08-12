@@ -27,6 +27,7 @@ InputParameters
 validParams<MultiAppPostprocessorToAuxScalarTransfer>()
 {
   InputParameters params = validParams<MultiAppTransfer>();
+  params.addClassDescription("Transfers from a postprocessor to an scalar auxiliary variable.");
   params.addRequiredParam<PostprocessorName>(
       "from_postprocessor",
       "The name of the Postprocessor in the Master to transfer the value from.");

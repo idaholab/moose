@@ -29,6 +29,8 @@ InputParameters
 validParams<MultiAppNearestNodeTransfer>()
 {
   InputParameters params = validParams<MultiAppFieldTransfer>();
+  params.addClassDescription(
+      "Transfer the value to the target domain from the nearest node in the source domain.");
 
   params.addParam<BoundaryName>(
       "source_boundary",

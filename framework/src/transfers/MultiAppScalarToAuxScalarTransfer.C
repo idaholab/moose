@@ -27,6 +27,8 @@ InputParameters
 validParams<MultiAppScalarToAuxScalarTransfer>()
 {
   InputParameters params = validParams<MultiAppTransfer>();
+  params.addClassDescription(
+      "Transfers data between a scalar non-linear variable and a scalar auxiliary variable.");
   params.addRequiredParam<VariableName>("source_variable",
                                         "The name of the scalar variable in the MultiApp to "
                                         "transfer the value from.");

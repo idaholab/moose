@@ -27,10 +27,13 @@ InputParameters
 validParams<MultiAppVariableValueSamplePostprocessorTransfer>()
 {
   InputParameters params = validParams<MultiAppTransfer>();
+  params.addClassDescription(
+      "Transfers the value of a variable within the master application at each sub-application "
+      "position and transfers the value to a postprocessor on the sub-application(s).");
   params.addRequiredParam<PostprocessorName>(
       "postprocessor",
       "The name of the postprocessor in the MultiApp to transfer the value to.  "
-      "This should most likely be a Reporter Postprocessor.");
+      "This should most likely be a Reciever Postprocessor.");
   params.addRequiredParam<VariableName>("source_variable", "The variable to transfer from.");
   return params;
 }

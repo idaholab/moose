@@ -15,11 +15,8 @@ import argparse
 
 moose_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(moose_dir, 'python'))
-
-skip = [os.path.join('modules', 'richards'),
-        os.path.join('modules', 'solid_mechanics')]
-
 import mooseutils
+
 def get_options():
     """Command-line options."""
     parser = argparse.ArgumentParser(description='SQA Requirement checking tool.')

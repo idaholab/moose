@@ -1,10 +1,15 @@
 [Tests]
-  [./vector_pp_transfer]
+  issues = '#10319'
+  design = 'MultiAppVectorPostprocessorTransfer.md'
+  [vector_pp_transfer]
     type = 'CSVDiff'
     input = 'master.i'
     csvdiff = 'master_out_receive_values_0001.csv'
     rel_err = 3.8e-05
     min_parallel = 2
     max_parallel = 2
-  [../]
+
+    requirement = "The system shall support the ability transfer vectors of post processing data "
+                  "between the master application and sub-applications."
+  []
 []

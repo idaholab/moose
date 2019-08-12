@@ -13,10 +13,11 @@ class SQAStats(object):
         self.files_with_requirement = 0
         self.tests = 0
         self.tests_with_requirement = 0
+        self.tests_deprecated = 0
 
     @property
     def complete(self):
-        return float(self.tests_with_requirement)/float(self.tests) if self.tests else 0
+        return float(self.tests_with_requirement)/float(self.tests - self.tests_deprecated) if self.tests else 0
 
     def __iadd__(self, other):
         self.files += other.files
@@ -34,6 +35,8 @@ class SQAStats(object):
         out.append('    Files with Requirements: {}'.format(self.files_with_requirement))
         out.append('      Total Number of Tests: {}'.format(self.tests))
         out.append('    Tests with Requirements: {}'.format(self.tests_with_requirement))
+        out.append('           Deprecated Tests: {}'.format(self.tests_deprecated))
+        out.append('            Tests Remaining: {}'.format(self.tests - self.tests_deprecated - self.tests_with_requirement))
         return '\n'.join(out)
 
 def compute_requirement_stats(location, specs=['tests'], working_dir=None, show=True):
@@ -59,6 +62,10 @@ def compute_requirement_stats(location, specs=['tests'], working_dir=None, show=
             has_requirement = False
             for child in root.children[0]:
                 data.tests += 1
+
+                if root.children[0].get('deprecated', False) or child.get('deprecated', False):
+                    data.tests_deprecated += 1
+
                 if child.get('requirement', None):
                     has_requirement = True
                     data.tests_with_requirement += 1

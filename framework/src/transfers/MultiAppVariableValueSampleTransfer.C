@@ -28,6 +28,9 @@ InputParameters
 validParams<MultiAppVariableValueSampleTransfer>()
 {
   InputParameters params = validParams<MultiAppTransfer>();
+  params.addClassDescription(
+      "Transfers the value of a variable within the master application at each sub-application "
+      "position and transfers the value to a field variable on the sub-application(s).");
   params.addRequiredParam<AuxVariableName>(
       "variable", "The auxiliary variable to store the transferred values in.");
   params.addRequiredParam<VariableName>("source_variable", "The variable to transfer from.");
