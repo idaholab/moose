@@ -50,12 +50,6 @@ public:
    */
   bool requiresIsotropicTensor() override { return true; }
 
-  /// List of enums for choosing which viscoplastic model to use
-  static MooseEnum getModelEnum();
-
-  /// List of enums for choosing which pore shape model to use
-  static MooseEnum getPoreShapeEnum();
-
 protected:
   virtual void initQpStatefulProperties() override;
 
@@ -112,10 +106,10 @@ protected:
                                        const ADRankTwoTensor & stress);
 
   /// Enum to choose which viscoplastic model to use
-  const MooseEnum _model;
+  const enum class ViscoplasticityModel { LPS, GTN } _model;
 
   /// Enum to choose which pore shape model to use
-  const MooseEnum _pore_shape;
+  const enum class PoreShapeModel { SPHERICAL, CYLINDRICAL } _pore_shape;
 
   /// Pore shape factor depending on pore shape model
   const Real _pore_shape_factor;
@@ -156,6 +150,9 @@ protected:
 
   /// Material property for the old porosity
   const MaterialProperty<Real> & _porosity_old;
+
+  /// Maximum ratio between the gauge stress and the equilvalent stress
+  const Real _maximum_gauge_ratio;
 
   /// Flag to enable verbose output
   const bool _verbose;

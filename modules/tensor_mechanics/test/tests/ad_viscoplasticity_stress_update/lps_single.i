@@ -1,3 +1,5 @@
+# This test provides an example of an individual LPS viscoplasticity model
+
 [GlobalParams]
   displacements = 'disp_x disp_y'
 []
@@ -14,7 +16,6 @@
 [Modules/TensorMechanics/Master/All]
   strain = FINITE
   add_variables = true
-  base_name = 'asdf'
   generate_output = 'strain_xx strain_yy strain_xy hydrostatic_stress vonmises_stress'
   use_automatic_differentiation = true
 []
@@ -32,28 +33,25 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e10
     poissons_ratio = 0.3
-    base_name = 'asdf'
   [../]
-  [./strain]
+  [./stress]
     type = ADComputeMultiplePorousInelasticStress
     inelastic_models = lps
     initial_porosity = 0.1
     outputs = all
-    base_name = 'asdf'
   [../]
 
   [./lps]
     type = ADViscoplasticityStressUpdate
-    total_strain_base_name = 'asdf'
     coefficient = 'coef'
     power = 3
-    base_name = 'lps'
     outputs = all
     relative_tolerance = 1e-11
   [../]
   [./coef]
     type = ParsedMaterial
     f_name = coef
+    # Example of creep power law
     function = '1e-18 * exp(-4e4 / 1.987 / 1200)'
   [../]
 []
@@ -99,11 +97,11 @@
   [../]
   [./avg_hydro]
     type = ElementAverageValue
-    variable = asdf_hydrostatic_stress
+    variable = hydrostatic_stress
   [../]
   [./avg_vonmises]
     type = ElementAverageValue
-    variable = asdf_vonmises_stress
+    variable = vonmises_stress
   [../]
   [./dt]
     type = TimestepSize
@@ -118,7 +116,7 @@
   [../]
   [./eff_creep_strain]
     type = ElementAverageValue
-    variable = lps_effective_viscoplasticity
+    variable = effective_viscoplasticity
   [../]
   [./porosity]
     type = ElementAverageValue

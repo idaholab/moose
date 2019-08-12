@@ -22,7 +22,7 @@ defineADValidParams(
     params.addParam<std::vector<MaterialPropertyName>>(
         "extra_stress_names",
         std::vector<MaterialPropertyName>(),
-        "Material property names of rank two tensors to be applied to the stress."));
+        "Material property names of rank two tensors to be added to the stress."));
 
 template <ComputeStage compute_stage>
 ADComputeStressBase<compute_stage>::ADComputeStressBase(const InputParameters & parameters)

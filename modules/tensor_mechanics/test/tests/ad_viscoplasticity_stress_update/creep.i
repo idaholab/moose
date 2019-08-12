@@ -1,3 +1,5 @@
+# This test is provided as a check to ensure ADComputeMultiplePorousInelasticStress
+
 [GlobalParams]
   displacements = 'disp_x disp_y'
 []
@@ -14,7 +16,7 @@
 [Modules/TensorMechanics/Master/All]
   strain = FINITE
   add_variables = true
-  base_name = 'asdf'
+  base_name = 'total'
   generate_output = 'strain_xx strain_yy strain_xy hydrostatic_stress vonmises_stress'
   use_automatic_differentiation = true
 []
@@ -28,24 +30,25 @@
 []
 
 [Materials]
+  active='elasticity_tensor porous_stress creep'
   [./elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e10
     poissons_ratio = 0.3
-    base_name = 'asdf'
+    base_name = 'total'
   [../]
   [./porous_stress]
     type = ADComputeMultiplePorousInelasticStress
     inelastic_models = creep
     initial_porosity = 0.1
     outputs = all
-    base_name = 'asdf'
+    base_name = 'total'
   [../]
   [./regular_stress]
     type = ADComputeMultipleInelasticStress
     inelastic_models = creep
     outputs = all
-    base_name = 'asdf'
+    base_name = 'total'
   [../]
   [./porosity]
     type = GenericConstantMaterial
@@ -106,11 +109,11 @@
   [../]
   [./avg_hydro]
     type = ElementAverageValue
-    variable = asdf_hydrostatic_stress
+    variable = total_hydrostatic_stress
   [../]
   [./avg_vonmises]
     type = ElementAverageValue
-    variable = asdf_vonmises_stress
+    variable = total_vonmises_stress
   [../]
   [./dt]
     type = TimestepSize

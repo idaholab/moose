@@ -1,4 +1,5 @@
-# This test provides an example of an individual GTN viscoplasticity model
+# This test provides an example of combining two LPS viscoplasticity model.
+# The answer should be close, but not exactly the same, as lps_single.i
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
@@ -16,7 +17,6 @@
 [Modules/TensorMechanics/Master/All]
   strain = FINITE
   add_variables = true
-  base_name = 'total'
   generate_output = 'strain_xx strain_yy strain_xy hydrostatic_stress vonmises_stress'
   use_automatic_differentiation = true
 []
@@ -27,6 +27,12 @@
     x = '0 0.1'
     y = '0 1e-5'
   [../]
+  [./tot_effective_viscoplasticity]
+    type = ParsedFunction
+    vals = 'lps_1_eff_creep_strain lps_2_eff_creep_strain'
+    vars = 'lps_1_eff_creep_strain lps_2_eff_creep_strain'
+    value = 'lps_1_eff_creep_strain+lps_2_eff_creep_strain'
+  [../]
 []
 
 [Materials]
@@ -34,22 +40,27 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e10
     poissons_ratio = 0.3
-    base_name = 'total'
   [../]
   [./stress]
     type = ADComputeMultiplePorousInelasticStress
-    inelastic_models = gtn
+    inelastic_models = 'one two'
     initial_porosity = 0.1
     outputs = all
-    base_name = 'total'
   [../]
 
-  [./gtn]
+  [./one]
     type = ADViscoplasticityStressUpdate
-    total_strain_base_name = 'total'
     coefficient = 'coef'
     power = 3
-    viscoplasticity_model = GTN
+    base_name = 'lps_first'
+    outputs = all
+    relative_tolerance = 1e-11
+  [../]
+  [./two]
+    type = ADViscoplasticityStressUpdate
+    coefficient = 'coef'
+    power = 3
+    base_name = 'lps_second'
     outputs = all
     relative_tolerance = 1e-11
   [../]
@@ -57,7 +68,7 @@
     type = ParsedMaterial
     f_name = coef
     # Example of creep power law
-    function = '1e-18 * exp(-4e4 / 1.987 / 1200)'
+    function = '0.5e-18 * exp(-4e4 / 1.987 / 1200)'
   [../]
 []
 
@@ -102,11 +113,11 @@
   [../]
   [./avg_hydro]
     type = ElementAverageValue
-    variable = total_hydrostatic_stress
+    variable = hydrostatic_stress
   [../]
   [./avg_vonmises]
     type = ElementAverageValue
-    variable = total_vonmises_stress
+    variable = vonmises_stress
   [../]
   [./dt]
     type = TimestepSize
@@ -119,9 +130,19 @@
     type = NumNonlinearIterations
     outputs = console
   [../]
-  [./eff_creep_strain]
+  [./lps_1_eff_creep_strain]
     type = ElementAverageValue
-    variable = effective_viscoplasticity
+    variable = lps_first_effective_viscoplasticity
+    outputs = none
+  [../]
+  [./lps_2_eff_creep_strain]
+    type = ElementAverageValue
+    variable = lps_second_effective_viscoplasticity
+    outputs = none
+  [../]
+  [./eff_creep_strain_tot]
+    type = FunctionValuePostprocessor
+    function = tot_effective_viscoplasticity
   [../]
   [./porosity]
     type = ElementAverageValue

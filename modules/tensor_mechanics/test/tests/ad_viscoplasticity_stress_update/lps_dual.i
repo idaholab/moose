@@ -1,3 +1,6 @@
+# This test provides an example of combining two LPS viscoplasticity models with different stress
+# exponents.
+
 [GlobalParams]
   displacements = 'disp_x disp_y'
 []
@@ -26,9 +29,9 @@
   [../]
   [./tot_effective_viscoplasticity]
     type = ParsedFunction
-    vals = 'lps_1_eff_creep_strain lps_2_eff_creep_strain'
-    vars = 'lps_1_eff_creep_strain lps_2_eff_creep_strain'
-    value = 'lps_1_eff_creep_strain+lps_2_eff_creep_strain'
+    vals = 'lps_1_eff_creep_strain lps_3_eff_creep_strain'
+    vars = 'lps_1_eff_creep_strain lps_3_eff_creep_strain'
+    value = 'lps_1_eff_creep_strain+lps_3_eff_creep_strain'
   [../]
 []
 
@@ -38,32 +41,33 @@
     youngs_modulus = 1e10
     poissons_ratio = 0.3
   [../]
-  [./strain]
+  [./stress]
     type = ADComputeMultiplePorousInelasticStress
-    inelastic_models = 'lps_1 lps_2'
+    inelastic_models = 'one two'
     initial_porosity = 0.1
     outputs = all
   [../]
 
-  [./lps_1]
+  [./one]
     type = ADViscoplasticityStressUpdate
-    coefficient = 'coef'
+    coefficient = 'coef_3'
     power = 3
     base_name = 'lps_1'
     outputs = all
     relative_tolerance = 1e-11
   [../]
-  [./lps_2]
+  [./two]
     type = ADViscoplasticityStressUpdate
-    coefficient = 'coef'
-    power = 3
-    base_name = 'lps_2'
+    coefficient = 1e-10
+    power = 1
+    base_name = 'lps_3'
     outputs = all
     relative_tolerance = 1e-11
   [../]
   [./coef]
     type = ParsedMaterial
-    f_name = coef
+    f_name = coef_3
+    # Example of creep power law
     function = '0.5e-18 * exp(-4e4 / 1.987 / 1200)'
   [../]
 []
@@ -129,12 +133,18 @@
   [./lps_1_eff_creep_strain]
     type = ElementAverageValue
     variable = lps_1_effective_viscoplasticity
-    outputs = none
   [../]
-  [./lps_2_eff_creep_strain]
+  [./lps_3_eff_creep_strain]
     type = ElementAverageValue
-    variable = lps_1_effective_viscoplasticity
-    outputs = none
+    variable = lps_3_effective_viscoplasticity
+  [../]
+  [./lps_1_gauge_stress]
+    type = ElementAverageValue
+    variable = lps_1_gauge_stress
+  [../]
+  [./lps_3_gauge_stress]
+    type = ElementAverageValue
+    variable = lps_3_gauge_stress
   [../]
   [./eff_creep_strain_tot]
     type = FunctionValuePostprocessor

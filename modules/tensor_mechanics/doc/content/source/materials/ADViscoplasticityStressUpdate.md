@@ -22,7 +22,7 @@ Microscopic strain: $\boldsymbol{\epsilon}, \epsilon_{ij}$\\
 Hydrostatic stress: $\Sigma_m$\\
 Deviatoric stress: $\boldsymbol{\Sigma}^{\prime} = \Sigma_{ij} - \tfrac{1}{3}\delta_{ij}\Sigma_{kk}$\\
 Equivalent stress: $\Sigma_{eq} = \sqrt{\tfrac{3}{2}\left(\boldsymbol{\Sigma}^{\prime}:\boldsymbol{\Sigma}^{\prime}\right)}$\\
-Trace: $\text{tr}(\mathbf{T})=T_{ii} + T_{jj} + T_{kk}$ \\
+Trace: $\text{tr}(\mathbf{T})=T_{11} + T_{22} + T_{33}$ \\
 Porosity: $f$ \\
 Stress exponent: $n$
 
@@ -69,18 +69,18 @@ $\dot{f}$ can be modeled simply based on overall dilatation:
   \dot{f} = (1-f)\text{tr}(\dot{\mathbf{E}})  
 \end{equation}
 
-The exact result for average dissipation in the unit cell was correlated to an analytical solution
-useful for application in finite element codes for large-scale component analysis. Several fitting
-parameters were introduced into Gurson's model by [!cite](Tvergaard:1984ip) to account for a
-periodic array of voids (rather than the original unit cell), leading to the famous GTN model that
-is the most widely-used damage and porosity evolution model for ductile materials.
+The exact result for average dissipation in the unit cell was correlated against an analytical
+solution so that it would be useful for application in finite element codes for large-scale
+component analysis. Several fitting parameters were introduced into Gurson's model by
+[!cite](Tvergaard:1984ip) to account for a periodic array of voids (rather than the original unit
+cell), leading to the famous GTN model that is the most widely-used damage and porosity evolution
+model for ductile materials.
 
 [!cite](Leblond:1994kl) (LPS) extended the GTN model to account for rate-sensitive plastics. While
 far less common than the rate-insensitive GTN model, the work by Leblond et al. generated a similar
-analytical solution to accounting for dissipation in the material, making it also very accessible to
-finite element implementation. The current model uses a rate-sensitive description of plasticity
-(i.e. creep power law), and it is expected that differences between rate-sensitive and
-rate-insensitive plasticity will become significant at lower temperatures and stresses. As such, the
+analytical solution to GTN, but accounted for dissipation in the material, making it also very accessible to
+finite element implementation. It is expected that differences between rate-sensitive (i.e. LPS) and
+rate-insensitive (i.e. GTN) plasticity will become significant at lower temperatures and stresses. As such, the
 LPS model is selected for describing dissipation in a rate-sensitive voided material. In the case of
 a single dissipative potential, described by a Norton-type power law:
 
@@ -96,9 +96,7 @@ Here, the gauge stress, $\Lambda_n$,  is used to translate applied stress and po
 \begin{equation}
   \mathcal{R} = \left(\frac{\Sigma_{eq}}{\Lambda_n(\boldsymbol{\Sigma},f)}\right)^2 + f\left[h_n + \frac{n-1}{n+1}\frac{1}{h_n}\right] - 1-\frac{n-1}{n+1}f^2 = 0
 \end{equation}
-where $h_n$ is a rate sensitivity factor.
-
-The law proposed by [!cite](Leblond:1994kl)reduces exactly to the [!cite](Gurson:1977gg) model when
+where $h_n$ is a rate sensitivity factor. The law proposed by [!cite](Leblond:1994kl)reduces exactly to the [!cite](Gurson:1977gg) model when
 using a rate-insensitive exponent.
 
 ## Implementation
@@ -107,7 +105,7 @@ The inelastic strain is currently calculated explicitly,
 \begin{equation}
 \mathbf{E}(t+\Delta t) = \mathbf{E}(t) + \dot{\mathbf{E}}\Delta t,
 \end{equation}
-where the strain rate can be calculated via,
+where the strain rate is calculated via,
 \begin{equation}
   \dot{\mathbf{E}} = \frac{\partial\psi(\boldsymbol{\Sigma})}{\partial\boldsymbol{\Sigma}} = \frac{\partial\psi(\boldsymbol{\Sigma})}{\partial\Lambda_n} \frac{\partial\Lambda_n}{\partial\boldsymbol{\Sigma}}.
   \label{eq:strain_rate}
@@ -117,9 +115,11 @@ By taking the derivative of [eq:strain_rate] with respect to the gauge stress, t
   \frac{\partial\psi(\boldsymbol{\Sigma})}{\partial\Lambda_n} = \frac{\dot{\epsilon}_0}{\sigma_0^n} \left(\Lambda_n(\boldsymbol{\Sigma},f)\right)^n,
   \label{eq:norton}
 \end{equation}
-providing a clear link between traditional power law creep solves; by replacing $\Sigma_{eq}$ with a gauge stress, the exact strain dissipation is captured due to the act of homogenization.
+providing a clear link between traditional power law creep solves; by replacing $\Sigma_{eq}$
+utilized in tradiation power law creep equations with a gauge stress, the exact strain dissipation
+is captured due to the act of homogenization.
 
-Using the LPS model, the gauge stress can be calculated by minimizing the residual,
+Using the LPS model, the gauge stress is calculated by minimizing the residual,
 \begin{equation}
   \mathcal{R} = \left(\frac{\Sigma_{eq}}{\Lambda_n(\boldsymbol{\Sigma},f)}\right)^2 + f\left[h_n + \frac{n-1}{n+1}\frac{1}{h_n}\right] - 1-\frac{n-1}{n+1}f^2 = 0
   \label{eq:residual}
@@ -139,18 +139,18 @@ s_f =\begin{cases}
 \end{cases}
 \end{equation}
 
-In addition, the mean stress utilized in [eq:residual] and [eq:h] is different depending on the shape of the pore,
+In addition, the mean stress utilized in [eq:h] is different depending on the shape of the pore,
 \begin{equation}
 \Sigma_m =\begin{cases}
-  \frac{1}{3}(\Sigma_{i,i} + \Sigma_{j,j} + \Sigma_{k,k})  &\text{for spherical pores} \\
-  \frac{1}{2}(\Sigma_{i,i} + \Sigma_{j,j}) &\text{for cylindrical pores}
+  \frac{1}{3}(\Sigma_{1,1} + \Sigma_{2,2} + \Sigma_{3,3})  &\text{for spherical pores} \\
+  \frac{1}{2}(\Sigma_{1,1} + \Sigma_{2,2}) &\text{for cylindrical pores}
   \label{eq:mean_stress}
 \end{cases}
 \end{equation}
 
 The GTN can be solved in exactly the same manner as the LPS model by taking $n\rightarrow \infty$ in [eq:residual] and [eq:shape_factor], reducing $\mathcal{R}$ to,
 \begin{equation}
-  \mathcal{R} = \left(\frac{\Sigma_{eq}}{\Lambda_n(\boldsymbol{\Sigma},f)}\right)^2 + 2f \cosh\left(s_f\frac{\Sigma_m}{\Lambda_{\infty}}\right) - 1 - f^2 = 0
+  \mathcal{R} = \left(\frac{\Sigma_{eq}}{\Lambda_{\infty}(\boldsymbol{\Sigma},f)}\right)^2 + 2f \cosh\left(s_f\frac{\Sigma_m}{\Lambda_{\infty}}\right) - 1 - f^2 = 0
 \end{equation}
 
 Once a solution for $\Lambda_n$ is found, the strain rate can be determined using [eq:strain_rate] with the relationship,
@@ -159,6 +159,24 @@ Once a solution for $\Lambda_n$ is found, the strain rate can be determined usin
 \end{equation}
 
 ## Example Input Files
+
+In all cases, `ADViscoplasticityStressUpdate` must be combined with
+[ADComputeMultiplePorousInelasticStress](ADComputeMultiplePorousInelasticStress.md) in order to
+calculate the stress and capture the porosity evolution of the material:
+
+!listing modules/tensor_mechanics/test/tests/ad_viscoplasticity_stress_update/lps_single.i block=Materials
+
+In this case, the power law coefficient defined in [eq:norton] is provided as an example here as a
+`ParsedMaterial`. Note, if necessary, the coefficient must be provided as an AD material if
+variables or variable dependent materials are utilized to calculate coefficient.
+
+If several different stress exponents are required, separate `ADViscoplasticityStressUpdate` must be
+specified, and combined in
+[ADComputeMultiplePorousInelasticStress](ADComputeMultiplePorousInelasticStress.md):
+
+Here,  materials calculated by `ADViscoplasticityStressUpdate` are prepended with `base_name` to
+separate their contributions to the overall system. Note, this is different than the `base_name`
+provided in the [TensorMechanics Master Action](/Modules/TensorMechanics/Master/index.md)
 
 !listing modules/tensor_mechanics/test/tests/ad_viscoplasticity_stress_update/lps_dual.i block=Materials
 

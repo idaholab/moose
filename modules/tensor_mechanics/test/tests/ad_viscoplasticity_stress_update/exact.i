@@ -1,3 +1,5 @@
+# This test provides comparison to calculated values from Leblond:1994kl
+
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
   pore_shape_model = spherical
@@ -127,7 +129,7 @@
     youngs_modulus = 1e10
     poissons_ratio = 0.3
   [../]
-  [./strain]
+  [./stress]
     type = ADComputeMultiplePorousInelasticStress
     inelastic_models = 'gtn lps_ten lps_five lps_three lps_two lps_onepointfive lps_one'
     initial_porosity = 1e-3
@@ -183,7 +185,6 @@
     base_name = onepointfive
     outputs = all
     relative_tolerance = 1e-30
-    # constant_on = ELEMENT
   [../]
   [./lps_one]
     type = ADViscoplasticityStressUpdate
@@ -192,7 +193,6 @@
     base_name = one
     outputs = all
     relative_tolerance = 1e-30
-    # constant_on = ELEMENT
   [../]
 
   [./const_stress]
@@ -222,7 +222,7 @@
     value = 0.0
   [../]
   [./Pressure]
-    [./asdf]
+    [./bcs]
       boundary = 'top right front'
       function = '10^(t/4.5)'
       use_automatic_differentiation = true

@@ -20,12 +20,14 @@ defineADValidParams(
     params.addClassDescription(
         "This material computes the non-linear homogenized gauge stress in order to compute the "
         "viscoplastic responce due to creep in porous materials. This material must be used in "
-        "conjunction with ComputeMultiplePorousInelasticStress");
+        "conjunction with ADComputeMultiplePorousInelasticStress");
+    MooseEnum viscoplasticity_model("LPS GTN", "LPS");
     params.addParam<MooseEnum>("viscoplasticity_model",
-                               ADViscoplasticityStressUpdate<RESIDUAL>::getModelEnum(),
+                               viscoplasticity_model,
                                "Which viscoplastic model to use");
+    MooseEnum pore_shape_model("spherical cylindrical", "spherical");
     params.addParam<MooseEnum>("pore_shape_model",
-                               ADViscoplasticityStressUpdate<RESIDUAL>::getPoreShapeEnum(),
+                               pore_shape_model,
                                "Which pore shape model to use");
     params.addParam<Real>("max_inelastic_increment",
                           1.0e-4,
@@ -39,22 +41,29 @@ defineADValidParams(
     params.addRequiredRangeCheckedParam<Real>("power",
                                               "power>=1.0",
                                               "Stress exponent for Norton power law");
+    params.addParam<Real>(
+        "maximum_gauge_ratio",
+        1.0e6,
+        "Maximum ratio between the gauge stress and the equilvalent stress. This "
+        "should be a high number. Note that this does not set an upper bound on the value, but "
+        "rather will help with convergence of the inner Newton loop");
     params.addParam<bool>("verbose", false, "Flag to output verbose information");
     params.addParam<MaterialPropertyName>("porosity_name",
                                           "porosity",
                                           "Name of porosity material property");
     params.addParam<std::string>("total_strain_base_name", "Base name for the total strain");
 
-    params.addParamNamesToGroup("effective_inelastic_strain_name", "Advanced"););
+    params.addParamNamesToGroup("effective_inelastic_strain_name maximum_gauge_ratio",
+                                "Advanced"););
 
 template <ComputeStage compute_stage>
 ADViscoplasticityStressUpdate<compute_stage>::ADViscoplasticityStressUpdate(
     const InputParameters & parameters)
   : ADStressUpdateBase<compute_stage>(parameters),
     ADSingleVariableReturnMappingSolution<compute_stage>(parameters),
-    _model(getParam<MooseEnum>("viscoplasticity_model")),
-    _pore_shape(getParam<MooseEnum>("pore_shape_model")),
-    _pore_shape_factor(_pore_shape == "spherical" ? 1.5 : std::sqrt(3.0)),
+    _model(parameters.get<MooseEnum>("viscoplasticity_model").getEnum<ViscoplasticityModel>()),
+    _pore_shape(parameters.get<MooseEnum>("pore_shape_model").getEnum<PoreShapeModel>()),
+    _pore_shape_factor(_pore_shape == PoreShapeModel::SPHERICAL ? 1.5 : std::sqrt(3.0)),
     _total_strain_base_name(isParamValid("total_strain_base_name")
                                 ? getParam<std::string>("total_strain_base_name") + "_"
                                 : ""),
@@ -68,31 +77,18 @@ ADViscoplasticityStressUpdate<compute_stage>::ADViscoplasticityStressUpdate(
     _creep_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "creep_strain")),
     _max_inelastic_increment(getParam<Real>("max_inelastic_increment")),
     _power(getParam<Real>("power")),
-    _power_factor(_model == "LPS" ? (_power - 1.0) / (_power + 1.0) : 1.0),
+    _power_factor(_model == ViscoplasticityModel::LPS ? (_power - 1.0) / (_power + 1.0) : 1.0),
     _coefficient(getADMaterialProperty<Real>("coefficient")),
     _gauge_stress(declareADProperty<Real>(_base_name + "gauge_stress")),
     _intermediate_porosity(0.0),
     _porosity_old(getMaterialPropertyOld<Real>(getParam<MaterialPropertyName>("porosity_name"))),
+    _maximum_gauge_ratio(getParam<Real>("maximum_gauge_ratio")),
     _verbose(getParam<bool>("verbose")),
     _hydro_stress(0.0),
     _identity_two(RankTwoTensor::initIdentity),
     _dhydro_stress_dsigma(_identity_two / 3.0),
     _derivative(0.0)
 {
-}
-
-template <ComputeStage compute_stage>
-MooseEnum
-ADViscoplasticityStressUpdate<compute_stage>::getModelEnum()
-{
-  return MooseEnum("LPS GTN", "LPS");
-}
-
-template <ComputeStage compute_stage>
-MooseEnum
-ADViscoplasticityStressUpdate<compute_stage>::getPoreShapeEnum()
-{
-  return MooseEnum("spherical cylindrical", "spherical");
 }
 
 template <ComputeStage compute_stage>
@@ -123,7 +119,7 @@ ADViscoplasticityStressUpdate<compute_stage>::updateState(
     const RankTwoTensor & elastic_strain_old)
 {
   // Compute initial hydrostatic stress and porosity
-  if (_pore_shape == "cylindrical")
+  if (_pore_shape == PoreShapeModel::CYLINDRICAL)
     _hydro_stress = (stress(0, 0) + stress(1, 1)) / 2.0;
   else
     _hydro_stress = stress.trace() / 3.0;
@@ -140,9 +136,7 @@ ADViscoplasticityStressUpdate<compute_stage>::updateState(
   // Compute intermediate equivalent stress
   const ADRankTwoTensor dev_stress = stress.deviatoric();
   const ADReal dev_stress_squared = dev_stress.doubleContraction(dev_stress);
-  const ADReal equiv_stress = MooseUtils::absoluteFuzzyEqual(dev_stress_squared, 0.0)
-                                  ? 0.0
-                                  : std::sqrt(1.5 * dev_stress_squared);
+  const ADReal equiv_stress = dev_stress_squared == 0.0 ? 0.0 : std::sqrt(1.5 * dev_stress_squared);
 
   computeStressInitialize(equiv_stress, elasticity_tensor);
 
@@ -198,7 +192,7 @@ ADReal
 ADViscoplasticityStressUpdate<compute_stage>::maximumPermissibleValue(
     const ADReal & effective_trial_stress) const
 {
-  return effective_trial_stress * 1.0e6;
+  return effective_trial_stress * _maximum_gauge_ratio;
 }
 
 template <ComputeStage compute_stage>
@@ -251,13 +245,13 @@ ADViscoplasticityStressUpdate<compute_stage>::computeResidual(const ADReal & equ
   ADReal residual = residual_left;
   _derivative = dresidual_left_dtrial_gauge;
 
-  if (_pore_shape == "spherical")
+  if (_pore_shape == PoreShapeModel::SPHERICAL)
   {
     residual *= 1.0 + _intermediate_porosity / 1.5;
     _derivative *= 1.0 + _intermediate_porosity / 1.5;
   }
 
-  if (_model == "GTN")
+  if (_model == ViscoplasticityModel::GTN)
   {
     residual += 2.0 * _intermediate_porosity * std::cosh(_pore_shape_factor * M) - 1.0 -
                 Utility::pow<2>(_intermediate_porosity);
@@ -323,7 +317,7 @@ ADViscoplasticityStressUpdate<compute_stage>::computeDGaugeDSigma(
   if (_hydro_stress)
   {
     const ADReal dM_dhydro_stress = M / _hydro_stress;
-    if (_model == "GTN")
+    if (_model == ViscoplasticityModel::GTN)
     {
       dresidual_dhydro_stress = 2.0 * _intermediate_porosity * std::sinh(_pore_shape_factor * M) *
                                 _pore_shape_factor * dM_dhydro_stress;
@@ -339,7 +333,7 @@ ADViscoplasticityStressUpdate<compute_stage>::computeDGaugeDSigma(
 
   // Compute the derivative of the residual with respect to the equilvalent stress
   ADReal dresidual_dequiv_stress = 2.0 * equiv_stress / Utility::pow<2>(gauge_stress);
-  if (_pore_shape == "spherical")
+  if (_pore_shape == PoreShapeModel::SPHERICAL)
     dresidual_dequiv_stress *= 1.0 + _intermediate_porosity / 1.5;
 
   // Compute the derivative of the equilvalent stress to the deviatoric stress
