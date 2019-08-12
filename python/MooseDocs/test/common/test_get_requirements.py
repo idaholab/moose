@@ -10,9 +10,12 @@
 
 import os
 import unittest
+import logging
 
 import MooseDocs
 from MooseDocs import common
+
+logging.basicConfig()
 
 class TestGetRequirements(unittest.TestCase):
     def testBasic(self):
@@ -130,6 +133,12 @@ class TestGetRequirements(unittest.TestCase):
         self.assertEqual(d.name, 'group3-b')
         self.assertEqual(d.text, '8D')
         self.assertEqual(d.text_line, 65)
+
+    def testRequirementWithDeprecated(self):
+        loc = [os.getcwd()]
+        req = common.get_requirements(loc, ['demo2'])
+        self.assertEqual(len(req), 0)
+        # TODO: In Python3 performing assert on log messages is possible, it is a pain in 2
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

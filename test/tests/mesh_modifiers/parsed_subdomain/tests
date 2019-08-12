@@ -1,4 +1,5 @@
 [Tests]
+  deprecated = True
   [./parsed_subdomain_mm]
     type = 'Exodiff'
     input = 'parsed_subdomain_mm.i'

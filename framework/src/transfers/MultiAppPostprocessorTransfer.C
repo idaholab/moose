@@ -25,6 +25,8 @@ InputParameters
 validParams<MultiAppPostprocessorTransfer>()
 {
   InputParameters params = validParams<MultiAppTransfer>();
+  params.addClassDescription(
+      "Transfers postprocessor data between the master application and sub-application(s).");
   params.addRequiredParam<PostprocessorName>(
       "from_postprocessor",
       "The name of the Postprocessor in the Master to transfer the value from.");

@@ -1,26 +1,48 @@
 [Tests]
-  [./master_to_sub]
-    type = 'Exodiff'
-    input = 'master.i'
-    exodiff = 'master_out_pp_sub0.e master_out_pp_sub1.e'
-    max_threads = 1  # Diffs with threads
-  [../]
+  issues = '#2340'
+  design = 'MultiAppPostprocessorToAuxScalarTransfer.md'
 
-  [./sub_to_master]
-    type = 'Exodiff'
-    input = 'master2.i'
-    exodiff = 'master2_out.e'
-    max_threads = 1  # Diffs with threads
-  [../]
+  [transfer]
+    requirement = "The system shall support the transfer of data between a master and "
+                  "sub-applications for scalar unknowns and postprocessing data:"
+    [master_to_sub]
+      type = 'Exodiff'
+      input = 'master.i'
+      exodiff = 'master_out_pp_sub0.e master_out_pp_sub1.e'
+      max_threads = 1 # Diffs with threads
 
-  [./sub_to_master_wrong_order]
-    type = 'RunException'
-    input = 'master2_wrong_order.i'
-    expect_err = "The number of sub apps \(3\) must be equal to the order of the scalar AuxVariable \(4\)"
-  [../]
-  [./sub_to_master_wrong_positions]
-    type = 'RunException'
-    input = 'master2_wrong_positions.i'
-    expect_err = "The number of sub apps \(1\) must be equal to the order of the scalar AuxVariable \(3\)"
-  [../]
+      detail = "from the master application to the sub-applications and"
+    []
+
+    [sub_to_master]
+      type = 'Exodiff'
+      input = 'master2.i'
+      exodiff = 'master2_out.e'
+      max_threads = 1 # Diffs with threads
+
+      detail = "to the master application from the sub-applications."
+    []
+  []
+
+  [error]
+    requirement = "The system shall error during the transfer of scalar variable and postprocessor "
+                  "data if the number of sub-applications differs from the order of the scalar "
+                  "variable if"
+    [sub_to_master_wrong_order]
+      type = 'RunException'
+      input = 'master2_wrong_order.i'
+      expect_err = "The number of sub apps \(3\) must be equal to the order of the scalar "
+                   "AuxVariable \(4\)"
+
+      detail = "the order is too large and"
+    []
+    [sub_to_master_wrong_positions]
+      type = 'RunException'
+      input = 'master2_wrong_positions.i'
+      expect_err = "The number of sub apps \(1\) must be equal to the order of the scalar "
+                   "AuxVariable \(3\)"
+
+      detail = "the order is too small."
+    []
+  []
 []

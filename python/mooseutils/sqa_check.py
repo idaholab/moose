@@ -21,7 +21,12 @@ def check_requirement(filename):
     root = hit_load(filename)
     design = root.children[0].get('design', None)
     issues = root.children[0].get('issues', None)
+    deprecated = root.children[0].get('deprecated', False)
+
     for child in root.children[0]:
+        if child.get('deprecated', deprecated):
+            continue
+
         if 'requirement' not in child:
             messages.append("    'requirement' parameter is missing in '{}' block.".format(child.name))
 

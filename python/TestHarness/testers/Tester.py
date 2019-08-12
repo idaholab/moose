@@ -91,6 +91,7 @@ class Tester(MooseObject):
         params.addParam("detail", None, "Details of SQA requirement for use within sub-blocks.")
         params.addParam("validation", False, "Set to True to mark test as a validation problem.")
         params.addParam("verification", False, "Set to True to mark test as a verification problem.")
+        params.addParam("deprecated", False, "When True the test is no longer considered part SQA process and as such does not include the need for a requirement definition.");
         return params
 
     # This is what will be checked for when we look for valid testers

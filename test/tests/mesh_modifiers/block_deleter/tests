@@ -1,4 +1,5 @@
 [Tests]
+  deprecated = True
   [./BlockDeleterTest1]
     type = 'Exodiff'
     input = 'BlockDeleterTest1.i'
