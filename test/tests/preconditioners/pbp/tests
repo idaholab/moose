@@ -1,9 +1,13 @@
 [Tests]
+  issues = '#13886'
+  design = '/PhysicsBasedPreconditioner.md'
+
   [./test]
     type = 'Exodiff'
     input = 'pbp_test.i'
     exodiff = 'out.e'
     max_parallel = 1
+    requirement = 'The system shall support a physics based preconditioner'
   [../]
 
   [./pbp_adapt_test]
@@ -12,6 +16,7 @@
     exodiff = 'out_pbp_adapt.e-s004'
     custom_cmp = 'pbp_adapt_test.cmp'
     group = 'adaptive'
+    requirement = 'The system shall support a physics based preconditioner together mesh adaptivity'
   [../]
 
   [./check_petsc_options_test]
@@ -19,6 +24,7 @@
     input = 'pbp_test_options.i'
     expect_out = 'Linear'
     max_parallel = 1
+    requirement = 'The system shall allow users to add petsc options in a PBP block'
   [../]
 
   [./lots_of_variables]
@@ -34,5 +40,13 @@
     # It is related to communcators in VTK
     # We will fix it in the new release
     petsc_version_release = true
+    requirement = 'The system shall solve a system with a lot of variables'
+  [../]
+
+  [./dg_pbp_test]
+    type = 'Exodiff'
+    input = 'pbp_dg_test.i'
+    exodiff = 'pbp_dg_test_out.e'
+    requirement = 'The system shall support DG kernels'
   [../]
 []

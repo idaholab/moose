@@ -43,7 +43,7 @@ ComputeJacobianBlocksThread::postElement(const Elem * elem)
 
   for (const auto & block : _blocks)
   {
-    const DofMap & dof_map = block->_precond_system.get_dof_map();
+    const auto & dof_map = block->_precond_system.get_dof_map();
     dof_map.dof_indices(elem, _dof_indices);
 
     _fe_problem.addJacobianBlock(
@@ -64,13 +64,13 @@ ComputeJacobianBlocksThread::postInternalSide(const Elem * elem, unsigned int si
 
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     // Get the global id of the element and the neighbor
-    const dof_id_type elem_id = elem->id(), neighbor_id = neighbor->id();
+    const auto elem_id = elem->id(), neighbor_id = neighbor->id();
 
     if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) ||
         (neighbor->level() < elem->level()))
       for (const auto & block : _blocks)
       {
-        const DofMap & dof_map = block->_precond_system.get_dof_map();
+        const auto & dof_map = block->_precond_system.get_dof_map();
         dof_map.dof_indices(elem, _dof_indices);
         dof_map.dof_indices(neighbor, _dof_neighbor_indices);
 
