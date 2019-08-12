@@ -15,8 +15,7 @@ registerADMooseObject("TensorMechanicsApp", ADViscoplasticityStressUpdate);
 
 defineADValidParams(
     ADViscoplasticityStressUpdate,
-    ADStressUpdateBase,
-    params += validParams<ADSingleVariableReturnMappingSolution<RESIDUAL>>();
+    ADViscoplasticityStressUpdateBase,
     params.addClassDescription(
         "This material computes the non-linear homogenized gauge stress in order to compute the "
         "viscoplastic responce due to creep in porous materials. This material must be used in "
@@ -29,13 +28,6 @@ defineADValidParams(
     params.addParam<MooseEnum>("pore_shape_model",
                                pore_shape_model,
                                "Which pore shape model to use");
-    params.addParam<Real>("max_inelastic_increment",
-                          1.0e-4,
-                          "The maximum inelastic strain increment allowed in a time step");
-    params.addParam<std::string>(
-        "effective_inelastic_strain_name",
-        "effective_viscoplasticity",
-        "Name of the material property that stores the effective inelastic strain");
     params.addRequiredParam<MaterialPropertyName>(
         "coefficient", "Material property name for the leading coefficient for Norton power law");
     params.addRequiredRangeCheckedParam<Real>("power",
@@ -47,64 +39,25 @@ defineADValidParams(
         "Maximum ratio between the gauge stress and the equilvalent stress. This "
         "should be a high number. Note that this does not set an upper bound on the value, but "
         "rather will help with convergence of the inner Newton loop");
-    params.addParam<bool>("verbose", false, "Flag to output verbose information");
-    params.addParam<MaterialPropertyName>("porosity_name",
-                                          "porosity",
-                                          "Name of porosity material property");
-    params.addParam<std::string>("total_strain_base_name", "Base name for the total strain");
 
-    params.addParamNamesToGroup("effective_inelastic_strain_name maximum_gauge_ratio",
-                                "Advanced"););
+    params.addParamNamesToGroup("verbose maximum_gauge_ratio", "Advanced"););
 
 template <ComputeStage compute_stage>
 ADViscoplasticityStressUpdate<compute_stage>::ADViscoplasticityStressUpdate(
     const InputParameters & parameters)
-  : ADStressUpdateBase<compute_stage>(parameters),
-    ADSingleVariableReturnMappingSolution<compute_stage>(parameters),
+  : ADViscoplasticityStressUpdateBase<compute_stage>(parameters),
     _model(parameters.get<MooseEnum>("viscoplasticity_model").getEnum<ViscoplasticityModel>()),
     _pore_shape(parameters.get<MooseEnum>("pore_shape_model").getEnum<PoreShapeModel>()),
     _pore_shape_factor(_pore_shape == PoreShapeModel::SPHERICAL ? 1.5 : std::sqrt(3.0)),
-    _total_strain_base_name(isParamValid("total_strain_base_name")
-                                ? getParam<std::string>("total_strain_base_name") + "_"
-                                : ""),
-    _strain_increment(
-        getADMaterialProperty<RankTwoTensor>(_total_strain_base_name + "strain_increment")),
-    _effective_inelastic_strain(declareADProperty<Real>(
-        _base_name + getParam<std::string>("effective_inelastic_strain_name"))),
-    _effective_inelastic_strain_old(getMaterialPropertyOld<Real>(
-        _base_name + getParam<std::string>("effective_inelastic_strain_name"))),
-    _creep_strain(declareADProperty<RankTwoTensor>(_base_name + "creep_strain")),
-    _creep_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "creep_strain")),
-    _max_inelastic_increment(getParam<Real>("max_inelastic_increment")),
     _power(getParam<Real>("power")),
     _power_factor(_model == ViscoplasticityModel::LPS ? (_power - 1.0) / (_power + 1.0) : 1.0),
     _coefficient(getADMaterialProperty<Real>("coefficient")),
     _gauge_stress(declareADProperty<Real>(_base_name + "gauge_stress")),
-    _intermediate_porosity(0.0),
-    _porosity_old(getMaterialPropertyOld<Real>(getParam<MaterialPropertyName>("porosity_name"))),
     _maximum_gauge_ratio(getParam<Real>("maximum_gauge_ratio")),
-    _verbose(getParam<bool>("verbose")),
     _hydro_stress(0.0),
     _identity_two(RankTwoTensor::initIdentity),
-    _dhydro_stress_dsigma(_identity_two / 3.0),
-    _derivative(0.0)
+    _dhydro_stress_dsigma(_identity_two / 3.0)
 {
-}
-
-template <ComputeStage compute_stage>
-void
-ADViscoplasticityStressUpdate<compute_stage>::initQpStatefulProperties()
-{
-  _effective_inelastic_strain[_qp] = 0.0;
-  _creep_strain[_qp].zero();
-}
-
-template <ComputeStage compute_stage>
-void
-ADViscoplasticityStressUpdate<compute_stage>::propagateQpStatefulProperties()
-{
-  _effective_inelastic_strain[_qp] = _effective_inelastic_strain_old[_qp];
-  _creep_strain[_qp] = _creep_strain_old[_qp];
 }
 
 template <ComputeStage compute_stage>
@@ -124,14 +77,7 @@ ADViscoplasticityStressUpdate<compute_stage>::updateState(
   else
     _hydro_stress = stress.trace() / 3.0;
 
-  // Subtract elastic strain from strain increment to find all inelastic strain increments
-  // calculated so far except the one that we're about to calculate
-  const ADRankTwoTensor inelastic_volumetric_increment =
-      _strain_increment[_qp] - elastic_strain_increment;
-  // Calculate intermdiate porosity from all inelastic strain increments calculated so far except
-  // the one that we're about to calculate
-  _intermediate_porosity =
-      (1.0 - _porosity_old[_qp]) * inelastic_volumetric_increment.trace() + _porosity_old[_qp];
+  updateIntermediatePorosity(elastic_strain_increment);
 
   // Compute intermediate equivalent stress
   const ADRankTwoTensor dev_stress = stress.deviatoric();
@@ -142,7 +88,7 @@ ADViscoplasticityStressUpdate<compute_stage>::updateState(
 
   // Prepare values
   _effective_inelastic_strain[_qp] = _effective_inelastic_strain_old[_qp];
-  _creep_strain[_qp] = _creep_strain_old[_qp];
+  _inelastic_strain[_qp] = _inelastic_strain_old[_qp];
   inelastic_strain_increment.zero();
 
   // If equivalent stress is present, calculate creep strain increment
@@ -161,23 +107,14 @@ ADViscoplasticityStressUpdate<compute_stage>::updateState(
     elastic_strain_increment -= inelastic_strain_increment;
     // Update stress due to new strain
     stress = elasticity_tensor * (elastic_strain_old + elastic_strain_increment);
-    // Compute effective strain from the stress potential
+    // Compute effective strain from the stress potential. Note that this is approximate and to be
+    // used qualitatively
     _effective_inelastic_strain[_qp] += dpsi_dgauge * _dt;
     // Update creep strain due to currently computed inelastic strain
-    _creep_strain[_qp] += inelastic_strain_increment;
+    _inelastic_strain[_qp] += inelastic_strain_increment;
   }
 
   computeStressFinalize(inelastic_strain_increment);
-}
-
-template <ComputeStage compute_stage>
-Real
-ADViscoplasticityStressUpdate<compute_stage>::computeReferenceResidual(
-    const ADReal & /*effective_trial_stress*/, const ADReal & gauge_stress)
-{
-  // Use gauge stress for relative tolerance criteria, defined as:
-  // std::abs(residual / gauge_stress) <= _relative_tolerance
-  return MetaPhysicL::raw_value(gauge_stress);
 }
 
 template <ComputeStage compute_stage>
@@ -201,34 +138,6 @@ ADViscoplasticityStressUpdate<compute_stage>::minimumPermissibleValue(
     const ADReal & effective_trial_stress) const
 {
   return effective_trial_stress;
-}
-
-template <ComputeStage compute_stage>
-Real
-ADViscoplasticityStressUpdate<compute_stage>::computeTimeStepLimit()
-{
-  const Real scalar_inelastic_strain_incr =
-      MetaPhysicL::raw_value(_effective_inelastic_strain[_qp]) -
-      _effective_inelastic_strain_old[_qp];
-
-  if (MooseUtils::absoluteFuzzyEqual(scalar_inelastic_strain_incr, 0.0))
-    return std::numeric_limits<Real>::max();
-
-  return _dt * _max_inelastic_increment / scalar_inelastic_strain_incr;
-}
-
-template <ComputeStage compute_stage>
-void
-ADViscoplasticityStressUpdate<compute_stage>::outputIterationSummary(
-    std::stringstream * iter_output, const unsigned int total_it)
-{
-  if (iter_output)
-  {
-    *iter_output << "At element " << _current_elem->id() << " _qp=" << _qp << " Coordinates "
-                 << _q_point[_qp] << " block=" << _current_elem->subdomain_id() << '\n';
-  }
-  ADSingleVariableReturnMappingSolution<compute_stage>::outputIterationSummary(iter_output,
-                                                                               total_it);
 }
 
 template <ComputeStage compute_stage>
@@ -369,7 +278,7 @@ ADViscoplasticityStressUpdate<compute_stage>::computeInelasticStrainIncrement(
     gauge_stress /= std::sqrt(1.0 + _power_factor * Utility::pow<2>(_intermediate_porosity));
 
   mooseAssert(gauge_stress > equiv_stress,
-              "Gauge stress calculated in inner Newton solve is less than equilvalent.");
+              "Gauge stress calculated in inner Newton solve is less than equivalent.");
 
   // Compute stress potential
   dpsi_dgauge = _coefficient[_qp] * std::pow(gauge_stress, _power);

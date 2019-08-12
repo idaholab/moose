@@ -7,7 +7,7 @@
 `ADComputeMultiplePorousInelasticStress` computes the stress and a decomposition of the strain into
 elastic and inelastic components for a series of different inelastic material models (e.g. creep and
 plasticity) which inherit from `ADStressUpdateBase`. The tangent operator and relevant Jacobian
-information is computed using (automatic differentiation)[jacobian_definition] techniques.
+information is computed using automatic differentiation techniques.
 `ADComputeMultiplePorousInelasticStress` operates almost exactly the same as
 [ADComputeMultipleInelasticStress](ADComputeMultipleInelasticStress.md) but adds a `porosity`
 material property. After a inelastic strain $\epsilon_{in}$ is calculated, the porosity, $f$ is
