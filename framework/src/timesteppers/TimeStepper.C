@@ -19,9 +19,11 @@ validParams<TimeStepper>()
   InputParameters params = validParams<MooseObject>();
   params.addParam<bool>(
       "reset_dt", false, "Use when restarting a calculation to force a change in dt.");
-  params.addParam<Real>("cutback_factor_at_failure",
-                        0.5,
-                        "Factor to apply to timestep if it a time step fails to convergence.");
+  params.addRangeCheckedParam<Real>(
+      "cutback_factor_at_failure",
+      0.5,
+      "cutback_factor_at_failure>0 & cutback_factor_at_failure<1",
+      "Factor to apply to timestep if it a time step fails to convergence.");
 
   params.registerBase("TimeStepper");
 
