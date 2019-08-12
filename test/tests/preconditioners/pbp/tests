@@ -1,33 +1,40 @@
 [Tests]
-  issues = '#13886'
-  design = '/PhysicsBasedPreconditioner.md'
+  design = PhysicsBasedPreconditioner.md
+  issues = '#1048'
 
-  [./test]
-    type = 'Exodiff'
-    input = 'pbp_test.i'
-    exodiff = 'out.e'
-    max_parallel = 1
-    requirement = 'The system shall support a physics based preconditioner'
-  [../]
+  [pbp]
+    requirement = "The system shall support the use of a physics based preconditioner"
+    [test]
+      type = 'Exodiff'
+      input = 'pbp_test.i'
+      exodiff = 'out.e'
+      max_parallel = 1
 
-  [./pbp_adapt_test]
-    type = 'Exodiff'
-    input = 'pbp_adapt_test.i'
-    exodiff = 'out_pbp_adapt.e-s004'
-    custom_cmp = 'pbp_adapt_test.cmp'
-    group = 'adaptive'
-    requirement = 'The system shall support a physics based preconditioner together mesh adaptivity'
-  [../]
+      detail = "without and"
+    []
 
-  [./check_petsc_options_test]
+    [pbp_adapt_test]
+      type = 'Exodiff'
+      input = 'pbp_adapt_test.i'
+      exodiff = 'out_pbp_adapt.e-s004'
+      custom_cmp = 'pbp_adapt_test.cmp'
+      group = 'adaptive'
+
+      detail = "with mesh adaptivity."
+    []
+  []
+
+  [check_petsc_options_test]
     type = 'RunApp'
     input = 'pbp_test_options.i'
     expect_out = 'Linear'
     max_parallel = 1
-    requirement = 'The system shall allow users to add petsc options in a PBP block'
-  [../]
 
-  [./lots_of_variables]
+    requirement = "The system shall support the ability to add arbitrary options to the solver when "
+                  "using a physics based precondioner."
+  []
+
+  [lots_of_variables]
     type = 'Exodiff'
     input = 'lots_of_variables.i'
     exodiff = 'lots_of_variables_out.e'
@@ -40,13 +47,8 @@
     # It is related to communcators in VTK
     # We will fix it in the new release
     petsc_version_release = true
-    requirement = 'The system shall solve a system with a lot of variables'
-  [../]
 
-  [./dg_pbp_test]
-    type = 'Exodiff'
-    input = 'pbp_dg_test.i'
-    exodiff = 'pbp_dg_test_out.e'
-    requirement = 'The system shall support DG kernels'
-  [../]
+    requirement = "The system shall support the ability to control the variable solve order when "
+                  "using a physics base preconditioner."
+  []
 []

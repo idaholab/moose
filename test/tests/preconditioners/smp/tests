@@ -1,22 +1,35 @@
 [Tests]
-  [./smp_test]
-    type = 'Exodiff'
-    input = 'smp_single_test.i'
-    exodiff = 'smp_single_test_out.e'
-    group = 'requirements'
-  [../]
+  design = SingleMatrixPrecondioner.md
+  issues = '#1048'
 
-  [./smp_adapt_test]
-    type = 'Exodiff'
-    input = 'smp_single_adapt_test.i'
-    exodiff = 'smp_single_adapt_test_out.e-s004'
-    group = 'adaptive'
-    max_parallel = 1
-  [../]
+  [smp]
+    requirement = "The system shall support the use of a single matrix preconditioner"
 
-  [./smp_group_test]
+    [smp_test]
+      type = 'Exodiff'
+      input = 'smp_single_test.i'
+      exodiff = 'smp_single_test_out.e'
+      group = 'requirements'
+
+      detail = "without and"
+    []
+
+    [smp_adapt_test]
+      type = 'Exodiff'
+      input = 'smp_single_adapt_test.i'
+      exodiff = 'smp_single_adapt_test_out.e-s004'
+      group = 'adaptive'
+      max_parallel = 1
+
+      detail = "with mesh adaptivity."
+    []
+  []
+  [smp_group_test]
     type = 'Exodiff'
     input = 'smp_group_test.i'
     exodiff = 'smp_group_test_out.e'
-  [../]
+
+    requirement = "The system shall support the ability to group variables when using a single "
+                  "matrix preconditioner."
+  []
 []

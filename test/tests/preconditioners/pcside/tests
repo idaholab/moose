@@ -1,8 +1,12 @@
 [Tests]
+  issues = '#8681'
+  design = 'Preconditioning/index.md'
   [./test]
     type = 'Exodiff'
     abs_zero = 1e-8
     input = 'diffusionCG.i'
     exodiff = 'out.e'
+
+    requirement = "The system shall support the ability to use the conjugate gradient method for preconditioning with PETSc."
   [../]
 []
