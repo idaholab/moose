@@ -25,7 +25,7 @@ def findDepApps(dep_names, use_current_only=False):
     p = subprocess.Popen('git rev-parse --show-cdup', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     p.wait()
     if p.returncode == 0:
-        git_dir = p.communicate()[0]
+        git_dir = p.communicate()[0].decode('utf-8')
         root_dir = os.path.abspath(os.path.join(os.getcwd(), git_dir)).rstrip()
 
         # Assume that any application we care about is always a peer
@@ -141,4 +141,4 @@ def findDepApps(dep_names, use_current_only=False):
 if __name__ == '__main__':
     if len(sys.argv) == 2:
         dep_apps = findDepApps(sys.argv[1], False)
-        print dep_apps
+        print(dep_apps)
