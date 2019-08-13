@@ -26,10 +26,8 @@ try:
     if not os.getenv('DISPLAY', False):
         matplotlib.use('Agg')
 
-
 except ImportError:
-    print("The 'mms' package requires matplotlib, it can be installed by running " \
-          "`pip install matplotlib --user`.")
-
+    print("The 'mms' package requires matplotlib for the ConvergencePlot object, matplotlib can " \
+          "be installed by running `pip install matplotlib --user`.")
 else:
     from ConvergencePlot import ConvergencePlot

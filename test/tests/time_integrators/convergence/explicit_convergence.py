@@ -28,13 +28,16 @@ df4 = mms.run_temporal('explicit_convergence.i', N,
                        'Executioner/TimeIntegrator/type=ExplicitEuler', file_base='expliciteuler_{}',
                        console=False, dt=0.00390625, y_pp='l2_err', executable=EXE)
 
-
-fig = mms.ConvergencePlot(xlabel='$\Delta t$', ylabel='$L_2$ Error')
-fig.plot(df1, label='Heun (2nd Order)', marker='o', markersize=8)
-fig.plot(df2, label='Ralston (2nd Order)', marker='s', markersize=8)
-fig.plot(df3, label='Midpoint (2nd Order)', marker='v', markersize=8)
-fig.plot(df4, label='Euler (1st Order)', marker='h', markersize=8)
-fig.save('explicit_convergence.pdf')
+if hasattr(mms, 'ConvergencePlot'):
+    # The ConvergencePlot object requires matplotlib, but it is not always installed on the test
+    # machines. The mms module checks for matplotlib before importing the ConvergencePlot. This
+    # check allows this script to work with and without matplotlib.
+    fig = mms.ConvergencePlot(xlabel='$\Delta t$', ylabel='$L_2$ Error')
+    fig.plot(df1, label='Heun (2nd Order)', marker='o', markersize=8)
+    fig.plot(df2, label='Ralston (2nd Order)', marker='s', markersize=8)
+    fig.plot(df3, label='Midpoint (2nd Order)', marker='v', markersize=8)
+    fig.plot(df4, label='Euler (1st Order)', marker='h', markersize=8)
+    fig.save('explicit_convergence.pdf')
 
 df1.to_csv('explicit_convergence_heun.csv')
 df2.to_csv('explicit_convergence_ralston.csv')
