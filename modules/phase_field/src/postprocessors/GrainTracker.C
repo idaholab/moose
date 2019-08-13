@@ -188,6 +188,23 @@ GrainTracker::doesFeatureIntersectBoundary(unsigned int feature_id) const
 }
 
 bool
+GrainTracker::doesFeatureIntersectSpecifiedBoundary(unsigned int feature_id) const
+{
+  // TODO: This data structure may need to be turned into a Multimap
+  mooseAssert(feature_id < _feature_id_to_local_index.size(), "Grain ID out of bounds");
+
+  auto feature_index = _feature_id_to_local_index[feature_id];
+  if (feature_index != invalid_size_t)
+  {
+    mooseAssert(feature_index < _feature_sets.size(), "Grain index out of bounds");
+    return ((_feature_sets[feature_index]._boundary_intersection &
+             BoundaryIntersection::SPECIFIED_BOUNDARY) == BoundaryIntersection::SPECIFIED_BOUNDARY);
+  }
+
+  return false;
+}
+
+bool
 GrainTracker::isFeaturePercolated(unsigned int feature_id) const
 {
   // TODO: This data structure may need to be turned into a Multimap

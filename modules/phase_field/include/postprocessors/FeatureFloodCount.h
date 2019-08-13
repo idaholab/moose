@@ -65,6 +65,9 @@ public:
   /// Returns a Boolean indicating whether this feature intersects _any_ boundary
   virtual bool doesFeatureIntersectBoundary(unsigned int feature_id) const;
 
+  /// Returns a Boolean indicating whether this feature intersects boundaries in a user-supplied list
+  virtual bool doesFeatureIntersectSpecifiedBoundary(unsigned int feature_id) const;
+
   /// Returns a Boolean indicating whether this feature is percolated (e.g. intersects at least two
   /// different boundaries from sets supplied by the user)
   virtual bool isFeaturePercolated(unsigned int feature_id) const;
@@ -128,7 +131,8 @@ public:
     NONE = 0x0,
     ANY_BOUNDARY = 0x1,
     PRIMARY_PERCOLATION_BOUNDARY = 0x2,
-    SECONDARY_PERCOLATION_BOUNDARY = 0x4
+    SECONDARY_PERCOLATION_BOUNDARY = 0x4,
+    SPECIFIED_BOUNDARY = 0x8
   };
 
   class FeatureData
@@ -714,6 +718,8 @@ protected:
   std::vector<BoundaryID> _primary_perc_bnds;
   std::vector<BoundaryID> _secondary_perc_bnds;
 
+  std::vector<BoundaryID> _specified_bnds;
+
   /// Determines if the flood counter is elements or not (nodes)
   const bool _is_elemental;
 
@@ -795,4 +801,3 @@ struct enable_bitmask_operators<FeatureFloodCount::BoundaryIntersection>
 {
   static const bool enable = true;
 };
-

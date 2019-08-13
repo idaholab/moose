@@ -150,6 +150,10 @@ validParams<FeatureFloodCount>()
   params.addParam<std::vector<BoundaryName>>(
       "secondary_percolation_boundaries",
       "Paired boundaries with \"primaryary_percolation_boundaries\" parameter");
+  params.addParam<std::vector<BoundaryName>>(
+      "specified_boundaries",
+      "An optional list of boundaries; if supplied, each feature is checked to determine whether "
+      "it intersects any of the specified boundaries in this list.");
 
   /**
    * The FeatureFloodCount and derived objects should not to operate on the displaced mesh. These
@@ -262,6 +266,10 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters)
     paramError("primary_percolation_boundaries",
                "primary_percolation_boundaries and secondary_percolation_boundaries must both be "
                "supplied when checking for percolation");
+
+  if (parameters.isParamValid("specified_boundaries"))
+    _specified_bnds =
+        _mesh.getBoundaryIDs(parameters.get<std::vector<BoundaryName>>("specified_boundaries"));
 }
 
 void
@@ -829,6 +837,30 @@ FeatureFloodCount::doesFeatureIntersectBoundary(unsigned int feature_id) const
     mooseAssert(local_index < _feature_sets.size(), "local_index out of bounds");
     return _feature_sets[local_index]._status != Status::INACTIVE
                ? _feature_sets[local_index]._boundary_intersection != BoundaryIntersection::NONE
+               : false;
+  }
+
+  return false;
+}
+
+bool
+FeatureFloodCount::doesFeatureIntersectSpecifiedBoundary(unsigned int feature_id) const
+{
+  // TODO: This information is not parallel consistent when using FeatureFloodCounter
+
+  // Some processors don't contain the largest feature id, in that case we just return invalid_id
+  if (feature_id >= _feature_id_to_local_index.size())
+    return false;
+
+  auto local_index = _feature_id_to_local_index[feature_id];
+
+  if (local_index != invalid_size_t)
+  {
+    mooseAssert(local_index < _feature_sets.size(), "local_index out of bounds");
+    return _feature_sets[local_index]._status != Status::INACTIVE
+               ? ((_feature_sets[local_index]._boundary_intersection &
+                   BoundaryIntersection::SPECIFIED_BOUNDARY) ==
+                  BoundaryIntersection::SPECIFIED_BOUNDARY)
                : false;
   }
 
@@ -1717,6 +1749,16 @@ FeatureFloodCount::updateBoundaryIntersections(FeatureData & feature) const
         for (auto secondary_id : _secondary_perc_bnds)
           if (_mesh.isBoundaryElem(entity, secondary_id))
             feature._boundary_intersection |= BoundaryIntersection::SECONDARY_PERCOLATION_BOUNDARY;
+      }
+
+      // See if the feature contacts any of the user-specified boundaries if we haven't
+      // done so already
+      if ((feature._boundary_intersection & BoundaryIntersection::SPECIFIED_BOUNDARY) ==
+          BoundaryIntersection::NONE)
+      {
+        for (auto specified_id : _specified_bnds)
+          if (_mesh.isBoundaryElem(entity, specified_id))
+            feature._boundary_intersection |= BoundaryIntersection::SPECIFIED_BOUNDARY;
       }
     }
   }
