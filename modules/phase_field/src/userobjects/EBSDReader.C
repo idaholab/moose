@@ -12,6 +12,7 @@
 #include "MooseMesh.h"
 #include "Conversion.h"
 #include "NonlinearSystem.h"
+#include <Eigen/Dense>
 
 #include <fstream>
 
@@ -160,12 +161,12 @@ EBSDReader::readFile()
   for (auto & j : _data)
   {
     EBSDAvgData & a = _avg_data[_global_id_map[j._feature_id]];
-    EulerAngles & b = _avg_angles[_global_id_map[j._feature_id]];
+    EulerAngles angles;
 
-    // use Eigen::Quaternion<Real> here?
-    b.phi1 += j._phi1;
-    b.Phi += j._Phi;
-    b.phi2 += j._phi2;
+    // convert Euler angles to quaternions
+    Eigen::Quaternion<Real> q = angles.ToQuaternion(j._phi1, j._Phi, j._phi2);
+
+    Quat[_global_id_map[j._feature_id]].push_back(q);
 
     if (a._n == 0)
       a._phase = j._phase;
@@ -195,10 +196,108 @@ EBSDReader::readFile()
     if (a._n == 0)
       continue;
 
-    // TODO: need better way to average angles
-    b.phi1 /= Real(a._n);
-    b.Phi /= Real(a._n);
-    b.phi2 /= Real(a._n);
+    Real w_index, x_index, y_index, z_index;
+    Real w, x, y, z;
+    std::vector<std::tuple<double, Eigen::VectorXd>> eigen_vectors_and_values;
+
+    // creating an empty map
+    BinToSize.push_back(std::map<std::tuple<unsigned int, unsigned int, unsigned int, unsigned int>,
+                                 unsigned int>());
+
+    // looping through quaternions of each grain
+    for (unsigned int k = 0; k < Quat[i].size(); k++)
+    {
+      std::tuple<unsigned int, unsigned int, unsigned int, unsigned int> Bin;
+      w_index = int((Quat[i][k].w() + 1) * 0.5 * _bins);
+      x_index = int((Quat[i][k].x() + 1) * 0.5 * _bins);
+      y_index = int((Quat[i][k].y() + 1) * 0.5 * _bins);
+      z_index = int((Quat[i][k].z() + 1) * 0.5 * _bins);
+
+      Bin = std::make_tuple(w_index, x_index, y_index, z_index);
+
+      // storing the bin corresponding to the quaternion Quat[i][k]
+      QuatToBin[i].push_back(Bin);
+
+      // storing the bin name and its corresponding size value
+      if (BinToSize[i].find(Bin) == BinToSize[i].end())
+        BinToSize[i].insert(std::make_pair(Bin, 1));
+      else
+        BinToSize[i][Bin] += 1;
+    }
+
+    /**
+     * Markley, F. Landis, Yang Cheng, John Lucas Crassidis, and Yaakov Oshman.
+     * "Averaging quaternions." Journal of Guidance, Control, and Dynamics 30,
+     * no. 4 (2007): 1193-1197.
+     * A 4 by N matrix (Q) is constructed, where N is the number of quaternions.
+     * A weight matrix (W) is created. The eigen vector corresponding to the
+     * maximum eigen value of Q*W*Q' is the weighted average quaternion
+     **/
+
+    // creating a quaternion matrix
+    Eigen::MatrixXd QuatMat(4, Quat[i].size());
+    // creating the weight matrix
+    Eigen::MatrixXd weight = Eigen::MatrixXd::Identity(Quat[i].size(), Quat[i].size());
+
+    unsigned int bin_size;
+    unsigned int flag = 0;
+    Real total_weight = 0.0;
+
+    for (unsigned int j = 0; j < Quat[i].size(); j++)
+    {
+      bin_size = BinToSize[i][QuatToBin[i][j]];
+      w = Quat[i][j].w();
+      x = Quat[i][j].x();
+      y = Quat[i][j].y();
+      z = Quat[i][j].z();
+
+      // instantiating columns of the matrix
+      QuatMat.col(j) << w, x, y, z;
+      // assigning weights to each quaternion
+      weight(j, j) = std::pow(bin_size, _L_norm);
+      total_weight += weight(j, j);
+      /**
+       * If no bin exists which has atleast 50% of total quaternions in a grain
+       * then the EBSD data may not be reliable
+       * Note: The limit 50% is arbitrary
+       */
+      if (bin_size / Quat[i].size() > 0.5)
+        flag = 1;
+    }
+
+    weight = weight / total_weight;
+
+    // throws a warning if EBSD data is not reliable
+    if (flag == 0)
+      _console << COLOR_YELLOW << "EBSD data may not be reliable"
+               << "\n"
+               << COLOR_DEFAULT;
+
+    // compute eigen values and eigen vectors
+    Eigen::EigenSolver<Eigen::MatrixXd> EigenSolver(QuatMat * weight * QuatMat.transpose());
+    Eigen::VectorXd eigen_values = EigenSolver.eigenvalues().real();
+    Eigen::MatrixXd eigen_vectors = EigenSolver.eigenvectors().real();
+
+    // creating a tuple of eigen values and eigen vectors
+    for (unsigned int i = 0; i < eigen_values.size(); i++)
+    {
+      std::tuple<double, Eigen::VectorXd> vec_and_val(eigen_values[i], eigen_vectors.col(i));
+      eigen_vectors_and_values.push_back(vec_and_val);
+    }
+    // Sorting the eigen values and vectors in ascending order of eigen values
+    std::sort(eigen_vectors_and_values.begin(),
+              eigen_vectors_and_values.end(),
+              [&](const std::tuple<double, Eigen::VectorXd> & a,
+                  const std::tuple<double, Eigen::VectorXd> & b) -> bool {
+                return std::get<0>(a) < std::get<0>(b);
+              });
+    // Selecting eigen vector corresponding to max eigen value to compute average euler angle
+    Eigen::VectorXd max_eigen_vector = std::get<1>(eigen_vectors_and_values[3]);
+    EulerAngles angles(
+        max_eigen_vector(0), max_eigen_vector(1), max_eigen_vector(2), max_eigen_vector(3));
+    b.phi1 = angles.phi1;
+    b.Phi = angles.Phi;
+    b.phi2 = angles.phi2;
 
     // link the EulerAngles into the EBSDAvgData for access via the functors
     a._angles = &b;

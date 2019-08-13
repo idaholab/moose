@@ -1,4 +1,4 @@
-# EBSDReader
+#EBSDReader
 
 !syntax description /UserObjects/EBSDReader
 
@@ -14,68 +14,76 @@ orientation information by use by the phase field and mechanics models.
 field variable initial conditions. To reconstruct a mesh of the microstructure,
 we recommend using [OOF](http://www.ctcms.nist.gov/oof/).
 
+### Average orientation of a grain
+
+Euler angles are not the best for representing the orientation of a grain because they suffer from gimbal lock. Therefore, we use quaternions to compute the average orientation of the grain. Firstly, the Euler angles are converted to quaternions. Next, we segregate the quaternions into different bins with the parameter "bins" specifying the number of bins. We then perform a weighted average of the quaternions with weights of each quaternion corresponds
+to size of the bin in which it resides. The average quaternion is then converted to Euler angle representation.
+
+Various weighted averages can be performed by raising power of the weights corresponding to each quaternion. The parameter "L_norm" allows us to
+raise the power of the weights according to the positive integer assigned to it. By default, the value of "L_norm" is set to 1, computing the simple weighted average of the quaternions.
+
 !syntax parameters /UserObjects/EBSDReader
 
-# EBSD Data File Format
+#EBSD Data File Format
 
 The `EBSDReader` user object reads in a data file taken from EBSD data. The file
 should have the following format:
 
 ```
-# Header:    Marmot Input File
+#Header : Marmot Input File
 
-# Date:      19-Jul-2013 00:23:55
-
-#
-# Column 1:  Euler angle "phi1" (in radians)
-
-# Column 2:  Euler angle "PHI" (in radians)
-
-# Column 3:  Euler angle "phi2" (in radians)
-
-# Column 4:  x-coordinate (in microns)
-
-# Column 5:  y-coordinate (in microns)
-
-# Column 6:  z-coordinate (in microns)
-
-# Column 7:  grain number (integer)
-
-# Column 8:  phase number (integer)
-
-# Column 9:  symmetry class (from TSL)
+#Date : 19 - Jul - 2013 00 : 23 : 55
 
 #
-# Phase 1:   Nickel (symmetry class = 43)
+#Column 1 : Euler angle "phi1"(in radians)
 
-# Number of Grains in Phase 1:  111
+#Column 2 : Euler angle "PHI"(in radians)
 
-#
-# X_Min:      0.000000
+#Column 3 : Euler angle "phi2"(in radians)
 
-# X_Max:      32.000000
+#Column 4 : x - coordinate(in microns)
 
-# X_step:     0.250000
+#Column 5 : y - coordinate(in microns)
 
-# X_Dim:      128
+#Column 6 : z - coordinate(in microns)
 
-#
-# Y_Min:      0.000000
+#Column 7 : grain number(integer)
 
-# Y_Max:      32.000000
+#Column 8 : phase number(integer)
 
-# Y_step:     0.250000
-
-# Y_Dim:      128
+#Column 9 : symmetry class(from TSL)
 
 #
-# Z_Min:      0.000000
+#Phase 1 : Nickel(symmetry class = 43)
 
-# Z_Max:      0.000000
+#Number of Grains in Phase 1 : 111
 
-# Z_step:     0.000000
+#
+#X_Min : 0.000000
 
-# Z_Dim:      0
+#X_Max : 32.000000
+
+#X_step : 0.250000
+
+#X_Dim : 128
+
+#
+#Y_Min : 0.000000
+
+#Y_Max : 32.000000
+
+#Y_step : 0.250000
+
+#Y_Dim : 128
+
+#
+#Z_Min : 0.000000
+
+#Z_Max : 0.000000
+
+#Z_step : 0.000000
+
+#Z_Dim : 0
 
 #
 2.48663 1.84098 5.50548 0.12500 0.12500 0.00000 0 1 43
