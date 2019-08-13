@@ -1,4 +1,4 @@
-var_num,feature_volumes,intersects_bounds,percolated
-0,3.198125,0,0
-1,1.035,1,0
-1,0.2728125,0,0
+var_num,feature_volumes,intersects_bounds,intersects_specified_bounds,percolated
+0,3.198125,0,0,0
+1,1.035,1,0,0
+1,0.2728125,0,0,0
