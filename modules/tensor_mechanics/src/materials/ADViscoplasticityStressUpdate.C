@@ -43,8 +43,13 @@ defineADValidParams(
         "minimum_equivalent_stress",
         1.0e-3,
         "Minimum value of equivalent stress below which viscoplasticiy is not calculated.");
+    params.addParam<Real>("maximum_equivalent_stress",
+                          1.0e12,
+                          "Maximum value of equivalent stress above which an exception is thrown "
+                          "instead of calculating the properties in this material.");
 
-    params.addParamNamesToGroup("verbose maximum_gauge_ratio", "Advanced"););
+    params.addParamNamesToGroup("verbose maximum_gauge_ratio maximum_equivalent_stress",
+                                "Advanced"););
 
 template <ComputeStage compute_stage>
 ADViscoplasticityStressUpdate<compute_stage>::ADViscoplasticityStressUpdate(
@@ -59,6 +64,7 @@ ADViscoplasticityStressUpdate<compute_stage>::ADViscoplasticityStressUpdate(
     _gauge_stress(declareADProperty<Real>(_base_name + "gauge_stress")),
     _maximum_gauge_ratio(getParam<Real>("maximum_gauge_ratio")),
     _minimum_equivalent_stress(getParam<Real>("minimum_equivalent_stress")),
+    _maximum_equivalent_stress(getParam<Real>("maximum_equivalent_stress")),
     _hydro_stress(0.0),
     _identity_two(RankTwoTensor::initIdentity),
     _dhydro_stress_dsigma(_identity_two / 3.0)
@@ -96,6 +102,16 @@ ADViscoplasticityStressUpdate<compute_stage>::updateState(
   _effective_inelastic_strain[_qp] = _effective_inelastic_strain_old[_qp];
   _inelastic_strain[_qp] = _inelastic_strain_old[_qp];
   inelastic_strain_increment.zero();
+
+  // Protect against extremely high values of stresses calculated by other viscoplastic materials
+  if (equiv_stress > _maximum_equivalent_stress)
+    mooseException("In ",
+                   _name,
+                   ": equivalent stress (",
+                   equiv_stress,
+                   ") is higher than maximum_equivalent_stress (",
+                   _maximum_equivalent_stress,
+                   ").\nCutting time step.");
 
   // If equivalent stress is present, calculate creep strain increment
   if (equiv_stress > _minimum_equivalent_stress)
@@ -229,7 +245,7 @@ ADViscoplasticityStressUpdate<compute_stage>::computeDGaugeDSigma(
 
   // Compute the derviative of the residual with respect to the hydrostatic stress
   ADReal dresidual_dhydro_stress = 0.0;
-  if (_hydro_stress)
+  if (_hydro_stress != 0.0)
   {
     const ADReal dM_dhydro_stress = M / _hydro_stress;
     if (_model == ViscoplasticityModel::GTN)
@@ -276,15 +292,17 @@ ADViscoplasticityStressUpdate<compute_stage>::computeInelasticStrainIncrement(
     const ADRankTwoTensor & stress)
 {
   // If hydrostatic stress and porosity present, compute non-linear gauge stress
-  if (!_intermediate_porosity)
+  if (_intermediate_porosity == 0.0)
     gauge_stress = equiv_stress;
-  else if (_hydro_stress)
-    returnMappingSolve(equiv_stress, gauge_stress, _console);
+  else if (_hydro_stress == 0.0)
+    gauge_stress =
+        equiv_stress / std::sqrt(1.0 - (1.0 + _power_factor) * _intermediate_porosity +
+                                 _power_factor * Utility::pow<2>(_intermediate_porosity));
   else
-    gauge_stress /= std::sqrt(1.0 + _power_factor * Utility::pow<2>(_intermediate_porosity));
+    returnMappingSolve(equiv_stress, gauge_stress, _console);
 
-  mooseAssert(gauge_stress > equiv_stress,
-              "Gauge stress calculated in inner Newton solve is less than equivalent.");
+  mooseAssert(gauge_stress >= equiv_stress,
+              "Gauge stress calculated in inner Newton solve is less than the equivalent stress.");
 
   // Compute stress potential
   dpsi_dgauge = _coefficient[_qp] * std::pow(gauge_stress, _power);

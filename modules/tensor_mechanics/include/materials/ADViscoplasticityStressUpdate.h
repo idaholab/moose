@@ -89,8 +89,11 @@ protected:
   /// Maximum ratio between the gauge stress and the equilvalent stress
   const Real _maximum_gauge_ratio;
 
-  /// Minimum value of equivalent below which viscoplasticiy is not calculated
+  /// Minimum value of equivalent stress below which viscoplasticiy is not calculated
   const Real _minimum_equivalent_stress;
+
+  /// Maximum value of equivalent stress above which an exception is thrown
+  const Real _maximum_equivalent_stress;
 
   /// Container for hydrostatic stress
   ADReal _hydro_stress;

@@ -26,7 +26,7 @@
     type = CSVDiff
     input = creep.i
     csvdiff = creep_out.csv
-    prereq = regular_creep
+    prereq = regular_creep-jac
     requirement = 'The PowerLawCreepStressUpdate, called through the ADComputeMultiplePorousInelasticStress, shall compute a creep strain based on an extrenal loading, and match the values computed instead with ADComputeMultipleInelasticStress.'
   [../]
   [./porous_creep-jac]

@@ -25,7 +25,8 @@
   using ADViscoplasticityStressUpdateBase<compute_stage>::_effective_inelastic_strain_old;         \
   using ADViscoplasticityStressUpdateBase<compute_stage>::_inelastic_strain;                       \
   using ADViscoplasticityStressUpdateBase<compute_stage>::_inelastic_strain_old;                   \
-  using ADViscoplasticityStressUpdateBase<compute_stage>::_verbose
+  using ADViscoplasticityStressUpdateBase<compute_stage>::_verbose;                                \
+  using ADViscoplasticityStressUpdateBase<compute_stage>::_porosity_old
 
 template <ComputeStage>
 class ADViscoplasticityStressUpdateBase;
