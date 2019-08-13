@@ -52,7 +52,7 @@ class RunApp(Tester):
 
     def __init__(self, name, params):
         Tester.__init__(self, name, params)
-        if os.environ.has_key("MOOSE_MPI_COMMAND"):
+        if os.environ.get("MOOSE_MPI_COMMAND"):
             self.mpi_command = os.environ['MOOSE_MPI_COMMAND']
             self.force_mpi = True
         else:
@@ -247,7 +247,7 @@ class RunApp(Tester):
             # We won't pay attention to the ERROR strings if EXPECT_ERR is set (from the derived class)
             # since a message to standard error might actually be a real error.  This case should be handled
             # in the derived class.
-            if options.valgrind_mode == '' and not specs.isValid('expect_err') and len( filter( lambda x: x in output, specs['errors'] ) ) > 0:
+            if options.valgrind_mode == '' and not specs.isValid('expect_err') and len( [x for x in filter( lambda x: x in output, specs['errors'] )] ) > 0:
                 reason = 'ERRMSG'
             elif self.exit_code == 0 and specs['should_crash'] == True:
                 reason = 'NO CRASH'

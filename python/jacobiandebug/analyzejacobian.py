@@ -408,7 +408,7 @@ if __name__ == '__main__':
     moose_dir = os.environ.get('MOOSE_DIR',
                                os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                                             '../..')))
-    if os.environ.has_key("LIBMESH_DIR"):
+    if os.environ.get("LIBMESH_DIR"):
         libmesh_dir = os.environ['LIBMESH_DIR']
     else:
         libmesh_dir = os.path.join(moose_dir, 'libmesh', 'installed')

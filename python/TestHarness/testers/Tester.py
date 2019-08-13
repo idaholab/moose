@@ -418,10 +418,10 @@ class Tester(MooseObject):
             return False
 
         # Are we running only tests in a specific group?
-        if options.group <> 'ALL' and options.group not in self.specs['group']:
+        if options.group != 'ALL' and options.group not in self.specs['group']:
             self.setStatus(self.silent)
             return False
-        if options.not_group <> '' and options.not_group in self.specs['group']:
+        if options.not_group != '' and options.not_group in self.specs['group']:
             self.setStatus(self.silent)
             return False
 
@@ -558,7 +558,7 @@ class Tester(MooseObject):
 
         # Check to make sure environment variable exists
         for var in self.specs['env_vars']:
-            if not os.environ.has_key(var):
+            if not os.environ.get(var):
                 reasons['env_vars'] = 'ENV VAR NOT SET'
 
         # Check for display

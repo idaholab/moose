@@ -42,7 +42,7 @@ class PetscJacobianTester(RunApp):
                                         os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                                                      '..')))
 
-        if os.environ.has_key("LIBMESH_DIR"):
+        if os.environ.get("LIBMESH_DIR"):
             self.libmesh_dir = os.environ['LIBMESH_DIR']
         else:
             self.libmesh_dir = os.path.join(self.moose_dir, 'libmesh', 'installed')

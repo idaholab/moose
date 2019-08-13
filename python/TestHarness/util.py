@@ -154,7 +154,7 @@ def runCommand(cmd, cwd=None):
     # On Windows it is not allowed to close fds while redirecting output
     should_close = platform.system() != "Windows"
     p = subprocess.Popen([cmd], cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=should_close, shell=True)
-    output = p.communicate()[0]
+    output = str(p.communicate()[0])
     if (p.returncode != 0):
         output = 'ERROR: ' + output
     return output
@@ -354,7 +354,7 @@ def getCompilers(libmesh_dir):
     # Supported compilers are GCC, INTEL or ALL
     compilers = set(['ALL'])
 
-    mpicxx_cmd = runExecutable(libmesh_dir, "bin", "libmesh-config", "--cxx")
+    mpicxx_cmd = str(runExecutable(libmesh_dir, "bin", "libmesh-config", "--cxx"))
 
     # Account for usage of distcc or ccache
     if "distcc" in mpicxx_cmd or "ccache" in mpicxx_cmd:
@@ -555,7 +555,7 @@ def getInitializedSubmodules(root_dir):
     Return:
       list[str]: List of iniitalized submodule names or an empty list if there was an error.
     """
-    output = runCommand("git submodule status", cwd=root_dir)
+    output = str(runCommand("git submodule status", cwd=root_dir))
     if output.startswith("ERROR"):
         return []
     # This ignores submodules that have a '-' at the beginning which means they are not initialized
@@ -690,10 +690,10 @@ def readOutput(stdout, stderr):
     output = ''
     if stdout:
         stdout.seek(0)
-        output += stdout.read()
+        output += str(stdout.read())
     if stderr:
         stderr.seek(0)
-        output += stderr.read()
+        output += str(stderr.read())
     return output
 
 # Trimming routines for job output
