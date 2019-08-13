@@ -106,14 +106,33 @@ MultiAppCommandLineControl::execute()
                  _param_names.size(),
                  ").");
 
-    for (unsigned int row = 0; row < matrix.m(); ++row)
+    // For SamplerFullSolveMultiApp, to avoid storing duplicated param_names for each sampler, we
+    // store only param_names once in "cli_args". For other MultApp, we store the full information
+    // of params_names and values for each sampler.
+
+    if (std::dynamic_pointer_cast<SamplerFullSolveMultiApp>(_multi_app) == nullptr)
+    {
+      for (unsigned int row = 0; row < matrix.m(); ++row)
+      {
+        std::ostringstream oss;
+        for (unsigned int col = 0; col < matrix.n(); ++col)
+        {
+          if (col > 0)
+            oss << ";";
+          oss << _param_names[col] << "=" << Moose::stringify(matrix(row, col));
+        }
+
+        cli_args.push_back(oss.str());
+      }
+    }
+    else
     {
       std::ostringstream oss;
       for (unsigned int col = 0; col < matrix.n(); ++col)
       {
         if (col > 0)
           oss << ";";
-        oss << _param_names[col] << "=" << Moose::stringify(matrix(row, col));
+        oss << _param_names[col];
       }
 
       cli_args.push_back(oss.str());
