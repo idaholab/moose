@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [gmg]
     type = GeneratedMeshGenerator
     dim = 2
@@ -17,10 +17,6 @@
 [Variables]
   [u]
   []
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 # Since this mesh is rotated into the z-plane, we need to output in 3D

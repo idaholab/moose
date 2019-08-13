@@ -13,7 +13,7 @@
 #include "FEProblem.h"
 #include "ActionWarehouse.h"
 
-registerMooseObjectReplaced("MooseApp", AddExtraNodeset, "08/12/2019 00:00", ExtraNodesetGenerator);
+registerMooseObjectReplaced("MooseApp", AddExtraNodeset, "11/30/2019 00:00", ExtraNodesetGenerator);
 
 template <>
 InputParameters

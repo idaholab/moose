@@ -14,7 +14,7 @@
 
 registerMooseObjectReplaced("MooseApp",
                             BoundingBoxNodeSet,
-                            "08/12/2019 00:00",
+                            "11/30/2019 00:00",
                             BoundingBoxNodeSetGenerator);
 
 template <>
