@@ -217,7 +217,7 @@ class ExodusSource(base.ChiggerSource):
         for item in ['block', 'boundary', 'nodeset']:
             if self.isOptionValid(item) and self.getOption(item) == []:
                 self.setOption(item, [item.name for item in \
-                                      block_info[getattr(ExodusReader, item.upper())].itervalues()])
+                                      block_info[getattr(ExodusReader, item.upper())].values()])
         self.setNeedsUpdate(False) # this function does not need to update again
 
         def get_indices(option, vtk_type):
@@ -227,7 +227,7 @@ class ExodusSource(base.ChiggerSource):
             indices = []
             if self.isOptionValid(option):
                 blocks = self.getOption(option)
-                for vtkid, item in block_info[vtk_type].iteritems():
+                for vtkid, item in block_info[vtk_type].items():
                     for name in blocks:
                         if (item.name == str(name)) or (str(name) == vtkid):
                             indices.append(item.multiblock_index)
@@ -284,7 +284,7 @@ class ExodusSource(base.ChiggerSource):
         if not available:
             return
 
-        default = available[available.keys()[0]]
+        default = available[list(available.keys())[0]]
         if not self.isOptionValid('variable'):
             varinfo = default
         else:

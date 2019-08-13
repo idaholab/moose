@@ -36,7 +36,7 @@ class PackageExtension(command.CommandExtension):
         config = command.CommandExtension.defaultConfig()
 
         # Assign a key/value for every item in packages_config.yml
-        for k, v in packages_config.iteritems():
+        for k, v in packages_config.items():
             if k != 'moose_packages':
                 config[k] = (v, 'Default version for %s' % (k))
             else:
@@ -83,7 +83,7 @@ class PackageCommand(command.CommandComponent):
             raise exceptions.MooseDocsException(msg, arch)
 
         href = os.path.join(self.extension.get('link'), packages[arch])
-        core.Link(parent, url=unicode(href), string=unicode(packages[arch]))
+        core.Link(parent, url=str(href), string=str(packages[arch]))
         return parent
 
 class PackageCodeReplace(command.CommandComponent):
@@ -126,7 +126,7 @@ class PackageCodeReplace(command.CommandComponent):
         for package in self.extension.keys():
             if package.upper() == key:
                 version = self.extension.get(package)
-                return unicode(version)
+                return str(version)
         return match.group(0)
 
 class PackageTextReplace(command.CommandComponent):
@@ -153,5 +153,5 @@ class PackageTextReplace(command.CommandComponent):
 
     def createToken(self, parent, info, page):
         content = self.extension.get(info['subcommand'], dict())
-        tokens.String(parent, content=unicode(content))
+        tokens.String(parent, content=str(content))
         return parent

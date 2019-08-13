@@ -126,7 +126,7 @@ class Option(object):
         # If the Option is storing another Set of options and is passed a dict(), then
         # loop through the dictionary and update each option in the set of options.
         if (self.vtype is Options) and isinstance(value, dict):
-            for k, v in value.iteritems():
+            for k, v in value.items():
                 self.__value[k] = v
 
         else:
@@ -318,7 +318,7 @@ class Options(object):
                     unused.add(key)
 
         # Update from kwargs
-        for k, v in kwargs.iteritems():
+        for k, v in kwargs.items():
             if k in self.__options:
                 changed = True
                 self[k] = v

@@ -114,7 +114,7 @@ class PDFExtension(command.CommandExtension):
 
         main = base.NodeBase(None, None)
         latex.Command(main, 'documentclass', string=u'report', end='')
-        for package, options in self.translator.renderer.getPackages().iteritems():
+        for package, options in self.translator.renderer.getPackages().items():
             args = []
             if options[0] or options[1]:
                 args = [self._getOptions(*options)]
@@ -127,7 +127,7 @@ class PDFExtension(command.CommandExtension):
             latex.String(main, content='\n' + preamble, escape=False)
 
         # New Commands
-        for cmd in self.translator.renderer.getNewCommands().itervalues():
+        for cmd in self.translator.renderer.getNewCommands().values():
             cmd.parent = main
 
         doc = latex.Environment(main, 'document', end='\n')
@@ -135,7 +135,7 @@ class PDFExtension(command.CommandExtension):
             page = node['page']
             if self.translator.getMetaData(page, 'active'):
                 cmd = latex.Command(doc, 'input', start='\n')
-                latex.String(cmd, content=unicode(page.destination), escape=False)
+                latex.String(cmd, content=str(page.destination), escape=False)
 
         # BibTeX
         bib_files = [n.source for n in self.translator.content if n.source.endswith('.bib')]
@@ -211,7 +211,7 @@ class PDFExtension(command.CommandExtension):
         txt = []
         for key in args:
             txt.append(key)
-        for key, value in kwargs.iteritems():
+        for key, value in kwargs.items():
             txt.append(u'{}={}'.format(key, str(value)))
         return latex.Bracket(string=u','.join(txt), escape=False)
 
@@ -278,7 +278,7 @@ class PDFExtension(command.CommandExtension):
         # Build directories
         for node in nodes:
             key = tuple([u''] + node.local.split(os.sep))[:-1]
-            for i in xrange(1, len(key) + 1):
+            for i in range(1, len(key) + 1):
                 k = key[:i]
                 if k not in tree:
                     tree[k] = base.NodeBase(k[-1], tree[k[:-1]])

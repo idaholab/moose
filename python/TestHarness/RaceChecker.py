@@ -38,7 +38,7 @@ class RaceChecker(object):
                     _files.update(_matching)
                     raceConditionsExist = True
             if _jobs:
-                self.racer_lists.append((sorted(_jobs), sorted(_files)))
+                self.racer_lists.append((_jobs, _files))
         return raceConditionsExist
 
     def printRaceConditionsByPrereq(self):

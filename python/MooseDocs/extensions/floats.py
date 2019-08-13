@@ -83,12 +83,12 @@ def create_modal(parent, title=None, content=None, **kwargs):
     Create the necessary Modal tokens for creating modal windows with materialize.
     """
     modal = ModalLink(parent.root, **kwargs)
-    if isinstance(title, unicode):
+    if isinstance(title, str):
         ModalLinkTitle(modal, string=title)
     elif isinstance(title, tokens.Token):
         title.parent = ModalLinkTitle(modal)
 
-    if isinstance(content, unicode):
+    if isinstance(content, str):
         ModalLinkContent(modal, string=content)
     elif isinstance(content, tokens.Token):
         content.parent = ModalLinkContent(modal)
@@ -99,7 +99,7 @@ def create_modal_link(parent, title=None, content=None, string=None, **kwargs):
     """
     Create the necessary tokens to create a link to a modal window with materialize.
     """
-    kwargs.setdefault('bookmark', unicode(uuid.uuid4()))
+    kwargs.setdefault('bookmark', str(uuid.uuid4()))
     link = core.Link(parent,
                      url=u'#{}'.format(kwargs['bookmark']),
                      class_='modal-trigger',

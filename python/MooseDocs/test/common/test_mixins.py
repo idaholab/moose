@@ -44,7 +44,7 @@ class TestConfigObject(unittest.TestCase):
         """
         with self.assertRaises(exceptions.MooseDocsException) as e:
             Bar()
-        self.assertIn("The return type from 'defaultConfig'", e.exception.message)
+        self.assertIn("The return type from 'defaultConfig'", str(e.exception))
 
     def testUpdateAndGet(self):
         """
@@ -62,8 +62,8 @@ class TestConfigObject(unittest.TestCase):
         """
         with self.assertRaises(exceptions.MooseDocsException) as e:
             Foo(unknown=42)
-        self.assertIn("The following config options", e.exception.message)
-        self.assertIn("unknown", e.exception.message)
+        self.assertIn("The following config options", str(e.exception))
+        self.assertIn("unknown", str(e.exception))
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

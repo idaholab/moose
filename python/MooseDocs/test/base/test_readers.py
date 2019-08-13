@@ -62,11 +62,11 @@ class TestReader(unittest.TestCase):
         reader = readers.Reader(lexers.RecursiveLexer('foo'))
         with self.assertRaises(exceptions.MooseDocsException) as e:
             reader.tokenize([], u'', None)
-        self.assertIn("The argument 'root'", e.exception.message)
+        self.assertIn("The argument 'root'", str(e.exception))
 
         with self.assertRaises(exceptions.MooseDocsException) as e:
             reader.tokenize(tokens.Token(), [], None)
-        self.assertIn("The argument 'content'", e.exception.message)
+        self.assertIn("The argument 'content'", str(e.exception))
         MooseDocs.LOG_LEVEL = logging.INFO
 
     def testAddExceptions(self):
@@ -75,15 +75,15 @@ class TestReader(unittest.TestCase):
 
         with self.assertRaises(exceptions.MooseDocsException) as e:
             reader.add([], u'', '')
-        self.assertIn("The argument 'group'", e.exception.message)
+        self.assertIn("The argument 'group'", str(e.exception))
 
         with self.assertRaises(exceptions.MooseDocsException) as e:
             reader.add('foo', u'', '')
-        self.assertIn("The argument 'component'", e.exception.message)
+        self.assertIn("The argument 'component'", str(e.exception))
 
         with self.assertRaises(exceptions.MooseDocsException) as e:
             reader.add('foo', components.TokenComponent(), [])
-        self.assertIn("The argument 'location'", e.exception.message)
+        self.assertIn("The argument 'location'", str(e.exception))
         MooseDocs.LOG_LEVEL = logging.INFO
 
     def testTokenizeException(self):

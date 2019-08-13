@@ -39,17 +39,17 @@ class TestLoadExtensions(unittest.TestCase):
     def testMissingMakeExtension(self):
         with self.assertRaises(exceptions.MooseDocsException) as e:
             common.load_extensions([MooseDocs.extensions])
-        self.assertIn("does not contain the required 'make_extension'", e.exception.message)
+        self.assertIn("does not contain the required 'make_extension'", str(e.exception))
 
     def testBadModuleName(self):
         with self.assertRaises(exceptions.MooseDocsException) as e:
             common.load_extensions(['not.a.module'])
-        self.assertIn("Failed to import the supplied", e.exception.message)
+        self.assertIn("Failed to import the supplied", str(e.exception))
 
     def testBadModuleType(self):
         with self.assertRaises(exceptions.MooseDocsException) as e:
             common.load_extensions([42])
-        self.assertIn("must be a module type", e.exception.message)
+        self.assertIn("must be a module type", str(e.exception))
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

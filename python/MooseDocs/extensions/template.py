@@ -74,7 +74,7 @@ class TemplateExtension(include.IncludeExtension):
         """
         Helper for applying template args (e.g., {{app}})
         """
-        if not isinstance(content, (str, unicode)):
+        if not isinstance(content, (str, str)):
             return content
 
         template_args = self.get('args', dict())
@@ -88,7 +88,7 @@ class TemplateExtension(include.IncludeExtension):
                 raise exceptions.MooseDocsException(msg, key)
             return arg
 
-        content = re.sub(ur'{{(?P<key>.*?)}}', sub, content)
+        content = re.sub(r'{{(?P<key>.*?)}}', sub, content)
         return content
 
 

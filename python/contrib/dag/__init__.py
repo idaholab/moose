@@ -83,7 +83,7 @@ class DAG(object):
 
         graph.pop(node_name)
 
-        for node, edges in graph.iteritems():
+        for node, edges in graph.items():
             if node_name in edges:
                 edges.remove(node_name)
 
@@ -191,9 +191,9 @@ class DAG(object):
         """
 
         self.reset_graph()
-        for new_node in graph_dict.iterkeys():
+        for new_node in graph_dict.keys():
             self.add_node(new_node)
-        for ind_node, dep_nodes in graph_dict.iteritems():
+        for ind_node, dep_nodes in graph_dict.items():
             if not isinstance(dep_nodes, list):
                 raise TypeError('dict values must be lists')
             for dep_node in dep_nodes:
@@ -215,8 +215,7 @@ class DAG(object):
         # cache current graph because someone is asking for concurrent nodes
         # and the graph is _probably_ the most complete at this stage
         self.__cacheGraph()
-
-        dependent_nodes = set(node for dependents in graph.itervalues() for node in dependents)
+        dependent_nodes = set(node for dependents in graph.values() for node in dependents)
         return [node for node in graph.keys() if node not in dependent_nodes]
 
     def validate(self, graph=None):
@@ -296,7 +295,7 @@ class DAG(object):
         for key in self.topological_sort(graph):
             new_graph.add_node(key)
 
-        for key, value in graph.iteritems():
+        for key, value in graph.items():
             for downstream_node in value:
                 new_graph.add_edge(downstream_node, key)
         return new_graph

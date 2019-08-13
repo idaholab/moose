@@ -24,7 +24,7 @@ source.SetResolution(n)
 data = vtk.vtkFloatArray()
 data.SetName(name)
 data.SetNumberOfTuples(n+1)
-for i in xrange(n+1):
+for i in range(n+1):
     data.SetValue(i, i*i)
 
 source.Update()

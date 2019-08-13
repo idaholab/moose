@@ -124,7 +124,7 @@ class LexerInformation(object):
         self.__match[0] = match.group(0)
         for i, group in enumerate(match.groups()):
             self.__match[i+1] = group
-        for key, value in match.groupdict().iteritems():
+        for key, value in match.groupdict().items():
             self.__match[key] = value
 
     @property
@@ -173,7 +173,7 @@ class LexerInformation(object):
         """
         Iterate over the named groups.
         """
-        for key, value in self.__match.iteritems():
+        for key, value in self.__match.items():
             yield key, value
 
     def __contains__(self, value):
@@ -210,7 +210,7 @@ class Lexer(object):
         Inputs:
             parent[tree.tokens]: The parent token to which the new token(s) should be attached.
             grammar[Grammar]: Object containing the grammar (defined by regexs) to search.
-            text[unicode]: The text to tokenize.
+            text[str]: The text to tokenize.
             line[int]: The line number to startwith, this allows for nested calls to begin with
                        the correct line.
 
@@ -222,9 +222,9 @@ class Lexer(object):
             common.check_type('page', page, pages.Page)
             common.check_type('line', line, int)
 
-        if not isinstance(text, unicode):
+        if not isinstance(text, str):
             msg = "EXCEPTION: {}:{}\n{}".format(page.source, line,
-                                                "The supplied text must be unicode.")
+                                                "The supplied text must be str.")
             raise TypeError(msg)
 
         n = len(text)
@@ -239,7 +239,7 @@ class Lexer(object):
                         obj = self.buildToken(parent, pattern, info, page)
                     except Exception as e: #pylint: disable=broad-except
                         obj = tokens.ErrorToken(parent,
-                                                message=unicode(e.message),
+                                                message=e,
                                                 traceback=traceback.format_exc())
 
                     if obj is not None:
@@ -294,7 +294,7 @@ class RecursiveLexer(Lexer):
             group[str]: The name of the grammar group to return, if not given the base is returned.
         """
         if group is None:
-            group = self._grammars.keys()[0]
+            group = list(self._grammars.keys())[0]
         return self._grammars[group]
 
     def grammars(self):
@@ -320,7 +320,7 @@ class RecursiveLexer(Lexer):
         obj = super(RecursiveLexer, self).buildToken(parent, pattern, info, page)
 
         if (obj is not None) and (obj is not parent) and obj.get('recursive'):
-            for key, grammar in self._grammars.iteritems():
+            for key, grammar in self._grammars.items():
                 if key in info.keys():
                     text = info[key]
                     if text is not None:

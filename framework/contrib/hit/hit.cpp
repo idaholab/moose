@@ -1179,6 +1179,38 @@ static int __Pyx_GetException(PyObject **type, PyObject **value, PyObject **tb);
 /* None.proto */
 static CYTHON_INLINE void __Pyx_RaiseUnboundLocalError(const char *varname);
 
+/* IncludeCppStringH.proto */
+#include <string>
+
+/* decode_c_string_utf16.proto */
+static CYTHON_INLINE PyObject *__Pyx_PyUnicode_DecodeUTF16(const char *s, Py_ssize_t size, const char *errors) {
+    int byteorder = 0;
+    return PyUnicode_DecodeUTF16(s, size, errors, &byteorder);
+}
+static CYTHON_INLINE PyObject *__Pyx_PyUnicode_DecodeUTF16LE(const char *s, Py_ssize_t size, const char *errors) {
+    int byteorder = -1;
+    return PyUnicode_DecodeUTF16(s, size, errors, &byteorder);
+}
+static CYTHON_INLINE PyObject *__Pyx_PyUnicode_DecodeUTF16BE(const char *s, Py_ssize_t size, const char *errors) {
+    int byteorder = 1;
+    return PyUnicode_DecodeUTF16(s, size, errors, &byteorder);
+}
+
+/* decode_c_bytes.proto */
+static CYTHON_INLINE PyObject* __Pyx_decode_c_bytes(
+         const char* cstring, Py_ssize_t length, Py_ssize_t start, Py_ssize_t stop,
+         const char* encoding, const char* errors,
+         PyObject* (*decode_func)(const char *s, Py_ssize_t size, const char *errors));
+
+/* decode_cpp_string.proto */
+static CYTHON_INLINE PyObject* __Pyx_decode_cpp_string(
+         std::string cppstring, Py_ssize_t start, Py_ssize_t stop,
+         const char* encoding, const char* errors,
+         PyObject* (*decode_func)(const char *s, Py_ssize_t size, const char *errors)) {
+    return __Pyx_decode_c_bytes(
+        cppstring.data(), cppstring.size(), start, stop, encoding, errors, decode_func);
+}
+
 /* ExtTypeTest.proto */
 static CYTHON_INLINE int __Pyx_TypeTest(PyObject *obj, PyTypeObject *type);
 
@@ -4204,7 +4236,7 @@ static PyObject *__pyx_pf_3hit_4Node_18line(struct __pyx_obj_3hit_Node *__pyx_v_
  *         return int(self._cnode.line())
  * 
  *     def path(self):             # <<<<<<<<<<<<<<
- *         return str(self._cnode.path())
+ *         return self._cnode.path().decode('utf-8')
  *     def fullpath(self):
  */
 
@@ -4225,38 +4257,33 @@ static PyObject *__pyx_pf_3hit_4Node_20path(struct __pyx_obj_3hit_Node *__pyx_v_
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
-  PyObject *__pyx_t_2 = NULL;
   __Pyx_RefNannySetupContext("path", 0);
 
   /* "hit.pyx":129
  * 
  *     def path(self):
- *         return str(self._cnode.path())             # <<<<<<<<<<<<<<
+ *         return self._cnode.path().decode('utf-8')             # <<<<<<<<<<<<<<
  *     def fullpath(self):
- *         return str(self._cnode.fullpath())
+ *         return self._cnode.fullpath().decode('utf-8')
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_v_self->_cnode->path()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 129, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_decode_cpp_string(__pyx_v_self->_cnode->path(), 0, PY_SSIZE_T_MAX, NULL, NULL, PyUnicode_DecodeUTF8); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 129, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyUnicode_Type)), __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 129, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_r = __pyx_t_2;
-  __pyx_t_2 = 0;
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
   goto __pyx_L0;
 
   /* "hit.pyx":128
  *         return int(self._cnode.line())
  * 
  *     def path(self):             # <<<<<<<<<<<<<<
- *         return str(self._cnode.path())
+ *         return self._cnode.path().decode('utf-8')
  *     def fullpath(self):
  */
 
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_2);
   __Pyx_AddTraceback("hit.Node.path", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
@@ -4267,9 +4294,9 @@ static PyObject *__pyx_pf_3hit_4Node_20path(struct __pyx_obj_3hit_Node *__pyx_v_
 
 /* "hit.pyx":130
  *     def path(self):
- *         return str(self._cnode.path())
+ *         return self._cnode.path().decode('utf-8')
  *     def fullpath(self):             # <<<<<<<<<<<<<<
- *         return str(self._cnode.fullpath())
+ *         return self._cnode.fullpath().decode('utf-8')
  *     def type(self):
  */
 
@@ -4290,38 +4317,33 @@ static PyObject *__pyx_pf_3hit_4Node_22fullpath(struct __pyx_obj_3hit_Node *__py
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
-  PyObject *__pyx_t_2 = NULL;
   __Pyx_RefNannySetupContext("fullpath", 0);
 
   /* "hit.pyx":131
- *         return str(self._cnode.path())
+ *         return self._cnode.path().decode('utf-8')
  *     def fullpath(self):
- *         return str(self._cnode.fullpath())             # <<<<<<<<<<<<<<
+ *         return self._cnode.fullpath().decode('utf-8')             # <<<<<<<<<<<<<<
  *     def type(self):
  *         t = <int>self._cnode.type()
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_v_self->_cnode->fullpath()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 131, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_decode_cpp_string(__pyx_v_self->_cnode->fullpath(), 0, PY_SSIZE_T_MAX, NULL, NULL, PyUnicode_DecodeUTF8); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 131, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyUnicode_Type)), __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 131, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_r = __pyx_t_2;
-  __pyx_t_2 = 0;
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
   goto __pyx_L0;
 
   /* "hit.pyx":130
  *     def path(self):
- *         return str(self._cnode.path())
+ *         return self._cnode.path().decode('utf-8')
  *     def fullpath(self):             # <<<<<<<<<<<<<<
- *         return str(self._cnode.fullpath())
+ *         return self._cnode.fullpath().decode('utf-8')
  *     def type(self):
  */
 
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_2);
   __Pyx_AddTraceback("hit.Node.fullpath", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
@@ -4332,7 +4354,7 @@ static PyObject *__pyx_pf_3hit_4Node_22fullpath(struct __pyx_obj_3hit_Node *__py
 
 /* "hit.pyx":132
  *     def fullpath(self):
- *         return str(self._cnode.fullpath())
+ *         return self._cnode.fullpath().decode('utf-8')
  *     def type(self):             # <<<<<<<<<<<<<<
  *         t = <int>self._cnode.type()
  *         if t == <int>chit.NTField:
@@ -4361,7 +4383,7 @@ static PyObject *__pyx_pf_3hit_4Node_24type(struct __pyx_obj_3hit_Node *__pyx_v_
   __Pyx_RefNannySetupContext("type", 0);
 
   /* "hit.pyx":133
- *         return str(self._cnode.fullpath())
+ *         return self._cnode.fullpath().decode('utf-8')
  *     def type(self):
  *         t = <int>self._cnode.type()             # <<<<<<<<<<<<<<
  *         if t == <int>chit.NTField:
@@ -4529,7 +4551,7 @@ static PyObject *__pyx_pf_3hit_4Node_24type(struct __pyx_obj_3hit_Node *__pyx_v_
 
   /* "hit.pyx":132
  *     def fullpath(self):
- *         return str(self._cnode.fullpath())
+ *         return self._cnode.fullpath().decode('utf-8')
  *     def type(self):             # <<<<<<<<<<<<<<
  *         t = <int>self._cnode.type()
  *         if t == <int>chit.NTField:
@@ -4877,7 +4899,7 @@ static PyObject *__pyx_pf_3hit_4Node_28raw(struct __pyx_obj_3hit_Node *__pyx_v_s
  *     def raw(self):
  *         if self.type() != NodeType.Field:             # <<<<<<<<<<<<<<
  *             return None
- *         return str(self._cnode.strVal())
+ *         return self._cnode.strVal().decode('utf-8')
  */
   __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_type); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 162, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
@@ -4912,7 +4934,7 @@ static PyObject *__pyx_pf_3hit_4Node_28raw(struct __pyx_obj_3hit_Node *__pyx_v_s
  *     def raw(self):
  *         if self.type() != NodeType.Field:
  *             return None             # <<<<<<<<<<<<<<
- *         return str(self._cnode.strVal())
+ *         return self._cnode.strVal().decode('utf-8')
  * 
  */
     __Pyx_XDECREF(__pyx_r);
@@ -4924,14 +4946,14 @@ static PyObject *__pyx_pf_3hit_4Node_28raw(struct __pyx_obj_3hit_Node *__pyx_v_s
  *     def raw(self):
  *         if self.type() != NodeType.Field:             # <<<<<<<<<<<<<<
  *             return None
- *         return str(self._cnode.strVal())
+ *         return self._cnode.strVal().decode('utf-8')
  */
   }
 
   /* "hit.pyx":164
  *         if self.type() != NodeType.Field:
  *             return None
- *         return str(self._cnode.strVal())             # <<<<<<<<<<<<<<
+ *         return self._cnode.strVal().decode('utf-8')             # <<<<<<<<<<<<<<
  * 
  *     def find(self, path):
  */
@@ -4942,13 +4964,10 @@ static PyObject *__pyx_pf_3hit_4Node_28raw(struct __pyx_obj_3hit_Node *__pyx_v_s
     __Pyx_CppExn2PyErr();
     __PYX_ERR(0, 164, __pyx_L1_error)
   }
-  __pyx_t_2 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_t_5); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 164, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_decode_cpp_string(__pyx_t_5, 0, PY_SSIZE_T_MAX, NULL, NULL, PyUnicode_DecodeUTF8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 164, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyUnicode_Type)), __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 164, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_r = __pyx_t_3;
-  __pyx_t_3 = 0;
+  __pyx_r = __pyx_t_2;
+  __pyx_t_2 = 0;
   goto __pyx_L0;
 
   /* "hit.pyx":161
@@ -4973,7 +4992,7 @@ static PyObject *__pyx_pf_3hit_4Node_28raw(struct __pyx_obj_3hit_Node *__pyx_v_s
 }
 
 /* "hit.pyx":166
- *         return str(self._cnode.strVal())
+ *         return self._cnode.strVal().decode('utf-8')
  * 
  *     def find(self, path):             # <<<<<<<<<<<<<<
  *         cpath = <string> path.encode('utf-8')
@@ -5087,7 +5106,7 @@ static PyObject *__pyx_pf_3hit_4Node_30find(struct __pyx_obj_3hit_Node *__pyx_v_
   goto __pyx_L0;
 
   /* "hit.pyx":166
- *         return str(self._cnode.strVal())
+ *         return self._cnode.strVal().decode('utf-8')
  * 
  *     def find(self, path):             # <<<<<<<<<<<<<<
  *         cpath = <string> path.encode('utf-8')
@@ -5487,7 +5506,7 @@ static PyObject *__pyx_pf_3hit_4Node_32param(struct __pyx_obj_3hit_Node *__pyx_v
  *             return float(f.floatVal())
  *         elif k == FieldKind.Bool:             # <<<<<<<<<<<<<<
  *             return bool(f.boolVal())
- *         return str(f.strVal())
+ *         return f.strVal().decode('utf-8')
  */
   __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_FieldKind); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 191, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
@@ -5504,7 +5523,7 @@ static PyObject *__pyx_pf_3hit_4Node_32param(struct __pyx_obj_3hit_Node *__pyx_v
  *             return float(f.floatVal())
  *         elif k == FieldKind.Bool:
  *             return bool(f.boolVal())             # <<<<<<<<<<<<<<
- *         return str(f.strVal())
+ *         return f.strVal().decode('utf-8')
  * 
  */
     __Pyx_XDECREF(__pyx_r);
@@ -5523,25 +5542,22 @@ static PyObject *__pyx_pf_3hit_4Node_32param(struct __pyx_obj_3hit_Node *__pyx_v
  *             return float(f.floatVal())
  *         elif k == FieldKind.Bool:             # <<<<<<<<<<<<<<
  *             return bool(f.boolVal())
- *         return str(f.strVal())
+ *         return f.strVal().decode('utf-8')
  */
   }
 
   /* "hit.pyx":193
  *         elif k == FieldKind.Bool:
  *             return bool(f.boolVal())
- *         return str(f.strVal())             # <<<<<<<<<<<<<<
+ *         return f.strVal().decode('utf-8')             # <<<<<<<<<<<<<<
  * 
  *     def walk(self, walker, node_type=NodeType.All):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_3 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_v_f->strVal()); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 193, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_decode_cpp_string(__pyx_v_f->strVal(), 0, PY_SSIZE_T_MAX, NULL, NULL, PyUnicode_DecodeUTF8); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 193, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyUnicode_Type)), __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 193, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_r = __pyx_t_2;
-  __pyx_t_2 = 0;
+  __pyx_r = __pyx_t_3;
+  __pyx_t_3 = 0;
   goto __pyx_L0;
 
   /* "hit.pyx":173
@@ -5568,7 +5584,7 @@ static PyObject *__pyx_pf_3hit_4Node_32param(struct __pyx_obj_3hit_Node *__pyx_v
 }
 
 /* "hit.pyx":195
- *         return str(f.strVal())
+ *         return f.strVal().decode('utf-8')
  * 
  *     def walk(self, walker, node_type=NodeType.All):             # <<<<<<<<<<<<<<
  *         if self.type() == node_type or node_type == NodeType.All:
@@ -5943,7 +5959,7 @@ static PyObject *__pyx_pf_3hit_4Node_34walk(struct __pyx_obj_3hit_Node *__pyx_v_
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "hit.pyx":195
- *         return str(f.strVal())
+ *         return f.strVal().decode('utf-8')
  * 
  *     def walk(self, walker, node_type=NodeType.All):             # <<<<<<<<<<<<<<
  *         if self.type() == node_type or node_type == NodeType.All:
@@ -8105,7 +8121,7 @@ if (!__Pyx_RefNanny) {
   PyType_Modified(__pyx_ptype_3hit_Node);
 
   /* "hit.pyx":195
- *         return str(f.strVal())
+ *         return f.strVal().decode('utf-8')
  * 
  *     def walk(self, walker, node_type=NodeType.All):             # <<<<<<<<<<<<<<
  *         if self.type() == node_type or node_type == NodeType.All:
@@ -9222,6 +9238,33 @@ bad:
 /* None */
 static CYTHON_INLINE void __Pyx_RaiseUnboundLocalError(const char *varname) {
     PyErr_Format(PyExc_UnboundLocalError, "local variable '%s' referenced before assignment", varname);
+}
+
+/* decode_c_bytes */
+static CYTHON_INLINE PyObject* __Pyx_decode_c_bytes(
+         const char* cstring, Py_ssize_t length, Py_ssize_t start, Py_ssize_t stop,
+         const char* encoding, const char* errors,
+         PyObject* (*decode_func)(const char *s, Py_ssize_t size, const char *errors)) {
+    if (unlikely((start < 0) | (stop < 0))) {
+        if (start < 0) {
+            start += length;
+            if (start < 0)
+                start = 0;
+        }
+        if (stop < 0)
+            stop += length;
+    }
+    if (stop > length)
+        stop = length;
+    length = stop - start;
+    if (unlikely(length <= 0))
+        return PyUnicode_FromUnicode(NULL, 0);
+    cstring += start;
+    if (decode_func) {
+        return decode_func(cstring, length, errors);
+    } else {
+        return PyUnicode_Decode(cstring, length, encoding, errors);
+    }
 }
 
 /* ExtTypeTest */

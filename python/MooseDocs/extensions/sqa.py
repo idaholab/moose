@@ -83,7 +83,7 @@ class SQAExtension(command.CommandExtension):
         # Build requirements sets
         self.__requirements = dict()
         self.__dependencies = dict()
-        for index, (category, info) in enumerate(self.get('categories').iteritems(), 1): #pylint: disable=no-member
+        for index, (category, info) in enumerate(self.get('categories').items(), 1): #pylint: disable=no-member
             specs = info.get('specs', ['tests'])
             directories = []
             for d in info.get('directories'):
@@ -197,11 +197,11 @@ class SQARequirementsCommand(command.CommandComponent):
             return parent
 
         group_map = self.extension.get('group_map', dict())
-        for group, requirements in self.extension.requirements(category).iteritems():
+        for group, requirements in self.extension.requirements(category).items():
             group = group_map.get(group, group.replace('_', ' ').title())
 
             matrix = SQARequirementMatrix(parent)
-            SQARequirementMatrixHeading(matrix, category=category, string=unicode(group))
+            SQARequirementMatrixHeading(matrix, category=category, string=str(group))
             for req in requirements:
                 self._addRequirement(matrix, info, page, req, requirements)
 
@@ -282,7 +282,7 @@ class SQACrossReferenceCommand(SQARequirementsCommand):
         if category == '_empty_':
             return parent
 
-        for requirements in self.extension.requirements(category).itervalues():
+        for requirements in self.extension.requirements(category).values():
             for req in requirements:
                 for d in req.design:
                     try:
@@ -297,10 +297,10 @@ class SQACrossReferenceCommand(SQARequirementsCommand):
                                                          traceback.format_exc(),
                                                          'SQA ERROR'))
 
-        for node, requirements in design.iteritems():
+        for node, requirements in design.items():
             matrix = SQARequirementMatrix(parent)
             heading = SQARequirementMatrixHeading(matrix, category=category)
-            autolink.AutoLink(heading, page=unicode(node.local))
+            autolink.AutoLink(heading, page=str(node.local))
             for req in requirements:
                 self._addRequirement(matrix, info, page, req, requirements)
 
@@ -370,7 +370,7 @@ class SQAVerificationCommand(command.CommandComponent):
             return parent
 
         matrix = SQARequirementMatrix(parent)
-        for requirements in self.extension.requirements(category).itervalues():
+        for requirements in self.extension.requirements(category).values():
             for req in requirements:
                 if getattr(req, info['subcommand']) is not None:
                     self._addRequirement(matrix, info, page, req)
@@ -399,12 +399,12 @@ class SQAVerificationCommand(command.CommandComponent):
             floats.create_modal_link(p,
                                      string=reqname,
                                      content=core.Code(None, language=u'text', content=content),
-                                     title=unicode(req.filename))
+                                     title=str(req.filename))
 
         p = core.Paragraph(item)
         tokens.String(p, content=u'Documentation: ')
         filename = getattr(req, info['subcommand'])
-        autolink.AutoLink(p, page=unicode(filename))
+        autolink.AutoLink(p, page=str(filename))
 
 class SQADependenciesCommand(command.CommandComponent):
     COMMAND = 'sqa'
@@ -563,7 +563,7 @@ class RenderSQARequirementDesign(autolink.RenderLinkBase):
                 link.info = token.info
                 self.createHTMLHelper(p, link, page, node)
             else:
-                html.Tag(p, 'a', string=unicode(design), class_='moose-sqa-error')
+                html.Tag(p, 'a', string=str(design), class_='moose-sqa-error')
 
     def createLatex(self, parent, token, page):
         prev = token.previous
@@ -627,7 +627,7 @@ class RenderSQARequirementIssues(components.RenderComponent):
             if url is None:
                 html.Tag(p, 'a', string=issue, class_='moose-error')
             else:
-                html.Tag(p, 'a', href=url, string=unicode(issue))
+                html.Tag(p, 'a', href=url, string=str(issue))
 
     def createLatex(self, parent, token, page):
         prev = token.previous
@@ -645,7 +645,7 @@ class RenderSQARequirementIssues(components.RenderComponent):
             if url is None:
                 latex.Command(parent, 'textcolor', args=[latex.Brace(string='red')], string=issue)
             else:
-                latex.Command(parent, 'href', args=[latex.Brace(string=url)], string=unicode(issue))
+                latex.Command(parent, 'href', args=[latex.Brace(string=url)], string=str(issue))
 
 class RenderSQARequirementSpecification(components.RenderComponent):
 

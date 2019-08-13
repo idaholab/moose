@@ -38,7 +38,7 @@ class ExodusPluginManager(QtWidgets.QWidget, peacock.base.PluginManager):
         # Compile output from the plugins
         output = dict()
         for plugin in self._plugins.itervalues():
-            for key, value in plugin.repr().iteritems():
+            for key, value in plugin.repr().items():
                 if key in output:
                     output[key] += value
                 else:

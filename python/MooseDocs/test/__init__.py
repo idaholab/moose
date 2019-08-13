@@ -50,7 +50,7 @@ class MooseDocsTestCase(unittest.TestCase):
 
     def setupContent(self):
         """Virtual method for populating Content section in configuration."""
-        pass
+        return []
 
     def tokenize(self, text, *args, **kwargs):
         """Helper for tokenization"""
@@ -127,7 +127,7 @@ class MooseDocsTestCase(unittest.TestCase):
         self.assertLatex(arg, tname, tname, string, size, **kwargs)
 
     def assertAttributes(self, node, **kwargs):
-        for key, value in kwargs.iteritems():
+        for key, value in kwargs.items():
             key = key.rstrip('_')
             self.assertEqual(node[key], value)
 

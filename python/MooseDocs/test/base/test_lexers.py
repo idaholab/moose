@@ -35,19 +35,19 @@ class TestGrammar(unittest.TestCase):
 
         with self.assertRaises(exceptions.MooseDocsException) as e:
             grammar.add(1, [], [], '_end')
-        self.assertIn("'name' must be of type", e.exception.message)
+        self.assertIn("'name' must be of type", str(e.exception))
 
         with self.assertRaises(exceptions.MooseDocsException) as e:
             grammar.add('foo', 1, [], '_end')
-        self.assertIn("'regex' must be of type", e.exception.message)
+        self.assertIn("'regex' must be of type", str(e.exception))
 
         with self.assertRaises(exceptions.MooseDocsException) as e:
             grammar.add('foo', re.compile(''), 1, '_end')
-        self.assertIn("'function' must be callable", e.exception.message)
+        self.assertIn("'function' must be callable", str(e.exception))
 
         with self.assertRaises(exceptions.MooseDocsException) as e:
             grammar.add('foo', re.compile(''), Proxy(), [])
-        self.assertIn("'location' must be of type", e.exception.message)
+        self.assertIn("'location' must be of type", str(e.exception))
 
     def testPatterns(self):
         """
@@ -76,7 +76,7 @@ class TestLexerInformation(unittest.TestCase):
         info = lexers.LexerInformation(match=match, pattern=pattern, line=42)
         self.assertEqual(info.line, 42)
         self.assertEqual(info.pattern, 'name')
-        self.assertEqual(info.keys(), [0, 1, 'key'])
+        self.assertEqual(list(info.keys()), [0, 1, 'key'])
         self.assertIn('key', info)
         self.assertIn('line:42', str(info))
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env/python3
+#!/usr/bin/env python3
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -109,7 +109,7 @@ def buildCMD(options):
     # Run all built commands. This is where the magic happens
     for single_command in tmp_cmd:
         if options.debug:
-            print '\n\nDry Run:', str(options.mode) + ' Mode\n', ' '.join(single_command)
+            print('\n\nDry Run:', str(options.mode) + ' Mode\n', ' '.join(single_command))
         else:
             runCMD(single_command)
 
@@ -121,10 +121,18 @@ def buildCMD(options):
         verifyCoverage(options)
 
 def verifyCoverage(options):
-    summary_command = subprocess.Popen([options.lcov_command[0], '--gcov-tool', options.cov_tool, '--summary', options.outfile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    summary_command = subprocess.Popen([options.lcov_command[0],
+                                        '--gcov-tool',
+                                        options.cov_tool,
+                                        '--summary',
+                                        options.outfile],
+                                       stdout=subprocess.PIPE,
+                                       stderr=subprocess.PIPE,
+                                       encoding='utf-8')
+
     summary_output = ' '.join(summary_command.communicate())
     coverage = float(re.findall(r'lines.*: (\d+.\d+)', summary_output)[0])
-    print summary_output + '\n\nCode Coverage: ' + str(coverage)
+    print(summary_output, '\n\nCode Coverage:', str(coverage))
     if coverage >= options.coverage_percent:
         sys.exit(0)
     else:
@@ -143,14 +151,14 @@ def cleanUp(options):
     if options.mode == 'combine':
         for tracefile in options.add_tracefile:
             if options.debug:
-                print '\n\nDry Run: deleting file', tracefile
+                print('\n\nDry Run: deleting file', tracefile)
             else:
                 try:
                     os.remove(tracefile)
                 except:
                     pass
         if options.debug:
-            print '\n\nDry Run: deleting file', options.outfile
+            print('\n\nDry Run: deleting file', options.outfile)
         else:
             try:
                 os.remove(options.outfile)
@@ -158,7 +166,7 @@ def cleanUp(options):
                 pass
     if options.mode == 'generate':
         if options.debug:
-            print '\n\nDry Run: deleting file', options.outfile
+            print('\n\nDry Run: deleting file', options.outfile)
         else:
             try:
                 os.remove(options.outfile)
@@ -167,7 +175,7 @@ def cleanUp(options):
 
 def addBetterDate(options):
     if options.debug:
-        print '\n\nDry Run: appending timestamp to generated HTML content\n', "echo '" + str(time.ctime(time.time())) + "'", '>>', str(options.html_location) + '/index.html'
+        print('\n\nDry Run: appending timestamp to generated HTML content\n', "echo '" + str(time.ctime(time.time())) + "'", '>>', str(options.html_location) + '/index.html')
     else:
         current_time = time.ctime(time.time())
         output_file = open(options.html_location + '/index.html', 'a')
@@ -175,22 +183,26 @@ def addBetterDate(options):
         output_file.close()
 
 def runCMD(cmd_opts):
-    a_proc = subprocess.Popen(cmd_opts, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    a_proc = subprocess.Popen(cmd_opts,
+                              stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE,
+                              encoding='utf-8')
+
     retstr = a_proc.communicate()
     if not a_proc.poll() == 0:
-        print 'Error:', retstr[1]
+        print('Error:', retstr[1])
         sys.exit(1)
     else:
         return retstr[0]
 
 def exit_error(error_list):
-    print '\n\tThere were errors running build_coverage:\n'
+    print('\n\tThere were errors running build_coverage:\n')
     for sgl_error in error_list:
-        print sgl_error + '\n'
+        print(sgl_error, '\n')
     sys.exit(1)
 
 def _find(myfile, matchFunc=os.path.isfile):
-    paths = string.split(os.getenv('PATH'), os.pathsep)
+    paths = os.getenv('PATH').split(os.pathsep)
     for eachpth in paths:
         candidate = os.path.join(eachpth, myfile)
         if matchFunc(candidate):

@@ -11,7 +11,7 @@ import platform, re, os, pkgutil
 from TestHarness import util
 from TestHarness.StatusSystem import StatusSystem
 from FactorySystem.MooseObject import MooseObject
-from tempfile import TemporaryFile
+from tempfile import SpooledTemporaryFile
 import subprocess
 from signal import SIGTERM
 
@@ -286,8 +286,8 @@ class Tester(MooseObject):
 
         self.process = None
         try:
-            f = TemporaryFile()
-            e = TemporaryFile()
+            f = SpooledTemporaryFile(max_size=1000000) # 1M character buffer
+            e = SpooledTemporaryFile(max_size=100000)  # 100K character buffer
 
             # On Windows, there is an issue with path translation when the command is passed in
             # as a list.
@@ -364,7 +364,7 @@ class Tester(MooseObject):
 
     def getRedirectedOutputFiles(self, options):
         """ return a list of redirected output """
-        return [os.path.join(self.getTestDir(), self.name() + '.processor.{}'.format(p)) for p in xrange(self.getProcs(options))]
+        return [os.path.join(self.getTestDir(), self.name() + '.processor.{}'.format(p)) for p in range(self.getProcs(options))]
 
     def addCaveats(self, *kwargs):
         """ Add caveat(s) which will be displayed with the final test status """
@@ -418,10 +418,10 @@ class Tester(MooseObject):
             return False
 
         # Are we running only tests in a specific group?
-        if options.group <> 'ALL' and options.group not in self.specs['group']:
+        if options.group != 'ALL' and options.group not in self.specs['group']:
             self.setStatus(self.silent)
             return False
-        if options.not_group <> '' and options.not_group in self.specs['group']:
+        if options.not_group != '' and options.not_group in self.specs['group']:
             self.setStatus(self.silent)
             return False
 
@@ -558,7 +558,7 @@ class Tester(MooseObject):
 
         # Check to make sure environment variable exists
         for var in self.specs['env_vars']:
-            if not os.environ.has_key(var):
+            if not os.environ.get(var):
                 reasons['env_vars'] = 'ENV VAR NOT SET'
 
         # Check for display
@@ -577,7 +577,7 @@ class Tester(MooseObject):
 
         if len(set(reasons.keys()) - caveat_list) > 0:
             tmp_reason = []
-            for key, value in reasons.iteritems():
+            for key, value in reasons.items():
                 if key.lower() not in caveat_list:
                     tmp_reason.append(value)
 

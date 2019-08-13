@@ -105,7 +105,7 @@ class TestHarness:
         self.base_dir = os.getcwd()
         self.run_tests_dir = os.path.abspath('.')
         self.results_storage = '.previous_test_results.json'
-        self.code = '2d2d6769726c2d6d6f6465'
+        self.code = b'2d2d6769726c2d6d6f6465'
         self.error_code = 0x0
         self.keyboard_talk = True
         # Assume libmesh is a peer directory to MOOSE if not defined
@@ -821,8 +821,8 @@ class TestHarness:
         queuegroup.add_argument('--queue-cleanup', action="store_true", help='Deprecated. Use --pbs-cleanup')
 
         code = True
-        if self.code.decode('hex') in argv:
-            del argv[argv.index(self.code.decode('hex'))]
+        if self.code.decode() in argv:
+            del argv[argv.index(self.code.decode())]
             code = False
         self.options = parser.parse_args(argv[1:])
         self.options.code = code

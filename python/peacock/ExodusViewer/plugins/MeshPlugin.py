@@ -342,7 +342,7 @@ class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
             options, sub_options = self._transform.options().toScriptString()
             output['filters'] = ['transform = chigger.filters.TransformFilter()']
             output['filters'] += ['transform.setOptions({})'.format(', '.join(options))]
-            for key, value in sub_options.iteritems():
+            for key, value in sub_options.items():
                 output['filters'] += ['transform.setOptions({}, {})'.format(repr(key), ', '.join(value))]
 
         return output

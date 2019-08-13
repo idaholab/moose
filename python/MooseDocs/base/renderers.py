@@ -53,7 +53,7 @@ class Renderer(mixins.ConfigObject, mixins.ComponentObject):
             compoment[RenderComponent]: The component to execute with the associated token type.
         """
         if MooseDocs.LOG_LEVEL == logging.DEBUG:
-            common.check_type("name", name, unicode)
+            common.check_type("name", name, str)
             common.check_type("component", component, MooseDocs.base.components.RenderComponent)
         component.setRenderer(self)
         self.addComponent(component)
@@ -87,7 +87,7 @@ class Renderer(mixins.ConfigObject, mixins.ComponentObject):
             else:
                 line = None
                 src = ''
-            msg = common.report_error(e.message,
+            msg = common.report_error(e,
                                       page.source,
                                       line,
                                       src,

@@ -22,5 +22,5 @@ class TestHarnessTester(TestHarnessTestCase):
 
         e = cm.exception
 
-        self.assertRegexpMatches(e.output, r'tests/test_harness.*? \[DUPLICATE TEST\] SKIP')
-        self.assertRegexpMatches(e.output, r'tests/test_harness.*?OK')
+        self.assertRegexpMatches(e.output.decode('utf-8'), r'tests/test_harness.*? \[DUPLICATE TEST\] SKIP')
+        self.assertRegexpMatches(e.output.decode('utf-8'), r'tests/test_harness.*?OK')

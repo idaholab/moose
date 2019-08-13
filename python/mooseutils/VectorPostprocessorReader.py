@@ -101,7 +101,7 @@ class VectorPostprocessorReader(object):
         else:
             return self.data.minor_xs(key)
 
-    def __nonzero__(self):
+    def __bool__(self):
         """
         Allows this object to be used in boolean cases.
 

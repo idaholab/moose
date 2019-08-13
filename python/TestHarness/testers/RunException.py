@@ -40,7 +40,7 @@ class RunException(RunApp):
     def prepare(self, options):
         if self.getProcs(options) > 1:
             file_paths = []
-            for processor_id in xrange(self.getProcs(options)):
+            for processor_id in range(self.getProcs(options)):
                 file_paths.append(self.name() + '.processor.{}'.format(processor_id))
             util.deleteFilesAndFolders(self.specs['test_dir'], file_paths, False)
 

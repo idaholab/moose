@@ -17,4 +17,4 @@ data = list()
 for i in range(3):
     reader.update(timestep=i)
     data.append(reader.getGlobalData('k_eff'))
-print data
+print(data)

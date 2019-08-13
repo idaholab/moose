@@ -126,9 +126,9 @@ cdef class Node:
         return int(self._cnode.line())
 
     def path(self):
-        return str(self._cnode.path())
+        return self._cnode.path().decode('utf-8')
     def fullpath(self):
-        return str(self._cnode.fullpath())
+        return self._cnode.fullpath().decode('utf-8')
     def type(self):
         t = <int>self._cnode.type()
         if t == <int>chit.NTField:
@@ -161,7 +161,7 @@ cdef class Node:
     def raw(self):
         if self.type() != NodeType.Field:
             return None
-        return str(self._cnode.strVal())
+        return self._cnode.strVal().decode('utf-8')
 
     def find(self, path):
         cpath = <string> path.encode('utf-8')
@@ -190,7 +190,7 @@ cdef class Node:
             return float(f.floatVal())
         elif k == FieldKind.Bool:
             return bool(f.boolVal())
-        return str(f.strVal())
+        return f.strVal().decode('utf-8')
 
     def walk(self, walker, node_type=NodeType.All):
         if self.type() == node_type or node_type == NodeType.All:

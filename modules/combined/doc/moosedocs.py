@@ -15,7 +15,7 @@ import os
 os.chdir(os.path.abspath(os.path.dirname(__file__)))
 MOOSE_DIR = os.getenv('MOOSE_DIR', os.path.join(os.getcwd(), '..', '..', '..'))
 if not os.path.exists(MOOSE_DIR):
-    print 'Failed to locate MOOSE, specify the MOOSE_DIR environment variable.'
+    print('Failed to locate MOOSE, specify the MOOSE_DIR environment variable.')
     sys.exit(1)
 os.environ['MOOSE_DIR'] = MOOSE_DIR
 

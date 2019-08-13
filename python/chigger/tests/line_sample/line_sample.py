@@ -22,7 +22,7 @@ sample.update()
 x = sample[0].getDistance()
 y = sample[0].getSample('phi')
 
-print x[98], y[98]
+print(x[98], y[98])
 
 line = chigger.graphs.Line(x, y, width=4, label='probe')
 graph = chigger.graphs.Graph(line, yaxis={'lim':[0,1]}, xaxis={'lim':[0,0.1]})

@@ -61,7 +61,7 @@ class Factory:
     def printDump(self, root_node_name):
         print("[" + root_node_name + "]")
 
-        for name, object in sorted(self.objects.iteritems()):
+        for name, object in sorted(self.objects.items()):
             print("  [./" + name + "]")
 
             params = self.validParams(name)
@@ -88,7 +88,7 @@ class Factory:
         print("  parameters:")
         print("  subblocks:")
 
-        for name, object in self.objects.iteritems():
+        for name, object in self.objects.items():
             print("  - name: /" + root_node_name + "/ + name")
             print("    description:")
             print("    type:")

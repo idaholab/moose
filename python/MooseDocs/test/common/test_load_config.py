@@ -33,7 +33,7 @@ class TestLoadExtensions(unittest.TestCase):
         with self.assertRaises(exceptions.MooseDocsException) as e:
             _yaml_load_extensions(config)
 
-        self.assertIn("Failed to import the supplied 'foo' module.", e.exception.message)
+        self.assertIn("Failed to import the supplied 'foo' module.", str(e.exception))
 
 class TestLoadReader(unittest.TestCase):
     def testEmpty(self):

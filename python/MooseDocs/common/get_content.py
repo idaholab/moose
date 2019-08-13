@@ -156,7 +156,7 @@ def get_items(options):
             else:
                 items.append(dict(root_dir=value, content=None))
     elif isinstance(options, dict):
-        for _, value in options.iteritems():
+        for _, value in options.items():
             content = value.get('content', None)
             items.append(dict(root_dir=value['root_dir'], content=content))
 
@@ -203,4 +203,4 @@ def get_content(items, in_ext):
         else:
             MooseDocs.PROJECT_FILES.update(mooseutils.list_files(root))
 
-    return nodes.values()
+    return list(nodes.values())

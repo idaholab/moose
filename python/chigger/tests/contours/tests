@@ -18,7 +18,6 @@
     type = RunException
     command = block_elem.py
     expect_err = "ContourFilter currently only works with nodal variables."
-    display_required = True
   [../]
 
   [./levels]

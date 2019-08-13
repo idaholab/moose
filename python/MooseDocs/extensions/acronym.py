@@ -39,7 +39,7 @@ class AcronymExtension(command.CommandExtension):
         self.__used = set()
 
         # Initialize the available acronyms
-        for key, value in self.get('acronyms').iteritems(): #pylint: disable=no-member
+        for key, value in self.get('acronyms').items(): #pylint: disable=no-member
             if isinstance(value, dict):
                 self.__acronyms.update(value)
             else:
@@ -132,7 +132,7 @@ class RenderAcronymToken(components.RenderComponent):
 
     def _createSpan(self, parent, token, page):
         acro = self.extension.getAcronym(token['acronym'])
-        content = unicode(acro.key) if acro.used else u'{} ({})'.format(acro.name, acro.key)
+        content = str(acro.key) if acro.used else u'{} ({})'.format(acro.name, acro.key)
         return html.Tag(parent, 'span', string=content), acro
 
     def createHTML(self, parent, token, page):
@@ -148,14 +148,14 @@ class RenderAcronymToken(components.RenderComponent):
 
     def createLatex(self, parent, token, page):
         acro = self.extension.getAcronym(token['acronym'])
-        content = unicode(acro.key) if acro.used else u'{} ({})'.format(acro.name, acro.key)
+        content = str(acro.key) if acro.used else u'{} ({})'.format(acro.name, acro.key)
         latex.String(parent, content=content)
 
 class RenderAcronymListToken(components.RenderComponent):
 
     def createHTML(self, parent, token, page):
         rows = []
-        for key, value in self.extension.getAcronyms(True).iteritems():
+        for key, value in self.extension.getAcronyms(True).items():
             rows.append([key, value])
 
         heading = ['Acronym', 'Description'] if token['heading'] else None
@@ -168,5 +168,5 @@ class RenderAcronymListToken(components.RenderComponent):
                                 args=[latex.Brace(None, string=u'\\linewidth', escape=False),
                                       latex.Brace(None, string=u'LL')])
 
-        for key, value in self.extension.getAcronyms(True).iteritems():
+        for key, value in self.extension.getAcronyms(True).items():
             latex.String(env, content=u'{}&{}\\\\'.format(key, value), escape=False)

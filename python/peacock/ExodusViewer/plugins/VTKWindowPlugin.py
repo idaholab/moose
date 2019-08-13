@@ -417,7 +417,7 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         window_options, window_sub_options = self._window.options().toScriptString()
         output['window'] = ['window = chigger.RenderWindow(result)']
         output['window'] += ['window.setOptions({})'.format(', '.join(window_options))]
-        for key, value in window_sub_options.iteritems():
+        for key, value in window_sub_options.items():
             output['window'] += ['window.setOptions({}, {})'.format(repr(key), ', '.join(value))]
         output['window'] += ['window.start()']
 
@@ -441,13 +441,13 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         output['reader'] = ['reader = chigger.exodus.ExodusReader({})'.format(repr(os.path.relpath(self._reader.filename())))]
         if reader_options:
             output['reader'] += ['reader.setOptions({})'.format(', '.join(reader_options))]
-        for key, value in reader_sub_options.iteritems():
+        for key, value in reader_sub_options.items():
             output['reader'] += ['reader.setOptions({}, {})'.format(repr(key), ', '.join(value))]
 
         output['result'] = ['result = chigger.exodus.ExodusResult(reader)']
         if result_options:
             output['result'] += ['result.setOptions({})'.format(', '.join(result_options))]
-        for key, value in result_sub_options.iteritems():
+        for key, value in result_sub_options.items():
             output['result'] += ['result.setOptions({}, {})'.format(repr(key), ', '.join(value))]
 
         return output

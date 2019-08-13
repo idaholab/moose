@@ -77,7 +77,7 @@ class CardComponent(command.CommandComponent):
             media_source = src
         else:
             node = self.translator.findPage(src)
-            location = unicode(node.relativeSource(page))
+            location = str(node.relativeSource(page))
             media_source = node.source
         CardImage(card, src=location, media_source=media_source)
 

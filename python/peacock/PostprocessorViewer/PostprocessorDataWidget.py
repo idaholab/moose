@@ -42,7 +42,7 @@ class PostprocessorDataWidget(QtCore.QObject):
     def __call__(self, keys, **kwargs):
         return self._reader(keys, **kwargs)
 
-    def __nonzero__(self):
+    def __bool__(self):
         return bool(self._reader)
 
     def setTimerActive(self, active):
