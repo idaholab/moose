@@ -1,6 +1,6 @@
 # PorousFlow module
 
-!media porous_flow/1phase_convection.gif style=width:80%;margin-left:10px caption=Density driven [convective mixing](porous_flow/lava_lamp.md) of CO2 in brine  id=1phase_convection_anim
+!media porous_flow/1phase_convection.gif style=width:80%;margin-left:10px caption=Density driven convective mixing of CO2 in brine  id=1phase_convection_anim
 
 The PorousFlow module is a library of physics for fluid and heat flow in porous
 media. It is formulated in an extremely general manner, so is capable of solving
@@ -38,7 +38,6 @@ and geomechanics.
 - [CO$_2$ storage benchmark problems](porous_flow/co2_intercomparison.md)
 - [Convective mixing](porous_flow/lava_lamp.md)
 - [Two-phase THM injection benchmark example](porous_flow/thm_example.md)
-- [Tidal impacts on porepressure](porous_flow/tidal.md)
 - [Restarting from previous simulation](porous_flow/restart.md)
 - [Heterogeneous models](porous_flow/heterogeneous_models.md)
 - [QA tests](porous_flow/tests.md)
