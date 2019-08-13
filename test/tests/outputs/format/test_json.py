@@ -211,7 +211,7 @@ class TestLineInfo(TestJSONBase):
         adapt = data["Adaptivity"]["actions"]["SetAdaptivityOptionsAction"]
         fi = adapt["file_info"]
         self.assertEqual(len(fi.keys()), 1)
-        fname = fi.keys()[0]
+        fname = list(fi)[0]
         # Clang seems to have the full path name for __FILE__
         # gcc seems to just use the path that is given on the command line, which won't include "framework"
         self.assertTrue(fname.endswith(os.path.join("src", "base", "Moose.C")), 'file "{}" found instead'.format(fname))
@@ -219,7 +219,7 @@ class TestLineInfo(TestJSONBase):
 
         fi = adapt["tasks"]["set_adaptivity_options"]["file_info"]
         self.assertEqual(len(fi.keys()), 1)
-        fname = fi.keys()[0]
+        fname = list(fi)[0]
         self.assertTrue(fname.endswith(os.path.join("src", "actions", "SetAdaptivityOptionsAction.C")))
         self.assertGreater(fi[fname], 0)
 

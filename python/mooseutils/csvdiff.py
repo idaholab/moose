@@ -149,7 +149,7 @@ class CSVSummary(CSVTools):
 
         field_len = []
         value_len = []
-        for field, value in table1.iteritems():
+        for field, value in table1.items():
             field_len.append(len(field))
             value_len.append(len("# min: %.3e @ t%d" % (Decimal(min(value)), value.index(min(value)))))
 
@@ -161,7 +161,7 @@ class CSVSummary(CSVTools):
             value_count = len(table1[table1.keys()[0]]) - 1
             formatted_messages.insert(0, 'TIME STEPS relative 1 floor 0  # min: 0 @ t0  max: %d @ t%d\n' % (value_count, value_count))
 
-        for field, value in table1.iteritems():
+        for field, value in table1.items():
             if field.lower() == 'time':
                 # Tolerance for time steps will be the same for value tolerances for now (future csvdiff capability will separate this tolerance)
                 formatted_messages.insert(0, 'TIME STEPS relative %s floor %s  # min: %d @ t%d  max: %d @ t%d\n' % \
@@ -222,7 +222,7 @@ class CSVDiffer(CSVTools):
             self.custom_rel_err = []
             self.custom_abs_zero = []
 
-            for field_id, value in custom_params['FIELDS'].iteritems():
+            for field_id, value in custom_params['FIELDS'].items():
                 self.custom_columns.append(field_id)
                 self.custom_abs_zero.append(value.get('ZERO', abs_zero))
                 self.custom_rel_err.append(value.get('RELATIVE', rel_tol))

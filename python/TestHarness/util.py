@@ -680,7 +680,7 @@ def getOutputFromFiles(tester, options):
     file_output = ''
     output_files = checkOutputReady(tester, options)
     for file_path in output_files:
-        with open(file_path, 'r') as f:
+        with open(file_path, 'r+b') as f:
             file_output += "#"*80 + "\nOutput from " + file_path \
                            + "\n" + "#"*80 + "\n" + readOutput(f, None)
     return file_output
@@ -690,10 +690,10 @@ def readOutput(stdout, stderr):
     output = ''
     if stdout:
         stdout.seek(0)
-        output += str(stdout.read())
+        output += stdout.read().decode('utf-8')
     if stderr:
         stderr.seek(0)
-        output += str(stderr.read())
+        output += stderr.read().decode('utf-8')
     return output
 
 # Trimming routines for job output

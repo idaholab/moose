@@ -63,7 +63,7 @@ Use OrderedDict for storing data.
 https://stackoverflow.com/a/21048064/1088076
 """
 def dict_representer(dumper, data):
-    return dumper.represent_dict(data.iteritems())
+    return dumper.represent_dict(data.items())
 
 def dict_constructor(loader, node):
     return collections.OrderedDict(loader.construct_pairs(node))

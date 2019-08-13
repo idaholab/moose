@@ -94,7 +94,7 @@ def sqa_check_requirement_duplicates(working_dir=os.getcwd(), specs=['tests'], s
                         requirements[req.strip()].append((filename, child.fullpath, child.line('requirement')))
 
     count = 0
-    for key, value in requirements.iteritems():
+    for key, value in requirements.items():
         if len(value) > 1:
             if count == 0:
                 print(colorText('Duplicate Requirements Found:\n', 'YELLOW'))
