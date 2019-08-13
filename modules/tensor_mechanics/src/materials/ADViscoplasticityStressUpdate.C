@@ -39,6 +39,10 @@ defineADValidParams(
         "Maximum ratio between the gauge stress and the equilvalent stress. This "
         "should be a high number. Note that this does not set an upper bound on the value, but "
         "rather will help with convergence of the inner Newton loop");
+    params.addParam<Real>(
+        "minimum_equivalent_stress",
+        1.0e-3,
+        "Minimum value of equivalent stress below which viscoplasticiy is not calculated.");
 
     params.addParamNamesToGroup("verbose maximum_gauge_ratio", "Advanced"););
 
@@ -54,10 +58,12 @@ ADViscoplasticityStressUpdate<compute_stage>::ADViscoplasticityStressUpdate(
     _coefficient(getADMaterialProperty<Real>("coefficient")),
     _gauge_stress(declareADProperty<Real>(_base_name + "gauge_stress")),
     _maximum_gauge_ratio(getParam<Real>("maximum_gauge_ratio")),
+    _minimum_equivalent_stress(getParam<Real>("minimum_equivalent_stress")),
     _hydro_stress(0.0),
     _identity_two(RankTwoTensor::initIdentity),
     _dhydro_stress_dsigma(_identity_two / 3.0)
 {
+  _check_range = true;
 }
 
 template <ComputeStage compute_stage>
@@ -92,7 +98,7 @@ ADViscoplasticityStressUpdate<compute_stage>::updateState(
   inelastic_strain_increment.zero();
 
   // If equivalent stress is present, calculate creep strain increment
-  if (equiv_stress)
+  if (equiv_stress > _minimum_equivalent_stress)
   {
     // Initalize stress potential
     ADReal dpsi_dgauge(0);
