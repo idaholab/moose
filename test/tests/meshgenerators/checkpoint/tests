@@ -1,92 +1,94 @@
 [Tests]
-  [./test_2]
-    # To generate the splits for this test, run
-    # moose_test-opt -i checkpoint_split.i --split-mesh 2 --split-file checkpoint_split_in
-    type = 'Exodiff'
-    input = 'checkpoint_split.i'
-    exodiff = 'test_2.e'
-    cli_args = 'Outputs/file_base=test_2 --use-split --split-file checkpoint_split_in'
-    max_parallel = 2
-    min_parallel = 2
-    mesh_mode = 'REPLICATED'
-    design = ''
-    requirement = ''
-    issues = '#11640'
-    recover = false
-  [../]
-  [./test_2a]
-    # To generate the splits for this test, run
-    # moose_test-opt -i checkpoint_split.i --split-mesh 2 --split-file checkpoint_split_in.cpa
-    type = 'Exodiff'
-    input = 'checkpoint_split.i'
-    exodiff = 'test_2a.e'
-    cli_args = 'Outputs/file_base=test_2a --use-split --split-file checkpoint_split_in.cpa'
-    max_parallel = 2
-    min_parallel = 2
-    mesh_mode = 'REPLICATED'
-    design = ''
-    requirement = ''
-    issues = '#11640'
-    recover = false
-  [../]
-  [./test_4]
-    # To generate the splits for this test, run
-    # moose_test-opt -i checkpoint_split.i --split-mesh 4 --split-file checkpoint_split_in
-    type = 'Exodiff'
-    input = 'checkpoint_split.i'
-    exodiff = 'test_4.e'
-    cli_args = 'Outputs/file_base=test_4 --use-split --split-file checkpoint_split_in'
-    max_parallel = 4
-    min_parallel = 4
-    mesh_mode = 'REPLICATED'
-    design = ''
-    requirement = ''
-    issues = '#11640'
-    recover = false
-  [../]
-  [./test_4a]
-    # To generate the splits for this test, run
-    # moose_test-opt -i checkpoint_split.i --split-mesh 4 --split-file checkpoint_split_in.cpa
-    type = 'Exodiff'
-    input = 'checkpoint_split.i'
-    exodiff = 'test_4a.e'
-    cli_args = 'Outputs/file_base=test_4a --use-split --split-file checkpoint_split_in.cpa'
-    max_parallel = 4
-    min_parallel = 4
-    mesh_mode = 'REPLICATED'
-    design = ''
-    requirement = ''
-    issues = '#11640'
-    recover = false
-  [../]
-  [./test_8]
-    # To generate the splits for this test, run
-    # moose_test-opt -i checkpoint_split.i --split-mesh 8 --split-file checkpoint_split_in
-    type = 'Exodiff'
-    input = 'checkpoint_split.i'
-    exodiff = 'test_8.e'
-    cli_args = 'Outputs/file_base=test_8 --use-split --split-file checkpoint_split_in'
-    max_parallel = 8
-    min_parallel = 8
-    mesh_mode = 'REPLICATED'
-    design = ''
-    requirement = ''
-    issues = '#11640'
-    recover = false
-  [../]
-  [./test_8a]
-    # To generate the splits for this test, run
-    # moose_test-opt -i checkpoint_split.i --split-mesh 8 --split-file checkpoint_split_in.cpa
-    type = 'Exodiff'
-    input = 'checkpoint_split.i'
-    exodiff = 'test_8a.e'
-    cli_args = 'Outputs/file_base=test_8a --use-split --split-file checkpoint_split_in.cpa'
-    max_parallel = 8
-    min_parallel = 8
-    mesh_mode = 'REPLICATED'
-    design = ''
-    requirement = ''
-    issues = '#11640'
-    recover = false
-  [../]
+  design = 'Mesh/index.md'
+  issues = '#11640'
+
+  [split]
+    requirement = "The system shall support the importing mesh data written using a checkpoint "
+                  "format in parallel:"
+
+    [test_2]
+      # To generate the splits for this test, run
+      # moose_test-opt -i checkpoint_split.i --split-mesh 2 --split-file checkpoint_split_in
+      type = 'Exodiff'
+      input = 'checkpoint_split.i'
+      exodiff = 'test_2.e'
+      cli_args = 'Outputs/file_base=test_2 --use-split --split-file checkpoint_split_in'
+      max_parallel = 2
+      min_parallel = 2
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = "on two processes from a binary file;"
+    []
+    [test_2a]
+      # To generate the splits for this test, run
+      # moose_test-opt -i checkpoint_split.i --split-mesh 2 --split-file checkpoint_split_in.cpa
+      type = 'Exodiff'
+      input = 'checkpoint_split.i'
+      exodiff = 'test_2a.e'
+      cli_args = 'Outputs/file_base=test_2a --use-split --split-file checkpoint_split_in.cpa'
+      max_parallel = 2
+      min_parallel = 2
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = "on two processes from an ASCII file;"
+    []
+    [test_4]
+      # To generate the splits for this test, run
+      # moose_test-opt -i checkpoint_split.i --split-mesh 4 --split-file checkpoint_split_in
+      type = 'Exodiff'
+      input = 'checkpoint_split.i'
+      exodiff = 'test_4.e'
+      cli_args = 'Outputs/file_base=test_4 --use-split --split-file checkpoint_split_in'
+      max_parallel = 4
+      min_parallel = 4
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = "on four processes from a binary file;"
+    []
+    [test_4a]
+      # To generate the splits for this test, run
+      # moose_test-opt -i checkpoint_split.i --split-mesh 4 --split-file checkpoint_split_in.cpa
+      type = 'Exodiff'
+      input = 'checkpoint_split.i'
+      exodiff = 'test_4a.e'
+      cli_args = 'Outputs/file_base=test_4a --use-split --split-file checkpoint_split_in.cpa'
+      max_parallel = 4
+      min_parallel = 4
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = "on four processes from an ASCII file;"
+    []
+    [test_8]
+      # To generate the splits for this test, run
+      # moose_test-opt -i checkpoint_split.i --split-mesh 8 --split-file checkpoint_split_in
+      type = 'Exodiff'
+      input = 'checkpoint_split.i'
+      exodiff = 'test_8.e'
+      cli_args = 'Outputs/file_base=test_8 --use-split --split-file checkpoint_split_in'
+      max_parallel = 8
+      min_parallel = 8
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = "on eight processes from a binary file; and"
+    []
+    [test_8a]
+      # To generate the splits for this test, run
+      # moose_test-opt -i checkpoint_split.i --split-mesh 8 --split-file checkpoint_split_in.cpa
+      type = 'Exodiff'
+      input = 'checkpoint_split.i'
+      exodiff = 'test_8a.e'
+      cli_args = 'Outputs/file_base=test_8a --use-split --split-file checkpoint_split_in.cpa'
+      max_parallel = 8
+      min_parallel = 8
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = "on eight processes from an ASCII file."
+    []
+  []
 []

@@ -1,8 +1,12 @@
 [Tests]
+  design = 'BoundsAux.md'
+  issues = '#951'
   [./test]
     type = 'Exodiff'
     input = 'bounds_test.i'
     exodiff = 'out.e'
     scale_refine = 3
+
+    requirement = "The system shall include the ability to compute a field variable from a another that is upper and lower bounded."
   [../]
 []

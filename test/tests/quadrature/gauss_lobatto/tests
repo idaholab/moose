@@ -1,7 +1,12 @@
 [Tests]
+  design = 'Executioner/Quadrature/index.md'
+  issues = '8f90ad2609945db87dc89c5e06a5a1554eb8f4a6'
+
   [./gauss_lobatto]
     type = CSVDiff
     input = 'gauss_lobatto.i'
     csvdiff = 'gauss_lobatto_out.csv'
+
+    requirement = "The system shall support the use of Gauss-Lobatto quadrature for numerical integration."
   [../]
 []

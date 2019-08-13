@@ -1,4 +1,7 @@
 [Tests]
+  design = 'Mesh/index.md'
+  issues = '#2270 #2289'
+
   [./centroid_partitioner_test]
     type = 'Exodiff'
     input = 'centroid_partitioner_test.i'
@@ -7,5 +10,7 @@
     min_parallel = 4
     scale_refine = 2
     group = 'requirements'
+
+    requirement = "The system shall support the use of a centroid-based parallel partitioning scheme."
   [../]
 []

@@ -1,25 +1,42 @@
 [Tests]
-  [./regular_spline]
+  design = 'SplineFunction.md'
+  issues = '#10918'
+
+  [regular_spline]
     type = 'Exodiff'
     input = 'spline_interpolation.i'
     exodiff = 'spline_interpolation_out.e'
-  [../]
-  [./bicubic_spline]
-    type = 'Exodiff'
-    input = 'bicubic_spline_interpolation.i'
-    exodiff = 'bicubic_spline_interpolation_out.e'
-    custom_cmp = 'bicubic_spline_interpolation.cmp'
-  [../]
-  [./bicubic_spline_x]
-    type = 'Exodiff'
-    input = 'bicubic_spline_interpolation_x_normal.i'
-    exodiff = 'bicubic_spline_interpolation_x_normal_out.e'
-    custom_cmp = 'bicubic_spline_interpolation.cmp'
-  [../]
-  [./bicubic_spline_y]
-    type = 'Exodiff'
-    input = 'bicubic_spline_interpolation_y_normal.i'
-    exodiff = 'bicubic_spline_interpolation_y_normal_out.e'
-    custom_cmp = 'bicubic_spline_interpolation.cmp'
-  [../]
+
+    requirement = 'The system shall include a utility for computing spline functions.'
+  []
+
+  [bicubic]
+    requirement = 'The system shall include a utility for computing bicubic spline functions'
+
+    [spline_x]
+      type = 'Exodiff'
+      input = 'bicubic_spline_interpolation_x_normal.i'
+      exodiff = 'bicubic_spline_interpolation_x_normal_out.e'
+      custom_cmp = 'bicubic_spline_interpolation.cmp'
+
+      detail = "using the x-component, and"
+    []
+    [spline_y]
+      type = 'Exodiff'
+      input = 'bicubic_spline_interpolation_y_normal.i'
+      exodiff = 'bicubic_spline_interpolation_y_normal_out.e'
+      custom_cmp = 'bicubic_spline_interpolation.cmp'
+
+      detail = "using the y-component."
+    []
+
+    [spline_z]
+      type = 'Exodiff'
+      input = 'bicubic_spline_interpolation.i'
+      exodiff = 'bicubic_spline_interpolation_out.e'
+      custom_cmp = 'bicubic_spline_interpolation.cmp'
+
+      detail = "using the z-component,"
+    []
+  []
 []

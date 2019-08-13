@@ -1,11 +1,13 @@
 [Tests]
+  design = 'FileMeshGenerator.md'
+  issues = '#11640'
+
   [./gmsh_bc_test]
     type = 'Exodiff'
     input = 'gmsh_bcs.i'
     exodiff = 'gmsh_bcs_out.e'
     mesh_mode = 'REPLICATED'
-    design = ''
-    requirement = ''
-    issues = '#11640'
+
+    requirement = "The system shall support the ability to read meshes using the General Mesh Viewer format."
   [../]
 []

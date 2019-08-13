@@ -1,19 +1,28 @@
 [Tests]
-  requirement = "Post-processor values shall be able to be compared and return a boolean value."
   design = 'PostprocessorComparison.md'
   issues = '#11910'
 
-  [./greater_than]
-    type = 'CSVDiff'
-    input = 'postprocessor_comparison.i'
-    csvdiff = 'greater_than.csv'
-  [../]
-  [./less_than]
-    type = 'CSVDiff'
-    input = 'postprocessor_comparison.i'
-    cli_args = '
+  [group]
+    requirement = "The system shall include the ability to compare post-processor data and return a "
+                  "boolean value for"
+
+    [greater_than]
+      type = 'CSVDiff'
+      input = 'postprocessor_comparison.i'
+      csvdiff = 'greater_than.csv'
+
+      detail = "greater than operator and the"
+    []
+    [less_than]
+      type = 'CSVDiff'
+      input = 'postprocessor_comparison.i'
+      cli_args = '
       Postprocessors/pp_comparison/comparison_type=less_than
-      Outputs/file_base=less_than'
-    csvdiff = 'less_than.csv'
-  [../]
+      '
+                 'Outputs/file_base=less_than'
+      csvdiff = 'less_than.csv'
+
+      detail = "less than operator."
+    []
+  []
 []

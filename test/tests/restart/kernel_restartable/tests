@@ -1,73 +1,111 @@
 [Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'kernel_restartable.i'
-    exodiff = 'kernel_restartable_out.e'
-    group = 'requirements'
-  [../]
+  design = 'DataIO.md Restartable.md'
+  issues = '#2306'
 
-  [./test2]
-    type = 'Exodiff'
-    input = 'kernel_restartable_second.i'
-    exodiff = 'kernel_restartable_second_out.e'
-    prereq = test
-    group = 'requirements'
-  [../]
+  [kernel]
+    requirement = "The system shall support the ability to"
 
-  [./test_custom_name]
-    type = 'Exodiff'
-    input = 'kernel_restartable_custom_name.i'
-    exodiff = 'kernel_restartable_custom_name_out.e'
-  [../]
+    [test]
+      type = 'Exodiff'
+      input = 'kernel_restartable.i'
+      exodiff = 'kernel_restartable_out.e'
+      group = 'requirements'
 
-  [./test_custom_name2]
-    type = 'Exodiff'
-    input = 'kernel_restartable_custom_name_second.i'
-    exodiff = 'kernel_restartable_custom_name_second_out.e'
-    prereq = test_custom_name
-  [../]
+      detail = "perform residual calculations that accumulate state and"
+    []
 
-  [./parallel_error1]
-    type = 'Exodiff'
-    input = 'kernel_restartable.i'
-    exodiff = 'kernel_restartable_out.e'
-    min_parallel = 2
-    max_parallel = 2
-    prereq = test2
-    recover = false
-    group = 'requirements'
-  [../]
+    [test2]
+      type = 'Exodiff'
+      input = 'kernel_restartable_second.i'
+      exodiff = 'kernel_restartable_second_out.e'
+      prereq = kernel/test
+      group = 'requirements'
 
-  [./parallel_error2]
-    type = 'RunException'
-    input = 'kernel_restartable_second.i'
-    min_parallel = 1
-    max_parallel = 1
-    prereq = parallel_error1
-    expect_err = 'Cannot restart using a different number of processors'
-  [../]
+      detail = "restart the calculation using the accumulated state."
+    []
+  []
 
-  [./with_threads]
-    type = 'Exodiff'
-    input = 'kernel_restartable.i'
-    exodiff = 'kernel_restartable_out.e'
-    min_threads = 4
-    max_threads = 4
-    max_parallel = 1
-    prereq = parallel_error1
-    cli_args = 'Outputs/restart/file_base=kernel_restartable_out_threads'
-    group = 'requirements'
-  [../]
+  [custom]
 
-  [./threads_error]
-    type = 'RunException'
-    input = 'kernel_restartable_second.i'
-    min_threads = 2
-    max_threads = 2
-    prereq = with_threads
-    cli_args = 'Problem/restart_file_base=kernel_restartable_out_threads_cp/0005'
-    expect_err = 'Cannot restart using a different number of threads'
-    group = 'requirements'
-    max_parallel = 1
-  [../]
+    requirement = "The system shall support the ability to"
+
+    [custom_name]
+      type = 'Exodiff'
+      input = 'kernel_restartable_custom_name.i'
+      exodiff = 'kernel_restartable_custom_name_out.e'
+
+      detail = "to name problem objects in a simulation and"
+    []
+
+    [custom_name2]
+      type = 'Exodiff'
+      input = 'kernel_restartable_custom_name_second.i'
+      exodiff = 'kernel_restartable_custom_name_second_out.e'
+      prereq = custom/custom_name
+
+      detail = "restart the calculation using the defined name."
+    []
+  []
+
+  [parallel_error]
+    requirement = "The system shall error when"
+
+    [error1]
+      type = 'Exodiff'
+      input = 'kernel_restartable.i'
+      exodiff = 'kernel_restartable_out.e'
+      min_parallel = 2
+      max_parallel = 2
+      prereq = kernel/test2
+      recover = false
+      group = 'requirements'
+
+      detail = "a simulation is started with multiple processors but"
+    []
+
+    [error2]
+      type = 'RunException'
+      input = 'kernel_restartable_second.i'
+      min_parallel = 1
+      max_parallel = 1
+      prereq = parallel_error/error1
+      expect_err = 'Cannot restart using a different number of processors'
+
+      detail = "restarted with a different number processors."
+    []
+  []
+
+  [thread_error]
+    requirement = "The system shall error when"
+
+    [with_threads]
+      type = 'Exodiff'
+      input = 'kernel_restartable.i'
+      exodiff = 'kernel_restartable_out.e'
+      min_threads = 4
+      max_threads = 4
+      max_parallel = 1
+      prereq = parallel_error/error1
+      cli_args = 'Outputs/restart/file_base=kernel_restartable_out_threads'
+      group = 'requirements'
+
+      detail = "a simulation is started with multiple threads but"
+
+    []
+
+    [threads_error]
+      type = 'RunException'
+      input = 'kernel_restartable_second.i'
+      min_threads = 2
+      max_threads = 2
+      prereq = thread_error/with_threads
+      cli_args = 'Problem/restart_file_base=kernel_restartable_out_threads_cp/0005'
+      expect_err = 'Cannot restart using a different number of threads'
+      group = 'requirements'
+      max_parallel = 1
+
+      detail = "restarted with a different number threads."
+
+    []
+  []
 []

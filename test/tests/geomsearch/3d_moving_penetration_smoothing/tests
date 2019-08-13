@@ -1,119 +1,160 @@
 [Tests]
-  [./pl_test3nns]
-    type = 'Exodiff'
-    input = 'pl_test3nns.i'
-    exodiff = 'pl_test3nns_out.e'
-    group = 'geometric'
-    custom_cmp = exclude_elem_id.cmp
-    allow_warnings = true
-  [../]
+  issues = '5478df0f0897ed7ac3dd3a3de1785a7948c75cfe'
+  design = 'source/auxkernels/PenetrationAux.md'
 
-  [./pl_test3nnstt]
-    type = 'Exodiff'
-    input = 'pl_test3nnstt.i'
-    exodiff = 'pl_test3nnstt_out.e'
-    group = 'geometric'
-    custom_cmp = exclude_elem_id.cmp
-    allow_warnings = true
-  [../]
+  [disjoint]
+    requirement = "The PenetrationAux object shall be capable of computing the distance, tangential "
+                  "distance, normal, closest point, side id, and element id between two disjoint "
+                  "surfaces:"
 
-  [./pl_test3ns]
-    type = 'Exodiff'
-    input = 'pl_test3ns.i'
-    exodiff = 'pl_test3ns_out.e'
-    group = 'geometric'
-    custom_cmp = exclude_elem_id.cmp
-    allow_warnings = true
-  [../]
+    [pl_test3nns]
+      type = 'Exodiff'
+      input = 'pl_test3nns.i'
+      exodiff = 'pl_test3nns_out.e'
+      group = 'geometric'
+      custom_cmp = exclude_elem_id.cmp
+      allow_warnings = true
 
-  [./pl_test3nstt]
-    type = 'Exodiff'
-    input = 'pl_test3nstt.i'
-    exodiff = 'pl_test3nstt_out.e'
-    group = 'geometric'
-    custom_cmp = exclude_elem_id.cmp
-    abs_zero = 1e-9
-    allow_warnings = true
-  [../]
+      detail = "with nodal normal based smoothing;"
+    []
 
-  [./pl_test3qns]
-    type = 'Exodiff'
-    input = 'pl_test3qns.i'
-    exodiff = 'pl_test3qns_out.e'
-    group = 'geometric'
-    custom_cmp = exclude_elem_id.cmp
-    allow_warnings = true
-  [../]
+    [pl_test3nnstt]
+      type = 'Exodiff'
+      input = 'pl_test3nnstt.i'
+      exodiff = 'pl_test3nnstt_out.e'
+      group = 'geometric'
+      custom_cmp = exclude_elem_id.cmp
+      allow_warnings = true
 
-  [./pl_test3qnstt]
-    type = 'Exodiff'
-    input = 'pl_test3qnstt.i'
-    exodiff = 'pl_test3qnstt_out.e'
-    group = 'geometric'
-    custom_cmp = exclude_elem_id.cmp
-    allow_warnings = true
-    compiler = '!INTEL'
+      detail = "with nodal normal based smoothing and a specified tangential tolerance;"
+    []
 
-    # Note: This test only works with replicated mesh
-    mesh_mode = REPLICATED
-  [../]
+    [pl_test3ns]
+      type = 'Exodiff'
+      input = 'pl_test3ns.i'
+      exodiff = 'pl_test3ns_out.e'
+      group = 'geometric'
+      custom_cmp = exclude_elem_id.cmp
+      allow_warnings = true
 
-  [./pl_test4nns]
-    type = 'Exodiff'
-    input = 'pl_test4nns.i'
-    exodiff = 'pl_test4nns_out.e'
-    group = 'geometric'
-    custom_cmp = exclude_elem_id.cmp
-    allow_warnings = true
-  [../]
+      detail = "with a specified normal smoothing distance;"
+    []
 
-  [./pl_test4nnstt]
-    type = 'Exodiff'
-    input = 'pl_test4nnstt.i'
-    exodiff = 'pl_test4nnstt_out.e'
-    group = 'geometric'
-    custom_cmp = exclude_elem_id.cmp
-    allow_warnings = true
-  [../]
+    [pl_test3nstt]
+      type = 'Exodiff'
+      input = 'pl_test3nstt.i'
+      exodiff = 'pl_test3nstt_out.e'
+      group = 'geometric'
+      custom_cmp = exclude_elem_id.cmp
+      abs_zero = 1e-9
+      allow_warnings = true
 
-  [./pl_test4ns]
-    type = 'Exodiff'
-    input = 'pl_test4ns.i'
-    exodiff = 'pl_test4ns_out.e'
-    group = 'geometric'
-    custom_cmp = exclude_elem_id.cmp
-    allow_warnings = true
-  [../]
+      detail = "with a specified normal smoothing distance and a specified tangential tolerance;"
+    []
 
-  [./pl_test4nstt]
-    type = 'Exodiff'
-    input = 'pl_test4nstt.i'
-    exodiff = 'pl_test4nstt_out.e'
-    group = 'geometric'
-    custom_cmp = exclude_elem_id.cmp
-    abs_zero = 1e-9
-    allow_warnings = true
-  [../]
+    [pl_test3qns]
+      type = 'Exodiff'
+      input = 'pl_test3qns.i'
+      exodiff = 'pl_test3qns_out.e'
+      group = 'geometric'
+      custom_cmp = exclude_elem_id.cmp
+      allow_warnings = true
 
-  [./pl_test4qns]
-    type = 'Exodiff'
-    input = 'pl_test4qns.i'
-    exodiff = 'pl_test4qns_out.e'
-    group = 'geometric'
-    custom_cmp = exclude_elem_id.cmp
-    allow_warnings = true
-  [../]
+      detail = "with second-order elements and third-order quadrature; and"
+    []
 
-  [./pl_test4qnstt]
-    type = 'Exodiff'
-    input = 'pl_test4qnstt.i'
-    exodiff = 'pl_test4qnstt_out.e'
-    group = 'geometric'
-    custom_cmp = exclude_elem_id.cmp
-    allow_warnings = true
-    compiler = '!INTEL'
+    [pl_test3qnstt]
+      type = 'Exodiff'
+      input = 'pl_test3qnstt.i'
+      exodiff = 'pl_test3qnstt_out.e'
+      group = 'geometric'
+      custom_cmp = exclude_elem_id.cmp
+      allow_warnings = true
+      compiler = '!INTEL'
 
-    # Note: This test only works with replicated mesh
-    mesh_mode = REPLICATED
-  [../]
+      # Note: This test only works with replicated mesh
+      mesh_mode = REPLICATED
+
+      detail = "with second-order elements and third-order quadrature and a specified tangential "
+               "tolerance."
+    []
+  []
+
+  [overlapping]
+    requirement = "The PenetrationAux object shall be capable of computing the distance, tangential "
+                  "distance, normal, closest point, side id, and element id between two overlapping "
+                  "surfaces:"
+
+    [pl_test4nns]
+      type = 'Exodiff'
+      input = 'pl_test4nns.i'
+      exodiff = 'pl_test4nns_out.e'
+      group = 'geometric'
+      custom_cmp = exclude_elem_id.cmp
+      allow_warnings = true
+
+      detail = "with nodal normal based smoothing;"
+    []
+
+    [pl_test4nnstt]
+      type = 'Exodiff'
+      input = 'pl_test4nnstt.i'
+      exodiff = 'pl_test4nnstt_out.e'
+      group = 'geometric'
+      custom_cmp = exclude_elem_id.cmp
+      allow_warnings = true
+
+      detail = "with nodal normal based smoothing and a specified tangential tolerance;"
+    []
+
+    [pl_test4ns]
+      type = 'Exodiff'
+      input = 'pl_test4ns.i'
+      exodiff = 'pl_test4ns_out.e'
+      group = 'geometric'
+      custom_cmp = exclude_elem_id.cmp
+      allow_warnings = true
+
+      detail = "with a specified normal smoothing distance;"
+    []
+
+    [pl_test4nstt]
+      type = 'Exodiff'
+      input = 'pl_test4nstt.i'
+      exodiff = 'pl_test4nstt_out.e'
+      group = 'geometric'
+      custom_cmp = exclude_elem_id.cmp
+      abs_zero = 1e-9
+      allow_warnings = true
+
+      detail = "with a specified normal smoothing distance and a specified tangential tolerance;"
+    []
+
+    [pl_test4qns]
+      type = 'Exodiff'
+      input = 'pl_test4qns.i'
+      exodiff = 'pl_test4qns_out.e'
+      group = 'geometric'
+      custom_cmp = exclude_elem_id.cmp
+      allow_warnings = true
+
+      detail = "with second-order elements and third-order quadrature; and"
+    []
+
+    [pl_test4qnstt]
+      type = 'Exodiff'
+      input = 'pl_test4qnstt.i'
+      exodiff = 'pl_test4qnstt_out.e'
+      group = 'geometric'
+      custom_cmp = exclude_elem_id.cmp
+      allow_warnings = true
+      compiler = '!INTEL'
+
+      # Note: This test only works with replicated mesh
+      mesh_mode = REPLICATED
+
+      detail = "with second-order elements and third-order quadrature and a specified tangential "
+               "tolerance."
+    []
+  []
 []
