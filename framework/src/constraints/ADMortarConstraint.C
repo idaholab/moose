@@ -12,6 +12,7 @@
 // MOOSE includes
 #include "MooseVariable.h"
 #include "Assembly.h"
+#include "SystemBase.h"
 
 defineADBaseValidParams(ADMortarConstraint, MortarConstraintBase, );
 

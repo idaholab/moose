@@ -785,6 +785,19 @@ public:
    */
   std::string & rawParamVal(const std::string & param) { return _params[param]._raw_val; };
 
+  /**
+   * Informs this object that values for this parameter set from the input file or from the command
+   * line should be ignored
+   */
+  template <typename T>
+  void ignoreParameter(const std::string & name);
+
+  /**
+   * Whether to ignore the value of an input parameter set in the input file or from the command
+   * line.
+   */
+  bool shouldIgnore(const std::string & name);
+
 private:
   // Private constructor so that InputParameters can only be created in certain places.
   InputParameters();
@@ -832,6 +845,8 @@ private:
     bool _controllable = false;
     /// Controllable execute flag restriction
     std::set<ExecFlagType> _controllable_flags;
+    /// whether user setting of this parameter should be ignored
+    bool _ignore = false;
   };
 
   Metadata & at(const std::string & param)
@@ -1307,6 +1322,14 @@ InputParameters::suppressParameter(const std::string & name)
 
   _params[name]._required = false;
   _params[name]._is_private = true;
+}
+
+template <typename T>
+void
+InputParameters::ignoreParameter(const std::string & name)
+{
+  suppressParameter<T>(name);
+  _params[name]._ignore = true;
 }
 
 template <typename T>

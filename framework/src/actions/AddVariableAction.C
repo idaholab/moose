@@ -27,22 +27,21 @@
 #include "libmesh/explicit_system.h"
 #include "libmesh/string_to_enum.h"
 
-// class static initialization
-const Real AddVariableAction::_abs_zero_tol = 1e-12;
-
 registerMooseAction("MooseApp", AddVariableAction, "add_variable");
 
 template <>
 InputParameters
 validParams<AddVariableAction>()
 {
-  // Get MooseEnums for the possible order/family options for this variable
+  auto params = validParams<MooseObjectAction>();
+
+  // The user may specify a type in the Variables block, but if they don't we'll just use all the
+  // parameters available from MooseVariableBase
+  params.set<std::string>("type") = "MooseVariableBase";
+
+  // The below is for backwards compatibility
   MooseEnum families(AddVariableAction::getNonlinearVariableFamilies());
   MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
-
-  // Define the general input options
-  InputParameters params = validParams<Action>();
-  params += validParams<OutputInterface>();
   params.addParam<MooseEnum>(
       "family", families, "Specifies the family of FE shape functions to use for this variable");
   params.addParam<MooseEnum>("order",
@@ -50,28 +49,16 @@ validParams<AddVariableAction>()
                              "Specifies the order of the FE shape function to use "
                              "for this variable (additional orders not listed are "
                              "allowed)");
-  params.addRangeCheckedParam<unsigned int>(
-      "components", 1, "components>0", "Number of components for an array variable");
-  params.addParam<std::vector<Real>>("initial_condition",
-                                     "Specifies the initial condition for this variable");
-  params.addParam<std::vector<SubdomainName>>("block", "The block id where this variable lives");
-  params.addParam<bool>("eigen", false, "True to make this variable an eigen variable");
-
-  // Advanced input options
   params.addParam<std::vector<Real>>("scaling",
                                      "Specifies a scaling factor to apply to this variable");
-  params.addParamNamesToGroup("scaling eigen", "Advanced");
-
   return params;
 }
 
 AddVariableAction::AddVariableAction(InputParameters params)
-  : Action(params),
-    OutputInterface(params, false),
-    _fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
-             Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family"))),
+  : MooseObjectAction(params),
+    _fe_type(feType(params)),
     _scalar_var(_fe_type.family == SCALAR),
-    _components(getParam<unsigned int>("components"))
+    _components(1)
 {
 }
 
@@ -89,15 +76,76 @@ AddVariableAction::getNonlinearVariableOrders()
   return MooseEnum("CONSTANT FIRST SECOND THIRD FOURTH", "FIRST", true);
 }
 
+FEType
+AddVariableAction::feType(const InputParameters & params)
+{
+  return {Utility::string_to_enum<Order>(params.get<MooseEnum>("order")),
+          Utility::string_to_enum<FEFamily>(params.get<MooseEnum>("family"))};
+}
+
+void
+AddVariableAction::init()
+{
+  _components = _moose_object_pars.get<unsigned int>("components");
+  if (_components == 0)
+    mooseError("There must be at least one variable component, but somehow 0 has been specified");
+
+  // We have to do some sanity checks because of our work to maintain backwards compatibility.
+  // `family`, `order`, and `scaling` are all parameters duplicated between this action and the
+  // `MooseVariable*` object itself. Consequently during input file parsing, the params objects for
+  // both the action and MooseVariable object can be populated with the exact same parameters.
+  // However, some applications actually create their variables solely through creation and setting
+  // of `AddVariableAction` parameters which means that the `MooseVariableBase*` params will never
+  // be populated. So we should apply the parameters directly from the action. There should be no
+  // case in which both params objects get set by the user and they have different values
+
+  if (_pars.isParamSetByUser("family") && _moose_object_pars.isParamSetByUser("family") &&
+      !_pars.get<MooseEnum>("family").compareCurrent(_moose_object_pars.get<MooseEnum>("family")))
+    mooseError("Both the MooseVariable* and Add*VariableAction parameters objects have had the "
+               "`family` parameter set, and they are different values: ",
+               _moose_object_pars.get<MooseEnum>("family"),
+               " and ",
+               _pars.get<MooseEnum>("family"),
+               " respectively. I don't know how you achieved this, but you need to rectify it.");
+
+  if (_pars.isParamSetByUser("order") && _moose_object_pars.isParamSetByUser("order") &&
+      !_pars.get<MooseEnum>("order").compareCurrent(_moose_object_pars.get<MooseEnum>("order")))
+    mooseError("Both the MooseVariable* and Add*VariableAction parameters objects have had the "
+               "`order` parameter set, and they are different values: ",
+               _moose_object_pars.get<MooseEnum>("order"),
+               " and ",
+               _pars.get<MooseEnum>("order"),
+               " respectively. I don't know how you achieved this, but you need to rectify it.");
+
+  if (_pars.isParamSetByUser("scaling") && _moose_object_pars.isParamSetByUser("scaling") &&
+      _pars.get<std::vector<Real>>("scaling") !=
+          _moose_object_pars.get<std::vector<Real>>("scaling"))
+    mooseError("Both the MooseVariable* and Add*VariableAction parameters objects have had the "
+               "`scaling` parameter set, and they are different values. I don't know how you "
+               "achieved this, but you need to rectify it.");
+
+  _moose_object_pars.applySpecificParameters(_pars, {"order", "family", "scaling"});
+
+  // Determine the MooseVariable type
+  _type = determineType(_fe_type, _components);
+
+  // Need static_cast to resolve overloads
+  _problem_add_var_method = static_cast<void (FEProblemBase::*)(
+      const std::string &, const std::string &, InputParameters &)>(&FEProblemBase::addVariable);
+}
+
 void
 AddVariableAction::act()
 {
+  // If we've been called that means that current_task == "add_variable"
+  init();
+
   // Get necessary data for creating a variable
   std::string var_name = name();
   addVariable(var_name);
 
   // Set the initial condition
-  if (isParamValid("initial_condition"))
+  if (_moose_object_pars.isParamValid("initial_condition"))
     createInitialConditionAction();
 }
 
@@ -129,7 +177,7 @@ AddVariableAction::createInitialConditionAction()
 
   // Set the required parameters for the object to be created
   action->getObjectParams().set<VariableName>("variable") = var_name;
-  auto value = getParam<std::vector<Real>>("initial_condition");
+  auto value = _moose_object_pars.get<std::vector<Real>>("initial_condition");
   if (value.size() != _components)
     mooseError("Size of 'initial_condition' is not consistent");
   if (_components > 1)
@@ -146,40 +194,39 @@ AddVariableAction::createInitialConditionAction()
   _awh.addActionBlock(action);
 }
 
+std::string
+AddVariableAction::determineType(const FEType & fe_type, unsigned int components)
+{
+  if (components > 1)
+  {
+    if (fe_type.family == LAGRANGE_VEC || fe_type.family == NEDELEC_ONE)
+      mooseError("Vector finite element families do not currently have ArrayVariable support");
+    else
+      return "ArrayMooseVariable";
+  }
+  else if (fe_type == FEType(0, MONOMIAL))
+    return "MooseVariableConstMonomial";
+  else if (fe_type.family == SCALAR)
+    return "MooseVariableScalar";
+  else if (fe_type.family == LAGRANGE_VEC || fe_type.family == NEDELEC_ONE)
+    return "VectorMooseVariable";
+  else
+    return "MooseVariable";
+}
+
 void
 AddVariableAction::addVariable(const std::string & var_name)
 {
-  std::set<SubdomainID> blocks = getSubdomainIDs();
-  std::vector<Real> scale_factor = isParamValid("scaling") ? getParam<std::vector<Real>>("scaling")
-                                                           : std::vector<Real>(_components, 1);
+  // Compare sizes of scaling_factor and components for Array Variables
+  const auto & scale_factor = _moose_object_pars.isParamValid("scaling")
+                                  ? _moose_object_pars.get<std::vector<Real>>("scaling")
+                                  : std::vector<Real>(_components, 1);
   if (scale_factor.size() != _components)
     mooseError("Size of 'scaling' is not consistent");
 
-  // Scalar variable
-  if (_scalar_var)
-    _problem->addScalarVariable(var_name, _fe_type.order, scale_factor[0]);
+  _problem_add_var_method(*_problem, _type, _name, _moose_object_pars);
 
-  // Block restricted variable
-  else if (_components == 1)
-  {
-    if (blocks.empty())
-      _problem->addVariable(var_name, _fe_type, scale_factor[0]);
-
-    // Non-block restricted variable
-    else
-      _problem->addVariable(var_name, _fe_type, scale_factor[0], &blocks);
-  }
-  else
-  {
-    if (blocks.empty())
-      _problem->addArrayVariable(var_name, _fe_type, _components, scale_factor);
-
-    // Non-block restricted variable
-    else
-      _problem->addArrayVariable(var_name, _fe_type, _components, scale_factor, &blocks);
-  }
-
-  if (getParam<bool>("eigen"))
+  if (_moose_object_pars.get<bool>("eigen"))
   {
     MooseEigenSystem & esys(static_cast<MooseEigenSystem &>(_problem->getNonlinearSystemBase()));
     esys.markEigenVariable(var_name);
@@ -191,7 +238,8 @@ AddVariableAction::getSubdomainIDs()
 {
   // Extract and return the block ids supplied in the input
   std::set<SubdomainID> blocks;
-  std::vector<SubdomainName> block_param = getParam<std::vector<SubdomainName>>("block");
+  std::vector<SubdomainName> block_param =
+      _moose_object_pars.get<std::vector<SubdomainName>>("block");
   for (const auto & subdomain_name : block_param)
   {
     SubdomainID blk_id = _problem->mesh().getSubdomainID(subdomain_name);

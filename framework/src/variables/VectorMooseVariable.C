@@ -7,20 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#pragma once
+#include "VectorMooseVariable.h"
 
-#include "AddVariableAction.h"
-
-class AddElementalFieldAction;
+registerMooseObject("MooseApp", VectorMooseVariable);
 
 template <>
-InputParameters validParams<AddElementalFieldAction>();
-
-class AddElementalFieldAction : public AddVariableAction
+InputParameters
+validParams<VectorMooseVariable>()
 {
-public:
-  AddElementalFieldAction(InputParameters params);
-
-  virtual void act() override;
-  void init() override;
-};
+  auto params = validParams<MooseVariableFEBase>();
+  params.addClassDescription("Represents vector field variables, e.g. Vector Lagrange or Nedelec");
+  return params;
+}

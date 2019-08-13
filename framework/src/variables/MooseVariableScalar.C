@@ -19,14 +19,19 @@
 
 #include <limits>
 
-MooseVariableScalar::MooseVariableScalar(unsigned int var_num,
-                                         const FEType & fe_type,
-                                         SystemBase & sys,
-                                         Assembly & assembly,
-                                         Moose::VarKindType var_kind,
-                                         THREAD_ID tid)
-  : MooseVariableBase(var_num, fe_type, sys, var_kind, tid),
-    _assembly(assembly),
+registerMooseObject("MooseApp", MooseVariableScalar);
+
+template <>
+InputParameters
+validParams<MooseVariableScalar>()
+{
+  auto params = validParams<MooseVariableBase>();
+  params.addClassDescription("Moose wrapper class around scalar variables");
+  return params;
+}
+
+MooseVariableScalar::MooseVariableScalar(const InputParameters & parameters)
+  : MooseVariableBase(parameters),
     _need_u_dot(false),
     _need_u_dotdot(false),
     _need_u_dot_old(false),

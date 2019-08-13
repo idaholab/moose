@@ -7,16 +7,16 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MooseVariableFE.h"
+#include "ArrayMooseVariable.h"
+
+registerMooseObject("MooseApp", ArrayMooseVariable);
 
 template <>
 InputParameters
-validParams<MooseVariableFEBase>()
+validParams<ArrayMooseVariable>()
 {
-  return validParams<MooseVariableBase>();
-}
-
-MooseVariableFEBase::MooseVariableFEBase(const InputParameters & parameters)
-  : MooseVariableBase(parameters)
-{
+  auto params = validParams<MooseVariableFEBase>();
+  params.addClassDescription(
+      "Used for grouping standard field variables with the same finite element family and order");
+  return params;
 }

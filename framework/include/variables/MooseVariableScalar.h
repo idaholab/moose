@@ -19,7 +19,10 @@ template <typename T>
 class NumericVector;
 }
 
-class Assembly;
+class MooseVariableScalar;
+
+template <>
+InputParameters validParams<MooseVariableScalar>();
 
 /**
  * Class for scalar variables (they are different).
@@ -27,12 +30,7 @@ class Assembly;
 class MooseVariableScalar : public MooseVariableBase
 {
 public:
-  MooseVariableScalar(unsigned int var_num,
-                      const FEType & fe_type,
-                      SystemBase & sys,
-                      Assembly & assembly,
-                      Moose::VarKindType var_kind,
-                      THREAD_ID tid);
+  MooseVariableScalar(const InputParameters & parameters);
   virtual ~MooseVariableScalar();
 
   /**
@@ -140,9 +138,6 @@ public:
   void insert(NumericVector<Number> & soln);
 
 protected:
-  /// The assembly
-  Assembly & _assembly;
-
   /// The value of scalar variable
   VariableValue _u;
   /// The old value of scalar variable

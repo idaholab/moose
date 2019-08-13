@@ -54,8 +54,9 @@ public:
   /**
    * Get the name of the object
    * @return The name of the object
+   * TODO:MooseVariableToMooseObject (see #10601)
    */
-  const std::string & name() const { return _name; }
+  virtual const std::string & name() const { return _name; }
 
   /**
    * Get the parameters of the object

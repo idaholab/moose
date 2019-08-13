@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "AddVariableAction.h"
+#include "Action.h"
 
 class AddMatAndKernel;
 
@@ -20,11 +20,10 @@ InputParameters validParams<AddMatAndKernel>();
 /// material property.  This is meant to help diagnose/check for issues
 /// relating to dynamically (in-code i.e. via actions) generated object
 /// dependencies are handled correctly.
-class AddMatAndKernel : public AddVariableAction
+class AddMatAndKernel : public Action
 {
 public:
   AddMatAndKernel(const InputParameters & params);
 
   virtual void act();
 };
-

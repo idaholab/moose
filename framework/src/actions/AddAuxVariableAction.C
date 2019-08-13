@@ -16,25 +16,7 @@ template <>
 InputParameters
 validParams<AddAuxVariableAction>()
 {
-  MooseEnum families(AddAuxVariableAction::getAuxVariableFamilies());
-  MooseEnum orders(AddAuxVariableAction::getAuxVariableOrders());
-
-  InputParameters params = validParams<Action>();
-  params += validParams<OutputInterface>();
-
-  params.addParam<MooseEnum>(
-      "family", families, "Specifies the family of FE shape functions to use for this variable");
-  params.addParam<MooseEnum>("order",
-                             orders,
-                             "Specifies the order of the FE shape function to use "
-                             "for this variable (additional orders not listed are "
-                             "allowed)");
-  params.addParam<unsigned int>("components", 1, "Number of components for an array variable");
-  params.addParam<std::vector<Real>>("initial_condition",
-                                     "Specifies the initial condition for this variable");
-  params.addParam<std::vector<SubdomainName>>("block", "The block id where this variable lives");
-
-  return params;
+  return validParams<AddVariableAction>();
 }
 
 AddAuxVariableAction::AddAuxVariableAction(InputParameters params) : AddVariableAction(params) {}
@@ -53,49 +35,17 @@ AddAuxVariableAction::getAuxVariableOrders()
 }
 
 void
-AddAuxVariableAction::act()
+AddAuxVariableAction::init()
 {
-  // Name of variable being added
-  std::string var_name = name();
+  AddVariableAction::init();
 
-  // Blocks from the input
-  std::set<SubdomainID> blocks = getSubdomainIDs();
+  if (_fe_type.order > NINTH && !_scalar_var)
+    mooseError("Non-scalar AuxVariables must be CONSTANT, FIRST, SECOND, THIRD, FOURTH, FIFTH, "
+               "SIXTH, SEVENTH, EIGHTH or NINTH order (",
+               _fe_type.order,
+               " supplied)");
 
-  // Scalar variable
-  if (_scalar_var)
-    _problem->addAuxScalarVariable(var_name, _fe_type.order);
-
-  // Non-scalar variable
-  else if (_components == 1)
-  {
-    // Check that the order is valid (CONSTANT, FIRST, or SECOND)
-    if (_fe_type.order > 9)
-      mooseError("Non-scalar AuxVariables must be CONSTANT, FIRST, SECOND, THIRD, FOURTH, FIFTH, "
-                 "SIXTH, SEVENTH, EIGHTH or NINTH order (",
-                 _fe_type.order,
-                 " supplied)");
-
-    if (blocks.empty())
-      _problem->addAuxVariable(var_name, _fe_type);
-    else
-      _problem->addAuxVariable(var_name, _fe_type, &blocks);
-  }
-  else
-  {
-    // Check that the order is valid (CONSTANT, FIRST, or SECOND)
-    if (_fe_type.order > 9)
-      mooseError("Non-scalar AuxVariables must be CONSTANT, FIRST, SECOND, THIRD, FOURTH, FIFTH, "
-                 "SIXTH, SEVENTH, EIGHTH or NINTH order (",
-                 _fe_type.order,
-                 " supplied)");
-
-    if (blocks.empty())
-      _problem->addAuxArrayVariable(var_name, _fe_type, _components);
-    else
-      _problem->addAuxArrayVariable(var_name, _fe_type, _components, &blocks);
-  }
-
-  // Create the initial condition
-  if (isParamValid("initial_condition"))
-    createInitialConditionAction();
+  // Need static_cast to resolve overloads
+  _problem_add_var_method = static_cast<void (FEProblemBase::*)(
+      const std::string &, const std::string &, InputParameters &)>(&FEProblemBase::addAuxVariable);
 }
