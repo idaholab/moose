@@ -75,7 +75,7 @@ class RunPBS(QueueManager):
         template = {}
 
         # Launch script location
-        template['launch_script'] = os.path.join(job.getTestDir(), job.getTestNameShort() + '.qsub')
+        template['launch_script'] = os.path.join(job.getTestDir(), os.path.basename(job.getTestNameShort()) + '.qsub')
 
         # NCPUS
         template['mpi_procs'] = job.getMetaData().get('QUEUEING_NCPUS', 1)
@@ -87,7 +87,7 @@ class RunPBS(QueueManager):
         template['walltime'] = '{0:02d}'.format(hours) + ':' + '{0:02d}'.format(minutes) + ':00'
 
         # Job Name
-        template['job_name'] = job.getTestNameShort()
+        template['job_name'] = os.path.basename(job.getTestNameShort())
 
         # PBS Project group
         template['pbs_project'] = '#PBS -P %s' % (self.options.queue_project)
@@ -141,7 +141,6 @@ class RunPBS(QueueManager):
                 other_tester.setStatus(other_tester.fail, 'launch failure')
 
             # This is _only_ to make the failed message more useful
-            tester.specs['test_dir'] = ''
             tester.specs['command'] = command
             tester.setStatus(tester.fail, 'QSUB Group Failure')
             job.setOutput(launch_results)
