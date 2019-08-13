@@ -85,6 +85,27 @@ developmental technology into the hands of scientists and engineers, which can s
 scientific discovery.
 !template-end!
 
+!template! item key=system-context
+[!ac](MOOSE) is a command-line driven application. This is typical for a high-performance software
+that is designed to run across several nodes of a cluster system. As such, all of the usage
+of the software is through any standard terminal program generally available on all supported
+operating systems. Similarly, for the purpose of interacting through the software, there is only
+a single user, "the user", which interacts with the software through the command-line. MOOSE does
+not maintain any back-end database or interact with any system daemons. It is a simple executable,
+which may be launched from the command line and writes out various result files as it runs.
+
+!media media/sqa/usage_diagram_uml.svg
+       id=usage_diagram
+       caption=Usage of [!ac](MOOSE) and [!ac](MOOSE)-based applications.
+       style=width:50%;
+!template-end!
+
+!template! item key=system-functions
+Since [!ac](MOOSE) is a command-line driven application, all functionality provided in the framework
+is operated through the use of standard UNIX command line flags and the extendable MOOSE input file.
+The framework is completely extendable so individual design pages should be consulted for specific
+behaviors of each user-defined object.
+!template-end!
 
 !template! item key=user-characteristics
 
@@ -127,10 +148,9 @@ coloring and line control.
 
 
 !template! item key=system-requirements
-!alert construction
-The creation of the requirements for [!ac](MOOSE) is an ongoing progress. The
-[#functional-requirements] are being generated from source code and soon all requirements should
-follow this format.
+The creation of the requirements for [!ac](MOOSE) is an ongoing progress as new objects are added.
+The [#functional-requirements] are generated from test specifications, which are required with
+each addition to the MOOSE framework or its modules.
 !template-end!
 
 !template! item key=minimum-requirements
@@ -173,6 +193,12 @@ follow this format.
 - The system shall support the OpenMP threading interface.
 !template-end!
 
+!template! item key=human-system-integration
+[!ac](MOOSE) is a command line driven application which conforms to all standard terminal
+behaviors. Specific human system interaction accommodations shall be a function of the end-user's
+terminal. MOOSE does support optional coloring within the terminal's ability to display color,
+which may be disabled.
+!template-end!
 
 
 !template! item key=maintainability
@@ -192,11 +218,68 @@ follow this format.
 The regression test suite will cover at least 80% of all lines of code at all times. Known
 regressions will be recorded and tracked (see [#maintainability]) to an independent and
 satisfactory resolution.
+!template-end!
 
 !template item key=information-management
 The core framework in its entirety will be made publicly available on an appropriate repository
 hosting site. Backups and security services will be provided by the hosting service.
+!template-end!
 
 !template item key=verification
 The regression test suite will employ several verification tests using comparison against known
 analytical solutions, the method of manufactured solutions, and convergence rate analysis.
+!template-end!
+
+!template! item key=system-modes
+[!ac](MOOSE) applications normally run in normal execution  mode when an input file is supplied. However
+there are a few other modes that can be triggered with various command line flags as indicated here:
+
+| Command Line Flag | Description of mode |
+| :- | :- |
+| `-i <input_file>` | Normal execution mode |
+| `--split-mesh <splits>` | Read the mesh block splitting the mesh into two or more pieces for use in a subsequent run |
+| `--use-split` | (inplies -i flag) Execute the the simulation but use pre-split mesh files instead of the mesh from the input file |
+| `--yaml` | Output all object descriptions and available parameters in YAML format |
+| `--json` | Output all object descriptions and available parameters in JSON format |
+| `--syntax` | Output all registered syntax |
+| `--registry` | Output all known objects and actions |
+| `--registry-hit` | Output all known objects and actions in HIT format |
+| `--mesh-only` (implies -i flag) | Run only the mesh related tasks and output the final mesh that would be used for the simulation |
+| `--start-in-debugger <debugger>` | Start the simulation attached to the supplied debugger |
+
+!alert note
+The list of system-modes may not be extensive as the system is designed to be extendable to end-user applications.
+The complete list of command line options for applications can be obtained by running the executable with
+zero arguments. See the [command line usage](command_line_usage.md optional=True).
+!template-end!
+
+!template! item key=physical-characteristics
+[!ac](MOOSE) is software only with no associated physical media. See [#system-requirements] for a description
+of the minimum required hardware necessary for running a [!ac](MOOSE)-based application.
+!template-end!
+
+!template! item key=environmental-conditions
+Not Applicable
+!template-end!
+
+!template! item key=system-security
+[!ac](MOOSE) based applications have no requirements or special needs related to system-security. The framework
+is designed to run completely in user-space with no elevated privileges required nor recommended.
+!template-end!
+
+!template! item key=policies-and-regulations
+[!ac](MOOSE)-based applications must comply with all export control restrictions.
+!template-end!
+
+!template! item key=system-life-cycle
+[!ac](MOOSE)-based development follows various agile methods. The system is continuously built and deployed in
+a piecemeal fashion since objects within the system are more or less independent. Every new object requires a test,
+which in turn requires an associated requirement and design description. Some [!ac](MOOSE)-based development
+teams follow the [!ac](NQA-1) standards.
+!template-end!
+
+!template! item key=packaging
+No special requirements are needed for packaging or shipping any media containing [!ac](MOOSE) source code. However,
+some [!ac](MOOSE)-based applications maybe be export controlled in which case all export control restrictions must
+be adhered to when packaging and shipping media.
+!template-end!
