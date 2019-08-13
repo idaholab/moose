@@ -38,15 +38,17 @@ df5 = mms.run_temporal('implicit_convergence.i', N,
                        file_base='astabledirk4_bootstrap_{}',
                        console=False, dt=0.5, y_pp='l2_err', executable=EXE)
 
-
-fig = mms.ConvergencePlot(xlabel='$\Delta t$', ylabel='$L_2$ Error')
-fig.plot(df1, label='Midpoint', marker='o', markersize=8)
-fig.plot(df2, label='L-stable DIRK3', marker='v', markersize=8)
-fig.plot(df3, label='L-stable DIRK4', marker='p', markersize=8)
-fig.plot(df4, label='A-stable DIRK4', marker='s', markersize=8)
-fig.plot(df5, label='A-stable DIRK4 (bootstrap)', marker='D', markersize=8)
-
-fig.save('implicit_convergence.pdf')
+if hasattr(mms, 'ConvergencePlot'):
+    # The ConvergencePlot object requires matplotlib, but it is not always installed on the test
+    # machines. The mms module checks for matplotlib before importing the ConvergencePlot. This
+    # check allows this script to work with and without matplotlib.
+    fig = mms.ConvergencePlot(xlabel='$\Delta t$', ylabel='$L_2$ Error')
+    fig.plot(df1, label='Midpoint', marker='o', markersize=8)
+    fig.plot(df2, label='L-stable DIRK3', marker='v', markersize=8)
+    fig.plot(df3, label='L-stable DIRK4', marker='p', markersize=8)
+    fig.plot(df4, label='A-stable DIRK4', marker='s', markersize=8)
+    fig.plot(df5, label='A-stable DIRK4 (bootstrap)', marker='D', markersize=8)
+    fig.save('implicit_convergence.pdf')
 
 df1.to_csv('implicit_convergence_midpoint.csv')
 df2.to_csv('implicit_convergence_lstabledirk3.csv')
