@@ -67,6 +67,7 @@ public:
   virtual std::size_t getNumberActiveGrains() const override;
   virtual Point getGrainCentroid(unsigned int grain_id) const override;
   virtual bool doesFeatureIntersectBoundary(unsigned int feature_id) const override;
+  virtual bool doesFeatureIntersectSpecifiedBoundary(unsigned int feature_id) const override;
   virtual bool isFeaturePercolated(unsigned int feature_id) const override;
   virtual std::vector<unsigned int> getNewGrainIDs() const override;
 
@@ -288,4 +289,3 @@ template <>
 void dataStore(std::ostream & stream, GrainTracker::PartialFeatureData & feature, void * context);
 template <>
 void dataLoad(std::istream & stream, GrainTracker::PartialFeatureData & feature, void * context);
-

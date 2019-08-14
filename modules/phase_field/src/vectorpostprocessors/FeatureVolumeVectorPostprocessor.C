@@ -53,6 +53,7 @@ FeatureVolumeVectorPostprocessor::FeatureVolumeVectorPostprocessor(
     _var_num(declareVector("var_num")),
     _feature_volumes(declareVector("feature_volumes")),
     _intersects_bounds(declareVector("intersects_bounds")),
+    _intersects_specified_bounds(declareVector("intersects_specified_bounds")),
     _percolated(declareVector("percolated")),
     _vars(_feature_counter.getFECoupledVars()),
     _mesh(_subproblem.mesh()),
@@ -84,9 +85,10 @@ FeatureVolumeVectorPostprocessor::execute()
   const auto num_features = _feature_counter.getTotalFeatureCount();
 
   // Reset the variable index and intersect bounds vectors
-  _var_num.assign(num_features, -1);           // Invalid
-  _intersects_bounds.assign(num_features, -1); // Invalid
-  _percolated.assign(num_features, -1);        // Invalid
+  _var_num.assign(num_features, -1);                     // Invalid
+  _intersects_bounds.assign(num_features, -1);           // Invalid
+  _intersects_specified_bounds.assign(num_features, -1); // Invalid
+  _percolated.assign(num_features, -1);                  // Invalid
   for (MooseIndex(num_features) feature_num = 0; feature_num < num_features; ++feature_num)
   {
     auto var_num = _feature_counter.getFeatureVar(feature_num);
@@ -95,6 +97,9 @@ FeatureVolumeVectorPostprocessor::execute()
 
     _intersects_bounds[feature_num] =
         static_cast<unsigned int>(_feature_counter.doesFeatureIntersectBoundary(feature_num));
+
+    _intersects_specified_bounds[feature_num] = static_cast<unsigned int>(
+        _feature_counter.doesFeatureIntersectSpecifiedBoundary(feature_num));
 
     _percolated[feature_num] =
         static_cast<unsigned int>(_feature_counter.isFeaturePercolated(feature_num));
