@@ -27,5 +27,10 @@ public:
 
 private:
   void setupMesh(MooseMesh * mesh);
-};
 
+  /**
+   * Modifies the MooseObject's parameters to build the right type of Mesh when using splits.
+   * @return The new type of object that will be built.
+   */
+  std::string modifyParamsForUseSplit(InputParameters & moose_object_params) const;
+};

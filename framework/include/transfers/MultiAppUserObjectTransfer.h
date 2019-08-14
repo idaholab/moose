@@ -38,4 +38,7 @@ protected:
    * cannot be mapped to a subApp during from_multiapp transfer
    **/
   const bool _all_master_nodes_contained_in_sub_app;
+
+  /// whether to check the bounding box check or not
+  const bool _skip_bbox_check;
 };
