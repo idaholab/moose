@@ -1,4 +1,4 @@
-#EBSDReader
+# EBSDReader
 
 !syntax description /UserObjects/EBSDReader
 
@@ -24,66 +24,66 @@ raise the power of the weights according to the positive integer assigned to it.
 
 !syntax parameters /UserObjects/EBSDReader
 
-#EBSD Data File Format
+# EBSD Data File Format
 
 The `EBSDReader` user object reads in a data file taken from EBSD data. The file
 should have the following format:
 
 ```
-#Header : Marmot Input File
+# Header:    Marmot Input File
 
-#Date : 19 - Jul - 2013 00 : 23 : 55
-
-#
-#Column 1 : Euler angle "phi1"(in radians)
-
-#Column 2 : Euler angle "PHI"(in radians)
-
-#Column 3 : Euler angle "phi2"(in radians)
-
-#Column 4 : x - coordinate(in microns)
-
-#Column 5 : y - coordinate(in microns)
-
-#Column 6 : z - coordinate(in microns)
-
-#Column 7 : grain number(integer)
-
-#Column 8 : phase number(integer)
-
-#Column 9 : symmetry class(from TSL)
+# Date:      19-Jul-2013 00:23:55
 
 #
-#Phase 1 : Nickel(symmetry class = 43)
+# Column 1:  Euler angle "phi1" (in radians)
 
-#Number of Grains in Phase 1 : 111
+# Column 2:  Euler angle "PHI" (in radians)
 
-#
-#X_Min : 0.000000
+# Column 3:  Euler angle "phi2" (in radians)
 
-#X_Max : 32.000000
+# Column 4:  x-coordinate (in microns)
 
-#X_step : 0.250000
+# Column 5:  y-coordinate (in microns)
 
-#X_Dim : 128
+# Column 6:  z-coordinate (in microns)
 
-#
-#Y_Min : 0.000000
+# Column 7:  grain number (integer)
 
-#Y_Max : 32.000000
+# Column 8:  phase number (integer)
 
-#Y_step : 0.250000
-
-#Y_Dim : 128
+# Column 9:  symmetry class (from TSL)
 
 #
-#Z_Min : 0.000000
+# Phase 1:   Nickel (symmetry class = 43)
 
-#Z_Max : 0.000000
+# Number of Grains in Phase 1:  111
 
-#Z_step : 0.000000
+#
+# X_Min:      0.000000
 
-#Z_Dim : 0
+# X_Max:      32.000000
+
+# X_step:     0.250000
+
+# X_Dim:      128
+
+#
+# Y_Min:      0.000000
+
+# Y_Max:      32.000000
+
+# Y_step:     0.250000
+
+# Y_Dim:      128
+
+#
+# Z_Min:      0.000000
+
+# Z_Max:      0.000000
+
+# Z_step:     0.000000
+
+# Z_Dim:      0
 
 #
 2.48663 1.84098 5.50548 0.12500 0.12500 0.00000 0 1 43

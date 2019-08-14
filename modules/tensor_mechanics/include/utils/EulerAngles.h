@@ -27,12 +27,12 @@ public:
   // default constructor
   EulerAngles();
   // Quaternions to Euler Angles
-  EulerAngles(const Real w, const Real x, const Real y, const Real z);
+  EulerAngles(Eigen::Quaternion<Real> & q);
 
   operator RealVectorValue() const { return RealVectorValue(phi1, Phi, phi2); }
 
   void random();
   void random(MooseRandom & random);
   // Euler to Quaternions
-  Eigen::Quaternion<Real> ToQuaternion(const Real Phi1, const Real PHI, const Real Phi2);
+  Eigen::Quaternion<Real> toQuaternion();
 };

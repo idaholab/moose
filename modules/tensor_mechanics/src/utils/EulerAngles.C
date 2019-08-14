@@ -17,13 +17,17 @@ EulerAngles::EulerAngles()
   phi2 = 0.0;
 }
 
-EulerAngles::EulerAngles(Real w, Real x, Real y, Real z)
+EulerAngles::EulerAngles(Eigen::Quaternion<Real> & q)
 {
-  phi1 = std::atan2((x * z + w * y), -(-w * x + y * z)) * (180.0 / libMesh::pi);
-  Phi = std::atan2(std::sqrt(1 - std::pow(w * w - x * x - y * y + z * z, 2.0)),
-                   w * w - x * x - y * y + z * z) *
+  phi1 = std::atan2((q.x() * q.z() + q.w() * q.y()), -(-q.w() * q.x() + q.y() * q.z())) *
+         (180.0 / libMesh::pi);
+  Phi = std::atan2(
+            std::sqrt(1 -
+                      std::pow(q.w() * q.w() - q.x() * q.x() - q.y() * q.y() + q.z() * q.z(), 2.0)),
+            q.w() * q.w() - q.x() * q.x() - q.y() * q.y() + q.z() * q.z()) *
         (180.0 / libMesh::pi);
-  phi2 = std::atan2((x * z - w * y), (w * x + y * z)) * (180.0 / libMesh::pi);
+  phi2 = std::atan2((q.x() * q.z() - q.w() * q.y()), (q.w() * q.x() + q.y() * q.z())) *
+         (180.0 / libMesh::pi);
 
   // Following checks and updates are done only to comply with bunge euler angle definitions, 0.0
   // <= phi1/phi2 <= 360.0
@@ -36,7 +40,7 @@ EulerAngles::EulerAngles(Real w, Real x, Real y, Real z)
 }
 
 Eigen::Quaternion<Real>
-EulerAngles::ToQuaternion(const Real Phi1, const Real PHI, const Real Phi2)
+EulerAngles::toQuaternion()
 {
   Eigen::Quaternion<Real> q;
 
@@ -48,13 +52,13 @@ EulerAngles::ToQuaternion(const Real Phi1, const Real PHI, const Real Phi2)
    * "Euler Angles, Quaternions, and Transformation Matrices". NASA.
    */
 
-  cPhi1PlusPhi2 = std::cos((Phi1 * libMesh::pi / 180.0 + Phi2 * libMesh::pi / 180.0) / 2.0);
-  cphi = std::cos(PHI * libMesh::pi / 360.0);
-  cPhi1MinusPhi2 = std::cos((Phi1 * libMesh::pi / 180.0 - Phi2 * libMesh::pi / 180.0) / 2.0);
+  cPhi1PlusPhi2 = std::cos((phi1 * libMesh::pi / 180.0 + phi2 * libMesh::pi / 180.0) / 2.0);
+  cphi = std::cos(Phi * libMesh::pi / 360.0);
+  cPhi1MinusPhi2 = std::cos((phi1 * libMesh::pi / 180.0 - phi2 * libMesh::pi / 180.0) / 2.0);
 
-  sPhi1PlusPhi2 = std::sin((Phi1 * libMesh::pi / 180.0 + Phi2 * libMesh::pi / 180.0) / 2.0);
-  sphi = std::sin(PHI * libMesh::pi / 360.0);
-  sPhi1MinusPhi2 = std::sin((Phi1 * libMesh::pi / 180.0 - Phi2 * libMesh::pi / 180.0) / 2.0);
+  sPhi1PlusPhi2 = std::sin((phi1 * libMesh::pi / 180.0 + phi2 * libMesh::pi / 180.0) / 2.0);
+  sphi = std::sin(Phi * libMesh::pi / 360.0);
+  sPhi1MinusPhi2 = std::sin((phi1 * libMesh::pi / 180.0 - phi2 * libMesh::pi / 180.0) / 2.0);
 
   q.w() = cphi * cPhi1PlusPhi2;
   q.x() = sphi * cPhi1MinusPhi2;

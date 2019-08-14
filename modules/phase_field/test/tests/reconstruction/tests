@@ -102,4 +102,14 @@
     requirement = "The system shall support reading a single phase of EBSD data at a time to initialize PolycrystalICs
                    and support regions within the domain that contain no grains at all."
   [../]
+[./average_orientation]
+    type = 'Exodiff'
+    input = 'euler2rgb_non_uniform_orientation.i'
+    exodiff = 'euler2rgb_non_uniform_orientation_out.e'
+
+    issues = "#13869"
+    design = "EBSDReader.md"
+    requirement = "The system shall support grain evolution when beginning from EBSD ICs and compute average orientation
+                   of non-uniformly oriented grains."
+  [../]
 []
