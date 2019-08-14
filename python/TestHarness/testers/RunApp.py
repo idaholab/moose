@@ -218,7 +218,7 @@ class RunApp(Tester):
                                 'message': "Matched the following {}, which we did NOT expect:"}
                            }
 
-        for param,attr in params_and_msgs.iteritems():
+        for param,attr in params_and_msgs.items():
             if specs.isValid(param) and (options.method in attr['modes'] or attr['modes'] == ['ALL']):
                 match_type = ""
                 if specs['match_literal']:
