@@ -318,7 +318,7 @@ splitFileName(std::string full_file)
 std::string
 camelCaseToUnderscore(const std::string & camel_case_name)
 {
-  string replaced = camel_case_name;
+  std::string replaced = camel_case_name;
   // Put underscores in front of each contiguous set of capital letters
   pcrecpp::RE("(?!^)(?<![A-Z_])([A-Z]+)").GlobalReplace("_\\1", &replaced);
 
