@@ -57,6 +57,88 @@ input file.
 
 !template-end!
 
+!template! item key=system-purpose
+The Software Design Description provided here is description of each object in the system. The pluggable
+architecture of the framework makes [!ac](MOOSE) and [!ac](MOOSE)-based applications straightforward
+to develop as each piece of end-user (developer) code that goes into the system follows a well-defined
+interface for the underlying systems that those object plug into. These descriptions are provided
+through developer-supplied "markdown" files that are required for all new objects that are developed
+as part of the framework, modules and derivative applications. More information about the design
+documentation can be found in [MooseDocs](MooseDocs/generate.md optional=True).
+!template-end!
+
+!template! item key=system-scope
+The purpose of this software is to provide several libraries that can be used to build an application
+based upon the [!ac](MOOSE) framework. Additionally several useful python utilities will be provided
+assisting developers and users in end-to-end [!ac](FEM) analysis. A brief overview of the major
+components are listed here:
+
+| Component | Description |
+| :- | :- |
+| framework library | The base system that all MOOSE-based applications must be built from |
+| module libraries | optional "physics" libraries that may be used in an application to provide capability |
+| build system | The system responsible for creating applications for a series of libraries and applications |
+| test harness | The extendable testing system for find, scheduling, running, and reporting regression tests |
+| "peacock" | The [!ac](GUI) for building input files, executing applications, and displaying results |
+| MooseDocs | The extendable markdown system for MOOSE providing common documentation and requirements enforcement |
+| "stork" | The script and templates for generating a new MOOSE-based application ready for building and testing |
+| examples | A set of complete applications demonstrating the use of [!ac](MOOSE)'s pluggable systems |
+| tutorials | Step by step guides to building up an application using [!ac](MOOSE)'s pluggable systems |
+| unit | An application for unit testing individual classes or methods of C++ code |
+
+!template-end!
+
+!template! item key=dependencies-and-limitations
+The [!ac](MOOSE) platform has several dependencies on other software packages and has scope that
+is constantly evolving based upon funding, resources, priorities, and lab direction. However, the
+software is open-source and many features and even bugs can be offloaded to developers with appropriate
+levels of knowledge and direction from the main design team. The primary list of software dependencies
+is listed below. This list is not meant to be exhaustive. Individual operating systems may require
+specific packages to be installed prior to using MOOSE, which can be found on the
+[Getting Started](getting_started/index.md optional=True) pages.
+
+| Software Dependency | Description |
+| :- | :- |
+| [libMesh](https://libmesh.github.io) | Finite Element Library and I/O routines |
+| [PETSc](https://www.mcs.anl.gov/petsc/) | Solver Package |
+| [hypre](https://computing.llnl.gov/projects/hypre-scalable-linear-solvers-multigrid-methods) | Multigrid Preconditioner |
+| MPI | A distributed parallel processing library ([MPICH](https://www.mpich.org)) |
+
+!media media/sqa/code_platform.png
+       id=code_platform
+       caption=Diagram of the MOOSE code platform
+       style=width=50%;
+
+!template-end!
+
+!template! item key=definitions
+- +Pull (Merge) Request+: A proposed change to the software (e.g. usually a code change, but may also include documentation, requirements, design, and/or testing).
+- +Baseline+: A specification or product (e.g., project plan, maintenance and operations (M&O) plan, requirements, or design) that has been formally reviewed and agreed upon, that thereafter serves as the basis for use and further development, and that can be changed only by using an approved change control process (NQA-1, 2009).
+- +Validation+: Confirmation, through the provision of objective evidence (e.g., acceptance test), that the requirements for a specific intended use or application have been fulfilled (24765:2010(E), 2010).
+- +Verification+: (1) The process of: evaluating a system or component to determine whether the products of a given development phase satisfy the conditions imposed at the start of that phase. (2) Formal proof of program correctness (e.g., requirements, design, implementation reviews, system tests) (24765:2010(E), 2010).
+!template-end!
+
+!template! item key=acronyms
+!acronym list
+!template-end!
+
+!template! item key=design-stakeholders
+Stakeholders for [!ac](MOOSE) include several of the funding sources including [!ac](DOE-NE)
+and the [!ac](INL). However, Since [!ac](MOOSE) is an open-source project, several universities,
+companies, and foreign governments have an interest in the development and maintenance of the
+[!ac](MOOSE) project.
+!template-end!
+
+!template! item key=stakeholder-design-concerns
+Concerns from many of the stakeholders are similar. These concerns include correctness, stability,
+and performance. The mitigation plan for each of these can be addressed. For correctness, [!ac](MOOSE)
+development requires either regression or unit testing for all new code added to the repository.
+The project contains several comparisons against analytical solutions where possible and also
+other verification methods such as [MMS](/mms.md optional=True). For stability, [!ac](MOOSE) maintains
+multiple branches to incorporate several layers of testing both internally and for downstream
+applications. Finally, performance tests are also performed as part of the the normal testing suite
+to monitor code change impacts to performance.
+!template-end!
 
 !template! item key=system-design
 The MOOSE framework itself is composed of a wide range of pluggable systems. Each system is generally
@@ -66,7 +148,7 @@ patterns. The primary overarching pattern is the "Factory Pattern". Users needin
 may inherit from one of MOOSE's systems to providing an implementation meeting his or her needs. The
 design of each of these systems is documented on the mooseframework.org wiki in the Tutorial
 section. Additionally, up-to-date documentation extracted from the source is maintained on the the
-moosefram<ework.org documentation site after every successful merge to MOOSE's stable branch. After
+mooseframework.org documentation site after every successful merge to MOOSE's stable branch. After
 these objects are created, the can be registered with the framework and used immediately in a MOOSE
 input file.
 !template-end!
@@ -76,12 +158,6 @@ The MOOSE framework architecture consists of a core and several pluggable system
 consists of a number of key objects responsible for setting up and managing the user-defined objects
 of a finite element simulation. This core set of objects has limited extendability and exist for
 every simulation configuration that the framework is capable of running.
-
-!alert construction
-This list is automatically generated by MooseDocs, each system (as determined by the syntax dump from
-the executable) is known and has a markdown page. It is assumed that each page contains the system
-design. In the future these pages may require a "design" section, which this list could reference
-directly.
 
 !syntax list subsystems=True actions=False objects=False
 
@@ -96,7 +172,36 @@ MOOSE's pluggable systems are documented on the mooseframework.org wiki. Each of
 set of defined polymorphic interfaces and are designed to accomplish a specific task within the
 simulation. The design of these systems is fluid and is managed through agile methods and ticket
 request system on the Github.org website.
+!template-end!
 
+!template! item key=data-design-and-control
+At a high level, the system is designed to process [!ac](HIT) input files to construct several
+objects that will constitute an [!ac](FE) simulation. Some of the objects in the simulation may
+in turn load other file-based resources to complete the simulation. Examples include meshes
+or data files. The system will then assemble systems of equations and solve them using the
+libraries of the [#dependencies-and-limitations](Code Platform). The system can then output the
+solution in one or more supported output formats commonly used for visualization.
+!template-end!
+
+!template! item key=human-machine-interface-design
+MOOSE is a command-line driven program. All interaction with MOOSE and MOOSE-based codes is
+ultimately done through the command line. This is typical for [!ac](HPC) applications that use
+the [!ac](MPI) interface for running on super computing clusters. Optional GUIs may be used
+to assist in creating input files and launching executables on the command line.
+!template-end!
+
+!template! item key=system-design-interface
+All external system interaction is performed either through file [!ac](I/O) or through local
+[!ac](API) calls. Neither the [!ac](MOOSE) framework, nor the modules are designed to interact
+with any external system directly through remote procedure calls. Any code to code coupling
+performed through the [!ac](MOOSE) framework is done directly through API calls either in
+a static binary or after loading shared libraries.
+!template-end!
+
+!template! item key=security-structure
+The [!ac](MOOSE) framework does not require any elevated privileges to operate and does not
+run any stateful services, daemons or other network programs. Distributed runs rely on the
+[!ac](MPI) library.
 !template-end!
 
 !template! item key=requirements-cross-reference

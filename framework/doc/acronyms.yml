@@ -1,18 +1,29 @@
-MOOSE: Multiphysics Object Oriented Simulation Environment
-CIVET: Continous Integration for Verification, Enhancement, and Testing
+AD: automatic differentiation
+API: Application Programming Interface
+CIVET: Continuous Integration for Verification, Enhancement, and Testing
+DOE: Department of Energy
+DOE-NE: Department of Energy, Nuclear Energy
+DOF: degree-of-freedom
+FE: Finite Element
+FEM: Finite Element Method
+GUI: graphical user interface
+HIT: Hierarchical Input Text
+HPC: High Performance Computing
+I/O: Input/Output
 INL: Idaho National Laboratory
 JFNK: Jacobian-Free Newton-Krylov
-FEM: Finite Element Method
-POSIX: Portable Operating System Interface
 LGPL: GNU Library General Public License
+MMS: Method of Manufactured Solutions
+MPI: Method Passing Interface
+MOOSE: Multiphysics Object Oriented Simulation Environment
+NE: Nuclear Energy
+NQA-1: Nuclear Quality Assurance Level 1
+PETSc: Portable, Extensible Toolkit for Scientific Computation
+POSIX: Portable Operating System Interface
 PDE: partial differential equation
 PDEs: partial differential equations
-AD: automatic differentiation
-SRS: Software Requirement Specification
 RTM: Requirement Traceability Matrix
 SDD: Software Design Description
+SRS: Software Requirement Specification
 STP: Software Test Plan
 VVR: Verification and Validation Report
-DOF: degree-of-freedom
-DOFs: degrees-of-freedom
-NQA-1: Nuclear Qualtity Assurance Level 1
