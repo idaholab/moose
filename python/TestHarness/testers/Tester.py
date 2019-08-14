@@ -286,8 +286,8 @@ class Tester(MooseObject):
 
         self.process = None
         try:
-            f = SpooledTemporaryFile()
-            e = SpooledTemporaryFile()
+            f = SpooledTemporaryFile(max_size=1000000) # 1M character buffer
+            e = SpooledTemporaryFile(max_size=100000)  # 100K character buffer
 
             # On Windows, there is an issue with path translation when the command is passed in
             # as a list.

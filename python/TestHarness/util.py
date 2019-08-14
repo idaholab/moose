@@ -154,7 +154,7 @@ def runCommand(cmd, cwd=None):
     # On Windows it is not allowed to close fds while redirecting output
     should_close = platform.system() != "Windows"
     p = subprocess.Popen([cmd], cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=should_close, shell=True)
-    output = str(p.communicate()[0])
+    output = p.communicate()[0].decode('utf-8')
     if (p.returncode != 0):
         output = 'ERROR: ' + output
     return output

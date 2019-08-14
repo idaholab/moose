@@ -412,7 +412,7 @@ if __name__ == '__main__':
         libmesh_dir = os.environ['LIBMESH_DIR']
     else:
         libmesh_dir = os.path.join(moose_dir, 'libmesh', 'installed')
-    new_petsc = map(int, util.getPetscVersion(libmesh_dir).split(".")) >= [3, 9]
+    new_petsc = list(map(int, util.getPetscVersion(libmesh_dir).split("."))) >= [3, 9]
 
     # build the parameter list for the jacobian debug run
     mooseparams = moosebaseparams[:]

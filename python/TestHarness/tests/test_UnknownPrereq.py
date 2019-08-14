@@ -19,4 +19,4 @@ class TestHarnessTester(TestHarnessTestCase):
             self.runTests('-i', 'unknown_prereq')
 
         e = cm.exception
-        self.assertRegexpMatches(e.output, r'tests/test_harness.foo.*?FAILED \(unknown dependency\)')
+        self.assertRegexpMatches(e.output.decode('utf-8'), r'tests/test_harness.foo.*?FAILED \(unknown dependency\)')
