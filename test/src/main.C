@@ -12,6 +12,8 @@
 #include "Moose.h"
 #include "AppFactory.h"
 
+#include <iostream>
+
 // Create a performance log
 PerfLog Moose::perf_log("Moose Test");
 

@@ -97,7 +97,7 @@ public:
   std::string getTaskName(const std::string & action);
 
   std::shared_ptr<Action>
-  create(const std::string & action, const std::string & action_name, InputParameters parameters);
+  create(const std::string & action, const std::string & action_name, InputParameters & parameters);
 
   InputParameters getValidParams(const std::string & name);
 
@@ -136,4 +136,3 @@ protected:
   /// set<objectname, task> used to track if an object previously added is being added again
   std::set<std::pair<std::string, std::string>> _current_objs;
 };
-

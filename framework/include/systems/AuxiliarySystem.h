@@ -53,11 +53,9 @@ public:
   virtual void jacobianSetup();
   virtual void updateActive(THREAD_ID tid);
 
-  virtual void addVariable(const std::string & var_name,
-                           const FEType & type,
-                           Real scale_factor,
-                           const std::set<SubdomainID> * const active_subdomains = NULL) override;
-
+  virtual void addVariable(const std::string & var_type,
+                           const std::string & name,
+                           InputParameters & parameters) override;
   /**
    * Add a time integrator
    * @param type Type of the integrator
@@ -66,7 +64,7 @@ public:
    */
   void addTimeIntegrator(const std::string & type,
                          const std::string & name,
-                         InputParameters parameters) override;
+                         InputParameters & parameters) override;
   using SystemBase::addTimeIntegrator;
 
   /**
@@ -81,8 +79,9 @@ public:
    * @param name The name of the kernel
    * @param parameters Parameters for this kernel
    */
-  void
-  addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+  void addKernel(const std::string & kernel_name,
+                 const std::string & name,
+                 InputParameters & parameters);
 
   /**
    * Adds a scalar kernel
@@ -92,7 +91,7 @@ public:
    */
   void addScalarKernel(const std::string & kernel_name,
                        const std::string & name,
-                       InputParameters parameters);
+                       InputParameters & parameters);
 
   virtual void reinitElem(const Elem * elem, THREAD_ID tid) override;
   virtual void
@@ -263,4 +262,3 @@ public:
   friend class ComputeNodalKernelJacobiansThread;
   friend class ComputeNodalKernelBCJacobiansThread;
 };
-

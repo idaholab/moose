@@ -7,20 +7,16 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#pragma once
+#include "MooseVariable.h"
 
-#include "AddVariableAction.h"
-
-class AddElementalFieldAction;
+registerMooseObject("MooseApp", MooseVariable);
 
 template <>
-InputParameters validParams<AddElementalFieldAction>();
-
-class AddElementalFieldAction : public AddVariableAction
+InputParameters
+validParams<MooseVariable>()
 {
-public:
-  AddElementalFieldAction(InputParameters params);
-
-  virtual void act() override;
-  void init() override;
-};
+  auto params = validParams<MooseVariableFEBase>();
+  params.addClassDescription(
+      "Represents standard field variables, e.g. Lagrange, Hermite, or non-constant Monomials");
+  return params;
+}

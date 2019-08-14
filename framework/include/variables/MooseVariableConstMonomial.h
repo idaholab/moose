@@ -9,24 +9,20 @@
 
 #pragma once
 
-#include "MooseTypes.h"
 #include "MooseVariableFE.h"
 
-class Assembly;
+class MooseVariableConstMonomial;
+
+template <>
+InputParameters validParams<MooseVariableConstMonomial>();
 
 class MooseVariableConstMonomial : public MooseVariableFE<Real>
 {
 public:
-  MooseVariableConstMonomial(unsigned int var_num,
-                             const FEType & fe_type,
-                             SystemBase & sys,
-                             Assembly & assembly,
-                             Moose::VarKindType var_kind,
-                             THREAD_ID tid);
+  MooseVariableConstMonomial(const InputParameters & parameters);
 
   virtual void computeElemValues() override;
   virtual void computeElemValuesFace() override;
   virtual void computeNeighborValuesFace() override;
   virtual void computeNeighborValues() override;
 };
-

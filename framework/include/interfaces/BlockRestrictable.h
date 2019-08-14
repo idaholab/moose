@@ -65,8 +65,12 @@ public:
    * Class constructor
    * Populates the 'block' input parameters, see the general class documentation for details.
    * @param parameters The input parameters (see the detailed help for additional information)
+   * @param initialize Disable initialization, MooseVariableBase was converted to a MooseObject,
+   * this flag allows it to be constructed as if it wasn't to maintain backward compatibility, this
+   * will be removed in the fugure.
+   *                   TODO:MooseVariableToMooseObject (see #10601)
    */
-  BlockRestrictable(const MooseObject * moose_object);
+  BlockRestrictable(const MooseObject * moose_object, bool initialize = true);
 
   /**
    * Class constructor

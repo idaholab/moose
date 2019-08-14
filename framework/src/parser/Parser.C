@@ -991,6 +991,9 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
   _current_error_stream = &error_stream;
   for (const auto & it : p)
   {
+    if (p.shouldIgnore(it.first))
+      continue;
+
     bool found = false;
     bool in_global = false;
     std::string orig_name = prefix + "/" + it.first;

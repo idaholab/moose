@@ -15,7 +15,6 @@
 #include "MooseTypes.h"
 #include "MooseVariableFEBase.h"
 #include "SubProblem.h"
-#include "SystemBase.h"
 #include "MooseMesh.h"
 #include "MooseVariableData.h"
 
@@ -27,6 +26,18 @@
 #include "libmesh/dense_vector.h"
 
 class TimeIntegrator;
+template <typename>
+class MooseVariableFE;
+typedef MooseVariableFE<Real> MooseVariable;
+typedef MooseVariableFE<RealVectorValue> VectorMooseVariable;
+typedef MooseVariableFE<RealEigenVector> ArrayMooseVariable;
+
+template <>
+InputParameters validParams<MooseVariable>();
+template <>
+InputParameters validParams<VectorMooseVariable>();
+template <>
+InputParameters validParams<ArrayMooseVariable>();
 
 /**
  * Class for stuff related to variables
@@ -83,13 +94,7 @@ public:
   typedef typename Moose::DOFType<OutputType>::type OutputData;
   typedef MooseArray<OutputData> DoFValue;
 
-  MooseVariableFE(unsigned int var_num,
-                  const FEType & fe_type,
-                  SystemBase & sys,
-                  const Assembly & assembly,
-                  Moose::VarKindType var_kind,
-                  THREAD_ID tid,
-                  unsigned int count = 1);
+  MooseVariableFE(const InputParameters & parameters);
 
   void clearDofIndices() override;
 
@@ -631,8 +636,6 @@ public:
   virtual void computeNodalNeighborValues() override;
 
 protected:
-  const Assembly & _assembly;
-
   /// Holder for all the data associated with the "main" element
   std::unique_ptr<MooseVariableData<OutputType>> _element_data;
 

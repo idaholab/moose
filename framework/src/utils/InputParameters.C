@@ -1040,3 +1040,12 @@ InputParameters::checkParamName(const std::string & name) const
   if (!valid.FullMatch(name))
     mooseError("Invalid parameter name: '", name, "'");
 }
+
+bool
+InputParameters::shouldIgnore(const std::string & name)
+{
+  auto it = _params.find(name);
+  if (it != _params.end())
+    return it->second._ignore;
+  mooseError("Parameter ", name, " does not exist");
+}

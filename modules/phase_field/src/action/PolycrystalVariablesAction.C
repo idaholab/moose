@@ -70,11 +70,13 @@ PolycrystalVariablesAction::act()
     // Add the variable
     if (_current_task == "add_variable")
     {
-      _problem->addVariable(
-          var_name,
-          FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
-                 Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family"))),
-          getParam<Real>("scaling"));
+      auto fe_type = AddVariableAction::feType(_pars);
+      auto type = AddVariableAction::determineType(fe_type, 1);
+      auto var_params = _factory.getValidParams(type);
+
+      var_params.applySpecificParameters(_pars, {"order", "family"});
+      var_params.set<std::vector<Real>>("scaling") = {_pars.get<Real>("scaling")};
+      _problem->addVariable(type, var_name, var_params);
     }
 
     // Setup initial from file if requested

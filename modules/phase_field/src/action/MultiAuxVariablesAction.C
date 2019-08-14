@@ -46,11 +46,10 @@ MultiAuxVariablesAction::MultiAuxVariablesAction(InputParameters params)
 void
 MultiAuxVariablesAction::act()
 {
+  init();
+
   if (_num_var != _data_size)
     mooseError("Data type not provided for all the AuxVariables in MultiAuxVariablesAction");
-
-  // Blocks from the input
-  std::set<SubdomainID> blocks = getSubdomainIDs();
 
   // mesh dimension & components required for gradient variables
   const unsigned int dim = _mesh->dimension();
@@ -67,10 +66,7 @@ MultiAuxVariablesAction::act()
         // to.
         std::string var_name = _var_name_base[val] + Moose::stringify(gr);
 
-        if (blocks.empty())
-          _problem->addAuxVariable(var_name, _fe_type);
-        else
-          _problem->addAuxVariable(var_name, _fe_type, &blocks);
+        _problem->addAuxVariable(_type, var_name, _moose_object_pars);
       }
       /// for exatrcting data from MaterialProperty<std::vector<RealGradient> >
       if (_data_type[val] == "RealGradient")
@@ -82,10 +78,7 @@ MultiAuxVariablesAction::act()
            */
           std::string var_name = _var_name_base[val] + Moose::stringify(gr) + "_" + suffix[x];
 
-          if (blocks.empty())
-            _problem->addAuxVariable(var_name, _fe_type);
-          else
-            _problem->addAuxVariable(var_name, _fe_type, &blocks);
+          _problem->addAuxVariable(_type, var_name, _moose_object_pars);
         }
     }
 }

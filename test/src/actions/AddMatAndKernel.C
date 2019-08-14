@@ -15,6 +15,7 @@
 #include "AddVariableAction.h"
 #include "Conversion.h"
 #include "DirichletBC.h"
+#include "AddVariableAction.h"
 
 #include <sstream>
 #include <stdexcept>
@@ -37,18 +38,44 @@ template <>
 InputParameters
 validParams<AddMatAndKernel>()
 {
-  InputParameters params = validParams<AddVariableAction>();
+  InputParameters params = validParams<Action>();
+  MooseEnum order(
+      "CONSTANT FIRST SECOND THIRD FOURTH FIFTH SIXTH SEVENTH EIGHTH NINTH", "FIRST", true);
+  params.addParam<MooseEnum>("order",
+                             order,
+                             "Order of the FE shape function to use for this variable (additional "
+                             "orders not listed here are allowed, depending on the family).");
+
+  MooseEnum family("LAGRANGE MONOMIAL HERMITE SCALAR HIERARCHIC CLOUGH XYZ SZABAB BERNSTEIN "
+                   "L2_LAGRANGE L2_HIERARCHIC NEDELEC_ONE LAGRANGE_VEC",
+                   "LAGRANGE");
+  params.addParam<MooseEnum>(
+      "family", family, "Specifies the family of FE shape functions to use for this variable.");
+  params.addParam<std::vector<SubdomainName>>(
+      "block", "The list of block ids (SubdomainID) that this object will be applied");
   return params;
 }
 
-AddMatAndKernel::AddMatAndKernel(const InputParameters & params) : AddVariableAction(params) {}
+AddMatAndKernel::AddMatAndKernel(const InputParameters & params) : Action(params) {}
 
 void
 AddMatAndKernel::act()
 {
   std::string var_name = "var1";
   if (_current_task == "add_variable")
-    addVariable(var_name);
+  {
+    auto fe_type = AddVariableAction::feType(_pars);
+    auto type = AddVariableAction::determineType(fe_type, 1);
+    auto var_params = _factory.getValidParams(type);
+
+    var_params.set<MooseEnum>("family") = getParam<MooseEnum>("family");
+    var_params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
+    if (isParamValid("block"))
+      var_params.set<std::vector<SubdomainName>>("block") =
+          getParam<std::vector<SubdomainName>>("block");
+
+    _problem->addVariable(type, var_name, var_params);
+  }
   else if (_current_task == "add_kernel")
   {
     InputParameters params = _factory.getValidParams("MatDiffusionTest");

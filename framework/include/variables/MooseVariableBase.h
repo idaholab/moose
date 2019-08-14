@@ -9,6 +9,9 @@
 
 #pragma once
 
+#include "MooseObject.h"
+#include "BlockRestrictable.h"
+#include "OutputInterface.h"
 #include "MooseTypes.h"
 #include "MooseArray.h"
 
@@ -21,20 +24,20 @@ class DofMap;
 class Variable;
 }
 
+class MooseVariableBase;
+
+template <>
+InputParameters validParams<MooseVariableBase>();
+
+class Assembly;
 class SubProblem;
 class SystemBase;
 class MooseMesh;
 
-class MooseVariableBase
+class MooseVariableBase : public MooseObject, public BlockRestrictable, public OutputInterface
 {
 public:
-  MooseVariableBase(unsigned int var_num,
-                    const FEType & fe_type,
-                    SystemBase & sys,
-                    Moose::VarKindType var_kind,
-                    THREAD_ID tid,
-                    unsigned int count = 1);
-  virtual ~MooseVariableBase();
+  MooseVariableBase(const InputParameters & parameters);
 
   /**
    * Get variable number coming from libMesh
@@ -55,7 +58,7 @@ public:
   /**
    * Get the variable name
    */
-  const std::string & name() const;
+  const std::string & name() const override { return _var_name; }
 
   /**
    * Get all global dofindices for the variable
@@ -120,23 +123,33 @@ public:
   virtual unsigned int numberOfDofs() const { return _dof_indices.size(); }
 
 protected:
-  /// variable number (from libMesh)
-  unsigned int _var_num;
-  /// The FEType associated with this variable
-  FEType _fe_type;
-  /// variable number within MOOSE
-  unsigned int _index;
-  Moose::VarKindType _var_kind;
-  /// Problem this variable is part of
-  SubProblem & _subproblem;
   /// System this variable is part of
   SystemBase & _sys;
+
+  /// The FEType associated with this variable
+  FEType _fe_type;
+
+  /// variable number (from libMesh)
+  unsigned int _var_num;
+
+  /// variable number within MOOSE
+  unsigned int _index;
+
+  /// Variable type (see MooseTypes.h)
+  Moose::VarKindType _var_kind;
+
+  /// Problem this variable is part of
+  SubProblem & _subproblem;
 
   /// libMesh variable object for this variable
   const Variable & _variable;
 
+  /// Assembly data
+  Assembly & _assembly;
+
   /// DOF map
   const DofMap & _dof_map;
+
   /// DOF indices
   std::vector<dof_id_type> _dof_indices;
 
@@ -152,5 +165,6 @@ protected:
   /// scaling factor for this variable
   std::vector<Real> _scaling_factor;
 
-  std::string _name;
+  /// Variable name
+  std::string _var_name;
 };

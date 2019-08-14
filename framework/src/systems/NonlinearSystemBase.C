@@ -394,7 +394,7 @@ NonlinearSystemBase::setupFieldDecomposition()
 void
 NonlinearSystemBase::addTimeIntegrator(const std::string & type,
                                        const std::string & name,
-                                       InputParameters parameters)
+                                       InputParameters & parameters)
 {
   parameters.set<SystemBase *>("_sys") = this;
 
@@ -405,7 +405,7 @@ NonlinearSystemBase::addTimeIntegrator(const std::string & type,
 void
 NonlinearSystemBase::addKernel(const std::string & kernel_name,
                                const std::string & name,
-                               InputParameters parameters)
+                               InputParameters & parameters)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -428,7 +428,7 @@ NonlinearSystemBase::addKernel(const std::string & kernel_name,
 void
 NonlinearSystemBase::addNodalKernel(const std::string & kernel_name,
                                     const std::string & name,
-                                    InputParameters parameters)
+                                    InputParameters & parameters)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -447,7 +447,7 @@ NonlinearSystemBase::addNodalKernel(const std::string & kernel_name,
 void
 NonlinearSystemBase::addScalarKernel(const std::string & kernel_name,
                                      const std::string & name,
-                                     InputParameters parameters)
+                                     InputParameters & parameters)
 {
   std::shared_ptr<ScalarKernel> kernel =
       _factory.create<ScalarKernel>(kernel_name, name, parameters);
@@ -457,7 +457,7 @@ NonlinearSystemBase::addScalarKernel(const std::string & kernel_name,
 void
 NonlinearSystemBase::addBoundaryCondition(const std::string & bc_name,
                                           const std::string & name,
-                                          InputParameters parameters)
+                                          InputParameters & parameters)
 {
   // ThreadID
   THREAD_ID tid = 0;
@@ -530,7 +530,7 @@ NonlinearSystemBase::addBoundaryCondition(const std::string & bc_name,
 void
 NonlinearSystemBase::addConstraint(const std::string & c_name,
                                    const std::string & name,
-                                   InputParameters parameters)
+                                   InputParameters & parameters)
 {
   std::shared_ptr<Constraint> constraint = _factory.create<Constraint>(c_name, name, parameters);
   _constraints.addObject(constraint);
@@ -542,7 +542,7 @@ NonlinearSystemBase::addConstraint(const std::string & c_name,
 void
 NonlinearSystemBase::addDiracKernel(const std::string & kernel_name,
                                     const std::string & name,
-                                    InputParameters parameters)
+                                    InputParameters & parameters)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -555,7 +555,7 @@ NonlinearSystemBase::addDiracKernel(const std::string & kernel_name,
 void
 NonlinearSystemBase::addDGKernel(std::string dg_kernel_name,
                                  const std::string & name,
-                                 InputParameters parameters)
+                                 InputParameters & parameters)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
@@ -574,7 +574,7 @@ NonlinearSystemBase::addDGKernel(std::string dg_kernel_name,
 void
 NonlinearSystemBase::addInterfaceKernel(std::string interface_kernel_name,
                                         const std::string & name,
-                                        InputParameters parameters)
+                                        InputParameters & parameters)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
@@ -592,7 +592,7 @@ NonlinearSystemBase::addInterfaceKernel(std::string interface_kernel_name,
 void
 NonlinearSystemBase::addDamper(const std::string & damper_name,
                                const std::string & name,
-                               InputParameters parameters)
+                               InputParameters & parameters)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
@@ -620,7 +620,7 @@ NonlinearSystemBase::addDamper(const std::string & damper_name,
 void
 NonlinearSystemBase::addSplit(const std::string & split_name,
                               const std::string & name,
-                              InputParameters parameters)
+                              InputParameters & parameters)
 {
   std::shared_ptr<Split> split = _factory.create<Split>(split_name, name, parameters);
   _splits.addObject(split);

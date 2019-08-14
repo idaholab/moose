@@ -9,6 +9,7 @@
 
 #include "KernelValue.h"
 #include "Assembly.h"
+#include "SystemBase.h"
 #include "libmesh/quadrature.h"
 
 template <>

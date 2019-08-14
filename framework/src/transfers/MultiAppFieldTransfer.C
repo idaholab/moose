@@ -15,6 +15,7 @@
 #include "MooseMesh.h"
 #include "UserObject.h"
 #include "NearestPointIntegralVariablePostprocessor.h"
+#include "SystemBase.h"
 
 template <>
 InputParameters

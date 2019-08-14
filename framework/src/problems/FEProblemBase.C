@@ -94,6 +94,7 @@
 #include "libmesh/coupling_matrix.h"
 #include "libmesh/nonlinear_solver.h"
 #include "libmesh/sparse_matrix.h"
+#include "libmesh/string_to_enum.h"
 
 // Anonymous namespace for helper function
 namespace
@@ -1720,7 +1721,7 @@ FEProblemBase::neighborSubdomainSetup(SubdomainID subdomain, THREAD_ID tid)
 }
 
 void
-FEProblemBase::addFunction(std::string type, const std::string & name, InputParameters parameters)
+FEProblemBase::addFunction(std::string type, const std::string & name, InputParameters & parameters)
 {
   parameters.set<SubProblem *>("_subproblem") = this;
 
@@ -1801,7 +1802,7 @@ FEProblemBase::getNonlinearSystem()
 void
 FEProblemBase::addDistribution(std::string type,
                                const std::string & name,
-                               InputParameters parameters)
+                               InputParameters & parameters)
 {
   parameters.set<std::string>("type") = type;
   std::shared_ptr<Distribution> dist = _factory.create<Distribution>(type, name, parameters);
@@ -1818,7 +1819,7 @@ FEProblemBase::getDistribution(const std::string & name)
 }
 
 void
-FEProblemBase::addSampler(std::string type, const std::string & name, InputParameters parameters)
+FEProblemBase::addSampler(std::string type, const std::string & name, InputParameters & parameters)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -1872,17 +1873,60 @@ FEProblemBase::duplicateVariableCheck(const std::string & var_name,
 }
 
 void
+FEProblemBase::addVariable(const std::string & var_type,
+                           const std::string & var_name,
+                           InputParameters & params)
+{
+  auto fe_type = FEType(Utility::string_to_enum<Order>(params.get<MooseEnum>("order")),
+                        Utility::string_to_enum<FEFamily>(params.get<MooseEnum>("family")));
+
+  if (duplicateVariableCheck(var_name, fe_type, /* is_aux = */ false))
+    return;
+
+  params.set<FEProblemBase *>("_fe_problem_base") = this;
+  params.set<Moose::VarKindType>("_var_kind") = Moose::VarKindType::VAR_NONLINEAR;
+
+  _nl->addVariable(var_type, var_name, params);
+  if (_displaced_problem)
+    // MooseObjects need to be unique so change the name here
+    _displaced_problem->addVariable(var_type, var_name, params);
+}
+
+void
 FEProblemBase::addVariable(const std::string & var_name,
                            const FEType & type,
                            Real scale_factor,
                            const std::set<SubdomainID> * const active_subdomains)
 {
+  mooseDeprecated("Please use the addVariable(var_type, var_name, params) API instead");
+
   if (duplicateVariableCheck(var_name, type, /* is_aux = */ false))
     return;
 
-  _nl->addVariable(var_name, type, scale_factor, active_subdomains);
+  std::string var_type;
+  if (type == FEType(0, MONOMIAL))
+    var_type = "MooseVariableConstMonomial";
+  else if (type.family == SCALAR)
+    var_type = "MooseVariableScalar";
+  else if (type.family == LAGRANGE_VEC || type.family == NEDELEC_ONE)
+    var_type = "VectorMooseVariable";
+  else
+    var_type = "MooseVariable";
+
+  InputParameters params = _factory.getValidParams(var_type);
+  params.set<FEProblemBase *>("_fe_problem_base") = this;
+  params.set<Moose::VarKindType>("_var_kind") = Moose::VarKindType::VAR_NONLINEAR;
+  params.set<MooseEnum>("order") = type.order.get_order();
+  params.set<MooseEnum>("family") = Moose::stringify(type.family);
+  params.set<std::vector<Real>>("scaling") =
+      std::vector<Real>(params.get<unsigned int>("components"), scale_factor);
+  if (active_subdomains)
+    for (const SubdomainID & id : *active_subdomains)
+      params.set<std::vector<SubdomainName>>("block").push_back(Moose::stringify(id));
+
+  _nl->addVariable(var_type, var_name, params);
   if (_displaced_problem)
-    _displaced_problem->addVariable(var_name, type, scale_factor, active_subdomains);
+    _displaced_problem->addVariable(var_type, var_name, params);
 }
 
 void
@@ -1892,13 +1936,26 @@ FEProblemBase::addArrayVariable(const std::string & var_name,
                                 const std::vector<Real> & scale_factor,
                                 const std::set<SubdomainID> * const active_subdomains)
 {
+  mooseDeprecated("Please use the addVariable(type_name, name, params) API instead");
+
   if (duplicateVariableCheck(var_name, type, /* is_aux = */ false))
     return;
 
-  _nl->addArrayVariable(var_name, type, components, scale_factor, active_subdomains);
+  auto moose_type = "ArrayMooseVariable";
+  auto params = _factory.getValidParams(moose_type);
+  params.set<FEProblemBase *>("_fe_problem_base") = this;
+  params.set<Moose::VarKindType>("_var_kind") = Moose::VarKindType::VAR_NONLINEAR;
+  params.set<MooseEnum>("order") = type.order.get_order();
+  params.set<MooseEnum>("family") = Moose::stringify(type.family);
+  params.set<unsigned int>("components") = components;
+  params.set<std::vector<Real>>("scaling") = scale_factor;
+  if (active_subdomains)
+    for (const SubdomainID & id : *active_subdomains)
+      params.set<std::vector<SubdomainName>>("block").push_back(Moose::stringify(id));
+
+  _nl->addVariable(moose_type, var_name, params);
   if (_displaced_problem)
-    _displaced_problem->addArrayVariable(
-        var_name, type, components, scale_factor, active_subdomains);
+    _displaced_problem->addVariable(moose_type, var_name, params);
 }
 
 void
@@ -1907,6 +1964,8 @@ FEProblemBase::addScalarVariable(const std::string & var_name,
                                  Real scale_factor,
                                  const std::set<SubdomainID> * const active_subdomains)
 {
+  mooseDeprecated("Please use the addVariable(type_name, name, params) API instead");
+
   if (order > _max_scalar_order)
     _max_scalar_order = order;
 
@@ -1914,15 +1973,25 @@ FEProblemBase::addScalarVariable(const std::string & var_name,
   if (duplicateVariableCheck(var_name, type, /* is_aux = */ false))
     return;
 
-  _nl->addScalarVariable(var_name, order, scale_factor, active_subdomains);
+  InputParameters params = _factory.getValidParams("MooseVariableScalar");
+  params.set<FEProblemBase *>("_fe_problem_base") = this;
+  params.set<Moose::VarKindType>("_var_kind") = Moose::VarKindType::VAR_NONLINEAR;
+  params.set<MooseEnum>("order") = type.order.get_order();
+  params.set<MooseEnum>("family") = "SCALAR";
+  params.set<std::vector<Real>>("scaling") = {scale_factor};
+  if (active_subdomains)
+    for (const SubdomainID & id : *active_subdomains)
+      params.set<std::vector<SubdomainName>>("block").push_back(Moose::stringify(id));
+
+  _nl->addVariable("MooseVariableScalar", var_name, params);
   if (_displaced_problem)
-    _displaced_problem->addScalarVariable(var_name, order, scale_factor, active_subdomains);
+    _displaced_problem->addVariable("MooseVariableScalar", var_name, params);
 }
 
 void
 FEProblemBase::addKernel(const std::string & kernel_name,
                          const std::string & name,
-                         InputParameters parameters)
+                         InputParameters & parameters)
 {
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
@@ -1955,7 +2024,7 @@ FEProblemBase::addKernel(const std::string & kernel_name,
 void
 FEProblemBase::addADKernel(const std::string & kernel_name,
                            const std::string & name,
-                           InputParameters parameters)
+                           InputParameters & parameters)
 {
   addKernel(kernel_name + "<RESIDUAL>", name + "_residual", parameters);
   addKernel(kernel_name + "<JACOBIAN>", name + "_jacobian", parameters);
@@ -1965,7 +2034,7 @@ FEProblemBase::addADKernel(const std::string & kernel_name,
 void
 FEProblemBase::addNodalKernel(const std::string & kernel_name,
                               const std::string & name,
-                              InputParameters parameters)
+                              InputParameters & parameters)
 {
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
@@ -1994,7 +2063,7 @@ FEProblemBase::addNodalKernel(const std::string & kernel_name,
 void
 FEProblemBase::addScalarKernel(const std::string & kernel_name,
                                const std::string & name,
-                               InputParameters parameters)
+                               InputParameters & parameters)
 {
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
@@ -2023,7 +2092,7 @@ FEProblemBase::addScalarKernel(const std::string & kernel_name,
 void
 FEProblemBase::addBoundaryCondition(const std::string & bc_name,
                                     const std::string & name,
-                                    InputParameters parameters)
+                                    InputParameters & parameters)
 {
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
@@ -2056,7 +2125,7 @@ FEProblemBase::addBoundaryCondition(const std::string & bc_name,
 void
 FEProblemBase::addConstraint(const std::string & c_name,
                              const std::string & name,
-                             InputParameters parameters)
+                             InputParameters & parameters)
 {
   _has_constraints = true;
 
@@ -2087,16 +2156,58 @@ FEProblemBase::addConstraint(const std::string & c_name,
 }
 
 void
+FEProblemBase::addAuxVariable(const std::string & var_type,
+                              const std::string & var_name,
+                              InputParameters & params)
+{
+  auto fe_type = FEType(Utility::string_to_enum<Order>(params.get<MooseEnum>("order")),
+                        Utility::string_to_enum<FEFamily>(params.get<MooseEnum>("family")));
+
+  if (duplicateVariableCheck(var_name, fe_type, /* is_aux = */ true))
+    return;
+
+  params.set<FEProblemBase *>("_fe_problem_base") = this;
+  params.set<Moose::VarKindType>("_var_kind") = Moose::VarKindType::VAR_AUXILIARY;
+
+  _aux->addVariable(var_type, var_name, params);
+  if (_displaced_problem)
+    // MooseObjects need to be unique so change the name here
+    _displaced_problem->addAuxVariable(var_type, var_name, params);
+}
+
+void
 FEProblemBase::addAuxVariable(const std::string & var_name,
                               const FEType & type,
                               const std::set<SubdomainID> * const active_subdomains)
 {
+  mooseDeprecated("Please use the addAuxVariable(var_type, var_name, params) API instead");
+
   if (duplicateVariableCheck(var_name, type, /* is_aux = */ true))
     return;
 
-  _aux->addVariable(var_name, type, 1.0, active_subdomains);
+  std::string var_type;
+  if (type == FEType(0, MONOMIAL))
+    var_type = "MooseVariableConstMonomial";
+  else if (type.family == SCALAR)
+    var_type = "MooseVariableScalar";
+  else if (type.family == LAGRANGE_VEC || type.family == NEDELEC_ONE)
+    var_type = "VectorMooseVariable";
+  else
+    var_type = "MooseVariable";
+
+  InputParameters params = _factory.getValidParams(var_type);
+  params.set<FEProblemBase *>("_fe_problem_base") = this;
+  params.set<Moose::VarKindType>("_var_kind") = Moose::VarKindType::VAR_AUXILIARY;
+  params.set<MooseEnum>("order") = type.order.get_order();
+  params.set<MooseEnum>("family") = Moose::stringify(type.family);
+
+  if (active_subdomains)
+    for (const SubdomainID & id : *active_subdomains)
+      params.set<std::vector<SubdomainName>>("block").push_back(Moose::stringify(id));
+
+  _aux->addVariable(var_type, var_name, params);
   if (_displaced_problem)
-    _displaced_problem->addAuxVariable(var_name, type, active_subdomains);
+    _displaced_problem->addAuxVariable("MooseVariable", var_name, params);
 }
 
 void
@@ -2105,21 +2216,35 @@ FEProblemBase::addAuxArrayVariable(const std::string & var_name,
                                    unsigned int components,
                                    const std::set<SubdomainID> * const active_subdomains)
 {
+  mooseDeprecated("Please use the addAuxVariable(var_type, var_name, params) API instead");
+
   if (duplicateVariableCheck(var_name, type, /* is_aux = */ true))
     return;
 
-  _aux->addArrayVariable(
-      var_name, type, components, std::vector<Real>(components, 1), active_subdomains);
+  InputParameters params = _factory.getValidParams("ArrayMooseVariable");
+  params.set<FEProblemBase *>("_fe_problem_base") = this;
+  params.set<Moose::VarKindType>("_var_kind") = Moose::VarKindType::VAR_AUXILIARY;
+  params.set<MooseEnum>("order") = type.order.get_order();
+  params.set<MooseEnum>("family") = Moose::stringify(type.family);
+  params.set<unsigned int>("components") = components;
+
+  if (active_subdomains)
+    for (const SubdomainID & id : *active_subdomains)
+      params.set<std::vector<SubdomainName>>("block").push_back(Moose::stringify(id));
+
+  _aux->addVariable("ArrayMooseVariable", var_name, params);
   if (_displaced_problem)
-    _displaced_problem->addAuxArrayVariable(var_name, type, components, active_subdomains);
+    _displaced_problem->addAuxVariable("ArrayMooseVariable", var_name, params);
 }
 
 void
 FEProblemBase::addAuxScalarVariable(const std::string & var_name,
                                     Order order,
-                                    Real scale_factor,
+                                    Real /*scale_factor*/,
                                     const std::set<SubdomainID> * const active_subdomains)
 {
+  mooseDeprecated("Please use the addAuxVariable(var_type, var_name, params) API instead");
+
   if (order > _max_scalar_order)
     _max_scalar_order = order;
 
@@ -2127,15 +2252,26 @@ FEProblemBase::addAuxScalarVariable(const std::string & var_name,
   if (duplicateVariableCheck(var_name, type, /* is_aux = */ true))
     return;
 
-  _aux->addScalarVariable(var_name, order, scale_factor, active_subdomains);
+  InputParameters params = _factory.getValidParams("MooseVariableScalar");
+  params.set<FEProblemBase *>("_fe_problem_base") = this;
+  params.set<Moose::VarKindType>("_var_kind") = Moose::VarKindType::VAR_AUXILIARY;
+
+  params.set<MooseEnum>("order") = type.order.get_order();
+  params.set<MooseEnum>("family") = "SCALAR";
+  params.set<std::vector<Real>>("scaling") = {1};
+  if (active_subdomains)
+    for (const SubdomainID & id : *active_subdomains)
+      params.set<std::vector<SubdomainName>>("block").push_back(Moose::stringify(id));
+
+  _aux->addVariable("MooseVariableScalar", var_name, params);
   if (_displaced_problem)
-    _displaced_problem->addAuxScalarVariable(var_name, order, scale_factor, active_subdomains);
+    _displaced_problem->addAuxVariable("MooseVariableScalar", var_name, params);
 }
 
 void
 FEProblemBase::addAuxKernel(const std::string & kernel_name,
                             const std::string & name,
-                            InputParameters parameters)
+                            InputParameters & parameters)
 {
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
@@ -2170,7 +2306,7 @@ FEProblemBase::addAuxKernel(const std::string & kernel_name,
 void
 FEProblemBase::addAuxScalarKernel(const std::string & kernel_name,
                                   const std::string & name,
-                                  InputParameters parameters)
+                                  InputParameters & parameters)
 {
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
@@ -2199,7 +2335,7 @@ FEProblemBase::addAuxScalarKernel(const std::string & kernel_name,
 void
 FEProblemBase::addDiracKernel(const std::string & kernel_name,
                               const std::string & name,
-                              InputParameters parameters)
+                              InputParameters & parameters)
 {
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
@@ -2231,7 +2367,7 @@ FEProblemBase::addDiracKernel(const std::string & kernel_name,
 void
 FEProblemBase::addDGKernel(const std::string & dg_kernel_name,
                            const std::string & name,
-                           InputParameters parameters)
+                           InputParameters & parameters)
 {
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
@@ -2265,7 +2401,7 @@ FEProblemBase::addDGKernel(const std::string & dg_kernel_name,
 void
 FEProblemBase::addInterfaceKernel(const std::string & interface_kernel_name,
                                   const std::string & name,
-                                  InputParameters parameters)
+                                  InputParameters & parameters)
 {
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
@@ -2297,9 +2433,8 @@ FEProblemBase::addInterfaceKernel(const std::string & interface_kernel_name,
 void
 FEProblemBase::addInitialCondition(const std::string & ic_name,
                                    const std::string & name,
-                                   InputParameters parameters)
+                                   InputParameters & parameters)
 {
-
   // before we start to mess with the initial condition, we need to check parameters for errors.
   parameters.checkParams(name);
 
@@ -2450,7 +2585,7 @@ FEProblemBase::getMaterialData(Moose::MaterialDataType type, THREAD_ID tid)
 void
 FEProblemBase::addMaterial(const std::string & mat_name,
                            const std::string & name,
-                           InputParameters parameters)
+                           InputParameters & parameters)
 {
   addMaterialHelper({&_residual_materials, &_jacobian_materials}, mat_name, name, parameters);
 }
@@ -2458,7 +2593,7 @@ FEProblemBase::addMaterial(const std::string & mat_name,
 void
 FEProblemBase::addADResidualMaterial(const std::string & mat_name,
                                      const std::string & name,
-                                     InputParameters parameters)
+                                     InputParameters & parameters)
 {
   addMaterialHelper({&_residual_materials}, mat_name, name, parameters);
 }
@@ -2466,7 +2601,7 @@ FEProblemBase::addADResidualMaterial(const std::string & mat_name,
 void
 FEProblemBase::addADJacobianMaterial(const std::string & mat_name,
                                      const std::string & name,
-                                     InputParameters parameters)
+                                     InputParameters & parameters)
 {
   addMaterialHelper({&_jacobian_materials}, mat_name, name, parameters);
 }
@@ -2475,7 +2610,7 @@ void
 FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
                                  const std::string & mat_name,
                                  const std::string & name,
-                                 InputParameters parameters)
+                                 InputParameters & parameters)
 {
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
@@ -2755,7 +2890,7 @@ FEProblemBase::initVectorPostprocessorData(const std::string & name)
 void
 FEProblemBase::addPostprocessor(std::string pp_name,
                                 const std::string & name,
-                                InputParameters parameters)
+                                InputParameters & parameters)
 {
   // Check for name collision
   if (hasUserObject(name))
@@ -2769,7 +2904,7 @@ FEProblemBase::addPostprocessor(std::string pp_name,
 void
 FEProblemBase::addVectorPostprocessor(std::string pp_name,
                                       const std::string & name,
-                                      InputParameters parameters)
+                                      InputParameters & parameters)
 {
   // Check for name collision
   if (hasUserObject(name))
@@ -2783,7 +2918,7 @@ FEProblemBase::addVectorPostprocessor(std::string pp_name,
 void
 FEProblemBase::addUserObject(std::string user_object_name,
                              const std::string & name,
-                             InputParameters parameters)
+                             InputParameters & parameters)
 {
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -3411,7 +3546,7 @@ FEProblemBase::reinitBecauseOfGhostingOrNewGeomObjects()
 void
 FEProblemBase::addDamper(std::string damper_name,
                          const std::string & name,
-                         InputParameters parameters)
+                         InputParameters & parameters)
 {
   parameters.set<SubProblem *>("_subproblem") = this;
   parameters.set<SystemBase *>("_sys") = _nl.get();
@@ -3429,7 +3564,7 @@ FEProblemBase::setupDampers()
 void
 FEProblemBase::addIndicator(std::string indicator_name,
                             const std::string & name,
-                            InputParameters parameters)
+                            InputParameters & parameters)
 {
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
@@ -3470,7 +3605,7 @@ FEProblemBase::addIndicator(std::string indicator_name,
 void
 FEProblemBase::addMarker(std::string marker_name,
                          const std::string & name,
-                         InputParameters parameters)
+                         InputParameters & parameters)
 {
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
@@ -3504,7 +3639,7 @@ FEProblemBase::addMarker(std::string marker_name,
 void
 FEProblemBase::addMultiApp(const std::string & multi_app_name,
                            const std::string & name,
-                           InputParameters parameters)
+                           InputParameters & parameters)
 {
   parameters.set<MPI_Comm>("_mpi_comm") = _communicator.get();
   parameters.set<std::shared_ptr<CommandLine>>("_command_line") = _app.commandLine();
@@ -3781,7 +3916,7 @@ FEProblemBase::execTransfers(ExecFlagType type)
 void
 FEProblemBase::addTransfer(const std::string & transfer_name,
                            const std::string & name,
-                           InputParameters parameters)
+                           InputParameters & parameters)
 {
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
@@ -4470,7 +4605,7 @@ FEProblemBase::onTimestepEnd()
 void
 FEProblemBase::addTimeIntegrator(const std::string & type,
                                  const std::string & name,
-                                 InputParameters parameters)
+                                 InputParameters & parameters)
 {
   parameters.set<SubProblem *>("_subproblem") = this;
   _aux->addTimeIntegrator(type, name + ":aux", parameters);
@@ -4486,7 +4621,7 @@ FEProblemBase::addTimeIntegrator(const std::string & type,
 void
 FEProblemBase::addPredictor(const std::string & type,
                             const std::string & name,
-                            InputParameters parameters)
+                            InputParameters & parameters)
 {
   parameters.set<SubProblem *>("_subproblem") = this;
   std::shared_ptr<Predictor> predictor = _factory.create<Predictor>(type, name, parameters);
@@ -6041,7 +6176,7 @@ FEProblemBase::constJacobian() const
 void
 FEProblemBase::addOutput(const std::string & object_type,
                          const std::string & object_name,
-                         InputParameters parameters)
+                         InputParameters & parameters)
 {
   // Get a reference to the OutputWarehouse
   OutputWarehouse & output_warehouse = _app.getOutputWarehouse();

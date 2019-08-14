@@ -20,32 +20,39 @@ template <>
 InputParameters
 validParams<AddElementalFieldAction>()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = validParams<AddVariableAction>();
   params.addClassDescription("Adds elemental auxiliary variable for adaptivity system.");
-  params.addParam<std::vector<SubdomainName>>("block", "The block id where this object lives.");
+  params.ignoreParameter<std::string>("type");
 
   return params;
 }
 
-AddElementalFieldAction::AddElementalFieldAction(InputParameters params) : Action(params) {}
+AddElementalFieldAction::AddElementalFieldAction(InputParameters params) : AddVariableAction(params)
+{
+}
+
+void
+AddElementalFieldAction::init()
+{
+  _moose_object_pars.set<MooseEnum>("order") = "CONSTANT";
+  _moose_object_pars.set<MooseEnum>("family") = "MONOMIAL";
+
+  _fe_type = FEType(CONSTANT, MONOMIAL);
+
+  _type = "MooseVariableConstMonomial";
+
+  _scalar_var = false;
+
+  // Need static_cast to resolve overloads
+  _problem_add_var_method = static_cast<void (FEProblemBase::*)(
+      const std::string &, const std::string &, InputParameters &)>(&FEProblemBase::addAuxVariable);
+}
 
 void
 AddElementalFieldAction::act()
 {
-  std::set<SubdomainID> blocks;
-  std::vector<SubdomainName> block_param = getParam<std::vector<SubdomainName>>("block");
-  for (const auto & subdomain_name : block_param)
-  {
-    SubdomainID blk_id = _problem->mesh().getSubdomainID(subdomain_name);
-    blocks.insert(blk_id);
-  }
-
-  FEType fe_type(CONSTANT, MONOMIAL);
+  init();
 
   std::string variable = name();
-
-  if (blocks.empty())
-    _problem->addAuxVariable(variable, fe_type);
-  else
-    _problem->addAuxVariable(variable, fe_type, &blocks);
+  addVariable(variable);
 }

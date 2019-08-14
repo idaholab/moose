@@ -1,5 +1,7 @@
 # ArrayMooseVariable
 
+!syntax description /Variables/ArrayMooseVariable
+
 An array variable is define as a set of standard field variables with the same finite element family and order.
 Each standard variable of an array variable is referred to as a component of the array variable.
 An array kernel is a MOOSE kernel operating on an array variable and assembles the residuals and Jacobians for all the components of the array variable.
@@ -87,3 +89,9 @@ Future work:
 - To change the current dof ordering for elemental variables so that we can avoid bunch of if statements with `isNodal()` in `MooseVariableFE.C`, (refer to [libMesh Issue 2114](https://github.com/libMesh/libmesh/issues/2114).
 - To use Eigen::Map for faster solution vector access.
 - To implement ArrayInterfaceKernel and ArrayConstraints.
+
+!syntax parameters  /Variables/ArrayMooseVariable
+
+!syntax inputs /Variables/ArrayMooseVariable
+
+!syntax children /Variables/ArrayMooseVariable

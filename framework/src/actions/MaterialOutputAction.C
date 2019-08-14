@@ -15,6 +15,8 @@
 #include "Material.h"
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
+#include "MooseEnum.h"
+#include "MooseVariableConstMonomial.h"
 
 #include "libmesh/utility.h"
 
@@ -194,13 +196,14 @@ MaterialOutputAction::act()
 
   if (_current_task == "add_output_aux_variables")
   {
+    auto params = _factory.getValidParams("MooseVariableConstMonomial");
+    // currently only elemental variables are support for material property output
+    params.set<MooseEnum>("order") = "CONSTANT";
+    params.set<MooseEnum>("family") = "MONOMIAL";
 
     // Create the AuxVariables
-    FEType fe_type(
-        CONSTANT,
-        MONOMIAL); // currently only elemental variables are support for material property output
     for (const auto & var_name : material_names)
-      _problem->addAuxVariable(var_name, fe_type);
+      _problem->addAuxVariable("MooseVariableConstMonomial", var_name, params);
   }
   else
   {

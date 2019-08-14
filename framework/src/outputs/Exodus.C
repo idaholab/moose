@@ -431,3 +431,9 @@ Exodus::outputEmptyTimestep()
 
   _exodus_initialized = true;
 }
+
+void
+Exodus::clear()
+{
+  _exodus_io_ptr.reset();
+}
