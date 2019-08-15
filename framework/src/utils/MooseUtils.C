@@ -748,7 +748,7 @@ split(const std::string & str, const std::string & delimiter)
     pos = str.find(delimiter, prev);
     output.push_back(str.substr(prev, pos - prev));
     prev = pos + delimiter.length();
-  } while (pos != string::npos);
+  } while (pos != std::string::npos);
   return output;
 }
 
