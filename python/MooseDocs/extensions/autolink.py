@@ -70,7 +70,7 @@ def createTokenHelper(key, parent, info, page, use_key_in_modal=False, optional=
         source = common.project_find(info[key])
         if len(source) == 1:
             src_link = SourceLink(parent)
-            src = unicode(source[0])
+            src = str(source[0])
             content = common.fix_moose_header(common.read(os.path.join(MooseDocs.ROOT_DIR, src)))
             code = core.Code(None, language=common.get_language(src), content=content)
             local = src.replace(MooseDocs.ROOT_DIR, '')
@@ -136,7 +136,7 @@ class RenderLinkBase(components.RenderComponent):
         if desired is page:
             url = '#{}'.format(bookmark) if bookmark else '#'
         else:
-            url = unicode(desired.relativeDestination(page))
+            url = str(desired.relativeDestination(page))
             if bookmark:
                 url += '#{}'.format(bookmark)
 
@@ -172,7 +172,7 @@ class RenderLinkBase(components.RenderComponent):
             self._createOptionalContent(parent, token, page)
             return None
 
-        url = unicode(desired.relativeDestination(page))
+        url = str(desired.relativeDestination(page))
         head = heading.find_heading(self.translator, desired, bookmark)
 
         tok = tokens.Token(None)

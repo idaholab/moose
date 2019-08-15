@@ -25,7 +25,7 @@ class MooseDataFrame(object):
     OLDFILE = 2
     UPDATED = 3
 
-    def __init__(self, filename, index=None, run_start_time=None):
+    def __init__(self, filename, index=None, run_start_time=0.0):
 
         self.filename = filename
         self.modified = None
@@ -51,7 +51,7 @@ class MooseDataFrame(object):
         """
         return (key in self.data)
 
-    def __nonzero__(self):
+    def __bool__(self):
         """
         Return False if the data is empty.
         """

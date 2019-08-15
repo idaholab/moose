@@ -13,7 +13,7 @@ import os
 import collections
 import yaml
 
-from eval_path import eval_path
+from .eval_path import eval_path
 
 class Loader(yaml.Loader):
     """

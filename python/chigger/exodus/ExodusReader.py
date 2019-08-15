@@ -45,7 +45,7 @@ class ExodusReaderErrorObserver(object):
         """
         self._errors.append(args)
 
-    def __nonzero__(self):
+    def __bool__(self):
         """
         Return True if an error occured.
         """

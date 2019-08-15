@@ -31,9 +31,9 @@ class CommonExtension(command.CommandExtension):
     def postTokenize(self, ast, page, meta, reader): #pylint: disable=unused-argument
         if ast.is_root:
             shortcuts = self.get('shortcuts', dict())
-            for key, value in shortcuts.iteritems():
+            for key, value in shortcuts.items():
                 if isinstance(value, dict):
-                    for k, v in value.iteritems():
-                        core.Shortcut(ast, key=unicode(k), link=unicode(v), string=unicode(k))
+                    for k, v in value.items():
+                        core.Shortcut(ast, key=str(k), link=str(v), string=str(k))
                 else:
-                    core.Shortcut(ast, key=unicode(key), link=unicode(value), string=unicode(key))
+                    core.Shortcut(ast, key=str(key), link=str(value), string=str(key))

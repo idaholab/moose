@@ -10,7 +10,7 @@
 #pylint: enable=missing-docstring
 import cgi
 import anytree
-from base import NodeBase
+from .base import NodeBase
 
 class Tag(NodeBase):
     """
@@ -65,7 +65,7 @@ class Tag(NodeBase):
         skip_list = ('close', 'string')
         for key, value in self.iteritems():
             if value and (key not in skip_list):
-                attr_list.append(u'{}="{}"'.format(key, unicode(value).strip()))
+                attr_list.append(u'{}="{}"'.format(key, str(value).strip()))
 
         attr = u' '.join(attr_list)
         if attr:
@@ -110,7 +110,7 @@ class String(NodeBase):
 
     def write(self):
         if self.get('escape'):
-            return cgi.escape(self.get('content'), quote=True)
+            return cgi.escape(str(self.get('content')), quote=True)
         else:
             return self.get('content')
 

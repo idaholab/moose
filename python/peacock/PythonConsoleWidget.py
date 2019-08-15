@@ -221,7 +221,7 @@ class PythonConsoleWidget(QWidget, MooseWidget):
         """
         The user pressed return so process the input line
         """
-        text = unicode(self.input_line.text())
+        text = str(self.input_line.text())
         self.input_line.setText("")
         self.new_line.emit(text)
         if text:

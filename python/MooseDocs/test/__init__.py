@@ -127,7 +127,7 @@ class MooseDocsTestCase(unittest.TestCase):
         self.assertLatex(arg, tname, tname, string, size, **kwargs)
 
     def assertAttributes(self, node, **kwargs):
-        for key, value in kwargs.iteritems():
+        for key, value in kwargs.items():
             key = key.rstrip('_')
             self.assertEqual(node[key], value)
 

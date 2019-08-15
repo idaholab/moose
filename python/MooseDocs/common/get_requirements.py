@@ -77,7 +77,7 @@ def get_requirements(directories, specs, prefix='F', category=None):
             if fname in specs:
                 _add_requirements(out, location, filename)
 
-    for i, requirements in enumerate(out.itervalues()):
+    for i, requirements in enumerate(out.values()):
         for j, req in enumerate(requirements):
             if category:
                 req.label = "{}{}.{}.{}".format(prefix, category, i+1, j+1)
@@ -156,7 +156,7 @@ def _add_requirements(out, location, filename):
             req = Requirement(name=child.name,
                               path=os.path.relpath(os.path.dirname(filename), location),
                               filename=filename,
-                              text=unicode(text),
+                              text=str(text),
                               text_line=child.line('requirement', None),
                               design=local_design.split(),
                               design_line=local_design_line,
@@ -187,7 +187,7 @@ def _add_requirements(out, location, filename):
                 req.details.append(Detail(name=grandchild.name,
                                           path=req.path,
                                           filename=filename,
-                                          text=unicode(detail),
+                                          text=str(detail),
                                           text_line=grandchild.line('detail')))
 
 

@@ -67,7 +67,7 @@ class BibtexExtension(command.CommandExtension):
                 db = parse_file(bfile)
             except UndefinedMacro as e:
                 msg = "The BibTeX file %s has an undefined macro:\n%s"
-                LOG.warning(msg, bfile, e.message)
+                LOG.warning(msg, bfile, e)
 
             #TODO: https://bitbucket.org/pybtex-devs/pybtex/issues/93/
             #      databaseadd_entries-method-not-considering

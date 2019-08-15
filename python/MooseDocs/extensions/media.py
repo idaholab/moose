@@ -131,7 +131,7 @@ class RenderImage(components.RenderComponent):
         src = token['src']
         if not src.startswith('http'):
             node = self.translator.findPage(src)
-            src = unicode(node.relativeSource(page))
+            src = str(node.relativeSource(page))
 
         return html.Tag(parent, 'img', token, src=src)
 
@@ -168,7 +168,7 @@ class RenderVideo(components.RenderComponent):
         src = token['src']
         if not src.startswith('http'):
             node = self.translator.findPage(src)
-            src = unicode(node.relativeSource(page))
+            src = str(node.relativeSource(page))
 
         tstart = token['tstart']
         tstop = token['tstop']

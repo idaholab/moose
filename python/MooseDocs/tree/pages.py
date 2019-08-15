@@ -72,7 +72,7 @@ class Page(mooseutils.AutoPropertyMixin):
         return '{}: {}, {}'.format(mooseutils.colorText(self.__class__.__name__, self.COLOR),
                                    self.local, self.source)
 
-@mooseutils.addProperty('content', ptype=unicode, default=u'')
+@mooseutils.addProperty('content', ptype=str, default=u'')
 class Text(Page):
     """Text only Page node for unit testing."""
     COLOR = 'GREEN'

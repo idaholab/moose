@@ -10,7 +10,7 @@
 #pylint: enable=missing-docstring
 import re
 import copy
-from base import NodeBase
+from .base import NodeBase
 from MooseDocs.common import exceptions
 
 def parse_style(token):
@@ -44,7 +44,7 @@ def escape(text):
 
     regex_list = []
     for key in sorted(conv.keys(), key=lambda item: - len(item)): #pylint: disable=consider-iterating-dictionary
-        regex_list.append(re.escape(unicode(key)))
+        regex_list.append(re.escape(str(key)))
     regex = re.compile('|'.join(regex_list))
     return regex.sub(lambda match: conv[match.group()], text)
 
@@ -177,6 +177,6 @@ class String(NodeBase):
 def create_settings(*args, **kwargs):
     """Creates token with key, value pairs settings application."""
     args = list(args)
-    args += ["{}={}".format(k, v) for k, v in kwargs.iteritems()]
+    args += ["{}={}".format(k, v) for k, v in kwargs.items()]
     opt = Bracket(None, escape=False, string=u",".join(args))
     return opt

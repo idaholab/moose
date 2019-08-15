@@ -86,7 +86,7 @@ class ColumnCommand(command.CommandComponent):
 
         icon = self.settings.get('icon', None)
         if icon:
-            materialicon.Icon(col, icon=unicode(icon), class_='moose-col-icon')
+            materialicon.Icon(col, icon=str(icon), class_='moose-col-icon')
 
         return col
 

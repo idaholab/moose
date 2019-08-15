@@ -348,7 +348,7 @@ def git_commit(working_dir=os.getcwd()):
     Return the current SHA from git.
     """
     out = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=working_dir)
-    return out.strip(' \n')
+    return out.strip(b' \n')
 
 def git_commit_message(sha, working_dir=os.getcwd()):
     """
@@ -370,7 +370,7 @@ def git_ls_files(working_dir=os.getcwd()):
     Return a list of files via 'git ls-files'.
     """
     out = set()
-    for fname in subprocess.check_output(['git', 'ls-files'], cwd=working_dir).split('\n'):
+    for fname in subprocess.check_output(['git', 'ls-files'], cwd=working_dir, encoding='utf-8').split('\n'):
         out.add(os.path.abspath(os.path.join(working_dir, fname)))
     return out
 
@@ -391,7 +391,7 @@ def git_root_dir(working_dir=os.getcwd()):
     try:
         return subprocess.check_output(['git', 'rev-parse', '--show-toplevel'],
                                        cwd=working_dir,
-                                       stderr=subprocess.STDOUT).strip('\n')
+                                       stderr=subprocess.STDOUT).decode('utf-8').strip('\n')
     except subprocess.CalledProcessError:
         print("The supplied directory is not a git repository: {}".format(working_dir))
     except OSError:

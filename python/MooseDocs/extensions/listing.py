@@ -137,12 +137,12 @@ class FileListingCommand(LocalListingCommand):
             # Create modal for display the files a popup
             code = core.Code(None, language=lang, content=content)
             link = floats.create_modal_link(flt,
-                                            url=unicode(rel_filename),
+                                            url=str(rel_filename),
                                             content=code,
-                                            title=unicode(filename),
+                                            title=str(filename),
                                             string=u'({})'.format(rel_filename))
             link.name = 'ListingLink'
-            link['data-tooltip'] = unicode(rel_filename)
+            link['data-tooltip'] = str(rel_filename)
 
         return parent
 
@@ -188,7 +188,7 @@ class InputListingCommand(FileListingCommand):
             if node is None:
                 msg = "Unable to find block '{}' in {}."
                 raise exceptions.MooseDocsException(msg, block, filename)
-            out.append(unicode(node.render()))
+            out.append(str(node.render()))
         return '\n'.join(out)
 
 def get_listing_options(token):

@@ -87,7 +87,7 @@ class Extension(mixins.ConfigObject, mixins.TranslatorObject):
         Called after to reading the file.
 
         Input:
-             content[unicode]: A copy of the content read from the page.
+             content[str]: A copy of the content read from the page.
              page[pages.Source]: The source object representing the content.
              meta[Meta]: Meta data object for storing data on the node (see translators.py)
         """
@@ -260,7 +260,7 @@ class TokenComponent(Component, mixins.ReaderObject):
         if self.PARSE_SETTINGS and ('settings' in info):
             self.__settings, _ = parse_settings(defaults, info['settings'])
         else:
-            self.__settings = {k:v[0] for k, v in defaults.iteritems()}
+            self.__settings = {k:v[0] for k, v in defaults.items()}
 
         # Call user method and reset settings
         token = self.createToken(parent, info, page)

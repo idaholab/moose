@@ -58,7 +58,7 @@ class TestTokenComponent(unittest.TestCase):
             self.assertIsInstance(defaults[key], tuple)
             self.assertEqual(len(defaults[key]), 2)
             self.assertEqual(defaults[key][0], u'')
-            self.assertIsInstance(defaults[key][1], unicode)
+            self.assertIsInstance(defaults[key][1], str)
 
     def testExceptions(self):
         """

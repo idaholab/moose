@@ -156,7 +156,7 @@ def get_items(options):
             else:
                 items.append(dict(root_dir=value, content=None))
     elif isinstance(options, dict):
-        for _, value in options.iteritems():
+        for _, value in options.items():
             content = value.get('content', None)
             items.append(dict(root_dir=value['root_dir'], content=content))
 

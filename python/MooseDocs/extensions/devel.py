@@ -115,7 +115,7 @@ class ComponentSettings(command.CommandComponent):
                   "'defaultConfig' method."
             raise exceptions.MooseDocsException(msg, mod, obj)
 
-        rows = [[key, value[0], value[1]] for key, value in settings.iteritems()]
+        rows = [[key, value[0], value[1]] for key, value in settings.items()]
         tbl = table.builder(rows, headings=[u'Key', u'Default', u'Description'])
         tbl.parent = master
 

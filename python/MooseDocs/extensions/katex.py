@@ -63,13 +63,13 @@ class KatexExtension(command.CommandExtension):
             renderer.addJavaScript('katex', "contrib/katex/katex.min.js", head=True)
 
             if self.get('macros', None):
-                mc = ','.join('"{}":"{}"'.format(k, v) for k, v in self.get('macros').iteritems()) #pylint: disable=no-member
+                mc = ','.join('"{}":"{}"'.format(k, v) for k, v in self.get('macros').items()) #pylint: disable=no-member
                 self.macros = '{' + mc + '}'
 
         elif isinstance(renderer, renderers.LatexRenderer):
             renderer.addPackage('amsfonts')
             if self.get('macros', None):
-                for k, v in self.get('macros').iteritems(): #pylint: disable=no-member
+                for k, v in self.get('macros').items(): #pylint: disable=no-member
                     renderer.addNewCommand(k, v)
 
     def postTokenize(self, ast, page, meta, reader):
@@ -141,7 +141,7 @@ class KatexBlockEquationComponent(components.TokenComponent):
         label = self.LABEL_RE.search(info['equation'])
         if label:
             token.set('label', label.group('id'))
-            token.set('tex', token['tex'].replace(label.group().encode('ascii'), ''))
+            token.set('tex', token['tex'].replace(str(label.group()), ''))
 
         return parent
 
@@ -192,10 +192,10 @@ class RenderLatexEquation(components.RenderComponent):
         if self.extension.macros:
             config['macros'] = self.extension.macros
 
-        config_str = ','.join('{}:{}'.format(key, value) for key, value in config.iteritems())
+        config_str = ','.join('{}:{}'.format(key, value) for key, value in config.items())
         content = u'var element = document.getElementById("%s");' % token['bookmark']
         content += u'katex.render("%s", element, {%s});' % \
-                   (token['tex'].encode('string-escape'), config_str.encode('string-escape'))
+                   (token['tex'].encode('unicode_escape'), config_str.encode('unicode_escape'))
         html.String(script, content=content)
 
         return parent

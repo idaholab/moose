@@ -37,7 +37,7 @@ def builder(rows, headings=None, form=None):
             if isinstance(h, tokens.Token):
                 h.parent = th
             else:
-                tokens.String(th, content=unicode(h))
+                tokens.String(th, content=str(h))
 
     tbody = TableBody(node)
     for data in rows:
@@ -47,7 +47,7 @@ def builder(rows, headings=None, form=None):
             if isinstance(d, tokens.Token):
                 d.parent = tr
             else:
-                tokens.String(tr, content=unicode(d))
+                tokens.String(tr, content=str(d))
 
     if form is None:
         form = 'L'*len(rows[0])

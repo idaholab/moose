@@ -50,7 +50,7 @@ class ConfigObject(object):
         error_on_unknown = kwargs.pop('error_on_unknown', True)
 
         unknown = []
-        for key, value in kwargs.iteritems():
+        for key, value in kwargs.items():
 
             if key not in self.__config:
                 unknown.append(key)

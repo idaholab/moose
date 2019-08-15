@@ -660,7 +660,7 @@ class RenderError(components.RenderComponent):
         html.String(head, content=u'Tokenize Error')
         p = html.Tag(content, 'p')
 
-        html.String(p, content=unicode(token['message']))
+        html.String(p, content=str(token['message']))
         html.Tag(p, 'br', close=False)
         if token.info:
             html.String(p, content=u'{}:{}'.format(page.local, token.info.line))

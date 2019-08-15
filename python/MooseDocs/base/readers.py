@@ -17,7 +17,7 @@ import MooseDocs
 from MooseDocs import common
 from MooseDocs.common import mixins
 from MooseDocs.tree import tokens, pages
-from lexers import RecursiveLexer
+from .lexers import RecursiveLexer
 
 LOG = logging.getLogger(__name__)
 
@@ -65,13 +65,13 @@ class Reader(mixins.ConfigObject, mixins.ComponentObject):
 
         Inputs:
             root[tokens.Token]: The root node for the AST.
-            content[unicode:tree.page.PageNodeBase]: The content to parse, either as a unicode
+            content[str:tree.page.PageNodeBase]: The content to parse, either as a str
                                                      string or a page node object.
         """
         # Type checking
         if MooseDocs.LOG_LEVEL == logging.DEBUG:
             common.check_type('root', root, tokens.Token)
-            common.check_type('content', content, unicode)
+            common.check_type('content', content, str)
 
         # Tokenize
         self.__lexer.tokenize(root, content, page, self.__lexer.grammar(group), line)

@@ -20,7 +20,7 @@ from mooseutils.yaml_load import yaml_load
 import MooseDocs
 from MooseDocs import common
 from MooseDocs.tree import pages
-from check import check
+from .check import check
 
 def command_line_options(subparser, parent):
     """
@@ -142,7 +142,7 @@ def _init_large_media():
     log = logging.getLogger('MooseDocs._init_large_media')
     status = common.submodule_status()
     large_media = os.path.realpath(os.path.join(MooseDocs.MOOSE_DIR, 'large_media'))
-    for submodule, status in status.iteritems():
+    for submodule, status in status.items():
         if ((os.path.realpath(os.path.join(MooseDocs.MOOSE_DIR, submodule)) == large_media)
                 and (status == '-')):
             log.info("Initializing the 'large_media' submodule for storing images above 1MB.")
@@ -197,7 +197,7 @@ def main(options):
     # Dump page tree
     if options.dump:
         for page in translator.content:
-            print '{}: {}'.format(page.local, page.source)
+            print('{}: {}'.format(page.local, page.source))
         sys.exit()
 
     # Set default for --clean: clean when --files is NOT used.

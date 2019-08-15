@@ -9,7 +9,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import mooseutils
-from box import box
+from .box import box
 def report_error(message, filename, line=None, src='', traceback=None, prefix=u'ERROR'):
     """
     Helper for reporting error to logging module.

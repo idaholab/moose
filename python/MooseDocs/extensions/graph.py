@@ -149,7 +149,7 @@ class RenderScatter(components.RenderComponent):
     HTML_TEMPLATE = GraphTemplate('scatter.js')
 
     def createHTML(self, parent, token, page):
-        plot_id = unicode(uuid.uuid4())
+        plot_id = str(uuid.uuid4())
         content = self.HTML_TEMPLATE(id_=plot_id,
                                      data=repr(token['data']),
                                      layout=repr(token['layout']))

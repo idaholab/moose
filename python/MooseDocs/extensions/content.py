@@ -100,7 +100,7 @@ class ContentExtension(command.CommandExtension):
                 path = node.relativeDestination(page)
                 headings[key].append((text, path, label))
 
-        for value in headings.itervalues():
+        for value in headings.values():
             value.sort(key=lambda x: x[2])
 
         return headings
@@ -161,7 +161,7 @@ class TableOfContentsCommand(command.CommandComponent):
             LOG.warning(common.report_error(msg, page.source, info.line, info[0], prefix='WARNING'))
 
         levels = self.settings['levels']
-        if isinstance(levels, (str, unicode)):
+        if isinstance(levels, (str, str)):
             levels = [int(l) for l in levels.split()]
 
         return TableOfContents(parent,
@@ -184,9 +184,9 @@ class RenderContentToken(components.RenderComponent):
                 if head in links:
                     p = self.translator.findPage(links[head])
                     dest = p.relativeDestination(page)
-                    html.Tag(h, 'a', href=dest, string=unicode(head) + u' ')
+                    html.Tag(h, 'a', href=dest, string=str(head) + u' ')
                 else:
-                    html.String(h, content=unicode(head))
+                    html.String(h, content=str(head))
 
             row = html.Tag(parent, 'div', class_='row')
             for chunk in mooseutils.make_chunks(list(items), 3):
@@ -194,7 +194,7 @@ class RenderContentToken(components.RenderComponent):
                 ul = html.Tag(col, 'ul', class_='moose-a-to-z')
                 for text, path, _ in chunk:
                     li = html.Tag(ul, 'li')
-                    html.Tag(li, 'a', href=path, string=unicode(text.replace('.md', '')))
+                    html.Tag(li, 'a', href=path, string=str(text.replace('.md', '')))
 
     def createLatex(self, parent, token, page):
 
@@ -235,7 +235,7 @@ class RenderAtoZ(components.RenderComponent):
             items = headings[letter]
             id_ = uuid.uuid4()
             btn = html.Tag(buttons, 'a',
-                           string=unicode(letter.upper()),
+                           string=str(letter.upper()),
                            class_='btn moose-a-to-z-button',
                            href='#{}'.format(id_))
 
@@ -245,8 +245,8 @@ class RenderAtoZ(components.RenderComponent):
 
             html.Tag(parent, 'h{:d}'.format(int(token['level'])),
                      class_='moose-a-to-z',
-                     id_=unicode(id_),
-                     string=unicode(letter))
+                     id_=str(id_),
+                     string=str(letter))
 
             row = html.Tag(parent, 'div', class_='row')
             for chunk in mooseutils.make_chunks(list(items), 3):
@@ -254,7 +254,7 @@ class RenderAtoZ(components.RenderComponent):
                 ul = html.Tag(col, 'ul', class_='moose-a-to-z')
                 for text, path, _ in chunk:
                     li = html.Tag(ul, 'li')
-                    html.Tag(li, 'a', href=path, string=unicode(text))
+                    html.Tag(li, 'a', href=path, string=str(text))
 
     def createLatex(self, parent, token, page):
 
