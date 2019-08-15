@@ -48,7 +48,9 @@ if [[ -n "$go_fast" && $# != 1 ]]; then
 fi
 
 # Set PETSc envir
-export PETSC_DIR=$SCRIPT_DIR/../petsc
+if [ -z "$PETSC_DIR" ]; then
+  export PETSC_DIR=$SCRIPT_DIR/../petsc
+fi
 export PETSC_ARCH=arch-moose
 
 
@@ -71,7 +73,8 @@ cd $SCRIPT_DIR/../petsc
 if [ -z "$go_fast" ]; then
   rm -rf $SCRIPT_DIR/../petsc/$PETSC_ARCH
 
-  ./configure --download-hypre=1 \
+  ./configure --prefix=$PETSC_DIR \
+      --download-hypre=1 \
       --with-ssl=0 \
       --with-debugging=no \
       --with-pic=1 \
@@ -81,7 +84,6 @@ if [ -z "$go_fast" ]; then
       --with-fc=mpif90 \
       --download-fblaslapack=1 \
       --download-metis=1 \
-      --download-ptscotch=1 \
       --download-parmetis=1 \
       --download-superlu_dist=1 \
       --download-mumps=1 \
@@ -97,9 +99,9 @@ if [ -z "$go_fast" ]; then
       --with-cxx-dialect=C++11 \
       --with-fortran-bindings=0 \
       --with-sowing=0 \
-      $* \
-
-   make all
-else
-   make all
+      PETSC_DIR=$PWD
 fi
+
+
+make PETSC_DIR=$PWD all -j ${MOOSE_JOBS:-1}
+make PETSC_DIR=$PWD install
