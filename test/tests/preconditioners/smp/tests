@@ -1,5 +1,5 @@
 [Tests]
-  design = SingleMatrixPrecondioner.md
+  design = SingleMatrixPreconditioner.md
   issues = '#1048'
 
   [smp]
