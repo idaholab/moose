@@ -71,6 +71,12 @@
                 'implicit_convergence_astabledirk4_bootstrap.csv'
 
       detail = "that demonstrate the correct temporal convergence rates for"
+
+     # Limited to OPT because it using the mms python module to run a test multiple times with
+     # increasing refinement. On certain machines and with a debug build this can be rather slow. The
+     # tests here are for a convergence study for the various time integrators, individual tests of
+     # the integrators exist in other directories.
+     method = 'OPT'
     []
 
     [midpoint]
