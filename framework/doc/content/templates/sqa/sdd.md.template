@@ -45,7 +45,7 @@ factor will affect the functional design.
 
 ## Definitions and Acronyms id=definitions-and-acronyms
 
-!template field key=definitions-and-acronyms
+!template field key=definitions-and-acronyms required=False
 This section defines, or provides the definition of, all terms and acronyms required to properly
 understand this specification.
 
@@ -87,7 +87,7 @@ Define specific acronyms.
 
 ## Design Stakeholders and Concerns id=design-stakeholders-and-concerns
 
-!template field key=design-stakeholders-and-concerns
+!template field key=design-stakeholders-and-concerns required=False
 
 ### Design Stakeholders id=design-stakeholders
 
