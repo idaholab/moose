@@ -69,16 +69,16 @@ documentation can be found in [MooseDocs](MooseDocs/generate.md optional=True).
 
 !template! item key=system-scope
 The purpose of this software is to provide several libraries that can be used to build an application
-based upon the [!ac](MOOSE) framework. Additionally several useful python utilities will be provided
-assisting developers and users in end-to-end [!ac](FEM) analysis. A brief overview of the major
+based upon the framework. Additionally, several utilities are provided
+for assisting developers and users in end-to-end [!ac](FEM) analysis. A brief overview of the major
 components are listed here:
 
 | Component | Description |
 | :- | :- |
-| framework library | The base system that all MOOSE-based applications must be built from |
-| module libraries | optional "physics" libraries that may be used in an application to provide capability |
+| framework library | The base system from which all MOOSE-based applications are created |
+| module libraries | Optional "physics" libraries that may be used in an application to provide capability |
 | build system | The system responsible for creating applications for a series of libraries and applications |
-| test harness | The extendable testing system for find, scheduling, running, and reporting regression tests |
+| test harness | The extendable testing system for finding, scheduling, running, and reporting regression tests |
 | "peacock" | The [!ac](GUI) for building input files, executing applications, and displaying results |
 | MooseDocs | The extendable markdown system for MOOSE providing common documentation and requirements enforcement |
 | "stork" | The script and templates for generating a new MOOSE-based application ready for building and testing |
@@ -106,7 +106,7 @@ specific packages to be installed prior to using MOOSE, which can be found on th
 
 !media media/sqa/code_platform.png
        id=code_platform
-       caption=Diagram of the MOOSE code platform
+       caption=A diagram of the MOOSE code platform.
        style=width=50%;
 
 !template-end!
@@ -135,7 +135,7 @@ and performance. The mitigation plan for each of these can be addressed. For cor
 development requires either regression or unit testing for all new code added to the repository.
 The project contains several comparisons against analytical solutions where possible and also
 other verification methods such as [MMS](/mms.md optional=True). For stability, [!ac](MOOSE) maintains
-multiple branches to incorporate several layers of testing both internally and for downstream
+multiple branches to incorporate several layers of testing both internally and for dependent
 applications. Finally, performance tests are also performed as part of the the normal testing suite
 to monitor code change impacts to performance.
 !template-end!
@@ -179,7 +179,7 @@ At a high level, the system is designed to process [!ac](HIT) input files to con
 objects that will constitute an [!ac](FE) simulation. Some of the objects in the simulation may
 in turn load other file-based resources to complete the simulation. Examples include meshes
 or data files. The system will then assemble systems of equations and solve them using the
-libraries of the [#dependencies-and-limitations](Code Platform). The system can then output the
+libraries of the [Code Platform](#dependencies-and-limitations). The system can then output the
 solution in one or more supported output formats commonly used for visualization.
 !template-end!
 
@@ -192,14 +192,14 @@ to assist in creating input files and launching executables on the command line.
 
 !template! item key=system-design-interface
 All external system interaction is performed either through file [!ac](I/O) or through local
-[!ac](API) calls. Neither the [!ac](MOOSE) framework, nor the modules are designed to interact
+[!ac](API) calls. Neither the framework, nor the modules are designed to interact
 with any external system directly through remote procedure calls. Any code to code coupling
-performed through the [!ac](MOOSE) framework is done directly through API calls either in
+performed using the framework are done directly through API calls either in
 a static binary or after loading shared libraries.
 !template-end!
 
 !template! item key=security-structure
-The [!ac](MOOSE) framework does not require any elevated privileges to operate and does not
+The framework does not require any elevated privileges to operate and does not
 run any stateful services, daemons or other network programs. Distributed runs rely on the
 [!ac](MPI) library.
 !template-end!

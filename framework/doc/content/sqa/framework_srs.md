@@ -91,7 +91,7 @@ that is designed to run across several nodes of a cluster system. As such, all o
 of the software is through any standard terminal program generally available on all supported
 operating systems. Similarly, for the purpose of interacting through the software, there is only
 a single user, "the user", which interacts with the software through the command-line. MOOSE does
-not maintain any back-end database or interact with any system daemons. It is a simple executable,
+not maintain any back-end database or interact with any system daemons. It is a executable,
 which may be launched from the command line and writes out various result files as it runs.
 
 !media media/sqa/usage_diagram_uml.svg
