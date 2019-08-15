@@ -1,3 +1,19 @@
+#-----------------------------------------------------------------------------#
+# This Dockerfile builds MPICH, PETSc, Libmesh, and finally MOOSE in a way that
+# is designed to take advantage of Docker's build caching.  Nominally, one 
+# would clone MOOSE, then run the build scripts.  This approach would result in
+# unnecessary rebuilding of upstream dependencies due to changes that only 
+# involve MOOSE, leading to unneccessary, redundant use of computating 
+# resources, bandwidth, and storage.
+#
+# To build a MOOSE image, there is one optional argument and two required 
+# arguments to be set using the --build-arg flag.  
+#
+# MOOSE_JOBS: Optional.  Sets number of cores for running make.
+# PETSC_REV: Commit hash of submodule petsc.
+# LIBMESH_REV: Commit hash of submodule libmesh.
+#-----------------------------------------------------------------------------#
+
 FROM ubuntu
 
 WORKDIR /opt
