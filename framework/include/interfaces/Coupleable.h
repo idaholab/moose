@@ -635,6 +635,26 @@ protected:
                                                              unsigned int comp = 0);
 
   /**
+   * Time derivative of a coupled vector variable with respect to the coefficients
+   * @param var_name Name of coupled vector variable
+   * @param comp Component number for vector of coupled vector variables
+   * @return Reference to a VariableValue containing the time derivative of the coupled
+   * vector variable with respect to the coefficients
+   */
+  virtual const VariableValue & coupledVectorDotDu(const std::string & var_name,
+                                                         unsigned int comp = 0);
+
+  /**
+   * Second time derivative of a coupled vector variable with respect to the coefficients
+   * @param var_name Name of coupled vector variable
+   * @param comp Component number for vector of coupled vector variables
+   * @return Reference to a VariableValue containing the time derivative of the coupled vector
+   * variable with respect to the coefficients
+   */
+  virtual const VariableValue & coupledVectorDotDotDu(const std::string & var_name,
+                                                            unsigned int comp = 0);
+
+  /**
    * Time derivative of a coupled array variable
    * @param var_name Name of coupled array variable
    * @param comp Component number for vector of coupled array variables
