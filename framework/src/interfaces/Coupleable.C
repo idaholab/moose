@@ -912,7 +912,7 @@ Coupleable::coupledDotDotDu(const std::string & var_name, unsigned int comp)
   {
     if (_c_nodal)
       return var->dofValuesDuDotDotDuNeighbor();
-    return var->duDotDotDu();
+    return var->duDotDotDuNeighbor();
   }
 }
 
