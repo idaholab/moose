@@ -2,6 +2,8 @@ FROM ubuntu
 
 WORKDIR /opt
 
+ARG MOOSE_JOBS=1
+
 #-----------------------------------------------------------------------------#
 # Install aptitutde packages and clear cache
 #-----------------------------------------------------------------------------#
@@ -54,13 +56,13 @@ FCFLAGS='' \
 F90FLAGS='' \
 F77FLAGS='' ; \
 # Build and install
-make -j $(grep -c ^processor /proc/cpuinfo) ; \
+make -j ${MOOSE_JOBS} ; \
 make install ; \
 # Cleanup
 cd ../../ ; rm -rf mpich-3.3*
 
 #-----------------------------------------------------------------------------#
-# Set environment variables for MOOSE deps
+# Set environment variables for MOOSE and deps
 #-----------------------------------------------------------------------------#
 ENV CC=mpicc \
 CXX=mpicxx \
@@ -68,21 +70,31 @@ PETSC_DIR=/usr/local \
 LIBMESH_DIR=/usr/local \
 MOOSE_DIR=/opt/moose
 
-#-----------------------------------------------------------------------------#
-# Copy MOOSE repository into the image
-#-----------------------------------------------------------------------------#
-COPY . ${MOOSE_DIR}
 WORKDIR ${MOOSE_DIR}
 
 #-----------------------------------------------------------------------------#
-# Install submodule dependencies
+# Install PETSc to system path
 #-----------------------------------------------------------------------------#
-RUN export MOOSE_JOBS=$(grep -c ^processor /proc/cpuinfo) ; \
-# Install petsc to system path
+ARG PETSC_REV
+COPY scripts/update_and_rebuild_petsc.sh ${MOOSE_DIR}/scripts/update_and_rebuild_petsc.sh
+RUN git clone https://bitbucket.org/petsc/petsc ; \
+git -C petsc checkout ${PETSC_REV} ; \
 ./scripts/update_and_rebuild_petsc.sh ; \
-rm -rf petsc/* ; \
-# Install libmesh to system path
+rm -rf petsc/* petsc/.* || true
+
+#-----------------------------------------------------------------------------#
+# Install Libmesh to system path
+#-----------------------------------------------------------------------------#
+ARG LIBMESH_REV
+COPY scripts/update_and_rebuild_libmesh.sh ${MOOSE_DIR}/scripts/update_and_rebuild_libmesh.sh
+RUN git clone https://github.com/libMesh/libmesh.git ; \
+git -C libmesh checkout ${LIBMESH_REV} ; \
+git -C libmesh submodule update --init ; \
 ./scripts/update_and_rebuild_libmesh.sh ; \
-rm -rf libmesh/* ; \
-# Build moose tests including framework
-cd test; make -j $MOOSE_JOBS 
+rm -rf libmesh/* libmesh/.* || true
+
+#-----------------------------------------------------------------------------#
+# Copy and build MOOSE framework and tests
+#-----------------------------------------------------------------------------#
+COPY . ${MOOSE_DIR}
+RUN cd test ; make -j ${MOOSE_JOBS}
