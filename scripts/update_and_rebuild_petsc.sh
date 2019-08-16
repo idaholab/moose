@@ -48,9 +48,7 @@ if [[ -n "$go_fast" && $# != 1 ]]; then
 fi
 
 # Set PETSc envir
-if [ -z "$PETSC_DIR" ]; then
-  export PETSC_DIR=$SCRIPT_DIR/../petsc
-fi
+export PETSC_DIR=$SCRIPT_DIR/../petsc
 export PETSC_ARCH=arch-moose
 
 
@@ -66,6 +64,12 @@ if [[ -z "$go_fast" && -z "$skip_sub_update" && $? == 0 && "x$git_dir" == "x" ]]
   fi
 fi
 
+# Set installation prefix if given
+PFX_STR=''
+if [ ! -z "$PETSC_PREFIX" ]; then
+  PFX_STR="--prefix=$PETSC_PREFIX"
+fi
+
 
 cd $SCRIPT_DIR/../petsc
 
@@ -73,7 +77,7 @@ cd $SCRIPT_DIR/../petsc
 if [ -z "$go_fast" ]; then
   rm -rf $SCRIPT_DIR/../petsc/$PETSC_ARCH
 
-  ./configure --prefix=$PETSC_DIR \
+  ./configure $(echo $PFX_STR) \
       --download-hypre=1 \
       --with-ssl=0 \
       --with-debugging=no \
@@ -98,10 +102,8 @@ if [ -z "$go_fast" ]; then
       --F77FLAGS='-fPIC -fopenmp' \
       --with-cxx-dialect=C++11 \
       --with-fortran-bindings=0 \
-      --with-sowing=0 \
-      PETSC_DIR=$PWD
+      --with-sowing=0
 fi
 
-
-make PETSC_DIR=$PWD all -j ${MOOSE_JOBS:-1}
-make PETSC_DIR=$PWD install
+make all -j ${MOOSE_JOBS:-1}
+if [ ! -z "$PETSC_PREFIX" ]; then make install; fi
