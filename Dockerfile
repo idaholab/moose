@@ -77,13 +77,8 @@ make install ; \
 # Cleanup
 cd ../../ ; rm -rf mpich-3.3*
 
-#-----------------------------------------------------------------------------#
-# Set environment variables for MOOSE and deps
-#-----------------------------------------------------------------------------#
 ENV CC=mpicc \
 CXX=mpicxx \
-PETSC_DIR=/usr/local \
-LIBMESH_DIR=/usr/local \
 MOOSE_DIR=/opt/moose
 
 WORKDIR ${MOOSE_DIR}
@@ -95,8 +90,10 @@ ARG PETSC_REV
 COPY scripts/update_and_rebuild_petsc.sh ${MOOSE_DIR}/scripts/update_and_rebuild_petsc.sh
 RUN git clone https://bitbucket.org/petsc/petsc ; \
 git -C petsc checkout ${PETSC_REV} ; \
-./scripts/update_and_rebuild_petsc.sh ; \
+PETSC_PREFIX=/usr/local ./scripts/update_and_rebuild_petsc.sh ; \
 rm -rf petsc/* petsc/.* || true
+
+ENV PETSC_DIR=/usr/local
 
 #-----------------------------------------------------------------------------#
 # Install Libmesh to system path
@@ -108,6 +105,8 @@ git -C libmesh checkout ${LIBMESH_REV} ; \
 git -C libmesh submodule update --init ; \
 ./scripts/update_and_rebuild_libmesh.sh ; \
 rm -rf libmesh/* libmesh/.* || true
+
+ENV LIBMESH_DIR=/usr/local
 
 #-----------------------------------------------------------------------------#
 # Copy and build MOOSE framework and tests
