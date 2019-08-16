@@ -21,6 +21,7 @@ class MooseObject;
  * Material properties get fully described using this structure, including their dependent
  * variables and derivation state.
  */
+template <typename T = Real>
 class FunctionMaterialPropertyDescriptor : public DerivativeMaterialPropertyNameInterface
 {
 public:
@@ -61,7 +62,7 @@ public:
   const std::string & getPropertyName() const { return _property_name; };
 
   /// get the property reference
-  const MaterialProperty<Real> & value() const;
+  const MaterialProperty<T> & value() const;
 
   /// take another derivative
   void addDerivative(const VariableName & var);
@@ -96,7 +97,7 @@ private:
   std::vector<VariableName> _derivative_vars;
 
   /// material property value (this is lazily updated and cached when read through value())
-  mutable const MaterialProperty<Real> * _value;
+  mutable const MaterialProperty<T> * _value;
 
   /// material object that owns this descriptor
   MooseObject * _parent;

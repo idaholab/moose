@@ -253,6 +253,8 @@ private:
   const PerfID _track_grains;
   const PerfID _broadcast_update;
   const PerfID _update_field_info;
+
+  bool _add_halos;
 };
 
 /**
@@ -288,4 +290,3 @@ template <>
 void dataStore(std::ostream & stream, GrainTracker::PartialFeatureData & feature, void * context);
 template <>
 void dataLoad(std::istream & stream, GrainTracker::PartialFeatureData & feature, void * context);
-

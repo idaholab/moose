@@ -27,9 +27,12 @@ ParsedMaterialHelper<T>::ParsedMaterialHelper(const InputParameters & parameters
   : FunctionMaterialBase<T>(parameters),
     FunctionParserUtils(parameters),
     _variable_names(this->_nargs),
-    _mat_prop_descriptors(0),
+    _real_mat_prop_descriptors(0),
+    _real_vec_mat_prop_descriptors(0),
+    _r_two_tens_mat_prop_descriptors(0),
     _tol(0),
-    _map_mode(map_mode)
+    _map_mode(map_mode),
+    _mat_prop_info(0)
 {
 }
 
@@ -74,6 +77,30 @@ ParsedMaterialHelper<T>::functionParse(const std::string & function_expression,
                 mat_prop_expressions,
                 tol_names,
                 tol_values);
+}
+
+template <typename T>
+void
+ParsedMaterialHelper<T>::functionParse(const std::string & function_expression,
+                                       const std::vector<std::pair<std::string, MaterialType> > & mat_prop_info)
+{
+  std::vector<std::string> empty_string_vector;
+  std::vector<Real> empty_real_vector;
+  std::vector<std::string> mat_prop_expressions;
+
+  unsigned int mat_size = mat_prop_info.size();
+  for(unsigned int i = 0; i < mat_size; ++i)
+  {
+    mat_prop_expressions.push_back(mat_prop_info[i].first);
+    _mat_prop_info.push_back(mat_prop_info[i].second);
+  }
+
+  functionParse(function_expression,
+                empty_string_vector,
+                empty_string_vector,
+                mat_prop_expressions,
+                empty_string_vector,
+                empty_real_vector);
 }
 
 template <typename T>
@@ -144,23 +171,23 @@ ParsedMaterialHelper<T>::functionParse(const std::vector<std::string> & function
         if(this->_arg_param_numbers[i] < 0)
         {
           _variable_names[4*i] = this->_arg_param_names[i];
-          _variable_names[4*i+1] = _variable_names[i] + "x";
-          _variable_names[4*i+2] = _variable_names[i] + "y";
-          _variable_names[4*i+3] = _variable_names[i] + "z";
+          _variable_names[4*i+1] = _variable_names[4*i] + "x";
+          _variable_names[4*i+2] = _variable_names[4*i] + "y";
+          _variable_names[4*i+3] = _variable_names[4*i] + "z";
         }
         else
         {
           _variable_names[4*i] = Coupleable::getVar(this->_arg_param_names[i],this->_arg_param_numbers[i])->name();
-          _variable_names[4*i+1] = _variable_names[i] + "x";
-          _variable_names[4*i+2] = _variable_names[i] + "y";
-          _variable_names[4*i+3] = _variable_names[i] + "z";
+          _variable_names[4*i+1] = _variable_names[4*i] + "x";
+          _variable_names[4*i+2] = _variable_names[4*i] + "y";
+          _variable_names[4*i+3] = _variable_names[4*i] + "z";
           std::string to_replace = this->_arg_param_names[i] + std::to_string(i);
           for(unsigned int j = 0; j < function.size(); ++j)
           {
             std::size_t variable_location = function[j].find(to_replace);
             while(variable_location != std::string::npos)
             {
-              function[j].replace(variable_location,to_replace.length(),_variable_names[j]);
+              function[j].replace(variable_location,to_replace.length(),_variable_names[4*i]);
               variable_location = function[j].find(to_replace);
             }
           }
@@ -200,15 +227,48 @@ ParsedMaterialHelper<T>::functionParse(const std::vector<std::string> & function
 
   // get all material properties
   unsigned int nmat_props = mat_prop_expressions.size();
-  _mat_prop_descriptors.resize(nmat_props);
+  int j = 0;
+  for (unsigned int i = 0; i < nmat_props; ++i)
+  {
+    if(_mat_prop_info[i] == RTwoTens)
+    {
+      _r_two_tens_mat_prop_descriptors.push_back(FunctionMaterialPropertyDescriptor<RankTwoTensor>(mat_prop_expressions[i], this));
+      variables += "," + _r_two_tens_mat_prop_descriptors[j].getSymbolName() + "xx";
+      variables += "," + _r_two_tens_mat_prop_descriptors[j].getSymbolName() + "xy";
+      variables += "," + _r_two_tens_mat_prop_descriptors[j].getSymbolName() + "xz";
+      variables += "," + _r_two_tens_mat_prop_descriptors[j].getSymbolName() + "yx";
+      variables += "," + _r_two_tens_mat_prop_descriptors[j].getSymbolName() + "yy";
+      variables += "," + _r_two_tens_mat_prop_descriptors[j].getSymbolName() + "yz";
+      variables += "," + _r_two_tens_mat_prop_descriptors[j].getSymbolName() + "zx";
+      variables += "," + _r_two_tens_mat_prop_descriptors[j].getSymbolName() + "zy";
+      variables += "," + _r_two_tens_mat_prop_descriptors[j].getSymbolName() + "zz";
+      j++;
+    }
+  }
+  j = 0;
+  for (unsigned int i = 0; i < nmat_props; ++i)
+  {
+    if(_mat_prop_info[i] == ReVecVal)
+    {
+      _real_vec_mat_prop_descriptors.push_back(FunctionMaterialPropertyDescriptor<RealVectorValue>(mat_prop_expressions[i], this));
+      variables += "," + _real_vec_mat_prop_descriptors[j].getSymbolName() + "x";
+      variables += "," + _real_vec_mat_prop_descriptors[j].getSymbolName() + "y";
+      variables += "," + _real_vec_mat_prop_descriptors[j].getSymbolName() + "z";
+      j++;
+    }
+  }
+  j = 0;
   for (unsigned int i = 0; i < nmat_props; ++i)
   {
     // parse the material property parameter entry into a FunctionMaterialPropertyDescriptor
-    _mat_prop_descriptors[i] = FunctionMaterialPropertyDescriptor(mat_prop_expressions[i], this);
-
-    // get the fparser symbol name for the new material property
-    variables += "," + _mat_prop_descriptors[i].getSymbolName();
+    if(_mat_prop_info.size() == 0 || _mat_prop_info[i] == Re)
+    {
+      _real_mat_prop_descriptors.push_back(FunctionMaterialPropertyDescriptor<>(mat_prop_expressions[i], this));
+      variables += "," + _real_mat_prop_descriptors[j].getSymbolName();
+      j++;
+    }
   }
+
   // erase leading comma
   variables.erase(0, 1);
   // build the base function
@@ -235,7 +295,11 @@ ParsedMaterialHelper<T>::functionsPostParse()
   functionsOptimize();
 
   // force a value update to get the property at least once and register it for the dependencies
-  for (auto & mpd : _mat_prop_descriptors)
+  for (auto & mpd : _real_mat_prop_descriptors)
+    mpd.value();
+  for (auto & mpd : _real_vec_mat_prop_descriptors)
+    mpd.value();
+  for (auto & mpd : _r_two_tens_mat_prop_descriptors)
     mpd.value();
 }
 
@@ -294,9 +358,32 @@ ParsedMaterialHelper<T>::computeQpProperties()
   }
 
   // insert material property values
-  auto nmat_props = _mat_prop_descriptors.size();
-  for (MooseIndex(_mat_prop_descriptors) i = 0; i < nmat_props; ++i)
-    _func_params[i + this->_nargs] = _mat_prop_descriptors[i].value()[this->_qp];
+  auto nmat_props = _r_two_tens_mat_prop_descriptors.size();
+  int j = 0;
+  for (MooseIndex(_r_two_tens_mat_prop_descriptors) i = 0; i < nmat_props; ++i)
+  {
+    _func_params[j++ + this->_nargs] = _r_two_tens_mat_prop_descriptors[i].value()[this->_qp](0,0);
+    _func_params[j++ + this->_nargs] = _r_two_tens_mat_prop_descriptors[i].value()[this->_qp](0,1);
+    _func_params[j++ + this->_nargs] = _r_two_tens_mat_prop_descriptors[i].value()[this->_qp](0,2);
+    _func_params[j++ + this->_nargs] = _r_two_tens_mat_prop_descriptors[i].value()[this->_qp](1,0);
+    _func_params[j++ + this->_nargs] = _r_two_tens_mat_prop_descriptors[i].value()[this->_qp](1,1);
+    _func_params[j++ + this->_nargs] = _r_two_tens_mat_prop_descriptors[i].value()[this->_qp](1,2);
+    _func_params[j++ + this->_nargs] = _r_two_tens_mat_prop_descriptors[i].value()[this->_qp](2,0);
+    _func_params[j++ + this->_nargs] = _r_two_tens_mat_prop_descriptors[i].value()[this->_qp](2,1);
+    _func_params[j++ + this->_nargs] = _r_two_tens_mat_prop_descriptors[i].value()[this->_qp](2,2);
+  }
+  nmat_props = _real_vec_mat_prop_descriptors.size();
+  for (MooseIndex(_real_vec_mat_prop_descriptors) i = 0; i < nmat_props; ++i)
+  {
+    _func_params[j++ + this->_nargs] = _real_vec_mat_prop_descriptors[i].value()[this->_qp](0);
+    _func_params[j++ + this->_nargs] = _real_vec_mat_prop_descriptors[i].value()[this->_qp](1);
+    _func_params[j++ + this->_nargs] = _real_vec_mat_prop_descriptors[i].value()[this->_qp](2);
+  }
+  nmat_props = _real_vec_mat_prop_descriptors.size();
+  for (MooseIndex(_real_vec_mat_prop_descriptors) i = 0; i < nmat_props; ++i)
+  {
+    _func_params[j++ + this->_nargs] = _real_mat_prop_descriptors[i].value()[this->_qp];
+  }
 
   // set function value
   functionValue();

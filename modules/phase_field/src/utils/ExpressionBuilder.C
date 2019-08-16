@@ -9,6 +9,45 @@
 
 #include "ExpressionBuilder.h"
 
+ExpressionBuilder::EBTerm
+ExpressionBuilder::setEBMaterialPropertyReal(const std::string & name)
+{
+  EBTerm new_term(name.c_str());
+  MatType type = Re;
+  _mat_prop_info.push_back(std::pair<std::string, MatType>(name,type));
+  return new_term;
+}
+
+ExpressionBuilder::EBVectorFunction
+ExpressionBuilder::setEBMaterialPropertyRealVectorValue(const std::string & name)
+{
+  EBVectorFunction new_term;
+  new_term[0] = EBTerm((name + "x").c_str());
+  new_term[1] = EBTerm((name + "y").c_str());
+  new_term[2] = EBTerm((name + "z").c_str());
+  MatType type = ReVecVal;
+  _mat_prop_info.push_back(std::pair<std::string, MatType>(name, type));
+  return new_term;
+}
+
+ExpressionBuilder::EBMatrixFunction
+ExpressionBuilder::setEBMaterialPropertyRankTwoTensor(const std::string & name)
+{
+  EBMatrixFunction new_term(3,3);
+  new_term[0][0] = EBTerm((name + "xx").c_str());
+  new_term[0][1] = EBTerm((name + "xy").c_str());
+  new_term[0][2] = EBTerm((name + "xz").c_str());
+  new_term[1][0] = EBTerm((name + "yx").c_str());
+  new_term[1][1] = EBTerm((name + "yy").c_str());
+  new_term[1][2] = EBTerm((name + "yz").c_str());
+  new_term[2][0] = EBTerm((name + "zx").c_str());
+  new_term[2][1] = EBTerm((name + "zy").c_str());
+  new_term[2][2] = EBTerm((name + "zz").c_str());
+  MatType type = RTwoTens;
+  _mat_prop_info.push_back(std::pair<std::string, MatType>(name,type));
+  return new_term;
+}
+
 ExpressionBuilder::EBTermList
 operator, (const ExpressionBuilder::EBTerm & larg, const ExpressionBuilder::EBTerm & rarg)
 {
@@ -135,6 +174,9 @@ ExpressionBuilder::EBBinaryOpTermNode::precedence() const
     case EQ:
     case NOTEQ:
       return 9;
+    case OR:
+    case AND:
+      return 10;
   }
 
   mooseError("Unknown type.");
@@ -302,6 +344,67 @@ pow(const ExpressionBuilder::EBTerm & left, const ExpressionBuilder::EBTerm & ri
         right.cloneRoot(),                                                                         \
         ExpressionBuilder::EBTernaryFuncTermNode::OP));                                            \
   }
+  /* Need to make constructor for new classes with EBTernaryFuncTermNodes as well as constructor for that
+  ExpressionBuilder::EBVectorFunction op(const ExpressionBuilder::EBTerm & left,                   \
+                               const ExpressionBuilder::EBVectorFunction & middle,                 \
+                               const ExpressionBuilder::EBVectorFunction & right)                  \
+  {                                                                                                \
+    mooseAssert(left._root != NULL,                                                                \
+                "Empty term provided as first argument of the ternary function " #op "()");        \
+    mooseAssert(middle[0]._root != NULL,                                                           \
+                "Empty term provided as second argument of the ternary function " #op "()");       \
+    mooseAssert(right[0]._root != NULL,                                                            \
+                "Empty term provided as third argument of the ternary function " #op "()");        \
+    ExpressionBuilder::EBVectorFunction result;                                                    \
+    for(unsigned int i = 0; i < 3; ++i)                                                            \
+      result.push_back(ExpressionBuilder::EBTerm(new ExpressionBuilder::EBTernaryFuncTermNode(     \
+          left.cloneRoot(),                                                                        \
+          middle[i].cloneRoot(),                                                                   \
+          right[i].cloneRoot(),                                                                    \
+          ExpressionBuilder::EBTernaryFuncTermNode::OP)));                                         \
+    return result;                                                                                 \
+  }
+  ExpressionBuilder::EBMatrixFunction op(const ExpressionBuilder::EBTerm & left,                   \
+                               const ExpressionBuilder::EBMatrixFunction & middle,                 \
+                               const ExpressionBuilder::EBMatrixFunction & right)                  \
+  {                                                                                                \
+    mooseAssert(left._root != NULL,                                                                \
+                "Empty term provided as first argument of the ternary function " #op "()");        \
+    mooseAssert(middle._root != NULL,                                                              \
+                "Empty term provided as second argument of the ternary function " #op "()");       \
+    mooseAssert(right._root != NULL,                                                               \
+                "Empty term provided as third argument of the ternary function " #op "()");        \
+    ExpressionBuilder::EBMatrixFunction::checkAddSize(middle,right);                               \
+    ExpressionBuilder::EBMatrixFunction result(middle.rowNum(), middle.colNum());                                     \
+    for(unsigned int i = 0; i < middle.rowNum(); ++i)                                                       \
+      for(unsigned int j = 0; j < middle.colNum(); ++j)                                                     \
+        result[i][j] = ExpressionBuilder::EBTerm(new ExpressionBuilder::EBTernaryFuncTermNode(     \
+                                                 left.cloneRoot(),                                 \
+                                                 middle[i][j].cloneRoot(),                         \
+                                                 right[i][j].cloneRoot(),                          \
+                                                 ExpressionBuilder::EBTernaryFuncTermNode::OP));   \
+    return result;                                                                                 \
+  }
+  ExpressionBuilder::EBQuaternionFunction op(const ExpressionBuilder::EBTerm & left,               \
+                               const ExpressionBuilder::EBQuaternionFunction & middle,             \
+                               const ExpressionBuilder::EBQuaternionFunction & right)              \
+  {                                                                                                \
+    mooseAssert(left._root != NULL,                                                                \
+                "Empty term provided as first argument of the ternary function " #op "()");        \
+    mooseAssert(middle._root != NULL,                                                              \
+                "Empty term provided as second argument of the ternary function " #op "()");       \
+    mooseAssert(right._root != NULL,                                                               \
+                "Empty term provided as third argument of the ternary function " #op "()");        \
+    ExpressionBuilder::EBQuaternionFunction result;                                                \
+    for(unsigned int i = 0; i < 4; ++i)                                                            \
+      result[i] = ExpressionBuilder::EBTerm(new ExpressionBuilder::EBTernaryFuncTermNode(          \
+          left.cloneRoot(),                                                                        \
+          middle[i].cloneRoot(),                                                                   \
+          right[i].cloneRoot(),                                                                    \
+          ExpressionBuilder::EBTernaryFuncTermNode::OP));                                          \
+    return result;                                                                                 \
+  }
+  */
 TERNARY_FUNC_IMPLEMENT(conditional, CONDITIONAL)
 
 unsigned int
@@ -477,12 +580,14 @@ ExpressionBuilder::EBLogPlogSubstitution::substitute(const EBUnaryFuncTermNode &
 }
 
 ExpressionBuilder::EBTerm::EBTermVector
-ExpressionBuilder::EBTerm::CreateEBTermVector(const std::vector<const char *> symbol)
+ExpressionBuilder::EBTerm::CreateEBTermVector(const std::string & var_name, unsigned int _op_num)
 {
   EBTermVector vec;
-  for(std::vector<const char *>::const_iterator it = symbol.begin();
-      it != symbol.end(); ++it)
-      vec.push_back(*it);
+  for(unsigned int i = 0; i < _op_num; ++i)
+  {
+    EBTerm temp((var_name + std::to_string(i)).c_str());
+    vec.push_back(temp);
+  }
   return vec;
 }
 
@@ -503,9 +608,15 @@ ExpressionBuilder::EBMatrixFunction::EBMatrixFunction(std::vector<std::vector <E
 
 ExpressionBuilder::EBMatrixFunction::EBMatrixFunction(unsigned int i, unsigned int j)
 {
-  _rowNum = i;
-  _colNum = j;
   setSize(i,j);
+}
+
+ExpressionBuilder::EBMatrixFunction::EBMatrixFunction(const RealTensorValue & rhs)
+{
+  this->setSize(3,3);
+  for(unsigned int i = 0; i < 3; ++i)
+    for(unsigned int j = 0; j < 3; ++j)
+      (*this)[i][j] = EBTerm(rhs(i,j));
 }
 
 ExpressionBuilder::EBMatrixFunction &
@@ -595,7 +706,28 @@ operator-(const ExpressionBuilder::EBMatrixFunction & lhs, const ExpressionBuild
   return lhs + (-1 * rhs);
 }
 
-//operator ExpressionBuilder::EBQuaternionFunction()
+ExpressionBuilder::EBMatrixFunction::operator ExpressionBuilder::EBQuaternionFunction() const
+{
+  Real _epsilon = 0.0001;
+  EBQuaternionFunction newQuat;
+  std::cout << (*this).FunctionMatrix.size() << (*this).FunctionMatrix[0].size() << std::endl;
+  ExpressionBuilder::EBTerm temp = (*this)[0][0] + (*this)[1][1] + (*this)[2][2];
+
+  newQuat[0] = conditional(temp > -(1.0 - _epsilon), sqrt(1.0 + temp) / 2.0, EBTerm(0.0));
+  newQuat[1] = conditional(temp > -(1.0 - _epsilon), ((*this)[1][2] - (*this)[2][1]) / (4.0 * newQuat[0]), ExpressionBuilder::EBTerm(0.0));
+  newQuat[2] = conditional(temp > -(1.0 - _epsilon), ((*this)[2][0] - (*this)[0][2]) / (4.0 * newQuat[0]), ExpressionBuilder::EBTerm(0.0));
+  newQuat[3] = conditional(temp > -(1.0 - _epsilon), ((*this)[0][1] - (*this)[1][0]) / (4.0 * newQuat[0]), sqrt(-((*this)[0][0] + (*this)[1][1]) / 2.0));
+
+  newQuat[1] = conditional(abs(newQuat[3] > _epsilon),(*this)[0][2] / (2.0 * newQuat[3]),sqrt(((*this)[0][0] + 1.0) / 2.0));
+  newQuat[2] = conditional(abs(newQuat[3] > _epsilon),(*this)[1][2] / (2.0 * newQuat[3]),conditional(newQuat[1] == 0, EBTerm(1.0), (*this)[1][0] / (2.0 * newQuat[1])));
+  newQuat[3] = conditional(abs(newQuat[3] > _epsilon),newQuat[3],EBTerm(0));
+
+  newQuat[1] = -newQuat[1];
+  newQuat[2] = -newQuat[2];
+  newQuat[3] = -newQuat[3];
+
+  return newQuat;
+}
 
 ExpressionBuilder::EBMatrixFunction::operator std::vector<std::vector<std::string> >() const
 {
@@ -640,13 +772,13 @@ ExpressionBuilder::EBMatrixFunction::operator[](unsigned int i) const
   return FunctionMatrix[i];
 }
 
-ExpressionBuilder::EBMatrixFunction &
-ExpressionBuilder::EBMatrixFunction::operator!() //Implemented as a transpose function
+ExpressionBuilder::EBMatrixFunction
+ExpressionBuilder::EBMatrixFunction::transpose()
 {
   for(unsigned int i = 0; i < _rowNum; ++i)
     for(unsigned int j = i + 1; j < _colNum; ++j)
     {
-      EBTerm temp = (*this)[i][j];
+      ExpressionBuilder::EBTerm temp = (*this)[i][j];
       (*this)[i][j] = (*this)[j][i];
       (*this)[j][i] = temp;
     }
@@ -676,9 +808,59 @@ ExpressionBuilder::EBMatrixFunction::colNum() const
 void
 ExpressionBuilder::EBMatrixFunction::setSize(const unsigned int i, const unsigned int j)
 {
+  _rowNum = i;
+  _colNum = j;
   FunctionMatrix.resize(i);
   for(unsigned int k = 0; k < i; k++)
-    FunctionMatrix.resize(j);
+    for(unsigned int l = 0; l < j; ++l)
+      FunctionMatrix[k].push_back(EBTerm(0));
+}
+
+ExpressionBuilder::EBMatrixFunction
+ExpressionBuilder::EBMatrixFunction::rotVec1ToVec2(ExpressionBuilder::EBVectorFunction & Vec1, ExpressionBuilder::EBVectorFunction & Vec2)
+{
+  EBMatrixFunction rot1_to_z = rotVecToZ(Vec1);
+  EBMatrixFunction rot2_to_z = rotVecToZ(Vec2);
+  return (rot2_to_z.transpose()) * rot1_to_z;
+}
+
+ExpressionBuilder::EBMatrixFunction
+ExpressionBuilder::EBMatrixFunction::rotVecToZ(ExpressionBuilder::EBVectorFunction & Vec)
+{
+  Vec = Vec / Vec.ExpressionBuilder::EBVectorFunction::norm();
+
+  ExpressionBuilder::EBVectorFunction v1;
+  ExpressionBuilder::EBVectorFunction w;
+
+  w[0] = abs(Vec[0]);
+  w[1] = abs(Vec[1]);
+  w[2] = abs(Vec[2]);
+
+  v1[0] = conditional((w[2] >= w[1] && w[1] >= w[0]) || (w[1] >= w[2] && w[2] >= w[0]), EBTerm(1.0),EBTerm(0.0));
+  v1[1] = conditional((w[2] >= w[0] && w[0] >= w[1]) || (w[0] >= w[2] && w[2] >= w[1]), EBTerm(1.0),EBTerm(0.0));
+  v1[2] = conditional((v1[1] == 0.0 && v1[1] == 0.0),1.0,0.0);
+
+  v1 = v1 - (v1 * Vec) * Vec;
+  v1 = v1 / v1.ExpressionBuilder::EBVectorFunction::norm();
+
+  ExpressionBuilder::EBVectorFunction v0;
+  v0[0] = v1[1] * Vec[2] - v1[2] * Vec[1];
+  v0[1] = v1[2] * Vec[0] - v1[0] * Vec[2];
+  v0[2] = v1[0] * Vec[1] - v1[1] * Vec[0];
+
+  ExpressionBuilder::EBMatrixFunction newMat(3,3);
+
+  newMat[0][0] = v0[0];
+  newMat[0][1] = v0[1];
+  newMat[0][2] = v0[2];
+  newMat[1][0] = v1[0];
+  newMat[1][1] = v1[1];
+  newMat[1][2] = v1[2];
+  newMat[2][0] = Vec[0];
+  newMat[2][1] = Vec[1];
+  newMat[2][2] = Vec[2];
+
+  return newMat;
 }
 
 void
@@ -697,6 +879,14 @@ ExpressionBuilder::EBMatrixFunction::checkAddSize(const ExpressionBuilder::EBMat
   {} //MooseError
 }
 
+ExpressionBuilder::EBVectorFunction::EBVectorFunction()
+{
+  for(int i = 0; i < 3; ++i)
+  {
+    FunctionVector.push_back(EBTerm(0));
+  }
+}
+
 ExpressionBuilder::EBVectorFunction::EBVectorFunction(std::vector<EBTerm> FunctionVector)
 {
   checkSize(FunctionVector);
@@ -707,7 +897,36 @@ ExpressionBuilder::EBVectorFunction::EBVectorFunction(std::vector<std::string> F
 {
   checkSize(FunctionNameVector);
   for(int i = 0; i < 3; ++i)
-    this->FunctionVector[i] = EBTerm(FunctionNameVector[i].c_str());
+    this->FunctionVector.push_back(EBTerm(FunctionNameVector[i].c_str()));
+}
+
+ExpressionBuilder::EBVectorFunction &
+ExpressionBuilder::EBVectorFunction::operator=(const RealVectorValue & rhs)
+{
+  EBVectorFunction * result = new EBVectorFunction;
+  for(unsigned int i = 0; i < 3; ++i)
+  {
+    (*result)[i] = EBTerm(rhs(i));
+  }
+  return (*result);
+}
+
+ExpressionBuilder::EBVectorFunction::EBVectorVector
+ExpressionBuilder::EBVectorFunction::CreateEBVectorVector(const std::string & var_name, unsigned int _op_num)
+{
+  EBVectorVector vec;
+  for(unsigned int i = 0; i < _op_num; ++i)
+  {
+    EBVectorFunction temp;
+    EBTerm tempx((var_name + std::to_string(i) + "x").c_str());
+    EBTerm tempy((var_name + std::to_string(i) + "y").c_str());
+    EBTerm tempz((var_name + std::to_string(i) = "z").c_str());
+    temp.push_back(tempx);
+    temp.push_back(tempy);
+    temp.push_back(tempz);
+    vec.push_back(temp);
+  }
+  return vec;
 }
 
 ExpressionBuilder::EBVectorFunction::operator std::vector<std::string>() const
@@ -840,8 +1059,8 @@ ExpressionBuilder::EBVectorFunction::operator[](unsigned int i) const
   return FunctionVector[i];
 }
 
-ExpressionBuilder::EBVectorFunction &
-ExpressionBuilder::EBVectorFunction::cross(const ExpressionBuilder::EBVectorFunction & lhs, const ExpressionBuilder::EBVectorFunction & rhs) // This is defined as the cross product
+ExpressionBuilder::EBVectorFunction
+ExpressionBuilder::EBVectorFunction::cross(const ExpressionBuilder::EBVectorFunction & lhs, const ExpressionBuilder::EBVectorFunction & rhs)
 {
   ExpressionBuilder::EBVectorFunction * result = new ExpressionBuilder::EBVectorFunction;
   (*result)[0] = lhs[1] * rhs[2] - lhs[2] * rhs[1];
@@ -851,9 +1070,17 @@ ExpressionBuilder::EBVectorFunction::cross(const ExpressionBuilder::EBVectorFunc
 }
 
 ExpressionBuilder::EBTerm
-ExpressionBuilder::EBVectorFunction::norm(const ExpressionBuilder::EBVectorFunction & rhs)
+ExpressionBuilder::EBVectorFunction::norm()
 {
-  return sqrt(rhs * rhs);
+  return sqrt(*this * *this);
+}
+
+void
+ExpressionBuilder::EBVectorFunction::push_back(EBTerm term)
+{
+  FunctionVector.push_back(term);
+  if(FunctionVector.size() > 3)
+  {} //MooseError
 }
 
 void
@@ -967,14 +1194,32 @@ ExpressionBuilder::EBQuaternionFunction::operator[](unsigned int i) const
   return FunctionQuat[i];
 }
 
+ExpressionBuilder::EBQuaternionFunction::operator ExpressionBuilder::EBMatrixFunction() const
+{
+  EBMatrixFunction newMat(3,3);
+  newMat[0][0] = (*this)[0] * (*this)[0] + (*this)[1] * (*this)[1] - (*this)[2] * (*this)[2] - (*this)[3] * (*this)[3];
+  newMat[0][1] = 2 * (*this)[1] * (*this)[2] - 2 * (*this)[0] * (*this)[3];
+  newMat[0][2] = 2 * (*this)[1] * (*this)[3] + 2 * (*this)[0] * (*this)[2];
+  newMat[1][0] = 2 * (*this)[1] * (*this)[2] + 2 * (*this)[0] * (*this)[3];
+  newMat[1][1] = (*this)[0] * (*this)[0] - (*this)[1] * (*this)[1] + (*this)[2] * (*this)[2] - (*this)[3] * (*this)[3];
+  newMat[1][2] = 2 * (*this)[2] * (*this)[3] - 2 * (*this)[0] * (*this)[1];
+  newMat[2][0] = 2 * (*this)[1] * (*this)[3] - 2 * (*this)[0] * (*this)[2];
+  newMat[2][1] = 2 * (*this)[2] * (*this)[3] + 2 * (*this)[0] * (*this)[1];
+  newMat[2][2] = (*this)[0] * (*this)[0] - (*this)[1] * (*this)[1] - (*this)[2] * (*this)[2] + (*this)[3] * (*this)[3];
+
+  const EBTerm d = (*this)[0] * (*this)[0] + (*this)[1] * (*this)[1] + (*this)[2] * (*this)[2] + (*this)[3] * (*this)[3];
+
+  return newMat / d;
+}
+
 ExpressionBuilder::EBTerm
-ExpressionBuilder::EBQuaternionFunction::norm(const ExpressionBuilder::EBQuaternionFunction & rhs)
+ExpressionBuilder::EBQuaternionFunction::norm()
 {
   ExpressionBuilder::EBTerm temp;
-  temp = rhs[0] * rhs[0];
+  temp = (*this)[0] * (*this)[0];
   for(unsigned int i = 1; i < 4; ++i)
   {
-    temp += rhs[i] * rhs[i];
+    temp += (*this)[i] * (*this)[i];
   }
   return sqrt(temp);
 }

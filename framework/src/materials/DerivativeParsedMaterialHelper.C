@@ -52,7 +52,11 @@ DerivativeParsedMaterialHelper<T>::functionsPostParse()
   assembleDerivatives();
 
   // force a value update to get the property at least once and register it for the dependencies
-  for (auto & mpd : this->_mat_prop_descriptors)
+  for (auto & mpd : ParsedMaterialHelper<T>::_real_mat_prop_descriptors)
+    mpd.value();
+  for (auto & mpd : ParsedMaterialHelper<T>::_real_vec_mat_prop_descriptors)
+    mpd.value();
+  for (auto & mpd : ParsedMaterialHelper<T>::_r_two_tens_mat_prop_descriptors)
     mpd.value();
 }
 
@@ -76,7 +80,7 @@ DerivativeParsedMaterialHelper<T>::recurseMatProps(unsigned int var,
       continue;
     }
     // otherwise add it to _mat_prop_descriptors
-    FunctionMaterialPropertyDescriptor mpd(parent_mpd);
+    FunctionMaterialPropertyDescriptor<> mpd(parent_mpd);
     mpd.addDerivative(this->_arg_names[var]);
 
     // create a new symbol name for it
@@ -92,7 +96,7 @@ DerivativeParsedMaterialHelper<T>::recurseMatProps(unsigned int var,
 
   // append material property descriptors
   for (const auto & mpd : mpd_list)
-    this->_mat_prop_descriptors.push_back(mpd);
+    this->_real_mat_prop_descriptors.push_back(mpd);
 
   // go one order deeper
   for (unsigned int i = var; i < this->_nargs; ++i)
@@ -114,6 +118,7 @@ DerivativeParsedMaterialHelper<T>::recurseDerivative(unsigned int var,
 
   // current derivative starts off of the parent function
   Derivative current;
+  bool is_zero = true;
   current._F.resize(this->_func_F.size());
   current._darg_names = parent_derivative._darg_names;
   // the moose variable name goes into the derivative property name
@@ -130,11 +135,12 @@ DerivativeParsedMaterialHelper<T>::recurseDerivative(unsigned int var,
     // optimize
     if (!this->_disable_fpoptimizer)
       current._F[i]->Optimize();
+    if(!current._F[i]->isZero())
+      is_zero = false;
   }
 
-  std::cout << std::to_string(current._F[0]->isZero()) << std::to_string(current._F[1]->isZero()) << std::to_string(current._F[2]->isZero()) << std::endl;
   // don't proceed only if the derivative of all components is zero
-  if (!current._F[0]->isZero() || !current._F[1]->isZero() || !current._F[2]->isZero())
+  if (!is_zero)
   {
     for(unsigned int i = 0; i < current._F.size(); ++i)
     {
@@ -193,13 +199,13 @@ DerivativeParsedMaterialHelper<T>::assembleDerivatives()
     }
 
     // copy coupled material properties
-    auto start = this->_mat_prop_descriptors.size();
-    for (MooseIndex(master->_mat_prop_descriptors) i = start;
-         i < master->_mat_prop_descriptors.size();
+    auto start = this->_real_mat_prop_descriptors.size();
+    for (MooseIndex(master->_real_mat_prop_descriptors) i = start;
+         i < master->_real_mat_prop_descriptors.size();
          ++i)
     {
-      FunctionMaterialPropertyDescriptor newdescriptor(master->_mat_prop_descriptors[i], this);
-      this->_mat_prop_descriptors.push_back(newdescriptor);
+      FunctionMaterialPropertyDescriptor<> newdescriptor(master->_real_mat_prop_descriptors[i], this);
+      this->_real_mat_prop_descriptors.push_back(newdescriptor);
     }
 
     // size parameter buffer
@@ -209,7 +215,7 @@ DerivativeParsedMaterialHelper<T>::assembleDerivatives()
 
   // generate all coupled material property mappings
   for (unsigned int i = 0; i < this->_nargs; ++i)
-    recurseMatProps(i, 1, this->_mat_prop_descriptors);
+    recurseMatProps(i, 1, this->_real_mat_prop_descriptors);
 
   for(unsigned int j = 0; j < this->_func_F.size(); ++j)
   {
@@ -236,7 +242,7 @@ DerivativeParsedMaterialHelper<T>::assembleDerivatives()
     recurseDerivative(i, 1, root);
 
   // increase the parameter buffer to provide storage for the material property derivatives
-  this->_func_params.resize(this->_nargs + this->_mat_prop_descriptors.size());
+  this->_func_params.resize(this->_nargs + this->_r_two_tens_mat_prop_descriptors.size() + this->_real_vec_mat_prop_descriptors.size() + this->_real_mat_prop_descriptors.size());
 }
 
 template <>

@@ -13,7 +13,8 @@
 #include "Kernel.h"
 #include <algorithm>
 
-FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(
+template <typename T>
+FunctionMaterialPropertyDescriptor<T>::FunctionMaterialPropertyDescriptor(
     const std::string & expression, MooseObject * parent)
   : _dependent_vars(), _derivative_vars(), _parent(parent)
 {
@@ -40,10 +41,12 @@ FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(
   updatePropertyName();
 }
 
-FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor() : _value(nullptr) {}
+template <typename T>
+FunctionMaterialPropertyDescriptor<T>::FunctionMaterialPropertyDescriptor() : _value(nullptr) {}
 
-FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(
-    const FunctionMaterialPropertyDescriptor & rhs)
+template <typename T>
+FunctionMaterialPropertyDescriptor<T>::FunctionMaterialPropertyDescriptor(
+    const FunctionMaterialPropertyDescriptor<T> & rhs)
   : _fparser_name(rhs._fparser_name),
     _base_name(rhs._base_name),
     _dependent_vars(rhs._dependent_vars),
@@ -54,8 +57,9 @@ FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(
 {
 }
 
-FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(
-    const FunctionMaterialPropertyDescriptor & rhs, MooseObject * parent)
+template <typename T>
+FunctionMaterialPropertyDescriptor<T>::FunctionMaterialPropertyDescriptor(
+    const FunctionMaterialPropertyDescriptor<T> & rhs, MooseObject * parent)
   : _fparser_name(rhs._fparser_name),
     _base_name(rhs._base_name),
     _dependent_vars(rhs._dependent_vars),
@@ -66,33 +70,37 @@ FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(
 {
 }
 
-std::vector<FunctionMaterialPropertyDescriptor>
-FunctionMaterialPropertyDescriptor::parseVector(const std::vector<std::string> & expression_list,
+template <typename T>
+std::vector<FunctionMaterialPropertyDescriptor<T>>
+FunctionMaterialPropertyDescriptor<T>::parseVector(const std::vector<std::string> & expression_list,
                                                 MooseObject * parent)
 {
-  std::vector<FunctionMaterialPropertyDescriptor> fmpds;
+  std::vector<FunctionMaterialPropertyDescriptor<T>> fmpds;
   for (auto & ex : expression_list)
-    fmpds.push_back(FunctionMaterialPropertyDescriptor(ex, parent));
+    fmpds.push_back(FunctionMaterialPropertyDescriptor<T>(ex, parent));
   return fmpds;
 }
 
+template <typename T>
 void
-FunctionMaterialPropertyDescriptor::addDerivative(const VariableName & var)
+FunctionMaterialPropertyDescriptor<T>::addDerivative(const VariableName & var)
 {
   _derivative_vars.push_back(var);
   _value = nullptr;
   updatePropertyName();
 }
 
+template <typename T>
 bool
-FunctionMaterialPropertyDescriptor::dependsOn(const std::string & var) const
+FunctionMaterialPropertyDescriptor<T>::dependsOn(const std::string & var) const
 {
   return std::find(_dependent_vars.begin(), _dependent_vars.end(), var) != _dependent_vars.end() ||
          std::find(_derivative_vars.begin(), _derivative_vars.end(), var) != _derivative_vars.end();
 }
 
+template <typename T>
 std::vector<VariableName>
-FunctionMaterialPropertyDescriptor::getDependentVariables()
+FunctionMaterialPropertyDescriptor<T>::getDependentVariables()
 {
   std::set<VariableName> all;
   all.insert(_dependent_vars.begin(), _dependent_vars.end());
@@ -101,8 +109,9 @@ FunctionMaterialPropertyDescriptor::getDependentVariables()
   return std::vector<VariableName>(all.begin(), all.end());
 }
 
+template <typename T>
 void
-FunctionMaterialPropertyDescriptor::parseDerivative(const std::string & expression)
+FunctionMaterialPropertyDescriptor<T>::parseDerivative(const std::string & expression)
 {
   auto open = expression.find_first_of("[");
   auto close = expression.find_last_of("]");
@@ -153,8 +162,9 @@ FunctionMaterialPropertyDescriptor::parseDerivative(const std::string & expressi
   mooseError("Malformed material_properties expression '", expression, "'");
 }
 
+template <typename T>
 void
-FunctionMaterialPropertyDescriptor::parseDependentVariables(const std::string & expression)
+FunctionMaterialPropertyDescriptor<T>::parseDependentVariables(const std::string & expression)
 {
   auto open = expression.find_first_of("(");
   auto close = expression.find_last_of(")");
@@ -181,8 +191,9 @@ FunctionMaterialPropertyDescriptor::parseDependentVariables(const std::string & 
     mooseError("Malformed material_properties expression '", expression, "'");
 }
 
+template <typename T>
 void
-FunctionMaterialPropertyDescriptor::printDebug()
+FunctionMaterialPropertyDescriptor<T>::printDebug()
 {
   Moose::out << "MPD: " << _fparser_name << ' ' << _base_name << " deriv = [";
   for (auto & dv : _derivative_vars)
@@ -193,8 +204,9 @@ FunctionMaterialPropertyDescriptor::printDebug()
   Moose::out << "] " << getPropertyName() << '\n';
 }
 
-const MaterialProperty<Real> &
-FunctionMaterialPropertyDescriptor::value() const
+template <typename T>
+const MaterialProperty<T> &
+FunctionMaterialPropertyDescriptor<T>::value() const
 {
   if (_value == nullptr)
   {
@@ -217,8 +229,9 @@ FunctionMaterialPropertyDescriptor::value() const
   return *_value;
 }
 
+template <typename T>
 void
-FunctionMaterialPropertyDescriptor::updatePropertyName()
+FunctionMaterialPropertyDescriptor<T>::updatePropertyName()
 {
   _property_name = derivativePropertyName(_base_name, _derivative_vars);
 }

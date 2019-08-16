@@ -16,6 +16,7 @@
 
 #include "MooseError.h"
 #include "libmesh/libmesh_common.h"
+#include "RotationTensor.h"
 
 using namespace libMesh;
 
@@ -54,11 +55,20 @@ public:
   class EBTermNode;
   class EBFunction;
   class EBMatrixFunction;
+  class EBVectorFunction;
   class EBQuaternionFunction;
   class EBSubstitutionRule;
   typedef std::vector<EBTerm> EBTermList;
   typedef std::vector<EBTermNode *> EBTermNodeList;
   typedef std::vector<const EBSubstitutionRule *> EBSubstitutionRuleList;
+
+  enum MatType {Re, ReVecVal, RTwoTens};
+
+  std::vector<std::pair<std::string, MatType> > _mat_prop_info;
+
+  EBTerm setEBMaterialPropertyReal(const std::string & name);
+  EBVectorFunction setEBMaterialPropertyRealVectorValue(const std::string & name);
+  EBMatrixFunction setEBMaterialPropertyRankTwoTensor(const std::string & name);
 
   /// Base class for nodes in the expression tree
   class EBTermNode
@@ -149,7 +159,9 @@ public:
       EXP,
       SINH,
       COSH,
-      SQRT
+      SQRT,
+      ACOS,
+      ATAN
     } _type;
 
     EBUnaryFuncTermNode(EBTermNode * subnode, NodeType type)
@@ -219,7 +231,9 @@ public:
       LESSEQ,
       GREATEREQ,
       EQ,
-      NOTEQ
+      NOTEQ,
+      AND,
+      OR
     };
 
     EBBinaryOpTermNode(EBTermNode * left, EBTermNode * right, NodeType type)
@@ -379,7 +393,7 @@ public:
     EBTerm(const char * symbol) : _root(new EBSymbolNode(symbol)) {}
 
     typedef std::vector<EBTerm> EBTermVector;
-    static EBTermVector CreateEBTermVector(const std::vector<const char *> symbol);
+    static EBTermVector CreateEBTermVector(const std::string & var_name, unsigned int _op_num);
 
     // concatenate terms to form a parameter list with (()) syntax (those need to be out-of-class!)
     friend EBTermList operator,(const ExpressionBuilder::EBTerm & larg,
@@ -439,6 +453,8 @@ public:
     friend EBTerm sinh(const EBTerm &);
     friend EBTerm cosh(const EBTerm &);
     friend EBTerm sqrt(const EBTerm &);
+    friend EBTerm acos(const EBTerm &);
+    friend EBTerm atan(const EBTerm &);
 
 /*
  * Binary operators (including number,term operations)
@@ -483,6 +499,8 @@ public:
     BINARY_OP_IMPLEMENT(>=, GREATEREQ)
     BINARY_OP_IMPLEMENT(==, EQ)
     BINARY_OP_IMPLEMENT(!=, NOTEQ)
+    BINARY_OP_IMPLEMENT(&&, AND)
+    BINARY_OP_IMPLEMENT(||,OR)
 
 /*
  * Compound assignment operators
@@ -520,7 +538,13 @@ public:
     /**
      * Ternary functions
      */
+
     friend EBTerm conditional(const EBTerm &, const EBTerm &, const EBTerm &);
+    /*
+    friend EBVectorFunction conditional(const EBTerm &, const EBVectorFunction &, const EBVectorFunction &);
+    friend EBMatrixFunction conditional(const EBTerm &, const EBMatrixFunction &, const EBMatrixFunction &);
+    friend EBQuaternionFunction conditional(const EBTerm &, const EBQuaternionFunction &, const EBQuaternionFunction &);
+    */
   };
 
   /// User facing host object for a function. This combines a term with an argument list.
@@ -641,8 +665,10 @@ public:
     EBMatrixFunction();
     EBMatrixFunction(std::vector<std::vector<EBTerm> > FunctionMatrix);
     EBMatrixFunction(unsigned int i, unsigned int j);
+    EBMatrixFunction(const RealTensorValue & rhs);
 
-    //operator EBQuaternionFunction();
+    operator EBQuaternionFunction() const;
+    //operator MaterialPropertyVariable<RankTwoTensor>() const;
     operator std::vector<std::vector<std::string> >() const;
     friend EBMatrixFunction & operator*(const EBMatrixFunction & lhs, const EBMatrixFunction & rhs);
     friend EBMatrixFunction & operator*(const Real & lhs, const EBMatrixFunction & rhs);
@@ -657,18 +683,21 @@ public:
     EBMatrixFunction & operator-();
     std::vector<EBTerm> & operator[](unsigned int i);
     const std::vector<EBTerm> & operator[](unsigned int i) const;
-    EBMatrixFunction & operator!(); //Implemented as a transpose function
+    EBMatrixFunction transpose();
 
     unsigned int rowNum() const;
     unsigned int colNum() const;
     void setSize(const unsigned int i, const unsigned int j); //Erases the entire matrix
+    static EBMatrixFunction rotVec1ToVec2(EBVectorFunction & Vec1, EBVectorFunction & Vec2);
+    static EBMatrixFunction rotVecToZ(EBVectorFunction & Vec);
+
+    void checkMultSize(const EBMatrixFunction & lhs, const EBMatrixFunction & rhs);
+    static void checkAddSize(const EBMatrixFunction & lhs, const EBMatrixFunction & rhs);
 
   private:
-    void checkMultSize(const EBMatrixFunction & lhs, const EBMatrixFunction & rhs);
-    void checkAddSize(const EBMatrixFunction & lhs, const EBMatrixFunction & rhs);
     void checkSize();
 
-    std::vector<std::vector<EBTerm> > FunctionMatrix;
+    std::vector<std::vector<EBTerm> > FunctionMatrix; // Row then column
     unsigned int _rowNum;
     unsigned int _colNum;
   };
@@ -676,12 +705,26 @@ public:
   class EBVectorFunction //3D vectors only, else use EBMatrixFunction
   {
   public:
-    EBVectorFunction() {
-      FunctionVector = std::vector<EBTerm>(3);
-    };
+    EBVectorFunction();
+    EBVectorFunction(Real i, Real j, Real k)
+    {
+      FunctionVector.push_back(EBTerm(i));
+      FunctionVector.push_back(EBTerm(j));
+      FunctionVector.push_back(EBTerm(k));
+    }
+    EBVectorFunction(EBTerm i, EBTerm j, EBTerm k)
+    {
+      FunctionVector.push_back(i);
+      FunctionVector.push_back(j);
+      FunctionVector.push_back(k);
+    }
     EBVectorFunction(std::vector<EBTerm> FunctionVector);
     EBVectorFunction(std::vector<std::string> FunctionNameVector);
 
+    typedef std::vector<EBVectorFunction> EBVectorVector;
+    static EBVectorVector CreateEBVectorVector(const std::string & var_name, unsigned int _op_num);
+
+    EBVectorFunction & operator=(const RealVectorValue & rhs);
     operator std::vector<std::string>() const;
     friend EBTerm & operator*(const EBVectorFunction & lhs, const EBVectorFunction & rhs); // This defines a dot product
     friend EBVectorFunction & operator*(const EBVectorFunction & lhs, const Real & rhs);
@@ -700,8 +743,9 @@ public:
     const EBTerm & operator[](unsigned int i) const;
     //operator EBMatrixFunction();
 
-    EBVectorFunction & cross(const EBVectorFunction & lhs, const EBVectorFunction & rhs);
-    EBTerm norm(const EBVectorFunction & rhs);
+    static EBVectorFunction cross(const EBVectorFunction & lhs, const EBVectorFunction & rhs);
+    EBTerm norm();
+    void push_back(EBTerm term);
 
   private:
     void checkSize(std::vector<std::string> FunctionVector);
@@ -730,14 +774,16 @@ public:
     EBQuaternionFunction & operator-(const EBQuaternionFunction & rhs);
     EBTerm & operator[](unsigned int i);
     const EBTerm & operator[](unsigned int i) const;
+    operator EBMatrixFunction() const;
 
-    EBTerm norm(const EBQuaternionFunction & rhs);
+    EBTerm norm();
 
   private:
     void checkSize(std::vector<EBTerm> FunctionQuat);
 
     std::vector<EBTerm> FunctionQuat;
   };
+
 /*
  * Binary operators
  */
@@ -775,6 +821,8 @@ public:
   BINARYFUNC_OP_IMPLEMENT(>=, GREATEREQ)
   BINARYFUNC_OP_IMPLEMENT(==, EQ)
   BINARYFUNC_OP_IMPLEMENT(!=, NOTEQ)
+  BINARYFUNC_OP_IMPLEMENT(||, OR)
+  BINARYFUNC_OP_IMPLEMENT(&&, AND)
 };
 
 // convenience function for numeric exponent

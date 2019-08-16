@@ -86,6 +86,15 @@
     length_scale = 1e-06
     time_scale = 1e-6
   [../]
+  [./opToGrain]
+    type = GrainTrackerWHalos
+    euler_angle_provider = ebsd_reader
+    grain_tracker_name = grain_tracker
+  [../]
+  [./AnisoEnergy]
+    type = EBGBAnisoEnergy
+    material = CU
+  [../]
 []
 
 [Executioner]

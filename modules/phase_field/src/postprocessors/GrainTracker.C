@@ -73,6 +73,7 @@ validParams<GrainTracker>()
 
   params.addClassDescription("Grain Tracker object for running reduced order parameter simulations "
                              "without grain coalescence.");
+  params.addParam<bool>("add_halos", false, "Adds the halo id's in getVarToFeatureVector");
 
   return params;
 }
@@ -103,7 +104,8 @@ GrainTracker::GrainTracker(const InputParameters & parameters)
     _remap_timer(registerTimedSection("remapGrains", 2)),
     _track_grains(registerTimedSection("trackGrains", 2)),
     _broadcast_update(registerTimedSection("broadCastUpdate", 2)),
-    _update_field_info(registerTimedSection("updateFieldInfo", 2))
+    _update_field_info(registerTimedSection("updateFieldInfo", 2)),
+    _add_halos(getParam<bool>("add_halos"))
 {
   if (_tolerate_failure)
     paramInfo("tolerate_failure",
@@ -1549,6 +1551,8 @@ GrainTracker::updateFieldInfo()
     std::size_t curr_var = grain._var_index;
     std::size_t map_index = (_single_map_mode || _condense_map_info) ? 0 : curr_var;
 
+    std::cout << grain << std::endl;
+
     for (auto entity : grain._local_ids)
     {
       // Highest variable value at this entity wins
@@ -1599,6 +1603,12 @@ GrainTracker::updateFieldInfo()
             vec_ref[reserve_index] = _reserve_grain_first_index + reserve_index;
         }
         vec_ref[grain._var_index] = grain._id;
+        if(_add_halos)
+          for (const auto & grain2 : _feature_sets)
+            if(grain._id != grain2._id)
+              for(auto entity2 : grain2._halo_ids)
+                if(entity2 == entity)
+                  vec_ref[grain2._var_index] = grain._id;
       }
     }
 

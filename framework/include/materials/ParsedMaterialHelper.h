@@ -36,6 +36,8 @@ public:
     USE_PARAM_NAMES
   };
 
+  enum MaterialType {Re, ReVecVal, RTwoTens};
+
   ParsedMaterialHelper(const InputParameters & parameters, VariableNameMappingMode map_mode);
 
   void functionParse(const std::string & function_expression);
@@ -48,6 +50,9 @@ public:
                      const std::vector<std::string> & mat_prop_names,
                      const std::vector<std::string> & tol_names,
                      const std::vector<Real> & tol_values);
+
+  void functionParse(const std::string & function_expression,
+                     const std::vector<std::pair<std::string, MaterialType> > & mat_prop_info);
 
   void functionParse(const std::vector<std::string> & function_expression);
   void functionParse(const std::vector<std::string> & function_expression,
@@ -78,10 +83,12 @@ protected:
   std::vector<std::string> _variable_names;
 
   /// convenience typedef for the material property descriptors
-  typedef std::vector<FunctionMaterialPropertyDescriptor> MatPropDescriptorList;
+  typedef std::vector<FunctionMaterialPropertyDescriptor<> > MatPropDescriptorList;
 
   /// Material property descriptors (obtained by parsing _mat_prop_expressions)
-  MatPropDescriptorList _mat_prop_descriptors;
+  std::vector<FunctionMaterialPropertyDescriptor<> > _real_mat_prop_descriptors;
+  std::vector<FunctionMaterialPropertyDescriptor<RealVectorValue> > _real_vec_mat_prop_descriptors;
+  std::vector<FunctionMaterialPropertyDescriptor<RankTwoTensor> > _r_two_tens_mat_prop_descriptors;
 
   /// Tolerance values for all arguments (to protect from log(0)).
   std::vector<Real> _tol;
@@ -93,4 +100,6 @@ protected:
    * parsing the FParser expression.
    */
   const VariableNameMappingMode _map_mode;
+
+  std::vector<MaterialType> _mat_prop_info;
 };
