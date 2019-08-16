@@ -1153,6 +1153,8 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
   // Add new elements
   std::map<unsigned int, std::vector<const Elem *>> temporary_parent_children_map;
 
+  std::vector<boundary_id_type> parent_boundary_ids;
+
   for (unsigned int i = 0; i < new_elements.size(); ++i)
   {
     unsigned int parent_id = new_elements[i]->getParent()->id();
@@ -1239,9 +1241,8 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
       }
 
       Node * parent_node = parent_elem->node_ptr(j);
-      std::vector<boundary_id_type> parent_node_boundary_ids =
-          _mesh->boundary_info->boundary_ids(parent_node);
-      _mesh->boundary_info->add_node(libmesh_node, parent_node_boundary_ids);
+      _mesh->boundary_info->boundary_ids(parent_node, parent_boundary_ids);
+      _mesh->boundary_info->add_node(libmesh_node, parent_boundary_ids);
 
       if (_displaced_mesh)
       {
@@ -1257,9 +1258,8 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
         libmesh_elem2->set_node(j) = libmesh_node;
 
         parent_node = parent_elem2->node_ptr(j);
-        parent_node_boundary_ids.clear();
-        parent_node_boundary_ids = _displaced_mesh->boundary_info->boundary_ids(parent_node);
-        _displaced_mesh->boundary_info->add_node(libmesh_node, parent_node_boundary_ids);
+        _displaced_mesh->boundary_info->boundary_ids(parent_node, parent_boundary_ids);
+        _displaced_mesh->boundary_info->add_node(libmesh_node, parent_boundary_ids);
       }
     }
 
@@ -1277,10 +1277,9 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
       (*_material_data)[0]->copy(*libmesh_elem, *parent_elem, 0);
       for (unsigned int side = 0; side < parent_elem->n_sides(); ++side)
       {
-        std::vector<boundary_id_type> parent_elem_boundary_ids =
-            _mesh->boundary_info->boundary_ids(parent_elem, side);
-        std::vector<boundary_id_type>::iterator it_bd = parent_elem_boundary_ids.begin();
-        for (; it_bd != parent_elem_boundary_ids.end(); ++it_bd)
+        _mesh->boundary_info->boundary_ids(parent_elem, side, parent_boundary_ids);
+        std::vector<boundary_id_type>::iterator it_bd = parent_boundary_ids.begin();
+        for (; it_bd != parent_boundary_ids.end(); ++it_bd)
         {
           if (_fe_problem->needBoundaryMaterialOnSide(*it_bd, 0))
             (*_bnd_material_data)[0]->copy(*libmesh_elem, *parent_elem, side);
@@ -1355,36 +1354,32 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
     unsigned int n_sides = parent_elem->n_sides();
     for (unsigned int side = 0; side < n_sides; ++side)
     {
-      std::vector<boundary_id_type> parent_elem_boundary_ids =
-          _mesh->boundary_info->boundary_ids(parent_elem, side);
-      _mesh->boundary_info->add_side(libmesh_elem, side, parent_elem_boundary_ids);
+      _mesh->boundary_info->boundary_ids(parent_elem, side, parent_boundary_ids);
+      _mesh->boundary_info->add_side(libmesh_elem, side, parent_boundary_ids);
     }
     if (_displaced_mesh)
     {
       n_sides = parent_elem2->n_sides();
       for (unsigned int side = 0; side < n_sides; ++side)
       {
-        std::vector<boundary_id_type> parent_elem_boundary_ids =
-            _displaced_mesh->boundary_info->boundary_ids(parent_elem2, side);
-        _displaced_mesh->boundary_info->add_side(libmesh_elem2, side, parent_elem_boundary_ids);
+        _displaced_mesh->boundary_info->boundary_ids(parent_elem2, side, parent_boundary_ids);
+        _displaced_mesh->boundary_info->add_side(libmesh_elem2, side, parent_boundary_ids);
       }
     }
 
     unsigned int n_edges = parent_elem->n_edges();
     for (unsigned int edge = 0; edge < n_edges; ++edge)
     {
-      std::vector<boundary_id_type> parent_elem_boundary_ids =
-          _mesh->boundary_info->edge_boundary_ids(parent_elem, edge);
-      _mesh->boundary_info->add_edge(libmesh_elem, edge, parent_elem_boundary_ids);
+      _mesh->boundary_info->edge_boundary_ids(parent_elem, edge, parent_boundary_ids);
+      _mesh->boundary_info->add_edge(libmesh_elem, edge, parent_boundary_ids);
     }
     if (_displaced_mesh)
     {
       n_edges = parent_elem2->n_edges();
       for (unsigned int edge = 0; edge < n_edges; ++edge)
       {
-        std::vector<boundary_id_type> parent_elem_boundary_ids =
-            _displaced_mesh->boundary_info->edge_boundary_ids(parent_elem2, edge);
-        _displaced_mesh->boundary_info->add_edge(libmesh_elem2, edge, parent_elem_boundary_ids);
+        _displaced_mesh->boundary_info->edge_boundary_ids(parent_elem2, edge, parent_boundary_ids);
+        _displaced_mesh->boundary_info->add_edge(libmesh_elem2, edge, parent_boundary_ids);
       }
     }
   }
