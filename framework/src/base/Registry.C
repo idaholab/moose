@@ -12,6 +12,7 @@
 #include "Factory.h"
 #include "ActionFactory.h"
 
+#include "libmesh/auto_ptr.h"
 #include "libmesh/libmesh_common.h"
 
 static Registry &

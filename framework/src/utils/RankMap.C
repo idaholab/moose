@@ -11,6 +11,8 @@
 
 #include "PerfGraphInterface.h"
 
+#include "libmesh/parallel.h"
+
 RankMap::RankMap(const Parallel::Communicator & comm, PerfGraph & perf_graph)
   : ParallelObject(comm),
     PerfGraphInterface(perf_graph, "RankMap"),
