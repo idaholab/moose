@@ -1902,8 +1902,7 @@ FeatureFloodCount::FeatureData::updateBBoxExtremes(MeshBase & mesh)
 }
 
 void
-FeatureFloodCount::FeatureData::updateBBoxExtremes(BoundingBox & bbox,
-                                                   const BoundingBox & rhs_bbox)
+FeatureFloodCount::FeatureData::updateBBoxExtremes(BoundingBox & bbox, const BoundingBox & rhs_bbox)
 {
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
   {
