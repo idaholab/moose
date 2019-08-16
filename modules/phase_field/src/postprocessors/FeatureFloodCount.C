@@ -52,7 +52,7 @@ dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void 
 
 template <>
 void
-dataStore(std::ostream & stream, MeshTools::BoundingBox & bbox, void * context)
+dataStore(std::ostream & stream, BoundingBox & bbox, void * context)
 {
   storeHelper(stream, bbox.min(), context);
   storeHelper(stream, bbox.max(), context);
@@ -83,15 +83,15 @@ dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, void *
 
 template <>
 void
-dataLoad(std::istream & stream, MeshTools::BoundingBox & bbox, void * context)
+dataLoad(std::istream & stream, BoundingBox & bbox, void * context)
 {
   loadHelper(stream, bbox.min(), context);
   loadHelper(stream, bbox.max(), context);
 }
 
 // Utility routines
-void updateBBoxExtremesHelper(MeshTools::BoundingBox & bbox, const Point & node);
-void updateBBoxExtremesHelper(MeshTools::BoundingBox & bbox, const Elem & elem);
+void updateBBoxExtremesHelper(BoundingBox & bbox, const Point & node);
+void updateBBoxExtremesHelper(BoundingBox & bbox, const Elem & elem);
 bool areElemListsMergeable(const std::list<dof_id_type> & elem_list1,
                            const std::list<dof_id_type> & elem_list2,
                            MeshBase & mesh);
@@ -1902,8 +1902,8 @@ FeatureFloodCount::FeatureData::updateBBoxExtremes(MeshBase & mesh)
 }
 
 void
-FeatureFloodCount::FeatureData::updateBBoxExtremes(MeshTools::BoundingBox & bbox,
-                                                   const MeshTools::BoundingBox & rhs_bbox)
+FeatureFloodCount::FeatureData::updateBBoxExtremes(BoundingBox & bbox,
+                                                   const BoundingBox & rhs_bbox)
 {
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
   {
@@ -2201,7 +2201,7 @@ operator<<(std::ostream & out, const FeatureFloodCount::FeatureData & feature)
  *****************************************************************************************
  */
 void
-updateBBoxExtremesHelper(MeshTools::BoundingBox & bbox, const Point & node)
+updateBBoxExtremesHelper(BoundingBox & bbox, const Point & node)
 {
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
   {
@@ -2211,7 +2211,7 @@ updateBBoxExtremesHelper(MeshTools::BoundingBox & bbox, const Point & node)
 }
 
 void
-updateBBoxExtremesHelper(MeshTools::BoundingBox & bbox, const Elem & elem)
+updateBBoxExtremesHelper(BoundingBox & bbox, const Elem & elem)
 {
   for (MooseIndex(elem.n_nodes()) node_n = 0; node_n < elem.n_nodes(); ++node_n)
     updateBBoxExtremesHelper(bbox, *(elem.node_ptr(node_n)));

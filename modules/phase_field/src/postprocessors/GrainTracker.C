@@ -1717,8 +1717,8 @@ GrainTracker::communicateHaloMap()
 }
 
 Real
-GrainTracker::centroidRegionDistance(std::vector<MeshTools::BoundingBox> & bboxes1,
-                                     std::vector<MeshTools::BoundingBox> & bboxes2) const
+GrainTracker::centroidRegionDistance(std::vector<BoundingBox> & bboxes1,
+                                     std::vector<BoundingBox> & bboxes2) const
 {
   /**
    * Find the minimum centroid distance between any to pieces of the grains.
@@ -1744,8 +1744,8 @@ GrainTracker::centroidRegionDistance(std::vector<MeshTools::BoundingBox> & bboxe
 }
 
 Real
-GrainTracker::boundingRegionDistance(std::vector<MeshTools::BoundingBox> & bboxes1,
-                                     std::vector<MeshTools::BoundingBox> & bboxes2) const
+GrainTracker::boundingRegionDistance(std::vector<BoundingBox> & bboxes1,
+                                     std::vector<BoundingBox> & bboxes2) const
 {
   /**
    * The region that each grain covers is represented by a bounding box large enough to encompassing
