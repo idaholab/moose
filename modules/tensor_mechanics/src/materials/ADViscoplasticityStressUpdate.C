@@ -118,6 +118,7 @@ ADViscoplasticityStressUpdate<compute_stage>::updateState(
   {
     // Initalize stress potential
     ADReal dpsi_dgauge(0);
+
     computeInelasticStrainIncrement(_gauge_stress[_qp],
                                     dpsi_dgauge,
                                     inelastic_strain_increment,
@@ -129,12 +130,27 @@ ADViscoplasticityStressUpdate<compute_stage>::updateState(
     elastic_strain_increment -= inelastic_strain_increment;
     // Update stress due to new strain
     stress = elasticity_tensor * (elastic_strain_old + elastic_strain_increment);
+
     // Compute effective strain from the stress potential. Note that this is approximate and to be
     // used qualitatively
     _effective_inelastic_strain[_qp] += dpsi_dgauge * _dt;
     // Update creep strain due to currently computed inelastic strain
     _inelastic_strain[_qp] += inelastic_strain_increment;
   }
+
+  const ADRankTwoTensor new_dev_stress = stress.deviatoric();
+  const ADReal new_dev_stress_squared = new_dev_stress.doubleContraction(new_dev_stress);
+  const ADReal new_equiv_stress =
+      new_dev_stress_squared == 0.0 ? 0.0 : std::sqrt(1.5 * new_dev_stress_squared);
+
+  if (MooseUtils::relativeFuzzyGreaterThan(new_equiv_stress, equiv_stress))
+    mooseException("In ",
+                   _name,
+                   ": updated equivalent stress (",
+                   MetaPhysicL::raw_value(new_equiv_stress),
+                   ") is greater than initial equivalent stress (",
+                   MetaPhysicL::raw_value(equiv_stress),
+                   "). Try decreasing max_inelastic_increment to avoid this exception.");
 
   computeStressFinalize(inelastic_strain_increment);
 }
@@ -276,7 +292,7 @@ ADViscoplasticityStressUpdate<compute_stage>::computeDGaugeDSigma(
 
   // Compute the deritative of the gauge stress with respect to the stress
   const ADRankTwoTensor dgauge_dsigma =
-      gauge_stress * dresidual_dsigma / dresidual_dsigma.doubleContraction(stress);
+      dresidual_dsigma * (gauge_stress / dresidual_dsigma.doubleContraction(stress));
 
   return dgauge_dsigma;
 }
@@ -309,6 +325,6 @@ ADViscoplasticityStressUpdate<compute_stage>::computeInelasticStrainIncrement(
 
   // Compute strain increment from stress potential and the gauge stress derivative with respect
   // to the stress stress. The current form is explicit, and should eventually be changed
-  inelastic_strain_increment +=
+  inelastic_strain_increment =
       _dt * dpsi_dgauge * computeDGaugeDSigma(gauge_stress, equiv_stress, dev_stress, stress);
 }

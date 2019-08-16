@@ -18,7 +18,6 @@
   using ADViscoplasticityStressUpdateBase<compute_stage>::updateIntermediatePorosity;              \
   using ADViscoplasticityStressUpdateBase<compute_stage>::computeStressInitialize;                 \
   using ADViscoplasticityStressUpdateBase<compute_stage>::computeStressFinalize;                   \
-  using ADViscoplasticityStressUpdateBase<compute_stage>::_strain_increment;                       \
   using ADViscoplasticityStressUpdateBase<compute_stage>::_intermediate_porosity;                  \
   using ADViscoplasticityStressUpdateBase<compute_stage>::_derivative;                             \
   using ADViscoplasticityStressUpdateBase<compute_stage>::_effective_inelastic_strain;             \
@@ -26,7 +25,8 @@
   using ADViscoplasticityStressUpdateBase<compute_stage>::_inelastic_strain;                       \
   using ADViscoplasticityStressUpdateBase<compute_stage>::_inelastic_strain_old;                   \
   using ADViscoplasticityStressUpdateBase<compute_stage>::_verbose;                                \
-  using ADViscoplasticityStressUpdateBase<compute_stage>::_porosity_old
+  using ADViscoplasticityStressUpdateBase<compute_stage>::_porosity_old;                           \
+  using ADViscoplasticityStressUpdateBase<compute_stage>::_max_inelastic_increment
 
 template <ComputeStage>
 class ADViscoplasticityStressUpdateBase;
