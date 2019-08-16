@@ -1,15 +1,27 @@
 [Tests]
-  [./adapt]
-    type = 'Exodiff'
-    input = 'cranic_adapt.i'
-    exodiff = 'cranic_adapt_out.e-s005'
-    group = 'adaptive'
-  [../]
+  design = 'CrankNicolson.md'
+  issues = '#1953'
 
-  [./test]
-    type = 'Exodiff'
-    input = 'cranic.i'
-    exodiff = 'cranic_out.e'
-    max_parallel = 1
-  [../]
+  [group]
+    requirement = "The system shall support the second-order Crank-Nicolson method for time "
+                  "integration"
+
+    [adapt]
+      type = 'Exodiff'
+      input = 'cranic_adapt.i'
+      exodiff = 'cranic_adapt_out.e-s005'
+      group = 'adaptive'
+
+      detail = "with and"
+    []
+
+    [test]
+      type = 'Exodiff'
+      input = 'cranic.i'
+      exodiff = 'cranic_out.e'
+      max_parallel = 1
+
+      detail = "without mesh adaptivity."
+    []
+  []
 []

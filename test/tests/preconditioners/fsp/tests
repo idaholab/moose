@@ -1,20 +1,30 @@
 [Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'fsp_test.i'
-    exodiff = 'out.e'
-    max_parallel = 1
-    # Splits require PETSc >= 3.3.0
-    petsc_version = '>=3.3.0'
-  [../]
-  [./fsp_image]
-    type = 'Exodiff'
-    input = 'fsp_test_image.i'
-    exodiff = 'kitten_out.e'
-    max_parallel = 4
-    min_parallel = 4
-    # Splits require PETSc >= 3.3.0
-    petsc_version = '>=3.3.0'
-    vtk = true
-  [../]
+  design = FieldSplitPreconditioner.md
+  issues = '#1851'
+  [group]
+    requirement = "The system shall support the use of field split preconditioner on"
+
+    [test]
+      type = 'Exodiff'
+      input = 'fsp_test.i'
+      exodiff = 'out.e'
+      max_parallel = 1
+      # Splits require PETSc >= 3.3.0
+      petsc_version = '>=3.3.0'
+
+      detail = "a single subdomain and"
+    []
+    [fsp_image]
+      type = 'Exodiff'
+      input = 'fsp_test_image.i'
+      exodiff = 'kitten_out.e'
+      max_parallel = 4
+      min_parallel = 4
+      # Splits require PETSc >= 3.3.0
+      petsc_version = '>=3.3.0'
+      vtk = true
+
+      detail = "multiple subdomains."
+    []
+  []
 []

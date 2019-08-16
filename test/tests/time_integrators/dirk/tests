@@ -1,13 +1,25 @@
-[Tests]
-  [./dirk-2d-heat]
-    type = 'Exodiff'
-    input = 'dirk-2d-heat.i'
-    exodiff = 'dirk-2d-heat_out.e'
-  [../]
 
-  [./dirk-2d-heat-adap]
-     type = 'Exodiff'
-     input = 'dirk-2d-heat-adap.i'
-     exodiff = 'dirk-2d-heat-adap_out.e-s005'
-  [../]
+[Tests]
+  design = 'LStableDirk2.md'
+  issues = '#1953'
+
+  [group]
+    requirement = "The system shall support the L-stable DIRK method for time integration"
+
+    [dirk-2d-heat]
+      type = 'Exodiff'
+      input = 'dirk-2d-heat.i'
+      exodiff = 'dirk-2d-heat_out.e'
+
+      detail = "with and"
+    []
+
+    [dirk-2d-heat-adap]
+      type = 'Exodiff'
+      input = 'dirk-2d-heat-adap.i'
+      exodiff = 'dirk-2d-heat-adap_out.e-s005'
+
+      detail = "without mesh adaptivity."
+    []
+  []
 []

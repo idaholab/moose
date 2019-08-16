@@ -1,8 +1,12 @@
 [Tests]
+  design = 'Transient.md'
+  issues = '02ae277ceb83dcd5'
   [./test]
     type = 'Exodiff'
     input = 'abort.i'
     exodiff = 'out.e'
     recover = false
+
+    requirement = "The system shall include an option that aborts the solve immediately if a solve fails."
   [../]
 []

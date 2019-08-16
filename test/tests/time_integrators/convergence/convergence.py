@@ -7,27 +7,13 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-import mms
-df1 = mms.run_temporal('implicit_convergence.i', 4, file_base='implicitmidpoint_{}'
-                       'Executioner/TimeIntegrator/type=ImplicitMidpoint',
-                       console=False, dt=0.0625, y_pp='l2_err', executable='../../../../test')
 
-fig = mms.ConvergencePlot(xlabel='$\Delta t$', ylabel='$L_2$ Error')
-fig.plot(df1, label='Midpoint (1nd order)', marker='o', markersize=8)
-fig.save('implicit_convergence.pdf')
+# This file contains the original convergence work performed on the time integration schemes with
+# the convergence data hard-coded into this file. The data includes more time steps than are
+# executed in the tests so it is best to keep both.
 
-df1.to_csv('implicit_convergence_midpoint.csv')
-
-"""
 import matplotlib.pyplot as plt
 import numpy as np
-
-# Use fonts that match LaTeX
-from matplotlib import rcParams
-rcParams['font.family'] = 'serif'
-rcParams['font.size'] = 17
-rcParams['font.serif'] = ['Computer Modern Roman']
-rcParams['text.usetex'] = True
 
 # Small font size for the legend
 from matplotlib.font_manager import FontProperties
@@ -148,7 +134,7 @@ crank_nicolson = [
 # accurate 2nd-order method for this problem.  The last data point is
 # not included here, since round-off error (we are doing 16,384
 # timesteps for this dt) starts to turn the line back up. The best
-# slope we were able to achive was therefore -2.96, which is fairly
+# slope we were able to achieve was therefore -2.96, which is fairly
 # close to -3.
 lstable_dirk3 = [
   .5, 6.367834e-03,
@@ -207,4 +193,3 @@ plt.savefig('implicit_plot.pdf', format='pdf')
 # Local Variables:
 # python-indent: 2
 # End:
-"""
