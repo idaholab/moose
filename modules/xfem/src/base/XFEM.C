@@ -111,7 +111,7 @@ XFEM::getCrackTipOrigin(std::map<unsigned int, const Elem *> & elem_id_crack_tip
 void
 XFEM::addStateMarkedElem(unsigned int elem_id, RealVectorValue & normal)
 {
-  Elem * elem = _mesh->elem(elem_id);
+  Elem * elem = _mesh->elem_ptr(elem_id);
   std::map<const Elem *, RealVectorValue>::iterator mit;
   mit = _state_marked_elems.find(elem);
   if (mit != _state_marked_elems.end())
@@ -123,7 +123,7 @@ void
 XFEM::addStateMarkedElem(unsigned int elem_id, RealVectorValue & normal, unsigned int marked_side)
 {
   addStateMarkedElem(elem_id, normal);
-  Elem * elem = _mesh->elem(elem_id);
+  Elem * elem = _mesh->elem_ptr(elem_id);
   std::map<const Elem *, unsigned int>::iterator mit;
   mit = _state_marked_elem_sides.find(elem);
   if (mit != _state_marked_elem_sides.end())
@@ -138,7 +138,7 @@ void
 XFEM::addStateMarkedFrag(unsigned int elem_id, RealVectorValue & normal)
 {
   addStateMarkedElem(elem_id, normal);
-  Elem * elem = _mesh->elem(elem_id);
+  Elem * elem = _mesh->elem_ptr(elem_id);
   std::set<const Elem *>::iterator mit;
   mit = _state_marked_frags.find(elem);
   if (mit != _state_marked_frags.end())
@@ -163,7 +163,7 @@ XFEM::addGeomMarkedElem2D(const unsigned int elem_id,
                           const Xfem::GeomMarkedElemInfo2D geom_info,
                           const unsigned int interface_id)
 {
-  Elem * elem = _mesh->elem(elem_id);
+  Elem * elem = _mesh->elem_ptr(elem_id);
   _geom_marked_elems_2d[elem].push_back(geom_info);
   _geom_marker_id_elems[interface_id].insert(elem_id);
 }
@@ -173,7 +173,7 @@ XFEM::addGeomMarkedElem3D(const unsigned int elem_id,
                           const Xfem::GeomMarkedElemInfo3D geom_info,
                           const unsigned int interface_id)
 {
-  Elem * elem = _mesh->elem(elem_id);
+  Elem * elem = _mesh->elem_ptr(elem_id);
   _geom_marked_elems_3d[elem].push_back(geom_info);
   _geom_marker_id_elems[interface_id].insert(elem_id);
 }
@@ -203,7 +203,7 @@ XFEM::storeCrackTipOriginAndDirection()
       Point direction(0, 0, 0);
 
       std::map<unique_id_type, XFEMCutElem *>::const_iterator it;
-      it = _cut_elem_map.find(_mesh->elem(cts_id)->unique_id());
+      it = _cut_elem_map.find(_mesh->elem_ptr(cts_id)->unique_id());
       if (it != _cut_elem_map.end())
       {
         const XFEMCutElem * xfce = it->second;
@@ -217,7 +217,7 @@ XFEM::storeCrackTipOriginAndDirection()
       std::vector<Point> tip_data;
       tip_data.push_back(origin);
       tip_data.push_back(direction);
-      const Elem * elem = _mesh->elem((*sit)->id());
+      const Elem * elem = _mesh->elem_ptr((*sit)->id());
       _elem_crack_origin_direction_map.insert(
           std::pair<const Elem *, std::vector<Point>>(elem, tip_data));
     }
@@ -964,8 +964,8 @@ XFEM::healMesh()
 
         if (_displaced_mesh)
         {
-          Elem * elem1_displaced = _displaced_mesh->elem(it.first->id());
-          Elem * elem2_displaced = _displaced_mesh->elem(it.second->id());
+          Elem * elem1_displaced = _displaced_mesh->elem_ptr(it.first->id());
+          Elem * elem2_displaced = _displaced_mesh->elem_ptr(it.second->id());
 
           std::map<unique_id_type, XFEMCutElem *>::iterator cemit =
               _cut_elem_map.find(elem1_displaced->unique_id());
@@ -1160,7 +1160,7 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
     unsigned int parent_id = new_elements[i]->getParent()->id();
     unsigned int efa_child_id = new_elements[i]->id();
 
-    Elem * parent_elem = _mesh->elem(parent_id);
+    Elem * parent_elem = _mesh->elem_ptr(parent_id);
     Elem * libmesh_elem = Elem::build(parent_elem->type()).release();
 
     for (unsigned int m = 0; m < _geometric_cuts.size(); ++m)
@@ -1182,7 +1182,7 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
     Elem * libmesh_elem2 = NULL;
     if (_displaced_mesh)
     {
-      parent_elem2 = _displaced_mesh->elem(parent_id);
+      parent_elem2 = _displaced_mesh->elem_ptr(parent_id);
       libmesh_elem2 = Elem::build(parent_elem2->type()).release();
 
       for (unsigned int m = 0; m < _geometric_cuts.size(); ++m)
@@ -1387,7 +1387,7 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
   // delete elements
   for (std::size_t i = 0; i < delete_elements.size(); ++i)
   {
-    Elem * elem_to_delete = _mesh->elem(delete_elements[i]->id());
+    Elem * elem_to_delete = _mesh->elem_ptr(delete_elements[i]->id());
 
     // delete the XFEMCutElem object for any elements that are to be deleted
     std::map<unique_id_type, XFEMCutElem *>::iterator cemit =
@@ -1407,7 +1407,7 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
 
     if (_displaced_mesh)
     {
-      Elem * elem_to_delete2 = _displaced_mesh->elem(delete_elements[i]->id());
+      Elem * elem_to_delete2 = _displaced_mesh->elem_ptr(delete_elements[i]->id());
       elem_to_delete2->nullify_neighbors();
       _displaced_mesh->boundary_info->remove(elem_to_delete2);
       _displaced_mesh->delete_elem(elem_to_delete2);
@@ -1438,8 +1438,8 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
     {
       for (auto & se : _sibling_elems[_geometric_cuts[i]->getInterfaceID()])
       {
-        Elem * elem = _displaced_mesh->elem(se.first->id());
-        Elem * elem_pair = _displaced_mesh->elem(se.second->id());
+        Elem * elem = _displaced_mesh->elem_ptr(se.first->id());
+        Elem * elem_pair = _displaced_mesh->elem_ptr(se.second->id());
         _sibling_displaced_elems[_geometric_cuts[i]->getInterfaceID()].push_back(
             std::make_pair(elem, elem_pair));
       }
@@ -1464,7 +1464,7 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
       if (eit != efa_id_to_new_elem.end())
         crack_tip_elem = eit->second;
       else
-        crack_tip_elem = _mesh->elem(eid);
+        crack_tip_elem = _mesh->elem_ptr(eid);
       _crack_tip_elems.insert(crack_tip_elem);
 
       // Store the crack tip elements which are going to be healed

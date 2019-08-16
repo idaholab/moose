@@ -1046,7 +1046,7 @@ FeatureFloodCount::prepareDataForTransfer()
       else
       {
         for (auto & halo_id : feature._halo_ids)
-          updateBBoxExtremesHelper(feature._bboxes[0], mesh.node(halo_id));
+          updateBBoxExtremesHelper(feature._bboxes[0], mesh.point(halo_id));
       }
 
       mooseAssert(!feature._local_ids.empty(), "local entity ids cannot be empty");
@@ -1822,9 +1822,9 @@ FeatureFloodCount::FeatureData::updateBBoxExtremes(MeshBase & mesh)
 {
   // First update the primary bounding box (all topologically connected)
   for (auto & halo_id : _halo_ids)
-    updateBBoxExtremesHelper(_bboxes[0], *mesh.elem(halo_id));
+    updateBBoxExtremesHelper(_bboxes[0], mesh.elem_ref(halo_id));
   for (auto & ghost_id : _ghosted_ids)
-    updateBBoxExtremesHelper(_bboxes[0], *mesh.elem(ghost_id));
+    updateBBoxExtremesHelper(_bboxes[0], mesh.elem_ref(ghost_id));
 
   // Remove all of the IDs that are in the primary region
   std::list<dof_id_type> disjoint_elem_id_list;

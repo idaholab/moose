@@ -1446,7 +1446,7 @@ GrainTracker::swapSolutionValues(FeatureData & grain,
   {
     if (_is_elemental)
     {
-      Elem * elem = mesh.query_elem(entity);
+      Elem * elem = mesh.query_elem_ptr(entity);
       if (!elem)
         continue;
 
