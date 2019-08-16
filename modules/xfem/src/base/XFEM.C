@@ -1816,7 +1816,7 @@ XFEM::getXFEMqRuleOnLine(std::vector<Point> & intersection_points,
   quad_wts.resize(num_qpoints);
   quad_pts.resize(num_qpoints);
 
-  Real integ_jacobian = pow((p1 - p2).size_sq(), 0.5) * 0.5;
+  Real integ_jacobian = pow((p1 - p2).norm_sq(), 0.5) * 0.5;
 
   quad_wts[0] = 1.0 * integ_jacobian;
   quad_wts[1] = 1.0 * integ_jacobian;
