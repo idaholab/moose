@@ -40,7 +40,9 @@ ContactPenetrationVarAction::act()
     mooseError("Contact requires updated coordinates.  Use the 'displacements = ...' line in the "
                "Mesh block.");
 
-  _problem->addAuxVariable("penetration",
-                           FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
-                                  Utility::string_to_enum<FEFamily>("LAGRANGE")));
+  auto var_params = _factory.getValidParams("MooseVariable");
+  var_params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
+  var_params.set<MooseEnum>("family") = "LAGRANGE";
+
+  _problem->addAuxVariable("MooseVariable", "penetration", var_params);
 }
