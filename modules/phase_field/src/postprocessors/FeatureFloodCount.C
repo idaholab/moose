@@ -52,7 +52,7 @@ dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void 
 
 template <>
 void
-dataStore(std::ostream & stream, MeshTools::BoundingBox & bbox, void * context)
+dataStore(std::ostream & stream, BoundingBox & bbox, void * context)
 {
   storeHelper(stream, bbox.min(), context);
   storeHelper(stream, bbox.max(), context);
@@ -83,15 +83,15 @@ dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, void *
 
 template <>
 void
-dataLoad(std::istream & stream, MeshTools::BoundingBox & bbox, void * context)
+dataLoad(std::istream & stream, BoundingBox & bbox, void * context)
 {
   loadHelper(stream, bbox.min(), context);
   loadHelper(stream, bbox.max(), context);
 }
 
 // Utility routines
-void updateBBoxExtremesHelper(MeshTools::BoundingBox & bbox, const Point & node);
-void updateBBoxExtremesHelper(MeshTools::BoundingBox & bbox, const Elem & elem);
+void updateBBoxExtremesHelper(BoundingBox & bbox, const Point & node);
+void updateBBoxExtremesHelper(BoundingBox & bbox, const Elem & elem);
 bool areElemListsMergeable(const std::list<dof_id_type> & elem_list1,
                            const std::list<dof_id_type> & elem_list2,
                            MeshBase & mesh);
@@ -1046,7 +1046,7 @@ FeatureFloodCount::prepareDataForTransfer()
       else
       {
         for (auto & halo_id : feature._halo_ids)
-          updateBBoxExtremesHelper(feature._bboxes[0], mesh.node(halo_id));
+          updateBBoxExtremesHelper(feature._bboxes[0], mesh.point(halo_id));
       }
 
       mooseAssert(!feature._local_ids.empty(), "local entity ids cannot be empty");
@@ -1822,9 +1822,9 @@ FeatureFloodCount::FeatureData::updateBBoxExtremes(MeshBase & mesh)
 {
   // First update the primary bounding box (all topologically connected)
   for (auto & halo_id : _halo_ids)
-    updateBBoxExtremesHelper(_bboxes[0], *mesh.elem(halo_id));
+    updateBBoxExtremesHelper(_bboxes[0], mesh.elem_ref(halo_id));
   for (auto & ghost_id : _ghosted_ids)
-    updateBBoxExtremesHelper(_bboxes[0], *mesh.elem(ghost_id));
+    updateBBoxExtremesHelper(_bboxes[0], mesh.elem_ref(ghost_id));
 
   // Remove all of the IDs that are in the primary region
   std::list<dof_id_type> disjoint_elem_id_list;
@@ -1902,8 +1902,7 @@ FeatureFloodCount::FeatureData::updateBBoxExtremes(MeshBase & mesh)
 }
 
 void
-FeatureFloodCount::FeatureData::updateBBoxExtremes(MeshTools::BoundingBox & bbox,
-                                                   const MeshTools::BoundingBox & rhs_bbox)
+FeatureFloodCount::FeatureData::updateBBoxExtremes(BoundingBox & bbox, const BoundingBox & rhs_bbox)
 {
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
   {
@@ -2201,7 +2200,7 @@ operator<<(std::ostream & out, const FeatureFloodCount::FeatureData & feature)
  *****************************************************************************************
  */
 void
-updateBBoxExtremesHelper(MeshTools::BoundingBox & bbox, const Point & node)
+updateBBoxExtremesHelper(BoundingBox & bbox, const Point & node)
 {
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
   {
@@ -2211,7 +2210,7 @@ updateBBoxExtremesHelper(MeshTools::BoundingBox & bbox, const Point & node)
 }
 
 void
-updateBBoxExtremesHelper(MeshTools::BoundingBox & bbox, const Elem & elem)
+updateBBoxExtremesHelper(BoundingBox & bbox, const Elem & elem)
 {
   for (MooseIndex(elem.n_nodes()) node_n = 0; node_n < elem.n_nodes(); ++node_n)
     updateBBoxExtremesHelper(bbox, *(elem.node_ptr(node_n)));

@@ -114,7 +114,7 @@ PorousFlowMaterial::nearestQP(unsigned nodenum) const
   Real smallest_dist = std::numeric_limits<Real>::max();
   for (unsigned qp = 1; qp < _qrule->n_points(); ++qp)
   {
-    const Real this_dist = (_current_elem->point(nodenum) - _q_point[qp]).size();
+    const Real this_dist = (_current_elem->point(nodenum) - _q_point[qp]).norm();
     if (this_dist < smallest_dist)
     {
       nearest_qp = qp;
