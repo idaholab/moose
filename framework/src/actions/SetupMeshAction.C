@@ -224,46 +224,63 @@ SetupMeshAction::act()
   // Create the mesh object and tell it to build itself
   if (_current_task == "setup_mesh")
   {
-    // If the [Mesh] block contains mesh generators, change the default type to construct
-    if (_awh.hasActions("add_mesh_generator"))
+    if (_app.masterMesh())
+      _mesh = _app.masterMesh()->safeClone();
+    else
     {
-      if (_pars.isParamSetByUser("type") && _type != "MeshGeneratorMesh")
-        mooseWarning("Mesh Generators present but the [Mesh] block is set to construct a \"",
-                     _type,
-                     "\" mesh.");
+      // If the [Mesh] block contains mesh generators, change the default type to construct
+      if (_awh.hasActions("add_mesh_generator"))
+      {
+        if (_pars.isParamSetByUser("type") && _type != "MeshGeneratorMesh")
+          mooseWarning("Mesh Generators present but the [Mesh] block is set to construct a \"",
+                       _type,
+                       "\" mesh.");
 
-      _type = "MeshGeneratorMesh";
-      _moose_object_pars = _factory.getValidParams("MeshGeneratorMesh");
+        _type = "MeshGeneratorMesh";
+        _moose_object_pars = _factory.getValidParams("MeshGeneratorMesh");
+      }
+      // switch non-file meshes to be a file-mesh if using a pre-split mesh configuration.
+      if (_app.isUseSplit())
+        _type = modifyParamsForUseSplit(_moose_object_pars);
+
+      _mesh = _factory.create<MooseMesh>(_type, "mesh", _moose_object_pars);
     }
-    // switch non-file meshes to be a file-mesh if using a pre-split mesh configuration.
-    if (_app.isUseSplit())
-      _type = modifyParamsForUseSplit(_moose_object_pars);
-
-    _mesh = _factory.create<MooseMesh>(_type, "mesh", _moose_object_pars);
   }
 
   else if (_current_task == "set_mesh_base")
-    _mesh->setMeshBase(_mesh->buildMeshBaseObject());
+  {
+    if (!_app.masterMesh())
+      _mesh->setMeshBase(_mesh->buildMeshBaseObject());
+  }
 
   else if (_current_task == "init_mesh")
   {
-    _mesh->init();
-
-    if (isParamValid("displacements") && getParam<bool>("use_displaced_mesh"))
+    if (_app.masterMesh())
     {
-      _displaced_mesh = _mesh->safeClone();
-      _displaced_mesh->getMesh().allow_remote_element_removal(
-          _mesh->getMesh().allow_remote_element_removal());
-
-      std::vector<std::string> displacements = getParam<std::vector<std::string>>("displacements");
-      if (displacements.size() < _displaced_mesh->dimension())
-        mooseError(
-            "Number of displacements must be greater than or equal to the dimension of the mesh!");
+      if (_app.masterDisplacedMesh())
+        _displaced_mesh = _app.masterDisplacedMesh()->safeClone();
     }
+    else
+    {
+      _mesh->init();
 
-    setupMesh(_mesh.get());
+      if (isParamValid("displacements") && getParam<bool>("use_displaced_mesh"))
+      {
+        _displaced_mesh = _mesh->safeClone();
+        _displaced_mesh->getMesh().allow_remote_element_removal(
+            _mesh->getMesh().allow_remote_element_removal());
 
-    if (_displaced_mesh)
-      setupMesh(_displaced_mesh.get());
+        std::vector<std::string> displacements =
+            getParam<std::vector<std::string>>("displacements");
+        if (displacements.size() < _displaced_mesh->dimension())
+          mooseError("Number of displacements must be greater than or equal to the dimension of "
+                     "the mesh!");
+      }
+
+      setupMesh(_mesh.get());
+
+      if (_displaced_mesh)
+        setupMesh(_displaced_mesh.get());
+    }
   }
 }

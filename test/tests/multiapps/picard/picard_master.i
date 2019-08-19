@@ -76,6 +76,7 @@
     app_type = MooseTestApp
     positions = '0 0 0'
     input_files = picard_sub.i
+    clone_master_mesh = true
   [../]
 []
 
