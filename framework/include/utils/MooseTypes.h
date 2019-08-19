@@ -954,3 +954,6 @@ DerivativeStringClass(TagName);
 
 /// Name of MeshGenerators
 DerivativeStringClass(MeshGeneratorName);
+
+/// Name of extra element IDs
+DerivativeStringClass(ExtraElementIDName);

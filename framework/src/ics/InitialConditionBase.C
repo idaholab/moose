@@ -48,6 +48,7 @@ InitialConditionBase::InitialConditionBase(const InputParameters & parameters)
     BoundaryRestrictable(this, _c_nodal),
     DependencyResolverInterface(),
     Restartable(this, "InitialConditionBases"),
+    ElementIDInterface(this),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _ignore_uo_dependency(getParam<bool>("ignore_uo_dependency"))
 {

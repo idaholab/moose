@@ -19,6 +19,7 @@
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
 #include "RandomInterface.h"
+#include "ElementIDInterface.h"
 
 // Forward Declarations
 class ElementUserObject;
@@ -40,7 +41,8 @@ class ElementUserObject : public UserObject,
                           public MooseVariableDependencyInterface,
                           public TransientInterface,
                           protected PostprocessorInterface,
-                          public RandomInterface
+                          public RandomInterface,
+                          public ElementIDInterface
 {
 public:
   ElementUserObject(const InputParameters & parameters);

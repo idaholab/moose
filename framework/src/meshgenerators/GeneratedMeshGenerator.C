@@ -72,6 +72,9 @@ validParams<GeneratedMeshGenerator>()
 
   params.addParamNamesToGroup("dim", "Main");
 
+  params.addParam<std::vector<ExtraElementIDName>>("extra_element_integers",
+                                                   "Names of extra element integers");
+
   params.addClassDescription(
       "Create a line, square, or cube mesh with uniformly spaced or biased elements.");
 
@@ -104,6 +107,12 @@ GeneratedMeshGenerator::generate()
 {
   // Have MOOSE construct the correct libMesh::Mesh object using Mesh block and CLI parameters.
   auto mesh = _mesh->buildMeshBaseObject();
+
+  if (isParamValid("extra_element_integers"))
+  {
+    for (auto & name : getParam<std::vector<ExtraElementIDName>>("extra_element_integers"))
+      mesh->add_elem_integer(name);
+  }
 
   MooseEnum elem_type_enum = getParam<MooseEnum>("elem_type");
 

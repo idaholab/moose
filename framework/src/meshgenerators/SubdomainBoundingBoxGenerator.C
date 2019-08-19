@@ -37,6 +37,8 @@ validParams<SubdomainBoundingBoxGenerator>()
   params.addParam<MooseEnum>(
       "location", location, "Control of where the subdomain id is to be set");
 
+  params.addParam<std::string>("integer_name",
+                               "Element integer to be assigned (default to subdomain ID)");
   return params;
 }
 
@@ -55,19 +57,37 @@ SubdomainBoundingBoxGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
-  // Loop over the elements
-  for (const auto & elem : mesh->active_element_ptr_range())
+  if (isParamValid("integer_name"))
   {
-    bool contains = _bounding_box.contains_point(elem->centroid());
-    if (contains && _location == "INSIDE")
-      elem->subdomain_id() = _block_id;
-    else if (!contains && _location == "OUTSIDE")
-      elem->subdomain_id() = _block_id;
-  }
+    std::string integer_name = getParam<std::string>("integer_name");
 
-  // Assign block name, if provided
-  if (isParamValid("block_name"))
-    mesh->subdomain_name(_block_id) = getParam<SubdomainName>("block_name");
+    if (!mesh->has_elem_integer(integer_name))
+      mooseError("Mesh does not have an element integer names as ", integer_name);
+
+    unsigned int id = mesh->get_elem_integer_index(integer_name);
+
+    // Loop over the elements
+    for (const auto & elem : mesh->active_element_ptr_range())
+    {
+      bool contains = _bounding_box.contains_point(elem->centroid());
+      if ((contains && _location == "INSIDE") || (!contains && _location == "OUTSIDE"))
+        elem->set_extra_integer(id, _block_id);
+    }
+  }
+  else
+  {
+    // Loop over the elements
+    for (const auto & elem : mesh->active_element_ptr_range())
+    {
+      bool contains = _bounding_box.contains_point(elem->centroid());
+      if ((contains && _location == "INSIDE") || (!contains && _location == "OUTSIDE"))
+        elem->subdomain_id() = _block_id;
+    }
+
+    // Assign block name, if provided
+    if (isParamValid("block_name"))
+      mesh->subdomain_name(_block_id) = getParam<SubdomainName>("block_name");
+  }
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
