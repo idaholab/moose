@@ -31,6 +31,7 @@ ComputeElasticityTensorBase::ComputeElasticityTensorBase(const InputParameters &
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _elasticity_tensor_name(_base_name + "elasticity_tensor"),
     _elasticity_tensor(declareProperty<RankFourTensor>(_elasticity_tensor_name)),
+    _effective_stiffness(declareProperty<Real>(_base_name + "effective_stiffness")),
     _prefactor_function(isParamValid("elasticity_tensor_prefactor")
                             ? &getFunction("elasticity_tensor_prefactor")
                             : nullptr)
@@ -41,7 +42,7 @@ void
 ComputeElasticityTensorBase::computeQpProperties()
 {
   computeQpElasticityTensor();
-
+  
   // Multiply by prefactor
   if (_prefactor_function)
     _elasticity_tensor[_qp] *= _prefactor_function->value(_t, _q_point[_qp]);

@@ -17,22 +17,14 @@ validParams<CriticalTimeStep>()
 {
   InputParameters params = validParams<ElementPostprocessor>();
   params.addClassDescription("Computes and reports the critical time step for the explicit solver.");
-  params.addParam<MaterialPropertyName>(
-      "density",
-      "density",
-      "Name of Material Property  or a constant real number defining the density of the material.");
   return params;
 }
 
 CriticalTimeStep::CriticalTimeStep(const InputParameters & parameters)
   : ElementPostprocessor(parameters),
   GuaranteeProvider(this),
-  _elasticity_tensor_name("elasticity_tensor"),
-  _elasticity_tensor(getMaterialPropertyByName<RankFourTensor>(_elasticity_tensor_name)),
-  _mat_dens(getMaterialPropertyByName<Real>("density"))
+  _effective_stiffness(getMaterialPropertyByName<Real>("effective_stiffness"))
 {
-  // all tensors created by this class are always isotropic
-  issueGuarantee(_elasticity_tensor_name, Guarantee::ISOTROPIC);
 }
 
 void
@@ -57,16 +49,18 @@ CriticalTimeStep::getValue()
 
 //  std::cout <<  << std::endl;
 
-  Real lame_1 = _elasticity_tensor[0](0,0,1,1);
+  /*Real lame_1 = _elasticity_tensor[0](0,0,1,1);
   Real lame_2 = _elasticity_tensor[0](0,1,0,1);
   Real dens = _mat_dens[0];
 
   Real elas_mod = lame_2*(3*lame_1+2*lame_2)/(lame_1+lame_2);
   Real poiss_rat = lame_1/(2*(lame_1+lame_2));
 
-  Real ele_c = std::sqrt((elas_mod*(1-poiss_rat))/((1+poiss_rat)*(1-2*poiss_rat) * (dens)));
+  Real ele_c = std::sqrt((elas_mod*(1-poiss_rat))/((1+poiss_rat)*(1-2*poiss_rat) * (dens)));*/
 
-  return _total_size/ele_c;
+  return _total_size/_effective_stiffness[0];
+
+  std::cout<< _total_size/_effective_stiffness[0] << std::endl;
 }
 
 void

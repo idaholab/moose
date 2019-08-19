@@ -76,6 +76,11 @@
     poissons_ratio = 0.1
     youngs_modulus = 1e6
   [../]
+  [./density]
+    type = GenericConstantMaterial
+    prop_names = 'density'
+    prop_values = '8050.0'
+  [../]
 []
 
 [Preconditioning]

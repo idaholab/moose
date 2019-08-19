@@ -22,6 +22,10 @@ validParams<ComputeIsotropicElasticityTensor>()
   params.addParam<Real>("poissons_ratio", "Poisson's ratio for the material.");
   params.addParam<Real>("shear_modulus", "The shear modulus of the material.");
   params.addParam<Real>("youngs_modulus", "Young's modulus of the material.");
+  params.addParam<MaterialPropertyName>(
+      "density",
+      "density",
+      "Name of Material Property  or a constant real number defining the density of the material.");
   return params;
 }
 
@@ -37,7 +41,8 @@ ComputeIsotropicElasticityTensor::ComputeIsotropicElasticityTensor(
     _lambda(_lambda_set ? getParam<Real>("lambda") : -1),
     _poissons_ratio(_poissons_ratio_set ? getParam<Real>("poissons_ratio") : -1),
     _shear_modulus(_shear_modulus_set ? getParam<Real>("shear_modulus") : -1),
-    _youngs_modulus(_youngs_modulus_set ? getParam<Real>("youngs_modulus") : -1)
+    _youngs_modulus(_youngs_modulus_set ? getParam<Real>("youngs_modulus") : -1),
+    _mat_dens(getMaterialPropertyByName<Real>("density"))
 {
   unsigned int num_elastic_constants = _bulk_modulus_set + _lambda_set + _poissons_ratio_set +
                                        _shear_modulus_set + _youngs_modulus_set;
@@ -129,9 +134,58 @@ ComputeIsotropicElasticityTensor::ComputeIsotropicElasticityTensor(
   _Cijkl.fillFromInputVector(iso_const, RankFourTensor::symmetric_isotropic);
 }
 
+/*Real
+CriticalTimeStep::getValue()
+{
+  gatherSum(_total_size);
+  gatherSum(_elems);
+
+//  std::cout <<  << std::endl;
+
+  Real lame_1 = _elasticity_tensor[0](0,0,1,1);
+  Real lame_2 = _elasticity_tensor[0](0,1,0,1);
+  Real dens = _mat_dens[0];
+
+  Real elas_mod = lame_2*(3*lame_1+2*lame_2)/(lame_1+lame_2);
+  Real poiss_rat = lame_1/(2*(lame_1+lame_2));
+
+  Real ele_c = std::sqrt((elas_mod*(1-poiss_rat))/((1+poiss_rat)*(1-2*poiss_rat) * (dens)));
+
+  return _total_size/ele_c;
+}*/
+
 void
 ComputeIsotropicElasticityTensor::computeQpElasticityTensor()
 {
   // Assign elasticity tensor at a given quad point
   _elasticity_tensor[_qp] = _Cijkl;
+
+  Real lame_1 = _elasticity_tensor[0](0,0,1,1);
+  Real lame_2 = _elasticity_tensor[0](0,1,0,1);
+  Real dens = _mat_dens[0];
+
+  Real elas_mod = lame_2*(3*lame_1+2*lame_2)/(lame_1+lame_2);
+  Real poiss_rat = lame_1/(2*(lame_1+lame_2));
+
+  _effective_stiffness[_qp] = std::sqrt((elas_mod*(1-poiss_rat))/((1+poiss_rat)*(1-2*poiss_rat) * (dens)));
+
 }
+
+/*ComputeIsotropicElasticityTensor::execute()
+{
+  Real lame_1 = _elasticity_tensor[0](0,0,1,1);
+  Real lame_2 = _elasticity_tensor[0](0,1,0,1);
+  Real dens = _mat_dens[0];
+
+  Real elas_mod = lame_2*(3*lame_1+2*lame_2)/(lame_1+lame_2);
+  Real poiss_rat = lame_1/(2*(lame_1+lame_2));
+
+  _ele_c = std::sqrt((elas_mod*(1-poiss_rat))/((1+poiss_rat)*(1-2*poiss_rat) * (dens)));
+  std::cout << _ele_c << std::endl;
+}
+
+Real
+ComputeIsotropicElasticityTensor::getValue()
+{
+  return _ele_c;
+}*/

@@ -55,6 +55,9 @@
 []
 
 [Materials]
+  [./stress]
+    type = ComputeLinearElasticStress
+  [../]
   [./elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.1
@@ -62,9 +65,6 @@
   [../]
   [./strain]
     type = ComputeSmallStrain
-  [../]
-  [./stress]
-    type = ComputeLinearElasticStress
   [../]
   [./density]
     type = GenericConstantMaterial
