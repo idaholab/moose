@@ -6,7 +6,7 @@ MOOSE uses an extensive set of automated processes and peer review to take in co
 
 ## 1. It begins with a Pull Request
 
-[Contributors](framework_development/contributing.md) submit code to MOOSE by pushing their modifications to their [Fork](https://help.github.com/articles/fork-a-repo) of the MOOSE repository.  Then, a Contributor will submit a Pull Request (PR) to pull their modifications from their Fork into the `devel` branch in the main MOOSE repository.
+[Contributors](framework_development/contributing.md) submit code to MOOSE by pushing their modifications to their [Fork](https://help.github.com/articles/fork-a-repo) of the MOOSE repository.  Then, a Contributor will submit a Pull Request (PR) to pull their modifications from their Fork into the `next` branch in the main MOOSE repository.
 
 ## 2. Testing At Every Turn
 
@@ -50,7 +50,7 @@ If there are more features that need to be added to your code before it's accept
 
 ## 5. Merging
 
-At the point where a MOOSE developer believes your code is fit for inclusion in MOOSE they will "merge" your code into the `devel` branch in the main MOOSE repository.  That act of merging automatically kicks off a set of processes:
+At the point where a MOOSE developer believes your code is fit for inclusion in MOOSE they will "merge" your code into the `next` branch in the main MOOSE repository.  That act of merging automatically kicks off a set of processes:
 
 1.  [CIVET](http://civet.inl.gov) is signaled and more testing is done across multiple platforms.
 2.  If #1 passes then the code change is automatically merged into the `master` branch in the main MOOSE repo (that is our "stable" branch).
