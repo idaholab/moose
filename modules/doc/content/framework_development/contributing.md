@@ -45,7 +45,7 @@ git remote add upstream git@github.com:idaholab/moose.git
 
 Create a branch for your work:
 
-```bash 
+```bash
 git checkout -b branch_name upstream/devel
 ```
 
@@ -96,7 +96,7 @@ GitHub utilizes Pull Requests (PRs) to allow you to submit changes stored in you
 
 In addition: [our own slides](https://mooseframework.org/static/media/uploads/docs/moose_github.pdf) are a great way to learn about the process of submitting a PR for the MOOSE project.
 
-The main thing to remember when issuing a PR for MOOSE is that all PRs should be specified to go to the `devel` branch.
+The main thing to remember when issuing a PR for MOOSE is that all PRs should be specified to go to the `next` branch.
 
 ## What Now?
 
