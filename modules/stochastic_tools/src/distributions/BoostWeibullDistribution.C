@@ -9,6 +9,8 @@
 
 #include "BoostWeibullDistribution.h"
 
+#include "libmesh/auto_ptr.h"
+
 registerMooseObject("StochasticToolsApp", BoostWeibullDistribution);
 
 template <>

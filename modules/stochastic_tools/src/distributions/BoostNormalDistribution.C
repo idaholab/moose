@@ -9,6 +9,8 @@
 
 #include "BoostNormalDistribution.h"
 
+#include "libmesh/auto_ptr.h"
+
 registerMooseObject("StochasticToolsApp", BoostNormalDistribution);
 
 template <>

@@ -10,6 +10,8 @@
 #include "Cartesian.h"
 #include "Legendre.h"
 
+#include "libmesh/auto_ptr.h"
+
 Cartesian::Cartesian(const std::string & who_is_using_me)
   : CompositeSeriesBasisInterface(who_is_using_me)
 {
