@@ -29,5 +29,3 @@ AlwaysBreakAfterDefinitionReturnType: TopLevel
 AlwaysBreakTemplateDeclarations: true
 
 FixNamespaceComments: false
-
-StatementMacros: ['variableValidParams']
