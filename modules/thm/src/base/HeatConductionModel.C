@@ -39,17 +39,17 @@ HeatConductionModel::HeatConductionModel(const InputParameters & params)
 void
 HeatConductionModel::addVariables()
 {
-  const auto & subdomain_ids = _hs.getSubdomainIds();
+  const auto & subdomain_names = _hs.getSubdomainNames();
   const Real & scaling_factor = _sim.getParamTempl<Real>("scaling_factor_temperature");
 
-  _sim.addVariable(true, TEMPERATURE, _fe_type, subdomain_ids, scaling_factor);
+  _sim.addVariable(true, TEMPERATURE, _fe_type, subdomain_names, scaling_factor);
 }
 
 void
 HeatConductionModel::addInitialConditions()
 {
-  const auto & subdomain_ids = _hs.getSubdomainNames();
-  _sim.addFunctionIC(TEMPERATURE, _hs.getInitialT(), subdomain_ids);
+  const auto & subdomain_names = _hs.getSubdomainNames();
+  _sim.addFunctionIC(TEMPERATURE, _hs.getInitialT(), subdomain_names);
 }
 
 void

@@ -41,25 +41,25 @@ FlowModelSinglePhase::addVariables()
 {
   FlowModel::addCommonVariables();
 
-  SubdomainID subdomain_id = _flow_channel.getSubdomainID();
+  const SubdomainName & subdomain_name = _flow_channel.getSubdomainName();
   std::vector<Real> scaling_factor = _sim.getParamTempl<std::vector<Real>>("scaling_factor_1phase");
 
   // Nonlinear variables
-  _sim.addVariable(true, RHOA, _fe_type, subdomain_id, scaling_factor[0]);
-  _sim.addVariable(true, RHOUA, _fe_type, subdomain_id, scaling_factor[1]);
-  _sim.addVariable(true, RHOEA, _fe_type, subdomain_id, scaling_factor[2]);
+  _sim.addVariable(true, RHOA, _fe_type, subdomain_name, scaling_factor[0]);
+  _sim.addVariable(true, RHOUA, _fe_type, subdomain_name, scaling_factor[1]);
+  _sim.addVariable(true, RHOEA, _fe_type, subdomain_name, scaling_factor[2]);
 
   _solution_vars = {RHOA, RHOUA, RHOEA};
   _derivative_vars = _solution_vars;
 
   // Auxiliary
-  _sim.addVariable(false, DENSITY, _fe_type, subdomain_id);
-  _sim.addVariable(false, VELOCITY, _fe_type, subdomain_id);
-  _sim.addVariable(false, PRESSURE, _fe_type, subdomain_id);
-  _sim.addVariable(false, SPECIFIC_VOLUME, _fe_type, subdomain_id);
-  _sim.addVariable(false, SPECIFIC_INTERNAL_ENERGY, _fe_type, subdomain_id);
-  _sim.addVariable(false, TEMPERATURE, _fe_type, subdomain_id);
-  _sim.addVariable(false, SPECIFIC_TOTAL_ENTHALPY, _fe_type, subdomain_id);
+  _sim.addVariable(false, DENSITY, _fe_type, subdomain_name);
+  _sim.addVariable(false, VELOCITY, _fe_type, subdomain_name);
+  _sim.addVariable(false, PRESSURE, _fe_type, subdomain_name);
+  _sim.addVariable(false, SPECIFIC_VOLUME, _fe_type, subdomain_name);
+  _sim.addVariable(false, SPECIFIC_INTERNAL_ENERGY, _fe_type, subdomain_name);
+  _sim.addVariable(false, TEMPERATURE, _fe_type, subdomain_name);
+  _sim.addVariable(false, SPECIFIC_TOTAL_ENTHALPY, _fe_type, subdomain_name);
 }
 
 void

@@ -27,7 +27,6 @@ FormLoss1PhaseBase::init()
   if (hasComponentByName<FlowChannel1Phase>(_flow_channel_name))
   {
     const FlowChannel1Phase & fch = getComponentByName<FlowChannel1Phase>(_flow_channel_name);
-    _block_ids_flow_channel = fch.getSubdomainIds();
     _flow_channel_subdomains = fch.getSubdomainNames();
   }
 }
