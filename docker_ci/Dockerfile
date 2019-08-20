@@ -88,7 +88,7 @@ WORKDIR ${MOOSE_DIR}
 #-----------------------------------------------------------------------------#
 ARG PETSC_REV
 COPY scripts/update_and_rebuild_petsc.sh ${MOOSE_DIR}/scripts/update_and_rebuild_petsc.sh
-RUN git clone https://bitbucket.org/petsc/petsc ; \
+RUN git clone https://gitlab.com/petsc/petsc.git ; \
 git -C petsc checkout ${PETSC_REV} ; \
 PETSC_PREFIX=/usr/local ./scripts/update_and_rebuild_petsc.sh ; \
 rm -rf petsc/* petsc/.* || true
