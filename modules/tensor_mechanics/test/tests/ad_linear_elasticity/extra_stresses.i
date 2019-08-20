@@ -13,26 +13,11 @@
   displacements = 'disp_x disp_y'
 []
 
-[Variables]
-  [./diffused]
-     [./InitialCondition]
-      type = RandomIC
-     [../]
-  [../]
-[]
-
 [Modules/TensorMechanics/Master/All]
   strain = SMALL
   add_variables = true
   generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx hydrostatic_stress vonmises_stress'
   use_automatic_differentiation = true
-[]
-
-[Kernels]
-  [./diff]
-    type = ADDiffusion
-    variable = diffused
-  [../]
 []
 
 [Materials]
@@ -58,18 +43,6 @@
 []
 
 [BCs]
-  [./bottom]
-    type = ADPresetBC
-    variable = diffused
-    boundary = '1'
-    value = 1
-  [../]
-  [./top]
-    type = ADPresetBC
-    variable = diffused
-    boundary = 'top'
-    value = 0
-  [../]
   [./disp_x_BC]
     type = ADPresetBC
     variable = disp_x

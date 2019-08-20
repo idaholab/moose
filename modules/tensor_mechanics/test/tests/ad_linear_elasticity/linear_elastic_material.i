@@ -48,7 +48,7 @@
   [./bottom]
     type = ADPresetBC
     variable = diffused
-    boundary = '1'
+    boundary = 'right'
     value = 1
   [../]
   [./top]
