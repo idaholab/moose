@@ -120,7 +120,7 @@ class ColorBar(base.ChiggerResult):
 
         data = vtk.vtkFloatArray()
         data.SetNumberOfTuples(n+1)
-        for i in xrange(n+1):
+        for i in range(n+1):
             data.SetValue(i, rng[0] + i*step)
         plane.setOptions(data=data)
 

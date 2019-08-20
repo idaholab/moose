@@ -184,7 +184,7 @@ class ExodusReader(base.ChiggerObject):
             active_blockinfo = self.__getActiveBlocks()
             blockinfo = self.getBlockInformation()
             for object_type in ExodusReader.BLOCK_TYPES:
-                for data in blockinfo[object_type].itervalues():
+                for data in blockinfo[object_type].values():
                     if (not active_blockinfo) or (data in active_blockinfo):
                         self.__vtkreader.SetObjectStatus(data.object_type, data.object_index, 1)
                     else:
@@ -204,7 +204,7 @@ class ExodusReader(base.ChiggerObject):
             # reduces loading times. If 'variables' is not given, all the variables are loaded.
             variables = self.getOption('variables')
             variable_info = self.getVariableInformation()
-            for vinfo in variable_info.itervalues():
+            for vinfo in variable_info.values():
                 if (not variables) or (vinfo.name in variables):
                     self.__vtkreader.SetObjectArrayStatus(vinfo.object_type, vinfo.name, 1)
                 else:
@@ -311,7 +311,7 @@ class ExodusReader(base.ChiggerObject):
             var_types = ExodusReader.VARIABLE_TYPES
 
         variables = collections.OrderedDict()
-        for name, var in self.__variableinfo.iteritems():
+        for name, var in self.__variableinfo.items():
             if var.object_type in var_types:
                 variables[name] = var
         return variables
@@ -399,7 +399,7 @@ class ExodusReader(base.ChiggerObject):
                                       [self.BLOCK, self.SIDESET, self.NODESET]):
             if self.isOptionValid(param):
                 blocks = self.getOption(param)
-                for data in blockinfo[object_type].itervalues():
+                for data in blockinfo[object_type].values():
                     if data.name in blocks:
                         output.append(data)
         return output
@@ -414,7 +414,7 @@ class ExodusReader(base.ChiggerObject):
         self.__active = filenames
 
         # Re-move any old files in timeinfo dict()
-        for fname in self.__fileinfo.keys():
+        for fname in list(self.__fileinfo.keys()):
             if fname not in filenames:
                 self.__fileinfo.pop(fname)
 
@@ -444,7 +444,7 @@ class ExodusReader(base.ChiggerObject):
         # Re-populate the time data
         self.__timedata = []
         timestep = 0
-        for tinfo in self.__fileinfo.itervalues():
+        for tinfo in self.__fileinfo.values():
             for i, t in enumerate(tinfo.times):
                 tdata = ExodusReader.TimeData(timestep=timestep, time=t, filename=tinfo.filename,
                                               index=i)
@@ -509,7 +509,7 @@ class ExodusReader(base.ChiggerObject):
                      (ExodusReader.GLOBAL, 'POSTPROCESSORS')]
         for vartype, vartitle in variables:
             out += '\n{}:\n'.format(mooseutils.colorText(vartitle, 'GREEN'))
-            for varinfo in self.getVariableInformation([vartype]).itervalues():
+            for varinfo in self.getVariableInformation([vartype]).values():
                 out += '  {}\n'.format(mooseutils.colorText(varinfo.name, 'CYAN'))
                 out += '{:>16}: {}\n'.format('components', varinfo.num_components)
         return out

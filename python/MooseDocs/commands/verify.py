@@ -18,9 +18,9 @@ import MooseDocs
 try:
     import bs4
 except ImportError:
-    print("The BeutifulSoup package (bs4) is required for the verify command, " \
-          "it may be downloaded by running the following:\n" \
-          "    pip install --user bs4")
+    print("The BeutifulSoup package (bs4) is required for the verify command",
+          "it may be downloaded by running the following:\n",
+          "\tpip install --user bs4")
     sys.exit(1)
 
 def command_line_options(subparser, parent):

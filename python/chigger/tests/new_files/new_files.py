@@ -29,7 +29,7 @@ for i in range(4):
     # Update the file
     if i < 3:
         time.sleep(1.5)
-        print "{} --> {}".format(filenames[i], 'new_file.e')
+        print("{} --> {}".format(filenames[i], 'new_file.e'))
         shutil.copy(filenames[i], 'new_file.e')
 
 

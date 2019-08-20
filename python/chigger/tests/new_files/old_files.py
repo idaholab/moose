@@ -42,4 +42,4 @@ os.utime('old_file_adapt.e-s009', None)   # 4.5
 # Read the file
 reader = chigger.exodus.ExodusReader('old_file_adapt.e')
 reader.update()
-print reader.getTimes()
+print(reader.getTimes())

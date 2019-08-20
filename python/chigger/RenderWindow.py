@@ -42,7 +42,7 @@ class RenderWindow(base.ChiggerObject):
         opt.add('chigger', False, "Places a chigger logo in the lower left corner.")
         opt.add('smoothing', False, "Enable VTK render window smoothing options.")
         opt.add('antialiasing', 0, "Number of antialiasing frames to perform "
-                                   "(set vtkRenderWindow::SetAAFrames).", vtype=int)
+                                   "(set vtkRenderWindow::SetMultiSamples).", vtype=int)
 
         # Observers
         opt.add('observers', [], "A list of ChiggerObserver objects, once added they are not " \

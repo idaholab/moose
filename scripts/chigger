@@ -64,7 +64,7 @@ def exodus_info(opt):
     Display information about the supplied ExodusII file.
     """
     reader = chigger.exodus.ExodusReader(opt.filename)
-    print reader
+    print(reader)
 
 def img2mov(opt):
     """

@@ -73,9 +73,9 @@ class TestExodusReader(unittest.TestCase):
 
         # Blocks
         blockinfo = reader.getBlockInformation()
-        self.assertEqual(blockinfo[reader.BLOCK].keys(), ['1', '76'])
-        self.assertEqual(blockinfo[reader.NODESET].keys(), ['1', '2'])
-        self.assertEqual(blockinfo[reader.SIDESET].keys(), ['1', '2'])
+        self.assertEqual(list(blockinfo[reader.BLOCK].keys()), ['1', '76'])
+        self.assertEqual(list(blockinfo[reader.NODESET].keys()), ['1', '2'])
+        self.assertEqual(list(blockinfo[reader.SIDESET].keys()), ['1', '2'])
         self.assertEqual(blockinfo[reader.SIDESET]['2'].name, 'top')
         self.assertEqual(blockinfo[reader.SIDESET]['2'].object_type, 3)
         self.assertEqual(blockinfo[reader.SIDESET]['2'].object_index, 1)
@@ -83,21 +83,21 @@ class TestExodusReader(unittest.TestCase):
 
         # Variable Info
         varinfo = reader.getVariableInformation()
-        self.assertEqual(varinfo.keys(), ['aux_elem', 'convected', 'diffused', 'func_pp'])
+        self.assertEqual(list(varinfo.keys()), ['aux_elem', 'convected', 'diffused', 'func_pp'])
 
         # Elemental Variables
         elemental = reader.getVariableInformation(var_types=[reader.ELEMENTAL])
-        self.assertEqual(elemental.keys(), ['aux_elem'])
+        self.assertEqual(list(elemental.keys()), ['aux_elem'])
         self.assertEqual(elemental['aux_elem'].num_components, 1)
 
         # Nodal Variables
         elemental = reader.getVariableInformation(var_types=[reader.NODAL])
-        self.assertEqual(elemental.keys(), ['convected', 'diffused'])
+        self.assertEqual(list(elemental.keys()), ['convected', 'diffused'])
         self.assertEqual(elemental['diffused'].num_components, 1)
 
         # Global Variables
         gvars = reader.getVariableInformation(var_types=[reader.GLOBAL])
-        self.assertEqual(gvars.keys(), ['func_pp'])
+        self.assertEqual(list(gvars.keys()), ['func_pp'])
         self.assertEqual(gvars['func_pp'].num_components, 1)
 
     def testSingleFieldData(self):
@@ -117,7 +117,7 @@ class TestExodusReader(unittest.TestCase):
         reader.update()
 
         variables = reader.getVariableInformation()
-        self.assertEqual(variables.keys(), ['u', 'vel_'])
+        self.assertEqual(list(variables.keys()), ['u', 'vel_'])
         self.assertEqual(variables['vel_'].num_components, 2)
 
     def testAdaptivity(self):

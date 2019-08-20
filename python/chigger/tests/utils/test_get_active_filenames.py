@@ -50,7 +50,7 @@ class Test_getActiveFilenames(unittest.TestCase):
         # Wait and the "update" the first few files
         time.sleep(1.5)
         for i in range(5):
-            print self.testfiles[i]
+            print(self.testfiles[i])
             mooseutils.touch(self.testfiles[i])
 
         active = chigger.utils.get_active_filenames(self.basename + '.e', self.basename + '.e-s*')

@@ -24,15 +24,15 @@ mug = chigger.exodus.ExodusResult(reader, camera=camera, variable='convected', c
 mug.update()
 
 
-print 'GLOBAL:', mug.getRange()
-print 'LOCAL:', mug.getRange(local=True)
+print('GLOBAL:', mug.getRange())
+print('LOCAL:', mug.getRange(local=True))
 
 
 window = chigger.RenderWindow(mug, size=[300,300], test=True)
 window.update()
 #window.write('clip.png')
 
-print 'GLOBAL:', mug.getRange()
-print 'LOCAL:', mug.getRange(local=True)
+print('GLOBAL:', mug.getRange())
+print('LOCAL:', mug.getRange(local=True))
 
 window.start()
