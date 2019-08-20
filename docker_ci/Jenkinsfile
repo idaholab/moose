@@ -28,6 +28,7 @@ pipeline {
                 --build-arg MOOSE_JOBS=$(grep -c ^processor /proc/cpuinfo) \
                 --build-arg PETSC_REV=$(sub_rev petsc) \
                 --build-arg LIBMESH_REV=$(sub_rev libmesh) \
+                -f "$WORKSPACE/docker_ci/Dockerfile" \
                 -t $DOCKER_TAG .
                 '''
             }
