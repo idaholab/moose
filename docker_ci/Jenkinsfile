@@ -43,10 +43,7 @@ pipeline {
                 sh '''
                 # Run tests and pipe to accessible log file
                 docker run $DOCKER_TAG /bin/bash -c \
-                'cd test; ./run_tests' | tee test_results.log
-                
-                # Remove characters from text coloring
-                sed -ie 's/\\x1b\\[[0-9;]*m//g' test_results.log
+                'cd test; ./run_tests --no-color' | tee test_results.log
                 '''
             }
         }
