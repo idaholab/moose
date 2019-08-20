@@ -34,4 +34,6 @@ quality.
 - [what_is_a_requirement.md]
 
 MOOSE employs a continuous integration strategy using [!ac](CIVET); the testing results for
-this version of the documentation is available: [!civet!results](Testing Results).
+this version of the documentation is available at the following links:
+
+!civet mergeresults
