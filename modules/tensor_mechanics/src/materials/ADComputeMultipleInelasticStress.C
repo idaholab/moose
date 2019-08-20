@@ -270,7 +270,8 @@ ADComputeMultipleInelasticStress<compute_stage>::updateQpState(
 
   if (counter == _max_iterations && l2norm_delta_stress > _absolute_tolerance &&
       (l2norm_delta_stress / first_l2norm_delta_stress) > _relative_tolerance)
-    throw MooseException("Max stress iteration hit during ADComputeMultipleInelasticStress solve!");
+    mooseException(
+        "In ", _name, ": Max stress iteration hit during ADComputeMultipleInelasticStress solve!");
 
   combined_inelastic_strain_increment.zero();
   for (unsigned i_rmm = 0; i_rmm < _num_models; ++i_rmm)

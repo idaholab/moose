@@ -206,33 +206,4 @@ taylorLog(Real x)
   return val * 2.0 * y;
 }
 
-// fast integer powers
-Real
-pow(Real x, int e)
-{
-  bool neg = false;
-  Real result = 1.0;
-
-  if (e < 0)
-  {
-    neg = true;
-    e = -e;
-  }
-
-  while (e)
-  {
-    // if bit 0 is set multiply the current power of two factor of the exponent
-    if (e & 1)
-      result *= x;
-
-    // x is incrementally set to consecutive powers of powers of two
-    x *= x;
-
-    // bit shift the exponent down
-    e >>= 1;
-  }
-
-  return neg ? 1.0 / result : result;
-}
-
 } // namespace MathUtils
