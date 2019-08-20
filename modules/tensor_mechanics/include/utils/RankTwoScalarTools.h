@@ -67,12 +67,6 @@ Real component(const RankTwoTensor & r2tensor, unsigned int i, unsigned int j, P
  */
 Real vonMisesStress(const RankTwoTensor & tensor);
 
-/*
- * The equivalent plastic strain is calculated as
- * \epsilon_{eqv}^{pl} = \sqrt{\frac{2}{3}\epsilon_{ij}^{pl} \epsilon_{ij}^{pl}}
- * Users must take care to pass in the plastic inelastic_strain only.
- */
-Real equivalentPlasticStrain(const RankTwoTensor & strain);
 
 /*
  * The effective strain is calculated as
