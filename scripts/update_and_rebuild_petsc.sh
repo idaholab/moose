@@ -88,6 +88,7 @@ if [ -z "$go_fast" ]; then
       --with-fc=mpif90 \
       --download-fblaslapack=1 \
       --download-metis=1 \
+      --download-ptscotch=1 \
       --download-parmetis=1 \
       --download-superlu_dist=1 \
       --download-mumps=1 \

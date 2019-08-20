@@ -43,7 +43,9 @@ libhwloc-dev \
 python \
 python-dev \
 cmake \
-curl ; \
+curl \
+bison \
+flex ; \
 rm -rf /var/lib/apt/lists/*
 
 #-----------------------------------------------------------------------------#
