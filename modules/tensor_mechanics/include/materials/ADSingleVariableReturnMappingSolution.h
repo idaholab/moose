@@ -127,6 +127,20 @@ protected:
   /// those bounds if outside them
   bool _bracket_solution;
 
+  /**
+   * Output information for a single iteration step to build the convergence history of the model
+   * @param iter_output            Output stream
+   * @param it                     Current iteration count
+   * @param effective_trial_stress Effective trial stress
+   * @param scalar                 Inelastic strain increment magnitude being solved for
+   * @param residual               Current value of the residual
+   * @param reference              Current value of the reference quantity
+   */
+  virtual void outputIterationStep(std::stringstream * iter_output,
+                                   const ADReal & effective_trial_stress,
+                                   const ADReal & scalar,
+                                   const Real reference_residual);
+
 private:
   enum class InternalSolveOutput
   {
@@ -237,18 +251,4 @@ private:
                     ADReal & scalar_upper_bound,
                     ADReal & scalar_lower_bound,
                     std::stringstream * iter_output);
-
-  /**
-   * Output information for a single iteration step to build the convergence history of the model
-   * @param iter_output            Output stream
-   * @param it                     Current iteration count
-   * @param effective_trial_stress Effective trial stress
-   * @param scalar                 Inelastic strain increment magnitude being solved for
-   * @param residual               Current value of the residual
-   * @param reference              Current value of the reference quantity
-   */
-  virtual void outputIterationStep(std::stringstream * iter_output,
-                                   const ADReal & effective_trial_stress,
-                                   const ADReal & scalar,
-                                   const Real reference_residual);
 };

@@ -1,3 +1,5 @@
+# This input file is designed to test adding extra stress to ADComputeLinearElasticStress
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -22,7 +24,7 @@
 [Modules/TensorMechanics/Master/All]
   strain = SMALL
   add_variables = true
-  generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
+  generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx hydrostatic_stress vonmises_stress'
   use_automatic_differentiation = true
 []
 
@@ -41,6 +43,17 @@
   [../]
   [./stress]
     type = ADComputeLinearElasticStress
+    extra_stress_names = 'stress_one stress_two'
+  [../]
+  [./stress_one]
+    type = GenericConstantRankTwoTensor
+    tensor_name = stress_one
+    tensor_values = '0 1e3 1e3 1e3 0 1e3 1e3 1e3 0'
+  [../]
+  [./stress_two]
+    type = GenericConstantRankTwoTensor
+    tensor_name = stress_two
+    tensor_values = '1e3 0 0 0 1e3 0 0 0 1e3'
   [../]
 []
 
@@ -86,8 +99,17 @@
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
+[]
 
-  nl_rel_tol = 1e-12
+[Postprocessors]
+  [./hydrostatic]
+    type = ElementAverageValue
+    variable = hydrostatic_stress
+  [../]
+  [./von_mises]
+    type = ElementAverageValue
+    variable = vonmises_stress
+  [../]
 []
 
 [Outputs]
