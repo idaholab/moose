@@ -99,14 +99,13 @@ ENV PETSC_DIR=/usr/local
 # Install Libmesh to system path
 #-----------------------------------------------------------------------------#
 ARG LIBMESH_REV
+ENV LIBMESH_DIR=/usr/local
 COPY scripts/update_and_rebuild_libmesh.sh ${MOOSE_DIR}/scripts/update_and_rebuild_libmesh.sh
 RUN git clone https://github.com/libMesh/libmesh.git ; \
 git -C libmesh checkout ${LIBMESH_REV} ; \
 git -C libmesh submodule update --init ; \
 ./scripts/update_and_rebuild_libmesh.sh ; \
 rm -rf libmesh/* libmesh/.* || true
-
-ENV LIBMESH_DIR=/usr/local
 
 #-----------------------------------------------------------------------------#
 # Copy and build MOOSE framework and tests
