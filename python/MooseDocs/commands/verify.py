@@ -105,7 +105,7 @@ def compare(out_fname, out_dir, gold_dir, update_gold=False):
                                        color=True, num_lines=2)
         if diff:
             print(mooseutils.colorText("DIFF: {} != {}".format(out_fname, gold_fname), 'YELLOW'))
-            print(diff.encode('utf-8'))
+            print(str(diff))
             errno = 1
         else:
             print(mooseutils.colorText("PASS: {} == {}".format(out_fname, gold_fname), 'GREEN'))
@@ -117,7 +117,7 @@ def main(options):
 
     # Create the content
     config = options.form + '.yml'
-    subprocess.check_output(['python', 'moosedocs.py', 'build',
+    subprocess.check_output(['python3', 'moosedocs.py', 'build',
                              '--config', config,
                              '--executioner', options.executioner,
                              '--disable', ' '.join(options.disable)],

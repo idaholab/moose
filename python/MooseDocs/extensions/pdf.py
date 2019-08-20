@@ -278,7 +278,7 @@ class PDFExtension(command.CommandExtension):
         # Build directories
         for node in nodes:
             key = tuple([u''] + node.local.split(os.sep))[:-1]
-            for i in xrange(1, len(key) + 1):
+            for i in range(1, len(key) + 1):
                 k = key[:i]
                 if k not in tree:
                     tree[k] = base.NodeBase(k[-1], tree[k[:-1]])

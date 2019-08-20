@@ -15,7 +15,7 @@ class TestExceptions(unittest.TestCase):
     def testMooseDocsException(self):
         with self.assertRaises(exceptions.MooseDocsException) as e:
             raise exceptions.MooseDocsException("{}", 'foo')
-        self.assertEqual('foo', e.exception.message)
+        self.assertEqual('foo', str(e.exception))
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

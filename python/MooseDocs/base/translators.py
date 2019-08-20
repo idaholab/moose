@@ -245,7 +245,7 @@ class Translator(mixins.ConfigObject):
             self.__markdown_file_list.add(local)
             parts = local.split(os.path.sep)
             n = len(parts)
-            for i in xrange(n, 0, -1):
+            for i in range(n, 0, -1):
                 self.__markdown_file_list.add(os.path.join(*parts[n-i:n]))
 
     def init(self):

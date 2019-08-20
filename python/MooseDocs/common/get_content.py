@@ -203,4 +203,4 @@ def get_content(items, in_ext):
         else:
             MooseDocs.PROJECT_FILES.update(mooseutils.list_files(root))
 
-    return nodes.values()
+    return list(nodes.values())

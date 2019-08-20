@@ -49,8 +49,8 @@ class TestParseSettings(unittest.TestCase):
         with self.assertRaises(exceptions.MooseDocsException) as e:
             known, unknown = common.parse_settings(defaults, raw)
 
-        self.assertIn("The following key, value settings are unknown:", e.exception.message)
-        self.assertIn("month", e.exception.message)
+        self.assertIn("The following key, value settings are unknown:", str(e.exception))
+        self.assertIn("month", str(e.exception))
 
     def testChangeException(self):
         defaults = dict(year=(1980, 'doc'))
@@ -58,10 +58,8 @@ class TestParseSettings(unittest.TestCase):
         with self.assertRaises(exceptions.MooseDocsException) as e:
             known, unknown = common.parse_settings(defaults, raw)
 
-        self.assertIn("The following key, value settings are unknown:", e.exception.message)
-        self.assertIn("month", e.exception.message)
-
-
+        self.assertIn("The following key, value settings are unknown:", str(e.exception))
+        self.assertIn("month", str(e.exception))
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

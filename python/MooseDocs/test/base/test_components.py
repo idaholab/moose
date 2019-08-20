@@ -77,7 +77,7 @@ class TestTokenComponent(unittest.TestCase):
 
         with self.assertRaises(exceptions.MooseDocsException) as e:
             TestToken()
-        self.assertIn("must return a dict", e.exception.message)
+        self.assertIn("must return a dict", str(e.exception))
 
     def testCreateToken(self):
         """

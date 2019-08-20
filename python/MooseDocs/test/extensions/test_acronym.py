@@ -75,10 +75,9 @@ class TestAcronymList(MooseDocsTestCase):
 
     def setupExtension(self, ext):
         if ext == acronym:
-            return dict(acronyms=dict(MTU="Michigan Technological University",
+            return dict(acronyms=dict(MSU="Montana State University",
                                       WSU="Washington State University",
-                                      MSU="Montana State University"))
-
+                                      MTU="Michigan Technological University"))
     def testAST(self):
         ast = self.tokenize(self.TEXT)
         self._assertAST(ast)

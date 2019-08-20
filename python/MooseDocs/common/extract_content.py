@@ -139,7 +139,7 @@ def prepareContent(content, settings): #pylint: disable=no-self-use
         if len(pairs) % 2:
             msg = "The 'replace' input must be a list of replacement string pairs."
             raise MooseDocsException(msg)
-        for f, r in [(pairs[i], pairs[i+1]) for i in xrange(0, len(pairs), 2)]:
+        for f, r in [(pairs[i], pairs[i+1]) for i in range(0, len(pairs), 2)]:
             content = content.replace(f, r)
 
     return content

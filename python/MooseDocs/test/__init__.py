@@ -50,7 +50,7 @@ class MooseDocsTestCase(unittest.TestCase):
 
     def setupContent(self):
         """Virtual method for populating Content section in configuration."""
-        pass
+        return []
 
     def tokenize(self, text, *args, **kwargs):
         """Helper for tokenization"""
