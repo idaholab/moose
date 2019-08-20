@@ -16,5 +16,5 @@ ReactorPower::ReactorPower(const InputParameters & parameters)
 void
 ReactorPower::addVariables()
 {
-  _sim.addVariable(false, _power_var_name, FEType(FIRST, SCALAR), 0);
+  _sim.addVariable(false, _power_var_name, FEType(FIRST, SCALAR));
 }

@@ -100,13 +100,13 @@ FlowModel::getVariableFn(const FunctionName & fn_param_name)
 void
 FlowModel::addCommonVariables()
 {
-  SubdomainID subdomain_id = _flow_channel.getSubdomainID();
+  const SubdomainName & subdomain_name = _flow_channel.getSubdomainName();
 
-  _sim.addVariable(false, AREA, _fe_type, subdomain_id);
-  _sim.addVariable(false, HEAT_FLUX_PERIMETER, _fe_type, subdomain_id);
+  _sim.addVariable(false, AREA, _fe_type, subdomain_name);
+  _sim.addVariable(false, HEAT_FLUX_PERIMETER, _fe_type, subdomain_name);
 
   if (_spatial_discretization == rDG)
-    _sim.addVariable(false, AREA_LINEAR, FEType(FIRST, LAGRANGE), subdomain_id);
+    _sim.addVariable(false, AREA_LINEAR, FEType(FIRST, LAGRANGE), subdomain_name);
 }
 
 void

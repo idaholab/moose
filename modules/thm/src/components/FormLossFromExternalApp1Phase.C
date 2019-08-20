@@ -22,7 +22,7 @@ FormLossFromExternalApp1Phase::FormLossFromExternalApp1Phase(const InputParamete
 void
 FormLossFromExternalApp1Phase::addVariables()
 {
-  _sim.addVariable(false, _K_prime_var_name, FEType(FIRST, LAGRANGE), _block_ids_flow_channel);
+  _sim.addVariable(false, _K_prime_var_name, FEType(FIRST, LAGRANGE), _flow_channel_subdomains);
 }
 
 void

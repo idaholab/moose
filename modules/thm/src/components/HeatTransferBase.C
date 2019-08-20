@@ -44,7 +44,6 @@ HeatTransferBase::init()
     flow_channel.addHeatTransferName(name());
 
     // get various data from flow channel
-    _block_ids_flow_channel = flow_channel.getSubdomainIds();
     _flow_channel_subdomains = flow_channel.getSubdomainNames();
     _model_type = flow_channel.getFlowModelID();
     _fp_name = flow_channel.getFluidPropertiesName();
@@ -94,7 +93,7 @@ HeatTransferBase::addMooseObjects()
     const std::string class_name = "FunctionAux";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<AuxVariableName>("variable") = {_P_hf_name};
-    params.set<std::vector<SubdomainName>>("block") = {_flow_channel_name};
+    params.set<std::vector<SubdomainName>>("block") = _flow_channel_subdomains;
     params.set<FunctionName>("function") = _P_hf_fn_name;
 
     ExecFlagEnum execute_on(MooseUtils::getDefaultExecFlagEnum());
@@ -108,7 +107,7 @@ HeatTransferBase::addMooseObjects()
 void
 HeatTransferBase::addHeatedPerimeter()
 {
-  _sim.addVariable(false, _P_hf_name, _sim.getFlowFEType(), _block_ids_flow_channel);
+  _sim.addVariable(false, _P_hf_name, _sim.getFlowFEType(), _flow_channel_subdomains);
 
   // create heat flux perimeter variable if not transferred from external app
   if (!_P_hf_transferred)
@@ -130,7 +129,7 @@ HeatTransferBase::addHeatedPerimeter()
       makeFunctionControllableIfConstant(_P_hf_fn_name, "P_hf");
     }
 
-    _sim.addFunctionIC(_P_hf_name, _P_hf_fn_name, _flow_channel_name);
+    _sim.addFunctionIC(_P_hf_name, _P_hf_fn_name, _flow_channel_subdomains);
   }
 }
 

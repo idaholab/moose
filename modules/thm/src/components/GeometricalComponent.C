@@ -149,14 +149,6 @@ GeometricalComponent::check() const
   }
 }
 
-const std::vector<SubdomainID> &
-GeometricalComponent::getSubdomainIds() const
-{
-  checkSetupStatus(MESH_PREPARED);
-
-  return _subdomain_ids;
-}
-
 const std::vector<SubdomainName> &
 GeometricalComponent::getSubdomainNames() const
 {

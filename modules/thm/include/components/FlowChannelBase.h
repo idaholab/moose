@@ -56,7 +56,7 @@ public:
 
   unsigned int getNodesetID() const;
   const BoundaryName & getNodesetName() const;
-  SubdomainID getSubdomainID() const;
+  SubdomainName getSubdomainName() const;
   virtual bool isHorizontal() const { return _is_horizontal; }
 
   /**
@@ -167,8 +167,6 @@ protected:
   /// True if user provides PoD
   bool _has_PoD;
 
-  /// Subdomain id this flow channel defined
-  SubdomainID _subdomain_id;
   /// Nodeset id for all flow channel nodes
   BoundaryID _nodeset_id;
   /// Nodeset name for all flow channel nodes

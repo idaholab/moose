@@ -34,13 +34,6 @@ public:
   virtual Real getLength() const { return _length; }
 
   /**
-   * Gets the subdomain IDs for this component
-   *
-   * @return vector of subdomain IDs for this component
-   */
-  virtual const std::vector<SubdomainID> & getSubdomainIds() const;
-
-  /**
    * Gets the subdomain names for this component
    *
    * @return vector of subdomain names for this component

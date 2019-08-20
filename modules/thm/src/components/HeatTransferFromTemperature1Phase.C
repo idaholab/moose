@@ -23,8 +23,8 @@ HeatTransferFromTemperature1Phase::addVariables()
   HeatTransfer1PhaseBase::addVariables();
 
   _sim.addVariable(
-      false, FlowModel::TEMPERATURE_WALL, HeatConductionModel::feType(), _block_ids_flow_channel);
-  _sim.addVariable(false, _T_wall_name, HeatConductionModel::feType(), _block_ids_flow_channel);
+      false, FlowModel::TEMPERATURE_WALL, HeatConductionModel::feType(), _flow_channel_subdomains);
+  _sim.addVariable(false, _T_wall_name, HeatConductionModel::feType(), _flow_channel_subdomains);
 }
 
 void

@@ -1,5 +1,5 @@
 #include "Simulation.h"
-
+#include "AddVariableAction.h"
 #include "MooseObjectAction.h"
 #include "Transient.h"
 #include "HeatConductionModel.h"
@@ -11,6 +11,8 @@
 #include "THMControl.h"
 #include "TerminateControl.h"
 #include "THMMesh.h"
+
+#include "libmesh/string_to_enum.h"
 
 Simulation::Simulation(ActionWarehouse & action_warehouse)
   : LoggingInterface(dynamic_cast<THMApp &>(action_warehouse.mooseApp())),
@@ -295,15 +297,19 @@ Simulation::addIterationCountPostprocessors()
 }
 
 void
-Simulation::addVariable(
-    bool nl, const std::string & name, FEType type, SubdomainID subdomain_id, Real scaling_factor)
+Simulation::addVariable(bool nl,
+                        const std::string & name,
+                        FEType type,
+                        const SubdomainName & subdomain_name,
+                        Real scaling_factor)
 {
   if (_vars.find(name) == _vars.end())
   {
     VariableInfo vi;
     vi._nl = nl;
     vi._type = type;
-    vi._subdomain.insert(subdomain_id);
+    if (!subdomain_name.empty())
+      vi._subdomain.insert(subdomain_name);
     vi._scaling_factor = scaling_factor;
     _vars[name] = vi;
   }
@@ -313,7 +319,7 @@ Simulation::addVariable(
     if (vi._type != type)
       mooseError(
           "A component is trying to add variable of the same name but with different order/type");
-    vi._subdomain.insert(subdomain_id);
+    vi._subdomain.insert(subdomain_name);
   }
 }
 
@@ -321,11 +327,11 @@ void
 Simulation::addVariable(bool nl,
                         const std::string & name,
                         FEType type,
-                        const std::vector<SubdomainID> & subdomain_ids,
+                        const std::vector<SubdomainName> & subdomain_names,
                         Real scaling_factor /* = 1.*/)
 {
-  for (auto && sid : subdomain_ids)
-    addVariable(nl, name, type, sid, scaling_factor);
+  for (auto && sdn : subdomain_names)
+    addVariable(nl, name, type, sdn, scaling_factor);
 }
 
 void
@@ -589,16 +595,30 @@ Simulation::addVariables()
 
     VariableInfo & vi = v.second;
 
-    std::set<subdomain_id_type> * subdomain = nullptr;
-    if (!vi._subdomain.empty())
-      subdomain = &vi._subdomain;
-
     if (vi._type.family != SCALAR)
     {
+      auto order = AddVariableAction::getNonlinearVariableOrders();
+      order = Utility::enum_to_string<Order>(vi._type.order);
+      auto family = AddVariableAction::getNonlinearVariableFamilies();
+      family = Utility::enum_to_string(vi._type.family);
+
+      auto var_type = "MooseVariable";
+      InputParameters params = _factory.getValidParams(var_type);
+      params.set<MooseEnum>("order") = order;
+      params.set<MooseEnum>("family") = family;
+      if (!vi._subdomain.empty())
+      {
+        std::vector<SubdomainName> subdomains(vi._subdomain.begin(), vi._subdomain.end());
+        params.set<std::vector<SubdomainName>>("block") = subdomains;
+      }
+
       if (vi._nl)
-        _fe_problem->addVariable(name, vi._type, vi._scaling_factor, subdomain);
+      {
+        params.set<std::vector<Real>>("scaling") = {vi._scaling_factor};
+        _fe_problem->addVariable(var_type, name, params);
+      }
       else
-        _fe_problem->addAuxVariable(name, vi._type, subdomain);
+        _fe_problem->addAuxVariable(var_type, name, params);
     }
   }
 
@@ -611,16 +631,25 @@ Simulation::addVariables()
           "Variable name '", name, "' is too long. The limit is ", THM::MAX_VARIABLE_LENGTH, ".");
     const VariableInfo & vi = v.second;
 
-    const std::set<subdomain_id_type> * subdomain = nullptr;
-    if (!vi._subdomain.empty())
-      subdomain = &vi._subdomain;
-
     if (vi._type.family == SCALAR)
     {
+      auto order = AddVariableAction::getNonlinearVariableOrders();
+      order = Utility::enum_to_string<Order>(vi._type.order);
+      auto family = AddVariableAction::getNonlinearVariableFamilies();
+      family = Utility::enum_to_string(vi._type.family);
+
+      auto var_type = "MooseVariableScalar";
+      InputParameters params = _factory.getValidParams(var_type);
+      params.set<MooseEnum>("order") = order;
+      params.set<MooseEnum>("family") = family;
+
       if (vi._nl)
-        _fe_problem->addScalarVariable(name, vi._type.order, vi._scaling_factor, subdomain);
+      {
+        params.set<std::vector<Real>>("scaling") = {vi._scaling_factor};
+        _fe_problem->addVariable(var_type, name, params);
+      }
       else
-        _fe_problem->addAuxScalarVariable(name, vi._type.order, vi._scaling_factor, subdomain);
+        _fe_problem->addAuxVariable(var_type, name, params);
     }
   }
 
@@ -658,30 +687,17 @@ Simulation::setupInitialConditionsFromFile()
     }
     else
     {
+      std::string class_name = "SolutionInitialCondition";
+      InputParameters params = _factory.getValidParams(class_name);
+      params.set<VariableName>("variable") = var_name;
+      params.set<VariableName>("from_variable") = var_name;
+      params.set<UserObjectName>("solution_uo") = suo_name;
       if (vi._subdomain.size() > 0)
       {
-        for (auto & sid : vi._subdomain)
-        {
-          SubdomainName block_name = _mesh->getSubdomainName(sid);
-
-          std::string class_name = "SolutionInitialCondition";
-          InputParameters params = _factory.getValidParams(class_name);
-          params.set<VariableName>("variable") = var_name;
-          params.set<VariableName>("from_variable") = var_name;
-          params.set<UserObjectName>("solution_uo") = suo_name;
-          params.set<std::vector<SubdomainName>>("block") = {block_name};
-          _fe_problem->addInitialCondition(class_name, genName(var_name, block_name, "ic"), params);
-        }
+        std::vector<SubdomainName> subdomains(vi._subdomain.begin(), vi._subdomain.end());
+        params.set<std::vector<SubdomainName>>("block") = subdomains;
       }
-      else
-      {
-        std::string class_name = "SolutionInitialCondition";
-        InputParameters params = _factory.getValidParams(class_name);
-        params.set<VariableName>("variable") = var_name;
-        params.set<VariableName>("from_variable") = var_name;
-        params.set<UserObjectName>("solution_uo") = suo_name;
-        _fe_problem->addInitialCondition(class_name, genName(var_name, "ic"), params);
-      }
+      _fe_problem->addInitialCondition(class_name, genName(var_name, "ic"), params);
     }
   }
 }
@@ -760,12 +776,12 @@ Simulation::setupCoordinateSystem()
     GeometricalComponent * gc = dynamic_cast<GeometricalComponent *>(comp.get());
     if (gc != NULL && gc->parent() == nullptr)
     {
-      const std::vector<SubdomainID> & subdomains = gc->getSubdomainIds();
+      const std::vector<SubdomainName> & subdomains = gc->getSubdomainNames();
       const std::vector<Moose::CoordinateSystemType> & coord_sys = gc->getCoordSysTypes();
 
       for (unsigned int i = 0; i < subdomains.size(); i++)
       {
-        blocks.push_back(Moose::stringify<unsigned int>(subdomains[i]));
+        blocks.push_back(subdomains[i]);
         // coord_types.push_back("XYZ");
         coord_types.push_back(coord_sys[i] == Moose::COORD_RZ ? "RZ" : "XYZ");
       }

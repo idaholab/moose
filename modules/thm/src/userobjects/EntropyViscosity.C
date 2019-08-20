@@ -124,7 +124,7 @@ EntropyViscosity::EntropyViscosity(const InputParameters & parameters)
 }
 
 void
-EntropyViscosity::addVariables(FlowModel &, SubdomainID) const
+EntropyViscosity::addVariables(FlowModel &, const SubdomainName &) const
 {
 }
 
