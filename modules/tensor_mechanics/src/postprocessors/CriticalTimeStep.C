@@ -17,14 +17,27 @@ validParams<CriticalTimeStep>()
 {
   InputParameters params = validParams<ElementPostprocessor>();
   params.addClassDescription("Computes and reports the critical time step for the explicit solver.");
+  params.addParam<MaterialPropertyName>(
+      "density",
+      "density",
+      "Name of Material Property  or a constant real number defining the density of the material.");
   return params;
 }
 
 CriticalTimeStep::CriticalTimeStep(const InputParameters & parameters)
   : ElementPostprocessor(parameters),
-  GuaranteeProvider(this),
+  GuaranteeConsumer(this),
+  _mat_dens(getMaterialPropertyByName<Real>("density")),
   _effective_stiffness(getMaterialPropertyByName<Real>("effective_stiffness"))
 {
+}
+
+void
+CriticalTimeStep::initialSetup()
+{
+  if (!hasGuaranteedMaterialProperty("effective_stiffness", Guarantee::ISOTROPIC))
+    mooseError("ComputeFiniteStrainElasticStress can only be used with elasticity tensor materials "
+               "that guarantee isotropic tensors.");
 }
 
 void
@@ -58,9 +71,11 @@ CriticalTimeStep::getValue()
 
   Real ele_c = std::sqrt((elas_mod*(1-poiss_rat))/((1+poiss_rat)*(1-2*poiss_rat) * (dens)));*/
 
-  return _total_size/_effective_stiffness[0];
+  Real dens = _mat_dens[0];
 
-  std::cout<< _total_size/_effective_stiffness[0] << std::endl;
+  return _total_size * std::sqrt(dens)/(_effective_stiffness[0]);
+
+  std::cout<< _total_size * std::sqrt(dens)/(_effective_stiffness[0]) << std::endl;
 }
 
 void

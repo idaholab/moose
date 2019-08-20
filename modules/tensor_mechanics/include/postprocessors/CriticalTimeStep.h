@@ -12,7 +12,8 @@
 #include "ElementPostprocessor.h"
 #include "ComputeStressBase.h"
 // #include "ComputeElasticityTensorBase.h"
-#include "GuaranteeProvider.h"
+#include "GuaranteeConsumer.h"
+
 
 // Forward Declarations
 class CriticalTimeStep;
@@ -23,13 +24,14 @@ InputParameters validParams<CriticalTimeStep>();
 /**
  * This postprocessor computes an average element size (h) for the whole domain.
  */
-class CriticalTimeStep : public ElementPostprocessor, public GuaranteeProvider
+class CriticalTimeStep : public ElementPostprocessor, public GuaranteeConsumer
 {
 public:
   CriticalTimeStep(const InputParameters & parameters);
 
   virtual void initialize() override;
   virtual void execute() override;
+  virtual void initialSetup() override;
 
   virtual Real getValue() override;
   virtual void threadJoin(const UserObject & y) override;
@@ -40,6 +42,8 @@ protected:
   // const std::string _elasticity_tensor_name;
   /// Elasticity tensor material property
   // const MaterialProperty<RankFourTensor> & _elasticity_tensor;
+  const MaterialProperty<Real> & _mat_dens;
+
   const MaterialProperty<Real> & _effective_stiffness;
 
   // const MaterialProperty<Real> & _mat_dens;

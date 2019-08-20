@@ -42,7 +42,8 @@ void
 ComputeElasticityTensorBase::computeQpProperties()
 {
   computeQpElasticityTensor();
-  
+  _effective_stiffness[_qp] = 0; // Currently overriden by ComputeIsotropicElasticityTensor
+
   // Multiply by prefactor
   if (_prefactor_function)
     _elasticity_tensor[_qp] *= _prefactor_function->value(_t, _q_point[_qp]);
