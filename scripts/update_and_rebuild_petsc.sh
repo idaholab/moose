@@ -104,7 +104,8 @@ if [ -z "$go_fast" ]; then
       --with-cxx-dialect=C++11 \
       --with-fortran-bindings=0 \
       --with-sowing=0 \
-      $*
+      $* \
+
 fi
 
 make all -j ${MOOSE_JOBS:-1}
