@@ -1,6 +1,6 @@
 [Tests]
   design = 'syntax/Variables/index.md'
-  issues = ''
+  issues = '#1636'
 
   [group]
     requirement = 'The system shall support the hierarchical family of shape functions on mesh '

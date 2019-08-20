@@ -1,6 +1,6 @@
 [Tests]
   design = 'syntax/Variables/index.md'
-  issues = ''
+  issues = '#3293'
 
   [./test]
     type = 'Exodiff'

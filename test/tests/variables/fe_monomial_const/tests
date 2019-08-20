@@ -1,6 +1,6 @@
 [Tests]
   design = 'syntax/Variables/index.md'
-  issues = ''
+  issues = '#1636'
 
   [constant_monomial]
     requirement = 'The system shall support the constant Monomial family of shape functions on mesh '
