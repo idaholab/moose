@@ -1,0 +1,8 @@
+[Tests]
+  [./flow_channel_parameters_calculator]
+    type = PythonUnitTest
+    input = test_FlowChannelParametersCalculator.py
+    separate = True
+    display_required = True
+  [../]
+[]
