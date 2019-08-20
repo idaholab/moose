@@ -39,7 +39,7 @@ class SQAStats(object):
         out.append('            Tests Remaining: {}'.format(self.tests - self.tests_deprecated - self.tests_with_requirement))
         return '\n'.join(out)
 
-def compute_requirement_stats(location, specs=['tests'], working_dir=None, show=True):
+def compute_requirement_stats(location, specs=['tests'], working_dir=None, show=True, list_missing=False):
     """
     Report requirement statistics for the test spec files with the supplied location.
 
@@ -50,6 +50,7 @@ def compute_requirement_stats(location, specs=['tests'], working_dir=None, show=
         working_dir: The working directory, if not supplied the root directory of the repository is used
 
     """
+    files_with_missing_requirements = set()
     working_dir = git_root_dir(os.getcwd()) if working_dir is None else working_dir
     data = SQAStats(location)
     location = os.path.join(working_dir, location)
@@ -73,7 +74,11 @@ def compute_requirement_stats(location, specs=['tests'], working_dir=None, show=
             data.files += 1
             if has_requirement:
                 data.files_with_requirement += 1
+            else:
+                files_with_missing_requirements.add(filename)
 
     if show:
         print(data)
+    if list_missing:
+        print('\n'.join(files_with_missing_requirements))
     return data

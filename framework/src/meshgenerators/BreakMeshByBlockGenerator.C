@@ -89,6 +89,8 @@ BreakMeshByBlockGenerator::generate()
             // assign the newly added node to current_elem
             Node * new_node = nullptr;
 
+            std::vector<boundary_id_type> node_boundary_ids;
+
             for (unsigned int node_id = 0; node_id < current_elem->n_nodes(); ++node_id)
               if (current_elem->node_id(node_id) ==
                   current_node->id()) // if current node == node on element
@@ -99,8 +101,7 @@ BreakMeshByBlockGenerator::generate()
                 mesh->add_node(new_node);
 
                 // Add boundary info to the new node
-                std::vector<boundary_id_type> node_boundary_ids =
-                    mesh->boundary_info->boundary_ids(current_node);
+                mesh->boundary_info->boundary_ids(current_node, node_boundary_ids);
                 mesh->boundary_info->add_node(new_node, node_boundary_ids);
 
                 multiplicity_counter--; // node created, update multiplicity counter

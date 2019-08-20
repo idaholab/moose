@@ -20,7 +20,7 @@
 #include <set>
 #include <vector>
 
-#include "libmesh/mesh_tools.h"
+#include "libmesh/bounding_box.h"
 #include "libmesh/periodic_boundaries.h"
 
 // External includes
@@ -162,7 +162,7 @@ public:
     FeatureData(std::size_t var_index,
                 Status status,
                 unsigned int id = invalid_id,
-                std::vector<MeshTools::BoundingBox> bboxes = {MeshTools::BoundingBox()})
+                std::vector<BoundingBox> bboxes = {BoundingBox()})
       : _var_index(var_index),
         _id(id),
         _bboxes(bboxes), // Assume at least one bounding box
@@ -185,7 +185,7 @@ public:
      * given a Point, Elem or BBox parameter.
      */
     void updateBBoxExtremes(MeshBase & mesh);
-    void updateBBoxExtremes(MeshTools::BoundingBox & bbox, const MeshTools::BoundingBox & rhs_bbox);
+    void updateBBoxExtremes(BoundingBox & bbox, const BoundingBox & rhs_bbox);
     ///@}
 
     /**
@@ -288,7 +288,7 @@ public:
 
     /// The vector of bounding boxes completely enclosing this feature
     /// (multiple used with periodic constraints)
-    std::vector<MeshTools::BoundingBox> _bboxes;
+    std::vector<BoundingBox> _bboxes;
 
     /// Original processor/local ids
     std::list<std::pair<processor_id_type, unsigned int>> _orig_ids;
@@ -783,12 +783,12 @@ private:
 template <>
 void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void * context);
 template <>
-void dataStore(std::ostream & stream, MeshTools::BoundingBox & bbox, void * context);
+void dataStore(std::ostream & stream, BoundingBox & bbox, void * context);
 
 template <>
 void dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, void * context);
 template <>
-void dataLoad(std::istream & stream, MeshTools::BoundingBox & bbox, void * context);
+void dataLoad(std::istream & stream, BoundingBox & bbox, void * context);
 
 template <>
 struct enable_bitmask_operators<FeatureFloodCount::Status>
