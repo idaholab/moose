@@ -18,39 +18,72 @@
 namespace MathUtils
 {
 
-inline Real
-round(Real x)
-{
-  return ::round(x); // use round from math.h
-}
-
-inline Real
-sign(Real x)
-{
-  return x >= 0.0 ? 1.0 : -1.0;
-}
-
 Real poly1Log(Real x, Real tol, int deriv);
 Real poly2Log(Real x, Real tol, int deriv);
 Real poly3Log(Real x, Real tol, int order);
 Real poly4Log(Real x, Real tol, int order);
 Real taylorLog(Real x);
 
-Real pow(Real x, int e);
-Real poly(std::vector<Real> c, const Real x, const bool deriv);
+template <typename T>
+T
+round(T x)
+{
+  return ::round(x); // use round from math.h
+}
 
-inline Real
-heavyside(Real x)
+template <typename T>
+T
+sign(T x)
+{
+  return x >= 0.0 ? 1.0 : -1.0;
+}
+
+template <typename T>
+T
+pow(T x, int e)
+{
+  bool neg = false;
+  T result = 1.0;
+
+  if (e < 0)
+  {
+    neg = true;
+    e = -e;
+  }
+
+  while (e)
+  {
+    // if bit 0 is set multiply the current power of two factor of the exponent
+    if (e & 1)
+      result *= x;
+
+    // x is incrementally set to consecutive powers of powers of two
+    x *= x;
+
+    // bit shift the exponent down
+    e >>= 1;
+  }
+
+  return neg ? 1.0 / result : result;
+}
+
+template <typename T>
+T
+heavyside(T x)
 {
   return x < 0.0 ? 0.0 : 1.0;
 }
-inline Real
-positivePart(Real x)
+
+template <typename T>
+T
+positivePart(T x)
 {
   return x > 0.0 ? x : 0.0;
 }
-inline Real
-negativePart(Real x)
+
+template <typename T>
+T
+negativePart(T x)
 {
   return x < 0.0 ? x : 0.0;
 }
@@ -80,8 +113,10 @@ addScaled(const T & scalar, const NumericVector<T2> & numeric_vector, NumericVec
 template <
     typename T,
     typename T2,
-    template <typename> class W,
-    template <typename> class W2,
+    template <typename>
+    class W,
+    template <typename>
+    class W2,
     typename std::enable_if<std::is_same<typename W<T>::index_type, unsigned int>::value &&
                                 std::is_same<typename W2<T2>::index_type, unsigned int>::value,
                             int>::type = 0>
@@ -93,8 +128,10 @@ dotProduct(const W<T> & a, const W2<T2> & b)
 
 template <typename T,
           typename T2,
-          template <typename> class W,
-          template <typename> class W2,
+          template <typename>
+          class W,
+          template <typename>
+          class W2,
           typename std::enable_if<std::is_same<typename W<T>::index_type,
                                                std::tuple<unsigned int, unsigned int>>::value &&
                                       std::is_same<typename W2<T2>::index_type,
@@ -130,9 +167,9 @@ poly(std::vector<Real> c, const T x, const bool derivative)
   return value;
 }
 
-template <typename T>
+template <typename T, typename T2>
 T
-clamp(const T & x, Real lowerlimit, Real upperlimit)
+clamp(const T & x, T2 lowerlimit, T2 upperlimit)
 {
   if (x < lowerlimit)
     return lowerlimit;
@@ -141,9 +178,9 @@ clamp(const T & x, Real lowerlimit, Real upperlimit)
   return x;
 }
 
-template <typename T>
+template <typename T, typename T2>
 T
-smootherStep(T x, T start, T end, bool derivative = false)
+smootherStep(T x, T2 start, T2 end, bool derivative = false)
 {
   if (end == start)
     return 0.0;
