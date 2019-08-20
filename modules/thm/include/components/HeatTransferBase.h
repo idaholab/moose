@@ -83,8 +83,6 @@ protected:
   /// wall heat flux name
   VariableName _q_wall_name;
 
-  /// block IDs corresponding to the connected flow channel
-  std::vector<SubdomainID> _block_ids_flow_channel;
   /// Subdomains corresponding to the connected flow channel
   std::vector<SubdomainName> _flow_channel_subdomains;
   /// flow model type

@@ -33,7 +33,7 @@ SimpleJunction::check() const
 void
 SimpleJunction::addVariables()
 {
-  auto connected_subdomains = getConnectedSubdomainIDs();
+  auto connected_subdomains = getConnectedSubdomainNames();
 
   // add scalar variable (i.e. Lagrange multiplier)
   if (_flow_model_id == THM::FM_SINGLE_PHASE)

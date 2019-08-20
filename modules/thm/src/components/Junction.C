@@ -47,7 +47,7 @@ Junction::check() const
 void
 Junction::addVariables()
 {
-  auto connected_subdomains = getConnectedSubdomainIDs();
+  auto connected_subdomains = getConnectedSubdomainNames();
 
   const SinglePhaseFluidProperties & spfp =
       _sim.getUserObjectTempl<SinglePhaseFluidProperties>(_fp_name);

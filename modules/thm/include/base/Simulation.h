@@ -143,12 +143,12 @@ public:
   void addVariable(bool nl,
                    const std::string & name,
                    FEType type,
-                   SubdomainID subdomain_id,
+                   const SubdomainName & subdomain_name = "",
                    Real scaling_factor = 1.);
   void addVariable(bool nl,
                    const std::string & name,
                    FEType type,
-                   const std::vector<SubdomainID> & subdomain_ids,
+                   const std::vector<SubdomainName> & subdomain_names,
                    Real scaling_factor = 1.);
 
   void addConstantIC(const std::string & var_name, Real value, const SubdomainName & block_name);
@@ -430,7 +430,7 @@ protected:
   {
     bool _nl; ///< true if the variable is non-linear
     FEType _type;
-    std::set<subdomain_id_type> _subdomain;
+    std::set<SubdomainName> _subdomain;
     Real _scaling_factor;
   };
   ActionWarehouse & _action_warehouse;

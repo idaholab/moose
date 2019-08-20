@@ -64,7 +64,7 @@ VolumeJunction1Phase::check() const
 void
 VolumeJunction1Phase::addVariables()
 {
-  auto connected_subdomains = getConnectedSubdomainIDs();
+  auto connected_subdomains = getConnectedSubdomainNames();
 
   Function & initial_p_fn = _sim.getFunction(getParam<FunctionName>("initial_p"));
   Function & initial_T_fn = _sim.getFunction(getParam<FunctionName>("initial_T"));

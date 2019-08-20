@@ -44,7 +44,7 @@ VolumeJunctionOld::addVariables()
   Real initial_rho = spfp.rho_from_p_T(_initial_p, _initial_T);
   Real initial_e = spfp.e_from_p_rho(_initial_p, initial_rho);
 
-  auto connected_subdomains = getConnectedSubdomainIDs();
+  auto connected_subdomains = getConnectedSubdomainNames();
 
   _sim.addVariable(
       true, _rho_var_name, FEType(FIRST, SCALAR), connected_subdomains, _scale_factors[0]);
@@ -56,11 +56,11 @@ VolumeJunctionOld::addVariables()
       true, _vel_var_name, FEType(FIRST, SCALAR), connected_subdomains, _scale_factors[2]);
   _sim.addConstantScalarIC(_vel_var_name, _initial_vel);
   // aux scalar vars
-  _sim.addVariable(false, _pressure_var_name, FEType(FIRST, SCALAR), 0);
+  _sim.addVariable(false, _pressure_var_name, FEType(FIRST, SCALAR));
   _sim.addConstantScalarIC(_pressure_var_name, _initial_p);
-  _sim.addVariable(false, _energy_var_name, FEType(FIRST, SCALAR), 0);
+  _sim.addVariable(false, _energy_var_name, FEType(FIRST, SCALAR));
   _sim.addConstantScalarIC(_energy_var_name, initial_e);
-  _sim.addVariable(false, _total_mfr_in_var_name, FEType(FIRST, SCALAR), 0);
+  _sim.addVariable(false, _total_mfr_in_var_name, FEType(FIRST, SCALAR));
   _sim.addConstantScalarIC(_total_mfr_in_var_name, 0);
 }
 

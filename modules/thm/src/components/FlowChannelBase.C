@@ -231,8 +231,8 @@ FlowChannelBase::buildMesh()
   }
 
   // elems
-  _subdomain_id = _mesh.getNextSubdomainId();
-  setSubdomainInfo(_subdomain_id, name());
+  SubdomainID subdomain_id = _mesh.getNextSubdomainId();
+  setSubdomainInfo(subdomain_id, name());
   BoundaryID bc_id_inlet = _mesh.getNextBoundaryId();
   BoundaryID bc_id_outlet = _mesh.getNextBoundaryId();
   for (unsigned int i = 0; i < _n_elem; i++)
@@ -242,7 +242,7 @@ FlowChannelBase::buildMesh()
       elem = addElementEdge3(_node_ids[2 * i], _node_ids[2 * i + 2], _node_ids[2 * i + 1]);
     else
       elem = addElementEdge2(_node_ids[i], _node_ids[i + 1]);
-    elem->subdomain_id() = _subdomain_id;
+    elem->subdomain_id() = subdomain_id;
 
     // BCs
     if (i == 0)
@@ -275,7 +275,7 @@ FlowChannelBase::addVariables()
 
   // wall heat flux
   if (!_temperature_mode && _n_heat_transfer_connections != 1)
-    _sim.addVariable(false, FlowModel::HEAT_FLUX_WALL, _sim.getFlowFEType(), _subdomain_id);
+    _sim.addVariable(false, FlowModel::HEAT_FLUX_WALL, _sim.getFlowFEType(), getSubdomainName());
 
   // total heat flux perimeter
   if (_n_heat_transfer_connections > 1)
@@ -294,7 +294,7 @@ FlowChannelBase::addVariables()
   {
     const StabilizationSettings & stabilization =
         _sim.getUserObjectTempl<StabilizationSettings>(_stabilization_uo_name);
-    stabilization.addVariables(*_flow_model, _subdomain_id);
+    stabilization.addVariables(*_flow_model, getSubdomainName());
   }
 }
 
@@ -505,10 +505,10 @@ FlowChannelBase::getNodesetName() const
   return _nodeset_name;
 }
 
-SubdomainID
-FlowChannelBase::getSubdomainID() const
+SubdomainName
+FlowChannelBase::getSubdomainName() const
 {
   checkSetupStatus(MESH_PREPARED);
 
-  return _subdomain_id;
+  return name();
 }
