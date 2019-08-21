@@ -1,4 +1,4 @@
-<!DOCTYPE html><head><meta charset="UTF-8"><link media="screen,projection" href="../contrib/materialize/materialize.min.css" rel="stylesheet" type="text/css"></link><link href="../contrib/prism/prism.min.css" rel="stylesheet" type="text/css"></link><link href="../css/moose.css" rel="stylesheet" type="text/css"></link><link href="../css/alert_moose.css" rel="stylesheet" type="text/css"></link><link href="../contrib/katex/katex.min.css" rel="stylesheet" type="text/css"></link><link href="../css/katex_moose.css" rel="stylesheet" type="text/css"></link><link href="../css/content_moose.css" rel="stylesheet" type="text/css"></link><link href="../css/sqa_moose.css" rel="stylesheet" type="text/css"></link><script src="../contrib/katex/katex.min.js" type="text/javascript"></script><script src="../contrib/plotly/plotly.min.js" type="text/javascript"></script><title>Application Syntax Extension|MOOSEDocs</title></head><body><div class="page-wrap"><header><nav><div class="nav-wrapper container"><a href="https://www.mooseframework.org" class="left moose-logo hide-on-med-and-down">MOOSEDocs</a><a href="https://github.com/idaholab/moose" class="right"><img src="../media/framework/github-logo.png" class="github-mark"></img><img src="../media/framework/github-mark.png" class="github-logo"></img></a><ul class="right hide-on-med-and-down"><li><a href="core.html">Direct</a></li><li class="moose-mega-menu-trigger" data-target="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"><a>Mega<i class="material-icons right">arrow_drop_down</i></a></li><li><a data-target="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" href="#!" data-constrainWidth="false" class="dropdown-trigger">Dict<i class="material-icons right">arrow_drop_down</i></a></li></ul><a data-target="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" href="#" class="sidenav-trigger"><i class="material-icons">menu</i></a><ul id="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" class="sidenav"><li><a href="core.html">Direct</a></li><li><a href="../mega.menu.html">Mega</a></li><li><a data-target="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" href="#!" data-constrainWidth="false" class="dropdown-trigger">Dict<i class="material-icons right">arrow_drop_down</i></a></li></ul><a href="#moose-search" class="modal-trigger"><i class="material-icons">search</i></a></div><ul class="dropdown-content" id="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"><li><a href="core.html">Core</a></li><li><a href="autolink.html">AutoLink</a></li></ul><ul class="dropdown-content" id="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"><li><a href="core.html">Core</a></li><li><a href="autolink.html">AutoLink</a></li></ul></nav><div id="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" class="moose-mega-menu-content"><div class="moose-mega-menu-wrapper"><h2 id="main-extensions">Main Extensions</h2><ul class="browser-default"><li><p><a href="core.html">Core</a> </p></li><li><p><a href="autolink.html">AutoLink</a></p></li></ul></div></div><div class="modal modal-fixed-footer moose-search-modal" id="moose-search"><div class="modal-content container moose-search-modal-content"><div class="row"><div class="col l12"><div class="input-field"><input id="moose-search-box" type_="text" onkeyup="mooseSearch()" placeholder="https://www.mooseframework.org"></input></div></div><div><div class="col s12" id="moose-search-results"></div></div></div></div><div class="modal-footer"><a href="#!" class="modal-action modal-close btn-flat">Close</a></div></div></header><main class="main"><div class="container"><div class="row"><div class="col hide-on-med-and-down l12"><nav class="breadcrumb-nav"><div class="nav-wrapper"><span class="breadcrumb">extensions</span><a href="#" class="breadcrumb">appsyntax</a></div></nav></div></div><div class="row"><div class="moose-content col s12 m12 l10"><section data-section-level="1" id="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" data-section-text="Application   Syntax   Extension"><h1 id="application-syntax-extension">Application Syntax Extension</h1><p>Sets the value of a 'Real' input parameters to the value of a provided function.</p><section data-section-level="2" id="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" data-section-text="Input   Parameters" class="scrollspy"><h2 id="input-parameters">Input Parameters</h2><section data-details-open="open" data-section-level="3" id="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" data-section-text="Required Parameters"><details class="moose-section-content" open="open"><ul data-collapsible="expandable" class="collapsible"><li><div class="collapsible-header"><span class="moose-parameter-name">function</span><span class="moose-parameter-header-description">The function to use for controlling the specified parameter.</span></div><div class="collapsible-body"><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>FunctionName</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>The function to use for controlling the specified parameter.</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">parameter</span><span class="moose-parameter-header-description">The input parameter(s) to control. Specify a single parameter name and all parameters in all objects matching the name will be updated</span></div><div class="collapsible-body"><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>std::string</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>The input parameter(s) to control. Specify a single parameter name and all parameters in all objects matching the name will be updated</p></div></li></ul><summary><h3 data-details-open="open"><span class="moose-section-icon"></span>Required Parameters</h3></summary></details></section><section data-details-open="open" data-section-level="3" id="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" data-section-text="Optional Parameters"><details class="moose-section-content" open="open"><ul data-collapsible="expandable" class="collapsible"><li><div class="collapsible-header"><span class="moose-parameter-name">depends_on</span><span class="moose-parameter-header-description">The Controls that this control relies upon (i.e. must execute before this one)</span></div><div class="collapsible-body"><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>std::vector<std::string></p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>The Controls that this control relies upon (i.e. must execute before this one)</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">execute_on</span><span class="moose-parameter-header-default">INITIAL TIMESTEP_END</span><span class="moose-parameter-header-description">The list of flag(s) indicating when this object should be executed, the available options include NONE, INITIAL, LINEAR, NONLINEAR, TIMESTEP_END, TIMESTEP_BEGIN, FINAL, CUSTOM.</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>INITIAL TIMESTEP_END</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>ExecFlagEnum</p><p class="moose-parameter-description-options"><span>Options:</span>NONE INITIAL LINEAR NONLINEAR TIMESTEP_END TIMESTEP_BEGIN FINAL CUSTOM PRE_MULTIAPP_SETUP</p><p class="moose-parameter-description"><span>Description:</span>The list of flag(s) indicating when this object should be executed, the available options include NONE, INITIAL, LINEAR, NONLINEAR, TIMESTEP_END, TIMESTEP_BEGIN, FINAL, CUSTOM.</p></div></li></ul><summary><h3 data-details-open="open"><span class="moose-section-icon"></span>Optional Parameters</h3></summary></details></section><section data-details-open="close" data-section-level="3" id="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" data-section-text="Advanced Parameters"><details class="moose-section-content"><ul data-collapsible="expandable" class="collapsible"><li><div class="collapsible-header"><span class="moose-parameter-name">control_tags</span><span class="moose-parameter-header-description">Adds user-defined labels for accessing object parameters via control logic.</span></div><div class="collapsible-body"><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>std::vector<std::string></p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Adds user-defined labels for accessing object parameters via control logic.</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">enable</span><span class="moose-parameter-header-default">True</span><span class="moose-parameter-header-description">Set the enabled status of the MooseObject.</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>True</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>bool</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Set the enabled status of the MooseObject.</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">implicit</span><span class="moose-parameter-header-default">True</span><span class="moose-parameter-header-description">Determines whether this object is calculated using an implicit or explicit form</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>True</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>bool</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Determines whether this object is calculated using an implicit or explicit form</p></div></li></ul><ul data-collapsible="expandable" class="collapsible"><li><div class="collapsible-header"><span class="moose-parameter-name">control_tags</span><span class="moose-parameter-header-description">Adds user-defined labels for accessing object parameters via control logic.</span></div><div class="collapsible-body"><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>std::vector<std::string></p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Adds user-defined labels for accessing object parameters via control logic.</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">enable</span><span class="moose-parameter-header-default">True</span><span class="moose-parameter-header-description">Set the enabled status of the MooseObject.</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>True</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>bool</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Set the enabled status of the MooseObject.</p></div></li></ul><summary><h3 data-details-open="close"><span class="moose-section-icon"></span>Advanced Parameters</h3></summary></details></section></section><section data-section-level="2" id="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" data-section-text="Input   Parameters" class="scrollspy"><h2 id="input-parameters">Input Parameters</h2><section data-details-open="open" data-section-level="3" id="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" data-section-text="Required Parameters"><details class="moose-section-content" open="open"><ul data-collapsible="expandable" class="collapsible"><li><div class="collapsible-header"><span class="moose-parameter-name">function</span><span class="moose-parameter-header-description">The function to use for controlling the specified parameter.</span></div><div class="collapsible-body"><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>FunctionName</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>The function to use for controlling the specified parameter.</p></div></li></ul><summary><h3 data-details-open="open"><span class="moose-section-icon"></span>Required Parameters</h3></summary></details></section><section data-details-open="close" data-section-level="3" id="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" data-section-text="Advanced Parameters"><details class="moose-section-content"><ul data-collapsible="expandable" class="collapsible"><li><div class="collapsible-header"><span class="moose-parameter-name">enable</span><span class="moose-parameter-header-default">True</span><span class="moose-parameter-header-description">Set the enabled status of the MooseObject.</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>True</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>bool</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Set the enabled status of the MooseObject.</p></div></li></ul><summary><h3 data-details-open="close"><span class="moose-section-icon"></span>Advanced Parameters</h3></summary></details></section></section><section data-section-level="2" id="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" data-section-text="Available   Objects ,   Actions ,   and   Subsystems" class="scrollspy"><h2 id="available-objects-actions-and-subsystems">Available Objects, Actions, and Subsystems</h2><ul class="moose-syntax-list collection with-header"><li class="collection-header">Moose App</li><li class="collection-item">AddControlAction</li><li class="collection-item">ConditionalFunctionEnableControlControl for enabling/disabling objects when a function value is true</li><li class="collection-item">RealFunctionControlSets the value of a 'Real' input parameters to the value of a provided function.</li><li class="collection-item">TimePeriodControl the enabled/disabled state of objects with time.</li></ul></section><section data-section-level="2" id="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" data-section-text="Input   Files" class="scrollspy"><h2 id="input-files">Input Files</h2><ul class="moose-list-inputs browser-default"><li><a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">test/tests/controls/real_function_control/real_function_control.i</a></li><li><a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">modules/stochastic_tools/test/tests/transfers/sampler_transfer/errors/sub_wrong_control.i</a></li><li><a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">test/tests/controls/real_function_control/multi_real_function_control.i</a></li><li><a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">test/tests/controls/dependency/test.i</a></li><li><a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">modules/stochastic_tools/test/tests/transfers/errors/sub_wrong_control.i</a></li></ul><div id="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" class="modal moose-modal"><div class="modal-content"><h4>test/tests/controls/real_function_control/real_function_control.i</h4><pre class="moose-pre"><code class="language-text">[Mesh]
+<!DOCTYPE html><head><meta charset="UTF-8"><link href="../contrib/materialize/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection"></link><link href="../contrib/prism/prism.min.css" type="text/css" rel="stylesheet"></link><link href="../css/moose.css" type="text/css" rel="stylesheet"></link><link href="../css/alert_moose.css" type="text/css" rel="stylesheet"></link><link href="../contrib/katex/katex.min.css" type="text/css" rel="stylesheet"></link><link href="../css/katex_moose.css" type="text/css" rel="stylesheet"></link><link href="../css/content_moose.css" type="text/css" rel="stylesheet"></link><link href="../css/sqa_moose.css" type="text/css" rel="stylesheet"></link><script type="text/javascript" src="../contrib/katex/katex.min.js"></script><script type="text/javascript" src="../contrib/plotly/plotly.min.js"></script><title>Application Syntax Extension|MOOSEDocs</title></head><body><div class="page-wrap"><header><nav><div class="nav-wrapper container"><a href="https://www.mooseframework.org" class="left moose-logo hide-on-med-and-down">MOOSEDocs</a><a href="https://github.com/idaholab/moose" class="right"><img src="../media/framework/github-logo.png" class="github-mark"></img><img src="../media/framework/github-mark.png" class="github-logo"></img></a><ul class="right hide-on-med-and-down"><li><a href="core.html">Direct</a></li><li class="moose-mega-menu-trigger" data-target="3ab37b06-7174-4c40-89b9-fa7740b4a4c0"><a>Mega<i class="material-icons right">arrow_drop_down</i></a></li><li><a href="#!" class="dropdown-trigger" data-target="a8506536-aea0-45ae-b7ff-688499675dd0" data-constrainWidth="false">Dict<i class="material-icons right">arrow_drop_down</i></a></li></ul><a href="#" class="sidenav-trigger" data-target="42a82eec-4f46-4f19-a4d7-e76f1a46d606"><i class="material-icons">menu</i></a><ul class="sidenav" id="42a82eec-4f46-4f19-a4d7-e76f1a46d606"><li><a href="core.html">Direct</a></li><li><a href="../mega.menu.html">Mega</a></li><li><a href="#!" class="dropdown-trigger" data-target="3c8a5dab-2ad3-4d0e-9f83-34219423d957" data-constrainWidth="false">Dict<i class="material-icons right">arrow_drop_down</i></a></li></ul><a href="#moose-search" class="modal-trigger"><i class="material-icons">search</i></a></div><ul class="dropdown-content" id="a8506536-aea0-45ae-b7ff-688499675dd0"><li><a href="core.html">Core</a></li><li><a href="autolink.html">AutoLink</a></li></ul><ul class="dropdown-content" id="3c8a5dab-2ad3-4d0e-9f83-34219423d957"><li><a href="core.html">Core</a></li><li><a href="autolink.html">AutoLink</a></li></ul></nav><div class="moose-mega-menu-content" id="3ab37b06-7174-4c40-89b9-fa7740b4a4c0"><div class="moose-mega-menu-wrapper"><h2 id="main-extensions">Main Extensions</h2><ul class="browser-default"><li><p><a href="core.html">Core</a> </p></li><li><p><a href="autolink.html">AutoLink</a></p></li></ul></div></div><div class="modal modal-fixed-footer moose-search-modal" id="moose-search"><div class="modal-content container moose-search-modal-content"><div class="row"><div class="col l12"><div class="input-field"><input type_="text" onkeyup="mooseSearch()" placeholder="https://www.mooseframework.org" id="moose-search-box"></input></div></div><div><div class="col s12" id="moose-search-results"></div></div></div></div><div class="modal-footer"><a href="#!" class="modal-action modal-close btn-flat">Close</a></div></div></header><main class="main"><div class="container"><div class="row"><div class="col hide-on-med-and-down l12"><nav class="breadcrumb-nav"><div class="nav-wrapper"><span class="breadcrumb">extensions</span><a href="#" class="breadcrumb">appsyntax</a></div></nav></div></div><div class="row"><div class="moose-content col s12 m12 l10"><section id="d2d08112-f4a9-462f-a304-35071d084318" data-section-level="1" data-section-text="Application   Syntax   Extension"><h1 id="application-syntax-extension">Application Syntax Extension</h1><p>Sets the value of a 'Real' input parameters to the value of a provided function.</p><section class="scrollspy" id="3ed3d45a-15d7-4920-9135-b726e014f844" data-section-level="2" data-section-text="Input   Parameters"><h2 id="input-parameters">Input Parameters</h2><section id="d382a951-4884-4206-acc6-14b2e08a69f2" data-section-level="3" data-section-text="Required Parameters" data-details-open="open"><details class="moose-section-content" open="open"><ul class="collapsible" data-collapsible="expandable"><li><div class="collapsible-header"><span class="moose-parameter-name">function</span><span class="moose-parameter-header-description">The function to use for controlling the specified parameter.</span></div><div class="collapsible-body"><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>FunctionName</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>The function to use for controlling the specified parameter.</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">parameter</span><span class="moose-parameter-header-description">The input parameter(s) to control. Specify a single parameter name and all parameters in all objects matching the name will be updated</span></div><div class="collapsible-body"><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>std::string</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>The input parameter(s) to control. Specify a single parameter name and all parameters in all objects matching the name will be updated</p></div></li></ul><summary><h3 data-details-open="open"><span class="moose-section-icon"></span>Required Parameters</h3></summary></details></section><section id="87400736-dc7f-4cad-9416-6bee7b0e426c" data-section-level="3" data-section-text="Optional Parameters" data-details-open="open"><details class="moose-section-content" open="open"><ul class="collapsible" data-collapsible="expandable"><li><div class="collapsible-header"><span class="moose-parameter-name">depends_on</span><span class="moose-parameter-header-description">The Controls that this control relies upon (i.e. must execute before this one)</span></div><div class="collapsible-body"><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>std::vector<std::string></p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>The Controls that this control relies upon (i.e. must execute before this one)</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">execute_on</span><span class="moose-parameter-header-default">INITIAL TIMESTEP_END</span><span class="moose-parameter-header-description">The list of flag(s) indicating when this object should be executed, the available options include NONE, INITIAL, LINEAR, NONLINEAR, TIMESTEP_END, TIMESTEP_BEGIN, FINAL, CUSTOM.</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>INITIAL TIMESTEP_END</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>ExecFlagEnum</p><p class="moose-parameter-description-options"><span>Options:</span>NONE INITIAL LINEAR NONLINEAR TIMESTEP_END TIMESTEP_BEGIN FINAL CUSTOM PRE_MULTIAPP_SETUP</p><p class="moose-parameter-description"><span>Description:</span>The list of flag(s) indicating when this object should be executed, the available options include NONE, INITIAL, LINEAR, NONLINEAR, TIMESTEP_END, TIMESTEP_BEGIN, FINAL, CUSTOM.</p></div></li></ul><summary><h3 data-details-open="open"><span class="moose-section-icon"></span>Optional Parameters</h3></summary></details></section><section id="f0483b8b-8d8c-46f4-91ba-85dc846eb9e2" data-section-level="3" data-section-text="Advanced Parameters" data-details-open="close"><details class="moose-section-content"><ul class="collapsible" data-collapsible="expandable"><li><div class="collapsible-header"><span class="moose-parameter-name">control_tags</span><span class="moose-parameter-header-description">Adds user-defined labels for accessing object parameters via control logic.</span></div><div class="collapsible-body"><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>std::vector<std::string></p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Adds user-defined labels for accessing object parameters via control logic.</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">enable</span><span class="moose-parameter-header-default">True</span><span class="moose-parameter-header-description">Set the enabled status of the MooseObject.</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>True</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>bool</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Set the enabled status of the MooseObject.</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">implicit</span><span class="moose-parameter-header-default">True</span><span class="moose-parameter-header-description">Determines whether this object is calculated using an implicit or explicit form</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>True</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>bool</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Determines whether this object is calculated using an implicit or explicit form</p></div></li></ul><ul class="collapsible" data-collapsible="expandable"><li><div class="collapsible-header"><span class="moose-parameter-name">control_tags</span><span class="moose-parameter-header-description">Adds user-defined labels for accessing object parameters via control logic.</span></div><div class="collapsible-body"><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>std::vector<std::string></p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Adds user-defined labels for accessing object parameters via control logic.</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">enable</span><span class="moose-parameter-header-default">True</span><span class="moose-parameter-header-description">Set the enabled status of the MooseObject.</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>True</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>bool</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Set the enabled status of the MooseObject.</p></div></li></ul><summary><h3 data-details-open="close"><span class="moose-section-icon"></span>Advanced Parameters</h3></summary></details></section></section><section class="scrollspy" id="4128e26d-faaa-4334-8b02-5e0f280873c0" data-section-level="2" data-section-text="Input   Parameters"><h2 id="input-parameters">Input Parameters</h2><section id="feda190a-8f9d-4421-98ad-933c2f644946" data-section-level="3" data-section-text="Required Parameters" data-details-open="open"><details class="moose-section-content" open="open"><ul class="collapsible" data-collapsible="expandable"><li><div class="collapsible-header"><span class="moose-parameter-name">function</span><span class="moose-parameter-header-description">The function to use for controlling the specified parameter.</span></div><div class="collapsible-body"><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>FunctionName</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>The function to use for controlling the specified parameter.</p></div></li></ul><summary><h3 data-details-open="open"><span class="moose-section-icon"></span>Required Parameters</h3></summary></details></section><section id="2d4f620b-241e-4e46-ad0f-375f1f666c59" data-section-level="3" data-section-text="Advanced Parameters" data-details-open="close"><details class="moose-section-content"><ul class="collapsible" data-collapsible="expandable"><li><div class="collapsible-header"><span class="moose-parameter-name">enable</span><span class="moose-parameter-header-default">True</span><span class="moose-parameter-header-description">Set the enabled status of the MooseObject.</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>True</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>bool</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Set the enabled status of the MooseObject.</p></div></li></ul><summary><h3 data-details-open="close"><span class="moose-section-icon"></span>Advanced Parameters</h3></summary></details></section></section><section class="scrollspy" id="d03ed23f-d62e-48c2-bf02-b6366f7bde8d" data-section-level="2" data-section-text="Available   Objects ,   Actions ,   and   Subsystems"><h2 id="available-objects-actions-and-subsystems">Available Objects, Actions, and Subsystems</h2><ul class="moose-syntax-list collection with-header"><li class="collection-header">Moose App</li><li class="collection-item">AddControlAction</li><li class="collection-item">ConditionalFunctionEnableControlControl for enabling/disabling objects when a function value is true</li><li class="collection-item">RealFunctionControlSets the value of a 'Real' input parameters to the value of a provided function.</li><li class="collection-item">TimePeriodControl the enabled/disabled state of objects with time.</li></ul></section><section class="scrollspy" id="c4e72b01-4164-4663-a193-8936e4f62440" data-section-level="2" data-section-text="Input   Files"><h2 id="input-files">Input Files</h2><ul class="moose-list-inputs browser-default"><li><a href="#95283374-7656-4279-8114-572a2e8200aa" class="modal-trigger">test/tests/controls/dependency/test.i</a></li><li><a href="#de721aad-79c1-4030-a48a-64d4bcef00d8" class="modal-trigger">test/tests/controls/real_function_control/multi_real_function_control.i</a></li><li><a href="#54d5afbd-75b4-4a12-bdef-b82b4d385dc7" class="modal-trigger">test/tests/controls/real_function_control/real_function_control.i</a></li><li><a href="#403cf0ba-3819-490a-ac92-ebb4c4d3853f" class="modal-trigger">modules/stochastic_tools/test/tests/transfers/sampler_transfer/errors/sub_wrong_control.i</a></li><li><a href="#424317b0-d27a-420b-b87a-6a6cedca790d" class="modal-trigger">modules/stochastic_tools/test/tests/transfers/errors/sub_wrong_control.i</a></li></ul><div class="modal moose-modal" id="95283374-7656-4279-8114-572a2e8200aa"><div class="modal-content"><h4>test/tests/controls/dependency/test.i</h4><pre class="moose-pre"><code class="language-text">[Mesh]
   type = GeneratedMesh
   dim = 2
   nx = 10
@@ -10,15 +10,26 @@
   [../]
 []
 
+[AuxVariables]
+  [./a]
+    family = SCALAR
+    order = FIRST
+  [../]
+[]
+
+[AuxScalarKernels]
+  [./a_sk]
+    type = ConstantScalarAux
+    variable = a
+    value = 0
+  [../]
+[]
+
 [Kernels]
   [./diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
-  [./time]
-    type = TimeDerivative
-    variable = u
   [../]
 []
 
@@ -38,10 +49,7 @@
 []
 
 [Executioner]
-  type = Transient
-  num_steps = 10
-  dt = 0.1
-  dtmin = 0.1
+  type = Steady
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
@@ -54,84 +62,29 @@
 [Functions]
   [./func_coef]
     type = ParsedFunction
-    value = '2*t + 0.1'
-  [../]
-[]
-
-[Postprocessors]
-  [./coef]
-    type = RealControlParameterReporter
-    parameter = 'Kernels/diff/coef'
-  [../]
-[]
-
-[Controls]
-  [./func_control]
-    type = RealFunctionControl
-    parameter = '*/*/coef'
-    function = 'func_coef'
-    execute_on = 'initial timestep_begin'
-  [../]
-[]
-</code></pre></div><div class="modal-footer"><a class="modal-close btn-flat">Close</a></div></div><div id="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" class="modal moose-modal"><div class="modal-content"><h4>modules/stochastic_tools/test/tests/transfers/sampler_transfer/errors/sub_wrong_control.i</h4><pre class="moose-pre"><code class="language-text">[Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 10
-  ny = 10
-[]
-
-[Variables]
-  [./u]
-  [../]
-[]
-
-[Kernels]
-  [./diff]
-    type = Diffusion
-    variable = u
-  [../]
-  [./time]
-    type = TimeDerivative
-    variable = u
-  [../]
-[]
-
-[BCs]
-  [./left]
-    type = DirichletBC
-    variable = u
-    boundary = left
-    value = 0
-  [../]
-  [./right]
-    type = DirichletBC
-    variable = u
-    boundary = right
     value = 1
   [../]
 []
 
-[Executioner]
-  type = Transient
-  num_steps = 5
-  dt = 0.01
-  solve_type = PJFNK
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
-[]
-
 [Controls]
-  [./stochastic]
+  # We start with a = 0, control2 sets its value to 1 and then control1 will multiply it by 3,
+  # so the end value has to be 3. If dependecy is broken, we multiply by 3 and then set to 1,
+  # which is wrong
+  [./control1]
+    type = TestControl
+    parameter = 'AuxScalarKernels/a_sk/value'
+    test_type = MULT
+    execute_on = 'initial timestep_begin'
+    depends_on = control2
+  [../]
+  [./control2]
     type = RealFunctionControl
-    function = '1'
-     parameter = 'BCs/left/value'
+    parameter = 'AuxScalarKernels/a_sk/value'
+    function = 'func_coef'
+    execute_on = 'initial timestep_begin'
   [../]
 []
-
-[Outputs]
-  exodus = true
-[]
-</code></pre></div><div class="modal-footer"><a class="modal-close btn-flat">Close</a></div></div><div id="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" class="modal moose-modal"><div class="modal-content"><h4>test/tests/controls/real_function_control/multi_real_function_control.i</h4><pre class="moose-pre"><code class="language-text">###########################################################
+</code></pre></div><div class="modal-footer"><a class="modal-close btn-flat">Close</a></div></div><div class="modal moose-modal" id="de721aad-79c1-4030-a48a-64d4bcef00d8"><div class="modal-content"><h4>test/tests/controls/real_function_control/multi_real_function_control.i</h4><pre class="moose-pre"><code class="language-text">###########################################################
 # This is a test of the Control Logic System. This test
 # uses the RealFunctionControl to change a multiple Kernel
 # coefficients based on an analytical function at the end
@@ -230,7 +183,7 @@
     execute_on = 'timestep_begin'
   [../]
 []
-</code></pre></div><div class="modal-footer"><a class="modal-close btn-flat">Close</a></div></div><div id="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" class="modal moose-modal"><div class="modal-content"><h4>test/tests/controls/dependency/test.i</h4><pre class="moose-pre"><code class="language-text">[Mesh]
+</code></pre></div><div class="modal-footer"><a class="modal-close btn-flat">Close</a></div></div><div class="modal moose-modal" id="54d5afbd-75b4-4a12-bdef-b82b4d385dc7"><div class="modal-content"><h4>test/tests/controls/real_function_control/real_function_control.i</h4><pre class="moose-pre"><code class="language-text">[Mesh]
   type = GeneratedMesh
   dim = 2
   nx = 10
@@ -242,26 +195,15 @@
   [../]
 []
 
-[AuxVariables]
-  [./a]
-    family = SCALAR
-    order = FIRST
-  [../]
-[]
-
-[AuxScalarKernels]
-  [./a_sk]
-    type = ConstantScalarAux
-    variable = a
-    value = 0
-  [../]
-[]
-
 [Kernels]
   [./diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
+  [../]
+  [./time]
+    type = TimeDerivative
+    variable = u
   [../]
 []
 
@@ -281,7 +223,10 @@
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
+  num_steps = 10
+  dt = 0.1
+  dtmin = 0.1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
@@ -294,29 +239,26 @@
 [Functions]
   [./func_coef]
     type = ParsedFunction
-    value = 1
+    value = '2*t + 0.1'
+  [../]
+[]
+
+[Postprocessors]
+  [./coef]
+    type = RealControlParameterReporter
+    parameter = 'Kernels/diff/coef'
   [../]
 []
 
 [Controls]
-  # We start with a = 0, control2 sets its value to 1 and then control1 will multiply it by 3,
-  # so the end value has to be 3. If dependecy is broken, we multiply by 3 and then set to 1,
-  # which is wrong
-  [./control1]
-    type = TestControl
-    parameter = 'AuxScalarKernels/a_sk/value'
-    test_type = MULT
-    execute_on = 'initial timestep_begin'
-    depends_on = control2
-  [../]
-  [./control2]
+  [./func_control]
     type = RealFunctionControl
-    parameter = 'AuxScalarKernels/a_sk/value'
+    parameter = '*/*/coef'
     function = 'func_coef'
     execute_on = 'initial timestep_begin'
   [../]
 []
-</code></pre></div><div class="modal-footer"><a class="modal-close btn-flat">Close</a></div></div><div id="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" class="modal moose-modal"><div class="modal-content"><h4>modules/stochastic_tools/test/tests/transfers/errors/sub_wrong_control.i</h4><pre class="moose-pre"><code class="language-text">[Mesh]
+</code></pre></div><div class="modal-footer"><a class="modal-close btn-flat">Close</a></div></div><div class="modal moose-modal" id="403cf0ba-3819-490a-ac92-ebb4c4d3853f"><div class="modal-content"><h4>modules/stochastic_tools/test/tests/transfers/sampler_transfer/errors/sub_wrong_control.i</h4><pre class="moose-pre"><code class="language-text">[Mesh]
   type = GeneratedMesh
   dim = 2
   nx = 10
@@ -374,7 +316,65 @@
 [Outputs]
   exodus = true
 []
-</code></pre></div><div class="modal-footer"><a class="modal-close btn-flat">Close</a></div></div></section><section data-section-level="2" id="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" data-section-text="Child   Objects" class="scrollspy"><h2 id="child-objects">Child Objects</h2><ul class="moose-list-children browser-default"><li><a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">framework/include/kernels/UserForcingFunction.h</a></li></ul><div id="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" class="modal moose-modal"><div class="modal-content"><h4>framework/include/kernels/UserForcingFunction.h</h4><pre class="moose-pre"><code class="language-cpp">// This file is part of the MOOSE framework
+</code></pre></div><div class="modal-footer"><a class="modal-close btn-flat">Close</a></div></div><div class="modal moose-modal" id="424317b0-d27a-420b-b87a-6a6cedca790d"><div class="modal-content"><h4>modules/stochastic_tools/test/tests/transfers/errors/sub_wrong_control.i</h4><pre class="moose-pre"><code class="language-text">[Mesh]
+  type = GeneratedMesh
+  dim = 2
+  nx = 10
+  ny = 10
+[]
+
+[Variables]
+  [./u]
+  [../]
+[]
+
+[Kernels]
+  [./diff]
+    type = Diffusion
+    variable = u
+  [../]
+  [./time]
+    type = TimeDerivative
+    variable = u
+  [../]
+[]
+
+[BCs]
+  [./left]
+    type = DirichletBC
+    variable = u
+    boundary = left
+    value = 0
+  [../]
+  [./right]
+    type = DirichletBC
+    variable = u
+    boundary = right
+    value = 1
+  [../]
+[]
+
+[Executioner]
+  type = Transient
+  num_steps = 5
+  dt = 0.01
+  solve_type = PJFNK
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
+[]
+
+[Controls]
+  [./stochastic]
+    type = RealFunctionControl
+    function = '1'
+     parameter = 'BCs/left/value'
+  [../]
+[]
+
+[Outputs]
+  exodus = true
+[]
+</code></pre></div><div class="modal-footer"><a class="modal-close btn-flat">Close</a></div></div></section><section class="scrollspy" id="f40f1940-ecd6-490c-a43a-c76836de7ed8" data-section-level="2" data-section-text="Child   Objects"><h2 id="child-objects">Child Objects</h2><ul class="moose-list-children browser-default"><li><a href="#885f3250-5713-4c64-b781-a47645b6d92f" class="modal-trigger">framework/include/kernels/UserForcingFunction.h</a></li></ul><div class="modal moose-modal" id="885f3250-5713-4c64-b781-a47645b6d92f"><div class="modal-content"><h4>framework/include/kernels/UserForcingFunction.h</h4><pre class="moose-pre"><code class="language-cpp">// This file is part of the MOOSE framework
 // https://www.mooseframework.org
 //
 // All rights reserved, see COPYRIGHT for full restrictions
@@ -402,4 +402,4 @@ protected:
 template &lt;&gt;
 InputParameters validParams&lt;UserForcingFunction&gt;();
 
-</code></pre></div><div class="modal-footer"><a class="modal-close btn-flat">Close</a></div></div></section></section></div><div class="col hide-on-med-and-down l2"><div class="toc-wrapper pin-top"><ul class="section table-of-contents"><li><a href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" data-tooltip="Input   Parameters" data-position="left" class="tooltipped">Input   Parameters</a></li><li><a href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" data-tooltip="Input   Parameters" data-position="left" class="tooltipped">Input   Parameters</a></li><li><a href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" data-tooltip="Available   Objects ,   Actions ,   and   Subsystems" data-position="left" class="tooltipped">Available   Objects ,   Actions ,   and   Subsystems</a></li><li><a href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" data-tooltip="Input   Files" data-position="left" class="tooltipped">Input   Files</a></li><li><a href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" data-tooltip="Child   Objects" data-position="left" class="tooltipped">Child   Objects</a></li></ul></div></div></div></div></main></div></body><script src="../js/google_analytics.js" type="text/javascript"></script><script src="../contrib/jquery/jquery.min.js" type="text/javascript"></script><script src="../contrib/materialize/materialize.min.js" type="text/javascript"></script><script src="../contrib/clipboard/clipboard.min.js" type="text/javascript"></script><script src="../contrib/prism/prism.min.js" type="text/javascript"></script><script src="../js/init.js" type="text/javascript"></script><script src="../js/navigation.js" type="text/javascript"></script><script src="../contrib/fuse/fuse.min.js" type="text/javascript"></script><script src="../js/search_index.js" type="text/javascript"></script>
+</code></pre></div><div class="modal-footer"><a class="modal-close btn-flat">Close</a></div></div></section></section></div><div class="col hide-on-med-and-down l2"><div class="toc-wrapper pin-top"><ul class="section table-of-contents"><li><a href="#3ed3d45a-15d7-4920-9135-b726e014f844" class="tooltipped" data-position="left" data-tooltip="Input   Parameters">Input   Parameters</a></li><li><a href="#4128e26d-faaa-4334-8b02-5e0f280873c0" class="tooltipped" data-position="left" data-tooltip="Input   Parameters">Input   Parameters</a></li><li><a href="#d03ed23f-d62e-48c2-bf02-b6366f7bde8d" class="tooltipped" data-position="left" data-tooltip="Available   Objects ,   Actions ,   and   Subsystems">Available   Objects ,   Actions ,   and   Subsystems</a></li><li><a href="#c4e72b01-4164-4663-a193-8936e4f62440" class="tooltipped" data-position="left" data-tooltip="Input   Files">Input   Files</a></li><li><a href="#f40f1940-ecd6-490c-a43a-c76836de7ed8" class="tooltipped" data-position="left" data-tooltip="Child   Objects">Child   Objects</a></li></ul></div></div></div></div></main></div></body><script type="text/javascript" src="../js/google_analytics.js"></script><script type="text/javascript" src="../contrib/jquery/jquery.min.js"></script><script type="text/javascript" src="../contrib/materialize/materialize.min.js"></script><script type="text/javascript" src="../contrib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="../contrib/prism/prism.min.js"></script><script type="text/javascript" src="../js/init.js"></script><script type="text/javascript" src="../js/navigation.js"></script><script type="text/javascript" src="../contrib/fuse/fuse.min.js"></script><script type="text/javascript" src="../js/search_index.js"></script>
