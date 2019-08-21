@@ -22,6 +22,8 @@ validParams<MooseVariableConstMonomial>()
 {
   auto params = validParams<MooseVariableBase>();
   params.addClassDescription("Specialization for constant monomials that avoids unnecessary loops");
+  params.set<MooseEnum>("family") = "MONOMIAL";
+  params.set<MooseEnum>("order") = "CONSTANT";
   return params;
 }
 

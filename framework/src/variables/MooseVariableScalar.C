@@ -27,6 +27,7 @@ validParams<MooseVariableScalar>()
 {
   auto params = validParams<MooseVariableBase>();
   params.addClassDescription("Moose wrapper class around scalar variables");
+  params.set<MooseEnum>("family") = "SCALAR";
   return params;
 }
 
