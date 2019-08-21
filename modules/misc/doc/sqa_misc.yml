@@ -1,0 +1,4 @@
+directories:
+    - ${MOOSE_DIR}/modules/misc/test/tests
+specs:
+    - tests
