@@ -79,7 +79,7 @@ def _locate_filenames(directories, ext):
 def _process(objects, filenames, regex, func):
     """Process regex"""
     for filename in filenames:
-        with open(filename, 'r') as fid:
+        with open(filename, 'r', encoding='utf-8') as fid:
             content = fid.read()
 
         for match in regex.finditer(content):
