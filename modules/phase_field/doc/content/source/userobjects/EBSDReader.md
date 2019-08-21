@@ -14,6 +14,14 @@ orientation information by use by the phase field and mechanics models.
 field variable initial conditions. To reconstruct a mesh of the microstructure,
 we recommend using [OOF](http://www.ctcms.nist.gov/oof/).
 
+### Average orientation of a grain
+
+Euler angles are not the best for representing the orientation of a grain because they suffer from gimbal lock. Therefore, we use quaternions to compute the average orientation of the grain. Firstly, the Euler angles are converted to quaternions. Next, we segregate the quaternions into different bins with the parameter "bins" specifying the number of bins. We then perform a weighted average of the quaternions with weights of each quaternion corresponds
+to size of the bin in which it resides. The average quaternion is then converted to Euler angle representation.
+
+Various weighted averages can be performed by raising power of the weights corresponding to each quaternion. The parameter "L_norm" allows us to
+raise the power of the weights according to the positive integer assigned to it. By default, the value of "L_norm" is set to 1, computing the simple weighted average of the quaternions.
+
 !syntax parameters /UserObjects/EBSDReader
 
 # EBSD Data File Format

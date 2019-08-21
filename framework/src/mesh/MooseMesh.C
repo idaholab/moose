@@ -221,14 +221,17 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _parallel_type(other_mesh._parallel_type),
     _use_distributed_mesh(other_mesh._use_distributed_mesh),
     _distribution_overridden(other_mesh._distribution_overridden),
+    _parallel_type_overridden(other_mesh._parallel_type_overridden),
     _mesh(other_mesh.getMesh().clone()),
     _partitioner_name(other_mesh._partitioner_name),
     _partitioner_overridden(other_mesh._partitioner_overridden),
+    _custom_partitioner_requested(other_mesh._custom_partitioner_requested),
     _uniform_refine_level(other_mesh.uniformRefineLevel()),
     _is_nemesis(false),
     _is_prepared(false),
     _needs_prepare_for_use(false),
     _node_to_elem_map_built(false),
+    _node_to_active_semilocal_elem_map_built(false),
     _patch_size(other_mesh._patch_size),
     _ghosting_patch_size(other_mesh._ghosting_patch_size),
     _max_leaf_size(other_mesh._max_leaf_size),
@@ -264,7 +267,8 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _change_boundary_id_timer(registerTimedSection("changeBoundaryId", 5)),
     _init_timer(registerTimedSection("init", 2)),
     _read_recovered_mesh_timer(registerTimedSection("readRecoveredMesh", 2)),
-    _ghost_ghosted_boundaries_timer(registerTimedSection("GhostGhostedBoundaries", 3))
+    _ghost_ghosted_boundaries_timer(registerTimedSection("GhostGhostedBoundaries", 3)),
+    _need_delete(other_mesh._need_delete)
 {
   // Note: this calls BoundaryInfo::operator= without changing the
   // ownership semantics of either Mesh's BoundaryInfo object.

@@ -178,11 +178,14 @@ ThermalContactAction::addAuxVariables()
     family = "MONOMIAL";
   }
 
-  _problem->addAuxVariable(_penetration_var_name,
-                           FEType(order, Utility::string_to_enum<FEFamily>(family)));
+  auto var_type =
+      AddVariableAction::determineType(FEType(order, Utility::string_to_enum<FEFamily>(family)), 1);
+  auto var_params = _factory.getValidParams(var_type);
+  var_params.set<MooseEnum>("order") = order;
+  var_params.set<MooseEnum>("family") = family;
 
-  _problem->addAuxVariable(_gap_value_name,
-                           FEType(order, Utility::string_to_enum<FEFamily>(family)));
+  _problem->addAuxVariable(var_type, _penetration_var_name, var_params);
+  _problem->addAuxVariable(var_type, _gap_value_name, var_params);
 }
 
 void

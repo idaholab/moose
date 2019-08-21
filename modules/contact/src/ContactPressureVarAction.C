@@ -41,7 +41,9 @@ ContactPressureVarAction::act()
                "Mesh block.");
   }
 
-  _problem->addAuxVariable("contact_pressure",
-                           FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
-                                  Utility::string_to_enum<FEFamily>("LAGRANGE")));
+  auto var_params = _factory.getValidParams("MooseVariable");
+  var_params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
+  var_params.set<MooseEnum>("family") = "LAGRANGE";
+
+  _problem->addAuxVariable("MooseVariable", "contact_pressure", var_params);
 }
