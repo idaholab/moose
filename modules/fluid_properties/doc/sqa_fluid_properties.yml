@@ -1,0 +1,4 @@
+directories:
+    - ${MOOSE_DIR}/modules/fluid_properties/test/tests
+specs:
+    - tests
