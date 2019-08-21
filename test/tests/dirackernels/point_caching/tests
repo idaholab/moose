@@ -1,38 +1,49 @@
 [Tests]
   issues = '#2364'
   design = 'syntax/DiracKernels/index.md'
-  [./point_caching]
-    type = 'Exodiff'
-    input = 'point_caching.i'
-    exodiff = 'point_caching_out.e'
-    requirement = "The DiracKernel system shall support source location caching using element ids."
-  [../]
 
-  [./point_caching_error]
+  [point_caching]
+    requirement = "The system shall support source location caching using element ids:"
+
+    [basic]
+      type = 'Exodiff'
+      input = 'point_caching.i'
+      exodiff = 'point_caching_out.e'
+
+      detail = 'on a static mesh with no adaptivity, '
+    []
+
+    [uniform_refinement]
+      type = 'Exodiff'
+      input = 'point_caching_uniform_refinement.i'
+      exodiff = 'point_caching_uniform_refinement_out.e-s002 '
+                'point_caching_uniform_refinement_out.e-s003'
+
+      detail = 'with uniform mesh refinement,'
+    []
+
+    [adaptive_refinement]
+      type = 'Exodiff'
+      input = 'point_caching_adaptive_refinement.i'
+      exodiff = 'point_caching_adaptive_refinement_out.e-s004'
+
+      detail = 'with adaptive mesh refinement, and'
+    []
+
+    [moving_mesh]
+      type = 'Exodiff'
+      input = 'point_caching_moving_mesh.i'
+      exodiff = 'point_caching_moving_mesh_out.e'
+
+      detail = 'with displaced mesh.'
+    []
+  []
+
+  [point_caching_error]
     type = 'RunException'
     input = 'point_caching_error.i'
     expect_err = "does not match point"
-    requirement = "The DiracKernel system shall report an error if a location does not correspond with the supplied element id."
-  [../]
-
-  [./point_caching_uniform_refinement]
-    type = 'Exodiff'
-    input = 'point_caching_uniform_refinement.i'
-    exodiff = 'point_caching_uniform_refinement_out.e-s002 point_caching_uniform_refinement_out.e-s003'
-    requirement = "The DiracKernel system shall support source location caching using element ids with uniform mesh refinement."
-  [../]
-
-  [./point_caching_adaptive_refinement]
-    type = 'Exodiff'
-    input = 'point_caching_adaptive_refinement.i'
-    exodiff = 'point_caching_adaptive_refinement_out.e-s004'
-    requirement = "The DiracKernel system shall support source location caching using element ids with mesh refinement."
-  [../]
-
-  [./point_caching_moving_mesh]
-    type = 'Exodiff'
-    input = 'point_caching_moving_mesh.i'
-    exodiff = 'point_caching_moving_mesh_out.e'
-    requirement = "The DiracKernel system shall support source location caching using element ids with a displaced mesh."
-  [../]
+    requirement = "The DiracKernel system shall report an error if a location does not correspond "
+                  "with the supplied element id."
+  []
 []

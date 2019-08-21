@@ -5,6 +5,6 @@
     type = 'Exodiff'
     input = 'aux_scalar_variable.i'
     exodiff = 'aux_scalar_variable_out.e'
-    requirement = "MOOSE shall support the coupling of scalar aux variables for the purpose of sharing data and reporting values."
+    requirement = "The system shall support the coupling of scalar aux variables for the purpose of sharing data and reporting values."
   [../]
 []
