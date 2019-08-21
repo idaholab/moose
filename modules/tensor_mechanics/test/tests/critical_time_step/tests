@@ -7,4 +7,11 @@
     issues = ''
     requirement = "The system shall contain a `Postprocessor` that computes the critical time step of an explicit solver."
   [../]
+  [./exception]
+    type = 'Exodiff'
+    input = 'exception.i'
+    exodiff = 'exception_out.e'
+    allow_warnings = true
+    requirement = 'A constitutive failure shall trigger an exception leading to a cut time step rather than a failed solve'
+  [../]
 []

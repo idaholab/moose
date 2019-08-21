@@ -28,6 +28,7 @@ public:
 protected:
   virtual void computeQpElasticityTensor() override;
 
+
   /// Elastic constants
   bool _bulk_modulus_set;
   bool _lambda_set;
@@ -41,8 +42,10 @@ protected:
   Real _shear_modulus;
   Real _youngs_modulus;
 
+  // const MaterialProperty<Real> & _prefactor;
+
   /// Individual elasticity tensor
   RankFourTensor _Cijkl;
 
-  Real _computed_value;
+  Real _effecstiff_local;
 };

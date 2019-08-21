@@ -18,7 +18,7 @@ validParams<CriticalTimeStep>()
   InputParameters params = validParams<ElementPostprocessor>();
   params.addClassDescription("Computes and reports the critical time step for the explicit solver.");
   params.addParam<MaterialPropertyName>(
-      "density",
+      "density0",
       "density",
       "Name of Material Property  or a constant real number defining the density of the material.");
   return params;
@@ -36,7 +36,7 @@ void
 CriticalTimeStep::initialSetup()
 {
   if (!hasGuaranteedMaterialProperty("effective_stiffness", Guarantee::ISOTROPIC))
-    mooseError("ComputeFiniteStrainElasticStress can only be used with elasticity tensor materials "
+    mooseError("CriticalTimeStep can only be used with elasticity tensor materials "
                "that guarantee isotropic tensors.");
 }
 
@@ -50,7 +50,10 @@ CriticalTimeStep::initialize()
 void
 CriticalTimeStep::execute()
 {
-  _total_size = std::min(_current_elem->hmin(), _total_size);
+  Real dens = _mat_dens[0];
+  _total_size = std::min(_current_elem->hmin() * std::sqrt(dens)/(_effective_stiffness[0]), _total_size);
+  // _total_size = std::min(_current_elem->hmin(), _total_size);
+  // std::cout<< (_effective_stiffness[0]) << std::endl;
   _elems++;
 }
 
@@ -60,22 +63,13 @@ CriticalTimeStep::getValue()
   gatherSum(_total_size);
   gatherSum(_elems);
 
-//  std::cout <<  << std::endl;
+  // Real dens = _mat_dens[0];
 
-  /*Real lame_1 = _elasticity_tensor[0](0,0,1,1);
-  Real lame_2 = _elasticity_tensor[0](0,1,0,1);
-  Real dens = _mat_dens[0];
+  // return _total_size * std::sqrt(dens)/(_effective_stiffness[0])
 
-  Real elas_mod = lame_2*(3*lame_1+2*lame_2)/(lame_1+lame_2);
-  Real poiss_rat = lame_1/(2*(lame_1+lame_2));
+  return _total_size;
 
-  Real ele_c = std::sqrt((elas_mod*(1-poiss_rat))/((1+poiss_rat)*(1-2*poiss_rat) * (dens)));*/
-
-  Real dens = _mat_dens[0];
-
-  return _total_size * std::sqrt(dens)/(_effective_stiffness[0]);
-
-  std::cout<< _total_size * std::sqrt(dens)/(_effective_stiffness[0]) << std::endl;
+  // std::cout<< _total_size * std::sqrt(dens)/(_effective_stiffness[0]) << std::endl;
 }
 
 void
