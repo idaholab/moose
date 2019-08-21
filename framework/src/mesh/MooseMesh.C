@@ -227,7 +227,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _uniform_refine_level(other_mesh.uniformRefineLevel()),
     _is_nemesis(false),
     _is_prepared(false),
-    _needs_prepare_for_use(false),
+    _needs_prepare_for_use(other_mesh._needs_prepare_for_use),
     _node_to_elem_map_built(false),
     _patch_size(other_mesh._patch_size),
     _ghosting_patch_size(other_mesh._ghosting_patch_size),
@@ -1148,9 +1148,15 @@ MooseMesh::getSubdomainIDs(const std::vector<SubdomainName> & subdomain_name) co
 }
 
 void
-MooseMesh::setSubdomainName(SubdomainID subdomain_id, SubdomainName name)
+MooseMesh::setSubdomainName(SubdomainID subdomain_id, const SubdomainName & name)
 {
   getMesh().subdomain_name(subdomain_id) = name;
+}
+
+void
+MooseMesh::setSubdomainName(MeshBase & mesh, SubdomainID subdomain_id, const SubdomainName & name)
+{
+  mesh.subdomain_name(subdomain_id) = name;
 }
 
 const std::string &
@@ -1946,15 +1952,23 @@ MooseMesh::changeBoundaryId(const boundary_id_type old_id,
                             bool delete_prev)
 {
   TIME_SECTION(_change_boundary_id_timer);
+  changeBoundaryId(getMesh(), old_id, new_id, delete_prev);
+}
 
+void
+MooseMesh::changeBoundaryId(MeshBase & mesh,
+                            const boundary_id_type old_id,
+                            const boundary_id_type new_id,
+                            bool delete_prev)
+{
   // Get a reference to our BoundaryInfo object, we will use it several times below...
-  BoundaryInfo & boundary_info = getMesh().get_boundary_info();
+  BoundaryInfo & boundary_info = mesh.get_boundary_info();
 
   // Container to catch ids passed back from BoundaryInfo
   std::vector<boundary_id_type> old_ids;
 
   // Only level-0 elements store BCs.  Loop over them.
-  for (auto & elem : as_range(getMesh().level_elements_begin(0), getMesh().level_elements_end(0)))
+  for (auto & elem : as_range(mesh.level_elements_begin(0), mesh.level_elements_end(0)))
   {
     unsigned int n_sides = elem->n_sides();
     for (unsigned int s = 0; s != n_sides; ++s)
