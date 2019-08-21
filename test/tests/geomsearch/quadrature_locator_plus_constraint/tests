@@ -1,0 +1,6 @@
+[Tests]
+  [quadrature_locator_plus_constraint]
+    type = RunApp
+    input = quadrature_locator_plus_constraint.i
+  []
+[]
