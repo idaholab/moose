@@ -1,26 +1,48 @@
 [Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'save_in_test.i'
-    exodiff = 'out.e'
-    scale_refine = 4
-    use_old_floor = True
-    abs_zero = 1e-7
-  [../]
-  [./test_soln_var_err]
-    type = RunException
-    input = 'save_in_soln_var_err_test.i'
-    expect_err = 'diff/save_in\).*?cannot use solution variable as save-in variable'
-  [../]
-  [./test_diag_sol_var_err]
-    type = RunException
-    input = 'diag_save_in_soln_var_err_test.i'
-    expect_err = '\(.*diff/diag_save_in\).*?cannot use solution variable as diag save-in variable'
-  [../]
-  [./test_dg]
-    type = 'Exodiff'
-    input = 'dg_save_in_test.i'
-    exodiff = 'dg_save_in_test_out.e'
-    abs_zero = 1e-9
-  [../]
+  design = 'syntax/Kernels/index.md'
+  issues = '4cb5e2a9f87973dba738584db39f7db935b65ce5'
+  [save_in]
+    requirement = "The system shall be capable of storing residual contributions as an auxiliary "
+                  "field variable for"
+
+    [cg]
+      type = 'Exodiff'
+      input = 'save_in_test.i'
+      exodiff = 'out.e'
+      scale_refine = 4
+      use_old_floor = True
+      abs_zero = 1e-7
+
+      detail = "continuous Galerkin and"
+    []
+
+    [dg]
+      type = 'Exodiff'
+      input = 'dg_save_in_test.i'
+      exodiff = 'dg_save_in_test_out.e'
+      abs_zero = 1e-9
+
+      detail = "discontinuous Galerkin methods."
+    []
+  []
+
+  [error]
+    requirement = "The system shall error if the residual calculation contribution is assigned to "
+                  "the incorrect variable for"
+
+    [test_soln_var_err]
+      type = RunException
+      input = 'save_in_soln_var_err_test.i'
+      expect_err = 'diff/save_in\).*?cannot use solution variable as save-in variable'
+
+      detail = "on-diagonal and"
+    []
+    [test_diag_sol_var_err]
+      type = RunException
+      input = 'diag_save_in_soln_var_err_test.i'
+      expect_err = '\(.*diff/diag_save_in\).*?cannot use solution variable as diag save-in variable'
+
+      detail = "off-diagonal terms."
+    []
+  []
 []

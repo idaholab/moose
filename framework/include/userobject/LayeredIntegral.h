@@ -21,7 +21,7 @@ InputParameters validParams<LayeredIntegral>();
 
 /**
  * This UserObject computes volume integrals of a variable storing partial sums for the specified
- * number of intervals in a direction (x,y,z).c
+ * number of intervals in a direction (x,y,z).
  */
 class LayeredIntegral : public ElementIntegralVariableUserObject, public LayeredBase
 {
@@ -40,4 +40,3 @@ public:
   virtual void finalize() override;
   virtual void threadJoin(const UserObject & y) override;
 };
-

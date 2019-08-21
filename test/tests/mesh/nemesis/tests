@@ -1,4 +1,7 @@
 [Tests]
+  design = 'Mesh/index.md outputs/Nemesis.md'
+  issues = '#2520'
+
   [./nemesis_test]
     type = 'Exodiff'
     input = 'nemesis_test.i'
@@ -8,9 +11,7 @@
     recover = false
     group = 'requirements nemesis'
 
-    requirement = 'MOOSE shall support writing out a solution in a parallel file format (domain decomposition solution files).'
-    issues = '#2520'
-    design = 'Mesh/index.md outputs/Nemesis.md'
+    requirement = 'The system shall support writing solution data in the Nemesis parallel file format.'
 [../]
 
   [./nemesis_repartitioning_test]
@@ -28,5 +29,7 @@
     # results on each platform they do not produce the
     # same results.
     platform = 'LINUX'
+
+    requirement = "The system shall support the re-partitioning of mesh files input using the Nemesis format."
   [../]
 []

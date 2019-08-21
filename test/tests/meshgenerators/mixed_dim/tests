@@ -1,34 +1,39 @@
 [Tests]
-  [./onedtwod_test]
-    type = 'Exodiff'
-    input = '1d_2d.i'
-    exodiff = 'out.e'
-    design = ''
-    requirement = ''
-    issues = '#11640'
-    recover = false
-    mesh_mode = 'REPLICATED'
-  [../]
+  design = 'Mesh/index.md'
+  issues = '#11640'
 
-  [./onedtwod_w_matl_test]
-    type = 'Exodiff'
-    input = '1d_2d_w_matl.i'
-    exodiff = '1d_2d_w_matl_out.e'
-    design = ''
-    requirement = ''
-    issues = '#11640'
-    recover = false
-    mesh_mode = 'REPLICATED'
-  [../]
+  [mixed]
+    requirement = "The system shall support the used finite element meshes with mixed dimensions "
+                  "including"
 
-  [./onedthreed_test]
-    type = 'Exodiff'
-    input = '1d_3d.i'
-    exodiff = '1d_3d_out.e'
-    design = ''
-    requirement = ''
-    issues = '#11640'
-    recover = false
-    mesh_mode = 'REPLICATED'
-  [../]
+    [onedtwod_test]
+      type = 'Exodiff'
+      input = '1d_2d.i'
+      exodiff = 'out.e'
+      recover = false
+      mesh_mode = 'REPLICATED'
+
+      detail = "1D and 2D together,"
+    []
+
+    [onedtwod_w_matl_test]
+      type = 'Exodiff'
+      input = '1d_2d_w_matl.i'
+      exodiff = '1d_2d_w_matl_out.e'
+      recover = false
+      mesh_mode = 'REPLICATED'
+
+      detail = "1D and 2D together with material properties defined, and"
+    []
+
+    [onedthreed_test]
+      type = 'Exodiff'
+      input = '1d_3d.i'
+      exodiff = '1d_3d_out.e'
+      recover = false
+      mesh_mode = 'REPLICATED'
+
+      detail = "1D and 3D together."
+    []
+  []
 []

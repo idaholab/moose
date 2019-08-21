@@ -1,9 +1,13 @@
 [Tests]
+  design = 'TimeIntegrator/index.md'
+  issues = '#3029 #5883 #5949'
   [./test]
     type = 'Exodiff'
     input = 'high_order_time_integration.i'
     exodiff = 'high_order_time_integration_out.e'
     scale_refine = 3
     rel_err = 1e-05
+
+    requirement = "The system shall support the use of Crank-Nicolson time integration scheme."
   [../]
 []

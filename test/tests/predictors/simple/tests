@@ -1,17 +1,31 @@
 [Tests]
-  [./test]
+  design = 'SimplePredictor.md'
+  issues = '#2282 #6506'
+
+  [test]
     type = 'CSVDiff'
     input = 'predictor_test.i'
     csvdiff = 'predictor_test_out.csv'
-  [../]
-  [./test_skip]
-    type = 'CSVDiff'
-    input = 'predictor_skip_test.i'
-    csvdiff = 'predictor_skip_test_out.csv'
-  [../]
-  [./test_skip_old]
-    type = 'CSVDiff'
-    input = 'predictor_skip_old_test.i'
-    csvdiff = 'predictor_skip_old_test_out.csv'
-  [../]
+
+    requirement = "The system shall include a means for predicting future solution based on previous "
+                  "solutions."
+  []
+
+  [skip]
+    requirement = "The system shall support the ability to skip performing solution predictions"
+    [test_skip]
+      type = 'CSVDiff'
+      input = 'predictor_skip_test.i'
+      csvdiff = 'predictor_skip_test_out.csv'
+
+      detail = "using solution times or"
+    []
+    [test_skip_old]
+      type = 'CSVDiff'
+      input = 'predictor_skip_old_test.i'
+      csvdiff = 'predictor_skip_old_test_out.csv'
+
+      detail = "previous solution times."
+    []
+  []
 []

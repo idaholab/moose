@@ -347,6 +347,21 @@ def git_commit(working_dir=os.getcwd()):
     out = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=working_dir)
     return out.strip(' \n')
 
+def git_commit_message(sha, working_dir=os.getcwd()):
+    """
+    Return the the commit message for the supplied SHA
+    """
+    out = subprocess.check_output(['git', 'show', '-s', '--format=%B', sha], cwd=working_dir)
+    return out.strip(' \n')
+
+def git_merge_commits(working_dir=os.getcwd()):
+    """
+    Return the current SHAs for a merge.
+    """
+    out = subprocess.check_output(['git', 'log', '-1', '--merges', '--pretty=format:%P'],
+                                  cwd=working_dir)
+    return out.strip(' \n').split(' ')
+
 def git_ls_files(working_dir=os.getcwd()):
     """
     Return a list of files via 'git ls-files'.

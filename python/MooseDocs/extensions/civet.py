@@ -26,6 +26,29 @@ class CivetExtension(command.CommandExtension):
     def extend(self, reader, renderer):
         self.requires(command)
         self.addCommand(reader, CivetResultsCommand())
+        self.addCommand(reader, CivetMergeResultsCommand())
+
+class CivetMergeResultsCommand(command.CommandComponent):
+    COMMAND = 'civet'
+    SUBCOMMAND = 'mergeresults'
+
+    @staticmethod
+    def defaultSettings():
+        settings = command.CommandComponent.defaultSettings()
+        settings['owner'] = (None, "The owner of the repository, e.g. 'idaholab'.")
+        settings['repo'] = (None, "The repository name, e.g. 'moose'.")
+        return settings
+
+    def createToken(self, parent, info, page):
+        owner = self.settings['owner'] or self.extension.get('owner')
+        repo = self.settings['repo'] or self.extension.get('repo')
+
+        rows = []
+        for sha in mooseutils.git_merge_commits():
+            url = u'https://civet.inl.gov/sha_events/{}/{}/{}'.format(owner, repo, sha)
+            link = core.Link(parent, url=url, string=sha)
+            core.LineBreak(parent)
+        return parent
 
 class CivetResultsCommand(command.CommandComponent):
     COMMAND = 'civet'

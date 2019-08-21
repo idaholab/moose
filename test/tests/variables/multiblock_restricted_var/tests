@@ -4,7 +4,7 @@
     input = 'multiblock_restricted_var_test.i'
     exodiff = 'multiblock_restricted_var_test_out.e'
 
-    issues = '#1405'
+    issues = '76ddaa1961753020e57d62d2b8f29e0638e40c28'
     design = 'syntax/Variables/index.md'
     requirement = 'The system shall support the ability to have multiple independent block restricted variables in a mesh contain multiple blocks.'
   [../]

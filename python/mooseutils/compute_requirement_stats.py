@@ -48,9 +48,8 @@ def compute_requirement_stats(location, specs=['tests'], working_dir=None, show=
                   relative to the cwd input.
         specs: The filename(s) to consider
         working_dir: The working directory, if not supplied the root directory of the repository is used
-
     """
-    files_with_missing_requirements = set()
+    tests_with_missing_requirements = set()
     working_dir = git_root_dir(os.getcwd()) if working_dir is None else working_dir
     data = SQAStats(location)
     location = os.path.join(working_dir, location)
@@ -64,21 +63,23 @@ def compute_requirement_stats(location, specs=['tests'], working_dir=None, show=
             for child in root.children[0]:
                 data.tests += 1
 
-                if root.children[0].get('deprecated', False) or child.get('deprecated', False):
+                deprecated = root.children[0].get('deprecated', False) or child.get('deprecated', False)
+                if deprecated:
                     data.tests_deprecated += 1
 
                 if child.get('requirement', None):
                     has_requirement = True
                     data.tests_with_requirement += 1
+                elif not deprecated:
+                    tests_with_missing_requirements.add((filename, child.name))
 
             data.files += 1
-            if has_requirement:
-                data.files_with_requirement += 1
-            else:
-                files_with_missing_requirements.add(filename)
 
     if show:
         print(data)
-    if list_missing:
-        print('\n'.join(files_with_missing_requirements))
+    if list_missing and tests_with_missing_requirements:
+        print('\nMissing Requirements:')
+        for filename, test in tests_with_missing_requirements:
+            print('{}:{}'.format(filename, test))
+
     return data
