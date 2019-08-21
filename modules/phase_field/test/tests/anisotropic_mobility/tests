@@ -38,8 +38,8 @@
     ratio_tol = 1e-8
     difference_tol = 1e-7
     run_sim = True
-    requirement = 'AD Diffusion with anm anisotropic material property diffusivity shall have a perfect Jacobian'
-    design = "jacobian_definition.md"
+    requirement = 'AD Diffusion with an anisotropic material property diffusivity shall have a perfect Jacobian'
+    design = "/ADMatAnisoDiffusion.md"
     issues = "#13632"
   [../]
 []
