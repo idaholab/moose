@@ -1,215 +1,167 @@
 [Tests]
-  [./a_stable_dirk4]
-    type = 'CSVDiff'
-    input = 'num_iterations.i'
-    csvdiff = 'a_stable_dirk4.csv'
-    cli_args = '
-      Executioner/TimeIntegrator/type=AStableDirk4
-      Executioner/TimeIntegrator/safe_start=true
-      Outputs/file_base=a_stable_dirk4'
-    max_parallel = 1
+  design = 'TimeIntegrator/index.md'
+  issues = '#11444'
 
-    requirement = "Time integrators shall report the correct number of nonlinear"
-                  " and linear iterations, even if there are multiple stages."
-    design = 'TimeIntegrator/index.md'
-    issues = '#11444'
-  [../]
-  [./actually_explicit_euler_consistent]
-    type = 'CSVDiff'
-    input = 'num_iterations.i'
-    csvdiff = 'actually_explicit_euler_consistent.csv'
-    cli_args = '
-      Executioner/TimeIntegrator/type=ActuallyExplicitEuler
-      Executioner/TimeIntegrator/solve_type=consistent
-      Outputs/file_base=actually_explicit_euler_consistent'
-    max_parallel = 1
+  [methods]
+    requirement = "The system shall support time integration schemes that compute a consistent "
+                  "number of nonlinear and linear iterations for"
 
-    requirement = "Time integrators shall report the correct number of nonlinear"
-                  " and linear iterations, even if there are multiple stages."
-    design = 'TimeIntegrator/index.md'
-    issues = '#11444'
-  [../]
-  [./actually_explicit_euler_lumped]
-    type = 'CSVDiff'
-    input = 'num_iterations.i'
-    csvdiff = 'actually_explicit_euler_lumped.csv'
-    cli_args = '
-      Executioner/TimeIntegrator/type=ActuallyExplicitEuler
-      Executioner/TimeIntegrator/solve_type=lumped
-      Outputs/file_base=actually_explicit_euler_lumped'
-    max_parallel = 1
+    [a_stable_dirk4]
+      type = 'CSVDiff'
+      input = 'num_iterations.i'
+      csvdiff = 'a_stable_dirk4.csv'
+      cli_args = 'Executioner/TimeIntegrator/type=AStableDirk4 '
+                 'Executioner/TimeIntegrator/safe_start=true Outputs/file_base=a_stable_dirk4'
+      max_parallel = 1
 
-    requirement = "Time integrators shall report the correct number of nonlinear"
-                  " and linear iterations, even if there are multiple stages."
-    design = 'TimeIntegrator/index.md'
-    issues = '#11444'
-  [../]
-  [./actually_explicit_euler_lump_preconditioned]
-    type = 'CSVDiff'
-    input = 'num_iterations.i'
-    csvdiff = 'actually_explicit_euler_lump_preconditioned.csv'
-    cli_args = '
-      Executioner/TimeIntegrator/type=ActuallyExplicitEuler
-      Executioner/TimeIntegrator/solve_type=lump_preconditioned
-      Outputs/file_base=actually_explicit_euler_lump_preconditioned'
-    max_parallel = 1
+      detail = "four stage, A-stable DIRK;"
 
-    requirement = "Time integrators shall report the correct number of nonlinear"
-                  " and linear iterations, even if there are multiple stages."
-    design = 'TimeIntegrator/index.md'
-    issues = '#11444'
-  [../]
-  [./bdf2]
-    type = 'CSVDiff'
-    input = 'num_iterations.i'
-    csvdiff = 'bdf2.csv'
-    cli_args = '
+    []
+    [actually_explicit_euler_consistent]
+      type = 'CSVDiff'
+      input = 'num_iterations.i'
+      csvdiff = 'actually_explicit_euler_consistent.csv'
+      cli_args = 'Executioner/TimeIntegrator/type=ActuallyExplicitEuler '
+                 'Executioner/TimeIntegrator/solve_type=consistent '
+                 'Outputs/file_base=actually_explicit_euler_consistent'
+      max_parallel = 1
+
+      detail = "explicit Euler;"
+    []
+    [actually_explicit_euler_lumped]
+      type = 'CSVDiff'
+      input = 'num_iterations.i'
+      csvdiff = 'actually_explicit_euler_lumped.csv'
+      cli_args = 'Executioner/TimeIntegrator/type=ActuallyExplicitEuler '
+                 'Executioner/TimeIntegrator/solve_type=lumped '
+                 'Outputs/file_base=actually_explicit_euler_lumped'
+      max_parallel = 1
+
+      detail = "lumped explicit Euler;"
+    []
+    [actually_explicit_euler_lump_preconditioned]
+      type = 'CSVDiff'
+      input = 'num_iterations.i'
+      csvdiff = 'actually_explicit_euler_lump_preconditioned.csv'
+      cli_args = 'Executioner/TimeIntegrator/type=ActuallyExplicitEuler '
+                 'Executioner/TimeIntegrator/solve_type=lump_preconditioned '
+                 'Outputs/file_base=actually_explicit_euler_lump_preconditioned'
+      max_parallel = 1
+
+      detail = "lumped and preconditioned explicit Euler;"
+    []
+    [bdf2]
+      type = 'CSVDiff'
+      input = 'num_iterations.i'
+      csvdiff = 'bdf2.csv'
+      cli_args = '
       Executioner/TimeIntegrator/type=BDF2
       Outputs/file_base=bdf2'
-    max_parallel = 1
+      max_parallel = 1
 
-    requirement = "Time integrators shall report the correct number of nonlinear"
-                  " and linear iterations, even if there are multiple stages."
-    design = 'TimeIntegrator/index.md'
-    issues = '#11444'
-  [../]
-  [./crank_nicolson]
-    type = 'CSVDiff'
-    input = 'num_iterations.i'
-    csvdiff = 'crank_nicolson.csv'
-    cli_args = '
-      Executioner/TimeIntegrator/type=CrankNicolson
-      Outputs/file_base=crank_nicolson'
-    max_parallel = 1
+      detail = "second-order backward difference;"
+    []
+    [crank_nicolson]
+      type = 'CSVDiff'
+      input = 'num_iterations.i'
+      csvdiff = 'crank_nicolson.csv'
+      cli_args = 'Executioner/TimeIntegrator/type=CrankNicolson Outputs/file_base=crank_nicolson'
+      max_parallel = 1
 
-    requirement = "Time integrators shall report the correct number of nonlinear"
-                  " and linear iterations, even if there are multiple stages."
-    design = 'TimeIntegrator/index.md'
-    issues = '#11444'
-  [../]
-  [./explicit_euler]
-    type = 'CSVDiff'
-    input = 'num_iterations.i'
-    csvdiff = 'explicit_euler.csv'
-    cli_args = '
-      Executioner/TimeIntegrator/type=ExplicitEuler
-      Outputs/file_base=explicit_euler'
-    max_parallel = 1
+      detail = "Crank-Nicloson;"
+    []
+    [explicit_euler]
+      type = 'CSVDiff'
+      input = 'num_iterations.i'
+      csvdiff = 'explicit_euler.csv'
+      cli_args = 'Executioner/TimeIntegrator/type=ExplicitEuler Outputs/file_base=explicit_euler'
+      max_parallel = 1
 
-    requirement = "Time integrators shall report the correct number of nonlinear"
-                  " and linear iterations, even if there are multiple stages."
-    design = 'TimeIntegrator/index.md'
-    issues = '#11444'
-  [../]
-  [./explicit_midpoint]
-    type = 'CSVDiff'
-    input = 'num_iterations.i'
-    csvdiff = 'explicit_midpoint.csv'
-    cli_args = '
-      Executioner/TimeIntegrator/type=ExplicitMidpoint
-      Outputs/file_base=explicit_midpoint'
-    max_parallel = 1
+      detail = "quasi explicit Euler;"
+    []
+    [explicit_midpoint]
+      type = 'CSVDiff'
+      input = 'num_iterations.i'
+      csvdiff = 'explicit_midpoint.csv'
+      cli_args = 'Executioner/TimeIntegrator/type=ExplicitMidpoint '
+                 'Outputs/file_base=explicit_midpoint'
+      max_parallel = 1
 
-    requirement = "Time integrators shall report the correct number of nonlinear"
-                  " and linear iterations, even if there are multiple stages."
-    design = 'TimeIntegrator/index.md'
-    issues = '#11444'
-  [../]
-  [./explicit_tvd_rk2]
-    type = 'CSVDiff'
-    input = 'num_iterations.i'
-    csvdiff = 'explicit_tvd_rk2.csv'
-    cli_args = '
-      Executioner/TimeIntegrator/type=ExplicitTVDRK2
-      Outputs/file_base=explicit_tvd_rk2'
-    max_parallel = 1
+      detail = "explicit midpoint;"
+    []
+    [explicit_tvd_rk2]
+      type = 'CSVDiff'
+      input = 'num_iterations.i'
+      csvdiff = 'explicit_tvd_rk2.csv'
+      cli_args = 'Executioner/TimeIntegrator/type=ExplicitTVDRK2 Outputs/file_base=explicit_tvd_rk2'
+      max_parallel = 1
 
-    requirement = "Time integrators shall report the correct number of nonlinear"
-                  " and linear iterations, even if there are multiple stages."
-    design = 'TimeIntegrator/index.md'
-    issues = '#11444'
-  [../]
-  [./heun]
-    type = 'CSVDiff'
-    input = 'num_iterations.i'
-    csvdiff = 'heun.csv'
-    cli_args = '
-      Executioner/TimeIntegrator/type=Heun
-      Outputs/file_base=heun'
-    max_parallel = 1
+      detail = "two-stage TVD Runge-Kutta;"
+    []
+    [heun]
+      type = 'CSVDiff'
+      input = 'num_iterations.i'
+      csvdiff = 'heun.csv'
+      cli_args = 'Executioner/TimeIntegrator/type=Heun Outputs/file_base=heun'
+      max_parallel = 1
 
-    requirement = "Time integrators shall report the correct number of nonlinear"
-                  " and linear iterations, even if there are multiple stages."
-    design = 'TimeIntegrator/index.md'
-    issues = '#11444'
-  [../]
-  [./implicit_euler]
-    type = 'CSVDiff'
-    input = 'num_iterations.i'
-    csvdiff = 'implicit_euler.csv'
-    cli_args = '
-      Executioner/TimeIntegrator/type=ImplicitEuler
-      Outputs/file_base=implicit_euler'
-    max_parallel = 1
-  [../]
-  [./implicit_midpoint]
-    type = 'CSVDiff'
-    input = 'num_iterations.i'
-    csvdiff = 'implicit_midpoint.csv'
-    cli_args = '
-      Executioner/TimeIntegrator/type=ImplicitMidpoint
-      Outputs/file_base=implicit_midpoint'
-    max_parallel = 1
-  [../]
-  [./l_stable_dirk2]
-    type = 'CSVDiff'
-    input = 'num_iterations.i'
-    csvdiff = 'l_stable_dirk2.csv'
-    cli_args = '
-      Executioner/TimeIntegrator/type=LStableDirk2
-      Outputs/file_base=l_stable_dirk2'
-    max_parallel = 1
+      detail = 'Heun;'
+    []
+    [implicit_euler]
+      type = 'CSVDiff'
+      input = 'num_iterations.i'
+      csvdiff = 'implicit_euler.csv'
+      cli_args = 'Executioner/TimeIntegrator/type=ImplicitEuler Outputs/file_base=implicit_euler'
+      max_parallel = 1
 
-    requirement = "Time integrators shall report the correct number of nonlinear"
-                  " and linear iterations, even if there are multiple stages."
-    design = 'TimeIntegrator/index.md'
-    issues = '#11444'
-  [../]
-  [./l_stable_dirk3]
-    type = 'CSVDiff'
-    input = 'num_iterations.i'
-    csvdiff = 'l_stable_dirk3.csv'
-    cli_args = '
-      Executioner/TimeIntegrator/type=LStableDirk3
-      Outputs/file_base=l_stable_dirk3'
-    max_parallel = 1
-  [../]
-  [./l_stable_dirk4]
-    type = 'CSVDiff'
-    input = 'num_iterations.i'
-    csvdiff = 'l_stable_dirk4.csv'
-    cli_args = '
-      Executioner/TimeIntegrator/type=LStableDirk4
-      Outputs/file_base=l_stable_dirk4'
-    max_parallel = 1
+      detail = 'implicit Euler;'
+    []
+    [implicit_midpoint]
+      type = 'CSVDiff'
+      input = 'num_iterations.i'
+      csvdiff = 'implicit_midpoint.csv'
+      cli_args = 'Executioner/TimeIntegrator/type=ImplicitMidpoint '
+                 'Outputs/file_base=implicit_midpoint'
+      max_parallel = 1
 
-    requirement = "Time integrators shall report the correct number of nonlinear"
-                  " and linear iterations, even if there are multiple stages."
-    design = 'TimeIntegrator/index.md'
-    issues = '#11444'
-  [../]
-  [./ralston]
-    type = 'CSVDiff'
-    input = 'num_iterations.i'
-    csvdiff = 'ralston.csv'
-    cli_args = '
-      Executioner/TimeIntegrator/type=Ralston
-      Outputs/file_base=ralston'
-    max_parallel = 1
+      detail = 'implicit midpoint;'
+    []
+    [l_stable_dirk2]
+      type = 'CSVDiff'
+      input = 'num_iterations.i'
+      csvdiff = 'l_stable_dirk2.csv'
+      cli_args = 'Executioner/TimeIntegrator/type=LStableDirk2 Outputs/file_base=l_stable_dirk2'
+      max_parallel = 1
 
-    requirement = "Time integrators shall report the correct number of nonlinear"
-                  " and linear iterations, even if there are multiple stages."
-    design = 'TimeIntegrator/index.md'
-    issues = '#11444'
-  [../]
+      detail = 'two-stage, L-stable DIRK;'
+    []
+
+    [l_stable_dirk3]
+      type = 'CSVDiff'
+      input = 'num_iterations.i'
+      csvdiff = 'l_stable_dirk3.csv'
+      cli_args = 'Executioner/TimeIntegrator/type=LStableDirk3 Outputs/file_base=l_stable_dirk3'
+      max_parallel = 1
+
+      detail = "four stage, L-stable DIRK;"
+    []
+    [l_stable_dirk4]
+      type = 'CSVDiff'
+      input = 'num_iterations.i'
+      csvdiff = 'l_stable_dirk4.csv'
+      cli_args = 'Executioner/TimeIntegrator/type=LStableDirk4 Outputs/file_base=l_stable_dirk4'
+      max_parallel = 1
+
+      detail = "four stage, L-stable DIRK;"
+    []
+    [ralston]
+      type = 'CSVDiff'
+      input = 'num_iterations.i'
+      csvdiff = 'ralston.csv'
+      cli_args = 'Executioner/TimeIntegrator/type=Ralston Outputs/file_base=ralston'
+      max_parallel = 1
+
+      detail = 'and Ralston methods.'
+    []
+  []
 []

@@ -33,8 +33,7 @@ protected:
 
   /**
    * Determines the information to be extracted from the tensor by using the
-   * RankTwoScalarTools namespace, e.g., vonMisesStress, EquivalentPlasticStrain,
-   * L2norm, MaxPrincipal eigenvalue, etc.
+   * RankTwoScalarTools namespace, e.g., vonMisesStressL2norm, MaxPrincipal eigenvalue, etc.
    */
   MooseEnum _scalar_type;
 
@@ -48,4 +47,3 @@ protected:
   const Point _point2;
   Point _input_direction;
 };
-

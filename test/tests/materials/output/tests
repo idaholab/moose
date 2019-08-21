@@ -1,56 +1,86 @@
 [Tests]
-  [./all]
-    type = 'Exodiff'
-    input = 'output.i'
-    exodiff = 'output_out.e'
-  [../]
-  [./all_via_outputs]
-    # Test the ability for Output objects to enable all material property output
-    type = 'Exodiff'
-    input = 'output_via_outputs.i'
-    exodiff = 'output_via_outputs_out.e'
-  [../]
-  [./limit_via_outputs]
-    # Test the ability for Output objects to enable specific material property outputs
-    type = 'Exodiff'
-    input = 'limited_via_outputs.i'
-    exodiff = 'limited_via_outputs_out.e'
-  [../]
-  [./block_via_outputs]
-    # Test the ability for Output objects to enable specific material property outputs across blocks
-    type = 'Exodiff'
-    input = 'block_via_outputs.i'
-    exodiff = 'block_via_outputs_out.e'
-  [../]
-  [./block]
-    type = 'Exodiff'
-    input = 'output_block.i'
-    exodiff = 'output_block_out.e'
-  [../]
-  [./block_displaced]
-    type = 'Exodiff'
-    input = 'output_block_displaced.i'
-    exodiff = 'output_block_displaced_exodus.e'
-  [../]
-  [./boundary]
-    type = 'Exodiff'
-    input = 'output_boundary.i'
-    exodiff = 'output_boundary_out.e'
-  [../]
-  [./multiple_files]
-    type = Exodiff
-    input = output_multiple_files.i
-    exodiff = 'output_multiple_files_exodus1.e output_multiple_files_exodus2.e'
-  [../]
-  [./invalid_outputs]
+  design = 'syntax/Materials/index.md syntax/Outputs/index.md'
+  issues = '#1189 #3538'
+
+  [group]
+    requirement = "The system shall support the output of material data as field variables including"
+
+    [all]
+      type = 'Exodiff'
+      input = 'output.i'
+      exodiff = 'output_out.e'
+
+      detail = 'outputting all properties within a material definition;'
+    []
+    [all_via_outputs]
+      # Test the ability for Output objects to enable all material property output
+      type = 'Exodiff'
+      input = 'output_via_outputs.i'
+      exodiff = 'output_via_outputs_out.e'
+
+      detail = 'outputting all properties from the output definition;'
+    []
+    [limit_via_outputs]
+      # Test the ability for Output objects to enable specific material property outputs
+      type = 'Exodiff'
+      input = 'limited_via_outputs.i'
+      exodiff = 'limited_via_outputs_out.e'
+
+      detail = 'outputting certain properties within a material definition;'
+    []
+    [block_via_outputs]
+      # Test the ability for Output objects to enable specific material property outputs across blocks
+      type = 'Exodiff'
+      input = 'block_via_outputs.i'
+      exodiff = 'block_via_outputs_out.e'
+
+      detail = 'outputting certain properties within the output definition on a subdomain;'
+    []
+    [block]
+      type = 'Exodiff'
+      input = 'output_block.i'
+      exodiff = 'output_block_out.e'
+
+      detail = 'outputting certain properties within the material definition on a subdomain;'
+    []
+    [block_displaced]
+      type = 'Exodiff'
+      input = 'output_block_displaced.i'
+      exodiff = 'output_block_displaced_exodus.e'
+
+      detail = 'outputting certain properties within the material definition on a subdomain with a '
+               'displaced configuration;'
+    []
+    [boundary]
+      type = 'Exodiff'
+      input = 'output_boundary.i'
+      exodiff = 'output_boundary_out.e'
+
+      detail = 'outputting certain properties within the material definition on a boundary;'
+    []
+    [multiple_files]
+      type = Exodiff
+      input = output_multiple_files.i
+      exodiff = 'output_multiple_files_exodus1.e output_multiple_files_exodus2.e'
+
+      detail = 'outputting certain properties within the material definition to different files; and'
+    []
+    [steady]
+      type = Exodiff
+      input = 'output_steady.i'
+      exodiff = 'output_steady_out.e'
+
+      detail = 'outputting properties for steady-state simulations.'
+    []
+  []
+
+  [invalid_outputs]
     type = RunException
     input = output.i
     expect_err = "The output object 'garbage' is not a defined output object"
     cli_args = 'Outputs/exodus=false Materials/test_material/outputs=garbage'
-  [../]
-  [./steady]
-    type = Exodiff
-    input = 'output_steady.i'
-    exodiff = 'output_steady_out.e'
-  [../]
+
+    requirement = "The system shall error if the supplied output options for material data output "
+                  "are not consistent with the list of available outputs."
+  []
 []

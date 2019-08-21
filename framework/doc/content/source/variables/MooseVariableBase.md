@@ -70,7 +70,7 @@ similar methods of `MooseVariableFE<Real>`.
 
 ## Accessors
 
-There are a myriad of ways to acess Moose variables from user interfaces. We'll
+There are a myriad of ways to access Moose variables from user interfaces. We'll
 outline a few below.
 
 ### SystemBase

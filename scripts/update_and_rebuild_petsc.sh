@@ -64,6 +64,12 @@ if [[ -z "$go_fast" && -z "$skip_sub_update" && $? == 0 && "x$git_dir" == "x" ]]
   fi
 fi
 
+# Set installation prefix if given
+PFX_STR=''
+if [ ! -z "$PETSC_PREFIX" ]; then
+  PFX_STR="--prefix=$PETSC_PREFIX"
+fi
+
 
 cd $SCRIPT_DIR/../petsc
 
@@ -71,7 +77,8 @@ cd $SCRIPT_DIR/../petsc
 if [ -z "$go_fast" ]; then
   rm -rf $SCRIPT_DIR/../petsc/$PETSC_ARCH
 
-  ./configure --download-hypre=1 \
+  ./configure $(echo $PFX_STR) \
+      --download-hypre=1 \
       --with-ssl=0 \
       --with-debugging=no \
       --with-pic=1 \
@@ -99,7 +106,7 @@ if [ -z "$go_fast" ]; then
       --with-sowing=0 \
       $* \
 
-   make all
-else
-   make all
 fi
+
+make all -j ${MOOSE_JOBS:-1}
+if [ ! -z "$PETSC_PREFIX" ]; then make install; fi

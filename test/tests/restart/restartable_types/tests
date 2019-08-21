@@ -1,36 +1,55 @@
 [Tests]
-  [./first]
-    type = 'RunApp'
-    input = 'restartable_types.i'
-    recover = false
-    group = 'requirements'
-  [../]
+  design = 'Restartable.md'
+  issues = '#1169 #2218'
 
-  [./second]
-    # Using RunApp here because the error checking happens _in_ the app
-    type = 'RunApp'
-    input = 'restartable_types2.i'
-    prereq = first
-    recover = false
-    group = 'requirements'
-  [../]
+  [serial]
+    requirement = "The system shall be capable, on a single process, of"
 
-  [./first_parallel]
-    type = 'RunApp'
-    input = 'restartable_types.i'
-    recover = false
-    min_parallel = 2
-    prereq = second
-    group = 'requirements'
-  [../]
+    [first]
+      type = 'RunApp'
+      input = 'restartable_types.i'
+      recover = false
+      group = 'requirements'
 
-  [./second_parallel]
-    # Using RunApp here because the error checking happens _in_ the app
-    type = 'RunApp'
-    input = 'restartable_types2.i'
-    prereq = first_parallel
-    min_parallel = 2
-    recover = false
-    group = 'requirements'
-  [../]
+      detail = "writing data to a restart file"
+    []
+
+    [second]
+      # Using RunApp here because the error checking happens _in_ the app
+      type = 'RunApp'
+      input = 'restartable_types2.i'
+      prereq = serial/first
+      recover = false
+      group = 'requirements'
+
+      detail = "and restarting the simulation from the restart file."
+    []
+  []
+
+  [parallel]
+    requirement = "The system shall be capable, in parallel, of"
+
+    [first]
+      type = 'RunApp'
+      input = 'restartable_types.i'
+      recover = false
+      min_parallel = 2
+      prereq = serial/second
+      group = 'requirements'
+
+      detail = "writing data to a restart file"
+    []
+
+    [second]
+      # Using RunApp here because the error checking happens _in_ the app
+      type = 'RunApp'
+      input = 'restartable_types2.i'
+      prereq = parallel/first
+      min_parallel = 2
+      recover = false
+      group = 'requirements'
+
+      detail = "and restarting the simulation from the restart file."
+    []
+  []
 []

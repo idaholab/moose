@@ -1,4 +1,7 @@
 [Tests]
+  design = 'NodalEqualValueConstraint.md OneDEqualValueConstraintBC.md'
+  issues = '#4211'
+
   [./test]
     type = 'Exodiff'
     input = '1d.i'
@@ -6,14 +9,7 @@
     max_parallel = 1
     max_threads = 1
     compiler = 'GCC CLANG'
-  [../]
 
-  [./test_with_nodebc_name]
-    type = 'Exodiff'
-    input = '1d_nodebc_name.i'
-    exodiff = '1d_nodebc_name_out.e'
-    max_parallel = 1
-    max_threads = 1
-    compiler = 'GCC CLANG'
+    requirement = 'The system shall support the use of constrains using the mortar method in 1D.'
   [../]
 []
