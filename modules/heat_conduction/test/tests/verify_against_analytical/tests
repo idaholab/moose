@@ -1,11 +1,12 @@
 [Tests]
+  design = "HeatConduction.md"
+
   [./1D_transient]
     type = 'Exodiff'
     input = '1D_transient.i'
     exodiff = '1D_transient_out.e'
     abs_zero = 1e-8
     requirement = "Heat conduction shall match the answer from an analytical solution"
-    design = "HeatConduction.md"
     issues = "#5975"
   [../]
   [./ad_1D_transient]
@@ -14,7 +15,6 @@
     exodiff = 'ad_1D_transient_out.e'
     abs_zero = 1e-8
     requirement = "Heat conduction from an AD kernel shall get the same answer as a traditional kernel"
-    design = "jacobian_definition.md"
     issues = "#5658 #12633"
   [../]
   [./ad_1D_transient_jacobian]
@@ -27,7 +27,6 @@
     method = 'OPT'
     cli_args = 'Executioner/num_steps=5'
     requirement = 'AD heat conduction and the Jacobian shall be beautiful'
-    design = "jacobian_definition.md"
     issues = "#5658 #12633"
   [../]
 
@@ -37,7 +36,6 @@
     exodiff = '2d_steady_state_out.e'
     abs_zero = 1e-8
     requirement = "Heat conduction shall match the answer from an analytical solution"
-    design = "HeatConduction.md"
     issues = "#8194"
   [../]
   [./ad_2D_steady_state]
@@ -46,7 +44,6 @@
     exodiff = 'ad_2d_steady_state_out.e'
     abs_zero = 1e-8
     requirement = "Heat conduction from an AD kernel shall get the same answer as a traditional kernel"
-    design = "jacobian_definition.md"
     issues = "#5658 #12633"
   [../]
   [./ad_2D_steady_state_jacobian]
@@ -58,7 +55,6 @@
     petsc_version = '>=3.9.4'
     method = 'OPT'
     requirement = 'AD heat conduction and the Jacobian shall be beautiful'
-    design = "jacobian_definition.md"
     issues = "#5658 #12633"
   [../]
 []
