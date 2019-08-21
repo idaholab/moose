@@ -1,56 +1,60 @@
 [Tests]
-  [./mesh_extruder_generator_test]
-    type = 'Exodiff'
-    input = 'extrude_remap_layer1.i'
-    exodiff = 'extrude_remap_layer1_out.e'
-    requirement = 'MOOSE shall be able to use libmesh mesh modification tools.'
-    design = 'meshgenerators/MeshExtruderGenerator.md'
-    issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
-  [../]
+  design = 'meshgenerators/MeshExtruderGenerator.md'
+  issues = '#11640'
 
-  [./mesh_extruder_generator_test2]
-    type = 'Exodiff'
-    input = 'extrude_remap_layer2.i'
-    exodiff = 'extrude_remap_layer2_out.e'
-    requirement = 'MOOSE shall be able to use libmesh mesh modification tools.'
-    design = 'meshgenerators/MeshExtruderGenerator.md'
-    issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
-  [../]
+  [extruder]
+    requirement = 'The system shall have the capability of extruding a lower dimensional mesh to '
+                  'create a higher dimensional mesh'
 
-  [./mesh_extruder_generator_quad_test]
-    type = 'Exodiff'
-    input = 'extrude_quad.i'
-    exodiff = 'out_quad.e'
-    requirement = 'MOOSE shall be able to use libmesh mesh modification tools.'
-    design = 'meshgenerators/MeshExtruderGenerator.md'
-    issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
-  [../]
+    [basic]
+      type = 'Exodiff'
+      input = 'extrude_quad.i'
+      exodiff = 'out_quad.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
 
-  [./mesh_extruder_generator_quad_angle_test]
-    type = 'Exodiff'
-    input = 'extrude_angle.i'
-    exodiff = 'out_quad_angle.e'
-    requirement = 'MOOSE shall be able to use libmesh mesh modification tools.'
-    design = 'meshgenerators/MeshExtruderGenerator.md'
-    issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
-  [../]
+      detail = 'from 2D quads to 3D hexes,'
+    []
 
-  [./mesh_extruder_generator_generated_test]
-    type = 'Exodiff'
-    input = 'gen_extrude.i'
-    exodiff = 'out_gen.e'
-    requirement = 'MOOSE shall be able to use libmesh mesh modification tools.'
-    design = 'meshgenerators/MeshExtruderGenerator.md'
-    issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
-  [../]
+    [new_subdomains]
+      type = 'Exodiff'
+      input = 'extrude_remap_layer1.i'
+      exodiff = 'extrude_remap_layer1_out.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = 'where newly created elements can be assigned a new subdomain IDs based on old IDs,'
+    []
+
+    [new_subdomain_pattern]
+      type = 'Exodiff'
+      input = 'extrude_remap_layer2.i'
+      exodiff = 'extrude_remap_layer2_out.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = 'where newly created elements can be assigned a new subdomain IDs based on a pattern,'
+    []
+
+    [angled]
+      type = 'Exodiff'
+      input = 'extrude_angle.i'
+      exodiff = 'out_quad_angle.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = 'where the extrusion direction is not orthogonal to the original line or plane of '
+               'elements, and'
+    []
+
+    [generator]
+      type = 'Exodiff'
+      input = 'gen_extrude.i'
+      exodiff = 'out_gen.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = 'where the extrusion occurs based on another generated mesh.'
+    []
+  []
 []

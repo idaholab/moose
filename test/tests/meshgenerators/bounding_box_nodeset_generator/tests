@@ -1,17 +1,4 @@
 [Tests]
-<<<<<<< HEAD
-  [./generate_boundingbox_nodeset_test]
-    type = 'Exodiff'
-    input = 'boundingbox_nodeset_inside.i'
-    cli_args = '--mesh-only'
-    exodiff = 'boundingbox_nodeset_inside_in.e'
-    requirement = 'MOOSE shall be able to use the BoundingBox class.'
-    design = 'meshgenerators/BoundingBoxNodeSetGenerator.md'
-    issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
-  [../]
-=======
   design = 'meshgenerators/BoundingBoxNodeSetGenerator.md'
   issues = '#11640'
   [gen_nodesets]
@@ -62,5 +49,4 @@
       detail = 'where multiple boundary IDs are supplied for a single bounding box.'
     []
   []
->>>>>>> Overhaul bounding box nodeset tests
 []

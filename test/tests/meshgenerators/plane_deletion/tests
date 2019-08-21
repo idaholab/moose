@@ -6,7 +6,7 @@
     cli_args = '--mesh-only'
     recover = false
 
-    requirement = "MOOSE shall provide a method for deleting elements lying on one side of a plane"
+    requirement = "The system shall provide a method for deleting mesh elements lying on one side of a user-defined plane."
     design = 'PlaneDeletionGenerator.md'
     issues = '#13046'
   [../]
