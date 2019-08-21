@@ -1,3 +1,5 @@
+# This input file is designed to test adding extra stress to ADComputeLinearElasticStress
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -11,26 +13,11 @@
   displacements = 'disp_x disp_y'
 []
 
-[Variables]
-  [./diffused]
-     [./InitialCondition]
-      type = RandomIC
-     [../]
-  [../]
-[]
-
 [Modules/TensorMechanics/Master/All]
   strain = SMALL
   add_variables = true
-  generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
+  generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx hydrostatic_stress vonmises_stress'
   use_automatic_differentiation = true
-[]
-
-[Kernels]
-  [./diff]
-    type = ADDiffusion
-    variable = diffused
-  [../]
 []
 
 [Materials]
@@ -41,22 +28,21 @@
   [../]
   [./stress]
     type = ADComputeLinearElasticStress
+    extra_stress_names = 'stress_one stress_two'
+  [../]
+  [./stress_one]
+    type = GenericConstantRankTwoTensor
+    tensor_name = stress_one
+    tensor_values = '0 1e3 1e3 1e3 0 1e3 1e3 1e3 0'
+  [../]
+  [./stress_two]
+    type = GenericConstantRankTwoTensor
+    tensor_name = stress_two
+    tensor_values = '1e3 0 0 0 1e3 0 0 0 1e3'
   [../]
 []
 
 [BCs]
-  [./bottom]
-    type = ADPresetBC
-    variable = diffused
-    boundary = 'right'
-    value = 1
-  [../]
-  [./top]
-    type = ADPresetBC
-    variable = diffused
-    boundary = 'top'
-    value = 0
-  [../]
   [./disp_x_BC]
     type = ADPresetBC
     variable = disp_x
@@ -86,8 +72,17 @@
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
+[]
 
-  nl_rel_tol = 1e-12
+[Postprocessors]
+  [./hydrostatic]
+    type = ElementAverageValue
+    variable = hydrostatic_stress
+  [../]
+  [./von_mises]
+    type = ElementAverageValue
+    variable = vonmises_stress
+  [../]
 []
 
 [Outputs]

@@ -11,14 +11,8 @@
   dim = 2
   nx = 2
   ny = 2
-  nz = 0
-  xmin = 0
   xmax = 2
-  ymin = 0
   ymax = 2
-  zmin = 0
-  zmax = 0
-  elem_type = QUAD4
 []
 
 [Variables]
@@ -337,37 +331,37 @@
   [./bottom]
     type = PresetBC
     variable = diffused
-    boundary = '1'
+    boundary = 'right'
     value = 1
   [../]
   [./top]
     type = PresetBC
     variable = diffused
-    boundary = '2'
+    boundary = 'top'
     value = 0
   [../]
   [./disp_x_BC]
     type = PresetBC
     variable = disp_x
-    boundary = '0 2'
+    boundary = 'bottom top'
     value = 0.5
   [../]
   [./disp_x_BC2]
     type = PresetBC
     variable = disp_x
-    boundary = '1 3'
+    boundary = 'left right'
     value = 0.01
   [../]
   [./disp_y_BC]
     type = PresetBC
     variable = disp_y
-    boundary = '0 2'
+    boundary = 'bottom top'
     value = 0.8
   [../]
   [./disp_y_BC2]
     type = PresetBC
     variable = disp_y
-    boundary = '1 3'
+    boundary = 'left right'
     value = 0.02
   [../]
 []

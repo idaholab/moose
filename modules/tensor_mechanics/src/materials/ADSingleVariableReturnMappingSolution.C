@@ -221,8 +221,9 @@ ADSingleVariableReturnMappingSolution<compute_stage>::internalSolve(
             modified_increment = true;
             scalar_increment *= alpha;
             if (iter_output)
-              *iter_output << "  Line search alpha = " << alpha
-                           << " increment = " << scalar_increment << std::endl;
+              *iter_output << "  Line search alpha = " << MetaPhysicL::raw_value(alpha)
+                           << " increment = " << MetaPhysicL::raw_value(scalar_increment)
+                           << std::endl;
           }
         }
       }
@@ -333,18 +334,19 @@ ADSingleVariableReturnMappingSolution<compute_stage>::checkPermissibleRange(
     scalar_increment = (max_permissible_scalar - scalar_old) / 2.0;
     scalar = scalar_old + scalar_increment;
     if (iter_output)
-      *iter_output << "Scalar greater than maximum (" << max_permissible_scalar
-                   << ") adjusted scalar=" << scalar << " scalar_increment=" << scalar_increment
-                   << std::endl;
+      *iter_output << "Scalar greater than maximum ("
+                   << MetaPhysicL::raw_value(max_permissible_scalar)
+                   << ") adjusted scalar=" << MetaPhysicL::raw_value(scalar)
+                   << " scalar_increment=" << MetaPhysicL::raw_value(scalar_increment) << std::endl;
   }
   else if (scalar < min_permissible_scalar)
   {
     scalar_increment = (min_permissible_scalar - scalar_old) / 2.0;
     scalar = scalar_old + scalar_increment;
     if (iter_output)
-      *iter_output << "Scalar less than minimum (" << min_permissible_scalar
-                   << ") adjusted scalar=" << scalar << " scalar_increment=" << scalar_increment
-                   << std::endl;
+      *iter_output << "Scalar less than minimum (" << MetaPhysicL::raw_value(min_permissible_scalar)
+                   << ") adjusted scalar=" << MetaPhysicL::raw_value(scalar)
+                   << " scalar_increment=" << MetaPhysicL::raw_value(scalar_increment) << std::endl;
   }
 }
 
@@ -393,7 +395,7 @@ ADSingleVariableReturnMappingSolution<compute_stage>::outputIterationStep(
                  << " trial_stress=" << MetaPhysicL::raw_value(effective_trial_stress)
                  << " scalar=" << MetaPhysicL::raw_value(scalar) << " residual=" << residual
                  << " ref_res=" << reference_residual
-                 << " rel_res=" << std::abs(MetaPhysicL::raw_value(residual)) / reference_residual
+                 << " rel_res=" << std::abs(residual) / reference_residual
                  << " rel_tol=" << _relative_tolerance << " abs_res=" << std::abs(residual)
                  << " abs_tol=" << _absolute_tolerance << '\n';
   }
@@ -405,8 +407,9 @@ ADSingleVariableReturnMappingSolution<compute_stage>::outputIterationSummary(
     std::stringstream * iter_output, const unsigned int total_it)
 {
   if (iter_output)
-    *iter_output << "In " << total_it << " iterations the residual went from " << _initial_residual
-                 << " to " << _residual << " in '" << _svrms_name << "'.\n";
+    *iter_output << "In " << total_it << " iterations the residual went from "
+                 << MetaPhysicL::raw_value(_initial_residual) << " to "
+                 << MetaPhysicL::raw_value(_residual) << " in '" << _svrms_name << "'.\n";
 }
 
 // explicit instantiation is required for AD base classes
