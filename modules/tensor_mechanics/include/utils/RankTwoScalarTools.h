@@ -10,18 +10,11 @@
 #pragma once
 
 // MOOSE includes
+#include "MooseEnum.h"
 #include "MooseTypes.h"
-
-// Forward declarations
-class MooseEnum;
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
-
-namespace libMesh
-{
-class Point;
-}
+#include "libmesh/point.h"
+#include "RankTwoTensor.h"
+#include "MooseError.h"
 
 namespace RankTwoScalarTools
 {

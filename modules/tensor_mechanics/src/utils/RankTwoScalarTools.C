@@ -9,13 +9,6 @@
 
 #include "RankTwoScalarTools.h"
 
-// MOOSE includes
-#include "MooseEnum.h"
-#include "RankTwoTensor.h"
-#include "MooseError.h"
-
-#include "libmesh/point.h"
-
 namespace RankTwoScalarTools
 {
 
