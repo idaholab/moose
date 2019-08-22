@@ -72,6 +72,8 @@ protected:
   const Elem * const & _current_side_elem;
   /// Volume of the current side
   const Real & _current_side_volume;
+  /// The currenty boundary id
+  const BoundaryID & _current_boundary_id;
 
   /// quadrature point index
   unsigned int _qp;
