@@ -1,4 +1,5 @@
 [Tests]
+<<<<<<< HEAD
   [./generate_boundingbox_nodeset_test]
     type = 'Exodiff'
     input = 'boundingbox_nodeset_inside.i'
@@ -10,4 +11,56 @@
     mesh_mode = 'REPLICATED'
     recover = false
   [../]
+=======
+  design = 'meshgenerators/BoundingBoxNodeSetGenerator.md'
+  issues = '#11640'
+  [gen_nodesets]
+    requirement = 'The system shall be capable of generating new mesh node sets based upon a '
+                  'user-specified bounding box'
+
+    [inside]
+      type = 'Exodiff'
+      input = 'boundingbox_nodeset_inside.i'
+      cli_args = '--mesh-only'
+      exodiff = 'boundingbox_nodeset_inside_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = 'where the new node set will be placed on nodes within the bounding box, or'
+    []
+
+    [outside]
+      type = 'Exodiff'
+      input = 'boundingbox_nodeset_outside.i'
+      cli_args = '--mesh-only'
+      exodiff = 'boundingbox_nodeset_outside_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = 'where the new node set will be placed on nodes outside of the bounding box.'
+    []
+  []
+
+  [errors]
+    requirement = 'The system shall produce an error when attempting to add a new mesh node set '
+                  'based on a bounding box'
+    [bad_coord]
+      type = 'RunException'
+      input = 'boundingbox_nodeset_inside.i'
+      expect_err = "No nodes found within the bounding box"
+      cli_args = 'Mesh/nodeset/bottom_left="1.05 1.05 0" --mesh-only'
+
+      detail = 'where the bounding box fails to span any mesh nodes, and'
+    []
+
+    [test_bad_boundaryid]
+      type = 'RunException'
+      input = 'boundingbox_nodeset_inside.i'
+      expect_err = "Only one boundary ID can be assigned to a nodeset using a bounding box!"
+      cli_args = 'Mesh/nodeset/new_boundary="middle_node bottom" --mesh-only'
+
+      detail = 'where multiple boundary IDs are supplied for a single bounding box.'
+    []
+  []
+>>>>>>> Overhaul bounding box nodeset tests
 []
