@@ -11,8 +11,6 @@
 
 #include "MeshGenerator.h"
 #include "MooseEnum.h"
-#include "libmesh/elem.h"
-#include "libmesh/string_to_enum.h"
 
 class PatchMeshGenerator;
 
@@ -29,31 +27,31 @@ public:
 protected:
   /*
    *  Make quad4 elements from nodes
-   *  @param mesh A reference to the replicated mesh object
+   *  @param mesh A reference to the mesh object
    *  @param nodes A reference to the vector containing the nodes
    */
 
-  void makeQuad4Elems(ReplicatedMesh & mesh, const std::vector<Node *> & nodes);
+  void makeQuad4Elems(MeshBase & mesh, const std::vector<Node *> & nodes);
   /*
    *  Make quad8 elements from nodes
-   *  @param mesh A reference to the replicated mesh object
+   *  @param mesh A reference to the mesh object
    *  @param nodes A reference to the vector containing the nodes
    */
-  void makeQuad8Elems(ReplicatedMesh & mesh, const std::vector<Node *> & nodes);
+  void makeQuad8Elems(MeshBase & mesh, const std::vector<Node *> & nodes);
 
   /*
    *  Make Hex8 elements from nodes
-   *  @param mesh A reference to the replicated mesh object
+   *  @param mesh A reference to the mesh object
    *  @param nodes A reference to the vector containing the nodes
    */
 
-  void makeHex8Elems(ReplicatedMesh & mesh, const std::vector<Node *> & nodes);
+  void makeHex8Elems(MeshBase & mesh, const std::vector<Node *> & nodes);
   /*
    *  Make hex20 elements from nodes
-   *  @param mesh A reference to the replicated mesh object
+   *  @param mesh A reference to the mesh object
    *  @param nodes A reference to the vector containing the nodes
    */
-  void makeHex20Elems(ReplicatedMesh & mesh, const std::vector<Node *> & nodes);
+  void makeHex20Elems(MeshBase & mesh, const std::vector<Node *> & nodes);
 
   /// The dimension of the mesh
   MooseEnum _dim;
