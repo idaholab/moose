@@ -11,6 +11,7 @@
 
 #include "Material.h"
 #include "RankTwoTensor.h"
+// #include "ElementPostprocessor.h"
 /**
  * ComputeIncrementalBeamStrain defines a displacement and rotation strain increment and rotation
  * increment (=1), for small strains.
@@ -22,11 +23,13 @@ class ComputeIncrementalBeamStrain;
 template <>
 InputParameters validParams<ComputeIncrementalBeamStrain>();
 
-class ComputeIncrementalBeamStrain : public Material
+class ComputeIncrementalBeamStrain : public Material// , public ElementPostprocessor
 {
 public:
   ComputeIncrementalBeamStrain(const InputParameters & parameters);
 
+  // virtual void initialize() override;
+  // virtual void execute() override;
   virtual void computeProperties() override;
 
 protected:
@@ -165,5 +168,14 @@ protected:
 
   /// Rotational transformation from global coordinate system to initial beam local configuration
   MaterialProperty<RankTwoTensor> & _initial_rotation;
-};
 
+  /// Psuedo stiffness for critical time step computation
+  MaterialProperty<Real> & _effective_stiffness;
+
+  /// prefactor function to multiply the elasticity tensor with
+  // const Function * const _prefactor_function;
+
+  /*Real _total_size;
+  int _elems;*/
+
+};

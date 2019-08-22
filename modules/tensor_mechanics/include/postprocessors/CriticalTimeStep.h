@@ -38,16 +38,11 @@ public:
 
 protected:
 
-  /// Name of the elasticity tensor material property
-  // const std::string _elasticity_tensor_name;
-  /// Elasticity tensor material property
-  // const MaterialProperty<RankFourTensor> & _elasticity_tensor;
   const MaterialProperty<Real> & _mat_dens;
 
   const MaterialProperty<Real> & _effective_stiffness;
 
-  // const MaterialProperty<Real> & _mat_dens;
-
   Real _total_size;
   int _elems;
+
 };

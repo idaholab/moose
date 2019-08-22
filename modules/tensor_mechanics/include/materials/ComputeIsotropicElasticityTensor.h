@@ -42,8 +42,6 @@ protected:
   Real _shear_modulus;
   Real _youngs_modulus;
 
-  // const MaterialProperty<Real> & _prefactor;
-
   /// Individual elasticity tensor
   RankFourTensor _Cijkl;
 

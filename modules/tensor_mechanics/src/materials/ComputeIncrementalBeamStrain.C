@@ -56,6 +56,9 @@ validParams<ComputeIncrementalBeamStrain>()
   params.addParam<bool>("large_strain", false, "Set to true if large strain are to be calculated.");
   params.addParam<std::vector<MaterialPropertyName>>(
       "eigenstrain_names", "List of beam eigenstrains to be applied in this strain calculation.");
+  // params.addParam<FunctionName>(
+  //    "elasticity_prefactor",
+  //    "Optional function to use as a scalar prefactor on the elasticity vector for the beam.");
   return params;
 }
 
@@ -97,7 +100,10 @@ ComputeIncrementalBeamStrain::ComputeIncrementalBeamStrain(const InputParameters
     _soln_disp_index_1(_ndisp),
     _soln_rot_index_0(_ndisp),
     _soln_rot_index_1(_ndisp),
-    _initial_rotation(declareProperty<RankTwoTensor>("initial_rotation"))
+    _initial_rotation(declareProperty<RankTwoTensor>("initial_rotation")),
+    _effective_stiffness(declareProperty<Real>("effective_stiffness"))
+  //  _prefactor_function(isParamValid("elasticity_prefactor") ? &getFunction("elasticity_prefactor")
+    //                                                         : nullptr)
 {
   // Checking for consistency between length of the provided displacements and rotations vector
   if (_ndisp != _nrot)
@@ -129,6 +135,19 @@ ComputeIncrementalBeamStrain::ComputeIncrementalBeamStrain(const InputParameters
         &getMaterialPropertyOld<RealVectorValue>("rot_" + _eigenstrain_names[i]);
   }
 }
+
+/*CriticalTimeStep::initialize()
+{
+  _total_size = 1e10;
+  _elems = 0;
+}*/
+
+/*void
+CriticalTimeStep::execute()
+{
+  _total_size = std::min(_current_elem->hmin(), _total_size);
+  _elems++;
+}*/
 
 void
 ComputeIncrementalBeamStrain::initQpStatefulProperties()
@@ -588,6 +607,23 @@ ComputeIncrementalBeamStrain::computeStiffnessMatrix()
     _K22_cross[0] += _total_rotation[0].transpose() * (-k1_large_22 - k2_large_22 + k3_large_22) *
                      _total_rotation[0];
   }
+  Real Dim_1 = std::sqrt(12 * Iz_avg / A_avg);
+  Real Dim_2 = A_avg / std::sqrt(12 * Iz_avg / A_avg);
+  Real h_min = std::min(Dim_1, Dim_2);
+
+  Real C1_paper = std::sqrt((4 * Utility::pow<2>(shear_modulus) - youngs_modulus * shear_modulus)/(3 * shear_modulus - youngs_modulus));
+  Real C2_paper = std::sqrt(shear_modulus);
+
+  Real r_Asq = std::min(Utility::pow<2>(_original_length[0]) / Utility::pow<2>(C1_paper), Utility::pow<2>(_original_length[0]) / Utility::pow<2>(C2_paper));
+  Real r_osq = Utility::pow<2>(_original_length[0])/2 * (1 / Utility::pow<2>(C1_paper) + 1 / Utility::pow<2>(C2_paper) - 3 / Utility::pow<2>(C1_paper) * Utility::pow<2>(_original_length[0] / h_min));
+
+  if (r_osq >= r_Asq)
+    _effective_stiffness[_qp] = std::max(1 / C1_paper, 1 / C2_paper);
+  else
+    _effective_stiffness[_qp] = h_min * _original_length[0]/(std::sqrt(3) * C2_paper) * std::sqrt(1 - 0.25 * Utility::pow<2>(C1_paper/C2_paper + C2_paper/C1_paper - 3 * C2_paper * Utility::pow<2>(_original_length[0])/(C1_paper * Utility::pow<2>(h_min))));
+
+  //if (_prefactor_function)
+    //_effective_stiffness[_qp] *= std::sqrt(_prefactor_function->value(_t, _q_point[_qp]));
 }
 
 void

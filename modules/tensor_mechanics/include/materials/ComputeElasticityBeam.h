@@ -46,4 +46,5 @@ protected:
 
   /// Shear coefficient for the beam cross-section
   const VariableValue & _shear_coefficient;
+
 };

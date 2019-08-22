@@ -160,7 +160,6 @@ ComputeIsotropicElasticityTensor::ComputeIsotropicElasticityTensor(
 
   // Fill elasticity tensor
   _Cijkl.fillFromInputVector(iso_const, RankFourTensor::symmetric_isotropic);
-  // _effecstiff_local = _effecstiff_local;
 
 }
 
@@ -170,9 +169,7 @@ ComputeIsotropicElasticityTensor::computeQpElasticityTensor()
   // Assign elasticity tensor at a given quad point
   _elasticity_tensor[_qp] = _Cijkl;
 
-  /*std::cout << _youngs_modulus << std::endl;
-  std::cout << _poissons_ratio << std::endl;*/
-
-  _effective_stiffness[_qp] = _effecstiff_local;// * std::sqrt(_prefactor[_qp]);
+  // Assign effective stiffness at a given quad point
+  _effective_stiffness[_qp] = _effecstiff_local;
 
 }
