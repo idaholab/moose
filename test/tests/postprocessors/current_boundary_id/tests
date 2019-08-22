@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#13953'
+  design = 'Assembly.md'
+  [current_boundary_id]
+    type = CSVDiff
+    input = current_boundary_id.i
+    csvdiff = 'current_boundary_id_out.csv'
+    requirement = "The current boundary id shall be available in objects evaluated on boundaries."
+  []
+[]
