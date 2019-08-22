@@ -1,0 +1,4 @@
+directories:
+    - ${MOOSE_DIR}/modules/heat_conduction/test/tests
+specs:
+    - tests

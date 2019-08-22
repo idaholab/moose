@@ -140,6 +140,14 @@ Extensions:
         categories:
             framework: !include framework/doc/sqa_framework.yml
             tensor_mechanics: !include modules/tensor_mechanics/doc/sqa_tensor_mechanics.yml
+            stochastic_tools: !include modules/stochastic_tools/doc/sqa_stochastic_tools.yml
+            contact: !include modules/contact/doc/sqa_contact.yml
+            heat_conduction: !include modules/heat_conduction/doc/sqa_heat_conduction.yml
+            fluid_properties: !include modules/fluid_properties/doc/sqa_fluid_properties.yml
+            misc: !include modules/misc/doc/sqa_misc.yml
+            phase_field: !include modules/phase_field/doc/sqa_phase_field.yml
+            xfem: !include modules/xfem/doc/sqa_xfem.yml
+
         requirement-groups:
             dgkernels: DGKernel Objects
             interfacekernels: InterfaceKernel Objects

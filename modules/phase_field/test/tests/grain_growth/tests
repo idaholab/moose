@@ -6,7 +6,7 @@
     group = 'adpative'
     requirement = 'MOOSE shall provide a polycrystalline material model with grain growth'
     design = 'PolycrystalKernelAction.md'
-    issues = 'SVN'
+    issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
   [../]
 
   [./temperature_gradient]
@@ -25,7 +25,7 @@
     group = 'adaptive'
     requirement = 'A thumb shaped grain IC shall be provided for direct comparison to grain boundary mobility experiments'
     design = 'ThumbIC.md'
-    issues = 'SVN'
+    issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
   [../]
 
   [./hex]
@@ -43,7 +43,7 @@
     exodiff = 'boundingbox_out.e-s003'
     requirement = 'A bicrystal grain IC shall be provided to set up a rectangular grain in a matrix'
     design = 'BicrystalBoundingBoxICAction.md'
-    issues = 'SVN'
+    issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
   [../]
 
   [./evolution]
@@ -52,7 +52,7 @@
     exodiff = 'evolution_out.e'
     requirement = 'The grain boundary evolution model shall be able to compute the grain boundary mobility based on an activation energy'
     design = 'GBEvolution.md'
-    issues = 'SVN'
+    issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
   [../]
 
   [./constant_mobility]
@@ -61,7 +61,7 @@
     exodiff = 'constant_mobility_out.e'
     requirement = 'The grain boundary evolution model shall permit specifying a constant mobility'
     design = 'GBEvolution.md'
-    issues = 'SVN'
+    issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
   [../]
 
   [./off-diagonal]
@@ -71,7 +71,7 @@
     group = 'adaptive'
     requirement = 'The grain boundary evolution model shall provide off-diagonal Jacobians'
     design = 'PolycrystalKernelAction.md'
-    issues = 'SVN'
+    issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
   [../]
 
   [./explicit]
@@ -80,7 +80,7 @@
     exodiff = 'explicit_out.e'
     requirement = 'The grain growth model shall work with explicit time integration'
     design = 'PolycrystalKernelAction.md'
-    issues = 'SVN'
+    issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
   [../]
 
   [./voronoi]
@@ -108,6 +108,6 @@
     custom_cmp = 'particle_out.cmp'
     requirement = 'The grain boundary evolution model shall provide coupling to conserved order parameters'
     design = 'ACGBPoly.md'
-    issues = 'SVN'
+    issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
   [../]
 []

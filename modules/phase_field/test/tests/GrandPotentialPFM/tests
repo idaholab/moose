@@ -4,7 +4,7 @@
     input = 'GrandPotentialPFM.i'
     exodiff = 'GrandPotentialPFM_out.e'
     issues = '#6977'
-    design = '/GrandPotentialKernelAction..md'
+    design = '/GrandPotentialKernelAction.md'
     requirement = 'MOOSE shall provide classes to implement a Grand Potential phase field formulation'
   [../]
   [./GrandPotentialMultiphase]

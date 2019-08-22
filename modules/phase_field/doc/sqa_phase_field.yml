@@ -1,0 +1,4 @@
+directories:
+    - ${MOOSE_DIR}/modules/phase_field/test/tests
+specs:
+    - tests
