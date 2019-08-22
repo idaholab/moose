@@ -11,7 +11,7 @@
 #
 # MOOSE_JOBS: Optional.  Sets number of cores for running make.
 # PETSC_REV: Commit hash of submodule petsc.
-# LIBMESH_REV: Commit hash of submodule libmesh. 
+# LIBMESH_REV: Commit hash of submodule libmesh.
 #-----------------------------------------------------------------------------#
 
 FROM ubuntu
