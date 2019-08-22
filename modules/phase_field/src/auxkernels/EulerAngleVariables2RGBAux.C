@@ -25,7 +25,7 @@ validParams<EulerAngleVariables2RGBAux>()
   params.addCoupledVar("phi", "Euler angle 2");
   params.addCoupledVar("phi2", "Euler angle 3");
   params.addCoupledVar("phase", "Grain phase index");
-  params.addCoupledVar("symmetry", "Grain symmetry indentifier");
+  params.addCoupledVar("symmetry", "Grain symmetry identifier");
   return params;
 }
 

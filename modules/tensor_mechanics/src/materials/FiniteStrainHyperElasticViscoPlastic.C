@@ -35,7 +35,7 @@ validParams<FiniteStrainHyperElasticViscoPlastic>()
   params.addParam<std::vector<UserObjectName>>(
       "internal_var_rate_user_objects",
       "List of User object names that computes internal variable rates and derivatives");
-  params.addClassDescription("Material class for hyper-elastic visco-platic flow: Can handle "
+  params.addClassDescription("Material class for hyper-elastic viscoplatic flow: Can handle "
                              "multiple flow models defined by flowratemodel type user objects");
 
   return params;

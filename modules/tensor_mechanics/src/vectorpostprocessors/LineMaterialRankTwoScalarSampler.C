@@ -19,11 +19,11 @@ validParams<LineMaterialRankTwoScalarSampler>()
   InputParameters params = validParams<LineMaterialSamplerBase<Real>>();
   params.addClassDescription("Compute a scalar property of a RankTwoTensor");
   params.addParam<MooseEnum>(
-      "scalar_type", RankTwoScalarTools::scalarOptions(), "A scalar to ouput");
+      "scalar_type", RankTwoScalarTools::scalarOptions(), "A scalar to output");
   params.addParam<Point>(
       "point1",
       Point(0, 0, 0),
-      "Start point for axis used to calculate some cylinderical material tensor quantities");
+      "Start point for axis used to calculate some cylindrical material tensor quantities");
   params.addParam<Point>("point2",
                          Point(0, 1, 0),
                          "End point for axis used to calculate some material tensor quantities");

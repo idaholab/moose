@@ -15,7 +15,7 @@ InputParameters
 validParams<GrainCentersPostprocessor>()
 {
   InputParameters params = validParams<VectorPostprocessor>();
-  params.addClassDescription("Outputs the values from GrainCentersPostprocessor");
+  params.addClassDescription("Outputs the values from ComputeGrainCenterUserObject");
   params.addParam<UserObjectName>(
       "grain_data", "Specify user object that gives center of mass and volume of grains");
   return params;

@@ -64,7 +64,7 @@ validParams<MultiSmoothSuperellipsoidIC>()
                         "prevent_overlap set to True.");
   params.addParam<bool>("prevent_overlap",
                         false,
-                        "Check all Superellipsoid centers for overlap with other Superellipsoids.");
+                        "Check all Superellipsoid centers for overlap with other superellipsoids.");
   params.addParam<bool>("vary_axes_independently",
                         true,
                         "If true the length of each semiaxis is randomly chosen "
@@ -151,13 +151,11 @@ MultiSmoothSuperellipsoidIC::computeSuperellipsoidSemiaxes()
         randnum = _random.rand(_tid);
         _as[i] = _semiaxis_a[_gk] * (1.0 + (1.0 - 2.0 * randnum) * _semiaxis_a_variation[_gk]);
         _bs[i] = _semiaxis_b[_gk] *
-                 (1.0 +
-                  (1.0 - 2.0 * (_vary_axes_independently ? _random.rand(_tid) : randnum)) *
-                      _semiaxis_b_variation[_gk]);
+                 (1.0 + (1.0 - 2.0 * (_vary_axes_independently ? _random.rand(_tid) : randnum)) *
+                            _semiaxis_b_variation[_gk]);
         _cs[i] = _semiaxis_c[_gk] *
-                 (1.0 +
-                  (1.0 - 2.0 * (_vary_axes_independently ? _random.rand(_tid) : randnum)) *
-                      _semiaxis_c_variation[_gk]);
+                 (1.0 + (1.0 - 2.0 * (_vary_axes_independently ? _random.rand(_tid) : randnum)) *
+                            _semiaxis_c_variation[_gk]);
         break;
 
       case 1: // Normal distribution

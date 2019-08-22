@@ -20,7 +20,7 @@ InputParameters
 validParams<NodalTranslationalInertia>()
 {
   InputParameters params = validParams<TimeNodalKernel>();
-  params.addClassDescription("Computes the interial forces and mass proportional damping terms "
+  params.addClassDescription("Computes the inertial forces and mass proportional damping terms "
                              "corresponding to nodal mass.");
   params.addCoupledVar("velocity", "velocity variable");
   params.addCoupledVar("acceleration", "acceleration variable");

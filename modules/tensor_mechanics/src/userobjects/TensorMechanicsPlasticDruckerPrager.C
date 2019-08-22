@@ -25,11 +25,12 @@ validParams<TensorMechanicsPlasticDruckerPrager>()
       mc_interpolation_scheme,
       "Scheme by which the Drucker-Prager cohesion, friction angle and dilation angle are set from "
       "the Mohr-Coulomb parameters mc_cohesion, mc_friction_angle and mc_dilation_angle.  Consider "
-      "the DP and MC yield surfaces on the devatoric (octahedral) plane.  Outer_tip: the DP circle "
-      "touches the outer tips of the MC hex.  Inner_tip: the DP circle touches the inner tips of "
-      "the MC hex.  Lode_zero: the DP circle intersects the MC hex at lode angle=0.  Inner_edge: "
-      "the DP circle is the largest circle that wholey fits inside the MC hex.  Native: The DP "
-      "cohesion, friction angle and dilation angle are set equal to the mc_ parameters entered.");
+      "the DP and MC yield surfaces on the deviatoric (octahedral) plane.  Outer_tip: the DP "
+      "circle touches the outer tips of the MC hex.  Inner_tip: the DP circle touches the inner "
+      "tips of the MC hex.  Lode_zero: the DP circle intersects the MC hex at lode angle=0.  "
+      "Inner_edge: the DP circle is the largest circle that wholly fits inside the MC hex.  "
+      "Native: The DP cohesion, friction angle and dilation angle are set equal to the mc_ "
+      "parameters entered.");
   params.addRequiredParam<UserObjectName>(
       "mc_cohesion",
       "A TensorMechanicsHardening UserObject that defines hardening of the "

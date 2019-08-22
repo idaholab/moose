@@ -18,7 +18,7 @@ validParams<ThermalFractureIntegral>()
 {
   InputParameters params = validParams<Material>();
   params.addClassDescription(
-      "Calculates summation of the derivative of the eigenstrains with respect to temparture.");
+      "Calculates summation of the derivative of the eigenstrains with respect to temperature.");
   params.addRequiredCoupledVar("temperature", "Coupled temperature");
   params.addParam<std::vector<MaterialPropertyName>>(
       "eigenstrain_names", "List of eigenstrains to be applied in this strain calculation");

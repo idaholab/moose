@@ -17,7 +17,7 @@ validParams<MathEBFreeEnergy>()
 {
   InputParameters params = validParams<DerivativeParsedMaterialHelper>();
   params.addClassDescription("Material that implements the math free energy using the expression "
-                             "builder and automatric differentiation");
+                             "builder and automatic differentiation");
   params.addRequiredCoupledVar("c", "Concentration variable");
   return params;
 }

@@ -16,7 +16,7 @@ InputParameters
 validParams<ACGrGrMulti>()
 {
   InputParameters params = validParams<ACGrGrBase>();
-  params.addClassDescription("Multi-phase poly-crystaline Allen-Cahn Kernel");
+  params.addClassDescription("Multi-phase poly-crystalline Allen-Cahn Kernel");
   params.addRequiredParam<std::vector<MaterialPropertyName>>(
       "gamma_names",
       "List of gamma material property names for each other order parameter. Place "

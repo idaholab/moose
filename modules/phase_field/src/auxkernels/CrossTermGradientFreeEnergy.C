@@ -16,7 +16,7 @@ InputParameters
 validParams<CrossTermGradientFreeEnergy>()
 {
   InputParameters params = validParams<TotalFreeEnergyBase>();
-  params.addClassDescription("Free energy contribution from the cross terms in ACMultiInetrface");
+  params.addClassDescription("Free energy contribution from the cross terms in ACMultiInterface");
   params.addRequiredParam<std::vector<MaterialPropertyName>>(
       "kappa_names",
       "Matrix of kappa names with rows and columns corresponding to each variable "

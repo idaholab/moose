@@ -17,7 +17,7 @@ validParams<GrainAdvectionVelocity>()
 {
   InputParameters params = validParams<Material>();
   params.addClassDescription(
-      "Calculation the advection velocity of grain due to rigid vody translation and rotation");
+      "Calculation the advection velocity of grain due to rigid body translation and rotation");
   params.addRequiredCoupledVarWithAutoBuild(
       "etas", "var_name_base", "op_num", "Array of other coupled order parameters");
   params.addCoupledVar("c", "Concentration field");

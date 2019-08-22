@@ -17,7 +17,7 @@ InputParameters
 validParams<ALEKernel>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addClassDescription("Sets up derivetives with respect to initial configuration");
+  params.addClassDescription("Sets up derivatives with respect to initial configuration");
   return params;
 }
 

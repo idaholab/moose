@@ -19,7 +19,7 @@ defineADValidParams(
     params.addClassDescription(
         "Compute state (stress and internal parameters such as plastic "
         "strains and internal parameters) using an iterative process. A porosity material property "
-        "is defined and is calcuated from the trace of inelastic strain increment.");
+        "is defined and is calculated from the trace of inelastic strain increment.");
 
     params.addParam<MaterialPropertyName>("porosity_name",
                                           "porosity",

@@ -23,7 +23,7 @@ validParams<GeneralizedPlaneStrainUserObject>()
 {
   InputParameters params = validParams<ElementUserObject>();
   params.addClassDescription(
-      "Generalized plane strain UserObject to provide residual and diagonal jacobian entries.");
+      "Generalized plane strain UserObject to provide residual and diagonal Jacobian entries.");
   params.addParam<UserObjectName>("subblock_index_provider",
                                   "SubblockIndexProvider user object name");
   params.addParam<FunctionName>(

@@ -23,7 +23,7 @@ validParams<IsotropicPowerLawHardeningStressUpdate>()
                              " This class can be used in conjunction with other creep and "
                              "plasticity materials for more complex simulations.");
 
-  // Set and Suppress paramaters to enable calculation of the yield stress
+  // Set and Suppress parameters to enable calculation of the yield stress
   params.set<Real>("yield_stress") = 1.0;
   params.set<Real>("hardening_constant") = 1.0;
   params.suppressParameter<Real>("yield_stress");

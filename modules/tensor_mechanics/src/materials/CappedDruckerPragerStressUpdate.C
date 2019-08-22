@@ -39,14 +39,14 @@ validParams<CappedDruckerPragerStressUpdate>()
       "amount.  Typical value is 0.1*cohesion");
   params.addParam<bool>("perfect_guess",
                         true,
-                        "Provide a guess to the Newton-Raphson proceedure "
+                        "Provide a guess to the Newton-Raphson procedure "
                         "that is the result from perfect plasticity.  With "
                         "severe hardening/softening this may be "
                         "suboptimal.");
   params.addParam<bool>("small_dilation",
                         true,
                         "If true, and if the trial stress exceeds the "
-                        "tensile strength, then the user gaurantees that "
+                        "tensile strength, then the user guarantees that "
                         "the returned stress will be independent of the "
                         "compressive strength.");
   return params;
@@ -448,8 +448,9 @@ CappedDruckerPragerStressUpdate::consistentTangentOperator(const RankTwoTensor &
       for (unsigned k = 0; k < _tensor_dimensionality; ++k)
         for (unsigned l = 0; l < _tensor_dimensionality; ++l)
         {
-          cto(i, j, k, l) -= (i == j) * (1.0 / 3.0) * (_Epp * (1.0 - _dp_dpt) / 3.0 * (k == l) +
-                                                       s_over_q(k, l) * _Eqq * (-_dp_dqt));
+          cto(i, j, k, l) -=
+              (i == j) * (1.0 / 3.0) *
+              (_Epp * (1.0 - _dp_dpt) / 3.0 * (k == l) + s_over_q(k, l) * _Eqq * (-_dp_dqt));
           cto(i, j, k, l) -= s_over_q(i, j) * (_Epp * (-_dq_dpt) / 3.0 * (k == l) +
                                                s_over_q(k, l) * _Eqq * (1.0 - _dq_dqt));
         }

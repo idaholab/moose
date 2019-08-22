@@ -23,7 +23,7 @@ InputParameters
 validParams<InertialForceBeam>()
 {
   InputParameters params = validParams<TimeKernel>();
-  params.addClassDescription("Calculates the residual for the interial force/moment and the "
+  params.addClassDescription("Calculates the residual for the inertial force/moment and the "
                              "contribution of mass dependent Rayleigh damping and HHT time "
                              "integration scheme.");
   params.set<bool>("use_displaced_mesh") = true;

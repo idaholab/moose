@@ -32,7 +32,7 @@ validParams<CrystalPlasticityStateVariable>()
                                              "slip systems 'format: [start end)', i.e.'0 "
                                              "4 8 11' groups 0-3, 4-7 and 8-11 ");
   params.addParam<std::vector<Real>>("group_values",
-                                     "The initial values correspoinding to each "
+                                     "The initial values corresponding to each "
                                      "group, i.e. '0.0 1.0 2.0' means 0-4 = 0.0, "
                                      "4-8 = 1.0 and 8-12 = 2.0 ");
   params.addParam<std::vector<std::string>>("uo_state_var_evol_rate_comp_name",

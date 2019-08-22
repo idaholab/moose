@@ -32,7 +32,7 @@ validParams<RankTwoScalarAux>()
   params.addParam<Point>(
       "point1",
       Point(0, 0, 0),
-      "Start point for axis used to calculate some cylinderical material tensor quantities");
+      "Start point for axis used to calculate some cylindrical material tensor quantities");
   params.addParam<Point>("point2",
                          Point(0, 1, 0),
                          "End point for axis used to calculate some material tensor quantities");
