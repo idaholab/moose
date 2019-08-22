@@ -418,7 +418,7 @@ stressIntensity(const RankTwoTensorTempl<T> & stress)
 template <typename T>
 T
 getQuantity(const RankTwoTensorTempl<T> & tensor,
-            const MooseEnum scalar_type,
+            const MooseEnum & scalar_type,
             const Point & point1,
             const Point & point2,
             const Point & curr_point,
