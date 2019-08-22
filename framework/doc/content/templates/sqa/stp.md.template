@@ -32,7 +32,7 @@ Outline all the assumptions being made while developing this test plan.
 !template field key=constraints
 List all constraints in this section as it relates to the testing.
 
-## Types of Tests to be Executed
+## Types of Tests to be Executed id=test-types
 
 !template! field key=test-types
 Clearly articulate what types of testing needs to be done (unit, component, system,
@@ -94,7 +94,7 @@ testing automation scripts should be stored for future use.
 
 ## Resource Requirement
 
-!template! field key=resource-requirement
+!template! field key=resource-requirement required=False
 This section must clearly articulate what type of skill set is required for all the planned
 testing and when and for how long the resources are required.
 

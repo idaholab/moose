@@ -1,0 +1,4 @@
+directories:
+    - ${MOOSE_DIR}/modules/xfem/test/tests
+specs:
+    - tests

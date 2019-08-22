@@ -131,7 +131,7 @@
     input = 'CoupledCoefAllenCahn.i'
     exodiff = 'CoupledCoefAllenCahn_out.e'
     issues = '#6265'
-    design = '/CoupledCoefAllenCahn.md'
+    design = '/CoupledAllenCahn.md'
     requirement = 'A coupled Allen-Cahn formulation with a user defined prefactor shall be provided'
   [../]
 
