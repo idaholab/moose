@@ -8,6 +8,7 @@
 - Disk: 3 GB (image size)
 
 ## Obtaining MOOSE and Running Tests
+
 Images of MOOSE are currently hosted on Docker Hub in the repository [herter4171/ubuntu-moose](https://cloud.docker.com/u/herter4171/repository/docker/herter4171/ubuntu-moose).  The tag "latest" is kept current with the master branch of the repository, and the other tags are commit hashes to be used by codes with MOOSE as a submodule.  Since the Docker image already has the framework compiled, it is possible to go from no extant, local copy of MOOSE to running the tests with a single command.
 
 ```bash
@@ -15,6 +16,7 @@ docker run -ti herter4171/ubuntu-moose:latest /bin/bash -c 'cd test; ./run_tests
 ```
 
 ## Extending the Image With MOOSE Apps
+
 With the fully configured MOOSE framework in a Docker image, the next logical step is to extend this image with whichever MOOSE app is of interest.  For example, consider another open sourced INL code known as BLACKBEAR.  To build an image of BLACKBEAR, start by pasting the following in a new file with the name Dockerfile.    
 
 ```docker
