@@ -29,3 +29,6 @@ Extensions:
         categories:
             framework: !include framework/doc/sqa_framework.yml
             tensor_mechanics: !include modules/tensor_mechanics/doc/sqa_tensor_mechanics.yml
+    MooseDocs.extensions.bibtex:
+        duplicates:
+            - hales15homogenization
