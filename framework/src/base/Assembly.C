@@ -601,7 +601,6 @@ Assembly::reinitFE(const Elem * elem)
   {
     auto n_qp = _current_qrule->n_points();
     resizeADMappingObjects(n_qp, dim);
-    _ad_JxW.resize(n_qp);
     if (_calculate_xyz)
       _ad_q_points.resize(n_qp);
     if (_displaced)
@@ -677,6 +676,17 @@ Assembly::computeGradPhiAD(
     typename VariableTestGradientType<OutputType, ComputeStage::JACOBIAN>::type & grad_phi,
     FEGenericBase<OutputType> * fe)
 {
+  // This function relies on the fact that FE::reinit has already been called. FE::reinit will
+  // importantly have already called FEMap::init_shape_functions which will have computed
+  // these quantities at the integration/quadrature points: dphidxi,
+  // dphideta, and dphidzeta (e.g. \nabla phi w.r.t. reference coordinates). These *phi* quantities
+  // are independent of mesh displacements when using a quadrature rule.
+  //
+  // Note that a user could have specified custom integration points (e.g. independent of a
+  // quadrature rule) which could very well depend on displacements. In that case even the *phi*
+  // quantities from the above paragraph would be a function of the displacements and we would be
+  // missing that derivative information in the calculations below
+
   auto dim = elem->dim();
   const auto & dphidxi = fe->get_dphidxi();
   const auto & dphideta = fe->get_dphideta();
@@ -765,6 +775,7 @@ Assembly::resizeADMappingObjects(unsigned int n_qp, unsigned int dim)
   }
 
   _ad_jac.resize(n_qp);
+  _ad_JxW.resize(n_qp);
 }
 
 void
@@ -830,6 +841,43 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
                                   unsigned p,
                                   FEBase * fe)
 {
+  // This function relies on the fact that FE::reinit has already been called. FE::reinit will
+  // importantly have already called FEMap::init_reference_to_physical_map which will have computed
+  // these quantities at the integration/quadrature points: phi_map, dphidxi_map,
+  // dphideta_map, and dphidzeta_map (e.g. phi and \nabla phi w.r.t reference coordinates). *_map is
+  // used to denote that quantities are in reference to a mapping Lagrange FE object. The FE<Dim,
+  // LAGRANGE> objects used for mapping will in general have an order matching the order of the
+  // mesh. These *phi*_map quantities are independent of mesh displacements when using a quadrature
+  // rule.
+  //
+  // Note that a user could have specified custom integration points (e.g. independent of a
+  // quadrature rule) which could very well depend on displacements. In that case even the *phi*_map
+  // quantities from the above paragraph would be a function of the displacements and we would be
+  // missing that derivative information in the calculations below
+  //
+  // Important quantities calculated by this method:
+  //   - _ad_JxW;
+  //   - _ad_q_points;
+  // And the following quantities are important because they are used in the computeGradPhiAD method
+  // to calculate the shape function gradients with respect to the physical coordinates
+  // dphi/dphys = dphi/dref * dref/dphys:
+  //   - _ad_dxidx_map;
+  //   - _ad_dxidy_map;
+  //   - _ad_dxidz_map;
+  //   - _ad_detadx_map;
+  //   - _ad_detady_map;
+  //   - _ad_detadz_map;
+  //   - _ad_dzetadx_map;
+  //   - _ad_dzetady_map;
+  //   - _ad_dzetadz_map;
+  //
+  // Some final notes. This method will be called both when we are reinit'ing in the volume and on
+  // faces. When reinit'ing on faces, computation of _ad_JxW will be garbage because we will be
+  // using dummy quadrature weights. _ad_q_points computation is also currently extraneous during
+  // face reinit because we compute _ad_q_points_face in the computeFaceMap method. However,
+  // computation of dref/dphys is absolutely necessary (and the reason we call this method for the
+  // face case) for both volume and face reinit
+
   auto dim = elem->dim();
   const auto & elem_nodes = elem->get_nodes();
   auto num_shapes = fe->n_shape_functions();
@@ -1111,6 +1159,12 @@ Assembly::reinitFEFace(const Elem * elem, unsigned int side)
 void
 Assembly::computeFaceMap(unsigned dim, const std::vector<Real> & qw, const Elem * side)
 {
+  // Important quantities calculated by this method:
+  //   - _ad_JxW_face
+  //   - _ad_q_points_face
+  //   - _ad_normals
+  //   - _ad_curvatures
+
   const auto n_qp = qw.size();
   const Elem * elem = side->parent();
   auto side_number = elem->which_side_am_i(side);
