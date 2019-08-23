@@ -7,7 +7,7 @@
     mesh_mode = 'REPLICATED'
     recover = false
 
-    requirement = 'MOOSE shall be able to extrude with variable height elevations with variable numbers of layers and swap subdomain IDs'
+    requirement = 'The system shall be able to extrude a mesh with variable height elevations, with variable numbers of layers, and swap subdomain IDs'
     design = 'FancyExtruderGenerator.md'
     issues = '#13276 #3554 #5634'
   [../]

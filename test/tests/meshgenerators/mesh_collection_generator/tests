@@ -7,7 +7,7 @@
     mesh_mode = 'REPLICATED'
     recover = false
 
-    requirement = 'MOOSE shall be able to combine multiple meshes into a single unconnected mesh.'
+    requirement = 'The system shall be able to combine multiple meshes into a single unconnected mesh.'
     design = 'meshgenerators/MeshCollectionGenerator.md'
     issues = '#13221'
   [../]

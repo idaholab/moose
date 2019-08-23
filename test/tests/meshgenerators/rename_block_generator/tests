@@ -2,7 +2,7 @@
   [rename_blocks]
     issues = '#11640'
     design = 'meshgenerators/RenameBlockGenerator.md'
-    requirement = 'The shall be able to rename or renumber mesh subdomains prior to running the '
+    requirement = 'The system shall be able to rename or renumber mesh subdomains prior to running the '
                   'simulation:'
 
     [rename_block_generator_test]

@@ -7,7 +7,7 @@
     mesh_mode = 'REPLICATED'
     recover = false
 
-    requirement = 'The system shall have the capability of generating a mesh based upon an "annual"-shaped geometry.'
+    requirement = 'The system shall have the capability of generating a mesh based upon an annular geometry.'
     design = 'meshgenerators/AnnularMeshGenerator.md'
     issues = '#11640'
   [../]
