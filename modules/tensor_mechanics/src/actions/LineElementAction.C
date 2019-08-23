@@ -49,7 +49,7 @@ validParams<LineElementAction>()
   params.addParam<bool>("add_variables",
                         false,
                         "Add the displacement variables for truss elements "
-                        "and both diplacement and rotation variables for "
+                        "and both displacement and rotation variables for "
                         "beam elements.");
   params.addParam<std::vector<VariableName>>(
       "displacements", "The nonlinear displacement variables for the problem");
@@ -108,7 +108,7 @@ LineElementAction::beamParameters()
                        "as either a number or a variable name.");
   params.addCoupledVar("Az",
                        0.0,
-                       "First moment of area of the beam about z asix. Can be supplied "
+                       "First moment of area of the beam about z axis. Can be supplied "
                        "as either a number or a variable name.");
   params.addCoupledVar("Ix",
                        "Second moment of area of the beam about x axis. Can be supplied as "

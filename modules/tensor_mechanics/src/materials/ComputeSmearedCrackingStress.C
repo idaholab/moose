@@ -53,7 +53,7 @@ validParams<ComputeSmearedCrackingStress>()
                                     0,
                                     "cracking_neg_fraction <= 1 & cracking_neg_fraction >= 0",
                                     "The fraction of the cracking strain at which "
-                                    "a transitition begins during decreasing "
+                                    "a transition begins during decreasing "
                                     "strain to the original stiffness.");
   params.addDeprecatedParam<Real>(
       "cracking_beta",

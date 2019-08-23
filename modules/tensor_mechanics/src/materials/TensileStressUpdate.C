@@ -22,7 +22,7 @@ validParams<TensileStressUpdate>()
       "A TensorMechanicsHardening UserObject that defines hardening of the tensile strength");
   params.addParam<bool>("perfect_guess",
                         true,
-                        "Provide a guess to the Newton-Raphson proceedure "
+                        "Provide a guess to the Newton-Raphson procedure "
                         "that is the result from perfect plasticity.  With "
                         "severe hardening/softening this may be "
                         "suboptimal.");

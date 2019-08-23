@@ -18,7 +18,7 @@ validParams<ConstantAnisotropicMobility>()
   InputParameters params = validParams<Material>();
   params.addClassDescription("Provide a constant mobility tensor value");
   params.addRequiredParam<MaterialPropertyName>("M_name",
-                                                "Name of the mobility tensor porperty to generate");
+                                                "Name of the mobility tensor property to generate");
   params.addRequiredRangeCheckedParam<std::vector<Real>>(
       "tensor", "tensor_size=9", "Tensor values");
   return params;

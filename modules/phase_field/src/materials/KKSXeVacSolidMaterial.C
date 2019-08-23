@@ -18,8 +18,8 @@ validParams<KKSXeVacSolidMaterial>()
   InputParameters params = validParams<DerivativeFunctionMaterialBase>();
   params.addClassDescription("KKS Solid phase free energy for Xe,Vac in UO2.  Fm(cmg,cmv)");
   params.addRequiredParam<Real>("T", "Temperature in [K]");
-  params.addRequiredCoupledVar("cmg", "Gas concnetration");
-  params.addRequiredCoupledVar("cmv", "Vacancy concnetration");
+  params.addRequiredCoupledVar("cmg", "Gas concentration");
+  params.addRequiredCoupledVar("cmv", "Vacancy concentration");
   return params;
 }
 
@@ -55,8 +55,9 @@ KKSXeVacSolidMaterial::expectedNumArgs()
 Real
 KKSXeVacSolidMaterial::computeF()
 {
-  return 1.0 / _Omega * (_kB * _T * (cLogC(_cmv[_qp]) + cLogC(1.0 - _cmv[_qp])) + _Efv * _cmv[_qp] +
-                         _kB * _T * (cLogC(_cmg[_qp]) + cLogC(1.0 - _cmg[_qp])) + _Efg * _cmg[_qp]);
+  return 1.0 / _Omega *
+         (_kB * _T * (cLogC(_cmv[_qp]) + cLogC(1.0 - _cmv[_qp])) + _Efv * _cmv[_qp] +
+          _kB * _T * (cLogC(_cmg[_qp]) + cLogC(1.0 - _cmg[_qp])) + _Efg * _cmg[_qp]);
 }
 
 // Derivative of the Free energy

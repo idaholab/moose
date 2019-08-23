@@ -20,7 +20,7 @@ validParams<ForceDensityMaterial>()
   params.addCoupledVar("etas", "Array of coupled order parameters");
   params.addCoupledVar("c", "Concentration field");
   params.addParam<Real>("ceq", 0.9816, "Equilibrium density");
-  params.addParam<Real>("cgb", 0.25, "Thresold Concentration for GB");
+  params.addParam<Real>("cgb", 0.25, "Threshold Concentration for GB");
   params.addParam<Real>("k", 100.0, "stiffness constant");
   return params;
 }

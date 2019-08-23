@@ -16,13 +16,13 @@ InputParameters
 validParams<ComputeDeformGradBasedStress>()
 {
   InputParameters params = validParams<Material>();
-  params.addClassDescription("Computes stress based on lagrangian strain");
+  params.addClassDescription("Computes stress based on Lagrangian strain");
   params.addRequiredParam<MaterialPropertyName>("deform_grad_name",
                                                 "Name of deformation gradient variable");
   params.addRequiredParam<MaterialPropertyName>("elasticity_tensor_name",
                                                 "Name of elasticity tensor variable");
   params.addRequiredParam<MaterialPropertyName>("stress_name", "Name of stress variable");
-  params.addRequiredParam<MaterialPropertyName>("jacobian_name", "Name of jacobian variable");
+  params.addRequiredParam<MaterialPropertyName>("jacobian_name", "Name of Jacobian variable");
   return params;
 }
 

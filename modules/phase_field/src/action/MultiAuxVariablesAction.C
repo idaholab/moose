@@ -22,7 +22,7 @@ validParams<MultiAuxVariablesAction>()
   params.addClassDescription("Set up auxvariables for components of "
                              "MaterialProperty<std::vector<data_type> > for polycrystal sample.");
   params.addRequiredParam<unsigned int>(
-      "grain_num", "Specifies the number of grains to create the aux varaivles for.");
+      "grain_num", "Specifies the number of grains to create the aux variables for.");
   params.addRequiredParam<std::vector<std::string>>(
       "variable_base", "Vector that specifies the base name of the variables.");
   MultiMooseEnum data_type("Real RealGradient", "Real");

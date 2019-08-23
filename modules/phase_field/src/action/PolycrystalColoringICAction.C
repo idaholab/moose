@@ -20,7 +20,7 @@ InputParameters
 validParams<PolycrystalColoringICAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addClassDescription("Random Voronoi tesselation polycrystal action");
+  params.addClassDescription("Random Voronoi tessellation polycrystal action");
   params.addRequiredParam<unsigned int>("op_num", "number of order parameters to create");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
   params.addRequiredParam<UserObjectName>("polycrystal_ic_uo", "Optional: TODO");

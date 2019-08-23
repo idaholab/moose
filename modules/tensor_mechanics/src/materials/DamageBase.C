@@ -17,7 +17,7 @@ validParams<DamageBase>()
   params.addClassDescription(
       "Base class for damage models for use in conjunction with "
       "ComputeMultipleInelasticStress. The damage model updates the "
-      "stress and jacobian multiplier at the end of the stress computation.");
+      "stress and Jacobian multiplier at the end of the stress computation.");
   params.addParam<std::string>("base_name",
                                "Optional parameter that allows the user to define "
                                "multiple mechanics material systems on the same "

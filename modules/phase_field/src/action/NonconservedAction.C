@@ -28,7 +28,7 @@ validParams<NonconservedAction>()
 {
   InputParameters params = validParams<Action>();
   params.addClassDescription(
-      "Set up the variable and the kernels needed for a nonconserved phase field variable");
+      "Set up the variable and the kernels needed for a non-conserved phase field variable");
   // Get MooseEnums for the possible order/family options for this variable
   MooseEnum families(AddVariableAction::getNonlinearVariableFamilies());
   MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
