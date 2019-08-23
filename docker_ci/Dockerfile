@@ -45,7 +45,8 @@ python-dev \
 cmake \
 curl \
 bison \
-flex ; \
+flex \
+libboost-all-dev ; \
 rm -rf /var/lib/apt/lists/*
 
 #-----------------------------------------------------------------------------#

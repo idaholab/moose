@@ -18,6 +18,7 @@ your operating system/platform and follow the instructions:
   - [getting_started/installation/centos.md]
 
 - [getting_started/installation/windows10.md]
+- [getting_started/installation/docker.md]
 - Advanced Instructions:
 
   - [getting_started/installation/hpc_install_moose.md]

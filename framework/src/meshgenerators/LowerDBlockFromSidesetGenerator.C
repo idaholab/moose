@@ -131,5 +131,5 @@ LowerDBlockFromSidesetGenerator::generate()
   if (isParamValid("new_block_name"))
     mesh->subdomain_name(_new_block_id) = getParam<SubdomainName>("new_block_name");
 
-  return dynamic_pointer_cast<MeshBase>(mesh);
+  return mesh;
 }
