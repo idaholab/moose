@@ -19,6 +19,7 @@ InputParameters
 validParams<MeshGeneratorMesh>()
 {
   InputParameters params = validParams<MooseMesh>();
+  params.set<bool>("_mesh_generator_mesh") = true;
   return params;
 }
 
