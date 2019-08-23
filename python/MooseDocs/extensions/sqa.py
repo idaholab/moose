@@ -67,7 +67,8 @@ class SQAExtension(command.CommandExtension):
         config['repo'] = (u"idaholab/moose",
                           "The default repository location to append to the given url.")
         config['categories'] = (dict(), "A dictionary of category names that includes a " \
-                                        "dictionary with 'directories' and optionally 'specs'.")
+                                        "dictionary with 'directories' and optionally 'specs' " \
+                                        "and 'dependencies'.")
         config['requirement-groups'] = (dict(), "Allows requirement group names to be changed.")
 
         # Disable by default to allow for updates to applications
@@ -79,6 +80,7 @@ class SQAExtension(command.CommandExtension):
 
         # Build requirements sets
         self.__requirements = dict()
+        self.__dependencies = dict()
         for index, (category, info) in enumerate(self.get('categories').iteritems(), 1): #pylint: disable=no-member
             specs = info.get('specs', ['tests'])
             directories = []
@@ -95,6 +97,9 @@ class SQAExtension(command.CommandExtension):
             # Create requirement database
             self.__requirements[category] = common.get_requirements(directories, specs, 'F', index)
 
+            # Create dependency database
+            self.__dependencies[category] = info.get('dependencies', [])
+
         # Storage for requirement matrix counting (see SQARequirementMatricCommand)
         self.__counts = collections.defaultdict(int)
 
@@ -104,6 +109,13 @@ class SQAExtension(command.CommandExtension):
         if req is None:
             raise exceptions.MooseDocsException("Unknown or missing 'category': {}", category)
         return req
+
+    def dependencies(self, category):
+        """Return the dependency list for given category."""
+        dep = self.__dependencies.get(category, None)
+        if dep is None:
+            raise exceptions.MooseDocsException("Unknown or missing 'category': {}", category)
+        return dep
 
     def preExecute(self, root):
         """Reset counts."""
@@ -388,14 +400,20 @@ class SQADependenciesCommand(command.CommandComponent):
     def defaultSettings():
         config = command.CommandComponent.defaultSettings()
         config['suffix'] = (None, "Provide the filename suffix to include.")
+        config['category'] = (None, "Provide the category.")
         return config
 
     def createToken(self, parent, info, page):
         suffix = self.settings['suffix']
+        category = self.settings['category']
+        if category == '_empty_':
+            return parent
+
         ul = core.UnorderedList(parent)
-        for category in self.extension.get('categories'):
-            fname = '{}_{}.md'.format(category, suffix)
-            if not page.local.endswith(fname):
+        depends = self.extension.dependencies(category) or self.extension.get('categories').keys()
+        for dep in depends:
+            if dep != category:
+                fname = '{}_{}.md'.format(dep, suffix)
                 autolink.AutoLink(core.ListItem(ul), page=u'sqa/{}'.format(fname),
                                   optional=True, warning=True, class_='moose-sqa-dependency')
         return parent
