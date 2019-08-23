@@ -1330,11 +1330,6 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
   mooseAssert(_var.kind() == Moose::VarKindType::VAR_AUXILIARY || ad_offset || !_var_num,
               "Either this is the zeroth variable or we should have an offset");
 
-  // Hopefully this problem can go away at some point
-  if (ad_offset + num_dofs > AD_MAX_DOFS_PER_ELEM)
-    mooseError("Current number of dofs per element is greater than AD_MAX_DOFS_PER_ELEM of ",
-               AD_MAX_DOFS_PER_ELEM);
-
   for (unsigned int qp = 0; qp < nqp; qp++)
   {
     if (_need_ad_u)
