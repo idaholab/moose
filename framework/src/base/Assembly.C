@@ -216,6 +216,7 @@ Assembly::~Assembly()
 
   _coord.release();
   _coord_neighbor.release();
+  _coord_msm.release();
 
   _ad_JxW.release();
   _ad_q_points.release();
@@ -1436,35 +1437,12 @@ Assembly::reinitNeighbor(const Elem * neighbor, const std::vector<Point> & refer
     fe->attach_quadrature_rule(qrule);
     fe->reinit(neighbor);
 
-    // set the coord transformation
-    _coord_neighbor.resize(qrule->n_points());
-    Moose::CoordinateSystemType coord_type =
-        _subproblem.getCoordSystem(_current_neighbor_subdomain_id);
-    unsigned int rz_radial_coord = _subproblem.getAxisymmetricRadialCoord();
     const std::vector<Real> & JxW = fe->get_JxW();
-    const std::vector<Point> & q_points = fe->get_xyz();
+    MooseArray<Point> q_points;
+    q_points.shallowCopy(const_cast<std::vector<Point> &>(fe->get_xyz()));
 
-    switch (coord_type)
-    {
-      case Moose::COORD_XYZ:
-        for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
-          _coord_neighbor[qp] = 1.;
-        break;
-
-      case Moose::COORD_RZ:
-        for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
-          _coord_neighbor[qp] = 2 * M_PI * q_points[qp](rz_radial_coord);
-        break;
-
-      case Moose::COORD_RSPHERICAL:
-        for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
-          _coord_neighbor[qp] = 4 * M_PI * q_points[qp](0) * q_points[qp](0);
-        break;
-
-      default:
-        mooseError("Unknown coordinate system");
-        break;
-    }
+    setCoordinateTransformation<RESIDUAL>(
+        qrule, q_points, _coord_neighbor, _current_neighbor_subdomain_id);
 
     _current_neighbor_volume = 0.;
     for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
@@ -1476,26 +1454,33 @@ template <ComputeStage compute_stage>
 void
 Assembly::setCoordinateTransformation(const QBase * qrule,
                                       const ADPoint & q_points,
-                                      MooseArray<ADReal> & coord)
+                                      MooseArray<ADReal> & coord,
+                                      SubdomainID sub_id)
 {
-  coord.resize(qrule->n_points());
-  _coord_type = _subproblem.getCoordSystem(_current_elem->subdomain_id());
+  mooseAssert(qrule, "The quadrature rule is null in Assembly::setCoordinateTransformation");
+  auto n_points = qrule->n_points();
+  mooseAssert(n_points == q_points.size(),
+              "The number of points in the quadrature rule doesn't match the number of passed-in "
+              "points in Assembly::setCoordinateTransformation");
+
+  coord.resize(n_points);
+  _coord_type = _subproblem.getCoordSystem(sub_id);
   unsigned int rz_radial_coord = _subproblem.getAxisymmetricRadialCoord();
 
   switch (_coord_type)
   {
     case Moose::COORD_XYZ:
-      for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
+      for (unsigned int qp = 0; qp < n_points; qp++)
         coord[qp] = 1.;
       break;
 
     case Moose::COORD_RZ:
-      for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
+      for (unsigned int qp = 0; qp < n_points; qp++)
         coord[qp] = 2 * M_PI * q_points[qp](rz_radial_coord);
       break;
 
     case Moose::COORD_RSPHERICAL:
-      for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
+      for (unsigned int qp = 0; qp < n_points; qp++)
         coord[qp] = 4 * M_PI * q_points[qp](0) * q_points[qp](0);
       break;
 
@@ -1506,9 +1491,9 @@ Assembly::setCoordinateTransformation(const QBase * qrule,
 }
 
 template void Assembly::setCoordinateTransformation<ComputeStage::RESIDUAL>(
-    const QBase *, const MooseArray<Point> &, MooseArray<Real> &);
+    const QBase *, const MooseArray<Point> &, MooseArray<Real> &, SubdomainID);
 template void Assembly::setCoordinateTransformation<ComputeStage::JACOBIAN>(
-    const QBase *, const MooseArray<VectorValue<DualReal>> &, MooseArray<DualReal> &);
+    const QBase *, const MooseArray<VectorValue<DualReal>> &, MooseArray<DualReal> &, SubdomainID);
 
 void
 Assembly::computeCurrentElemVolume()
@@ -1516,9 +1501,11 @@ Assembly::computeCurrentElemVolume()
   if (_current_elem_volume_computed)
     return;
 
-  setCoordinateTransformation<ComputeStage::RESIDUAL>(_current_qrule, _current_q_points, _coord);
+  setCoordinateTransformation<ComputeStage::RESIDUAL>(
+      _current_qrule, _current_q_points, _coord, _current_elem->subdomain_id());
   if (_computing_jacobian && _calculate_xyz)
-    setCoordinateTransformation<ComputeStage::JACOBIAN>(_current_qrule, _ad_q_points, _ad_coord);
+    setCoordinateTransformation<ComputeStage::JACOBIAN>(
+        _current_qrule, _ad_q_points, _ad_coord, _current_elem->subdomain_id());
 
   _current_elem_volume = 0.;
   for (unsigned int qp = 0; qp < _current_qrule->n_points(); qp++)
@@ -1534,10 +1521,10 @@ Assembly::computeCurrentFaceVolume()
     return;
 
   setCoordinateTransformation<ComputeStage::RESIDUAL>(
-      _current_qrule_face, _current_q_points_face, _coord);
+      _current_qrule_face, _current_q_points_face, _coord, _current_elem->subdomain_id());
   if (_computing_jacobian && _calculate_face_xyz)
     setCoordinateTransformation<ComputeStage::JACOBIAN>(
-        _current_qrule_face, _ad_q_points_face, _ad_coord);
+        _current_qrule_face, _ad_q_points_face, _ad_coord, _current_elem->subdomain_id());
 
   _current_side_volume = 0.;
   for (unsigned int qp = 0; qp < _current_qrule_face->n_points(); qp++)
@@ -1967,6 +1954,11 @@ Assembly::reinitLowerDElemRef(const Elem * elem,
       fesd->_second_phi.shallowCopy(
           const_cast<std::vector<std::vector<TensorValue<Real>>> &>(fe_lower->get_d2phi()));
   }
+
+  MooseArray<Point> array_q_points;
+  array_q_points.shallowCopy(const_cast<std::vector<Point> &>(*pts));
+  setCoordinateTransformation<RESIDUAL>(
+      _qrule_msm, array_q_points, _coord_msm, _current_lower_d_elem->subdomain_id());
 }
 
 void

@@ -90,7 +90,7 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     _normals(_assembly.normals()),
     _tangents(_assembly.tangents()),
     _JxW_msm(_assembly.jxWMortar()),
-    _coord(_assembly.coordTransformation()),
+    _coord(_assembly.mortarCoordTransformation()),
     _qrule_msm(_assembly.qRuleMortar()),
     _test(_var ? _var->phiLower() : _test_dummy),
     _test_slave(_slave_var.phiFace()),
