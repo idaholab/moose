@@ -27,7 +27,7 @@ using MetaPhysicL::DualNumber;
 using MetaPhysicL::NWrapper;
 using MetaPhysicL::SemiDynamicSparseNumberArray;
 
-#define AD_MAX_DOFS_PER_ELEM 50
+#define AD_MAX_DOFS_PER_ELEM 81
 
 typedef SemiDynamicSparseNumberArray<Real, unsigned int, NWrapper<AD_MAX_DOFS_PER_ELEM>>
     DNDerivativeType;
