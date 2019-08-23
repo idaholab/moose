@@ -23,7 +23,7 @@ validParams<PolycrystalVoronoi>()
 {
   InputParameters params = validParams<PolycrystalUserObjectBase>();
   params.addClassDescription(
-      "Random Voronoi tesselation polycrystal (used by PolycrystalVoronoiAction)");
+      "Random Voronoi tessellation polycrystal (used by PolycrystalVoronoiAction)");
   params.addParam<unsigned int>(
       "grain_num", 0, "Number of grains being represented by the order parameters");
   params.addParam<unsigned int>("rand_seed", 0, "The random seed");

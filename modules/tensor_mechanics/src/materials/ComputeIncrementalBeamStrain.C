@@ -42,7 +42,7 @@ validParams<ComputeIncrementalBeamStrain>()
                        "as either a number or a variable name.");
   params.addCoupledVar("Az",
                        0.0,
-                       "First moment of area of the beam about z asix. Can be supplied "
+                       "First moment of area of the beam about z axis. Can be supplied "
                        "as either a number or a variable name.");
   params.addCoupledVar("Ix",
                        "Second moment of area of the beam about x axis. Can be "

@@ -20,7 +20,7 @@ validParams<ThermalConductivity>()
   params.addRequiredParam<PostprocessorName>(
       "flux", "Heat flux out of 'cold' boundary in solution units, should always be positive");
   params.addRequiredParam<PostprocessorName>("T_hot", "Temperature on 'hot' boundary in K");
-  params.addParam<Real>("length_scale", 1e-8, "lengthscale of the solution, default is 1e-8");
+  params.addParam<Real>("length_scale", 1e-8, "Length scale of the solution, default is 1e-8");
   params.addParam<Real>("k0", 0.0, "Initial value of the thermal conductivity");
   return params;
 }

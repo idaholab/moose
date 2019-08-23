@@ -65,7 +65,7 @@ ComputeStrainBase::ComputeStrainBase(const InputParameters & parameters)
 
   // Generate warning when volumetric locking correction is used with second order elements
   if (_mesh.hasSecondOrderElements() && _volumetric_locking_correction)
-    mooseWarning("Volumteric locking correction is not required for second order elements. Using "
+    mooseWarning("Volumetric locking correction is not required for second order elements. Using "
                  "volumetric locking with second order elements could cause zigzag patterns in "
                  "stresses and strains.");
 }

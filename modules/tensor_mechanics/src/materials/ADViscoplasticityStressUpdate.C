@@ -36,7 +36,7 @@ defineADValidParams(
     params.addParam<Real>(
         "maximum_gauge_ratio",
         1.0e6,
-        "Maximum ratio between the gauge stress and the equilvalent stress. This "
+        "Maximum ratio between the gauge stress and the equivalent stress. This "
         "should be a high number. Note that this does not set an upper bound on the value, but "
         "rather will help with convergence of the inner Newton loop");
     params.addParam<Real>(

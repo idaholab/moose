@@ -33,7 +33,7 @@ validParams<KKSSplitCHCRes>()
       "h_name", "h", "Base name for the switching function h(eta)"); // TODO: everywhere else this
                                                                      // is called just "h"
   params.addRequiredCoupledVar("w",
-                               "Chemical potenial non-linear helper variable for the split solve");
+                               "Chemical potential non-linear helper variable for the split solve");
 
   return params;
 }

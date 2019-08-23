@@ -17,7 +17,7 @@ validParams<GeneralizedMaxwellModel>()
 {
   InputParameters params = validParams<GeneralizedMaxwellBase>();
   params.addClassDescription(
-      "Generalized Maxwell model composed of a parralel assembly of unit Maxwell modules");
+      "Generalized Maxwell model composed of a parallel assembly of unit Maxwell modules");
   params.addRequiredParam<Real>("young_modulus", "initial elastic modulus of the material");
   params.addRequiredParam<Real>("poisson_ratio", "initial poisson ratio of the material");
   params.addRequiredParam<std::vector<Real>>(

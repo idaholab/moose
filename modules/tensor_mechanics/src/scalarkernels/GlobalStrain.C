@@ -44,7 +44,7 @@ GlobalStrain::GlobalStrain(const InputParameters & parameters)
       (_dim == 3 && _var.order() != SIXTH))
     mooseError("PerdiodicStrain ScalarKernel is only compatible with scalar variables of order "
                "FIRST in 1D, THIRD in 2D, and SIXTH in 3D. Please change the order of the scalar"
-               "variable acoording to the mesh dimension.");
+               "variable according to the mesh dimension.");
 
   assignComponentIndices(_var.order());
 }

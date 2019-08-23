@@ -35,7 +35,7 @@ validParams<DynamicTensorMechanicsAction>()
   params.addParam<bool>("static_initialization",
                         false,
                         "Set to true get the system to "
-                        "equillibrium under gravity by running a "
+                        "equilibrium under gravity by running a "
                         "quasi-static analysis (by solving Ku = F) "
                         "in the first time step.");
   return params;

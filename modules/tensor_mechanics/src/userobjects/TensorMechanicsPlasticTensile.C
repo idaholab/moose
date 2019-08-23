@@ -49,7 +49,7 @@ validParams<TensorMechanicsPlasticTensile>()
   params.addParam<Real>("tensile_lode_cutoff",
                         "If the second invariant of stress is less than "
                         "this amount, the Lode angle is assumed to be zero. "
-                        " This is to gaurd against precision-loss problems, "
+                        "This is to guard against precision-loss problems, "
                         "and this parameter should be set small.  Default = "
                         "0.00001*((yield_Function_tolerance)^2)");
   params.addClassDescription(
