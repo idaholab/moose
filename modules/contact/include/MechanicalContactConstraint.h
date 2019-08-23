@@ -89,7 +89,7 @@ public:
 
 protected:
   MooseSharedPointer<DisplacedProblem> _displaced_problem;
-  FEProblem & _fe_problem;
+  FEProblemBase & _fe_problem;
   Real nodalArea(PenetrationInfo & pinfo);
   Real getPenalty(PenetrationInfo & pinfo);
   Real getTangentialPenalty(PenetrationInfo & pinfo);

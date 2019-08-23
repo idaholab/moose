@@ -110,7 +110,7 @@ Threads::spin_mutex MechanicalContactConstraint::_contact_set_mutex;
 MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters & parameters)
   : NodeFaceConstraint(parameters),
     _displaced_problem(parameters.get<FEProblemBase *>("_fe_problem_base")->getDisplacedProblem()),
-    _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
+    _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
     _component(getParam<unsigned int>("component")),
     _model(getParam<MooseEnum>("model").getEnum<ContactModel>()),
     _formulation(getParam<MooseEnum>("formulation").getEnum<ContactFormulation>()),

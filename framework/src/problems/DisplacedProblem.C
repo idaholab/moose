@@ -51,7 +51,7 @@ DisplacedProblem::DisplacedProblem(const InputParameters & parameters)
                    _mproblem.getAuxiliarySystem(),
                    _mproblem.getAuxiliarySystem().name(),
                    Moose::VAR_AUXILIARY),
-    _geometric_search_data(_mproblem, _mesh),
+    _geometric_search_data(*this, _mesh),
     _eq_init_timer(registerTimedSection("eq::init", 2)),
     _update_mesh_timer(registerTimedSection("updateMesh", 3)),
     _sync_solutions_timer(registerTimedSection("syncSolutions", 5)),

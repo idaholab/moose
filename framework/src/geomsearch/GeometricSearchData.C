@@ -283,9 +283,10 @@ GeometricSearchData::generateQuadratureNodes(unsigned int slave_id, unsigned int
     {
       if (boundary_id == (BoundaryID)slave_id)
       {
+        // All we should need to do here is reinit the underlying libMesh::FE object because that
+        // will get us the correct points for the current element and side
         _subproblem.setCurrentSubdomainID(elem, 0);
-        _subproblem.prepare(elem, 0);
-        _subproblem.reinitElemFace(elem, side, boundary_id, 0);
+        _subproblem.assembly(0).reinit(elem, side);
 
         for (unsigned int qp = 0; qp < points_face.size(); qp++)
           _mesh.addQuadratureNode(elem, side, qp, qslave_id, points_face[qp]);
@@ -317,9 +318,10 @@ GeometricSearchData::updateQuadratureNodes(unsigned int slave_id)
     {
       if (boundary_id == (BoundaryID)slave_id)
       {
+        // All we should need to do here is reinit the underlying libMesh::FE object because that
+        // will get us the correct points for the current element and side
         _subproblem.setCurrentSubdomainID(elem, 0);
-        _subproblem.prepare(elem, 0);
-        _subproblem.reinitElemFace(elem, side, boundary_id, 0);
+        _subproblem.assembly(0).reinit(elem, side);
 
         for (unsigned int qp = 0; qp < points_face.size(); qp++)
           (*_mesh.getQuadratureNode(elem, side, qp)) = points_face[qp];
