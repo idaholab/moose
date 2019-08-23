@@ -56,6 +56,7 @@ class ColorMap(ChiggerObject):
         opt.add('cmap_reverse', False, "Reverse the order of colormap.")
         opt.add('cmap_num_colors', 256, "Number of colors to use (matplotlib only).")
         opt.add('cmap_range', [0, 1], "Set the data range for the color map to display.")
+        opt.add('cmap_nan', [0.5, 0.5, 0.5, 1], "Set the NaN color.")
         return opt
 
     # The table is only needed once
@@ -99,6 +100,9 @@ class ColorMap(ChiggerObject):
 
         if self.isOptionValid('cmap_range'):
             vtktable.SetRange(*self.getOption('cmap_range'))
+
+        if self.isOptionValid('cmap_nan'):
+            vtktable.SetNanColor(*self.getOption('cmap_nan'))
         vtktable.Build()
         return vtktable
 

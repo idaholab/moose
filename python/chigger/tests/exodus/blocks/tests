@@ -1,51 +1,83 @@
 [Tests]
-  [./default]
-    type = ImageDiff
-    command = default.py
-    imagediff = 'default.png'
-  [../]
-  [./blocks]
-    type = ImageDiff
-    command = blocks.py
-    imagediff = 'blocks.png'
-  [../]
-  [./all_boundary]
-    type = ImageDiff
-    command = all_boundary.py
-    imagediff = 'all_boundary.png'
-    allowed_linux = 0.95
-  [../]
-  [./boundary]
-    type = ImageDiff
-    command = boundary.py
-    imagediff = 'boundary.png'
-  [../]
-  [./boundary_numeric]
-    type = ImageDiff
-    command = boundary_numeric.py
-    imagediff = 'boundary_numeric.png'
-  [../]
-  [./nodesets]
-    type = ImageDiff
-    command = nodesets.py
-    imagediff = 'nodesets.png'
-    allowed_linux = 0.97
-  [../]
-  [./all_nodesets]
-    type = ImageDiff
-    command = all_nodesets.py
-    imagediff = 'all_nodesets.png'
-    allowed_linux = 0.90
-  [../]
-  [./none]
-    type = ImageDiff
-    command = none.py
-    imagediff = 'none.png'
-  [../]
-  [./combo]
-    type = ImageDiff
-    command = combo.py
-    imagediff = 'combo.png'
-    allowed_linux = 0.95
-  [../]
+  issues = '#7451'
+  design = 'python/chigger/index.md'
+
+  [exodus]
+    requirement = "The system shall include a graphical scripting language that includes the ability "
+                  "to display ExodusII file data with"
+    [default]
+      type = ImageDiff
+      command = default.py
+      imagediff = 'default.png'
+
+      detail = "default settings;"
+    []
+    [blocks]
+      type = ImageDiff
+      command = blocks.py
+      imagediff = 'blocks.png'
+
+      detail = "defined subdomains;"
+    []
+    [all_boundary]
+      type = ImageDiff
+      command = all_boundary.py
+      imagediff = 'all_boundary.png'
+      allowed_linux = 0.95
+
+      detail = "all boundaries;"
+    []
+    [boundary]
+      type = ImageDiff
+      command = boundary.py
+      imagediff = 'boundary.png'
+
+      detail = "defined boundaries by name;"
+    []
+    [boundary_numeric]
+      type = ImageDiff
+      command = boundary_numeric.py
+      imagediff = 'boundary_numeric.png'
+
+      detail = "defined boundaries by number;"
+    []
+    [nodesets]
+      type = ImageDiff
+      command = nodesets.py
+      imagediff = 'nodesets.png'
+      allowed_linux = 0.97
+
+      detail = "defined nodesets;"
+    []
+    [all_nodesets]
+      type = ImageDiff
+      command = all_nodesets.py
+      imagediff = 'all_nodesets.png'
+      allowed_linux = 0.90
+
+      detail = "all nodesets;"
+    []
+    [none]
+      type = ImageDiff
+      command = none.py
+      imagediff = 'none.png'
+
+      detail = "no geometric entities selected;"
+    []
+    [combo]
+      type = ImageDiff
+      command = combo.py
+      imagediff = 'combo.png'
+      allowed_linux = 0.95
+
+      detail = "subdomains, boundaries, and nodesets specified; and"
+    []
+    [partial]
+      type = ImageDiff
+      command = partial.py
+      imagediff = 'partial.png'
+
+      detail = "data only defined on a subset of subdomains."
+    []
+  []
 []
