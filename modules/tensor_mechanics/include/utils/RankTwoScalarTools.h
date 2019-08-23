@@ -418,75 +418,53 @@ stressIntensity(const RankTwoTensorTempl<T> & stress)
 template <typename T>
 T
 getQuantity(const RankTwoTensorTempl<T> & tensor,
-            const MooseEnum scalar_type,
+            const MooseEnum & scalar_type,
             const Point & point1,
             const Point & point2,
             const Point & curr_point,
             Point & direction)
 {
-  T val = 0.0;
-
   switch (scalar_type)
   {
     case 0:
-      val = vonMisesStress(tensor);
-      break;
+      return vonMisesStress(tensor);
     case 1:
-      val = effectiveStrain(tensor);
-      break;
+      return effectiveStrain(tensor);
     case 2:
-      val = hydrostatic(tensor);
-      break;
+      return hydrostatic(tensor);
     case 3:
-      val = L2norm(tensor);
-      break;
+      return L2norm(tensor);
     case 4:
-      val = maxPrincipal(tensor, direction);
-      break;
+      return maxPrincipal(tensor, direction);
     case 5:
-      val = midPrincipal(tensor, direction);
-      break;
+      return midPrincipal(tensor, direction);
     case 6:
-      val = minPrincipal(tensor, direction);
-      break;
+      return minPrincipal(tensor, direction);
     case 7:
-      val = volumetricStrain(tensor);
-      break;
+      return volumetricStrain(tensor);
     case 8:
-      val = firstInvariant(tensor);
-      break;
+      return firstInvariant(tensor);
     case 9:
-      val = secondInvariant(tensor);
-      break;
+      return secondInvariant(tensor);
     case 10:
-      val = thirdInvariant(tensor);
-      break;
+      return thirdInvariant(tensor);
     case 11:
-      val = axialStress(tensor, point1, point2, direction);
-      break;
+      return axialStress(tensor, point1, point2, direction);
     case 12:
-      val = hoopStress(tensor, point1, point2, curr_point, direction);
-      break;
+      return hoopStress(tensor, point1, point2, curr_point, direction);
     case 13:
-      val = radialStress(tensor, point1, point2, curr_point, direction);
-      break;
+      return radialStress(tensor, point1, point2, curr_point, direction);
     case 14:
-      val = triaxialityStress(tensor);
-      break;
+      return triaxialityStress(tensor);
     case 15:
-      val = directionValueTensor(tensor, direction);
-      break;
+      return directionValueTensor(tensor, direction);
     case 16:
-      val = maxShear(tensor);
-      break;
+      return maxShear(tensor);
     case 17:
-      val = stressIntensity(tensor);
-      break;
+      return stressIntensity(tensor);
     default:
       mooseError("RankTwoScalarAux Error: Pass valid scalar type - " +
                  scalarOptions().getRawNames());
   }
-
-  return val;
 }
 }
