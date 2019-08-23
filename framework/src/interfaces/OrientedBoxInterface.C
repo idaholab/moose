@@ -13,7 +13,7 @@
 #include "InputParameters.h"
 #include "MooseError.h"
 
-// libMesh incluces
+#include "libmesh/auto_ptr.h"
 
 template <>
 InputParameters
