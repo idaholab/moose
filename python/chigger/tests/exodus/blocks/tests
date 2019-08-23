@@ -17,7 +17,7 @@
       command = blocks.py
       imagediff = 'blocks.png'
 
-      detail = "with defined subdomains;"
+      detail = "defined subdomains;"
     []
     [all_boundary]
       type = ImageDiff
@@ -25,21 +25,21 @@
       imagediff = 'all_boundary.png'
       allowed_linux = 0.95
 
-      detail = "with all boundaries;"
+      detail = "all boundaries;"
     []
     [boundary]
       type = ImageDiff
       command = boundary.py
       imagediff = 'boundary.png'
 
-      detail = "with defined boundaries by name;"
+      detail = "defined boundaries by name;"
     []
     [boundary_numeric]
       type = ImageDiff
       command = boundary_numeric.py
       imagediff = 'boundary_numeric.png'
 
-      detail = "with defined boundaries by number;"
+      detail = "defined boundaries by number;"
     []
     [nodesets]
       type = ImageDiff
@@ -47,7 +47,7 @@
       imagediff = 'nodesets.png'
       allowed_linux = 0.97
 
-      detail = "with defined nodesets;"
+      detail = "defined nodesets;"
     []
     [all_nodesets]
       type = ImageDiff
@@ -55,14 +55,14 @@
       imagediff = 'all_nodesets.png'
       allowed_linux = 0.90
 
-      detail = "with all nodesets;"
+      detail = "all nodesets;"
     []
     [none]
       type = ImageDiff
       command = none.py
       imagediff = 'none.png'
 
-      detail = "with no geometric entities selected;"
+      detail = "no geometric entities selected;"
     []
     [combo]
       type = ImageDiff
@@ -70,14 +70,14 @@
       imagediff = 'combo.png'
       allowed_linux = 0.95
 
-      detail = "with subdomains, boundaries, and nodesets specified; and"
+      detail = "subdomains, boundaries, and nodesets specified; and"
     []
     [partial]
       type = ImageDiff
       command = partial.py
       imagediff = 'partial.png'
 
-      detail = "with data only defined on a subset of subdomains."
+      detail = "data only defined on a subset of subdomains."
     []
   []
 []
