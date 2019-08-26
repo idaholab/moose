@@ -5,7 +5,8 @@
     exodiff = 'displaced_mesh_in.e'
     cli_args = '--mesh-only'
     recover = false
-    requirement = "The MeshGenerator system shall work with displaced mesh"
+
+    requirement = "The system shall support the generation of meshes for both reference and displaced mesh configurations."
     design = 'MeshGenerators/index.md'
     issues = '#12712'
   [../]

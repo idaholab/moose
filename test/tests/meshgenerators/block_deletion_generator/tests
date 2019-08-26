@@ -3,9 +3,10 @@
     type = 'Exodiff'
     input = 'block_deletion_test1.i'
     exodiff = 'block_deletion_test1_out.e'
-    requirement = 'MOOSE shall be able to create different subdomains.'
+    recover = false
+
+    requirement = 'The system shall be capable of deleting all of the elements in a mesh based on subdomain ID.'
     design = 'meshgenerators/BlockDeletionGenerator.md'
     issues = '#11640'
-    recover = false
   [../]
 []

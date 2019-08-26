@@ -5,6 +5,6 @@
     type = 'Exodiff'
     input = 'function_dirac_source.i'
     exodiff = 'function_dirac_source_out.e'
-    requirement = "MOOSE shall have the ability to set the value of point source from a function."
+    requirement = "The system shall have the ability to set the value of point source from a function."
   [../]
 []
