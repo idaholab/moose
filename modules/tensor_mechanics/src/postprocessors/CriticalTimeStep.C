@@ -51,6 +51,9 @@ void
 CriticalTimeStep::execute()
 {
   Real dens = _mat_dens[0];
+  /*std::cout << _current_elem->hmin() << std::endl;
+  std::cout << dens << std::endl;
+  std::cout << _effective_stiffness[0] << std::endl;*/
   _total_size = std::min(_current_elem->hmin() * std::sqrt(dens)/(_effective_stiffness[0]), _total_size);
   _elems++;
 }
