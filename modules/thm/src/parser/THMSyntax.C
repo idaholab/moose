@@ -16,6 +16,7 @@ associateSyntax(Syntax & syntax)
                               "THM:add_heat_structure_material");
   syntax.registerActionSyntax("AddComponentAction", "Components/*", "THM:add_component");
   syntax.registerActionSyntax("PostprocessorAsControlAction", "Postprocessors/*");
+  syntax.registerActionSyntax("AddIterationCountPostprocessorsAction", "Debug");
 }
 
 void
