@@ -10,6 +10,7 @@ validParams<ClosureTestAction>()
   InputParameters params = validParams<TestAction>();
 
   params.addParam<FunctionName>("T_wall", "Wall temperature function");
+  params.addParam<Real>("q_wall", 0., "Convective wall heat flux");
   params.addParam<std::vector<std::string>>("output", "List of material properties to output");
 
   params.set<std::string>("fe_family") = "LAGRANGE";
@@ -24,6 +25,8 @@ ClosureTestAction::ClosureTestAction(InputParameters params)
     _T_wall_name("T_wall"),
     _has_T_wall(isParamValid("T_wall")),
     _T_wall_fn(_has_T_wall ? getParam<FunctionName>("T_wall") : ""),
+    _has_q_wall(isParamValid("q_wall")),
+    _q_wall(getParam<Real>("q_wall")),
     _output_properties(getParam<std::vector<std::string>>("output"))
 {
   _default_use_transient_executioner = true;
@@ -48,6 +51,26 @@ ClosureTestAction::addAuxVariables()
   TestAction::addAuxVariables();
   if (_has_T_wall)
     addAuxVariable(_T_wall_name, _fe_family, _fe_order);
+}
+
+void
+ClosureTestAction::addMaterials()
+{
+  TestAction::addMaterials();
+  if (_has_q_wall)
+  {
+    const std::string class_name = "AddMaterialAction";
+    InputParameters params = _action_factory.getValidParams(class_name);
+    params.set<std::string>("type") = "GenericConstantMaterial";
+
+    std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
+        _action_factory.create(class_name, "q_wall_mat", params));
+
+    action->getObjectParams().set<std::vector<std::string>>("prop_names") = {"q_wall"};
+    action->getObjectParams().set<std::vector<Real>>("prop_values") = {_q_wall};
+
+    _awh.addActionBlock(action);
+  }
 }
 
 void
