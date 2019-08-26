@@ -1,4 +1,7 @@
 directories:
     - ${MOOSE_DIR}/modules/xfem/test/tests
+dependencies:
+    - framework
+    - tensor_mechanics
 specs:
     - tests

@@ -1,4 +1,6 @@
 directories:
     - ${MOOSE_DIR}/modules/misc/test/tests
+dependencies:
+    - framework
 specs:
     - tests

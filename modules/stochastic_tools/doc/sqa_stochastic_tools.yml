@@ -2,3 +2,5 @@ directories:
     - ${MOOSE_DIR}/modules/stochastic_tools/test/tests
 specs:
     - tests
+dependencies:
+    - framework
