@@ -1,0 +1,4 @@
+time,num_linear_iterations,num_linear_iterations_per_step,num_nonlinear_iterations,num_nonlinear_iterations_per_step
+0,0,0,0,0
+0.01,1,1,1,1
+0.02,2,1,2,1
