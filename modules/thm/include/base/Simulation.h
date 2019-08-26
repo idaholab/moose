@@ -90,11 +90,6 @@ public:
   void printComponentLoops() const;
 
   /**
-   * Adds postprocessors for cumulative numbers of linear and nonlinear iterations
-   */
-  void addIterationCountPostprocessors();
-
-  /**
    * Run the simulation
    */
   virtual void run();

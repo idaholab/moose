@@ -40,10 +40,6 @@ validParams<THMApp>()
       "check_jacobian", "--check-jacobian", "To indicate we are checking jacobians");
   params.addCommandLineParam<std::string>(
       "print_component_loops", "--print-component-loops", "Flag to print component loops");
-  params.addCommandLineParam<std::string>(
-      "count_iterations",
-      "--count-iterations",
-      "Flag to add postprocessors for linear and nonlinear iterations");
   return params;
 }
 
@@ -87,9 +83,6 @@ THMApp::setupOptions()
     _sim->printComponentLoops();
     _ready_to_exit = true;
   }
-
-  if (isParamValid("count_iterations"))
-    _sim->addIterationCountPostprocessors();
 }
 
 void
