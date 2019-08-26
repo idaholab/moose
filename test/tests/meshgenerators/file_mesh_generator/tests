@@ -4,10 +4,11 @@
     input = 'file_mesh_generator.i'
     cli_args = '--mesh-only'
     exodiff = 'file_mesh_generator_in.e'
-    requirement = 'MOOSE shall be able to read in a file.'
-    design = 'meshgenerators/FileMeshGenerator.md'
-    issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
+
+    requirement = 'The system shall have the ability to generate a mesh by reading it from a file.'
+    design = 'meshgenerators/FileMeshGenerator.md'
+    issues = '#11640'
   [../]
 []

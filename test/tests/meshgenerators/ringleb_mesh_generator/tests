@@ -4,10 +4,11 @@
     input = 'ringleb_mesh_generator.i'
     cli_args = '--mesh-only'
     exodiff = 'ringleb_mesh_generator_in.e'
-    requirement = 'MOOSE shall be able to create meshes.'
-    design = 'meshgenerators/RinglebMeshGenerator.md'
-    issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
+
+    requirement = 'The system shall support the ability to create a mesh for a "Ringleb" geometry.'
+    design = 'meshgenerators/RinglebMeshGenerator.md'
+    issues = '#11640'
   [../]
 []

@@ -5,6 +5,6 @@
     type = 'Exodiff'
     input = 'nonlinear_source.i'
     exodiff = 'nonlinear_source_out.e'
-    requirement = "DiracKernel objects shall support the computation of off diagonal Jacobian terms."
+    requirement = "The system shall support the computation of off diagonal Jacobian terms for residual terms defined with a Dirac delta function."
   [../]
 []

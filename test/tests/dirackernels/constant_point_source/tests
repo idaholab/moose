@@ -1,24 +1,31 @@
 [Tests]
   issues = '#1695 #1696'
   design = 'syntax/DiracKernels/index.md'
-  [./test]
-    type = 'Exodiff'
-    input = 'constant_point_source_test.i'
-    exodiff = 'out.e'
-    requirement = "MOOSE shall support a constant point source implemented as a Dirac function in 2D."
-  [../]
 
-  [./1d]
-    type = 'Exodiff'
-    input = '1d_point_source.i'
-    exodiff = '1d_point_source_out.e'
-    requirement = "MOOSE shall support a constant point source implemented as a Dirac function in 1D."
-  [../]
+  [dim]
+    requirement = "The system shall support a constant point source implemented as a Dirac function:"
+    [1D]
+      type = 'Exodiff'
+      input = '1d_point_source.i'
+      exodiff = '1d_point_source_out.e'
 
-  [./3d]
-    type = 'Exodiff'
-    input = '3d_point_source.i'
-    exodiff = '3d_point_source_out.e'
-    requirement = "MOOSE shall support a constant point source implemented as a Dirac function in 3D."
-  [../]
+      detail = 'in 1D,'
+    []
+
+    [2D]
+      type = 'Exodiff'
+      input = 'constant_point_source_test.i'
+      exodiff = 'out.e'
+
+      detail = 'in 2D, and'
+    []
+
+    [3D]
+      type = 'Exodiff'
+      input = '3d_point_source.i'
+      exodiff = '3d_point_source_out.e'
+
+      detail = 'in 3D.'
+    []
+  []
 []

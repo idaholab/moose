@@ -1,75 +1,82 @@
 [Tests]
-  [./generate_sidesets_bounding_box_test]
-    type = 'Exodiff'
-    input = 'generate_sidesets_bounding_box.i'
-    cli_args = '--mesh-only'
-    exodiff = 'generate_sidesets_bounding_box_in.e'
-    requirement = 'MOOSE shall be able to use the BoundingBox class.'
-    design = 'meshgenerators/SideSetsFromBoundingBoxGenerator.md'
-    issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
-  [../]
+  design = 'meshgenerators/SideSetsFromBoundingBoxGenerator.md'
+  issues = '#11640'
 
-  [./test_multiple_boundary_ids]
-    type = 'Exodiff'
-    input = 'multiple_boundary_ids.i'
-    exodiff = 'multiple_boundary_ids_out.e'
-    requirement = 'MOOSE shall be able to use the BoundingBox class.'
-    design = 'meshgenerators/SideSetsFromBoundingBoxGenerator.md'
-    issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
-  [../]
-  
-  [./test_multiple_boundary_ids_3d]
-    type = 'Exodiff'
-    input = 'multiple_boundary_ids_3d.i'
-    exodiff = 'multiple_boundary_ids_3d_out.e'
-    requirement = 'MOOSE shall be able to use the BoundingBox class.'
-    design = 'meshgenerators/SideSetsFromBoundingBoxGenerator.md'
-    issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
-  [../]
-  [./test_overlapping_sidesets]
-    type = 'Exodiff'
-    input = 'overlapping_sidesets.i'
-    exodiff = 'overlapping_sidesets_out.e'
-    requirement = 'MOOSE shall be able to use the BoundingBox class.'
-    design = 'meshgenerators/SideSetsFromBoundingBoxGenerator.md'
-    issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
-  [../]
-  [./error_no_elements_in_bounding_box]
-    type = 'RunException'
-    input = 'error_no_elements_in_bounding_box.i'
-    expect_err = 'No elements found within the bounding box'
-    requirement = 'MOOSE shall be able to use the BoundingBox class.'
-    design = 'meshgenerators/SideSetsFromBoundingBoxGenerator.md'
-    issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
-  [../]
-  [./error_no_side_sets_found]
-    type = 'RunException'
-    input = 'error_no_side_sets_found.i'
-    expect_err = 'No side sets found on active elements within the bounding box'
-    requirement = 'MOOSE shall be able to use the BoundingBox class.'
-    design = 'meshgenerators/SideSetsFromBoundingBoxGenerator.md'
-    issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
-  [../]
-  [./error_no_nodes_found]
-    type = 'RunException'
-    input = 'error_no_nodes_found.i'
-    expect_err = 'No nodes found within the bounding box'
-    requirement = 'MOOSE shall be able to use the BoundingBox class.'
-    design = 'meshgenerators/SideSetsFromBoundingBoxGenerator.md'
-    issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
-  [../]
+  [generate]
+    requirement = 'The system shall have the ability to generate side sets based upon bounding '
+                  'boxes:'
+    [generate_sidesets_bounding_box_test]
+      type = 'Exodiff'
+      input = 'generate_sidesets_bounding_box.i'
+      cli_args = '--mesh-only'
+      exodiff = 'generate_sidesets_bounding_box_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = 'a bounding box contained within the domain,'
+    []
+
+    [test_multiple_boundary_ids]
+      type = 'Exodiff'
+      input = 'multiple_boundary_ids.i'
+      exodiff = 'multiple_boundary_ids_out.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = 'multiple bounding boxes contained within the domain,'
+    []
+
+    [test_multiple_boundary_ids_3d]
+      type = 'Exodiff'
+      input = 'multiple_boundary_ids_3d.i'
+      exodiff = 'multiple_boundary_ids_3d_out.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = 'multiple bounding boxes contained within a 3D domain, and'
+    []
+    [test_overlapping_sidesets]
+      type = 'Exodiff'
+      input = 'overlapping_sidesets.i'
+      exodiff = 'overlapping_sidesets_out.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = 'where bounding boxes perfectly overlap but create unique ids.'
+    []
+  []
+
+  [errors]
+    requirement = 'The system shall issue an error when attempting to create side sets from a '
+                  'bounding box:'
+
+    [no_elements_in_bounding_box]
+      type = 'RunException'
+      input = 'error_no_elements_in_bounding_box.i'
+      expect_err = 'No elements found within the bounding box'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = 'when no elements are located within the specified bounding box,'
+    []
+    [no_side_sets_found]
+      type = 'RunException'
+      input = 'error_no_side_sets_found.i'
+      expect_err = 'No side sets found on active elements within the bounding box'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = 'when the bounding box is larger than the domain so that no new side set is created, '
+               'and'
+    []
+    [no_nodes_found]
+      type = 'RunException'
+      input = 'error_no_nodes_found.i'
+      expect_err = 'No nodes found within the bounding box'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = 'when the bounding box fails to span over any nodes.'
+    []
+  []
 []
