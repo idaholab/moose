@@ -202,8 +202,7 @@ SinglePhaseFluidProperties::vaporPressure(const DualReal & T) const
   vaporPressure(temperature, p, dpdT);
 
   DualReal result = p;
-  for (std::size_t i = 0; i < T.derivatives().size(); ++i)
-    result.derivatives().insert(i) = T.derivatives()[i] * dpdT;
+  result.derivatives() = T.derivatives() * dpdT;
 
   return result;
 }
@@ -232,8 +231,7 @@ SinglePhaseFluidProperties::vaporTemperature(const DualReal & p) const
   vaporTemperature(pressure, T, dTdp);
 
   DualReal result = T;
-  for (std::size_t i = 0; i < p.derivatives().size(); ++i)
-    result.derivatives().insert(i) = p.derivatives()[i] * dTdp;
+  result.derivatives() = p.derivatives() * dTdp;
 
   return result;
 }

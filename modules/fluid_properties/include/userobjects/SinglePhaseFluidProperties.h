@@ -32,8 +32,7 @@ InputParameters validParams<SinglePhaseFluidProperties>();
     want##_from_##prop1##_##prop2(raw1, raw2, x, dxd1, dxd2);                                      \
                                                                                                    \
     DualReal result = x;                                                                           \
-    for (size_t i = 0; i < p1.derivatives().size(); i++)                                           \
-      result.derivatives().insert(i) = p1.derivatives()[i] * dxd1 + p2.derivatives()[i] * dxd2;    \
+    result.derivatives() = p1.derivatives() * dxd1 + p2.derivatives() * dxd2;                      \
     return result;                                                                                 \
   }                                                                                                \
                                                                                                    \
