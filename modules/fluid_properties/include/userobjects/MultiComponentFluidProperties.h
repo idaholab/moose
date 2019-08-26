@@ -55,9 +55,8 @@ InputParameters validParams<MultiComponentFluidProperties>();
     want##_from_##prop1##_##prop2##_##prop3(raw1, raw2, raw3, x, dxd1, dxd2, dxd3);                \
                                                                                                    \
     DualReal result = x;                                                                           \
-    for (std::size_t i = 0; i < p1.derivatives().size(); ++i)                                      \
-      result.derivatives().insert(i) =                                                             \
-          p1.derivatives()[i] * dxd1 + p2.derivatives()[i] * dxd2 + p3.derivatives()[i] * dxd3;    \
+    result.derivatives() =                                                                         \
+        p1.derivatives() * dxd1 + p2.derivatives() * dxd2 + p3.derivatives() * dxd3;               \
                                                                                                    \
     return result;                                                                                 \
   }

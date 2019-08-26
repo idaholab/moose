@@ -399,8 +399,7 @@ PorousFlowWaterNCG::enthalpyOfDissolution(const DualReal & temperature) const
   const Real dhdis_dT =
       (-_R * t2 * t2 * Kh2.derivatives()[_Tidx] / Kh2 / _Mncg - hdis).value() / dT;
 
-  for (std::size_t i = 0; i < temperature.derivatives().size(); ++i)
-    hdis.derivatives().insert(i) = temperature.derivatives()[i] * dhdis_dT;
+  hdis.derivatives() = temperature.derivatives() * dhdis_dT;
 
   return hdis;
 }

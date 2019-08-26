@@ -180,8 +180,7 @@ PorousFlowCapillaryPressure::capillaryPressure(DualReal saturation, unsigned qp)
   const Real dPc_ds = dCapillaryPressure(saturation.value(), qp);
 
   DualReal result = Pc;
-  for (std::size_t i = 0; i < saturation.derivatives().size(); ++i)
-    result.derivatives().insert(i) = saturation.derivatives()[i] * dPc_ds;
+  result.derivatives() = saturation.derivatives() * dPc_ds;
 
   return result;
 }

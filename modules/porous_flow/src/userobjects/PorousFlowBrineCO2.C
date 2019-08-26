@@ -1121,9 +1121,7 @@ PorousFlowBrineCO2::enthalpyOfDissolutionGas(const DualReal & temperature,
       (-_R * temperature * temperature * Kh3.derivatives()[_Tidx] / Kh3 / _Mco2 - hdis).value() /
       dX;
 
-  for (std::size_t i = 0; i < temperature.derivatives().size(); ++i)
-    hdis.derivatives().insert(i) =
-        temperature.derivatives()[i] * dhdis_dT + Xnacl.derivatives()[i] * dhdis_dX;
+  hdis.derivatives() = temperature.derivatives() * dhdis_dT + Xnacl.derivatives() * dhdis_dX;
 
   return hdis;
 }
