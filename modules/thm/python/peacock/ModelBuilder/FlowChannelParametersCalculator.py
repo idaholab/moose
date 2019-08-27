@@ -2,6 +2,7 @@ import os, sys
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot, QProcess
 from PyQt5.QtWidgets import QSizePolicy
+from PyQt5.QtGui import QDoubleValidator
 import peacock
 import FlowChannelGeometries
 
@@ -48,6 +49,9 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
 
                 self.ctlInputs[i][name] = QtWidgets.QLineEdit(self)
                 self.ctlInputs[i][name].setToolTip(hint)
+                validator = QDoubleValidator(self)
+                validator.setBottom(0.)
+                self.ctlInputs[i][name].setValidator(validator)
                 self.ctlInputs[i][name].returnPressed.connect(self.computeParameters)
 
                 lblUnit = QtWidgets.QLabel(unit, self)
