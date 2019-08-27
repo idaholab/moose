@@ -324,16 +324,13 @@ class TestSQADependencies(MooseDocsTestCase):
                                                   specs=['demo'])))
 
     def testCommand(self):
-        text = u"!sqa dependencies suffix=foo"
+        text = u"!sqa dependencies suffix=foo category=Demo"
         ast = self.tokenize(text)
 
         self.assertSize(ast, 1)
-        self.assertToken(ast(0), 'UnorderedList', size=2)
+        self.assertToken(ast(0), 'UnorderedList', size=1)
         self.assertToken(ast(0)(0), 'ListItem', size=1)
         self.assertToken(ast(0)(0)(0), 'AutoLink', page=u'sqa/Demo2_foo.md', optional=True, warning=True)
-        self.assertToken(ast(0), 'UnorderedList', size=2)
-        self.assertToken(ast(0)(1), 'ListItem', size=1)
-        self.assertToken(ast(0)(1)(0), 'AutoLink', page=u'sqa/Demo_foo.md', optional=True, warning=True)
 
 class TestSQADocument(MooseDocsTestCase):
     EXTENSIONS = [core, command, floats, autolink, heading, sqa]
