@@ -42,7 +42,7 @@ ClosureTest1PhaseAction::addAuxVariables()
 void
 ClosureTest1PhaseAction::addMaterials()
 {
-  TestAction::addMaterials();
+  ClosureTestAction::addMaterials();
   FlowModelSetup1Phase::addMaterials();
 }
 
