@@ -38,6 +38,18 @@ class TestFlowChannelParametersCalculator(unittest.TestCase):
         self.assertTrue(self._plugin.ctlParams[idx]['D_h'].displayText() == '1.000000e+00')
         self.assertTrue(self._plugin.ctlParams[idx]['P_hf'].displayText() == '4.000000e+00')
 
+    def testRectangular(self):
+        idx = 4
+        self._plugin.GeometryLayout.setCurrentIndex(idx)
+
+        self._plugin.ctlInputs[idx]['a'].setText('2')
+        self._plugin.ctlInputs[idx]['b'].setText('3')
+        self._plugin.computeParameters()
+
+        self.assertTrue(self._plugin.ctlParams[idx]['A'].displayText() == '6.000000e+00')
+        self.assertTrue(self._plugin.ctlParams[idx]['D_h'].displayText() == '2.400000e+00')
+        self.assertTrue(self._plugin.ctlParams[idx]['P_hf'].displayText() == '1.000000e+01')
+
     def testAnnulus(self):
         idx = 2
         self._plugin.GeometryLayout.setCurrentIndex(idx)
