@@ -263,4 +263,3 @@ public:
   friend class ComputeNodalKernelJacobiansThread;
   friend class ComputeNodalKernelBCJacobiansThread;
 };
-

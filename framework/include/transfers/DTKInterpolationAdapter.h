@@ -122,4 +122,3 @@ protected:
 };
 
 #endif // #ifdef LIBMESH_TRILINOS_HAVE_DTK
-

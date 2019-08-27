@@ -191,4 +191,3 @@ private:
   /// Flag to output discontinuous format in Exodus
   bool _discontinuous;
 };
-

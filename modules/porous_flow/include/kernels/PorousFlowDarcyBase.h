@@ -203,4 +203,3 @@ protected:
    */
   void harmonicMean(JacRes res_or_jac, unsigned int ph, unsigned int pvar);
 };
-

@@ -155,4 +155,3 @@ protected:
   /// Critical temperature of water (K)
   const Real _water_critical_temperature;
 };
-

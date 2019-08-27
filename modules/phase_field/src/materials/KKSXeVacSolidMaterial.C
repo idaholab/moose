@@ -55,8 +55,9 @@ KKSXeVacSolidMaterial::expectedNumArgs()
 Real
 KKSXeVacSolidMaterial::computeF()
 {
-  return 1.0 / _Omega * (_kB * _T * (cLogC(_cmv[_qp]) + cLogC(1.0 - _cmv[_qp])) + _Efv * _cmv[_qp] +
-                         _kB * _T * (cLogC(_cmg[_qp]) + cLogC(1.0 - _cmg[_qp])) + _Efg * _cmg[_qp]);
+  return 1.0 / _Omega *
+         (_kB * _T * (cLogC(_cmv[_qp]) + cLogC(1.0 - _cmv[_qp])) + _Efv * _cmv[_qp] +
+          _kB * _T * (cLogC(_cmg[_qp]) + cLogC(1.0 - _cmg[_qp])) + _Efg * _cmg[_qp]);
 }
 
 // Derivative of the Free energy

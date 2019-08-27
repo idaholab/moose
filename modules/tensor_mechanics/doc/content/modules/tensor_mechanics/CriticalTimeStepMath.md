@@ -7,7 +7,7 @@ _critical time step_ so the solution remains valid.
 
 Critical time step is defined as the smallest time step which ensures that the speed
 of propagating waves within an element is less than what it can theoretically transmit.
-As per [!citet](Hughes1987), critical time step (\Delta t_{crit}) is mathematically defined by:
+As per [!citet](hughes1987finite), critical time step (\Delta t_{crit}) is mathematically defined by:
 
 \begin{equation}
 \label{eqn1}
@@ -52,7 +52,7 @@ the implementations for this class are generalized and adapted for an elastic be
 difference being: expressing some quantities in the [!citet](Krieg1973) work in terms of the second
 moment of area ($I$) and the cross sectional area ($A$).
 
-First, two quantities, $r_o^2$ and $r_A^2$, are defined below.
+First, two quantities ($r_o^2$ and $r_A^2$) are defined below.
 
 \begin{equation}
 \label{eqn4}

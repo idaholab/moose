@@ -55,4 +55,3 @@ protected:
 
   std::vector<JacobianBlock *> _blocks;
 };
-

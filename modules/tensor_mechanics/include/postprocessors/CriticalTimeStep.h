@@ -11,9 +11,7 @@
 
 #include "ElementPostprocessor.h"
 #include "ComputeStressBase.h"
-// #include "ComputeElasticityTensorBase.h"
 #include "GuaranteeConsumer.h"
-
 
 // Forward Declarations
 class CriticalTimeStep;
@@ -37,12 +35,10 @@ public:
   virtual void threadJoin(const UserObject & y) override;
 
 protected:
-
   const MaterialProperty<Real> & _mat_dens;
 
   const MaterialProperty<Real> & _effective_stiffness;
 
   Real _total_size;
   int _elems;
-
 };

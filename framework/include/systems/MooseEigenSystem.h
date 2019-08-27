@@ -107,4 +107,3 @@ protected:
   /// counter of eigen kernels
   unsigned int _eigen_kernel_counter;
 };
-

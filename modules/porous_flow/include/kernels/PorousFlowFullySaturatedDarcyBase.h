@@ -85,4 +85,3 @@ protected:
   /// Gravity pointing downwards
   const RealVectorValue _gravity;
 };
-

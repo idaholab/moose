@@ -288,4 +288,3 @@ template <>
 void dataStore(std::ostream & stream, GrainTracker::PartialFeatureData & feature, void * context);
 template <>
 void dataLoad(std::istream & stream, GrainTracker::PartialFeatureData & feature, void * context);
-

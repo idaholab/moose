@@ -29,4 +29,3 @@ public:
   virtual void computeNeighborValuesFace() override;
   virtual void computeNeighborValues() override;
 };
-

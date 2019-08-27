@@ -84,4 +84,3 @@ protected:
   /// NaCl mass fraction at the qps or nodes
   const VariableValue & _xnacl;
 };
-

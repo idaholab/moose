@@ -57,8 +57,8 @@ validParams<ComputeIncrementalBeamStrain>()
   params.addParam<std::vector<MaterialPropertyName>>(
       "eigenstrain_names", "List of beam eigenstrains to be applied in this strain calculation.");
   params.addParam<FunctionName>(
-  "elasticity_prefactor",
-  "Optional function to use as a scalar prefactor on the elasticity vector for the beam.");
+      "elasticity_prefactor",
+      "Optional function to use as a scalar prefactor on the elasticity vector for the beam.");
   return params;
 }
 
@@ -105,7 +105,6 @@ ComputeIncrementalBeamStrain::ComputeIncrementalBeamStrain(const InputParameters
     _prefactor_function(isParamValid("elasticity_prefactor") ? &getFunction("elasticity_prefactor")
                                                              : nullptr)
 {
-  // issueGuarantee("effective_stiffness", Guarantee::ISOTROPIC);
   // Checking for consistency between length of the provided displacements and rotations vector
   if (_ndisp != _nrot)
     mooseError("ComputeIncrementalBeamStrain: The number of variables supplied in 'displacements' "
@@ -332,9 +331,11 @@ ComputeIncrementalBeamStrain::computeQpStrain()
   Real C1_paper = std::sqrt(_material_stiffness[0](0));
   Real C2_paper = std::sqrt(_material_stiffness[0](1));
 
-  Real r_Asq = std::min(Utility::pow<2>(_original_length[0]) / Utility::pow<2>(C1_paper), Utility::pow<2>(_original_length[0]) / Utility::pow<2>(C2_paper));
-  Real r_osq = Utility::pow<2>(_original_length[0])/2 * (1 / Utility::pow<2>(C1_paper) + 1 / Utility::pow<2>(C2_paper) - (A_avg / Iz_avg) * Utility::pow<2>(_original_length[0] / C1_paper));
-
+  Real r_Asq = std::min(Utility::pow<2>(_original_length[0]) / Utility::pow<2>(C1_paper),
+                        Utility::pow<2>(_original_length[0]) / Utility::pow<2>(C2_paper));
+  Real r_osq = Utility::pow<2>(_original_length[0]) / 2 *
+               (1 / Utility::pow<2>(C1_paper) + 1 / Utility::pow<2>(C2_paper) -
+                (A_avg / Iz_avg) * Utility::pow<2>(_original_length[0] / C1_paper));
 
   if (r_osq > r_Asq)
   {
@@ -342,12 +343,19 @@ ComputeIncrementalBeamStrain::computeQpStrain()
   }
   else
   {
-    Real temp1 = Utility::pow<2>(C2_paper / C1_paper) + 1 - Utility::pow<2>(C2_paper / C1_paper) * Utility::pow<2>(_original_length[0]) * A_avg / Iz_avg;
-    Real temp2 = 1 - 0.5 * (1 + Utility::pow<2>(C1_paper / C2_paper) - Utility::pow<2>(_original_length[0]) * A_avg / Iz_avg);
-    Real temp3 = 1 - 0.5 * (1 + Utility::pow<2>(C2_paper / C1_paper) - Utility::pow<2>(C2_paper / C1_paper) * Utility::pow<2>(_original_length[0]) * A_avg / Iz_avg);
-    _effective_stiffness[_qp] = std::sqrt(Utility::pow<2>(_original_length[0]) / (2 * Utility::pow<2>(C2_paper)) * temp1 + Iz_avg / (A_avg * Utility::pow<2>(C2_paper)) * temp2 * temp3);
+    Real temp1 = Utility::pow<2>(C2_paper / C1_paper) + 1 -
+                 Utility::pow<2>(C2_paper / C1_paper) * Utility::pow<2>(_original_length[0]) *
+                     A_avg / Iz_avg;
+    Real temp2 = 1 - 0.5 * (1 + Utility::pow<2>(C1_paper / C2_paper) -
+                            Utility::pow<2>(_original_length[0]) * A_avg / Iz_avg);
+    Real temp3 = 1 - 0.5 * (1 + Utility::pow<2>(C2_paper / C1_paper) -
+                            Utility::pow<2>(C2_paper / C1_paper) *
+                                Utility::pow<2>(_original_length[0]) * A_avg / Iz_avg);
+    _effective_stiffness[_qp] =
+        std::sqrt(Utility::pow<2>(_original_length[0]) / (2 * Utility::pow<2>(C2_paper)) * temp1 +
+                  Iz_avg / (A_avg * Utility::pow<2>(C2_paper)) * temp2 * temp3);
 
-    _effective_stiffness[_qp] =  _original_length[0] / _effective_stiffness[_qp];
+    _effective_stiffness[_qp] = _original_length[0] / _effective_stiffness[_qp];
   }
   if (_prefactor_function)
     _effective_stiffness[_qp] *= std::sqrt(_prefactor_function->value(_t, _q_point[_qp]));

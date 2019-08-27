@@ -82,4 +82,3 @@ protected:
   const VariableName _temperature_variable_name;
   const VariableName _mass_fraction_variable_name;
 };
-

@@ -126,4 +126,3 @@ std::string stringifyExact(Real);
  * @return Converted point
  */
 Point toPoint(const std::vector<Real> & pos);
-

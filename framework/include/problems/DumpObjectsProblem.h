@@ -123,4 +123,3 @@ protected:
 
   std::shared_ptr<DumpObjectsNonlinearSystem> _nl_sys;
 };
-

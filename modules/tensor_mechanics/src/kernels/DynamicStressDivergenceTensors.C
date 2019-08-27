@@ -48,18 +48,18 @@ Real
 DynamicStressDivergenceTensors::computeQpResidual()
 {
   /**
-  *This kernel needs to be used only if either Rayleigh damping or numerical damping through HHT
-  *time integration scheme needs to be added to the problem thorugh the stiffness dependent damping
-  * parameter _zeta or HHT parameter _alpha, respectively.
-  *
-  * The residual of _zeta*K*[(1+_alpha)vel-_alpha vel_old]+ alpha K [ u - uold] + K u is required
-  * = _zeta*[(1+_alpha)d/dt (Div sigma)-alpha d/dt(Div sigma_old)] +alpha [Div sigma - Div
-  *sigma_old]+ Div sigma
-  * = _zeta*[(1+alpha)(Div sigma - Div sigma_old)/dt - alpha (Div sigma_old - Div sigma_older)/dt]
-  *   + alpha [Div sigma - Div sigma_old] +Div sigma
-  * = [(1+_alpha)*_zeta/dt +_alpha+1]* Div sigma - [(1+2_alpha)*_zeta/dt + _alpha] Div sigma_old +
-  *_alpha*_zeta/dt Div sigma_older
-  */
+   *This kernel needs to be used only if either Rayleigh damping or numerical damping through HHT
+   *time integration scheme needs to be added to the problem thorugh the stiffness dependent damping
+   * parameter _zeta or HHT parameter _alpha, respectively.
+   *
+   * The residual of _zeta*K*[(1+_alpha)vel-_alpha vel_old]+ alpha K [ u - uold] + K u is required
+   * = _zeta*[(1+_alpha)d/dt (Div sigma)-alpha d/dt(Div sigma_old)] +alpha [Div sigma - Div
+   *sigma_old]+ Div sigma
+   * = _zeta*[(1+alpha)(Div sigma - Div sigma_old)/dt - alpha (Div sigma_old - Div sigma_older)/dt]
+   *   + alpha [Div sigma - Div sigma_old] +Div sigma
+   * = [(1+_alpha)*_zeta/dt +_alpha+1]* Div sigma - [(1+2_alpha)*_zeta/dt + _alpha] Div sigma_old +
+   *_alpha*_zeta/dt Div sigma_older
+   */
 
   Real residual = 0.0;
   if (_static_initialization && _t == _dt)

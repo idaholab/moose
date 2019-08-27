@@ -45,8 +45,8 @@ class FEType;
  * A class for performing interplation transfers via DTK.
  */
 class DTKInterpolationEvaluator
-    : public DataTransferKit::FieldEvaluator<long unsigned int,
-                                             DataTransferKit::FieldContainer<double>>
+  : public DataTransferKit::FieldEvaluator<long unsigned int,
+                                           DataTransferKit::FieldContainer<double>>
 {
 public:
   typedef DataTransferKit::MeshContainer<long unsigned int> MeshContainerType;
@@ -73,4 +73,3 @@ protected:
 } // namespace libMesh
 
 #endif // #ifdef LIBMESH_TRILINOS_HAVE_DTK
-

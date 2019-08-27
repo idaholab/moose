@@ -136,4 +136,3 @@ protected:
   /// set<objectname, task> used to track if an object previously added is being added again
   std::set<std::pair<std::string, std::string>> _current_objs;
 };
-

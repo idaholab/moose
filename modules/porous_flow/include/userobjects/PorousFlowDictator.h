@@ -180,4 +180,3 @@ private:
   /// _pf_var_num[i] = the porous flow variable corresponding to moose variable i
   std::vector<unsigned int> _pf_var_num;
 };
-

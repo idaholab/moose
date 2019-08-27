@@ -28,4 +28,3 @@ public:
   void random();
   void random(MooseRandom & random);
 };
-

@@ -85,8 +85,9 @@ InertialTorque::computeQpResidual()
   for (unsigned int j = 0; j < _ndisp; ++j)
   {
     // Newmark and damping
-    _accel[j] = 1.0 / _beta * ((((*_disp[j])[_qp] - (*_disp_old[j])[_qp]) / (_dt * _dt)) -
-                               (*_vel_old[j])[_qp] / _dt - (*_accel_old[j])[_qp] * (0.5 - _beta));
+    _accel[j] = 1.0 / _beta *
+                ((((*_disp[j])[_qp] - (*_disp_old[j])[_qp]) / (_dt * _dt)) -
+                 (*_vel_old[j])[_qp] / _dt - (*_accel_old[j])[_qp] * (0.5 - _beta));
     _vel[j] = (*_vel_old[j])[_qp] + (_dt * (1 - _gamma)) * (*_accel_old[j])[_qp] +
               _gamma * _dt * _accel[j];
     _accel[j] =
@@ -111,8 +112,9 @@ InertialTorque::computeQpOffDiagJacobian(unsigned int jvar)
 {
   for (unsigned int j = 0; j < _ndisp; ++j)
   {
-    _accel[j] = 1.0 / _beta * ((((*_disp[j])[_qp] - (*_disp_old[j])[_qp]) / (_dt * _dt)) -
-                               (*_vel_old[j])[_qp] / _dt - (*_accel_old[j])[_qp] * (0.5 - _beta));
+    _accel[j] = 1.0 / _beta *
+                ((((*_disp[j])[_qp] - (*_disp_old[j])[_qp]) / (_dt * _dt)) -
+                 (*_vel_old[j])[_qp] / _dt - (*_accel_old[j])[_qp] * (0.5 - _beta));
     _daccel[j] = 1.0 / _beta / _dt / _dt;
     _vel[j] = (*_vel_old[j])[_qp] + (_dt * (1 - _gamma)) * (*_accel_old[j])[_qp] +
               _gamma * _dt * _accel[j];

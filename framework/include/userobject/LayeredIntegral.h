@@ -40,4 +40,3 @@ public:
   virtual void finalize() override;
   virtual void threadJoin(const UserObject & y) override;
 };
-

@@ -23,4 +23,3 @@ public:
 
   virtual void act();
 };
-

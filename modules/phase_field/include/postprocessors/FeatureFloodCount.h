@@ -795,4 +795,3 @@ struct enable_bitmask_operators<FeatureFloodCount::BoundaryIntersection>
 {
   static const bool enable = true;
 };
-

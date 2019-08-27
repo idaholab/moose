@@ -28,7 +28,6 @@ public:
 protected:
   virtual void computeQpElasticityTensor() override;
 
-
   /// Elastic constants
   bool _bulk_modulus_set;
   bool _lambda_set;

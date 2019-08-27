@@ -541,4 +541,3 @@ protected:
   /// computational burden when small values of Z are present
   const Real _Zmin;
 };
-

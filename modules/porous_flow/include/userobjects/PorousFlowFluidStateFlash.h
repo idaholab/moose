@@ -80,4 +80,3 @@ protected:
   /// Tolerance for Newton-Raphson iterations
   const Real _nr_tol;
 };
-

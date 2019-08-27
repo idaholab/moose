@@ -159,4 +159,3 @@ protected:
 
   usingComputeFiniteStrainElasticStressMembers;
 };
-

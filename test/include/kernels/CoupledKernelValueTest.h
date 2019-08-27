@@ -30,4 +30,3 @@ protected:
   const VariableValue & _var2;
   unsigned int _var2_num;
 };
-

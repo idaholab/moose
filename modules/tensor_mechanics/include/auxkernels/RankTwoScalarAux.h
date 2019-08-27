@@ -48,4 +48,3 @@ protected:
   const Point _point2;
   Point _input_direction;
 };
-

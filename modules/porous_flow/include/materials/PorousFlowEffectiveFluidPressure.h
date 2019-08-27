@@ -55,4 +55,3 @@ protected:
   /// d(_pf)/d(PorousFlow variable)
   MaterialProperty<std::vector<Real>> & _dpf_dvar;
 };
-

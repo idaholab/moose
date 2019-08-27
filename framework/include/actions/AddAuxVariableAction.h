@@ -43,4 +43,3 @@ public:
    */
   static MooseEnum getAuxVariableOrders();
 };
-

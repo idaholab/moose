@@ -16,7 +16,8 @@ InputParameters
 validParams<CriticalTimeStep>()
 {
   InputParameters params = validParams<ElementPostprocessor>();
-  params.addClassDescription("Computes and reports the critical time step for the explicit solver.");
+  params.addClassDescription(
+      "Computes and reports the critical time step for the explicit solver.");
   params.addParam<MaterialPropertyName>(
       "density0",
       "density",
@@ -26,9 +27,9 @@ validParams<CriticalTimeStep>()
 
 CriticalTimeStep::CriticalTimeStep(const InputParameters & parameters)
   : ElementPostprocessor(parameters),
-  GuaranteeConsumer(this),
-  _mat_dens(getMaterialPropertyByName<Real>("density")),
-  _effective_stiffness(getMaterialPropertyByName<Real>("effective_stiffness"))
+    GuaranteeConsumer(this),
+    _mat_dens(getMaterialPropertyByName<Real>("density")),
+    _effective_stiffness(getMaterialPropertyByName<Real>("effective_stiffness"))
 {
 }
 
@@ -51,7 +52,8 @@ void
 CriticalTimeStep::execute()
 {
   Real dens = _mat_dens[0];
-  _total_size = std::min(_current_elem->hmin() * std::sqrt(dens)/(_effective_stiffness[0]), _total_size);
+  _total_size =
+      std::min(_current_elem->hmin() * std::sqrt(dens) / (_effective_stiffness[0]), _total_size);
   _elems++;
 }
 
@@ -62,7 +64,6 @@ CriticalTimeStep::getValue()
   gatherSum(_elems);
 
   return _total_size;
-
 }
 
 void

@@ -124,4 +124,3 @@ protected:
   /// Transverse dispersivity for each phase
   const std::vector<Real> _disp_trans;
 };
-

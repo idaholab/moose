@@ -93,4 +93,3 @@ protected:
   /// output aux variables to generate for sclar stress/strain tensor quantities
   std::vector<std::string> _generate_output;
 };
-

@@ -28,4 +28,3 @@ public:
 private:
   void setupMesh(MooseMesh * mesh);
 };
-

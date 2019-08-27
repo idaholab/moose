@@ -28,8 +28,8 @@ class MultiApp;
  * Evaluates the specified UserObject and returns the result in a DTK FieldContainer.
  */
 class MultiAppDTKUserObjectEvaluator
-    : public DataTransferKit::FieldEvaluator<long unsigned int,
-                                             DataTransferKit::FieldContainer<double>>
+  : public DataTransferKit::FieldEvaluator<long unsigned int,
+                                           DataTransferKit::FieldContainer<double>>
 {
 public:
   MultiAppDTKUserObjectEvaluator(MultiApp & multi_app, const std::string & user_object_name);

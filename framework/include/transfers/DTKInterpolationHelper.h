@@ -78,4 +78,3 @@ protected:
 } // namespace libMesh
 
 #endif // #ifdef LIBMESH_TRILINOS_HAVE_DTK
-

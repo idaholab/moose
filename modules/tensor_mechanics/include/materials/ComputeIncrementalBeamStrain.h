@@ -11,7 +11,6 @@
 
 #include "Material.h"
 #include "RankTwoTensor.h"
-// #include "ComputeElasticityTensorBase.h"
 
 /**
  * ComputeIncrementalBeamStrain defines a displacement and rotation strain increment and rotation
@@ -24,13 +23,11 @@ class ComputeIncrementalBeamStrain;
 template <>
 InputParameters validParams<ComputeIncrementalBeamStrain>();
 
-class ComputeIncrementalBeamStrain : public Material// , public ComputeElasticityTensorBase
+class ComputeIncrementalBeamStrain : public Material
 {
 public:
   ComputeIncrementalBeamStrain(const InputParameters & parameters);
 
-  // virtual void initialize() override;
-  // virtual void execute() override;
   virtual void computeProperties() override;
 
 protected:
@@ -178,5 +175,4 @@ protected:
 
   /*Real _total_size;
   int _elems;*/
-
 };

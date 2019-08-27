@@ -185,4 +185,3 @@ protected:
   /// Build grain and phase weight maps
   void buildNodeWeightMaps();
 };
-
