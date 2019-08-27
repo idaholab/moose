@@ -21,6 +21,9 @@ public:
   virtual bool isTemperatureType() const override;
 
 protected:
+  /// Get the FE type for wall temperature variable
+  virtual const FEType & getFEType();
+
   /**
    * Adds 1-phase heat transfer kernels
    */
