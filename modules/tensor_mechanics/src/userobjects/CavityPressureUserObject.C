@@ -75,14 +75,16 @@ CavityPressureUserObject::getValue(const MooseEnum & quantity) const
   if (quantity == INITIAL_MOLES)
   {
     if (_n0 < 0.0)
-      mooseError("Negative number of moles calculated as an input for the cavity pressure");
+      mooseError("In ",
+                 _name,
+                 ": Negative number of moles calculated as an input for the cavity pressure");
 
     value = _n0;
   }
   else if (quantity == CAVITY_PRESSURE)
     value = _cavity_pressure;
   else
-    mooseError("Unknown quantity in " + name());
+    mooseError("In ", _name, ": Unknown quantity.");
 
   return value;
 }

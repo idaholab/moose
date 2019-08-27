@@ -10,7 +10,6 @@
 #pragma once
 
 #include "Action.h"
-#include "MooseTypes.h"
 
 class CavityPressureAction;
 

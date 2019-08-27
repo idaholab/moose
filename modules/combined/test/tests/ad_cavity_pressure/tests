@@ -1,0 +1,112 @@
+[Tests]
+  issues = '#2703'
+  design = 'CavityPressure/index.md'
+  [./test]
+    type = 'Exodiff'
+    input = 'cavity_pressure.i'
+    exodiff = 'cavity_pressure_out.e'
+    abs_zero = 1e-10
+    rel_err = 1e-5
+    requirement = 'The system shall compute a cavity pressure based on the ideal gas law using the AD formuation'
+  [../]
+  [./test-jac]
+    type = 'PetscJacobianTester'
+    input = 'cavity_pressure.i'
+    ratio_tol = 5e-8
+    difference_tol = 1e-4
+    cli_args = 'Executioner/num_steps=1 -snes_test_err 1e-9'
+    run_sim = True
+    heavy = True
+    method = 'OPT'
+    petsc_version = '>=3.9.4'
+    requirement = 'The system shall compute a cavity pressure based on the ideal gas law using the AD formuation and calculate a perfect Jacobian'
+  [../]
+
+  [./test_init_temp]
+    type = 'Exodiff'
+    input = 'cavity_pressure_init_temp.i'
+    exodiff = 'cavity_pressure_init_temp_out.e'
+    abs_zero = 1e-10
+    rel_err = 1e-5
+    requirement = 'The system shall compute a cavity pressure based on the ideal gas law where the initial temperature of the cavity is independently specified and using the AD formuation'
+  [../]
+  [./test_init_temp-jac]
+    type = 'PetscJacobianTester'
+    input = 'cavity_pressure_init_temp.i'
+    ratio_tol = 5e-8
+    difference_tol = 1e-4
+    cli_args = 'Executioner/num_steps=1 -snes_test_err 1e-9'
+    run_sim = True
+    heavy = True
+    method = 'OPT'
+    petsc_version = '>=3.9.4'
+    requirement = 'The system shall compute a cavity pressure based on the ideal gas law where the initial temperature of the cavity is independently specified and using the AD formuation and calculate a perfect Jacobian'
+  [../]
+
+  [./test_rz]
+    type = 'Exodiff'
+    input = 'cavity_pressure_rz.i'
+    exodiff = 'cavity_pressure_rz_out.e'
+    abs_zero = 1e-10
+    recover = false
+    requirement = 'The system shall compute a cavity pressure based on the ideal gas law for an axisymmetric model using the AD formuation'
+  [../]
+  [./test_rz-jac]
+    type = 'PetscJacobianTester'
+    input = 'cavity_pressure_rz.i'
+    ratio_tol = 1e-7
+    difference_tol = 1e3
+    cli_args = 'Executioner/num_steps=1 -snes_test_err 1e-9'
+    run_sim = True
+    heavy = True
+    method = 'OPT'
+    petsc_version = '>=3.9.4'
+    requirement = 'The system shall compute a cavity pressure based on the ideal gas law for an axisymmetric model using the AD formuation and calculate a perfect Jacobian'
+  [../]
+
+  [./test_rz_restart1]
+    type = RunApp
+    prereq = test_rz
+    input = 'cavity_pressure_rz.i'
+    cli_args = 'Executioner/num_steps=1'
+    recover = false
+    requirement = 'The system shall write a restart file with cavity pressure information using the AD formuation'
+  [../]
+
+  [./test_rz_restart2]
+    type = 'Exodiff'
+    prereq = 'test_rz_restart1'
+    input = 'cavity_pressure_rz.i'
+    exodiff = 'cavity_pressure_rz_out.e'
+    delete_output_before_running = false
+    requirement = 'The system shall restart properly when running with cavity pressure using the AD formuation'
+  [../]
+
+  [./rz_negative_moles_check]
+    type = RunException
+    input = 'cavity_pressure_negative_volume.i'
+    expect_err = 'Negative number of moles calculated as an input for the cavity pressure'
+    requirement = 'The system shall report an error if a negative volume is supplied to the cavity pressure calculation using the AD formuation'
+  [../]
+
+  [./test_vector_input]
+    type = 'Exodiff'
+    input = 'cavity_pressure_vector.i'
+    exodiff = 'cavity_pressure_vector_out.e'
+    abs_zero = 1e-10
+    rel_err = 1e-5
+    requirement = 'The system shall compute a cavity pressure based on the ideal gas law when given a set of internal volumes to sum using the AD formuation'
+  [../]
+  [./test_vector_input-jac]
+    type = 'PetscJacobianTester'
+    input = 'cavity_pressure_vector.i'
+    ratio_tol = 5e-8
+    difference_tol = 1e-4
+    cli_args = 'Executioner/num_steps=1 -snes_test_err 1e-9'
+    run_sim = True
+    heavy = True
+    method = 'OPT'
+    petsc_version = '>=3.9.4'
+    requirement = 'The system shall compute a cavity pressure based on the ideal gas law when given a set of internal volumes to sum using the AD formuation and calculate a perfect Jacobian'
+  [../]
+[]

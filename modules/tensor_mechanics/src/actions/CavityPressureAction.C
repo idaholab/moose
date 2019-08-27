@@ -60,7 +60,7 @@ CavityPressureAction::act()
 
   std::string kernel_name = ad_prepend + "Pressure";
 
-    InputParameters params = _factory.getValidParams(kernel_name + ad_append);
+  InputParameters params = _factory.getValidParams(kernel_name + ad_append);
   params.applyParameters(parameters());
 
   params.set<PostprocessorName>("postprocessor") =
