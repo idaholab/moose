@@ -150,6 +150,7 @@ def main(size=None):
     """
     from ModelBuilderPluginManager import ModelBuilderPluginManager
     widget = ModelBuilderPluginManager(plugins=[FlowChannelParametersCalculator])
+    widget.MainLayout.setContentsMargins(5, 5, 5, 5)
     widget.show()
     widget.setWindowTitle("Flow Channel Parameter Calculator")
     return widget
