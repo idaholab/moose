@@ -1,7 +1,7 @@
 import os, sys
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot, QProcess
-from PyQt5.QtWidgets import QSizePolicy
+from PyQt5.QtWidgets import QSizePolicy, QLabel
 from PyQt5.QtGui import QDoubleValidator
 import peacock
 import FlowChannelGeometries
@@ -22,6 +22,7 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
         num_geometris = len(FlowChannelGeometries.GEOMETRIES)
         self.ctlInputs = []
         self.ctlParams = []
+        self.lblErrorMessage = []
 
         self.MainLayout = QtWidgets.QVBoxLayout(self)
 
@@ -104,6 +105,11 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
             widget.setLayout(paramsLayout)
             self.GeometryLayout.addWidget(widget)
 
+            lblErrorMsg = QLabel(self)
+            lblErrorMsg.setStyleSheet("QLabel { color: red; }");
+            paramsLayout.addRow(lblErrorMsg)
+            self.lblErrorMessage.append(lblErrorMsg)
+
         self.MainLayout.addLayout(self.GeometryLayout)
 
         self.setMainLayoutName('MainLayout')
@@ -139,10 +145,17 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
 
         params = geom.compute(**args)
 
-        for o in geom.outputs():
-            name = o['name']
-            s = "%e" % params[name]
-            self.ctlParams[g][name].setText(s)
+        if 'error' in params:
+            self.lblErrorMessage[g].setText(params['error'])
+            for o in geom.outputs():
+                name = o['name']
+                self.ctlParams[g][name].setText('error')
+        else:
+            self.lblErrorMessage[g].setText("")
+            for o in geom.outputs():
+                name = o['name']
+                s = "%e" % params[name]
+                self.ctlParams[g][name].setText(s)
 
     def onGeometryTypeChanged(self, index):
         page = self.ctlFChType.itemData(index)
