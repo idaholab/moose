@@ -329,31 +329,25 @@ ComputeIncrementalBeamStrain::computeQpStrain()
         _total_rotation[0] * ((*_rot_eigenstrain[i])[_qp] - (*_rot_eigenstrain_old[i])[_qp]);
   }
 
-  Real Dim_1 = std::sqrt(12 * Iz_avg / A_avg);
-  Real Dim_2 = A_avg / std::sqrt(12 * Iz_avg / A_avg);
-  Real h_min = std::min(Dim_1, Dim_2);
-
-  std::cout << h_min << std::endl;
-  // youngs_modulus/(2 * shear_modulus)-1
   Real C1_paper = std::sqrt(_material_stiffness[0](0));
   Real C2_paper = std::sqrt(_material_stiffness[0](1));
 
   Real r_Asq = std::min(Utility::pow<2>(_original_length[0]) / Utility::pow<2>(C1_paper), Utility::pow<2>(_original_length[0]) / Utility::pow<2>(C2_paper));
-  Real r_osq = Utility::pow<2>(_original_length[0])/2 * (1 / Utility::pow<2>(C1_paper) + 1 / Utility::pow<2>(C2_paper) - 3 / Utility::pow<2>(C1_paper) * Utility::pow<2>(_original_length[0] / h_min));
-
-std::cout << std::max(1 / C1_paper, 1 / C2_paper);
-std::cout << h_min * _original_length[0]/(std::sqrt(3) * C2_paper) * std::sqrt(1 - 0.25 * Utility::pow<2>(C1_paper / C2_paper + C2_paper / C1_paper - 3 * C2_paper * Utility::pow<2>(_original_length[0]) / (C1_paper * Utility::pow<2>(h_min)))) << std::endl;
+  Real r_osq = Utility::pow<2>(_original_length[0])/2 * (1 / Utility::pow<2>(C1_paper) + 1 / Utility::pow<2>(C2_paper) - (A_avg / Iz_avg) * Utility::pow<2>(_original_length[0] / C1_paper));
 
 
-  if (r_osq >= r_Asq)
+  if (r_osq > r_Asq)
   {
     _effective_stiffness[_qp] = std::max(1 / C1_paper, 1 / C2_paper);
-    // std::cout << _effective_stiffness[_qp] << std::endl;
   }
   else
   {
-    _effective_stiffness[_qp] = h_min * _original_length[0]/(std::sqrt(3) * C2_paper) * std::sqrt(1 - 0.25 * Utility::pow<2>(C1_paper/C2_paper + C2_paper/C1_paper - 3 * C2_paper * Utility::pow<2>(_original_length[0])/(C1_paper * Utility::pow<2>(h_min))));
-    // std::cout << _effective_stiffness[_qp] << std::endl;
+    Real temp1 = Utility::pow<2>(C2_paper / C1_paper) + 1 - Utility::pow<2>(C2_paper / C1_paper) * Utility::pow<2>(_original_length[0]) * A_avg / Iz_avg;
+    Real temp2 = 1 - 0.5 * (1 + Utility::pow<2>(C1_paper / C2_paper) - Utility::pow<2>(_original_length[0]) * A_avg / Iz_avg);
+    Real temp3 = 1 - 0.5 * (1 + Utility::pow<2>(C2_paper / C1_paper) - Utility::pow<2>(C2_paper / C1_paper) * Utility::pow<2>(_original_length[0]) * A_avg / Iz_avg);
+    _effective_stiffness[_qp] = std::sqrt(Utility::pow<2>(_original_length[0]) / (2 * Utility::pow<2>(C2_paper)) * temp1 + Iz_avg / (A_avg * Utility::pow<2>(C2_paper)) * temp2 * temp3);
+
+    _effective_stiffness[_qp] =  _original_length[0] / _effective_stiffness[_qp];
   }
   if (_prefactor_function)
     _effective_stiffness[_qp] *= std::sqrt(_prefactor_function->value(_t, _q_point[_qp]));
@@ -626,30 +620,6 @@ ComputeIncrementalBeamStrain::computeStiffnessMatrix()
     _K22_cross[0] += _total_rotation[0].transpose() * (-k1_large_22 - k2_large_22 + k3_large_22) *
                      _total_rotation[0];
   }
-/*  Real Dim_1 = std::sqrt(12 * Iz_avg / A_avg);
-  Real Dim_2 = A_avg / std::sqrt(12 * Iz_avg / A_avg);
-  Real h_min = std::min(Dim_1, Dim_2);
-
-  // std::cout << _material_stiffness[0](0) << std::endl;
-// youngs_modulus/(2 * shear_modulus)-1
-  Real C1_paper = std::sqrt(youngs_modulus);
-  Real C2_paper = std::sqrt(_material_stiffness[0](1));
-
-  Real r_Asq = std::min(Utility::pow<2>(_original_length[0]) / Utility::pow<2>(C1_paper), Utility::pow<2>(_original_length[0]) / Utility::pow<2>(C2_paper));
-  Real r_osq = Utility::pow<2>(_original_length[0])/2 * (1 / Utility::pow<2>(C1_paper) + 1 / Utility::pow<2>(C2_paper) - 3 / Utility::pow<2>(C1_paper) * Utility::pow<2>(_original_length[0] / h_min));
-
-  if (r_osq >= r_Asq)
-  {
-    _effective_stiffness[_qp] = std::max(1 / C1_paper, 1 / C2_paper);
-    // std::cout << _effective_stiffness[_qp] << std::endl;
-  }
-  else
-  {
-    _effective_stiffness[_qp] = h_min * _original_length[0]/(std::sqrt(3) * C2_paper) * std::sqrt(1 - 0.25 * Utility::pow<2>(C1_paper/C2_paper + C2_paper/C1_paper - 3 * C2_paper * Utility::pow<2>(_original_length[0])/(C1_paper * Utility::pow<2>(h_min))));
-    // std::cout << _effective_stiffness[_qp] << std::endl;
-  }
-  if (_prefactor_function)
-    _effective_stiffness[_qp] *= std::sqrt(_prefactor_function->value(_t, _q_point[_qp]));*/
 }
 
 void

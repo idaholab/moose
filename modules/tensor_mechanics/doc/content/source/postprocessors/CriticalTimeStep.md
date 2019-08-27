@@ -4,12 +4,12 @@
 
 ## Description
 
-The `CriticalTimeStepPostprocessor` is used to store the value of the initial moles or the current pressure for an internal volume.
+The `CriticalTimeStep` postprocessor is used to compute the value of the minimum
+time step for explicit integration scheme. Please refer to
+[CriticalTimeStepMath](/CriticalTimeStepMath.md) for the theoretical details.
 
-These quantities are calculated by the [CriticalTimeStepUserObject](/CriticalTimeStepUserObject.md). `CriticalTimeStepPostprocessor`.
+!syntax parameters /Postprocessors/CriticalTimeStep
 
-!syntax parameters /Postprocessors/CriticalTimeStepPostprocessor
+!syntax inputs /Postprocessors/CriticalTimeStep
 
-!syntax inputs /Postprocessors/CriticalTimeStepPostprocessor
-
-!syntax children /Postprocessors/CriticalTimeStepPostprocessor
+!syntax children /Postprocessors/CriticalTimeStep

@@ -224,5 +224,7 @@
 []
 
 [Outputs]
+  file_base = timoshenko_smallstrain_critstep_out
   exodus = true
+  csv = true
 []

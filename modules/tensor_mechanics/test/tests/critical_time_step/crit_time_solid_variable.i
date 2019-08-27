@@ -1,30 +1,18 @@
 [GlobalParams]
-  displacements = 'disp_x disp_y disp_z'
+  displacements = 'disp_x'
 []
 
 [Mesh]
   type = GeneratedMesh
-  dim = 3
-  nx = 10
-  ny = 10
-  nz = 15
+  dim = 1
+  nx = 50
 
   xmin = 0
-  xmax = 2
-
-  ymin = 0
-  ymax = 2
-
-  zmin = 0
-  zmax = 1
+  xmax = 5
 []
 
 [Variables]
   [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
   [../]
 []
 
@@ -37,28 +25,24 @@
   [./2_x]
     type = DirichletBC
     variable = disp_x
-    boundary = 3
+    boundary = 1
     value = 0.0
   [../]
-  [./2_y]
-    type = DirichletBC
-    variable = disp_y
-    boundary = 3
-    value = 0.0
-  [../]
-  [./2_z]
-    type = DirichletBC
-    variable = disp_z
-    boundary = 3
-    value = 0.0
+[]
+
+[Functions]
+  [./prefac]
+    type = ParsedFunction
+    value = '1+2*x'
   [../]
 []
 
 [Materials]
   [./elasticity_tensor]
-    type = ComputeElasticityTensor
-  C_ijkl = '1.684e5 0.176e5 0.176e5 1.684e5 0.176e5 1.684e5 0.754e5 0.754e5 0.754e5'
-  fill_method = symmetric9
+    type = ComputeIsotropicElasticityTensor
+    poissons_ratio = 0.1
+    youngs_modulus = 1e6
+    elasticity_tensor_prefactor = prefac
   [../]
   [./strain]
     type = ComputeSmallStrain
@@ -94,6 +78,7 @@
 []
 
 [Outputs]
-  file_base = out
+  file_base = crit_time_solid_variable_out
   exodus = true
+  csv = true
 []

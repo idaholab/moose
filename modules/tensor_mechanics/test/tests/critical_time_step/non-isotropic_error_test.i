@@ -56,9 +56,9 @@
 
 [Materials]
   [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
-    poissons_ratio = 0.1
-    youngs_modulus = 1e6
+    type = ComputeElasticityTensor
+  C_ijkl = '1.684e5 0.176e5 0.176e5 1.684e5 0.176e5 1.684e5 0.754e5 0.754e5 0.754e5'
+  fill_method = symmetric9
   [../]
   [./strain]
     type = ComputeSmallStrain
@@ -96,4 +96,5 @@
 [Outputs]
   file_base = out
   exodus = true
+  csv = true
 []

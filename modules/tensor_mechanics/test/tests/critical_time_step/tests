@@ -1,17 +1,23 @@
 [Tests]
-  design = 'source/postprocessors/CriticalTimeStep.md'
-  [./test]
+  [./crit_time_solid_uniform]
     type = 'CSVDiff'
-    input = 'critical_time_step_test.i'
-    csvdiff = 'out.csv'
-    issues = ''
-    requirement = "The system shall contain a `Postprocessor` that computes the critical time step of an explicit solver."
+    input = 'crit_time_solid_uniform.i'
+    csvdiff = 'crit_time_solid_uniform_out.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
   [../]
-  [./exception]
-    type = 'Exodiff'
-    input = 'exception.i'
-    exodiff = 'exception_out.e'
-    allow_warnings = true
-    requirement = 'A constitutive failure shall trigger an exception leading to a cut time step rather than a failed solve'
+  [./crit_time_solid_variable]
+    type = 'CSVDiff'
+    input = 'crit_time_solid_variable.i'
+    csvdiff = 'crit_time_solid_variable_out.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+  [./timoshenko_smallstrain_critstep]
+    type = 'CSVDiff'
+    input = 'timoshenko_smallstrain_critstep.i'
+    csvdiff = 'timoshenko_smallstrain_critstep_out.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
   [../]
 []
