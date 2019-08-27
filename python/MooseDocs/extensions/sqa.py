@@ -407,10 +407,12 @@ class SQADependenciesCommand(command.CommandComponent):
         suffix = self.settings['suffix']
         category = self.settings['category']
         if category == '_empty_':
-            return parent
+            depends = self.extension.get('categories').keys()
+        else:
+            depends = self.extension.dependencies(category) or \
+                self.extension.get('categories').keys()
 
         ul = core.UnorderedList(parent)
-        depends = self.extension.dependencies(category) or self.extension.get('categories').keys()
         for dep in depends:
             if dep != category:
                 fname = '{}_{}.md'.format(dep, suffix)
