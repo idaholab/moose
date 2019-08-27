@@ -7,7 +7,7 @@ _critical time step_ so the solution remains valid.
 
 Critical time step is defined as the smallest time step which ensures that the speed
 of propagating waves within an element is less than what it can theoretically transmit.
-As per [!citet](Askes2015), critical time step (\Delta t_{crit}) is mathematically defined by:
+As per [!citet](Hughes1987), critical time step (\Delta t_{crit}) is mathematically defined by:
 
 \begin{equation}
 \label{eqn1}
@@ -46,10 +46,10 @@ positive, the $\frac{\Delta x}{c_d}$ term in equation \eqref{eqn2} is significan
 
 # Elastic Beam Element
 
-Critical time step for an elastic beam element is based on the work by CITE. This paper,
+Critical time step for an elastic beam element is based on the work by [!citet](Krieg1973). This paper,
 however, develops the mathematics of $\Delta t^e_{crit}$ specifically for an elastic plate. Hence,
 the implementations for this class are generalized and adapted for an elastic beam, with the major
-difference being: expressing some quantities in the CITE work in terms of the second
+difference being: expressing some quantities in the [!citet](Krieg1973) work in terms of the second
 moment of area ($I$) and the cross sectional area ($A$).
 
 First, two quantities, $r_o^2$ and $r_A^2$, are defined below.

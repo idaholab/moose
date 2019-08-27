@@ -5,6 +5,8 @@
     csvdiff = 'crit_time_solid_uniform_out.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
+    requirement = "The CriticalTimeStep class shall correctly compute the critical time step for a solid with uniform properties."
+    design = "CriticalTimeStep.md"
   [../]
   [./crit_time_solid_variable]
     type = 'CSVDiff'
@@ -12,6 +14,8 @@
     csvdiff = 'crit_time_solid_variable_out.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
+    requirement = "The CriticalTimeStep class shall correctly compute the critical time step for a solid with variable properties."
+    design = "CriticalTimeStep.md"
   [../]
   [./timoshenko_smallstrain_critstep]
     type = 'CSVDiff'
@@ -19,5 +23,12 @@
     csvdiff = 'timoshenko_smallstrain_critstep_out.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
+    requirement = "The CriticalTimeStep class shall correctly compute the critical time step for a beam."
+    design = "CriticalTimeStep.md"
+  [../]
+  [./except1]
+    type = 'RunException'
+    input = 'non-isotropic_error_test.i'
+    expect_err = 'CriticalTimeStep can only be used with elasticity tensor materials that guarantee isotropic tensors.'
   [../]
 []
