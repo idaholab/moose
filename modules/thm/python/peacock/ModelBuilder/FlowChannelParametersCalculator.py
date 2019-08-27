@@ -84,7 +84,6 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
                 self.ctlParams[i][name] = QtWidgets.QLineEdit(self)
                 self.ctlParams[i][name].setReadOnly(True)
                 self.ctlParams[i][name].setToolTip(hint)
-                self.ctlParams[i][name].setFocusPolicy(QtCore.Qt.NoFocus)
 
                 lblUnit = QtWidgets.QLabel(unit, self)
                 lblUnit.setFixedWidth(self.UNITS_WIDTH)
