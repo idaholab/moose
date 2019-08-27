@@ -115,8 +115,6 @@ protected:
   MaterialProperty<std::vector<std::vector<RealGradient>>> * _grad_mass_frac_qp;
   /// Derivative of the mass fraction matrix with respect to the Porous Flow variables
   MaterialProperty<std::vector<std::vector<std::vector<Real>>>> & _dmass_frac_dvar;
-  /// Old value of saturation
-  const MaterialProperty<std::vector<Real>> & _saturation_old;
 
   /// Fluid density of each phase
   MaterialProperty<std::vector<Real>> & _fluid_density;
