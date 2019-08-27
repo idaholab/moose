@@ -34,6 +34,7 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
             self.ctlFChType.addItem(gname, i)
 
             paramsLayout = QtWidgets.QFormLayout()
+            paramsLayout.setContentsMargins(5, 0, 5, 0)
             paramsLayout.setLabelAlignment(QtCore.Qt.AlignLeft)
             paramsLayout.setFormAlignment(QtCore.Qt.AlignLeft)
             paramsLayout.setFieldGrowthPolicy(QtWidgets.QFormLayout.ExpandingFieldsGrow)
