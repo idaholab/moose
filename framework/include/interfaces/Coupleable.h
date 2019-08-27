@@ -642,7 +642,7 @@ protected:
    * vector variable with respect to the coefficients
    */
   virtual const VariableValue & coupledVectorDotDu(const std::string & var_name,
-                                                         unsigned int comp = 0);
+                                                   unsigned int comp = 0);
 
   /**
    * Second time derivative of a coupled vector variable with respect to the coefficients
@@ -652,7 +652,7 @@ protected:
    * variable with respect to the coefficients
    */
   virtual const VariableValue & coupledVectorDotDotDu(const std::string & var_name,
-                                                            unsigned int comp = 0);
+                                                      unsigned int comp = 0);
 
   /**
    * Time derivative of a coupled array variable
