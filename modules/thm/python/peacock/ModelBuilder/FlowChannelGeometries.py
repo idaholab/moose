@@ -89,6 +89,36 @@ class SquareFlowChannelGeometry(FlowChannelGeometry):
         }
 
 
+class RectangularFlowChannelGeometry(FlowChannelGeometry):
+    """
+    Rectangular flow channel defined by two sides
+    """
+
+    NAME = "Rectangular"
+
+    def inputs(self):
+        return [
+            { 'name': "a", 'unit': "m", 'hint': "Side one" },
+            { 'name': "b", 'unit': "m", 'hint': "Side two" }
+        ]
+
+    def outputs(self):
+        return [
+            { 'name': "A", 'unit': "m^2", 'hint': "Cross-sectional area" },
+            { 'name': "D_h", 'unit': "m", 'hint': "Hydraulic diameter" },
+            { 'name': "P_hf", 'unit': "m", 'hint': "Heated perimeter" }
+        ]
+
+    def compute(self, **kwargs):
+        a = kwargs['a']
+        b = kwargs['b']
+        return {
+            'A' : a * b,
+            'D_h' : 2 * a * b / (a + b),
+            'P_hf' : 2 * (a + b)
+        }
+
+
 class AnnulusFlowChannelGeometry(FlowChannelGeometry):
     """
     Annulus flow channel defined by the inner and outer radius
@@ -174,5 +204,6 @@ GEOMETRIES = (
     CircularFlowChannelGeometry(),
     SquareFlowChannelGeometry(),
     AnnulusFlowChannelGeometry(),
-    CoreChannelRoundFuelFlowChannelGeometry()
+    CoreChannelRoundFuelFlowChannelGeometry(),
+    RectangularFlowChannelGeometry()
 )

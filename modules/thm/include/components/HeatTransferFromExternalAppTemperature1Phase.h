@@ -19,8 +19,11 @@ public:
   virtual void addMooseObjects() override;
 
 protected:
+  virtual const FEType & getFEType() override;
   virtual void check() const override;
 
   /// Name of the function specifying initial condition for wall temperature
   const FunctionName _T_wall_fn_name;
+  /// The type of the wall temperature variable
+  FEType _fe_type;
 };

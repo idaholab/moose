@@ -17,14 +17,20 @@ HeatTransferFromTemperature1Phase::HeatTransferFromTemperature1Phase(
 {
 }
 
+const FEType &
+HeatTransferFromTemperature1Phase::getFEType()
+{
+  return HeatConductionModel::feType();
+}
+
 void
 HeatTransferFromTemperature1Phase::addVariables()
 {
   HeatTransfer1PhaseBase::addVariables();
 
-  _sim.addVariable(
-      false, FlowModel::TEMPERATURE_WALL, HeatConductionModel::feType(), _flow_channel_subdomains);
-  _sim.addVariable(false, _T_wall_name, HeatConductionModel::feType(), _flow_channel_subdomains);
+  const FEType & fe_type = getFEType();
+  _sim.addVariable(false, FlowModel::TEMPERATURE_WALL, fe_type, _flow_channel_subdomains);
+  _sim.addVariable(false, _T_wall_name, fe_type, _flow_channel_subdomains);
 }
 
 void
