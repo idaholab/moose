@@ -79,9 +79,6 @@ PorousFlowFluidStateSingleComponent::PorousFlowFluidStateSingleComponent(
                                            "dPorousFlow_mass_frac_nodal_dvar")
                                      : declareProperty<std::vector<std::vector<std::vector<Real>>>>(
                                            "dPorousFlow_mass_frac_qp_dvar")),
-    _saturation_old(_nodal_material
-                        ? getMaterialPropertyOld<std::vector<Real>>("PorousFlow_saturation_nodal")
-                        : getMaterialPropertyOld<std::vector<Real>>("PorousFlow_saturation_qp")),
 
     _fluid_density(_nodal_material
                        ? declareProperty<std::vector<Real>>("PorousFlow_fluid_phase_density_nodal")
