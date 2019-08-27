@@ -30,7 +30,7 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
         self.GeometryLayout = QtWidgets.QStackedLayout()
         for i, g in enumerate(FlowChannelGeometries.GEOMETRIES):
             gname = g.name()
-            self.ctlFChType.addItem(gname)
+            self.ctlFChType.addItem(gname, i)
 
             paramsLayout = QtWidgets.QFormLayout()
             paramsLayout.setLabelAlignment(QtCore.Qt.AlignLeft)
@@ -104,7 +104,8 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
 
         self.setMainLayoutName('MainLayout')
 
-        self.ctlFChType.activated[int].connect(self.GeometryLayout.setCurrentIndex)
+        self.ctlFChType.model().sort(0)
+        self.ctlFChType.activated[int].connect(self.onGeometryTypeChanged)
 
         self.setup()
         self.store(key='default')
@@ -139,6 +140,9 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
             s = "%e" % params[name]
             self.ctlParams[g][name].setText(s)
 
+    def onGeometryTypeChanged(self, index):
+        page = self.ctlFChType.itemData(index)
+        self.GeometryLayout.setCurrentIndex(page)
 
 def main(size=None):
     """
