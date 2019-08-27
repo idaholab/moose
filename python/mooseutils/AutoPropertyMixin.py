@@ -225,6 +225,12 @@ class AutoPropertyMixin(object):
         for key, value in self.__properties.items():
             setattr(self, key, value)
 
+    def get(self, *args):
+        """
+        Return an attribute with optional default
+        """
+        return self.__attributes.get(*args)
+
     def __getitem__(self, key):
         """
         Return an attribute.

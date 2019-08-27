@@ -16,14 +16,17 @@ import logging
 import collections
 import traceback
 import moosetree
+import uuid
+import json
+import time
 
 import mooseutils
 import MooseDocs
-from MooseDocs import common
-from MooseDocs.common import exceptions
-from MooseDocs.base import components, LatexRenderer, HTMLRenderer
-from MooseDocs.extensions import core, command, floats, autolink
-from MooseDocs.tree import tokens, html, latex
+from .. import common
+from ..common import exceptions
+from ..base import components, LatexRenderer, HTMLRenderer
+from ..tree import tokens, html, latex, pages
+from . import core, command, floats, autolink, civet
 
 LOG = logging.getLogger(__name__)
 
@@ -132,8 +135,8 @@ class SQAExtension(command.CommandExtension):
             raise exceptions.MooseDocsException("Unknown or missing 'category': {}", category)
         return dep
 
-    def preExecute(self, root):
-        """Reset counts."""
+    def preExecute(self, content):
+        """Reset counts and create test pages."""
         self.__counts.clear()
 
     def increment(self, key):
@@ -142,7 +145,7 @@ class SQAExtension(command.CommandExtension):
         return self.__counts[key]
 
     def extend(self, reader, renderer):
-        self.requires(core, command, autolink, floats)
+        self.requires(core, command, autolink, floats, civet)
 
         self.addCommand(reader, SQARequirementsCommand())
         self.addCommand(reader, SQARequirementsMatrixCommand())
@@ -169,6 +172,8 @@ class SQAExtension(command.CommandExtension):
 
         if isinstance(renderer, HTMLRenderer):
             renderer.addCSS('sqa_moose', "css/sqa_moose.css")
+            renderer.addJavaScript('sqa_moose', "js/sqa_moose.js")
+
 
 class SQARequirementsCommand(command.CommandComponent):
     COMMAND = 'sqa'
@@ -188,6 +193,7 @@ class SQARequirementsCommand(command.CommandComponent):
                                  "the 'link' setting must be true.")
         config['link-prerequisites'] = (True, "Enable/disable the link of the test prerequisites, "\
                                         "the 'link' setting must be true.")
+        config['link-results'] = (True, "Enable/disable the link to the test results.")
 
         return config
 
@@ -264,6 +270,16 @@ class SQARequirementsCommand(command.CommandComponent):
 
                 SQARequirementPrequisites(item, specs=labels)
 
+            if self.settings.get('link-results', False):
+                keys = list()
+
+                for detail in req.details:
+                    keys.append('{}.{}/{}'.format(req.path, req.name, detail.name))
+
+                if not keys:
+                    keys.append('{}.{}'.format(req.path, req.name))
+
+                civet.CivetTestBadges(item, tests=keys)
 
 class SQACrossReferenceCommand(SQARequirementsCommand):
     COMMAND = 'sqa'

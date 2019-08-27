@@ -15,7 +15,7 @@ import moosetree
 import MooseDocs
 from MooseDocs import common
 from MooseDocs.common import exceptions
-from MooseDocs.base import components
+from MooseDocs.base import components, Translator
 from MooseDocs.extensions import core, command, include, alert, floats, materialicon
 from MooseDocs.tree import tokens
 
@@ -116,7 +116,8 @@ class TemplateLoadCommand(command.CommandComponent):
         settings, t_args = common.match_settings(self.defaultSettings(), info['settings'])
 
         location = self.translator.findPage(settings['file'])
-        self.extension.addDependency(location)
+        #with Translator.LOCK:
+        #    page['dependencies'].add(location.uid)
         content = common.read(location.source)
 
         content = self.extension.applyTemplateArguments(content, **t_args)

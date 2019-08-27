@@ -61,6 +61,13 @@ Extensions:
                     - python/MooseDocs/test
                 specs:
                     - demo
+    MooseDocs.extensions.civet:
+        active: True
+        categories:
+            moose:
+                url: https://civet.inl.gov
+                repo: idaholab/moose
+
     MooseDocs.extensions.navigation:
         active: True
         name: MOOSEDocs

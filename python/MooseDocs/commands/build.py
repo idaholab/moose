@@ -111,7 +111,7 @@ class MooseDocsWatcher(livereload.watcher.Watcher):
         # Build a list of pages to be translated including the dependencies
         nodes = [page]
         for node in self._translator.content:
-            uids = self._translator.getMetaData(node, 'dependencies') or []
+            uids = node['dependencies'] if 'dependencies' in node else set()
             if page.uid in uids:
                 nodes.append(node)
 
@@ -179,7 +179,7 @@ def main(options):
     if options.fast:
         options.disable.append('appsyntax')
         options.disable.append('navigation')
-        options.disable.append('sqa')
+        #options.disable.append('sqa')
 
     # Disable extensions based on command line arguments
     if options.disable:

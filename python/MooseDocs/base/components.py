@@ -76,9 +76,9 @@ class Extension(mixins.ConfigObject, mixins.TranslatorObject):
         """
         self.__requires.update(args)
 
-    def initMetaData(self, page, meta):
+    def init(self):
         """
-        Called prior to reading.
+        Called after Translator is set, prior to initializing pages.
         """
         pass
 
