@@ -34,8 +34,6 @@
 
 [GlobalParams]
   displacements = 'disp_r disp_z'
-  order = FIRST
-  family = LAGRANGE
 []
 
 [Mesh]
@@ -66,8 +64,9 @@
     use_displaced_mesh = true
   [../]
   [./heat]
-    type = HeatConduction
+    type = Diffusion
     variable = temp
+    use_displaced_mesh = true
   [../]
 []
 
@@ -132,26 +131,15 @@
     type = ComputeFiniteStrainElasticStress
     block = 2
   [../]
-  [./heatconduction]
-    type = HeatConductionMaterial
-    block = '1 2'
-    thermal_conductivity = 1.0
-    specific_heat = 1.0
-  [../]
   [./density]
     type = Density
     block = '1 2'
     density = 1.0
-    disp_r = disp_r
-    disp_z = disp_z
   [../]
 []
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
 
   petsc_options_iname = '-pc_type -sub_pc_type'
   petsc_options_value = 'asm       lu'
@@ -160,7 +148,6 @@
 
   l_max_its = 20
 
-  start_time = 0.0
   dt = 0.5
   end_time = 1.0
 []

@@ -54,7 +54,6 @@ protected:
   const bool _init_temp_given;
   const Real _init_temp;
 
-  Real _start_time;
   const Real _startup_time;
 
   bool & _initialized;
@@ -62,4 +61,3 @@ protected:
 
 template <>
 InputParameters validParams<CavityPressureUserObject>();
-
