@@ -1,7 +1,8 @@
 import os, sys
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot, QProcess
-from PyQt5.QtWidgets import QSizePolicy
+from PyQt5.QtWidgets import QSizePolicy, QLabel
+from PyQt5.QtGui import QDoubleValidator
 import peacock
 import FlowChannelGeometries
 
@@ -21,6 +22,7 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
         num_geometris = len(FlowChannelGeometries.GEOMETRIES)
         self.ctlInputs = []
         self.ctlParams = []
+        self.lblErrorMessage = []
 
         self.MainLayout = QtWidgets.QVBoxLayout(self)
 
@@ -33,6 +35,7 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
             self.ctlFChType.addItem(gname, i)
 
             paramsLayout = QtWidgets.QFormLayout()
+            paramsLayout.setContentsMargins(5, 0, 5, 0)
             paramsLayout.setLabelAlignment(QtCore.Qt.AlignLeft)
             paramsLayout.setFormAlignment(QtCore.Qt.AlignLeft)
             paramsLayout.setFieldGrowthPolicy(QtWidgets.QFormLayout.ExpandingFieldsGrow)
@@ -48,6 +51,9 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
 
                 self.ctlInputs[i][name] = QtWidgets.QLineEdit(self)
                 self.ctlInputs[i][name].setToolTip(hint)
+                validator = QDoubleValidator(self)
+                validator.setBottom(0.)
+                self.ctlInputs[i][name].setValidator(validator)
                 self.ctlInputs[i][name].returnPressed.connect(self.computeParameters)
 
                 lblUnit = QtWidgets.QLabel(unit, self)
@@ -84,7 +90,6 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
                 self.ctlParams[i][name] = QtWidgets.QLineEdit(self)
                 self.ctlParams[i][name].setReadOnly(True)
                 self.ctlParams[i][name].setToolTip(hint)
-                self.ctlParams[i][name].setFocusPolicy(QtCore.Qt.NoFocus)
 
                 lblUnit = QtWidgets.QLabel(unit, self)
                 lblUnit.setFixedWidth(self.UNITS_WIDTH)
@@ -99,6 +104,11 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
             widget = QtWidgets.QWidget()
             widget.setLayout(paramsLayout)
             self.GeometryLayout.addWidget(widget)
+
+            lblErrorMsg = QLabel(self)
+            lblErrorMsg.setStyleSheet("QLabel { color: red; }");
+            paramsLayout.addRow(lblErrorMsg)
+            self.lblErrorMessage.append(lblErrorMsg)
 
         self.MainLayout.addLayout(self.GeometryLayout)
 
@@ -135,10 +145,17 @@ class FlowChannelParametersCalculator(QtWidgets.QWidget, peacock.base.Plugin):
 
         params = geom.compute(**args)
 
-        for o in geom.outputs():
-            name = o['name']
-            s = "%e" % params[name]
-            self.ctlParams[g][name].setText(s)
+        if 'error' in params:
+            self.lblErrorMessage[g].setText(params['error'])
+            for o in geom.outputs():
+                name = o['name']
+                self.ctlParams[g][name].setText('error')
+        else:
+            self.lblErrorMessage[g].setText("")
+            for o in geom.outputs():
+                name = o['name']
+                s = "%e" % params[name]
+                self.ctlParams[g][name].setText(s)
 
     def onGeometryTypeChanged(self, index):
         page = self.ctlFChType.itemData(index)
@@ -150,6 +167,7 @@ def main(size=None):
     """
     from ModelBuilderPluginManager import ModelBuilderPluginManager
     widget = ModelBuilderPluginManager(plugins=[FlowChannelParametersCalculator])
+    widget.MainLayout.setContentsMargins(5, 5, 5, 5)
     widget.show()
     widget.setWindowTitle("Flow Channel Parameter Calculator")
     return widget

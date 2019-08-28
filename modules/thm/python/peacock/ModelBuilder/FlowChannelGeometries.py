@@ -157,7 +157,8 @@ class AnnulusFlowChannelGeometry(FlowChannelGeometry):
                 'A' : 0,
                 'D_h' : 0,
                 'P_hf_in' : 0,
-                'P_hf_out' : 0
+                'P_hf_out' : 0,
+                'error' : 'r_in has to be smaller than r_out'
             }
 
 
@@ -196,7 +197,8 @@ class CoreChannelRoundFuelFlowChannelGeometry(FlowChannelGeometry):
             return {
                 'A' : 0,
                 'D_h' : 0,
-                'P_hf' : 0
+                'P_hf' : 0,
+                'error' : 'pitch has to be larger than diameter'
             }
 
 
