@@ -1,5 +1,5 @@
 #
-# Cavity Pressure Test (Volume input as a vector of postprocessors)
+# Cavity Pressure Test
 #
 # This test is designed to compute an internal pressure based on
 #   p = n * R * T / V
@@ -30,10 +30,6 @@
 # So, n0 = p0 * V0 / R / T0 = 100 * 7 / 8.314472 / 240.544439
 #        = 0.35
 #
-# In this test the internal volume is calculated as the sum of two Postprocessors
-# internalVolumeInterior and internalVolumeExterior.  This sum equals the value
-# reported by the internalVolume postprocessor.
-#
 # The parameters combined at t = 1 gives p = 301.
 #
 
@@ -43,7 +39,7 @@
 []
 
 [Mesh]
-  file = cavity_pressure.e
+  file = 3d.e
 []
 
 [Functions]
@@ -259,7 +255,7 @@
       material_input = materialInput
       R = 8.314472
       temperature = aveTempInterior
-      volume = 'internalVolumeInterior internalVolumeExterior'
+      volume = internalVolume
       startup_time = 0.5
       output = ppress
       save_in = 'pressure_residual_x pressure_residual_y pressure_residual_z'
@@ -297,11 +293,6 @@
     type = ADComputeFiniteStrainElasticStress
     block = 2
   [../]
-  [./density]
-    type = ADDensity
-    block = '1 2'
-    density = 1.0
-  [../]
 []
 
 [Executioner]
@@ -331,16 +322,6 @@
     type = SideAverageValue
     boundary = 100
     variable = temp
-    execute_on = 'initial linear'
-  [../]
-  [./internalVolumeInterior]
-    type = InternalVolume
-    boundary = '1 2 3 4 5 6'
-    execute_on = 'initial linear'
-  [../]
-  [./internalVolumeExterior]
-    type = InternalVolume
-    boundary = '13 14 15 16 17 18'
     execute_on = 'initial linear'
   [../]
   [./materialInput]

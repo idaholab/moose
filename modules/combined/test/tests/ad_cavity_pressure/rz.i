@@ -37,7 +37,7 @@
 []
 
 [Mesh]
-  file = cavity_pressure_rz.e
+  file = rz.e
 []
 
 [Functions]
@@ -132,11 +132,6 @@
   [./stress2]
     type = ADComputeFiniteStrainElasticStress
     block = 2
-  [../]
-  [./density]
-    type = ADDensity
-    block = '1 2'
-    density = 1.0
   [../]
 []
 

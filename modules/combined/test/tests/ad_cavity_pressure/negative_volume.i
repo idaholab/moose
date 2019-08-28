@@ -96,10 +96,6 @@
   [./stress1]
     type = ADComputeFiniteStrainElasticStress
   [../]
-  [./density]
-    type = ADDensity
-    density = 1.0
-  [../]
 []
 
 [Executioner]

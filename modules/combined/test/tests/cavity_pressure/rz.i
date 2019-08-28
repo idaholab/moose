@@ -37,7 +37,7 @@
 []
 
 [Mesh]
-  file = cavity_pressure_rz.e
+  file = rz.e
 []
 
 [Functions]
@@ -130,11 +130,6 @@
   [./stress2]
     type = ComputeFiniteStrainElasticStress
     block = 2
-  [../]
-  [./density]
-    type = Density
-    block = '1 2'
-    density = 1.0
   [../]
 []
 

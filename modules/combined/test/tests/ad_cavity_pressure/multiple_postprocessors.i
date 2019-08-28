@@ -43,7 +43,7 @@
 []
 
 [Mesh]
-  file = cavity_pressure.e
+  file = 3d.e
 []
 
 [Functions]
@@ -120,14 +120,15 @@
 [Kernels]
   [./TensorMechanics]
     use_displaced_mesh = true
+    use_automatic_differentiation = true
   [../]
   [./heat]
-    type = Diffusion
+    type = ADDiffusion
     variable = temp
     use_displaced_mesh = true
   [../]
   [./material_input_dummy]
-    type = Diffusion
+    type = ADDiffusion
     variable = material_input
     use_displaced_mesh = true
   [../]
@@ -198,13 +199,13 @@
     value = 0.0
   [../]
   [./prescribed_left]
-    type = FunctionPresetBC
+    type = ADFunctionPresetBC
     variable = disp_x
     boundary = 13
     function = displ_positive
   [../]
   [./prescribed_right]
-    type = FunctionPresetBC
+    type = ADFunctionPresetBC
     variable = disp_x
     boundary = 14
     function = displ_negative
@@ -240,13 +241,13 @@
     value = 0.0
   [../]
   [./temperatureInterior]
-    type = FunctionPresetBC
+    type = ADFunctionPresetBC
     boundary = 100
     function = temp1
     variable = temp
   [../]
   [./MaterialInput]
-    type = FunctionPresetBC
+    type = ADFunctionPresetBC
     boundary = '100 13 14 15 16'
     function = material_input_function
     variable = material_input
@@ -262,6 +263,7 @@
       startup_time = 0.5
       output = ppress
       save_in = 'pressure_residual_x pressure_residual_y pressure_residual_z'
+      use_automatic_differentiation = true
     [../]
   [../]
 []
@@ -274,11 +276,11 @@
     block = 1
   [../]
   [./strain1]
-    type = ComputeFiniteStrain
+    type = ADComputeFiniteStrain
     block = 1
   [../]
   [./stress1]
-    type = ComputeFiniteStrainElasticStress
+    type = ADComputeFiniteStrainElasticStress
     block = 1
   [../]
   [./elast_tensor2]
@@ -288,22 +290,19 @@
     block = 2
   [../]
   [./strain2]
-    type = ComputeFiniteStrain
+    type = ADComputeFiniteStrain
     block = 2
   [../]
   [./stress2]
-    type = ComputeFiniteStrainElasticStress
+    type = ADComputeFiniteStrainElasticStress
     block = 2
-  [../]
-  [./density]
-    type = Density
-    block = '1 2'
-    density = 1.0
   [../]
 []
 
 [Executioner]
   type = Transient
+
+  solve_type = 'NEWTON'
 
   petsc_options_iname = '-pc_type -sub_pc_type'
   petsc_options_value = 'asm       lu'

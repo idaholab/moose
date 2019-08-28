@@ -1,1 +1,0 @@
-../../cavity_pressure/gold/cavity_pressure_rz_out.e

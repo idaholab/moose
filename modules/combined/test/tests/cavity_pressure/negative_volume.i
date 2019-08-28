@@ -94,10 +94,6 @@
   [./stress1]
     type = ComputeFiniteStrainElasticStress
   [../]
-  [./density]
-    type = Density
-    density = 1.0
-  [../]
 []
 
 [Executioner]

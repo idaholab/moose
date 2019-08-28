@@ -1,5 +1,5 @@
 #
-# Cavity Pressure Test
+# Cavity Pressure Test (Volume input as a vector of postprocessors)
 #
 # This test is designed to compute an internal pressure based on
 #   p = n * R * T / V
@@ -20,7 +20,7 @@
 # with
 #   alpha = n0
 #   beta = T0 / 2
-#   gamma = -(0.003322259...) * V0
+#   gamma = - (0.003322259...) * V0
 #   T0 = 240.54443866068704
 #   V0 = 7
 #   n0 = f(p0)
@@ -30,22 +30,20 @@
 # So, n0 = p0 * V0 / R / T0 = 100 * 7 / 8.314472 / 240.544439
 #        = 0.35
 #
+# In this test the internal volume is calculated as the sum of two Postprocessors
+# internalVolumeInterior and internalVolumeExterior.  This sum equals the value
+# reported by the internalVolume postprocessor.
+#
 # The parameters combined at t = 1 gives p = 301.
 #
-# This test sets the initial temperature to 500, but the CavityPressure
-#   is told that that initial temperature is T0.  Thus, the final solution
-#   is unchanged.
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
+  volumetric_locking_correction = true
 []
 
 [Mesh]
-  file = cavity_pressure.e
-[]
-
-[GlobalParams]
-  volumetric_locking_correction = true
+  file = 3d.e
 []
 
 [Functions]
@@ -80,7 +78,7 @@
   [./disp_z]
   [../]
   [./temp]
-    initial_condition = 500
+    initial_condition = 240.54443866068704
   [../]
   [./material_input]
   [../]
@@ -260,8 +258,7 @@
       material_input = materialInput
       R = 8.314472
       temperature = aveTempInterior
-      initial_temperature = 240.54443866068704
-      volume = internalVolume
+      volume = 'internalVolumeInterior internalVolumeExterior'
       startup_time = 0.5
       output = ppress
       save_in = 'pressure_residual_x pressure_residual_y pressure_residual_z'
@@ -271,9 +268,9 @@
 
 [Materials]
   [./elast_tensor1]
-    type = ComputeElasticityTensor
-    C_ijkl = '0 5'
-    fill_method = symmetric_isotropic
+    type = ComputeIsotropicElasticityTensor
+    youngs_modulus = 1e1
+    poissons_ratio = 0
     block = 1
   [../]
   [./strain1]
@@ -285,9 +282,9 @@
     block = 1
   [../]
   [./elast_tensor2]
-    type = ComputeElasticityTensor
-    C_ijkl = '0 5'
-    fill_method = symmetric_isotropic
+    type = ComputeIsotropicElasticityTensor
+    youngs_modulus = 1e6
+    poissons_ratio = 0
     block = 2
   [../]
   [./strain2]
@@ -298,12 +295,6 @@
     type = ComputeFiniteStrainElasticStress
     block = 2
   [../]
-  [./density]
-    type = Density
-    block = '1 2'
-    density = 1.0
-  [../]
-
 []
 
 [Executioner]
@@ -331,6 +322,16 @@
     type = SideAverageValue
     boundary = 100
     variable = temp
+    execute_on = 'initial linear'
+  [../]
+  [./internalVolumeInterior]
+    type = InternalVolume
+    boundary = '1 2 3 4 5 6'
+    execute_on = 'initial linear'
+  [../]
+  [./internalVolumeExterior]
+    type = InternalVolume
+    boundary = '13 14 15 16 17 18'
     execute_on = 'initial linear'
   [../]
   [./materialInput]
