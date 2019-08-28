@@ -22,7 +22,6 @@ public:
 
 protected:
   virtual void check() const override;
-  void checkFlowChannelAlignment() const;
 
   /**
    * Gets the "master side" (heat structure) boundary name for this connection
