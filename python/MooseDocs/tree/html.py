@@ -117,3 +117,27 @@ class String(NodeBase):
     def copy(self, _parent=None):
         """Copy the String. These shouldn't have children, so don't worry about them."""
         return String(_parent, **self.attributes)
+
+if __name__ == '__main__':
+    import mooseutils
+
+    class Node(object):
+        def __init__(self, parent, name, **kwargs):
+            self.children = list()
+            self.attributes = dict()
+            self.attributes.update(kwargs)
+            if parent is not None:
+                parent.children.append(self)
+
+    def createTree(N, cls):
+        body = cls(None, 'body')
+        for i in range(N):
+            div0 = cls(body, 'div')
+            for j in range(N):
+                div1 = cls(div0, 'div')
+                for k in range(N):
+                    p = cls(div1, 'p', string='STUFF')
+
+
+    mooseutils.run_profile(createTree, 100, Tag)
+    mooseutils.run_profile(createTree, 100, Node)

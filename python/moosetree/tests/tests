@@ -1,0 +1,27 @@
+[Tests]
+  design = 'moosetree/index.md'
+  issues = '#13657'
+  [tree]
+    requirement = "The system shall include a utility for building tree structures using "
+                  "a scripting language that includes"
+
+    [Node]
+      type = PythonUnitTest
+      input = test_Node.py
+
+      detail = 'a node object,'
+    []
+    [iterator]
+      type = PythonUnitTest
+      input = test_iterate.py
+
+      detail = 'a tree iteration function, and'
+    []
+    [search]
+      type = PythonUnitTest
+      input = test_search.py
+
+      detail = 'search algorithms.'
+    []
+  []
+[]
