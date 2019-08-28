@@ -8,7 +8,6 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from __future__ import print_function
 import os
 import glob
 import shutil
@@ -168,7 +167,7 @@ def img2mov(pattern, output, ffmpeg='ffmpeg', duration=60, framerate=None, bitra
     # Compute framerate from the duration if framerate is not given
     if not framerate:
         n = len(glob.glob(pattern))
-        framerate = n/duration
+        framerate = int(n/duration)
 
     # Build the command
     cmd = [ffmpeg]

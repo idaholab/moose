@@ -87,7 +87,6 @@
 
   [./precision_with_wrong_notation]
     type = RunApp
-    display_required = true
     command = precision_with_wrong_notation.py
     expect_out = "When using 'precision' option, 'notation' option has to be set to either 'scientific' or 'fixed'"
     match_literal = true
