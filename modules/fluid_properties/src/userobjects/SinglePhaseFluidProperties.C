@@ -14,6 +14,8 @@ InputParameters
 validParams<SinglePhaseFluidProperties>()
 {
   InputParameters params = validParams<FluidProperties>();
+  params.addCustomTypeParam<std::string>(
+      "fp_type", "single-phase-fp", "FPType", "Type of the fluid property object");
   return params;
 }
 
