@@ -263,8 +263,7 @@
     ca       = c1l
     cb       = c1s
     fa_name  = fl
-    fb_name  = fs
-    args     = 'c2l c2s'
+    args     = 'c2l'
   [../]
   [./ACBulkC2]
     type = KKSACBulkC
@@ -272,8 +271,7 @@
     ca       = c2l
     cb       = c2s
     fa_name  = fl
-    fb_name  = fs
-    args     = 'c1l c1s'
+    args     = 'c1l'
   [../]
   [./ACInterface]
     type = ACInterface

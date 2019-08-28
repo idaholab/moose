@@ -190,7 +190,6 @@
     ca       = cm
     cb       = cd
     fa_name  = fm
-    fb_name  = fd
   [../]
   [./ACInterface]
     type = ACInterface

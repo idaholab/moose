@@ -227,8 +227,7 @@
     ca       = cvm
     cb       = cvb
     fa_name  = f_total_matrix
-    fb_name  = f_total_bub
-    args     = 'cgm cgb'
+    args     = 'cgm'
   [../]
   [./ACBulkCg]
     type = KKSACBulkC
@@ -236,8 +235,7 @@
     ca       = cgm
     cb       = cgb
     fa_name  = f_total_matrix
-    fb_name  = f_total_bub
-    args     = 'cvm cvb'
+    args     = 'cvm'
   [../]
   [./ACInterface]
     type = ACInterface

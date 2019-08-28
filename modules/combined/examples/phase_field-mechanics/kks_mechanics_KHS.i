@@ -426,7 +426,6 @@
     ca       = cm
     cb       = cp
     fa_name  = fm
-    fb_name  = fp
   [../]
   [./ACBulk_el] #This adds df_el/deta for strain interpolation
     type = AllenCahn

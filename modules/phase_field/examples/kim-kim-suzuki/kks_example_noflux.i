@@ -181,7 +181,6 @@
     ca       = cl
     cb       = cs
     fa_name  = fl
-    fb_name  = fs
   [../]
   [./ACInterface]
     type = ACInterface
