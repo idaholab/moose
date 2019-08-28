@@ -203,8 +203,23 @@ DisplacedProblem::updateMesh()
 
   Threads::parallel_reduce(node_range, udmt);
 
-  // Update the geometric searches that depend on the displaced mesh
-  _geometric_search_data.update();
+  // Update the geometric searches that depend on the displaced mesh. This call can end up running
+  // NearestNodeThread::operator() which has a throw inside of it. We need to catch it and make sure
+  // it's propagated to all processes before updating the point locator because the latter requires
+  // communication
+  try
+  {
+    _geometric_search_data.update();
+  }
+  catch (MooseException & e)
+  {
+    _mproblem.setException(e.what());
+  }
+
+  // The below call will throw an exception on all processes if any of our processes had an
+  // exception above. This exception will be caught higher up the call stack and the error message
+  // will be printed there
+  _mproblem.checkExceptionAndStopSolve(/*print_message=*/false);
 
   // Since the Mesh changed, update the PointLocator object used by DiracKernels.
   _dirac_kernel_info.updatePointLocator(_mesh);
@@ -232,8 +247,23 @@ DisplacedProblem::updateMesh(const NumericVector<Number> & soln,
 
   Threads::parallel_reduce(node_range, udmt);
 
-  // Update the geometric searches that depend on the displaced mesh
-  _geometric_search_data.update();
+  // Update the geometric searches that depend on the displaced mesh. This call can end up running
+  // NearestNodeThread::operator() which has a throw inside of it. We need to catch it and make sure
+  // it's propagated to all processes before updating the point locator because the latter requires
+  // communication
+  try
+  {
+    _geometric_search_data.update();
+  }
+  catch (MooseException & e)
+  {
+    _mproblem.setException(e.what());
+  }
+
+  // The below call will throw an exception on all processes if any of our processes had an
+  // exception above. This exception will be caught higher up the call stack and the error message
+  // will be printed there
+  _mproblem.checkExceptionAndStopSolve(/*print_message=*/false);
 
   // Since the Mesh changed, update the PointLocator object used by DiracKernels.
   _dirac_kernel_info.updatePointLocator(_mesh);
