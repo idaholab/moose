@@ -210,9 +210,7 @@
     type = KKSSplitCHCRes
     variable = c1
     ca       = c1l
-    cb       = c1s
     fa_name  = fl
-    fb_name  = fs
     w        = w1
     args_a   = 'c2l'
   [../]
@@ -220,9 +218,7 @@
     type = KKSSplitCHCRes
     variable = c2
     ca       = c2l
-    cb       = c2s
     fa_name  = fl
-    fb_name  = fs
     w        = w2
     args_a   = 'c1l'
   [../]

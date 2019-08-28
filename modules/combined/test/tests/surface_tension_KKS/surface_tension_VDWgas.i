@@ -175,9 +175,7 @@
     type = KKSSplitCHCRes
     variable = cg
     ca       = cgm
-    cb       = cgb
     fa_name  = f_total_matrix
-    fb_name  = f_total_bub
     w        = wg
     args_a   = 'cvm'
   [../]
@@ -185,9 +183,7 @@
     type = KKSSplitCHCRes
     variable = cv
     ca       = cvm
-    cb       = cvb
     fa_name  = f_total_matrix
-    fb_name  = f_total_bub
     w        = wv
     args_a   = 'cgm'
   [../]

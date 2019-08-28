@@ -161,9 +161,7 @@
     type = KKSSplitCHCRes
     variable = c
     ca       = cl
-    cb       = cs
     fa_name  = fl
-    fb_name  = fs
     w        = w
   [../]
 

@@ -394,9 +394,7 @@
     type = KKSSplitCHCRes
     variable = c
     ca       = cm
-    cb       = cp
     fa_name  = fm
-    fb_name  = fp
     w        = w
   [../]
 
