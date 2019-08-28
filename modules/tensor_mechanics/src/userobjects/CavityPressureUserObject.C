@@ -57,7 +57,8 @@ CavityPressureUserObject::CavityPressureUserObject(const InputParameters & param
     _init_temp_given(isParamValid("initial_temperature")),
     _init_temp(_init_temp_given ? getParam<Real>("initial_temperature") : 0.0),
     _startup_time(getParam<Real>("startup_time")),
-    _initialized(declareRestartableData<bool>("initialized", false))
+    _initialized(declareRestartableData<bool>("initialized", false)),
+    _start_time(0.0)
 {
   auto material_names = params.get<std::vector<PostprocessorName>>("material_input");
   for (unsigned int i = 0; i < _material_input.size(); ++i)
@@ -104,8 +105,9 @@ CavityPressureUserObject::initialize()
                  "Does the supplied Postprocessor for temperature execute at initial?");
 
     _n0 = _initial_pressure * volume / (_R * init_temp);
-    const Real start_time = _t - _dt;
-    const Real factor = _t >= start_time + _startup_time ? 1.0 : (_t - start_time) / _startup_time;
+    _start_time = _t - _dt;
+    const Real factor =
+        _t >= _start_time + _startup_time ? 1.0 : (_t - _start_time) / _startup_time;
     _cavity_pressure = factor * _initial_pressure;
     _initialized = true;
   }
@@ -121,8 +123,7 @@ CavityPressureUserObject::execute()
     mat += *_material_input[i];
 
   const Real pressure = (_n0 + mat) * _R * _temperature / volume;
-  const Real start_time = _t - _dt;
-  const Real factor = _t >= start_time + _startup_time ? 1.0 : (_t - start_time) / _startup_time;
+  const Real factor = _t >= _start_time + _startup_time ? 1.0 : (_t - _start_time) / _startup_time;
   _cavity_pressure = factor * pressure;
 }
 

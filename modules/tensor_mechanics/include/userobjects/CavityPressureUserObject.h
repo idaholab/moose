@@ -50,6 +50,7 @@ protected:
   const Real _startup_time;
 
   bool & _initialized;
+  Real _start_time;
 };
 
 template <>
