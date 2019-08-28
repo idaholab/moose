@@ -407,10 +407,12 @@ class SQADependenciesCommand(command.CommandComponent):
         suffix = self.settings['suffix']
         category = self.settings['category']
         if category == '_empty_':
-            return parent
+            depends = self.extension.get('categories').keys()
+        else:
+            depends = self.extension.dependencies(category) or \
+                self.extension.get('categories').keys()
 
         ul = core.UnorderedList(parent)
-        depends = self.extension.dependencies(category) or self.extension.get('categories').keys()
         for dep in depends:
             if dep != category:
                 fname = '{}_{}.md'.format(dep, suffix)
@@ -582,7 +584,7 @@ class RenderSQARequirementIssues(components.RenderComponent):
         elif issue.startswith('#'):
             url = u"{}/{}/issues/{}".format(base, repo, issue[1:])
         elif re.search(r'\A[0-9a-f]{10,40}\Z', issue):
-            url = u"{}/{}/commit/{}".format(base, repo, issue[1:])
+            url = u"{}/{}/commit/{}".format(base, repo, issue)
 
         if (url is None) and (issue != u''):
             msg = "Unknown issue number or commit (commit SHA-1 must be at least 10 digits): "\
