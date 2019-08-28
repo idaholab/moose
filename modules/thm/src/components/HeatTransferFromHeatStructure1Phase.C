@@ -3,9 +3,8 @@
 #include "HeatStructureBase.h"
 #include "HeatStructureCylindrical.h"
 #include "FlowModelSinglePhase.h"
-#include "KDTree.h"
 #include "THMMesh.h"
-#include "libmesh/fe_interface.h"
+#include "FlowChannelAlignment.h"
 
 registerMooseObject("THMApp", HeatTransferFromHeatStructure1Phase);
 
@@ -25,102 +24,6 @@ HeatTransferFromHeatStructure1Phase::HeatTransferFromHeatStructure1Phase(
     const InputParameters & parameters)
   : HeatTransferFromTemperature1Phase(parameters), HSBoundaryInterface(this)
 {
-}
-
-void
-HeatTransferFromHeatStructure1Phase::checkFlowChannelAlignment() const
-{
-  const FlowChannel1Phase & flow_channel =
-      getComponentByName<FlowChannel1Phase>(_flow_channel_name);
-
-  // master element centroids
-  std::vector<Point> master_points;
-  // element ids corresponding to the centroids in `master_points`
-  std::vector<dof_id_type> master_elem_ids;
-  // local side number corresponding to the element id in `master_elem_ids`
-  std::vector<dof_id_type> master_elem_sides;
-  // slave element centroids
-  std::vector<Point> slave_points;
-  // element ids corresponding to the centroids in `slave_points`
-  std::vector<dof_id_type> slave_elem_ids;
-  /// Map of the element ID and its nearest element ID
-  std::map<dof_id_type, dof_id_type> nearest_elem_ids;
-  /// Map of the element ID and local side number of the nearest element
-  std::map<dof_id_type, unsigned int> nearest_elem_side;
-
-  BoundaryID master_bnd_id = _mesh.getBoundaryID(getMasterSideName());
-  BoundaryID slave_bnd_id = _mesh.getBoundaryID(getSlaveSideName());
-
-  ConstBndElemRange & range = *_mesh.getBoundaryElementRange();
-  for (const auto & belem : range)
-  {
-    const Elem * elem = belem->_elem;
-    BoundaryID boundary_id = belem->_bnd_id;
-
-    if (boundary_id == master_bnd_id)
-    {
-      // 2D elements
-      master_elem_ids.push_back(elem->id());
-      master_elem_sides.push_back(belem->_side);
-      master_points.push_back(elem->centroid());
-      nearest_elem_side.insert(std::pair<dof_id_type, unsigned int>(elem->id(), belem->_side));
-    }
-    else if (boundary_id == slave_bnd_id)
-    {
-      if (std::find(slave_elem_ids.begin(), slave_elem_ids.end(), elem->id()) ==
-          slave_elem_ids.end())
-      {
-        // 1D elements
-        slave_elem_ids.push_back(elem->id());
-        slave_points.push_back(elem->centroid());
-      }
-    }
-  }
-
-  if (master_points.size() > 0 && slave_points.size() > 0)
-  {
-    // find the master elements that are nearest to the slave elements
-    KDTree kd_tree(master_points, _mesh.getMaxLeafSize());
-    for (std::size_t i = 0; i < slave_points.size(); i++)
-    {
-      unsigned int patch_size = 1;
-      std::vector<std::size_t> return_index(patch_size);
-      kd_tree.neighborSearch(slave_points[i], patch_size, return_index);
-
-      nearest_elem_ids.insert(
-          std::pair<dof_id_type, dof_id_type>(slave_elem_ids[i], master_elem_ids[return_index[0]]));
-      nearest_elem_ids.insert(
-          std::pair<dof_id_type, dof_id_type>(master_elem_ids[return_index[0]], slave_elem_ids[i]));
-    }
-
-    // Go over all elements in the flow channel. Take the center of each element and project it onto
-    // the heat structure side. Then check that the projected location on the heat structure matches
-    // the location of the original center of the flow channel element
-    const std::vector<unsigned int> & fch_elem_ids = flow_channel.getElementIDs();
-    for (const auto & elem_id : fch_elem_ids)
-    {
-      const Elem * elem = _mesh.elemPtr(elem_id);
-      Point center_pt = elem->centroid();
-
-      const dof_id_type & hs_elem_id = nearest_elem_ids.at(elem_id);
-      const unsigned int & hs_elem_side = nearest_elem_side.at(hs_elem_id);
-      const Elem * neighbor = _mesh.elemPtr(hs_elem_id);
-      const Elem * neighbor_side_elem = neighbor->build_side_ptr(hs_elem_side).release();
-      unsigned int neighbor_dim = neighbor_side_elem->dim();
-      Point ref_pt =
-          FEInterface::inverse_map(neighbor_dim, FEType(), neighbor_side_elem, center_pt);
-      Point hs_pt = FEInterface::map(neighbor_dim, FEType(), neighbor_side_elem, ref_pt);
-      delete neighbor_side_elem;
-
-      if (!center_pt.absolute_fuzzy_equals(hs_pt))
-      {
-        logError("The centers of the elements of flow channel '",
-                 _flow_channel_name,
-                 "' do not equal the centers of the specified heat structure side.");
-        break;
-      }
-    }
-  }
 }
 
 void
@@ -159,7 +62,14 @@ HeatTransferFromHeatStructure1Phase::check() const
                ". They must be the same.");
 
     if (_hs_side_valid)
-      checkFlowChannelAlignment();
+    {
+      FlowChannelAlignment fcha(flow_channel, getMasterSideName(), getSlaveSideName());
+      fcha.build();
+      if (!fcha.check())
+        logError("The centers of the elements of flow channel '",
+                 _flow_channel_name,
+                 "' do not equal the centers of the specified heat structure side.");
+    }
   }
 }
 

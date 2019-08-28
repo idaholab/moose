@@ -43,6 +43,8 @@ public:
 
   Component * parent() { return _parent; }
 
+  THMMesh & mesh() const { return _mesh; }
+
   /**
    * Test if a parameter exists in the object's input parameters
    * @param name The name of the parameter
