@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "MooseConfig.h"
+
 #include "libmesh/libmesh_common.h"
 #include "libmesh/compare_types.h"
 

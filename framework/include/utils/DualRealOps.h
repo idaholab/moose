@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "MooseConfig.h"
 #include "DualReal.h"
 
 #ifdef SPARSE_AD
