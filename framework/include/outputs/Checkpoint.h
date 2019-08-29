@@ -88,16 +88,9 @@ private:
   /// Reference to the recoverable data
   std::set<std::string> & _recoverable_data;
 
-  /// Reference to the material property storage
-  const MaterialPropertyStorage & _material_property_storage;
-
-  /// Reference to the boundary material property storage
-  const MaterialPropertyStorage & _bnd_material_property_storage;
-
   /// RestrableData input/output interface
   RestartableDataIO _restartable_data_io;
 
   /// Vector of checkpoint filename structures
   std::deque<CheckpointFileNames> _file_names;
 };
-
