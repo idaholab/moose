@@ -76,9 +76,9 @@ PorousFlowWaterVapor::thermophysicalProperties(Real pressure,
 
   // AD versions of primary variables
   DualReal p = pressure;
-  p.derivatives().insert(_pidx) = 1.0;
+  Moose::derivInsert(p.derivatives(), _pidx, 1.0);
   DualReal h = enthalpy;
-  h.derivatives().insert(_hidx) = 1.0;
+  Moose::derivInsert(h.derivatives(), _hidx, 1.0);
 
   DualReal Tsat = 0.0;
   DualReal hl = 0.0;

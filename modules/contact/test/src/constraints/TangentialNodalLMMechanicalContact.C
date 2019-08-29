@@ -14,9 +14,6 @@
 #include "Assembly.h"
 
 #include "DualRealOps.h"
-using MetaPhysicL::DualNumber;
-using MetaPhysicL::NWrapper;
-using MetaPhysicL::SemiDynamicSparseNumberArray;
 
 registerMooseObject("ContactTestApp", TangentialNodalLMMechanicalContact);
 
@@ -212,21 +209,20 @@ TangentialNodalLMMechanicalContact::computeQpOffDiagJacobian(Moose::ConstraintJa
       // Our local dual number is going to depend on only three degrees of freedom: the slave nodal
       // dofs for disp_x (index 0), disp_y (index 1), and the contact pressure (index 2). The latter
       // of course exists only on the slave side
-      typedef DualNumber<Real, SemiDynamicSparseNumberArray<Real, unsigned int, NWrapper<3>>>
-          LocalDN;
+      typedef DualNumber<Real, DNDerivativeSize<3>> LocalDN;
 
       RealVectorValue tangent_vec(pinfo->_normal(1), -pinfo->_normal(0), 0);
 
       LocalDN dual_disp_x_dot(_disp_x_dot);
       // We index the zeroth entry of the _du_dot_du member variable because there is only one
       // degree of freedom on the node
-      dual_disp_x_dot.derivatives().insert(0) = _du_dot_du[0];
+      Moose::derivInsert(dual_disp_x_dot.derivatives(), 0, _du_dot_du[0]);
 
       LocalDN dual_disp_y_dot(_disp_y_dot);
-      dual_disp_y_dot.derivatives().insert(1) = _du_dot_du[0];
+      Moose::derivInsert(dual_disp_y_dot.derivatives(), 1, _du_dot_du[0]);
 
       LocalDN dual_contact_pressure(_contact_pressure);
-      dual_contact_pressure.derivatives().insert(2) = 1;
+      Moose::derivInsert(dual_contact_pressure.derivatives(), 2, 1);
 
       auto v_dot_tan = VectorValue<LocalDN>(dual_disp_x_dot, dual_disp_y_dot, 0) * tangent_vec;
 

@@ -84,11 +84,11 @@ PorousFlowWaterNCG::thermophysicalProperties(Real pressure,
 
   // AD versions of primary variables
   DualReal p = pressure;
-  p.derivatives().insert(_pidx) = 1.0;
+  Moose::derivInsert(p.derivatives(), _pidx, 1.0);
   DualReal T = temperature;
-  T.derivatives().insert(_Tidx) = 1.0;
+  Moose::derivInsert(T.derivatives(), _Tidx, 1.0);
   DualReal Zncg = Z;
-  Zncg.derivatives().insert(_Zidx) = 1.0;
+  Moose::derivInsert(Zncg.derivatives(), _Zidx, 1.0);
 
   // Clear all of the FluidStateProperties data
   clearFluidStateProperties(fsp);
@@ -167,9 +167,9 @@ PorousFlowWaterNCG::massFractions(const DualReal & pressure,
       Yncg = 0.0;
       Xh2o = 1.0 - Z;
       Yh2o = 0.0;
-      Xncg.derivatives().insert(_pidx) = 0.0;
-      Xncg.derivatives().insert(_Tidx) = 0.0;
-      Xncg.derivatives().insert(_Zidx) = 1.0;
+      Moose::derivInsert(Xncg.derivatives(), _pidx, 0.0);
+      Moose::derivInsert(Xncg.derivatives(), _Tidx, 0.0);
+      Moose::derivInsert(Xncg.derivatives(), _Zidx, 1.0);
       break;
     }
 
@@ -178,9 +178,9 @@ PorousFlowWaterNCG::massFractions(const DualReal & pressure,
       Xncg = 0.0;
       Yncg = Z;
       Yh2o = 1.0 - Z;
-      Yncg.derivatives().insert(_pidx) = 0.0;
-      Yncg.derivatives().insert(_Tidx) = 0.0;
-      Yncg.derivatives().insert(_Zidx) = 1.0;
+      Moose::derivInsert(Yncg.derivatives(), _pidx, 0.0);
+      Moose::derivInsert(Yncg.derivatives(), _Tidx, 0.0);
+      Moose::derivInsert(Yncg.derivatives(), _Zidx, 1.0);
       break;
     }
 
