@@ -31,11 +31,21 @@ using MetaPhysicL::NWrapper;
 using MetaPhysicL::SemiDynamicSparseNumberArray;
 
 #ifdef SPARSE_AD
+
 typedef SemiDynamicSparseNumberArray<Real, unsigned int, NWrapper<AD_MAX_DOFS_PER_ELEM>>
     DNDerivativeType;
+
+template <std::size_t N>
+using DNDerivativeSize = SemiDynamicSparseNumberArray<Real, unsigned int, NWrapper<N>>;
+
 #else
+
 typedef NumberArray<AD_MAX_DOFS_PER_ELEM, Real> DNDerivativeType;
-#endif
+
+template <std::size_t N>
+using DNDerivativeSize = NumberArray<N, Real>;
+
+#endif // SPARSE_AD
 
 typedef DualNumber<Real, DNDerivativeType> DualReal;
 

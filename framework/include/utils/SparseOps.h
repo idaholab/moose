@@ -7,24 +7,18 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "DualRealOps.h"
+#pragma once
 
-#ifdef SPARSE_AD
+#include "metaphysicl/dualsemidynamicsparsenumberarray.h"
+
 namespace Moose
 {
-void
-derivInsert(DNDerivativeType & derivs, std::size_t index, Real value)
+template <std::size_t N>
+inline void
+derivInsert(SemiDynamicSparseNumberArray<Real, unsigned int, NWrapper<N>> & derivs,
+            unsigned int index,
+            Real value)
 {
   derivs.insert(index) = value;
 }
 }
-#else
-namespace Moose
-{
-void
-derivInsert(DNDerivativeType & derivs, std::size_t index, Real value)
-{
-  derivs[index] = value;
-}
-}
-#endif
