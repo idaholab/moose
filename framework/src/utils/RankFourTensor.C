@@ -17,7 +17,7 @@
 #include "MatrixTools.h"
 #include "PermutationTensor.h"
 
-#include "metaphysicl/dualsemidynamicsparsenumberarray.h"
+#include "DualRealOps.h"
 
 #include "libmesh/utility.h"
 #include "libmesh/tensor_value.h"

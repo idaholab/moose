@@ -12,7 +12,7 @@
 #include "LinearInterpolation.h"
 #include "DualReal.h"
 
-#include "metaphysicl/dualsemidynamicsparsenumberarray.h"
+#include "DualRealOps.h"
 
 #include <cmath>
 

@@ -18,7 +18,7 @@
 #include "libmesh/dense_matrix.h"
 #include "libmesh/elem.h"
 
-#include "metaphysicl/dualsemidynamicsparsenumberarray.h"
+#include "DualRealOps.h"
 
 template <>
 void
