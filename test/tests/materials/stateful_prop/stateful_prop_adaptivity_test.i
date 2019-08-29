@@ -84,7 +84,7 @@
 
   l_max_its = 10
   start_time = 0.0
-  num_steps = 3
+  num_steps = 4
   dt = .1
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
