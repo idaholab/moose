@@ -583,10 +583,10 @@ TEST_F(Water97FluidPropertiesTest, derivatives)
 
   // Check derivatives of temperature calculated using pressure and enthalpy using AD
   DualReal adp = 3.0e6;
-  adp.derivatives().insert(0) = 1.0;
+  Moose::derivInsert(adp.derivatives(), 0, 1.0);
 
   DualReal adh = 4.0e6;
-  adh.derivatives().insert(1) = 1.0;
+  Moose::derivInsert(adh.derivatives(), 1, 1.0);
 
   DualReal adT = _ad_fp->T_from_p_h(adp, adh);
 

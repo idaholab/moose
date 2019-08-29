@@ -53,7 +53,7 @@ TEST(LinearInterpolationTest, automatic_differentiation_sample)
   DualLinearInterpolation interp(x, y);
 
   DualReal xx = 1.5;
-  xx.derivatives().insert(0) = 1;
+  Moose::derivInsert(xx.derivatives(), 0, 1);
   auto yy = interp.sample(xx);
 
   EXPECT_DOUBLE_EQ(yy.value(), 2.5);
