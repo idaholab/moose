@@ -39,7 +39,7 @@ VectorTransientAbsorbingBC::VectorTransientAbsorbingBC(const InputParameters & p
     _u_dot(dot()),
     _coupled_dot(coupledVectorDot("coupled_field")),
     _du_dot_du(dotDu()),
-    _coupled_dot_du(coupledVectorDotDu("coupled"))
+    _coupled_dot_du(coupledVectorDotDu("coupled_field"))
 
 // TODO: Add incoming field capability
 // _inc_real(getFunction("real_incoming")),
