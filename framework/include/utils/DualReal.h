@@ -18,19 +18,25 @@ template <typename, typename>
 class DualNumber;
 template <typename, typename, typename>
 class SemiDynamicSparseNumberArray;
+template <std::size_t, typename>
+class NumberArray;
 template <std::size_t N>
 struct NWrapper;
 }
 
 using libMesh::Real;
 using MetaPhysicL::DualNumber;
+using MetaPhysicL::NumberArray;
 using MetaPhysicL::NWrapper;
 using MetaPhysicL::SemiDynamicSparseNumberArray;
 
-#define AD_MAX_DOFS_PER_ELEM 81
-
+#ifdef SPARSE_AD
 typedef SemiDynamicSparseNumberArray<Real, unsigned int, NWrapper<AD_MAX_DOFS_PER_ELEM>>
     DNDerivativeType;
+#else
+typedef NumberArray<AD_MAX_DOFS_PER_ELEM, Real> DNDerivativeType;
+#endif
+
 typedef DualNumber<Real, DNDerivativeType> DualReal;
 
 #ifndef LIBMESH_DUAL_NUMBER_COMPARE_TYPES
