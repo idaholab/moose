@@ -872,7 +872,7 @@ void
 Water97FluidProperties::vaporTemperature(Real pressure, Real & Tsat, Real & dTsat_dp) const
 {
   FPDualReal p = pressure;
-  p.derivatives().insert(0) = 1.0;
+  Moose::derivInsert(p.derivatives(), 0, 1.0);
 
   const FPDualReal T = vaporTemperature_ad(p);
 
@@ -1686,9 +1686,9 @@ Water97FluidProperties::T_from_p_h(
     Real pressure, Real enthalpy, Real & temperature, Real & dT_dp, Real & dT_dh) const
 {
   FPDualReal p = pressure;
-  p.derivatives().insert(0) = 1.0;
+  Moose::derivInsert(p.derivatives(), 0, 1.0);
   FPDualReal h = enthalpy;
-  h.derivatives().insert(1) = 1.0;
+  Moose::derivInsert(h.derivatives(), 1, 1.0);
 
   const FPDualReal T = T_from_p_h_ad(p, h);
 

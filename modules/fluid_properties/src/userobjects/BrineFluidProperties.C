@@ -190,11 +190,11 @@ BrineFluidProperties::rho_from_p_T_X(Real pressure,
 {
   // Initialise the AD value and derivatives
   FPDualReal p = pressure;
-  p.derivatives().insert(0) = 1.0;
+  Moose::derivInsert(p.derivatives(), 0, 1.0);
   FPDualReal T = temperature;
-  T.derivatives().insert(1) = 1.0;
+  Moose::derivInsert(T.derivatives(), 1, 1.0);
   FPDualReal x = xnacl;
-  x.derivatives().insert(2) = 1.0;
+  Moose::derivInsert(x.derivatives(), 2, 1.0);
 
   _water_fp_derivs = true;
   FPDualReal ad_rho = this->rho_from_p_T_X(p, T, x);
@@ -331,11 +331,11 @@ BrineFluidProperties::h_from_p_T_X(Real pressure,
 {
   // Initialise the AD value and derivatives
   FPDualReal p = pressure;
-  p.derivatives().insert(0) = 1.0;
+  Moose::derivInsert(p.derivatives(), 0, 1.0);
   FPDualReal T = temperature;
-  T.derivatives().insert(1) = 1.0;
+  Moose::derivInsert(T.derivatives(), 1, 1.0);
   FPDualReal x = xnacl;
-  x.derivatives().insert(2) = 1.0;
+  Moose::derivInsert(x.derivatives(), 2, 1.0);
 
   _water_fp_derivs = true;
   FPDualReal ad_h = h_from_p_T_X(p, T, x);
@@ -414,11 +414,11 @@ BrineFluidProperties::e_from_p_T_X(Real pressure,
 {
   // Initialise the AD value and derivatives
   FPDualReal p = pressure;
-  p.derivatives().insert(0) = 1.0;
+  Moose::derivInsert(p.derivatives(), 0, 1.0);
   FPDualReal T = temperature;
-  T.derivatives().insert(1) = 1.0;
+  Moose::derivInsert(T.derivatives(), 1, 1.0);
   FPDualReal x = xnacl;
-  x.derivatives().insert(2) = 1.0;
+  Moose::derivInsert(x.derivatives(), 2, 1.0);
 
   _water_fp_derivs = true;
   FPDualReal ad_e = e_from_p_T_X(p, T, x);

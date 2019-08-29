@@ -100,11 +100,11 @@ void
 HeliumFluidProperties::c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real & dc_de) const
 {
   DualReal myv = v;
-  myv.derivatives().insert(0) = 1;
-  myv.derivatives().insert(1) = 0;
+  Moose::derivInsert(myv.derivatives(), 0, 1);
+  Moose::derivInsert(myv.derivatives(), 1, 0);
   DualReal mye = e;
-  mye.derivatives().insert(0) = 0;
-  mye.derivatives().insert(1) = 1;
+  Moose::derivInsert(mye.derivatives(), 0, 0);
+  Moose::derivInsert(mye.derivatives(), 1, 1);
 
   auto p = SinglePhaseFluidProperties::p_from_v_e(myv, mye);
   auto T = SinglePhaseFluidProperties::T_from_v_e(myv, mye);
