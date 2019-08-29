@@ -23,12 +23,12 @@ TEST_F(ADFluidPropsTest, ad_basic)
 
   DNDerivativeType dvdx;
   DNDerivativeType dedx;
-  dvdx.insert(0) = 1;
-  dvdx.insert(1) = 2;
-  dvdx.insert(2) = 3;
-  dedx.insert(0) = 1;
-  dedx.insert(1) = 0;
-  dedx.insert(2) = 2;
+  Moose::derivInsert(dvdx, 0, 1);
+  Moose::derivInsert(dvdx, 1, 2);
+  Moose::derivInsert(dvdx, 2, 3);
+  Moose::derivInsert(dedx, 0, 1);
+  Moose::derivInsert(dedx, 1, 0);
+  Moose::derivInsert(dedx, 2, 2);
 
   DualReal v_ad(v, dvdx);
   DualReal e_ad(e, dedx);
