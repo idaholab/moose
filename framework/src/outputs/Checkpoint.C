@@ -52,8 +52,6 @@ Checkpoint::Checkpoint(const InputParameters & parameters)
     _parallel_mesh(_problem_ptr->mesh().isDistributedMesh()),
     _restartable_data(_app.getRestartableData()),
     _recoverable_data(_app.getRecoverableData()),
-    _material_property_storage(_problem_ptr->getMaterialPropertyStorage()),
-    _bnd_material_property_storage(_problem_ptr->getBndMaterialPropertyStorage()),
     _restartable_data_io(RestartableDataIO(*_problem_ptr))
 {
 }

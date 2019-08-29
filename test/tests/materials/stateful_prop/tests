@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#1927 #8278 #4268 #5658 #3277 #3414 #808 #8450'
+  issues = '#1927 #8278 #4268 #5658 #3277 #3414 #808 #8450 #13972'
   design = 'syntax/Materials/index.md'
 
   [stateful_old]
@@ -106,7 +106,7 @@
     [spatially_const]
       type = 'Exodiff'
       input = 'stateful_prop_adaptivity_test.i'
-      exodiff = 'stateful_prop_adaptivity_test_out.e-s003'
+      exodiff = 'stateful_prop_adaptivity_test_out.e-s004'
 
       detail = 'when properties are spatially constant, and'
     []
@@ -114,7 +114,7 @@
     [spatially_varying]
       type = 'Exodiff'
       input = 'spatial_adaptivity_test.i'
-      exodiff = 'spatial_adaptivity_test_out.e-s003'
+      exodiff = 'spatial_adaptivity_test_out.e-s004'
 
       detail = 'when properties vary spatially.'
     []

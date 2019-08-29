@@ -158,6 +158,12 @@ MaterialPropertyStorage::prolongStatefulProps(
       }
     }
   }
+
+  // Remove inactive parent element properties
+  _props_elem->erase(&elem);
+  _props_elem_old->erase(&elem);
+  if (hasOlderProperties())
+    _props_elem_older->erase(&elem);
 }
 
 void
@@ -214,6 +220,12 @@ MaterialPropertyStorage::restrictStatefulProps(
       if (hasOlderProperties())
         propsOlder(&elem, side)[i]->qpCopy(qp, propsOlder(child_elem, side)[i], qp_map._to);
     }
+
+    // Remove inactive child element properties
+    _props_elem->erase(child_elem);
+    _props_elem_old->erase(child_elem);
+    if (hasOlderProperties())
+      _props_elem_older->erase(child_elem);
   }
 }
 
