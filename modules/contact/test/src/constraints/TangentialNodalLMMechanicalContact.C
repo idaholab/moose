@@ -177,7 +177,7 @@ Real TangentialNodalLMMechanicalContact::computeQpJacobian(Moose::ConstraintJaco
 
         // NCP part 2: require that the frictional force can never exceed the frictional
         // coefficient times the normal force.
-        DualNumber<Real> dual_u_slave(_u_slave[_qp]);
+        DualNumber<Real, Real> dual_u_slave(_u_slave[_qp]);
         dual_u_slave.derivatives() = 1;
 
         auto b = _mu * _contact_pressure - std::abs(dual_u_slave);

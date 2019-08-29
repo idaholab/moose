@@ -138,7 +138,7 @@ Real NormalNodalLMMechanicalContact::computeQpJacobian(Moose::ConstraintJacobian
     PenetrationInfo * pinfo = found->second;
     if (pinfo != NULL)
     {
-      DualNumber<Real> dual_u_slave(_u_slave[_qp]);
+      DualNumber<Real, Real> dual_u_slave(_u_slave[_qp]);
       dual_u_slave.derivatives() = 1.;
 
       auto a = -pinfo->_distance * _c;
@@ -164,7 +164,7 @@ NormalNodalLMMechanicalContact::computeQpOffDiagJacobian(Moose::ConstraintJacobi
     PenetrationInfo * pinfo = found->second;
     if (pinfo != NULL)
     {
-      DualNumber<Real> gap(-pinfo->_distance);
+      DualNumber<Real, Real> gap(-pinfo->_distance);
 
       unsigned comp;
       if (jvar == _master_var_num)
