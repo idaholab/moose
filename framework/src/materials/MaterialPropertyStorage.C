@@ -73,16 +73,36 @@ void
 MaterialPropertyStorage::releaseProperties()
 {
   for (auto & i : *_props_elem)
-    for (auto & j : i.second)
-      j.second.destroy();
+    releasePropertyMap(i.second);
 
   for (auto & i : *_props_elem_old)
-    for (auto & j : i.second)
-      j.second.destroy();
+    releasePropertyMap(i.second);
 
   for (auto & i : *_props_elem_older)
-    for (auto & j : i.second)
-      j.second.destroy();
+    releasePropertyMap(i.second);
+}
+
+void
+MaterialPropertyStorage::releasePropertyMap(HashMap<unsigned int, MaterialProperties> & inner_map)
+{
+  for (auto & i : inner_map)
+    i.second.destroy();
+}
+
+void
+MaterialPropertyStorage::eraseProperty(const Elem * elem)
+{
+  if (_props_elem->contains(elem))
+    releasePropertyMap((*_props_elem)[elem]);
+  _props_elem->erase(elem);
+
+  if (_props_elem_old->contains(elem))
+    releasePropertyMap((*_props_elem_old)[elem]);
+  _props_elem_old->erase(elem);
+
+  if (_props_elem_older->contains(elem))
+    releasePropertyMap((*_props_elem_older)[elem]);
+  _props_elem_older->erase(elem);
 }
 
 void
@@ -160,10 +180,7 @@ MaterialPropertyStorage::prolongStatefulProps(
   }
 
   // Remove inactive parent element properties
-  _props_elem->erase(&elem);
-  _props_elem_old->erase(&elem);
-  if (hasOlderProperties())
-    _props_elem_older->erase(&elem);
+  eraseProperty(&elem);
 }
 
 void
@@ -222,10 +239,7 @@ MaterialPropertyStorage::restrictStatefulProps(
     }
 
     // Remove inactive child element properties
-    _props_elem->erase(child_elem);
-    _props_elem_old->erase(child_elem);
-    if (hasOlderProperties())
-      _props_elem_older->erase(child_elem);
+    eraseProperty(child_elem);
   }
 }
 
