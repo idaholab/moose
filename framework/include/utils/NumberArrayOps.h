@@ -9,10 +9,14 @@
 
 #pragma once
 
-#include "DualReal.h"
+#include "metaphysicl/dualnumberarray.h"
 
-#ifdef SPARSE_AD
-#include "SparseOps.h"
-#else
-#include "NumberArrayOps.h"
-#endif
+namespace Moose
+{
+template <std::size_t N>
+inline void
+derivInsert(NumberArray<N, Real> & derivs, unsigned int index, Real value)
+{
+  derivs[index] = value;
+}
+}
