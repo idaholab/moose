@@ -19,6 +19,7 @@
 #include <iostream>
 #include <thread>
 #include <future>
+#include <ios>
 
 #if defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ < 9) && !defined(__INTEL_COMPILER) &&  \
     !defined(__clang__)
@@ -115,9 +116,16 @@ public:
         auto end = std::chrono::steady_clock::now();
         std::chrono::duration<double> duration = end - start;
 
+        auto original_precision = out.precision();
+        auto original_flags = out.flags();
+
         out << std::setw(WRAP_LENGTH - offset) << ' ' << " [" << COLOR_YELLOW << std::setw(6)
             << std::fixed << std::setprecision(2) << duration.count() << " s" << COLOR_DEFAULT
             << ']';
+
+        // Restore the original stream state
+        out.precision(original_precision);
+        out.flags(original_flags);
       }
 
       out << std::endl;

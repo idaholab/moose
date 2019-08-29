@@ -71,6 +71,7 @@
 #include "ADPresetNodalBC.h"
 #include "Moose.h"
 #include "TimedPrint.h"
+#include "ConsoleStream.h"
 
 // libMesh
 #include "libmesh/nonlinear_solver.h"
@@ -88,6 +89,8 @@
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/petsc_matrix.h"
 #include "libmesh/default_coupling.h"
+
+#include <ios>
 
 // PETSc
 #ifdef LIBMESH_HAVE_PETSC
@@ -3265,6 +3268,11 @@ NonlinearSystemBase::computeScalingJacobian(NonlinearImplicitSystem & sys)
     if (_verbose)
     {
       _console << "Automatic scaling factors:\n";
+      auto original_flags = _console.flags();
+      auto original_precision = _console.precision();
+      _console.unsetf(std::ios_base::floatfield);
+      _console.precision(6);
+
       for (MooseIndex(field_variables) i = 0; i < field_variables.size(); ++i)
       {
         auto & field_variable = *field_variables[i];
@@ -3278,6 +3286,10 @@ NonlinearSystemBase::computeScalingJacobian(NonlinearImplicitSystem & sys)
                  << 1.0 / inverse_scaling_factors[offset + i] << "\n";
       }
       _console << "\n\n";
+
+      // restore state
+      _console.flags(original_flags);
+      _console.precision(original_precision);
     }
 
     // Now set the scaling factors for the variables
