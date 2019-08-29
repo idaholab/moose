@@ -16,7 +16,7 @@
 #include "Conversion.h"
 #include "MathUtils.h"
 
-#include "metaphysicl/dualsemidynamicsparsenumberarray.h"
+#include "DualRealOps.h"
 
 #include <limits>
 #include <string>

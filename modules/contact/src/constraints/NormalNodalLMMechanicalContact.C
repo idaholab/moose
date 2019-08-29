@@ -13,7 +13,7 @@
 #include "SystemBase.h"
 #include "Assembly.h"
 
-#include "metaphysicl/dualsemidynamicsparsenumberarray.h"
+#include "DualRealOps.h"
 
 using MetaPhysicL::DualNumber;
 

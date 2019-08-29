@@ -11,7 +11,7 @@
 
 #include "libmesh/dense_matrix.h"
 
-#include "metaphysicl/dualsemidynamicsparsenumberarray.h"
+#include "DualRealOps.h"
 
 namespace libMesh
 {

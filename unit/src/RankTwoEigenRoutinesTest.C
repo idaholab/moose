@@ -9,7 +9,7 @@
 
 #include "gtest/gtest.h"
 
-#include "metaphysicl/dualsemidynamicsparsenumberarray.h"
+#include "DualRealOps.h"
 
 #include "MooseTypes.h"
 #include "DualReal.h"

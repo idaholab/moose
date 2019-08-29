@@ -11,7 +11,7 @@
 
 #include "DualReal.h"
 
-#include "metaphysicl/dualsemidynamicsparsenumberarray.h"
+#include "DualRealOps.h"
 #include "libmesh/libmesh_common.h"
 
 using namespace libMesh;

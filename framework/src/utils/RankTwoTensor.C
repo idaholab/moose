@@ -18,7 +18,7 @@
 #include "Conversion.h"
 #include "MooseArray.h"
 
-#include "metaphysicl/dualsemidynamicsparsenumberarray.h"
+#include "DualRealOps.h"
 
 #include "libmesh/libmesh.h"
 #include "libmesh/tensor_value.h"

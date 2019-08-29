@@ -17,7 +17,7 @@
 #include "libmesh/tensor_value.h"
 #include "libmesh/type_n_tensor.h"
 #include "libmesh/fe_type.h"
-#include "metaphysicl/dualsemidynamicsparsenumberarray.h"
+#include "DualRealOps.h"
 
 #include <functional>
 #include <vector>

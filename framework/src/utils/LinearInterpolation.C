@@ -9,7 +9,7 @@
 
 #include "LinearInterpolation.h"
 
-#include "metaphysicl/dualsemidynamicsparsenumberarray.h"
+#include "DualRealOps.h"
 
 #include <cassert>
 #include <fstream>
