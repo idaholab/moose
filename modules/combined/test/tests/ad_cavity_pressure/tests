@@ -1,134 +1,139 @@
 [Tests]
-  issues = '#2703'
+  issues = '#12650'
   design = 'CavityPressure/index.md'
-  [./3d]
-    type = 'Exodiff'
-    input = '3d.i'
-    exodiff = '3d_out.e'
-    abs_zero = 1e-10
-    rel_err = 1e-5
+  [values]
     requirement = 'The system shall compute a cavity pressure based on the ideal gas law using the AD formuation'
-  [../]
-  [./3d-jac]
-    type = 'PetscJacobianTester'
-    input = '3d.i'
-    ratio_tol = 5e-8
-    difference_tol = 1e-4
-    cli_args = 'Executioner/num_steps=1 -snes_test_err 1e-9'
-    run_sim = True
-    heavy = True
-    method = 'OPT'
-    petsc_version = '>=3.9.4'
-    requirement = 'The system shall compute a cavity pressure based on the ideal gas law using the AD formuation and calculate a perfect Jacobian'
-  [../]
+    [./3d]
+      type = 'Exodiff'
+      input = '3d.i'
+      exodiff = '3d_out.e'
+      abs_zero = 1e-10
+      rel_err = 1e-5
+      detail = 'in 3D.'
+    [../]
+    [./3d-jac]
+      type = 'PetscJacobianTester'
+      input = '3d.i'
+      ratio_tol = 5e-8
+      difference_tol = 1e-4
+      cli_args = 'Executioner/num_steps=1 -snes_test_err 1e-9'
+      run_sim = True
+      heavy = True
+      method = 'OPT'
+      petsc_version = '>=3.9.4'
+      detail = 'in 3D and calculate a perfect Jacobian.'
+    [../]
 
-  [./initial_temperature]
-    type = 'Exodiff'
-    input = 'initial_temperature.i'
-    exodiff = 'initial_temperature_out.e'
-    abs_zero = 1e-10
-    rel_err = 1e-5
-    requirement = 'The system shall compute a cavity pressure based on the ideal gas law where the initial temperature of the cavity is independently specified and using the AD formuation'
-  [../]
-  [./initial_temperature-jac]
-    type = 'PetscJacobianTester'
-    input = 'initial_temperature.i'
-    ratio_tol = 5e-8
-    difference_tol = 1e-4
-    cli_args = 'Executioner/num_steps=1 -snes_test_err 1e-9'
-    run_sim = True
-    heavy = True
-    method = 'OPT'
-    petsc_version = '>=3.9.4'
-    requirement = 'The system shall compute a cavity pressure based on the ideal gas law where the initial temperature of the cavity is independently specified and using the AD formuation and calculate a perfect Jacobian'
-  [../]
+    [./initial_temperature]
+      type = 'Exodiff'
+      input = 'initial_temperature.i'
+      exodiff = 'initial_temperature_out.e'
+      abs_zero = 1e-10
+      rel_err = 1e-5
+      requirement = 'where the initial temperature of the cavity is independently specified.'
+    [../]
+    [./initial_temperature-jac]
+      type = 'PetscJacobianTester'
+      input = 'initial_temperature.i'
+      ratio_tol = 5e-8
+      difference_tol = 1e-4
+      cli_args = 'Executioner/num_steps=1 -snes_test_err 1e-9'
+      run_sim = True
+      heavy = True
+      method = 'OPT'
+      petsc_version = '>=3.9.4'
+      requirement = 'where the initial temperature of the cavity is independently specified and calculate a perfect Jacobian.'
+    [../]
 
-  [./rz]
-    type = 'Exodiff'
-    input = 'rz.i'
-    exodiff = 'rz_out.e'
-    abs_zero = 1e-10
-    recover = false
-    requirement = 'The system shall compute a cavity pressure based on the ideal gas law for an axisymmetric model using the AD formuation'
-  [../]
-  [./rz-jac]
-    type = 'PetscJacobianTester'
-    input = 'rz.i'
-    ratio_tol = 1e-7
-    difference_tol = 1e3
-    cli_args = 'Executioner/num_steps=1 -snes_test_err 1e-9'
-    run_sim = True
-    heavy = True
-    method = 'OPT'
-    petsc_version = '>=3.9.4'
-    requirement = 'The system shall compute a cavity pressure based on the ideal gas law for an axisymmetric model using the AD formuation and calculate a perfect Jacobian'
-  [../]
+    [./rz]
+      type = 'Exodiff'
+      input = 'rz.i'
+      exodiff = 'rz_out.e'
+      abs_zero = 1e-10
+      recover = false
+      requirement = 'in axisymmetric geometry.'
+    [../]
+    [./rz-jac]
+      type = 'PetscJacobianTester'
+      input = 'rz.i'
+      ratio_tol = 1e-7
+      difference_tol = 1e3
+      cli_args = 'Executioner/num_steps=1 -snes_test_err 1e-9'
+      run_sim = True
+      heavy = True
+      method = 'OPT'
+      petsc_version = '>=3.9.4'
+      requirement = 'in axisymmetric geometry and calculate a perfect Jacobian.'
+    [../]
 
-  [./rz_restart_prereq]
-    type = RunApp
-    prereq = rz
-    input = 'rz.i'
-    cli_args = 'Executioner/num_steps=1'
-    recover = false
-    requirement = 'The system shall write a restart file with cavity pressure information using the AD formuation'
-  [../]
+    [./rz_restart_prereq]
+      type = RunApp
+      prereq = values/rz
+      input = 'rz.i'
+      cli_args = 'Executioner/num_steps=1'
+      recover = false
+      requirement = 'in axisymmetric geometry and write a restart file with cavity pressure information.'
+    [../]
 
-  [./rz_restart]
-    type = 'Exodiff'
-    prereq = 'rz_restart_prereq'
-    input = 'rz.i'
-    exodiff = 'rz_out.e'
-    delete_output_before_running = false
-    requirement = 'The system shall restart properly when running with cavity pressure using the AD formuation'
-  [../]
+    [./rz_restart]
+      type = 'Exodiff'
+      prereq = 'values/rz_restart_prereq'
+      input = 'rz.i'
+      exodiff = 'rz_out.e'
+      delete_output_before_running = false
+      requirement = 'in axisymmetric geometry and restart properly.'
+    [../]
 
-  [./negative_volume]
-    type = RunException
-    input = 'negative_volume.i'
-    expect_err = 'Negative number of moles calculated as an input for the cavity pressure'
-    requirement = 'The system shall report an error if a negative volume is supplied to the cavity pressure calculation using the AD formuation'
-  [../]
+    [./multiple_postprocessors]
+      type = 'Exodiff'
+      input = 'multiple_postprocessors.i'
+      exodiff = 'multiple_postprocessors_out.e'
+      abs_zero = 1e-10
+      rel_err = 1e-5
+      requirement = 'when given a set of internal volumes to sum.'
+    [../]
+    [./multiple_postprocessors-jac]
+      type = 'PetscJacobianTester'
+      input = 'multiple_postprocessors.i'
+      ratio_tol = 5e-8
+      difference_tol = 1e-4
+      cli_args = 'Executioner/num_steps=1 -snes_test_err 1e-9'
+      run_sim = True
+      heavy = True
+      method = 'OPT'
+      petsc_version = '>=3.9.4'
+      requirement = 'when given a set of internal volumes to sum and calculate a perfect Jacobian'
+    [../]
+  []
 
-  [./multiple_postprocessors]
-    type = 'Exodiff'
-    input = 'multiple_postprocessors.i'
-    exodiff = 'multiple_postprocessors_out.e'
-    abs_zero = 1e-10
-    rel_err = 1e-5
-    requirement = 'The system shall compute a cavity pressure based on the ideal gas law when given a set of internal volumes to sum using the AD formuation'
-  [../]
-  [./multiple_postprocessors-jac]
-    type = 'PetscJacobianTester'
-    input = 'multiple_postprocessors.i'
-    ratio_tol = 5e-8
-    difference_tol = 1e-4
-    cli_args = 'Executioner/num_steps=1 -snes_test_err 1e-9'
-    run_sim = True
-    heavy = True
-    method = 'OPT'
-    petsc_version = '>=3.9.4'
-    requirement = 'The system shall compute a cavity pressure based on the ideal gas law when given a set of internal volumes to sum using the AD formuation and calculate a perfect Jacobian'
-  [../]
-
-  [./range_check_R]
-    type = 'RunException'
-    input = '3d.i'
-    cli_args = 'BCs/CavityPressure/1/R=0'
-    expect_err = 'Range check failed for parameter BCs/CavityPressure/1/R'
-    requirement = 'The system shall correctly report if the range checking of the gas constant parameter R fails'
-  [../]
-  [./range_check_initial_temperature]
-    type = 'RunException'
-    input = '3d.i'
-    cli_args = 'BCs/CavityPressure/1/initial_temperature=0'
-    expect_err = 'Range check failed for parameter BCs/CavityPressure/1/initial_temperature'
-    requirement = 'The system shall correctly report if the range checking of the initial temperature fails'
-  [../]
-  [./range_check_initial_pressure]
-    type = 'RunException'
-    input = '3d.i'
-    cli_args = 'BCs/CavityPressure/1/initial_pressure=-1'
-    expect_err = 'Range check failed for parameter BCs/CavityPressure/1/initial_pressure'
-    requirement = 'The system shall correctly report if the range checking of the initial pressure fails'
-  [../]
+  [errorr]
+    requirement = 'The system shall report an error using the AD formuation if'
+    [./negative_volume]
+      type = RunException
+      input = 'negative_volume.i'
+      expect_err = 'Negative number of moles calculated as an input for the cavity pressure'
+      requirement = 'a negative volume is supplied to the cavity pressure calculation.'
+    [../]
+    [./range_check_R]
+      type = 'RunException'
+      input = '3d.i'
+      cli_args = 'BCs/CavityPressure/1/R=0'
+      expect_err = 'Range check failed for parameter BCs/CavityPressure/1/R'
+      requirement = 'the range checking of the gas constant parameter R fails'
+    [../]
+    [./range_check_initial_temperature]
+      type = 'RunException'
+      input = '3d.i'
+      cli_args = 'BCs/CavityPressure/1/initial_temperature=0'
+      expect_err = 'Range check failed for parameter BCs/CavityPressure/1/initial_temperature'
+      requirement = 'the range checking of the initial temperature fails'
+    [../]
+    [./range_check_initial_pressure]
+      type = 'RunException'
+      input = '3d.i'
+      cli_args = 'BCs/CavityPressure/1/initial_pressure=-1'
+      expect_err = 'Range check failed for parameter BCs/CavityPressure/1/initial_pressure'
+      requirement = 'the range checking of the initial pressure fails'
+    [../]
+  []
 []
