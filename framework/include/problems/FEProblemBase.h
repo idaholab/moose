@@ -443,7 +443,7 @@ public:
    * Note: DO NOT CALL THIS IN A THREADED REGION!  This is meant to be called just after a threaded
    * section.
    */
-  virtual void checkExceptionAndStopSolve();
+  virtual void checkExceptionAndStopSolve(bool print_message = true);
 
   virtual bool converged() override;
   virtual unsigned int nNonlinearIterations() const override;

@@ -73,16 +73,36 @@ void
 MaterialPropertyStorage::releaseProperties()
 {
   for (auto & i : *_props_elem)
-    for (auto & j : i.second)
-      j.second.destroy();
+    releasePropertyMap(i.second);
 
   for (auto & i : *_props_elem_old)
-    for (auto & j : i.second)
-      j.second.destroy();
+    releasePropertyMap(i.second);
 
   for (auto & i : *_props_elem_older)
-    for (auto & j : i.second)
-      j.second.destroy();
+    releasePropertyMap(i.second);
+}
+
+void
+MaterialPropertyStorage::releasePropertyMap(HashMap<unsigned int, MaterialProperties> & inner_map)
+{
+  for (auto & i : inner_map)
+    i.second.destroy();
+}
+
+void
+MaterialPropertyStorage::eraseProperty(const Elem * elem)
+{
+  if (_props_elem->contains(elem))
+    releasePropertyMap((*_props_elem)[elem]);
+  _props_elem->erase(elem);
+
+  if (_props_elem_old->contains(elem))
+    releasePropertyMap((*_props_elem_old)[elem]);
+  _props_elem_old->erase(elem);
+
+  if (_props_elem_older->contains(elem))
+    releasePropertyMap((*_props_elem_older)[elem]);
+  _props_elem_older->erase(elem);
 }
 
 void
@@ -158,6 +178,9 @@ MaterialPropertyStorage::prolongStatefulProps(
       }
     }
   }
+
+  // Remove inactive parent element properties
+  eraseProperty(&elem);
 }
 
 void
@@ -214,6 +237,9 @@ MaterialPropertyStorage::restrictStatefulProps(
       if (hasOlderProperties())
         propsOlder(&elem, side)[i]->qpCopy(qp, propsOlder(child_elem, side)[i], qp_map._to);
     }
+
+    // Remove inactive child element properties
+    eraseProperty(child_elem);
   }
 }
 

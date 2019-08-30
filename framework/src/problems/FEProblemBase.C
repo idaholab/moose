@@ -4420,7 +4420,7 @@ FEProblemBase::setException(const std::string & message)
 }
 
 void
-FEProblemBase::checkExceptionAndStopSolve()
+FEProblemBase::checkExceptionAndStopSolve(bool print_message)
 {
   if (_skip_exception_check)
     return;
@@ -4438,7 +4438,7 @@ FEProblemBase::checkExceptionAndStopSolve()
     _communicator.broadcast(_exception_message, processor_id);
 
     // Print the message
-    if (_communicator.rank() == 0)
+    if (_communicator.rank() == 0 && print_message)
       Moose::err << _exception_message << std::endl;
 
     // Stop the solve -- this entails setting
