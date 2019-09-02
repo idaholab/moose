@@ -585,7 +585,7 @@ MooseApp::setupOptions()
       param_search = following_arg;
 
     JsonSyntaxTree tree(param_search);
-    _parser.buildJsonSyntaxTree(tree);
+    parser().buildJsonSyntaxTree(tree);
     JsonInputFileFormatter formatter;
     Moose::out << "### START DUMP DATA ###\n"
                << formatter.toString(tree.getRoot()) << "\n### END DUMP DATA ###\n";
@@ -678,7 +678,7 @@ MooseApp::setupOptions()
   {
     Moose::perf_log.disable_logging();
     JsonSyntaxTree tree("");
-    _parser.buildJsonSyntaxTree(tree);
+    parser().buildJsonSyntaxTree(tree);
     SONDefinitionFormatter formatter;
     Moose::out << formatter.toString(tree.getRoot()) << "\n";
     _ready_to_exit = true;
@@ -687,7 +687,7 @@ MooseApp::setupOptions()
   {
     Moose::perf_log.disable_logging();
 
-    _parser.initSyntaxFormatter(Parser::YAML, true);
+    parser().initSyntaxFormatter(Parser::YAML, true);
 
     // Get command line argument following --yaml on command line
     std::string yaml_following_arg = getParam<std::string>("yaml");
@@ -696,9 +696,9 @@ MooseApp::setupOptions()
     // a dash, call buildFullTree() with an empty string, otherwise
     // pass the argument following --yaml.
     if (yaml_following_arg.empty() || (yaml_following_arg.find('-') == 0))
-      _parser.buildFullTree("");
+      parser().buildFullTree("");
     else
-      _parser.buildFullTree(yaml_following_arg);
+      parser().buildFullTree(yaml_following_arg);
 
     _ready_to_exit = true;
   }
@@ -716,7 +716,7 @@ MooseApp::setupOptions()
       search = json_following_arg;
 
     JsonSyntaxTree tree(search);
-    _parser.buildJsonSyntaxTree(tree);
+    parser().buildJsonSyntaxTree(tree);
 
     Moose::out << "**START JSON DATA**\n" << tree.getRoot() << "\n**END JSON DATA**\n";
     _ready_to_exit = true;
@@ -761,7 +761,7 @@ MooseApp::setupOptions()
       _recover_suffix = getParam<std::string>("recoversuffix");
     }
 
-    _parser.parse(_input_filename);
+    parser().parse(_input_filename);
 
     if (isParamValid("mesh_only"))
     {
@@ -840,7 +840,7 @@ MooseApp::errorCheck()
   bool warn = _enable_unused_check == WARN_UNUSED;
   bool err = _enable_unused_check == ERROR_UNUSED;
 
-  _parser.errorCheck(*_comm, warn, err);
+  parser().errorCheck(*_comm, warn, err);
 
   auto apps = _executioner->feProblem().getMultiAppWarehouse().getObjects();
   for (auto app : apps)
@@ -1065,7 +1065,7 @@ MooseApp::setStartTime(const Real time)
 std::string
 MooseApp::getFileName(bool stripLeadingPath) const
 {
-  return _parser.getFileName(stripLeadingPath);
+  return parser().getFileName(stripLeadingPath);
 }
 
 OutputWarehouse &

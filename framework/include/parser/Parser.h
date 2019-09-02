@@ -14,6 +14,7 @@
 #include "MooseTypes.h"
 #include "InputParameters.h"
 #include "Syntax.h"
+#include "GlobalParamsAction.h"
 
 #include "hit.h"
 
@@ -27,7 +28,6 @@ class SyntaxTree;
 class MooseApp;
 class Factory;
 class ActionFactory;
-class GlobalParamsAction;
 class JsonSyntaxTree;
 
 class FuncParseEvaler : public hit::Evaler
@@ -152,9 +152,14 @@ public:
   std::string hitCLIFilter(std::string appname, const std::vector<std::string> & argv);
 
 protected:
+  template <typename T>
+  bool toBool(const std::string & /*s*/, T & /*val*/)
+  {
+    return false;
+  }
+
   /**
-   * Helper functions for setting parameters of arbitrary types - bodies are in the .C file
-   * since they are called only from this Object
+   * Helper functions for setting parameters of arbitrary types
    */
   /// Template method for setting any scalar type parameter read from the input file or command line
   template <typename T, typename Base>
@@ -235,6 +240,15 @@ protected:
                                    bool in_global,
                                    GlobalParamsAction * global_block);
 
+  /**
+   * Extract custom application parameters
+   */
+  virtual bool extractCustomParams(const std::string & full_name,
+                                   const std::string & short_name,
+                                   Parameters::Value * par,
+                                   bool in_global,
+                                   GlobalParamsAction * global_block);
+
   std::unique_ptr<hit::Node> _cli_root = nullptr;
   std::unique_ptr<hit::Node> _root = nullptr;
   std::vector<std::string> _secs_need_first;
@@ -273,3 +287,320 @@ private:
   std::string _warnmsg;
   void walkRaw(std::string fullpath, std::string nodepath, hit::Node * n);
 };
+
+// Template Specializations for retrieving special types from the input file
+
+template <typename T, typename Base>
+void
+Parser::setScalarParameter(const std::string & full_name,
+                           const std::string & short_name,
+                           InputParameters::Parameter<T> * param,
+                           bool in_global,
+                           GlobalParamsAction * global_block)
+{
+  try
+  {
+    param->set() = _root->param<Base>(full_name);
+  }
+  catch (hit::Error & err)
+  {
+    auto strval = _root->param<std::string>(full_name);
+
+    // handle the case where the user put a number inside quotes
+    auto & t = typeid(T);
+    if (t == typeid(int) || t == typeid(unsigned int) || t == typeid(SubdomainID) ||
+        t == typeid(BoundaryID) || t == typeid(double))
+    {
+      try
+      {
+        param->set() = MooseUtils::convert<T>(strval, true);
+      }
+      catch (std::invalid_argument & /*e*/)
+      {
+        const std::string format_type = (t == typeid(double)) ? "float" : "integer";
+        _errmsg += hit::errormsg(_input_filename,
+                                 _root->find(full_name),
+                                 "invalid ",
+                                 format_type,
+                                 " syntax for parameter: ",
+                                 full_name,
+                                 "=",
+                                 strval) +
+                   "\n";
+      }
+    }
+    else if (t == typeid(bool))
+    {
+      bool isbool = toBool(strval, param->set());
+      if (!isbool)
+        _errmsg += hit::errormsg(_input_filename,
+                                 _root->find(full_name),
+                                 "invalid boolean syntax for parameter: ",
+                                 full_name,
+                                 "=",
+                                 strval) +
+                   "\n";
+    }
+    else
+      throw;
+  }
+
+  if (in_global)
+  {
+    global_block->remove(short_name);
+    global_block->setScalarParam<T>(short_name) = param->get();
+  }
+}
+
+template <typename T>
+void
+Parser::setFilePathParam(const std::string & full_name,
+                         const std::string & short_name,
+                         InputParameters::Parameter<T> * param,
+                         InputParameters & params,
+                         bool in_global,
+                         GlobalParamsAction * global_block)
+{
+  std::string prefix;
+  std::string postfix = _root->param<std::string>(full_name);
+  size_t pos = _input_filename.find_last_of('/');
+  if (pos != std::string::npos && postfix[0] != '/' && !postfix.empty())
+    prefix = _input_filename.substr(0, pos + 1);
+
+  params.rawParamVal(short_name) = postfix;
+  param->set() = prefix + postfix;
+
+  if (in_global)
+  {
+    global_block->remove(short_name);
+    global_block->setScalarParam<T>(short_name) = param->get();
+  }
+}
+
+template <typename T, typename UP_T, typename Base>
+void
+Parser::setScalarValueTypeParameter(const std::string & full_name,
+                                    const std::string & short_name,
+                                    InputParameters::Parameter<T> * param,
+                                    bool in_global,
+                                    GlobalParamsAction * global_block)
+{
+  setScalarParameter<T, Base>(full_name, short_name, param, in_global, global_block);
+
+  // If this is a range checked param, we need to make sure that the value falls within the
+  // requested range
+  mooseAssert(_current_params, "Current params is nullptr");
+
+  _current_params->rangeCheck<T, UP_T>(full_name, short_name, param, *_current_error_stream);
+}
+
+template <typename T, typename Base>
+void
+Parser::setVectorParameter(const std::string & full_name,
+                           const std::string & short_name,
+                           InputParameters::Parameter<std::vector<T>> * param,
+                           bool in_global,
+                           GlobalParamsAction * global_block)
+{
+  std::vector<T> vec;
+  if (_root->find(full_name))
+  {
+    try
+    {
+      auto tmp = _root->param<std::vector<Base>>(full_name);
+      for (auto val : tmp)
+        vec.push_back(val);
+    }
+    catch (hit::Error & err)
+    {
+      _errmsg += hit::errormsg(_input_filename, _root->find(full_name), err.what()) + "\n";
+      return;
+    }
+  }
+
+  param->set() = vec;
+
+  if (in_global)
+  {
+    global_block->remove(short_name);
+    global_block->setVectorParam<T>(short_name).resize(param->get().size());
+    for (unsigned int i = 0; i < vec.size(); ++i)
+      global_block->setVectorParam<T>(short_name)[i] = param->get()[i];
+  }
+}
+
+template <typename T>
+void
+Parser::setVectorFilePathParam(const std::string & full_name,
+                               const std::string & short_name,
+                               InputParameters::Parameter<std::vector<T>> * param,
+                               InputParameters & params,
+                               bool in_global,
+                               GlobalParamsAction * global_block)
+{
+  std::vector<T> vec;
+  std::vector<std::string> rawvec;
+  if (_root->find(full_name))
+  {
+    auto tmp = _root->param<std::vector<std::string>>(full_name);
+    params.rawParamVal(short_name) = _root->param<std::string>(full_name);
+    for (auto val : tmp)
+    {
+      std::string prefix;
+      std::string postfix = val;
+      size_t pos = _input_filename.find_last_of('/');
+      if (pos != std::string::npos && postfix[0] != '/')
+        prefix = _input_filename.substr(0, pos + 1);
+      rawvec.push_back(postfix);
+      vec.push_back(prefix + postfix);
+    }
+  }
+
+  param->set() = vec;
+
+  if (in_global)
+  {
+    global_block->remove(short_name);
+    global_block->setVectorParam<T>(short_name).resize(param->get().size());
+    for (unsigned int i = 0; i < vec.size(); ++i)
+      global_block->setVectorParam<T>(short_name)[i] = param->get()[i];
+  }
+}
+
+template <typename T>
+void
+Parser::setDoubleIndexParameter(const std::string & full_name,
+                                const std::string & short_name,
+                                InputParameters::Parameter<std::vector<std::vector<T>>> * param,
+                                bool in_global,
+                                GlobalParamsAction * global_block)
+{
+  // Get the full string assigned to the variable full_name
+  std::string buffer = _root->param<std::string>(full_name);
+
+  // split vector at delim ;
+  // NOTE: the substrings are _not_ of type T yet
+  std::vector<std::string> first_tokenized_vector;
+  MooseUtils::tokenize(buffer, first_tokenized_vector, 1, ";");
+  param->set().resize(first_tokenized_vector.size());
+
+  for (unsigned j = 0; j < first_tokenized_vector.size(); ++j)
+    if (!MooseUtils::tokenizeAndConvert<T>(first_tokenized_vector[j], param->set()[j]))
+    {
+      _errmsg +=
+          hit::errormsg(
+              _input_filename, _root->find(full_name), "invalid format for parameter ", full_name) +
+          "\n";
+      return;
+    }
+
+  if (in_global)
+  {
+    global_block->remove(short_name);
+    global_block->setDoubleIndexParam<T>(short_name).resize(first_tokenized_vector.size());
+    for (unsigned j = 0; j < first_tokenized_vector.size(); ++j)
+    {
+      global_block->setDoubleIndexParam<T>(short_name)[j].resize(param->get()[j].size());
+      for (unsigned int i = 0; i < param->get()[j].size(); ++i)
+        global_block->setDoubleIndexParam<T>(short_name)[j][i] = param->get()[j][i];
+    }
+  }
+}
+
+template <typename T>
+void
+Parser::setScalarComponentParameter(const std::string & full_name,
+                                    const std::string & short_name,
+                                    InputParameters::Parameter<T> * param,
+                                    bool in_global,
+                                    GlobalParamsAction * global_block)
+{
+  std::vector<double> vec;
+  try
+  {
+    vec = _root->param<std::vector<double>>(full_name);
+  }
+  catch (hit::Error & err)
+  {
+    _errmsg += hit::errormsg(_input_filename, _root->find(full_name), err.what()) + "\n";
+    return;
+  }
+
+  if (vec.size() != LIBMESH_DIM)
+  {
+    _errmsg += hit::errormsg(_input_filename,
+                             _root->find(full_name),
+                             "wrong number of values in scalar component parameter ",
+                             full_name,
+                             ": size ",
+                             vec.size(),
+                             " is not a multiple of ",
+                             LIBMESH_DIM) +
+               "\n";
+    return;
+  }
+
+  T value;
+  for (unsigned int i = 0; i < vec.size(); ++i)
+    value(i) = Real(vec[i]);
+
+  param->set() = value;
+  if (in_global)
+  {
+    global_block->remove(short_name);
+    global_block->setScalarParam<T>(short_name) = value;
+  }
+}
+
+template <typename T>
+void
+Parser::setVectorComponentParameter(const std::string & full_name,
+                                    const std::string & short_name,
+                                    InputParameters::Parameter<std::vector<T>> * param,
+                                    bool in_global,
+                                    GlobalParamsAction * global_block)
+{
+  std::vector<double> vec;
+  try
+  {
+    vec = _root->param<std::vector<double>>(full_name);
+  }
+  catch (hit::Error & err)
+  {
+    _errmsg += hit::errormsg(_input_filename, _root->find(full_name), err.what()) + "\n";
+    return;
+  }
+
+  if (vec.size() % LIBMESH_DIM)
+  {
+    _errmsg += hit::errormsg(_input_filename,
+                             _root->find(full_name),
+                             "wrong number of values in vector component parameter ",
+                             full_name,
+                             ": size ",
+                             vec.size(),
+                             " is not a multiple of ",
+                             LIBMESH_DIM) +
+               "\n";
+    return;
+  }
+
+  std::vector<T> values;
+  for (unsigned int i = 0; i < vec.size() / LIBMESH_DIM; ++i)
+  {
+    T value;
+    for (int j = 0; j < LIBMESH_DIM; ++j)
+      value(j) = Real(vec[i * LIBMESH_DIM + j]);
+    values.push_back(value);
+  }
+
+  param->set() = values;
+
+  if (in_global)
+  {
+    global_block->remove(short_name);
+    global_block->setVectorParam<T>(short_name).resize(vec.size(), values[0]);
+    for (unsigned int i = 0; i < vec.size() / LIBMESH_DIM; ++i)
+      global_block->setVectorParam<T>(short_name)[i] = values[0];
+  }
+}

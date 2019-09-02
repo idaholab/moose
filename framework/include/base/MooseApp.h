@@ -146,7 +146,12 @@ public:
 
   ActionWarehouse & actionWarehouse() { return _action_warehouse; }
 
-  Parser & parser() { return _parser; }
+  virtual Parser & parser()
+  {
+    return const_cast<Parser &>(const_cast<const MooseApp *>(this)->parser());
+  }
+
+  virtual const Parser & parser() const { return _parser; }
 
   Syntax & syntax() { return _syntax; }
 
