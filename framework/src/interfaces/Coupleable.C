@@ -639,6 +639,34 @@ Coupleable::coupledDot(const std::string & var_name, unsigned int comp)
 }
 
 const VariableValue &
+Coupleable::coupledDotResidual(const std::string & var_name, unsigned int comp)
+{
+  checkVar(var_name);
+  if (!isCoupled(var_name)) // Return default 0
+    return _default_value_zero;
+
+  validateExecutionerType(var_name, "coupledDotResidual");
+  MooseVariable * var = getVar(var_name, comp);
+  if (var == NULL)
+    mooseError("Call corresponding vector variable method");
+
+  if (!_coupleable_neighbor)
+  {
+    if (_c_nodal)
+      return var->dofValuesDotResidual();
+    else
+      return var->uDotResidual();
+  }
+  else
+  {
+    if (_c_nodal)
+      return var->dofValuesDotNeighborResidual();
+    else
+      return var->uDotNeighborResidual();
+  }
+}
+
+const VariableValue &
 Coupleable::coupledDotDot(const std::string & var_name, unsigned int comp)
 {
   MooseVariable * var = getVar(var_name, comp);
@@ -657,6 +685,34 @@ Coupleable::coupledDotDot(const std::string & var_name, unsigned int comp)
     if (_c_nodal)
       return var->dofValuesDotDotNeighbor();
     return var->uDotDotNeighbor();
+  }
+}
+
+const VariableValue &
+Coupleable::coupledDotDotResidual(const std::string & var_name, unsigned int comp)
+{
+  checkVar(var_name);
+  if (!isCoupled(var_name)) // Return default 0
+    return _default_value_zero;
+
+  validateExecutionerType(var_name, "coupledDotDotResidual");
+  MooseVariable * var = getVar(var_name, comp);
+  if (var == NULL)
+    mooseError("Call corresponding vector variable method");
+
+  if (!_coupleable_neighbor)
+  {
+    if (_c_nodal)
+      return var->dofValuesDotDotResidual();
+    else
+      return var->uDotDotResidual();
+  }
+  else
+  {
+    if (_c_nodal)
+      return var->dofValuesDotDotNeighborResidual();
+    else
+      return var->uDotDotNeighborResidual();
   }
 }
 
@@ -718,6 +774,19 @@ Coupleable::coupledVectorDot(const std::string & var_name, unsigned int comp)
 }
 
 const VectorVariableValue &
+Coupleable::coupledVectorDotResidual(const std::string & var_name, unsigned int comp)
+{
+  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  if (!var)
+    return _default_vector_value_zero;
+  checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
+
+  if (!_coupleable_neighbor)
+    return var->uDotResidual();
+  return var->uDotNeighborResidual();
+}
+
+const VectorVariableValue &
 Coupleable::coupledVectorDotDot(const std::string & var_name, unsigned int comp)
 {
   VectorMooseVariable * var = getVectorVar(var_name, comp);
@@ -728,6 +797,19 @@ Coupleable::coupledVectorDotDot(const std::string & var_name, unsigned int comp)
   if (!_coupleable_neighbor)
     return var->uDotDot();
   return var->uDotDotNeighbor();
+}
+
+const VectorVariableValue &
+Coupleable::coupledVectorDotDotResidual(const std::string & var_name, unsigned int comp)
+{
+  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  if (!var)
+    return _default_vector_value_zero;
+  checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
+
+  if (!_coupleable_neighbor)
+    return var->uDotDotResidual();
+  return var->uDotDotNeighborResidual();
 }
 
 const VectorVariableValue &
@@ -805,6 +887,28 @@ Coupleable::coupledArrayDot(const std::string & var_name, unsigned int comp)
 }
 
 const ArrayVariableValue &
+Coupleable::coupledArrayDotResidual(const std::string & var_name, unsigned int comp)
+{
+  ArrayMooseVariable * var = getArrayVar(var_name, comp);
+  if (!var)
+    return _default_array_value_zero;
+  checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
+
+  if (!_coupleable_neighbor)
+  {
+    if (_c_nodal)
+      return var->dofValuesDotResidual();
+    return var->uDotResidual();
+  }
+  else
+  {
+    if (_c_nodal)
+      return var->dofValuesDotNeighborResidual();
+    return var->uDotNeighborResidual();
+  }
+}
+
+const ArrayVariableValue &
 Coupleable::coupledArrayDotDot(const std::string & var_name, unsigned int comp)
 {
   ArrayMooseVariable * var = getArrayVar(var_name, comp);
@@ -823,6 +927,28 @@ Coupleable::coupledArrayDotDot(const std::string & var_name, unsigned int comp)
     if (_c_nodal)
       return var->dofValuesDotDotNeighbor();
     return var->uDotDotNeighbor();
+  }
+}
+
+const ArrayVariableValue &
+Coupleable::coupledArrayDotDotResidual(const std::string & var_name, unsigned int comp)
+{
+  ArrayMooseVariable * var = getArrayVar(var_name, comp);
+  if (!var)
+    return _default_array_value_zero;
+  checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
+
+  if (!_coupleable_neighbor)
+  {
+    if (_c_nodal)
+      return var->dofValuesDotDotResidual();
+    return var->uDotDotResidual();
+  }
+  else
+  {
+    if (_c_nodal)
+      return var->dofValuesDotDotNeighborResidual();
+    return var->uDotDotNeighborResidual();
   }
 }
 
@@ -1254,6 +1380,27 @@ Coupleable::coupledNodalDot(const std::string & var_name, unsigned int comp)
   mooseError("Neighbor version not implemented");
 }
 
+template <typename T>
+const T &
+Coupleable::coupledNodalDotResidual(const std::string & var_name, unsigned int comp)
+{
+  checkVar(var_name);
+  static const T zero = 0;
+  if (!isCoupled(var_name)) // Return default 0
+    return zero;
+
+  validateExecutionerType(var_name, "coupledNodalDotResidual");
+  coupledCallback(var_name, false);
+  MooseVariableFE<T> * var = getVarHelper<T>(var_name, comp);
+  if (var == NULL)
+    mooseError("Call corresponding vector variable method");
+
+  if (!_coupleable_neighbor)
+    return var->nodalValueDotResidual();
+  else
+    mooseError("Neighbor version not implemented");
+}
+
 const VariableValue &
 Coupleable::coupledNodalDotDot(const std::string & var_name, unsigned int comp)
 {
@@ -1265,6 +1412,25 @@ Coupleable::coupledNodalDotDot(const std::string & var_name, unsigned int comp)
   if (!_coupleable_neighbor)
     return var->dofValuesDotDot();
   return var->dofValuesDotDotNeighbor();
+}
+
+const VariableValue &
+Coupleable::coupledNodalDotDotResidual(const std::string & var_name, unsigned int comp)
+{
+  checkVar(var_name);
+  if (!isCoupled(var_name)) // Return default 0
+    return _default_value_zero;
+
+  validateExecutionerType(var_name, "coupledNodalDotDotResidual");
+  coupledCallback(var_name, false);
+  MooseVariable * var = getVar(var_name, comp);
+  if (var == NULL)
+    mooseError("Call corresponding vector variable method");
+
+  if (!_coupleable_neighbor)
+    return var->dofValuesDotDotResidual();
+  else
+    return var->dofValuesDotDotNeighborResidual();
 }
 
 const VariableValue &
@@ -1456,8 +1622,14 @@ Coupleable::coupledNodalValuePreviousNL<RealVectorValue>(const std::string & var
                                                          unsigned int comp);
 template const Real & Coupleable::coupledNodalDot<Real>(const std::string & var_name,
                                                         unsigned int comp);
+template const Real & Coupleable::coupledNodalDotResidual<Real>(const std::string & var_name,
+                                                                unsigned int comp);
 template const RealVectorValue &
 Coupleable::coupledNodalDot<RealVectorValue>(const std::string & var_name, unsigned int comp);
+
+template const RealVectorValue &
+Coupleable::coupledNodalDotResidual<RealVectorValue>(const std::string & var_name,
+                                                     unsigned int comp);
 
 template const Real &
 Coupleable::adCoupledNodalValueTemplate<Real, RESIDUAL>(const std::string & var_name,

@@ -13,6 +13,7 @@
 
 // Forward Declarations
 class NodalTranslationalInertia;
+class TimeIntegrator;
 
 template <>
 InputParameters validParams<NodalTranslationalInertia>();
@@ -68,19 +69,14 @@ protected:
   /// Map between boundary nodes and nodal mass
   std::map<dof_id_type, Real> _node_id_to_mass;
 
-  /// Velocity variable value
-  const MooseArray<Number> * _vel;
+  // Velocity and acceleration calculated by time integrator
+  const VariableValue * _u_dot_residual;
+  const VariableValue * _u_dotdot_residual;
+  const VariableValue * _u_dot_old;
+  const VariableValue * _du_dot_du;
+  const VariableValue * _du_dotdot_du;
 
-  /// Old velocity variable value
-  const MooseArray<Number> * _vel_old;
-
-  /// Acceleration variable value
-  const MooseArray<Number> * _accel;
-
-  /// du_dot_du variable value
-  const MooseArray<Number> * _du_dot_du;
-
-  /// du_dotdot_du variable value
-  const MooseArray<Number> * _du_dotdot_du;
+  /// A pointer to TimeIntegrator.
+  TimeIntegrator * _time_integrator;
 };
 

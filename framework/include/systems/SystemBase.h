@@ -182,6 +182,7 @@ public:
   virtual NumericVector<Number> & solution() = 0;
   virtual NumericVector<Number> & solutionOld() = 0;
   virtual NumericVector<Number> & solutionOlder() = 0;
+  virtual NumericVector<Number> * solutionState(unsigned int i) = 0;
   virtual NumericVector<Number> * solutionPreviousNewton() = 0;
   virtual const NumericVector<Number> & solution() const = 0;
   virtual const NumericVector<Number> & solutionOld() const = 0;
@@ -806,6 +807,9 @@ protected:
 
   /// Map variable number to its pointer
   std::vector<std::vector<MooseVariableFEBase *>> _numbered_vars;
+
+  std::vector<NumericVector<Real> *> _saved_solution_state;
+  unsigned int _solution_state_size;
 
   /// Storage for MooseVariable objects
   MooseObjectWarehouseBase<MooseVariableBase> _variable_warehouse;

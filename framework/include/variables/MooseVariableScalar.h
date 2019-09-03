@@ -24,6 +24,9 @@ class MooseVariableScalar;
 template <>
 InputParameters validParams<MooseVariableScalar>();
 
+class Assembly;
+class TimeIntegrator;
+
 /**
  * Class for scalar variables (they are different).
  */
@@ -74,12 +77,37 @@ public:
                  "set uDotRequested() to true in FEProblemBase before requesting `u_dot`.");
   }
 
+  VariableValue & uDotResidual()
+  {
+    if (_sys.solutionUDot())
+    {
+      _need_u_dot_residual = true;
+      return _u_dot_residual;
+    }
+    else
+      mooseError("MooseVariableScalar: Time derivative of solution (`u_dot`) is not stored. Please "
+                 "set uDotRequested() to true in FEProblemBase before requesting `u_dot`.");
+  }
+
   VariableValue & uDotDot()
   {
     if (_sys.solutionUDotDot())
     {
       _need_u_dotdot = true;
       return _u_dotdot;
+    }
+    else
+      mooseError("MooseVariableScalar: Second time derivative of solution (`u_dotdot`) is not "
+                 "stored. Please set uDotDotRequested() to true in FEProblemBase before requesting "
+                 "`u_dotdot`.");
+  }
+
+  VariableValue & uDotDotResidual()
+  {
+    if (_sys.solutionUDotDot())
+    {
+      _need_u_dotdot_residual = true;
+      return _u_dotdot_residual;
     }
     else
       mooseError("MooseVariableScalar: Second time derivative of solution (`u_dotdot`) is not "
@@ -154,14 +182,18 @@ protected:
   std::vector<bool> _need_matrix_tag_u;
 
   VariableValue _u_dot;
+  VariableValue _u_dot_residual;
   VariableValue _u_dotdot;
+  VariableValue _u_dotdot_residual;
   VariableValue _u_dot_old;
   VariableValue _u_dotdot_old;
   VariableValue _du_dot_du;
   VariableValue _du_dotdot_du;
 
   bool _need_u_dot;
+  bool _need_u_dot_residual;
   bool _need_u_dotdot;
+  bool _need_u_dotdot_residual;
   bool _need_u_dot_old;
   bool _need_u_dotdot_old;
   bool _need_du_dot_du;
@@ -173,6 +205,9 @@ protected:
   mutable bool _need_dual_u;
   /// The scalar solution with derivative information
   DualVariableValue _dual_u;
+
+  /// A pointer to TimeIntegrator. nullptr if _sys is not a NonlinearSystemBase
+  TimeIntegrator * _time_integrator;
 
 private:
   /**

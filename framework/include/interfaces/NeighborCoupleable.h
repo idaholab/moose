@@ -33,6 +33,8 @@ public:
                                                      unsigned int comp = 0);
   virtual const VariableValue & coupledNeighborValueDot(const std::string & var_name,
                                                         unsigned int comp = 0);
+  virtual const VariableValue & coupledNeighborValueDotResidual(const std::string & var_name,
+                                                                unsigned int comp = 0);
   virtual const VariableValue & coupledNeighborValueDotDu(const std::string & var_name,
                                                           unsigned int comp = 0);
   virtual const VariableValue & coupledNeighborValueOld(const std::string & var_name,

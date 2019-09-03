@@ -43,6 +43,16 @@ NeighborCoupleable::coupledNeighborValueDot(const std::string & var_name, unsign
 }
 
 const VariableValue &
+NeighborCoupleable::coupledNeighborValueDotResidual(const std::string & var_name, unsigned int comp)
+{
+  MooseVariable * var = getVar(var_name, comp);
+  if (_neighbor_nodal)
+    return var->dofValuesDotNeighborResidual();
+  else
+    return var->uDotNeighborResidual();
+}
+
+const VariableValue &
 NeighborCoupleable::coupledNeighborValueDotDu(const std::string & var_name, unsigned int comp)
 {
   MooseVariable * var = getVar(var_name, comp);

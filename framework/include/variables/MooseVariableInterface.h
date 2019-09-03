@@ -77,11 +77,22 @@ protected:
   virtual const typename OutputTools<T>::VariableValue & dot();
 
   /**
+   * The residual correponding to the time derivative of the variable this object is operating on.
+   */
+  virtual const typename OutputTools<T>::VariableValue & dotResidual();
+
+  /**
    * The second time derivative of the variable this object is operating on.
    *
    * @return The reference to be stored off and used later.
    */
   virtual const typename OutputTools<T>::VariableValue & dotDot();
+
+  /**
+   * The residual corresponding to the second time derivative of the variable this object is
+   * operating on.
+   */
+  virtual const typename OutputTools<T>::VariableValue & dotDotResidual();
 
   /**
    * The old time derivative of the variable this object is operating on.
