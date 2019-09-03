@@ -136,28 +136,28 @@ public:
    * @param scaling_factor Scaling factor for the variable
    */
   void addVariable(bool nl,
-                   const std::string & name,
+                   const VariableName & name,
                    FEType type,
                    const SubdomainName & subdomain_name = "",
                    Real scaling_factor = 1.);
   void addVariable(bool nl,
-                   const std::string & name,
+                   const VariableName & name,
                    FEType type,
                    const std::vector<SubdomainName> & subdomain_names,
                    Real scaling_factor = 1.);
 
-  void addConstantIC(const std::string & var_name, Real value, const SubdomainName & block_name);
-  void addConstantIC(const std::string & var_name,
+  void addConstantIC(const VariableName & var_name, Real value, const SubdomainName & block_name);
+  void addConstantIC(const VariableName & var_name,
                      Real value,
                      const std::vector<SubdomainName> & block_names);
-  void addFunctionIC(const std::string & var_name,
+  void addFunctionIC(const VariableName & var_name,
                      const std::string & func_name,
                      const SubdomainName & block_name);
-  void addFunctionIC(const std::string & var_name,
+  void addFunctionIC(const VariableName & var_name,
                      const std::string & func_name,
                      const std::vector<SubdomainName> & block_names);
-  void addConstantScalarIC(const std::string & var_name, Real value);
-  void addComponentScalarIC(const std::string & var_name, const std::vector<Real> & value);
+  void addConstantScalarIC(const VariableName & var_name, Real value);
+  void addComponentScalarIC(const VariableName & var_name, const std::vector<Real> & value);
 
   void
   addInitialCondition(const std::string & type, const std::string & name, InputParameters params);
@@ -453,7 +453,7 @@ protected:
   std::map<std::string, THM::FlowModelID> _loop_name_to_model_id;
 
   /// variables for this simulation (name and info about the var)
-  std::map<std::string, VariableInfo> _vars;
+  std::map<VariableName, VariableInfo> _vars;
 
   struct ICInfo
   {

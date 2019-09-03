@@ -23,6 +23,6 @@ protected:
   void add1Phase();
   void add2Phase();
 
-  std::string _lm_name;
+  const VariableName _lm_name;
   Real _scaling_factor;
 };

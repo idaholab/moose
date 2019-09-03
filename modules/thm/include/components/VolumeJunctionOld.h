@@ -18,9 +18,9 @@ public:
   virtual void addVariables() override;
   virtual void addMooseObjects() override;
 
-  virtual const std::string & getPressureVariableName() const { return _pressure_var_name; }
-  virtual const std::string & getDensityVariableName() const { return _rho_var_name; }
-  virtual const std::string & getInternalEnergyDensityVariableName() const
+  virtual const VariableName & getPressureVariableName() const { return _pressure_var_name; }
+  virtual const VariableName & getDensityVariableName() const { return _rho_var_name; }
+  virtual const VariableName & getInternalEnergyDensityVariableName() const
   {
     return _rhoe_var_name;
   }
@@ -28,10 +28,10 @@ public:
 protected:
   virtual void check() const override;
 
-  const std::string _rho_var_name;
-  const std::string _rhoe_var_name;
-  const std::string _vel_var_name;
-  const std::string _pressure_var_name;
-  const std::string _energy_var_name;
-  const std::string _total_mfr_in_var_name;
+  const VariableName _rho_var_name;
+  const VariableName _rhoe_var_name;
+  const VariableName _vel_var_name;
+  const VariableName _pressure_var_name;
+  const VariableName _energy_var_name;
+  const VariableName _total_mfr_in_var_name;
 };

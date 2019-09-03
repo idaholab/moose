@@ -1,0 +1,112 @@
+[Tests]
+  [./sod_shock_tube_erk2_heavy]
+    type = 'Exodiff'
+    input = 'sod_shock_tube.i'
+    exodiff = 'sod_shock_tube_erk2_heavy.e'
+    cli_args = '
+      Outputs/file_base=sod_shock_tube_erk2_heavy
+      Outputs/execute_on=final'
+    abs_zero = 1e-10
+    rel_err = 1e-5
+    heavy = true
+    recover = false
+    group = '1phase rdg explicit pipe free_boundary'
+  [../]
+  [./sod_shock_tube_erk2_light]
+    type = 'Exodiff'
+    input = 'sod_shock_tube.i'
+    exodiff = 'sod_shock_tube_erk2_light.e'
+    cli_args = '
+      Executioner/num_steps=5
+      Outputs/file_base=sod_shock_tube_erk2_light'
+    abs_zero = 1e-10
+    rel_err = 1e-5
+    group = '1phase rdg explicit pipe free_boundary'
+  [../]
+  [./non_x_direction_1phase]
+    type = 'Exodiff'
+    input = 'sod_shock_tube.i'
+    exodiff = 'non_x_direction_1phase.e'
+    cli_args = '
+      Functions/p_ic_fn/axis=y
+      Functions/T_ic_fn/axis=y
+      Components/pipe/position="1 0 0"
+      Components/pipe/orientation="0 1 0"
+      Executioner/num_steps=5
+      Outputs/file_base=non_x_direction_1phase'
+    abs_zero = 1e-10
+    rel_err = 1e-5
+    group = '1phase rdg explicit pipe free_boundary'
+  [../]
+  [./sod_shock_tube_be]
+    type = 'Exodiff'
+    input = 'sod_shock_tube.i'
+    exodiff = 'sod_shock_tube_be.e'
+    cli_args = '
+      Executioner/scheme=implicit-euler
+      Executioner/solve_type=PJFNK
+      Executioner/num_steps=5
+      Outputs/file_base=sod_shock_tube_be'
+    abs_zero = 1e-7
+    rel_err = 1e-5
+    group = '1phase rdg implicit pipe free_boundary'
+  [../]
+
+  # This tests that the 2-phase solution equals the 1-phase solution in a phase.
+  # The exodus gold file was verified to have the 1-phase solution.
+  [./2phase_rdg_equals_1phase]
+    type = 'Exodiff'
+    input = 'sod_shock_tube_2phase_rdg.i'
+    cli_args = '
+      Executioner/num_steps=5
+      Outputs/csv/type=CSV
+      Outputs/csv/show="arhoA_vpp_equal"
+      Outputs/csv/execute_vector_postprocessors_on=none'
+    exodiff = 'sod_shock_tube_2phase_rdg.e'
+    abs_zero = 1e-10
+    rel_err = 1e-5
+    group = '2phase rdg explicit pipe free_boundary'
+  [../]
+
+  # This tests that the phases have equal solutions since there is no phase interaction.
+  [./2phase_rdg_equal_phases]
+    type = 'CSVDiff'
+    input = 'sod_shock_tube_2phase_rdg.i'
+    should_execute = false
+    recover = false
+    prereq = 2phase_rdg_equals_1phase
+    csvdiff = 'sod_shock_tube_2phase_rdg.csv'
+    group = '2phase rdg explicit pipe free_boundary'
+  [../]
+
+  # This tests that 2-phase slope reconstruction works in a non-x direction.
+  [./non_x_direction_2phase]
+    type = 'Exodiff'
+    input = 'sod_shock_tube_2phase_rdg.i'
+    cli_args = '
+      Functions/p_ic_fn/axis=y
+      Functions/T_ic_fn/axis=y
+      Components/pipe/position="1 0 0"
+      Components/pipe/orientation="0 1 0"
+      Executioner/num_steps=5
+      Outputs/file_base=non_x_direction_2phase'
+    exodiff = 'non_x_direction_2phase.e'
+    group = '2phase rdg explicit pipe free_boundary'
+  [../]
+
+  # This tests that when the cross-sectional area is doubled, the solution
+  # (expressed in terms of primitive variables) is the same, since area is constant.
+  # The exodus gold file was copied directly from the default (A=1) case.
+  [./2phase_rdg_double_area]
+    type = 'Exodiff'
+    input = 'sod_shock_tube_2phase_rdg.i'
+    cli_args = '
+      Components/pipe/A=2
+      Executioner/num_steps=5
+      Outputs/file_base="sod_shock_tube_2phase_rdg_double_area"'
+    exodiff = 'sod_shock_tube_2phase_rdg_double_area.e'
+    abs_zero = 1e-10
+    rel_err = 1e-5
+    group = '2phase rdg explicit pipe free_boundary'
+  [../]
+[]

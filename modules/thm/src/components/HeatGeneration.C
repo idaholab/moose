@@ -19,7 +19,7 @@ validParams<HeatGeneration>()
   params.addParam<Real>(
       "power_fraction", 1., "The fraction of reactor power that goes into the heat structure");
   params.addParam<FunctionName>("power_shape_function", "axial power shape of the fuel");
-  params.addParam<std::string>("power_density", "The name of the power density variable");
+  params.addParam<VariableName>("power_density", "The name of the power density variable");
 
   return params;
 }
@@ -31,7 +31,7 @@ HeatGeneration::HeatGeneration(const InputParameters & parameters)
     _has_psf(isParamValid("power_shape_function")),
     _power_shape_func(_has_psf ? getParam<FunctionName>("power_shape_function") : ""),
     _has_power_density(isParamValid("power_density")),
-    _power_density_name(_has_power_density ? getParam<std::string>("power_density") : "")
+    _power_density_name(_has_power_density ? getParam<VariableName>("power_density") : "")
 {
   checkSizeGreaterThan<std::string>("regions", 0);
 }
