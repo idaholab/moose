@@ -107,8 +107,8 @@ $(call symlink_rules, $(all_header_dir), $(include_files))
 
 moose_config_symlink := $(moose_all_header_dir)/MooseConfig.h
 $(moose_config_symlink): $(moose_config)
-	@echo "Symlinking MOOSE configure"
-	@ln -sf $(moose_config) $(moose_all_header_dir)/MooseConfig.h
+	@echo "Symlinking MOOSE configure "$(moose_config_symlink)
+	@ln -sf $(moose_config) $(moose_config_symlink)
 
 header_symlinks: $(all_header_dir) $(moose_config_symlink) $(link_names)
 moose_INC_DIRS := $(all_header_dir)
@@ -220,7 +220,7 @@ app_DIRS     := $(FRAMEWORK_DIR)
 
 moose_revision_header := $(FRAMEWORK_DIR)/include/base/MooseRevision.h
 
-all: libmesh_submodule_status header_symlinks $(moose_revision_header) moose
+all: libmesh_submodule_status moose $(moose_revision_header)
 
 # revision header
 moose_GIT_DIR := $(shell cd "$(FRAMEWORK_DIR)" && which git &> /dev/null && git rev-parse --show-toplevel)
@@ -273,7 +273,7 @@ $(moose_LIB): $(moose_objects) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB)
 	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(moose_objects) $(pcre_LIB) $(png_LIB) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(FRAMEWORK_DIR)
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(moose_LIB) $(FRAMEWORK_DIR)
 
-$(moose_objects): $(moose_config_symlink)
+$(moose_objects): $(moose_config_symlink) header_symlinks
 
 ## Clang static analyzer
 sa: $(moose_analyzer)
