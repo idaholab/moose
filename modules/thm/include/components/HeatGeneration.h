@@ -34,5 +34,5 @@ protected:
   /// True is power density is given via another variable
   const bool _has_power_density;
   /// The name of the power density variable (typically an aux variable)
-  const std::string _power_density_name;
+  const VariableName _power_density_name;
 };

@@ -45,19 +45,19 @@ protected:
   const Real & _scaling_factor_rhoEV;
 
   /// rho*V variable name for junction
-  const std::string _rhoV_var_name;
+  const VariableName _rhoV_var_name;
   /// rho*u*V variable name for junction
-  const std::string _rhouV_var_name;
+  const VariableName _rhouV_var_name;
   /// rho*v*V variable name for junction
-  const std::string _rhovV_var_name;
+  const VariableName _rhovV_var_name;
   /// rho*w*V variable name for junction
-  const std::string _rhowV_var_name;
+  const VariableName _rhowV_var_name;
   /// rho*E*V variable name for junction
-  const std::string _rhoEV_var_name;
+  const VariableName _rhoEV_var_name;
   /// pressure variable name for junction
-  const std::string _pressure_var_name;
+  const VariableName _pressure_var_name;
   /// temperature variable name for junction
-  const std::string _temperature_var_name;
+  const VariableName _temperature_var_name;
   /// velocity variable name for junction
-  const std::string _velocity_var_name;
+  const VariableName _velocity_var_name;
 };

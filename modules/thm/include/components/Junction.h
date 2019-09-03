@@ -34,7 +34,7 @@ public:
 protected:
   virtual void check() const override;
 
-  const std::string _entropy_var_name;
+  const VariableName _entropy_var_name;
   const UserObjectName _H_junction_uo_name;
 
   const Real _initial_p;

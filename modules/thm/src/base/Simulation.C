@@ -264,7 +264,7 @@ Simulation::printComponentLoops() const
 
 void
 Simulation::addVariable(bool nl,
-                        const std::string & name,
+                        const VariableName & name,
                         FEType type,
                         const SubdomainName & subdomain_name,
                         Real scaling_factor)
@@ -291,7 +291,7 @@ Simulation::addVariable(bool nl,
 
 void
 Simulation::addVariable(bool nl,
-                        const std::string & name,
+                        const VariableName & name,
                         FEType type,
                         const std::vector<SubdomainName> & subdomain_names,
                         Real scaling_factor /* = 1.*/)
@@ -432,7 +432,7 @@ Simulation::addInitialCondition(const std::string & type,
 }
 
 void
-Simulation::addConstantIC(const std::string & var_name,
+Simulation::addConstantIC(const VariableName & var_name,
                           Real value,
                           const SubdomainName & block_name)
 {
@@ -448,7 +448,7 @@ Simulation::addConstantIC(const std::string & var_name,
 }
 
 void
-Simulation::addConstantIC(const std::string & var_name,
+Simulation::addConstantIC(const VariableName & var_name,
                           Real value,
                           const std::vector<SubdomainName> & block_names)
 {
@@ -468,7 +468,7 @@ Simulation::addConstantIC(const std::string & var_name,
 }
 
 void
-Simulation::addFunctionIC(const std::string & var_name,
+Simulation::addFunctionIC(const VariableName & var_name,
                           const std::string & func_name,
                           const SubdomainName & block_name)
 {
@@ -484,7 +484,7 @@ Simulation::addFunctionIC(const std::string & var_name,
 }
 
 void
-Simulation::addFunctionIC(const std::string & var_name,
+Simulation::addFunctionIC(const VariableName & var_name,
                           const std::string & func_name,
                           const std::vector<SubdomainName> & block_names)
 {
@@ -504,7 +504,7 @@ Simulation::addFunctionIC(const std::string & var_name,
 }
 
 void
-Simulation::addConstantScalarIC(const std::string & var_name, Real value)
+Simulation::addConstantScalarIC(const VariableName & var_name, Real value)
 {
   if (hasInitialConditionsFromFile())
     return;
@@ -517,7 +517,7 @@ Simulation::addConstantScalarIC(const std::string & var_name, Real value)
 }
 
 void
-Simulation::addComponentScalarIC(const std::string & var_name, const std::vector<Real> & value)
+Simulation::addComponentScalarIC(const VariableName & var_name, const std::vector<Real> & value)
 {
   if (hasInitialConditionsFromFile())
     return;
@@ -554,7 +554,7 @@ Simulation::addVariables()
   // pass the variables to MOOSE
   for (auto && v : _vars)
   {
-    std::string name = v.first;
+    VariableName name = v.first;
     if (name.size() > THM::MAX_VARIABLE_LENGTH)
       mooseError(
           "Variable name '", name, "' is too long. The limit is ", THM::MAX_VARIABLE_LENGTH, ".");
@@ -591,7 +591,7 @@ Simulation::addVariables()
   // pass the scalar variables to MOOSE
   for (auto && v : _vars)
   {
-    const std::string & name = v.first;
+    const VariableName & name = v.first;
     if (name.size() > THM::MAX_VARIABLE_LENGTH)
       mooseError(
           "Variable name '", name, "' is too long. The limit is ", THM::MAX_VARIABLE_LENGTH, ".");
@@ -639,7 +639,7 @@ Simulation::setupInitialConditionsFromFile()
 
   for (auto && v : _vars)
   {
-    const std::string & var_name = v.first;
+    const VariableName & var_name = v.first;
     VariableInfo & vi = v.second;
 
     if (vi._type.family == SCALAR)
