@@ -1,0 +1,23 @@
+[Tests]
+  [./lax_shock_tube]
+    type = 'Exodiff'
+    input = 'lax_shock_tube.i'
+    exodiff = 'lax_shock_tube.e'
+    cli_args = 'Executioner/num_steps=5'
+    abs_zero = 1e-10
+    rel_err = 1e-5
+    group = '1phase rdg explicit pipe free_boundary'
+  [../]
+  [./2phase]
+    type = 'CSVDiff'
+    input = 'lax_shock_tube_2phase.i'
+    cli_args = '
+      Executioner/num_steps=5
+      Outputs/exodus=false
+      Outputs/csv/type=CSV
+      Outputs/csv/show="arhoA_vpp_equal"
+      Outputs/csv/execute_vector_postprocessors_on=none'
+    csvdiff = 'lax_shock_tube_2phase.csv'
+    group = '2phase rdg explicit pipe free_boundary'
+  [../]
+[]
