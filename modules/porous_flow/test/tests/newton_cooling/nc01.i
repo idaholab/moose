@@ -125,7 +125,6 @@
 []
 
 [Preconditioning]
-  active = 'andy'
   [./andy]
     type = SMP
     full = true
@@ -143,9 +142,6 @@
 
 [Outputs]
   file_base = nc01
-  interval = 100000
-  execute_on = final
-  exodus = false
   [./along_line]
     type = CSV
     execute_vector_postprocessors_on = final
