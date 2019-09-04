@@ -62,6 +62,9 @@ class SQAExtension(command.CommandExtension):
     @staticmethod
     def defaultConfig():
         config = command.CommandExtension.defaultConfig()
+        config['url'] = (u'https://github.com', "Deprecated, see 'repos'.")
+        config['repo'] = (None, "Deprecated, see 'repos'.")
+
         config['repos'] = (dict(default=u"https://github.com/idaholab/moose"),
                            "The repository locations for linking issues, set 'default' to allow " \
                            "'#1234' or add additional keys to allow for foo#1234.")
@@ -101,6 +104,19 @@ class SQAExtension(command.CommandExtension):
 
         # Storage for requirement matrix counting (see SQARequirementMatricCommand)
         self.__counts = collections.defaultdict(int)
+
+        # Deprecate 'url' and 'repo' config options
+        url = self.get('url')
+        repo = self.get('repo')
+        if repo is not None:
+            msg = "The 'url' and 'repo' config options for MooseDocs.extensions.sqa are deprecated,"\
+                 " add the 'repos' option with a 'default' entry instead."
+            LOG.warning(msg)
+            self['repos'].update(dict(default="{}/{}".format(url, repo)))
+
+        # Always include MOOSE and libMesh
+        self['repos'].update(dict(moose=u"https://github.com/idaholab/moose",
+                                  libmesh=u"https://github.com/libMesh/libmesh"))
 
     def requirements(self, category):
         """Return the requirements dictionaries."""
