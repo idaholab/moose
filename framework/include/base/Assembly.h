@@ -214,6 +214,12 @@ public:
   const MooseArray<Real> & coordTransformation() const { return _coord; }
 
   /**
+   * Returns the reference to the coordinate transformation coefficients on the mortar segment mesh
+   * @return A _reference_.  Make sure to store this as a reference!
+   */
+  const MooseArray<Real> & mortarCoordTransformation() const { return _coord_msm; }
+
+  /**
    * Returns the reference to the AD version of the coordinate transformation coefficients
    * @return A _reference_.  Make sure to store this as a reference!
    */
@@ -1353,7 +1359,8 @@ protected:
   template <ComputeStage compute_stage>
   void setCoordinateTransformation(const QBase * qrule,
                                    const ADPoint & q_points,
-                                   MooseArray<ADReal> & coord);
+                                   MooseArray<ADReal> & coord,
+                                   SubdomainID sub_id);
 
   void computeCurrentElemVolume();
 
@@ -1711,6 +1718,9 @@ private:
   MooseArray<Real> _current_JxW_neighbor;
   /// The current coordinate transformation coefficients
   MooseArray<Real> _coord_neighbor;
+  /// The coordinate transformation coefficients evaluated on the quadrature points of the mortar
+  /// segment mesh
+  MooseArray<Real> _coord_msm;
 
   /********** mortar stuff *************/
 

@@ -37,7 +37,8 @@ validParams<NormalNodalLMMechanicalContact>()
 
   params.addClassDescription("Implements the KKT conditions for normal contact using an NCP "
                              "function. Requires that either the gap distance or the normal "
-                             "contact pressure (represented by the value of `variable`) is zero.");
+                             "contact pressure (represented by the value of `variable`) is zero. "
+                             "The LM variable must be of the same order as the mesh");
   return params;
 }
 
@@ -116,6 +117,10 @@ Real NormalNodalLMMechanicalContact::computeQpResidual(Moose::ConstraintType /*t
     if (pinfo != NULL)
     {
       Real a = -pinfo->_distance * _c;
+      mooseAssert(
+          _qp < _u_slave.size(),
+          "qp is greater than the size of u_slave in NormalNodalLMMechanicalContact. Check and "
+          "make sure that your Lagrange multiplier variable has the same order as the mesh");
       Real b = _u_slave[_qp];
 
       if (_ncp_type == "fb")
