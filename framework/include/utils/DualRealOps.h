@@ -12,7 +12,7 @@
 #include "MooseConfig.h"
 #include "DualReal.h"
 
-#ifdef SPARSE_AD
+#ifdef MOOSE_SPARSE_AD
 #include "SparseOps.h"
 #else
 #include "NumberArrayOps.h"

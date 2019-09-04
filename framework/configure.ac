@@ -1,4 +1,4 @@
-AC_INIT([moose], [1.0.0], [moose-users@googlegroups.com], [moose], [https://mooseframework.org])
+AC_INIT([moose], [0.9.0], [moose-users@googlegroups.com], [moose], [https://mooseframework.org])
 AC_PREREQ([2.69])
 
 # Infer the source directory as the path to the ./configure script
@@ -9,7 +9,12 @@ AC_MSG_RESULT(---------------------------------------------)
 AC_MSG_RESULT(----------- Configuring MOOSE ---------------)
 AC_MSG_RESULT(---------------------------------------------)
 
-AC_CONFIG_HEADER(include/base/MooseConfig.h)
+AC_CONFIG_MACRO_DIR([m4])
+
+# Create a temporary file with e.g. SPARSE_AD
+AC_CONFIG_HEADER(include/base/MooseConfig.h.tmp:include/base/MooseConfig.h.in)
+# Prefixes everything in the temporary file with MOOSE_, e.g. MOOSE_SPARSE_AD
+AX_PREFIX_CONFIG_H(include/base/MooseConfig.h,MOOSE,include/base/MooseConfig.h.tmp)
 
 AC_ARG_WITH(derivative-type,
             AS_HELP_STRING([--with-derivative-type=sparse,nonsparse],[Specify the derivative type to use]),
