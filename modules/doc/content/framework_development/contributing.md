@@ -101,3 +101,22 @@ The main thing to remember when issuing a PR for MOOSE is that all PRs should be
 ## What Now?
 
 The next phase is covered in [How a Patch Becomes Code](framework_development/patch_to_code.md)... that will take you through the process of a PR ultimately making it's way into the `master` branch in MOOSE...
+
+## Autotools
+
+If a developer ever needs to modify MOOSE configuration settings, they will need
+to edit `$MOOSE_DIR/framework/configure.ac`. For those changes to then go into
+effect, they will need to run `autoreconf` to generate the `configure` script
+from `configure.ac`. We require a specific version of `autoconf` in order to
+avoid generating an unnecessary `git diff`. The `autoconf` version required is
+specified in the `AC_PREREQ` macro in `configure.ac`. If you do not have an
+adequate version of `autoconf`, then libMesh can build it for you. To have
+libMesh build you a set of autotools, do:
+
+```
+cd $MOOSE_DIR/libmesh
+./bootstrap --build-autotools
+```
+
+and then prepend `$MOOSE/libmesh/contrib/autotools/bin` to your `PATH`
+environment variable.

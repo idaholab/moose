@@ -25,12 +25,11 @@ options for `D` types, including:
     - Avoid looping over the whole size of the std::array by
       maintaining a dynamic size data member
 
-Because of its flexibility and speed, `SemiDynamicSparseNumberArray` is the
-structure chosen as the `D` type for MOOSE's `DualNumber`/`DualReal`.
-The only real draw-back to this derivative type is that an assertion will be triggered
-if the sparse size ever exceeds the static storage size
-of the std::array. One could get around this by increasing the static size
-of the array, but this could incur some (small?) memory overhead because of
-the dynamic material property and variable value containers (underlying
-`std::vector` and `MooseArray` respectively) that hold MOOSE's `DualReal`
-objects.
+The default configuration in MOOSE uses `NumberArray` for derivative storage
+because it is generally the fastest container (albeit
+inflexible). `SemiDynamicSparseNumberArray` can be selected as the derivative
+storage type by running `./configure --with-derivative-type=sparse` in MOOSE's
+framework directory. The underlying derivative storage array size for both
+`NumberArray` and `SemiDynamicSparseNumberArray` can be modified by running
+`configure` with the option `--with-derivative-size=<n>` where `<n>` is the
+desired size of the container. By default, MOOSE is configured `--with-derivative-size=50`.
