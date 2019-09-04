@@ -62,10 +62,9 @@ class SQAExtension(command.CommandExtension):
     @staticmethod
     def defaultConfig():
         config = command.CommandExtension.defaultConfig()
-        config['url'] = (u"https://github.com",
-                         "Repository for linking issues and commits.")
-        config['repo'] = (u"idaholab/moose",
-                          "The default repository location to append to the given url.")
+        config['repos'] = (dict(default=u"https://github.com/idaholab/moose"),
+                           "The repository locations for linking issues, set 'default' to allow " \
+                           "'#1234' or add additional keys to allow for foo#1234.")
         config['categories'] = (dict(), "A dictionary of category names that includes a " \
                                         "dictionary with 'directories' and optionally 'specs' " \
                                         "and 'dependencies'.")
@@ -339,7 +338,6 @@ class SQARequirementsMatrixCommand(command.CommandComponent):
 
         return parent
 
-
 class SQAVerificationCommand(command.CommandComponent):
     COMMAND = 'sqa'
     SUBCOMMAND = ('verification', 'validation')
@@ -573,18 +571,29 @@ class RenderSQARequirementDesign(autolink.RenderLinkBase):
 
 class RenderSQARequirementIssues(components.RenderComponent):
 
+    ISSUE_RE = re.compile(r"(?P<key>\w+)?#(?P<issues>[0-9]+)")
+    COMMIT_RE = re.compile(r"(?:(?P<key>\w+):)?(?P<commit>[0-9a-f]{10,40})")
+
+    def __urlHelper(self, regex, name, issue, token):
+        """Function for creating issue/commit links."""
+        repos = self.extension['repos']
+        default = repos.get('default', None)
+        match = regex.search(issue)
+        if match:
+            key = match.group('key')
+            repo = repos.get(key, None)
+            if (key is not None) and (repo is None):
+                msg = "Unknown key '{}' for MooseDocs.extensions.sqa 'repos' config.\n    {}:{}"
+                raise exceptions.MooseDocsException(msg, key, token['filename'], token['line'])
+            repo = repo or default
+            url = u"{}/{}/{}".format(repo, name, match.group(name))
+            return url
+
     def getURL(self, issue, token):
         url = None
-        base = self.extension['url'].rstrip('/')
-        repo = self.extension['repo'].strip('/')
-
-        match = re.search(r"(?P<repo>\w+/\w+)#(?P<issue>[0-9]+)", issue)
-        if match:
-            url = u"{}/{}/issues/{}".format(base, match.group('repo'), match.group('issue'))
-        elif issue.startswith('#'):
-            url = u"{}/{}/issues/{}".format(base, repo, issue[1:])
-        elif re.search(r'\A[0-9a-f]{10,40}\Z', issue):
-            url = u"{}/{}/commit/{}".format(base, repo, issue)
+        url = self.__urlHelper(self.ISSUE_RE, 'issues', issue, token)
+        if url is None:
+            url = self.__urlHelper(self.COMMIT_RE, 'commit', issue, token)
 
         if (url is None) and (issue != u''):
             msg = "Unknown issue number or commit (commit SHA-1 must be at least 10 digits): "\
