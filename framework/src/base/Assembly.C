@@ -216,6 +216,7 @@ Assembly::~Assembly()
 
   _coord.release();
   _coord_neighbor.release();
+  _coord_msm.release();
 
   _ad_JxW.release();
   _ad_q_points.release();
@@ -600,7 +601,6 @@ Assembly::reinitFE(const Elem * elem)
   {
     auto n_qp = _current_qrule->n_points();
     resizeADMappingObjects(n_qp, dim);
-    _ad_JxW.resize(n_qp);
     if (_calculate_xyz)
       _ad_q_points.resize(n_qp);
     if (_displaced)
@@ -676,6 +676,17 @@ Assembly::computeGradPhiAD(
     typename VariableTestGradientType<OutputType, ComputeStage::JACOBIAN>::type & grad_phi,
     FEGenericBase<OutputType> * fe)
 {
+  // This function relies on the fact that FE::reinit has already been called. FE::reinit will
+  // importantly have already called FEMap::init_shape_functions which will have computed
+  // these quantities at the integration/quadrature points: dphidxi,
+  // dphideta, and dphidzeta (e.g. \nabla phi w.r.t. reference coordinates). These *phi* quantities
+  // are independent of mesh displacements when using a quadrature rule.
+  //
+  // Note that a user could have specified custom integration points (e.g. independent of a
+  // quadrature rule) which could very well depend on displacements. In that case even the *phi*
+  // quantities from the above paragraph would be a function of the displacements and we would be
+  // missing that derivative information in the calculations below
+
   auto dim = elem->dim();
   const auto & dphidxi = fe->get_dphidxi();
   const auto & dphideta = fe->get_dphideta();
@@ -764,6 +775,7 @@ Assembly::resizeADMappingObjects(unsigned int n_qp, unsigned int dim)
   }
 
   _ad_jac.resize(n_qp);
+  _ad_JxW.resize(n_qp);
 }
 
 void
@@ -829,6 +841,43 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
                                   unsigned p,
                                   FEBase * fe)
 {
+  // This function relies on the fact that FE::reinit has already been called. FE::reinit will
+  // importantly have already called FEMap::init_reference_to_physical_map which will have computed
+  // these quantities at the integration/quadrature points: phi_map, dphidxi_map,
+  // dphideta_map, and dphidzeta_map (e.g. phi and \nabla phi w.r.t reference coordinates). *_map is
+  // used to denote that quantities are in reference to a mapping Lagrange FE object. The FE<Dim,
+  // LAGRANGE> objects used for mapping will in general have an order matching the order of the
+  // mesh. These *phi*_map quantities are independent of mesh displacements when using a quadrature
+  // rule.
+  //
+  // Note that a user could have specified custom integration points (e.g. independent of a
+  // quadrature rule) which could very well depend on displacements. In that case even the *phi*_map
+  // quantities from the above paragraph would be a function of the displacements and we would be
+  // missing that derivative information in the calculations below
+  //
+  // Important quantities calculated by this method:
+  //   - _ad_JxW;
+  //   - _ad_q_points;
+  // And the following quantities are important because they are used in the computeGradPhiAD method
+  // to calculate the shape function gradients with respect to the physical coordinates
+  // dphi/dphys = dphi/dref * dref/dphys:
+  //   - _ad_dxidx_map;
+  //   - _ad_dxidy_map;
+  //   - _ad_dxidz_map;
+  //   - _ad_detadx_map;
+  //   - _ad_detady_map;
+  //   - _ad_detadz_map;
+  //   - _ad_dzetadx_map;
+  //   - _ad_dzetady_map;
+  //   - _ad_dzetadz_map;
+  //
+  // Some final notes. This method will be called both when we are reinit'ing in the volume and on
+  // faces. When reinit'ing on faces, computation of _ad_JxW will be garbage because we will be
+  // using dummy quadrature weights. _ad_q_points computation is also currently extraneous during
+  // face reinit because we compute _ad_q_points_face in the computeFaceMap method. However,
+  // computation of dref/dphys is absolutely necessary (and the reason we call this method for the
+  // face case) for both volume and face reinit
+
   auto dim = elem->dim();
   const auto & elem_nodes = elem->get_nodes();
   auto num_shapes = fe->n_shape_functions();
@@ -1110,6 +1159,12 @@ Assembly::reinitFEFace(const Elem * elem, unsigned int side)
 void
 Assembly::computeFaceMap(unsigned dim, const std::vector<Real> & qw, const Elem * side)
 {
+  // Important quantities calculated by this method:
+  //   - _ad_JxW_face
+  //   - _ad_q_points_face
+  //   - _ad_normals
+  //   - _ad_curvatures
+
   const auto n_qp = qw.size();
   const Elem * elem = side->parent();
   auto side_number = elem->which_side_am_i(side);
@@ -1436,35 +1491,12 @@ Assembly::reinitNeighbor(const Elem * neighbor, const std::vector<Point> & refer
     fe->attach_quadrature_rule(qrule);
     fe->reinit(neighbor);
 
-    // set the coord transformation
-    _coord_neighbor.resize(qrule->n_points());
-    Moose::CoordinateSystemType coord_type =
-        _subproblem.getCoordSystem(_current_neighbor_subdomain_id);
-    unsigned int rz_radial_coord = _subproblem.getAxisymmetricRadialCoord();
     const std::vector<Real> & JxW = fe->get_JxW();
-    const std::vector<Point> & q_points = fe->get_xyz();
+    MooseArray<Point> q_points;
+    q_points.shallowCopy(const_cast<std::vector<Point> &>(fe->get_xyz()));
 
-    switch (coord_type)
-    {
-      case Moose::COORD_XYZ:
-        for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
-          _coord_neighbor[qp] = 1.;
-        break;
-
-      case Moose::COORD_RZ:
-        for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
-          _coord_neighbor[qp] = 2 * M_PI * q_points[qp](rz_radial_coord);
-        break;
-
-      case Moose::COORD_RSPHERICAL:
-        for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
-          _coord_neighbor[qp] = 4 * M_PI * q_points[qp](0) * q_points[qp](0);
-        break;
-
-      default:
-        mooseError("Unknown coordinate system");
-        break;
-    }
+    setCoordinateTransformation<RESIDUAL>(
+        qrule, q_points, _coord_neighbor, _current_neighbor_subdomain_id);
 
     _current_neighbor_volume = 0.;
     for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
@@ -1476,26 +1508,33 @@ template <ComputeStage compute_stage>
 void
 Assembly::setCoordinateTransformation(const QBase * qrule,
                                       const ADPoint & q_points,
-                                      MooseArray<ADReal> & coord)
+                                      MooseArray<ADReal> & coord,
+                                      SubdomainID sub_id)
 {
-  coord.resize(qrule->n_points());
-  _coord_type = _subproblem.getCoordSystem(_current_elem->subdomain_id());
+  mooseAssert(qrule, "The quadrature rule is null in Assembly::setCoordinateTransformation");
+  auto n_points = qrule->n_points();
+  mooseAssert(n_points == q_points.size(),
+              "The number of points in the quadrature rule doesn't match the number of passed-in "
+              "points in Assembly::setCoordinateTransformation");
+
+  coord.resize(n_points);
+  _coord_type = _subproblem.getCoordSystem(sub_id);
   unsigned int rz_radial_coord = _subproblem.getAxisymmetricRadialCoord();
 
   switch (_coord_type)
   {
     case Moose::COORD_XYZ:
-      for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
+      for (unsigned int qp = 0; qp < n_points; qp++)
         coord[qp] = 1.;
       break;
 
     case Moose::COORD_RZ:
-      for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
+      for (unsigned int qp = 0; qp < n_points; qp++)
         coord[qp] = 2 * M_PI * q_points[qp](rz_radial_coord);
       break;
 
     case Moose::COORD_RSPHERICAL:
-      for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
+      for (unsigned int qp = 0; qp < n_points; qp++)
         coord[qp] = 4 * M_PI * q_points[qp](0) * q_points[qp](0);
       break;
 
@@ -1506,9 +1545,9 @@ Assembly::setCoordinateTransformation(const QBase * qrule,
 }
 
 template void Assembly::setCoordinateTransformation<ComputeStage::RESIDUAL>(
-    const QBase *, const MooseArray<Point> &, MooseArray<Real> &);
+    const QBase *, const MooseArray<Point> &, MooseArray<Real> &, SubdomainID);
 template void Assembly::setCoordinateTransformation<ComputeStage::JACOBIAN>(
-    const QBase *, const MooseArray<VectorValue<DualReal>> &, MooseArray<DualReal> &);
+    const QBase *, const MooseArray<VectorValue<DualReal>> &, MooseArray<DualReal> &, SubdomainID);
 
 void
 Assembly::computeCurrentElemVolume()
@@ -1516,9 +1555,11 @@ Assembly::computeCurrentElemVolume()
   if (_current_elem_volume_computed)
     return;
 
-  setCoordinateTransformation<ComputeStage::RESIDUAL>(_current_qrule, _current_q_points, _coord);
+  setCoordinateTransformation<ComputeStage::RESIDUAL>(
+      _current_qrule, _current_q_points, _coord, _current_elem->subdomain_id());
   if (_computing_jacobian && _calculate_xyz)
-    setCoordinateTransformation<ComputeStage::JACOBIAN>(_current_qrule, _ad_q_points, _ad_coord);
+    setCoordinateTransformation<ComputeStage::JACOBIAN>(
+        _current_qrule, _ad_q_points, _ad_coord, _current_elem->subdomain_id());
 
   _current_elem_volume = 0.;
   for (unsigned int qp = 0; qp < _current_qrule->n_points(); qp++)
@@ -1534,10 +1575,10 @@ Assembly::computeCurrentFaceVolume()
     return;
 
   setCoordinateTransformation<ComputeStage::RESIDUAL>(
-      _current_qrule_face, _current_q_points_face, _coord);
+      _current_qrule_face, _current_q_points_face, _coord, _current_elem->subdomain_id());
   if (_computing_jacobian && _calculate_face_xyz)
     setCoordinateTransformation<ComputeStage::JACOBIAN>(
-        _current_qrule_face, _ad_q_points_face, _ad_coord);
+        _current_qrule_face, _ad_q_points_face, _ad_coord, _current_elem->subdomain_id());
 
   _current_side_volume = 0.;
   for (unsigned int qp = 0; qp < _current_qrule_face->n_points(); qp++)
@@ -1967,6 +2008,11 @@ Assembly::reinitLowerDElemRef(const Elem * elem,
       fesd->_second_phi.shallowCopy(
           const_cast<std::vector<std::vector<TensorValue<Real>>> &>(fe_lower->get_d2phi()));
   }
+
+  MooseArray<Point> array_q_points;
+  array_q_points.shallowCopy(const_cast<std::vector<Point> &>(*pts));
+  setCoordinateTransformation<RESIDUAL>(
+      _qrule_msm, array_q_points, _coord_msm, _current_lower_d_elem->subdomain_id());
 }
 
 void
