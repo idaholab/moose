@@ -3,7 +3,7 @@
     type = 'Exodiff'
     input = 'transient_vector_diffusion.i'
     exodiff = 'transient_vector_diffusion_out.e'
-    requirement = 'We shall be able to reproduce the simple_transient_diffusion results with a vector compatible TimeDerivative (VectorTimeDerivative) containing a hand-coded Jacobian.'
+    requirement = 'The system shall be able to reproduce the simple_transient_diffusion test with VectorTimeDerivative (hand-coded Jacobian).'
     issues = '#13913'
     design = 'VectorTimeDerivative.md'
   [../]

@@ -7,7 +7,7 @@
 # IMPORTANT NOTE:
 # Currently, this test produces a_vec_dot and a_vec_dot_dot that contains oscillations over time.
 # This is a known by-product of Newmark Beta time integration (see the Newmark Beta documentation),
-# but as of Summer 2019, there is no alternative time integrator in MOOSE that can contain these
+# but as of Summer 2019, there is no alternative time integrator in MOOSE that can dampen these
 # oscillations. This test is used as coverage for the function call coupledVectorDotDot.
 
 [Mesh]
