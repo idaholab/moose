@@ -373,8 +373,6 @@ PorousFlowBrineCO2::equilibriumMassFractions(const DualReal & pressure,
                                              DualReal & Xco2,
                                              DualReal & Yh2o) const
 {
-  const DualReal co2_density = _co2_fp.rho_from_p_T(pressure, temperature);
-
   // Mole fractions at equilibrium
   DualReal xco2, yh2o;
   equilibriumMoleFractions(pressure, temperature, Xnacl, xco2, yh2o);
@@ -673,9 +671,6 @@ PorousFlowBrineCO2::equilibriumMoleFractions(const DualReal & pressure,
                                              DualReal & xco2,
                                              DualReal & yh2o) const
 {
-  // CO2 density and derivatives wrt pressure and temperature
-  const DualReal co2_density = _co2_fp.rho_from_p_T(pressure, temperature);
-
   if (temperature.value() <= _Tlower)
   {
     equilibriumMoleFractionsLowTemp(pressure, temperature, Xnacl, xco2, yh2o);
@@ -740,17 +735,20 @@ PorousFlowBrineCO2::equilibriumMoleFractions(const DualReal & pressure,
   }
   else
   {
+    // CO2 density and derivatives wrt pressure and temperature
+    const Real co2_density = _co2_fp.rho_from_p_T(pressure.value(), temperature.value());
+
     // Equilibrium mole fractions solved using iteration in this regime
     Real xco2r, yh2or;
     solveEquilibriumMoleFractionHighTemp(
-        pressure.value(), temperature.value(), Xnacl.value(), co2_density.value(), xco2r, yh2or);
+        pressure.value(), temperature.value(), Xnacl.value(), co2_density, xco2r, yh2or);
 
     // Can use these in funcABHighTemp() to get derivatives analytically rather than by iteration
     Real A, dA_dp, dA_dT, B, dB_dp, dB_dT, dB_dX;
     funcABHighTemp(pressure.value(),
                    temperature.value(),
                    Xnacl.value(),
-                   co2_density.value(),
+                   co2_density,
                    xco2r,
                    yh2or,
                    A,
