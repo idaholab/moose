@@ -9,7 +9,9 @@
 
 #pragma once
 
+#include "MooseError.h"
 #include "metaphysicl/dualsemidynamicsparsenumberarray.h"
+#include "metaphysicl/metaphysicl_exceptions.h"
 
 namespace Moose
 {
@@ -19,6 +21,18 @@ derivInsert(SemiDynamicSparseNumberArray<Real, unsigned int, NWrapper<N>> & deri
             unsigned int index,
             Real value)
 {
+#ifndef NDEBUG
+  try
+  {
+    derivs.insert(index) = value;
+  }
+  catch (MetaPhysicL::LogicError &)
+  {
+    mooseError("The last insertion into the sparse derivative storage container exceeded the "
+               "underlying array size. Consider running `configure --with-derivative-size=<n>` to "
+               "obtain a larger underlying container");
+  }
+#else
   derivs.insert(index) = value;
 }
 }

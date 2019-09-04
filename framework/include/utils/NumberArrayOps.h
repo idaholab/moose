@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "MooseConfig.h"
+#include "MooseError.h"
 #include "metaphysicl/dualnumberarray.h"
 
 namespace Moose
@@ -17,6 +19,11 @@ template <std::size_t N>
 inline void
 derivInsert(NumberArray<N, Real> & derivs, unsigned int index, Real value)
 {
+  mooseAssert(index < MOOSE_AD_MAX_DOFS_PER_ELEM,
+              "The requested derivative index "
+                  << index << " is not less than " << MOOSE_AD_MAX_DOFS_PER_ELEM
+                  << ". You can run `configure --with-derivative-size=<n>` to request a larger "
+                     "derivative container.");
   derivs[index] = value;
 }
 }
