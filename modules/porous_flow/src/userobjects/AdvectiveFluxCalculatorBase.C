@@ -173,6 +173,42 @@ AdvectiveFluxCalculatorBase::timestepSetup()
       buildCommLists();
 
     _resizing_needed = false;
+
+    // Clear all member vectors
+    _dij.clear();
+    _dDij_dKij.clear();
+    _dDij_dKji.clear();
+    _dDii_dKij.clear();
+    _dDii_dKji.clear();
+    _lij.clear();
+    _rP.clear();
+    _rM.clear();
+    _drP.clear();
+    _drM.clear();
+    _drP_dk.clear();
+    _drM_dk.clear();
+    _fa.clear();
+    _dfa.clear();
+    _dFij_dKik.clear();
+    _dFij_dKjk.clear();
+
+    // Size member vectors
+    _dij.resize(_number_of_nodes);
+    _dDij_dKij.resize(_number_of_nodes);
+    _dDij_dKji.resize(_number_of_nodes);
+    _dDii_dKij.resize(_number_of_nodes);
+    _dDii_dKji.resize(_number_of_nodes);
+    _lij.resize(_number_of_nodes);
+    _rP.resize(_number_of_nodes);
+    _rM.resize(_number_of_nodes);
+    _drP.resize(_number_of_nodes);
+    _drM.resize(_number_of_nodes);
+    _drP_dk.resize(_number_of_nodes);
+    _drM_dk.resize(_number_of_nodes);
+    _fa.resize(_number_of_nodes);
+    _dfa.resize(_number_of_nodes);
+    _dFij_dKik.resize(_number_of_nodes);
+    _dFij_dKjk.resize(_number_of_nodes);
   }
 }
 
@@ -263,25 +299,16 @@ AdvectiveFluxCalculatorBase::finalize()
   // This adds artificial diffusion, which eliminates any spurious oscillations
   // The idea is that D will remove all negative off-diagonal elements when it is added to K
   // This is identical to full upwinding
-  std::vector<std::vector<Real>> dij(_number_of_nodes);
-  std::vector<std::vector<Real>> dDij_dKij(
-      _number_of_nodes); // dDij_dKij[i][j] = d(D[i][j])/d(K[i][j]) for i!=j
-  std::vector<std::vector<Real>> dDij_dKji(
-      _number_of_nodes); // dDij_dKji[i][j] = d(D[i][j])/d(K[j][i]) for i!=j
-  std::vector<std::vector<Real>> dDii_dKij(
-      _number_of_nodes); // dDii_dKij[i][j] = d(D[i][i])/d(K[i][j])
-  std::vector<std::vector<Real>> dDii_dKji(
-      _number_of_nodes); // dDii_dKji[i][j] = d(D[i][i])/d(K[j][i])
   for (dof_id_type sequential_i = 0; sequential_i < _number_of_nodes; ++sequential_i)
   {
-    const std::vector<dof_id_type> con_i =
+    const std::vector<dof_id_type> & con_i =
         _connections.sequentialConnectionsToSequentialID(sequential_i);
     const std::size_t num_con_i = con_i.size();
-    dij[sequential_i].assign(num_con_i, 0.0);
-    dDij_dKij[sequential_i].assign(num_con_i, 0.0);
-    dDij_dKji[sequential_i].assign(num_con_i, 0.0);
-    dDii_dKij[sequential_i].assign(num_con_i, 0.0);
-    dDii_dKji[sequential_i].assign(num_con_i, 0.0);
+    _dij[sequential_i].assign(num_con_i, 0.0);
+    _dDij_dKij[sequential_i].assign(num_con_i, 0.0);
+    _dDij_dKji[sequential_i].assign(num_con_i, 0.0);
+    _dDii_dKij[sequential_i].assign(num_con_i, 0.0);
+    _dDii_dKji[sequential_i].assign(num_con_i, 0.0);
     const unsigned index_i_to_i =
         _connections.indexOfSequentialConnection(sequential_i, sequential_i);
     for (std::size_t j = 0; j < num_con_i; ++j)
@@ -295,94 +322,65 @@ AdvectiveFluxCalculatorBase::finalize()
       const Real kji = _kij[sequential_j][index_j_to_i];
       if ((kij <= kji) && (kij < 0.0))
       {
-        dij[sequential_i][j] = -kij;
-        dDij_dKij[sequential_i][j] = -1.0;
-        dDii_dKij[sequential_i][j] += 1.0;
+        _dij[sequential_i][j] = -kij;
+        _dDij_dKij[sequential_i][j] = -1.0;
+        _dDii_dKij[sequential_i][j] += 1.0;
       }
       else if ((kji <= kij) && (kji < 0.0))
       {
-        dij[sequential_i][j] = -kji;
-        dDij_dKji[sequential_i][j] = -1.0;
-        dDii_dKji[sequential_i][j] += 1.0;
+        _dij[sequential_i][j] = -kji;
+        _dDij_dKji[sequential_i][j] = -1.0;
+        _dDii_dKji[sequential_i][j] += 1.0;
       }
       else
-        dij[sequential_i][j] = 0.0;
-      dij[sequential_i][index_i_to_i] -= dij[sequential_i][j];
+        _dij[sequential_i][j] = 0.0;
+      _dij[sequential_i][index_i_to_i] -= _dij[sequential_i][j];
     }
   }
 
   // Calculate KuzminTurek L matrix
   // See Fig 2: L = K + D
-  std::vector<std::vector<Real>> lij(_number_of_nodes);
   for (dof_id_type sequential_i = 0; sequential_i < _number_of_nodes; ++sequential_i)
   {
-    const std::vector<dof_id_type> con_i =
+    const std::vector<dof_id_type> & con_i =
         _connections.sequentialConnectionsToSequentialID(sequential_i);
     const std::size_t num_con_i = con_i.size();
-    lij[sequential_i].assign(num_con_i, 0.0);
+    _lij[sequential_i].assign(num_con_i, 0.0);
     for (std::size_t j = 0; j < num_con_i; ++j)
-      lij[sequential_i][j] = _kij[sequential_i][j] + dij[sequential_i][j];
+      _lij[sequential_i][j] = _kij[sequential_i][j] + _dij[sequential_i][j];
   }
 
   // Compute KuzminTurek R matrices
   // See Eqns (49) and (12)
-  std::vector<Real> rP(_number_of_nodes);
-  std::vector<Real> rM(_number_of_nodes);
-  std::vector<std::vector<Real>> drP(_number_of_nodes); // drP[i][j] = d(rP[i])/d(u[j]).  Here j
-                                                        // indexes the j^th node connected to i
-  std::vector<std::vector<Real>> drM(_number_of_nodes);
-  std::vector<std::vector<Real>> drP_dk(
-      _number_of_nodes); // drP_dk[i][j] = d(rP[i])/d(K[i][j]).  Here j indexes the j^th node
-                         // connected to i
-  std::vector<std::vector<Real>> drM_dk(_number_of_nodes);
   for (dof_id_type sequential_i = 0; sequential_i < _number_of_nodes; ++sequential_i)
   {
-    rP[sequential_i] = rPlus(sequential_i, drP[sequential_i], drP_dk[sequential_i]);
-    rM[sequential_i] = rMinus(sequential_i, drM[sequential_i], drM_dk[sequential_i]);
+    _rP[sequential_i] = rPlus(sequential_i, _drP[sequential_i], _drP_dk[sequential_i]);
+    _rM[sequential_i] = rMinus(sequential_i, _drM[sequential_i], _drM_dk[sequential_i]);
   }
 
   // Calculate KuzminTurek f^{a} matrix
   // This is the antidiffusive flux
   // See Eqn (50)
-  std::vector<std::vector<Real>> fa(_number_of_nodes); // fa[sequential_i][j]  sequential_j is the
-                                                       // j^th connection to sequential_i
-  // The derivatives are a bit complicated.
-  // If i is upwind of j then fa[i][j] depends on all nodes connected to i.
-  // But if i is downwind of j then fa[i][j] depends on all nodes connected to j.
-  std::vector<std::vector<std::map<dof_id_type, Real>>> dfa(
-      _number_of_nodes); // dfa[sequential_i][j][global_k] = d(fa[sequential_i][j])/du[global_k].
-                         // Here global_k can be a neighbor to sequential_i or a neighbour to
-                         // sequential_j (sequential_j is the j^th connection to sequential_i)
-  std::vector<std::vector<std::vector<Real>>> dFij_dKik(
-      _number_of_nodes); // dFij_dKik[sequential_i][j][k] =
-                         // d(fa[sequential_i][j])/d(K[sequential_i][k]).  Here j denotes the j^th
-                         // connection to sequential_i, while k denotes the k^th connection to
-                         // sequential_i
-  std::vector<std::vector<std::vector<Real>>> dFij_dKjk(
-      _number_of_nodes); // dFij_dKjk[sequential_i][j][k] =
-                         // d(fa[sequential_i][j])/d(K[sequential_j][k]).  Here sequential_j is
-                         // the j^th connection to sequential_i, and k denotes the k^th connection
-                         // to sequential_j (this will include sequential_i itself)
   for (dof_id_type sequential_i = 0; sequential_i < _number_of_nodes; ++sequential_i)
   {
-    const std::vector<dof_id_type> con_i =
+    const std::vector<dof_id_type> & con_i =
         _connections.globalConnectionsToSequentialID(sequential_i);
     const unsigned num_con_i = con_i.size();
-    fa[sequential_i].assign(num_con_i, 0.0);
-    dfa[sequential_i].resize(num_con_i);
-    dFij_dKik[sequential_i].resize(num_con_i);
-    dFij_dKjk[sequential_i].resize(num_con_i);
+    _fa[sequential_i].assign(num_con_i, 0.0);
+    _dfa[sequential_i].resize(num_con_i);
+    _dFij_dKik[sequential_i].resize(num_con_i);
+    _dFij_dKjk[sequential_i].resize(num_con_i);
     for (std::size_t j = 0; j < num_con_i; ++j)
     {
       for (const auto & global_k : con_i)
-        dfa[sequential_i][j][global_k] = 0;
+        _dfa[sequential_i][j][global_k] = 0;
       const dof_id_type global_j = con_i[j];
-      const std::vector<dof_id_type> con_j = _connections.globalConnectionsToGlobalID(global_j);
+      const std::vector<dof_id_type> & con_j = _connections.globalConnectionsToGlobalID(global_j);
       const unsigned num_con_j = con_j.size();
       for (const auto & global_k : con_j)
-        dfa[sequential_i][j][global_k] = 0;
-      dFij_dKik[sequential_i][j].assign(num_con_i, 0.0);
-      dFij_dKjk[sequential_i][j].assign(num_con_j, 0.0);
+        _dfa[sequential_i][j][global_k] = 0;
+      _dFij_dKik[sequential_i][j].assign(num_con_i, 0.0);
+      _dFij_dKjk[sequential_i][j].assign(num_con_j, 0.0);
     }
   }
 
@@ -390,7 +388,7 @@ AdvectiveFluxCalculatorBase::finalize()
   {
     const dof_id_type global_i = _connections.globalID(sequential_i);
     const Real u_i = _u_nodal[sequential_i];
-    const std::vector<dof_id_type> con_i =
+    const std::vector<dof_id_type> & con_i =
         _connections.sequentialConnectionsToSequentialID(sequential_i);
     const std::size_t num_con_i = con_i.size();
     for (std::size_t j = 0; j < num_con_i; ++j)
@@ -400,11 +398,11 @@ AdvectiveFluxCalculatorBase::finalize()
         continue;
       const unsigned index_j_to_i =
           _connections.indexOfSequentialConnection(sequential_j, sequential_i);
-      const Real Lij = lij[sequential_i][j];
-      const Real Lji = lij[sequential_j][index_j_to_i];
+      const Real Lij = _lij[sequential_i][j];
+      const Real Lji = _lij[sequential_j][index_j_to_i];
       if (Lji >= Lij) // node i is upwind of node j.
       {
-        const Real Dij = dij[sequential_i][j];
+        const Real Dij = _dij[sequential_i][j];
         const dof_id_type global_j = _connections.globalID(sequential_j);
         const Real u_j = _u_nodal[sequential_j];
         Real prefactor = 0.0;
@@ -415,59 +413,59 @@ AdvectiveFluxCalculatorBase::finalize()
         Real dprefactor_dKji = 0; // dprefactor_dKji = d(prefactor)/dKij[sequential_j][index_j_to_i]
         if (u_i >= u_j)
         {
-          if (Lji <= rP[sequential_i] * Dij)
+          if (Lji <= _rP[sequential_i] * Dij)
           {
             prefactor = Lji;
-            dprefactor_dKij[j] += dDij_dKji[sequential_j][index_j_to_i];
-            dprefactor_dKji += 1.0 + dDij_dKij[sequential_j][index_j_to_i];
+            dprefactor_dKij[j] += _dDij_dKji[sequential_j][index_j_to_i];
+            dprefactor_dKji += 1.0 + _dDij_dKij[sequential_j][index_j_to_i];
           }
           else
           {
-            prefactor = rP[sequential_i] * Dij;
+            prefactor = _rP[sequential_i] * Dij;
             for (std::size_t ind_j = 0; ind_j < num_con_i; ++ind_j)
-              dprefactor_du[ind_j] = drP[sequential_i][ind_j] * Dij;
-            dprefactor_dKij[j] += rP[sequential_i] * dDij_dKij[sequential_i][j];
-            dprefactor_dKji += rP[sequential_i] * dDij_dKji[sequential_i][j];
+              dprefactor_du[ind_j] = _drP[sequential_i][ind_j] * Dij;
+            dprefactor_dKij[j] += _rP[sequential_i] * _dDij_dKij[sequential_i][j];
+            dprefactor_dKji += _rP[sequential_i] * _dDij_dKji[sequential_i][j];
             for (std::size_t ind_j = 0; ind_j < num_con_i; ++ind_j)
-              dprefactor_dKij[ind_j] += drP_dk[sequential_i][ind_j] * Dij;
+              dprefactor_dKij[ind_j] += _drP_dk[sequential_i][ind_j] * Dij;
           }
         }
         else
         {
-          if (Lji <= rM[sequential_i] * Dij)
+          if (Lji <= _rM[sequential_i] * Dij)
           {
             prefactor = Lji;
-            dprefactor_dKij[j] += dDij_dKji[sequential_j][index_j_to_i];
-            dprefactor_dKji += 1.0 + dDij_dKij[sequential_j][index_j_to_i];
+            dprefactor_dKij[j] += _dDij_dKji[sequential_j][index_j_to_i];
+            dprefactor_dKji += 1.0 + _dDij_dKij[sequential_j][index_j_to_i];
           }
           else
           {
-            prefactor = rM[sequential_i] * Dij;
+            prefactor = _rM[sequential_i] * Dij;
             for (std::size_t ind_j = 0; ind_j < num_con_i; ++ind_j)
-              dprefactor_du[ind_j] = drM[sequential_i][ind_j] * Dij;
-            dprefactor_dKij[j] += rM[sequential_i] * dDij_dKij[sequential_i][j];
-            dprefactor_dKji += rM[sequential_i] * dDij_dKji[sequential_i][j];
+              dprefactor_du[ind_j] = _drM[sequential_i][ind_j] * Dij;
+            dprefactor_dKij[j] += _rM[sequential_i] * _dDij_dKij[sequential_i][j];
+            dprefactor_dKji += _rM[sequential_i] * _dDij_dKji[sequential_i][j];
             for (std::size_t ind_j = 0; ind_j < num_con_i; ++ind_j)
-              dprefactor_dKij[ind_j] += drM_dk[sequential_i][ind_j] * Dij;
+              dprefactor_dKij[ind_j] += _drM_dk[sequential_i][ind_j] * Dij;
           }
         }
-        fa[sequential_i][j] = prefactor * (u_i - u_j);
-        dfa[sequential_i][j][global_i] = prefactor;
-        dfa[sequential_i][j][global_j] = -prefactor;
+        _fa[sequential_i][j] = prefactor * (u_i - u_j);
+        _dfa[sequential_i][j][global_i] = prefactor;
+        _dfa[sequential_i][j][global_j] = -prefactor;
         for (std::size_t ind_j = 0; ind_j < num_con_i; ++ind_j)
         {
-          dfa[sequential_i][j][_connections.globalID(con_i[ind_j])] +=
+          _dfa[sequential_i][j][_connections.globalID(con_i[ind_j])] +=
               dprefactor_du[ind_j] * (u_i - u_j);
-          dFij_dKik[sequential_i][j][ind_j] += dprefactor_dKij[ind_j] * (u_i - u_j);
+          _dFij_dKik[sequential_i][j][ind_j] += dprefactor_dKij[ind_j] * (u_i - u_j);
         }
-        dFij_dKjk[sequential_i][j][index_j_to_i] += dprefactor_dKji * (u_i - u_j);
+        _dFij_dKjk[sequential_i][j][index_j_to_i] += dprefactor_dKji * (u_i - u_j);
       }
     }
   }
 
   for (dof_id_type sequential_i = 0; sequential_i < _number_of_nodes; ++sequential_i)
   {
-    const std::vector<dof_id_type> con_i =
+    const std::vector<dof_id_type> & con_i =
         _connections.sequentialConnectionsToSequentialID(sequential_i);
     const std::size_t num_con_i = con_i.size();
     for (std::size_t j = 0; j < num_con_i; ++j)
@@ -477,17 +475,17 @@ AdvectiveFluxCalculatorBase::finalize()
         continue;
       const unsigned index_j_to_i =
           _connections.indexOfSequentialConnection(sequential_j, sequential_i);
-      if (lij[sequential_j][index_j_to_i] < lij[sequential_i][j]) // node_i is downwind of node_j.
+      if (_lij[sequential_j][index_j_to_i] < _lij[sequential_i][j]) // node_i is downwind of node_j.
       {
-        fa[sequential_i][j] = -fa[sequential_j][index_j_to_i];
-        for (const auto & dof_deriv : dfa[sequential_j][index_j_to_i])
-          dfa[sequential_i][j][dof_deriv.first] = -dof_deriv.second;
+        _fa[sequential_i][j] = -_fa[sequential_j][index_j_to_i];
+        for (const auto & dof_deriv : _dfa[sequential_j][index_j_to_i])
+          _dfa[sequential_i][j][dof_deriv.first] = -dof_deriv.second;
         for (std::size_t k = 0; k < num_con_i; ++k)
-          dFij_dKik[sequential_i][j][k] = -dFij_dKjk[sequential_j][index_j_to_i][k];
+          _dFij_dKik[sequential_i][j][k] = -_dFij_dKjk[sequential_j][index_j_to_i][k];
         const std::size_t num_con_j =
             _connections.sequentialConnectionsToSequentialID(sequential_j).size();
         for (std::size_t k = 0; k < num_con_j; ++k)
-          dFij_dKjk[sequential_i][j][k] = -dFij_dKik[sequential_j][index_j_to_i][k];
+          _dFij_dKjk[sequential_i][j][k] = -_dFij_dKik[sequential_j][index_j_to_i][k];
       }
     }
   }
@@ -509,14 +507,14 @@ AdvectiveFluxCalculatorBase::finalize()
   _dflux_out_dKjk.resize(_number_of_nodes);
   for (dof_id_type sequential_i = 0; sequential_i < _number_of_nodes; ++sequential_i)
   {
-    const std::vector<dof_id_type> con_i =
+    const std::vector<dof_id_type> & con_i =
         _connections.sequentialConnectionsToSequentialID(sequential_i);
     const std::size_t num_con_i = con_i.size();
     _dflux_out_dKjk[sequential_i].resize(num_con_i);
     for (std::size_t j = 0; j < num_con_i; ++j)
     {
       const dof_id_type sequential_j = con_i[j];
-      std::vector<dof_id_type> con_j =
+      const std::vector<dof_id_type> & con_j =
           _connections.sequentialConnectionsToSequentialID(sequential_j);
       _dflux_out_dKjk[sequential_i][j].assign(con_j.size(), 0.0);
     }
@@ -526,7 +524,8 @@ AdvectiveFluxCalculatorBase::finalize()
   // See step 3 in Fig 2, noting Eqn (36)
   for (dof_id_type sequential_i = 0; sequential_i < _number_of_nodes; ++sequential_i)
   {
-    std::vector<dof_id_type> con_i = _connections.sequentialConnectionsToSequentialID(sequential_i);
+    const std::vector<dof_id_type> & con_i =
+        _connections.sequentialConnectionsToSequentialID(sequential_i);
     const size_t num_con_i = con_i.size();
     const dof_id_type index_i_to_i =
         _connections.indexOfSequentialConnection(sequential_i, sequential_i);
@@ -537,39 +536,39 @@ AdvectiveFluxCalculatorBase::finalize()
       const Real u_j = _u_nodal[sequential_j];
 
       // negative sign because residual = -Lu (KT equation (19))
-      _flux_out[sequential_i] -= lij[sequential_i][j] * u_j + fa[sequential_i][j];
+      _flux_out[sequential_i] -= _lij[sequential_i][j] * u_j + _fa[sequential_i][j];
 
-      _dflux_out_du[sequential_i][global_j] -= lij[sequential_i][j];
-      for (const auto & dof_deriv : dfa[sequential_i][j])
+      _dflux_out_du[sequential_i][global_j] -= _lij[sequential_i][j];
+      for (const auto & dof_deriv : _dfa[sequential_i][j])
         _dflux_out_du[sequential_i][dof_deriv.first] -= dof_deriv.second;
 
       _dflux_out_dKjk[sequential_i][index_i_to_i][j] -= 1.0 * u_j; // from the K in L = K + D
 
       if (sequential_j == sequential_i)
         for (dof_id_type k = 0; k < num_con_i; ++k)
-          _dflux_out_dKjk[sequential_i][index_i_to_i][k] -= dDii_dKij[sequential_i][k] * u_j;
+          _dflux_out_dKjk[sequential_i][index_i_to_i][k] -= _dDii_dKij[sequential_i][k] * u_j;
       else
-        _dflux_out_dKjk[sequential_i][index_i_to_i][j] -= dDij_dKij[sequential_i][j] * u_j;
+        _dflux_out_dKjk[sequential_i][index_i_to_i][j] -= _dDij_dKij[sequential_i][j] * u_j;
       for (dof_id_type k = 0; k < num_con_i; ++k)
-        _dflux_out_dKjk[sequential_i][index_i_to_i][k] -= dFij_dKik[sequential_i][j][k];
+        _dflux_out_dKjk[sequential_i][index_i_to_i][k] -= _dFij_dKik[sequential_i][j][k];
 
       if (sequential_j == sequential_i)
         for (unsigned k = 0; k < con_i.size(); ++k)
         {
           const unsigned index_k_to_i =
               _connections.indexOfSequentialConnection(con_i[k], sequential_i);
-          _dflux_out_dKjk[sequential_i][k][index_k_to_i] -= dDii_dKji[sequential_i][k] * u_j;
+          _dflux_out_dKjk[sequential_i][k][index_k_to_i] -= _dDii_dKji[sequential_i][k] * u_j;
         }
       else
       {
         const unsigned index_j_to_i =
             _connections.indexOfSequentialConnection(sequential_j, sequential_i);
-        _dflux_out_dKjk[sequential_i][j][index_j_to_i] -= dDij_dKji[sequential_i][j] * u_j;
+        _dflux_out_dKjk[sequential_i][j][index_j_to_i] -= _dDij_dKji[sequential_i][j] * u_j;
       }
       for (unsigned k = 0;
            k < _connections.sequentialConnectionsToSequentialID(sequential_j).size();
            ++k)
-        _dflux_out_dKjk[sequential_i][j][k] -= dFij_dKjk[sequential_i][j][k];
+        _dflux_out_dKjk[sequential_i][j][k] -= _dFij_dKjk[sequential_i][j][k];
     }
   }
 }

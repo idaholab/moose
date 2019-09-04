@@ -180,7 +180,7 @@ PorousFlowAdvectiveFluxCalculatorBase::initialize()
   _du_dvar_computed_by_thread.assign(num_nodes, false);
   for (dof_id_type sequential_i = 0; sequential_i < num_nodes; ++sequential_i)
   {
-    const std::vector<dof_id_type> con_i =
+    const std::vector<dof_id_type> & con_i =
         _connections.globalConnectionsToSequentialID(sequential_i);
     const std::size_t num_con_i = con_i.size();
     for (unsigned j = 0; j < num_con_i; ++j)
@@ -219,7 +219,7 @@ PorousFlowAdvectiveFluxCalculatorBase::threadJoin(const UserObject & uo)
   const std::size_t num_nodes = _connections.numNodes();
   for (dof_id_type sequential_i = 0; sequential_i < num_nodes; ++sequential_i)
   {
-    const std::vector<dof_id_type> con_i =
+    const std::vector<dof_id_type> & con_i =
         _connections.globalConnectionsToSequentialID(sequential_i);
     const std::size_t num_con_i = con_i.size();
     for (unsigned j = 0; j < num_con_i; ++j)
@@ -261,7 +261,7 @@ PorousFlowAdvectiveFluxCalculatorBase::finalize()
     const dof_id_type sequential_i = _connections.sequentialID(node_i);
     _dflux_out_dvars[sequential_i].clear();
 
-    const std::map<dof_id_type, Real> dflux_out_du =
+    const std::map<dof_id_type, Real> & dflux_out_du =
         AdvectiveFluxCalculatorBase::getdFluxOutdu(node_i);
     for (const auto & node_du : dflux_out_du)
     {
@@ -275,18 +275,18 @@ PorousFlowAdvectiveFluxCalculatorBase::finalize()
     // _dflux_out_dvars is now sized correctly, because getdFluxOutdu(i) contains all nodes
     // connected to i and all nodes connected to nodes connected to i.  The
     // getdFluxOutdKij contains no extra nodes, so just += the dflux/dK terms
-    const std::vector<std::vector<Real>> dflux_out_dKjk =
+    const std::vector<std::vector<Real>> & dflux_out_dKjk =
         AdvectiveFluxCalculatorBase::getdFluxOutdKjk(node_i);
-    const std::vector<dof_id_type> con_i = _connections.globalConnectionsToGlobalID(node_i);
+    const std::vector<dof_id_type> & con_i = _connections.globalConnectionsToGlobalID(node_i);
     for (std::size_t index_j = 0; index_j < con_i.size(); ++index_j)
     {
       const dof_id_type node_j = con_i[index_j];
-      const std::vector<dof_id_type> con_j = _connections.globalConnectionsToGlobalID(node_j);
+      const std::vector<dof_id_type> & con_j = _connections.globalConnectionsToGlobalID(node_j);
       for (std::size_t index_k = 0; index_k < con_j.size(); ++index_k)
       {
         const dof_id_type node_k = con_j[index_k];
         const Real dflux_out_dK_jk = dflux_out_dKjk[index_j][index_k];
-        const std::map<dof_id_type, std::vector<Real>> dkj_dvarl = getdK_dvar(node_j, node_k);
+        const std::map<dof_id_type, std::vector<Real>> & dkj_dvarl = getdK_dvar(node_j, node_k);
         for (const auto & nodel_deriv : dkj_dvarl)
         {
           const dof_id_type l = nodel_deriv.first;

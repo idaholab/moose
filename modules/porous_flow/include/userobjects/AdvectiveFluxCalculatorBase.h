@@ -283,4 +283,45 @@ protected:
    * @param[in] node_i nodal id
    */
   void zeroedConnection(std::map<dof_id_type, Real> & the_map, dof_id_type node_i) const;
+
+  /// Vectors used in finalize()
+  std::vector<std::vector<Real>> _dij;
+  /// dDij_dKij[i][j] = d(D[i][j])/d(K[i][j]) for i!=j
+  std::vector<std::vector<Real>> _dDij_dKij;
+  /// dDij_dKji[i][j] = d(D[i][j])/d(K[j][i]) for i!=j
+  std::vector<std::vector<Real>> _dDij_dKji;
+  /// dDii_dKij[i][j] = d(D[i][i])/d(K[i][j])
+  std::vector<std::vector<Real>> _dDii_dKij;
+  /// dDii_dKji[i][j] = d(D[i][i])/d(K[j][i])
+  std::vector<std::vector<Real>> _dDii_dKji;
+
+  std::vector<std::vector<Real>> _lij;
+  std::vector<Real> _rP;
+  std::vector<Real> _rM;
+
+  /// drP[i][j] = d(rP[i])/d(u[j]). Here j indexes the j^th node connected to i
+  std::vector<std::vector<Real>> _drP;
+  /// drM[i][j] = d(rM[i])/d(u[j]). Here j indexes the j^th node connected to i
+  std::vector<std::vector<Real>> _drM;
+  /// drP_dk[i][j] = d(rP[i])/d(K[i][j]).  Here j indexes the j^th node connected to i
+  std::vector<std::vector<Real>> _drP_dk;
+  /// drM_dk[i][j] = d(rM[i])/d(K[i][j]).  Here j indexes the j^th node connected to i
+  std::vector<std::vector<Real>> _drM_dk;
+
+  /// fa[sequential_i][j]  sequential_j is the j^th connection to sequential_i
+  std::vector<std::vector<Real>> _fa;
+  /// dfa[sequential_i][j][global_k] = d(fa[sequential_i][j])/du[global_k].
+  /// Here global_k can be a neighbor to sequential_i or a neighbour to
+  /// sequential_j (sequential_j is the j^th connection to sequential_i)
+  std::vector<std::vector<std::map<dof_id_type, Real>>> _dfa;
+  /// dFij_dKik[sequential_i][j][k] =
+  /// d(fa[sequential_i][j])/d(K[sequential_i][k]).  Here j denotes
+  /// the j^th connection to sequential_i, while k denotes the k^th
+  /// connection to sequential_i
+  std::vector<std::vector<std::vector<Real>>> _dFij_dKik;
+  /// dFij_dKjk[sequential_i][j][k] =
+  /// d(fa[sequential_i][j])/d(K[sequential_j][k]).  Here sequential_j is
+  /// the j^th connection to sequential_i, and k denotes the k^th connection
+  /// to sequential_j (this will include sequential_i itself)
+  std::vector<std::vector<std::vector<Real>>> _dFij_dKjk;
 };
