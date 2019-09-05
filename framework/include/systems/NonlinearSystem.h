@@ -29,11 +29,6 @@ public:
   virtual void solve() override;
 
   /**
-   * Method used to obtain scaling factors for variables
-   */
-  void computeScalingJacobian() final;
-
-  /**
    * Quit the current solve as soon as possible.
    */
   virtual void stopSolve() override;

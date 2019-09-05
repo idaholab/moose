@@ -285,6 +285,8 @@ ReferenceResidualProblem::timestepSetup()
   }
   FEProblemBase::timestepSetup();
 
+  auto & nonlinear_sys = getNonlinearSystemBase();
+
   const unsigned int size_solnVars = _soln_vars.size();
   _scaling_factors.resize(size_solnVars);
   for (unsigned int i = 0; i < size_solnVars; ++i)

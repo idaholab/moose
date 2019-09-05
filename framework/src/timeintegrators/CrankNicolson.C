@@ -60,15 +60,6 @@ CrankNicolson::init()
   u_dot.zero();
   _du_dot_du = 0;
 
-  if (_nl.automaticScaling())
-  {
-    if (!_nl.computeScalingOnce())
-      mooseError("Cannot change variable scaling factors over time because the time integration "
-                 "scheme relies on old data");
-    else
-      _nl.computeScalingJacobian();
-  }
-
   // compute residual for the initial time step
   // Note: we can not directly pass _residual_old in computeResidualTag because
   //       the function will call postResidual, which will cause _residual_old

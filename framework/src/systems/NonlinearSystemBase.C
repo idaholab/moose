@@ -104,7 +104,7 @@ EXTERN_C_END
 #endif
 
 NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
-                                         System & sys,
+                                         NonlinearImplicitSystem & sys,
                                          const std::string & name)
   : SystemBase(fe_problem, name, Moose::VAR_NONLINEAR),
     ConsoleStreamInterface(fe_problem.getMooseApp()),
@@ -368,18 +368,18 @@ NonlinearSystemBase::timestepSetup()
   _nodal_bcs.timestepSetup();
 
   // Do an initial Jacobian evaluation in order to determine variable scaling factors
-  if (_fe_problem.automaticScaling())
+  if (_automatic_scaling)
   {
-    if (_fe_problem.computeScalingOnce())
+    if (_compute_scaling_once)
     {
       if (!_computed_scaling)
       {
-        computeScalingJacobian(_transient_sys);
+        computeScalingJacobian();
         _computed_scaling = true;
       }
     }
     else
-      computeScalingJacobian(_transient_sys);
+      computeScalingJacobian();
   }
 }
 
@@ -3202,26 +3202,26 @@ NonlinearSystemBase::mortarJacobianConstraints(bool displaced)
 }
 
 void
-NonlinearSystemBase::computeScalingJacobian(NonlinearImplicitSystem & sys)
+NonlinearSystemBase::computeScalingJacobian()
 {
 #ifdef LIBMESH_HAVE_PETSC
 
-  if (dynamic_cast<PetscMatrix<Real> *>(sys.matrix))
+  if (dynamic_cast<PetscMatrix<Real> *>(_sys.matrix))
   {
 #if !PETSC_VERSION_LESS_THAN(3, 9, 0)
     _console << "\nPerforming automatic scaling calculation\n\n";
 
     TIME_SECTION(_compute_scaling_jacobian_timer);
 
-    auto & petsc_matrix = *static_cast<PetscMatrix<Real> *>(sys.matrix);
+    auto & petsc_matrix = *static_cast<PetscMatrix<Real> *>(_sys.matrix);
 
     if (!petsc_matrix.local_m())
       mooseError("MOOSE doesn't currently support automatic scaling when there are any processes "
                  "owning zero dofs. Check back soon :-)");
 
-    _computing_initial_jacobian = true;
-    _fe_problem.computeJacobianSys(sys, *_current_solution, *sys.matrix);
-    _computing_initial_jacobian = false;
+    _computing_scaling_jacobian = true;
+    _fe_problem.computeJacobianSys(_sys, *_current_solution, *_sys.matrix);
+    _computing_scaling_jacobian = false;
 
     // container for repeated access of element global dof indices
     std::vector<dof_id_type> dof_indices;

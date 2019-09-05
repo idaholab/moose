@@ -162,18 +162,6 @@ PicardSolve::solve()
     }
   }
 
-  // Do an initial Jacobian evaluation in order to determine variable scaling factors
-  if (_nl.automaticScaling())
-  {
-    if (_nl.computeScalingOnce())
-    {
-      if (!_nl.computedScalingJacobian())
-        _nl.computeScalingJacobian();
-    }
-    else
-      _nl.computeScalingJacobian();
-  }
-
   for (_picard_it = 0; _picard_it < _picard_max_its; ++_picard_it)
   {
     if (_has_picard_its)
