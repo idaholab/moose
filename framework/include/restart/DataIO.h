@@ -606,6 +606,14 @@ void dataLoad(std::istream & stream, RealEigenVector & v, void * context);
 template <>
 void dataLoad(std::istream & stream, RealEigenMatrix & v, void * context);
 
+template <std::size_t N>
+inline void
+dataLoad(std::istream & stream, DualReal (&dn)[N], void * context)
+{
+  for (std::size_t i = 0; i < N; ++i)
+    dataLoad(stream, dn[i], context);
+}
+
 template <typename T>
 void
 dataLoad(std::istream & stream, NumericVector<T> & v, void * context)

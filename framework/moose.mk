@@ -59,6 +59,16 @@ gtest_LIB       := $(gtest_DIR)/libgtest.la
 gtest_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(gtest_srcfiles))
 
 #
+# MooseConfigure
+#
+moose_config := $(FRAMEWORK_DIR)/include/base/MooseConfig.h
+moose_default_config := $(FRAMEWORK_DIR)/include/base/MooseDefaultConfig.h
+
+$(moose_config):
+	@echo "Copying default MOOSE configuration to: "$@"..."
+	@cp $(moose_default_config) $(moose_config)
+
+#
 # header symlinks
 #
 ifeq ($(MOOSE_HEADER_SYMLINKS),true)
@@ -72,7 +82,7 @@ $(1):
 	@$$(shell mkdir -p $$@)
 endef
 
-include_files	:= $(shell find $(FRAMEWORK_DIR)/include -regex "[^\#~]*\.h")
+include_files	:= $(shell find $(FRAMEWORK_DIR)/include \( -regex "[^\#~]*\.h" ! -name "*MooseConfig.h" \))
 link_names := $(foreach i, $(include_files), $(all_header_dir)/$(notdir $(i)))
 
 # Create a rule for one symlink for one header file
@@ -94,6 +104,11 @@ endef
 
 $(eval $(call all_header_dir_rule, $(all_header_dir)))
 $(call symlink_rules, $(all_header_dir), $(include_files))
+
+moose_config_symlink := $(moose_all_header_dir)/MooseConfig.h
+$(moose_config_symlink): $(moose_config) | $(moose_all_header_dir)
+	@echo "Symlinking MOOSE configure "$(moose_config_symlink)
+	@ln -sf $(moose_config) $(moose_config_symlink)
 
 header_symlinks: $(all_header_dir) $(link_names)
 moose_INC_DIRS := $(all_header_dir)
@@ -257,6 +272,16 @@ $(moose_LIB): $(moose_objects) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB)
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
 	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(moose_objects) $(pcre_LIB) $(png_LIB) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(FRAMEWORK_DIR)
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(moose_LIB) $(FRAMEWORK_DIR)
+
+ifeq ($(MOOSE_HEADER_SYMLINKS),true)
+
+$(moose_objects): $(moose_config_symlink)
+
+else
+
+$(moose_objects): $(moose_config)
+
+endif
 
 ## Clang static analyzer
 sa: $(moose_analyzer)

@@ -11,8 +11,7 @@
 
 #include "KernelBase.h"
 
-#include "metaphysicl/numberarray.h"
-#include "metaphysicl/dualnumber.h"
+#include "DualRealOps.h"
 
 #define usingTemplKernelMembers(type)                                                              \
   usingMooseObjectMembers;                                                                         \

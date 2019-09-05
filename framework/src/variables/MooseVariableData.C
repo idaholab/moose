@@ -1330,11 +1330,6 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
   mooseAssert(_var.kind() == Moose::VarKindType::VAR_AUXILIARY || ad_offset || !_var_num,
               "Either this is the zeroth variable or we should have an offset");
 
-  // Hopefully this problem can go away at some point
-  if (ad_offset + num_dofs > AD_MAX_DOFS_PER_ELEM)
-    mooseError("Current number of dofs per element is greater than AD_MAX_DOFS_PER_ELEM of ",
-               AD_MAX_DOFS_PER_ELEM);
-
   for (unsigned int qp = 0; qp < nqp; qp++)
   {
     if (_need_ad_u)
@@ -1356,7 +1351,7 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
 
     // NOTE!  You have to do this AFTER setting the value!
     if (_var.kind() == Moose::VAR_NONLINEAR)
-      _ad_dof_values[i].derivatives()[ad_offset + i] = 1.0;
+      Moose::derivInsert(_ad_dof_values[i].derivatives(), ad_offset + i, 1.);
 
     if (_need_ad_u_dot && _time_integrator)
     {
@@ -2334,7 +2329,7 @@ MooseVariableData<OutputType>::fetchADDoFValues()
   {
     _ad_dof_values[i] = _dof_values[i];
     if (_var.kind() == Moose::VAR_NONLINEAR)
-      _ad_dof_values[i].derivatives()[ad_offset + i] = 1.;
+      Moose::derivInsert(_ad_dof_values[i].derivatives(), ad_offset + i, 1.);
     assignADNodalValue(_ad_dof_values[i], i);
   }
 }

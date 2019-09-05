@@ -9,6 +9,8 @@
 
 #include "DimensionlessFlowNumbers.h"
 
+#include "DualRealOps.h"
+
 namespace fp
 {
 

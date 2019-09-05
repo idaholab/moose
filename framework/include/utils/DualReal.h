@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "MooseConfig.h"
+
 #include "libmesh/libmesh_common.h"
 #include "libmesh/compare_types.h"
 
@@ -16,17 +18,38 @@ namespace MetaPhysicL
 {
 template <typename, typename>
 class DualNumber;
+template <typename, typename, typename>
+class SemiDynamicSparseNumberArray;
 template <std::size_t, typename>
 class NumberArray;
+template <std::size_t N>
+struct NWrapper;
 }
 
 using libMesh::Real;
 using MetaPhysicL::DualNumber;
 using MetaPhysicL::NumberArray;
+using MetaPhysicL::NWrapper;
+using MetaPhysicL::SemiDynamicSparseNumberArray;
 
-#define AD_MAX_DOFS_PER_ELEM 50
+#ifdef MOOSE_SPARSE_AD
 
-typedef DualNumber<Real, NumberArray<AD_MAX_DOFS_PER_ELEM, Real>> DualReal;
+typedef SemiDynamicSparseNumberArray<Real, unsigned int, NWrapper<MOOSE_AD_MAX_DOFS_PER_ELEM>>
+    DNDerivativeType;
+
+template <std::size_t N>
+using DNDerivativeSize = SemiDynamicSparseNumberArray<Real, unsigned int, NWrapper<N>>;
+
+#else
+
+typedef NumberArray<MOOSE_AD_MAX_DOFS_PER_ELEM, Real> DNDerivativeType;
+
+template <std::size_t N>
+using DNDerivativeSize = NumberArray<N, Real>;
+
+#endif // MOOSE_SPARSE_AD
+
+typedef DualNumber<Real, DNDerivativeType> DualReal;
 
 #ifndef LIBMESH_DUAL_NUMBER_COMPARE_TYPES
 

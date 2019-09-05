@@ -1,0 +1,25 @@
+/* include/base/MooseConfig.h.in.  Generated from configure.ac by autoheader.  */
+
+/* The size of the derivative backing array */
+#undef AD_MAX_DOFS_PER_ELEM
+
+/* Define to the address where bug reports for this package should be sent. */
+#undef PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#undef PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#undef PACKAGE_STRING
+
+/* Define to the one symbol short name of this package. */
+#undef PACKAGE_TARNAME
+
+/* Define to the home page for this package. */
+#undef PACKAGE_URL
+
+/* Define to the version of this package. */
+#undef PACKAGE_VERSION
+
+/* Whether to use a sparse derivative type */
+#undef SPARSE_AD
