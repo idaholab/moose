@@ -21,4 +21,6 @@ protected:
 
   const VectorVariableValue & _u_dot_dot;
   const VariableValue & _du_dot_dot_du;
+
+  const Function & _coeff;
 };
