@@ -601,8 +601,6 @@ Assembly::reinitFE(const Elem * elem)
   {
     auto n_qp = _current_qrule->n_points();
     resizeADMappingObjects(n_qp, dim);
-    if (_calculate_xyz)
-      _ad_q_points.resize(n_qp);
     if (_displaced)
     {
       const auto & qw = _current_qrule->get_weights();
@@ -776,6 +774,8 @@ Assembly::resizeADMappingObjects(unsigned int n_qp, unsigned int dim)
 
   _ad_jac.resize(n_qp);
   _ad_JxW.resize(n_qp);
+  if (_calculate_xyz)
+    _ad_q_points.resize(n_qp);
 }
 
 void
