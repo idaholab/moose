@@ -1,0 +1,10 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'vector_test.i'
+    exodiff = 'vector_test_out.e'
+    requirement = 'The system shall compute second-order time derivatives for vector variables'
+    design = 'Coupleable.md'
+    issues = '#13913'
+  [../]
+[]
