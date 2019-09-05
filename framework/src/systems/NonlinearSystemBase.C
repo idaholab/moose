@@ -366,6 +366,21 @@ NonlinearSystemBase::timestepSetup()
   _constraints.timestepSetup();
   _general_dampers.timestepSetup();
   _nodal_bcs.timestepSetup();
+
+  // Do an initial Jacobian evaluation in order to determine variable scaling factors
+  if (_fe_problem.automaticScaling())
+  {
+    if (_fe_problem.computeScalingOnce())
+    {
+      if (!_computed_scaling)
+      {
+        computeScalingJacobian(_transient_sys);
+        _computed_scaling = true;
+      }
+    }
+    else
+      computeScalingJacobian(_transient_sys);
+  }
 }
 
 void

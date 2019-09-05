@@ -7,11 +7,20 @@
     exodiff = 'reference_residual_out.e'
     requirement = 'ReferenceResidualProblem shall base convergence on comparison of individual variables with reference quantities'
   []
-  [err]
+  [scaled_bad]
     type = 'RunApp'
     input = 'reference_residual.i'
     expect_out = 'Solve Did NOT Converge'
     cli_args = 'coef=1e17 Outputs/exodus=false -pc_type svd -ksp_max_it 10'
     requirement = 'A badly scaled ReferenceResidualProblem will not converge'
+  []
+  [scaled_good]
+    type = 'Exodiff'
+    input = 'reference_residual.i'
+    cli_args = 'coef=1e17 Outputs/file_base=scaled Executioner/automatic_scaling=true Executioner/verbose=true -pc_type svd -ksp_max_it 10'
+    exodiff = 'scaled.e'
+    requirement = 'An automatically scaled ReferenceResidualProblem will converge'
+    petsc_version = '>=3.9.0'
+    max_parallel = 2
   []
 []

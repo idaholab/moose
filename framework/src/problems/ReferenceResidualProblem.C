@@ -272,14 +272,6 @@ ReferenceResidualProblem::initialSetup()
     }
   }
 
-  const unsigned int size_solnVars = _soln_vars.size();
-  _scaling_factors.resize(size_solnVars);
-  for (unsigned int i = 0; i < size_solnVars; ++i)
-    if (nonlinear_sys.isScalarVariable(_soln_vars[i]))
-      _scaling_factors[i] = nonlinear_sys.getScalarVariable(0, _soln_vars[i]).scalingFactor();
-    else
-      _scaling_factors[i] = nonlinear_sys.getVariable(/*tid*/ 0, _soln_vars[i]).scalingFactor();
-
   FEProblemBase::initialSetup();
 }
 
@@ -292,6 +284,14 @@ ReferenceResidualProblem::timestepSetup()
     _resid[i] = 0.0;
   }
   FEProblemBase::timestepSetup();
+
+  const unsigned int size_solnVars = _soln_vars.size();
+  _scaling_factors.resize(size_solnVars);
+  for (unsigned int i = 0; i < size_solnVars; ++i)
+    if (nonlinear_sys.isScalarVariable(_soln_vars[i]))
+      _scaling_factors[i] = nonlinear_sys.getScalarVariable(0, _soln_vars[i]).scalingFactor();
+    else
+      _scaling_factors[i] = nonlinear_sys.getVariable(/*tid*/ 0, _soln_vars[i]).scalingFactor();
 }
 
 void
