@@ -79,6 +79,9 @@ PatchSidesetGenerator::generate()
   if (typeid(mesh).name() == typeid(std::unique_ptr<DistributedMesh>).name())
     distributed = true;
 
+  if (distributed)
+    mooseWarning("Distributed mesh may not work yet, because communication is not done.");
+
   // Get a reference to our BoundaryInfo object for later use
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
 
