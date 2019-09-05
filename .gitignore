@@ -224,3 +224,10 @@ python/peacock/tests/postprocessor_tab/TestPostprocessorPluginManager_test_scrip
 !python/peacock/tests/**/input/*.*
 peacock_tmp_diff.exo
 *.e.diff
+
+# configure
+_configs.sed
+autom4te.cache
+config.status
+*MooseConfig.h
+*MooseConfig.h.tmp

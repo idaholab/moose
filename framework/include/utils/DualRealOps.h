@@ -9,12 +9,11 @@
 
 #pragma once
 
-#include "libmesh/dense_matrix.h"
+#include "MooseConfig.h"
+#include "DualReal.h"
 
-#include "DualRealOps.h"
-
-namespace libMesh
-{
-template <>
-DenseMatrix<DualReal>::DenseMatrix(const unsigned int new_m, const unsigned int new_n);
-}
+#ifdef MOOSE_SPARSE_AD
+#include "SparseOps.h"
+#else
+#include "NumberArrayOps.h"
+#endif

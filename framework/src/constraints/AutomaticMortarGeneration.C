@@ -19,6 +19,8 @@
 
 #include "metaphysicl/dualnumber.h"
 
+#include <array>
+
 using namespace libMesh;
 using MetaPhysicL::DualNumber;
 

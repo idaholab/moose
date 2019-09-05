@@ -9,9 +9,6 @@
 
 #pragma once
 
-#include "metaphysicl/numberarray.h"
-#include "metaphysicl/dualnumber.h"
-
 #include "MooseTypes.h"
 #include "MooseVariableFEBase.h"
 #include "SubProblem.h"
