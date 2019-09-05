@@ -16,4 +16,23 @@
     design = '/ADCoupledTimeDerivative.md'
     requirement = 'A coupled time derivative kernel with forward mode automatic differentiation shall be provided'
   [../]
+  [./vectortestdirichlet]
+    type = 'Exodiff'
+    input = 'vector_coupled_time_derivative_test.i'
+    exodiff = 'vector_coupled_time_derivative_test_out.e'
+    issues = '#13913'
+    design = 'VectorCoupledTimeDerivative.md'
+    requirement = 'A coupled time derivative kernel compatible with vector variables with hand-coded jacobians shall be provided'
+  [../]
+  [./jac_vectortestdirichlet]
+    type = 'PetscJacobianTester'
+    input = 'vector_coupled_time_derivative_test.i'
+    cli_args = 'Outputs/exodus=false'
+    run_sim = True
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    requirement = 'The Jacobian from VectorCoupledTimeDerivative shall be perfect'
+    issues = '#13913'
+    design = 'VectorCoupledTimeDerivative.md'
+  [../]
 []

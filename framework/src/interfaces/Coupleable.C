@@ -758,6 +758,32 @@ Coupleable::coupledVectorDotDotOld(const std::string & var_name, unsigned int co
   return var->uDotDotOldNeighbor();
 }
 
+const VariableValue &
+Coupleable::coupledVectorDotDu(const std::string & var_name, unsigned int comp)
+{
+  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  if (!var)
+    return _default_value_zero;
+  checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
+
+  if (!_coupleable_neighbor)
+    return var->duDotDu();
+  return var->duDotDuNeighbor();
+}
+
+const VariableValue &
+Coupleable::coupledVectorDotDotDu(const std::string & var_name, unsigned int comp)
+{
+  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  if (!var)
+    return _default_value_zero;
+  checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
+
+  if (!_coupleable_neighbor)
+    return var->duDotDotDu();
+  return var->duDotDotDuNeighbor();
+}
+
 const ArrayVariableValue &
 Coupleable::coupledArrayDot(const std::string & var_name, unsigned int comp)
 {
@@ -886,7 +912,7 @@ Coupleable::coupledDotDotDu(const std::string & var_name, unsigned int comp)
   {
     if (_c_nodal)
       return var->dofValuesDuDotDotDuNeighbor();
-    return var->duDotDotDu();
+    return var->duDotDotDuNeighbor();
   }
 }
 
