@@ -1,0 +1,13 @@
+[Tests]
+  [./time_harmonic]
+    type = Exodiff
+    input = 'dipole.i'
+    exodiff = 'dipole_out.e'
+  [../]
+  [./transient]
+    type = Exodiff
+    input = 'dipole_transient.i'
+    exodiff = 'dipole_transient_out.e'
+    cli_args = 'Mesh/file=dipole_antenna_1G_coarse.msh Executioner/num_steps=10'
+  [../]
+[]
