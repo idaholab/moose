@@ -9,8 +9,8 @@ validParams<VectorSecondTimeDerivative>()
   InputParameters params = validParams<VectorTimeKernel>();
   params.addClassDescription(
       "The second time derivative operator with the weak form of $(\\vec{\\psi_i}, "
-      "a(\\vec{r}) \\frac{\\partial^2 \\vec{u_h}}{\\partial t^2})$, where $a(\\vec{r})$ is a "
-      "coefficient (default, a(\\vec{r}) = 1.0).");
+      "a(\\vec{r}, t) \\frac{\\partial^2 \\vec{u_h}}{\\partial t^2})$, where $a(\\vec{r}, t)$ is a "
+      "coefficient (default, a(\\vec{r}, t) = 1.0).");
   params.addParam<FunctionName>("coefficient", 1.0, "Coefficient function.");
   return params;
 }
