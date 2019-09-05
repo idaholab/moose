@@ -15,5 +15,6 @@
     requirement = 'Volumetric AD assembly data shall be properly sized when reinitializing faces'
     group = 'geometric'
     issues = '#5658'
+    custom_cmp = 'qnnl_ad.cmp'
   []
 []
