@@ -7,4 +7,11 @@
     exodiff = 'reference_residual_out.e'
     requirement = 'ReferenceResidualProblem shall base convergence on comparison of individual variables with reference quantities'
   []
+  [err]
+    type = 'RunApp'
+    input = 'reference_residual.i'
+    expect_out = 'Solve Did NOT Converge'
+    cli_args = 'coef=1e17 Outputs/exodus=false -pc_type svd -ksp_max_it 10'
+    requirement = 'A badly scaled ReferenceResidualProblem will not converge'
+  []
 []
