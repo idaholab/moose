@@ -36,6 +36,19 @@ def check_requirement(filename):
         if not child.get('issues', issues).strip():
             messages.append("    'issues' parameter is missing or empty in '{}' block.".format(child.name))
 
+        for grandchild in child.children:
+            if 'detail' not in grandchild:
+                messages.append("    'detail' parameter is missing or empty in '{}' block.".format(grandchild.name))
+
+            if 'requirement' in grandchild:
+                messages.append("    'requirement' parameter in block '{}' must not be used within a group, use 'detail' instead.".format(grandchild.name))
+
+            if 'design' in grandchild:
+                messages.append("    'design' parameter in block '{}' must not be used within a group.".format(grandchild.name))
+
+            if 'issues' in grandchild:
+                messages.append("    'issues' parameter in block '{}' must not be used within a group.".format(grandchild.name))
+
     if messages:
         print 'ERROR in {}'.format(filename)
         print '\n'.join(messages) + '\n'

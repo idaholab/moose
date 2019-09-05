@@ -135,7 +135,7 @@
     expect_err = "Input file block '\S+' has been deprecated."
 
     requirement = 'The system shall report an error message when a deprecated input file block is used.'
-    issues = '#$1405'
+    issues = '#1405'
   [../]
 
   [./deprecated_param_default]

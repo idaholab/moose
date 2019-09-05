@@ -51,16 +51,10 @@ protected:
   virtual void computeProperties() override;
 
   /**
-   * Resizes property with ID prop_id to be equal to
-   * max(number of nodes, number of quadpoints) in the current element
+   * Resizes properties to be equal to max(number of nodes, number of quadpoints)
+   * in the current element
    */
-  void sizeNodalProperty(unsigned int prop_id);
-
-  /**
-   * Makes all supplied properties for this material to be size
-   * equal to max(number of nodes, number of quadpoints) in the current element
-   */
-  void sizeAllSuppliedProperties();
+  void sizeNodalProperties();
 
   /**
    * Find the nearest quadpoint to the node labelled by nodenum
@@ -82,7 +76,4 @@ protected:
   const VariableName _saturation_variable_name;
   const VariableName _temperature_variable_name;
   const VariableName _mass_fraction_variable_name;
-
-  /// Unique Ids of supplied material properties
-  std::set<unsigned int> _prop_ids;
 };

@@ -1,6 +1,6 @@
 [Tests]
   design = 'Diffusion.md'
-  issues = 'libMesh/libmesh#1985'
+  issues = 'libmesh#1985'
   [./test_smp]
     type = 'Exodiff'
     input = 'simple_diffusion.i'
