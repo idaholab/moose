@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#9151'
+  design = 'ReferenceResidualProblem.md'
+  [base]
+    type = 'Exodiff'
+    input = 'reference_residual.i'
+    exodiff = 'reference_residual_out.e'
+    requirement = 'ReferenceResidualProblem shall base convergence on comparison of individual variables with reference quantities'
+  []
+[]
