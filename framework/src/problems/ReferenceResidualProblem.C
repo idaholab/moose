@@ -21,7 +21,7 @@
 #include "libmesh/enum_norm_type.h"
 #include "libmesh/utility.h"
 
-registerMooseObject("ContactApp", ReferenceResidualProblem);
+registerMooseObject("MooseApp", ReferenceResidualProblem);
 
 template <>
 InputParameters
