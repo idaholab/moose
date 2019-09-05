@@ -146,6 +146,18 @@ public:
     return _storage.getPropertyId(prop_name);
   }
 
+  /**
+   * Set _resize_only_if_smaller to perform a non-destructive resize. Setting this
+   * flag to true means that resize(n) will not decrease the size of _material_data
+   * if n is smaller than the size of the material data object.
+   */
+  void onlyResizeIfSmaller(bool flag) { _resize_only_if_smaller = flag; };
+
+  /**
+   * Check value of _resize_only_if_smaller
+   */
+  bool isOnlyResizeIfSmaller() const { return _resize_only_if_smaller; };
+
 protected:
   /// Reference to the MaterialStorage class
   MaterialPropertyStorage & _storage;
@@ -168,6 +180,10 @@ protected:
 
   /// Status of storage swapping (calling swap sets this to true; swapBack sets it to false)
   bool _swapped;
+
+  /// Use non-destructive resize of material data (calling resize() will not reduce size).
+  /// Default is false (normal resize behaviour)
+  bool _resize_only_if_smaller;
 
 private:
   template <typename T>

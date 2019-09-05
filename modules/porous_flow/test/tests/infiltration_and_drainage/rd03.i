@@ -75,7 +75,7 @@
 
 [Variables]
   [./pressure]
-    initial_from_file_timestep = 1
+    initial_from_file_timestep = LATEST
     initial_from_file_var = pressure
   [../]
 []

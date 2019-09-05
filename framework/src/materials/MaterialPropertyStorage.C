@@ -428,6 +428,10 @@ MaterialPropertyStorage::initProps(MaterialData & material_data,
   material_data.resize(n_qpoints);
   auto n = _stateful_prop_id_to_prop_id.size();
 
+  // In some special cases, material_data might be larger than n_qpoints
+  if (material_data.isOnlyResizeIfSmaller())
+    n_qpoints = material_data.nQPoints();
+
   if (props(&elem, side).size() < n)
     props(&elem, side).resize(n, nullptr);
   if (propsOld(&elem, side).size() < n)
