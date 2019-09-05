@@ -174,41 +174,23 @@ AdvectiveFluxCalculatorBase::timestepSetup()
 
     _resizing_needed = false;
 
-    // Clear all member vectors
-    _dij.clear();
-    _dDij_dKij.clear();
-    _dDij_dKji.clear();
-    _dDii_dKij.clear();
-    _dDii_dKji.clear();
-    _lij.clear();
-    _rP.clear();
-    _rM.clear();
-    _drP.clear();
-    _drM.clear();
-    _drP_dk.clear();
-    _drM_dk.clear();
-    _fa.clear();
-    _dfa.clear();
-    _dFij_dKik.clear();
-    _dFij_dKjk.clear();
-
-    // Size member vectors
-    _dij.resize(_number_of_nodes);
-    _dDij_dKij.resize(_number_of_nodes);
-    _dDij_dKji.resize(_number_of_nodes);
-    _dDii_dKij.resize(_number_of_nodes);
-    _dDii_dKji.resize(_number_of_nodes);
-    _lij.resize(_number_of_nodes);
-    _rP.resize(_number_of_nodes);
-    _rM.resize(_number_of_nodes);
-    _drP.resize(_number_of_nodes);
-    _drM.resize(_number_of_nodes);
-    _drP_dk.resize(_number_of_nodes);
-    _drM_dk.resize(_number_of_nodes);
-    _fa.resize(_number_of_nodes);
-    _dfa.resize(_number_of_nodes);
-    _dFij_dKik.resize(_number_of_nodes);
-    _dFij_dKjk.resize(_number_of_nodes);
+    // Clear and size all member vectors
+    _dij.assign(_number_of_nodes, {});
+    _dDij_dKij.assign(_number_of_nodes, {});
+    _dDij_dKji.assign(_number_of_nodes, {});
+    _dDii_dKij.assign(_number_of_nodes, {});
+    _dDii_dKji.assign(_number_of_nodes, {});
+    _lij.assign(_number_of_nodes, {});
+    _rP.assign(_number_of_nodes, 0.0);
+    _rM.assign(_number_of_nodes, 0.0);
+    _drP.assign(_number_of_nodes, {});
+    _drM.assign(_number_of_nodes, {});
+    _drP_dk.assign(_number_of_nodes, {});
+    _drM_dk.assign(_number_of_nodes, {});
+    _fa.assign(_number_of_nodes, {});
+    _dfa.assign(_number_of_nodes, {});
+    _dFij_dKik.assign(_number_of_nodes, {});
+    _dFij_dKjk.assign(_number_of_nodes, {});
   }
 }
 
