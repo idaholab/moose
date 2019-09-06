@@ -7,9 +7,6 @@ class VectorSecondTimeDerivative;
 template <>
 InputParameters validParams<VectorSecondTimeDerivative>();
 
-/**
- *
- */
 class VectorSecondTimeDerivative : public VectorTimeKernel
 {
 public:
