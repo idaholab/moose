@@ -7,9 +7,6 @@ class PEC;
 template <>
 InputParameters validParams<PEC>();
 
-/**
- *
- */
 class PEC : public IntegratedBC
 {
 public:

@@ -7,9 +7,6 @@ class CoupledTimeDerivativeAux;
 template <>
 InputParameters validParams<CoupledTimeDerivativeAux>();
 
-/**
- *
- */
 class CoupledTimeDerivativeAux : public AuxKernel
 {
 public:

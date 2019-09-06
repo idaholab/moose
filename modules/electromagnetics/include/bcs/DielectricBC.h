@@ -7,9 +7,6 @@ class DielectricBC;
 template <>
 InputParameters validParams<DielectricBC>();
 
-/**
- *
- */
 class DielectricBC : public DiffusionFluxBC
 {
 public:

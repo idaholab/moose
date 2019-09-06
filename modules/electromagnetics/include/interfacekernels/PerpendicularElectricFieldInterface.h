@@ -8,9 +8,6 @@ template <>
 InputParameters
 validParams<PerpendicularElectricFieldInterface>();
 
-/**
- *
- */
 class PerpendicularElectricFieldInterface : public VectorInterfaceKernel
 {
 public:

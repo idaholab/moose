@@ -7,9 +7,6 @@ class CoupledCoeffTimeDerivative;
 template <>
 InputParameters validParams<CoupledCoeffTimeDerivative>();
 
-/**
- *
- */
 class CoupledCoeffTimeDerivative : public CoupledTimeDerivative
 {
 public:
