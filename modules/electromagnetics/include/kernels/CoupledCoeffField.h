@@ -1,5 +1,4 @@
-#ifndef COUPLEDCOEFFFIELD_H
-#define COUPLEDCOEFFFIELD_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -27,5 +26,3 @@ private:
 
   Real _sign;
 };
-
-#endif /* COUPLEDCOEFFFIELD_H */

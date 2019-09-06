@@ -1,5 +1,4 @@
-#ifndef COEFFFIELD_H
-#define COEFFFIELD_H
+#pragma once
 
 #include "Reaction.h"
 
@@ -23,5 +22,3 @@ private:
 
   const Function & _func;
 };
-
-#endif /* COEFFFIELD_H */

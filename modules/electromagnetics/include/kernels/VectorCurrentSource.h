@@ -1,5 +1,4 @@
-#ifndef VECTORCURRENTSOURCE_H
-#define VECTORCURRENTSOURCE_H
+#pragma once
 
 #include "VectorKernel.h"
 
@@ -24,5 +23,3 @@ protected:
 
   MooseEnum _component;
 };
-
-#endif // VECTORCURRENTSOURCE_H

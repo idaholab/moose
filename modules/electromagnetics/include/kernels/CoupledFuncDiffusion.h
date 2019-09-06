@@ -1,5 +1,4 @@
-#ifndef COUPLEDFUNCDIFFUSION_H
-#define COUPLEDFUNCDIFFUSION_H
+#pragma once
 
 #include "Diffusion.h"
 
@@ -25,5 +24,3 @@ private:
 
   const VariableGradient & _coupled_grad;
 };
-
-#endif // COUPLEDFUNCDIFFUSION_H

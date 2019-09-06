@@ -1,5 +1,4 @@
-#ifndef COUPLEDVECTORCOEFFFIELD_H
-#define COUPLEDVECTORCOEFFFIELD_H
+#pragma once
 
 #include "VectorKernel.h"
 
@@ -23,5 +22,3 @@ protected:
 
   const VectorVariableValue & _coupled_val;
 };
-
-#endif // COUPLEDVECTORCOEFFFIELD_H

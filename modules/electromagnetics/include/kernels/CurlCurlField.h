@@ -1,5 +1,4 @@
-#ifndef CURLCURLFIELD_H
-#define CURLCURLFIELD_H
+#pragma once
 
 #include "VectorKernel.h"
 
@@ -28,5 +27,3 @@ protected:
 
   Real _coeff;
 };
-
-#endif // CURLCURLFIELD_H

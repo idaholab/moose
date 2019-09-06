@@ -1,5 +1,4 @@
-#ifndef VECTORCOEFFFIELD_H
-#define VECTORCOEFFFIELD_H
+#pragma once
 
 #include "VectorKernel.h"
 
@@ -21,5 +20,3 @@ protected:
 
   const Function & _func;
 };
-
-#endif // VECTORCOEFFFIELD_H
