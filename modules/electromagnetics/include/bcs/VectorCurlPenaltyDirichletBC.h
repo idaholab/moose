@@ -7,9 +7,6 @@ class VectorCurlPenaltyDirichletBC;
 template <>
 InputParameters validParams<VectorCurlPenaltyDirichletBC>();
 
-/**
- *
- */
 class VectorCurlPenaltyDirichletBC : public VectorIntegratedBC
 {
 public:

@@ -8,10 +8,6 @@ class VectorPortBC;
 template <>
 InputParameters validParams<VectorPortBC>();
 
-/**
- *
- */
-
 class VectorPortBC : public VectorIntegratedBC
 {
 public:
