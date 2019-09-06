@@ -1,4 +1,5 @@
 #include "VectorSecondTimeDerivative.h"
+#include "Function.h"
 
 registerMooseObject("ElkApp", VectorSecondTimeDerivative);
 

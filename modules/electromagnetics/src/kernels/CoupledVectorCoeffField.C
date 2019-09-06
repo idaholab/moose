@@ -1,4 +1,5 @@
 #include "CoupledVectorCoeffField.h"
+#include "Function.h"
 
 registerMooseObject("ElkApp", CoupledVectorCoeffField);
 
