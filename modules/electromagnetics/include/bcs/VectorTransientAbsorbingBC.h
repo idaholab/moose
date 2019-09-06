@@ -31,9 +31,5 @@ protected:
   const VariableValue & _du_dot_du;
   const VariableValue & _coupled_dot_du;
 
-  // TODO: Add incoming field capability
-  // const Function & _inc_real;
-  // const Function & _inc_imag;
-
   std::complex<double> _jay;
 };

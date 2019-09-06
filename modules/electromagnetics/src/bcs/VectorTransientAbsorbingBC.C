@@ -20,9 +20,6 @@ validParams<VectorTransientAbsorbingBC>()
   params.addParam<MooseEnum>(
       "component", component, "Variable field component (real or imaginary).");
   params.addRequiredCoupledVar("coupled_field", "Coupled field variable.");
-  // TODO: Add incoming field parameters
-  // params.addParam<FunctionName>("real_incoming", 0.0, "Real incoming field vector.");
-  // params.addParam<FunctionName>("imag_incoming", 0.0, "Imaginary incoming field vector.");
   return params;
 }
 
@@ -40,10 +37,6 @@ VectorTransientAbsorbingBC::VectorTransientAbsorbingBC(const InputParameters & p
     _coupled_dot(coupledVectorDot("coupled_field")),
     _du_dot_du(dotDu()),
     _coupled_dot_du(coupledVectorDotDu("coupled_field"))
-
-// TODO: Add incoming field capability
-// _inc_real(getFunction("real_incoming")),
-// _inc_imag(getFunction("imag_incoming"))
 {
 }
 
@@ -79,8 +72,6 @@ VectorTransientAbsorbingBC::computeQpResidual()
     field_dot_2.imag(_u_dot[_qp](2));
   }
   VectorValue<std::complex<double>> field_dot(field_dot_0, field_dot_1, field_dot_2);
-
-  // TODO: Create vector, curl for field_inc_dot before residual and Jacobian contributions
 
   // Calculate solution field contribution to BC residual
   std::complex<double> p_dot_test =
