@@ -46,6 +46,12 @@ SRC_DIRS    := $(APPLICATION_DIR)/src
 PLUGIN_DIR  := $(APPLICATION_DIR)/plugins
 
 excluded_srcfiles += main.C
+excluded_srcfile_paths += $(shell find $(SRC_DIRS) -name main.C)
+ifeq ($(LIBRARY_SUFFIX),yes)
+excluded_objects	    := $(patsubst %.C, %_with$(app_LIB_SUFFIX).$(obj-suffix), $(excluded_srcfile_paths))
+else
+excluded_objects	    := $(patsubst %.C, %.$(obj-suffix), $(excluded_srcfile_paths))
+endif
 
 find_excludes     := $(foreach i, $(excluded_srcfiles), -not -name $(i))
 srcfiles    := $(shell find $(SRC_DIRS) -regex "[^\#~]*\.C" $(find_excludes))
@@ -132,13 +138,13 @@ ifeq ($(MOOSE_HEADER_SYMLINKS),true)
 
 $(app_objects): $(moose_config_symlink)
 $(app_test_objects): $(moose_config_symlink)
-$(excluded_srcfiles): $(moose_config_symlink)
+$(excluded_objects): $(moose_config_symlink)
 
 else
 
 $(app_objects): $(moose_config)
 $(app_test_objects): $(moose_config)
-$(excluded_srcfiles): $(moose_config_symlink)
+$(excluded_objects): $(moose_config_symlink)
 
 endif
 
