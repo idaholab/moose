@@ -6,31 +6,31 @@
 # between subdomain 0 and 1
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 3
-  nx = 10
-  ny = 10
-  nz = 10
-  xmax = 2
-  ymax = 2
-  zmax = 2
-  elem_type = HEX20
-[]
-
-[MeshModifiers]
+  [./gmg]
+    type = GeneratedMeshGenerator
+    dim = 3
+    nx = 10
+    ny = 10
+    nz = 10
+    xmax = 2
+    ymax = 2
+    zmax = 2
+    elem_type = HEX20
+  [../]
   [./subdomain1]
-    type = SubdomainBoundingBox
+    type = SubdomainBoundingBoxGenerator
     bottom_left = '0 0 0'
     top_right = '1 1 1'
     block_id = 1
+    input = gmg
   [../]
   [./break_boundary]
-    type = BreakBoundaryOnSubdomain
-    depends_on = subdomain1
+    type = BreakBoundaryOnSubdomainGenerator
+    input = subdomain1
   [../]
   [./interface]
-    type = SideSetsBetweenSubdomains
-    depends_on = break_boundary
+    type = SideSetsBetweenSubdomainsGenerator
+    input = break_boundary
     master_block = '0'
     paired_block = '1'
     new_boundary = 'master0_interface'
