@@ -36,6 +36,7 @@ validParams<ReferenceResidualProblem>()
   params.addParam<std::vector<std::string>>(
       "reference_residual_variables",
       "Set of variables that provide reference residuals for relative convergence check");
+  params.addParam<TagName>("reference_vector", "The tag name of the reference residual vector.");
   params.addParam<Real>("acceptable_multiplier",
                         1.0,
                         "Multiplier applied to relative tolerance for acceptable limit");
@@ -50,18 +51,39 @@ validParams<ReferenceResidualProblem>()
 }
 
 ReferenceResidualProblem::ReferenceResidualProblem(const InputParameters & params)
-  : FEProblem(params), _use_group_variables(false)
+  : FEProblem(params), _use_group_variables(false), _reference_vector(nullptr)
 {
   if (params.isParamValid("solution_variables"))
     _soln_var_names = params.get<std::vector<std::string>>("solution_variables");
+
+  if (params.isParamValid("reference_residual_variables") &&
+      params.isParamValid("reference_vector"))
+    mooseError(
+        "For `ReferenceResidualProblem` you can specify either the `reference_residual_variables` "
+        "or `reference_vector` parameter, not both. `reference_residual_variables` is deprecated "
+        "so we recommend using `reference_vector`");
+
   if (params.isParamValid("reference_residual_variables"))
+  {
+    mooseDeprecated("The save-in method for composing reference residual quantities is deprecated "
+                    "and will be removed on Januay 1, 2020. Please use the tagging system instead; "
+                    "specifically, please assign a TagName to the `reference_vector` parameter");
+
     _ref_resid_var_names = params.get<std::vector<std::string>>("reference_residual_variables");
-  if (_soln_var_names.size() != _ref_resid_var_names.size())
-    mooseError("In ReferenceResidualProblem, size of solution_variables (",
-               _soln_var_names.size(),
-               ") != size of reference_residual_variables (",
-               _ref_resid_var_names.size(),
-               ")");
+
+    if (_soln_var_names.size() != _ref_resid_var_names.size())
+      mooseError("In ReferenceResidualProblem, size of solution_variables (",
+                 _soln_var_names.size(),
+                 ") != size of reference_residual_variables (",
+                 _ref_resid_var_names.size(),
+                 ")");
+  }
+  else if (params.isParamValid("reference_vector"))
+    _reference_vector = &_nl->getVector(getVectorTagID(getParam<TagName>("reference_vector")));
+  else
+    mooseError("Either the `reference_residual_variables` or `reference_vector` parameter must be "
+               "specified for `ReferenceResidualProblem`. `reference_residual_variables` is "
+               "deprecated so we recommend using `reference_vector`");
 
   if (params.isParamValid("group_variables"))
   {
@@ -167,6 +189,8 @@ ReferenceResidualProblem::initialSetup()
       {
         _soln_vars.push_back(var_num);
         _resid.push_back(0.0);
+        if (_reference_vector)
+          _ref_resid.push_back(0.);
         foundMatch = true;
         break;
       }
@@ -175,22 +199,25 @@ ReferenceResidualProblem::initialSetup()
       mooseError("Could not find solution variable '", _soln_var_names[i], "' in system");
   }
 
-  _ref_resid_vars.clear();
-  for (unsigned int i = 0; i < _ref_resid_var_names.size(); ++i)
+  if (!_reference_vector)
   {
-    bool foundMatch = false;
-    for (unsigned int var_num = 0; var_num < as.n_vars(); var_num++)
+    _ref_resid_vars.clear();
+    for (unsigned int i = 0; i < _ref_resid_var_names.size(); ++i)
     {
-      if (_ref_resid_var_names[i] == as.variable_name(var_num))
+      bool foundMatch = false;
+      for (unsigned int var_num = 0; var_num < as.n_vars(); var_num++)
       {
-        _ref_resid_vars.push_back(var_num);
-        _ref_resid.push_back(0.0);
-        foundMatch = true;
-        break;
+        if (_ref_resid_var_names[i] == as.variable_name(var_num))
+        {
+          _ref_resid_vars.push_back(var_num);
+          _ref_resid.push_back(0.0);
+          foundMatch = true;
+          break;
+        }
       }
+      if (!foundMatch)
+        mooseError("Could not find variable '", _ref_resid_var_names[i], "' in auxiliary system");
     }
-    if (!foundMatch)
-      mooseError("Could not find variable '", _ref_resid_var_names[i], "' in auxiliary system");
   }
 
   unsigned int ungroup_index = 0;
@@ -264,12 +291,26 @@ ReferenceResidualProblem::initialSetup()
         _group_soln_var_names[_variable_group_num_index[i]] += " (grouped) ";
     }
 
-    if (_group_ref_resid_var_names[_variable_group_num_index[i]].empty())
+    if (!_reference_vector)
     {
-      _group_ref_resid_var_names[_variable_group_num_index[i]] = _ref_resid_var_names[i];
-      if (_use_group_variables && _variable_group_num_index[i] < _group_variables.size())
-        _group_ref_resid_var_names[_variable_group_num_index[i]] += " (grouped) ";
+      if (_group_ref_resid_var_names[_variable_group_num_index[i]].empty())
+      {
+        _group_ref_resid_var_names[_variable_group_num_index[i]] = _ref_resid_var_names[i];
+        if (_use_group_variables && _variable_group_num_index[i] < _group_variables.size())
+          _group_ref_resid_var_names[_variable_group_num_index[i]] += " (grouped) ";
+      }
     }
+  }
+
+  if (!_reference_vector)
+  {
+    const unsigned int size_solnVars = _soln_vars.size();
+    _scaling_factors.resize(size_solnVars);
+    for (unsigned int i = 0; i < size_solnVars; ++i)
+      if (nonlinear_sys.isScalarVariable(_soln_vars[i]))
+        _scaling_factors[i] = nonlinear_sys.getScalarVariable(0, _soln_vars[i]).scalingFactor();
+      else
+        _scaling_factors[i] = nonlinear_sys.getVariable(/*tid*/ 0, _soln_vars[i]).scalingFactor();
   }
 
   FEProblemBase::initialSetup();
@@ -284,16 +325,6 @@ ReferenceResidualProblem::timestepSetup()
     _resid[i] = 0.0;
   }
   FEProblemBase::timestepSetup();
-
-  auto & nonlinear_sys = getNonlinearSystemBase();
-
-  const unsigned int size_solnVars = _soln_vars.size();
-  _scaling_factors.resize(size_solnVars);
-  for (unsigned int i = 0; i < size_solnVars; ++i)
-    if (nonlinear_sys.isScalarVariable(_soln_vars[i]))
-      _scaling_factors[i] = nonlinear_sys.getScalarVariable(0, _soln_vars[i]).scalingFactor();
-    else
-      _scaling_factors[i] = nonlinear_sys.getVariable(/*tid*/ 0, _soln_vars[i]).scalingFactor();
 }
 
 void
@@ -314,14 +345,22 @@ ReferenceResidualProblem::updateReferenceResidual()
   {
     _resid[i] = s.calculate_norm(nonlinear_sys.RHS(), _soln_vars[i], DISCRETE_L2);
     _group_resid[_variable_group_num_index[i]] += Utility::pow<2>(_resid[i]);
+    if (_reference_vector)
+    {
+      _ref_resid[i] = s.calculate_norm(*_reference_vector, _soln_vars[i], DISCRETE_L2);
+      _group_ref_resid[_variable_group_num_index[i]] += Utility::pow<2>(_ref_resid[i]);
+    }
   }
 
-  for (unsigned int i = 0; i < _ref_resid_vars.size(); ++i)
+  if (!_reference_vector)
   {
-    const Real refResidual =
-        as.calculate_norm(*as.current_local_solution, _ref_resid_vars[i], DISCRETE_L2);
-    _ref_resid[i] = refResidual * _scaling_factors[i];
-    _group_ref_resid[_variable_group_num_index[i]] += Utility::pow<2>(_ref_resid[i]);
+    for (unsigned int i = 0; i < _ref_resid_vars.size(); ++i)
+    {
+      const Real refResidual =
+          as.calculate_norm(*as.current_local_solution, _ref_resid_vars[i], DISCRETE_L2);
+      _ref_resid[i] = refResidual * _scaling_factors[i];
+      _group_ref_resid[_variable_group_num_index[i]] += Utility::pow<2>(_ref_resid[i]);
+    }
   }
 
   for (unsigned int i = 0; i < _group_resid.size(); ++i)
@@ -357,14 +396,21 @@ ReferenceResidualProblem::checkNonlinearConvergence(std::string & msg,
     {
       if (_group_soln_var_names[i].size() > maxwsv)
         maxwsv = _group_soln_var_names[i].size();
-      if (_group_ref_resid_var_names[i].size() > maxwrv)
+      if (!_reference_vector && _group_ref_resid_var_names[i].size() > maxwrv)
         maxwrv = _group_ref_resid_var_names[i].size();
     }
+    if (_reference_vector)
+      // maxwrv is the width of maxwsv plus the length of "_ref" (e.g. 4)
+      maxwrv = maxwsv + 4;
 
     for (unsigned int i = 0; i < _group_soln_var_names.size(); ++i)
+    {
+      auto ref_var_name =
+          _reference_vector ? _group_soln_var_names[i] + "_ref" : _group_ref_resid_var_names[i];
       _console << "   " << std::setw(maxwsv + 2) << std::left << _group_soln_var_names[i] + ":"
-               << _group_resid[i] << "  " << std::setw(maxwrv + 2)
-               << _group_ref_resid_var_names[i] + ":" << _group_ref_resid[i] << '\n';
+               << _group_resid[i] << "  " << std::setw(maxwrv + 2) << ref_var_name + ":"
+               << _group_ref_resid[i] << '\n';
+    }
   }
 
   NonlinearSystemBase & system = getNonlinearSystemBase();

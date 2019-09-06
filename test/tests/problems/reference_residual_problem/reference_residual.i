@@ -9,7 +9,8 @@ coef=1
 [Problem]
   type = ReferenceResidualProblem
   solution_variables = 'u v'
-  reference_residual_variables = 'saved_u saved_v'
+  extra_tag_vectors = 'ref'
+  reference_vector = 'ref'
 []
 
 [Variables]
@@ -17,48 +18,43 @@ coef=1
   [v][]
 []
 
-[AuxVariables]
-  [saved_u][]
-  [saved_v][]
-[]
-
 [Kernels]
   [u_diff]
     type = CoefDiffusion
     variable = u
     coef = ${coef}
-    save_in = saved_u
+    extra_vector_tags = 'ref'
   []
   [u_rxn]
     type = PReaction
     variable = u
     coefficient = ${coef}
     power = 2
-    save_in = saved_u
+    extra_vector_tags = 'ref'
   []
   [u_f]
     type = BodyForce
     variable = u
     value = ${coef}
-    save_in = saved_u
+    extra_vector_tags = 'ref'
   []
   [v_diff]
     type = Diffusion
     variable = v
-    save_in = saved_v
+    extra_vector_tags = 'ref'
   []
   [v_rxn]
     type = PReaction
     variable = v
     coefficient = 1
     power = 2
-    save_in = saved_v
+    extra_vector_tags = 'ref'
   []
   [v_f]
     type = BodyForce
     variable = v
     value = 1
-    save_in = saved_v
+    extra_vector_tags = 'ref'
   []
 []
 
