@@ -7,53 +7,56 @@
 # The top surface is then pulled upwards (the bottom is fixed because of the roller BCs)
 # This causes more failure
 [Mesh]
-  type = GeneratedMesh
-  dim = 3
-  nx = 9
-  ny = 9
-  nz = 9
-  xmin = 0
-  xmax = 0.1
-  ymin = 0
-  ymax = 0.1
-  zmin = 0
-  zmax = 0.1
-[]
-
-[MeshModifiers]
-  [./block_to_remove_xmin]
-    type = SubdomainBoundingBox
+  [generated_mesh]
+    type = GeneratedMeshGenerator
+    dim = 3
+    nx = 9
+    ny = 9
+    nz = 9
+    xmin = 0
+    xmax = 0.1
+    ymin = 0
+    ymax = 0.1
+    zmin = 0
+    zmax = 0.1
+  []
+  [block_to_remove_xmin]
+    type = SubdomainBoundingBoxGenerator
     bottom_left = '-0.01 -0.01 0.045'
     top_right = '0.01 0.11 0.055'
     location = INSIDE
     block_id = 1
-  [../]
-  [./block_to_remove_xmax]
-    type = SubdomainBoundingBox
+    input = generated_mesh
+  []
+  [block_to_remove_xmax]
+    type = SubdomainBoundingBoxGenerator
     bottom_left = '0.09 -0.01 0.045'
     top_right = '0.11 0.11 0.055'
     location = INSIDE
     block_id = 1
-  [../]
-  [./block_to_remove_ymin]
-    type = SubdomainBoundingBox
+    input = block_to_remove_xmin
+  []
+  [block_to_remove_ymin]
+    type = SubdomainBoundingBoxGenerator
     bottom_left = '-0.01 -0.01 0.045'
     top_right = '0.11 0.01 0.055'
     location = INSIDE
     block_id = 1
-  [../]
-  [./block_to_remove_ymax]
-    type = SubdomainBoundingBox
+    input = block_to_remove_xmax
+  []
+  [block_to_remove_ymax]
+    type = SubdomainBoundingBoxGenerator
     bottom_left = '-0.01 0.09 0.045'
     top_right = '0.11 0.11 0.055'
     location = INSIDE
     block_id = 1
-  [../]
-  [./remove_block]
-    type = BlockDeleter
-    depends_on = 'block_to_remove_xmin block_to_remove_xmax block_to_remove_ymin block_to_remove_ymax'
+    input = block_to_remove_ymin
+  []
+  [remove_block]
+    type = BlockDeletionGenerator
     block_id = 1
-  [../]
+    input = block_to_remove_ymax
+  []
 []
 
 [GlobalParams]

@@ -1,10 +1,48 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 3
-  nx = 2
-  ny = 2
-  nz = 2
-  zmax = 0.2
+  [generated_mesh]
+    type = GeneratedMeshGenerator
+    dim = 3
+    nx = 2
+    ny = 2
+    nz = 2
+    zmax = 0.2
+  []
+  [bottom_xline1]
+    type = ExtraNodesetGenerator
+    new_boundary = 101
+    coord = '0 0 0'
+    input = generated_mesh
+  []
+  [bottom_xline2]
+    type = ExtraNodesetGenerator
+    new_boundary = 101
+    coord = '0.5 0 0'
+    input = bottom_xline1
+  []
+  [bottom_xline3]
+    type = ExtraNodesetGenerator
+    new_boundary = 101
+    coord = '1 0 0'
+    input = bottom_xline2
+  []
+  [bottom_zline1]
+    type = ExtraNodesetGenerator
+    new_boundary = 102
+    coord = '0 0 0.0'
+    input = bottom_xline3
+  []
+  [bottom_zline2]
+    type = ExtraNodesetGenerator
+    new_boundary = 102
+    coord = '0 0 0.1'
+    input = bottom_zline1
+  []
+  [bottom_zline3]
+    type = ExtraNodesetGenerator
+    new_boundary = 102
+    coord = '0 0 0.2'
+    input = bottom_zline2
+  []
 []
 
 [GlobalParams]
@@ -22,39 +60,6 @@
     type = PointValue
     point = '0.5 1 0.1'
     variable = wc_z
-  [../]
-[]
-
-[MeshModifiers]
-  [./bottom_xline1]
-    type = AddExtraNodeset
-    new_boundary = 101
-    coord = '0 0 0'
-  [../]
-  [./bottom_xline2]
-    type = AddExtraNodeset
-    new_boundary = 101
-    coord = '0.5 0 0'
-  [../]
-  [./bottom_xline3]
-    type = AddExtraNodeset
-    new_boundary = 101
-    coord = '1 0 0'
-  [../]
-  [./bottom_zline1]
-    type = AddExtraNodeset
-    new_boundary = 102
-    coord = '0 0 0.0'
-  [../]
-  [./bottom_zline2]
-    type = AddExtraNodeset
-    new_boundary = 102
-    coord = '0 0 0.1'
-  [../]
-  [./bottom_zline3]
-    type = AddExtraNodeset
-    new_boundary = 102
-    coord = '0 0 0.2'
   [../]
 []
 
