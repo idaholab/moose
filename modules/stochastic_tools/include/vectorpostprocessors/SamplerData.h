@@ -29,13 +29,9 @@ public:
   void virtual execute() override;
 
 protected:
-  /// Storage for declared vectors
+  /// Storage for declared vectors, one for each column
   std::vector<VectorPostprocessorValue *> _sample_vectors;
 
   /// The sampler to extract data
   Sampler & _sampler;
-
-  /// Whether to output the number of rows and columns in the first two rows of output
-  const bool & _output_col_row_sizes;
 };
-

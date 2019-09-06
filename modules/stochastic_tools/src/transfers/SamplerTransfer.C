@@ -56,20 +56,18 @@ SamplerTransfer::SamplerTransfer(const InputParameters & parameters)
     _sampler_ptr = &(ptr_fullsolve->getSampler());
 }
 
-std::vector<Real>
-SamplerTransfer::getRow(const dof_id_type global_index) const
+void
+SamplerTransfer::getRow(const dof_id_type row_index, std::vector<Real> & row) const
 {
-  Sampler::Location loc = _sampler_ptr->getLocation(global_index);
-  std::vector<Real> row;
-  row.reserve(_samples[loc.sample()].n());
-  for (unsigned int j = 0; j < _samples[loc.sample()].n(); ++j)
-    row.emplace_back(_samples[loc.sample()](loc.row(), j));
-  return row;
+  row.resize(_samples.n());
+  for (unsigned int i = 0; i < _samples.n(); ++i)
+    row[i] = _samples(row_index, i);
 }
 
 void
 SamplerTransfer::execute()
 {
+  // TODO: getLocalSamples()
   // Get the Sampler data
   _samples = _sampler_ptr->getSamples();
 
@@ -84,7 +82,8 @@ SamplerTransfer::execute()
     SamplerReceiver * ptr = getReceiver(app_index);
 
     // Populate the row of data to transfer
-    std::vector<Real> row = getRow(app_index);
+    std::vector<Real> row;
+    getRow(app_index, row);
 
     // Perform the transfer
     ptr->transfer(_parameter_names, row);
@@ -101,16 +100,20 @@ SamplerTransfer::initializeToMultiapp()
 void
 SamplerTransfer::executeToMultiapp()
 {
-
   SamplerReceiver * ptr = getReceiver(processor_id());
-  std::vector<Real> row = getRow(_global_index);
+
+  std::vector<Real> row;
+  getRow(_global_index, row);
+
   ptr->transfer(_parameter_names, row);
-  _global_index += 1;
+
+  _global_index++;
 }
 
 void
 SamplerTransfer::finalizeToMultiapp()
 {
+  _samples.resize(0, 0);
 }
 
 SamplerReceiver *

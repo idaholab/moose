@@ -25,56 +25,33 @@ validParams<SamplerData>()
   params += validParams<SamplerInterface>();
   params.addRequiredParam<SamplerName>("sampler",
                                        "The sample from which to extract distribution data.");
-  params.addParam<bool>("output_column_and_row_sizes",
-                        false,
-                        "Whether to output the number of "
-                        "columns and rows in the matrix in "
-                        "the first two rows of output");
+  // The execute method computes the complete vectors on all processes, so broadcasting the data
+  // is not required.
+  params.set<bool>("_is_broadcast") = true;
   return params;
 }
 
 SamplerData::SamplerData(const InputParameters & parameters)
-  : GeneralVectorPostprocessor(parameters),
-    SamplerInterface(this),
-    _sampler(getSampler("sampler")),
-    _output_col_row_sizes(getParam<bool>("output_column_and_row_sizes"))
+  : GeneralVectorPostprocessor(parameters), SamplerInterface(this), _sampler(getSampler("sampler"))
 {
+  for (dof_id_type i = 0; i < _sampler.getNumberOfCols(); ++i)
+    _sample_vectors.push_back(
+        &declareVector(getParam<SamplerName>("sampler") + "_" + std::to_string(i)));
 }
 
 void
 SamplerData::initialize()
 {
-  for (auto ptr : _sample_vectors)
-    ptr->clear();
 }
 
 void
 SamplerData::execute()
 {
-  std::vector<DenseMatrix<Real>> data = _sampler.getSamples();
-  auto n = data.size();
-  if (_sample_vectors.empty())
+  DenseMatrix<Real> data = _sampler.getSamples();
+  for (unsigned int j = 0; j < data.n(); ++j)
   {
-    _sample_vectors.resize(n);
-    for (MooseIndex(data) i = 0; i < n; ++i)
-    {
-      std::string name = "mat_" + std::to_string(i);
-      _sample_vectors[i] = &declareVector(name);
-    }
-  }
-
-  for (MooseIndex(data) i = 0; i < n; ++i)
-  {
-    const std::size_t offset = _output_col_row_sizes ? 2 : 0;
-    const std::size_t vec_size = data[i].get_values().size() + offset;
-    _sample_vectors[i]->resize(vec_size);
-    if (_output_col_row_sizes)
-    {
-      (*_sample_vectors[i])[0] = data[i].n(); // number of columns
-      (*_sample_vectors[i])[1] = data[i].m(); // number of rows
-    }
-    std::copy(data[i].get_values().begin(),
-              data[i].get_values().end(),
-              _sample_vectors[i]->begin() + offset);
+    _sample_vectors[j]->resize(data.m());
+    for (unsigned int i = 0; i < data.m(); ++i)
+      (*_sample_vectors[j])[i] = data(i, j);
   }
 }

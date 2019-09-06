@@ -29,6 +29,9 @@ InputParameters validParams<DistributionInterface>();
 class DistributionInterface
 {
 public:
+
+  static InputParameters validParams();
+
   /**
    * @param params The parameters used by the object being instantiated. This
    *        class needs them so it can get the distribution named in the input file,
@@ -36,8 +39,6 @@ public:
    *        left hand side of the statement "distribution = dist_name"
    */
   DistributionInterface(const MooseObject * moose_object);
-
-  static InputParameters validParams();
 
   ///@{
   /**

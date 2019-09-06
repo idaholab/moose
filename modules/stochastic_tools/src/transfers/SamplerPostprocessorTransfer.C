@@ -97,13 +97,9 @@ SamplerPostprocessorTransfer::finalizeFromMultiapp()
   if (processor_id() == 0)
   {
     _results->initialize();
-    const dof_id_type n = _sampler->getTotalNumberOfRows();
-    for (MooseIndex(n) i = 0; i < n; i++)
-    {
-      Sampler::Location loc = _sampler->getLocation(i);
-      VectorPostprocessorValue & vpp = _results->getVectorPostprocessorValueByGroup(loc.sample());
-      vpp[loc.row()] = _local_values[i];
-    }
+    VectorPostprocessorValue & vpp =
+        _fe_problem.getVectorPostprocessorValue(_master_vpp_name, _sampler->name(), false);
+    vpp = _local_values;
   }
 }
 
@@ -133,10 +129,7 @@ SamplerPostprocessorTransfer::execute()
   _results->initialize();
 
   // Update VPP
-  for (unsigned int i = 0; i < n; i++)
-  {
-    Sampler::Location loc = _sampler->getLocation(i);
-    VectorPostprocessorValue & vpp = _results->getVectorPostprocessorValueByGroup(loc.sample());
-    vpp[loc.row()] = _local_values[i];
-  }
+  VectorPostprocessorValue & vpp =
+      _fe_problem.getVectorPostprocessorValue(_master_vpp_name, _sampler->name(), false);
+  vpp = _local_values;
 }

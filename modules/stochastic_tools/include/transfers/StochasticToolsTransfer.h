@@ -31,4 +31,9 @@ public:
   virtual void executeToMultiapp();
 
   virtual void finalizeToMultiapp();
+
+  void setGlobalMultiAppIndex(dof_id_type index) { _global_index = index; }
+
+protected:
+  dof_id_type _global_index = 0;
 };

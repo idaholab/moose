@@ -10,28 +10,18 @@
   [../]
 []
 
-[Distributions]
-  [./uniform]
-    type = UniformDistribution
-    lower_bound = 1980
-    upper_bound = 2017
-  [../]
-[]
-
 [Samplers]
   [./sample]
-    type = MonteCarloSampler
-    n_samples = 10
-    distributions = 'uniform'
+    type = TestSampler
     execute_on = 'initial'
   [../]
 []
 
 [UserObjects]
   [./test]
-    type = TestSampler
+    type = SamplerTester
     sampler = sample
-    test_type = THREAD
+    test_type = MPI
   [../]
 []
 

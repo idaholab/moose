@@ -9,31 +9,33 @@
 
 #pragma once
 
-#include "ElementUserObject.h"
+#include "GeneralUserObject.h"
 #include "SamplerInterface.h"
 #include "Sampler.h"
 
 // Forward Declarations
-class TestSampler;
+class SamplerTester;
 
 template <>
-InputParameters validParams<TestSampler>();
+InputParameters validParams<SamplerTester>();
 
 /**
  * UserObject for testing Sampler object threaded and parallel behavior, it should be used for
- * anything else.
+ * anything else, see TestSampler object.
  */
-class TestSampler : public ElementUserObject, public SamplerInterface
+class SamplerTester : public GeneralUserObject, public SamplerInterface
 {
 public:
-  TestSampler(const InputParameters & parameters);
+  SamplerTester(const InputParameters & parameters);
 
 protected:
-  virtual void execute() final {}
+  void assertEqual(const Real & value, const Real & gold);
+  void assertEqual(const DenseMatrix<Real> & value, const DenseMatrix<Real> & gold);
+
+  virtual void execute() final;
   virtual void initialize() final {}
   virtual void finalize() final;
   virtual void threadJoin(const UserObject & uo) final;
   Sampler & _sampler;
   const MooseEnum & _test_type;
 };
-

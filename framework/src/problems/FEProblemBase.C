@@ -1898,8 +1898,9 @@ FEProblemBase::addSampler(std::string type, const std::string & name, InputParam
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    std::shared_ptr<Sampler> dist = _factory.create<Sampler>(type, name, parameters, tid);
-    _samplers.addObject(dist, tid);
+    std::shared_ptr<Sampler> obj = _factory.create<Sampler>(type, name, parameters, tid);
+    obj->init();
+    _samplers.addObject(obj, tid);
   }
 }
 

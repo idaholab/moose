@@ -32,7 +32,7 @@
 [Samplers]
   [./sample]
     type = MonteCarloSampler
-    n_samples = 10
+    num_rows = 10
     distributions = 'uniform'
     execute_on = PRE_MULTIAPP_SETUP
   [../]

@@ -1,0 +1,59 @@
+[Tests]
+  [./threads]
+    type = RunApp
+    input = threads.i
+    min_threads = 2
+    allow_test_objects = true
+  [../]
+  [./mpi]
+    type = RunApp
+    input = mpi.i
+    min_parallel = 2
+    allow_test_objects = true
+  [../]
+  [base_global_vs_local_1rank]
+    type = RunApp
+    input = global_vs_local.i
+    min_parallel = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [base_global_vs_local_2rank]
+    type = RunApp
+    input = global_vs_local.i
+    min_parallel = 2
+    max_parallel = 2
+    allow_test_objects = true
+  []
+  [base_global_vs_local_3rank]
+    type = RunApp
+    input = global_vs_local.i
+    min_parallel = 3
+    max_parallel = 3
+    allow_test_objects = true
+  []
+  [rand_global_vs_local_1rank]
+    type = RunApp
+    input = global_vs_local.i
+    min_parallel = 1
+    max_parallel = 1
+    allow_test_objects = true
+    cli_args = 'Samplers/sample/use_rand=true UserObjects/test/test_type=RAND_GLOBAL_VS_LOCAL'
+  []
+  [rand_global_vs_local_2rank]
+    type = RunApp
+    input = global_vs_local.i
+    min_parallel = 2
+    max_parallel = 2
+    allow_test_objects = true
+    cli_args = 'Samplers/sample/use_rand=true UserObjects/test/test_type=RAND_GLOBAL_VS_LOCAL'
+  []
+  [rand_global_vs_local_3rank]
+    type = RunApp
+    input = global_vs_local.i
+    min_parallel = 3
+    max_parallel = 3
+    allow_test_objects = true
+    cli_args = 'Samplers/sample/use_rand=true UserObjects/test/test_type=RAND_GLOBAL_VS_LOCAL'
+  []
+[]

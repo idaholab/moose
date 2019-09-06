@@ -24,17 +24,22 @@ public:
   SobolSampler(const InputParameters & parameters);
 
 protected:
-  virtual std::vector<DenseMatrix<Real>> sample() override;
+  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
   virtual void sampleSetUp() override;
   virtual void sampleTearDown() override;
-
-  /// Number of Monte Carlo samples to create for each Sobol matrix
-  const std::size_t _num_samples;
 
   ///@{
   /// Sobol Monte Carlo matrices, these are sized and cleared to avoid keeping large matrices around
   DenseMatrix<Real> _a_matrix;
   DenseMatrix<Real> _b_matrix;
   ///@}
-};
 
+  /// Storage for distribution objects to be utilized
+  std::vector<Distribution const *> _distributions;
+
+  /// Distribution names
+  const std::vector<DistributionName> & _distribution_names;
+
+  /// The number of rows per matrix
+  const dof_id_type _num_rows_per_matrix;
+};

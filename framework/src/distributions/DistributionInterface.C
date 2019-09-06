@@ -25,7 +25,10 @@ DistributionInterface::DistributionInterface(const MooseObject * moose_object)
   : _dni_params(moose_object->parameters()),
     _dni_feproblem(*_dni_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _dni_moose_object_ptr(moose_object)
+//_distribution_names(_dni_params.get<std::vector<DistributionName>>("distributions"))
 {
+  // for (const DistributionName & name : _distribution_names)
+  //  _distributions.push_back(&getDistributionByName(name));
 }
 
 const Distribution &

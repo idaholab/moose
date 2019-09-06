@@ -1,19 +1,30 @@
 [Tests]
   issues = "#8863"
   design = "SamplerTransfer.md"
-  [normal]
+  [normal_n1]
     type = CSVDiff
     input = master.i
     csvdiff = 'master_out_storage_0002.csv master_out_data_0002.csv'
     cli_args = 'MultiApps/runner/mode=normal'
-    requirement = "The stochastic tools module shall include the ability to modify parameters for each sub-application using values from a distribution within a MultiApp."
+    #requirement = "The stochastic tools module shall include the ability to modify parameters for each sub-application using values from a distribution within a MultiApp."
+  []
+  [normal_n2]
+    type = CSVDiff
+    input = master.i
+    csvdiff = 'master_out_storage_0002.csv master_out_data_0002.csv'
+    cli_args = 'MultiApps/runner/mode=normal'
+    prereq = normal_n1
+    min_parallel = 2
+    max_parallel = 2
+
+    #requirement = "The stochastic tools module shall include the ability to modify parameters for each sub-application using values from a distribution within a MultiApp."
   []
   [batch_n1]
     type = CSVDiff
     input = master.i
     csvdiff = 'master_out_storage_0002.csv master_out_data_0002.csv'
     max_parallel = 1
-    prereq = normal
+    prereq = normal_n2
     requirement = "The stochastic tools module shall include the ability to modify parameters for each sub-application using values from a distribution within a MultiApp with the MultiApp executing solves in a single batch."
   []
   [batch_n2]
