@@ -46,6 +46,13 @@ SRC_DIRS    := $(APPLICATION_DIR)/src
 PLUGIN_DIR  := $(APPLICATION_DIR)/plugins
 
 excluded_srcfiles += main.C
+relative_excluded_srcfiles := $(foreach i, $(excluded_srcfiles), $(shell find $(SRC_DIRS) -name $(i)))
+ifeq ($(LIBRARY_SUFFIX),yes)
+excluded_objects	    := $(patsubst %.C, %_with$(app_LIB_SUFFIX).$(obj-suffix), $(relative_excluded_srcfiles))
+else
+excluded_objects	    := $(patsubst %.C, %.$(obj-suffix), $(relative_excluded_srcfiles))
+endif
+
 find_excludes     := $(foreach i, $(excluded_srcfiles), -not -name $(i))
 srcfiles    := $(shell find $(SRC_DIRS) -regex "[^\#~]*\.C" $(find_excludes))
 
@@ -126,6 +133,20 @@ test_cobjects:= $(patsubst %.c, %.$(obj-suffix), $(test_csrcfiles))
 test_fobjects:= $(patsubst %.f, %.$(obj-suffix), $(test_fsrcfiles))
 test_f90objects:= $(patsubst %.f90, %.$(obj-suffix), $(test_f90srcfiles))
 app_test_objects := $(test_objects) $(test_cobjects) $(test_fobjects) $(test_f90objects)
+
+ifeq ($(MOOSE_HEADER_SYMLINKS),true)
+
+$(app_objects): $(moose_config_symlink)
+$(app_test_objects): $(moose_config_symlink)
+$(excluded_objects): $(moose_config_symlink)
+
+else
+
+$(app_objects): $(moose_config)
+$(app_test_objects): $(moose_config)
+$(excluded_objects): $(moose_config_symlink)
+
+endif
 
 # plugin files
 plugfiles   := $(shell find $(PLUGIN_DIR) -regex "[^\#~]*\.C" 2>/dev/null)
