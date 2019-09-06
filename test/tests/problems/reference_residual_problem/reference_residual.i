@@ -23,38 +23,32 @@ coef=1
     type = CoefDiffusion
     variable = u
     coef = ${coef}
-    extra_vector_tags = 'ref'
   []
   [u_rxn]
     type = PReaction
     variable = u
     coefficient = ${coef}
     power = 2
-    extra_vector_tags = 'ref'
   []
   [u_f]
     type = BodyForce
     variable = u
     value = ${coef}
-    extra_vector_tags = 'ref'
   []
   [v_diff]
     type = Diffusion
     variable = v
-    extra_vector_tags = 'ref'
   []
   [v_rxn]
     type = PReaction
     variable = v
     coefficient = 1
     power = 2
-    extra_vector_tags = 'ref'
   []
   [v_f]
     type = BodyForce
     variable = v
     value = 1
-    extra_vector_tags = 'ref'
   []
 []
 
@@ -64,12 +58,14 @@ coef=1
     boundary = 'left right'
     coef = ${coef}
     variable = u
+    extra_vector_tags = 'ref'
   []
   [v]
     type = RobinBC
     boundary = 'left right'
     coef = 1
     variable = v
+    extra_vector_tags = 'ref'
   []
 []
 
