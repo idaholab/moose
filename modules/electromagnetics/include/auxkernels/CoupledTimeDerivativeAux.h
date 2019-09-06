@@ -1,5 +1,4 @@
-#ifndef COUPLEDTIMEDERIVATIVEAUX_H
-#define COUPLEDTIMEDERIVATIVEAUX_H
+#pragma once
 
 #include "AuxKernel.h"
 
@@ -21,5 +20,3 @@ protected:
 
   const VariableValue & _coupled_dt;
 };
-
-#endif // COUPLEDTIMEDERIVATIVEAUX_H

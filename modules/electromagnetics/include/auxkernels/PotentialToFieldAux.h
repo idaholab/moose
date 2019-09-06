@@ -1,5 +1,4 @@
-#ifndef POTENTIALTOFIELDAUX_H
-#define POTENTIALTOFIELDAUX_H
+#pragma once
 
 #include "VariableGradientComponent.h"
 
@@ -21,5 +20,3 @@ protected:
 
   Real _sign;
 };
-
-#endif // POTENTIALTOFIELDAUX_H
