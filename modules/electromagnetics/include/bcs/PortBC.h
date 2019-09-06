@@ -1,5 +1,4 @@
-#ifndef PORTBC_H
-#define PORTBC_H
+#pragma once
 
 #include "IntegratedBC.h"
 
@@ -37,5 +36,3 @@ private:
 
   Real _sign;
 };
-
-#endif // PORTBC_H

@@ -1,5 +1,4 @@
-#ifndef DIELECTRICBC_H
-#define DIELECTRICBC_H
+#pragma once
 
 #include "DiffusionFluxBC.h"
 
@@ -23,5 +22,3 @@ protected:
   Real _eps_one;
   Real _eps_two;
 };
-
-#endif // DIELECTRICBC_H

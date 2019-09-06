@@ -1,5 +1,4 @@
-#ifndef VECTORCURLPENALTYDIRICHLETBC_H
-#define VECTORCURLPENALTYDIRICHLETBC_H
+#pragma once
 
 #include "VectorIntegratedBC.h"
 
@@ -24,5 +23,3 @@ protected:
   const Function & _exact_y;
   const Function & _exact_z;
 };
-
-#endif // VECTORCURLPENALTYDIRICHLETBC_H

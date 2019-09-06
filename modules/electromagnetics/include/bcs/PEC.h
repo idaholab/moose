@@ -1,5 +1,4 @@
-#ifndef PEC_H
-#define PEC_H
+#pragma once
 
 #include "IntegratedBC.h"
 
@@ -23,5 +22,3 @@ protected:
   const VariableValue & _coupled_val_1;
   const VariableValue & _coupled_val_2;
 };
-
-#endif // PEC_H

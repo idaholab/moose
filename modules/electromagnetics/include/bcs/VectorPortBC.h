@@ -1,5 +1,4 @@
-#ifndef VECTORPORTBC_H
-#define VECTORPORTBC_H
+#pragma once
 
 #include "VectorIntegratedBC.h"
 #include <complex>
@@ -35,5 +34,3 @@ protected:
 
   std::complex<double> _jay;
 };
-
-#endif // VECTORPORTBC_H
