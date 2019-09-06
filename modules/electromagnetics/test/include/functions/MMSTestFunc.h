@@ -1,5 +1,4 @@
-#ifndef MMSTESTFUNC_H
-#define MMSTESTFUNC_H
+#pragma once
 
 #include "Function.h"
 #include "FunctionInterface.h"
@@ -37,5 +36,3 @@ protected:
   MooseEnum _component;
 
 };
-
-#endif // MMSTESTFUNC_H
