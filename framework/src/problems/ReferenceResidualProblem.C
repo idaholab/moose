@@ -81,9 +81,10 @@ ReferenceResidualProblem::ReferenceResidualProblem(const InputParameters & param
   else if (params.isParamValid("reference_vector"))
     _reference_vector = &_nl->getVector(getVectorTagID(getParam<TagName>("reference_vector")));
   else
-    mooseError("Either the `reference_residual_variables` or `reference_vector` parameter must be "
-               "specified for `ReferenceResidualProblem`. `reference_residual_variables` is "
-               "deprecated so we recommend using `reference_vector`");
+    mooseInfo("Neither the `reference_residual_variables` nor `reference_vector` parameter is "
+              "specified for `ReferenceResidualProblem`, which means that no reference "
+              "quantites are set. The only way to achieve convergence will be through "
+              "nl_abs_tol which is generally not recommended as an indicator for convergence.");
 
   if (params.isParamValid("group_variables"))
   {
