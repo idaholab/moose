@@ -1,5 +1,4 @@
-#ifndef ELKENUMS_H
-#define ELKENUMS_H
+#pragma once
 
 /** ElkEnums contains various enumerations useful in ELK, such as real/imag component definitions in
  * Kernels, BCs, etc.
@@ -13,5 +12,3 @@ enum ComponentEnum
   IMAGINARY
 };
 } // namespace elk
-
-#endif // ELKENUMS_H
