@@ -1,5 +1,4 @@
-#ifndef ONEDFIELDCOEFF_H
-#define ONEDFIELDCOEFF_H
+#pragma once
 
 #include "Function.h"
 #include "FunctionInterface.h"
@@ -23,5 +22,3 @@ private:
 
   const Function & _inverse_mu_r;
 };
-
-#endif // ONEDFIELDCOEFF_H

@@ -1,5 +1,4 @@
-#ifndef ZPOLARIZEDWAVE_H
-#define ZPOLARIZEDWAVE_H
+#pragma once
 
 #include "Function.h"
 
@@ -26,5 +25,3 @@ private:
 
   bool _sign_flip;
 };
-
-#endif // ZPOLARIZEDWAVE_H

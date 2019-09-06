@@ -1,5 +1,4 @@
-#ifndef JINSLABCOEFFFUNC_H
-#define JINSLABCOEFFFUNC_H
+#pragma once
 
 #include "Function.h"
 #include "FunctionInterface.h"
@@ -27,5 +26,3 @@ protected:
 
   MooseEnum _component;
 };
-
-#endif // JINSLABCOEFFFUNC_H

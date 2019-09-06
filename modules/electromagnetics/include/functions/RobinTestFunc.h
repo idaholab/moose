@@ -1,5 +1,4 @@
-#ifndef ROBINTESTFUNC_H
-#define ROBINTESTFUNC_H
+#pragma once
 
 #include "Function.h"
 #include "FunctionInterface.h"
@@ -35,5 +34,3 @@ protected:
 
   MooseEnum _component;
 };
-
-#endif // ROBINTESTFUNC_H

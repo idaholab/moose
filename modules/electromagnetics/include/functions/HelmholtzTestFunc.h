@@ -1,5 +1,4 @@
-#ifndef HELMHOLTZTESTFUNC_H
-#define HELMHOLTZTESTFUNC_H
+#pragma once
 
 #include "Function.h"
 #include "FunctionInterface.h"
@@ -42,5 +41,3 @@ protected:
   Real _C2_real;
   Real _C2_imag;
 };
-
-#endif // HELMHOLTZTESTFUNC_H
