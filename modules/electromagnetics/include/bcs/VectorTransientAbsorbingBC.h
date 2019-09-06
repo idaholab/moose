@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IntegratedBC.h"
+#include "VectorIntegratedBC.h"
 #include <complex>
 
 class VectorTransientAbsorbingBC;
