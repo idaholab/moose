@@ -46,11 +46,11 @@ SRC_DIRS    := $(APPLICATION_DIR)/src
 PLUGIN_DIR  := $(APPLICATION_DIR)/plugins
 
 excluded_srcfiles += main.C
-excluded_srcfile_paths += $(shell find $(SRC_DIRS) -name main.C)
+relative_excluded_srcfiles := $(foreach i, $(excluded_srcfiles), $(shell find $(SRC_DIRS) -name $(i)))
 ifeq ($(LIBRARY_SUFFIX),yes)
-excluded_objects	    := $(patsubst %.C, %_with$(app_LIB_SUFFIX).$(obj-suffix), $(excluded_srcfile_paths))
+excluded_objects	    := $(patsubst %.C, %_with$(app_LIB_SUFFIX).$(obj-suffix), $(relative_excluded_srcfiles))
 else
-excluded_objects	    := $(patsubst %.C, %.$(obj-suffix), $(excluded_srcfile_paths))
+excluded_objects	    := $(patsubst %.C, %.$(obj-suffix), $(relative_excluded_srcfiles))
 endif
 
 find_excludes     := $(foreach i, $(excluded_srcfiles), -not -name $(i))
