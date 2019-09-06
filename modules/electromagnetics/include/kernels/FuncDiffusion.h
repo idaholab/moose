@@ -1,5 +1,4 @@
-#ifndef FUNCDIFFUSION_H
-#define FUNCDIFFUSION_H
+#pragma once
 
 #include "Diffusion.h"
 
@@ -21,5 +20,3 @@ private:
 
   const Function & _func;
 };
-
-#endif // FUNCDIFFUSION_H

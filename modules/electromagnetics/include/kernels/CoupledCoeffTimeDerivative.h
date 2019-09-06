@@ -1,5 +1,4 @@
-#ifndef COUPLEDCOEFFTIMEDERIVATIVE_H
-#define COUPLEDCOEFFTIMEDERIVATIVE_H
+#pragma once
 
 #include "CoupledTimeDerivative.h"
 
@@ -22,5 +21,3 @@ protected:
 
   Real _coeff;
 };
-
-#endif // COUPLEDCOEFFTIMEDERIVATIVE_H

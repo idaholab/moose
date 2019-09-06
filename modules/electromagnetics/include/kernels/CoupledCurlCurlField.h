@@ -1,5 +1,4 @@
-#ifndef COUPLEDCURLCURLFIELD_H
-#define COUPLEDCURLCURLFIELD_H
+#pragma once
 
 #include "VectorKernel.h"
 
@@ -24,5 +23,3 @@ protected:
 
   Real _sign;
 };
-
-#endif // COUPLEDCURLCURLFIELD_H
