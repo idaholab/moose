@@ -32,6 +32,14 @@ validParams<KKSPhaseChemicalPotential>()
                                                 "Base name of the free energy function "
                                                 "Fb (f_name in the corresponding "
                                                 "derivative function material)");
+  params.addParam<Real>("ka",
+                        1.0,
+                        "Site fraction for the ca variable (specify this if ca is a sublattice "
+                        "concentration, and make sure it is a true site fraction eg. 0.6666666) ");
+  params.addParam<Real>("kb",
+                        1.0,
+                        "Site fraction for the cb variable (specify this if ca is a sublattice "
+                        "concentration, and make sure it is a true site fraction eg. 0.6666666) ");
   params.addCoupledVar(
       "args_a",
       "Vector of further parameters to Fa (optional, to add in second cross derivatives of Fa)");
@@ -50,7 +58,10 @@ KKSPhaseChemicalPotential::KKSPhaseChemicalPotential(const InputParameters & par
     _dfbdcb(getMaterialPropertyDerivative<Real>("fb_name", _cb_name)),
     // second derivatives d2F/dx*dca for jacobian diagonal elements
     _d2fadca2(getMaterialPropertyDerivative<Real>("fa_name", _var.name(), _var.name())),
-    _d2fbdcbca(getMaterialPropertyDerivative<Real>("fb_name", _cb_name, _var.name()))
+    _d2fbdcbca(getMaterialPropertyDerivative<Real>("fb_name", _cb_name, _var.name())),
+    // site fractions
+    _ka(getParam<Real>("ka")),
+    _kb(getParam<Real>("kb"))
 {
   MooseVariableFEBase * arg;
   unsigned int i;
@@ -87,14 +98,14 @@ Real
 KKSPhaseChemicalPotential::computeQpResidual()
 {
   // enforce _dfadca==_dfbdcb
-  return _test[_i][_qp] * (_dfadca[_qp] - _dfbdcb[_qp]);
+  return _test[_i][_qp] * (_dfadca[_qp] / _ka - _dfbdcb[_qp] / _kb);
 }
 
 Real
 KKSPhaseChemicalPotential::computeQpJacobian()
 {
   // for on diagonal we return the d/dca derivative of the residual
-  return _test[_i][_qp] * _phi[_j][_qp] * (_d2fadca2[_qp] - _d2fbdcbca[_qp]);
+  return _test[_i][_qp] * _phi[_j][_qp] * (_d2fadca2[_qp] / _ka - _d2fbdcbca[_qp] / _kb);
 }
 
 Real
@@ -103,5 +114,6 @@ KKSPhaseChemicalPotential::computeQpOffDiagJacobian(unsigned int jvar)
   // get the coupled variable jvar is referring to
   const unsigned int cvar = mapJvarToCvar(jvar);
 
-  return _test[_i][_qp] * _phi[_j][_qp] * ((*_d2fadcadarg[cvar])[_qp] - (*_d2fbdcbdarg[cvar])[_qp]);
+  return _test[_i][_qp] * _phi[_j][_qp] *
+         ((*_d2fadcadarg[cvar])[_qp] / _ka - (*_d2fbdcbdarg[cvar])[_qp] / _kb);
 }
