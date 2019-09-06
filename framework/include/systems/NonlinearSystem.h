@@ -71,6 +71,8 @@ public:
 
   virtual TransientNonlinearImplicitSystem & sys() { return _transient_sys; }
 
+  void computeScalingJacobian() override;
+
 protected:
   TransientNonlinearImplicitSystem & _transient_sys;
   ComputeResidualFunctor _nl_residual_functor;

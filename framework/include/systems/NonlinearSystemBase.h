@@ -63,9 +63,7 @@ class NonlinearSystemBase : public SystemBase,
                             public PerfGraphInterface
 {
 public:
-  NonlinearSystemBase(FEProblemBase & problem,
-                      NonlinearImplicitSystem & sys,
-                      const std::string & name);
+  NonlinearSystemBase(FEProblemBase & problem, System & sys, const std::string & name);
   virtual ~NonlinearSystemBase();
 
   virtual void init() override;
@@ -611,8 +609,8 @@ public:
   NumericVector<Number> & solution() override { return *_sys.solution; }
   const NumericVector<Number> & solution() const override { return *_sys.solution; }
 
-  virtual NonlinearImplicitSystem & system() override { return _sys; }
-  virtual const NonlinearImplicitSystem & system() const override { return _sys; }
+  virtual System & system() override { return _sys; }
+  virtual const System & system() const override { return _sys; }
 
   NumericVector<Number> * solutionPreviousNewton() override { return _solution_previous_nl; }
   const NumericVector<Number> * solutionPreviousNewton() const override
@@ -651,7 +649,7 @@ public:
 
 public:
   FEProblemBase & _fe_problem;
-  NonlinearImplicitSystem & _sys;
+  System & _sys;
   // FIXME: make these protected and create getters/setters
   Real _last_rnorm;
   Real _last_nl_rnorm;
