@@ -1,5 +1,4 @@
-#ifndef ABSORBINGBC_H
-#define ABSORBINGBC_H
+#pragma once
 
 #include "IntegratedBC.h"
 
@@ -33,5 +32,3 @@ private:
 
   Real _sign;
 };
-
-#endif // ABSORBINGBC_H

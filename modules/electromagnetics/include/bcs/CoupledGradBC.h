@@ -1,5 +1,4 @@
-#ifndef COUPLEDGRADBC_H
-#define COUPLEDGRADBC_H
+#pragma once
 
 #include "IntegratedBC.h"
 
@@ -26,5 +25,3 @@ private:
 
   const VariableGradient & _coupled_grad;
 };
-
-#endif // COUPLEDGRADBC_H

@@ -1,5 +1,4 @@
-#ifndef REFLECTIONBC_H
-#define REFLECTIONBC_H
+#pragma once
 
 #include "IntegratedBC.h"
 
@@ -35,5 +34,3 @@ private:
 
   Real _rhs_coeff;
 };
-
-#endif // REFLECTIONBC_H
