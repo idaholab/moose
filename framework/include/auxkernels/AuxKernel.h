@@ -213,6 +213,9 @@ protected:
   /// Current node (valid only for nodal kernels)
   const Node * const & _current_node;
 
+  /// The current boundary ID
+  const BoundaryID & _current_boundary_id;
+
   /// reference to the solution vector of auxiliary system
   NumericVector<Number> & _solution;
 

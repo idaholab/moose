@@ -369,7 +369,7 @@ public:
   virtual void reinitScalars(THREAD_ID tid, bool reinit_for_derivative_reordering = false) = 0;
   virtual void reinitOffDiagScalars(THREAD_ID tid) = 0;
 
-  /// sets the current boundary id in assembly
+  /// sets the current boundary ID in assembly
   void setCurrentBoundaryID(BoundaryID bid, THREAD_ID tid);
 
   /**

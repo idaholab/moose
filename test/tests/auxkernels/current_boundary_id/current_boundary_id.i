@@ -9,7 +9,9 @@
 #    type = CartesianMeshGenerator
 #    dim = 2
 #    dx = '1 1'
+#    ix = '10 10'
 #    dy = '1'
+#    iy = '10'
 #    subdomain_id = '1 2'
 #  [../]
 #
@@ -36,22 +38,38 @@
   [../]
 []
 
-[Postprocessors]
-  [./interior_boundary]
-    type = AverageBID
-    boundary = 12
-  [../]
-
-  [./top_boundary]
-    type = AverageBID
-    boundary = top
-  [../]
-[]
-
 [Executioner]
   type = Steady
 []
 
+[AuxVariables]
+  [./id1]
+    family = MONOMIAL
+    order = CONSTANT
+  []
+
+  [./id2]
+    family = MONOMIAL
+    order = CONSTANT
+  []
+[]
+
+[AuxKernels]
+  [./id1]
+    type = BIDAux
+    variable = id1
+    boundary = 'top'
+  [../]
+
+  [./id2]
+    type = BIDAux
+    variable = id2
+    boundary = '12'
+  [../]
+[]
+
+
+
 [Outputs]
-  csv = true
+  exodus = true
 []
