@@ -1,5 +1,4 @@
-#ifndef REFLECTIONCOEFFICIENT_H
-#define REFLECTIONCOEFFICIENT_H
+#pragma once
 
 #include "SidePostprocessor.h"
 #include "MooseVariableInterface.h"
@@ -40,5 +39,3 @@ private:
 
   Real _reflection_coefficient;
 };
-
-#endif // REFLECTIONCOEFFICIENT_H
