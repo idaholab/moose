@@ -1,5 +1,6 @@
 #include "VectorCurrentSource.h"
 #include "ElkEnums.h"
+#include "Function.h"
 #include <complex>
 
 registerMooseObject("ElkApp", VectorCurrentSource);

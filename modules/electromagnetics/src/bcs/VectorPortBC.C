@@ -1,5 +1,6 @@
 #include "VectorPortBC.h"
 #include "ElkEnums.h"
+#include "Function.h"
 #include <complex>
 
 registerMooseObject("ElkApp", VectorPortBC);
