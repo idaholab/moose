@@ -1,5 +1,4 @@
-#ifndef WAVECOEFF_H
-#define WAVECOEFF_H
+#pragma once
 
 #include "Function.h"
 #include "FunctionInterface.h"
@@ -30,5 +29,3 @@ protected:
 
   MooseEnum _component;
 };
-
-#endif // WAVECOEFF_H

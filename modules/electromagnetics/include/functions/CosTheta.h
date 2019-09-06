@@ -1,5 +1,4 @@
-#ifndef COSTHETA_H
-#define COSTHETA_H
+#pragma once
 
 #include "Function.h"
 
@@ -21,5 +20,3 @@ public:
 private:
   Real _theta;
 };
-
-#endif // COSTHETA_H
