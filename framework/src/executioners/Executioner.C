@@ -59,12 +59,19 @@ Executioner::Executioner(const InputParameters & parameters)
 
   auto & nl = _fe_problem.getNonlinearSystemBase();
 
+#if PETSC_VERSION_LESS_THAN(3, 9, 0)
+  if (_pars.isParamSetByUser("automatic_scaling") && getParam<bool>("automatic_scaling"))
+    paramError("automatic_scaling",
+               "Automatic scaling requires a PETSc version of 3.9.0 or greater");
+#endif
+
   // Check whether the user has explicitly requested automatic scaling and is using a solve type
   // without a matrix. If so, then we warn them
   if ((_pars.isParamSetByUser("automatic_scaling") && getParam<bool>("automatic_scaling")) &&
       _fe_problem.solverParams()._type == Moose::ST_JFNK)
   {
-    mooseWarning("Automatic scaling isn't implemented for the case where you do not have a "
+    paramWarning("automatic_scaling",
+                 "Automatic scaling isn't implemented for the case where you do not have a "
                  "preconditioning matrix. No scaling will be applied");
     nl.automaticScaling(false);
   }

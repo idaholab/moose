@@ -401,7 +401,6 @@ void
 NonlinearSystem::computeScalingJacobian()
 {
 #ifdef LIBMESH_HAVE_PETSC
-
   if (dynamic_cast<PetscMatrix<Real> *>(_transient_sys.matrix))
   {
 #if !PETSC_VERSION_LESS_THAN(3, 9, 0)
@@ -510,12 +509,11 @@ NonlinearSystem::computeScalingJacobian()
 
     // Now it's essential that we reset the sparsity pattern of the matrix
     petsc_matrix.reset_preallocation();
-
-#else
-    mooseWarning("Automatic scaling requires a PETSc version of 3.9.0 or greater, so no automatic "
-                 "scaling is going to be performed");
 #endif
   }
-
+  else
+    mooseError(
+        "Automatic scaling has been requested but you are not using a PetscMatrix. Please contact "
+        "the MOOSE development team at moose-users@googlegroups.com if you encounter this error");
 #endif
 }

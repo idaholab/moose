@@ -172,7 +172,9 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _compute_dampers_timer(registerTimedSection("computeDampers", 3)),
     _compute_dirac_timer(registerTimedSection("computeDirac", 3)),
     _compute_scaling_jacobian_timer(registerTimedSection("computeScalingJacobian", 2)),
-    _computed_scaling(false)
+    _computed_scaling(false),
+    _automatic_scaling(false),
+    _compute_scaling_once(true)
 {
   getResidualNonTimeVector();
   // Don't need to add the matrix - it already exists (for now)
