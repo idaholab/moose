@@ -57,10 +57,33 @@ Executioner::Executioner(const InputParameters & parameters)
   if (!_restart_file_base.empty())
     _fe_problem.setRestartFile(_restart_file_base);
 
-  _fe_problem.automaticScaling(isParamValid("automatic_scaling")
-                                   ? getParam<bool>("automatic_scaling")
-                                   : getMooseApp().defaultAutomaticScaling());
-  _fe_problem.computeScalingOnce(getParam<bool>("compute_scaling_once"));
+  auto & nl = _fe_problem.getNonlinearSystemBase();
+
+#if PETSC_VERSION_LESS_THAN(3, 9, 0)
+  if (_pars.isParamSetByUser("automatic_scaling") && getParam<bool>("automatic_scaling"))
+    paramError("automatic_scaling",
+               "Automatic scaling requires a PETSc version of 3.9.0 or greater");
+#endif
+
+  // Check whether the user has explicitly requested automatic scaling and is using a solve type
+  // without a matrix. If so, then we warn them
+  if ((_pars.isParamSetByUser("automatic_scaling") && getParam<bool>("automatic_scaling")) &&
+      _fe_problem.solverParams()._type == Moose::ST_JFNK)
+  {
+    paramWarning("automatic_scaling",
+                 "Automatic scaling isn't implemented for the case where you do not have a "
+                 "preconditioning matrix. No scaling will be applied");
+    nl.automaticScaling(false);
+  }
+  else
+    // Check to see whether automatic_scaling has been specified anywhere, including at the
+    // application level. No matter what: if we don't have a matrix, we don't do scaling
+    nl.automaticScaling((isParamValid("automatic_scaling")
+                             ? getParam<bool>("automatic_scaling")
+                             : getMooseApp().defaultAutomaticScaling()) &&
+                        (_fe_problem.solverParams()._type != Moose::ST_JFNK));
+
+  nl.computeScalingOnce(getParam<bool>("compute_scaling_once"));
 }
 
 Problem &

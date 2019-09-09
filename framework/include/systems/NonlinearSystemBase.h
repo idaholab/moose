@@ -68,7 +68,7 @@ public:
 
   virtual void init() override;
 
-  bool computingInitialJacobian() const final { return _computing_initial_jacobian; }
+  bool computedScalingJacobian() const { return _computed_scaling; }
 
   /**
    * Turn off the Jacobian (must be called before equation system initialization)
@@ -302,7 +302,7 @@ public:
   /**
    * Method used to obtain scaling factors for variables
    */
-  void computeScalingJacobian(NonlinearImplicitSystem & sys);
+  virtual void computeScalingJacobian();
 
   /**
    * Associate jacobian to systemMatrixTag, and then form a matrix for all the tags
@@ -638,6 +638,15 @@ public:
    */
   void setVerboseFlag(const bool & verbose) { _verbose = verbose; }
 
+  bool automaticScaling() const { return _automatic_scaling; }
+  void automaticScaling(bool automatic_scaling) { _automatic_scaling = automatic_scaling; }
+
+  bool computeScalingOnce() const { return _compute_scaling_once; }
+  void computeScalingOnce(bool compute_scaling_once)
+  {
+    _compute_scaling_once = compute_scaling_once;
+  }
+
 public:
   FEProblemBase & _fe_problem;
   System & _sys;
@@ -884,8 +893,8 @@ protected:
   PerfID _compute_dirac_timer;
   PerfID _compute_scaling_jacobian_timer;
 
-  /// Flag used to indicate whether we are computing the initial Jacobian
-  bool _computing_initial_jacobian;
+  /// Flag used to indicate whether we have already computed the scaling Jacobian
+  bool _computed_scaling;
 
   /// A vector to be filled by the preconditioning matrix diagonal
   NumericVector<Number> * _pmat_diagonal;
@@ -910,4 +919,12 @@ private:
   std::unordered_map<std::pair<BoundaryID, BoundaryID>,
                      ComputeMortarFunctor<ComputeStage::JACOBIAN>>
       _displaced_mortar_jacobian_functors;
+
+  /// Whether to automatically scale the variables
+  bool _automatic_scaling;
+
+  /// Whether the scaling factors should only be computed once at the beginning of the simulation
+  /// through an extra Jacobian evaluation. If this is set to false, then the scaling factors will
+  /// be computed during an extra Jacobian evaluation at the beginning of every time step.
+  bool _compute_scaling_once;
 };
