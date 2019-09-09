@@ -35,7 +35,7 @@ Extensions:
             Documentation: documentation.menu.md
             Help: help.menu.md
             News: newsletter/index.md
-            Citing MOOSE: citing.md
+            Citing: citing.md
     MooseDocs.extensions.bibtex:
         duplicates:
             - kim_phase-field_1999 # referenced in both Tensor Mechanics and Phase Field
