@@ -47,6 +47,7 @@ IntegratedBCBase::IntegratedBCBase(const InputParameters & parameters)
     _current_side(_assembly.side()),
     _current_side_elem(_assembly.sideElem()),
     _current_side_volume(_assembly.sideElemVolume()),
+    _current_boundary_id(_assembly.currentBoundaryID()),
     _qrule(_assembly.qRuleFace()),
     _q_point(_assembly.qPointsFace()),
     _JxW(_assembly.JxWFace()),

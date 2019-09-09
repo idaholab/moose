@@ -310,6 +310,16 @@ public:
   void setCurrentSubdomainID(SubdomainID i) { _current_subdomain_id = i; }
 
   /**
+   * Return the current boundary ID
+   */
+  const BoundaryID & currentBoundaryID() const { return _current_boundary_id; }
+
+  /**
+   * set the current boundary ID
+   */
+  void setCurrentBoundaryID(BoundaryID i) { _current_boundary_id = i; }
+
+  /**
    * Returns the reference to the current element volume
    * @return A _reference_.  Make sure to store this as a reference!
    */
@@ -1739,6 +1749,8 @@ private:
   const Elem * _current_elem;
   /// The current subdomain ID
   SubdomainID _current_subdomain_id;
+  /// The current boundary ID
+  BoundaryID _current_boundary_id;
   /// Volume of the current element
   Real _current_elem_volume;
   /// The current side of the selected element (valid only when working with sides)

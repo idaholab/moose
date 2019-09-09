@@ -126,7 +126,7 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
     _current_side_volume(_assembly.sideElemVolume()),
 
     _current_node(_assembly.node()),
-
+    _current_boundary_id(_assembly.currentBoundaryID()),
     _solution(_aux_sys.solution())
 {
   addMooseVariableDependency(mooseVariable());

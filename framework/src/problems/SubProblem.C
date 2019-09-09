@@ -601,6 +601,12 @@ SubProblem::restrictionBoundaryCheckName(BoundaryID check_id)
   return mesh().getMesh().get_boundary_info().sideset_name(check_id);
 }
 
+void
+SubProblem::setCurrentBoundaryID(BoundaryID bid, THREAD_ID tid)
+{
+  assembly(tid).setCurrentBoundaryID(bid);
+}
+
 unsigned int
 SubProblem::getAxisymmetricRadialCoord() const
 {

@@ -63,6 +63,15 @@ public:
   virtual void postElement(const Elem * elem);
 
   /**
+   * Called before the boundary assembly
+   *
+   * @param elem - The element we are checking is on the boundary.
+   * @param side - The side of the element in question.
+   * @param bnd_id - ID of the boundary we are at
+   */
+  virtual void preBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id);
+
+  /**
    * Called when doing boundary assembling
    *
    * @param elem - The element we are checking is on the boundary.
@@ -207,7 +216,10 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
             for (std::vector<BoundaryID>::iterator it = boundary_ids.begin();
                  it != boundary_ids.end();
                  ++it)
+            {
+              preBoundary(elem, side, *it);
               onBoundary(elem, side, *it);
+            }
 
           const Elem * neighbor = elem->neighbor_ptr(side);
           if (neighbor != nullptr)
@@ -274,6 +286,14 @@ ThreadedElementLoopBase<RangeType>::preElement(const Elem * /*elem*/)
 template <typename RangeType>
 void
 ThreadedElementLoopBase<RangeType>::postElement(const Elem * /*elem*/)
+{
+}
+
+template <typename RangeType>
+void
+ThreadedElementLoopBase<RangeType>::preBoundary(const Elem * /*elem*/,
+                                                unsigned int /*side*/,
+                                                BoundaryID /*bnd_id*/)
 {
 }
 
