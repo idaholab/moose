@@ -184,6 +184,16 @@
     requirement = 'The system shall dump line information along with JSON formatted syntax.'
   [../]
 
+  [./json_no_template]
+    type = 'PythonUnitTest'
+    input = 'test_json.py'
+    test_case = "TestNoTemplate"
+    max_buffer_size = -1
+    issues = '#12960'
+    design = 'JsonInputFileFormatter.md'
+    requirement = 'The system shall not include RESIDUAL and JACOBIAN template arguments in the JSON syntax format.'
+  [../]
+
   [./hit]
     type = 'PythonUnitTest'
     input = 'test_hit_output.py'
