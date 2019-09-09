@@ -201,6 +201,13 @@ class AppSyntaxExtension(command.CommandExtension):
         return self._app_type
 
     def find(self, name, node_type=None):
+
+        if name.endswith('<RESIDUAL>'):
+            msg = "The use of <RESIDUAL> is no longer needed in the syntax name '%s', it " \
+                  "should be removed."
+            LOG.warning(msg, name)
+            name = name[0:-10]
+
         try:
             if node_type == syntax.ObjectNode:
                 return self._object_cache[name]
