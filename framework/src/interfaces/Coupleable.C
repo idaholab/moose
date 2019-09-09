@@ -71,7 +71,6 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal)
             _coupled_array_moose_vars.push_back(tmp_var);
           else
             _obj->paramError(name, "provided c++ type for variable parameter is not supported");
-          // mooseError("Unknown variable type!");
         }
         else if (problem.hasScalarVariable(coupled_var_name))
         {
@@ -81,7 +80,6 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal)
         }
         else
           _obj->paramError(name, "coupled variable '", coupled_var_name, "' was not found");
-        // mooseError(_c_name, ": Coupled variable '", coupled_var_name, "' was not found");
       }
     }
     else // This means it was optional coupling.  Let's assign a unique id to this variable
