@@ -14,7 +14,7 @@ import logging
 import traceback
 import codecs
 import shutil
-import anytree
+import moosetree
 
 import MooseDocs
 from MooseDocs import common
@@ -227,8 +227,8 @@ class HTMLRenderer(Renderer):
                 return path
             return os.path.relpath(path, os.path.dirname(page.local))
 
-        head = anytree.search.find_by_attr(root, 'head')
-        body = anytree.search.find_by_attr(root, 'body')
+        head = moosetree.find(root, lambda n: n.name == 'head')
+        body = moosetree.find(root, lambda n: n.name == 'body')
 
         favicon = self.get('favicon')
         if favicon:

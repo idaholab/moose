@@ -11,7 +11,7 @@
 import os
 import re
 import logging
-import anytree
+import moosetree
 import MooseDocs
 from MooseDocs import common
 from MooseDocs.base import components
@@ -144,8 +144,8 @@ class RenderLinkBase(components.RenderComponent):
         if len(token.children) == 0:
             head = None
             if desired is page:
-                for n in anytree.PreOrderIter(token.root,
-                                              filter_=lambda n: bookmark == n.get('id', None)):
+                for n in moosetree.iterate(token.root,
+                                           lambda n: bookmark == n.get('id', None)):
                     head = n
                     break
             else:

@@ -88,7 +88,7 @@ class SyntaxNodeBase(NodeBase, mooseutils.AutoPropertyMixin):
             filter_ = lambda node: (syntax in node.fullpath) and \
                                    isinstance(node, node_type) and \
                                    (group is None or group in node.groups)
-            return self.findall(filter_=filter_)
+            return moosetree.findall(self, filter_)
 
         else:
             return [node for node in self.children if (syntax in node.fullpath) and \

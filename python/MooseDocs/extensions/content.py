@@ -12,7 +12,7 @@ import os
 import uuid
 import collections
 import logging
-import anytree
+import moosetree
 import mooseutils
 from MooseDocs import common
 from MooseDocs.common import exceptions
@@ -274,7 +274,7 @@ class RenderTableOfContents(components.RenderComponent):
         levels = token['levels']
         func = lambda n: (n.name == 'Heading') and (n['level'] in levels) and (n is not token) \
                and (n['id'] not in hide)
-        toks = anytree.search.findall(token.root, filter_=func)
+        toks = moosetree.findall(token.root, func)
 
         div = html.Tag(parent, 'div', class_='moose-table-of-contents')
         div.addStyle('column-count:{}'.format(token['columns']))

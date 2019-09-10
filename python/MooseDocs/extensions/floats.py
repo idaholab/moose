@@ -10,7 +10,7 @@
 
 import uuid
 import collections
-import anytree
+import moosetree
 import MooseDocs
 from MooseDocs.common import exceptions
 from MooseDocs.base import components, LatexRenderer
@@ -128,7 +128,7 @@ class FloatExtension(components.Extension):
 
     def postTokenize(self, ast, page, meta, reader):
         """Set float number for each counter."""
-        for node in anytree.PreOrderIter(ast, filter_=lambda n: n.name == 'FloatCaption'):
+        for node in moosetree.iterate(ast, lambda n: n.name == 'FloatCaption'):
             prefix = node.get('prefix', None)
             if prefix is not None:
                 meta.getData('counts')[prefix] += 1

@@ -14,7 +14,7 @@ import logging
 import copy
 import re
 import time
-import anytree
+import moosetree
 
 import mooseutils
 
@@ -173,7 +173,7 @@ class AppSyntaxExtension(command.CommandExtension):
         self._cache = dict()
         self._object_cache = dict()
         self._syntax_cache = dict()
-        for node in anytree.PreOrderIter(self._app_syntax):
+        for node in moosetree.iterate(self._app_syntax):
             if not node.removed:
                 self._cache[node.fullpath] = node
                 if node.alias:

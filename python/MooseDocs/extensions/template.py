@@ -10,7 +10,7 @@
 import re
 import codecs
 import logging
-import anytree
+import moosetree
 
 import MooseDocs
 from MooseDocs import common
@@ -59,7 +59,7 @@ class TemplateExtension(include.IncludeExtension):
         items = set()
         fields = set()
 
-        for node in anytree.PreOrderIter(ast):
+        for node in moosetree.iterate(ast):
             if node.name == 'TemplateItem':
                 items.add(node['key'])
             elif node.name == 'TemplateField':
@@ -184,7 +184,7 @@ class RenderTemplateField(components.RenderComponent):
         # Locate the replacement
         key = token['key']
         func = lambda n: (n.name == 'TemplateItem') and (n['key'] == key)
-        replacement = anytree.search.find(token.root, filter_=func)
+        replacement = moosetree.find(token.root, func)
 
         if replacement:
             # Add beginning TemplateSubField
@@ -201,7 +201,9 @@ class RenderTemplateField(components.RenderComponent):
                     self.renderer.render(parent, child, page)
 
             # Remove the TemplateFieldItem, otherwise the content will be rendered again
-            replacement.remove()
+            replacement.parent = None
+            for child in replacement.children:
+                child.parent = None
 
         elif not token['required']:
             tok = tokens.Token(None)

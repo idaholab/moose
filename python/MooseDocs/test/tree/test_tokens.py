@@ -29,5 +29,27 @@ class TestTokens(unittest.TestCase):
         self.assertEqual(token.toDict(),
                          {'attributes': {'foo': 'bar', 'recursive': True}, 'children': [], 'name': 'Test'})
 
+    def testCopyToToken(self):
+        from MooseDocs.extensions import core
+
+        token = Test(None)
+        core.Word(token, content=u'Word')
+        core.Space(token, count=1)
+        core.Word(token, content=u'Word')
+
+        t2 = Test(None)
+        token.copyToToken(t2)
+
+        self.assertEqual(t2(0).name, u'Word')
+        self.assertEqual(t2(0)['content'], u'Word')
+
+        self.assertEqual(t2(1).name, u'Space')
+        self.assertEqual(t2(1)['count'], 1)
+
+        self.assertEqual(t2(2).name, u'Word')
+        self.assertEqual(t2(2)['content'], u'Word')
+
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)

@@ -113,7 +113,7 @@ class TestContentAtoZ(MooseDocsTestCase):
             else:
                 self.assertHTMLTag(res(0)(i), 'a', class_='btn moose-a-to-z-button disabled', string=b[i])
 
-        res(0).remove()
+        res(0).parent = None
         self.assertHTMLTag(res, 'div', size=6)
         self._assertHTML(res)
 

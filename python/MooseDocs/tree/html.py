@@ -9,7 +9,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 #pylint: enable=missing-docstring
 import cgi
-import anytree
+import moosetree
 from .base import NodeBase
 
 class Tag(NodeBase):
@@ -56,14 +56,14 @@ class Tag(NodeBase):
         """
         c = self.get('class', '').strip().split(' ')
         c += [a.strip() for a in args]
-        self.set('class', ' '.join(c).strip())
+        self['class'] = ' '.join(c).strip()
 
     def write(self):
         """Write the HTML as a string, e.g., <foo>...</foo>."""
         out = ''
         attr_list = []
         skip_list = ('close', 'string')
-        for key, value in self.iteritems():
+        for key, value in self.items():
             if value and (key not in skip_list):
                 attr_list.append('{}="{}"'.format(key, str(value).strip()))
 
@@ -84,7 +84,7 @@ class Tag(NodeBase):
         Convert String objects into a single string.
         """
         strings = []
-        for node in anytree.PreOrderIter(self):
+        for node in moosetree.iterate(self):
             if node.name == 'String':
                 strings.append(node['content'])
         return ' '.join(strings)
@@ -106,7 +106,7 @@ class String(NodeBase):
         super(String, self).__init__('String', parent, **kwargs)
 
         if self.get('content') is None:
-            self.set('content', '')
+            self['content'] = ''
 
     def write(self):
         if self.get('escape'):
