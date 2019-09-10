@@ -121,7 +121,7 @@ class ParamsByGroup(QTabWidget, MooseWidget):
         might not have been saved yet.
         """
         param_data = {}
-        for group, t in self.group_table_map.iteritems():
+        for group, t in self.group_table_map.items():
             param_data.update(t.getCurrentParamData())
         return param_data
 
@@ -135,7 +135,7 @@ class ParamsByGroup(QTabWidget, MooseWidget):
             prev[ParamsByGroup]: parameters to sync from
         """
         ignore = ["Name", "type"]
-        for name, prev_p in prev.getParamData().iteritems():
+        for name, prev_p in prev.getParamData().items():
             if name in ignore:
                 continue
             if prev_p["changed"] and not prev_p["user_added"]:

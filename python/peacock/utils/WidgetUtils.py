@@ -158,7 +158,7 @@ def storeWidget(widget, key, **kwargs):
     debug = kwargs.pop('debug', message.MOOSE_DEBUG_MODE)
 
     # Loop over widget storing pairings
-    for wtype, methods in WIDGET_SETTINGS_CACHE.iteritems():
+    for wtype, methods in WIDGET_SETTINGS_CACHE.items():
         if isinstance(widget, wtype):
 
             # Debugging information

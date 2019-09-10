@@ -388,7 +388,7 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         colorbar_options, colorbar_sub_options = self._colorbar.options().toScriptString()
         output['colorbar'] = ['cbar = chigger.exodus.ExodusColorBar(result)']
         output['colorbar'] += ['cbar.setOptions({})'.format(', '.join(colorbar_options))]
-        for key, value in colorbar_sub_options.iteritems():
+        for key, value in colorbar_sub_options.items():
             output['colorbar'] += ['cbar.setOptions({}, {})'.format(repr(key), ', '.join(value))]
         return output
 

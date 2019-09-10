@@ -154,7 +154,7 @@ class LineGroupWidget(peacock.base.MooseWidget, QtWidgets.QGroupBox):
 
             # Loop through all the line settings toggles and create lines
             y_vars = [[], []]
-            for variable, toggle in self._toggles.iteritems():
+            for variable, toggle in self._toggles.items():
                 if toggle.isValid():
                     settings = toggle.settings()
                     i = settings.pop('axis')
@@ -179,7 +179,7 @@ class LineGroupWidget(peacock.base.MooseWidget, QtWidgets.QGroupBox):
 
         y_vars = []
         y2_vars = []
-        for variable, toggle in self._toggles.iteritems():
+        for variable, toggle in self._toggles.items():
             if toggle.isValid():
                 if toggle.axis() == 'right':
                     y2_vars.append(variable)

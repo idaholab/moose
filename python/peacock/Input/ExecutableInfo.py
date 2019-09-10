@@ -112,19 +112,19 @@ class ExecutableInfo(object):
     def _getCommonParameters(self, block):
         actions = block.get("actions", {})
         all_params = {}
-        for name, data in actions.iteritems():
+        for name, data in actions.items():
             all_params.update(self.getDict(data, "parameters"))
         return all_params
 
     def _processChild(self, parent, jdata, is_hard):
         info = self._createBasicInfo(parent, jdata, is_hard)
-        for name, child in self.getDict(jdata, "subblocks").iteritems():
+        for name, child in self.getDict(jdata, "subblocks").items():
             child["name"] = name
             child_info = self._processChild(info, child, True & is_hard)
             info.addChildBlock(child_info)
             self.path_map[child_info.path] = child_info
 
-        for name, child in self.getDict(jdata, "types").iteritems():
+        for name, child in self.getDict(jdata, "types").items():
             child["name"] = name
             child_info = self._processChild(info, child, False)
             info.types[name] = child_info
@@ -134,18 +134,18 @@ class ExecutableInfo(object):
             star_node = self._processChild(info, jdata["star"], False)
             info.setStarInfo(star_node)
 
-        for name, child in self.getDict(jdata, "subblock_types").iteritems():
+        for name, child in self.getDict(jdata, "subblock_types").items():
             child["name"] = name
             child_info = self._processChild(info, child, False)
             info.types[name] = child_info
 
         common_params = self._getCommonParameters(jdata)
-        for name, param in common_params.iteritems():
+        for name, param in common_params.items():
             param_info = ParameterInfo(info, name)
             param_info.setFromData(param)
             info.addParameter(param_info)
 
-        for name, param in self.getDict(jdata, "parameters").iteritems():
+        for name, param in self.getDict(jdata, "parameters").items():
             param_info = ParameterInfo(info, name)
             param_info.setFromData(param)
             info.addParameter(param_info)
@@ -166,7 +166,7 @@ class ExecutableInfo(object):
     def _createPathMap(self):
         self.path_map = {}
         self.root_info = BlockInfo(None, "/", False, "root node")
-        for name, block in self.json_data.json_data["blocks"].iteritems():
+        for name, block in self.json_data.json_data["blocks"].items():
             block["name"] = name
             block_info = self._processChild(self.root_info, block, True)
             self.root_info.addChildBlock(block_info)
