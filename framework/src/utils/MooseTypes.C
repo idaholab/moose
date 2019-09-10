@@ -9,6 +9,7 @@
 
 #include "MooseTypes.h"
 #include "libmesh/elem.h"
+#include "libmesh/libmesh.h"
 
 namespace Moose
 {
@@ -16,4 +17,5 @@ const SubdomainID ANY_BLOCK_ID = libMesh::Elem::invalid_subdomain_id - 1;
 const SubdomainID INVALID_BLOCK_ID = libMesh::Elem::invalid_subdomain_id;
 const BoundaryID ANY_BOUNDARY_ID = static_cast<BoundaryID>(-1);
 const BoundaryID INVALID_BOUNDARY_ID = libMesh::BoundaryInfo::invalid_id;
+const TagID INVALID_TAG_ID = libMesh::invalid_uint;
 }

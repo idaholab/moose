@@ -4486,6 +4486,9 @@ FEProblemBase::init()
   if (solverParams()._type == Moose::ST_JFNK)
     _nl->turnOffJacobian();
 
+  _nl->init();
+  _aux->init();
+
   {
     TIME_SECTION(_eq_init_timer);
     CONSOLE_TIMED_PRINT("Initializing equation system")
@@ -4501,12 +4504,8 @@ FEProblemBase::init()
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     _assembly[tid]->init(_cm.get());
 
-  _nl->init();
-
   if (_displaced_problem)
     _displaced_problem->init();
-
-  _aux->init();
 
   _initialized = true;
 }
