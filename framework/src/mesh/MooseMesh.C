@@ -2107,54 +2107,7 @@ MooseMesh::init()
     getMesh().partitioner().reset(_custom_partitioner.release());
   }
   else
-  {
-    // Set standard partitioner
-    // Set the partitioner based on partitioner name
-    switch (_partitioner_name)
-    {
-      case -3: // default
-        // We'll use the default partitioner, but notify the user of which one is being used...
-        if (_use_distributed_mesh)
-          _partitioner_name = "parmetis";
-        else
-          _partitioner_name = "metis";
-        break;
-
-      // No need to explicitily create the metis or parmetis partitioners,
-      // They are the default for serial and parallel mesh respectively
-      case -2: // metis
-      case -1: // parmetis
-        break;
-
-      case 0: // linear
-        getMesh().partitioner().reset(new LinearPartitioner);
-        break;
-      case 1: // centroid
-      {
-        if (!isParamValid("centroid_partitioner_direction"))
-          mooseError("If using the centroid partitioner you _must_ specify "
-                     "centroid_partitioner_direction!");
-
-        MooseEnum direction = getParam<MooseEnum>("centroid_partitioner_direction");
-
-        if (direction == "x")
-          getMesh().partitioner().reset(new CentroidPartitioner(CentroidPartitioner::X));
-        else if (direction == "y")
-          getMesh().partitioner().reset(new CentroidPartitioner(CentroidPartitioner::Y));
-        else if (direction == "z")
-          getMesh().partitioner().reset(new CentroidPartitioner(CentroidPartitioner::Z));
-        else if (direction == "radial")
-          getMesh().partitioner().reset(new CentroidPartitioner(CentroidPartitioner::RADIAL));
-        break;
-      }
-      case 2: // hilbert_sfc
-        getMesh().partitioner().reset(new HilbertSFCPartitioner);
-        break;
-      case 3: // morton_sfc
-        getMesh().partitioner().reset(new MortonSFCPartitioner);
-        break;
-    }
-  }
+    setPartitionerHelper();
 
   if (_app.isRecovering() && _allow_recovery && _app.isUltimateMaster())
   {
@@ -2746,6 +2699,67 @@ MooseMesh::errorIfDistributedMesh(std::string name) const
                " with DistributedMesh!\n",
                "Consider specifying parallel_type = 'replicated' in your input file\n",
                "to prevent it from being run with DistributedMesh.");
+}
+
+void
+MooseMesh::setPartitionerHelper()
+{
+  setPartitioner(getMesh(), _partitioner_name, _use_distributed_mesh, _pars, *this);
+}
+
+void
+MooseMesh::setPartitioner(MeshBase & mesh_base,
+                          MooseEnum & partitioner,
+                          bool use_distributed_mesh,
+                          const InputParameters & params,
+                          MooseObject & context_obj)
+{
+  // Set the partitioner based on partitioner name
+  switch (partitioner)
+  {
+    case -3: // default
+      // We'll use the default partitioner, but notify the user of which one is being used...
+      if (use_distributed_mesh)
+        partitioner = "parmetis";
+      else
+        partitioner = "metis";
+      break;
+
+    // No need to explicitily create the metis or parmetis partitioners,
+    // They are the default for serial and parallel mesh respectively
+    case -2: // metis
+    case -1: // parmetis
+      break;
+
+    case 0: // linear
+      mesh_base.partitioner().reset(new LinearPartitioner);
+      break;
+    case 1: // centroid
+    {
+      if (!params.isParamValid("centroid_partitioner_direction"))
+        context_obj.paramError(
+            "centroid_partitioner_direction",
+            "If using the centroid partitioner you _must_ specify centroid_partitioner_direction!");
+
+      MooseEnum direction = params.get<MooseEnum>("centroid_partitioner_direction");
+
+      if (direction == "x")
+        mesh_base.partitioner().reset(new CentroidPartitioner(CentroidPartitioner::X));
+      else if (direction == "y")
+        mesh_base.partitioner().reset(new CentroidPartitioner(CentroidPartitioner::Y));
+      else if (direction == "z")
+        mesh_base.partitioner().reset(new CentroidPartitioner(CentroidPartitioner::Z));
+      else if (direction == "radial")
+        mesh_base.partitioner().reset(new CentroidPartitioner(CentroidPartitioner::RADIAL));
+      break;
+    }
+    case 2: // hilbert_sfc
+      mesh_base.partitioner().reset(new HilbertSFCPartitioner);
+      break;
+    case 3: // morton_sfc
+      mesh_base.partitioner().reset(new MortonSFCPartitioner);
+      break;
+  }
 }
 
 void
