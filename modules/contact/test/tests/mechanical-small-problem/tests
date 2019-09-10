@@ -1,6 +1,6 @@
 [Tests]
   design = 'Constraints/index.md'
-  issues = '#13080'
+  issues = '#13080 #13676'
   [mortar-mech]
     type = 'Exodiff'
     input = 'mortar-mech.i'
@@ -20,5 +20,12 @@
     mesh_mode = 'REPLICATED'
     requirement = "We shall be able to do mechanical contact with mortar for the displacements and node enforcement of the constraints."
     allow_test_objects = true
+  []
+  [mortar-contact-action]
+    type = 'Exodiff'
+    input = 'mortar-contact-action.i'
+    exodiff = 'frictionless-nodal-lm-mortar-disp_out.e'
+    mesh_mode = 'REPLICATED'
+    requirement = "We shall be able to do mechanical contact with mortar using the Contact action block with identical results as specifying individual mortar constraints, variables, and mesh objects."
   []
 []
