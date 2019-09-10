@@ -70,7 +70,7 @@ class InputTree(object):
         """
         comments = []
         for n in node.children(node_type=hit.NodeType.Comment):
-            c = n.render().strip()[1:].strip()
+            c = n.render().decode().strip()[1:].strip()
             comments.append(c)
 
         return '\n'.join(comments)
