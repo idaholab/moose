@@ -22,18 +22,18 @@
   [./function_left]
     type = CosineTransitionFunction
     axis = y
-    begin_coordinate = 1
+    transition_center = 2
     transition_width = 2
-    begin_value = 5
-    end_value = 20
+    function1 = 5
+    function2 = 20
   [../]
   [./function_right]
     type = CosineTransitionFunction
     axis = y
-    begin_coordinate = 3
+    transition_center = 4
     transition_width = 2
-    begin_value = 20
-    end_value = 5
+    function1 = 20
+    function2 = 5
   [../]
   [./function_end]
     type = ConstantFunction
