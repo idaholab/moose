@@ -20,6 +20,15 @@ class SystemBase;
 class AuxiliarySystem;
 class Transient;
 
+std::string
+paramErrorPrefix(const InputParameters & params, const std::string & param)
+{
+  auto prefix = param + ":";
+  if (!params.inputLocation(param).empty())
+    prefix = params.inputLocation(param) + ": (" + params.paramFullpath(param) + ")";
+  return prefix;
+}
+
 template <>
 InputParameters
 validParams<MooseObject>()
