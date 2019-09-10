@@ -23,7 +23,7 @@
     requirement = 'We shall not do any mallocs in MatSetValues because of automatic scaling'
     issues = '#12601'
     design = 'FEProblemSolve.md'
-    allow_warnings = True # for PETSc versions < 3.9
+    petsc_version = '>=3.9.0'
     max_parallel = 4 # Can't have zero dofs on any process for MatResetPreallocation
   []
   [proper_ghosting_with_action_serial]

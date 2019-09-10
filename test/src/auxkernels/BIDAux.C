@@ -7,23 +7,22 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#pragma once
+#include "BIDAux.h"
 
-#include "IntegratedBC.h"
-
-class RobinBC;
+registerMooseObject("MooseTestApp", BIDAux);
 
 template <>
-InputParameters validParams<RobinBC>();
-
-class RobinBC : public IntegratedBC
+InputParameters
+validParams<BIDAux>()
 {
-public:
-  RobinBC(const InputParameters & parameters);
+  InputParameters params = validParams<AuxKernel>();
+  return params;
+}
 
-protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
+BIDAux::BIDAux(const InputParameters & parameters) : AuxKernel(parameters) {}
 
-  const Real _coef;
-};
+Real
+BIDAux::computeValue()
+{
+  return _current_boundary_id;
+}

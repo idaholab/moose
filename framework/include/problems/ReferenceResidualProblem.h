@@ -120,5 +120,7 @@ protected:
 
   /// True if any variables are grouped
   bool _use_group_variables;
-};
 
+  /// The vector storing the reference residual values
+  const NumericVector<Number> * _reference_vector;
+};

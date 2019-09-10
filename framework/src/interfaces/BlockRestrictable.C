@@ -121,9 +121,10 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
   // Produce error if the object is not allowed to be both block and boundary restricted
   if (!_blk_dual_restrictable && !_boundary_ids.empty() && !_boundary_ids.empty())
     if (!_boundary_ids.empty() && _boundary_ids.find(Moose::ANY_BOUNDARY_ID) == _boundary_ids.end())
-      mooseError("Attempted to restrict the object '",
-                 _blk_name,
-                 "' to a block, but the object is already restricted by boundary");
+      moose_object->paramError("block",
+                               "Attempted to restrict the object '",
+                               _blk_name,
+                               "' to a block, but the object is already restricted by boundary");
 
   // If no blocks were defined above, specify that it is valid on all blocks
   if (_blk_ids.empty() && !moose_object->isParamValid("boundary"))
@@ -147,11 +148,10 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
     if (!diff.empty())
     {
       std::ostringstream msg;
-      msg << "The object '" << _blk_name
-          << "' contains the following block ids that do not exist on the mesh:";
+      msg << "the following block ids do not exist on the mesh:";
       for (const auto & id : diff)
         msg << " " << id;
-      mooseError(msg.str());
+      moose_object->paramError("block", msg.str());
     }
   }
 }

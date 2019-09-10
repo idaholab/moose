@@ -9,21 +9,22 @@
 
 #pragma once
 
-#include "IntegratedBC.h"
+#include "AuxKernel.h"
 
-class RobinBC;
+// Forward Declarations
+class BIDAux;
 
 template <>
-InputParameters validParams<RobinBC>();
+InputParameters validParams<BIDAux>();
 
-class RobinBC : public IntegratedBC
+/**
+ * returns the boundary ID
+ */
+class BIDAux : public AuxKernel
 {
 public:
-  RobinBC(const InputParameters & parameters);
+  BIDAux(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
-
-  const Real _coef;
+  virtual Real computeValue();
 };

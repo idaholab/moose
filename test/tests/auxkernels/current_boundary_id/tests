@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#13953'
+  design = 'Assembly.md'
+  [current_boundary_id]
+    type = 'Exodiff'
+    input = current_boundary_id.i
+    exodiff = 'current_boundary_id_out.e'
+    requirement = "The system shall make current boundary id available in objects evaluated on boundaries."
+  []
+[]

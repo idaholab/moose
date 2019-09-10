@@ -59,6 +59,9 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
     unsigned short int side = belem->_side;
     BoundaryID boundary_id = belem->_bnd_id;
 
+    // need to update the boundary ID in assembly
+    _problem.setCurrentBoundaryID(boundary_id, _tid);
+
     if (elem->processor_id() == _problem.processor_id())
     {
       // prepare variables

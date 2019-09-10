@@ -71,6 +71,8 @@ public:
 
   virtual TransientNonlinearImplicitSystem & sys() { return _transient_sys; }
 
+  void computeScalingJacobian() override;
+
 protected:
   TransientNonlinearImplicitSystem & _transient_sys;
   ComputeResidualFunctor _nl_residual_functor;
@@ -97,7 +99,4 @@ private:
   void setupColoringFiniteDifferencedPreconditioner();
 
   bool _use_coloring_finite_difference;
-
-  /// Whether we've computed the variable scaling factors
-  bool _computed_scaling;
 };

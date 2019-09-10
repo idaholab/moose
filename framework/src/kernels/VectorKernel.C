@@ -84,7 +84,7 @@ VectorKernel::computeJacobian()
 
   ke += _local_ke;
 
-  if (_has_diag_save_in)
+  if (_has_diag_save_in && !_sys.computingScalingJacobian())
   {
     unsigned int rows = ke.m();
     DenseVector<Number> diag(rows);
