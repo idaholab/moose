@@ -108,7 +108,7 @@ class RecentlyUsedMenu(QObject, MooseWidget):
             return
         self._menu.setEnabled(True)
         for i, value in enumerate(self._values):
-            if i < self._max_val:
+            if i < int(self._max_val):
                 action = QAction(value, self)
                 action.triggered.connect(self._fileSelected)
                 self._menu.addAction(action)

@@ -262,7 +262,7 @@ class BlockTree(QTreeWidget, MooseWidget):
             state = Qt.Checked
         new_child.setCheckState(0, state)
         self._path_item_map[block.path] = new_child
-        self._item_block_map[new_child] = block
+        self._item_block_map[new_child.__str__()] = block
         if block.star:
             new_child.setForeground(0, QBrush(QColor("blue")))
 
