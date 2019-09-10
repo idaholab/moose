@@ -76,7 +76,7 @@ class BlockTree(QTreeWidget, MooseWidget):
         Populate the items from the InputTree
         """
         self.clear()
-        self._item_block_map = {self.root_item: "/"}
+        self._item_block_map = {self.root_item.__str__(): "/"}
         self._path_item_map = {"/": self.root_item}
 
         self.blockSignals(True)

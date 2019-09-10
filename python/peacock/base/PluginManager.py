@@ -185,9 +185,9 @@ class PluginManager(MooseWidget):
     def fixLayoutWidth(self, layout):
         # Set the width of the left-side widgets to that the VTK window gets the space
         width = 0
-        for child in self._plugins.itervalues():
+        for child in self._plugins.values():
             if child.mainLayoutName() == layout:
                 width = max(child.sizeHint().width(), width)
-        for child in self._plugins.itervalues():
+        for child in self._plugins.values():
             if child.mainLayoutName() == layout:
                 child.setFixedWidth(width)

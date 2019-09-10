@@ -208,7 +208,7 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
         """
         Called when the application is about to close.
         """
-        for child in self._plugins.itervalues():
+        for child in self._plugins.values():
             try:
                 child.closing()
             except:
