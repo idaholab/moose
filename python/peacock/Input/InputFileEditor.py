@@ -178,7 +178,7 @@ class InputFileEditor(QWidget, MooseWidget):
             return
         content = self.tree.getInputFileString()
         try:
-            with open(filename, "w") as f:
+            with open(filename, "wb") as f:
                 f.write(content)
         except IOError as e:
             mooseutils.mooseWarning("Failed to write input file %s: %s" % (filename, e))

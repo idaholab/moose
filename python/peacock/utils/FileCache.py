@@ -121,7 +121,7 @@ class FileCache(object):
 
         filename = uuid.uuid4().hex
         full_path = os.path.join(cache_dir, filename)
-        with open(full_path, "w") as f:
+        with open(full_path, "wb") as f:
             pickle.dump(obj, f, protocol=pickle.HIGHEST_PROTOCOL)
         self.path_data = {"ctime": self.stat.st_ctime,
                 "size": self.stat.st_size,

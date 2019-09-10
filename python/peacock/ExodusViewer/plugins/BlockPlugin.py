@@ -151,7 +151,7 @@ class BlockPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         Check if current blocks on the widget are the same as exist on the reader.
         """
         blk_info = reader.getBlockInformation()[btype]
-        blocks = [blk.name for blk in blk_info.itervalues()]
+        blocks = [blk.name for blk in blk_info.values()]
         current = [qobject.StandardItemModel.item(i).data(QtCore.Qt.UserRole) for i in range(1, qobject.StandardItemModel.rowCount())]
         return set(blocks) != set(current)
 

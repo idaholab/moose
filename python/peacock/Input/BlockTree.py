@@ -76,7 +76,7 @@ class BlockTree(QTreeWidget, MooseWidget):
         Populate the items from the InputTree
         """
         self.clear()
-        self._item_block_map = {self.root_item: "/"}
+        self._item_block_map = {self.root_item.__str__(): "/"}
         self._path_item_map = {"/": self.root_item}
 
         self.blockSignals(True)
@@ -100,7 +100,7 @@ class BlockTree(QTreeWidget, MooseWidget):
         """
         item = self.currentItem()
         if item:
-            block = self._item_block_map.get(item)
+            block = self._item_block_map.get(item.__str__())
             if block:
                 self.copyBlock(block)
 
@@ -111,7 +111,7 @@ class BlockTree(QTreeWidget, MooseWidget):
             item[QTreeWidgetItem]: The item that was clicked
             col[int]: The column that was clicked.
         """
-        block = self._item_block_map.get(item)
+        block = self._item_block_map.get(item.__str__())
         if block:
             self.blockClicked.emit(block)
 
@@ -122,7 +122,7 @@ class BlockTree(QTreeWidget, MooseWidget):
             item[QTreeWidgetItem]: The item that was double clicked
             col[int]: The column that was double clicked.
         """
-        block = self._item_block_map.get(item)
+        block = self._item_block_map.get(item.__str__())
         if block:
             self.blockDoubleClicked.emit(block)
 
@@ -133,7 +133,7 @@ class BlockTree(QTreeWidget, MooseWidget):
             item[QTreeWidgetItem]: The item that was changed.
             col[int]: The column that was changed.
         """
-        block = self._item_block_map.get(item)
+        block = self._item_block_map.get(item.__str__())
         if block:
             block.included = item.checkState(0) == Qt.Checked
             self.changed.emit(block)
@@ -173,7 +173,7 @@ class BlockTree(QTreeWidget, MooseWidget):
         data = event.mimeData()
         if self._current_drag and item and data.hasFormat(self._mime_type):
             current_block = self._item_block_map.get(self._current_drag)
-            to_block = self._item_block_map.get(item)
+            to_block = self._item_block_map.get(item.__str__())
             if current_block and to_block and current_block.parent == to_block.parent and to_block.parent.path != "/":
                 idx = self.indexOfItem(self._current_drag)
                 super(BlockTree, self).dropEvent(event)
@@ -194,7 +194,7 @@ class BlockTree(QTreeWidget, MooseWidget):
             del self._path_item_map[block.path]
             self.tree.renameUserBlock(block.parent.path, block.name, newname)
             self._path_item_map[block.path] = item
-            block = self._item_block_map[item]
+            block = self._item_block_map[item.__str__()]
             item.setText(0, block.name)
 
     def removeBlock(self, block):
@@ -209,7 +209,7 @@ class BlockTree(QTreeWidget, MooseWidget):
         if item:
             self.tree.removeBlock(block.path)
             del self._path_item_map[block.path]
-            del self._item_block_map[item]
+            del self._item_block_map[item.__str__()]
             self._getItemParent(item).removeChild(item)
 
     def _getItemParent(self, item):
@@ -262,7 +262,7 @@ class BlockTree(QTreeWidget, MooseWidget):
             state = Qt.Checked
         new_child.setCheckState(0, state)
         self._path_item_map[block.path] = new_child
-        self._item_block_map[new_child] = block
+        self._item_block_map[new_child.__str__()] = block
         if block.star:
             new_child.setForeground(0, QBrush(QColor("blue")))
 
@@ -287,7 +287,7 @@ class BlockTree(QTreeWidget, MooseWidget):
             new_block = self.tree.addUserBlock(block.path, new_name)
         elif block.user_added:
             parent = self._getItemParent(item)
-            parent_block = self._item_block_map.get(parent)
+            parent_block = self._item_block_map.get(parent.__str__())
             new_name = parent_block.findFreeChildName()
             new_block = self.tree.cloneUserBlock(block.path, new_name)
         else:
@@ -313,7 +313,7 @@ class BlockTree(QTreeWidget, MooseWidget):
         if item:
             parent = item.parent()
             if parent:
-                parent_block = self._item_block_map.get(parent)
+                parent_block = self._item_block_map.get(parent.__str__())
                 if parent.checkState(0) == Qt.Unchecked:
                     parent.setCheckState(0, Qt.Checked)
                     parent_block.included = True
@@ -345,7 +345,7 @@ class BlockTree(QTreeWidget, MooseWidget):
         item = self.itemAt(point)
         if not item:
             return
-        block = self._item_block_map.get(item)
+        block = self._item_block_map.get(item.__str__())
         if not block:
             return
 
@@ -378,7 +378,7 @@ class BlockTree(QTreeWidget, MooseWidget):
             level[int]: indent level
             sep[str]: indent string
         """
-        b = self._item_block_map.get(item)
+        b = self._item_block_map.get(item.__str__())
         output.write("%s%s: %s: %s\n" % (sep*level, item.text(0), b.star, item.checkState(0) == Qt.Checked))
         child_count = item.childCount()
         for i in range(child_count):

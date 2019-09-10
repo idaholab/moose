@@ -42,7 +42,7 @@ class PostprocessorPluginManager(QtWidgets.QWidget, peacock.base.PluginManager):
         imports = []
 
         # Build script from plugins
-        for plugin in self._plugins.itervalues():
+        for plugin in self._plugins.values():
             out, imp = plugin.repr()
             output += out
             mooseutils.unique_list(imports, imp)
