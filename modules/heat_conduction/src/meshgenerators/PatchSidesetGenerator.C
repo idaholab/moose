@@ -75,11 +75,7 @@ PatchSidesetGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
-  bool distributed = false;
-  if (typeid(mesh).name() == typeid(std::unique_ptr<DistributedMesh>).name())
-    distributed = true;
-
-  if (distributed)
+  if (_mesh->isDistributedMesh())
     mooseWarning("Distributed mesh may not work yet, because communication is not done.");
 
   // Get a reference to our BoundaryInfo object for later use
@@ -133,7 +129,7 @@ PatchSidesetGenerator::generate()
 
           // this adds this node to the boundary mesh and puts it at the right position
           // in the boundary_nodes array
-          Point pt(node->operator()(0), node->operator()(1), node->operator()(2));
+          Point pt(*node);
           boundary_nodes.push_back(boundary_mesh->add_point(pt, boundary_node_id));
 
           // keep track of the boundary node for setting up the element
@@ -148,7 +144,7 @@ PatchSidesetGenerator::generate()
 
       // all nodes for this element have been added, so we can add the element to the
       // boundary mesh
-      Elem * new_bnd_elem = boundaryElementHelper(boundary_mesh, boundary_elem->type());
+      Elem * new_bnd_elem = boundaryElementHelper(*boundary_mesh, boundary_elem->type());
 
       // keep track of these new boundary elements in boundary_elem_to_mesh_elem
       boundary_elem_to_mesh_elem.insert(
@@ -172,7 +168,7 @@ PatchSidesetGenerator::generate()
 
   // partition the boundary mesh
   boundary_mesh->prepare_for_use();
-  setPartitionerHelper(boundary_mesh);
+  MooseMesh::setPartitioner(*boundary_mesh, _partitioner_name, false, _pars, *this);
   boundary_mesh->partition(_n_patches);
 
   // prepare sideset names and boundary_ids added to mesh
@@ -228,59 +224,13 @@ PatchSidesetGenerator::sidesetNameHelper(const std::string & base_name) const
 }
 
 Elem *
-PatchSidesetGenerator::boundaryElementHelper(std::unique_ptr<libMesh::ReplicatedMesh> & mesh,
-                                             int type) const
+PatchSidesetGenerator::boundaryElementHelper(MeshBase & mesh, libMesh::ElemType type) const
 {
   switch (type)
   {
     case 5:
-      return mesh->add_elem(new libMesh::Quad4);
+      return mesh.add_elem(new libMesh::Quad4);
     default:
       mooseError("Unsupported element type (libMesh elem_type enum): ", type);
-  }
-}
-
-void
-PatchSidesetGenerator::setPartitionerHelper(std::unique_ptr<libMesh::ReplicatedMesh> & mesh) const
-{
-  switch (_partitioner_name)
-  {
-    case -3: // default
-      return;
-
-    // No need to explicitily create the metis or parmetis partitioners,
-    // They are the default for serial and parallel mesh respectively
-    case -2: // metis
-      return;
-    case -1: // parmetis
-      return;
-
-    case 0: // linear
-      mesh->partitioner().reset(new LinearPartitioner);
-      return;
-    case 1: // centroid
-    {
-      if (!isParamValid("centroid_partitioner_direction"))
-        mooseError("If using the centroid partitioner you _must_ specify "
-                   "centroid_partitioner_direction!");
-
-      MooseEnum direction = getParam<MooseEnum>("centroid_partitioner_direction");
-
-      if (direction == "x")
-        mesh->partitioner().reset(new CentroidPartitioner(CentroidPartitioner::X));
-      else if (direction == "y")
-        mesh->partitioner().reset(new CentroidPartitioner(CentroidPartitioner::Y));
-      else if (direction == "z")
-        mesh->partitioner().reset(new CentroidPartitioner(CentroidPartitioner::Z));
-      else if (direction == "radial")
-        mesh->partitioner().reset(new CentroidPartitioner(CentroidPartitioner::RADIAL));
-      return;
-    }
-    case 2: // hilbert_sfc
-      mesh->partitioner().reset(new HilbertSFCPartitioner);
-      return;
-    case 3: // morton_sfc
-      mesh->partitioner().reset(new MortonSFCPartitioner);
-      return;
   }
 }

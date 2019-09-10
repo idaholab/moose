@@ -821,6 +821,15 @@ public:
   void allowRecovery(bool allow) { _allow_recovery = allow; }
 
   /**
+   * Method for setting the partitioner on the passed in mesh_base object.
+   */
+  static void setPartitioner(MeshBase & mesh_base,
+                             MooseEnum & partitioner,
+                             bool use_distributed_mesh,
+                             const InputParameters & params,
+                             MooseObject & context_obj);
+
+  /**
    * Setter for custom partitioner
    */
   void setCustomPartitioner(Partitioner * partitioner);
@@ -1034,6 +1043,7 @@ protected:
   void cacheInfo();
   void freeBndNodes();
   void freeBndElems();
+  void setPartitionerHelper();
 
 private:
   /**

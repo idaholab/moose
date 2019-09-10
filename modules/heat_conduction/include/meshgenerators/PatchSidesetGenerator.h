@@ -33,9 +33,7 @@ protected:
   /// returns the name of the _n_patches subdivisions derived from _sideset
   std::vector<BoundaryName> sidesetNameHelper(const std::string & base_name) const;
 
-  Elem * boundaryElementHelper(std::unique_ptr<libMesh::ReplicatedMesh> & mesh, int type) const;
-
-  void setPartitionerHelper(std::unique_ptr<libMesh::ReplicatedMesh> & mesh) const;
+  Elem * boundaryElementHelper(MeshBase & mesh, libMesh::ElemType type) const;
 
   std::unique_ptr<MeshBase> & _input;
 
