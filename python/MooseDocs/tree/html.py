@@ -8,7 +8,8 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 #pylint: enable=missing-docstring
-import cgi
+import html
+import re
 import moosetree
 from .base import NodeBase
 
@@ -87,7 +88,7 @@ class Tag(NodeBase):
         for node in moosetree.iterate(self):
             if node.name == 'String':
                 strings.append(node['content'])
-        return ' '.join(strings)
+        return re.sub(r' {2,}', ' ', ' '.join(strings))
 
     def copy(self, _parent=None):
         """Copy the tree from this node."""
@@ -110,7 +111,7 @@ class String(NodeBase):
 
     def write(self):
         if self.get('escape'):
-            return cgi.escape(str(self.get('content')), quote=True)
+            return html.escape(str(self.get('content')), quote=True)
         else:
             return self.get('content')
 

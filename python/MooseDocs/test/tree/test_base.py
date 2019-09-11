@@ -32,7 +32,7 @@ class TestNodeBase(unittest.TestCase):
         with self.assertRaises(IndexError) as ex:
             node = base.NodeBase('root', None)
             node(0)
-        self.assertIn('A child node with index', ex.exception.message)
+        self.assertIn('list index out of range', str(ex.exception))
 
     def testWrite(self):
         node = base.NodeBase('root', None)

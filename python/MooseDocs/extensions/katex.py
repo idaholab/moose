@@ -140,8 +140,8 @@ class KatexBlockEquationComponent(components.TokenComponent):
         # Add a label
         label = self.LABEL_RE.search(info['equation'])
         if label:
-            token['label'] = label.group('id'))
-            token['tex'] = token['tex'].replace(label.group().encode('ascii'), '')
+            token['label'] = label.group('id')
+            token['tex'] = token['tex'].replace(label.group(), '')
         return parent
 
 class KatexInlineEquationComponent(components.TokenComponent):

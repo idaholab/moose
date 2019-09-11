@@ -239,7 +239,7 @@ class Lexer(object):
                         obj = self.buildToken(parent, pattern, info, page)
                     except Exception as e: #pylint: disable=broad-except
                         obj = tokens.ErrorToken(parent,
-                                                message=e,
+                                                message=str(e),
                                                 traceback=traceback.format_exc())
 
                     if obj is not None:

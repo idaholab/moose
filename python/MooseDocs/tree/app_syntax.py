@@ -85,7 +85,7 @@ def app_syntax(exe, remove=None, allow_test_objects=False, hide=None, alias=None
     # Alias
     if alias:
         for node in moosetree.iterate(root):
-            for k, v in alias.iteritems():
+            for k, v in alias.items():
                 if node.fullpath == k:
                     node.alias = str(v)
 

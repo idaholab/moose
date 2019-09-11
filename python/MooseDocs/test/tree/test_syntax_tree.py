@@ -61,7 +61,7 @@ class TestSyntaxTree(unittest.TestCase):
         location = os.path.join(MooseDocs.MOOSE_DIR, 'test')
         exe = mooseutils.find_moose_executable(location)
         root = app_syntax(exe)
-        node = anytree.search.find_by_attr(root, '/Kernels/ADDiffusion', name='fullpath')
+        node = moosetree.find(root, lambda n: n.fullpath == '/Kernels/ADDiffusion')
         self.assertEqual(node.fullpath, '/Kernels/ADDiffusion')
 
 if __name__ == '__main__':

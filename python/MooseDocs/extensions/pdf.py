@@ -75,10 +75,6 @@ class PDFExtension(command.CommandExtension):
         """
         Combines all the LaTeX files into a single file.
         """
-        for c in content:
-            print c.source
-
-
         files = []
         for page in content:
             if isinstance(page, pages.Source):
@@ -304,5 +300,4 @@ class PDFExtension(command.CommandExtension):
                     sort_files(child)
 
         sort_files(root)
-        print root
         return root

@@ -3,6 +3,7 @@ For simplicity this module should be a stand-alone package, i.e., it should not 
 non-standard python packages such as mooseutils.
 """
 import copy
+from . import search
 
 class Node(object):
     """
@@ -52,7 +53,9 @@ class Node(object):
     @parent.setter
     def parent(self, new_parent):
         """Set the parent Node object, use None to remove the node from the tree."""
-        self.__parent.__children.remove(self)
+        if (self.__parent is not None) and (self in self.__parent.__children):
+            self.__parent.__children.remove(self)
+
         self.__parent = new_parent
         if self.__parent is not None:
             self.__parent.__children.append(self)
@@ -64,6 +67,11 @@ class Node(object):
         NOTE: the list is a copy but the Node objects in the list are not.
         """
         return copy.copy(self.__children)
+
+    @property
+    def descendants(self):
+        """Return a list of all descendants, children's children etc."""
+        return search.iterate(self, method=search.IterMethod.PRE_ORDER)
 
     def __iter__(self):
         """Iterate of the children (e.g., `for child in node:`)"""
@@ -159,7 +167,7 @@ class Node(object):
         """If this class exists then it should evaluate to True."""
         return True
 
-    def __unicode__(self):
+    def __str__(self):
         """Return a unicode string showing the tree structure."""
         return self.__print()
 
