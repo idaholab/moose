@@ -33,6 +33,5 @@ public:
 
 protected:
   Real _total_size;
-  int _elems;
+  dof_id_type _elems;
 };
-

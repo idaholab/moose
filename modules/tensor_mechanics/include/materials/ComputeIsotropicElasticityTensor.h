@@ -43,5 +43,7 @@ protected:
 
   /// Individual elasticity tensor
   RankFourTensor _Cijkl;
-};
 
+  /// Effective stiffness of the element: function of material properties
+  Real _effective_stiffness_local;
+};

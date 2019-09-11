@@ -1,0 +1,42 @@
+[Tests]
+design = 'CriticalTimeStep.md'
+issues = '#13975'
+  [./crit_time_solid]
+    design = "CriticalTimeStep.md"
+    requirement = "The system shall correctly compute the critical time step for a solid with:"
+    [./uniform]
+      type = 'CSVDiff'
+      input = 'crit_time_solid_uniform.i'
+      csvdiff = 'crit_time_solid_uniform_out.csv'
+      rel_err = 1.0E-5
+      abs_zero = 1.0E-5
+
+      detail = "uniform properties and"
+    [../]
+    [./variable]
+      type = 'CSVDiff'
+      input = 'crit_time_solid_variable.i'
+      csvdiff = 'crit_time_solid_variable_out.csv'
+      rel_err = 1.0E-5
+      abs_zero = 1.0E-5
+
+      detail = "variable properties."
+    [../]
+  [../]
+  [./timoshenko_smallstrain_critstep]
+    type = 'CSVDiff'
+    input = 'timoshenko_smallstrain_critstep.i'
+    csvdiff = 'timoshenko_smallstrain_critstep_out.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    requirement = "The system shall correctly compute the critical time step for a beam."
+    design = "CriticalTimeStep.md"
+  [../]
+  [./except1]
+    type = 'RunException'
+    input = 'non-isotropic_error_test.i'
+    expect_err = 'CriticalTimeStep can only be used with elasticity tensor materials that guarantee isotropic tensors.'
+    requirement = "The system shall produce an error"
+                  " if the input elasticity tensor is non-isotropic."
+  [../]
+[]
