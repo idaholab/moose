@@ -4,5 +4,6 @@
     input = test_postprocessor_state.py
     platform = "DARWIN"
     separate = True
+    python = 3
   [../]
 []

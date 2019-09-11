@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # This script generates pictures that demonstrate the agreement between the analytic LaForce solutions and MOOSE
 
 import os

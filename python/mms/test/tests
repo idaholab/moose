@@ -50,5 +50,6 @@
     input = test_mms.py
     sympy = true
     requirement = "The system shall include a tool for computing forcing functions for the method of manufactured solutions."
+    python = 3
   []
 []

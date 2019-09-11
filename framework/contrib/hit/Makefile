@@ -2,12 +2,13 @@ CXX ?= g++
 PYTHON_VERSION := $(shell python -c 'import sys;print(sys.version_info[0])')
 
 ifeq ($(PYTHON_VERSION), 2)
-	pyconfig := python-config
+	pyconfig := python2-config
 else
 	pyconfig := python3-config
-	ifeq (, $(shell which python3-config 2>/dev/null))
-		pyconfig := python-config
-	endif
+endif
+
+ifeq (, $(shell which $(pyconfig) 2>/dev/null))
+	pyconfig := python-config
 endif
 
 $(info Building hit for python $(PYTHON_VERSION) with $(pyconfig))

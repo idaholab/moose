@@ -7,7 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import platform, re, os, pkgutil
+import platform, re, os, sys, pkgutil
 from TestHarness import util
 from TestHarness.StatusSystem import StatusSystem
 from FactorySystem.MooseObject import MooseObject
@@ -83,6 +83,7 @@ class Tester(MooseObject):
         params.addParam('timing',         True, "If True, the test will be allowed to run with the timing flag (i.e. Manually turning on performance logging).")
         params.addParam('boost',         ['ALL'], "A test that runs only if BOOST is detected ('ALL', 'TRUE', 'FALSE')")
         params.addParam('sympy', False, "If True, sympy is required.")
+        params.addParam('python',        None, "Restrict the test to s specific version of python (2 or 3).")
 
         # SQA
         params.addParam("requirement", None, "The SQA requirement that this test satisfies (e.g., 'The Marker system shall provide means to mark elements for refinement within a box region.')")
@@ -568,6 +569,11 @@ class Tester(MooseObject):
         # Check for sympy
         if self.specs['sympy'] and pkgutil.find_loader('sympy') is None:
             reasons['python_package_required'] = 'NO SYMPY'
+
+        # Check python version
+        py_version = self.specs['python']
+        if (py_version is not None) and (sys.version_info[0] != py_version):
+            reasons['python'] = 'PYTHON != {}'.format(py_version)
 
         # Remove any matching user supplied caveats from accumulated checkRunnable caveats that
         # would normally produce a skipped test.

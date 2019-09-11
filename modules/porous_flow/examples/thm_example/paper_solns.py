@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 
 # This script generates the solutions to the radially-symmetric cold-CO2 injection scenario

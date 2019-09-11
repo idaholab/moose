@@ -2,6 +2,7 @@
   [./ExecuteRunnerPlugin]
     type = PythonUnitTest
     input = test_ExecuteRunnerPlugin.py
-    display_required = True    
+    display_required = True
+    python = 3
   [../]
 []

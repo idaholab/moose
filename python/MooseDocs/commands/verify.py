@@ -117,7 +117,7 @@ def main(options):
 
     # Create the content
     config = options.form + '.yml'
-    subprocess.check_output(['python3', 'moosedocs.py', 'build',
+    subprocess.check_output(['python', 'moosedocs.py', 'build',
                              '--config', config,
                              '--executioner', options.executioner,
                              '--disable', ' '.join(options.disable)],

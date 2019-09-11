@@ -4,5 +4,6 @@
     input = test_exodus_state.py
     platform = "DARWIN"
     separate = True
+    python = 3
   [../]
 []

@@ -4,83 +4,94 @@
   [materialize]
     requirement = "MooseDocs shall be able to translate markdown syntax using to HTML with Materialize support:"
     [barrier]
-        type = RunCommand
-        command = 'python3 moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelBarrier'
-        detail = "using a barrier-based parallel scheme;"
+      type = RunCommand
+      command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelBarrier'
+      detail = "using a barrier-based parallel scheme;"
+      python = 3
     []
     [serial]
-        type = RunCommand
-        command = 'python3 moosedocs.py verify --form materialize --executioner MooseDocs.base.Serial'
-        detail = "using a serial scheme;"
-        prereq = 'materialize/barrier'
+      type = RunCommand
+      command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.Serial'
+      detail = "using a serial scheme;"
+      prereq = 'materialize/barrier'
+      python = 3
     []
     [pipe]
-        type = RunCommand
-        command = 'python3 moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelPipe'
-        #prereq = serial
-        skip = 'WIP'
-        detail = "using a pipe-based parallel scheme; and"
+      type = RunCommand
+      command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelPipe'
+      #prereq = serial
+      skip = 'WIP'
+      detail = "using a pipe-based parallel scheme; and"
+      python = 3
     []
     [demand]
-        type = RunCommand
-        command = 'python3 moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelDemand'
-        #prereq = pipe
-        skip = 'WIP'
-        detail = "using a on-demand parser parallel scheme."
+      type = RunCommand
+      command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelDemand'
+      #prereq = pipe
+      skip = 'WIP'
+      detail = "using a on-demand parser parallel scheme."
+      python = 3
     []
   []
 
   [html_barrier]
     type = RunCommand
-    command = 'python3 moosedocs.py verify --form html --executioner MooseDocs.base.ParallelBarrier'
+    command = 'python moosedocs.py verify --form html --executioner MooseDocs.base.ParallelBarrier'
     requirement = "MooseDocs shall be able to convert markdown to HTML with the ParallelBarrier executioner."
+    python = 3
   []
   [html_serial]
     type = RunCommand
-    command = 'python3 moosedocs.py verify --form html --executioner MooseDocs.base.Serial'
+    command = 'python moosedocs.py verify --form html --executioner MooseDocs.base.Serial'
     requirement = "MooseDocs shall be able to convert markdown to HTML with the Serial executioner."
     prereq = html_barrier
+    python = 3
   []
   [html_pipe]
     type = RunCommand
-    command = 'python3 moosedocs.py verify --form html --executioner MooseDocs.base.ParallelPipe'
+    command = 'python moosedocs.py verify --form html --executioner MooseDocs.base.ParallelPipe'
     requirement = "MooseDocs shall be able to convert markdown to HTML with the ParallelPipe executioner."
     #prereq = html_serial
     skip = 'WIP'
+    python = 3
   []
   [html_demand]
     type = RunCommand
-    command = 'python3 moosedocs.py verify --form html --executioner MooseDocs.base.ParallelDemand'
+    command = 'python moosedocs.py verify --form html --executioner MooseDocs.base.ParallelDemand'
     requirement = "MooseDocs shall be able to convert markdown to HTML with the ParallelDemand executioner."
     #prereq = html_pipe
     skip = 'WIP'
+    python = 3
   []
-
 
   [latex_barrier]
     type = RunCommand
-    command = 'python3 moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelBarrier'
+    command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelBarrier'
     requirement = "MooseDocs shall be able to convert markdown to latex with the ParallelBarrier executioner."
+    python = 3
   []
   [latex_serial]
     type = RunCommand
-    command = 'python3 moosedocs.py verify --form latex --executioner MooseDocs.base.Serial'
+    command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.Serial'
     requirement = "MooseDocs shall be able to convert markdown to latex with the Serial executioner."
     prereq = latex_barrier
     skip = 'WIP'
+    python = 3
   []
   [latex_pipe]
     type = RunCommand
-    command = 'python3 moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelPipe'
+    command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelPipe'
     requirement = "MooseDocs shall be able to convert markdown to latex with the ParallelPipe executioner."
     #prereq = latex_serial
     skip = 'WIP'
+    python = 3
   []
   [latex_demand]
     type = RunCommand
-    command = 'python3 moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelDemand'
+    command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelDemand'
     requirement = "MooseDocs shall be able to convert markdown to latex with the ParallelDemand executioner."
     #prereq = latex_pip
     skip = 'WIP'
+    python = 3
   []
 []

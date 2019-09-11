@@ -4,5 +4,6 @@
     input = test_PeacockMainWindow.py
     display_required = True
     separate = True
+    python = 3
   [../]
 []

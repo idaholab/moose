@@ -2,6 +2,7 @@
   [./ParameterInfo]
     type = PythonUnitTest
     input = test_ParameterInfo.py
-    display_required = True    
+    display_required = True
+    python = 3
   [../]
 []

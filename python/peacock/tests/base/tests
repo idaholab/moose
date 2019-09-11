@@ -1,12 +1,14 @@
 [Tests]
   [./PluginManager]
-     type = RunApp
-     command = test_PluginManager.py
-     display_required = True
+    type = RunApp
+    command = test_PluginManager.py
+    display_required = True
+    python = 3
   [../]
   [./collapsible]
     type = RunApp
     command = test_PeacockCollapsibleWidget.py
     display_required = True
+    python = 3
   [../]
 []

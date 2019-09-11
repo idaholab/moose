@@ -1,10 +1,10 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 import os
 import vtk
 import chigger
 import mooseutils
 
-#!/usr/bin/env python3
+#!/usr/bin/env python
 import os
 import argparse
 import vtk

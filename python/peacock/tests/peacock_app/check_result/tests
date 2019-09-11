@@ -3,6 +3,7 @@
     type = PythonUnitTest
     input = test_check_result.py
     separate = True
-    display_required = True    
+    display_required = True
+    python = 3
   [../]
 []
