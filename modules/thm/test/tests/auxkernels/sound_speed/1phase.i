@@ -44,25 +44,8 @@
   []
 []
 
-[Variables]
-  [./u]
-  [../]
-[]
-
-[Kernels]
-  [./diff]
-    type = Diffusion
-    variable = u
-  [../]
-[]
-
-[BCs]
-  [./bcs]
-    type = DirichletBC
-    variable = u
-    boundary = 'left right'
-    value = 1
-  [../]
+[Problem]
+  solve = false
 []
 
 [Postprocessors]
