@@ -139,6 +139,10 @@ validParams<MooseMesh>()
                                 "KDTree construction becomes faster but the nearest neighbor search"
                                 "becomes slower.");
 
+  // This indicates that the derived mesh type accepts a MeshGenerator, and should be set to true in
+  // derived types that do so.
+  params.addPrivateParam<bool>("_mesh_generator_mesh", false);
+
   params.registerBase("MooseMesh");
 
   // groups

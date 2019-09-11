@@ -231,14 +231,19 @@ SetupMeshAction::act()
       // If the [Mesh] block contains mesh generators, change the default type to construct
       if (_awh.hasActions("add_mesh_generator"))
       {
-        if (_pars.isParamSetByUser("type") && _type != "MeshGeneratorMesh")
+        if (!_pars.isParamSetByUser("type"))
+        {
+          _type = "MeshGeneratorMesh";
+          _moose_object_pars = _factory.getValidParams("MeshGeneratorMesh");
+        }
+        else if (!_moose_object_pars.get<bool>("_mesh_generator_mesh"))
+        {
           mooseWarning("Mesh Generators present but the [Mesh] block is set to construct a \"",
                        _type,
-                       "\" mesh.");
-
-        _type = "MeshGeneratorMesh";
-        _moose_object_pars = _factory.getValidParams("MeshGeneratorMesh");
+                       "\" mesh, which does not use Mesh Generators in constructing the mesh.");
+        }
       }
+
       // switch non-file meshes to be a file-mesh if using a pre-split mesh configuration.
       if (_app.isUseSplit())
         _type = modifyParamsForUseSplit(_moose_object_pars);
