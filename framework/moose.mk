@@ -35,7 +35,8 @@ hit_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(hit_srcfiles))
 #
 # hit python bindings
 #
-pyhit_srcfiles  := $(hit_DIR)/hit.cpp $(hit_DIR)/lex.cc $(hit_DIR)/parse.cc $(hit_DIR)/braceexpr.cc
+python_version 	:= $(shell python -c 'import sys;print(sys.version_info[0])')
+pyhit_srcfiles  := $(hit_DIR)/hit$(python_version).cpp $(hit_DIR)/lex.cc $(hit_DIR)/parse.cc $(hit_DIR)/braceexpr.cc
 pyhit_LIB       := $(FRAMEWORK_DIR)/../python/hit.so
 
 # some systems have python2 but no python2-config command - fall back to python-config for them
