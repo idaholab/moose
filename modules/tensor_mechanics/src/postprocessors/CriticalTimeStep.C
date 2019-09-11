@@ -64,7 +64,7 @@ CriticalTimeStep::execute()
 void
 CriticalTimeStep::finalize()
 {
-  gatherSum(_critical_time);
+  gatherMin(_critical_time);
 }
 
 Real
