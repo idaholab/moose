@@ -46,33 +46,16 @@
   []
 []
 
-[Variables]
-  [u]
-  []
-[]
-
-[Kernels]
-  [diff]
-    type = Diffusion
-    variable = u
-  []
-[]
-
-[BCs]
-  [bcs]
-    type = DirichletBC
-    variable = u
-    boundary = 'left right'
-    value = 1
-  []
-[]
-
 [Postprocessors]
   [mach_no]
     type = ElementalVariableValue
     variable = mach_no
     elementid = 0
   []
+[]
+
+[Problem]
+  solve = false
 []
 
 [Executioner]
