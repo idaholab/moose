@@ -56,7 +56,7 @@ To calculate the beam strain increment, the incremental beam displacements at ti
 \end{equation}
 \begin{equation}
 {u_2}(x,y,z) = u_2(x) - \theta_1(x) z
-\end{equations}
+\end{equation}
 \begin{equation}
 {u_3}(x,y,z) = u_3(x) + \theta_1(x) y
 \end{equation}
