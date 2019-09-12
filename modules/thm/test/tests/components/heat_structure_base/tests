@@ -7,6 +7,26 @@
     rel_err = 1e-5
   [../]
 
+  [./phy:variable_init_t]
+    type = Exodiff
+    input = 'phy.variable_init_t.i'
+    exodiff = 'phy.variable_init_t_out.e'
+    custom_cmp = 'phy.variable_init_t.exodiff'
+  [../]
+
+  [./phy:sub_discretization]
+    type = Exodiff
+    input = 'phy.sub_discretization.i'
+    exodiff = 'phy.sub_discretization_out.e'
+    custom_cmp = 'phy.sub_discretization.exodiff'
+  [../]
+
+  [./2nd_order]
+    type = 'RunApp'
+    input = '2nd_order.i'
+    expect_out = "Solve Converged"
+  [../]
+
   [./missing_axial_regions_parameter]
     type = RunException
     input = 'axial_regions.i'
@@ -18,5 +38,17 @@
     input = 'axial_regions.i'
     cli_args = "Components/hs/axial_region_names='region1 region2'"
     expect_err = "The number of entries in parameter 'axial_region_names' \(2\) must equal the number of entries of parameter 'length' \(3\)"
+  [../]
+
+  [./err:no_2nd_order_with_trap]
+    type = 'RunException'
+    input = 'err.no_2nd_order_with_trap.i'
+    expect_err = "Cannot use TRAP quadrature rule with 2nd order elements.  Use SIMPSON or GAUSS instead."
+  [../]
+
+  [./err:no_T_ic]
+    type = 'RunException'
+    input = 'err.no_T_ic.i'
+    expect_err = "hs: Missing initial condition for temperature."
   [../]
 []
