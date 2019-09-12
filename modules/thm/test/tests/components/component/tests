@@ -5,4 +5,11 @@
     expect_err = "cmp: The component 'pipe' does not exist"
     allow_test_objects = true
   [../]
+
+  [./err:setup_status]
+    type = 'RunException'
+    input = 'err.setup_status.i'
+    expect_err = "pipe: The component setup status \(1\) is less than the required status \(2\)"
+    allow_test_objects = true
+  [../]
 []
