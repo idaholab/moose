@@ -180,6 +180,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _patch_update_strategy(
         getParam<MooseEnum>("patch_update_strategy").getEnum<Moose::PatchUpdateType>()),
     _regular_orthogonal_mesh(false),
+    _meta_data(declareRestartableData<Parameters>("meta_data")),
     _allow_recovery(true),
     _construct_node_list_from_side_list(getParam<bool>("construct_node_list_from_side_list")),
     _prepare_timer(registerTimedSection("prepare", 2)),
@@ -242,6 +243,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _max_leaf_size(other_mesh._max_leaf_size),
     _patch_update_strategy(other_mesh._patch_update_strategy),
     _regular_orthogonal_mesh(false),
+    _meta_data(other_mesh._meta_data),
     _construct_node_list_from_side_list(other_mesh._construct_node_list_from_side_list),
     _prepare_timer(registerTimedSection("prepare", 2)),
     _update_timer(registerTimedSection("update", 2)),
