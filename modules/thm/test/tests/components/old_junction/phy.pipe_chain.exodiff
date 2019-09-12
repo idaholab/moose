@@ -1,0 +1,6 @@
+COORDINATES
+TIME STEPS
+NODAL VARIABLES relative 1e-4
+	rhoA
+	rhouA
+	rhoEA
