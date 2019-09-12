@@ -33,7 +33,8 @@ RestartableTypes::RestartableTypes(const InputParameters & params)
     _set_data(declareRestartableData<std::set<Real>>("set_data")),
     _map_data(declareRestartableData<std::map<unsigned int, Real>>("map_data")),
     _dense_vector_data(declareRestartableData<DenseVector<Real>>("dense_vector_data")),
-    _dense_matrix_data(declareRestartableData<DenseMatrix<Real>>("dense_matrix_data"))
+    _dense_matrix_data(declareRestartableData<DenseMatrix<Real>>("dense_matrix_data")),
+    _raw_parameters(declareRestartableData<Parameters>("raw_parameters"))
 {
   _vector_data.resize(4, 1);
   _vector_vector_data.resize(4);
@@ -85,6 +86,10 @@ RestartableTypes::initialSetup()
   for (unsigned int i = 0; i < _dense_matrix_data.m(); i++)
     for (unsigned int j = 0; j < _dense_matrix_data.n(); j++)
       _dense_matrix_data(i, j) = static_cast<Real>(i + j);
+
+  _raw_parameters.set<int>("i") = 42;
+  _raw_parameters.set<unsigned int>("j") = 55;
+  _raw_parameters.set<Real>("Pi") = 3.14159;
 }
 
 void
