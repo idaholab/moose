@@ -20,9 +20,9 @@ class TestHitLoad(unittest.TestCase):
     def testRender(self):
         root = mooseutils.hit_load(os.path.join('..', '..', 'test_files', 'test.hit'))
         out = root.render()
-        self.assertIn('[A]', out)
-        self.assertIn('param = bar', out)
-        self.assertIn('comment', out)
+        self.assertIn('[A]', out.decode())
+        self.assertIn('param = bar', out.decode())
+        self.assertIn('comment', out.decode())
 
     def testBasic(self):
         root = mooseutils.hit_load(os.path.join('..', '..', 'test_files', 'test.hit'))
