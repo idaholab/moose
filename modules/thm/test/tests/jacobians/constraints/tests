@@ -1,0 +1,36 @@
+[Tests]
+  [./old_junction_momentum_constraint_positive_velocity]
+    type = 'PetscJacobianTester'
+    input = 'old_junction_momentum_constraint.i'
+    ratio_tol = 1e-6
+    difference_tol = 1e-4
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./old_junction_momentum_constraint_negative_velocity]
+    type = 'PetscJacobianTester'
+    input = 'old_junction_momentum_constraint.i'
+    cli_args = "JacobianTest1Phase/vel=-2"
+    ratio_tol = 1e-6
+    difference_tol = 1e-4
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./old_junction_energy_constraint_positive_velocity]
+    type = 'PetscJacobianTester'
+    input = 'old_junction_energy_constraint.i'
+    ratio_tol = 1e-8
+    difference_tol = 0.09
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./old_junction_energy_constraint_negative_velocity]
+    type = 'PetscJacobianTester'
+    input = 'old_junction_energy_constraint.i'
+    cli_args = "JacobianTest1Phase/vel=-2"
+    ratio_tol = 1e-8
+    difference_tol = 0.09
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+[]
