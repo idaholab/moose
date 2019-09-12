@@ -1,0 +1,4 @@
+COORDINATES
+TIME STEPS
+NODAL VARIABLES relative 2e-6 floor 1.e-10
+	T_solid

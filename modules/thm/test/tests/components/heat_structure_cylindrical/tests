@@ -1,0 +1,8 @@
+[Tests]
+  [./phy:rz]
+    type = Exodiff
+    input = 'phy.rz.i'
+    exodiff = 'phy.rz_out.e'
+    custom_cmp = 'phy.rz.exodiff'
+  [../]
+[]
