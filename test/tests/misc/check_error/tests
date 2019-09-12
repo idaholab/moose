@@ -1039,4 +1039,14 @@
     design = 'Executioner/index.md'
     issues = '#11586'
   [../]
+
+  [./nodal_bc_on_elemental_var]
+    type = 'RunException'
+    input = 'nodal_bc_on_elemental_var.i'
+    expect_err = "Trying to use nodal boundary condition 'bcs' on a non-nodal variable 'u'"
+
+    requirement = 'The system shall report an error when nodal boundary condition is applied on a non-nodal variable.'
+    design = 'NonlinearSystem.md'
+    issues = '#14019'
+  [../]
 []
