@@ -1046,6 +1046,8 @@ protected:
   void setPartitionerHelper();
 
 private:
+  Parameters & _meta_data;
+
   /**
    * A map of vectors indicating which dimensions are periodic in a regular orthogonal mesh for
    * the specified variable numbers.  This data structure is populated by addPeriodicVariable.
