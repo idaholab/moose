@@ -1,0 +1,10 @@
+COORDINATES
+TIME STEPS
+NODAL VARIABLES relative 1e-6 floor 1e-9
+	alpha_liquid
+	arhoA_liquid
+	arhouA_liquid
+	arhoEA_liquid
+	arhoA_vapor
+	arhouA_vapor
+	arhoEA_vapor
