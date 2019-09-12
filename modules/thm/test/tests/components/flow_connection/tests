@@ -1,0 +1,7 @@
+[Tests]
+  [./err:connecting_to_non_existent_component]
+    type = 'RunException'
+    input = 'err.connecting_to_non_existent_component.i'
+    expect_err = "inlet_1p: Trying to connect to a component 'pipe', but there is no such component in the simulation. Please check your spelling."
+  [../]
+[]
