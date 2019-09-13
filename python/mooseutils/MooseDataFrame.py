@@ -25,14 +25,15 @@ class MooseDataFrame(object):
     OLDFILE = 2
     UPDATED = 3
 
-    def __init__(self, filename, index=None, run_start_time=None):
+    def __init__(self, filename, index=None, run_start_time=None, update=True):
 
         self.filename = filename
         self.modified = None
         self.data = pandas.DataFrame()
         self._index = index
         self._run_start_time = run_start_time
-        self.update()
+        if update:
+            self.update()
 
     def __getitem__(self, key):
         """
@@ -87,6 +88,7 @@ class MooseDataFrame(object):
                 retcode = MooseDataFrame.UPDATED
                 try:
                     self.modified = modified
+                    print 'LOADING DATA...', self.filename
                     self.data = pandas.read_csv(self.filename)
                     if self._index:
                         self.data.set_index(self._index, inplace=True)
