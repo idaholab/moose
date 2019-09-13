@@ -1,0 +1,20 @@
+Content:
+    sub_channel:
+        root_dir: ${ROOT_DIR}/doc/content
+    moose:
+        root_dir: ${MOOSE_DIR}/framework/doc/content
+        content:
+            - js/*
+            - css/*
+            - contrib/**
+            - media/**
+
+Renderer:
+    type: MooseDocs.base.MaterializeRenderer
+    name: sub_channel
+
+Extensions:
+    MooseDocs.extensions.appsyntax:
+        executable: ${ROOT_DIR}
+        includes:
+            - include
