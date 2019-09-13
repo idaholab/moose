@@ -57,7 +57,7 @@
 
 [UserObjects]
   [./cavity_radiation]
-    type = GrayLambertSurfaceRadiation
+    type = ConstantViewFactorSurfaceRadiation
     boundary = 'left_interior right_interior bottom_to_2 top_to_2'
     temperature = temperature
     emissivity = '0.8 0.8 0.8 0.8'

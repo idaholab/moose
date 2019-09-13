@@ -21,17 +21,21 @@
 
 [UserObjects]
   [./gray_lambert]
-    type = ConstantViewFactorSurfaceRadiation
+    type = ViewFactorObjectSurfaceRadiation
     boundary = 'bottom top left right'
     fixed_temperature_boundary = 'bottom top'
     fixed_boundary_temperatures = '550 300'
     adiabatic_boundary = 'right left'
     emissivity = '1 0.75 0.75 0.75'
     temperature = temperature
-    view_factors = '0 0.123 0.6928 0.1841;
-                    0.123 0 0.1841 0.6928;
-                    0.2771 0.0736 0.4458 0.2035;
-                    0.0736 0.2771 0.2035 0.4458'
+    view_factor_object_name = view_factor
+  [../]
+
+  [./view_factor]
+    type = UnobstructedPlanarViewFactor
+    boundary = 'left right bottom top'
+    normalize_view_factor = true
+    execute_on = 'INITIAL'
   [../]
 []
 
@@ -68,4 +72,8 @@
 [Executioner]
   type = Transient
   num_steps = 1
+[]
+
+[Outputs]
+  csv = true
 []

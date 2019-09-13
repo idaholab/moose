@@ -10,28 +10,27 @@
 #pragma once
 
 #include "GeneralPostprocessor.h"
-#include "GrayLambertSurfaceRadiationBase.h"
 
-class GrayLambertSurfaceRadiationPP;
+class ViewFactorPP;
+class ViewFactorBase;
 
 template <>
-InputParameters validParams<GrayLambertSurfaceRadiationPP>();
+InputParameters validParams<ViewFactorPP>();
 
 /**
- * A postprocessor that extracts information from
- * the GrayLambertSurfaceRadiationBase UserObject
+ * This postprocessor allows to extract view factors from ViewFactor userobjects
  */
-class GrayLambertSurfaceRadiationPP : public GeneralPostprocessor
+class ViewFactorPP : public GeneralPostprocessor
 {
 public:
-  GrayLambertSurfaceRadiationPP(const InputParameters & parameters);
+  ViewFactorPP(const InputParameters & parameters);
 
   virtual void initialize() override {}
   virtual void execute() override {}
   virtual PostprocessorValue getValue() override;
 
 protected:
-  const GrayLambertSurfaceRadiationBase & _glsr_uo;
-  MooseEnum _return_type;
-  BoundaryID _bnd_id;
+  const ViewFactorBase & _vf_uo;
+  const BoundaryID _from_bnd_id;
+  const BoundaryID _to_bnd_id;
 };
