@@ -1,7 +1,10 @@
 # This test solves a 2D steady state heat equation
 # The error is found by comparing to the analytical solution
 
-[MeshGenerators]
+[Mesh]
+  type = PeridynamicsMesh
+  horizon_number = 3
+
   [./gmg]
     type = GeneratedMeshGenerator
     dim = 2
@@ -13,11 +16,6 @@
     input = gmg
     retain_fe_mesh = false
   [../]
-[]
-
-[Mesh]
-  type = PeridynamicsMesh
-  horizon_number = 3
 []
 
 [Variables]

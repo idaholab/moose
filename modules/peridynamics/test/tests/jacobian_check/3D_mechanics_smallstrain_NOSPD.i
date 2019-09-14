@@ -3,7 +3,10 @@
   full_jacobian = true
 []
 
-[MeshGenerators]
+[Mesh]
+  type = PeridynamicsMesh
+  horizon_number = 2
+
   [./gmg]
     type = GeneratedMeshGenerator
     dim = 3
@@ -16,11 +19,6 @@
     input = gmg
     retain_fe_mesh = false
   [../]
-[]
-
-[Mesh]
-  type = PeridynamicsMesh
-  horizon_number = 2
 []
 
 [Variables]

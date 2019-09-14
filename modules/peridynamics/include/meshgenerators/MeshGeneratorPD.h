@@ -42,4 +42,7 @@ protected:
   /// flag to specify whether the FE mesh should be retained or not
   /// in addition to newly created PD mesh
   bool _retain_fe_mesh;
+
+  /// flag to specify whether PD sideset should be constructed or not
+  bool _construct_pd_sideset;
 };

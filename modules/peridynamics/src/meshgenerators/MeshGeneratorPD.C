@@ -12,6 +12,8 @@
 #include "CastUniquePointer.h"
 
 #include "libmesh/edge_edge2.h"
+#include "libmesh/face_tri3.h"
+#include "libmesh/cell_tet4.h"
 
 registerMooseObject("PeridynamicsApp", MeshGeneratorPD);
 
@@ -29,6 +31,10 @@ validParams<MeshGeneratorPD>()
   params.addRequiredParam<bool>(
       "retain_fe_mesh",
       "whether to retain the FE mesh or not in addition to the newly created PD mesh");
+  params.addParam<bool>(
+      "construct_peridynamics_sideset",
+      false,
+      "whether to construct peridynamics sidesets based on the sidesets in original FE mesh");
 
   return params;
 }
@@ -37,7 +43,8 @@ MeshGeneratorPD::MeshGeneratorPD(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input")),
     _has_block_id(isParamValid("convert_block_ids")),
-    _retain_fe_mesh(getParam<bool>("retain_fe_mesh"))
+    _retain_fe_mesh(getParam<bool>("retain_fe_mesh")),
+    _construct_pd_sideset(getParam<bool>("construct_peridynamics_sideset"))
 {
   if (_has_block_id)
   {
@@ -71,14 +78,14 @@ MeshGeneratorPD::generate()
     _conv_block_ids = all_block_ids;
 
   // save IDs of converted FE elems
-  std::vector<dof_id_type> conv_elem_ids;
+  std::set<dof_id_type> conv_elem_ids;
   // retained FE mesh and unconverted FE mesh, if any
   std::set<dof_id_type> fe_nodes_ids;
   std::set<dof_id_type> fe_elems_ids;
   for (const auto & old_elem : old_mesh->element_ptr_range())
     if (_conv_block_ids.count(old_elem->subdomain_id())) // record converted FE elem IDs
     {
-      conv_elem_ids.push_back(old_elem->id());
+      conv_elem_ids.insert(old_elem->id());
       if (_retain_fe_mesh) // save converted elems and their nodes if retained
       {
         fe_elems_ids.insert(old_elem->id());
@@ -96,6 +103,25 @@ MeshGeneratorPD::generate()
   // number of FE elements and nodes in the old mesh to be saved in the new mesh
   dof_id_type n_fe_nodes = fe_nodes_ids.size();
   dof_id_type n_fe_elems = fe_elems_ids.size();
+  dof_id_type n_phantom_elems = 0;
+
+  // determine the number of phantom elements to be generated in the new mesh based on sideset in
+  // old mesh
+  BoundaryInfo & old_boundary_info = old_mesh->get_boundary_info();
+
+  // save the IDs of FE sidesets excluding constructed from nodesets in old mesh
+  std::set<boundary_id_type> fe_sbnd_ids = old_boundary_info.get_side_boundary_ids();
+  // determine number of FE side elements, the number of actual phantom elements is less than or
+  // equal to the number of FE side elements, this number is used to reserve number of elements
+  // in the new mesh only
+  std::map<boundary_id_type, std::set<dof_id_type>> fe_sbnd_elem_ids;
+  auto fe_sbc_tuples = old_boundary_info.build_side_list();
+  // 0: element ID, 1: side ID, 2: boundary ID
+  for (const auto & sbct : fe_sbc_tuples)
+  {
+    fe_sbnd_elem_ids[std::get<2>(sbct)].insert(std::get<0>(sbct));
+    ++n_phantom_elems;
+  }
 
   // STEP 2: generate PD data based on to-be converted FE mesh and prepare for new mesh
 
@@ -114,16 +140,21 @@ MeshGeneratorPD::generate()
   new_mesh->set_mesh_dimension(old_mesh->mesh_dimension());
   new_mesh->set_spatial_dimension(old_mesh->spatial_dimension());
   // reserve elements and nodes for the new mesh
-  new_mesh->reserve_nodes(n_pd_bonds + n_fe_elems);
-  new_mesh->reserve_elem(n_pd_nodes + n_fe_nodes);
+  new_mesh->reserve_nodes(n_pd_nodes + n_fe_nodes);
+  new_mesh->reserve_elem(n_pd_bonds + n_fe_elems + n_phantom_elems);
+
+  BoundaryInfo & new_boundary_info = new_mesh->get_boundary_info();
 
   // STEP 3: add points of PD data and FE mesh (retained and/or unconverted, if any) to new mesh
 
   // save PD nodes to new mesh first
   unsigned int new_node_id = 0;
-  for (unsigned int i = 0; i < n_pd_nodes; ++i)
+  // map of IDs of converted FE elements and PD nodes
+  std::map<dof_id_type, dof_id_type> fe_elem_pd_node_map;
+  for (const auto & eid : conv_elem_ids)
   {
-    new_mesh->add_point(old_mesh->elem_ptr(conv_elem_ids[i])->centroid(), new_node_id);
+    new_mesh->add_point(old_mesh->elem_ptr(eid)->centroid(), new_node_id);
+    fe_elem_pd_node_map.insert(std::make_pair(eid, new_node_id));
 
     ++new_node_id;
   }
@@ -138,9 +169,9 @@ MeshGeneratorPD::generate()
     ++new_node_id;
   }
 
-  // STEP 4: generate PD elem, and FE elem using retained and/or unconverted mesh, if any
+  // STEP 4: generate PD, phantom and FE elems using retained and/or unconverted mesh, if any
 
-  // generate and save PD elements first to new mesh
+  // generate PD elements first to new mesh
   unsigned int new_elem_id = 0;
   for (unsigned int i = 0; i < n_pd_nodes; ++i)
   {
@@ -148,9 +179,16 @@ MeshGeneratorPD::generate()
     for (unsigned int j = 0; j < pd_node_neighbors.size(); ++j)
       if (pd_node_neighbors[j] > i)
       {
+        unsigned int bid_i = pd_mesh.getNodeBlockID(i);
+        unsigned int bid_j = pd_mesh.getNodeBlockID(pd_node_neighbors[j]);
         Elem * new_elem = new Edge2;
         new_elem->set_id(new_elem_id);
-        new_elem->subdomain_id() = pd_mesh.getNodeBlockID(i); // block id for PD mesh from FE mesh
+        if (bid_i == bid_j)
+          new_elem->subdomain_id() =
+              bid_i; // assign block ID to PD elems based on block ID of PD nodes
+        else
+          new_elem->subdomain_id() = bid_i + bid_j; // assign a new block ID to PD interface elems
+
         new_elem = new_mesh->add_elem(new_elem);
         new_elem->set_node(0) = new_mesh->node_ptr(i);
         new_elem->set_node(1) = new_mesh->node_ptr(pd_node_neighbors[j]);
@@ -158,6 +196,235 @@ MeshGeneratorPD::generate()
         ++new_elem_id;
       }
   }
+
+  // then generate phantom elements for sidesets in PD mesh, this is optional
+  std::map<std::pair<dof_id_type, dof_id_type>, std::set<dof_id_type>> elem_edge_node;
+  if (_construct_pd_sideset)
+    for (const auto & bidit : fe_sbnd_ids)
+      for (const auto & eidit : fe_sbnd_elem_ids[bidit])
+      {
+        bool should_add = false;
+        Elem * old_elem = old_mesh->elem_ptr(eidit);
+        if (_conv_block_ids.count(old_elem->subdomain_id()))
+        {
+          std::vector<dof_id_type> node_ids;
+          if (new_mesh->mesh_dimension() == 2) // 2D
+          {
+            node_ids.resize(3);
+            node_ids[0] = fe_elem_pd_node_map.at(eidit);
+            Point p0 = *new_mesh->node_ptr(node_ids[0]);
+            // search for two more nodes to construct a phantom 3-node triangular element
+            if (old_elem->n_nodes() == 3 ||
+                old_elem->n_nodes() == 6) // original triangular FE elements: 3-node or 6-node
+            {
+              // check existence of counterclockwise nodes ordering
+              for (unsigned int i = 0; i < old_elem->n_neighbors(); ++i)
+              {
+                Elem * nb = old_elem->neighbor_ptr(i);
+                if (nb != NULL)
+                {
+                  for (unsigned int j = 0; j < nb->n_neighbors(); ++j)
+                  {
+                    Elem * nb_nb = nb->neighbor_ptr(j);
+                    if (nb_nb != NULL && fe_sbnd_elem_ids[bidit].count(nb_nb->id()) &&
+                        nb_nb->id() != eidit)
+                    {
+                      Point p1 = *new_mesh->node_ptr(fe_elem_pd_node_map.at(nb_nb->id()));
+                      Point p2 = *new_mesh->node_ptr(fe_elem_pd_node_map.at(nb->id()));
+                      Real val =
+                          (p1(1) - p0(1)) * (p2(0) - p1(0)) - (p1(0) - p0(0)) * (p2(1) - p1(1));
+                      if (val < 0) // counterclockwise
+                      {
+                        node_ids[1] = fe_elem_pd_node_map.at(nb_nb->id());
+                        node_ids[2] = fe_elem_pd_node_map.at(nb->id());
+                        should_add = true;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            else // original quadrilateral FE elements: 4-node, 8-node and 9-node
+            {
+              // find potential nodes for construction of the phantom triangular element
+              std::vector<dof_id_type> boundary_node_ids;
+              for (unsigned int i = 0; i < old_elem->n_neighbors(); ++i)
+              {
+                Elem * nb = old_elem->neighbor_ptr(i);
+                if (nb != NULL)
+                {
+                  if (fe_sbnd_elem_ids[bidit].count(nb->id()))
+                    boundary_node_ids.push_back(fe_elem_pd_node_map.at(nb->id()));
+                  else
+                    node_ids[2] = fe_elem_pd_node_map.at(nb->id());
+                }
+              }
+              // check existence of counterclockwise ordering based on the above found nodes
+              Point p2 = *new_mesh->node_ptr(node_ids[2]);
+              for (unsigned int i = 0; i < boundary_node_ids.size(); ++i)
+              {
+                Point p1 = *new_mesh->node_ptr(boundary_node_ids[i]);
+                Real val = (p1(1) - p0(1)) * (p2(0) - p1(0)) - (p1(0) - p0(0)) * (p2(1) - p1(1));
+                if (val < 0) // counterclockwise
+                {
+                  node_ids[1] = boundary_node_ids[i];
+                  should_add = true;
+                }
+              }
+            }
+
+            if (should_add)
+            {
+              Elem * new_elem = new Tri3;
+              new_elem->set_id(new_elem_id);
+              new_elem->subdomain_id() = old_elem->subdomain_id() + 10000;
+              new_elem = new_mesh->add_elem(new_elem);
+              new_elem->set_node(0) = new_mesh->node_ptr(node_ids[0]);
+              new_elem->set_node(1) = new_mesh->node_ptr(node_ids[1]);
+              new_elem->set_node(2) = new_mesh->node_ptr(node_ids[2]);
+
+              ++new_elem_id;
+
+              new_boundary_info.add_side(new_elem, 0, 1000 + bidit);
+              if (old_boundary_info.get_sideset_name(bidit) != "")
+                new_boundary_info.sideset_name(1000 + bidit) =
+                    "pd_side_" + old_boundary_info.get_sideset_name(bidit);
+            }
+          }
+          else // 3D
+          {
+            node_ids.resize(4);
+            node_ids[0] = fe_elem_pd_node_map.at(eidit);
+            Point p0 = *new_mesh->node_ptr(node_ids[0]);
+            // search for three more nodes to construct a phantom 4-node tetrahedral element
+
+            if (old_elem->n_nodes() == 4 ||
+                old_elem->n_nodes() == 10) // original tetrahedral FE elements: 4-node or 10-node
+            {
+              // construct phantom element based on original tet mesh
+              mooseError("Peridynamics sideset generation doesn't accept tetrahedral elements!");
+            }
+            else // original hexahedral FE elements
+            {
+              std::vector<dof_id_type> boundary_elem_ids;
+              for (unsigned int i = 0; i < old_elem->n_neighbors(); ++i)
+              {
+                Elem * nb = old_elem->neighbor_ptr(i);
+                if (nb != NULL)
+                {
+                  if (fe_sbnd_elem_ids[bidit].count(nb->id()))
+                    boundary_elem_ids.push_back(nb->id());
+                  else
+                    node_ids[3] = fe_elem_pd_node_map.at(nb->id());
+                }
+              }
+              // choose three nodes ordered in a way such that the normal points to the fourth node
+              Point p3 = *new_mesh->node_ptr(node_ids[3]);
+              for (unsigned int i = 0; i < boundary_elem_ids.size(); ++i)
+              {
+                Elem * nb_i = old_mesh->elem_ptr(boundary_elem_ids[i]);
+                for (unsigned int j = i + 1; j < boundary_elem_ids.size(); ++j)
+                {
+                  should_add = false;
+                  Elem * nb_j = old_mesh->elem_ptr(boundary_elem_ids[j]);
+                  unsigned int common_nb = 0;
+                  for (unsigned int k = 0; k < nb_j->n_neighbors();
+                       ++k) // check whether nb_i and nb_j shares two common neighbors
+                  {
+                    if (nb_j->neighbor_ptr(k) != NULL && nb_i->has_neighbor(nb_j->neighbor_ptr(k)))
+                      ++common_nb;
+                  }
+                  if (common_nb == 2)
+                  {
+                    should_add = true;
+                    // check whether this new elem overlaps with already created elems by the saved
+                    // edge and nodes of previously created phantom elems
+                    std::pair<dof_id_type, dof_id_type> pair;
+                    if (eidit < boundary_elem_ids[i])
+                      pair = std::make_pair(eidit, boundary_elem_ids[i]);
+                    else
+                      pair = std::make_pair(boundary_elem_ids[i], eidit);
+
+                    if (elem_edge_node.count(pair))
+                    {
+                      for (const auto & nbid : elem_edge_node[pair])
+                        if (nbid != old_elem->id() && old_mesh->elem_ptr(nbid)->has_neighbor(nb_j))
+                          should_add = false;
+                    }
+
+                    if (eidit < boundary_elem_ids[j])
+                      pair = std::make_pair(eidit, boundary_elem_ids[j]);
+                    else
+                      pair = std::make_pair(boundary_elem_ids[j], eidit);
+                    if (elem_edge_node.count(pair))
+                    {
+                      for (const auto & nbid : elem_edge_node[pair])
+                        if (nbid != old_elem->id() && old_mesh->elem_ptr(nbid)->has_neighbor(nb_i))
+                          should_add = false;
+                    }
+
+                    if (should_add)
+                    {
+                      Point p1 = *new_mesh->node_ptr(fe_elem_pd_node_map.at(boundary_elem_ids[i]));
+                      Point p2 = *new_mesh->node_ptr(fe_elem_pd_node_map.at(boundary_elem_ids[j]));
+                      // check whether the normal of face formed by p0, p1 and p2 points to p3
+                      Real val =
+                          ((p1(1) - p0(1)) * (p2(2) - p0(2)) - (p1(2) - p0(2)) * (p2(1) - p0(1))) *
+                              (p3(0) - p0(0)) +
+                          ((p1(2) - p0(2)) * (p2(0) - p0(0)) - (p1(0) - p0(0)) * (p2(2) - p0(2))) *
+                              (p3(1) - p0(1)) +
+                          ((p1(0) - p0(0)) * (p2(1) - p0(1)) - (p1(1) - p0(1)) * (p2(0) - p0(0))) *
+                              (p3(2) - p0(2));
+                      if (val > 0) // normal point to p3
+                      {
+                        node_ids[1] = fe_elem_pd_node_map.at(boundary_elem_ids[i]);
+                        node_ids[2] = fe_elem_pd_node_map.at(boundary_elem_ids[j]);
+                      }
+                      else
+                      {
+                        node_ids[1] = fe_elem_pd_node_map.at(boundary_elem_ids[j]);
+                        node_ids[2] = fe_elem_pd_node_map.at(boundary_elem_ids[i]);
+                      }
+
+                      // construct the new phantom element
+                      Elem * new_elem = new Tet4;
+                      new_elem->set_id(new_elem_id);
+                      new_elem->subdomain_id() = old_elem->subdomain_id() + 10000;
+                      new_elem = new_mesh->add_elem(new_elem);
+                      new_elem->set_node(0) = new_mesh->node_ptr(node_ids[0]);
+                      new_elem->set_node(1) = new_mesh->node_ptr(node_ids[1]);
+                      new_elem->set_node(2) = new_mesh->node_ptr(node_ids[2]);
+                      new_elem->set_node(3) = new_mesh->node_ptr(node_ids[3]);
+
+                      // save the edges and nodes used in the new phantom elem
+                      if (eidit < boundary_elem_ids[i])
+                        elem_edge_node[std::make_pair(eidit, boundary_elem_ids[i])].insert(
+                            boundary_elem_ids[j]);
+                      else
+                        elem_edge_node[std::make_pair(boundary_elem_ids[i], eidit)].insert(
+                            boundary_elem_ids[j]);
+
+                      if (eidit < boundary_elem_ids[j])
+                        elem_edge_node[std::make_pair(eidit, boundary_elem_ids[j])].insert(
+                            boundary_elem_ids[i]);
+                      else
+                        elem_edge_node[std::make_pair(boundary_elem_ids[j], eidit)].insert(
+                            boundary_elem_ids[i]);
+
+                      ++new_elem_id;
+
+                      new_boundary_info.add_side(new_elem, 0, 1000 + bidit);
+                      if (old_boundary_info.get_sideset_name(bidit) != "")
+                        new_boundary_info.sideset_name(1000 + bidit) =
+                            "pd_side_" + old_boundary_info.get_sideset_name(bidit);
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
 
   // then save FE elements, if any, to new mesh
   std::map<dof_id_type, dof_id_type> fe_elems_map; // IDs of the same elem in the old and new meshes
@@ -178,75 +445,100 @@ MeshGeneratorPD::generate()
 
   // STEP 5: convert old boundary_info to new boundary_info
 
-  BoundaryInfo & new_boundary_info = new_mesh->get_boundary_info();
-  BoundaryInfo & old_boundary_info = old_mesh->get_boundary_info();
-
-  // peridynamics doesnot accept edgesets and facesets
+  // peridynamics ONLY accept nodesets and sidesets
+  // nodeset consisting single node in the converted FE block will no longer be available
   if (old_boundary_info.n_edge_conds())
     mooseError("PeridynamicsMesh doesn't support edgesets!");
 
-  // check the existence of nodesets, if exist, build sidesets
+  // check the existence of nodesets, if exist, build sidesets in case this hasn't been done yet
   if (old_boundary_info.n_nodeset_conds())
     old_boundary_info.build_side_list_from_node_list();
 
   // first, create a tuple to collect all sidesets (including those converted from nodesets) in the
   // old mesh
-  auto old_bc_tuples = old_boundary_info.build_side_list();
+  auto old_side_bc_tuples = old_boundary_info.build_side_list();
   // 0: element ID, 1: side ID, 2: boundary ID
   // map of set of elem IDs connected to each boundary in the old mesh
   std::map<boundary_id_type, std::set<dof_id_type>> old_bnd_elem_ids;
   // map of set of side ID for each elem in the old mesh
   std::map<dof_id_type, std::map<boundary_id_type, dof_id_type>> old_bnd_elem_side_ids;
-  for (const auto & bct : old_bc_tuples)
+  for (const auto & sbct : old_side_bc_tuples)
   {
-    old_bnd_elem_ids[std::get<2>(bct)].insert(std::get<0>(bct));
-    old_bnd_elem_side_ids[std::get<0>(bct)].insert(
-        std::make_pair(std::get<2>(bct), std::get<1>(bct)));
+    old_bnd_elem_ids[std::get<2>(sbct)].insert(std::get<0>(sbct));
+    old_bnd_elem_side_ids[std::get<0>(sbct)].insert(
+        std::make_pair(std::get<2>(sbct), std::get<1>(sbct)));
   }
 
   // next, convert element lists in old mesh to PD nodesets in new mesh
   std::set<boundary_id_type> old_side_bid(old_boundary_info.get_side_boundary_ids());
 
-  // loop through all old FE sideset boundaries
-  for (const auto & sbidit : old_side_bid)
-  {
-    // create PD nodeset in new mesh based on converted FE element list in old mesh
-    for (const auto & beidit : old_bnd_elem_ids[sbidit])
-    {
-      std::vector<dof_id_type>::iterator itr =
-          std::find(conv_elem_ids.begin(), conv_elem_ids.end(), beidit);
-      if (itr != conv_elem_ids.end()) // for converted FE mesh
+  // loop through all old FE _sideset_ boundaries
+  for (const auto & sbid : old_side_bid)
+    for (const auto & beid : old_bnd_elem_ids[sbid])
+      if (conv_elem_ids.count(beid)) // for converted FE mesh
       {
         // save corresponding boundaries on converted FE mesh to PD nodes
-        new_boundary_info.add_node(new_mesh->node_ptr(std::distance(conv_elem_ids.begin(), itr)),
-                                   sbidit + 1000);
-        new_boundary_info.nodeset_name(sbidit + 1000) =
-            "pd_" + old_boundary_info.get_sideset_name(sbidit) + Moose::stringify(sbidit);
+        new_boundary_info.add_node(new_mesh->node_ptr(fe_elem_pd_node_map.at(beid)), sbid + 1000);
+        if (old_boundary_info.get_sideset_name(sbid) != "")
+          new_boundary_info.nodeset_name(sbid + 1000) =
+              "pd_node_" + old_boundary_info.get_sideset_name(sbid);
 
         if (_retain_fe_mesh) // if retained, copy the corresponding boundaries, if any, to new mesh
                              // from old mesh
         {
-          new_boundary_info.add_side(new_mesh->elem_ptr(fe_elems_map[beidit]),
-                                     old_bnd_elem_side_ids[beidit][sbidit],
-                                     sbidit);
-          new_boundary_info.sideset_name(sbidit) = old_boundary_info.get_sideset_name(sbidit);
+          new_boundary_info.add_side(
+              new_mesh->elem_ptr(fe_elems_map[beid]), old_bnd_elem_side_ids[beid][sbid], sbid);
+          new_boundary_info.sideset_name(sbid) = old_boundary_info.get_sideset_name(sbid);
         }
       }
-      else // for unconverted FE mesh, if any, copy the corresponding boundaries to new mesh from
-           // old mesh
+      else // for unconverted FE mesh, if any, copy the corresponding boundaries to new mesh
+           // from old mesh
       {
-        new_boundary_info.add_side(new_mesh->elem_ptr(fe_elems_map[beidit]),
-                                   old_bnd_elem_side_ids[beidit][sbidit],
-                                   sbidit);
-        new_boundary_info.sideset_name(sbidit) = old_boundary_info.get_sideset_name(sbidit);
+        new_boundary_info.add_side(
+            new_mesh->elem_ptr(fe_elems_map[beid]), old_bnd_elem_side_ids[beid][sbid], sbid);
+        new_boundary_info.sideset_name(sbid) = old_boundary_info.get_sideset_name(sbid);
+      }
+
+  // similar for sideset above, save _nodesets_ of unconverted FE mesh, if any, to new mesh
+  auto old_node_bc_tuples = old_boundary_info.build_node_list();
+  // 0: node ID, 1: boundary ID
+  std::map<boundary_id_type, std::set<dof_id_type>> old_bnd_node_ids;
+  for (const auto & nbct : old_node_bc_tuples)
+    old_bnd_node_ids[std::get<1>(nbct)].insert(std::get<0>(nbct));
+
+  std::set<boundary_id_type> old_node_bid(old_boundary_info.get_node_boundary_ids());
+
+  for (const auto & nbid : old_node_bid)
+    for (const auto & bnid : old_bnd_node_ids[nbid])
+      if (fe_nodes_ids.count(bnid))
+      {
+        new_boundary_info.add_node(new_mesh->node_ptr(fe_nodes_map.at(bnid)), nbid);
+        new_boundary_info.nodeset_name(nbid) = old_boundary_info.get_sideset_name(nbid);
+      }
+
+  // create nodesets to include all PD nodes for PD blocks in the new mesh
+  for (unsigned int i = 0; i < n_pd_nodes; ++i)
+  {
+    if (_conv_block_ids.size() > 1)
+    {
+      unsigned int j = 0;
+      for (const auto & bid : _conv_block_ids)
+      {
+        ++j;
+        unsigned int real_bid =
+            bid + 1000; // acount for the 1000 increment after converting to PD mesh
+        if (pd_mesh.getNodeBlockID(i) == real_bid)
+        {
+          new_boundary_info.add_node(new_mesh->node_ptr(i), 999 - j);
+          new_boundary_info.nodeset_name(999 - j) =
+              "pd_nodes_block_" + Moose::stringify(bid + 1000);
+        }
       }
     }
-  }
 
-  // create a nodeset to include all PD nodes in the new mesh
-  for (unsigned int i = 0; i < n_pd_nodes; ++i)
     new_boundary_info.add_node(new_mesh->node_ptr(i), 999);
-  new_boundary_info.nodeset_name(999) = "pd_all";
+    new_boundary_info.nodeset_name(999) = "pd_nodes_all";
+  }
 
   old_mesh.reset(); // destroy the old_mesh unique_ptr
 

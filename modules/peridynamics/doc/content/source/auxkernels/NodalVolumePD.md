@@ -2,7 +2,7 @@
 
 ## Description
 
-AuxKernel `NodalVolumePD` is used to output the area or volume of a material point from the mesh objects.
+AuxKernel `NodalVolumePD` is used to output the area or volume of a material point from the PD mesh object.
 
 !syntax parameters /AuxKernels/NodalVolumePD
 

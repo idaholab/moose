@@ -51,7 +51,7 @@ public:
    * @param fe_mesh   The finite element mesh based on which the peridynamics mesh will be created
    * @param converted_elem_id  The IDs of finite elements to be converted to peridynamics mesh
    */
-  void createPeridynamicsMeshData(MeshBase & fe_mesh, std::vector<dof_id_type> converted_elem_id);
+  void createPeridynamicsMeshData(MeshBase & fe_mesh, std::set<dof_id_type> converted_elem_id);
 
   /**
    * Function to return neighbor nodes indices for node node_id
@@ -144,6 +144,13 @@ public:
    */
   Real getHorizon(dof_id_type node_id);
 
+  /**
+   * Function to return offset for boundary nodes
+   * @param node_id   The querying node index
+   * @return The offset
+   */
+  Real getBoundaryOffset(dof_id_type node_id);
+
 protected:
   ///@{ Horizon size control parameters
   const Real _horiz_rad;
@@ -157,6 +164,11 @@ protected:
   std::vector<Point> _cracks_start;
   std::vector<Point> _cracks_end;
   std::vector<Real> _cracks_width;
+  ///@}
+
+  ///@{ Information on whether to create interfacial bonds or not
+  const bool _has_interface;
+  std::set<unsigned int> _interface_blocks;
   ///@}
 
   /// Mesh dimension
@@ -189,6 +201,9 @@ protected:
 
   /// Volume fraction of deformation gradient region to its sum at a node
   std::vector<std::vector<Real>> & _dg_vol_frac;
+
+  /// Offset of each boundary node to its original FE element boundary edge or face
+  std::map<dof_id_type, Real> & _boundary_node_offset;
 
   /**
    * Function to create neighbors and other data for each material point with given horizon

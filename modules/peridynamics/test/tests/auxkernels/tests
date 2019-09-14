@@ -17,4 +17,22 @@
     design = 'modules/peridynamics/ComputePlaneSmallStrainNOSPD.md'
     issues = '#11561'
   [../]
+  [./boundary_offset_2D]
+    type = 'Exodiff'
+    input = 'boundary_offset_2D.i'
+    exodiff = 'boundary_offset_2D_out.e'
+    map = false
+    requirement = 'BoundaryOffsetPD shall retrieve the offset of boundary nodes from mesh for 2D geometries.'
+    design = 'modules/peridynamics/BoundaryOffsetPD.md'
+    issues = '#11561'
+  [../]
+  [./boundary_offset_3D]
+    type = 'Exodiff'
+    input = 'boundary_offset_3D.i'
+    exodiff = 'boundary_offset_3D_out.e'
+    map = false
+    requirement = 'BoundaryOffsetPD shall retrieve the offset of boundary nodes from mesh for 3D geometries.'
+    design = 'modules/peridynamics/BoundaryOffsetPD.md'
+    issues = '#11561'
+  [../]
 []

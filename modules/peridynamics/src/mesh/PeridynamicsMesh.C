@@ -33,6 +33,10 @@ validParams<PeridynamicsMesh>()
   params.addParam<std::vector<Point>>("cracks_end",
                                       "Cartesian coordinates where predefined line cracks end");
   params.addParam<std::vector<Real>>("cracks_width", "Widths of predefined line cracks");
+  params.addParam<std::vector<unsigned int>>(
+      "interface_blocks", "List of blocks among which interfacial bonds will be constructed");
+
+  params.set<bool>("_mesh_generator_mesh") = true;
 
   return params;
 }
@@ -44,6 +48,7 @@ PeridynamicsMesh::PeridynamicsMesh(const InputParameters & parameters)
     _horiz_num(_has_horiz_num ? getParam<Real>("horizon_number") : 0),
     _bah_ratio(getParam<Real>("bond_associated_horizon_ratio")),
     _has_cracks(isParamValid("cracks_start") || isParamValid("cracks_end")),
+    _has_interface(isParamValid("interface_blocks")),
     _dim(declareRestartableData<unsigned int>("dim")),
     _n_pdnodes(declareRestartableData<unsigned int>("n_pdnodes")),
     _n_pdbonds(declareRestartableData<unsigned int>("n_pdbonds")),
@@ -58,7 +63,9 @@ PeridynamicsMesh::PeridynamicsMesh(const InputParameters & parameters)
     _pdnode_bonds(declareRestartableData<std::vector<std::vector<dof_id_type>>>("pdnode_bonds")),
     _dg_neighbors(declareRestartableData<std::vector<std::vector<std::vector<unsigned int>>>>(
         "dg_neighbors")),
-    _dg_vol_frac(declareRestartableData<std::vector<std::vector<Real>>>("dg_vol_fraction"))
+    _dg_vol_frac(declareRestartableData<std::vector<std::vector<Real>>>("dg_vol_fraction")),
+    _boundary_node_offset(
+        declareRestartableData<std::map<dof_id_type, Real>>("boundary_node_offset"))
 {
   if (!(isParamValid("horizon_radius") || _has_horiz_num))
     mooseError("Must specify either horizon_radius or horizon_number to determine horizon size in "
@@ -95,6 +102,16 @@ PeridynamicsMesh::PeridynamicsMesh(const InputParameters & parameters)
   }
   else
     _cracks_width.push_back(0);
+
+  if (_has_interface)
+  {
+    std::vector<unsigned int> blocks(getParam<std::vector<unsigned int>>("interface_blocks"));
+    for (unsigned int i = 0; i < blocks.size(); ++i)
+      _interface_blocks.insert(blocks[i] +
+                               1000); // acount for the 1000 increment after converting to PD mesh
+  }
+  else
+    _interface_blocks.insert(0);
 }
 
 std::unique_ptr<MooseMesh>
@@ -130,7 +147,7 @@ PeridynamicsMesh::nPDBonds() const
 
 void
 PeridynamicsMesh::createPeridynamicsMeshData(MeshBase & fe_mesh,
-                                             std::vector<dof_id_type> converted_elem_id)
+                                             std::set<dof_id_type> converted_elem_id)
 {
   _dim = fe_mesh.mesh_dimension();
   _n_pdnodes = converted_elem_id.size();
@@ -150,9 +167,9 @@ PeridynamicsMesh::createPeridynamicsMeshData(MeshBase & fe_mesh,
 
   // loop through converted fe elements to generate PD nodes structure
   unsigned int id = 0; // make pd nodes start at 0 in the new mesh
-  for (unsigned int i = 0; i < _n_pdnodes; ++i)
+  for (const auto & eid : converted_elem_id)
   {
-    Elem * fe_elem = fe_mesh.elem_ptr(converted_elem_id[i]);
+    Elem * fe_elem = fe_mesh.elem_ptr(eid);
     // calculate the nodes spacing as average distance between fe element with its neighbors
     unsigned int n_fe_neighbors = 0;
     Real dist_sum = 0.0;
@@ -161,6 +178,32 @@ PeridynamicsMesh::createPeridynamicsMeshData(MeshBase & fe_mesh,
       {
         dist_sum += (fe_elem->centroid() - fe_elem->neighbor_ptr(j)->centroid()).norm();
         n_fe_neighbors++;
+      }
+      else // this side is on boundary and calculate the distance to the centroid
+      {
+        Real dist = 0.0;
+        std::vector<unsigned int> nid = fe_elem->nodes_on_side(j);
+        Point p0 = fe_elem->centroid();
+        Point p1 = fe_elem->point(nid[0]);
+        if (fe_elem->dim() == 2) // 2D elems
+        {
+          Point p2 = fe_elem->point(nid.back());
+          Real area = 0.5 * std::abs(p0(0) * (p1(1) - p2(1)) + p1(0) * (p2(1) - p0(1)) +
+                                     p2(0) * (p0(1) - p1(1)));
+          dist = 2.0 * area / fe_elem->length(nid[0], nid[1]);
+        }
+        else // 3D elems
+        {
+          Point p2 = fe_elem->point(nid[1]);
+          Point p3 = fe_elem->point(nid.back());
+          Point vec0 = p1 - p2;
+          Point vec1 = p1 - p3;
+          Point normal = vec0.cross(vec1);
+          normal /= normal.norm();
+          dist = std::abs(normal(0) * (p0(0) - p1(0)) + normal(1) * (p0(1) - p1(1)) +
+                          normal(2) * (p0(2) - p1(2)));
+        }
+        _boundary_node_offset.insert(std::make_pair(id, -dist));
       }
 
     _pdnode_coord[id] = fe_elem->centroid();
@@ -208,8 +251,10 @@ PeridynamicsMesh::createNodeHorizBasedData()
     for (unsigned int j = 0; j < _n_pdnodes; ++j)
     {
       dis = (_pdnode_coord[i] - _pdnode_coord[j]).norm();
-      if (_pdnode_blockID[i] == _pdnode_blockID[j] && dis <= 1.0001 * _pdnode_horiz_rad[i] &&
-          j != i)
+      if ((_pdnode_blockID[i] == _pdnode_blockID[j] ||
+           (_interface_blocks.count(_pdnode_blockID[i]) &&
+            _interface_blocks.count(_pdnode_blockID[j]))) &&
+          dis <= 1.0001 * _pdnode_horiz_rad[i] && j != i)
       {
         // check whether pdnode i falls in the region whose bonds may need to be removed due to
         // the pre-existing cracks
@@ -310,7 +355,7 @@ std::vector<dof_id_type>
 PeridynamicsMesh::getBonds(dof_id_type node_id)
 {
   if (node_id > _n_pdnodes)
-    mooseError("Querying node ID exceeds the total number of PD nodes!");
+    mooseError("Querying node ID exceeds the available PD node IDs!");
 
   return _pdnode_bonds[node_id];
 }
@@ -319,7 +364,7 @@ std::vector<unsigned int>
 PeridynamicsMesh::getDefGradNeighbors(dof_id_type node_id, unsigned int neighbor_id)
 {
   if (node_id > _n_pdnodes)
-    mooseError("Querying node ID exceeds the total number of PD nodes!");
+    mooseError("Querying node ID exceeds the available PD node IDs!");
 
   std::vector<unsigned int> dg_neighbors = _dg_neighbors[node_id][neighbor_id];
   if (dg_neighbors.size() < _dim)
@@ -333,7 +378,7 @@ unsigned int
 PeridynamicsMesh::getNodeBlockID(dof_id_type node_id)
 {
   if (node_id > _n_pdnodes)
-    mooseError("Querying node ID exceeds the total number of PD nodes!");
+    mooseError("Querying node ID exceeds the available PD node IDs!");
 
   return _pdnode_blockID[node_id];
 }
@@ -342,7 +387,7 @@ Point
 PeridynamicsMesh::getPDNodeCoord(dof_id_type node_id)
 {
   if (node_id > _n_pdnodes)
-    mooseError("Querying node ID exceeds the total number of PD nodes!");
+    mooseError("Querying node ID exceeds the available PD node IDs!");
 
   return _pdnode_coord[node_id];
 }
@@ -357,7 +402,7 @@ Real
 PeridynamicsMesh::getPDNodeVolume(dof_id_type node_id)
 {
   if (node_id > _n_pdnodes)
-    mooseError("Querying node ID exceeds the total number of PD nodes!");
+    mooseError("Querying node ID exceeds the available PD node IDs!");
 
   return _pdnode_vol[node_id];
 }
@@ -366,7 +411,7 @@ Real
 PeridynamicsMesh::getHorizVolume(dof_id_type node_id)
 {
   if (node_id > _n_pdnodes)
-    mooseError("Querying node ID exceeds the total number of PD nodes!");
+    mooseError("Querying node ID exceeds the available PD node IDs!");
 
   return _pdnode_horiz_vol[node_id];
 }
@@ -375,7 +420,7 @@ Real
 PeridynamicsMesh::getDefGradVolFraction(dof_id_type node_id, unsigned int neighbor_id)
 {
   if (node_id > _n_pdnodes)
-    mooseError("Querying node ID exceeds the total number of PD nodes!");
+    mooseError("Querying node ID exceeds the available PD node IDs!");
 
   return _dg_vol_frac[node_id][neighbor_id];
 }
@@ -384,7 +429,7 @@ Real
 PeridynamicsMesh::getNodeAvgSpacing(dof_id_type node_id)
 {
   if (node_id > _n_pdnodes)
-    mooseError("Querying node ID exceeds the total number of PD nodes!");
+    mooseError("Querying node ID exceeds the available PD node IDs!");
 
   return _pdnode_avg_spacing[node_id];
 }
@@ -393,9 +438,18 @@ Real
 PeridynamicsMesh::getHorizon(dof_id_type node_id)
 {
   if (node_id > _n_pdnodes)
-    mooseError("Querying node ID exceeds the total number of PD nodes!");
+    mooseError("Querying node ID exceeds the available PD node IDs!");
 
   return _pdnode_horiz_rad[node_id];
+}
+
+Real
+PeridynamicsMesh::getBoundaryOffset(dof_id_type node_id)
+{
+  if (_boundary_node_offset.count(node_id))
+    return _boundary_node_offset[node_id];
+  else
+    return 0.0;
 }
 
 bool

@@ -66,7 +66,31 @@
     exodiff = '2D_mesh_conversion_all_retain_in.e'
     recover = false
     map = false
-    requirement = 'MeshGeneratorPD shall generate peridynamic meshs for given mesh blocks and retain the converted FE meshes.'
+    requirement = 'MeshGeneratorPD shall generate peridynamic meshes for given mesh blocks and retain the converted FE meshes.'
+    design = 'modules/peridynamics/MeshGeneratorPD.md'
+    issues = '#11561'
+  [../]
+
+  [./generate_2D_sideset]
+    type = 'Exodiff'
+    input = '2D_sideset_generation.i'
+    cli_args = '--mesh-only'
+    exodiff = '2D_sideset_generation_in.e'
+    recover = false
+    map = false
+    requirement = 'MeshGeneratorPD shall generate sidesets using phantom FE elements based on sidesets of FE meshes for 2D peridynamic meshes.'
+    design = 'modules/peridynamics/MeshGeneratorPD.md'
+    issues = '#11561'
+  [../]
+
+  [./generate_3D_sideset]
+    type = 'Exodiff'
+    input = '3D_sideset_generation.i'
+    cli_args = '--mesh-only'
+    exodiff = '3D_sideset_generation_in.e'
+    recover = false
+    map = false
+    requirement = 'MeshGeneratorPD shall generate sidesets using phantom FE elements based on sidesets of FE meshes for 3D peridynamic meshes.'
     design = 'modules/peridynamics/MeshGeneratorPD.md'
     issues = '#11561'
   [../]

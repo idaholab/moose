@@ -121,10 +121,16 @@ MechanicsActionPD::act()
   else if (_current_task == "add_aux_variable")
   {
     // add the bond_status aux variable to all peridynamic domains
-    _problem->addAuxVariable("bond_status",
-                             FEType(Utility::string_to_enum<Order>("CONSTANT"),
-                                    Utility::string_to_enum<FEFamily>("MONOMIAL")),
-                             _subdomain_id_union.empty() ? nullptr : &_subdomain_id_union);
+    const std::string var_type = "MooseVariableConstMonomial";
+    InputParameters params = _factory.getValidParams(var_type);
+    params.set<MooseEnum>("order") = "CONSTANT";
+    params.set<MooseEnum>("family") = "MONOMIAL";
+
+    if (!_subdomain_id_union.empty())
+      for (const SubdomainID & id : _subdomain_id_union)
+        params.set<std::vector<SubdomainName>>("block").push_back(Moose::stringify(id));
+
+    _problem->addAuxVariable(var_type, "bond_status", params);
   }
   else if (_current_task == "add_ic")
   {
