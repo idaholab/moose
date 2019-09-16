@@ -498,6 +498,13 @@ NonlinearSystemBase::addBoundaryCondition(const std::string & bc_name,
   // NodalBCBase
   if (nbc)
   {
+    if (!nbc->variable().isNodal())
+      mooseError("Trying to use nodal boundary condition '",
+                 nbc->name(),
+                 "' on a non-nodal variable '",
+                 nbc->variable().name(),
+                 "'.");
+
     _nodal_bcs.addObject(nbc);
     _vars[tid].addBoundaryVars(boundary_ids, nbc->getCoupledVars());
 

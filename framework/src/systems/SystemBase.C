@@ -378,11 +378,9 @@ SystemBase::reinitNode(const Node * /*node*/, THREAD_ID tid)
   const std::vector<MooseVariableFEBase *> & vars = _vars[tid].fieldVariables();
   for (const auto & var : vars)
   {
-    if (var->isNodal())
-    {
-      var->reinitNode();
+    var->reinitNode();
+    if (var->isNodalDefined())
       var->computeNodalValues();
-    }
   }
 }
 
@@ -392,11 +390,9 @@ SystemBase::reinitNodeFace(const Node * /*node*/, BoundaryID /*bnd_id*/, THREAD_
   const std::vector<MooseVariableFEBase *> & vars = _vars[tid].fieldVariables();
   for (const auto & var : vars)
   {
-    if (var->isNodal())
-    {
-      var->reinitNode();
+    var->reinitNode();
+    if (var->isNodalDefined())
       var->computeNodalValues();
-    }
   }
 }
 
