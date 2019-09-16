@@ -4,7 +4,7 @@
     input = 'ode_expl_test.i'
     exodiff = 'ode_expl_test_out.e'
 
-    design = ""
+    design = "ScalarKernels/index.md"
     issues = "#726"
     requirement = "The system shall support solving Ordinary Differential Equations in explicit form."
   [../]
@@ -16,7 +16,7 @@
     max_parallel = 2
     max_threads = 2
 
-    design = ""
+    design = "ScalarKernels/index.md"
     issues = "#726"
     requirement = "The system shall support solving Ordinary Differential Equations in implicit form."
   [../]
@@ -30,9 +30,21 @@
     max_parallel = 2
     max_threads = 2
 
-    design = ""
+    design = "ParsedODEKernel.md"
     issues = "#726"
     requirement = "The system shall support solving ODEs specified within the input file through parsed function syntax."
+  [../]
+
+  [./test_parsed_pp]
+    type = 'CSVDiff'
+    input = 'parsedode_pp_test.i'
+    csvdiff = 'ode_pp_test_out.csv'
+    max_parallel = 2
+    max_threads = 2
+
+    design = "ParsedODEKernel.md"
+    issues = "#14034"
+    requirement = "The system coupling postprocessor values in the parsed function ODE kernel."
   [../]
 
   [./test_coupled_ode_td]
@@ -41,7 +53,7 @@
     csvdiff = 'coupled_ode_td_out.csv'
     cli_args = 'Outputs/exodus=true' # Turn on Exodus for the Scalar IC tests
 
-    design = ""
+    design = "ScalarKernels/index.md"
     issues = "#726"
     requirement = "The system shall support solving Coupled Ordinary Differential Equations."
   [../]
@@ -52,7 +64,7 @@
     csvdiff = 'coupled_ode_td_var_ic_from_mesh_out.csv'
     prereq = 'test_coupled_ode_td'
 
-    design = ""
+    design = "SystemBase.md"
     issues = "#13040"
     requirement = "The system shall allow scalar variable initial condition to be loaded from a file mesh"
   [../]
@@ -63,7 +75,7 @@
     csvdiff = 'coupled_ode_td_auxvar_ic_from_mesh_out.csv'
     prereq = 'test_coupled_ode_td'
 
-    design = ""
+    design = "SystemBase.md"
     issues = "#13040"
     requirement = "The system shall allow auxscalar variable initial condition to be loaded from a file mesh"
   [../]

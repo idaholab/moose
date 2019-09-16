@@ -32,6 +32,8 @@ validParams<ParsedODEKernel>()
   params.addParam<std::vector<std::string>>(
       "constant_expressions",
       "Vector of values for the constants in constant_names (can be an FParser expression)");
+  params.addParam<std::vector<PostprocessorName>>(
+      "postprocessors", "Vector of postprocessor names used in the function expression");
 
   return params;
 }
@@ -61,6 +63,15 @@ ParsedODEKernel::ParsedODEKernel(const InputParameters & parameters)
     unsigned int number = coupledScalar("args", i);
     if (number < _number_of_nl_variables)
       _arg_index[number] = i;
+  }
+
+  // add postprocessors
+  auto pp_names = getParam<std::vector<PostprocessorName>>("postprocessors");
+  _pp.resize(pp_names.size());
+  for (unsigned int i = 0; i < pp_names.size(); ++i)
+  {
+    variables += "," + pp_names[i];
+    _pp[i] = &getPostprocessorValueByName(pp_names[i]);
   }
 
   // base function object
@@ -117,7 +128,7 @@ ParsedODEKernel::ParsedODEKernel(const InputParameters & parameters)
   }
 
   // reserve storage for parameter passing buffer
-  _func_params.resize(_nargs + 1);
+  _func_params.resize(1 + _nargs + _pp.size());
 }
 
 void
@@ -127,6 +138,8 @@ ParsedODEKernel::updateParams()
 
   for (unsigned int j = 0; j < _nargs; ++j)
     _func_params[j + 1] = (*_args[j])[_i];
+  for (unsigned int j = 0; j < _pp.size(); ++j)
+    _func_params[j + 1 + _nargs] = *_pp[j];
 }
 
 Real

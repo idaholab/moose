@@ -202,7 +202,6 @@
 - /ScalarKernels/CoupledODETimeDerivative
 - /ScalarKernels/NodalEqualValueConstraint
 - /ScalarKernels/ODETimeDerivative
-- /ScalarKernels/ParsedODEKernel
 - /UserObjects/AddUserObjectAction
 - /UserObjects/ElementIntegralVariableUserObject
 - /UserObjects/LayeredAverage
