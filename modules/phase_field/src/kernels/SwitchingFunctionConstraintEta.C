@@ -22,17 +22,22 @@ validParams<SwitchingFunctionConstraintEta>()
   params.addParam<MaterialPropertyName>("h_name",
                                         "Switching Function Materials that provides h(eta_i)");
   params.addRequiredCoupledVar("lambda", "Lagrange multiplier");
+  params.addCoupledVar("args", "Further arguments to the switching function");
   return params;
 }
 
 SwitchingFunctionConstraintEta::SwitchingFunctionConstraintEta(const InputParameters & parameters)
-  : DerivativeMaterialInterface<Kernel>(parameters),
+  : DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>(parameters),
     _eta_name(_var.name()),
     _dh(getMaterialPropertyDerivative<Real>("h_name", _eta_name)),
     _d2h(getMaterialPropertyDerivative<Real>("h_name", _eta_name, _eta_name)),
+    _d2ha(coupledComponents("args")),
+    _d2ha_map(getParameterJvarMap("args")),
     _lambda(coupledValue("lambda")),
     _lambda_var(coupled("lambda"))
 {
+  for (std::size_t i = 0; i < _d2ha.size(); ++i)
+    _d2ha[i] = &getMaterialPropertyDerivative<Real>("h_name", _eta_name, getVar("args", i)->name());
 }
 
 Real
@@ -48,10 +53,14 @@ SwitchingFunctionConstraintEta::computeQpJacobian()
 }
 
 Real
-SwitchingFunctionConstraintEta::computeQpOffDiagJacobian(unsigned int j_var)
+SwitchingFunctionConstraintEta::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if (j_var == _lambda_var)
+  if (jvar == _lambda_var)
     return _phi[_j][_qp] * _dh[_qp] * _test[_i][_qp];
-  else
-    return 0.0;
+
+  auto k = mapJvarToCvar(jvar, _d2ha_map);
+  if (k >= 0)
+    return _lambda[_qp] * (*_d2ha[k])[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+
+  return 0.0;
 }

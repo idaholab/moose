@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Kernel.h"
+#include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
 #include "NonlinearSystem.h"
 
@@ -24,7 +25,8 @@ InputParameters validParams<SwitchingFunctionConstraintLagrange>();
  * lambda lagrange multiplier non-linear variables to
  * enforce \f$ \sum_n h_i(\eta_i) - \epsilon\lambda \equiv 1 \f$.
  */
-class SwitchingFunctionConstraintLagrange : public DerivativeMaterialInterface<Kernel>
+class SwitchingFunctionConstraintLagrange
+  : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
 {
 public:
   SwitchingFunctionConstraintLagrange(const InputParameters & parameters);
@@ -36,18 +38,19 @@ protected:
 
   /// Switching function names
   std::vector<MaterialPropertyName> _h_names;
+
+  /// number of switching functions
   unsigned int _num_h;
 
-  /// Switching functions and their drivatives
-  std::vector<const MaterialProperty<Real> *> _h, _dh;
+  /// Switching functions
+  std::vector<const MaterialProperty<Real> *> _h;
 
-  /// number of non-linear variables in the problem
-  const unsigned int _number_of_nl_variables;
+  /// Switching function derivatives
+  std::vector<std::vector<const MaterialProperty<Real> *>> _dh;
 
-  /// eta index for the j_vars in the jacobian computation
-  std::vector<int> _j_eta;
+  /// map for getting the "etas" index from jvar
+  const JvarMap & _eta_map;
 
   /// shift factor
   Real _epsilon;
 };
-
