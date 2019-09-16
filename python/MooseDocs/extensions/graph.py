@@ -102,8 +102,8 @@ class GraphScatter(command.CommandComponent):
             reader = mooseutils.PostprocessorReader(filename)
 
             for i, line in enumerate(data):
-                data[i]['x'] = reader(line['x']).tolist()
-                data[i]['y'] = reader(line['y']).tolist()
+                data[i]['x'] = reader[line['x']].tolist()
+                data[i]['y'] = reader[line['y']].tolist()
 
         flt = floats.create_float(parent, self.extension, self.reader, page, self.settings,
                                   bottom=True)

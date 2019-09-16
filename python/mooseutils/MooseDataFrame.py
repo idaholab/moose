@@ -25,12 +25,13 @@ class MooseDataFrame(object):
     INVALID = 2
     OLDFILE = 3
 
-    def __init__(self, filename, index=None, run_start_time=None, update=True):
+    def __init__(self, filename, index=None, run_start_time=None, update=True, peacock_index=False):
 
         self._filename = filename
         self._data = pandas.DataFrame()
         self._modified = None
         self._index = index
+        self._add_peacock_index = peacock_index
         self._run_start_time = run_start_time
         if update:
             self.update()
@@ -113,6 +114,10 @@ class MooseDataFrame(object):
                     self._data = pandas.read_csv(self._filename)
                     if self._index:
                         self._data.set_index(self._index, inplace=True)
+
+                    if self._add_peacock_index:
+                        self._data.insert(0, 'index (Peacock)',
+                                          pandas.Series(self._data.index, index=self._data.index))
                     message.mooseDebug("Reading csv file: {}".format(self._filename))
                 except:
                     self.clear()

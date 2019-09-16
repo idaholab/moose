@@ -55,7 +55,7 @@ class VectorPostprocessorReader(object):
 
     def __getitem__(self, keys):
         """
-        Operator[] returns the latest time or the desired time.
+        Operator[] returns the data for the current time.
 
         Args:
             keys[str|list]: The key(s) to return.
@@ -128,7 +128,8 @@ class VectorPostprocessorReader(object):
 
             mdf = self._frames.get(idx, None)
             if mdf is None:
-                mdf = MooseDataFrame(fname, run_start_time=self._run_start_time, update=False)
+                mdf = MooseDataFrame(fname, run_start_time=self._run_start_time, update=False,
+                                     peacock_index=True)
                 self._frames[idx] = mdf
 
             if (mdf.modified < last_modified):
