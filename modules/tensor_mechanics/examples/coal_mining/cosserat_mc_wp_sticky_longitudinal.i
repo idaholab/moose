@@ -43,77 +43,82 @@
 # MC compressive strength = 100 MPa
 #
 [Mesh]
-  type = GeneratedMesh
-  dim = 3
-  nx = 1
-  xmin = -5
-  xmax = 5
-  nz = 40
-  zmin = 0
-  zmax = 400
-  bias_z = 1.1
-  ny = 140 # 15m elements
-  ymin = -300
-  ymax = 1800
+   [generated_mesh]
+    type = GeneratedMeshGenerator
+    dim = 3
+    nx = 1
+    xmin = -5
+    xmax = 5
+    nz = 40
+    zmin = 0
+    zmax = 400
+    bias_z = 1.1
+    ny = 140 # 15m elements
+    ymin = -300
+    ymax = 1800
+  []
+  [left]
+    type = SideSetsAroundSubdomainGenerator
+    block = 0
+    new_boundary = 11
+    normal = '0 -1 0'
+    input = generated_mesh
+  []
+  [right]
+    type = SideSetsAroundSubdomainGenerator
+    block = 0
+    new_boundary = 12
+    normal = '0 1 0'
+    input = left
+  []
+  [front]
+    type = SideSetsAroundSubdomainGenerator
+    block = 0
+    new_boundary = 13
+    normal = '-1 0 0'
+    input = right
+  []
+  [back]
+    type = SideSetsAroundSubdomainGenerator
+    block = 0
+    new_boundary = 14
+    normal = '1 0 0'
+    input = front
+  []
+  [top]
+    type = SideSetsAroundSubdomainGenerator
+    block = 0
+    new_boundary = 15
+    normal = '0 0 1'
+    input = back
+  []
+  [bottom]
+    type = SideSetsAroundSubdomainGenerator
+    block = 0
+    new_boundary = 16
+    normal = '0 0 -1'
+    input = top
+  []
+  [excav]
+    type = SubdomainBoundingBoxGenerator
+    block_id = 1
+    bottom_left = '-5 0 0'
+    top_right = '5 1500 3'
+    input = bottom
+  []
+  [roof]
+    type = SideSetsAroundSubdomainGenerator
+    block = 1
+    new_boundary = 18
+    normal = '0 0 1'
+    input = excav
+  []
 []
 
 [GlobalParams]
   perform_finite_strain_rotations = false
   displacements = 'disp_x disp_y disp_z'
   Cosserat_rotations = 'wc_x wc_y wc_z'
-[]
-
-[MeshModifiers]
-  [./left]
-    type = SideSetsAroundSubdomain
-    block = 0
-    new_boundary = 11
-    normal = '0 -1 0'
-  [../]
-  [./right]
-    type = SideSetsAroundSubdomain
-    block = 0
-    new_boundary = 12
-    normal = '0 1 0'
-  [../]
-  [./front]
-    type = SideSetsAroundSubdomain
-    block = 0
-    new_boundary = 13
-    normal = '-1 0 0'
-  [../]
-  [./back]
-    type = SideSetsAroundSubdomain
-    block = 0
-    new_boundary = 14
-    normal = '1 0 0'
-  [../]
-  [./top]
-    type = SideSetsAroundSubdomain
-    block = 0
-    new_boundary = 15
-    normal = '0 0 1'
-  [../]
-  [./bottom]
-    type = SideSetsAroundSubdomain
-    block = 0
-    new_boundary = 16
-    normal = '0 0 -1'
-  [../]
-  [./excav]
-    type = SubdomainBoundingBox
-    depends_on = 'left right front back top bottom'
-    block_id = 1
-    bottom_left = '-5 0 0'
-    top_right = '5 1500 3'
-  [../]
-  [./roof]
-    type = SideSetsAroundSubdomain
-    block = 1
-    depends_on = excav
-    new_boundary = 18
-    normal = '0 0 1'
-  [../]
 []
 
 [Variables]

@@ -1,14 +1,14 @@
 [Mesh]
-  type = FileMesh
-  file = circle.e
-[]
-
-[MeshModifiers]
-  [./cnode]
-    type = AddExtraNodeset
+  [file_mesh]
+    type = FileMeshGenerator
+    file = circle.e
+  []
+  [cnode]
+    type = ExtraNodesetGenerator
     coord = '1000.0 0.0'
     new_boundary = 10
-  [../]
+    input = file_mesh
+  []
 []
 
 [Variables]
