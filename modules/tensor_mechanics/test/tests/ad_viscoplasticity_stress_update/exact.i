@@ -5,7 +5,7 @@
   pore_shape_model = spherical
 []
 
-[MeshGenerators]
+[Mesh]
   [./msh]
     type = CartesianMeshGenerator
     dim = 3
@@ -16,17 +16,12 @@
     ix = 1
     iy = 1
   [../]
-
   [./extra_nodeset]
     type = ExtraNodesetGenerator
     input = msh
     new_boundary = 'origin'
     coord = '0 0 0'
   []
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Modules/TensorMechanics/Master/All]

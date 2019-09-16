@@ -3,23 +3,23 @@
 []
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 4
-  ny = 8
-  xmin = 0.0
-  xmax = 1.0
-  ymin = 0.0
-  ymax = 2.0
-  elem_type = QUAD4
-[]
-
-[MeshModifiers]
-  [./rotate]
-    type = Transform
+  [generated_mesh]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 4
+    ny = 8
+    xmin = 0.0
+    xmax = 1.0
+    ymin = 0.0
+    ymax = 2.0
+    elem_type = QUAD4
+  []
+  [rotate]
+    type = TransformGenerator
     transform = ROTATE
     vector_value = '0 0 -60'
-  [../]
+    input = generated_mesh
+  []
 []
 
 [Modules/TensorMechanics/Master/All]

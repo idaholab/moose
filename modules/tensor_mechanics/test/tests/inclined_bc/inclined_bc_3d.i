@@ -3,26 +3,26 @@
 []
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 3
-  nx = 2
-  ny = 4
-  nz = 2
-  xmin = 0.0
-  xmax = 1.0
-  ymin = 0.0
-  ymax = 2.0
-  zmin = 0.0
-  zmax = 1.0
-  elem_type = HEX8
-[]
-
-[MeshModifiers]
-  [./rotate]
-    type = Transform
+  [generated_mesh]
+    type = GeneratedMeshGenerator
+    dim = 3
+    nx = 2
+    ny = 4
+    nz = 2
+    xmin = 0.0
+    xmax = 1.0
+    ymin = 0.0
+    ymax = 2.0
+    zmin = 0.0
+    zmax = 1.0
+    elem_type = HEX8
+  []
+  [rotate]
+    type = TransformGenerator
     transform = ROTATE
     vector_value = '0 -20 -60'
-  [../]
+    input = generated_mesh
+  []
 []
 
 [Modules/TensorMechanics/Master/All]

@@ -7,26 +7,26 @@
 # fail, but in the second nonlinear step, and so the simulation
 # would require at least two nonlinear steps.)
 [Mesh]
-  type = GeneratedMesh
-  dim = 3
-  nx = 2
-  ny = 1
-  nz = 2
-  xmin = -10
-  xmax = 10
-  ymin = -10
-  ymax = 10
-  zmin = -100
-  zmax = 0
-[]
-
-[MeshModifiers]
-  [./bottomz_middle]
-    type = BoundingBoxNodeSet
+  [generated_mesh]
+    type = GeneratedMeshGenerator
+    dim = 3
+    nx = 2
+    ny = 1
+    nz = 2
+    xmin = -10
+    xmax = 10
+    ymin = -10
+    ymax = 10
+    zmin = -100
+    zmax = 0
+  []
+  [bottomz_middle]
+    type = BoundingBoxNodeSetGenerator
     new_boundary = bottomz_middle
     bottom_left = '-1 -15 -105'
     top_right = '1 15 -95'
-  [../]
+    input = generated_mesh
+  []
 []
 
 [GlobalParams]
