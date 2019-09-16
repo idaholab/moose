@@ -7,6 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 """Module for defining Executioner objects, which are helpers for tokenization and rendering."""
+import sys
 import time
 import logging
 import traceback
@@ -336,13 +337,16 @@ class ParallelBarrier(Executioner):
         if num_threads > len(nodes):
             num_threads = len(nodes)
 
-        barrier = mooseutils.parallel.Barrier(num_threads)
+        if sys.version_info[0] == 2:
+            barrier = mooseutils.parallel.Barrier(num_threads)
+        else:
+            barrier = multiprocessing.Barrier(num_threads)
 
         jobs = []
         for chunk in mooseutils.make_chunks(nodes, num_threads):
             p = multiprocessing.Process(target=self.__target, args=(chunk, barrier))
-            p.start()
             jobs.append(p)
+            p.start()
 
         for job in jobs:
             job.join()

@@ -25,8 +25,8 @@ LOG = logging.getLogger(__name__)
 def make_extension(**kwargs):
     return ContentExtension(**kwargs)
 
-ContentToken = tokens.newToken('ContentToken', location=u'', level=None)
-AtoZToken = tokens.newToken('AtoZToken', location=u'', level=None, buttons=True)
+ContentToken = tokens.newToken('ContentToken', location='', level=None)
+AtoZToken = tokens.newToken('AtoZToken', location='', level=None, buttons=True)
 TableOfContents = tokens.newToken('TableOfContents', levels=list(), columns=1, hide=[])
 
 LATEX_CONTENTLIST = """
@@ -94,7 +94,7 @@ class ContentExtension(command.CommandExtension):
                     key = label[0]
                 elif method == ContentExtension.FOLDER:
                     parts = tuple(node.local.replace(location, '').strip(os.sep).split(os.sep))
-                    key = parts[0] if len(parts) > 1 else u''
+                    key = parts[0] if len(parts) > 1 else ''
                 else:
                     raise exceptions.MooseDocsException("Unknown method.")
                 path = node.relativeDestination(page)
@@ -112,7 +112,7 @@ class ContentCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings['location'] = (u'', "The markdown content directory to build contents.")
+        settings['location'] = ('', "The markdown content directory to build contents.")
         settings['level'] = (2, 'Heading level for top-level headings.')
         return settings
 
@@ -130,7 +130,7 @@ class AtoZCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings['location'] = (u'', "The markdown content directory to build contents.")
+        settings['location'] = ('', "The markdown content directory to build contents.")
         settings['level'] = (2, 'Heading level for A, B,... headings.')
         settings['buttons'] = (True, 'Display buttons linking to the A, B,... headings.')
         return settings
@@ -184,7 +184,7 @@ class RenderContentToken(components.RenderComponent):
                 if head in links:
                     p = self.translator.findPage(links[head])
                     dest = p.relativeDestination(page)
-                    html.Tag(h, 'a', href=dest, string=str(head) + u' ')
+                    html.Tag(h, 'a', href=dest, string=str(head) + ' ')
                 else:
                     html.String(h, content=str(head))
 
@@ -280,7 +280,7 @@ class RenderTableOfContents(components.RenderComponent):
         div.addStyle('column-count:{}'.format(token['columns']))
         for tok in toks:
             id_ = tok['id']
-            bookmark = id_ if id_ else tok.text(u'-').lower()
+            bookmark = id_ if id_ else tok.text('-').lower()
             link = core.Link(None, url='#{}'.format(bookmark))
             tok.copyToToken(link)
             core.LineBreak(link)

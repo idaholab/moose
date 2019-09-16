@@ -108,8 +108,8 @@ class PackageCodeReplace(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings['max-height'] = (u'350px', "The default height for listing content.")
-        settings['language'] = (u'bash', "The language to use for highlighting, if not supplied " \
+        settings['max-height'] = ('350px', "The default height for listing content.")
+        settings['language'] = ('bash', "The language to use for highlighting, if not supplied " \
                                          "it will be inferred from the extension (if possible).")
         return settings
 

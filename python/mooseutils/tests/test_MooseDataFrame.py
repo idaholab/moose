@@ -31,9 +31,6 @@ class TestMooseDataFrame(unittest.TestCase):
         Test that if a file exists it is loaded w/o error.
         """
 
-        #x_key = 'air_temp_low_24_hour_set_1'
-        #y_key = 'snow_depth_set_1'
-
         # Test basic read
         data = mooseutils.MooseDataFrame(self._filename)
         self.assertEqual(self._filename, data.filename)

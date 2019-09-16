@@ -21,18 +21,18 @@ def box(content, title=None, line=None, width=None, color='RESET'):
         num_digits = len(str(line + len(lines)))
         if width:
             n_lines = max([width - num_digits - 2, n_lines])
-        out += u'{0:>{1}}{2}{3}{4}'.format(' ', num_digits, u'\u250C', u'\u2500'*n_lines, u'\u2510')
+        out += '{0:>{1}}{2}{3}{4}'.format(' ', num_digits, '\u250C', '\u2500'*n_lines, '\u2510')
         for i, x in enumerate(lines):
-            out += u'\n{0:>{1}}{2}{3:<{4}}{2}'.format(line+i, num_digits, u'\u2502', x, n_lines)
-        out += u'\n{0:>{1}}{2}{3}{4}'.format(' ', num_digits, u'\u2514', u'\u2500'*n_lines,
-                                             u'\u2518')
+            out += '\n{0:>{1}}{2}{3:<{4}}{2}'.format(line+i, num_digits, '\u2502', x, n_lines)
+        out += '\n{0:>{1}}{2}{3}{4}'.format(' ', num_digits, '\u2514', '\u2500'*n_lines,
+                                             '\u2518')
     else:
         if width:
             n_lines = max([width - 2, n_lines])
-        out += u'{}{}{}'.format(u'\u250C', u'\u2500'*n_lines, u'\u2510')
+        out += '{}{}{}'.format('\u250C', '\u2500'*n_lines, '\u2510')
         for i, x in enumerate(lines):
-            out += u'\n{0}{1:<{2}}{0}'.format(u'\u2502', x, n_lines)
-        out += u'\n{}{}{}'.format(u'\u2514', u'\u2500'*n_lines, u'\u2518')
+            out += '\n{0}{1:<{2}}{0}'.format('\u2502', x, n_lines)
+        out += '\n{}{}{}'.format('\u2514', '\u2500'*n_lines, '\u2518')
 
     if color is None:
         return out

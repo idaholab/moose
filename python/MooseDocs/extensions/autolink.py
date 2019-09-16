@@ -25,8 +25,8 @@ PAGE_LINK_RE = re.compile(r'(?P<filename>.*?\.md)?(?P<bookmark>#.*)?', flags=re.
 LOG = logging.getLogger(__name__)
 
 SourceLink = tokens.newToken('SourceLink')
-LocalLink = tokens.newToken('LocalLink', bookmark=u'')
-AutoLink = tokens.newToken('AutoLink', page=u'', bookmark=u'', optional=False, warning=False,
+LocalLink = tokens.newToken('LocalLink', bookmark='')
+AutoLink = tokens.newToken('AutoLink', page='', bookmark='', optional=False, warning=False,
                            exact=False)
 
 class AutoLinkExtension(components.Extension):
@@ -55,12 +55,12 @@ class AutoLinkExtension(components.Extension):
 
 def createTokenHelper(key, parent, info, page, use_key_in_modal=False, optional=False, exact=False):
     match = PAGE_LINK_RE.search(info[key])
-    bookmark = match.group('bookmark')[1:] if match.group('bookmark') else u''
+    bookmark = match.group('bookmark')[1:] if match.group('bookmark') else ''
     filename = match.group('filename')
 
     # The link is local (i.e., [#foo]), the heading will be gathered on render because it
     # could be after the current position.
-    if (filename is None) and (bookmark != u'' or (match.group('bookmark') == u'#')):
+    if (filename is None) and (bookmark != '' or (match.group('bookmark') == '#')):
         return LocalLink(parent, bookmark=bookmark)
 
     elif filename is not None:

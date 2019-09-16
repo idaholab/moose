@@ -85,7 +85,7 @@ class Reader(mixins.ConfigObject, mixins.ComponentObject):
                                               token.info.line if token.info else None,
                                               token.info[0] if token.info else token.text(),
                                               token['traceback'],
-                                              u'TOKENIZE ERROR')
+                                              'TOKENIZE ERROR')
                     LOG.error(msg)
 
     def add(self, group, component, location='_end'):

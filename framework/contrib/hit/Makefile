@@ -1,5 +1,6 @@
 CXX ?= g++
 PYTHON_VERSION := $(shell python -c 'import sys;print(sys.version_info[0])')
+UNAME := $(shell uname)
 
 ifeq ($(PYTHON_VERSION), 2)
 	pyconfig := python2-config
@@ -11,11 +12,16 @@ ifeq (, $(shell which $(pyconfig) 2>/dev/null))
 	pyconfig := python-config
 endif
 
+ifeq ($(UNAME), Darwin)
+	DYNAMIC_LOOKUP := -undefined dynamic_lookup
+else
+	DYNAMIC_LOOKUP := ""
+endif
+
 $(info Building hit for python $(PYTHON_VERSION) with $(pyconfig))
 
 PYTHONPREFIX ?= `$(pyconfig) --prefix`
 PYTHONCFLAGS ?= `$(pyconfig) --cflags`
-PYTHONLDFLAGS ?= `$(pyconfig) --ldflags`
 HITCPP := hit$(PYTHON_VERSION).cpp
 
 hit: main.cc parse.cc lex.cc braceexpr.cc braceexpr.h lex.h parse.h
@@ -27,7 +33,7 @@ rewrite: rewrite.cc parse.cc lex.cc lex.h parse.h
 bindings: hit.so
 
 hit.so: parse.cc lex.cc braceexpr.cc $(HITCPP)
-	$(CXX) -std=c++11 -w -fPIC -lstdc++ -shared -L$(PYTHONPREFIX)/lib $(PYTHONCFLAGS) $(PYTHONLDFLAGS) $^ -o $@
+	$(CXX) -std=c++11 -w -fPIC -lstdc++ -shared -L$(PYTHONPREFIX)/lib $(PYTHONCFLAGS) $(DYNAMIC_LOOKUP) $^ -o $@
 
 $(HITCPP): hit.pyx chit.pxd
 	cython -$(PYTHON_VERSION) -o $@ --cplus $<

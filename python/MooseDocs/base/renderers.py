@@ -92,7 +92,7 @@ class Renderer(mixins.ConfigObject, mixins.ComponentObject):
                                       line,
                                       src,
                                       traceback.format_exc(),
-                                      u'RENDER ERROR')
+                                      'RENDER ERROR')
             with MooseDocs.base.translators.Translator.LOCK:
                 LOG.error(msg)
 

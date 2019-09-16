@@ -26,7 +26,7 @@ def extractContentSettings():
     settings['indent'] = (0, "The level of indenting to apply to the included text.")
     settings['strip-header'] = (True, "When True the MOOSE header is removed for display.")
     settings['fix-moose-header'] = (True, "In C/h files within MOOSE the '//*' is used for the "
-                                          "header at the top. This breaks the higlighting, this "
+                                          "header at the top. This breaks the highlighting, this "
                                           "option removes these and replaces them with '//'.")
     settings['strip-extra-newlines'] = (True, "Removes extraneous new lines from the text.")
     settings['strip-leading-whitespace'] = (False, "When True leading white-space is removed "
@@ -125,10 +125,10 @@ def prepareContent(content, settings): #pylint: disable=no-self-use
         content = re.sub(r'^(.*?)$', replace, content, flags=re.MULTILINE|re.UNICODE)
 
     if settings['header'] is not None:
-        content = u'{}{}{}'.format(settings['header'], '\n'*settings['header-newlines'], content)
+        content = '{}{}{}'.format(settings['header'], '\n'*settings['header-newlines'], content)
 
     if settings['footer'] is not None:
-        content = u'{}{}{}'.format(content, '\n'*settings['footer-newlines'], settings['footer'])
+        content = '{}{}{}'.format(content, '\n'*settings['footer-newlines'], settings['footer'])
 
     if settings['fix-moose-header']:
         content = fix_moose_header(content)

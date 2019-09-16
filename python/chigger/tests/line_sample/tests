@@ -4,6 +4,7 @@
     command = line_sample_default.py
     imagediff = 'line_sample_default.png'
     allowed_linux = 0.95
+    python = 3
   [../]
 
   [./line_sample]
@@ -21,6 +22,7 @@
     command = line_sample_elem.py
     imagediff = 'line_sample_elem.png'
     allowed_linux = 0.97
+    python = 3
   [../]
 
   [./line_sample_error]
@@ -28,5 +30,6 @@
     command = line_sample_error.py
     expect_out = "Unable to locate the variable, invalid_name, in the supplied source data."
     errors = "zzzzzzz" # Supress default error checking
+    python = 3
   [../]
 []

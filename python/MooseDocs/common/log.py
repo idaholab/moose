@@ -35,7 +35,7 @@ class MooseDocsFormatter(logging.Formatter):
     def format(self, record):
         """Format the supplied logging record and count the occurrences."""
         tid = multiprocessing.current_process().name
-        msg = u'{} ({}): {}'.format(record.name, tid, logging.Formatter.format(self, record))
+        msg = '{} ({}): {}'.format(record.name, tid, logging.Formatter.format(self, record))
 
         with self.COUNTS[record.levelname].get_lock():
             self.COUNTS[record.levelname].value += 1
@@ -87,5 +87,5 @@ def init_logging(level=logging.INFO):
 def report_exception(msg, *args):
     """Helper to output exceptions in logs."""
     msg = msg.format(*args)
-    msg += u'\n{}\n'.format(mooseutils.colorText(traceback.format_exc(), 'GREY'))
+    msg += '\n{}\n'.format(mooseutils.colorText(traceback.format_exc(), 'GREY'))
     return msg

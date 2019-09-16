@@ -12,6 +12,7 @@ from .mooseutils import find_moose_executable_recursive, run_executable
 from .mooseutils import touch, unique_list, gold, make_chunks, camel_to_space
 from .mooseutils import text_diff, git_ls_files, git_root_dir, is_git_repo, unidiff, text_unidiff
 from .mooseutils import run_profile, list_files, git_commit, git_merge_commits, git_commit_message
+from .mooseutils import check_output
 from .message import mooseDebug, mooseWarning, mooseMessage, mooseError
 from .MooseException import MooseException
 from .eval_path import eval_path
@@ -20,6 +21,7 @@ from .AutoPropertyMixin import AutoPropertyMixin, Property, addProperty
 from . import parallel
 from .compute_requirement_stats import compute_requirement_stats, SQAStats
 from .levenshtein import levenshtein, levenshteinDistance
+from .json_load import json_load, json_parse
 
 try:
     from .hit_load import hit_load, HitNode, hit_parse

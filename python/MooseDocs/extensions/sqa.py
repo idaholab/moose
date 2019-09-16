@@ -62,10 +62,10 @@ class SQAExtension(command.CommandExtension):
     @staticmethod
     def defaultConfig():
         config = command.CommandExtension.defaultConfig()
-        config['url'] = (u'https://github.com', "Deprecated, see 'repos'.")
+        config['url'] = ('https://github.com', "Deprecated, see 'repos'.")
         config['repo'] = (None, "Deprecated, see 'repos'.")
 
-        config['repos'] = (dict(default=u"https://github.com/idaholab/moose"),
+        config['repos'] = (dict(default="https://github.com/idaholab/moose"),
                            "The repository locations for linking issues, set 'default' to allow " \
                            "'#1234' or add additional keys to allow for foo#1234.")
         config['categories'] = (dict(), "A dictionary of category names that includes a " \
@@ -115,8 +115,8 @@ class SQAExtension(command.CommandExtension):
             self['repos'].update(dict(default="{}/{}".format(url, repo)))
 
         # Always include MOOSE and libMesh
-        self['repos'].update(dict(moose=u"https://github.com/idaholab/moose",
-                                  libmesh=u"https://github.com/libMesh/libmesh"))
+        self['repos'].update(dict(moose="https://github.com/idaholab/moose",
+                                  libmesh="https://github.com/libMesh/libmesh"))
 
     def requirements(self, category):
         """Return the requirements dictionaries."""
@@ -208,7 +208,7 @@ class SQARequirementsCommand(command.CommandComponent):
         return parent
 
     def _addRequirement(self, parent, info, page, req, requirements):
-        reqname = u"{}:{}".format(req.path, req.name) if req.path != '.' else req.name
+        reqname = "{}:{}".format(req.path, req.name) if req.path != '.' else req.name
         item = SQARequirementMatrixItem(parent, label=req.label, reqname=reqname,
                                         satisfied=req.satisfied)
         text = SQARequirementText(item)
@@ -221,7 +221,7 @@ class SQARequirementsCommand(command.CommandComponent):
                                           req.text_line,
                                           req.text,
                                           token['traceback'],
-                                          u'SQA TOKENIZE ERROR')
+                                          'SQA TOKENIZE ERROR')
                 LOG.critical(msg)
 
         if req.details:
@@ -242,7 +242,7 @@ class SQARequirementsCommand(command.CommandComponent):
 
                 floats.create_modal_link(p,
                                          title=reqname, string=reqname,
-                                         content=core.Code(None, language=u'text', content=content))
+                                         content=core.Code(None, language='text', content=content))
 
             if self.settings['link-design'] and req.design:
                 p = SQARequirementDesign(item, filename=req.filename, design=req.design,
@@ -339,7 +339,7 @@ class SQARequirementsMatrixCommand(command.CommandComponent):
 
         # Build the matrix
         prefix = self.settings['prefix']
-        label = u'{}{:d}'.format(prefix, self.extension.increment(prefix))
+        label = '{}{:d}'.format(prefix, self.extension.increment(prefix))
         matrix = SQARequirementMatrix(parent)
 
         heading = self.settings['heading']
@@ -348,7 +348,7 @@ class SQARequirementsMatrixCommand(command.CommandComponent):
             self.reader.tokenize(head, heading, page, MooseDocs.INLINE, info.line)
 
         for i, item in enumerate(ul.children):
-            matrix_item = SQARequirementMatrixListItem(matrix, label=u'{}.{:d}'.format(label, i))
+            matrix_item = SQARequirementMatrixListItem(matrix, label='{}.{:d}'.format(label, i))
             for child in item:
                 child.parent = matrix_item
 
@@ -378,7 +378,7 @@ class SQAVerificationCommand(command.CommandComponent):
         return parent
 
     def _addRequirement(self, parent, info, page, req):
-        reqname = u"{}:{}".format(req.path, req.name) if req.path != '.' else req.name
+        reqname = "{}:{}".format(req.path, req.name) if req.path != '.' else req.name
         item = SQARequirementMatrixItem(parent, label=req.label, reqname=reqname)
         self.reader.tokenize(item, req.text, page, MooseDocs.INLINE, info.line, report=False)
         for token in anytree.PreOrderIter(item):
@@ -388,21 +388,20 @@ class SQAVerificationCommand(command.CommandComponent):
                                           req.text_line,
                                           req.text,
                                           token['traceback'],
-                                          u'SQA TOKENIZE ERROR')
+                                          'SQA TOKENIZE ERROR')
                 LOG.critical(msg)
 
         p = core.Paragraph(item)
-        tokens.String(p, content=u'Specification: ')
+        tokens.String(p, content='Specification: ')
 
-        with codecs.open(req.filename, encoding='utf-8') as fid:
-            content = fid.read()
-            floats.create_modal_link(p,
-                                     string=reqname,
-                                     content=core.Code(None, language=u'text', content=content),
-                                     title=str(req.filename))
+        content = common.read(req.filename)
+        floats.create_modal_link(p,
+                                 string=reqname,
+                                 content=core.Code(None, language='text', content=content),
+                                 title=str(req.filename))
 
         p = core.Paragraph(item)
-        tokens.String(p, content=u'Documentation: ')
+        tokens.String(p, content='Documentation: ')
         filename = getattr(req, info['subcommand'])
         autolink.AutoLink(p, page=str(filename))
 
@@ -430,7 +429,7 @@ class SQADependenciesCommand(command.CommandComponent):
         for dep in depends:
             if dep != category:
                 fname = '{}_{}.md'.format(dep, suffix)
-                autolink.AutoLink(core.ListItem(ul), page=u'sqa/{}'.format(fname),
+                autolink.AutoLink(core.ListItem(ul), page='sqa/{}'.format(fname),
                                   optional=True, warning=True, class_='moose-sqa-dependency')
         return parent
 
@@ -448,7 +447,7 @@ class SQADocumentCommand(command.CommandComponent):
     def createToken(self, parent, info, page):
         category = self.settings.get('category')
         suffix = self.settings.get('suffix')
-        return autolink.AutoLink(parent, page=u'sqa/{}_{}.md'.format(category, suffix),
+        return autolink.AutoLink(parent, page='sqa/{}_{}.md'.format(category, suffix),
                                  optional=True, warning=True)
 
 class RenderSQARequirementMatrix(core.RenderUnorderedList):
@@ -555,7 +554,7 @@ class RenderSQARequirementDesign(autolink.RenderLinkBase):
         return node
 
     def createHTML(self, parent, token, page):
-        p = html.Tag(parent, 'p', string=u'Design: ', class_='moose-sqa-items')
+        p = html.Tag(parent, 'p', string='Design: ', class_='moose-sqa-items')
         for design in token['design']:
             node = self.findDesign(token['filename'], design, token['line'])
             if node is not None:
@@ -602,7 +601,7 @@ class RenderSQARequirementIssues(components.RenderComponent):
                 msg = "Unknown key '{}' for MooseDocs.extensions.sqa 'repos' config.\n    {}:{}"
                 raise exceptions.MooseDocsException(msg, key, token['filename'], token['line'])
             repo = repo or default
-            url = u"{}/{}/{}".format(repo, name, match.group(name))
+            url = "{}/{}/{}".format(repo, name, match.group(name))
             return url
 
     def getURL(self, issue, token):
@@ -611,7 +610,7 @@ class RenderSQARequirementIssues(components.RenderComponent):
         if url is None:
             url = self.__urlHelper(self.COMMIT_RE, 'commit', issue, token)
 
-        if (url is None) and (issue != u''):
+        if (url is None) and (issue != ''):
             msg = "Unknown issue number or commit (commit SHA-1 must be at least 10 digits): "\
                   "{}\n    {}:{}".format(issue, token['filename'], token['line'])
             LOG.error(msg)
@@ -620,7 +619,7 @@ class RenderSQARequirementIssues(components.RenderComponent):
 
     def createHTML(self, parent, token, page):
 
-        p = html.Tag(parent, 'p', string=u'Issue(s): ', class_='moose-sqa-items')
+        p = html.Tag(parent, 'p', string='Issue(s): ', class_='moose-sqa-items')
         for issue in token['issues']:
 
             url = self.getURL(issue, token)
@@ -650,14 +649,14 @@ class RenderSQARequirementIssues(components.RenderComponent):
 class RenderSQARequirementSpecification(components.RenderComponent):
 
     def createMaterialize(self, parent, token, page):
-        return html.Tag(parent, 'p', string=u'Specification: ')
+        return html.Tag(parent, 'p', string='Specification: ')
 
     def createHTML(self, parent, token, page):
         spath = token['spec_path']
         if spath == '.':
-            spec = u'Specification: {}'.format(token['spec_name'])
+            spec = 'Specification: {}'.format(token['spec_name'])
         else:
-            spec = u'Specification: {}:{}'.format(token['spec_path'], token['spec_name'])
+            spec = 'Specification: {}:{}'.format(token['spec_path'], token['spec_name'])
         html.Tag(parent, 'p', string=spec)
 
     def createLatex(self, parent, token, page):
@@ -673,10 +672,10 @@ class RenderSQARequirementSpecification(components.RenderComponent):
 
 class RenderSQARequirementPrequisites(components.RenderComponent):
     def createHTML(self, parent, token, page):
-        p = html.Tag(parent, 'p', string=u'Prerequisite(s): ', class_='moose-sqa-items')
+        p = html.Tag(parent, 'p', string='Prerequisite(s): ', class_='moose-sqa-items')
 
         for path, name, label in token['specs']:
-            url = u'#{}:{}'.format(path, name)
+            url = '#{}:{}'.format(path, name)
             html.Tag(p, 'a', href=url, string=label)
 
     def createLatex(self, parent, token, page):

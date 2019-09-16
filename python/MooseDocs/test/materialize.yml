@@ -40,7 +40,7 @@ Extensions:
     MooseDocs.extensions.bibtex: default
     MooseDocs.extensions.materialicon: default
     MooseDocs.extensions.layout: default
-    MooseDocs.extensions.content: default
+    MooseDocs.extensions.content: disable
     MooseDocs.extensions.graph: default
     MooseDocs.extensions.heading: default
     MooseDocs.extensions.gallery: default
@@ -62,6 +62,7 @@ Extensions:
                 specs:
                     - demo
     MooseDocs.extensions.navigation:
+        active: True
         name: MOOSEDocs
         repo: https://github.com/idaholab/moose
         home: https://www.mooseframework.org
@@ -72,14 +73,18 @@ Extensions:
                 Core: core.md
                 AutoLink: autolink.md
     MooseDocs.extensions.acronym:
+        active: True
         acronyms:
             INL: Idaho National Laboratory
             MTU: Michigan Technological University
     MooseDocs.extensions.common:
+        active: True
         shortcuts:
             MOOSE: https:://mooseframework.org
             libMesh: https://libmesh.github.io/
     MooseDocs.extensions.appsyntax:
+        active: True
+
         executable: ${MOOSE_DIR}/test
         hide: !include framework/doc/hidden.yml
         remove: !include framework/doc/remove.yml

@@ -3,18 +3,21 @@
     type = RunApp
     command = field_data.py
     expect_out = "13.960"
+    python = 3
   [../]
 
   [./current_field_data]
     type = RunApp
     command = current_field_data.py
     expect_out = "0.0,\s14.\d+,\s14."
+    python = 3
   [../]
 
   [./plot_field_data]
     type = ImageDiff
     command = plot_field_data.py
     imagediff = 'plot_field_data.png'
+    python = 3
   [../]
 
   [./plot_current_field_data]
@@ -22,5 +25,6 @@
     command = plot_current_field_data.py
     imagediff = 'plot_current_field_data_0.png plot_current_field_data_4.png plot_current_field_data_9.png'
     allowed_linux = 0.95
-[../]
+    python = 3
+  [../]
 []

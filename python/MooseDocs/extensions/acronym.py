@@ -19,7 +19,7 @@ def make_extension(**kwargs):
     return AcronymExtension(**kwargs)
 
 AcronymItem = collections.namedtuple('AcronymItem', 'key name used')
-AcronymToken = tokens.newToken('AcronymToken', acronym=u'')
+AcronymToken = tokens.newToken('AcronymToken', acronym='')
 AcronymListToken = tokens.newToken('AcronymListToken', heading=True)
 
 class AcronymExtension(command.CommandExtension):
@@ -113,7 +113,7 @@ class AcronymListComponent(command.CommandComponent):
         settings['complete'] = (False, "Show the complete list of acronyms regardless of use on " \
                                        "current page.")
         settings['heading'] = (True, "Display the headings row of the acronym table.")
-        settings['prefix'] = (u'Table', "Prefix to use when a caption and id are provided.")
+        settings['prefix'] = ('Table', "Prefix to use when a caption and id are provided.")
         settings['caption'] = (None, "The caption to use for the acronym table.")
         return settings
 
@@ -132,7 +132,7 @@ class RenderAcronymToken(components.RenderComponent):
 
     def _createSpan(self, parent, token, page):
         acro = self.extension.getAcronym(token['acronym'])
-        content = str(acro.key) if acro.used else u'{} ({})'.format(acro.name, acro.key)
+        content = str(acro.key) if acro.used else '{} ({})'.format(acro.name, acro.key)
         return html.Tag(parent, 'span', string=content), acro
 
     def createHTML(self, parent, token, page):
@@ -148,7 +148,7 @@ class RenderAcronymToken(components.RenderComponent):
 
     def createLatex(self, parent, token, page):
         acro = self.extension.getAcronym(token['acronym'])
-        content = str(acro.key) if acro.used else u'{} ({})'.format(acro.name, acro.key)
+        content = str(acro.key) if acro.used else '{} ({})'.format(acro.name, acro.key)
         latex.String(parent, content=content)
 
 class RenderAcronymListToken(components.RenderComponent):
@@ -165,8 +165,8 @@ class RenderAcronymListToken(components.RenderComponent):
     def createLatex(self, parent, token, page):
 
         env = latex.Environment(parent, 'tabulary',
-                                args=[latex.Brace(None, string=u'\\linewidth', escape=False),
-                                      latex.Brace(None, string=u'LL')])
+                                args=[latex.Brace(None, string='\\linewidth', escape=False),
+                                      latex.Brace(None, string='LL')])
 
         for key, value in self.extension.getAcronyms(True).items():
-            latex.String(env, content=u'{}&{}\\\\'.format(key, value), escape=False)
+            latex.String(env, content='{}&{}\\\\'.format(key, value), escape=False)

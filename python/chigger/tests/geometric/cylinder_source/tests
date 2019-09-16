@@ -3,5 +3,6 @@
     type = ImageDiff
     command = cylinder_source.py
     imagediff = 'cylinder_source.png'
+    python = 3
   [../]
 []

@@ -3,5 +3,6 @@
     type = ImageDiff
     command = window_clear.py
     imagediff = 'window_clear.png'
+    python = 3
   [../]
 []

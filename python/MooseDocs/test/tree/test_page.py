@@ -21,7 +21,7 @@ class TestPage(unittest.TestCase):
     def testPage(self):
         one = pages.Page('one', source='foo')
         self.assertEqual(one.name, 'one')
-        self.assertEqual(one.source, u'foo')
+        self.assertEqual(one.source, 'foo')
 
     def testDirectory(self):
         node = pages.Directory('name', source='foo')

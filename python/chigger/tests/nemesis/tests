@@ -3,10 +3,12 @@
     type = ImageDiff
     command = nemesis.py
     imagediff = 'nemesis.png'
+    python = 3
   [../]
   [./explode]
     type = ImageDiff
     command = explode.py
     imagediff = 'explode.png'
+    python = 3
   [../]
 []

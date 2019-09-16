@@ -8,6 +8,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 """Utilities for reading files."""
+import sys
 import codecs
 import os
 
@@ -26,6 +27,10 @@ def read(filename):
     """
     with codecs.open(filename, encoding='utf-8') as fid:
         content = fid.read()
+
+    if sys.version_info[0] == 2:
+        content = str(content)
+
     return content
 
 def write(filename, content):
@@ -45,7 +50,7 @@ def get_language(filename):
     """
     _, ext = os.path.splitext(filename)
     if ext in ['.C', '.h', '.cpp', '.hpp']:
-        return u'cpp'
+        return 'cpp'
     elif ext == '.py':
-        return u'python'
-    return u'text'
+        return 'python'
+    return 'text'

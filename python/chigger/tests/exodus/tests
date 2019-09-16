@@ -2,5 +2,6 @@
   [./reader]
     type = PythonUnitTest
     input = test_ExodusReader.py
+    python = 3
   [../]
 []

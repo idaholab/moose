@@ -200,7 +200,7 @@ def main(filenames, reader=mooseutils.VectorPostprocessorReader):
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
-    filenames = ['../../../tests/input/vpp_*.csv']
+    filenames = ['../../tests/input/vpp_*.csv']
     _, widget, _ = main(filenames)
     app.exec_()
     os.remove('tmp_001.csv')

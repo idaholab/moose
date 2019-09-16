@@ -26,6 +26,7 @@ LOG = logging.getLogger(__name__)
 REGISTER_PAIRS = [('Postprocessor', 'UserObjects/*'),
                   ('AuxKernel', 'Bounds/*')]
 
+
 def app_syntax(exe, remove=None, allow_test_objects=False, hide=None, alias=None):
     """
     Creates a tree structure representing the MooseApp syntax for the given executable.
@@ -39,7 +40,7 @@ def app_syntax(exe, remove=None, allow_test_objects=False, hide=None, alias=None
         raw = mooseutils.runExe(exe, ['--json', '--allow-test-objects'])
         raw = raw.split('**START JSON DATA**\n')[1]
         raw = raw.split('**END JSON DATA**')[0]
-        tree = json.loads(raw, object_pairs_hook=collections.OrderedDict)
+        tree = mooseutils.json_parse(raw)
 
     except Exception as e: #pylint: disable=broad-except
         LOG.error("Failed to execute the MOOSE executable '%s':\n%s", exe, e)

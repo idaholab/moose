@@ -41,7 +41,7 @@ InputParametersToken = tokens.newToken('InputParametersToken',
                                        visible=list())
 
 SyntaxList = tokens.newToken('SyntaxList')
-SyntaxListItem = tokens.newToken('SyntaxListItem', syntax=u'', group=u'', header=False)
+SyntaxListItem = tokens.newToken('SyntaxListItem', syntax='', group='', header=False)
 SyntaxLink = tokens.newToken('SyntaxLink', core.Link)
 
 LATEX_PARAMETER = """
@@ -272,7 +272,7 @@ class SyntaxCommandHeadingBase(SyntaxCommandBase):
     @staticmethod
     def defaultSettings():
         settings = SyntaxCommandBase.defaultSettings()
-        settings['heading'] = (u'Input Parameters',
+        settings['heading'] = ('Input Parameters',
                                "The heading title for the input parameters table, use 'None' to " \
                                "remove the heading.")
         settings['heading-level'] = (2, "Heading level for section title.")
@@ -378,7 +378,7 @@ class SyntaxParameterCommand(command.CommandComponent):
             raise common.MooseDocsException(msg, param_name, obj_syntax)
 
         ParameterToken(parent, parameter=parameters[param_name],
-                       string=u'"{}"'.format(param_name))
+                       string='"{}"'.format(param_name))
         return parent
 
 
@@ -389,7 +389,7 @@ class SyntaxChildrenCommand(SyntaxCommandHeadingBase):
     @staticmethod
     def defaultSettings():
         settings = SyntaxCommandHeadingBase.defaultSettings()
-        settings['heading'] = (u"Child Objects",
+        settings['heading'] = ("Child Objects",
                                "Heading to include for sections, use 'None' to remove the title.")
         return settings
 
@@ -422,7 +422,7 @@ class SyntaxInputsCommand(SyntaxChildrenCommand):
     @staticmethod
     def defaultSettings():
         settings = SyntaxChildrenCommand.defaultSettings()
-        settings['heading'] = (u"Input Files", settings['heading'][1])
+        settings['heading'] = ("Input Files", settings['heading'][1])
         return settings
 
 
@@ -433,7 +433,7 @@ class SyntaxListCommand(SyntaxCommandHeadingBase):
     @staticmethod
     def defaultSettings():
         settings = SyntaxCommandHeadingBase.defaultSettings()
-        settings['heading'] = (u'AUTO',
+        settings['heading'] = ('AUTO',
                                "The heading title for the input parameters table, use 'None' to " \
                                "remove the heading.")
         settings['group-headings'] = (True, "Display group headings.")
@@ -477,16 +477,16 @@ class SyntaxListCommand(SyntaxCommandHeadingBase):
         return parent
 
     def createHeading(self, parent, page, **kwargs):
-        if self.settings['heading'] == u'AUTO':
+        if self.settings['heading'] == 'AUTO':
             h = ['Objects', 'Actions', 'Subsystems']
             idx = [self.settings['objects'], self.settings['actions'], self.settings['subsystems']]
             names = [h[i] for i, v in enumerate(idx) if v]
             if len(names) == 1:
-                self.settings['heading'] = u'Available {}'.format(*names)
+                self.settings['heading'] = 'Available {}'.format(*names)
             elif len(names) == 2:
-                self.settings['heading'] = u'Available {} and {}'.format(*names)
+                self.settings['heading'] = 'Available {} and {}'.format(*names)
             elif len(names) == 3:
-                self.settings['heading'] = u'Available {}, {}, and {}'.format(*names)
+                self.settings['heading'] = 'Available {}, {}, and {}'.format(*names)
             else:
                 self.settings['heading'] = None
 
@@ -509,7 +509,7 @@ class SyntaxListCommand(SyntaxCommandHeadingBase):
                                url=str(nodes[0].relativeDestination(page)))
 
                 if obj.description:
-                    self.reader.tokenize(item, obj.description, page, MooseDocs.INLINE, info.line)
+                    self.reader.tokenize(item, str(obj.description), page, MooseDocs.INLINE, info.line)
 
         return count
 
@@ -573,7 +573,7 @@ class RenderSyntaxListItem(components.RenderComponent):
     def createHTML(self, parent, token, page):
         token(0).parent = None
         p = html.Tag(parent, 'p', class_='moose-syntax-list-item')
-        html.Tag(p, 'span', string=u'{}: '.format(token['syntax']),
+        html.Tag(p, 'span', string='{}: '.format(token['syntax']),
                  class_='moose-syntax-list-item-syntax')
         return html.Tag(p, 'span',
                         class_='moose-syntax-list-item-details')
@@ -742,24 +742,24 @@ def _insert_parameter(parent, name, param):
         html.Tag(header, 'span', class_='moose-parameter-header-default', string=default)
 
         p = html.Tag(body, 'p', class_='moose-parameter-description-default')
-        html.Tag(p, 'span', string=u'Default:')
+        html.Tag(p, 'span', string='Default:')
         html.String(p, content=default)
 
     cpp_type = param['cpp_type']
     p = html.Tag(body, 'p', class_='moose-parameter-description-cpptype')
-    html.Tag(p, 'span', string=u'C++ Type:')
+    html.Tag(p, 'span', string='C++ Type:')
     html.String(p, content=cpp_type)
 
     if 'options' in param:
         p = html.Tag(body, 'p', class_='moose-parameter-description-options')
-        html.Tag(p, 'span', string=u'Options:')
+        html.Tag(p, 'span', string='Options:')
         html.String(p, content=param['options'])
 
     p = html.Tag(body, 'p', class_='moose-parameter-description')
     desc = param['description']
     if desc:
         html.Tag(header, 'span', class_='moose-parameter-header-description', string=str(desc))
-        html.Tag(p, 'span', string=u'Description:')
+        html.Tag(p, 'span', string='Description:')
         html.String(p, content=str(desc))
 
 def _format_default(parameter):

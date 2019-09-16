@@ -177,14 +177,14 @@ class Translator(mixins.ConfigObject):
            nodes = self.findPages(lambda p: p.name == 'foo')
 
         Inputs:
-            name[str|str|lambda]: The partial name to search against or the function to use
-                                      to test for matches.
+            name[str|lambda]: The partial name to search against or the function to use
+                              to test for matches.
             exact[bool]: (False) When True an exact path match is required.
         """
         if MooseDocs.LOG_LEVEL == logging.DEBUG:
-            common.check_type('name', arg, (str, str, types.FunctionType))
+            common.check_type('name', arg, (str, types.FunctionType))
 
-        if isinstance(arg, (str, str)):
+        if isinstance(arg, str):
             items = self.__page_cache.get(arg, None)
             if items is None:
                 func = lambda p: (p.local == arg) or \

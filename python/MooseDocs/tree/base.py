@@ -144,6 +144,10 @@ class NodeBase(anytree.NodeMixin):
         """
         return True
 
+    def __nonzero__(self):
+        # PYTHON2
+        return self.__bool__()
+
     def get(self, key, default=None):
         """
         Get an attribute with a possible default.

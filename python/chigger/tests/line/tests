@@ -7,6 +7,7 @@
     requirement = 'Chigger shall provide a line plot widget'
     design = ''
     issues = '#7451'
+    python = 3
   [../]
 
   [./single_point]
@@ -17,6 +18,7 @@
     requirement = 'Chigger shall provide a scatter plot widget'
     design = ''
     issues = '#7451'
+    python = 3
   [../]
 
   [./empty]
@@ -27,6 +29,7 @@
     requirement = 'An empty graph shall be a valid chigger widget'
     design = ''
     issues = '#7451'
+    python = 3
   [../]
 
   [./color]
@@ -37,6 +40,7 @@
     requirement = 'Chigger shall provide the capability to assign colors to curves in a graph'
     design = ''
     issues = '#7451'
+    python = 3
   [../]
 
   [./legend]
@@ -48,6 +52,7 @@
     requirement = 'Chigger shall provide an optional legend widget for curves in a graph'
     design = ''
     issues = '#7451'
+    python = 3
   [../]
 
   [./legend_viewport]
@@ -59,6 +64,7 @@
     requirement = 'Chigger shall scale teh legend position relative to the graph viewport'
     design = ''
     issues = '#7451'
+    python = 3
   [../]
 
   [./update]
@@ -69,6 +75,7 @@
     requirement = 'Chigger shall provide a capability for incremental curves updates in a graph'
     design = ''
     issues = '#7451'
+    python = 3
   [../]
 
   [./secondary]
@@ -79,6 +86,7 @@
     requirement = 'Chigger shall provide a capability for multiple curves and secondary axis in a graph'
     design = ''
     issues = '#7451'
+    python = 3
   [../]
 
   [./tracer]
@@ -90,5 +98,6 @@
     requirement = 'Chigger shall provide a tracer line indicator capability'
     design = ''
     issues = '#7451'
+    python = 3
   [../]
 []

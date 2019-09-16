@@ -16,7 +16,7 @@ from MooseDocs.tree import tokens, html, latex
 def make_extension(**kwargs):
     return LayoutExtension(**kwargs)
 
-ColumnToken = tokens.newToken('ColumnToken', width=u'', small=12, medium=12, large=12)
+ColumnToken = tokens.newToken('ColumnToken', width='', small=12, medium=12, large=12)
 RowToken = tokens.newToken('RowToken')
 
 class LayoutExtension(command.CommandExtension):

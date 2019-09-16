@@ -7,7 +7,7 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-
+import sys
 import re
 import uuid
 import anytree
@@ -86,7 +86,7 @@ class KatexExtension(command.CommandExtension):
                     core.Shortcut(ast,
                                   key=node['label'],
                                   string='{} ({})'.format(self.get('prefix'), count),
-                                  link=u'#{}'.format(node['bookmark']))
+                                  link='#{}'.format(node['bookmark']))
 
         meta.setData('labels', labels)
 
@@ -182,7 +182,7 @@ class RenderLatexEquation(components.RenderComponent):
                      **token.attributes)
             if token['label'] is not None:
                 num = html.Tag(div, 'span', class_='moose-katex-equation-number')
-                html.String(num, content=u'({})'.format(token['number']))
+                html.String(num, content='({})'.format(token['number']))
 
         # Build the KaTeX script
         script = html.Tag(div, 'script')
@@ -193,16 +193,24 @@ class RenderLatexEquation(components.RenderComponent):
             config['macros'] = self.extension.macros
 
         config_str = ','.join('{}:{}'.format(key, value) for key, value in config.items())
-        content = u'var element = document.getElementById("%s");' % token['bookmark']
-        content += u'katex.render("%s", element, {%s});' % \
-                   (token['tex'].encode('unicode_escape'), config_str.encode('unicode_escape'))
+
+        if sys.version_info[0] == 2:
+            config_str = config_str.encode('unicode_escape')
+            tex = token['tex'].encode('unicode_escape')
+        else:
+            config_str = config_str.encode('unicode_escape').decode('utf-8')
+            tex = token['tex'].encode('unicode_escape').decode('utf-8')
+
+        content = 'var element = document.getElementById("%s");' % token['bookmark']
+        content += 'katex.render("%s", element, {%s});' % \
+                   (tex, config_str)
         html.String(script, content=content)
 
         return parent
 
     def createLatex(self, parent, token, page): #pylint: disable=no-self-use
         if token.name == 'LatexInlineEquation':
-            latex.String(parent, content=u'${}$'.format(token['tex']), escape=False)
+            latex.String(parent, content='${}$'.format(token['tex']), escape=False)
         else:
             cmd = 'equation' if token['number'] else 'equation*'
             env = latex.Environment(parent, cmd)

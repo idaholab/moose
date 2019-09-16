@@ -50,10 +50,16 @@ ifeq (, $(shell which $(pyconfig) 2>/dev/null))
 	pyconfig := python-config
 endif
 
+UNAME := $(shell uname)
+ifeq ($(UNAME), Darwin)
+	DYNAMIC_LOOKUP := -undefined dynamic_lookup
+else
+	DYNAMIC_LOOKUP :=
+endif
+
 hit $(pyhit_LIB): $(pyhit_srcfiles)
 	@echo "Building and linking "$@"..."
-	@bash -c '(cd "$(hit_DIR)" && $(libmesh_CXX) -std=c++11 -w -fPIC -lstdc++ -shared -L`$(pyconfig) --prefix`/lib `$(pyconfig) --includes` `$(pyconfig) --ldflags` $^ -o $(pyhit_LIB))'
-
+	@bash -c '(cd "$(hit_DIR)" && $(libmesh_CXX) -std=c++11 -w -fPIC -lstdc++ -shared -L`$(pyconfig) --prefix`/lib `$(pyconfig) --includes` $(DYNAMIC_LOOKUP) $^ -o $(pyhit_LIB))'
 #
 # gtest
 #

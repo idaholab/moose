@@ -17,7 +17,7 @@ LOG = logging.getLogger(__name__)
 def make_extension(**kwargs):
     return GalleryExtension(**kwargs)
 
-CARD_LATEX = u"""\\NewDocumentEnvironment{card}{mm}{ %
+CARD_LATEX = """\\NewDocumentEnvironment{card}{mm}{ %
   \\tcbset{width=#1,title=#2}
   \\begin{tcolorbox}[fonttitle=\\bfseries, colback=white, colframe=card-frame]
 }{ %
@@ -26,7 +26,7 @@ CARD_LATEX = u"""\\NewDocumentEnvironment{card}{mm}{ %
 """
 
 Card = tokens.newToken('Card')
-CardImage = tokens.newToken('CardImage', src=u'', media_source=u'')
+CardImage = tokens.newToken('CardImage', src='', media_source='')
 CardTitle = tokens.newToken('CardTitle')
 CardContent = tokens.newToken('CardContent')
 Gallery = tokens.newToken('Gallery', large=3, medium=6, small=12)
@@ -54,7 +54,7 @@ class GalleryExtension(media.MediaExtensionBase):
         if isinstance(renderer, LatexRenderer):
             renderer.addPackage('tcolorbox')
             renderer.addPackage('xparse')
-            renderer.addPreamble(u'\\definecolor{card-frame}{RGB}{0,88,151}')
+            renderer.addPreamble('\\definecolor{card-frame}{RGB}{0,88,151}')
             renderer.addPreamble(CARD_LATEX)
 
 class CardComponent(command.CommandComponent):
@@ -64,7 +64,7 @@ class CardComponent(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings['title'] = (u'', "Title of the card.")
+        settings['title'] = ('', "Title of the card.")
         return settings
 
     def createToken(self, parent, info, page):
@@ -133,11 +133,11 @@ class RenderCard(components.RenderComponent):
         width = style.get('width', None)
         if width:
             if width.endswith('%'):
-                width = u'{}\\textwidth'.format(int(width[:-1])/100.)
+                width = '{}\\textwidth'.format(int(width[:-1])/100.)
             args.append(latex.Brace(string=width, escape=False))
             token.children[0]['width'] = width
         else:
-            args.append(latex.Brace(string=u'\\textwidth', escape=False))
+            args.append(latex.Brace(string='\\textwidth', escape=False))
 
         if (len(token.children) > 1) and (token.children[1].name == 'CardTitle'):
             title = latex.Brace()
@@ -172,7 +172,7 @@ class RenderCardImage(components.RenderComponent):
                 return parent
 
         img = self.extension.latexImage(latex.Environment(parent, 'center'), token, fname)
-        img['args'] = [latex.Bracket(string=u'width=\\textwidth', escape=False)]
+        img['args'] = [latex.Bracket(string='width=\\textwidth', escape=False)]
         return parent
 
 class RenderCardTitle(components.RenderComponent):

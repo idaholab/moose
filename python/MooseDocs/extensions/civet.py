@@ -45,7 +45,7 @@ class CivetMergeResultsCommand(command.CommandComponent):
 
         rows = []
         for sha in mooseutils.git_merge_commits():
-            url = u'https://civet.inl.gov/sha_events/{}/{}/{}'.format(owner, repo, sha)
+            url = 'https://civet.inl.gov/sha_events/{}/{}/{}'.format(owner, repo, sha)
             link = core.Link(parent, url=url, string=sha)
             core.LineBreak(parent)
         return parent
@@ -65,5 +65,5 @@ class CivetResultsCommand(command.CommandComponent):
         owner = self.settings['owner'] or self.extension.get('owner')
         repo = self.settings['repo'] or self.extension.get('repo')
         sha = mooseutils.git_commit()
-        url = u'https://civet.inl.gov/sha_events/{}/{}/{}'.format(owner, repo, sha)
+        url = 'https://civet.inl.gov/sha_events/{}/{}/{}'.format(owner, repo, sha)
         return core.Link(parent, url=url)

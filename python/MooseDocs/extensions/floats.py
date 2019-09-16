@@ -20,8 +20,8 @@ from MooseDocs.tree import tokens, html, latex
 def make_extension(**kwargs):
     return FloatExtension(**kwargs)
 
-Float = tokens.newToken('Float', img=False, bottom=False, command=u'figure')
-FloatCaption = tokens.newToken('FloatCaption', key=u'', prefix=u'', number='?')
+Float = tokens.newToken('Float', img=False, bottom=False, command='figure')
+FloatCaption = tokens.newToken('FloatCaption', key='', prefix='', number='?')
 ModalLink = tokens.newToken('ModalLink', bookmark=True, bottom=False, close=True)
 ModalLinkTitle = tokens.newToken('ModalLinkTitle')
 ModalLinkContent = tokens.newToken('ModalLinkContent')
@@ -101,7 +101,7 @@ def create_modal_link(parent, title=None, content=None, string=None, **kwargs):
     """
     kwargs.setdefault('bookmark', str(uuid.uuid4()))
     link = core.Link(parent,
-                     url=u'#{}'.format(kwargs['bookmark']),
+                     url='#{}'.format(kwargs['bookmark']),
                      class_='modal-trigger',
                      string=string)
     create_modal(parent, title, content, **kwargs)
@@ -135,13 +135,13 @@ class FloatExtension(components.Extension):
                 node['number'] = meta.getData('counts')[prefix]
             key = node.get('key')
             if key:
-                shortcut = core.Shortcut(ast.root, key=key, link=u'#{}'.format(key))
+                shortcut = core.Shortcut(ast.root, key=key, link='#{}'.format(key))
 
                 # TODO: This is a bit of a hack to get Figure~\ref{} etc. working in general
                 if isinstance(self.translator.renderer, LatexRenderer):
                     shortcut['prefix'] = prefix.title()
                 else:
-                    tokens.String(shortcut, content=u'{} {}'.format(prefix.title(), node['number']))
+                    tokens.String(shortcut, content='{} {}'.format(prefix.title(), node['number']))
 
 
 class RenderFloat(components.RenderComponent):
@@ -194,7 +194,7 @@ class RenderFloatCaption(components.RenderComponent):
         prefix = token.get('prefix', None)
         if prefix:
             heading = html.Tag(caption, 'span', class_="moose-caption-heading")
-            html.String(heading, content=u"{} {}: ".format(prefix, token['number']))
+            html.String(heading, content="{} {}: ".format(prefix, token['number']))
 
         return html.Tag(caption, 'span', class_="moose-caption-text")
 
@@ -221,7 +221,7 @@ class RenderModalLink(core.RenderLink):
 
         if token['close']:
             footer = html.Tag(modal, 'div', class_='modal-footer')
-            html.Tag(footer, 'a', class_='modal-close btn-flat', string=u'Close')
+            html.Tag(footer, 'a', class_='modal-close btn-flat', string='Close')
         return modal_content
 
 class RenderModalLinkTitle(components.RenderComponent):

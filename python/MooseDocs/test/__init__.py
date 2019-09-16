@@ -59,14 +59,14 @@ class MooseDocsTestCase(unittest.TestCase):
 
         self.__text.content = text
         self.__ast, self.__meta = self.__translator.executioner.tokenize(self.__text)
-        self.__text.content = u''
+        self.__text.content = ''
         return self.__ast
 
     def render(self, ast, *args, **kwargs):
         """Helper for rendering AST"""
         if args or kwargs or (self.__translator is None):
             self.__setup(*args, **kwargs)
-            self.tokenize(u'')
+            self.tokenize('')
         self.__result = self.__translator.executioner.render(self.__text, ast, self.__meta)
         return self.__result
 

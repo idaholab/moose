@@ -50,16 +50,6 @@ class TestrPostprocessorReader(unittest.TestCase):
         self.assertEqual(x.loc[10][self._keys[0]], 2.12)
         self.assertEqual(x.loc[10][self._keys[1]], 51.00)
 
-    def testCallWarning(self):
-        """
-        Test that a warning appears if 'time' is used.
-        """
-        data = mooseutils.PostprocessorReader(self._filename)
-        data(self._keys[0], time=76)
-        output = sys.stdout.getvalue()
-
-        self.assertIn(" Supplying a time argument is not supported in the PostprocessorReader", output)
-
     def testCall(self):
         """
         Test that operator() method is working.
@@ -67,11 +57,11 @@ class TestrPostprocessorReader(unittest.TestCase):
         data = mooseutils.PostprocessorReader(self._filename)
 
         # Single key
-        x = data(self._keys[0])
+        x = data[self._keys[0]]
         self.assertEqual(x.loc[10], 2.12)
 
         # Multiple keys
-        x = data(self._keys)
+        x = data[self._keys]
         self.assertEqual(x.loc[10][self._keys[0]], 2.12)
         self.assertEqual(x.loc[10][self._keys[1]], 51.00)
 

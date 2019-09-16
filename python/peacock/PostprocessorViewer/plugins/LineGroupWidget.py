@@ -159,7 +159,7 @@ class LineGroupWidget(peacock.base.MooseWidget, QtWidgets.QGroupBox):
                     settings = toggle.settings()
                     i = settings.pop('axis')
                     y_vars[i].append(variable)
-                    y = self._data(variable, time=self._time, warning=False)
+                    y = self._data(variable, time=self._time)
                     if self._axes[i]:
                         self._artists[variable] = self._axes[i].plot(x, y, **settings)
 

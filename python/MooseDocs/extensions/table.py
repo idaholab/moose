@@ -62,7 +62,7 @@ class TableExtension(command.CommandExtension):
     @staticmethod
     def defaultConfig():
         config = command.CommandExtension.defaultConfig()
-        config['prefix'] = (u'Table', "The caption prefix (e.g., Tbl.).")
+        config['prefix'] = ('Table', "The caption prefix (e.g., Tbl.).")
         return config
 
     def extend(self, reader, renderer):
@@ -167,8 +167,8 @@ class RenderTable(components.RenderComponent):
 
     def createLatex(self, parent, token, page):
 
-        args = [latex.Brace(string=u'\\textwidth', escape=False),
-                latex.Brace(string=u"".join([f[0].upper() for f in token['form']]))]
+        args = [latex.Brace(string='\\textwidth', escape=False),
+                latex.Brace(string="".join([f[0].upper() for f in token['form']]))]
         return latex.Environment(parent, 'tabulary', start='\\par', args=args)
 
 class RenderTag(components.RenderComponent):
@@ -186,12 +186,12 @@ class RenderTag(components.RenderComponent):
 
         items = parent
         if token.name == 'TableHead':
-            latex.String(parent, content=u'\\toprule\n', escape=False)
+            latex.String(parent, content='\\toprule\n', escape=False)
             items = latex.String(parent)
-            latex.String(parent, content=u'\\midrule\n', escape=False)
+            latex.String(parent, content='\\midrule\n', escape=False)
         elif (token.name == 'TableBody') and (token is token.parent.children[-1]):
             items = latex.String(parent)
-            latex.String(parent, content=u'\\bottomrule', escape=False)
+            latex.String(parent, content='\\bottomrule', escape=False)
         return items
 
 class RenderItem(RenderTag):
@@ -203,7 +203,7 @@ class RenderItem(RenderTag):
     def createLatex(self, parent, token, page):
 
         item = latex.String(parent)
-        end = u' \\\\\n' if token is token.parent.children[-1] else u' &'
+        end = ' \\\\\n' if token is token.parent.children[-1] else ' &'
         latex.String(parent, content=end, escape=False)
 
         return item

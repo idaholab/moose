@@ -67,7 +67,6 @@ def _doc_import(root_dir, content=None):
         content[list]: List of file/path globs to include, relative to the 'base' directory, paths
                        beginning with '~' are excluded.
     """
-
     # Check root_dir
     if not os.path.isdir(root_dir):
         LOG.error('The "root_dir" must be a valid directory: %s', root_dir)

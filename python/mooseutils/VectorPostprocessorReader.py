@@ -33,7 +33,6 @@ class VectorPostprocessorReader(object):
     on subsequent calls to "update()".
     """
     def __init__(self, pattern, run_start_time=0):
-
         self._pattern = pattern
         self._timedata = MooseDataFrame(self._pattern.replace('*', 'time'),
                                         run_start_time=None,
@@ -55,7 +54,7 @@ class VectorPostprocessorReader(object):
 
     def __getitem__(self, keys):
         """
-        Operator[] returns the latest time or the desired time.
+        Operator[] returns the data for the current time.
 
         Args:
             keys[str|list]: The key(s) to return.
@@ -124,14 +123,14 @@ class VectorPostprocessorReader(object):
 
             mdf = self._frames.get(idx, None)
             if mdf is None:
-                mdf = MooseDataFrame(fname, run_start_time=self._run_start_time, update=False)
+                mdf = MooseDataFrame(fname, run_start_time=self._run_start_time, update=False,
+                                     peacock_index=True)
                 self._frames[idx] = mdf
 
             if (mdf.modified < last_modified):
                 self._frames.pop(idx)
             elif mdf.filesize == 0:
                 self._frames.pop(idx)
-
             else:
                 last_modified = mdf.modified
 

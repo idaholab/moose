@@ -74,8 +74,19 @@ Diffusion::computeQpJacobian()
 {
   return _grad_phi[_j][_qp] * _grad_test[_i][_qp];
 }
-</code></pre></div><div class="modal-footer"><a class="modal-close btn-flat">Close</a></div></div><pre class="moose-pre"><code class="language-text">xxxxxb'[Mesh]\n  type = GeneratedMesh\n  dim = 2\n  nx = 10\n  ny = 10\n[]'
-xxxxxb'\n[Kernels]\n  [./diff]\n    type = Diffusion\n    variable = u\n  [../]\n[]'
+</code></pre></div><div class="modal-footer"><a class="modal-close btn-flat">Close</a></div></div><pre class="moose-pre"><code class="language-text">xxxxx[Mesh]
+xxxxx  type = GeneratedMesh
+xxxxx  dim = 2
+xxxxx  nx = 10
+xxxxx  ny = 10
+xxxxx[]
+xxxxx
+xxxxx[Kernels]
+xxxxx  [./diff]
+xxxxx    type = Diffusion
+xxxxx    variable = u
+xxxxx  [../]
+xxxxx[]
 </code></pre><a href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" class="modal-trigger">(test/tests/kernels/simple_diffusion/simple_diffusion.i)</a><div class="modal moose-modal" id="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"><div class="modal-content"><h4>${MOOSE_DIR}/test/tests/kernels/simple_diffusion/simple_diffusion.i</h4><pre class="moose-pre"><code class="language-text">[Mesh]
   type = GeneratedMesh
   dim = 2
@@ -121,7 +132,10 @@ xxxxxb'\n[Kernels]\n  [./diff]\n    type = Diffusion\n    variable = u\n  [../]\
   exodus = true
 []
 </code></pre></div><div class="modal-footer"><a class="modal-close btn-flat">Close</a></div></div><pre class="moose-pre"><code class="language-text">[AuxKernels]
-    b'[./diff]\n  type = Diffusion\n  variable = u\n[../]'
+    [./diff]
+      type = Diffusion
+      variable = u
+    [../]
 [./]</code></pre><a href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" class="modal-trigger">(test/tests/kernels/simple_diffusion/simple_diffusion.i)</a><div class="modal moose-modal" id="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"><div class="modal-content"><h4>${MOOSE_DIR}/test/tests/kernels/simple_diffusion/simple_diffusion.i</h4><pre class="moose-pre"><code class="language-text">[Mesh]
   type = GeneratedMesh
   dim = 2

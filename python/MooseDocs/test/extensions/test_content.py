@@ -15,21 +15,21 @@ class TestContentList(MooseDocsTestCase):
         return common.get_content(config, '.md')
 
     def testAST(self):
-        ast = self.tokenize(u'!content list')
+        ast = self.tokenize('!content list')
         self.assertSize(ast, 1)
-        self.assertToken(ast(0), 'ContentToken', size=0, level=2, location=u'')
+        self.assertToken(ast(0), 'ContentToken', size=0, level=2, location='')
 
-        ast = self.tokenize(u'!content list location=foo level=42')
+        ast = self.tokenize('!content list location=foo level=42')
         self.assertSize(ast, 1)
-        self.assertToken(ast(0), 'ContentToken', size=0, level=42, location=u'foo')
+        self.assertToken(ast(0), 'ContentToken', size=0, level=42, location='foo')
 
     def testHTML(self):
-        _, res = self.execute(u'!content list location=extensions')
+        _, res = self.execute('!content list location=extensions')
         self.assertHTMLTag(res, 'body', size=1)
         self._assertHTML(res)
 
     def testMaterialize(self):
-        _, res = self.execute(u'!content list location=extensions', renderer=base.MaterializeRenderer())
+        _, res = self.execute('!content list location=extensions', renderer=base.MaterializeRenderer())
         self.assertHTMLTag(res, 'div', size=1)
         self._assertHTML(res)
 
@@ -40,30 +40,30 @@ class TestContentList(MooseDocsTestCase):
         self.assertHTMLTag(col, 'div', size=1, class_='col s12 m6 l4')
         self.assertHTMLTag(col(0), 'ul', size=1, class_='moose-a-to-z')
         self.assertHTMLTag(col(0)(0), 'li', size=1)
-        self.assertHTMLTag(col(0)(0)(0), 'a', href='extensions/content.html', string=u'Content Extension')
+        self.assertHTMLTag(col(0)(0)(0), 'a', href='extensions/content.html', string='Content Extension')
 
         col = res(0)(1)
         self.assertHTMLTag(col, 'div', size=1, class_='col s12 m6 l4')
         self.assertHTMLTag(col(0), 'ul', size=1, class_='moose-a-to-z')
         self.assertHTMLTag(col(0)(0), 'li', size=1)
-        self.assertHTMLTag(col(0)(0)(0), 'a', href='extensions/core.html', string=u'Core Extension')
+        self.assertHTMLTag(col(0)(0)(0), 'a', href='extensions/core.html', string='Core Extension')
 
         col = res(0)(2)
         self.assertHTMLTag(col, 'div', size=1, class_='col s12 m6 l4')
         self.assertHTMLTag(col(0), 'ul', size=0, class_='moose-a-to-z')
 
     def testLatex(self):
-        _, res = self.execute(u'!content list location=extensions', renderer=base.LatexRenderer())
+        _, res = self.execute('!content list location=extensions', renderer=base.LatexRenderer())
         self.assertSize(res, 4)
 
         self.assertLatex(res(0), 'Command' ,'par')
-        self.assertLatex(res(1), 'Command', 'ContentItem', string=u'Content Extension')
-        self.assertLatexArg(res(1), 0, 'Brace', u'extensions/content.tex')
-        self.assertLatexArg(res(1), 1, 'Brace', u'content-extension')
+        self.assertLatex(res(1), 'Command', 'ContentItem', string='Content Extension')
+        self.assertLatexArg(res(1), 0, 'Brace', 'extensions/content.tex')
+        self.assertLatexArg(res(1), 1, 'Brace', 'content-extension')
 
-        self.assertLatex(res(2), 'Command', 'ContentItem', string=u'Core Extension')
-        self.assertLatexArg(res(2), 0, 'Brace', u'extensions/core.tex')
-        self.assertLatexArg(res(2), 1, 'Brace', u'core-extension')
+        self.assertLatex(res(2), 'Command', 'ContentItem', string='Core Extension')
+        self.assertLatexArg(res(2), 0, 'Brace', 'extensions/core.tex')
+        self.assertLatexArg(res(2), 1, 'Brace', 'core-extension')
         self.assertLatex(res(3), 'Command' ,'par')
 
 class TestContentAtoZ(MooseDocsTestCase):
@@ -80,21 +80,21 @@ class TestContentAtoZ(MooseDocsTestCase):
             return dict(active=False)
 
     def testAST(self):
-        ast = self.tokenize(u'!content a-to-z')
+        ast = self.tokenize('!content a-to-z')
         self.assertSize(ast, 1)
-        self.assertToken(ast(0), 'AtoZToken', size=0, level=2, location=u'', buttons=True)
+        self.assertToken(ast(0), 'AtoZToken', size=0, level=2, location='', buttons=True)
 
-        ast = self.tokenize(u'!content a-to-z location=foo level=42 buttons=False')
+        ast = self.tokenize('!content a-to-z location=foo level=42 buttons=False')
         self.assertSize(ast, 1)
-        self.assertToken(ast(0), 'AtoZToken', size=0, level=42, location=u'foo', buttons=False)
+        self.assertToken(ast(0), 'AtoZToken', size=0, level=42, location='foo', buttons=False)
 
     def testHTML(self):
-        _, res = self.execute(u'!content a-to-z location=extensions')
+        _, res = self.execute('!content a-to-z location=extensions')
         self.assertHTMLTag(res, 'body', size=6)
         self._assertHTML(res)
 
     def testMaterialize(self):
-        _, res = self.execute(u'!content a-to-z location=extensions', renderer=base.MaterializeRenderer())
+        _, res = self.execute('!content a-to-z location=extensions', renderer=base.MaterializeRenderer())
 
         b = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
         self.assertHTMLTag(res(0), 'div', size=len(b), class_='moose-a-to-z-buttons')
@@ -109,59 +109,59 @@ class TestContentAtoZ(MooseDocsTestCase):
         self._assertHTML(res)
 
     def testLatex(self):
-        _, res = self.execute(u'!content a-to-z location=extensions', renderer=base.LatexRenderer())
+        _, res = self.execute('!content a-to-z location=extensions', renderer=base.LatexRenderer())
         self.assertSize(res, 8)
         self.assertLatex(res(0), 'Command' ,'par')
-        self.assertLatex(res(1), 'Command', 'ContentItem', string=u'Acronym Extension')
-        self.assertLatexArg(res(1), 0, 'Brace', u'extensions/acronym.tex')
-        self.assertLatexArg(res(1), 1, 'Brace', u'acronym-extension')
+        self.assertLatex(res(1), 'Command', 'ContentItem', string='Acronym Extension')
+        self.assertLatexArg(res(1), 0, 'Brace', 'extensions/acronym.tex')
+        self.assertLatexArg(res(1), 1, 'Brace', 'acronym-extension')
 
         self.assertLatex(res(2), 'Command' ,'par')
-        self.assertLatex(res(3), 'Command', 'ContentItem', string=u'Content Extension')
-        self.assertLatexArg(res(3), 0, 'Brace', u'extensions/content.tex')
-        self.assertLatexArg(res(3), 1, 'Brace', u'content-extension')
+        self.assertLatex(res(3), 'Command', 'ContentItem', string='Content Extension')
+        self.assertLatexArg(res(3), 0, 'Brace', 'extensions/content.tex')
+        self.assertLatexArg(res(3), 1, 'Brace', 'content-extension')
 
-        self.assertLatex(res(4), 'Command', 'ContentItem', string=u'Core Extension')
-        self.assertLatexArg(res(4), 0, 'Brace', u'extensions/core.tex')
-        self.assertLatexArg(res(4), 1, 'Brace', u'core-extension')
+        self.assertLatex(res(4), 'Command', 'ContentItem', string='Core Extension')
+        self.assertLatexArg(res(4), 0, 'Brace', 'extensions/core.tex')
+        self.assertLatexArg(res(4), 1, 'Brace', 'core-extension')
 
         self.assertLatex(res(5), 'Command' ,'par')
-        self.assertLatex(res(6), 'Command', 'ContentItem', string=u'Table Extensions')
-        self.assertLatexArg(res(6), 0, 'Brace', u'extensions/table.tex')
-        self.assertLatexArg(res(6), 1, 'Brace', u'table-extensions')
+        self.assertLatex(res(6), 'Command', 'ContentItem', string='Table Extensions')
+        self.assertLatexArg(res(6), 0, 'Brace', 'extensions/table.tex')
+        self.assertLatexArg(res(6), 1, 'Brace', 'table-extensions')
 
     def _assertHTML(self, res):
 
         # A
-        self.assertHTMLTag(res(0), 'h2', string=u'a', class_='moose-a-to-z')
+        self.assertHTMLTag(res(0), 'h2', string='a', class_='moose-a-to-z')
         row = res(1)
         self._assertCols(row, [1,0,0])
 
         col = row(0)
         self.assertHTMLTag(col(0)(0), 'li', size=1)
-        self.assertHTMLTag(col(0)(0)(0), 'a', href='extensions/acronym.html', string=u'Acronym Extension')
+        self.assertHTMLTag(col(0)(0)(0), 'a', href='extensions/acronym.html', string='Acronym Extension')
 
         # C
-        self.assertHTMLTag(res(2), 'h2', string=u'c', class_='moose-a-to-z')
+        self.assertHTMLTag(res(2), 'h2', string='c', class_='moose-a-to-z')
         row = res(3)
         self._assertCols(row, [1,1,0])
 
         col = row(0)
         self.assertHTMLTag(col(0)(0), 'li', size=1)
-        self.assertHTMLTag(col(0)(0)(0), 'a', href='extensions/content.html', string=u'Content Extension')
+        self.assertHTMLTag(col(0)(0)(0), 'a', href='extensions/content.html', string='Content Extension')
 
         col = row(1)
         self.assertHTMLTag(col(0)(0), 'li', size=1)
-        self.assertHTMLTag(col(0)(0)(0), 'a', href='extensions/core.html', string=u'Core Extension')
+        self.assertHTMLTag(col(0)(0)(0), 'a', href='extensions/core.html', string='Core Extension')
 
         # T
-        self.assertHTMLTag(res(4), 'h2', string=u't', class_='moose-a-to-z')
+        self.assertHTMLTag(res(4), 'h2', string='t', class_='moose-a-to-z')
         row = res(5)
         self._assertCols(row, [1,0,0])
 
         col = row(0)
         self.assertHTMLTag(col(0)(0), 'li', size=1)
-        self.assertHTMLTag(col(0)(0)(0), 'a', href='extensions/table.html', string=u'Table Extensions')
+        self.assertHTMLTag(col(0)(0)(0), 'a', href='extensions/table.html', string='Table Extensions')
 
     def _assertCols(self, row, sz):
         self.assertHTMLTag(row, 'div', size=3, class_='row')
@@ -171,7 +171,7 @@ class TestContentAtoZ(MooseDocsTestCase):
 
 class TestContentToc(MooseDocsTestCase):
     EXTENSIONS = [core, command, heading, content]
-    TEXT = u'# TOC id=toc\n\n!content toc hide=toc levels=1 2\n\n## One\n\n## Two'
+    TEXT = '# TOC id=toc\n\n!content toc hide=toc levels=1 2\n\n## One\n\n## Two'
 
     def testAST(self):
         ast = self.tokenize(self.TEXT)
@@ -192,11 +192,11 @@ class TestContentToc(MooseDocsTestCase):
 
         self.assertHTMLTag(res, 'div', size=2, class_='moose-table-of-contents')
         self.assertHTMLTag(res(0), 'a', size=2, href='#one')
-        self.assertHTMLString(res(0)(0), content=u'One')
+        self.assertHTMLString(res(0)(0), content='One')
         self.assertHTMLTag(res(0)(1), 'br', close=False)
 
         self.assertHTMLTag(res(1), 'a', size=2, href='#two')
-        self.assertHTMLString(res(1)(0), content=u'Two')
+        self.assertHTMLString(res(1)(0), content='Two')
         self.assertHTMLTag(res(1)(1), 'br', close=False)
 
 

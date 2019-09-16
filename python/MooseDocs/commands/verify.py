@@ -51,8 +51,8 @@ def insert_moose_dir(content):
 
 def replace_uuid4(content):
     """Replace uuid.uuid4() numbers."""
-    return re.sub(r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',
-                  r'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', content)
+    return re.sub('[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',
+                  'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', content, flags=re.UNICODE)
 
 def replace_package_file(content):
     """Replace the package filename with something consistent."""
@@ -76,8 +76,8 @@ def compare(out_fname, out_dir, gold_dir, update_gold=False):
     gold_fname = out_fname.replace(out_dir, gold_dir)
 
     # Read the content to be tested
-    with open(out_fname, 'r') as fid:
-        out_content = prepare_content(fid.read())
+    out_content = MooseDocs.common.read(out_fname)
+    out_content = prepare_content(out_content)
 
     # Update gold content
     if update_gold:

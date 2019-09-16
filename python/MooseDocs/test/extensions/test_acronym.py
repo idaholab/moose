@@ -8,7 +8,7 @@ logging.basicConfig()
 
 class TestInlineAcronym(MooseDocsTestCase):
     EXTENSIONS = [core, command, floats, table, acronym]
-    TEXT = u"[!ac!INL] and [!ac!INL]"
+    TEXT = "[!ac!INL] and [!ac!INL]"
 
     def setupExtension(self, ext):
         if ext == acronym:
@@ -71,7 +71,7 @@ class TestInlineAcronym(MooseDocsTestCase):
 
 class TestAcronymList(MooseDocsTestCase):
     EXTENSIONS = [core, command, floats, table, acronym]
-    TEXT = u"!acronym list"
+    TEXT = "!acronym list"
 
     def setupExtension(self, ext):
         if ext == acronym:

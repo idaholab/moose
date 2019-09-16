@@ -8,7 +8,6 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 """Wrapper for hit parser."""
-
 import os
 import hit
 from . import message

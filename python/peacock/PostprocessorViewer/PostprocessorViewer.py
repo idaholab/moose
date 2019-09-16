@@ -107,7 +107,7 @@ def main():
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
-    filenames = ['../../tests/input/white_elephant_jan_2016.csv']
+    filenames = ['../tests/input/white_elephant_jan_2016.csv']
     widget = main()
     widget.onSetFilenames(filenames)
     sys.exit(app.exec_())

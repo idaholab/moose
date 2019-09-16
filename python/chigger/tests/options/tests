@@ -3,6 +3,7 @@
     type = RunApp
     command = options.py
     cli_args = '--type=run'
+    python = 3
   [../]
 
   [./bad_type]
@@ -10,6 +11,7 @@
     command = options.py
     cli_args = '--type=bad-type'
     expect_out = "param must be of type int but str provided."
+    python = 3
   [../]
 
   [./bad_allow_type]
@@ -17,6 +19,7 @@
     command = options.py
     cli_args = '--type=bad-allow-type'
     expect_out = "The type provided, int, does not match the type of the allowed values, list."
+    python = 3
   [../]
 
   [./value_not_allowed]
@@ -24,6 +27,7 @@
     command = options.py
     cli_args = '--type=value-not-allowed'
     expect_out = "Attempting to set param to a value of 1 but only the following are allowed"
+    python = 3
   [../]
 
   [./bad-arg-count]
@@ -31,6 +35,7 @@
     command = options.py
     cli_args = '--type=bad-arg-count'
     expect_err = "Wrong number of arguments, must supply 2 or 3 input arguments."
+    python = 3
   [../]
 
   [./dump]
@@ -39,6 +44,7 @@
     cli_args = '--type=dump'
     expect_out = "Some parameter"
     skip = 'Needs terminaltables'
+    python = 3
   [../]
 
   [./duplicate]
@@ -46,5 +52,6 @@
     command = options.py
     cli_args = '--type=duplicate'
     expect_out = "A parameter with the name param already exists."
+    python = 3
   [../]
 []

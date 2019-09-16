@@ -217,9 +217,9 @@ class TokenComponent(Component, mixins.ReaderObject):
         the default settings for the component, see core.py for examples.
         """
         settings = dict()
-        settings['style'] = (u'', u"The style settings that are passed to rendered HTML tag.")
-        settings['class'] = (u'', u"The class settings to be passed to rendered HTML tag.")
-        settings['id'] = (u'', u"The class settings to be passed to the rendered tag.")
+        settings['style'] = ('', "The style settings that are passed to rendered HTML tag.")
+        settings['class'] = ('', "The class settings to be passed to rendered HTML tag.")
+        settings['id'] = ('', "The class settings to be passed to the rendered tag.")
         return settings
 
     def __init__(self):
