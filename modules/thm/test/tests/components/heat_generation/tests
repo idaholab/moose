@@ -76,7 +76,7 @@
     type = 'RunException'
     input = 'err.base.i'
     cli_args = "Components/hgen/hs=hs Components/hgen/regions='fuel' Components/hgen/power=hs"
-    expect_err = "hgen: The component 'hs' is not of type 'ReactorPower'"
+    expect_err = "hgen: The component 'hs' is not of type 'TotalPowerBase'"
   [../]
   [./err:both_power_and_power_density]
     type = 'RunException'
