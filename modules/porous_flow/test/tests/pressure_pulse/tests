@@ -120,4 +120,14 @@
     design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'PorousFlow shall correctly simulate the transient evolution of a pressure pulse in 1D when using 1 fluid phase and employing the fully-saturated version of Darcy flow along with the fully-saturated version of the fluid-mass time derivative'
   [../]
+  [./pressure_pulse_1d_adapt]
+    type = 'CSVDiff'
+    input = 'pressure_pulse_1d_adaptivity.i'
+    csvdiff = 'pressure_pulse_1d_adaptivity_out.csv'
+    rel_err = 1.0E-5
+    threading = '!pthreads'
+    issues = '#6845 14035'
+    design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
+    requirement = 'PorousFlow shall correctly simulate the transient evolution of a pressure pulse when mesh adaptivity is included'
+  [../]
 []
