@@ -65,8 +65,6 @@
 #include "ODETimeKernel.h"
 #include "AllLocalDofIndicesThread.h"
 #include "FloatingPointExceptionGuard.h"
-#include "MaxVarNDofsPerElem.h"
-#include "MaxVarNDofsPerNode.h"
 #include "ADKernel.h"
 #include "ADPresetNodalBC.h"
 #include "Moose.h"
@@ -175,6 +173,10 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _computed_scaling(false),
     _automatic_scaling(false),
     _compute_scaling_once(true)
+#ifdef MOOSE_SPARSE_AD
+    ,
+    _required_derivative_size(0)
+#endif
 {
   getResidualNonTimeVector();
   // Don't need to add the matrix - it already exists (for now)
@@ -260,25 +262,6 @@ NonlinearSystemBase::restoreSolutions()
 void
 NonlinearSystemBase::initialSetup()
 {
-  if (_fe_problem.haveADObjects())
-  {
-    CONSOLE_TIMED_PRINT("Computing max dofs per elem/node");
-
-    MaxVarNDofsPerElem mvndpe(_fe_problem, *this);
-    Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), mvndpe);
-    _max_var_n_dofs_per_elem = mvndpe.max();
-    _communicator.max(_max_var_n_dofs_per_elem);
-    auto displaced_problem = _fe_problem.getDisplacedProblem();
-    if (displaced_problem)
-      displaced_problem->nlSys().assignMaxVarNDofsPerElem(_max_var_n_dofs_per_elem);
-
-    MaxVarNDofsPerNode mvndpn(_fe_problem, *this);
-    Threads::parallel_reduce(*_mesh.getLocalNodeRange(), mvndpn);
-    _max_var_n_dofs_per_node = mvndpn.max();
-    _communicator.max(_max_var_n_dofs_per_node);
-    if (displaced_problem)
-      displaced_problem->nlSys().assignMaxVarNDofsPerNode(_max_var_n_dofs_per_node);
-  }
   {
     CONSOLE_TIMED_PRINT("Initializing Kernels, BCs and Constraints");
 
