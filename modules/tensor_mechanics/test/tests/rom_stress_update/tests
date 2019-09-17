@@ -8,6 +8,7 @@
       input = '3d.i'
       csvdiff = '3d_out.csv'
       detail = '3D'
+      petsc_version = '>=3.9.0'
     [../]
     [./3d-jac]
       type = 'PetscJacobianTester'
@@ -27,6 +28,7 @@
       input = '2drz.i'
       csvdiff = '2drz_out.csv'
       detail = '2DRz'
+      petsc_version = '>=3.9.0'
     [../]
     [./2drz-jac]
       type = 'PetscJacobianTester'
@@ -45,6 +47,7 @@
       type = 'CSVDiff'
       input = 'verification.i'
       csvdiff = 'verification_1e-3_out.csv'
+      petsc_version = '>=3.9.0'
       detail = 'isolation (i.e. without a full displacement solve), and match with code-to-code comparison with a small set of input parameters'
     [../]
     [./verification_heavy]
@@ -52,6 +55,7 @@
       input = 'verification.i'
       csvdiff = 'verification_1e-5_out.csv'
       heavy = true
+      petsc_version = '>=3.9.0'
       cli_args = 'Executioner/dt=1e-5 Outputs/file_base=verification_1e-5_out'
       detail = 'isolation (i.e. without a full displacement solve), and match with code-to-code comparison with a large set of input parameters'
     [../]
