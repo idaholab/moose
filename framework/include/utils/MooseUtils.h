@@ -56,6 +56,9 @@ MetaPhysicL::DualNumber<T, D> abs(MetaPhysicL::DualNumber<T, D> && in);
 namespace MooseUtils
 {
 
+/// Replaces all occurences of from in str with to and returns the result.
+std::string replaceAll(std::string str, const std::string & from, const std::string & to);
+
 /**
  * Replaces "LATEST" placeholders with the latest checkpoint file name.  If base_only is true, then
  * only return the base-name of the checkpoint directory - otherwise, a full mesh

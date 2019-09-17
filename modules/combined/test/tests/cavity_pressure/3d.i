@@ -20,7 +20,7 @@
 # with
 #   alpha = n0
 #   beta = T0 / 2
-#   gamma = -(0.003322259...) * V0
+#   gamma = - (0.003322259...) * V0
 #   T0 = 240.54443866068704
 #   V0 = 7
 #   n0 = f(p0)
@@ -32,22 +32,14 @@
 #
 # The parameters combined at t = 1 gives p = 301.
 #
-# This test sets the initial temperature to 500, but the CavityPressure
-#   is told that that initial temperature is T0.  Thus, the final solution
-#   is unchanged.
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
-  order = FIRST
-  family = LAGRANGE
+  volumetric_locking_correction = true
 []
 
 [Mesh]
-  file = cavity_pressure.e
-[]
-
-[GlobalParams]
-  volumetric_locking_correction=true
+  file = 3d.e
 []
 
 [Functions]
@@ -82,10 +74,9 @@
   [./disp_z]
   [../]
   [./temp]
-    initial_condition = 500
+    initial_condition = 240.54443866068704
   [../]
   [./material_input]
-    initial_condition = 0
   [../]
 []
 
@@ -127,12 +118,14 @@
     use_displaced_mesh = true
   [../]
   [./heat]
-    type = HeatConduction
+    type = Diffusion
     variable = temp
+    use_displaced_mesh = true
   [../]
   [./material_input_dummy]
-    type = HeatConduction
+    type = Diffusion
     variable = material_input
+    use_displaced_mesh = true
   [../]
 []
 
@@ -261,7 +254,6 @@
       material_input = materialInput
       R = 8.314472
       temperature = aveTempInterior
-      initial_temperature = 240.54443866068704
       volume = internalVolume
       startup_time = 0.5
       output = ppress
@@ -272,11 +264,9 @@
 
 [Materials]
   [./elast_tensor1]
-    type = ComputeElasticityTensor
-    C_ijkl = '0 5'
-#    youngs_modulus = 1e1
-#    poissons_ratio = 0
-    fill_method = symmetric_isotropic
+    type = ComputeIsotropicElasticityTensor
+    youngs_modulus = 1e1
+    poissons_ratio = 0
     block = 1
   [../]
   [./strain1]
@@ -288,11 +278,9 @@
     block = 1
   [../]
   [./elast_tensor2]
-    type = ComputeElasticityTensor
-    C_ijkl = '0 5'
-#    youngs_modulus = 1e1
-#    poissons_ratio = 0
-    fill_method = symmetric_isotropic
+    type = ComputeIsotropicElasticityTensor
+    youngs_modulus = 1e6
+    poissons_ratio = 0
     block = 2
   [../]
   [./strain2]
@@ -303,28 +291,10 @@
     type = ComputeFiniteStrainElasticStress
     block = 2
   [../]
-  [./heatconduction]
-    type = HeatConductionMaterial
-    block = '1 2'
-    thermal_conductivity = 1.0
-    specific_heat = 1.0
-  [../]
-  [./density]
-    type = Density
-    block = '1 2'
-    density = 1.0
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-  [../]
-
 []
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
 
   petsc_options_iname = '-pc_type -sub_pc_type'
   petsc_options_value = 'asm       lu'
@@ -334,7 +304,6 @@
 
   l_max_its = 20
 
-  start_time = 0.0
   dt = 0.5
   end_time = 1.0
 []

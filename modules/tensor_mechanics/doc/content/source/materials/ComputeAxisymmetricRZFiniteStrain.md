@@ -15,7 +15,7 @@ the [Finite Strain Class](ComputeFiniteStrain.md) page.
 
 ## Example Input File
 
-!listing modules/combined/test/tests/cavity_pressure/cavity_pressure_rz.i block=Materials/strain1
+!listing modules/combined/test/tests/cavity_pressure/rz.i block=Materials/strain1
 
 !syntax parameters /Materials/ComputeAxisymmetricRZFiniteStrain
 

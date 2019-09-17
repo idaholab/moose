@@ -291,4 +291,5 @@
   execute_on = 'initial timestep_end'
   exodus = true
   perf_graph = true
+  checkpoint = true
 []

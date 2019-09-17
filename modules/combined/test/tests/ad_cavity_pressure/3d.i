@@ -1,5 +1,5 @@
 #
-# Cavity Pressure Test (Volume input as a vector of postprocessors)
+# Cavity Pressure Test
 #
 # This test is designed to compute an internal pressure based on
 #   p = n * R * T / V
@@ -30,22 +30,16 @@
 # So, n0 = p0 * V0 / R / T0 = 100 * 7 / 8.314472 / 240.544439
 #        = 0.35
 #
-# In this test the internal volume is calculated as the sum of two Postprocessors
-# internalVolumeInterior and internalVolumeExterior.  This sum equals the value
-# reported by the internalVolume postprocessor.
-#
 # The parameters combined at t = 1 gives p = 301.
 #
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
   volumetric_locking_correction = true
-  order = FIRST
-  family = LAGRANGE
 []
 
 [Mesh]
-  file = cavity_pressure.e
+  file = 3d.e
 []
 
 [Functions]
@@ -83,7 +77,6 @@
     initial_condition = 240.54443866068704
   [../]
   [./material_input]
-    initial_condition = 0
   [../]
 []
 
@@ -123,14 +116,17 @@
 [Kernels]
   [./TensorMechanics]
     use_displaced_mesh = true
+    use_automatic_differentiation = true
   [../]
   [./heat]
-    type = HeatConduction
+    type = ADDiffusion
     variable = temp
+    use_displaced_mesh = true
   [../]
   [./material_input_dummy]
-    type = HeatConduction
+    type = ADDiffusion
     variable = material_input
+    use_displaced_mesh = true
   [../]
 []
 
@@ -199,13 +195,13 @@
     value = 0.0
   [../]
   [./prescribed_left]
-    type = FunctionPresetBC
+    type = ADFunctionPresetBC
     variable = disp_x
     boundary = 13
     function = displ_positive
   [../]
   [./prescribed_right]
-    type = FunctionPresetBC
+    type = ADFunctionPresetBC
     variable = disp_x
     boundary = 14
     function = displ_negative
@@ -241,13 +237,13 @@
     value = 0.0
   [../]
   [./temperatureInterior]
-    type = FunctionPresetBC
+    type = ADFunctionPresetBC
     boundary = 100
     function = temp1
     variable = temp
   [../]
   [./MaterialInput]
-    type = FunctionPresetBC
+    type = ADFunctionPresetBC
     boundary = '100 13 14 15 16'
     function = material_input_function
     variable = material_input
@@ -259,10 +255,11 @@
       material_input = materialInput
       R = 8.314472
       temperature = aveTempInterior
-      volume = 'internalVolumeInterior internalVolumeExterior'
+      volume = internalVolume
       startup_time = 0.5
       output = ppress
       save_in = 'pressure_residual_x pressure_residual_y pressure_residual_z'
+      use_automatic_differentiation = true
     [../]
   [../]
 []
@@ -275,11 +272,11 @@
     block = 1
   [../]
   [./strain1]
-    type = ComputeFiniteStrain
+    type = ADComputeFiniteStrain
     block = 1
   [../]
   [./stress1]
-    type = ComputeFiniteStrainElasticStress
+    type = ADComputeFiniteStrainElasticStress
     block = 1
   [../]
   [./elast_tensor2]
@@ -289,32 +286,19 @@
     block = 2
   [../]
   [./strain2]
-    type = ComputeFiniteStrain
+    type = ADComputeFiniteStrain
     block = 2
   [../]
   [./stress2]
-    type = ComputeFiniteStrainElasticStress
+    type = ADComputeFiniteStrainElasticStress
     block = 2
-  [../]
-  [./heatconduction]
-    type = HeatConductionMaterial
-    block = '1 2'
-    thermal_conductivity = 1.0
-    specific_heat = 1.0
-  [../]
-  [./density]
-    type = Density
-    block = '1 2'
-    density = 1.0
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
   [../]
 []
 
 [Executioner]
   type = Transient
-  solve_type = 'PJFNK'
+
+  solve_type = 'NEWTON'
 
   petsc_options_iname = '-pc_type -sub_pc_type'
   petsc_options_value = 'asm       lu'
@@ -324,7 +308,6 @@
 
   l_max_its = 20
 
-  start_time = 0.0
   dt = 0.5
   end_time = 1.0
 []
@@ -339,16 +322,6 @@
     type = SideAverageValue
     boundary = 100
     variable = temp
-    execute_on = 'initial linear'
-  [../]
-  [./internalVolumeInterior]
-    type = InternalVolume
-    boundary = '1 2 3 4 5 6'
-    execute_on = 'initial linear'
-  [../]
-  [./internalVolumeExterior]
-    type = InternalVolume
-    boundary = '13 14 15 16 17 18'
     execute_on = 'initial linear'
   [../]
   [./materialInput]
