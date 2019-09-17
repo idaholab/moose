@@ -35,7 +35,7 @@ LAROMData::initialSetup()
     mooseError("In ", _name, ": numbergetNumberInputs() from LAROMData is not 5 or 6");
   if (getNumberOutputs() != 3)
     mooseError("In ", _name, ": number_num_outputs from LAROMData is not 3");
-  if (getDegree() < 0 || getDegree() > 4)
+  if (!getDegree() || getDegree() > 4)
     mooseError("In ", _name, ": getDegree() must be 1, 2, 3 or 4.");
 
   if (getNumberRomCoefficients() != MathUtils::pow(getDegree(), getNumberInputs()))
@@ -46,7 +46,7 @@ LAROMData::initialSetup()
   // Check that transform makes sense
   for (unsigned int i = 0; i < getNumberOutputs(); ++i)
     for (unsigned int j = 0; j < getNumberInputs(); ++j)
-      if (transform[i][j] != 0 & transform[i][j] != 1 & transform[i][j] != 2)
+      if (transform[i][j] != 0 && transform[i][j] != 1 && transform[i][j] != 2)
         mooseError("In ", _name, ": transform has an invalid function type");
 
   // Check sizes
@@ -59,9 +59,8 @@ LAROMData::initialSetup()
   if (input_limits.size() != getNumberInputs() || input_limits[0].size() != 2)
     mooseError("In ", _name, ": input_limits is the wrong shape!");
 
-  Moose::out << "ROM model info:\n  name:\t" << _name
-             << "\n  number of outputs:\t" << getNumberOutputs()
-             << "\n  number of inputs:\t" << getNumberInputs()
+  Moose::out << "ROM model info:\n  name:\t" << _name << "\n  number of outputs:\t"
+             << getNumberOutputs() << "\n  number of inputs:\t" << getNumberInputs()
              << "\n  degree (max Legendre degree + constant):\t" << getDegree()
              << "\n  number of coefficients:\t" << getNumberRomCoefficients() << std::endl;
 }

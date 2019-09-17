@@ -18,8 +18,9 @@ defineADValidParams(
     ADLAROMCreepStressUpdate,
     ADRadialReturnCreepStressUpdateBase,
     params.addClassDescription(
-        "Calculates the effective J2 stress based on the inelastic strains predicted by a material "
-        "specific Reduced Order Model derived from a Visco-Plastic Self Consistent calculations.");
+        "Calculates the effective creep strain based on the rates predicted by a material "
+        "specific Los Alamos Reduced Order Model derived from a Visco-Plastic Self Consistent "
+        "calculations.");
 
     params.addRequiredParam<UserObjectName>("rom_data", "Name of user object holding ROM data");
     params.addRequiredCoupledVar("temperature", "The coupled temperature (K)");
@@ -73,7 +74,8 @@ defineADValidParams(
     params.addParam<bool>("verbose", false, "Flag to add verbose output"););
 
 template <ComputeStage compute_stage>
-ADLAROMCreepStressUpdate<compute_stage>::ADLAROMCreepStressUpdate(const InputParameters & parameters)
+ADLAROMCreepStressUpdate<compute_stage>::ADLAROMCreepStressUpdate(
+    const InputParameters & parameters)
   : ADRadialReturnCreepStressUpdateBase<compute_stage>(parameters),
     _rom(getUserObject<LAROMData>("rom_data")),
     _temperature(adCoupledValue("temperature")),
@@ -143,7 +145,7 @@ ADLAROMCreepStressUpdate<compute_stage>::initQpStatefulProperties()
 template <ComputeStage compute_stage>
 ADReal
 ADLAROMCreepStressUpdate<compute_stage>::computeResidual(const ADReal & effective_trial_stress,
-                                                       const ADReal & scalar)
+                                                         const ADReal & scalar)
 {
   if (_immobile_function)
     _immobile_old = _immobile_function->value(_t, _q_point[_qp]);
@@ -385,8 +387,8 @@ ADLAROMCreepStressUpdate<compute_stage>::checkInputWindows(std::vector<ADReal> &
 template <ComputeStage compute_stage>
 void
 ADLAROMCreepStressUpdate<compute_stage>::convertInput(const std::vector<ADReal> & input,
-                                                    std::vector<std::vector<ADReal>> & converted,
-                                                    std::vector<std::vector<ADReal>> & dconverted)
+                                                      std::vector<std::vector<ADReal>> & converted,
+                                                      std::vector<std::vector<ADReal>> & dconverted)
 {
   for (unsigned int i = 0; i < _num_outputs; ++i)
   {
@@ -477,12 +479,13 @@ ADLAROMCreepStressUpdate<compute_stage>::computeValues(
 
 template <ComputeStage compute_stage>
 void
-ADLAROMCreepStressUpdate<compute_stage>::convertOutput(const Real dt,
-                                                     const std::vector<ADReal> & old_input_values,
-                                                     const std::vector<ADReal> & rom_outputs,
-                                                     const std::vector<ADReal> & drom_outputs,
-                                                     std::vector<ADReal> & input_value_increments,
-                                                     std::vector<ADReal> & dinput_value_increments)
+ADLAROMCreepStressUpdate<compute_stage>::convertOutput(
+    const Real dt,
+    const std::vector<ADReal> & old_input_values,
+    const std::vector<ADReal> & rom_outputs,
+    const std::vector<ADReal> & drom_outputs,
+    std::vector<ADReal> & input_value_increments,
+    std::vector<ADReal> & dinput_value_increments)
 {
   for (unsigned int i = 0; i < _num_outputs; ++i)
   {
@@ -502,8 +505,8 @@ ADLAROMCreepStressUpdate<compute_stage>::convertOutput(const Real dt,
 template <ComputeStage compute_stage>
 ADReal
 ADLAROMCreepStressUpdate<compute_stage>::computePolynomial(const ADReal & value,
-                                                         const unsigned int degree,
-                                                         const bool derivative)
+                                                           const unsigned int degree,
+                                                           const bool derivative)
 {
   if (degree == 0)
   {
