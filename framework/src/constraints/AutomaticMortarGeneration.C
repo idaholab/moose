@@ -131,6 +131,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       new_elem = mortar_segment_mesh.add_elem(new Edge2);
 
     new_elem->processor_id() = slave_elem->processor_id();
+    new_elem->set_interior_parent(const_cast<Elem *>(slave_elem->interior_parent()));
 
     for (MooseIndex(new_elem->n_nodes()) n = 0; n < new_elem->n_nodes(); ++n)
       new_elem->set_node(n) = new_nodes[n];
@@ -234,6 +235,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     else
       new_elem_left = mortar_segment_mesh.add_elem(new Edge2);
     new_elem_left->processor_id() = current_mortar_segment->processor_id();
+    new_elem_left->set_interior_parent(current_mortar_segment->interior_parent());
     new_elem_left->set_node(0) = current_mortar_segment->node_ptr(0);
     new_elem_left->set_node(1) = new_node;
 
@@ -262,6 +264,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     else
       new_elem_right = mortar_segment_mesh.add_elem(new Edge2);
     new_elem_right->processor_id() = current_mortar_segment->processor_id();
+    new_elem_right->set_interior_parent(current_mortar_segment->interior_parent());
     new_elem_right->set_node(0) = new_node;
     new_elem_right->set_node(1) = current_mortar_segment->node_ptr(1);
 

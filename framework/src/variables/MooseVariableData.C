@@ -1330,6 +1330,16 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
   mooseAssert(_var.kind() == Moose::VarKindType::VAR_AUXILIARY || ad_offset || !_var_num,
               "Either this is the zeroth variable or we should have an offset");
 
+#ifndef MOOSE_SPARSE_AD
+  if (ad_offset + num_dofs > MOOSE_AD_MAX_DOFS_PER_ELEM)
+    mooseError("Current number of dofs per element ",
+               ad_offset + num_dofs,
+               " is greater than AD_MAX_DOFS_PER_ELEM of ",
+               MOOSE_AD_MAX_DOFS_PER_ELEM,
+               ". You can run `configure --with-derivative-size=<n>` to request a larger "
+               "derivative container.");
+#endif
+
   for (unsigned int qp = 0; qp < nqp; qp++)
   {
     if (_need_ad_u)

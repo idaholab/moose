@@ -115,6 +115,9 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
 
   _fe_msm = FEGenericBase<Real>::build(_mesh_dimension - 1, FEType(helper_order, LAGRANGE));
   _JxW_msm = &_fe_msm->get_JxW();
+  // Prerequest xyz so that it is computed for _fe_msm so that it can be used for calculating
+  // _coord_msm
+  _fe_msm->get_xyz();
 }
 
 Assembly::~Assembly()
@@ -2019,11 +2022,6 @@ Assembly::reinitLowerDElemRef(const Elem * elem,
       fesd->_second_phi.shallowCopy(
           const_cast<std::vector<std::vector<TensorValue<Real>>> &>(fe_lower->get_d2phi()));
   }
-
-  MooseArray<Point> array_q_points;
-  array_q_points.shallowCopy(const_cast<std::vector<Point> &>(*pts));
-  setCoordinateTransformation<RESIDUAL>(
-      _qrule_msm, array_q_points, _coord_msm, _current_lower_d_elem->subdomain_id());
 }
 
 void
@@ -2033,6 +2031,11 @@ Assembly::reinitMortarElem(const Elem * elem)
               "You should be calling reinitMortarElem on a lower dimensional element");
 
   _fe_msm->reinit(elem);
+
+  MooseArray<Point> array_q_points;
+  array_q_points.shallowCopy(const_cast<std::vector<Point> &>(_fe_msm->get_xyz()));
+  setCoordinateTransformation<RESIDUAL>(
+      _qrule_msm, array_q_points, _coord_msm, elem->interior_parent()->subdomain_id());
 }
 
 void
