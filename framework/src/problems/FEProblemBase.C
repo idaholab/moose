@@ -1650,6 +1650,8 @@ FEProblemBase::reinitOffDiagScalars(THREAD_ID tid)
 void
 FEProblemBase::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid)
 {
+  setNeighborSubdomainID(elem, side, tid);
+
   const Elem * neighbor = elem->neighbor_ptr(side);
   unsigned int neighbor_side = neighbor->which_neighbor_am_i(elem);
 
