@@ -10,7 +10,6 @@
 #pragma once
 
 #include "Action.h"
-#include "MooseTypes.h"
 
 class CavityPressurePPAction : public Action
 {
@@ -22,4 +21,3 @@ public:
 
 template <>
 InputParameters validParams<CavityPressurePPAction>();
-

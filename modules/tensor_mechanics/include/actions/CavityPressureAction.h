@@ -10,7 +10,6 @@
 #pragma once
 
 #include "Action.h"
-#include "MooseTypes.h"
 
 class CavityPressureAction;
 
@@ -23,5 +22,7 @@ public:
   CavityPressureAction(const InputParameters & params);
 
   virtual void act() override;
-};
 
+  /// Flag to use automatic differentiation where possible
+  const bool _use_ad;
+};
