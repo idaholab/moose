@@ -2,7 +2,7 @@
 #include "HeatStructureBase.h"
 #include "HeatStructureCylindrical.h"
 #include "HeatStructurePlate.h"
-#include "ReactorPower.h"
+#include "TotalPowerBase.h"
 
 registerMooseObject("THMApp", HeatGeneration);
 
@@ -42,9 +42,9 @@ HeatGeneration::init()
   Component::init();
 
   if (isParamValid("power"))
-    if (hasComponent<ReactorPower>("power"))
+    if (hasComponent<TotalPowerBase>("power"))
     {
-      const ReactorPower & rp = getComponent<ReactorPower>("power");
+      const TotalPowerBase & rp = getComponent<TotalPowerBase>("power");
       _power_var_name = rp.getPowerVariableName();
     }
 }
@@ -76,7 +76,7 @@ HeatGeneration::check() const
   checkMutuallyExclusiveParameters({"power", "power_density"});
 
   if (isParamValid("power"))
-    checkComponentOfTypeExists<ReactorPower>("power");
+    checkComponentOfTypeExists<TotalPowerBase>("power");
 }
 
 void

@@ -17,6 +17,9 @@ class LinearTestFluidProperties : public SinglePhaseFluidProperties
 public:
   LinearTestFluidProperties(const InputParameters & parameters);
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
   virtual Real rho_from_p_T(Real p, Real T) const override;
   virtual void
   rho_from_p_T(Real p, Real T, Real & rho, Real & drho_dp, Real & drho_dT) const override;
@@ -27,6 +30,8 @@ public:
   virtual void T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Real & dT_de) const override;
   virtual Real p_from_v_e(Real v, Real e) const override;
   virtual void p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real & dp_de) const override;
+
+#pragma GCC diagnostic pop
 
 protected:
 };

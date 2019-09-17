@@ -121,7 +121,7 @@
 - /Components/Pipe
 - /Components/PipeConnectable
 - /Components/PrescribedReactorPower
-- /Components/ReactorPower
+- /Components/PrescribedTotalPower
 - /Components/SimpleJunction
 - /Components/SolidWall
 - /Components/SupersonicInlet

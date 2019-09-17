@@ -29,7 +29,7 @@
 
 [Components]
   [./reactor]
-    type = PrescribedReactorPower
+    type = TotalPower
     power = 296153.84615384615385
   [../]
 
