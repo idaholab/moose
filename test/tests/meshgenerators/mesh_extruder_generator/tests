@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/MeshExtruderGenerator.md'
-  issues = '#11640'
+  issues = '#11640 #14037'
 
   [extruder]
     requirement = 'The system shall have the capability of extruding a lower dimensional mesh to '
@@ -10,7 +10,6 @@
       type = 'Exodiff'
       input = 'extrude_quad.i'
       exodiff = 'out_quad.e'
-      mesh_mode = 'REPLICATED'
       recover = false
 
       detail = 'from 2D quads to 3D hexes,'
@@ -20,7 +19,6 @@
       type = 'Exodiff'
       input = 'extrude_remap_layer1.i'
       exodiff = 'extrude_remap_layer1_out.e'
-      mesh_mode = 'REPLICATED'
       recover = false
 
       detail = 'where newly created elements can be assigned a new subdomain IDs based on old IDs,'
@@ -30,7 +28,6 @@
       type = 'Exodiff'
       input = 'extrude_remap_layer2.i'
       exodiff = 'extrude_remap_layer2_out.e'
-      mesh_mode = 'REPLICATED'
       recover = false
 
       detail = 'where newly created elements can be assigned a new subdomain IDs based on a pattern,'
@@ -40,7 +37,6 @@
       type = 'Exodiff'
       input = 'extrude_angle.i'
       exodiff = 'out_quad_angle.e'
-      mesh_mode = 'REPLICATED'
       recover = false
 
       detail = 'where the extrusion direction is not orthogonal to the original line or plane of '
@@ -50,11 +46,20 @@
     [generator]
       type = 'Exodiff'
       input = 'gen_extrude.i'
-      exodiff = 'out_gen.e'
-      mesh_mode = 'REPLICATED'
+      exodiff = 'gen_extrude_out.e'
       recover = false
 
-      detail = 'where the extrusion occurs based on another generated mesh.'
+      detail = 'where the extrusion occurs based on another generated mesh,'
+    []
+
+    [preserve_sideset_names]
+      type = 'Exodiff'
+      input = 'gen_extrude.i'
+      exodiff = 'gen_extrude_out_left_right.e'
+      cli_args = 'BCs/first/boundary=left BCs/second/boundary=right Outputs/file_base=gen_extrude_out_left_right'
+      mesh_mode = 'REPLICATED' # Node sets still need work in distributed mesh mode
+
+      detail = 'while making sure to preserve existing side set names.'
     []
   []
 []
