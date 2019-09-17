@@ -56,8 +56,9 @@
       # Test error message when blocks are incompatible
       type = RunException
       input = recompute_block_error.i
-      expect_err = "The Material object 'recompute_props' is defined on blocks that are incompatible "
-                   "with the retrieving object 'newton':\n\s*recompute_props\s0\n\s*newton\s0\s10"
+      expect_err = "Incompatible material and object blocks:\s*"
+                   ".*recompute_block_error.i:.* \(Materials/recompute_props/block\) material defined on blocks 0"
+                   ".*recompute_block_error.i:.* \(Materials/newton/block\) object needs material on blocks 0, 10"
 
       detail = 'on compatible blocks, and'
     []
@@ -66,9 +67,9 @@
       # Test error message when boundary are incompatible
       type = RunException
       input = recompute_boundary_error.i
-      expect_err = "The Material object 'recompute_props' is defined on boundaries that are "
-                   "incompatible with the retrieving object "
-                   "'newton':\n\s*recompute_props\s3\n\s*newton\s1\s3"
+      expect_err = "Incompatible material and object boundaries:\s*"
+                   ".*recompute_boundary_error.i:.* \(Materials/recompute_props/boundary\) material defined on boundaries 3,"
+                   ".*recompute_boundary_error.i:.* \(Materials/newton/boundary\) object needs material on boundaries 1, 3,"
 
       detail = 'on compatible boundaries.'
     []

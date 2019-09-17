@@ -482,9 +482,15 @@ void
 Parser::parse(const std::string & input_filename)
 {
   // Save the filename
-  char abspath[PATH_MAX + 1];
-  realpath(input_filename.c_str(), abspath);
-  _input_filename = std::string(abspath);
+  _input_filename = input_filename;
+  std::string use_rel_paths_str =
+      std::getenv("MOOSE_RELATIVE_FILEPATHS") ? std::getenv("MOOSE_RELATIVE_FILEPATHS") : "false";
+  if (use_rel_paths_str == "0" || use_rel_paths_str == "false")
+  {
+    char abspath[PATH_MAX + 1];
+    realpath(input_filename.c_str(), abspath);
+    _input_filename = std::string(abspath);
+  }
 
   // vector for initializing active blocks
   std::vector<std::string> all = {"__all__"};
