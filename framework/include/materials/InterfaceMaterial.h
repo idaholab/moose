@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INTERFACEMATERIAL_H
-#define INTERFACEMATERIAL_H
+#pragma once
 
 // MOOOSE includes
 #include "MaterialBase.h"
@@ -40,11 +39,11 @@ public:
    * to getting it by name
    */
   template <typename T>
-  const MaterialProperty<T> & getMaterialProperty(const std::string & name);
+  const MaterialProperty<T> & getMaterialPropertyTempl(const std::string & name);
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
+  const MaterialProperty<T> & getMaterialPropertyOldTempl(const std::string & name);
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
+  const MaterialProperty<T> & getMaterialPropertyOlderTempl(const std::string & name);
   ///@}
 
   ///@{
@@ -52,11 +51,11 @@ public:
    * Retrieve the property named "name"
    */
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyByName(const std::string & prop_name);
+  const MaterialProperty<T> & getMaterialPropertyByNameTempl(const std::string & prop_name);
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyOldByName(const std::string & prop_name);
+  const MaterialProperty<T> & getMaterialPropertyOldByNameTempl(const std::string & prop_name);
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyOlderByName(const std::string & prop_name);
+  const MaterialProperty<T> & getMaterialPropertyOlderByNameTempl(const std::string & prop_name);
   ///@}
 
   ///@{
@@ -65,7 +64,7 @@ public:
    * to getting it by name
    */
   template <typename T>
-  const MaterialProperty<T> & getNeighborMaterialProperty(const std::string & name);
+  const MaterialProperty<T> & getNeighborMaterialPropertyTempl(const std::string & name);
   template <typename T>
   const MaterialProperty<T> & getNeighborMaterialPropertyOld(const std::string & name);
   template <typename T>
@@ -102,15 +101,15 @@ protected:
   bool _bnd;
   bool _neighbor;
   const MooseArray<Point> & _q_point;
-  QBase *& _qrule;
+  const QBase * const & _qrule;
   const MooseArray<Real> & _JxW;
 
-  const Elem *& _current_elem;
+  const Elem * const & _current_elem;
 
   const SubdomainID & _current_subdomain_id;
 
   /// current side of the current element
-  unsigned int & _current_side;
+  const unsigned int & _current_side;
 
   // virtual bool hasActiveInterfaceMaterials(BoundaryID bnd_id, THREAD_ID tid) override
   // {
@@ -121,7 +120,7 @@ protected:
 
 template <typename T>
 const MaterialProperty<T> &
-InterfaceMaterial::getMaterialProperty(const std::string & name)
+InterfaceMaterial::getMaterialPropertyTempl(const std::string & name)
 {
   // Check if the supplied parameter is a valid imput parameter key
   std::string prop_name = deducePropertyName(name);
@@ -136,7 +135,7 @@ InterfaceMaterial::getMaterialProperty(const std::string & name)
 
 template <typename T>
 const MaterialProperty<T> &
-InterfaceMaterial::getMaterialPropertyOld(const std::string & name)
+InterfaceMaterial::getMaterialPropertyOldTempl(const std::string & name)
 {
   // Check if the supplied parameter is a valid imput parameter key
   std::string prop_name = deducePropertyName(name);
@@ -151,7 +150,7 @@ InterfaceMaterial::getMaterialPropertyOld(const std::string & name)
 
 template <typename T>
 const MaterialProperty<T> &
-InterfaceMaterial::getMaterialPropertyOlder(const std::string & name)
+InterfaceMaterial::getMaterialPropertyOlderTempl(const std::string & name)
 {
   // Check if the supplied parameter is a valid imput parameter key
   std::string prop_name = deducePropertyName(name);
@@ -166,37 +165,37 @@ InterfaceMaterial::getMaterialPropertyOlder(const std::string & name)
 
 template <typename T>
 const MaterialProperty<T> &
-InterfaceMaterial::getMaterialPropertyByName(const std::string & prop_name)
+InterfaceMaterial::getMaterialPropertyByNameTempl(const std::string & prop_name)
 {
   MaterialBase::checkExecutionStage();
   // The property may not exist yet, so declare it (declare/getMaterialProperty are referencing the
   // same memory)
   _requested_props.insert(prop_name);
   registerPropName(prop_name, true, MaterialBase::CURRENT);
-  return TwoMaterialPropertyInterface::getMaterialPropertyByName<T>(prop_name);
+  return TwoMaterialPropertyInterface::getMaterialPropertyByNameTempl<T>(prop_name);
 }
 
 template <typename T>
 const MaterialProperty<T> &
-InterfaceMaterial::getMaterialPropertyOldByName(const std::string & prop_name)
+InterfaceMaterial::getMaterialPropertyOldByNameTempl(const std::string & prop_name)
 {
   registerPropName(prop_name, true, MaterialBase::OLD);
-  return TwoMaterialPropertyInterface::getMaterialPropertyOldByName<T>(prop_name);
+  return TwoMaterialPropertyInterface::getMaterialPropertyOldByNameTempl<T>(prop_name);
 }
 
 template <typename T>
 const MaterialProperty<T> &
-InterfaceMaterial::getMaterialPropertyOlderByName(const std::string & prop_name)
+InterfaceMaterial::getMaterialPropertyOlderByNameTempl(const std::string & prop_name)
 {
   registerPropName(prop_name, true, MaterialBase::OLDER);
-  return TwoMaterialPropertyInterface::getMaterialPropertyOlderByName<T>(prop_name);
+  return TwoMaterialPropertyInterface::getMaterialPropertyOlderByNameTempl<T>(prop_name);
 }
 
 // Neighbor material properties
 
 template <typename T>
 const MaterialProperty<T> &
-InterfaceMaterial::getNeighborMaterialProperty(const std::string & name)
+InterfaceMaterial::getNeighborMaterialPropertyTempl(const std::string & name)
 {
   // Check if the supplied parameter is a valid imput parameter key
   std::string prop_name = deducePropertyName(name);
@@ -206,7 +205,7 @@ InterfaceMaterial::getNeighborMaterialProperty(const std::string & name)
   if (default_property)
     return *default_property;
 
-  return TwoMaterialPropertyInterface::getNeighborMaterialProperty<T>(prop_name);
+  return TwoMaterialPropertyInterface::getNeighborMaterialPropertyTempl<T>(prop_name);
 }
 
 template <typename T>
@@ -238,5 +237,3 @@ InterfaceMaterial::getNeighborMaterialPropertyOlder(const std::string & name)
 
   return TwoMaterialPropertyInterface::getNeighborMaterialPropertyOlder<T>(prop_name);
 }
-
-#endif // INTERFACEMATERIAL_H

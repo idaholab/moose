@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef JUMPINTERFACEMATERIAL_H
-#define JUMPINTERFACEMATERIAL_H
+#pragma once
 
 #include "InterfaceMaterial.h"
 #include "MaterialProperty.h"
@@ -34,5 +33,3 @@ protected:
   const VariableValue & _neighbor_value;
   MaterialProperty<Real> & _jump;
 };
-
-#endif // JUMPINTERFACEMATERIAL_H

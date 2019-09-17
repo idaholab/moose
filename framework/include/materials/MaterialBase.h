@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATERIALBASE_H
-#define MATERIALBASE_H
+#pragma once
 
 // MOOOSE includes
 #include "MooseObject.h"
@@ -268,7 +267,7 @@ MaterialProperty<T> &
 MaterialBase::declarePropertyTempl(const std::string & prop_name)
 {
   registerPropName(prop_name, false, MaterialBase::CURRENT);
-  return materialData().declareProperty<T>(prop_name);
+  return materialData().declarePropertyTempl<T>(prop_name);
 }
 
 template <typename T>
@@ -322,5 +321,3 @@ MaterialBase::getZeroMaterialProperty(const std::string & prop_name)
 
   return preload_with_zero;
 }
-
-#endif // MATERIALBASE_H

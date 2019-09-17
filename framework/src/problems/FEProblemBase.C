@@ -2606,7 +2606,7 @@ FEProblemBase::getMaterial(std::string name,
   }
 
   std::shared_ptr<MaterialBase> material = _all_materials[type].getActiveObject(name, tid);
-  if (!no_warn && material->getParam<bool>("compute") && type == Moose::BLOCK_MATERIAL_DATA)
+  if (!no_warn && material->getParamTempl<bool>("compute") && type == Moose::BLOCK_MATERIAL_DATA)
     mooseWarning("You are retrieving a Material object (",
                  material->name(),
                  "), but its compute flag is set to true. This indicates that MOOSE is "
@@ -2945,7 +2945,7 @@ FEProblemBase::reinitMaterialsNeighborOnInterface(BoundaryID boundary_id,
   if (hasActiveMaterialProperties(tid))
   {
     // NOTE: this will not work with h-adaptivity
-    const Elem *& neighbor = _assembly[tid]->neighbor();
+    const Elem * const & neighbor = _assembly[tid]->neighbor();
     if (neighbor == nullptr)
       return;
 
@@ -3013,7 +3013,7 @@ FEProblemBase::reinitMaterialsInterface(BoundaryID boundary_id, THREAD_ID tid, b
 {
   if (hasActiveMaterialProperties(tid))
   {
-    const Elem *& elem = _assembly[tid]->elem();
+    const Elem * const & elem = _assembly[tid]->elem();
     unsigned int side = _assembly[tid]->side();
     unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
     _interface_material_data[tid]->resize(n_points);
@@ -3064,7 +3064,7 @@ FEProblemBase::swapBackMaterialsNeighbor(THREAD_ID tid)
 void
 FEProblemBase::swapBackMaterialsInterface(THREAD_ID tid)
 {
-  const Elem *& elem = _assembly[tid]->elem();
+  const Elem * const & elem = _assembly[tid]->elem();
   unsigned int side = _assembly[tid]->side();
   _interface_material_data[tid]->swapBack(*elem, side);
 }

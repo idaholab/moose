@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INTERFACEVALUEMATERIAL_H
-#define INTERFACEVALUEMATERIAL_H
+#pragma once
 
 #include "InterfaceMaterial.h"
 // #include "MaterialProperty.h"
@@ -49,5 +48,3 @@ protected:
   // virtual Real computeInterfaceValueType(const Real /*value_master*/, const Real
   // /*value_slave*/);
 };
-
-#endif // INTERFACEVALUEMATERIAL_H
