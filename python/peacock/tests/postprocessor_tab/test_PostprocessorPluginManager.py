@@ -87,6 +87,7 @@ class TestPostprocessorPluginManager(Testing.PeacockImageTestCase):
         self.plot()
         self.assertImage('testWidgets.png')
 
+    @unittest.skip("Broken by #12702")
     def testOutput(self):
         """
         Test that the python output is working.

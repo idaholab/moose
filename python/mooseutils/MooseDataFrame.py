@@ -97,7 +97,7 @@ class MooseDataFrame(object):
         file_exists = self.exists
         if file_exists and (os.path.getmtime(self._filename) < self._run_start_time):
             self.clear()
-            message.mooseDebug("The csv file {} exists but is old compared to the run start time.".format(self.filename), debug=True)
+            message.mooseDebug("The csv file {} exists but is old ({}) compared to the run start time ({}).".format(self.filename, os.path.getmtime(self._filename), self._run_start_time), debug=True)
             retcode = MooseDataFrame.OLDFILE
 
         elif not file_exists:

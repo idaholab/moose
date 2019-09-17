@@ -33,7 +33,6 @@ class VectorPostprocessorReader(object):
     on subsequent calls to "update()".
     """
     def __init__(self, pattern, run_start_time=0):
-
         self._pattern = pattern
         self._timedata = MooseDataFrame(self._pattern.replace('*', 'time'),
                                         run_start_time=None,
@@ -136,7 +135,6 @@ class VectorPostprocessorReader(object):
                 self._frames.pop(idx)
             elif mdf.filesize == 0:
                 self._frames.pop(idx)
-
             else:
                 last_modified = mdf.modified
 
