@@ -6,7 +6,8 @@
 # is refined
 #
 
-[MeshGenerators]
+[Mesh]
+  type = MeshGeneratorMesh
   [./cartesian]
     type = CartesianMeshGenerator
     dim = 2
@@ -28,10 +29,6 @@
     new_sideset_name = left
     input = remove_1
   [../]
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Problem]

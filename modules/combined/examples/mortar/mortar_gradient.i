@@ -5,33 +5,36 @@
 #
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 40
-  ny = 40
-[]
-
-[MeshModifiers]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 40
+    ny = 40
+  []
   [slave_x]
-    type = LowerDBlockFromSideset
+    input = gen
+    type = LowerDBlockFromSidesetGenerator
     sidesets = '3'
     new_block_id = 10
     new_block_name = "slave_x"
   []
   [master_x]
-    type = LowerDBlockFromSideset
+    input = slave_x
+    type = LowerDBlockFromSidesetGenerator
     sidesets = '1'
     new_block_id = 12
     new_block_name = "master_x"
   []
   [slave_y]
-    type = LowerDBlockFromSideset
+    input = master_x
+    type = LowerDBlockFromSidesetGenerator
     sidesets = '0'
     new_block_id = 11
     new_block_name = "slave_y"
   []
   [master_y]
-    type = LowerDBlockFromSideset
+    input = slave_y
+    type = LowerDBlockFromSidesetGenerator
     sidesets = '2'
     new_block_id = 13
     new_block_name = "master_y"

@@ -103,6 +103,12 @@ GrainGrowthAction::act()
   // Loop over order parameters
   for (unsigned int op = 0; op < _op_num; op++)
   {
+    auto type = AddVariableAction::determineType(_fe_type, 1);
+    auto var_params = _factory.getValidParams(type);
+
+    var_params.applySpecificParameters(_pars, {"family", "order"});
+    var_params.set<std::vector<Real>>("scaling") = {getParam<Real>("scaling")};
+
     // Create variable name
     std::string var_name = _var_name_base + Moose::stringify(op);
 
@@ -121,7 +127,7 @@ GrainGrowthAction::act()
 
     // Add variable
     if (_current_task == "add_variable")
-      _problem->addVariable(var_name, _fe_type, getParam<Real>("scaling"));
+      _problem->addVariable(type, var_name, var_params);
 
     // Add Kernels
     else if (_current_task == "add_kernel")
@@ -211,9 +217,13 @@ GrainGrowthAction::act()
   }
   // Create auxvariable
   if (_current_task == "add_aux_variable")
-    _problem->addAuxVariable("bnds",
-                             FEType(Utility::string_to_enum<Order>("FIRST"),
-                                    Utility::string_to_enum<FEFamily>("LAGRANGE")));
+  {
+    auto var_params = _factory.getValidParams("MooseVariable");
+    var_params.set<MooseEnum>("family") = "LAGRANGE";
+    var_params.set<MooseEnum>("order") = "FIRST";
+    _problem->addAuxVariable("MooseVariable", "bnds", var_params);
+  }
+
   // Create BndsCalcAux auxkernel
   else if (_current_task == "add_aux_kernel")
   {

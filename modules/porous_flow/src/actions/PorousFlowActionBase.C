@@ -197,9 +197,10 @@ PorousFlowActionBase::addSaturationAux(unsigned phase)
   std::string phase_str = Moose::stringify(phase);
 
   if (_current_task == "add_aux_variable")
-    _problem->addAuxVariable("saturation" + phase_str,
-                             FEType(Utility::string_to_enum<Order>("CONSTANT"),
-                                    Utility::string_to_enum<FEFamily>("MONOMIAL")));
+  {
+    auto var_params = _factory.getValidParams("MooseVariableConstMonomial");
+    _problem->addAuxVariable("MooseVariableConstMonomial", "saturation" + phase_str, var_params);
+  }
 
   if (_current_task == "add_aux_kernel")
   {
@@ -220,15 +221,11 @@ PorousFlowActionBase::addDarcyAux(const RealVectorValue & gravity)
 {
   if (_current_task == "add_aux_variable")
   {
-    _problem->addAuxVariable("darcy_vel_x",
-                             FEType(Utility::string_to_enum<Order>("CONSTANT"),
-                                    Utility::string_to_enum<FEFamily>("MONOMIAL")));
-    _problem->addAuxVariable("darcy_vel_y",
-                             FEType(Utility::string_to_enum<Order>("CONSTANT"),
-                                    Utility::string_to_enum<FEFamily>("MONOMIAL")));
-    _problem->addAuxVariable("darcy_vel_z",
-                             FEType(Utility::string_to_enum<Order>("CONSTANT"),
-                                    Utility::string_to_enum<FEFamily>("MONOMIAL")));
+    auto var_params = _factory.getValidParams("MooseVariableConstMonomial");
+
+    _problem->addAuxVariable("MooseVariableConstMonomial", "darcy_vel_x", var_params);
+    _problem->addAuxVariable("MooseVariableConstMonomial", "darcy_vel_y", var_params);
+    _problem->addAuxVariable("MooseVariableConstMonomial", "darcy_vel_z", var_params);
   }
 
   if (_current_task == "add_aux_kernel")
@@ -262,33 +259,16 @@ PorousFlowActionBase::addStressAux()
 {
   if (_current_task == "add_aux_variable")
   {
-    _problem->addAuxVariable("stress_xx",
-                             FEType(Utility::string_to_enum<Order>("CONSTANT"),
-                                    Utility::string_to_enum<FEFamily>("MONOMIAL")));
-    _problem->addAuxVariable("stress_xy",
-                             FEType(Utility::string_to_enum<Order>("CONSTANT"),
-                                    Utility::string_to_enum<FEFamily>("MONOMIAL")));
-    _problem->addAuxVariable("stress_xz",
-                             FEType(Utility::string_to_enum<Order>("CONSTANT"),
-                                    Utility::string_to_enum<FEFamily>("MONOMIAL")));
-    _problem->addAuxVariable("stress_yx",
-                             FEType(Utility::string_to_enum<Order>("CONSTANT"),
-                                    Utility::string_to_enum<FEFamily>("MONOMIAL")));
-    _problem->addAuxVariable("stress_yy",
-                             FEType(Utility::string_to_enum<Order>("CONSTANT"),
-                                    Utility::string_to_enum<FEFamily>("MONOMIAL")));
-    _problem->addAuxVariable("stress_yz",
-                             FEType(Utility::string_to_enum<Order>("CONSTANT"),
-                                    Utility::string_to_enum<FEFamily>("MONOMIAL")));
-    _problem->addAuxVariable("stress_zx",
-                             FEType(Utility::string_to_enum<Order>("CONSTANT"),
-                                    Utility::string_to_enum<FEFamily>("MONOMIAL")));
-    _problem->addAuxVariable("stress_zy",
-                             FEType(Utility::string_to_enum<Order>("CONSTANT"),
-                                    Utility::string_to_enum<FEFamily>("MONOMIAL")));
-    _problem->addAuxVariable("stress_zz",
-                             FEType(Utility::string_to_enum<Order>("CONSTANT"),
-                                    Utility::string_to_enum<FEFamily>("MONOMIAL")));
+    auto var_params = _factory.getValidParams("MooseVariableConstMonomial");
+    _problem->addAuxVariable("MooseVariableConstMonomial", "stress_xx", var_params);
+    _problem->addAuxVariable("MooseVariableConstMonomial", "stress_xy", var_params);
+    _problem->addAuxVariable("MooseVariableConstMonomial", "stress_xz", var_params);
+    _problem->addAuxVariable("MooseVariableConstMonomial", "stress_yx", var_params);
+    _problem->addAuxVariable("MooseVariableConstMonomial", "stress_yy", var_params);
+    _problem->addAuxVariable("MooseVariableConstMonomial", "stress_yz", var_params);
+    _problem->addAuxVariable("MooseVariableConstMonomial", "stress_zx", var_params);
+    _problem->addAuxVariable("MooseVariableConstMonomial", "stress_zy", var_params);
+    _problem->addAuxVariable("MooseVariableConstMonomial", "stress_zz", var_params);
   }
 
   if (_current_task == "add_aux_kernel")
@@ -361,8 +341,8 @@ PorousFlowActionBase::addTemperatureMaterial(bool at_nodes)
   if (_current_task == "add_material")
   {
     if (!parameters().hasDefaultCoupledValue("temperature"))
-      mooseError(
-          "Attempt to add a PorousFlowTemperature material without setting a temperature variable");
+      mooseError("Attempt to add a PorousFlowTemperature material without setting a temperature "
+                 "variable");
 
     std::string material_type = "PorousFlowTemperature";
     InputParameters params = _factory.getValidParams(material_type);

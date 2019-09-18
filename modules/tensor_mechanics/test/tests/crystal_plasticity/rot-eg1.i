@@ -10,10 +10,60 @@
 #
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 3
-  elem_type = HEX8
-  displacements = 'ux uy uz'
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 3
+    elem_type = HEX8
+    displacements = 'ux uy uz'
+  []
+  [./side1n1]
+    input = gen
+    type = ExtraNodesetGenerator
+    coord = '0.0 0.0 0.0'
+    boundary = 6
+  [../]
+  [./side1n2]
+    input = side1n1
+    type = ExtraNodesetGenerator
+    coord = '1.0 0.0 0.0'
+    boundary = 7
+  [../]
+  [./side2n1]
+    input = side1n2
+    type = ExtraNodesetGenerator
+    coord = '0.0 1.0 0.0'
+    boundary = 8
+  [../]
+  [./side2n2]
+    input = side2n1
+    type = ExtraNodesetGenerator
+    coord = '1.0 1.0 0.0'
+    boundary = 9
+  [../]
+  [./side3n1]
+    input = side2n2
+    type = ExtraNodesetGenerator
+    coord = '0.0 1.0 1.0'
+    boundary = 10
+  [../]
+  [./side3n2]
+    input = side3n1
+    type = ExtraNodesetGenerator
+    coord = '1.0 1.0 1.0'
+    boundary = 11
+  [../]
+  [./side4n1]
+    input = side3n2
+    type = ExtraNodesetGenerator
+    coord = '0.0 0.0 1.0'
+    boundary = 12
+  [../]
+  [./side4n2]
+    input = side4n1
+    type = ExtraNodesetGenerator
+    coord = '1.0 0.0 1.0'
+    boundary = 13
+  [../]
 []
 
 [Variables]
@@ -179,48 +229,5 @@
     disp_z = uz
     disp_y = uy
     disp_x = ux
-  [../]
-[]
-
-[MeshModifiers]
-  [./side1n1]
-    type = AddExtraNodeset
-    coord = '0.0 0.0 0.0'
-    boundary = 6
-  [../]
-  [./side1n2]
-    type = AddExtraNodeset
-    coord = '1.0 0.0 0.0'
-    boundary = 7
-  [../]
-  [./side2n1]
-    type = AddExtraNodeset
-    coord = '0.0 1.0 0.0'
-    boundary = 8
-  [../]
-  [./side2n2]
-    type = AddExtraNodeset
-    coord = '1.0 1.0 0.0'
-    boundary = 9
-  [../]
-  [./side3n1]
-    type = AddExtraNodeset
-    coord = '0.0 1.0 1.0'
-    boundary = 10
-  [../]
-  [./side3n2]
-    type = AddExtraNodeset
-    coord = '1.0 1.0 1.0'
-    boundary = 11
-  [../]
-  [./side4n1]
-    type = AddExtraNodeset
-    coord = '0.0 0.0 1.0'
-    boundary = 12
-  [../]
-  [./side4n2]
-    type = AddExtraNodeset
-    coord = '1.0 0.0 1.0'
-    boundary = 13
   [../]
 []

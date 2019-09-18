@@ -54,11 +54,13 @@ DisplacementGradientsAction::act()
     Real scaling = getParam<Real>("scaling");
     for (unsigned int i = 0; i < ngrad; ++i)
     {
+      auto var_params = _factory.getValidParams("MooseVariable");
+      var_params.set<MooseEnum>("family") = "LAGRANGE";
+      var_params.set<MooseEnum>("order") = "FIRST";
+      var_params.set<std::vector<Real>>("scaling") = {scaling};
+
       // Create displacement gradient variables
-      _problem->addVariable(_displacement_gradients[i],
-                            FEType(Utility::string_to_enum<Order>("FIRST"),
-                                   Utility::string_to_enum<FEFamily>("LAGRANGE")),
-                            scaling);
+      _problem->addVariable("MooseVariable", _displacement_gradients[i], var_params);
     }
   }
   else if (_current_task == "add_material")

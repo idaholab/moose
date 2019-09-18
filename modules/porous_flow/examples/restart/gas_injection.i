@@ -19,16 +19,16 @@
 # run before running this input file.
 
 [Mesh]
-  type = FileMesh
-  file = gravityeq_out.e
   uniform_refine = 1
-[]
-
-[MeshModifiers]
+  [file]
+    type = FileMeshGenerator
+    file = gravityeq_out.e
+  []
   [./translate]
-    type = Transform
+    type = TransformGenerator
     transform = TRANSLATE
     vector_value = '0.1 0 0'
+    input = file
   [../]
 []
 

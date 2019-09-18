@@ -34,6 +34,12 @@ AddPrimarySpeciesAction::AddPrimarySpeciesAction(const InputParameters & params)
 void
 AddPrimarySpeciesAction::act()
 {
+  auto fe_type = AddVariableAction::feType(_pars);
+  auto type = AddVariableAction::determineType(fe_type, 1);
+  auto var_params = _factory.getValidParams(type);
+
+  var_params.applySpecificParameters(_pars, {"family", "order", "scaling"});
+
   for (auto & var : _vars)
-    _problem->addVariable(var, _fe_type, _scaling[0]);
+    _problem->addVariable(type, var, var_params);
 }

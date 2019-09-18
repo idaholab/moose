@@ -17,7 +17,8 @@
 [Problem]
   type = ReferenceResidualProblem
   solution_variables = 'disp_x disp_y'
-  reference_residual_variables = 'saved_x saved_y'
+  extra_tag_vectors = 'ref'
+  reference_vector = 'ref'
 []
 
 [Variables]
@@ -46,6 +47,7 @@
   [./TensorMechanics]
     use_displaced_mesh = true
     save_in = 'saved_x saved_y'
+    extra_vector_tags = 'ref'
     use_finite_deform_jacobian = true
   [../]
 []
