@@ -2,10 +2,10 @@
 
 ## Overview
 
-In general, MOOSE is not designed for generating finite element meshes. Generally,
-[CUBIT](https://cubit.sandia.gov/) from [Sandia National Laboratories](http://www.sandia.gov/) is
-recommended for creating meshes, especially complex geometries, for use in MOOSE. CUBIT can be
-licensed from CSimSoft for a fee depending that varies based on the type of organization and work
+There are two primary ways of creating a mesh for use in a MOOSE simulation: "offline generation" through
+a tool like [CUBIT](https://cubit.sandia.gov/) from [Sandia National Laboratories](http://www.sandia.gov/), and
+"online generation" through programmatic interfaces. CUBIT is useful for creating complex geometries, and can be
+licensed from CSimSoft for a fee depending on the type of organization and work
 being performed. Other mesh generators can work as long as they output a file format that is
 supported by the [FileMesh](/FileMesh.md) object.
 
@@ -22,6 +22,24 @@ of Mesh objects refer to the individual object pages listed below.
 !syntax list /Mesh objects=False actions=False subsystems=True
 
 !syntax list /Mesh objects=False actions=True subsystems=False
+
+## MeshGenerator System
+
+The MeshGenerator System is useful for programmatically constructing a mesh. This includes generating the mesh
+from a serious of points and connectivity, adding features on the fly, linearly transforming the mesh, stitching
+together pieces of meshes, etc. There are several built-in generators but this system is also extendable. MeshGenerators
+may or may not consumer the output from other generators and produce a single mesh. They can be chained together
+through dependencies so that complex meshes may be built up from a series of simple processes.
+
+### DAG and final mesh selection
+
+When chaining together several MeshGenerators, you are implicitly creating a DAG (directed acyclic graph).
+MOOSE evaluates and generates the individual objects to build up your final mesh. If your input file has
+multiple end points, (e.g. B->A and C->A) then MOOSE will issue an error and terminate. Generally, it doesn't
+make sense to have multiple end points since the output of one would simply be discarded anyway. It is possible
+to force the selection of a particular end point by using the "final_generator" parameter in the Mesh block.
+This parameter can be used on any generator whether there is ambiguity or not in the generator dependencies.
+
 
 ## Outputing The Mesh
 

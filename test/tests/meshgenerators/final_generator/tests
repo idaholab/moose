@@ -1,0 +1,60 @@
+[Tests]
+  issues = '#14058'
+  design = 'syntax/Mesh/index.md'
+
+  [final_select]
+    requirement = 'The system shall support using a directed acyclic graph of objects to generate a '
+                  'mesh where multiple possible end points may be explicitly selected:'
+    [first]
+      type = 'Exodiff'
+      input = 'final_ambigious.i'
+      cli_args = 'Mesh/final_generator=subdomain_lower --mesh-only final_first_in.e'
+      exodiff = 'final_first_in.e'
+      recover = false
+
+      detail = 'the first of two targets'
+    []
+    [second]
+      type = 'Exodiff'
+      input = 'final_ambigious.i'
+      cli_args = 'Mesh/final_generator=subdomain_upper --mesh-only final_second_in.e'
+      exodiff = 'final_second_in.e'
+      recover = false
+
+      detail = 'and the second of two targets.'
+      prereq = 'final_select/first'
+    []
+  []
+
+  [final_early_stop]
+    type = 'Exodiff'
+    input = 'final_linear.i'
+    cli_args = '--mesh-only'
+    exodiff = 'final_linear_in.e'
+    recover = false
+
+    requirement = 'The system shall support selecting an earlier generation state of the mesh '
+                  'generator system used to generate the final mesh for a simulation.'
+  []
+
+  [ambigious]
+    requirement = 'The system shall generate an error when the objects used to generate a mesh '
+                  'results in an ambiguous end point'
+
+    [single_graph]
+      type = 'RunException'
+      input = 'final_ambigious.i'
+      expect_err = "Your MeshGenerator tree contains multiple possible generator outputs"
+
+      detail = 'due to a single graph with multiple end points, or'
+    []
+
+    [independent_graphs]
+      type = 'RunException'
+      input = 'final_multi_trees.i'
+      expect_err = "Your MeshGenerator tree contains multiple possible generator outputs"
+
+      detail = 'due to multiple independent trees.'
+    []
+  []
+[]
