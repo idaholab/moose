@@ -16,7 +16,7 @@
 
 [Components]
   [./reactor]
-    type = PrescribedReactorPower
+    type = TotalPower
     power = 10
   [../]
 

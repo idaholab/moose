@@ -2,18 +2,18 @@
 
 #include "Component.h"
 
-class ReactorPower;
+class TotalPowerBase;
 
 template <>
-InputParameters validParams<ReactorPower>();
+InputParameters validParams<TotalPowerBase>();
 
 /**
- * Base class for components that provide reactor power
+ * Base class for components that provide total power
  */
-class ReactorPower : public Component
+class TotalPowerBase : public Component
 {
 public:
-  ReactorPower(const InputParameters & parameters);
+  TotalPowerBase(const InputParameters & parameters);
 
   virtual void addVariables() override;
   virtual const VariableName & getPowerVariableName() const { return _power_var_name; }
