@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./fmg_left]
     type = FileMeshGenerator
     file = left.e
@@ -22,10 +22,6 @@
                                right left'
     parallel_type = 'replicated'
   []
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Outputs]

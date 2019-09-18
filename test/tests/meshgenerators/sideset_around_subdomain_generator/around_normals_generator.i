@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./fmg]
     type = FileMeshGenerator
     file = twoblocks.e
@@ -36,10 +36,6 @@
     normal = '1 0 0'
   []
 
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Outputs]

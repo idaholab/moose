@@ -1,10 +1,11 @@
 [Mesh]
-  file = 2subdomains.e
-[]
-
-[MeshModifiers]
+  [file]
+    type = FileMeshGenerator
+    file = 2subdomains.e
+  []
   [boundary_fuel_side]
-    type = SubdomainBoundingBox
+    input = file
+    type = SubdomainBoundingBoxGenerator
     block_id = 2
     bottom_left = '0.2 0 0'
     top_right = '0.3 1 0'

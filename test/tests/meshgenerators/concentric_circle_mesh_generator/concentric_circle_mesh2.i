@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./ccmg]
     type = ConcentricCircleMeshGenerator
     num_sectors = 6
@@ -11,10 +11,6 @@
     preserve_volumes = off
     smoothing_max_it = 3
   []
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Variables]

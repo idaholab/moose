@@ -1,22 +1,22 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 3
-  xmin = 0
-  xmax = 5
-  nx = 5
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 3
+    xmin = 0
+    xmax = 5
+    nx = 5
 
-  ymin = 0
-  ymax = 5
-  ny = 5
+    ymin = 0
+    ymax = 5
+    ny = 5
 
-  zmin = 0
-  zmax = 5
-  nz = 5
-[]
-
-[MeshModifiers]
+    zmin = 0
+    zmax = 5
+    nz = 5
+  []
   [./blocks]
-    type = SubdomainBoundingBox
+    input = gen
+    type = SubdomainBoundingBoxGenerator
     block_id = 1
     bottom_left = '1 1 0'
     top_right = '4 4 5'
