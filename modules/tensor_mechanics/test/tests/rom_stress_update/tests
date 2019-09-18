@@ -1,0 +1,63 @@
+[Tests]
+  [./rom]
+    issues = '#14046'
+    design = 'SS316LAROMData.md ADLAROMCreepStressUpdate.md'
+    requirement = 'The system shall compute a creep rate based on a reduced order model in:'
+    [./3d]
+      type = 'CSVDiff'
+      input = '3d.i'
+      csvdiff = '3d_out.csv'
+      detail = '3D'
+      petsc_version = '>=3.9.0'
+    [../]
+    [./3d-jac]
+      type = 'PetscJacobianTester'
+      input = '3d.i'
+      prereq = 'rom/3d'
+      method = 'opt'
+      ratio_tol = 5e-4
+      cli_args = 'Executioner/num_steps=2'
+      difference_tol = 1
+      run_sim = True
+      petsc_version = '>=3.9.4'
+      detail = '3D and compute a perfect Jacobian'
+    [../]
+
+    [./2drz]
+      type = 'CSVDiff'
+      input = '2drz.i'
+      csvdiff = '2drz_out.csv'
+      detail = '2DRz'
+      petsc_version = '>=3.9.0'
+    [../]
+    [./2drz-jac]
+      type = 'PetscJacobianTester'
+      input = '2drz.i'
+      method = 'opt'
+      prereq = 'rom/2drz'
+      ratio_tol = 5e-4
+      difference_tol = 1
+      cli_args = 'Executioner/num_steps=2'
+      run_sim = True
+      petsc_version = '>=3.9.4'
+      detail = '2DRz and compute a perfect Jacobian'
+    [../]
+
+    [./verification]
+      type = 'CSVDiff'
+      input = 'verification.i'
+      csvdiff = 'verification_1e-3_out.csv'
+      petsc_version = '>=3.9.0'
+      detail = 'isolation (i.e. without a full displacement solve), and match with code-to-code comparison with a small set of input parameters'
+    [../]
+    [./verification_heavy]
+      type = 'CSVDiff'
+      input = 'verification.i'
+      csvdiff = 'verification_1e-5_out.csv'
+      heavy = true
+      petsc_version = '>=3.9.0'
+      cli_args = 'Executioner/dt=1e-5 Outputs/file_base=verification_1e-5_out'
+      detail = 'isolation (i.e. without a full displacement solve), and match with code-to-code comparison with a large set of input parameters'
+    [../]
+  [../]
+[]
