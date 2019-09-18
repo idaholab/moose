@@ -464,24 +464,24 @@ public:
    *
    * @return The max
    */
-  size_t getMaxVarNDofsPerElem() const { return _max_var_n_dofs_per_elem; }
+  std::size_t getMaxVarNDofsPerElem() const { return _max_var_n_dofs_per_elem; }
 
   /**
    * Gets the maximum number of dofs used by any one variable on any one node
    *
    * @return The max
    */
-  size_t getMaxVarNDofsPerNode() const { return _max_var_n_dofs_per_node; }
+  std::size_t getMaxVarNDofsPerNode() const { return _max_var_n_dofs_per_node; }
 
   /**
    * assign the maximum element dofs
    */
-  void assignMaxVarNDofsPerElem(const size_t & max_dofs) { _max_var_n_dofs_per_elem = max_dofs; }
+  void assignMaxVarNDofsPerElem(std::size_t max_dofs) { _max_var_n_dofs_per_elem = max_dofs; }
 
   /**
    * assign the maximum node dofs
    */
-  void assignMaxVarNDofsPerNode(const size_t & max_dofs) { _max_var_n_dofs_per_node = max_dofs; }
+  void assignMaxVarNDofsPerNode(std::size_t max_dofs) { _max_var_n_dofs_per_node = max_dofs; }
 
   /**
    * Adds this variable to the list of variables to be zeroed during each residual evaluation.

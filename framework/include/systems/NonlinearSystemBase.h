@@ -647,6 +647,18 @@ public:
     _compute_scaling_once = compute_scaling_once;
   }
 
+#ifndef MOOSE_SPARSE_AD
+  /**
+   * Set the required size of the derivative vector
+   */
+  void setRequiredDerivativeSize(std::size_t size) { _required_derivative_size = size; }
+
+  /**
+   * Return the required size of the derivative vector
+   */
+  std::size_t requiredDerivativeSize() const { return _required_derivative_size; }
+#endif
+
 public:
   FEProblemBase & _fe_problem;
   System & _sys;
@@ -927,4 +939,9 @@ private:
   /// through an extra Jacobian evaluation. If this is set to false, then the scaling factors will
   /// be computed during an extra Jacobian evaluation at the beginning of every time step.
   bool _compute_scaling_once;
+
+#ifndef MOOSE_SPARSE_AD
+  /// The required size of the derivative storage array
+  std::size_t _required_derivative_size;
+#endif
 };
