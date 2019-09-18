@@ -1,0 +1,11 @@
+[Tests]  
+  design = 'syntax/Executioner/index.md'
+  [./test]
+    type = 'Exodiff'
+    input = 'nl_divergence_tolerance.i'
+    exodiff = 'nl_divergence_tolerance_out.e'
+    petsc_version = '>=3.8.0'
+    requirement = "The Executioner system shall support the PETSc non-linear divergence tolerance."
+    issues = '#13991'
+  [../]
+[]

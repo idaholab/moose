@@ -305,6 +305,11 @@ petscNonlinearConverged(SNES snes,
   ierr = SNESGetTolerances(snes, &atol, &rtol, &stol, &maxit, &maxf);
   CHKERRABORT(problem.comm().get(), ierr);
 
+  // Ask the SNES object about its divergence tolerance.
+  PetscReal dtol = 0.; // relative divergence tolerance
+  ierr = SNESGetDivergenceTolerance(snes, &dtol);
+  CHKERRABORT(problem.comm().get(), ierr);
+
   // Get current number of function evaluations done by SNES.
   PetscInt nfuncs = 0;
   ierr = SNESGetNumberFunctionEvals(snes, &nfuncs);
@@ -345,6 +350,7 @@ petscNonlinearConverged(SNES snes,
                                         snorm,
                                         fnorm,
                                         rtol,
+                                        dtol,
                                         stol,
                                         atol,
                                         nfuncs,
@@ -368,6 +374,12 @@ petscNonlinearConverged(SNES snes,
 
     case MooseNonlinearConvergenceReason::CONVERGED_FNORM_RELATIVE:
       *reason = SNES_CONVERGED_FNORM_RELATIVE;
+      break;
+
+    case MooseNonlinearConvergenceReason::DIVERGED_DTOL:
+#if !PETSC_VERSION_LESS_THAN(3, 8, 0) // A new convergence enum in PETSc 3.8
+      *reason = SNES_DIVERGED_DTOL;
+#endif
       break;
 
     case MooseNonlinearConvergenceReason::CONVERGED_SNORM_RELATIVE:
@@ -764,7 +776,7 @@ getCommonPetscKeys()
                         "-pc_hypre_boomeramg_max_iter "
                         "-pc_hypre_boomeramg_strong_threshold -pc_hypre_type -pc_type -snes_atol "
                         "-snes_linesearch_type "
-                        "-snes_ls -snes_max_it -snes_rtol -snes_type -sub_ksp_type -sub_pc_type",
+                        "-snes_ls -snes_max_it -snes_rtol -snes_divergence_tolerance -snes_type -sub_ksp_type -sub_pc_type",
                         "",
                         true);
 }

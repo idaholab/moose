@@ -6161,6 +6161,7 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
                                          const Real snorm,
                                          const Real fnorm,
                                          const Real rtol,
+                                         const Real dtol,
                                          const Real stol,
                                          const Real abstol,
                                          const PetscInt nfuncs,
@@ -6222,6 +6223,12 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
       oss << "Converged due to small update length: " << snorm << " < " << stol << " * " << xnorm
           << '\n';
       reason = MooseNonlinearConvergenceReason::CONVERGED_SNORM_RELATIVE;
+    }
+    else if (dtol > 0 && fnorm > the_residual * dtol)
+    {
+      oss << "Diverged due to function norm " << fnorm << " > divergence tolerance " << dtol
+          << " * function norm " << fnorm << '\n';
+      reason = MooseNonlinearConvergenceReason::DIVERGED_DTOL;
     }
   }
 

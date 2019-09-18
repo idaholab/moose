@@ -38,6 +38,7 @@ public:
                             const Real snorm,
                             const Real fnorm,
                             const Real rtol,
+                            const Real dtol,
                             const Real stol,
                             const Real abstol,
                             const PetscInt nfuncs,
