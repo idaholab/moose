@@ -18,9 +18,12 @@
 
 #include "DualRealOps.h"
 
+#include "libmesh/auto_ptr.h" // libmesh_make_unique
+
 #include <limits>
 #include <string>
 #include <cmath>
+#include <memory>
 
 defineADValidParamsFromEmpty(
     ADSingleVariableReturnMappingSolution,
@@ -94,14 +97,17 @@ ADSingleVariableReturnMappingSolution<compute_stage>::returnMappingSolve(
     const ADReal & effective_trial_stress, ADReal & scalar, const ConsoleStream & console)
 {
   // construct the stringstream here only if the debug level is set to ALL
-  std::stringstream * iter_output =
-      (_internal_solve_output_on == InternalSolveOutput::ALWAYS) ? new std::stringstream : nullptr;
+  std::unique_ptr<std::stringstream> iter_output =
+      (_internal_solve_output_on == InternalSolveOutput::ALWAYS)
+          ? libmesh_make_unique<std::stringstream>()
+          : nullptr;
 
   // do the internal solve and capture iteration info during the first round
   // iff full history output is requested regardless of whether the solve failed or succeeded
-  auto solve_state = internalSolve(effective_trial_stress,
-                                   scalar,
-                                   _internal_solve_full_iteration_history ? iter_output : nullptr);
+  auto solve_state =
+      internalSolve(effective_trial_stress,
+                    scalar,
+                    _internal_solve_full_iteration_history ? iter_output.get() : nullptr);
   if (solve_state != SolveState::SUCCESS &&
       _internal_solve_output_on != InternalSolveOutput::ALWAYS)
   {
@@ -111,7 +117,7 @@ ADSingleVariableReturnMappingSolution<compute_stage>::returnMappingSolve(
 
     // user expects some kind of output, if necessary setup output stream now
     if (!iter_output)
-      iter_output = new std::stringstream;
+      iter_output = libmesh_make_unique<std::stringstream>();
 
     // add the appropriate error message to the output
     switch (solve_state)
@@ -131,17 +137,17 @@ ADSingleVariableReturnMappingSolution<compute_stage>::returnMappingSolve(
     // if full history output is only requested for failed solves we have to repeat
     // the solve a second time
     if (_internal_solve_full_iteration_history)
-      internalSolve(effective_trial_stress, scalar, iter_output);
+      internalSolve(effective_trial_stress, scalar, iter_output.get());
 
     // Append summary and throw exception
-    outputIterationSummary(iter_output, _iteration);
+    outputIterationSummary(iter_output.get(), _iteration);
     throw MooseException(iter_output->str());
   }
 
   if (_internal_solve_output_on == InternalSolveOutput::ALWAYS)
   {
     // the solve did not fail but the user requested debug output anyways
-    outputIterationSummary(iter_output, _iteration);
+    outputIterationSummary(iter_output.get(), _iteration);
     console << iter_output->str();
   }
 }
