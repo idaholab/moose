@@ -148,6 +148,10 @@ LIBMESH_OPTIONS = {
                    },
 }
 
+TESTHARNESS_OPTIONS = {
+    'mpi_command' : os.getenv('MOOSE_MPI_COMMAND', 'mpiexec'),
+    'force_mpi'   : 'MOOSE_MPI_COMMAND' in os.environ,
+}
 
 ## Run a command and return the output, or ERROR: + output if retcode != 0
 def runCommand(cmd, cwd=None):
@@ -158,7 +162,6 @@ def runCommand(cmd, cwd=None):
     if (p.returncode != 0):
         output = 'ERROR: ' + output
     return output
-
 
 ## method to return current character count with given results_dictionary
 def resultCharacterCount(results_dict):
@@ -348,7 +351,6 @@ def runExecutable(libmesh_dir, location, bin, args):
         exit(1)
 
     return runCommand(libmesh_exe + " " + args).rstrip()
-
 
 def getCompilers(libmesh_dir):
     # Supported compilers are GCC, INTEL or ALL
@@ -717,3 +719,10 @@ def trimOutput(job, options):
                                                    "#"*80,
                                                    "#"*80,
                                                    output[-second_part:])
+
+def getTestHarnessOption(option):
+    if option in TESTHARNESS_OPTIONS:
+        return TESTHARNESS_OPTIONS[option]
+
+def checkMPI(checks):
+    return 'ERROR' not in runCommand(checks['mpi_command'] + " -n 2 true")

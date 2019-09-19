@@ -52,12 +52,6 @@ class RunApp(Tester):
 
     def __init__(self, name, params):
         Tester.__init__(self, name, params)
-        if os.environ.has_key("MOOSE_MPI_COMMAND"):
-            self.mpi_command = os.environ['MOOSE_MPI_COMMAND']
-            self.force_mpi = True
-        else:
-            self.mpi_command = 'mpiexec'
-            self.force_mpi = False
 
         # Make sure that either input or command is supplied
         if not (params.isValid('input') or params.isValid('command')):
@@ -70,6 +64,7 @@ class RunApp(Tester):
             return None # Not all testers that inherit from RunApp have an input file
 
     def checkRunnable(self, options):
+        checks = options._checks
         if options.enable_recover:
             if self.specs.isValid('expect_out') or self.specs.isValid('absent_out') or self.specs['should_crash'] == True:
                 self.addCaveats('expect_out RECOVER')
@@ -82,10 +77,17 @@ class RunApp(Tester):
             return False
 
         if self.specs.isValid('min_threads') or self.specs.isValid('max_threads'):
-            if 'NONE' in options._checks['threading'] and self.getThreads(options) > 1:
+            if 'NONE' in checks['threading'] and self.getThreads(options) > 1:
                 self.addCaveats('threading_model=None')
                 self.setStatus(self.skip)
                 return False
+
+        if not checks['mpi_works'] and (options.parallel
+                                        or self.getProcs(options) > 1
+                                        or checks['force_mpi']):
+            self.addCaveats('MPI check failed')
+            self.setStatus(self.skip)
+            return False
 
         return True
 
@@ -122,6 +124,7 @@ class RunApp(Tester):
 
     def getCommand(self, options):
         specs = self.specs
+        checks = options._checks
 
         # Just return an arbitrary command if one is supplied
         if specs.isValid('command'):
@@ -185,8 +188,8 @@ class RunApp(Tester):
         elif nthreads > 1:
             command = command + ' --n-threads=' + str(nthreads)
 
-        if self.force_mpi or options.parallel or ncpus > 1:
-            command = self.mpi_command + ' -n ' + str(ncpus) + ' ' + command
+        if checks['force_mpi'] or options.parallel or ncpus > 1:
+            command = checks['mpi_command'] + ' -n ' + str(ncpus) + ' ' + command
 
         return command
 

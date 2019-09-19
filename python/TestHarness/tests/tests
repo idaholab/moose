@@ -182,4 +182,10 @@
     requirement = "TestHarness shall detect and report race conditions that exist in the supplied tests"
     issues = '#13186'
   [../]
+  [./valid_mpi]
+    type = PythonUnitTest
+    input = test_ValidMPI.py
+    requirement = "TestHarness shall detect the inability to use the MPI currently available"
+    issues = '#6171'
+  [../]
 []

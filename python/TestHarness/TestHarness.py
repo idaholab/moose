@@ -130,6 +130,9 @@ class TestHarness:
         checks['submodules'] = util.getInitializedSubmodules(self.run_tests_dir)
         checks['exe_objects'] = None # This gets calculated on demand
         checks['registered_apps'] = None # This gets extracted on demand
+        checks['mpi_command'] = util.getTestHarnessOption('mpi_command')
+        checks['force_mpi'] = util.getTestHarnessOption('force_mpi')
+        checks['mpi_works'] = util.checkMPI(checks)
 
         # The TestHarness doesn't strictly require the existence of libMesh in order to run. Here we allow the user
         # to select whether they want to probe for libMesh configuration options.
