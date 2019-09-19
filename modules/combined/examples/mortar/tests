@@ -1,4 +1,6 @@
 [Tests]
+  design = 'EqualGradientConstraint.md'
+  issues = '#7319'
   [./eigenstrain]
     type = RunApp
     input = 'eigenstrain.i'
@@ -7,10 +9,12 @@
     cli_args = 'Mesh/gen/nx=2 Mesh/gen/ny=2'
     check_input = True
     fparser_jit = True
+    requirement = 'The system shall be able to solve an eigenstrain problem using mortar to enforce periodic equal gradient constraints'
   [../]
   [./mortar_gradient]
     type = RunApp
     input = 'mortar_gradient.i'
     check_input = True
+    requirement = 'The system shall be able to solve a diffusion equation using mortar to enforce periodic equal gradient constraints'
   [../]
 []

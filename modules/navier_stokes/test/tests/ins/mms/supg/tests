@@ -1,86 +1,109 @@
 [Tests]
-  [./4x4_alpha_1e-6]
-    type = 'Exodiff'
-    input = 'supg_mms_test.i'
-    exodiff = '4x4_alpha_1e-6.e'
-    cli_args = 'Outputs/file_base=4x4_alpha_1e-6 Mesh/gen/nx=4 Mesh/gen/ny=4 GlobalParams/alpha=1e-6'
-    heavy = true
-  [../]
-  [./8x8_alpha_1e-6]
-    type = 'Exodiff'
-    input = 'supg_mms_test.i'
-    exodiff = '8x8_alpha_1e-6.e'
-    cli_args = 'Outputs/file_base=8x8_alpha_1e-6 Mesh/gen/nx=8 Mesh/gen/ny=8 GlobalParams/alpha=1e-6'
-    heavy = true
-  [../]
-  [./16x16_alpha_1e-6]
-    type = 'Exodiff'
-    input = 'supg_mms_test.i'
-    exodiff = '16x16_alpha_1e-6.e'
-    cli_args = 'Outputs/file_base=16x16_alpha_1e-6 Mesh/gen/nx=16 Mesh/gen/ny=16 GlobalParams/alpha=1e-6'
-    heavy = true
-  [../]
-  [./32x32_alpha_1e-6]
-    type = 'Exodiff'
-    input = 'supg_mms_test.i'
-    exodiff = '32x32_alpha_1e-6.e'
-    cli_args = 'Outputs/file_base=32x32_alpha_1e-6 Mesh/gen/nx=32 Mesh/gen/ny=32 GlobalParams/alpha=1e-6'
-    heavy = true
-  [../]
+  design = 'INSMass.md INSMomentumLaplaceForm.md'
+  issues = '#9960'
+  [alpha_1e-6]
+    requirement = 'The system shall be able to apply streamline-upwind stabilization using an alpha parameter of 1e-6 on a'
+    [./4x4]
+      type = 'Exodiff'
+      input = 'supg_mms_test.i'
+      exodiff = '4x4_alpha_1e-6.e'
+      cli_args = 'Outputs/file_base=4x4_alpha_1e-6 Mesh/gen/nx=4 Mesh/gen/ny=4 GlobalParams/alpha=1e-6'
+      heavy = true
+      detail = '4x4,'
+    [../]
+    [./8x8]
+      type = 'Exodiff'
+      input = 'supg_mms_test.i'
+      exodiff = '8x8_alpha_1e-6.e'
+      cli_args = 'Outputs/file_base=8x8_alpha_1e-6 Mesh/gen/nx=8 Mesh/gen/ny=8 GlobalParams/alpha=1e-6'
+      heavy = true
+      detail = '8x8,'
+    [../]
+    [./16x16]
+      type = 'Exodiff'
+      input = 'supg_mms_test.i'
+      exodiff = '16x16_alpha_1e-6.e'
+      cli_args = 'Outputs/file_base=16x16_alpha_1e-6 Mesh/gen/nx=16 Mesh/gen/ny=16 GlobalParams/alpha=1e-6'
+      heavy = true
+      detail = '16x16,'
+    [../]
+    [./32x32]
+      type = 'Exodiff'
+      input = 'supg_mms_test.i'
+      exodiff = '32x32_alpha_1e-6.e'
+      cli_args = 'Outputs/file_base=32x32_alpha_1e-6 Mesh/gen/nx=32 Mesh/gen/ny=32 GlobalParams/alpha=1e-6'
+      heavy = true
+      detail = 'and 32x32 mesh.'
+    [../]
+  []
 
-  [./4x4_alpha_1e-3]
-    type = 'Exodiff'
-    input = 'supg_mms_test.i'
-    exodiff = '4x4_alpha_1e-3.e'
-    cli_args = 'Outputs/file_base=4x4_alpha_1e-3 Mesh/gen/nx=4 Mesh/gen/ny=4 GlobalParams/alpha=1e-3'
-    heavy = true
-  [../]
-  [./8x8_alpha_1e-3]
-    type = 'Exodiff'
-    input = 'supg_mms_test.i'
-    exodiff = '8x8_alpha_1e-3.e'
-    cli_args = 'Outputs/file_base=8x8_alpha_1e-3 Mesh/gen/nx=8 Mesh/gen/ny=8 GlobalParams/alpha=1e-3'
-    heavy = true
-  [../]
-  [./16x16_alpha_1e-3]
-    type = 'Exodiff'
-    input = 'supg_mms_test.i'
-    exodiff = '16x16_alpha_1e-3.e'
-    cli_args = 'Outputs/file_base=16x16_alpha_1e-3 Mesh/gen/nx=16 Mesh/gen/ny=16 GlobalParams/alpha=1e-3'
-    heavy = true
-  [../]
-  [./32x32_alpha_1e-3]
-    type = 'Exodiff'
-    input = 'supg_mms_test.i'
-    exodiff = '32x32_alpha_1e-3.e'
-    cli_args = 'Outputs/file_base=32x32_alpha_1e-3 Mesh/gen/nx=32 Mesh/gen/ny=32 GlobalParams/alpha=1e-3'
-    heavy = true
-  [../]
+  [alpha_1e-3]
+    requirement = 'The system shall be able to apply streamline-upwind stabilization using an alpha parameter of 1e-3 on a'
+    [./4x4]
+      type = 'Exodiff'
+      input = 'supg_mms_test.i'
+      exodiff = '4x4_alpha_1e-3.e'
+      cli_args = 'Outputs/file_base=4x4_alpha_1e-3 Mesh/gen/nx=4 Mesh/gen/ny=4 GlobalParams/alpha=1e-3'
+      heavy = true
+      detail = '4x4,'
+    [../]
+    [./8x8]
+      type = 'Exodiff'
+      input = 'supg_mms_test.i'
+      exodiff = '8x8_alpha_1e-3.e'
+      cli_args = 'Outputs/file_base=8x8_alpha_1e-3 Mesh/gen/nx=8 Mesh/gen/ny=8 GlobalParams/alpha=1e-3'
+      heavy = true
+      detail = '8x8,'
+    [../]
+    [./16x16]
+      type = 'Exodiff'
+      input = 'supg_mms_test.i'
+      exodiff = '16x16_alpha_1e-3.e'
+      cli_args = 'Outputs/file_base=16x16_alpha_1e-3 Mesh/gen/nx=16 Mesh/gen/ny=16 GlobalParams/alpha=1e-3'
+      heavy = true
+      detail = '16x16,'
+    [../]
+    [./32x32]
+      type = 'Exodiff'
+      input = 'supg_mms_test.i'
+      exodiff = '32x32_alpha_1e-3.e'
+      cli_args = 'Outputs/file_base=32x32_alpha_1e-3 Mesh/gen/nx=32 Mesh/gen/ny=32 GlobalParams/alpha=1e-3'
+      heavy = true
+      detail = 'and 32x32 mesh.'
+    [../]
+  []
 
-  [./4x4_alpha_1e0]
-    type = 'Exodiff'
-    input = 'supg_mms_test.i'
-    exodiff = '4x4_alpha_1e0.e'
-    cli_args = 'Outputs/file_base=4x4_alpha_1e0 Mesh/gen/nx=4 Mesh/gen/ny=4 GlobalParams/alpha=1e0'
-  [../]
-  [./8x8_alpha_1e0]
-    type = 'Exodiff'
-    input = 'supg_mms_test.i'
-    exodiff = '8x8_alpha_1e0.e'
-    cli_args = 'Outputs/file_base=8x8_alpha_1e0 Mesh/gen/nx=8 Mesh/gen/ny=8 GlobalParams/alpha=1e0'
-  [../]
-  [./16x16_alpha_1e0]
-    type = 'Exodiff'
-    input = 'supg_mms_test.i'
-    exodiff = '16x16_alpha_1e0.e'
-    cli_args = 'Outputs/file_base=16x16_alpha_1e0 Mesh/gen/nx=16 Mesh/gen/ny=16 GlobalParams/alpha=1e0'
-  [../]
-  [./32x32_alpha_1e0]
-    type = 'Exodiff'
-    input = 'supg_mms_test.i'
-    exodiff = '32x32_alpha_1e0.e'
-    cli_args = 'Outputs/file_base=32x32_alpha_1e0 Mesh/gen/nx=32 Mesh/gen/ny=32 GlobalParams/alpha=1e0'
-  [../]
+  [alpha_1e0]
+    requirement = 'The system shall be able to apply streamline-upwind stabilization using an alpha parameter of 1e0 on a'
+    [./4x4]
+      type = 'Exodiff'
+      input = 'supg_mms_test.i'
+      exodiff = '4x4_alpha_1e0.e'
+      cli_args = 'Outputs/file_base=4x4_alpha_1e0 Mesh/gen/nx=4 Mesh/gen/ny=4 GlobalParams/alpha=1e0'
+      detail = '4x4,'
+    [../]
+    [./8x8]
+      type = 'Exodiff'
+      input = 'supg_mms_test.i'
+      exodiff = '8x8_alpha_1e0.e'
+      cli_args = 'Outputs/file_base=8x8_alpha_1e0 Mesh/gen/nx=8 Mesh/gen/ny=8 GlobalParams/alpha=1e0'
+      detail = '8x8,'
+    [../]
+    [./16x16]
+      type = 'Exodiff'
+      input = 'supg_mms_test.i'
+      exodiff = '16x16_alpha_1e0.e'
+      cli_args = 'Outputs/file_base=16x16_alpha_1e0 Mesh/gen/nx=16 Mesh/gen/ny=16 GlobalParams/alpha=1e0'
+      detail = '16x16,'
+    [../]
+    [./32x32]
+      type = 'Exodiff'
+      input = 'supg_mms_test.i'
+      exodiff = '32x32_alpha_1e0.e'
+      cli_args = 'Outputs/file_base=32x32_alpha_1e0 Mesh/gen/nx=32 Mesh/gen/ny=32 GlobalParams/alpha=1e0'
+      detail = 'and 32x32 mesh.'
+    [../]
+  []
 
   # This SUPG stabilized Q2Q1 case greatly damps and localizes oscillations compared to an
   # unstabilized run. Run with more time steps to completely remove oscillations
@@ -89,6 +112,7 @@
     input = 'supg_adv_dominated_mms.i'
     exodiff = 'adv_dominated_stabilized.e'
     cli_args = 'GlobalParams/supg=true Outputs/file_base=adv_dominated_stabilized'
+    requirement = 'The system shall be able to solve high Reynolds number incompressible flow problems through use of streamline upwind Petrov-Galerkin stabilization and with a Q2Q1 discretization'
   [../]
   # This SUPG and PSPG stabilized Q1Q1 case does not exhibit any oscillations with Reynolds
   # number a factor of 100 higher than previous two cases and with twice as large a dt.
@@ -99,5 +123,6 @@
     exodiff = 'supg_pspg_adv_dominated_mms_exodus.e'
     # This problem uses SuperLU.
     superlu = true
+    requirement = 'The system shall be able to solve high Reynolds number incompressible flow problems through use of streamline upwind and pressure stabilized Petrov-Galerkin and with a Q1Q1 discretization'
   [../]
 []
