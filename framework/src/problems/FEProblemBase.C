@@ -88,6 +88,8 @@
 #include "LineSearch.h"
 #include "FloatingPointExceptionGuard.h"
 #include "TimedPrint.h"
+#include "MaxVarNDofsPerElem.h"
+#include "MaxVarNDofsPerNode.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -322,7 +324,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _u_dot_requested(false),
     _u_dotdot_requested(false),
     _u_dot_old_requested(false),
-    _u_dotdot_old_requested(false)
+    _u_dotdot_old_requested(false),
+    _has_mortar(false)
 {
   _time = 0.0;
   _time_old = 0.0;
@@ -585,6 +588,42 @@ FEProblemBase::initialSetup()
   _started_initial_setup = true;
   setCurrentExecuteOnFlag(EXEC_INITIAL);
   addExtraVectors();
+
+  // Execute this here in case we want to print out the required derivative size in
+  // OutputWarehouse::initialSetup
+  if (haveADObjects())
+  {
+    CONSOLE_TIMED_PRINT("Computing max dofs per elem/node");
+
+    MaxVarNDofsPerElem mvndpe(*this, *_nl);
+    Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), mvndpe);
+    auto max_var_n_dofs_per_elem = mvndpe.max();
+    _communicator.max(max_var_n_dofs_per_elem);
+
+    _nl->assignMaxVarNDofsPerElem(max_var_n_dofs_per_elem);
+    auto displaced_problem = getDisplacedProblem();
+    if (displaced_problem)
+      displaced_problem->nlSys().assignMaxVarNDofsPerElem(max_var_n_dofs_per_elem);
+
+    MaxVarNDofsPerNode mvndpn(*this, *_nl);
+    Threads::parallel_reduce(*_mesh.getLocalNodeRange(), mvndpn);
+    auto max_var_n_dofs_per_node = mvndpn.max();
+    _communicator.max(max_var_n_dofs_per_node);
+
+    _nl->assignMaxVarNDofsPerNode(max_var_n_dofs_per_node);
+    if (displaced_problem)
+      displaced_problem->nlSys().assignMaxVarNDofsPerNode(max_var_n_dofs_per_node);
+
+#ifndef MOOSE_SPARSE_AD
+    auto size_required = max_var_n_dofs_per_elem * _nl->nVariables();
+    if (hasMortarCoupling())
+      size_required *= 3;
+    else if (hasNeighborCoupling())
+      size_required *= 2;
+
+    _nl->setRequiredDerivativeSize(size_required);
+#endif
+  }
 
   // Perform output related setups
   _app.getOutputWarehouse().initialSetup();
@@ -5284,6 +5323,8 @@ FEProblemBase::createMortarInterface(
     bool on_displaced,
     bool periodic)
 {
+  _has_mortar = true;
+
   if (on_displaced)
     return _mortar_data.createMortarInterface(master_slave_boundary_pair,
                                               master_slave_subdomain_pair,

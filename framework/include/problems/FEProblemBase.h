@@ -1709,6 +1709,16 @@ public:
    */
   const MortarData & mortarData() const { return _mortar_data; }
 
+  /**
+   * Whether the simulation has neighbor coupling
+   */
+  virtual bool hasNeighborCoupling() const { return _has_internal_edge_residual_objects; }
+
+  /**
+   * Whether the simulation has mortar coupling
+   */
+  virtual bool hasMortarCoupling() const { return _has_mortar; }
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -2050,6 +2060,9 @@ private:
   friend class RestartableDataIO;
   friend class Restartable;
   friend class DisplacedProblem;
+
+  /// Whether the simulation requires mortar coupling
+  bool _has_mortar;
 };
 
 template <typename T>

@@ -112,15 +112,8 @@ outputAuxiliarySystemInformation(FEProblemBase & problem)
 }
 
 std::string
-outputNonlinearSystemInformation(FEProblemBase & problem)
+outputSystemInformationHelper(std::stringstream & oss, System & system)
 {
-  return outputSystemInformationHelper(problem.getNonlinearSystemBase().system());
-}
-
-std::string
-outputSystemInformationHelper(System & system)
-{
-  std::stringstream oss;
   oss << std::left;
 
   if (system.n_dofs())
@@ -217,6 +210,31 @@ outputSystemInformationHelper(System & system)
   }
 
   return oss.str();
+}
+
+std::string
+outputNonlinearSystemInformation(FEProblemBase & problem)
+{
+  std::stringstream oss;
+  oss << std::left;
+
+#ifndef MOOSE_SPARSE_AD
+  if (problem.haveADObjects())
+  {
+    oss << std::setw(console_field_width)
+        << "  AD size required: " << problem.getNonlinearSystemBase().requiredDerivativeSize()
+        << "\n";
+  }
+#endif
+  return outputSystemInformationHelper(oss, problem.getNonlinearSystemBase().system());
+}
+
+std::string
+outputSystemInformationHelper(System & system)
+{
+  std::stringstream oss;
+
+  return outputSystemInformationHelper(oss, system);
 }
 
 std::string
