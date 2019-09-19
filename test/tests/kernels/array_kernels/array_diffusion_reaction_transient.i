@@ -14,6 +14,11 @@
 []
 
 [Kernels]
+  [dudt]
+    type = ArrayTimeDerivative
+    variable = u
+    time_derivative_coefficient = tc
+  []
   [diff]
     type = ArrayDiffusion
     variable = u
@@ -28,10 +33,10 @@
 
 [BCs]
   [left]
-    type = ArrayVacuumBC
+    type = ArrayDirichletBC
     variable = u
     boundary = 1
-    alpha = '1 1.2'
+    values = '0 0'
   []
 
   [right]
@@ -43,6 +48,11 @@
 []
 
 [Materials]
+  [tc]
+    type = GenericConstantArray
+    prop_name = tc
+    prop_value = '1 1'
+  []
   [dc]
     type = GenericConstantArray
     prop_name = dc
@@ -55,16 +65,24 @@
   []
 []
 
-[Preconditioning]
-  [smp]
-    type = SMP
-    full = true
+[Postprocessors]
+  [intu0]
+    type = ElementIntegralArrayVariablePostprocessor
+    variable = u
+    component = 0
+  []
+  [intu1]
+    type = ElementIntegralArrayVariablePostprocessor
+    variable = u
+    component = 1
   []
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
   solve_type = 'NEWTON'
+  dt = 0.1
+  num_steps = 10
 []
 
 [Outputs]
