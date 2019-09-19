@@ -27,6 +27,7 @@ defineADValidParams(
     params.addRequiredParam<std::string>(
         "effective_inelastic_strain_name",
         "Name of the material property that stores the effective inelastic strain");
+    params.addParam<bool>("apply_strain", true, "Flag to apply strain. Used for testing.");
     params.addParamNamesToGroup("effective_inelastic_strain_name", "Advanced"););
 
 template <ComputeStage compute_stage>
@@ -38,7 +39,8 @@ ADRadialReturnStressUpdate<compute_stage>::ADRadialReturnStressUpdate(
         _base_name + getParam<std::string>("effective_inelastic_strain_name"))),
     _effective_inelastic_strain_old(getMaterialPropertyOld<Real>(
         _base_name + getParam<std::string>("effective_inelastic_strain_name"))),
-    _max_inelastic_increment(getParam<Real>("max_inelastic_increment"))
+    _max_inelastic_increment(getParam<Real>("max_inelastic_increment")),
+    _apply_strain(getParam<bool>("apply_strain"))
 {
 }
 
@@ -97,14 +99,17 @@ ADRadialReturnStressUpdate<compute_stage>::updateState(
   else
     inelastic_strain_increment.zero();
 
-  strain_increment -= inelastic_strain_increment;
-  _effective_inelastic_strain[_qp] =
-      _effective_inelastic_strain_old[_qp] + scalar_effective_inelastic_strain;
+  if (_apply_strain)
+  {
+    strain_increment -= inelastic_strain_increment;
+    _effective_inelastic_strain[_qp] =
+        _effective_inelastic_strain_old[_qp] + scalar_effective_inelastic_strain;
 
-  // Use the old elastic strain here because we require tensors used by this class
-  // to be isotropic and this method natively allows for changing in time
-  // elasticity tensors
-  stress_new = elasticity_tensor * (elastic_strain_old + strain_increment);
+    // Use the old elastic strain here because we require tensors used by this class
+    // to be isotropic and this method natively allows for changing in time
+    // elasticity tensors
+    stress_new = elasticity_tensor * (elastic_strain_old + strain_increment);
+  }
 
   computeStressFinalize(inelastic_strain_increment);
 }

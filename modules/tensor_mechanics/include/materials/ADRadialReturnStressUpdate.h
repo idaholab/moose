@@ -124,6 +124,7 @@ protected:
   ADMaterialProperty(Real) & _effective_inelastic_strain;
   const MaterialProperty<Real> & _effective_inelastic_strain_old;
   Real _max_inelastic_increment;
+  const bool _apply_strain;
 
   usingStressUpdateBaseMembers;
   usingSingleVariableReturnMappingSolutionMembers;
