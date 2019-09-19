@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+function exitIfExitCode() {
+    if [ $1 -ne 0 ]; then
+        printf "There was an error. Exiting...\n"
+        exit 1
+    fi
+}
+
 # Set go_fast flag if "--fast" is found in command line args.
 for i in "$@"
 do
@@ -93,9 +100,17 @@ if [ -z "$go_fast" ]; then
       --with-cxx-dialect=C++11 \
       --with-fortran-bindings=0 \
       --with-sowing=0 \
-      $* \
+      $*
 
+  exitIfExitCode $?
 fi
 
 make all -j ${MOOSE_JOBS:-1}
-if [ ! -z "$PETSC_PREFIX" ]; then make install; fi
+exitIfExitCode $?
+
+if [ ! -z "$PETSC_PREFIX" ]; then
+  make install
+  exitIfExitCode $?
+fi
+
+exit 0
