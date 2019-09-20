@@ -48,6 +48,7 @@
       input = 'verification.i'
       csvdiff = 'verification_1e-3_out.csv'
       petsc_version = '>=3.9.0'
+      max_parallel = 1
       detail = 'isolation (i.e. without a full displacement solve), and match with code-to-code comparison with a small set of input parameters'
     [../]
     [./verification_heavy]
@@ -57,6 +58,7 @@
       heavy = true
       petsc_version = '>=3.9.0'
       cli_args = 'Executioner/dt=1e-5 Outputs/file_base=verification_1e-5_out'
+      max_parallel = 1
       detail = 'isolation (i.e. without a full displacement solve), and match with code-to-code comparison with a large set of input parameters'
     [../]
   [../]
