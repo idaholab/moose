@@ -21,6 +21,11 @@ validParams<CavityPressureUOAction>()
 {
   InputParameters params = validParams<Action>();
   params += validParams<CavityPressureUserObject>();
+
+  ExecFlagEnum exec_enum = MooseUtils::getDefaultExecFlagEnum();
+  exec_enum = EXEC_LINEAR;
+  params.addParam<ExecFlagEnum>("execute_on", exec_enum, exec_enum.getDocString());
+
   return params;
 }
 
