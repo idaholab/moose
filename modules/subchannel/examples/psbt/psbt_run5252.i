@@ -80,10 +80,10 @@
 []
 
 [Kernels]
-#  [dummy_kern]
-#    type = Diffusion
-#    variable = dummy_var
-#  []
+  [dummy_kern]
+    type = Diffusion
+    variable = dummy_var
+  []
 []
 
 [BCs]

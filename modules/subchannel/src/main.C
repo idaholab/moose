@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "sub_channelTestApp.h"
+#include "sub_channelApp.h"
 #include "MooseInit.h"
 #include "Moose.h"
 #include "MooseApp.h"
@@ -24,10 +24,10 @@ main(int argc, char * argv[])
   MooseInit init(argc, argv);
 
   // Register this application's MooseApp and any it depends on
-  sub_channelTestApp::registerApps();
+  sub_channelApp::registerApps();
 
   // Create an instance of the application and store it in a smart pointer for easy cleanup
-  std::shared_ptr<MooseApp> app = AppFactory::createAppShared("sub_channelTestApp", argc, argv);
+  std::shared_ptr<MooseApp> app = AppFactory::createAppShared("sub_channelApp", argc, argv);
 
   // Execute the application
   app->run();
