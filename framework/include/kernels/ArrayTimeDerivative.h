@@ -9,27 +9,28 @@
 
 #pragma once
 
-#include "ArrayKernel.h"
+#include "ArrayTimeKernel.h"
 
-class ArrayDiffusion;
+// Forward Declaration
+class ArrayTimeDerivative;
 
 template <>
-InputParameters validParams<ArrayDiffusion>();
+InputParameters validParams<ArrayTimeDerivative>();
 
-class ArrayDiffusion : public ArrayKernel
+class ArrayTimeDerivative : public ArrayTimeKernel
 {
 public:
-  ArrayDiffusion(const InputParameters & parameters);
+  ArrayTimeDerivative(const InputParameters & parameters);
 
 protected:
   virtual RealEigenVector computeQpResidual() override;
   virtual RealEigenVector computeQpJacobian() override;
   virtual RealEigenMatrix computeQpOffDiagJacobian(MooseVariableFEBase & jvar) override;
 
-  /// scalar diffusion coefficient
-  const MaterialProperty<Real> * _d;
-  /// array diffusion coefficient
-  const MaterialProperty<RealEigenVector> * _d_array;
-  /// matrix diffusion coefficient
-  const MaterialProperty<RealEigenMatrix> * _d_2d_array;
+  /// scalar time derivative coefficient
+  const MaterialProperty<Real> * _coeff;
+  /// array time derivative coefficient
+  const MaterialProperty<RealEigenVector> * _coeff_array;
+  /// matrix time derivative coefficient
+  const MaterialProperty<RealEigenMatrix> * _coeff_2d_array;
 };

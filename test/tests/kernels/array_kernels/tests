@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#6881'
+  issues = '#6881 #14057'
   design = '/variables/ArrayMooseVariable.md'
   [./test]
     type = 'Exodiff'
@@ -44,5 +44,11 @@
     exodiff = 'array_save_in_out.e'
     requirement = 'MOOSE shall provide residual save-in and Jacobian diagonal save-in on an array variable.'
     prereq = test_save_in
+  [../]
+  [./test_diffusion_reaction_transient]
+    type = 'Exodiff'
+    input = 'array_diffusion_reaction_transient.i'
+    exodiff = 'array_diffusion_reaction_transient_out.e'
+    requirement = 'MOOSE shall provide array time derivative kernels on an array variable.'
   [../]
 []

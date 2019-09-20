@@ -22,7 +22,6 @@
   [reaction]
     type = ArrayReaction
     variable = u
-    reaction_coefficient_type = full
     reaction_coefficient = rc
   []
 []
