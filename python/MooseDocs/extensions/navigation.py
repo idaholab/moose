@@ -38,6 +38,7 @@ class NavigationExtension(components.Extension):
         config['home'] = ('', "The homepage for the website.")
         config['repo'] = (None, "The source code repository.")
         config['name'] = (None, "The name of the website (e.g., MOOSE)")
+        config['home-name'] = (None, "The name of the 'home page' link; uses 'name' by default.")
         config['breadcrumbs'] = (True, "Toggle for the breadcrumb links at the top of page.")
         config['sections'] = (True, "Group heading content into <section> tags.")
         config['scrollspy'] = (True, "Enable/disable the scrolling table of contents.")
@@ -229,7 +230,7 @@ class NavigationExtension(components.Extension):
                  type_='text',
                  id_="moose-search-box",
                  onkeyup="mooseSearch()",
-                 placeholder=unicode(self.get('home')))
+                 placeholder=unicode(self.get('home-name', self.get('name'))))
         result_wrapper = html.Tag(row, 'div')
 
         html.Tag(result_wrapper, 'div', id_="moose-search-results", class_="col s12")

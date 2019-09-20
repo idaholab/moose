@@ -94,6 +94,10 @@ a {
     width:100%;
 }
 
+.card .card-title{
+    font-weight:100;
+    font-size:130%;
+}
 
 .moose-exception {
   color: red;
@@ -769,11 +773,18 @@ li p {
   margin-bottom: 0;
 }
 
-.card .card-content{
-  padding-top: 6px;
-  padding-bottom: 6px;
+.card{
+  display:table;
 }
 
+.card .card-image,
+.card .card-content{
+  display:table-row;
+}
+
+.card .card-title{
+    margin-left: 6px;
+}
 
 .moose-error,
 .moose-katex-error{
