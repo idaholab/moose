@@ -234,7 +234,10 @@ SetupMeshAction::act()
         if (!_pars.isParamSetByUser("type"))
         {
           _type = "MeshGeneratorMesh";
+          auto original_params = _moose_object_pars;
           _moose_object_pars = _factory.getValidParams("MeshGeneratorMesh");
+          if (original_params.isParamSetByUser("parallel_type"))
+            _moose_object_pars.applySpecificParameters(original_params, {"parallel_type"});
         }
         else if (!_moose_object_pars.get<bool>("_mesh_generator_mesh"))
         {
