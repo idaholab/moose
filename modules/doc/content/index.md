@@ -1,4 +1,4 @@
-!config navigation breadcrumbs=False scrollspy=False home-name=MOOSE name=Parallel Multiphysics Finite Element Framework
+!config navigation breadcrumbs=False scrollspy=False long-name=Parallel Multiphysics Finite Element Framework
 
 # HOME style=visibility:hidden;
 
