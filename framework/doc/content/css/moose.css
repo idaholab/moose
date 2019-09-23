@@ -773,6 +773,29 @@ li p {
   margin-bottom: 0;
 }
 
+.moose-card{
+    height:340px;
+    width:100%;
+    display:block;
+}
+
+.moose-card .card-image{
+    height:260px;
+}
+
+.moose-card .card-content{
+    height: auto;
+    width: auto;
+}
+
+.moose-card .card-image .material-placeholder .moose-image{
+    max-height:260px;
+    max-width:100%;
+    margin:auto;
+    width:auto;
+}
+
+/*
 .card{
   display:table;
 }
@@ -781,7 +804,7 @@ li p {
 .card .card-content{
   display:table-row;
 }
-
+*/
 .card .card-title{
     margin-left: 6px;
 }
