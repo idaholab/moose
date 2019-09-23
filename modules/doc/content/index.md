@@ -39,7 +39,7 @@ see [Pronghorn: Porous media thermal-hydraulics for reactor applications](https:
 !card-end!
 
 !card! gallery/elder.gif title=Density driven, porous flow with adaptivity style=height:320px
-Density driven, porous flow simulation of the Elder problem using [Falcon](https://github.com/idaholab/falcon) (*credit: Robert Podgorney (INL)*).
+Density driven, porous flow simulation of the Elder problem using [Falcon](https://github.com/idaholab/falcon).  Mesh adaptivity is used to accurately capture the moving fronts. (*credit: Robert Podgorney (INL)*).
 !card-end!
 
 !card! gallery/step10_result.gif title=Multi-scale Simulation style=height:300px
