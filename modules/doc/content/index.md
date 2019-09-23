@@ -67,11 +67,12 @@ A 3D spinodal decomposition modeled with Cahn-Hilliard equations using third-ord
 the [phase field module](modules/phase_field/index.md).
 !card-end!
 
-!card! gallery/grain_tracker.gif title=Casey Here style=height:380px
-This is a place holder for Casey.
+!card! gallery/dipole_antenna.gif title=2D Half-Wave Dipole Antenna style=height:480px
+The 2D electric field radiation pattern of a broadcasting half-wave dipole antenna, modeled using
+the [VectorMooseVariable][VectorMooseVariable.md] system with first-order Nedelec elements.
 !card-end!
 
-!card! gallery/grain_tracker.gif title=3D Grain Tracking style=height:400px;
+!card! gallery/grain_tracker.gif title=3D Grain Tracking style=height:480px;
 The [GrainTracker](GrainTracker.md) is a utility that dramatically reduces the number of order
 parameters needed to model a large polycrystal system with the phase-field module. This video shows
 the dynamic remapping that occurs as "reused" order parameters get too close to one and other as the
