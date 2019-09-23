@@ -30,11 +30,10 @@ CavityPressurePPAction::CavityPressurePPAction(InputParameters params) : Action(
 void
 CavityPressurePPAction::act()
 {
-  std::string uo_name = _name + "UserObject";
-
   InputParameters params = _factory.getValidParams("CavityPressurePostprocessor");
+
   params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_LINEAR};
-  params.set<UserObjectName>("cavity_pressure_uo") = uo_name;
+  params.set<UserObjectName>("cavity_pressure_uo") = _name + "UserObject";
   params.set<MooseEnum>("quantity") = "cavity_pressure";
 
   _problem->addPostprocessor("CavityPressurePostprocessor",

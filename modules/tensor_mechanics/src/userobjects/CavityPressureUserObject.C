@@ -41,7 +41,6 @@ validParams<CavityPressureUserObject>()
       "The amount of time during which the pressure will ramp from zero to its true value.");
   params.set<bool>("use_displaced_mesh") = true;
 
-  params.addPrivateParam<std::string>("built_by_action", "");
   return params;
 }
 
