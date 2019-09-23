@@ -205,7 +205,7 @@ class NavigationExtension(components.Extension):
         # Locate h1 heading, if it is found extract the rendered text
         h = heading.find_heading(self.translator, page)
         page_name = h.text() if h else page.name
-        name = self.get('long-name', self.get('name'))
+        name = self.get('long-name') or self.get('name')
         if name is not None:
             html.Tag(head, 'title', string=u'{}|{}'.format(page_name, name))
         else:
