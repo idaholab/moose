@@ -17,7 +17,9 @@ sudo apt-get install build-essential \
   libcurl4-gnutls-dev \
   zlib1g-dev \
   libhwloc-dev \
-  libxml2-dev
+  libxml2-dev \
+  libpng-dev \
+  pkg-config
 ```
 
 Download and install one of our redistributable packages according to your version of Mint. Mint is a spinoff of Ubuntu. But the versions do not necessarly match (each Mint release is based on Ubuntu's LTS release schedule): [https://en.wikipedia.org/wiki/Linux_Mint_version_history](https://en.wikipedia.org/wiki/Linux_Mint_version_history).
