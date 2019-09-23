@@ -38,7 +38,7 @@ Transient flow around corner using porous flow approximation of Euler equations 
 see [Pronghorn: Porous media thermal-hydraulics for reactor applications](https://escholarship.org/uc/item/61k9r05w).
 !card-end!
 
-!card! gallery/elder.gif title=Density driven, porous flow style=height:320px
+!card! gallery/elder.gif title=Density driven, porous flow with adaptivity style=height:320px
 Density driven, porous flow simulation of the Elder problem using [Falcon](https://github.com/idaholab/falcon) (*credit: Robert Podgorney (INL)*).
 !card-end!
 
