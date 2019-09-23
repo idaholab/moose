@@ -230,7 +230,7 @@ class NavigationExtension(components.Extension):
                  type_='text',
                  id_="moose-search-box",
                  onkeyup="mooseSearch()",
-                 placeholder=unicode(self.get('name')))
+                 placeholder=unicode(self.get('home')))
         result_wrapper = html.Tag(row, 'div')
 
         html.Tag(result_wrapper, 'div', id_="moose-search-results", class_="col s12")
