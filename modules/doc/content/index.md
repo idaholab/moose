@@ -55,9 +55,11 @@ Densification of a 3D snow pack using empirical, density based continuum model u
 !gallery! large=6
 !card! gallery/snow.gif title=Dendritic Crystal Growth style=height:480px
 Process of dendritic crystal growth, which is an anisotropic nucleation process as presented by
-[Modeling and numerical simulations of dendritic crystal growth](Modeling and numerical simulations of dendritic crystal growth)
-(*credit: Yang Xia, Department of Material Science and Engineering,
-Shanghai Jiao Tong University, Shanghai).
+[Modeling and numerical simulations of dendritic crystal growth](https://www.sciencedirect.com/science/article/pii/016727899390120P).
+
+!style fontsize=80% fontweight=100
+*Credit*: Yang Xia, Department of Material Science and Engineering,
+Shanghai Jiao Tong University, Shanghai.
 !card-end!
 
 !card! gallery/ch_40.gif title=3D spinodal decomposition style=height:480px
