@@ -3,10 +3,20 @@
     type = 'CSVDiff'
     input = 'residual.i'
     csvdiff = 'residual_out.csv'
+    design = 'InertialTorque.md'
+    requirement = 'The tensor mechanics module computes residual for a simple'
+                  'situation correctly'
+
+    issues = '#13634'
   [../]
   [./simple]
     type = 'CSVDiff'
     input = 'simple.i'
     csvdiff = 'simple_out.csv'
+    design = 'InertialTorque.md'
+    requirement = 'The tensor mechanics module computes the ith component of'
+                  'inertial torque where the only degree of freedom in y'
+
+    issues = '#13634'
   [../]
 []
