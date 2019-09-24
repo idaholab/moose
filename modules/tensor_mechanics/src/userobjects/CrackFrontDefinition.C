@@ -25,6 +25,8 @@ InputParameters
 validParams<CrackFrontDefinition>()
 {
   InputParameters params = validParams<GeneralUserObject>();
+  params.addClassDescription("Gathers information about nodes at the crack front; this object is "
+                             "normally created by the DomainIntegralAction.");
   params += validParams<BoundaryRestrictable>();
   addCrackFrontDefinitionParams(params);
   params.set<bool>("use_displaced_mesh") = false;
