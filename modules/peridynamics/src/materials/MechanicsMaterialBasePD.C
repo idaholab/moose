@@ -17,30 +17,25 @@ validParams<MechanicsMaterialBasePD>()
   InputParameters params = validParams<PeridynamicsMaterialBase>();
   params.addClassDescription("Base class for Peridynamic mechanic materials");
 
-  params.addRequiredParam<std::vector<NonlinearVariableName>>(
-      "displacements", "Nonlinear variable name for the displacements");
-  params.addParam<VariableName>("temperature", "Nonlinear variable name for the temperature");
+  params.addRequiredCoupledVar("displacements", "Nonlinear variable name for the displacements");
+  params.addCoupledVar("temperature", "Nonlinear variable name for the temperature");
 
   return params;
 }
 
 MechanicsMaterialBasePD::MechanicsMaterialBasePD(const InputParameters & parameters)
   : PeridynamicsMaterialBase(parameters),
-    _has_temp(isParamValid("temperature")),
-    _temp_var(_has_temp
-                  ? &_subproblem.getStandardVariable(_tid, getParam<VariableName>("temperature"))
-                  : NULL),
-    _bond_status_var(_subproblem.getStandardVariable(_tid, "bond_status")),
+    _has_temp(isCoupled("temperature")),
+    _temp_var(_has_temp ? getVar("temperature", 0) : nullptr),
+    _bond_status_var(&_subproblem.getStandardVariable(_tid, "bond_status")),
     _total_stretch(declareProperty<Real>("total_stretch")),
     _mechanical_stretch(declareProperty<Real>("mechanical_stretch"))
 {
-  const std::vector<NonlinearVariableName> & nl_vnames(
-      getParam<std::vector<NonlinearVariableName>>("displacements"));
-  if (_dim != nl_vnames.size())
+  if (_dim != coupledComponents("displacements"))
     mooseError("Size of displacements vector is different from the mesh dimension!");
 
-  for (unsigned int i = 0; i < nl_vnames.size(); ++i)
-    _disp_var.push_back(&_subproblem.getStandardVariable(_tid, nl_vnames[i]));
+  for (unsigned int i = 0; i < coupledComponents("displacements"); ++i)
+    _disp_var.push_back(getVar("displacements", i));
 }
 
 void

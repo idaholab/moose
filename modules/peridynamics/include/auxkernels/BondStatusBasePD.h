@@ -39,7 +39,7 @@ protected:
   virtual Real computeFailureCriterionValue() = 0;
 
   /// Bond_status variable
-  const MooseVariable & _bond_status_var;
+  MooseVariable * _bond_status_var;
 
   /// Critical AuxVariable
   const VariableValue & _critical_val;

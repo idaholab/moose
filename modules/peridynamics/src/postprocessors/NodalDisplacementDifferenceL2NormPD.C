@@ -34,11 +34,11 @@ NodalDisplacementDifferenceL2NormPD::NodalDisplacementDifferenceL2NormPD(
     const InputParameters & parameters)
   : NodalIntegralPostprocessorBasePD(parameters),
     _has_func_0(isParamValid("function_0")),
-    _func_0(_has_func_0 ? &getFunction("function_0") : NULL),
+    _func_0(_has_func_0 ? &getFunction("function_0") : nullptr),
     _has_func_1(isParamValid("function_1")),
-    _func_1(_has_func_1 ? &getFunction("function_1") : NULL),
+    _func_1(_has_func_1 ? &getFunction("function_1") : nullptr),
     _has_func_2(isParamValid("function_2")),
-    _func_2(_has_func_2 ? &getFunction("function_2") : NULL)
+    _func_2(_has_func_2 ? &getFunction("function_2") : nullptr)
 {
   if (_has_func_0 + _has_func_1 + _has_func_2 == 0)
     mooseError("Must provide at least one displacement function for integral error check!");

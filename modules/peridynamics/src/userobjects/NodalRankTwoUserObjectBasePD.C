@@ -43,6 +43,6 @@ NodalRankTwoUserObjectBasePD::computeValue(unsigned int id, dof_id_type dof)
   Real dg_vol_frac = _pdmesh.getDefGradVolFraction(_current_elem->node_id(id), id_j_in_i);
 
   // gather volume weighted contribution only if the bond is active
-  if (_bond_status_var.getElementalValue(_current_elem) > 0.5)
+  if (_bond_status_var->getElementalValue(_current_elem) > 0.5)
     gatherWeightedValue(id, dof, dg_vol_frac);
 }

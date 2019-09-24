@@ -55,7 +55,7 @@ protected:
   MooseVariable * _temp_var;
 
   /// bond_status variable
-  MooseVariable & _bond_status_var;
+  MooseVariable * _bond_status_var;
 
   ///@{ variable for generalized plane strain cases
   bool _scalar_out_of_plane_strain_coupled;

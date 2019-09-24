@@ -84,8 +84,8 @@ GeneralizedPlaneStrainOffDiagNOSPD::computeDispPartialOffDiagJacobianScalar(unsi
   for (_i = 0; _i < _test.size(); ++_i)
     for (_j = 0; _j < jvar.order(); ++_j)
       ken(_i, _j) += (_i == _j ? -1 : 1) *
-                     (_multi[0] * (dSdE33[0] * _shape[0].inverse()).row(component) +
-                      _multi[1] * (dSdE33[1] * _shape[1].inverse()).row(component)) *
+                     (_multi[0] * (dSdE33[0] * _shape2[0].inverse()).row(component) +
+                      _multi[1] * (dSdE33[1] * _shape2[1].inverse()).row(component)) *
                      _origin_vec_ij * _bond_status_ij;
 
   kne(0, 0) += computeDSDU(component, 0)(2, 2) * _vols_ij[0] * _dg_vol_frac_ij[0] *
@@ -116,8 +116,8 @@ GeneralizedPlaneStrainOffDiagNOSPD::computeDispFullOffDiagJacobianScalar(unsigne
   for (_i = 0; _i < _test.size(); ++_i)
     for (_j = 0; _j < jvar.order(); ++_j)
       ken(_i, _j) += (_i == _j ? -1 : 1) *
-                     (_multi[0] * (dSdE33[0] * _shape[0].inverse()).row(component) +
-                      _multi[1] * (dSdE33[1] * _shape[1].inverse()).row(component)) *
+                     (_multi[0] * (dSdE33[0] * _shape2[0].inverse()).row(component) +
+                      _multi[1] * (dSdE33[1] * _shape2[1].inverse()).row(component)) *
                      _origin_vec_ij * _bond_status_ij;
 
   // fill in the row corresponding to the scalar variable
@@ -157,15 +157,13 @@ GeneralizedPlaneStrainOffDiagNOSPD::computeDispFullOffDiagJacobianScalar(unsigne
         dFdUk(component, j) =
             _horiz_rad[cur_nd] / origin_vec_ijk.norm() * origin_vec_ijk(j) * vol_k;
 
-      dFdUk *= _shape[cur_nd].inverse();
+      dFdUk *= _shape2[cur_nd].inverse();
 
-      RankTwoTensor dPdUk =
-          _Jacobian_mult[cur_nd] * 0.5 *
-          (dFdUk.transpose() * _dgrad[cur_nd] + _dgrad[cur_nd].transpose() * dFdUk);
+      RankTwoTensor dPdUk = _Jacobian_mult[cur_nd] * 0.5 * (dFdUk.transpose() + dFdUk);
 
       // bond status for bond k
       Real bond_status_ijk =
-          _bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[dg_neighbors[k]]));
+          _bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[dg_neighbors[k]]));
 
       _local_ke.resize(ken.n(), ken.m());
       _local_ke.zero();

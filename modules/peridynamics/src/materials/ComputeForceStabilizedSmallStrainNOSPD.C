@@ -35,14 +35,14 @@ ComputeForceStabilizedSmallStrainNOSPD::ComputeForceStabilizedSmallStrainNOSPD(
 void
 ComputeForceStabilizedSmallStrainNOSPD::computeQpDeformationGradient()
 {
-  _shape_tensor[_qp].zero();
+  _shape2[_qp].zero();
   _deformation_gradient[_qp].zero();
   _ddgraddu[_qp].zero();
   _ddgraddv[_qp].zero();
   _ddgraddw[_qp].zero();
 
   if (_dim == 2)
-    _shape_tensor[_qp](2, 2) = _deformation_gradient[_qp](2, 2) = 1.0;
+    _shape2[_qp](2, 2) = _deformation_gradient[_qp](2, 2) = 1.0;
 
   const Node * cur_nd = _current_elem->node_ptr(_qp);
   std::vector<dof_id_type> neighbors = _pdmesh.getNeighbors(cur_nd->id());
@@ -53,7 +53,7 @@ ComputeForceStabilizedSmallStrainNOSPD::computeQpDeformationGradient()
   RealGradient cur_vec(_dim);
 
   for (unsigned int j = 0; j < neighbors.size(); ++j)
-    if (_bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[j])) > 0.5)
+    if (_bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[j])) > 0.5)
     {
       Node * node_j = _pdmesh.nodePtr(neighbors[j]);
       Real vol_j = _pdmesh.getPDNodeVolume(neighbors[j]);
@@ -68,7 +68,7 @@ ComputeForceStabilizedSmallStrainNOSPD::computeQpDeformationGradient()
       {
         for (unsigned int l = 0; l < _dim; ++l)
         {
-          _shape_tensor[_qp](k, l) += vol_j * _horiz_rad[_qp] / ori_len * ori_vec(k) * ori_vec(l);
+          _shape2[_qp](k, l) += vol_j * _horiz_rad[_qp] / ori_len * ori_vec(k) * ori_vec(l);
           _deformation_gradient[_qp](k, l) +=
               vol_j * _horiz_rad[_qp] / ori_len * cur_vec(k) * ori_vec(l);
         }
@@ -81,10 +81,10 @@ ComputeForceStabilizedSmallStrainNOSPD::computeQpDeformationGradient()
     }
 
   // finalize the deformation gradient tensor
-  _deformation_gradient[_qp] *= _shape_tensor[_qp].inverse();
-  _ddgraddu[_qp] *= _shape_tensor[_qp].inverse();
-  _ddgraddv[_qp] *= _shape_tensor[_qp].inverse();
-  _ddgraddw[_qp] *= _shape_tensor[_qp].inverse();
+  _deformation_gradient[_qp] *= _shape2[_qp].inverse();
+  _ddgraddu[_qp] *= _shape2[_qp].inverse();
+  _ddgraddv[_qp] *= _shape2[_qp].inverse();
+  _ddgraddw[_qp] *= _shape2[_qp].inverse();
 
   Real youngs_modulus = ElasticityTensorTools::getIsotropicYoungsModulus(_Cijkl[_qp]);
   _sf_coeff[_qp] = youngs_modulus * _pdmesh.getNodeAvgSpacing(_current_elem->node_id(_qp)) *

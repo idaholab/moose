@@ -221,12 +221,12 @@ MeshGeneratorPD::generate()
               for (unsigned int i = 0; i < old_elem->n_neighbors(); ++i)
               {
                 Elem * nb = old_elem->neighbor_ptr(i);
-                if (nb != NULL)
+                if (nb != nullptr)
                 {
                   for (unsigned int j = 0; j < nb->n_neighbors(); ++j)
                   {
                     Elem * nb_nb = nb->neighbor_ptr(j);
-                    if (nb_nb != NULL && fe_sbnd_elem_ids[bidit].count(nb_nb->id()) &&
+                    if (nb_nb != nullptr && fe_sbnd_elem_ids[bidit].count(nb_nb->id()) &&
                         nb_nb->id() != eidit)
                     {
                       Point p1 = *new_mesh->node_ptr(fe_elem_pd_node_map.at(nb_nb->id()));
@@ -251,7 +251,7 @@ MeshGeneratorPD::generate()
               for (unsigned int i = 0; i < old_elem->n_neighbors(); ++i)
               {
                 Elem * nb = old_elem->neighbor_ptr(i);
-                if (nb != NULL)
+                if (nb != nullptr)
                 {
                   if (fe_sbnd_elem_ids[bidit].count(nb->id()))
                     boundary_node_ids.push_back(fe_elem_pd_node_map.at(nb->id()));
@@ -310,7 +310,7 @@ MeshGeneratorPD::generate()
               for (unsigned int i = 0; i < old_elem->n_neighbors(); ++i)
               {
                 Elem * nb = old_elem->neighbor_ptr(i);
-                if (nb != NULL)
+                if (nb != nullptr)
                 {
                   if (fe_sbnd_elem_ids[bidit].count(nb->id()))
                     boundary_elem_ids.push_back(nb->id());
@@ -331,7 +331,8 @@ MeshGeneratorPD::generate()
                   for (unsigned int k = 0; k < nb_j->n_neighbors();
                        ++k) // check whether nb_i and nb_j shares two common neighbors
                   {
-                    if (nb_j->neighbor_ptr(k) != NULL && nb_i->has_neighbor(nb_j->neighbor_ptr(k)))
+                    if (nb_j->neighbor_ptr(k) != nullptr &&
+                        nb_i->has_neighbor(nb_j->neighbor_ptr(k)))
                       ++common_nb;
                   }
                   if (common_nb == 2)
@@ -481,7 +482,7 @@ MeshGeneratorPD::generate()
         new_boundary_info.add_node(new_mesh->node_ptr(fe_elem_pd_node_map.at(beid)), sbid + 1000);
         if (old_boundary_info.get_sideset_name(sbid) != "")
           new_boundary_info.nodeset_name(sbid + 1000) =
-              "pd_node_" + old_boundary_info.get_sideset_name(sbid);
+              "pd_nodes_" + old_boundary_info.get_sideset_name(sbid);
 
         if (_retain_fe_mesh) // if retained, copy the corresponding boundaries, if any, to new mesh
                              // from old mesh

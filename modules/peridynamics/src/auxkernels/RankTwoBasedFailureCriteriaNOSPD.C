@@ -35,7 +35,7 @@ RankTwoBasedFailureCriteriaNOSPD::RankTwoBasedFailureCriteriaNOSPD(
     const InputParameters & parameters)
   : BondStatusBasePD(parameters),
     _failure_criterion(getParam<MooseEnum>("failure_criterion")),
-    _tensor(NULL)
+    _tensor(nullptr)
 {
   if (hasMaterialProperty<RankTwoTensor>("rank_two_tensor"))
     _tensor = &getMaterialProperty<RankTwoTensor>("rank_two_tensor");

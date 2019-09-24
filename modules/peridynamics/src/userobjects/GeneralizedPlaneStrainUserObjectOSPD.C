@@ -21,9 +21,8 @@ validParams<GeneralizedPlaneStrainUserObjectOSPD>()
   params.addClassDescription("Class for calculating the scalar residual and diagonal Jacobian "
                              "entry of generalized plane strain in OSPD formulation");
 
-  params.addRequiredParam<AuxVariableName>(
-      "out_of_plane_stress_variable",
-      "Auxiliary variable name for out-of-plane stress in GPS simulation");
+  params.addCoupledVar("out_of_plane_stress_variable",
+                       "Auxiliary variable name for out-of-plane stress in GPS simulation");
 
   return params;
 }
@@ -31,8 +30,7 @@ validParams<GeneralizedPlaneStrainUserObjectOSPD>()
 GeneralizedPlaneStrainUserObjectOSPD::GeneralizedPlaneStrainUserObjectOSPD(
     const InputParameters & parameters)
   : GeneralizedPlaneStrainUserObjectBasePD(parameters),
-    _out_of_plane_stress_var(_subproblem.getStandardVariable(
-        _tid, getParam<AuxVariableName>("out_of_plane_stress_variable")))
+    _out_of_plane_stress_var(getVar("out_of_plane_stress_variable", 0))
 {
   if (_strain == "Finite")
     mooseError("Generalized plane strain model based on OSPD only support SMALL strain!");
@@ -59,10 +57,10 @@ GeneralizedPlaneStrainUserObjectOSPD::execute()
   unsigned int nn_j = _pdmesh.getNeighbors(node_j).size();
 
   // residual
-  _residual += (_out_of_plane_stress_var.getNodalValue(*_current_elem->node_ptr(0)) -
+  _residual += (_out_of_plane_stress_var->getNodalValue(*_current_elem->node_ptr(0)) -
                 _pressure.value(_t, coord_i) * _factor) *
                nv_i / nn_i;
-  _residual += (_out_of_plane_stress_var.getNodalValue(*_current_elem->node_ptr(1)) -
+  _residual += (_out_of_plane_stress_var->getNodalValue(*_current_elem->node_ptr(1)) -
                 _pressure.value(_t, coord_j) * _factor) *
                nv_j / nn_j;
 

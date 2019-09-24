@@ -26,7 +26,7 @@ validParams<BondStatusBasePD>()
 
 BondStatusBasePD::BondStatusBasePD(const InputParameters & parameters)
   : AuxKernelBasePD(parameters),
-    _bond_status_var(_subproblem.getStandardVariable(_tid, "bond_status")),
+    _bond_status_var(&_subproblem.getStandardVariable(_tid, "bond_status")),
     _critical_val(coupledValue("critical_variable"))
 {
 }
@@ -36,7 +36,7 @@ BondStatusBasePD::computeValue()
 {
   Real val = 0.0;
 
-  if (_bond_status_var.getElementalValue(_current_elem) > 0.5) // unbroken bond
+  if (_bond_status_var->getElementalValue(_current_elem) > 0.5) // unbroken bond
   {
     Real failure_criterion_val = computeFailureCriterionValue();
     if (failure_criterion_val < 0.0) // unmet failure criterion

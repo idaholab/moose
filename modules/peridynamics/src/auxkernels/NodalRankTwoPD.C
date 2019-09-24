@@ -23,9 +23,8 @@ validParams<NodalRankTwoPD>()
       "of nodal rank two strain and stress tensors for bond-based and ordinary "
       "state-based peridynamic models");
 
-  params.addRequiredParam<std::vector<NonlinearVariableName>>(
-      "displacements", "Nonlinear variable names for the displacements");
-  params.addParam<VariableName>("temperature", "Nonlinear variable name for the temperature");
+  params.addRequiredCoupledVar("displacements", "Nonlinear variable names for the displacements");
+  params.addCoupledVar("temperature", "Nonlinear variable name for the temperature");
   params.addCoupledVar("scalar_out_of_plane_strain",
                        "Scalar variable for strain in the out-of-plane direction");
   params.addParam<bool>("plane_stress", false, "Plane stress problem or not");
@@ -58,11 +57,9 @@ validParams<NodalRankTwoPD>()
 
 NodalRankTwoPD::NodalRankTwoPD(const InputParameters & parameters)
   : AuxKernelBasePD(parameters),
-    _has_temp(isParamValid("temperature")),
-    _temp_var(_has_temp
-                  ? &_subproblem.getStandardVariable(_tid, getParam<VariableName>("temperature"))
-                  : NULL),
-    _bond_status_var(_subproblem.getStandardVariable(_tid, "bond_status")),
+    _has_temp(isCoupled("temperature")),
+    _temp_var(_has_temp ? getVar("temperature", 0) : nullptr),
+    _bond_status_var(&_subproblem.getStandardVariable(_tid, "bond_status")),
     _scalar_out_of_plane_strain_coupled(isCoupledScalar("scalar_out_of_plane_strain")),
     _scalar_out_of_plane_strain(_scalar_out_of_plane_strain_coupled
                                     ? coupledScalarValue("scalar_out_of_plane_strain")
@@ -83,12 +80,10 @@ NodalRankTwoPD::NodalRankTwoPD(const InputParameters & parameters)
   if (!_var.isNodal())
     mooseError("NodalRankTwoPD operates on nodal variable!");
 
-  const std::vector<NonlinearVariableName> & nl_vnames(
-      getParam<std::vector<NonlinearVariableName>>("displacements"));
-  if (nl_vnames.size() != _dim)
+  if (coupledComponents("displacements") != _dim)
     mooseError("Number of displacements should be the same as problem dimension!");
-  for (unsigned int i = 0; i < _dim; ++i)
-    _disp_var.push_back(&_subproblem.getStandardVariable(_tid, nl_vnames[i]));
+  for (unsigned int i = 0; i < coupledComponents("displacements"); ++i)
+    _disp_var.push_back(getVar("displacements", i));
 
   if (_rank_two_tensor == "stress" && !isParamValid("youngs_modulus") &&
       !isParamValid("poissons_ratio"))
@@ -167,7 +162,7 @@ NodalRankTwoPD::computeNodalTotalStrain()
                           _disp_var[k]->getNodalValue(*_current_node);
     }
     Real origin_length = origin_vector.norm();
-    Real bond_status_ij = _bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[j]));
+    Real bond_status_ij = _bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[j]));
     for (unsigned int k = 0; k < _dim; ++k)
       for (unsigned int l = 0; l < _dim; ++l)
       {

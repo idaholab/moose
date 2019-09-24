@@ -36,7 +36,7 @@ protected:
   ///@{ Material point based material properties
   const MaterialProperty<Real> & _multi;
   const MaterialProperty<RankTwoTensor> & _stress;
-  const MaterialProperty<RankTwoTensor> & _shape;
+  const MaterialProperty<RankTwoTensor> & _shape2;
   const MaterialProperty<RankTwoTensor> & _dgrad;
   const MaterialProperty<RankTwoTensor> & _ddgraddu;
   const MaterialProperty<RankTwoTensor> & _ddgraddv;

@@ -37,8 +37,8 @@ validParams<GeneralizedPlaneStrainActionPD>()
                                  formulation_option.getRawNames());
   MooseEnum strain_type("SMALL FINITE", "SMALL");
   params.addParam<MooseEnum>("strain", strain_type, "Strain formulation");
-  params.addParam<AuxVariableName>("out_of_plane_stress_variable",
-                                   "Name of out-of-plane stress auxiliary variable");
+  params.addParam<VariableName>("out_of_plane_stress_variable",
+                                "Name of out-of-plane stress auxiliary variable");
   params.addParam<FunctionName>(
       "out_of_plane_pressure",
       "0",
@@ -96,7 +96,8 @@ GeneralizedPlaneStrainActionPD::act()
 
     InputParameters params = _factory.getValidParams(k_type);
 
-    params.applyParameters(parameters(), {"displacements", "scalar_out_of_plane_strain"});
+    params.applyParameters(parameters(),
+                           {"displacements", "temperature", "scalar_out_of_plane_strain"});
 
     params.set<std::vector<VariableName>>("displacements") = _displacements;
     params.set<std::vector<VariableName>>("scalar_out_of_plane_strain") = {
@@ -118,15 +119,14 @@ GeneralizedPlaneStrainActionPD::act()
       VariableName temp = getParam<VariableName>("temperature");
       if (_problem->getNonlinearSystemBase().hasVariable(temp))
       {
-        params.set<VariableName>("temperature") = temp;
+        params.set<std::vector<VariableName>>("temperature") = {temp};
 
         std::string k_name = name() + "_GeneralizedPlaneStrainPDOffDiag_temp";
         params.set<NonlinearVariableName>("variable") = temp;
+
         if (_formulation == "NONORDINARY_STATE")
-        {
           params.set<std::vector<MaterialPropertyName>>("eigenstrain_names") =
               getParam<std::vector<MaterialPropertyName>>("eigenstrain_names");
-        }
 
         _problem->addKernel(k_type, k_name, params);
       }
@@ -151,8 +151,8 @@ GeneralizedPlaneStrainActionPD::act()
     params.applyParameters(parameters(), {"out_of_plane_stress_variable"});
 
     if (_formulation == "ORDINARY_STATE")
-      params.set<AuxVariableName>("out_of_plane_stress_variable") =
-          getParam<AuxVariableName>("out_of_plane_stress_variable");
+      params.set<std::vector<VariableName>>("out_of_plane_stress_variable") = {
+          getParam<VariableName>("out_of_plane_stress_variable")};
 
     _problem->addUserObject(uo_type, uo_name, params);
   }

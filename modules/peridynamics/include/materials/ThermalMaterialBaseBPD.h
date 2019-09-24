@@ -35,7 +35,7 @@ protected:
   virtual void computePeridynamicsParams(const Real ave_thermal_conductivity) = 0;
 
   ///@{ Temperature variable and values
-  MooseVariable & _temp_var;
+  MooseVariable * _temp_var;
   std::vector<Real> _temp;
   ///@}
 

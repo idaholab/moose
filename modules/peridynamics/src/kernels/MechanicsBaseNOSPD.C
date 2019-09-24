@@ -30,7 +30,7 @@ MechanicsBaseNOSPD::MechanicsBaseNOSPD(const InputParameters & parameters)
   : MechanicsBasePD(parameters),
     _multi(getMaterialProperty<Real>("multi")),
     _stress(getMaterialProperty<RankTwoTensor>("stress")),
-    _shape(getMaterialProperty<RankTwoTensor>("shape_tensor")),
+    _shape2(getMaterialProperty<RankTwoTensor>("rank_two_shape_tensor")),
     _dgrad(getMaterialProperty<RankTwoTensor>("deformation_gradient")),
     _ddgraddu(getMaterialProperty<RankTwoTensor>("ddeformation_gradient_du")),
     _ddgraddv(getMaterialProperty<RankTwoTensor>("ddeformation_gradient_dv")),
@@ -39,9 +39,10 @@ MechanicsBaseNOSPD::MechanicsBaseNOSPD(const InputParameters & parameters)
     _eigenstrain_names(getParam<std::vector<MaterialPropertyName>>("eigenstrain_names")),
     _deigenstrain_dT(_eigenstrain_names.size())
 {
-  for (unsigned int i = 0; i < _deigenstrain_dT.size(); ++i)
-    _deigenstrain_dT[i] =
-        &getMaterialPropertyDerivative<RankTwoTensor>(_eigenstrain_names[i], _temp_var->name());
+  if (_temp_coupled)
+    for (unsigned int i = 0; i < _deigenstrain_dT.size(); ++i)
+      _deigenstrain_dT[i] =
+          &getMaterialPropertyDerivative<RankTwoTensor>(_eigenstrain_names[i], _temp_var->name());
 }
 
 RankTwoTensor
@@ -50,14 +51,11 @@ MechanicsBaseNOSPD::computeDSDU(unsigned int component, unsigned int nd)
   // compute the derivative of stress w.r.t the solution components for small strain
   RankTwoTensor dSdU;
   if (component == 0)
-    dSdU = _Jacobian_mult[nd] * 0.5 *
-           (_ddgraddu[nd].transpose() * _dgrad[nd] + _dgrad[nd].transpose() * _ddgraddu[nd]);
+    dSdU = _Jacobian_mult[nd] * 0.5 * (_ddgraddu[nd].transpose() + _ddgraddu[nd]);
   else if (component == 1)
-    dSdU = _Jacobian_mult[nd] * 0.5 *
-           (_ddgraddv[nd].transpose() * _dgrad[nd] + _dgrad[nd].transpose() * _ddgraddv[nd]);
+    dSdU = _Jacobian_mult[nd] * 0.5 * (_ddgraddv[nd].transpose() + _ddgraddv[nd]);
   else if (component == 2)
-    dSdU = _Jacobian_mult[nd] * 0.5 *
-           (_ddgraddw[nd].transpose() * _dgrad[nd] + _dgrad[nd].transpose() * _ddgraddw[nd]);
+    dSdU = _Jacobian_mult[nd] * 0.5 * (_ddgraddw[nd].transpose() + _ddgraddw[nd]);
 
   return dSdU;
 }

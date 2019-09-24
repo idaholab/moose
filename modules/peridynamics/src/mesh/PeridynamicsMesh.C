@@ -174,7 +174,7 @@ PeridynamicsMesh::createPeridynamicsMeshData(MeshBase & fe_mesh,
     unsigned int n_fe_neighbors = 0;
     Real dist_sum = 0.0;
     for (unsigned int j = 0; j < fe_elem->n_neighbors(); ++j)
-      if (fe_elem->neighbor_ptr(j) != NULL)
+      if (fe_elem->neighbor_ptr(j) != nullptr)
       {
         dist_sum += (fe_elem->centroid() - fe_elem->neighbor_ptr(j)->centroid()).norm();
         n_fe_neighbors++;

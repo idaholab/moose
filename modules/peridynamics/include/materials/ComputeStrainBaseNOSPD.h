@@ -51,7 +51,7 @@ protected:
   ///@}
 
   ///@{ Material properties to store
-  MaterialProperty<RankTwoTensor> & _shape_tensor;
+  MaterialProperty<RankTwoTensor> & _shape2;
   MaterialProperty<RankTwoTensor> & _deformation_gradient;
 
   MaterialProperty<RankTwoTensor> & _ddgraddu;

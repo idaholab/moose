@@ -28,7 +28,7 @@ validParams<PeridynamicsKernelBase>()
 
 PeridynamicsKernelBase::PeridynamicsKernelBase(const InputParameters & parameters)
   : Kernel(parameters),
-    _bond_status_var(_subproblem.getStandardVariable(_tid, "bond_status")),
+    _bond_status_var(&_subproblem.getStandardVariable(_tid, "bond_status")),
     _use_full_jacobian(getParam<bool>("full_jacobian")),
     _pdmesh(dynamic_cast<PeridynamicsMesh &>(_mesh)),
     _dim(_pdmesh.dimension()),
@@ -53,7 +53,7 @@ PeridynamicsKernelBase::prepare()
 
   _origin_vec_ij = _pdmesh.getPDNodeCoord(_current_elem->node_id(1)) -
                    _pdmesh.getPDNodeCoord(_current_elem->node_id(0));
-  _bond_status_ij = _bond_status_var.getElementalValue(_current_elem);
+  _bond_status_ij = _bond_status_var->getElementalValue(_current_elem);
 }
 
 void

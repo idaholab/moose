@@ -116,7 +116,7 @@ GeneralizedPlaneStrainOffDiagOSPD::computeDispFullOffDiagJacobianScalar(unsigned
       Real current_len_k = current_ori_k.norm();
 
       // bond status for bond k
-      Real bond_status_k = _bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[k]));
+      Real bond_status_k = _bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[k]));
 
       // prepare shape tensor and deformation gradient tensor for current node
       for (unsigned int m = 0; m < _dim; m++)

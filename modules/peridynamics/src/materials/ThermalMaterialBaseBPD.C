@@ -21,8 +21,7 @@ validParams<ThermalMaterialBaseBPD>()
   InputParameters params = validParams<PeridynamicsMaterialBase>();
   params.addClassDescription("Base class for bond-based peridynamic thermal models");
 
-  params.addRequiredParam<NonlinearVariableName>("temperature",
-                                                 "Nonlinear variable name for the temperature");
+  params.addRequiredCoupledVar("temperature", "Nonlinear variable name for the temperature");
   params.addRequiredParam<MaterialPropertyName>("thermal_conductivity",
                                                 "Name of material defining thermal conductivity");
 
@@ -31,8 +30,7 @@ validParams<ThermalMaterialBaseBPD>()
 
 ThermalMaterialBaseBPD::ThermalMaterialBaseBPD(const InputParameters & parameters)
   : PeridynamicsMaterialBase(parameters),
-    _temp_var(
-        _subproblem.getStandardVariable(_tid, getParam<NonlinearVariableName>("temperature"))),
+    _temp_var(getVar("temperature", 0)),
     _temp(2),
     _bond_heat_flow(declareProperty<Real>("bond_heat_flow")),
     _bond_dQdT(declareProperty<Real>("bond_dQdT")),
@@ -51,8 +49,8 @@ ThermalMaterialBaseBPD::computeProperties()
   ave_thermal_conductivity /= _assembly.elemVolume();
 
   // nodal temperature
-  _temp[0] = _temp_var.getNodalValue(*_current_elem->node_ptr(0));
-  _temp[1] = _temp_var.getNodalValue(*_current_elem->node_ptr(1));
+  _temp[0] = _temp_var->getNodalValue(*_current_elem->node_ptr(0));
+  _temp[1] = _temp_var->getNodalValue(*_current_elem->node_ptr(1));
 
   // compute peridynamic micro-conductivity: _Kij
   computePeridynamicsParams(ave_thermal_conductivity);

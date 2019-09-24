@@ -18,27 +18,23 @@ validParams<MechanicsBasePD>()
   params.addClassDescription(
       "Base class for calculating residual and Jacobian for peridynamic mechanic kernels");
 
-  params.addParam<VariableName>("temperature", "Nonlinear variable name for the temperature");
-  params.addParam<VariableName>("out_of_plane_strain",
-                                "Nonlinear variable name for the out_of_plane strain for "
-                                "plane stress analysis using SNOSPD formulation");
+  params.addCoupledVar("temperature", "Nonlinear variable name for the temperature");
+  params.addCoupledVar("out_of_plane_strain",
+                       "Nonlinear variable name for the out_of_plane strain for "
+                       "plane stress analysis using SNOSPD formulation");
 
   return params;
 }
 
 MechanicsBasePD::MechanicsBasePD(const InputParameters & parameters)
   : DerivativeMaterialInterface<PeridynamicsKernelBase>(parameters),
-    _temp_coupled(isParamValid("temperature")),
-    _temp_var(_temp_coupled
-                  ? &_subproblem.getStandardVariable(_tid, getParam<VariableName>("temperature"))
-                  : NULL),
+    _temp_coupled(isCoupled("temperature")),
+    _temp_var(_temp_coupled ? getVar("temperature", 0) : nullptr),
     _ndisp(coupledComponents("displacements")),
-    _out_of_plane_strain_coupled(isParamValid("out_of_plane_strain")),
-    _out_of_plane_strain_var(
-        _out_of_plane_strain_coupled
-            ? &_subproblem.getStandardVariable(_tid, getParam<VariableName>("out_of_plane_strain"))
-            : NULL),
-    _orientation(NULL)
+    _out_of_plane_strain_coupled(isCoupled("out_of_plane_strain")),
+    _out_of_plane_strain_var(_out_of_plane_strain_coupled ? getVar("out_of_plane_strain", 0)
+                                                          : nullptr),
+    _orientation(nullptr)
 {
   if (_ndisp != _dim)
     mooseError("Number of displacements should be consistent with mesh dimension!");

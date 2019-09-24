@@ -53,7 +53,7 @@ protected:
   virtual void prepare();
 
   /// Bond_status variable
-  const MooseVariable & _bond_status_var;
+  MooseVariable * _bond_status_var;
 
   /// Option to use full jacobian including nonlocal constribution or not
   const bool _use_full_jacobian;

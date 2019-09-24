@@ -41,7 +41,7 @@ protected:
   ///@}
 
   /// Bond_status variable
-  MooseVariable & _bond_status_var;
+  MooseVariable * _bond_status_var;
 
   ///@{ Material properties to store
   MaterialProperty<Real> & _total_stretch;

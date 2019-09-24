@@ -218,16 +218,26 @@ MechanicsActionPD::getKernelParameters(std::string name)
 {
   InputParameters params = _factory.getValidParams(name);
 
-  params.applyParameters(
-      parameters(),
-      {"displacements", "eigenstrain_names", "use_displaced_mesh", "save_in", "diag_save_in"});
+  params.applyParameters(parameters(),
+                         {"displacements",
+                          "temperature",
+                          "out_of_plane_strain",
+                          "eigenstrain_names",
+                          "use_displaced_mesh",
+                          "save_in",
+                          "diag_save_in"});
 
   params.set<std::vector<VariableName>>("displacements") = _displacements;
+  if (isParamValid("temperature"))
+    params.set<std::vector<VariableName>>("temperature") = {getParam<VariableName>("temperature")};
+  if (isParamValid("out_of_plane_strain"))
+    params.set<std::vector<VariableName>>("out_of_plane_strain") = {
+        getParam<VariableName>("out_of_plane_strain")};
 
   // peridynamics modules are formulated based on initial configuration
   params.set<bool>("use_displaced_mesh") = false;
 
-  if (_formulation == "NONORDINARY_STATE")
+  if (_formulation == "NONORDINARY_STATE" && isParamValid("eigenstrain_names"))
   {
     params.set<std::vector<MaterialPropertyName>>("eigenstrain_names") =
         getParam<std::vector<MaterialPropertyName>>("eigenstrain_names");

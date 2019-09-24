@@ -37,7 +37,7 @@ ComputeStrainBaseNOSPD::ComputeStrainBaseNOSPD(const InputParameters & parameter
     _Cijkl(getMaterialProperty<RankFourTensor>("elasticity_tensor")),
     _eigenstrain_names(getParam<std::vector<MaterialPropertyName>>("eigenstrain_names")),
     _eigenstrains(_eigenstrain_names.size()),
-    _shape_tensor(declareProperty<RankTwoTensor>("shape_tensor")),
+    _shape2(declareProperty<RankTwoTensor>("rank_two_shape_tensor")),
     _deformation_gradient(declareProperty<RankTwoTensor>("deformation_gradient")),
     _ddgraddu(declareProperty<RankTwoTensor>("ddeformation_gradient_du")),
     _ddgraddv(declareProperty<RankTwoTensor>("ddeformation_gradient_dv")),
@@ -70,7 +70,7 @@ ComputeStrainBaseNOSPD::initQpStatefulProperties()
 void
 ComputeStrainBaseNOSPD::computeQpDeformationGradient()
 {
-  _shape_tensor[_qp].zero();
+  _shape2[_qp].zero();
   _deformation_gradient[_qp].zero();
   _ddgraddu[_qp].zero();
   _ddgraddv[_qp].zero();
@@ -78,15 +78,15 @@ ComputeStrainBaseNOSPD::computeQpDeformationGradient()
   _multi[_qp] = 0.0;
 
   // for cases when current bond was broken, assign shape tensor and deformation gradient to unity
-  if (_bond_status_var.getElementalValue(_current_elem) < 0.5)
+  if (_bond_status_var->getElementalValue(_current_elem) < 0.5)
   {
-    _shape_tensor[_qp] = RankTwoTensor::initIdentity;
-    _deformation_gradient[_qp] = _shape_tensor[_qp];
+    _shape2[_qp] = RankTwoTensor::initIdentity;
+    _deformation_gradient[_qp] = _shape2[_qp];
   }
   else
   {
     if (_dim == 2)
-      _shape_tensor[_qp](2, 2) = _deformation_gradient[_qp](2, 2) = 1.0;
+      _shape2[_qp](2, 2) = _deformation_gradient[_qp](2, 2) = 1.0;
 
     const Node * cur_nd = _current_elem->node_ptr(_qp);
     const Node * end_nd = _current_elem->node_ptr(1 - _qp); // two nodes for edge2 element
@@ -102,7 +102,7 @@ ComputeStrainBaseNOSPD::computeQpDeformationGradient()
     RealGradient ori_vec(_dim), cur_vec(_dim);
 
     for (unsigned int j = 0; j < dg_neighbors.size(); ++j)
-      if (_bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[dg_neighbors[j]])) > 0.5)
+      if (_bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[dg_neighbors[j]])) > 0.5)
       {
         Node * node_j = _pdmesh.nodePtr(neighbors[dg_neighbors[j]]);
         Real vol_j = _pdmesh.getPDNodeVolume(neighbors[dg_neighbors[j]]);
@@ -118,7 +118,7 @@ ComputeStrainBaseNOSPD::computeQpDeformationGradient()
         {
           for (unsigned int l = 0; l < _dim; ++l)
           {
-            _shape_tensor[_qp](k, l) += _horiz_rad[_qp] / ori_len * ori_vec(k) * ori_vec(l) * vol_j;
+            _shape2[_qp](k, l) += _horiz_rad[_qp] / ori_len * ori_vec(k) * ori_vec(l) * vol_j;
             _deformation_gradient[_qp](k, l) +=
                 _horiz_rad[_qp] / ori_len * cur_vec(k) * ori_vec(l) * vol_j;
           }
@@ -130,10 +130,10 @@ ComputeStrainBaseNOSPD::computeQpDeformationGradient()
         }
       }
     // finalize the deformation gradient and its derivatives
-    _deformation_gradient[_qp] *= _shape_tensor[_qp].inverse();
-    _ddgraddu[_qp] *= _shape_tensor[_qp].inverse();
-    _ddgraddv[_qp] *= _shape_tensor[_qp].inverse();
-    _ddgraddw[_qp] *= _shape_tensor[_qp].inverse();
+    _deformation_gradient[_qp] *= _shape2[_qp].inverse();
+    _ddgraddu[_qp] *= _shape2[_qp].inverse();
+    _ddgraddv[_qp] *= _shape2[_qp].inverse();
+    _ddgraddw[_qp] *= _shape2[_qp].inverse();
 
     // force state multiplier
     _multi[_qp] = _horiz_rad[_qp] / _origin_length * _node_vol[0] * _node_vol[1] * dgnodes_vsum /

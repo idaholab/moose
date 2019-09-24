@@ -19,6 +19,7 @@ validParams<PeridynamicsApp>()
 {
   InputParameters params = validParams<MooseApp>();
   params.set<bool>("automatic_automatic_scaling") = false;
+
   return params;
 }
 

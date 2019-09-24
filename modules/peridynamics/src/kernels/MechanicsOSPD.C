@@ -75,7 +75,7 @@ MechanicsOSPD::computeNonlocalResidual()
       cur_ori_ijk /= cur_ori_ijk.norm();
 
       // bond status for bond k
-      const Real bond_status_ijk = _bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[k]));
+      const Real bond_status_ijk = _bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[k]));
 
       _local_re(0) = (cur_nd == 0 ? -1 : 1) * _bond_force_i_j[cur_nd] * vol_k /
                      origin_ori_ijk.norm() * cur_ori_ijk(_component) * _bond_status_ij *
@@ -164,7 +164,7 @@ MechanicsOSPD::computeNonlocalJacobian()
       cur_ori_ijk /= cur_ori_ijk.norm();
 
       // bond status for bond k
-      const Real bond_status_ijk = _bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[k]));
+      const Real bond_status_ijk = _bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[k]));
 
       const Real val = (cur_nd == 0 ? 1 : -1) * cur_ori_ijk(_component) * _cur_ori_ij(_component) *
                        _bond_dfdU_i_j[cur_nd];
@@ -268,7 +268,7 @@ MechanicsOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_num,
       cur_ori_ijk /= cur_ori_ijk.norm();
 
       // bond status for bond k
-      const Real bond_status_ijk = _bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[k]));
+      const Real bond_status_ijk = _bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[k]));
 
       _local_ke.zero();
       if (coupled_component == 3)

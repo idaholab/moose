@@ -9,8 +9,6 @@
 
 #include "FiniteStrainMechanicsNOSPD.h"
 #include "PeridynamicsMesh.h"
-#include "RankTwoTensor.h"
-#include "RankFourTensor.h"
 
 registerMooseObject("PeridynamicsApp", FiniteStrainMechanicsNOSPD);
 
@@ -50,13 +48,15 @@ FiniteStrainMechanicsNOSPD::computeLocalResidual()
   // i.e., T = (J * Sigma * inv(F)^T) * inv(Shape) * xi * multi.
   // Cauchy stress is calculated as Sigma_n+1 = Sigma_n + R * (C * dt * D) * R^T
 
-  std::vector<RankTwoTensor> nodal_force(_nnodes);
+  std::vector<Real> nodal_force_comp(_nnodes);
   for (unsigned int nd = 0; nd < _nnodes; ++nd)
-    nodal_force[nd] = (_dgrad[nd].det() * _stress[nd] * _dgrad[nd].inverse().transpose()) *
-                      _shape[nd].inverse() * _multi[nd];
+    nodal_force_comp[nd] = _multi[nd] *
+                           ((_dgrad[nd].det() * _stress[nd] * _dgrad[nd].inverse().transpose()) *
+                            _shape2[nd].inverse())
+                               .row(_component) *
+                           (nd == 0 ? 1 : -1) * _origin_vec_ij;
 
-  _local_re(0) = -(nodal_force[0].row(_component) + nodal_force[1].row(_component)) *
-                 _origin_vec_ij * _bond_status_ij;
+  _local_re(0) = -(nodal_force_comp[0] - nodal_force_comp[1]) * _bond_status_ij;
   _local_re(1) = -_local_re(0);
 }
 
@@ -73,7 +73,7 @@ FiniteStrainMechanicsNOSPD::computeLocalJacobian()
   for (_i = 0; _i < _test.size(); ++_i)
     for (_j = 0; _j < _phi.size(); ++_j)
       _local_ke(_i, _j) += (_i == 0 ? -1 : 1) * _multi[_j] *
-                           (dPxdUx[_j] * _shape[_j].inverse()).row(_component) * _origin_vec_ij *
+                           (dPxdUx[_j] * _shape2[_j].inverse()).row(_component) * _origin_vec_ij *
                            _bond_status_ij;
 }
 
@@ -111,7 +111,7 @@ FiniteStrainMechanicsNOSPD::computeNonlocalJacobian()
         dFdUk(_component, j) =
             _horiz_rad[cur_nd] / origin_vec_ijk.norm() * origin_vec_ijk(j) * vol_k;
 
-      dFdUk *= _shape[cur_nd].inverse();
+      dFdUk *= _shape2[cur_nd].inverse();
 
       RankTwoTensor dPxdUkx;
       // calculate dJ/du
@@ -138,14 +138,14 @@ FiniteStrainMechanicsNOSPD::computeNonlocalJacobian()
 
       // bond status for bond k
       Real bond_status_ijk =
-          _bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[dg_neighbors[k]]));
+          _bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[dg_neighbors[k]]));
 
       _local_ke.resize(_test.size(), _phi.size());
       _local_ke.zero();
       for (_i = 0; _i < _test.size(); ++_i)
         for (_j = 0; _j < _phi.size(); ++_j)
           _local_ke(_i, _j) = (_i == 0 ? -1 : 1) * (_j == 0 ? 0 : 1) * _multi[cur_nd] *
-                              (dPxdUkx * _shape[cur_nd].inverse()).row(_component) *
+                              (dPxdUkx * _shape2[cur_nd].inverse()).row(_component) *
                               _origin_vec_ij * _bond_status_ij * bond_status_ijk;
 
       _assembly.cacheJacobianBlock(_local_ke, _ivardofs_ij, dof, _var.scalingFactor());
@@ -180,7 +180,7 @@ FiniteStrainMechanicsNOSPD::computeLocalOffDiagJacobian(unsigned int coupled_com
     for (_i = 0; _i < _test.size(); ++_i)
       for (_j = 0; _j < _phi.size(); ++_j)
         _local_ke(_i, _j) += (_i == 0 ? -1 : 1) * _multi[_j] *
-                             (dSdT[_j] * _shape[_j].inverse()).row(_component) * _origin_vec_ij *
+                             (dSdT[_j] * _shape2[_j].inverse()).row(_component) * _origin_vec_ij *
                              _bond_status_ij;
   }
   else
@@ -195,7 +195,7 @@ FiniteStrainMechanicsNOSPD::computeLocalOffDiagJacobian(unsigned int coupled_com
     for (_i = 0; _i < _test.size(); ++_i)
       for (_j = 0; _j < _phi.size(); ++_j)
         _local_ke(_i, _j) += (_i == 0 ? -1 : 1) * _multi[_j] *
-                             (dPxdUy[_j] * _shape[_j].inverse()).row(_component) * _origin_vec_ij *
+                             (dPxdUy[_j] * _shape2[_j].inverse()).row(_component) * _origin_vec_ij *
                              _bond_status_ij;
   }
 }
@@ -236,7 +236,7 @@ FiniteStrainMechanicsNOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_n
           dFdUk(coupled_component, j) =
               _horiz_rad[cur_nd] / origin_vec_ijk.norm() * origin_vec_ijk(j) * vol_k;
 
-        dFdUk *= _shape[cur_nd].inverse();
+        dFdUk *= _shape2[cur_nd].inverse();
 
         RankTwoTensor dPxdUky;
         // calculate dJ/du
@@ -263,13 +263,13 @@ FiniteStrainMechanicsNOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_n
 
         // bond status for bond k
         Real bond_status_ijk =
-            _bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[dg_neighbors[k]]));
+            _bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[dg_neighbors[k]]));
 
         _local_ke.zero();
         for (_i = 0; _i < _test.size(); ++_i)
           for (_j = 0; _j < _phi.size(); ++_j)
             _local_ke(_i, _j) = (_i == 0 ? -1 : 1) * (_j == 0 ? 0 : 1) * _multi[cur_nd] *
-                                (dPxdUky * _shape[cur_nd].inverse()).row(_component) *
+                                (dPxdUky * _shape2[cur_nd].inverse()).row(_component) *
                                 _origin_vec_ij * _bond_status_ij * bond_status_ijk;
 
         _assembly.cacheJacobianBlock(_local_ke, _ivardofs_ij, jvardofs_ijk, _var.scalingFactor());

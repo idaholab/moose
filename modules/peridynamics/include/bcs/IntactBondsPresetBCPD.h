@@ -38,7 +38,7 @@ protected:
   const VariableValue & _u_old;
 
   /// Bond_status variable
-  const MooseVariable & _bond_status_var;
+  MooseVariable * _bond_status_var;
 
   /// Maximum number of intact bonds connected a node for this BC to be active
   const unsigned int _max_intact_bonds;

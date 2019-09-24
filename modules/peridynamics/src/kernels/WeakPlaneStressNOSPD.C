@@ -10,8 +10,6 @@
 #include "WeakPlaneStressNOSPD.h"
 #include "MooseVariable.h"
 #include "PeridynamicsMesh.h"
-#include "RankTwoTensor.h"
-#include "RankFourTensor.h"
 
 registerMooseObject("PeridynamicsApp", WeakPlaneStressNOSPD);
 
@@ -109,7 +107,7 @@ WeakPlaneStressNOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_num,
           dFdUk(coupled_component, j) =
               _horiz_rad[cur_nd] / origin_vec_ijk.norm() * origin_vec_ijk(j) * vol_k;
 
-        dFdUk *= _shape[cur_nd].inverse();
+        dFdUk *= _shape2[cur_nd].inverse();
 
         RankTwoTensor dPdUk =
             _Jacobian_mult[cur_nd] * 0.5 *
@@ -117,7 +115,7 @@ WeakPlaneStressNOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_num,
 
         // bond status for bond k
         Real bond_status_ijk =
-            _bond_status_var.getElementalValue(_pdmesh.elemPtr(bonds[dg_neighbors[k]]));
+            _bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[dg_neighbors[k]]));
 
         _local_ke.zero();
         _local_ke(cur_nd, 1) = dPdUk(2, 2) * _dg_vol_frac_ij[cur_nd] * _vols_ij[cur_nd] *
