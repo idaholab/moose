@@ -16,7 +16,8 @@ from MooseDocs.tree import tokens, html, latex
 def make_extension(**kwargs):
     return StyleExtension(**kwargs)
 
-StyleToken = tokens.newToken('StyleToken', halign='left', color=None, border=0, fontsize=None)
+StyleToken = tokens.newToken('StyleToken', halign='left', color=None, border=0, fontsize=None,
+                             fontweight=None)
 
 class StyleExtension(command.CommandExtension):
     @staticmethod
@@ -44,6 +45,7 @@ class StyleCommand(command.CommandComponent):
         settings['border'] = (None, "The size of the border in pixels")
         settings['color'] = (None, "Set the color of content.")
         settings['fontsize'] = (None, "Set the font size.")
+        settings['fontweight'] = (None, "Set the font weight.")
         return settings
 
     def createToken(self, parent, info, page):
@@ -52,6 +54,7 @@ class StyleCommand(command.CommandComponent):
                           border=self.settings['border'],
                           color=self.settings['color'],
                           fontsize=self.settings['fontsize'],
+                          fontweight=self.settings['fontweight'],
                           **self.attributes)
 
 class RenderStyleToken(components.RenderComponent):
@@ -71,6 +74,8 @@ class RenderStyleToken(components.RenderComponent):
             style.append('color:{}'.format(token['color']))
         if token['fontsize']:
             style.append('font-size:{}'.format(token['fontsize']))
+        if token['fontweight']:
+            style.append('font-weight:{}'.format(int(token['fontweight'])))
 
         tag_type = 'span'
         if token.info.pattern in ('BlockInlineCommand', 'BlockBlockCommand'):
