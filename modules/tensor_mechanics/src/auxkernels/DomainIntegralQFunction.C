@@ -16,7 +16,8 @@ InputParameters
 validParams<DomainIntegralQFunction>()
 {
   InputParameters params = validParams<AuxKernel>();
-
+  params.addClassDescription("Computes the q-function for a segment along the crack front, used in "
+                             "the calculation of the J-integral");
   params.addRequiredParam<Real>("j_integral_radius_inner", "Radius for J-Integral calculation");
   params.addRequiredParam<Real>("j_integral_radius_outer", "Radius for J-Integral calculation");
   params.addRequiredParam<UserObjectName>("crack_front_definition",

@@ -66,7 +66,7 @@ public:
   RealVectorValue rotateFromCrackFrontCoordsToGlobal(const RealVectorValue vector,
                                                      const unsigned int point_index) const;
 
-  /** calculate r and theta in the crack front polar cooridnate
+  /** calculate r and theta in the crack front polar coordinates
    * @param qp the point cooridnate
    * @param point_index the crack front point index
    */
@@ -74,7 +74,7 @@ public:
                                    const unsigned int point_index,
                                    Real & r,
                                    Real & theta) const;
-  /** calculate r and theta in the crack front polar cooridnate relatively to the closest crack
+  /** calculate r and theta in the crack front polar coordinate relatively to the closest crack
    * front point. It does additional loop over all crack front points to find the one closest to the
    * point qp.
    * @return The closest crack front point index
@@ -197,4 +197,3 @@ protected:
                              unsigned int crack_front_point_index,
                              const Node * const current_node) const;
 };
-
