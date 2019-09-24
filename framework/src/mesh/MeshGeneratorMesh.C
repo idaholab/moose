@@ -34,5 +34,4 @@ MeshGeneratorMesh::safeClone() const
 void
 MeshGeneratorMesh::buildMesh()
 {
-  _mesh = _app.getMeshGeneratorMesh();
 }

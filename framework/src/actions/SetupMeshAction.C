@@ -258,7 +258,12 @@ SetupMeshAction::act()
   else if (_current_task == "set_mesh_base")
   {
     if (!_app.masterMesh() && !_mesh->hasMeshBase())
-      _mesh->setMeshBase(_mesh->buildMeshBaseObject());
+    {
+      if (_awh.hasActions("add_mesh_generator"))
+        _mesh->setMeshBase(_app.getMeshGeneratorMesh());
+      else
+        _mesh->setMeshBase(_mesh->buildMeshBaseObject());
+    }
   }
 
   else if (_current_task == "init_mesh")
