@@ -11,6 +11,7 @@
 
 #include "MooseArray.h"
 #include "MooseTypes.h"
+#include "ArbitraryQuadrature.h"
 
 #include "libmesh/dense_matrix.h"
 #include "libmesh/dense_vector.h"
@@ -19,6 +20,8 @@
 #include "libmesh/point.h"
 
 #include "DualRealOps.h"
+
+#include <unordered_map>
 
 // libMesh forward declarations
 namespace libMesh
@@ -421,6 +424,8 @@ public:
    * Creates the volume, face and arbitrary qrules based on the orders passed in.
    */
   void createQRules(QuadratureType type, Order order, Order volume_order, Order face_order);
+  void createQRules(
+      QuadratureType type, Order order, Order volume_order, Order face_order, SubdomainID block);
 
   /**
    * Set the qrule to be used for volume integration.
@@ -1639,16 +1644,43 @@ private:
   /// The AD version of the current coordinate transformation coefficients
   MooseArray<DualReal> _ad_coord;
 
-  /// Holds volume qrules for each dimension
-  std::map<unsigned int, QBase *> _holder_qrule_volume;
-  /// Holds arbitrary qrules for each dimension
-  std::map<unsigned int, ArbitraryQuadrature *> _holder_qrule_arbitrary;
-  /// Holds arbitrary qrules for each dimension for faces
-  std::map<unsigned int, ArbitraryQuadrature *> _holder_qrule_arbitrary_face;
-  /// Holds pointers to the dimension's q_points
-  std::map<unsigned int, const std::vector<Point> *> _holder_q_points;
-  /// Holds pointers to the dimension's transformed jacobian weights
-  std::map<unsigned int, const std::vector<Real> *> _holder_JxW;
+  struct QRules
+  {
+    QRules()
+      : vol(nullptr),
+        face(nullptr),
+        arbitrary_vol(nullptr),
+        arbitrary_face(nullptr),
+        neighbor(nullptr)
+    {
+    }
+
+    std::unique_ptr<QBase> vol;
+    std::unique_ptr<QBase> face;
+    std::unique_ptr<ArbitraryQuadrature> arbitrary_vol;
+    std::unique_ptr<ArbitraryQuadrature> arbitrary_face;
+    std::unique_ptr<ArbitraryQuadrature> neighbor;
+  };
+
+  /// Holds qrules for each dimension
+  std::unordered_map<SubdomainID, std::vector<QRules>> _qrules;
+
+  inline QRules & qrules(unsigned int dim)
+  {
+    auto block = _current_subdomain_id;
+    if (_qrules.find(block) == _qrules.end())
+    {
+      mooseAssert(_qrules.find(Moose::ANY_BLOCK_ID) != _qrules.end(),
+                  "missing quadrature rules for specified block");
+      mooseAssert(_qrules[Moose::ANY_BLOCK_ID].size() > dim,
+                  "quadrature rules not sized property for dimension");
+      return _qrules[Moose::ANY_BLOCK_ID][dim];
+    }
+    mooseAssert(_qrules.find(block) != _qrules.end(),
+                "missing quadrature rules for specified block");
+    mooseAssert(_qrules[block].size() > dim, "quadrature rules not sized property for dimension");
+    return _qrules[block][dim];
+  }
 
   /**** Face Stuff ****/
 
@@ -1680,12 +1712,6 @@ private:
   std::vector<Eigen::Map<RealDIMValue>> _mapped_normals;
   /// The current tangent vectors at the quadrature points
   MooseArray<std::vector<Point>> _current_tangents;
-  /// Holds face qrules for each dimension
-  std::map<unsigned int, QBase *> _holder_qrule_face;
-  /// Holds pointers to the dimension's q_points on a face
-  std::map<unsigned int, const std::vector<Point> *> _holder_q_points_face;
-  /// Holds pointers to the dimension's transformed jacobian weights on a face
-  std::map<unsigned int, const std::vector<Real> *> _holder_JxW_face;
   /// Holds pointers to the dimension's normal vectors
   std::map<unsigned int, const std::vector<Point> *> _holder_normals;
 
@@ -1721,8 +1747,6 @@ private:
   QBase * _current_qrule_neighbor;
   /// The current quadrature points on the neighbor face
   MooseArray<Point> _current_q_points_face_neighbor;
-  /// Holds arbitrary qrules for each dimension
-  std::map<unsigned int, ArbitraryQuadrature *> _holder_qrule_neighbor;
   /// The current transformed jacobian weights on a neighbor's face
   MooseArray<Real> _current_JxW_neighbor;
   /// The current coordinate transformation coefficients
@@ -1741,7 +1765,7 @@ private:
   /// raw pointer because we need to be able to return a reference to it because
   /// we will be constructing other objects that need the qrule before the qrule
   /// is actually created
-  QBase * _qrule_msm;
+  std::unique_ptr<QBase> _qrule_msm;
   /// A pointer to const qrule_msm
   const QBase * _const_qrule_msm;
 

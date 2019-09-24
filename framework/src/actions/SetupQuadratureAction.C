@@ -30,7 +30,12 @@ validParams<SetupQuadratureAction>()
   params.addParam<MooseEnum>("order", order, "Order of the quadrature");
   params.addParam<MooseEnum>("element_order", order, "Order of the quadrature for elements");
   params.addParam<MooseEnum>("side_order", order, "Order of the quadrature for sides");
-
+  params.addParam<std::vector<SubdomainID>>("custom_blocks",
+                                            std::vector<SubdomainID>{},
+                                            "list of blocks to specify custom quadrature order");
+  params.addParam<std::vector<std::string>>("custom_element_orders",
+                                            std::vector<std::string>{},
+                                            "list of quadrature orders (e.g. FIRST, SECOND, etc.)");
   return params;
 }
 
@@ -39,13 +44,29 @@ SetupQuadratureAction::SetupQuadratureAction(InputParameters parameters)
     _type(Moose::stringToEnum<QuadratureType>(getParam<MooseEnum>("type"))),
     _order(Moose::stringToEnum<Order>(getParam<MooseEnum>("order"))),
     _element_order(Moose::stringToEnum<Order>(getParam<MooseEnum>("element_order"))),
-    _side_order(Moose::stringToEnum<Order>(getParam<MooseEnum>("side_order")))
+    _side_order(Moose::stringToEnum<Order>(getParam<MooseEnum>("side_order"))),
+    _blocks(getParam<std::vector<SubdomainID>>("custom_blocks")),
+    _elem_orders(getParam<std::vector<std::string>>("custom_element_orders"))
 {
 }
 
 void
 SetupQuadratureAction::act()
 {
-  if (_problem.get() != NULL)
-    _problem->createQRules(_type, _order, _element_order, _side_order);
+  if (_problem.get() == nullptr)
+    return;
+
+  _problem->createQRules(_type, _order, _element_order, _side_order);
+
+  if (_blocks.size() != _elem_orders.size())
+    paramError("custom_element_orders",
+               "number of orders (",
+               _elem_orders.size(),
+               ") doesn't match number of blocks (",
+               _blocks.size(),
+               ")");
+
+  for (unsigned int i = 0; i < _blocks.size(); i++)
+    _problem->createQRules(
+        _type, _order, Moose::stringToEnum<Order>(_elem_orders[i]), _side_order, _blocks[i]);
 }

@@ -158,21 +158,6 @@ Assembly::~Assembly()
     for (auto & it : _vector_fe_face_neighbor[dim])
       delete it.second;
 
-  for (auto & it : _holder_qrule_volume)
-    delete it.second;
-
-  for (auto & it : _holder_qrule_arbitrary)
-    delete it.second;
-
-  for (auto & it : _holder_qrule_arbitrary_face)
-    delete it.second;
-
-  for (auto & it : _holder_qrule_face)
-    delete it.second;
-
-  for (auto & it : _holder_qrule_neighbor)
-    delete it.second;
-
   for (auto & it : _fe_shape_data)
     delete it.second;
 
@@ -229,8 +214,6 @@ Assembly::~Assembly()
   _curvatures.release();
   _ad_curvatures.release();
   _ad_coord.release();
-
-  delete _qrule_msm;
 }
 
 void
@@ -480,36 +463,33 @@ Assembly::buildVectorFaceNeighborFE(FEType type) const
 }
 
 void
+Assembly::createQRules(
+    QuadratureType type, Order order, Order volume_order, Order face_order, SubdomainID block)
+{
+  auto & qvec = _qrules[block];
+  if (qvec.size() != (_mesh_dimension + 1))
+    qvec.resize(_mesh_dimension + 1);
+
+  for (unsigned int i = 0; i < qvec.size(); i++)
+  {
+    auto & q = qvec[i];
+    int dim = i;
+    q.vol = QBase::build(type, dim, volume_order);
+    q.face = QBase::build(type, dim - 1, face_order);
+    q.neighbor = libmesh_make_unique<ArbitraryQuadrature>(dim - 1, face_order);
+    q.arbitrary_vol = libmesh_make_unique<ArbitraryQuadrature>(dim, order);
+    q.arbitrary_face = libmesh_make_unique<ArbitraryQuadrature>(dim - 1, face_order);
+  }
+
+  _qrule_msm = QBase::build(type, _mesh_dimension - 1, face_order);
+  _const_qrule_msm = _qrule_msm.get();
+  _fe_msm->attach_quadrature_rule(_qrule_msm.get());
+}
+
+void
 Assembly::createQRules(QuadratureType type, Order order, Order volume_order, Order face_order)
 {
-  for (auto & it : _holder_qrule_volume)
-    delete it.second;
-  for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
-    _holder_qrule_volume[dim] = QBase::build(type, dim, volume_order).release();
-
-  for (auto & it : _holder_qrule_face)
-    delete it.second;
-  for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
-    _holder_qrule_face[dim] = QBase::build(type, dim - 1, face_order).release();
-
-  for (auto & it : _holder_qrule_neighbor)
-    delete it.second;
-  for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
-    _holder_qrule_neighbor[dim] = new ArbitraryQuadrature(dim - 1, face_order);
-
-  for (auto & it : _holder_qrule_arbitrary)
-    delete it.second;
-  for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
-    _holder_qrule_arbitrary[dim] = new ArbitraryQuadrature(dim, order);
-
-  for (auto & it : _holder_qrule_arbitrary_face)
-    delete it.second;
-  for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
-    _holder_qrule_arbitrary_face[dim] = new ArbitraryQuadrature(dim - 1, face_order);
-
-  delete _qrule_msm;
-  _const_qrule_msm = _qrule_msm = QBase::build(type, _mesh_dimension - 1, face_order).release();
-  _fe_msm->attach_quadrature_rule(_qrule_msm);
+  createQRules(type, order, volume_order, face_order, Moose::ANY_BLOCK_ID);
 }
 
 void
@@ -1487,7 +1467,7 @@ Assembly::reinitNeighbor(const Elem * neighbor, const std::vector<Point> & refer
 {
   unsigned int neighbor_dim = neighbor->dim();
 
-  ArbitraryQuadrature * neighbor_rule = _holder_qrule_neighbor[neighbor_dim];
+  ArbitraryQuadrature * neighbor_rule = qrules(neighbor_dim).neighbor.get();
   neighbor_rule->setPoints(reference_points);
   setNeighborQRule(neighbor_rule, neighbor_dim);
 
@@ -1500,7 +1480,7 @@ Assembly::reinitNeighbor(const Elem * neighbor, const std::vector<Point> & refer
   {
     unsigned int dim = neighbor->dim();
     FEBase * fe = *_holder_fe_neighbor_helper[dim];
-    QBase * qrule = _holder_qrule_volume[dim];
+    QBase * qrule = qrules(dim).vol.get();
 
     fe->attach_quadrature_rule(qrule);
     fe->reinit(neighbor);
@@ -1633,7 +1613,7 @@ Assembly::reinit(const Elem * elem)
 
   unsigned int elem_dimension = elem->dim();
 
-  _current_qrule_volume = _holder_qrule_volume[elem_dimension];
+  _current_qrule_volume = qrules(elem_dimension).vol.get();
 
   // Make sure the qrule is the right one
   if (_current_qrule != _current_qrule_volume)
@@ -1655,7 +1635,7 @@ Assembly::reinit(const Elem * elem, const std::vector<Point> & reference_points)
 
   unsigned int elem_dimension = _current_elem->dim();
 
-  _current_qrule_arbitrary = _holder_qrule_arbitrary[elem_dimension];
+  _current_qrule_arbitrary = qrules(elem_dimension).arbitrary_vol.get();
 
   // Make sure the qrule is the right one
   if (_current_qrule != _current_qrule_arbitrary)
@@ -1682,9 +1662,9 @@ Assembly::reinit(const Elem * elem, unsigned int side)
   unsigned int elem_dimension = _current_elem->dim();
 
   // Make sure the qrule is the right one
-  if (_current_qrule_face != _holder_qrule_face[elem_dimension])
+  if (_current_qrule_face != qrules(elem_dimension).face.get())
   {
-    _current_qrule_face = _holder_qrule_face[elem_dimension];
+    _current_qrule_face = qrules(elem_dimension).face.get();
     setFaceQRule(_current_qrule_face, elem_dimension);
   }
 
@@ -1710,7 +1690,7 @@ Assembly::reinit(const Elem * elem, unsigned int side, const std::vector<Point> 
 
   unsigned int elem_dimension = _current_elem->dim();
 
-  _current_qrule_arbitrary_face = _holder_qrule_arbitrary_face[elem_dimension];
+  _current_qrule_arbitrary_face = qrules(elem_dimension).arbitrary_face.get();
 
   // Make sure the qrule is the right one
   if (_current_qrule_face != _current_qrule_arbitrary_face)
@@ -1768,15 +1748,15 @@ Assembly::reinitElemFaceRef(const Elem * elem,
   // Attach the quadrature rules
   if (pts)
   {
-    ArbitraryQuadrature * face_rule = _holder_qrule_arbitrary_face[elem_dim];
+    ArbitraryQuadrature * face_rule = qrules(elem_dim).arbitrary_face.get();
     face_rule->setPoints(*pts);
     setFaceQRule(face_rule, elem_dim);
   }
   else
   {
-    if (_current_qrule_face != _holder_qrule_face[elem_dim])
+    if (_current_qrule_face != qrules(elem_dim).face.get())
     {
-      _current_qrule_face = _holder_qrule_face[elem_dim];
+      _current_qrule_face = qrules(elem_dim).face.get();
       setFaceQRule(_current_qrule_face, elem_dim);
     }
   }
@@ -1934,8 +1914,7 @@ Assembly::reinitNeighborFaceRef(const Elem * neighbor,
 
   unsigned int neighbor_dim = neighbor->dim();
 
-  // _holder_qrule_neighbor really does contain pointers to ArbitraryQuadrature
-  ArbitraryQuadrature * neighbor_rule = _holder_qrule_neighbor[neighbor_dim];
+  ArbitraryQuadrature * neighbor_rule = qrules(neighbor_dim).neighbor.get();
   neighbor_rule->setPoints(*pts);
 
   // Attach this quadrature rule to all the _fe_face_neighbor FE objects. This
@@ -2035,7 +2014,7 @@ Assembly::reinitMortarElem(const Elem * elem)
   MooseArray<Point> array_q_points;
   array_q_points.shallowCopy(const_cast<std::vector<Point> &>(_fe_msm->get_xyz()));
   setCoordinateTransformation<RESIDUAL>(
-      _qrule_msm, array_q_points, _coord_msm, elem->interior_parent()->subdomain_id());
+      _qrule_msm.get(), array_q_points, _coord_msm, elem->interior_parent()->subdomain_id());
 }
 
 void
