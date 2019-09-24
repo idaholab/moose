@@ -96,4 +96,18 @@ A 3D soil desiccation simulation using phase-field for cohesive fracture model, 
 !card-end!
 !gallery-end!
 
+# MOOSE Features class=center style=font-weight:200;
+
+!row!
+!col small=12 medium=6 large=6
+- Continuous Finite Element
+- Discontinuous Finite Elements
+
+!col small=12 medium=6 large=6
+- Automatic Differentiation
+- In-situ Postprocessing
+
+!row-end!
+
+
 !media media/inl_blue.png style=width:30%;display:block;margin-top:3em;margin-left:auto;margin-right:auto;
