@@ -290,7 +290,8 @@ public:
   virtual void createQRules(QuadratureType type,
                             Order order,
                             Order volume_order = INVALID_ORDER,
-                            Order face_order = INVALID_ORDER);
+                            Order face_order = INVALID_ORDER,
+                            SubdomainID block = Moose::ANY_BLOCK_ID);
 
   /**
    * @return The maximum number of quadrature points in use on any element in this problem.

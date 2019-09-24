@@ -36,5 +36,7 @@ protected:
   Order _order;
   Order _element_order;
   Order _side_order;
+  const std::vector<SubdomainID> & _custom_blocks;
+  const std::vector<std::string> & _custom_orders;
 };
 

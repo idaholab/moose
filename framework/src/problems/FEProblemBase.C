@@ -4635,8 +4635,10 @@ FEProblemBase::clearActiveMaterialProperties(THREAD_ID tid)
 }
 
 void
-FEProblemBase::createQRules(QuadratureType type, Order order, Order volume_order, Order face_order)
+FEProblemBase::createQRules(
+    QuadratureType type, Order order, Order volume_order, Order face_order, SubdomainID block)
 {
+
   if (order == INVALID_ORDER)
   {
     // automatically determine the integration order
@@ -4652,10 +4654,10 @@ FEProblemBase::createQRules(QuadratureType type, Order order, Order volume_order
     face_order = order;
 
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
-    _assembly[tid]->createQRules(type, order, volume_order, face_order);
+    _assembly[tid]->createQRules(type, order, volume_order, face_order, block);
 
   if (_displaced_problem)
-    _displaced_problem->createQRules(type, order, volume_order, face_order);
+    _displaced_problem->createQRules(type, order, volume_order, face_order, block);
 
   // Find the maximum number of quadrature points
   {
