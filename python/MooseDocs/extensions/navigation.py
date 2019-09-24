@@ -38,6 +38,7 @@ class NavigationExtension(components.Extension):
         config['home'] = ('', "The homepage for the website.")
         config['repo'] = (None, "The source code repository.")
         config['name'] = (None, "The name of the website (e.g., MOOSE)")
+        config['long-name'] = (None, "A long version of the page namer that is used in the title, 'name' by default.")
         config['breadcrumbs'] = (True, "Toggle for the breadcrumb links at the top of page.")
         config['sections'] = (True, "Group heading content into <section> tags.")
         config['scrollspy'] = (True, "Enable/disable the scrolling table of contents.")
@@ -204,9 +205,9 @@ class NavigationExtension(components.Extension):
         # Locate h1 heading, if it is found extract the rendered text
         h = heading.find_heading(self.translator, page)
         page_name = h.text() if h else page.name
-        name = self.get('name', None)
+        name = self.get('long-name') or self.get('name')
         if name is not None:
-            html.Tag(head, 'title', string=u'{}|{}'.format(page_name, self.get('name')))
+            html.Tag(head, 'title', string=u'{}|{}'.format(page_name, name))
         else:
             html.Tag(head, 'title', string=unicode(page_name))
 

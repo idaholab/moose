@@ -1,4 +1,4 @@
-!config navigation breadcrumbs=False scrollspy=False
+!config navigation breadcrumbs=False scrollspy=False long-name=Parallel Multiphysics Finite Element Framework
 
 # HOME style=visibility:hidden;
 
@@ -12,18 +12,15 @@
 !col! small=12 medium=4 large=4 icon=flash_on
 ### Rapid Development class=center style=font-weight:200;
 
-MOOSE is a finite-element framework that aids in application development by harnessing
-state-of-the-art fully-coupled, fully-implicit multiphysics solvers while providing automatic
-parallelization, mesh adaptivity, and a growing set of physics modules.
+MOOSE provides a plug-in infrastructure that simplifies definitions of physics, material properties,
+and postprocessing.
 !col-end!
 
 !col! small=12 medium=4 large=4 icon=group
 ### User Focused class=center style=font-weight:200;
 
-MOOSE includes ever-expanding set of physics modules including solid mechanics, phase-field,
-Navier-Stokes, and heat conduction. MOOSE supports multi-scale models allowing linking of
-MOOSE-based applications, enabling collaboration across applications, time-scales, and spatial
-domains.
+MOOSE includes ever-expanding set of [physics modules](modules/index.md) and supports multi-scale models, enabling
+collaboration across applications, time-scales, and spatial domains.
 !col-end!
 
 !col! small=12 medium=4 large=4 icon=settings
@@ -31,8 +28,72 @@ domains.
 
 MOOSE works on Mac OS, Linux, and Windows and is easy to get started with. Begin by exploring
 [our getting started page](getting_started/index.md).
-
 !col-end!
 !row-end!
+
+
+!gallery! large=6
+!card! gallery/corner_flow.gif title=Porous Flow around Corner
+Transient flow around corner using porous flow approximation of Euler equations with variable porosity,
+see [Pronghorn: Porous media thermal-hydraulics for reactor applications](https://escholarship.org/uc/item/61k9r05w).
+!card-end!
+
+!card! gallery/elder.gif title=Density driven, porous flow with adaptivity
+Density driven, porous flow simulation of the Elder problem using [Falcon](https://github.com/idaholab/falcon).  Mesh adaptivity is used to accurately capture the moving fronts.
+
+!style fontsize=80% fontweight=100
+*Credit:* Robert Podgorney (INL)
+!card-end!
+
+!card! gallery/step10_result.gif title=Multi-scale Simulation
+Engineering scale porous flow, modeled using Darcy's equation within a cylinder assuming a porous
+media of closely packed steel spheres, see [MultiApps/index.md].
+!card-end!
+
+!card! gallery/densification.gif title=3D Densification of snow
+Densification of a 3D snow pack using empirical, density based continuum model using [Pika](https://github.com/idaholab/pika).
+!card-end!
+!gallery-end!
+
+!gallery! large=6
+!card! gallery/snow.gif title=Dendritic Crystal Growth
+Process of dendritic crystal growth, which is an anisotropic nucleation process as presented by
+[Modeling and numerical simulations of dendritic crystal growth](https://www.sciencedirect.com/science/article/pii/016727899390120P).
+
+!style fontsize=80% fontweight=100
+*Credit:* Yang Xia, Department of Material Science and Engineering,
+Shanghai Jiao Tong University, Shanghai.
+!card-end!
+
+!card! gallery/ch_40.gif title=3D spinodal decomposition
+A 3D spinodal decomposition modeled with Cahn-Hilliard equations using third-order Hermite elements with
+the [phase field module](modules/phase_field/index.md).
+!card-end!
+
+!card! gallery/dipole_antenna.gif title=2D Half-Wave Dipole Antenna
+The 2D electric field radiation pattern of a broadcasting half-wave dipole antenna, modeled using
+the [VectorMooseVariable.md] system with first-order Nedelec elements.
+!card-end!
+
+!card! gallery/grain_tracker.gif title=3D Grain Tracking
+The [GrainTracker](GrainTracker.md) is a utility that dramatically reduces the number of order
+parameters needed to model a large polycrystal system with the phase-field module. This video shows
+the dynamic remapping that occurs as "reused" order parameters get too close to one and other as the
+simulation evolves.
+!card-end!
+
+!card! level_set/vortex_out.gif title=Vortex Benchmark
+The level set equation is commonly used to for interface tracking, especially when the interface
+velocity is known. MOOSE contains a level set module, for more information see [level_set/index.md].
+!card-end!
+
+!card! gallery/soil.gif title=Soil desiccation simulation
+A 3D soil desiccation simulation using phase-field for cohesive fracture model, see
+[A phase-field formulation for dynamic cohesive fracture](https://arxiv.org/abs/1809.09691).
+
+!style fontsize=80% fontweight=100
+*Credit:* Gary Hu, [Duke Computational Mechanics Lab](http://dcml.pratt.duke.edu/)
+!card-end!
+!gallery-end!
 
 !media media/inl_blue.png style=width:30%;display:block;margin-top:3em;margin-left:auto;margin-right:auto;

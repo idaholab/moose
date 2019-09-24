@@ -106,9 +106,9 @@ class GalleryComponent(command.CommandComponent):
 
     def createToken(self, parent, info, page):
         return Gallery(parent,
-                       large=self.settings['large'],
-                       medium=self.settings['medium'],
-                       small=self.settings['small'])
+                       large=int(self.settings['large']),
+                       medium=int(self.settings['medium']),
+                       small=int(self.settings['small']))
 
 class RenderCard(components.RenderComponent):
     def createHTML(self, parent, token, page):
@@ -154,7 +154,7 @@ class RenderCardImage(components.RenderComponent):
 
     def createMaterialize(self, parent, token, page):
         div = html.Tag(parent, 'div', class_='card-image')
-        html.Tag(div, 'img', class_='activator', src=token['src'])
+        html.Tag(div, 'img', class_='materialboxed moose-image', src=token['src'])
 
     def createLatex(self, parent, token, page):
 
