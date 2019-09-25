@@ -254,7 +254,7 @@ SetupMeshAction::act()
 
   else if (_current_task == "set_mesh_base")
   {
-    if (!_app.masterMesh())
+    if (!_app.masterMesh() && !_mesh->hasMeshBase())
       _mesh->setMeshBase(_mesh->buildMeshBaseObject());
   }
 
