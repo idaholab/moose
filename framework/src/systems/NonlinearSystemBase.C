@@ -173,7 +173,7 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _computed_scaling(false),
     _automatic_scaling(false),
     _compute_scaling_once(true)
-#ifdef MOOSE_SPARSE_AD
+#ifndef MOOSE_SPARSE_AD
     ,
     _required_derivative_size(0)
 #endif
