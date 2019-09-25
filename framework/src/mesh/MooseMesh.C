@@ -162,6 +162,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _use_distributed_mesh(false),
     _distribution_overridden(false),
     _parallel_type_overridden(false),
+    _mesh(nullptr),
     _partitioner_name(getParam<MooseEnum>("partitioner")),
     _partitioner_overridden(false),
     _custom_partitioner_requested(false),
