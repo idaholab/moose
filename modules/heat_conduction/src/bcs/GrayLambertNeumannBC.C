@@ -42,5 +42,7 @@ Real
 GrayLambertNeumannBC::computeQpJacobian()
 {
   // this is not the exact Jacobian but it ensures correct scaling
-  return _test[_i][_qp] * _sigma_stefan_boltzmann * 4 * MathUtils::pow(_u[_qp], 3) * _phi[_j][_qp];
+  return _test[_i][_qp] * _sigma_stefan_boltzmann *
+         _glsr_uo.getSurfaceEmissivity(_current_boundary_id) * 4 * MathUtils::pow(_u[_qp], 3) *
+         _phi[_j][_qp];
 }

@@ -43,6 +43,7 @@ public:
   Real getSurfaceHeatFluxDensity(BoundaryID id) const;
   Real getSurfaceTemperature(BoundaryID id) const;
   Real getSurfaceRadiosity(BoundaryID id) const;
+  Real getSurfaceEmissivity(BoundaryID id) const;
   ///@}
 
 protected:

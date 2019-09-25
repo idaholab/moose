@@ -19,7 +19,10 @@ InputParameters
 validParams<GrayLambertSurfaceRadiation>()
 {
   InputParameters params = validParams<SideUserObject>();
-  params.addParam<Real>("stefan_boltzmann_constant", 5.670367e-8, "The Stefan-Boltzmann constant.");
+  params.addParam<Real>(
+      "stefan_boltzmann_constant",
+      5.670367e-8,
+      "The Stefan-Boltzmann constant. Default value is in units of [W / m^2 K^4].");
   params.addRequiredCoupledVar("temperature", "The coupled temperature variable.");
   params.addRequiredParam<std::vector<Real>>("emissivity", "Emissivities for each boundary.");
   params.addRequiredParam<std::vector<std::vector<Real>>>(
@@ -55,8 +58,12 @@ GrayLambertSurfaceRadiation::GrayLambertSurfaceRadiation(const InputParameters &
   // note that boundaryIDs is not in the right order anymore!
   {
     std::vector<BoundaryName> boundary_names = getParam<std::vector<BoundaryName>>("boundary");
+
     for (unsigned int j = 0; j < boundary_names.size(); ++j)
     {
+      if (boundary_names[j] == "ANY_BOUNDARY_ID")
+        paramError("boundary", "boundary must be explicitly provided.");
+
       _side_id_index[_mesh.getBoundaryID(boundary_names[j])] = j;
       _side_type[j] = VARIABLE_TEMPERATURE;
     }
@@ -86,7 +93,7 @@ GrayLambertSurfaceRadiation::GrayLambertSurfaceRadiation(const InputParameters &
                  _view_factors[i].size(),
                  " entries.");
 
-    // check row-sum and normalize of necessary
+    // check row-sum and normalize if necessary
     Real sum = 0;
     for (auto & v : _view_factors[i])
       sum += v;
@@ -104,15 +111,15 @@ GrayLambertSurfaceRadiation::GrayLambertSurfaceRadiation(const InputParameters &
   // get the fixed boundaries of the system if any are provided
   if (isParamValid("fixed_temperature_boundary"))
   {
-    auto fst_fn = getParam<std::vector<FunctionName>>("fixed_boundary_temperatures");
-    for (auto & fn : fst_fn)
-      _fixed_side_temperature.push_back(&getFunctionByName(fn));
-
     // if fixed_temperature_boundary is valid, then fixed_side_temperatures must be
     // valid, too
     if (!isParamValid("fixed_boundary_temperatures"))
       paramError("fixed_boundary_temperatures",
                  "fixed_temperature_boundary is provided, but fixed_boundary_temperatures is not.");
+
+    auto fst_fn = getParam<std::vector<FunctionName>>("fixed_boundary_temperatures");
+    for (auto & fn : fst_fn)
+      _fixed_side_temperature.push_back(&getFunctionByName(fn));
 
     // get the fixed boundaries and temperatures
     std::vector<BoundaryName> boundary_names =
@@ -147,7 +154,7 @@ GrayLambertSurfaceRadiation::GrayLambertSurfaceRadiation(const InputParameters &
     // get the adiabatic boundaries and temperatures
     std::vector<BoundaryName> boundary_names =
         getParam<std::vector<BoundaryName>>("adiabatic_boundary");
-    ;
+
     for (auto & name : boundary_names)
       _adiabatic_side_ids.insert(_mesh.getBoundaryID(name));
 
@@ -170,8 +177,8 @@ GrayLambertSurfaceRadiation::GrayLambertSurfaceRadiation(const InputParameters &
 void
 GrayLambertSurfaceRadiation::execute()
 {
-  if (_side_id_index.find(_current_boundary_id) == _side_id_index.end())
-    mooseError("Current boundary id: ", _current_boundary_id, " not in _side_id_index.");
+  mooseAssert(_side_id_index.find(_current_boundary_id) != _side_id_index.end(),
+              "Current boundary id not in _side_id_index.");
   unsigned int index = _side_id_index.find(_current_boundary_id)->second;
 
   for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
@@ -210,12 +217,9 @@ void
 GrayLambertSurfaceRadiation::finalize()
 {
   // need to do some parallel communiction here
-  for (unsigned int j = 0; j < _n_sides; ++j)
-  {
-    _communicator.sum(_areas[j]);
-    _communicator.sum(_beta[j]);
-    _communicator.sum(_side_temperature[j]);
-  }
+  gatherSum(_areas);
+  gatherSum(_beta);
+  gatherSum(_side_temperature);
 
   // first compute averages from the totals
   for (unsigned int j = 0; j < _n_sides; ++j)
@@ -299,4 +303,12 @@ GrayLambertSurfaceRadiation::getSurfaceRadiosity(BoundaryID id) const
   if (_side_id_index.find(id) == _side_id_index.end())
     return 0;
   return _radiosity[_side_id_index.find(id)->second];
+}
+
+Real
+GrayLambertSurfaceRadiation::getSurfaceEmissivity(BoundaryID id) const
+{
+  if (_side_id_index.find(id) == _side_id_index.end())
+    return 1;
+  return _emissivity[_side_id_index.find(id)->second];
 }
