@@ -306,6 +306,10 @@ ul {
   margin: 0;
 }
 
+.modal-content.container.moose-search-modal-content{
+    padding:0;
+}
+
 /* NAME/HOME link */
 .moose-logo{
     margin-right:30px;
