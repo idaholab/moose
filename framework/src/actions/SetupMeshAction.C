@@ -259,8 +259,13 @@ SetupMeshAction::act()
   {
     if (!_app.masterMesh() && !_mesh->hasMeshBase())
     {
-      if (!_awh.getActionListByName("add_mesh_generator").empty() && !_app.isRecovering() &&
-          !_app.isRestarting())
+      // We want to set the MeshBase object to that coming from mesh generators when the following
+      // conditions are met:
+      // 1. We have mesh generators
+      // 2. We are recovering/restarting AND we are not the master application, e.g. we are a
+      //    sub-application
+      if (!_awh.getActionListByName("add_mesh_generator").empty() &&
+          !((_app.isRecovering() || _app.isRestarting()) && _app.isUltimateMaster()))
         _mesh->setMeshBase(_app.getMeshGeneratorMesh());
       else
         _mesh->setMeshBase(_mesh->buildMeshBaseObject());
