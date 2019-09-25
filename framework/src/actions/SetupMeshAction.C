@@ -229,7 +229,7 @@ SetupMeshAction::act()
     else
     {
       // If the [Mesh] block contains mesh generators, change the default type to construct
-      if (_awh.hasActions("add_mesh_generator"))
+      if (!_awh.getActionListByName("add_mesh_generator").empty())
       {
         if (!_pars.isParamSetByUser("type"))
         {
@@ -259,7 +259,7 @@ SetupMeshAction::act()
   {
     if (!_app.masterMesh() && !_mesh->hasMeshBase())
     {
-      if (_awh.hasActions("add_mesh_generator"))
+      if (!_awh.getActionListByName("add_mesh_generator").empty())
         _mesh->setMeshBase(_app.getMeshGeneratorMesh());
       else
         _mesh->setMeshBase(_mesh->buildMeshBaseObject());
