@@ -1,5 +1,13 @@
 # DualReal
 
+`DualReal` is the type underpinning all of MOOSE's automatic differentiation (AD)
+capabilities.
+
+[#overview]
+[#timings]
+
+## Overview id=overview
+
 `DualReal` is a MOOSE typedef defined from the
 [`MetaPhysicL`](https://github.com/roystgnr/metaphysicl) template class
 `DualNumber`. `DualNumber` takes two template arguments `T` and `D`; `T`
@@ -33,3 +41,24 @@ framework directory. The underlying derivative storage array size for both
 `NumberArray` and `SemiDynamicSparseNumberArray` can be modified by running
 `configure` with the option `--with-derivative-size=<n>` where `<n>` is the
 desired size of the container. By default, MOOSE is configured `--with-derivative-size=50`.
+
+## AD-Related Timings id=timings
+
+[#stabilized_ins]
+
+### Stabilized Incompressible Navier Stokes id=stabilized_ins
+
+#### Test specs
+
+- Navier-Stokes test directory input file: `ad_lid_driven_stabilized.i`
+- 200x200 mesh
+- default backing array size of 50
+- Computer specs:
+    - MacBook Pro running Mojave 10.14.5
+    - 2.4 GHz Intel Core i9
+    - 32 GB 2400 MHz DDR4
+
+#### SNESComputeJacobian timing
+
+- MOOSE non-sparse config: 9.61 seconds
+- MOOSE sparse config: 9.22 seconds
