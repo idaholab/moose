@@ -35,6 +35,8 @@ validParams<DomainIntegralAction>()
   addCrackFrontDefinitionParams(params);
   MultiMooseEnum integral_vec("JIntegral InteractionIntegralKI InteractionIntegralKII "
                               "InteractionIntegralKIII InteractionIntegralT");
+  params.addClassDescription(
+      "Creates the MOOSE objects needed to compute fraction domain integrals");
   params.addRequiredParam<MultiMooseEnum>("integrals",
                                           integral_vec,
                                           "Domain integrals to calculate.  Choices are: " +

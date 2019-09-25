@@ -16,6 +16,7 @@ InputParameters
 validParams<LinearElasticTruss>()
 {
   InputParameters params = validParams<TrussMaterial>();
+  params.addClassDescription("Computes the linear elastic strain for a truss element");
   params.addParam<Real>("thermal_expansion_coeff", 0.0, "Thermal expansion coefficient in 1/K");
   params.addParam<Real>("temperature_ref", 273, "Reference temperature for thermal expansion in K");
   params.addCoupledVar("temperature", 273, "Temperature in Kelvin");
