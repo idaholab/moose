@@ -259,7 +259,8 @@ SetupMeshAction::act()
   {
     if (!_app.masterMesh() && !_mesh->hasMeshBase())
     {
-      if (!_awh.getActionListByName("add_mesh_generator").empty())
+      if (!_awh.getActionListByName("add_mesh_generator").empty() && !_app.isRecovering() &&
+          !_app.isRestarting())
         _mesh->setMeshBase(_app.getMeshGeneratorMesh());
       else
         _mesh->setMeshBase(_mesh->buildMeshBaseObject());
