@@ -44,11 +44,11 @@ Cacace M., Jacquey, A.B. (2017): [Flexible parallel implicit modeling of coupled
 !card-end!
 
 !card! gallery/laser_welding.gif title=Laser Melt Pool
-A laser is rotated around the surface of a stainless steel block. The steel first melts and then
-begins to evaporate. The recoil force from evaporation deforms the surface of the melt pool which in
-turn drives flow in the melt pool interior. Melt flow is determined using the incompressible
-[Navier-Stokes](modules/navier_stokes/index.md) equations while mesh deformation is determined using
-a linear elasticity equation.
+Using an arbitrary Lagrangian-Eulerian (ALE) formulation a laser is rotated around the surface of a stainless
+steel block. The steel first melts and then begins to evaporate. The recoil force from evaporation
+deforms the surface of the melt pool which in turn drives flow in the melt pool interior. Melt flow
+is determined using the incompressible [Navier-Stokes](modules/navier_stokes/index.md) equations
+while mesh deformation is determined using a linear elasticity equation.
 !card-end!
 
 !card! gallery/corner_flow.gif title=Porous Flow around Corner
@@ -123,6 +123,7 @@ A 3D soil desiccation simulation using phase-field for cohesive fracture model, 
 - [Scalability Proven to Over 30,000 cores](https://ieeexplore.ieee.org/abstract/document/8638143)
 - Massive Problem Sizes (1B+ elements, 100B+ unknowns)
 - [Multiscale Solves](MultiApps/index.md)
+- Leverages [PETSc](https://www.mcs.anl.gov/petsc) solvers
 - [Physics Modules:](modules/index.md)
 
   - [Heat Conduction](HeatConduction.md)
@@ -142,6 +143,6 @@ A 3D soil desiccation simulation using phase-field for cohesive fracture model, 
 - Point Sources
 - Multiple Formats for Input and Output ([Exodus](Exodus.md), [VTK](VTKOutput.md), GMSH, etc.)
 - Nonlinear, Coupled ODE / PDE Systems
-
+- Arbitrary Lagrangian-Eulerian (ALE) formulation
 
 !media media/inl_blue.png style=width:30%;display:block;margin-top:3em;margin-left:auto;margin-right:auto;
