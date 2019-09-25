@@ -33,6 +33,16 @@ MOOSE works on Mac OS, Linux, and Windows and is easy to get started with. Begin
 
 
 !gallery! large=6
+
+!card! gallery/golem_app_reservoir_analysis.gif title=Faulted Geothermal Reservoirs
+Evolution of the 100C temperature during 30 years of injection/production for a complex doublet
+system into a fractured geothermal reservoir. Based on [GOLEM](https://github.com/ajacquey/golem),
+a MOOSE based application for thermo-hydro-mechanical simulations of fractured reservoirs.
+
+!style fontsize=90% fontweight=100
+Cacace M., Jacquey, A.B. (2017): [Flexible parallel implicit modeling of coupled thermal-hydraulic-mechanical processes in fractured rocks.](https://www.solid-earth.net/8/921/2017/) Solid Earth
+!card-end!
+
 !card! gallery/corner_flow.gif title=Porous Flow around Corner
 Transient flow around corner using porous flow approximation of Euler equations with variable porosity,
 see [Pronghorn: Porous media thermal-hydraulics for reactor applications](https://escholarship.org/uc/item/61k9r05w).
@@ -53,9 +63,7 @@ media of closely packed steel spheres, see [MultiApps/index.md].
 !card! gallery/densification.gif title=3D Densification of snow
 Densification of a 3D snow pack using empirical, density based continuum model using [Pika](https://github.com/idaholab/pika).
 !card-end!
-!gallery-end!
 
-!gallery! large=6
 !card! gallery/snow.gif title=Dendritic Crystal Growth
 Process of dendritic crystal growth, which is an anisotropic nucleation process as presented by
 [Modeling and numerical simulations of dendritic crystal growth](https://www.sciencedirect.com/science/article/pii/016727899390120P).
