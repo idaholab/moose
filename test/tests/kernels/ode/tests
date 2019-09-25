@@ -39,12 +39,10 @@
     type = 'CSVDiff'
     input = 'parsedode_pp_test.i'
     csvdiff = 'ode_pp_test_out.csv'
-    max_parallel = 2
-    max_threads = 2
 
     design = "ParsedODEKernel.md"
     issues = "#14034"
-    requirement = "The system coupling postprocessor values in the parsed function ODE kernel."
+    requirement = "The system support coupling of postprocessor values in the parsed function ODE kernel."
   [../]
 
   [./test_coupled_ode_td]
