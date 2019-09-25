@@ -43,6 +43,14 @@ a MOOSE based application for thermo-hydro-mechanical simulations of fractured r
 Cacace M., Jacquey, A.B. (2017): [Flexible parallel implicit modeling of coupled thermal-hydraulic-mechanical processes in fractured rocks.](https://www.solid-earth.net/8/921/2017/) Solid Earth
 !card-end!
 
+!card! gallery/laser_welding.gif title=Laser Melt Pool
+A laser is rotated around the surface of a stainless steel block. The steel first melts and then
+begins to evaporate. The recoil force from evaporation deforms the surface of the melt pool which in
+turn drives flow in the melt pool interior. Melt flow is determined using the incompressible
+[Navier-Stokes](modules/navier_stokes/index.md) equations while mesh deformation is determined using
+a linear elasticity equation.
+!card-end!
+
 !card! gallery/corner_flow.gif title=Porous Flow around Corner
 Transient flow around corner using porous flow approximation of Euler equations with variable porosity,
 see [Pronghorn: Porous media thermal-hydraulics for reactor applications](https://escholarship.org/uc/item/61k9r05w).
