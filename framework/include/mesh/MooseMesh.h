@@ -873,6 +873,11 @@ public:
    */
   bool needsRemoteElemDeletion() const { return _need_delete; }
 
+  /**
+   * Whether mesh base object was constructed or not
+   */
+  bool hasMeshBase() const { return _mesh.get() != nullptr; }
+
 protected:
   /// Deprecated (DO NOT USE)
   std::vector<std::unique_ptr<GhostingFunctor>> _ghosting_functors;
