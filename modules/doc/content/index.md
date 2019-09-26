@@ -51,12 +51,12 @@ is determined using the incompressible [Navier-Stokes](modules/navier_stokes/ind
 while mesh deformation is determined using a linear elasticity equation.
 !card-end!
 
-!card! gallery/corner_flow.gif title=Porous Flow around Corner
-Transient flow around corner using porous flow approximation of Euler equations with variable porosity,
+!card! gallery/corner_flow.gif title=Single-phase Flow in a Packed Bed
+Transient flow around corner using Euler equations with variable porosity,
 see [Pronghorn: Porous media thermal-hydraulics for reactor applications](https://escholarship.org/uc/item/61k9r05w).
 !card-end!
 
-!card! gallery/elder.gif title=Density driven, porous flow with adaptivity
+!card! gallery/elder.gif title=Density Driven, Porous Flow with Adaptivity
 Density driven, porous flow simulation of the Elder problem using [Falcon](https://github.com/idaholab/falcon).  Mesh adaptivity is used to accurately capture the moving fronts.
 
 !style fontsize=80% fontweight=100
@@ -68,7 +68,7 @@ Engineering scale porous flow, modeled using Darcy's equation within a cylinder 
 media of closely packed steel spheres, see [MultiApps/index.md].
 !card-end!
 
-!card! gallery/densification.gif title=3D Densification of snow
+!card! gallery/densification.gif title=3D Densification of Snow
 Densification of a 3D snow pack using empirical, density based continuum model using [Pika](https://github.com/idaholab/pika).
 !card-end!
 
@@ -81,7 +81,7 @@ Process of dendritic crystal growth, which is an anisotropic nucleation process 
 Shanghai Jiao Tong University, Shanghai.
 !card-end!
 
-!card! gallery/ch_40.gif title=3D spinodal decomposition
+!card! gallery/ch_40.gif title=3D Spinodal Decomposition
 A 3D spinodal decomposition modeled with Cahn-Hilliard equations using third-order Hermite elements with
 the [phase field module](modules/phase_field/index.md).
 !card-end!
@@ -103,7 +103,7 @@ The level set equation is commonly used to for interface tracking, especially wh
 velocity is known. MOOSE contains a level set module, for more information see [level_set/index.md].
 !card-end!
 
-!card! gallery/soil.gif title=Soil desiccation simulation
+!card! gallery/soil.gif title=Soil Desiccation Simulation
 A 3D soil desiccation simulation using phase-field for cohesive fracture model, see
 [A phase-field formulation for dynamic cohesive fracture](https://arxiv.org/abs/1809.09691).
 
