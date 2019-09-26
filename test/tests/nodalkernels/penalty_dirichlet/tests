@@ -1,0 +1,11 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'nodal_penalty_dirichlet.i'
+    exodiff = 'nodal_preset_bc_out.e'
+
+    requirement = "MOOSE shall support the application of Dirichlet type boundary conditions using the penalty method for nodesets."
+    design = 'nodalkernels/PenaltyDirichletNodalKernel.md'
+    issues = '#14092'
+  [../]
+[]
