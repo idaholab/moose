@@ -78,7 +78,7 @@
     inelastic_models = rom_stress_prediction
   [../]
   [./rom_stress_prediction]
-    type = ADLAROMCreepStressUpdate
+    type = ADLAROMANCEStressUpdateBase
     temperature = temperature
     initial_mobile_dislocation_density = 6.0e12
     initial_immobile_dislocation_density = 4.4e11

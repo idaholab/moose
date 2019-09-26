@@ -7,15 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ADLAROMCreepStressUpdate.h"
+#include "ADLAROMANCEStressUpdateBase.h"
 
 #include "Function.h"
 #include "MathUtils.h"
 
-registerADMooseObject("TensorMechanicsApp", ADLAROMCreepStressUpdate);
+registerADMooseObject("TensorMechanicsApp", ADLAROMANCEStressUpdateBase);
 
 defineADValidParams(
-    ADLAROMCreepStressUpdate,
+    ADLAROMANCEStressUpdateBase,
     ADRadialReturnCreepStressUpdateBase,
     params.addClassDescription(
         "Calculates the effective creep strain based on the rates predicted by a material "
@@ -79,7 +79,7 @@ defineADValidParams(
         "Advanced"););
 
 template <ComputeStage compute_stage>
-ADLAROMCreepStressUpdate<compute_stage>::ADLAROMCreepStressUpdate(
+ADLAROMANCEStressUpdateBase<compute_stage>::ADLAROMANCEStressUpdateBase(
     const InputParameters & parameters)
   : ADRadialReturnCreepStressUpdateBase<compute_stage>(parameters),
     _rom(getUserObject<LAROMData>("rom_data")),
@@ -139,7 +139,7 @@ ADLAROMCreepStressUpdate<compute_stage>::ADLAROMCreepStressUpdate(
 
 template <ComputeStage compute_stage>
 void
-ADLAROMCreepStressUpdate<compute_stage>::initQpStatefulProperties()
+ADLAROMANCEStressUpdateBase<compute_stage>::initQpStatefulProperties()
 {
   _mobile_dislocations[_qp] = _initial_mobile_dislocations;
   _immobile_dislocations[_qp] = _initial_immobile_dislocations;
@@ -149,7 +149,7 @@ ADLAROMCreepStressUpdate<compute_stage>::initQpStatefulProperties()
 
 template <ComputeStage compute_stage>
 ADReal
-ADLAROMCreepStressUpdate<compute_stage>::computeResidual(const ADReal & effective_trial_stress,
+ADLAROMANCEStressUpdateBase<compute_stage>::computeResidual(const ADReal & effective_trial_stress,
                                                          const ADReal & scalar)
 {
   if (_immobile_function)
@@ -231,7 +231,7 @@ ADLAROMCreepStressUpdate<compute_stage>::computeResidual(const ADReal & effectiv
 
 template <ComputeStage compute_stage>
 void
-ADLAROMCreepStressUpdate<compute_stage>::computeStressFinalize(
+ADLAROMANCEStressUpdateBase<compute_stage>::computeStressFinalize(
     const ADRankTwoTensor & plastic_strain_increment)
 {
   _mobile_dislocations[_qp] = _mobile_old + _mobile_dislocation_increment;
@@ -258,7 +258,7 @@ ADLAROMCreepStressUpdate<compute_stage>::computeStressFinalize(
 
 template <ComputeStage compute_stage>
 Real
-ADLAROMCreepStressUpdate<compute_stage>::computeTimeStepLimit()
+ADLAROMANCEStressUpdateBase<compute_stage>::computeTimeStepLimit()
 {
   Real limited_dt = ADRadialReturnStressUpdate<compute_stage>::computeTimeStepLimit();
 
@@ -276,7 +276,7 @@ ADLAROMCreepStressUpdate<compute_stage>::computeTimeStepLimit()
 
 template <ComputeStage compute_stage>
 void
-ADLAROMCreepStressUpdate<compute_stage>::computeROMStrainRate(
+ADLAROMANCEStressUpdateBase<compute_stage>::computeROMStrainRate(
     const Real dt,
     const Real & mobile_dislocations_old,
     const Real & immobile_dislocations_old,
@@ -335,7 +335,7 @@ ADLAROMCreepStressUpdate<compute_stage>::computeROMStrainRate(
 
 template <ComputeStage compute_stage>
 void
-ADLAROMCreepStressUpdate<compute_stage>::checkInputWindows(std::vector<ADReal> & input)
+ADLAROMANCEStressUpdateBase<compute_stage>::checkInputWindows(std::vector<ADReal> & input)
 {
   if (compute_stage != RESIDUAL)
     return;
@@ -391,7 +391,7 @@ ADLAROMCreepStressUpdate<compute_stage>::checkInputWindows(std::vector<ADReal> &
 
 template <ComputeStage compute_stage>
 void
-ADLAROMCreepStressUpdate<compute_stage>::convertInput(const std::vector<ADReal> & input,
+ADLAROMANCEStressUpdateBase<compute_stage>::convertInput(const std::vector<ADReal> & input,
                                                       std::vector<std::vector<ADReal>> & converted,
                                                       std::vector<std::vector<ADReal>> & dconverted)
 {
@@ -425,7 +425,7 @@ ADLAROMCreepStressUpdate<compute_stage>::convertInput(const std::vector<ADReal> 
 
 template <ComputeStage compute_stage>
 void
-ADLAROMCreepStressUpdate<compute_stage>::buildPolynomials(
+ADLAROMANCEStressUpdateBase<compute_stage>::buildPolynomials(
     const std::vector<std::vector<ADReal>> & rom_inputs,
     const std::vector<std::vector<ADReal>> & drom_inputs,
     std::vector<std::vector<std::vector<ADReal>>> & polynomial_inputs,
@@ -455,7 +455,7 @@ ADLAROMCreepStressUpdate<compute_stage>::buildPolynomials(
 
 template <ComputeStage compute_stage>
 void
-ADLAROMCreepStressUpdate<compute_stage>::computeValues(
+ADLAROMANCEStressUpdateBase<compute_stage>::computeValues(
     const std::vector<std::vector<Real>> & coefs,
     const std::vector<std::vector<std::vector<ADReal>>> & polynomial_inputs,
     const std::vector<std::vector<std::vector<ADReal>>> & dpolynomial_inputs,
@@ -484,7 +484,7 @@ ADLAROMCreepStressUpdate<compute_stage>::computeValues(
 
 template <ComputeStage compute_stage>
 void
-ADLAROMCreepStressUpdate<compute_stage>::convertOutput(
+ADLAROMANCEStressUpdateBase<compute_stage>::convertOutput(
     const Real dt,
     const std::vector<ADReal> & old_input_values,
     const std::vector<ADReal> & rom_outputs,
@@ -509,7 +509,7 @@ ADLAROMCreepStressUpdate<compute_stage>::convertOutput(
 
 template <ComputeStage compute_stage>
 ADReal
-ADLAROMCreepStressUpdate<compute_stage>::computePolynomial(const ADReal & value,
+ADLAROMANCEStressUpdateBase<compute_stage>::computePolynomial(const ADReal & value,
                                                            const unsigned int degree,
                                                            const bool derivative)
 {

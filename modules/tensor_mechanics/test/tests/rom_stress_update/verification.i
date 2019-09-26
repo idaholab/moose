@@ -182,7 +182,7 @@
     inelastic_models = rom_stress_prediction
   [../]
   [./rom_stress_prediction]
-    type = ADLAROMCreepStressUpdate
+    type = ADLAROMANCEStressUpdateBase
     temperature = temperature
     effective_inelastic_strain_name = effective_creep_strain
     internal_solve_full_iteration_history = true

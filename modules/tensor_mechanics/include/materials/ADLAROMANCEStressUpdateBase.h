@@ -14,29 +14,32 @@
 #include "LAROMData.h"
 
 template <ComputeStage compute_stage>
-class ADLAROMCreepStressUpdate;
+class ADLAROMANCEStressUpdateBase;
 
-declareADValidParams(ADLAROMCreepStressUpdate);
+declareADValidParams(ADLAROMANCEStressUpdateBase);
 
 /**
  * Class to call the Reduced Order Model to predict the behavior of creep
  */
 
 template <ComputeStage compute_stage>
-class ADLAROMCreepStressUpdate : public ADRadialReturnCreepStressUpdateBase<compute_stage>
+class ADLAROMANCEStressUpdateBase : public ADRadialReturnCreepStressUpdateBase<compute_stage>
 {
 public:
-  ADLAROMCreepStressUpdate(const InputParameters & parameters);
+  ADLAROMANCEStressUpdateBase(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
+
   virtual ADReal computeResidual(const ADReal & effective_trial_stress,
                                  const ADReal & scalar) override;
+
   virtual ADReal computeDerivative(const ADReal & /*effective_trial_stress*/,
                                    const ADReal & /*scalar*/) override
   {
     return _derivative;
   }
+
   virtual void computeStressFinalize(const ADRankTwoTensor & plastic_strain_increment) override;
 
   /**
