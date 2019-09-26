@@ -127,7 +127,7 @@ defect density rates are also needed, as they affect the evolution of the creep 
 through their own evolution. An entirely independent regression model is employed to predict each of
 the three outputs required. For example, the regression model for $\dot{\epsilon}_{vm}$ is shown, i.e.,
 \begin{equation}
-  {\dot{\varepsilon}}_{vm}\ ~\ \sum_{n_\varepsilon}^{deg}\sum_{n_{\rho_{cell}}}^{deg}\sum_{n_{\rho_W}}^{deg}\sum_{n_\sigma}^{deg}\sum_{n_T=0}^{deg}{\alpha_{n_\varepsilon n_{\rho_{cell}}n_{\rho_W}n_\sigma n_T}^{{\dot{\varepsilon}}_{vm}}P_{n_\varepsilon}\left(\varepsilon_{vm}\right)P_{n_{\rho_{cell}}}\left(\rho_{cell}\right)P_{n_{\rho_W}}\left(\rho_W\right)P_{n_\sigma}\left(\sigma_{vm}\right)P_{n_T}\left(T\right)\ }
+  {\dot{\varepsilon}}_{vm}\ \simeq \sum_{n_\varepsilon}^{deg}\sum_{n_{\rho_{cell}}}^{deg}\sum_{n_{\rho_W}}^{deg}\sum_{n_\sigma}^{deg}\sum_{n_T=0}^{deg}{\alpha_{n_\varepsilon n_{\rho_{cell}}n_{\rho_W}n_\sigma n_T}^{{\dot{\varepsilon}}_{vm}}P_{n_\varepsilon}\left(\varepsilon_{vm}\right)P_{n_{\rho_{cell}}}\left(\rho_{cell}\right)P_{n_{\rho_W}}\left(\rho_W\right)P_{n_\sigma}\left(\sigma_{vm}\right)P_{n_T}\left(T\right)\ }
 \end{equation}
 where each $n_{sub}$ is an index corresponding to the degree of the Legendre polynomial of the input parameter in the subscript. The coefficients are denoted
 as specific to the output $(\dot{\epsilon}_{vm})$ with a superscript. Additionally, mappings are
@@ -142,7 +142,7 @@ overfitting is indicated by a stark difference in the regression fit to training
 To validate the obtained regression coefficient values, initial conditions are given to the ROM and
 VPSC, and the resulting simulations are compared.  
 
-### Implementation
+## Implementation
 
 While `ADLAROMCreepStressUpdate` contains the necessary algorithms contained to evaluate the ROM,
 the actual data that comprises the ROM is contained in a separate UserObject that inherets from

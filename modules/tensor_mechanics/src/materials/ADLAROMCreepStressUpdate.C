@@ -71,7 +71,12 @@ defineADValidParams(
         "the old creep strain will be reset to the function value at the beginning of the "
         "timestep. Used for testing purposes only.");
 
-    params.addParam<bool>("verbose", false, "Flag to add verbose output"););
+    params.addParam<bool>("verbose", false, "Flag to add verbose output");
+
+    params.addParamNamesToGroup(
+        "mobile_dislocation_density_forcing_function immobile_dislocation_density_forcing_function "
+        "old_creep_strain_forcing_function",
+        "Advanced"););
 
 template <ComputeStage compute_stage>
 ADLAROMCreepStressUpdate<compute_stage>::ADLAROMCreepStressUpdate(

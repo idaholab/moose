@@ -28,7 +28,7 @@ defineADValidParams(
         "effective_inelastic_strain_name",
         "Name of the material property that stores the effective inelastic strain");
     params.addParam<bool>("apply_strain", true, "Flag to apply strain. Used for testing.");
-    params.addParamNamesToGroup("effective_inelastic_strain_name", "Advanced"););
+    params.addParamNamesToGroup("effective_inelastic_strain_name apply_strain", "Advanced"););
 
 template <ComputeStage compute_stage>
 ADRadialReturnStressUpdate<compute_stage>::ADRadialReturnStressUpdate(
