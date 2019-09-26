@@ -90,7 +90,7 @@ problems if we remove `dt` from it.
 
 To get the sum of each row of the mass matrix for "lumping" purposes a vector consisting of all `1`s is used in a matrix-vector product:
 
-!listing framework/src/timeintegrators/ActuallyExplicitEuler.C line=mass_matrix.vector_mult
+!listing framework/src/timeintegrators/ExplicitTimeIntegrator.C line=mass_matrix.vector_mult
 
 This is actually the very same way `MatGetRowSum` is implemented in PETSc; however,
 doing it manually cuts down on vector creation/destruction and a few other book-keeping operations.
@@ -120,5 +120,3 @@ After `postResidual()` the `NodalBC` BCs are applied with the time at the final 
 When the mesh changes the linear solver needs to be destroyed and recreated.
 This is done by simply building a new one and setting it up again.  This happens
 automatically just by "overwriting" the `std::unique_ptr` to the LinearSolver.
-
-!syntax children /Executioner/TimeIntegrator/ExplicitTimeIntegrator
