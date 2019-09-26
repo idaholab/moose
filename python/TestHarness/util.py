@@ -16,6 +16,17 @@ import json
 TERM_COLS = int(os.getenv('MOOSE_TERM_COLS', '110'))
 TERM_FORMAT = os.getenv('MOOSE_TERM_FORMAT', 'njcst')
 
+MOOSE_OPTIONS = {
+    'ad_mode' :   { 're_option' : r'#define\s+MOOSE_SPARSE_AD\s+(\d+)',
+                    'default'   : 'NONSPARSE',
+                    'options'   :
+                    { 'SPARSE'    : '1',
+                      'NONSPARSE' : '0'
+                    }
+                  }
+                }
+
+
 LIBMESH_OPTIONS = {
   'mesh_mode' :    { 're_option' : r'#define\s+LIBMESH_ENABLE_PARMESH\s+(\d+)',
                      'default'   : 'REPLICATED',
@@ -483,27 +494,22 @@ def getIfAsioExists(moose_dir):
         option_set.add('FALSE')
     return option_set
 
-def getLibMeshConfigOption(libmesh_dir, option):
+def getConfigOption(config_files, option, options):
     # Some tests work differently with parallel mesh enabled
     # We need to detect this condition
     option_set = set(['ALL'])
 
-    filenames = [
-      libmesh_dir + '/include/base/libmesh_config.h',   # Old location
-      libmesh_dir + '/include/libmesh/libmesh_config.h' # New location
-      ];
-
     success = 0
-    for filename in filenames:
+    for config_file in config_files:
         if success == 1:
             break
 
         try:
-            f = open(filename)
+            f = open(config_file)
             contents = f.read()
             f.close()
 
-            info = LIBMESH_OPTIONS[option]
+            info = options[option]
             m = re.search(info['re_option'], contents)
             if m != None:
                 if 'options' in info:
@@ -519,14 +525,27 @@ def getLibMeshConfigOption(libmesh_dir, option):
             success = 1
 
         except IOError:
-            # print "Warning: I/O Error trying to read", filename, ":", e.strerror, "... Will try other locations."
             pass
 
     if success == 0:
-        print "Error! Could not find libmesh_config.h in any of the usual locations!"
+        print "Error! Could not find configuration file in any of the usual locations!"
         exit(1)
 
     return option_set
+
+def getMooseConfigOption(moose_dir, option):
+    filenames = [moose_dir + '/framework/include/base/MooseConfig.h']
+
+    return getConfigOption(filenames, option, MOOSE_OPTIONS)
+
+
+def getLibMeshConfigOption(libmesh_dir, option):
+    filenames = [
+      libmesh_dir + '/include/base/libmesh_config.h',   # Old location
+      libmesh_dir + '/include/libmesh/libmesh_config.h' # New location
+      ];
+
+    return getConfigOption(filenames, option, LIBMESH_OPTIONS)
 
 def getSharedOption(libmesh_dir):
     # Some tests may only run properly with shared libraries on/off
