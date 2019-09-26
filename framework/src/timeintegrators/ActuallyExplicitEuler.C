@@ -108,7 +108,7 @@ ActuallyExplicitEuler::computeTimeDerivatives()
 {
   if (!_sys.solutionUDot())
     mooseError("ActuallyExplicitEuler: Time derivative of solution (`u_dot`) is not stored. Please "
-               "set uDotRequested() to true in FEProblemBase befor requesting `u_dot`.");
+               "set uDotRequested() to true in FEProblemBase before requesting `u_dot`.");
 
   NumericVector<Number> & u_dot = *_sys.solutionUDot();
   u_dot = *_solution;
@@ -131,29 +131,26 @@ ActuallyExplicitEuler::solve()
 
   auto & nonlinear_system = _fe_problem.getNonlinearSystemBase();
 
-  auto & libmesh_system = dynamic_cast<NonlinearImplicitSystem &>(nonlinear_system.system());
-
-  auto & mass_matrix = *libmesh_system.matrix;
+  auto & mass_matrix = *_nonlinear_implicit_system->matrix;
 
   _current_time = _fe_problem.time();
 
   // Set time back so that we're evaluating the interior residual at the old time
   _fe_problem.time() = _fe_problem.timeOld();
 
-  libmesh_system.update();
+  _nonlinear_implicit_system->update();
 
   // Must compute the residual first
   _explicit_residual.zero();
-  _fe_problem.computeResidual(*libmesh_system.current_local_solution, _explicit_residual);
+  _fe_problem.computeResidual(*_nonlinear_implicit_system->current_local_solution,
+                              _explicit_residual);
 
   // The residual is on the RHS
   _explicit_residual *= -1.;
 
   // Compute the mass matrix
-  _fe_problem.computeJacobianTag(*libmesh_system.current_local_solution, mass_matrix, _Ke_time_tag);
-
-  // Still testing whether leaving the old update is a good idea or not
-  // _explicit_euler_update = 0;
+  _fe_problem.computeJacobianTag(
+      *_nonlinear_implicit_system->current_local_solution, mass_matrix, _Ke_time_tag);
 
   auto converged = false;
 
@@ -217,18 +214,19 @@ ActuallyExplicitEuler::solve()
       mooseError("Unknown solve_type in ActuallyExplicitEuler ");
   }
 
-  *libmesh_system.solution = nonlinear_system.solutionOld();
-  *libmesh_system.solution += _explicit_euler_update;
+  *_nonlinear_implicit_system->solution = nonlinear_system.solutionOld();
+  *_nonlinear_implicit_system->solution += _explicit_euler_update;
 
   // Enforce contraints on the solution
-  DofMap & dof_map = libmesh_system.get_dof_map();
-  dof_map.enforce_constraints_exactly(libmesh_system, libmesh_system.solution.get());
+  DofMap & dof_map = _nonlinear_implicit_system->get_dof_map();
+  dof_map.enforce_constraints_exactly(*_nonlinear_implicit_system,
+                                      _nonlinear_implicit_system->solution.get());
 
-  libmesh_system.update();
+  _nonlinear_implicit_system->update();
 
-  nonlinear_system.setSolution(*libmesh_system.current_local_solution);
+  nonlinear_system.setSolution(*_nonlinear_implicit_system->current_local_solution);
 
-  libmesh_system.nonlinear_solver->converged = converged;
+  _nonlinear_implicit_system->nonlinear_solver->converged = converged;
 }
 
 void
