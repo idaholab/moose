@@ -22,18 +22,18 @@ public:
   LAROMData(const InputParameters & parameters);
 
   virtual void initialSetup() override;
-  virtual void initialize() override{};
+  virtual void initialize() override {}
   virtual void execute() override {}
   virtual void finalize() override {}
 
   /// Calculates and returns the number of inputs for the ROM data set
-  unsigned int getNumberInputs() const;
+  unsigned int getNumberOfInputs() const;
 
   /// Calculates and returns the number of outputs for the ROM data set
-  unsigned int getNumberOutputs() const;
+  unsigned int getNumberOfOutputs() const;
 
   /// Calculates and returns the number of ROM coefficients for the ROM data set
-  unsigned int getNumberRomCoefficients() const;
+  unsigned int getNumberOfRomCoefficients() const;
 
   /// Checks to number of inputs to see if the environmental factor is included
   bool checkForEnvironmentFactor() const;

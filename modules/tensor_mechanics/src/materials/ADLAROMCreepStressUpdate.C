@@ -112,11 +112,11 @@ ADLAROMCreepStressUpdate<compute_stage>::ADLAROMCreepStressUpdate(
                                            ? &getFunction("old_creep_strain_forcing_function")
                                            : NULL),
 
-    _num_inputs(_rom.getNumberInputs()),
-    _num_outputs(_rom.getNumberOutputs()),
+    _num_inputs(_rom.getNumberOfInputs()),
+    _num_outputs(_rom.getNumberOfOutputs()),
     _stress_index(_rom.getStressIndex()),
     _degree(_rom.getDegree()),
-    _num_coefs(_rom.getNumberRomCoefficients()),
+    _num_coefs(_rom.getNumberOfRomCoefficients()),
     _transform(_rom.getTransform()),
     _transform_coef(_rom.getTransformCoefs()),
     _input_limits(_rom.getInputLimits()),

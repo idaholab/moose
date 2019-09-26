@@ -60,7 +60,8 @@ protected:
   /// Function to check input values against applicability windows set by ROM data set
   void checkInputWindows(std::vector<ADReal> & input);
 
-  /* Convert the input variables into the form expected by the ROM Legendre polynomials
+  /**
+   * Convert the input variables into the form expected by the ROM Legendre polynomials
    * to have a normalized space from [-1, 1] so that every variable has equal weight
    */
   void convertInput(const std::vector<ADReal> & input,
@@ -87,8 +88,9 @@ protected:
                      std::vector<ADReal> & rom_outputs,
                      std::vector<ADReal> & drom_outputs);
 
-  /* Computes the output variable increments from the ROM predictions by bringing out of the
-   *normalized map to the actual physical values
+  /**
+   * Computes the output variable increments from the ROM predictions by bringing out of the
+   * normalized map to the actual physical values
    */
   void convertOutput(const Real dt,
                      const std::vector<ADReal> & old_input_values,

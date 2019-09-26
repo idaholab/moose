@@ -31,42 +31,42 @@ LAROMData::initialSetup()
   auto ceofs = getCoefs();
 
   // check sizes make sense
-  if (getNumberInputs() != 5 && getNumberInputs() != 6)
-    mooseError("In ", _name, ": numbergetNumberInputs() from LAROMData is not 5 or 6");
-  if (getNumberOutputs() != 3)
+  if (getNumberOfInputs() != 5 && getNumberOfInputs() != 6)
+    mooseError("In ", _name, ": numbergetNumberOfInputs() from LAROMData is not 5 or 6");
+  if (getNumberOfOutputs() != 3)
     mooseError("In ", _name, ": number_num_outputs from LAROMData is not 3");
   if (!getDegree() || getDegree() > 4)
     mooseError("In ", _name, ": getDegree() must be 1, 2, 3 or 4.");
 
-  if (getNumberRomCoefficients() != MathUtils::pow(getDegree(), getNumberInputs()))
-    mooseError("In ", _name, ": getNumberRomCoefficients() is incorrect");
+  if (getNumberOfRomCoefficients() != MathUtils::pow(getDegree(), getNumberOfInputs()))
+    mooseError("In ", _name, ": getNumberOfRomCoefficients() is incorrect");
   if (getDegree() > 4)
     mooseError("In ", _name, ": Maximum allowed Legendre degree is 3 + constant.");
 
   // Check that transform makes sense
-  for (unsigned int i = 0; i < getNumberOutputs(); ++i)
-    for (unsigned int j = 0; j < getNumberInputs(); ++j)
+  for (unsigned int i = 0; i < getNumberOfOutputs(); ++i)
+    for (unsigned int j = 0; j < getNumberOfInputs(); ++j)
       if (transform[i][j] != 0 && transform[i][j] != 1 && transform[i][j] != 2)
         mooseError("In ", _name, ": transform has an invalid function type");
 
   // Check sizes
-  if (transform.size() != getNumberOutputs() || transform[0].size() != getNumberInputs())
+  if (transform.size() != getNumberOfOutputs() || transform[0].size() != getNumberOfInputs())
     mooseError("In ", _name, ": transform is the wrong shape!");
-  if (transform_coef.size() != getNumberOutputs() || transform_coef[0].size() != getNumberInputs())
+  if (transform_coef.size() != getNumberOfOutputs() || transform_coef[0].size() != getNumberOfInputs())
     mooseError("In ", _name, ": transform_coef is the wrong shape!");
-  if (ceofs.size() != getNumberOutputs() || ceofs[0].size() != getNumberRomCoefficients())
+  if (ceofs.size() != getNumberOfOutputs() || ceofs[0].size() != getNumberOfRomCoefficients())
     mooseError("In ", _name, ": coefs is the wrong shape!");
-  if (input_limits.size() != getNumberInputs() || input_limits[0].size() != 2)
+  if (input_limits.size() != getNumberOfInputs() || input_limits[0].size() != 2)
     mooseError("In ", _name, ": input_limits is the wrong shape!");
 
   Moose::out << "ROM model info:\n  name:\t" << _name << "\n  number of outputs:\t"
-             << getNumberOutputs() << "\n  number of inputs:\t" << getNumberInputs()
+             << getNumberOfOutputs() << "\n  number of inputs:\t" << getNumberOfInputs()
              << "\n  degree (max Legendre degree + constant):\t" << getDegree()
-             << "\n  number of coefficients:\t" << getNumberRomCoefficients() << std::endl;
+             << "\n  number of coefficients:\t" << getNumberOfRomCoefficients() << std::endl;
 }
 
 unsigned int
-LAROMData::getNumberInputs() const
+LAROMData::getNumberOfInputs() const
 {
   auto v = getTransform();
   if (!v.size())
@@ -75,14 +75,14 @@ LAROMData::getNumberInputs() const
 }
 
 unsigned int
-LAROMData::getNumberOutputs() const
+LAROMData::getNumberOfOutputs() const
 {
   auto v = getTransform();
   return v.size();
 }
 
 unsigned int
-LAROMData::getNumberRomCoefficients() const
+LAROMData::getNumberOfRomCoefficients() const
 {
   auto v = getCoefs();
   if (!v.size())
@@ -93,7 +93,7 @@ LAROMData::getNumberRomCoefficients() const
 bool
 LAROMData::checkForEnvironmentFactor() const
 {
-  if (getNumberInputs() == 6)
+  if (getNumberOfInputs() == 6)
     return true;
   return false;
 }
@@ -102,15 +102,15 @@ std::vector<std::vector<std::vector<Real>>>
 LAROMData::getTransformedLimits() const
 {
   std::vector<std::vector<std::vector<Real>>> transformed_limits(
-      getNumberOutputs(), std::vector<std::vector<Real>>(getNumberInputs(), std::vector<Real>(2)));
+      getNumberOfOutputs(), std::vector<std::vector<Real>>(getNumberOfInputs(), std::vector<Real>(2)));
 
   auto transform = getTransform();
   auto input_limits = getInputLimits();
   auto transform_coefs = getTransformCoefs();
 
-  for (unsigned int i = 0; i < getNumberOutputs(); ++i)
+  for (unsigned int i = 0; i < getNumberOfOutputs(); ++i)
   {
-    for (unsigned int j = 0; j < getNumberInputs(); ++j)
+    for (unsigned int j = 0; j < getNumberOfInputs(); ++j)
     {
       for (unsigned int k = 0; k < 2; ++k)
       {
@@ -130,12 +130,12 @@ LAROMData::getTransformedLimits() const
 std::vector<std::vector<unsigned int>>
 LAROMData::getMakeFrameHelper() const
 {
-  std::vector<std::vector<unsigned int>> v(getNumberRomCoefficients(),
-                                           std::vector<unsigned int>(getNumberInputs()));
+  std::vector<std::vector<unsigned int>> v(getNumberOfRomCoefficients(),
+                                           std::vector<unsigned int>(getNumberOfInputs()));
   auto degree = getDegree();
 
-  for (unsigned int numcoeffs = 0; numcoeffs < getNumberRomCoefficients(); ++numcoeffs)
-    for (unsigned int invar = 0; invar < getNumberInputs(); ++invar)
+  for (unsigned int numcoeffs = 0; numcoeffs < getNumberOfRomCoefficients(); ++numcoeffs)
+    for (unsigned int invar = 0; invar < getNumberOfInputs(); ++invar)
       v[numcoeffs][invar] = numcoeffs / MathUtils::pow(degree, invar) % degree;
 
   return v;
