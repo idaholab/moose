@@ -34,5 +34,6 @@ derivInsert(SemiDynamicSparseNumberArray<Real, unsigned int, NWrapper<N>> & deri
   }
 #else
   derivs.insert(index) = value;
+#endif
 }
 }
