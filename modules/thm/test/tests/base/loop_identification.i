@@ -34,6 +34,23 @@
 
 [GlobalParams]
   closures = simple
+
+  initial_p = 1e6
+  initial_T = 300
+  initial_vel = 0
+
+  velocity_relaxation = false
+  pressure_relaxation = false
+  interface_transfer = false
+  wall_mass_transfer = false
+
+  initial_p_liquid = 1e6
+  initial_T_liquid = 453
+  initial_vel_liquid = 0
+  initial_p_vapor = 1e6
+  initial_T_vapor = 454
+  initial_vel_vapor = 0
+  initial_alpha_vapor = 0.5
 []
 
 [FluidProperties]
@@ -70,9 +87,6 @@
     n_elems = 1
     A = 1
     f = 1
-    initial_p = 1
-    initial_T = 1
-    initial_vel = 1
     fp = fp_liquid
   [../]
   [./j1]
@@ -87,9 +101,6 @@
     n_elems = 1
     A = 1
     f = 1
-    initial_p = 1
-    initial_T = 1
-    initial_vel = 1
     fp = fp_liquid
   [../]
   [./j2]
@@ -104,9 +115,6 @@
     n_elems = 1
     A = 1
     f = 1
-    initial_p = 1
-    initial_T = 1
-    initial_vel = 1
     fp = fp_liquid
   [../]
   [./j3]
@@ -121,9 +129,6 @@
     n_elems = 1
     A = 1
     f = 1
-    initial_p = 1
-    initial_T = 1
-    initial_vel = 1
     fp = fp_liquid
   [../]
   [./j4]
@@ -144,34 +149,29 @@
     names = 0
     widths = 1
     depth = 1
-    initial_T = 1
+    initial_T = 300
   [../]
   [./ht_primary]
     type = HeatTransferFromHeatStructure1Phase
     hs = hs
     flow_channel = hx:primary
     hs_side = outer
-    Hw = 1
+    Hw = 0
   [../]
   [./ht_secondary]
     type = HeatTransferFromHeatStructure2Phase
     hs = hs
     flow_channel = hx:secondary
     hs_side = inner
-    Hw_liquid = 1
-    Hw_vapor = 1
+    Hw_liquid = 0
+    Hw_vapor = 0
   [../]
 
   # SECONDARY LOOP
 
   [./inlet]
-    type = InletDensityVelocity2Phase
+    type = SolidWall
     input = 'hx:secondary:out'
-    rho_liquid = 1
-    rho_vapor = 1
-    vel_liquid = 1
-    vel_vapor = 1
-    alpha_vapor = 1
   [../]
   [./hx:secondary]
     type = FlowChannel2Phase
@@ -182,22 +182,11 @@
     A = 1
     f = 1
     f_interface = 1
-    Hw_liquid = 1
-    Hw_vapor = 1
-    initial_p_liquid = 1
-    initial_T_liquid = 1
-    initial_vel_liquid = 1
-    initial_p_vapor = 1
-    initial_T_vapor = 1
-    initial_vel_vapor = 1
-    initial_alpha_vapor = 1
     fp = fp_2phase
   [../]
   [./outlet]
-    type = Outlet2Phase
+    type = SolidWall
     input = 'hx:secondary:in'
-    p_liquid = 1
-    p_vapor = 1
   [../]
 []
 

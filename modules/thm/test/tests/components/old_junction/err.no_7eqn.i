@@ -1,7 +1,10 @@
 [GlobalParams]
-  initial_p = 1e6
-  initial_T = 300
-  initial_vel = 0
+  initial_p_liquid = 1e6
+  initial_p_vapor = 1e6
+  initial_T_liquid = 300
+  initial_T_vapor = 500
+  initial_vel_liquid = 0
+  initial_vel_vapor = 0
   initial_alpha_vapor = 0.1
 
   closures = simple
@@ -15,7 +18,7 @@
 
 [Components]
   [./pipe1]
-    type = FlowChannel1Phase
+    type = FlowChannel2Phase
     position = '0 0 0'
     orientation = '1 0 0'
     length = 1
@@ -29,7 +32,7 @@
   [../]
 
   [./pipe2]
-    type = FlowChannel1Phase
+    type = FlowChannel2Phase
     position = '1 0 0'
     orientation = '1 0 0'
     length = 1
