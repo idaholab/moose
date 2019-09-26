@@ -1,4 +1,6 @@
 #include "Component.h"
+#include "THMMesh.h"
+#include "THMApp.h"
 #include "ConstantFunction.h"
 #include "Numerics.h"
 
@@ -9,7 +11,7 @@ validParams<Component>()
   InputParameters params = validParams<THMObject>();
   params.addParam<RealVectorValue>(
       "gravity_vector", THM::default_gravity_vector, "Gravitational acceleration vector");
-  params.addPrivateParam<Simulation *>("_sim");
+  params.addPrivateParam<THMProblem *>("_thm_problem");
   params.addPrivateParam<Component *>("_parent", nullptr);
   params.addPrivateParam<std::string>("built_by_action", "add_component");
 
@@ -25,7 +27,7 @@ static unsigned int comp_id = 0;
 
 Component::Component(const InputParameters & parameters)
   : THMObject(parameters),
-    LoggingInterface(dynamic_cast<THMApp &>(MooseObject::_app)),
+    LoggingInterface(getCheckedPointerParam<THMProblem *>("_thm_problem")->log()),
     NamingInterface(),
 
     _gravity_vector(getParam<RealVectorValue>("gravity_vector")),
@@ -35,11 +37,10 @@ Component::Component(const InputParameters & parameters)
 
     _id(comp_id++),
     _parent(getParam<Component *>("_parent")),
-    _sim(*getCheckedPointerParam<Simulation *>("_sim")),
-    _app(dynamic_cast<THMApp &>(MooseObject::_app)),
+    _sim(*getCheckedPointerParam<THMProblem *>("_thm_problem")),
     _factory(_app.getFactory()),
-    _mesh(_sim.mesh()),
-    _zero(_sim._zero),
+    _mesh(static_cast<THMMesh &>(_sim.mesh())),
+    _zero(_sim._real_zero[0]),
     _component_setup_status(CREATED)
 {
 }

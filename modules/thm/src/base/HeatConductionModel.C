@@ -1,5 +1,5 @@
 #include "HeatConductionModel.h"
-#include "Simulation.h"
+#include "THMProblem.h"
 #include "Factory.h"
 #include "Component.h"
 #include "THMApp.h"
@@ -11,7 +11,7 @@ InputParameters
 validParams<HeatConductionModel>()
 {
   InputParameters params = validParams<MooseObject>();
-  params.addPrivateParam<Simulation *>("_sim");
+  params.addPrivateParam<THMProblem *>("_thm_problem");
   params.addPrivateParam<HeatStructureBase *>("_hs");
   params.registerBase("THM:heat_conduction_model");
   return params;
@@ -28,8 +28,7 @@ FEType HeatConductionModel::_fe_type(FIRST, LAGRANGE);
 
 HeatConductionModel::HeatConductionModel(const InputParameters & params)
   : MooseObject(params),
-    _sim(*params.getCheckedPointerParam<Simulation *>("_sim")),
-    _app(_sim.getApp()),
+    _sim(*params.getCheckedPointerParam<THMProblem *>("_thm_problem")),
     _factory(_app.getFactory()),
     _hs(*params.getCheckedPointerParam<HeatStructureBase *>("_hs")),
     _comp_name(name())
@@ -42,7 +41,7 @@ HeatConductionModel::addVariables()
   const auto & subdomain_names = _hs.getSubdomainNames();
   const Real & scaling_factor = _sim.getParamTempl<Real>("scaling_factor_temperature");
 
-  _sim.addVariable(true, TEMPERATURE, _fe_type, subdomain_names, scaling_factor);
+  _sim.addSimVariable(true, TEMPERATURE, _fe_type, subdomain_names, scaling_factor);
 }
 
 void

@@ -50,28 +50,28 @@ public:
   /**
    * This will print the message log
    */
-  void print();
+  void print() const;
 
   /**
    * Is the log empty?
    *
    * @return true if there is nothing in the log, othwerwise false
    */
-  bool isEmpty();
+  bool isEmpty() const;
 
   /**
    * Return the number of errors
    *
    * @return The number of errors in this log
    */
-  unsigned int getNumberOfErrors();
+  unsigned int getNumberOfErrors() const;
 
   /**
    * Return the number of warnings
    *
    * @return The number of warnings in this log
    */
-  unsigned int getNumberOfWarnings();
+  unsigned int getNumberOfWarnings() const;
 
   /**
    * Treat warnings as errors
@@ -97,10 +97,10 @@ protected:
     std::string _msg;
   };
 
-  void printMessage();
+  void printMessage() const;
 
   template <typename T, typename... Args>
-  void printMessage(T && val, Args &&... args)
+  void printMessage(T && val, Args &&... args) const
   {
     Moose::err << val;
     printMessage(std::forward<Args>(args)...);

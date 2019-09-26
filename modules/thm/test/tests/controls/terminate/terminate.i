@@ -43,6 +43,9 @@
   [../]
 []
 
+[Components]
+[]
+
 [Controls]
   [./threshold]
     type = UnitTripControl

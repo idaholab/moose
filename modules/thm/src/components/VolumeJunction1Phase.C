@@ -90,27 +90,27 @@ VolumeJunction1Phase::addVariables()
   const RealVectorValue vel(initial_vel_x, initial_vel_y, initial_vel_z);
   const Real initial_E = fp.e_from_p_rho(initial_p, initial_rho) + 0.5 * vel * vel;
 
-  _sim.addVariable(
+  _sim.addSimVariable(
       true, _rhoV_var_name, FEType(FIRST, SCALAR), connected_subdomains, _scaling_factor_rhoV);
   _sim.addConstantScalarIC(_rhoV_var_name, initial_rho * _volume);
-  _sim.addVariable(
+  _sim.addSimVariable(
       true, _rhouV_var_name, FEType(FIRST, SCALAR), connected_subdomains, _scaling_factor_rhouV);
   _sim.addConstantScalarIC(_rhouV_var_name, initial_rho * initial_vel_x * _volume);
-  _sim.addVariable(
+  _sim.addSimVariable(
       true, _rhovV_var_name, FEType(FIRST, SCALAR), connected_subdomains, _scaling_factor_rhovV);
   _sim.addConstantScalarIC(_rhovV_var_name, initial_rho * initial_vel_y * _volume);
-  _sim.addVariable(
+  _sim.addSimVariable(
       true, _rhowV_var_name, FEType(FIRST, SCALAR), connected_subdomains, _scaling_factor_rhowV);
   _sim.addConstantScalarIC(_rhowV_var_name, initial_rho * initial_vel_z * _volume);
-  _sim.addVariable(
+  _sim.addSimVariable(
       true, _rhoEV_var_name, FEType(FIRST, SCALAR), connected_subdomains, _scaling_factor_rhoEV);
   _sim.addConstantScalarIC(_rhoEV_var_name, initial_rho * initial_E * _volume);
 
-  _sim.addVariable(false, _pressure_var_name, FEType(FIRST, SCALAR), connected_subdomains);
+  _sim.addSimVariable(false, _pressure_var_name, FEType(FIRST, SCALAR), connected_subdomains);
   _sim.addConstantScalarIC(_pressure_var_name, initial_p);
-  _sim.addVariable(false, _temperature_var_name, FEType(FIRST, SCALAR), connected_subdomains);
+  _sim.addSimVariable(false, _temperature_var_name, FEType(FIRST, SCALAR), connected_subdomains);
   _sim.addConstantScalarIC(_temperature_var_name, initial_T);
-  _sim.addVariable(false, _velocity_var_name, FEType(FIRST, SCALAR), connected_subdomains);
+  _sim.addSimVariable(false, _velocity_var_name, FEType(FIRST, SCALAR), connected_subdomains);
   _sim.addConstantScalarIC(_velocity_var_name, vel.norm());
 }
 

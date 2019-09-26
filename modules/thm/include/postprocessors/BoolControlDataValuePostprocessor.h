@@ -1,9 +1,10 @@
 #pragma once
 
 #include "GeneralPostprocessor.h"
+#include "ControlData.h"
 
 class BoolControlDataValuePostprocessor;
-class Simulation;
+class THMProblem;
 
 template <>
 InputParameters validParams<BoolControlDataValuePostprocessor>();
@@ -21,9 +22,9 @@ public:
   virtual void execute();
 
 protected:
-  Simulation & _sim;
+  THMProblem * _thm_problem;
   /// The name of the control data value
   const std::string & _control_data_name;
   /// The boolean value of the control data
-  const bool & _control_data_value;
+  const ControlData<bool> * _control_data_value;
 };

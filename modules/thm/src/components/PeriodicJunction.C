@@ -65,8 +65,7 @@ PeriodicJunction::addMooseObjects()
 void
 PeriodicJunction::addPeriodicBC(const std::vector<VariableName> variables) const
 {
-  FEProblem & fe_problem = _sim.feproblem();
-  NonlinearSystemBase & nl_system = fe_problem.getNonlinearSystemBase();
+  NonlinearSystemBase & nl_system = _sim.getNonlinearSystemBase();
 
   PeriodicBoundary periodic_boundary(_translation_vector);
   periodic_boundary.myboundary = _boundary_ids[1];
@@ -80,8 +79,8 @@ PeriodicJunction::addPeriodicBC(const std::vector<VariableName> variables) const
         var_num, periodic_boundary.myboundary, periodic_boundary.pairedboundary);
   }
 
-  fe_problem.addGhostedBoundary(periodic_boundary.myboundary);
-  fe_problem.addGhostedBoundary(periodic_boundary.pairedboundary);
+  _sim.addGhostedBoundary(periodic_boundary.myboundary);
+  _sim.addGhostedBoundary(periodic_boundary.pairedboundary);
 
   nl_system.dofMap().add_periodic_boundary(periodic_boundary);
 }

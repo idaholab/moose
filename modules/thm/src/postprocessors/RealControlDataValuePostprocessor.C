@@ -1,5 +1,5 @@
 #include "RealControlDataValuePostprocessor.h"
-#include "Simulation.h"
+#include "THMProblem.h"
 
 registerMooseObject("THMApp", RealControlDataValuePostprocessor);
 
@@ -15,11 +15,18 @@ validParams<RealControlDataValuePostprocessor>()
 
 RealControlDataValuePostprocessor::RealControlDataValuePostprocessor(
     const InputParameters & parameters)
-  : GeneralPostprocessor(parameters),
-    _sim(*_app.parameters().getCheckedPointerParam<Simulation *>("_sim")),
-    _control_data_name(getParam<std::string>("control_data_name")),
-    _control_data_value(_sim.getControlData<Real>(_control_data_name)->get())
+  : GeneralPostprocessor(parameters), _control_data_name(getParam<std::string>("control_data_name"))
 {
+  THMProblem * thm_problem =
+      dynamic_cast<THMProblem *>(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"));
+  if (thm_problem)
+  {
+    _thm_problem = thm_problem;
+    _control_data_value = _thm_problem->getControlData<Real>(_control_data_name);
+  }
+  else
+    mooseError(name(),
+               ": Cannot use RealControlDataValuePostprocessor without the component system.");
 }
 
 void
@@ -35,5 +42,5 @@ RealControlDataValuePostprocessor::execute()
 Real
 RealControlDataValuePostprocessor::getValue()
 {
-  return _control_data_value;
+  return _control_data_value->get();
 }

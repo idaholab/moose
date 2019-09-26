@@ -1,4 +1,5 @@
 #include "THMInitComponentsAction.h"
+#include "THMProblem.h"
 
 registerMooseAction("THMApp", THMInitComponentsAction, "THM:init_components");
 
@@ -6,17 +7,17 @@ template <>
 InputParameters
 validParams<THMInitComponentsAction>()
 {
-  InputParameters params = validParams<THMAction>();
+  InputParameters params = validParams<Action>();
 
   return params;
 }
 
-THMInitComponentsAction::THMInitComponentsAction(InputParameters parameters) : THMAction(parameters)
-{
-}
+THMInitComponentsAction::THMInitComponentsAction(InputParameters parameters) : Action(parameters) {}
 
 void
 THMInitComponentsAction::act()
 {
-  _simulation.initComponents();
+  THMProblem * thm_problem = dynamic_cast<THMProblem *>(_problem.get());
+  if (thm_problem)
+    thm_problem->initComponents();
 }

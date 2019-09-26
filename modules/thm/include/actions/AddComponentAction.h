@@ -1,13 +1,13 @@
 #pragma once
 
-#include "THMObjectAction.h"
+#include "MooseObjectAction.h"
 
 class AddComponentAction;
 
 template <>
 InputParameters validParams<AddComponentAction>();
 
-class AddComponentAction : public THMObjectAction
+class AddComponentAction : public MooseObjectAction
 {
 public:
   AddComponentAction(InputParameters params);

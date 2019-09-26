@@ -25,7 +25,7 @@ HeatTransferFromExternalAppHeatFlux1Phase::addVariables()
 {
   HeatTransfer1PhaseBase::addVariables();
 
-  _sim.addVariable(false, _q_wall_name, FEType(CONSTANT, MONOMIAL), _flow_channel_subdomains);
+  _sim.addSimVariable(false, _q_wall_name, FEType(CONSTANT, MONOMIAL), _flow_channel_subdomains);
   _sim.addConstantIC(_q_wall_name, 0, _flow_channel_name);
 }
 

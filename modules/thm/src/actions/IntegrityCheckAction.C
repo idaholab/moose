@@ -1,4 +1,5 @@
 #include "IntegrityCheckAction.h"
+#include "THMProblem.h"
 #include "THMApp.h"
 
 registerMooseAction("THMApp", IntegrityCheckAction, "THM:integrity_check");
@@ -7,18 +8,17 @@ template <>
 InputParameters
 validParams<IntegrityCheckAction>()
 {
-  InputParameters params = validParams<THMAction>();
+  InputParameters params = validParams<Action>();
 
   return params;
 }
 
-IntegrityCheckAction::IntegrityCheckAction(InputParameters parameters) : THMAction(parameters) {}
+IntegrityCheckAction::IntegrityCheckAction(InputParameters parameters) : Action(parameters) {}
 
 void
 IntegrityCheckAction::act()
 {
-  THMApp & app = dynamic_cast<THMApp &>(_app);
-
-  if (!app.checkJacobian())
-    _simulation.integrityCheck();
+  THMProblem * thm_problem = dynamic_cast<THMProblem *>(_problem.get());
+  if (thm_problem)
+    thm_problem->integrityCheck();
 }

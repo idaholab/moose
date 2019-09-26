@@ -1,4 +1,5 @@
 #include "AddComponentPhysicsAction.h"
+#include "THMProblem.h"
 
 registerMooseAction("THMApp", AddComponentPhysicsAction, "THM:add_component_physics");
 
@@ -6,14 +7,16 @@ template <>
 InputParameters
 validParams<AddComponentPhysicsAction>()
 {
-  InputParameters params = validParams<THMAction>();
+  InputParameters params = validParams<Action>();
   return params;
 }
 
-AddComponentPhysicsAction::AddComponentPhysicsAction(InputParameters params) : THMAction(params) {}
+AddComponentPhysicsAction::AddComponentPhysicsAction(InputParameters params) : Action(params) {}
 
 void
 AddComponentPhysicsAction::act()
 {
-  _simulation.addComponentPhysics();
+  THMProblem * thm_problem = dynamic_cast<THMProblem *>(_problem.get());
+  if (thm_problem)
+    thm_problem->addComponentPhysics();
 }

@@ -7,7 +7,7 @@
 class ClosuresBase;
 class FlowChannelBase;
 class HeatTransferBase;
-class Simulation;
+class THMProblem;
 class Factory;
 
 template <>
@@ -72,7 +72,7 @@ protected:
   void addWallTemperatureFromAuxMaterial(const FlowChannelBase & flow_channel) const;
 
   /// Simulation
-  Simulation & _sim;
+  THMProblem & _sim;
 
   /// Factory associated with the MooseApp
   Factory & _factory;

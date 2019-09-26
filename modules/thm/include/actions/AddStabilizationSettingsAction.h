@@ -1,13 +1,13 @@
 #pragma once
 
-#include "THMObjectAction.h"
+#include "MooseObjectAction.h"
 
 class AddStabilizationSettingsAction;
 
 template <>
 InputParameters validParams<AddStabilizationSettingsAction>();
 
-class AddStabilizationSettingsAction : public THMObjectAction
+class AddStabilizationSettingsAction : public MooseObjectAction
 {
 public:
   AddStabilizationSettingsAction(InputParameters params);

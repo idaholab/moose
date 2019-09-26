@@ -1,6 +1,6 @@
 #pragma once
 
-#include "THMAction.h"
+#include "Action.h"
 
 class THMSetupQuadratureAction;
 
@@ -10,7 +10,7 @@ InputParameters validParams<THMSetupQuadratureAction>();
 /**
  * Sets the quadrature
  */
-class THMSetupQuadratureAction : public THMAction
+class THMSetupQuadratureAction : public Action
 {
 public:
   THMSetupQuadratureAction(InputParameters parameters);

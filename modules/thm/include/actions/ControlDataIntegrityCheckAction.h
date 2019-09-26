@@ -1,6 +1,6 @@
 #pragma once
 
-#include "THMAction.h"
+#include "Action.h"
 
 class ControlDataIntegrityCheckAction;
 
@@ -10,7 +10,7 @@ InputParameters validParams<ControlDataIntegrityCheckAction>();
 /**
  * Action to trigger the check of control data integrity
  */
-class ControlDataIntegrityCheckAction : public THMAction
+class ControlDataIntegrityCheckAction : public Action
 {
 public:
   ControlDataIntegrityCheckAction(InputParameters parameters);

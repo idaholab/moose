@@ -1,13 +1,13 @@
 #pragma once
 
-#include "THMAction.h"
+#include "Action.h"
 
 class THMAddVariablesAction;
 
 template <>
 InputParameters validParams<THMAddVariablesAction>();
 
-class THMAddVariablesAction : public THMAction
+class THMAddVariablesAction : public Action
 {
 public:
   THMAddVariablesAction(InputParameters params);

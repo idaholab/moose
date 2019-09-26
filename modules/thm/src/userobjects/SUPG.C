@@ -1,4 +1,5 @@
 #include "SUPG.h"
+#include "Factory.h"
 #include "FlowModel.h"
 #include "Simulation.h"
 #include "Component.h"
@@ -100,7 +101,7 @@ SUPG::addMooseObjects(FlowModel & fm, InputParameters & pars) const
     if (_shock_capturing)
       params.set<unsigned>("n_iterations_before_freezing_delta") = 1;
 
-    _m_sim.addMaterial(class_name, genName(comp_name, "r7_material"), params);
+    _fe_problem.addMaterial(class_name, genName(comp_name, "r7_material"), params);
   }
 
   std::vector<std::string> vars = {
@@ -125,7 +126,7 @@ SUPG::addMooseObjects(FlowModel & fm, InputParameters & pars) const
     params.set<MaterialPropertyName>("SUPG_dUdx") = DUDX;
     params.set<MaterialPropertyName>("SUPG_dAdU") = DADU;
     params.set<MaterialPropertyName>("direction") = FlowModel::DIRECTION;
-    _m_sim.addKernel(class_name, genName(comp_name, vars[i], "supg"), params);
+    _fe_problem.addKernel(class_name, genName(comp_name, vars[i], "supg"), params);
   }
 
   if (_shock_capturing)
@@ -145,7 +146,7 @@ SUPG::addMooseObjects(FlowModel & fm, InputParameters & pars) const
       params.set<MaterialPropertyName>("SUPG_y") = COLUMNS;
       params.set<MaterialPropertyName>("SUPG_dUdx") = DUDX;
       params.set<MaterialPropertyName>("SUPG_dAdU") = DADU;
-      _m_sim.addKernel(class_name, genName(comp_name, vars[i], "sc"), params);
+      _fe_problem.addKernel(class_name, genName(comp_name, vars[i], "sc"), params);
     }
   }
 }

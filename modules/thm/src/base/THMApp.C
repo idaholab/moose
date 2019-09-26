@@ -3,7 +3,6 @@
 
 #include "ModulesApp.h"
 #include "AppFactory.h"
-#include "Simulation.h"
 
 #include "SinglePhaseFluidProperties.h"
 #include "TwoPhaseFluidProperties.h"
@@ -36,54 +35,15 @@ InputParameters
 validParams<THMApp>()
 {
   InputParameters params = validParams<MooseApp>();
-  params.addCommandLineParam<std::string>(
-      "check_jacobian", "--check-jacobian", "To indicate we are checking jacobians");
-  params.addCommandLineParam<std::string>(
-      "print_component_loops", "--print-component-loops", "Flag to print component loops");
   return params;
 }
 
-THMApp::THMApp(InputParameters parameters)
-  : MooseApp(parameters), _sim(nullptr), _check_jacobian(false)
+THMApp::THMApp(InputParameters parameters) : MooseApp(parameters)
 {
   THMApp::registerAll(_factory, _action_factory, _syntax);
 }
 
-THMApp::~THMApp() { delete _sim; }
-
-void
-THMApp::buildSimulation()
-{
-  _sim = new Simulation(_action_warehouse);
-}
-
-void
-THMApp::build()
-{
-  _action_warehouse.executeAllActions();
-  _sim->build();
-}
-
-void
-THMApp::setupOptions()
-{
-  if (isParamValid("check_jacobian"))
-    _check_jacobian = true;
-
-  buildSimulation();
-  _pars.set<Simulation *>("_sim") = _sim;
-
-  MooseApp::setupOptions();
-  if (Moose::_warnings_are_errors)
-    _log.setWarningsAsErrors();
-
-  if (isParamValid("print_component_loops"))
-  {
-    build();
-    _sim->printComponentLoops();
-    _ready_to_exit = true;
-  }
-}
+THMApp::~THMApp() {}
 
 void
 THMApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
@@ -109,21 +69,6 @@ THMApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   registerFlowModel(THM::FM_TWO_PHASE_NCG, FlowModelTwoPhaseNCG);
 }
 
-const THM::FlowModelID &
-THMApp::getFlowModelID(const FluidProperties & fp)
-{
-  if (dynamic_cast<const SinglePhaseFluidProperties *>(&fp) != nullptr)
-    return THM::FM_SINGLE_PHASE;
-  else if (dynamic_cast<const TwoPhaseNCGFluidProperties *>(&fp) != nullptr)
-    return THM::FM_TWO_PHASE_NCG;
-  else if (dynamic_cast<const TwoPhaseFluidProperties *>(&fp) != nullptr)
-    return THM::FM_TWO_PHASE;
-  else
-    raiseFlowModelError(fp,
-                        "one of the following types: 'SinglePhaseFluidProperties', "
-                        "'TwoPhaseFluidProperties', or 'TwoPhaseNCGFluidProperties'");
-}
-
 const std::string &
 THMApp::getFlowModelClassName(const THM::FlowModelID & flow_model_id)
 {
@@ -136,13 +81,6 @@ THMApp::getFlowModelClassName(const THM::FlowModelID & flow_model_id)
 }
 
 void
-THMApp::raiseFlowModelError(const FluidProperties & fp, const std::string & mbdf)
-{
-  mooseError(
-      "The specified fluid properties object, '", fp.name(), "', must be derived from ", mbdf, ".");
-}
-
-void
 THMApp::registerApps()
 {
   registerApp(THMApp);
@@ -150,7 +88,7 @@ THMApp::registerApps()
 
 const std::string &
 THMApp::getClosuresClassName(const std::string & closures_option,
-                             const THM::FlowModelID & flow_model_id) const
+                             const THM::FlowModelID & flow_model_id)
 {
   const std::string closures_option_lc = MooseUtils::toLower(closures_option);
 

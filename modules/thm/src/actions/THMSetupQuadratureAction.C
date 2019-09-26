@@ -1,4 +1,5 @@
 #include "THMSetupQuadratureAction.h"
+#include "THMProblem.h"
 
 registerMooseAction("THMApp", THMSetupQuadratureAction, "setup_quadrature");
 
@@ -6,17 +7,18 @@ template <>
 InputParameters
 validParams<THMSetupQuadratureAction>()
 {
-  InputParameters params = validParams<THMAction>();
+  InputParameters params = validParams<Action>();
   return params;
 }
 
-THMSetupQuadratureAction::THMSetupQuadratureAction(InputParameters parameters)
-  : THMAction(parameters)
+THMSetupQuadratureAction::THMSetupQuadratureAction(InputParameters parameters) : Action(parameters)
 {
 }
 
 void
 THMSetupQuadratureAction::act()
 {
-  _simulation.setupQuadrature();
+  THMProblem * thm_problem = dynamic_cast<THMProblem *>(_problem.get());
+  if (thm_problem)
+    thm_problem->setupQuadrature();
 }

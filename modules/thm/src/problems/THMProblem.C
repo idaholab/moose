@@ -1,17 +1,13 @@
-#include "GlobalSimParamAction.h"
-#include "Simulation.h"
-#include "FlowModel.h"
-#include "HeatConductionModel.h"
-#include "THMApp.h"
-#include "Numerics.h"
+#include "THMProblem.h"
 
-registerMooseAction("THMApp", GlobalSimParamAction, "THM:global_sim_params");
+registerMooseObject("THMApp", THMProblem);
 
 template <>
 InputParameters
-validParams<GlobalSimParamAction>()
+validParams<THMProblem>()
 {
-  InputParameters params = validParams<THMAction>();
+  InputParameters params = validParams<FEProblem>();
+
   // default scaling factors
   std::vector<Real> sf_1phase(3, 1.0);
   params.addParam<std::vector<Real>>(
@@ -52,29 +48,12 @@ validParams<GlobalSimParamAction>()
       "Gives the timestep (or \"LATEST\") for which to read a solution from a file "
       "for a given variable. (Default: LATEST)");
 
+  params.addClassDescription("Specialization of FEProblem to run with component subsystem");
+
   return params;
 }
 
-GlobalSimParamAction::GlobalSimParamAction(InputParameters parameters) : THMAction(parameters)
-{
-  InputParameters & pars = _simulation.params();
-  // merge parameters into simulation parameters
-  pars += this->parameters();
-
-  // Setting the _spatial_discretization and _flow_fe_type members is currently achieved
-  // via friend statement. This is because we need to support CG.  When CG is removed
-  // the need to friend should go away
-  _simulation._spatial_discretization = THM::stringToEnum<FlowModel::ESpatialDiscretizationType>(
-      pars.get<MooseEnum>("spatial_discretization"));
-
-  bool second_order_mesh = pars.get<bool>("2nd_order_mesh");
-  HeatConductionModel::_fe_type =
-      second_order_mesh ? FEType(SECOND, LAGRANGE) : FEType(FIRST, LAGRANGE);
-  if (_simulation.getSpatialDiscretization() == FlowModel::CG)
-    _simulation._flow_fe_type = HeatConductionModel::_fe_type;
-}
-
-void
-GlobalSimParamAction::act()
+THMProblem::THMProblem(const InputParameters & parameters)
+  : FEProblem(parameters), Simulation(*this, parameters)
 {
 }
