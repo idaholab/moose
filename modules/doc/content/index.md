@@ -33,12 +33,30 @@ MOOSE works on Mac OS, Linux, and Windows and is easy to get started with. Begin
 
 
 !gallery! large=6
-!card! gallery/corner_flow.gif title=Porous Flow around Corner
-Transient flow around corner using porous flow approximation of Euler equations with variable porosity,
+
+!card! gallery/golem_app_reservoir_analysis.gif title=Faulted Geothermal Reservoirs
+Evolution of the 100C temperature during 30 years of injection/production for a complex doublet
+system into a fractured geothermal reservoir. Based on [GOLEM](https://github.com/ajacquey/golem),
+a MOOSE based application for thermo-hydro-mechanical simulations of fractured reservoirs.
+
+!style fontsize=90% fontweight=100
+Cacace M., Jacquey, A.B. (2017): [Flexible parallel implicit modeling of coupled thermal-hydraulic-mechanical processes in fractured rocks.](https://www.solid-earth.net/8/921/2017/) Solid Earth
+!card-end!
+
+!card! gallery/laser_welding.gif title=Laser Melt Pool
+Using an arbitrary Lagrangian-Eulerian (ALE) formulation a laser is rotated around the surface of a stainless
+steel block. The steel first melts and then begins to evaporate. The recoil force from evaporation
+deforms the surface of the melt pool which in turn drives flow in the melt pool interior. Melt flow
+is determined using the incompressible [Navier-Stokes](modules/navier_stokes/index.md) equations
+while mesh deformation is determined using a linear elasticity equation.
+!card-end!
+
+!card! gallery/corner_flow.gif title=Single-phase Flow in a Packed Bed
+Transient flow around corner using Euler equations with variable porosity,
 see [Pronghorn: Porous media thermal-hydraulics for reactor applications](https://escholarship.org/uc/item/61k9r05w).
 !card-end!
 
-!card! gallery/elder.gif title=Density driven, porous flow with adaptivity
+!card! gallery/elder.gif title=Density Driven, Porous Flow with Adaptivity
 Density driven, porous flow simulation of the Elder problem using [Falcon](https://github.com/idaholab/falcon).  Mesh adaptivity is used to accurately capture the moving fronts.
 
 !style fontsize=80% fontweight=100
@@ -50,12 +68,10 @@ Engineering scale porous flow, modeled using Darcy's equation within a cylinder 
 media of closely packed steel spheres, see [MultiApps/index.md].
 !card-end!
 
-!card! gallery/densification.gif title=3D Densification of snow
+!card! gallery/densification.gif title=3D Densification of Snow
 Densification of a 3D snow pack using empirical, density based continuum model using [Pika](https://github.com/idaholab/pika).
 !card-end!
-!gallery-end!
 
-!gallery! large=6
 !card! gallery/snow.gif title=Dendritic Crystal Growth
 Process of dendritic crystal growth, which is an anisotropic nucleation process as presented by
 [Modeling and numerical simulations of dendritic crystal growth](https://www.sciencedirect.com/science/article/pii/016727899390120P).
@@ -65,7 +81,7 @@ Process of dendritic crystal growth, which is an anisotropic nucleation process 
 Shanghai Jiao Tong University, Shanghai.
 !card-end!
 
-!card! gallery/ch_40.gif title=3D spinodal decomposition
+!card! gallery/ch_40.gif title=3D Spinodal Decomposition
 A 3D spinodal decomposition modeled with Cahn-Hilliard equations using third-order Hermite elements with
 the [phase field module](modules/phase_field/index.md).
 !card-end!
@@ -87,7 +103,7 @@ The level set equation is commonly used to for interface tracking, especially wh
 velocity is known. MOOSE contains a level set module, for more information see [level_set/index.md].
 !card-end!
 
-!card! gallery/soil.gif title=Soil desiccation simulation
+!card! gallery/soil.gif title=Soil Desiccation Simulation
 A 3D soil desiccation simulation using phase-field for cohesive fracture model, see
 [A phase-field formulation for dynamic cohesive fracture](https://arxiv.org/abs/1809.09691).
 
@@ -95,5 +111,38 @@ A 3D soil desiccation simulation using phase-field for cohesive fracture model, 
 *Credit:* Gary Hu, [Duke Computational Mechanics Lab](http://dcml.pratt.duke.edu/)
 !card-end!
 !gallery-end!
+
+# Select MOOSE Features class=center style=font-weight:200;
+
+- Flexible Plug-In Architecture Reducing Code Development
+- [Automatic Differentiation](NonlinearSystem.md)
+- Continuous Finite Element
+- Discontinuous Finite Element
+- Mixed (CG and DG, coupled in the same simulation)
+- Massively Parallel: Hybrid MPI + Threading / OpenMP
+- [Scalability Proven to Over 30,000 cores](https://ieeexplore.ieee.org/abstract/document/8638143)
+- Massive Problem Sizes (1B+ elements, 100B+ unknowns)
+- [Multiscale Solves](MultiApps/index.md)
+- Leverages [PETSc](https://www.mcs.anl.gov/petsc) solvers
+- [Physics Modules:](modules/index.md)
+
+  - [Heat Conduction](HeatConduction.md)
+  - [Navier Stokes](NavierStokes/index.md)
+  - [Solid Mechanics](syntax/Modules/TensorMechanics/index.md)
+  - [Contact](contact/index.md)
+  - [Porous Flow](porous_flow/index.md)
+  - [Phase Field](phase_field/index.md)
+  - [Level Set](level_set/index.md)
+
+- Unstructured Mesh (Quads, Tris, Hexes, Tets, Pyramids, Wedges, etc.)
+- Curvilinear Geometry
+- [Mesh Adaptivity](syntax/Adaptivity/index.md)
+- [In-situ Postprocessing](Postprocessors/index.md)
+- [Nonlinear Material Properties](examples/ex08_materials.md)
+- [Physics-Based Damping](Dampers/index.md)
+- Point Sources
+- Multiple Formats for Input and Output ([Exodus](Exodus.md), [VTK](VTKOutput.md), GMSH, etc.)
+- Nonlinear, Coupled ODE / PDE Systems
+- Arbitrary Lagrangian-Eulerian (ALE) formulation
 
 !media media/inl_blue.png style=width:30%;display:block;margin-top:3em;margin-left:auto;margin-right:auto;
