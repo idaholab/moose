@@ -50,10 +50,24 @@ SS316LAROMANCEStressUpdateTest<compute_stage>::SS316LAROMANCEStressUpdateTest(
 }
 
 template <ComputeStage compute_stage>
-std::vector<std::vector<unsigned int>>
+std::vector<std::vector<ROMInputTransform>>
 SS316LAROMANCEStressUpdateTest<compute_stage>::getTransform() const
 {
-  return {{1, 1, 1, 1, 0}, {2, 1, 1, 0, 1}, {0, 1, 1, 1, 0}};
+  return {{ROMInputTransform::LOG,
+           ROMInputTransform::LOG,
+           ROMInputTransform::LOG,
+           ROMInputTransform::LOG,
+           ROMInputTransform::LINEAR},
+          {ROMInputTransform::EXP,
+           ROMInputTransform::LOG,
+           ROMInputTransform::LOG,
+           ROMInputTransform::LINEAR,
+           ROMInputTransform::LOG},
+          {ROMInputTransform::LINEAR,
+           ROMInputTransform::LOG,
+           ROMInputTransform::LOG,
+           ROMInputTransform::LOG,
+           ROMInputTransform::LINEAR}};
 }
 
 template <ComputeStage compute_stage>

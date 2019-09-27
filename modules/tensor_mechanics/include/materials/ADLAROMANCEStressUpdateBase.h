@@ -23,6 +23,13 @@ class ADLAROMANCEStressUpdateBase;
 
 declareADValidParams(ADLAROMANCEStressUpdateBase);
 
+enum class ROMInputTransform
+{
+  LINEAR,
+  LOG,
+  EXP
+};
+
 template <ComputeStage compute_stage>
 class ADLAROMANCEStressUpdateBase : public ADRadialReturnCreepStressUpdateBase<compute_stage>
 {
@@ -115,12 +122,8 @@ protected:
   /// Calculates and returns vector utilized in assign values
   std::vector<std::vector<unsigned int>> getMakeFrameHelper() const;
 
-  /* Returns vector of the functions to use for the conversion of input variables.
-   * 0 = regular
-   * 1 = log
-   * 2 = exp
-   */
-  virtual std::vector<std::vector<unsigned int>> getTransform() const;
+  /// Returns vector of the functions to use for the conversion of input variables.
+  virtual std::vector<std::vector<ROMInputTransform>> getTransform() const;
 
   /// Returns factors for the functions for the conversion functions given in getTransform
   virtual std::vector<std::vector<Real>> getTransformCoefs() const;
@@ -139,9 +142,6 @@ protected:
   virtual std::vector<std::vector<Real>> getCoefs() const;
 
 private:
-  // /// Userobject that holds ROM data set
-  // const LAROMData & _rom;
-
   /// Coupled temperature variable
   const ADVariableValue & _temperature;
 
@@ -219,7 +219,7 @@ private:
   unsigned int _num_coefs;
 
   /// Transform rules defined by the ROM data set
-  std::vector<std::vector<unsigned int>> _transform;
+  std::vector<std::vector<ROMInputTransform>> _transform;
 
   /// Transform coefficients defined by the ROM data set
   std::vector<std::vector<Real>> _transform_coefs;

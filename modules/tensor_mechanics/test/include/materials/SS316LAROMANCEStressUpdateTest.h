@@ -23,12 +23,8 @@ public:
   SS316LAROMANCEStressUpdateTest(const InputParameters & parameters);
 
 protected:
-  /* Returns vector of the functions to use for the conversion of input variables.
-   * 0 = regular
-   * 1 = log
-   * 2 = exp
-   */
-  virtual std::vector<std::vector<unsigned int>> getTransform() const override;
+  /// Returns vector of the functions to use for the conversion of input variables.
+  virtual std::vector<std::vector<ROMInputTransform>> getTransform() const override;
 
   /// Returns factors for the functions for the conversion functions given in getTransform
   virtual std::vector<std::vector<Real>> getTransformCoefs() const override;

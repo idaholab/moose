@@ -139,11 +139,11 @@ ADLAROMANCEStressUpdateBase<compute_stage>::initialSetup()
 
   _num_outputs = _transform.size();
   if (_num_outputs != 3)
-    mooseError("In ", _name, ": _num_outputs (", _num_outputs, ") from is not 3");
+    mooseError("In ", _name, ": _num_outputs (", _num_outputs, ") is not 3");
 
   _num_inputs = _transform[0].size();
   if (_num_inputs != 5 && _num_inputs != 6)
-    mooseError("In ", _name, ": _num_inputs (", _num_inputs, ") from is not 5 or 6");
+    mooseError("In ", _name, ": _num_inputs (", _num_inputs, ") is not 5 or 6");
   _use_env = _num_inputs == 6 ? true : false;
 
   _transform_coefs = getTransformCoefs();
@@ -162,12 +162,6 @@ ADLAROMANCEStressUpdateBase<compute_stage>::initialSetup()
   _degree = std::pow(_num_coefs, 1.0 / _num_inputs);
   if (!_degree || _degree > 4)
     mooseError("In ", _name, ": degree must be 1, 2, 3 or 4.");
-
-  // Check that transform makes sense
-  for (unsigned int i = 0; i < _num_outputs; ++i)
-    for (unsigned int j = 0; j < _num_inputs; ++j)
-      if (_transform[i][j] != 0 && _transform[i][j] != 1 && _transform[i][j] != 2)
-        mooseError("In ", _name, ": transform has an invalid function type");
 
   _transformed_limits = getTransformedLimits();
   _makeframe_helper = getMakeFrameHelper();
@@ -439,12 +433,12 @@ ADLAROMANCEStressUpdateBase<compute_stage>::convertInput(
     {
       ADReal x = input[j];
       ADReal dx = 1.0;
-      if (_transform[i][j] == 2)
+      if (_transform[i][j] == ROMInputTransform::EXP)
       {
         x = std::exp(x / _transform_coefs[i][j]);
         dx = x / _transform_coefs[i][j];
       }
-      else if (_transform[i][j] == 1)
+      else if (_transform[i][j] == ROMInputTransform::LOG)
       {
         dx = 1.0 / (x + _transform_coefs[i][j]);
         x = std::log(x + _transform_coefs[i][j]);
@@ -590,9 +584,9 @@ ADLAROMANCEStressUpdateBase<compute_stage>::getTransformedLimits() const
     {
       for (unsigned int k = 0; k < 2; ++k)
       {
-        if (_transform[i][j] == 2)
+        if (_transform[i][j] == ROMInputTransform::EXP)
           transformed_limits[i][j][k] = std::exp(_input_limits[j][k] / _transform_coefs[i][j]);
-        else if (_transform[i][j] == 1)
+        else if (_transform[i][j] == ROMInputTransform::LOG)
           transformed_limits[i][j][k] = std::log(_input_limits[j][k] + _transform_coefs[i][j]);
         else
           transformed_limits[i][j][k] = _input_limits[j][k];
@@ -617,10 +611,12 @@ ADLAROMANCEStressUpdateBase<compute_stage>::getMakeFrameHelper() const
 }
 
 template <ComputeStage compute_stage>
-std::vector<std::vector<unsigned int>>
+std::vector<std::vector<ROMInputTransform>>
 ADLAROMANCEStressUpdateBase<compute_stage>::getTransform() const
 {
   mooseError("In ", _name, ": getTransform must be defined by an inherited class!");
+  std::vector<std::vector<ROMInputTransform>> v;
+  return v;
 }
 
 template <ComputeStage compute_stage>
@@ -628,6 +624,8 @@ std::vector<std::vector<Real>>
 ADLAROMANCEStressUpdateBase<compute_stage>::getTransformCoefs() const
 {
   mooseError("In ", _name, ": getTransformCoefs must be defined by an inherited class!");
+  std::vector<std::vector<Real>> v;
+  return v;
 }
 
 template <ComputeStage compute_stage>
@@ -635,6 +633,8 @@ std::vector<std::vector<Real>>
 ADLAROMANCEStressUpdateBase<compute_stage>::getInputLimits() const
 {
   mooseError("In ", _name, ": getInputLimits must be defined by an inherited class!");
+  std::vector<std::vector<Real>> v;
+  return v;
 }
 
 template <ComputeStage compute_stage>
@@ -642,6 +642,8 @@ std::vector<std::vector<Real>>
 ADLAROMANCEStressUpdateBase<compute_stage>::getCoefs() const
 {
   mooseError("In ", _name, ": getCoefs must be defined by an inherited class!");
+  std::vector<std::vector<Real>> v;
+  return v;
 }
 
 // explicit instantiation is required for AD base classes
