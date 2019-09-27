@@ -9,67 +9,76 @@
 
 //  saturation as a function of effective saturation, and its derivs wrt effective saturation
 //
-#include "SS316LAROMData.h"
+#include "SS316LAROMANCEStressUpdateTest.h"
 
-registerMooseObject("TensorMechanicsApp", SS316LAROMData);
+registerADMooseObject("TensorMechanicsTestApp", SS316LAROMANCEStressUpdateTest);
 
-template <>
-InputParameters
-validParams<SS316LAROMData>()
+defineADValidParams(SS316LAROMANCEStressUpdateTest,
+                    ADLAROMANCEStressUpdateBase,
+                    params.addClassDescription(
+                        "UserObject that stores the relevant data for the reduced order model "
+                        "for SS316. Must be used in conjuction with ADROMCreepStressUpdate"););
+
+template <ComputeStage compute_stage>
+SS316LAROMANCEStressUpdateTest<compute_stage>::SS316LAROMANCEStressUpdateTest(
+    const InputParameters & parameters)
+  : ADLAROMANCEStressUpdateBase<compute_stage>(parameters)
 {
-  InputParameters params = validParams<LAROMData>();
-  params.addClassDescription("UserObject that stores the relevant data for the reduced order model "
-                             "for SS316. Must be used in conjuction with ADROMCreepStressUpdate");
-  return params;
 }
 
-SS316LAROMData::SS316LAROMData(const InputParameters & parameters) : LAROMData(parameters) {}
-
+template <ComputeStage compute_stage>
 unsigned int
-SS316LAROMData::getStressIndex() const
+SS316LAROMANCEStressUpdateTest<compute_stage>::getStressIndex() const
 {
   return 2;
 }
 
+template <ComputeStage compute_stage>
 unsigned int
-SS316LAROMData::getDegree() const
+SS316LAROMANCEStressUpdateTest<compute_stage>::getDegree() const
 {
   return 4;
 }
 
+template <ComputeStage compute_stage>
 Real
-SS316LAROMData::getMaxRelativeMobileInc() const
+SS316LAROMANCEStressUpdateTest<compute_stage>::getMaxRelativeMobileInc() const
 {
   return 0.5;
 }
 
+template <ComputeStage compute_stage>
 Real
-SS316LAROMData::getMaxRelativeImmobileInc() const
+SS316LAROMANCEStressUpdateTest<compute_stage>::getMaxRelativeImmobileInc() const
 {
   return 0.5;
 }
 
+template <ComputeStage compute_stage>
 Real
-SS316LAROMData::getMaxEnvironmentalFactorInc() const
+SS316LAROMANCEStressUpdateTest<compute_stage>::getMaxEnvironmentalFactorInc() const
 {
   return 1.0e30;
 }
 
+template <ComputeStage compute_stage>
 std::vector<std::vector<unsigned int>>
-SS316LAROMData::getTransform() const
+SS316LAROMANCEStressUpdateTest<compute_stage>::getTransform() const
 {
   return {{1, 1, 1, 1, 0}, {2, 1, 1, 0, 1}, {0, 1, 1, 1, 0}};
 }
 
+template <ComputeStage compute_stage>
 std::vector<std::vector<Real>>
-SS316LAROMData::getTransformCoefs() const
+SS316LAROMANCEStressUpdateTest<compute_stage>::getTransformCoefs() const
 {
   return {
       {1.0, 1.0, 1.0e1, 4.0e-5, 0.0}, {1.0e13, 1.0, 1.0e1, 0.0, 1.0}, {0.0, 1.0, 5.0, 1.0e-4, 0.0}};
 }
 
+template <ComputeStage compute_stage>
 std::vector<std::vector<Real>>
-SS316LAROMData::getInputLimits() const
+SS316LAROMANCEStressUpdateTest<compute_stage>::getInputLimits() const
 {
   return {{1.32776E+12, 9.99959E+12},
           {2.93039E+11, 9.99798E+11},
@@ -78,8 +87,9 @@ SS316LAROMData::getInputLimits() const
           {800.0160634, 949.9873586}};
 }
 
+template <ComputeStage compute_stage>
 std::vector<std::vector<Real>>
-SS316LAROMData::getCoefs() const
+SS316LAROMANCEStressUpdateTest<compute_stage>::getCoefs() const
 {
   return {
       {-16.438661699503427,    4.591731583001092,     0.6746168063837104,     0.24145810486515984,

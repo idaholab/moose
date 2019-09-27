@@ -22,7 +22,7 @@ defineADValidParams(
         "specific Los Alamos Reduced Order Model derived from a Visco-Plastic Self Consistent "
         "calculations.");
 
-    params.addRequiredParam<UserObjectName>("rom_data", "Name of user object holding ROM data");
+    // params.addRequiredParam<UserObjectName>("rom_data", "Name of user object holding ROM data");
     params.addRequiredCoupledVar("temperature", "The coupled temperature (K)");
     params.addCoupledVar("environmental_factor", 0.0, "Optional coupled environmental factor");
     params.addRangeCheckedParam<Real>("input_window_limit",
@@ -82,7 +82,7 @@ template <ComputeStage compute_stage>
 ADLAROMANCEStressUpdateBase<compute_stage>::ADLAROMANCEStressUpdateBase(
     const InputParameters & parameters)
   : ADRadialReturnCreepStressUpdateBase<compute_stage>(parameters),
-    _rom(getUserObject<LAROMData>("rom_data")),
+    // _rom(getUserObject<LAROMData>("rom_data")),
     _temperature(adCoupledValue("temperature")),
     _environmental(adCoupledValue("environmental_factor")),
     _window(getParam<Real>("input_window_limit")),
@@ -95,7 +95,8 @@ ADLAROMANCEStressUpdateBase<compute_stage>::ADLAROMANCEStressUpdateBase(
     _initial_mobile_dislocations(getParam<Real>("initial_mobile_dislocation_density")),
     _max_mobile_increment(isParamValid("max_relative_mobile_dislocation_increment")
                               ? getParam<Real>("max_relative_mobile_dislocation_increment")
-                              : _rom.getMaxRelativeMobileInc()),
+                              : 0.0),
+    // : _rom.getMaxRelativeMobileInc()),
     _mobile_function(isParamValid("mobile_dislocation_density_forcing_function")
                          ? &getFunction("mobile_dislocation_density_forcing_function")
                          : NULL),
@@ -106,7 +107,8 @@ ADLAROMANCEStressUpdateBase<compute_stage>::ADLAROMANCEStressUpdateBase(
     _initial_immobile_dislocations(getParam<Real>("initial_immobile_dislocation_density")),
     _max_immobile_increment(isParamValid("max_relative_immobile_dislocation_increment")
                                 ? getParam<Real>("max_relative_immobile_dislocation_increment")
-                                : _rom.getMaxRelativeImmobileInc()),
+                                : 0.0),
+    // : _rom.getMaxRelativeImmobileInc()),
     _immobile_function(isParamValid("immobile_dislocation_density_forcing_function")
                            ? &getFunction("immobile_dislocation_density_forcing_function")
                            : NULL),
@@ -117,24 +119,82 @@ ADLAROMANCEStressUpdateBase<compute_stage>::ADLAROMANCEStressUpdateBase(
                                            ? &getFunction("old_creep_strain_forcing_function")
                                            : NULL),
 
-    _num_inputs(_rom.getNumberOfInputs()),
-    _num_outputs(_rom.getNumberOfOutputs()),
-    _stress_index(_rom.getStressIndex()),
-    _degree(_rom.getDegree()),
-    _num_coefs(_rom.getNumberOfRomCoefficients()),
-    _transform(_rom.getTransform()),
-    _transform_coef(_rom.getTransformCoefs()),
-    _input_limits(_rom.getInputLimits()),
-    _coefs(_rom.getCoefs()),
-    _use_env(_rom.checkForEnvironmentFactor()),
-    _transformed_limits(_rom.getTransformedLimits()),
-    _makeframe_helper(_rom.getMakeFrameHelper()),
+    // _num_inputs(_rom.getNumberOfInputs()),
+    // _num_outputs(_rom.getNumberOfOutputs()),
+    // _stress_index(_rom.getStressIndex()),
+    // _degree(_rom.getDegree()),
+    // _num_coefs(_rom.getNumberOfRomCoefficients()),
+    // _transform(_rom.getTransform()),
+    // _transform_coef(_rom.getTransformCoefs()),
+    // _input_limits(_rom.getInputLimits()),
+    // _coefs(_rom.getCoefs()),
+    // _use_env(_rom.checkForEnvironmentFactor()),
+    // _transformed_limits(_rom.getTransformedLimits()),
+    // _makeframe_helper(_rom.getMakeFrameHelper()),
 
     _creep_rate(declareADProperty<Real>(_base_name + "creep_rate")),
     _failed(declareProperty<Real>("ROM_failure")),
 
     _derivative(0.0)
 {
+}
+
+template <ComputeStage compute_stage>
+void
+ADLAROMANCEStressUpdateBase<compute_stage>::initialSetup()
+{
+  _num_inputs = getNumberOfInputs();
+  _num_outputs = getNumberOfOutputs();
+  _stress_index = getStressIndex();
+  _degree = getDegree();
+  _num_coefs = getNumberOfRomCoefficients();
+  _transform = getTransform();
+  _transform_coef = getTransformCoefs();
+  _input_limits = getInputLimits();
+  _coefs = getCoefs();
+  _use_env = checkForEnvironmentFactor();
+  _transformed_limits = getTransformedLimits();
+  _makeframe_helper = getMakeFrameHelper();
+
+  auto transform = getTransform();
+  auto transform_coef = getTransformCoefs();
+  auto input_limits = getInputLimits();
+  auto ceofs = getCoefs();
+
+  // check sizes make sense
+  if (getNumberOfInputs() != 5 && getNumberOfInputs() != 6)
+    mooseError("In ", _name, ": numbergetNumberOfInputs() from LAROMData is not 5 or 6");
+  if (getNumberOfOutputs() != 3)
+    mooseError("In ", _name, ": number_num_outputs from LAROMData is not 3");
+  if (!getDegree() || getDegree() > 4)
+    mooseError("In ", _name, ": getDegree() must be 1, 2, 3 or 4.");
+
+  if (getNumberOfRomCoefficients() != MathUtils::pow(getDegree(), getNumberOfInputs()))
+    mooseError("In ", _name, ": getNumberOfRomCoefficients() is incorrect");
+  if (getDegree() > 4)
+    mooseError("In ", _name, ": Maximum allowed Legendre degree is 3 + constant.");
+
+  // Check that transform makes sense
+  for (unsigned int i = 0; i < getNumberOfOutputs(); ++i)
+    for (unsigned int j = 0; j < getNumberOfInputs(); ++j)
+      if (transform[i][j] != 0 && transform[i][j] != 1 && transform[i][j] != 2)
+        mooseError("In ", _name, ": transform has an invalid function type");
+
+  // Check sizes
+  if (transform.size() != getNumberOfOutputs() || transform[0].size() != getNumberOfInputs())
+    mooseError("In ", _name, ": transform is the wrong shape!");
+  if (transform_coef.size() != getNumberOfOutputs() ||
+      transform_coef[0].size() != getNumberOfInputs())
+    mooseError("In ", _name, ": transform_coef is the wrong shape!");
+  if (ceofs.size() != getNumberOfOutputs() || ceofs[0].size() != getNumberOfRomCoefficients())
+    mooseError("In ", _name, ": coefs is the wrong shape!");
+  if (input_limits.size() != getNumberOfInputs() || input_limits[0].size() != 2)
+    mooseError("In ", _name, ": input_limits is the wrong shape!");
+
+  Moose::out << "ROM model info:\n  name:\t" << _name << "\n  number of outputs:\t"
+             << getNumberOfOutputs() << "\n  number of inputs:\t" << getNumberOfInputs()
+             << "\n  degree (max Legendre degree + constant):\t" << getDegree()
+             << "\n  number of coefficients:\t" << getNumberOfRomCoefficients() << std::endl;
 }
 
 template <ComputeStage compute_stage>
@@ -150,7 +210,7 @@ ADLAROMANCEStressUpdateBase<compute_stage>::initQpStatefulProperties()
 template <ComputeStage compute_stage>
 ADReal
 ADLAROMANCEStressUpdateBase<compute_stage>::computeResidual(const ADReal & effective_trial_stress,
-                                                         const ADReal & scalar)
+                                                            const ADReal & scalar)
 {
   if (_immobile_function)
     _immobile_old = _immobile_function->value(_t, _q_point[_qp]);
@@ -391,9 +451,10 @@ ADLAROMANCEStressUpdateBase<compute_stage>::checkInputWindows(std::vector<ADReal
 
 template <ComputeStage compute_stage>
 void
-ADLAROMANCEStressUpdateBase<compute_stage>::convertInput(const std::vector<ADReal> & input,
-                                                      std::vector<std::vector<ADReal>> & converted,
-                                                      std::vector<std::vector<ADReal>> & dconverted)
+ADLAROMANCEStressUpdateBase<compute_stage>::convertInput(
+    const std::vector<ADReal> & input,
+    std::vector<std::vector<ADReal>> & converted,
+    std::vector<std::vector<ADReal>> & dconverted)
 {
   for (unsigned int i = 0; i < _num_outputs; ++i)
   {
@@ -510,8 +571,8 @@ ADLAROMANCEStressUpdateBase<compute_stage>::convertOutput(
 template <ComputeStage compute_stage>
 ADReal
 ADLAROMANCEStressUpdateBase<compute_stage>::computePolynomial(const ADReal & value,
-                                                           const unsigned int degree,
-                                                           const bool derivative)
+                                                              const unsigned int degree,
+                                                              const bool derivative)
 {
   if (degree == 0)
   {
@@ -538,3 +599,152 @@ ADLAROMANCEStressUpdateBase<compute_stage>::computePolynomial(const ADReal & val
     return 2.5 * Utility::pow<3>(value) - 1.5 * value;
   }
 }
+
+template <ComputeStage compute_stage>
+unsigned int
+ADLAROMANCEStressUpdateBase<compute_stage>::getNumberOfInputs() const
+{
+  auto v = getTransform();
+  if (!v.size())
+    mooseError("In ", _name, ": getTransform is the wrong size");
+  return v[0].size();
+}
+
+template <ComputeStage compute_stage>
+unsigned int
+ADLAROMANCEStressUpdateBase<compute_stage>::getNumberOfOutputs() const
+{
+  auto v = getTransform();
+  return v.size();
+}
+
+template <ComputeStage compute_stage>
+unsigned int
+ADLAROMANCEStressUpdateBase<compute_stage>::getNumberOfRomCoefficients() const
+{
+  auto v = getCoefs();
+  if (!v.size())
+    mooseError("In ", _name, ": getCoefs is the wrong size");
+  return v[0].size();
+}
+
+template <ComputeStage compute_stage>
+bool
+ADLAROMANCEStressUpdateBase<compute_stage>::checkForEnvironmentFactor() const
+{
+  if (getNumberOfInputs() == 6)
+    return true;
+  return false;
+}
+
+template <ComputeStage compute_stage>
+std::vector<std::vector<std::vector<Real>>>
+ADLAROMANCEStressUpdateBase<compute_stage>::getTransformedLimits() const
+{
+  std::vector<std::vector<std::vector<Real>>> transformed_limits(
+      getNumberOfOutputs(),
+      std::vector<std::vector<Real>>(getNumberOfInputs(), std::vector<Real>(2)));
+
+  auto transform = getTransform();
+  auto input_limits = getInputLimits();
+  auto transform_coefs = getTransformCoefs();
+
+  for (unsigned int i = 0; i < getNumberOfOutputs(); ++i)
+  {
+    for (unsigned int j = 0; j < getNumberOfInputs(); ++j)
+    {
+      for (unsigned int k = 0; k < 2; ++k)
+      {
+        if (transform[i][j] == 2)
+          transformed_limits[i][j][k] = std::exp(input_limits[j][k] / transform_coefs[i][j]);
+        else if (transform[i][j] == 1)
+          transformed_limits[i][j][k] = std::log(input_limits[j][k] + transform_coefs[i][j]);
+        else
+          transformed_limits[i][j][k] = input_limits[j][k];
+      }
+    }
+  }
+
+  return transformed_limits;
+}
+
+template <ComputeStage compute_stage>
+std::vector<std::vector<unsigned int>>
+ADLAROMANCEStressUpdateBase<compute_stage>::getMakeFrameHelper() const
+{
+  std::vector<std::vector<unsigned int>> v(getNumberOfRomCoefficients(),
+                                           std::vector<unsigned int>(getNumberOfInputs()));
+  auto degree = getDegree();
+
+  for (unsigned int numcoeffs = 0; numcoeffs < getNumberOfRomCoefficients(); ++numcoeffs)
+    for (unsigned int invar = 0; invar < getNumberOfInputs(); ++invar)
+      v[numcoeffs][invar] = numcoeffs / MathUtils::pow(degree, invar) % degree;
+
+  return v;
+}
+
+template <ComputeStage compute_stage>
+unsigned int
+ADLAROMANCEStressUpdateBase<compute_stage>::getStressIndex() const
+{
+  mooseError("In ", _name, ": getStressIndex must be defined by an inherited class!");
+}
+
+template <ComputeStage compute_stage>
+unsigned int
+ADLAROMANCEStressUpdateBase<compute_stage>::getDegree() const
+{
+  mooseError("In ", _name, ": getDegree must be defined by an inherited class!");
+}
+
+template <ComputeStage compute_stage>
+Real
+ADLAROMANCEStressUpdateBase<compute_stage>::getMaxRelativeMobileInc() const
+{
+  mooseError("In ", _name, ": getMaxRelativeMobileInc must be defined by an inherited class!");
+}
+
+template <ComputeStage compute_stage>
+Real
+ADLAROMANCEStressUpdateBase<compute_stage>::getMaxRelativeImmobileInc() const
+{
+  mooseError("In ", _name, ": getMaxRelativeImmobileInc must be defined by an inherited class!");
+}
+
+template <ComputeStage compute_stage>
+Real
+ADLAROMANCEStressUpdateBase<compute_stage>::getMaxEnvironmentalFactorInc() const
+{
+  mooseError("In ", _name, ": getMaxEnvironmentalFactorInc must be defined by an inherited class!");
+}
+
+template <ComputeStage compute_stage>
+std::vector<std::vector<unsigned int>>
+ADLAROMANCEStressUpdateBase<compute_stage>::getTransform() const
+{
+  mooseError("In ", _name, ": getTransform must be defined by an inherited class!");
+}
+
+template <ComputeStage compute_stage>
+std::vector<std::vector<Real>>
+ADLAROMANCEStressUpdateBase<compute_stage>::getTransformCoefs() const
+{
+  mooseError("In ", _name, ": getTransformCoefs must be defined by an inherited class!");
+}
+
+template <ComputeStage compute_stage>
+std::vector<std::vector<Real>>
+ADLAROMANCEStressUpdateBase<compute_stage>::getInputLimits() const
+{
+  mooseError("In ", _name, ": getInputLimits must be defined by an inherited class!");
+}
+
+template <ComputeStage compute_stage>
+std::vector<std::vector<Real>>
+ADLAROMANCEStressUpdateBase<compute_stage>::getCoefs() const
+{
+  mooseError("In ", _name, ": getCoefs must be defined by an inherited class!");
+}
+
+// explicit instantiation is required for AD base classes
+adBaseClass(ADLAROMANCEStressUpdateBase);

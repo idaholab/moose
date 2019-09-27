@@ -9,18 +9,20 @@
 
 #pragma once
 
-#include "LAROMData.h"
+#include "ADLAROMANCEStressUpdateBase.h"
 
-class SS316LAROMData;
+template <ComputeStage compute_stage>
+class SS316LAROMANCEStressUpdateTest;
 
-template <>
-InputParameters validParams<SS316LAROMData>();
+declareADValidParams(SS316LAROMANCEStressUpdateTest);
 
-class SS316LAROMData : public LAROMData
+template <ComputeStage compute_stage>
+class SS316LAROMANCEStressUpdateTest : public ADLAROMANCEStressUpdateBase<compute_stage>
 {
 public:
-  SS316LAROMData(const InputParameters & parameters);
+  SS316LAROMANCEStressUpdateTest(const InputParameters & parameters);
 
+protected:
   /// Returns index corresponding to the stress input
   virtual unsigned int getStressIndex() const override;
 
@@ -58,4 +60,6 @@ public:
 
   /// Material specific coefficients multiplied by the Legendre polynomials for each of the input variables
   virtual std::vector<std::vector<Real>> getCoefs() const override;
+
+  usingADLAROMANCEStressUpdateBase;
 };

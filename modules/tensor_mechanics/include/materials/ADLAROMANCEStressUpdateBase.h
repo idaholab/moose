@@ -11,7 +11,19 @@
 
 #include "ADRadialReturnCreepStressUpdateBase.h"
 
-#include "LAROMData.h"
+// #include "LAROMData.h"
+
+#define usingADLAROMANCEStressUpdateBase                                                           \
+  usingRadialReturnCreepStressUpdateBaseMembers;                                                   \
+  using ADLAROMANCEStressUpdateBase<compute_stage>::getStressIndex;                                \
+  using ADLAROMANCEStressUpdateBase<compute_stage>::getDegree;                                     \
+  using ADLAROMANCEStressUpdateBase<compute_stage>::getMaxRelativeMobileInc;                       \
+  using ADLAROMANCEStressUpdateBase<compute_stage>::getMaxRelativeImmobileInc;                     \
+  using ADLAROMANCEStressUpdateBase<compute_stage>::getMaxEnvironmentalFactorInc;                  \
+  using ADLAROMANCEStressUpdateBase<compute_stage>::getTransform;                                  \
+  using ADLAROMANCEStressUpdateBase<compute_stage>::getTransformCoefs;                             \
+  using ADLAROMANCEStressUpdateBase<compute_stage>::getInputLimits;                                \
+  using ADLAROMANCEStressUpdateBase<compute_stage>::getCoefs
 
 template <ComputeStage compute_stage>
 class ADLAROMANCEStressUpdateBase;
@@ -29,6 +41,8 @@ public:
   ADLAROMANCEStressUpdateBase(const InputParameters & parameters);
 
 protected:
+  virtual void initialSetup() override;
+
   virtual void initQpStatefulProperties() override;
 
   virtual ADReal computeResidual(const ADReal & effective_trial_stress,
@@ -106,9 +120,65 @@ protected:
   ADReal
   computePolynomial(const ADReal & value, const unsigned int degree, const bool derivative = false);
 
+  /// Calculates and returns the number of inputs for the ROM data set
+  unsigned int getNumberOfInputs() const;
+
+  /// Calculates and returns the number of outputs for the ROM data set
+  unsigned int getNumberOfOutputs() const;
+
+  /// Calculates and returns the number of ROM coefficients for the ROM data set
+  unsigned int getNumberOfRomCoefficients() const;
+
+  /// Checks to number of inputs to see if the environmental factor is included
+  bool checkForEnvironmentFactor() const;
+
+  /// Calculates and returns the transformed limits for the ROM calculations
+  std::vector<std::vector<std::vector<Real>>> getTransformedLimits() const;
+
+  /// Calculates and returns vector utilized in assign values
+  std::vector<std::vector<unsigned int>> getMakeFrameHelper() const;
+
+  /// Returns index corresponding to the stress input
+  virtual unsigned int getStressIndex() const;
+
+  /// Returns degree number for the Rom data set
+  virtual unsigned int getDegree() const;
+
+  /// Returns the relative increment size limit for mobile dislocation density
+  virtual Real getMaxRelativeMobileInc() const;
+
+  /// Returns the relative increment size limit for immobile dislocation density
+  virtual Real getMaxRelativeImmobileInc() const;
+
+  /// Returns the relative increment size limit for the environmental factor
+  virtual Real getMaxEnvironmentalFactorInc() const;
+
+  /* Returns vector of the functions to use for the conversion of input variables.
+   * 0 = regular
+   * 1 = log
+   * 2 = exp
+   */
+  virtual std::vector<std::vector<unsigned int>> getTransform() const;
+
+  /// Returns factors for the functions for the conversion functions given in getTransform
+  virtual std::vector<std::vector<Real>> getTransformCoefs() const;
+
+  /* Returns human-readable limits for the inputs. Inputs ordering is
+   * 0: mobile
+   * 1: immobile_old
+   * 2: trial stress,
+   * 3: effective strain old,
+   * 4: temperature
+   * 5: environmental factor (optional)
+   */
+  virtual std::vector<std::vector<Real>> getInputLimits() const;
+
+  /// Material specific coefficients multiplied by the Legendre polynomials for each of the input variables
+  virtual std::vector<std::vector<Real>> getCoefs() const;
+
 private:
-  /// Userobject that holds ROM data set
-  const LAROMData & _rom;
+  // /// Userobject that holds ROM data set
+  // const LAROMData & _rom;
 
   /// Coupled temperature variable
   const ADVariableValue & _temperature;
@@ -172,19 +242,19 @@ private:
   const Function * const _creep_strain_old_forcing_function;
 
   /// Number of inputs for the ROM data set
-  const unsigned int _num_inputs;
+  unsigned int _num_inputs;
 
   /// Number of inputs to the ROM data set
-  const unsigned int _num_outputs;
+  unsigned int _num_outputs;
 
   /// Index corresponding to the position for the stress in the input vector
-  const unsigned int _stress_index;
+  unsigned int _stress_index;
 
   /// Legendre polynomial degree for the ROM data set
-  const unsigned int _degree;
+  unsigned int _degree;
 
   /// Total number of Legendre polynomial coefficients for the ROM data set
-  const unsigned int _num_coefs;
+  unsigned int _num_coefs;
 
   /// Transform rules defined by the ROM data set
   std::vector<std::vector<unsigned int>> _transform;
@@ -199,7 +269,7 @@ private:
   std::vector<std::vector<Real>> _coefs;
 
   /// Flag that checks if environmental factor is included in ROM data set
-  const bool _use_env;
+  bool _use_env;
 
   /// Limits transformed from readabile input to ROM readable limits
   std::vector<std::vector<std::vector<Real>>> _transformed_limits;
