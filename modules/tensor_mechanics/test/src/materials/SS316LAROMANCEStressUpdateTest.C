@@ -7,58 +7,46 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-//  saturation as a function of effective saturation, and its derivs wrt effective saturation
-//
 #include "SS316LAROMANCEStressUpdateTest.h"
 
 registerADMooseObject("TensorMechanicsTestApp", SS316LAROMANCEStressUpdateTest);
 
-defineADValidParams(SS316LAROMANCEStressUpdateTest,
-                    ADLAROMANCEStressUpdateBase,
-                    params.addClassDescription(
-                        "UserObject that stores the relevant data for the reduced order model "
-                        "for SS316. Must be used in conjuction with ADROMCreepStressUpdate"););
+defineADValidParams(
+    SS316LAROMANCEStressUpdateTest,
+    ADLAROMANCEStressUpdateBase,
+    params.addClassDescription("LAROMANCE creep update model for SS316H");
+
+    // Override defaults for material specific parameters below
+    params.addRangeCheckedParam<unsigned int>(
+        "stress_index",
+        2,
+        "stress_index > 0",
+        "Index corresponding to the trial stress for in the input vector");
+    params.addRangeCheckedParam<Real>("initial_mobile_dislocation_density",
+                                      0.0,
+                                      "initial_mobile_dislocation_density >= 0.0",
+                                      "Initial density of mobile (glissile) dislocations (1/m^2)");
+    params.addRangeCheckedParam<Real>(
+        "max_relative_mobile_dislocation_increment",
+        0.5,
+        "max_relative_mobile_dislocation_increment > 0.0",
+        "Maximum increment of density of mobile (glissile) dislocations.");
+    params.addRangeCheckedParam<Real>(
+        "initial_immobile_dislocation_density",
+        0.0,
+        "initial_immobile_dislocation_density >= 0.0",
+        "Immobile (locked) dislocation density initial value (1/m^2).");
+    params.addRangeCheckedParam<Real>(
+        "max_relative_immobile_dislocation_increment",
+        0.5,
+        "max_relative_immobile_dislocation_increment > 0.0",
+        "Maximum increment of immobile (locked) dislocation density initial value (1/m^2)."););
 
 template <ComputeStage compute_stage>
 SS316LAROMANCEStressUpdateTest<compute_stage>::SS316LAROMANCEStressUpdateTest(
     const InputParameters & parameters)
   : ADLAROMANCEStressUpdateBase<compute_stage>(parameters)
 {
-}
-
-template <ComputeStage compute_stage>
-unsigned int
-SS316LAROMANCEStressUpdateTest<compute_stage>::getStressIndex() const
-{
-  return 2;
-}
-
-template <ComputeStage compute_stage>
-unsigned int
-SS316LAROMANCEStressUpdateTest<compute_stage>::getDegree() const
-{
-  return 4;
-}
-
-template <ComputeStage compute_stage>
-Real
-SS316LAROMANCEStressUpdateTest<compute_stage>::getMaxRelativeMobileInc() const
-{
-  return 0.5;
-}
-
-template <ComputeStage compute_stage>
-Real
-SS316LAROMANCEStressUpdateTest<compute_stage>::getMaxRelativeImmobileInc() const
-{
-  return 0.5;
-}
-
-template <ComputeStage compute_stage>
-Real
-SS316LAROMANCEStressUpdateTest<compute_stage>::getMaxEnvironmentalFactorInc() const
-{
-  return 1.0e30;
 }
 
 template <ComputeStage compute_stage>

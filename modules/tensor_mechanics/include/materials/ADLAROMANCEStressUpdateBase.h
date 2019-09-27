@@ -11,15 +11,8 @@
 
 #include "ADRadialReturnCreepStressUpdateBase.h"
 
-// #include "LAROMData.h"
-
 #define usingADLAROMANCEStressUpdateBase                                                           \
   usingRadialReturnCreepStressUpdateBaseMembers;                                                   \
-  using ADLAROMANCEStressUpdateBase<compute_stage>::getStressIndex;                                \
-  using ADLAROMANCEStressUpdateBase<compute_stage>::getDegree;                                     \
-  using ADLAROMANCEStressUpdateBase<compute_stage>::getMaxRelativeMobileInc;                       \
-  using ADLAROMANCEStressUpdateBase<compute_stage>::getMaxRelativeImmobileInc;                     \
-  using ADLAROMANCEStressUpdateBase<compute_stage>::getMaxEnvironmentalFactorInc;                  \
   using ADLAROMANCEStressUpdateBase<compute_stage>::getTransform;                                  \
   using ADLAROMANCEStressUpdateBase<compute_stage>::getTransformCoefs;                             \
   using ADLAROMANCEStressUpdateBase<compute_stage>::getInputLimits;                                \
@@ -29,10 +22,6 @@ template <ComputeStage compute_stage>
 class ADLAROMANCEStressUpdateBase;
 
 declareADValidParams(ADLAROMANCEStressUpdateBase);
-
-/**
- * Class to call the Reduced Order Model to predict the behavior of creep
- */
 
 template <ComputeStage compute_stage>
 class ADLAROMANCEStressUpdateBase : public ADRadialReturnCreepStressUpdateBase<compute_stage>
@@ -120,38 +109,11 @@ protected:
   ADReal
   computePolynomial(const ADReal & value, const unsigned int degree, const bool derivative = false);
 
-  /// Calculates and returns the number of inputs for the ROM data set
-  unsigned int getNumberOfInputs() const;
-
-  /// Calculates and returns the number of outputs for the ROM data set
-  unsigned int getNumberOfOutputs() const;
-
-  /// Calculates and returns the number of ROM coefficients for the ROM data set
-  unsigned int getNumberOfRomCoefficients() const;
-
-  /// Checks to number of inputs to see if the environmental factor is included
-  bool checkForEnvironmentFactor() const;
-
   /// Calculates and returns the transformed limits for the ROM calculations
   std::vector<std::vector<std::vector<Real>>> getTransformedLimits() const;
 
   /// Calculates and returns vector utilized in assign values
   std::vector<std::vector<unsigned int>> getMakeFrameHelper() const;
-
-  /// Returns index corresponding to the stress input
-  virtual unsigned int getStressIndex() const;
-
-  /// Returns degree number for the Rom data set
-  virtual unsigned int getDegree() const;
-
-  /// Returns the relative increment size limit for mobile dislocation density
-  virtual Real getMaxRelativeMobileInc() const;
-
-  /// Returns the relative increment size limit for immobile dislocation density
-  virtual Real getMaxRelativeImmobileInc() const;
-
-  /// Returns the relative increment size limit for the environmental factor
-  virtual Real getMaxEnvironmentalFactorInc() const;
 
   /* Returns vector of the functions to use for the conversion of input variables.
    * 0 = regular
@@ -238,6 +200,9 @@ private:
   /// Container for old immobile dislocation value
   Real _immobile_old;
 
+  /// Index corresponding to the position for the stress in the input vector
+  const unsigned int _stress_index;
+
   /// Optional old creep strain forcing function
   const Function * const _creep_strain_old_forcing_function;
 
@@ -246,9 +211,6 @@ private:
 
   /// Number of inputs to the ROM data set
   unsigned int _num_outputs;
-
-  /// Index corresponding to the position for the stress in the input vector
-  unsigned int _stress_index;
 
   /// Legendre polynomial degree for the ROM data set
   unsigned int _degree;
@@ -260,7 +222,7 @@ private:
   std::vector<std::vector<unsigned int>> _transform;
 
   /// Transform coefficients defined by the ROM data set
-  std::vector<std::vector<Real>> _transform_coef;
+  std::vector<std::vector<Real>> _transform_coefs;
 
   /// Input limits defined by the ROM data set
   std::vector<std::vector<Real>> _input_limits;

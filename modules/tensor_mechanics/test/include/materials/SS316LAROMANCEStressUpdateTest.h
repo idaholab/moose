@@ -23,21 +23,6 @@ public:
   SS316LAROMANCEStressUpdateTest(const InputParameters & parameters);
 
 protected:
-  /// Returns index corresponding to the stress input
-  virtual unsigned int getStressIndex() const override;
-
-  /// Returns degree number for the Rom data set
-  virtual unsigned int getDegree() const override;
-
-  /// Returns the relative increment size limit for mobile dislocation density
-  virtual Real getMaxRelativeMobileInc() const override;
-
-  /// Returns the relative increment size limit for immobile dislocation density
-  virtual Real getMaxRelativeImmobileInc() const override;
-
-  /// Returns the relative increment size limit for the environmental factor
-  virtual Real getMaxEnvironmentalFactorInc() const override;
-
   /* Returns vector of the functions to use for the conversion of input variables.
    * 0 = regular
    * 1 = log
