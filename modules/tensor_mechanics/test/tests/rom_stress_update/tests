@@ -1,7 +1,7 @@
 [Tests]
   [./rom]
     issues = '#14046'
-    design = 'SS316LAROMData.md ADLAROMCreepStressUpdate.md'
+    design = 'ADLAROMANCEStressUpdateBase.md'
     requirement = 'The system shall compute a creep rate based on a reduced order model in:'
     [./3d]
       type = 'CSVDiff'

@@ -11,23 +11,23 @@
 
 #include "ADLAROMANCEStressUpdateBase.h"
 
-template <ComputeStage compute_stage>
-class SS316LAROMANCEStressUpdateTest;
+template <ComputeStage>
+class SS316HLAROMANCEStressUpdateTest;
 
-declareADValidParams(SS316LAROMANCEStressUpdateTest);
+declareADValidParams(SS316HLAROMANCEStressUpdateTest);
 
 template <ComputeStage compute_stage>
-class SS316LAROMANCEStressUpdateTest : public ADLAROMANCEStressUpdateBase<compute_stage>
+class SS316HLAROMANCEStressUpdateTest : public ADLAROMANCEStressUpdateBase<compute_stage>
 {
 public:
-  SS316LAROMANCEStressUpdateTest(const InputParameters & parameters);
+  SS316HLAROMANCEStressUpdateTest(const InputParameters & parameters);
 
 protected:
   /// Returns vector of the functions to use for the conversion of input variables.
-  virtual std::vector<std::vector<ROMInputTransform>> getTransform() const override;
+  virtual std::vector<std::vector<ROMInputTransform>> getTransform() override;
 
   /// Returns factors for the functions for the conversion functions given in getTransform
-  virtual std::vector<std::vector<Real>> getTransformCoefs() const override;
+  virtual std::vector<std::vector<Real>> getTransformCoefs() override;
 
   /* Returns human-readable limits for the inputs. Inputs ordering is
    * 0: mobile
@@ -37,10 +37,10 @@ protected:
    * 4: temperature
    * 5: environmental factor (optional)
    */
-  virtual std::vector<std::vector<Real>> getInputLimits() const override;
+  virtual std::vector<std::vector<Real>> getInputLimits() override;
 
   /// Material specific coefficients multiplied by the Legendre polynomials for each of the input variables
-  virtual std::vector<std::vector<Real>> getCoefs() const override;
+  virtual std::vector<std::vector<Real>> getCoefs() override;
 
   usingADLAROMANCEStressUpdateBase;
 };

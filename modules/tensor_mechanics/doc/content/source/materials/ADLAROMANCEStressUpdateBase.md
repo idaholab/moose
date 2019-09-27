@@ -1,10 +1,9 @@
-# AD LAROM Creep Stress Update
-
-!syntax description /Materials/ADLAROMCreepStressUpdate
+# LAROMANCE Stress Update with Automatic Differentiation
 
 ## Description
 
-`ADLAROMCreepStressUpdate` computes the creep rate of materials by sampling a Reduced Order Model (ROM) formulated
+The `ADLAROMANCEStressUpdate` method computes the creep rate of materials by sampling a Los Alamos Reduced Order
+Model Applied to Nonlinear Constitutive Equations (LAROMANCE) formulated
 via calibration with lower-length scale simulations. This method utilizes the exact same techniques
 utilized in [ADPowerLawCreepStressUpdate](/ADPowerLawCreepStressUpdate.md) including the radial
 return method implemented in [ADRadialReturnStressUpdate](/ADRadialReturnStressUpdate.md), however
@@ -12,6 +11,10 @@ in place of a traditional power-law creep model, a ROM is sampled to determine t
 function of temperature, defect concentrations, the von Mises trial stress, and an environmental
 factor. In addition, lower-length scale information, here mobile defect dislocations and immobile
 defect dislocations, are evolved as determined by the ROM.
+
+`ADLAROMANCEStressUpdateBase` provides the necessary math and implementation for ROMs provided in
+the correct `LAROMANCE` model format, which essentially includes the necessary material specific
+data. An example of how to implement the necessary data is provided in `SS316HLAROMANCEStressUpdateTest`.
 
 ### Theory
 
@@ -142,27 +145,27 @@ overfitting is indicated by a stark difference in the regression fit to training
 To validate the obtained regression coefficient values, initial conditions are given to the ROM and
 VPSC, and the resulting simulations are compared.  
 
-## Implementation
+## Writing a LAROMANCE Stress Update Material
 
-While `ADLAROMCreepStressUpdate` contains the necessary algorithms contained to evaluate the ROM,
-the actual data that comprises the ROM is contained in a separate UserObject that inherets from
-`LAROMData`. The data contained in `LAROMData` is the maximum and minimum values used to calibrate
-the ROM, the transform used to prepare the input for the ROM, and the Legendre Polyonimal
-coefficients.
+While `ADLAROMANCEStressUpdateBase` contains the necessary algorithms contained to evaluate the ROM,
+he material specific `LAROMANCE` data is contained in inherited classes, for example `SS316HLAROMANCEStressUpdateTest`,
+which consists of the input limits, input transformations, and Legendre polynomials. Derived classes
+must overwrite the four virtual methods:
 
-`ADLAROMCreepStressUpdate` must be run in conjunction with an inelastic strain return mapping stress
+- +getTransform+: Returns vector of the functions to use for the conversion of input variables.
+- +getTransformCoefs+: Returns factors for the functions for the conversion functions given in getTransform.
+- +getInputLimits+: Returns human-readable limits for the inputs.
+- +getCoefs+: Material specific coefficients multiplied by the Legendre polynomials for each of the input variables.
+
+Additionally, new `LAROMANCE` models can override five input parameter defaults to ensure correct ROM implementation:
+
+- +stress_index+: Index corresponding to the trial stress for in the input vector.
+- +initial_mobile_dislocation_density+: Initial density of mobile (glissile) dislocations.
+- +max_relative_mobile_dislocation_increment+: Maximum increment of density of mobile (glissile) dislocations.
+- +initial_immobile_dislocation_density+: Immobile (locked) dislocation density initial value.
+- +max_relative_immobile_dislocation_increment+: Maximum increment of immobile (locked) dislocation density initial value.
+
+`ADLAROMANCEStressUpdateBase` derived classes must be run in conjunction with an inelastic strain return mapping stress
 calculator such as [ADComputeMultipleInelasticStress](ADComputeMultipleInelasticStress.md).
-
-!listing modules/tensor_mechanics/test/tests/rom_stress_update/2drz.i block=Materials
-
-In addition, the material specific `LAROMData` user object must also be coupled:
-
-!listing modules/tensor_mechanics/test/tests/rom_stress_update/2drz.i block=UserObjects
-
-!syntax parameters /Materials/ADLAROMCreepStressUpdate
-
-!syntax inputs /Materials/ADLAROMCreepStressUpdate
-
-!syntax children /Materials/ADLAROMCreepStressUpdate
 
 !bibtex bibliography

@@ -97,10 +97,7 @@ ADLAROMANCEStressUpdateBase<compute_stage>::ADLAROMANCEStressUpdateBase(
     _mobile_dislocations(declareADProperty<Real>(_base_name + "mobile_dislocations")),
     _mobile_dislocations_old(getMaterialPropertyOld<Real>(_base_name + "mobile_dislocations")),
     _initial_mobile_dislocations(getParam<Real>("initial_mobile_dislocation_density")),
-    _max_mobile_increment(isParamValid("max_relative_mobile_dislocation_increment")
-                              ? getParam<Real>("max_relative_mobile_dislocation_increment")
-                              : 0.0),
-    // : _rom.getMaxRelativeMobileInc()),
+    _max_mobile_increment(getParam<Real>("max_relative_mobile_dislocation_increment")),
     _mobile_function(isParamValid("mobile_dislocation_density_forcing_function")
                          ? &getFunction("mobile_dislocation_density_forcing_function")
                          : NULL),
@@ -109,10 +106,7 @@ ADLAROMANCEStressUpdateBase<compute_stage>::ADLAROMANCEStressUpdateBase(
     _immobile_dislocations(declareADProperty<Real>(_base_name + "immobile_dislocations")),
     _immobile_dislocations_old(getMaterialPropertyOld<Real>(_base_name + "immobile_dislocations")),
     _initial_immobile_dislocations(getParam<Real>("initial_immobile_dislocation_density")),
-    _max_immobile_increment(isParamValid("max_relative_immobile_dislocation_increment")
-                                ? getParam<Real>("max_relative_immobile_dislocation_increment")
-                                : 0.0),
-    // : _rom.getMaxRelativeImmobileInc()),
+    _max_immobile_increment(getParam<Real>("max_relative_immobile_dislocation_increment")),
     _immobile_function(isParamValid("immobile_dislocation_density_forcing_function")
                            ? &getFunction("immobile_dislocation_density_forcing_function")
                            : NULL),
@@ -612,7 +606,7 @@ ADLAROMANCEStressUpdateBase<compute_stage>::getMakeFrameHelper() const
 
 template <ComputeStage compute_stage>
 std::vector<std::vector<ROMInputTransform>>
-ADLAROMANCEStressUpdateBase<compute_stage>::getTransform() const
+ADLAROMANCEStressUpdateBase<compute_stage>::getTransform()
 {
   mooseError("In ", _name, ": getTransform must be defined by an inherited class!");
   std::vector<std::vector<ROMInputTransform>> v;
@@ -621,7 +615,7 @@ ADLAROMANCEStressUpdateBase<compute_stage>::getTransform() const
 
 template <ComputeStage compute_stage>
 std::vector<std::vector<Real>>
-ADLAROMANCEStressUpdateBase<compute_stage>::getTransformCoefs() const
+ADLAROMANCEStressUpdateBase<compute_stage>::getTransformCoefs()
 {
   mooseError("In ", _name, ": getTransformCoefs must be defined by an inherited class!");
   std::vector<std::vector<Real>> v;
@@ -630,7 +624,7 @@ ADLAROMANCEStressUpdateBase<compute_stage>::getTransformCoefs() const
 
 template <ComputeStage compute_stage>
 std::vector<std::vector<Real>>
-ADLAROMANCEStressUpdateBase<compute_stage>::getInputLimits() const
+ADLAROMANCEStressUpdateBase<compute_stage>::getInputLimits()
 {
   mooseError("In ", _name, ": getInputLimits must be defined by an inherited class!");
   std::vector<std::vector<Real>> v;
@@ -639,7 +633,7 @@ ADLAROMANCEStressUpdateBase<compute_stage>::getInputLimits() const
 
 template <ComputeStage compute_stage>
 std::vector<std::vector<Real>>
-ADLAROMANCEStressUpdateBase<compute_stage>::getCoefs() const
+ADLAROMANCEStressUpdateBase<compute_stage>::getCoefs()
 {
   mooseError("In ", _name, ": getCoefs must be defined by an inherited class!");
   std::vector<std::vector<Real>> v;

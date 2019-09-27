@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "SS316LAROMANCEStressUpdateTest.h"
+#include "SS316HLAROMANCEStressUpdateTest.h"
 
-registerADMooseObject("TensorMechanicsTestApp", SS316LAROMANCEStressUpdateTest);
+registerADMooseObject("TensorMechanicsTestApp", SS316HLAROMANCEStressUpdateTest);
 
 defineADValidParams(
-    SS316LAROMANCEStressUpdateTest,
+    SS316HLAROMANCEStressUpdateTest,
     ADLAROMANCEStressUpdateBase,
     params.addClassDescription("LAROMANCE creep update model for SS316H");
 
@@ -23,7 +23,7 @@ defineADValidParams(
         "stress_index > 0",
         "Index corresponding to the trial stress for in the input vector");
     params.addRangeCheckedParam<Real>("initial_mobile_dislocation_density",
-                                      0.0,
+                                      5.0e12,
                                       "initial_mobile_dislocation_density >= 0.0",
                                       "Initial density of mobile (glissile) dislocations (1/m^2)");
     params.addRangeCheckedParam<Real>(
@@ -33,7 +33,7 @@ defineADValidParams(
         "Maximum increment of density of mobile (glissile) dislocations.");
     params.addRangeCheckedParam<Real>(
         "initial_immobile_dislocation_density",
-        0.0,
+        5.0e11,
         "initial_immobile_dislocation_density >= 0.0",
         "Immobile (locked) dislocation density initial value (1/m^2).");
     params.addRangeCheckedParam<Real>(
@@ -43,7 +43,7 @@ defineADValidParams(
         "Maximum increment of immobile (locked) dislocation density initial value (1/m^2)."););
 
 template <ComputeStage compute_stage>
-SS316LAROMANCEStressUpdateTest<compute_stage>::SS316LAROMANCEStressUpdateTest(
+SS316HLAROMANCEStressUpdateTest<compute_stage>::SS316HLAROMANCEStressUpdateTest(
     const InputParameters & parameters)
   : ADLAROMANCEStressUpdateBase<compute_stage>(parameters)
 {
@@ -51,7 +51,7 @@ SS316LAROMANCEStressUpdateTest<compute_stage>::SS316LAROMANCEStressUpdateTest(
 
 template <ComputeStage compute_stage>
 std::vector<std::vector<ROMInputTransform>>
-SS316LAROMANCEStressUpdateTest<compute_stage>::getTransform() const
+SS316HLAROMANCEStressUpdateTest<compute_stage>::getTransform()
 {
   return {{ROMInputTransform::LOG,
            ROMInputTransform::LOG,
@@ -72,7 +72,7 @@ SS316LAROMANCEStressUpdateTest<compute_stage>::getTransform() const
 
 template <ComputeStage compute_stage>
 std::vector<std::vector<Real>>
-SS316LAROMANCEStressUpdateTest<compute_stage>::getTransformCoefs() const
+SS316HLAROMANCEStressUpdateTest<compute_stage>::getTransformCoefs()
 {
   return {
       {1.0, 1.0, 1.0e1, 4.0e-5, 0.0}, {1.0e13, 1.0, 1.0e1, 0.0, 1.0}, {0.0, 1.0, 5.0, 1.0e-4, 0.0}};
@@ -80,7 +80,7 @@ SS316LAROMANCEStressUpdateTest<compute_stage>::getTransformCoefs() const
 
 template <ComputeStage compute_stage>
 std::vector<std::vector<Real>>
-SS316LAROMANCEStressUpdateTest<compute_stage>::getInputLimits() const
+SS316HLAROMANCEStressUpdateTest<compute_stage>::getInputLimits()
 {
   return {{1.32776E+12, 9.99959E+12},
           {2.93039E+11, 9.99798E+11},
@@ -91,7 +91,7 @@ SS316LAROMANCEStressUpdateTest<compute_stage>::getInputLimits() const
 
 template <ComputeStage compute_stage>
 std::vector<std::vector<Real>>
-SS316LAROMANCEStressUpdateTest<compute_stage>::getCoefs() const
+SS316HLAROMANCEStressUpdateTest<compute_stage>::getCoefs()
 {
   return {
       {-16.438661699503427,    4.591731583001092,     0.6746168063837104,     0.24145810486515984,

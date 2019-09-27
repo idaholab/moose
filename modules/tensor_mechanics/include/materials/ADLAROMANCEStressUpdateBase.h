@@ -18,7 +18,7 @@
   using ADLAROMANCEStressUpdateBase<compute_stage>::getInputLimits;                                \
   using ADLAROMANCEStressUpdateBase<compute_stage>::getCoefs
 
-template <ComputeStage compute_stage>
+template <ComputeStage>
 class ADLAROMANCEStressUpdateBase;
 
 declareADValidParams(ADLAROMANCEStressUpdateBase);
@@ -123,10 +123,10 @@ protected:
   std::vector<std::vector<unsigned int>> getMakeFrameHelper() const;
 
   /// Returns vector of the functions to use for the conversion of input variables.
-  virtual std::vector<std::vector<ROMInputTransform>> getTransform() const;
+  virtual std::vector<std::vector<ROMInputTransform>> getTransform();
 
   /// Returns factors for the functions for the conversion functions given in getTransform
-  virtual std::vector<std::vector<Real>> getTransformCoefs() const;
+  virtual std::vector<std::vector<Real>> getTransformCoefs();
 
   /* Returns human-readable limits for the inputs. Inputs ordering is
    * 0: mobile
@@ -136,12 +136,11 @@ protected:
    * 4: temperature
    * 5: environmental factor (optional)
    */
-  virtual std::vector<std::vector<Real>> getInputLimits() const;
+  virtual std::vector<std::vector<Real>> getInputLimits();
 
   /// Material specific coefficients multiplied by the Legendre polynomials for each of the input variables
-  virtual std::vector<std::vector<Real>> getCoefs() const;
+  virtual std::vector<std::vector<Real>> getCoefs();
 
-private:
   /// Coupled temperature variable
   const ADVariableValue & _temperature;
 
