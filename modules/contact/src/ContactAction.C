@@ -178,17 +178,6 @@ ContactAction::addMortarContact()
     // Don't do mesh modifiers when recovering!
     if (!_app.isRecovering())
     {
-      // Get the current subdomain ids so that we can add the new ones at the end of the list.
-      // These ids are needed by the mesh modifier and lagrange multiplier variable.
-      //      std::set<SubdomainID> current_subdomain_ids;
-      //      _mesh->getMesh().subdomain_ids(current_subdomain_ids);
-      //      const SubdomainID current_max_subdomain_id =
-      //          *std::max_element(current_subdomain_ids.begin(), current_subdomain_ids.end());
-      const SubdomainID current_max_subdomain_id = 10000; // fixme
-
-      const SubdomainID master_subdomain_id = current_max_subdomain_id + 1;
-      const SubdomainID slave_subdomain_id = current_max_subdomain_id + 2;
-
       const MeshGeneratorName master_name = master_subdomain_name + "_generator";
       const MeshGeneratorName slave_name = slave_subdomain_name + "_generator";
 
@@ -197,9 +186,6 @@ ContactAction::addMortarContact()
 
       master_params.set<MeshGeneratorName>("input") = _mesh_gen_name;
       slave_params.set<MeshGeneratorName>("input") = master_name;
-
-      master_params.set<SubdomainID>("new_block_id") = master_subdomain_id;
-      slave_params.set<SubdomainID>("new_block_id") = slave_subdomain_id;
 
       master_params.set<SubdomainName>("new_block_name") = master_subdomain_name;
       slave_params.set<SubdomainName>("new_block_name") = slave_subdomain_name;
