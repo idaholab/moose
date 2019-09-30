@@ -14,22 +14,23 @@
 []
 
 [Mesh]
-  # file = wedge_4x6.e
-  file = wedge_8x12.e
-  # file = wedge_16x24.e
-  # file = wedge_32x48.e
-  # file = wedge_64x96.e
-[]
-
-[MeshModifiers]
+  [file]
+    type = FileMeshGenerator
+    # file = wedge_4x6.e
+    file = wedge_8x12.e
+    # file = wedge_16x24.e
+    # file = wedge_32x48.e
+    # file = wedge_64x96.e
+  []
   [./corner_node]
     # Pin is on the centerline of the channel on the left-hand side of
     # the domain at r=1.  If you change the domain, you will need to
     # update this pin location for the pressure exact solution to
     # work.
-    type = AddExtraNodeset
+    type = ExtraNodesetGenerator
     new_boundary = pinned_node
     coord = '1 0'
+    input = file
   [../]
 []
 

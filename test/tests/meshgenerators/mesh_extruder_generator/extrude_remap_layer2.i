@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./fmg]
     type = FileMeshGenerator
     file = multiblock.e
@@ -17,10 +17,6 @@
     layers = '1 3 5'
     new_ids = '10 12 15' # Repeat this remapping for each layer
   []
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Variables]

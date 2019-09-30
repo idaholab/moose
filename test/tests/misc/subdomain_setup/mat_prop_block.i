@@ -1,12 +1,4 @@
 [Mesh]
-  type = MeshGeneratorMesh
-[]
-
-[Debug]
-  show_material_props = true
-[]
-
-[MeshGenerators]
   [./generator]
     type = GeneratedMeshGenerator
     dim = 2
@@ -41,6 +33,10 @@
     top_right = '1 1 0'
     block_id = 4
   [../]
+[]
+
+[Debug]
+  show_material_props = true
 []
 
 [Variables]

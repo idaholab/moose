@@ -1,13 +1,13 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 2
-  ny = 2
-[]
-
-[MeshModifiers]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 2
+    ny = 2
+  []
   [./right_side]
-    type = SubdomainBoundingBox
+    input = gen
+    type = SubdomainBoundingBoxGenerator
     bottom_left = '0 0 0'
     top_right = '1 0.5 0'
     block_id = 1

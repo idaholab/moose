@@ -12,19 +12,6 @@
   zmin = -10
 []
 
-#[MeshModifiers]
-#  [./cnode]
-#    type = AddExtraNodeset
-#    coord = '0 0 0'
-#    new_boundary = 100
-#  [../]
-#  [./anode]
-#    type = AddExtraNodeset
-#    coord = '0 10'
-#    new_boundary = 101
-#  [../]
-#[]
-
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
 []

@@ -5,16 +5,16 @@
 # For better agreement with the analytical solution (ana_pp), just increase nx
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 1
-  nx = 100
-  xmin = -1
-  xmax = 0
-[]
-
-[MeshModifiers]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 1
+    nx = 100
+    xmin = -1
+    xmax = 0
+  []
   [./define_block1]
-    type = SubdomainBoundingBox
+    input = gen
+    type = SubdomainBoundingBoxGenerator
     block_id = 1
     bottom_left = '-1 -1 -1'
     top_right = '-0.5 1 1'

@@ -229,12 +229,15 @@ SetupMeshAction::act()
     else
     {
       // If the [Mesh] block contains mesh generators, change the default type to construct
-      if (_awh.hasActions("add_mesh_generator"))
+      if (!_awh.getActionListByName("add_mesh_generator").empty())
       {
         if (!_pars.isParamSetByUser("type"))
         {
           _type = "MeshGeneratorMesh";
+          auto original_params = _moose_object_pars;
           _moose_object_pars = _factory.getValidParams("MeshGeneratorMesh");
+          if (original_params.isParamSetByUser("parallel_type"))
+            _moose_object_pars.applySpecificParameters(original_params, {"parallel_type"});
         }
         else if (!_moose_object_pars.get<bool>("_mesh_generator_mesh"))
         {
@@ -255,7 +258,18 @@ SetupMeshAction::act()
   else if (_current_task == "set_mesh_base")
   {
     if (!_app.masterMesh() && !_mesh->hasMeshBase())
-      _mesh->setMeshBase(_mesh->buildMeshBaseObject());
+    {
+      // We want to set the MeshBase object to that coming from mesh generators when the following
+      // conditions are met:
+      // 1. We have mesh generators
+      // 2. We are recovering/restarting AND we are not the master application, e.g. we are a
+      //    sub-application
+      if (!_awh.getActionListByName("add_mesh_generator").empty() &&
+          !((_app.isRecovering() || _app.isRestarting()) && _app.isUltimateMaster()))
+        _mesh->setMeshBase(_app.getMeshGeneratorMesh());
+      else
+        _mesh->setMeshBase(_mesh->buildMeshBaseObject());
+    }
   }
 
   else if (_current_task == "init_mesh")

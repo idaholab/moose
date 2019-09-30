@@ -9,7 +9,8 @@
 [Problem]
   type = ReferenceResidualProblem
   solution_variables = 'disp_x disp_y'
-  reference_residual_variables = 'saved_x saved_y'
+  extra_tag_vectors = 'ref'
+  reference_vector = 'ref'
 []
 
 [Variables]
@@ -64,6 +65,7 @@
     save_in_disp_x = saved_x
     diag_save_in_disp_y = diag_saved_y
     diag_save_in_disp_x = diag_saved_x
+    extra_vector_tags = 'ref'
   [../]
 []
 

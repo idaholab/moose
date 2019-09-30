@@ -962,6 +962,10 @@ private:
   /// Whether to turn on automatic scaling by default
   const bool _automatic_automatic_scaling;
 
+  /// Whether the mesh generator MeshBase has been popped off its storage container and is no
+  /// longer accessible
+  bool _popped_final_mesh_generator;
+
   // Allow FEProblemBase to set the recover/restart state, so make it a friend
   friend class FEProblemBase;
   friend class Restartable;

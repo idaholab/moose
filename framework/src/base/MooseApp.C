@@ -321,7 +321,8 @@ MooseApp::MooseApp(InputParameters parameters)
         _perf_graph.registerSection("MooseApp::executeMeshGenerators", 1)),
     _restore_cached_backup_timer(_perf_graph.registerSection("MooseApp::restoreCachedBackup", 2)),
     _create_minimal_app_timer(_perf_graph.registerSection("MooseApp::createMinimalApp", 3)),
-    _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling"))
+    _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling")),
+    _popped_final_mesh_generator(false)
 {
   Registry::addKnownLabel(_type);
   Moose::registerAll(_factory, _action_factory, _syntax);
@@ -1568,12 +1569,18 @@ MooseApp::clearMeshGenerators()
 std::unique_ptr<MeshBase>
 MooseApp::getMeshGeneratorMesh(bool check_unique)
 {
+  if (_popped_final_mesh_generator == true)
+    mooseError("MooseApp::getMeshGeneratorMesh is being called for a second time. You cannot do "
+               "this because the final generated mesh was popped from its storage container the "
+               "first time this method was called");
+
   if (_final_generated_meshes.empty())
     mooseError("No generated mesh to retrieve. Your input file should contain either a [Mesh] or "
                "[MeshGenerators] block.");
 
   auto mesh_unique_ptr_ptr = _final_generated_meshes.front();
   _final_generated_meshes.pop_front();
+  _popped_final_mesh_generator = true;
 
   if (check_unique && !_final_generated_meshes.empty())
     mooseError("Multiple generated meshes exist while retrieving the final Mesh. This means that "

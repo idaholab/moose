@@ -122,9 +122,7 @@ StressDivergenceTensors::initialSetup()
 void
 StressDivergenceTensors::computeResidual()
 {
-  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
-  _local_re.resize(re.size());
-  _local_re.zero();
+  prepareVectorTag(_assembly, _var.number());
 
   if (_volumetric_locking_correction)
     computeAverageGradientTest();
@@ -134,7 +132,7 @@ StressDivergenceTensors::computeResidual()
     for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
       _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual();
 
-  re += _local_re;
+  accumulateTaggedLocalResidual();
 
   if (_has_save_in)
   {

@@ -10,7 +10,8 @@
 [Problem]
   type = ReferenceResidualProblem
   solution_variables = 'disp_x disp_y disp_z temp'
-  reference_residual_variables = 'saved_x saved_y saved_z saved_t'
+  extra_tag_vectors = 'ref'
+  reference_vector = 'ref'
 []
 
 [Variables]
@@ -54,6 +55,7 @@
     save_in_disp_x = saved_x
     save_in_disp_y = saved_y
     save_in_disp_z = saved_z
+    extra_vector_tags = 'ref'
   [../]
 []
 
@@ -62,6 +64,7 @@
     type = HeatConduction
     variable = temp
     save_in = saved_t
+    extra_vector_tags = 'ref'
   [../]
 []
 

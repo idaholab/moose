@@ -24,22 +24,22 @@
 []
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  xmin = 0
-  xmax = 1.0
-  ymin = 0
-  ymax = 1.0
-  nx = 64
-  ny = 64
-  elem_type = QUAD4
-[]
-
-[MeshModifiers]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    xmin = 0
+    xmax = 1.0
+    ymin = 0
+    ymax = 1.0
+    nx = 64
+    ny = 64
+    elem_type = QUAD4
+  []
   [./corner_node]
-    type = AddExtraNodeset
+    type = ExtraNodesetGenerator
     new_boundary = 'pinned_node'
     nodes = '0'
+    input = gen
   [../]
 []
 

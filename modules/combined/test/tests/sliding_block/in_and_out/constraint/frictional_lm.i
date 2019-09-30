@@ -1,16 +1,18 @@
 [Mesh]
-  file = sliding_elastic_blocks_2d.e
-  patch_size = 80
-[]
-
-[MeshModifiers]
+  [file]
+    type = FileMeshGenerator
+    file = sliding_elastic_blocks_2d.e
+    patch_size = 80
+  []
   [slave]
-    type = LowerDBlockFromSideset
+    input = file
+    type = LowerDBlockFromSidesetGenerator
     sidesets = '3'
     new_block_id = '30'
   []
   [master]
-    type = LowerDBlockFromSideset
+    input = slave
+    type = LowerDBlockFromSidesetGenerator
     sidesets = '2'
     new_block_id = '20'
   []

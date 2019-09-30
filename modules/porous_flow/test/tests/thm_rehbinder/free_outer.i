@@ -1,17 +1,17 @@
 [Mesh]
-  type = AnnularMesh
-  nr = 40
-  nt = 16
-  rmin = 0.1
-  rmax = 1
-  tmin = 0.0
-  tmax = 1.570796326795
-  growth_r = 1.1
-[]
-
-[MeshModifiers]
+  [annular]
+    type = AnnularMeshGenerator
+    nr = 40
+    nt = 16
+    rmin = 0.1
+    rmax = 1
+    tmin = 0.0
+    tmax = 1.570796326795
+    growth_r = 1.1
+  []
   [./make3D]
-    type = MeshExtruder
+    input = annular
+    type = MeshExtruderGenerator
     bottom_sideset = bottom
     top_sideset = top
     extrusion_vector = '0 0 1'

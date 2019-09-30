@@ -8,33 +8,33 @@
 []
 ############################################################
 [Mesh]
-  type = GeneratedMesh
-  dim = 1
-  xmin = 0
-  xmax = 1
-  nx = 100
-[]
-
-[MeshModifiers]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 1
+    xmin = 0
+    xmax = 1
+    nx = 100
+  []
   [./subdomain1]
-    type = SubdomainBoundingBox
+    type = SubdomainBoundingBoxGenerator
     bottom_left = '0.5 0 0'
     block_id = 1
     top_right = '1.0 1.0 0'
+    input = gen
   [../]
   [./interface]
-    type = SideSetsBetweenSubdomains
-    depends_on = subdomain1
+    type = SideSetsBetweenSubdomainsGenerator
     master_block = '0'
     paired_block = '1'
     new_boundary = 'master0_interface'
+    input = subdomain1
   [../]
   [./interface_again]
-    type = SideSetsBetweenSubdomains
-    depends_on = subdomain1
+    type = SideSetsBetweenSubdomainsGenerator
     master_block = '1'
     paired_block = '0'
     new_boundary = 'master1_interface'
+    input = interface
   [../]
 []
 ############################################################

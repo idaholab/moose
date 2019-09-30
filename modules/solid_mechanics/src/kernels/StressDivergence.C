@@ -79,9 +79,7 @@ StressDivergence::StressDivergence(const InputParameters & parameters)
 void
 StressDivergence::computeResidual()
 {
-  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
-  _local_re.resize(re.size());
-  _local_re.zero();
+  prepareVectorTag(_assembly, _var.number());
 
   if (_volumetric_locking_correction)
   {
@@ -103,7 +101,7 @@ StressDivergence::computeResidual()
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual();
 
-  re += _local_re;
+  accumulateTaggedLocalResidual();
 
   if (_has_save_in)
   {
@@ -147,9 +145,7 @@ StressDivergence::computeQpResidual()
 void
 StressDivergence::computeJacobian()
 {
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
-  _local_ke.resize(ke.m(), ke.n());
-  _local_ke.zero();
+  prepareMatrixTag(_assembly, _var.number(), _var.number());
 
   if (_volumetric_locking_correction)
   {
@@ -185,11 +181,11 @@ StressDivergence::computeJacobian()
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
         _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
 
-  ke += _local_ke;
+  accumulateTaggedLocalMatrix();
 
   if (_has_diag_save_in)
   {
-    unsigned int rows = ke.m();
+    unsigned int rows = _local_ke.m();
     DenseVector<Number> diag(rows);
     for (unsigned int i = 0; i < rows; i++)
       diag(i) = _local_ke(i, i);
@@ -295,12 +291,14 @@ StressDivergence::computeOffDiagJacobian(MooseVariableFEBase & jvar)
       }
     }
 
-    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar_num);
+    prepareMatrixTag(_assembly, _var.number(), jvar_num);
 
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < jvar.phiSize(); _j++)
         for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-          ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar_num);
+          _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar_num);
+
+    accumulateTaggedLocalMatrix();
   }
 }
 

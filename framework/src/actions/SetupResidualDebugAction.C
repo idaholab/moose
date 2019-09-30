@@ -59,16 +59,22 @@ SetupResidualDebugAction::act()
     aux_var_ss << "residual_" << var.name();
     std::string aux_var_name = aux_var_ss.str();
 
+    auto var_params = _factory.getValidParams("MooseVariable");
+    var_params.set<MooseEnum>("family") = "LAGRANGE";
+    var_params.set<MooseEnum>("order") = "FIRST";
+
     if (subdomains.empty())
-      _problem->addAuxVariable(aux_var_name, FEType(FIRST, LAGRANGE));
+      _problem->addAuxVariable("MooseVariable", aux_var_name, var_params);
     else
     {
-      _problem->addAuxVariable(aux_var_name, FEType(FIRST, LAGRANGE), &subdomains);
       std::vector<SubdomainName> block_names;
       block_names.reserve(subdomains.size());
       for (const SubdomainID & id : subdomains)
         block_names.push_back(Moose::stringify(id));
       params.set<std::vector<SubdomainName>>("block") = block_names;
+      var_params.set<std::vector<SubdomainName>>("block") = block_names;
+
+      _problem->addAuxVariable("MooseVariable", aux_var_name, var_params);
     }
 
     // add aux-kernel

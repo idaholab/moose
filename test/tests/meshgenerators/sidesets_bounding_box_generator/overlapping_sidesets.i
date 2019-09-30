@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
 #active = 'gmg'
   [./gmg]
     type = GeneratedMeshGenerator
@@ -38,10 +38,6 @@
     block_id = 0
     boundary_id_overlap = true
   [../]
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Variables]

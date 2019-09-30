@@ -15,7 +15,7 @@ There are three main ways to use the `CombinerGenerator`:
 The most straightforwad thing to do is simply to combine the output of multiple `MeshGenerator`s together into a single mesh.  For example:
 
 !listing moose/test/tests/meshgenerators/combiner_generator/combiner_multi_input.i
-         block=MeshGenerators
+         block=Mesh
 
 Will generate a mesh that looks like:
 
@@ -30,7 +30,7 @@ It is also possible to translate (move) the input `MeshGenerator`s as they are c
 If you specify `positions` then the number of `positions` must match the number of `inputs`, unless only one input is specified (more on that in a moment).
 
 !listing moose/test/tests/meshgenerators/combiner_generator/combiner_multi_input_translate.i
-         block=MeshGenerators
+         block=Mesh
 
 Will generate a mesh that looks like:
 
@@ -41,7 +41,7 @@ Will generate a mesh that looks like:
 The final option is to provide exactly one `inputs` but specify multiple `positions`.  This will cause the single input to be copied multiple times withthe position of each copy specified by the `positions` parameter.  For example
 
 !listing moose/test/tests/meshgenerators/combiner_generator/combiner_generator.i
-         block=MeshGenerators
+         block=Mesh
 
 Will generate a mesh that looks like:
 

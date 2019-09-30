@@ -1,34 +1,35 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 50
-  ny = 50
-  xmin = 0
-  xmax = 50
-  ymin = 0
-  ymax = 50
-  elem_type = QUAD4
-[]
-
-[MeshModifiers]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 50
+    ny = 50
+    xmin = 0
+    xmax = 50
+    ymin = 0
+    ymax = 50
+    elem_type = QUAD4
+  []
   [./left_side]
-    type = SubdomainBoundingBox
+    input = gen
+    type = SubdomainBoundingBoxGenerator
     block_id = 1
     bottom_left = '0 0 0'
     top_right = '24.9 50 0'
   [../]
   [./right_side]
-    type = SubdomainBoundingBox
+    input = left_side
+    type = SubdomainBoundingBoxGenerator
     block_id = 2
     bottom_left = '25.1 0 0'
     top_right = '50 50 0'
   [../]
   [./iface_u]
-    type = SideSetsBetweenSubdomains
+    type = SideSetsBetweenSubdomainsGenerator
     master_block = 1
     paired_block = 2
     new_boundary = 10
-    depends_on = 'left_side right_side'
+    input = right_side
   [../]
 []
 
