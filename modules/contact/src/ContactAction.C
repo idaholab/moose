@@ -267,6 +267,7 @@ ContactAction::addMortarContact()
       params.set<SubdomainName>("slave_subdomain") = slave_subdomain_name;
       params.set<NonlinearVariableName>("variable") = lagrange_multiplier_name;
       params.set<bool>("use_displaced_mesh") = true;
+      params.set<bool>("compute_lm_residuals") = false;
 
       const std::string constraint_prefix = action_name + "_constraint_";
 
