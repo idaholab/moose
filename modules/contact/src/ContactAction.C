@@ -171,7 +171,7 @@ ContactAction::addMortarContact()
   // Definitions for mortar contact.
   const std::string master_subdomain_name = action_name + "_master_subdomain";
   const std::string slave_subdomain_name = action_name + "_slave_subdomain";
-  const std::string lagrange_multiplier_name = action_name + "_lagrange_multiplier";
+  const std::string lagrange_multiplier_name = action_name + "_lambda";
 
   if (_current_task == "add_mesh_generator")
   {

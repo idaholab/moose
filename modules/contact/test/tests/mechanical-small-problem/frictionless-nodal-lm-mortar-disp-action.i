@@ -7,53 +7,10 @@
     type = FileMeshGenerator
     file = mesh.e
   [../]
-  [./master]
-    type = LowerDBlockFromSidesetGenerator
-    input = simple_mesh
-    sidesets = '2'
-    new_block_id = '3'
-  [../]
-  [./slave]
-    type = LowerDBlockFromSidesetGenerator
-    input = master
-    sidesets = '1'
-    new_block_id = '4'
-  [../]
 []
 
-[Constraints]
-  [./lm]
-    type = NormalNodalLMMechanicalContact
-    slave = 1
-    master = 2
-    variable = frictionless_lambda
-    master_variable = disp_x
-    disp_y = disp_y
-  [../]
-  [x]
-    type = NormalMortarMechanicalContact
-    master_boundary = '2'
-    slave_boundary = '1'
-    master_subdomain = '3'
-    slave_subdomain = '4'
-    variable = frictionless_lambda
-    slave_variable = disp_x
-    component = x
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-  []  
-  [y]
-    type = NormalMortarMechanicalContact
-    master_boundary = '2'
-    slave_boundary = '1'
-    master_subdomain = '3'
-    slave_subdomain = '4'
-    variable = frictionless_lambda
-    slave_variable = disp_y
-    component = y
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-  []
+[Problem]
+  kernel_coverage_check = false
 []
 
 [Variables]
@@ -62,9 +19,6 @@
   [../]
   [./disp_y]
     block = '1 2'
-  [../]
-  [./frictionless_lambda]
-    block = 4
   [../]
 []
 
@@ -112,6 +66,17 @@
   show_var_residual_norms = 1
 []
 
+[Contact]
+  [frictionless]
+    mesh = simple_mesh
+    master = 2
+    slave = 1
+    formulation = mortar
+    system = constraint
+    ncp_function_type = min
+  []
+[]
+
 [Preconditioning]
   [./smp]
     type = SMP
@@ -131,6 +96,7 @@
 
 [Outputs]
   exodus = true
+  hide = 'contact_pressure nodal_area_frictionless penetration'
 []
 
 [Postprocessors]
@@ -141,3 +107,4 @@
     execute_on = 'nonlinear timestep_end'
   []
 []
+
