@@ -73,7 +73,6 @@
     slave = 1
     formulation = mortar
     system = constraint
-    ncp_function_type = min
   []
 []
 
@@ -102,7 +101,7 @@
 [Postprocessors]
   [contact]
     type = ContactDOFSetSize
-    variable = frictionless_lambda
+    variable = frictionless_normal_lm
     subdomain = '4'
     execute_on = 'nonlinear timestep_end'
   []

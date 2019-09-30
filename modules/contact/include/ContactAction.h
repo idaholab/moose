@@ -48,8 +48,6 @@ public:
   static MooseEnum getFormulationEnum();
   static MooseEnum getSystemEnum();
   static MooseEnum getSmoothingEnum();
-  static MooseEnum getOrderEnum();
-  static MooseEnum getFamilyEnum();
 
   static InputParameters commonParameters();
 
@@ -58,8 +56,6 @@ protected:
   const BoundaryName _slave;
   const MooseEnum _model;
   const MooseEnum _formulation;
-  const MooseEnum _lagrange_variable_family;
-  const MooseEnum _lagrange_variable_order;
   const MooseEnum _system;
   const MeshGeneratorName _mesh_gen_name;
 

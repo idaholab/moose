@@ -26,7 +26,7 @@
     type = NormalNodalLMMechanicalContact
     slave = 1
     master = 2
-    variable = frictionless_lambda
+    variable = frictionless_normal_lm
     master_variable = disp_x
     disp_y = disp_y
   [../]
@@ -36,19 +36,19 @@
     slave_boundary = '1'
     master_subdomain = '3'
     slave_subdomain = '4'
-    variable = frictionless_lambda
+    variable = frictionless_normal_lm
     slave_variable = disp_x
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
-  []  
+  []
   [y]
     type = NormalMortarMechanicalContact
     master_boundary = '2'
     slave_boundary = '1'
     master_subdomain = '3'
     slave_subdomain = '4'
-    variable = frictionless_lambda
+    variable = frictionless_normal_lm
     slave_variable = disp_y
     component = y
     use_displaced_mesh = true
@@ -63,7 +63,7 @@
   [./disp_y]
     block = '1 2'
   [../]
-  [./frictionless_lambda]
+  [./frictionless_normal_lm]
     block = 4
   [../]
 []
@@ -136,7 +136,7 @@
 [Postprocessors]
   [contact]
     type = ContactDOFSetSize
-    variable = frictionless_lambda
+    variable = frictionless_normal_lm
     subdomain = '4'
     execute_on = 'nonlinear timestep_end'
   []

@@ -12,9 +12,22 @@ offset = 1e-2
 []
 
 [Mesh]
-  [./file_mesh]
+  [./original_file_mesh]
     type = FileMeshGenerator
     file = long-bottom-block-1elem-blocks-coarse.e
+  [../]
+  # These sidesets need to be deleted because the contact action adds them automatically. For this
+  # particular mesh, the new IDs will be identical to the deleted ones and will conflict if we don't
+  # remove the original ones.
+  [./delete_3]
+    type = BlockDeletionGenerator
+    input = original_file_mesh
+    block_id = 3
+  [../]
+  [./revised_file_mesh]
+    type = BlockDeletionGenerator
+    input = delete_3
+    block_id = 4
   [../]
 []
 
@@ -27,16 +40,18 @@ offset = 1e-2
     block = '1 2'
     # order = SECOND
   [../]
-  [./frictional_normal_lm]
-    block = 3
-    # family = MONOMIAL
-    # order = CONSTANT
-  [../]
-  [./frictional_tangential_lm]
-    block = 3
-    family = MONOMIAL
-    order = CONSTANT
-  [../]
+[]
+
+[Contact]
+  [frictional]
+    mesh = revised_file_mesh
+    master = 20
+    slave = 10
+    formulation = mortar
+    system = constraint
+    model = coulomb
+    friction_coefficient = 0.1
+  []
 []
 
 [ICs]
@@ -57,82 +72,6 @@ offset = 1e-2
     type = MatDiffusion
     variable = disp_y
   [../]
-[]
-
-
-[Constraints]
-  [frictional_normal_lm]
-    type = NormalNodalLMMechanicalContact
-    slave = 10
-    master = 20
-    variable = frictional_normal_lm
-    master_variable = disp_x
-    disp_y = disp_y
-    ncp_function_type = min
-  [../]
-  [normal_x]
-    type = NormalMortarMechanicalContact
-    master_boundary = 20
-    slave_boundary = 10
-    master_subdomain = 4
-    slave_subdomain = 3
-    variable = frictional_normal_lm
-    slave_variable = disp_x
-    component = x
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-  []
-  [normal_y]
-    type = NormalMortarMechanicalContact
-    master_boundary = 20
-    slave_boundary = 10
-    master_subdomain = 4
-    slave_subdomain = 3
-    variable = frictional_normal_lm
-    slave_variable = disp_y
-    component = y
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-  []
-  [frictional_tangential_lm]
-    type = TangentialMortarLMMechanicalContact
-    master_boundary = 20
-    slave_boundary = 10
-    master_subdomain = 4
-    slave_subdomain = 3
-    variable = frictional_tangential_lm
-    slave_variable = disp_x
-    slave_disp_y = disp_y
-    use_displaced_mesh = true
-    compute_primal_residuals = false
-    contact_pressure = frictional_normal_lm
-    friction_coefficient = .1
-    ncp_function_type = fb
-  []
-  [tangential_x]
-    type = TangentialMortarMechanicalContact
-    master_boundary = 20
-    slave_boundary = 10
-    master_subdomain = 4
-    slave_subdomain = 3
-    variable = frictional_tangential_lm
-    slave_variable = disp_x
-    component = x
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-  []
-  [tangential_y]
-    type = TangentialMortarMechanicalContact
-    master_boundary = 20
-    slave_boundary = 10
-    master_subdomain = 4
-    slave_subdomain = 3
-    variable = frictional_tangential_lm
-    slave_variable = disp_y
-    component = y
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-  []
 []
 
 [BCs]
@@ -174,11 +113,6 @@ offset = 1e-2
   l_max_its = 30
   nl_max_its = 20
   line_search = 'none'
-
-  # [./Predictor]
-  #   type = SimplePredictor
-  #   scale = 1.0
-  # [../]
 []
 
 [Debug]
@@ -187,11 +121,7 @@ offset = 1e-2
 
 [Outputs]
   exodus = true
-  # checkpoint = true
-  # [./dofmap]
-  #   type = DOFMap
-  #   execute_on = 'initial'
-  # [../]
+  hide = 'contact_pressure nodal_area_frictional penetration'
 []
 
 [Preconditioning]

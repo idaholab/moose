@@ -81,11 +81,10 @@ validParams<ContactAction>()
 
   params.addParam<Real>("al_frictional_force_tolerance",
                         "The tolerance of the frictional force for augmented Lagrangian method.");
-  params.addParam<Real>("c", 1, "Parameter for balancing the size of the gap and contact pressure");
-
-  MooseEnum ncp_function_type("min fb", "min");
-  params.addParam<MooseEnum>(
-      "ncp_function_type", ncp_function_type, "The type of NCP function to use");
+  params.addParam<Real>(
+      "c_normal", 1, "Parameter for balancing the size of the gap and contact pressure");
+  params.addParam<Real>(
+      "c_tangential", 1, "Parameter for balancing the contact pressure and velocity");
 
   return params;
 }
@@ -96,8 +95,6 @@ ContactAction::ContactAction(const InputParameters & params)
     _slave(getParam<BoundaryName>("slave")),
     _model(getParam<MooseEnum>("model")),
     _formulation(getParam<MooseEnum>("formulation")),
-    _lagrange_variable_family(getParam<MooseEnum>("family")),
-    _lagrange_variable_order(getParam<MooseEnum>("order")),
     _system(getParam<MooseEnum>("system")),
     _mesh_gen_name(getParam<MeshGeneratorName>("mesh"))
 {
@@ -119,6 +116,8 @@ ContactAction::ContactAction(const InputParameters & params)
                  "The 'mortar' formulation can only be used with the 'Constraint' system");
     if (_mesh_gen_name.empty())
       paramError("mesh", "The 'mortar' formulation requires 'mesh' to be supplied");
+    if (_model == "glued")
+      paramError("model", "The 'mortar' formulation does not support glued contact (yet)");
   }
 }
 
@@ -171,7 +170,8 @@ ContactAction::addMortarContact()
   // Definitions for mortar contact.
   const std::string master_subdomain_name = action_name + "_master_subdomain";
   const std::string slave_subdomain_name = action_name + "_slave_subdomain";
-  const std::string lagrange_multiplier_name = action_name + "_lambda";
+  const std::string normal_lagrange_multiplier_name = action_name + "_normal_lm";
+  const std::string tangential_lagrange_multiplier_name = action_name + "_tangential_lm";
 
   if (_current_task == "add_mesh_generator")
   {
@@ -201,23 +201,19 @@ ContactAction::addMortarContact()
   if (_current_task == "add_variable")
   {
     // Add the lagrange multiplier on the slave subdomain.
-    InputParameters params = _factory.getValidParams("MooseVariableBase");
+    const auto addLagrangeMultiplier =
+        [this, &slave_subdomain_name, &displacements](const std::string & variable_name,
+                                                      const int codimension) //
+    {
+      InputParameters params = _factory.getValidParams("MooseVariableBase");
 
-    // If the user hasn't supplied a family/order, set the family/order same as primal for normal
-    // contact and one order lower for tangential.
-    if (_lagrange_variable_order.isValid() && _lagrange_variable_family.isValid())
-    {
-      params.set<MooseEnum>("family") = getParam<MooseEnum>("family");
-      params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
-    }
-    else
-    {
       mooseAssert(_problem->systemBaseNonlinear().hasVariable(displacements[0]),
                   "Displacement variable is missing");
       const auto primal_type =
           _problem->systemBaseNonlinear().system().variable_type(displacements[0]);
+      const int lm_order = primal_type.order.get_order() - codimension;
 
-      if (primal_type.family == MONOMIAL)
+      if (primal_type.family == MONOMIAL || (primal_type.family == LAGRANGE && lm_order < 1))
       {
         params.set<MooseEnum>("family") = "MONOMIAL";
         params.set<MooseEnum>("order") = "CONSTANT";
@@ -225,28 +221,35 @@ ContactAction::addMortarContact()
       else if (primal_type.family == LAGRANGE)
       {
         params.set<MooseEnum>("family") = Utility::enum_to_string<FEFamily>(primal_type.family);
-        params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(primal_type.order);
+        params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{lm_order});
       }
       else
         mooseError("Primal variable type must be either MONOMIAL or LAGRANGE for mortar contact.");
-    }
 
-    params.set<std::vector<SubdomainName>>("block") = {slave_subdomain_name};
-    auto fe_type = AddVariableAction::feType(params);
-    auto var_type = AddVariableAction::determineType(fe_type, 1);
-    _problem->addVariable(var_type, lagrange_multiplier_name, params);
+      params.set<std::vector<SubdomainName>>("block") = {slave_subdomain_name};
+      auto fe_type = AddVariableAction::feType(params);
+      auto var_type = AddVariableAction::determineType(fe_type, 1);
+      _problem->addVariable(var_type, variable_name, params);
+    };
+
+    // Set the family/order same as primal for normal contact and one order lower for tangential.
+    addLagrangeMultiplier(normal_lagrange_multiplier_name, 0);
+    if (_model == "coulomb")
+      addLagrangeMultiplier(tangential_lagrange_multiplier_name, 1);
   }
 
   if (_current_task == "add_constraint")
   {
-    // Add the Lagrange multiplier constraint on the slave boundary.
+    // Add the normal Lagrange multiplier constraint on the slave boundary.
     {
       InputParameters params = _factory.getValidParams("NormalNodalLMMechanicalContact");
 
-      // This should set master, slave, order, ncp_function_type, and c.
-      params.applyParameters(parameters(), {"displacements", "variable"});
-      params.set<NonlinearVariableName>("variable") = lagrange_multiplier_name;
+      params.set<BoundaryName>("master") = _master;
+      params.set<BoundaryName>("slave") = _slave;
+      params.set<NonlinearVariableName>("variable") = normal_lagrange_multiplier_name;
       params.set<bool>("use_displaced_mesh") = true;
+      params.set<MooseEnum>("ncp_function_type") = "min";
+      params.set<Real>("c") = getParam<Real>("c_normal");
 
       params.set<std::vector<VariableName>>("master_variable") = {displacements[0]};
       if (ndisp > 1)
@@ -254,24 +257,57 @@ ContactAction::addMortarContact()
       if (ndisp > 2)
         params.set<std::vector<VariableName>>("disp_z") = {displacements[2]};
 
-      _problem->addConstraint("NormalNodalLMMechanicalContact", action_name + "", params);
+      _problem->addConstraint("NormalNodalLMMechanicalContact", action_name + "_normal_lm", params);
     }
 
-    // Add a NormalMortarMechanicalContact for each dimension
+    // Add the tangential Lagrange multiplier constraint on the slave boundary.
+    if (_model == "coulomb")
     {
-      InputParameters params = _factory.getValidParams("NormalMortarMechanicalContact<RESIDUAL>");
+      InputParameters params =
+          _factory.getValidParams("TangentialMortarLMMechanicalContact<RESIDUAL>");
 
       params.set<BoundaryName>("master_boundary") = _master;
       params.set<BoundaryName>("slave_boundary") = _slave;
       params.set<SubdomainName>("master_subdomain") = master_subdomain_name;
       params.set<SubdomainName>("slave_subdomain") = slave_subdomain_name;
-      params.set<NonlinearVariableName>("variable") = lagrange_multiplier_name;
+      params.set<NonlinearVariableName>("variable") = tangential_lagrange_multiplier_name;
+      params.set<bool>("use_displaced_mesh") = true;
+      params.set<MooseEnum>("ncp_function_type") = "fb";
+      params.set<Real>("c") = getParam<Real>("c_tangential");
+      params.set<bool>("compute_primal_residuals") = false;
+      params.set<NonlinearVariableName>("contact_pressure") = normal_lagrange_multiplier_name;
+      params.set<Real>("friction_coefficient") = getParam<Real>("friction_coefficient");
+
+      params.set<VariableName>("slave_variable") = displacements[0];
+      if (ndisp > 1)
+        params.set<NonlinearVariableName>("slave_disp_y") = displacements[1];
+      // slave_disp_z is not implemented for tangential (yet).
+
+      _problem->addConstraint("TangentialMortarLMMechanicalContact<RESIDUAL>",
+                              action_name + "_tangential_lm_residual",
+                              params);
+      _problem->addConstraint("TangentialMortarLMMechanicalContact<JACOBIAN>",
+                              action_name + "_tangential_lm_jacobian",
+                              params);
+    }
+
+    const auto addMechanicalContactConstraints =
+        [this, &master_subdomain_name, &slave_subdomain_name, &displacements](
+            const std::string & variable_name,
+            const std::string & constraint_prefix,
+            const std::string & constraint_type) //
+    {
+      InputParameters params = _factory.getValidParams(constraint_type + "<RESIDUAL>");
+
+      params.set<BoundaryName>("master_boundary") = _master;
+      params.set<BoundaryName>("slave_boundary") = _slave;
+      params.set<SubdomainName>("master_subdomain") = master_subdomain_name;
+      params.set<SubdomainName>("slave_subdomain") = slave_subdomain_name;
+      params.set<NonlinearVariableName>("variable") = variable_name;
       params.set<bool>("use_displaced_mesh") = true;
       params.set<bool>("compute_lm_residuals") = false;
 
-      const std::string constraint_prefix = action_name + "_constraint_";
-
-      for (unsigned int i = 0; i < ndisp; ++i)
+      for (unsigned int i = 0; i < displacements.size(); ++i)
       {
         std::string constraint_name = constraint_prefix + Moose::stringify(i);
 
@@ -279,12 +315,21 @@ ContactAction::addMortarContact()
         params.set<MooseEnum>("component") = i;
 
         _problem->addConstraint(
-            "NormalMortarMechanicalContact<RESIDUAL>", constraint_name + "_residual", params);
+            constraint_type + "<RESIDUAL>", constraint_name + "_residual", params);
         _problem->addConstraint(
-            "NormalMortarMechanicalContact<JACOBIAN>", constraint_name + "_jacobian", params);
+            constraint_type + "<JACOBIAN>", constraint_name + "_jacobian", params);
       }
       _problem->haveADObjects(true);
-    }
+    };
+
+    // Add mortar mechanical contact for each dimension
+    addMechanicalContactConstraints(normal_lagrange_multiplier_name,
+                                    action_name + "_normal_constraint_",
+                                    "NormalMortarMechanicalContact");
+    if (_model == "coulomb")
+      addMechanicalContactConstraints(tangential_lagrange_multiplier_name,
+                                      action_name + "_tangential_constraint_",
+                                      "TangentialMortarMechanicalContact");
   }
 }
 
@@ -381,34 +426,13 @@ ContactAction::getSmoothingEnum()
   return MooseEnum("edge_based nodal_normal_based", "");
 }
 
-MooseEnum
-ContactAction::getOrderEnum()
-{
-  // No default here because we want to set this automatically if it is not supplied by the user.
-  return MooseEnum("CONSTANT FIRST SECOND THIRD FOURTH", "", true);
-}
-
-MooseEnum
-ContactAction::getFamilyEnum()
-{
-  // No default here because we want to set this automatically if it is not supplied by the user.
-  return MooseEnum("LAGRANGE MONOMIAL");
-}
-
 InputParameters
 ContactAction::commonParameters()
 {
   InputParameters params = emptyInputParameters();
 
-  params.addParam<MooseEnum>(
-      "order",
-      getOrderEnum(),
-      "The finite element order for the mortars: CONSTANT, FIRST, SECOND, etc.");
-
-  params.addParam<MooseEnum>(
-      "family",
-      getFamilyEnum(),
-      "The family of FE shape functions for the mortars: MONOMIAL or LAGRANGE.");
+  MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
+  params.addParam<MooseEnum>("order", orders, "The finite element order: FIRST, SECOND, etc.");
 
   params.addParam<MooseEnum>("normal_smoothing_method",
                              ContactAction::getSmoothingEnum(),
