@@ -175,8 +175,8 @@ ContactAction::addMortarContact()
 
   if (_current_task == "add_mesh_generator")
   {
-    // Don't do mesh modifiers when recovering!
-    if (!_app.isRecovering())
+    // Don't do mesh generators when recovering.
+    if (!(_app.isRecovering() && _app.isUltimateMaster()) && !_app.masterMesh())
     {
       const MeshGeneratorName master_name = master_subdomain_name + "_generator";
       const MeshGeneratorName slave_name = slave_subdomain_name + "_generator";
