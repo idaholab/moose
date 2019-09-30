@@ -1,3 +1,4 @@
 #include "LoggingInterface.h"
+#include "THMProblem.h"
 
-LoggingInterface::LoggingInterface(THMApp & app) : _logging_app(app) {}
+LoggingInterface::LoggingInterface(Logger & log) : _log(log) {}

@@ -47,7 +47,7 @@ OldJunction::addVariables()
 {
   auto connected_subdomains = getConnectedSubdomainNames();
 
-  _sim.addVariable(
+  _sim.addSimVariable(
       true, _pressure_var_name, FEType(FIRST, SCALAR), connected_subdomains, _scaling_factors[0]);
   _sim.addConstantScalarIC(_pressure_var_name, _initial_P);
 
@@ -57,14 +57,14 @@ OldJunction::addVariables()
   Real initial_rho = spfp.rho_from_p_T(_initial_P, initial_T);
   Real initial_e = spfp.e_from_p_rho(_initial_P, initial_rho);
 
-  _sim.addVariable(
+  _sim.addSimVariable(
       true, _energy_var_name, FEType(FIRST, SCALAR), connected_subdomains, _scaling_factors[1]);
   _sim.addConstantScalarIC(_energy_var_name, initial_e);
 
-  _sim.addVariable(false, _total_mfr_in_var_name, FEType(FIRST, SCALAR));
+  _sim.addSimVariable(false, _total_mfr_in_var_name, FEType(FIRST, SCALAR));
   _sim.addConstantScalarIC(_total_mfr_in_var_name, 0);
 
-  _sim.addVariable(false, _total_int_energy_rate_in_var_name, FEType(FIRST, SCALAR));
+  _sim.addSimVariable(false, _total_int_energy_rate_in_var_name, FEType(FIRST, SCALAR));
   _sim.addConstantScalarIC(_total_int_energy_rate_in_var_name, 0);
 }
 

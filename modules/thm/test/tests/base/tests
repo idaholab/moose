@@ -12,7 +12,7 @@
   [./loop_identification]
     type = 'RunApp'
     input = 'loop_identification.i'
-    cli_args = '--print-component-loops'
+    cli_args = 'Debug/print_component_loops=true'
     expect_out = "Loop 1:
 \s+corechannel
 \s+hx:primary

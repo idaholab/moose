@@ -1,4 +1,4 @@
-#include "Simulation.h"
+#include "THMProblem.h"
 #include "Component.h"
 #include "FlowChannelBase.h"
 #include "ConstantFunction.h"
@@ -8,7 +8,7 @@ InputParameters
 validParams<FlowModel>()
 {
   InputParameters params = validParams<MooseObject>();
-  params.addPrivateParam<Simulation *>("_sim");
+  params.addPrivateParam<THMProblem *>("_thm_problem");
   params.addPrivateParam<FlowChannelBase *>("_flow_channel");
   params.addRequiredParam<UserObjectName>(
       "fp", "The name of the user object that defines fluid properties");
@@ -67,8 +67,7 @@ const std::string FlowModel::DIRECTION = "direction";
 
 FlowModel::FlowModel(const InputParameters & params)
   : MooseObject(params),
-    _sim(*params.getCheckedPointerParam<Simulation *>("_sim")),
-    _app(_sim.getApp()),
+    _sim(*params.getCheckedPointerParam<THMProblem *>("_thm_problem")),
     _factory(_app.getFactory()),
     _flow_channel(*params.getCheckedPointerParam<FlowChannelBase *>("_flow_channel")),
     _fe_type(_sim.getFlowFEType()),
@@ -102,11 +101,11 @@ FlowModel::addCommonVariables()
 {
   const SubdomainName & subdomain_name = _flow_channel.getSubdomainName();
 
-  _sim.addVariable(false, AREA, _fe_type, subdomain_name);
-  _sim.addVariable(false, HEAT_FLUX_PERIMETER, _fe_type, subdomain_name);
+  _sim.addSimVariable(false, AREA, _fe_type, subdomain_name);
+  _sim.addSimVariable(false, HEAT_FLUX_PERIMETER, _fe_type, subdomain_name);
 
   if (_spatial_discretization == rDG)
-    _sim.addVariable(false, AREA_LINEAR, FEType(FIRST, LAGRANGE), subdomain_name);
+    _sim.addSimVariable(false, AREA_LINEAR, FEType(FIRST, LAGRANGE), subdomain_name);
 }
 
 void
@@ -139,7 +138,7 @@ FlowModel::addCommonInitialConditions()
           params.set<VariableName>("variable") = AREA;
           params.set<std::vector<SubdomainName>>("block") = block;
           params.set<FunctionName>("function") = area_function;
-          _sim.addInitialCondition(class_name, genName(_comp_name, AREA, "ic"), params);
+          _sim.addSimInitialCondition(class_name, genName(_comp_name, AREA, "ic"), params);
         }
       }
       else

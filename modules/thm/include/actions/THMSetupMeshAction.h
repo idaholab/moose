@@ -1,13 +1,13 @@
 #pragma once
 
-#include "THMAction.h"
+#include "Action.h"
 
 class THMSetupMeshAction;
 
 template <>
 InputParameters validParams<THMSetupMeshAction>();
 
-class THMSetupMeshAction : public THMAction
+class THMSetupMeshAction : public Action
 {
 public:
   THMSetupMeshAction(InputParameters params);

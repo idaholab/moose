@@ -1,6 +1,6 @@
 #pragma once
 
-#include "THMAction.h"
+#include "Action.h"
 
 class THMInitSimulationAction;
 
@@ -10,12 +10,10 @@ InputParameters validParams<THMInitSimulationAction>();
 /**
  *
  */
-class THMInitSimulationAction : public THMAction
+class THMInitSimulationAction : public Action
 {
 public:
   THMInitSimulationAction(InputParameters parameters);
 
   virtual void act();
-
-protected:
 };

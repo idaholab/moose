@@ -5,7 +5,7 @@
 #include "NamingInterface.h"
 
 class StabilizationSettings;
-class Simulation;
+class Factory;
 
 template <>
 InputParameters validParams<StabilizationSettings>();
@@ -24,9 +24,6 @@ public:
   virtual void addMooseObjects(FlowModel & fm, InputParameters & pars) const = 0;
 
 protected:
-  Simulation & _m_sim;
-  /// The application this is associated with
-  THMApp & _m_app;
   /// The Factory associated with the MooseApp
   Factory & _m_factory;
 };

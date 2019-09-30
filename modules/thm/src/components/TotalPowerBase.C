@@ -16,5 +16,5 @@ TotalPowerBase::TotalPowerBase(const InputParameters & parameters)
 void
 TotalPowerBase::addVariables()
 {
-  _sim.addVariable(false, _power_var_name, FEType(FIRST, SCALAR));
+  _sim.addSimVariable(false, _power_var_name, FEType(FIRST, SCALAR));
 }

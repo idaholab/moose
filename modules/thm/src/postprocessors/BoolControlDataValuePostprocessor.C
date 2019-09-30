@@ -1,5 +1,5 @@
 #include "BoolControlDataValuePostprocessor.h"
-#include "Simulation.h"
+#include "THMProblem.h"
 
 registerMooseObject("THMApp", BoolControlDataValuePostprocessor);
 
@@ -15,11 +15,18 @@ validParams<BoolControlDataValuePostprocessor>()
 
 BoolControlDataValuePostprocessor::BoolControlDataValuePostprocessor(
     const InputParameters & parameters)
-  : GeneralPostprocessor(parameters),
-    _sim(*_app.parameters().getCheckedPointerParam<Simulation *>("_sim")),
-    _control_data_name(getParam<std::string>("control_data_name")),
-    _control_data_value(_sim.getControlData<bool>(_control_data_name)->get())
+  : GeneralPostprocessor(parameters), _control_data_name(getParam<std::string>("control_data_name"))
 {
+  THMProblem * thm_problem =
+      dynamic_cast<THMProblem *>(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"));
+  if (thm_problem)
+  {
+    _thm_problem = thm_problem;
+    _control_data_value = _thm_problem->getControlData<bool>(_control_data_name);
+  }
+  else
+    mooseError(name(),
+               ": Cannot use BoolControlDataValuePostprocessor without the component system.");
 }
 
 void
@@ -35,7 +42,7 @@ BoolControlDataValuePostprocessor::execute()
 Real
 BoolControlDataValuePostprocessor::getValue()
 {
-  if (_control_data_value)
+  if (_control_data_value->get())
     return 1.;
   else
     return 0.;

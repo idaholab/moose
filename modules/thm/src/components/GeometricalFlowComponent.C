@@ -29,14 +29,6 @@ GeometricalFlowComponent::GeometricalFlowComponent(const InputParameters & param
 {
 }
 
-void
-GeometricalFlowComponent::init()
-{
-  GeometricalComponent::init();
-
-  _model_id = _app.getFlowModelID(_sim.getUserObjectTempl<FluidProperties>(_fp_name));
-}
-
 bool
 GeometricalFlowComponent::usingSecondOrderMesh() const
 {
@@ -57,12 +49,4 @@ GeometricalFlowComponent::getConnections(FlowConnection::EEndType end_type) cons
     return it->second;
   else
     mooseError(name(), ": Invalid flow channel end type (", end_type, ").");
-}
-
-const THM::FlowModelID &
-GeometricalFlowComponent::getFlowModelID() const
-{
-  checkSetupStatus(INITIALIZED_PRIMARY);
-
-  return _model_id;
 }

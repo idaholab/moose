@@ -83,7 +83,7 @@ public:
   /**
    * @returns a read-only reference to the parameter value.
    */
-  const T & get() { return *_value_ptr; }
+  const T & get() const { return *_value_ptr; }
 
   /**
    * @returns a writable reference to the parameter value.

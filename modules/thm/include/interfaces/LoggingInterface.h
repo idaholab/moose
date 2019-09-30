@@ -1,9 +1,8 @@
 #pragma once
 
-#include "THMApp.h"
+#include "Logger.h"
 
-class THMApp;
-class LoggingInterface;
+class FEProblemBase;
 
 /**
  * Interface class for logging errors and warnings
@@ -17,9 +16,9 @@ public:
   /**
    * Constructor
    *
-   * @param[in] app   THM application
+   * @param[in] fe_problem  FEProblemBase-derived object that has the Logger instance
    */
-  LoggingInterface(THMApp & app);
+  LoggingInterface(Logger & log);
 
   /**
    * Logs an error
@@ -27,7 +26,7 @@ public:
   template <typename... Args>
   void logError(Args &&... args) const
   {
-    _logging_app.log().add(Logger::ERROR, std::forward<Args>(args)...);
+    _log.add(Logger::ERROR, std::forward<Args>(args)...);
   }
 
   /**
@@ -38,7 +37,7 @@ public:
   template <typename... Args>
   void logComponentError(const std::string & component_name, Args &&... args) const
   {
-    _logging_app.log().add(Logger::ERROR, component_name, ": ", std::forward<Args>(args)...);
+    _log.add(Logger::ERROR, component_name, ": ", std::forward<Args>(args)...);
   }
 
   /**
@@ -47,7 +46,7 @@ public:
   template <typename... Args>
   void logWarning(Args &&... args) const
   {
-    _logging_app.log().add(Logger::WARNING, std::forward<Args>(args)...);
+    _log.add(Logger::WARNING, std::forward<Args>(args)...);
   }
 
   /**
@@ -58,10 +57,9 @@ public:
   template <typename... Args>
   void logComponentWarning(const std::string & component_name, Args &&... args) const
   {
-    _logging_app.log().add(Logger::WARNING, component_name, ": ", std::forward<Args>(args)...);
+    _log.add(Logger::WARNING, component_name, ": ", std::forward<Args>(args)...);
   }
 
 protected:
-  /// THM application
-  THMApp & _logging_app;
+  Logger & _log;
 };

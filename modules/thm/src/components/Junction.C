@@ -56,11 +56,11 @@ Junction::addVariables()
   const Real initial_e = spfp.e_from_p_rho(_initial_p, initial_rho);
   const Real initial_s = spfp.s_from_v_e(1. / initial_rho, initial_e);
 
-  _sim.addVariable(true,
-                   _entropy_var_name,
-                   FEType(FIRST, SCALAR),
-                   connected_subdomains,
-                   _scaling_factor_s_junction);
+  _sim.addSimVariable(true,
+                      _entropy_var_name,
+                      FEType(FIRST, SCALAR),
+                      connected_subdomains,
+                      _scaling_factor_s_junction);
   _sim.addConstantScalarIC(_entropy_var_name, initial_s);
 }
 

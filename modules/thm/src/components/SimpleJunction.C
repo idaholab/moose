@@ -38,11 +38,12 @@ SimpleJunction::addVariables()
   // add scalar variable (i.e. Lagrange multiplier)
   if (_flow_model_id == THM::FM_SINGLE_PHASE)
   {
-    _sim.addVariable(true, _lm_name, FEType(THIRD, SCALAR), connected_subdomains, _scaling_factor);
+    _sim.addSimVariable(
+        true, _lm_name, FEType(THIRD, SCALAR), connected_subdomains, _scaling_factor);
   }
   else if (_flow_model_id == THM::FM_TWO_PHASE)
   {
-    _sim.addVariable(
+    _sim.addSimVariable(
         true, _lm_name, FEType(SEVENTH, SCALAR), connected_subdomains, _scaling_factor);
   }
   else if (_flow_model_id == THM::FM_TWO_PHASE_NCG)
@@ -51,7 +52,8 @@ SimpleJunction::addVariables()
     auto fm_ncg = dynamic_cast<const FlowModelTwoPhaseNCG *>(_flow_model.get());
     if (fm_ncg != nullptr)
       n_vars += fm_ncg->getNCGSolutionVars().size();
-    _sim.addVariable(true, _lm_name, FEType(n_vars, SCALAR), connected_subdomains, _scaling_factor);
+    _sim.addSimVariable(
+        true, _lm_name, FEType(n_vars, SCALAR), connected_subdomains, _scaling_factor);
   }
 }
 

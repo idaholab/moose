@@ -1,13 +1,13 @@
 #pragma once
 
-#include "THMAction.h"
+#include "Action.h"
 
 class AddComponentPhysicsAction;
 
 template <>
 InputParameters validParams<AddComponentPhysicsAction>();
 
-class AddComponentPhysicsAction : public THMAction
+class AddComponentPhysicsAction : public Action
 {
 public:
   AddComponentPhysicsAction(InputParameters params);

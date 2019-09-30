@@ -1,13 +1,13 @@
 #pragma once
 
-#include "THMAction.h"
+#include "Action.h"
 
 class THMSetupOutputAction;
 
 template <>
 InputParameters validParams<THMSetupOutputAction>();
 
-class THMSetupOutputAction : public THMAction
+class THMSetupOutputAction : public Action
 {
 public:
   THMSetupOutputAction(InputParameters params);

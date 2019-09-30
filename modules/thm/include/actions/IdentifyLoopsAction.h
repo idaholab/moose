@@ -1,6 +1,6 @@
 #pragma once
 
-#include "THMAction.h"
+#include "Action.h"
 
 class IdentifyLoopsAction;
 
@@ -10,7 +10,7 @@ InputParameters validParams<IdentifyLoopsAction>();
 /**
  * Identifies the component loops.
  */
-class IdentifyLoopsAction : public THMAction
+class IdentifyLoopsAction : public Action
 {
 public:
   IdentifyLoopsAction(InputParameters parameters);

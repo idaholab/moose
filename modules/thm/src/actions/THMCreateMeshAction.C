@@ -1,0 +1,56 @@
+#include "THMCreateMeshAction.h"
+#include "THMMesh.h"
+#include "FEProblemBase.h"
+#include "CreateProblemAction.h"
+#include "Factory.h"
+#include "MooseApp.h"
+#include "ActionWarehouse.h"
+
+registerMooseAction("THMApp", THMCreateMeshAction, "setup_mesh");
+
+template <>
+InputParameters
+validParams<THMCreateMeshAction>()
+{
+  InputParameters params = validParams<Action>();
+  params.addClassDescription("Action that creates an empty mesh (in case one was not already "
+                             "created) and also builds THMProblem.");
+  return params;
+}
+
+THMCreateMeshAction::THMCreateMeshAction(InputParameters params) : Action(params) {}
+
+void
+THMCreateMeshAction::act()
+{
+  if (_current_task == "setup_mesh")
+  {
+    if (!_mesh)
+    {
+      const std::string class_name = "THMMesh";
+      InputParameters params = _factory.getValidParams(class_name);
+      params.set<MooseEnum>("dim") = "3";
+      params.set<unsigned int>("patch_size") = 1;
+      // We need to go through the Factory to create the THMMesh so
+      // that its params object is properly added to the Warehouse.
+      _mesh = _factory.create<THMMesh>(class_name, "THM:mesh", params);
+    }
+
+    if (!_mesh->hasMeshBase())
+      _mesh->setMeshBase(_mesh->buildMeshBaseObject());
+
+    {
+      const std::string class_name = "THMProblem";
+      InputParameters params = _factory.getValidParams(class_name);
+      _app.parser().extractParams("", params); // extract global params
+      // apply common parameters of the object held by CreateProblemAction to honor user inputs in
+      // [Problem]
+      auto p = _awh.getActionByTask<CreateProblemAction>("create_problem");
+      if (p)
+        params.applyParameters(p->getObjectParams());
+      params.set<MooseMesh *>("mesh") = _mesh.get();
+      params.set<bool>("use_nonlinear") = _app.useNonlinear();
+      _problem = _factory.create<FEProblemBase>(class_name, "THM:problem", params);
+    }
+  }
+}

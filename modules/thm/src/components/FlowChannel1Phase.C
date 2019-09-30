@@ -1,5 +1,6 @@
 #include "FlowChannel1Phase.h"
 #include "FlowModelSinglePhase.h"
+#include "SinglePhaseFluidProperties.h"
 #include "StabilizationSettings.h"
 #include "HeatTransfer1PhaseBase.h"
 #include "Closures1PhaseBase.h"
@@ -33,12 +34,22 @@ validParams<FlowChannel1Phase>()
 
 FlowChannel1Phase::FlowChannel1Phase(const InputParameters & params) : FlowChannelBase(params) {}
 
+void
+FlowChannel1Phase::init()
+{
+  FlowChannelBase::init();
+
+  const UserObject & fp = _sim.getUserObjectTempl<UserObject>(_fp_name);
+  if (dynamic_cast<const SinglePhaseFluidProperties *>(&fp) == nullptr)
+    logError("Supplied fluid properties must be for 1-phase fluids.");
+}
+
 std::shared_ptr<FlowModel>
 FlowChannel1Phase::buildFlowModel()
 {
   const std::string class_name = "FlowModelSinglePhase";
   InputParameters pars = _factory.getValidParams(class_name);
-  pars.set<Simulation *>("_sim") = &_sim;
+  pars.set<THMProblem *>("_thm_problem") = &_sim;
   pars.set<FlowChannelBase *>("_flow_channel") = this;
   pars.set<UserObjectName>("fp") = _fp_name;
   pars.set<UserObjectName>("numerical_flux") = _numerical_flux_name;

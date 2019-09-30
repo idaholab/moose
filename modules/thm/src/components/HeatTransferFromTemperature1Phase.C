@@ -29,8 +29,8 @@ HeatTransferFromTemperature1Phase::addVariables()
   HeatTransfer1PhaseBase::addVariables();
 
   const FEType & fe_type = getFEType();
-  _sim.addVariable(false, FlowModel::TEMPERATURE_WALL, fe_type, _flow_channel_subdomains);
-  _sim.addVariable(false, _T_wall_name, fe_type, _flow_channel_subdomains);
+  _sim.addSimVariable(false, FlowModel::TEMPERATURE_WALL, fe_type, _flow_channel_subdomains);
+  _sim.addSimVariable(false, _T_wall_name, fe_type, _flow_channel_subdomains);
 }
 
 void

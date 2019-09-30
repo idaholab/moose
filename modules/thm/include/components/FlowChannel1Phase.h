@@ -23,7 +23,10 @@ public:
    */
   std::vector<MaterialPropertyName> getWallHTCNames1Phase() const { return _Hw_1phase_names; }
 
+  virtual const THM::FlowModelID & getFlowModelID() const override { return THM::FM_SINGLE_PHASE; }
+
 protected:
+  virtual void init() override;
   virtual std::shared_ptr<FlowModel> buildFlowModel() override;
   virtual void check() const override;
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "MooseApp.h"
-#include "Logger.h"
 #include "MooseUtils.h"
 
 class THMApp;
@@ -47,47 +46,6 @@ public:
   THMApp(InputParameters parameters);
   virtual ~THMApp();
 
-  virtual void setupOptions() override;
-
-  /**
-   * Gets the class name of the closures corresponding to the flow model and user option
-   *
-   * @param[in] closures_option   Closures option
-   * @param[in] flow_model_id     Flow model ID
-   */
-  const std::string & getClosuresClassName(const std::string & closures_option,
-                                           const THM::FlowModelID & flow_model_id) const;
-
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
-
-  /**
-   * Returns a flow model ID for the specified fluid properties
-   *
-   * @return The flow model ID corresponding to the given fluid properties
-   * @param fp FluidProperties class to get the model ID for
-   */
-  virtual const THM::FlowModelID & getFlowModelID(const FluidProperties & fp);
-
-  /**
-   * Get the class name of a flow model corresponding to the flow model ID
-   *
-   * @param closure_name The name of the closure type
-   * @return The class name of a material that computes the flow regime maps
-   */
-  const std::string & getFlowModelClassName(const THM::FlowModelID & flow_model_id);
-
-  Logger & log() { return _log; }
-  virtual bool checkJacobian() { return _check_jacobian; }
-
-protected:
-  /**
-   * Build the simulation class
-   */
-  virtual void buildSimulation();
-
-  void build();
-
   /**
    * Registers a closures option
    *
@@ -99,15 +57,30 @@ protected:
                                      const std::string & class_name,
                                      const THM::FlowModelID & flow_model_id);
 
-  Logger _log;
-  Simulation * _sim;
-  bool _check_jacobian;
+  /**
+   * Gets the class name of the closures corresponding to the flow model and user option
+   *
+   * @param[in] closures_option   Closures option
+   * @param[in] flow_model_id     Flow model ID
+   */
+  static const std::string & getClosuresClassName(const std::string & closures_option,
+                                                  const THM::FlowModelID & flow_model_id);
 
-  /// Map from flow model ID to map of closures option to its class
-  static std::map<THM::FlowModelID, std::map<std::string, std::string>> _closures_class_names_map;
+  static void registerApps();
+  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+
+  /**
+   * Get the class name of a flow model corresponding to the flow model ID
+   *
+   * @param closure_name The name of the closure type
+   * @return The class name of a material that computes the flow regime maps
+   */
+  const std::string & getFlowModelClassName(const THM::FlowModelID & flow_model_id);
 
   /// Map from flow model ID to flow model instance
   static std::map<THM::FlowModelID, std::string> _flow_model_map;
 
-  [[noreturn]] void raiseFlowModelError(const FluidProperties & fp, const std::string & mbdf);
+protected:
+  /// Map from flow model ID to map of closures option to its class
+  static std::map<THM::FlowModelID, std::map<std::string, std::string>> _closures_class_names_map;
 };

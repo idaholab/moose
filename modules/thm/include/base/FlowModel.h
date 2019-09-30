@@ -6,7 +6,7 @@
 #include "Enums.h"
 #include "libmesh/fe_type.h"
 
-class Simulation;
+class THMProblem;
 class Factory;
 class THMApp;
 class FluidProperties;
@@ -87,10 +87,7 @@ public:
   virtual void addMooseObjects() = 0;
 
 protected:
-  Simulation & _sim;
-
-  /// The application this is associated with
-  THMApp & _app;
+  THMProblem & _sim;
 
   /// The Factory associated with the MooseApp
   Factory & _factory;

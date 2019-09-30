@@ -2,15 +2,15 @@
 
 #include "THMObject.h"
 #include "FlowModel.h"
-#include "Simulation.h"
+#include "THMProblem.h"
 #include "InputParameterWarehouse.h"
-#include "THMApp.h"
 #include "LoggingInterface.h"
 #include "NamingInterface.h"
 
 class Component;
-class FEProblem;
+class THMProblem;
 class THMMesh;
+class THMApp;
 
 template <>
 InputParameters validParams<Component>();
@@ -197,7 +197,7 @@ public:
   template <typename... Args>
   void logWarning(Args &&... args) const
   {
-    _logging_app.log().add(Logger::WARNING, std::forward<Args>(args)...);
+    _sim.log().add(Logger::WARNING, std::forward<Args>(args)...);
   }
 
 protected:
@@ -415,11 +415,9 @@ protected:
   /// Pointer to a parent component (used in composed components)
   Component * _parent;
 
-  /// Simulation this component is part of
-  Simulation & _sim;
+  /// THM problem this component is part of
+  THMProblem & _sim;
 
-  /// THM App (hides _app from MooseObject)
-  THMApp & _app;
   /// The Factory associated with the MooseApp
   Factory & _factory;
 
