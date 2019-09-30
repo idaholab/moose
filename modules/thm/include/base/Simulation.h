@@ -1,8 +1,8 @@
 #pragma once
 
-#include "FEProblem.h"
 #include "THMApp.h"
 #include "FlowModel.h"
+#include "Logger.h"
 #include "ControlData.h"
 #include "LoggingInterface.h"
 #include "NamingInterface.h"
@@ -10,6 +10,7 @@
 class ActionWarehouse;
 class Component;
 class THMMesh;
+class THMProblem;
 
 /**
  * Main class for simulation (the driver of the simulation)
@@ -17,34 +18,8 @@ class THMMesh;
 class Simulation : public LoggingInterface, public NamingInterface
 {
 public:
-  Simulation(ActionWarehouse & action_warehouse);
+  Simulation(FEProblemBase & fe_problem, const InputParameters & params);
   virtual ~Simulation();
-
-  /**
-   * Get the reference to the mesh
-   * @return The reference to the mesh
-   */
-  THMMesh & mesh();
-
-  /**
-   * Get the input parameters for the simulation
-   * @return The reference to the input parameters
-   */
-  InputParameters & params();
-
-  /**
-   * Get the FEProblem associated with this simulation
-   * @return The reference to the FEProblem
-   */
-  FEProblem & feproblem();
-
-  /**
-   * Get parameter from simulation (global one)
-   * @param name The name on the parameter
-   * @return The value of the parameter
-   */
-  template <typename T>
-  const T & getParamTempl(const std::string & name) const;
 
   /**
    * Gets the FE type for the flow in this simulation
@@ -65,14 +40,9 @@ public:
   virtual void setupQuadrature();
 
   /**
-   * Sets the simulation up
-   */
-  virtual void build();
-
-  /**
    * Initialize this simulation
    */
-  virtual void init();
+  virtual void initSimulation();
 
   /**
    * Initialize this simulation's components
@@ -135,16 +105,16 @@ public:
    * @param subdomain_id Subdomain of the variable
    * @param scaling_factor Scaling factor for the variable
    */
-  void addVariable(bool nl,
-                   const VariableName & name,
-                   FEType type,
-                   const SubdomainName & subdomain_name = "",
-                   Real scaling_factor = 1.);
-  void addVariable(bool nl,
-                   const VariableName & name,
-                   FEType type,
-                   const std::vector<SubdomainName> & subdomain_names,
-                   Real scaling_factor = 1.);
+  void addSimVariable(bool nl,
+                      const VariableName & name,
+                      FEType type,
+                      const SubdomainName & subdomain_name = "",
+                      Real scaling_factor = 1.);
+  void addSimVariable(bool nl,
+                      const VariableName & name,
+                      FEType type,
+                      const std::vector<SubdomainName> & subdomain_names,
+                      Real scaling_factor = 1.);
 
   void addConstantIC(const VariableName & var_name, Real value, const SubdomainName & block_name);
   void addConstantIC(const VariableName & var_name,
@@ -159,121 +129,9 @@ public:
   void addConstantScalarIC(const VariableName & var_name, Real value);
   void addComponentScalarIC(const VariableName & var_name, const std::vector<Real> & value);
 
-  void
-  addInitialCondition(const std::string & type, const std::string & name, InputParameters params);
-
-  /**
-   * Adds a kernel
-   * @param type Type (registered name) of the kernel
-   * @param name Name of the kernel
-   * @param params Input parameters
-   */
-  void addKernel(const std::string & type, const std::string & name, InputParameters params);
-
-  /**
-   * Adds a DG kernel
-   *
-   * @param[in] type     Type (registered name) of the object
-   * @param[in] name     Name of the object
-   * @param[in] params   Input parameters
-   */
-  void addDGKernel(const std::string & type, const std::string & name, InputParameters params);
-
-  /**
-   * Adds an auxiliary kernels
-   * @param type Type (registered name) of the auxiliary kernel
-   * @param name Name of the auxiliary kernel
-   * @param params Input parameters
-   */
-  void addAuxKernel(const std::string & type, const std::string & name, InputParameters params);
-
-  /**
-   * Adds a scalar kernels
-   * @param type Type (registered name) of the scalar kernel
-   * @param name Name of the scalar kernel
-   * @param params Input parameters
-   */
-  void addScalarKernel(const std::string & type, const std::string & name, InputParameters params);
-
-  void
-  addAuxScalarKernel(const std::string & type, const std::string & name, InputParameters params);
-
-  /**
-   * Adds a boundary condition
-   * @param type Type (registered name) of the boundary condition
-   * @param name Name of the boundary condition
-   * @param params Input parameters
-   */
-  void
-  addBoundaryCondition(const std::string & type, const std::string & name, InputParameters params);
-
-  /**
-   * Adds an auxiliary boundary condition
-   * @param type Type (registered name) of the auxiliary boundary condition
-   * @param name Name of the auxiliary boundary condition
-   * @param params Input parameters
-   */
-  void addAuxBoundaryCondition(const std::string & type,
-                               const std::string & name,
-                               InputParameters params);
-
-  /**
-   * Adds a function
-   * @param type Type (registered name) of the function
-   * @param name Name of the function
-   * @param params Input parameters
-   */
-  void addFunction(const std::string & type, const std::string & name, InputParameters params);
-
-  /**
-   * Adds a Material
-   * @param type Type (registered name) of the material
-   * @param name Name of the material
-   * @param params Input parameters
-   */
-  void addMaterial(const std::string & type, const std::string & name, InputParameters params);
-
-  /**
-   * Adds a postprocessor
-   * @param type Type (registered name) of the prostprocessor
-   * @param name Name of the postprocessor
-   * @param params Input parameters
-   */
-  void addPostprocessor(const std::string & type, const std::string & name, InputParameters params);
-
-  /**
-   * Adds a vector postprocessor
-   * @param type Type (registered name) of the prostprocessor
-   * @param name Name of the postprocessor
-   * @param params Input parameters
-   */
-  void addVectorPostprocessor(const std::string & type,
+  void addSimInitialCondition(const std::string & type,
                               const std::string & name,
                               InputParameters params);
-
-  /**
-   * Adds a constraint
-   * @param type Type (registered name) of the constraint
-   * @param name Name of the constraint
-   * @param params Input parameters
-   */
-  void addConstraint(const std::string & type, const std::string & name, InputParameters params);
-
-  /**
-   * Adds a user object
-   * @param type Type (registered name) of the user object
-   * @param name Name of the user object
-   * @param params Input parameters
-   */
-  void addUserObject(const std::string & type, const std::string & name, InputParameters params);
-
-  /**
-   * Add a transfer
-   * @param type Type (registered name) of the transfer
-   * @param name Name of the transfer
-   * @param params Input parameters
-   */
-  void addTransfer(const std::string & type, const std::string & name, InputParameters params);
 
   /**
    * Add a control
@@ -293,25 +151,6 @@ public:
    * @returns output names vector corresponding to key
    */
   std::vector<OutputName> getOutputsVector(const std::string & key) const;
-
-  /**
-   * Get a reference to a postprocessor value
-   * @param name Name of the postprocessor
-   * @return The reference to the postprocessor value
-   */
-  Real & getPostprocessorValue(const std::string & name);
-
-  bool hasFunction(const std::string & name, THREAD_ID tid = 0);
-
-  virtual Function & getFunction(const std::string & name, THREAD_ID tid = 0);
-
-  bool hasUserObject(const UserObjectName & name) { return _fe_problem->hasUserObject(name); }
-
-  template <class T>
-  const T & getUserObjectTempl(const UserObjectName & name)
-  {
-    return _fe_problem->getUserObjectTempl<T>(name);
-  }
 
   /**
    * Create mesh for this simulation
@@ -420,6 +259,15 @@ public:
    */
   bool hasInitialConditionsFromFile();
 
+  Logger & log() { return _log; }
+
+  /**
+   * Enable Jacobian checking
+   *
+   * @param state True for Jacobian checking, otherwise false
+   */
+  void setCheckJacobian(bool state) { _check_jacobian = state; }
+
 protected:
   struct VariableInfo
   {
@@ -428,20 +276,16 @@ protected:
     std::set<SubdomainName> _subdomain;
     Real _scaling_factor;
   };
-  ActionWarehouse & _action_warehouse;
-  std::shared_ptr<THMMesh> _mesh;
+  THMMesh & _mesh;
 
   /// Pointer to FEProblem representing this simulation
-  FEProblem * _fe_problem;
+  FEProblemBase & _fe_problem;
 
   /// The application this is associated with
   THMApp & _app;
 
   /// The Factory associated with the MooseApp
   Factory & _factory;
-
-  /// Builds Actions
-  ActionFactory & _action_factory;
 
   /// List of components in this simulation
   std::vector<std::shared_ptr<Component>> _components;
@@ -468,7 +312,7 @@ protected:
   std::map<std::string, ICInfo> _ics;
 
   /// "Global" of this simulation
-  InputParameters _pars;
+  const InputParameters & _pars;
 
   /// finite element type for the flow in the simulation
   FEType _flow_fe_type;
@@ -514,18 +358,14 @@ protected:
   /// true if using implicit time integration scheme
   bool _implicit_time_integration;
 
+  Logger _log;
+
+  /// True if checking jacobian
+  bool _check_jacobian;
+
 public:
   Real _zero;
-
-  friend class GlobalSimParamAction;
 };
-
-template <typename T>
-const T &
-Simulation::getParamTempl(const std::string & name) const
-{
-  return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
-}
 
 template <typename T>
 bool

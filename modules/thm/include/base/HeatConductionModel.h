@@ -1,6 +1,6 @@
 #pragma once
 
-class Simulation;
+class THMProblem;
 class THMApp;
 class Factory;
 class HeatStructureBase;
@@ -51,9 +51,7 @@ public:
   static const FEType & feType() { return _fe_type; }
 
 protected:
-  Simulation & _sim;
-  /// The MOOSE application this is associated with
-  THMApp & _app;
+  THMProblem & _sim;
   /// The Factory associated with the MooseApp
   Factory & _factory;
   /// The heat structure component that built this class
@@ -72,5 +70,5 @@ protected:
   // FE type used for heat conduction
   static FEType _fe_type;
 
-  friend class GlobalSimParamAction;
+  friend class Simulation;
 };

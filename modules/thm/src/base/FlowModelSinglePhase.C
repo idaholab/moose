@@ -45,21 +45,21 @@ FlowModelSinglePhase::addVariables()
   std::vector<Real> scaling_factor = _sim.getParamTempl<std::vector<Real>>("scaling_factor_1phase");
 
   // Nonlinear variables
-  _sim.addVariable(true, RHOA, _fe_type, subdomain_name, scaling_factor[0]);
-  _sim.addVariable(true, RHOUA, _fe_type, subdomain_name, scaling_factor[1]);
-  _sim.addVariable(true, RHOEA, _fe_type, subdomain_name, scaling_factor[2]);
+  _sim.addSimVariable(true, RHOA, _fe_type, subdomain_name, scaling_factor[0]);
+  _sim.addSimVariable(true, RHOUA, _fe_type, subdomain_name, scaling_factor[1]);
+  _sim.addSimVariable(true, RHOEA, _fe_type, subdomain_name, scaling_factor[2]);
 
   _solution_vars = {RHOA, RHOUA, RHOEA};
   _derivative_vars = _solution_vars;
 
   // Auxiliary
-  _sim.addVariable(false, DENSITY, _fe_type, subdomain_name);
-  _sim.addVariable(false, VELOCITY, _fe_type, subdomain_name);
-  _sim.addVariable(false, PRESSURE, _fe_type, subdomain_name);
-  _sim.addVariable(false, SPECIFIC_VOLUME, _fe_type, subdomain_name);
-  _sim.addVariable(false, SPECIFIC_INTERNAL_ENERGY, _fe_type, subdomain_name);
-  _sim.addVariable(false, TEMPERATURE, _fe_type, subdomain_name);
-  _sim.addVariable(false, SPECIFIC_TOTAL_ENTHALPY, _fe_type, subdomain_name);
+  _sim.addSimVariable(false, DENSITY, _fe_type, subdomain_name);
+  _sim.addSimVariable(false, VELOCITY, _fe_type, subdomain_name);
+  _sim.addSimVariable(false, PRESSURE, _fe_type, subdomain_name);
+  _sim.addSimVariable(false, SPECIFIC_VOLUME, _fe_type, subdomain_name);
+  _sim.addSimVariable(false, SPECIFIC_INTERNAL_ENERGY, _fe_type, subdomain_name);
+  _sim.addSimVariable(false, TEMPERATURE, _fe_type, subdomain_name);
+  _sim.addSimVariable(false, SPECIFIC_TOTAL_ENTHALPY, _fe_type, subdomain_name);
 }
 
 void
@@ -89,7 +89,7 @@ FlowModelSinglePhase::addInitialConditions()
       params.set<std::vector<VariableName>>("p") = {PRESSURE};
       params.set<std::vector<VariableName>>("T") = {TEMPERATURE};
       params.set<UserObjectName>("fp") = _fp_name;
-      _sim.addInitialCondition(class_name, genName(_comp_name, "rho_ic"), params);
+      _sim.addSimInitialCondition(class_name, genName(_comp_name, "rho_ic"), params);
     }
 
     {
@@ -98,7 +98,7 @@ FlowModelSinglePhase::addInitialConditions()
       params.set<VariableName>("variable") = RHOA;
       params.set<std::vector<SubdomainName>>("block") = block;
       params.set<std::vector<VariableName>>("values") = {DENSITY, FlowModel::AREA};
-      _sim.addInitialCondition(class_name, genName(_comp_name, "rhoA_ic"), params);
+      _sim.addSimInitialCondition(class_name, genName(_comp_name, "rhoA_ic"), params);
     }
     {
       std::string class_name = "VariableProductIC";
@@ -106,7 +106,7 @@ FlowModelSinglePhase::addInitialConditions()
       params.set<VariableName>("variable") = RHOUA;
       params.set<std::vector<SubdomainName>>("block") = block;
       params.set<std::vector<VariableName>>("values") = {DENSITY, VELOCITY, FlowModel::AREA};
-      _sim.addInitialCondition(class_name, genName(_comp_name, "rhouA_ic"), params);
+      _sim.addSimInitialCondition(class_name, genName(_comp_name, "rhouA_ic"), params);
     }
     {
       std::string class_name = "RhoEAFromPressureTemperatureVelocityIC";
@@ -118,7 +118,7 @@ FlowModelSinglePhase::addInitialConditions()
       params.set<std::vector<VariableName>>("vel") = {VELOCITY};
       params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
       params.set<UserObjectName>("fp") = _fp_name;
-      _sim.addInitialCondition(class_name, genName(_comp_name, "rhoEA_ic"), params);
+      _sim.addSimInitialCondition(class_name, genName(_comp_name, "rhoEA_ic"), params);
     }
 
     {
@@ -128,7 +128,7 @@ FlowModelSinglePhase::addInitialConditions()
       params.set<std::vector<SubdomainName>>("block") = block;
       params.set<std::vector<VariableName>>("rhoA") = {RHOA};
       params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
-      _sim.addInitialCondition(class_name, genName(_comp_name, "v_ic"), params);
+      _sim.addSimInitialCondition(class_name, genName(_comp_name, "v_ic"), params);
     }
     {
       std::string class_name = "SpecificInternalEnergyIC";
@@ -138,7 +138,7 @@ FlowModelSinglePhase::addInitialConditions()
       params.set<std::vector<VariableName>>("rhoA") = {RHOA};
       params.set<std::vector<VariableName>>("rhouA") = {RHOUA};
       params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
-      _sim.addInitialCondition(class_name, genName(_comp_name, "u_ic"), params);
+      _sim.addSimInitialCondition(class_name, genName(_comp_name, "u_ic"), params);
     }
     {
       std::string class_name = "SpecificTotalEnthalpyIC";
@@ -149,7 +149,7 @@ FlowModelSinglePhase::addInitialConditions()
       params.set<std::vector<VariableName>>("rhoA") = {RHOA};
       params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
       params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
-      _sim.addInitialCondition(class_name, genName(_comp_name, "H_ic"), params);
+      _sim.addSimInitialCondition(class_name, genName(_comp_name, "H_ic"), params);
     }
   }
 }

@@ -1,4 +1,5 @@
 #include "Simulation.h"
+#include "FEProblemBase.h"
 #include "AddVariableAction.h"
 #include "MooseObjectAction.h"
 #include "Transient.h"
@@ -14,59 +15,34 @@
 
 #include "libmesh/string_to_enum.h"
 
-Simulation::Simulation(ActionWarehouse & action_warehouse)
-  : LoggingInterface(dynamic_cast<THMApp &>(action_warehouse.mooseApp())),
-    _action_warehouse(action_warehouse),
-    _fe_problem(nullptr),
-    _app(dynamic_cast<THMApp &>(_action_warehouse.mooseApp())),
+Simulation::Simulation(FEProblemBase & fe_problem, const InputParameters & pars)
+  : LoggingInterface(_log),
+    _mesh(*static_cast<THMMesh *>(pars.get<MooseMesh *>("mesh"))),
+    _fe_problem(fe_problem),
+    _app(static_cast<THMApp &>(*pars.get<MooseApp *>("_moose_app"))),
     _factory(_app.getFactory()),
-    _action_factory(_app.getActionFactory()),
-    _pars(emptyInputParameters()),
+    _pars(pars),
     _flow_fe_type(FEType(CONSTANT, MONOMIAL)),
-    _spatial_discretization(FlowModel::rDG),
+    _spatial_discretization(THM::stringToEnum<FlowModel::ESpatialDiscretizationType>(
+        pars.get<MooseEnum>("spatial_discretization"))),
     _implicit_time_integration(true),
+    _check_jacobian(false),
     _zero(0)
 {
-  {
-    InputParameters params = _factory.getValidParams("THMMesh");
-    params.set<MooseEnum>("dim") = "3";
-    params.set<unsigned int>("patch_size") = 1;
-    // We need to go through the Factory to create the THMMesh so
-    // that its params object is properly added to the Warehouse.
-    _mesh = _factory.create<THMMesh>("THMMesh", "THM:mesh", params);
-  }
+  bool second_order_mesh = pars.get<bool>("2nd_order_mesh");
+  HeatConductionModel::_fe_type =
+      second_order_mesh ? FEType(SECOND, LAGRANGE) : FEType(FIRST, LAGRANGE);
+  if (getSpatialDiscretization() == FlowModel::CG)
+    _flow_fe_type = HeatConductionModel::_fe_type;
 
-  // NOTE: when Simulation gets merged in THMProblem, these will reside in its input parameters,
-  // so this ugliness will go away
-  params().set<std::vector<Real>>("scaling_factor_1phase") = {1., 1., 1.};
-  params().set<std::vector<Real>>("scaling_factor_2phase") = {1., 1., 1., 1., 1., 1., 1.};
-  params().set<Real>("scaling_factor_temperature") = 1.;
+  if (Moose::_warnings_are_errors)
+    _log.setWarningsAsErrors();
 }
 
 Simulation::~Simulation()
 {
   for (auto && k : _control_data)
     delete k.second;
-
-  // _mesh is destroyed by MOOSE
-}
-
-THMMesh &
-Simulation::mesh()
-{
-  return *_mesh;
-}
-
-InputParameters &
-Simulation::params()
-{
-  return _pars;
-}
-
-FEProblem &
-Simulation::feproblem()
-{
-  return *_fe_problem;
 }
 
 void
@@ -75,17 +51,12 @@ Simulation::buildMesh()
   if (_components.size() == 0)
     return;
 
-  _mesh->setMeshBase(_mesh->buildMeshBaseObject());
-
   // build mesh
   for (auto && comp : _components)
     comp->executeSetupMesh();
   // Some components add side sets, some add node sets. Make sure both versions exist
-  _mesh->getMesh().get_boundary_info().build_side_list_from_node_list();
-  _mesh->prep();
-
-  // store in parser
-  _action_warehouse.mesh() = _mesh;
+  _mesh.getMesh().get_boundary_info().build_side_list_from_node_list();
+  _mesh.prep();
 }
 
 void
@@ -122,11 +93,11 @@ Simulation::setupQuadrature()
       order = fe_type.default_quadrature_order();
   }
 
-  feproblem().createQRules(QGAUSS, order, order, order);
+  _fe_problem.createQRules(QGAUSS, order, order, order);
 }
 
 void
-Simulation::init()
+Simulation::initSimulation()
 {
   // sort the components using dependency resolver
   DependencyResolver<std::shared_ptr<Component>> dependency_resolver;
@@ -224,9 +195,7 @@ Simulation::identifyLoops()
           MooseSharedNamespace::dynamic_pointer_cast<FlowChannelBase>(component);
       if (flow_chan_base_component && (_component_name_to_loop_name[component->name()] == loop))
       {
-        const UserObjectName fp_name = flow_chan_base_component->getFluidPropertiesName();
-        const FluidProperties & fp = getUserObject<FluidProperties>(fp_name);
-        model_id = _app.getFlowModelID(fp);
+        model_id = flow_chan_base_component->getFlowModelID();
         found_model_id = true;
         break;
       }
@@ -263,11 +232,11 @@ Simulation::printComponentLoops() const
 }
 
 void
-Simulation::addVariable(bool nl,
-                        const VariableName & name,
-                        FEType type,
-                        const SubdomainName & subdomain_name,
-                        Real scaling_factor)
+Simulation::addSimVariable(bool nl,
+                           const VariableName & name,
+                           FEType type,
+                           const SubdomainName & subdomain_name,
+                           Real scaling_factor)
 {
   if (_vars.find(name) == _vars.end())
   {
@@ -290,134 +259,28 @@ Simulation::addVariable(bool nl,
 }
 
 void
-Simulation::addVariable(bool nl,
-                        const VariableName & name,
-                        FEType type,
-                        const std::vector<SubdomainName> & subdomain_names,
-                        Real scaling_factor /* = 1.*/)
+Simulation::addSimVariable(bool nl,
+                           const VariableName & name,
+                           FEType type,
+                           const std::vector<SubdomainName> & subdomain_names,
+                           Real scaling_factor /* = 1.*/)
 {
   for (auto && sdn : subdomain_names)
-    addVariable(nl, name, type, sdn, scaling_factor);
-}
-
-void
-Simulation::addKernel(const std::string & type, const std::string & name, InputParameters params)
-{
-  _fe_problem->addKernel(type, name, params);
-}
-
-void
-Simulation::addDGKernel(const std::string & type, const std::string & name, InputParameters params)
-{
-  _fe_problem->addDGKernel(type, name, params);
-}
-
-void
-Simulation::addAuxKernel(const std::string & type, const std::string & name, InputParameters params)
-{
-  _fe_problem->addAuxKernel(type, name, params);
-}
-
-void
-Simulation::addScalarKernel(const std::string & type,
-                            const std::string & name,
-                            InputParameters params)
-{
-  _fe_problem->addScalarKernel(type, name, params);
-}
-
-void
-Simulation::addAuxScalarKernel(const std::string & type,
-                               const std::string & name,
-                               InputParameters params)
-{
-  _fe_problem->addAuxScalarKernel(type, name, params);
-}
-
-void
-Simulation::addBoundaryCondition(const std::string & type,
-                                 const std::string & name,
-                                 InputParameters params)
-{
-  _fe_problem->addBoundaryCondition(type, name, params);
-}
-
-void
-Simulation::addAuxBoundaryCondition(const std::string & type,
-                                    const std::string & name,
-                                    InputParameters params)
-{
-  _fe_problem->addAuxKernel(type, name, params);
-}
-
-void
-Simulation::addFunction(const std::string & type, const std::string & name, InputParameters params)
-{
-  _fe_problem->addFunction(type, name, params);
-}
-
-void
-Simulation::addMaterial(const std::string & type, const std::string & name, InputParameters params)
-{
-  _fe_problem->addMaterial(type, name, params);
-}
-
-void
-Simulation::addPostprocessor(const std::string & type,
-                             const std::string & name,
-                             InputParameters params)
-{
-  _fe_problem->addPostprocessor(type, name, params);
-}
-
-void
-Simulation::addVectorPostprocessor(const std::string & type,
-                                   const std::string & name,
-                                   InputParameters params)
-{
-  _fe_problem->addVectorPostprocessor(type, name, params);
-}
-
-void
-Simulation::addConstraint(const std::string & type,
-                          const std::string & name,
-                          InputParameters params)
-{
-  _fe_problem->addConstraint(type, name, params);
-}
-
-void
-Simulation::addUserObject(const std::string & type,
-                          const std::string & name,
-                          InputParameters params)
-{
-  _fe_problem->addUserObject(type, name, params);
-}
-
-void
-Simulation::addTransfer(const std::string & type, const std::string & name, InputParameters params)
-{
-  _fe_problem->addTransfer(type, name, params);
+    addSimVariable(nl, name, type, sdn, scaling_factor);
 }
 
 void
 Simulation::addControl(const std::string & type, const std::string & name, InputParameters params)
 {
-  params.addPrivateParam<FEProblemBase *>("_fe_problem_base", _fe_problem);
+  params.addPrivateParam<FEProblemBase *>("_fe_problem_base", &_fe_problem);
   std::shared_ptr<Control> control = _factory.create<Control>(type, name, params);
-  _fe_problem->getControlWarehouse().addObject(control);
-}
-
-Real &
-Simulation::getPostprocessorValue(const std::string & name)
-{
-  return _fe_problem->getPostprocessorValue(name);
+  _fe_problem.getControlWarehouse().addObject(control);
 }
 
 void
-Simulation::addInitialCondition(const std::string & type,
-                                const std::string & name,
-                                InputParameters params)
+Simulation::addSimInitialCondition(const std::string & type,
+                                   const std::string & name,
+                                   InputParameters params)
 {
   if (hasInitialConditionsFromFile())
     return;
@@ -444,7 +307,7 @@ Simulation::addConstantIC(const VariableName & var_name,
   params.set<VariableName>("variable") = var_name;
   params.set<Real>("value") = value;
   params.set<std::vector<SubdomainName>>("block") = {block_name};
-  addInitialCondition(class_name, genName(var_name, block_name, "ic"), params);
+  addSimInitialCondition(class_name, genName(var_name, block_name, "ic"), params);
 }
 
 void
@@ -464,7 +327,7 @@ Simulation::addConstantIC(const VariableName & var_name,
   params.set<VariableName>("variable") = var_name;
   params.set<Real>("value") = value;
   params.set<std::vector<SubdomainName>>("block") = block_names;
-  addInitialCondition(class_name, genName(var_name, blk_str, "ic"), params);
+  addSimInitialCondition(class_name, genName(var_name, blk_str, "ic"), params);
 }
 
 void
@@ -480,7 +343,7 @@ Simulation::addFunctionIC(const VariableName & var_name,
   params.set<VariableName>("variable") = var_name;
   params.set<std::vector<SubdomainName>>("block") = {block_name};
   params.set<FunctionName>("function") = func_name;
-  addInitialCondition(class_name, genName(var_name, block_name, "ic"), params);
+  addSimInitialCondition(class_name, genName(var_name, block_name, "ic"), params);
 }
 
 void
@@ -500,7 +363,7 @@ Simulation::addFunctionIC(const VariableName & var_name,
   params.set<VariableName>("variable") = var_name;
   params.set<std::vector<SubdomainName>>("block") = block_names;
   params.set<FunctionName>("function") = func_name;
-  addInitialCondition(class_name, genName(var_name, blk_str, "ic"), params);
+  addSimInitialCondition(class_name, genName(var_name, blk_str, "ic"), params);
 }
 
 void
@@ -513,7 +376,7 @@ Simulation::addConstantScalarIC(const VariableName & var_name, Real value)
   InputParameters params = _factory.getValidParams(class_name);
   params.set<VariableName>("variable") = var_name;
   params.set<Real>("value") = value;
-  addInitialCondition(class_name, genName(var_name, "ic"), params);
+  addSimInitialCondition(class_name, genName(var_name, "ic"), params);
 }
 
 void
@@ -526,7 +389,7 @@ Simulation::addComponentScalarIC(const VariableName & var_name, const std::vecto
   InputParameters params = _factory.getValidParams(class_name);
   params.set<VariableName>("variable") = var_name;
   params.set<std::vector<Real>>("values") = value;
-  addInitialCondition(class_name, genName(var_name, "ic"), params);
+  addSimInitialCondition(class_name, genName(var_name, "ic"), params);
 }
 
 void
@@ -581,10 +444,10 @@ Simulation::addVariables()
       if (vi._nl)
       {
         params.set<std::vector<Real>>("scaling") = {vi._scaling_factor};
-        _fe_problem->addVariable(var_type, name, params);
+        _fe_problem.addVariable(var_type, name, params);
       }
       else
-        _fe_problem->addAuxVariable(var_type, name, params);
+        _fe_problem.addAuxVariable(var_type, name, params);
     }
   }
 
@@ -612,10 +475,10 @@ Simulation::addVariables()
       if (vi._nl)
       {
         params.set<std::vector<Real>>("scaling") = {vi._scaling_factor};
-        _fe_problem->addVariable(var_type, name, params);
+        _fe_problem.addVariable(var_type, name, params);
       }
       else
-        _fe_problem->addAuxVariable(var_type, name, params);
+        _fe_problem.addAuxVariable(var_type, name, params);
     }
   }
 
@@ -632,9 +495,9 @@ Simulation::setupInitialConditionsFromFile()
   {
     const std::string class_name = "SolutionUserObject";
     InputParameters params = _factory.getValidParams(class_name);
-    params.set<MeshFileName>("mesh") = getParam<FileName>("initial_from_file");
-    params.set<std::string>("timestep") = getParam<std::string>("initial_from_file_timestep");
-    _fe_problem->addUserObject(class_name, suo_name, params);
+    params.set<MeshFileName>("mesh") = _pars.get<FileName>("initial_from_file");
+    params.set<std::string>("timestep") = _pars.get<std::string>("initial_from_file_timestep");
+    _fe_problem.addUserObject(class_name, suo_name, params);
   }
 
   for (auto && v : _vars)
@@ -649,7 +512,7 @@ Simulation::setupInitialConditionsFromFile()
       params.set<VariableName>("variable") = var_name;
       params.set<VariableName>("from_variable") = var_name;
       params.set<UserObjectName>("solution_uo") = suo_name;
-      _fe_problem->addInitialCondition(class_name, genName(var_name, "ic"), params);
+      _fe_problem.addInitialCondition(class_name, genName(var_name, "ic"), params);
     }
     else
     {
@@ -663,7 +526,7 @@ Simulation::setupInitialConditionsFromFile()
         std::vector<SubdomainName> subdomains(vi._subdomain.begin(), vi._subdomain.end());
         params.set<std::vector<SubdomainName>>("block") = subdomains;
       }
-      _fe_problem->addInitialCondition(class_name, genName(var_name, "ic"), params);
+      _fe_problem.addInitialCondition(class_name, genName(var_name, "ic"), params);
     }
   }
 }
@@ -675,20 +538,8 @@ Simulation::setupInitialConditions()
   {
     const std::string & name = i.first;
     ICInfo & ic = i.second;
-    _fe_problem->addInitialCondition(ic._type, name, ic._params);
+    _fe_problem.addInitialCondition(ic._type, name, ic._params);
   }
-}
-
-bool
-Simulation::hasFunction(const std::string & name, THREAD_ID tid)
-{
-  return feproblem().hasFunction(name, tid);
-}
-
-Function &
-Simulation::getFunction(const std::string & name, THREAD_ID tid)
-{
-  return feproblem().getFunction(name, tid);
 }
 
 void
@@ -700,14 +551,9 @@ Simulation::addComponentPhysics()
 }
 
 void
-Simulation::build()
-{
-}
-
-void
 Simulation::ghostElements()
 {
-  const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem = _mesh->nodeToElemMap();
+  const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem = _mesh.nodeToElemMap();
 
   for (auto && comp : _components)
   {
@@ -725,7 +571,7 @@ Simulation::ghostElements()
         // ghost all elements connected to the nodes
         const std::vector<dof_id_type> & elems = it->second;
         for (const auto & elem_it : elems)
-          _fe_problem->addGhostedElem(elem_it);
+          _fe_problem.addGhostedElem(elem_it);
       }
     }
   }
@@ -753,19 +599,19 @@ Simulation::setupCoordinateSystem()
       }
     }
   }
-  _fe_problem->setCoordSystem(blocks, coord_types);
+  _fe_problem.setCoordSystem(blocks, coord_types);
 
   // RZ geometries are always aligned with x-axis
   MooseEnum rz_coord_axis("X=0 Y=1", "X");
-  _fe_problem->setAxisymmetricCoordAxis(rz_coord_axis);
+  _fe_problem.setAxisymmetricCoordAxis(rz_coord_axis);
 }
 
 void
 Simulation::setupMesh()
 {
-  _fe_problem = dynamic_cast<FEProblem *>(_action_warehouse.problemBase().get());
-  if (_fe_problem == nullptr)
-    mooseError("You need to be running with FEProblem derived class.");
+  // _fe_problem = dynamic_cast<FEProblem *>(_action_warehouse.problemBase().get());
+  // if (_fe_problem == nullptr)
+  //   mooseError("You need to be running with FEProblem derived class.");
 
   if (_components.size() == 0)
     return;
@@ -778,6 +624,9 @@ void
 Simulation::integrityCheck() const
 {
   if (_components.size() == 0)
+    return;
+
+  if (_check_jacobian)
     return;
 
   // go over components and put flow channels into one "bucket"
@@ -832,20 +681,20 @@ Simulation::integrityCheck() const
   for (auto && comp : _components)
     comp->executeCheck();
 
-  if (_app.log().getNumberOfErrors() > 0)
+  if (_log.getNumberOfErrors() > 0)
   {
     Moose::err << COLOR_RED
                << "Execution stopped, the following problems were found:" << COLOR_DEFAULT
                << std::endl
                << std::endl;
-    _app.log().print();
+    _log.print();
     Moose::err << std::endl;
     MOOSE_ABORT;
   }
 
-  if (_app.log().getNumberOfWarnings() > 0)
+  if (_log.getNumberOfWarnings() > 0)
   {
-    _app.log().print();
+    _log.print();
     Moose::err << std::endl;
   }
 }
@@ -853,6 +702,9 @@ Simulation::integrityCheck() const
 void
 Simulation::controlDataIntegrityCheck()
 {
+  if (_check_jacobian)
+    return;
+
   // check that control data are consistent
   for (auto && i : _control_data)
   {
@@ -862,18 +714,18 @@ Simulation::controlDataIntegrityCheck()
                "' was requested, but was not declared by any active control object.");
   }
 
-  if (_app.log().getNumberOfErrors() > 0)
+  if (_log.getNumberOfErrors() > 0)
   {
     Moose::err << COLOR_RED
                << "Execution stopped, the following problems were found:" << COLOR_DEFAULT
                << std::endl
                << std::endl;
-    _app.log().print();
+    _log.print();
     Moose::err << std::endl;
     MOOSE_ABORT;
   }
 
-  auto & ctrl_wh = _fe_problem->getControlWarehouse()[EXEC_TIMESTEP_BEGIN];
+  auto & ctrl_wh = _fe_problem.getControlWarehouse()[EXEC_TIMESTEP_BEGIN];
 
   // initialize THM control objects
   for (auto && i : ctrl_wh.getObjects())
@@ -908,7 +760,7 @@ Simulation::controlDataIntegrityCheck()
   // Find all `TerminateControl`s and all their dependencies. Then add those
   // objects into TIMESTEP_END control warehouse
   MooseObjectWarehouse<Control> & ctrl_wh_tse =
-      _fe_problem->getControlWarehouse()[EXEC_TIMESTEP_END];
+      _fe_problem.getControlWarehouse()[EXEC_TIMESTEP_END];
   for (auto && i : ctrl_wh.getObjects())
   {
     if (TerminateControl * ctrl = dynamic_cast<TerminateControl *>(i.get()))
@@ -939,7 +791,6 @@ Simulation::run()
 void
 Simulation::addComponent(const std::string & type, const std::string & name, InputParameters params)
 {
-  params.set<Simulation *>("_sim") = this;
   std::shared_ptr<Component> comp = _factory.create<Component>(type, name, params);
   if (_comp_by_name.find(name) == _comp_by_name.end())
     _comp_by_name[name] = comp;

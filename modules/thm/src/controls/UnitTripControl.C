@@ -40,7 +40,7 @@ UnitTripControl::buildConditionFunction()
       tid = getParam<THREAD_ID>("_tid");
 
     _condition_ptr = libmesh_make_unique<THMParsedFunctionWrapper>(
-        _sim, _pfb_feproblem, _condition, _vars, _vals, tid);
+        *_sim, _pfb_feproblem, _condition, _vars, _vals, tid);
   }
 }
 

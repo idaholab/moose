@@ -1,5 +1,6 @@
 #include "PostprocessorAsControlAction.h"
 #include "Simulation.h"
+#include "THMProblem.h"
 
 registerMooseAction("THMApp", PostprocessorAsControlAction, "add_postprocessor");
 
@@ -22,14 +23,18 @@ PostprocessorAsControlAction::PostprocessorAsControlAction(InputParameters param
 void
 PostprocessorAsControlAction::act()
 {
-  const std::string class_name = "AddControlAction";
-  InputParameters params = _action_factory.getValidParams(class_name);
-  params.set<std::string>("type") = "CopyPostprocessorValueControl";
+  THMProblem * thm_problem = dynamic_cast<THMProblem *>(_problem.get());
+  if (thm_problem)
+  {
+    const std::string class_name = "THMAddControlAction";
+    InputParameters params = _action_factory.getValidParams(class_name);
+    params.set<std::string>("type") = "CopyPostprocessorValueControl";
 
-  std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
-      _action_factory.create(class_name, _name + "_copy_ctrl", params));
+    std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
+        _action_factory.create(class_name, _name + "_copy_ctrl", params));
 
-  action->getObjectParams().set<PostprocessorName>("postprocessor") = _name;
+    action->getObjectParams().set<PostprocessorName>("postprocessor") = _name;
 
-  _awh.addActionBlock(action);
+    _awh.addActionBlock(action);
+  }
 }

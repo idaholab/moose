@@ -127,9 +127,10 @@ FlowChannelBase::init()
 std::shared_ptr<ClosuresBase>
 FlowChannelBase::buildClosures()
 {
-  const std::string class_name = _app.getClosuresClassName(_closures_name, _model_id);
+  const std::string class_name = THMApp::getClosuresClassName(_closures_name, getFlowModelID());
   InputParameters params = _factory.getValidParams(class_name);
-  params.set<Simulation *>("_sim") = &_sim;
+  params.set<THMProblem *>("_thm_problem") = &_sim;
+  params.set<Logger *>("_logger") = &_sim.log();
   return _factory.create<ClosuresBase>(
       class_name, genName(name(), "closure", _closures_name), params);
 }
@@ -275,7 +276,7 @@ FlowChannelBase::addVariables()
 
   // wall heat flux
   if (!_temperature_mode && _n_heat_transfer_connections != 1)
-    _sim.addVariable(false, FlowModel::HEAT_FLUX_WALL, _sim.getFlowFEType(), getSubdomainName());
+    _sim.addSimVariable(false, FlowModel::HEAT_FLUX_WALL, _sim.getFlowFEType(), getSubdomainName());
 
   // total heat flux perimeter
   if (_n_heat_transfer_connections > 1)
@@ -285,7 +286,7 @@ FlowChannelBase::addVariables()
     params.set<VariableName>("variable") = FlowModel::HEAT_FLUX_PERIMETER;
     params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
     params.set<std::vector<VariableName>>("values") = _P_hf_names;
-    _sim.addInitialCondition(class_name, genName(name(), "P_hf_ic"), params);
+    _sim.addSimInitialCondition(class_name, genName(name(), "P_hf_ic"), params);
   }
 
   _flow_model->addInitialConditions();

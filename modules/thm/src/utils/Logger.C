@@ -9,7 +9,7 @@ Logger::~Logger()
 }
 
 void
-Logger::print()
+Logger::print() const
 {
   // errors
   if (_n_errors > 0)
@@ -33,19 +33,19 @@ Logger::print()
 }
 
 bool
-Logger::isEmpty()
+Logger::isEmpty() const
 {
   return (_n_errors == 0) && (_n_warnings == 0);
 }
 
 unsigned int
-Logger::getNumberOfErrors()
+Logger::getNumberOfErrors() const
 {
   return _n_errors;
 }
 
 unsigned int
-Logger::getNumberOfWarnings()
+Logger::getNumberOfWarnings() const
 {
   return _n_warnings;
 }
@@ -57,7 +57,7 @@ Logger::setWarningsAsErrors()
 }
 
 void
-Logger::printMessage()
+Logger::printMessage() const
 {
   Moose::err << COLOR_DEFAULT << std::endl;
 }

@@ -154,7 +154,7 @@ HeatTransferFromHeatStructure1Phase::addMooseObjects()
     params.set<BoundaryName>("paired_boundary") = getMasterSideName();
     params.set<std::vector<VariableName>>("paired_variable") =
         std::vector<VariableName>(1, HeatConductionModel::TEMPERATURE);
-    _sim.addAuxBoundaryCondition(class_name, genName(name(), "T_wall_transfer"), params);
+    _sim.addAuxKernel(class_name, genName(name(), "T_wall_transfer"), params);
   }
 }
 

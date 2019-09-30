@@ -1,6 +1,6 @@
 #pragma once
 
-#include "THMAction.h"
+#include "Action.h"
 
 class IntegrityCheckAction;
 
@@ -10,7 +10,7 @@ InputParameters validParams<IntegrityCheckAction>();
 /**
  * Check the integrity of the simulation
  */
-class IntegrityCheckAction : public THMAction
+class IntegrityCheckAction : public Action
 {
 public:
   IntegrityCheckAction(InputParameters parameters);

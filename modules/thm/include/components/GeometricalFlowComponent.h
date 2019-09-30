@@ -50,7 +50,7 @@ public:
   /**
    * Gets the flow model ID
    */
-  const THM::FlowModelID & getFlowModelID() const;
+  virtual const THM::FlowModelID & getFlowModelID() const = 0;
 
   /**
    * Gets the numerical flux user object name
@@ -71,8 +71,6 @@ public:
   const MooseEnum & getSlopeReconstruction() const { return _rdg_slope_reconstruction; }
 
 protected:
-  virtual void init() override;
-
   virtual bool usingSecondOrderMesh() const override;
 
   /// Spatial discretization
@@ -92,7 +90,4 @@ protected:
 
   /// Slope reconstruction type for rDG
   const MooseEnum _rdg_slope_reconstruction;
-
-  /// Flow model type
-  THM::FlowModelID _model_id;
 };

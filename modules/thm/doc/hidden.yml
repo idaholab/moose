@@ -69,7 +69,6 @@
 - /Components/BoundaryBase
 - /Components/Component
 - /Components/ConnectorBase
-- /Components/FlowChannel
 - /Components/FlowChannel1Phase
 - /Components/FlowChannel2Phase
 - /Components/FormLossFromExternalApp1Phase
@@ -139,6 +138,8 @@
 - /Constraints/OldJunctionEnergyConstraint
 - /Constraints/OldJunctionMomentumConstraint
 
+- /Controls
+- /Controls/THMAddControlAction
 - /Controls/ControlData
 - /Controls/CopyPostprocessorValueControl
 - /Controls/GetFunctionValueControl
@@ -148,6 +149,9 @@
 - /Controls/TerminateControl
 - /Controls/TimeFunctionControl
 - /Controls/UnitTripControl
+
+- /Debug/THMDebugAction
+- /Debug/THMPrintComponentLoopsAction
 
 - /DGKernels/NumericalFlux7EqnNCGDGKernel
 
@@ -162,9 +166,6 @@
 - /Functions/ConstantTimesAreaFunction
 - /Functions/GeneralizedCircumference
 - /Functions/LinearFunction
-
-- /GlobalParams
-- /GlobalParams/GlobalSimParamAction
 
 - /HeatStructureMaterials
 - /HeatStructureMaterials/AddHeatStructureMaterialAction
@@ -287,6 +288,8 @@
 - /Materials/WallMassTransferSimpleMaterial
 
 - /Mesh/THMMesh
+
+- /Problem/THMProblem
 
 - /Postprocessors/ElementHeatFluxPostprocessor
 - /Postprocessors/BoolControlDataValuePostprocessor

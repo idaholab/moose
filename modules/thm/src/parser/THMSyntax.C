@@ -8,21 +8,22 @@ namespace THM
 void
 associateSyntax(Syntax & syntax)
 {
-  syntax.registerActionSyntax("GlobalSimParamAction", "GlobalParams");
   syntax.registerActionSyntax(
       "AddStabilizationSettingsAction", "Stabilizations/*", "THM:add_stabilization");
   syntax.registerActionSyntax("AddHeatStructureMaterialAction",
                               "HeatStructureMaterials/*",
                               "THM:add_heat_structure_material");
+  syntax.registerActionSyntax("THMCreateMeshAction", "Components");
   syntax.registerActionSyntax("AddComponentAction", "Components/*", "THM:add_component");
-  syntax.registerActionSyntax("PostprocessorAsControlAction", "Postprocessors/*");
   syntax.registerActionSyntax("AddIterationCountPostprocessorsAction", "Debug");
+  syntax.registerActionSyntax("PostprocessorAsControlAction", "Postprocessors/*");
+  syntax.registerActionSyntax("THMDebugAction", "Debug");
+  syntax.registerActionSyntax("THMPrintComponentLoopsAction", "Debug");
 }
 
 void
 registerActions(Syntax & syntax)
 {
-  registerTask("THM:global_sim_params", false);
   registerTask("THM:init_simulation", true);
   registerTask("THM:setup_mesh", true);
   registerTask("THM:build_mesh", true);
@@ -34,25 +35,29 @@ registerActions(Syntax & syntax)
   registerTask("THM:integrity_check", true);
   registerTask("THM:control_data_integrity_check", true);
   registerTask("THM:setup_quadrature", true);
+  registerTask("THM:debug_action", false);
+  registerTask("THM:print_component_loops", false);
 
   registerMooseObjectTask("THM:add_component", Component, false);
   registerMooseObjectTask("THM:add_heat_structure_material", SolidMaterialProperties, false);
 
   registerMooseObjectTask("THM:add_stabilization", StabilizationSettings, false);
 
+  syntax.replaceActionSyntax("THMAddControlAction", "Controls/*", "add_control");
+
   try
   {
-    syntax.addDependency("THM:global_sim_params", "set_global_params");
-    syntax.addDependency("setup_recover_file_base", "THM:global_sim_params");
     syntax.addDependency("THM:add_heat_structure_material", "add_function");
-    syntax.addDependency("THM:add_component", "check_copy_nodal_vars");
+    syntax.addDependency("THM:add_component", "setup_mesh");
+    syntax.addDependency("THM:debug_action", "setup_mesh");
     syntax.addDependency("THM:init_simulation", "THM:add_component");
+    syntax.addDependency("add_mesh_generator", "THM:add_component");
     syntax.addDependency("THM:identify_loops", "THM:add_component");
     syntax.addDependency("THM:identify_loops", "add_fluid_properties");
     syntax.addDependency("THM:integrity_check", "THM:init_components");
     syntax.addDependency("THM:integrity_check", "THM:identify_loops");
     syntax.addDependency("THM:build_mesh", "THM:init_simulation");
-    syntax.addDependency("add_partitioner", "THM:build_mesh");
+    syntax.addDependency("add_mesh_generator", "THM:build_mesh");
     syntax.addDependency("THM:setup_mesh", "create_problem_complete");
     syntax.addDependency("add_fluid_properties", "THM:setup_mesh");
     syntax.addDependency("add_elemental_field_variable", "add_fluid_properties");
@@ -68,6 +73,7 @@ registerActions(Syntax & syntax)
     syntax.addDependency("add_output_aux_variables", "THM:add_component_physics");
     syntax.addDependency("add_periodic_bc", "THM:add_variables");
     syntax.addDependency("THM:add_stabilization", "add_function");
+    syntax.addDependency("THM:print_component_loops", "THM:control_data_integrity_check");
   }
   catch (CyclicDependencyException<std::string> & e)
   {

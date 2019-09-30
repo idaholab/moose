@@ -1,4 +1,5 @@
 #include "AddStabilizationSettingsAction.h"
+#include "FEProblemBase.h"
 
 registerMooseAction("THMApp", AddStabilizationSettingsAction, "THM:add_stabilization");
 
@@ -6,11 +7,11 @@ template <>
 InputParameters
 validParams<AddStabilizationSettingsAction>()
 {
-  return validParams<THMObjectAction>();
+  return validParams<MooseObjectAction>();
 }
 
 AddStabilizationSettingsAction::AddStabilizationSettingsAction(InputParameters params)
-  : THMObjectAction(params)
+  : MooseObjectAction(params)
 {
 }
 

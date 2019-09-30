@@ -7,7 +7,8 @@ validParams<ClosuresBase>()
 {
   InputParameters params = validParams<MooseObject>();
 
-  params.addPrivateParam<Simulation *>("_sim");
+  params.addPrivateParam<THMProblem *>("_thm_problem");
+  params.addPrivateParam<Logger *>("_logger");
 
   params.registerBase("THM:closures");
 
@@ -16,10 +17,10 @@ validParams<ClosuresBase>()
 
 ClosuresBase::ClosuresBase(const InputParameters & params)
   : MooseObject(params),
-    LoggingInterface(dynamic_cast<THMApp &>(getMooseApp())),
+    LoggingInterface(*params.getCheckedPointerParam<Logger *>("_logger")),
     NamingInterface(),
 
-    _sim(*params.getCheckedPointerParam<Simulation *>("_sim")),
+    _sim(*params.getCheckedPointerParam<THMProblem *>("_thm_problem")),
     _factory(_app.getFactory())
 {
 }

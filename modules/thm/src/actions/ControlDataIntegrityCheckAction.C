@@ -1,4 +1,5 @@
 #include "ControlDataIntegrityCheckAction.h"
+#include "THMProblem.h"
 #include "THMApp.h"
 
 registerMooseAction("THMApp", ControlDataIntegrityCheckAction, "THM:control_data_integrity_check");
@@ -7,21 +8,20 @@ template <>
 InputParameters
 validParams<ControlDataIntegrityCheckAction>()
 {
-  InputParameters params = validParams<THMAction>();
+  InputParameters params = validParams<Action>();
 
   return params;
 }
 
 ControlDataIntegrityCheckAction::ControlDataIntegrityCheckAction(InputParameters parameters)
-  : THMAction(parameters)
+  : Action(parameters)
 {
 }
 
 void
 ControlDataIntegrityCheckAction::act()
 {
-  THMApp & app = dynamic_cast<THMApp &>(_app);
-
-  if (!app.checkJacobian())
-    _simulation.controlDataIntegrityCheck();
+  THMProblem * thm_problem = dynamic_cast<THMProblem *>(_problem.get());
+  if (thm_problem)
+    thm_problem->controlDataIntegrityCheck();
 }
