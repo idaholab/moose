@@ -66,9 +66,9 @@ MooseParsedGradFunction::initialSetup()
 
   if (!_function_ptr)
     _function_ptr =
-        libmesh_make_unique<MooseParsedFunctionWrapper>(_pfb_feproblem, _value, _vars, _vals, tid);
+        libmesh_make_unique<MooseParsedFunctionWrapper>(this, _value, _vars, _vals, tid);
 
   if (!_grad_function_ptr)
-    _grad_function_ptr = libmesh_make_unique<MooseParsedFunctionWrapper>(
-        _pfb_feproblem, _grad_value, _vars, _vals, tid);
+    _grad_function_ptr =
+        libmesh_make_unique<MooseParsedFunctionWrapper>(this, _grad_value, _vars, _vals, tid);
 }

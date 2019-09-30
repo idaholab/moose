@@ -71,6 +71,6 @@ MooseParsedFunction::initialSetup()
       tid = getParam<THREAD_ID>("_tid");
 
     _function_ptr =
-        libmesh_make_unique<MooseParsedFunctionWrapper>(_pfb_feproblem, _value, _vars, _vals, tid);
+        libmesh_make_unique<MooseParsedFunctionWrapper>(this, _value, _vars, _vals, tid);
   }
 }

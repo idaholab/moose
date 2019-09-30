@@ -22,6 +22,7 @@
 // Forward declarations
 class FEProblemBase;
 class Function;
+class MooseObject;
 
 /**
  * A wrapper class for creating and evaluating parsed functions via the
@@ -40,7 +41,7 @@ public:
    * @param vars A vector of variable names contained within the function
    * @param vals A vector of variable values, matching the variables defined in vars
    */
-  MooseParsedFunctionWrapper(FEProblemBase & feproblem,
+  MooseParsedFunctionWrapper(MooseObject * moose_object_ptr,
                              const std::string & function_str,
                              const std::vector<std::string> & vars,
                              const std::vector<std::string> & vals,
@@ -74,8 +75,11 @@ public:
   Real evaluateDot(Real t, const Point & p);
 
 private:
+  /// Pointer to the MooseObject using this wrapper
+  MooseObject * _moose_object_ptr;
+
   /// Reference to the FEProblemBase object
-  FEProblemBase & _feproblem;
+  FEProblemBase * _feproblem_ptr;
 
   /// Reference to the string containing the function to evaluate
   const std::string & _function_str;

@@ -52,4 +52,12 @@
     requirement = "The Function system shall support the creation of objects that execute a curl of a vector function defined within the input file."
     issues = '#13041'
   [../]
+
+  [parsed_func_with_var_error]
+    type = RunException
+    input = function_with_var_error.i
+    expect_err = "The 'vals' input includes an item \('f'\) that is a variable"
+    requirement = "The system shall error if a function string defined in an input file includes a field variable."
+    issues = '#14102'
+  []
 []

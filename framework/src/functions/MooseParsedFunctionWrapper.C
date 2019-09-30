@@ -12,13 +12,19 @@
 #include "MooseVariableScalar.h"
 #include "Function.h"
 #include "MooseUtils.h"
+#include "MooseObject.h"
 
-MooseParsedFunctionWrapper::MooseParsedFunctionWrapper(FEProblemBase & feproblem,
+MooseParsedFunctionWrapper::MooseParsedFunctionWrapper(MooseObject * moose_object_ptr,
                                                        const std::string & function_str,
                                                        const std::vector<std::string> & vars,
                                                        const std::vector<std::string> & vals,
                                                        const THREAD_ID tid)
-  : _feproblem(feproblem), _function_str(function_str), _vars(vars), _vals_input(vals), _tid(tid)
+  : _moose_object_ptr(moose_object_ptr),
+    _feproblem_ptr(moose_object_ptr->getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
+    _function_str(function_str),
+    _vars(vars),
+    _vals_input(vals),
+    _tid(tid)
 {
   initialize();
 
@@ -92,31 +98,39 @@ MooseParsedFunctionWrapper::initialize()
   for (unsigned int i = 0; i < _vals_input.size(); ++i)
   {
     // Case when a Postprocessor is found by the name given in the input values
-    if (_feproblem.hasPostprocessor(_vals_input[i]))
+    if (_feproblem_ptr->hasPostprocessor(_vals_input[i]))
     {
-      Real & pp_val = _feproblem.getPostprocessorValue(_vals_input[i]);
+      Real & pp_val = _feproblem_ptr->getPostprocessorValue(_vals_input[i]);
       _initial_vals.push_back(pp_val);
       _pp_vals.push_back(&pp_val);
       _pp_index.push_back(i);
     }
 
     // Case when a scalar variable is found by the name given in the input values
-    else if (_feproblem.hasScalarVariable(_vals_input[i]))
+    else if (_feproblem_ptr->hasScalarVariable(_vals_input[i]))
     {
-      Real & scalar_val = _feproblem.getScalarVariable(_tid, _vals_input[i]).sln()[0];
+      Real & scalar_val = _feproblem_ptr->getScalarVariable(_tid, _vals_input[i]).sln()[0];
       _initial_vals.push_back(scalar_val);
       _scalar_vals.push_back(&scalar_val);
       _scalar_index.push_back(i);
     }
 
     // Case when a function is found by the name given in the input values
-    else if (_feproblem.hasFunction(_vals_input[i]))
+    else if (_feproblem_ptr->hasFunction(_vals_input[i]))
     {
-      Function & fn = _feproblem.getFunction(_vals_input[i], _tid);
+      Function & fn = _feproblem_ptr->getFunction(_vals_input[i], _tid);
       _initial_vals.push_back(0);
       _functions.push_back(&fn);
       _function_index.push_back(i);
     }
+
+    // Error when a variable is supplied
+    else if (_feproblem_ptr->hasVariable(_vals_input[i]))
+      _moose_object_ptr->paramError(
+          "vals",
+          "The 'vals' input includes an item ('",
+          _vals_input[i],
+          "') that is a variable, which is not supported by the ParsedFunction object.");
 
     // Case when a Real is supplied
     else

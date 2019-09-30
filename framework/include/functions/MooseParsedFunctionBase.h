@@ -63,9 +63,6 @@ protected:
   */
   const std::string verifyFunction(const std::string & function_str);
 
-  /// Reference to the FEProblemBase class for this object
-  FEProblemBase & _pfb_feproblem;
-
   /// Variables passed to libMesh::ParsedFunction
   const std::vector<std::string> _vars;
 
@@ -75,4 +72,3 @@ protected:
   /// Pointer to the Parsed function wrapper object for the scalar
   std::unique_ptr<MooseParsedFunctionWrapper> _function_ptr;
 };
-
