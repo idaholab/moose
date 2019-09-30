@@ -30,13 +30,10 @@ InletDensityVelocity1Phase::check() const
   if (fm == nullptr)
     logError("Incompatible flow model. Make sure you use this component with single phase flow "
              "channel.");
-
-  if (_spatial_discretization == FlowModel::rDG)
-    logSpatialDiscretizationNotImplementedError(_spatial_discretization);
 }
 
 void
-InletDensityVelocity1Phase::addMooseObjects()
+InletDensityVelocity1Phase::setupCG()
 {
   Real rho_in = getParam<Real>("rho");
   Real u_in = getParam<Real>("vel");
@@ -87,4 +84,39 @@ InletDensityVelocity1Phase::addMooseObjects()
     connectObject(params, nm, "rho");
     connectObject(params, nm, "vel");
   }
+}
+
+void
+InletDensityVelocity1Phase::setupRDG()
+{
+  ExecFlagEnum execute_on(MooseUtils::getDefaultExecFlagEnum());
+  execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
+
+  // boundary flux user object
+  const std::string boundary_flux_name = genName(name(), "boundary_flux");
+  {
+    const std::string class_name = "BoundaryFlux3EqnGhostDensityVelocity";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<Real>("rho") = getParam<Real>("rho");
+    params.set<Real>("vel") = getParam<Real>("vel");
+    params.set<UserObjectName>("fluid_properties") = _fp_name;
+    params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
+    params.set<ExecFlagEnum>("execute_on") = execute_on;
+    _sim.addUserObject(class_name, boundary_flux_name, params);
+
+    connectObject(params, boundary_flux_name, "rho");
+    connectObject(params, boundary_flux_name, "vel");
+  }
+
+  // BCs
+  addWeakBC3Eqn(boundary_flux_name);
+}
+
+void
+InletDensityVelocity1Phase::addMooseObjects()
+{
+  if (_spatial_discretization == FlowModel::CG)
+    setupCG();
+  else if (_spatial_discretization == FlowModel::rDG)
+    setupRDG();
 }
