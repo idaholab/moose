@@ -8,6 +8,9 @@
   scaling_factor_1phase = '1. 1. 1.'
 
   closures = simple
+
+  spatial_discretization = rdg
+  rdg_slope_reconstruction = none
 []
 
 [FluidProperties]
@@ -61,9 +64,4 @@
 
   l_tol = 1e-3
   l_max_its = 100
-
-  [./Quadrature]
-    type = TRAP
-    order = FIRST
-  [../]
 []

@@ -12,6 +12,9 @@ f = 5
   scaling_factor_1phase = '1e0 1e-2 1e-4'
 
   closures = simple
+
+  spatial_discretization = rdg
+  rdg_slope_reconstruction = none
 []
 
 [FluidProperties]
@@ -67,7 +70,6 @@ f = 5
     type = Outlet1Phase
     input = 'pipe:out'
     p = 7.0e6
-    legacy = true
   [../]
 []
 
@@ -94,11 +96,6 @@ f = 5
 
   l_tol = 1e-2
   l_max_its = 30
-
-  [./Quadrature]
-    type = TRAP
-    order = FIRST
-  [../]
 []
 
 [Postprocessors]

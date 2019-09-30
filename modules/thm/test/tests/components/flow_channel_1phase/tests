@@ -8,19 +8,6 @@
   [../]
 
   # controls
-  [./clg:Hw]
-    type = 'Exodiff'
-    input = 'clg.Hw.i'
-    exodiff = 'clg.Hw_out.e'
-    custom_cmp = 'clg.Hw.exodiff'
-  [../]
-
-  [./clg:T_wall]
-    type = 'Exodiff'
-    input = 'clg.T_wall.i'
-    exodiff = 'clg.T_wall_out.e'
-    custom_cmp = 'clg.T_wall.exodiff'
-  [../]
 
   # error checking
   [./err:wrong_fp]
@@ -29,25 +16,12 @@
     expect_err = "pipe: Supplied fluid properties must be for 1-phase fluids."
   [../]
 
-
-  [./err:2nd_order]
-    type = 'RunException'
-    input = 'err.2nd_order.i'
-    expect_err = "Cannot use TRAP quadrature rule with 2nd order elements.  Use SIMPSON or GAUSS instead."
-  [../]
-
-  [./err:missing_f_1phase]
-    type = 'RunException'
-    input = 'err.missing_f_1phase.i'
-    expect_err = "pipe: When using simple closures, the parameter 'f' must be provided."
-  [../]
-
   # jacobians
   [./jac:3eqn]
     type = 'PetscJacobianTester'
     input = 'jac.3eqn.i'
-    ratio_tol = 5e-8
-    difference_tol = 0.2
+    ratio_tol = 7e-8
+    difference_tol = 15
     cli_args = 'Debug/check_jacobian=true'
   [../]
 

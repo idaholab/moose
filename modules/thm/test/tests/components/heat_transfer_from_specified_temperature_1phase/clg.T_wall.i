@@ -4,6 +4,9 @@
   initial_T = 300
   scaling_factor_1phase = '1e+0 1e-2 1e-4'
   closures = simple
+
+  spatial_discretization = rdg
+  rdg_slope_reconstruction = none
 []
 
 [FluidProperties]
@@ -34,7 +37,7 @@
     type = HeatTransferFromSpecifiedTemperature1Phase
     flow_channel = pipe1
     T_wall = 300
-    Hw = 10000
+    Hw = 0
   [../]
 
   [./inlet1]
@@ -48,7 +51,6 @@
     type = Outlet1Phase
     input = 'pipe1:out'
     p = 0.1e6
-    legacy = true
   [../]
 []
 
@@ -64,8 +66,8 @@
   scheme = 'bdf2'
 
   start_time = 0
-  dt = 0.1
-  num_steps = 10
+  dt = 0.05
+  num_steps = 20
   abort_on_solve_fail = true
 
   solve_type = 'PJFNK'
@@ -76,17 +78,10 @@
 
   l_tol = 1e-3
   l_max_its = 30
-
-  [./Quadrature]
-    type = TRAP
-    order = FIRST
-  [../]
 []
 
 [Outputs]
-  [./out]
-    type = Exodus
-  [../]
+  csv = true
 []
 
 [Functions]
@@ -103,5 +98,13 @@
     component = ht_pipe1
     parameter = T_wall
     function = T_wall_fn
+  [../]
+[]
+
+[Postprocessors]
+  [./T_wall]
+    type = RealComponentParameterValuePostprocessor
+    component = ht_pipe1
+    parameter = T_wall
   [../]
 []

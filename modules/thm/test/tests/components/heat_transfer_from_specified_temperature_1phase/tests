@@ -1,0 +1,14 @@
+[Tests]
+  # controls
+  [./clg:Hw]
+    type = 'CSVDiff'
+    input = 'clg.Hw.i'
+    csvdiff = 'clg.Hw_out.csv'
+  [../]
+
+  [./clg:T_wall]
+    type = 'CSVDiff'
+    input = 'clg.T_wall.i'
+    csvdiff = 'clg.T_wall_out.csv'
+  [../]
+[]

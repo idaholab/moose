@@ -7,6 +7,9 @@
   initial_T = 300
 
   closures = simple
+
+  spatial_discretization = rdg
+  rdg_slope_reconstruction = none
 []
 
 [FluidProperties]
@@ -59,11 +62,6 @@
 
   start_time = 0.0
   num_steps = 10
-
-  [./Quadrature]
-    type = TRAP
-    order = FIRST
-  [../]
 []
 
 [Outputs]

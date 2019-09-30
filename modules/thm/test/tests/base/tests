@@ -40,4 +40,10 @@
     expect_err = "Incorrect connection specified 'pipe_in'\. Valid connection format is 'component_name:end_type'\."
     cli_args = "Components/left_wall/input='pipe_in'"
   [../]
+
+  [./err:2nd_order]
+    type = 'RunException'
+    input = 'err.2nd_order.i'
+    expect_err = "Cannot use TRAP quadrature rule with 2nd order elements.  Use SIMPSON or GAUSS instead."
+  [../]
 []
