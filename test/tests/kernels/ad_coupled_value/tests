@@ -42,5 +42,6 @@
     design = 'DualReal.md'
     cli_args = 'Outputs/exodus=false'
     issues = '#5658'
+    ad_mode = 'NONSPARSE'
   []
 []
