@@ -186,6 +186,7 @@ class HTMLRenderer(Renderer):
         config = Renderer.defaultConfig()
         config['google_analytics'] = (False, "Enable Google Analytics.")
         config['favicon'] = (None, "The location of the website favicon.")
+        config['extra-css'] = ([], "List of additional CSS files to include.")
         return config
 
     def __init__(self, *args, **kwargs):
@@ -231,6 +232,12 @@ class HTMLRenderer(Renderer):
         if favicon:
             html.Tag(head, 'link', rel="icon", type="image/x-icon", href=rel(favicon), \
                      sizes="16x16 32x32 64x64 128x128")
+
+        # Add the extra-css, this is done here to make sure it shows up last
+        for i, css in enumerate(self.get('extra-css')):
+            key = 'extra-css-{}'.format(i)
+            if key not in self.__css:
+                self.addCSS(key, css)
 
         for name, kwargs in self.__css:
             html.Tag(head, 'link', href=rel(name), type="text/css", rel="stylesheet", **kwargs)
