@@ -39,8 +39,6 @@ public:
    */
   const std::string & cname() const;
 
-  unsigned int id() { return _id; }
-
   Component * parent() { return _parent; }
 
   THMMesh & mesh() const { return _mesh; }
@@ -410,8 +408,6 @@ protected:
   /// Gravitational acceleration unit direction
   const RealVectorValue _gravity_direction;
 
-  /// Unique ID of this component
-  unsigned int _id;
   /// Pointer to a parent component (used in composed components)
   Component * _parent;
 
