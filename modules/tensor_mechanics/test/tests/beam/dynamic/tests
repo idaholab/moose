@@ -27,7 +27,7 @@
                   " of an Euler-Bernoulli beam modeled using beam elements in the"
                   " presence of Rayleigh damping and numerical damping introduced"
                   " by Hilber-Hughes-Taylor (HHT) time integration."
-    rel_err = 7e-6
+    rel_err = 2e-5
   [../]
   [./dyn_euler_rayleigh_hht_ti]
     type = 'Exodiff'

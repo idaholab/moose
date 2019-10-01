@@ -236,8 +236,10 @@ SetupMeshAction::act()
           _type = "MeshGeneratorMesh";
           auto original_params = _moose_object_pars;
           _moose_object_pars = _factory.getValidParams("MeshGeneratorMesh");
-          if (original_params.isParamSetByUser("parallel_type"))
-            _moose_object_pars.applySpecificParameters(original_params, {"parallel_type"});
+          std::vector<std::string> params_to_apply{"parallel_type", "patch_size", "uniform_refine"};
+          for (const auto & param : params_to_apply)
+            if (original_params.isParamSetByUser(param))
+              _moose_object_pars.applySpecificParameters(original_params, {param});
         }
         else if (!_moose_object_pars.get<bool>("_mesh_generator_mesh"))
         {

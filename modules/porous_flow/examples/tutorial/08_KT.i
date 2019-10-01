@@ -2,7 +2,6 @@
 [Mesh]
   [annular]
     type = AnnularMeshGenerator
-    dim = 2
     nr = 10
     rmin = 1.0
     rmax = 10
