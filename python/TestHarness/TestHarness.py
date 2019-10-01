@@ -140,6 +140,7 @@ class TestHarness:
             checks['slepc_version'] = 'N/A'
             checks['library_mode'] = set(['ALL'])
             checks['mesh_mode'] = set(['ALL'])
+            checks['ad_mode'] = set(['ALL'])
             checks['dtk'] = set(['ALL'])
             checks['unique_ids'] = set(['ALL'])
             checks['vtk'] = set(['ALL'])
@@ -166,6 +167,7 @@ class TestHarness:
             checks['slepc_version'] = util.getSlepcVersion(self.libmesh_dir)
             checks['library_mode'] = util.getSharedOption(self.libmesh_dir)
             checks['mesh_mode'] = util.getLibMeshConfigOption(self.libmesh_dir, 'mesh_mode')
+            checks['ad_mode'] = util.getMooseConfigOption(self.moose_dir, 'ad_mode')
             checks['dtk'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'dtk')
             checks['unique_ids'] = util.getLibMeshConfigOption(self.libmesh_dir, 'unique_ids')
             checks['vtk'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'vtk')

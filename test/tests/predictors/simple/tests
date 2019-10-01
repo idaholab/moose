@@ -10,6 +10,14 @@
     requirement = "The system shall include a means for predicting future solution based on previous "
                   "solutions."
   []
+  [output]
+    type = 'RunApp'
+    input = 'predictor_reference_residual_test.i'
+    expect_out = 'Applying predictor with scale factor = 1e-10'
+
+    requirement = "The system shall include a means for predicting future solution based on previous "
+                  "solutions and print the scale factor to the output stream."
+  []
 
   [skip]
     requirement = "The system shall support the ability to skip performing solution predictions"
