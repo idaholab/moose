@@ -35,8 +35,6 @@ KKSACBulkC::KKSACBulkC(const InputParameters & parameters)
     _prop_d2Fadca2(getMaterialPropertyDerivative<Real>("fa_name", _ca_name, _ca_name)),
     _prop_d2Fadcadarg(_nvar)
 {
-  // Resize to number of coupled variables (_nvar from KKSACBulkBase constructor)
-
   // Iterate over all coupled variables
   for (unsigned int i = 0; i < _nvar; ++i)
   {
