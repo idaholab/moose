@@ -35,10 +35,11 @@ class NavigationExtension(components.Extension):
         config['menu'] = (dict(), "Navigation items, this can either be a *.menu.md file or dict. "\
                           "The former creates a 'mega menu' and the later uses dropdowns.")
         config['search'] = (True, "Enable/disable the search bar.")
+        config['google-cse'] = (None, "Enable Google search by supplying the Google 'search engine ID'.")
         config['home'] = ('', "The homepage for the website.")
         config['repo'] = (None, "The source code repository.")
         config['name'] = (None, "The name of the website (e.g., MOOSE)")
-        config['long-name'] = (None, "A long version of the page namer that is used in the title, 'name' by default.")
+        config['long-name'] = (None, "A long version of the page name that is used in the title, 'name' by default.")
         config['breadcrumbs'] = (True, "Toggle for the breadcrumb links at the top of page.")
         config['sections'] = (True, "Group heading content into <section> tags.")
         config['scrollspy'] = (True, "Enable/disable the scrolling table of contents.")
@@ -66,8 +67,12 @@ class NavigationExtension(components.Extension):
             renderer.addJavaScript('nav', 'js/navigation.js')
 
             if self.get('search', False):
-                renderer.addJavaScript('fuse', "contrib/fuse/fuse.min.js")
-                renderer.addJavaScript('fuse_index', "js/search_index.js")
+                cx = self.get('google-cse', None)
+                if cx is not None:
+                    renderer.addJavaScript("google_cse", "https://cse.google.com/cse.js?cx={}".format(cx))
+                else:
+                    renderer.addJavaScript('fuse', "contrib/fuse/fuse.min.js")
+                    renderer.addJavaScript('fuse_index', "js/search_index.js")
 
     def initMetaData(self, page, meta):
         """Initialize the meta data to hold search index data."""
@@ -220,26 +225,30 @@ class NavigationExtension(components.Extension):
         btn = html.Tag(parent, 'a', class_="modal-trigger", href="#moose-search")
         html.Tag(btn, 'i', string=u'search', class_="material-icons")
 
-        # Search modal
+        # Search Modal window
         div = html.Tag(anytree.search.find_by_attr(parent.root, 'header'), 'div',
                        id_="moose-search",
                        class_="modal modal-fixed-footer moose-search-modal")
         container = html.Tag(div, 'div',
                              class_="modal-content container moose-search-modal-content")
-        row = html.Tag(container, 'div', class_="row")
-        col = html.Tag(row, 'div', class_="col l12")
-        box_div = html.Tag(col, 'div', class_="input-field")
-        html.Tag(box_div, 'input',
-                 type_='text',
-                 id_="moose-search-box",
-                 onkeyup="mooseSearch()",
-                 placeholder=unicode(self.get('home')))
-        result_wrapper = html.Tag(row, 'div')
 
-        html.Tag(result_wrapper, 'div', id_="moose-search-results", class_="col s12")
+        cx = self.get('google-cse', None)
+        if cx is not None:
+            html.Tag(container, 'div', class_='gcse-search')
+        else:
+            row = html.Tag(container, 'div', class_="row")
+            col = html.Tag(row, 'div', class_="col l12")
+            box_div = html.Tag(col, 'div', class_="input-field")
+            html.Tag(box_div, 'input',
+                     type_='text',
+                     id_="moose-search-box",
+                     onkeyup="mooseSearch()",
+                     placeholder=unicode(self.get('home')))
+            result_wrapper = html.Tag(row, 'div')
+            html.Tag(result_wrapper, 'div', id_="moose-search-results", class_="col s12")
+
         footer = html.Tag(div, 'div', class_="modal-footer")
-        html.Tag(footer, 'a', href='#!', class_="modal-action modal-close btn-flat",
-                 string=u'Close')
+        html.Tag(footer, 'a', href='#!', class_="modal-close btn-flat", string=u'Close')
 
     def _addTopNavigation(self, parent, page):
         """Create navigation in the top bar."""

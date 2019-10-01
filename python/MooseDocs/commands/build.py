@@ -40,6 +40,8 @@ def command_line_options(subparser, parent):
                              "(default: MooseDocs.base.ParallelBarrier).")
     parser.add_argument('--profile', action='store_true',
                         help="Build the pages with python profiling.")
+    parser.add_argument('--serve-with-google-cse', action='store_true',
+                        help="Allow Google custom search to operate with --serve.")
     parser.add_argument('--destination',
                         default=None,
                         help="Destination for writing build content.")
@@ -189,6 +191,11 @@ def main(options):
     home = options.home
     if options.serve:
         home = 'http://127.0.0.1:{}'.format(options.port)
+        if not options.serve_with_google_cse:
+            for ext in translator.extensions:
+                if 'google-cse' in ext:
+                    ext.update(**{'google-cse':None, 'set_initial':True})
+
     if home is not None:
         for ext in translator.extensions:
             if 'home' in ext:

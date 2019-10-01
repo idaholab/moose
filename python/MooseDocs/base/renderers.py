@@ -223,6 +223,8 @@ class HTMLRenderer(Renderer):
 
         def rel(path):
             """Helper to create relative paths for js/css dependencies."""
+            if path.startswith('http'):
+                return path
             return os.path.relpath(path, os.path.dirname(page.local))
 
         head = anytree.search.find_by_attr(root, 'head')
