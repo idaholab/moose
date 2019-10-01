@@ -11,4 +11,41 @@
     issues = "#5658 #12633"
     allow_test_objects = true
   [../]
+
+  [./heated_rod]
+    type = 'CSVDiff'
+    input = heated_rod.i
+    csvdiff = heated_rod_out.csv
+    allow_test_objects = true
+    requirement = 'todo'
+    design = "ADHeatConduction.md"
+    issues = "todo"
+  [../]
+  [./heated_rod_scaled]
+    type = 'CSVDiff'
+    input = heated_rod_scaled.i
+    csvdiff = heated_rod_scaled_out.csv
+    allow_test_objects = true
+    requirement = 'todo'
+    design = "ADHeatConduction.md"
+    issues = "todo"
+  [../]
+  [./heated_rod_bcs]
+    type = 'CSVDiff'
+    input = heated_rod_bcs.i
+    csvdiff = heated_rod_bcs_out.csv
+    allow_test_objects = true
+    requirement = 'todo'
+    design = "ADHeatConduction.md"
+    issues = "todo"
+  [../]
+  [./heated_rod_bcs_scaled]
+    type = 'CSVDiff'
+    input = heated_rod_bcs_scaled.i
+    csvdiff = heated_rod_bcs_scaled_out.csv
+    allow_test_objects = true
+    requirement = 'todo'
+    design = "ADHeatConduction.md"
+    issues = "todo"
+  [../]
 []

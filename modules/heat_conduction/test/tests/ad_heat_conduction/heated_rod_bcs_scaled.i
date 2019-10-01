@@ -6,15 +6,16 @@
   dim = 2
   nx = 5
   ny = 5
-  xmax = 0.001
-  ymax = 0.001
+  xmax = 1
+  ymax = 1
+[]
+
+[Problem]
+  coord_type = RZ
 []
 
 [Variables]
   [./T]
-    initial_condition = 1.5
-  [../]
-  [./c]
     initial_condition = 1.5
   [../]
 []
@@ -24,6 +25,7 @@
     type = ADHeatConduction
     variable = T
     thermal_conductivity = thermal_conductivity
+    axis_scaling_vector = '1e3 1e2 0'
   [../]
   [./heat_dt]
     type = ADHeatConductionTimeDerivative
@@ -31,66 +33,68 @@
     specific_heat = thermal_conductivity
     density_name = thermal_conductivity
   [../]
-  [./c]
-    type = ADDiffusion
-    variable = c
-  [../]
-[]
-
-[Kernels]
-  [./c_dt]
-    type = TimeDerivative
-    variable = c
-  [../]
 []
 
 [BCs]
-  [./left_c]
-    type = DirichletBC
-    variable = c
-    boundary = left
-    value = 2
-  [../]
-  [./right_c]
-    type = DirichletBC
-    variable = c
-    boundary = right
-    value = 1
-  [../]
-  [./top_T]
-    type = DirichletBC
+  [./top]
+    type = FunctionDirichletBC
     variable = T
     boundary = top
-    value = 1
+    function = t
   [../]
-  [./bottom_T]
+  [./bottom]
     type = DirichletBC
     variable = T
     boundary = bottom
     value = 2
+  [../]
+
+  [./left]
+    type = DirichletBC
+    variable = T
+    boundary = left
+    value = 1
+  [../]
+  [./right]
+    type = FunctionDirichletBC
+    variable = T
+    boundary = right
+    function = t*2
   [../]
 []
 
 [Materials]
   [./k]
     type = ADThermalConductivityTest
-    c = c
+    c = T
     temperature = T
-  [../]
-[]
-
-[Preconditioning]
-  [./full]
-    type = SMP
-    full = true
   [../]
 []
 
 [Executioner]
   type = Transient
-  num_steps = 1
+  solve_type = NEWTON
+  num_steps = 2
+  dt = 1
+  automatic_scaling = true
+[]
+
+[Postprocessors]
+  [./avg]
+    type = ElementAverageValue
+    variable = T
+  [../]
+  [./max]
+    type = ElementExtremeValue
+    variable = T
+  [../]
+  [./min]
+    type = ElementExtremeValue
+    variable = T
+    value_type = min
+  [../]
 []
 
 [Outputs]
-  exodus = true
+  csv = true
 []

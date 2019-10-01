@@ -9,7 +9,7 @@
   type = GeneratedMesh
   dim = 1
   nx = 160
-  xmax = 80
+  xmax = 1
 []
 
 [Variables]
@@ -21,7 +21,7 @@
   [./T_IC]
     type = FunctionIC
     variable = T
-    function = '100*sin(pi*x/80)'
+    function = '100*sin(pi*x/1)'
   [../]
 []
 
@@ -29,6 +29,7 @@
   [./HeatDiff]
     type = ADHeatConduction
     variable = T
+    axis_scaling_vector = '0.0125 0 0'
   [../]
   [./HeatTdot]
     type = ADHeatConductionTimeDerivative
@@ -66,7 +67,7 @@
 [Postprocessors]
   [./error]
     type = NodalL2Error
-    function = '100*sin(pi*x/80)*exp(-0.95/(0.092*8.92)*pi^2/80^2*t)'
+    function = '100*sin(pi*x/1)*exp(-0.95/(0.092*8.92)*pi^2/80^2*t)'
     variable = T
   [../]
 []

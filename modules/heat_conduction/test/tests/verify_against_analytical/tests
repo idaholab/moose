@@ -17,6 +17,14 @@
     requirement = "Heat conduction from an AD kernel shall get the same answer as a traditional kernel"
     issues = "#5658 #12633"
   [../]
+  [./ad_1D_transient_scaled]
+    type = 'Exodiff'
+    input = 'ad_1D_transient_scaled.i'
+    exodiff = 'ad_1D_transient_scaled_out.e'
+    abs_zero = 1e-8
+    requirement = "todo"
+    issues = "todo"
+  [../]
   [./ad_1D_transient_jacobian]
     type = 'PetscJacobianTester'
     input = 'ad_1D_transient.i'
@@ -45,6 +53,14 @@
     abs_zero = 1e-8
     requirement = "Heat conduction from an AD kernel shall get the same answer as a traditional kernel"
     issues = "#5658 #12633"
+  [../]
+  [./ad_2D_steady_state_scaled]
+    type = 'Exodiff'
+    input = 'ad_2d_steady_state_scaled.i'
+    exodiff = 'ad_2d_steady_state_scaled_out.e'
+    abs_zero = 1e-8
+    requirement = "todo"
+    issues = "todo"
   [../]
   [./ad_2D_steady_state_jacobian]
     type = 'PetscJacobianTester'

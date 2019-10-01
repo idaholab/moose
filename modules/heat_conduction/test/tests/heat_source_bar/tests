@@ -18,6 +18,16 @@
     issues = "#12633"
     custom_cmp = 'ad_heat_source_bar.cmp'
   [../]
+  [./ad_heat_source_bar_scaled]
+    type = 'Exodiff'
+    input = 'ad_heat_source_bar_scaled.i'
+    exodiff = 'ad_heat_source_bar_scaled_out.e'
+    abs_zero = 1e-7
+    requirement = 'todo'
+    design = "todo"
+    issues = "todo"
+    custom_cmp = 'ad_heat_source_bar.cmp'
+  [../]
   [./ad_heat_source_bar_jacobian]
     type = 'PetscJacobianTester'
     input = 'ad_heat_source_bar.i'
