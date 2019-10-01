@@ -4,5 +4,6 @@
     input = 'phy.form_loss_1phase.master.i'
     exodiff = 'phy.form_loss_1phase.master_out_slave0.e'
     rel_err = 1e-10
+    recover = false
   [../]
 []

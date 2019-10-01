@@ -1,0 +1,69 @@
+[Tests]
+  # physics
+  [./phy:f_fn_3eqn]
+    type = 'CSVDiff'
+    input = 'phy.f_fn.3eqn.i'
+    csvdiff = 'phy.f_fn.3eqn_out.csv'
+    rel_err = 1e-10
+  [../]
+
+  # controls
+  [./clg:Hw]
+    type = 'Exodiff'
+    input = 'clg.Hw.i'
+    exodiff = 'clg.Hw_out.e'
+    custom_cmp = 'clg.Hw.exodiff'
+  [../]
+
+  [./clg:T_wall]
+    type = 'Exodiff'
+    input = 'clg.T_wall.i'
+    exodiff = 'clg.T_wall_out.e'
+    custom_cmp = 'clg.T_wall.exodiff'
+  [../]
+
+  # error checking
+  [./err:wrong_fp]
+    type = 'RunException'
+    input = 'err.wrong_fp.i'
+    expect_err = "pipe: Supplied fluid properties must be for 1-phase fluids."
+  [../]
+
+
+  [./err:2nd_order]
+    type = 'RunException'
+    input = 'err.2nd_order.i'
+    expect_err = "Cannot use TRAP quadrature rule with 2nd order elements.  Use SIMPSON or GAUSS instead."
+  [../]
+
+  [./err:missing_f_1phase]
+    type = 'RunException'
+    input = 'err.missing_f_1phase.i'
+    expect_err = "pipe: When using simple closures, the parameter 'f' must be provided."
+  [../]
+
+  # jacobians
+  [./jac:3eqn]
+    type = 'PetscJacobianTester'
+    input = 'jac.3eqn.i'
+    ratio_tol = 5e-8
+    difference_tol = 0.2
+    cli_args = 'Debug/check_jacobian=true'
+  [../]
+
+  [./phy:par_fn]
+    type = 'CSVDiff'
+    input = 'phy.par_fn.i'
+    csvdiff = 'phy.par_fn_out.csv'
+    rel_err = 1e-10
+  [../]
+
+  [./phy:sub_discretization]
+    type = 'Exodiff'
+    input = 'phy.sub_discretization.i'
+    exodiff = 'phy.sub_discretization_out.e'
+    custom_cmp = 'phy.sub_discretization.exodiff'
+    # matching geometry at t=0
+    recover = false
+  [../]
+[]
