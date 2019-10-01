@@ -14,6 +14,7 @@
 #include "FEProblem.h"
 #include "ActionWarehouse.h"
 #include "Factory.h"
+#include "AddMeshGeneratorAction.h"
 
 registerMooseAction("MooseApp", SetupMeshAction, "setup_mesh");
 registerMooseAction("MooseApp", SetupMeshAction, "set_mesh_base");
@@ -228,10 +229,17 @@ SetupMeshAction::act()
       _mesh = _app.masterMesh()->safeClone();
     else
     {
-      // If the [Mesh] block contains mesh generators, change the default type to construct
-      if (!_awh.getActionListByName("add_mesh_generator").empty())
+      const auto & generator_actions = _awh.getActionListByName("add_mesh_generator");
+
+      // If we trigger any actions that can build MeshGenerators, whether through input file
+      // syntax or through custom actions, change the default type to construct. We can't yet
+      // check whether there are any actual MeshGenerator objects because those are added after
+      // setup_mesh
+      if (!generator_actions.empty())
       {
-        if (!_pars.isParamSetByUser("type"))
+        // Check for whether type has been set or whether for the default type (FileMesh) a file has
+        // been provided
+        if (!_pars.isParamSetByUser("type") && !_moose_object_pars.isParamValid("file"))
         {
           _type = "MeshGeneratorMesh";
           auto original_params = _moose_object_pars;
@@ -243,9 +251,18 @@ SetupMeshAction::act()
         }
         else if (!_moose_object_pars.get<bool>("_mesh_generator_mesh"))
         {
-          mooseWarning("Mesh Generators present but the [Mesh] block is set to construct a \"",
-                       _type,
-                       "\" mesh, which does not use Mesh Generators in constructing the mesh.");
+          // There are cases where a custom action may register the "add_mesh_generator" task, but
+          // may not actually add any mesh generators depending on user input. We don't want to risk
+          // giving false warnings in this case. However, if we triggered the "add_mesh_generator"
+          // task through explicit input file syntax, then it is definitely safe to warn
+          for (auto generator_action_ptr : generator_actions)
+            if (dynamic_cast<AddMeshGeneratorAction *>(generator_action_ptr))
+            {
+              mooseWarning("Mesh Generators present but the [Mesh] block is set to construct a \"",
+                           _type,
+                           "\" mesh, which does not use Mesh Generators in constructing the mesh.");
+              break;
+            }
         }
       }
 
@@ -266,7 +283,7 @@ SetupMeshAction::act()
       // 1. We have mesh generators
       // 2. We are recovering/restarting AND we are not the master application, e.g. we are a
       //    sub-application
-      if (!_awh.getActionListByName("add_mesh_generator").empty() &&
+      if (!_app.getMeshGeneratorNames().empty() &&
           !((_app.isRecovering() || _app.isRestarting()) && _app.isUltimateMaster()))
         _mesh->setMeshBase(_app.getMeshGeneratorMesh());
       else
