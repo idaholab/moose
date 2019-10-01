@@ -21,6 +21,9 @@ validParams<KKSACBulkF>()
   params.addRequiredParam<Real>("w", "Double well height parameter");
   params.addParam<MaterialPropertyName>(
       "g_name", "g", "Base name for the double well function g(eta)");
+  params.addRequiredParam<MaterialPropertyName>(
+      "fb_name",
+      "Base name of the free energy function F (f_base in the corresponding KKSBaseMaterial)");
   return params;
 }
 
@@ -28,27 +31,23 @@ KKSACBulkF::KKSACBulkF(const InputParameters & parameters)
   : KKSACBulkBase(parameters),
     _w(getParam<Real>("w")),
     _prop_dg(getMaterialPropertyDerivative<Real>("g_name", _eta_name)),
-    _prop_d2g(getMaterialPropertyDerivative<Real>("g_name", _eta_name, _eta_name))
+    _prop_d2g(getMaterialPropertyDerivative<Real>("g_name", _eta_name, _eta_name)),
+    _prop_Fb(getMaterialProperty<Real>("fb_name")),
+    _prop_dFb(getMaterialPropertyDerivative<Real>("fb_name", _eta_name))
 {
 }
 
 Real
 KKSACBulkF::computeDFDOP(PFFunctionType type)
 {
-  Real res = 0.0;
-  Real A1 = _prop_Fa[_qp] - _prop_Fb[_qp];
-
+  const Real A1 = _prop_Fa[_qp] - _prop_Fb[_qp];
   switch (type)
   {
     case Residual:
       return -_prop_dh[_qp] * A1 + _w * _prop_dg[_qp];
 
     case Jacobian:
-    {
-      res = -_prop_d2h[_qp] * A1 + _w * _prop_d2g[_qp];
-
-      return _phi[_j][_qp] * res;
-    }
+      return _phi[_j][_qp] * (-_prop_d2h[_qp] * A1 + _w * _prop_d2g[_qp]);
   }
 
   mooseError("Invalid type passed in");
@@ -64,9 +63,7 @@ KKSACBulkF::computeQpOffDiagJacobian(unsigned int jvar)
   // member function
   Real res = ACBulk<Real>::computeQpOffDiagJacobian(jvar);
 
-  // Then add dependence of KKSACBulkF on other variables
-  res -= _L[_qp] * _prop_dh[_qp] * ((*_derivatives_Fa[cvar])[_qp] - (*_derivatives_Fb[cvar])[_qp]) *
-         _phi[_j][_qp] * _test[_i][_qp];
-
-  return res;
+  return res - _L[_qp] * _prop_dh[_qp] *
+                   ((*_derivatives_Fa[cvar])[_qp] - (*_derivatives_Fb[cvar])[_qp]) * _phi[_j][_qp] *
+                   _test[_i][_qp];
 }
