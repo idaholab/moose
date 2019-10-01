@@ -1,20 +1,17 @@
 [GlobalParams]
   gravity_vector = '0 0 0'
 
-  initial_p = 1e5
-  initial_T = 300
+  initial_p = 1e6
+  initial_T = 453.1
   initial_vel = 0.0
 
   scaling_factor_1phase = '1 1 1e-5'
 
   closures = simple
-
-  spatial_discretization = rDG
-  rdg_slope_reconstruction = none
 []
 
 [FluidProperties]
-  [./fp]
+  [./eos]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     cv = 1816.0
@@ -35,55 +32,30 @@
     n_elems = 50
 
     A   = 1.0000000000e-04
-    D_h = 1.1283791671e-02
+    D_h  = 1.1283791671e-02
 
     f = 0.0
 
-    fp = fp
+    fp = eos
   [../]
 
   [./inlet]
     type = InletStagnationPressureTemperature1Phase
     input = 'pipe:in'
-    p0 = 1.01e5
-    T0 = 300
+    p0 = 1e6
+    T0 = 453.1
   [../]
 
   [./outlet]
     type = Outlet1Phase
     input = 'pipe:out'
-    p = 1e5
+    p = 0.5e6
+    legacy = true
   [../]
 []
-
-[Functions]
-  [./inlet_T0_fn]
-    type = PiecewiseLinear
-    x = '0   1'
-    y = '300 350'
-  [../]
-[]
-
-[Controls]
-  [./set_inlet_value]
-    type = TimeFunctionControl
-    component = inlet
-    parameter = T0
-    function = inlet_T0_fn
-  [../]
-[]
-
-[Postprocessors]
-  [./inlet_T0]
-    type = RealComponentParameterValuePostprocessor
-    component = inlet
-    parameter = T0
-  [../]
-[]
-
 
 [Preconditioning]
-  [./pc]
+  [./SMP_PJFNK]
     type = SMP
     full = true
   [../]
@@ -92,15 +64,11 @@
 [Executioner]
   type = Transient
   scheme = 'bdf2'
-
-  start_time = 0.0
-  dt = 0.25
-  num_steps = 5
+  dt = 1.e-2
   abort_on_solve_fail = true
 
   solve_type = 'NEWTON'
   line_search = 'basic'
-
   nl_rel_tol = 1e-5
   nl_abs_tol = 1e-6
   nl_max_its = 30
@@ -108,12 +76,17 @@
   l_tol = 1e-3
   l_max_its = 100
 
+  start_time = 0.0
+  end_time = 1
+
   [./Quadrature]
-    type = GAUSS
-    order = SECOND
+    type = TRAP
+    order = FIRST
   [../]
 []
 
 [Outputs]
-  csv = true
+  [./out]
+    type = Exodus
+  [../]
 []
