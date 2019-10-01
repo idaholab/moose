@@ -26,7 +26,7 @@ It is stressed that this UserObject may give wrong results if obstruction is pre
 
 ## Example Input syntax
 
-!listing modules/heat_conduction/ test/tests/view_factors/view_factor_cube.i
+!listing modules/heat_conduction/test/tests/view_factors/view_factor_cube.i
 block=UserObjects
 
 !syntax parameters /UserObjects/UnobstructedPlanarViewFactor

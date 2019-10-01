@@ -2,7 +2,7 @@
 
 ## Description
 
-`ViewFactorObjectSurfaceRadiation` inherits from [GrayLambertSurfaceRadiationBase](GrayLambertSurfaceRadiationBase.md).
+`ViewFactorObjectSurfaceRadiation` inherits from `GrayLambertSurfaceRadiationBase` and allows automatic computation of view factors.
 View factors for `ViewFactorObjectSurfaceRadiation` are provided by a `ViewFactorBase` object, e.g. [UnobstructedPlanarViewFactor](UnobstructedPlanarViewFactor.md).
 
 ## Example Input syntax
