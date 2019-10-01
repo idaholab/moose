@@ -13,6 +13,8 @@
 #include "MooseVariable.h"
 #include "ThreadedElementLoopBase.h"
 #include "ThreadedNodeLoop.h"
+#include "PetscExternalPartitioner.h"
+#include "CastUniquePointer.h"
 
 #include "libmesh/quadrature.h"
 
@@ -41,6 +43,13 @@ validParams<WorkBalance>()
                         "true will use more communication, but is necessary if you expect these "
                         "vectors to be available on all processors");
 
+  MultiMooseEnum balances(
+      "num_elems=0 num_nodes=1 num_dofs=2 num_partition_sides=3 partition_surface_area=4 "
+      "num_partition_hardware_id_sides=5 partition_hardware_id_surface_area=6",
+      "num_elems num_nodes num_dofs num_partition_sides partition_surface_area "
+      "num_partition_hardware_id_sides partition_hardware_id_surface_area");
+  params.addParam<MultiMooseEnum>(
+      "balances", balances, "Which metrics do you want to use to represent word balance");
   return params;
 }
 
@@ -58,14 +67,11 @@ WorkBalance::WorkBalance(const InputParameters & parameters)
     _local_num_partition_hardware_id_sides(0),
     _local_partition_hardware_id_surface_area(0),
     _pid(declareVector("pid")),
-    _num_elems(declareVector("num_elems")),
-    _num_nodes(declareVector("num_nodes")),
-    _num_dofs(declareVector("num_dofs")),
-    _num_partition_sides(declareVector("num_partition_sides")),
-    _partition_surface_area(declareVector("partition_surface_area")),
-    _num_partition_hardware_id_sides(declareVector("num_partition_hardware_id_sides")),
-    _partition_hardware_id_surface_area(declareVector("partition_hardware_id_surface_area"))
+    _balances(getParam<MultiMooseEnum>("balances"))
 {
+  for (auto & balance : _balances)
+    _balance_vectors[balance] = &declareVector(MooseUtils::toLower(
+        balance)); // Use 'toLower' to make names consistent with the original interface
 }
 
 void
@@ -100,6 +106,9 @@ public:
       _local_partition_hardware_id_surface_area(0),
       _this_pid(_mesh.processor_id()) // Get this once because it is expensive
   {
+    // This is required because dynamic_pointer_cast() requires an l-value
+    auto partitioner = mesh.getMesh().partitioner()->clone();
+    _petsc_partitioner = dynamic_pointer_cast<PetscExternalPartitioner>(partitioner);
   }
 
   WBElementLoop(WBElementLoop & x, Threads::split split)
@@ -115,6 +124,12 @@ public:
       _local_partition_hardware_id_surface_area(0),
       _this_pid(x._this_pid)
   {
+    if (x._petsc_partitioner)
+    {
+      // This is required because dynamic_pointer_cast() requires an l-value
+      auto partitioner = x._petsc_partitioner->clone();
+      _petsc_partitioner = dynamic_pointer_cast<PetscExternalPartitioner>(partitioner);
+    }
   }
 
   virtual ~WBElementLoop() {}
@@ -131,7 +146,14 @@ public:
 
   virtual void onElement(const Elem * elem) override
   {
-    _local_num_elems++;
+    if (_petsc_partitioner && _petsc_partitioner->applyElementEeight())
+    {
+      // We should change parititioner interface to take const
+      // But at this point let us keep API intact
+      _local_num_elems += _petsc_partitioner->computeElementWeight(const_cast<Elem &>(*elem));
+    }
+    else
+      _local_num_elems++;
 
     // Find out how many dofs there are on this element
     if (_system == WorkBalance::ALL) // All systems
@@ -158,7 +180,15 @@ public:
   {
     if (elem->neighbor_ptr(side)->processor_id() != _this_pid)
     {
-      _local_num_partition_sides++;
+      if (_petsc_partitioner && _petsc_partitioner->applySideWeight())
+      {
+        // We should change parititioner interface to take const
+        // But at this point let us keep API intact
+        _local_num_partition_sides +=
+            _petsc_partitioner->computeSideWeight(const_cast<Elem &>(*elem), side);
+      }
+      else
+        _local_num_partition_sides++;
 
       // Build the side so we can compute its volume
       auto side_elem = elem->build_side_ptr(side);
@@ -197,6 +227,8 @@ public:
   Real _local_partition_hardware_id_surface_area;
 
   processor_id_type _this_pid;
+
+  std::unique_ptr<PetscExternalPartitioner> _petsc_partitioner;
 };
 
 class WBNodeLoop : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
@@ -265,7 +297,7 @@ WorkBalance::execute()
   auto & mesh = _fe_problem.mesh();
 
   // Get all of the Elem info first
-  auto wb_el = WBElementLoop(mesh, _system, _rank_map);
+  WBElementLoop wb_el(mesh, _system, _rank_map);
 
   Threads::parallel_reduce(*mesh.getActiveLocalElementRange(), wb_el);
 
@@ -277,7 +309,7 @@ WorkBalance::execute()
   _local_partition_hardware_id_surface_area = wb_el._local_partition_hardware_id_surface_area;
 
   // Now Node info
-  auto wb_nl = WBNodeLoop(_fe_problem, _system);
+  WBNodeLoop wb_nl(_fe_problem, _system);
 
   Threads::parallel_reduce(*mesh.getLocalNodeRange(), wb_nl);
 
@@ -286,37 +318,80 @@ WorkBalance::execute()
 }
 
 void
-WorkBalance::finalize()
+WorkBalance::gather(int balance_id, VectorPostprocessorValue & vppv)
 {
   if (!_sync_to_all_procs)
   {
-    // Gather the results down to processor 0
-    _communicator.gather(0, static_cast<Real>(_local_num_elems), _num_elems);
-    _communicator.gather(0, static_cast<Real>(_local_num_nodes), _num_nodes);
-    _communicator.gather(0, static_cast<Real>(_local_num_dofs), _num_dofs);
-    _communicator.gather(0, static_cast<Real>(_local_num_partition_sides), _num_partition_sides);
-    _communicator.gather(0, _local_partition_surface_area, _partition_surface_area);
-    _communicator.gather(0,
-                         static_cast<Real>(_local_num_partition_hardware_id_sides),
-                         _num_partition_hardware_id_sides);
-    _communicator.gather(
-        0, _local_partition_hardware_id_surface_area, _partition_hardware_id_surface_area);
+    switch (balance_id)
+    {
+      case 0: // num_elems
+        _communicator.gather(0, static_cast<Real>(_local_num_elems), vppv);
+        break;
+      case 1: // num_nodes
+        _communicator.gather(0, static_cast<Real>(_local_num_nodes), vppv);
+        break;
+      case 2: // num_dofs
+        _communicator.gather(0, static_cast<Real>(_local_num_dofs), vppv);
+        break;
+      case 3: // num_partition_sides
+        _communicator.gather(0, static_cast<Real>(_local_num_partition_sides), vppv);
+        break;
+      case 4: // partition_surface_area
+        _communicator.gather(0, _local_partition_surface_area, vppv);
+        break;
+      case 5: // num_partition_hardware_id_sides
+        _communicator.gather(0, static_cast<Real>(_local_num_partition_hardware_id_sides), vppv);
+        break;
+      case 6: // partition_hardware_id_surface_area
+        _communicator.gather(0, _local_partition_hardware_id_surface_area, vppv);
+        break;
+      default:
+        mooseError("Unknown balance type: ", balance_id);
+    }
   }
   else
   {
-    // Gather the results down to all procs
-    _communicator.allgather(static_cast<Real>(_local_num_elems), _num_elems);
-    _communicator.allgather(static_cast<Real>(_local_num_nodes), _num_nodes);
-    _communicator.allgather(static_cast<Real>(_local_num_dofs), _num_dofs);
-    _communicator.allgather(static_cast<Real>(_local_num_partition_sides), _num_partition_sides);
-    _communicator.allgather(_local_partition_surface_area, _partition_surface_area);
-    _communicator.allgather(static_cast<Real>(_local_num_partition_hardware_id_sides),
-                            _num_partition_hardware_id_sides);
-    _communicator.allgather(_local_partition_hardware_id_surface_area,
-                            _partition_hardware_id_surface_area);
+    switch (balance_id)
+    {
+      case 0: // num_elems
+        _communicator.allgather(static_cast<Real>(_local_num_elems), vppv);
+        break;
+      case 1: // num_nodes
+        _communicator.allgather(static_cast<Real>(_local_num_nodes), vppv);
+        break;
+      case 2: // num_dofs
+        _communicator.allgather(static_cast<Real>(_local_num_dofs), vppv);
+        break;
+      case 3: // num_partition_sides
+        _communicator.allgather(static_cast<Real>(_local_num_partition_sides), vppv);
+        break;
+      case 4: // partition_surface_area
+        _communicator.allgather(_local_partition_surface_area, vppv);
+        break;
+      case 5: // num_partition_hardware_id_sides
+        _communicator.allgather(static_cast<Real>(_local_num_partition_hardware_id_sides), vppv);
+        break;
+      case 6: // partition_hardware_id_surface_area
+        _communicator.allgather(_local_partition_hardware_id_surface_area, vppv);
+        break;
+      default:
+        mooseError("Unknown balance type: ", balance_id);
+    }
   }
+}
 
+void
+WorkBalance::finalize()
+{
+  for (auto & balance : _balances)
+  {
+    auto balance_id = balance.id();
+
+    auto & balance_vector = *_balance_vectors.at(balance);
+
+    gather(balance_id, balance_vector);
+  }
   // Fill in the PID column - this just makes plotting easier
-  _pid.resize(_num_elems.size());
+  _pid.resize(_communicator.size());
   std::iota(_pid.begin(), _pid.end(), 0);
 }

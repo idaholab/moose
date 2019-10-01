@@ -33,7 +33,7 @@ validParams<StatisticsVectorPostprocessor>()
 
   // These are directly numbered to ensure that any changes to this list will not cause a bug
   // Do not change the numbers here without changing the corresponding code in computeStatVector()
-  MultiMooseEnum stats("min=0 max=1 sum=2 average=3 stddev=4 norm2=5");
+  MultiMooseEnum stats("min=0 max=1 sum=2 average=3 stddev=4 norm2=5 ratio=6");
   params.addRequiredParam<MultiMooseEnum>(
       "stats",
       stats,
@@ -143,6 +143,11 @@ StatisticsVectorPostprocessor::computeStatValue(int stat_id, const std::vector<R
             return running_value + std::pow(current_value, 2);
 
           }));
+    case 6: // ratio
+    {
+      auto min = *std::min_element(stat_vector.begin(), stat_vector.end()) * 1.;
+      return (min != 0. ? *std::max_element(stat_vector.begin(), stat_vector.end()) / min : 0.);
+    }
     default:
       mooseError("Unknown statistics type: ", stat_id);
   }
