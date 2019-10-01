@@ -23,7 +23,6 @@ validParams<Component>()
 /*
  * Component implementation
  */
-static unsigned int comp_id = 0;
 
 Component::Component(const InputParameters & parameters)
   : THMObject(parameters),
@@ -35,7 +34,6 @@ Component::Component(const InputParameters & parameters)
     _gravity_is_zero(MooseUtils::absoluteFuzzyEqual(_gravity_magnitude, 0.0)),
     _gravity_direction(_gravity_is_zero ? RealVectorValue(0.0, 0.0, 0.0) : _gravity_vector.unit()),
 
-    _id(comp_id++),
     _parent(getParam<Component *>("_parent")),
     _sim(*getCheckedPointerParam<THMProblem *>("_thm_problem")),
     _factory(_app.getFactory()),
