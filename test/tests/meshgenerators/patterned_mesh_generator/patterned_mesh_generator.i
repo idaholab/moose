@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./fmg]
     type = FileMeshGenerator
     file = quad_mesh.e
@@ -29,10 +29,6 @@
     top_boundary = 3
     left_boundary = 4
   []
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Variables]

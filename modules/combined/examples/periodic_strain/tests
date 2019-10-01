@@ -6,7 +6,7 @@
     input = 'global_strain_pfm.i'
     # The actual input file solves on a 50x50 mesh.  For checking the
     # input we can run on something much smaller...
-    cli_args = 'Mesh/nx=2 Mesh/ny=2'
+    cli_args = 'Mesh/gen/nx=2 Mesh/gen/ny=2'
     check_input = True
     fparser_jit = True
     requirement = "This shall correctly compute the deformation behavior using
@@ -16,7 +16,7 @@
     type = RunApp
     input = 'global_strain_pfm_3D.i'
     # Checking input on smaller mesh
-    cli_args = 'Mesh/nx=2 Mesh/ny=2 Mesh/nz=2'
+    cli_args = 'Mesh/gen/nx=2 Mesh/gen/ny=2 Mesh/gen/nz=2'
     check_input = True
     fparser_jit = True
     requirement = "This shall correctly compute the deformation behavior using

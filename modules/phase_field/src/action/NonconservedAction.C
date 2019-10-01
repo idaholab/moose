@@ -76,8 +76,14 @@ NonconservedAction::act()
   //
   if (_current_task == "add_variable")
   {
+    auto type = AddVariableAction::determineType(_fe_type, 1);
+    auto var_params = _factory.getValidParams(type);
+
+    var_params.applySpecificParameters(_pars, {"family", "order"});
+    var_params.set<std::vector<Real>>("scaling") = {getParam<Real>("scaling")};
+
     // Create nonconserved variable
-    _problem->addVariable(_var_name, _fe_type, getParam<Real>("scaling"));
+    _problem->addVariable(type, _var_name, var_params);
   }
 
   //

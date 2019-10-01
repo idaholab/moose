@@ -1,8 +1,14 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 100
-  ny = 100
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 100
+    ny = 100
+  []
+  [manyblocks]
+    input = gen
+    type = ElemUniqueSubdomainsGenerator
+  []
 []
 
 [Variables]
@@ -27,12 +33,6 @@
     type = GenericConstantMaterial
     prop_names = diffusivity
     prop_values = 2
-  []
-[]
-
-[MeshModifiers]
-  [manyblocks]
-    type = ElemUniqueSubdomains
   []
 []
 

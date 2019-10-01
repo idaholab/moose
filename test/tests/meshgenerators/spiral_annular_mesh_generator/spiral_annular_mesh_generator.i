@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./samg]
     type = SpiralAnnularMeshGenerator
     use_tri6 = true
@@ -7,10 +7,6 @@
     outer_radius = 10
     num_rings = 10
   []
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Outputs]

@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./gmg]
     type = GeneratedMeshGenerator
     dim = 3
@@ -41,10 +41,6 @@
     block_id = 10
     block_name = center_mesh
   []
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Variables]

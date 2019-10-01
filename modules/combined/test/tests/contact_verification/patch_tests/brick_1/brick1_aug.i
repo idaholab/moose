@@ -10,7 +10,8 @@
 [Problem]
   type = AugmentedLagrangianContactProblem
   solution_variables = 'disp_x disp_y disp_z'
-  reference_residual_variables = 'saved_x saved_y saved_z'
+  extra_tag_vectors = 'ref'
+  reference_vector = 'ref'
   maximum_lagrangian_update_iterations = 100
 []
 
@@ -72,6 +73,7 @@
   [./TensorMechanics]
     use_displaced_mesh = true
     save_in = 'saved_x saved_y saved_z'
+    extra_vector_tags = 'ref'
   [../]
 []
 

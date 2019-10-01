@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./fmg]
     type = FileMeshGenerator
     file = cylinder.e
@@ -14,10 +14,6 @@
     new_boundary = 'front back'
     variance = 0.5
   []
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Variables]

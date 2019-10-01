@@ -1,12 +1,12 @@
 [Mesh]
-  type = FileMesh
-  file = chimney_quad.e
   uniform_refine = 1
-[]
-
-[MeshModifiers]
+  [file]
+    type = FileMeshGenerator
+    file = chimney_quad.e
+  []
   [./extrude]
-    type = MeshExtruder
+    input = file
+    type = MeshExtruderGenerator
     num_layers = 20
     extrusion_vector = '0 1e-2 0'
     bottom_sideset = '2'

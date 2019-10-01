@@ -56,6 +56,13 @@ PFCRFFVariablesAction::act()
              << "\tfamily: " << getParam<MooseEnum>("family") << std::endl;
 #endif
 
+  auto fe_type = AddVariableAction::feType(_pars);
+  auto type = AddVariableAction::determineType(fe_type, 1);
+  auto var_params = _factory.getValidParams(type);
+
+  var_params.applySpecificParameters(_pars, {"family", "order"});
+  var_params.set<std::vector<Real>>("scaling") = {getParam<Real>("scaling")};
+
   // Loop through the number of L variables
   for (unsigned int l = 0; l < _num_L; ++l)
   {
@@ -64,20 +71,13 @@ PFCRFFVariablesAction::act()
 
     // Create real L variable
     const std::string real_name = L_name + "_real";
-    _problem->addVariable(real_name,
-                          FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
-                                 Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family"))),
-                          getParam<Real>("scaling"));
+    _problem->addVariable(type, real_name, var_params);
 
     if (l > 0)
     {
       // Create imaginary L variable IF l > 0
       std::string imag_name = L_name + "_imag";
-      _problem->addVariable(
-          imag_name,
-          FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
-                 Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family"))),
-          getParam<Real>("scaling"));
+      _problem->addVariable(type, imag_name, var_params);
     }
   }
 }

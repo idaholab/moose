@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./gmg]
     type = GeneratedMeshGenerator
     dim = 3
@@ -31,10 +31,6 @@
     block = '1 2 3'
     new_boundary = 'to0'
   []
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Outputs]

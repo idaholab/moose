@@ -18,7 +18,7 @@ Each linear subdivision in x, y, or z can be additionally subdivided into sub-el
 ## Example Syntax
 
 !listing moose/test/tests/meshgenerators/cartesian_mesh_generator/cartesian_mesh_3D.i
-         block=MeshGenerators
+         block=Mesh
 
 !syntax parameters /MeshGenerators/CartesianMeshGenerator
 

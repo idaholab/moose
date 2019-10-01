@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./samg]
     type = SpiralAnnularMeshGenerator
     input = eg
@@ -18,10 +18,6 @@
     element_connectivity = '0 1 2'
     elem_type = TRI3
   []
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Outputs]

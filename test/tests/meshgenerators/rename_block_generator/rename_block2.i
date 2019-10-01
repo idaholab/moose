@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./gmg]
     type = GeneratedMeshGenerator
     dim = 3
@@ -97,10 +97,6 @@
     new_block_id = '1 12345 4 4 4 7'  # note this makes block_id=4 have name "three", since the first occurance of new_block_id=4 has name "three"
     input = does_nothing_there_is_no_block_2_now
   [../]
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Variables]

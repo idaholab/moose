@@ -1,16 +1,16 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  xmin = 0.01 # to make sure the meshes don't align
-  xmax = 0.49 # to make sure the meshes don't align
-  ymax = 1
-  nx = 10
-  ny = 10
-[]
-
-[MeshModifiers]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    xmin = 0.01 # to make sure the meshes don't align
+    xmax = 0.49 # to make sure the meshes don't align
+    ymax = 1
+    nx = 10
+    ny = 10
+  []
   [block1]
-    type = SubdomainBoundingBox
+    input = gen
+    type = SubdomainBoundingBoxGenerator
     block_id = 1
     bottom_left = '0.2 0.2 0'
     top_right = '0.3 0.8 0'

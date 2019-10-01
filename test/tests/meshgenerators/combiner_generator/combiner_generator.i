@@ -1,8 +1,4 @@
 [Mesh]
-  type = MeshGeneratorMesh
-[]
-
-[MeshGenerators]
   [gen]
     type = GeneratedMeshGenerator
     dim = 2

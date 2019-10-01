@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./fmg]
     type = FileMeshGenerator
     file = twoblocks.e
@@ -11,10 +11,6 @@
     paired_block = 'right'
     new_boundary = 'in_between'
   [../]
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Outputs]

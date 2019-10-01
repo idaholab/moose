@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./gmg]
     type = GeneratedMeshGenerator
     dim = 3
@@ -25,10 +25,6 @@
     block_id = 1
     input = SubdomainBoundingBox
   [../]
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Variables]

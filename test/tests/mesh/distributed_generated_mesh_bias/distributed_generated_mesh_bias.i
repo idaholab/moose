@@ -1,4 +1,3 @@
-inactive = 'MeshModifiers'
 [Mesh]
   type = DistributedGeneratedMesh
   nx = 10
@@ -43,7 +42,4 @@ inactive = 'MeshModifiers'
 
 [Outputs]
   exodus = true
-[]
-
-[MeshModifiers]
 []

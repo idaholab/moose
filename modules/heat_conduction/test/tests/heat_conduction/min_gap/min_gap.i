@@ -1,10 +1,7 @@
 [Mesh]
   type = MeshGeneratorMesh
   displacements = 'disp_x disp_y'
-[]
-
-[MeshGenerators]
-  [./left]
+  [./left_gen]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 2
@@ -14,7 +11,7 @@
     ymin = -5
     ymax = 5
   [../]
-  [./right]
+  [./right_gen]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 2
@@ -27,44 +24,44 @@
 
   [./left_and_right]
     type = MeshCollectionGenerator
-    inputs = 'left right'
+    inputs = 'left_gen right_gen'
   [../]
-[]
-
-[MeshModifiers]
   [./leftleft]
-    type = SideSetsAroundSubdomain
+    type = SideSetsAroundSubdomainGenerator
     block = 0
     new_boundary = leftleft
     normal = '-1 0 0'
+    input = left_and_right
   [../]
   [./leftright]
-    type = SideSetsAroundSubdomain
+    type = SideSetsAroundSubdomainGenerator
     block = 0
     new_boundary = leftright
     normal = '1 0 0'
+    input = leftleft
   [../]
 
   [./right]
-    type = SubdomainBoundingBox
+    type = SubdomainBoundingBoxGenerator
     top_right = '6 5 0'
     bottom_left = '3 -5 0'
     block_id = 1
+    input = leftright
   [../]
 
   [./rightleft]
-    type = SideSetsAroundSubdomain
-    depends_on = right
+    type = SideSetsAroundSubdomainGenerator
     block = 1
     new_boundary = rightleft
     normal = '-1 0 0'
+    input = right
   [../]
   [./rightright]
-    type = SideSetsAroundSubdomain
-    depends_on = right
+    type = SideSetsAroundSubdomainGenerator
     block = 1
     new_boundary = rightright
     normal = '1 0 0'
+    input = rightleft
   [../]
 []
 

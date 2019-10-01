@@ -44,15 +44,16 @@
 []
 
 [Mesh]
-  file = gap_heat_transfer_htonly_rz_test.e
-[]
-
-[MeshModifiers]
-  active = '' # this is modified through CLI args to test Z-R as opposed to R-Z
+  active = 'file'
+  [file]
+    type = FileMeshGenerator
+    file = gap_heat_transfer_htonly_rz_test.e
+  []
   [rotate]
-    type = Transform
+    type = TransformGenerator
     transform = ROTATE
     vector_value = '90 0 0'
+    input = file
   []
 []
 [Functions]

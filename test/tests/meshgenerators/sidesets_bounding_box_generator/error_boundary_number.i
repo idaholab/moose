@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./gmg]
     type = GeneratedMeshGenerator
     dim = 2
@@ -27,10 +27,6 @@
     block_id = 0
     boundary_id_overlap = true
   [../]
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Outputs]

@@ -10,7 +10,8 @@
 [Problem]
   type = AugmentedLagrangianContactProblem
   solution_variables = 'disp_x disp_y'
-  reference_residual_variables = 'saved_x saved_y'
+  extra_tag_vectors = 'ref'
+  reference_vector = 'ref'
   maximum_lagrangian_update_iterations = 200
 []
 
@@ -68,6 +69,7 @@
     disp_y = disp_y
     save_in_disp_y = saved_y
     save_in_disp_x = saved_x
+    extra_vector_tags = 'ref'
   [../]
 []
 

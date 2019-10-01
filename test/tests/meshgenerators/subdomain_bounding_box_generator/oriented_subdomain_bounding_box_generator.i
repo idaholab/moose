@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./gmg]
     type = GeneratedMeshGenerator
     dim = 3
@@ -24,10 +24,6 @@
     length_direction = '-1 2 2'
     block_id = 10
   []
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Problem]

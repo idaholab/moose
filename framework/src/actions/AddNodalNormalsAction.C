@@ -53,16 +53,20 @@ void
 AddNodalNormalsAction::act()
 {
   // Set the order from the input
-  Order order = Utility::string_to_enum<Order>(getParam<MooseEnum>("order"));
+  auto enum_order = getParam<MooseEnum>("order");
+  Order order = Utility::string_to_enum<Order>(enum_order);
   FEFamily family = LAGRANGE;
-  FEType fe_type(order, family);
+
+  auto var_params = _factory.getValidParams("MooseVariable");
+  var_params.set<MooseEnum>("family") = "LAGRANGE";
+  var_params.set<MooseEnum>("order") = enum_order;
 
   // Add 3 aux variables for each component of the normal
   if (_current_task == "add_aux_variable")
   {
-    _problem->addAuxVariable("nodal_normal_x", fe_type);
-    _problem->addAuxVariable("nodal_normal_y", fe_type);
-    _problem->addAuxVariable("nodal_normal_z", fe_type);
+    _problem->addAuxVariable("MooseVariable", "nodal_normal_x", var_params);
+    _problem->addAuxVariable("MooseVariable", "nodal_normal_y", var_params);
+    _problem->addAuxVariable("MooseVariable", "nodal_normal_z", var_params);
   }
 
   // Set the execute options

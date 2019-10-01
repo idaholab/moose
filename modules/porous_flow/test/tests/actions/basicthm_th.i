@@ -1,41 +1,41 @@
-# PorousFlowBasicTHM action with coupling_type = ThermoHydro
+# PorousFlowBasicTHM action with coupling_type = ThermoHydroGenerator
 # (no mechanical effects)
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 10
-  ny = 3
-  xmax = 10
-  ymax = 3
-[]
-
-[MeshModifiers]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 10
+    ny = 3
+    xmax = 10
+    ymax = 3
+  []
   [./aquifer]
-    type = SubdomainBoundingBox
+    input = gen
+    type = SubdomainBoundingBoxGenerator
     block_id = 1
     bottom_left = '0 1 0'
     top_right = '10 2 0'
   [../]
   [./injection_area]
-    type = SideSetsAroundSubdomain
+    type = SideSetsAroundSubdomainGenerator
     block = 1
     new_boundary = 'injection_area'
     normal = '-1 0 0'
-    depends_on = 'aquifer'
+    input = 'aquifer'
   [../]
   [./outflow_area]
-    type = SideSetsAroundSubdomain
+    type = SideSetsAroundSubdomainGenerator
     block = 1
     new_boundary = 'outflow_area'
     normal = '1 0 0'
-    depends_on = 'aquifer'
+    input = 'injection_area'
   [../]
   [./rename]
-    type = RenameBlock
+    type = RenameBlockGenerator
     old_block_id = '0 1'
     new_block_name = 'caprock aquifer'
-    depends_on = 'injection_area'
+    input = 'outflow_area'
   [../]
 []
 

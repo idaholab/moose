@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./gmg]
     type = GeneratedMeshGenerator
     dim = 3
@@ -39,10 +39,6 @@
     type = BreakBoundaryOnSubdomainGenerator
     boundaries = 'bottom interface'
   [../]
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Outputs]

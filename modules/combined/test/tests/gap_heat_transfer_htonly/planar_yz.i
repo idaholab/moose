@@ -26,14 +26,15 @@
 # are the same as for the unit 1-D gap heat transfer between two unit cubes.
 
 [Mesh]
-  file = simple_2D.e
-[]
-
-[MeshModifiers]
+  [file]
+    type = FileMeshGenerator
+    file = simple_2D.e
+  []
   [./rotate]
-    type = Transform
+    type = TransformGenerator
     transform = ROTATE
     vector_value = '0 90 90'
+    input = file
   [../]
 []
 

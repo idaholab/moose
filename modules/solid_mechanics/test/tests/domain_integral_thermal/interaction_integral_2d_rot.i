@@ -27,15 +27,15 @@
 []
 
 [Mesh]
-  file = crack2d.e
-#  uniform_refine = 3
-[]
-
-[MeshModifiers]
+  [file_mesh]
+    type = FileMeshGenerator
+    file = crack2d.e
+  []
   [./rotate]
-    type = Transform
+    type = TransformGenerator
     transform = ROTATE
     vector_value = '0 0 90'
+    input = file_mesh
   [../]
 []
 

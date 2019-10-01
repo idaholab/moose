@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./fmg]
     type = FileMeshGenerator
     file = chimney_quad.e
@@ -12,10 +12,6 @@
     bottom_sideset = '10'
     top_sideset = '20'
   []
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Variables]

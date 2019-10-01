@@ -1,18 +1,18 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  xmin = -1
-  ymin = -1
-  xmax = 1
-  ymax = 1
-  nx = 2
-  ny = 2
-  elem_type = QUAD4
-[]
-
-[MeshModifiers]
+  [gen]
+  type = GeneratedMeshGenerator
+    dim = 2
+    xmin = -1
+    ymin = -1
+    xmax = 1
+    ymax = 1
+    nx = 2
+    ny = 2
+    elem_type = QUAD4
+  []
   [./subdomain_id]
-    type = AssignElementSubdomainID
+    input = gen
+    type = ElementSubdomainIDGenerator
     subdomain_ids = '0 1
                      1 1'
   [../]

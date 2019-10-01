@@ -61,10 +61,9 @@ StressDivergenceTensorsTruss::initialSetup()
 void
 StressDivergenceTensorsTruss::computeResidual()
 {
-  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
-  mooseAssert(re.size() == 2, "Truss element has and only has two nodes.");
-  _local_re.resize(re.size());
-  _local_re.zero();
+  prepareVectorTag(_assembly, _var.number());
+
+  mooseAssert(_local_re.size() == 2, "Truss element has and only has two nodes.");
 
   RealGradient orientation((*_orientation)[0]);
   orientation /= orientation.norm();
@@ -74,7 +73,7 @@ StressDivergenceTensorsTruss::computeResidual()
   _local_re(0) = -force_local(_component);
   _local_re(1) = -_local_re(0);
 
-  re += _local_re;
+  accumulateTaggedLocalResidual();
 
   if (_has_save_in)
   {
@@ -96,19 +95,17 @@ StressDivergenceTensorsTruss::computeStiffness(unsigned int i, unsigned int j)
 void
 StressDivergenceTensorsTruss::computeJacobian()
 {
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
-  _local_ke.resize(ke.m(), ke.n());
-  _local_ke.zero();
+  prepareMatrixTag(_assembly, _var.number(), _var.number());
 
   for (unsigned int i = 0; i < _test.size(); ++i)
     for (unsigned int j = 0; j < _phi.size(); ++j)
       _local_ke(i, j) += (i == j ? 1 : -1) * computeStiffness(_component, _component);
 
-  ke += _local_ke;
+  accumulateTaggedLocalMatrix();
 
   if (_has_diag_save_in)
   {
-    unsigned int rows = ke.m();
+    unsigned int rows = _local_ke.m();
     DenseVector<Number> diag(rows);
     for (unsigned int i = 0; i < rows; ++i)
       diag(i) = _local_ke(i, i);
@@ -138,12 +135,16 @@ StressDivergenceTensorsTruss::computeOffDiagJacobian(MooseVariableFEBase & jvar)
         break;
       }
 
-    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar_num);
-
     if (disp_coupled)
+    {
+      prepareMatrixTag(_assembly, _var.number(), jvar_num);
+
       for (unsigned int i = 0; i < _test.size(); ++i)
         for (unsigned int j = 0; j < jvar.phiSize(); ++j)
-          ke(i, j) += (i == j ? 1 : -1) * computeStiffness(_component, coupled_component);
+          _local_ke(i, j) += (i == j ? 1 : -1) * computeStiffness(_component, coupled_component);
+
+      accumulateTaggedLocalMatrix();
+    }
     else if (false) // Need some code here for coupling with temperature
     {
     }

@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./fmg_left]
     type = FileMeshGenerator
     file = left.e
@@ -21,10 +21,6 @@
     stitch_boundaries_pairs = 'right left;
                                right left'
   []
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Variables]

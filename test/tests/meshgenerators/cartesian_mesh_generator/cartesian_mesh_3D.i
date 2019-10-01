@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./cmg]
     type = CartesianMeshGenerator
     dim = 3
@@ -21,8 +21,4 @@
                     5 5 5
                     '
   [../]
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
