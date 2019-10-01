@@ -3,7 +3,7 @@
     type = 'Exodiff'
     input = 'generate_radiation_patch.i'
     exodiff = 'generate_radiation_patch_in.e'
-    requirement = "Moose shall be able to divide a sideset into patches for more accurate radiative transfer modeling."
+    requirement = "The system shall be able to divide a sideset into patches for more accurate radiative transfer modeling."
     design = 'source/meshgenerators/PatchSidesetGenerator.md'
     cli_args = '--mesh-only'
     issues = "#14000"
@@ -13,7 +13,7 @@
     type = 'Exodiff'
     input = 'generate_radiation_patch.i'
     exodiff = 'generate_radiation_patch_linear.e'
-    requirement = "Moose shall be able to use linear partitioner for subdividing sidesets into patches."
+    requirement = "The system shall be able to use linear partitioner for subdividing sidesets into patches."
     design = 'source/meshgenerators/PatchSidesetGenerator.md'
     cli_args = 'Mesh/patch/partitioner=linear --mesh-only generate_radiation_patch_linear.e'
     issues = "#14000"
@@ -23,7 +23,7 @@
     type = 'Exodiff'
     input = 'generate_radiation_patch.i'
     exodiff = 'generate_radiation_patch_centroid.e'
-    requirement = "Moose shall be able to use centroid partitioner for subdividing sidesets into patches."
+    requirement = "The system shall be able to use centroid partitioner for subdividing sidesets into patches."
     design = 'source/meshgenerators/PatchSidesetGenerator.md'
     cli_args = 'Mesh/patch/partitioner=centroid Mesh/patch/centroid_partitioner_direction=x --mesh-only generate_radiation_patch_centroid.e'
     issues = "#14000"
@@ -33,7 +33,7 @@
     type = RunException
     input = 'generate_radiation_patch.i'
     expect_err = "If using the centroid partitioner you _must_ specify centroid_partitioner_direction!"
-    requirement = "Moose shall error when centroid partitioner is used but centroid_partitioner_direction is not provided."
+    requirement = "The system shall error when centroid partitioner is used but centroid_partitioner_direction is not provided."
     design = 'source/meshgenerators/PatchSidesetGenerator.md'
     cli_args = 'Mesh/patch/partitioner=centroid --mesh-only generate_radiation_patch_centroid.e'
     issues = "#14000"
