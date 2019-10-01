@@ -300,7 +300,6 @@
 - /Postprocessors/MassFluxIntegral
 - /Postprocessors/MomentumFluxIntegral
 - /Postprocessors/NodalEnergyFluxPostprocessor
-- /Postprocessors/NodalMaxFromAverage
 - /Postprocessors/PostprocessorAsControlAction
 - /Postprocessors/RealComponentParameterValuePostprocessor
 - /Postprocessors/RealControlDataValuePostprocessor
@@ -316,7 +315,6 @@
 
 - /Stabilizations
 - /Stabilizations/AddStabilizationSettingsAction
-- /Stabilizations/EntropyViscosity
 - /Stabilizations/SUPG
 
 - /UserObjects/BoundaryFlux7EqnNCGGhostWall
@@ -331,7 +329,6 @@
 - /UserObjects/SpecificInterfacialAreaCurve
 - /UserObjects/RiemannSolver7EqnNCGHLLC
 - /UserObjects/VolumeFractionMapper
-- /UserObjects/EntropyViscosity
 - /UserObjects/JunctionStagnationEnthalpyUserObject
 - /UserObjects/SUPG
 - /UserObjects/StabilizationSettings
