@@ -1,11 +1,4 @@
-  [Tests]
-  [./free_boundary_2phase]
-    type = 'Exodiff'
-    input = 'free_boundary_2phase.i'
-    exodiff = 'free_boundary_2phase_out.e'
-    custom_cmp = 'free_boundary_2phase.exodiff'
-  [../]
-
+[Tests]
   # 1-phase
   [./phy:mass_1phase]
     type = 'CSVDiff'
