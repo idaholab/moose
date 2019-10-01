@@ -6,6 +6,9 @@
   initial_vel = 0
 
   closures = simple
+
+  spatial_discretization = rdg
+  rdg_slope_reconstruction = none
 []
 
 [FluidProperties]
@@ -32,21 +35,20 @@
     D_h  = 2.0000000000e-03
     f = 0.1
     length = 1
-    n_elems = 100
+    n_elems = 10
   [../]
 
   [./inlet]
     type = InletDensityVelocity1Phase
     input = 'pipe:in'
-    rho = 8.0541249965e+02
-    vel = 1.0000000000e+00
+    rho = 805
+    vel = 1
   [../]
 
   [./outlet]
     type = Outlet1Phase
     input = 'pipe:out'
     p = 7e6
-    legacy = true
   [../]
 []
 
@@ -63,7 +65,7 @@
 
   dt = 1e-1
   start_time = 0.0
-  num_steps = 55
+  num_steps = 50
   abort_on_solve_fail = true
 
   solve_type = 'PJFNK'
@@ -73,16 +75,10 @@
 
   l_tol = 1e-3
   l_max_its = 100
-
-  [./Quadrature]
-    type = GAUSS
-    order = THIRD
-  [../]
 []
 
 [Outputs]
-  [./out]
-    type = Exodus
-    execute_on = 'initial final'
-  [../]
+  exodus = true
+  execute_on = 'final'
+  show = 'rho vel'
 []

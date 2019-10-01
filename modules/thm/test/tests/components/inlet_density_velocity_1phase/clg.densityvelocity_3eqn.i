@@ -8,6 +8,9 @@
   scaling_factor_1phase = '1. 1. 1.'
 
   closures = simple
+
+  spatial_discretization = rdg
+  rdg_slope_reconstruction = none
 []
 
 [FluidProperties]
@@ -30,7 +33,7 @@
     position = '0 0 0'
     orientation = '1 0 0'
     length = 1
-    n_elems = 100
+    n_elems = 10
 
     A = 1.907720E-04
     f = 0.0
@@ -49,9 +52,7 @@
   [./outlet]
     type = Outlet1Phase
     input = 'pipe:out'
-
     p = 0.1e6
-    legacy = true
   [../]
 []
 
@@ -108,11 +109,6 @@
 
   l_tol = 1e-3
   l_max_its = 100
-
-  [./Quadrature]
-    type = GAUSS
-    order = THIRD
-  [../]
 []
 
 [Postprocessors]
@@ -129,7 +125,5 @@
 []
 
 [Outputs]
-  [./out]
-    type = CSV
-  [../]
+  csv = true
 []

@@ -62,6 +62,14 @@
   [../]
 
   # density and velocity boundary flux
+  [./boundary_flux_3eqn_ghost_density_velocity]
+    type = 'PetscJacobianTester'
+    input = 'boundary_flux_3eqn_ghost_density_velocity.i'
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    max_threads = 1
+    allow_test_objects = true
+  [../]
   [./boundary_flux_7eqn_ghost_density_velocity]
     type = 'PetscJacobianTester'
     input = 'boundary_flux_7eqn_ghost_density_velocity.i'

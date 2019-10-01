@@ -4,7 +4,7 @@
     type = 'Exodiff'
     input = 'phy.densityvelocity_3eqn.i'
     exodiff = 'phy.densityvelocity_3eqn_out.e'
-    custom_cmp = 'phy.densityvelocity_3eqn.exodiff'
+    recover = false
   [../]
 
   # control logic
