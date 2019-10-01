@@ -110,18 +110,21 @@ FlowChannelBase::init()
   _area_function = createAreaFunctionAndGetName();
 
   _flow_model = buildFlowModel();
-  _flow_model->init();
+  if (_flow_model)
+  {
+    _flow_model->init();
 
-  _closures = buildClosures();
+    _closures = buildClosures();
 
-  // initialize the stabilization object
-  if (!_stabilization_uo_name.empty())
-    if (_sim.hasUserObject(_stabilization_uo_name))
-    {
-      StabilizationSettings & stabilization = const_cast<StabilizationSettings &>(
-          _sim.getUserObjectTempl<StabilizationSettings>(_stabilization_uo_name));
-      stabilization.initMooseObjects(*_flow_model);
-    }
+    // initialize the stabilization object
+    if (!_stabilization_uo_name.empty())
+      if (_sim.hasUserObject(_stabilization_uo_name))
+      {
+        StabilizationSettings & stabilization = const_cast<StabilizationSettings &>(
+            _sim.getUserObjectTempl<StabilizationSettings>(_stabilization_uo_name));
+        stabilization.initMooseObjects(*_flow_model);
+      }
+  }
 }
 
 std::shared_ptr<ClosuresBase>
@@ -159,7 +162,8 @@ FlowChannelBase::check() const
 {
   GeometricalFlowComponent::check();
 
-  _closures->check(*this);
+  if (_closures)
+    _closures->check(*this);
 
   // check that stabilization exists
   if (!_stabilization_uo_name.empty())
