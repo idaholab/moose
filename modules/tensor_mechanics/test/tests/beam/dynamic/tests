@@ -131,7 +131,7 @@
                   " a consistent mass/inertia matrix in the presence of Rayleigh"
                   " damping and numerical damping in the form of Hilber-Hughes-Taylor (HHT) time integration."
     design = "C0TimoshenkoBeam.md LineElementMaster/index.md"
-    rel_err = 7e-6
+    rel_err = 2e-5
   [../]
   [./dyn_euler_added_mass_inertia_damping_action]
     type = 'Exodiff'
