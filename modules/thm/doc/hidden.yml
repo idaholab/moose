@@ -69,6 +69,8 @@
 - /Components/BoundaryBase
 - /Components/Component
 - /Components/ConnectorBase
+- /Components/ElbowPipe1Phase
+- /Components/ElbowPipe2Phase
 - /Components/FlowChannel1Phase
 - /Components/FlowChannel2Phase
 - /Components/FormLossFromExternalApp1Phase
