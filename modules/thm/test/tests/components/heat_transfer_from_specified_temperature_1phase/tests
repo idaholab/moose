@@ -1,4 +1,11 @@
 [Tests]
+  [./phy.energy_walltemperature_ss_1phase]
+    type = 'CSVDiff'
+    input = 'phy.energy_walltemperature_ss_1phase.i'
+    csvdiff = 'phy.energy_walltemperature_ss_1phase_out.csv'
+    abs_zero = 1e-9
+  [../]
+
   # controls
   [./clg:Hw]
     type = 'CSVDiff'
