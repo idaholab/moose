@@ -20,10 +20,17 @@ validParams<MeshGeneratorMesh>()
 {
   InputParameters params = validParams<MooseMesh>();
   params.set<bool>("_mesh_generator_mesh") = true;
+
+  params.addParam<std::string>("final_generator",
+                               "The name of the mesh generator output to use for the final Mesh");
   return params;
 }
 
-MeshGeneratorMesh::MeshGeneratorMesh(const InputParameters & parameters) : MooseMesh(parameters) {}
+MeshGeneratorMesh::MeshGeneratorMesh(const InputParameters & parameters) : MooseMesh(parameters)
+{
+  if (isParamValid("final_generator"))
+    _app.setFinalMeshGeneratorName(getParam<std::string>("final_generator"));
+}
 
 std::unique_ptr<MooseMesh>
 MeshGeneratorMesh::safeClone() const

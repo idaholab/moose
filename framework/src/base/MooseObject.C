@@ -61,9 +61,12 @@ MooseObject::MooseObject(const InputParameters & parameters)
     _app(*getCheckedPointerParam<MooseApp *>("_moose_app")),
     _type(getParam<std::string>("_type")),
     _name(getParam<std::string>("_object_name")),
-    _enabled(getParam<bool>("enable")){}
+    _enabled(getParam<bool>("enable"))
+{
+}
 
-        [[noreturn]] void callMooseErrorRaw(std::string & msg, MooseApp * app)
+[[noreturn]] void
+callMooseErrorRaw(std::string & msg, MooseApp * app)
 {
   app->getOutputWarehouse().mooseConsole();
   std::string prefix;
