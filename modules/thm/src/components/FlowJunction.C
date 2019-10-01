@@ -8,14 +8,6 @@ validParams<FlowJunction>()
 {
   InputParameters params = validParams<FlowConnection>();
   params.addPrivateParam<std::string>("component_type", "flow_junction");
-  params.addDeprecatedParam<std::vector<BoundaryName>>(
-      "inputs",
-      "Inputs of this junction",
-      "Use 'connections' parameter instead. Put 'inputs' and 'outputs' in it.");
-  params.addDeprecatedParam<std::vector<BoundaryName>>(
-      "outputs",
-      "Outputs of this junction",
-      "Use 'connections' parameter instead. Put 'inputs' and 'outputs' in it.");
   params.addRequiredParam<std::vector<BoundaryName>>("connections", "Junction connections");
   return params;
 }
