@@ -1,8 +1,8 @@
 [Mesh]
+  patch_size = 80
   [file]
     type = FileMeshGenerator
     file = sliding_elastic_blocks_2d.e
-    patch_size = 80
   []
   [slave]
     input = file

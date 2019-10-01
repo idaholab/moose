@@ -133,8 +133,14 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
         if (cross_interface_neighbor_ip && cross_interface_neighbor_ip->processor_id() != p)
           coupled_elements.insert(std::make_pair(cross_interface_neighbor_ip, null_mat));
       } // end loop over bounds range
-    }   // end loop over active local elements range
-  }     // end if (_amg)
+
+      // Finally add the interior parent of this element if it's not local
+      auto elem_ip = elem->interior_parent();
+      if (elem_ip && elem_ip->processor_id() != p)
+        coupled_elements.insert(std::make_pair(elem_ip, null_mat));
+
+    } // end loop over active local elements range
+  }   // end if (_amg)
 }
 
 bool
