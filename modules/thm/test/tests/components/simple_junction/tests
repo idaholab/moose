@@ -1,0 +1,72 @@
+[Tests]
+  # physics
+  [./phy:3eqn]
+    type = 'Exodiff'
+    input = 'phy.3eqn.i'
+    exodiff = 'phy.3eqn_out.e'
+    custom_cmp = 'phy.3eqn.exodiff'
+  [../]
+  [./phy:7eqn]
+    type = 'CSVDiff'
+    input = 'phy.7eqn.i'
+    csvdiff = 'phy.7eqn_out.csv'
+    rel_err = 1e-15
+    abs_zero = 1e-12
+  [../]
+  [./phy:7eqn_ncg]
+    type = 'CSVDiff'
+    input = 'phy.7eqn_ncg.i'
+    csvdiff = 'phy.7eqn_ncg_out.csv'
+    rel_err = 1e-15
+    abs_zero = 1e-8
+  [../]
+
+  # jacobians
+  [./jac:simple_junction_3eqn_positive_vel]
+    type = 'PetscJacobianTester'
+    input = 'jac.simple_junction_3eqn.i'
+    ratio_tol = 4e-7
+    difference_tol = 50
+    cli_args = 'Debug/check_jacobian=true'
+  [../]
+
+  [./jac:simple_junction_3eqn_negative_vel]
+    type = 'PetscJacobianTester'
+    input = 'jac.simple_junction_3eqn.i'
+    ratio_tol = 4e-7
+    difference_tol = 50
+    cli_args = 'Debug/check_jacobian=true GlobalParams/initial_vel=-2'
+  [../]
+
+  [./jac:simple_junction_7eqn_1]
+    type = 'PetscJacobianTester'
+    input = 'jac.simple_junction_7eqn.i'
+    ratio_tol = 2e-5
+    difference_tol = 155
+    cli_args = 'Debug/check_jacobian=true'
+  [../]
+
+  [./jac:simple_junction_7eqn_2]
+    type = 'PetscJacobianTester'
+    input = 'jac.simple_junction_7eqn.i'
+    ratio_tol = 2e-5
+    difference_tol = 155
+    cli_args = 'Debug/check_jacobian=true GlobalParams/initial_vel_liquid=-2 GlobalParams/initial_vel_vapor=-2 GlobalParams/specific_interfacial_area_max_value=1700 Components/pipe1/f=0.1 Components/pipe2/f=0.1'
+  [../]
+
+  [./jac:simple_junction_7eqn_ncg_1]
+    type = 'PetscJacobianTester'
+    input = 'jac.simple_junction_7eqn_ncg.i'
+    ratio_tol = 1e-6
+    difference_tol = 4
+    cli_args = 'Debug/check_jacobian=true'
+  [../]
+
+  [./jac:simple_junction_7eqn_ncg_2]
+    type = 'PetscJacobianTester'
+    input = 'jac.simple_junction_7eqn_ncg.i'
+    ratio_tol = 1e-6
+    difference_tol = 4
+    cli_args = 'Debug/check_jacobian=true GlobalParams/initial_vel_liquid=-2 GlobalParams/initial_vel_vapor=-2 GlobalParams/specific_interfacial_area_max_value=1700 Components/pipe1/f=0.1 Components/pipe2/f=0.1'
+  [../]
+[]
