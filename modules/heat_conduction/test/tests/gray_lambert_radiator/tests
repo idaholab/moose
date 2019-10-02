@@ -1,0 +1,88 @@
+[Tests]
+  issues = '#13918'
+  design = 'GrayLambertSurfaceRadiation.md'
+
+  ## check error checking
+  [./inconsistent_bnd_eps]
+    type = 'RunException'
+    input = 'gray_lambert_cavity.i'
+    cli_args = 'UserObjects/gray_lambert/emissivity="1"'
+    expect_err = 'The number of entries must match the number of boundary entries.'
+    requirement = 'The system shall check consistency of boundary and emissivity entries'
+  [../]
+
+  [./inconsistent_bnd_view_factors]
+    type = 'RunException'
+    input = 'gray_lambert_cavity.i'
+    cli_args = 'UserObjects/gray_lambert/boundary="top bottom"
+                UserObjects/gray_lambert/emissivity="1 1"'
+    expect_err = 'Leading dimension of view_factors must be equal to number of side sets.'
+    requirement = 'The system shall check consistency of boundary and view factor entries'
+  [../]
+
+  [./inconsistent_iso_temperature]
+    type = 'RunException'
+    input = 'gray_lambert_cavity.i'
+    cli_args = 'UserObjects/gray_lambert/boundary="top bottom"
+                UserObjects/gray_lambert/fixed_temperature_boundary="top"
+                UserObjects/gray_lambert/emissivity="1 1"
+                UserObjects/gray_lambert/view_factors="0.5 0.5 ; 0.5 0.5"'
+    expect_err = 'fixed_boundary_temperatures and fixed_temperature_boundary must have the same length.'
+    requirement = 'The system shall check consistency of fixed_boundary_temperatures and fixed_temperature_boundary entries'
+  [../]
+
+  [./inconsistent_bnd_iso_bnd]
+    type = 'RunException'
+    input = 'gray_lambert_cavity.i'
+    cli_args = 'UserObjects/gray_lambert/boundary="top bottom"
+                UserObjects/gray_lambert/fixed_temperature_boundary="right"
+                UserObjects/gray_lambert/fixed_boundary_temperatures="300"
+                UserObjects/gray_lambert/emissivity="1 1"
+                UserObjects/gray_lambert/view_factors="0.5 0.5 ; 0.5 0.5"'
+    expect_err = 'fixed_temperature_boundary must be a subset of boundary.'
+    requirement = 'The system shall check consistency of boundary and fixed_temperature_boundary entries'
+  [../]
+
+  [./inconsistent_bnd_adiabatic_bnd]
+    type = 'RunException'
+    input = 'gray_lambert_cavity.i'
+    cli_args = 'UserObjects/gray_lambert/boundary="top bottom"
+                UserObjects/gray_lambert/fixed_temperature_boundary="top"
+                UserObjects/gray_lambert/fixed_boundary_temperatures="300"
+                UserObjects/gray_lambert/emissivity="1 1"
+                UserObjects/gray_lambert/view_factors="0.5 0.5 ; 0.5 0.5"'
+    expect_err = 'adiabatic_boundary must be a subset of boundary.'
+    requirement = 'The system shall check consistency of boundary and adiabatic_boundary entries'
+  [../]
+
+  [./incorrect_view_factor_shape]
+    type = 'RunException'
+    input = 'gray_lambert_cavity.i'
+    cli_args = 'UserObjects/gray_lambert/view_factors="0.25 0.25 0.25 0.25; 0.5 0.5 ; 1 1 1 1; 1 1 1 1"'
+    expect_err = 'view_factors must be provided as square array. Row 1 has 2 entries.'
+    requirement = 'The system shall check consistency of the view_factors entry'
+  [../]
+
+  [./bad_rowsum]
+    type = 'RunException'
+    input = 'gray_lambert_cavity.i'
+    cli_args = 'UserObjects/gray_lambert/view_factors="0.25 0.25 0.25 0.25; 0.2 0.25 0.25 0.25 ; 0.25 0.25 0.25 0.25; 0.25 0.25 0.25 0.25"'
+    expect_err = 'view_factors row 1 sums to 0.95.'
+    compiler = '!GCC'
+    requirement = 'The system shall check consistency of the view_factors entry'
+  [../]
+
+  [./gray_lambert_cavity]
+    type = CSVDiff
+    input = 'gray_lambert_cavity.i'
+    csvdiff = 'gray_lambert_cavity_out.csv'
+    requirement = 'The system shall compute radiative transfer between gray Lambert surfaces'
+  [../]
+
+  [./coupled_heat_conduction]
+    type = Exodiff
+    input = 'coupled_heat_conduction.i'
+    exodiff = 'coupled_heat_conduction_out.e'
+    requirement = 'The system shall allow coupling radiative transfer between gray Lambert surfaces to solving heat conduction'
+  [../]
+[]

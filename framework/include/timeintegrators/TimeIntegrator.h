@@ -97,6 +97,15 @@ public:
   virtual void postStep() {}
 
   virtual int order() = 0;
+
+  /**
+   * Computes the time derivative and the Jacobian of the time derivative
+   *
+   * This function is responsible for the following:
+   * - computing the time derivative; a reference is retrieved from _sys.solutionUDot().
+   * - computing the time derivative Jacobian, stored in _du_dot_du, which is a
+   *   reference to _sys.duDotDu().
+   */
   virtual void computeTimeDerivatives() = 0;
 
   /**
@@ -130,9 +139,10 @@ protected:
   NonlinearSystemBase & _nl;
 
   /// Nonlinear implicit system, if applicable; otherwise, nullptr
-  const NonlinearImplicitSystem * _nonlinear_implicit_system;
+  // NonlinearImplicitSystem * _nonlinear_implicit_system;
+  NonlinearImplicitSystem * _nonlinear_implicit_system;
 
-  /// solution vector for \f$ {du^dot}\over{du} \f$
+  /// Derivative of time derivative with respect to current solution: \f$ {du^dot}\over{du} \f$
   Real & _du_dot_du;
   /// solution vectors
   const NumericVector<Number> * const & _solution;
@@ -154,4 +164,3 @@ protected:
   /// Total number of linear iterations over all stages of the time step
   unsigned int _n_linear_iterations;
 };
-
