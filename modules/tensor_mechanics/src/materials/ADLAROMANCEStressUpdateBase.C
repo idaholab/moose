@@ -72,15 +72,9 @@ defineADValidParams(
 
     params.addParam<bool>("verbose", false, "Flag to add verbose output");
 
-    params.addRangeCheckedParam<unsigned int>(
-        "stress_index",
-        2,
-        "stress_index > 0",
-        "Index corresponding to the trial stress for in the input vector");
-
     params.addParamNamesToGroup(
         "mobile_dislocation_density_forcing_function immobile_dislocation_density_forcing_function "
-        "old_creep_strain_forcing_function stress_index",
+        "old_creep_strain_forcing_function",
         "Advanced"););
 
 template <ComputeStage compute_stage>
@@ -112,7 +106,7 @@ ADLAROMANCEStressUpdateBase<compute_stage>::ADLAROMANCEStressUpdateBase(
                            : NULL),
     _immobile_dislocation_increment(0.0),
     _immobile_old(0.0),
-    _stress_index(getParam<unsigned int>("stress_index")),
+    _stress_index(2),
 
     _creep_strain_old_forcing_function(isParamValid("old_creep_strain_forcing_function")
                                            ? &getFunction("old_creep_strain_forcing_function")
@@ -226,8 +220,6 @@ ADLAROMANCEStressUpdateBase<compute_stage>::computeResidual(const ADReal & effec
 
   if (_verbose && compute_stage == RESIDUAL)
   {
-    // Moose::out.precision(9);
-    // Moose::out << std::scientific;
     Moose::out << "Verbose information from " << _name << ": \n";
     Moose::out << "  dt: " << _dt << "\n";
     Moose::out << "  old mobile disl: " << _mobile_old << "\n";
@@ -601,42 +593,6 @@ ADLAROMANCEStressUpdateBase<compute_stage>::getMakeFrameHelper() const
     for (unsigned int invar = 0; invar < _num_inputs; ++invar)
       v[numcoeffs][invar] = numcoeffs / MathUtils::pow(_degree, invar) % _degree;
 
-  return v;
-}
-
-template <ComputeStage compute_stage>
-std::vector<std::vector<ROMInputTransform>>
-ADLAROMANCEStressUpdateBase<compute_stage>::getTransform()
-{
-  mooseError("In ", _name, ": getTransform must be defined by an inherited class!");
-  std::vector<std::vector<ROMInputTransform>> v;
-  return v;
-}
-
-template <ComputeStage compute_stage>
-std::vector<std::vector<Real>>
-ADLAROMANCEStressUpdateBase<compute_stage>::getTransformCoefs()
-{
-  mooseError("In ", _name, ": getTransformCoefs must be defined by an inherited class!");
-  std::vector<std::vector<Real>> v;
-  return v;
-}
-
-template <ComputeStage compute_stage>
-std::vector<std::vector<Real>>
-ADLAROMANCEStressUpdateBase<compute_stage>::getInputLimits()
-{
-  mooseError("In ", _name, ": getInputLimits must be defined by an inherited class!");
-  std::vector<std::vector<Real>> v;
-  return v;
-}
-
-template <ComputeStage compute_stage>
-std::vector<std::vector<Real>>
-ADLAROMANCEStressUpdateBase<compute_stage>::getCoefs()
-{
-  mooseError("In ", _name, ": getCoefs must be defined by an inherited class!");
-  std::vector<std::vector<Real>> v;
   return v;
 }
 

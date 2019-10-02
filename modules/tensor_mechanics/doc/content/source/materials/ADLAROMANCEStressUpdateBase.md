@@ -2,9 +2,9 @@
 
 ## Description
 
-The `ADLAROMANCEStressUpdate` method computes the creep rate of materials by sampling a Los Alamos Reduced Order
+The `ADLAROMANCEStressUpdateBase` class computes the creep rate of materials by sampling a Los Alamos Reduced Order
 Model Applied to Nonlinear Constitutive Equations (LAROMANCE) formulated
-via calibration with lower-length scale simulations. This method utilizes the exact same techniques
+via calibration with lower-length scale simulations. `ADLAROMANCEStressUpdateBase` utilizes the exact same techniques
 utilized in [ADPowerLawCreepStressUpdate](/ADPowerLawCreepStressUpdate.md) including the radial
 return method implemented in [ADRadialReturnStressUpdate](/ADRadialReturnStressUpdate.md), however
 in place of a traditional power-law creep model, a ROM is sampled to determine the creep rate as a
@@ -148,18 +148,22 @@ VPSC, and the resulting simulations are compared.
 ## Writing a LAROMANCE Stress Update Material
 
 While `ADLAROMANCEStressUpdateBase` contains the necessary algorithms contained to evaluate the ROM,
-he material specific `LAROMANCE` data is contained in inherited classes, for example `SS316HLAROMANCEStressUpdateTest`,
-which consists of the input limits, input transformations, and Legendre polynomials. Derived classes
-must overwrite the four virtual methods:
+the material specific `LAROMANCE` data is contained in inherited classes.
+Within the `tensor_mechanics` module, a test object `SS316HLAROMANCEStressUpdateTest` is included as
+an example of how a ROM can be formulated. Note that `SS316HLAROMANCEStressUpdateTest` is only a
+test object located in `tensor_mechanics/test/src/`, and is not actively updated nor validated, but
+rather included in order to verify the math contained in `ADLAROMANCEStressUpdateBase`. The
+material specific ROMs provided in specific MOOSE applications should be utilized, which consists of
+the input limits, input transformations, and Legendre polynomials. Derived classes must overwrite
+the four virtual methods:
 
 - +getTransform+: Returns vector of the functions to use for the conversion of input variables.
 - +getTransformCoefs+: Returns factors for the functions for the conversion functions given in getTransform.
 - +getInputLimits+: Returns human-readable limits for the inputs.
 - +getCoefs+: Material specific coefficients multiplied by the Legendre polynomials for each of the input variables.
 
-Additionally, new `LAROMANCE` models can override five input parameter defaults to ensure correct ROM implementation:
+Additionally, new `LAROMANCE` models can override four input parameter defaults to ensure correct ROM implementation:
 
-- +stress_index+: Index corresponding to the trial stress for in the input vector.
 - +initial_mobile_dislocation_density+: Initial density of mobile (glissile) dislocations.
 - +max_relative_mobile_dislocation_increment+: Maximum increment of density of mobile (glissile) dislocations.
 - +initial_immobile_dislocation_density+: Immobile (locked) dislocation density initial value.

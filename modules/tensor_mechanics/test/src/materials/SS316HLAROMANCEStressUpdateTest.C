@@ -17,14 +17,10 @@ defineADValidParams(
     params.addClassDescription("LAROMANCE creep update model for SS316H");
 
     // Override defaults for material specific parameters below
-    params.addRangeCheckedParam<unsigned int>(
-        "stress_index",
-        2,
-        "stress_index > 0",
-        "Index corresponding to the trial stress for in the input vector");
     params.addRangeCheckedParam<Real>("initial_mobile_dislocation_density",
                                       5.0e12,
-                                      "initial_mobile_dislocation_density >= 0.0",
+                                      "initial_mobile_dislocation_density >=1.32776E+12 & "
+                                      "initial_mobile_dislocation_density <= 9.99959E+12",
                                       "Initial density of mobile (glissile) dislocations (1/m^2)");
     params.addRangeCheckedParam<Real>(
         "max_relative_mobile_dislocation_increment",
@@ -34,7 +30,8 @@ defineADValidParams(
     params.addRangeCheckedParam<Real>(
         "initial_immobile_dislocation_density",
         5.0e11,
-        "initial_immobile_dislocation_density >= 0.0",
+        "initial_immobile_dislocation_density >= 2.93039E+11 & "
+        "initial_immobile_dislocation_density <= 9.99798E+11",
         "Immobile (locked) dislocation density initial value (1/m^2).");
     params.addRangeCheckedParam<Real>(
         "max_relative_immobile_dislocation_increment",

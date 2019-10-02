@@ -30,7 +30,7 @@ protected:
   virtual std::vector<std::vector<Real>> getTransformCoefs() override;
 
   /* Returns human-readable limits for the inputs. Inputs ordering is
-   * 0: mobile
+   * 0: mobile_old
    * 1: immobile_old
    * 2: trial stress,
    * 3: effective strain old,
