@@ -1,209 +1,293 @@
 [Tests]
-  [./RampIC]
-    # Test ramp ic generator
+  issues = '#6858 #5816 #7358 #8721 #12000 #6655 #9174'
+  design = 'PolycrystalICs.md'
+
+  [RampIC]
     type = Exodiff
     input = 'RampIC.i'
     exodiff = 'RampIC_out.e'
-  [../]
 
-  [./BimodalInverseSuperellipsoidsIC]
-    type = Exodiff
-    input = 'BimodalInverseSuperellipsoidsIC.i'
-    exodiff = 'BimodalInverseSuperellipsoidsIC_out.e'
-    scale_refine = 1
-  [../]
+    requirement = 'The system shall support a ramp or linear initial condition in one dimension.'
+  []
 
-  [./BimodalSuperellipsoidsIC]
-    type = Exodiff
-    input = 'BimodalSuperellipsoidsIC.i'
-    exodiff = 'BimodalSuperellipsoidsIC_out.e'
-    scale_refine = 1
-  [../]
-
-  [./BoundingBoxIC]
-    type = Exodiff
-    input = 'BoundingBoxIC.i'
-    exodiff = 'BoundingBoxIC_out.e'
-    scale_refine = 1
-    valgrind = 'HEAVY'
-  [../]
-
-  [./CrossIC]
+  [CrossIC]
     type = Exodiff
     input = 'CrossIC.i'
     exodiff = 'CrossIC_out.e'
     scale_refine = 1
-  [../]
 
-  [./PolycrystalVoronoiVoidIC_moregrains]
-    type = 'Exodiff'
-    input = 'PolycrystalVoronoiVoidIC_moregrains.i'
-    exodiff = 'PolycrystalVoronoiVoidIC_moregrains_out.e'
-  [../]
+    requirement = 'The system shall support the creation of a smooth cross initial condition.'
+  []
 
-  [./PolycrystalVoronoiVoidIC_notperiodic]
-    type = 'Exodiff'
-    input = 'PolycrystalVoronoiVoidIC_notperiodic.i'
-    exodiff = 'PolycrystalVoronoiVoidIC_notperiodic_out.e'
-  [../]
+  [ellipsoids]
+    requirement = 'The system shall support ellipsoidal phase-field initial conditions:'
 
-  [./PolycrystalVoronoiVoidIC_periodic]
-    type = 'Exodiff'
-    input = 'PolycrystalVoronoiVoidIC_periodic.i'
-    exodiff = 'PolycrystalVoronoiVoidIC_periodic_out.e'
-  [../]
+    [BimodalInverseSuperellipsoidsIC]
+      type = Exodiff
+      input = 'BimodalInverseSuperellipsoidsIC.i'
+      exodiff = 'BimodalInverseSuperellipsoidsIC_out.e'
+      scale_refine = 1
 
-  [./PolycrystalVoronoiVoidIC_periodic_fromfile]
-    type = 'Exodiff'
-    input = 'PolycrystalVoronoiVoidIC_periodic_fromfile.i'
-    exodiff = 'PolycrystalVoronoiVoidIC_periodic_fromfile_out.e'
-  [../]
+      detail = 'bimodal inverse superellipsoidal structures,'
+    []
 
-  [./SmoothCircleIC]
-    type = Exodiff
-    input = 'SmoothCircleIC.i'
-    exodiff = 'SmoothCircleIC_out.e'
-    scale_refine = 1
-    valgrind = 'HEAVY'
-  [../]
+    [BimodalSuperellipsoidsIC]
+      type = Exodiff
+      input = 'BimodalSuperellipsoidsIC.i'
+      exodiff = 'BimodalSuperellipsoidsIC_out.e'
+      scale_refine = 1
 
-  [./SmoothSuperellipsoidIC]
-    type = Exodiff
-    input = 'SmoothSuperellipsoidIC.i'
-    exodiff = 'SmoothSuperellipsoidIC_out.e'
-    scale_refine = 1
-    valgrind = 'HEAVY'
-  [../]
+      detail = 'bimodal superellipsoidal structures,'
+    []
 
-  [./SpecifiedSmoothSuperellipsoidIC]
-    type = Exodiff
-    input = 'SpecifiedSmoothSuperellipsoidIC.i'
-    exodiff = 'SpecifiedSmoothSuperellipsoidIC_out.e'
-    scale_refine = 1
-    valgrind = 'HEAVY'
-  [../]
+    [SmoothSuperellipsoidIC]
+      type = Exodiff
+      input = 'SmoothSuperellipsoidIC.i'
+      exodiff = 'SmoothSuperellipsoidIC_out.e'
+      scale_refine = 1
+      valgrind = 'HEAVY'
 
-  [./RndBoundingBoxIC]
-    type = Exodiff
-    input = 'RndBoundingBoxIC.i'
-    exodiff = 'RndBoundingBoxIC_out.e'
-    scale_refine = 1
-    valgrind = 'HEAVY'
-    max_parallel = 1
-    max_threads = 1
-    recover = false # See #5207
-  [../]
+      detail = 'smooth superellipsoidal structures,'
+    []
 
-  [./SmoothCircleIC_3D]
-    type = Exodiff
-    input = 'SmoothCircleIC_3D.i'
-    exodiff = 'SmoothCircleIC_3D_out.e'
-    scale_refine = 1
-    valgrind = 'HEAVY'
-  [../]
+    [SpecifiedSmoothSuperellipsoidIC]
+      type = Exodiff
+      input = 'SpecifiedSmoothSuperellipsoidIC.i'
+      exodiff = 'SpecifiedSmoothSuperellipsoidIC_out.e'
+      scale_refine = 1
+      valgrind = 'HEAVY'
 
-  [./SmoothSuperellipsoidIC_3D]
-    type = Exodiff
-    input = 'SmoothSuperellipsoidIC_3D.i'
-    exodiff = 'SmoothSuperellipsoidIC_3D_out.e'
-    scale_refine = 1
-    valgrind = 'HEAVY'
-  [../]
+      detail = 'smooth superellipsoidal structures specified from a file,'
+    []
 
-  [./RndSmoothCircleIC]
-    type = Exodiff
-    input = 'RndSmoothCircleIC.i'
-    exodiff = 'RndSmoothCircleIC_out.e'
-    scale_refine = 1
-    valgrind = 'HEAVY'
-    max_parallel = 1
-    max_threads = 1
-  [../]
+    [SmoothSuperellipsoidIC_3D]
+      type = Exodiff
+      input = 'SmoothSuperellipsoidIC_3D.i'
+      exodiff = 'SmoothSuperellipsoidIC_3D_out.e'
+      scale_refine = 1
+      valgrind = 'HEAVY'
 
-  [./ClosePackIC]
-    # Test close pack ic generator (2D)
-    type = Exodiff
-    input = ClosePackIC.i
-    exodiff = ClosePackIC_out.e
-  [../]
+      detail = 'smooth superellipsoidal structures in 3D,'
+    []
 
-  [./ClosePackIC_3D]
-    # Test close pack ic generator (3D)
-    type = Exodiff
-    input = ClosePackIC_3D.i
-    exodiff = ClosePackIC_3D_out.e
-    method = 'opt oprof' # This test is too slow in debug
-  [../]
+    [MultiSmoothSuperellipsoidIC_2D]
+      type = Exodiff
+      input = 'MultiSmoothSuperellipsoidIC_2D.i'
+      exodiff = 'MultiSmoothSuperellipsoidIC_2D_out.e'
 
-  [./HexPolycrystalIC]
-    type = Exodiff
-    input = HexPolycrystalIC.i
-    exodiff = HexPolycrystalIC_out.e
-  [../]
+      detail = 'multiple smooth superellipsoidal structures in 2D, and'
+    []
 
-  [./MultiBoundingBoxIC1D]
-    type = Exodiff
-    input = MultiBoundingBoxIC1D.i
-    exodiff = MultiBoundingBoxIC1D_out.e
-  [../]
+    [MultiSmoothSuperellipsoidIC_3D]
+      type = Exodiff
+      input = 'MultiSmoothSuperellipsoidIC_3D.i'
+      exodiff = 'MultiSmoothSuperellipsoidIC_3D_out.e'
 
-  [./MultiBoundingBoxIC2D]
-    type = Exodiff
-    input = MultiBoundingBoxIC2D.i
-    exodiff = MultiBoundingBoxIC2D_out.e
-  [../]
+      detail = 'multiple smooth superellipsoidal structures in 3D.'
+    []
+  []
 
-  [./MultiBoundingBoxIC3D]
-    type = Exodiff
-    input = MultiBoundingBoxIC3D.i
-    exodiff = MultiBoundingBoxIC3D_out.e
-  [../]
+  [polycrystal]
+    requirement = 'The system shall support polycrystal phase-field initial conditions:'
 
-  [./MultiSmoothSuperellipsoidIC_3D]
-    type = Exodiff
-    input = 'MultiSmoothSuperellipsoidIC_3D.i'
-    exodiff = 'MultiSmoothSuperellipsoidIC_3D_out.e'
-  [../]
+    [PolycrystalVoronoiVoidIC_moregrains]
+      type = 'Exodiff'
+      input = 'PolycrystalVoronoiVoidIC_moregrains.i'
+      exodiff = 'PolycrystalVoronoiVoidIC_moregrains_out.e'
 
-  [./MultiSmoothSuperellipsoidIC_2D]
-    type = Exodiff
-    input = 'MultiSmoothSuperellipsoidIC_2D.i'
-    exodiff = 'MultiSmoothSuperellipsoidIC_2D_out.e'
-  [../]
+      detail = 'large polycrystal structure with voids,'
+    []
 
-  [./TricrystalTripleJunctionIC]
-    type = Exodiff
-    input = 'TricrystalTripleJunctionIC.i'
-    exodiff = 'TricrystalTripleJunctionIC_out.e'
-  [../]
+    [PolycrystalVoronoiVoidIC_notperiodic]
+      type = 'Exodiff'
+      input = 'PolycrystalVoronoiVoidIC_notperiodic.i'
+      exodiff = 'PolycrystalVoronoiVoidIC_notperiodic_out.e'
 
-  [./PolycrystalCircles_FromFile]
-    type = Exodiff
-    input = 'polycrystalcircles_fromfile.i'
-    exodiff = 'polycrystalcircles_fromfile_out.e'
-    # This test uses a coloring algorithm that requires PETSc >= 3.5.0.
-    petsc_version = '>=3.5.0'
-  [../]
+      detail = 'polycrystal structure with voids,'
+    []
 
-  [./PolycrystalVoronoi_FromFile]
-    type = Exodiff
-    input = 'PolycrystalVoronoi_fromfile.i'
-    exodiff = 'PolycrystalVoronoi_fromfile_out.e'
-    # This test uses a coloring algorithm that requires PETSc >= 3.5.0.
-    petsc_version = '>=3.5.0'
-  [../]
+    [PolycrystalVoronoiVoidIC_periodic]
+      type = 'Exodiff'
+      input = 'PolycrystalVoronoiVoidIC_periodic.i'
+      exodiff = 'PolycrystalVoronoiVoidIC_periodic_out.e'
 
-  [./PolycrystalCircles_FromVector]
-    type = Exodiff
-    input = 'polycrystalcircles_fromvector.i'
-    exodiff = 'polycrystalcircles_fromvector_out.e'
-    # This test uses a coloring algorithm that requires PETSc >= 3.5.0.
-    petsc_version = '>=3.5.0'
-  [../]
+      detail = 'polycrystal structure with voids on a periodic domain,'
+    []
 
-  [./SmoothCirclesFromFile]
-    type = Exodiff
-    input = 'circles_from_file_ic.i'
-    exodiff = 'circles_from_file_ic_out.e'
-  [../]
+    [PolycrystalVoronoiVoidIC_periodic_fromfile]
+      type = 'Exodiff'
+      input = 'PolycrystalVoronoiVoidIC_periodic_fromfile.i'
+      exodiff = 'PolycrystalVoronoiVoidIC_periodic_fromfile_out.e'
+      method = '!DBG'
+
+      detail = 'polycrystal structure with voids with centroids specified from a file,'
+    []
+
+    [PolycrystalVoronoi_FromFile]
+      type = Exodiff
+      input = 'PolycrystalVoronoi_fromfile.i'
+      exodiff = 'PolycrystalVoronoi_fromfile_out.e'
+      # This test uses a coloring algorithm that requires PETSc >= 3.5.0.
+      petsc_version = '>=3.5.0'
+
+      detail = 'polycrystal structure with centroids specified from a file,'
+    []
+
+    [PolycrystalCircles_FromFile]
+      type = Exodiff
+      input = 'polycrystalcircles_fromfile.i'
+      exodiff = 'polycrystalcircles_fromfile_out.e'
+      # This test uses a coloring algorithm that requires PETSc >= 3.5.0.
+      petsc_version = '>=3.5.0'
+
+      detail = 'polycrystal circles specified from a file,'
+    []
+
+    [PolycrystalCircles_FromVector]
+      type = Exodiff
+      input = 'polycrystalcircles_fromvector.i'
+      exodiff = 'polycrystalcircles_fromvector_out.e'
+      # This test uses a coloring algorithm that requires PETSc >= 3.5.0.
+      petsc_version = '>=3.5.0'
+
+      detail = 'and polycrystal circles specified from an input vector,'
+    []
+
+    [HexPolycrystalIC]
+      type = Exodiff
+      input = HexPolycrystalIC.i
+      exodiff = HexPolycrystalIC_out.e
+
+      detail = 'hexagonal structure, and'
+    []
+
+    [TricrystalTripleJunctionIC]
+      type = Exodiff
+      input = 'TricrystalTripleJunctionIC.i'
+      exodiff = 'TricrystalTripleJunctionIC_out.e'
+
+      detail = 'smooth interface in a triple junction.'
+    []
+  []
+
+  [circles]
+    requirement = "The system shall support phase-field initial conditions consisting of circle "
+                  "patterns:"
+
+    [SmoothCircleIC]
+      type = Exodiff
+      input = 'SmoothCircleIC.i'
+      exodiff = 'SmoothCircleIC_out.e'
+      scale_refine = 1
+      valgrind = 'HEAVY'
+
+      detail = 'smooth interface circles,'
+    []
+
+    [SmoothCircleIC_3D]
+      type = Exodiff
+      input = 'SmoothCircleIC_3D.i'
+      exodiff = 'SmoothCircleIC_3D_out.e'
+      scale_refine = 1
+      valgrind = 'HEAVY'
+
+      detail = 'smooth interface spheres,'
+    []
+
+    [SmoothCirclesFromFile]
+      type = Exodiff
+      input = 'circles_from_file_ic.i'
+      exodiff = 'circles_from_file_ic_out.e'
+
+      detail = 'smooth interface circles specified from a file, and'
+    []
+
+    [RndSmoothCircleIC]
+      type = Exodiff
+      input = 'RndSmoothCircleIC.i'
+      exodiff = 'RndSmoothCircleIC_out.e'
+      scale_refine = 1
+      valgrind = 'HEAVY'
+      max_parallel = 1
+      max_threads = 1
+
+      detail = 'smooth interface circles with random noise.'
+    []
+  []
+
+  [close_pack]
+    requirement = "The system shall support phase-field initial conditions consisting of close pack "
+                  "particle patterns:"
+
+    [ClosePackIC]
+      # Test close pack ic generator (2D)
+      type = Exodiff
+      input = ClosePackIC.i
+      exodiff = ClosePackIC_out.e
+
+      detail = 'in 2D, and'
+    []
+
+    [ClosePackIC_3D]
+      # Test close pack ic generator (3D)
+      type = Exodiff
+      input = ClosePackIC_3D.i
+      exodiff = ClosePackIC_3D_out.e
+      method = '!dbg' # This test is too slow in debug
+
+      detail = 'in 3D.'
+    []
+  []
+
+  [boxes]
+    requirement = "The system shall support phase-field initial conditions consiting of box "
+                  "patterns:"
+
+    [BoundingBoxIC]
+      type = Exodiff
+      input = 'BoundingBoxIC.i'
+      exodiff = 'BoundingBoxIC_out.e'
+      scale_refine = 1
+      valgrind = 'HEAVY'
+
+      detail = 'bounding boxes,'
+    []
+
+    [RndBoundingBoxIC]
+      type = Exodiff
+      input = 'RndBoundingBoxIC.i'
+      exodiff = 'RndBoundingBoxIC_out.e'
+      scale_refine = 1
+      valgrind = 'HEAVY'
+      max_parallel = 1
+      max_threads = 1
+      recover = false # See #5207
+
+      detail = 'bounding boxes with random noise,'
+    []
+
+    [MultiBoundingBoxIC1D]
+      type = Exodiff
+      input = MultiBoundingBoxIC1D.i
+      exodiff = MultiBoundingBoxIC1D_out.e
+
+      detail = 'multiple bounding boxes in 1D,'
+    []
+
+    [MultiBoundingBoxIC2D]
+      type = Exodiff
+      input = MultiBoundingBoxIC2D.i
+      exodiff = MultiBoundingBoxIC2D_out.e
+
+      detail = 'multiple bounding boxes in 2D, and'
+    []
+
+    [MultiBoundingBoxIC3D]
+      type = Exodiff
+      input = MultiBoundingBoxIC3D.i
+      exodiff = MultiBoundingBoxIC3D_out.e
+
+      detail = 'multiple bounding boxes in 3D.'
+    []
+  []
 []
