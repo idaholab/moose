@@ -1,12 +1,12 @@
 # Exception testing of AnnularMesh.
-# In this file tmax - tmin > 2 Pi
+# In this file rmax < rmin
 [Mesh]
   type = AnnularMesh
   nr = 10
   nt = 12
-  rmin = 1
-  rmax = 5
-  dmin = 45
-  dmax = 422
+  rmin = 5
+  rmax = 1
+  tmin = 45
+  tmax = 135
   growth_r = 1.3
 []

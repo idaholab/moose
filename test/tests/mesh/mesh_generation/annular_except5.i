@@ -6,6 +6,6 @@
   nt = 1
   rmin = 1
   rmax = 5
-  tmax = 4
+  dmax = 230
   growth_r = 1.3
 []

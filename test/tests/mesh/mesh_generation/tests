@@ -30,95 +30,120 @@
     issues = '#6129'
   [../]
 
-  [./annular_except1]
-    type = RunException
-    input = annular_except1.i
-    expect_err = 'AnnularMesh: rmax must be greater than rmin'
-    requirement = "MOOSE's annular mesh generator shall throw an error if the min radius is larger than the max radius."
-    design = 'mesh/AnnularMesh.md'
+  [./annular]
     issues = '#8432'
-  [../]
+    design = 'mesh/AnnularMesh.md'
+    requirement = 'MOOSEs annular mesh generator'
+    [./annular_except1]
+      type = RunException
+      input = annular_except1.i
+      expect_err = 'rmax must be greater than rmin'
+      requirement = 'shall throw an error if the min radius is larger than the max radius.'
+    [../]
+    [./annular_except1_deprecated]
+      type = RunException
+      input = annular_except1_deprecated.i
+      expect_err = 'rmax must be greater than rmin'
+      deprecated = true
+    [../]
 
-  [./annular_except2]
-    type = RunException
-    input = annular_except2.i
-    expect_err = 'AnnularMesh: tmax must be greater than tmin'
-    requirement = "MOOSE's annular mesh generator shall throw an error if the min angle is >= the max angle."
-    design = 'mesh/AnnularMesh.md'
-    issues = '#8432'
-  [../]
+    [./annular_except2]
+      type = RunException
+      input = annular_except2.i
+      expect_err = 'dmax must be greater than dmin'
+      requirement = 'shall throw an error if the min angle is greater than or equal to the max angle.'
+    [../]
+    [./annular_except2_deprecated]
+      type = RunException
+      input = annular_except2_deprecated.i
+      expect_err = 'dmax must be greater than dmin'
+      deprecated = true
+    [../]
 
-  [./annular_except3]
-    type = RunException
-    input = annular_except3.i
-    expect_err = 'AnnularMesh: tmax - tmin must be <= 2 Pi'
-    requirement = "MOOSE's annular mesh generator shall throw an error if the angle separation is larger than 2*pi."
-    design = 'mesh/AnnularMesh.md'
-    issues = '#8432'
-  [../]
+    [./annular_except3]
+      type = RunException
+      input = annular_except3.i
+      expect_err = 'dmax - dmin must be <= 360'
+      requirement = 'shall throw an error if the angle separation is larger than 360 degrees.'
+    [../]
+    [./annular_except3_deprecated]
+      type = RunException
+      input = annular_except3_deprecated.i
+      expect_err = 'dmax - dmin must be <= 360'
+      deprecated = true
+    [../]
 
-  [./annular_except4]
-    type = RunException
-    input = annular_except4.i
-    expect_err = 'AnnularMesh: nt must be greater than \(tmax - tmin\) / Pi in order to avoid inverted elements'
-    requirement = "MOOSE's annular mesh generator shall throw an error if the number of elements in the angular direction is too small."
-    design = 'mesh/AnnularMesh.md'
-    issues = '#8432'
-  [../]
+    [./annular_except4]
+      type = RunException
+      input = annular_except4.i
+      expect_err = 'nt must be greater than \(dmax - dmin\) / 180 in order to avoid inverted elements'
+      requirement = 'shall throw an error if the number of elements in the angular direction is too small.'
+    [../]
 
-  [./annular_except5]
-    type = RunException
-    input = annular_except5.i
-    expect_err = 'AnnularMesh: nt must be greater than \(tmax - tmin\) / Pi in order to avoid inverted elements'
-    requirement = "MOOSE's annular mesh generator shall throw an error if the number of elements in the angular direction is too small."
-    design = 'mesh/AnnularMesh.md'
-    issues = '#8432'
-  [../]
+    [./annular_except5]
+      type = RunException
+      input = annular_except5.i
+      expect_err = 'nt must be greater than \(dmax - dmin\) / 180 in order to avoid inverted elements'
+      requirement = 'shall throw an error if the number of elements in the angular direction is too small.'
+    [../]
+    [./annular_except5_deprecated]
+      type = RunException
+      input = annular_except5_deprecated.i
+      expect_err = 'nt must be greater than \(dmax - dmin\) / 180 in order to avoid inverted elements'
+      deprecated = true
+    [../]
 
-  [./annular_except6]
-    type = RunException
-    input = annular_except6.i
-    expect_err = 'AnnularMesh: quad_subdomain_id must not equal tri_subdomain_id'
-    requirement = "MOOSE's annular mesh generator shall throw an error if the quadrilateral and triangular subdomain ids are the same."
-    design = 'mesh/AnnularMesh.md'
-    issues = '#8432'
-  [../]
+    [./annular_except6]
+      type = RunException
+      input = annular_except6.i
+      expect_err = 'quad_subdomain_id must not equal tri_subdomain_id'
+      requirement = 'shall throw an error if the quadrilateral and triangular subdomain ids are the same.'
+    [../]
 
-  [./annulus]
-    type = Exodiff
-    input = annulus.i
-    exodiff = 'annulus_out.e'
-    requirement = 'MOOSE shall have an algorithm for quad meshing an annulus.'
-    design = 'mesh/AnnularMesh.md'
-    issues = '#8432'
-  [../]
+    [./annulus]
+      type = Exodiff
+      input = annulus.i
+      exodiff = 'annulus_out.e'
+      requirement = 'shall create an annulus using quad elements.'
+      design = 'mesh/AnnularMesh.md'
+      issues = '#8432'
+    [../]
 
-  [./annulus_sector]
-    type = Exodiff
-    input = annulus_sector.i
-    exodiff = 'annulus_sector_out.e'
-    requirement = 'MOOSE shall have an algorithm for quad meshing an annular sector.'
-    design = 'mesh/AnnularMesh.md'
-    issues = '#8432'
-  [../]
+    [./annulus_sector]
+      type = Exodiff
+      input = annulus_sector.i
+      exodiff = 'annulus_sector_out.e'
+      requirement = 'shall create an annulus sector using quad elements.'
+    [../]
+    [./annulus_sector_deprecated]
+      type = Exodiff
+      input = annulus_sector_deprecated.i
+      exodiff = 'annulus_sector_deprecated_out.e'
+      deprecated = true
+      prereq = annular/annulus_sector
+    [../]
 
-  [./disc]
-    type = Exodiff
-    input = disc.i
-    exodiff = 'disc_out.e'
-    requirement = 'MOOSE shall have an algorithm for quad meshing a circular region, including the origin.'
-    design = 'mesh/AnnularMesh.md'
-    issues = '#8432'
-  [../]
+    [./disc]
+      type = Exodiff
+      input = disc.i
+      exodiff = 'disc_out.e'
+      requirement = 'shall create a circular disk using quad elements.'
+    [../]
 
-  [./disc_sector]
-    type = Exodiff
-    input = disc_sector.i
-    exodiff = 'disc_sector_out.e'
-    requirement = 'MOOSE shall have an algorithm for quad meshing a circular sector, including the origin.'
-    design = 'mesh/AnnularMesh.md'
-    issues = '#8432'
-  [../]
+    [./disc_sector]
+      type = Exodiff
+      input = disc_sector.i
+      exodiff = 'disc_sector_out.e'
+      requirement = 'shall create a circular disk sector using quad elements.'
+    [../]
+    [./disc_sector_deprecated]
+      type = Exodiff
+      input = disc_sector_deprecated.i
+      exodiff = 'disc_sector_deprecated_out.e'
+      design = 'mesh/AnnularMesh.md'
+      prereq = annular/disc_sector
+    [../]
+  []
 
   [./spiral_annular_mesh]
     type = 'Exodiff'

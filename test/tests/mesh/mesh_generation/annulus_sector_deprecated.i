@@ -1,16 +1,19 @@
-# Generates a sector of a Disc Mesh between angle=Pi/4 and angle=3Pi/4
+# Generates a sector of an Annular Mesh between angle=Pi/4 and angle=3Pi/4
+# Radius of inside circle=1
 # Radius of outside circle=5
-# Solves the diffusion equation with u=-5 at origin, and u=0 on outside
-# as well as u=-5+r at angle=Pi/4 and u=-5+r^4/125 at angle=3Pi/4
+# Solves the diffusion equation with
+# u=0 on inside
+# u=log(5) on outside
+# u=log(r) at angle=Pi/4 and angle=3Pi/4
 
 [Mesh]
   type = AnnularMesh
   nr = 10
   nt = 12
-  rmin = 0
+  rmin = 1
   rmax = 5
-  dmin = 45
-  dmax = 135
+  tmin = 0.785398163
+  tmax = 2.356194490
   growth_r = 1.3
 []
 
@@ -30,26 +33,20 @@
   [./inner]
     type = PresetBC
     variable = u
-    value = -5.0
+    value = 0.0
     boundary = rmin
   [../]
   [./outer]
     type = FunctionPresetBC
     variable = u
-    function = 0
+    function = log(5)
     boundary = rmax
   [../]
-  [./tmin]
+  [./min_angle]
     type = FunctionPresetBC
     variable = u
-    function = '-5.0+sqrt(x*x + y*y)'
-    boundary = dmin
-  [../]
-  [./tmax]
-    type = FunctionPresetBC
-    variable = u
-    function = '-5.0+pow(x*x + y*y, 2)/125'
-    boundary = dmax
+    function = 'log(sqrt(x*x + y*y))'
+    boundary = 'tmin tmax'
   [../]
 []
 
