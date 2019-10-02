@@ -7,8 +7,8 @@
     rmax = 10
     growth_r = 1.4
     nt = 4
-    tmin = 0
-    tmax = 1.57079632679
+    dmin = 0
+    dmax = 90
   []
   [./make3D]
     type = MeshExtruderGenerator

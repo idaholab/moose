@@ -1,5 +1,5 @@
 # Exception testing of AnnularMesh.
-# In this file tmax - tmin > 2 Pi
+# In this file dmax - dmin > 360
 [Mesh]
   type = AnnularMesh
   nr = 10

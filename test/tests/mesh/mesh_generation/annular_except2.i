@@ -1,5 +1,5 @@
 # Exception testing of AnnularMesh.
-# In this filx tmax < tmin
+# In this filx dmax < dmin
 [Mesh]
   type = AnnularMesh
   nr = 10
