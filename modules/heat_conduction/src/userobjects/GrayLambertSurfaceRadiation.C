@@ -12,6 +12,8 @@
 #include "Function.h"
 #include "libmesh/quadrature.h"
 
+#include <cmath>
+
 registerMooseObject("HeatConductionApp", GrayLambertSurfaceRadiation);
 
 template <>
@@ -100,7 +102,7 @@ GrayLambertSurfaceRadiation::GrayLambertSurfaceRadiation(const InputParameters &
 
     // an error of 5% is acceptable, but more indicates an error in the
     // problem setup
-    if (abs(sum - 1) > 0.05)
+    if (std::abs(sum - 1) > 0.05)
       paramError("view_factors", "view_factors row ", i, " sums to ", sum);
 
     // correct view factors
