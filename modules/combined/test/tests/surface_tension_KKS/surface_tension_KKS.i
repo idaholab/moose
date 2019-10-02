@@ -147,9 +147,7 @@
     type = KKSSplitCHCRes
     variable = c
     ca       = cm
-    cb       = cp
     fa_name  = f_total_matrix
-    fb_name  = f_total_ppt
     w        = w
   [../]
 
@@ -181,7 +179,6 @@
     ca       = cm
     cb       = cp
     fa_name  = f_total_matrix
-    fb_name  = f_total_ppt
   [../]
   [./ACInterface]
     type = ACInterface

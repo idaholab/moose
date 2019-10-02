@@ -17,42 +17,36 @@ validParams<SwitchingFunctionConstraintLagrange>()
 {
   InputParameters params = validParams<Kernel>();
   params.addClassDescription("Lagrange multiplier kernel to constrain the sum of all switching "
-                             "functions in a multiphase system. This kernel acts on the lagrange "
+                             "functions in a multiphase system. This kernel acts on the Lagrange "
                              "multiplier variable.");
-  params.addParam<std::vector<MaterialPropertyName>>(
-      "h_names", "Switching Function Materials that provide h(eta_i)");
-  params.addRequiredCoupledVar("etas", "eta_i order parameters, one for each h");
+  params.addParam<std::vector<MaterialPropertyName>>("h_names", "Switching function materials");
+  params.addRequiredCoupledVar("etas", "eta order parameters");
   params.addParam<Real>("epsilon", 1e-9, "Shift factor to avoid a zero pivot");
   return params;
 }
 
 SwitchingFunctionConstraintLagrange::SwitchingFunctionConstraintLagrange(
     const InputParameters & parameters)
-  : DerivativeMaterialInterface<Kernel>(parameters),
+  : DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>(parameters),
     _h_names(getParam<std::vector<MaterialPropertyName>>("h_names")),
     _num_h(_h_names.size()),
     _h(_num_h),
     _dh(_num_h),
-    _number_of_nl_variables(_fe_problem.getNonlinearSystemBase().nVariables()),
-    _j_eta(_number_of_nl_variables, -1),
+    _eta_map(getParameterJvarMap("etas")),
     _epsilon(getParam<Real>("epsilon"))
 {
   // parameter check. We need exactly one eta per h
   if (_num_h != coupledComponents("etas"))
-    mooseError(
-        "Need to pass in as many h_names as etas in SwitchingFunctionConstraintLagrange kernel ",
-        name());
+    paramError("etas", "Need to pass in as many etas as h_names");
 
   // fetch switching functions (for the residual) and h derivatives (for the Jacobian)
-  for (unsigned int i = 0; i < _num_h; ++i)
+  for (std::size_t i = 0; i < _num_h; ++i)
   {
     _h[i] = &getMaterialPropertyByName<Real>(_h_names[i]);
-    _dh[i] = &getMaterialPropertyDerivative<Real>(_h_names[i], getVar("etas", i)->name());
 
-    // generate the lookup table from j_var -> eta index
-    unsigned int num = coupled("etas", i);
-    if (num < _number_of_nl_variables)
-      _j_eta[num] = i;
+    _dh[i].resize(_num_h);
+    for (std::size_t j = 0; j < _num_h; ++j)
+      _dh[i][j] = &getMaterialPropertyDerivative<Real>(_h_names[i], getVar("etas", j)->name());
   }
 }
 
@@ -60,7 +54,7 @@ Real
 SwitchingFunctionConstraintLagrange::computeQpResidual()
 {
   Real g = -_epsilon * _u[_qp] - 1.0;
-  for (unsigned int i = 0; i < _num_h; ++i)
+  for (std::size_t i = 0; i < _num_h; ++i)
     g += (*_h[i])[_qp];
 
   return _test[_i][_qp] * g;
@@ -73,12 +67,16 @@ SwitchingFunctionConstraintLagrange::computeQpJacobian()
 }
 
 Real
-SwitchingFunctionConstraintLagrange::computeQpOffDiagJacobian(unsigned int j_var)
+SwitchingFunctionConstraintLagrange::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  const int eta = _j_eta[j_var];
-
+  auto eta = mapJvarToCvar(jvar, _eta_map);
   if (eta >= 0)
-    return (*_dh[eta])[_qp] * _phi[_j][_qp] * _test[_i][_qp];
-  else
-    return 0.0;
+  {
+    Real g = 0.0;
+    for (std::size_t i = 0; i < _num_h; ++i)
+      g += (*_dh[i][eta])[_qp] * _phi[_j][_qp];
+    return g * _test[_i][_qp];
+  }
+
+  return 0.0;
 }

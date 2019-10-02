@@ -15,7 +15,7 @@ template <>
 InputParameters
 validParams<KKSMultiPhaseConcentration>()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = validParams<KernelValue>();
   params.addClassDescription(
       "KKS multi-phase model kernel to enforce $c = h_1c_1 + h_2c_2 + h_3c_3 + \\dots$"
       ". The non-linear variable of this kernel is $c_n$, the final phase "
@@ -31,17 +31,17 @@ validParams<KKSMultiPhaseConcentration>()
 
 // Phase interpolation func
 KKSMultiPhaseConcentration::KKSMultiPhaseConcentration(const InputParameters & parameters)
-  : DerivativeMaterialInterface<Kernel>(parameters),
+  : DerivativeMaterialInterface<JvarMapKernelInterface<KernelValue>>(parameters),
     _num_j(coupledComponents("cj")),
-    _cjs(_num_j),
-    _cjs_var(_num_j),
+    _cj(_num_j),
+    _cj_map(getParameterJvarMap("cj")),
     _k(-1),
     _c(coupledValue("c")),
     _c_var(coupled("c")),
     _hj_names(getParam<std::vector<MaterialPropertyName>>("hj_names")),
     _prop_hj(_hj_names.size()),
     _eta_names(coupledComponents("etas")),
-    _eta_vars(coupledComponents("etas")),
+    _eta_map(getParameterJvarMap("etas")),
     _prop_dhjdetai(_num_j)
 {
   // Check to make sure the the number of hj's is the same as the number of cj's
@@ -57,16 +57,12 @@ KKSMultiPhaseConcentration::KKSMultiPhaseConcentration(const InputParameters & p
 
   // get order parameter names and variable indices
   for (unsigned int i = 0; i < _num_j; ++i)
-  {
     _eta_names[i] = getVar("etas", i)->name();
-    _eta_vars[i] = coupled("etas", i);
-  }
 
   // Load concentration variables into the arrays
   for (unsigned int m = 0; m < _num_j; ++m)
   {
-    _cjs[m] = &coupledValue("cj", m);
-    _cjs_var[m] = coupled("cj", m);
+    _cj[m] = &coupledValue("cj", m);
     _prop_hj[m] = &getMaterialPropertyByName<Real>(_hj_names[m]);
     _prop_dhjdetai[m].resize(_num_j);
     // Set _k to the position of the nonlinear variable in the list of cj's
@@ -85,20 +81,20 @@ KKSMultiPhaseConcentration::KKSMultiPhaseConcentration(const InputParameters & p
 }
 
 Real
-KKSMultiPhaseConcentration::computeQpResidual()
+KKSMultiPhaseConcentration::precomputeQpResidual()
 {
   // R = sum_i (h_i * c_i) - c
   Real sum_ch = 0.0;
   for (unsigned int m = 0; m < _num_j; ++m)
-    sum_ch += (*_cjs[m])[_qp] * (*_prop_hj[m])[_qp];
+    sum_ch += (*_cj[m])[_qp] * (*_prop_hj[m])[_qp];
 
-  return _test[_i][_qp] * (sum_ch - _c[_qp]);
+  return sum_ch - _c[_qp];
 }
 
 Real
-KKSMultiPhaseConcentration::computeQpJacobian()
+KKSMultiPhaseConcentration::precomputeQpJacobian()
 {
-  return _test[_i][_qp] * (*_prop_hj[_k])[_qp] * _phi[_j][_qp];
+  return (*_prop_hj[_k])[_qp] * _phi[_j][_qp];
 }
 
 Real
@@ -107,20 +103,20 @@ KKSMultiPhaseConcentration::computeQpOffDiagJacobian(unsigned int jvar)
   if (jvar == _c_var)
     return -_test[_i][_qp] * _phi[_j][_qp];
 
-  for (unsigned int m = 0; m < _num_j; ++m)
-    if (jvar == _cjs_var[m])
-      return _test[_i][_qp] * (*_prop_hj[m])[_qp] * _phi[_j][_qp];
+  auto cjvar = mapJvarToCvar(jvar, _cj_map);
+  if (cjvar >= 0)
+    return _test[_i][_qp] * (*_prop_hj[cjvar])[_qp] * _phi[_j][_qp];
 
-  for (unsigned int m = 0; m < _num_j; ++m)
-    if (jvar == _eta_vars[m])
-    {
-      Real sum = 0.0;
+  auto etavar = mapJvarToCvar(jvar, _eta_map);
+  if (etavar >= 0)
+  {
+    Real sum = 0.0;
 
-      for (unsigned int n = 0; n < _num_j; ++n)
-        sum += (*_prop_dhjdetai[n][m])[_qp] * (*_cjs[n])[_qp];
+    for (unsigned int n = 0; n < _num_j; ++n)
+      sum += (*_prop_dhjdetai[n][etavar])[_qp] * (*_cj[n])[_qp];
 
-      return _test[_i][_qp] * sum * _phi[_j][_qp];
-    }
+    return _test[_i][_qp] * sum * _phi[_j][_qp];
+  }
 
   return 0.0;
 }
