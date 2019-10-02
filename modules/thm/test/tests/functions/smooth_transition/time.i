@@ -15,24 +15,25 @@
 []
 
 [Functions]
-  [./cosine_transition_fn]
+  [./transition_fn]
     type = CosineTransitionFunction
     axis = t
-    begin_coordinate = 3
+    transition_center = 5
     transition_width = 4
-    begin_value = 0
-    end_value = 100
+    function1 = 0
+    function2 = 100
   [../]
 []
 
 [Postprocessors]
-  [./cosine_transition]
+  [./transition]
     type = FunctionValuePostprocessor
-    function = cosine_transition_fn
+    function = transition_fn
     execute_on = 'initial timestep_end'
   [../]
 []
 
 [Outputs]
   csv = true
+  file_base = time_weighted
 []
