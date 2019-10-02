@@ -18,5 +18,7 @@
     mesh_mode = 'REPLICATED'
     recover = false
     deprecated = true
+    design = 'meshgenerators/AnnularMeshGenerator.md'
+    issues = '#11640'
   [../]
 []

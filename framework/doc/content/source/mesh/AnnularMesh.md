@@ -1,4 +1,4 @@
-#AnnularMesh
+# AnnularMesh
 
 !syntax description /Mesh/AnnularMesh
 
@@ -8,7 +8,7 @@ The `AnnularMesh` mesh generator builds simple 2D annular and disc meshes.  They
 
 The inner radius and the outer radius must be specified.  If the inner radius is zero a disc mesh is created, while if it is positive an annulus is created.  The annulus has just one subdomain (block number = 0), whereas the disc has two subdomains: subdomain zero consists of the outer quadrilaterals, while the other (block number = 1) consists of the triangular elements that emanate from the origin.
 
-The minimum and maximum angle may also be specified.  These default to zero and $2\pi$, respectively.  If other values are chosen, a sector of an annulus, or a sector of a disc will be created.  Both angles are measured anti-clockwise from the $x$ axis.
+The minimum and maximum angle may also be specified.  These default to zero and 360, respectively.  If other values are chosen, a sector of an annulus, or a sector of a disc will be created.  Both angles are measured anti-clockwise from the $x$ axis.
 
 The number of elements in the radial direction and the angular direction may be specified.  In addition, a growth factor on the element size in the radial direction may be chosen.  The element-size (in the radial direction) is multiplied by this factor for each concentric ring of elements, moving from the inner to the outer radius.
 

@@ -147,9 +147,9 @@ AnnularMeshGenerator::generate()
 
     // add node at angle = _dmin
     nodes[node_id] = mesh->add_point(Point(current_r * std::cos(_dmin * M_PI / 180.0),
-                                          current_r * std::sin(_dmin * M_PI / 180.0),
-                                          0.0),
-                                    node_id);
+                                           current_r * std::sin(_dmin * M_PI / 180.0),
+                                           0.0),
+                                     node_id);
     node_id++;
     for (unsigned angle_num = 1; angle_num < num_angular_nodes; ++angle_num)
     {
