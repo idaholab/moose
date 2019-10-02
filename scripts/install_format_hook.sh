@@ -23,11 +23,11 @@ function moose_is_git_submodule()
     #   nothing will be printed.
     cd $moose_git_dir/.. && git rev-parse --show-toplevel 2> /dev/null
 }
-if [[ $(moose_is_git_submodule) ]]; then
-    hookfile="$(cd $script_dir && git rev-parse --show-toplevel)/../.git/modules/moose/hooks/pre-commit"
-else
+#if [[ $(moose_is_git_submodule) ]]; then
+#    hookfile="$(cd $script_dir && git rev-parse --show-toplevel)/../.git/modules/moose/hooks/pre-commit"
+#else
     hookfile="$(cd $script_dir && git rev-parse --show-toplevel)/.git/hooks/pre-commit"
-fi
+#fi
 
 # ensure that hook file does not exist yet
 if [[ -f $hookfile ]]; then

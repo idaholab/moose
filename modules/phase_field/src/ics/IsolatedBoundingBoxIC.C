@@ -16,8 +16,8 @@ registerMooseObject("PhaseFieldApp", IsolatedBoundingBoxIC);
 namespace
 {
 // Convenience function for sizing a vector to "n" given a vector with size 1 or "n"
-std::vector<Real>
-static sizeVector(std::vector<Real> v, std::size_t size); //if uncommand the definition, delete ';'
+std::vector<Real> static sizeVector(std::vector<Real> v,
+                                    std::size_t size); // if uncommand the definition, delete ';'
 // {
 //   if (v.size() == 1)
 //     return std::vector<Real>(size, v[0]);
@@ -31,11 +31,19 @@ InputParameters
 validParams<IsolatedBoundingBoxIC>()
 {
   InputParameters params = validParams<InitialCondition>();
-  params.addClassDescription("Specify variable values inside and outside a list of isolated boxes shaped "
-                             "axis-aligned regions defined by pairs of opposing corners");
-  params.addRequiredParam<std::vector<Point>>("smaller_coordinate_corners", "For 1D, these are the left points; for 2D, these are the bottom left corners; for 3D, these are the back bottom left corners. The format is (corner1_x corner1_y corner1_z corner2_x corner2_y corner2_z ...)");
+  params.addClassDescription(
+      "Specify variable values inside and outside a list of isolated boxes shaped "
+      "axis-aligned regions defined by pairs of opposing corners");
   params.addRequiredParam<std::vector<Point>>(
-      "larger_coordinate_corners", "For 1D, these are the right points; for 2D, these are the top right corners; for 3D, these are the front top right corners. The format is (corner1_x corner1_y corner1_z corner2_x corner2_y corner2_z ...)");
+      "smaller_coordinate_corners",
+      "For 1D, these are the left points; for 2D, these are the bottom left corners; for 3D, these "
+      "are the back bottom left corners. The format is (corner1_x corner1_y corner1_z corner2_x "
+      "corner2_y corner2_z ...)");
+  params.addRequiredParam<std::vector<Point>>(
+      "larger_coordinate_corners",
+      "For 1D, these are the right points; for 2D, these are the top right corners; for 3D, these "
+      "are the front top right corners. The format is (corner1_x corner1_y corner1_z corner2_x "
+      "corner2_y corner2_z ...)");
   params.addRequiredParam<std::vector<Real>>("inside",
                                              "The value of the variable inside each box "
                                              "(one value per box)");
@@ -68,24 +76,25 @@ IsolatedBoundingBoxIC::IsolatedBoundingBoxIC(const InputParameters & parameters)
 Real
 IsolatedBoundingBoxIC::value(const Point & p)
 {
-  Real value = _outside; //if p is not inside the largest box, assign the last element of inside which is 'outside' to value
+  Real value = _outside; // if p is not inside the largest box, assign the last element of inside
+                         // which is 'outside' to value
 
   if (_int_width < 0.0)
     mooseError("'int_width' should be non-negative");
 
   if (_int_width == 0.0)
+  {
+    for (unsigned int b = 0; b < _nbox; ++b)
     {
-      for (unsigned int b = 0; b < _nbox; ++b)
-        {
-          if (p(0) >= _c1[b](0) && p(0) <= _c2[b](0))
-            if (_dim <= 1 || (_c1[b](1) < _c2[b](1) && p(1) >= _c1[b](1) && p(1) <= _c2[b](1)))
-              if (_dim <= 2 || (_c1[b](2) < _c2[b](2) && p(2) >= _c1[b](2) && p(2) <= _c2[b](2)))
-                  {
-                    value = _inside[b];
-                    break;
-                  }
-        }
+      if (p(0) >= _c1[b](0) && p(0) <= _c2[b](0))
+        if (_dim <= 1 || (_c1[b](1) < _c2[b](1) && p(1) >= _c1[b](1) && p(1) <= _c2[b](1)))
+          if (_dim <= 2 || (_c1[b](2) < _c2[b](2) && p(2) >= _c1[b](2) && p(2) <= _c2[b](2)))
+          {
+            value = _inside[b];
+            break;
+          }
     }
+  }
 
   else
   {
@@ -95,13 +104,16 @@ IsolatedBoundingBoxIC::value(const Point & p)
         if (_dim <= 1 || (p(1) >= _c1[b](1) - _int_width && p(1) <= _c2[b](1) + _int_width))
           if (_dim <= 2 || (p(2) >= _c1[b](2) - _int_width && p(2) <= _c2[b](2) + _int_width))
           {
-            for (unsigned int n = b+1; n<_nbox; ++n)
+            for (unsigned int n = b + 1; n < _nbox; ++n)
             {
               if (p(0) >= _c1[n](0) - _int_width && p(0) <= _c2[n](0) + _int_width)
                 if (_dim <= 1 || (p(1) >= _c1[n](1) - _int_width && p(1) <= _c2[n](1) + _int_width))
-                  if (_dim <= 2 || (p(2) >= _c1[n](2) - _int_width && p(2) <= _c2[n](2) + _int_width))
+                  if (_dim <= 2 ||
+                      (p(2) >= _c1[n](2) - _int_width && p(2) <= _c2[n](2) + _int_width))
                   {
-                    mooseError("Partially overlapping boxes are not allowed. Note that this includes the overlapping diffused interfaces. For nested boxes, use NestedBoundingBoxIC.C");
+                    mooseError("Partially overlapping boxes are not allowed. Note that this "
+                               "includes the overlapping diffused interfaces. For nested boxes, "
+                               "use NestedBoundingBoxIC.C");
                   }
             }
 
@@ -117,5 +129,5 @@ IsolatedBoundingBoxIC::value(const Point & p)
     }
   }
 
-       return value;
+  return value;
 }
