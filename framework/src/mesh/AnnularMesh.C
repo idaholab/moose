@@ -87,8 +87,7 @@ AnnularMesh::AnnularMesh(const InputParameters & parameters)
   if ((parameters.isParamSetByUser("tmin") || parameters.isParamSetByUser("tmax")) &&
       (parameters.isParamSetByUser("dmin") || parameters.isParamSetByUser("dmax")))
     paramError("tmin",
-               "Both Ddegree and radian specifications are provided. Please use degree "
-               "specifications dmin and dmax.");
+               "You specified the angles using both degrees and radians. Please use degrees.");
 
   if (_rmax <= _rmin)
     paramError("rmax", "rmax must be greater than rmin");

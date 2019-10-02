@@ -16,8 +16,8 @@ Sidesets are also created:
 
 * Sideset 0 is called "rmin" and is the set of sides at the minimum radius (which is zero for the disc).
 * Sideset 1 is called "rmax" and is the set of sides at the maximum radius.
-* Sideset 2 is called "rmin" and is the set of sides at the minimum angle, which is created only in the case of a sector of an annulus (or disc)
-* Sideset 3 is called "rmax" and is the set of sides at the maximum angle, which is created only in the case of a sector of an annulus (or disc)
+* Sideset 2 is called "dmin" and is the set of sides at the minimum angle, which is created only in the case of a sector of an annulus (or disc)
+* Sideset 3 is called "dmax" and is the set of sides at the maximum angle, which is created only in the case of a sector of an annulus (or disc)
 
 ## Example Syntax
 
