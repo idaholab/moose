@@ -1,0 +1,18 @@
+[Tests]
+  issues = '#1654'
+  design = 'bcs/NeumannBC.md'
+  requirement = "MOOSE shall support Neumann type boundary conditions using automatic differentiation for a 1D problem"
+  [./test]
+    type = 'Exodiff'
+    input = '1d_neumann.i'
+    exodiff = '1d_neumann_out.e'
+    detail = 'using a generated mesh.'
+  [../]
+
+  [./from_cubit]
+    type = 'Exodiff'
+    input = 'from_cubit.i'
+    exodiff = 'from_cubit_out.e'
+    detail = 'using an imported mesh.'
+  [../]
+[]
