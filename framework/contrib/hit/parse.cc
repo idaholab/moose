@@ -369,7 +369,9 @@ Comment::render(int indent, const std::string & indent_text, int /*maxlen*/)
 Node *
 Comment::clone()
 {
-  return new Comment(_text, _isinline);
+  auto n = new Comment(_text, _isinline);
+  n->tokens() = tokens();
+  return n;
 }
 
 Section::Section(const std::string & path) : Node(NodeType::Section), _path(pathNorm(path)) {}
@@ -496,7 +498,9 @@ Field::render(int indent, const std::string & indent_text, int maxlen)
 Node *
 Field::clone()
 {
-  return new Field(_field, _kind, _val);
+  auto n = new Field(_field, _kind, _val);
+  n->tokens() = tokens();
+  return n;
 }
 
 Field::Kind
@@ -994,6 +998,7 @@ explode(Node * n)
         if (n->parent())
           n->parent()->addChild(newsec);
         newsec->addChild(newnode);
+        newsec->tokens() = n->tokens();
       }
       auto newroot = explode(newnode);
       delete n;
