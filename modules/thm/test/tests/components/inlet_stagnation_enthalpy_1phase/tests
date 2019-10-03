@@ -1,0 +1,13 @@
+[Tests]
+  # physics
+  [./phy:h_rhou_3eqn]
+    type = 'Exodiff'
+    input = 'phy.h_rhou_3eqn.i'
+    exodiff = 'phy.h_rhou_3eqn_out.e'
+    custom_cmp = 'phy.h_rhou_3eqn.exodiff'
+    max_time = 900
+  [../]
+
+  # control logic
+
+[]

@@ -4,6 +4,9 @@
   initial_p = 1e5
   initial_T = 300
   initial_vel = 0
+
+  spatial_discretization = rdg
+  rdg_slope_reconstruction = none
 []
 
 [FluidProperties]
