@@ -1,0 +1,227 @@
+[Tests]
+  [./acoustic_impedance_liquid]
+    type = 'PetscJacobianTester'
+    input = 'acoustic_impedance_7eqn.i'
+    cli_args = 'Kernels/test_kernel/material_property=Z_liquid Kernels/test_kernel/args="beta arhoA_liquid arhouA_liquid arhoEA_liquid"'
+    ratio_tol = 5e-3
+    difference_tol = 5e5
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./acoustic_impedance_vapor]
+    type = 'PetscJacobianTester'
+    input = 'acoustic_impedance_7eqn.i'
+    cli_args = 'Kernels/test_kernel/material_property=Z_vapor Kernels/test_kernel/args="beta arhoA_vapor arhouA_vapor arhoEA_vapor"'
+    ratio_tol = 5e-3
+    difference_tol = 5e5
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./constant_material]
+    type = 'PetscJacobianTester'
+    input = 'constant_material.i'
+    ratio_tol = 1e-14
+    difference_tol = 1e-14
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./density_3eqn_material]
+    type = 'PetscJacobianTester'
+    input = 'density_3eqn.i'
+    ratio_tol = 5e-9
+    difference_tol = 5e-10
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./density_7eqn_material]
+    type = 'PetscJacobianTester'
+    input = 'density_7eqn.i'
+    ratio_tol = 5e-7
+    difference_tol = 2e-4
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./interfacial_area_density_simple]
+    type = 'PetscJacobianTester'
+    input = 'interfacial_area_density_simple.i'
+    ratio_tol = 5e-7
+    difference_tol = 5e-4
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./linear_test_material]
+    type = 'PetscJacobianTester'
+    input = 'linear_test_material.i'
+    ratio_tol = 5e-14
+    difference_tol = 5e-14
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./pressure_relaxation_rate]
+    type = 'PetscJacobianTester'
+    input = 'pressure_relaxation_rate.i'
+    ratio_tol = 5e-7
+    difference_tol = 1e-9
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./specific_internal_energy_3eqn]
+    type = 'PetscJacobianTester'
+    input = 'specific_internal_energy_3eqn.i'
+    ratio_tol = 5e-8
+    difference_tol = 5e-7
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./specific_internal_energy_7eqn]
+    type = 'PetscJacobianTester'
+    input = 'specific_internal_energy_7eqn.i'
+    ratio_tol = 5e-8
+    difference_tol = 5e-8
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./specific_volume_3eqn]
+    type = 'PetscJacobianTester'
+    input = 'specific_volume_3eqn.i'
+    ratio_tol = 5e-8
+    difference_tol = 5e-14
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./specific_volume_7eqn]
+    type = 'PetscJacobianTester'
+    input = 'specific_volume_7eqn.i'
+    ratio_tol = 5e-9
+    difference_tol = 5e-12
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./saturation_temperature]
+    type = 'PetscJacobianTester'
+    input = 'saturation_temperature.i'
+    ratio_tol = 5e-14
+    difference_tol = 5e-14
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./sound_speed_liquid]
+    type = 'PetscJacobianTester'
+    input = 'sound_speed_7eqn.i'
+    cli_args = 'Kernels/test_kernel/material_property=c_liquid Kernels/test_kernel/args="beta arhoA_liquid arhouA_liquid arhoEA_liquid"'
+    ratio_tol = 5e-3
+    difference_tol = 10
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./sound_speed_vapor]
+    type = 'PetscJacobianTester'
+    input = 'sound_speed_7eqn.i'
+    cli_args = 'Kernels/test_kernel/material_property=c_vapor Kernels/test_kernel/args="beta arhoA_vapor arhouA_vapor arhoEA_vapor"'
+    ratio_tol = 5e-3
+    difference_tol = 10
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./velocity_relaxation_rate]
+    type = 'PetscJacobianTester'
+    input = 'velocity_relaxation_rate.i'
+    ratio_tol = 1e-8
+    difference_tol = 5e-2
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./velocity_3eqn]
+    type = 'PetscJacobianTester'
+    input = 'velocity_3eqn.i'
+    ratio_tol = 5e-8
+    difference_tol = 5e-8
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./velocity_7eqn]
+    type = 'PetscJacobianTester'
+    input = 'velocity_7eqn.i'
+    ratio_tol = 5e-8
+    difference_tol = 5e-12
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./enthalpy_3eqn]
+    type = 'PetscJacobianTester'
+    input = 'enthalpy_3eqn.i'
+    ratio_tol = 1e-7
+    difference_tol = 5e-5
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./enthalpy_7eqn]
+    type = 'PetscJacobianTester'
+    input = 'enthalpy_7eqn.i'
+    ratio_tol = 5e-3
+    difference_tol = 5e3
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./total_enthalpy_3eqn]
+    type = 'PetscJacobianTester'
+    input = 'total_enthalpy_3eqn.i'
+    ratio_tol = 5e-8
+    difference_tol = 1e-5
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./total_enthalpy_7eqn]
+    type = 'PetscJacobianTester'
+    input = 'total_enthalpy_7eqn.i'
+    ratio_tol = 5e-3
+    difference_tol = 5e3
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  # liquid volume fraction in the exponential region of the volume fraction mapper
+  [./volume_fraction_liquid_exponential]
+    type = 'PetscJacobianTester'
+    input = 'volume_fraction.i'
+    cli_args = "JacobianTestGeneral/variable_values='0.95' JacobianTestGeneral/snes_test_err=1e-8"
+    ratio_tol = 5e-8
+    difference_tol = 5e-8
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  # liquid volume fraction in the linear region of the volume fraction mapper
+  [./volume_fraction_liquid_linear]
+    type = 'PetscJacobianTester'
+    input = 'volume_fraction.i'
+    ratio_tol = 1e-13
+    difference_tol = 1e-13
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  # vapor volume fraction in the linear region of the volume fraction mapper
+  [./volume_fraction_vapor_linear]
+    type = 'PetscJacobianTester'
+    input = 'volume_fraction.i'
+    cli_args = 'Kernels/test_kernel/material_property=alpha_vapor'
+    ratio_tol = 1e-13
+    difference_tol = 1e-13
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./wall_boiling_fraction]
+    type = 'PetscJacobianTester'
+    input = 'wall_boiling_fraction.i'
+    ratio_tol = 5e-8
+    difference_tol = 5e-8
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./wall_friction_function]
+    type = 'PetscJacobianTester'
+    input = 'wall_friction_function.i'
+    ratio_tol = 1e-14
+    difference_tol = 1e-14
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+[]
