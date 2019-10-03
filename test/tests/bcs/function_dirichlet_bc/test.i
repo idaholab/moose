@@ -13,17 +13,11 @@
 []
 
 [Variables]
-  active = 'u'
-
   [./u]
-    order = FIRST
-    family = LAGRANGE
   [../]
 []
 
 [Functions]
-  active = 'ff_1 ff_2 forcing_func bc_func'
-
   [./ff_1]
     type = ParsedFunction
     value = alpha*alpha*pi
@@ -52,26 +46,20 @@
 []
 
 [Kernels]
-  active = 'diff forcing'
-
   [./diff]
-    type = ADDiffusion
+    type = Diffusion
     variable = u
   [../]
-
   [./forcing]
-    type = ADBodyForce
+    type = BodyForce
     variable = u
     function = forcing_func
   [../]
 []
 
 [BCs]
-  active = 'all'
-
-  # Boundary Condition System
   [./all]
-    type = ADFunctionDirichletBC
+    type = FunctionDirichletBC
     variable = u
     boundary = '1 2'
     function = bc_func
@@ -85,6 +73,5 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  file_base = ad-out
   exodus = true
 []
