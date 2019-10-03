@@ -100,7 +100,10 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
             }
 
           _problem.reinitMaterialsBoundary(boundary_id, _tid);
-          _problem.reinitMaterialsInterface(boundary_id, _tid);
+          // We need to think about whether it makes sense to do interface materials here because in
+          // order for them to function properly we would also need to reinit materials on the
+          // neighboring element face. That just doesn't seem appropriate
+          // _problem.reinitMaterialsInterface(boundary_id, _tid);
         }
 
         for (const auto & aux : iter->second)
