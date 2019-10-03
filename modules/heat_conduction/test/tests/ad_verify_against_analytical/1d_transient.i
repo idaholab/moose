@@ -27,11 +27,11 @@
 
 [Kernels]
   [./HeatDiff]
-    type = HeatConduction
+    type = ADHeatConduction
     variable = T
   [../]
   [./HeatTdot]
-    type = HeatConductionTimeDerivative
+    type = ADHeatConductionTimeDerivative
     variable = T
   [../]
 []
@@ -64,6 +64,10 @@
 []
 
 [Postprocessors]
+  [./T_avg]
+    type = ElementAverageValue
+    variable = T
+  [../]
   [./error]
     type = NodalL2Error
     function = '100*sin(pi*x/80)*exp(-0.95/(0.092*8.92)*pi^2/80^2*t)'
@@ -73,12 +77,12 @@
 
 [Executioner]
   type = Transient
+  solve_type = newton
   scheme = bdf2
-  l_tol = 1e-6
   dt = 2
   end_time = 100
 []
 
 [Outputs]
-  exodus = true
+  csv = true
 []

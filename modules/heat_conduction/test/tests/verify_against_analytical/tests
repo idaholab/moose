@@ -1,19 +1,19 @@
 [Tests]
-  design = "HeatConduction.md"
-  issues = "#5975 #8194"
-  requirement = 'Heat conduction shall match the answer from an analytical solution'
-  [./1D_transient]
-    type = 'Exodiff'
-    input = '1D_transient.i'
-    exodiff = '1D_transient_out.e'
-    abs_zero = 1e-8
-    detail = 'for transient 1D'
-  [../]
-  [./2D_steady_state]
-    type = 'Exodiff'
-    input = '2d_steady_state.i'
-    exodiff = '2d_steady_state_out.e'
-    abs_zero = 1e-8
-    detail = 'for steady state 2D'
+  [./group]
+    design = "HeatConduction.md"
+    issues = "#5975 #8194"
+    requirement = 'Heat conduction shall match the answer from an analytical solution'
+    [./1d_transient]
+      type = CSVDiff
+      input = '1d_transient.i'
+      csvdiff = '1d_transient_out.csv'
+      detail = 'for transient 1D'
+    [../]
+    [./2d_steady_state]
+      type = CSVDiff
+      input = '2d_steady_state.i'
+      csvdiff = '2d_steady_state_out.csv'
+      detail = 'for steady state 2D'
+    [../]
   [../]
 []

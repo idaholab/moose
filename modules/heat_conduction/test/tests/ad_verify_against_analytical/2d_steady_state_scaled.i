@@ -45,12 +45,16 @@
 [Materials]
   [./properties]
     type = GenericConstantMaterial
-    prop_names = 'thermal_conductivity specific_heat density'
-    prop_values = '1 1 1'
+    prop_names = 'thermal_conductivity'
+    prop_values = '1'
   [../]
 []
 
 [Postprocessors]
+  [./T_avg]
+    type = ElementAverageValue
+    variable = T
+  [../]
   [./nodal_error]
     type = NodalL2Error
     function = '10/(sinh(pi))*sin(pi*x*2)*sinh(pi*y*4)'
@@ -65,8 +69,9 @@
 
 [Executioner]
   type = Steady
+  automatic_scaling = true
 []
 
 [Outputs]
-  exodus = true
+  csv = true
 []

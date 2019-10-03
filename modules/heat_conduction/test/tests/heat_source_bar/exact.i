@@ -30,15 +30,14 @@
 
 [Kernels]
   [./heat]
-    type = ADHeatConduction
+    type = HeatConduction
     variable = temp
-    thermal_conductivity = thermal_conductivity
+    diffusion_coefficient = 3
   [../]
   [./heatsource]
-    type = ADMatHeatSource
-    material_property = volumetric_heat
+    type = HeatSource
+    function = volumetric_heat
     variable = temp
-    scalar = 10
   [../]
 []
 
@@ -51,18 +50,10 @@
   [../]
 []
 
-[Materials]
-  [./density]
-    type = GenericConstantMaterial
-    prop_names = 'density  thermal_conductivity volumetric_heat  '
-    prop_values = '10431.0 3.0                  3.8e7'
-  [../]
-[]
-
-[Preconditioning]
-  [./full]
-    type = SMP
-    full = true
+[Functions]
+  [./volumetric_heat]
+     type = ParsedFunction
+     value = 3.8e+8
   [../]
 []
 
@@ -84,6 +75,5 @@
 []
 
 [Outputs]
-  execute_on = FINAL
-  exodus = true
+  csv = true
 []

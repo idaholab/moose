@@ -1,0 +1,31 @@
+[Tests]
+  [./ad]
+    design = "ADMatHeatSource.md"
+    issues = "#12633 #14119"
+    requirement = 'MOOSE shall calculate the temperature in a 1D bar with a heat source using AD kernels'
+    [./exact]
+      type = CSVDiff
+      input = 'exact.i'
+      csvdiff = 'exact_out.csv'
+      abs_zero = 1e-8
+      detail = 'and reproduce the analytical solution.'
+    [../]
+    [./exact-scaled]
+      type = CSVDiff
+      input = 'exact_scaled.i'
+      csvdiff = 'exact_scaled_out.csv'
+      abs_zero = 1e-6
+      detail = 'and reproduce the analytical solution using scaled geometry.'
+    [../]
+    [./exact-jac]
+      type = 'PetscJacobianTester'
+      input = 'exact.i'
+      ratio_tol = 2e-7
+      difference_tol = 1e-2
+      run_sim = True
+      petsc_version = '>=3.9.4'
+      detail = 'and calculation a perfect Jacobian.'
+      prereq = 'ad/exact'
+    [../]
+  [../]
+[]

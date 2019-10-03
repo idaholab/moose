@@ -50,6 +50,10 @@
 []
 
 [Postprocessors]
+  [./T_avg]
+    type = ElementAverageValue
+    variable = T
+  [../]
   [./nodal_error]
     type = NodalL2Error
     function = '10/(sinh(pi))*sin(pi*x*0.5)*sinh(pi*y*0.5)'
@@ -67,5 +71,5 @@
 []
 
 [Outputs]
-  exodus = true
+  csv = true
 []

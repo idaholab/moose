@@ -1,55 +1,59 @@
 [Tests]
-  design = "ADHeatConduction.md"
-  issues = "#12633 #14119"
-  requirement = 'Heat conduction shall match the answer from an analytical solution using autmatic differentiation'
-  [./ad_1D_transient]
-    type = 'Exodiff'
-    input = 'ad_1D_transient.i'
-    exodiff = 'ad_1D_transient_out.e'
-    detail = 1e-8
-    requirement = 'for transient 1D'
-  [../]
-  [./ad_1D_transient_scaled]
-    type = 'Exodiff'
-    input = 'ad_1D_transient_scaled.i'
-    exodiff = 'ad_1D_transient_scaled_out.e'
-    abs_zero = 1e-8
-    detail = 'for transient 1D using scaled geometry'
-  [../]
-  [./ad_1D_transient_jacobian]
-    type = 'PetscJacobianTester'
-    input = 'ad_1D_transient.i'
-    ratio_tol = 1e-7
-    difference_tol = 1e-5
-    run_sim = True
-    petsc_version = '>=3.9.4'
-    method = 'OPT'
-    cli_args = 'Executioner/num_steps=2'
-    detail = 'for transient 1D and the Jacobian shall be perfect'
-  [../]
+  [./ad]
+    design = "ADHeatConduction.md"
+    issues = "#12633 #14119"
+    requirement = 'Heat conduction shall match the answer from an analytical solution using autmatic differentiation'
+    [./1d_transient]
+      type = CSVDiff
+      input = '1d_transient.i'
+      csvdiff = '1d_transient_out.csv'
+      detail = 'for transient 1D'
+    [../]
+    [./1d_transient_scaled]
+      type = CSVDiff
+      input = '1d_transient_scaled.i'
+      csvdiff = '1d_transient_scaled_out.csv'
+      detail = 'for transient 1D using scaled geometry'
+    [../]
+    [./1d_transient_jacobian]
+      type = 'PetscJacobianTester'
+      prereq = ad/1d_transient
+      input = '1d_transient.i'
+      ratio_tol = 1e-7
+      difference_tol = 1e-5
+      run_sim = True
+      petsc_version = '>=3.9.4'
+      method = 'OPT'
+      cli_args = 'Executioner/num_steps=2'
+      detail = 'for transient 1D and the Jacobian shall be perfect'
+    [../]
 
-  [./ad_2D_steady_state]
-    type = 'Exodiff'
-    input = 'ad_2d_steady_state.i'
-    exodiff = 'ad_2d_steady_state_out.e'
-    abs_zero = 1e-8
-    detail = 'for steady state 2D'
-  [../]
-  [./ad_2D_steady_state_scaled]
-    type = 'Exodiff'
-    input = 'ad_2d_steady_state_scaled.i'
-    exodiff = 'ad_2d_steady_state_scaled_out.e'
-    abs_zero = 1e-8
-    detail = 'for steady state 2D using scaled geometry'
-  [../]
-  [./ad_2D_steady_state_jacobian]
-    type = 'PetscJacobianTester'
-    input = 'ad_2d_steady_state.i'
-    ratio_tol = 1e-7
-    difference_tol = 1e-5
-    run_sim = True
-    petsc_version = '>=3.9.4'
-    method = 'OPT'
-    detail = 'for steady state 2D and the Jacobian shall be perfect'
+    [./2D_steady_state]
+      type = CSVDiff
+      input = '2d_steady_state.i'
+      csvdiff = '2d_steady_state_out.csv'
+      detail = 'for steady state 2D'
+    [../]
+    [./2D_steady_state_scaled]
+      type = CSVDiff
+      input = '2d_steady_state_scaled.i'
+      csvdiff = '2d_steady_state_scaled_out.csv'
+      override_columns = 'elemental_error'
+      override_rel_err = '1'
+      override_abs_zero = '1e-10'
+      petsc_version = '>=3.9.0'
+      detail = 'for steady state 2D using scaled geometry'
+    [../]
+    [./2D_steady_state_jacobian]
+      type = 'PetscJacobianTester'
+      input = '2d_steady_state.i'
+      prereq = ad/2D_steady_state
+      ratio_tol = 1e-7
+      difference_tol = 1e-5
+      run_sim = True
+      petsc_version = '>=3.9.4'
+      method = 'OPT'
+      detail = 'for steady state 2D and the Jacobian shall be perfect'
+    [../]
   [../]
 []

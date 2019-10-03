@@ -1,1 +1,0 @@
-heat_source_bar_out.e

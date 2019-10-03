@@ -55,8 +55,8 @@
 [Materials]
   [./density]
     type = GenericConstantMaterial
-    prop_names = 'density  thermal_conductivity volumetric_heat  '
-    prop_values = '10431.0 3.0                  3.8e7'
+    prop_names = 'thermal_conductivity volumetric_heat  '
+    prop_values = '3.0                  3.8e7'
   [../]
 []
 
@@ -85,6 +85,5 @@
 []
 
 [Outputs]
-  execute_on = FINAL
-  exodus = true
+  csv = true
 []
