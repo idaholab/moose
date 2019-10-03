@@ -5,8 +5,8 @@
     nt = 16
     rmin = 0.1
     rmax = 1
-    tmin = 0.0
-    tmax = 1.570796326795
+    dmin = 0.0
+    dmax = 90
     growth_r = 1.1
   []
   [./make3D]
@@ -53,13 +53,13 @@
     type = PresetBC
     variable = disp_y
     value = 0
-    boundary = tmin
+    boundary = dmin
   [../]
   [./xmin]
     type = PresetBC
     variable = disp_x
     value = 0
-    boundary = tmax
+    boundary = dmax
   [../]
 
   [./cavity_temperature]

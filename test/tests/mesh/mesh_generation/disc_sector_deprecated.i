@@ -9,8 +9,8 @@
   nt = 12
   rmin = 0
   rmax = 5
-  dmin = 45
-  dmax = 135
+  tmin = 0.785398163
+  tmax = 2.356194490
   growth_r = 1.3
 []
 
@@ -43,13 +43,13 @@
     type = FunctionPresetBC
     variable = u
     function = '-5.0+sqrt(x*x + y*y)'
-    boundary = dmin
+    boundary = tmin
   [../]
   [./tmax]
     type = FunctionPresetBC
     variable = u
     function = '-5.0+pow(x*x + y*y, 2)/125'
-    boundary = dmax
+    boundary = tmax
   [../]
 []
 

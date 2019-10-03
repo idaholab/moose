@@ -48,11 +48,14 @@ protected:
   /// Maximum radius
   const Real _rmax;
 
-  /// Minimum angle
-  const Real _tmin;
+  /// Minimum angle in degrees
+  const Real _dmin;
 
-  /// Maximum angle
-  const Real _tmax;
+  /// Maximum angle in degrees
+  const Real _dmax;
+
+  /// Bool to check if radians are given in the input file
+  const bool _radians;
 
   /// Bias on radial meshing
   const Real _growth_r;
@@ -72,4 +75,3 @@ protected:
   /// Boolean to indicate that dimensions may have changed
   bool _dims_may_have_changed;
 };
-
