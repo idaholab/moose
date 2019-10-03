@@ -262,8 +262,6 @@
 - /Materials/WeightedAverageMaterial
 - /Materials/AverageWallTemperature7EqnMaterial
 - /Materials/FluidProperties7EqnMaterial
-- /Materials/GradientPressureSmootherCoefMaterial
-- /Materials/GradientPressureSmootherVolumeFractionCoefMaterial
 - /Materials/InterfacialHeatTransferCoefBaseMaterial
 - /Materials/InterfacialHeatTransferCoefConstantMaterial
 - /Materials/InterfacialHeatTransferCoefSimpleMaterial
