@@ -1,0 +1,59 @@
+[Tests]
+  # physics
+  [./phy:one_in_one_out]
+    type = 'Exodiff'
+    input = 'phy.one_in_one_out.i'
+    exodiff = 'phy.one_in_one_out_out.e'
+    custom_cmp = 'phy.one_in_one_out.exodiff'
+    max_time = 180
+  [../]
+
+  [./phy:three_in_two_out]
+    type = 'Exodiff'
+    input = 'phy.three_in_two_out.i'
+    exodiff = 'phy.three_in_two_out_out.e'
+    custom_cmp = 'phy.three_in_two_out.exodiff'
+    max_time = 180
+    method = 'OPT OPROF DEVEL'
+  [../]
+
+  # error checking
+  [./err:bad_number_of_conns]
+    type = 'RunException'
+    input = 'err.bad_number_of_conns.i'
+    expect_err = ""
+  [../]
+
+  # jacobians
+  [./jac:volume_junction_old-3eqn_1]
+    type = 'PetscJacobianTester'
+    input = 'jac.volume_junction_old-3eqn_1.i'
+    ratio_tol = 4e-7
+    difference_tol = 2
+    cli_args = 'Debug/check_jacobian=true'
+  [../]
+
+  [./jac:volume_junction_old-3eqn_2]
+    type = 'PetscJacobianTester'
+    input = 'jac.volume_junction_old-3eqn_2.i'
+    ratio_tol = 4e-7
+    difference_tol = 2
+    cli_args = 'Debug/check_jacobian=true'
+  [../]
+
+  [./jac:volume_junction_old_vu-3eqn_1]
+    type = 'PetscJacobianTester'
+    input = 'jac.volume_junction_old_vu-3eqn_1.i'
+    ratio_tol = 2e-7
+    difference_tol = 2
+    cli_args = 'Debug/check_jacobian=true'
+  [../]
+
+  [./jac:volume_junction_old_vu-3eqn_2]
+    type = 'PetscJacobianTester'
+    input = 'jac.volume_junction_old_vu-3eqn_2.i'
+    ratio_tol = 2e-7
+    difference_tol = 2
+    cli_args = 'Debug/check_jacobian=true'
+  [../]
+[]
