@@ -17,7 +17,8 @@ defineADValidParams(
     params.addParam<MaterialPropertyName>("thermal_conductivity",
                                           "thermal_conductivity",
                                           "the name of the thermal conductivity material property");
-    params.addParam<RealVectorValue>("axis_scaling_vector", "todo");
+    params.addParam<RealVectorValue>("axis_scaling_vector",
+                                     "Vector of scalars to scale gradients.");
     params.set<bool>("use_displaced_mesh") = true;);
 
 template <ComputeStage compute_stage>

@@ -3,15 +3,13 @@
 
 [Mesh]
   type = GeneratedMesh
-  dim = 2
-  nx = 5
-  ny = 5
-  xmax = 1
-  ymax = 1
-[]
-
-[Problem]
-  coord_type = RZ
+  dim = 3
+  nx = 10
+  ny = 10
+  nz = 10
+  xmax = 0.001
+  ymax = 0.01
+  zmax = 0.1
 []
 
 [Variables]
@@ -25,7 +23,6 @@
     type = ADHeatConduction
     variable = T
     thermal_conductivity = thermal_conductivity
-    axis_scaling_vector = '1e3 1e2 0'
   [../]
   [./heat_dt]
     type = ADHeatConductionTimeDerivative
@@ -42,16 +39,42 @@
 
 [BCs]
   [./top]
-    type = DirichletBC
+    type = ADFunctionPresetBC
     variable = T
     boundary = top
-    value = 1
+    function = 't+1'
   [../]
   [./bottom]
-    type = DirichletBC
+    type = ADPresetBC
     variable = T
     boundary = bottom
     value = 2
+  [../]
+
+  [./left]
+    type = ADPresetBC
+    variable = T
+    boundary = left
+    value = 1
+  [../]
+  [./right]
+    type = ADFunctionPresetBC
+    variable = T
+    boundary = right
+    function = 't*2+1'
+  [../]
+
+  [./front]
+    type = ADPresetBC
+    variable = T
+    boundary = front
+    value = 1.2
+  [../]
+  [./back]
+    type = ADFunctionPresetBC
+    variable = T
+    boundary = back
+    function = 't*1.4+1'
   [../]
 []
 
@@ -67,7 +90,7 @@
   type = Transient
   solve_type = NEWTON
   num_steps = 2
-  dt = 1e-4
+  dt = 1
   automatic_scaling = true
 []
 
@@ -85,8 +108,14 @@
     variable = T
     value_type = min
   [../]
+  [./point]
+    type = PointValue
+    point = '0.0002 0.002 0.02'
+    variable = T
+  [../]
 []
 
 [Outputs]
   csv = true
+  exodus = true
 []

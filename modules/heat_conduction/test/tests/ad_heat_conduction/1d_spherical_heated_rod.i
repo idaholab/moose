@@ -3,15 +3,13 @@
 
 [Mesh]
   type = GeneratedMesh
-  dim = 2
-  nx = 5
-  ny = 5
-  xmax = 1
-  ymax = 1
+  dim = 1
+  nx = 20
+  xmax = 0.001
 []
 
 [Problem]
-  coord_type = RZ
+  coord_type = RSPHERICAL
 []
 
 [Variables]
@@ -25,7 +23,6 @@
     type = ADHeatConduction
     variable = T
     thermal_conductivity = thermal_conductivity
-    axis_scaling_vector = '1e3 1e2 0'
   [../]
   [./heat_dt]
     type = ADHeatConductionTimeDerivative
@@ -33,33 +30,25 @@
     specific_heat = thermal_conductivity
     density_name = thermal_conductivity
   [../]
+  [./source]
+    type = ADMatHeatSource
+    variable = T
+    scalar = 1000
+  [../]
 []
 
 [BCs]
-  [./top]
-    type = FunctionDirichletBC
-    variable = T
-    boundary = top
-    function = t
-  [../]
-  [./bottom]
-    type = DirichletBC
-    variable = T
-    boundary = bottom
-    value = 2
-  [../]
-
   [./left]
-    type = DirichletBC
+    type = ADPresetBC
     variable = T
     boundary = left
     value = 1
   [../]
   [./right]
-    type = FunctionDirichletBC
+    type = ADFunctionPresetBC
     variable = T
     boundary = right
-    function = t*2
+    function = 't*2+1'
   [../]
 []
 
@@ -93,8 +82,14 @@
     variable = T
     value_type = min
   [../]
+  [./point]
+    type = PointValue
+    point = '0.0002 0 0'
+    variable = T
+  [../]
 []
 
 [Outputs]
   csv = true
+  exodus = true
 []

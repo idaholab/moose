@@ -11,6 +11,15 @@ where $k$ denotes the thermal conductivity of the material. $k$ can either be an
 
 This class inherits from the [ADDiffusion](/ADDiffusion.md) class.
 
+## Example Input File Syntax
+
+!listing modules/heat_conduction/test/tests/ad_heat_conduction/jacobian_test.i block=Kernels/HeatDiff
+
+`ADHeatConduction` includes an vector input parameter +axis_scaling_vector+. This vector can be used
+to scale the gradient of the temperature variable in order to capture scaled geometries.
+
+!listing modules/heat_conduction/test/tests/ad_heat_conduction/3d_heated_rod_scaled.i block=Kernels/HeatDiff
+
 !syntax description /Kernels/ADHeatConduction
 
 !syntax parameters /Kernels/ADHeatConduction

@@ -1,51 +1,99 @@
 [Tests]
   [./jacobian_test]
     type = 'PetscJacobianTester'
-    input = 'test.i'
+    input = 'jacobian_test.i'
     ratio_tol = 1e-7
     difference_tol = 1e-5
     run_sim = True
     petsc_version = '>=3.9.4'
-    requirement = 'AD heat conduction and the Jacobian shall be beautiful'
+    requirement = 'MOOSE shall calculate heat conduction using the automatic differentiation and the Jacobian shall be beautiful.'
     design = "ADHeatConduction.md"
     issues = "#5658 #12633"
     allow_test_objects = true
   [../]
-
-  [./heated_rod]
-    type = 'CSVDiff'
-    input = heated_rod.i
-    csvdiff = heated_rod_out.csv
-    allow_test_objects = true
-    requirement = 'todo'
-    design = "ADHeatConduction.md"
-    issues = "todo"
-  [../]
-  [./heated_rod_scaled]
-    type = 'CSVDiff'
-    input = heated_rod_scaled.i
-    csvdiff = heated_rod_scaled_out.csv
-    allow_test_objects = true
-    requirement = 'todo'
-    design = "ADHeatConduction.md"
-    issues = "todo"
-  [../]
-  [./heated_rod_bcs]
-    type = 'CSVDiff'
-    input = heated_rod_bcs.i
-    csvdiff = heated_rod_bcs_out.csv
-    allow_test_objects = true
-    requirement = 'todo'
-    design = "ADHeatConduction.md"
-    issues = "todo"
-  [../]
-  [./heated_rod_bcs_scaled]
-    type = 'CSVDiff'
-    input = heated_rod_bcs_scaled.i
-    csvdiff = heated_rod_bcs_scaled_out.csv
-    allow_test_objects = true
-    requirement = 'todo'
-    design = "ADHeatConduction.md"
-    issues = "todo"
+  [./rod]
+    issues = '#12633 #14119'
+    design = 'ADHeatConduction.md'
+    requirement = 'MOOSE shall use automatic differentiation to calculate heat conduction due to internal generated energy and boundary conditions'
+    [./1d_heated_rod]
+      type = 'CSVDiff'
+      input = 1d_heated_rod.i
+      csvdiff = 1d_heated_rod_out.csv
+      detail = 'in 1D.'
+      allow_test_objects = true
+      petsc_version = '>=3.9.0'
+    [../]
+    [./1d_heated_rod_scaled]
+      type = 'CSVDiff'
+      input = 1d_heated_rod_scaled.i
+      csvdiff = 1d_heated_rod_scaled_out.csv
+      detail = 'in 1D with scaled geometry.'
+      allow_test_objects = true
+      petsc_version = '>=3.9.0'
+    [../]
+    [./1d_spherical_heated_rod]
+      type = 'CSVDiff'
+      input = 1d_spherical_heated_rod.i
+      csvdiff = 1d_spherical_heated_rod_out.csv
+      detail = 'in 1D spherical.'
+      allow_test_objects = true
+      petsc_version = '>=3.9.0'
+    [../]
+    [./1d_spherical_heated_rod_scaled]
+      type = 'CSVDiff'
+      input = 1d_spherical_heated_rod_scaled.i
+      csvdiff = 1d_spherical_heated_rod_scaled_out.csv
+      detail = 'in 1D spherical with scaled geometry.'
+      allow_test_objects = true
+      petsc_version = '>=3.9.0'
+    [../]
+    [./2d_heated_rod]
+      type = 'CSVDiff'
+      input = 2d_heated_rod.i
+      csvdiff = 2d_heated_rod_out.csv
+      detail = 'in 2D.'
+      allow_test_objects = true
+      petsc_version = '>=3.9.0'
+    [../]
+    [./2d_heated_rod_scaled]
+      type = 'CSVDiff'
+      input = 2d_heated_rod_scaled.i
+      csvdiff = 2d_heated_rod_scaled_out.csv
+      detail = 'in 2D wtih scaled geometry.'
+      allow_test_objects = true
+      petsc_version = '>=3.9.0'
+    [../]
+    [./2drz_heated_rod]
+      type = 'CSVDiff'
+      input = 2drz_heated_rod.i
+      csvdiff = 2drz_heated_rod_out.csv
+      detail = 'in 2DRZ.'
+      allow_test_objects = true
+      petsc_version = '>=3.9.0'
+    [../]
+    [./2drz_heated_rod_scaled]
+      type = 'CSVDiff'
+      input = 2drz_heated_rod_scaled.i
+      csvdiff = 2drz_heated_rod_scaled_out.csv
+      detail = 'in 2DRZ with scaled geometry.'
+      allow_test_objects = true
+      petsc_version = '>=3.9.0'
+    [../]
+    [./3d_heated_rod]
+      type = 'CSVDiff'
+      input = 3d_heated_rod.i
+      csvdiff = 3d_heated_rod_out.csv
+      detail = 'in 3D.'
+      allow_test_objects = true
+      petsc_version = '>=3.9.0'
+    [../]
+    [./3d_heated_rod_scaled]
+      type = 'CSVDiff'
+      input = 3d_heated_rod_scaled.i
+      csvdiff = 3d_heated_rod_scaled_out.csv
+      detail = 'in 3D with scaled geometry.'
+      allow_test_objects = true
+      petsc_version = '>=3.9.0'
+    [../]
   [../]
 []
