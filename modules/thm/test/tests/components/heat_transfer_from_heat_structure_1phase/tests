@@ -130,6 +130,13 @@
     expect_err = "hx: The component 'inlet' is not of type 'HeatStructureBase'"
   [../]
 
+  [./err:wrong_hs_side]
+    type = 'RunException'
+    input = 'err.1phase.i'
+    cli_args = "Components/hx/hs_side=asdf"
+    expect_err = "hx: Invalid option 'asdf' provided for 'hs_side' parameter. Valid options \(not case-sensitive\) are 'inner' and 'outer'."
+  [../]
+
   [./err:elems_mismatch]
     type = 'RunException'
     input = 'err.1phase.i'
