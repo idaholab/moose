@@ -24,7 +24,7 @@
     variable = c
     smaller_coordinate_corners = '20 20 0 170 50 0 320 70 0'
     larger_coordinate_corners = '150 30 0 300 60 0 380 80 0'
-    inside = '0.2 0.5 0.8 '
+    inside = '0.2 0.5 0.8'
     outside = 1
     int_width = 5
   [../]
