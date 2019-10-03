@@ -9,6 +9,8 @@
 
 #include "ADFunctionNeumannBC.h"
 
+#include "Function.h"
+
 registerADMooseObject("MooseApp", ADFunctionNeumannBC);
 
 defineADValidParams(ADFunctionNeumannBC,
