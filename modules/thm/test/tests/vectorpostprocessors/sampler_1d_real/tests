@@ -1,0 +1,7 @@
+[Tests]
+  [./sampler_1d_real]
+    type = 'CSVDiff'
+    input = 'sampler_1d_real.i'
+    csvdiff = 'out_test_property_vpp_0001.csv'
+  [../]
+[]
