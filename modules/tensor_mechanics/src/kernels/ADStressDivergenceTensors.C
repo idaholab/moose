@@ -25,6 +25,7 @@ defineADValidParams(
     params.addRequiredCoupledVar("displacements",
                                  "The string of displacements suitable for the problem statement");
     params.addParam<std::string>("base_name", "Material property base name");
+    params.addParam<RealVectorValue>("axis_scaling_vector", "todo");
     params.set<bool>("use_displaced_mesh") = false;
     params.addParam<bool>("volumetric_locking_correction",
                           false,
@@ -50,6 +51,19 @@ ADStressDivergenceTensors<compute_stage>::ADStressDivergenceTensors(
   // Error if volumetric locking correction is turned on for 1D problems
   if (_ndisp == 1 && _volumetric_locking_correction)
     mooseError("Volumetric locking correction should be set to false for 1-D problems.");
+
+  _scaling_vector = {1.0, 1.0, 1.0};
+  if (isParamValid("axis_scaling_vector"))
+  {
+    if (_volumetric_locking_correction)
+      paramError("volumetric_locking_correction",
+                 "axis scaling not set up for use with volumetric locking correction");
+    _scaling_vector = getParam<RealVectorValue>("axis_scaling_vector");
+
+    _scaling_vector(0) *= _scaling_vector(0);
+    _scaling_vector(1) *= _scaling_vector(1);
+    _scaling_vector(2) *= _scaling_vector(2);
+  }
 }
 
 template <ComputeStage compute_stage>
@@ -65,7 +79,7 @@ template <ComputeStage compute_stage>
 ADReal
 ADStressDivergenceTensors<compute_stage>::computeQpResidual()
 {
-  ADReal residual = _stress[_qp].row(_component) * _grad_test[_i][_qp];
+  ADReal residual = _stress[_qp].row(_component) * _grad_test[_i][_qp] * _scaling_vector(_component);
 
   // volumetric locking correction
   if (_volumetric_locking_correction)

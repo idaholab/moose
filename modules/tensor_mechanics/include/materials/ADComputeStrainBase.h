@@ -23,7 +23,8 @@
   using ADComputeStrainBase<compute_stage>::_current_elem_volume;                                  \
   using ADComputeStrainBase<compute_stage>::_eigenstrain_names;                                    \
   using ADComputeStrainBase<compute_stage>::_eigenstrains;                                         \
-  using ADComputeStrainBase<compute_stage>::_total_strain
+  using ADComputeStrainBase<compute_stage>::_total_strain;                                         \
+  using ADComputeStrainBase<compute_stage>::_scaling_vector
 
 // Forward Declarations
 template <ComputeStage>
@@ -68,6 +69,7 @@ protected:
   const bool _volumetric_locking_correction;
   const Real & _current_elem_volume;
 
+  RealVectorValue _scaling_vector;
+
   usingMaterialMembers;
 };
-

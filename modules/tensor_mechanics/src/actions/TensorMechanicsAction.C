@@ -294,6 +294,10 @@ TensorMechanicsAction::act()
 
     if (_use_ad)
     {
+      if (isParamValid("axis_scaling_vector"))
+        params.set<RealVectorValue>("axis_scaling_vector") =
+            getParam<RealVectorValue>("axis_scaling_vector");
+            
       _problem->addADResidualMaterial(
           ad_prepend + type + "<RESIDUAL>", name() + "_strain" + "_residual", params);
       _problem->addADJacobianMaterial(
@@ -337,6 +341,9 @@ TensorMechanicsAction::act()
 
       if (_use_ad)
       {
+        if (isParamValid("axis_scaling_vector"))
+          params.set<RealVectorValue>("axis_scaling_vector") =
+              getParam<RealVectorValue>("axis_scaling_vector");
         _problem->addKernel(
             ad_prepend + tensor_kernel_type + "<RESIDUAL>", kernel_name + "_residual", params);
         _problem->addKernel(

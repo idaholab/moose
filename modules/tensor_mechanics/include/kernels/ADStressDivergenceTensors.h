@@ -19,7 +19,8 @@
   using ADStressDivergenceTensors<compute_stage>::_ndisp;                                          \
   using ADStressDivergenceTensors<compute_stage>::_disp_var;                                       \
   using ADStressDivergenceTensors<compute_stage>::_avg_grad_test;                                  \
-  using ADStressDivergenceTensors<compute_stage>::_volumetric_locking_correction
+  using ADStressDivergenceTensors<compute_stage>::_volumetric_locking_correction;                  \
+  using ADStressDivergenceTensors<compute_stage>::_scaling_vector;
 
 // Forward Declarations
 template <ComputeStage>
@@ -48,6 +49,8 @@ protected:
 
   const std::string _base_name;
 
+  RealVectorValue _scaling_vector;
+
   const ADMaterialProperty(RankTwoTensor) & _stress;
   const unsigned int _component;
 
@@ -63,4 +66,3 @@ protected:
 
   usingKernelMembers;
 };
-

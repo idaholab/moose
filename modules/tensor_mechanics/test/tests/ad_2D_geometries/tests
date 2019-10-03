@@ -32,7 +32,17 @@
     type = Exodiff
     input = '3D-RZ_finiteStrain_test.i'
     exodiff = '3D-RZ_finiteStrain_test_out.e'
-    skip = 'Exceeds AD_MAX_DOFS_PER_ELEM'
+    valgrind = 'HEAVY'
+    heavy = true
+    abs_zero = 1e-5
+    rel_err = 3e-3
+    design = 'syntax/Modules/TensorMechanics/Master/index.md'
+    requirement = 'The TensorMechanics MasterAction shall calculate the elastic stress and strain response for a 3D pressurized hollow cylinder with a large strain incremental strain formulation using AD.'
+  [../]
+  [./3D_RZ_finitestrain_scaled]
+    type = Exodiff
+    input = '3D-RZ_finiteStrain_test_scaled.i'
+    exodiff = '3D-RZ_finiteStrain_test_scaled_out.e'
     valgrind = 'HEAVY'
     heavy = true
     abs_zero = 1e-5
@@ -115,7 +125,7 @@
     type = PetscJacobianTester
     input = '3D-RZ_finiteStrain_test.i'
     valgrind = 'HEAVY'
-    skip = 'Exceeds AD_MAX_DOFS_PER_ELEM'
+    skip = "too heavy"
     heavy = true
     run_sim = 'True'
     ratio_tol = 1e-8

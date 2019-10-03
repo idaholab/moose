@@ -30,6 +30,7 @@ defineADValidParams(
     params.addParam<MaterialPropertyName>("global_strain",
                                           "Optional material property holding a global strain "
                                           "tensor applied to the mesh as a whole");
+    params.addParam<RealVectorValue>("axis_scaling_vector", "todo");
     params.suppressParameter<bool>("use_displaced_mesh"););
 
 template <ComputeStage compute_stage>
@@ -61,6 +62,16 @@ ADComputeStrainBase<compute_stage>::ADComputeStrainBase(const InputParameters & 
 
   if (getParam<bool>("use_displaced_mesh"))
     paramError("use_displaced_mesh", "The strain calculator needs to run on the undisplaced mesh.");
+
+  _scaling_vector = {1.0, 1.0, 1.0};
+  if (isParamValid("axis_scaling_vector"))
+  {
+    _scaling_vector = getParam<RealVectorValue>("axis_scaling_vector");
+
+    _scaling_vector(0) *= _scaling_vector(0);
+    _scaling_vector(1) *= _scaling_vector(1);
+    _scaling_vector(2) *= _scaling_vector(2);
+  }
 }
 
 template <ComputeStage compute_stage>

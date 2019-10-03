@@ -38,6 +38,12 @@
     type = FileMeshGenerator
     file = 3D_mesh.e
   [../]
+  [./scale]
+    type = TransformGenerator
+    vector_value = '2 2 2'
+    transform = SCALE
+    input = mesh
+  [../]
 []
 
 [GlobalParams]
@@ -192,7 +198,7 @@
   [../]
   [./stressTheta_pt]
     type = PointValue
-    point = '5.0 0.0 0.0'
+    point = '10.0 0.0 0.0'
     #bottom inside edge for comparison to theory; use csv = true
     variable = stress_theta
   [../]

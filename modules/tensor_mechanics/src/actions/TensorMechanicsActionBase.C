@@ -60,6 +60,8 @@ validParams<TensorMechanicsActionBase>()
   params.addParam<bool>("use_automatic_differentiation",
                         false,
                         "Flag to use automatic differentiation (AD) objects when possible");
+  params.addParam<RealVectorValue>("axis_scaling_vector", "todo");
+
   // Global Strain
   params.addParam<MaterialPropertyName>(
       "global_strain",
