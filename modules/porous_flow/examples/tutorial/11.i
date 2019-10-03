@@ -7,8 +7,8 @@
     rmax = 10
     growth_r = 1.4
     nt = 4
-    tmin = 0
-    tmax = 1.57079632679
+    dmin = 0
+    dmax = 90
   []
   [./make3D]
     input = annular
@@ -273,13 +273,13 @@
     type = PresetBC
     variable = disp_x
     value = 0
-    boundary = tmax
+    boundary = dmax
   [../]
   [./roller_tmin]
     type = PresetBC
     variable = disp_y
     value = 0
-    boundary = tmin
+    boundary = dmin
   [../]
   [./pinned_top_bottom_x]
     type = PresetBC

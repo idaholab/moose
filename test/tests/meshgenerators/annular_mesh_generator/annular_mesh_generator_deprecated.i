@@ -5,8 +5,8 @@
     nt = 12
     rmin = 1
     rmax = 5
-    dmin = 45
-    dmax = 135
+    tmin = 0.785398163
+    tmax = 2.356194490
     growth_r = 1.3
   []
 []
