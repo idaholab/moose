@@ -8,8 +8,12 @@
 
 
 [Mesh]
-  file = square.e
-  uniform_refine = 4
+  [./square]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 32
+    ny = 32
+  [../]
 []
 
 [Variables]
@@ -61,7 +65,7 @@
   [./all]
     type = FunctionDirichletBC
     variable = u
-    boundary = '1 2'
+    boundary = 'left right'
     function = bc_func
   [../]
 []
