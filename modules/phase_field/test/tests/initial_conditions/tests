@@ -289,5 +289,35 @@
 
       detail = 'multiple bounding boxes in 3D.'
     []
+
+    [IsolatedBoundingBoxIC_2D]
+      type = Exodiff
+      input = 'IsolatedBoundingBoxIC_2D.i'
+      exodiff = 'IsolatedBoundingBoxIC_2D_out.e'
+    []
+
+    [IsolatedBoundingBoxIC_2D_Overlapping]
+      type = Exodiff
+      input = 'IsolatedBoundingBoxIC_2D_Overlapping.i'
+      exodiff = 'IsolatedBoundingBoxIC_2D_Overlapping_out.e'
+    []
+
+    [IsolatedBoundingBoxIC_3D]
+      type = Exodiff
+      input = 'IsolatedBoundingBoxIC_3D.i'
+      exodiff = 'IsolatedBoundingBoxIC_3D_out.e'
+    []
+
+    [NestedBoundingBoxIC_2D]
+      type = Exodiff
+      input = 'NestedBoundingBoxIC_2D.i'
+      exodiff = 'NestedBoundingBoxIC_2D_out.e'
+    []
+
+    [NestedBoundingBoxIC_3D]
+      type = Exodiff
+      input = 'NestedBoundingBoxIC_3D.i'
+      exodiff = 'NestedBoundingBoxIC_3D_out.e'
+    []
   []
 []
