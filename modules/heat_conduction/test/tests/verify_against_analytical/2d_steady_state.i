@@ -44,8 +44,8 @@
 [Materials]
   [./properties]
     type = GenericConstantMaterial
-    prop_names = 'thermal_conductivity specific_heat density'
-    prop_values = '1 1 1'
+    prop_names = 'thermal_conductivity'
+    prop_values = '1'
   [../]
 []
 

@@ -1,76 +1,19 @@
 [Tests]
   design = "HeatConduction.md"
-
+  issues = "#5975 #8194"
+  requirement = 'Heat conduction shall match the answer from an analytical solution'
   [./1D_transient]
     type = 'Exodiff'
     input = '1D_transient.i'
     exodiff = '1D_transient_out.e'
     abs_zero = 1e-8
-    requirement = "Heat conduction shall match the answer from an analytical solution"
-    issues = "#5975"
+    detail = 'for transient 1D'
   [../]
-  [./ad_1D_transient]
-    type = 'Exodiff'
-    input = 'ad_1D_transient.i'
-    exodiff = 'ad_1D_transient_out.e'
-    abs_zero = 1e-8
-    requirement = "Heat conduction from an AD kernel shall get the same answer as a traditional kernel"
-    issues = "#5658 #12633"
-  [../]
-  [./ad_1D_transient_scaled]
-    type = 'Exodiff'
-    input = 'ad_1D_transient_scaled.i'
-    exodiff = 'ad_1D_transient_scaled_out.e'
-    abs_zero = 1e-8
-    requirement = "todo"
-    issues = "todo"
-  [../]
-  [./ad_1D_transient_jacobian]
-    type = 'PetscJacobianTester'
-    input = 'ad_1D_transient.i'
-    ratio_tol = 1e-7
-    difference_tol = 1e-5
-    run_sim = True
-    petsc_version = '>=3.9.4'
-    method = 'OPT'
-    cli_args = 'Executioner/num_steps=5'
-    requirement = 'AD heat conduction and the Jacobian shall be beautiful'
-    issues = "#5658 #12633"
-  [../]
-
   [./2D_steady_state]
     type = 'Exodiff'
     input = '2d_steady_state.i'
     exodiff = '2d_steady_state_out.e'
     abs_zero = 1e-8
-    requirement = "Heat conduction shall match the answer from an analytical solution"
-    issues = "#8194"
-  [../]
-  [./ad_2D_steady_state]
-    type = 'Exodiff'
-    input = 'ad_2d_steady_state.i'
-    exodiff = 'ad_2d_steady_state_out.e'
-    abs_zero = 1e-8
-    requirement = "Heat conduction from an AD kernel shall get the same answer as a traditional kernel"
-    issues = "#5658 #12633"
-  [../]
-  [./ad_2D_steady_state_scaled]
-    type = 'Exodiff'
-    input = 'ad_2d_steady_state_scaled.i'
-    exodiff = 'ad_2d_steady_state_scaled_out.e'
-    abs_zero = 1e-8
-    requirement = "todo"
-    issues = "todo"
-  [../]
-  [./ad_2D_steady_state_jacobian]
-    type = 'PetscJacobianTester'
-    input = 'ad_2d_steady_state.i'
-    ratio_tol = 1e-7
-    difference_tol = 1e-5
-    run_sim = True
-    petsc_version = '>=3.9.4'
-    method = 'OPT'
-    requirement = 'AD heat conduction and the Jacobian shall be beautiful'
-    issues = "#5658 #12633"
+    detail = 'for steady state 2D'
   [../]
 []
