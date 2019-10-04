@@ -68,7 +68,10 @@ Closures1PhaseSimple::addMooseObjects(const FlowChannelBase & flow_channel)
         addWallTemperatureFromAuxMaterial(flow_channel_1phase);
     }
     else
-      addWallTemperatureFromHeatFluxMaterial(flow_channel_1phase);
+    {
+      if (n_ht_connections > 1)
+        addWallTemperatureFromHeatFluxMaterial(flow_channel_1phase);
+    }
   }
 }
 
