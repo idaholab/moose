@@ -150,6 +150,7 @@ NodalKernel::computeResidual()
     const dof_id_type & dof_idx = _var.nodalDofIndex();
     _qp = 0;
     Real res = computeQpResidual();
+    res *= _var.scalingFactor();
     _assembly.cacheResidualContribution(dof_idx, res, _vector_tags);
 
     if (_has_save_in)
@@ -169,6 +170,8 @@ NodalKernel::computeJacobian()
     _qp = 0;
     Real cached_val = computeQpJacobian();
     dof_id_type cached_row = _var.nodalDofIndex();
+
+    cached_val *= _var.scalingFactor();
 
     _assembly.cacheJacobianContribution(cached_row, cached_row, cached_val, _matrix_tags);
 
@@ -193,6 +196,8 @@ NodalKernel::computeOffDiagJacobian(unsigned int jvar)
     dof_id_type cached_row = _var.nodalDofIndex();
     // Note: this only works for Lagrange variables...
     dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar, 0);
+
+    cached_val *= _var.scalingFactor();
 
     _assembly.cacheJacobianContribution(cached_row, cached_col, cached_val, _matrix_tags);
   }
