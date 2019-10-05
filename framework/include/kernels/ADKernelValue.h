@@ -11,7 +11,9 @@
 
 #include "ADKernel.h"
 
-#define usingTemplKernelValueMembers(T) usingTemplKernelMembers(T)
+#define usingTemplKernelValueMembers(T)                                                            \
+  usingTemplKernelMembers(T);                                                                      \
+  using ADKernelValueTempl<T, compute_stage>::precomputeQpResidual
 #define usingKernelValueMembers usingTemplKernelValueMembers(Real)
 #define usingVectorKernelValueMembers usingTemplKernelMembers(RealVectorValue)
 
@@ -48,4 +50,3 @@ protected:
 
   usingTemplKernelMembers(T);
 };
-
