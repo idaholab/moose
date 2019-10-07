@@ -1,0 +1,25 @@
+[Tests]
+  [./part1]
+    type = 'Exodiff'
+    input = 'part1.i'
+    exodiff = 'part1_out.e'
+    recover = false
+  [../]
+
+  [./part2]
+    type = 'Exodiff'
+    input = 'part2.i'
+    exodiff = 'part2_out.e'
+    prereq = 'part1'
+    recover = false
+    skip = '#89'
+  [../]
+
+  [./part2_ics]
+    type = 'Exodiff'
+    input = 'part2_ics.i'
+    exodiff = 'part2_ics_out.e'
+    prereq = 'part1'
+    recover = false
+  [../]
+[]
