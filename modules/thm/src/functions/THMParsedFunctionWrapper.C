@@ -57,8 +57,8 @@ THMParsedFunctionWrapper::initialize()
     }
     else if (_feproblem.hasScalarVariable(_vals_input[i]))
     {
-      Real & scalar_val = _feproblem.getScalarVariable(_tid, _vals_input[i]).sln()[0];
-      _initial_vals.push_back(scalar_val);
+      VariableValue & scalar_val = _feproblem.getScalarVariable(_tid, _vals_input[i]).sln();
+      _initial_vals.push_back(0);
       _scalar_vals.push_back(&scalar_val);
       _scalar_index.push_back(i);
     }
@@ -81,7 +81,7 @@ void
 THMParsedFunctionWrapper::update()
 {
   for (unsigned int i = 0; i < _scalar_index.size(); ++i)
-    (*_addr[_scalar_index[i]]) = (*_scalar_vals[i]);
+    (*_addr[_scalar_index[i]]) = (*_scalar_vals[i])[0];
 }
 
 void
