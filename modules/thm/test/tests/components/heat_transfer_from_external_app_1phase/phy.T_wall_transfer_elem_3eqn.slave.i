@@ -9,8 +9,6 @@
 
   spatial_discretization = rdg
   rdg_slope_reconstruction = none
-
-  scaling_factor_1phase = '1 1 1e-5'
 []
 
 [FluidProperties]
@@ -78,7 +76,7 @@
 
   solve_type = 'PJFNK'
   line_search = 'basic'
-  nl_rel_tol = 1e-8
+  nl_rel_tol = 1e-7
   nl_abs_tol = 1e-6
   nl_max_its = 20
 
@@ -87,6 +85,8 @@
 
   start_time = 0.0
   end_time = 5
+
+  automatic_scaling = true
 []
 
 [Outputs]
