@@ -167,7 +167,6 @@
 
 - /Functions/ConstantTimesAreaFunction
 - /Functions/GeneralizedCircumference
-- /Functions/LinearFunction
 
 - /HeatStructureMaterials
 - /HeatStructureMaterials/AddHeatStructureMaterialAction
@@ -262,15 +261,11 @@
 - /Materials/WeightedAverageMaterial
 - /Materials/AverageWallTemperature7EqnMaterial
 - /Materials/FluidProperties7EqnMaterial
-- /Materials/GradientPressureSmootherCoefMaterial
-- /Materials/GradientPressureSmootherVolumeFractionCoefMaterial
 - /Materials/InterfacialHeatTransferCoefBaseMaterial
 - /Materials/InterfacialHeatTransferCoefConstantMaterial
 - /Materials/InterfacialHeatTransferCoefSimpleMaterial
 - /Materials/InterfacialVelocityPressureCG7EqnMaterial
 - /Materials/InterphaseMassTransferMaterial
-- /Materials/LaplacianPressureSmootherCoefMaterial
-- /Materials/LaplacianPressureSmootherVolumeFractionCoefMaterial
 - /Materials/LinearTestMaterial
 - /Materials/MultiComponentFluidPropertiesMaterialPT
 - /Materials/PressureRelaxationRateMaterial
