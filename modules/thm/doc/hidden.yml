@@ -276,6 +276,7 @@
 - /Materials/SpecificInterfacialAreaSimpleMaterial
 - /Materials/SurfaceTensionMaterial
 - /Materials/TemperatureWall7EqnMaterial
+- /Materials/VectorPropertyTestMaterial
 - /Materials/VelocityRelaxationRateMaterial
 - /Materials/VolumeFractionMaterial
 - /Materials/WallBoilingFractionMaterial

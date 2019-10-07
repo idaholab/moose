@@ -1,4 +1,42 @@
 [Tests]
+  # junction constraints
+  [./junction_mass_constraint]
+    type = 'PetscJacobianTester'
+    input = 'junction_constraint_general.i'
+    cli_args = "Constraints/test_constraint/type=JunctionMassConstraint"
+    ratio_tol = 5e-5
+    difference_tol = 5e-5
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./junction_momentum_constraint]
+    type = 'PetscJacobianTester'
+    input = 'junction_constraint_general.i'
+    cli_args = "Constraints/test_constraint/type=JunctionMomentumConstraint"
+    ratio_tol = 5e-5
+    difference_tol = 100
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./junction_energy_constraint]
+    type = 'PetscJacobianTester'
+    input = 'junction_constraint_general.i'
+    cli_args = "Constraints/test_constraint/type=JunctionEnergyConstraint"
+    ratio_tol = 5e-4
+    difference_tol = 5e3
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+
+  [./mass_free_constraint]
+    type = 'PetscJacobianTester'
+    input = 'mass_free_constraint.i'
+    ratio_tol = 5e-6
+    difference_tol = 5e-6
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+
   [./old_junction_momentum_constraint_positive_velocity]
     type = 'PetscJacobianTester'
     input = 'old_junction_momentum_constraint.i'
