@@ -208,6 +208,7 @@
 - /Kernels/HeatConductionRZ
 - /Kernels/HeatConductionTimeDerivativeRZ
 - /Kernels/OneDEnergyFlux
+- /Kernels/OneDEnergyFriction
 - /Kernels/OneDEnergyGravity
 - /Kernels/OneDEnergyHeatSource
 - /Kernels/OneDEnergyWallHeatFlux
