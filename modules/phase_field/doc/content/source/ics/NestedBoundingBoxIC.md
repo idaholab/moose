@@ -10,7 +10,7 @@ interfacial width can be assigned for diffused interfaces. Partially overlapping
 
 !listing NestedBoundingBoxIC_2D.i block=ICs
 
-!media media/phase_field/nested_bounding_box_ic.png
+!media media/phase_field/nested_bounding_box.png
        caption=Initial condition of the variable defined in the above example.
        style=width:80%;display:block;margin-left:auto;margin-right:auto;
 
