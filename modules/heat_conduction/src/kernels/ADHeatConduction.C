@@ -18,23 +18,21 @@ defineADValidParams(
                                           "thermal_conductivity",
                                           "the name of the thermal conductivity material property");
     params.addParam<RealVectorValue>("axis_scaling_vector",
+                                     RealVectorValue(1, 1, 1),
                                      "Vector of scalars to scale gradients.");
     params.set<bool>("use_displaced_mesh") = true;);
 
 template <ComputeStage compute_stage>
 ADHeatConduction<compute_stage>::ADHeatConduction(const InputParameters & parameters)
   : ADDiffusion<compute_stage>(parameters),
-    _thermal_conductivity(getADMaterialProperty<Real>("thermal_conductivity"))
+    _thermal_conductivity(getADMaterialProperty<Real>("thermal_conductivity")),
+    _scaling_vector(getParam<RealVectorValue>("axis_scaling_vector")(0) *
+                        getParam<RealVectorValue>("axis_scaling_vector")(0),
+                    getParam<RealVectorValue>("axis_scaling_vector")(1) *
+                        getParam<RealVectorValue>("axis_scaling_vector")(1),
+                    getParam<RealVectorValue>("axis_scaling_vector")(2) *
+                        getParam<RealVectorValue>("axis_scaling_vector")(2))
 {
-  _scaling_vector = {1.0, 1.0, 1.0};
-  if (isParamValid("axis_scaling_vector"))
-  {
-    _scaling_vector = getParam<RealVectorValue>("axis_scaling_vector");
-
-    _scaling_vector(0) *= _scaling_vector(0);
-    _scaling_vector(1) *= _scaling_vector(1);
-    _scaling_vector(2) *= _scaling_vector(2);
-  }
 }
 
 template <ComputeStage compute_stage>

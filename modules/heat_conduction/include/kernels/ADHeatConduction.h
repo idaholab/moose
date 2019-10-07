@@ -27,7 +27,7 @@ protected:
 
   const ADMaterialProperty(Real) & _thermal_conductivity;
 
-  RealVectorValue _scaling_vector;
+  const RealVectorValue _scaling_vector;
 
   usingKernelGradMembers;
 };
