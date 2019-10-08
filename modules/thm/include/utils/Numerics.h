@@ -94,11 +94,11 @@ DenseVector<Real> applyQuotientRule(const Real & num,
  *
  * @param volume_fraction The volume fraction of the phase
  * @param rho The density of the phase
- * @param v The velocity of the phase
+ * @param vel The velocity of the phase
  * @param D_h The hydraulic diameter
  * @param visc The viscosity of the phase
  */
-Real Reynolds(Real volume_fraction, Real rho, Real v, Real D_h, Real visc);
+Real Reynolds(Real volume_fraction, Real rho, Real vel, Real D_h, Real visc);
 
 /**
  * Compute Prandtl number

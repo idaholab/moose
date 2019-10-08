@@ -45,9 +45,9 @@ applyQuotientRule(const Real & num,
 }
 
 Real
-Reynolds(Real volume_fraction, Real rho, Real v, Real Dh, Real visc)
+Reynolds(Real volume_fraction, Real rho, Real vel, Real Dh, Real visc)
 {
-  return volume_fraction * rho * std::fabs(v) * Dh / visc;
+  return volume_fraction * rho * std::fabs(vel) * Dh / visc;
 }
 
 Real
