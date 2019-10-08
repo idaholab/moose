@@ -91,7 +91,7 @@
   start_time = 0
   end_time = 5
   steady_state_detection = true
-  steady_state_tolerance = 1e-8
+  steady_state_tolerance = 2e-7
 
   dt = 0.05
   abort_on_solve_fail = true
