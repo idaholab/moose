@@ -38,6 +38,8 @@ HeatTransfer1PhaseBase::initSecondary()
 
     _Hw_1phase_name = FlowModelSinglePhase::HEAT_TRANSFER_COEFFICIENT_WALL + Hw_suffix;
   }
+  else
+    logError("Coupled component '", _flow_channel_name, "' must be a single phase flow channel.");
 }
 
 void
