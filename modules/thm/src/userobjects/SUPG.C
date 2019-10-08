@@ -21,16 +21,10 @@ InputParameters
 validParams<SUPG>()
 {
   InputParameters params = validParams<StabilizationSettings>();
-  // Shock capturing is "extra" artificial diffusion which may be required
-  // when strong discontinuities are present in the flow
-  params.addParam<bool>("shock_capturing", false, "Use shock capturing or not");
   return params;
 }
 
-SUPG::SUPG(const InputParameters & parameters)
-  : StabilizationSettings(parameters), _shock_capturing(getParam<bool>("shock_capturing"))
-{
-}
+SUPG::SUPG(const InputParameters & parameters) : StabilizationSettings(parameters) {}
 
 void
 SUPG::addVariables(FlowModel &, const SubdomainName &) const
@@ -98,9 +92,6 @@ SUPG::addMooseObjects(FlowModel & fm, InputParameters & pars) const
     params.set<MaterialPropertyName>("direction") = FlowModel::DIRECTION;
     params.set<RealVectorValue>("gravity_vector") = pars.get<RealVectorValue>("gravity_vector");
 
-    if (_shock_capturing)
-      params.set<unsigned>("n_iterations_before_freezing_delta") = 1;
-
     _fe_problem.addMaterial(class_name, genName(comp_name, "r7_material"), params);
   }
 
@@ -127,26 +118,5 @@ SUPG::addMooseObjects(FlowModel & fm, InputParameters & pars) const
     params.set<MaterialPropertyName>("SUPG_dAdU") = DADU;
     params.set<MaterialPropertyName>("direction") = FlowModel::DIRECTION;
     _fe_problem.addKernel(class_name, genName(comp_name, vars[i], "supg"), params);
-  }
-
-  if (_shock_capturing)
-  {
-    mooseError("Shock capturing not implemented for variable-area model.");
-
-    for (unsigned int i = 0; i < vars.size(); i++)
-    {
-      std::string class_name = "OneDShockCapturing";
-      InputParameters params = _m_factory.getValidParams(class_name);
-      params.set<NonlinearVariableName>("variable") = vars[i];
-      params.set<std::vector<SubdomainName>>("block") = blocks;
-      params.set<UserObjectName>("fp") = pars.get<UserObjectName>("fp");
-      params.set<MaterialPropertyName>("SUPG_delta") = DELTA;
-      params.set<MaterialPropertyName>("SUPG_R") = RESIDUAL;
-      params.set<MaterialPropertyName>("SUPG_A") = MATRIX;
-      params.set<MaterialPropertyName>("SUPG_y") = COLUMNS;
-      params.set<MaterialPropertyName>("SUPG_dUdx") = DUDX;
-      params.set<MaterialPropertyName>("SUPG_dAdU") = DADU;
-      _fe_problem.addKernel(class_name, genName(comp_name, vars[i], "sc"), params);
-    }
   }
 }
