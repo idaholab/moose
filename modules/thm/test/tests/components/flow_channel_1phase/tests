@@ -7,6 +7,22 @@
     rel_err = 1e-10
   [../]
 
+  [./phy:par_fn]
+    type = 'CSVDiff'
+    input = 'phy.par_fn.i'
+    csvdiff = 'phy.par_fn_out.csv'
+    rel_err = 1e-10
+  [../]
+
+  [./phy:sub_discretization]
+    type = 'Exodiff'
+    input = 'phy.sub_discretization.i'
+    exodiff = 'phy.sub_discretization_out.e'
+    custom_cmp = 'phy.sub_discretization.exodiff'
+    # matching geometry at t=0
+    recover = false
+  [../]
+
   # controls
 
   # error checking
@@ -23,21 +39,5 @@
     ratio_tol = 7e-8
     difference_tol = 15
     cli_args = 'Debug/check_jacobian=true'
-  [../]
-
-  [./phy:par_fn]
-    type = 'CSVDiff'
-    input = 'phy.par_fn.i'
-    csvdiff = 'phy.par_fn_out.csv'
-    rel_err = 1e-10
-  [../]
-
-  [./phy:sub_discretization]
-    type = 'Exodiff'
-    input = 'phy.sub_discretization.i'
-    exodiff = 'phy.sub_discretization_out.e'
-    custom_cmp = 'phy.sub_discretization.exodiff'
-    # matching geometry at t=0
-    recover = false
   [../]
 []
