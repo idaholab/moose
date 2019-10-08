@@ -60,8 +60,6 @@
   type = Transient
   dt = 1
   num_steps = 2
-  steady_state_detection = true
-  steady_state_tolerance = 1e-08
 []
 
 [Outputs]
