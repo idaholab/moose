@@ -1,12 +1,12 @@
 :root {
     --alert-error: rgba(153, 0, 0, 1.0);
-    --alert-error-content: rgba(153, 0, 0, 0.1);
+    --alert-error-content: rgba(153, 0, 0, 0.2);
     --alert-note: rgba(0, 88, 151, 1.0);
-    --alert-note-content: rgba(0, 88, 151, 0.1);
+    --alert-note-content: rgba(0, 88, 151, 0.2);
     --alert-warning: rgba(255, 255, 51, 1.0);
-    --alert-warning-content: rgba(255, 255, 51, 0.1);
+    --alert-warning-content: rgba(255, 255, 51, 0.2);
     --alert-construction: rgba(255, 114, 33, 1.0);
-    --alert-construction-content: rgba(255, 114, 33, 0.1);
+    --alert-construction-content: rgba(255, 114, 33, 0.2);
 }
 
 .moose-alert-title a{
