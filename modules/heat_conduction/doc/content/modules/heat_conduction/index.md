@@ -143,7 +143,7 @@ area $dA$ at $\vec{x}$, during time interval $dt$ at time $t$, along direction w
 \end{equation}
 
 where $\vec{n}$ is the normal on face $dA$.
-The intensity is computed by a code that solves the radiative transfer equation, e.g. Rattlesnake within the MOOSE framework. The solution of the radiative transfer equation is coupled to heat conduction within solid domains
+The intensity is computed by a code that solves the radiative transfer equation, e.g. [Rattlesnake](https://rattlesnake.inl.gov/SitePages/Home.aspx) within the MOOSE framework. The solution of the radiative transfer equation is coupled to heat conduction within solid domains
 through the balance at the surface [eq:heat_balance], but now we evaluate the net heat flux from the spectral intensity:
 
 \begin{equation}

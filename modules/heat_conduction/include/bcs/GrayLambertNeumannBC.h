@@ -10,7 +10,7 @@
 #pragma once
 
 #include "IntegratedBC.h"
-#include "GrayLambertSurfaceRadiation.h"
+#include "GrayLambertSurfaceRadiationBase.h"
 
 class GrayLambertNeumannBC;
 
@@ -19,7 +19,7 @@ InputParameters validParams<GrayLambertNeumannBC>();
 
 /**
  * Boundary condition for radiative heat that is computed by the
- * GrayLambertSurfaceRadiation userobject
+ * GrayLambertSurfaceRadiationBase userobject
  */
 class GrayLambertNeumannBC : public IntegratedBC
 {
@@ -32,5 +32,5 @@ protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
 
-  const GrayLambertSurfaceRadiation & _glsr_uo;
+  const GrayLambertSurfaceRadiationBase & _glsr_uo;
 };

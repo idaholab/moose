@@ -1,27 +1,27 @@
-# GrayLambertSurfaceRadiation
+# ConstantViewFactorSurfaceRadiation
 
 ## Description
 
-`GrayLambertSurfaceRadiation` implements the exchange of heat by radiation between
+`ConstantViewFactorSurfaceRadiation` implements the exchange of heat by radiation between
 sidesets by the net radiation method.
 The net radiation method is valid if the surfaces are gray, diffuse radiators.
-The purpose of the `GrayLambertSurfaceRadiation` is to provide the means
-to model radiative exchange for coarse-grained model. `GrayLambertSurfaceRadiation`
+The purpose of the `ConstantViewFactorSurfaceRadiation` is to provide the means
+to model radiative exchange for coarse-grained model. `ConstantViewFactorSurfaceRadiation`
 does not compute radiative exchange between element surfaces, but it computes radiative
 transfer only in an average sense between sidesets.
 
-The `GrayLambertSurfaceRadiation` allows coupling radiative heat transfer to regions
+The `ConstantViewFactorSurfaceRadiation` allows coupling radiative heat transfer to regions
 where the heat equation is solved. The net heat transfer caused by radiative heat transfer is
-coupled to the temperature field by `GrayLambertNeumannBC`. `GrayLambertSurfaceRadiation` also supports the
+coupled to the temperature field by `GrayLambertNeumannBC`. `ConstantViewFactorSurfaceRadiation` also supports the
 definition of adiabatic and fixed temperature sidesets. The temperature variable, i.e. the
 variable of the heat conduction equation, does not need to be defined on adiabatic and fixed
 temperature boundaries. This is particularly useful in cavities, where temperature is only
 defined on sidesets immediately adjacent to the heat conduction domain and not on the
 adiabatic and isothermal walls enclosing the cavity. There are three different types of boundary
-conditions in `GrayLambertSurfaceRadiation`:
+conditions in `ConstantViewFactorSurfaceRadiation`:
 
 - `VARIABLE_TEMPERATURE` are sidesets where temperature is provided by the `temperature` variable.
-  The heat equation is coupled to the `GrayLambertSurfaceRadiation` through these boundaries.
+  The heat equation is coupled to the `ConstantViewFactorSurfaceRadiation` through these boundaries.
 
 - `FIXED_TEMPERATURE` are sidesets with temperature given as a function. The difference to `VARIABLE_TEMPERATURE`
   is that we do not need to solve for temperature on `FIXED_TEMPERATURE`. `FIXED_TEMPERATURE` sidesets
@@ -34,7 +34,7 @@ conditions in `GrayLambertSurfaceRadiation`:
 
 ## Explanation of the input parameters
 
-This paragraph describes the input structure of the `GrayLambertSurfaceRadiation` object.
+This paragraph describes the input structure of the `ConstantViewFactorSurfaceRadiation` object.
 The following parameters are defined in detail:
 
 - `temperature`: the user must provide the name of the temperature variable as the `temperature` parameter.
@@ -70,8 +70,8 @@ The following parameters are defined in detail:
 !listing modules/heat_conduction/test/tests/gray_lambert_radiator/gray_lambert_cavity.i
 block=UserObjects
 
-!syntax parameters /UserObjects/GrayLambertSurfaceRadiation
+!syntax parameters /UserObjects/ConstantViewFactorSurfaceRadiation
 
-!syntax inputs /UserObjects/GrayLambertSurfaceRadiation
+!syntax inputs /UserObjects/ConstantViewFactorSurfaceRadiation
 
-!syntax children /UserObjects/GrayLambertSurfaceRadiation
+!syntax children /UserObjects/ConstantViewFactorSurfaceRadiation
