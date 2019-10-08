@@ -66,10 +66,10 @@ FlowChannel1Phase::check() const
   for (unsigned int i = 0; i < _heat_transfer_names.size(); i++)
   {
     if (!hasComponentByName<HeatTransfer1PhaseBase>(_heat_transfer_names[i]))
-      logError("Coupled heat sources '",
+      logError("Coupled heat source '",
                _heat_transfer_names[i],
-               "' is not compatible with single phase flow channel. Either change the type of the "
-               "flow channel or the heat transfer component.");
+               "' is not compatible with single phase flow channel. Use single phase heat transfer "
+               "component instead.");
   }
 
   bool ics_set =
