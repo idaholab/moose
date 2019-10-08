@@ -12,7 +12,6 @@
     exodiff = 'part2_out.e'
     prereq = 'part1'
     recover = false
-    skip = '#89'
   [../]
 
   [./part2_ics]

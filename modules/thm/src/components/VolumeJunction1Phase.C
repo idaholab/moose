@@ -13,11 +13,11 @@ validParams<VolumeJunction1Phase>()
 {
   InputParameters params = validParams<VolumeJunctionBase>();
 
-  params.addRequiredParam<FunctionName>("initial_p", "Initial pressure [Pa]");
-  params.addRequiredParam<FunctionName>("initial_T", "Initial temperature [K]");
-  params.addRequiredParam<FunctionName>("initial_vel_x", "Initial velocity in x-direction [m/s]");
-  params.addRequiredParam<FunctionName>("initial_vel_y", "Initial velocity in y-direction [m/s]");
-  params.addRequiredParam<FunctionName>("initial_vel_z", "Initial velocity in z-direction [m/s]");
+  params.addParam<FunctionName>("initial_p", "Initial pressure [Pa]");
+  params.addParam<FunctionName>("initial_T", "Initial temperature [K]");
+  params.addParam<FunctionName>("initial_vel_x", "Initial velocity in x-direction [m/s]");
+  params.addParam<FunctionName>("initial_vel_y", "Initial velocity in y-direction [m/s]");
+  params.addParam<FunctionName>("initial_vel_z", "Initial velocity in z-direction [m/s]");
 
   params.addParam<Real>("scaling_factor_rhoV", 1.0, "Scaling factor for rho*V");
   params.addParam<Real>("scaling_factor_rhouV", 1.0, "Scaling factor for rho*u*V");
@@ -59,6 +59,24 @@ VolumeJunction1Phase::check() const
     logModelNotImplementedError(_flow_model_id);
   if (_spatial_discretization != FlowModel::rDG)
     logSpatialDiscretizationNotImplementedError(_spatial_discretization);
+
+  bool ics_set =
+      _sim.hasInitialConditionsFromFile() ||
+      (isParamValid("initial_p") && isParamValid("initial_T") && isParamValid("initial_vel_x") &&
+       isParamValid("initial_vel_y") && isParamValid("initial_vel_z"));
+
+  if (!ics_set && !_app.isRestarting())
+  {
+    // create a list of the missing IC parameters
+    const std::vector<std::string> ic_params{
+        "initial_p", "initial_T", "initial_vel_x", "initial_vel_y", "initial_vel_z"};
+    std::ostringstream oss;
+    for (const auto & ic_param : ic_params)
+      if (!isParamValid(ic_param))
+        oss << " " << ic_param;
+
+    logError("The following initial condition parameters are missing:", oss.str());
+  }
 }
 
 void
@@ -66,52 +84,57 @@ VolumeJunction1Phase::addVariables()
 {
   auto connected_subdomains = getConnectedSubdomainNames();
 
-  Function & initial_p_fn = _sim.getFunction(getParam<FunctionName>("initial_p"));
-  Function & initial_T_fn = _sim.getFunction(getParam<FunctionName>("initial_T"));
-  Function & initial_vel_x_fn = _sim.getFunction(getParam<FunctionName>("initial_vel_x"));
-  Function & initial_vel_y_fn = _sim.getFunction(getParam<FunctionName>("initial_vel_y"));
-  Function & initial_vel_z_fn = _sim.getFunction(getParam<FunctionName>("initial_vel_z"));
-
-  initial_p_fn.initialSetup();
-  initial_T_fn.initialSetup();
-  initial_vel_x_fn.initialSetup();
-  initial_vel_y_fn.initialSetup();
-  initial_vel_z_fn.initialSetup();
-
-  const Real initial_p = initial_p_fn.value(0, _position);
-  const Real initial_T = initial_T_fn.value(0, _position);
-  const Real initial_vel_x = initial_vel_x_fn.value(0, _position);
-  const Real initial_vel_y = initial_vel_y_fn.value(0, _position);
-  const Real initial_vel_z = initial_vel_z_fn.value(0, _position);
-
-  const SinglePhaseFluidProperties & fp =
-      _sim.getUserObjectTempl<SinglePhaseFluidProperties>(_fp_name);
-  const Real initial_rho = fp.rho_from_p_T(initial_p, initial_T);
-  const RealVectorValue vel(initial_vel_x, initial_vel_y, initial_vel_z);
-  const Real initial_E = fp.e_from_p_rho(initial_p, initial_rho) + 0.5 * vel * vel;
-
   _sim.addSimVariable(
       true, _rhoV_var_name, FEType(FIRST, SCALAR), connected_subdomains, _scaling_factor_rhoV);
-  _sim.addConstantScalarIC(_rhoV_var_name, initial_rho * _volume);
   _sim.addSimVariable(
       true, _rhouV_var_name, FEType(FIRST, SCALAR), connected_subdomains, _scaling_factor_rhouV);
-  _sim.addConstantScalarIC(_rhouV_var_name, initial_rho * initial_vel_x * _volume);
   _sim.addSimVariable(
       true, _rhovV_var_name, FEType(FIRST, SCALAR), connected_subdomains, _scaling_factor_rhovV);
-  _sim.addConstantScalarIC(_rhovV_var_name, initial_rho * initial_vel_y * _volume);
   _sim.addSimVariable(
       true, _rhowV_var_name, FEType(FIRST, SCALAR), connected_subdomains, _scaling_factor_rhowV);
-  _sim.addConstantScalarIC(_rhowV_var_name, initial_rho * initial_vel_z * _volume);
   _sim.addSimVariable(
       true, _rhoEV_var_name, FEType(FIRST, SCALAR), connected_subdomains, _scaling_factor_rhoEV);
-  _sim.addConstantScalarIC(_rhoEV_var_name, initial_rho * initial_E * _volume);
-
   _sim.addSimVariable(false, _pressure_var_name, FEType(FIRST, SCALAR), connected_subdomains);
-  _sim.addConstantScalarIC(_pressure_var_name, initial_p);
   _sim.addSimVariable(false, _temperature_var_name, FEType(FIRST, SCALAR), connected_subdomains);
-  _sim.addConstantScalarIC(_temperature_var_name, initial_T);
   _sim.addSimVariable(false, _velocity_var_name, FEType(FIRST, SCALAR), connected_subdomains);
-  _sim.addConstantScalarIC(_velocity_var_name, vel.norm());
+
+  if (isParamValid("initial_p") && isParamValid("initial_T") && isParamValid("initial_vel_x") &&
+      isParamValid("initial_vel_y") && isParamValid("initial_vel_z"))
+  {
+    Function & initial_p_fn = _sim.getFunction(getParam<FunctionName>("initial_p"));
+    Function & initial_T_fn = _sim.getFunction(getParam<FunctionName>("initial_T"));
+    Function & initial_vel_x_fn = _sim.getFunction(getParam<FunctionName>("initial_vel_x"));
+    Function & initial_vel_y_fn = _sim.getFunction(getParam<FunctionName>("initial_vel_y"));
+    Function & initial_vel_z_fn = _sim.getFunction(getParam<FunctionName>("initial_vel_z"));
+
+    initial_p_fn.initialSetup();
+    initial_T_fn.initialSetup();
+    initial_vel_x_fn.initialSetup();
+    initial_vel_y_fn.initialSetup();
+    initial_vel_z_fn.initialSetup();
+
+    const Real initial_p = initial_p_fn.value(0, _position);
+    const Real initial_T = initial_T_fn.value(0, _position);
+    const Real initial_vel_x = initial_vel_x_fn.value(0, _position);
+    const Real initial_vel_y = initial_vel_y_fn.value(0, _position);
+    const Real initial_vel_z = initial_vel_z_fn.value(0, _position);
+
+    const SinglePhaseFluidProperties & fp =
+        _sim.getUserObjectTempl<SinglePhaseFluidProperties>(_fp_name);
+    const Real initial_rho = fp.rho_from_p_T(initial_p, initial_T);
+    const RealVectorValue vel(initial_vel_x, initial_vel_y, initial_vel_z);
+    const Real initial_E = fp.e_from_p_rho(initial_p, initial_rho) + 0.5 * vel * vel;
+
+    _sim.addConstantScalarIC(_rhoV_var_name, initial_rho * _volume);
+    _sim.addConstantScalarIC(_rhouV_var_name, initial_rho * initial_vel_x * _volume);
+    _sim.addConstantScalarIC(_rhovV_var_name, initial_rho * initial_vel_y * _volume);
+    _sim.addConstantScalarIC(_rhowV_var_name, initial_rho * initial_vel_z * _volume);
+    _sim.addConstantScalarIC(_rhoEV_var_name, initial_rho * initial_E * _volume);
+
+    _sim.addConstantScalarIC(_pressure_var_name, initial_p);
+    _sim.addConstantScalarIC(_temperature_var_name, initial_T);
+    _sim.addConstantScalarIC(_velocity_var_name, vel.norm());
+  }
 }
 
 void
