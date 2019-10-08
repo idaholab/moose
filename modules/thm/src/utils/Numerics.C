@@ -57,10 +57,10 @@ Prandtl(Real cp, Real mu, Real k)
 }
 
 Real
-Grashof(Real beta, Real dT, Real Dh, Real rho_l, Real mu_liquid, Real gravity_magnitude)
+Grashof(Real beta, Real dT, Real Dh, Real rho_liquid, Real mu_liquid, Real gravity_magnitude)
 {
   // Eq. 6-17
-  return gravity_magnitude * beta * dT * std::pow(Dh, 3) * (rho_l * rho_l) /
+  return gravity_magnitude * beta * dT * std::pow(Dh, 3) * (rho_liquid * rho_liquid) /
          (mu_liquid * mu_liquid);
 }
 

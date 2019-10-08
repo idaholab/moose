@@ -115,13 +115,13 @@ Real Prandtl(Real cp, Real mu, Real k);
  * @param beta Thermal expansion coefficient
  * @param dT |T_w - T|
  * @param D_h Hydraulic diameter
- * @param rho_l Density of liquid
+ * @param rho_liquid Density of liquid
  * @param mu_liquid Viscosity of liquid
  * @param gravity_magnitude   Gravitational acceleration magnitude
  *
  * @return Grashof number
  */
-Real Grashof(Real beta, Real dT, Real D_h, Real rho_l, Real mu_liquid, Real gravity_magnitude);
+Real Grashof(Real beta, Real dT, Real D_h, Real rho_liquid, Real mu_liquid, Real gravity_magnitude);
 
 /**
  * Compute Laplace number (or coefficient)
