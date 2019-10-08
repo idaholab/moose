@@ -1,0 +1,17 @@
+[Tests]
+  [exo]
+    input = interpolated-ncp-lm-nodal-enforcement-nodal-forces.i
+    type = Exodiff
+    exodiff = interpolated-ncp-lm-nodal-enforcement-nodal-forces_out.e
+    requirement = 'The system shall be able to solve a positively constrained PDE using nodal NCP, nodal application of resultant forces, and have no oscillations in the solution'
+  []
+  [non_singular]
+    input = interpolated-ncp-lm-nodal-enforcement-nodal-forces.i
+    type = RunApp
+    prereq = exo
+    requirement = 'The system shall be able to solve a positively constrained PDE using nodal NCP, nodal application of resultant forces, and have a non-singular matrix'
+    absent_out = '[1-9]+[0-9]* of 22 singular values'
+    expect_out = '0 of 22 singular values'
+    cli_args = 'nx=10 num_steps=5 -pc_type svd -pc_svd_monitor'
+  []
+[]
