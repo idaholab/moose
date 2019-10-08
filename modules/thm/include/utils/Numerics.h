@@ -96,9 +96,9 @@ DenseVector<Real> applyQuotientRule(const Real & num,
  * @param rho The density of the phase
  * @param vel The velocity of the phase
  * @param D_h The hydraulic diameter
- * @param visc The viscosity of the phase
+ * @param mu The viscosity of the phase
  */
-Real Reynolds(Real volume_fraction, Real rho, Real vel, Real D_h, Real visc);
+Real Reynolds(Real volume_fraction, Real rho, Real vel, Real D_h, Real mu);
 
 /**
  * Compute Prandtl number
@@ -116,12 +116,12 @@ Real Prandtl(Real cp, Real mu, Real k);
  * @param dT |T_w - T|
  * @param D_h Hydraulic diameter
  * @param rho_l Density of liquid
- * @param visc_l Viscosity of liquid
+ * @param mu_liquid Viscosity of liquid
  * @param gravity_magnitude   Gravitational acceleration magnitude
  *
  * @return Grashof number
  */
-Real Grashof(Real beta, Real dT, Real D_h, Real rho_l, Real visc_l, Real gravity_magnitude);
+Real Grashof(Real beta, Real dT, Real D_h, Real rho_l, Real mu_liquid, Real gravity_magnitude);
 
 /**
  * Compute Laplace number (or coefficient)

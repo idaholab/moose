@@ -42,3 +42,5 @@ TEST(NumericsTest, test_haveSameDirection_False)
   const RealVectorValue b(-1.0, 2.0, 3.0);
   EXPECT_FALSE(THM::haveSameDirection(a, b));
 }
+
+TEST(NumericsTest, Reynolds) { ABS_TEST(THM::Reynolds(0.1, 999, 2e-2), 0.16, 1e-13); }
