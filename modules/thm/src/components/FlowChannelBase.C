@@ -279,8 +279,12 @@ FlowChannelBase::addVariables()
   _flow_model->addVariables();
 
   // wall heat flux
-  if (!_temperature_mode && _n_heat_transfer_connections != 1)
-    _sim.addSimVariable(false, FlowModel::HEAT_FLUX_WALL, _sim.getFlowFEType(), getSubdomainName());
+  if (_n_heat_transfer_connections > 0)
+  {
+    if (!_temperature_mode)
+      _sim.addSimVariable(
+          false, FlowModel::HEAT_FLUX_WALL, _sim.getFlowFEType(), getSubdomainName());
+  }
 
   // total heat flux perimeter
   if (_n_heat_transfer_connections > 1)
