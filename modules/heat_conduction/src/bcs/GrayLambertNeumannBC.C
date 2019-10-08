@@ -20,15 +20,15 @@ validParams<GrayLambertNeumannBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
   params.addRequiredParam<UserObjectName>("surface_radiation_object_name",
-                                          "Name of the GrayLambertSurfaceRadiation UO");
+                                          "Name of the GrayLambertSurfaceRadiationBase UO");
   params.addClassDescription("This BC imposes a heat flux density that is computed from the "
-                             "GrayLambertSurfaceRadiation userobject.");
+                             "GrayLambertSurfaceRadiationBase userobject.");
   return params;
 }
 
 GrayLambertNeumannBC::GrayLambertNeumannBC(const InputParameters & parameters)
   : IntegratedBC(parameters),
-    _glsr_uo(getUserObject<GrayLambertSurfaceRadiation>("surface_radiation_object_name"))
+    _glsr_uo(getUserObject<GrayLambertSurfaceRadiationBase>("surface_radiation_object_name"))
 {
 }
 
