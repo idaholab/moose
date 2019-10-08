@@ -244,7 +244,6 @@
 - /Kernels/OneD7EqnVolumeFractionTimeDerivative
 - /Kernels/OneD7EqnVolumeFractionWallMassTransfer
 - /Kernels/OneDSUPG
-- /Kernels/OneDShockCapturing
 - /Kernels/OneDStabilizationBase
 
 - /Materials/AverageWallTemperature3EqnMaterial

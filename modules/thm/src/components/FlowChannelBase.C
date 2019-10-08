@@ -53,7 +53,6 @@ validParams<FlowChannelBase>()
   params.addParam<FunctionName>("D_h", "Hydraulic diameter");
   params.addParam<UserObjectName>(
       "stabilization", "", "The name of the local stabilization scheme to use");
-  params.addParam<bool>("shock_capturing", false, "Use shock capturing or not (locally)");
   params.addParam<bool>("lump_mass_matrix", false, "Lump the mass matrix");
   params.addRequiredParam<std::string>("closures", "Closures type");
 
