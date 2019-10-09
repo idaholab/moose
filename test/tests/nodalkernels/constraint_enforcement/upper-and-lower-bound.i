@@ -12,7 +12,9 @@ num_steps=10
 [Variables]
   [u]
   []
-  [lm]
+  [lm_upper]
+  []
+  [lm_lower]
   []
 []
 
@@ -20,7 +22,7 @@ num_steps=10
   [u]
     type = FunctionIC
     variable = u
-    function = '${l} - x'
+    function = 'x'
   []
 []
 
@@ -36,21 +38,36 @@ num_steps=10
   [ffn]
     type = BodyForce
     variable = u
-    function = '-1'
+    function = 'if(x<5,-1,1)'
   []
 []
 
 [NodalKernels]
-  [positive_constraint]
-    type = LowerBoundNodalKernel
-    variable = lm
+  [upper_bound]
+    type = UpperBoundNodalKernel
+    variable = lm_upper
     v = u
     exclude_boundaries = 'left right'
+    upper_bound = 10
   []
-  [forces]
+  [forces_from_upper]
     type = CoupledForceNodalKernel
     variable = u
-    v = lm
+    v = lm_upper
+    coef = -1
+  []
+  [lower_bound]
+    type = LowerBoundNodalKernel
+    variable = lm_lower
+    v = u
+    exclude_boundaries = 'left right'
+    lower_bound = 0
+  []
+  [forces_from_lower]
+    type = CoupledForceNodalKernel
+    variable = u
+    v = lm_lower
+    coef = 1
   []
 []
 
@@ -59,18 +76,15 @@ num_steps=10
   [left]
     type = DirichletBC
     boundary = left
-    value = ${l}
+    value = 0
     variable = u
   []
   [right]
     type = DirichletBC
     boundary = right
-    value = 0
+    value = ${l}
     variable = u
   []
-[]
-
-[NodalKernels]
 []
 
 [Preconditioning]
@@ -106,14 +120,29 @@ num_steps=10
 []
 
 [Postprocessors]
-  [active_lm]
-    type = LMActiveSetSize
-    variable = lm
+  [active_upper_lm]
+    type = GreaterThanLessThanPostprocessor
+    variable = lm_upper
     execute_on = 'nonlinear timestep_end'
-    value = 1e-12
+    value = 1e-8
+    comparator = 'greater'
   []
-  [violations]
-    type = LMActiveSetSize
+  [upper_violations]
+    type = GreaterThanLessThanPostprocessor
+    variable = u
+    execute_on = 'nonlinear timestep_end'
+    value = ${fparse 10+1e-8}
+    comparator = 'greater'
+  []
+  [active_lower_lm]
+    type = GreaterThanLessThanPostprocessor
+    variable = lm_lower
+    execute_on = 'nonlinear timestep_end'
+    value = 1e-8
+    comparator = 'greater'
+  []
+  [lower_violations]
+    type = GreaterThanLessThanPostprocessor
     variable = u
     execute_on = 'nonlinear timestep_end'
     value = -1e-8

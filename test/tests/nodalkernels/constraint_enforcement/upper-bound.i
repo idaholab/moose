@@ -72,9 +72,6 @@ num_steps=10
   []
 []
 
-[NodalKernels]
-[]
-
 [Preconditioning]
   [smp]
     type = SMP

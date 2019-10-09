@@ -36,4 +36,22 @@
       detail = 'have a non-singular matrix'
     []
   []
+  [upper_and_lower_bound]
+    design = UpperBoundNodalKernel.md
+    requirement = 'The system shall be able to enforce an upper and lower bound on a variable using nodal NCP, nodal application of resultant forces,'
+    [exo]
+      input = upper-and-lower-bound.i
+      type = Exodiff
+      exodiff = upper-and-lower-bound_out.e
+      detail = 'have no oscillations in the solution, and'
+    []
+    [non_singular]
+      input = upper-and-lower-bound.i
+      type = RunApp
+      absent_out = '[1-9]+[0-9]* of 33 singular values'
+      expect_out = '0 of 33 singular values'
+      cli_args = "nx=10 num_steps=5 Outputs/exodus=false Outputs/active='' -pc_type svd -pc_svd_monitor"
+      detail = 'have a non-singular matrix'
+    []
+  []
 []
