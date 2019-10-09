@@ -19,6 +19,13 @@ defineADValidParams(ADKernelGrad, ADKernel, );
 defineADValidParams(ADVectorKernelGrad, ADVectorKernel, );
 
 template <typename T, ComputeStage compute_stage>
+InputParameters
+ADKernelGradTempl<T, compute_stage>::validParams()
+{
+  return ADKernelTempl<T, compute_stage>::validParams();
+}
+
+template <typename T, ComputeStage compute_stage>
 ADKernelGradTempl<T, compute_stage>::ADKernelGradTempl(const InputParameters & parameters)
   : ADKernelTempl<T, compute_stage>(parameters)
 {

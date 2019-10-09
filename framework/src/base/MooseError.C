@@ -15,6 +15,10 @@
 
 namespace moose
 {
+
+bool show_trace = true;
+bool show_multiple = false;
+
 namespace internal
 {
 
@@ -33,7 +37,7 @@ std::string
 mooseMsgFmt(const std::string & msg, const std::string & title, const std::string & color)
 {
   std::ostringstream oss;
-  oss << "\n\n" << color << "\n\n" << title << "\n" << msg << COLOR_DEFAULT << "\n\n";
+  oss << "\n" << color << "\n" << title << "\n" << msg << COLOR_DEFAULT << "\n";
   return oss.str();
 }
 

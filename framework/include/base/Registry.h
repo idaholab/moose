@@ -159,6 +159,34 @@
                                              #templatename "<JACOBIAN>",                           \
                                              true})
 
+template <typename T>
+auto
+callValidParamsInner(long) -> decltype(T::validParams(), emptyInputParameters())
+{
+  return T::validParams();
+}
+
+template <typename T>
+auto
+callValidParamsInner(int) -> decltype(validParams<T>(), emptyInputParameters())
+{
+  moose::show_trace = false;
+  moose::show_multiple = true;
+  mooseDeprecated("Convert validParams<",
+                  demangle(typeid(T).name()),
+                  ">() into a static member function and remove the old function.");
+  moose::show_multiple = false;
+  moose::show_trace = true;
+  return validParams<T>();
+}
+
+template <typename T>
+auto
+callValidParams() -> decltype(callValidParamsInner<T>(0), emptyInputParameters())
+{
+  return callValidParamsInner<T>(0);
+}
+
 struct RegistryEntry;
 class Factory;
 class ActionFactory;
@@ -201,14 +229,14 @@ struct RegistryEntry
   bool _is_ad;
 };
 
-template <class T>
+template <typename T>
 std::shared_ptr<MooseObject>
 buildObj(const InputParameters & parameters)
 {
   return std::make_shared<T>(parameters);
 }
 
-template <class T>
+template <typename T>
 std::shared_ptr<Action>
 buildAct(const InputParameters & parameters)
 {
@@ -235,7 +263,7 @@ public:
   {
     RegistryEntry copy = info;
     copy._build_ptr = &buildObj<T>;
-    copy._params_ptr = &validParams<T>;
+    copy._params_ptr = &callValidParams<T>;
     addInner(copy);
     return 0;
   }
@@ -248,7 +276,7 @@ public:
   {
     RegistryEntry copy = info;
     copy._build_action_ptr = &buildAct<T>;
-    copy._params_ptr = &validParams<T>;
+    copy._params_ptr = &callValidParams<T>;
     addActionInner(copy);
     return 0;
   }

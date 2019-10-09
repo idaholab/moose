@@ -17,6 +17,16 @@ defineADValidParams(
     params.addClassDescription("Same as `Diffusion` in terms of physics/residual, but the Jacobian "
                                "is computed using forward automatic differentiation"););
 
+template <ComputeStage T>
+InputParameters
+ADDiffusion<T>::validParams()
+{
+  auto params = ADKernelGrad<T>::validParams();
+  params.addClassDescription("Same as `Diffusion` in terms of physics/residual, but the Jacobian "
+                             "is computed using forward automatic differentiation");
+  return params;
+}
+
 template <ComputeStage compute_stage>
 ADDiffusion<compute_stage>::ADDiffusion(const InputParameters & parameters)
   : ADKernelGrad<compute_stage>(parameters)

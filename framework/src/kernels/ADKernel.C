@@ -21,6 +21,20 @@ defineADBaseValidParams(ADKernel, KernelBase, params.registerBase("Kernel"););
 defineADBaseValidParams(ADVectorKernel, KernelBase, params.registerBase("VectorKernel"););
 
 template <typename T, ComputeStage compute_stage>
+InputParameters
+ADKernelTempl<T, compute_stage>::validParams()
+{
+  auto params = KernelBase::validParams();
+  if (typeid(T).name() == typeid(Real).name())
+    params.registerBase("Kernel");
+  else if (typeid(T).name() == typeid(RealVectorValue).name())
+    params.registerBase("VectorKernel");
+  else
+    ::mooseError("unsupported ADKernelTempl specialization");
+  return params;
+}
+
+template <typename T, ComputeStage compute_stage>
 ADKernelTempl<T, compute_stage>::ADKernelTempl(const InputParameters & parameters)
   : KernelBase(parameters),
     MooseVariableInterface<T>(this,

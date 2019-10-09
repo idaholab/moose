@@ -39,7 +39,7 @@
   do                                                                                               \
   {                                                                                                \
     static bool did_this_already = false;                                                          \
-    if (!did_this_already)                                                                         \
+    if (moose::show_multiple || !did_this_already)                                                 \
     {                                                                                              \
       did_this_already = true;                                                                     \
       do_this;                                                                                     \
@@ -99,6 +99,10 @@ class MooseVariableFEBase;
 
 namespace moose
 {
+
+extern bool show_trace;
+extern bool show_multiple;
+
 namespace internal
 {
 
@@ -181,13 +185,18 @@ mooseDeprecatedStream(S & oss, bool expired, Args &&... args)
   mooseDoOnce(std::ostringstream ss; mooseStreamAll(ss, args...);
               std::string msg = mooseMsgFmt(
                   ss.str(),
-                  "*** Warning, This code is deprecated and will be removed in future versions!\n",
+                  "*** Warning, This code is deprecated and will be removed in future versions:",
                   expired ? COLOR_RED : COLOR_YELLOW);
               oss << msg;
               ss.str("");
-              if (libMesh::global_n_processors() == 1) print_trace(ss);
-              else libMesh::write_traceout();
-              oss << ss.str() << std::endl;);
+              if (show_trace) {
+                if (libMesh::global_n_processors() == 1)
+                  print_trace(ss);
+                else
+                  libMesh::write_traceout();
+                oss << ss.str() << std::endl;
+                ;
+              });
 }
 /**
  * @}

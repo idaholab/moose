@@ -21,13 +21,19 @@ template <>
 InputParameters
 validParams<KernelBase>()
 {
-  InputParameters params = validParams<MooseObject>();
-  params += validParams<TransientInterface>();
-  params += validParams<BlockRestrictable>();
-  params += validParams<RandomInterface>();
-  params += validParams<MeshChangedInterface>();
-  params += validParams<MaterialPropertyInterface>();
-  params += validParams<TaggingInterface>();
+  return KernelBase::validParams();
+}
+
+InputParameters
+KernelBase::validParams()
+{
+  auto params = MooseObject::validParams();
+  params += ::validParams<TransientInterface>();
+  params += ::validParams<BlockRestrictable>();
+  params += ::validParams<RandomInterface>();
+  params += ::validParams<MeshChangedInterface>();
+  params += ::validParams<MaterialPropertyInterface>();
+  params += ::validParams<TaggingInterface>();
 
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this Kernel operates on");

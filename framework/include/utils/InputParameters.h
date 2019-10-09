@@ -1500,6 +1500,5 @@ InputParameters
 validParams()
 {
   static_assert(false && sizeof(T), "Missing validParams declaration!");
-
   mooseError("Missing validParams declaration!");
 }
