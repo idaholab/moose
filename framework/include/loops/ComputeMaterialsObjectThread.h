@@ -27,11 +27,9 @@ public:
                                std::vector<std::shared_ptr<MaterialData>> & material_data,
                                std::vector<std::shared_ptr<MaterialData>> & bnd_material_data,
                                std::vector<std::shared_ptr<MaterialData>> & neighbor_material_data,
-                               std::vector<std::shared_ptr<MaterialData>> & interface_material_data,
                                MaterialPropertyStorage & material_props,
                                MaterialPropertyStorage & bnd_material_props,
                                MaterialPropertyStorage & neighbor_material_props,
-                               MaterialPropertyStorage & interface_material_props,
                                std::vector<std::unique_ptr<Assembly>> & assembly);
 
   // Splitting Constructor
@@ -52,16 +50,20 @@ protected:
   std::vector<std::shared_ptr<MaterialData>> & _material_data;
   std::vector<std::shared_ptr<MaterialData>> & _bnd_material_data;
   std::vector<std::shared_ptr<MaterialData>> & _neighbor_material_data;
-  std::vector<std::shared_ptr<MaterialData>> & _interface_material_data;
   MaterialPropertyStorage & _material_props;
   MaterialPropertyStorage & _bnd_material_props;
   MaterialPropertyStorage & _neighbor_material_props;
-  MaterialPropertyStorage & _interface_material_props;
 
   /// This is populated using _fe_problem.getResidualMaterialsWarehouse because it has the union
   /// of traditional materials and the residual version of AD materials. We don't need the Jacobian
   /// version of the ADMaterial for doing stateful stuff
   const MaterialWarehouse & _materials;
+
+  /// This is populated using _fe_problem.getResidualInterfaceMaterialsWarehouse because it has the
+  /// union of traditional interface materials and the residual version of AD interface
+  /// materials. We don't need the Jacobian version of the ADInterfaceMaterial for doing stateful
+  /// stuff
+  const MaterialWarehouse & _interface_materials;
 
   const MaterialWarehouse & _discrete_materials;
 
@@ -71,6 +73,4 @@ protected:
   const bool _has_stateful_props;
   const bool _has_bnd_stateful_props;
   const bool _has_neighbor_stateful_props;
-  const bool _has_interface_stateful_props;
 };
-

@@ -159,7 +159,8 @@ ComputeResidualThread::onInterface(const Elem * elem, unsigned int side, Boundar
       _fe_problem.reinitNeighbor(elem, side, _tid);
 
       // Set up Sentinels so that, even if one of the reinitMaterialsXXX() calls throws, we
-      // still remember to swap back during stack unwinding.
+      // still remember to swap back during stack unwinding. Note that face, boundary, and interface
+      // all operate with the same MaterialData object
       SwapBackSentinel face_sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
       _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
       _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
@@ -167,8 +168,7 @@ ComputeResidualThread::onInterface(const Elem * elem, unsigned int side, Boundar
       SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblem::swapBackMaterialsNeighbor, _tid);
       _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
 
-      SwapBackSentinel interface_sentinel(
-          _fe_problem, &FEProblem::swapBackMaterialsInterface, _tid);
+      // Has to happen after face and neighbor properties have been computed
       _fe_problem.reinitMaterialsInterface(bnd_id, _tid);
 
       const auto & int_ks = _ik_warehouse->getActiveBoundaryObjects(bnd_id, _tid);

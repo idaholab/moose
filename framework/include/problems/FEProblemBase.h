@@ -699,9 +699,6 @@ public:
   virtual void reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful = true);
   virtual void
   reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful = true);
-  virtual void reinitMaterialsNeighborOnInterface(BoundaryID boundary_id,
-                                                  THREAD_ID tid,
-                                                  bool swap_stateful = true);
   virtual void
   reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid, bool swap_stateful = true);
   virtual void
@@ -712,7 +709,6 @@ public:
   virtual void swapBackMaterials(THREAD_ID tid);
   virtual void swapBackMaterialsFace(THREAD_ID tid);
   virtual void swapBackMaterialsNeighbor(THREAD_ID tid);
-  virtual void swapBackMaterialsInterface(THREAD_ID tid);
 
   // Postprocessors /////
   virtual void
@@ -1299,10 +1295,6 @@ public:
   {
     return _neighbor_material_props;
   }
-  const MaterialPropertyStorage & getInterfaceMaterialPropertyStorage()
-  {
-    return _interface_material_props;
-  }
   ///@}
 
   ///@{
@@ -1462,6 +1454,10 @@ public:
   const MaterialWarehouse & getResidualMaterialsWarehouse() const { return _residual_materials; }
   const MaterialWarehouse & getJacobianMaterialsWarehouse() const { return _jacobian_materials; }
   const MaterialWarehouse & getDiscreteMaterialWarehouse() const { return _discrete_materials; }
+  const MaterialWarehouse & getResidualInterfaceMaterialsWarehouse() const
+  {
+    return _residual_interface_materials;
+  }
 
   /**
    * Return a pointer to a MaterialBase object.  If no_warn is true, suppress
@@ -1726,6 +1722,11 @@ public:
    */
   virtual bool hasMortarCoupling() const { return _has_mortar; }
 
+  /**
+   * Mark whether materials need to be reinitialized
+   */
+  void materialsNeedReinit(bool need_reinit = true);
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -1784,12 +1785,10 @@ protected:
   MaterialPropertyStorage & _material_props;
   MaterialPropertyStorage & _bnd_material_props;
   MaterialPropertyStorage & _neighbor_material_props;
-  MaterialPropertyStorage & _interface_material_props;
 
   std::vector<std::shared_ptr<MaterialData>> _material_data;
   std::vector<std::shared_ptr<MaterialData>> _bnd_material_data;
   std::vector<std::shared_ptr<MaterialData>> _neighbor_material_data;
-  std::vector<std::shared_ptr<MaterialData>> _interface_material_data;
 
   ///@{
   // Material Warehouses
@@ -2081,6 +2080,18 @@ private:
 
   /// Whether the simulation requires mortar coupling
   bool _has_mortar;
+
+  /// Whether boundary materials need to be reinitialized
+  bool _bnd_needs_reinit;
+
+  /// Whether face materials need to be reinitialized
+  bool _face_needs_reinit;
+
+  /// Whether neighbor materials need to be reinitialized
+  bool _neighbor_needs_reinit;
+
+  /// Whether interface materials need to be reinitialized
+  bool _interface_needs_reinit;
 };
 
 template <typename T>

@@ -87,6 +87,7 @@ void
 ThreadedElementLoop<RangeType>::preElement(const Elem * el)
 {
   _fe_problem.setCurrentSubdomainID(el, ThreadedElementLoopBase<RangeType>::_tid);
+  _fe_problem.materialsNeedReinit();
 }
 
 template <typename RangeType>
