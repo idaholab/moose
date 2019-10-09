@@ -325,11 +325,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _u_dotdot_requested(false),
     _u_dot_old_requested(false),
     _u_dotdot_old_requested(false),
-    _has_mortar(false),
-    _bnd_needs_reinit(true),
-    _face_needs_reinit(true),
-    _neighbor_needs_reinit(true),
-    _interface_needs_reinit(true)
+    _has_mortar(false)
 {
   _time = 0.0;
   _time_old = 0.0;
@@ -2868,7 +2864,7 @@ FEProblemBase::reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stat
 void
 FEProblemBase::reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful)
 {
-  if (hasActiveMaterialProperties(tid) && _face_needs_reinit)
+  if (hasActiveMaterialProperties(tid))
   {
     auto && elem = _assembly[tid]->elem();
     unsigned int side = _assembly[tid]->side();
@@ -2892,15 +2888,13 @@ FEProblemBase::reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid, bool swap_
         !_currently_computing_jacobian)
       _bnd_material_data[tid]->reinit(
           _residual_materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
-
-    _face_needs_reinit = false;
   }
 }
 
 void
 FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful)
 {
-  if (hasActiveMaterialProperties(tid) && _neighbor_needs_reinit)
+  if (hasActiveMaterialProperties(tid))
   {
     // NOTE: this will not work with h-adaptivity
     auto && neighbor = _assembly[tid]->neighbor();
@@ -2925,15 +2919,13 @@ FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool s
         !_currently_computing_jacobian)
       _neighbor_material_data[tid]->reinit(
           _residual_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
-
-    _neighbor_needs_reinit = false;
   }
 }
 
 void
 FEProblemBase::reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid, bool swap_stateful)
 {
-  if (hasActiveMaterialProperties(tid) && _bnd_needs_reinit)
+  if (hasActiveMaterialProperties(tid))
   {
     auto && elem = _assembly[tid]->elem();
     unsigned int side = _assembly[tid]->side();
@@ -2956,26 +2948,21 @@ FEProblemBase::reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid, bo
         !_currently_computing_jacobian)
       _bnd_material_data[tid]->reinit(
           _residual_materials.getActiveBoundaryObjects(boundary_id, tid));
-
-    _bnd_needs_reinit = false;
   }
 }
 
 void
 FEProblemBase::reinitMaterialsInterface(BoundaryID boundary_id, THREAD_ID tid, bool swap_stateful)
 {
-  if (hasActiveMaterialProperties(tid) && _interface_needs_reinit)
+  if (hasActiveMaterialProperties(tid))
   {
-    if (_bnd_needs_reinit)
-    {
-      const Elem * const & elem = _assembly[tid]->elem();
-      unsigned int side = _assembly[tid]->side();
-      unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
-      _bnd_material_data[tid]->resize(n_points);
+    const Elem * const & elem = _assembly[tid]->elem();
+    unsigned int side = _assembly[tid]->side();
+    unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
+    _bnd_material_data[tid]->resize(n_points);
 
-      if (swap_stateful && !_bnd_material_data[tid]->isSwapped())
-        _bnd_material_data[tid]->swap(*elem, side);
-    }
+    if (swap_stateful && !_bnd_material_data[tid]->isSwapped())
+      _bnd_material_data[tid]->swap(*elem, side);
 
     if (_jacobian_interface_materials.hasActiveBoundaryObjects(boundary_id, tid) &&
         _currently_computing_jacobian)
@@ -2986,8 +2973,6 @@ FEProblemBase::reinitMaterialsInterface(BoundaryID boundary_id, THREAD_ID tid, b
         !_currently_computing_jacobian)
       _bnd_material_data[tid]->reinit(
           _residual_interface_materials.getActiveBoundaryObjects(boundary_id, tid));
-
-    _interface_needs_reinit = false;
   }
 }
 
@@ -6376,13 +6361,4 @@ SystemBase &
 FEProblemBase::systemBaseAuxiliary()
 {
   return *_aux;
-}
-
-void
-FEProblemBase::materialsNeedReinit(bool need_reinit)
-{
-  _bnd_needs_reinit = need_reinit;
-  _face_needs_reinit = need_reinit;
-  _neighbor_needs_reinit = need_reinit;
-  _interface_needs_reinit = need_reinit;
 }

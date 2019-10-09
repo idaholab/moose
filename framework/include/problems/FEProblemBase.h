@@ -1722,11 +1722,6 @@ public:
    */
   virtual bool hasMortarCoupling() const { return _has_mortar; }
 
-  /**
-   * Mark whether materials need to be reinitialized
-   */
-  void materialsNeedReinit(bool need_reinit = true);
-
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -2080,18 +2075,6 @@ private:
 
   /// Whether the simulation requires mortar coupling
   bool _has_mortar;
-
-  /// Whether boundary materials need to be reinitialized
-  bool _bnd_needs_reinit;
-
-  /// Whether face materials need to be reinitialized
-  bool _face_needs_reinit;
-
-  /// Whether neighbor materials need to be reinitialized
-  bool _neighbor_needs_reinit;
-
-  /// Whether interface materials need to be reinitialized
-  bool _interface_needs_reinit;
 };
 
 template <typename T>
