@@ -2692,6 +2692,31 @@ FEProblemBase::addADJacobianMaterial(const std::string & mat_name,
 }
 
 void
+FEProblemBase::addInterfaceMaterial(const std::string & mat_name,
+                                    const std::string & name,
+                                    InputParameters & parameters)
+{
+  addMaterialHelper(
+      {&_residual_interface_materials, &_jacobian_interface_materials}, mat_name, name, parameters);
+}
+
+void
+FEProblemBase::addADResidualInterfaceMaterial(const std::string & mat_name,
+                                              const std::string & name,
+                                              InputParameters & parameters)
+{
+  addMaterialHelper({&_residual_interface_materials}, mat_name, name, parameters);
+}
+
+void
+FEProblemBase::addADJacobianInterfaceMaterial(const std::string & mat_name,
+                                              const std::string & name,
+                                              InputParameters & parameters)
+{
+  addMaterialHelper({&_jacobian_interface_materials}, mat_name, name, parameters);
+}
+
+void
 FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
                                  const std::string & mat_name,
                                  const std::string & name,
@@ -2728,41 +2753,12 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
     // If the object is boundary restricted do not create the neighbor and face objects
     if (material->boundaryRestricted())
     {
-
-      std::shared_ptr<MaterialBase> interface_material;
-      if (material->isInterfaceMaterial())
-      {
-        std::string object_name;
-        InputParameters current_parameters = parameters;
-
-        current_parameters.set<Moose::MaterialDataType>("_material_data_type") =
-            Moose::INTERFACE_MATERIAL_DATA;
-        object_name = name + "_interface";
-        interface_material =
-            _factory.create<MaterialBase>(mat_name, object_name, current_parameters, tid);
-      }
-
       _all_materials.addObject(material, tid);
       if (discrete)
-      {
         _discrete_materials.addObject(material, tid);
-        if (material->isInterfaceMaterial())
-          _discrete_materials.addInterfaceObject(interface_material, tid);
-      }
       else
         for (auto && warehouse : warehouses)
-        {
           warehouse->addObject(material, tid);
-          if (material->isInterfaceMaterial())
-            warehouse->addInterfaceObject(interface_material, tid);
-        }
-      if (material->isInterfaceMaterial())
-      {
-        MooseObjectParameterName interface_name(
-            MooseObjectName("Material", interface_material->name()), "*");
-        _app.getInputParameterWarehouse().addControllableParameterConnection(
-            name, interface_name, false);
-      }
     }
 
     // Non-boundary restricted require face and neighbor objects
@@ -3023,19 +3019,15 @@ FEProblemBase::reinitMaterialsInterface(BoundaryID boundary_id, THREAD_ID tid, b
     if (swap_stateful && !_interface_material_data[tid]->isSwapped())
       _interface_material_data[tid]->swap(*elem, side);
 
-    if (_discrete_materials.hasActiveBoundaryObjects(boundary_id, tid))
-      _interface_material_data[tid]->reset(
-          _discrete_materials.getActiveBoundaryObjects(boundary_id, tid));
-
-    if (_jacobian_materials.hasActiveBoundaryObjects(boundary_id, tid) &&
+    if (_jacobian_interface_materials.hasActiveBoundaryObjects(boundary_id, tid) &&
         _currently_computing_jacobian)
       _interface_material_data[tid]->reinit(
-          _jacobian_materials.getActiveBoundaryObjects(boundary_id, tid));
+          _jacobian_interface_materials.getActiveBoundaryObjects(boundary_id, tid));
 
-    if (_residual_materials.hasActiveBoundaryObjects(boundary_id, tid) &&
+    if (_residual_interface_materials.hasActiveBoundaryObjects(boundary_id, tid) &&
         !_currently_computing_jacobian)
       _interface_material_data[tid]->reinit(
-          _residual_materials.getActiveBoundaryObjects(boundary_id, tid));
+          _residual_interface_materials.getActiveBoundaryObjects(boundary_id, tid));
   }
 }
 

@@ -678,6 +678,15 @@ public:
                                  const std::string & kernel_name,
                                  const std::string & name,
                                  InputParameters & parameters);
+  virtual void addInterfaceMaterial(const std::string & kernel_name,
+                                    const std::string & name,
+                                    InputParameters & parameters);
+  virtual void addADResidualInterfaceMaterial(const std::string & kernel_name,
+                                              const std::string & name,
+                                              InputParameters & parameters);
+  virtual void addADJacobianInterfaceMaterial(const std::string & kernel_name,
+                                              const std::string & name,
+                                              InputParameters & parameters);
 
   /**
    * Add the MooseVariables that the current materials depend on to the dependency list.
@@ -1788,7 +1797,13 @@ protected:
                                          // materials and the residual copy of an ADMaterial
   MaterialWarehouse _jacobian_materials; // Jacobian materials. This is the union of traditional
                                          // materials and the Jacobian copy of an ADMaterial
-  MaterialWarehouse _discrete_materials; // Materials that the user must compute
+  MaterialWarehouse _residual_interface_materials; // Residual interface materials. This is the
+                                                   // union of traditional interface materials and
+                                                   // the residual copy of an ADInterfaceMaterial
+  MaterialWarehouse _jacobian_interface_materials; // Jacobian materials. This is the union of
+                                                   // traditional interface materials and the
+                                                   // Jacobian copy of an ADInterface Material
+  MaterialWarehouse _discrete_materials;           // Materials that the user must compute
   MaterialWarehouse _all_materials; // All materials for error checking and MaterialData storage
   ///@}
 

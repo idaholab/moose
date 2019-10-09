@@ -16,6 +16,8 @@ validParams<InterfaceMaterial>()
 {
   InputParameters params = validParams<MaterialBase>();
   params += validParams<TwoMaterialPropertyInterface>();
+  params.set<bool>("_interface") = true;
+  params.set<Moose::MaterialDataType>("_material_data_type") = Moose::INTERFACE_MATERIAL_DATA;
   return params;
 }
 

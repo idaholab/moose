@@ -167,6 +167,10 @@ ComputeResidualThread::onInterface(const Elem * elem, unsigned int side, Boundar
       SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblem::swapBackMaterialsNeighbor, _tid);
       _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
 
+      SwapBackSentinel interface_sentinel(
+          _fe_problem, &FEProblem::swapBackMaterialsInterface, _tid);
+      _fe_problem.reinitMaterialsInterface(bnd_id, _tid);
+
       const auto & int_ks = _ik_warehouse->getActiveBoundaryObjects(bnd_id, _tid);
       for (const auto & interface_kernel : int_ks)
         interface_kernel->computeResidual();

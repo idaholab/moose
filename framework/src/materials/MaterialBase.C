@@ -41,6 +41,7 @@ validParams<MaterialBase>()
                         "Non-computed MaterialBases are not sorted for dependencies.");
 
   params.addPrivateParam<bool>("_neighbor", false);
+  params.addPrivateParam<bool>("_interface", false);
 
   // Outputs
   params += validParams<OutputInterface>();
