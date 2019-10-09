@@ -1,17 +1,39 @@
 [Tests]
-  [exo]
-    input = interpolated-ncp-lm-nodal-enforcement-nodal-forces.i
-    type = Exodiff
-    exodiff = interpolated-ncp-lm-nodal-enforcement-nodal-forces_out.e
-    requirement = 'The system shall be able to solve a positively constrained PDE using nodal NCP, nodal application of resultant forces, and have no oscillations in the solution'
+  issues = '#2999'
+  [lower_bound]
+    design = LowerBoundNodalKernel.md
+    requirement = 'The system shall be able to enforce a lower bound on a variable using nodal NCP, nodal application of resultant forces,'
+    [exo]
+      input = lower-bound.i
+      type = Exodiff
+      exodiff = lower-bound_out.e
+      detail = 'have no oscillations in the solution, and'
+    []
+    [non_singular]
+      input = lower-bound.i
+      type = RunApp
+      absent_out = '[1-9]+[0-9]* of 22 singular values'
+      expect_out = '0 of 22 singular values'
+      cli_args = "nx=10 num_steps=5 Outputs/exodus=false Outputs/active='' -pc_type svd -pc_svd_monitor"
+      detail = 'have a non-singular matrix'
+    []
   []
-  [non_singular]
-    input = interpolated-ncp-lm-nodal-enforcement-nodal-forces.i
-    type = RunApp
-    prereq = exo
-    requirement = 'The system shall be able to solve a positively constrained PDE using nodal NCP, nodal application of resultant forces, and have a non-singular matrix'
-    absent_out = '[1-9]+[0-9]* of 22 singular values'
-    expect_out = '0 of 22 singular values'
-    cli_args = 'nx=10 num_steps=5 -pc_type svd -pc_svd_monitor'
+  [upper_bound]
+    design = UpperBoundNodalKernel.md
+    requirement = 'The system shall be able to enforce an upper bound on a variable using nodal NCP, nodal application of resultant forces,'
+    [exo]
+      input = upper-bound.i
+      type = Exodiff
+      exodiff = upper-bound_out.e
+      detail = 'have no oscillations in the solution, and'
+    []
+    [non_singular]
+      input = upper-bound.i
+      type = RunApp
+      absent_out = '[1-9]+[0-9]* of 22 singular values'
+      expect_out = '0 of 22 singular values'
+      cli_args = "nx=10 num_steps=5 Outputs/exodus=false Outputs/active='' -pc_type svd -pc_svd_monitor"
+      detail = 'have a non-singular matrix'
+    []
   []
 []
