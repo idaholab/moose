@@ -87,7 +87,7 @@ private:
   std::vector<unsigned int> _scalar_index;
 
   /// Vector of pointers to scalar variables values
-  std::vector<Real *> _scalar_vals;
+  std::vector<VariableValue *> _scalar_vals;
 
   /// Stores _addr variable indices for each Function
   std::vector<unsigned int> _function_index;
