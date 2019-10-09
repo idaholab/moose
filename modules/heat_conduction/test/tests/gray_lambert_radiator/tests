@@ -98,6 +98,15 @@
     design = 'ConstantViewFactorSurfaceRadiation.md'
   [../]
 
+  [./coupled_heat_conduction_emission_reconstruction]
+    type = Exodiff
+    input = 'coupled_heat_conduction.i'
+    exodiff = 'coupled_heat_conduction_emission_er.e'
+    cli_args = 'BCs/radiation/reconstruct_emission=true Outputs/file_base=coupled_heat_conduction_emission_er'
+    requirement = 'The system shall allow reconstructing the spatial distribution of the emission component on a radiation boundary via the T4 law'
+    design = 'GrayLambertNeumannBC.md'
+  [../]
+
   [./gray_lambert_cavity_automatic_vf]
     type = CSVDiff
     input = 'gray_lambert_cavity_automatic_vf.i'

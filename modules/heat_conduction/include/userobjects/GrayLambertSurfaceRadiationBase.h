@@ -40,6 +40,7 @@ public:
   };
 
   ///@{ public interface of this UserObject
+  Real getSurfaceIrradiation(BoundaryID id) const;
   Real getSurfaceHeatFluxDensity(BoundaryID id) const;
   Real getSurfaceTemperature(BoundaryID id) const;
   Real getSurfaceRadiosity(BoundaryID id) const;
@@ -87,6 +88,9 @@ protected:
 
   /// the average value of sigma * eps * T^4
   std::vector<Real> _beta;
+
+  /// the irradiation into each surface
+  std::vector<Real> _surface_irradiation;
 
   /// side id to index map for isothermal boundaries, side ids can have holes or be out of order
   std::map<unsigned int, unsigned int> _fixed_side_id_index;
