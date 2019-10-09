@@ -1,24 +1,24 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 2
-  xmax = 2
-  ny = 2
-  ymax = 2
-  elem_type = QUAD4
-[]
-
-[MeshModifiers]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 2
+    xmax = 2
+    ny = 2
+    ymax = 2
+    elem_type = QUAD4
+  []
   [./subdomain_id]
-    type = SubdomainBoundingBox
-    bottom_left = '0 0 0'
-    top_right = '1 1 0'
+    input = gen
+    type = SubdomainBoundingBoxGenerator
+    bottom_left = '1 0 0'
+    top_right = '2 2 0'
     block_id = 1
   [../]
 
   [./interface]
-    type = SideSetsBetweenSubdomains
-    depends_on = subdomain_id
+    type = SideSetsBetweenSubdomainsGenerator
+    input = subdomain_id
     master_block = '0'
     paired_block = '1'
     new_boundary = 'interface'
@@ -26,53 +26,63 @@
 
 []
 
-[Functions]
-  [./fn_exact]
-    type = ParsedFunction
-    value = 'x*x+y*y'
-  [../]
-
-  [./ffn]
-    type = ParsedFunction
-    value = -4
-  [../]
-[]
-
 [Variables]
   [./u]
-    family = LAGRANGE
-    order = FIRST
+    block = 0
+  [../]
+  [./v]
+    block = 1
   [../]
 []
 
 
 [Kernels]
   [./diff]
-    type = Diffusion
+    type = MatDiffusion
     variable = u
+    diffusivity = 'diffusivity'
+    block = 0
   [../]
 
-  [./ffn]
-    type = BodyForce
-    variable = u
-    function = ffn
+  [./diff_v]
+    type = MatDiffusion
+    variable = v
+    diffusivity = 'diffusivity'
+    block = 1
   [../]
 []
 
-[BCs]
-  [./all]
-    type = FunctionDirichletBC
+[InterfaceKernels]
+  [tied]
+    type = PenaltyInterfaceDiffusion
     variable = u
-    boundary = '0 1 2 3'
-    function = fn_exact
-  [../]
+    neighbor_var = v
+    jump_prop_name = "average_jump"
+    penalty = 1e6
+    boundary = 'interface'
+  []
+[]
+
+[BCs]
+  [u_left]
+    type = DirichletBC
+    boundary = 'left'
+    variable = u
+    value = 1
+  []
+  [v_right]
+    type = DirichletBC
+    boundary = 'right'
+    variable = v
+    value = 0
+  []
 []
 
 [Materials]
   [./stateful1]
     type = StatefulMaterial
     block = 0
-    initial_diffusivity = 5
+    initial_diffusivity = 1
     # outputs = all
   [../]
   [./stateful2]
@@ -85,83 +95,83 @@
       type = InterfaceValueMaterial
       mat_prop_master = diffusivity
       mat_prop_slave = diffusivity
+      var_master = diffusivity_var
+      var_slave = diffusivity_var
       mat_prop_out_basename = diff
       boundary = interface
       interface_value_type = average
-      var_master = diffusivity_1
-      var_slave = diffusivity_2
       mat_prop_var_out_basename = diff_var
+      nl_var_master = u
+      nl_var_slave = v
   [../]
   [./interface_material_jump_master_minus_slave]
       type = InterfaceValueMaterial
       mat_prop_master = diffusivity
       mat_prop_slave = diffusivity
+      var_master = diffusivity_var
+      var_slave = diffusivity_var
       mat_prop_out_basename = diff
       boundary = interface
       interface_value_type = jump_master_minus_slave
-      var_master = diffusivity_1
-      var_slave = diffusivity_2
       mat_prop_var_out_basename = diff_var
+      nl_var_master = u
+      nl_var_slave = v
   [../]
   [./interface_material_jump_slave_minus_master]
       type = InterfaceValueMaterial
       mat_prop_master = diffusivity
       mat_prop_slave = diffusivity
+      var_master = diffusivity_var
+      var_slave = diffusivity_var
       mat_prop_out_basename = diff
       boundary = interface
       interface_value_type = jump_slave_minus_master
-      var_master = diffusivity_1
-      var_slave = diffusivity_2
       mat_prop_var_out_basename = diff_var
+      nl_var_master = u
+      nl_var_slave = v
   [../]
   [./interface_material_jump_abs]
       type = InterfaceValueMaterial
       mat_prop_master = diffusivity
       mat_prop_slave = diffusivity
+      var_master = diffusivity_var
+      var_slave = diffusivity_var
       mat_prop_out_basename = diff
       boundary = interface
       interface_value_type = jump_abs
-      var_master = diffusivity_1
-      var_slave = diffusivity_2
       mat_prop_var_out_basename = diff_var
+      nl_var_master = u
+      nl_var_slave = v
   [../]
   [./interface_material_master]
       type = InterfaceValueMaterial
       mat_prop_master = diffusivity
       mat_prop_slave = diffusivity
+      var_master = diffusivity_var
+      var_slave = diffusivity_var
       mat_prop_out_basename = diff
       boundary = interface
       interface_value_type = master
-      var_master = diffusivity_1
-      var_slave = diffusivity_2
       mat_prop_var_out_basename = diff_var
+      nl_var_master = u
+      nl_var_slave = v
   [../]
   [./interface_material_slave]
       type = InterfaceValueMaterial
       mat_prop_master = diffusivity
       mat_prop_slave = diffusivity
+      var_master = diffusivity_var
+      var_slave = diffusivity_var
       mat_prop_out_basename = diff
-      var_master = diffusivity_1
-      var_slave = diffusivity_2
       mat_prop_var_out_basename = diff_var
       boundary = interface
       interface_value_type = slave
+      nl_var_master = u
+      nl_var_slave = v
   [../]
 []
 
 [AuxKernels]
-  [./diffusivity_1]
-    type = MaterialRealAux
-    property = diffusivity
-    variable = diffusivity_1
-    block = 0
-  []
-  [./diffusivity_2]
-    type = MaterialRealAux
-    property = diffusivity
-    variable = diffusivity_2
-    block = 1
-  []
   [./interface_material_avg]
     type = MaterialRealAux
     property = diff_average
@@ -198,16 +208,15 @@
     variable = diffusivity_slave
     boundary = interface
   []
-
-
+  [diffusivity_var]
+    type = MaterialRealAux
+    property = diffusivity
+    variable = diffusivity_var
+  []
 []
 
 [AuxVariables]
-  [./diffusivity_1]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [./diffusivity_2]
+  [diffusivity_var]
     family = MONOMIAL
     order = CONSTANT
   []

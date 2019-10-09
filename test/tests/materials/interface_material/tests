@@ -1,0 +1,10 @@
+[Tests]
+  [jump]
+    type = Exodiff
+    input = interface_value_material.i
+    exodiff = interface_value_material_out.e
+    design = 'Materials/index.md'
+    issues = '#12066'
+    requirement = 'The system shall be able to grab face and neighboring face variable values and material properties in a single material object that lives on an interface'
+  []
+[]

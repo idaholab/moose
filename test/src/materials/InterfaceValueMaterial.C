@@ -24,10 +24,18 @@ validParams<InterfaceValueMaterial>()
                                        "The material property on the slave side of the interface");
   params.addRequiredParam<std::string>("mat_prop_out_basename",
                                        "The base name for the output material property");
-  params.addRequiredCoupledVar("var_master",
-                               "The material property on the master side of the interface");
-  params.addRequiredCoupledVar("var_slave",
-                               "The material property on the slave side of the interface");
+  params.addRequiredCoupledVar(
+      "var_master",
+      "A variable on the master side of the interface that should be equivalent to the value of "
+      "the master material property (through MaterialRealAux for example");
+  params.addRequiredCoupledVar(
+      "var_slave",
+      "A variable on the slave side of the interface that should be equivalent to the value of "
+      "the slave material property (through MaterialRealAux for example");
+  params.addRequiredCoupledVar("nl_var_master",
+                               "Master side non-linear variable for jump computation");
+  params.addRequiredCoupledVar("nl_var_slave",
+                               "Slave side non-linear variable for jump computation");
   params.addRequiredParam<std::string>("mat_prop_var_out_basename",
                                        "The base name for the output material property");
   params.addParam<MooseEnum>("interface_value_type",
@@ -44,6 +52,8 @@ InterfaceValueMaterial::InterfaceValueMaterial(const InputParameters & parameter
     _mp_slave(getNeighborMaterialProperty<Real>(_mp_slave_name)),
     _var_master(coupledValue("var_master")),
     _var_slave(coupledNeighborValue("var_slave")),
+    _nl_var_master(coupledValue("nl_var_master")),
+    _nl_var_slave(coupledNeighborValue("nl_var_slave")),
 
     _interface_value_type(parameters.get<MooseEnum>("interface_value_type")),
     _mp_out_base_name(getParam<std::string>("mat_prop_out_basename")),
@@ -55,29 +65,29 @@ InterfaceValueMaterial::InterfaceValueMaterial(const InputParameters & parameter
     _interface_value_old(
         getMaterialPropertyOld<Real>(_mp_out_base_name + "_" + std::string(_interface_value_type))),
     _interface_value_2_old(getMaterialPropertyOld<Real>(_mp_var_out_base_name + "_" +
-                                                        std::string(_interface_value_type)))
+                                                        std::string(_interface_value_type))),
+    _jump(declareProperty<Real>(static_cast<std::string>(_interface_value_type) + "_jump"))
 {
 }
 
 void
 InterfaceValueMaterial::computeQpProperties()
 {
-  // TODO remove when everything works correctly
-  if (_mp_master[_qp] != _var_master[_qp])
-    mooseWarning("the material property and variable values on the master side do not coincide.");
-  if (_mp_slave[_qp] != _var_slave[_qp])
-    mooseWarning("the material property and variable values on the slave side do not coincide.");
+  mooseAssert(_mp_master[_qp] == _var_master[_qp],
+              "the material property and variable values on the master side do not coincide.");
+  mooseAssert(_mp_slave[_qp] == _var_slave[_qp],
+              "the material property and variable values on the slave side do not coincide.");
 
   _interface_value[_qp] =
       InterfaceValueTools::getQuantity(_interface_value_type, _mp_master[_qp], _mp_slave[_qp]);
   _interface_value_2[_qp] =
       InterfaceValueTools::getQuantity(_interface_value_type, _var_master[_qp], _var_slave[_qp]);
+  _jump[_qp] = _nl_var_master[_qp] - _nl_var_slave[_qp];
 }
 
 void
 InterfaceValueMaterial::initQpStatefulProperties()
 {
-
   _interface_value[_qp] = 0;
   _interface_value_2[_qp] = 0;
 }
