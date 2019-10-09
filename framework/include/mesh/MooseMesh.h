@@ -1052,8 +1052,7 @@ protected:
   void setPartitionerHelper();
 
 private:
-  friend MeshMetaDataInterface::MeshMetaDataInterface(const MooseObject * moose_object,
-                                                      const MooseMesh & mesh);
+  friend void MeshMetaDataInterface::setMeshMetaData(MooseMesh & mesh);
 
   Parameters & meshMetaData() const { return _meta_data; }
 

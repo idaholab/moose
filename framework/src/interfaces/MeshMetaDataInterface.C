@@ -11,8 +11,14 @@
 #include "MeshMetaDataInterface.h"
 #include "MooseMesh.h"
 
-MeshMetaDataInterface::MeshMetaDataInterface(const MooseObject * /*moose_object*/,
-                                             const MooseMesh & mesh)
-  : _mgi_mesh_props(mesh.meshMetaData())
+MeshMetaDataInterface::MeshMetaDataInterface(MooseMesh * mesh_ptr) : _mgi_mesh_props(nullptr)
 {
+  if (mesh_ptr)
+    setMeshMetaData(*mesh_ptr);
+}
+
+void
+MeshMetaDataInterface::setMeshMetaData(MooseMesh & mesh)
+{
+  _mgi_mesh_props = &mesh.meshMetaData();
 }

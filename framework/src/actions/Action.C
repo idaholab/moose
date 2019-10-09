@@ -50,6 +50,7 @@ validParams<Action>()
 Action::Action(InputParameters parameters)
   : ConsoleStreamInterface(
         *parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
+    MeshMetaDataInterface(),
     PerfGraphInterface(
         parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")
             ->perfGraph(),
@@ -81,6 +82,7 @@ Action::Action(InputParameters parameters)
     _problem(_awh.problemBase()),
     _act_timer(registerTimedSection("act", 4))
 {
+  setMeshMetaData(*_mesh);
 }
 
 void
