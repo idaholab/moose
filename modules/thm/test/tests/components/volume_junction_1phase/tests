@@ -31,4 +31,11 @@
     csvdiff = 't_junction_1phase_out.csv'
     abs_zero = 1e-10
   [../]
+
+  # error checking
+  [./err.missing_ics]
+    type = 'RunException'
+    input = 'err.missing_ics.i'
+    expect_err = "junction: The following initial condition parameters are missing: initial_p initial_T initial_vel_x initial_vel_y initial_vel_z"
+  [../]
 []
