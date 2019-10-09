@@ -12,7 +12,7 @@ between the coupled variable and the applied force. When `coef` is positive
 
 ## Example Syntax
 
-!listing test/tests/nodalkernels/constraint_enforcement/lower_bound.i block=NodalKernels
+!listing test/tests/nodalkernels/constraint_enforcement/lower-bound.i block=NodalKernels
 
 !syntax parameters /NodalKernels/CoupledForceNodalKernel
 

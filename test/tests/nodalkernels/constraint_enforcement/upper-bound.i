@@ -109,13 +109,13 @@ num_steps=10
 
 [Postprocessors]
   [active_lm]
-    type = LMActiveSetSize
+    type = GreaterThanLessThanPostprocessor
     variable = lm
     execute_on = 'nonlinear timestep_end'
     value = 1e-8
   []
   [violations]
-    type = LMActiveSetSize
+    type = GreaterThanLessThanPostprocessor
     variable = u
     execute_on = 'nonlinear timestep_end'
     value = ${fparse 10+1e-8}

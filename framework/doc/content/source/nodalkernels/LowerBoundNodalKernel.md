@@ -16,7 +16,7 @@ constraint (like a `DirichletBC` is also active).
 
 ## Example Syntax
 
-!listing test/tests/nodalkernels/constraint_enforcement/lower_bound.i block=NodalKernels
+!listing test/tests/nodalkernels/constraint_enforcement/lower-bound.i block=NodalKernels
 
 !syntax parameters /NodalKernels/LowerBoundNodalKernel
 

@@ -12,7 +12,7 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
-class LMActiveSetSize;
+class GreaterThanLessThanPostprocessor;
 class MooseVariableFEBase;
 namespace libMesh
 {
@@ -20,12 +20,12 @@ class MeshBase;
 }
 
 template <>
-InputParameters validParams<LMActiveSetSize>();
+InputParameters validParams<GreaterThanLessThanPostprocessor>();
 
-class LMActiveSetSize : public GeneralPostprocessor
+class GreaterThanLessThanPostprocessor : public GeneralPostprocessor
 {
 public:
-  LMActiveSetSize(const InputParameters & parameters);
+  GreaterThanLessThanPostprocessor(const InputParameters & parameters);
 
   void initialize() override;
   void execute() override;

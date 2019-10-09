@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "LMActiveSetSize.h"
+#include "GreaterThanLessThanPostprocessor.h"
 
 // MOOSE includes
 #include "MooseVariable.h"
@@ -18,14 +18,15 @@
 
 #include "libmesh/mesh_base.h"
 
-registerMooseObject("MooseApp", LMActiveSetSize);
+registerMooseObject("MooseApp", GreaterThanLessThanPostprocessor);
 
 template <>
 InputParameters
-validParams<LMActiveSetSize>()
+validParams<GreaterThanLessThanPostprocessor>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
-  params.addRequiredParam<VariableName>("variable", "The name of the variable to test for contact");
+  params.addRequiredParam<VariableName>("variable",
+                                        "The name of the variable to conduct a comparison for");
   params.addParam<SubdomainName>("subdomain", "The subdomain that the variable lives on");
   params.addParam<Real>("value", 0, "The value to compare against");
   MooseEnum comparator("greater less", "greater");
@@ -36,7 +37,8 @@ validParams<LMActiveSetSize>()
   return params;
 }
 
-LMActiveSetSize::LMActiveSetSize(const InputParameters & parameters)
+GreaterThanLessThanPostprocessor::GreaterThanLessThanPostprocessor(
+    const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     _var(_fe_problem.getVariable(_tid,
                                  getParam<VariableName>("variable"),
@@ -53,13 +55,13 @@ LMActiveSetSize::LMActiveSetSize(const InputParameters & parameters)
 }
 
 void
-LMActiveSetSize::initialize()
+GreaterThanLessThanPostprocessor::initialize()
 {
   _count = 0;
 }
 
 void
-LMActiveSetSize::execute()
+GreaterThanLessThanPostprocessor::execute()
 {
   AllLocalDofIndicesThread aldit(_fe_problem.getNonlinearSystemBase().system(), {_var.name()});
 
@@ -98,7 +100,7 @@ LMActiveSetSize::execute()
 }
 
 PostprocessorValue
-LMActiveSetSize::getValue()
+GreaterThanLessThanPostprocessor::getValue()
 {
   return _count;
 }
