@@ -40,4 +40,3 @@ protected:
   /// Reference to FEProblemBase instance
   FEProblemBase & _mci_feproblem;
 };
-

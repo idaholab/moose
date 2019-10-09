@@ -195,6 +195,8 @@ validParams<FEProblemBase>()
                                         "by objects which compute residuals and Jacobians "
                                         "(Kernels, BCs, etc.) by setting tags on them.");
 
+  params.addPrivateParam<MooseMesh *>("mesh");
+
   return params;
 }
 

@@ -15,6 +15,7 @@
 #include "Restartable.h"
 #include "MooseEnum.h"
 #include "PerfGraphInterface.h"
+#include "MeshMetaDataInterface.h" // For friend declaration
 
 #include <memory> //std::unique_ptr
 #include <unordered_map>
@@ -1051,6 +1052,11 @@ protected:
   void setPartitionerHelper();
 
 private:
+  friend MeshMetaDataInterface::MeshMetaDataInterface(const MooseObject * moose_object,
+                                                      const MooseMesh & mesh);
+
+  Parameters & meshMetaData() const { return _meta_data; }
+
   Parameters & _meta_data;
 
   /**

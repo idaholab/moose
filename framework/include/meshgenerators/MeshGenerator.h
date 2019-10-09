@@ -47,6 +47,8 @@ public:
    */
   std::vector<std::string> & getDependencies() { return _depends_on; }
 
+  void setProperty(const std::string & name);
+
 protected:
   /**
    * Takes the name of a MeshGeneratorName parameter and then gets a pointer to the
@@ -78,4 +80,3 @@ private:
   /// A nullptr to use for when inputs aren't specified
   std::unique_ptr<MeshBase> _null_mesh = nullptr;
 };
-
