@@ -45,9 +45,9 @@ applyQuotientRule(const Real & num,
 }
 
 Real
-Reynolds(Real volume_fraction, Real rho, Real v, Real Dh, Real visc)
+Reynolds(Real volume_fraction, Real rho, Real vel, Real Dh, Real mu)
 {
-  return volume_fraction * rho * std::fabs(v) * Dh / visc;
+  return volume_fraction * rho * std::fabs(vel) * Dh / mu;
 }
 
 Real
@@ -57,10 +57,11 @@ Prandtl(Real cp, Real mu, Real k)
 }
 
 Real
-Grashof(Real beta, Real dT, Real Dh, Real rho_l, Real visc_l, Real gravity_magnitude)
+Grashof(Real beta, Real dT, Real Dh, Real rho_liquid, Real mu_liquid, Real gravity_magnitude)
 {
   // Eq. 6-17
-  return gravity_magnitude * beta * dT * std::pow(Dh, 3) * (rho_l * rho_l) / (visc_l * visc_l);
+  return gravity_magnitude * beta * dT * std::pow(Dh, 3) * (rho_liquid * rho_liquid) /
+         (mu_liquid * mu_liquid);
 }
 
 Real
