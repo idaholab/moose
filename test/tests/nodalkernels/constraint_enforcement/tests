@@ -51,7 +51,15 @@
       absent_out = '[1-9]+[0-9]* of 33 singular values'
       expect_out = '0 of 33 singular values'
       cli_args = "nx=10 num_steps=5 Outputs/exodus=false Outputs/active='' -pc_type svd -pc_svd_monitor"
-      detail = 'have a non-singular matrix'
+      detail = 'have a non-singular matrix, and'
+    []
+    [amg_fail]
+      input = upper-and-lower-bound.i
+      type = RunException
+      expect_err = 'Linear solve did not converge due to DIVERGED_ITS'
+      cli_args = "Outputs/exodus=false Outputs/active='' -pc_type hypre -pc_hypre_type boomeramg -ksp_converged_reason"
+      detail = 'be incompataible with algebraic multigrid'
+      petsc_version = '>=3.10.0'
     []
   []
   [vi]
@@ -61,8 +69,16 @@
       input = vi-bounding.i
       type = Exodiff
       exodiff = vi-bounding_out.e
-      detail = 'reduced space active set solver, and'
+      detail = 'reduced space active set solver, which'
       custom_cmp = 'upper-and-lower.cmp'
+    []
+    [rsls_amg]
+      input = vi-bounding.i
+      type = Exodiff
+      exodiff = vi-amg.e
+      detail = 'is compatible with algebraic multigrid, and'
+      custom_cmp = 'upper-and-lower.cmp'
+      cli_args = 'Outputs/file_base=vi-amg -pc_type hypre -pc_hypre_type boomeramg'
     []
   []
 []
