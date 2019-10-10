@@ -26,13 +26,12 @@
 
 [Kernels]
   [./mass_flux]
-    type = OneDMassFlux
+    type = OneD3EqnMassFlux
     variable = rhoA
     A = A
     arhoA = rhoA
     arhouA = rhouA
     direction = direction
-    alpha = unity
     rho = rho
     vel = vel
   [../]

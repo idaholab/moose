@@ -3,18 +3,18 @@
 #include "Kernel.h"
 #include "DerivativeMaterialInterfaceTHM.h"
 
-class OneDMassFlux;
+class OneD3EqnMassFlux;
 
 template <>
-InputParameters validParams<OneDMassFlux>();
+InputParameters validParams<OneD3EqnMassFlux>();
 
 /**
- * Mass flux
+ * Mass flux for 1-phase flow
  */
-class OneDMassFlux : public DerivativeMaterialInterfaceTHM<Kernel>
+class OneD3EqnMassFlux : public DerivativeMaterialInterfaceTHM<Kernel>
 {
 public:
-  OneDMassFlux(const InputParameters & parameters);
+  OneD3EqnMassFlux(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();
@@ -26,17 +26,12 @@ protected:
   /// The direction of the flow channel
   const MaterialProperty<RealVectorValue> & _dir;
 
-  const MaterialProperty<Real> & _alpha;
-  const MaterialProperty<Real> * const _dalpha_dbeta;
-
   const MaterialProperty<Real> & _rho;
-  const MaterialProperty<Real> * const _drho_dbeta;
   const MaterialProperty<Real> & _drho_darhoA;
 
   const MaterialProperty<Real> & _vel;
   const MaterialProperty<Real> & _dvel_darhoA;
   const MaterialProperty<Real> & _dvel_darhouA;
 
-  const unsigned int _beta_var_number;
   const unsigned int _arhouA_var_number;
 };

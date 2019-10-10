@@ -202,7 +202,7 @@ FlowModelSinglePhase::addMooseObjects()
   }
   if (_spatial_discretization == CG)
   {
-    std::string class_name = "OneDMassFlux";
+    std::string class_name = "OneD3EqnMassFlux";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = RHOA;
     params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
@@ -210,7 +210,6 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<VariableName>>("arhoA") = {RHOA};
     params.set<std::vector<VariableName>>("arhouA") = {RHOUA};
     params.set<MaterialPropertyName>("direction") = DIRECTION;
-    params.set<MaterialPropertyName>("alpha") = UNITY;
     params.set<MaterialPropertyName>("rho") = DENSITY;
     params.set<MaterialPropertyName>("vel") = VELOCITY;
     _sim.addKernel(class_name, genName(_comp_name, "rho_if"), params);
