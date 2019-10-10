@@ -28,11 +28,7 @@ class Material : public MaterialBase, public Coupleable, public MaterialProperty
 public:
   Material(const InputParameters & parameters);
 
-  virtual void initStatefulProperties(unsigned int n_points) override;
-
   virtual void computeProperties() override;
-
-  virtual void computePropertiesAtQp(unsigned int qp) override;
 
   ///@{
   /**
