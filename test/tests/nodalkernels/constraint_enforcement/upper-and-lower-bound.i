@@ -148,4 +148,11 @@ num_steps=10
     value = -1e-8
     comparator = 'less'
   []
+  [nls]
+    type = NumNonlinearIterations
+  []
+  [cum_nls]
+    type = CumulativeValuePostprocessor
+    postprocessor = nls
+  []
 []

@@ -44,6 +44,7 @@
       type = Exodiff
       exodiff = upper-and-lower-bound_out.e
       detail = 'have no oscillations in the solution, and'
+      cli_args = "Postprocessors/active='active_upper_lm upper_violations active_lower_lm lower_violations'"
     []
     [non_singular]
       input = upper-and-lower-bound.i
