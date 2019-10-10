@@ -80,5 +80,21 @@
       custom_cmp = 'upper-and-lower.cmp'
       cli_args = 'Outputs/file_base=vi-amg -pc_type hypre -pc_hypre_type boomeramg'
     []
+    [ssls]
+      input = vi-bounding.i
+      type = Exodiff
+      exodiff = vi-ssls.e
+      detail = 'a semi-smooth solver, which'
+      custom_cmp = 'upper-and-lower.cmp'
+      cli_args = 'Outputs/file_base=vi-ssls -snes_type vinewtonssls'
+    []
+    [ssls_amg]
+      input = vi-bounding.i
+      type = Exodiff
+      exodiff = vi-ssls-amg.e
+      detail = 'is also compatible with algebraic multigrid'
+      custom_cmp = 'upper-and-lower.cmp'
+      cli_args = 'Outputs/file_base=vi-ssls-amg -pc_type hypre -pc_hypre_type boomeramg -snes_type vinewtonssls'
+    []
   []
 []
