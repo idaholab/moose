@@ -275,11 +275,8 @@ ComputeMaterialsObjectThread::onInterface(const Elem * elem, unsigned int side, 
 
     const Elem * neighbor = elem->neighbor_ptr(side);
     unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[_tid]->elem());
-    const dof_id_type elem_id = elem->id(), neighbor_id = neighbor->id();
 
-    if (_has_neighbor_stateful_props &&
-        ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) ||
-         (neighbor->level() < elem->level())))
+    if (_has_neighbor_stateful_props && neighbor->active())
     {
       _assembly[_tid]->reinitElemAndNeighbor(elem, side, neighbor, neighbor_side);
 
