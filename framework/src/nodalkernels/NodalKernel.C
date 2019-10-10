@@ -187,19 +187,23 @@ NodalKernel::computeJacobian()
 void
 NodalKernel::computeOffDiagJacobian(unsigned int jvar)
 {
-  if (jvar == _var.number())
-    computeJacobian();
-  else
+  if (_var.isNodalDefined())
   {
-    _qp = 0;
-    Real cached_val = computeQpOffDiagJacobian(jvar);
-    dof_id_type cached_row = _var.nodalDofIndex();
-    // Note: this only works for Lagrange variables...
-    dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar, 0);
+    if (jvar == _var.number())
+      computeJacobian();
+    else
+    {
+      _qp = 0;
+      Real cached_val = computeQpOffDiagJacobian(jvar);
+      dof_id_type cached_row = _var.nodalDofIndex();
 
-    cached_val *= _var.scalingFactor();
+      // Note: this only works for equal order Lagrange variables...
+      dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar, 0);
 
-    _assembly.cacheJacobianContribution(cached_row, cached_col, cached_val, _matrix_tags);
+      cached_val *= _var.scalingFactor();
+
+      _assembly.cacheJacobianContribution(cached_row, cached_col, cached_val, _matrix_tags);
+    }
   }
 }
 
