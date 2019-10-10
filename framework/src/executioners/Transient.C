@@ -149,8 +149,6 @@ Transient::Transient(const InputParameters & parameters)
     _steady_state_detection(getParam<bool>("steady_state_detection")),
     _steady_state_tolerance(getParam<Real>("steady_state_tolerance")),
     _steady_state_start_time(getParam<Real>("steady_state_start_time")),
-    _sln_diff_norm(declareRecoverableData<Real>("sln_diff_norm", 0.0)),
-    _old_time_solution_norm(declareRecoverableData<Real>("old_time_solution_norm", 0.0)),
     _sync_times(_app.getOutputWarehouse().getSyncTimes()),
     _abort(getParam<bool>("abort_on_solve_fail")),
     _time_interval(declareRecoverableData<bool>("time_interval", false)),
@@ -158,6 +156,7 @@ Transient::Transient(const InputParameters & parameters)
     _timestep_tolerance(getParam<Real>("timestep_tolerance")),
     _target_time(declareRecoverableData<Real>("target_time", -1)),
     _use_multiapp_dt(getParam<bool>("use_multiapp_dt")),
+    _solution_change_norm(declareRecoverableData<Real>("solution_change_norm", 0.0)),
     _sln_diff(_nl.addVector("sln_diff", false, PARALLEL)),
     _final_timer(registerTimedSection("final", 1))
 {
@@ -429,8 +428,7 @@ Transient::takeStep(Real input_dt)
 
   _time_stepper->postSolve();
 
-  _sln_diff_norm = relativeSolutionDifferenceNorm();
-  _solution_change_norm = _sln_diff_norm / _dt;
+  _solution_change_norm = relativeSolutionDifferenceNorm() / _dt;
 
   return;
 }
@@ -565,7 +563,7 @@ Transient::keepGoing()
       if (_steady_state_detection == true && _time > _steady_state_start_time)
       {
         // Check solution difference relative norm against steady-state tolerance
-        if (_sln_diff_norm < _steady_state_tolerance)
+        if (_solution_change_norm < _steady_state_tolerance)
         {
           _console << "Steady-State Solution Achieved at time: " << _time << std::endl;
           // Output last solve if not output previously by forcing it
@@ -573,10 +571,9 @@ Transient::keepGoing()
         }
         else // Keep going
         {
-          // Update solution norm for next time step
-          _old_time_solution_norm = _nl.currentSolution()->l2_norm();
           // Print steady-state relative error norm
-          _console << "Steady-State Relative Differential Norm: " << _sln_diff_norm << std::endl;
+          _console << "Steady-State Relative Differential Norm: " << _solution_change_norm
+                   << std::endl;
         }
       }
 

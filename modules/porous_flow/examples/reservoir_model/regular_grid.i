@@ -160,6 +160,7 @@
   nl_abs_tol = 1e-12
   nl_rel_tol = 1e-06
   steady_state_detection = true
+  steady_state_tolerance = 1e-12
   [TimeStepper]
     type = IterationAdaptiveDT
     dt = 1e2
