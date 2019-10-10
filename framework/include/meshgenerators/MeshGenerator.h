@@ -16,6 +16,7 @@
 #include "MooseMesh.h"
 
 #include "libmesh/mesh_base.h"
+#include "libmesh/parameters.h"
 
 // Forward declarations
 class MeshGenerator;
@@ -27,7 +28,7 @@ InputParameters validParams<MeshGenerator>();
 /**
  * MeshGenerators are objects that can modify or add to an existing mesh.
  */
-class MeshGenerator : public MooseObject, public Restartable
+class MeshGenerator : public MooseObject, public MeshMetaDataInterface, public Restartable
 {
 public:
   /**
@@ -39,6 +40,7 @@ public:
 
   /**
    * Generate / modify the mesh
+   *
    */
   virtual std::unique_ptr<MeshBase> generate() = 0;
 
@@ -47,9 +49,10 @@ public:
    */
   std::vector<std::string> & getDependencies() { return _depends_on; }
 
-  void setProperty(const std::string & name);
-
 protected:
+  template <typename T>
+  void setProperty(const std::string & name, const T & value);
+
   /**
    * Takes the name of a MeshGeneratorName parameter and then gets a pointer to the
    * Mesh that MeshGenerator is going to create.
@@ -79,4 +82,13 @@ private:
 
   /// A nullptr to use for when inputs aren't specified
   std::unique_ptr<MeshBase> _null_mesh = nullptr;
+
+  Parameters & _mesh_meta_data;
 };
+
+template <typename T>
+void
+MeshGenerator::setProperty(const std::string & name, const T & value)
+{
+  _mesh_meta_data.set<T>(name) = value;
+}

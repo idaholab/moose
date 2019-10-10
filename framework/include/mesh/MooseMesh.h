@@ -1053,6 +1053,7 @@ protected:
 
 private:
   friend void MeshMetaDataInterface::setMeshMetaData(MooseMesh & mesh);
+  friend class MeshGenerator;
 
   Parameters & meshMetaData() const { return _meta_data; }
 

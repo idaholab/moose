@@ -23,6 +23,7 @@ public:
 
   void setMeshMetaData(MooseMesh & mesh);
 
+protected:
   template <typename T>
   bool hasMeshProperty(const std::string & name) const;
 
