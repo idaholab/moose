@@ -57,6 +57,12 @@ public:
    */
   MultiMooseEnum(const MultiMooseEnum & other_enum);
 
+  /**
+   * Copy Assignment operator must be explicitly defined when a copy ctor exists and this
+   * method is used.
+   */
+  MultiMooseEnum & operator=(const MultiMooseEnum & other_enum) = default;
+
   ///@{
   /**
    * Comparison operators for comparing with character constants, MultiMooseEnums
@@ -197,4 +203,3 @@ protected:
    */
   MultiMooseEnum(const MooseEnumBase & other_enum);
 };
-
