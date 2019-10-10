@@ -54,4 +54,15 @@
       detail = 'have a non-singular matrix'
     []
   []
+  [vi]
+    design = BoundsAux.md
+    requirement = 'The system shall be able to enforce an upper and lower bound on a variable using a variational inequality'
+    [rsls]
+      input = vi-bounding.i
+      type = Exodiff
+      exodiff = vi-bounding_out.e
+      detail = 'reduced space active set solver, and'
+      custom_cmp = 'upper-and-lower.cmp'
+    []
+  []
 []
