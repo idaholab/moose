@@ -15,9 +15,9 @@
     max_threads = 1
     allow_test_objects = true
   [../]
-  [./one_d_momentum_area_gradient]
+  [./one_d_3eqn_momentum_area_gradient]
     type = 'PetscJacobianTester'
-    input = 'one_d_momentum_area_gradient.i'
+    input = 'one_d_3eqn_momentum_area_gradient.i'
     ratio_tol = 0.0005
     difference_tol = 3e5
     max_threads = 1
@@ -178,6 +178,14 @@
     input = 'one_d_7eqn_momentum_flux.i'
     ratio_tol = 5e-7
     difference_tol = 60000
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./one_d_7eqn_momentum_area_gradient]
+    type = 'PetscJacobianTester'
+    input = 'one_d_7eqn_momentum_area_gradient.i'
+    ratio_tol = 0.0005
+    difference_tol = 3e5
     max_threads = 1
     allow_test_objects = true
   [../]

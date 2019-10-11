@@ -245,7 +245,7 @@ FlowModelSinglePhase::addMooseObjects()
     _sim.addKernel(class_name, genName(_comp_name, "rhou_if"), params);
   }
   {
-    std::string class_name = "OneDMomentumAreaGradient";
+    std::string class_name = "OneD3EqnMomentumAreaGradient";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = RHOUA;
     params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
@@ -257,7 +257,6 @@ FlowModelSinglePhase::addMooseObjects()
       params.set<std::vector<VariableName>>("A") = {AREA_LINEAR};
     params.set<MaterialPropertyName>("direction") = DIRECTION;
     params.set<MaterialPropertyName>("p") = PRESSURE;
-    params.set<MaterialPropertyName>("alpha") = UNITY;
     params.set<std::vector<VariableName>>("arhoEA") = {RHOEA};
     _sim.addKernel(class_name, genName(_comp_name, "rhou_ps"), params);
   }
