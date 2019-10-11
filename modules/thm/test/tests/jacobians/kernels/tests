@@ -55,9 +55,9 @@
     max_threads = 1
     allow_test_objects = true
   [../]
-  [./one_d_momentum_gravity]
+  [./one_d_3eqn_momentum_gravity]
     type = 'PetscJacobianTester'
-    input = 'one_d_momentum_gravity.i'
+    input = 'one_d_3eqn_momentum_gravity.i'
     ratio_tol = 5e-8
     difference_tol = 5e-5
     max_threads = 1
@@ -194,6 +194,14 @@
     input = 'one_d_7eqn_momentum_area_gradient.i'
     ratio_tol = 0.0005
     difference_tol = 3e5
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./one_d_7eqn_momentum_gravity]
+    type = 'PetscJacobianTester'
+    input = 'one_d_7eqn_momentum_gravity.i'
+    ratio_tol = 5e-8
+    difference_tol = 5e-5
     max_threads = 1
     allow_test_objects = true
   [../]

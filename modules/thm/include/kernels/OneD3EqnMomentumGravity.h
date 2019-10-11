@@ -3,33 +3,27 @@
 #include "Kernel.h"
 #include "DerivativeMaterialInterfaceTHM.h"
 
-class OneDMomentumGravity;
+class OneD3EqnMomentumGravity;
 
 template <>
-InputParameters validParams<OneDMomentumGravity>();
+InputParameters validParams<OneD3EqnMomentumGravity>();
 
 /**
- * Computes gravity term for the momentum equation
+ * Computes gravity term for the momentum equation for 1-phase flow
  */
-class OneDMomentumGravity : public DerivativeMaterialInterfaceTHM<Kernel>
+class OneD3EqnMomentumGravity : public DerivativeMaterialInterfaceTHM<Kernel>
 {
 public:
-  OneDMomentumGravity(const InputParameters & parameters);
+  OneD3EqnMomentumGravity(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  const bool _has_beta;
-
   const VariableValue & _A;
 
-  const MaterialProperty<Real> & _alpha;
-  const MaterialProperty<Real> * const _dalpha_dbeta;
-
   const MaterialProperty<Real> & _rho;
-  const MaterialProperty<Real> * const _drho_dbeta;
   const MaterialProperty<Real> & _drho_darhoA;
 
   /// The direction of the flow channel
@@ -37,6 +31,5 @@ protected:
   /// Gravitational acceleration vector
   const RealVectorValue & _gravity_vector;
 
-  const unsigned int _beta_var_number;
   const unsigned int _arhoA_var_number;
 };

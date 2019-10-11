@@ -1,8 +1,8 @@
-# Tests the Jacobians of the OneDMomentumGravity kernel
+# Tests the Jacobians of the OneD3EqnMomentumGravity kernel
 
 [JacobianTestGeneral]
-  variable_names = 'beta arhoA arhouA'
-  variable_values = '2 3 4'
+  variable_names = 'rhoA rhouA'
+  variable_values = '3 4'
   aux_variable_names = 'A'
   aux_variable_values = '5'
   snes_test_err = 1e-8
@@ -15,17 +15,11 @@
 []
 
 [Materials]
-  [./alpha_material]
-    type = LinearTestMaterial
-    name = alpha
-    vars = 'beta'
-    slopes = '6'
-  [../]
   [./rho_material]
     type = LinearTestMaterial
     name = rho
-    vars = 'beta arhoA'
-    slopes = '1.5 2.5'
+    vars = 'rhoA'
+    slopes = '2.5'
   [../]
   [./dir_material]
     type = DirectionMaterial
@@ -34,13 +28,11 @@
 
 [Kernels]
   [./test]
-    type = OneDMomentumGravity
-    variable = arhouA
+    type = OneD3EqnMomentumGravity
+    variable = rhouA
     A = A
-    beta = beta
-    arhoA = arhoA
+    arhoA = rhoA
     direction = direction
-    alpha = alpha
     rho = rho
     gravity_vector = '1 2 3'
   [../]
