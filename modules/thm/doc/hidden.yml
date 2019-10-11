@@ -86,6 +86,7 @@
 - /Components/HeatStructureCylindrical
 - /Components/HeatStructurePlate
 - /Components/HeatTransferFromExternalAppHeatFlux1Phase
+- /Components/HeatTransferFromExternalAppHeatFlux2Phase
 - /Components/HeatTransferFromExternalAppTemperature
 - /Components/HeatTransferFromExternalAppTemperature1Phase
 - /Components/HeatTransferFromExternalAppTemperature2Phase
