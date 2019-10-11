@@ -3,20 +3,20 @@
 #include "Kernel.h"
 #include "DerivativeMaterialInterfaceTHM.h"
 
-class OneDMomentumFriction;
+class OneD3EqnMomentumFriction;
 
 template <>
-InputParameters validParams<OneDMomentumFriction>();
+InputParameters validParams<OneD3EqnMomentumFriction>();
 
 /**
- * Computes wall friction term
+ * Computes wall friction term for single phase flow
  *
  * See RELAP-7 Theory Manual, pg. 71, Equation (230) {eq:wall_friction_force_2phase}
  */
-class OneDMomentumFriction : public DerivativeMaterialInterfaceTHM<Kernel>
+class OneD3EqnMomentumFriction : public DerivativeMaterialInterfaceTHM<Kernel>
 {
 public:
-  OneDMomentumFriction(const InputParameters & parameters);
+  OneD3EqnMomentumFriction(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
@@ -29,13 +29,8 @@ protected:
   /// Hydraulic diameter
   const MaterialProperty<Real> & _D_h;
 
-  /// Volume fraction
-  const MaterialProperty<Real> & _alpha;
-  const MaterialProperty<Real> * const _dalpha_dbeta;
-
   /// Density
   const MaterialProperty<Real> & _rho;
-  const MaterialProperty<Real> * const _drho_dbeta;
   const MaterialProperty<Real> & _drho_darhoA;
 
   /// velocity
@@ -45,19 +40,10 @@ protected:
 
   /// Darcy friction factor
   const MaterialProperty<Real> & _f_D;
-  const MaterialProperty<Real> * const _df_D_dbeta;
   const MaterialProperty<Real> & _df_D_darhoA;
   const MaterialProperty<Real> & _df_D_darhouA;
   const MaterialProperty<Real> & _df_D_darhoEA;
 
-  /// two-phase multiplier
-  const MaterialProperty<Real> & _mult;
-  const MaterialProperty<Real> * const _dmult_dbeta;
-  const MaterialProperty<Real> & _dmult_darhoA;
-  const MaterialProperty<Real> & _dmult_darhouA;
-  const MaterialProperty<Real> & _dmult_darhoEA;
-
-  unsigned int _beta_var_number;
   unsigned int _arhoA_var_number;
   unsigned int _arhouA_var_number;
   unsigned int _arhoEA_var_number;

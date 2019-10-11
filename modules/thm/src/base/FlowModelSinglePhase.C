@@ -260,7 +260,7 @@ FlowModelSinglePhase::addMooseObjects()
     _sim.addKernel(class_name, genName(_comp_name, "rhou_ps"), params);
   }
   {
-    std::string class_name = "OneDMomentumFriction";
+    std::string class_name = "OneD3EqnMomentumFriction";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = RHOUA;
     params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
@@ -269,11 +269,9 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<VariableName>>("arhoA") = {RHOA};
     params.set<std::vector<VariableName>>("arhouA") = {RHOUA};
     params.set<std::vector<VariableName>>("arhoEA") = {RHOEA};
-    params.set<MaterialPropertyName>("alpha") = UNITY;
     params.set<MaterialPropertyName>("rho") = DENSITY;
     params.set<MaterialPropertyName>("vel") = VELOCITY;
     params.set<MaterialPropertyName>("f_D") = FRICTION_FACTOR_DARCY;
-    params.set<MaterialPropertyName>("2phase_multiplier") = UNITY;
     _sim.addKernel(class_name, genName(_comp_name, "rhou_friction"), params);
   }
   {
