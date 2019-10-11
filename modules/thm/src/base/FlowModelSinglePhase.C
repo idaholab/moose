@@ -300,7 +300,7 @@ FlowModelSinglePhase::addMooseObjects()
   }
   if (_spatial_discretization == CG)
   {
-    std::string class_name = "OneDEnergyFlux";
+    std::string class_name = "OneD3EqnEnergyFlux";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = RHOEA;
     params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
@@ -309,7 +309,6 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<VariableName>>("arhouA") = {RHOUA};
     params.set<std::vector<VariableName>>("arhoEA") = {RHOEA};
     params.set<MaterialPropertyName>("direction") = DIRECTION;
-    params.set<MaterialPropertyName>("alpha") = UNITY;
     params.set<MaterialPropertyName>("rho") = DENSITY;
     params.set<MaterialPropertyName>("vel") = VELOCITY;
     params.set<MaterialPropertyName>("e") = SPECIFIC_INTERNAL_ENERGY;

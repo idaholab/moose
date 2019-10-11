@@ -206,10 +206,10 @@
 - /Kernels/OneD3EqnMomentumFriction
 - /Kernels/OneD3EqnMomentumFormLoss
 - /Kernels/OneD3EqnMomentumGravity
+- /Kernels/OneD3EqnEnergyFlux
 - /Kernels/OneD7EqnEnergyHeatFlux
 - /Kernels/HeatConductionRZ
 - /Kernels/HeatConductionTimeDerivativeRZ
-- /Kernels/OneDEnergyFlux
 - /Kernels/OneDEnergyFriction
 - /Kernels/OneDEnergyGravity
 - /Kernels/OneDEnergyHeatSource
@@ -217,6 +217,7 @@
 - /Kernels/OneDEnergyWallHeating
 - /Kernels/OneDHeatForcingFunction
 - /Kernels/OneDHeatForcingFunctionRZ
+- /Kernels/OneD7EqnEnergyFlux
 - /Kernels/OneD7EqnEnergyInterfacialHeatTransfer
 - /Kernels/OneD7EqnEnergyInterfacialMassTransfer
 - /Kernels/OneD7EqnEnergyPressureRelaxation

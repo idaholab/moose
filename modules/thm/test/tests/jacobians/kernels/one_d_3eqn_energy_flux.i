@@ -1,7 +1,7 @@
-# Tests the Jacobians of OneDEnergyFlux for single-phase flow
+# Tests the Jacobians of OneD3EqnEnergyFlux for single-phase flow
 
 [JacobianTestGeneral]
-  variable_names = 'arhoA arhouA arhoEA'
+  variable_names = 'rhoA rhouA rhoEA'
   variable_values = '2.0 3.0 4.0'
   aux_variable_names = 'A'
   aux_variable_values = '5.0'
@@ -18,25 +18,25 @@
   [./rho_material]
     type = LinearTestMaterial
     name = rho
-    vars = 'arhoA'
+    vars = 'rhoA'
     slopes = '1.2'
   [../]
   [./vel_material]
     type = LinearTestMaterial
     name = vel
-    vars = 'arhoA arhouA'
+    vars = 'rhoA rhouA'
     slopes = '1.4 2.4'
   [../]
   [./e_material]
     type = LinearTestMaterial
     name = e
-    vars = 'arhoA arhouA arhoEA'
+    vars = 'rhoA rhouA rhoEA'
     slopes = '1.6 2.6 3.6'
   [../]
   [./p_material]
     type = LinearTestMaterial
     name = p
-    vars = 'arhoA arhouA arhoEA'
+    vars = 'rhoA rhouA rhoEA'
     slopes = '1.8 2.8 3.8'
   [../]
   [./dir_material]
@@ -46,14 +46,13 @@
 
 [Kernels]
   [./energy_flux]
-    type = OneDEnergyFlux
-    variable = arhoEA
+    type = OneD3EqnEnergyFlux
+    variable = rhoEA
     A = A
-    arhoA = arhoA
-    arhouA = arhouA
-    arhoEA = arhoEA
+    arhoA = rhoA
+    arhouA = rhouA
+    arhoEA = rhoEA
     direction = direction
-    alpha = unity
     rho = rho
     vel = vel
     e = e

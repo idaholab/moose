@@ -3,36 +3,30 @@
 #include "Kernel.h"
 #include "DerivativeMaterialInterfaceTHM.h"
 
-class OneDEnergyFlux;
+class OneD3EqnEnergyFlux;
 
 template <>
-InputParameters validParams<OneDEnergyFlux>();
+InputParameters validParams<OneD3EqnEnergyFlux>();
 
 /**
- * Energy flux
+ * Energy flux for single phase flow
  */
-class OneDEnergyFlux : public DerivativeMaterialInterfaceTHM<Kernel>
+class OneD3EqnEnergyFlux : public DerivativeMaterialInterfaceTHM<Kernel>
 {
 public:
-  OneDEnergyFlux(const InputParameters & parameters);
+  OneD3EqnEnergyFlux(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  const bool _has_beta;
-
   const VariableValue & _A;
 
   /// The direction of the flow channel
   const MaterialProperty<RealVectorValue> & _dir;
 
-  const MaterialProperty<Real> & _alpha;
-  const MaterialProperty<Real> * const _dalpha_dbeta;
-
   const MaterialProperty<Real> & _rho;
-  const MaterialProperty<Real> * const _drho_dbeta;
   const MaterialProperty<Real> & _drho_darhoA;
 
   const MaterialProperty<Real> & _vel;
@@ -45,12 +39,10 @@ protected:
   const MaterialProperty<Real> & _de_darhoEA;
 
   const MaterialProperty<Real> & _p;
-  const MaterialProperty<Real> * const _dp_dbeta;
   const MaterialProperty<Real> & _dp_darhoA;
   const MaterialProperty<Real> & _dp_darhouA;
   const MaterialProperty<Real> & _dp_darhoEA;
 
-  const unsigned int _beta_var_number;
   const unsigned int _arhoA_var_number;
   const unsigned int _arhouA_var_number;
 };
