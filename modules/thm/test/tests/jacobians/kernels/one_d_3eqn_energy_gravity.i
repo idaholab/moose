@@ -1,8 +1,8 @@
-# Tests the Jacobians of the OneDEnergyGravity kernel
+# Tests the Jacobians of the OneD3EqnEnergyGravity kernel
 
 [JacobianTestGeneral]
-  variable_names = 'beta arhoA arhouA arhoEA'
-  variable_values = '2 3 4 5'
+  variable_names = 'rhoA rhouA rhoEA'
+  variable_values = '3 4 5'
   aux_variable_names = 'A'
   aux_variable_values = '5'
   snes_test_err = 1e-8
@@ -15,22 +15,16 @@
 []
 
 [Materials]
-  [./alpha_material]
-    type = LinearTestMaterial
-    name = alpha
-    vars = 'beta'
-    slopes = '6'
-  [../]
   [./rho_material]
     type = LinearTestMaterial
     name = rho
-    vars = 'beta arhoA'
-    slopes = '1.5 2.5'
+    vars = 'rhoA'
+    slopes = '2.5'
   [../]
   [./vel_material]
     type = LinearTestMaterial
     name = vel
-    vars = 'arhoA arhouA'
+    vars = 'rhoA rhouA'
     slopes = '3.5 4.5'
   [../]
   [./dir_material]
@@ -40,14 +34,12 @@
 
 [Kernels]
   [./test]
-    type = OneDEnergyGravity
-    variable = arhoEA
+    type = OneD3EqnEnergyGravity
+    variable = rhoEA
     A = A
-    beta = beta
-    arhoA = arhoA
-    arhouA = arhouA
+    arhoA = rhoA
+    arhouA = rhouA
     direction = direction
-    alpha = alpha
     rho = rho
     vel = vel
     gravity_vector = '1 2 3'

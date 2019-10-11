@@ -3,33 +3,27 @@
 #include "Kernel.h"
 #include "DerivativeMaterialInterfaceTHM.h"
 
-class OneDEnergyGravity;
+class OneD3EqnEnergyGravity;
 
 template <>
-InputParameters validParams<OneDEnergyGravity>();
+InputParameters validParams<OneD3EqnEnergyGravity>();
 
 /**
- * Computes gravity term for the energy equation
+ * Computes gravity term for the energy equation in 1-phase flow
  */
-class OneDEnergyGravity : public DerivativeMaterialInterfaceTHM<Kernel>
+class OneD3EqnEnergyGravity : public DerivativeMaterialInterfaceTHM<Kernel>
 {
 public:
-  OneDEnergyGravity(const InputParameters & parameters);
+  OneD3EqnEnergyGravity(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  const bool _has_beta;
-
   const VariableValue & _A;
 
-  const MaterialProperty<Real> & _alpha;
-  const MaterialProperty<Real> * const _dalpha_dbeta;
-
   const MaterialProperty<Real> & _rho;
-  const MaterialProperty<Real> * const _drho_dbeta;
   const MaterialProperty<Real> & _drho_darhoA;
 
   const MaterialProperty<Real> & _vel;
@@ -41,7 +35,6 @@ protected:
   /// Gravitational acceleration vector
   const RealVectorValue & _gravity_vector;
 
-  const unsigned int _beta_var_number;
   const unsigned int _arhoA_var_number;
   const unsigned int _arhouA_var_number;
 };
