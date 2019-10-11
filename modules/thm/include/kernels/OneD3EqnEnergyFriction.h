@@ -3,18 +3,18 @@
 #include "Kernel.h"
 #include "DerivativeMaterialInterfaceTHM.h"
 
-class OneDEnergyFriction;
+class OneD3EqnEnergyFriction;
 
 template <>
-InputParameters validParams<OneDEnergyFriction>();
+InputParameters validParams<OneD3EqnEnergyFriction>();
 
 /**
- * Computes energy dissipation caused by wall friction
+ * Computes energy dissipation caused by wall friction in 1-phase flow
  */
-class OneDEnergyFriction : public DerivativeMaterialInterfaceTHM<Kernel>
+class OneD3EqnEnergyFriction : public DerivativeMaterialInterfaceTHM<Kernel>
 {
 public:
-  OneDEnergyFriction(const InputParameters & parameters);
+  OneD3EqnEnergyFriction(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
@@ -27,13 +27,8 @@ protected:
   /// Hydraulic diameter
   const MaterialProperty<Real> & _D_h;
 
-  /// Volume fraction
-  const MaterialProperty<Real> & _alpha;
-  const MaterialProperty<Real> * const _dalpha_dbeta;
-
   /// Density
   const MaterialProperty<Real> & _rho;
-  const MaterialProperty<Real> * const _drho_dbeta;
   const MaterialProperty<Real> & _drho_darhoA;
 
   /// velocity
@@ -43,19 +38,10 @@ protected:
 
   /// Darcy friction factor
   const MaterialProperty<Real> & _f_D;
-  const MaterialProperty<Real> * const _df_D_dbeta;
   const MaterialProperty<Real> & _df_D_darhoA;
   const MaterialProperty<Real> & _df_D_darhouA;
   const MaterialProperty<Real> & _df_D_darhoEA;
 
-  /// two-phase multiplier
-  const MaterialProperty<Real> & _mult;
-  const MaterialProperty<Real> * const _dmult_dbeta;
-  const MaterialProperty<Real> & _dmult_darhoA;
-  const MaterialProperty<Real> & _dmult_darhouA;
-  const MaterialProperty<Real> & _dmult_darhoEA;
-
-  unsigned int _beta_var_number;
   unsigned int _arhoA_var_number;
   unsigned int _arhouA_var_number;
   unsigned int _arhoEA_var_number;

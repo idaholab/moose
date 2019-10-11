@@ -43,7 +43,7 @@
 
 [Kernels]
   [./test_kernel]
-    type = OneDEnergyFriction
+    type = OneD7EqnEnergyFriction
     variable = arhoEA
     A = A
     D_h = D_h
