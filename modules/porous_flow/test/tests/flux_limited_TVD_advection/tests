@@ -157,6 +157,7 @@
     csvdiff = 'fltvd_2D_trimesh_out_tracer_0101.csv'
     heavy = true
     abs_zero = 1.0E-5
+    max_time = 1000
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 2D when using triangular mesh elements'
@@ -166,6 +167,7 @@
     input = 'fltvd_2D_trimesh.i'
     csvdiff = 'fltvd_2D_trimesh_out_tracer_0101.csv'
     heavy = true
+    max_time = 1000
     min_threads = 3
     max_threads = 3
     prereq = 'fltvd_2D_trimesh'

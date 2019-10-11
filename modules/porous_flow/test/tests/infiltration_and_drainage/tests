@@ -30,7 +30,7 @@
     rel_err = 1E-5
     use_old_floor = True
     heavy = true
-    max_time = 1000
+    max_time = 2000
     threading = '!pthreads'
     requirement = 'PorousFlow shall be able to model 2-phase drainage and agree with the analytic solution'
     issues = '#13155'
