@@ -26,14 +26,13 @@
 
 [Kernels]
   [./mom_flux]
-    type = OneDMomentumFlux
+    type = OneD3EqnMomentumFlux
     variable = rhouA
     A = A
     arhoA = rhoA
     arhouA = rhouA
     arhoEA = rhoEA
     direction = direction
-    alpha = unity
     rho = rho
     vel = vel
     p = p
