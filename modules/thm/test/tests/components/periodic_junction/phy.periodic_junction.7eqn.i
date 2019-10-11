@@ -93,7 +93,7 @@
   petsc_options_value = 'lu'
   nl_rel_tol = 1e-10
   nl_abs_tol = 1e-8
-  nl_max_its = 15
+  nl_max_its = 20
 
   l_tol = 1e-2
   l_max_its = 10
