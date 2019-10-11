@@ -98,4 +98,12 @@
       cli_args = 'Outputs/file_base=vi-ssls-amg -pc_type hypre -pc_hypre_type boomeramg -snes_type vinewtonssls'
     []
   []
+  [unbounded]
+    design = BoundsAux.md
+    requirement = 'The system shall show violation of bounds when a non-variational-inequality solver is used'
+    type = Exodiff
+    input = vi-bounding.i
+    exodiff = unbounded.e
+    cli_args = "Postprocessors/active='upper_violations lower_violations' Outputs/file_base=unbounded -snes_type newtonls"
+  []
 []
