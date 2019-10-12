@@ -776,7 +776,8 @@ getCommonPetscKeys()
                         "-pc_hypre_boomeramg_max_iter "
                         "-pc_hypre_boomeramg_strong_threshold -pc_hypre_type -pc_type -snes_atol "
                         "-snes_linesearch_type "
-                        "-snes_ls -snes_max_it -snes_rtol -snes_divergence_tolerance -snes_type -sub_ksp_type -sub_pc_type",
+                        "-snes_ls -snes_max_it -snes_rtol -snes_divergence_tolerance -snes_type "
+                        "-sub_ksp_type -sub_pc_type",
                         "",
                         true);
 }

@@ -122,8 +122,7 @@ FEProblemSolve::FEProblemSolve(Executioner * ex)
   es.parameters.set<Real>("nonlinear solver relative residual tolerance") =
       getParam<Real>("nl_rel_tol");
 
-  es.parameters.set<Real>("nonlinear solver divergence tolerance") =
-      getParam<Real>("nl_div_tol");
+  es.parameters.set<Real>("nonlinear solver divergence tolerance") = getParam<Real>("nl_div_tol");
 
   es.parameters.set<Real>("nonlinear solver absolute step tolerance") =
       getParam<Real>("nl_abs_step_tol");
