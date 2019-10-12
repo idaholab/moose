@@ -1,0 +1,26 @@
+[Tests]
+  # physics
+  [./phy:power_density_shape]
+    type = 'Exodiff'
+    input = 'phy.cylinder_power_shape_aux_var.i'
+    exodiff = 'phy.cylinder_power_shape_aux_var_out.e'
+    rel_err = 1e-4
+    abs_zero = 1e-9
+
+    requirement = "The system shall provide the heat source shape when power density is supplied"
+  [../]
+
+  # Error checking
+  [./err:no_hs]
+    type = 'RunException'
+    input = 'err.base.i'
+    cli_args = "Components/hgen/hs=hgen Components/hgen/regions='fuel'"
+    expect_err = "hgen: The component 'hgen' is not of type 'HeatStructureBase'"
+  [../]
+  [./err:wrong_block_name]
+    type = 'RunException'
+    input = 'err.base.i'
+    cli_args = "Components/hgen/hs=hs Components/hgen/regions='asdf'"
+    expect_err = "hgen: Region 'asdf' does not exist in heat structure 'hs'."
+  [../]
+[]

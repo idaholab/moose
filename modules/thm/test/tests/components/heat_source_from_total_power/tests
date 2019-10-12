@@ -1,14 +1,5 @@
 [Tests]
   # physics
-  [./phy:power_density_shape]
-    type = 'Exodiff'
-    input = 'phy.cylinder_power_shape_aux_var.i'
-    exodiff = 'phy.cylinder_power_shape_aux_var_out.e'
-    rel_err = 1e-4
-    abs_zero = 1e-9
-
-    requirement = "The system shall provide the heat source shape when power density is supplied"
-  [../]
   [./phy:power_component_shape_cylindrical]
     type = 'Exodiff'
     input = 'phy.cylinder_power_shape_fn.i'
@@ -77,17 +68,5 @@
     input = 'err.base.i'
     cli_args = "Components/hgen/hs=hs Components/hgen/regions='fuel' Components/hgen/power=hs"
     expect_err = "hgen: The component 'hs' is not of type 'TotalPowerBase'"
-  [../]
-  [./err:both_power_and_power_density]
-    type = 'RunException'
-    input = 'err.base.i'
-    cli_args = "Components/hgen/hs=hs Components/hgen/regions='fuel' Components/hgen/power=reactor Components/hgen/power_density=asdf"
-    expect_err = "hgen: Only one of the parameters \{'power', 'power_density'\} can be provided"
-  [../]
-  [./err:neither_power_nor_power_density]
-    type = 'RunException'
-    input = 'err.base.i'
-    cli_args = "Components/hgen/hs=hs Components/hgen/regions='fuel'"
-    expect_err = "hgen: One of the parameters \{'power', 'power_density'\} must be provided"
   [../]
 []

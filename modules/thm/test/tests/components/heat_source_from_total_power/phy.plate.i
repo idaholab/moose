@@ -1,4 +1,4 @@
-# @requirement F8.8, F8.9
+# @requirement F8.4
 
 [GlobalParams]
   scaling_factor_temperature = 1e0
@@ -39,7 +39,7 @@
   [../]
 
   [./CH1:solid]
-    type = HeatStructureCylindrical
+    type = HeatStructurePlate
     position = '0 -0.024 0'
     orientation = '0 0 1'
     length = 0.8
@@ -49,16 +49,16 @@
 
     names = 'fuel gap clad'
     widths = '0.003015 0.000465  0.00052'
+    depth = 1
     n_part_elems = '20 2 2'
     materials = 'fuel-mat gap-mat clad-mat'
   [../]
 
   [./CH1:hgen]
-    type = HeatGeneration
+    type = HeatSourceFromTotalPower
     hs = CH1:solid
     regions = 'fuel'
     power = reactor
-    power_shape_function = psf
     power_fraction = 1
   [../]
 []

@@ -50,7 +50,7 @@
 []
 
 [Components]
-  [./reactor]
+  [./total_power]
     type = TotalPower
     power = 3.0e4
   [../]
@@ -71,11 +71,10 @@
   [../]
 
   [./CH1:hgen]
-    type = HeatGeneration
+    type = HeatSourceFromPowerDensity
     hs = CH1:solid
     regions = 'fuel'
     power_density = power_density
-    power_fraction = 1
   [../]
 []
 
