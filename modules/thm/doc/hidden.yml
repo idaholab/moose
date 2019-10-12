@@ -129,7 +129,6 @@
 - /Components/VolumeJunctionOld
 - /Components/VolumeJunctionOldBase
 
-- /Constraints/Node1DFace2DConstraint
 - /Constraints/JunctionConstraint
 - /Constraints/JunctionEnergyConstraint
 - /Constraints/JunctionMassConstraint
