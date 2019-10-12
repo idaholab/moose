@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Component.h"
+#include "HeatSourceBase.h"
 
 class HeatSourceFromTotalPower;
 
@@ -10,7 +10,7 @@ InputParameters validParams<HeatSourceFromTotalPower>();
 /**
  * Heat generation from total power
  */
-class HeatSourceFromTotalPower : public Component
+class HeatSourceFromTotalPower : public HeatSourceBase
 {
 public:
   HeatSourceFromTotalPower(const InputParameters & parameters);
@@ -21,8 +21,6 @@ protected:
   virtual void init() override;
   virtual void check() const override;
 
-  /// Names of the heat structure regions where heat generation is to be applied
-  const std::vector<std::string> & _region_names;
   /// The name of the variable that represents total power
   VariableName _power_var_name;
   /// The fraction of the power that goes into the heat structure

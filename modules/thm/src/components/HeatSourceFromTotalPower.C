@@ -10,11 +10,7 @@ template <>
 InputParameters
 validParams<HeatSourceFromTotalPower>()
 {
-  InputParameters params = validParams<Component>();
-  params.addRequiredParam<std::string>(
-      "hs", "The name of the heat structure component to put the heat source onto");
-  params.addRequiredParam<std::vector<std::string>>(
-      "regions", "The names of the heat structure regions where heat generation is to be applied");
+  InputParameters params = validParams<HeatSourceBase>();
   params.addRequiredParam<std::string>("power", "The component name that provides total power");
   params.addParam<Real>(
       "power_fraction", 1., "The fraction of total power that goes into the heat structure");
@@ -24,8 +20,7 @@ validParams<HeatSourceFromTotalPower>()
 }
 
 HeatSourceFromTotalPower::HeatSourceFromTotalPower(const InputParameters & parameters)
-  : Component(parameters),
-    _region_names(getParam<std::vector<std::string>>("regions")),
+  : HeatSourceBase(parameters),
     _power_fraction(getParam<Real>("power_fraction")),
     _has_psf(isParamValid("power_shape_function")),
     _power_shape_func(_has_psf ? getParam<FunctionName>("power_shape_function") : "")
@@ -36,7 +31,7 @@ HeatSourceFromTotalPower::HeatSourceFromTotalPower(const InputParameters & param
 void
 HeatSourceFromTotalPower::init()
 {
-  Component::init();
+  HeatSourceBase::init();
 
   if (hasComponent<TotalPowerBase>("power"))
   {
@@ -48,26 +43,7 @@ HeatSourceFromTotalPower::init()
 void
 HeatSourceFromTotalPower::check() const
 {
-  Component::check();
-
-  checkComponentOfTypeExists<HeatStructureBase>("hs");
-
-  if (hasComponent<HeatStructureBase>("hs"))
-  {
-    if (!hasComponent<HeatStructurePlate>("hs") && !hasComponent<HeatStructureCylindrical>("hs"))
-      logError(
-          "Heat structure must be of type 'HeatStructurePlate' or 'HeatStructureCylindrical'.");
-
-    const HeatStructureBase & hs = getComponent<HeatStructureBase>("hs");
-
-    for (auto && region : _region_names)
-      if (!hs.hasBlock(region))
-        logError("Region '",
-                 region,
-                 "' does not exist in heat structure '",
-                 getParam<std::string>("hs"),
-                 "'.");
-  }
+  HeatSourceBase::check();
 
   checkComponentOfTypeExists<TotalPowerBase>("power");
 }
