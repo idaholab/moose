@@ -49,7 +49,7 @@
   nl_div_tol = 1.0e+4
 
   dt = 5
-  num_steps = 4 
+  num_steps = 4
 
   petsc_options = '-snes_converged_reason -ksp_converged_reason '
   petsc_options_iname = '-pc_type -pc_hypre_type '
