@@ -26,6 +26,7 @@
 #include "Eigen/Core"
 #include "libmesh/restore_warnings.h"
 #include "libmesh/tensor_tools.h"
+#include "libmesh/dense_matrix.h"
 
 #include <string>
 #include <vector>
@@ -176,6 +177,8 @@ struct DecrementRank<Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM>>
 #define ADRealTensorValue typename RealTensorValueType<compute_stage>::type
 #define ADRankTwoTensor typename RankTwoTensorType<compute_stage>::type
 #define ADRankFourTensor typename RankFourTensorType<compute_stage>::type
+#define ADDenseMatrix typename DenseMatrixType<compute_stage>::type
+#define ADDenseVector typename DenseVectorType<compute_stage>::type
 
 /**
  * MOOSE typedefs
@@ -416,6 +419,26 @@ template <>
 struct RankFourTensorType<JACOBIAN>
 {
   typedef DualRankFourTensor type;
+};
+template <ComputeStage compute_stage>
+struct DenseMatrixType
+{
+  typedef DenseMatrix<Real> type;
+};
+template <>
+struct DenseMatrixType<JACOBIAN>
+{
+  typedef DenseMatrix<DualReal> type;
+};
+template <ComputeStage compute_stage>
+struct DenseVectorType
+{
+  typedef DenseVector<Real> type;
+};
+template <>
+struct DenseVectorType<JACOBIAN>
+{
+  typedef DenseVector<DualReal> type;
 };
 
 template <typename mat_prop_type, ComputeStage compute_stage>

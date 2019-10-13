@@ -22,6 +22,7 @@
   usingBlockRestrictableMembers;                                                                   \
   usingFunctionInterfaceMembers;                                                                   \
   using ConsoleStreamInterface::_console;                                                          \
+  using ADMaterial<compute_stage>::_tid;                                                           \
   using ADMaterial<compute_stage>::_qp;                                                            \
   using ADMaterial<compute_stage>::_name;                                                          \
   using ADMaterial<compute_stage>::_qrule;                                                         \
