@@ -202,7 +202,7 @@ FlowModelSinglePhase::addMooseObjects()
   }
   if (_spatial_discretization == CG)
   {
-    std::string class_name = "OneDMassFlux";
+    std::string class_name = "OneD3EqnMassFlux";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = RHOA;
     params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
@@ -210,7 +210,6 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<VariableName>>("arhoA") = {RHOA};
     params.set<std::vector<VariableName>>("arhouA") = {RHOUA};
     params.set<MaterialPropertyName>("direction") = DIRECTION;
-    params.set<MaterialPropertyName>("alpha") = UNITY;
     params.set<MaterialPropertyName>("rho") = DENSITY;
     params.set<MaterialPropertyName>("vel") = VELOCITY;
     _sim.addKernel(class_name, genName(_comp_name, "rho_if"), params);
@@ -229,7 +228,7 @@ FlowModelSinglePhase::addMooseObjects()
   }
   if (_spatial_discretization == CG)
   {
-    std::string class_name = "OneDMomentumFlux";
+    std::string class_name = "OneD3EqnMomentumFlux";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = RHOUA;
     params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
@@ -239,14 +238,13 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<VariableName>>("arhouA") = {RHOUA};
     params.set<std::vector<VariableName>>("arhoEA") = {RHOEA};
     params.set<MaterialPropertyName>("direction") = DIRECTION;
-    params.set<MaterialPropertyName>("alpha") = UNITY;
     params.set<MaterialPropertyName>("rho") = DENSITY;
     params.set<MaterialPropertyName>("vel") = VELOCITY;
     params.set<MaterialPropertyName>("p") = PRESSURE;
     _sim.addKernel(class_name, genName(_comp_name, "rhou_if"), params);
   }
   {
-    std::string class_name = "OneDMomentumAreaGradient";
+    std::string class_name = "OneD3EqnMomentumAreaGradient";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = RHOUA;
     params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
@@ -258,12 +256,11 @@ FlowModelSinglePhase::addMooseObjects()
       params.set<std::vector<VariableName>>("A") = {AREA_LINEAR};
     params.set<MaterialPropertyName>("direction") = DIRECTION;
     params.set<MaterialPropertyName>("p") = PRESSURE;
-    params.set<MaterialPropertyName>("alpha") = UNITY;
     params.set<std::vector<VariableName>>("arhoEA") = {RHOEA};
     _sim.addKernel(class_name, genName(_comp_name, "rhou_ps"), params);
   }
   {
-    std::string class_name = "OneDMomentumFriction";
+    std::string class_name = "OneD3EqnMomentumFriction";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = RHOUA;
     params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
@@ -272,22 +269,19 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<VariableName>>("arhoA") = {RHOA};
     params.set<std::vector<VariableName>>("arhouA") = {RHOUA};
     params.set<std::vector<VariableName>>("arhoEA") = {RHOEA};
-    params.set<MaterialPropertyName>("alpha") = UNITY;
     params.set<MaterialPropertyName>("rho") = DENSITY;
     params.set<MaterialPropertyName>("vel") = VELOCITY;
     params.set<MaterialPropertyName>("f_D") = FRICTION_FACTOR_DARCY;
-    params.set<MaterialPropertyName>("2phase_multiplier") = UNITY;
     _sim.addKernel(class_name, genName(_comp_name, "rhou_friction"), params);
   }
   {
-    std::string class_name = "OneDMomentumGravity";
+    std::string class_name = "OneD3EqnMomentumGravity";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = RHOUA;
     params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
     params.set<std::vector<VariableName>>("A") = {AREA};
     params.set<std::vector<VariableName>>("arhoA") = {RHOA};
     params.set<MaterialPropertyName>("direction") = DIRECTION;
-    params.set<MaterialPropertyName>("alpha") = UNITY;
     params.set<MaterialPropertyName>("rho") = DENSITY;
     params.set<RealVectorValue>("gravity_vector") = _gravity_vector;
     _sim.addKernel(class_name, genName(_comp_name, "rhou_gravity"), params);
@@ -306,7 +300,7 @@ FlowModelSinglePhase::addMooseObjects()
   }
   if (_spatial_discretization == CG)
   {
-    std::string class_name = "OneDEnergyFlux";
+    std::string class_name = "OneD3EqnEnergyFlux";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = RHOEA;
     params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
@@ -315,7 +309,6 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<VariableName>>("arhouA") = {RHOUA};
     params.set<std::vector<VariableName>>("arhoEA") = {RHOEA};
     params.set<MaterialPropertyName>("direction") = DIRECTION;
-    params.set<MaterialPropertyName>("alpha") = UNITY;
     params.set<MaterialPropertyName>("rho") = DENSITY;
     params.set<MaterialPropertyName>("vel") = VELOCITY;
     params.set<MaterialPropertyName>("e") = SPECIFIC_INTERNAL_ENERGY;
@@ -323,7 +316,7 @@ FlowModelSinglePhase::addMooseObjects()
     _sim.addKernel(class_name, genName(_comp_name, "rhoE_if"), params);
   }
   {
-    std::string class_name = "OneDEnergyFriction";
+    std::string class_name = "OneD3EqnEnergyFriction";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = RHOEA;
     params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
@@ -332,15 +325,13 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<VariableName>>("arhoA") = {RHOA};
     params.set<std::vector<VariableName>>("arhouA") = {RHOUA};
     params.set<std::vector<VariableName>>("arhoEA") = {RHOEA};
-    params.set<MaterialPropertyName>("alpha") = UNITY;
     params.set<MaterialPropertyName>("rho") = DENSITY;
     params.set<MaterialPropertyName>("vel") = VELOCITY;
     params.set<MaterialPropertyName>("f_D") = FRICTION_FACTOR_DARCY;
-    params.set<MaterialPropertyName>("2phase_multiplier") = UNITY;
     _sim.addKernel(class_name, genName(_comp_name, "rhoE_friction"), params);
   }
   {
-    std::string class_name = "OneDEnergyGravity";
+    std::string class_name = "OneD3EqnEnergyGravity";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = RHOEA;
     params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
@@ -348,7 +339,6 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<VariableName>>("arhoA") = {RHOA};
     params.set<std::vector<VariableName>>("arhouA") = {RHOUA};
     params.set<MaterialPropertyName>("direction") = DIRECTION;
-    params.set<MaterialPropertyName>("alpha") = UNITY;
     params.set<MaterialPropertyName>("rho") = DENSITY;
     params.set<MaterialPropertyName>("vel") = VELOCITY;
     params.set<RealVectorValue>("gravity_vector") = _gravity_vector;

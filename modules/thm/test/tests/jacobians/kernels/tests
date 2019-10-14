@@ -1,47 +1,47 @@
 [Tests]
-  [./one_d_mass_flux]
+  [./one_d_3eqn_mass_flux]
     type = 'PetscJacobianTester'
-    input = 'one_d_mass_flux.i'
+    input = 'one_d_3eqn_mass_flux.i'
     ratio_tol = 8e-12
     difference_tol = 8e-12
     max_threads = 1
     allow_test_objects = true
   [../]
-  [./one_d_momentum_flux]
+  [./one_d_3eqn_momentum_flux]
     type = 'PetscJacobianTester'
-    input = 'one_d_momentum_flux.i'
+    input = 'one_d_3eqn_momentum_flux.i'
     ratio_tol = 6e-8
     difference_tol = 0.09
     max_threads = 1
     allow_test_objects = true
   [../]
-  [./one_d_momentum_area_gradient]
+  [./one_d_3eqn_momentum_area_gradient]
     type = 'PetscJacobianTester'
-    input = 'one_d_momentum_area_gradient.i'
+    input = 'one_d_3eqn_momentum_area_gradient.i'
     ratio_tol = 0.0005
     difference_tol = 3e5
     max_threads = 1
     allow_test_objects = true
   [../]
-  [./one_d_momentum_friction]
+  [./one_d_3eqn_momentum_friction]
     type = 'PetscJacobianTester'
-    input = 'one_d_momentum_friction.i'
+    input = 'one_d_3eqn_momentum_friction.i'
     ratio_tol = 4e-8
     difference_tol = 1
     max_threads = 1
     allow_test_objects = true
   [../]
-  [./one_d_energy_flux]
+  [./one_d_3eqn_energy_flux]
     type = 'PetscJacobianTester'
-    input = 'one_d_energy_flux.i'
+    input = 'one_d_3eqn_energy_flux.i'
     ratio_tol = 2e-8
     difference_tol = 2e-4
     max_threads = 1
     allow_test_objects = true
   [../]
-  [./one_d_energy_friction]
+  [./one_d_3eqn_energy_friction]
     type = 'PetscJacobianTester'
-    input = 'one_d_energy_friction.i'
+    input = 'one_d_3eqn_energy_friction.i'
     ratio_tol = 3e-8
     difference_tol = 3
     max_threads = 1
@@ -55,17 +55,17 @@
     max_threads = 1
     allow_test_objects = true
   [../]
-  [./one_d_momentum_gravity]
+  [./one_d_3eqn_momentum_gravity]
     type = 'PetscJacobianTester'
-    input = 'one_d_momentum_gravity.i'
+    input = 'one_d_3eqn_momentum_gravity.i'
     ratio_tol = 5e-8
     difference_tol = 5e-5
     max_threads = 1
     allow_test_objects = true
   [../]
-  [./one_d_energy_gravity]
+  [./one_d_3eqn_energy_gravity]
     type = 'PetscJacobianTester'
-    input = 'one_d_energy_gravity.i'
+    input = 'one_d_3eqn_energy_gravity.i'
     ratio_tol = 5e-8
     difference_tol = 5e-2
     max_threads = 1
@@ -130,6 +130,14 @@
     allow_test_objects = true
   [../]
 
+  [./one_d_7eqn_mass_flux]
+    type = 'PetscJacobianTester'
+    input = 'one_d_7eqn_mass_flux.i'
+    ratio_tol = 1e-8
+    difference_tol = 1e-8
+    max_threads = 1
+    allow_test_objects = true
+  [../]
   [./one_d_7eqn_mass_interfacial_mass_transfer_low_void_fraction]
     type = 'PetscJacobianTester'
     input = 'one_d_7eqn_mass_interfacial_mass_transfer.i'
@@ -170,6 +178,30 @@
     input = 'one_d_7eqn_momentum_flux.i'
     ratio_tol = 5e-7
     difference_tol = 60000
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./one_d_7eqn_momentum_friction]
+    type = 'PetscJacobianTester'
+    input = 'one_d_7eqn_momentum_friction.i'
+    ratio_tol = 4e-8
+    difference_tol = 1
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./one_d_7eqn_momentum_area_gradient]
+    type = 'PetscJacobianTester'
+    input = 'one_d_7eqn_momentum_area_gradient.i'
+    ratio_tol = 0.0005
+    difference_tol = 3e5
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./one_d_7eqn_momentum_gravity]
+    type = 'PetscJacobianTester'
+    input = 'one_d_7eqn_momentum_gravity.i'
+    ratio_tol = 5e-8
+    difference_tol = 5e-5
     max_threads = 1
     allow_test_objects = true
   [../]
@@ -237,6 +269,22 @@
     input = 'one_d_7eqn_energy_flux.i'
     ratio_tol = 2e-8
     difference_tol = 0.002
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./one_d_7eqn_energy_friction]
+    type = 'PetscJacobianTester'
+    input = 'one_d_7eqn_energy_friction.i'
+    ratio_tol = 3e-8
+    difference_tol = 3
+    max_threads = 1
+    allow_test_objects = true
+  [../]
+  [./one_d_7eqn_energy_gravity]
+    type = 'PetscJacobianTester'
+    input = 'one_d_7eqn_energy_gravity.i'
+    ratio_tol = 5e-8
+    difference_tol = 5e-2
     max_threads = 1
     allow_test_objects = true
   [../]
