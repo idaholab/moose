@@ -60,7 +60,11 @@ PorousFlowFluidMass::PorousFlowFluidMass(const InputParameters & parameters)
         getMaterialProperty<std::vector<std::vector<Real>>>("PorousFlow_mass_frac_nodal")),
     _saturation_threshold(getParam<Real>("saturation_threshold")),
     _var(getParam<unsigned>("kernel_variable_number") < _dictator.numVariables()
-             ? _dictator.getCoupledStandardMooseVars()[getParam<unsigned>("kernel_variable_number")]
+             ? &_fe_problem.getStandardVariable(
+                   _tid,
+                   _dictator
+                       .getCoupledStandardMooseVars()[getParam<unsigned>("kernel_variable_number")]
+                       ->name())
              : nullptr)
 {
   const unsigned int num_phases = _dictator.numPhases();
