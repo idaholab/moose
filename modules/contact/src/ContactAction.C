@@ -211,7 +211,7 @@ ContactAction::addMortarContact()
                   "Displacement variable is missing");
       const auto primal_type =
           _problem->systemBaseNonlinear().system().variable_type(displacements[0]);
-      const int lm_order = primal_type.order.get_order() - codimension;
+      const int lm_order = std::max(primal_type.order.get_order() - codimension, 0);
 
       if (primal_type.family == MONOMIAL || (primal_type.family == LAGRANGE && lm_order < 1))
       {

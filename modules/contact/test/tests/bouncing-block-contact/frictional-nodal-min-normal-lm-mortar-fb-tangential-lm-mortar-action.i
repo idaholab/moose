@@ -142,7 +142,7 @@ offset = 1e-2
   [contact]
     type = ContactDOFSetSize
     variable = frictional_normal_lm
-    subdomain = '3'
+    subdomain = frictional_slave_subdomain
     execute_on = 'nonlinear timestep_end'
   []
 []

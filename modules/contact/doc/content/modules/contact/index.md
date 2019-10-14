@@ -92,7 +92,7 @@ discretization technique for solving mechanical contact. Some results are summar
  The `contact/test/tests/bouncing-block-contact` directory provides a series of
 input files testing different algorithms for solving both normal and tangential
 frictional contact. Mortar contact can also be specified using the `Contact` block 
-similar to mechanical constraint contact. For normal mortar contact:
+similar to pure node-face discretization contact. For normal mortar contact:
 
 !listing test/tests/mechanical-small-problem/frictionless-nodal-lm-mortar-disp-action.i block=Contact
 

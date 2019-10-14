@@ -27,7 +27,7 @@ validParams<LowerDBlockFromSidesetGenerator>()
   InputParameters params = validParams<MeshGenerator>();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
-  params.addParam<subdomain_id_type>("new_block_id", "The lower dimensional block id to create");
+  params.addParam<SubdomainID>("new_block_id", "The lower dimensional block id to create");
   params.addParam<SubdomainName>("new_block_name",
                                  "The lower dimensional block name to create (optional)");
   params.addRequiredParam<std::vector<boundary_id_type>>(
@@ -61,7 +61,7 @@ LowerDBlockFromSidesetGenerator::generate()
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
   // Generate a new block id if one isn't supplied.
-  subdomain_id_type new_block_id;
+  SubdomainID new_block_id;
   if (isParamValid("new_block_id"))
     new_block_id = getParam<SubdomainID>("new_block_id");
   else
