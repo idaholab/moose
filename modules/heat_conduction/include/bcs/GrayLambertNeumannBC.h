@@ -33,4 +33,5 @@ protected:
   virtual Real computeQpJacobian() override;
 
   const GrayLambertSurfaceRadiationBase & _glsr_uo;
+  bool _reconstruct_emission;
 };

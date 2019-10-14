@@ -21,6 +21,10 @@ validParams<GrayLambertNeumannBC>()
   InputParameters params = validParams<IntegratedBC>();
   params.addRequiredParam<UserObjectName>("surface_radiation_object_name",
                                           "Name of the GrayLambertSurfaceRadiationBase UO");
+  params.addParam<bool>(
+      "reconstruct_emission",
+      true,
+      "Flag to apply constant heat flux on sideset or reconstruct emission by T^4 law.");
   params.addClassDescription("This BC imposes a heat flux density that is computed from the "
                              "GrayLambertSurfaceRadiationBase userobject.");
   return params;
@@ -28,14 +32,20 @@ validParams<GrayLambertNeumannBC>()
 
 GrayLambertNeumannBC::GrayLambertNeumannBC(const InputParameters & parameters)
   : IntegratedBC(parameters),
-    _glsr_uo(getUserObject<GrayLambertSurfaceRadiationBase>("surface_radiation_object_name"))
+    _glsr_uo(getUserObject<GrayLambertSurfaceRadiationBase>("surface_radiation_object_name")),
+    _reconstruct_emission(getParam<bool>("reconstruct_emission"))
 {
 }
 
 Real
 GrayLambertNeumannBC::computeQpResidual()
 {
-  return _test[_i][_qp] * _glsr_uo.getSurfaceHeatFluxDensity(_current_boundary_id);
+  if (!_reconstruct_emission)
+    return _test[_i][_qp] * _glsr_uo.getSurfaceHeatFluxDensity(_current_boundary_id);
+
+  Real eps = _glsr_uo.getSurfaceEmissivity(_current_boundary_id);
+  Real emission = _sigma_stefan_boltzmann * MathUtils::pow(_u[_qp], 4);
+  return _test[_i][_qp] * eps * (emission - _glsr_uo.getSurfaceIrradiation(_current_boundary_id));
 }
 
 Real
