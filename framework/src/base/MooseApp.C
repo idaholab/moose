@@ -1035,7 +1035,7 @@ MooseApp::getCheckpointDirectories() const
     if (moose_object_action->getParamTempl<std::string>("type") == "Checkpoint")
     {
       if (params.isParamValid("file_base"))
-        checkpoint_dirs.push_back(common->getParamTempl<std::string>("file_base") + "_cp");
+        checkpoint_dirs.push_back(params.get<std::string>("file_base") + "_cp");
       else
       {
         std::ostringstream oss;
