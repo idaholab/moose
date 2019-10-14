@@ -44,6 +44,7 @@
       type = Exodiff
       exodiff = upper-and-lower-bound_out.e
       detail = 'have no oscillations in the solution, and'
+      cli_args = "Postprocessors/active='active_upper_lm upper_violations active_lower_lm lower_violations'"
     []
     [non_singular]
       input = upper-and-lower-bound.i
@@ -51,7 +52,58 @@
       absent_out = '[1-9]+[0-9]* of 33 singular values'
       expect_out = '0 of 33 singular values'
       cli_args = "nx=10 num_steps=5 Outputs/exodus=false Outputs/active='' -pc_type svd -pc_svd_monitor"
-      detail = 'have a non-singular matrix'
+      detail = 'have a non-singular matrix, and'
     []
+    [amg_fail]
+      input = upper-and-lower-bound.i
+      type = RunException
+      expect_err = 'Linear solve did not converge due to DIVERGED_ITS'
+      cli_args = "Outputs/exodus=false Outputs/active='' -pc_type hypre -pc_hypre_type boomeramg -ksp_converged_reason"
+      detail = 'be incompataible with algebraic multigrid'
+      petsc_version = '>=3.10.0'
+    []
+  []
+  [vi]
+    design = BoundsAux.md
+    requirement = 'The system shall be able to enforce an upper and lower bound on a variable using a variational inequality'
+    [rsls]
+      input = vi-bounding.i
+      type = Exodiff
+      exodiff = vi-bounding_out.e
+      detail = 'reduced space active set solver, which'
+      custom_cmp = 'upper-and-lower.cmp'
+    []
+    [rsls_amg]
+      input = vi-bounding.i
+      type = Exodiff
+      exodiff = vi-amg.e
+      detail = 'is compatible with algebraic multigrid, and'
+      custom_cmp = 'upper-and-lower.cmp'
+      cli_args = 'Outputs/file_base=vi-amg -pc_type hypre -pc_hypre_type boomeramg'
+    []
+    [ssls]
+      input = vi-bounding.i
+      type = Exodiff
+      exodiff = vi-ssls.e
+      detail = 'a semi-smooth solver, which'
+      custom_cmp = 'upper-and-lower.cmp'
+      cli_args = 'Outputs/file_base=vi-ssls -snes_type vinewtonssls'
+    []
+    [ssls_amg]
+      input = vi-bounding.i
+      type = Exodiff
+      exodiff = vi-ssls-amg.e
+      detail = 'is also compatible with algebraic multigrid'
+      custom_cmp = 'upper-and-lower.cmp'
+      cli_args = 'Outputs/file_base=vi-ssls-amg -pc_type hypre -pc_hypre_type boomeramg -snes_type vinewtonssls'
+    []
+  []
+  [unbounded]
+    design = BoundsAux.md
+    requirement = 'The system shall show violation of bounds when a non-variational-inequality solver is used'
+    type = Exodiff
+    input = vi-bounding.i
+    exodiff = unbounded.e
+    cli_args = "Postprocessors/active='upper_violations lower_violations' Outputs/file_base=unbounded -snes_type newtonls"
   []
 []
