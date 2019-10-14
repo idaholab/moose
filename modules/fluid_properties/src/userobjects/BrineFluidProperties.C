@@ -35,7 +35,7 @@ BrineFluidProperties::BrineFluidProperties(const InputParameters & parameters)
   {
     const std::string class_name = "Water97FluidProperties";
     InputParameters params = _app.getFactory().getValidParams(class_name);
-    if (!_fe_problem.hasUserObject(water_name)) // multi-threaded guard
+    if (_tid == 0)
       _fe_problem.addUserObject(class_name, water_name, params);
   }
   _water97_fp = &_fe_problem.getUserObjectTempl<Water97FluidProperties>(water_name);
@@ -60,7 +60,7 @@ BrineFluidProperties::BrineFluidProperties(const InputParameters & parameters)
   {
     const std::string class_name = "NaClFluidProperties";
     InputParameters params = _app.getFactory().getValidParams(class_name);
-    if (!_fe_problem.hasUserObject(nacl_name)) // multi-threaded guard
+    if (_tid == 0)
       _fe_problem.addUserObject(class_name, nacl_name, params);
   }
   _nacl_fp = &_fe_problem.getUserObjectTempl<SinglePhaseFluidProperties>(nacl_name);
