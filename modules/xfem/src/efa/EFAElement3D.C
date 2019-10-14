@@ -2050,6 +2050,24 @@ EFAElement3D::addFaceEdgeCut(unsigned int face_id,
     if (cut_edge->numEmbeddedNodes() > 2)
       EFAError("element edge can't have >2 embedded nodes");
 
+    // cut fragment faces, which is an essential addition to other code in this method that cuts
+    // element faces
+    unsigned int FragFaceID;
+    unsigned int FragFaceEdgeID;
+    if (getFragmentFaceEdgeID(face_id, edge_id, FragFaceID, FragFaceEdgeID))
+    {
+      EFAEdge * elem_edge = _faces[face_id]->getEdge(edge_id);
+      EFAEdge * frag_edge = getFragmentFace(0, FragFaceID)->getEdge(FragFaceEdgeID);
+      double xi[2] = {-1.0, -1.0}; // relative coords of two frag edge nodes
+      xi[0] = elem_edge->distanceFromNode1(frag_edge->getNode(0));
+      xi[1] = elem_edge->distanceFromNode1(frag_edge->getNode(1));
+      double frag_pos = (position - xi[0]) / (xi[1] - xi[0]);
+      EFANode * frag_edge_node1 = frag_edge->getNode(0);
+
+      if (!frag_edge->hasIntersection())
+        frag_edge->addIntersection(frag_pos, local_embedded, frag_edge_node1);
+    }
+
     // add to adjacent face edge
     if (add_to_adjacent)
     {
