@@ -212,7 +212,6 @@
 - /Kernels/OneD7EqnEnergyHeatFlux
 - /Kernels/HeatConductionRZ
 - /Kernels/HeatConductionTimeDerivativeRZ
-- /Kernels/OneDEnergyHeatSource
 - /Kernels/OneDEnergyWallHeatFlux
 - /Kernels/OneDEnergyWallHeating
 - /Kernels/OneDHeatForcingFunction
