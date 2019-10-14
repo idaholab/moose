@@ -38,18 +38,17 @@
     type = RunApp
     input = no_negative_jacobian.i
     issues = '#9740'
-    requirement = 'A simulation shall run fine if there are no negative element Jacobians'
+    requirement = 'If use_displaced_mesh = false then MOOSE will not throw an exception if elements are inverted to produce a negative element Jacobian, in 3D simulations'
   [../]
   [./jacobian_zero]
     type = RunException
     input = no_negative_jacobian.i
     prereq = no_negative_jacobian
-    # num_steps takes precendence over the end_time in the input file.
     cli_args = 'Kernels/diff/use_displaced_mesh=true Executioner/num_steps=2'
     expect_err = 'ERROR: negative Jacobian 0 at point \(x,y,z\)=\(       0, 0.211325, 0.211325\) in element 0'
     should_crash = False
     issues = '#9740'
-    requirement = 'A simulation shall throw an exception if there is a zero element Jacobians'
+    requirement = 'A 3D simulation shall throw an exception if there is a zero element Jacobian, when use_displaced_mesh = true'
   [../]
   [./jacobian_negative]
     type = RunException
@@ -60,10 +59,35 @@
     expect_err = 'ERROR: negative Jacobian -0.0625 at point \(x,y,z\)=\(-0.105662, 0.211325, 0.211325\) in element 0'
     should_crash = False
     issues = '#9740'
-    requirement = 'A simulation shall throw an exception if there is a negative element Jacobians'
+    requirement = 'A 3D simulation shall throw an exception if there is a negative element Jacobian, when use_displaced_mesh = true'
   [../]
 
-  [./inf_nan]
+  [./no_negative_jacobian_2D]
+    type = RunApp
+    input = no_negative_jacobian_2D.i
+    issues = '#9740 #10229'
+    requirement = 'If use_displaced_mesh = false then MOOSE will not throw an exception if elements are inverted to produce a negative element Jacobian, in 2D simulations'
+  [../]
+  [./zero_jacobian_2D_ok]
+    type = RunApp
+    input = no_negative_jacobian_2D.i
+    prereq = no_negative_jacobian_2D
+    cli_args = 'Executioner/dt=0.5'
+    issues = '#9740 #10229'
+    requirement = 'If use_displaced_mesh = false then MOOSE will not throw an exception if elements are distored to produce a zero element Jacobian, in 2D simulations'
+  [../]
+  [./jacobian_zero_2D]
+    type = RunException
+    input = no_negative_jacobian_2D.i
+    prereq = zero_jacobian_2D_ok
+    cli_args = 'Kernels/diff/use_displaced_mesh=true Executioner/dt=0.5 Executioner/num_steps=2'
+    expect_err = 'ERROR: negative Jacobian 0 at point \(x,y,z\)=\(       0, 0.211325,        0\) in element 0'
+    should_crash = False
+    issues = '#9740 #10229'
+    requirement = 'A 2D simulation shall throw an exception if there is a zero element Jacobian, when use_displaced_mesh = true'
+  [../]
+
+[./inf_nan]
     type = PetscJacobianTester
     input = 'inf_nan.i'
     recover = false
