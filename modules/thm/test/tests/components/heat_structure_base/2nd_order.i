@@ -48,7 +48,7 @@
   [../]
 
   [./hg]
-    type = HeatGeneration
+    type = HeatSourceFromTotalPower
     hs = hs
     regions = 'FUEL'
     power_fraction = 3.33672612e-1
