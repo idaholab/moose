@@ -49,7 +49,8 @@ GrayLambertSurfaceRadiationBase::GrayLambertSurfaceRadiationBase(const InputPara
     _side_temperature(_n_sides),
     _side_type(_n_sides),
     _areas(_n_sides),
-    _beta(_n_sides)
+    _beta(_n_sides),
+    _surface_irradiation(_n_sides)
 {
   // set up the map from the side id to the local index & check
   // note that boundaryIDs is not in the right order anymore!
@@ -249,6 +250,11 @@ GrayLambertSurfaceRadiationBase::finalize()
           std::pow((radiosity(i) + (1 - _emissivity[i]) / _emissivity[i] * _heat_flux_density[i]) /
                        _sigma_stefan_boltzmann,
                    0.25);
+
+    // compute the surface irradiation into i from the radiosities
+    _surface_irradiation[i] = 0;
+    for (unsigned int j = 0; j < _n_sides; ++j)
+      _surface_irradiation[i] += _view_factors[i][j] * radiosity(j);
   }
 }
 
@@ -264,6 +270,14 @@ GrayLambertSurfaceRadiationBase::threadJoin(const UserObject & y)
     _side_temperature[j] += pps._side_temperature[j];
     _beta[j] += pps._beta[j];
   }
+}
+
+Real
+GrayLambertSurfaceRadiationBase::getSurfaceIrradiation(BoundaryID id) const
+{
+  if (_side_id_index.find(id) == _side_id_index.end())
+    return 0;
+  return _surface_irradiation[_side_id_index.find(id)->second];
 }
 
 Real

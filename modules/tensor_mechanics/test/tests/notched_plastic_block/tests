@@ -24,6 +24,8 @@
       input = 'biaxial_planar.i'
       csvdiff = 'biaxial_planar.csv'
       heavy = true
+      # note, the number of residual calls for this test was documented in a published journal article.  To get no diffs when testing in parallel, various tolerances and settings must be set differently, resulting in a different number of residual calls.  Therefore, to keep the journal article correct, only test in serial.
+      max_parallel = 1
       cli_args = 'Executioner/end_time=1 Postprocessors/active=s_zz'
       detail = 'unsmoothed Mohr-Coulomb plasticity'
     [../]

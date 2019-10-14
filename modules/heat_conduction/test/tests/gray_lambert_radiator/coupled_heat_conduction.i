@@ -90,6 +90,7 @@
   [./radiation]
     type = GrayLambertNeumannBC
     variable = temperature
+    reconstruct_emission = false
     surface_radiation_object_name = cavity_radiation
     boundary = 'left_interior right_interior'
   [../]
