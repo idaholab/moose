@@ -637,12 +637,6 @@ FEProblemBase::initialSetup()
 #endif
   }
 
-  // Perform output related setups
-  _app.getOutputWarehouse().initialSetup();
-
-  // Flush all output to _console that occur during construction and initialization of objects
-  _app.getOutputWarehouse().mooseConsole();
-
   if (_app.isRecovering() && (_app.isUltimateMaster() || _force_restart))
   {
     _resurrector->setRestartFile(_app.getRecoverFileBase());
@@ -654,6 +648,7 @@ FEProblemBase::initialSetup()
   {
     CONSOLE_TIMED_PRINT("Restarting from file");
     _resurrector->restartFromFile();
+    _resurrector->restartRestartableData();
   }
   else
   {
@@ -666,6 +661,12 @@ FEProblemBase::initialSetup()
       _aux->copyVars(*reader);
     }
   }
+
+  // Perform output related setups
+  _app.getOutputWarehouse().initialSetup();
+
+  // Flush all output to _console that occur during construction and initialization of objects
+  _app.getOutputWarehouse().mooseConsole();
 
   // Build Refinement and Coarsening maps for stateful material projections if necessary
   if (_adaptivity.isOn() &&
@@ -885,12 +886,12 @@ FEProblemBase::initialSetup()
 
       _app.restoreCachedBackup();
     }
-    else
-    {
-      CONSOLE_TIMED_PRINT("Restoring restart data");
-
-      _resurrector->restartRestartableData();
-    }
+    //    else
+    //    {
+    //      CONSOLE_TIMED_PRINT("Restoring restart data");
+    //
+    //      _resurrector->restartRestartableData();
+    //    }
 
     // We may have just clobbered initial conditions that were explicitly set
     // In a _restart_ scenario it is completely valid to specify new initial conditions

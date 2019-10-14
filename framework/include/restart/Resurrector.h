@@ -64,10 +64,9 @@ protected:
   RestartableDataIO _restartable;
 
   /// Timers
-  PerfID _restart_from_file_timer;
-  PerfID _restart_restartable_data_timer;
+  const PerfID _restart_from_file_timer;
+  const PerfID _restart_restartable_data_timer;
 
   static const std::string MAT_PROP_EXT;
   static const std::string RESTARTABLE_DATA_EXT;
 };
-

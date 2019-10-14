@@ -127,15 +127,11 @@ RestartableDataIO::deserializeRestartableData(
 
   for (unsigned int i = 0; i < n_data; i++)
   {
-    std::string data_name;
-    char ch = 0;
-    do
-    {
-      stream.read(&ch, 1);
-      if (ch != '\0')
-        data_name += ch;
-    } while (ch != '\0');
-    data_names[i] = data_name;
+    std::getline(stream, data_names[i], '\0');
+    if (!stream)
+      mooseError("Error while reading stream");
+
+    std::cout << "data name: " << data_names[i] << '\n';
   }
 
   // Grab this processor's block size
@@ -158,17 +154,11 @@ RestartableDataIO::deserializeRestartableData(
                                               // this hasn't been specified to be recovery only data
 
     {
-      // Moose::out<<"Loading "<<current_name<<std::endl;
-
-      try
-      {
-        auto & current_data = restartable_data.at(current_name);
-        current_data->load(stream);
-      }
-      catch (...)
-      {
+      auto current_pair = restartable_data.find(current_name);
+      if (current_pair == restartable_data.end())
         mooseError("restartable_data missing ", current_name, "\n");
-      }
+
+      current_pair->second->load(stream);
     }
     else
     {
