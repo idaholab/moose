@@ -12,6 +12,7 @@
   [./coarse_3D]
     type = CSVDiff
     heavy = true
+    max_time = 1000
     input = 'coarse_3D.i'
     csvdiff = 'coarse_3D_csv_xmass_0021.csv'
     abs_zero = 1E-7
