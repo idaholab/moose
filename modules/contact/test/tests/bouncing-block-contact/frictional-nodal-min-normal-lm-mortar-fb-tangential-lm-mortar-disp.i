@@ -12,7 +12,10 @@ offset = 1e-2
 []
 
 [Mesh]
-  file = long-bottom-block-1elem-blocks.e
+  [./file_mesh]
+    type = FileMeshGenerator
+    file = long-bottom-block-1elem-blocks-coarse.e
+  [../]
 []
 
 [Variables]
@@ -24,12 +27,12 @@ offset = 1e-2
     block = '1 2'
     # order = SECOND
   [../]
-  [./normal_lm]
+  [./frictional_normal_lm]
     block = 3
     # family = MONOMIAL
     # order = CONSTANT
   [../]
-  [./tangential_lm]
+  [./frictional_tangential_lm]
     block = 3
     family = MONOMIAL
     order = CONSTANT
@@ -58,11 +61,11 @@ offset = 1e-2
 
 
 [Constraints]
-  [normal_lm]
+  [frictional_normal_lm]
     type = NormalNodalLMMechanicalContact
     slave = 10
     master = 20
-    variable = normal_lm
+    variable = frictional_normal_lm
     master_variable = disp_x
     disp_y = disp_y
     ncp_function_type = min
@@ -73,7 +76,7 @@ offset = 1e-2
     slave_boundary = 10
     master_subdomain = 4
     slave_subdomain = 3
-    variable = normal_lm
+    variable = frictional_normal_lm
     slave_variable = disp_x
     component = x
     use_displaced_mesh = true
@@ -85,24 +88,24 @@ offset = 1e-2
     slave_boundary = 10
     master_subdomain = 4
     slave_subdomain = 3
-    variable = normal_lm
+    variable = frictional_normal_lm
     slave_variable = disp_y
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false
   []
-  [tangential_lm]
+  [frictional_tangential_lm]
     type = TangentialMortarLMMechanicalContact
     master_boundary = 20
     slave_boundary = 10
     master_subdomain = 4
     slave_subdomain = 3
-    variable = tangential_lm
+    variable = frictional_tangential_lm
     slave_variable = disp_x
     slave_disp_y = disp_y
     use_displaced_mesh = true
     compute_primal_residuals = false
-    contact_pressure = normal_lm
+    contact_pressure = frictional_normal_lm
     friction_coefficient = .1
     ncp_function_type = fb
   []
@@ -112,7 +115,7 @@ offset = 1e-2
     slave_boundary = 10
     master_subdomain = 4
     slave_subdomain = 3
-    variable = tangential_lm
+    variable = frictional_tangential_lm
     slave_variable = disp_x
     component = x
     use_displaced_mesh = true
@@ -124,7 +127,7 @@ offset = 1e-2
     slave_boundary = 10
     master_subdomain = 4
     slave_subdomain = 3
-    variable = tangential_lm
+    variable = frictional_tangential_lm
     slave_variable = disp_y
     component = y
     use_displaced_mesh = true
@@ -208,7 +211,7 @@ offset = 1e-2
   [../]
   [contact]
     type = ContactDOFSetSize
-    variable = normal_lm
+    variable = frictional_normal_lm
     subdomain = '3'
     execute_on = 'nonlinear timestep_end'
   []

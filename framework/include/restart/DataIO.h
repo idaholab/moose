@@ -259,6 +259,24 @@ dataStore(std::ostream & stream, std::list<T> & l, void * context)
   }
 }
 
+template <typename T>
+inline void
+dataStore(std::ostream & stream, std::deque<T> & l, void * context)
+{
+  // First store the size of the container
+  unsigned int size = l.size();
+  stream.write((char *)&size, sizeof(size));
+
+  typename std::deque<T>::iterator it = l.begin();
+  typename std::deque<T>::iterator end = l.end();
+
+  for (; it != end; ++it)
+  {
+    T & x = const_cast<T &>(*it);
+    storeHelper(stream, x, context);
+  }
+}
+
 template <typename T, typename U>
 inline void
 dataStore(std::ostream & stream, std::map<T, U> & m, void * context)
@@ -511,6 +529,22 @@ inline void
 dataLoad(std::istream & stream, std::list<T> & l, void * context)
 {
   // First read the size of the set
+  unsigned int size = 0;
+  stream.read((char *)&size, sizeof(size));
+
+  for (unsigned int i = 0; i < size; i++)
+  {
+    T data;
+    loadHelper(stream, data, context);
+    l.push_back(std::move(data));
+  }
+}
+
+template <typename T>
+inline void
+dataLoad(std::istream & stream, std::deque<T> & l, void * context)
+{
+  // First read the size of the container
   unsigned int size = 0;
   stream.read((char *)&size, sizeof(size));
 
