@@ -41,6 +41,9 @@ public:
 
   virtual void act() override;
 
+  using Action::addRelationshipManagers;
+  virtual void addRelationshipManagers(Moose::RelationshipManagerType input_rm_type) override;
+
   static MooseEnum getModelEnum();
   static MooseEnum getFormulationEnum();
   static MooseEnum getSystemEnum();
@@ -54,4 +57,12 @@ protected:
   const MooseEnum _model;
   const MooseEnum _formulation;
   const MooseEnum _system;
+  const MeshGeneratorName _mesh_gen_name;
+
+private:
+  void addMortarContact();
+  void addNodeFaceContact();
+  void addDiracContact();
+
+  std::vector<VariableName> getDisplacementVarNames();
 };
