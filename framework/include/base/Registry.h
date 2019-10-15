@@ -159,6 +159,21 @@
                                              #templatename "<JACOBIAN>",                           \
                                              true})
 
+struct RegistryEntry;
+class Factory;
+class ActionFactory;
+class InputParameters;
+class MooseObject;
+class Action;
+
+using paramsPtr = InputParameters (*)();
+using buildPtr = std::shared_ptr<MooseObject> (*)(const InputParameters & parameters);
+using buildActionPtr = std::shared_ptr<Action> (*)(const InputParameters & parameters);
+
+namespace moose
+{
+namespace internal
+{
 template <typename T>
 auto
 callValidParamsInner(long) -> decltype(T::validParams(), emptyInputParameters())
@@ -187,16 +202,22 @@ callValidParams() -> decltype(callValidParamsInner<T>(0), emptyInputParameters()
   return callValidParamsInner<T>(0);
 }
 
-struct RegistryEntry;
-class Factory;
-class ActionFactory;
-class InputParameters;
-class MooseObject;
-class Action;
+template <typename T>
+std::shared_ptr<MooseObject>
+buildObj(const InputParameters & parameters)
+{
+  return std::make_shared<T>(parameters);
+}
 
-using paramsPtr = InputParameters (*)();
-using buildPtr = std::shared_ptr<MooseObject> (*)(const InputParameters & parameters);
-using buildActionPtr = std::shared_ptr<Action> (*)(const InputParameters & parameters);
+template <typename T>
+std::shared_ptr<Action>
+buildAct(const InputParameters & parameters)
+{
+  return std::make_shared<T>(parameters);
+}
+
+} // namespace internal
+} // namespace moose
 
 /// Holds details and meta-data info for a particular MooseObject or Action for use in the
 /// registry.
@@ -229,20 +250,6 @@ struct RegistryEntry
   bool _is_ad;
 };
 
-template <typename T>
-std::shared_ptr<MooseObject>
-buildObj(const InputParameters & parameters)
-{
-  return std::make_shared<T>(parameters);
-}
-
-template <typename T>
-std::shared_ptr<Action>
-buildAct(const InputParameters & parameters)
-{
-  return std::make_shared<T>(parameters);
-}
-
 /// The registry is used as a global singleton to collect information on all available MooseObject
 /// and Action classes for use in a moose app/simulation.  It must be global because we want+need
 /// to be able to register objects in global scope during static initialization time before other
@@ -262,8 +269,8 @@ public:
   static char add(const RegistryEntry & info)
   {
     RegistryEntry copy = info;
-    copy._build_ptr = &buildObj<T>;
-    copy._params_ptr = &callValidParams<T>;
+    copy._build_ptr = &moose::internal::buildObj<T>;
+    copy._params_ptr = &moose::internal::callValidParams<T>;
     addInner(copy);
     return 0;
   }
@@ -275,8 +282,8 @@ public:
   static char addAction(const RegistryEntry & info)
   {
     RegistryEntry copy = info;
-    copy._build_action_ptr = &buildAct<T>;
-    copy._params_ptr = &callValidParams<T>;
+    copy._build_action_ptr = &moose::internal::buildAct<T>;
+    copy._params_ptr = &moose::internal::callValidParams<T>;
     addActionInner(copy);
     return 0;
   }
