@@ -214,9 +214,9 @@ template <typename... Args>
 [[noreturn]] void
 MooseObject::paramError(const std::string & param, Args... args) const
 {
-  moose::show_trace = false;
+  Moose::show_trace = false;
   mooseError(paramErrorMsg(param, std::forward<Args>(args)...));
-  moose::show_trace = true;
+  Moose::show_trace = true;
 }
 
 template <typename... Args>

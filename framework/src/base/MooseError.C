@@ -16,9 +16,6 @@
 namespace moose
 {
 
-bool show_trace = true;
-bool show_multiple = false;
-
 namespace internal
 {
 
@@ -70,7 +67,7 @@ mooseErrorRaw(std::string msg, const std::string prefix)
   }
 
   oss.str("");
-  if (libMesh::global_n_processors() == 1)
+  if (Moose::show_trace && libMesh::global_n_processors() == 1)
     print_trace(oss);
 
   msg = oss.str();

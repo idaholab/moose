@@ -39,7 +39,7 @@
   do                                                                                               \
   {                                                                                                \
     static bool did_this_already = false;                                                          \
-    if (moose::show_multiple || !did_this_already)                                                 \
+    if (Moose::show_multiple || !did_this_already)                                                 \
     {                                                                                              \
       did_this_already = true;                                                                     \
       do_this;                                                                                     \
@@ -99,9 +99,6 @@ class MooseVariableFEBase;
 
 namespace moose
 {
-
-extern bool show_trace;
-extern bool show_multiple;
 
 namespace internal
 {
@@ -189,7 +186,7 @@ mooseDeprecatedStream(S & oss, bool expired, Args &&... args)
                   expired ? COLOR_RED : COLOR_YELLOW);
               oss << msg;
               ss.str("");
-              if (show_trace) {
+              if (Moose::show_trace) {
                 if (libMesh::global_n_processors() == 1)
                   print_trace(ss);
                 else
