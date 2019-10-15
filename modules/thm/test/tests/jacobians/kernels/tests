@@ -299,8 +299,8 @@
   [./one_d_7eqn_energy_pressure_relaxation]
     type = 'PetscJacobianTester'
     input = 'one_d_7eqn_energy_pressure_relaxation.i'
-    ratio_tol = 9e-6
-    difference_tol = 4e9
+    ratio_tol = 5e-6
+    difference_tol = 2e9
     max_threads = 1
     allow_test_objects = true
   [../]
