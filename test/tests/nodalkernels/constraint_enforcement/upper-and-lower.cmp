@@ -1,0 +1,10 @@
+COORDINATES absolute 1.e-6
+
+TIME STEPS relative 1.e-6 floor 1e-10
+
+GLOBAL VARIABLES relative 1.e-6 floor 1e-10
+	lower_violations
+	upper_violations
+
+NODAL VARIABLES relative 1.e-6 floor 1e-10
+	u

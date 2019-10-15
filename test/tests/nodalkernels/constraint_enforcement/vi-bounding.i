@@ -12,9 +12,19 @@ num_steps=10
 [Variables]
   [u]
   []
-  [lm_upper]
-  []
-  [lm_lower]
+[]
+
+[AuxVariables]
+  [bounds][]
+[]
+
+[Bounds]
+  [bounds]
+    type = BoundsAux
+    variable = bounds
+    bounded_variable = u
+    upper = ${l}
+    lower = 0
   []
 []
 
@@ -41,36 +51,6 @@ num_steps=10
     function = 'if(x<5,-1,1)'
   []
 []
-
-[NodalKernels]
-  [upper_bound]
-    type = UpperBoundNodalKernel
-    variable = lm_upper
-    v = u
-    exclude_boundaries = 'left right'
-    upper_bound = 10
-  []
-  [forces_from_upper]
-    type = CoupledForceNodalKernel
-    variable = u
-    v = lm_upper
-    coef = -1
-  []
-  [lower_bound]
-    type = LowerBoundNodalKernel
-    variable = lm_lower
-    v = u
-    exclude_boundaries = 'left right'
-    lower_bound = 0
-  []
-  [forces_from_lower]
-    type = CoupledForceNodalKernel
-    variable = u
-    v = lm_lower
-    coef = 1
-  []
-[]
-
 
 [BCs]
   [left]
@@ -99,8 +79,8 @@ num_steps=10
   num_steps = ${num_steps}
   solve_type = NEWTON
   dtmin = 1
-  petsc_options_iname = '-snes_max_linear_solve_fail -ksp_max_it -pc_type -sub_pc_factor_levels -snes_linesearch_type'
-  petsc_options_value = '0                           30          asm      16                    basic'
+  petsc_options_iname = '-snes_max_linear_solve_fail -ksp_max_it -pc_type -sub_pc_factor_levels -snes_linesearch_type -snes_type'
+  petsc_options_value = '0                           30          asm      16                    basic                 vinewtonrsls'
 []
 
 [Outputs]
@@ -120,25 +100,11 @@ num_steps=10
 []
 
 [Postprocessors]
-  [active_upper_lm]
-    type = GreaterThanLessThanPostprocessor
-    variable = lm_upper
-    execute_on = 'nonlinear timestep_end'
-    value = 1e-8
-    comparator = 'greater'
-  []
   [upper_violations]
     type = GreaterThanLessThanPostprocessor
     variable = u
     execute_on = 'nonlinear timestep_end'
     value = ${fparse 10+1e-8}
-    comparator = 'greater'
-  []
-  [active_lower_lm]
-    type = GreaterThanLessThanPostprocessor
-    variable = lm_lower
-    execute_on = 'nonlinear timestep_end'
-    value = 1e-8
     comparator = 'greater'
   []
   [lower_violations]
