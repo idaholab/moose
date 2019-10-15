@@ -20,7 +20,7 @@
     # PTScotch is not valgrind clean
     valgrind = none
     # Do not need a high tolerance because mesh is small and parititioner is not accurate
-    rel_err = '3e-1'
+    rel_err = '1e-1'
   [../]
 
   [./ptscotch_weight_elment]
@@ -38,7 +38,7 @@
    # PTScotch is not valgrind clean
     valgrind = none
     # Do not need a high tolerance because mesh is small and parititioner is not accurate
-    rel_err = '3e-1'
+    rel_err = '1e-1'
   [../]
 
   [./ptscotch_weight_side]
@@ -56,7 +56,7 @@
    # PTScotch is not valgrind clean
     valgrind = none
     # Do not need a high tolerance because mesh is small and parititioner is not accurate
-    rel_err = '3e-1'
+    rel_err = '1e-1'
   [../]
 
   [./ptscotch_weight_both]
@@ -74,7 +74,7 @@
   # PTScotch is not valgrind clean
     valgrind = none
     # Do not need a high tolerance because mesh is small and parititioner is not accurate
-    rel_err = '3e-1'
+    rel_err = '1e-1'
   [../]
 
   [./parmetis]
@@ -89,7 +89,7 @@
     min_parallel = 4
     max_parallel = 4
     # Do not need a high tolerance because mesh is small and parititioner is not accurate
-    rel_err = '3e-1'
+    rel_err = '1e-1'
   [../]
 
   [./parmetis_weight_element]
@@ -105,7 +105,7 @@
     min_parallel = 4
     max_parallel = 4
     # Do not need a high tolerance because mesh is small and parititioner is not accurate
-    rel_err = '3e-1'
+    rel_err = '1e-1'
   [../]
 
   [./parmetis_weight_side]
@@ -121,7 +121,7 @@
     min_parallel = 4
     max_parallel = 4
     # Do not need a high tolerance because mesh is small and parititioner is not accurate
-    rel_err = '3e-1'
+    rel_err = '1e-1'
   [../]
 
   [./parmetis_weight_both]
@@ -137,7 +137,7 @@
     min_parallel = 4
     max_parallel = 4
     # Do not need a high tolerance because mesh is small and parititioner is not accurate
-    rel_err = '3e-1'
+    rel_err = '1e-1'
   [../]
 
   [./parmetis_presplit_mesh]
