@@ -1,6 +1,7 @@
 [Tests]
    design = "Eigenvalue.md"
    issues = "#7398"
+
   [./test]
     type = 'CSVDiff'
     input = 'ipm.i'
@@ -8,6 +9,7 @@
     slepc = true
     requirement = "Eigenvalue system should support standard eigenvalue problems"
   [../]
+
   [./gipm_test]
     type = 'CSVDiff'
     input = 'gipm.i'
