@@ -1,0 +1,25 @@
+[Tests]
+  design = MultiAppMeshFunctionTransfer.md
+  issues = '#14166'
+  [sequencing]
+    requirement = 'The system shall be able to use the solution of a coarse mesh as the initial guess for a fine mesh solution for the current timestep, and the solution on a fine mesh from the previous timestep as the initial guess for a coarse mesh solution for a'
+    [diffusion]
+      type = Exodiff
+      input = fine.i
+      exodiff = 'fine_out.e fine_out_coarse0.e'
+      detail = 'diffusion problem and a'
+    []
+    [vi]
+      type = Exodiff
+      input = vi-fine.i
+      exodiff = 'vi-fine_out.e vi-fine_out_coarse0.e vi-fine_out_coarse0_coarser0.e'
+      detail = 'variational inequality problem resulting in a significantly reduced number of nonlinear iterations to solve the fine mesh problem'
+    []
+  []
+  [no_sequencing]
+    type = Exodiff
+    input = vi-fine-alone.i
+    exodiff = 'vi-fine-alone_out.e'
+    requirement = 'The system shall be able to solve a fine mesh variational inequality problem without grid sequencing but with a lot more nonlinear iterations'
+  []
+[]
