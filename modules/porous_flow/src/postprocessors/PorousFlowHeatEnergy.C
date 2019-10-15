@@ -59,7 +59,11 @@ PorousFlowHeatEnergy::PorousFlowHeatEnergy(const InputParameters & parameters)
                                        "PorousFlow_fluid_phase_internal_energy_nodal")
                                  : nullptr),
     _var(getParam<unsigned>("kernel_variable_number") < _dictator.numVariables()
-             ? _dictator.getCoupledStandardMooseVars()[getParam<unsigned>("kernel_variable_number")]
+             ? &_fe_problem.getStandardVariable(
+                   _tid,
+                   _dictator
+                       .getCoupledStandardMooseVars()[getParam<unsigned>("kernel_variable_number")]
+                       ->name())
              : nullptr)
 {
   if (!_phase_index.empty())
