@@ -37,21 +37,21 @@ public:
   /**
    * Write out the restartable data.
    */
-  void writeRestartableData(std::string base_file_name,
-                            const RestartableDatas & restartable_datas,
-                            std::set<std::string> & _recoverable_data);
+  void writeRestartableData(const std::string & base_file_name,
+                            const RestartableDataMaps & restartable_datas,
+                            const DataNames & _recoverable_data_names);
 
   /**
    * Read restartable data header to verify that we are restarting on the correct number of
    * processors and threads.
    */
-  void readRestartableDataHeader(std::string base_file_name);
+  void readRestartableDataHeader(const std::string & base_file_name);
 
   /**
    * Read the restartable data.
    */
-  void readRestartableData(const RestartableDatas & restartable_datas,
-                           const std::set<std::string> & _recoverable_data);
+  void readRestartableData(const RestartableDataMaps & restartable_datas,
+                           const DataNames & _recoverable_data_names);
 
   /**
    * Create a Backup for the current system.
@@ -67,17 +67,14 @@ private:
   /**
    * Serializes the data into the stream object.
    */
-  void serializeRestartableData(
-      const std::map<std::string, std::unique_ptr<RestartableDataValue>> & restartable_data,
-      std::ostream & stream);
+  void serializeRestartableData(const RestartableDataMap & restartable_data, std::ostream & stream);
 
   /**
    * Deserializes the data from the stream object.
    */
-  void deserializeRestartableData(
-      const std::map<std::string, std::unique_ptr<RestartableDataValue>> & restartable_data,
-      std::istream & stream,
-      const std::set<std::string> & recoverable_data);
+  void deserializeRestartableData(const RestartableDataMap & restartable_data,
+                                  std::istream & stream,
+                                  const DataNames & recoverable_data);
 
   /**
    * Serializes the data for the Systems in FEProblemBase
@@ -95,4 +92,3 @@ private:
   /// A vector of file handles, one per thread
   std::vector<std::shared_ptr<std::ifstream>> _in_file_handles;
 };
-

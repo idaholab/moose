@@ -51,7 +51,7 @@ Checkpoint::Checkpoint(const InputParameters & parameters)
     _binary(getParam<bool>("binary")),
     _parallel_mesh(_problem_ptr->mesh().isDistributedMesh()),
     _restartable_data(_app.getRestartableData()),
-    _recoverable_data(_app.getRecoverableData()),
+    _recoverable_data_names(_app.getRecoverableData()),
     _restartable_data_io(RestartableDataIO(*_problem_ptr))
 {
 }
@@ -117,7 +117,7 @@ Checkpoint::output(const ExecFlagType & /*type*/)
 
   // Write the restartable data
   _restartable_data_io.writeRestartableData(
-      current_file_struct.restart, _restartable_data, _recoverable_data);
+      current_file_struct.restart, _restartable_data, _recoverable_data_names);
 
   // Remove old checkpoint files
   updateCheckpointFiles(current_file_struct);

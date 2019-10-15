@@ -37,17 +37,18 @@ public:
   void setRestartFile(const std::string & file_base);
 
   /**
-   * Set the file extension from which we will restart libMesh
-   * equation systems.  The default suffix is "xdr".
-   * @param file_ext The file extension of a restart file
+   * Tell the Resurrector to use Ascii formatted data instead of the default binary format.
    */
-  void setRestartSuffix(const std::string & file_ext);
+  void useAsciiExtension();
 
   /**
-   * Perform a restart from a file
+   * Perform a restart of the libMesh Equation Systems from a file.
    */
-  void restartFromFile();
+  void restartEquationSystemsObject();
 
+  /**
+   * Perform a restart of the MOOSE user-defined restartable data from a file.
+   */
   void restartRestartableData();
 
 protected:
@@ -58,15 +59,17 @@ protected:
   std::string _restart_file_base;
 
   /// name of the file extension that we restart from
-  std::string _restart_file_suffix;
+  bool _use_binary_ext;
 
   /// Restartable Data
   RestartableDataIO _restartable;
 
   /// Timers
-  const PerfID _restart_from_file_timer;
+  const PerfID _restart_es_timer;
   const PerfID _restart_restartable_data_timer;
 
-  static const std::string MAT_PROP_EXT;
   static const std::string RESTARTABLE_DATA_EXT;
+  static const std::string RESTARTABLE_MESH_DATA_EXT;
+  static const std::string ES_BINARY_EXT;
+  static const std::string ES_ASCII_EXT;
 };

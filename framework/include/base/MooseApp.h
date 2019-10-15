@@ -31,6 +31,7 @@
 #include <list>
 #include <map>
 #include <set>
+#include <unordered_set>
 
 // Forward declarations
 class Executioner;
@@ -471,7 +472,7 @@ public:
    * @param data The actual data object.
    * @param tid The thread id of the object.  Use 0 if the object is not threaded.
    */
-  void registerRestartableData(std::string name,
+  void registerRestartableData(const std::string & name,
                                std::unique_ptr<RestartableDataValue> data,
                                THREAD_ID tid);
 
@@ -479,13 +480,13 @@ public:
    * Return reference to the restatable data object
    * @return A const reference to the restatable data object
    */
-  const RestartableDatas & getRestartableData() { return _restartable_data; }
+  const RestartableDataMaps & getRestartableData() { return _restartable_data; }
 
   /**
    * Return a reference to the recoverable data object
    * @return A const reference to the recoverable data
    */
-  std::set<std::string> & getRecoverableData() { return _recoverable_data; }
+  const DataNames & getRecoverableData() { return _recoverable_data_names; }
 
   /**
    * Create a Backup from the current App. A Backup contains all the data necessary to be able to
@@ -744,7 +745,7 @@ protected:
    *
    * @param name The full (unique) name.
    */
-  void registerRecoverableData(std::string name);
+  void registerRecoverableDataName(const std::string & name);
 
   /**
    * Runs post-initialization error checking that cannot be run correctly unless the simulation
@@ -753,7 +754,7 @@ protected:
   void errorCheck();
 
   /// The name of this object
-  std::string _name;
+  const std::string _name;
 
   /// Parameters of this object
   InputParameters _pars;
@@ -907,10 +908,10 @@ private:
   void createMinimalApp();
 
   /// Where the restartable data is held (indexed on tid)
-  RestartableDatas _restartable_data;
+  RestartableDataMaps _restartable_data;
 
   /// Data names that will only be read from the restart file during RECOVERY
-  std::set<std::string> _recoverable_data;
+  DataNames _recoverable_data_names;
 
   /// Enumeration for holding the valid types of dynamic registrations allowed
   enum RegistrationType

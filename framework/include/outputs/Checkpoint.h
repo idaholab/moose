@@ -83,10 +83,10 @@ private:
   bool _parallel_mesh;
 
   /// Reference to the restartable data
-  const RestartableDatas & _restartable_data;
+  const RestartableDataMaps & _restartable_data;
 
   /// Reference to the recoverable data
-  std::set<std::string> & _recoverable_data;
+  const DataNames & _recoverable_data_names;
 
   /// RestrableData input/output interface
   RestartableDataIO _restartable_data_io;

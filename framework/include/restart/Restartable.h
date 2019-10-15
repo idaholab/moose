@@ -74,7 +74,7 @@ protected:
    * @param data_name The name of the data (usually just use the same name as the member variable)
    */
   template <typename T>
-  T & declareRestartableDataTempl(std::string data_name);
+  T & declareRestartableDataTempl(const std::string & data_name);
 
   /**
    * Declare a piece of data as "restartable" and initialize it.
@@ -87,7 +87,7 @@ protected:
    * @param init_value The initial value of the data
    */
   template <typename T>
-  T & declareRestartableDataTempl(std::string data_name, const T & init_value);
+  T & declareRestartableDataTempl(const std::string & data_name, const T & init_value);
 
   /**
    * Declare a piece of data as "restartable".
@@ -100,7 +100,7 @@ protected:
    * @param context Context pointer that will be passed to the load and store functions
    */
   template <typename T>
-  T & declareRestartableDataWithContext(std::string data_name, void * context);
+  T & declareRestartableDataWithContext(const std::string & data_name, void * context);
 
   /**
    * Declare a piece of data as "restartable" and initialize it.
@@ -114,8 +114,9 @@ protected:
    * @param context Context pointer that will be passed to the load and store functions
    */
   template <typename T>
-  T &
-  declareRestartableDataWithContext(std::string data_name, const T & init_value, void * context);
+  T & declareRestartableDataWithContext(const std::string & data_name,
+                                        const T & init_value,
+                                        void * context);
 
   /**
    * Declare a piece of data as "recoverable".
@@ -129,7 +130,7 @@ protected:
    * @param data_name The name of the data (usually just use the same name as the member variable)
    */
   template <typename T>
-  T & declareRecoverableData(std::string data_name);
+  T & declareRecoverableData(const std::string & data_name);
 
   /**
    * Declare a piece of data as "restartable" and initialize it.
@@ -144,7 +145,7 @@ protected:
    * @param init_value The initial value of the data
    */
   template <typename T>
-  T & declareRecoverableData(std::string data_name, const T & init_value);
+  T & declareRecoverableData(const std::string & data_name, const T & init_value);
 
   /**
    * Declare a piece of data as "restartable".
@@ -157,7 +158,8 @@ protected:
    * @param object_name A supplied name for the object that is declaring this data.
    */
   template <typename T>
-  T & declareRestartableDataWithObjectName(std::string data_name, std::string object_name);
+  T & declareRestartableDataWithObjectName(const std::string & data_name,
+                                           const std::string & object_name);
 
   /**
    * Declare a piece of data as "restartable".
@@ -171,18 +173,18 @@ protected:
    * @param context Context pointer that will be passed to the load and store functions
    */
   template <typename T>
-  T & declareRestartableDataWithObjectNameWithContext(std::string data_name,
-                                                      std::string object_name,
+  T & declareRestartableDataWithObjectNameWithContext(const std::string & data_name,
+                                                      const std::string & object_name,
                                                       void * context);
 
 private:
   /// Helper function for actually registering the restartable data.
-  void registerRestartableDataOnApp(std::string name,
+  void registerRestartableDataOnApp(const std::string & name,
                                     std::unique_ptr<RestartableDataValue> data,
                                     THREAD_ID tid);
 
   /// Helper function for actually registering the restartable data.
-  void registerRecoverableDataOnApp(std::string name);
+  void registerRecoverableDataNameOnApp(const std::string & name);
 
   /// Reference to the application
   MooseApp & _restartable_app;
@@ -199,21 +201,21 @@ private:
 
 template <typename T>
 T &
-Restartable::declareRestartableDataTempl(std::string data_name)
+Restartable::declareRestartableDataTempl(const std::string & data_name)
 {
   return declareRestartableDataWithContext<T>(data_name, nullptr);
 }
 
 template <typename T>
 T &
-Restartable::declareRestartableDataTempl(std::string data_name, const T & init_value)
+Restartable::declareRestartableDataTempl(const std::string & data_name, const T & init_value)
 {
   return declareRestartableDataWithContext<T>(data_name, init_value, nullptr);
 }
 
 template <typename T>
 T &
-Restartable::declareRestartableDataWithContext(std::string data_name, void * context)
+Restartable::declareRestartableDataWithContext(const std::string & data_name, void * context)
 {
   std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
   auto data_ptr = libmesh_make_unique<RestartableData<T>>(full_name, context);
@@ -226,7 +228,7 @@ Restartable::declareRestartableDataWithContext(std::string data_name, void * con
 
 template <typename T>
 T &
-Restartable::declareRestartableDataWithContext(std::string data_name,
+Restartable::declareRestartableDataWithContext(const std::string & data_name,
                                                const T & init_value,
                                                void * context)
 {
@@ -242,15 +244,16 @@ Restartable::declareRestartableDataWithContext(std::string data_name,
 
 template <typename T>
 T &
-Restartable::declareRestartableDataWithObjectName(std::string data_name, std::string object_name)
+Restartable::declareRestartableDataWithObjectName(const std::string & data_name,
+                                                  const std::string & object_name)
 {
   return declareRestartableDataWithObjectNameWithContext<T>(data_name, object_name, nullptr);
 }
 
 template <typename T>
 T &
-Restartable::declareRestartableDataWithObjectNameWithContext(std::string data_name,
-                                                             std::string object_name,
+Restartable::declareRestartableDataWithObjectNameWithContext(const std::string & data_name,
+                                                             const std::string & object_name,
                                                              void * context)
 {
   std::string old_name = _restartable_name;
@@ -266,22 +269,22 @@ Restartable::declareRestartableDataWithObjectNameWithContext(std::string data_na
 
 template <typename T>
 T &
-Restartable::declareRecoverableData(std::string data_name)
+Restartable::declareRecoverableData(const std::string & data_name)
 {
   std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
 
-  registerRecoverableDataOnApp(full_name);
+  registerRecoverableDataNameOnApp(full_name);
 
   return declareRestartableDataWithContext<T>(data_name, nullptr);
 }
 
 template <typename T>
 T &
-Restartable::declareRecoverableData(std::string data_name, const T & init_value)
+Restartable::declareRecoverableData(const std::string & data_name, const T & init_value)
 {
   std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
 
-  registerRecoverableDataOnApp(full_name);
+  registerRecoverableDataNameOnApp(full_name);
 
   return declareRestartableDataWithContext<T>(data_name, init_value, nullptr);
 }

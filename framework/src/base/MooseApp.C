@@ -922,9 +922,9 @@ MooseApp::hasRecoverFileBase()
 }
 
 void
-MooseApp::registerRecoverableData(std::string name)
+MooseApp::registerRecoverableDataName(const std::string & name)
 {
-  _recoverable_data.insert(name);
+  _recoverable_data_names.insert(name);
 }
 
 std::shared_ptr<Backup>
@@ -1122,12 +1122,12 @@ MooseApp::libNameToAppName(const std::string & library_name) const
 }
 
 void
-MooseApp::registerRestartableData(std::string name,
+MooseApp::registerRestartableData(const std::string & name,
                                   std::unique_ptr<RestartableDataValue> data,
                                   THREAD_ID tid)
 {
   auto & restartable_data = _restartable_data[tid];
-  auto insert_pair = moose_try_emplace(restartable_data, name, std::move(data));
+  auto insert_pair = restartable_data.emplace(name, std::move(data));
 
   if (!insert_pair.second)
     mooseError("Attempted to declare restartable twice with the same name: ", name);

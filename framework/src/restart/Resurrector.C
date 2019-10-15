@@ -17,15 +17,17 @@
 #include <stdio.h>
 #include <sys/stat.h>
 
-const std::string Resurrector::MAT_PROP_EXT(".msmp");
 const std::string Resurrector::RESTARTABLE_DATA_EXT(".rd");
+const std::string Resurrector::RESTARTABLE_MESH_DATA_EXT(".mrd");
+const std::string Resurrector::ES_BINARY_EXT(".xdr");
+const std::string Resurrector::ES_ASCII_EXT(".xda");
 
 Resurrector::Resurrector(FEProblemBase & fe_problem)
   : PerfGraphInterface(fe_problem.getMooseApp().perfGraph(), "Resurrector"),
     _fe_problem(fe_problem),
-    _restart_file_suffix("xdr"),
+    _use_binary_ext(true),
     _restartable(_fe_problem),
-    _restart_from_file_timer(registerTimedSection("restartFromFile", 3)),
+    _restart_es_timer(registerTimedSection("restartEquationSystems", 3)),
     _restart_restartable_data_timer(registerTimedSection("restartRestartableData", 3))
 {
 }
@@ -37,19 +39,19 @@ Resurrector::setRestartFile(const std::string & file_base)
 }
 
 void
-Resurrector::setRestartSuffix(const std::string & file_ext)
+Resurrector::useAsciiExtension()
 {
-  _restart_file_suffix = file_ext;
+  _use_binary_ext = false;
 }
 
 void
-Resurrector::restartFromFile()
+Resurrector::restartEquationSystemsObject()
 {
-  TIME_SECTION(_restart_from_file_timer);
+  TIME_SECTION(_restart_es_timer);
 
-  std::string file_name(_restart_file_base + '.' + _restart_file_suffix);
+  std::string file_name(_restart_file_base + (_use_binary_ext ? ES_BINARY_EXT : ES_ASCII_EXT));
   MooseUtils::checkFileReadable(file_name);
-  _restartable.readRestartableDataHeader(_restart_file_base + RESTARTABLE_DATA_EXT);
+
   unsigned int read_flags = EquationSystems::READ_DATA;
   if (!_fe_problem.skipAdditionalRestartData())
     read_flags |= EquationSystems::READ_ADDITIONAL_DATA;
@@ -72,6 +74,8 @@ void
 Resurrector::restartRestartableData()
 {
   TIME_SECTION(_restart_restartable_data_timer);
+
+  _restartable.readRestartableDataHeader(_restart_file_base + RESTARTABLE_DATA_EXT);
 
   _restartable.readRestartableData(_fe_problem.getMooseApp().getRestartableData(),
                                    _fe_problem.getMooseApp().getRecoverableData());

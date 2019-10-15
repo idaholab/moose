@@ -43,7 +43,7 @@ Restartable::Restartable(MooseApp & moose_app,
 }
 
 void
-Restartable::registerRestartableDataOnApp(std::string name,
+Restartable::registerRestartableDataOnApp(const std::string & name,
                                           std::unique_ptr<RestartableDataValue> data,
                                           THREAD_ID tid)
 {
@@ -51,7 +51,7 @@ Restartable::registerRestartableDataOnApp(std::string name,
 }
 
 void
-Restartable::registerRecoverableDataOnApp(std::string name)
+Restartable::registerRecoverableDataNameOnApp(const std::string & name)
 {
-  _restartable_app.registerRecoverableData(name);
+  _restartable_app.registerRecoverableDataName(name);
 }

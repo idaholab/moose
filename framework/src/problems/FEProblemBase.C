@@ -641,14 +641,20 @@ FEProblemBase::initialSetup()
   {
     _resurrector->setRestartFile(_app.getRecoverFileBase());
     if (_app.getRecoverFileSuffix() == "cpa")
-      _resurrector->setRestartSuffix("xda");
+      _resurrector->useAsciiExtension();
   }
 
   if ((_app.isRestarting() || _app.isRecovering()) && (_app.isUltimateMaster() || _force_restart))
   {
     CONSOLE_TIMED_PRINT("Restarting from file");
-    _resurrector->restartFromFile();
-    _resurrector->restartRestartableData();
+    _resurrector->restartEquationSystemsObject();
+
+    /**
+     * TODO: Move the resurrector call to reload data here. Only a few tests fail when doing this
+     * now. Material Properties aren't sized properly at this point and fail across the board,
+     * there are a few other misc tests that fail too.
+     * _resurrector->restartRestartableData();
+     */
   }
   else
   {
@@ -886,12 +892,12 @@ FEProblemBase::initialSetup()
 
       _app.restoreCachedBackup();
     }
-    //    else
-    //    {
-    //      CONSOLE_TIMED_PRINT("Restoring restart data");
-    //
-    //      _resurrector->restartRestartableData();
-    //    }
+    else
+    {
+      CONSOLE_TIMED_PRINT("Restoring restart data");
+
+      _resurrector->restartRestartableData();
+    }
 
     // We may have just clobbered initial conditions that were explicitly set
     // In a _restart_ scenario it is completely valid to specify new initial conditions
@@ -6102,8 +6108,6 @@ FEProblemBase::setRestartFile(const std::string & file_name)
 {
   _app.setRestart(true);
   _resurrector->setRestartFile(file_name);
-  if (_app.getRecoverFileSuffix() == "cpa")
-    _resurrector->setRestartSuffix("xda");
 }
 
 std::vector<VariableName>
