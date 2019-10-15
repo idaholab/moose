@@ -1,0 +1,48 @@
+#include "HeatSourceBase.h"
+#include "HeatStructureBase.h"
+#include "HeatStructureCylindrical.h"
+#include "HeatStructurePlate.h"
+
+template <>
+InputParameters
+validParams<HeatSourceBase>()
+{
+  InputParameters params = validParams<Component>();
+  params.addRequiredParam<std::string>(
+      "hs", "The name of the heat structure component to put the heat source onto");
+  params.addRequiredParam<std::vector<std::string>>(
+      "regions", "The names of the heat structure regions where heat generation is to be applied");
+  params.addClassDescription("Base class for heat source components");
+  return params;
+}
+
+HeatSourceBase::HeatSourceBase(const InputParameters & parameters)
+  : Component(parameters), _region_names(getParam<std::vector<std::string>>("regions"))
+{
+  checkSizeGreaterThan<std::string>("regions", 0);
+}
+
+void
+HeatSourceBase::check() const
+{
+  Component::check();
+
+  checkComponentOfTypeExists<HeatStructureBase>("hs");
+
+  if (hasComponent<HeatStructureBase>("hs"))
+  {
+    if (!hasComponent<HeatStructurePlate>("hs") && !hasComponent<HeatStructureCylindrical>("hs"))
+      logError(
+          "Heat structure must be of type 'HeatStructurePlate' or 'HeatStructureCylindrical'.");
+
+    const HeatStructureBase & hs = getComponent<HeatStructureBase>("hs");
+
+    for (auto && region : _region_names)
+      if (!hs.hasBlock(region))
+        logError("Region '",
+                 region,
+                 "' does not exist in heat structure '",
+                 getParam<std::string>("hs"),
+                 "'.");
+  }
+}

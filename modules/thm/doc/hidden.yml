@@ -79,6 +79,8 @@
 - /Components/HSBoundarySpecifiedTemperature
 - /Components/HXConnector
 - /Components/HeatGeneration
+- /Components/HeatSourceFromPowerDensity
+- /Components/HeatSourceFromTotalPower
 - /Components/HeatStructure
 - /Components/HeatStructureCylindrical
 - /Components/HeatStructurePlate

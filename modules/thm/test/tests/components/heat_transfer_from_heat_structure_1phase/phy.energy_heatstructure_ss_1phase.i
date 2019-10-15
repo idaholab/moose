@@ -80,7 +80,7 @@
   [../]
 
   [./core:hgen]
-    type = HeatGeneration
+    type = HeatSourceFromTotalPower
     hs = core:solid
     regions = 'FUEL'
     power = reactor

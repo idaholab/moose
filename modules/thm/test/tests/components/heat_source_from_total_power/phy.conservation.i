@@ -45,13 +45,13 @@ energy_change = ${fparse power_fraction * power * t}
     initial_T = 300
   [../]
   [./heat_generation]
-    type = HeatGeneration
+    type = HeatSourceFromTotalPower
     hs = heat_structure
     regions = 'rgn1 rgn2'
-    power = reactor
+    power = total_power
     power_fraction = ${power_fraction}
   [../]
-  [./reactor]
+  [./total_power]
     type = TotalPower
     power = ${power}
   [../]
