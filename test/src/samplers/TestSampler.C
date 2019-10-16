@@ -16,14 +16,16 @@ validParams<TestSampler>()
 {
   InputParameters params = validParams<Sampler>();
   params.addParam<bool>("use_rand", false, "Use rand method for computeSample method.");
+  params.addParam<dof_id_type>("num_rows", 14, "Number of rows.");
+  params.addParam<dof_id_type>("num_cols", 8, "Number of columns.");
   return params;
 }
 
 TestSampler::TestSampler(const InputParameters & parameters)
   : Sampler(parameters), _use_rand(getParam<bool>("use_rand"))
 {
-  setNumberOfRows(14);
-  setNumberOfCols(8);
+  setNumberOfRows(getParam<dof_id_type>("num_rows"));
+  setNumberOfCols(getParam<dof_id_type>("num_cols"));
 }
 
 Real

@@ -18,7 +18,7 @@ validParams<SamplerTester>()
   InputParameters params = validParams<GeneralUserObject>();
   params.addRequiredParam<SamplerName>("sampler", "The sampler to test.");
 
-  MooseEnum test_type("mpi thread base_global_vs_local rand_global_vs_local");
+  MooseEnum test_type("mpi thread base_global_vs_local rand_global_vs_local getSamples getLocalSamples");
   params.addParam<MooseEnum>("test_type", test_type, "The type of test to perform.");
   return params;
 }
@@ -34,11 +34,16 @@ SamplerTester::SamplerTester(const InputParameters & parameters)
 void
 SamplerTester::execute()
 {
-  DenseMatrix<Real> global = _sampler.getSamples();
-  DenseMatrix<Real> local = _sampler.getLocalSamples();
+  if (_test_type == "getSamples")
+    _samples = _sampler.getSamples();
+
+  if (_test_type == "getLocalSamples")
+    _samples = _sampler.getLocalSamples();
 
   if (_test_type == "rand_global_vs_local")
   {
+    DenseMatrix<Real> global = _sampler.getSamples();
+    DenseMatrix<Real> local = _sampler.getLocalSamples();
     if (n_processors() == 1)
     {
       assertEqual(global.m(), 14);
@@ -134,6 +139,9 @@ SamplerTester::execute()
 
   if (_test_type == "base_global_vs_local")
   {
+    DenseMatrix<Real> global = _sampler.getSamples();
+    DenseMatrix<Real> local = _sampler.getLocalSamples();
+
     if (n_processors() == 1)
     {
       assertEqual(global.m(), 14);
@@ -226,6 +234,12 @@ SamplerTester::execute()
       }
     }
   }
+}
+
+void
+SamplerTester::initialize()
+{
+  _samples.resize(0,0);
 }
 
 void
