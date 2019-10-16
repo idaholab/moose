@@ -445,8 +445,13 @@ MultiAppFieldTransfer::adjustTransferedSolution(FEProblemBase * from_problem,
       }
       if (scale_current_element)
       {
-        dof_id_type dof = elem->dof_number(sys_num, var_num, 0);
-        to_solution.set(dof, (from_adjuster / to_adjuster) * to_solution(dof));
+        unsigned int n_comp = elem->n_comp(sys_num, var_num);
+
+        for (unsigned int offset = 0; offset < n_comp; offset++)
+        {
+          dof_id_type dof = elem->dof_number(sys_num, var_num, offset);
+          to_solution.set(dof, (from_adjuster / to_adjuster) * to_solution(dof));
+        }
       }
     }
   }
