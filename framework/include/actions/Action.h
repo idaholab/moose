@@ -44,7 +44,7 @@ class Action : public ConsoleStreamInterface,
 public:
   Action(InputParameters parameters);
 
-  virtual ~Action() {}
+  virtual ~Action() = default;
 
   /**
    * The method called externally that causes the action to act()

@@ -9,16 +9,8 @@
 
 // MOOSE includes
 #include "MeshMetaDataInterface.h"
-#include "MooseMesh.h"
+#include "MooseApp.h"
 
-MeshMetaDataInterface::MeshMetaDataInterface(MooseMesh * mesh_ptr) : _mgi_mesh_props(nullptr)
+MeshMetaDataInterface::MeshMetaDataInterface(MooseApp & app) : _mgi_mesh_props(app.meshMetaData())
 {
-  if (mesh_ptr)
-    setMeshMetaData(*mesh_ptr);
-}
-
-void
-MeshMetaDataInterface::setMeshMetaData(MooseMesh & mesh)
-{
-  _mgi_mesh_props = &mesh.meshMetaData();
 }

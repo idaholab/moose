@@ -15,7 +15,6 @@
 #include "Restartable.h"
 #include "MooseEnum.h"
 #include "PerfGraphInterface.h"
-#include "MeshMetaDataInterface.h" // For friend declaration
 
 #include <memory> //std::unique_ptr
 #include <unordered_map>
@@ -1052,13 +1051,6 @@ protected:
   void setPartitionerHelper();
 
 private:
-  friend void MeshMetaDataInterface::setMeshMetaData(MooseMesh & mesh);
-  friend class MeshGenerator;
-
-  Parameters & meshMetaData() const { return _meta_data; }
-
-  Parameters & _meta_data;
-
   /**
    * A map of vectors indicating which dimensions are periodic in a regular orthogonal mesh for
    * the specified variable numbers.  This data structure is populated by addPeriodicVariable.

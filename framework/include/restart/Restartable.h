@@ -20,6 +20,7 @@ class SubProblem;
 class InputParameters;
 class MooseObject;
 class MooseApp;
+class MooseMesh;
 
 /**
  * A class for creating restricted objects
@@ -48,6 +49,10 @@ public:
    * constructor.
    */
   Restartable(const MooseObject * moose_object, const std::string & system_name, THREAD_ID tid);
+
+  /**
+   */
+  Restartable(const MooseMesh & mesh);
 
   /**
    * This class constructor is used for non-Moose-based objects like interfaces. A name for the
@@ -184,7 +189,8 @@ private:
                                     THREAD_ID tid);
 
   /// Helper function for actually registering the restartable data.
-  void registerRecoverableDataNameOnApp(const std::string & name);
+  void registerRestartableNameWithFilterOnApp(const std::string & name,
+                                              Moose::RESTARTABLE_FILTER filter);
 
   /// Reference to the application
   MooseApp & _restartable_app;
@@ -197,6 +203,10 @@ private:
 
   /// The thread ID for this object
   THREAD_ID _restartable_tid;
+
+  /// Used to register data names with different filters on the MooseApp for selectively using
+  /// different data in different scenarios
+  bool _store_in_mesh_meta_data;
 };
 
 template <typename T>
@@ -273,7 +283,10 @@ Restartable::declareRecoverableData(const std::string & data_name)
 {
   std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
 
-  registerRecoverableDataNameOnApp(full_name);
+  registerRestartableNameWithFilterOnApp(full_name,
+                                         _store_in_mesh_meta_data
+                                             ? Moose::RESTARTABLE_FILTER::MESH_META_DATA
+                                             : Moose::RESTARTABLE_FILTER::RECOVERABLE);
 
   return declareRestartableDataWithContext<T>(data_name, nullptr);
 }
@@ -284,7 +297,10 @@ Restartable::declareRecoverableData(const std::string & data_name, const T & ini
 {
   std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
 
-  registerRecoverableDataNameOnApp(full_name);
+  registerRestartableNameWithFilterOnApp(full_name,
+                                         _store_in_mesh_meta_data
+                                             ? Moose::RESTARTABLE_FILTER::MESH_META_DATA
+                                             : Moose::RESTARTABLE_FILTER::RECOVERABLE);
 
   return declareRestartableDataWithContext<T>(data_name, init_value, nullptr);
 }

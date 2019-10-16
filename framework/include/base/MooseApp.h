@@ -22,6 +22,7 @@
 #include "TheWarehouse.h"
 #include "RankMap.h"
 #include "MemberTemplateMacros.h"
+#include "Restartable.h"
 
 #include "libmesh/parallel_object.h"
 #include "libmesh/mesh_base.h"
@@ -58,7 +59,7 @@ InputParameters validParams<MooseApp>();
  *
  * Each application should register its own objects and register its own special syntax
  */
-class MooseApp : public ConsoleStreamInterface, public libMesh::ParallelObject
+class MooseApp : public Restartable, public ConsoleStreamInterface, public libMesh::ParallelObject
 {
 public:
   virtual ~MooseApp();
@@ -738,14 +739,14 @@ protected:
   /**
    * NOTE: This is an internal function meant for MOOSE use only!
    *
-   * Register a piece of recoverable data.  This is data that will get
-   * written / read to / from a restart file.
-   *
-   * However, this data will ONLY get read from the restart file during a RECOVERY operation!
+   * Register a piece of restartable data that will be used in a filter in/out during
+   * deserialization. Note however that this data will always be written to the restart file.
    *
    * @param name The full (unique) name.
+   * @param filter The filter name where to direct the name
    */
-  void registerRecoverableDataName(const std::string & name);
+  void registerRestartableNameWithFilter(const std::string & name,
+                                         Moose::RESTARTABLE_FILTER filter);
 
   /**
    * Runs post-initialization error checking that cannot be run correctly unless the simulation
@@ -910,8 +911,23 @@ private:
   /// Where the restartable data is held (indexed on tid)
   RestartableDataMaps _restartable_data;
 
-  /// Data names that will only be read from the restart file during RECOVERY
+  /**
+   * Data names that will only be read from the restart file during RECOVERY.
+   * e.g. these names are _excluded_ during restart.
+   */
   DataNames _recoverable_data_names;
+
+  /**
+   * Data names specifically associated with the mesh (meta-data) that will read from the restart
+   * file early during the simulation setup so that they are available to Actions and other objects
+   * that need them during the setup process. Most of the restartable data isn't made available
+   * until all objects have been created and all Actions have been executed (i.e. initialSetup).
+   */
+  DataNames _mesh_meta_data_names;
+
+  friend MeshMetaDataInterface::MeshMetaDataInterface(MooseApp &);
+  Parameters & meshMetaData() const { return *_mesh_meta_data; }
+  Parameters * _mesh_meta_data;
 
   /// Enumeration for holding the valid types of dynamic registrations allowed
   enum RegistrationType
@@ -956,17 +972,17 @@ private:
   ExecFlagEnum _execute_flags;
 
   /// Timers
-  PerfID _setup_timer;
-  PerfID _setup_options_timer;
-  PerfID _run_input_file_timer;
-  PerfID _execute_timer;
-  PerfID _execute_executioner_timer;
-  PerfID _restore_timer;
-  PerfID _run_timer;
-  PerfID _execute_mesh_modifiers_timer;
-  PerfID _execute_mesh_generators_timer;
-  PerfID _restore_cached_backup_timer;
-  PerfID _create_minimal_app_timer;
+  const PerfID _setup_timer;
+  const PerfID _setup_options_timer;
+  const PerfID _run_input_file_timer;
+  const PerfID _execute_timer;
+  const PerfID _execute_executioner_timer;
+  const PerfID _restore_timer;
+  const PerfID _run_timer;
+  const PerfID _execute_mesh_modifiers_timer;
+  const PerfID _execute_mesh_generators_timer;
+  const PerfID _restore_cached_backup_timer;
+  const PerfID _create_minimal_app_timer;
 
   /// Whether to turn on automatic scaling by default
   const bool _automatic_automatic_scaling;

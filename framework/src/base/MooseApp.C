@@ -265,7 +265,8 @@ validParams<MooseApp>()
 }
 
 MooseApp::MooseApp(InputParameters parameters)
-  : ConsoleStreamInterface(*this),
+  : Restartable(*this, parameters.get<std::string>("_app_name"), "App", 0),
+    ConsoleStreamInterface(*this),
     ParallelObject(*parameters.get<std::shared_ptr<Parallel::Communicator>>(
         "_comm")), // Can't call getParam() before pars is set
     _name(parameters.get<std::string>("_app_name")),
@@ -435,6 +436,8 @@ MooseApp::MooseApp(InputParameters parameters)
 
   if (_master_displaced_mesh && !_master_mesh)
     mooseError("_master_mesh should have been set when _master_displaced_mesh is set");
+
+  _mesh_meta_data = &declareRestartableData<Parameters>("meta_data");
 }
 
 void
@@ -922,9 +925,21 @@ MooseApp::hasRecoverFileBase()
 }
 
 void
-MooseApp::registerRecoverableDataName(const std::string & name)
+MooseApp::registerRestartableNameWithFilter(const std::string & name,
+                                            Moose::RESTARTABLE_FILTER filter)
 {
-  _recoverable_data_names.insert(name);
+  using Moose::RESTARTABLE_FILTER;
+  switch (filter)
+  {
+    case RESTARTABLE_FILTER::RECOVERABLE:
+      _recoverable_data_names.insert(name);
+      break;
+    case RESTARTABLE_FILTER::MESH_META_DATA:
+      _mesh_meta_data_names.insert(name);
+      break;
+    default:
+      mooseError("Unknown filter");
+  }
 }
 
 std::shared_ptr<Backup>

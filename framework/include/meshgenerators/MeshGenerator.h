@@ -11,6 +11,7 @@
 
 #include "MooseObject.h"
 #include "Restartable.h"
+#include "MeshMetaDataInterface.h"
 
 // Included so mesh generators don't need to include this when constructing MeshBase objects
 #include "MooseMesh.h"

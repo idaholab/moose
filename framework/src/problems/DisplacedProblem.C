@@ -30,6 +30,7 @@ InputParameters
 validParams<DisplacedProblem>()
 {
   InputParameters params = validParams<SubProblem>();
+  params.addPrivateParam<MooseMesh *>("mesh");
   params.addPrivateParam<std::vector<std::string>>("displacements");
   return params;
 }

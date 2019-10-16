@@ -13,6 +13,7 @@
 #include "FEProblem.h"
 #include "MooseObject.h"
 #include "MooseApp.h"
+#include "MooseMesh.h"
 
 Restartable::Restartable(const MooseObject * moose_object, const std::string & system_name)
   : Restartable(moose_object->getMooseApp(),
@@ -31,6 +32,12 @@ Restartable::Restartable(const MooseObject * moose_object,
 {
 }
 
+Restartable::Restartable(const MooseMesh & mesh)
+  : Restartable(mesh.getMooseApp(), mesh.name(), "MeshMetaData", 0)
+{
+  _store_in_mesh_meta_data = true;
+}
+
 Restartable::Restartable(MooseApp & moose_app,
                          const std::string & name,
                          const std::string & system_name,
@@ -38,7 +45,8 @@ Restartable::Restartable(MooseApp & moose_app,
   : _restartable_app(moose_app),
     _restartable_name(name),
     _restartable_system_name(system_name),
-    _restartable_tid(tid)
+    _restartable_tid(tid),
+    _store_in_mesh_meta_data(false)
 {
 }
 
@@ -51,7 +59,8 @@ Restartable::registerRestartableDataOnApp(const std::string & name,
 }
 
 void
-Restartable::registerRecoverableDataNameOnApp(const std::string & name)
+Restartable::registerRestartableNameWithFilterOnApp(const std::string & name,
+                                                    Moose::RESTARTABLE_FILTER filter)
 {
-  _restartable_app.registerRecoverableDataName(name);
+  _restartable_app.registerRestartableNameWithFilter(name, filter);
 }

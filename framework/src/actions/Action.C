@@ -42,7 +42,7 @@ validParams<Action>()
   params.addPrivateParam<std::string>("task");
   params.addPrivateParam<std::string>("registered_identifier");
   params.addPrivateParam<std::string>("action_type");
-  params.addPrivateParam<ActionWarehouse *>("awh", NULL);
+  params.addPrivateParam<ActionWarehouse *>("awh", nullptr);
 
   return params;
 }
@@ -50,7 +50,8 @@ validParams<Action>()
 Action::Action(InputParameters parameters)
   : ConsoleStreamInterface(
         *parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
-    MeshMetaDataInterface(),
+    MeshMetaDataInterface(
+        *parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
     PerfGraphInterface(
         parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")
             ->perfGraph(),
@@ -82,7 +83,6 @@ Action::Action(InputParameters parameters)
     _problem(_awh.problemBase()),
     _act_timer(registerTimedSection("act", 4))
 {
-  setMeshMetaData(*_mesh);
 }
 
 void
