@@ -18,6 +18,25 @@
     design = '/ADBodyForce.md'
   [../]
 
+  [./testneumann]
+    type = 'Exodiff'
+    input = '2d_diffusion_neumannbc_test.i'
+    exodiff = 'neumannbc_out.e'
+    scale_refine = 5
+    requirement = 'MOOSE shall provide an ability to solve a 2D diffusion problem using AD with Neumann boundary conditions.'
+    issues = '#12903'
+    design = '/ADNeumannBC.md'
+  [../]
+  [./testneumann-jac]
+    type = 'PetscJacobianTester'
+    input = '2d_diffusion_neumannbc_test.i'
+    scale_refine = 5
+    difference_tol = 1e-7
+    requirement = 'MOOSE shall provide an ability to solve a 2D diffusion problem using AD with Neumann boundary conditions and compute a perfect jacobian.'
+    issues = '#13260'
+    design = '/ADBodyForce.md'
+  [../]
+
   [./testbodyforce]
     type = 'Exodiff'
     input = '2d_diffusion_bodyforce_test.i'
