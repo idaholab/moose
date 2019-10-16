@@ -37,12 +37,12 @@ with the desired data.
 
 Create a member variable, as a reference, for the vector data
 
-!listing WorkBalance.h line=_num_nodes
+!listing WorkBalance.h line=_pid
 
 
 Initialize the reference using the `declareVector` method with a name
 
-!listing WorkBalance.C line=declareVector("num_nodes")
+!listing WorkBalance.C line=declareVector("pid")
 
 
 !---

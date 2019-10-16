@@ -2741,46 +2741,67 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
   Real damping = 1.0;
   bool has_active_dampers = false;
 
-  if (_element_dampers.hasActiveObjects())
+  try
   {
-    TIME_SECTION(_compute_dampers_timer);
-    has_active_dampers = true;
-    *_increment_vec = update;
-    ComputeElemDampingThread cid(_fe_problem);
-    Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cid);
-    damping = std::min(cid.damping(), damping);
-  }
-
-  if (_nodal_dampers.hasActiveObjects())
-  {
-    TIME_SECTION(_compute_dampers_timer);
-
-    has_active_dampers = true;
-    *_increment_vec = update;
-    ComputeNodalDampingThread cndt(_fe_problem);
-    Threads::parallel_reduce(*_mesh.getLocalNodeRange(), cndt);
-    damping = std::min(cndt.damping(), damping);
-  }
-
-  if (_general_dampers.hasActiveObjects())
-  {
-    TIME_SECTION(_compute_dampers_timer);
-
-    has_active_dampers = true;
-    const auto & gdampers = _general_dampers.getActiveObjects();
-    for (const auto & damper : gdampers)
+    if (_element_dampers.hasActiveObjects())
     {
-      Real gd_damping = damper->computeDamping(solution, update);
-      try
+      PARALLEL_TRY
       {
-        damper->checkMinDamping(gd_damping);
+        TIME_SECTION(_compute_dampers_timer);
+        has_active_dampers = true;
+        *_increment_vec = update;
+        ComputeElemDampingThread cid(_fe_problem);
+        Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cid);
+        damping = std::min(cid.damping(), damping);
       }
-      catch (MooseException & e)
-      {
-        _fe_problem.setException(e.what());
-      }
-      damping = std::min(gd_damping, damping);
+      PARALLEL_CATCH;
     }
+
+    if (_nodal_dampers.hasActiveObjects())
+    {
+      PARALLEL_TRY
+      {
+        TIME_SECTION(_compute_dampers_timer);
+
+        has_active_dampers = true;
+        *_increment_vec = update;
+        ComputeNodalDampingThread cndt(_fe_problem);
+        Threads::parallel_reduce(*_mesh.getLocalNodeRange(), cndt);
+        damping = std::min(cndt.damping(), damping);
+      }
+      PARALLEL_CATCH;
+    }
+
+    if (_general_dampers.hasActiveObjects())
+    {
+      PARALLEL_TRY
+      {
+        TIME_SECTION(_compute_dampers_timer);
+
+        has_active_dampers = true;
+        const auto & gdampers = _general_dampers.getActiveObjects();
+        for (const auto & damper : gdampers)
+        {
+          Real gd_damping = damper->computeDamping(solution, update);
+          try
+          {
+            damper->checkMinDamping(gd_damping);
+          }
+          catch (MooseException & e)
+          {
+            _fe_problem.setException(e.what());
+          }
+          damping = std::min(gd_damping, damping);
+        }
+      }
+      PARALLEL_CATCH;
+    }
+  }
+  catch (MooseException & e)
+  {
+    // The buck stops here, we have already handled the exception by
+    // calling stopSolve(), it is now up to PETSc to return a
+    // "diverged" reason during the next solve.
   }
 
   _communicator.min(damping);
