@@ -8,22 +8,20 @@
 
 
 [Mesh]
-  file = square.e
-  uniform_refine = 4
+  [./square]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 32
+    ny = 32
+  [../]
 []
 
 [Variables]
-  active = 'u'
-
   [./u]
-    order = FIRST
-    family = LAGRANGE
   [../]
 []
 
 [Functions]
-  active = 'ff_1 ff_2 forcing_func bc_func'
-
   [./ff_1]
     type = ParsedFunction
     value = alpha*alpha*pi
@@ -52,13 +50,10 @@
 []
 
 [Kernels]
-  active = 'diff forcing'
-
   [./diff]
     type = Diffusion
     variable = u
   [../]
-
   [./forcing]
     type = BodyForce
     variable = u
@@ -67,13 +62,10 @@
 []
 
 [BCs]
-  active = 'all'
-
-  # Boundary Condition System
   [./all]
     type = FunctionDirichletBC
     variable = u
-    boundary = '1 2'
+    boundary = 'left right'
     function = bc_func
   [../]
 []
@@ -85,6 +77,5 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  file_base = out
   exodus = true
 []

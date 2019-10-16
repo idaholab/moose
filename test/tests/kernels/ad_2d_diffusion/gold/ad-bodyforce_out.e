@@ -1,1 +1,0 @@
-../../2d_diffusion/gold/ad-bodyforce_out.e

@@ -6,24 +6,21 @@
 # @Requirement F3.40
 ###########################################################
 
-
 [Mesh]
-  file = square.e
-  uniform_refine = 4
+  [./square]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 32
+    ny = 32
+  [../]
 []
 
 [Variables]
-  active = 'u'
-
   [./u]
-    order = FIRST
-    family = LAGRANGE
   [../]
 []
 
 [Functions]
-  active = 'ff_1 ff_2 forcing_func bc_func'
-
   [./ff_1]
     type = ParsedFunction
     value = alpha*alpha*pi
@@ -52,13 +49,10 @@
 []
 
 [Kernels]
-  active = 'diff forcing'
-
   [./diff]
     type = ADDiffusion
     variable = u
   [../]
-
   [./forcing]
     type = ADBodyForce
     variable = u
@@ -67,13 +61,10 @@
 []
 
 [BCs]
-  active = 'all'
-
-  # Boundary Condition System
   [./all]
     type = ADFunctionDirichletBC
     variable = u
-    boundary = '1 2'
+    boundary = 'left right'
     function = bc_func
   [../]
 []
@@ -85,6 +76,5 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  file_base = ad-out
   exodus = true
 []

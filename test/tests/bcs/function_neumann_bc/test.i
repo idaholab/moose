@@ -1,25 +1,18 @@
 [Mesh]
-  file = square.e
-  uniform_refine = 4
+  [./square]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 32
+    ny = 32
+  [../]
 []
 
 [Variables]
-  active = 'u'
-
   [./u]
-    order = FIRST
-    family = LAGRANGE
   [../]
 []
 
 [Functions]
-  active = 'forcing_func exact_func'
-
-  [./forcing_func]
-    type = ParsedGradFunction
-    value = 2
-  [../]
-
   [./exact_func]
     type = ParsedFunction
     value = x*x
@@ -27,35 +20,29 @@
 []
 
 [Kernels]
-  active = 'diff forcing'
-
   [./diff]
     type = Diffusion
     variable = u
   [../]
-
   [./forcing]
     type = BodyForce
     variable = u
-    function = forcing_func
+    value = 2
   [../]
 []
 
 [BCs]
-  active = 'left right'
-
   [./left]
     type = DirichletBC
     variable = u
-    boundary = '1'
+    boundary = left
     value = 0
   [../]
-
   [./right]
     type = FunctionNeumannBC
     function = exact_func
     variable = u
-    boundary = '2'
+    boundary = right
   [../]
 []
 
