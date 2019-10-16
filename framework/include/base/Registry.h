@@ -185,13 +185,15 @@ template <typename T>
 auto
 callValidParamsInner(int) -> decltype(validParams<T>(), emptyInputParameters())
 {
-  Moose::show_trace = false;
-  Moose::show_multiple = true;
-  mooseDeprecated("Convert validParams<",
-                  demangle(typeid(T).name()),
-                  ">() into a static member function and remove the old function.");
-  Moose::show_multiple = false;
-  Moose::show_trace = true;
+  // The following error could be useful when doing the final
+  // conversion/removal of the old style validParams functions:
+  // Moose::show_trace = false;
+  // Moose::show_multiple = true;
+  // mooseDeprecated("Convert validParams<",
+  //                demangle(typeid(T).name()),
+  //                ">() into a static member function and remove the old function.");
+  // Moose::show_multiple = false;
+  // Moose::show_trace = true;
   return validParams<T>();
 }
 
