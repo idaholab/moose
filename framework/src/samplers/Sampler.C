@@ -54,8 +54,13 @@ Sampler::init()
   if (_n_rows == 0)
     mooseError("The number of columns cannot be zero.");
 
+  // TODO: When Sampler is updated to a threaded GeneralUserObject, this partitioning must
+  //       also include threads
   MooseUtils::linearPartitionItems(
       _n_rows, n_processors(), processor_id(), _n_local_rows, _local_row_begin, _local_row_end);
+
+  // See FEProblemBase::execute
+  execute();
 
   _initialized = true;
 }
@@ -151,14 +156,17 @@ Sampler::setNumberOfRandomSeeds(std::size_t number)
   if (number == 0)
     mooseError("The number of seeds must be larger than zero.");
 
+  if (_initialized)
+    mooseError(
+        "The 'setNumberOfRandomSeeds()' method can not be called after the Sampler has been initialized; "
+        "this method should be called in the constructor of the Sampler object.");
+
   // Seed the "master" seed generator
   _seed_generator.seed(0, _seed);
 
   // See the "slave" generator that will be used for the random number generation
   for (std::size_t i = 0; i < number; ++i)
     _generator.seed(i, _seed_generator.randl(0));
-
-  _generator.saveState();
 }
 
 dof_id_type

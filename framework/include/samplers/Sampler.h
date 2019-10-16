@@ -53,21 +53,22 @@ public:
 
   ///@{
   /**
-   * Return the sampled distribution data.
+   * Return the sampled complete or distributed sample data.
    */
   DenseMatrix<Real> getSamples();
   DenseMatrix<Real> getLocalSamples();
   ///@}
 
   /**
-   * Store the state of the MooseRandom generator so that new calls to getSamples will create
-   * new numbers.
+   * Store the state of the MooseRandom generator so that new calls to getSamples/getLocalSamples
+   * methods will create new numbers.
    */
   void execute();
 
   /**
    * Return the number of samples.
-   * @return The total number of rows that exist in all DenseMatrix values from getSamples()
+   * @return The total number of rows that exist in all DenseMatrix values from the
+   * getSamples/getLocalSamples methods.
    */
   dof_id_type getNumberOfRows() const;
   dof_id_type getNumberOfCols() const;

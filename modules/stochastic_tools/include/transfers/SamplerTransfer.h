@@ -64,7 +64,7 @@ protected:
   dof_id_type _global_index;
 
   /**
-   * Extract single row of Sampler data given the global index.
+   * Extract single row of Sampler data given the local index.
    */
-  void getRow(const dof_id_type row_index, std::vector<Real> & row) const;
+  void getLocalRow(const dof_id_type row_index, std::vector<Real> & row) const;
 };

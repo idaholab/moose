@@ -94,7 +94,7 @@ void
 MultiAppCommandLineControl::execute()
 {
   std::vector<std::string> cli_args;
-  DenseMatrix<Real> matrix = _sampler.getSamples();
+  DenseMatrix<Real> matrix = _sampler.getLocalSamples();
 
   if (matrix.n() != _param_names.size())
     paramError("param_names",

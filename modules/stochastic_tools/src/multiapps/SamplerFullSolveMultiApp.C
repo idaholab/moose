@@ -154,7 +154,7 @@ SamplerFullSolveMultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
 {
   // Since we only store param_names in cli_args, we need to find the values for each param from
   // sampler data and combine them to get full command line option strings.
-  DenseMatrix<Real> matrix = _sampler.getSamples();
+  DenseMatrix<Real> matrix = _sampler.getLocalSamples();
   std::ostringstream oss;
 
   const std::vector<std::string> & cli_args_name =
@@ -167,10 +167,10 @@ SamplerFullSolveMultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
 
     if (_mode == StochasticTools::MultiAppMode::BATCH_RESET)
       oss << cli_args_name[col] << "="
-          << Moose::stringify(matrix(_local_batch_app_index + _sampler.getLocalRowBegin(), col));
+          << Moose::stringify(matrix(_local_batch_app_index, col));
     else
       oss << cli_args_name[col] << "="
-          << Moose::stringify(matrix(local_app + _first_local_app, col));
+          << Moose::stringify(matrix(local_app, col));
   }
   return oss.str();
 }

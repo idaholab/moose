@@ -40,7 +40,7 @@
 []
 
 [Problem]
-  solve = false
+  #solve = false
   kernel_coverage_check = false
 []
 

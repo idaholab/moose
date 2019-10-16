@@ -1,14 +1,30 @@
-
 [Tests]
   [./uniform]
     type = 'CSVDiff'
     input = 'monte_carlo_uniform.i'
     csvdiff = 'monte_carlo_uniform_out_data_0000.csv monte_carlo_uniform_out_data_0001.csv'
   [../]
+
+  [./uniform_global]
+    type = 'CSVDiff'
+    input = 'monte_carlo_uniform.i'
+    csvdiff = 'monte_carlo_uniform_out_data_0000.csv monte_carlo_uniform_out_data_0001.csv'
+    prereq = uniform
+    cli_args = VectorPostprocessors/data/use_local_samples=False
+  [../]
+
   [./weibull]
     type = 'CSVDiff'
     input = 'monte_carlo_weibull.i'
     csvdiff = 'monte_carlo_weibull_out_data_0000.csv monte_carlo_weibull_out_data_0001.csv'
     boost = true
+  [../]
+  [./weibull_global]
+    type = 'CSVDiff'
+    input = 'monte_carlo_weibull.i'
+    csvdiff = 'monte_carlo_weibull_out_data_0000.csv monte_carlo_weibull_out_data_0001.csv'
+    boost = true
+    prereq = weibull
+    cli_args = VectorPostprocessors/data/use_local_samples=False
   [../]
 []

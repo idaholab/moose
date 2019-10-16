@@ -25,8 +25,10 @@ class SamplerData : public GeneralVectorPostprocessor, SamplerInterface
 {
 public:
   SamplerData(const InputParameters & parameters);
-  void virtual initialize() override;
-  void virtual execute() override;
+  virtual void initialize() override;
+  virtual void finalize() override;
+  virtual void execute() override;
+  virtual void threadJoin(const UserObject & uo) override;
 
 protected:
   /// Storage for declared vectors, one for each column
@@ -34,4 +36,7 @@ protected:
 
   /// The sampler to extract data
   Sampler & _sampler;
+
+  /// Flag for using getLocalSamples/getSamples
+  const bool _use_local_samples;
 };
