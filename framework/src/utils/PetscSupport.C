@@ -277,102 +277,6 @@ petscSetupOutput(CommandLine * cmd_line)
 }
 
 PetscErrorCode
-petscConverged(KSP ksp, PetscInt n, PetscReal rnorm, KSPConvergedReason * reason, void * ctx)
-{
-  // Cast the context pointer coming from PETSc to an FEProblemBase& and
-  // get a reference to the System from it.
-  FEProblemBase & problem = *static_cast<FEProblemBase *>(ctx);
-
-  // Let's be nice and always check PETSc error codes.
-  PetscErrorCode ierr = 0;
-
-  // We want the default behavior of the KSPDefaultConverged test, but
-  // we don't want PETSc to die in that function with a CHKERRQ
-  // call... that is probably extremely unlikely/impossible, but just
-  // to be on the safe side, we push a different error handler before
-  // calling KSPDefaultConverged().
-  ierr = PetscPushErrorHandler(PetscReturnErrorHandler, /*void* ctx=*/PETSC_NULL);
-  CHKERRABORT(problem.comm().get(), ierr);
-
-#if PETSC_VERSION_LESS_THAN(3, 0, 0)
-  // Prior to PETSc 3.0.0, you could call KSPDefaultConverged with a NULL context
-  // pointer, as it was unused.
-  KSPDefaultConverged(ksp, n, rnorm, reason, PETSC_NULL);
-#elif PETSC_VERSION_LESS_THAN(3, 5, 0)
-  // As of PETSc 3.0.0, you must call KSPDefaultConverged with a
-  // non-NULL context pointer which must be created with
-  // KSPDefaultConvergedCreate(), and destroyed with
-  // KSPDefaultConvergedDestroy().
-  void * default_ctx = NULL;
-  KSPDefaultConvergedCreate(&default_ctx);
-  KSPDefaultConverged(ksp, n, rnorm, reason, default_ctx);
-  KSPDefaultConvergedDestroy(default_ctx);
-#else
-  // As of PETSc 3.5.0, use KSPConvergedDefaultXXX
-  void * default_ctx = NULL;
-  KSPConvergedDefaultCreate(&default_ctx);
-  KSPConvergedDefault(ksp, n, rnorm, reason, default_ctx);
-  KSPConvergedDefaultDestroy(default_ctx);
-#endif
-
-  // Pop the Error handler we pushed on the stack to go back
-  // to default PETSc error handling behavior.
-  ierr = PetscPopErrorHandler();
-  CHKERRABORT(problem.comm().get(), ierr);
-
-  // Get tolerances from the KSP object
-  PetscReal rtol = 0.;
-  PetscReal atol = 0.;
-  PetscReal dtol = 0.;
-  PetscInt maxits = 0;
-  ierr = KSPGetTolerances(ksp, &rtol, &atol, &dtol, &maxits);
-  CHKERRABORT(problem.comm().get(), ierr);
-
-  // Now do some additional MOOSE-specific tests...
-  std::string msg;
-  MooseLinearConvergenceReason moose_reason =
-      problem.checkLinearConvergence(msg, n, rnorm, rtol, atol, dtol, maxits);
-
-  switch (moose_reason)
-  {
-    case MooseLinearConvergenceReason::CONVERGED_RTOL:
-      *reason = KSP_CONVERGED_RTOL;
-      break;
-
-    case MooseLinearConvergenceReason::CONVERGED_ITS:
-      *reason = KSP_CONVERGED_ITS;
-      break;
-
-    case MooseLinearConvergenceReason::DIVERGED_NANORINF:
-#if PETSC_VERSION_LESS_THAN(3, 4, 0)
-      // Report divergence due to exceeding the divergence tolerance.
-      *reason = KSP_DIVERGED_DTOL;
-#else
-      // KSP_DIVERGED_NANORINF was added in PETSc 3.4.0.
-      *reason = KSP_DIVERGED_NANORINF;
-#endif
-      break;
-#if !PETSC_VERSION_LESS_THAN(3, 6, 0) // A new convergence enum in PETSc 3.6
-    case MooseLinearConvergenceReason::DIVERGED_PCSETUP_FAILED:
-#if PETSC_VERSION_LESS_THAN(3, 11, 0) && PETSC_VERSION_RELEASE
-      *reason = KSP_DIVERGED_PCSETUP_FAILED;
-#else
-      *reason = KSP_DIVERGED_PC_FAILED;
-#endif
-      break;
-#endif
-    default:
-    {
-      // If it's not either of the two specific cases we handle, just go
-      // with whatever PETSc decided in KSPDefaultConverged.
-      break;
-    }
-  }
-
-  return 0;
-}
-
-PetscErrorCode
 petscNonlinearConverged(SNES snes,
                         PetscInt it,
                         PetscReal xnorm,
@@ -559,25 +463,6 @@ petscSetDefaultPCSide(FEProblemBase & problem, KSP ksp)
 void
 petscSetKSPDefaults(FEProblemBase & problem, KSP ksp)
 {
-  NonlinearSystemBase & nl = problem.getNonlinearSystemBase();
-
-#if PETSC_VERSION_LESS_THAN(3, 0, 0)
-  // PETSc 2.3.3-
-  KSPSetConvergenceTest(ksp, petscConverged, &problem);
-#else
-  // PETSc 3.0.0+
-
-  // In 3.0.0, the context pointer must actually be used, and the
-  // final argument to KSPSetConvergenceTest() is a pointer to a
-  // routine for destroying said private data context.  In this case,
-  // we use the default context provided by PETSc in addition to
-  // a few other tests.
-  {
-    PetscErrorCode ierr = KSPSetConvergenceTest(ksp, petscConverged, &problem, PETSC_NULL);
-    CHKERRABORT(nl.comm().get(), ierr);
-  }
-#endif
-
   auto & es = problem.es();
 
   PetscReal rtol = es.parameters.get<Real>("linear solver tolerance");

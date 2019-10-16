@@ -6091,53 +6091,6 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
   return reason;
 }
 
-MooseLinearConvergenceReason
-FEProblemBase::checkLinearConvergence(std::string & /*msg*/,
-                                      const PetscInt n,
-                                      const Real rnorm,
-                                      const Real /*rtol*/,
-                                      const Real /*atol*/,
-                                      const Real /*dtol*/,
-                                      const PetscInt maxits)
-{
-  TIME_SECTION(_check_linear_convergence_timer);
-
-  if (_fail_next_linear_convergence_check)
-  {
-    // Unset the flag
-    _fail_next_linear_convergence_check = false;
-    return MooseLinearConvergenceReason::DIVERGED_NANORINF;
-  }
-
-  // We initialize the reason to something that basically means MOOSE
-  // has not made a decision on convergence yet.
-  MooseLinearConvergenceReason reason = MooseLinearConvergenceReason::ITERATING;
-
-  // Get a reference to our Nonlinear System
-  NonlinearSystemBase & system = getNonlinearSystemBase();
-
-  // If it's the beginning of a new set of iterations, reset
-  // last_rnorm, otherwise record the most recent linear residual norm
-  // in the NonlinearSystem.
-  if (n == 0)
-    system._last_rnorm = 1e99;
-  else
-    system._last_rnorm = rnorm;
-
-  // If we hit max its, then we consider that converged (rather than
-  // KSP_DIVERGED_ITS).
-  if (n >= maxits)
-    reason = MooseLinearConvergenceReason::CONVERGED_ITS;
-
-  // If either of our convergence criteria is met, store the number of linear
-  // iterations in the System.
-  if (reason == MooseLinearConvergenceReason::CONVERGED_ITS ||
-      reason == MooseLinearConvergenceReason::CONVERGED_RTOL)
-    system._current_l_its.push_back(static_cast<unsigned int>(n));
-
-  return reason;
-}
-
 SolverParams &
 FEProblemBase::solverParams()
 {

@@ -211,24 +211,6 @@ public:
                             const Real initial_residual_before_preset_bcs,
                             const Real div_threshold);
 
-  /**
-   * Check for convergence of the linear solution
-   * @param msg            Error message that gets sent back to the solver
-   * @param n              Iteration counter
-   * @param rnorm          Norm of the residual vector
-   * @param rtol           Relative residual convergence tolerance
-   * @param atol           Absolute residual convergence tolerance
-   * @param dtol           Divergence tolerance
-   * @param maxits         Maximum number of linear iterations allowed
-   */
-  virtual MooseLinearConvergenceReason checkLinearConvergence(std::string & msg,
-                                                              const PetscInt n,
-                                                              const Real rnorm,
-                                                              const Real rtol,
-                                                              const Real atol,
-                                                              const Real dtol,
-                                                              const PetscInt maxits);
-
   virtual bool hasVariable(const std::string & var_name) const override;
   virtual MooseVariableFEBase & getVariable(
       THREAD_ID tid,

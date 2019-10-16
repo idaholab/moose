@@ -663,7 +663,6 @@ public:
   FEProblemBase & _fe_problem;
   System & _sys;
   // FIXME: make these protected and create getters/setters
-  Real _last_rnorm;
   Real _last_nl_rnorm;
   Real _initial_residual_before_preset_bcs;
   Real _initial_residual_after_preset_bcs;
