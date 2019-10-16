@@ -78,18 +78,11 @@
     inelastic_models = rom_stress_prediction
   [../]
   [./rom_stress_prediction]
-    type = ADLAROMCreepStressUpdate
+    type = SS316HLAROMANCEStressUpdateTest
     temperature = temperature
     initial_mobile_dislocation_density = 6.0e12
     initial_immobile_dislocation_density = 4.4e11
     outputs = all
-    rom_data = rom_data
-  [../]
-[]
-
-[UserObjects]
-  [./rom_data]
-    type = SS316LAROMData
   [../]
 []
 
