@@ -44,6 +44,14 @@ public:
   NonlinearEigenSystem & getNonlinearEigenSystem() { return *_nl_eigen; }
 
   virtual void checkProblemIntegrity() override;
+
+  /**
+   * A flag indicates if a negative sign is used in eigen kernels.
+   * If the negative sign is used, eigen kernels are consistent in nonlinear solver.
+   * In nonlinear solver, RHS kernels always have a negative sign.
+   */
+  bool negativeSignEigenKernel() { return _negative_sign_eigen_kernel; }
+
 #if LIBMESH_HAVE_SLEPC
   void setEigenproblemType(Moose::EigenProblemType eigen_problem_type);
 
@@ -85,6 +93,7 @@ protected:
   unsigned int _n_eigen_pairs_required;
   bool _generalized_eigenvalue_problem;
   std::shared_ptr<NonlinearEigenSystem> _nl_eigen;
+  bool _negative_sign_eigen_kernel;
 
   /// Timers
   PerfID _compute_jacobian_tag_timer;
@@ -93,4 +102,3 @@ protected:
   PerfID _compute_residual_ab_timer;
   PerfID _solve_timer;
 };
-

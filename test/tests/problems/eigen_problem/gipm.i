@@ -68,8 +68,9 @@
   [../]
 
   [./rhs]
-    type = Reaction
+    type = CoefReaction
     variable = u
+    coefficient = -1.0
     use_displaced_mesh = true
     extra_vector_tags = 'eigen'
   [../]
