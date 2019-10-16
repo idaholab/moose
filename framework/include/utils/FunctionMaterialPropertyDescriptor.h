@@ -47,6 +47,10 @@ public:
   /// copy constructor assigning new parent
   FunctionMaterialPropertyDescriptor(const FunctionMaterialPropertyDescriptor &, MooseObject *);
 
+  // copy assignment operator
+  FunctionMaterialPropertyDescriptor &
+  operator=(const FunctionMaterialPropertyDescriptor &) = default;
+
   /// construct a vector of FunctionMaterialPropertyDescriptors from a vector of strings
   static std::vector<FunctionMaterialPropertyDescriptor>
   parseVector(const std::vector<std::string> &, MooseObject *);

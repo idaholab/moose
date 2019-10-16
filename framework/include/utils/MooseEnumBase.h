@@ -40,6 +40,12 @@ public:
   MooseEnumBase(const MooseEnumBase & other_enum);
 
   /**
+   * Copy Assignment operator must be explicitly defined when a copy ctor exists and this
+   * method is used.
+   */
+  MooseEnumBase & operator=(const MooseEnumBase & other_enum) = default;
+
+  /**
    * This class must have a virtual destructor since it has derived classes.
    */
   virtual ~MooseEnumBase() = default;
