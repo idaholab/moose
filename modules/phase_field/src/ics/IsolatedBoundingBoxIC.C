@@ -13,7 +13,7 @@
 
 registerMooseObject("PhaseFieldApp", IsolatedBoundingBoxIC);
 
-namespace
+namespace sizeVector_def_isolated
 {
 // Convenience function for sizing a vector to "n" given a vector with size 1 or "n"
 std::vector<Real>
@@ -65,7 +65,7 @@ IsolatedBoundingBoxIC::IsolatedBoundingBoxIC(const InputParameters & parameters)
     _nbox(_c1.size()),
     _int_width(getParam<Real>("int_width")),
     _dim(_fe_problem.mesh().dimension()),
-    _inside(sizeVector(getParam<std::vector<Real>>("inside"), _nbox)),
+    _inside(sizeVector_def_isolated::sizeVector(getParam<std::vector<Real>>("inside"), _nbox)),
     _outside(getParam<Real>("outside"))
 {
   // make sure inputs are the same length

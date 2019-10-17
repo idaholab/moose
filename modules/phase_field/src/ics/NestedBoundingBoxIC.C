@@ -9,11 +9,12 @@
 
 #include "NestedBoundingBoxIC.h"
 #include "MooseMesh.h"
+
 #include <iostream>
 
 registerMooseObject("PhaseFieldApp", NestedBoundingBoxIC);
 
-namespace
+namespace sizeVector_def_nested
 {
 // Convenience function for sizing a vector to "n" given a vector with size 1 or "n"
 std::vector<Real>
@@ -62,7 +63,7 @@ NestedBoundingBoxIC::NestedBoundingBoxIC(const InputParameters & parameters)
     _nbox(_c1.size()),
     _int_width(getParam<Real>("int_width")),
     _dim(_fe_problem.mesh().dimension()),
-    _inside(sizeVector(getParam<std::vector<Real>>("inside"), _nbox)),
+    _inside(sizeVector_def_nested::sizeVector(getParam<std::vector<Real>>("inside"), _nbox)),
     _outside(getParam<Real>("outside"))
 {
   // make sure inputs are the same length
