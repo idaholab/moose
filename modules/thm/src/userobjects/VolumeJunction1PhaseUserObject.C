@@ -26,6 +26,9 @@ validParams<VolumeJunction1PhaseUserObject>()
 
   params.addRequiredParam<UserObjectName>("fp", "Fluid properties user object name");
 
+  params.addRequiredParam<Real>("K", "Form loss coefficient [-]");
+  params.addRequiredParam<Real>("A_ref", "Reference area [m^2]");
+
   params.addClassDescription(
       "Computes and caches flux and residual vectors for a 1-phase volume junction");
 
@@ -56,6 +59,9 @@ VolumeJunction1PhaseUserObject::VolumeJunction1PhaseUserObject(const InputParame
     _rhovV_jvar(coupledScalar("rhovV")),
     _rhowV_jvar(coupledScalar("rhowV")),
     _rhoEV_jvar(coupledScalar("rhoEV")),
+
+    _K(getParam<Real>("K")),
+    _A_ref(getParam<Real>("A_ref")),
 
     _fp(getUserObject<SinglePhaseFluidProperties>("fp"))
 {
@@ -107,6 +113,21 @@ VolumeJunction1PhaseUserObject::computeFluxesAndResiduals(const unsigned int & c
   dpJ_dUJ[VolumeJunction1Phase::RHOVV_INDEX] = dpJ_deJ * deJ_drhovV;
   dpJ_dUJ[VolumeJunction1Phase::RHOWV_INDEX] = dpJ_deJ * deJ_drhowV;
   dpJ_dUJ[VolumeJunction1Phase::RHOEV_INDEX] = dpJ_deJ * deJ_drhoEV;
+
+  if (c == 0)
+  {
+    const RealVectorValue velJ = rhouV_vec / _rhoV[0];
+    const Real s0J = _fp.s_from_v_e(vJ, eJ);
+    const Real TJ = _fp.T_from_v_e(vJ, eJ);
+    const Real hJ = _fp.h_from_p_T(pJ, TJ);
+    const Real h0J = hJ + 0.5 * velJ * velJ;
+    const Real p0J = _fp.p_from_h_s(h0J, s0J);
+    const Real S_loss = _K * (p0J - pJ) * _A_ref;
+
+    _residual[VolumeJunction1Phase::RHOUV_INDEX] += ni(0) * S_loss;
+    _residual[VolumeJunction1Phase::RHOVV_INDEX] += ni(1) * S_loss;
+    _residual[VolumeJunction1Phase::RHOWV_INDEX] += ni(2) * S_loss;
+  }
 
   _residual[VolumeJunction1Phase::RHOV_INDEX] -= din * _flux[c][THM3Eqn::CONS_VAR_RHOA];
   _residual[VolumeJunction1Phase::RHOUV_INDEX] -=

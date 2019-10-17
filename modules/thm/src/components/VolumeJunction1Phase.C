@@ -25,6 +25,9 @@ validParams<VolumeJunction1Phase>()
   params.addParam<Real>("scaling_factor_rhowV", 1.0, "Scaling factor for rho*w*V");
   params.addParam<Real>("scaling_factor_rhoEV", 1.0, "Scaling factor for rho*E*V");
 
+  params.addParam<Real>("K", 0., "Form loss factor [-]");
+  params.addParam<Real>("A_ref", 0., "Reference area [m^2]");
+
   params.addClassDescription("Junction between 1-phase flow channels that has a non-zero volume");
 
   return params;
@@ -46,8 +49,16 @@ VolumeJunction1Phase::VolumeJunction1Phase(const InputParameters & params)
     _rhoEV_var_name(genName(name(), "rhoEV")),
     _pressure_var_name(genName(name(), "p")),
     _temperature_var_name(genName(name(), "T")),
-    _velocity_var_name(genName(name(), "vel"))
+    _velocity_var_name(genName(name(), "vel")),
+
+    _K(getParam<Real>("K")),
+    _A_ref(getParam<Real>("A_ref"))
 {
+  if (params.isParamSetByUser("K") && !params.isParamSetByUser("A_ref"))
+    logError("With specified form loss factor 'K', parameter 'A_ref' is required.");
+  if (params.isParamSetByUser("A_ref") && !params.isParamSetByUser("K"))
+    logWarning("Parameter 'A_ref' is specified, but 'K' is not specified, so the junction will "
+               "behave as if there were no form loss.");
 }
 
 void
@@ -161,6 +172,8 @@ VolumeJunction1Phase::addMooseObjects()
     params.set<std::vector<VariableName>>("rhovV") = {_rhovV_var_name};
     params.set<std::vector<VariableName>>("rhowV") = {_rhowV_var_name};
     params.set<std::vector<VariableName>>("rhoEV") = {_rhoEV_var_name};
+    params.set<Real>("K") = _K;
+    params.set<Real>("A_ref") = _A_ref;
     params.set<UserObjectName>("fp") = _fp_name;
     params.set<ExecFlagEnum>("execute_on") = execute_on;
     _sim.addUserObject(class_name, volume_junction_uo_name, params);
