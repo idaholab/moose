@@ -14,13 +14,19 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-#define PGParams                                                                                   \
-  params.addParam<MaterialPropertyName>(                                                           \
-      "tau_name", "tau", "The name of the stabilization parameter tau.");                          \
-  params.addRequiredCoupledVar("velocity", "The velocity variable.")
+defineADLegacyParams(ADKernelSUPG);
+defineADLegacyParams(ADVectorKernelSUPG);
 
-defineADValidParams(ADKernelSUPG, ADKernel, PGParams;);
-defineADValidParams(ADVectorKernelSUPG, ADVectorKernel, PGParams;);
+template <typename T, ComputeStage compute_stage>
+InputParameters
+ADKernelSUPGTempl<T, compute_stage>::validParams()
+{
+  InputParameters params = ADKernelStabilizedTempl<T, compute_stage>::validParams();
+  params.addParam<MaterialPropertyName>(
+      "tau_name", "tau", "The name of the stabilization parameter tau.");
+  params.addRequiredCoupledVar("velocity", "The velocity variable.");
+  return params;
+}
 
 template <typename T, ComputeStage compute_stage>
 ADKernelSUPGTempl<T, compute_stage>::ADKernelSUPGTempl(const InputParameters & parameters)

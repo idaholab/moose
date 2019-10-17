@@ -16,14 +16,18 @@
 
 #include "libmesh/quadrature.h"
 
-defineADValidParams(ADTimeKernelGrad,
-                    ADKernelGrad,
-                    params.set<MultiMooseEnum>("vector_tags") = "time";
-                    params.set<MultiMooseEnum>("matrix_tags") = "system time";);
-defineADValidParams(ADVectorTimeKernelGrad,
-                    ADVectorKernelGrad,
-                    params.set<MultiMooseEnum>("vector_tags") = "time";
-                    params.set<MultiMooseEnum>("matrix_tags") = "system time";);
+defineADLegacyParams(ADTimeKernelGrad);
+defineADLegacyParams(ADVectorTimeKernelGrad);
+
+template <typename T, ComputeStage compute_stage>
+InputParameters
+ADTimeKernelGradTempl<T, compute_stage>::validParams()
+{
+  InputParameters params = ADKernelGradTempl<T, compute_stage>::validParams();
+  params.set<MultiMooseEnum>("vector_tags") = "time";
+  params.set<MultiMooseEnum>("matrix_tags") = "system time";
+  return params;
+}
 
 template <typename T, ComputeStage compute_stage>
 ADTimeKernelGradTempl<T, compute_stage>::ADTimeKernelGradTempl(const InputParameters & parameters)

@@ -15,8 +15,15 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-defineADValidParams(ADKernelStabilized, ADKernel, );
-defineADValidParams(ADVectorKernelStabilized, ADVectorKernel, );
+defineADLegacyParams(ADKernelStabilized);
+defineADLegacyParams(ADVectorKernelStabilized);
+
+template <typename T, ComputeStage compute_stage>
+InputParameters
+ADKernelStabilizedTempl<T, compute_stage>::validParams()
+{
+  return ADKernelTempl<T, compute_stage>::validParams();
+}
 
 template <typename T, ComputeStage compute_stage>
 ADKernelStabilizedTempl<T, compute_stage>::ADKernelStabilizedTempl(

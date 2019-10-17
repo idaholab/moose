@@ -29,12 +29,7 @@ paramErrorPrefix(const InputParameters & params, const std::string & param)
   return prefix;
 }
 
-template <>
-InputParameters
-validParams<MooseObject>()
-{
-  return MooseObject::validParams();
-}
+defineLegacyParams(MooseObject);
 
 InputParameters
 MooseObject::validParams()

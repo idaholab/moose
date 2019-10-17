@@ -9,15 +9,20 @@
 
 #include "ADMatDiffusionBase.h"
 
-defineADValidParams(
-    ADMatDiffusionBase,
-    ADKernelGrad,
-    params.addClassDescription("Diffusion kernel with a material property as diffusivity and "
-                               "automatic differentiation to provide perfect Jacobians");
-    params.addParam<MaterialPropertyName>("diffusivity",
-                                          "D",
-                                          "The diffusivity value or material property");
-    params.addCoupledVar("v",
-                         "Coupled concentration variable for kernel to operate on; if this "
-                         "is not specified, the kernel's nonlinear variable will be used as "
-                         "usual"););
+defineADLegacyParams(ADMatDiffusionBase);
+
+template <ComputeStage compute_stage, typename T>
+InputParameters
+ADMatDiffusionBase<compute_stage, T>::validParams()
+{
+  InputParameters params = ADKernelGrad<compute_stage>::validParams();
+  params.addClassDescription("Diffusion kernel with a material property as diffusivity and "
+                             "automatic differentiation to provide perfect Jacobians");
+  params.addParam<MaterialPropertyName>(
+      "diffusivity", "D", "The diffusivity value or material property");
+  params.addCoupledVar("v",
+                       "Coupled concentration variable for kernel to operate on; if this "
+                       "is not specified, the kernel's nonlinear variable will be used as "
+                       "usual");
+  return params;
+}

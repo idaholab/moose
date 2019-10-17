@@ -26,6 +26,8 @@ class ADCoupledTimeDerivative : public ADKernelValue<compute_stage>
 public:
   ADCoupledTimeDerivative(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual ADReal precomputeQpResidual() override;
 

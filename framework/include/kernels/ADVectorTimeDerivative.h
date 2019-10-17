@@ -23,6 +23,8 @@ class ADVectorTimeDerivative : public ADVectorTimeKernelValue<compute_stage>
 public:
   ADVectorTimeDerivative(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual ADRealVectorValue precomputeQpResidual() override;
 

@@ -488,6 +488,27 @@ typedef VectorVariableTestSecond ADVectorVariableTestSecond;
   }                                                                                                \
   void mooseClangFormatFunction()
 
+#define defineLegacyParams(ObjectType)                                                             \
+  template <>                                                                                      \
+  InputParameters validParams<ObjectType>()                                                        \
+  {                                                                                                \
+    return ObjectType::validParams();                                                              \
+  }                                                                                                \
+  void mooseClangFormatFunction()
+
+#define defineADLegacyParams(ADObjectType)                                                         \
+  template <>                                                                                      \
+  InputParameters validParams<ADObjectType<RESIDUAL>>()                                            \
+  {                                                                                                \
+    return ADObjectType<RESIDUAL>::validParams();                                                  \
+  }                                                                                                \
+  template <>                                                                                      \
+  InputParameters validParams<ADObjectType<JACOBIAN>>()                                            \
+  {                                                                                                \
+    return ADObjectType<RESIDUAL>::validParams();                                                  \
+  }                                                                                                \
+  void mooseClangFormatFunction()
+
 #define defineADBaseValidParams(ADObjectType, BaseObjectType, addedParamCode)                      \
   template <>                                                                                      \
   InputParameters validParams<ADObjectType<RESIDUAL>>()                                            \

@@ -11,11 +11,12 @@
 
 registerMooseObject("MooseApp", AnisotropicDiffusion);
 
-template <>
+defineLegacyParams(AnisotropicDiffusion);
+
 InputParameters
-validParams<AnisotropicDiffusion>()
+AnisotropicDiffusion::validParams()
 {
-  InputParameters p = validParams<Kernel>();
+  InputParameters p = Kernel::validParams();
   p.addClassDescription("Anisotropic diffusion kernel $\\nabla \\cdot -\\widetilde{k} \\nabla u$ "
                         "with weak form given by $(\\nabla \\psi_i, \\widetilde{k} \\nabla u)$.");
   p.addRequiredParam<RealTensorValue>("tensor_coeff",

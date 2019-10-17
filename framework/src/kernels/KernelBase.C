@@ -17,12 +17,7 @@
 
 #include "libmesh/threads.h"
 
-template <>
-InputParameters
-validParams<KernelBase>()
-{
-  return KernelBase::validParams();
-}
+defineLegacyParams(KernelBase);
 
 InputParameters
 KernelBase::validParams()

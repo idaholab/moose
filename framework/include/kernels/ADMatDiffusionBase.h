@@ -37,6 +37,8 @@ class ADMatDiffusionBase : public ADKernelGrad<compute_stage>
 public:
   ADMatDiffusionBase(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual ADRealVectorValue precomputeQpResidual() override;
 

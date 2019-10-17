@@ -21,6 +21,8 @@ class ADMatDiffusion : public ADMatDiffusionBase<compute_stage, Real>
 {
 public:
   ADMatDiffusion(const InputParameters & parameters);
+
+  static InputParameters validParams();
 };
 
 declareADValidParams(ADMatDiffusion);
