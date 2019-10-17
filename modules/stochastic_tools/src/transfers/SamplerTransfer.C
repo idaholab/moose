@@ -67,13 +67,17 @@ SamplerTransfer::getLocalRow(const dof_id_type row_index, std::vector<Real> & ro
 void
 SamplerTransfer::execute()
 {
-  mooseAssert(_sampler_ptr->getNumberOfLocalRows() == _multi_app->numLocalApps(), "The number of MultiApps and the number of sample rows must be the same.");
+  mooseAssert(_sampler_ptr->getNumberOfLocalRows() == _multi_app->numLocalApps(),
+              "The number of MultiApps and the number of sample rows must be the same.");
   _samples = _sampler_ptr->getLocalSamples();
 
   // Loop over all sub-apps
-  for (dof_id_type row_index = _sampler_ptr->getLocalRowBegin(); row_index < _sampler_ptr->getLocalRowEnd(); row_index++)
+  for (dof_id_type row_index = _sampler_ptr->getLocalRowBegin();
+       row_index < _sampler_ptr->getLocalRowEnd();
+       row_index++)
   {
-    mooseAssert(_multi_app->hasLocalApp(row_index), "The current sample row index is not a valid global MultiApp index.");
+    mooseAssert(_multi_app->hasLocalApp(row_index),
+                "The current sample row index is not a valid global MultiApp index.");
 
     // Get the sub-app SamplerReceiver object and perform error checking
     SamplerReceiver * ptr = getReceiver(row_index);

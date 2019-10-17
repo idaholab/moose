@@ -18,7 +18,8 @@ validParams<SamplerTester>()
   InputParameters params = validParams<GeneralUserObject>();
   params.addRequiredParam<SamplerName>("sampler", "The sampler to test.");
 
-  MooseEnum test_type("mpi thread base_global_vs_local rand_global_vs_local getSamples getLocalSamples");
+  MooseEnum test_type(
+      "mpi thread base_global_vs_local rand_global_vs_local getSamples getLocalSamples");
   params.addParam<MooseEnum>("test_type", test_type, "The type of test to perform.");
   return params;
 }
@@ -239,7 +240,7 @@ SamplerTester::execute()
 void
 SamplerTester::initialize()
 {
-  _samples.resize(0,0);
+  _samples.resize(0, 0);
 }
 
 void

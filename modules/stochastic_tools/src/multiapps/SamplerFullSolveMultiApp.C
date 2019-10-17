@@ -166,11 +166,9 @@ SamplerFullSolveMultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
       oss << ";";
 
     if (_mode == StochasticTools::MultiAppMode::BATCH_RESET)
-      oss << cli_args_name[col] << "="
-          << Moose::stringify(matrix(_local_batch_app_index, col));
+      oss << cli_args_name[col] << "=" << Moose::stringify(matrix(_local_batch_app_index, col));
     else
-      oss << cli_args_name[col] << "="
-          << Moose::stringify(matrix(local_app, col));
+      oss << cli_args_name[col] << "=" << Moose::stringify(matrix(local_app, col));
   }
   return oss.str();
 }

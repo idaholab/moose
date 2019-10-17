@@ -31,13 +31,17 @@ validParams<SamplerData>()
 
   // Flag for using getSamples or getLocalSamples, by default getLocalSamples is used. This option
   // is mainly for testing to make sure the methods return the same values.
-  params.addParam<bool>("use_local_samples", true, "Toggle the use of getLocalSamples (true) or getSamples (false).");
+  params.addParam<bool>(
+      "use_local_samples", true, "Toggle the use of getLocalSamples (true) or getSamples (false).");
 
   return params;
 }
 
 SamplerData::SamplerData(const InputParameters & parameters)
-    : GeneralVectorPostprocessor(parameters), SamplerInterface(this), _sampler(getSampler("sampler")), _use_local_samples(getParam<bool>("use_local_samples"))
+  : GeneralVectorPostprocessor(parameters),
+    SamplerInterface(this),
+    _sampler(getSampler("sampler")),
+    _use_local_samples(getParam<bool>("use_local_samples"))
 {
   for (dof_id_type i = 0; i < _sampler.getNumberOfCols(); ++i)
     _sample_vectors.push_back(

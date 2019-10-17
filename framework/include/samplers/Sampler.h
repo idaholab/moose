@@ -43,14 +43,6 @@ public:
 
   Sampler(const InputParameters & parameters);
 
-  /**
-   * Function called by MOOSE to setup the Sampler for use. The primary purpose is to partition
-   * the DenseMatrix rows for parallel distribution.
-   *
-   * This function is for internal use by MOOSE, it should not be called otherwise.
-   */
-  void init();
-
   ///@{
   /**
    * Return the sampled complete or distributed sample data.
@@ -58,12 +50,6 @@ public:
   DenseMatrix<Real> getSamples();
   DenseMatrix<Real> getLocalSamples();
   ///@}
-
-  /**
-   * Store the state of the MooseRandom generator so that new calls to getSamples/getLocalSamples
-   * methods will create new numbers.
-   */
-  void execute();
 
   /**
    * Return the number of samples.
@@ -92,30 +78,22 @@ protected:
   void setNumberOfCols(dof_id_type n_cols);
   ///@}
 
-  ///@{
   /**
-   * Setup method called prior and after looping through distributions.
+   * Set the number of seeds required by the sampler. The Sampler will generate
+   * additional seeds as needed. This function should be called in the constructor
+   * of child objects.
+   * @param number The required number of random seeds, by default this is called with 1.
    */
-  virtual void sampleSetUp(){};
-  virtual void sampleTearDown(){};
-  ///@}
+  void setNumberOfRandomSeeds(std::size_t number);
 
   /**
    * Get the next random number from the generator.
-   * @param offset The index of the seed, by default this is zero. To add additional seeds
-   *               indices call the setNumberOfRequiedRandomSeeds method.
+   * @param index The index of the seed, by default this is zero. To add additional seeds
+   *              indices call the setNumberOfRequiedRandomSeeds method.
    *
    * @return A double for the random number, this is double because MooseRandom class uses double.
    */
   double rand(unsigned int index = 0);
-
-  ///@{
-  /**
-   * Methods that perform call
-   */
-  virtual DenseMatrix<Real> computeSampleMatrix();
-  virtual DenseMatrix<Real> computeLocalSampleMatrix();
-  ///@}
 
   /**
    * Base class must override this method to supply the sample distribution data.
@@ -125,16 +103,64 @@ protected:
    */
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) = 0;
 
+  ///@{
   /**
-   * Set the number of seeds required by the sampler. The Sampler will generate
-   * additional seeds as needed. This function should be called in the constructor
-   * of child objects.
-   * @param number The required number of random seeds, by default this is called with 1.
+   * Setup method called prior and after looping through distributions.
+   *
+   * These methods should not be called directly, each is automatically called by the public
+   * getSamples() or getLocalSamples() methods.
    */
-  void setNumberOfRandomSeeds(std::size_t number);
+  virtual void sampleSetUp(){};
+  virtual void sampleTearDown(){};
+  ///@}
+
+  ///@{
+  /**
+   * Methods to populate the global or local sample matrix.
+   * @param matrix The correctly sized matrix of sample values to populate
+   *
+   * These methods should not be called directly, each is automatically called by the public
+   * getSamples() or getLocalSamples() methods.
+   */
+  virtual void computeSampleMatrix(DenseMatrix<Real> & matrix);
+  virtual void computeLocalSampleMatrix(DenseMatrix<Real> & matrix);
+  ///@}
 
 private:
+  /**
+   * Method for advancing the random number generator(s) by the supplied number or calls to rand().
+   *
+   * TODO: This should be updated if the If the random number generator is updated to type that
+   * supports native advancing.
+   */
   void advanceGenerators(dof_id_type count);
+
+  /**
+   * Function called by MOOSE to setup the Sampler for use. The primary purpose is to partition
+   * the DenseMatrix rows for parallel distribution. A separate method is required so that the
+   * set methods can be called within the constructors of child objects, see
+   * FEProblemBase::addSampler method.
+   *
+   * This method is for internal use by MOOSE, it should not be called otherwise.
+   *
+   * This init() method is called by FEProblemBase::addSampler; it should not be called elsewhere.
+   */
+  void init();
+  friend void FEProblemBase::addSampler(std::string type,
+                                        const std::string & name,
+                                        InputParameters & parameters);
+
+  /**
+   * Store the state of the MooseRandom generator so that new calls to getSamples/getLocalSamples
+   * methods will create new numbers. This also handles sample data cache, if enabled.
+   *
+   * This method is for internal use by MOOSE, it should not be called otherwise.
+   *
+   * The execute() method is called in the init() method of this class and
+   * FEProblemBase::executeSamplers; it should not be called elsewhere.
+   */
+  void execute();
+  friend void FEProblemBase::executeSamplers(const ExecFlagType & exec_type);
 
   /// Random number generator, don't give users access. Control it via the interface from this class.
   MooseRandom _generator;

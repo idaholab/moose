@@ -98,7 +98,8 @@ Sampler::getSamples()
 {
   _generator.restoreState();
   sampleSetUp();
-  DenseMatrix<Real> output = computeSampleMatrix();
+  DenseMatrix<Real> output(_n_rows, _n_cols);
+  computeSampleMatrix(output);
   sampleTearDown();
   return output;
 }
@@ -108,31 +109,28 @@ Sampler::getLocalSamples()
 {
   _generator.restoreState();
   sampleSetUp();
-  DenseMatrix<Real> output = computeLocalSampleMatrix();
+  DenseMatrix<Real> output(_n_local_rows, _n_cols);
+  computeLocalSampleMatrix(output);
   sampleTearDown();
   return output;
 }
 
-DenseMatrix<Real>
-Sampler::computeSampleMatrix()
+void
+Sampler::computeSampleMatrix(DenseMatrix<Real> & matrix)
 {
-  DenseMatrix<Real> output(_n_rows, _n_cols);
   for (dof_id_type i = 0; i < _n_rows; ++i)
     for (dof_id_type j = 0; j < _n_cols; ++j)
-      output(i, j) = computeSample(i, j);
-  return output;
+      matrix(i, j) = computeSample(i, j);
 }
 
-DenseMatrix<Real>
-Sampler::computeLocalSampleMatrix()
+void
+Sampler::computeLocalSampleMatrix(DenseMatrix<Real> & matrix)
 {
-  DenseMatrix<Real> output(_n_local_rows, _n_cols);
   advanceGenerators(_local_row_begin * _n_cols);
   for (dof_id_type i = _local_row_begin; i < _local_row_end; ++i)
     for (dof_id_type j = 0; j < _n_cols; ++j)
-      output(i - _local_row_begin, j) = computeSample(i, j);
+      matrix(i - _local_row_begin, j) = computeSample(i, j);
   advanceGenerators((_n_rows - _local_row_end) * _n_cols);
-  return output;
 }
 
 void
@@ -157,9 +155,9 @@ Sampler::setNumberOfRandomSeeds(std::size_t number)
     mooseError("The number of seeds must be larger than zero.");
 
   if (_initialized)
-    mooseError(
-        "The 'setNumberOfRandomSeeds()' method can not be called after the Sampler has been initialized; "
-        "this method should be called in the constructor of the Sampler object.");
+    mooseError("The 'setNumberOfRandomSeeds()' method can not be called after the Sampler has been "
+               "initialized; "
+               "this method should be called in the constructor of the Sampler object.");
 
   // Seed the "master" seed generator
   _seed_generator.seed(0, _seed);
