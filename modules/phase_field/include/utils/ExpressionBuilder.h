@@ -13,7 +13,6 @@
 #include <ostream>
 #include <sstream>
 #include <iomanip>
-#include <iostream>
 
 #include "MooseError.h"
 #include "libmesh/libmesh_common.h"
