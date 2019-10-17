@@ -86,6 +86,10 @@ PorousFlowHeatEnergy::PorousFlowHeatEnergy(const InputParameters & parameters)
                ", however you have used ",
                getParam<unsigned>("kernel_variable_number"),
                ". This is an error");
+
+  // Now that we know kernel_variable_number is OK, _var must be OK,
+  // so ensure that reinit is called on _var:
+  addMooseVariableDependency(_var);
 }
 
 Real
