@@ -98,6 +98,10 @@ PorousFlowFluidMass::PorousFlowFluidMass(const InputParameters & parameters)
                getParam<unsigned>("kernel_variable_number"),
                ". This is an error");
 
+  // Now that we know kernel_variable_number is OK, _var must be OK,
+  // so ensure that reinit is called on _var:
+  addMooseVariableDependency(_var);
+
   // Also check that the phase indices entered are not greater than the number of phases
   // to avoid a segfault. Note that the input parser takes care of negative inputs so we
   // don't need to guard against them
