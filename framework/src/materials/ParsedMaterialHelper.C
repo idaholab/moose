@@ -86,13 +86,13 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
       break;
 
     case USE_PARAM_NAMES:
-      // we do not allow vector coupling in this mode
-      if (!_mapping_is_unique)
-        mooseError("Derivative parsed materials must couple exactly one non-linear variable per "
-                   "coupled variable input parameter.");
-
       for (unsigned i = 0; i < _nargs; ++i)
-        _variable_names[i] = _arg_param_names[i];
+      {
+        if(_arg_param_numbers[i] < 0)
+          _variable_names[i] = _arg_names[i];
+        else
+          _variable_names[i] = _arg_param_names[i] + std::to_string(_arg_param_numbers[i]);
+      }
       break;
 
     default:
