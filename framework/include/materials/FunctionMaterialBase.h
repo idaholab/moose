@@ -73,6 +73,7 @@ protected:
 
   /// String vector of the input file coupling parameter name for each argument.
   std::vector<std::string> _arg_param_names;
+  std::vector<int> _arg_param_numbers;
 
   /// coupled variables with default values
   std::vector<std::string> _arg_constant_defaults;
@@ -94,4 +95,3 @@ private:
   /// Vector to look up the internal coupled variable index into _arg_*  through the libMesh variable number
   std::vector<unsigned int> _arg_index;
 };
-
