@@ -36,7 +36,6 @@
     variable = u
     v = v
     extra_vector_tags = 'eigen'
-    coef = -1.0
   [../]
   [./src_v]
     type = CoupledForce
