@@ -81,7 +81,6 @@
 - /Components/HeatGeneration
 - /Components/HeatSourceFromPowerDensity
 - /Components/HeatSourceFromTotalPower
-- /Components/HeatStructure
 - /Components/HeatStructureCylindrical
 - /Components/HeatStructurePlate
 - /Components/HeatTransferFromExternalAppHeatFlux1Phase

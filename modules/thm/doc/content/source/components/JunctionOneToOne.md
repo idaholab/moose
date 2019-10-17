@@ -16,7 +16,7 @@ for 2-phase).
 Using this junction between 2 flow channels should be numerically equivalent to having
 the 2 connected flow channels merged into 1 large flow channel. This junction is useful
 for cases where a separation in a flow channel is required. One particular example is
-when a [HeatStructure](/HeatStructure.md) is connected to a section of an otherwise
+when a heat structure is connected to a section of an otherwise
 single flow channel.
 
 !syntax parameters /Components/JunctionOneToOne
