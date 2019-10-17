@@ -15,14 +15,15 @@ registerMooseObject("PhaseFieldApp", NestedBoundingBoxIC);
 
 namespace
 {
-// // Convenience function for sizing a vector to "n" given a vector with size 1 or "n"
-std::vector<Real> static sizeVector(std::vector<Real> v, std::size_t size);
-// {
-//   if (v.size() == 1)
-//     return std::vector<Real>(size, v[0]);
-//   else
-//     return v;
-// }
+// Convenience function for sizing a vector to "n" given a vector with size 1 or "n"
+std::vector<Real>
+sizeVector(std::vector<Real> v, std::size_t size)
+{
+  if (v.size() == 1)
+    return std::vector<Real>(size, v[0]);
+  else
+    return v;
+}
 }
 
 template <>
