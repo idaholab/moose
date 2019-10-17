@@ -10,7 +10,7 @@
 #pragma once
 
 #include "ExplicitTimeIntegrator.h"
-#include "LumpedPreconditioner.h"
+// #include "LumpedPreconditioner.h"
 
 class ActuallyExplicitEuler;
 

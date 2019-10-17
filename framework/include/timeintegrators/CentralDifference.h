@@ -9,8 +9,8 @@
 
 #pragma once
 
-#include "ActuallyExplicitEuler.h"
-#include "MeshChangedInterface.h"
+#include "ExplicitTimeIntegrator.h"
+// #include "MeshChangedInterface.h"
 
 // Forward declarations
 class CentralDifference;
@@ -19,15 +19,19 @@ template <>
 InputParameters validParams<CentralDifference>();
 
 /**
- * Implements a truly explicit (no nonlinear solve) first-order, forward Euler
- * time integration scheme.
+ * Implements a truly explicit (no nonlinear solve) Central Difference time
+ * integration scheme.
  */
-class CentralDifference : public ActuallyExplicitEuler
+class CentralDifference : public ExplicitTimeIntegrator
 {
 public:
   CentralDifference(const InputParameters & parameters);
 
+  virtual int order() override { return 2; }
+
   virtual void computeTimeDerivatives() override;
+
+  void computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof) const override;
 
   virtual NumericVector<Number> & uDotDotResidual() const override;
 

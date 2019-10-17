@@ -12,13 +12,16 @@
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
 
+// libMesh includes
+#include "libmesh/nonlinear_solver.h"
+
 registerMooseObject("MooseApp", CentralDifference);
 
 template <>
 InputParameters
 validParams<CentralDifference>()
 {
-  InputParameters params = validParams<ActuallyExplicitEuler>();
+  InputParameters params = validParams<ExplicitTimeIntegrator>();
 
   params.addClassDescription("Implementation of explicit, Central Difference integration without "
                              "invoking any of the nonlinear solver");
@@ -27,7 +30,7 @@ validParams<CentralDifference>()
 }
 
 CentralDifference::CentralDifference(const InputParameters & parameters)
-  : ActuallyExplicitEuler(parameters),
+  : ExplicitTimeIntegrator(parameters),
     _du_dotdot_du(_sys.duDotDotDu()),
     _u_dotdot_residual(_sys.addVector("u_dotdot_residual", true, GHOSTED)),
     _u_dot_residual(_sys.addVector("u_dot_residual", true, GHOSTED))
@@ -40,6 +43,12 @@ CentralDifference::CentralDifference(const InputParameters & parameters)
   _fe_problem.setUDotDotRequested(true);
   _fe_problem.setUDotDotOldRequested(true);
   _fe_problem.setSolutionState(4);
+}
+
+void
+CentralDifference::computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof) const
+{
+  computeTimeDerivativeHelper(ad_u_dot, _solution_old(dof));
 }
 
 void
