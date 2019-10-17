@@ -11,39 +11,69 @@
 
 #include "ADRadialReturnCreepStressUpdateBase.h"
 
-#include "LAROMData.h"
+#define usingADLAROMANCEStressUpdateBase                                                           \
+  usingRadialReturnCreepStressUpdateBaseMembers;                                                   \
+  using ADLAROMANCEStressUpdateBase<compute_stage>::getTransform;                                  \
+  using ADLAROMANCEStressUpdateBase<compute_stage>::getTransformCoefs;                             \
+  using ADLAROMANCEStressUpdateBase<compute_stage>::getInputLimits;                                \
+  using ADLAROMANCEStressUpdateBase<compute_stage>::getCoefs
+
+template <ComputeStage>
+class ADLAROMANCEStressUpdateBase;
+
+declareADValidParams(ADLAROMANCEStressUpdateBase);
+
+enum class ROMInputTransform
+{
+  LINEAR,
+  LOG,
+  EXP
+};
 
 template <ComputeStage compute_stage>
-class ADLAROMCreepStressUpdate;
-
-declareADValidParams(ADLAROMCreepStressUpdate);
-
-/**
- * Class to call the Reduced Order Model to predict the behavior of creep
- */
-
-template <ComputeStage compute_stage>
-class ADLAROMCreepStressUpdate : public ADRadialReturnCreepStressUpdateBase<compute_stage>
+class ADLAROMANCEStressUpdateBase : public ADRadialReturnCreepStressUpdateBase<compute_stage>
 {
 public:
-  ADLAROMCreepStressUpdate(const InputParameters & parameters);
+  ADLAROMANCEStressUpdateBase(const InputParameters & parameters);
 
 protected:
+  virtual void initialSetup() override;
+
   virtual void initQpStatefulProperties() override;
+
   virtual ADReal computeResidual(const ADReal & effective_trial_stress,
                                  const ADReal & scalar) override;
+
   virtual ADReal computeDerivative(const ADReal & /*effective_trial_stress*/,
                                    const ADReal & /*scalar*/) override
   {
     return _derivative;
   }
+
   virtual void computeStressFinalize(const ADRankTwoTensor & plastic_strain_increment) override;
 
   /**
    * Compute the limiting value of the time step for this material
+   *
    * @return Limiting time step
    */
   virtual Real computeTimeStepLimit() override;
+
+  /**
+   *Computes the ROM Strain rate
+   * @param dt Timestep size
+   * @param mobile_dislocations_old Mobile dislocation density from previous timestep
+   * @param immobile_dislocations_old Immobile dislocation density from previous timestep
+   * @param trial_stress Trial stress from radial return method
+   * @param effective_strain_old Effective strain from the previous timestep
+   * @param temperature Temperature variable value
+   * @param environmental Environmental variable value
+   * @param mobile_dislocation_increment Mobile dislocation density incremental change
+   * @param immobile_dislocation_increment Immobile dislocation density incremental change
+   * @param rom_effective_strain ROM calculated effective strain
+   * @param rom_effective_strain_derivative Derivative of ROM calculated effective strain with
+   *respect to stress
+   */
 
   void computeROMStrainRate(const Real dt,
                             const Real & mobile_dislocations_old,
@@ -57,11 +87,18 @@ protected:
                             ADReal & rom_effective_strain,
                             ADReal & rom_effective_strain_derivative);
 
-  /// Function to check input values against applicability windows set by ROM data set
+  /**
+   * Function to check input values against applicability windows set by ROM data set
+   * @param input Vector of input values
+   */
   void checkInputWindows(std::vector<ADReal> & input);
 
-  /* Convert the input variables into the form expected by the ROM Legendre polynomials
+  /**
+   * Convert the input variables into the form expected by the ROM Legendre polynomials
    * to have a normalized space from [-1, 1] so that every variable has equal weight
+   * @param input Vector of input values
+   * @param converted Vector of converted input values
+   * @param dconverted Vector of derivative of converted input values with respect to stress
    */
   void convertInput(const std::vector<ADReal> & input,
                     std::vector<std::vector<ADReal>> & converted,
@@ -70,6 +107,11 @@ protected:
   /**
    * Assemble the array of Legendre polynomials to be multiplied by the ROM
    * coefficients
+   * @param rom_inputs Vector of converted input values
+   * @param drom_inputs Vector of derivative of converted input values with respect to stress
+   * @param polynomial_inputs Vector of Legendre polynomial transformation
+   * @param dpolynomial_inputs Vector of derivative of Legendre polynomial transformation with
+   * respect to stress
    */
   void buildPolynomials(const std::vector<std::vector<ADReal>> & rom_inputs,
                         const std::vector<std::vector<ADReal>> & drom_inputs,
@@ -80,6 +122,12 @@ protected:
    * Arranges the calculated Legendre polynomials into the order expected by the
    * ROM coefficients and ultiplies the Legendre polynomials by the ROM coefficients to compute the
    * the predicted output values
+   * @param coefs Legendre polynomials
+   * @param polynomial_inputs Vector of Legendre polynomial transformation
+   * @param dpolynomial_inputs Vector of derivative of Legendre polynomial transformation with
+   * respect to stress
+   * @param rom_outputs Outputs from ROM
+   * @param drom_outputs Derivative of outputs from ROM with respect to stress
    */
   void computeValues(const std::vector<std::vector<Real>> & coefs,
                      const std::vector<std::vector<std::vector<ADReal>>> & polynomial_inputs,
@@ -87,8 +135,16 @@ protected:
                      std::vector<ADReal> & rom_outputs,
                      std::vector<ADReal> & drom_outputs);
 
-  /* Computes the output variable increments from the ROM predictions by bringing out of the
-   *normalized map to the actual physical values
+  /**
+   * Computes the output variable increments from the ROM predictions by bringing out of the
+   * normalized map to the actual physical values
+   * @param dt Timestep size
+   * @param old_input_values Previous timestep values of ROM inputs
+   * @param rom_outputs Outputs from ROM
+   * @param drom_outputs Derivative of outputs from ROM with respect to stress
+   * @param input_value_increments Incremental change of input values
+   * @param input_value_increments Derivative of the incremental change of input values with respect
+   * to stress
    */
   void convertOutput(const Real dt,
                      const std::vector<ADReal> & old_input_values,
@@ -97,13 +153,57 @@ protected:
                      std::vector<ADReal> & input_value_increments,
                      std::vector<ADReal> & dinput_value_increments);
 
-  /// Calculate the value or derivative of Legendre polynomial up to 3rd order
+  /**
+   * Calculate the value or derivative of Legendre polynomial up to 3rd order
+   * @param value Input to Legendre polynomial
+   * @param degree Degree of Legendre polynomial
+   * @param derivative Flag to return derivative of Legendre polynomial Legendre
+   * @return Computed value from Legendre polynomial
+   */
   ADReal
   computePolynomial(const ADReal & value, const unsigned int degree, const bool derivative = false);
 
-private:
-  /// Userobject that holds ROM data set
-  const LAROMData & _rom;
+  /*
+   * Calculates and returns the transformed limits for the ROM calculations
+   * @return Multi-dimentional vector of transformed limits
+   */
+  std::vector<std::vector<std::vector<Real>>> getTransformedLimits() const;
+
+  /*
+   * Calculates and returns vector utilized in assign values
+   * @return Multi-dimentional vector that preallocates calculations for polynomial calculation
+   */
+  std::vector<std::vector<unsigned int>> getMakeFrameHelper() const;
+
+  /*
+   * Returns vector of the functions to use for the conversion of input variables.
+   * @return vector of the functions to use for the conversion of input variables.
+   */
+  virtual std::vector<std::vector<ROMInputTransform>> getTransform() = 0;
+
+  /*
+   * Returns factors for the functions for the conversion functions given in getTransform
+   * @return factors for the functions for the conversion functions given in getTransform
+   */
+  virtual std::vector<std::vector<Real>> getTransformCoefs() = 0;
+
+  /* Returns human-readable limits for the inputs. Inputs ordering is
+   * 0: mobile_old
+   * 1: immobile_old
+   * 2: trial stress,
+   * 3: effective strain old,
+   * 4: temperature
+   * 5: environmental factor (optional)
+   * @return human-readable limits for the inputs
+   */
+  virtual std::vector<std::vector<Real>> getInputLimits() = 0;
+
+  /*
+   * Material specific coefficients multiplied by the Legendre polynomials for each of the input
+   * variables
+   * @return Legendre polynomial coefficients
+   */
+  virtual std::vector<std::vector<Real>> getCoefs() = 0;
 
   /// Coupled temperature variable
   const ADVariableValue & _temperature;
@@ -163,38 +263,38 @@ private:
   /// Container for old immobile dislocation value
   Real _immobile_old;
 
+  /// Index corresponding to the position for the stress in the input vector
+  const unsigned int _stress_index;
+
   /// Optional old creep strain forcing function
   const Function * const _creep_strain_old_forcing_function;
 
   /// Number of inputs for the ROM data set
-  const unsigned int _num_inputs;
+  unsigned int _num_inputs;
 
   /// Number of inputs to the ROM data set
-  const unsigned int _num_outputs;
-
-  /// Index corresponding to the position for the stress in the input vector
-  const unsigned int _stress_index;
+  unsigned int _num_outputs;
 
   /// Legendre polynomial degree for the ROM data set
-  const unsigned int _degree;
+  unsigned int _degree;
 
   /// Total number of Legendre polynomial coefficients for the ROM data set
-  const unsigned int _num_coefs;
+  unsigned int _num_coefs;
 
   /// Transform rules defined by the ROM data set
-  std::vector<std::vector<unsigned int>> _transform;
+  std::vector<std::vector<ROMInputTransform>> _transform;
 
   /// Transform coefficients defined by the ROM data set
-  std::vector<std::vector<Real>> _transform_coef;
+  std::vector<std::vector<Real>> _transform_coefs;
 
   /// Input limits defined by the ROM data set
   std::vector<std::vector<Real>> _input_limits;
 
-  /// Coefficients used with Legendgre polynomials defined by the ROM data set
+  /// Coefficients used with Legendre polynomials defined by the ROM data set
   std::vector<std::vector<Real>> _coefs;
 
   /// Flag that checks if environmental factor is included in ROM data set
-  const bool _use_env;
+  bool _use_env;
 
   /// Limits transformed from readabile input to ROM readable limits
   std::vector<std::vector<std::vector<Real>>> _transformed_limits;

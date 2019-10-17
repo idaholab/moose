@@ -7,69 +7,77 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-//  saturation as a function of effective saturation, and its derivs wrt effective saturation
-//
-#include "SS316LAROMData.h"
+#include "SS316HLAROMANCEStressUpdateTest.h"
 
-registerMooseObject("TensorMechanicsApp", SS316LAROMData);
+registerADMooseObject("TensorMechanicsTestApp", SS316HLAROMANCEStressUpdateTest);
 
-template <>
-InputParameters
-validParams<SS316LAROMData>()
+defineADValidParams(
+    SS316HLAROMANCEStressUpdateTest,
+    ADLAROMANCEStressUpdateBase,
+    params.addClassDescription("LAROMANCE creep update model for SS316H");
+
+    // Override defaults for material specific parameters below
+    params.addRangeCheckedParam<Real>("initial_mobile_dislocation_density",
+                                      5.0e12,
+                                      "initial_mobile_dislocation_density >=1.32776E+12 & "
+                                      "initial_mobile_dislocation_density <= 9.99959E+12",
+                                      "Initial density of mobile (glissile) dislocations (1/m^2)");
+    params.addRangeCheckedParam<Real>(
+        "max_relative_mobile_dislocation_increment",
+        0.5,
+        "max_relative_mobile_dislocation_increment > 0.0",
+        "Maximum increment of density of mobile (glissile) dislocations.");
+    params.addRangeCheckedParam<Real>(
+        "initial_immobile_dislocation_density",
+        5.0e11,
+        "initial_immobile_dislocation_density >= 2.93039E+11 & "
+        "initial_immobile_dislocation_density <= 9.99798E+11",
+        "Immobile (locked) dislocation density initial value (1/m^2).");
+    params.addRangeCheckedParam<Real>(
+        "max_relative_immobile_dislocation_increment",
+        0.5,
+        "max_relative_immobile_dislocation_increment > 0.0",
+        "Maximum increment of immobile (locked) dislocation density initial value (1/m^2)."););
+
+template <ComputeStage compute_stage>
+SS316HLAROMANCEStressUpdateTest<compute_stage>::SS316HLAROMANCEStressUpdateTest(
+    const InputParameters & parameters)
+  : ADLAROMANCEStressUpdateBase<compute_stage>(parameters)
 {
-  InputParameters params = validParams<LAROMData>();
-  params.addClassDescription("UserObject that stores the relevant data for the reduced order model "
-                             "for SS316. Must be used in conjuction with ADROMCreepStressUpdate");
-  return params;
 }
 
-SS316LAROMData::SS316LAROMData(const InputParameters & parameters) : LAROMData(parameters) {}
-
-unsigned int
-SS316LAROMData::getStressIndex() const
+template <ComputeStage compute_stage>
+std::vector<std::vector<ROMInputTransform>>
+SS316HLAROMANCEStressUpdateTest<compute_stage>::getTransform()
 {
-  return 2;
+  return {{ROMInputTransform::LOG,
+           ROMInputTransform::LOG,
+           ROMInputTransform::LOG,
+           ROMInputTransform::LOG,
+           ROMInputTransform::LINEAR},
+          {ROMInputTransform::EXP,
+           ROMInputTransform::LOG,
+           ROMInputTransform::LOG,
+           ROMInputTransform::LINEAR,
+           ROMInputTransform::LOG},
+          {ROMInputTransform::LINEAR,
+           ROMInputTransform::LOG,
+           ROMInputTransform::LOG,
+           ROMInputTransform::LOG,
+           ROMInputTransform::LINEAR}};
 }
 
-unsigned int
-SS316LAROMData::getDegree() const
-{
-  return 4;
-}
-
-Real
-SS316LAROMData::getMaxRelativeMobileInc() const
-{
-  return 0.5;
-}
-
-Real
-SS316LAROMData::getMaxRelativeImmobileInc() const
-{
-  return 0.5;
-}
-
-Real
-SS316LAROMData::getMaxEnvironmentalFactorInc() const
-{
-  return 1.0e30;
-}
-
-std::vector<std::vector<unsigned int>>
-SS316LAROMData::getTransform() const
-{
-  return {{1, 1, 1, 1, 0}, {2, 1, 1, 0, 1}, {0, 1, 1, 1, 0}};
-}
-
+template <ComputeStage compute_stage>
 std::vector<std::vector<Real>>
-SS316LAROMData::getTransformCoefs() const
+SS316HLAROMANCEStressUpdateTest<compute_stage>::getTransformCoefs()
 {
   return {
       {1.0, 1.0, 1.0e1, 4.0e-5, 0.0}, {1.0e13, 1.0, 1.0e1, 0.0, 1.0}, {0.0, 1.0, 5.0, 1.0e-4, 0.0}};
 }
 
+template <ComputeStage compute_stage>
 std::vector<std::vector<Real>>
-SS316LAROMData::getInputLimits() const
+SS316HLAROMANCEStressUpdateTest<compute_stage>::getInputLimits()
 {
   return {{1.32776E+12, 9.99959E+12},
           {2.93039E+11, 9.99798E+11},
@@ -78,8 +86,9 @@ SS316LAROMData::getInputLimits() const
           {800.0160634, 949.9873586}};
 }
 
+template <ComputeStage compute_stage>
 std::vector<std::vector<Real>>
-SS316LAROMData::getCoefs() const
+SS316HLAROMANCEStressUpdateTest<compute_stage>::getCoefs()
 {
   return {
       {-16.438661699503427,    4.591731583001092,     0.6746168063837104,     0.24145810486515984,

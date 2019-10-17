@@ -7,22 +7,19 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ADLAROMCreepStressUpdate.h"
+#include "ADLAROMANCEStressUpdateBase.h"
 
 #include "Function.h"
 #include "MathUtils.h"
 
-registerADMooseObject("TensorMechanicsApp", ADLAROMCreepStressUpdate);
-
 defineADValidParams(
-    ADLAROMCreepStressUpdate,
+    ADLAROMANCEStressUpdateBase,
     ADRadialReturnCreepStressUpdateBase,
     params.addClassDescription(
         "Calculates the effective creep strain based on the rates predicted by a material "
         "specific Los Alamos Reduced Order Model derived from a Visco-Plastic Self Consistent "
         "calculations.");
 
-    params.addRequiredParam<UserObjectName>("rom_data", "Name of user object holding ROM data");
     params.addRequiredCoupledVar("temperature", "The coupled temperature (K)");
     params.addCoupledVar("environmental_factor", 0.0, "Optional coupled environmental factor");
     params.addRangeCheckedParam<Real>("input_window_limit",
@@ -41,10 +38,11 @@ defineADValidParams(
                                       0.0,
                                       "initial_mobile_dislocation_density >= 0.0",
                                       "Initial density of mobile (glissile) dislocations (1/m^2)");
-    params.addParam<Real>(
+    params.addRangeCheckedParam<Real>(
         "max_relative_mobile_dislocation_increment",
-        "Maximum increment of density of mobile (glissile) dislocations (1/m^2). If provided, this "
-        "will override the increment provided with the ROM data.");
+        0.5,
+        "max_relative_mobile_dislocation_increment > 0.0",
+        "Maximum increment of density of mobile (glissile) dislocations.");
     params.addParam<FunctionName>(
         "mobile_dislocation_density_forcing_function",
         "Optional forcing function for immobile dislocation. If provided, the immobile dislocation "
@@ -55,10 +53,11 @@ defineADValidParams(
         0.0,
         "initial_immobile_dislocation_density >= 0.0",
         "Immobile (locked) dislocation density initial value (1/m^2).");
-    params.addParam<Real>(
+    params.addRangeCheckedParam<Real>(
         "max_relative_immobile_dislocation_increment",
-        "Maximum increment of immobile (locked) dislocation density initial value (1/m^2). If "
-        "provided, this will override the increment provided with the ROM data.");
+        0.5,
+        "max_relative_immobile_dislocation_increment > 0.0",
+        "Maximum increment of immobile (locked) dislocation density initial value (1/m^2).");
     params.addParam<FunctionName>(
         "immobile_dislocation_density_forcing_function",
         "Optional forcing function for immobile dislocation. If provided, the immobile dislocation "
@@ -71,13 +70,17 @@ defineADValidParams(
         "the old creep strain will be reset to the function value at the beginning of the "
         "timestep. Used for testing purposes only.");
 
-    params.addParam<bool>("verbose", false, "Flag to add verbose output"););
+    params.addParam<bool>("verbose", false, "Flag to add verbose output");
+
+    params.addParamNamesToGroup(
+        "mobile_dislocation_density_forcing_function immobile_dislocation_density_forcing_function "
+        "old_creep_strain_forcing_function",
+        "Advanced"););
 
 template <ComputeStage compute_stage>
-ADLAROMCreepStressUpdate<compute_stage>::ADLAROMCreepStressUpdate(
+ADLAROMANCEStressUpdateBase<compute_stage>::ADLAROMANCEStressUpdateBase(
     const InputParameters & parameters)
   : ADRadialReturnCreepStressUpdateBase<compute_stage>(parameters),
-    _rom(getUserObject<LAROMData>("rom_data")),
     _temperature(adCoupledValue("temperature")),
     _environmental(adCoupledValue("environmental_factor")),
     _window(getParam<Real>("input_window_limit")),
@@ -88,9 +91,7 @@ ADLAROMCreepStressUpdate<compute_stage>::ADLAROMCreepStressUpdate(
     _mobile_dislocations(declareADProperty<Real>(_base_name + "mobile_dislocations")),
     _mobile_dislocations_old(getMaterialPropertyOld<Real>(_base_name + "mobile_dislocations")),
     _initial_mobile_dislocations(getParam<Real>("initial_mobile_dislocation_density")),
-    _max_mobile_increment(isParamValid("max_relative_mobile_dislocation_increment")
-                              ? getParam<Real>("max_relative_mobile_dislocation_increment")
-                              : _rom.getMaxRelativeMobileInc()),
+    _max_mobile_increment(getParam<Real>("max_relative_mobile_dislocation_increment")),
     _mobile_function(isParamValid("mobile_dislocation_density_forcing_function")
                          ? &getFunction("mobile_dislocation_density_forcing_function")
                          : NULL),
@@ -99,31 +100,17 @@ ADLAROMCreepStressUpdate<compute_stage>::ADLAROMCreepStressUpdate(
     _immobile_dislocations(declareADProperty<Real>(_base_name + "immobile_dislocations")),
     _immobile_dislocations_old(getMaterialPropertyOld<Real>(_base_name + "immobile_dislocations")),
     _initial_immobile_dislocations(getParam<Real>("initial_immobile_dislocation_density")),
-    _max_immobile_increment(isParamValid("max_relative_immobile_dislocation_increment")
-                                ? getParam<Real>("max_relative_immobile_dislocation_increment")
-                                : _rom.getMaxRelativeImmobileInc()),
+    _max_immobile_increment(getParam<Real>("max_relative_immobile_dislocation_increment")),
     _immobile_function(isParamValid("immobile_dislocation_density_forcing_function")
                            ? &getFunction("immobile_dislocation_density_forcing_function")
                            : NULL),
     _immobile_dislocation_increment(0.0),
     _immobile_old(0.0),
+    _stress_index(2),
 
     _creep_strain_old_forcing_function(isParamValid("old_creep_strain_forcing_function")
                                            ? &getFunction("old_creep_strain_forcing_function")
                                            : NULL),
-
-    _num_inputs(_rom.getNumberInputs()),
-    _num_outputs(_rom.getNumberOutputs()),
-    _stress_index(_rom.getStressIndex()),
-    _degree(_rom.getDegree()),
-    _num_coefs(_rom.getNumberRomCoefficients()),
-    _transform(_rom.getTransform()),
-    _transform_coef(_rom.getTransformCoefs()),
-    _input_limits(_rom.getInputLimits()),
-    _coefs(_rom.getCoefs()),
-    _use_env(_rom.checkForEnvironmentFactor()),
-    _transformed_limits(_rom.getTransformedLimits()),
-    _makeframe_helper(_rom.getMakeFrameHelper()),
 
     _creep_rate(declareADProperty<Real>(_base_name + "creep_rate")),
     _failed(declareProperty<Real>("ROM_failure")),
@@ -134,7 +121,48 @@ ADLAROMCreepStressUpdate<compute_stage>::ADLAROMCreepStressUpdate(
 
 template <ComputeStage compute_stage>
 void
-ADLAROMCreepStressUpdate<compute_stage>::initQpStatefulProperties()
+ADLAROMANCEStressUpdateBase<compute_stage>::initialSetup()
+{
+  _transform = getTransform();
+
+  _num_outputs = _transform.size();
+  if (_num_outputs != 3)
+    mooseError("In ", _name, ": _num_outputs (", _num_outputs, ") is not 3");
+
+  _num_inputs = _transform[0].size();
+  if (_num_inputs != 5 && _num_inputs != 6)
+    mooseError("In ", _name, ": _num_inputs (", _num_inputs, ") is not 5 or 6");
+  _use_env = _num_inputs == 6 ? true : false;
+
+  _transform_coefs = getTransformCoefs();
+  if (_transform_coefs.size() != _num_outputs || _transform_coefs[0].size() != _num_inputs)
+    mooseError("In ", _name, ": transform_coef is the wrong shape!");
+
+  _input_limits = getInputLimits();
+  if (_input_limits.size() != _num_inputs || _input_limits[0].size() != 2)
+    mooseError("In ", _name, ": input_limits is the wrong shape!");
+
+  _coefs = getCoefs();
+  if (_coefs.size() != _num_outputs)
+    mooseError("In ", _name, ": coefs is the wrong shape!");
+
+  _num_coefs = _coefs[0].size();
+  _degree = std::pow(_num_coefs, 1.0 / _num_inputs);
+  if (!_degree || _degree > 4)
+    mooseError("In ", _name, ": degree must be 1, 2, 3 or 4.");
+
+  _transformed_limits = getTransformedLimits();
+  _makeframe_helper = getMakeFrameHelper();
+
+  Moose::out << "ROM model info:\n  name:\t" << _name << "\n  number of outputs:\t" << _num_outputs
+             << "\n  number of inputs:\t" << _num_inputs
+             << "\n  degree (max Legendre degree + constant):\t" << _degree
+             << "\n  number of coefficients:\t" << _num_coefs << std::endl;
+}
+
+template <ComputeStage compute_stage>
+void
+ADLAROMANCEStressUpdateBase<compute_stage>::initQpStatefulProperties()
 {
   _mobile_dislocations[_qp] = _initial_mobile_dislocations;
   _immobile_dislocations[_qp] = _initial_immobile_dislocations;
@@ -144,8 +172,8 @@ ADLAROMCreepStressUpdate<compute_stage>::initQpStatefulProperties()
 
 template <ComputeStage compute_stage>
 ADReal
-ADLAROMCreepStressUpdate<compute_stage>::computeResidual(const ADReal & effective_trial_stress,
-                                                         const ADReal & scalar)
+ADLAROMANCEStressUpdateBase<compute_stage>::computeResidual(const ADReal & effective_trial_stress,
+                                                            const ADReal & scalar)
 {
   if (_immobile_function)
     _immobile_old = _immobile_function->value(_t, _q_point[_qp]);
@@ -192,29 +220,23 @@ ADLAROMCreepStressUpdate<compute_stage>::computeResidual(const ADReal & effectiv
 
   if (_verbose && compute_stage == RESIDUAL)
   {
-    Moose::out.precision(9);
-    Moose::out << std::scientific;
-    Moose::out << "Need to see what is going into the rom model: \n";
+    Moose::out << "Verbose information from " << _name << ": \n";
     Moose::out << "  dt: " << _dt << "\n";
     Moose::out << "  old mobile disl: " << _mobile_old << "\n";
     Moose::out << "  old immobile disl: " << _immobile_old << "\n";
-    Moose::out << "  input vonmises devitoric stress (MPa): " << effective_trial_stress * 1.0e-6
-               << "\n";
-    Moose::out << "  the scalar strain value: " << scalar << "\n";
+    Moose::out << "  initial stress (MPa): " << effective_trial_stress * 1.0e-6 << "\n";
+    Moose::out << "  temperature: " << _temperature[_qp] << "\n";
+    Moose::out << "  environmental factor: " << _environmental[_qp] << "\n";
+    Moose::out << "  calculated scalar strain value: " << scalar << "\n";
     Moose::out << "  trial stress into rom (MPa): " << trial_stress_mpa << "\n";
     Moose::out << "  old effective strain: " << effective_strain_old << "\n";
-    Moose::out << "  temperature: " << _temperature[_qp] << "\n";
-    Moose::out << "  environmental: " << _environmental[_qp] << "\n";
-    Moose::out << "ROM outputs \n";
-    Moose::out << "  increment effective strain from rom: " << rom_effective_strain << "\n";
-    Moose::out << "  new rom_effective_strain: " << effective_strain_old + rom_effective_strain
-               << "\n";
+    Moose::out << " ROM outputs \n";
+    Moose::out << "  effective incremental strain from rom: " << rom_effective_strain << "\n";
+    Moose::out << "  new effective strain: " << effective_strain_old + rom_effective_strain << "\n";
     Moose::out << "  new mobile dislocations: " << _mobile_old + _mobile_dislocation_increment
                << "\n";
     Moose::out << "  new immobile dislocations: " << _immobile_old + _immobile_dislocation_increment
-               << "\n";
-    Moose::out << "  different rom_effective_strain - scalar: " << rom_effective_strain - scalar
-               << "\n \n"
+               << "\n"
                << std::endl;
   }
 
@@ -226,7 +248,7 @@ ADLAROMCreepStressUpdate<compute_stage>::computeResidual(const ADReal & effectiv
 
 template <ComputeStage compute_stage>
 void
-ADLAROMCreepStressUpdate<compute_stage>::computeStressFinalize(
+ADLAROMANCEStressUpdateBase<compute_stage>::computeStressFinalize(
     const ADRankTwoTensor & plastic_strain_increment)
 {
   _mobile_dislocations[_qp] = _mobile_old + _mobile_dislocation_increment;
@@ -234,7 +256,7 @@ ADLAROMCreepStressUpdate<compute_stage>::computeStressFinalize(
 
   if (_verbose && compute_stage == RESIDUAL)
   {
-    Moose::out << "Values calculated in finalize step for qp number:" << _qp << " \n";
+    Moose::out << "Finalized verbose information from " << _name << "\n";
     Moose::out << "  increment effective creep strain: "
                << std::sqrt(2.0 / 3.0 *
                             plastic_strain_increment.doubleContraction(plastic_strain_increment))
@@ -243,8 +265,8 @@ ADLAROMCreepStressUpdate<compute_stage>::computeStressFinalize(
                << std::sqrt(2.0 / 3.0 * _creep_strain[_qp].doubleContraction(_creep_strain[_qp]))
                << "\n";
     Moose::out << "  new mobile dislocations: " << _mobile_dislocations[_qp] << "\n";
-    Moose::out << "  new immobile dislocations: " << _immobile_dislocations[_qp]
-               << "\n \n --------------------------------------" << std::endl;
+    Moose::out << "  new immobile dislocations: " << _immobile_dislocations[_qp] << "\n"
+               << std::endl;
   }
 
   ADRadialReturnCreepStressUpdateBase<compute_stage>::computeStressFinalize(
@@ -253,7 +275,7 @@ ADLAROMCreepStressUpdate<compute_stage>::computeStressFinalize(
 
 template <ComputeStage compute_stage>
 Real
-ADLAROMCreepStressUpdate<compute_stage>::computeTimeStepLimit()
+ADLAROMANCEStressUpdateBase<compute_stage>::computeTimeStepLimit()
 {
   Real limited_dt = ADRadialReturnStressUpdate<compute_stage>::computeTimeStepLimit();
 
@@ -271,7 +293,7 @@ ADLAROMCreepStressUpdate<compute_stage>::computeTimeStepLimit()
 
 template <ComputeStage compute_stage>
 void
-ADLAROMCreepStressUpdate<compute_stage>::computeROMStrainRate(
+ADLAROMANCEStressUpdateBase<compute_stage>::computeROMStrainRate(
     const Real dt,
     const Real & mobile_dislocations_old,
     const Real & immobile_dislocations_old,
@@ -330,7 +352,7 @@ ADLAROMCreepStressUpdate<compute_stage>::computeROMStrainRate(
 
 template <ComputeStage compute_stage>
 void
-ADLAROMCreepStressUpdate<compute_stage>::checkInputWindows(std::vector<ADReal> & input)
+ADLAROMANCEStressUpdateBase<compute_stage>::checkInputWindows(std::vector<ADReal> & input)
 {
   if (compute_stage != RESIDUAL)
     return;
@@ -386,9 +408,10 @@ ADLAROMCreepStressUpdate<compute_stage>::checkInputWindows(std::vector<ADReal> &
 
 template <ComputeStage compute_stage>
 void
-ADLAROMCreepStressUpdate<compute_stage>::convertInput(const std::vector<ADReal> & input,
-                                                      std::vector<std::vector<ADReal>> & converted,
-                                                      std::vector<std::vector<ADReal>> & dconverted)
+ADLAROMANCEStressUpdateBase<compute_stage>::convertInput(
+    const std::vector<ADReal> & input,
+    std::vector<std::vector<ADReal>> & converted,
+    std::vector<std::vector<ADReal>> & dconverted)
 {
   for (unsigned int i = 0; i < _num_outputs; ++i)
   {
@@ -396,15 +419,15 @@ ADLAROMCreepStressUpdate<compute_stage>::convertInput(const std::vector<ADReal> 
     {
       ADReal x = input[j];
       ADReal dx = 1.0;
-      if (_transform[i][j] == 2)
+      if (_transform[i][j] == ROMInputTransform::EXP)
       {
-        x = std::exp(x / _transform_coef[i][j]);
-        dx = x / _transform_coef[i][j];
+        x = std::exp(x / _transform_coefs[i][j]);
+        dx = x / _transform_coefs[i][j];
       }
-      else if (_transform[i][j] == 1)
+      else if (_transform[i][j] == ROMInputTransform::LOG)
       {
-        dx = 1.0 / (x + _transform_coef[i][j]);
-        x = std::log(x + _transform_coef[i][j]);
+        dx = 1.0 / (x + _transform_coefs[i][j]);
+        x = std::log(x + _transform_coefs[i][j]);
       }
 
       converted[i][j] = 2.0 * (x - _transformed_limits[i][j][0]) /
@@ -420,7 +443,7 @@ ADLAROMCreepStressUpdate<compute_stage>::convertInput(const std::vector<ADReal> 
 
 template <ComputeStage compute_stage>
 void
-ADLAROMCreepStressUpdate<compute_stage>::buildPolynomials(
+ADLAROMANCEStressUpdateBase<compute_stage>::buildPolynomials(
     const std::vector<std::vector<ADReal>> & rom_inputs,
     const std::vector<std::vector<ADReal>> & drom_inputs,
     std::vector<std::vector<std::vector<ADReal>>> & polynomial_inputs,
@@ -450,7 +473,7 @@ ADLAROMCreepStressUpdate<compute_stage>::buildPolynomials(
 
 template <ComputeStage compute_stage>
 void
-ADLAROMCreepStressUpdate<compute_stage>::computeValues(
+ADLAROMANCEStressUpdateBase<compute_stage>::computeValues(
     const std::vector<std::vector<Real>> & coefs,
     const std::vector<std::vector<std::vector<ADReal>>> & polynomial_inputs,
     const std::vector<std::vector<std::vector<ADReal>>> & dpolynomial_inputs,
@@ -479,7 +502,7 @@ ADLAROMCreepStressUpdate<compute_stage>::computeValues(
 
 template <ComputeStage compute_stage>
 void
-ADLAROMCreepStressUpdate<compute_stage>::convertOutput(
+ADLAROMANCEStressUpdateBase<compute_stage>::convertOutput(
     const Real dt,
     const std::vector<ADReal> & old_input_values,
     const std::vector<ADReal> & rom_outputs,
@@ -504,9 +527,9 @@ ADLAROMCreepStressUpdate<compute_stage>::convertOutput(
 
 template <ComputeStage compute_stage>
 ADReal
-ADLAROMCreepStressUpdate<compute_stage>::computePolynomial(const ADReal & value,
-                                                           const unsigned int degree,
-                                                           const bool derivative)
+ADLAROMANCEStressUpdateBase<compute_stage>::computePolynomial(const ADReal & value,
+                                                              const unsigned int degree,
+                                                              const bool derivative)
 {
   if (degree == 0)
   {
@@ -533,3 +556,45 @@ ADLAROMCreepStressUpdate<compute_stage>::computePolynomial(const ADReal & value,
     return 2.5 * Utility::pow<3>(value) - 1.5 * value;
   }
 }
+
+template <ComputeStage compute_stage>
+std::vector<std::vector<std::vector<Real>>>
+ADLAROMANCEStressUpdateBase<compute_stage>::getTransformedLimits() const
+{
+  std::vector<std::vector<std::vector<Real>>> transformed_limits(
+      _num_outputs, std::vector<std::vector<Real>>(_num_inputs, std::vector<Real>(2)));
+
+  for (unsigned int i = 0; i < _num_outputs; ++i)
+  {
+    for (unsigned int j = 0; j < _num_inputs; ++j)
+    {
+      for (unsigned int k = 0; k < 2; ++k)
+      {
+        if (_transform[i][j] == ROMInputTransform::EXP)
+          transformed_limits[i][j][k] = std::exp(_input_limits[j][k] / _transform_coefs[i][j]);
+        else if (_transform[i][j] == ROMInputTransform::LOG)
+          transformed_limits[i][j][k] = std::log(_input_limits[j][k] + _transform_coefs[i][j]);
+        else
+          transformed_limits[i][j][k] = _input_limits[j][k];
+      }
+    }
+  }
+
+  return transformed_limits;
+}
+
+template <ComputeStage compute_stage>
+std::vector<std::vector<unsigned int>>
+ADLAROMANCEStressUpdateBase<compute_stage>::getMakeFrameHelper() const
+{
+  std::vector<std::vector<unsigned int>> v(_num_coefs, std::vector<unsigned int>(_num_inputs));
+
+  for (unsigned int numcoeffs = 0; numcoeffs < _num_coefs; ++numcoeffs)
+    for (unsigned int invar = 0; invar < _num_inputs; ++invar)
+      v[numcoeffs][invar] = numcoeffs / MathUtils::pow(_degree, invar) % _degree;
+
+  return v;
+}
+
+// explicit instantiation is required for AD base classes
+adBaseClass(ADLAROMANCEStressUpdateBase);
