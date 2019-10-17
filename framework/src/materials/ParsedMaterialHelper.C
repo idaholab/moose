@@ -10,7 +10,7 @@
 #include "ParsedMaterialHelper.h"
 
 #include "libmesh/quadrature.h"
-#include <iostream>
+
 template <>
 InputParameters
 validParams<ParsedMaterialHelper>()
