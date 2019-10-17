@@ -52,4 +52,11 @@
     requirement = "The Function system shall support the creation of objects that execute a curl of a vector function defined within the input file."
     issues = '#13041'
   [../]
+
+  [./vals_error]
+    type = 'RunException'
+    input = 'vals_error.i'
+    expect_err = 'No postprocessor, scalar variable, or function with the name \'invalid\' found. Unable to convert \'invalid\' to type double'
+    requirement = "The ParsedFunction object shall fail with a human readable error if a vals entry is supplied that is neither a valid postprocessor, scalar variable, function, or real number."
+  [../]
 []
