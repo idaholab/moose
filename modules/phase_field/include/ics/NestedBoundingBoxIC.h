@@ -10,6 +10,7 @@
 #pragma once
 
 #include "InitialCondition.h"
+#include "MultiBoundingBoxIC.h"
 
 // Forward Declarations
 class NestedBoundingBoxIC;
@@ -17,12 +18,7 @@ class NestedBoundingBoxIC;
 template <>
 InputParameters validParams<NestedBoundingBoxIC>();
 
-/**
- * MultiBoundingBoxIC allows setting the initial condition of a value of a field inside and outside
- * multiple bounding boxes. Each box is axis-aligned and is specified by passing in the x,y,z
- * coordinates of opposite corners. Separate values for each box may be supplied.
- */
-class NestedBoundingBoxIC : public InitialCondition
+class NestedBoundingBoxIC : public MultiBoundingBoxIC
 {
 public:
   NestedBoundingBoxIC(const InputParameters & parameters);
@@ -30,23 +26,6 @@ public:
   virtual Real value(const Point & p) override;
 
 protected:
-  ///@{ lists of opposite corners
-  const std::vector<Point> _c1;
-  const std::vector<Point> _c2;
-  ///@}
-
-  /// number of boxes
-  const unsigned int _nbox;
-
   /// value of interfacial width
   const Real _int_width;
-
-  /// dimensionality of the mesh
-  const unsigned int _dim;
-
-  /// values inside the boxes
-  const std::vector<Real> _inside;
-
-  /// values outside the boxes
-  const Real _outside;
 };

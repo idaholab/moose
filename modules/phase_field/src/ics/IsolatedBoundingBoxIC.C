@@ -13,19 +13,6 @@
 
 registerMooseObject("PhaseFieldApp", IsolatedBoundingBoxIC);
 
-namespace sizeVector_def_isolated
-{
-// Convenience function for sizing a vector to "n" given a vector with size 1 or "n"
-std::vector<Real>
-sizeVector(std::vector<Real> v, std::size_t size)
-{
-  if (v.size() == 1)
-    return std::vector<Real>(size, v[0]);
-  else
-    return v;
-}
-}
-
 template <>
 InputParameters
 validParams<IsolatedBoundingBoxIC>()
@@ -65,28 +52,29 @@ IsolatedBoundingBoxIC::IsolatedBoundingBoxIC(const InputParameters & parameters)
     _nbox(_c1.size()),
     _int_width(getParam<Real>("int_width")),
     _dim(_fe_problem.mesh().dimension()),
-    _inside(sizeVector_def_isolated::sizeVector(getParam<std::vector<Real>>("inside"), _nbox)),
+    _inside(getParam<std::vector<Real>>("inside")),
     _outside(getParam<Real>("outside"))
+
+        Real IsolatedBoundingBoxIC::value(const Point & p)
 {
+  Real value = _outside;
+
+  // if "inside" vector only has size 1, all the boxes have the same inside value
+  if (_inside.size() == 1)
+    _inside = _inside.assign(_nbox, _inside[0]);
+
   // make sure inputs are the same length
   if (_c2.size() != _nbox || _inside.size() != _nbox)
-    mooseError("vector inputs must all be the same size");
-}
-
-Real
-IsolatedBoundingBoxIC::value(const Point & p)
-{
-  Real value = _outside; // if p is not inside the largest box, assign the last element of inside
-                         // which is 'outside' to value
+    paramError("vector inputs must all be the same size");
 
   if (_int_width < 0.0)
-    mooseError("'int_width' should be non-negative");
+    paramError("'int_width' should be non-negative");
 
   if (_int_width == 0.0)
   {
     for (unsigned int b = 0; b < _nbox; ++b)
     {
-      if (p(0) >= _c1[b](0) && p(0) <= _c2[b](0))
+      if (_c1[b](0) < _c2[b](0) && p(0) >= _c1[b](0) && p(0) <= _c2[b](0))
         if (_dim <= 1 || (_c1[b](1) < _c2[b](1) && p(1) >= _c1[b](1) && p(1) <= _c2[b](1)))
           if (_dim <= 2 || (_c1[b](2) < _c2[b](2) && p(2) >= _c1[b](2) && p(2) <= _c2[b](2)))
           {
@@ -100,9 +88,11 @@ IsolatedBoundingBoxIC::value(const Point & p)
   {
     for (unsigned int b = 0; b < _nbox; ++b)
     {
-      if (p(0) >= _c1[b](0) - _int_width && p(0) <= _c2[b](0) + _int_width)
-        if (_dim <= 1 || (p(1) >= _c1[b](1) - _int_width && p(1) <= _c2[b](1) + _int_width))
-          if (_dim <= 2 || (p(2) >= _c1[b](2) - _int_width && p(2) <= _c2[b](2) + _int_width))
+      if (_c1[b](0) < _c2[b](0) && p(0) >= _c1[b](0) - _int_width && p(0) <= _c2[b](0) + _int_width)
+        if (_dim <= 1 || (_c1[b](1) < _c2[b](1) && p(1) >= _c1[b](1) - _int_width &&
+                          p(1) <= _c2[b](1) + _int_width))
+          if (_dim <= 2 || (_c1[b](2) < _c2[b](2) && p(2) >= _c1[b](2) - _int_width &&
+                            p(2) <= _c2[b](2) + _int_width))
           {
             for (unsigned int n = b + 1; n < _nbox; ++n)
             {
@@ -120,8 +110,8 @@ IsolatedBoundingBoxIC::value(const Point & p)
             Real f_in = 1.0;
             for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
               if (_c1[b](i) != _c2[b](i))
-                f_in *= 0.5 * (std::tanh(2.0 * 3.1415926 * (p(i) - _c1[b](i)) / _int_width) -
-                               std::tanh(2.0 * 3.1415926 * (p(i) - _c2[b](i)) / _int_width));
+                f_in *= 0.5 * (std::tanh(2.0 * libMesh::PI * (p(i) - _c1[b](i)) / _int_width) -
+                               std::tanh(2.0 * libMesh::PI * (p(i) - _c2[b](i)) / _int_width));
 
             value = _outside + (_inside[b] - _outside) * f_in;
             break;

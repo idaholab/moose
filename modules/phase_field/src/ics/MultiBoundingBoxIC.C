@@ -12,19 +12,6 @@
 
 registerMooseObject("PhaseFieldApp", MultiBoundingBoxIC);
 
-namespace
-{
-// Convenience function for sizing a vector to "n" given a vector with size 1 or "n"
-std::vector<Real>
-sizeVector(std::vector<Real> v, std::size_t size)
-{
-  if (v.size() == 1)
-    return std::vector<Real>(size, v[0]);
-  else
-    return v;
-}
-}
-
 template <>
 InputParameters
 validParams<MultiBoundingBoxIC>()
@@ -52,18 +39,20 @@ MultiBoundingBoxIC::MultiBoundingBoxIC(const InputParameters & parameters)
     _c2(getParam<std::vector<Point>>("opposite_corners")),
     _nbox(_c1.size()),
     _dim(_fe_problem.mesh().dimension()),
-    _inside(sizeVector(getParam<std::vector<Real>>("inside"), _nbox)),
+    _inside(getParam<std::vector<Real>>("inside")),
     _outside(getParam<Real>("outside"))
-{
-  // make sure inputs are the same length
-  if (_c2.size() != _nbox || _inside.size() != _nbox)
-    mooseError("vector inputs must all be the same size");
-}
 
-Real
-MultiBoundingBoxIC::value(const Point & p)
+        Real MultiBoundingBoxIC::value(const Point & p)
 {
   Real value = _outside;
+
+  // if "inside" vector only has size 1, all the boxes have the same inside value
+  if (_inside.size() == 1)
+    _inside = _inside.assign(_nbox, _inside[0]);
+
+  // make sure inputs are the same length
+  if (_c2.size() != _nbox || _inside.size() != _nbox)
+    paramError("vector inputs must all be the same size");
 
   for (unsigned int b = 0; b < _nbox; ++b)
   {

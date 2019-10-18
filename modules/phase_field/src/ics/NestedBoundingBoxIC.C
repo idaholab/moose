@@ -9,23 +9,9 @@
 
 #include "NestedBoundingBoxIC.h"
 #include "MooseMesh.h"
-
 #include <iostream>
 
 registerMooseObject("PhaseFieldApp", NestedBoundingBoxIC);
-
-namespace sizeVector_def_nested
-{
-// Convenience function for sizing a vector to "n" given a vector with size 1 or "n"
-std::vector<Real>
-sizeVector(std::vector<Real> v, std::size_t size)
-{
-  if (v.size() == 1)
-    return std::vector<Real>(size, v[0]);
-  else
-    return v;
-}
-}
 
 template <>
 InputParameters
@@ -65,19 +51,22 @@ NestedBoundingBoxIC::NestedBoundingBoxIC(const InputParameters & parameters)
     _dim(_fe_problem.mesh().dimension()),
     _inside(sizeVector_def_nested::sizeVector(getParam<std::vector<Real>>("inside"), _nbox)),
     _outside(getParam<Real>("outside"))
-{
-  // make sure inputs are the same length
-  if (_c2.size() != _nbox || _inside.size() != _nbox)
-    mooseError("vector inputs must all be the same size");
-}
 
 Real
 NestedBoundingBoxIC::value(const Point & p)
 {
   Real value = _outside;
 
+  // if "inside" vector only has size 1, all the boxes have the same inside value
+  if (_inside.size() == 1)
+    _inside = _inside.assign(_nbox, _inside[0]);
+
+  // make sure inputs are the same length
+  if (_c2.size() != _nbox || _inside.size() != _nbox)
+    paramError("vector inputs must all be the same size");
+
   if (_int_width < 0.0)
-    mooseError("'int_width' should be non-negative");
+    paramError("'int_width' should be non-negative");
 
   if (_int_width == 0.0)
   {
@@ -106,8 +95,8 @@ NestedBoundingBoxIC::value(const Point & p)
             Real f_in = 1.0;
             for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
               if (_c1[b](i) != _c2[b](i))
-                f_in *= 0.5 * (std::tanh(2.0 * 3.1415926 * (p(i) - _c1[b](i)) / _int_width) -
-                               std::tanh(2.0 * 3.1415926 * (p(i) - _c2[b](i)) / _int_width));
+                f_in *= 0.5 * (std::tanh(2.0 * libMesh::PI * (p(i) - _c1[b](i)) / _int_width) -
+                               std::tanh(2.0 * libMesh::PI * (p(i) - _c2[b](i)) / _int_width));
             if (b == _nbox - 1)
               value = _outside + (_inside[b] - _outside) * f_in;
             else
