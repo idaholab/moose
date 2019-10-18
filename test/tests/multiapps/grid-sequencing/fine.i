@@ -74,12 +74,4 @@
     variable = u
     execute_on = timestep_begin
   [../]
-  [./mesh_function_end]
-    type = MultiAppMeshFunctionTransfer
-    direction = to_multiapp
-    multi_app = coarse
-    source_variable = u
-    variable = u
-    execute_on = timestep_begin
-  [../]
 []
