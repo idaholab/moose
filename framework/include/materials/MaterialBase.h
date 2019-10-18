@@ -29,7 +29,7 @@
 #include "RandomInterface.h"
 #include "MaterialProperty.h"
 #include "MaterialData.h"
-#include "ZeroMaterial.h"
+#include "MathUtils.h"
 #include "Assembly.h"
 
 // forward declarations
@@ -317,7 +317,7 @@ MaterialBase::getZeroMaterialProperty(const std::string & prop_name)
   if (nqp > preload_with_zero.size())
     preload_with_zero.resize(nqp);
   for (unsigned int qp = 0; qp < nqp; ++qp)
-    mooseSetToZero<T>(preload_with_zero[qp]);
+    MathUtils::mooseSetToZero<T>(preload_with_zero[qp]);
 
   return preload_with_zero;
 }

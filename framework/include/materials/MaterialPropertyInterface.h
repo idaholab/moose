@@ -15,7 +15,7 @@
 #include "MooseTypes.h"
 #include "MaterialData.h"
 #include "MemberTemplateMacros.h"
-#include "ZeroMaterial.h"
+#include "MathUtils.h"
 
 // Forward declarations
 class InputParameters;
@@ -501,7 +501,7 @@ MaterialPropertyInterface::getZeroMaterialProperty(const std::string & /*prop_na
 
   // set values for all qpoints to zero
   for (unsigned int qp = 0; qp < nqp; ++qp)
-    mooseSetToZero<T>(zero[qp]);
+    MathUtils::mooseSetToZero<T>(zero[qp]);
 
   return zero;
 }
