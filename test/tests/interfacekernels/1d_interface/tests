@@ -25,7 +25,6 @@
     design = 'InterfaceKernels/index.md'
     issues = '#12066'
     requirement = "The InterfaceKernel system shall use with interface material in 1D."
-                  "In this penalty implementation, jump is calculated by an interface material."
     prereq = 'interface_diffusion'
   [../]
   # This test ensures that shape functions for the NEIGHBORING variable are used in test_neighbor

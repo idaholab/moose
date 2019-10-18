@@ -49,7 +49,7 @@ InterfaceValueMaterial::InterfaceValueMaterial(const InputParameters & parameter
     _mp_master_name(getParam<std::string>("mat_prop_master")),
     _mp_slave_name(getParam<std::string>("mat_prop_slave")),
     _mp_master(getMaterialPropertyByName<Real>(_mp_master_name)),
-    _mp_slave(getNeighborMaterialProperty<Real>(_mp_slave_name)),
+    _mp_slave(getNeighborMaterialPropertyByName<Real>(_mp_slave_name)),
     _var_master(coupledValue("var_master")),
     _var_slave(coupledNeighborValue("var_slave")),
     _nl_var_master(coupledValue("nl_var_master")),
@@ -66,7 +66,7 @@ InterfaceValueMaterial::InterfaceValueMaterial(const InputParameters & parameter
         getMaterialPropertyOld<Real>(_mp_out_base_name + "_" + std::string(_interface_value_type))),
     _interface_value_2_old(getMaterialPropertyOld<Real>(_mp_var_out_base_name + "_" +
                                                         std::string(_interface_value_type))),
-    _jump(declareProperty<Real>(static_cast<std::string>(_interface_value_type) + "_jump"))
+    _jump(declareProperty<Real>(std::string(_interface_value_type) + "_jump"))
 {
 }
 

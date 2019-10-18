@@ -28,9 +28,8 @@
     issues = "#12066"
     design = "InterfaceKernels/index.md"
     requirement = "The InterfaceKernel system shall use with interface material in 2D."
-                  "In this penalty implementation, jump is calculated by an interface material."
   [../]
-  
+
   [./jacobian_test]
     type = AnalyzeJacobian
     input = coupled_value_coupled_flux.i
