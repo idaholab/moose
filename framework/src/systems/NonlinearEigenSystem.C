@@ -154,6 +154,8 @@ NonlinearEigenSystem::initialSetup()
   addEigenTagToMooseObjects(_nodal_bcs);
   // Scalar kernels
   addEigenTagToMooseObjects(_scalar_kernels);
+  // IntegratedBCs
+  addEigenTagToMooseObjects(_integrated_bcs);
 }
 
 template <typename T>
@@ -262,9 +264,6 @@ NonlinearEigenSystem::nonlinearSolver()
 void
 NonlinearEigenSystem::checkIntegrity()
 {
-  if (_integrated_bcs.hasActiveObjects())
-    mooseError("Can't set an inhomogeneous integrated boundary condition for eigenvalue problems.");
-
   if (_nodal_bcs.hasActiveObjects())
   {
     const auto & nodal_bcs = _nodal_bcs.getActiveObjects();
