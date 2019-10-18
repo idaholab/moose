@@ -412,10 +412,23 @@ Transient::takeStep(Real input_dt)
 
   _problem.onTimestepBegin();
 
-  _time_stepper->step();
-  _xfem_repeat_step = _picard_solve.XFEMRepeatStep();
+  auto steps = _problem.numGridSequences();
+  for (decltype(steps) step = 0; step <= steps; ++step)
+  {
+    _time_stepper->step();
+    _xfem_repeat_step = _picard_solve.XFEMRepeatStep();
 
-  _last_solve_converged = _time_stepper->converged();
+    _last_solve_converged = _time_stepper->converged();
+
+    if (!lastSolveConverged())
+    {
+      _console << "Aborting as solve did not converge\n";
+      break;
+    }
+
+    if (step != steps)
+      _problem.uniformRefine();
+  }
 
   if (!(_problem.haveXFEM() && _picard_solve.XFEMRepeatStep()))
   {
