@@ -30,8 +30,14 @@ validParams<LowerDBlockFromSidesetGenerator>()
   params.addParam<SubdomainID>("new_block_id", "The lower dimensional block id to create");
   params.addParam<SubdomainName>("new_block_name",
                                  "The lower dimensional block name to create (optional)");
-  params.addRequiredParam<std::vector<boundary_id_type>>(
-      "sidesets", "The sidesets from which to create the new block");
+  params.addParam<std::vector<boundary_id_type>>(
+      "sidesets",
+      "The sidesets from which to create the new block. Either sideset_names or sidesets must be "
+      "specified");
+  params.addParam<std::vector<BoundaryName>>(
+      "sideset_names",
+      "The sideset names from which to create the new block. Either sideset_names or sidesets must "
+      "be specified");
 
   params.addClassDescription("Adds lower dimensional elements on the specified sidesets.");
 
@@ -39,10 +45,12 @@ validParams<LowerDBlockFromSidesetGenerator>()
 }
 
 LowerDBlockFromSidesetGenerator::LowerDBlockFromSidesetGenerator(const InputParameters & parameters)
-  : MeshGenerator(parameters),
-    _input(getMesh("input")),
-    _sidesets(getParam<std::vector<boundary_id_type>>("sidesets"))
+  : MeshGenerator(parameters), _input(getMesh("input"))
 {
+  if (isParamValid("sidesets") && isParamValid("sideset_names"))
+    paramError("sideset_names", "Either sideset or sideset_names must be provided, not both");
+  if (!isParamValid("sidesets") && !isParamValid("sideset_names"))
+    paramError("sideset_names", "Either sideset or sideset_names must be provided, not both");
 }
 
 // Used to temporarily store information about which lower-dimensional
@@ -104,7 +112,21 @@ LowerDBlockFromSidesetGenerator::generate()
                 return a_elem_id < b_elem_id;
             });
 
-  std::set<boundary_id_type> sidesets(_sidesets.begin(), _sidesets.end());
+  std::set<boundary_id_type> sidesets;
+  if (isParamValid("sidesets"))
+  {
+    std::vector<boundary_id_type> sideset_ids = getParam<std::vector<boundary_id_type>>("sidesets");
+    for (auto & id : sideset_ids)
+      sidesets.emplace(id);
+  }
+  else
+  {
+    auto & boundary_info = mesh->get_boundary_info();
+    std::vector<BoundaryName> sideset_names = getParam<std::vector<BoundaryName>>("sideset_names");
+    for (auto & name : sideset_names)
+      sidesets.emplace(boundary_info.get_id_by_name(name));
+  }
+
   std::vector<ElemSideDouble> element_sides_on_boundary;
   for (const auto & triple : side_list)
     if (sidesets.count(std::get<2>(triple)))
