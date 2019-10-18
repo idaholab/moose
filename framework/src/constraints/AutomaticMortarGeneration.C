@@ -79,7 +79,7 @@ AutomaticMortarGeneration::buildNodeToElemMaps()
     mooseError("Must specify slave and master boundary ids before building node-to-elem maps.");
 
   // Construct nodes_to_slave_elem_map
-  for (const auto & slave_elem : as_range(mesh.elements_begin(), mesh.elements_end()))
+  for (const auto & slave_elem : as_range(mesh.active_elements_begin(), mesh.active_elements_end()))
   {
     // If this is not one of the lower-dimensional slave side elements, go on to the next one.
     if (!this->slave_boundary_subdomain_ids.count(slave_elem->subdomain_id()))
@@ -93,7 +93,8 @@ AutomaticMortarGeneration::buildNodeToElemMaps()
   }
 
   // Construct nodes_to_master_elem_map
-  for (const auto & master_elem : as_range(mesh.elements_begin(), mesh.elements_end()))
+  for (const auto & master_elem :
+       as_range(mesh.active_elements_begin(), mesh.active_elements_end()))
   {
     // If this is not one of the lower-dimensional master side elements, go on to the next one.
     if (!this->master_boundary_subdomain_ids.count(master_elem->subdomain_id()))
