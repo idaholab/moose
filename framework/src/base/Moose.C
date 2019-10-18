@@ -182,6 +182,7 @@ addActionTypes(Syntax & syntax)
   registerTask("dynamic_object_registration", false);
   registerTask("common_output", true);
   registerTask("setup_recover_file_base", true);
+  registerTask("recover_mesh_meta_data", true);
 
   registerTask("add_bounds_vectors", false);
   registerTask("add_periodic_bc", false);
@@ -257,6 +258,7 @@ addActionTypes(Syntax & syntax)
                            "(common_output)"
                            "(set_global_params)"
                            "(setup_recover_file_base)"
+                           "(recover_mesh_meta_data)"
                            "(setup_mesh)"
                            "(add_mesh_generator)"
                            "(execute_mesh_generators)"

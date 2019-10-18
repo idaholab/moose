@@ -481,13 +481,15 @@ public:
    * Return reference to the restatable data object
    * @return A const reference to the restatable data object
    */
-  const RestartableDataMaps & getRestartableData() { return _restartable_data; }
+  const RestartableDataMaps & getRestartableData() const { return _restartable_data; }
 
   /**
    * Return a reference to the recoverable data object
    * @return A const reference to the recoverable data
    */
-  const DataNames & getRecoverableData() { return _recoverable_data_names; }
+  const DataNames & getRecoverableData() const { return _recoverable_data_names; }
+
+  const DataNames & getMeshMetaData() const { return _mesh_meta_data_names; }
 
   /**
    * Create a Backup from the current App. A Backup contains all the data necessary to be able to

@@ -32,6 +32,8 @@ class RestartableDataIO
 public:
   RestartableDataIO(FEProblemBase & fe_problem);
 
+  RestartableDataIO(MooseApp & moose_app);
+
   virtual ~RestartableDataIO() = default;
 
   /**
@@ -74,7 +76,8 @@ private:
    */
   void deserializeRestartableData(const RestartableDataMap & restartable_data,
                                   std::istream & stream,
-                                  const DataNames & recoverable_data);
+                                  const DataNames & filter_names,
+                                  bool exclude = true);
 
   /**
    * Serializes the data for the Systems in FEProblemBase
@@ -86,8 +89,11 @@ private:
    */
   void deserializeSystems(std::istream & stream);
 
-  /// Reference to a FEProblemBase being restarted
-  FEProblemBase & _fe_problem;
+  /// A reference to the MooseApp object for retrieving restartable data stores and filters
+  MooseApp & _moose_app;
+
+  /// Pointer to the FEProblemBase when serializing/deserializing system data
+  FEProblemBase * _fe_problem;
 
   /// A vector of file handles, one per thread
   std::vector<std::shared_ptr<std::ifstream>> _in_file_handles;

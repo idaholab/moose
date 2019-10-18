@@ -438,6 +438,7 @@ MooseApp::MooseApp(InputParameters parameters)
     mooseError("_master_mesh should have been set when _master_displaced_mesh is set");
 
   _mesh_meta_data = &declareRestartableData<Parameters>("meta_data");
+  registerRestartableNameWithFilter("meta_data", Moose::RESTARTABLE_FILTER::MESH_META_DATA);
 }
 
 void

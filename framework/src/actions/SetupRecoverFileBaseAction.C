@@ -15,6 +15,7 @@
 #include "MooseObjectAction.h"
 
 registerMooseAction("MooseApp", SetupRecoverFileBaseAction, "setup_recover_file_base");
+registerMooseAction("MooseApp", SetupRecoverFileBaseAction, "recover_mesh_meta_data");
 
 template <>
 InputParameters
@@ -34,8 +35,20 @@ SetupRecoverFileBaseAction::act()
   if (!_app.isRecovering() || !_app.isUltimateMaster())
     return;
 
-  _app.setRecoverFileBase(MooseUtils::convertLatestCheckpoint(_app.getRecoverFileBase()));
+  if (_current_task == "setup_recover_file_base")
+  {
+    _app.setRecoverFileBase(MooseUtils::convertLatestCheckpoint(_app.getRecoverFileBase()));
 
-  // Set the recover file base in the App
-  _console << "\nUsing " << _app.getRecoverFileBase() << " for recovery.\n\n";
+    // Set the recover file base in the App
+    _console << "\nUsing " << _app.getRecoverFileBase() << " for recovery.\n\n";
+  }
+  else // recover_mesh_meta_data
+  {
+    RestartableDataIO restartable(_app);
+    auto recover_file_base = _app.getRecoverFileBase();
+
+    restartable.readRestartableDataHeader(recover_file_base + ".rd");
+
+    restartable.readRestartableData(_app.getRestartableData(), _app.getMeshMetaData());
+  }
 }
