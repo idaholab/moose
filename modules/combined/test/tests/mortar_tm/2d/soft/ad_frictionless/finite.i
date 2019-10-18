@@ -1,5 +1,5 @@
-E_block = 1e9
-E_plank = 1e9
+E_block = 1e7
+E_plank = 1e7
 elem = QUAD4
 order = FIRST
 name = 'first_finite'
@@ -109,6 +109,7 @@ name = 'first_finite'
     strain = FINITE
     generate_output = 'stress_xx stress_yy stress_zz vonmises_stress hydrostatic_stress strain_xx strain_yy strain_zz'
     block = 'plank block'
+    use_automatic_differentiation = true
   [../]
 []
 
@@ -151,25 +152,25 @@ name = 'first_finite'
 
 [BCs]
   [./left_x]
-    type = PresetBC
+    type = ADPresetBC
     variable = disp_x
     boundary = plank_left
     value = 0.0
   [../]
   [./left_y]
-    type = PresetBC
+    type = ADPresetBC
     variable = disp_y
     boundary = plank_bottom
     value = 0.0
   [../]
   [./right_x]
-    type = FunctionPresetBC
+    type = ADFunctionPresetBC
     variable = disp_x
     boundary = block_right
     function = '-0.04*sin(4*t)+0.02'
   [../]
   [./right_y]
-    type = FunctionPresetBC
+    type = ADFunctionPresetBC
     variable = disp_y
     boundary = block_right
     function = '-t'
@@ -190,7 +191,7 @@ name = 'first_finite'
     youngs_modulus = ${E_block}
   [../]
   [./stress]
-    type = ComputeFiniteStrainElasticStress
+    type = ADComputeFiniteStrainElasticStress
     block = 'plank block'
   [../]
 []

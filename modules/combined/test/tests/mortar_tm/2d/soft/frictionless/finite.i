@@ -6,7 +6,7 @@ name = 'first_finite'
 
 [Mesh]
   patch_size = 80
-  construct_node_list_from_side_list = true
+  patch_update_strategy = auto
   [./plank]
     type = GeneratedMeshGenerator
     dim = 2
@@ -91,10 +91,12 @@ name = 'first_finite'
   [./disp_x]
     order = ${order}
     block = 'plank block'
+    scaling = 1e-7
   [../]
   [./disp_y]
     order = ${order}
     block = 'plank block'
+    scaling = 1e-7
   [../]
   [./normal_lm]
     order = ${order}
@@ -157,7 +159,7 @@ name = 'first_finite'
   [./left_y]
     type = PresetBC
     variable = disp_y
-    boundary = plank_left
+    boundary = plank_bottom
     value = 0.0
   [../]
   [./right_x]
@@ -208,11 +210,11 @@ name = 'first_finite'
   petsc_options_value = 'lu       1e-5          NONZERO               1e-15'
   end_time = 15
   dt = 0.1
-  dtmin = 0.01
+  dtmin = 0.1
   l_max_its = 30
   nl_max_its = 20
-  line_search = 'none'
   timestep_tolerance = 1e-6
+  line_search = 'contact'
 []
 
 [Postprocessors]

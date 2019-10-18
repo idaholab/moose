@@ -1,12 +1,13 @@
-E_block = 1e9
-E_plank = 1e9
+E_block = 1e7
+E_plank = 1e7
 elem = QUAD4
 order = FIRST
-name = 'first_finite'
+name = 'first_small'
 
 [Mesh]
   patch_size = 80
   patch_update_strategy = auto
+  uniform_refine = 0
   [./plank]
     type = GeneratedMeshGenerator
     dim = 2
@@ -106,9 +107,9 @@ name = 'first_finite'
 
 [Modules/TensorMechanics/Master]
   [./fuel]
-    strain = FINITE
     generate_output = 'stress_xx stress_yy stress_zz vonmises_stress hydrostatic_stress strain_xx strain_yy strain_zz'
     block = 'plank block'
+    use_automatic_differentiation = true
   [../]
 []
 
@@ -122,8 +123,9 @@ name = 'first_finite'
     disp_y = disp_y
     ncp_function_type = min
     use_displaced_mesh = true
+    c = 1
   [../]
-  [normal_x]
+  [./normal_x]
     type = NormalMortarMechanicalContact
     master_boundary = plank_right
     slave_boundary = block_left
@@ -134,8 +136,8 @@ name = 'first_finite'
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
-  []
-  [normal_y]
+  [../]
+  [./normal_y]
     type = NormalMortarMechanicalContact
     master_boundary = plank_right
     slave_boundary = block_left
@@ -146,30 +148,30 @@ name = 'first_finite'
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false
-  []
+  [../]
 []
 
 [BCs]
   [./left_x]
-    type = PresetBC
+    type = ADPresetBC
     variable = disp_x
     boundary = plank_left
     value = 0.0
   [../]
   [./left_y]
-    type = PresetBC
+    type = ADPresetBC
     variable = disp_y
     boundary = plank_bottom
     value = 0.0
   [../]
   [./right_x]
-    type = FunctionPresetBC
+    type = ADFunctionPresetBC
     variable = disp_x
     boundary = block_right
     function = '-0.04*sin(4*t)+0.02'
   [../]
   [./right_y]
-    type = FunctionPresetBC
+    type = ADFunctionPresetBC
     variable = disp_y
     boundary = block_right
     function = '-t'
@@ -190,7 +192,7 @@ name = 'first_finite'
     youngs_modulus = ${E_block}
   [../]
   [./stress]
-    type = ComputeFiniteStrainElasticStress
+    type = ADComputeLinearElasticStress
     block = 'plank block'
   [../]
 []
