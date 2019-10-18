@@ -85,7 +85,7 @@ public:
 
   using MaterialBase::getZeroMaterialProperty;
 
-  virtual bool isBoundaryMaterial() const override { return _bnd; }
+  virtual bool isBoundaryMaterial() const override { return true; }
 
   virtual const std::set<unsigned int> & getMatPropDependencies() const override
   {
@@ -99,23 +99,18 @@ protected:
   virtual const QBase & qRule() const override { return *_qrule; }
 
   bool _bnd;
-  bool _neighbor;
   const MooseArray<Point> & _q_point;
   const QBase * const & _qrule;
   const MooseArray<Real> & _JxW;
 
+  /// Current element
   const Elem * const & _current_elem;
-
-  const SubdomainID & _current_subdomain_id;
-
+  /// Current neighbor element
+  const Elem * const & _neighbor_elem;
   /// current side of the current element
   const unsigned int & _current_side;
-
-  // virtual bool hasActiveInterfaceMaterials(BoundaryID bnd_id, THREAD_ID tid) override
-  // {
-  //   MaterialWarehouse<THREAD_ID>::checkThreadID(tid);
-  //   return true;
-  // }
+  /// current side of the neighbor element
+  const unsigned int & _neighbor_side;
 };
 
 template <typename T>

@@ -2589,9 +2589,6 @@ FEProblemBase::getMaterial(std::string name,
     case Moose::FACE_MATERIAL_DATA:
       name += "_face";
       break;
-    // case Moose::INTERFACE_MATERIAL_DATA:
-    //   name += "_interface";
-    //   break;
     default:
       break;
   }
