@@ -9,6 +9,13 @@
       input = 'small.i'
       csvdiff = 'first_small.csv'
     [../]
+    [./small_refined]
+      detail = 'using the small strain formulation.'
+      type = 'CSVDiff'
+      input = 'small.i'
+      cli_args = 'Mesh/uniform_refine=1 name=first_small_refined'
+      csvdiff = 'first_small_refined.csv'
+    [../]
     [./finite] # fails due to finite strain
       detail = 'using the finite strain formulation.'
       type = 'CSVDiff'

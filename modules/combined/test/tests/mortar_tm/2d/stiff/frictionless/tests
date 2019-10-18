@@ -20,7 +20,7 @@
       detail = 'using the small strain formulation with automatic scaling.'
       type = 'CSVDiff'
       input = 'small.i'
-      cli_args = 'order=FIRST elem=QUAD4 name=first_small_scaling Executioner/automatic_scaling=true Executioner/compute_scaling_once=false'
+      cli_args = 'name=first_small_scaling Executioner/automatic_scaling=true Executioner/compute_scaling_once=false'
       csvdiff = 'first_small_scaling.csv'
     [../]
   [../]
