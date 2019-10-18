@@ -114,19 +114,77 @@ VolumeJunction1PhaseUserObject::computeFluxesAndResiduals(const unsigned int & c
   dpJ_dUJ[VolumeJunction1Phase::RHOWV_INDEX] = dpJ_deJ * deJ_drhowV;
   dpJ_dUJ[VolumeJunction1Phase::RHOEV_INDEX] = dpJ_deJ * deJ_drhoEV;
 
+  std::vector<Real> dS_loss_dUJ(_n_scalar_eq, 0);
   if (c == 0)
   {
     const RealVectorValue velJ = rhouV_vec / _rhoV[0];
-    const Real s0J = _fp.s_from_v_e(vJ, eJ);
-    const Real TJ = _fp.T_from_v_e(vJ, eJ);
-    const Real hJ = _fp.h_from_p_T(pJ, TJ);
-    const Real h0J = hJ + 0.5 * velJ * velJ;
-    const Real p0J = _fp.p_from_h_s(h0J, s0J);
+
+    Real s0J, ds0J_dvJ, ds0J_deJ;
+    _fp.s_from_v_e(vJ, eJ, s0J, ds0J_dvJ, ds0J_deJ);
+    const Real ds0J_drhoV = ds0J_dvJ * dvJ_drhoV + ds0J_deJ * deJ_drhoV;
+    const Real ds0J_drhouV = ds0J_deJ * deJ_drhouV;
+    const Real ds0J_drhovV = ds0J_deJ * deJ_drhovV;
+    const Real ds0J_drhowV = ds0J_deJ * deJ_drhowV;
+    const Real ds0J_drhoEV = ds0J_deJ * deJ_drhoEV;
+
+    Real TJ, dTJ_dvJ, dTJ_deJ;
+    _fp.T_from_v_e(vJ, eJ, TJ, dTJ_dvJ, dTJ_deJ);
+    const Real dTJ_drhoV = dTJ_dvJ * dvJ_drhoV + dTJ_deJ * deJ_drhoV;
+    const Real dTJ_drhouV = dTJ_deJ * deJ_drhouV;
+    const Real dTJ_drhovV = dTJ_deJ * deJ_drhovV;
+    const Real dTJ_drhowV = dTJ_deJ * deJ_drhowV;
+    const Real dTJ_drhoEV = dTJ_deJ * deJ_drhoEV;
+
+    Real hJ, dhJ_dpJ, dhJ_dTJ;
+    _fp.h_from_p_T(pJ, TJ, hJ, dhJ_dpJ, dhJ_dTJ);
+    const Real dhJ_drhoV =
+        dhJ_dpJ * dpJ_dUJ[VolumeJunction1Phase::RHOV_INDEX] + dhJ_dTJ * dTJ_drhoV;
+    const Real dhJ_drhouV =
+        dhJ_dpJ * dpJ_dUJ[VolumeJunction1Phase::RHOUV_INDEX] + dhJ_dTJ * dTJ_drhouV;
+    const Real dhJ_drhovV =
+        dhJ_dpJ * dpJ_dUJ[VolumeJunction1Phase::RHOVV_INDEX] + dhJ_dTJ * dTJ_drhovV;
+    const Real dhJ_drhowV =
+        dhJ_dpJ * dpJ_dUJ[VolumeJunction1Phase::RHOWV_INDEX] + dhJ_dTJ * dTJ_drhowV;
+    const Real dhJ_drhoEV =
+        dhJ_dpJ * dpJ_dUJ[VolumeJunction1Phase::RHOEV_INDEX] + dhJ_dTJ * dTJ_drhoEV;
+
+    const Real velJ2 = velJ * velJ;
+    const Real dvelJ2_drhoV = -2. * velJ2 / _rhoV[0];
+    const Real dvelJ2_drhouV = 2. * _rhouV[0] / _rhoV[0] / _rhoV[0];
+    const Real dvelJ2_drhovV = 2. * _rhovV[0] / _rhoV[0] / _rhoV[0];
+    const Real dvelJ2_drhowV = 2. * _rhowV[0] / _rhoV[0] / _rhoV[0];
+
+    const Real h0J = hJ + 0.5 * velJ2;
+    const Real dh0J_drhoV = dhJ_drhoV + 0.5 * dvelJ2_drhoV;
+    const Real dh0J_drhouV = dhJ_drhouV + 0.5 * dvelJ2_drhouV;
+    const Real dh0J_drhovV = dhJ_drhovV + 0.5 * dvelJ2_drhovV;
+    const Real dh0J_drhowV = dhJ_drhowV + 0.5 * dvelJ2_drhowV;
+    const Real dh0J_drhoEV = dhJ_drhoEV;
+
+    Real p0J, dp0J_dh0J, dp0J_ds0J;
+    _fp.p_from_h_s(h0J, s0J, p0J, dp0J_dh0J, dp0J_ds0J);
+    const Real dp0J_drhoV = dp0J_dh0J * dh0J_drhoV + dp0J_ds0J * ds0J_drhoV;
+    const Real dp0J_drhouV = dp0J_dh0J * dh0J_drhouV + dp0J_ds0J * ds0J_drhouV;
+    const Real dp0J_drhovV = dp0J_dh0J * dh0J_drhovV + dp0J_ds0J * ds0J_drhovV;
+    const Real dp0J_drhowV = dp0J_dh0J * dh0J_drhowV + dp0J_ds0J * ds0J_drhowV;
+    const Real dp0J_drhoEV = dp0J_dh0J * dh0J_drhoEV + dp0J_ds0J * ds0J_drhoEV;
+
     const Real S_loss = _K * (p0J - pJ) * _A_ref;
 
     _residual[VolumeJunction1Phase::RHOUV_INDEX] += ni(0) * S_loss;
     _residual[VolumeJunction1Phase::RHOVV_INDEX] += ni(1) * S_loss;
     _residual[VolumeJunction1Phase::RHOWV_INDEX] += ni(2) * S_loss;
+
+    dS_loss_dUJ[VolumeJunction1Phase::RHOV_INDEX] =
+        _K * (dp0J_drhoV - dpJ_dUJ[VolumeJunction1Phase::RHOV_INDEX]) * _A_ref;
+    dS_loss_dUJ[VolumeJunction1Phase::RHOUV_INDEX] =
+        _K * (dp0J_drhouV - dpJ_dUJ[VolumeJunction1Phase::RHOUV_INDEX]) * _A_ref;
+    dS_loss_dUJ[VolumeJunction1Phase::RHOVV_INDEX] =
+        _K * (dp0J_drhovV - dpJ_dUJ[VolumeJunction1Phase::RHOVV_INDEX]) * _A_ref;
+    dS_loss_dUJ[VolumeJunction1Phase::RHOWV_INDEX] =
+        _K * (dp0J_drhowV - dpJ_dUJ[VolumeJunction1Phase::RHOWV_INDEX]) * _A_ref;
+    dS_loss_dUJ[VolumeJunction1Phase::RHOEV_INDEX] =
+        _K * (dp0J_drhoEV - dpJ_dUJ[VolumeJunction1Phase::RHOEV_INDEX]) * _A_ref;
   }
 
   _residual[VolumeJunction1Phase::RHOV_INDEX] -= din * _flux[c][THM3Eqn::CONS_VAR_RHOA];
@@ -175,6 +233,18 @@ VolumeJunction1PhaseUserObject::computeFluxesAndResiduals(const unsigned int & c
         dpJ_dUJ[i] * ni(2) * _A[0];
     _residual_jacobian_scalar_vars[VolumeJunction1Phase::RHOEV_INDEX](0, i) -=
         din * _flux_jacobian_scalar_vars[c](THM3Eqn::CONS_VAR_RHOEA, i);
+  }
+  if (c == 0)
+  {
+    for (unsigned int i = 0; i < _n_scalar_eq; i++)
+    {
+      _residual_jacobian_scalar_vars[VolumeJunction1Phase::RHOUV_INDEX](0, i) +=
+          ni(0) * dS_loss_dUJ[i];
+      _residual_jacobian_scalar_vars[VolumeJunction1Phase::RHOVV_INDEX](0, i) +=
+          ni(1) * dS_loss_dUJ[i];
+      _residual_jacobian_scalar_vars[VolumeJunction1Phase::RHOWV_INDEX](0, i) +=
+          ni(2) * dS_loss_dUJ[i];
+    }
   }
 
   // Compute Jacobian w.r.t. flow channel solution function

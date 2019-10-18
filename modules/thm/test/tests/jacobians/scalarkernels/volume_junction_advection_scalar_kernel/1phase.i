@@ -5,7 +5,7 @@
   scalar_variable_values = '1.2 0.2 0.5 0.8 2.9'
   aux_variable_names = 'A_elem A_linear'
   aux_variable_values = '1.1 1.2'
-  snes_test_err = 1e-6
+  snes_test_err = 1e-7
   generate_mesh = false
 []
 
@@ -55,7 +55,7 @@
     fp = fp
     boundary = '1 3'
     normals = '-1 -1'
-    K = 0
+    K = 2
     A_ref = 1.1
     numerical_flux_names = 'numerical_flux1 numerical_flux2'
     execute_on = 'initial linear nonlinear'
