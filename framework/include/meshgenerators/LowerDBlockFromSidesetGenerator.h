@@ -29,4 +29,6 @@ public:
 
 protected:
   std::unique_ptr<MeshBase> & _input;
+
+  const std::vector<BoundaryName> _sideset_names;
 };
