@@ -49,11 +49,10 @@ NestedBoundingBoxIC::NestedBoundingBoxIC(const InputParameters & parameters)
     _nbox(_c1.size()),
     _int_width(getParam<Real>("int_width")),
     _dim(_fe_problem.mesh().dimension()),
-    _inside(sizeVector_def_nested::sizeVector(getParam<std::vector<Real>>("inside"), _nbox)),
+    _inside(getParam<std::vector<Real>>("inside")),
     _outside(getParam<Real>("outside"))
 
-Real
-NestedBoundingBoxIC::value(const Point & p)
+        Real NestedBoundingBoxIC::value(const Point & p)
 {
   Real value = _outside;
 
