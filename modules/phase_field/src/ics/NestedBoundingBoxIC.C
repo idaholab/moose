@@ -43,7 +43,7 @@ validParams<NestedBoundingBoxIC>()
 }
 
 NestedBoundingBoxIC::NestedBoundingBoxIC(const InputParameters & parameters)
-  : MultiBoundingBoxIC(InputParameters),
+  : MultiBoundingBoxIC(parameters),
     _c1(getParam<std::vector<Point>>("smaller_coordinate_corners")),
     _c2(getParam<std::vector<Point>>("larger_coordinate_corners")),
     _nbox(_c1.size()),
