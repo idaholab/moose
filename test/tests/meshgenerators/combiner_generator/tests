@@ -41,7 +41,7 @@
     [missing_pos]
       type = 'RunException'
       input = 'combiner_generator.i'
-      cli_args = 'MeshGenerators/cmbn/positions=""'
+      cli_args = 'Mesh/cmbn/positions=""'
       expect_err = 'If only one input mesh is given'
       detail = 'but only one input is supplied with no positions, or'
     []
@@ -49,7 +49,7 @@
     [mismatch_pos]
       type = 'RunException'
       input = 'combiner_multi_input.i'
-      cli_args = 'MeshGenerators/cmbn/positions="0 0 0"'
+      cli_args = 'Mesh/cmbn/positions="0 0 0"'
       expect_err = 'If more than one input mesh'
       detail = 'the number of meshes and the number of positions is mismatched.'
     []

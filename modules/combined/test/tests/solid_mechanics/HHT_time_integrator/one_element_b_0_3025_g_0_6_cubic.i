@@ -7,12 +7,6 @@
 #  displacements = 'disp_x disp_y disp_z'
 []
 
-#[Problem]
-#  type = ReferenceResidualProblem
-#  solution_variables = 'disp_x disp_y disp_z'
-#  reference_residual_variables = 'saved_x saved_y saved_z'
-#[]
-
 [Variables]
   [./disp_x]
   [../]

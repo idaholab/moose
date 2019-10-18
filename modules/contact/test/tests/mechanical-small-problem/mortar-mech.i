@@ -1,18 +1,20 @@
 [Mesh]
-  file = mesh.e
   displacements = 'disp_x disp_y'
-[]
-
-[MeshModifiers]
+  [file]
+    type = FileMeshGenerator
+    file = mesh.e
+  []
   [./master]
-    type = LowerDBlockFromSideset
+    type = LowerDBlockFromSidesetGenerator
     sidesets = '2'
     new_block_id = '20'
+    input = file
   [../]
   [./slave]
-    type = LowerDBlockFromSideset
+    type = LowerDBlockFromSidesetGenerator
     sidesets = '1'
     new_block_id = '10'
+    input = master
   [../]
 []
 

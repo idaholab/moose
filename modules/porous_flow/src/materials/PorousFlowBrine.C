@@ -143,7 +143,8 @@ PorousFlowBrine::PorousFlowBrine(const InputParameters & parameters)
     if (parameters.isParamSetByUser("water_fp"))
       params.set<UserObjectName>("water_fp") = _water_fp->name();
 
-    _fe_problem.addUserObject(class_name, brine_name, params);
+    if (_tid == 0)
+      _fe_problem.addUserObject(class_name, brine_name, params);
   }
   _brine_fp = &_fe_problem.getUserObjectTempl<BrineFluidProperties>(brine_name);
 }

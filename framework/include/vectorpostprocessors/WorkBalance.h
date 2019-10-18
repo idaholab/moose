@@ -37,6 +37,7 @@ public:
   virtual void initialize() override;
   virtual void execute() override;
   virtual void finalize() override;
+  void gather(int balance_id, VectorPostprocessorValue & vppv);
 
 protected:
   /// The system to count DoFs from
@@ -60,12 +61,10 @@ protected:
   Real _local_partition_hardware_id_surface_area;
 
   VectorPostprocessorValue & _pid;
-  VectorPostprocessorValue & _num_elems;
-  VectorPostprocessorValue & _num_nodes;
-  VectorPostprocessorValue & _num_dofs;
-  VectorPostprocessorValue & _num_partition_sides;
-  VectorPostprocessorValue & _partition_surface_area;
-  VectorPostprocessorValue & _num_partition_hardware_id_sides;
-  VectorPostprocessorValue & _partition_hardware_id_surface_area;
-};
 
+  /// The chosen balance metrics to compute
+  MultiMooseEnum _balances;
+
+  /// The VPP vectors that will hold the balance metrics
+  std::map<std::string, VectorPostprocessorValue *> _balance_vectors;
+};

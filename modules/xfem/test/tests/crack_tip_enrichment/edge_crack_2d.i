@@ -27,33 +27,35 @@
 []
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 5
-  ny = 9
-  xmin = 0.0
-  xmax = 1.0
-  ymin = 0.0
-  ymax = 2.0
-  elem_type = QUAD4
-[]
-
-[MeshModifiers]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 5
+    ny = 9
+    xmin = 0.0
+    xmax = 1.0
+    ymin = 0.0
+    ymax = 2.0
+    elem_type = QUAD4
+  []
   [./all_node]
-    type = BoundingBoxNodeSet
+    type = BoundingBoxNodeSetGenerator
     new_boundary = 'all'
     top_right = '1 2 0'
     bottom_left = '0 0 0'
+    input = gen
   [../]
   [./right_bottom_node]
-    type = AddExtraNodeset
+    type = ExtraNodesetGenerator
     new_boundary = 'right_bottom_node'
     coord = '1.0 0.0'
+    input = all_node
   [../]
   [./right_top_node]
-    type = AddExtraNodeset
+    type = ExtraNodesetGenerator
     new_boundary = 'right_top_node'
     coord = '1.0 2.0'
+    input = right_bottom_node
   [../]
 []
 

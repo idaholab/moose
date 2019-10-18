@@ -46,9 +46,7 @@
 - /Bounds/AddKernelAction
 - /Constraints/AddConstraintAction
 - /Constraints/CoupledTiedValueConstraint
-- /Constraints/EqualGradientConstraint
 - /Constraints/EqualValueBoundaryConstraint
-- /Constraints/EqualValueConstraint
 - /Constraints/TiedValueConstraint
 - /Controls/AddControlAction
 - /DGKernels
@@ -202,7 +200,6 @@
 - /ScalarKernels/CoupledODETimeDerivative
 - /ScalarKernels/NodalEqualValueConstraint
 - /ScalarKernels/ODETimeDerivative
-- /ScalarKernels/ParsedODEKernel
 - /UserObjects/AddUserObjectAction
 - /UserObjects/ElementIntegralVariableUserObject
 - /UserObjects/LayeredAverage

@@ -1,0 +1,35 @@
+[Tests]
+  design = '/ExplicitSSPRungeKutta.md'
+  issues = '#11855'
+
+  [all]
+    requirement = "The system shall include the strong-stability-preserving Runge-Kutta method of"
+
+    [first_order]
+      type = CSVDiff
+      input = 'explicit_ssp_runge_kutta.i'
+      csvdiff = 'first_order.csv'
+      rel_err = 1e-12
+
+      detail = "1st order"
+    []
+    [second_order]
+      type = CSVDiff
+      input = 'explicit_ssp_runge_kutta.i'
+      cli_args = 'Executioner/TimeIntegrator/order=2 Outputs/file_base=second_order'
+      csvdiff = 'second_order.csv'
+      rel_err = 1e-12
+
+      detail = "2nd order"
+    []
+    [third_order]
+      type = CSVDiff
+      input = 'explicit_ssp_runge_kutta.i'
+      cli_args = 'Executioner/TimeIntegrator/order=3 Outputs/file_base=third_order'
+      csvdiff = 'third_order.csv'
+      rel_err = 1e-12
+
+      detail = "3rd order"
+    []
+  []
+[]

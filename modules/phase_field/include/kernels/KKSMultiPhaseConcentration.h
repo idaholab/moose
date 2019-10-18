@@ -9,7 +9,8 @@
 
 #pragma once
 
-#include "Kernel.h"
+#include "KernelValue.h"
+#include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
@@ -31,20 +32,22 @@ InputParameters validParams<KKSMultiPhaseConcentration>();
  *
  * \see KKSPhaseChemicalPotential
  */
-class KKSMultiPhaseConcentration : public DerivativeMaterialInterface<Kernel>
+class KKSMultiPhaseConcentration
+  : public DerivativeMaterialInterface<JvarMapKernelInterface<KernelValue>>
 {
 public:
   KKSMultiPhaseConcentration(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
+  virtual Real precomputeQpResidual();
+  virtual Real precomputeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
 private:
   const unsigned int _num_j;
-  std::vector<const VariableValue *> _cjs;
-  std::vector<unsigned int> _cjs_var;
+  std::vector<const VariableValue *> _cj;
+  const JvarMap & _cj_map;
+
   /// Position of the nonlinear variable in the list of cj's
   int _k;
 
@@ -57,9 +60,8 @@ private:
 
   /// Order parameters for each phase \f$ \eta_j \f$
   std::vector<VariableName> _eta_names;
-  std::vector<unsigned int> _eta_vars;
+  const JvarMap & _eta_map;
 
   /// Derivative of the switching function \f$ \frac d{d\eta} h(\eta) \f$
   std::vector<std::vector<const MaterialProperty<Real> *>> _prop_dhjdetai;
 };
-

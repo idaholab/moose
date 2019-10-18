@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./left]
     type = GeneratedMeshGenerator
     dim = 2
@@ -24,10 +24,6 @@
     type = MeshCollectionGenerator
     inputs = 'left right'
   [../]
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Outputs]

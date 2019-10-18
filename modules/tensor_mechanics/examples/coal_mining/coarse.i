@@ -46,67 +46,72 @@
 # WeakPlane compressive strength = 100 MPa softening to 1 MPa at strain = 1
 #
 [Mesh]
-  type = FileMesh
-  file = mesh/coarse.e
+  [file]
+    type = FileMeshGenerator
+    file = mesh/coarse.e
+  []
+  [./xmin]
+    input = file
+    type = SideSetsAroundSubdomainGenerator
+    block = '2 3 4 5 6 7 8 9 10 11 12 13 14 15 16'
+    new_boundary = xmin
+    normal = '-1 0 0'
+  [../]
+  [./xmax]
+    input = xmin
+    type = SideSetsAroundSubdomainGenerator
+    block = '2 3 4 5 6 7 8 9 10 11 12 13 14 15 16'
+    new_boundary = xmax
+    normal = '1 0 0'
+  [../]
+  [./ymin]
+    input = xmax
+    type = SideSetsAroundSubdomainGenerator
+    block = '2 3 4 5 6 7 8 9 10 11 12 13 14 15 16'
+    new_boundary = ymin
+    normal = '0 -1 0'
+  [../]
+  [./ymax]
+    input = ymin
+    type = SideSetsAroundSubdomainGenerator
+    block = '2 3 4 5 6 7 8 9 10 11 12 13 14 15 16'
+    new_boundary = ymax
+    normal = '0 1 0'
+  [../]
+  [./zmax]
+    input = ymax
+    type = SideSetsAroundSubdomainGenerator
+    block = 16
+    new_boundary = zmax
+    normal = '0 0 1'
+  [../]
+  [./zmin]
+    input = zmax
+    type = SideSetsAroundSubdomainGenerator
+    block = 2
+    new_boundary = zmin
+    normal = '0 0 -1'
+  [../]
+  [./excav]
+    type = SubdomainBoundingBoxGenerator
+    input = zmin
+    block_id = 1
+    bottom_left = '0 0 -400'
+    top_right = '150 1000 -397'
+  [../]
+  [./roof]
+    type = SideSetsAroundSubdomainGenerator
+    block = 1
+    input = excav
+    new_boundary = roof
+    normal = '0 0 1'
+  [../]
 []
 
 [GlobalParams]
   perform_finite_strain_rotations = false
   displacements = 'disp_x disp_y disp_z'
   Cosserat_rotations = 'wc_x wc_y wc_z'
-[]
-
-[MeshModifiers]
-  [./xmin]
-    type = SideSetsAroundSubdomain
-    block = '2 3 4 5 6 7 8 9 10 11 12 13 14 15 16'
-    new_boundary = xmin
-    normal = '-1 0 0'
-  [../]
-  [./xmax]
-    type = SideSetsAroundSubdomain
-    block = '2 3 4 5 6 7 8 9 10 11 12 13 14 15 16'
-    new_boundary = xmax
-    normal = '1 0 0'
-  [../]
-  [./ymin]
-    type = SideSetsAroundSubdomain
-    block = '2 3 4 5 6 7 8 9 10 11 12 13 14 15 16'
-    new_boundary = ymin
-    normal = '0 -1 0'
-  [../]
-  [./ymax]
-    type = SideSetsAroundSubdomain
-    block = '2 3 4 5 6 7 8 9 10 11 12 13 14 15 16'
-    new_boundary = ymax
-    normal = '0 1 0'
-  [../]
-  [./zmax]
-    type = SideSetsAroundSubdomain
-    block = 16
-    new_boundary = zmax
-    normal = '0 0 1'
-  [../]
-  [./zmin]
-    type = SideSetsAroundSubdomain
-    block = 2
-    new_boundary = zmin
-    normal = '0 0 -1'
-  [../]
-  [./excav]
-    type = SubdomainBoundingBox
-    depends_on = 'xmin xmax ymin ymax zmin zmax'
-    block_id = 1
-    bottom_left = '0 0 -400'
-    top_right = '150 1000 -397'
-  [../]
-  [./roof]
-    type = SideSetsAroundSubdomain
-    block = 1
-    depends_on = excav
-    new_boundary = roof
-    normal = '0 0 1'
-  [../]
 []
 
 [Variables]

@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./rmg]
     type = RinglebMeshGenerator
     kmin = 0.7
@@ -9,10 +9,6 @@
     gamma = 1.4
     triangles = true
   []
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Outputs]

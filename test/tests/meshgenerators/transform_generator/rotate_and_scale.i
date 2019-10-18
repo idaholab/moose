@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./fmg]
     type = FileMeshGenerator
     file = cylinder.e
@@ -17,10 +17,6 @@
     transform = SCALE
     vector_value ='1e2 1e2 1e2'
   []
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
  [Variables]

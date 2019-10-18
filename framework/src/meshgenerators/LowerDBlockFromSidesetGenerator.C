@@ -27,8 +27,7 @@ validParams<LowerDBlockFromSidesetGenerator>()
   InputParameters params = validParams<MeshGenerator>();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
-  params.addRequiredParam<subdomain_id_type>("new_block_id",
-                                             "The lower dimensional block id to create");
+  params.addParam<SubdomainID>("new_block_id", "The lower dimensional block id to create");
   params.addParam<SubdomainName>("new_block_name",
                                  "The lower dimensional block name to create (optional)");
   params.addRequiredParam<std::vector<boundary_id_type>>(
@@ -42,7 +41,6 @@ validParams<LowerDBlockFromSidesetGenerator>()
 LowerDBlockFromSidesetGenerator::LowerDBlockFromSidesetGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input")),
-    _new_block_id(getParam<subdomain_id_type>("new_block_id")),
     _sidesets(getParam<std::vector<boundary_id_type>>("sidesets"))
 {
 }
@@ -61,6 +59,26 @@ std::unique_ptr<MeshBase>
 LowerDBlockFromSidesetGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
+
+  // Generate a new block id if one isn't supplied.
+  SubdomainID new_block_id;
+  if (isParamValid("new_block_id"))
+    new_block_id = getParam<SubdomainID>("new_block_id");
+  else
+  {
+    std::set<SubdomainID> preexisting_subdomain_ids;
+    mesh->subdomain_ids(preexisting_subdomain_ids);
+    if (preexisting_subdomain_ids.empty())
+      new_block_id = 0;
+    else
+    {
+      const auto highest_subdomain_id =
+          *std::max_element(preexisting_subdomain_ids.begin(), preexisting_subdomain_ids.end());
+      mooseAssert(highest_subdomain_id < std::numeric_limits<SubdomainID>::max(),
+                  "A SubdomainID with max possible value was found");
+      new_block_id = highest_subdomain_id + 1;
+    }
+  }
 
   bool distributed = false;
   if (typeid(mesh).name() == typeid(std::unique_ptr<DistributedMesh>).name())
@@ -113,7 +131,7 @@ LowerDBlockFromSidesetGenerator::generate()
     side_elem->processor_id() = elem->processor_id();
 
     // Add subdomain ID
-    side_elem->subdomain_id() = _new_block_id;
+    side_elem->subdomain_id() = new_block_id;
 
     // Also assign the side's interior parent, so it is always
     // easy to figure out the Elem we came from.
@@ -129,7 +147,7 @@ LowerDBlockFromSidesetGenerator::generate()
 
   // Assign block name, if provided
   if (isParamValid("new_block_name"))
-    mesh->subdomain_name(_new_block_id) = getParam<SubdomainName>("new_block_name");
+    mesh->subdomain_name(new_block_id) = getParam<SubdomainName>("new_block_name");
 
   return mesh;
 }

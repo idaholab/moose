@@ -1,19 +1,20 @@
 [Mesh]
-  file = nodal_normals_test_offset_nonmatching_gap.e
-  # block 1: left
-  # block 2: right
-
   displacements = 'disp_x disp_y'
-[]
-
-[MeshModifiers]
+  [file]
+    type = FileMeshGenerator
+    file = nodal_normals_test_offset_nonmatching_gap.e
+    # block 1: left
+    # block 2: right
+  []
   [./master]
-    type = LowerDBlockFromSideset
+    input = file
+    type = LowerDBlockFromSidesetGenerator
     sidesets = '2'
     new_block_id = '20'
   [../]
   [./slave]
-    type = LowerDBlockFromSideset
+    input = master
+    type = LowerDBlockFromSidesetGenerator
     sidesets = '1'
     new_block_id = '10'
   [../]

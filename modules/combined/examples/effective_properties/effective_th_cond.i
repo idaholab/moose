@@ -3,17 +3,17 @@
 # the direct method that applies a temperature to one side and a heat flux to the other,
 # and the AEH method.
 [Mesh] #Sets mesh size to 10 microns by 10 microns
-  type = GeneratedMesh
-  dim = 2
-  nx = 100
-  ny = 100
-  xmax = 10
-  ymax = 10
-[]
-
-[MeshModifiers] #Adds a new node set
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 100
+    ny = 100
+    xmax = 10
+    ymax = 10
+  []
   [./new_nodeset]
-    type = AddExtraNodeset
+    input = gen
+    type = ExtraNodesetGenerator
     coord = '5 5'
     new_boundary = 100
   [../]

@@ -1,13 +1,13 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 2
-  ny = 2
-[]
-
-[MeshModifiers]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 2
+    ny = 2
+  []
   [./subdomain]
-    type = AssignElementSubdomainID
+    input = gen
+    type = ElementSubdomainIDGenerator
     element_ids   = '0 1 2 3'
     subdomain_ids = '1 2 3 4'
   [../]

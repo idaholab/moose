@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./cmg]
     type = CartesianMeshGenerator
     dim = 1
@@ -6,8 +6,4 @@
     ix = '2 1 1'
     subdomain_id = '0 2 1'
   [../]
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []

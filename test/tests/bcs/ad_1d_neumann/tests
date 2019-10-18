@@ -1,0 +1,27 @@
+[Tests]
+  issues = '#1654'
+  design = 'bcs/ADNeumannBC.md'
+  [./ad]
+    requirement = 'The system shall support Neumann type boundary conditions using automatic differentiation for a 1D problem'
+    [./test]
+      type = 'Exodiff'
+      input = '1d_neumann.i'
+      exodiff = '1d_neumann_out.e'
+      detail = 'using a generated mesh.'
+    [../]
+    [./jac]
+      type = 'PetscJacobianTester'
+      input = '1d_neumann.i'
+      run_sim = True
+      ratio_tol = 1e-7
+      difference_tol = 1e-6
+      detail = 'and shall be able to produce the exact Jacobian'
+    [../]
+    [./from_cubit]
+      type = 'Exodiff'
+      input = 'from_cubit.i'
+      exodiff = 'from_cubit_out.e'
+      detail = 'using an imported mesh.'
+    [../]
+  [../]
+[]

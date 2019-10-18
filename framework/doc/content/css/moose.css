@@ -306,6 +306,10 @@ ul {
   margin: 0;
 }
 
+.modal-content.container.moose-search-modal-content{
+    padding:0;
+}
+
 /* NAME/HOME link */
 .moose-logo{
     margin-right:30px;
@@ -805,9 +809,6 @@ li p {
   display:table-row;
 }
 */
-.card .card-title{
-    margin-left: 6px;
-}
 
 .moose-error,
 .moose-katex-error{

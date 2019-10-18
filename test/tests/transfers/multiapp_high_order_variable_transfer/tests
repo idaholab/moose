@@ -67,4 +67,11 @@
     requirement = "The system shall support user object transfer with the first order elemental variable"
   []
 
+  [L2_Lagrange_conservative]
+    type = 'Exodiff'
+    input = 'master_L2_Lagrange_conservative.i'
+    exodiff = 'master_L2_Lagrange_conservative_out.e master_L2_Lagrange_conservative_out_sub0.e'
+    requirement = "The system shall support conservative transfer with L2 nonlinear variable"
+  []
+
 []

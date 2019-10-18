@@ -32,6 +32,7 @@
     type = PMassKernel
     extra_vector_tags = 'eigen'
     variable = u
+    coefficient = -1.0
     p = 3
   [../]
 []

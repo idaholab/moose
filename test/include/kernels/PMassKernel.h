@@ -30,6 +30,8 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
+private:
   Real _p;
+  /// input parameter multiplied by the  kernel
+  Real _coef;
 };
-

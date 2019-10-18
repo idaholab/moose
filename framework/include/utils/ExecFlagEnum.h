@@ -27,6 +27,7 @@ public:
   ExecFlagEnum();
   ExecFlagEnum(const ExecFlagEnum & other);
   ExecFlagEnum(const MultiMooseEnum & other);
+  ExecFlagEnum & operator=(const ExecFlagEnum & other) = default;
 
   ///@{
   /**
@@ -94,4 +95,3 @@ ExecFlagEnum::removeAvailableFlags(const ExecFlagType & flag, Args... flags)
   removeAvailableFlags(flag);
   removeAvailableFlags(flags...);
 }
-

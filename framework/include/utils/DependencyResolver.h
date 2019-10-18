@@ -18,6 +18,8 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <list>
+#include <unordered_set>
 #include <algorithm>
 #include <sstream>
 #include <exception>
@@ -119,9 +121,14 @@ public:
   bool dependsOn(const std::vector<T> & keys, const T & value);
 
   /**
-   * Returns a vector of values that the given key depends on
+   * Returns a list of all values that a given key depends on
    */
-  const std::vector<T> & getValues(const T & key);
+  const std::list<T> getAncestors(const T & key);
+
+  /**
+   * Returns the number of unique items stored in the dependency resolver.
+   */
+  std::size_t size() const;
 
   bool operator()(const T & a, const T & b);
 
@@ -154,9 +161,6 @@ private:
 
   /// The sorted vector (if requested)
   std::vector<T> _ordered_items_vector;
-
-  /// List of values that a given key depends upon
-  std::vector<T> _values_vector;
 };
 
 template <typename T>
@@ -297,7 +301,6 @@ DependencyResolver<T>::clear()
   _ordering_vector.clear();
   _ordered_items.clear();
   _ordered_items_vector.clear();
-  _values_vector.clear();
 }
 
 template <typename T>
@@ -490,17 +493,38 @@ DependencyResolver<T>::dependsOn(const std::vector<T> & keys, const T & value)
 }
 
 template <typename T>
-const std::vector<T> &
-DependencyResolver<T>::getValues(const T & key)
+const std::list<T>
+DependencyResolver<T>::getAncestors(const T & key)
 {
-  _values_vector.clear();
+  std::list<T> ancestors = {key};
+  std::unordered_set<T> unique_values;
 
-  auto ret = _depends.equal_range(key);
+  auto it = ancestors.begin();
+  while (it != ancestors.end())
+  {
+    auto ret = _depends.equal_range(*it);
 
-  for (auto it = ret.first; it != ret.second; ++it)
-    _values_vector.push_back(it->second);
+    for (auto it_range = ret.first; it_range != ret.second; ++it_range)
+    {
+      auto & item = it_range->second;
+      if (unique_values.find(item) == unique_values.end())
+      {
+        ancestors.push_back(item);
+        unique_values.insert(item);
+      }
+    }
 
-  return _values_vector;
+    ++it;
+  }
+
+  return ancestors;
+}
+
+template <typename T>
+std::size_t
+DependencyResolver<T>::size() const
+{
+  return _ordering_vector.size();
 }
 
 template <typename T>
@@ -532,4 +556,3 @@ DependencyResolver<T>::operator()(const T & a, const T & b)
      */
     return a_it < b_it;
 }
-

@@ -1,20 +1,22 @@
 [Mesh]
-  file = 2blk-gap.e
   displacements = 'disp_x disp_y'
-[]
-
-[MeshModifiers]
+  [file]
+    type = FileMeshGenerator
+    file = 2blk-gap.e
+  []
   [slave]
-    type = LowerDBlockFromSideset
+    type = LowerDBlockFromSidesetGenerator
     sidesets = '101'
     new_block_id = 10001
     new_block_name = 'slave_lower'
+    input = file
   []
   [master]
-    type = LowerDBlockFromSideset
+    type = LowerDBlockFromSidesetGenerator
     sidesets = '100'
     new_block_id = 10000
     new_block_name = 'master_lower'
+    input = slave
   []
 []
 

@@ -56,6 +56,9 @@ validParams<TensorMechanicsAction>()
   params.addParam<std::string>(
       "strain_base_name",
       "The base name used for the strain. If not provided, it will be set equal to base_name");
+  params.addParam<std::vector<TagName>>(
+      "extra_vector_tags",
+      "The tag names for extra vectors that residual data should be saved into");
 
   return params;
 }
@@ -328,6 +331,9 @@ TensorMechanicsAction::act()
         params.set<std::vector<AuxVariableName>>("save_in") = {_save_in[i]};
       if (_diag_save_in.size() == _ndisp)
         params.set<std::vector<AuxVariableName>>("diag_save_in") = {_diag_save_in[i]};
+      if (isParamValid("extra_vector_tags"))
+        params.set<std::vector<TagName>>("extra_vector_tags") =
+            getParam<std::vector<TagName>>("extra_vector_tags");
 
       if (_use_ad)
       {

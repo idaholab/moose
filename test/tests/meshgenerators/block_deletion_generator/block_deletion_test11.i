@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./fmg]
     type = FileMeshGenerator
     file = pyramid.e
@@ -72,10 +72,6 @@
     block_id = 6
     input = 'sbb6'
   [../]
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Variables]

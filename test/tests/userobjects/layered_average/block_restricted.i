@@ -1,10 +1,18 @@
 [Mesh]
-  type = GeneratedMesh
-  nx = 10
-  ny = 10
-  dim = 2
+  [gen]
+    type = GeneratedMeshGenerator
+    nx = 10
+    ny = 10
+    dim = 2
+  []
+  [middle]
+    input = gen
+    type = SubdomainBoundingBoxGenerator
+    block_id = 1
+    top_right = '0.6 0.6 0'
+    bottom_left = '0.4 0.4 0'
+  []
 []
-
 [Variables]
   [u]
   []
@@ -86,13 +94,4 @@
 
 [Outputs]
   exodus = true
-[]
-
-[MeshModifiers]
-  [middle]
-    type = SubdomainBoundingBox
-    block_id = 1
-    top_right = '0.6 0.6 0'
-    bottom_left = '0.4 0.4 0'
-  []
 []

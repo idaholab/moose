@@ -22,7 +22,16 @@
 #include "libmesh/hilbert_sfc_partitioner.h"
 #include "libmesh/morton_sfc_partitioner.h"
 #include "libmesh/enum_elem_type.h"
+
+// libmesh elem types
+#include "libmesh/edge_edge2.h"
+#include "libmesh/edge_edge3.h"
+#include "libmesh/edge_edge4.h"
+#include "libmesh/face_tri3.h"
+#include "libmesh/face_tri6.h"
 #include "libmesh/face_quad4.h"
+#include "libmesh/face_quad8.h"
+#include "libmesh/face_quad9.h"
 
 #include <set>
 #include <limits>
@@ -75,8 +84,7 @@ PatchSidesetGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
-  if (_mesh->isDistributedMesh())
-    mooseWarning("Distributed mesh may not work yet, because communication is not done.");
+  _mesh->errorIfDistributedMesh("PatchSidesetGenerator");
 
   // Get a reference to our BoundaryInfo object for later use
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
@@ -228,8 +236,22 @@ PatchSidesetGenerator::boundaryElementHelper(MeshBase & mesh, libMesh::ElemType 
 {
   switch (type)
   {
+    case 0:
+      return mesh.add_elem(new libMesh::Edge2);
+    case 1:
+      return mesh.add_elem(new libMesh::Edge3);
+    case 2:
+      return mesh.add_elem(new libMesh::Edge4);
+    case 3:
+      return mesh.add_elem(new libMesh::Tri3);
+    case 4:
+      return mesh.add_elem(new libMesh::Tri6);
     case 5:
       return mesh.add_elem(new libMesh::Quad4);
+    case 6:
+      return mesh.add_elem(new libMesh::Quad8);
+    case 7:
+      return mesh.add_elem(new libMesh::Quad9);
     default:
       mooseError("Unsupported element type (libMesh elem_type enum): ", type);
   }

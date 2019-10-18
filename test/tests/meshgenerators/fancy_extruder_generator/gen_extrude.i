@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./gmg]
     type = GeneratedMeshGenerator
     dim = 2
@@ -22,8 +22,4 @@
                        0 2;
                        0 3'
   []
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []

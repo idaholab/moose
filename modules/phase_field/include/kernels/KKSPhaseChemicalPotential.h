@@ -57,5 +57,9 @@ private:
 
   std::vector<const MaterialProperty<Real> *> _d2fadcadarg;
   std::vector<const MaterialProperty<Real> *> _d2fbdcbdarg;
-};
 
+  ///@{ site fractions
+  const Real _ka;
+  const Real _kb;
+  ///@}
+};

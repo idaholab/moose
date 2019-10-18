@@ -245,16 +245,18 @@ TEST_F(DependencyResolverTest, cyclicTest)
 
 TEST_F(DependencyResolverTest, getValuesTest)
 {
-  const std::vector<std::string> & values = _tree.getValues("k0");
+  auto values = _tree.getAncestors("k0");
 
-  // Make a sorted copy to compare against
-  std::vector<std::string> copy;
-  for (auto val : values)
-    copy.push_back(val);
+  values.sort();
 
-  std::sort(copy.begin(), copy.end());
+  auto it = values.begin();
 
-  EXPECT_EQ(copy[0], "m0");
-  EXPECT_EQ(copy[1], "m1");
-  EXPECT_EQ(copy[2], "m2");
+  EXPECT_EQ(*it++, "k0");
+  EXPECT_EQ(*it++, "m0");
+  EXPECT_EQ(*it++, "m1");
+  EXPECT_EQ(*it++, "m2");
+  EXPECT_EQ(*it++, "mA");
+  EXPECT_EQ(*it++, "mB");
+  EXPECT_EQ(*it++, "mC");
+  EXPECT_EQ(*it++, "mD");
 }

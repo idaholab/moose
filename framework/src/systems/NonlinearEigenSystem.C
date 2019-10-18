@@ -47,6 +47,10 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
                          *eigen_system.matrix_B,
                          eigen_nl.nonEigenMatrixTag(),
                          eigen_nl.eigenMatrixTag());
+#if LIBMESH_HAVE_SLEPC
+    if (p->negativeSignEigenKernel())
+      MatScale(static_cast<PetscMatrix<Number> &>(*eigen_system.matrix_B).mat(), -1.0);
+#endif
     return;
   }
 
@@ -150,6 +154,8 @@ NonlinearEigenSystem::initialSetup()
   addEigenTagToMooseObjects(_nodal_bcs);
   // Scalar kernels
   addEigenTagToMooseObjects(_scalar_kernels);
+  // IntegratedBCs
+  addEigenTagToMooseObjects(_integrated_bcs);
 }
 
 template <typename T>
@@ -258,9 +264,6 @@ NonlinearEigenSystem::nonlinearSolver()
 void
 NonlinearEigenSystem::checkIntegrity()
 {
-  if (_integrated_bcs.hasActiveObjects())
-    mooseError("Can't set an inhomogeneous integrated boundary condition for eigenvalue problems.");
-
   if (_nodal_bcs.hasActiveObjects())
   {
     const auto & nodal_bcs = _nodal_bcs.getActiveObjects();

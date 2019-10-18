@@ -110,7 +110,6 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     PerfGraphInterface(fe_problem.getMooseApp().perfGraph(), "NonlinearSystemBase"),
     _fe_problem(fe_problem),
     _sys(sys),
-    _last_rnorm(0.),
     _last_nl_rnorm(0.),
     _initial_residual_before_preset_bcs(0.),
     _initial_residual_after_preset_bcs(0.),
@@ -2294,9 +2293,23 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 
   PARALLEL_TRY
   {
-    // We can compute these up front because we want these included whether we are computing an
-    // ordinary Jacobian or a Jacobian for determining variable scaling factors
+    // We would like to compute ScalarKernels and block NodalKernels up front because we want these
+    // included whether we are computing an ordinary Jacobian or a Jacobian for determining variable
+    // scaling factors
     computeScalarKernelsJacobians(tags);
+
+    // Block restricted Nodal Kernels
+    if (_nodal_kernels.hasActiveBlockObjects())
+    {
+      ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _nodal_kernels, tags);
+      ConstNodeRange & range = *_mesh.getLocalNodeRange();
+      Threads::parallel_reduce(range, cnkjt);
+
+      unsigned int n_threads = libMesh::n_threads();
+      for (unsigned int i = 0; i < n_threads;
+           i++) // Add any cached jacobians that might be hanging around
+        _fe_problem.assembly(i).addCachedJacobianContributions();
+    }
 
     // Get our element range for looping over
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
@@ -2332,19 +2345,6 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
              i++) // Add any Jacobian contributions still hanging around
           _fe_problem.addCachedJacobian(i);
 
-        // Block restricted Nodal Kernels
-        if (_nodal_kernels.hasActiveBlockObjects())
-        {
-          ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _nodal_kernels, tags);
-          ConstNodeRange & range = *_mesh.getLocalNodeRange();
-          Threads::parallel_reduce(range, cnkjt);
-
-          unsigned int n_threads = libMesh::n_threads();
-          for (unsigned int i = 0; i < n_threads;
-               i++) // Add any cached jacobians that might be hanging around
-            _fe_problem.assembly(i).addCachedJacobianContributions();
-        }
-
         // Boundary restricted Nodal Kernels
         if (_nodal_kernels.hasActiveBoundaryObjects())
         {
@@ -2369,19 +2369,6 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 
         for (unsigned int i = 0; i < n_threads; i++)
           _fe_problem.addCachedJacobian(i);
-
-        // Block restricted Nodal Kernels
-        if (_nodal_kernels.hasActiveBlockObjects())
-        {
-          ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _nodal_kernels, tags);
-          ConstNodeRange & range = *_mesh.getLocalNodeRange();
-          Threads::parallel_reduce(range, cnkjt);
-
-          unsigned int n_threads = libMesh::n_threads();
-          for (unsigned int i = 0; i < n_threads;
-               i++) // Add any cached jacobians that might be hanging around
-            _fe_problem.assembly(i).addCachedJacobianContributions();
-        }
 
         // Boundary restricted Nodal Kernels
         if (_nodal_kernels.hasActiveBoundaryObjects())
@@ -2753,46 +2740,67 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
   Real damping = 1.0;
   bool has_active_dampers = false;
 
-  if (_element_dampers.hasActiveObjects())
+  try
   {
-    TIME_SECTION(_compute_dampers_timer);
-    has_active_dampers = true;
-    *_increment_vec = update;
-    ComputeElemDampingThread cid(_fe_problem);
-    Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cid);
-    damping = std::min(cid.damping(), damping);
-  }
-
-  if (_nodal_dampers.hasActiveObjects())
-  {
-    TIME_SECTION(_compute_dampers_timer);
-
-    has_active_dampers = true;
-    *_increment_vec = update;
-    ComputeNodalDampingThread cndt(_fe_problem);
-    Threads::parallel_reduce(*_mesh.getLocalNodeRange(), cndt);
-    damping = std::min(cndt.damping(), damping);
-  }
-
-  if (_general_dampers.hasActiveObjects())
-  {
-    TIME_SECTION(_compute_dampers_timer);
-
-    has_active_dampers = true;
-    const auto & gdampers = _general_dampers.getActiveObjects();
-    for (const auto & damper : gdampers)
+    if (_element_dampers.hasActiveObjects())
     {
-      Real gd_damping = damper->computeDamping(solution, update);
-      try
+      PARALLEL_TRY
       {
-        damper->checkMinDamping(gd_damping);
+        TIME_SECTION(_compute_dampers_timer);
+        has_active_dampers = true;
+        *_increment_vec = update;
+        ComputeElemDampingThread cid(_fe_problem);
+        Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cid);
+        damping = std::min(cid.damping(), damping);
       }
-      catch (MooseException & e)
-      {
-        _fe_problem.setException(e.what());
-      }
-      damping = std::min(gd_damping, damping);
+      PARALLEL_CATCH;
     }
+
+    if (_nodal_dampers.hasActiveObjects())
+    {
+      PARALLEL_TRY
+      {
+        TIME_SECTION(_compute_dampers_timer);
+
+        has_active_dampers = true;
+        *_increment_vec = update;
+        ComputeNodalDampingThread cndt(_fe_problem);
+        Threads::parallel_reduce(*_mesh.getLocalNodeRange(), cndt);
+        damping = std::min(cndt.damping(), damping);
+      }
+      PARALLEL_CATCH;
+    }
+
+    if (_general_dampers.hasActiveObjects())
+    {
+      PARALLEL_TRY
+      {
+        TIME_SECTION(_compute_dampers_timer);
+
+        has_active_dampers = true;
+        const auto & gdampers = _general_dampers.getActiveObjects();
+        for (const auto & damper : gdampers)
+        {
+          Real gd_damping = damper->computeDamping(solution, update);
+          try
+          {
+            damper->checkMinDamping(gd_damping);
+          }
+          catch (MooseException & e)
+          {
+            _fe_problem.setException(e.what());
+          }
+          damping = std::min(gd_damping, damping);
+        }
+      }
+      PARALLEL_CATCH;
+    }
+  }
+  catch (MooseException & e)
+  {
+    // The buck stops here, we have already handled the exception by
+    // calling stopSolve(), it is now up to PETSc to return a
+    // "diverged" reason during the next solve.
   }
 
   _communicator.min(damping);

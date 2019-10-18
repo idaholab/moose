@@ -94,7 +94,15 @@
     exodiff = 'frictional-nodal-min-normal-lm-mortar-fb-tangential-lm-mortar-disp_out.e'
     mesh_mode = 'REPLICATED'
     requirement = 'We will solve the frictional bouncing block problem with nodal constraint enforcment for the normal LM using min NCP, mortar constraint enforcement of the tangential LM with fb, and mortar application of forces'
-    cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 Postprocessors/active=''"
+    cli_args = "Executioner/end_time=50 Postprocessors/active=''"
     allow_test_objects = true
+  []
+  [frictional-nodal-min-normal-lm-mortar-fb-tangential-lm-mortar-action]
+    type = 'Exodiff'
+    input = 'frictional-nodal-min-normal-lm-mortar-fb-tangential-lm-mortar-action.i'
+    exodiff = 'frictional-nodal-min-normal-lm-mortar-fb-tangential-lm-mortar-action_out.e'
+    mesh_mode = 'REPLICATED'
+    requirement = 'We will solve the frictional bouncing block problem with nodal constraint enforcment for the normal LM using min NCP, mortar constraint enforcement of the tangential LM with fb, and mortar application of forces using the ContactAction. The result shall be identical to that obtained by directly specifying individual objects.'
+    cli_args = "Executioner/end_time=50 Postprocessors/active=''"
   []
 []

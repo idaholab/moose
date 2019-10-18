@@ -1,12 +1,3 @@
-[Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 1
-  ny = 5
-  ymax = 5
-  second_order = true
-[../]
-
 [GlobalParams]
   gravity = '0 -0.001 0'
   convective_term = false
@@ -16,11 +7,20 @@
   p = p
 []
 
-[MeshModifiers]
+[Mesh]
+  second_order = true
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 1
+    ny = 5
+    ymax = 5
+  [../]
   [./corner_node]
-    type = AddExtraNodeset
+    type = ExtraNodesetGenerator
     new_boundary = top_right
     coord = '0 5'
+    input = gen
   [../]
 []
 

@@ -1,0 +1,12 @@
+[Tests]
+  [scaling]
+    input = scaling.i
+    exodiff = scaling_out.e
+    type = Exodiff
+    expect_out = "Automatic scaling factors:\s+u:\s0\.25"
+    requirement = "The system shall apply scaling to residuals and Jacobians for volumetric PDE terms applied at nodes"
+    design = 'NonlinearSystem.md'
+    issues = '#12601'
+    petsc_version = '>=3.9.0'
+  []
+[]

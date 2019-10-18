@@ -1,13 +1,13 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 41
-  ny = 41
-[]
-
-[MeshModifiers]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 41
+    ny = 41
+  []
   [./image]
-    type = ImageSubdomain
+    input = gen
+    type = ImageSubdomainGenerator
     file = kitten.png
     threshold = 100
   [../]

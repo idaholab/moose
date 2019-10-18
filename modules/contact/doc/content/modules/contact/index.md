@@ -87,10 +87,19 @@ The `DEFAULT` option uses an enforcement algorithmn that moves th internal force
 ## Mortar-Based Mechanical Contact
 
 The [mortar constraint system](Constraints/index.md) provides an alternative
-discretization technique for solving mechanical contact. The
-`contact/test/tests/bouncing-block-contact` directory provides a series of
+discretization technique for solving mechanical contact. Some results are summarized below.
+
+ The `contact/test/tests/bouncing-block-contact` directory provides a series of
 input files testing different algorithms for solving both normal and tangential
-frictional contact. Some results are summarized below.
+frictional contact. Mortar contact can also be specified using the `Contact` block 
+similar to pure node-face discretization contact. For normal mortar contact:
+
+!listing test/tests/mechanical-small-problem/frictionless-nodal-lm-mortar-disp-action.i block=Contact
+
+For normal and tangential (frictional) mortar contact:
+
+!listing test/tests/bouncing-block-contact/frictional-nodal-min-normal-lm-mortar-fb-tangential-lm-mortar-action.i block=Contact
+
 
 ### Frictionless contact algorithm comparison
 

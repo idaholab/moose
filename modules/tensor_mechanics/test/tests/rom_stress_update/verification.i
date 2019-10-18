@@ -182,7 +182,7 @@
     inelastic_models = rom_stress_prediction
   [../]
   [./rom_stress_prediction]
-    type = ADLAROMCreepStressUpdate
+    type = SS316HLAROMANCEStressUpdateTest
     temperature = temperature
     effective_inelastic_strain_name = effective_creep_strain
     internal_solve_full_iteration_history = true
@@ -191,13 +191,6 @@
     immobile_dislocation_density_forcing_function = rhoi_fcn
     mobile_dislocation_density_forcing_function = rhom_fcn
     old_creep_strain_forcing_function = evm_fcn
-    rom_data = rom_data
-  [../]
-[]
-
-[UserObjects]
-  [./rom_data]
-    type = SS316LAROMData
   [../]
 []
 

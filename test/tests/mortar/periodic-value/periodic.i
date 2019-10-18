@@ -1,16 +1,18 @@
 [Mesh]
-  file = square.msh
-[]
-
-[MeshModifiers]
+  [file]
+    type = FileMeshGenerator
+    file = square.msh
+  []
   [slave]
-    type = LowerDBlockFromSideset
+    input = file
+    type = LowerDBlockFromSidesetGenerator
     new_block_id = 11
     new_block_name = "slave"
     sidesets = '101'
   []
   [master]
-    type = LowerDBlockFromSideset
+    input = slave
+    type = LowerDBlockFromSidesetGenerator
     new_block_id = 12
     new_block_name = "master"
     sidesets = '103'

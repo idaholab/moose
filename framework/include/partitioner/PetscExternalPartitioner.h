@@ -38,6 +38,10 @@ public:
 
   virtual void partition(MeshBase & mesh, const unsigned int n) override;
 
+  bool applySideWeight() { return _apply_side_weight; }
+
+  bool applyElementEeight() { return _apply_element_weight; }
+
 protected:
   virtual void _do_partition(MeshBase & mesh, const unsigned int n) override;
 

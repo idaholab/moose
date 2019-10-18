@@ -243,8 +243,6 @@ protected:
   ActionFactory & _action_factory;
   /// Pointers to the actual parsed input file blocks
   std::map<std::string, std::list<Action *>> _action_blocks;
-  /// Action blocks that have been requested
-  std::map<std::string, std::vector<Action *>> _requested_action_blocks;
   /// The container that holds the sorted action names from the DependencyResolver
   std::vector<std::string> _ordered_names;
   /// Use to store the current list of unsatisfied dependencies

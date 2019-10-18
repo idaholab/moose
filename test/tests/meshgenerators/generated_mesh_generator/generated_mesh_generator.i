@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [gmg]
     type = GeneratedMeshGenerator
     dim = 3
@@ -8,10 +8,6 @@
     bias_x = 2
     bias_z = 0.5
   []
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Outputs]

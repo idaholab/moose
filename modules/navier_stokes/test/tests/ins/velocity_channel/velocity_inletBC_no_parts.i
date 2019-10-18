@@ -6,22 +6,22 @@
 []
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  xmin = 0
-  xmax = 3.0
-  ymin = 0
-  ymax = 1.0
-  nx = 30
-  ny = 10
-  elem_type = QUAD9
-[]
-
-[MeshModifiers]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    xmin = 0
+    xmax = 3.0
+    ymin = 0
+    ymax = 1.0
+    nx = 30
+    ny = 10
+    elem_type = QUAD9
+  []
   [./corner_node]
-    type = AddExtraNodeset
+    type = ExtraNodesetGenerator
     new_boundary = top_right
     coord = '3 1'
+    input = gen
   [../]
 []
 

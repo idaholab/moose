@@ -31,6 +31,11 @@ InputParameters
 validParams<EigenProblem>()
 {
   InputParameters params = validParams<FEProblemBase>();
+  params.addParam<bool>("negative_sign_eigen_kernel",
+                        true,
+                        "Whether or not to use a negative sign for eigenvalue kernels. "
+                        "Using a negative sign makes eigenvalue kernels consistent with "
+                        "a nonlinear solver");
   return params;
 }
 
@@ -40,6 +45,7 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
     _n_eigen_pairs_required(1),
     _generalized_eigenvalue_problem(false),
     _nl_eigen(std::make_shared<NonlinearEigenSystem>(*this, "eigen0")),
+    _negative_sign_eigen_kernel(getParam<bool>("negative_sign_eigen_kernel")),
     _compute_jacobian_tag_timer(registerTimedSection("computeJacobianTag", 3)),
     _compute_jacobian_ab_timer(registerTimedSection("computeJacobianAB", 3)),
     _compute_residual_tag_timer(registerTimedSection("computeResidualTag", 3)),

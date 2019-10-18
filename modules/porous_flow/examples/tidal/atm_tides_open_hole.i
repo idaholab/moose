@@ -4,7 +4,7 @@
 # only vertical displacement is allowed
 # the atmospheric pressure sets the total stress at the top of the model
 # at the slab left-hand side there is a borehole that taps into the base of the slab.
-[MeshGenerators]
+[Mesh]
   [./the_mesh]
     type = GeneratedMeshGenerator
     dim = 3
@@ -24,16 +24,6 @@
     input = the_mesh
     new_boundary = 11
   [../]
-  [./bh_front]
-    type = ExtraNodesetGenerator
-    coord = '0 5 -100'
-    input = the_mesh
-    new_boundary = 11
-  [../]
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [GlobalParams]

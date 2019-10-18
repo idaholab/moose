@@ -162,6 +162,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _use_distributed_mesh(false),
     _distribution_overridden(false),
     _parallel_type_overridden(false),
+    _mesh(nullptr),
     _partitioner_name(getParam<MooseEnum>("partitioner")),
     _partitioner_overridden(false),
     _custom_partitioner_requested(false),
@@ -758,7 +759,7 @@ MooseMesh::getActiveLocalElementRange()
   if (!_active_local_elem_range)
   {
     TIME_SECTION(_get_active_local_element_range_timer);
-    CONSOLE_TIMED_PRINT("Caching active local element rage");
+    CONSOLE_TIMED_PRINT("Caching active local element range");
 
     _active_local_elem_range = libmesh_make_unique<ConstElemRange>(
         getMesh().active_local_elements_begin(), getMesh().active_local_elements_end(), GRAIN_SIZE);

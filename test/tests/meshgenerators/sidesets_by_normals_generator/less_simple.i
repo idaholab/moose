@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./fmg]
     type = FileMeshGenerator
     file = reactor.e
@@ -8,10 +8,6 @@
     type = AllSideSetsByNormalsGenerator
     input = fmg
   []
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Outputs]

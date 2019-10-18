@@ -241,8 +241,8 @@
   type = Transient
 
   l_tol = 1E-2
-  nl_abs_tol = 1E-5
-  nl_rel_tol = 1E-7
+  nl_abs_tol = 1E-9
+  nl_rel_tol = 1E-11
   l_max_its = 200
   nl_max_its = 400
 

@@ -1,39 +1,42 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 20
-  ny = 20
-  xmax = 2
-  ymax = 2
   uniform_refine = 1
-[]
-
-[MeshModifiers]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 20
+    ny = 20
+    xmax = 2
+    ymax = 2
+  []
   # Define block IDs for the four quadrants in CCW order:
   # 1=top_right
   # 2=top_left
   # 3=bottom_left
   # 4=bottom_right
   [./top_right_modifier]
-    type = SubdomainBoundingBox
+    input = gen
+    type = SubdomainBoundingBoxGenerator
     top_right = '2 2 0'
     bottom_left = '1 1 0'
     block_id = 1
   [../]
   [./top_left_modifier]
-    type = SubdomainBoundingBox
+    input = top_right_modifier
+    type = SubdomainBoundingBoxGenerator
     top_right = '1 2 0'
     bottom_left = '0 1 0'
     block_id = 2
   [../]
   [./bottom_left_modifier]
-    type = SubdomainBoundingBox
+    input = top_left_modifier
+    type = SubdomainBoundingBoxGenerator
     top_right = '1 1 0'
     bottom_left = '0 0 0'
     block_id = 3
   [../]
   [./bottom_right_modifier]
-    type = SubdomainBoundingBox
+    input = bottom_left_modifier
+    type = SubdomainBoundingBoxGenerator
     top_right = '2 1 0'
     bottom_left = '1 0 0'
     block_id = 4
@@ -87,7 +90,7 @@
 []
 
 [ICs]
-  # Defined the same way as the MeshModifiers
+  # Defined the same way as the MeshGenerators
   [./top_right_ic]
     function = top_right_func
     variable = u
