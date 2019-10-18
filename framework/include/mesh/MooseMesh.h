@@ -229,6 +229,12 @@ public:
   std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> buildSideList();
 
   /**
+   * Calls BoundaryInfo::build_active_side_list
+   * @return A container of active (element, side, id) tuples.
+   */
+  std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> buildActiveSideList();
+
+  /**
    * Calls BoundaryInfo::side_with_boundary_id().
    */
   unsigned int sideWithBoundaryID(const Elem * const elem, const BoundaryID boundary_id) const;

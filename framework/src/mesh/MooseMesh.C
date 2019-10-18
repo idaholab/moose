@@ -2211,6 +2211,12 @@ MooseMesh::buildSideList()
   return getMesh().get_boundary_info().build_side_list();
 }
 
+std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>>
+MooseMesh::buildActiveSideList()
+{
+  return getMesh().get_boundary_info().build_active_side_list();
+}
+
 unsigned int
 MooseMesh::sideWithBoundaryID(const Elem * const elem, const BoundaryID boundary_id) const
 {

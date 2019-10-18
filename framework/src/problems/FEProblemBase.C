@@ -5715,6 +5715,9 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
   // callbacks (e.g. for sparsity calculations) triggered by the
   // EquationSystems reinit may require up-to-date MooseMesh caches.
   _mesh.meshChanged();
+  _geometric_search_data.reinit();
+  if (_displaced_problem)
+    _displaced_problem->meshChanged();
 
   // If we're just going to alter the mesh again, all we need to
   // handle here is AMR and projections, not full system reinit
@@ -5728,20 +5731,19 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
   // "active" and "local" may have been *changed* by refinement and
   // repartitioning done in EquationSystems::reinit().
   _mesh.meshChanged();
-
-  // Since the Mesh changed, update the PointLocator object used by DiracKernels.
-  _dirac_kernel_info.updatePointLocator(_mesh);
-
   // Need to redo ghosting
   _geometric_search_data.reinit();
+  // Since the Mesh changed, update the PointLocator object used by DiracKernels.
+  _dirac_kernel_info.updatePointLocator(_mesh);
+  _mesh.updateActiveSemiLocalNodeRange(_ghosted_elems);
 
   if (_displaced_problem)
   {
+    // This reinits the displaced _geometric_search_data, Dirc point locators, and then the
+    // EquationSystems object
     _displaced_problem->meshChanged();
     _displaced_mesh->updateActiveSemiLocalNodeRange(_ghosted_elems);
   }
-
-  _mesh.updateActiveSemiLocalNodeRange(_ghosted_elems);
 
   _evaluable_local_elem_range.reset();
 
