@@ -36,7 +36,7 @@ EBCoupledVarTest::EBCoupledVarTest(const InputParameters & parameters)
     _vals[i] = new_term;
   }
   EBFunction tester;
-  tester(_vals) = pow(_vals[0], 2) + sin(_vals[1]);
+  tester(_vals) = _vals[0] + 2 * _vals[1];
 
   functionParse(tester);
 }

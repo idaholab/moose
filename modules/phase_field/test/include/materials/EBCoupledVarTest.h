@@ -18,6 +18,9 @@ class EBCoupledVarTest;
 template <>
 InputParameters validParams<EBCoupledVarTest>();
 
+/**
+ * Grain boundary energy parameters for isotropic uniform grain boundary energies
+ */
 class EBCoupledVarTest : public DerivativeParsedMaterialHelper, public ExpressionBuilder
 {
 public:
