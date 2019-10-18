@@ -47,8 +47,13 @@ template <typename T>
 T
 MeshMetaDataInterface::getMeshProperty(const std::string & name) const
 {
-  if (hasMeshProperty<T>(name))
-    mooseError("Property ", name, " doesn't exist in this instance.");
+  if (!hasMeshProperty<T>(name))
+    mooseError("Property \"",
+               name,
+               "\" with type \"",
+               demangle(typeid(T).name()),
+               "\" doesn't exist in this mesh meta-data instance:\n",
+               _mgi_mesh_props);
 
   return _mgi_mesh_props.get<T>(name);
 }

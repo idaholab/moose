@@ -29,6 +29,8 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  void setMeshMetaData();
+
   /// The dimension of the mesh
   MooseEnum _dim;
 
@@ -52,4 +54,3 @@ protected:
   /// _bias_x > 1 implies cells are growing in the x-direction.
   Real _bias_x, _bias_y, _bias_z;
 };
-

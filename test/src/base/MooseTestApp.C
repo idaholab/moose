@@ -68,6 +68,7 @@ MooseTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_
     // For testing the ability to create problems in user defined Actions
     registerSyntax("CreateSpecialProblemAction", "TestProblem");
     registerSyntax("AddDGDiffusion", "DGDiffusionAction");
+    registerSyntax("MeshMetaDataDependenceAction", "AutoLineSamplerTest");
   }
 }
 

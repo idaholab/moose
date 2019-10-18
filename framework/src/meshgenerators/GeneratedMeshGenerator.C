@@ -257,5 +257,23 @@ GeneratedMeshGenerator::generate()
     }
   }
 
+  setMeshMetaData();
+
   return dynamic_pointer_cast<MeshBase>(mesh);
+}
+
+void
+GeneratedMeshGenerator::setMeshMetaData()
+{
+  setProperty<unsigned int>("num_elements_x", _nx);
+  setProperty<unsigned int>("num_elements_y", _ny);
+  setProperty<unsigned int>("num_elements_z", _nz);
+
+  setProperty<Real>("xmin", _xmin);
+  setProperty<Real>("ymin", _ymin);
+  setProperty<Real>("zmin", _zmin);
+
+  setProperty<Real>("xmax", _xmax);
+  setProperty<Real>("ymax", _ymax);
+  setProperty<Real>("zmax", _zmax);
 }
