@@ -114,7 +114,7 @@ available in the SamplerTransientMultiApp.
 
 Again, an important feature of the various modes of operation is that run-time is not negatively
 impacted by changing the mode as seen in [transient-serial-time] and [transient-mpi-time]. The
-solve portion of this example is significantly longer than the stead-state example. As such the
+solve portion of this example is significantly longer than the steady-state example. As such the
 differences in execution time due to the instantiating of objects is diminished and both modes behave
 similarly.
 

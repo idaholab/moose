@@ -7,19 +7,19 @@ import matplotlib.pyplot as plt
 
 def execute(name, ylabel, yscale=1):
 
-    fig = plt.figure(figsize=[9,4], dpi=600)
+    fig = plt.figure(figsize=[6,3], dpi=600, tight_layout=True)
     ax = fig.subplots()
 
     add_plot(ax, 'distribute_none', name, 'Baseline w/o sample data', yscale)
     add_plot(ax, 'distribute_off', name, 'Non-distributed', yscale)
     add_plot(ax, 'distribute_on', name, 'Distributed', yscale)
 
-    ax.set_xlabel('Num. Processors', fontsize=12)
-    ax.set_ylabel(ylabel, fontsize=12)
+    ax.set_xlabel('Num. Processors', fontsize=14)
+    ax.set_ylabel(ylabel, fontsize=14)
     ax.grid(True, color=[0.7]*3)
     ax.legend()
 
-    fig.savefig('memory_{}.pdf'.format(name))
+    fig.savefig('memory_{}.svg'.format(name))
 
 def add_plot(ax, prefix, name, label, yscale):
     """Show matplotlib plot of memory data"""
