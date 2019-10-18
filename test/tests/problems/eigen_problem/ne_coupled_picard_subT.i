@@ -49,13 +49,13 @@
 [Executioner]
   type = Steady
   picard_max_its = 30
-  picard_rel_tol = 1e-60
+  picard_rel_tol = 1e-6
 []
 
 [MultiApps]
   [./sub]
     type = FullSolveMultiApp
-    input_files = ne_coupled_picard_masterT_sub.i
+    input_files = ne_coupled_picard_subT_sub.i
     execute_on = timestep_end
   [../]
 []

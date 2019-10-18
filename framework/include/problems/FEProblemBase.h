@@ -1622,6 +1622,15 @@ public:
   bool isSNESMFReuseBaseSetbyUser() { return _snesmf_reuse_base_set_by_user; }
 
   /**
+   * If petsc options are already inserted
+   */
+  bool & petscOptionsInserted() { return _is_petsc_options_inserted; }
+
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  PetscOptions & petscOptionsDatabase() { return _petsc_option_data_base; }
+#endif
+
+  /**
    * Set the global automatic differentiaion (AD) flag which indicates whether any consumer has
    * requested an AD material property or whether any suppier has declared an AD material property
    */
@@ -1950,7 +1959,12 @@ protected:
 #ifdef LIBMESH_HAVE_PETSC
   /// PETSc option storage
   Moose::PetscSupport::PetscOptions _petsc_options;
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  PetscOptions _petsc_option_data_base;
+#endif
 #endif // LIBMESH_HAVE_PETSC
+  /// If or not petsc options have been added to database
+  bool _is_petsc_options_inserted;
 
   std::shared_ptr<LineSearch> _line_search;
 

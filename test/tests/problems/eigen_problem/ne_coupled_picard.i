@@ -88,8 +88,8 @@
   type = Eigenvalue
   solve_type = MF_MONOLITH_NEWTON
   eigen_problem_type = GEN_NON_HERMITIAN
-  picard_max_its = 30
-  picard_rel_tol = 1e-60
+  picard_max_its = 10
+  picard_rel_tol = 1e-6
 []
 
 [Postprocessors]
@@ -109,7 +109,6 @@
 
 [Outputs]
   csv = true
-  file_base = ne_coupled
   execute_on = 'timestep_end'
 []
 

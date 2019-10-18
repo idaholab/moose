@@ -250,6 +250,7 @@ petscSetOptions(FEProblemBase & problem)
   // Add any additional options specified in the input file
   for (const auto & flag : petsc.flags)
     setSinglePetscOption(flag.rawName().c_str());
+  // Add option pairs
   for (unsigned int i = 0; i < petsc.inames.size(); ++i)
     setSinglePetscOption(petsc.inames[i], petsc.values[i]);
 
