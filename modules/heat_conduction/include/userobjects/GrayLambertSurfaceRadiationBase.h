@@ -45,6 +45,7 @@ public:
   Real getSurfaceTemperature(BoundaryID id) const;
   Real getSurfaceRadiosity(BoundaryID id) const;
   Real getSurfaceEmissivity(BoundaryID id) const;
+  std::set<BoundaryID> getSurfaceIDs() const;
   ///@}
 
 protected:
@@ -81,7 +82,7 @@ protected:
   std::vector<enum RAD_BND_TYPE> _side_type;
 
   /// side id to index map, side ids can have holes or be out of order
-  std::map<unsigned int, unsigned int> _side_id_index;
+  std::map<BoundaryID, unsigned int> _side_id_index;
 
   /// the area by participating side set
   std::vector<Real> _areas;

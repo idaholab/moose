@@ -84,7 +84,7 @@
   [./gray_lambert_cavity]
     type = CSVDiff
     input = 'gray_lambert_cavity.i'
-    csvdiff = 'gray_lambert_cavity_out.csv'
+    csvdiff = 'gray_lambert_cavity_out.csv gray_lambert_cavity_out_temperature_0001.csv'
     cli_args = 'Outputs/csv=true'
     requirement = 'The system shall compute radiative transfer between gray Lambert surfaces'
     design = 'ConstantViewFactorSurfaceRadiation.md'

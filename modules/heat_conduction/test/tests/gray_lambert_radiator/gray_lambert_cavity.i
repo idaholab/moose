@@ -35,6 +35,14 @@
   [../]
 []
 
+[VectorPostprocessors]
+  [./temperature]
+    type = SurfaceRadiationVectorPostprocessor
+    surface_radiation_object_name = gray_lambert
+    information = 'temperature emissivity radiosity heat_flux_density'
+  [../]
+[]
+
 [Postprocessors]
   [./heat_flux_density_bottom]
     type = GrayLambertSurfaceRadiationPP

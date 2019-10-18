@@ -272,6 +272,15 @@ GrayLambertSurfaceRadiationBase::threadJoin(const UserObject & y)
   }
 }
 
+std::set<BoundaryID>
+GrayLambertSurfaceRadiationBase::getSurfaceIDs() const
+{
+  std::set<BoundaryID> surface_ids;
+  for (auto & p : _side_id_index)
+    surface_ids.insert(p.first);
+  return surface_ids;
+}
+
 Real
 GrayLambertSurfaceRadiationBase::getSurfaceIrradiation(BoundaryID id) const
 {
