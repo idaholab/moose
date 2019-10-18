@@ -1,7 +1,12 @@
 [Tests]
-  [./sobol]
+  issues = '#8065'
+  design = 'SobolSampler.md'
+
+  [sobol]
     type = CSVDiff
     input = sobol.i
     csvdiff = 'sobol_out_data_0000.csv'
-  [../]
+
+    requirement = 'The system shall include a SOBOL method for sampling distribution data.'
+  []
 []
