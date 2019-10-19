@@ -7,4 +7,14 @@
     issues = '#12066'
     requirement = 'The system shall be able to grab face and neighboring face variable values and material properties in a single material object that lives on an interface'
   []
+  [jump_split]
+    type = Exodiff
+    input = interface_value_material_split_mesh.i
+    exodiff = interface_value_material_split_mesh_out.e
+    design = 'Materials/index.md'
+    issues = '#12066'
+    requirement = 'The system shall be able to grab face and neighboring face variable values and material properties in a single material object that lives on an interface when the mesh is split'
+    mesh_mode = 'REPLICATED'
+    recover = false
+  []
 []
