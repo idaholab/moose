@@ -76,11 +76,7 @@ public:
    * Retrieve the neighbor property named "name"
    */
   template <typename T>
-  const MaterialProperty<T> & getNeighborMaterialPropertyByName(const std::string & prop_name);
-  template <typename T>
-  const MaterialProperty<T> & getNeighborMaterialPropertyOldByName(const std::string & prop_name);
-  template <typename T>
-  const MaterialProperty<T> & getNeighborMaterialPropertyOlderByName(const std::string & prop_name);
+  const MaterialProperty<T> & getNeighborMaterialPropertyByNameTempl(const std::string & prop_name);
   ///@}
 
   using MaterialBase::getZeroMaterialProperty;
@@ -200,7 +196,19 @@ InterfaceMaterial::getNeighborMaterialPropertyTempl(const std::string & name)
   if (default_property)
     return *default_property;
 
-  return TwoMaterialPropertyInterface::getNeighborMaterialPropertyTempl<T>(prop_name);
+  return getNeighborMaterialPropertyByNameTempl<T>(prop_name);
+}
+
+template <typename T>
+const MaterialProperty<T> &
+InterfaceMaterial::getNeighborMaterialPropertyByNameTempl(const std::string & prop_name)
+{
+  MaterialBase::checkExecutionStage();
+  // The property may not exist yet, so declare it (declare/getMaterialProperty are referencing the
+  // same memory)
+  _requested_props.insert(prop_name);
+  registerPropName(prop_name, true, MaterialBase::CURRENT);
+  return TwoMaterialPropertyInterface::getNeighborMaterialPropertyByNameTempl<T>(prop_name);
 }
 
 template <typename T>

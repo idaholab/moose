@@ -241,6 +241,11 @@ protected:
   const ADMaterialPropertyObject<T> * defaultADMaterialProperty(const std::string & name);
 
   /**
+   * Check and throw an error if the execution has progressed past the construction stage
+   */
+  void checkExecutionStage();
+
+  /**
    * True by default. If false, this class throws an error if any of
    * the stateful material properties interfaces are used.
    */
@@ -265,9 +270,6 @@ protected:
   std::set<unsigned int> _material_property_dependencies;
 
 private:
-  /// Check and throw an error if the execution has progressed past the construction stage
-  void checkExecutionStage();
-
   /// BoundaryRestricted flag
   const bool _mi_boundary_restricted;
 
