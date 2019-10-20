@@ -41,6 +41,9 @@ validParams<InterfaceValueMaterial>()
   params.addParam<MooseEnum>("interface_value_type",
                              InterfaceValueTools::InterfaceAverageOptions(),
                              "Type of scalar output");
+  params.addParam<bool>("couple_old_values_and_properties",
+                        false,
+                        "get also old variable and material properties values");
   return params;
 }
 
@@ -54,7 +57,20 @@ InterfaceValueMaterial::InterfaceValueMaterial(const InputParameters & parameter
     _var_slave(coupledNeighborValue("var_slave")),
     _nl_var_master(coupledValue("nl_var_master")),
     _nl_var_slave(coupledNeighborValue("nl_var_slave")),
-
+    _couple_old_values_and_properties(getParam<bool>("couple_old_values_and_properties")),
+    _mp_master_old(_couple_old_values_and_properties
+                       ? &getMaterialPropertyOldByName<Real>(_mp_master_name)
+                       : nullptr),
+    _mp_slave_old(_couple_old_values_and_properties
+                      ? &getNeighborMaterialPropertyOld<Real>(_mp_slave_name)
+                      : nullptr),
+    _var_master_old(_couple_old_values_and_properties ? &coupledValueOld("var_master") : nullptr),
+    _var_slave_old(_couple_old_values_and_properties ? &coupledNeighborValueOld("var_slave")
+                                                     : nullptr),
+    _nl_var_master_old(_couple_old_values_and_properties ? &coupledValueOld("nl_var_master")
+                                                         : nullptr),
+    _nl_var_slave_old(_couple_old_values_and_properties ? &coupledNeighborValueOld("nl_var_slave")
+                                                        : nullptr),
     _interface_value_type(parameters.get<MooseEnum>("interface_value_type")),
     _mp_out_base_name(getParam<std::string>("mat_prop_out_basename")),
     _mp_var_out_base_name(getParam<std::string>("mat_prop_var_out_basename")),
@@ -66,7 +82,12 @@ InterfaceValueMaterial::InterfaceValueMaterial(const InputParameters & parameter
         getMaterialPropertyOld<Real>(_mp_out_base_name + "_" + std::string(_interface_value_type))),
     _interface_value_2_old(getMaterialPropertyOld<Real>(_mp_var_out_base_name + "_" +
                                                         std::string(_interface_value_type))),
-    _jump(declareProperty<Real>(std::string(_interface_value_type) + "_jump"))
+    _interface_value_prev(declareProperty<Real>(_mp_out_base_name + "_" +
+                                                std::string(_interface_value_type) + "_prev")),
+    _interface_value_prev_2(declareProperty<Real>(_mp_var_out_base_name + "_" +
+                                                  std::string(_interface_value_type) + "_prev_2")),
+    _jump(declareProperty<Real>(std::string(_interface_value_type) + "_jump")),
+    _jump_prev(declareProperty<Real>(std::string(_interface_value_type) + "_jump_prev"))
 {
 }
 
@@ -83,6 +104,16 @@ InterfaceValueMaterial::computeQpProperties()
   _interface_value_2[_qp] =
       InterfaceValueTools::getQuantity(_interface_value_type, _var_master[_qp], _var_slave[_qp]);
   _jump[_qp] = _nl_var_master[_qp] - _nl_var_slave[_qp];
+
+  if (_couple_old_values_and_properties)
+  {
+    _interface_value_prev[_qp] = InterfaceValueTools::getQuantity(
+        _interface_value_type, (*_mp_master_old)[_qp], (*_mp_slave_old)[_qp]);
+    _interface_value_prev_2[_qp] = InterfaceValueTools::getQuantity(
+        _interface_value_type, (*_var_master_old)[_qp], (*_var_slave_old)[_qp]);
+
+    _jump_prev[_qp] = (*_nl_var_master_old)[_qp] - (*_nl_var_slave_old)[_qp];
+  }
 }
 
 void
