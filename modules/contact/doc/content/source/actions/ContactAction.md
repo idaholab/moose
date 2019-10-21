@@ -1,7 +1,5 @@
 # Contact Action
 
-!syntax description /Contact/ContactAction
-
 ## Description
 
 `ContactAction` can be used to specify mechanical normal and tangential contact using several possible

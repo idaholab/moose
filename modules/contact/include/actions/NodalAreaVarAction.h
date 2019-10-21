@@ -13,21 +13,13 @@
 #include "MooseTypes.h"
 #include "MooseEnum.h"
 
-class ContactPenetrationAuxAction;
-
-template <>
-InputParameters validParams<ContactPenetrationAuxAction>();
-
-class ContactPenetrationAuxAction : public Action
+class NodalAreaVarAction : public Action
 {
 public:
-  ContactPenetrationAuxAction(const InputParameters & params);
+  NodalAreaVarAction(const InputParameters & params);
 
   virtual void act();
-
-private:
-  const BoundaryName _master;
-  const BoundaryName _slave;
-  const MooseEnum _order;
 };
 
+template <>
+InputParameters validParams<NodalAreaVarAction>();

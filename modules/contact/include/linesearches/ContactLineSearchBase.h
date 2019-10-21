@@ -78,4 +78,3 @@ protected:
   /// Whether to modify the linear tolerance
   bool _affect_ltol;
 };
-

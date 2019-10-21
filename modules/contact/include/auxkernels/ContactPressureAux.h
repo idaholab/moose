@@ -30,4 +30,3 @@ protected:
 
 template <>
 InputParameters validParams<ContactPressureAux>();
-

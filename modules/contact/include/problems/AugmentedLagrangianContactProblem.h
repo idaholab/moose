@@ -52,4 +52,3 @@ private:
   int _num_lagmul_iterations;
   int _max_lagmul_iters;
 };
-
