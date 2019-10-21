@@ -3,8 +3,8 @@
   [./rhoV]
     type = 'PetscJacobianTester'
     input = '1phase.i'
-    ratio_tol = 1e-5
-    difference_tol = 1e15
+    ratio_tol = 1e-6
+    difference_tol = 1e-5
     max_threads = 1
     allow_test_objects = true
   [../]
@@ -14,8 +14,8 @@
     cli_args = '
       ScalarKernels/scalar_kernel/variable=rhouV
       ScalarKernels/scalar_kernel/equation_index=1'
-    ratio_tol = 1e-5
-    difference_tol = 1e15
+    ratio_tol = 1e-6
+    difference_tol = 1e-5
     max_threads = 1
     allow_test_objects = true
   [../]
@@ -25,8 +25,8 @@
     cli_args = '
       ScalarKernels/scalar_kernel/variable=rhovV
       ScalarKernels/scalar_kernel/equation_index=2'
-    ratio_tol = 1e-5
-    difference_tol = 1e15
+    ratio_tol = 1e-6
+    difference_tol = 1e-5
     max_threads = 1
     allow_test_objects = true
   [../]
@@ -36,8 +36,8 @@
     cli_args = '
       ScalarKernels/scalar_kernel/variable=rhowV
       ScalarKernels/scalar_kernel/equation_index=3'
-    ratio_tol = 1e-5
-    difference_tol = 1e15
+    ratio_tol = 1e-6
+    difference_tol = 1e-5
     max_threads = 1
     allow_test_objects = true
   [../]
@@ -47,8 +47,8 @@
     cli_args = '
       ScalarKernels/scalar_kernel/variable=rhoEV
       ScalarKernels/scalar_kernel/equation_index=4'
-    ratio_tol = 1e-5
-    difference_tol = 1e15
+    ratio_tol = 1e-6
+    difference_tol = 1e-5
     max_threads = 1
     allow_test_objects = true
   [../]
@@ -57,8 +57,8 @@
   [./aV_liquid]
     type = 'PetscJacobianTester'
     input = '2phase.i'
-    ratio_tol = 1e-5
-    difference_tol = 1e15
+    ratio_tol = 1e-6
+    difference_tol = 2e-4
     max_threads = 1
     allow_test_objects = true
   [../]
@@ -68,8 +68,8 @@
     cli_args = '
       ScalarKernels/scalar_kernel/variable=arhoV_liquid
       ScalarKernels/scalar_kernel/equation_index=1'
-    ratio_tol = 1e-5
-    difference_tol = 1e15
+    ratio_tol = 1e-6
+    difference_tol = 2e-4
     max_threads = 1
     allow_test_objects = true
   [../]
@@ -79,8 +79,8 @@
     cli_args = '
       ScalarKernels/scalar_kernel/variable=arhouV_liquid
       ScalarKernels/scalar_kernel/equation_index=2'
-    ratio_tol = 1e-5
-    difference_tol = 1e15
+    ratio_tol = 1e-6
+    difference_tol = 2e-4
     max_threads = 1
     allow_test_objects = true
   [../]
@@ -90,8 +90,8 @@
     cli_args = '
       ScalarKernels/scalar_kernel/variable=arhovV_liquid
       ScalarKernels/scalar_kernel/equation_index=3'
-    ratio_tol = 1e-5
-    difference_tol = 1e15
+    ratio_tol = 1e-6
+    difference_tol = 2e-4
     max_threads = 1
     allow_test_objects = true
   [../]
@@ -101,8 +101,8 @@
     cli_args = '
       ScalarKernels/scalar_kernel/variable=arhowV_liquid
       ScalarKernels/scalar_kernel/equation_index=4'
-    ratio_tol = 1e-5
-    difference_tol = 1e15
+    ratio_tol = 1e-6
+    difference_tol = 2e-4
     max_threads = 1
     allow_test_objects = true
   [../]
@@ -112,8 +112,8 @@
     cli_args = '
       ScalarKernels/scalar_kernel/variable=arhoEV_liquid
       ScalarKernels/scalar_kernel/equation_index=5'
-    ratio_tol = 1e-5
-    difference_tol = 1e15
+    ratio_tol = 1e-6
+    difference_tol = 2e-4
     max_threads = 1
     allow_test_objects = true
   [../]
@@ -123,8 +123,8 @@
     cli_args = '
       ScalarKernels/scalar_kernel/variable=arhoV_vapor
       ScalarKernels/scalar_kernel/equation_index=6'
-    ratio_tol = 1e-5
-    difference_tol = 1e15
+    ratio_tol = 1e-6
+    difference_tol = 2e-4
     max_threads = 1
     allow_test_objects = true
   [../]
@@ -134,8 +134,8 @@
     cli_args = '
       ScalarKernels/scalar_kernel/variable=arhouV_vapor
       ScalarKernels/scalar_kernel/equation_index=7'
-    ratio_tol = 1e-5
-    difference_tol = 1e15
+    ratio_tol = 1e-6
+    difference_tol = 2e-4
     max_threads = 1
     allow_test_objects = true
   [../]
@@ -145,8 +145,8 @@
     cli_args = '
       ScalarKernels/scalar_kernel/variable=arhovV_vapor
       ScalarKernels/scalar_kernel/equation_index=8'
-    ratio_tol = 1e-5
-    difference_tol = 1e15
+    ratio_tol = 1e-6
+    difference_tol = 2e-4
     max_threads = 1
     allow_test_objects = true
   [../]
@@ -156,8 +156,8 @@
     cli_args = '
       ScalarKernels/scalar_kernel/variable=arhowV_vapor
       ScalarKernels/scalar_kernel/equation_index=9'
-    ratio_tol = 1e-5
-    difference_tol = 1e15
+    ratio_tol = 1e-6
+    difference_tol = 2e-4
     max_threads = 1
     allow_test_objects = true
   [../]
@@ -167,8 +167,8 @@
     cli_args = '
       ScalarKernels/scalar_kernel/variable=arhoEV_vapor
       ScalarKernels/scalar_kernel/equation_index=10'
-    ratio_tol = 1e-5
-    difference_tol = 1e15
+    ratio_tol = 1e-6
+    difference_tol = 2e-4
     max_threads = 1
     allow_test_objects = true
   [../]

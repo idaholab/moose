@@ -72,6 +72,11 @@ protected:
   /// Junction rho*E*V coupled variable index
   const unsigned int _rhoEV_jvar;
 
+  /// Form loss coefficient
+  const Real & _K;
+  /// Reference area
+  const Real & _A_ref;
+
   /// Single-phase fluid properties user object
   const SinglePhaseFluidProperties & _fp;
 
