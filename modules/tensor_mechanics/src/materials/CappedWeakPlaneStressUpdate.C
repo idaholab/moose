@@ -286,8 +286,8 @@ CappedWeakPlaneStressUpdate::computeAllQ(Real p,
                                          std::vector<yieldAndFlow> & all_q) const
 {
   // yield function values
-  all_q[0].f = MathUtils::sqrt(Utility::pow<2>(q) + _small_smoother2) + p * _tan_phi.value(intnl[0]) -
-               _cohesion.value(intnl[0]);
+  all_q[0].f = MathUtils::sqrt(Utility::pow<2>(q) + _small_smoother2) +
+               p * _tan_phi.value(intnl[0]) - _cohesion.value(intnl[0]);
   if (_stress_return_type == StressReturnType::no_tension)
     all_q[1].f = std::numeric_limits<Real>::lowest();
   else

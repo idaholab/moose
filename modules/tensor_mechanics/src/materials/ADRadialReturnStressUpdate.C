@@ -11,6 +11,7 @@
 
 #include "MooseMesh.h"
 #include "ElasticityTensorTools.h"
+#include "MathUtils.h"
 
 defineADValidParams(
     ADRadialReturnStressUpdate,
@@ -77,7 +78,7 @@ ADRadialReturnStressUpdate<compute_stage>::updateState(
   ADReal dev_trial_stress_squared =
       deviatoric_trial_stress.doubleContraction(deviatoric_trial_stress);
   ADReal effective_trial_stress =
-      dev_trial_stress_squared == 0.0 ? 0.0 : std::sqrt(3.0 / 2.0 * dev_trial_stress_squared);
+      dev_trial_stress_squared == 0.0 ? 0.0 : MathUtils::sqrt(3.0 / 2.0 * dev_trial_stress_squared);
 
   // Set the value of 3 * shear modulus for use as a reference residual value
   _three_shear_modulus = 3.0 * ElasticityTensorTools::getIsotropicShearModulus(elasticity_tensor);

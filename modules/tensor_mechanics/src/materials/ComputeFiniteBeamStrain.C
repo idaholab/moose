@@ -45,12 +45,12 @@ ComputeFiniteBeamStrain::computeRotation()
   // Second - calculate the incremental rotation matrix using Euler angles
   const Real intermediate_length_1 =
       MathUtils::sqrt(Utility::pow<2>(_original_length[0] + delta_disp_local(0)) +
-                Utility::pow<2>(delta_disp_local(2)));
+                      Utility::pow<2>(delta_disp_local(2)));
   const Real cos_alpha = (_original_length[0] + delta_disp_local(0)) / intermediate_length_1;
   const Real sin_alpha = MathUtils::sqrt(1.0 - Utility::pow<2>(cos_alpha));
 
-  const Real intermediate_length_2 =
-      MathUtils::sqrt(Utility::pow<2>(intermediate_length_1) + Utility::pow<2>(delta_disp_local(1)));
+  const Real intermediate_length_2 = MathUtils::sqrt(Utility::pow<2>(intermediate_length_1) +
+                                                     Utility::pow<2>(delta_disp_local(1)));
   const Real sin_beta = delta_disp_local(1) / intermediate_length_2;
   const Real cos_beta = MathUtils::sqrt(1.0 - Utility::pow<2>(sin_beta));
 

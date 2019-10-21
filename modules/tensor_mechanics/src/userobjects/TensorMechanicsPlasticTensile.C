@@ -95,7 +95,8 @@ TensorMechanicsPlasticTensile::yieldFunction(const RankTwoTensor & stress, Real 
     // the non-edge-smoothed version
     std::vector<Real> eigvals;
     stress.symmetricEigenvalues(eigvals);
-    return mean_stress + MathUtils::sqrt(smooth(stress) + Utility::pow<2>(eigvals[2] - mean_stress)) -
+    return mean_stress +
+           MathUtils::sqrt(smooth(stress) + Utility::pow<2>(eigvals[2] - mean_stress)) -
            tensile_strength(intnl);
   }
   else

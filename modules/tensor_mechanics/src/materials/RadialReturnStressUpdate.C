@@ -121,10 +121,10 @@ RadialReturnStressUpdate::updateState(RankTwoTensor & strain_increment,
     {
       // mu = _three_shear_modulus / 3.0;
       // norm_dev_stress = ||s_n+1||
-      // effective_trial_stress = von mises trial stress = MathUtils::sqrt(3.0 / 2.0) * ||s_n+1^trial||
-      // scalar_effective_inelastic_strain = Delta epsilon^cr_n+1
-      // deriv = derivative of scalar_effective_inelastic_strain w.r.t. von mises stress
-      // deriv = MathUtils::sqrt(3.0 / 2.0) partial Delta epsilon^cr_n+1n over partial ||s_n+1^trial||
+      // effective_trial_stress = von mises trial stress = MathUtils::sqrt(3.0 / 2.0) *
+      // ||s_n+1^trial|| scalar_effective_inelastic_strain = Delta epsilon^cr_n+1 deriv = derivative
+      // of scalar_effective_inelastic_strain w.r.t. von mises stress deriv = MathUtils::sqrt(3.0
+      // / 2.0) partial Delta epsilon^cr_n+1n over partial ||s_n+1^trial||
 
       mooseAssert(_three_shear_modulus != 0.0, "Shear modulus is zero");
 

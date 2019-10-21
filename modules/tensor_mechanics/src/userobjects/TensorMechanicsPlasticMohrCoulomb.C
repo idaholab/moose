@@ -106,8 +106,9 @@ TensorMechanicsPlasticMohrCoulomb::TensorMechanicsPlasticMohrCoulomb(
   // I think the following is the best we can do
   Real sin_angle = std::sin(std::max(phi(0), psi(0)));
   sin_angle = std::max(sin_angle, std::sin(std::max(phi(1E6), psi(1E6))));
-  Real rhs = MathUtils::sqrt(3) * (35 * std::sin(_tt) + 14 * std::sin(5 * _tt) - 5 * std::sin(7 * _tt)) /
-             16 / Utility::pow<5>(std::cos(_tt)) / (11 - 10 * std::cos(2 * _tt));
+  Real rhs = MathUtils::sqrt(3) *
+             (35 * std::sin(_tt) + 14 * std::sin(5 * _tt) - 5 * std::sin(7 * _tt)) / 16 /
+             Utility::pow<5>(std::cos(_tt)) / (11 - 10 * std::cos(2 * _tt));
   if (rhs <= sin_angle)
     mooseError("Mohr-Coulomb edge smoothing angle is too small and a non-convex yield surface will "
                "result.  Please choose a larger value");
@@ -126,9 +127,10 @@ TensorMechanicsPlasticMohrCoulomb::yieldFunction(const RankTwoTensor & stress, R
     std::vector<Real> eigvals;
     stress.symmetricEigenvalues(eigvals);
     return mean_stress * sinphi +
-           MathUtils::sqrt(smooth(stress) +
-                     0.25 * Utility::pow<2>(eigvals[2] - eigvals[0] +
-                                            (eigvals[2] + eigvals[0] - 2 * mean_stress) * sinphi)) -
+           MathUtils::sqrt(
+               smooth(stress) +
+               0.25 * Utility::pow<2>(eigvals[2] - eigvals[0] +
+                                      (eigvals[2] + eigvals[0] - 2 * mean_stress) * sinphi)) -
            cohesion(intnl) * cosphi;
   }
   else

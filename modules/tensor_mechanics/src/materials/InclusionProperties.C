@@ -70,9 +70,8 @@ InclusionProperties::computeQpProperties()
   {
     // Outside the inclusion
     Real l = 0.5 * (x * x + y * y - _a * _a - _b * _b // Parameter l called lambda in the paper
-                    +
-                    MathUtils::sqrt(Utility::pow<2>((x * x + y * y - _a * _a + _b * _b)) +
-                              4 * (_a * _a - _b * _b) * y * y));
+                    + MathUtils::sqrt(Utility::pow<2>((x * x + y * y - _a * _a + _b * _b)) +
+                                      4 * (_a * _a - _b * _b) * y * y));
     Real rho_a = _a / sqrt(_a * _a + l);
     Real rho_b = _b / sqrt(_b * _b + l);
     Real m_x = x / (_a * _a + l);

@@ -86,7 +86,7 @@ TensorMechanicsPlasticWeakPlaneShear::yieldFunction(const RankTwoTensor & stress
 {
   // note that i explicitly symmeterise in preparation for Cosserat
   return MathUtils::sqrt(Utility::pow<2>((stress(0, 2) + stress(2, 0)) / 2.0) +
-                   Utility::pow<2>((stress(1, 2) + stress(2, 1)) / 2.0) + smooth(stress)) +
+                         Utility::pow<2>((stress(1, 2) + stress(2, 1)) / 2.0) + smooth(stress)) +
          stress(2, 2) * tan_phi(intnl) - cohesion(intnl);
 }
 
@@ -97,7 +97,7 @@ TensorMechanicsPlasticWeakPlaneShear::df_dsig(const RankTwoTensor & stress,
   RankTwoTensor deriv; // the constructor zeroes this
 
   Real tau = MathUtils::sqrt(Utility::pow<2>((stress(0, 2) + stress(2, 0)) / 2.0) +
-                       Utility::pow<2>((stress(1, 2) + stress(2, 1)) / 2.0) + smooth(stress));
+                             Utility::pow<2>((stress(1, 2) + stress(2, 1)) / 2.0) + smooth(stress));
   // note that i explicitly symmeterise in preparation for Cosserat
   if (tau == 0.0)
   {
@@ -142,7 +142,7 @@ TensorMechanicsPlasticWeakPlaneShear::dflowPotential_dstress(const RankTwoTensor
 {
   RankFourTensor dr_dstress;
   Real tau = MathUtils::sqrt(Utility::pow<2>((stress(0, 2) + stress(2, 0)) / 2.0) +
-                       Utility::pow<2>((stress(1, 2) + stress(2, 1)) / 2.0) + smooth(stress));
+                             Utility::pow<2>((stress(1, 2) + stress(2, 1)) / 2.0) + smooth(stress));
   if (tau == 0.0)
     return dr_dstress;
 
@@ -300,7 +300,7 @@ TensorMechanicsPlasticWeakPlaneShear::activeConstraints(const std::vector<Real> 
   // norm(2) = df/dsig(2,2)
   std::vector<Real> norm(3, 0.0);
   const Real tau = MathUtils::sqrt(Utility::pow<2>((stress(0, 2) + stress(2, 0)) / 2.0) +
-                             Utility::pow<2>((stress(1, 2) + stress(2, 1)) / 2.0));
+                                   Utility::pow<2>((stress(1, 2) + stress(2, 1)) / 2.0));
   if (tau > 0.0)
   {
     norm[0] = 0.25 * (stress(0, 2) + stress(2, 0)) / tau;

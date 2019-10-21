@@ -201,7 +201,7 @@ ADLAROMANCEStressUpdateBase<compute_stage>::computeResidual(const ADReal & effec
     effective_strain_old = _creep_strain_old_forcing_function->value(_t, _q_point[_qp]);
   else
     effective_strain_old =
-        std::sqrt(_creep_strain_old[_qp].doubleContraction(_creep_strain_old[_qp]) / 1.5);
+        MathUtils::sqrt(_creep_strain_old[_qp].doubleContraction(_creep_strain_old[_qp]) / 1.5);
 
   ADReal rom_effective_strain = 0.0;
   ADReal derivative_rom_effective_strain = 0.0;
@@ -258,11 +258,13 @@ ADLAROMANCEStressUpdateBase<compute_stage>::computeStressFinalize(
   {
     Moose::out << "Finalized verbose information from " << _name << "\n";
     Moose::out << "  increment effective creep strain: "
-               << std::sqrt(2.0 / 3.0 *
-                            plastic_strain_increment.doubleContraction(plastic_strain_increment))
+               << MathUtils::sqrt(
+                      2.0 / 3.0 *
+                      plastic_strain_increment.doubleContraction(plastic_strain_increment))
                << "\n";
     Moose::out << "  effective_creep_strain: "
-               << std::sqrt(2.0 / 3.0 * _creep_strain[_qp].doubleContraction(_creep_strain[_qp]))
+               << MathUtils::sqrt(2.0 / 3.0 *
+                                  _creep_strain[_qp].doubleContraction(_creep_strain[_qp]))
                << "\n";
     Moose::out << "  new mobile dislocations: " << _mobile_dislocations[_qp] << "\n";
     Moose::out << "  new immobile dislocations: " << _immobile_dislocations[_qp] << "\n"

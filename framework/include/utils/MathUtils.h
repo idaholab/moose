@@ -11,6 +11,7 @@
 
 #include "Moose.h"
 #include "MooseError.h"
+#include "MooseTypes.h"
 #include "libmesh/libmesh.h"
 #include "libmesh/utility.h"
 #include "libmesh/numeric_vector.h"
@@ -202,6 +203,14 @@ smootherStep(T x, T2 start, T2 end, bool derivative = false)
 template <typename T>
 Real
 sqrt(T x)
+{
+  mooseAssert(x >= 0.0, "Cannot take square root of negative value");
+  return std::sqrt(x);
+}
+
+template <ComputeStage compute_stage>
+ADReal
+sqrt(ADReal x)
 {
   mooseAssert(x >= 0.0, "Cannot take square root of negative value");
   return std::sqrt(x);

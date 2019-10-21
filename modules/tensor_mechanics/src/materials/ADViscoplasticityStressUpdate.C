@@ -9,6 +9,7 @@
 
 #include "ADViscoplasticityStressUpdate.h"
 
+#include "MathUtils.h"
 #include "libmesh/utility.h"
 
 registerADMooseObject("TensorMechanicsApp", ADViscoplasticityStressUpdate);
@@ -57,7 +58,7 @@ ADViscoplasticityStressUpdate<compute_stage>::ADViscoplasticityStressUpdate(
   : ADViscoplasticityStressUpdateBase<compute_stage>(parameters),
     _model(parameters.get<MooseEnum>("viscoplasticity_model").getEnum<ViscoplasticityModel>()),
     _pore_shape(parameters.get<MooseEnum>("pore_shape_model").getEnum<PoreShapeModel>()),
-    _pore_shape_factor(_pore_shape == PoreShapeModel::SPHERICAL ? 1.5 : std::sqrt(3.0)),
+    _pore_shape_factor(_pore_shape == PoreShapeModel::SPHERICAL ? 1.5 : MathUtils::sqrt(3.0)),
     _power(getParam<Real>("power")),
     _power_factor(_model == ViscoplasticityModel::LPS ? (_power - 1.0) / (_power + 1.0) : 1.0),
     _coefficient(getADMaterialProperty<Real>("coefficient")),
@@ -94,7 +95,8 @@ ADViscoplasticityStressUpdate<compute_stage>::updateState(
   // Compute intermediate equivalent stress
   const ADRankTwoTensor dev_stress = stress.deviatoric();
   const ADReal dev_stress_squared = dev_stress.doubleContraction(dev_stress);
-  const ADReal equiv_stress = dev_stress_squared == 0.0 ? 0.0 : std::sqrt(1.5 * dev_stress_squared);
+  const ADReal equiv_stress =
+      dev_stress_squared == 0.0 ? 0.0 : MathUtils::sqrt(1.5 * dev_stress_squared);
 
   computeStressInitialize(equiv_stress, elasticity_tensor);
 
@@ -141,7 +143,7 @@ ADViscoplasticityStressUpdate<compute_stage>::updateState(
   const ADRankTwoTensor new_dev_stress = stress.deviatoric();
   const ADReal new_dev_stress_squared = new_dev_stress.doubleContraction(new_dev_stress);
   const ADReal new_equiv_stress =
-      new_dev_stress_squared == 0.0 ? 0.0 : std::sqrt(1.5 * new_dev_stress_squared);
+      new_dev_stress_squared == 0.0 ? 0.0 : MathUtils::sqrt(1.5 * new_dev_stress_squared);
 
   if (MooseUtils::relativeFuzzyGreaterThan(new_equiv_stress, equiv_stress))
     mooseException("In ",
@@ -312,8 +314,8 @@ ADViscoplasticityStressUpdate<compute_stage>::computeInelasticStrainIncrement(
     gauge_stress = equiv_stress;
   else if (_hydro_stress == 0.0)
     gauge_stress =
-        equiv_stress / std::sqrt(1.0 - (1.0 + _power_factor) * _intermediate_porosity +
-                                 _power_factor * Utility::pow<2>(_intermediate_porosity));
+        equiv_stress / MathUtils::sqrt(1.0 - (1.0 + _power_factor) * _intermediate_porosity +
+                                       _power_factor * Utility::pow<2>(_intermediate_porosity));
   else
     returnMappingSolve(equiv_stress, gauge_stress, _console);
 

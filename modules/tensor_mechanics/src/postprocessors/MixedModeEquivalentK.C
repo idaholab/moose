@@ -40,5 +40,5 @@ Real
 MixedModeEquivalentK::getValue()
 {
   return MathUtils::sqrt(_ki_value * _ki_value + _kii_value * _kii_value +
-                   1 / (1 - _poissons_ratio) * _kiii_value * _kiii_value);
+                         1 / (1 - _poissons_ratio) * _kiii_value * _kiii_value);
 }

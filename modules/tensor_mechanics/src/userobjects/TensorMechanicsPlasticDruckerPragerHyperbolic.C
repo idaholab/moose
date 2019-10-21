@@ -80,7 +80,8 @@ TensorMechanicsPlasticDruckerPragerHyperbolic::dflowPotential_dstress(const Rank
                                                                       Real /*intnl*/) const
 {
   RankFourTensor dr_dstress;
-  dr_dstress = 0.5 * stress.d2secondInvariant() / MathUtils::sqrt(stress.secondInvariant() + _smoother2);
+  dr_dstress =
+      0.5 * stress.d2secondInvariant() / MathUtils::sqrt(stress.secondInvariant() + _smoother2);
   dr_dstress += -0.5 * 0.5 * stress.dsecondInvariant().outerProduct(stress.dsecondInvariant()) /
                 std::pow(stress.secondInvariant() + _smoother2, 1.5);
   return dr_dstress;

@@ -182,7 +182,7 @@ JIntegral::getValue()
   Real sign = (_integral_value > 0.0) ? 1.0 : ((_integral_value < 0.0) ? -1.0 : 0.0);
   if (_convert_J_to_K)
     _integral_value = sign * MathUtils::sqrt(std::abs(_integral_value) * _youngs_modulus /
-                                       (1 - std::pow(_poissons_ratio, 2)));
+                                             (1 - std::pow(_poissons_ratio, 2)));
 
   return _integral_value;
 }

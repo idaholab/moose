@@ -165,7 +165,7 @@ ComputeFiniteStrain::computeQpIncrements(RankTwoTensor & total_strain_increment,
       // cos theta_a
       const Real C1 =
           MathUtils::sqrt(p + 3.0 * Utility::pow<2>(p) * (1.0 - (p + q)) / Utility::pow<2>(p + q) -
-                    2.0 * Utility::pow<3>(p) * (1.0 - (p + q)) / Utility::pow<3>(p + q));
+                          2.0 * Utility::pow<3>(p) * (1.0 - (p + q)) / Utility::pow<3>(p + q));
 
       Real C2;
       if (q > 0.01)
@@ -181,7 +181,7 @@ ComputeFiniteStrain::computeQpIncrements(RankTwoTensor & total_strain_increment,
                  (512.0 * Utility::pow<4>(p));
       const Real C3 =
           0.5 * MathUtils::sqrt((p * q * (3.0 - q) + Utility::pow<3>(p) + Utility::pow<2>(q)) /
-                          Utility::pow<3>(p + q)); // sin theta_a/(2 sqrt(q))
+                                Utility::pow<3>(p + q)); // sin theta_a/(2 sqrt(q))
 
       // Calculate incremental rotation. Note that this value is the transpose of that from Rashid,
       // 93, so we transpose it before storing
