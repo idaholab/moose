@@ -917,8 +917,24 @@ FEProblemBase::initialSetup()
 
   // Call initialSetup on the transfers
   _transfers.initialSetup();
-  _to_multi_app_transfers.initialSetup();
-  _from_multi_app_transfers.initialSetup();
+
+  // Call initialSetup on the MultiAppTransfers to be executed on TO_MULTIAPP
+  const auto & to_multi_app_objects = _to_multi_app_transfers.getActiveObjects();
+  for (const auto & transfer : to_multi_app_objects)
+  {
+    const auto multi_app_transfer = std::dynamic_pointer_cast<MultiAppTransfer>(transfer);
+    multi_app_transfer->setCurrentDirection(MultiAppTransfer::DIRECTION::TO_MULTIAPP);
+    multi_app_transfer->initialSetup();
+  }
+
+  // Call initialSetup on the MultiAppTransfers to be executed on FROM_MULTIAPP
+  const auto & from_multi_app_objects = _from_multi_app_transfers.getActiveObjects();
+  for (const auto & transfer : from_multi_app_objects)
+  {
+    const auto multi_app_transfer = std::dynamic_pointer_cast<MultiAppTransfer>(transfer);
+    multi_app_transfer->setCurrentDirection(MultiAppTransfer::DIRECTION::FROM_MULTIAPP);
+    multi_app_transfer->initialSetup();
+  }
 
   if (!_app.isRecovering())
   {
@@ -3845,7 +3861,11 @@ FEProblemBase::execMultiAppTransfers(ExecFlagType type, MultiAppTransfer::DIRECT
     _console << COLOR_CYAN << "\nStarting Transfers on " << Moose::stringify(type)
              << string_direction << "MultiApps" << COLOR_DEFAULT << std::endl;
     for (const auto & transfer : transfers)
-      transfer->execute();
+    {
+      const auto multi_app_transfer = std::dynamic_pointer_cast<MultiAppTransfer>(transfer);
+      multi_app_transfer->setCurrentDirection(direction);
+      multi_app_transfer->execute();
+    }
 
     MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);
 
@@ -4090,9 +4110,9 @@ FEProblemBase::addTransfer(const std::string & transfer_name,
       std::dynamic_pointer_cast<MultiAppTransfer>(transfer);
   if (multi_app_transfer)
   {
-    if (multi_app_transfer->direction() == MultiAppTransfer::TO_MULTIAPP)
+    if (multi_app_transfer->directions().contains(MultiAppTransfer::TO_MULTIAPP))
       _to_multi_app_transfers.addObject(multi_app_transfer);
-    else
+    if (multi_app_transfer->directions().contains(MultiAppTransfer::FROM_MULTIAPP))
       _from_multi_app_transfers.addObject(multi_app_transfer);
   }
   else
