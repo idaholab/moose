@@ -1,59 +1,80 @@
 [Tests]
-  [./threads]
-    type = RunApp
-    input = threads.i
-    min_threads = 2
-    allow_test_objects = true
-  [../]
-  [./mpi]
-    type = RunApp
-    input = mpi.i
-    min_parallel = 2
-    allow_test_objects = true
-  [../]
-  [base_global_vs_local_1rank]
-    type = RunApp
-    input = global_vs_local.i
-    min_parallel = 1
-    max_parallel = 1
-    allow_test_objects = true
+  design = 'Sampler.md'
+  issues = '#13906'
+
+  [parallel]
+    requirement = "The system shall include a random number sampling system that operates in "
+                  "parallel"
+    [threads]
+      type = RunApp
+      input = threads.i
+      min_threads = 2
+      allow_test_objects = true
+      detail = "with threads and"
+    []
+    [mpi]
+      type = RunApp
+      input = mpi.i
+      min_parallel = 2
+      allow_test_objects = true
+      detail = " MPI."
+    []
   []
-  [base_global_vs_local_2rank]
-    type = RunApp
-    input = global_vs_local.i
-    min_parallel = 2
-    max_parallel = 2
-    allow_test_objects = true
-  []
-  [base_global_vs_local_3rank]
-    type = RunApp
-    input = global_vs_local.i
-    min_parallel = 3
-    max_parallel = 3
-    allow_test_objects = true
-  []
-  [rand_global_vs_local_1rank]
-    type = RunApp
-    input = global_vs_local.i
-    min_parallel = 1
-    max_parallel = 1
-    allow_test_objects = true
-    cli_args = 'Samplers/sample/use_rand=true UserObjects/test/test_type=RAND_GLOBAL_VS_LOCAL'
-  []
-  [rand_global_vs_local_2rank]
-    type = RunApp
-    input = global_vs_local.i
-    min_parallel = 2
-    max_parallel = 2
-    allow_test_objects = true
-    cli_args = 'Samplers/sample/use_rand=true UserObjects/test/test_type=RAND_GLOBAL_VS_LOCAL'
-  []
-  [rand_global_vs_local_3rank]
-    type = RunApp
-    input = global_vs_local.i
-    min_parallel = 3
-    max_parallel = 3
-    allow_test_objects = true
-    cli_args = 'Samplers/sample/use_rand=true UserObjects/test/test_type=RAND_GLOBAL_VS_LOCAL'
+
+  [global_vs_local]
+    requirement = "The system shall include a random number sampling system that creates replicated "
+                  "and/or distribute sample data that is consistent:"
+
+    [base_1rank]
+      type = RunApp
+      input = global_vs_local.i
+      min_parallel = 1
+      max_parallel = 1
+      allow_test_objects = true
+      detail = "on a single processor,"
+    []
+    [base_2rank]
+      type = RunApp
+      input = global_vs_local.i
+      min_parallel = 2
+      max_parallel = 2
+      allow_test_objects = true
+      detail = "on a two processors,"
+    []
+    [base_3rank]
+      type = RunApp
+      input = global_vs_local.i
+      min_parallel = 3
+      max_parallel = 3
+      allow_test_objects = true
+      detail = "on a three processors,"
+    []
+    [rand_1rank]
+      type = RunApp
+      input = global_vs_local.i
+      min_parallel = 1
+      max_parallel = 1
+      allow_test_objects = true
+      cli_args = 'Samplers/sample/use_rand=true UserObjects/test/test_type=RAND_GLOBAL_VS_LOCAL'
+      detail = "on a one processor with random numbers,"
+    []
+    [rand_2rank]
+      type = RunApp
+      input = global_vs_local.i
+      min_parallel = 2
+      max_parallel = 2
+      allow_test_objects = true
+      cli_args = 'Samplers/sample/use_rand=true UserObjects/test/test_type=RAND_GLOBAL_VS_LOCAL'
+      detail = "on two processor with random numbers, and"
+    []
+    [rand_3rank]
+      type = RunApp
+      input = global_vs_local.i
+      min_parallel = 3
+      max_parallel = 3
+      allow_test_objects = true
+      cli_args = 'Samplers/sample/use_rand=true UserObjects/test/test_type=RAND_GLOBAL_VS_LOCAL'
+      detail = "on thre processor with random numbers."
+    []
   []
 []
