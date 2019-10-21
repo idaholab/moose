@@ -30,6 +30,9 @@ validParams<JacobianTest1PhaseRDGAction>()
 
   params.addParam<bool>("use_slope_reconstruction", true, "Use slope reconstruction?");
 
+  params.addParam<bool>(
+      "use_elem_area", false, "Use the elemental area variable instead of linear area");
+
   params.set<std::string>("fe_family") = "MONOMIAL";
   params.set<std::string>("fe_order") = "CONSTANT";
 
@@ -229,7 +232,10 @@ JacobianTest1PhaseRDGAction::addAuxVariables()
 {
   addAuxVariable(_A_name, _fe_family, _fe_order);
   addFunctionIC(_A_name, _A_fn_name);
-  addAuxVariable(_A_linear_name, "LAGRANGE", "FIRST");
+  if (getParam<bool>("use_elem_area"))
+    addAuxVariable(_A_linear_name, _fe_family, _fe_order);
+  else
+    addAuxVariable(_A_linear_name, "LAGRANGE", "FIRST");
   addFunctionIC(_A_linear_name, _A_fn_name);
 }
 

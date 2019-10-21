@@ -51,9 +51,7 @@ NumericalFlux3EqnHLLC::calcFlux(const std::vector<Real> & U1,
   const Real rhoEA2 = U2[THM3Eqn::CONS_VAR_RHOEA];
   const Real A2 = U2[THM3Eqn::CONS_VAR_AREA];
 
-  // areas are assumed be equal, so name the area to be either side
-  mooseAssert(std::abs(A2 - A1) < 1e-15, "Left and right areas must be equal.");
-  const Real A = A1;
+  const Real A_flow = std::min(A1, A2);
 
   // reference transformation normal
   const Real & nx = nLR_dot_d;
@@ -123,33 +121,33 @@ NumericalFlux3EqnHLLC::calcFlux(const std::vector<Real> & U1,
   FL.resize(THM3Eqn::N_EQ);
   if (s1 > 0.0)
   {
-    FL[THM3Eqn::EQ_MASS] = u1 * rho1 * A1;
-    FL[THM3Eqn::EQ_MOMENTUM] = (u1 * rhou1 + p1) * A1;
-    FL[THM3Eqn::EQ_ENERGY] = u1 * (rhoE1 + p1) * A1;
+    FL[THM3Eqn::EQ_MASS] = u1 * rho1 * A_flow;
+    FL[THM3Eqn::EQ_MOMENTUM] = (u1 * rhou1 + p1) * A_flow;
+    FL[THM3Eqn::EQ_ENERGY] = u1 * (rhoE1 + p1) * A_flow;
 
     _last_region_index = 0;
   }
   else if (s1 <= 0.0 && sm > 0.0)
   {
-    FL[THM3Eqn::EQ_MASS] = sm * nx * rhoLs * A;
-    FL[THM3Eqn::EQ_MOMENTUM] = (sm * nx * rhouLs + ps) * A;
-    FL[THM3Eqn::EQ_ENERGY] = sm * nx * (rhoELs + ps) * A;
+    FL[THM3Eqn::EQ_MASS] = sm * nx * rhoLs * A_flow;
+    FL[THM3Eqn::EQ_MOMENTUM] = (sm * nx * rhouLs + ps) * A_flow;
+    FL[THM3Eqn::EQ_ENERGY] = sm * nx * (rhoELs + ps) * A_flow;
 
     _last_region_index = 1;
   }
   else if (sm <= 0.0 && s2 >= 0.0)
   {
-    FL[THM3Eqn::EQ_MASS] = sm * nx * rhoRs * A;
-    FL[THM3Eqn::EQ_MOMENTUM] = (sm * nx * rhouRs + ps) * A;
-    FL[THM3Eqn::EQ_ENERGY] = sm * nx * (rhoERs + ps) * A;
+    FL[THM3Eqn::EQ_MASS] = sm * nx * rhoRs * A_flow;
+    FL[THM3Eqn::EQ_MOMENTUM] = (sm * nx * rhouRs + ps) * A_flow;
+    FL[THM3Eqn::EQ_ENERGY] = sm * nx * (rhoERs + ps) * A_flow;
 
     _last_region_index = 2;
   }
   else if (s2 < 0.0)
   {
-    FL[THM3Eqn::EQ_MASS] = u2 * rho2 * A2;
-    FL[THM3Eqn::EQ_MOMENTUM] = (u2 * rhou2 + p2) * A2;
-    FL[THM3Eqn::EQ_ENERGY] = u2 * (rhoE2 + p2) * A2;
+    FL[THM3Eqn::EQ_MASS] = u2 * rho2 * A_flow;
+    FL[THM3Eqn::EQ_MOMENTUM] = (u2 * rhou2 + p2) * A_flow;
+    FL[THM3Eqn::EQ_ENERGY] = u2 * (rhoE2 + p2) * A_flow;
 
     _last_region_index = 3;
   }
@@ -179,6 +177,12 @@ NumericalFlux3EqnHLLC::calcFlux(const std::vector<Real> & U1,
   }
 
   FR = FL;
+
+  const Real A_wall_L = A1 - A_flow;
+  FL[THM3Eqn::EQ_MOMENTUM] += p1 * A_wall_L;
+
+  const Real A_wall_R = A2 - A_flow;
+  FR[THM3Eqn::EQ_MOMENTUM] += p2 * A_wall_R;
 }
 
 void
@@ -209,6 +213,8 @@ NumericalFlux3EqnHLLC::calcJacobian(const std::vector<Real> & U1,
   const Real rho2 = rhoA2 / A2;
   const Real rhou2 = rhouA2 / A2;
   const Real rhoE2 = rhoEA2 / A2;
+
+  const Real A_flow = std::min(A1, A2);
 
   // reference transformation normal
   const Real & nx = nLR_dot_d;
@@ -680,6 +686,19 @@ NumericalFlux3EqnHLLC::calcJacobian(const std::vector<Real> & U1,
     }
   }
 
+  dFL_dUL *= A_flow / A1;
+  dFL_dUR *= A_flow / A2;
+
   dFR_dUL = dFL_dUL;
   dFR_dUR = dFL_dUR;
+
+  const Real A_wall_L = A1 - A_flow;
+  dFL_dUL(THM3Eqn::EQ_MOMENTUM, THM3Eqn::EQ_MASS) += dp1_drho1 * A_wall_L / A1;
+  dFL_dUL(THM3Eqn::EQ_MOMENTUM, THM3Eqn::EQ_MOMENTUM) += dp1_drhou1 * A_wall_L / A1;
+  dFL_dUL(THM3Eqn::EQ_MOMENTUM, THM3Eqn::EQ_ENERGY) += dp1_drhoE1 * A_wall_L / A1;
+
+  const Real A_wall_R = A2 - A_flow;
+  dFR_dUR(THM3Eqn::EQ_MOMENTUM, THM3Eqn::EQ_MASS) += dp2_drho2 * A_wall_R / A2;
+  dFR_dUR(THM3Eqn::EQ_MOMENTUM, THM3Eqn::EQ_MOMENTUM) += dp2_drhou2 * A_wall_R / A2;
+  dFR_dUR(THM3Eqn::EQ_MOMENTUM, THM3Eqn::EQ_ENERGY) += dp2_drhoE2 * A_wall_R / A2;
 }

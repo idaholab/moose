@@ -10,6 +10,7 @@
     type = 'Exodiff'
     input = 'part2.i'
     exodiff = 'part2_out.e'
+    abs_zero = 1e-7
     prereq = 'part1'
     recover = false
   [../]

@@ -27,7 +27,8 @@ validParams<NumericalFlux3EqnDGKernel>()
 NumericalFlux3EqnDGKernel::NumericalFlux3EqnDGKernel(const InputParameters & parameters)
   : DGKernel(parameters),
 
-    _A_linear(coupledValue("A_linear")),
+    _A_elem(coupledValue("A_linear")),
+    _A_neig(coupledNeighborValue("A_linear")),
     _rhoA1(getMaterialProperty<Real>("rhoA")),
     _rhouA1(getMaterialProperty<Real>("rhouA")),
     _rhoEA1(getMaterialProperty<Real>("rhoEA")),
@@ -49,8 +50,8 @@ Real
 NumericalFlux3EqnDGKernel::computeQpResidual(Moose::DGResidualType type)
 {
   // construct the left and right solution vectors from the reconstructed solution
-  std::vector<Real> U1 = {_rhoA1[_qp], _rhouA1[_qp], _rhoEA1[_qp], _A_linear[_qp]};
-  std::vector<Real> U2 = {_rhoA2[_qp], _rhouA2[_qp], _rhoEA2[_qp], _A_linear[_qp]};
+  std::vector<Real> U1 = {_rhoA1[_qp], _rhouA1[_qp], _rhoEA1[_qp], _A_elem[_qp]};
+  std::vector<Real> U2 = {_rhoA2[_qp], _rhouA2[_qp], _rhoEA2[_qp], _A_neig[_qp]};
 
   const std::vector<Real> & flux_elem =
       _numerical_flux.getFlux(_current_side, _current_elem->id(), true, U1, U2, _normals[_qp](0));
@@ -80,8 +81,8 @@ Real
 NumericalFlux3EqnDGKernel::computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigned int jvar)
 {
   // construct the left and right solution vectors from the cell-average solution
-  std::vector<Real> U1 = {_rhoA1[_qp], _rhouA1[_qp], _rhoEA1[_qp], _A_linear[_qp]};
-  std::vector<Real> U2 = {_rhoA2[_qp], _rhouA2[_qp], _rhoEA2[_qp], _A_linear[_qp]};
+  std::vector<Real> U1 = {_rhoA1[_qp], _rhouA1[_qp], _rhoEA1[_qp], _A_elem[_qp]};
+  std::vector<Real> U2 = {_rhoA2[_qp], _rhouA2[_qp], _rhoEA2[_qp], _A_neig[_qp]};
 
   const DenseMatrix<Real> & dF1_dU1 = _numerical_flux.getJacobian(
       true, true, _current_side, _current_elem->id(), U1, U2, _normals[_qp](0));
