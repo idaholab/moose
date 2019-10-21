@@ -69,7 +69,7 @@ MultiAppInterpolationTransfer::execute()
 {
   _console << "Beginning InterpolationTransfer " << name() << std::endl;
 
-  switch (_direction)
+  switch (_current_direction)
   {
     case TO_MULTIAPP:
     {

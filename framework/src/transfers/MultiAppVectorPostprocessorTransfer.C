@@ -48,6 +48,8 @@ MultiAppVectorPostprocessorTransfer::MultiAppVectorPostprocessorTransfer(
     _master_vpp_name(getParam<VectorPostprocessorName>("vector_postprocessor")),
     _vector_name(getParam<std::string>("vector_name"))
 {
+  if (_directions.size() != 1)
+    paramError("direction", "This transfer is only unidirectional");
 }
 
 void
@@ -100,7 +102,7 @@ MultiAppVectorPostprocessorTransfer::execute()
 {
   _console << "Beginning VectorPostprocessorTransfer " << name() << std::endl;
 
-  if (_direction == FROM_MULTIAPP)
+  if (_current_direction == FROM_MULTIAPP)
     executeFromMultiapp();
   else
     executeToMultiapp();

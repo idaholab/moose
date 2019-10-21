@@ -43,6 +43,8 @@ MultiAppPostprocessorToAuxScalarTransfer::MultiAppPostprocessorToAuxScalarTransf
     _from_pp_name(getParam<PostprocessorName>("from_postprocessor")),
     _to_aux_name(getParam<VariableName>("to_aux_scalar"))
 {
+  if (_directions.size() != 1)
+    paramError("direction", "This transfer is only unidirectional");
 }
 
 void
@@ -51,7 +53,7 @@ MultiAppPostprocessorToAuxScalarTransfer::execute()
   _console << "Beginning PostprocessorToAuxScalarTransfer " << name() << std::endl;
 
   // Perform action based on the transfer direction
-  switch (_direction)
+  switch (_current_direction)
   {
     // MasterApp -> SubApp
     case TO_MULTIAPP:

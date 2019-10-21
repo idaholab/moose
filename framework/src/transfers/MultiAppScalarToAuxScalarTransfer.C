@@ -44,6 +44,8 @@ MultiAppScalarToAuxScalarTransfer::MultiAppScalarToAuxScalarTransfer(
     _from_variable_name(getParam<VariableName>("source_variable")),
     _to_aux_name(getParam<VariableName>("to_aux_scalar"))
 {
+  if (_directions.size() != 1)
+    paramError("direction", "This transfer is only unidirectional");
 }
 
 void
@@ -52,7 +54,7 @@ MultiAppScalarToAuxScalarTransfer::execute()
   _console << "Beginning ScalarToAuxScalarTransfer " << name() << std::endl;
 
   // Perform action based on the transfer direction
-  switch (_direction)
+  switch (_current_direction)
   {
     // MasterApp -> SubApp
     case TO_MULTIAPP:

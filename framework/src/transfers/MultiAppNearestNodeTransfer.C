@@ -485,7 +485,7 @@ MultiAppNearestNodeTransfer::execute()
     unsigned int var_num = to_sys->variable_number(_to_var_name);
 
     NumericVector<Real> * solution = nullptr;
-    switch (_direction)
+    switch (_current_direction)
     {
       case TO_MULTIAPP:
         solution = &getTransferVector(i_to, _to_var_name);
